@@ -1,0 +1,37 @@
+nobase_include_HEADERS= osmscout/Util.h \
+                        osmscout/Cache.h \
+                        osmscout/StyleConfig.h \
+                        osmscout/StyleConfigLoader.h \
+                        osmscout/TypeConfig.h \
+                        osmscout/TypeConfigLoader.h \
+                        osmscout/Tiles.h \
+                        osmscout/RawNode.h \
+                        osmscout/RawRelation.h \
+                        osmscout/RawWay.h \
+                        osmscout/City.h \
+                        osmscout/Node.h \
+                        osmscout/Point.h \
+                        osmscout/Street.h \
+                        osmscout/Tag.h \
+                        osmscout/Way.h \
+                        osmscout/Reference.h \
+                        osmscout/Preprocess.h \
+                        osmscout/Resolve.h \
+                        osmscout/GenAreaNodeIndex.h \
+                        osmscout/GenAreaWayIndex.h \
+                        osmscout/GenCityStreetIndex.h \
+                        osmscout/GenNodeDat.h \
+                        osmscout/GenNodeIndex.h \
+                        osmscout/GenNodeUseIndex.h \
+                        osmscout/GenWayDat.h \
+                        osmscout/GenWayIndex.h \
+                        osmscout/AreaNodeIndex.h \
+                        osmscout/AreaWayIndex.h \
+                        osmscout/CityStreetIndex.h \
+                        osmscout/NodeIndex.h \
+                        osmscout/NodeUseIndex.h \
+                        osmscout/WayIndex.h \
+                        osmscout/Route.h \
+                        osmscout/RoutingProfile.h \
+                        osmscout/Database.h
+

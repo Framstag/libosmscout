@@ -1,0 +1,5 @@
+Name: libosmscout                       # human-readable name
+Description: osm navigation library     # human-readable description
+Version: @VERSION@
+Libs: @XML2_LIBS@ -L@abs_builddir@/src/.libs -losmscout
+Cflags: -I@abs_builddir@/include
