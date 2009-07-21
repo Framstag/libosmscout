@@ -1,0 +1,11 @@
+* Improve loading speed by using memory maped files for pages and then
+  parsing into memory.
+* Move code into namespace "osmscout"
+* Improve RouteData and RouteDescription
+* Remove asserts from code (at leats where asserts can be provoked by user)
+* Define a error code concept (possibly copy class Status form Illumination)
+* Add text only interactive demo applications.
+* Define an interface for getting progres information
+* Improve routing algorithm to check for routing to non-rechable targets
+* Use DLL export to reduce visible symbols.
+* Think about virtual vs. non-virtual methods.
