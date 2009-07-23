@@ -1177,6 +1177,10 @@
     <label minMag="region"/>
   </node>
 
+  <way key="internal" value="route" prio="1">
+    <line color="ff000088" minPixel="2" maxPixel="17" width="20"/>
+  </way>
+
 </TravelJinni-Style>
 
 

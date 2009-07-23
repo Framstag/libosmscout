@@ -181,7 +181,7 @@ bool CityStreetIndex::LoadCityStreetIndex(const std::string& path)
 }
 
 
-void CityStreetIndex::GetMatchingCities(const std::string& name,
+bool CityStreetIndex::GetMatchingCities(const std::string& name,
                                         std::list<City>& cities,
                                         size_t limit,
                                         bool& limitReached) const
@@ -196,16 +196,18 @@ void CityStreetIndex::GetMatchingCities(const std::string& name,
       if (cities.size()>=limit) {
         std::cout << "Limit reached!!!" << std::endl;
         limitReached=true;
-        return;
+        return true;
       }
       else {
         cities.push_back(*city);
       }
     }
   }
+
+  return true;
 }
 
-void CityStreetIndex::GetMatchingStreets(Id urbanId, const std::string& name,
+bool CityStreetIndex::GetMatchingStreets(Id urbanId, const std::string& name,
                                          std::list<Street>& streets,
                                          size_t limit, bool& limitReached) const
 {
@@ -214,7 +216,7 @@ void CityStreetIndex::GetMatchingStreets(Id urbanId, const std::string& name,
 
   if (!urbanLoaded || urban.id!=urbanId) {
     if (!LoadUrban(urbanId) || !urbanLoaded) {
-      return;
+      return false;
     }
   }
 
@@ -224,7 +226,7 @@ void CityStreetIndex::GetMatchingStreets(Id urbanId, const std::string& name,
     if (way->first.find(name)!=std::string::npos) {
       if (streets.size()>=limit) {
         limitReached=true;
-        return;
+        return true;
       }
       else {
         Street street;
@@ -244,7 +246,7 @@ void CityStreetIndex::GetMatchingStreets(Id urbanId, const std::string& name,
     if (area->first.find(name)!=std::string::npos) {
       if (streets.size()>=limit) {
         limitReached=true;
-        return;
+        return true;
       }
       else {
         Street street;
@@ -257,6 +259,8 @@ void CityStreetIndex::GetMatchingStreets(Id urbanId, const std::string& name,
       }
     }
   }
+
+  return true;
 }
 
 void CityStreetIndex::DumpStatistics()

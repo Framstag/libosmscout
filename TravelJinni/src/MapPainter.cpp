@@ -969,22 +969,6 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
       }
     }
 
-    /*
-    cairo_restore(draw);
-  }
-
-  //std::cout << "Draw paths..." << std::endl;
-
-  for (size_t l=0; l<11; l++) {
-    int8_t layer=l-5;
-    // Inner path fill
-
-    if (!wayLayers[l]) {
-      continue;
-    } */
-
-    //std::cout << "Drawing layer " << (int)layer << std::endl;
-
     cairo_save(draw);
     for (std::list<Way>::const_iterator way=ways.begin();
          way!=ways.end();
@@ -1401,6 +1385,160 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
     }
   }
   cairo_restore(draw);
+
+  // Way POIs (aka routes)
+  cairo_save(draw);
+
+  for (std::list<Way>::const_iterator way=poiWays.begin();
+       way!=poiWays.end();
+       ++way) {
+
+    std::cout << "Drawing POI way with "<< way->nodes.size() <<" nodes..." << std::endl;
+
+    if (way->IsArea()) {
+      std::cout << "POI way is area,skipping..." << std::endl;
+      continue;
+    }
+
+    const LineStyle *style=styleConfig.GetWayLineStyle(way->type);
+
+    if (style==NULL) {
+      std::cout << "POI way of type " << way->type << " has no line style,skipping..." << std::endl;
+      continue;
+    }
+
+    cairo_set_source_rgba(draw,
+                          style->GetLineR(),
+                          style->GetLineG(),
+                          style->GetLineB(),
+                          style->GetLineA());
+
+    cairo_set_line_width(draw,lineWidth[(size_t)way->type]);
+    cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
+
+    switch (style->GetStyle()) {
+    case LineStyle::none:
+      // way should not be visible in this case!
+      assert(false);
+      break;
+    case LineStyle::normal:
+      cairo_set_dash(draw,NULL,0,0);
+      break;
+    case LineStyle::longDash:
+      cairo_set_dash(draw,longDash,2,0);
+      break;
+    case LineStyle::dotted:
+      cairo_set_dash(draw,dotted,2,0);
+      break;
+    case LineStyle::lineDot:
+      cairo_set_dash(draw,lineDot,4,0);
+      break;
+    }
+
+    // First we draw all nodes
+    for (size_t i=0; i<way->nodes.size(); i++) {
+      drawNode[i]=true;
+      outNode[i]=false;
+    }
+
+    // Ignore all nodes which are on a direct line between the previous and the next
+    // node (minimal deriviation of slopes)
+    for (size_t i=1; i+1<way->nodes.size(); i++) {
+      if (drawNode[i] &&
+          std::abs((way->nodes[i].lon-way->nodes[i-1].lon)/
+                   (way->nodes[i].lat-way->nodes[i-1].lat)-
+                   (way->nodes[i+1].lon-way->nodes[i].lon)/
+                   (way->nodes[i+1].lat-way->nodes[i].lat))<relevantSlopeDeriviation) {
+        drawNode[i]=false;
+      }
+    }
+
+    // Calculate screen position for all points left
+    for (size_t i=0; i<way->nodes.size(); i++) {
+      if (drawNode[i]) {
+        nodeX[i]=(way->nodes[i].lon*gradtorad-hmin)*hscale;
+        nodeY[i]=height-(atanh(sin(way->nodes[i].lat*gradtorad))-vmin)*vscale;
+      }
+    }
+
+    // Now ignore all points which are close to another point of the same way
+    for (size_t i=1; i+1<way->nodes.size(); i++) {
+      if (drawNode[i]) {
+        size_t j=i+1;
+        while (!drawNode[j]) {
+          j++;
+        }
+
+        if (std::fabs(nodeX[j]-nodeX[i])<=relevantPosDeriviation &&
+            std::fabs(nodeY[j]-nodeY[i])<=relevantPosDeriviation) {
+          drawNode[i]=false;
+        }
+      }
+    }
+
+    /*
+    // Check which nodes or not visible in the given area
+    for (size_t i=0; i<way->nodes.size(); i++) {
+      if (way->nodes[i].lon<lonMin || way->nodes[i].lon>lonMax ||
+          way->nodes[i].lat<latMin || way->nodes[i].lat>latMax){
+        outNode[i]=true;
+      }
+    }
+
+    if (drawNode[0] && outNode[1]) {
+      drawNode[0]=false;
+    }
+
+    for (size_t i=1; i<way->nodes.size()-1; i++) {
+      if (drawNode[i-1] && outNode[i-1] && drawNode[i+1] && outNode[i+1]) {
+        drawNode[i]=false;
+      }
+    }
+
+    if (drawNode[way->nodes.size()-2] && outNode[way->nodes.size()-2]) {
+      drawNode[way->nodes.size()-1]=false;
+    } */
+
+    bool start=true;
+    for (size_t i=0; i<way->nodes.size(); i++) {
+      if (drawNode[i]) {
+        if (start) {
+          cairo_move_to(draw,nodeX[i],nodeY[i]);
+          start=false;
+        }
+        else  {
+          cairo_line_to(draw,nodeX[i],nodeY[i]);
+        }
+        drawnNodeDistribution[way->type]++;
+        nodesDrawnCount++;
+      }
+    }
+    nodesAllCount+=way->nodes.size();
+
+    cairo_stroke(draw);
+
+    /*
+    for (size_t i=0; i<way->nodes.size(); i++) {
+      double x,y;
+
+      x=(way->nodes[i].lon*gradtorad-hmin)*hscale;
+      y=height-(atanh(sin(way->nodes[i].lat*gradtorad))-vmin)*vscale;
+
+      if (drawNode[i]) {
+        cairo_set_source_rgb(draw,0,1,0);
+      }
+      else {
+        cairo_set_source_rgb(draw,1,0,0);
+      }
+      cairo_arc(draw,
+                x,y,
+                1.5,
+                0,2*M_PI);
+      cairo_fill(draw);
+    }*/
+  }
+  cairo_restore(draw);
+
 
   std::cout << "Nodes drawn: " << nodesDrawnCount << std::endl;
   std::cout << "Nodes out: " << nodesOut << std::endl;

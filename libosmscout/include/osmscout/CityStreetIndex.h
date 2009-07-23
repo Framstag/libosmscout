@@ -52,10 +52,10 @@ public:
 
   bool LoadCityStreetIndex(const std::string& path);
 
-  void GetMatchingCities(const std::string& name,
+  bool GetMatchingCities(const std::string& name,
                          std::list<City>& cities,
                          size_t limit, bool& limitReached) const;
-  void GetMatchingStreets(Id urbanId, const std::string& name,
+  bool GetMatchingStreets(Id urbanId, const std::string& name,
                           std::list<Street>& streets,
                           size_t limit, bool& limitReached) const;
 

@@ -605,18 +605,18 @@ bool Database::GetWays(const std::set<Id>& ids, std::list<Way>& ways) const
   return true;
 }
 
-void Database::GetMatchingCities(const std::string& name,
+bool Database::GetMatchingCities(const std::string& name,
                                  std::list<City>& cities,
                                  size_t limit, bool& limitReached) const
 {
-  cityStreetIndex.GetMatchingCities(name,cities,limit,limitReached);
+  return cityStreetIndex.GetMatchingCities(name,cities,limit,limitReached);
 }
 
-void Database::GetMatchingStreets(Id urbanId, const std::string& name,
+bool Database::GetMatchingStreets(Id urbanId, const std::string& name,
                                   std::list<Street>& streets,
                                   size_t limit, bool& limitReached) const
 {
-  cityStreetIndex.GetMatchingStreets(urbanId,name,streets,limit,limitReached);
+  return cityStreetIndex.GetMatchingStreets(urbanId,name,streets,limit,limitReached);
 }
 
 bool Database::GetJoints(Id id,
@@ -1203,6 +1203,7 @@ bool Database::TransformRouteDataToRouteDescription(const RouteData& data,
                                                     RouteDescription& description)
 {
   Way                                              way,newWay;
+  Id                                               node=0,newNode=0;
   std::list<RouteData::RouteEntry>::const_iterator iter;
   std::string                                      name,refName;
   double                                           distance=0.0;
@@ -1219,6 +1220,13 @@ bool Database::TransformRouteDataToRouteDescription(const RouteData& data,
     return false;
   }
 
+  for (size_t i=0; i<way.nodes.size(); i++) {
+    if (way.nodes[i].id==iter->GetNodeId()) {
+      node=i;
+      break;
+    }
+  }
+
   description.AddStep(0.0,RouteDescription::start,way.GetName(),way.GetRefName());
   description.AddStep(0.0,RouteDescription::drive,way.GetName(),way.GetRefName());
 
@@ -1227,6 +1235,14 @@ bool Database::TransformRouteDataToRouteDescription(const RouteData& data,
   while (iter!=data.Entries().end()) {
     if (!GetWay(iter->GetWayId(),newWay)) {
       return false;
+    }
+
+    for (size_t i=0; i<newWay.nodes.size(); i++) {
+      if (newWay.nodes[i].id==iter->GetNodeId()) {
+        distance+=GetCost(way.nodes[node].lon,way.nodes[node].lat,
+                          newWay.nodes[i].lon,newWay.nodes[i].lat);
+        newNode=i;
+      }
     }
 
 //    distance+=GetCosts(way
@@ -1238,11 +1254,22 @@ bool Database::TransformRouteDataToRouteDescription(const RouteData& data,
            newWay.GetRefName().empty()) {
       ++iter;
 
+      double lastLon=newWay.nodes[newNode].lon;
+      double lastLat=newWay.nodes[newNode].lat;
+
       if (!GetWay(iter->GetWayId(),newWay)) {
         return false;
       }
-    }
 
+      for (size_t i=0; i<newWay.nodes.size(); i++) {
+        if (newWay.nodes[i].id==iter->GetNodeId()) {
+          distance+=GetCost(lastLon,lastLat,
+                            newWay.nodes[i].lon,newWay.nodes[i].lat);
+          newNode=i;
+          break;
+        }
+      }
+    }
 
     if (!way.GetName().empty() &&
         way.GetName()==newWay.GetName()) {
@@ -1260,6 +1287,7 @@ bool Database::TransformRouteDataToRouteDescription(const RouteData& data,
     }
 
     way=newWay;
+    node=newNode;
 
     ++iter;
   }
@@ -1269,6 +1297,40 @@ bool Database::TransformRouteDataToRouteDescription(const RouteData& data,
   return true;
 }
 
+bool Database::TransformRouteDataToWay(const RouteData& data,
+                                       Way& way)
+{
+  way.id=0;
+  way.type=typeRoute;
+  way.flags=0;
+  way.layer=5;
+  way.tags.clear();
+  way.nodes.clear();
+  way.nodes.reserve(data.Entries().size());
+
+  if (data.Entries().size()==0) {
+    return true;
+  }
+
+  for (std::list<RouteData::RouteEntry>::const_iterator iter=data.Entries().begin();
+       iter!=data.Entries().end();
+       ++iter) {
+    Way w;
+
+    if (!GetWay(iter->GetWayId(),w)) {
+      return false;
+    }
+
+    for (size_t i=0; i<w.nodes.size(); i++) {
+      if (w.nodes[i].id==iter->GetNodeId()) {
+        way.nodes.push_back(w.nodes[i]);
+        break;
+      }
+    }
+  }
+
+  return true;
+}
 void Database::DumpStatistics()
 {
   nodeCache.DumpStatistics("Node cache",NodeCacheValueSizer());

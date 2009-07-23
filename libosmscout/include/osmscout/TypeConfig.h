@@ -60,8 +60,10 @@ const static TagId tagPlaceName  = 32009;
 const static TagId tagBoundary   = 32010;
 const static TagId tagAdminLevel = 32011;
 const static TagId tagHighway    = 32012;
+const static TagId tagInternal   = 32013;
 
 const static TypeId typeIgnore   = 32000;
+const static TypeId typeRoute    = 32001;
 
 class TagInfo
 {

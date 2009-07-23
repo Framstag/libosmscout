@@ -37,9 +37,11 @@
 
 
 DatabaseTask::DatabaseTask(Database* database,
+                           const TypeConfig& typeConfig,
                            const StyleConfig& styleConfig,
                            Lum::Model::Action* jobFinishedAction)
  : database(database),
+   typeConfig(typeConfig),
    styleConfig(styleConfig),
    finish(false),
    newJob(NULL),
@@ -127,6 +129,88 @@ void DatabaseTask::Run()
   }
 }
 
+void DatabaseTask::Finish()
+{
+  Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
+
+  finish=true;
+}
+
+bool DatabaseTask::GetWay(Id id, Way& way) const
+{
+  Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
+
+  return database->GetWay(id,way);
+}
+
+bool DatabaseTask::GetMatchingCities(const std::wstring& name,
+                                     std::list<City>& cities,
+                                     size_t limit,
+                                     bool& limitReached) const
+{
+  Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
+
+  return database->GetMatchingCities(Lum::Base::WStringToUTF8(name),
+                                     cities,
+                                     limit,limitReached);
+}
+
+bool DatabaseTask::GetMatchingStreets(Id urbanId, const std::wstring& name,
+                                      std::list<Street>& streets,
+                                      size_t limit, bool& limitReached) const
+{
+  Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
+
+  return database->GetMatchingStreets(urbanId,
+                                      Lum::Base::WStringToUTF8(name),
+                                      streets,
+                                      limit,limitReached);
+}
+
+bool DatabaseTask::CalculateRoute(Id startWayId, Id startNodeId,
+                                  Id targetWayId, Id targetNodeId,
+                                  RouteData& route)
+{
+  Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
+
+  return database->CalculateRoute(typeConfig,
+                                  startWayId,
+                                  startNodeId,
+                                  targetWayId,
+                                  targetNodeId,
+                                  route);
+}
+
+bool DatabaseTask::TransformRouteDataToRouteDescription(const RouteData& data,
+                                                        RouteDescription& description)
+{
+  Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
+
+  return database->TransformRouteDataToRouteDescription(data,description);
+}
+
+bool DatabaseTask::TransformRouteDataToWay(const RouteData& data,
+                                           Way& way)
+{
+  Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
+
+  return database->TransformRouteDataToWay(data,way);
+}
+
+void DatabaseTask::ClearRoute()
+{
+  Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
+
+  painter.poiWays.clear();
+}
+
+void DatabaseTask::AddRoute(const Way& way)
+{
+  Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
+
+  painter.poiWays.push_back(way);
+}
+
 void DatabaseTask::PostJob(Job *job)
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
@@ -135,32 +219,6 @@ void DatabaseTask::PostJob(Job *job)
   newJob=job;
 
   condition.Signal();
-}
-
-void DatabaseTask::GetMatchingCities(const std::wstring& name,
-                                     std::list<City>& cities,
-                                     size_t limit,
-                                     bool& limitReached) const
-{
-  Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
-
-  database->GetMatchingCities(Lum::Base::WStringToUTF8(name),cities,limit,limitReached);
-}
-
-void DatabaseTask::GetMatchingStreets(Id urbanId, const std::wstring& name,
-                                      std::list<Street>& streets,
-                                      size_t limit, bool& limitReached) const
-{
-  Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
-
-  database->GetMatchingStreets(urbanId,Lum::Base::WStringToUTF8(name),streets,limit,limitReached);
-}
-
-void DatabaseTask::Finish()
-{
-  Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
-
-  finish=true;
 }
 
 bool DatabaseTask::DrawResult(Lum::OS::DrawInfo* draw,

@@ -63,6 +63,9 @@ TypeConfig::TypeConfig()
   AddTagInfo(TagInfo("boundary",tagBoundary));
   AddTagInfo(TagInfo("admin_level",tagAdminLevel));
   AddTagInfo(TagInfo("highway",tagHighway));
+  AddTagInfo(TagInfo("internal",tagInternal));
+
+  AddTypeInfo(TypeInfo(typeRoute,tagInternal,"route").CanBeWay(true));
 }
 
 TypeConfig& TypeConfig::AddTagInfo(const TagInfo& tagInfo)

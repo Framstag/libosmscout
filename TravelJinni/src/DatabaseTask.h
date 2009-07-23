@@ -44,6 +44,7 @@ class DatabaseTask : public Lum::OS::Thread
 {
 private:
   Database           *database;
+  const TypeConfig   &typeConfig;
   const StyleConfig  &styleConfig;
   Lum::OS::Condition condition;
   mutable Lum::OS::Mutex mutex;
@@ -66,24 +67,35 @@ private:
 
 public:
   DatabaseTask(Database* database,
+               const TypeConfig& typeConfig,
                const StyleConfig& styleConfig,
                Lum::Model::Action* jobFinishedAction);
 
   void Run();
+  void Finish();
 
-  void PostJob(Job *job);
+  bool GetWay(Id id, Way& way) const;
 
-  void GetMatchingCities(const std::wstring& name,
+  bool GetMatchingCities(const std::wstring& name,
                          std::list<City>& cities,
                          size_t limit,
                          bool& limitReached) const;
 
-  void GetMatchingStreets(Id urbanId, const std::wstring& name,
+  bool GetMatchingStreets(Id urbanId, const std::wstring& name,
                           std::list<Street>& streets,
                           size_t limit, bool& limitReached) const;
 
-  void Finish();
+  bool CalculateRoute(Id startWayId, Id startNodeId,
+                      Id targetWayId, Id targetNodeId,
+                      RouteData& route);
+  bool TransformRouteDataToRouteDescription(const RouteData& data,
+                                            RouteDescription& description);
+  bool TransformRouteDataToWay(const RouteData& data,
+                               Way& way);
+  void ClearRoute();
+  void AddRoute(const Way& way);
 
+  void PostJob(Job *job);
   bool DrawResult(Lum::OS::DrawInfo* draw,
                   int x, int y,
                   size_t width, size_t height,

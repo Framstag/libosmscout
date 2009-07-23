@@ -52,6 +52,9 @@ void DrawSymbol(cairo_t* draw,
                 double x, double y);
 
 public:
+  std::list<Way> poiWays;
+
+public:
   MapPainter(const Database& database);
   virtual ~MapPainter();
 

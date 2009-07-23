@@ -122,10 +122,10 @@ public:
   bool GetWay(const Id& id, Way& way) const;
   bool GetWays(const std::set<Id>& ids, std::list<Way>& ways) const;
 
-  void GetMatchingCities(const std::string& name,
+  bool GetMatchingCities(const std::string& name,
                          std::list<City>& cities,
                          size_t limit, bool& limitReached) const;
-  void GetMatchingStreets(Id urbanId, const std::string& name,
+  bool GetMatchingStreets(Id urbanId, const std::string& name,
                           std::list<Street>& streets,
                           size_t limit, bool& limitReached) const;
   bool GetJoints(Id id,
@@ -140,6 +140,8 @@ public:
 
   bool TransformRouteDataToRouteDescription(const RouteData& data,
                                             RouteDescription& description);
+  bool TransformRouteDataToWay(const RouteData& data,
+                               Way& way);
 
   void DumpStatistics();
 };

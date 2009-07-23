@@ -35,29 +35,44 @@
  */
 class RouteDialog : public Lum::Dlg::ActionDialog
 {
+public:
+  struct RouteSelection
+  {
+    std::string startCity;
+    std::string startStreet;
+    Id          startWay;
+    Id          startNode;
+    std::string endCity;
+    std::string endStreet;
+    Id          endWay;
+    Id          endNode;
+
+    bool IsStartValid() const;
+    bool IsEndValid() const;
+  };
+
 private:
   DatabaseTask*         databaseTask;
   Lum::Model::ActionRef okAction;
   Lum::Model::StringRef start;
-  City                  startCity;
-  Street                startStreet;
   bool                  hasStart;
   Lum::Model::ActionRef startAction;
   Lum::Model::StringRef end;
-  City                  endCity;
-  Street                endStreet;
   bool                  hasEnd;
   Lum::Model::ActionRef endAction;
+  RouteSelection        result;
   bool                  hasResult;
 
 public:
-  RouteDialog(DatabaseTask* databaseTask);
+  RouteDialog(DatabaseTask* databaseTask,
+              const RouteSelection& selection);
 
   Lum::Object* GetContent();
   void GetActions(std::vector<Lum::Dlg::ActionInfo>& actions);
   void Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& msg);
 
   bool HasResult() const;
+  const RouteSelection& GetResult() const;
 };
 
 #endif

@@ -19,6 +19,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <iomanip>
 
 #include <Lum/Base/DateTime.h>
 #include <Lum/Base/L10N.h>
@@ -338,12 +339,13 @@ public:
 class MainDialog : public Lum::Dialog
 {
 private:
-  Lum::Model::ActionRef searchCityAction;
-  Lum::Model::ActionRef searchAddressAction;
-  Lum::Model::ActionRef routeAction;
-  Lum::Model::ActionRef debugStatisticsAction;
-  Lum::Model::ActionRef aboutAction;
-  Map                   *map;
+  Lum::Model::ActionRef       searchCityAction;
+  Lum::Model::ActionRef       searchAddressAction;
+  Lum::Model::ActionRef       routeAction;
+  Lum::Model::ActionRef       debugStatisticsAction;
+  Lum::Model::ActionRef       aboutAction;
+  Map                         *map;
+  RouteDialog::RouteSelection routeSelection;
 
 public:
   MainDialog()
@@ -450,23 +452,16 @@ public:
 
       RouteDialog *dialog;
 
-      dialog=new RouteDialog(databaseTask);
+      dialog=new RouteDialog(databaseTask,routeSelection);
       dialog->SetParent(this);
       if (dialog->Open()) {
         dialog->EventLoop();
         dialog->Close();
 
-        hasResult=dialog->HasResult();
-        if (dialog->HasResult()) {
-          //street=dialog->GetResultStreet();
-        }
+        routeSelection=dialog->GetResult();
       }
 
       delete dialog;
-
-      //if (hasResult) {
-      //  map->ShowReference(street.reference,magVeryClose);
-      //}
     }
     else if (model==debugStatisticsAction && debugStatisticsAction->IsFinished()) {
       database->DumpStatistics();
@@ -528,20 +523,30 @@ public:
     }
 
     database->DumpStatistics();
+
+    databaseTask=new DatabaseTask(database,
+                                  typeConfig,
+                                  styleConfig,
+                                  jobFinishedAction);
+    databaseTask->Start();
+
     /*
+    Way              way;
     RouteData        routeData;
     RouteDescription routeDescription;
     database->CalculateRoute(typeConfig,
                              14331559,138190834,
                              10414977,254429626,
                              routeData);
-    database->TransformRouteDataToRouteDescription(routeData,routeDescription);
     database->DumpStatistics();
+
+    database->TransformRouteDataToRouteDescription(routeData,routeDescription);
 
     for (std::list<RouteDescription::RouteStep>::const_iterator step=routeDescription.Steps().begin();
          step!=routeDescription.Steps().end();
          ++step) {
-      std::cout << step->GetDistance() << " ";
+      std::cout << std::fixed << std::setprecision(1);
+      std::cout << step->GetDistance() << "km ";
 
       switch (step->GetAction()) {
       case RouteDescription::start:
@@ -600,10 +605,9 @@ public:
 
       std::cout << std::endl;
     }
-    return false;*/
 
-    databaseTask=new DatabaseTask(database,styleConfig,jobFinishedAction);
-    databaseTask->Start();
+    database->TransformRouteDataToWay(routeData,way);
+    databaseTask->AddRoute(way);*/
 
     return true;
   }

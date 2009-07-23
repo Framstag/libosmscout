@@ -19,6 +19,9 @@
 
 #include "RouteDialog.h"
 
+#include <iomanip>
+#include <iostream>
+
 #include <Lum/Label.h>
 #include <Lum/Object.h>
 #include <Lum/Panel.h>
@@ -29,7 +32,18 @@
 
 #include "CityStreetSearchDialog.h"
 
-RouteDialog::RouteDialog(DatabaseTask* databaseTask)
+bool RouteDialog::RouteSelection::IsStartValid() const
+{
+  return !startCity.empty() && !startStreet.empty() && startWay!=0 && startNode!=0;
+}
+
+bool RouteDialog::RouteSelection::IsEndValid() const
+{
+  return !endCity.empty() && !endStreet.empty() && endWay!=0 && endNode!=0;
+}
+
+RouteDialog::RouteDialog(DatabaseTask* databaseTask,
+                         const RouteSelection& selection)
  : databaseTask(databaseTask),
    okAction(new Lum::Model::Action()),
    start(new Lum::Model::String()),
@@ -38,6 +52,7 @@ RouteDialog::RouteDialog(DatabaseTask* databaseTask)
    end(new Lum::Model::String()),
    hasEnd(false),
    endAction(new Lum::Model::Action()),
+   result(selection),
    hasResult(false)
 {
   Observe(okAction);
@@ -48,6 +63,40 @@ RouteDialog::RouteDialog(DatabaseTask* databaseTask)
   start->Disable();
   end->Disable();
   okAction->Disable();
+
+  if (result.startCity.empty()) {
+    result.startCity="Dortmund";
+    result.startStreet="Am Birkenbaum";
+    result.startWay=10414977;
+    result.startNode=254429626;
+    start->Set(L"Dortmund, Am Birkenbaum");
+    hasStart=true;
+
+    result.endCity="Bonn";
+    result.endWay=14331559;
+    result.endNode=138190834;
+    result.endStreet="Promenadenweg";
+    end->Set(L"Bonn, Promenadenweg");
+    hasEnd=true;
+  }
+
+  if (result.IsStartValid()) {
+    start->Set(Lum::Base::UTF8ToWString(result.startCity)+
+               L", "+
+               Lum::Base::UTF8ToWString(result.startStreet));
+    hasStart=true;
+  }
+
+  if (result.IsEndValid()) {
+    end->Set(Lum::Base::UTF8ToWString(result.endCity)+
+             L", "+
+             Lum::Base::UTF8ToWString(result.endStreet));
+    hasEnd=true;
+  }
+
+  if (result.IsStartValid() && result.IsEndValid()) {
+    okAction->Enable();
+  }
 }
 
 Lum::Object* RouteDialog::GetContent()
@@ -96,10 +145,20 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
       dialog->EventLoop();
       dialog->Close();
 
-      hasResult=dialog->HasResult();
       if (dialog->HasResult()) {
-        startCity=dialog->GetResultCity();
-        startStreet=dialog->GetResultStreet();
+        City   city=dialog->GetResultCity();
+        Street street=dialog->GetResultStreet();
+        Way    way;
+
+        result.startCity=city.name;
+        result.startStreet=street.name;
+        result.startWay=street.reference.id;
+
+        if (databaseTask->GetWay(result.startWay,way)) {
+          result.startNode=way.nodes[0].id;
+
+          hasResult=true;
+        }
       }
     }
 
@@ -108,9 +167,9 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
     if (hasResult) {
       hasStart=true;
 
-      start->Set(Lum::Base::UTF8ToWString(startCity.name)+
+      start->Set(Lum::Base::UTF8ToWString(result.startCity)+
                  L", "+
-                 Lum::Base::UTF8ToWString(startStreet.name));
+                 Lum::Base::UTF8ToWString(result.startStreet));
 
       if (hasStart && hasEnd) {
         okAction->Enable();
@@ -128,10 +187,20 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
       dialog->EventLoop();
       dialog->Close();
 
-      hasResult=dialog->HasResult();
       if (dialog->HasResult()) {
-        endCity=dialog->GetResultCity();
-        endStreet=dialog->GetResultStreet();
+        City   city=dialog->GetResultCity();
+        Street street=dialog->GetResultStreet();
+        Way    way;
+
+        result.endCity=city.name;
+        result.endStreet=street.name;
+        result.endWay=street.reference.id;
+
+        if (databaseTask->GetWay(result.endWay,way)) {
+          result.endNode=way.nodes[0].id;
+
+          hasResult=true;
+        }
       }
     }
 
@@ -140,9 +209,9 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
     if (hasResult) {
       hasEnd=true;
 
-      end->Set(Lum::Base::UTF8ToWString(endCity.name)+
+      end->Set(Lum::Base::UTF8ToWString(result.endCity)+
                L", "+
-               Lum::Base::UTF8ToWString(endStreet.name));
+               Lum::Base::UTF8ToWString(result.endStreet));
 
       if (hasStart && hasEnd) {
         okAction->Enable();
@@ -152,11 +221,86 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
   else if (model==okAction && okAction->IsEnabled() && okAction->IsFinished()) {
     assert(hasStart && hasEnd);
 
-    std::cout << "Route: " << startStreet.reference.id << " => " << endStreet.reference.id << std::endl;
+    RouteData        routeData;
+    RouteDescription routeDescription;
+    Way              way;
 
-    /*
-    result=citiesModel->GetEntry(citySelection->GetLine());
-    hasResult=true;*/
+    databaseTask->CalculateRoute(result.startWay,result.startNode,
+                                 result.endWay,result.endNode,
+                                 routeData);
+    //databaseTask->DumpStatistics();
+
+    databaseTask->TransformRouteDataToRouteDescription(routeData,routeDescription);
+
+    for (std::list<RouteDescription::RouteStep>::const_iterator step=routeDescription.Steps().begin();
+         step!=routeDescription.Steps().end();
+         ++step) {
+      std::cout << std::fixed << std::setprecision(1);
+      std::cout << step->GetDistance() << "km ";
+
+      switch (step->GetAction()) {
+      case RouteDescription::start:
+        std::cout << "Start at ";
+        if (!step->GetName().empty()) {
+          std::cout << step->GetName();
+
+          if (!step->GetRefName().empty()) {
+            std::cout << " (" << step->GetRefName() << ")";
+          }
+        }
+        else {
+          std::cout << step->GetRefName();
+        }
+        break;
+      case RouteDescription::drive:
+        std::cout << "drive along ";
+        if (!step->GetName().empty()) {
+          std::cout << step->GetName();
+
+          if (!step->GetRefName().empty()) {
+            std::cout << " (" << step->GetRefName() << ")";
+          }
+        }
+        else {
+          std::cout << step->GetRefName();
+        }
+        break;
+      case RouteDescription::switchRoad:
+        std::cout << "turn into ";
+        if (!step->GetName().empty()) {
+          std::cout << step->GetName();
+
+          if (!step->GetRefName().empty()) {
+            std::cout << " (" << step->GetRefName() << ")";
+          }
+        }
+        else {
+          std::cout << step->GetRefName();
+        }
+        break;
+      case RouteDescription::reachTarget:
+        std::cout << "Arriving at ";
+        if (!step->GetName().empty()) {
+          std::cout << step->GetName();
+
+          if (!step->GetRefName().empty()) {
+            std::cout << " (" << step->GetRefName() << ")";
+          }
+        }
+        else {
+          std::cout << step->GetRefName();
+        }
+        break;
+      }
+
+      std::cout << std::endl;
+    }
+
+    databaseTask->TransformRouteDataToWay(routeData,way);
+    databaseTask->ClearRoute();
+    databaseTask->AddRoute(way);
+
+    hasResult=true;
     Exit();
   }
   else {
@@ -167,5 +311,10 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
 bool RouteDialog::HasResult() const
 {
   return hasResult;
+}
+
+const RouteDialog::RouteSelection& RouteDialog::GetResult() const
+{
+  return result;
 }
 
