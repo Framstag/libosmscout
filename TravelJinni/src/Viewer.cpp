@@ -27,6 +27,7 @@
 #include <Lum/Base/String.h>
 
 #include <Lum/Def/AppInfo.h>
+#include <Lum/Def/Menu.h>
 
 #include <Lum/Dlg/About.h>
 
@@ -370,24 +371,33 @@ public:
 
     SetMain(map);
 
-    Lum::MenuDesc *menu=new Lum::MenuDesc();
+    Lum::Def::Menu *menu=Lum::Def::Menu::Create();
 
     menu
-      ->AddMenuItemSub(_ld(menuProject))
-        ->AddMenuItemAction(_ld(menuProjectQuit),Lum::OS::qualifierControl,L"q",GetClosedAction());
-    menu
-      ->AddMenuItemSub(L"_Search")
-        ->AddMenuItemAction(L"Search _city",Lum::OS::qualifierControl,L"c",searchCityAction)
-        ->AddMenuItemAction(L"Search _address",Lum::OS::qualifierControl,L"a",searchAddressAction)
-        ->AddSeparator()
-        ->AddMenuItemAction(L"_Route",Lum::OS::qualifierControl,L"r",routeAction);
-    menu
-      ->AddMenuItemSub(L"Debug")
-        ->AddMenuItemAction(L"Dump _statistics",Lum::OS::qualifierControl,L"s",debugStatisticsAction);
-    menu
-      ->AddMenuItemSub(_ld(menuHelp))
-        ->AddMenuItemAction(_ld(menuHelpHelp),NULL)
-        ->AddMenuItemAction(_ld(menuHelpAbout),aboutAction);
+      ->GroupProject()
+        ->ActionQuit(GetClosedAction())
+      ->End()
+      ->Group(L"_Search")
+        ->Action(Lum::Def::Action(Lum::Def::Desc(L"Search _city")
+                                  .SetShortcut(Lum::OS::qualifierControl,L"c"),
+                                  searchCityAction))
+        ->Action(Lum::Def::Action(Lum::Def::Desc(L"Search _address")
+                                  .SetShortcut(Lum::OS::qualifierControl,L"a"),
+                                  searchAddressAction))
+        ->Separator()
+        ->Action(Lum::Def::Action(Lum::Def::Desc(L"_Route")
+                                  .SetShortcut(Lum::OS::qualifierControl,L"r"),
+                                  routeAction))
+      ->End()
+      ->Group(L"Debug")
+        ->Action(Lum::Def::Action(Lum::Def::Desc(L"Dump _statistics")
+                                  .SetShortcut(Lum::OS::qualifierControl,L"s"),
+                                  debugStatisticsAction))
+      ->End()
+      ->GroupHelp()
+        //->ActionHelp()(
+        ->ActionAbout(aboutAction)
+      ->End();
 
     SetMenu(menu);
 

@@ -202,6 +202,8 @@ void DatabaseTask::ClearRoute()
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
   painter.poiWays.clear();
+
+  SignalRedraw();
 }
 
 void DatabaseTask::AddRoute(const Way& way)
@@ -209,6 +211,8 @@ void DatabaseTask::AddRoute(const Way& way)
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
   painter.poiWays.push_back(way);
+
+  SignalRedraw();
 }
 
 void DatabaseTask::PostJob(Job *job)
@@ -217,6 +221,20 @@ void DatabaseTask::PostJob(Job *job)
 
   delete newJob;
   newJob=job;
+
+  condition.Signal();
+}
+
+void DatabaseTask::SignalRedraw()
+{
+  delete newJob;
+  newJob=new Job();
+
+  newJob->lon=currentLon;
+  newJob->lat=currentLat;
+  newJob->magnification=currentMagnification;
+  newJob->width=currentWidth;
+  newJob->height=currentHeight;
 
   condition.Signal();
 }

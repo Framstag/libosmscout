@@ -65,6 +65,9 @@ private:
   double             finishedMagnification;
   MapPainter         painter;
 
+private:
+  void SignalRedraw();
+
 public:
   DatabaseTask(Database* database,
                const TypeConfig& typeConfig,
@@ -96,6 +99,7 @@ public:
   void AddRoute(const Way& way);
 
   void PostJob(Job *job);
+
   bool DrawResult(Lum::OS::DrawInfo* draw,
                   int x, int y,
                   size_t width, size_t height,
