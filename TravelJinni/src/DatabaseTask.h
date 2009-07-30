@@ -44,8 +44,7 @@ class DatabaseTask : public Lum::OS::Thread
 {
 private:
   Database           *database;
-  const TypeConfig   &typeConfig;
-  const StyleConfig  &styleConfig;
+  StyleConfig        *styleConfig;
   Lum::OS::Condition condition;
   mutable Lum::OS::Mutex mutex;
   bool               finish;
@@ -70,12 +69,12 @@ private:
 
 public:
   DatabaseTask(Database* database,
-               const TypeConfig& typeConfig,
-               const StyleConfig& styleConfig,
                Lum::Model::Action* jobFinishedAction);
 
   void Run();
   void Finish();
+
+  void SetStyle(StyleConfig* styleConfig);
 
   bool GetWay(Id id, Way& way) const;
 

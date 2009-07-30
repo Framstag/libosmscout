@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
 
   TypeConfig typeConfig;
 
-  if (!LoadTypeConfig("types.xml",typeConfig)) {
+  if (!LoadTypeConfig("map.ost.xml",typeConfig)) {
     std::cerr << "Cannot load type configuration!" << std::endl;
   }
 

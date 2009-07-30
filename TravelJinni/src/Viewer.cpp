@@ -128,13 +128,17 @@ public:
 
     /* --- */
 
-    if (!databaseTask->DrawResult(GetDrawInfo(),
+    Lum::OS::DrawInfo *draw=GetDrawInfo();
+
+    if (!databaseTask->DrawResult(draw,
                                   this->x,this->y,
                                   this->width,this->height,
                                   lon,lat,
                                   magnification) && requestNewMap) {
       RequestNewMap();
     }
+
+
   }
 
   void RequestNewMap()
@@ -163,6 +167,30 @@ public:
 
     lon=startLon-(lonMax-lonMin)*(event.x-startX)/width;
     lat=startLat+(latMax-latMin)*(event.y-startY)/height;
+  }
+
+  void ZoomIn(double zoomFactor)
+  {
+    if (magnification*zoomFactor>100000) {
+      magnification=100000;
+    }
+    else {
+      magnification*=zoomFactor;
+    }
+
+    RequestNewMap();
+  }
+
+  void ZoomOut(double zoomFactor)
+  {
+    if (magnification/zoomFactor<1) {
+      magnification=1;
+    }
+    else {
+      magnification/=zoomFactor;
+    }
+
+    RequestNewMap();
   }
 
   bool HandleMouseEvent(const Lum::OS::MouseEvent& event)
@@ -196,21 +224,15 @@ public:
     }
     else if (event.type==Lum::OS::MouseEvent::down &&
              event.button==Lum::OS::MouseEvent::button4) {
-      magnification*=1.2;
-
-      RequestNewMap();
+      ZoomIn(1.2);
 
       return true;
     }
     else if (event.type==Lum::OS::MouseEvent::down &&
              event.button==Lum::OS::MouseEvent::button5) {
-      if (magnification>=1*1.2) {
-        magnification/=1.2;
+      ZoomOut(1.2);
 
-        RequestNewMap();
-
-        return true;
-      }
+      return true;
     }
 
     return false;
@@ -276,14 +298,12 @@ public:
         return true;
       }
       else if (event.text==L"+") {
-        magnification*=2;
-
-        RequestNewMap();
+        ZoomIn(2.0);
 
         return true;
       }
-      else if (event.text==L"-" && magnification>=2) {
-        magnification/=2;
+      else if (event.text==L"-") {
+        ZoomOut(2.0);
 
         RequestNewMap();
 
@@ -458,8 +478,6 @@ public:
       }
     }
     else if (model==routeAction && routeAction->IsFinished()) {
-      bool hasResult=false;
-
       RouteDialog *dialog;
 
       dialog=new RouteDialog(databaseTask,routeSelection);
@@ -509,11 +527,11 @@ public:
       return false;
     }
 
-    if (!LoadTypeConfig("types.xml",typeConfig)) {
+    if (!LoadTypeConfig("map.ost.xml",typeConfig)) {
       std::cerr << "Cannot load type configuration!" << std::endl;
     }
 
-    if (!LoadStyleConfig("style.xml",typeConfig,styleConfig)) {
+    if (!LoadStyleConfig("standard.oss.xml",typeConfig,styleConfig)) {
       std::cerr << "Cannot load style configuration!" << std::endl;
     }
 
@@ -528,16 +546,17 @@ public:
 
     std::string     pathString=Lum::Base::WStringToString(path.GetPath());
 
-    if (!database->Initialize(pathString)) {
+    if (!database->Open(pathString)) {
       std::cerr << "Cannot initialize database!" << std::endl;
     }
 
     database->DumpStatistics();
 
     databaseTask=new DatabaseTask(database,
-                                  typeConfig,
-                                  styleConfig,
                                   jobFinishedAction);
+
+    databaseTask->SetStyle(&styleConfig);
+
     databaseTask->Start();
 
     /*
@@ -634,6 +653,9 @@ public:
 
     Lum::OS::MainDialog<MainDialog>::Cleanup();
 
+    if (database->IsOpen()) {
+      database->Close();
+    }
     delete database;
     database=NULL;
   }

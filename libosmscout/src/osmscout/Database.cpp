@@ -24,6 +24,7 @@
 #include <iostream>
 
 #include <osmscout/RoutingProfile.h>
+#include <osmscout/TypeConfigLoader.h>
 
 struct NodeCacheValueSizer : public Database::NodeCache::ValueSizer
 {
@@ -68,9 +69,11 @@ struct NodeUseCacheValueSizer : public Database::NodeUseCache::ValueSizer
 };
 
 Database::Database()
- : nodeCache(2000),
+ : isOpen(false),
+   nodeCache(2000),
    wayCache(3000),
-   nodeUseCache(10) // Seems like the cache is more expensive than direct loading!?
+   nodeUseCache(10), // Seems like the cache is more expensive than direct loading!?
+   typeConfig(NULL)
 {
   // no code
 }
@@ -80,11 +83,22 @@ Database::~Database()
   // no code
 }
 
-bool Database::Initialize(const std::string& path)
+bool Database::Open(const std::string& path)
 {
   assert(!path.empty());
 
   this->path=path;
+
+  std::string typeConfigFileName=path+"/"+"map.ost.xml";
+
+  typeConfig=new TypeConfig();
+
+  if (!LoadTypeConfig(typeConfigFileName.c_str(),*typeConfig)) {
+    delete typeConfig;
+    typeConfig=NULL;
+    std::cerr << "Cannot load map.ost.xml!" << std::endl;
+    return false;
+  }
 
   std::cout << "Loading node index..." << std::endl;
   if (!nodeIndex.LoadNodeIndex(path)) {
@@ -128,7 +142,24 @@ bool Database::Initialize(const std::string& path)
   }
   std::cout << "Loading node use index done." << std::endl;
 
+  isOpen=true;
+
   return true;
+}
+
+bool Database::IsOpen() const
+{
+  return isOpen;
+}
+
+
+void Database::Close()
+{
+  nodeCache.Flush();
+  wayCache.Flush();
+  nodeUseCache.Flush();
+
+  isOpen=false;
 }
 
 size_t Database::GetMaximumPriority(const StyleConfig& styleConfig,
@@ -786,8 +817,7 @@ struct RouteStep
   Id nodeId;
 };
 
-bool Database::CalculateRoute(const TypeConfig& typeConfig,
-                              Id startWayId, Id startNodeId,
+bool Database::CalculateRoute(Id startWayId, Id startNodeId,
                               Id targetWayId, Id targetNodeId,
                               RouteData& route)
 {
@@ -811,59 +841,59 @@ bool Database::CalculateRoute(const TypeConfig& typeConfig,
 
   profile.SetTurnCostFactor(1/60/2); // 30 seconds
 
-  type=typeConfig.GetWayTypeId(tagHighway,"motorway");
+  type=typeConfig->GetWayTypeId(tagHighway,"motorway");
   assert(type!=typeIgnore);
   profile.SetTypeCostFactor(type,1/110.0);
 
-  type=typeConfig.GetWayTypeId(tagHighway,"motorway_link");
+  type=typeConfig->GetWayTypeId(tagHighway,"motorway_link");
   assert(type!=typeIgnore);
   profile.SetTypeCostFactor(type,1/90.0);
 
-  type=typeConfig.GetWayTypeId(tagHighway,"trunk");
+  type=typeConfig->GetWayTypeId(tagHighway,"trunk");
   assert(type!=typeIgnore);
   profile.SetTypeCostFactor(type,1/90.0);
 
-  type=typeConfig.GetWayTypeId(tagHighway,"trunk_link");
+  type=typeConfig->GetWayTypeId(tagHighway,"trunk_link");
   assert(type!=typeIgnore);
   profile.SetTypeCostFactor(type,1/70.0);
 
-  type=typeConfig.GetWayTypeId(tagHighway,"primary");
+  type=typeConfig->GetWayTypeId(tagHighway,"primary");
   assert(type!=typeIgnore);
   profile.SetTypeCostFactor(type,1/70.0);
 
-  type=typeConfig.GetWayTypeId(tagHighway,"primary_link");
+  type=typeConfig->GetWayTypeId(tagHighway,"primary_link");
   assert(type!=typeIgnore);
   profile.SetTypeCostFactor(type,1/60.0);
 
-  type=typeConfig.GetWayTypeId(tagHighway,"secondary");
+  type=typeConfig->GetWayTypeId(tagHighway,"secondary");
   assert(type!=typeIgnore);
   profile.SetTypeCostFactor(type,1/60.0);
 
-  type=typeConfig.GetWayTypeId(tagHighway,"secondary_link");
+  type=typeConfig->GetWayTypeId(tagHighway,"secondary_link");
   assert(type!=typeIgnore);
   profile.SetTypeCostFactor(type,1/50.0);
 
-  type=typeConfig.GetWayTypeId(tagHighway,"tertiary");
+  type=typeConfig->GetWayTypeId(tagHighway,"tertiary");
   assert(type!=typeIgnore);
   profile.SetTypeCostFactor(type,1/55.0);
 
-  type=typeConfig.GetWayTypeId(tagHighway,"unclassified");
+  type=typeConfig->GetWayTypeId(tagHighway,"unclassified");
   assert(type!=typeIgnore);
   profile.SetTypeCostFactor(type,1/50.0);
 
-  type=typeConfig.GetWayTypeId(tagHighway,"road");
+  type=typeConfig->GetWayTypeId(tagHighway,"road");
   assert(type!=typeIgnore);
   profile.SetTypeCostFactor(type,1/50.0);
 
-  type=typeConfig.GetWayTypeId(tagHighway,"residential");
+  type=typeConfig->GetWayTypeId(tagHighway,"residential");
   assert(type!=typeIgnore);
   profile.SetTypeCostFactor(type,1/40.0);
 
-  type=typeConfig.GetWayTypeId(tagHighway,"living_street");
+  type=typeConfig->GetWayTypeId(tagHighway,"living_street");
   assert(type!=typeIgnore);
   profile.SetTypeCostFactor(type,1/10.0);
 
-  type=typeConfig.GetWayTypeId(tagHighway,"service");
+  type=typeConfig->GetWayTypeId(tagHighway,"service");
   assert(type!=typeIgnore);
   profile.SetTypeCostFactor(type,1/30.0);
 

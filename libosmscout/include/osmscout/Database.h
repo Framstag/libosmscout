@@ -61,6 +61,7 @@ public: // Fix this
   typedef Cache<size_t,std::vector<NodeUse> > NodeUseCache;
 
 private:
+  bool                  isOpen;
   NodeIndex             nodeIndex;
   WayIndex              wayIndex;
 
@@ -80,6 +81,7 @@ private:
   mutable std::ifstream nodeStream;    //! File stream to the node.dat file
   mutable std::ifstream wayStream;     //! File stream to the way.dat file
   mutable std::ifstream nodeUseStream; //! File stream to the nodeuse.idx file
+  TypeConfig            *typeConfig;   //! Type config for the currently opened map
 
 private:
   size_t GetMaximumPriority(const StyleConfig& styleConfig,
@@ -108,7 +110,9 @@ public:
   Database();
   virtual ~Database();
 
-  bool Initialize(const std::string& path);
+  bool Open(const std::string& path);
+  bool IsOpen() const;
+  void Close();
 
   bool GetObjects(const StyleConfig& styleConfig,
                   double lonMin, double latMin,
@@ -133,8 +137,7 @@ public:
   bool GetJoints(const std::set<Id>& ids,
                  std::list<Way>& ways) const;
 
-  bool CalculateRoute(const TypeConfig& typeConfig,
-                      Id startWayId, Id startNodeId,
+  bool CalculateRoute(Id startWayId, Id startNodeId,
                       Id targetWayId, Id targetNodeId,
                       RouteData& route);
 

@@ -145,7 +145,9 @@
 
   <node key="highway" value="bus_stop" prio="11">
     <!-- sybol -->
-    <label  minMag="veryClose"/>
+    <!--<label  minMag="veryClose"/>-->
+    <!-- TODO: We need a bus symbol here! -->
+    <symbol style="circle" size="4" fillColor="7885b0" minMag="close"/>
   </node>
 
   <node key="highway" value="motorway_junction" prio="11">
@@ -159,7 +161,7 @@
   </way>
 
   <way key="railway" value="tram" prio="100">
-    <line style="dotted" color="b3b3b3" minPixel="1" maxPixel="2" width="5" />
+    <line color="444444" minPixel="1" maxPixel="2" width="5" />
     <label style="contour" minMag="close"/>
   </way>
 
@@ -175,7 +177,7 @@
 
   <node key="railway" value="station" prio="6">
     <!-- sybol -->
-    <label minMag="close"/>
+    <label style="emphasize" textColor="8888fd" minMag="detail"/>
     <symbol style="box" fillColor="7885b0" minMag="close"/>
   </node>
 
@@ -254,12 +256,12 @@
 
   <area key="landuse" value="forest" prio="5">
     <fill color="8dc56c" layer="1"/>
-    <label minMag="city"/>
+    <label style="emphasize" minMag="city"/>
   </area>
 
   <area key="landuse" value="allotments" prio="8">
     <fill color="c8b084"/>
-    <label minMag="detail"/>
+    <label style="emphasize" minMag="detail"/>
   </area>
 
   <area key="landuse" value="vineyard" prio="8">
@@ -267,7 +269,7 @@
     <label minMag="detail"/>
   </area>
 
-  <area key="landuse" value="residential" prio="8">
+  <area key="landuse" value="residential" prio="5">
     <fill color="dcdcdc"/>
     <label minMag="city"/>
   </area>
@@ -343,15 +345,10 @@
     <fill color="ddecec"/>
     <label minMag="city"/>
   </area>
-
-  <area key="natural" value="scrub" prio="6">
-    <fill color="ddecec"/>
-    <label minMag="city"/>
-  </area>
   -->
 
   <area key="natural" value="scrub" prio="6">
-    <fill color="72bf81"/>
+    <fill color="b5e2b5"/>
     <label minMag="city"/>
   </area>
 

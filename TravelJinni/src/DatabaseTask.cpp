@@ -37,12 +37,9 @@
 
 
 DatabaseTask::DatabaseTask(Database* database,
-                           const TypeConfig& typeConfig,
-                           const StyleConfig& styleConfig,
                            Lum::Model::Action* jobFinishedAction)
  : database(database),
-   typeConfig(typeConfig),
-   styleConfig(styleConfig),
+   styleConfig(NULL),
    finish(false),
    newJob(NULL),
    currentJob(NULL),
@@ -99,10 +96,18 @@ void DatabaseTask::Run()
       currentLat=currentJob->lat;
       currentMagnification=currentJob->magnification;
 
-      painter.DrawMap(styleConfig,
+      if (database->IsOpen() && styleConfig!=NULL) {
+        painter.DrawMap(*styleConfig,
                       currentLon,currentLat,currentMagnification,
                       currentWidth,currentHeight,
                       currentSurface,currentCairo);
+      }
+      else {
+        cairo_save(currentCairo);
+        cairo_set_source_rgb(currentCairo,0,0,0);
+        cairo_paint(currentCairo);
+        cairo_restore(currentCairo);
+      }
 
       mutex.Lock();
 
@@ -136,9 +141,20 @@ void DatabaseTask::Finish()
   finish=true;
 }
 
+void DatabaseTask::SetStyle(StyleConfig* styleConfig)
+{
+  Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
+
+  this->styleConfig=styleConfig;
+}
+
 bool DatabaseTask::GetWay(Id id, Way& way) const
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
+
+  if (!database->IsOpen()) {
+    return false;
+  }
 
   return database->GetWay(id,way);
 }
@@ -150,6 +166,10 @@ bool DatabaseTask::GetMatchingCities(const std::wstring& name,
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
+  if (!database->IsOpen()) {
+    return false;
+  }
+
   return database->GetMatchingCities(Lum::Base::WStringToUTF8(name),
                                      cities,
                                      limit,limitReached);
@@ -160,6 +180,10 @@ bool DatabaseTask::GetMatchingStreets(Id urbanId, const std::wstring& name,
                                       size_t limit, bool& limitReached) const
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
+
+  if (!database->IsOpen()) {
+    return false;
+  }
 
   return database->GetMatchingStreets(urbanId,
                                       Lum::Base::WStringToUTF8(name),
@@ -173,8 +197,11 @@ bool DatabaseTask::CalculateRoute(Id startWayId, Id startNodeId,
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
-  return database->CalculateRoute(typeConfig,
-                                  startWayId,
+  if (!database->IsOpen()) {
+    return false;
+  }
+
+  return database->CalculateRoute(startWayId,
                                   startNodeId,
                                   targetWayId,
                                   targetNodeId,
@@ -186,6 +213,10 @@ bool DatabaseTask::TransformRouteDataToRouteDescription(const RouteData& data,
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
+  if (!database->IsOpen()) {
+    return false;
+  }
+
   return database->TransformRouteDataToRouteDescription(data,description);
 }
 
@@ -193,6 +224,10 @@ bool DatabaseTask::TransformRouteDataToWay(const RouteData& data,
                                            Way& way)
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
+
+  if (!database->IsOpen()) {
+    return false;
+  }
 
   return database->TransformRouteDataToWay(data,way);
 }
