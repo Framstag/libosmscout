@@ -22,7 +22,15 @@
 #include <cmath>
 #include <iostream>
 
+#include <osmscout/StyleConfigLoader.h>
+
 #include <Lum/Base/String.h>
+
+// Cairo includes X11, defines Status
+#if defined(Status)
+  #undef Status
+#endif
+#include <Lum/Base/Path.h>
 
 #include <Lum/OS/Cairo/Bitmap.h>
 #include <Lum/OS/Cairo/Display.h>
@@ -34,7 +42,6 @@
 #include <Lum/OS/Thread.h>
 
 #include "MapPainter.h"
-
 
 DatabaseTask::DatabaseTask(Database* database,
                            Lum::Model::Action* jobFinishedAction)
@@ -103,6 +110,7 @@ void DatabaseTask::Run()
                       currentSurface,currentCairo);
       }
       else {
+        std::cout << "Cannot draw map: " << database->IsOpen() << " " << (styleConfig!=NULL) << std::endl;
         cairo_save(currentCairo);
         cairo_set_source_rgb(currentCairo,0,0,0);
         cairo_paint(currentCairo);
@@ -139,6 +147,60 @@ void DatabaseTask::Finish()
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
   finish=true;
+}
+
+bool DatabaseTask::Open(const std::wstring& path)
+{
+  Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
+
+  Lum::Base::Path p;
+
+  p.SetNativeDir(path);
+
+  return database->Open(Lum::Base::WStringToString(p.GetPath()).c_str());
+}
+
+bool DatabaseTask::IsOpen() const
+{
+  Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
+
+  return database->IsOpen();
+}
+
+void DatabaseTask::Close()
+{
+  Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
+
+  database->Close();
+}
+
+bool DatabaseTask::LoadStyleConfig(const std::wstring& filename,
+                                   StyleConfig*& styleConfig)
+{
+  Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
+
+  Lum::Base::Path f;
+
+  f.SetNativePath(filename);
+
+  if (database->GetTypeConfig()!=NULL) {
+    styleConfig=new StyleConfig(database->GetTypeConfig());
+
+    if (::LoadStyleConfig(Lum::Base::WStringToString(f.GetPath()).c_str(),
+                          *styleConfig)) {
+      return true;
+    }
+    else {
+      delete styleConfig;
+      styleConfig=NULL;
+
+      return false;
+    }
+  }
+  else {
+    styleConfig=NULL;
+    return false;
+  }
 }
 
 void DatabaseTask::SetStyle(StyleConfig* styleConfig)

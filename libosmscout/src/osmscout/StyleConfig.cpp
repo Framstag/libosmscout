@@ -229,6 +229,11 @@ SymbolStyle& SymbolStyle::SetFillColor(double r, double g, double b, double a)
   return *this;
 }
 
+StyleConfig::StyleConfig(TypeConfig* typeConfig)
+ : typeConfig(typeConfig)
+{
+}
+
 StyleConfig::~StyleConfig()
 {
   for (size_t i=0; i<nodeSymbolStyles.size(); i++) {
@@ -270,6 +275,11 @@ StyleConfig::~StyleConfig()
   for (size_t i=0; i<areaLabelStyles.size(); i++) {
     delete areaLabelStyles[i];
   }
+}
+
+TypeConfig* StyleConfig::GetTypeConfig() const
+{
+  return typeConfig;
 }
 
 StyleConfig& StyleConfig::SetWayPrio(TypeId type, size_t prio)

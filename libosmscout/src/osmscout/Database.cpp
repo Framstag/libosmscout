@@ -162,6 +162,11 @@ void Database::Close()
   isOpen=false;
 }
 
+TypeConfig* Database::GetTypeConfig() const
+{
+  return typeConfig;
+}
+
 size_t Database::GetMaximumPriority(const StyleConfig& styleConfig,
                                     double minlon, double minlat,
                                     double maxlon, double maxlat,

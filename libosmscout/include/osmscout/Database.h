@@ -114,6 +114,8 @@ public:
   bool IsOpen() const;
   void Close();
 
+  TypeConfig* GetTypeConfig() const;
+
   bool GetObjects(const StyleConfig& styleConfig,
                   double lonMin, double latMin,
                   double lonMax, double latMax,

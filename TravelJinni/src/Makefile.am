@@ -4,6 +4,8 @@ TravelJinni_SOURCES = MapPainter.h \
                       MapPainter.cpp \
                       DatabaseTask.h \
                       DatabaseTask.cpp \
+                      Configuration.h \
+                      Configuration.cpp \
                       CitySearchDialog.h \
                       CitySearchDialog.cpp \
                       CityStreetSearchDialog.h \

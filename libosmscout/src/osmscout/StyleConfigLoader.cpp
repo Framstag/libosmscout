@@ -58,15 +58,13 @@ class StyleConfigParser
   };
 
 private:
-  Context           context;
-  const TypeConfig& typeConfig;
-  StyleConfig&      styleConfig;
-  TypeId            type;
+  Context     context;
+  StyleConfig &styleConfig;
+  TypeId      type;
 
 public:
-  StyleConfigParser(const TypeConfig& typeConfig, StyleConfig& styleConfig)
-  : typeConfig(typeConfig),
-    styleConfig(styleConfig)
+  StyleConfigParser(StyleConfig& styleConfig)
+  : styleConfig(styleConfig)
   {
     context=contextUnknown;
   }
@@ -220,6 +218,8 @@ public:
 
   void StartElement(const xmlChar *name, const xmlChar **atts)
   {
+    TypeConfig *typeConfig=styleConfig.GetTypeConfig();
+
     if (context==contextUnknown) {
       if (strcmp((const char*)name,"TravelJinni-Style")==0) {
         context=contextTop;
@@ -334,13 +334,13 @@ public:
       }
 
       if (context==contextNode) {
-        type=typeConfig.GetNodeTypeId(typeConfig.GetTagId(key.c_str()),value.c_str());
+        type=typeConfig->GetNodeTypeId(typeConfig->GetTagId(key.c_str()),value.c_str());
       }
       else if (context==contextWay) {
-        type=typeConfig.GetWayTypeId(typeConfig.GetTagId(key.c_str()),value.c_str());
+        type=typeConfig->GetWayTypeId(typeConfig->GetTagId(key.c_str()),value.c_str());
       }
       else if (context==contextArea) {
-        type=typeConfig.GetAreaTypeId(typeConfig.GetTagId(key.c_str()),value.c_str());
+        type=typeConfig->GetAreaTypeId(typeConfig->GetTagId(key.c_str()),value.c_str());
       }
 
       if (type==typeIgnore) {
@@ -869,10 +869,9 @@ static void StructuredErrorHandler(void *data, xmlErrorPtr error)
 }
 
 bool LoadStyleConfig(const char* styleFile,
-                     const TypeConfig& typeConfig,
                      StyleConfig& styleConfig)
 {
-  StyleConfigParser parser(typeConfig,styleConfig);
+  StyleConfigParser parser(styleConfig);
   xmlSAXHandler     saxParser;
 
   memset(&saxParser,0,sizeof(xmlSAXHandler));

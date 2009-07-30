@@ -1,8 +1,8 @@
-#ifndef OSMSCOUT_STYLECONFIGLOADER_H
-#define OSMSCOUT_STYLECONFIGLOADER_H
+#ifndef CONFIGURATION_H
+#define CONFIGURATION_H
 
 /*
-  Import/TravelJinni - Openstreetmap offline viewer
+  TravelJinni - Openstreetmap offline viewer
   Copyright (C) 2009  Tim Teulings
 
   This library is free software; you can redistribute it and/or
@@ -20,10 +20,25 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/StyleConfig.h>
-#include <osmscout/TypeConfig.h>
+#include <list>
+#include <string>
 
-extern bool LoadStyleConfig(const char* styleFile,
-                            StyleConfig& styleConfig);
+struct Map
+{
+  std::wstring name;
+  std::wstring path;
+};
+
+struct Style
+{
+  std::wstring name;
+  std::wstring file;
+};
+
+extern std::list<Map> maps;
+extern std::list<Style> styles;
+
+extern bool LoadConfig();
+extern bool SaveConfig();
 
 #endif

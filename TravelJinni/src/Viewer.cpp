@@ -30,6 +30,7 @@
 #include <Lum/Def/Menu.h>
 
 #include <Lum/Dlg/About.h>
+#include <Lum/Dlg/Msg.h>
 
 #include <Lum/Model/String.h>
 #include <Lum/Model/Table.h>
@@ -50,13 +51,9 @@
 #include <Lum/String.h>
 #include <Lum/Table.h>
 
-#include <osmscout/StyleConfig.h>
-#include <osmscout/StyleConfigLoader.h>
-#include <osmscout/TypeConfig.h>
-#include <osmscout/TypeConfigLoader.h>
-
 #include "MapPainter.h"
 
+#include "Configuration.h"
 #include "CitySearchDialog.h"
 #include "CityStreetSearchDialog.h"
 #include "RouteDialog.h"
@@ -64,13 +61,12 @@
 
 static Lum::Def::AppInfo info;
 
-static TypeConfig            typeConfig;
-static StyleConfig           styleConfig;
+static StyleConfig           *styleConfig;
 static Database              *database=NULL;
 static Lum::Model::ActionRef jobFinishedAction;
 static DatabaseTask          *databaseTask=NULL;
 
-class Map : public Lum::Object
+class MapControl : public Lum::Object
 {
 private:
   double                lon;
@@ -81,7 +77,7 @@ private:
   bool                  requestNewMap;
 
 public:
-  Map()
+  MapControl()
   : lon(7.13601),
     lat(50.68924),
     magnification(/*2*2*2**/2*1024),
@@ -94,7 +90,7 @@ public:
 
   }
 
-  ~Map()
+  ~MapControl()
   {
     // no code
   }
@@ -365,7 +361,7 @@ private:
   Lum::Model::ActionRef       routeAction;
   Lum::Model::ActionRef       debugStatisticsAction;
   Lum::Model::ActionRef       aboutAction;
-  Map                         *map;
+  MapControl                  *map;
   RouteDialog::RouteSelection routeSelection;
 
 public:
@@ -376,6 +372,7 @@ public:
      debugStatisticsAction(new Lum::Model::Action()),
      aboutAction(new Lum::Model::Action())
   {
+    Observe(GetOpenedAction());
     Observe(GetClosedAction());
     Observe(searchCityAction);
     Observe(searchAddressAction);
@@ -386,7 +383,7 @@ public:
 
   void PreInit()
   {
-    map=new Map();
+    map=new MapControl();
     map->SetFlex(true,true);
 
     SetMain(map);
@@ -426,8 +423,31 @@ public:
 
   void Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& msg)
   {
-    if (model==GetClosedAction() && GetClosedAction()->IsFinished()) {
-      std::cout << "Quitting..." << std::endl;
+    if (model==GetOpenedAction() && GetOpenedAction()->IsFinished()) {
+      if (!LoadConfig()) {
+        Lum::Dlg::Msg::ShowOk(this,
+                              L"Cannot load configuration!",
+                              L"Cannot load configuration!");
+      }
+
+      if (databaseTask->Open(L".")) {
+        if (databaseTask->LoadStyleConfig(L"./standard.oss.xml",styleConfig)) {
+          databaseTask->SetStyle(styleConfig);
+        }
+        else {
+          std::cerr << "Cannot load style configuration!" << std::endl;
+        }
+      }
+      else {
+        std::cerr << "Cannot initialize database!" << std::endl;
+      }
+
+      std::cout << "Status: " << databaseTask->IsOpen() << " " << (styleConfig!=NULL) << std::endl;
+
+      map->RequestNewMap();
+    }
+    else if (model==GetClosedAction() && GetClosedAction()->IsFinished()) {
+      SaveConfig();
     }
     else if (model==searchCityAction && searchCityAction->IsFinished()) {
       City city;
@@ -508,6 +528,10 @@ class Main : public Lum::OS::MainDialog<MainDialog>
 public:
   bool Prepare()
   {
+    std::vector<Way> bla;
+
+    std::cout << "Vector size: " << sizeof(bla) << std::endl;
+
     database=new Database();
     jobFinishedAction=new Lum::Model::Action();
 
@@ -527,116 +551,10 @@ public:
       return false;
     }
 
-    if (!LoadTypeConfig("map.ost.xml",typeConfig)) {
-      std::cerr << "Cannot load type configuration!" << std::endl;
-    }
-
-    if (!LoadStyleConfig("standard.oss.xml",typeConfig,styleConfig)) {
-      std::cerr << "Cannot load style configuration!" << std::endl;
-    }
-
-    Lum::Base::Path path;
-
-    if (Lum::OS::display->GetArgCount()==1) {
-      path.SetNativeDir(Lum::OS::display->GetArg(0));
-    }
-    else {
-      path.SetNativeDir(Lum::Base::Path::GetCWD());
-    }
-
-    std::string     pathString=Lum::Base::WStringToString(path.GetPath());
-
-    if (!database->Open(pathString)) {
-      std::cerr << "Cannot initialize database!" << std::endl;
-    }
-
-    database->DumpStatistics();
-
     databaseTask=new DatabaseTask(database,
                                   jobFinishedAction);
 
-    databaseTask->SetStyle(&styleConfig);
-
     databaseTask->Start();
-
-    /*
-    Way              way;
-    RouteData        routeData;
-    RouteDescription routeDescription;
-    database->CalculateRoute(typeConfig,
-                             14331559,138190834,
-                             10414977,254429626,
-                             routeData);
-    database->DumpStatistics();
-
-    database->TransformRouteDataToRouteDescription(routeData,routeDescription);
-
-    for (std::list<RouteDescription::RouteStep>::const_iterator step=routeDescription.Steps().begin();
-         step!=routeDescription.Steps().end();
-         ++step) {
-      std::cout << std::fixed << std::setprecision(1);
-      std::cout << step->GetDistance() << "km ";
-
-      switch (step->GetAction()) {
-      case RouteDescription::start:
-        std::cout << "Start at ";
-        if (!step->GetName().empty()) {
-          std::cout << step->GetName();
-
-          if (!step->GetRefName().empty()) {
-            std::cout << " (" << step->GetRefName() << ")";
-          }
-        }
-        else {
-          std::cout << step->GetRefName();
-        }
-        break;
-      case RouteDescription::drive:
-        std::cout << "drive along ";
-        if (!step->GetName().empty()) {
-          std::cout << step->GetName();
-
-          if (!step->GetRefName().empty()) {
-            std::cout << " (" << step->GetRefName() << ")";
-          }
-        }
-        else {
-          std::cout << step->GetRefName();
-        }
-        break;
-      case RouteDescription::switchRoad:
-        std::cout << "turn into ";
-        if (!step->GetName().empty()) {
-          std::cout << step->GetName();
-
-          if (!step->GetRefName().empty()) {
-            std::cout << " (" << step->GetRefName() << ")";
-          }
-        }
-        else {
-          std::cout << step->GetRefName();
-        }
-        break;
-      case RouteDescription::reachTarget:
-        std::cout << "Arriving at ";
-        if (!step->GetName().empty()) {
-          std::cout << step->GetName();
-
-          if (!step->GetRefName().empty()) {
-            std::cout << " (" << step->GetRefName() << ")";
-          }
-        }
-        else {
-          std::cout << step->GetRefName();
-        }
-        break;
-      }
-
-      std::cout << std::endl;
-    }
-
-    database->TransformRouteDataToWay(routeData,way);
-    databaseTask->AddRoute(way);*/
 
     return true;
   }

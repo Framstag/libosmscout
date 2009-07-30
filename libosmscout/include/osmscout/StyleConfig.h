@@ -366,6 +366,8 @@ public:
 class StyleConfig
 {
 private:
+  TypeConfig                *typeConfig;
+
   std::vector<SymbolStyle*> nodeSymbolStyles;
   std::vector<LabelStyle*>  nodeRefLabelStyles;
   std::vector<LabelStyle*>  nodeLabelStyles;
@@ -383,7 +385,10 @@ private:
   std::vector<size_t>       areaPrio;
 
 public:
+  StyleConfig(TypeConfig* typeConfig);
   virtual ~StyleConfig();
+
+  TypeConfig* GetTypeConfig() const;
 
   StyleConfig& SetWayPrio(TypeId type, size_t prio);
   StyleConfig& SetAreaPrio(TypeId type, size_t prio);

@@ -74,6 +74,11 @@ public:
   void Run();
   void Finish();
 
+  bool Open(const std::wstring& path);
+  bool IsOpen() const;
+  void Close();
+
+  bool LoadStyleConfig(const std::wstring& filename, StyleConfig*& styleConfig);
   void SetStyle(StyleConfig* styleConfig);
 
   bool GetWay(Id id, Way& way) const;
