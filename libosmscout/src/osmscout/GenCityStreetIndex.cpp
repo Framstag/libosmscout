@@ -687,13 +687,15 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
        ++area) {
     std::string name;
 
-    for (size_t i=0; i<area->tags.size(); i++) {
-      if (area->tags[i].key==tagPlaceName) {
-        name=area->tags[i].value;
-        break;
-      }
-      else if (area->tags[i].key==tagName && name.empty()) {
-        name=area->tags[i].value;
+    if (name.empty()) {
+      for (size_t i=0; i<area->tags.size(); i++) {
+        if (area->tags[i].key==tagPlaceName) {
+          name=area->tags[i].value;
+          break;
+        }
+        else if (area->tags[i].key==tagName) {
+          name=area->tags[i].value;
+        }
       }
     }
 
@@ -1146,14 +1148,7 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
     if (in) {
       if (wayTypes.find(way.type)!=wayTypes.end()) {
 
-        std::string name;
-
-        for (size_t i=0; i<way.tags.size(); i++) {
-          if (way.tags[i].key==tagName) {
-            name=way.tags[i].value;
-            break;
-          }
-        }
+        std::string name=way.GetName();
 
         if (!name.empty()) {
           double minlon=way.nodes[0].lon;

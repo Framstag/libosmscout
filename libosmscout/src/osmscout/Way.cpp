@@ -19,16 +19,38 @@
 
 #include <osmscout/Way.h>
 
+#include <cassert>
 #include <cmath>
-#include <iostream>
+
 static double conversionFactor=10000000.0;
 
 static TagId    scratchTags[1024];
 static Id       scratchIds[1024];
 static uint32_t scratchCoords[2*1024];
 
+Way::Restriction::Restriction(RestrictionType type)
+ : type(type)
+{
+  // no code
+}
+
+Way::AllowTurnRestriction::AllowTurnRestriction(Id via, Id to)
+ : Restriction(Way::rstrAllowTurn),
+   via(via),to(to)
+{
+  // no code
+}
+
+Way::ForbitTurnRestriction::ForbitTurnRestriction(Id via, Id to)
+ : Restriction(rstrForbitTurn),
+   via(via),to(to)
+{
+  // no code
+}
+
 void Way::Read(std::istream& file)
 {
+  uint8_t  restrictionsCount;
   uint8_t  tagCount;
   uint16_t nodeCount;
 
@@ -40,32 +62,6 @@ void Way::Read(std::istream& file)
 
   file.read((char*)&type,sizeof(type));
   file.read((char*)&flags,sizeof(flags));
-
-  if (flags & hasLayer) {
-    file.read((char*)&layer,sizeof(layer));
-  }
-
-  file.read((char*)&tagCount,sizeof(tagCount));
-  tags.resize(tagCount);
-
-  // To safe read calls we try to bulk load upto 1024 tag ids
-  if (tagCount<=1024) {
-    file.read((char*)&scratchTags,sizeof(TagId)*tagCount);
-
-    for (size_t i=0; i<tagCount; i++) {
-      tags[i].key=scratchTags[i];
-    }
-  }
-  else {
-    for (size_t i=0; i<tagCount; i++) {
-      file.read((char*)&tags[i].key,sizeof(tags[i].key));
-    }
-
-  }
-
-  for (size_t i=0; i<tagCount; i++) {
-    std::getline(file,tags[i].value,'\0');
-  }
 
   file.read((char*)&nodeCount,sizeof(nodeCount));
   nodes.resize(nodeCount);
@@ -100,31 +96,85 @@ void Way::Read(std::istream& file)
       nodes[i].lon=lonValue/conversionFactor-90.0;
     }
   }
+
+  if (flags & hasName) {
+      std::getline(file,name,'\0');
+  }
+
+  if (flags & hasRef) {
+      std::getline(file,ref,'\0');
+  }
+
+  if (flags & hasLayer) {
+    file.read((char*)&layer,sizeof(layer));
+  }
+
+  if (flags & hasTags) {
+    file.read((char*)&tagCount,sizeof(tagCount));
+    tags.resize(tagCount);
+
+    // To safe read calls we try to bulk load upto 1024 tag ids
+    if (tagCount<=1024) {
+      file.read((char*)&scratchTags,sizeof(TagId)*tagCount);
+
+      for (size_t i=0; i<tagCount; i++) {
+        tags[i].key=scratchTags[i];
+      }
+    }
+    else {
+      for (size_t i=0; i<tagCount; i++) {
+        file.read((char*)&tags[i].key,sizeof(tags[i].key));
+      }
+    }
+
+    for (size_t i=0; i<tagCount; i++) {
+      std::getline(file,tags[i].value,'\0');
+    }
+  }
+
+  if (flags & hasRestrictions) {
+    file.read((char*)&restrictionsCount,sizeof(restrictionsCount));
+    restrictions.resize(restrictionsCount);
+
+    for (size_t i=0; i<restrictionsCount; i++) {
+      uint8_t type;
+
+      file.read((char*)&type,sizeof(type));
+
+      if (type==rstrAllowTurn) {
+        Id via;
+        Id to;
+
+        file.read((char*)&via,sizeof(via));
+        file.read((char*)&to,sizeof(to));
+
+        restrictions[i]=new AllowTurnRestriction(via,to);
+      }
+      else if (type==rstrForbitTurn) {
+        Id via;
+        Id to;
+
+        file.read((char*)&via,sizeof(via));
+        file.read((char*)&to,sizeof(to));
+
+        restrictions[i]=new ForbitTurnRestriction(via,to);
+      }
+      else {
+        assert(false);
+      }
+    }
+  }
 }
 
 void Way::Write(std::ostream& file) const
 {
-  uint8_t  tagCount=tags.size();
   uint16_t nodeCount=nodes.size();
+  uint8_t  tagCount=tags.size();
+  uint8_t  restrictionsCount=restrictions.size();
 
   file.write((const char*)&id,sizeof(id));
   file.write((const char*)&type,sizeof(type));
   file.write((const char*)&flags,sizeof(flags));
-
-  if (flags & hasLayer) {
-    file.write((const char*)&layer,sizeof(layer));
-  }
-
-  file.write((const char*)&tagCount,sizeof(tagCount));
-
-  for (size_t i=0; i<tags.size(); i++) {
-    file.write((const char*)&tags[i].key,sizeof(tags[i].key));
-  }
-
-
-  for (size_t i=0; i<tags.size(); i++) {
-    file << tags[i].value << '\0';
-  }
 
   file.write((const char*)&nodeCount,sizeof(nodeCount));
 
@@ -139,27 +189,55 @@ void Way::Write(std::ostream& file) const
     file.write((const char*)&latValue,sizeof(latValue));
     file.write((const char*)&lonValue,sizeof(lonValue));
   }
-}
 
-std::string Way::GetName() const
-{
-  for (size_t i=0; i<tags.size(); i++) {
-    if (tags[i].key==tagName) {
-      return tags[i].value;
+  if (flags & hasName) {
+      file << name << '\0';
+  }
+
+  if (flags & hasRef) {
+      file << ref << '\0';
+  }
+
+  if (flags & hasLayer) {
+    file.write((const char*)&layer,sizeof(layer));
+  }
+
+  if (flags & hasTags) {
+    file.write((const char*)&tagCount,sizeof(tagCount));
+
+    for (size_t i=0; i<tags.size(); i++) {
+      file.write((const char*)&tags[i].key,sizeof(tags[i].key));
+    }
+
+    for (size_t i=0; i<tags.size(); i++) {
+      file << tags[i].value << '\0';
     }
   }
 
-  return "";
-}
+  if (flags & hasRestrictions) {
+    file.write((const char*)&restrictionsCount,sizeof(restrictionsCount));
 
-std::string Way::GetRefName() const
-{
-  for (size_t i=0; i<tags.size(); i++) {
-    if (tags[i].key==tagRef) {
-      return tags[i].value;
+    for (size_t i=0; i<restrictions.size(); i++) {
+      uint8_t type=restrictions[i]->type;
+
+      file.write((const char*)&type,sizeof(type));
+
+      if (restrictions[i]->type==rstrAllowTurn) {
+        AllowTurnRestriction *r=static_cast<AllowTurnRestriction*>(restrictions[i]);
+
+        file.write((const char*)&r->via,sizeof(r->via));
+        file.write((const char*)&r->to,sizeof(r->to));
+      }
+      else if (restrictions[i]->type==rstrForbitTurn) {
+        ForbitTurnRestriction *r=static_cast<ForbitTurnRestriction*>(restrictions[i]);
+
+        file.write((const char*)&r->via,sizeof(r->via));
+        file.write((const char*)&r->to,sizeof(r->to));
+      }
+      else {
+        assert(false);
+      }
     }
   }
-
-  return "";
 }
 

@@ -27,11 +27,6 @@
 class RawRelation
 {
 public:
-  enum Role
-  {
-    roleEmpty
-  };
-
   enum MemberType {
     memberNode,
     memberWay,
@@ -40,9 +35,9 @@ public:
 
   struct Member
   {
-    MemberType type;
-    Id         id;
-    Role       role;
+    MemberType  type;
+    Id          id;
+    std::string role;
   };
 
 public:

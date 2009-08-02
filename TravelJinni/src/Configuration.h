@@ -25,18 +25,19 @@
 
 struct Map
 {
-  std::wstring name;
-  std::wstring path;
+  std::wstring dir;
 };
 
 struct Style
 {
-  std::wstring name;
   std::wstring file;
 };
 
 extern std::list<Map> maps;
 extern std::list<Style> styles;
+
+extern std::wstring currentMap;
+extern std::wstring currentStyle;
 
 extern bool LoadConfig();
 extern bool SaveConfig();

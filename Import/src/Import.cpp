@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
 
   if (startStep==3) {
     std::cout << "Generate 'ways.dat'..." << std::endl;
-    if (!GenerateWayDat()) {
+    if (!GenerateWayDat(typeConfig)) {
       std::cerr << "Cannot generate way data file!" << std::endl;
       return 1;
     }

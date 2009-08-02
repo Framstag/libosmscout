@@ -65,18 +65,18 @@ RouteDialog::RouteDialog(DatabaseTask* databaseTask,
   okAction->Disable();
 
   if (result.startCity.empty()) {
-    result.startCity="Dortmund";
-    result.startStreet="Am Birkenbaum";
-    result.startWay=10414977;
-    result.startNode=254429626;
-    start->Set(L"Dortmund, Am Birkenbaum");
+    result.startCity="Bonn";
+    result.startWay=14331559;
+    result.startNode=138190834;
+    result.startStreet="Promenadenweg";
+    start->Set(L"Bonn, Promenadenweg");
     hasStart=true;
 
-    result.endCity="Bonn";
-    result.endWay=14331559;
-    result.endNode=138190834;
-    result.endStreet="Promenadenweg";
-    end->Set(L"Bonn, Promenadenweg");
+    result.endCity="Dortmund";
+    result.endStreet="Am Birkenbaum";
+    result.endWay=10414977;
+    result.endNode=254429626;
+    end->Set(L"Dortmund, Am Birkenbaum");
     hasEnd=true;
   }
 
@@ -235,9 +235,12 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
     for (std::list<RouteDescription::RouteStep>::const_iterator step=routeDescription.Steps().begin();
          step!=routeDescription.Steps().end();
          ++step) {
+      std::cout << "<tr><td>";
       std::cout << std::fixed << std::setprecision(1);
       std::cout << step->GetDistance() << "km ";
+      std::cout <<"</td>";
 
+      std::cout << "<td>";
       switch (step->GetAction()) {
       case RouteDescription::start:
         std::cout << "Start at ";
@@ -292,6 +295,8 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
         }
         break;
       }
+
+      std::cout << "</td></tr>";
 
       std::cout << std::endl;
     }

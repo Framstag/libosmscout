@@ -29,6 +29,9 @@
 std::list<Map>   maps;
 std::list<Style> styles;
 
+std::wstring     currentMap;
+std::wstring     currentStyle;
+
 bool LoadConfig()
 {
   Lum::Config::Node      *top;
@@ -37,15 +40,13 @@ bool LoadConfig()
 
   top=Lum::Config::LoadConfigFromXMLFile(path.GetPath(),errors);
 
-  if (top==NULL) {
-    return false;
-  }
-
-  if (top->GetName()!=L"TravelJinni") {
+  if (top==NULL || top->GetName()!=L"TravelJinni") {
     std::cerr << "'" << Lum::Base::WStringToString(path.GetPath()) << "' is not a valid config file!" << std::endl;
     delete top;
     return false;
   }
+
+  std::cout << "TravelJinni top node found: " << top->GetChildren().size() << std::endl;
 
   for (Lum::Config::Node::NodeList::const_iterator iter=top->GetChildren().begin();
        iter!=top->GetChildren().end();
@@ -53,21 +54,50 @@ bool LoadConfig()
     Lum::Config::Node *node=*iter;
 
     if (node->GetName()==L"map") {
+      std::cout << "Map" << std::endl;
       Map map;
 
-      if (node->GetAttribute(L"name",map.name) &&
-          node->GetAttribute(L"path",map.path)) {
+      if (node->GetAttribute(L"dir",map.dir)) {
+        bool active=false;
+
+        node->GetAttribute(L"active",active);
+
+        if (active) {
+          currentMap=map.dir;
+        }
+
         maps.push_back(map);
       }
     }
     else if (node->GetName()==L"style") {
+      std::cout << "Style" << std::endl;
       Style style;
 
-      if (node->GetAttribute(L"name",style.name) &&
-          node->GetAttribute(L"file",style.file)) {
+      if (node->GetAttribute(L"file",style.file)) {
+        bool active=false;
+
+        node->GetAttribute(L"active",active);
+
+        if (active) {
+          currentStyle=style.file;
+        }
+
         styles.push_back(style);
       }
     }
+    else {
+      std::cout << "Unnown element'" << Lum::Base::WStringToString(node->GetName()) << "'" << std::endl;
+    }
+  }
+
+  std::cout << "Maps/style: " << maps.size() << " " << styles.size() << std::endl;
+
+  if (currentMap.empty() && maps.size()>0) {
+    currentMap=maps.front().dir;
+  }
+
+  if (currentStyle.empty() && styles.size()>0) {
+    currentStyle=styles.front().file;
   }
 
   delete top;
@@ -90,8 +120,11 @@ bool SaveConfig()
        ++map) {
     Lum::Config::Node *node=new Lum::Config::Node(L"map");
 
-    node->SetAttribute(L"name",map->name);
-    node->SetAttribute(L"path",map->path);
+    node->SetAttribute(L"dir",map->dir);
+
+    if (map->dir==currentMap) {
+      node->SetAttribute(L"active",true);
+    }
 
     top->Add(node);
   }
@@ -101,8 +134,11 @@ bool SaveConfig()
        ++style) {
     Lum::Config::Node *node=new Lum::Config::Node(L"style");
 
-    node->SetAttribute(L"name",style->name);
     node->SetAttribute(L"file",style->file);
+
+    if (style->file==currentStyle) {
+      node->SetAttribute(L"active",true);
+    }
 
     top->Add(node);
   }

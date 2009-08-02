@@ -28,40 +28,23 @@
 class RawWay
 {
 public:
-  // Common flags
-  const static uint8_t isArea       = 1 << 0; //! We are an area
-
-  // Area flags
-  const static uint8_t isBuilding   = 1 << 1; //! We are a building
-
-  // Way flags
-  const static uint8_t hasLayer     = 1 << 1; //! We have optional layer information
-  const static uint8_t isBridge     = 1 << 2; //! We are a bridge
-  const static uint8_t isTunnel     = 1 << 3; //! We are a tunnel
-  const static uint8_t startIsJoint = 1 << 4; //! Start node is a joint node
-  const static uint8_t endIsJoint   = 1 << 5; //! End node is a joint node
-  const static uint8_t isOneway     = 1 << 6; //! We are a oneway (in way direction)
-
-public:
   Id               id;
   TypeId           type;
-  uint8_t          flags;
-  int8_t           layer;
+  bool             isArea;
   std::vector<Tag> tags;
   std::vector<Id>  nodes;
 
 public:
   inline RawWay()
   : type(typeIgnore),
-    flags(0),
-    layer(0)
+    isArea(false)
   {
     // no code
   }
 
   inline bool IsArea() const
   {
-    return flags & isArea;
+    return isArea;
   }
 
   void Read(std::istream& file);

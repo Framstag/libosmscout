@@ -21,7 +21,6 @@
 
 #include <cassert>
 #include <cmath>
-#include <fstream>
 #include <iostream>
 #include <list>
 #include <cstdlib>
@@ -263,7 +262,10 @@ static double relevantSlopeDeriviation=0.1;
 MapPainter::MapPainter(const Database& database)
  : database(database)
 {
-  // no code
+  drawNode.resize(10000); // TODO: Calculate matching size
+  outNode.resize(10000); // TODO: Calculate matching size
+  nodeX.resize(10000);
+  nodeY.resize(10000);
 }
 
 MapPainter::~MapPainter()
@@ -493,36 +495,6 @@ void MapPainter::DrawSymbol(cairo_t* draw,
   }
 }
 
-void MapPainter::GetPixelDelta(double lonA, double latA,
-                               double lonB, double latB,
-                               double magnification,
-                               size_t width, size_t height,
-                               double& dx, double& dy)
-{
-  double lonMin,lonMax,latMin,latMax;
-  double hmin,hmax;
-  double vmin,vmax;
-  double hscale,vscale;
-
-  GetDimensions(lonA,latA,magnification,width,height,lonMin,latMin,lonMax,latMax);
-
-  hmin=lonMin*gradtorad;
-  hmax=lonMax*gradtorad;
-  vmin=atanh(sin(latMin*gradtorad));
-  vmax=atanh(sin(latMax*gradtorad));
-
-  hscale=(width-1)/(hmax-hmin);
-  vscale=(height-1)/(vmax-vmin);
-
-  std::cout << lonA << "," << latA << " <=> " << lonB << "," << latB << std::endl;
-
-  dx=(lonB*gradtorad-hmin)*hscale-(lonA*gradtorad-hmin)*hscale;
-  dy=(atanh(sin(latB*gradtorad))-vmin)*vscale-(atanh(sin(latA*gradtorad))-vmin)*vscale;
-
-  std::cout << "DELTA: " << dx << " - " << dy << std::endl;
-}
-
-
 void MapPainter::GetDimensions(double lon, double lat,
                                double magnification,
                                size_t width, size_t height,
@@ -541,6 +513,176 @@ void MapPainter::GetDimensions(double lon, double lat,
   latMax=atan(sinh(atanh(sin(lat*gradtorad))+boxHeight/2*gradtorad))/gradtorad;
 }
 
+static void OptimizeArea(const Way& area,
+                         std::vector<bool>& drawNode,
+                         std::vector<double>& x,
+                         std::vector<double>& y,
+                         double hmin,
+                         double vmin,
+                         double height,
+                         double hscale,
+                         double vscale)
+{
+  drawNode[0]=true;
+  drawNode[area.nodes.size()-1]=true;
+
+  // Drop every point that is on direct line between two points A and B
+  for (size_t i=1; i+1<area.nodes.size(); i++) {
+    drawNode[i]=std::abs((area.nodes[i].lon-area.nodes[i-1].lon)/
+                         (area.nodes[i].lat-area.nodes[i-1].lat)-
+                         (area.nodes[i+1].lon-area.nodes[i].lon)/
+                         (area.nodes[i+1].lat-area.nodes[i].lat))>=relevantSlopeDeriviation;
+  }
+
+  // Calculate screen position
+  for (size_t i=0; i<area.nodes.size(); i++) {
+    if (drawNode[i]) {
+      x[i]=(area.nodes[i].lon*gradtorad-hmin)*hscale;
+      y[i]=height-(atanh(sin(area.nodes[i].lat*gradtorad))-vmin)*vscale;
+    }
+  }
+
+  // Drop all points that do not differ in position from the previous node
+  for (size_t i=1; i<area.nodes.size()-1; i++) {
+    if (drawNode[i]) {
+      size_t j=i+1;
+      while (!drawNode[j]) {
+        j++;
+      }
+
+      if (std::fabs(x[j]-x[i])<=relevantPosDeriviation &&
+          std::fabs(y[j]-y[i])<=relevantPosDeriviation) {
+        drawNode[i]=false;
+      }
+    }
+  }
+}
+
+static void OptimizeWay(const Way& way,
+                         std::vector<bool>& drawNode,
+                         std::vector<double>& x,
+                         std::vector<double>& y,
+                         double lonMin,
+                         double lonMax,
+                         double latMin,
+                         double latMax,
+                         double hmin,
+                         double vmin,
+                         double height,
+                         double hscale,
+                         double vscale)
+{
+  size_t a;
+
+  for (size_t i=0; i<way.nodes.size(); i++) {
+    drawNode[i]=true;
+  }
+
+  if (way.nodes.size()>=3) {
+    a=0;
+    while (a+1<way.nodes.size()) {
+      if (way.nodes[a].lon>=lonMin && way.nodes[a].lon<=lonMax &&
+          way.nodes[a].lat>=latMin && way.nodes[a].lat<=latMax) {
+        break;
+      }
+
+      a++;
+    }
+
+    if (a>1) {
+      for (size_t i=0; i<a-1; i++) {
+        drawNode[i]=false;
+      }
+    }
+  }
+
+  if (way.nodes.size()>=3) {
+    a=way.nodes.size()-1;
+    while (a>0) {
+      if (way.nodes[a].lon>=lonMin && way.nodes[a].lon<=lonMax &&
+          way.nodes[a].lat>=latMin && way.nodes[a].lat<=latMax) {
+        break;
+      }
+
+      a--;
+    }
+
+    if (a<way.nodes.size()-2) {
+      for (size_t i=a+2; i<way.nodes.size(); i++) {
+        drawNode[i]=false;
+      }
+    }
+  }
+
+  // Drop every point that is on direct line between two points A and B
+  for (size_t i=0; i+2<way.nodes.size(); i++) {
+    if (drawNode[i]) {
+      size_t j=i+1;
+      while (j<way.nodes.size() && !drawNode[j]) {
+        j++;
+      }
+
+      size_t k=j+1;
+      while (k<way.nodes.size() && !drawNode[k]) {
+        k++;
+      }
+
+      if (j<way.nodes.size() && k<way.nodes.size()) {
+        drawNode[j]=std::abs((way.nodes[j].lon-way.nodes[i].lon)/
+                             (way.nodes[j].lat-way.nodes[i].lat)-
+                             (way.nodes[k].lon-way.nodes[j].lon)/
+                             (way.nodes[k].lat-way.nodes[j].lat))>=relevantSlopeDeriviation;
+      }
+    }
+  }
+
+  // Calculate screen position
+  for (size_t i=0; i<way.nodes.size(); i++) {
+    if (drawNode[i]) {
+      x[i]=(way.nodes[i].lon*gradtorad-hmin)*hscale;
+      y[i]=height-(atanh(sin(way.nodes[i].lat*gradtorad))-vmin)*vscale;
+    }
+  }
+
+  // Drop all points that do not differ in position from the previous node
+  for (size_t i=1; i<way.nodes.size()-1; i++) {
+    if (drawNode[i]) {
+      size_t j=i+1;
+      while (!drawNode[j]) {
+        j++;
+      }
+
+      if (std::fabs(x[j]-x[i])<=relevantPosDeriviation &&
+          std::fabs(y[j]-y[i])<=relevantPosDeriviation) {
+        drawNode[i]=false;
+      }
+    }
+  }
+
+  /*
+  // Check which nodes or not visible in the given way
+  for (size_t i=0; i<way->nodes.size(); i++) {
+    if (way->nodes[i].lon<lonMin || way->nodes[i].lon>lonMax ||
+        way->nodes[i].lat<latMin || way->nodes[i].lat>latMax){
+      outNode[i]=true;
+    }
+  }
+
+  if (outNode[1]) {
+    drawNode[0]=false;
+  }
+
+  for (size_t i=1; i<way->nodes.size()-1; i++) {
+    if (outNode[i-1] && outNode[i+1]) {
+      drawNode[i]=false;
+    }
+  }
+
+  if (outNode[way->nodes.size()-2]) {
+    drawNode[way->nodes.size()-1]=false;
+  }*/
+}
+
 bool MapPainter::DrawMap(const StyleConfig& styleConfig,
                          double lon, double lat,
                          double magnification,
@@ -551,19 +693,10 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   size_t              styleCount=styleConfig.GetStyleCount();
   std::list<Node>     nodes;
   std::list<Way>      ways;
-  size_t              nodesOut=0;
+  size_t              nodesOutCount=0;
   size_t              nodesAllCount=0;
   size_t              nodesDrawnCount=0;
   std::ifstream       in;
-  std::vector<size_t> distribution; // Distribution of DrawStyle in loaded data
-  std::vector<size_t> drawnDistribution; // Distribution of DrawStyle in drawn data
-  std::vector<size_t> drawnNodeDistribution; // Distribution of nodes per DrawStyle in drawn data
-  std::vector<double> lineWidth; // line with for this way style
-  std::vector<bool>   outline; // We draw an outline for this way style
-  std::vector<bool>   drawNode; // This node will be drawn
-  std::vector<bool>   outNode; // This nodes is out of the visible area
-  std::vector<double> nodeX;
-  std::vector<double> nodeY;
   bool                areaLayers[11];
   bool                wayLayers[11];
   double              lonMin,lonMax,latMin,latMax;
@@ -590,24 +723,21 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   vmin=atanh(sin(latMin*gradtorad));
   vmax=atanh(sin(latMax*gradtorad));
 
-  std::cout << "Box (grad) h: " << lonMin << "-" << lonMax << " v: " << latMin <<"-" << latMax << std::endl;
-  std::cout << "Box (merc) h: " << hmin << "-" << hmax << " v: " << vmin <<"-" << vmax << std::endl;
-
   hscale=(width-1)/(hmax-hmin);
   vscale=(height-1)/(vmax-vmin);
-
-  std::cout << "hscale: " << hscale << " vscale: " << vscale << std::endl;
 
   double d=(lonMax-lonMin)*gradtorad;
   double pixelSize=d*180*60/M_PI*1852.216/width;
 
+  /*
+  std::cout << "Box (grad) h: " << lonMin << "-" << lonMax << " v: " << latMin <<"-" << latMax << std::endl;
+  std::cout << "Box (merc) h: " << hmin << "-" << hmax << " v: " << vmin <<"-" << vmax << std::endl;
+  std::cout << "hscale: " << hscale << " vscale: " << vscale << std::endl;
   std::cout << "d: " << d << " " << d*180*60/M_PI << std::endl;
-
   std::cout << "The complete screen are " << d*180*60/M_PI*1852.216 << " meters" << std::endl;
-
   std::cout << "1 pixel are " << pixelSize << " meters" << std::endl;
-
   std::cout << "20 meters are " << 20/(d*180*60/M_PI*1852.216/width) << " pixels" << std::endl;
+  */
 
   database.GetObjects(styleConfig,
                       lonMin,latMin,lonMax,latMax,
@@ -622,15 +752,8 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   // Setup and Precalculation
   //
 
-  distribution.resize(styleCount,0);
-  drawnDistribution.resize(styleCount,0);
-  drawnNodeDistribution.resize(styleCount,0);
   lineWidth.resize(styleCount,0);
   outline.resize(styleCount,false);
-  drawNode.resize(10000,true); // TODO: Calculate matching size
-  outNode.resize(10000,true); // TODO: Calculate matching size
-  nodeX.resize(10000,true); // TODO: Calculate matching size
-  nodeY.resize(10000,true); // TODO: Calculate matching size
 
   // Calculate real line width and outline size for each way line style
 
@@ -755,49 +878,20 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
       cairo_set_source_rgb(draw,style->GetFillR(),style->GetFillG(),style->GetFillB());
       cairo_set_line_width(draw,1);
 
-      for (size_t i=0; i<area->nodes.size(); i++) {
-        drawNode[i]=true;
-      }
-
-      for (size_t i=1; i<area->nodes.size()-1; i++) {
-        if (std::abs((area->nodes[i].lon-area->nodes[i-1].lon)/
-                     (area->nodes[i].lat-area->nodes[i-1].lat)-
-                     (area->nodes[i+1].lon-area->nodes[i].lon)/
-                     (area->nodes[i+1].lat-area->nodes[i].lat))<relevantSlopeDeriviation) {
-          drawNode[i]=false;
-        }
-      }
-
-      for (size_t i=0; i<area->nodes.size(); i++) {
-        if (drawNode[i]) {
-          nodeX[i]=(area->nodes[i].lon*gradtorad-hmin)*hscale;
-          nodeY[i]=height-(atanh(sin(area->nodes[i].lat*gradtorad))-vmin)*vscale;
-        }
-      }
-
-      for (size_t i=1; i<area->nodes.size()-1; i++) {
-        if (drawNode[i]) {
-          size_t j=i+1;
-          while (!drawNode[j]) {
-            j++;
-          }
-
-          if (std::fabs(nodeX[j]-nodeX[i])<=relevantPosDeriviation &&
-              std::fabs(nodeY[j]-nodeY[i])<=relevantPosDeriviation) {
-            drawNode[i]=false;
-          }
-        }
-      }
+      OptimizeArea(*area,
+                   drawNode,
+                   nodeX,nodeY,
+                   hmin,vmin,
+                   height,
+                   hscale,vscale);
 
       for (size_t i=0; i<area->nodes.size(); i++) {
         if (i==0) {
           cairo_move_to(draw,nodeX[i],nodeY[i]);
-          drawnNodeDistribution[area->type]++;
           nodesDrawnCount++;
         }
         else if (drawNode[i]) {
           cairo_line_to(draw,nodeX[i],nodeY[i]);
-          drawnNodeDistribution[area->type]++;
           nodesDrawnCount++;
         }
 
@@ -840,18 +934,18 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
 
       if (style==NULL ||
           (!outline[(size_t)way->type] &&
-           !(way->flags & Way::isBridge) &&
-           !(way->flags & Way::isTunnel)) ||
+           !(way->flags & Way::isBridge && magnification>=magCity) &&
+           !(way->flags & Way::isTunnel && magnification>=magCity)) ||
            way->layer!=layer) {
         continue;
       }
 
-      if (way->flags & Way::isBridge) {
+      if (way->flags & Way::isBridge && magnification>=magCity) {
         cairo_set_dash(draw,NULL,0,0);
         cairo_set_source_rgb(draw,0.0,0.0,0.0);
         cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
       }
-      else if (way->flags & Way::isTunnel) {
+      else if (way->flags & Way::isTunnel && magnification>=magCity) {
         double tunnel[2];
 
         tunnel[0]=7+lineWidth[(size_t)way->type]+2*style->GetOutline();
@@ -868,64 +962,14 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
       }
       cairo_set_line_width(draw,lineWidth[(size_t)way->type]+2*style->GetOutline());
 
-      for (size_t i=0; i<way->nodes.size(); i++) {
-        drawNode[i]=true;
-        outNode[i]=false;
-      }
-
-      /*
-      // Check which nodes or not visible in the given area
-      for (size_t i=0; i<way->nodes.size(); i++) {
-        if (way->nodes[i].lon<lonMin || way->nodes[i].lon>lonMax ||
-            way->nodes[i].lat<latMin || way->nodes[i].lat>latMax){
-          outNode[i]=true;
-        }
-      }
-
-      if (outNode[1]) {
-        drawNode[0]=false;
-      }
-
-      for (size_t i=1; i<way->nodes.size()-1; i++) {
-        if (outNode[i-1] && outNode[i+1]) {
-          drawNode[i]=false;
-        }
-      }
-
-      if (outNode[way->nodes.size()-2]) {
-        drawNode[way->nodes.size()-1]=false;
-      }*/
-
-      for (size_t i=1; i+1<way->nodes.size(); i++) {
-        if (drawNode[i] &&
-            std::abs((way->nodes[i].lon-way->nodes[i-1].lon)/
-                     (way->nodes[i].lat-way->nodes[i-1].lat)-
-                     (way->nodes[i+1].lon-way->nodes[i].lon)/
-                     (way->nodes[i+1].lat-way->nodes[i].lat))<relevantSlopeDeriviation) {
-          drawNode[i]=false;
-        }
-      }
-
-      for (size_t i=0; i<way->nodes.size(); i++) {
-        if (drawNode[i]) {
-          nodeX[i]=(way->nodes[i].lon*gradtorad-hmin)*hscale;
-          nodeY[i]=height-(atanh(sin(way->nodes[i].lat*gradtorad))-vmin)*vscale;
-        }
-      }
-
-      for (size_t i=1; i+1<way->nodes.size(); i++) {
-        if (drawNode[i]) {
-          size_t j=i+1;
-          while (!drawNode[j]) {
-            j++;
-          }
-
-          if (std::fabs(nodeX[j]-nodeX[i])<=relevantPosDeriviation &&
-              std::fabs(nodeY[j]-nodeY[i])<=relevantPosDeriviation) {
-            drawNode[i]=false;
-          }
-        }
-      }
+      OptimizeWay(*way,
+                  drawNode,
+                  nodeX,nodeY,
+                  lonMin,lonMax,
+                  latMin,latMax,
+                  hmin,vmin,
+                  height,
+                  hscale,vscale);
 
       bool start=true;
       for (size_t i=0; i<way->nodes.size(); i++) {
@@ -938,8 +982,10 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
             cairo_line_to(draw,nodeX[i],nodeY[i]);
           }
 
-          drawnNodeDistribution[way->type]++;
           nodesDrawnCount++;
+        }
+        else {
+          nodesOutCount++;
         }
       }
       nodesAllCount+=way->nodes.size();
@@ -1012,69 +1058,14 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
         break;
       }
 
-      // First we draw all nodes
-      for (size_t i=0; i<way->nodes.size(); i++) {
-        drawNode[i]=true;
-        outNode[i]=false;
-      }
-
-      // Ignore all nodes which are on a direct line between the previous and the next
-      // node (minimal deriviation of slopes)
-      for (size_t i=1; i+1<way->nodes.size(); i++) {
-        if (drawNode[i] &&
-            std::abs((way->nodes[i].lon-way->nodes[i-1].lon)/
-                     (way->nodes[i].lat-way->nodes[i-1].lat)-
-                     (way->nodes[i+1].lon-way->nodes[i].lon)/
-                     (way->nodes[i+1].lat-way->nodes[i].lat))<relevantSlopeDeriviation) {
-          drawNode[i]=false;
-        }
-      }
-
-      // Calculate screen position for all points left
-      for (size_t i=0; i<way->nodes.size(); i++) {
-        if (drawNode[i]) {
-          nodeX[i]=(way->nodes[i].lon*gradtorad-hmin)*hscale;
-          nodeY[i]=height-(atanh(sin(way->nodes[i].lat*gradtorad))-vmin)*vscale;
-        }
-      }
-
-      // Now ignore all points which are close to another point of the same way
-      for (size_t i=1; i+1<way->nodes.size(); i++) {
-        if (drawNode[i]) {
-          size_t j=i+1;
-          while (!drawNode[j]) {
-            j++;
-          }
-
-          if (std::fabs(nodeX[j]-nodeX[i])<=relevantPosDeriviation &&
-              std::fabs(nodeY[j]-nodeY[i])<=relevantPosDeriviation) {
-            drawNode[i]=false;
-          }
-        }
-      }
-
-      /*
-      // Check which nodes or not visible in the given area
-      for (size_t i=0; i<way->nodes.size(); i++) {
-        if (way->nodes[i].lon<lonMin || way->nodes[i].lon>lonMax ||
-            way->nodes[i].lat<latMin || way->nodes[i].lat>latMax){
-          outNode[i]=true;
-        }
-      }
-
-      if (drawNode[0] && outNode[1]) {
-        drawNode[0]=false;
-      }
-
-      for (size_t i=1; i<way->nodes.size()-1; i++) {
-        if (drawNode[i-1] && outNode[i-1] && drawNode[i+1] && outNode[i+1]) {
-          drawNode[i]=false;
-        }
-      }
-
-      if (drawNode[way->nodes.size()-2] && outNode[way->nodes.size()-2]) {
-        drawNode[way->nodes.size()-1]=false;
-      } */
+      OptimizeWay(*way,
+                  drawNode,
+                  nodeX,nodeY,
+                  lonMin,lonMax,
+                  latMin,latMax,
+                  hmin,vmin,
+                  height,
+                  hscale,vscale);
 
       bool start=true;
       for (size_t i=0; i<way->nodes.size(); i++) {
@@ -1083,36 +1074,19 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
             cairo_move_to(draw,nodeX[i],nodeY[i]);
             start=false;
           }
-          else  {
+          else {
             cairo_line_to(draw,nodeX[i],nodeY[i]);
           }
-          drawnNodeDistribution[way->type]++;
+
           nodesDrawnCount++;
+        }
+        else {
+          nodesOutCount++;
         }
       }
       nodesAllCount+=way->nodes.size();
 
       cairo_stroke(draw);
-
-      /*
-      for (size_t i=0; i<way->nodes.size(); i++) {
-        double x,y;
-
-        x=(way->nodes[i].lon*gradtorad-hmin)*hscale;
-        y=height-(atanh(sin(way->nodes[i].lat*gradtorad))-vmin)*vscale;
-
-        if (drawNode[i]) {
-          cairo_set_source_rgb(draw,0,1,0);
-        }
-        else {
-          cairo_set_source_rgb(draw,1,0,0);
-        }
-        cairo_arc(draw,
-                  x,y,
-                  1.5,
-                  0,2*M_PI);
-        cairo_fill(draw);
-      }*/
     }
     cairo_restore(draw);
   }
@@ -1131,36 +1105,34 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
       continue;
     }
 
-    for (size_t i=0; i<way->tags.size(); i++) {
-      if (way->tags[i].key==tagRef) {
-        const LabelStyle *style=styleConfig.GetWayRefLabelStyle(way->type);
+    if (!way->GetRefName().empty()) {
+      const LabelStyle *style=styleConfig.GetWayRefLabelStyle(way->type);
 
-        if (style==NULL || magnification<style->GetMinMag()) {
-          continue;
-        }
-
-        if (style->GetStyle()==LabelStyle::contour) {
-          DrawContourLabel(draw,
-                           *style,
-                           way->tags[i].value,
-                           way->nodes,
-                           hmin,vmin,hscale,vscale,height);
-        }
+      if (style==NULL || magnification<style->GetMinMag()) {
+        continue;
       }
-      else if (way->tags[i].key==tagName) {
-        const LabelStyle *style=styleConfig.GetWayNameLabelStyle(way->type);
 
-        if (style==NULL || magnification<style->GetMinMag()) {
-          continue;
-        }
+      if (style->GetStyle()==LabelStyle::contour) {
+        DrawContourLabel(draw,
+                         *style,
+                         way->GetRefName(),
+                         way->nodes,
+                         hmin,vmin,hscale,vscale,height);
+      }
+    }
+    else if (!way->GetName().empty()) {
+      const LabelStyle *style=styleConfig.GetWayNameLabelStyle(way->type);
 
-        if (style->GetStyle()==LabelStyle::contour) {
-          DrawContourLabel(draw,
-                           *style,
-                           way->tags[i].value,
-                           way->nodes,
-                           hmin,vmin,hscale,vscale,height);
-        }
+      if (style==NULL || magnification<style->GetMinMag()) {
+        continue;
+      }
+
+      if (style->GetStyle()==LabelStyle::contour) {
+        DrawContourLabel(draw,
+                         *style,
+                         way->GetName(),
+                         way->nodes,
+                         hmin,vmin,hscale,vscale,height);
       }
     }
   }
@@ -1175,90 +1147,88 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
       continue;
     }
 
-    for (size_t i=0; i<way->tags.size(); i++) {
-      if (way->tags[i].key==tagRef) {
-        const LabelStyle *style=styleConfig.GetWayRefLabelStyle(way->type);
+    if (!way->GetRefName().empty()) {
+      const LabelStyle *style=styleConfig.GetWayRefLabelStyle(way->type);
 
-        if (style==NULL ||
-            magnification<style->GetMinMag() ||
-            style->GetStyle()==LabelStyle::contour) {
+      if (style==NULL ||
+          magnification<style->GetMinMag() ||
+          style->GetStyle()==LabelStyle::contour) {
           continue;
-        }
-
-        double x,y;
-
-        double xmin=way->nodes[0].lon;
-        double xmax=way->nodes[0].lon;
-        double ymin=way->nodes[0].lat;
-        double ymax=way->nodes[0].lat;
-
-        for (size_t j=1; j<way->nodes.size(); j++) {
-          xmin=std::min(xmin,way->nodes[j].lon);
-          xmax=std::max(xmax,way->nodes[j].lon);
-          ymin=std::min(ymin,way->nodes[j].lat);
-          ymax=std::max(ymax,way->nodes[j].lat);
-        }
-
-        xmin=(xmin*gradtorad-hmin)*hscale;
-        xmax=(xmax*gradtorad-hmin)*hscale;
-
-        ymin=height-(atanh(sin(ymin*gradtorad))-vmin)*vscale;
-        ymax=height-(atanh(sin(ymax*gradtorad))-vmin)*vscale;
-
-        x=xmin+(xmax-xmin)/2;
-        y=ymin+(ymax-ymin)/2;
-
-        size_t tx,ty;
-
-        tx=(x-xmin)*20/(xmax-xmin);
-        ty=(y-ymin)*20/(ymax-ymin);
-
-        size_t tile=20*ty+tx;
-
-        if (labelMap.find(tile)!=labelMap.end()) {
-          break;
-        }
-
-        DrawLabel(draw,
-                  *style,
-                  way->tags[i].value,
-                  x,y);
-
-        labelMap.insert(tile);
       }
-      else if (way->tags[i].key==tagName) {
-        const LabelStyle *style=styleConfig.GetWayNameLabelStyle(way->type);
 
-        if (style==NULL ||
-            magnification<style->GetMinMag() ||
-            style->GetStyle()==LabelStyle::contour) {
-          continue;
-        }
+      double x,y;
 
-        double xmin=way->nodes[0].lon;
-        double xmax=way->nodes[0].lon;
-        double ymin=way->nodes[0].lat;
-        double ymax=way->nodes[0].lat;
+      double xmin=way->nodes[0].lon;
+      double xmax=way->nodes[0].lon;
+      double ymin=way->nodes[0].lat;
+      double ymax=way->nodes[0].lat;
 
-        for (size_t j=1; j<way->nodes.size(); j++) {
-          xmin=std::min(xmin,way->nodes[j].lon);
-          xmax=std::max(xmax,way->nodes[j].lon);
-          ymin=std::min(ymin,way->nodes[j].lat);
-          ymax=std::max(ymax,way->nodes[j].lat);
-        }
-
-        xmin=(xmin*gradtorad-hmin)*hscale;
-        xmax=(xmax*gradtorad-hmin)*hscale;
-
-        ymin=height-(atanh(sin(ymin*gradtorad))-vmin)*vscale;
-        ymax=height-(atanh(sin(ymax*gradtorad))-vmin)*vscale;
-
-        DrawLabel(draw,
-                  *style,
-                  way->tags[i].value,
-                  xmin+(xmax-xmin)/2,
-                  ymin+(ymax-ymin)/2);
+      for (size_t j=1; j<way->nodes.size(); j++) {
+        xmin=std::min(xmin,way->nodes[j].lon);
+        xmax=std::max(xmax,way->nodes[j].lon);
+        ymin=std::min(ymin,way->nodes[j].lat);
+        ymax=std::max(ymax,way->nodes[j].lat);
       }
+
+      xmin=(xmin*gradtorad-hmin)*hscale;
+      xmax=(xmax*gradtorad-hmin)*hscale;
+
+      ymin=height-(atanh(sin(ymin*gradtorad))-vmin)*vscale;
+      ymax=height-(atanh(sin(ymax*gradtorad))-vmin)*vscale;
+
+      x=xmin+(xmax-xmin)/2;
+      y=ymin+(ymax-ymin)/2;
+
+      size_t tx,ty;
+
+      tx=(x-xmin)*20/(xmax-xmin);
+      ty=(y-ymin)*20/(ymax-ymin);
+
+      size_t tile=20*ty+tx;
+
+      if (labelMap.find(tile)!=labelMap.end()) {
+        break;
+      }
+
+      DrawLabel(draw,
+                *style,
+                way->GetRefName(),
+                x,y);
+
+      labelMap.insert(tile);
+    }
+    else if (!way->GetName().empty()) {
+      const LabelStyle *style=styleConfig.GetWayNameLabelStyle(way->type);
+
+      if (style==NULL ||
+          magnification<style->GetMinMag() ||
+          style->GetStyle()==LabelStyle::contour) {
+        continue;
+      }
+
+      double xmin=way->nodes[0].lon;
+      double xmax=way->nodes[0].lon;
+      double ymin=way->nodes[0].lat;
+      double ymax=way->nodes[0].lat;
+
+      for (size_t j=1; j<way->nodes.size(); j++) {
+        xmin=std::min(xmin,way->nodes[j].lon);
+        xmax=std::max(xmax,way->nodes[j].lon);
+        ymin=std::min(ymin,way->nodes[j].lat);
+        ymax=std::max(ymax,way->nodes[j].lat);
+      }
+
+      xmin=(xmin*gradtorad-hmin)*hscale;
+      xmax=(xmax*gradtorad-hmin)*hscale;
+
+      ymin=height-(atanh(sin(ymin*gradtorad))-vmin)*vscale;
+      ymax=height-(atanh(sin(ymax*gradtorad))-vmin)*vscale;
+
+      DrawLabel(draw,
+                *style,
+                way->GetName(),
+                xmin+(xmax-xmin)/2,
+                ymin+(ymax-ymin)/2);
     }
   }
   cairo_restore(draw);
@@ -1355,33 +1325,53 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
       continue;
     }
 
-    for (size_t i=0; i<area->tags.size(); i++) {
-      // TODO: We should make sure we prefare one over the other
-      if (area->tags[i].key==tagName || area->tags[i].key==tagRef) {
-        double xmin=area->nodes[0].lon;
-        double xmax=area->nodes[0].lon;
-        double ymin=area->nodes[0].lat;
-        double ymax=area->nodes[0].lat;
+    if (!area->GetName().empty()) {
+      double xmin=area->nodes[0].lon;
+      double xmax=area->nodes[0].lon;
+      double ymin=area->nodes[0].lat;
+      double ymax=area->nodes[0].lat;
 
-        for (size_t j=1; j<area->nodes.size(); j++) {
-          xmin=std::min(xmin,area->nodes[j].lon);
-          xmax=std::max(xmax,area->nodes[j].lon);
-          ymin=std::min(ymin,area->nodes[j].lat);
-          ymax=std::max(ymax,area->nodes[j].lat);
-        }
-
-        xmin=(xmin*gradtorad-hmin)*hscale;
-        xmax=(xmax*gradtorad-hmin)*hscale;
-
-        ymin=height-(atanh(sin(ymin*gradtorad))-vmin)*vscale;
-        ymax=height-(atanh(sin(ymax*gradtorad))-vmin)*vscale;
-
-        DrawLabel(draw,*style,
-                  area->tags[i].value,
-                  xmin+(xmax-xmin)/2,
-                  ymin+(ymax-ymin)/2);
-        break;
+      for (size_t j=1; j<area->nodes.size(); j++) {
+        xmin=std::min(xmin,area->nodes[j].lon);
+        xmax=std::max(xmax,area->nodes[j].lon);
+        ymin=std::min(ymin,area->nodes[j].lat);
+        ymax=std::max(ymax,area->nodes[j].lat);
       }
+
+      xmin=(xmin*gradtorad-hmin)*hscale;
+      xmax=(xmax*gradtorad-hmin)*hscale;
+
+      ymin=height-(atanh(sin(ymin*gradtorad))-vmin)*vscale;
+      ymax=height-(atanh(sin(ymax*gradtorad))-vmin)*vscale;
+
+      DrawLabel(draw,*style,
+                area->GetName(),
+                xmin+(xmax-xmin)/2,
+                ymin+(ymax-ymin)/2);
+    }
+    else if (!area->GetRefName().empty()) {
+      double xmin=area->nodes[0].lon;
+      double xmax=area->nodes[0].lon;
+      double ymin=area->nodes[0].lat;
+      double ymax=area->nodes[0].lat;
+
+      for (size_t j=1; j<area->nodes.size(); j++) {
+        xmin=std::min(xmin,area->nodes[j].lon);
+        xmax=std::max(xmax,area->nodes[j].lon);
+        ymin=std::min(ymin,area->nodes[j].lat);
+        ymax=std::max(ymax,area->nodes[j].lat);
+      }
+
+      xmin=(xmin*gradtorad-hmin)*hscale;
+      xmax=(xmax*gradtorad-hmin)*hscale;
+
+      ymin=height-(atanh(sin(ymin*gradtorad))-vmin)*vscale;
+      ymax=height-(atanh(sin(ymax*gradtorad))-vmin)*vscale;
+
+      DrawLabel(draw,*style,
+                area->GetRefName(),
+                xmin+(xmax-xmin)/2,
+                ymin+(ymax-ymin)/2);
     }
   }
   cairo_restore(draw);
@@ -1393,17 +1383,17 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
        way!=poiWays.end();
        ++way) {
 
-    std::cout << "Drawing POI way with "<< way->nodes.size() <<" nodes..." << std::endl;
+    //std::cout << "Drawing POI way with "<< way->nodes.size() <<" nodes..." << std::endl;
 
     if (way->IsArea()) {
-      std::cout << "POI way is area,skipping..." << std::endl;
+      //std::cout << "POI way is area,skipping..." << std::endl;
       continue;
     }
 
     const LineStyle *style=styleConfig.GetWayLineStyle(way->type);
 
     if (style==NULL) {
-      std::cout << "POI way of type " << way->type << " has no line style,skipping..." << std::endl;
+      std::cerr << "POI way of type " << way->type << " has no line style,skipping..." << std::endl;
       continue;
     }
 
@@ -1435,69 +1425,14 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
       break;
     }
 
-    // First we draw all nodes
-    for (size_t i=0; i<way->nodes.size(); i++) {
-      drawNode[i]=true;
-      outNode[i]=false;
-    }
-
-    // Ignore all nodes which are on a direct line between the previous and the next
-    // node (minimal deriviation of slopes)
-    for (size_t i=1; i+1<way->nodes.size(); i++) {
-      if (drawNode[i] &&
-          std::abs((way->nodes[i].lon-way->nodes[i-1].lon)/
-                   (way->nodes[i].lat-way->nodes[i-1].lat)-
-                   (way->nodes[i+1].lon-way->nodes[i].lon)/
-                   (way->nodes[i+1].lat-way->nodes[i].lat))<relevantSlopeDeriviation) {
-        drawNode[i]=false;
-      }
-    }
-
-    // Calculate screen position for all points left
-    for (size_t i=0; i<way->nodes.size(); i++) {
-      if (drawNode[i]) {
-        nodeX[i]=(way->nodes[i].lon*gradtorad-hmin)*hscale;
-        nodeY[i]=height-(atanh(sin(way->nodes[i].lat*gradtorad))-vmin)*vscale;
-      }
-    }
-
-    // Now ignore all points which are close to another point of the same way
-    for (size_t i=1; i+1<way->nodes.size(); i++) {
-      if (drawNode[i]) {
-        size_t j=i+1;
-        while (!drawNode[j]) {
-          j++;
-        }
-
-        if (std::fabs(nodeX[j]-nodeX[i])<=relevantPosDeriviation &&
-            std::fabs(nodeY[j]-nodeY[i])<=relevantPosDeriviation) {
-          drawNode[i]=false;
-        }
-      }
-    }
-
-    /*
-    // Check which nodes or not visible in the given area
-    for (size_t i=0; i<way->nodes.size(); i++) {
-      if (way->nodes[i].lon<lonMin || way->nodes[i].lon>lonMax ||
-          way->nodes[i].lat<latMin || way->nodes[i].lat>latMax){
-        outNode[i]=true;
-      }
-    }
-
-    if (drawNode[0] && outNode[1]) {
-      drawNode[0]=false;
-    }
-
-    for (size_t i=1; i<way->nodes.size()-1; i++) {
-      if (drawNode[i-1] && outNode[i-1] && drawNode[i+1] && outNode[i+1]) {
-        drawNode[i]=false;
-      }
-    }
-
-    if (drawNode[way->nodes.size()-2] && outNode[way->nodes.size()-2]) {
-      drawNode[way->nodes.size()-1]=false;
-    } */
+    OptimizeWay(*way,
+                drawNode,
+                nodeX,nodeY,
+                lonMin,lonMax,
+                latMin,latMax,
+                hmin,vmin,
+                height,
+                hscale,vscale);
 
     bool start=true;
     for (size_t i=0; i<way->nodes.size(); i++) {
@@ -1506,11 +1441,14 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
           cairo_move_to(draw,nodeX[i],nodeY[i]);
           start=false;
         }
-        else  {
+        else {
           cairo_line_to(draw,nodeX[i],nodeY[i]);
         }
-        drawnNodeDistribution[way->type]++;
+
         nodesDrawnCount++;
+      }
+      else {
+        nodesOutCount++;
       }
     }
     nodesAllCount+=way->nodes.size();
@@ -1541,7 +1479,7 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
 
 
   std::cout << "Nodes drawn: " << nodesDrawnCount << std::endl;
-  std::cout << "Nodes out: " << nodesOut << std::endl;
+  std::cout << "Nodes out: " << nodesOutCount << std::endl;
   std::cout << "Nodes all: " << nodesAllCount << std::endl;
   std::cout << "Drawing (done)." << std::endl;
 
@@ -1554,7 +1492,6 @@ bool MapPainter::PrintMap(const StyleConfig& styleConfig,
                           size_t width, size_t height)
 {
   cairo_surface_t *image=cairo_image_surface_create(CAIRO_FORMAT_RGB24,width,height);
-  //cairo_surface_t *image=cairo_image_surface_create(CAIRO_FORMAT_ARGB32,width,height);
   cairo_t         *draw=cairo_create(image);
 
   DrawMap(styleConfig,

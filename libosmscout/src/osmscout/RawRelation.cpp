@@ -44,7 +44,7 @@ void RawRelation::Read(std::istream& file)
   for (size_t i=0; i<memberCount; i++) {
     file.read((char*)&members[i].type,sizeof(members[i].type));
     file.read((char*)&members[i].id,sizeof(members[i].id));
-    file.read((char*)&members[i].role,sizeof(members[i].role));
+    std::getline(file,members[i].role,'\0');
   }
 }
 
@@ -66,7 +66,7 @@ void RawRelation::Write(std::ostream& file) const
   for (size_t i=0; i<members.size(); i++) {
     file.write((const char*)&members[i].type,sizeof(members[i].type));
     file.write((const char*)&members[i].id,sizeof(members[i].id));
-    file.write((const char*)&members[i].role,sizeof(members[i].role));
+    file << members[i].role << '\0';
   }
 }
 

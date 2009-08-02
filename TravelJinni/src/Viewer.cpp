@@ -53,6 +53,8 @@
 
 #include "MapPainter.h"
 
+#include "config.h"
+
 #include "Configuration.h"
 #include "CitySearchDialog.h"
 #include "CityStreetSearchDialog.h"
@@ -141,8 +143,6 @@ public:
   {
     Job *job=new Job();
 
-    std::cout << "Requesting " << lon << ", " << lat << " with magnification " << magnification << "x" << std::endl;
-
     job->lon=lon;
     job->lat=lat;
     job->magnification=magnification;
@@ -220,13 +220,13 @@ public:
     }
     else if (event.type==Lum::OS::MouseEvent::down &&
              event.button==Lum::OS::MouseEvent::button4) {
-      ZoomIn(1.2);
+      ZoomIn(1.35);
 
       return true;
     }
     else if (event.type==Lum::OS::MouseEvent::down &&
              event.button==Lum::OS::MouseEvent::button5) {
-      ZoomOut(1.2);
+      ZoomOut(1.35);
 
       return true;
     }
@@ -430,16 +430,23 @@ public:
                               L"Cannot load configuration!");
       }
 
-      if (databaseTask->Open(L".")) {
-        if (databaseTask->LoadStyleConfig(L"./standard.oss.xml",styleConfig)) {
-          databaseTask->SetStyle(styleConfig);
+      if (!currentMap.empty() && !currentStyle.empty()) {
+        if (databaseTask->Open(currentMap)) {
+          if (databaseTask->LoadStyleConfig(currentStyle,styleConfig)) {
+            databaseTask->SetStyle(styleConfig);
+          }
+          else {
+            std::cerr << "Cannot load style configuration!" << std::endl;
+          }
         }
         else {
-          std::cerr << "Cannot load style configuration!" << std::endl;
+          std::cerr << "Cannot initialize database!" << std::endl;
         }
       }
       else {
-        std::cerr << "Cannot initialize database!" << std::endl;
+        Lum::Dlg::Msg::ShowOk(this,
+                              L"Cannot show map!",
+                              L"No map and/or style configured!");
       }
 
       std::cout << "Status: " << databaseTask->IsOpen() << " " << (styleConfig!=NULL) << std::endl;
@@ -580,5 +587,5 @@ public:
 };
 
 
-LUM_MAIN(Main,L"Viewer")
+LUM_MAIN(Main,L"TravelJinni")
 

@@ -33,11 +33,8 @@ void RawWay::Read(std::istream& file)
   }
 
   file.read((char*)&type,sizeof(type));
-  file.read((char*)&flags,sizeof(flags));
+  file.read((char*)&isArea,sizeof(isArea));
 
-  if (flags && hasLayer) {
-    file.read((char*)&layer,sizeof(layer));
-  }
 
   file.read((char*)&tagCount,sizeof(tagCount));
   tags.resize(tagCount);
@@ -60,11 +57,7 @@ void RawWay::Write(std::ostream& file) const
 
   file.write((const char*)&id,sizeof(id));
   file.write((const char*)&type,sizeof(type));
-  file.write((const char*)&flags,sizeof(flags));
-
-  if (flags && hasLayer) {
-    file.write((const char*)&layer,sizeof(layer));
-  }
+  file.write((const char*)&isArea,sizeof(isArea));
 
   file.write((const char*)&tagCount,sizeof(tagCount));
   for (size_t i=0; i<tags.size(); i++) {

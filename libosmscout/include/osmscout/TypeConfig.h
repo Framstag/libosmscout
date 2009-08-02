@@ -34,36 +34,38 @@ typedef uint16_t TypeId;
 typedef uint16_t NodeCount;
 
 enum Mag {
- magWorld     =              1,
- magState     =             32,
- magStateOver =             64,
- magCounty    =            128,
- magRegion    =            256,
- magProximity =            512,
- magCityOver  =           1024,
- magCity      =         2*1024,
- magDetail    =     2*2*2*1024,
- magClose     =   2*2*2*2*1024,
- magVeryClose = 2*2*2*2*2*1024
+ magWorld     =              1, //  0
+ magState     =             32, //  5
+ magStateOver =             64, //  6
+ magCounty    =            128, //  7
+ magRegion    =            256, //  8
+ magProximity =            512, //  9
+ magCityOver  =           1024, // 10
+ magCity      =         2*1024, // 11
+ magSuburb    =       2*2*1014, // 12
+ magDetail    =     2*2*2*1024, // 13
+ magClose     =   2*2*2*2*1024, // 14
+ magVeryClose = 2*2*2*2*2*1024  // 15
 };
 
-const static TagId tagIgnore     = 32000;
-const static TagId tagName       = 32001;
-const static TagId tagRef        = 32002;
-const static TagId tagOneway     = 32003;
-const static TagId tagBridge     = 32004;
-const static TagId tagTunnel     = 32005;
-const static TagId tagLayer      = 32006;
-const static TagId tagBuilding   = 32007;
-const static TagId tagPlace      = 32008;
-const static TagId tagPlaceName  = 32009;
-const static TagId tagBoundary   = 32010;
-const static TagId tagAdminLevel = 32011;
-const static TagId tagHighway    = 32012;
-const static TagId tagInternal   = 32013;
+const static TagId tagIgnore      = 32000;
+const static TagId tagName        = 32001;
+const static TagId tagRef         = 32002;
+const static TagId tagOneway      = 32003;
+const static TagId tagBridge      = 32004;
+const static TagId tagTunnel      = 32005;
+const static TagId tagLayer       = 32006;
+const static TagId tagBuilding    = 32007;
+const static TagId tagPlace       = 32008;
+const static TagId tagPlaceName   = 32009;
+const static TagId tagBoundary    = 32010;
+const static TagId tagAdminLevel  = 32011;
+const static TagId tagHighway     = 32012;
+const static TagId tagRestriction = 32013;
+const static TagId tagInternal    = 32014;
 
-const static TypeId typeIgnore   = 32000;
-const static TypeId typeRoute    = 32001;
+const static TypeId typeIgnore    = 32000;
+const static TypeId typeRoute     = 32001;
 
 class TagInfo
 {

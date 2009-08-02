@@ -1,6 +1,14 @@
 <TravelJinni-Style>
 
 <!--
+  TODO:
+  * Define a name for a map
+  * Define magnification limits where outlines, tunnels and bridges are drawn
+  * Define background for dotted paths and similar
+  * Get railway style correctly
+ -->
+
+<!--
   Area layers:
 
   0 - general landuse (farmland, landfill)
@@ -286,7 +294,7 @@
 
   <area key="landuse" value="industrial" prio="8">
     <fill color="dfd1d6"/>
-    <label minMag="city"/>
+    <label minMag="close"/>
   </area>
 
   <area key="landuse" value="brownfield" prio="8">
@@ -1163,7 +1171,7 @@
   </node>
 
   <node key="place" value="suburb">
-    <label minMag="detail"/>
+    <label minMag="suburb"/>
   </node>
 
   <node key="place" value="locality">

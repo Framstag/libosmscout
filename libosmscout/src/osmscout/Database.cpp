@@ -808,6 +808,34 @@ double GetCost(double aLon, double aLat,
 }
 
 
+bool CanBeTurnedInto(const Way& way, Id via, Id to)
+{
+  if (way.restrictions.size()==0) {
+    return true;
+  }
+
+  for (std::vector<Way::Restriction*>::const_iterator iter=way.restrictions.begin();
+       iter!=way.restrictions.end();
+       ++iter) {
+    if ((*iter)->GetType()==Way::rstrAllowTurn) {
+      Way::AllowTurnRestriction *r=static_cast<Way::AllowTurnRestriction*>(*iter);
+
+      if (r->via==via && r->to!=to) {
+        return false;
+      }
+    }
+    else if ((*iter)->GetType()==Way::rstrForbitTurn) {
+      Way::ForbitTurnRestriction *r=static_cast<Way::ForbitTurnRestriction*>(*iter);
+
+      if (r->via==via && r->to==to) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
 struct Follower
 {
   std::list<Way>  ways;
@@ -1094,7 +1122,7 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
       }
       else {
         for (size_t i=0; i<iter->nodes.size(); ++i) {
-          if (iter->nodes[i].id==current.id) {
+          if (iter->nodes[i].id==current.id  && CanBeTurnedInto(currentWay,iter->nodes[i].id,iter->id)) {
 
             if (i>0 && !iter->IsOneway()) {
               std::map<Id,RNode>::iterator closeEntry=closeMap.find(iter->nodes[i-1].id);

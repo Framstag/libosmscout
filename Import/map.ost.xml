@@ -1,24 +1,25 @@
 <TravelJinni-Type>
   <tags>
-    <tag value="highway"   id="1"/>
-    <tag value="junction"  id="2"/>
-    <tag value="railway"   id="3"/>
-    <tag value="aeroway"   id="4"/>
-    <tag value="waterway"  id="5"/>
-    <tag value="landuse"   id="6"/>
-    <tag value="natural"   id="7"/>
-    <tag value="boundary"  id="8"/>
-    <tag value="aero"      id="9"/>
-    <tag value="amenity"   id="10"/>
-    <tag value="shop"      id="11"/>
-    <tag value="tourism"   id="12"/>
-    <tag value="historic"  id="13"/>
-    <tag value="military"  id="14"/>
-    <tag value="sport"     id="15"/>
-    <tag value="leisure"   id="16"/>
-    <tag value="barrier"   id="17"/>
-    <tag value="place"     id="18"/>
-    <tag value="building"  id="19"/>
+    <tag value="highway"     id="1"/>
+    <tag value="junction"    id="2"/>
+    <tag value="railway"     id="3"/>
+    <tag value="aeroway"     id="4"/>
+    <tag value="waterway"    id="5"/>
+    <tag value="landuse"     id="6"/>
+    <tag value="natural"     id="7"/>
+    <tag value="boundary"    id="8"/>
+    <tag value="aero"        id="9"/>
+    <tag value="amenity"     id="10"/>
+    <tag value="shop"        id="11"/>
+    <tag value="tourism"     id="12"/>
+    <tag value="historic"    id="13"/>
+    <tag value="military"    id="14"/>
+    <tag value="sport"       id="15"/>
+    <tag value="leisure"     id="16"/>
+    <tag value="barrier"     id="17"/>
+    <tag value="place"       id="18"/>
+    <tag value="building"    id="19"/>
+    <tag value="restriction" id="20"/>
   </tags>
 
   <types>
@@ -468,6 +469,15 @@
 
     <type id="2000" name="building" value="yes" area="true"/>
     <type id="2000" name="building" value="true" area="true"/>
+
+    <type id="2001" name="restriction" value="no_right_turn" relation="true"/>
+    <type id="2001" name="restriction" value="no_left_turn" relation="true"/>
+    <type id="2001" name="restriction" value="no_u_turn" relation="true"/>
+    <type id="2001" name="restriction" value="no_straight_on" relation="true"/>
+    <type id="2002" name="restriction" value="only_right_turn" relation="true"/>
+    <type id="2002" name="restriction" value="only_right_turn" relation="true"/>
+    <type id="2002" name="restriction" value="only_left_turn" relation="true"/>
+    <type id="2002" name="restriction" value="only_straight_on" relation="true"/>
   </types>
 </TravelJinni-Type>
 

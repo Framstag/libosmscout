@@ -34,6 +34,15 @@ class MapPainter
 private:
   const Database& database;
 
+  // helper struct for drawing
+  std::vector<bool>   drawNode; // This node will be drawn
+  std::vector<bool>   outNode; // This nodes is out of the visible area
+  std::vector<double> nodeX;
+  std::vector<double> nodeY;
+  std::vector<double> lineWidth; // line with for this way style
+  std::vector<bool>   outline; // We draw an outline for this way style
+
+
   void DrawLabel(cairo_t* draw,
                  const LabelStyle& style,
                  const std::string& text,
@@ -70,12 +79,6 @@ public:
                 double lon, double lat,
                 double magnification,
                 size_t width, size_t height);
-
-  static void GetPixelDelta(double lonA, double latA,
-                            double lonB, double latB,
-                            double magnification,
-                            size_t width, size_t height,
-                            double& dx, double& dy);
 
   static void GetDimensions(double lon, double lat,
                             double magnification,

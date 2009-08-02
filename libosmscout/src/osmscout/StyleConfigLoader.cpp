@@ -162,6 +162,9 @@ public:
     else if (name=="city") {
       mag=magCity;
     }
+    else if (name=="suburb") {
+      mag=magSuburb;
+    }
     else if (name=="detail") {
       mag=magDetail;
     }

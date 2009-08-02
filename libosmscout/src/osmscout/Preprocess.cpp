@@ -106,13 +106,15 @@ void Preprocessor::Process(const Id& id,
   std::vector<Tag>           t=tags;
   std::vector<Tag>::iterator wayTag=t.end();
   std::vector<Tag>::iterator areaTag=t.end();
+  /*
   int8_t                     layer=0;
   bool                       isBridge=false;
   bool                       isTunnel=false;
-  bool                       isBuilding=false;
+  bool                       isBuilding=false;*/
   bool                       isArea=false;
+  /*
   bool                       isOneway=false;
-  bool                       reverseNodes=false;
+  bool                       reverseNodes=false;*/
 
   config.GetWayAreaTypeId(t,wayTag,wayType,areaTag,areaType);
 
@@ -125,46 +127,6 @@ void Preprocessor::Process(const Id& id,
     t.erase(wayTag);
   }
 
-  std::vector<Tag>::iterator tag=t.begin();
-  while (tag!=t.end()) {
-    if (tag->key==tagLayer) {
-      if (sscanf(tag->value.c_str(),"%hhd",&layer)!=1) {
-        std::cerr << "Layer tag value '" << tag->value << "' for way " << id << " is not numeric!" << std::endl;
-      }
-      tag=t.erase(tag);
-    }
-    else if (tag->key==tagBridge) {
-      isBridge=(tag->value=="yes" || tag->value=="true" || tag->value=="1") &&
-              !(tag->value=="no" || tag->value=="false" || tag->value=="0");
-      tag=t.erase(tag);
-    }
-    else if (tag->key==tagTunnel) {
-      isTunnel=(tag->value=="yes" || tag->value=="true" || tag->value=="1") &&
-              !(tag->value=="no" || tag->value=="false" || tag->value=="0");
-      tag=t.erase(tag);
-    }
-    else if (tag->key==tagBuilding) {
-      isBuilding=(tag->value=="yes" || tag->value=="true" || tag->value=="1") &&
-                 !(tag->value=="no" || tag->value=="false" || tag->value=="0");
-
-      tag=t.erase(tag);
-    }
-    else if (tag->key==tagOneway) {
-      if (tag->value=="-1") {
-        isOneway=true;
-        reverseNodes=true;
-      }
-      else {
-        isOneway=(tag->value=="yes" || tag->value=="true" || tag->value=="1") &&
-                !(tag->value=="no" || tag->value=="false" || tag->value=="0");
-      }
-
-      tag=t.erase(tag);
-    }
-    else {
-      ++tag;
-    }
-  }
 
   RawWay way;
 
@@ -178,37 +140,9 @@ void Preprocessor::Process(const Id& id,
   }
 
   way.id=id;
+  way.isArea=isArea;
   way.nodes=nodes;
   way.tags=t;
-
-  if (reverseNodes) {
-    std::reverse(way.nodes.begin(),way.nodes.end());
-  }
-
-  if (layer!=0) {
-    way.flags|=RawWay::hasLayer;
-    way.layer=layer;
-  }
-
-  if (isBridge) {
-    way.flags|=RawWay::isBridge;
-  }
-
-  if (isTunnel) {
-    way.flags|=RawWay::isTunnel;
-  }
-
-  if (isArea) {
-    way.flags|=RawWay::isArea;
-  }
-
-  if (isBuilding) {
-    way.flags|=RawWay::isBuilding;
-  }
-
-  if (isOneway) {
-    way.flags|=RawWay::isOneway;
-  }
 
   way.Write(wayFile);
 }
@@ -444,7 +378,9 @@ public:
         return;
       }
 
-      member.role=RawRelation::roleEmpty;
+      if (roleValue!=NULL) {
+        member.role=(const char*)roleValue;
+      }
 
       members.push_back(member);
     }
