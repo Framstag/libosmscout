@@ -31,61 +31,14 @@ class Way
 public:
   enum RestrictionType
   {
-    rstrAllowTurn  = 0,
-    rstrForbitTurn = 1
+    rstrAllowTurn  = 0, //! 0th member will be to, rest via ids
+    rstrForbitTurn = 1  //! 0th member will be to, rest via ids
   };
 
-  class Restriction
+  struct Restriction
   {
-  public:
     RestrictionType type;
-
-    Restriction(RestrictionType type);
-
-    inline RestrictionType GetType() const
-    {
-      return type;
-    }
-  };
-
-  class AllowTurnRestriction : public Restriction
-  {
-  public:
-    Id via;
-    Id to;
-
-  public:
-    AllowTurnRestriction(Id via, Id to);
-
-    inline Id GetVia() const
-    {
-      return via;
-    }
-
-    inline Id GetTo() const
-    {
-      return to;
-    }
-  };
-
-  class ForbitTurnRestriction : public Restriction
-  {
-  public:
-    Id via;
-    Id to;
-
-  public:
-    ForbitTurnRestriction(Id via, Id to);
-
-    inline Id GetVia() const
-    {
-      return via;
-    }
-
-    inline Id GetTo() const
-    {
-      return to;
-    }
+    std::vector<Id> members;
   };
 
 public:
@@ -116,7 +69,7 @@ public:
   std::string               ref;
   int8_t                    layer;
   std::vector<Tag>          tags;
-  std::vector<Restriction*> restrictions;
+  std::vector<Restriction>  restrictions;
 
 public:
   inline Way()
@@ -126,81 +79,6 @@ public:
   {
     // no code
   }
-
-  inline Way(const Way& other)
-  {
-    if (this==&other) {
-      return;
-    }
-
-    id=other.id;
-    type=other.type;
-    flags=other.flags;
-    nodes=other.nodes;
-    name=other.name;
-    ref=other.ref;
-    layer=other.layer;
-    tags=other.tags;
-
-    if (other.restrictions.size()>0) {
-      restrictions.resize(other.restrictions.size());
-
-      for (size_t i=0; i<other.restrictions.size(); i++) {
-        if (other.restrictions[i]->type==rstrAllowTurn) {
-          AllowTurnRestriction *r=static_cast<AllowTurnRestriction*>(other.restrictions[i]);
-
-          restrictions[i]=new AllowTurnRestriction(r->via,r->to);
-        }
-        else if (other.restrictions[i]->type==rstrForbitTurn) {
-          ForbitTurnRestriction *r=static_cast<ForbitTurnRestriction*>(other.restrictions[i]);
-
-          restrictions[i]=new ForbitTurnRestriction(r->via,r->to);
-        }
-      }
-    }
-  }
-
-  inline const Way& operator=(const Way& other)
-  {
-    if (this==&other) {
-      return *this;
-    }
-
-    id=other.id;
-    type=other.type;
-    flags=other.flags;
-    nodes=other.nodes;
-    name=other.name;
-    ref=other.ref;
-    layer=other.layer;
-    tags=other.tags;
-
-    if (other.restrictions.size()>0) {
-      restrictions.resize(other.restrictions.size());
-
-      for (size_t i=0; i<other.restrictions.size(); i++) {
-        if (other.restrictions[i]->type==rstrAllowTurn) {
-          AllowTurnRestriction *r=static_cast<AllowTurnRestriction*>(other.restrictions[i]);
-
-          restrictions[i]=new AllowTurnRestriction(r->via,r->to);
-        }
-        else if (other.restrictions[i]->type==rstrForbitTurn) {
-          ForbitTurnRestriction *r=static_cast<ForbitTurnRestriction*>(other.restrictions[i]);
-
-          restrictions[i]=new ForbitTurnRestriction(r->via,r->to);
-        }
-      }
-    }
-
-    return *this;
-  }
-
-  inline ~Way()
-  {
-    for (size_t i=0; i<restrictions.size(); i++) {
-      delete restrictions[i];
-    }
-  };
 
   inline bool IsArea() const
   {

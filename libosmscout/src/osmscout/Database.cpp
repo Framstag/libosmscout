@@ -814,21 +814,35 @@ bool CanBeTurnedInto(const Way& way, Id via, Id to)
     return true;
   }
 
-  for (std::vector<Way::Restriction*>::const_iterator iter=way.restrictions.begin();
+  for (std::vector<Way::Restriction>::const_iterator iter=way.restrictions.begin();
        iter!=way.restrictions.end();
        ++iter) {
-    if ((*iter)->GetType()==Way::rstrAllowTurn) {
-      Way::AllowTurnRestriction *r=static_cast<Way::AllowTurnRestriction*>(*iter);
+    if (iter->type==Way::rstrAllowTurn) {
+      // If our "to" is restriction "to" and our via is in the list of restriction "vias"
+      // we can turn, else not.
+      // If our !"to" is not the "to" of our restriction we also cannot turn.
+      if (iter->members[0]==to) {
+        for (size_t i=1; i<iter->members.size(); i++) {
+          if (iter->members[i]==via) {
+            return true;
+          }
+        }
 
-      if (r->via==via && r->to!=to) {
+        return false;
+      }
+      else {
         return false;
       }
     }
-    else if ((*iter)->GetType()==Way::rstrForbitTurn) {
-      Way::ForbitTurnRestriction *r=static_cast<Way::ForbitTurnRestriction*>(*iter);
-
-      if (r->via==via && r->to==to) {
-        return false;
+    else if (iter->type==Way::rstrForbitTurn) {
+      // If our "to" is the restriction "to" and our "via" is in the list of the restriction "vias"
+      // we cannot turn.
+      if (iter->members[0]==to) {
+        for (size_t i=1; i<iter->members.size(); i++) {
+          if (iter->members[i]==via) {
+            return false;
+          }
+        }
       }
     }
   }

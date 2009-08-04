@@ -27,4 +27,9 @@
 
 extern void GetKeysForName(const std::string& name, std::set<uint32_t>& keys);
 
+extern bool EncodeNumber(unsigned long number,
+                         size_t bufferLength,
+                         char* buffer,
+                         size_t& bytes);
+
 #endif

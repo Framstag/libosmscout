@@ -36,11 +36,11 @@ bool GenerateWayDat(const TypeConfig& typeConfig)
 
   std::cout << "Generate ways.dat..." << std::endl;
 
-  std::ifstream                              in;
-  std::ofstream                              out;
-  TypeId                                     restrictionPosId;
-  TypeId                                     restrictionNegId;
-  std::map<Id,std::list<Way::Restriction*> > restrictions;
+  std::ifstream                               in;
+  std::ofstream                               out;
+  TypeId                                      restrictionPosId;
+  TypeId                                      restrictionNegId;
+  std::map<Id,std::vector<Way::Restriction> > restrictions;
 
   restrictionPosId=typeConfig.GetRelationTypeId(tagRestriction,"only_straight_on");
   assert(restrictionPosId!=typeIgnore);
@@ -63,9 +63,20 @@ bool GenerateWayDat(const TypeConfig& typeConfig)
 
     if (in) {
       if (relation.type==restrictionPosId || relation.type==restrictionNegId) {
-        Id from=0;
-        Id via=0;
-        Id to=0;
+        Id               from;
+        Way::Restriction restriction;
+
+        restriction.members.resize(1,0);
+
+        if (relation.type==restrictionPosId) {
+          restriction.type=Way::rstrAllowTurn;
+        }
+        else if (relation.type==restrictionNegId) {
+          restriction.type=Way::rstrForbitTurn;
+        }
+        else {
+          continue;
+        }
 
         for (size_t i=0; i<relation.members.size(); i++) {
           if (relation.members[i].type==RawRelation::memberWay &&
@@ -74,27 +85,18 @@ bool GenerateWayDat(const TypeConfig& typeConfig)
           }
           else if (relation.members[i].type==RawRelation::memberWay &&
                    relation.members[i].role=="to") {
-            to=relation.members[i].id;
+            restriction.members[0]=relation.members[i].id;
           }
           else if (relation.members[i].type==RawRelation::memberNode &&
                    relation.members[i].role=="via") {
-            via=relation.members[i].id;
+            restriction.members.push_back(relation.members[i].id);
           }
         }
 
-        if (from!=0 && to!=0 && via!=0) {
-          std::cout << "Found valid relation restriction " << relation.id << std::endl;
-
-          if (relation.type==restrictionPosId) {
-            Way::Restriction *r=new Way::AllowTurnRestriction(via,to);
-
-            restrictions[from].push_back(r);
-          }
-          else if (relation.type==restrictionNegId) {
-            Way::Restriction *r=new Way::ForbitTurnRestriction(via,to);
-
-            restrictions[from].push_back(r);
-          }
+        if (from!=0 &&
+            restriction.members[1]!=0 &&
+            restriction.members.size()>1) {
+          restrictions[from].push_back(restriction);
         }
       }
     }
@@ -227,23 +229,12 @@ bool GenerateWayDat(const TypeConfig& typeConfig)
         way.nodes[i].id=rawWay.nodes[i];
       }
 
-      std::map<Id,std::list<Way::Restriction*> >::iterator iter=restrictions.find(way.id);
+      std::map<Id,std::vector<Way::Restriction> >::iterator iter=restrictions.find(way.id);
 
       if (iter!=restrictions.end()) {
-        std::cout << "Using valid relation restriction for way " << way.id << std::endl;
         way.flags|=Way::hasRestrictions;
 
-        way.restrictions.reserve(iter->second.size());
-
-        for (std::list<Way::Restriction*>::const_iterator r=iter->second.begin();
-             r!=iter->second.end();
-             ++r) {
-          way.restrictions.push_back(*r);
-        }
-
-        // We pass ownership to the way, so have to remove this entry to don#t interfere
-        // with the cleanup code later on...
-        restrictions.erase(iter);
+        way.restrictions=iter->second;
       }
 
       way.Write(out);
@@ -254,16 +245,6 @@ bool GenerateWayDat(const TypeConfig& typeConfig)
   out.close();
 
   // Cleaning up...
-
-  for (std::map<Id,std::list<Way::Restriction*> >::const_iterator iter=restrictions.begin();
-       iter!=restrictions.end();
-       ++iter) {
-    for (std::list<Way::Restriction*>::const_iterator r=iter->second.begin();
-         r!=iter->second.end();
-         ++r) {
-      delete *r;
-    }
-  }
 
   restrictions.clear();
 

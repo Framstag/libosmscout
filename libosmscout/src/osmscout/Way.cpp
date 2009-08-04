@@ -28,26 +28,6 @@ static TagId    scratchTags[1024];
 static Id       scratchIds[1024];
 static uint32_t scratchCoords[2*1024];
 
-Way::Restriction::Restriction(RestrictionType type)
- : type(type)
-{
-  // no code
-}
-
-Way::AllowTurnRestriction::AllowTurnRestriction(Id via, Id to)
- : Restriction(Way::rstrAllowTurn),
-   via(via),to(to)
-{
-  // no code
-}
-
-Way::ForbitTurnRestriction::ForbitTurnRestriction(Id via, Id to)
- : Restriction(rstrForbitTurn),
-   via(via),to(to)
-{
-  // no code
-}
-
 void Way::Read(std::istream& file)
 {
   uint8_t  restrictionsCount;
@@ -138,29 +118,16 @@ void Way::Read(std::istream& file)
 
     for (size_t i=0; i<restrictionsCount; i++) {
       uint8_t type;
+      uint8_t memberCount;
 
       file.read((char*)&type,sizeof(type));
+      file.read((char*)&memberCount,sizeof(memberCount));
 
-      if (type==rstrAllowTurn) {
-        Id via;
-        Id to;
+      restrictions[i].type=(Way::RestrictionType)type;
+      restrictions[i].members.resize(memberCount);
 
-        file.read((char*)&via,sizeof(via));
-        file.read((char*)&to,sizeof(to));
-
-        restrictions[i]=new AllowTurnRestriction(via,to);
-      }
-      else if (type==rstrForbitTurn) {
-        Id via;
-        Id to;
-
-        file.read((char*)&via,sizeof(via));
-        file.read((char*)&to,sizeof(to));
-
-        restrictions[i]=new ForbitTurnRestriction(via,to);
-      }
-      else {
-        assert(false);
+      for (size_t j=0; j<memberCount; j++) {
+        file.read((char*)&restrictions[i].members[j],sizeof(restrictions[i].members[j]));
       }
     }
   }
@@ -218,24 +185,14 @@ void Way::Write(std::ostream& file) const
     file.write((const char*)&restrictionsCount,sizeof(restrictionsCount));
 
     for (size_t i=0; i<restrictions.size(); i++) {
-      uint8_t type=restrictions[i]->type;
+      uint8_t type=restrictions[i].type;
+      uint8_t memberCount=restrictions[i].members.size();
 
       file.write((const char*)&type,sizeof(type));
+      file.write((const char*)&memberCount,sizeof(memberCount));
 
-      if (restrictions[i]->type==rstrAllowTurn) {
-        AllowTurnRestriction *r=static_cast<AllowTurnRestriction*>(restrictions[i]);
-
-        file.write((const char*)&r->via,sizeof(r->via));
-        file.write((const char*)&r->to,sizeof(r->to));
-      }
-      else if (restrictions[i]->type==rstrForbitTurn) {
-        ForbitTurnRestriction *r=static_cast<ForbitTurnRestriction*>(restrictions[i]);
-
-        file.write((const char*)&r->via,sizeof(r->via));
-        file.write((const char*)&r->to,sizeof(r->to));
-      }
-      else {
-        assert(false);
+      for (size_t j=0; j<restrictions[i].members.size(); j++) {
+        file.write((const char*)&restrictions[i].members[j],sizeof(restrictions[i].members[j]));
       }
     }
   }

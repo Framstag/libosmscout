@@ -48,6 +48,6 @@ dnl                    AC_SUBST(CAIRO_LIBS)])
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
-AC_CONFIG_FILES([Makefile src/Makefile include/Makefile libosmscout.pc libosmscout-uninstalled.pc])
+AC_CONFIG_FILES([Makefile src/Makefile include/Makefile tests/Makefile libosmscout.pc libosmscout-uninstalled.pc])
 AC_OUTPUT
 

@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = src include
+SUBDIRS = src include tests
 EXTRA_DIST = ./config.rpath autogen.sh \
 	     style.xml \
              types.xml

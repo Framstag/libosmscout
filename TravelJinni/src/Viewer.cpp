@@ -535,10 +535,6 @@ class Main : public Lum::OS::MainDialog<MainDialog>
 public:
   bool Prepare()
   {
-    std::vector<Way> bla;
-
-    std::cout << "Vector size: " << sizeof(bla) << std::endl;
-
     database=new Database();
     jobFinishedAction=new Lum::Model::Action();
 
