@@ -1,4 +1,6 @@
 nobase_include_HEADERS= osmscout/Util.h \
+                        osmscout/FileReader.h \
+                        osmscout/FileWriter.h \
                         osmscout/Cache.h \
                         osmscout/StyleConfig.h \
                         osmscout/StyleConfigLoader.h \

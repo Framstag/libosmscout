@@ -6,6 +6,8 @@ AM_LDFLAGS  = $(XML2_LIBS) $(CAIRO_LIBS)
 
 lib_LTLIBRARIES = libosmscout.la
 libosmscout_la_SOURCES= osmscout/Util.cpp \
+                        osmscout/FileReader.cpp \
+                        osmscout/FileWriter.cpp \
                         osmscout/Cache.cpp \
                         osmscout/StyleConfig.cpp \
                         osmscout/StyleConfigLoader.cpp \

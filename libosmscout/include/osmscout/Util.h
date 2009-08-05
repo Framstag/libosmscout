@@ -32,4 +32,6 @@ extern bool EncodeNumber(unsigned long number,
                          char* buffer,
                          size_t& bytes);
 
+extern bool DecodeNumber(const char* buffer, unsigned long& number);
+
 #endif
