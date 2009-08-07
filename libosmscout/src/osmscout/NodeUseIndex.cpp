@@ -20,45 +20,38 @@
 #include <osmscout/NodeUseIndex.h>
 
 #include <cassert>
-#include <fstream>
 #include <iostream>
+
+#include <osmscout/FileReader.h>
 
 bool NodeUseIndex::LoadNodeUseIndex(const std::string& path)
 {
-  std::ifstream indexFile;
-  std::string   file=path+"/"+"nodeuse.idx";
+  std::string file=path+"/"+"nodeuse.idx";
+  FileReader  reader;
 
-  indexFile.open(file.c_str(),std::ios::in|std::ios::binary);
-
-  if (!indexFile) {
+  if (!reader.Open(file) || !reader.ReadFileToBuffer()) {
     return false;
   }
 
   size_t intervalCount;
 
-  indexFile.read((char*)&intervalSize,sizeof(intervalSize)); // Size of interval
-  indexFile.read((char*)&intervalCount,sizeof(intervalCount)); // Number of intervals
+  reader.ReadNumber(intervalSize);  // Size of interval
+  reader.ReadNumber(intervalCount); // Number of intervals
 
-  std::cout << intervalCount << " entries..." << std::endl;
+  std::cout << intervalCount << " entries of page size " << intervalSize << "..." << std::endl;
 
   for (size_t i=0; i<intervalCount; i++) {
     IndexEntry entry;
     size_t     interval;
 
-    indexFile.read((char*)&interval,sizeof(interval));         // The interval
-    indexFile.read((char*)&entry.offset,sizeof(entry.offset)); // The offset into the way.dat file
-    indexFile.read((char*)&entry.count,sizeof(entry.count));   // The number of entries in the interval
+    reader.Read(interval);     // The interval
+    reader.Read(entry.offset); // The offset into the way.dat file
+    reader.Read(entry.count);  // The number of entries in the interval
 
     nodeUseIndex[interval]=entry;
   }
 
-  if (!indexFile) {
-    indexFile.close();
-    return false;
-  }
-
-  indexFile.close();
-  return true;
+ return !reader.HasError() && reader.Close();
 }
 
 size_t NodeUseIndex::GetIntervalSize() const

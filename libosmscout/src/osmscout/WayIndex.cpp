@@ -20,8 +20,9 @@
 #include <osmscout/WayIndex.h>
 
 #include <cassert>
-#include <fstream>
 #include <iostream>
+
+#include <osmscout/FileReader.h>
 
 WayIndex::WayIndex()
 {
@@ -35,40 +36,32 @@ WayIndex::~WayIndex()
 
 bool WayIndex::LoadWayIndex(const std::string& path)
 {
-  std::ifstream indexFile;
-  std::string   file=path+"/"+"way.idx";
+  FileReader  reader;
+  std::string file=path+"/"+"way.idx";
 
-  indexFile.open(file.c_str(),std::ios::in|std::ios::binary);
-
-  if (!indexFile) {
+  if (!reader.Open(file)|| !reader.ReadFileToBuffer()) {
     return false;
   }
 
   size_t intervalCount;
 
-  indexFile.read((char*)&intervalSize,sizeof(intervalSize)); // Size of interval
-  indexFile.read((char*)&intervalCount,sizeof(intervalCount)); // Number of intervals
+  reader.ReadNumber(intervalSize);  // Size of interval
+  reader.ReadNumber(intervalCount); // Number of intervals
 
-  std::cout << intervalCount << " entries..." << std::endl;
+  std::cout << intervalCount << " entries of page size " << intervalSize << "..." << std::endl;
 
   for (size_t i=0; i<intervalCount; i++) {
     IndexEntry entry;
     size_t     interval;
 
-    indexFile.read((char*)&interval,sizeof(interval)); // The interval
-    indexFile.read((char*)&entry.offset,sizeof(entry.offset));     // The offset into the way.dat file
-    indexFile.read((char*)&entry.count,sizeof(entry.count)); // The number of ways in theinterval
+    reader.ReadNumber(interval);     // The interval
+    reader.ReadNumber(entry.offset); // The offset into the way.dat file
+    reader.ReadNumber(entry.count);  // The number of ways in the interval
 
     wayIndex[interval]=entry;
   }
 
-  if (!indexFile) {
-    indexFile.close();
-    return false;
-  }
-
-  indexFile.close();
-  return true;
+  return !reader.HasError() && reader.Close();
 }
 
 size_t WayIndex::GetIntervalSize() const

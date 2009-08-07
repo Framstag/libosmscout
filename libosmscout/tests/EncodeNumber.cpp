@@ -32,17 +32,23 @@ bool CheckEncode(unsigned long value,
   return true;
 }
 
-bool CheckDecode(const char* buffer, unsigned long expected)
+bool CheckDecode(const char* buffer, unsigned long expected, size_t bytesExpected)
 {
   unsigned long value;
+  size_t        bytes;
 
-  if (!DecodeNumber(buffer,value)) {
+  if (!DecodeNumber(buffer,value,bytes)) {
     std::cerr << "Decoding of '" << expected << "' failed!" << std::endl;
     return false;
   }
 
   if (value!=expected) {
     std::cerr << "Error in decoding: expected " << expected << " actual " << value << std::endl;
+    return false;
+  }
+
+  if (bytes!=bytesExpected) {
+    std::cerr << "Error in decoding: expected " << bytesExpected << "bytes read, actual " << bytes << std::endl;
     return false;
   }
 
@@ -55,7 +61,7 @@ int main()
     errors++;
   }
 
-  if (!CheckDecode("\0",0)) {
+  if (!CheckDecode("\0",0,1)) {
     errors++;
   }
 
@@ -63,7 +69,7 @@ int main()
     errors++;
   }
 
-  if (!CheckDecode("\x01",1)) {
+  if (!CheckDecode("\x01",1,1)) {
     errors++;
   }
 
@@ -71,7 +77,7 @@ int main()
     errors++;
   }
 
-  if (!CheckDecode("\x7f",127)) {
+  if (!CheckDecode("\x7f",127,1)) {
     errors++;
   }
 
@@ -79,7 +85,15 @@ int main()
     errors++;
   }
 
-  if (!CheckDecode("\x80\x01",128)) {
+  if (!CheckDecode("\x80\x01",128,2)) {
+    errors++;
+  }
+
+  if (!CheckEncode(213,"\xd5\x01",2)) {
+    errors++;
+  }
+
+  if (!CheckDecode("\xd5\x01",213,2)) {
     errors++;
   }
 
@@ -87,7 +101,7 @@ int main()
     errors++;
   }
 
-  if (!CheckDecode("\xff\x01",255)) {
+  if (!CheckDecode("\xff\x01",255,2)) {
     errors++;
   }
 
@@ -95,7 +109,7 @@ int main()
     errors++;
   }
 
-  if (!CheckDecode("\x80\x02",256)) {
+  if (!CheckDecode("\x80\x02",256,2)) {
     errors++;
   }
 
@@ -103,7 +117,7 @@ int main()
     errors++;
   }
 
-  if (!CheckDecode("\xff\xff\x03",65535)) {
+  if (!CheckDecode("\xff\xff\x03",65535,3)) {
     errors++;
   }
 

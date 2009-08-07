@@ -23,6 +23,7 @@
 #include <iostream>
 #include <map>
 
+#include <osmscout/FileWriter.h>
 #include <osmscout/RawNode.h>
 #include <osmscout/Way.h>
 
@@ -37,7 +38,6 @@ bool GenerateNodeUseIndex(const TypeConfig& typeConfig, size_t intervalSize)
   size_t              nodeCount=0;
   std::vector<size_t> nodeDistribution;
   std::ifstream       in;
-  std::ofstream       out;
 
   typeConfig.GetRoutables(types);
 
@@ -164,9 +164,8 @@ bool GenerateNodeUseIndex(const TypeConfig& typeConfig, size_t intervalSize)
   std::vector<size_t> resultDistribution; // Number of entries in interval
   std::vector<size_t> resultOffset;       // Offset for each interval
   std::vector<size_t> resultOffsetCount;  // Number of entries for each interval
-  size_t              indexOffset;        // Start of the offset table in file
-
-  out.close();
+  long                indexOffset;        // Start of the offset table in file
+  FileWriter          writer;
 
   for (std::map<Id, std::set<Id> >::const_iterator res=wayWayMap.begin();
        res!=wayWayMap.end();
@@ -185,10 +184,7 @@ bool GenerateNodeUseIndex(const TypeConfig& typeConfig, size_t intervalSize)
 
   std::cout << "Writing 'nodeuse.idx'..." << std::endl;
 
-  out.open("nodeuse.idx",std::ios::out|std::ios::trunc|std::ios::binary);
-
-  if (!out) {
-    std::cerr<< "Error while opening to 'nodeuse.idx'!" << std::endl;
+  if (!writer.Open("nodeuse.idx")) {
     return false;
   }
 
@@ -200,39 +196,41 @@ bool GenerateNodeUseIndex(const TypeConfig& typeConfig, size_t intervalSize)
     }
   }
 
-  out.write((const char*)&intervalSize,sizeof(intervalSize)); // The size of the interval
-  out.write((const char*)&intervalCount,sizeof(intervalCount)); // The number of intervals we have
+  writer.WriteNumber(intervalSize);  // The size of the interval
+  writer.WriteNumber(intervalCount); // The number of intervals
 
-  indexOffset=out.tellp();
+  writer.GetPos(indexOffset);
 
   for (size_t i=0; i<intervalCount; i++) {
-    size_t offset=0;
-    size_t offsetCount=0;
+    size_t offset=0;      // place holder
+    size_t offsetCount=0; // place holder
 
-    out.write((const char*)&i,sizeof(i)); // The interval
-    out.write((const char*)&offset,sizeof(offset)); // The offset to the interval
-    out.write((const char*)&offsetCount,sizeof(offsetCount)); // The number of entries in the interval
+    writer.Write(i);           // The interval
+    writer.Write(offset);      // The offset to the interval
+    writer.Write(offsetCount); // The number of entries in the interval
   }
 
   for (size_t i=0; i<resultDistribution.size(); i++) {
     if (resultDistribution[i]>0) {
       size_t entryCount=0;
+      long   offset;
 
-      resultOffset[i]=out.tellp();
+      writer.GetPos(offset);
+      resultOffset[i]=offset;
 
       for (std::map<Id, std::set<Id> >::const_iterator id=wayWayMap.lower_bound(i*intervalSize);
            id!=wayWayMap.end() && id->first<(i+1)*intervalSize;
            ++id) {
         size_t refCount=id->second.size();
 
-        out.write((const char*)&id->first,sizeof(id->first)); // The id of the way/area
-        out.write((const char*)&refCount,sizeof(refCount));   // The number of references
+        writer.Write(id->first); // The id of the way/area
+        writer.Write(refCount);  // The number of references
 
         for (std::set<Id>::const_iterator ref=id->second.begin();
              ref!=id->second.end();
              ++ref) {
           Id i=*ref;
-          out.write((const char*)&i,sizeof(i));   // The id of the references
+          writer.Write(i); // The id of the references
         }
 
         entryCount++;
@@ -242,25 +240,15 @@ bool GenerateNodeUseIndex(const TypeConfig& typeConfig, size_t intervalSize)
     }
   }
 
-  out.seekp(indexOffset);
+  writer.SetPos(indexOffset);
 
   for (size_t i=0; i<resultDistribution.size(); i++) {
     if (resultDistribution[i]>0) {
-      size_t offset=resultOffset[i];
-      size_t count=resultOffsetCount[i];
-
-      out.write((const char*)&i,sizeof(i));           // The interval (already written, but who caes
-      out.write((const char*)&offset,sizeof(offset)); // offset for this interval
-      out.write((const char*)&count,sizeof(count));   // offset for this interval
+      writer.Write(i);                    // The interval (already written, but who cares)
+      writer.Write(resultOffset[i]);      // offset for this interval
+      writer.Write(resultOffsetCount[i]); // entry count for this interval
     }
   }
 
-  if (!out) {
-    std::cerr<< "Error while writing to 'nodeuse.idx'!" << std::endl;
-    return false;
-  }
-
-  out.close();
-
-  return true;
+  return !writer.HasError() && writer.Close();
 }

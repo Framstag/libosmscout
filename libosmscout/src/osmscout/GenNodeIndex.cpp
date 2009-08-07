@@ -19,11 +19,11 @@
 
 #include <osmscout/GenNodeIndex.h>
 
-#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <map>
 
+#include <osmscout/FileWriter.h>
 #include <osmscout/Node.h>
 #include <osmscout/Tiles.h>
 
@@ -81,30 +81,24 @@ bool GenerateNodeIndex(size_t intervalSize)
   // Writing index file
   //
 
-  std::ofstream indexFile;
-  size_t        intervalCount=offsetMap.size();
+  FileWriter writer;
+  size_t     intervalCount=offsetMap.size();
 
-  indexFile.open("node.idx",std::ios::out|std::ios::trunc|std::ios::binary);
-
-  if (!indexFile) {
+  if (!writer.Open("node.idx")) {
     return false;
   }
 
-  indexFile.write((const char*)&intervalSize,sizeof(intervalSize)); // The size of the interval
-  indexFile.write((const char*)&intervalCount,sizeof(intervalCount)); // The number of intervals we have
+  writer.WriteNumber(intervalSize);   // Size of intervals
+  writer.WriteNumber(intervalCount);  // Numbe rof intervals
 
   for (std::map<size_t,size_t>::const_iterator offset=offsetMap.begin();
        offset!=offsetMap.end();
        ++offset) {
-    NodeCount count=intervalDist[offset->first];
-
-    indexFile.write((const char*)&offset->first,sizeof(offset->first)); // The interval
-    indexFile.write((const char*)&offset->second,sizeof(offset->second)); // The offset
-    indexFile.write((const char*)&count,sizeof(count)); // The number of nodes
+    writer.WriteNumber(offset->first);  // The interval
+    writer.WriteNumber(offset->second); // The offset into the file
+    writer.WriteNumber(intervalDist[offset->first]); // The numbe rof nodes in the interval
   }
 
-  indexFile.close();
-
-  return true;
+  return !writer.HasError() && writer.Close();
 }
 

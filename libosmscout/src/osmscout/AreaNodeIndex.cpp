@@ -21,51 +21,50 @@
 
 #include <cerrno>
 #include <cstring>
-#include <fstream>
 #include <iostream>
 #include <map>
 
+#include <osmscout/FileReader.h>
+
 bool AreaNodeIndex::LoadAreaNodeIndex(const std::string& path)
 {
-  std::ifstream indexFile;
-  std::string   file=path+"/"+"areanode.idx";
+  FileReader  reader;
+  std::string file=path+"/"+"areanode.idx";
 
-  indexFile.open(file.c_str(),std::ios::in|std::ios::binary);
-
-  if (!indexFile) {
-    std::cerr << "Cannot open 'areanode.idx': " << strerror(errno) << std::endl;
+  if (!reader.Open(file) || !reader.ReadFileToBuffer()) {
     return false;
   }
 
   size_t drawTypes;
 
   // The number of draw types we have an index for
-  indexFile.read((char*)&drawTypes,sizeof(drawTypes)); // Number of entries
+  reader.ReadNumber(drawTypes); // Number of entries
 
-  std::cout << drawTypes << " entries..." << std::endl;
+  std::cout << drawTypes << " area node index entries..." << std::endl;
 
   for (size_t i=0; i<drawTypes; i++) {
     TypeId type;
     size_t tiles;
 
-    indexFile.read((char*)&type,sizeof(type)); // The draw type id
-    indexFile.read((char*)&tiles,sizeof(tiles)); // The number of tiles
+    reader.ReadNumber(type);  // The draw type id
+    reader.ReadNumber(tiles); // The number of tiles
 
     for (size_t t=0; t<tiles; t++) {
       IndexEntry entry;
       TileId     tileId;
       size_t     pageCount;
 
-      indexFile.read((char*)&tileId,sizeof(tileId)); // The tile id
-      indexFile.read((char*)&entry.nodeCount,sizeof(entry.nodeCount)); // The number of nodes
-      indexFile.read((char*)&pageCount,sizeof(pageCount)); // The number of pages
+      reader.ReadNumber(tileId);          // The tile id
+      reader.ReadNumber(entry.nodeCount); // The number of nodes
+      reader.ReadNumber(pageCount);       // The number of pages
 
       entry.pages.reserve(pageCount);
 
       for (size_t p=0; p<pageCount; p++) {
         Page page;
 
-        indexFile.read((char*)&page,sizeof(page)); // The id of the page
+        reader.ReadNumber(page); // The id of the page
+
         entry.pages.push_back(page);
 
       }
@@ -74,14 +73,7 @@ bool AreaNodeIndex::LoadAreaNodeIndex(const std::string& path)
     }
   }
 
-  if (!indexFile) {
-    std::cerr << "Cannot read from 'areanode.idx': " << strerror(errno) << std::endl;
-    indexFile.close();
-    return false;
-  }
-
-  indexFile.close();
-  return true;
+  return !reader.HasError() && reader.Close();
 }
 
 size_t AreaNodeIndex::GetNodes(TypeId drawType,

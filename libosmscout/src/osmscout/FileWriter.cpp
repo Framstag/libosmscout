@@ -19,4 +19,145 @@
 
 #include <osmscout/FileWriter.h>
 
+#include <osmscout/Util.h>
+
+FileWriter::FileWriter()
+ : file(NULL),
+   hasError(true)
+{
+  // no code
+}
+
+FileWriter::~FileWriter()
+{
+  if (file!=NULL) {
+    fclose(file);
+  }
+}
+
+bool FileWriter::Open(const std::string& filename)
+{
+  if (file!=NULL) {
+    return false;
+  }
+
+  file=fopen(filename.c_str(),"w+b");
+
+  hasError=file==NULL;
+
+  return !hasError;
+}
+
+bool FileWriter::IsOpen() const
+{
+  return file!=NULL;
+}
+
+bool FileWriter::Close()
+{
+  if (file==NULL) {
+    return false;
+  }
+
+  hasError=fclose(file)!=0;
+
+  if (!hasError) {
+    file=NULL;
+  }
+
+  return !hasError;
+}
+
+bool FileWriter::HasError() const
+{
+  return file==NULL || hasError;
+}
+
+bool FileWriter::GetPos(long& pos)
+{
+  if (file==NULL || hasError) {
+    return false;
+  }
+
+  pos=ftell(file);
+
+  hasError=pos==-1;
+
+  return !hasError;
+}
+
+bool FileWriter::SetPos(long pos)
+{
+  if (file==NULL || hasError) {
+    return false;
+  }
+
+  hasError=fseek(file,pos,SEEK_SET)!=0;
+
+  return !hasError;
+}
+
+bool FileWriter::Write(unsigned long number)
+{
+  if (file==NULL || hasError) {
+    return false;
+  }
+
+  hasError=fwrite((const char*)&number,sizeof(unsigned long),1,file)!=1;
+
+  return !hasError;
+
+  /*
+  char buffer[sizeof(unsigned long)];
+
+  for (size_t i=0; i<sizeof(unsigned long); i++) {
+    buffer[i]=(number >> (i*8)) && 0xff;
+  }
+
+  hasError=fwrite(buffer,sizeof(char),sizeof(unsigned long),file)!=sizeof(unsigned long);
+
+  return !hasError;*/
+}
+
+bool FileWriter::Write(unsigned int number)
+{
+  if (file==NULL || hasError) {
+    return false;
+  }
+
+  hasError=fwrite((const char*)&number,sizeof(unsigned int),1,file)!=1;
+
+  return !hasError;
+
+  /*
+  char buffer[sizeof(unsigned int)];
+
+  for (size_t i=0; i<sizeof(unsigned int); i++) {
+    buffer[i]=(number >> (i*8)) && 0xff;
+  }
+
+  hasError=fwrite(buffer,sizeof(char),sizeof(unsigned int),file)!=sizeof(unsigned int);
+
+  return !hasError;*/
+}
+
+bool FileWriter::WriteNumber(unsigned long number)
+{
+  char   buffer[5];
+  size_t bytes;
+
+  if (file==NULL || hasError) {
+    return false;
+  }
+
+  if (!EncodeNumber(number,5,buffer,bytes)) {
+    hasError=true;
+    return false;
+  }
+
+  hasError=fwrite(buffer,sizeof(char),bytes,file)!=bytes;
+
+  return !hasError;
+}
+
 

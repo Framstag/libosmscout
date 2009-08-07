@@ -103,9 +103,10 @@ bool EncodeNumber(unsigned long number,
   return true;
 }
 
-bool DecodeNumber(const char* buffer, unsigned long& number)
+bool DecodeNumber(const char* buffer, unsigned long& number, size_t& bytes)
 {
   number=0;
+  bytes=1;
 
   if (buffer[0]==0) {
     return true;
@@ -122,6 +123,7 @@ bool DecodeNumber(const char* buffer, unsigned long& number)
         return true;
       }
 
+      bytes++;
       idx++;
     };
   }

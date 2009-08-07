@@ -19,4 +19,220 @@
 
 #include <osmscout/FileReader.h>
 
+#include <limits>
+
+#include <osmscout/Util.h>
+
+FileReader::FileReader()
+ : file(NULL),
+   buffer(NULL),
+   offset(0),
+   hasError(true)
+{
+  // no code
+}
+
+FileReader::~FileReader()
+{
+  if (file!=NULL) {
+    fclose(file);
+  }
+}
+
+bool FileReader::Open(const std::string& filename)
+{
+  if (file!=NULL || buffer!=NULL) {
+    return false;
+  }
+
+  file=fopen(filename.c_str(),"r");
+
+  hasError=file==NULL;
+
+  return !hasError;
+}
+
+bool FileReader::Close()
+{
+  bool result;
+
+  if (file==NULL) {
+    return false;
+  }
+
+  delete buffer;
+  buffer=NULL;
+
+  result=fclose(file)==0;
+
+  if (result) {
+    file=NULL;
+  }
+
+  return result;
+}
+
+bool FileReader::HasError() const
+{
+  return file==NULL || buffer==NULL || hasError;
+}
+
+bool FileReader::ReadFileToBuffer()
+{
+  if (file==NULL) {
+    return false;
+  }
+
+  delete buffer;
+  buffer=NULL;
+
+  long size;
+
+  if (fseek(file,0L,SEEK_END)!=0) {
+    hasError=true;
+    return false;
+  }
+
+  size=ftell(file);
+
+  if (size==-1) {
+    hasError=true;
+    return false;
+  }
+
+  if (fseek(file,0L,SEEK_SET)!=0) {
+    hasError=true;
+    return false;
+  }
+
+  buffer = new char[size];
+
+  if (fread(buffer,sizeof(char),(size_t)size,file)!=(size_t)size) {
+    hasError=true;
+
+    delete buffer;
+    buffer=NULL;
+
+    return false;
+  }
+
+  this->size=(size_t)size;
+  offset=0;
+
+  return true;
+}
+
+bool FileReader::Read(unsigned long& number)
+{
+  if (file==NULL || buffer==NULL || hasError || offset+sizeof(unsigned long)>=size) {
+    return false;
+  }
+
+  number=*(unsigned long*)&buffer[offset];
+
+  /*
+  unsigned long value=0;
+
+  for (size_t i=0; i<sizeof(unsigned long); i++) {
+    value=value | (buffer[offset+i] << (i*8));
+  }*/
+
+  offset+=sizeof(unsigned long);
+
+  return true;
+}
+
+bool FileReader::Read(unsigned int& number)
+{
+  if (file==NULL || buffer==NULL || hasError || offset+sizeof(unsigned int)>=size) {
+    return false;
+  }
+
+  number=*(unsigned int*)&buffer[offset];
+
+  /*
+  unsigned int value=0;
+
+  for (size_t i=0; i<sizeof(unsigned int); i++) {
+    value=value | (buffer[offset+i] << (i*8));
+  }*/
+
+  offset+=sizeof(unsigned int);
+
+  return true;
+}
+
+bool FileReader::ReadNumber(unsigned long& number)
+{
+  if (file==NULL || buffer==NULL || hasError || offset>=size) {
+    return false;
+  }
+
+  size_t bytes;
+
+  if (DecodeNumber(&buffer[offset],number,bytes)) {
+    offset+=bytes;
+
+    return true;
+  }
+  else {
+    hasError=true;
+
+    return false;
+  }
+}
+
+bool FileReader::ReadNumber(unsigned int& number)
+{
+  if (file==NULL || buffer==NULL || hasError || offset>=size) {
+    return false;
+  }
+
+  unsigned long value;
+  size_t        bytes;
+
+  if (DecodeNumber(&buffer[offset],value,bytes)) {
+    offset+=bytes;
+
+    if (value>std::numeric_limits<unsigned int>::max()) {
+      return false;
+    }
+
+    number=(unsigned int)value;
+
+    return true;
+  }
+  else {
+    hasError=true;
+
+    return false;
+  }
+}
+
+bool FileReader::ReadNumber(NodeCount& number)
+{
+  if (file==NULL || buffer==NULL || hasError || offset>=size) {
+    return false;
+  }
+
+  unsigned long value;
+  size_t        bytes;
+
+  if (DecodeNumber(&buffer[offset],value,bytes)) {
+    offset+=bytes;
+
+    if (value>std::numeric_limits<NodeCount>::max()) {
+      return false;
+    }
+
+    number=(unsigned int)value;
+
+    return true;
+  }
+  else {
+    hasError=true;
+
+    return false;
+  }
+}
 

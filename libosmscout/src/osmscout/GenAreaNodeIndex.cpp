@@ -25,6 +25,7 @@
 #include <map>
 #include <set>
 
+#include <osmscout/FileWriter.h>
 #include <osmscout/Node.h>
 #include <osmscout/Tiles.h>
 
@@ -133,46 +134,37 @@ bool GenerateAreaNodeIndex(size_t nodeIndexIntervalSize)
   // Writing index file
   //
 
-  std::ofstream indexFile;
+  FileWriter writer;
 
-  indexFile.open("areanode.idx",std::ios::out|std::ios::trunc|std::ios::binary);
-
-  if (!indexFile) {
+  if (!writer.Open("areanode.idx")) {
     return false;
   }
 
   // The number of draw types we have an index for
-  indexFile.write((const char*)&drawTypeSum,sizeof(drawTypeSum)); // Number of entries
+  writer.WriteNumber(drawTypeSum); // Number of entries
 
   for (TypeId i=0; i<drawTypeTilePages.size(); i++) {
-    size_t tiles=drawTypeTilePages[i].size();
-
-    if (i!=typeIgnore && tiles>0) {
-      indexFile.write((const char*)&i,sizeof(i)); // The draw type id
-      indexFile.write((const char*)&tiles,sizeof(tiles)); // The number of tiles
+    if (i!=typeIgnore && drawTypeTilePages[i].size()>0) {
+      writer.WriteNumber(i);                           // The draw type id
+      writer.WriteNumber(drawTypeTilePages[i].size()); // The number of tiles
 
       for (std::map<TileId,std::set<Page> >::const_iterator tile=drawTypeTilePages[i].begin();
            tile!=drawTypeTilePages[i].end();
            ++tile) {
-        NodeCount nodeCount=drawTypeTileNodeCount[i][tile->first];
-        size_t    pageCount=tile->second.size();
-
-        indexFile.write((const char*)&tile->first,sizeof(tile->first)); // The tile id
-        indexFile.write((const char*)&nodeCount,sizeof(nodeCount));     // The number of nodes
-        indexFile.write((const char*)&pageCount,sizeof(pageCount));     // The number of pages
+        writer.WriteNumber(tile->first);                           // The tile id
+        writer.WriteNumber(drawTypeTileNodeCount[i][tile->first]); // The number of nodes
+        writer.WriteNumber(tile->second.size());                   // The number of pages
 
         for (std::set<Page>::const_iterator page=tile->second.begin();
              page!=tile->second.end();
              ++page) {
           Page p=*page;
 
-          indexFile.write((const char*)&p,sizeof(p)); // The id of the page
+          writer.WriteNumber(p); // The id of the page
         }
       }
     }
   }
 
-  indexFile.close();
-
-  return true;
+  return !writer.HasError() && writer.Close();
 }

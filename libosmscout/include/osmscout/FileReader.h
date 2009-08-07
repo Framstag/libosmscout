@@ -20,4 +20,37 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <cstdio>
+#include <string>
+
+#include <osmscout/TypeConfig.h>
+
+class FileReader
+{
+private:
+  FILE   *file;
+  char   *buffer;
+  size_t size;
+  size_t offset;
+  bool   hasError;
+
+public:
+  FileReader();
+  virtual ~FileReader();
+
+  bool Open(const std::string& filename);
+  bool Close();
+
+  bool HasError() const;
+
+  bool ReadFileToBuffer();
+
+  bool Read(unsigned long& number);
+  bool Read(unsigned int& number);
+
+  bool ReadNumber(unsigned long& number);
+  bool ReadNumber(unsigned int& number);
+  bool ReadNumber(NodeCount& number);
+};
+
 #endif

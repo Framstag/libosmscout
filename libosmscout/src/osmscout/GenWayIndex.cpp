@@ -24,6 +24,7 @@
 #include <iostream>
 #include <map>
 
+#include <osmscout/FileWriter.h>
 #include <osmscout/Tiles.h>
 #include <osmscout/Way.h>
 
@@ -77,29 +78,24 @@ bool GenerateWayIndex(size_t intervalSize)
   // Writing index file
   //
 
-  std::ofstream indexFile;
-  size_t        intervalCount=offsetMap.size();
+  FileWriter writer;
+  size_t     intervalCount=offsetMap.size();
 
-  indexFile.open("way.idx",std::ios::out|std::ios::trunc|std::ios::binary);
-
-  if (!indexFile) {
+  if (!writer.Open("way.idx")) {
     return false;
   }
 
-  indexFile.write((const char*)&intervalSize,sizeof(intervalSize)); // The size of the interval
-  indexFile.write((const char*)&intervalCount,sizeof(intervalCount)); // The number of intervals we have
+  writer.WriteNumber(intervalSize);  // The size of the interval
+  writer.WriteNumber(intervalCount); // The number of intervals we have
 
   for (std::map<size_t,size_t>::const_iterator offset=offsetMap.begin();
        offset!=offsetMap.end();
        ++offset) {
-    NodeCount count=intervalDist[offset->first];
-    indexFile.write((const char*)&offset->first,sizeof(offset->first)); // The interval
-    indexFile.write((const char*)&offset->second,sizeof(offset->second)); // The offset
-    indexFile.write((const char*)&count,sizeof(count)); // The number of ways
+    writer.WriteNumber(offset->first);               // The interval
+    writer.WriteNumber(offset->second);              // The offset
+    writer.WriteNumber(intervalDist[offset->first]); // The number of ways
   }
 
-  indexFile.close();
-
-  return true;
+  return !writer.HasError() && writer.Close();
 }
 
