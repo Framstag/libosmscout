@@ -23,7 +23,7 @@
 
 bool RawWay::Read(FileScanner& scanner)
 {
-  scanner.ReadNumber(id);
+  scanner.Read(id);
   scanner.ReadNumber(type);
   scanner.Read(isArea);
 
@@ -50,7 +50,7 @@ bool RawWay::Read(FileScanner& scanner)
 
   nodes.resize(nodeCount);
   for (size_t i=0; i<nodeCount; i++) {
-    scanner.ReadNumber(nodes[i]);
+    scanner.Read(nodes[i]);
   }
 
   return scanner.HasError();
@@ -58,7 +58,7 @@ bool RawWay::Read(FileScanner& scanner)
 
 bool RawWay::Write(FileWriter& writer) const
 {
-  writer.WriteNumber(id);
+  writer.Write(id);
   writer.WriteNumber(type);
   writer.Write(isArea);
 
@@ -70,7 +70,7 @@ bool RawWay::Write(FileWriter& writer) const
 
   writer.WriteNumber(nodes.size());
   for (size_t i=0; i<nodes.size(); i++) {
-    writer.WriteNumber(nodes[i]);
+    writer.Write(nodes[i]);
   }
 
   return !writer.HasError();

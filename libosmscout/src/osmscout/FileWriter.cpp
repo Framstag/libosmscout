@@ -163,6 +163,11 @@ bool FileWriter::Write(unsigned int number)
   return !hasError;*/
 }
 
+/**
+  Write a numeric value to the file using same internal encoding
+  to reduce storage size. Note that this works only if the average number
+  is small. Don't use this method for storing ids, latitude or longitude.
+  */
 bool FileWriter::WriteNumber(unsigned long number)
 {
   char   buffer[5];

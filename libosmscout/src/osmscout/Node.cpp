@@ -30,10 +30,10 @@ bool Node::Read(FileReader& reader)
   unsigned long latValue;
   unsigned long lonValue;
 
-  reader.ReadNumber(id);
+  reader.Read(id);
   reader.ReadNumber(tmpType);
-  reader.ReadNumber(latValue);
-  reader.ReadNumber(lonValue);
+  reader.Read(latValue);
+  reader.Read(lonValue);
 
   type=(TypeId)tmpType;
   lat=latValue/conversionFactor-180.0;
@@ -61,10 +61,10 @@ bool Node::Read(FileScanner& scanner)
   unsigned long latValue;
   unsigned long lonValue;
 
-  scanner.ReadNumber(id);
+  scanner.Read(id);
   scanner.ReadNumber(tmpType);
-  scanner.ReadNumber(latValue);
-  scanner.ReadNumber(lonValue);
+  scanner.Read(latValue);
+  scanner.Read(lonValue);
 
   type=(TypeId)tmpType;
   lat=latValue/conversionFactor-180.0;
@@ -90,10 +90,10 @@ bool Node::Write(FileWriter& writer) const
   uint32_t latValue=round((lat+180.0)*conversionFactor);
   uint32_t lonValue=round((lon+90.0)*conversionFactor);
 
-  writer.WriteNumber(id);
+  writer.Write(id);
   writer.WriteNumber(type);
-  writer.WriteNumber(latValue);
-  writer.WriteNumber(lonValue);
+  writer.Write(latValue);
+  writer.Write(lonValue);
 
   writer.WriteNumber(tags.size());
   for (size_t i=0; i<tags.size(); i++) {

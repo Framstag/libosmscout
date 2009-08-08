@@ -24,7 +24,7 @@ bool RawRelation::Read(FileScanner& scanner)
   unsigned long tagCount;
   unsigned long memberCount;
 
-  scanner.ReadNumber(id);
+  scanner.Read(id);
   scanner.ReadNumber(type);
 
   scanner.ReadNumber(tagCount);
@@ -51,7 +51,7 @@ bool RawRelation::Read(FileScanner& scanner)
 
     scanner.ReadNumber(memberType);
     members[i].type=(MemberType)memberType;
-    scanner.ReadNumber(members[i].id);
+    scanner.Read(members[i].id);
     scanner.Read(members[i].role);
   }
 
@@ -60,7 +60,7 @@ bool RawRelation::Read(FileScanner& scanner)
 
 bool RawRelation::Write(FileWriter& writer) const
 {
-  writer.WriteNumber(id);
+  writer.Write(id);
   writer.WriteNumber(type);
 
   writer.WriteNumber(tags.size());
@@ -72,7 +72,7 @@ bool RawRelation::Write(FileWriter& writer) const
   writer.WriteNumber(members.size());
   for (size_t i=0; i<members.size(); i++) {
     writer.WriteNumber(members[i].type);
-    writer.WriteNumber(members[i].id);
+    writer.Write(members[i].id);
     writer.Write(members[i].role);
   }
 

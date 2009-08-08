@@ -25,7 +25,7 @@ static double conversionFactor=10000000.0;
 
 bool RawNode::Read(FileScanner& scanner)
 {
-  scanner.ReadNumber(id);
+  scanner.Read(id);
 
   if (scanner.HasError()) {
     return false;
@@ -37,8 +37,8 @@ bool RawNode::Read(FileScanner& scanner)
   unsigned long lonValue;
 
   scanner.ReadNumber(tmpType);
-  scanner.ReadNumber(latValue);
-  scanner.ReadNumber(lonValue);
+  scanner.Read(latValue);
+  scanner.Read(lonValue);
 
   type=(TypeId)tmpType;
   lat=latValue/conversionFactor-180.0;
@@ -64,10 +64,10 @@ bool RawNode::Write(FileWriter& writer) const
   uint32_t latValue=round((lat+180.0)*conversionFactor);
   uint32_t lonValue=round((lon+90.0)*conversionFactor);
 
-  writer.WriteNumber(id);
+  writer.Write(id);
   writer.WriteNumber(type);
-  writer.WriteNumber(latValue);
-  writer.WriteNumber(lonValue);
+  writer.Write(latValue);
+  writer.Write(lonValue);
 
   writer.WriteNumber(tags.size());
   for (size_t i=0; i<tags.size(); i++) {

@@ -26,24 +26,26 @@ static double conversionFactor=10000000.0;
 
 bool Way::Read(FileReader& reader)
 {
-  reader.ReadNumber(id);
-  reader.ReadNumber(type);
-  reader.ReadNumber(flags);
-
   unsigned long nodeCount;
+  unsigned long flags;
 
+
+  reader.Read(id);
+  reader.ReadNumber(type);
+  reader.Read(flags);
   reader.ReadNumber(nodeCount);
 
   if (reader.HasError()) {
     return false;
   }
 
+  this->flags=flags;
   nodes.resize(nodeCount);
   for (size_t i=0; i<nodeCount; i++) {
     unsigned long latValue;
     unsigned long lonValue;
 
-    reader.ReadNumber(nodes[i].id);
+    reader.Read(nodes[i].id);
     reader.Read(latValue);
     reader.Read(lonValue);
 
@@ -110,7 +112,7 @@ bool Way::Read(FileReader& reader)
       restrictions[i].members.resize(memberCount);
 
       for (size_t j=0; j<memberCount; j++) {
-        reader.ReadNumber(restrictions[i].members[j]);
+        reader.Read(restrictions[i].members[j]);
       }
     }
   }
@@ -120,24 +122,25 @@ bool Way::Read(FileReader& reader)
 
 bool Way::Read(FileScanner& scanner)
 {
-  scanner.ReadNumber(id);
-  scanner.ReadNumber(type);
-  scanner.ReadNumber(flags);
-
   unsigned long nodeCount;
+  unsigned long flags;
 
+  scanner.Read(id);
+  scanner.ReadNumber(type);
+  scanner.Read(flags);
   scanner.ReadNumber(nodeCount);
 
   if (scanner.HasError()) {
     return false;
   }
 
+  this->flags=flags;
   nodes.resize(nodeCount);
   for (size_t i=0; i<nodeCount; i++) {
     unsigned long latValue;
     unsigned long lonValue;
 
-    scanner.ReadNumber(nodes[i].id);
+    scanner.Read(nodes[i].id);
     scanner.Read(latValue);
     scanner.Read(lonValue);
 
@@ -204,7 +207,7 @@ bool Way::Read(FileScanner& scanner)
       restrictions[i].members.resize(memberCount);
 
       for (size_t j=0; j<memberCount; j++) {
-        scanner.ReadNumber(restrictions[i].members[j]);
+        scanner.Read(restrictions[i].members[j]);
       }
     }
   }
@@ -214,9 +217,9 @@ bool Way::Read(FileScanner& scanner)
 
 bool Way::Write(FileWriter& writer) const
 {
-  writer.WriteNumber(id);
+  writer.Write(id);
   writer.WriteNumber(type);
-  writer.WriteNumber(flags);
+  writer.Write((unsigned long)flags);
 
   writer.WriteNumber(nodes.size());
 
@@ -224,7 +227,7 @@ bool Way::Write(FileWriter& writer) const
     unsigned long latValue=round((nodes[i].lat+180.0)*conversionFactor);
     unsigned long lonValue=round((nodes[i].lon+90.0)*conversionFactor);
 
-    writer.WriteNumber(nodes[i].id);
+    writer.Write(nodes[i].id);
     writer.Write(latValue);
     writer.Write(lonValue);
   }
@@ -255,10 +258,11 @@ bool Way::Write(FileWriter& writer) const
 
     for (size_t i=0; i<restrictions.size(); i++) {
       writer.WriteNumber(restrictions[i].type);
+
       writer.WriteNumber(restrictions[i].members.size());
 
       for (size_t j=0; j<restrictions[i].members.size(); j++) {
-        writer.WriteNumber(restrictions[i].members[j]);
+        writer.Write(restrictions[i].members[j]);
       }
     }
   }
