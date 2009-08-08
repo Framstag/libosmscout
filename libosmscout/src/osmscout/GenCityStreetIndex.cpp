@@ -367,32 +367,30 @@ static void ResolveWaysInRelations(std::list<RawRelation>& relations,
 static bool GetNodesFromNodeIds(const std::set<Id> & ids,
                                 std::map<Id,RawNode>& nodes)
 {
-  std::ifstream in;
+  FileScanner scanner;
 
   nodes.clear();
 
   if (ids.size()!=0) {
     std::cout << "Resolving " << ids.size() << " node ids..." << std::endl;
 
-    in.open("rawnodes.dat",std::ios::in|std::ios::binary);
-
-    if (!in) {
+    if (!scanner.Open("rawnodes.dat")) {
       return false;
     }
 
-    while (in) {
+    while (!scanner.HasError()) {
       RawNode node;
 
-      node.Read(in);
+      node.Read(scanner);
 
-      if (in) {
+      if (!scanner.HasError()) {
         if (ids.find(node.id)!=ids.end()) {
           nodes[node.id]=node;
         }
       }
     }
 
-    in.close();
+    scanner.Close();
 
     std::cout << ids.size() << " ids searched, " << nodes.size() << " nodes found" << std::endl;
 
@@ -411,32 +409,30 @@ static bool GetNodesFromNodeIds(const std::set<Id> & ids,
 static bool GetWaysFromWayIds(const std::set<Id> & ids,
                               std::map<Id,RawWay>& ways)
 {
-  std::ifstream in;
+  FileScanner scanner;
 
   ways.clear();
 
   if (ids.size()!=0) {
     std::cout << "Resolving " << ids.size() << " way ids..." << std::endl;
 
-    in.open("rawways.dat",std::ios::in|std::ios::binary);
-
-    if (!in) {
+    if (!scanner.Open("rawways.dat")) {
       return false;
     }
 
-    while (in) {
+    while (!scanner.HasError()) {
       RawWay way;
 
-      way.Read(in);
+      way.Read(scanner);
 
-      if (in) {
+      if (!scanner.HasError()) {
         if (ids.find(way.id)!=ids.end()) {
           ways[way.id]=way;
         }
       }
     }
 
-    in.close();
+    scanner.Close();
 
     std::cout << ids.size() << " ids searched, " << ways.size() << " way found" << std::endl;
 
@@ -567,7 +563,7 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
   std::set<TypeId>          cityIds;
   TypeId                    boundaryId=typeIgnore;
   TypeId                    typeId;
-  std::ifstream             in;
+  FileScanner               scanner;
   std::map<Id,Urban>        urbans;
   std::list<RawNode>        cityNodes;
   std::list<RawWay>         cityAreas;
@@ -602,18 +598,16 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
   // Getting all nodes of type place=*. We later need an area for these cities.
   //
 
-  in.open("rawnodes.dat",std::ios::in|std::ios::binary);
-
-  if (!in) {
+  if (!scanner.Open("rawnodes.dat")) {
     return false;
   }
 
-  while (in) {
+  while (!scanner.HasError()) {
     RawNode node;
 
-    node.Read(in);
+    node.Read(scanner);
 
-    if (in) {
+    if (!scanner.HasError()) {
 
       if (cityIds.find(node.type)!=cityIds.end()) {
         std::string name;
@@ -635,7 +629,7 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
     }
   }
 
-  in.close();
+  scanner.Close();
 
   std::cout << "Found " << cityNodes.size() << " cities of type 'node'" << std::endl;
 
@@ -645,18 +639,22 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
 
   std::cout << "Scanning for cities of type 'area'..." << std::endl;
 
+  if (!scanner.Open("rawways.dat")) {
+    return false;
+  }
+  /*
   in.open("rawways.dat",std::ios::in|std::ios::binary);
 
   if (!in) {
     return false;
-  }
+  }*/
 
-  while (in) {
+  while (!scanner.HasError()) {
     RawWay way;
 
-    way.Read(in);
+    way.Read(scanner);
 
-    if (in) {
+    if (!scanner.HasError()) {
 
       if (way.IsArea() && cityIds.find(way.type)!=cityIds.end()) {
         //std::cout << "Found area of type city: " << area.id << " " << name << std::endl;
@@ -666,7 +664,7 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
     }
   }
 
-  in.close();
+  scanner.Close();
 
   GetNodeIdsFromAreas(cityAreas,ids);
 
@@ -725,18 +723,22 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
 
   std::cout << "Scanning for city boundaries of type 'area'..." << std::endl;
 
+  if (!scanner.Open("rawways.dat")) {
+    return false;
+  }
+  /*
   in.open("rawways.dat",std::ios::in|std::ios::binary);
 
   if (!in) {
     return false;
-  }
+  }*/
 
-  while (in) {
+  while (!scanner.HasError()) {
     RawWay way;
 
-    way.Read(in);
+    way.Read(scanner);
 
-    if (in) {
+    if (!scanner.HasError()) {
       if (way.IsArea() && way.type==boundaryId) {
         size_t level=0;
 
@@ -771,7 +773,7 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
     }
   }
 
-  in.close();
+  scanner.Close();
 
   //
   // Getting all relations of type 'administrative boundary' of level 6 and 8. We use them to later
@@ -780,18 +782,16 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
 
   std::cout << "Scanning for city boundaries of type 'relation'..." << std::endl;
 
-  in.open("rawrels.dat",std::ios::in|std::ios::binary);
-
-  if (!in) {
+  if (!scanner.Open("rawrels.dat")) {
     return false;
   }
 
-  while (in) {
+  while (!scanner.HasError()) {
     RawRelation relation;
 
-    relation.Read(in);
+    relation.Read(scanner);
 
-    if (in) {
+    if (!scanner.HasError()) {
 
       if (relation.type==boundaryId) {
         bool match=false;
@@ -822,7 +822,7 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
     }
   }
 
-  in.close();
+  scanner.Close();
 
   GetRelationIdsFromRelations(boundaryRelations,ids);
 
@@ -1134,18 +1134,16 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
   // resolved (later we have to rethink this, but why should we index ways that are not
   // part fo the database (...but should we index urbans that are not in the database?)?)
 
-  in.open("ways.dat",std::ios::in|std::ios::binary);
-
-  if (!in) {
+  if (!scanner.Open("ways.dat")) {
     return false;
   }
 
-  while (in) {
+  while (!scanner.HasError()) {
     Way way;
 
-    way.Read(in);
+    way.Read(scanner);
 
-    if (in) {
+    if (!scanner.HasError()) {
       if (wayTypes.find(way.type)!=wayTypes.end()) {
 
         std::string name=way.GetName();
@@ -1196,7 +1194,7 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
     }
   }
 
-  in.close();
+  scanner.Close();
 
   std::cout << "Generating 'citysteet.idx'..." << std::endl;
 

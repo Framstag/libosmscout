@@ -1,5 +1,6 @@
 nobase_include_HEADERS= osmscout/Util.h \
                         osmscout/FileReader.h \
+                        osmscout/FileScanner.h \
                         osmscout/FileWriter.h \
                         osmscout/Cache.h \
                         osmscout/StyleConfig.h \
@@ -18,7 +19,6 @@ nobase_include_HEADERS= osmscout/Util.h \
                         osmscout/Way.h \
                         osmscout/Reference.h \
                         osmscout/Preprocess.h \
-                        osmscout/Resolve.h \
                         osmscout/GenAreaNodeIndex.h \
                         osmscout/GenAreaWayIndex.h \
                         osmscout/GenCityStreetIndex.h \

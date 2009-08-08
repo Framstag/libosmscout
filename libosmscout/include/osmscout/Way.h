@@ -20,8 +20,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <fstream>
-
+#include <osmscout/FileReader.h>
+#include <osmscout/FileScanner.h>
+#include <osmscout/FileWriter.h>
 #include <osmscout/Point.h>
 #include <osmscout/Tag.h>
 #include <osmscout/TypeConfig.h>
@@ -100,8 +101,9 @@ public:
     return flags & isOneway;
   }
 
-  void Read(std::istream& file);
-  void Write(std::ostream& file) const;
+  bool Read(FileReader& reader);
+  bool Read(FileScanner& scanner);
+  bool Write(FileWriter& writer) const;
 };
 
 #endif

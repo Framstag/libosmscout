@@ -20,8 +20,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <fstream>
-
+#include <osmscout/FileScanner.h>
+#include <osmscout/FileWriter.h>
 #include <osmscout/TypeConfig.h>
 
 class RawRelation
@@ -53,8 +53,8 @@ public:
     // no code
   }
 
-  void Read(std::istream& file);
-  void Write(std::ostream& file) const;
+  bool Read(FileScanner& scanner);
+  bool Write(FileWriter& writer) const;
 };
 
 #endif

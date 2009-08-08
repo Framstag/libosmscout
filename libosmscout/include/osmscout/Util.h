@@ -31,7 +31,8 @@ extern bool EncodeNumber(unsigned long number,
                          size_t bufferLength,
                          char* buffer,
                          size_t& bytes);
-
 extern bool DecodeNumber(const char* buffer, unsigned long& number, size_t& bytes);
+
+extern bool GetFileSize(const std::string& filename, long& size);
 
 #endif

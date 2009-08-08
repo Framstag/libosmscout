@@ -24,7 +24,6 @@
 #include <osmscout/TypeConfigLoader.h>
 
 #include <osmscout/Preprocess.h>
-#include <osmscout/Resolve.h>
 #include <osmscout/GenAreaNodeIndex.h>
 #include <osmscout/GenAreaWayIndex.h>
 #include <osmscout/GenNodeIndex.h>
@@ -162,12 +161,13 @@ int main(int argc, char* argv[])
   }
 
   if (startStep==6) {
+    /*
     std::cout << "Resolving..." << std::endl;
 
     if (!Resolve()) {
       std::cerr << "Cannot resolve ways!" << std::endl;
       return 1;
-    }
+    }*/
 
     startStep++;
   }

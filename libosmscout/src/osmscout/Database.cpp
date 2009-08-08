@@ -23,6 +23,9 @@
 #include <cmath>
 #include <iostream>
 
+// For mesurement of time
+#include <sys/time.h>
+
 #include <osmscout/RoutingProfile.h>
 #include <osmscout/TypeConfigLoader.h>
 
@@ -276,13 +279,10 @@ bool Database::GetWays(const StyleConfig& styleConfig,
 
   std::cout << "Scanning ways..." << std::endl;
 
-  if (!wayStream.is_open()) {
-    wayStream.open(file.c_str(),std::ios::in|std::ios::binary);
-  }
-
-  if (!wayStream) {
-    std::cerr << "Error while reading from ways.dat file!" << std::endl;
-    return false;
+  if (!wayReader.IsOpen()) {
+    if (!wayReader.Open(file)){
+      std::cerr << "Error while opening ways.dat file!" << std::endl;
+    }
   }
 
   for (std::list<WayIndexEntry>::iterator indexEntry=wayIndexEntries.begin();
@@ -291,8 +291,10 @@ bool Database::GetWays(const StyleConfig& styleConfig,
     Cache<size_t,std::vector<Way> >::CacheRef cacheRef;
 
     if (!wayCache.GetEntry(indexEntry->interval,cacheRef)) {
+      if (!wayReader.ReadPageToBuffer(indexEntry->offset,indexEntry->size)) {
+        std::cerr << "Error while reading page from ways.dat file!" << std::endl;
+      }
       diskCount++;
-      wayStream.seekg(indexEntry->offset);
 
       Cache<size_t, std::vector<Way> >::CacheEntry cacheEntry(indexEntry->interval);
 
@@ -300,11 +302,11 @@ bool Database::GetWays(const StyleConfig& styleConfig,
       cacheRef->value.resize(indexEntry->count);
 
       for (size_t i=0; i<indexEntry->count; i++) {
-        cacheRef->value[i].Read(wayStream);
+        cacheRef->value[i].Read(wayReader);
 
-        if (!wayStream) {
-          std::cerr << "Error while reading from ways.dat file!" << std::endl;
-          wayStream.close();
+        if (wayReader.HasError()) {
+          std::cerr << "Error while reading data from ways.dat page!" << std::endl;
+          wayReader.Close();
           break;
         }
       }
@@ -401,13 +403,11 @@ bool Database::GetNodes(const StyleConfig& styleConfig,
   //
 
 
-  if (!nodeStream.is_open()) {
-    nodeStream.open(file.c_str(),std::ios::in|std::ios::binary);
-  }
-
-  if (!nodeStream) {
-    std::cerr << "Error while reading from nodes.dat file!" << std::endl;
-    return false;
+  if (!nodeReader.IsOpen()) {
+    if (!nodeReader.Open(file)) {
+      std::cerr << "Error while opening nodes.dat file!" << std::endl;
+      return false;
+    }
   }
 
   for (std::list<NodeIndexEntry>::iterator indexEntry=nodeIndexEntries.begin();
@@ -417,7 +417,11 @@ bool Database::GetNodes(const StyleConfig& styleConfig,
 
     if (!nodeCache.GetEntry(indexEntry->interval,cacheRef)) {
       diskCount++;
-      nodeStream.seekg(indexEntry->offset);
+      if (!nodeReader.ReadPageToBuffer(indexEntry->offset,indexEntry->size)) {
+        std::cerr << "Error while reading page from nodes.dat file!" << std::endl;
+        nodeReader.Close();
+        return false;
+      }
 
       Cache<size_t, std::vector<Node> >::CacheEntry cacheEntry(indexEntry->interval);
 
@@ -428,12 +432,12 @@ bool Database::GetNodes(const StyleConfig& styleConfig,
       for (size_t i=0; i<indexEntry->nodeCount; i++) {
         Node node;
 
-        node.Read(nodeStream);
+        node.Read(nodeReader);
         //cacheRef->value[i].Read(nodeStream);
 
-        if (!nodeStream) {
-          std::cerr << "Error while reading from nodes.dat file!" << std::endl;
-          nodeStream.close();
+        if (nodeReader.HasError()) {
+          std::cerr << "Error while reading data from nodes.dat page!" << std::endl;
+          nodeReader.Close();
           break;
         }
 
@@ -519,13 +523,11 @@ bool Database::GetNode(const Id& id, Node& node) const
     return false;
   }
 
-  if (!nodeStream.is_open()) {
-    nodeStream.open(file.c_str(),std::ios::in|std::ios::binary);
-  }
-
-  if (!nodeStream) {
-    std::cerr << "Error while reading from nodes.dat file!" << std::endl;
-    return false;
+  if (!nodeReader.IsOpen()) {
+    if (!nodeReader.Open(file)) {
+      std::cerr << "Error while opening nodes.dat file!" << std::endl;
+      return false;
+    }
   }
 
   Cache<size_t,std::vector<Node> >::CacheRef cacheRef;
@@ -533,7 +535,11 @@ bool Database::GetNode(const Id& id, Node& node) const
   const NodeIndexEntry& indexEntry=indexEntries.front();
 
   if (!nodeCache.GetEntry(indexEntry.interval,cacheRef)) {
-    nodeStream.seekg(indexEntry.offset);
+    if (!nodeReader.ReadPageToBuffer(indexEntry.offset,indexEntry.size)) {
+      std::cerr << "Error while reading page from nodes.dat file!" << std::endl;
+      nodeReader.Close();
+      return false;
+    }
 
     Cache<size_t, std::vector<Node> >::CacheEntry cacheEntry(indexEntry.interval);
 
@@ -543,11 +549,11 @@ bool Database::GetNode(const Id& id, Node& node) const
     for (size_t i=1; i<=indexEntry.nodeCount; i++) {
       Node node;
 
-      node.Read(nodeStream);
+      node.Read(nodeReader);
 
-      if (!nodeStream) {
-        std::cerr << "Error while reading from nodes.dat file!" << std::endl;
-        nodeStream.close();
+      if (nodeReader.HasError()) {
+        std::cerr << "Error while reading data from nodes.dat page!" << std::endl;
+        nodeReader.Close();
         return false;
       }
 
@@ -596,13 +602,11 @@ bool Database::GetWays(const std::set<Id>& ids, std::list<Way>& ways) const
     return false;
   }
 
-  if (!wayStream.is_open()) {
-    wayStream.open(file.c_str(),std::ios::in|std::ios::binary);
-  }
-
-  if (!wayStream) {
-    std::cerr << "Error while reading from ways.dat file!" << std::endl;
-    return false;
+  if (!wayReader.IsOpen()) {
+    if (!wayReader.Open(file)) {
+      std::cerr << "Error while opening ways.dat file!" << std::endl;
+      return false;
+    }
   }
 
   Cache<size_t,std::vector<Way> >::CacheRef cacheRef;
@@ -611,7 +615,7 @@ bool Database::GetWays(const std::set<Id>& ids, std::list<Way>& ways) const
        indexEntry!=indexEntries.end();
        ++indexEntry) {
     if (!wayCache.GetEntry(indexEntry->interval,cacheRef)) {
-      wayStream.seekg(indexEntry->offset);
+      wayReader.ReadPageToBuffer(indexEntry->offset,indexEntry->size);
 
       Cache<size_t, std::vector<Way> >::CacheEntry cacheEntry(indexEntry->interval);
 
@@ -619,11 +623,11 @@ bool Database::GetWays(const std::set<Id>& ids, std::list<Way>& ways) const
       cacheRef->value.resize(indexEntry->count);
 
       for (size_t i=0; i<indexEntry->count; i++) {
-        cacheRef->value[i].Read(wayStream);
+        cacheRef->value[i].Read(wayReader);
 
-        if (!wayStream) {
+        if (wayReader.HasError()) {
           std::cerr << "Error while reading from ways.dat file!" << std::endl;
-          wayStream.close();
+          wayReader.Close();
           return false;
         }
       }
@@ -682,13 +686,11 @@ bool Database::GetJoints(const std::set<Id>& ids,
     return false;
   }
 
-  if (!nodeUseStream.is_open()) {
-    nodeUseStream.open(file.c_str(),std::ios::in|std::ios::binary);
-  }
-
-  if (!nodeUseStream) {
-    std::cerr << "Error while reading from nodeuse.idx file!" << std::endl;
-    return false;
+  if (!nodeUseReader.IsOpen()) {
+    if (!nodeUseReader.Open(file)) {
+      std::cerr << "Cannot open nodeuse.idx file!" << std::endl;
+      return false;
+    }
   }
 
   Cache<size_t,std::vector<NodeUse> >::CacheRef cacheRef;
@@ -697,29 +699,34 @@ bool Database::GetJoints(const std::set<Id>& ids,
        indexEntry!=indexEntries.end();
        ++indexEntry) {
     if (!nodeUseCache.GetEntry(indexEntry->interval,cacheRef)) {
-      nodeUseStream.seekg(indexEntry->offset);
+      if (!nodeUseReader.ReadPageToBuffer(indexEntry->offset,indexEntry->size)) {
+        std::cerr << "Cannot read nodeuse.idx page from file!" << std::endl;
+        nodeUseReader.Close();
+        return false;
+      }
 
       Cache<size_t, std::vector<NodeUse> >::CacheEntry cacheEntry(indexEntry->interval);
 
       cacheEntry.value.reserve(indexEntry->count);
       cacheRef=nodeUseCache.SetEntry(cacheEntry);
 
-      for (size_t i=1; i<=indexEntry->count; i++) {
+      for (size_t i=0; i<indexEntry->count; i++) {
         NodeUse nodeUse;
         size_t  count;
 
-        nodeUseStream.read((char*)&nodeUse.id,sizeof(nodeUse.id));
-        nodeUseStream.read((char*)&count,sizeof(count));
+        nodeUseReader.Read(nodeUse.id);
+        nodeUseReader.Read(count);
+
+        if (nodeUseReader.HasError()) {
+          std::cerr << "Error while reading from nodeuse.idx file!" << std::endl;
+          nodeUseReader.Close();
+          return false;
+        }
+
         nodeUse.references.resize(count);
 
         for (size_t j=0; j<count; j++) {
-          nodeUseStream.read((char*)&nodeUse.references[j],sizeof(nodeUse.references[j]));
-        }
-
-        if (!nodeUseStream) {
-          std::cerr << "Error while reading from nodeuse.idx file!" << std::endl;
-          nodeUseStream.close();
-          return false;
+          nodeUseReader.Read(nodeUse.references[j]);
         }
 
         cacheRef->value.push_back(nodeUse);
@@ -883,6 +890,11 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
   RoutingProfile      profile;
 
   std::cout << "=========== Routing start =============" << std::endl;
+
+  timeval start;
+  timeval stop;
+
+  gettimeofday(&start,NULL);
 
   route.Clear();
 
@@ -1264,6 +1276,12 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
 
         std::cout << std::endl;*/
       }
+
+      gettimeofday(&stop,NULL);
+
+      timersub(&stop,&start,&stop);
+
+      std::cout << "Time:" << stop.tv_sec << "." << start.tv_usec << std::endl;
 
       std::cout << "=========== Routing end ==============" << std::endl;
       return true;

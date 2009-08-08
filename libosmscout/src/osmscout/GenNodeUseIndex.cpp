@@ -19,10 +19,10 @@
 
 #include <osmscout/GenNodeUseIndex.h>
 
-#include <fstream>
 #include <iostream>
 #include <map>
 
+#include <osmscout/FileScanner.h>
 #include <osmscout/FileWriter.h>
 #include <osmscout/RawNode.h>
 #include <osmscout/Way.h>
@@ -37,22 +37,20 @@ bool GenerateNodeUseIndex(const TypeConfig& typeConfig, size_t intervalSize)
   std::set<TypeId>    types;
   size_t              nodeCount=0;
   std::vector<size_t> nodeDistribution;
-  std::ifstream       in;
+  FileScanner         scanner;
 
   typeConfig.GetRoutables(types);
 
-  in.open("rawnodes.dat",std::ios::in|std::ios::binary);
-
-  if (!in) {
+  if (!scanner.Open("rawnodes.dat")) {
     return false;
   }
 
-  while (in) {
+  while (!scanner.HasError()) {
     RawNode node;
 
-    node.Read(in);
+    node.Read(scanner);
 
-    if (in) {
+    if (!scanner.HasError()) {
       size_t index=node.id/distributionGranuality;
 
       if (index>=nodeDistribution.size()) {
@@ -64,7 +62,7 @@ bool GenerateNodeUseIndex(const TypeConfig& typeConfig, size_t intervalSize)
     }
   }
 
-  in.close();
+  scanner.Close();
 
   std::cout << "Nodes: " << nodeCount << std::endl;
 
@@ -91,19 +89,17 @@ bool GenerateNodeUseIndex(const TypeConfig& typeConfig, size_t intervalSize)
 
     std::cout << "Scanning areas/ways..." << std::endl;
 
-    in.open("ways.dat",std::ios::in|std::ios::binary);
-
-    if (!in) {
+    if (!scanner.Open("ways.dat")) {
       std::cerr << "Error while opening ways.dat!" << std::endl;
       return false;
     }
 
-    while (in) {
+    while (!scanner.HasError()) {
       Way way;
 
-      way.Read(in);
+      way.Read(scanner);
 
-      if (in)  {
+      if (!scanner.HasError())  {
         if (types.find(way.type)!=types.end()) {
           for (size_t i=0; i<way.nodes.size(); i++) {
             if (way.nodes[i].id>=start && way.nodes[i].id<end) {
@@ -114,25 +110,23 @@ bool GenerateNodeUseIndex(const TypeConfig& typeConfig, size_t intervalSize)
       }
     }
 
-    in.close();
+    scanner.Close();
 
     std::cout << "Resolving area/way references " << start << ">=id<" << end << "..." << std::endl;
 
     std::cout << "Scanning areas/ways..." << std::endl;
 
-    in.open("ways.dat",std::ios::in|std::ios::binary);
-
-    if (!in) {
+    if (!scanner.Open("ways.dat")) {
       std::cerr << "Error while opening ways.dat!" << std::endl;
       return false;
     }
 
-    while (in) {
+    while (!scanner.HasError()) {
       Way way;
 
-      way.Read(in);
+      way.Read(scanner);
 
-      if (in)  {
+      if (!scanner.HasError())  {
         if (types.find(way.type)!=types.end()) {
           for (size_t i=0; i<way.nodes.size(); i++) {
             if (way.nodes[i].id>=start && way.nodes[i].id<end) {
@@ -156,7 +150,7 @@ bool GenerateNodeUseIndex(const TypeConfig& typeConfig, size_t intervalSize)
       }
     }
 
-    in.close();
+    scanner.Close();
 
     index=newIndex;
   }
@@ -211,43 +205,44 @@ bool GenerateNodeUseIndex(const TypeConfig& typeConfig, size_t intervalSize)
   }
 
   for (size_t i=0; i<resultDistribution.size(); i++) {
-    if (resultDistribution[i]>0) {
-      size_t entryCount=0;
-      long   offset;
+    if (resultDistribution[i]==0) {
+      continue;
+    }
 
-      writer.GetPos(offset);
-      resultOffset[i]=offset;
+    size_t entryCount=0;
+    long   offset;
 
-      for (std::map<Id, std::set<Id> >::const_iterator id=wayWayMap.lower_bound(i*intervalSize);
-           id!=wayWayMap.end() && id->first<(i+1)*intervalSize;
-           ++id) {
-        size_t refCount=id->second.size();
+    writer.GetPos(offset);
+    resultOffset[i]=offset;
 
-        writer.Write(id->first); // The id of the way/area
-        writer.Write(refCount);  // The number of references
+    for (std::map<Id, std::set<Id> >::const_iterator id=wayWayMap.lower_bound(i*intervalSize);
+         id!=wayWayMap.end() && id->first<(i+1)*intervalSize;
+         ++id) {
+      writer.Write(id->first);          // The id of the way/area
+      writer.Write(id->second.size());  // The number of references
 
-        for (std::set<Id>::const_iterator ref=id->second.begin();
-             ref!=id->second.end();
-             ++ref) {
-          Id i=*ref;
-          writer.Write(i); // The id of the references
-        }
-
-        entryCount++;
+      for (std::set<Id>::const_iterator ref=id->second.begin();
+           ref!=id->second.end();
+           ++ref) {
+        writer.Write(*ref); // The id of the references
       }
 
-      resultOffsetCount[i]=entryCount;
+      entryCount++;
     }
+
+    resultOffsetCount[i]=entryCount;
   }
 
   writer.SetPos(indexOffset);
 
   for (size_t i=0; i<resultDistribution.size(); i++) {
-    if (resultDistribution[i]>0) {
-      writer.Write(i);                    // The interval (already written, but who cares)
-      writer.Write(resultOffset[i]);      // offset for this interval
-      writer.Write(resultOffsetCount[i]); // entry count for this interval
+    if (resultDistribution[i]==0) {
+      continue;
     }
+
+    writer.Write(i);                    // The interval (already written, but who cares)
+    writer.Write(resultOffset[i]);      // offset for this interval
+    writer.Write(resultOffsetCount[i]); // entry count for this interval
   }
 
   return !writer.HasError() && writer.Close();

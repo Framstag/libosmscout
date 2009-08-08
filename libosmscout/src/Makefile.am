@@ -7,6 +7,7 @@ AM_LDFLAGS  = $(XML2_LIBS) $(CAIRO_LIBS)
 lib_LTLIBRARIES = libosmscout.la
 libosmscout_la_SOURCES= osmscout/Util.cpp \
                         osmscout/FileReader.cpp \
+                        osmscout/FileScanner.cpp \
                         osmscout/FileWriter.cpp \
                         osmscout/Cache.cpp \
                         osmscout/StyleConfig.cpp \
@@ -25,7 +26,6 @@ libosmscout_la_SOURCES= osmscout/Util.cpp \
                         osmscout/Way.cpp \
                         osmscout/Reference.cpp \
                         osmscout/Preprocess.cpp \
-                        osmscout/Resolve.cpp \
                         osmscout/GenAreaNodeIndex.cpp \
                         osmscout/GenAreaWayIndex.cpp \
                         osmscout/GenCityStreetIndex.cpp \

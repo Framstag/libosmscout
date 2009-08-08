@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_RESOLVE_H
-#define OSMSCOUT_RESOLVE_H
+#ifndef OSMSCOUT_FILESCANNER_H
+#define OSMSCOUT_FILESCANNER_H
 
 /*
   Import/TravelJinni - Openstreetmap offline viewer
@@ -20,6 +20,41 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-extern bool Resolve();
+#include <cstdio>
+#include <string>
+
+#include <osmscout/TypeConfig.h>
+
+class FileScanner
+{
+private:
+  FILE   *file;
+  bool   hasError;
+  bool   readOnly;
+
+public:
+  FileScanner();
+  virtual ~FileScanner();
+
+  bool Open(const std::string& filename, bool readOnly=true);
+  bool Close();
+
+  bool HasError() const;
+
+  bool GetPos(long &pos);
+
+  bool Read(std::string& value);
+  bool Read(bool& boolean);
+  bool Read(unsigned long& number);
+  bool Read(unsigned int& number);
+
+  bool ReadNumber(unsigned long& number);
+  bool ReadNumber(unsigned int& number);
+  bool ReadNumber(NodeCount& number);
+
+  bool Write(bool boolean);
+  bool Write(unsigned long number);
+  bool Write(unsigned int number);
+};
 
 #endif

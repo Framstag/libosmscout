@@ -20,10 +20,10 @@
 #include <osmscout/GenWayIndex.h>
 
 #include <cmath>
-#include <fstream>
 #include <iostream>
 #include <map>
 
+#include <osmscout/FileScanner.h>
 #include <osmscout/FileWriter.h>
 #include <osmscout/Tiles.h>
 #include <osmscout/Way.h>
@@ -36,23 +36,23 @@ bool GenerateWayIndex(size_t intervalSize)
 
   std::cout << "Analysing distribution..." << std::endl;
 
-  std::ifstream              in;
+  FileScanner                scanner;
   std::map<size_t,NodeCount> intervalDist;
   std::map<size_t,size_t>    offsetMap;
 
-  in.open("ways.dat",std::ios::in|std::ios::binary);
-
-  if (!in) {
+  if (!scanner.Open("ways.dat")) {
     return false;
   }
 
-  while (in) {
-    size_t pos=in.tellg();
+  while (!scanner.HasError()) {
+    long   pos;
     Way    way;
 
-    way.Read(in);
+    scanner.GetPos(pos);
 
-    if (in) {
+    way.Read(scanner);
+
+    if (!scanner.HasError()) {
       intervalDist[way.id/intervalSize]++;
 
       if (intervalDist[way.id/intervalSize]==1) {
@@ -61,7 +61,7 @@ bool GenerateWayIndex(size_t intervalSize)
     }
   }
 
-  in.close();
+  scanner.Close();
 
   /*
   std::cout << "Distribution:" << std::endl;

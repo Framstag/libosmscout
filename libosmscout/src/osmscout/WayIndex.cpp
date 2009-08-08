@@ -23,6 +23,7 @@
 #include <iostream>
 
 #include <osmscout/FileReader.h>
+#include <osmscout/Util.h>
 
 WayIndex::WayIndex()
 {
@@ -38,6 +39,10 @@ bool WayIndex::LoadWayIndex(const std::string& path)
 {
   FileReader  reader;
   std::string file=path+"/"+"way.idx";
+
+  if (!GetFileSize(path+"/"+"ways.dat",datSize)) {
+    return false;
+  }
 
   if (!reader.Open(file)|| !reader.ReadFileToBuffer()) {
     return false;
@@ -94,6 +99,15 @@ void WayIndex::GetWayIndexEntries(const std::set<Id>& wayIds, std::list<WayIndex
     tmp.offset=entry->second.offset;
     tmp.count=entry->second.count;
 
+    entry++;
+
+    if (entry!=wayIndex.end()) {
+      tmp.size=entry->second.offset-tmp.offset;
+    }
+    else {
+      tmp.size=datSize-tmp.offset;
+    }
+
     entries.push_back(tmp);
   }
 }
@@ -115,6 +129,15 @@ void WayIndex::GetWayPagesIndexEntries(const std::set<Page>& pages,
     tmp.interval=entry->first;;
     tmp.offset=entry->second.offset;
     tmp.count=entry->second.count;
+
+    entry++;
+
+    if (entry!=wayIndex.end()) {
+      tmp.size=entry->second.offset-tmp.offset;
+    }
+    else {
+      tmp.size=datSize-tmp.offset;
+    }
 
     entries.push_back(tmp);
   }

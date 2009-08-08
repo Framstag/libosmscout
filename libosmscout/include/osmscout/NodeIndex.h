@@ -29,6 +29,7 @@ struct NodeIndexEntry
 {
   size_t    interval;
   size_t    offset;
+  size_t    size;
   NodeCount nodeCount;
 };
 
@@ -44,6 +45,7 @@ private:
 private:
   std::map<size_t,IndexEntry> nodeIndex;
   size_t                      intervalSize;
+  long                        datSize;
 
 public:
   bool LoadNodeIndex(const std::string& path);

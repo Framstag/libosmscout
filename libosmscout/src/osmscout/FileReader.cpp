@@ -19,6 +19,7 @@
 
 #include <osmscout/FileReader.h>
 
+#include <cassert>
 #include <limits>
 
 #include <osmscout/Util.h>
@@ -45,7 +46,7 @@ bool FileReader::Open(const std::string& filename)
     return false;
   }
 
-  file=fopen(filename.c_str(),"r");
+  file=fopen(filename.c_str(),"rb");
 
   hasError=file==NULL;
 
@@ -70,6 +71,11 @@ bool FileReader::Close()
   }
 
   return result;
+}
+
+bool FileReader::IsOpen() const
+{
+  return file!=NULL;
 }
 
 bool FileReader::HasError() const
@@ -105,7 +111,7 @@ bool FileReader::ReadFileToBuffer()
     return false;
   }
 
-  buffer = new char[size];
+  buffer=new char[size];
 
   if (fread(buffer,sizeof(char),(size_t)size,file)!=(size_t)size) {
     hasError=true;
@@ -118,13 +124,85 @@ bool FileReader::ReadFileToBuffer()
 
   this->size=(size_t)size;
   offset=0;
+  hasError=false;
+
+  return true;
+}
+
+bool FileReader::ReadPageToBuffer(unsigned long offset, unsigned long size)
+{
+  assert(offset>=0);
+  assert(size>0);
+
+  if (file==NULL) {
+    return false;
+  }
+
+  delete buffer;
+  buffer=NULL;
+
+  if (fseek(file,offset,SEEK_SET)!=0) {
+    hasError=true;
+    return false;
+  }
+
+  buffer=new char[size];
+
+  size_t res=0;
+
+  if ((res=fread(buffer,sizeof(char),(size_t)size,file))!=(size_t)size) {
+    hasError=true;
+
+    delete buffer;
+    buffer=NULL;
+
+    return false;
+  }
+
+  this->size=(size_t)size;
+  this->offset=0;
+  hasError=false;
+
+  return true;
+}
+
+bool FileReader::Read(std::string& value)
+{
+  if (file==NULL || buffer==NULL || hasError || offset>=size) {
+    hasError=true;
+    return false;
+  }
+
+  value.clear();
+
+  while (offset<size && buffer[offset]!='\0') {
+    value.append(1,buffer[offset]);
+
+    offset++;
+  }
+  offset++;
+
+  return true;
+}
+
+bool FileReader::Read(bool& boolean)
+{
+  if (file==NULL || buffer==NULL || hasError || offset+sizeof(char)>size) {
+    hasError=true;
+    return false;
+  }
+
+  boolean=buffer[offset]!=0;
+
+  offset+=sizeof(char);
 
   return true;
 }
 
 bool FileReader::Read(unsigned long& number)
 {
-  if (file==NULL || buffer==NULL || hasError || offset+sizeof(unsigned long)>=size) {
+  if (file==NULL || buffer==NULL || hasError || offset+sizeof(unsigned long)>size) {
+    hasError=true;
     return false;
   }
 
@@ -144,7 +222,8 @@ bool FileReader::Read(unsigned long& number)
 
 bool FileReader::Read(unsigned int& number)
 {
-  if (file==NULL || buffer==NULL || hasError || offset+sizeof(unsigned int)>=size) {
+  if (file==NULL || buffer==NULL || hasError || offset+sizeof(unsigned int)>size) {
+    hasError=true;
     return false;
   }
 
@@ -165,6 +244,7 @@ bool FileReader::Read(unsigned int& number)
 bool FileReader::ReadNumber(unsigned long& number)
 {
   if (file==NULL || buffer==NULL || hasError || offset>=size) {
+    hasError=true;
     return false;
   }
 
@@ -185,6 +265,7 @@ bool FileReader::ReadNumber(unsigned long& number)
 bool FileReader::ReadNumber(unsigned int& number)
 {
   if (file==NULL || buffer==NULL || hasError || offset>=size) {
+    hasError=true;
     return false;
   }
 
@@ -194,7 +275,7 @@ bool FileReader::ReadNumber(unsigned int& number)
   if (DecodeNumber(&buffer[offset],value,bytes)) {
     offset+=bytes;
 
-    if (value>std::numeric_limits<unsigned int>::max()) {
+    if (value>(unsigned long)std::numeric_limits<unsigned int>::max()) {
       return false;
     }
 
@@ -212,6 +293,7 @@ bool FileReader::ReadNumber(unsigned int& number)
 bool FileReader::ReadNumber(NodeCount& number)
 {
   if (file==NULL || buffer==NULL || hasError || offset>=size) {
+    hasError=true;
     return false;
   }
 
@@ -221,7 +303,7 @@ bool FileReader::ReadNumber(NodeCount& number)
   if (DecodeNumber(&buffer[offset],value,bytes)) {
     offset+=bytes;
 
-    if (value>std::numeric_limits<NodeCount>::max()) {
+    if (value>(unsigned long)std::numeric_limits<NodeCount>::max()) {
       return false;
     }
 

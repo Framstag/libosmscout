@@ -19,6 +19,8 @@
 
 #include <osmscout/Util.h>
 
+#include <cstdio>
+
 void GetKeysForName(const std::string& name, std::set<uint32_t>& keys)
 {
   for (size_t s=0; s==0 || s+4<=name.length(); s++) {
@@ -127,5 +129,34 @@ bool DecodeNumber(const char* buffer, unsigned long& number, size_t& bytes)
       idx++;
     };
   }
+}
+
+bool GetFileSize(const std::string& filename, long& size)
+{
+  FILE *file;
+
+  file=fopen(filename.c_str(),"rb");
+
+  if (file==NULL) {
+    return false;
+  }
+
+  if (fseek(file,0L,SEEK_END)!=0) {
+    fclose(file);
+
+    return false;
+  }
+
+  size=ftell(file);
+
+  if (size==-1) {
+    fclose(file);
+
+    return false;
+  }
+
+  fclose(file);
+
+  return true;
 }
 

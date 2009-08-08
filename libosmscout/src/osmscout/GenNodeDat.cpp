@@ -20,10 +20,11 @@
 #include <osmscout/GenNodeDat.h>
 
 #include <cmath>
-#include <fstream>
 #include <iostream>
 #include <map>
 
+#include <osmscout/FileScanner.h>
+#include <osmscout/FileWriter.h>
 #include <osmscout/Tiles.h>
 #include <osmscout/RawNode.h>
 #include <osmscout/Node.h>
@@ -36,26 +37,22 @@ bool GenerateNodeDat()
 
   std::cout << "Generate nodes.dat..." << std::endl;
 
-  std::ifstream in;
-  std::ofstream out;
+  FileScanner scanner;
+  FileWriter  writer;
 
-  in.open("rawnodes.dat",std::ios::in|std::ios::binary);
-
-  if (!in) {
+  if (!scanner.Open("rawnodes.dat")) {
     return false;
   }
 
-  out.open("nodes.dat",std::ios::out|std::ios::trunc|std::ios::binary);
-
-  if (!out) {
+  if (!writer.Open("nodes.dat")) {
     return false;
   }
 
-  while (in) {
+  while (!scanner.HasError()) {
     RawNode rawNode;
     Node    node;
 
-    rawNode.Read(in);
+    rawNode.Read(scanner);
 
     if (rawNode.type!=typeIgnore) {
       node.id=rawNode.id;
@@ -64,12 +61,12 @@ bool GenerateNodeDat()
       node.lon=rawNode.lon;
       node.tags=rawNode.tags;
 
-      node.Write(out);
+      node.Write(writer);
     }
   }
 
-  in.close();
-  out.close();
+  scanner.Close();
+  writer.Close();
 
   return true;
 }

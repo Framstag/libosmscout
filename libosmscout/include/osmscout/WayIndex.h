@@ -29,6 +29,7 @@ struct WayIndexEntry
 {
   size_t    interval;
   size_t    offset;
+  size_t    size;
   NodeCount count;
 };
 
@@ -44,6 +45,7 @@ private:
 private:
   std::map<size_t,IndexEntry> wayIndex;
   size_t                      intervalSize;
+  long                        datSize;
 
 public:
   WayIndex();

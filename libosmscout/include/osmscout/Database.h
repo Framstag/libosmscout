@@ -25,6 +25,8 @@
 
 #include <osmscout/Cache.h>
 
+#include <osmscout/FileReader.h>
+
 #include <osmscout/StyleConfig.h>
 #include <osmscout/TypeConfig.h>
 
@@ -78,9 +80,9 @@ private:
   mutable WayCache      wayCache;      //! Cache for way data
   mutable NodeUseCache  nodeUseCache;  //! Cache for node use data
 
-  mutable std::ifstream nodeStream;    //! File stream to the node.dat file
-  mutable std::ifstream wayStream;     //! File stream to the way.dat file
-  mutable std::ifstream nodeUseStream; //! File stream to the nodeuse.idx file
+  mutable FileReader    nodeReader;    //! File stream to the node.dat file
+  mutable FileReader    wayReader;     //! File stream to the way.dat file
+  mutable FileReader    nodeUseReader; //! File stream to the nodeuse.idx file
   TypeConfig            *typeConfig;   //! Type config for the currently opened map
 
 private:

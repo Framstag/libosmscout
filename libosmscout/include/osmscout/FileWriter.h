@@ -42,6 +42,8 @@ public:
   bool GetPos(long &pos);
   bool SetPos(long pos);
 
+  bool Write(const std::string& value);
+  bool Write(bool boolean);
   bool Write(unsigned long number);
   bool Write(unsigned int number);
 

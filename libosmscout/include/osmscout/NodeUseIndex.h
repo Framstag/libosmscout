@@ -29,6 +29,7 @@ struct NodeUseIndexEntry
 {
   size_t interval;
   size_t offset;
+  size_t size;
   size_t count;
 };
 
@@ -42,8 +43,9 @@ private:
   };
 
 private:
-  std::map<size_t,IndexEntry> nodeUseIndex;
-  size_t                      intervalSize;
+  std::map<size_t,IndexEntry> nodeUseIndex; //! The index, mapping intervals to IndexEntry
+  unsigned long               intervalSize; //! The id range of an interval
+  long                        datSize;      //! The size of the nodeuse.dat file
 
 public:
   bool LoadNodeUseIndex(const std::string& path);

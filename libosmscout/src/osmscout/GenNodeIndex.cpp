@@ -19,10 +19,10 @@
 
 #include <osmscout/GenNodeIndex.h>
 
-#include <fstream>
 #include <iostream>
 #include <map>
 
+#include <osmscout/FileScanner.h>
 #include <osmscout/FileWriter.h>
 #include <osmscout/Node.h>
 #include <osmscout/Tiles.h>
@@ -35,23 +35,24 @@ bool GenerateNodeIndex(size_t intervalSize)
 
   std::cout << "Analysing distribution..." << std::endl;
 
-  std::ifstream              in;
+  FileScanner                scanner;
   std::map<size_t,NodeCount> intervalDist;
   std::map<size_t,size_t>    offsetMap;
 
-  in.open("nodes.dat",std::ios::in|std::ios::binary);
-
-  if (!in) {
+  if (!scanner.Open("nodes.dat")) {
     return false;
   }
 
-  while (in) {
-    size_t pos=in.tellg();
+  while (!scanner.HasError()) {
+    long pos;
+
+    scanner.GetPos(pos);
+
     Node node;
 
-    node.Read(in);
+    node.Read(scanner);
 
-    if (in) {
+    if (!scanner.HasError()) {
       std::map<size_t,NodeCount>::iterator entry=intervalDist.find(node.id/intervalSize);
 
       if (entry!=intervalDist.end()) {
@@ -64,7 +65,7 @@ bool GenerateNodeIndex(size_t intervalSize)
     }
   }
 
-  in.close();
+  scanner.Close();
 
   /*
   std::cout << "Distribution:" << std::endl;
@@ -89,14 +90,14 @@ bool GenerateNodeIndex(size_t intervalSize)
   }
 
   writer.WriteNumber(intervalSize);   // Size of intervals
-  writer.WriteNumber(intervalCount);  // Numbe rof intervals
+  writer.WriteNumber(intervalCount);  // Number of intervals
 
   for (std::map<size_t,size_t>::const_iterator offset=offsetMap.begin();
        offset!=offsetMap.end();
        ++offset) {
     writer.WriteNumber(offset->first);  // The interval
     writer.WriteNumber(offset->second); // The offset into the file
-    writer.WriteNumber(intervalDist[offset->first]); // The numbe rof nodes in the interval
+    writer.WriteNumber(intervalDist[offset->first]); // The number of nodes in the interval
   }
 
   return !writer.HasError() && writer.Close();

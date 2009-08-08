@@ -97,6 +97,28 @@ bool FileWriter::SetPos(long pos)
   return !hasError;
 }
 
+bool FileWriter::Write(const std::string& value)
+{
+  size_t length=value.length();
+
+  hasError=fwrite(value.c_str(),sizeof(char),length+1,file)!=length+1;
+
+  return !hasError;
+}
+
+bool FileWriter::Write(bool boolean)
+{
+  if (file==NULL || hasError) {
+    return false;
+  }
+
+  char value=boolean ? 1 : 0;
+
+  hasError=fwrite((const char*)&value,sizeof(char),1,file)!=1;
+
+  return !hasError;
+}
+
 bool FileWriter::Write(unsigned long number)
 {
   if (file==NULL || hasError) {

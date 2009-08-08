@@ -20,7 +20,6 @@
 #include <osmscout/Preprocess.h>
 
 #include <algorithm>
-#include <fstream>
 #include <iostream>
 #include <map>
 #include <string>
@@ -39,9 +38,9 @@ class Preprocessor
 {
 private:
   const TypeConfig& config;
-  std::ofstream     nodeFile;
-  std::ofstream     wayFile;
-  std::ofstream     relationFile;
+  FileWriter        nodeWriter;
+  FileWriter        wayWriter;
+  FileWriter        relationWriter;
 
 public:
   size_t nodeCount;
@@ -71,9 +70,9 @@ Preprocessor::Preprocessor(const TypeConfig& config)
    areaCount(0),
    relationCount(0)
 {
-  nodeFile.open("rawnodes.dat",std::ios::out|std::ios::trunc|std::ios::binary);
-  wayFile.open("rawways.dat",std::ios::out|std::ios::trunc|std::ios::binary);
-  relationFile.open("rawrels.dat",std::ios::out|std::ios::trunc|std::ios::binary);
+  nodeWriter.Open("rawnodes.dat");
+  wayWriter.Open("rawways.dat");
+  relationWriter.Open("rawrels.dat");
 }
 
 void Preprocessor::Process(const Id& id,
@@ -93,7 +92,7 @@ void Preprocessor::Process(const Id& id,
     node.tags.erase(tag);
   }
 
-  node.Write(nodeFile);
+  node.Write(nodeWriter);
   nodeCount++;
 }
 
@@ -144,7 +143,7 @@ void Preprocessor::Process(const Id& id,
   way.nodes=nodes;
   way.tags=t;
 
-  way.Write(wayFile);
+  way.Write(wayWriter);
 }
 
 void Preprocessor::Process(const Id& id,
@@ -163,15 +162,15 @@ void Preprocessor::Process(const Id& id,
     relation.tags.erase(tag);
   }
 
-  relation.Write(relationFile);
+  relation.Write(relationWriter);
   relationCount++;
 }
 
 void Preprocessor::Cleanup()
 {
-  nodeFile.close();
-  wayFile.close();
-  relationFile.close();
+  nodeWriter.Close();
+  wayWriter.Close();
+  relationWriter.Close();
 }
 
 class Parser

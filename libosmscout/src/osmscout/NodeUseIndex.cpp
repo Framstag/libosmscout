@@ -23,11 +23,16 @@
 #include <iostream>
 
 #include <osmscout/FileReader.h>
+#include <osmscout/Util.h>
 
 bool NodeUseIndex::LoadNodeUseIndex(const std::string& path)
 {
   std::string file=path+"/"+"nodeuse.idx";
   FileReader  reader;
+
+  if (!GetFileSize(file,datSize)) {
+    return false;
+  }
 
   if (!reader.Open(file) || !reader.ReadFileToBuffer()) {
     return false;
@@ -84,6 +89,15 @@ void NodeUseIndex::GetNodeIndexEntries(const std::set<Id>& ids,
       tmp.offset=entry->second.offset;
       tmp.count=entry->second.count;
 
+      entry++;
+
+      if (entry!=nodeUseIndex.end()) {
+        tmp.size=entry->second.offset-tmp.offset;
+      }
+      else {
+        tmp.size=datSize-tmp.offset;
+      }
+
       entries.push_back(tmp);
     }
   }
@@ -107,6 +121,15 @@ void NodeUseIndex::GetNodePagesIndexEntries(const std::set<Page>& pages,
     tmp.interval=entry->first;;
     tmp.offset=entry->second.offset;
     tmp.count=entry->second.count;
+
+    entry++;
+
+    if (entry!=nodeUseIndex.end()) {
+      tmp.size=entry->second.offset-tmp.offset;
+    }
+    else {
+      tmp.size=datSize-tmp.offset;
+    }
 
     entries.push_back(tmp);
   }

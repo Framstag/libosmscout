@@ -23,51 +23,58 @@
 
 static double conversionFactor=10000000.0;
 
-void RawNode::Read(std::istream& file)
+bool RawNode::Read(FileScanner& scanner)
 {
-  file.read((char*)&id,sizeof(id));
+  scanner.ReadNumber(id);
 
-  if (!file) {
-    return;
+  if (scanner.HasError()) {
+    return false;
   }
 
-  uint16_t tmpType;
-  uint8_t  tagCount;
-  uint32_t latValue;
-  uint32_t lonValue;
+  unsigned long tmpType;
+  unsigned long tagCount;
+  unsigned long latValue;
+  unsigned long lonValue;
 
-  file.read((char*)&tmpType,sizeof(tmpType));
-  file.read((char*)&latValue,sizeof(latValue));
-  file.read((char*)&lonValue,sizeof(lonValue));
+  scanner.ReadNumber(tmpType);
+  scanner.ReadNumber(latValue);
+  scanner.ReadNumber(lonValue);
 
   type=(TypeId)tmpType;
   lat=latValue/conversionFactor-180.0;
   lon=lonValue/conversionFactor-90.0;
 
-  file.read((char*)&tagCount,sizeof(tagCount));
+  scanner.ReadNumber(tagCount);
+
+  if (scanner.HasError()) {
+    return false;
+  }
+
   tags.resize(tagCount);
   for (size_t i=0; i<tagCount; i++) {
-    file.read((char*)&tags[i].key,sizeof(tags[i].key));
-    std::getline(file,tags[i].value,'\0');
+    scanner.ReadNumber(tags[i].key);
+    scanner.Read(tags[i].value);
   }
+
+  return !scanner.HasError();
 }
 
-void RawNode::Write(std::ostream& file) const
+bool RawNode::Write(FileWriter& writer) const
 {
-  uint8_t  tagCount=tags.size();
-  uint16_t tmpType=(uint16_t)type;
   uint32_t latValue=round((lat+180.0)*conversionFactor);
   uint32_t lonValue=round((lon+90.0)*conversionFactor);
 
-  file.write((const char*)&id,sizeof(id));
-  file.write((const char*)&tmpType,sizeof(tmpType));
-  file.write((const char*)&latValue,sizeof(latValue));
-  file.write((const char*)&lonValue,sizeof(lonValue));
+  writer.WriteNumber(id);
+  writer.WriteNumber(type);
+  writer.WriteNumber(latValue);
+  writer.WriteNumber(lonValue);
 
-  file.write((const char*)&tagCount,sizeof(tagCount));
+  writer.WriteNumber(tags.size());
   for (size_t i=0; i<tags.size(); i++) {
-    file.write((const char*)&tags[i].key,sizeof(tags[i].key));
-    file << tags[i].value << '\0';
+    writer.WriteNumber(tags[i].key);
+    writer.Write(tags[i].value);
   }
+
+  return !writer.HasError();
 }
 

@@ -21,12 +21,15 @@
 
 #include <algorithm>
 #include <cassert>
-#include <fstream>
 #include <iostream>
 
-#include <osmscout/Way.h>
+#include <osmscout/RawNode.h>
 #include <osmscout/RawRelation.h>
 #include <osmscout/RawWay.h>
+#include <osmscout/Way.h>
+
+static size_t distributionGranuality = 1000000;
+static size_t waysLoadSize           = 1000000;
 
 bool GenerateWayDat(const TypeConfig& typeConfig)
 {
@@ -36,8 +39,8 @@ bool GenerateWayDat(const TypeConfig& typeConfig)
 
   std::cout << "Generate ways.dat..." << std::endl;
 
-  std::ifstream                               in;
-  std::ofstream                               out;
+  FileScanner                                 scanner;
+  FileWriter                                  writer;
   TypeId                                      restrictionPosId;
   TypeId                                      restrictionNegId;
   std::map<Id,std::vector<Way::Restriction> > restrictions;
@@ -50,20 +53,18 @@ bool GenerateWayDat(const TypeConfig& typeConfig)
 
   std::cout << "Scanning for restriction relations..." << std::endl;
 
-  in.open("rawrels.dat",std::ios::in|std::ios::binary);
-
-  if (!in) {
+  if (!scanner.Open("rawrels.dat")) {
     return false;
   }
 
-  while (in) {
+  while (!scanner.HasError()) {
     RawRelation relation;
 
-    relation.Read(in);
+    relation.Read(scanner);
 
-    if (in) {
+    if (!scanner.HasError()) {
       if (relation.type==restrictionPosId || relation.type==restrictionNegId) {
-        Id               from;
+        Id               from=0;
         Way::Restriction restriction;
 
         restriction.members.resize(1,0);
@@ -102,27 +103,151 @@ bool GenerateWayDat(const TypeConfig& typeConfig)
     }
   }
 
-  in.close();
+  scanner.Close();
 
-  in.open("rawways.dat",std::ios::in|std::ios::binary);
+  std::vector<size_t> wayDistribution;
+  size_t              wayCount=0;
+  size_t              sum=0;
 
-  if (!in) {
+  std::cout << "Analysing distribution..." << std::endl;
+
+  if (!scanner.Open("rawways.dat")) {
     return false;
   }
 
-  out.open("ways.dat",std::ios::out|std::ios::trunc|std::ios::binary);
+  while (!scanner.HasError()) {
+    RawWay way;
 
-  if (!out) {
+    way.Read(scanner);
+
+    if (way.type!=typeIgnore) {
+      size_t index=way.id/distributionGranuality;
+
+      if (index>=wayDistribution.size()) {
+        wayDistribution.resize(index+1,0);
+      }
+
+      wayDistribution[index]++;
+      wayCount++;
+    }
+  }
+
+  scanner.Close();
+
+  std::cout << "Ways: " << wayCount << std::endl;
+  for (size_t i=0; i<wayDistribution.size(); i++) {
+    sum+=wayDistribution[i];
+    //std::cout << "Nodes " << i*distributionGranuality << "-" << (i+1)*distributionGranuality << ": "  << nodeDistribution[i] << std::endl;
+  }
+
+  if (sum!=wayCount) {
+    std::cerr << "Number of ways over all does not match sum over distribution (" << wayCount << "!=" << sum << ")!" << std::endl;
     return false;
   }
 
-  while (in) {
-    RawWay rawWay;
-    Way    way;
+  if (!writer.Open("ways.dat")) {
+    std::cerr << "Cannot create ways.dat" << std::endl;
+    return false;
+  }
 
-    rawWay.Read(in);
+  size_t index=0;
+  while (index<wayDistribution.size()) {
+    size_t bucketSize=0;
+    size_t newIndex=index;
 
-    if (rawWay.type!=typeIgnore) {
+    while (newIndex<wayDistribution.size() &&
+           bucketSize+wayDistribution[newIndex]<waysLoadSize) {
+      bucketSize+=wayDistribution[newIndex];
+      newIndex++;
+    }
+
+    size_t start=index*distributionGranuality;
+    size_t end=newIndex*distributionGranuality;
+
+    std::cout << "Loading way id " << start << ">=id<" << end << "..." << std::endl;
+
+    std::map<Id,RawWay>  ways;
+    std::set<Id>         nodeIds;
+    std::map<Id,uint8_t> nodeUses;
+
+    if (!scanner.Open("rawways.dat")) {
+      return false;
+    }
+
+    while (!scanner.HasError()) {
+      RawWay way;
+
+      way.Read(scanner);
+
+      if (way.type!=typeIgnore && way.id>=start && way.id<end) {
+        ways[way.id]=way;
+
+        for (size_t j=0; j<way.nodes.size(); j++) {
+          nodeIds.insert(way.nodes[j]);
+          nodeUses[way.nodes[j]]=0;
+        }
+      }
+    }
+
+    scanner.Close();
+
+    if (bucketSize!=ways.size()) {
+      std::cerr << "Number of loaded ways does not match expected number of ways (" << ways.size() << "!=" << bucketSize << ")!" << std::endl;
+    }
+
+    std::cout << "Ways loaded: " << ways.size() << std::endl;
+
+    std::cout << "Scanning for matching nodes..." << std::endl;
+
+    std::map<Id,RawNode> nodes;
+
+    if (!scanner.Open("rawnodes.dat")) {
+      return false;
+    }
+
+    while (!scanner.HasError()) {
+      RawNode node;
+
+      node.Read(scanner);
+
+      if (nodeIds.find(node.id)!=nodeIds.end()) {
+        nodes[node.id]=node;
+      }
+    }
+
+    scanner.Close();
+
+    std::cout << "Scanning way node usage..." << std::endl;
+
+    if (!scanner.Open("rawways.dat")) {
+      return false;
+    }
+
+    while (!scanner.HasError()) {
+      RawWay way;
+
+      way.Read(scanner);
+
+      if (way.type!=typeIgnore) {
+        for (size_t j=0; j<way.nodes.size(); j++) {
+          std::map<Id,uint8_t>::iterator nodeUse=nodeUses.find(way.nodes[j]);
+
+          if (nodeUse!=nodeUses.end()) {
+            nodeUse->second++;
+          }
+        }
+      }
+    }
+
+    scanner.Close();
+
+    std::cout << "Writing ways..." << std::endl;
+
+    for (std::map<Id,RawWay>::iterator w=ways.begin();
+         w!=ways.end();
+         ++w) {
+      RawWay rawWay=w->second;
+      Way    way;
       int8_t layer=0;
       bool   isBridge=false;
       bool   isTunnel=false;
@@ -182,9 +307,7 @@ bool GenerateWayDat(const TypeConfig& typeConfig)
         }
       }
 
-      if (reverseNodes) {
-        std::reverse(way.nodes.begin(),way.nodes.end());
-      }
+      // Flags
 
       if (rawWay.IsArea()) {
         way.flags|=Way::isArea;
@@ -219,15 +342,49 @@ bool GenerateWayDat(const TypeConfig& typeConfig)
         way.flags|=Way::isOneway;
       }
 
+      // tags
+
       way.tags=rawWay.tags;
       if (way.tags.size()>0) {
         way.flags|=Way::hasTags;
       }
 
+      // Nodes
+
       way.nodes.resize(rawWay.nodes.size());
       for (size_t i=0; i<rawWay.nodes.size(); i++) {
+        std::map<Id,RawNode>::iterator node=nodes.find(rawWay.nodes[i]);
+
+        assert(node!=nodes.end());
+
         way.nodes[i].id=rawWay.nodes[i];
+        way.nodes[i].lat=node->second.lat;
+        way.nodes[i].lon=node->second.lon;
       }
+
+      if (reverseNodes) {
+        std::reverse(way.nodes.begin(),way.nodes.end());
+      }
+
+      // startIsJoint/endIsJoint
+
+      if (!way.IsArea()) {
+        std::map<Id,uint8_t>::const_iterator nodeUse;
+
+        nodeUse=nodeUses.find(way.nodes[0].id);
+
+        if (nodeUse!=nodeUses.end() && nodeUse->second>=2) {
+          way.flags|=Way::startIsJoint;
+        }
+
+        nodeUse=nodeUses.find(way.nodes[way.nodes.size()-1].id);
+
+        if (nodeUse!=nodeUses.end() && nodeUse->second>=2) {
+          way.flags|=Way::endIsJoint;
+        }
+      }
+
+      // Restrictions
 
       std::map<Id,std::vector<Way::Restriction> >::iterator iter=restrictions.find(way.id);
 
@@ -237,12 +394,13 @@ bool GenerateWayDat(const TypeConfig& typeConfig)
         way.restrictions=iter->second;
       }
 
-      way.Write(out);
+      way.Write(writer);
     }
+
+    index=newIndex;
   }
 
-  in.close();
-  out.close();
+  writer.Close();
 
   // Cleaning up...
 

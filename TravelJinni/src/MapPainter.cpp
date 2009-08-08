@@ -696,7 +696,6 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   size_t              nodesOutCount=0;
   size_t              nodesAllCount=0;
   size_t              nodesDrawnCount=0;
-  std::ifstream       in;
   bool                areaLayers[11];
   bool                wayLayers[11];
   double              lonMin,lonMax,latMin,latMax;

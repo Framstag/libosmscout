@@ -19,54 +19,62 @@
 
 #include <osmscout/RawRelation.h>
 
-void RawRelation::Read(std::istream& file)
+bool RawRelation::Read(FileScanner& scanner)
 {
-  uint8_t  tagCount;
-  uint16_t memberCount;
+  unsigned long tagCount;
+  unsigned long memberCount;
 
-  file.read((char*)&id,sizeof(id));
+  scanner.ReadNumber(id);
+  scanner.ReadNumber(type);
 
-  if (!file) {
-    return;
+  scanner.ReadNumber(tagCount);
+
+  if (scanner.HasError()) {
+    return false;
   }
 
-  file.read((char*)&type,sizeof(type));
-
-  file.read((char*)&tagCount,sizeof(tagCount));
   tags.resize(tagCount);
   for (size_t i=0; i<tagCount; i++) {
-    file.read((char*)&tags[i].key,sizeof(tags[i].key));
-    std::getline(file,tags[i].value,'\0');
+    scanner.ReadNumber(tags[i].key);
+    scanner.Read(tags[i].value);
   }
 
-  file.read((char*)&memberCount,sizeof(memberCount));
+  scanner.ReadNumber(memberCount);
+
+  if (scanner.HasError()) {
+    return false;
+  }
+
   members.resize(memberCount);
   for (size_t i=0; i<memberCount; i++) {
-    file.read((char*)&members[i].type,sizeof(members[i].type));
-    file.read((char*)&members[i].id,sizeof(members[i].id));
-    std::getline(file,members[i].role,'\0');
+    unsigned long memberType;
+
+    scanner.ReadNumber(memberType);
+    members[i].type=(MemberType)memberType;
+    scanner.ReadNumber(members[i].id);
+    scanner.Read(members[i].role);
   }
+
+  return !scanner.HasError();
 }
 
-void RawRelation::Write(std::ostream& file) const
+bool RawRelation::Write(FileWriter& writer) const
 {
-  uint8_t  tagCount=tags.size();
-  uint16_t memberCount=members.size();
+  writer.WriteNumber(id);
+  writer.WriteNumber(type);
 
-  file.write((const char*)&id,sizeof(id));
-  file.write((const char*)&type,sizeof(type));
-
-  file.write((const char*)&tagCount,sizeof(tagCount));
+  writer.WriteNumber(tags.size());
   for (size_t i=0; i<tags.size(); i++) {
-    file.write((const char*)&tags[i].key,sizeof(tags[i].key));
-    file << tags[i].value << '\0';
+    writer.WriteNumber(tags[i].key);
+    writer.Write(tags[i].value);
   }
 
-  file.write((const char*)&memberCount,sizeof(memberCount));
+  writer.WriteNumber(members.size());
   for (size_t i=0; i<members.size(); i++) {
-    file.write((const char*)&members[i].type,sizeof(members[i].type));
-    file.write((const char*)&members[i].id,sizeof(members[i].id));
-    file << members[i].role << '\0';
+    writer.WriteNumber(members[i].type);
+    writer.WriteNumber(members[i].id);
+    writer.Write(members[i].role);
   }
-}
 
+  return !writer.HasError();
+}

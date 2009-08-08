@@ -21,53 +21,57 @@
 
 #include <cmath>
 
-void RawWay::Read(std::istream& file)
+bool RawWay::Read(FileScanner& scanner)
 {
-  uint8_t  tagCount;
-  uint16_t nodeCount;
+  scanner.ReadNumber(id);
+  scanner.ReadNumber(type);
+  scanner.Read(isArea);
 
-  file.read((char*)&id,sizeof(id));
+  unsigned long tagCount;
+  unsigned long nodeCount;
 
-  if (!file) {
-    return;
+  scanner.ReadNumber(tagCount);
+
+  if (scanner.HasError()) {
+    return false;
   }
 
-  file.read((char*)&type,sizeof(type));
-  file.read((char*)&isArea,sizeof(isArea));
-
-
-  file.read((char*)&tagCount,sizeof(tagCount));
   tags.resize(tagCount);
   for (size_t i=0; i<tagCount; i++) {
-    file.read((char*)&tags[i].key,sizeof(tags[i].key));
-    std::getline(file,tags[i].value,'\0');
+    scanner.ReadNumber(tags[i].key);
+    scanner.Read(tags[i].value);
   }
 
-  file.read((char*)&nodeCount,sizeof(nodeCount));
+  scanner.ReadNumber(nodeCount);
+
+  if (scanner.HasError()) {
+    return false;
+  }
+
   nodes.resize(nodeCount);
   for (size_t i=0; i<nodeCount; i++) {
-    file.read((char*)&nodes[i],sizeof(nodes[i]));
+    scanner.ReadNumber(nodes[i]);
   }
+
+  return scanner.HasError();
 }
 
-void RawWay::Write(std::ostream& file) const
+bool RawWay::Write(FileWriter& writer) const
 {
-  uint8_t  tagCount=tags.size();
-  uint16_t nodeCount=nodes.size();
+  writer.WriteNumber(id);
+  writer.WriteNumber(type);
+  writer.Write(isArea);
 
-  file.write((const char*)&id,sizeof(id));
-  file.write((const char*)&type,sizeof(type));
-  file.write((const char*)&isArea,sizeof(isArea));
-
-  file.write((const char*)&tagCount,sizeof(tagCount));
+  writer.WriteNumber(tags.size());
   for (size_t i=0; i<tags.size(); i++) {
-    file.write((const char*)&tags[i].key,sizeof(tags[i].key));
-    file << tags[i].value << '\0';
+    writer.WriteNumber(tags[i].key);
+    writer.Write(tags[i].value);
   }
 
-  file.write((const char*)&nodeCount,sizeof(nodeCount));
+  writer.WriteNumber(nodes.size());
   for (size_t i=0; i<nodes.size(); i++) {
-    file.write((const char*)&nodes[i],sizeof(nodes[i]));
+    writer.WriteNumber(nodes[i]);
   }
-}
 
+  return !writer.HasError();
+}

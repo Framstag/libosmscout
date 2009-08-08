@@ -20,11 +20,11 @@
 #include <osmscout/GenAreaNodeIndex.h>
 
 #include <cmath>
-#include <fstream>
 #include <iostream>
 #include <map>
 #include <set>
 
+#include <osmscout/FileScanner.h>
 #include <osmscout/FileWriter.h>
 #include <osmscout/Node.h>
 #include <osmscout/Tiles.h>
@@ -37,25 +37,24 @@ bool GenerateAreaNodeIndex(size_t nodeIndexIntervalSize)
 
   std::cout << "Analysing distribution..." << std::endl;
 
-  std::ifstream                                  in;
+  FileScanner                                    scanner;
   std::vector<size_t>                            drawTypeDist;
   std::vector<std::map<TileId,NodeCount> >       drawTypeTileNodeCount;
   std::vector<std::map<TileId,std::set<Page> > > drawTypeTilePages;
   size_t                                         nodeCount=0;
 
-  in.open("nodes.dat",std::ios::in|std::ios::out|std::ios::binary);
-  std::ostream out(in.rdbuf());
+  scanner.Open("nodes.dat");
 
-  if (!in) {
+  if (scanner.HasError()) {
     return false;
   }
 
-  while (in) {
+  while (!scanner.HasError()) {
     Node node;
 
-    node.Read(in);
+    node.Read(scanner);
 
-    if (in) {
+    if (!scanner.HasError()) {
       TileId tileId=GetTileId(node.lon,node.lat);
 
       nodeCount++;
@@ -82,7 +81,7 @@ bool GenerateAreaNodeIndex(size_t nodeIndexIntervalSize)
     }
   }
 
-  in.close();
+  scanner.Close();
 
   std::cout << "Nodes scanned: " << nodeCount << std::endl;
 

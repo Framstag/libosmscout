@@ -41,10 +41,14 @@ public:
   bool Open(const std::string& filename);
   bool Close();
 
+  bool IsOpen() const;
   bool HasError() const;
 
   bool ReadFileToBuffer();
+  bool ReadPageToBuffer(unsigned long offset, unsigned long size);
 
+  bool Read(std::string& value);
+  bool Read(bool& boolean);
   bool Read(unsigned long& number);
   bool Read(unsigned int& number);
 
