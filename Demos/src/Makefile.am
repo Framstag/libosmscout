@@ -1,0 +1,7 @@
+AM_CXXFLAGS=$(LIBOSMSCOUT_CFLAGS)
+LDADD=$(LIBOSMSCOUT_LIBS)
+
+bin_PROGRAMS = Routing
+
+Routing_SOURCES = Routing.cpp
+
