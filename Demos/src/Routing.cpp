@@ -18,8 +18,14 @@
 */
 
 #include <iostream>
+#include <iomanip>
 
 #include <osmscout/Database.h>
+
+/*
+  Example for the nordrhein-westfalen.osm:
+  time src/Routing ../TravelJinni/ 14331559 138190834 10414977 254429626
+*/
 
 int main(int argc, char* argv[])
 {
@@ -64,7 +70,8 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  RouteData data;
+  RouteData        data;
+  RouteDescription description;
 
   if (!database.CalculateRoute(startWayId,startNodeId,
                                targetWayId,targetNodeId,
@@ -72,6 +79,77 @@ int main(int argc, char* argv[])
     std::cerr << "There was an error while calculating the route!" << std::endl;
     database.Close();
     return 1;
+  }
+
+  database.TransformRouteDataToRouteDescription(data,description);
+
+  for (std::list<RouteDescription::RouteStep>::const_iterator step=description.Steps().begin();
+       step!=description.Steps().end();
+       ++step) {
+    std::cout << "<tr><td>";
+    std::cout << std::fixed << std::setprecision(1);
+    std::cout << step->GetDistance() << "km ";
+    std::cout <<"</td>";
+
+    std::cout << "<td>";
+    switch (step->GetAction()) {
+    case RouteDescription::start:
+      std::cout << "Start at ";
+      if (!step->GetName().empty()) {
+        std::cout << step->GetName();
+
+        if (!step->GetRefName().empty()) {
+          std::cout << " (" << step->GetRefName() << ")";
+        }
+      }
+      else {
+        std::cout << step->GetRefName();
+      }
+      break;
+    case RouteDescription::drive:
+      std::cout << "drive along ";
+      if (!step->GetName().empty()) {
+        std::cout << step->GetName();
+
+        if (!step->GetRefName().empty()) {
+          std::cout << " (" << step->GetRefName() << ")";
+        }
+      }
+      else {
+        std::cout << step->GetRefName();
+      }
+      break;
+    case RouteDescription::switchRoad:
+      std::cout << "turn into ";
+      if (!step->GetName().empty()) {
+        std::cout << step->GetName();
+
+        if (!step->GetRefName().empty()) {
+          std::cout << " (" << step->GetRefName() << ")";
+        }
+      }
+      else {
+        std::cout << step->GetRefName();
+      }
+      break;
+    case RouteDescription::reachTarget:
+      std::cout << "Arriving at ";
+      if (!step->GetName().empty()) {
+        std::cout << step->GetName();
+
+        if (!step->GetRefName().empty()) {
+          std::cout << " (" << step->GetRefName() << ")";
+        }
+      }
+      else {
+        std::cout << step->GetRefName();
+      }
+      break;
+    }
+
+    std::cout << "</td></tr>";
+
+    std::cout << std::endl;
   }
 
   database.Close();
