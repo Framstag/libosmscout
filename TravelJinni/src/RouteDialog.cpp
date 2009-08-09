@@ -225,10 +225,14 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
     RouteDescription routeDescription;
     Way              way;
 
-    databaseTask->CalculateRoute(result.startWay,result.startNode,
-                                 result.endWay,result.endNode,
-                                 routeData);
-    //databaseTask->DumpStatistics();
+    if (!databaseTask->CalculateRoute(result.startWay,result.startNode,
+                                      result.endWay,result.endNode,
+                                      routeData)) {
+      std::cerr << "There was an error while routing!" << std::endl;
+      hasResult=true;
+      Exit();
+    }
+                                 //databaseTask->DumpStatistics();
 
     databaseTask->TransformRouteDataToRouteDescription(routeData,routeDescription);
 
