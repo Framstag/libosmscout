@@ -20,9 +20,9 @@
 #include <osmscout/CityStreetIndex.h>
 
 #include <cassert>
-#include <fstream>
 #include <iostream>
 
+#include <osmscout/FileScanner.h>
 #include <osmscout/Util.h>
 
 CityStreetIndex::CityStreetIndex()
@@ -38,7 +38,7 @@ CityStreetIndex::~CityStreetIndex()
 
 bool CityStreetIndex::LoadUrban(Id id) const
 {
-  std::ifstream                       indexFile;
+  FileScanner                         scanner;
   std::string                         file=path+"/"+"citystreet.idx";
   std::map<Id,size_t>::const_iterator offset;
 
@@ -50,23 +50,21 @@ bool CityStreetIndex::LoadUrban(Id id) const
 
   assert(offset!=urbanOffsets.end());
 
-  indexFile.open(file.c_str(),std::ios::in|std::ios::binary);
-
-  if (!indexFile) {
+  if (!scanner.Open(file)) {
     return false;
   }
 
   std::cout << "Loading urban " << id << " " << offset->second << std::endl;
 
-  indexFile.seekg(offset->second);
+  scanner.SetPos(offset->second);
 
   urban.id=id;
 
   size_t wayEntries;
   size_t areaEntries;
 
-  indexFile.read((char*)&wayEntries,sizeof(wayEntries)); // Number of ways
-  indexFile.read((char*)&areaEntries,sizeof(areaEntries)); // Number of areas
+  scanner.ReadNumber(wayEntries);  // Number of ways
+  scanner.ReadNumber(areaEntries); // Number of areas
 
   std::cout << wayEntries << " ways, " << areaEntries << " areas" << std::endl;
 
@@ -75,16 +73,16 @@ bool CityStreetIndex::LoadUrban(Id id) const
     size_t                                                         idEntries;
     std::pair<std::map<std::string,std::list<Id> >::iterator,bool> result;
 
-    std::getline(indexFile,name,'\0'); // The name of the way
+    scanner.Read(name); // The name of the way
 
     result=urban.ways.insert(std::pair<std::string,std::list<Id> >(name,std::list<Id>()));
 
-    indexFile.read((char*)&idEntries,sizeof(idEntries)); // Number of ids
+    scanner.ReadNumber(idEntries); // Number of ids
 
     for (size_t j=0; j<idEntries;j++) {
       Id id;
 
-      indexFile.read((char*)&id,sizeof(id)); // The id
+      scanner.Read(id); // The id
 
       result.first->second.push_back(id);
     }
@@ -95,22 +93,22 @@ bool CityStreetIndex::LoadUrban(Id id) const
     size_t                                                         idEntries;
     std::pair<std::map<std::string,std::list<Id> >::iterator,bool> result;
 
-    std::getline(indexFile,name,'\0'); // The name of the way
+    scanner.Read(name); // The name of the way
 
     result=urban.areas.insert(std::pair<std::string,std::list<Id> >(name,std::list<Id>()));
 
-    indexFile.read((char*)&idEntries,sizeof(idEntries)); // Number of ids
+    scanner.ReadNumber(idEntries); // Number of ids
 
     for (size_t j=0; j<idEntries;j++) {
       Id id;
 
-      indexFile.read((char*)&id,sizeof(id)); // The id
+      scanner.Read(id); // The id
 
       result.first->second.push_back(id);
     }
   }
 
-  if (!indexFile) {
+  if (scanner.HasError()) {
     urban.ways.clear();
     urban.areas.clear();
     urbanLoaded=false;
@@ -119,25 +117,23 @@ bool CityStreetIndex::LoadUrban(Id id) const
 
   urbanLoaded=true;
 
-  return true;
+  return scanner.Close();
 }
 
 bool CityStreetIndex::LoadCityStreetIndex(const std::string& path)
 {
-  std::ifstream indexFile;
+  FileScanner   scanner;
   std::string   file=path+"/"+"citystreet.idx";
 
   this->path=path;
 
-  indexFile.open(file.c_str(),std::ios::in|std::ios::binary);
-
-  if (!indexFile) {
+  if (!scanner.Open(file)) {
     return false;
   }
 
   size_t cityEntries;
 
-  indexFile.read((char*)&cityEntries,sizeof(cityEntries)); // Number of cities
+  scanner.ReadNumber(cityEntries); // Number of cities
 
   std::cout << cityEntries << " citys..." << std::endl;
 
@@ -145,12 +141,12 @@ bool CityStreetIndex::LoadCityStreetIndex(const std::string& path)
     City city;
 
     Id            id;
-    unsigned char refType;
+    unsigned long refType;
 
-    indexFile.read((char*)&id,sizeof(id)); // The id of the city
-    indexFile.read((char*)&refType,sizeof(refType)); // Type of id
-    indexFile.read((char*)&city.urbanId,sizeof(city.urbanId)); // The urban id
-    std::getline(indexFile,city.name,'\0'); // The name of the city
+    scanner.Read(id);            // The id of the city
+    scanner.ReadNumber(refType); // Type of id
+    scanner.Read(city.urbanId);  // The urban id
+    scanner.Read(city.name);     // The name of the city
 
     city.reference.Set(id,(RefType)refType);
 
@@ -159,7 +155,7 @@ bool CityStreetIndex::LoadCityStreetIndex(const std::string& path)
 
   size_t urbanEntries;
 
-  indexFile.read((char*)&urbanEntries,sizeof(urbanEntries)); // Number of urbans
+  scanner.Read(urbanEntries); // Number of urbans
 
   std::cout << urbanEntries << " urbans..." << std::endl;
 
@@ -167,17 +163,13 @@ bool CityStreetIndex::LoadCityStreetIndex(const std::string& path)
     Id     id;
     size_t offset;
 
-    indexFile.read((char*)&id,sizeof(id)); // The id of the urban
-    indexFile.read((char*)&offset,sizeof(offset)); // The file offset for this urban
+    scanner.Read(id);     // The id of the urban
+    scanner.Read(offset); // The file offset for this urban
 
     urbanOffsets[id]=offset;
   }
 
-  if (!indexFile) {
-    return false;
-  }
-
-  return true;
+  return !scanner.HasError() && scanner.Close();
 }
 
 

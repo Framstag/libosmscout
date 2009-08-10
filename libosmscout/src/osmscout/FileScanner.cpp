@@ -80,6 +80,17 @@ bool FileScanner::HasError() const
   return file==NULL || hasError;
 }
 
+bool FileScanner::SetPos(long pos)
+{
+  if (file==NULL || hasError) {
+    return false;
+  }
+
+  hasError=fseek(file,pos,SEEK_SET)!=0;
+
+  return !hasError;
+}
+
 bool FileScanner::GetPos(long& pos)
 {
   if (file==NULL || hasError) {

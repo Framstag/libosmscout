@@ -41,6 +41,7 @@ public:
 
   bool HasError() const;
 
+  bool SetPos(long pos);
   bool GetPos(long &pos);
 
   bool Read(std::string& value);

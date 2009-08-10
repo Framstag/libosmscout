@@ -21,11 +21,11 @@
 
 #include <cassert>
 #include <cmath>
-#include <fstream>
 #include <iostream>
 #include <list>
 #include <set>
 
+#include <osmscout/FileWriter.h>
 #include <osmscout/RawNode.h>
 #include <osmscout/RawRelation.h>
 #include <osmscout/RawWay.h>
@@ -1198,11 +1198,9 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
 
   std::cout << "Generating 'citysteet.idx'..." << std::endl;
 
-  std::ofstream out;
+  FileWriter writer;
 
-  out.open("citystreet.idx",std::ios::out|std::ios::trunc|std::ios::binary);
-
-  if (!out) {
+  if (!writer.Open("citystreet.idx")) {
     return false;
   }
 
@@ -1222,36 +1220,37 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
 
   size_t cityEntries=cities.size();
 
-  out.write((const char*)&cityEntries,sizeof(cityEntries)); // Number of cities
+  writer.WriteNumber(cityEntries); // Number of cities
 
   for (std::map<std::string,City>::const_iterator city=cities.begin();
        city!=cities.end();
        ++city) {
     unsigned char refType=city->second.refType;
 
-    out.write((const char*)&city->second.id,sizeof(city->second.id)); // Id of city
-    out.write((const char*)&refType,sizeof(refType)); // Type of id
-    out.write((const char*)&city->second.urbanId,sizeof(city->second.urbanId)); // Id of the urban area this icty belongs to
-    out << city->first << '\0';  // city name
+    writer.Write(city->second.id);      // Id of city
+    writer.WriteNumber(refType);        // Type of id
+    writer.Write(city->second.urbanId); // Id of the urban area this icty belongs to
+    writer.Write(city->first);          // city name
   }
 
   cities.clear();
 
   std::cout << "Storing urbans..." << std::endl;
 
-   size_t urbanEntries=urbans.size();
 
-  out.write((const char*)&urbanEntries,sizeof(urbanEntries)); // Number of urbans
+  writer.WriteNumber(urbans.size()); // Number of urbans
 
-  size_t urbanEntriesOffset=out.tellp();
+  long urbanEntriesOffset;
+
+  writer.GetPos(urbanEntriesOffset);
 
   for (std::map<Id,Urban>::const_iterator urban=urbans.begin();
        urban!=urbans.end();
        ++urban) {
     size_t offset=0;
 
-    out.write((const char*)&urban->first,sizeof(urban->first)); // Id of urban
-    out.write((const char*)&offset,sizeof(offset)); // Offset of urban data
+    writer.Write(urban->first); // Id of urban
+    writer.Write(offset);       // Offset of urban data
   }
 
   size_t index=0;
@@ -1259,53 +1258,46 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
   for (std::map<Id,Urban>::const_iterator urban=urbans.begin();
        urban!=urbans.end();
        ++urban) {
-    size_t offset=out.tellp();
+    long offset;
 
-    out.seekp(urbanEntriesOffset+index*(sizeof(Id)+sizeof(size_t))+sizeof(Id));
-    out.write((const char*)&offset,sizeof(offset)); // Offset to urban data
-    out.seekp(offset);
+    writer.GetPos(offset);
 
-    size_t wayEntries=urban->second.ways.size();
-    size_t areaEntries=urban->second.areas.size();
+    writer.SetPos(urbanEntriesOffset+index*(sizeof(Id)+sizeof(unsigned long))+sizeof(Id));
+    writer.Write((unsigned long)offset); // Offset to urban data
+    writer.SetPos(offset);
 
-    out.write((const char*)&wayEntries,sizeof(wayEntries)); // Number of ways in urban
-    out.write((const char*)&areaEntries,sizeof(areaEntries)); // Number of areas in urban
+    writer.WriteNumber(urban->second.ways.size());  // Number of ways in urban
+    writer.WriteNumber(urban->second.areas.size()); // Number of areas in urban
 
     for (std::map<std::string,std::list<Id> >::const_iterator way=urban->second.ways.begin();
          way!=urban->second.ways.end();
          ++way) {
-      size_t idEntries=way->second.size();
-
-      out << way->first << '\0'; // Way name
-      out.write((const char*)&idEntries,sizeof(size_t)); // Number of ids
+      writer.Write(way->first);               // Way name
+      writer.WriteNumber(way->second.size()); // Number of ids
 
       for (std::list<Id>::const_iterator id=way->second.begin();
            id!=way->second.end();
            ++id) {
-        out.write((const char*)&*id,sizeof(*id)); // Id of way
+        writer.Write(*id); // Id of way
       }
     }
 
     for (std::map<std::string,std::list<Id> >::const_iterator area=urban->second.areas.begin();
          area!=urban->second.areas.end();
          ++area) {
-      size_t idEntries=area->second.size();
-
-      out << area->first << '\0'; // Area name
-      out.write((const char*)&idEntries,sizeof(size_t)); // Number of ids
+      writer.Write(area->first);               // Area name
+      writer.WriteNumber(area->second.size()); // Number of ids
 
       for (std::list<Id>::const_iterator id=area->second.begin();
            id!=area->second.end();
            ++id) {
-        out.write((const char*)&*id,sizeof(*id)); // Id of area
+        writer.Write(*id); // Id of area
       }
     }
 
     index++;
   }
 
-  out.close();
-
-  return true;
+  return !writer.HasError() && writer.Close();
 }
 
