@@ -155,7 +155,7 @@ bool CityStreetIndex::LoadCityStreetIndex(const std::string& path)
 
   size_t urbanEntries;
 
-  scanner.Read(urbanEntries); // Number of urbans
+  scanner.ReadNumber(urbanEntries); // Number of urbans
 
   std::cout << urbanEntries << " urbans..." << std::endl;
 
