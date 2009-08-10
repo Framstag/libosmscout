@@ -1,4 +1,4 @@
-AM_CPPFLAGS = $(LIB_CXXFLAGS) -DLUMDLL -I$(top_srcdir)/include \
+AM_CPPFLAGS = $(LIB_CXXFLAGS) -DOSMSCDLL -I$(top_srcdir)/include \
               $(XML2_CFLAGS) $(CAIRO_CFLAGS)
 
 # We disable $(X_PRE_LIBS) until we need them somewhere

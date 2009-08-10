@@ -34,6 +34,9 @@ private:
   size_t offset;
   bool   hasError;
 
+private:
+  void FreeBuffer();
+
 public:
   FileReader();
   virtual ~FileReader();

@@ -158,13 +158,18 @@ bool FileScanner::Read(unsigned long& number)
     return false;
   }
 
-  hasError=fread(&number,sizeof(unsigned long),1,file)!=1;
-  /*
-  unsigned long value=0;
+  unsigned char buffer[sizeof(unsigned long)];
 
-  for (size_t i=0; i<sizeof(unsigned long); i++) {
-    value=value | (buffer[offset+i] << (i*8));
-  }*/
+  hasError=fread(&buffer,sizeof(char),sizeof(unsigned long),file)!=sizeof(unsigned long);
+
+  if (!hasError) {
+    number=0;
+
+    for (size_t i=0; i<sizeof(unsigned long); i++) {
+
+      number=number | (buffer[i] << (i*8));
+    }
+  }
 
   return !hasError;
 }
@@ -175,14 +180,17 @@ bool FileScanner::Read(unsigned int& number)
     return false;
   }
 
-  hasError=fread(&number,sizeof(unsigned int),1,file)!=1;
+  unsigned char buffer[sizeof(unsigned int)];
 
-  /*
-  unsigned int value=0;
+  hasError=fread(&buffer,sizeof(char),sizeof(unsigned int),file)!=sizeof(unsigned int);
 
-  for (size_t i=0; i<sizeof(unsigned int); i++) {
-    value=value | (buffer[offset+i] << (i*8));
-  }*/
+  if (!hasError) {
+    number=0;
+
+    for (size_t i=0; i<sizeof(unsigned int); i++) {
+      number=number | (buffer[i] << (i*8));
+    }
+  }
 
   return true;
 }
@@ -261,65 +269,5 @@ bool FileScanner::ReadNumber(NodeCount& number)
   number=(NodeCount)value;
 
   return true;
-}
-
-bool FileScanner::Write(bool boolean)
-{
-  if (file==NULL || hasError || readOnly) {
-    hasError=true;
-    return false;
-  }
-
-  char value=boolean ? 1 : 0;
-
-  hasError=fwrite((const char*)&value,sizeof(char),1,file)!=1;
-
-  return !hasError;
-}
-
-bool FileScanner::Write(unsigned long number)
-{
-  if (file==NULL || hasError || readOnly) {
-    hasError=true;
-    return false;
-  }
-
-  hasError=fwrite((const char*)&number,sizeof(unsigned long),1,file)!=1;
-
-  return !hasError;
-
-  /*
-  char buffer[sizeof(unsigned long)];
-
-  for (size_t i=0; i<sizeof(unsigned long); i++) {
-    buffer[i]=(number >> (i*8)) && 0xff;
-  }
-
-  hasError=fwrite(buffer,sizeof(char),sizeof(unsigned long),file)!=sizeof(unsigned long);
-
-  return !hasError;*/
-}
-
-bool FileScanner::Write(unsigned int number)
-{
-  if (file==NULL || hasError || readOnly) {
-    hasError=true;
-    return false;
-  }
-
-  hasError=fwrite((const char*)&number,sizeof(unsigned int),1,file)!=1;
-
-  return !hasError;
-
-  /*
-  char buffer[sizeof(unsigned int)];
-
-  for (size_t i=0; i<sizeof(unsigned int); i++) {
-    buffer[i]=(number >> (i*8)) && 0xff;
-  }
-
-  hasError=fwrite(buffer,sizeof(char),sizeof(unsigned int),file)!=sizeof(unsigned int);
-
-  return !hasError;*/
 }
 

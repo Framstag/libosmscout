@@ -105,6 +105,8 @@ bool GenerateWayDat(const TypeConfig& typeConfig)
 
   scanner.Close();
 
+  std::cout << "Found " << restrictions.size() << " restrictions." << std::endl;
+
   std::vector<size_t> wayDistribution;
   size_t              wayCount=0;
   size_t              sum=0;

@@ -5,7 +5,7 @@ AC_INIT([libosmscout],[0.1],[tim@teulings.org],[libosmscout])
 AC_CONFIG_SRCDIR(src/osmscout/Database.cpp)
 AC_CONFIG_MACRO_DIR([m4])
 
-dnl AC_CONFIG_HEADERS()
+AC_CONFIG_HEADERS([include/osmscout/private/Config.h])
 AM_INIT_AUTOMAKE([no-define nostdinc subdir-objects dist-bzip2])
 AC_GNU_SOURCE
 AC_PROG_CXX
@@ -15,6 +15,8 @@ AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 
 AC_TYPE_SIZE_T
+
+AC_CHECK_FUNCS([mmap])
 
 AC_SEARCH_LIBS([sqrt],[m])
 
@@ -40,11 +42,6 @@ dnl Check for libxml2
 PKG_CHECK_MODULES(XML2,[libxml-2.0 >= 2.6.0],
                   [AC_SUBST(XML2_CFLAGS)
                    AC_SUBST(XML2_LIBS)])
-
-dnl Check for libCairo
-dnl PKG_CHECK_MODULES(CAIRO,[cairo],
-dnl                   [AC_SUBST(CAIRO_CFLAGS)
-dnl                    AC_SUBST(CAIRO_LIBS)])
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 

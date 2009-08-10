@@ -76,9 +76,6 @@ int main(int argc, char* argv[])
         else if (std::string(argv[i])=="9") {
           startStep=9;
         }
-        else if (std::string(argv[i])=="10") {
-          startStep=10;
-        }
         else {
           parameterError=true;
         }
@@ -161,18 +158,6 @@ int main(int argc, char* argv[])
   }
 
   if (startStep==6) {
-    /*
-    std::cout << "Resolving..." << std::endl;
-
-    if (!Resolve()) {
-      std::cerr << "Cannot resolve ways!" << std::endl;
-      return 1;
-    }*/
-
-    startStep++;
-  }
-
-  if (startStep==7) {
     std::cout << "Generating 'way.idx'..." << std::endl;
 
     if (!GenerateWayIndex(wayIndexIntervalSize)) {
@@ -183,7 +168,7 @@ int main(int argc, char* argv[])
     startStep++;
   }
 
-  if (startStep==8) {
+  if (startStep==7) {
     std::cout << "Generating 'areaway.idx'..." << std::endl;
 
     if (!GenerateAreaWayIndex(wayIndexIntervalSize)) {
@@ -194,7 +179,7 @@ int main(int argc, char* argv[])
     startStep++;
   }
 
-  if (startStep==9) {
+  if (startStep==8) {
     std::cout << "Generating 'citystreet.idx'..." << std::endl;
 
     if (!GenerateCityStreetIndex(typeConfig)) {
@@ -205,7 +190,7 @@ int main(int argc, char* argv[])
     startStep++;
   }
 
-  if (startStep==10) {
+  if (startStep==9) {
     std::cout << "Generating 'nodeuse.idx'..." << std::endl;
 
     if (!GenerateNodeUseIndex(typeConfig,nodeIndexIntervalSize)) {

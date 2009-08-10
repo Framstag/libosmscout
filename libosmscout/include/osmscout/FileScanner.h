@@ -52,10 +52,6 @@ public:
   bool ReadNumber(unsigned long& number);
   bool ReadNumber(unsigned int& number);
   bool ReadNumber(NodeCount& number);
-
-  bool Write(bool boolean);
-  bool Write(unsigned long number);
-  bool Write(unsigned int number);
 };
 
 #endif

@@ -125,20 +125,16 @@ bool FileWriter::Write(unsigned long number)
     return false;
   }
 
-  hasError=fwrite((const char*)&number,sizeof(unsigned long),1,file)!=1;
-
-  return !hasError;
-
-  /*
-  char buffer[sizeof(unsigned long)];
+  char     buffer[sizeof(unsigned long)];
+  unsigned long mask=0xff;
 
   for (size_t i=0; i<sizeof(unsigned long); i++) {
-    buffer[i]=(number >> (i*8)) && 0xff;
+    buffer[i]=(number >> (i*8)) & mask;
   }
 
   hasError=fwrite(buffer,sizeof(char),sizeof(unsigned long),file)!=sizeof(unsigned long);
 
-  return !hasError;*/
+  return !hasError;
 }
 
 bool FileWriter::Write(unsigned int number)
@@ -147,20 +143,16 @@ bool FileWriter::Write(unsigned int number)
     return false;
   }
 
-  hasError=fwrite((const char*)&number,sizeof(unsigned int),1,file)!=1;
-
-  return !hasError;
-
-  /*
-  char buffer[sizeof(unsigned int)];
+  char         buffer[sizeof(unsigned int)];
+  unsigned int mask=0xff;
 
   for (size_t i=0; i<sizeof(unsigned int); i++) {
-    buffer[i]=(number >> (i*8)) && 0xff;
+    buffer[i]=(number >> (i*8)) & mask;
   }
 
   hasError=fwrite(buffer,sizeof(char),sizeof(unsigned int),file)!=sizeof(unsigned int);
 
-  return !hasError;*/
+  return !hasError;
 }
 
 /**

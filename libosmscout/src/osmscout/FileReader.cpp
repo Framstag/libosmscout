@@ -20,9 +20,19 @@
 #include <osmscout/FileReader.h>
 
 #include <cassert>
+#include <cerrno>
+#include <cstring>
+#include <iostream>
 #include <limits>
 
 #include <osmscout/Util.h>
+
+#include <osmscout/private/Config.h>
+
+#if defined(HAVE_MMAP)
+  #include <unistd.h>
+  #include <sys/mman.h>
+#endif
 
 FileReader::FileReader()
  : file(NULL),
@@ -37,6 +47,19 @@ FileReader::~FileReader()
 {
   if (file!=NULL) {
     fclose(file);
+  }
+}
+
+void FileReader::FreeBuffer()
+{
+  if (buffer!=NULL) {
+#if defined(HAVE_MMAP)
+    if (munmap(buffer,size)!=0) {
+      std::cerr << "Error while calling munmap: "<< strerror(errno) << std::endl;
+    }
+#else
+    delete [] buffer;
+#endif
   }
 }
 
@@ -61,8 +84,7 @@ bool FileReader::Close()
     return false;
   }
 
-  delete buffer;
-  buffer=NULL;
+  FreeBuffer();
 
   result=fclose(file)==0;
 
@@ -89,8 +111,7 @@ bool FileReader::ReadFileToBuffer()
     return false;
   }
 
-  delete buffer;
-  buffer=NULL;
+  FreeBuffer();
 
   long size;
 
@@ -106,6 +127,14 @@ bool FileReader::ReadFileToBuffer()
     return false;
   }
 
+#if defined(HAVE_MMAP)
+  buffer=(char*)mmap(NULL,size,PROT_READ,MAP_SHARED,fileno(file),0);
+  if (buffer==MAP_FAILED) {
+    std::cerr << "Cannot mmap complete file: " << strerror(errno) << std::endl;
+    buffer=NULL;
+    return false;
+  }
+#else
   if (fseek(file,0L,SEEK_SET)!=0) {
     hasError=true;
     return false;
@@ -116,14 +145,13 @@ bool FileReader::ReadFileToBuffer()
   if (fread(buffer,sizeof(char),(size_t)size,file)!=(size_t)size) {
     hasError=true;
 
-    delete buffer;
-    buffer=NULL;
+    FreeBuffer();
 
     return false;
   }
-
+#endif
   this->size=(size_t)size;
-  offset=0;
+  this->offset=0;
   hasError=false;
 
   return true;
@@ -138,9 +166,24 @@ bool FileReader::ReadPageToBuffer(unsigned long offset, unsigned long size)
     return false;
   }
 
-  delete buffer;
-  buffer=NULL;
+  FreeBuffer();
 
+#if defined(HAVE_MMAP)
+  size_t mmapOff=(offset/getpagesize())*getpagesize();
+
+  size=size+offset-mmapOff;
+
+  buffer=(char*)mmap(NULL,size,PROT_READ,MAP_SHARED,fileno(file),mmapOff);
+  if (buffer==MAP_FAILED) {
+    std::cerr << "Cannot mmap page of file: " << strerror(errno) << std::endl;
+    buffer=NULL;
+    return false;
+  }
+
+  this->offset=offset-mmapOff;
+  this->size=(size_t)size;
+
+#else
   if (fseek(file,offset,SEEK_SET)!=0) {
     hasError=true;
     return false;
@@ -153,14 +196,13 @@ bool FileReader::ReadPageToBuffer(unsigned long offset, unsigned long size)
   if ((res=fread(buffer,sizeof(char),(size_t)size,file))!=(size_t)size) {
     hasError=true;
 
-    delete buffer;
-    buffer=NULL;
+    FreeBuffer();
 
     return false;
   }
-
-  this->size=(size_t)size;
   this->offset=0;
+  this->size=(size_t)size;
+#endif
   hasError=false;
 
   return true;
@@ -206,14 +248,11 @@ bool FileReader::Read(unsigned long& number)
     return false;
   }
 
-  number=*(unsigned long*)&buffer[offset];
-
-  /*
-  unsigned long value=0;
+  number=0;
 
   for (size_t i=0; i<sizeof(unsigned long); i++) {
-    value=value | (buffer[offset+i] << (i*8));
-  }*/
+    number=number | (((unsigned char)buffer[offset+i]) << (i*8));
+  }
 
   offset+=sizeof(unsigned long);
 
@@ -227,14 +266,11 @@ bool FileReader::Read(unsigned int& number)
     return false;
   }
 
-  number=*(unsigned int*)&buffer[offset];
-
-  /*
-  unsigned int value=0;
+  number=0;
 
   for (size_t i=0; i<sizeof(unsigned int); i++) {
-    value=value | (buffer[offset+i] << (i*8));
-  }*/
+    number=number | (((unsigned char)buffer[offset+i]) << (i*8));
+  }
 
   offset+=sizeof(unsigned int);
 
