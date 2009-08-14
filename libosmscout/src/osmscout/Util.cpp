@@ -20,6 +20,7 @@
 #include <osmscout/Util.h>
 
 #include <cstdio>
+#include <cmath>
 
 void GetKeysForName(const std::string& name, std::set<uint32_t>& keys)
 {
@@ -158,5 +159,119 @@ bool GetFileSize(const std::string& filename, long& size)
   fclose(file);
 
   return true;
+}
+
+/**
+  Calculating basic cost for the A* algorithm based on the
+  spherical distance of two points on earth
+  */
+double GetSphericalDistance(double aLon, double aLat,
+                            double bLon, double bLat)
+{
+  double r=6371.01; // Average radius of earth
+  double dLat=(bLat-aLat)*M_PI/180;
+  double dLon=(bLon-aLon)*M_PI/180;
+
+  double a = sin(dLat/2)*sin(dLat/2)+cos(dLon/2)*cos(dLat/2)*sin(dLon/2)*sin(dLon/2);
+
+  double c = 2*atan2(sqrt(a),sqrt(1-a));
+
+  return r*c;
+}
+
+/**
+  Calculating Vincenty's inverse for getting the ellipsoidal distance
+  of two points on earth.
+  */
+double GetEllipsoidalDistance(double aLon, double aLat,
+                              double bLon, double bLat)
+{
+  double a=6378137;
+  double b=6356752.3142;
+  double f=1/298.257223563;  // WGS-84 ellipsiod
+  double phi1=aLat*M_PI/180;
+  double phi2=bLat*M_PI/180;
+  double lambda1=aLon*M_PI/180;
+  double lambda2=bLon*M_PI/180;
+  double a2b2b2=(a*a - b*b) / (b*b);
+
+  double omega=lambda2 - lambda1;
+
+  double U1=atan((1.0 - f) * tan(phi1));
+  double sinU1=sin(U1);
+  double cosU1=cos(U1);
+
+  double U2=atan((1.0 - f) * tan(phi2));
+  double sinU2=sin(U2);
+  double cosU2=cos(U2);
+
+  double sinU1sinU2=sinU1 * sinU2;
+  double cosU1sinU2=cosU1 * sinU2;
+  double sinU1cosU2=sinU1 * cosU2;
+  double cosU1cosU2=cosU1 * cosU2;
+
+  double lambda=omega;
+
+  double A=0.0;
+  double B=0.0;
+  double sigma=0.0;
+  double deltasigma=0.0;
+  double lambda0;
+  bool converged=false;
+
+  for (int i=0; i < 10; i++)
+  {
+    lambda0=lambda;
+
+    double sinlambda=sin(lambda);
+    double coslambda=cos(lambda);
+
+    double sin2sigma=(cosU2 * sinlambda * cosU2 * sinlambda) +
+                      (cosU1sinU2 - sinU1cosU2 * coslambda) *
+                      (cosU1sinU2 - sinU1cosU2 * coslambda);
+
+    double sinsigma=sqrt(sin2sigma);
+
+    double cossigma=sinU1sinU2 + (cosU1cosU2 * coslambda);
+
+    sigma=atan2(sinsigma, cossigma);
+
+    double sinalpha=(sin2sigma == 0) ? 0.0 :
+                     cosU1cosU2 * sinlambda / sinsigma;
+
+    double alpha=asin(sinalpha);
+    double cosalpha=cos(alpha);
+    double cos2alpha=cosalpha * cosalpha;
+
+    double cos2sigmam=cos2alpha == 0.0 ? 0.0 :
+                       cossigma - 2 * sinU1sinU2 / cos2alpha;
+
+    double u2=cos2alpha * a2b2b2;
+
+    double cos2sigmam2=cos2sigmam * cos2sigmam;
+
+    A=1.0 + u2 / 16384 * (4096 + u2 *
+                          (-768 + u2 * (320 - 175 * u2)));
+
+    B=u2 / 1024 * (256 + u2 * (-128 + u2 * (74 - 47 * u2)));
+
+    deltasigma=B * sinsigma * (cos2sigmam + B / 4 *
+                               (cossigma * (-1 + 2 * cos2sigmam2) - B / 6 *
+                                cos2sigmam * (-3 + 4 * sin2sigma) *
+                                (-3 + 4 * cos2sigmam2)));
+
+    double C=f / 16 * cos2alpha * (4 + f * (4 - 3 * cos2alpha));
+
+    lambda=omega + (1 - C) * f * sinalpha *
+           (sigma + C * sinsigma * (cos2sigmam + C *
+                                    cossigma * (-1 + 2 * cos2sigmam2)));
+
+    if ((i > 1) && (std::abs((lambda - lambda0) / lambda) < 0.0000000000001)) {
+      converged=true;
+      break;
+    }
+  }
+
+  return b * A * (sigma - deltasigma)/1000; // We want the distance in Km
 }
 

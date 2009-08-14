@@ -235,16 +235,32 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
                                  //databaseTask->DumpStatistics();
 
     databaseTask->TransformRouteDataToRouteDescription(routeData,routeDescription);
+    double lastDistance = 0;
 
     for (std::list<RouteDescription::RouteStep>::const_iterator step=routeDescription.Steps().begin();
          step!=routeDescription.Steps().end();
          ++step) {
+#if defined(HTML)
       std::cout << "<tr><td>";
+#endif
       std::cout << std::fixed << std::setprecision(1);
       std::cout << step->GetDistance() << "km ";
-      std::cout <<"</td>";
 
+      if (step->GetDistance()-lastDistance!=0.0) {
+        std::cout << std::fixed << std::setprecision(1);
+        std::cout << step->GetDistance()-lastDistance << "km ";
+      }
+      else {
+        std::cout << "      ";
+      }
+
+#if defined(HTML)
+      std::cout <<"</td>";
+#endif
+
+#if defined(HTML)
       std::cout << "<td>";
+#endif
       switch (step->GetAction()) {
       case RouteDescription::start:
         std::cout << "Start at ";
@@ -298,11 +314,27 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
           std::cout << step->GetRefName();
         }
         break;
+      case RouteDescription::pass:
+        std::cout << "passing along ";
+        if (!step->GetName().empty()) {
+          std::cout << step->GetName();
+
+          if (!step->GetRefName().empty()) {
+            std::cout << " (" << step->GetRefName() << ")";
+          }
+        }
+        else {
+          std::cout << step->GetRefName();
+        }
+        break;
       }
 
+#if defined(HTML)
       std::cout << "</td></tr>";
-
+#endif
       std::cout << std::endl;
+
+      lastDistance=step->GetDistance();
     }
 
     databaseTask->TransformRouteDataToWay(routeData,way);

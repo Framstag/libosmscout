@@ -35,4 +35,8 @@ extern bool DecodeNumber(const char* buffer, unsigned long& number, size_t& byte
 
 extern bool GetFileSize(const std::string& filename, long& size);
 
+double GetSphericalDistance(double aLon, double aLat,
+                            double bLon, double bLat);
+double GetEllipsoidalDistance(double aLon, double aLat,
+                              double bLon, double bLat);
 #endif

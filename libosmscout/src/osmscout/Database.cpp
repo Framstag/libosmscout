@@ -28,6 +28,7 @@
 
 #include <osmscout/RoutingProfile.h>
 #include <osmscout/TypeConfigLoader.h>
+#include <osmscout/Util.h>
 
 struct NodeCacheValueSizer : public Database::NodeCache::ValueSizer
 {
@@ -806,15 +807,6 @@ struct RNodeCostCompare
   }
 };
 
-double GetCost(double aLon, double aLat,
-               double bLon, double bLat)
-{
-  return 6371.01*2*asin(sqrt(pow(sin((bLon-aLon)*M_PI/360),2)+
-                             cos(aLon*M_PI/180)*cos(bLon*M_PI/180)*
-                             pow(sin((bLat-aLat)*M_PI/360),2)));
-}
-
-
 bool CanBeTurnedInto(const Way& way, Id via, Id to)
 {
   if (way.restrictions.size()==0) {
@@ -992,10 +984,10 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
                    0);
 
   node.currentCost=0.0;
-  node.estimateCost=GetCost(startLon,
-                            startLat,
-                            targetLon,
-                            targetLat);
+  node.estimateCost=GetSphericalDistance(startLon,
+                                         startLat,
+                                         targetLon,
+                                         targetLat);
   node.overallCost=openList.begin()->currentCost+openList.begin()->estimateCost;
 
   openList.insert(node);
@@ -1184,10 +1176,11 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
          iter!=follower.end();
          ++iter) {
       double currentCost=current.currentCost+
-                         profile.GetCostFactor(currentWay.type)*GetCost(current.lon,
-                                                                        current.lat,
-                                                                        iter->lon,
-                                                                        iter->lat);
+                         profile.GetCostFactor(currentWay.type)*
+                         GetSphericalDistance(current.lon,
+                                              current.lat,
+                                              iter->lon,
+                                              iter->lat);
 
       if (currentWay.id!=iter->id) {
         currentCost+=profile.GetTurnCostFactor();
@@ -1200,7 +1193,8 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
         continue;
       }
 
-      double estimateCost=profile.GetMinCostFactor()*GetCost(iter->lon,iter->lat,targetLon,targetLat);
+      double estimateCost=profile.GetMinCostFactor()*
+                          GetSphericalDistance(iter->lon,iter->lat,targetLon,targetLat);
       double overallCost=currentCost+estimateCost;
 
       if (openEntry!=openMap.end()) {
@@ -1300,7 +1294,6 @@ bool Database::TransformRouteDataToRouteDescription(const RouteData& data,
   Way                                              way,newWay;
   Id                                               node=0,newNode=0;
   std::list<RouteData::RouteEntry>::const_iterator iter;
-  std::string                                      name,refName;
   double                                           distance=0.0;
 
   description.Clear();
@@ -1315,6 +1308,7 @@ bool Database::TransformRouteDataToRouteDescription(const RouteData& data,
     return false;
   }
 
+  // Find the starting node
   for (size_t i=0; i<way.nodes.size(); i++) {
     if (way.nodes[i].id==iter->GetNodeId()) {
       node=i;
@@ -1322,71 +1316,57 @@ bool Database::TransformRouteDataToRouteDescription(const RouteData& data,
     }
   }
 
+  // Lets start at the starting node (suprise, suprise ;-))
   description.AddStep(0.0,RouteDescription::start,way.GetName(),way.GetRefName());
   description.AddStep(0.0,RouteDescription::drive,way.GetName(),way.GetRefName());
 
   iter++;
 
-  while (iter!=data.Entries().end()) {
-    if (!GetWay(iter->GetWayId(),newWay)) {
-      return false;
+  // For every step in the route...
+  for ( /* no code */ ;iter!=data.Entries().end(); ++iter, way=newWay, node=newNode) {
+    // Find the corresponding way (which may be the old way?)
+    if (iter->GetWayId()!=way.id) {
+      if (!GetWay(iter->GetWayId(),newWay)) {
+        return false;
+      }
+    }
+    else {
+      newWay=way;
     }
 
+    // Find the current node in the new way and calculate the distance
+    // between the old point and the new point
     for (size_t i=0; i<newWay.nodes.size(); i++) {
       if (newWay.nodes[i].id==iter->GetNodeId()) {
-        distance+=GetCost(way.nodes[node].lon,way.nodes[node].lat,
-                          newWay.nodes[i].lon,newWay.nodes[i].lat);
+        distance+=GetEllipsoidalDistance(way.nodes[node].lon,way.nodes[node].lat,
+                                         newWay.nodes[i].lon,newWay.nodes[i].lat);
         newNode=i;
       }
     }
 
-//    distance+=GetCosts(way
-
-    bool match=false;
-
-    while (iter!=data.Entries().end() &&
-           newWay.GetName().empty() &&
-           newWay.GetRefName().empty()) {
-      ++iter;
-
-      double lastLon=newWay.nodes[newNode].lon;
-      double lastLat=newWay.nodes[newNode].lat;
-
-      if (!GetWay(iter->GetWayId(),newWay)) {
-        return false;
-      }
-
-      for (size_t i=0; i<newWay.nodes.size(); i++) {
-        if (newWay.nodes[i].id==iter->GetNodeId()) {
-          distance+=GetCost(lastLon,lastLat,
-                            newWay.nodes[i].lon,newWay.nodes[i].lat);
-          newNode=i;
-          break;
-        }
-      }
+    // We skip steps where street doe not have any names
+    if (newWay.GetName().empty() &&
+        newWay.GetRefName().empty()) {
+      continue;
     }
 
+    // We didn't change street name, so we do not create a new entry...
     if (!way.GetName().empty() &&
         way.GetName()==newWay.GetName()) {
-      match=true;
-    }
-    else if (way.GetName().empty() &&
-             !way.GetRefName().empty()
-             && way.GetRefName()==newWay.GetRefName()) {
-      match=true;
+      continue;
     }
 
-    if (!match) {
-      description.AddStep(distance,RouteDescription::switchRoad,newWay.GetName(),newWay.GetRefName());
-      description.AddStep(distance,RouteDescription::drive,newWay.GetName(),newWay.GetRefName());
+    // We didn't change ref name, so we do not create a new entry...
+    if (!way.GetRefName().empty()
+        && way.GetRefName()==newWay.GetRefName()) {
+      continue;
     }
 
-    way=newWay;
-    node=newNode;
-
-    ++iter;
+    description.AddStep(distance,RouteDescription::switchRoad,newWay.GetName(),newWay.GetRefName());
+    description.AddStep(distance,RouteDescription::drive,newWay.GetName(),newWay.GetRefName());
   }
 
+  // We reached the destination!
   description.AddStep(distance,RouteDescription::reachTarget,newWay.GetName(),newWay.GetRefName());
 
   return true;
