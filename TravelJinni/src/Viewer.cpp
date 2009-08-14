@@ -128,7 +128,8 @@ public:
 
     Lum::OS::DrawInfo *draw=GetDrawInfo();
 
-    if (!databaseTask->DrawResult(draw,
+    if (!databaseTask->DrawResult(GetWindow(),
+                                  draw,
                                   this->x,this->y,
                                   this->width,this->height,
                                   lon,lat,

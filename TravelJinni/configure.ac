@@ -17,7 +17,7 @@ if test "$GXX" = yes; then
   CPPFLAGS="$CPPFLAGS -Wall -pedantic -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
 fi
 
-PKG_CHECK_MODULES(ILLUMINATION, illumination)
+PKG_CHECK_MODULES(ILLUMINATION, illumination-full)
 AC_SUBST(ILLUMINATION_CFLAGS)
 AC_SUBST(ILLUMINATION_LIBS)
 

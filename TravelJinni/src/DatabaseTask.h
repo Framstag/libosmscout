@@ -104,7 +104,8 @@ public:
 
   void PostJob(Job *job);
 
-  bool DrawResult(Lum::OS::DrawInfo* draw,
+  bool DrawResult(Lum::OS::Window* window,
+                  Lum::OS::DrawInfo* draw,
                   int x, int y,
                   size_t width, size_t height,
                   double lon, double lat,

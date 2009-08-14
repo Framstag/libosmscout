@@ -22,24 +22,29 @@
 #include <cmath>
 #include <iostream>
 
+#include <cairo/cairo.h>
+
 #include <osmscout/StyleConfigLoader.h>
 
 #include <Lum/Base/String.h>
+
+#include <Lum/OS/Cairo/Bitmap.h>
+#include <Lum/OS/Cairo/Display.h>
+#include <Lum/OS/Cairo/DrawInfo.h>
+
+#include <Lum/OS/X11/DrawInfo.h>
+#include <Lum/OS/X11/Display.h>
+
+#include <Lum/OS/Bitmap.h>
+#include <Lum/OS/Display.h>
+#include <Lum/OS/Driver.h>
+#include <Lum/OS/Thread.h>
 
 // Cairo includes X11, defines Status
 #if defined(Status)
   #undef Status
 #endif
 #include <Lum/Base/Path.h>
-
-#include <Lum/OS/Cairo/Bitmap.h>
-#include <Lum/OS/Cairo/Display.h>
-#include <Lum/OS/Cairo/DrawInfo.h>
-
-#include <Lum/OS/Bitmap.h>
-#include <Lum/OS/Display.h>
-#include <Lum/OS/Driver.h>
-#include <Lum/OS/Thread.h>
 
 #include "MapPainter.h"
 
@@ -336,7 +341,8 @@ void DatabaseTask::SignalRedraw()
   condition.Signal();
 }
 
-bool DatabaseTask::DrawResult(Lum::OS::DrawInfo* draw,
+bool DatabaseTask::DrawResult(Lum::OS::Window* window,
+                              Lum::OS::DrawInfo* draw,
                               int x, int y,
                               size_t width, size_t height,
                               double lon, double lat,
@@ -420,6 +426,23 @@ bool DatabaseTask::DrawResult(Lum::OS::DrawInfo* draw,
 
       cairo_restore(cairo);
 
+    }
+    else if (dynamic_cast<Lum::OS::X11::DrawInfo*>(draw)!=NULL) {
+      Lum::OS::X11::DrawInfo *x11Draw=dynamic_cast<Lum::OS::X11::DrawInfo*>(draw);
+
+      cairo_surface_t *surface=cairo_xlib_surface_create(x11Draw->display,
+                                                         x11Draw->drawable,
+                                                         dynamic_cast<Lum::OS::X11::Display*>(Lum::OS::display)->visual,
+                                                         window->GetWidth(),window->GetHeight());
+
+      cairo_t* cairo=cairo_create(surface);
+
+      cairo_set_source_surface(cairo,finishedSurface,x-dx,y+dy);
+      cairo_rectangle(cairo,x,y,finishedWidth,finishedHeight);
+      cairo_fill(cairo);
+
+      cairo_destroy(cairo),
+      cairo_surface_destroy(surface);
     }
 
     draw->PopClip();
