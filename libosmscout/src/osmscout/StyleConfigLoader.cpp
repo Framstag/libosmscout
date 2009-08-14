@@ -54,7 +54,8 @@ class StyleConfigParser
     contextArea,
     contextAreaFill,
     contextAreaSymbol,
-    contextAreaLabel
+    contextAreaLabel,
+    contextAreaBorder,
   };
 
 private:
@@ -287,6 +288,9 @@ public:
       else if (strcmp((const char*)name,"label")==0) {
         context=contextAreaLabel;
       }
+      else if (strcmp((const char*)name,"border")==0) {
+        context=contextAreaBorder;
+      }
       else {
         std::cerr << "Expected one of tags 'fill', 'symbol' or 'label'" << std::endl;
         return;
@@ -365,9 +369,11 @@ public:
 
       config.AddTagInfo(tagInfo);*/
     }
-    else if (context==contextWayLine) {
+    else if (context==contextWayLine ||
+             context==contextAreaBorder) {
       const xmlChar *styleValue=NULL;
       const xmlChar *colorValue=NULL;
+      const xmlChar *outlineColorValue=NULL;
       const xmlChar *minPixelValue=NULL;
       const xmlChar *maxPixelValue=NULL;
       const xmlChar *widthValue=NULL;
@@ -386,6 +392,9 @@ public:
           }
           else if (strcmp((const char*)atts[i],"color")==0) {
             colorValue=atts[i+1];
+          }
+          else if (strcmp((const char*)atts[i],"outlineColor")==0) {
+            outlineColorValue=atts[i+1];
           }
           else if (strcmp((const char*)atts[i],"minPixel")==0) {
             minPixelValue=atts[i+1];
@@ -425,11 +434,22 @@ public:
           color=(const char*)colorValue;
 
           if (!GetColor(color,r,g,b,a)) {
-            std::cerr << "Unknown style '" << style << "' for style type 'fill'" << std::endl;
+            std::cerr << "Cannot parse color value '" << color << "'" << std::endl;
             return;
           }
 
-          line.SetColor(r,g,b,a);
+          line.SetLineColor(r,g,b,a);
+        }
+
+        if (outlineColorValue!=NULL) {
+          color=(const char*)outlineColorValue;
+
+          if (!GetColor(color,r,g,b,a)) {
+            std::cerr << "Cannot parse color value '" << color << "'" << std::endl;
+            return;
+          }
+
+          line.SetOutlineColor(r,g,b,a);
         }
 
         if (minPixelValue!=NULL) {
@@ -470,6 +490,9 @@ public:
 
         if (context==contextWayLine) {
           styleConfig.SetWayLineStyle(type,line);
+        }
+        else if (context==contextAreaBorder) {
+          styleConfig.SetAreaBorderStyle(type,line);
         }
       }
     }
@@ -560,6 +583,8 @@ public:
              context==contextAreaLabel) {
       const xmlChar *styleValue=NULL;
       const xmlChar *minMagValue=NULL;
+      const xmlChar *scaleAndFadeMagValue=NULL;
+      const xmlChar *maxMagValue=NULL;
       const xmlChar *sizeValue=NULL;
       const xmlChar *textColorValue=NULL;
       const xmlChar *bgColorValue=NULL;
@@ -573,6 +598,12 @@ public:
           }
           else if (strcmp((const char*)atts[i],"minMag")==0) {
             minMagValue=atts[i+1];
+          }
+          else if (strcmp((const char*)atts[i],"scaleAndFadeMag")==0) {
+            scaleAndFadeMagValue=atts[i+1];
+          }
+          else if (strcmp((const char*)atts[i],"maxMag")==0) {
+            maxMagValue=atts[i+1];
           }
           else if (strcmp((const char*)atts[i],"size")==0) {
             sizeValue=atts[i+1];
@@ -620,6 +651,34 @@ public:
         }
 
         label.SetMinMag(m);
+      }
+
+      if (scaleAndFadeMagValue!=NULL) {
+        std::string scaleAndFadeMag;
+        Mag         m;
+
+        scaleAndFadeMag=(const char*)scaleAndFadeMagValue;
+
+        if (!GetMag(scaleAndFadeMag,m)) {
+          std::cerr << "Unknown scaleAndFade magnification '" << scaleAndFadeMag << "' for style type 'label'" << std::endl;
+          return;
+        }
+
+        label.SetScaleAndFadeMag(m);
+      }
+
+      if (maxMagValue!=NULL) {
+        std::string maxMag;
+        Mag         m;
+
+        maxMag=(const char*)maxMagValue;
+
+        if (!GetMag(maxMag,m)) {
+          std::cerr << "Unknown maximum magnification '" << maxMag << "' for style type 'label'" << std::endl;
+          return;
+        }
+
+        label.SetMaxMag(m);
       }
 
       if (sizeValue!=NULL) {
@@ -838,6 +897,11 @@ public:
     }
     else if (context==contextAreaLabel) {
       if (strcmp((const char*)name,"label")==0) {
+        context=contextArea;
+      }
+    }
+    else if (context==contextAreaBorder) {
+      if (strcmp((const char*)name,"border")==0) {
         context=contextArea;
       }
     }

@@ -45,6 +45,10 @@ private:
   double lineG;
   double lineB;
   double lineA;
+  double outlineR;
+  double outlineG;
+  double outlineB;
+  double outlineA;
   double minPixel;
   double maxPixel;
   double width;
@@ -54,7 +58,8 @@ public:
   LineStyle();
 
   LineStyle& SetStyle(Style style);
-  LineStyle& SetColor(double r, double g, double b, double a);
+  LineStyle& SetLineColor(double r, double g, double b, double a);
+  LineStyle& SetOutlineColor(double r, double g, double b, double a);
   LineStyle& SetMinPixel(double value);
   LineStyle& SetMaxPixel(double value);
   LineStyle& SetWidth(double value);
@@ -89,6 +94,27 @@ public:
   {
     return lineA;
   }
+
+  inline double GetOutlineR() const
+  {
+    return outlineR;
+  }
+
+  inline double GetOutlineG() const
+  {
+    return outlineG;
+  }
+
+  inline double GetOutlineB() const
+  {
+    return outlineB;
+  }
+
+  inline double GetOutlineA() const
+  {
+    return outlineA;
+  }
+
 
   inline size_t GetMinPixel() const
   {
@@ -185,6 +211,8 @@ public:
 private:
   Style style;
   Mag   minMag;
+  Mag   scaleAndFadeMag;
+  Mag   maxMag;
   double size;
   double textR;
   double textG;
@@ -204,6 +232,8 @@ public:
 
   LabelStyle& SetStyle(Style style);
   LabelStyle& SetMinMag(Mag mag);
+  LabelStyle& SetScaleAndFadeMag(Mag mag);
+  LabelStyle& SetMaxMag(Mag mag);
   LabelStyle& SetSize(double size);
   LabelStyle& SetTextColor(double r, double g, double b, double a);
   LabelStyle& SetBgColor(double r, double g, double b, double a);
@@ -222,6 +252,16 @@ public:
   inline const Mag& GetMinMag() const
   {
     return minMag;
+  }
+
+  inline const Mag& GetScaleAndFadeMag() const
+  {
+    return scaleAndFadeMag;
+  }
+
+  inline const Mag& GetMaxMag() const
+  {
+    return maxMag;
   }
 
   inline double GetSize() const
@@ -380,6 +420,7 @@ private:
   std::vector<FillStyle*>   areaBuildingFillStyles;
   std::vector<SymbolStyle*> areaSymbolStyles;
   std::vector<LabelStyle*>  areaLabelStyles;
+  std::vector<LineStyle*>   areaBorderStyles;
 
   std::vector<size_t>       wayPrio;
   std::vector<size_t>       areaPrio;
@@ -405,6 +446,7 @@ public:
   StyleConfig& SetAreaBuildingFillStyle(TypeId type, const FillStyle& style);
   StyleConfig& SetAreaLabelStyle(TypeId type, const LabelStyle& style);
   StyleConfig& SetAreaSymbolStyle(TypeId type, const SymbolStyle& style);
+  StyleConfig& SetAreaBorderStyle(TypeId type, const LineStyle& style);
 
   size_t GetStyleCount() const;
 
@@ -540,6 +582,16 @@ public:
   {
     if (type<areaSymbolStyles.size()) {
       return areaSymbolStyles[type];
+    }
+    else {
+      return NULL;
+    }
+  }
+
+  const LineStyle* GetAreaBorderStyle(TypeId type) const
+  {
+    if (type<areaBorderStyles.size()) {
+      return areaBorderStyles[type];
     }
     else {
       return NULL;

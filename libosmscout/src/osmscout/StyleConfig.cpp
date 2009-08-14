@@ -25,6 +25,10 @@ LineStyle::LineStyle()
    lineG(1),
    lineB(1),
    lineA(1),
+   outlineR(0.5),
+   outlineG(0.5),
+   outlineB(0.5),
+   outlineA(0.5),
    minPixel(2),
    maxPixel(2),
    width(5),
@@ -40,12 +44,22 @@ LineStyle& LineStyle::SetStyle(Style style)
   return *this;
 }
 
-LineStyle& LineStyle::SetColor(double r, double g, double b, double a)
+LineStyle& LineStyle::SetLineColor(double r, double g, double b, double a)
 {
   lineR=r;
   lineG=g;
   lineB=b;
   lineA=a;
+
+  return *this;
+}
+
+LineStyle& LineStyle::SetOutlineColor(double r, double g, double b, double a)
+{
+  outlineR=r;
+  outlineG=g;
+  outlineB=b;
+  outlineA=a;
 
   return *this;
 }
@@ -118,6 +132,8 @@ FillStyle& FillStyle::SetColor(double r, double g, double b, double a)
 LabelStyle::LabelStyle()
  : style(none),
    minMag(magWorld),
+   scaleAndFadeMag((Mag)1000000),
+   maxMag((Mag)1000000),
    size(1),
    textR(0),
    textG(0),
@@ -145,6 +161,20 @@ LabelStyle& LabelStyle::SetStyle(Style style)
 LabelStyle& LabelStyle::SetMinMag(Mag mag)
 {
   this->minMag=mag;
+
+  return *this;
+}
+
+LabelStyle& LabelStyle::SetScaleAndFadeMag(Mag mag)
+{
+  this->scaleAndFadeMag=mag;
+
+  return *this;
+}
+
+LabelStyle& LabelStyle::SetMaxMag(Mag mag)
+{
+  this->maxMag=mag;
 
   return *this;
 }
@@ -304,6 +334,7 @@ StyleConfig& StyleConfig::SetAreaPrio(TypeId type, size_t prio)
     areaBuildingFillStyles.resize(type+1);
     areaSymbolStyles.resize(type+1);
     areaLabelStyles.resize(type+1);
+    areaBorderStyles.resize(type+1);
   }
 
   areaPrio[type]=prio;
@@ -418,6 +449,7 @@ StyleConfig& StyleConfig::SetAreaFillStyle(TypeId type, const FillStyle& style)
     areaBuildingFillStyles.resize(type+1,NULL);
     areaSymbolStyles.resize(type+1,NULL);
     areaLabelStyles.resize(type+1,NULL);
+    areaBorderStyles.resize(type+1,NULL);
   }
 
   FillStyle *f=new FillStyle();
@@ -436,6 +468,7 @@ StyleConfig& StyleConfig::SetAreaBuildingFillStyle(TypeId type, const FillStyle&
     areaBuildingFillStyles.resize(type+1,NULL);
     areaSymbolStyles.resize(type+1,NULL);
     areaLabelStyles.resize(type+1,NULL);
+    areaBorderStyles.resize(type+1,NULL);
   }
 
   FillStyle *f=new FillStyle();
@@ -454,6 +487,7 @@ StyleConfig& StyleConfig::SetAreaLabelStyle(TypeId type, const LabelStyle& style
     areaBuildingFillStyles.resize(type+1,NULL);
     areaSymbolStyles.resize(type+1,NULL);
     areaLabelStyles.resize(type+1,NULL);
+    areaBorderStyles.resize(type+1,NULL);
   }
 
   LabelStyle *l=new LabelStyle();
@@ -472,12 +506,32 @@ StyleConfig& StyleConfig::SetAreaSymbolStyle(TypeId type, const SymbolStyle& sty
     areaBuildingFillStyles.resize(type+1,NULL);
     areaSymbolStyles.resize(type+1,NULL);
     areaLabelStyles.resize(type+1,NULL);
+    areaBorderStyles.resize(type+1,NULL);
   }
 
   SymbolStyle *s=new SymbolStyle();
   *s=style;
 
   areaSymbolStyles[type]=s;
+
+  return *this;
+}
+
+StyleConfig& StyleConfig::SetAreaBorderStyle(TypeId type, const LineStyle& style)
+{
+  if (type>=areaPrio.size()) {
+    areaPrio.resize(type+1,10000); // TODO: max(size_t)
+    areaFillStyles.resize(type+1,NULL);
+    areaBuildingFillStyles.resize(type+1,NULL);
+    areaSymbolStyles.resize(type+1,NULL);
+    areaLabelStyles.resize(type+1,NULL);
+    areaBorderStyles.resize(type+1,NULL);
+  }
+
+  LineStyle *s=new LineStyle();
+  *s=style;
+
+  areaBorderStyles[type]=s;
 
   return *this;
 }

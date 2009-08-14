@@ -39,11 +39,13 @@ private:
   std::vector<bool>   outNode; // This nodes is out of the visible area
   std::vector<double> nodeX;
   std::vector<double> nodeY;
-  std::vector<double> lineWidth; // line with for this way style
-  std::vector<bool>   outline; // We draw an outline for this way style
+  std::vector<double> lineWidth; // line with for this way line style
+  std::vector<bool>   outline; // We draw an outline for this way line style
+  std::vector<double> borderWidth; // border with for this way (area) border style
 
 
   void DrawLabel(cairo_t* draw,
+                 double magnification,
                  const LabelStyle& style,
                  const std::string& text,
                  double x, double y);
@@ -56,9 +58,16 @@ private:
                         double hscale, double vscale,
                         double height);
 
-void DrawSymbol(cairo_t* draw,
-                const SymbolStyle* style,
-                double x, double y);
+  void DrawSymbol(cairo_t* draw,
+                  const SymbolStyle* style,
+                  double x, double y);
+
+  void SetLineStyle(cairo_t* draw,
+                    double lineWidth,
+                    const LineStyle& style);
+  void SetLinePatternStyle(cairo_t* draw,
+                           double lineWidth,
+                           const LineStyle& style);
 
 public:
   std::list<Way> poiWays;
