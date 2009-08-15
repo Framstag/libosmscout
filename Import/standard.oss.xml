@@ -748,10 +748,18 @@
   </area>
 
   <area key="amenity" value="post_office" prio="9">
-    <fill filter="building" color="cb4040" layer="2"/>
+    <fill filter="building" color="ffcc00" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
+
+  <node key="amenity" value="post_box" prio="11">
+    <symbol style="circle" size="4" fillColor="ffcc00" minMag="veryClose"/>
+  </node>
+
+  <node key="amenity" value="post_office" prio="11">
+    <symbol style="box" fillColor="ffcc00" minMag="veryClose"/>
+  </node>
 
   <area key="amenity" value="prison" prio="9">
     <fill filter="building" color="cb4040" layer="2"/>
@@ -1173,15 +1181,15 @@
   </node>
 
   <node key="place" value="city">
-    <label style="emphasize" minMag="stateOver" scaleAndFadeMag="region" size="1.5"/>
+    <label style="emphasize" minMag="stateOver" scaleAndFadeMag="region" maxMag="detail" size="1.5"/>
   </node>
 
   <node key="place" value="town">
-    <label style="emphasize" minMag="proximity" size="1.3"/>
+    <label style="emphasize" minMag="proximity" scaleAndFadeMag="cityOver" maxMag="detail" size="1.3"/>
   </node>
 
   <node key="place" value="village">
-    <label style="emphasize" minMag="cityOver" size="1.2"/>
+    <label style="emphasize" minMag="cityOver" scaleAndFadeMag="suburb" size="1.2"/>
   </node>
 
   <node key="place" value="hamlet">
@@ -1189,7 +1197,7 @@
   </node>
 
   <node key="place" value="suburb">
-    <label style="emphasize" minMag="suburb" size="1.2"/>
+    <label style="emphasize" minMag="city" scaleAndFadeMag="suburb" size="1.2"/>
   </node>
 
   <node key="place" value="locality">

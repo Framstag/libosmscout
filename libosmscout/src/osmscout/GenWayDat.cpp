@@ -277,18 +277,15 @@ bool GenerateWayDat(const TypeConfig& typeConfig)
           tag=rawWay.tags.erase(tag);
         }
         else if (tag->key==tagBridge) {
-          isBridge=(tag->value=="yes" || tag->value=="true" || tag->value=="1") &&
-                  !(tag->value=="no" || tag->value=="false" || tag->value=="0");
+          isBridge=!(tag->value=="no" || tag->value=="false" || tag->value=="0");
           tag=rawWay.tags.erase(tag);
         }
         else if (tag->key==tagTunnel) {
-          isTunnel=(tag->value=="yes" || tag->value=="true" || tag->value=="1") &&
-                  !(tag->value=="no" || tag->value=="false" || tag->value=="0");
+          isTunnel=!(tag->value=="no" || tag->value=="false" || tag->value=="0");
           tag=rawWay.tags.erase(tag);
         }
         else if (tag->key==tagBuilding) {
-          isBuilding=(tag->value=="yes" || tag->value=="true" || tag->value=="1") &&
-                     !(tag->value=="no" || tag->value=="false" || tag->value=="0");
+          isBuilding=!(tag->value=="no" || tag->value=="false" || tag->value=="0");
 
           tag=rawWay.tags.erase(tag);
         }
@@ -298,8 +295,7 @@ bool GenerateWayDat(const TypeConfig& typeConfig)
             reverseNodes=true;
           }
           else {
-            isOneway=(tag->value=="yes" || tag->value=="true" || tag->value=="1") &&
-                    !(tag->value=="no" || tag->value=="false" || tag->value=="0");
+            isOneway=!(tag->value=="no" || tag->value=="false" || tag->value=="0");
           }
 
           tag=rawWay.tags.erase(tag);

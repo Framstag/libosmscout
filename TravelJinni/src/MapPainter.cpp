@@ -498,18 +498,28 @@ void MapPainter::DrawSymbol(cairo_t* draw,
   case SymbolStyle::none:
     break;
   case SymbolStyle::box:
-    cairo_set_source_rgb(draw,style->GetFillR(),style->GetFillG(),style->GetFillB());
+    cairo_set_source_rgba(draw,
+                          style->GetFillR(),
+                          style->GetFillG(),
+                          style->GetFillB(),
+                          style->GetFillA());
     cairo_set_line_width(draw,1);
 
+    cairo_new_path(draw);
     cairo_rectangle(draw,
                     x-style->GetSize()/2,y-style->GetSize()/2,
                     style->GetSize(),style->GetSize());
     cairo_fill(draw);
     break;
   case SymbolStyle::circle:
-    cairo_set_source_rgb(draw,style->GetFillR(),style->GetFillG(),style->GetFillB());
+    cairo_set_source_rgba(draw,
+                          style->GetFillR(),
+                          style->GetFillG(),
+                          style->GetFillB(),
+                          style->GetFillA());
     cairo_set_line_width(draw,1);
 
+    cairo_new_path(draw);
     cairo_arc(draw,
               x,y,
               style->GetSize(),
