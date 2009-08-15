@@ -45,6 +45,8 @@
 #include <Lum/OS/Main.h>
 #include <Lum/OS/Thread.h>
 
+#include <Lum/Features.h>
+
 #include <Lum/Dialog.h>
 #include <Lum/Object.h>
 #include <Lum/Panel.h>
@@ -104,8 +106,13 @@ public:
 
   void CalcSize()
   {
+#if defined(LUM_HAVE_LIB_HILDON)
+    width=200;
+    height=200;    
+#else	  
     width=800;
     height=480;
+#endif    
 
     minWidth=width;
     minHeight=height;

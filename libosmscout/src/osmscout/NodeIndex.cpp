@@ -40,8 +40,12 @@ bool NodeIndex::LoadNodeIndex(const std::string& path)
 
   size_t intervalCount;
 
-  reader.ReadNumber(intervalSize);  // Size of an indicidual interval
+  reader.ReadNumber(intervalSize);  // Size of an individual interval
   reader.ReadNumber(intervalCount); // Number of intervals
+
+  if (reader.HasError()) {
+    return false;
+  }
 
   std::cout << intervalCount << " pages of pageSize " << intervalSize << "..." << std::endl;
 

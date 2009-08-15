@@ -143,7 +143,6 @@ void DatabaseTask::Run()
       finishedLon=currentLon;
       finishedLat=currentLat;
       finishedMagnification=currentMagnification;
-
       Lum::OS::display->QueueActionForAsyncNotification(jobFinishedAction);
 
       mutex.Unlock();
@@ -354,7 +353,11 @@ bool DatabaseTask::DrawResult(Lum::OS::Window* window,
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
-  if (finishedCairo!=NULL) {
+  if (finishedCairo==NULL) {
+    std::cout << "No map available!" << std::endl;
+    return false;
+  }
+
     double dx,dy;
 
     double lonMin,lonMax,latMin,latMax;
@@ -399,7 +402,7 @@ bool DatabaseTask::DrawResult(Lum::OS::Window* window,
 
     draw->PushClip(x,y,width,height);
 
-#if defined(HAVE_LIB_CAIRO)
+#if defined(LUM_HAVE_LIB_CAIRO)
     if (dynamic_cast<Lum::OS::Cairo::DrawInfo*>(draw)!=NULL) {
       cairo_t* cairo=dynamic_cast<Lum::OS::Cairo::DrawInfo*>(draw)->cairo;
 
@@ -433,7 +436,7 @@ bool DatabaseTask::DrawResult(Lum::OS::Window* window,
 
     }
 #endif
-#if defined(HAVE_LIB_X)
+#if defined(LUM_HAVE_LIB_X)
     if (dynamic_cast<Lum::OS::X11::DrawInfo*>(draw)!=NULL) {
       Lum::OS::X11::DrawInfo *x11Draw=dynamic_cast<Lum::OS::X11::DrawInfo*>(draw);
 
@@ -460,9 +463,6 @@ bool DatabaseTask::DrawResult(Lum::OS::Window* window,
     finishedLon==lon &&
     finishedLat==lat &&
     finishedMagnification==magnification;
-  }
-
-  return false;
 }
 
 
