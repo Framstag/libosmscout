@@ -805,7 +805,7 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   database.GetObjects(styleConfig,
                       lonMin,latMin,lonMax,latMax,
                       magnification,
-                      5000,
+                      2000,
                       nodes,
                       ways);
 

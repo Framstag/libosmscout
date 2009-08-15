@@ -64,8 +64,8 @@ Lum::Object* CitySearchDialog::GetContent()
 
   table=new Lum::Table();
   table->SetFlex(true,true);
-  table->SetMinWidth(Lum::Base::Size::stdCharWidth,25);
-  table->SetMinHeight(Lum::Base::Size::stdCharHeight,10);
+  table->SetMinWidth(Lum::Base::Size::stdCharWidth,30);
+  table->SetMinHeight(Lum::Base::Size::stdCharHeight,5);
   table->SetShowHeader(true);
   table->GetTableView()->SetAutoFitColumns(true);
   table->GetTableView()->SetAutoVSize(true);
