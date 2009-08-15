@@ -19,6 +19,8 @@
 
 #include "MapPainter.h"
 
+#include <sys/time.h>
+
 #include <cassert>
 #include <cmath>
 #include <iostream>
@@ -775,6 +777,13 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
 
   std::cout << "Showing " << lon <<", " << lat << " with magnification " << magnification << "x" << std::endl;
 
+  timeval startTime;
+  timeval dataFetchedTime;
+  timeval mapDrawnTime;
+  timeval timespan;
+
+  gettimeofday(&startTime,NULL);
+
   //
   // calculation of bounds and scaling factors
   //
@@ -810,6 +819,8 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
                       ways);
 
   std::cout << "Nodes: " << nodes.size() << " ways: " << ways.size() << std::endl;
+
+  gettimeofday(&dataFetchedTime,NULL);
 
   //
   // Setup and Precalculation
@@ -1576,11 +1587,20 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   }
   cairo_restore(draw);
 
+  gettimeofday(&mapDrawnTime,NULL);
 
   std::cout << "Nodes drawn: " << nodesDrawnCount << std::endl;
   std::cout << "Nodes out: " << nodesOutCount << std::endl;
   std::cout << "Nodes all: " << nodesAllCount << std::endl;
   std::cout << "Drawing (done)." << std::endl;
+
+  timersub(&dataFetchedTime,&startTime,&timespan);
+
+  std::cout << "Data fetched time:" << timespan.tv_sec << "." << timespan.tv_usec << std::endl;
+
+  timersub(&mapDrawnTime,&dataFetchedTime,&timespan);
+
+  std::cout << "Map drawn time:" << timespan.tv_sec << "." << timespan.tv_usec << std::endl;
 
   return true;
 }
