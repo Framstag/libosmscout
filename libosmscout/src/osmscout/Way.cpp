@@ -224,8 +224,8 @@ bool Way::Write(FileWriter& writer) const
   writer.WriteNumber(nodes.size());
 
   for (size_t i=0; i<nodes.size(); i++) {
-    unsigned long latValue=round((nodes[i].lat+180.0)*conversionFactor);
-    unsigned long lonValue=round((nodes[i].lon+90.0)*conversionFactor);
+    unsigned long latValue=(unsigned long)round((nodes[i].lat+180.0)*conversionFactor);
+    unsigned long lonValue=(unsigned long)round((nodes[i].lon+90.0)*conversionFactor);
 
     writer.Write(nodes[i].id);
     writer.Write(latValue);

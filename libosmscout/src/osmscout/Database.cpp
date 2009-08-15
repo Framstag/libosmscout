@@ -193,7 +193,7 @@ size_t Database::GetMaximumPriority(const StyleConfig& styleConfig,
   std::cout << "One tile area: " << GetTileWidth()*GetTileHeight() << std::endl;
   std::cout << "Tile area: " << tileArea << std::endl;
   std::cout << "Max nodes: " << maxNodes << std::endl;
-  effectiveNodes=maxNodes*(tileArea/realArea);
+  effectiveNodes=(size_t)maxNodes*(tileArea/realArea);
   std::cout << "Effective max nodes: " << effectiveNodes << std::endl;
 
   size_t           iterations=0;
@@ -871,9 +871,9 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
   std::map<Id,Way>    wayCache; // Does not gain much performance since we are caching in database, too
   std::map<Id,Follower> candidatesCache;
   Way                 currentWay;
-  double              startLon,startLat;
+  double              startLon=0.0L,startLat=0.0L;
   Way                 targetWay;
-  double              targetLon,targetLat;
+  double              targetLon=0.0L,targetLat=0.0L;
   OpenList            openList;
   std::map<Id,RNodeRef> openMap;
   std::map<Id,RNode>  closeMap;
@@ -1247,7 +1247,7 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
       }
 
       route.AddEntry(startWayId,startNodeId);
-      for (std::list<RouteStep>::const_reverse_iterator step=steps.rbegin();
+      for (std::list<RouteStep>::reverse_iterator step=steps.rbegin();
            step!=steps.rend();
            ++step) {
         route.AddEntry(step->wayId,step->nodeId);

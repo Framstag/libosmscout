@@ -116,22 +116,22 @@ public:
   }
 
 
-  inline size_t GetMinPixel() const
+  inline double GetMinPixel() const
   {
     return minPixel;
   }
 
-  inline size_t GetMaxPixel() const
+  inline double GetMaxPixel() const
   {
     return maxPixel;
   }
 
-  inline size_t GetWidth() const
+  inline double GetWidth() const
   {
     return width;
   }
 
-  inline size_t GetOutline() const
+  inline double GetOutline() const
   {
     return outline;
   }

@@ -26,11 +26,15 @@
 
 #include <osmscout/StyleConfigLoader.h>
 
+#include <Lum/Features.h>
+
 #include <Lum/Base/String.h>
 
+#if defined(HAVE_LIB_CAIRO)
 #include <Lum/OS/Cairo/Bitmap.h>
 #include <Lum/OS/Cairo/Display.h>
 #include <Lum/OS/Cairo/DrawInfo.h>
+#endif
 
 #include <Lum/OS/X11/DrawInfo.h>
 #include <Lum/OS/X11/Display.h>
@@ -395,6 +399,7 @@ bool DatabaseTask::DrawResult(Lum::OS::Window* window,
 
     draw->PushClip(x,y,width,height);
 
+#if defined(HAVE_LIB_CAIRO)
     if (dynamic_cast<Lum::OS::Cairo::DrawInfo*>(draw)!=NULL) {
       cairo_t* cairo=dynamic_cast<Lum::OS::Cairo::DrawInfo*>(draw)->cairo;
 
@@ -427,7 +432,9 @@ bool DatabaseTask::DrawResult(Lum::OS::Window* window,
       cairo_restore(cairo);
 
     }
-    else if (dynamic_cast<Lum::OS::X11::DrawInfo*>(draw)!=NULL) {
+#endif
+#if defined(HAVE_LIB_X)
+    if (dynamic_cast<Lum::OS::X11::DrawInfo*>(draw)!=NULL) {
       Lum::OS::X11::DrawInfo *x11Draw=dynamic_cast<Lum::OS::X11::DrawInfo*>(draw);
 
       cairo_surface_t *surface=cairo_xlib_surface_create(x11Draw->display,
@@ -444,6 +451,7 @@ bool DatabaseTask::DrawResult(Lum::OS::Window* window,
       cairo_destroy(cairo),
       cairo_surface_destroy(surface);
     }
+#endif
 
     draw->PopClip();
 
@@ -453,9 +461,8 @@ bool DatabaseTask::DrawResult(Lum::OS::Window* window,
     finishedLat==lat &&
     finishedMagnification==magnification;
   }
-  else {
-    return false;
-  }
+
+  return false;
 }
 
 

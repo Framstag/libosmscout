@@ -35,17 +35,17 @@ double GetTileHeight()
 
 size_t GetTileX(double lon)
 {
-  return ceil((lon+180)*tileDiv);
+  return (size_t)ceil((lon+180)*tileDiv);
 }
 
 size_t GetTileY(double lat)
 {
-  return ceil((lat+90)*tileDiv);
+  return (size_t)ceil((lat+90)*tileDiv);
 }
 
 TileId GetTileId(size_t x, size_t y)
 {
-  return y*360*tileDiv+x;
+  return (size_t)y*360*tileDiv+x;
 }
 
 TileId GetTileId(double lon, double lat)

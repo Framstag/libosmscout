@@ -87,8 +87,8 @@ bool Node::Read(FileScanner& scanner)
 
 bool Node::Write(FileWriter& writer) const
 {
-  uint32_t latValue=round((lat+180.0)*conversionFactor);
-  uint32_t lonValue=round((lon+90.0)*conversionFactor);
+  uint32_t latValue=(uint32_t)round((lat+180.0)*conversionFactor);
+  uint32_t lonValue=(uint32_t)round((lon+90.0)*conversionFactor);
 
   writer.Write(id);
   writer.WriteNumber(type);
