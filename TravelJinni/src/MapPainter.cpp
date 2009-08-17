@@ -24,6 +24,7 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
+#include <iomanip>
 #include <list>
 #include <cstdlib>
 
@@ -1589,18 +1590,16 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
 
   gettimeofday(&mapDrawnTime,NULL);
 
-  std::cout << "Nodes drawn: " << nodesDrawnCount << std::endl;
-  std::cout << "Nodes out: " << nodesOutCount << std::endl;
-  std::cout << "Nodes all: " << nodesAllCount << std::endl;
+  std::cout << "Nodes drawn: " << nodesDrawnCount << "/" << nodesAllCount << " (" << nodesOutCount << " out)" << std::endl;
   std::cout << "Drawing (done)." << std::endl;
 
   timersub(&dataFetchedTime,&startTime,&timespan);
 
-  std::cout << "Data fetched time:" << timespan.tv_sec << "." << timespan.tv_usec << std::endl;
+  std::cout << "Data fetched time:" << timespan.tv_sec << "." << std::setw(6) << std::setfill('0') << timespan.tv_usec << std::endl;
 
   timersub(&mapDrawnTime,&dataFetchedTime,&timespan);
 
-  std::cout << "Map drawn time:" << timespan.tv_sec << "." << timespan.tv_usec << std::endl;
+  std::cout << "Map drawn time:" << timespan.tv_sec << "." << std::setw(6) << std::setfill('0') << timespan.tv_usec << std::endl;
 
   return true;
 }

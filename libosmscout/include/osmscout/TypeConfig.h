@@ -48,24 +48,26 @@ enum Mag {
  magVeryClose = 2*2*2*2*2*1024  // 15
 };
 
-const static TagId tagIgnore      = 32000;
-const static TagId tagName        = 32001;
-const static TagId tagRef         = 32002;
-const static TagId tagOneway      = 32003;
-const static TagId tagBridge      = 32004;
-const static TagId tagTunnel      = 32005;
-const static TagId tagLayer       = 32006;
-const static TagId tagBuilding    = 32007;
-const static TagId tagPlace       = 32008;
-const static TagId tagPlaceName   = 32009;
-const static TagId tagBoundary    = 32010;
-const static TagId tagAdminLevel  = 32011;
-const static TagId tagHighway     = 32012;
-const static TagId tagRestriction = 32013;
-const static TagId tagInternal    = 32014;
+const static TagId tagPrivateBase   = 5000;
+const static TagId tagIgnore        = tagPrivateBase+ 0;
+const static TagId tagName          = tagPrivateBase+ 1;
+const static TagId tagRef           = tagPrivateBase+ 2;
+const static TagId tagOneway        = tagPrivateBase+ 3;
+const static TagId tagBridge        = tagPrivateBase+ 4;
+const static TagId tagTunnel        = tagPrivateBase+ 5;
+const static TagId tagLayer         = tagPrivateBase+ 6;
+const static TagId tagBuilding      = tagPrivateBase+ 7;
+const static TagId tagPlace         = tagPrivateBase+ 8;
+const static TagId tagPlaceName     = tagPrivateBase+ 9;
+const static TagId tagBoundary      = tagPrivateBase+10;
+const static TagId tagAdminLevel    = tagPrivateBase+11;
+const static TagId tagHighway       = tagPrivateBase+12;
+const static TagId tagRestriction   = tagPrivateBase+13;
+const static TagId tagInternal      = tagPrivateBase+14;
 
-const static TypeId typeIgnore    = 32000;
-const static TypeId typeRoute     = 32001;
+const static TypeId typePrivateBase = 5000;
+const static TypeId typeIgnore      = typePrivateBase+0;
+const static TypeId typeRoute       = typePrivateBase+1;
 
 class TagInfo
 {
@@ -189,6 +191,8 @@ private:
   std::list<TagInfo>                              tags;
   std::list<TypeInfo>                             types;
 
+  TypeId                                          maxTypeId;
+
   std::map<std::string,TagInfo>                   stringToTagMap;
   std::map<TagId,std::map<std::string,TypeInfo> > tagToTypeMap;
 
@@ -196,6 +200,8 @@ public:
   TypeConfig();
   TypeConfig& AddTagInfo(const TagInfo& tagInfo);
   TypeConfig& AddTypeInfo(const TypeInfo& typeInfo);
+
+  TypeId GetMaxTypeId() const;
 
   TagId GetTagId(const char* name) const;
 

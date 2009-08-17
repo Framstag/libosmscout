@@ -950,5 +950,7 @@ bool LoadStyleConfig(const char* styleFile,
 
   xmlSAXUserParseFile(&saxParser,&parser,styleFile);
 
+  styleConfig.Postprocess();
+
   return true;
 }

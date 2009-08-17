@@ -424,10 +424,13 @@ private:
 
   std::vector<size_t>       wayPrio;
   std::vector<size_t>       areaPrio;
+  std::vector<size_t>       priorities;
 
 public:
   StyleConfig(TypeConfig* typeConfig);
   virtual ~StyleConfig();
+
+  void Postprocess();
 
   TypeConfig* GetTypeConfig() const;
 
@@ -450,12 +453,10 @@ public:
 
   size_t GetStyleCount() const;
 
-  void GetAreaTypesWithPrio(size_t prio, std::set<TypeId>& types) const;
-  void GetAreaTypesWithMaxPrio(size_t prio, std::set<TypeId>& types) const;
   void GetWayTypesWithPrio(size_t prio, std::set<TypeId>& types) const;
   void GetWayTypesWithMaxPrio(size_t prio, std::set<TypeId>& types) const;
   void GetNodeTypesWithMag(double mag, std::set<TypeId>& types) const;
-  void GetPriorities(std::set<size_t>& priorities) const;
+  void GetPriorities(std::vector<size_t>& priorities) const;
 
   bool IsWayVisible(TypeId type, size_t prio) const
   {

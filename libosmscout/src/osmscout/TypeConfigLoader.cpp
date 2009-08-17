@@ -126,6 +126,11 @@ public:
         return;
       }
 
+      if (id>=tagPrivateBase) {
+        std::cerr << "Tag '" << value << "' has id in illegal range (must be <" << tagPrivateBase << ")!" << std::endl;
+        return;
+      }
+
       TagInfo tagInfo(value,id);
 
       config.AddTagInfo(tagInfo);
@@ -204,7 +209,12 @@ public:
       TagId tag=config.GetTagId((const char*)nameValue);
 
       if (tag==tagIgnore) {
-        std::cerr << "Type with tag '" << nameValue << "' has no corresponding tag definition, skipping!" << std::endl;
+        std::cerr << "Type with tag '" << nameValue <<"/" << valueValue << "' has no corresponding tag definition, skipping!" << std::endl;
+        return;
+      }
+
+      if (id>=typePrivateBase) {
+        std::cerr << "Type '" << nameValue << "/" << valueValue << "' has id in illegal range (must be <" << typePrivateBase << ")!" << std::endl;
         return;
       }
 

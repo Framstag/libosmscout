@@ -176,22 +176,22 @@
     <ref style="plate"  textColor="ffffff" bgColor="e46d71" borderColor="ffffff" minMag="detail"/>
   </node>
 
-  <way key="railway" value="rail" prio="100">
+  <way key="railway" value="rail" prio="20">
     <line color="b3b3b3" minPixel="1" maxPixel="2" width="5" />
     <label style="contour" minMag="close"/>
   </way>
 
-  <way key="railway" value="tram" prio="100">
+  <way key="railway" value="tram" prio="20">
     <line color="444444" minPixel="1" maxPixel="2" width="5" />
     <label style="contour" minMag="close"/>
   </way>
 
-  <way key="railway" value="light_rail" prio="100">
+  <way key="railway" value="light_rail" prio="20">
     <line color="b3b3b3" minPixel="1" maxPixel="2" width="5" />
     <label style="contour" minMag="close"/>
   </way>
 
-  <way key="railway" value="subway" prio="100">
+  <way key="railway" value="subway" prio="20">
     <line style="longDash"
           outlineColor="ffffff80" color="b3b3b3"
           minPixel="1" maxPixel="2" width="5"
@@ -223,7 +223,7 @@
     <symbol style="box" fillColor="7885b0" minMag="close"/>
   </node>
 
-  <way key="waterway" value="stream" prio="100">
+  <way key="waterway" value="stream" prio="20">
     <line color="b5d0d0" minPixel="1" maxPixel="2" width="2" />
     <label style="contour" minMag="close"/>
   </way>
@@ -428,32 +428,32 @@
     <label minMag="region"/>
   </area>
 
-  <area key="aeroway" value="aerodrome" prio="100">
+  <area key="aeroway" value="aerodrome" prio="20">
     <fill color="d5ddbd"/>
     <label minMag="detail"/>
   </area>
 
-  <area key="aeroway" value="terminal" prio="100">
+  <area key="aeroway" value="terminal" prio="20">
     <fill color="d5ddbd"/>
     <label minMag="detail"/>
   </area>
 
-  <area key="aeroway" value="helipad" prio="100">
+  <area key="aeroway" value="helipad" prio="20">
     <fill color="d5ddbd"/>
     <label minMag="detail"/>
   </area>
 
-  <way key="aeroway" value="runway" prio="100">
+  <way key="aeroway" value="runway" prio="20">
     <line color="d5ddbd" minPixel="2" maxPixel="20" width="5" />
     <label style="contour" minMag="close"/>
   </way>
 
-  <way key="aeroway" value="taxiway" prio="100">
+  <way key="aeroway" value="taxiway" prio="20">
     <line color="d5ddbd" minPixel="2" maxPixel="20" width="5" />
     <label style="contour" minMag="close"/>
   </way>
 
-  <area key="aeroway" value="apron" prio="100">
+  <area key="aeroway" value="apron" prio="20">
     <fill color="d5ddbd"/>
     <label minMag="detail"/>
   </area>
@@ -1150,12 +1150,12 @@
     <label minMag="city"/>
   </area>
 
-  <area key="building" value="yes" prio="100">
+  <area key="building" value="yes" prio="20">
     <fill color="cc9999" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="building" value="true" prio="100">
+  <area key="building" value="true" prio="20">
     <fill color="cc9999" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>

@@ -307,6 +307,57 @@ StyleConfig::~StyleConfig()
   }
 }
 
+void StyleConfig::Postprocess()
+{
+  std::set<size_t > prios;
+  priorities.clear();
+
+  for (size_t i=0; i<areaFillStyles.size() && i<areaPrio.size(); i++) {
+    if (areaFillStyles[i]!=NULL || areaBuildingFillStyles[i]!=NULL) {
+      prios.insert(areaPrio[i]);
+    }
+  }
+
+  for (size_t i=0; i<wayLineStyles.size() && i<wayPrio.size(); i++) {
+    if (wayLineStyles[i]!=NULL) {
+      prios.insert(wayPrio[i]);
+    }
+  }
+
+  priorities.reserve(prios.size());
+  for (std::set<size_t>::const_iterator prio=prios.begin();
+       prio!=prios.end();
+       ++prio) {
+    priorities.push_back(*prio);
+  }
+
+  std::set<Mag> magnifications;
+  for (size_t i=0; i<nodeSymbolStyles.size(); i++) {
+    if (nodeLabelStyles[i]!=NULL) {
+      magnifications.insert(nodeLabelStyles[i]->GetMinMag());
+    }
+
+    if (nodeSymbolStyles[i]!=NULL) {
+      magnifications.insert(nodeSymbolStyles[i]->GetMinMag());
+    }
+  }
+
+  std::map<Mag,std::set<TypeId> > nodeTypesByMag;
+
+  for (std::set<Mag>::const_iterator mag=magnifications.begin();
+       mag!=magnifications.end();
+       ++mag) {
+    for (size_t i=0; i<nodeSymbolStyles.size() || i<nodeLabelStyles.size(); i++) {
+      if (nodeLabelStyles[i]!=NULL && *mag>=nodeLabelStyles[i]->GetMinMag()) {
+        nodeTypesByMag[*mag].insert(i);
+      }
+      if (nodeSymbolStyles[i]!=NULL && *mag>=nodeSymbolStyles[i]->GetMinMag()) {
+        nodeTypesByMag[*mag].insert(i);
+      }
+    }
+  }
+}
+
 TypeConfig* StyleConfig::GetTypeConfig() const
 {
   return typeConfig;
@@ -315,7 +366,7 @@ TypeConfig* StyleConfig::GetTypeConfig() const
 StyleConfig& StyleConfig::SetWayPrio(TypeId type, size_t prio)
 {
   if (type>=wayPrio.size()) {
-    wayPrio.resize(type+1,10000); // TODO: max(size_t)
+    wayPrio.resize(type+1);
     wayLineStyles.resize(type+1);
     wayRefLabelStyles.resize(type+1);
     wayNameLabelStyles.resize(type+1);
@@ -329,7 +380,7 @@ StyleConfig& StyleConfig::SetWayPrio(TypeId type, size_t prio)
 StyleConfig& StyleConfig::SetAreaPrio(TypeId type, size_t prio)
 {
   if (type>=areaPrio.size()) {
-    areaPrio.resize(type+1,10000); // TODO: max(size_t)
+    areaPrio.resize(type+1);
     areaFillStyles.resize(type+1);
     areaBuildingFillStyles.resize(type+1);
     areaSymbolStyles.resize(type+1);
@@ -547,7 +598,7 @@ size_t StyleConfig::GetStyleCount() const
   return result;
 }
 
-void StyleConfig::GetAreaTypesWithPrio(size_t prio, std::set<TypeId>& types) const
+void StyleConfig::GetWayTypesWithPrio(size_t prio, std::set<TypeId>& types) const
 {
   for (size_t i=0; i<areaFillStyles.size() && i<areaPrio.size(); i++) {
     if ((areaFillStyles[i]!=NULL && areaPrio[i]==prio) ||
@@ -555,20 +606,7 @@ void StyleConfig::GetAreaTypesWithPrio(size_t prio, std::set<TypeId>& types) con
       types.insert(i);
     }
   }
-}
 
-void StyleConfig::GetAreaTypesWithMaxPrio(size_t prio, std::set<TypeId>& types) const
-{
-  for (size_t i=0; i<areaFillStyles.size() && i<areaPrio.size(); i++) {
-    if ((areaFillStyles[i]!=NULL && areaPrio[i]<=prio) ||
-        (areaBuildingFillStyles[i]!=NULL && areaPrio[i]<=prio)) {
-      types.insert(i);
-    }
-  }
-}
-
-void StyleConfig::GetWayTypesWithPrio(size_t prio, std::set<TypeId>& types) const
-{
   for (size_t i=0; i<wayLineStyles.size() && i<wayPrio.size(); i++) {
     if (wayLineStyles[i]!=NULL && wayPrio[i]==prio) {
       types.insert(i);
@@ -578,6 +616,13 @@ void StyleConfig::GetWayTypesWithPrio(size_t prio, std::set<TypeId>& types) cons
 
 void StyleConfig::GetWayTypesWithMaxPrio(size_t prio, std::set<TypeId>& types) const
 {
+  for (size_t i=0; i<areaFillStyles.size() && i<areaPrio.size(); i++) {
+    if ((areaFillStyles[i]!=NULL && areaPrio[i]<=prio) ||
+        (areaBuildingFillStyles[i]!=NULL && areaPrio[i]<=prio)) {
+      types.insert(i);
+    }
+  }
+
   for (size_t i=0; i<wayLineStyles.size() && i<wayPrio.size(); i++) {
     if (wayLineStyles[i]!=NULL && wayPrio[i]<=prio) {
       types.insert(i);
@@ -587,7 +632,7 @@ void StyleConfig::GetWayTypesWithMaxPrio(size_t prio, std::set<TypeId>& types) c
 
 void StyleConfig::GetNodeTypesWithMag(double mag, std::set<TypeId>& types) const
 {
-  for (size_t i=0; i<nodeSymbolStyles.size() || i<nodeLabelStyles.size(); i++) {
+  for (size_t i=0; i<nodeSymbolStyles.size(); i++) {
     if (nodeLabelStyles[i]!=NULL && mag>=nodeLabelStyles[i]->GetMinMag()) {
       types.insert(i);
     }
@@ -597,18 +642,14 @@ void StyleConfig::GetNodeTypesWithMag(double mag, std::set<TypeId>& types) const
   }
 }
 
-void StyleConfig::GetPriorities(std::set<size_t>& priorities) const
-{
-  for (size_t i=0; i<areaFillStyles.size() && i<areaPrio.size(); i++) {
-    if (areaFillStyles[i]!=NULL || areaBuildingFillStyles[i]!=NULL) {
-      priorities.insert(areaPrio[i]);
-    }
-  }
+/**
+  Returns a sorted array (high priority with low numerical value to low priority with
+  high numerical value) of used priorities.
 
-  for (size_t i=0; i<wayLineStyles.size() && i<wayPrio.size(); i++) {
-    if (wayLineStyles[i]!=NULL) {
-      priorities.insert(wayPrio[i]);
-    }
-  }
+  Example: [1,2,3,4,5,6,7,8,9,10,11,20]
+  */
+void StyleConfig::GetPriorities(std::vector<size_t>& priorities) const
+{
+  priorities=this->priorities;
 }
 

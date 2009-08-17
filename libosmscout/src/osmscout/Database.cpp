@@ -177,9 +177,9 @@ size_t Database::GetMaximumPriority(const StyleConfig& styleConfig,
                                     double magnification,
                                     size_t maxNodes) const
 {
-  size_t           effectiveNodes;
-  std::set<size_t> priorities;
-  size_t           maxPriority=0;
+  size_t              effectiveNodes;
+  std::vector<size_t> priorities;
+  size_t              maxPriority=0;
 
   double realArea=(maxlon-minlon)*(maxlat-minlat);
   double tileArea=(GetTileY(maxlat)-GetTileY(minlat)+1)*
@@ -187,16 +187,13 @@ size_t Database::GetMaximumPriority(const StyleConfig& styleConfig,
                   (GetTileWidth()*GetTileHeight());
 
 
-  std::cout << "Real region: " << maxlon-minlon << "x" << maxlat-minlat << std::endl;
-  std::cout << "Real area: " << realArea << std::endl;
-  std::cout << "Number of tiles: " << (GetTileY(maxlat)-GetTileY(minlat)+1)*(GetTileX(maxlon)-GetTileX(minlon)+1) << std::endl;
-  std::cout << "One tile area: " << GetTileWidth()*GetTileHeight() << std::endl;
-  std::cout << "Tile area: " << tileArea << std::endl;
-  std::cout << "Max nodes: " << maxNodes << std::endl;
+  std::cout << "Real region: " << maxlon-minlon << "x" << maxlat-minlat << " = " << realArea << std::endl;
+  std::cout << "Tile area: " << tileArea << ", with one tile " << GetTileWidth()*GetTileHeight();
+  std::cout << " => " << (GetTileY(maxlat)-GetTileY(minlat)+1)*(GetTileX(maxlon)-GetTileX(minlon)+1) << " tiles " << std::endl;
   effectiveNodes=(size_t)maxNodes*(tileArea/realArea);
-  std::cout << "Effective max nodes: " << effectiveNodes << std::endl;
+  std::cout << "Nodes: " << maxNodes << ", effective => " << effectiveNodes << std::endl;
 
-  size_t           iterations=0;
+  size_t           optional=false; // if true, we are not required to ftech and add more nodes...
   size_t           nodes=0;
   std::set<TypeId> drawTypes;
 
@@ -216,13 +213,10 @@ size_t Database::GetMaximumPriority(const StyleConfig& styleConfig,
 
   // Number of way and area nodes is dependend on the priority
 
-  for (std::set<size_t>::const_iterator priority=priorities.begin();
-       priority!=priorities.end();
-       ++priority) {
-    iterations++;
+  for (size_t priority=0; priority<priorities.size(); priority++) {
+    optional=true;
     drawTypes.clear();
 
-    styleConfig.GetAreaTypesWithPrio(maxPriority,drawTypes);
     styleConfig.GetWayTypesWithPrio(maxPriority,drawTypes);
 
     size_t newNodes=0;
@@ -235,11 +229,11 @@ size_t Database::GetMaximumPriority(const StyleConfig& styleConfig,
                                       GetTileX(maxlon),GetTileY(maxlat));
     }
 
-    if (iterations>1 && nodes+newNodes>=effectiveNodes) {
+    if (optional && nodes+newNodes>=effectiveNodes) {
       break;
     }
 
-    maxPriority=*priority;
+    maxPriority=priorities[priority];
     nodes+=newNodes;
   }
 
@@ -361,8 +355,7 @@ bool Database::GetWays(const StyleConfig& styleConfig,
     }
   }
 
-  std::cout << "Ways scanned: " << wayAllCount << std::endl;
-  std::cout << "Ways selected: " << waySelectedCount << std::endl;
+  std::cout << "Ways scanned: " << wayAllCount << " selected: " << waySelectedCount << std::endl;
   std::cout << "Maximum nodes per way: " << maxNodesCount << std::endl;
   std::cout << "Way cache: " << cacheCount << " disk: " << diskCount << " cache size: " << wayCache.GetSize() << std::endl;
 
@@ -463,8 +456,7 @@ bool Database::GetNodes(const StyleConfig& styleConfig,
     }
   }
 
-  std::cout << "Nodes scanned: " << nodeAllCount << std::endl;
-  std::cout << "Nodes selected: " << nodeSelectedCount << std::endl;
+  std::cout << "Nodes scanned: " << nodeAllCount << " selected: " << nodeSelectedCount << std::endl;
   std::cout << "Node cache: " << cacheCount << " disk: " << diskCount << " cache size: " << nodeCache.GetSize() << std::endl;
 
   return true;

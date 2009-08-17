@@ -49,6 +49,7 @@ TypeInfo::TypeInfo(TypeId id,
 }
 
 TypeConfig::TypeConfig()
+ : maxTypeId(0)
 {
   AddTagInfo(TagInfo("ignore",tagIgnore));
   AddTagInfo(TagInfo("name",tagName));
@@ -79,11 +80,18 @@ TypeConfig& TypeConfig::AddTagInfo(const TagInfo& tagInfo)
 
 TypeConfig& TypeConfig::AddTypeInfo(const TypeInfo& typeInfo)
 {
+  maxTypeId=std::max(maxTypeId,typeInfo.GetId());
+
   types.push_back(typeInfo);
 
   tagToTypeMap[typeInfo.GetTag()][typeInfo.GetTagValue()]=typeInfo;
 
   return *this;
+}
+
+TypeId TypeConfig::GetMaxTypeId() const
+{
+  return maxTypeId;
 }
 
 TagId TypeConfig::GetTagId(const char* name) const

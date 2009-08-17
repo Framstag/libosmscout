@@ -84,15 +84,14 @@ size_t AreaWayIndex::GetNodes(TypeId drawType,
 
   if (drawTypeEntry!=areaWayIndex.end()) {
     for (size_t y=tileMinY; y<=tileMaxY; y++) {
-      for (size_t x=tileMinX; x<=tileMaxX; x++) {
-        std::map<TileId,IndexEntry>::const_iterator tile;
-        TileId                                      tileId=GetTileId(x,y);
+      TileId                                      startTileId=GetTileId(tileMinX,y);
+      TileId                                      endTileId=GetTileId(tileMaxX,y);
+      std::map<TileId,IndexEntry>::const_iterator tile=drawTypeEntry->second.lower_bound(startTileId);
 
-        tile=drawTypeEntry->second.find(tileId);
+      while (tile->first<=endTileId && tile!=drawTypeEntry->second.end()) {
+        nodes+=tile->second.nodeCount;
 
-        if (tile!=drawTypeEntry->second.end()) {
-          nodes+=tile->second.nodeCount;
-        }
+        ++tile;
       }
     }
   }
@@ -110,7 +109,6 @@ void AreaWayIndex::GetPages(const StyleConfig& styleConfig,
   std::set<TypeId> types;
 
   styleConfig.GetWayTypesWithMaxPrio(maxPriority,types);
-  styleConfig.GetAreaTypesWithMaxPrio(maxPriority,types);
 
   size_t minTileX=GetTileX(minlon);
   size_t maxTileX=GetTileX(maxlon);
@@ -127,17 +125,16 @@ void AreaWayIndex::GetPages(const StyleConfig& styleConfig,
 
     if (typeEntry!=areaWayIndex.end()) {
       for (size_t y=minTileY; y<=maxTileY; y++) {
-        for (size_t x=minTileX; x<=maxTileX; x++) {
-          std::map<TileId,IndexEntry>::const_iterator tile;
-          TileId                                      tileId=GetTileId(x,y);
+        TileId                                      startTileId=GetTileId(minTileX,y);
+        TileId                                      endTileId=GetTileId(maxTileX,y);
+        std::map<TileId,IndexEntry>::const_iterator tile=typeEntry->second.lower_bound(startTileId);
 
-          tile=typeEntry->second.find(tileId);
-
-          if (tile!=typeEntry->second.end()) {
-            for (size_t j=0; j<tile->second.pages.size(); j++) {
-              pages.insert(tile->second.pages[j]);
-            }
+        while (tile->first<=endTileId && tile!=typeEntry->second.end()) {
+          for (size_t j=0; j<tile->second.pages.size(); j++) {
+            pages.insert(tile->second.pages[j]);
           }
+
+          ++tile;
         }
       }
     }
