@@ -278,7 +278,7 @@
     <label minMag="detail"/>
   </area>
 
-  <area key="landuse" value="forest" prio="5">
+  <area key="landuse" value="forest" prio="2">
     <fill color="8dc56c" layer="1"/>
     <label style="emphasize" minMag="city"/>
   </area>

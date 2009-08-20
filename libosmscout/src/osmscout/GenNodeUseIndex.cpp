@@ -27,7 +27,7 @@
 #include <osmscout/RawNode.h>
 #include <osmscout/Way.h>
 
-static size_t distributionGranuality =  1000000;
+static size_t distributionGranuality = 1000000;
 static size_t nodesLoadSize          = 1000000;
 
 bool GenerateNodeUseIndex(const TypeConfig& typeConfig, size_t intervalSize)
@@ -219,7 +219,7 @@ bool GenerateNodeUseIndex(const TypeConfig& typeConfig, size_t intervalSize)
          id!=wayWayMap.end() && id->first<(i+1)*intervalSize;
          ++id) {
       writer.Write(id->first);          // The id of the way/area
-      writer.Write(id->second.size());  // The number of references
+      writer.WriteNumber(id->second.size());  // The number of references
 
       for (std::set<Id>::const_iterator ref=id->second.begin();
            ref!=id->second.end();

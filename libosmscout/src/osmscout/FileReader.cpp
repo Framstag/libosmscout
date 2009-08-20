@@ -215,13 +215,14 @@ bool FileReader::Read(std::string& value)
     return false;
   }
 
-  value.clear();
+  size_t start=offset;
 
   while (offset<size && buffer[offset]!='\0') {
-    value.append(1,buffer[offset]);
-
     offset++;
   }
+
+  value.assign(&buffer[start],offset-start);
+
   offset++;
 
   return true;

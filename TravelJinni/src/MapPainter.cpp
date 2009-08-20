@@ -815,9 +815,53 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   database.GetObjects(styleConfig,
                       lonMin,latMin,lonMax,latMax,
                       magnification,
-                      2000,
+                      50000,
                       nodes,
                       ways);
+
+  {
+    std::list<Node> nodes;
+    std::list<Way>  ways;
+
+    timeval s,e,d;
+
+    gettimeofday(&s,NULL);
+
+    database.GetObjects(styleConfig,
+                        lonMin,latMin,lonMax,latMax,
+                        magnification,
+                        50000,
+                        nodes,
+                        ways);
+
+    gettimeofday(&e,NULL);
+
+    timersub(&e,&s,&d);
+
+    std::cout << "*** Cache copy: " << d.tv_sec << "." << std::setw(6) << std::setfill('0') << d.tv_usec << std::endl;
+  }
+
+  {
+    std::list<Database::NodeRef> nodes;
+    std::list<Database::WayRef>  ways;
+
+    timeval s,e,d;
+
+    gettimeofday(&s,NULL);
+
+    database.GetObjects(styleConfig,
+                        lonMin,latMin,lonMax,latMax,
+                        magnification,
+                        50000,
+                        nodes,
+                        ways);
+
+    gettimeofday(&e,NULL);
+
+    timersub(&e,&s,&d);
+
+    std::cout << "*** Cache reference: " << d.tv_sec << "." << std::setw(6) << std::setfill('0') << d.tv_usec << std::endl;
+  }
 
   std::cout << "Nodes: " << nodes.size() << " ways: " << ways.size() << std::endl;
 

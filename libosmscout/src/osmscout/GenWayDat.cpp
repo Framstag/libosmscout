@@ -28,8 +28,8 @@
 #include <osmscout/RawWay.h>
 #include <osmscout/Way.h>
 
-static size_t distributionGranuality = 1000000;
-static size_t waysLoadSize           = 1000000;
+static size_t distributionGranuality = 100000;
+static size_t waysLoadSize           = 250000;
 
 bool GenerateWayDat(const TypeConfig& typeConfig)
 {

@@ -20,10 +20,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <cassert>
 #include <iostream>
 #include <list>
 #include <map>
 
+/**
+  Generic FIFO cache implementation with O(n log n) semantic.
+ */
 template <class K, class V>
 class Cache
 {
@@ -60,6 +64,10 @@ private:
   std::map<K,CacheRef>  map;
 
 private:
+  /**
+    Clear the cache deleting the oldest cache entries
+    until it has the given max size.
+    */
   void StripCache()
   {
     while (order.size()>maxSize) {
@@ -77,25 +85,59 @@ private:
   }
 
 public:
+  /**
+   Create a new cache object with the given max size.
+    */
   Cache(size_t maxSize)
    : maxSize(maxSize)
   {
-    // no code
+    assert(maxSize>0);
   }
 
-  bool GetEntry(const K& key, CacheRef& reference) const
+  /**
+    Getting the value witht he given key from cache.
+
+    If there is no valued stored with the given key, false will be
+    returned and the reference will be untouched.
+
+    If there is a value with the given key, reference will return
+    a reference to the value and the value will move to the
+    from position of the cache to assure FIFO behaviour.
+    */
+  bool GetEntry(const K& key, CacheRef& reference)
   {
-    typename std::map<K,CacheRef>::const_iterator iter=map.find(key);
+    typename std::map<K,CacheRef>::iterator iter=map.find(key);
 
     if (iter==map.end()) {
       return false;
     }
+
+    CacheRef next=iter->second;
+
+    next++;
+
+    // Place key/value to the start of the order list
+    order.insert(order.begin(),iter->second,next);
+
+    // Erase the entry from its current order list position
+    order.erase(iter->second);
+
+
+    // Update the map with the new iterator into the order list
+    iter->second=order.begin();
 
     reference=iter->second;
 
     return true;
   }
 
+  /**
+    Set or update the cache witht he given value for the given key.
+
+    If the key is not available in the cache the value will be added
+    to the front of the cache (FIFO semantic) else the value will be updated
+    (also moving it to the front of the cache (FIFO again).
+    */
   typename Cache::CacheRef SetEntry(const CacheEntry& entry)
   {
     typename std::map<K,CacheRef>::iterator iter=map.find(entry.key);
@@ -127,24 +169,39 @@ public:
     return order.begin();
   }
 
+  /**
+    Set a new cache max size, possible striping the oldest entries
+    from cache if the new size is smaller than the old one.
+    */
   void SetMaxSize(size_t maxSize)
   {
+    assert(maxSize>0);
+
     this->maxSize=maxSize;
 
     StripCache();
   }
 
+  /**
+    Completely flush the cache removing all entries from it.
+    */
   void Flush()
   {
     order.clear();
     map.clear();
   }
 
+  /**
+    Returns the current size of the cache.
+    */
   size_t GetSize() const
   {
     return order.size();
   }
 
+  /**
+    Dump some cache statistics to std::cout.
+    */
   void DumpStatistics(const char* cacheName, const ValueSizer& sizer)
   {
     size_t memory=0;

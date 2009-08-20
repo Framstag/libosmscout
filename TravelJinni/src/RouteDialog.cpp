@@ -231,8 +231,10 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
       std::cerr << "There was an error while routing!" << std::endl;
       hasResult=true;
       Exit();
+      return;
     }
-                                 //databaseTask->DumpStatistics();
+
+    //databaseTask->DumpStatistics();
 
     databaseTask->TransformRouteDataToRouteDescription(routeData,routeDescription);
     double lastDistance = 0;

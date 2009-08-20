@@ -33,8 +33,8 @@
 #include <osmscout/GenWayDat.h>
 #include <osmscout/GenWayIndex.h>
 
-static size_t nodeIndexIntervalSize=500; // Must not be > max(uint16_t)!
-static size_t wayIndexIntervalSize=500;  // Must not be > max(uint16_t)!
+static size_t nodeIndexIntervalSize=50; // Must not be > max(uint16_t)!
+static size_t wayIndexIntervalSize=50;  // Must not be > max(uint16_t)!
 
 int main(int argc, char* argv[])
 {

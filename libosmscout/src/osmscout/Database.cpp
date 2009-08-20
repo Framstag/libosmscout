@@ -75,7 +75,7 @@ struct NodeUseCacheValueSizer : public Database::NodeUseCache::ValueSizer
 Database::Database()
  : isOpen(false),
    nodeCache(2000),
-   wayCache(3000),
+   wayCache(6000),
    nodeUseCache(10), // Seems like the cache is more expensive than direct loading!?
    typeConfig(NULL)
 {
@@ -262,17 +262,11 @@ bool Database::GetWays(const StyleConfig& styleConfig,
                         maxPriority,
                         pages);
 
-  std::cout << "Getting way index entries..." << std::endl;
-
   wayIndex.GetWayPagesIndexEntries(pages,wayIndexEntries);
-
-  std::cout << "Found " << wayIndexEntries.size() << " index entries" << std::endl;
 
   //
   // Loading relevant ways
   //
-
-  std::cout << "Scanning ways..." << std::endl;
 
   if (!wayReader.IsOpen()) {
     if (!wayReader.Open(file)){
@@ -362,6 +356,122 @@ bool Database::GetWays(const StyleConfig& styleConfig,
   return true;
 }
 
+bool Database::GetWays(const StyleConfig& styleConfig,
+                       double lonMin, double latMin,
+                       double lonMax, double latMax,
+                       double magnification,
+                       size_t maxPriority,
+                       std::list<WayRef>& ways) const
+{
+  std::set<Page>           pages;
+  std::list<WayIndexEntry> wayIndexEntries;
+  size_t                   wayAllCount=0;
+  size_t                   waySelectedCount=0;
+  size_t                   maxNodesCount=0;
+  size_t                   cacheCount=0;
+  size_t                   diskCount=0;
+  std::string              file=path+"/"+"ways.dat";
+
+  areaWayIndex.GetPages(styleConfig,
+                        lonMin,latMin,lonMax,latMax,
+                        magnification,
+                        maxPriority,
+                        pages);
+
+  wayIndex.GetWayPagesIndexEntries(pages,wayIndexEntries);
+
+  //
+  // Loading relevant ways
+  //
+
+  if (!wayReader.IsOpen()) {
+    if (!wayReader.Open(file)){
+      std::cerr << "Error while opening ways.dat file!" << std::endl;
+    }
+  }
+
+  for (std::list<WayIndexEntry>::iterator indexEntry=wayIndexEntries.begin();
+       indexEntry!=wayIndexEntries.end();
+       ++indexEntry) {
+    Cache<size_t,std::vector<Way> >::CacheRef cacheRef;
+
+    if (!wayCache.GetEntry(indexEntry->interval,cacheRef)) {
+      if (!wayReader.ReadPageToBuffer(indexEntry->offset,indexEntry->size)) {
+        std::cerr << "Error while reading page from ways.dat file!" << std::endl;
+      }
+      diskCount++;
+
+      Cache<size_t, std::vector<Way> >::CacheEntry cacheEntry(indexEntry->interval);
+
+      cacheRef=wayCache.SetEntry(cacheEntry);
+      cacheRef->value.resize(indexEntry->count);
+
+      for (size_t i=0; i<indexEntry->count; i++) {
+        cacheRef->value[i].Read(wayReader);
+
+        if (wayReader.HasError()) {
+          std::cerr << "Error while reading data from ways.dat page!" << std::endl;
+          wayReader.Close();
+          break;
+        }
+      }
+    }
+    else {
+      cacheCount++;
+    }
+
+    // Filter ways based on priority, type and covered area
+    for (std::vector<Way>::const_iterator way=cacheRef->value.begin();
+         way!=cacheRef->value.end();
+         ++way) {
+      if ((!way->IsArea() && styleConfig.IsWayVisible(way->type,maxPriority)) ||
+          (way->IsArea() && styleConfig.IsAreaVisible(way->type,maxPriority))) {
+        maxNodesCount=std::max(maxNodesCount,way->nodes.size());
+
+        double wLonMin=way->nodes[0].lon;
+        double wLonMax=way->nodes[0].lon;
+        double wLatMin=way->nodes[0].lat;
+        double wLatMax=way->nodes[0].lat;
+        double match=false;
+
+        for (size_t i=0; i<way->nodes.size(); i++) {
+          wLonMin=std::min(wLonMin,way->nodes[i].lon);
+          wLatMin=std::min(wLatMin,way->nodes[i].lat);
+          wLonMax=std::max(wLonMax,way->nodes[i].lon);
+          wLatMax=std::max(wLatMax,way->nodes[i].lat);
+
+          if (way->nodes[i].lon>=lonMin && way->nodes[i].lon<=lonMax &&
+              way->nodes[i].lat>=latMin && way->nodes[i].lat<=latMax) {
+            match=true;
+            break;
+          }
+        }
+
+        if (way->IsArea()) {
+          // Check that to be drawn area is completely in area
+          if (!match &&
+              lonMin>=wLonMin && latMin>=wLatMin &&
+              lonMax<=wLonMax && latMax<=wLatMax) {
+            match=true;
+          }
+        }
+
+        if (match) {
+          ways.push_back(&*way);
+          waySelectedCount++;
+        }
+      }
+      wayAllCount++;
+    }
+  }
+
+  std::cout << "Ways scanned: " << wayAllCount << " selected: " << waySelectedCount << std::endl;
+  std::cout << "Maximum nodes per way: " << maxNodesCount << std::endl;
+  std::cout << "Way cache: " << cacheCount << " disk: " << diskCount << " cache size: " << wayCache.GetSize() << std::endl;
+
+  return true;
+}
+
 bool Database::GetNodes(const StyleConfig& styleConfig,
                         double lonMin, double latMin,
                         double lonMax, double latMax,
@@ -385,12 +495,7 @@ bool Database::GetNodes(const StyleConfig& styleConfig,
                          maxPriority,
                          pages);
 
-  std::cout << "Getting node index entries..." << std::endl;
-
-
   nodeIndex.GetNodePagesIndexEntries(pages,nodeIndexEntries);
-
-  std::cout << "Found " << nodeIndexEntries.size() << " index entries" << std::endl;
 
   //
   // Loading relevant nodes
@@ -462,6 +567,101 @@ bool Database::GetNodes(const StyleConfig& styleConfig,
   return true;
 }
 
+bool Database::GetNodes(const StyleConfig& styleConfig,
+                        double lonMin, double latMin,
+                        double lonMax, double latMax,
+                        double magnification,
+                        size_t maxPriority,
+                        std::list<NodeRef>& nodes) const
+{
+  std::set<Page>            pages;
+  std::list<NodeIndexEntry> nodeIndexEntries;
+  size_t                    nodeAllCount=0;
+  size_t                    nodeSelectedCount=0;
+  size_t                    cacheCount=0;
+  size_t                    diskCount=0;
+  std::string               file=path+"/"+"nodes.dat";
+
+  // Nodes
+
+  areaNodeIndex.GetPages(styleConfig,
+                         lonMin,latMin,lonMax,latMax,
+                         magnification,
+                         maxPriority,
+                         pages);
+
+  nodeIndex.GetNodePagesIndexEntries(pages,nodeIndexEntries);
+
+  //
+  // Loading relevant nodes
+  //
+
+
+  if (!nodeReader.IsOpen()) {
+    if (!nodeReader.Open(file)) {
+      std::cerr << "Error while opening nodes.dat file!" << std::endl;
+      return false;
+    }
+  }
+
+  for (std::list<NodeIndexEntry>::iterator indexEntry=nodeIndexEntries.begin();
+       indexEntry!=nodeIndexEntries.end();
+       ++indexEntry) {
+    Cache<size_t,std::vector<Node> >::CacheRef cacheRef;
+
+    if (!nodeCache.GetEntry(indexEntry->interval,cacheRef)) {
+      diskCount++;
+      if (!nodeReader.ReadPageToBuffer(indexEntry->offset,indexEntry->size)) {
+        std::cerr << "Error while reading page from nodes.dat file!" << std::endl;
+        nodeReader.Close();
+        return false;
+      }
+
+      Cache<size_t, std::vector<Node> >::CacheEntry cacheEntry(indexEntry->interval);
+
+      cacheRef=nodeCache.SetEntry(cacheEntry);
+      //cacheRef->value.resize(indexEntry->nodeCount);
+      cacheRef->value.reserve(indexEntry->nodeCount);
+
+      for (size_t i=0; i<indexEntry->nodeCount; i++) {
+        Node node;
+
+        node.Read(nodeReader);
+        //cacheRef->value[i].Read(nodeStream);
+
+        if (nodeReader.HasError()) {
+          std::cerr << "Error while reading data from nodes.dat page!" << std::endl;
+          nodeReader.Close();
+          break;
+        }
+
+        cacheRef->value.push_back(node);
+      }
+    }
+    else {
+      cacheCount++;
+    }
+
+    for (std::vector<Node>::const_iterator node=cacheRef->value.begin();
+         node!=cacheRef->value.end();
+         ++node) {
+      if (styleConfig.IsNodeVisible(node->type,magnification)) {
+        if (node->lon>=lonMin && node->lon<=lonMax &&
+            node->lat>=latMin && node->lat<=latMax) {
+          nodes.push_back(&*node);
+          nodeSelectedCount++;
+        }
+      }
+      nodeAllCount++;
+    }
+  }
+
+  std::cout << "Nodes scanned: " << nodeAllCount << " selected: " << nodeSelectedCount << std::endl;
+  std::cout << "Node cache: " << cacheCount << " disk: " << diskCount << " cache size: " << nodeCache.GetSize() << std::endl;
+
+  return true;
+}
+
 bool Database::GetObjects(const StyleConfig& styleConfig,
                           double lonMin, double latMin,
                           double lonMax, double latMax,
@@ -469,6 +669,46 @@ bool Database::GetObjects(const StyleConfig& styleConfig,
                           size_t maxNodes,
                           std::list<Node>& nodes,
                           std::list<Way>& ways) const
+{
+  std::cout << "Getting objects from index..." << std::endl;
+
+  size_t maxPriority;
+
+  std::cout << "Analysing distribution for maximum priority..." << std::endl;
+
+  maxPriority=GetMaximumPriority(styleConfig,
+                                 lonMin,latMin,lonMax,latMax,
+                                 magnification,
+                                 maxNodes);
+
+  std::cout << "Maximum priority is: " << maxPriority << std::endl;
+
+  if (!GetWays(styleConfig,
+               lonMin,latMin,lonMax,latMax,
+               magnification,
+               maxPriority,
+               ways)) {
+    return false;
+  }
+
+  if (!GetNodes(styleConfig,
+                lonMin,latMin,lonMax,latMax,
+                magnification,
+                maxPriority,
+                nodes)) {
+    return false;
+  }
+
+  return true;
+}
+
+bool Database::GetObjects(const StyleConfig& styleConfig,
+                          double lonMin, double latMin,
+                          double lonMax, double latMax,
+                          double magnification,
+                          size_t maxNodes,
+                          std::list<NodeRef>& nodes,
+                          std::list<WayRef>& ways) const
 {
   std::cout << "Getting objects from index..." << std::endl;
 
@@ -583,6 +823,23 @@ bool Database::GetWay(const Id& id, Way& way) const
   return false;
 }
 
+bool Database::GetWay(const Id& id, WayRef& way) const
+{
+  std::set<Id>      ids;
+  std::list<WayRef> ways;
+
+  ids.insert(id);
+
+  if (GetWays(ids,ways)) {
+    if (ways.size()>0) {
+      way=ways.front();
+      return true;
+    }
+  }
+
+  return false;
+}
+
 bool Database::GetWays(const std::set<Id>& ids, std::list<Way>& ways) const
 {
   std::list<WayIndexEntry> indexEntries;
@@ -638,6 +895,61 @@ bool Database::GetWays(const std::set<Id>& ids, std::list<Way>& ways) const
   return true;
 }
 
+bool Database::GetWays(const std::set<Id>& ids, std::list<WayRef>& ways) const
+{
+  std::list<WayIndexEntry> indexEntries;
+  std::string              file=path+"/"+"ways.dat";
+
+  wayIndex.GetWayIndexEntries(ids,indexEntries);
+
+  if (indexEntries.size()==0) {
+    std::cout << "GetWays(): Ids not found in index" << std::endl;
+    return false;
+  }
+
+  if (!wayReader.IsOpen()) {
+    if (!wayReader.Open(file)) {
+      std::cerr << "Error while opening ways.dat file!" << std::endl;
+      return false;
+    }
+  }
+
+  Cache<size_t,std::vector<Way> >::CacheRef cacheRef;
+
+  for (std::list<WayIndexEntry>::const_iterator indexEntry=indexEntries.begin();
+       indexEntry!=indexEntries.end();
+       ++indexEntry) {
+    if (!wayCache.GetEntry(indexEntry->interval,cacheRef)) {
+      wayReader.ReadPageToBuffer(indexEntry->offset,indexEntry->size);
+
+      Cache<size_t, std::vector<Way> >::CacheEntry cacheEntry(indexEntry->interval);
+
+      cacheRef=wayCache.SetEntry(cacheEntry);
+      cacheRef->value.resize(indexEntry->count);
+
+      for (size_t i=0; i<indexEntry->count; i++) {
+        cacheRef->value[i].Read(wayReader);
+
+        if (wayReader.HasError()) {
+          std::cerr << "Error while reading from ways.dat file!" << std::endl;
+          wayReader.Close();
+          return false;
+        }
+      }
+    }
+
+    for (std::vector<Way>::const_iterator w=cacheRef->value.begin();
+         w!=cacheRef->value.end();
+         ++w) {
+      if (ids.find(w->id)!=ids.end()) {
+        ways.push_back(&*w);
+      }
+    }
+  }
+
+  return true;
+}
+
 bool Database::GetMatchingCities(const std::string& name,
                                  std::list<City>& cities,
                                  size_t limit, bool& limitReached) const
@@ -652,25 +964,98 @@ bool Database::GetMatchingStreets(Id urbanId, const std::string& name,
   return cityStreetIndex.GetMatchingStreets(urbanId,name,streets,limit,limitReached);
 }
 
-bool Database::GetJoints(Id id,
-                         std::list<Way>& ways) const
+bool GetWays(const WayIndex& index,
+             const std::string& path,
+             std::map<Id,Way>& cache,
+             const std::set<Id>& ids,
+             std::vector<Database::WayRef>& refs)
 {
-  std::set<Id> ids;
+  bool result=true;
+
+  refs.clear();
+  refs.reserve(ids.size());
+
+  std::set<Id> remaining;
+
+  for (std::set<Id>::const_iterator id=ids.begin();
+       id!=ids.end();
+       ++id) {
+    std::map<Id,Way>::const_iterator ref=cache.find(*id);
+
+    if (ref!=cache.end()) {
+      refs.push_back(&ref->second);
+    }
+    else {
+      remaining.insert(*id);
+    }
+  }
+
+  if (remaining.size()>0) {
+    std::list<WayIndexEntry> indexEntries;
+    FileReader               wayReader;
+    std::string              file=path+"/"+"ways.dat";
+
+    if (!wayReader.Open(file)){
+      std::cerr << "Error while opening ways.dat file!" << std::endl;
+    }
+
+    index.GetWayIndexEntries(remaining,indexEntries);
+
+    for (std::list<WayIndexEntry>::const_iterator entry=indexEntries.begin();
+         entry!=indexEntries.end();
+         ++entry) {
+      if (!wayReader.ReadPageToBuffer(entry->offset,entry->size)) {
+        std::cerr << "Error while reading page from ways.dat file!" << std::endl;
+      }
+
+      for (size_t i=0; i<entry->count; i++) {
+        Way way;
+
+        way.Read(wayReader);
+
+        std::pair<std::map<Id,Way>::iterator,bool> result=cache.insert(std::pair<Id,Way>(way.id,way));
+
+        if (ids.find(way.id)!=ids.end()) {
+          refs.push_back(&result.first->second);
+        }
+      }
+    }
+
+    result=!wayReader.HasError() && wayReader.Close();
+  }
+
+  assert(ids.size()==refs.size());
+
+  return result;
+}
+
+bool GetWay(const WayIndex& index,
+            const std::string& path,
+            std::map<Id,Way>& cache,
+            Id id,
+            Database::WayRef& ref)
+{
+  std::set<Id>                  ids;
+  std::vector<Database::WayRef> refs;
 
   ids.insert(id);
 
-  return GetJoints(ids,ways);
+  if (!GetWays(index,path,cache,ids,refs)) {
+    return false;
+  }
+
+  ref=refs[0];
+
+  return true;
 }
 
 bool Database::GetJoints(const std::set<Id>& ids,
-                         std::list<Way>& ways) const
+                         std::set<Id>& wayIds) const
 {
   std::list<NodeUseIndexEntry> indexEntries;
   std::string                  file=path+"/"+"nodeuse.idx";
-  std::set<Id>                 wayIds;
-  std::set<Id>                 areaIds;
 
-  ways.clear();
+  wayIds.clear();
 
   nodeUseIndex.GetNodeIndexEntries(ids,indexEntries);
 
@@ -699,16 +1084,15 @@ bool Database::GetJoints(const std::set<Id>& ids,
       }
 
       Cache<size_t, std::vector<NodeUse> >::CacheEntry cacheEntry(indexEntry->interval);
-
-      cacheEntry.value.reserve(indexEntry->count);
       cacheRef=nodeUseCache.SetEntry(cacheEntry);
 
+      cacheRef->value.resize(indexEntry->count);
+
       for (size_t i=0; i<indexEntry->count; i++) {
-        NodeUse nodeUse;
         size_t  count;
 
-        nodeUseReader.Read(nodeUse.id);
-        nodeUseReader.Read(count);
+        nodeUseReader.Read(cacheRef->value[i].id);
+        nodeUseReader.ReadNumber(count);
 
         if (nodeUseReader.HasError()) {
           std::cerr << "Error while reading from nodeuse.idx file!" << std::endl;
@@ -716,13 +1100,11 @@ bool Database::GetJoints(const std::set<Id>& ids,
           return false;
         }
 
-        nodeUse.references.resize(count);
+        cacheRef->value[i].references.resize(count);
 
         for (size_t j=0; j<count; j++) {
-          nodeUseReader.Read(nodeUse.references[j]);
+          nodeUseReader.Read(cacheRef->value[i].references[j]);
         }
-
-        cacheRef->value.push_back(nodeUse);
       }
     }
 
@@ -737,10 +1119,17 @@ bool Database::GetJoints(const std::set<Id>& ids,
     }
   }
 
-  GetWays(wayIds,ways);
-
   return true;
+}
 
+bool Database::GetJoints(Id id,
+                         std::set<Id>& wayIds) const
+{
+  std::set<Id> ids;
+
+  ids.insert(id);
+
+  return GetJoints(ids,wayIds);
 }
 
 struct RNode
@@ -790,12 +1179,7 @@ struct RNodeCostCompare
 {
   bool operator()(const RNode& a, const RNode& b) const
   {
-//    if (a.overallCost==b.overallCost) {
-      //return a.currentCost<b.currentCost;
-/*    }
-    else {*/
-      return a.overallCost<b.overallCost;
-    //}
+    return a.overallCost<b.overallCost;
   }
 };
 
@@ -843,7 +1227,7 @@ bool CanBeTurnedInto(const Way& way, Id via, Id to)
 
 struct Follower
 {
-  std::list<Way>  ways;
+  std::set<Id>  ways;
 };
 
 typedef std::set<RNode,RNodeCostCompare> OpenList;
@@ -860,11 +1244,13 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
                               RouteData& route)
 {
   TypeId              type;
-  std::map<Id,Way>    wayCache; // Does not gain much performance since we are caching in database, too
+  std::map<Id,Way>    waysCache;
   std::map<Id,Follower> candidatesCache;
-  Way                 currentWay;
+  std::vector<WayRef> followWays;
+  WayRef              startWay;
+  WayRef              currentWay;
   double              startLon=0.0L,startLat=0.0L;
-  Way                 targetWay;
+  WayRef              targetWay;
   double              targetLon=0.0L,targetLat=0.0L;
   OpenList            openList;
   std::map<Id,RNodeRef> openMap;
@@ -890,11 +1276,11 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
 
   type=typeConfig->GetWayTypeId(tagHighway,"motorway_link");
   assert(type!=typeIgnore);
-  profile.SetTypeCostFactor(type,1/90.0);
+  profile.SetTypeCostFactor(type,1/60.0);
 
   type=typeConfig->GetWayTypeId(tagHighway,"trunk");
   assert(type!=typeIgnore);
-  profile.SetTypeCostFactor(type,1/90.0);
+  profile.SetTypeCostFactor(type,1/70.0);
 
   type=typeConfig->GetWayTypeId(tagHighway,"trunk_link");
   assert(type!=typeIgnore);
@@ -940,34 +1326,47 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
   assert(type!=typeIgnore);
   profile.SetTypeCostFactor(type,1/30.0);
 
-  GetWay(startWayId,currentWay);
-  GetWay(targetWayId,targetWay);
+  if (!::GetWay(wayIndex,
+                path,
+                waysCache,
+                startWayId,
+                startWay)) {
+    return false;
+  }
+
+  if (!::GetWay(wayIndex,
+                path,
+                waysCache,
+                targetWayId,
+                targetWay)) {
+    return false;
+  }
 
   size_t index=0;
-  while (index<currentWay.nodes.size()) {
-    if (currentWay.nodes[index].id==startNodeId) {
-      startLon=currentWay.nodes[index].lon;
-      startLat=currentWay.nodes[index].lat;
+  while (index<startWay->nodes.size()) {
+    if (startWay->nodes[index].id==startNodeId) {
+      startLon=startWay->nodes[index].lon;
+      startLat=startWay->nodes[index].lat;
       break;
     }
 
     index++;
   }
 
-  assert(index<currentWay.nodes.size());
+  assert(index<startWay->nodes.size());
 
   index=0;
-  while (index<targetWay.nodes.size()) {
-    if (targetWay.nodes[index].id==targetNodeId) {
-      targetLon=targetWay.nodes[index].lon;
-      targetLat=targetWay.nodes[index].lat;
+  while (index<targetWay->nodes.size()) {
+    if (targetWay->nodes[index].id==targetNodeId) {
+      targetLon=targetWay->nodes[index].lon;
+      targetLat=targetWay->nodes[index].lat;
       break;
     }
 
     index++;
   }
 
-  assert(index<targetWay.nodes.size());
+  assert(index<targetWay->nodes.size());
 
   RNode node=RNode(startNodeId,
                    startLon,
@@ -980,34 +1379,38 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
                                          startLat,
                                          targetLon,
                                          targetLat);
-  node.overallCost=openList.begin()->currentCost+openList.begin()->estimateCost;
+  node.overallCost=node.currentCost+node.estimateCost;
 
   openList.insert(node);
-
   openMap[openList.begin()->id]=openList.begin();
 
-  currentWay.id=0;
+  currentWay=startWay;
 
   std::vector<RNode> follower;
 
   follower.reserve(1000);
-  std::map<Id,Follower>::const_iterator cacheEntry=candidatesCache.end();
+
+  bool cachedFollower=false;
 
   do {
-    bool cachedFollower=false;
     //
     // Take entry from open list with lowest cost
     //
 
     RNode current=*openList.begin();
-    openList.erase(openList.begin());
-    openMap.erase(current.id);
 
     /*
-    std::cout << "Cost " << current.currentCost << " " << current.overallCost;
-    std::cout << " node " << current.id << " of " << (current.ref.type==refWay ? "way" : "area") << " " << current.ref.id;
-    std::cout << " " << openList.size() << " " << closeMap.size() << std::endl;
-    */
+    std::cout << "S:   " << openList.size() << std::endl;
+    std::cout << "ID:  " << current.id << std::endl;
+    std::cout << "REF: " << current.ref.id << std::endl;
+    std::cout << "PRV: " << current.prev << std::endl;
+    std::cout << "CC:  " << current.currentCost << std::endl;
+    std::cout << "EC:  " << current.estimateCost << std::endl;
+    std::cout << "OC:  " << current.overallCost << std::endl;
+      */
+
+    openList.erase(openList.begin());
+    openMap.erase(current.id);
 
     //
     // Place all followers on list
@@ -1016,68 +1419,63 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
     follower.clear();
 
     // Get joint nodes in same way/area
-    if (currentWay.id!=current.ref.id) {
-      std::map<Id,Way>::const_iterator cacheEntry=wayCache.find(current.ref.id);
-      if (cacheEntry!=wayCache.end()) {
-        currentWay=cacheEntry->second;
-        cachedFollower=false;
+    if (currentWay->id!=current.ref.id) {
+      if (!::GetWay(wayIndex,
+                    path,
+                    waysCache,
+                    current.ref.id,
+                    currentWay)) {
+        return false;
       }
-      else {
-        // TODO: Create cache entry first and then fill it directly...
-        GetWay(current.ref.id,currentWay);
-        wayCache[current.ref.id]=currentWay;
-        cachedFollower=false;
-      }
-    }
-    else {
-      cachedFollower=true;
+
+      cachedFollower=false;
     }
 
-    if (!profile.CanUse(currentWay.type)) {
+    if (!profile.CanUse(currentWay->type)) {
       continue;
     }
 
-    if (currentWay.IsArea()) {
-      for (size_t i=0; i<currentWay.nodes.size(); ++i) {
-        if (currentWay.nodes[i].id!=current.id) {
+    if (currentWay->IsArea()) {
+      for (size_t i=0; i<currentWay->nodes.size(); ++i) {
+        if (currentWay->nodes[i].id!=current.id) {
 
-          std::map<Id,RNode>::iterator closeEntry=closeMap.find(currentWay.nodes[i].id);
+          std::map<Id,RNode>::iterator closeEntry=closeMap.find(currentWay->nodes[i].id);
 
           if (closeEntry!=closeMap.end()) {
             continue;
           }
 
-          follower.push_back(RNode(currentWay.nodes[i].id,
-                                   currentWay.nodes[i].lon,
-                                   currentWay.nodes[i].lat,
-                                   Reference(currentWay.id,refWay),
+          follower.push_back(RNode(currentWay->nodes[i].id,
+                                   currentWay->nodes[i].lon,
+                                   currentWay->nodes[i].lat,
+                                   Reference(currentWay->id,refWay),
                                    current.id));
         }
       }
     }
     else {
-      for (size_t i=0; i<currentWay.nodes.size(); ++i) {
-        if (currentWay.nodes[i].id==current.id) {
-          if (i>0 && !currentWay.IsOneway()) {
-            std::map<Id,RNode>::iterator closeEntry=closeMap.find(currentWay.nodes[i-1].id);
+      for (size_t i=0; i<currentWay->nodes.size(); ++i) {
+        if (currentWay->nodes[i].id==current.id) {
+          if (i>0 && !currentWay->IsOneway()) {
+            std::map<Id,RNode>::iterator closeEntry=closeMap.find(currentWay->nodes[i-1].id);
 
             if (closeEntry==closeMap.end()) {
-              follower.push_back(RNode(currentWay.nodes[i-1].id,
-                                       currentWay.nodes[i-1].lon,
-                                       currentWay.nodes[i-1].lat,
-                                       Reference(currentWay.id,refWay),
+              follower.push_back(RNode(currentWay->nodes[i-1].id,
+                                       currentWay->nodes[i-1].lon,
+                                       currentWay->nodes[i-1].lat,
+                                       Reference(currentWay->id,refWay),
                                        current.id));
             }
           }
 
-          if (i<currentWay.nodes.size()-1) {
-            std::map<Id,RNode>::iterator closeEntry=closeMap.find(currentWay.nodes[i+1].id);
+          if (i<currentWay->nodes.size()-1) {
+            std::map<Id,RNode>::iterator closeEntry=closeMap.find(currentWay->nodes[i+1].id);
 
             if (closeEntry==closeMap.end()) {
-              follower.push_back(RNode(currentWay.nodes[i+1].id,
-                                       currentWay.nodes[i+1].lon,
-                                       currentWay.nodes[i+1].lat,
-                                       Reference(currentWay.id,refWay),
+              follower.push_back(RNode(currentWay->nodes[i+1].id,
+                                       currentWay->nodes[i+1].lon,
+                                       currentWay->nodes[i+1].lat,
+                                       Reference(currentWay->id,refWay),
                                        current.id));
             }
           }
@@ -1090,70 +1488,83 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
     // Get joint ways and areas
 
     if (!cachedFollower) {
-      cacheEntry=candidatesCache.find(current.ref.id);
+      std::map<Id,Follower>::const_iterator cacheEntry=candidatesCache.find(current.ref.id);
 
       if (cacheEntry==candidatesCache.end()) {
         std::pair<std::map<Id,Follower >::iterator,bool> result;
 
         result=candidatesCache.insert(std::pair<Id,Follower>(current.ref.id,Follower()));
 
-        GetJoints(current.ref.id,result.first->second.ways);
+        if (!GetJoints(current.ref.id,result.first->second.ways)) {
+          return false;
+        }
 
         cacheEntry=result.first;
       }
+
+      if (!::GetWays(wayIndex,
+                     path,
+                     waysCache,
+                     cacheEntry->second.ways,
+                     followWays)) {
+        return false;
+      }
+
+      cachedFollower=true;
     }
 
     // Get joint nodes in joint way/area
 
-    for (std::list<Way>::const_iterator iter=cacheEntry->second.ways.begin();
-         iter!=cacheEntry->second.ways.end();
+    for (std::vector<WayRef>::const_iterator iter=followWays.begin();
+         iter!=followWays.end();
          ++iter) {
+      const Way* way=*iter;
 
-      if (!profile.CanUse(iter->type)) {
+      if (!profile.CanUse(way->type)) {
         continue;
       }
 
-      if (iter->IsArea()) {
-        for (size_t i=0; i<iter->nodes.size(); i++) {
-          if (iter->nodes[i].id!=current.id) {
-            std::map<Id,RNode>::iterator closeEntry=closeMap.find(iter->nodes[i].id);
+      if (way->IsArea()) {
+        for (size_t i=0; i<way->nodes.size(); i++) {
+          if (way->nodes[i].id!=current.id) {
+            std::map<Id,RNode>::iterator closeEntry=closeMap.find(way->nodes[i].id);
 
             if (closeEntry!=closeMap.end()) {
               continue;
             }
 
-            follower.push_back(RNode(iter->nodes[i].id,
-                                     iter->nodes[i].lon,
-                                     iter->nodes[i].lat,
-                                     Reference(iter->id,refArea),
+            follower.push_back(RNode(way->nodes[i].id,
+                                     way->nodes[i].lon,
+                                     way->nodes[i].lat,
+                                     Reference(way->id,refArea),
                                      current.id));
           }
         }
       }
       else {
-        for (size_t i=0; i<iter->nodes.size(); ++i) {
-          if (iter->nodes[i].id==current.id  && CanBeTurnedInto(currentWay,iter->nodes[i].id,iter->id)) {
+        for (size_t i=0; i<way->nodes.size(); ++i) {
+          if (way->nodes[i].id==current.id  && CanBeTurnedInto(*currentWay,way->nodes[i].id,way->id)) {
 
-            if (i>0 && !iter->IsOneway()) {
-              std::map<Id,RNode>::iterator closeEntry=closeMap.find(iter->nodes[i-1].id);
+            if (i>0 && !way->IsOneway()) {
+              std::map<Id,RNode>::iterator closeEntry=closeMap.find(way->nodes[i-1].id);
 
               if (closeEntry==closeMap.end()) {
-                follower.push_back(RNode(iter->nodes[i-1].id,
-                                         iter->nodes[i-1].lon,
-                                         iter->nodes[i-1].lat,
-                                         Reference(iter->id,refWay),
+                follower.push_back(RNode(way->nodes[i-1].id,
+                                         way->nodes[i-1].lon,
+                                         way->nodes[i-1].lat,
+                                         Reference(way->id,refWay),
                                          current.id));
               }
             }
 
-            if (i<iter->nodes.size()-1) {
-              std::map<Id,RNode>::iterator closeEntry=closeMap.find(iter->nodes[i+1].id);
+            if (i<way->nodes.size()-1) {
+              std::map<Id,RNode>::iterator closeEntry=closeMap.find(way->nodes[i+1].id);
 
               if (closeEntry==closeMap.end()) {
-                follower.push_back(RNode(iter->nodes[i+1].id,
-                                         iter->nodes[i+1].lon,
-                                         iter->nodes[i+1].lat,
-                                         Reference(iter->id,refWay),
+                follower.push_back(RNode(way->nodes[i+1].id,
+                                         way->nodes[i+1].lon,
+                                         way->nodes[i+1].lat,
+                                         Reference(way->id,refWay),
                                          current.id));
               }
             }
@@ -1168,13 +1579,13 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
          iter!=follower.end();
          ++iter) {
       double currentCost=current.currentCost+
-                         profile.GetCostFactor(currentWay.type)*
+                         profile.GetCostFactor(currentWay->type)*
                          GetSphericalDistance(current.lon,
                                               current.lat,
                                               iter->lon,
                                               iter->lat);
 
-      if (currentWay.id!=iter->id) {
+      if (currentWay->id!=iter->id) {
         currentCost+=profile.GetTurnCostFactor();
       }
 
@@ -1196,15 +1607,17 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
         iter->overallCost=overallCost;
 
         openList.erase(openEntry->second);
-        openList.insert(*iter);
+        std::pair<RNodeRef,bool> result=openList.insert(*iter);
+
+        openEntry->second=result.first;
       }
       else {
         iter->currentCost=currentCost;
         iter->estimateCost=estimateCost;
         iter->overallCost=overallCost;
 
-        openList.insert(*iter);
-        openMap[openList.begin()->id]=openList.begin();
+        std::pair<RNodeRef,bool> result=openList.insert(*iter);
+        openMap[iter->id]=result.first;
       }
     }
 
@@ -1223,7 +1636,7 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
       std::cout << "Final Path:" << std::endl;
       std::cout << "-----------" << std::endl;
       std::cout << current.currentCost << "Km" << std::endl;
-      std::cout << wayCache.size() << " ways cached" << std::endl;
+      std::cout << waysCache.size() << " ways cached" << std::endl;
       std::cout << std::endl;*/
 
       std::list<RouteStep> steps;
