@@ -102,13 +102,6 @@ private:
                size_t maxPriority,
                std::list<Way>& ways) const;
 
-  bool GetWays(const StyleConfig& styleConfig,
-               double lonMin, double latMin,
-               double lonMax, double latMax,
-               double magnification,
-               size_t maxPriority,
-               std::list<WayRef>& ways) const;
-
   bool GetNodes(std::list<NodeIndexEntry>& indexEntries) const;
 
   bool GetNodes(const StyleConfig& styleConfig,
@@ -117,13 +110,6 @@ private:
                 double magnification,
                 size_t maxPriority,
                 std::list<Node>& nodes) const;
-
-  bool GetNodes(const StyleConfig& styleConfig,
-                double lonMin, double latMin,
-                double lonMax, double latMax,
-                double magnification,
-                size_t maxPriority,
-                std::list<NodeRef>& nodes) const;
 
 public:
   Database();
@@ -143,19 +129,9 @@ public:
                   std::list<Node>& nodes,
                   std::list<Way>& ways) const;
 
-  bool GetObjects(const StyleConfig& styleConfig,
-                  double lonMin, double latMin,
-                  double lonMax, double latMax,
-                  double magnification,
-                  size_t maxNodes,
-                  std::list<NodeRef>& nodes,
-                  std::list<WayRef>& ways) const;
-
   bool GetNode(const Id& id, Node& node) const;
   bool GetWay(const Id& id, Way& way) const;
-  bool GetWay(const Id& id, WayRef& way) const;
   bool GetWays(const std::set<Id>& ids, std::list<Way>& ways) const;
-  bool GetWays(const std::set<Id>& ids, std::list<WayRef>& ways) const;
 
   bool GetMatchingCities(const std::string& name,
                          std::list<City>& cities,
