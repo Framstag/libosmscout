@@ -25,6 +25,40 @@
 #include <set>
 #include <string>
 
+class NumberSet
+{
+  typedef unsigned long Number;
+
+  struct Data
+  {
+    virtual ~Data();
+  };
+
+  struct Refs : public Data
+  {
+    Data* refs[256];
+
+    Refs();
+    ~Refs();
+  };
+
+  struct Leaf : public Data
+  {
+    unsigned char values[32];
+
+    Leaf();
+  };
+
+private:
+  Refs refs;
+
+public:
+  NumberSet();
+  ~NumberSet();
+  void Insert(Number value);
+  bool IsSet(Number value) const;
+};
+
 extern void GetKeysForName(const std::string& name, std::set<uint32_t>& keys);
 
 extern bool EncodeNumber(unsigned long number,
