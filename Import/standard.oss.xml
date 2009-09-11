@@ -1150,12 +1150,12 @@
     <label minMag="city"/>
   </area>
 
-  <area key="building" value="yes" prio="20">
+  <area key="building" value="yes" prio="21">
     <fill color="cc9999" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="building" value="true" prio="20">
+  <area key="building" value="true" prio="21">
     <fill color="cc9999" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
