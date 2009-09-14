@@ -50,8 +50,6 @@
 #endif
 #include <Lum/Base/Path.h>
 
-#include "MapPainter.h"
-
 DatabaseTask::DatabaseTask(Database* database,
                            Lum::Model::Action* jobFinishedAction)
  : database(database),

@@ -29,7 +29,7 @@
 #include <osmscout/StyleConfig.h>
 #include <osmscout/TypeConfig.h>
 
-#include "MapPainter.h"
+#include <osmscout/MapPainter.h>
 
 struct Job
 {

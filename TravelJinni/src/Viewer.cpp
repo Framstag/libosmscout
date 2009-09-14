@@ -53,8 +53,6 @@
 #include <Lum/String.h>
 #include <Lum/Table.h>
 
-#include "MapPainter.h"
-
 #include "config.h"
 
 #include "Configuration.h"
@@ -108,11 +106,11 @@ public:
   {
 #if defined(LUM_HAVE_LIB_HILDON)
     width=200;
-    height=200;    
-#else	  
+    height=200;
+#else	
     width=800;
     height=480;
-#endif    
+#endif
 
     minWidth=width;
     minHeight=height;
