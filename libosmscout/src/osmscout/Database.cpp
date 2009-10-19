@@ -23,9 +23,6 @@
 #include <cmath>
 #include <iostream>
 
-// For mesurement of time
-#include <sys/time.h>
-
 #include <osmscout/RoutingProfile.h>
 #include <osmscout/TypeConfigLoader.h>
 #include <osmscout/Util.h>
@@ -938,10 +935,7 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
 
   std::cout << "=========== Routing start =============" << std::endl;
 
-  timeval start;
-  timeval stop;
-
-  gettimeofday(&start,NULL);
+  StopClock clock;
 
   route.Clear();
 
@@ -1353,11 +1347,9 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
         std::cout << std::endl;*/
       }
 
-      gettimeofday(&stop,NULL);
+      clock.Stop();
 
-      timersub(&stop,&start,&stop);
-
-      std::cout << "Time:" << stop.tv_sec << "." << start.tv_usec << std::endl;
+      std::cout << "Time: " << clock << std::endl;
 
       std::cout << "=========== Routing end ==============" << std::endl;
       return true;

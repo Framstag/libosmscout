@@ -22,6 +22,8 @@
 
 #include <stdint.h>
 
+#include <sys/time.h>
+
 #include <set>
 #include <string>
 
@@ -59,6 +61,22 @@ public:
   bool IsSet(Number value) const;
 };
 
+class StopClock
+{
+private:
+  timeval start;
+  timeval stop;
+
+public:
+  StopClock();
+
+  void Stop();
+
+  friend std::ostream& operator<<(std::ostream& stream, const StopClock& clock);
+};
+
+extern std::ostream& operator<<(std::ostream& stream, const StopClock& clock);
+
 extern void GetKeysForName(const std::string& name, std::set<uint32_t>& keys);
 
 extern bool EncodeNumber(unsigned long number,
@@ -73,4 +91,7 @@ double GetSphericalDistance(double aLon, double aLat,
                             double bLon, double bLat);
 double GetEllipsoidalDistance(double aLon, double aLat,
                               double bLon, double bLat);
+
+
+
 #endif

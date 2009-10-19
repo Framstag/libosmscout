@@ -22,6 +22,19 @@
 #include <cstdio>
 #include <cmath>
 #include <iostream>
+
+#ifndef timersub
+    # define timersub(a, b, result) \
+          do { \
+                (result)->tv_sec = (a)->tv_sec - (b)->tv_sec; \
+                (result)->tv_usec = (a)->tv_usec - (b)->tv_usec; \
+                if ((result)->tv_usec < 0) { \
+                      --(result)->tv_sec; \
+                  (result)->tv_usec += 1000000; \
+                } \
+          } while (0)
+#endif
+
 NumberSet::Data::~Data()
 {
   // no code
@@ -127,6 +140,28 @@ bool NumberSet::IsSet(Number value) const
 
   return l->values[by] & (1 << bi);
 }
+
+StopClock::StopClock()
+{
+  gettimeofday(&start,NULL);
+}
+
+void StopClock::Stop()
+{
+  gettimeofday(&stop,NULL);
+}
+
+std::ostream& operator<<(std::ostream& stream, const StopClock& clock)
+{
+  timeval diff;
+
+  timersub(&clock.stop,&clock.start,&diff);
+
+  stream << diff.tv_sec << "." << diff.tv_usec;
+
+  return stream;
+}
+
 
 void GetKeysForName(const std::string& name, std::set<uint32_t>& keys)
 {
