@@ -108,7 +108,7 @@ bool GenerateAreaNodeIndex(size_t nodeIndexIntervalSize)
       //std::cout << styleTypes[i].GetType() << ": " << drawTypeTileDist[styleTypes[i].GetType()].size();
       tileSum+=drawTypeTilePages[i].size();
 
-      for (std::map<size_t,std::set<Page> >::const_iterator tile=drawTypeTilePages[i].begin();
+      for (std::map<TileId,std::set<Page> >::const_iterator tile=drawTypeTilePages[i].begin();
            tile!=drawTypeTilePages[i].end();
            ++tile) {
         pageSum+=tile->second.size();
