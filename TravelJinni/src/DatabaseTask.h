@@ -20,8 +20,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <Lum/OS/Cairo/Bitmap.h>
-#include <Lum/OS/Cairo/DrawInfo.h>
+#include <Lum/Features.h>
+
+#if defined(LUM_HAVE_LIB_CAIRO)
+  #include <Lum/OS/Cairo/Bitmap.h>
+  #include <Lum/OS/Cairo/DrawInfo.h>
+#endif
 
 #include <Lum/OS/Bitmap.h>
 #include <Lum/OS/Thread.h>

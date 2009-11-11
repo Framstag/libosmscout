@@ -26,23 +26,17 @@
 
 #include <osmscout/StyleConfigLoader.h>
 
-#include <Lum/Features.h>
-
 #include <Lum/Base/String.h>
 
-#if defined(HAVE_LIB_CAIRO)
-#include <Lum/OS/Cairo/Bitmap.h>
-#include <Lum/OS/Cairo/Display.h>
-#include <Lum/OS/Cairo/DrawInfo.h>
+#if defined(LUM_HAVE_LIB_CAIRO)
+  #include <Lum/OS/Cairo/Display.h>
 #endif
 
 #include <Lum/OS/X11/DrawInfo.h>
 #include <Lum/OS/X11/Display.h>
 
-#include <Lum/OS/Bitmap.h>
 #include <Lum/OS/Display.h>
 #include <Lum/OS/Driver.h>
-#include <Lum/OS/Thread.h>
 
 // Cairo includes X11, defines Status
 #if defined(Status)
