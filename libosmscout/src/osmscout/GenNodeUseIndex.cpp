@@ -19,25 +19,28 @@
 
 #include <osmscout/GenNodeUseIndex.h>
 
-#include <iostream>
 #include <map>
 
 #include <osmscout/FileScanner.h>
 #include <osmscout/FileWriter.h>
 #include <osmscout/RawNode.h>
+#include <osmscout/Util.h>
 #include <osmscout/Way.h>
 
 static size_t distributionGranuality = 1000000;
 static size_t nodesLoadSize          = 1000000;
 
-bool GenerateNodeUseIndex(const TypeConfig& typeConfig, size_t intervalSize)
+bool GenerateNodeUseIndex(const TypeConfig& typeConfig,
+                          const ImportParameter& parameter,
+                          Progress& progress)
 {
-  std::cout << "Analysing distribution..." << std::endl;
+  progress.SetAction("Analysing distribution");
 
   std::set<TypeId>    types;
   size_t              nodeCount=0;
   std::vector<size_t> nodeDistribution;
   FileScanner         scanner;
+  size_t              intervalSize=parameter.GetNodeIndexIntervalSize();
 
   typeConfig.GetRoutables(types);
 
@@ -64,9 +67,9 @@ bool GenerateNodeUseIndex(const TypeConfig& typeConfig, size_t intervalSize)
 
   scanner.Close();
 
-  std::cout << "Nodes: " << nodeCount << std::endl;
+  //std::cout << "Nodes: " << nodeCount << std::endl;
 
-  std::cout << "Scanning node usage..." << std::endl;
+  progress.SetAction("Scanning node usage");
 
   std::map<Id,std::set<Id> > wayWayMap;
   size_t                     index=0;
@@ -85,12 +88,10 @@ bool GenerateNodeUseIndex(const TypeConfig& typeConfig, size_t intervalSize)
     size_t                      end=newIndex*distributionGranuality;
     std::map<Id,std::list<Id> > nodeWayMap;
 
-    std::cout << "Scanning for node ids " << start << ">=id<" << end << "..." << std::endl;
-
-    std::cout << "Scanning areas/ways..." << std::endl;
+    progress.Info(std::string("Scanning for node ids ")+NumberToString(start)+">=id<"+NumberToString(end));
 
     if (!scanner.Open("ways.dat")) {
-      std::cerr << "Error while opening ways.dat!" << std::endl;
+      progress.Error("Error while opening ways.dat!");
       return false;
     }
 
@@ -112,12 +113,10 @@ bool GenerateNodeUseIndex(const TypeConfig& typeConfig, size_t intervalSize)
 
     scanner.Close();
 
-    std::cout << "Resolving area/way references " << start << ">=id<" << end << "..." << std::endl;
-
-    std::cout << "Scanning areas/ways..." << std::endl;
+    progress.Info(std::string("Resolving area/way references ")+NumberToString(start)+">=id<"+NumberToString(end));
 
     if (!scanner.Open("ways.dat")) {
-      std::cerr << "Error while opening ways.dat!" << std::endl;
+      progress.Error("Error while opening ways.dat!");
       return false;
     }
 
@@ -176,9 +175,10 @@ bool GenerateNodeUseIndex(const TypeConfig& typeConfig, size_t intervalSize)
   resultOffset.resize(resultDistribution.size(),0);
   resultOffsetCount.resize(resultDistribution.size(),0);
 
-  std::cout << "Writing 'nodeuse.idx'..." << std::endl;
+  progress.SetAction("Writing 'nodeuse.idx'");
 
   if (!writer.Open("nodeuse.idx")) {
+    progress.Error("Error while opening 'nodeuse.idx'!");
     return false;
   }
 

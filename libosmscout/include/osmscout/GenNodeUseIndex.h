@@ -22,9 +22,12 @@
 
 #include <cstdio>
 
+#include <osmscout/Import.h>
+#include <osmscout/Progress.h>
 #include <osmscout/TypeConfig.h>
 
 extern bool GenerateNodeUseIndex(const TypeConfig& typeConfig,
-                                 size_t intervalSize);
+                                 const ImportParameter& parameter,
+                                 Progress& progress);
 
 #endif

@@ -21,23 +21,25 @@
 
 #include <algorithm>
 #include <cassert>
-#include <iostream>
 
 #include <osmscout/RawNode.h>
 #include <osmscout/RawRelation.h>
 #include <osmscout/RawWay.h>
+#include <osmscout/Util.h>
 #include <osmscout/Way.h>
 
 static size_t distributionGranuality = 100000;
 static size_t waysLoadSize           = 250000;
 
-bool GenerateWayDat(const TypeConfig& typeConfig)
+bool GenerateWayDat(const TypeConfig& typeConfig,
+                    const ImportParameter& parameter,
+                    Progress& progress)
 {
   //
   // Analysing distribution of nodes in the given interval size
   //
 
-  std::cout << "Generate ways.dat..." << std::endl;
+  progress.SetAction("Generate ways.dat");
 
   FileScanner                                 scanner;
   FileWriter                                  writer;
@@ -51,9 +53,10 @@ bool GenerateWayDat(const TypeConfig& typeConfig)
   restrictionNegId=typeConfig.GetRelationTypeId(tagRestriction,"no_straight_on");
   assert(restrictionNegId!=typeIgnore);
 
-  std::cout << "Scanning for restriction relations..." << std::endl;
+  progress.SetAction("Scanning for restriction relations");
 
   if (!scanner.Open("rawrels.dat")) {
+    progress.Error("Canot open 'rawrels.dat'");
     return false;
   }
 
@@ -105,15 +108,16 @@ bool GenerateWayDat(const TypeConfig& typeConfig)
 
   scanner.Close();
 
-  std::cout << "Found " << restrictions.size() << " restrictions." << std::endl;
+  progress.Info(std::string("Found ")+NumberToString(restrictions.size())+" restrictions");
 
   std::vector<size_t> wayDistribution;
   size_t              wayCount=0;
   size_t              sum=0;
 
-  std::cout << "Analysing distribution..." << std::endl;
+  progress.SetAction("Analysing distribution");
 
   if (!scanner.Open("rawways.dat")) {
+    progress.Error("Canot open 'rawways.dat'");
     return false;
   }
 
@@ -136,19 +140,19 @@ bool GenerateWayDat(const TypeConfig& typeConfig)
 
   scanner.Close();
 
-  std::cout << "Ways: " << wayCount << std::endl;
+  progress.Info(std::string("Ways: ")+NumberToString(wayCount));
   for (size_t i=0; i<wayDistribution.size(); i++) {
     sum+=wayDistribution[i];
     //std::cout << "Nodes " << i*distributionGranuality << "-" << (i+1)*distributionGranuality << ": "  << nodeDistribution[i] << std::endl;
   }
 
   if (sum!=wayCount) {
-    std::cerr << "Number of ways over all does not match sum over distribution (" << wayCount << "!=" << sum << ")!" << std::endl;
+    progress.Error(std::string("Number of ways over all does not match sum over distribution (")+NumberToString(wayCount)+"!="+NumberToString(sum )+")!");
     return false;
   }
 
   if (!writer.Open("ways.dat")) {
-    std::cerr << "Cannot create ways.dat" << std::endl;
+    progress.Error("Canot create 'ways.dat'");
     return false;
   }
 
@@ -166,13 +170,14 @@ bool GenerateWayDat(const TypeConfig& typeConfig)
     size_t start=index*distributionGranuality;
     size_t end=newIndex*distributionGranuality;
 
-    std::cout << "Loading way id " << start << ">=id<" << end << "..." << std::endl;
+    progress.Info(std::string("Loading way id ")+NumberToString(start)+">=id<"+NumberToString(end));
 
     std::map<Id,RawWay>  ways;
     std::set<Id>         nodeIds;
     std::map<Id,uint8_t> nodeUses;
 
     if (!scanner.Open("rawways.dat")) {
+      progress.Error("Canot open 'rawways.dat'");
       return false;
     }
 
@@ -194,16 +199,17 @@ bool GenerateWayDat(const TypeConfig& typeConfig)
     scanner.Close();
 
     if (bucketSize!=ways.size()) {
-      std::cerr << "Number of loaded ways does not match expected number of ways (" << ways.size() << "!=" << bucketSize << ")!" << std::endl;
+      progress.Info(std::string("Number of loaded ways does not match expected number of ways (")+NumberToString(ways.size())+"!="+NumberToString(bucketSize)+")!");
     }
 
-    std::cout << "Ways loaded: " << ways.size() << std::endl;
+    progress.Info(std::string("Ways loaded: ")+NumberToString(ways.size()));
 
-    std::cout << "Scanning for matching nodes..." << std::endl;
+    progress.Info("Scanning for matching nodes");
 
     std::map<Id,RawNode> nodes;
 
     if (!scanner.Open("rawnodes.dat")) {
+      progress.Error("Canot open 'rawnodes.dat'");
       return false;
     }
 
@@ -219,9 +225,10 @@ bool GenerateWayDat(const TypeConfig& typeConfig)
 
     scanner.Close();
 
-    std::cout << "Scanning way node usage..." << std::endl;
+    progress.Info("Scanning way node usage");
 
     if (!scanner.Open("rawways.dat")) {
+      progress.Error("Canot open 'rawways.dat'");
       return false;
     }
 
@@ -243,7 +250,7 @@ bool GenerateWayDat(const TypeConfig& typeConfig)
 
     scanner.Close();
 
-    std::cout << "Writing ways..." << std::endl;
+    progress.Info("Writing ways");
 
     for (std::map<Id,RawWay>::iterator w=ways.begin();
          w!=ways.end();
@@ -272,7 +279,7 @@ bool GenerateWayDat(const TypeConfig& typeConfig)
         }
         else if (tag->key==tagLayer) {
           if (sscanf(tag->value.c_str(),"%hhd",&layer)!=1) {
-            std::cerr << "Layer tag value '" << tag->value << "' for way " << rawWay.id << " is not numeric!" << std::endl;
+            progress.Warning(std::string("Layer tag value '")+tag->value+"' for way "+NumberToString(rawWay.id)+" is not numeric!");
           }
           tag=rawWay.tags.erase(tag);
         }

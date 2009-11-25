@@ -27,19 +27,22 @@
 #include <osmscout/Node.h>
 #include <osmscout/Tiles.h>
 
-bool GenerateNodeIndex(size_t intervalSize)
+bool GenerateNodeIndex(const ImportParameter& parameter,
+                       Progress& progress)
 {
   //
   // Analysing distribution of nodes in the given interval size
   //
 
-  std::cout << "Analysing distribution..." << std::endl;
+  progress.SetAction("Analysing distribution");
 
+  size_t                     intervalSize=parameter.GetNodeIndexIntervalSize();
   FileScanner                scanner;
   std::map<size_t,NodeCount> intervalDist;
   std::map<size_t,size_t>    offsetMap;
 
   if (!scanner.Open("nodes.dat")) {
+    progress.Error("Cannot open 'nodes.dat'");
     return false;
   }
 
@@ -82,10 +85,13 @@ bool GenerateNodeIndex(size_t intervalSize)
   // Writing index file
   //
 
+  progress.SetAction("Generating 'node.idx'");
+
   FileWriter writer;
   size_t     intervalCount=offsetMap.size();
 
   if (!writer.Open("node.idx")) {
+    progress.Error("Cannot create 'nodes.idx'");
     return false;
   }
 

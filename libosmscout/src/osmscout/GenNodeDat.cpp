@@ -29,22 +29,25 @@
 #include <osmscout/RawNode.h>
 #include <osmscout/Node.h>
 
-bool GenerateNodeDat()
+bool GenerateNodeDat(const ImportParameter& parameter,
+                     Progress& progress)
 {
   //
   // Analysing distribution of nodes in the given interval size
   //
 
-  std::cout << "Generate nodes.dat..." << std::endl;
+  progress.SetAction("Generating nodes.dat");
 
   FileScanner scanner;
   FileWriter  writer;
 
   if (!scanner.Open("rawnodes.dat")) {
+    progress.Error("Cannot open 'rawnodes.dat'");
     return false;
   }
 
   if (!writer.Open("nodes.dat")) {
+    progress.Error("Cannot create 'nodes.dat'");
     return false;
   }
 

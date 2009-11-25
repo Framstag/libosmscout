@@ -25,7 +25,6 @@
 #include <string>
 #include <vector>
 
-
 #include <string.h>
 
 #include <libxml/parser.h>
@@ -33,6 +32,7 @@
 #include <osmscout/RawNode.h>
 #include <osmscout/RawRelation.h>
 #include <osmscout/RawWay.h>
+#include <osmscout/Util.h>
 
 class Preprocessor
 {
@@ -431,8 +431,9 @@ static void StructuredErrorHandler(void *data, xmlErrorPtr error)
   std::cerr << "XML error, line " << error->line << ": " << error->message << std::endl;
 }
 
-bool Preprocess(const char* mapfile,
-                const TypeConfig& typeConfig)
+bool Preprocess(const TypeConfig& typeConfig,
+                const ImportParameter& parameter,
+                Progress& progress)
 {
   Preprocessor  pp(typeConfig);
   Parser        parser(pp,typeConfig);
@@ -446,12 +447,12 @@ bool Preprocess(const char* mapfile,
   saxParser.endElement=EndElement;
   saxParser.serror=StructuredErrorHandler;
 
-  xmlSAXUserParseFile(&saxParser,&parser,mapfile);
+  xmlSAXUserParseFile(&saxParser,&parser,parameter.GetMapfile().c_str());
 
-  std::cout << "Nodes: " << pp.nodeCount << std::endl;
-  std::cout << "Ways:  " << pp.wayCount << std::endl;
-  std::cout << "Areas: " << pp.areaCount << std::endl;
-  std::cout << "Relations: " << pp.relationCount << std::endl;
+  progress.Info(std::string("Nodes: ")+NumberToString(pp.nodeCount));
+  progress.Info(std::string("Ways:  ")+NumberToString(pp.wayCount));
+  progress.Info(std::string("Areas: ")+NumberToString(pp.areaCount));
+  progress.Info(std::string("Relations: ")+NumberToString(pp.relationCount));
 
   return true;
 }

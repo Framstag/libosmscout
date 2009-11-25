@@ -19,17 +19,17 @@
 
 #include <osmscout/GenAreaWayIndex.h>
 
-#include <cmath>
-#include <iostream>
 #include <map>
 #include <set>
 
 #include <osmscout/FileScanner.h>
 #include <osmscout/FileWriter.h>
 #include <osmscout/Tiles.h>
+#include <osmscout/Util.h>
 #include <osmscout/Way.h>
 
-bool GenerateAreaWayIndex(size_t wayIndexIntervalSize)
+bool GenerateAreaWayIndex(const ImportParameter& parameter,
+                                 Progress& progress)
 {
   /*
   std::cout << "Tile -180 -90   : " << GetTileId(-180.0,-90.0) << std::endl;
@@ -49,8 +49,9 @@ bool GenerateAreaWayIndex(size_t wayIndexIntervalSize)
   // Analysing ways regarding draw type and matching tiles.
   //
 
-  std::cout << "Analysing distribution..." << std::endl;
+  progress.SetAction("Analysing distribution");
 
+  size_t                                         wayIndexIntervalSize=parameter.GetWayIndexIntervalSize();
   FileScanner                                    scanner;
   std::vector<size_t>                            drawTypeDist;
   std::vector<std::map<TileId,NodeCount > >      drawTypeTileNodeCount;
@@ -65,6 +66,7 @@ bool GenerateAreaWayIndex(size_t wayIndexIntervalSize)
   //
 
   if (!scanner.Open("ways.dat")) {
+    progress.Error("Cannot open 'ways.dat'");
     return false;
   }
 
@@ -120,7 +122,7 @@ bool GenerateAreaWayIndex(size_t wayIndexIntervalSize)
 
   scanner.Close();
 
-  std::cout << "Ways scanned: " << wayCount << std::endl;
+  progress.Info(std::string("Ways scanned: ")+NumberToString(wayCount));
   /*
   std::cout << "Distribution by type" << std::endl;
   for (size_t i=0; i<styleTypes.size(); i++) {
@@ -128,6 +130,8 @@ bool GenerateAreaWayIndex(size_t wayIndexIntervalSize)
       std::cout << styleTypes[i].GetType() << ": " << drawTypeDist[styleTypes[i].GetType()] << std::endl;
     }
   }*/
+
+  progress.SetAction("Calculating statistics");
 
   size_t drawTypeSum=0;
   size_t tileSum=0;
@@ -159,18 +163,21 @@ bool GenerateAreaWayIndex(size_t wayIndexIntervalSize)
     }
   }
 
-  std::cout << "Total number of draw types with tiles: " << drawTypeSum << std::endl;
-  std::cout << "Total number of tiles: " << tileSum << std::endl;
-  std::cout << "Total number of pages in tiles: " << pageSum << std::endl;
-  std::cout << "Total number of nodes in tiles: " << nodeSum << std::endl;
+  progress.Info(std::string("Total number of draw types with tiles: ")+NumberToString(drawTypeSum));
+  progress.Info(std::string("Total number of tiles: ")+NumberToString(tileSum));
+  progress.Info(std::string("Total number of pages in tiles: ")+NumberToString(pageSum));
+  progress.Info(std::string("Total number of nodes in tiles: ")+NumberToString(nodeSum));
 
   //
-  // Writing index file (with blanks for way ids)
+  // Writing index file
   //
+
+  progress.SetAction("Generating 'areaway.idx'");
 
   FileWriter writer;
 
   if (!writer.Open("areaway.idx")) {
+    progress.Error("Cannot create 'areaway.idx'");
     return false;
   }
 

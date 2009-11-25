@@ -24,6 +24,7 @@
 
 #include <sys/time.h>
 
+#include <limits>
 #include <set>
 #include <string>
 
@@ -86,6 +87,38 @@ extern bool EncodeNumber(unsigned long number,
 extern bool DecodeNumber(const char* buffer, unsigned long& number, size_t& bytes);
 
 extern bool GetFileSize(const std::string& filename, long& size);
+
+template<typename A>
+std::string NumberToString(const A& a)
+{
+  std::string res;
+  A           value(a);
+  bool        negative=false;
+
+  if (std::numeric_limits<A>::is_signed) {
+    if (value<0) {
+      negative=true;
+      value=-value;
+    }
+  }
+
+  res.reserve(20);
+
+  while (value!=0) {
+    res.insert(0,1,'0'+value%10);
+    value=value/10;
+  }
+
+  if (res.empty()) {
+    res.insert(0,1,'0');
+  }
+
+  if (negative) {
+    res.insert(0,1,'-');
+  }
+
+  return res;
+}
 
 double GetSphericalDistance(double aLon, double aLat,
                             double bLon, double bLat);

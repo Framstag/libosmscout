@@ -20,8 +20,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <osmscout/Import.h>
+#include <osmscout/Progress.h>
 #include <osmscout/TypeConfig.h>
 
-extern bool GenerateWayDat(const TypeConfig& typeConfig);
+extern bool GenerateWayDat(const TypeConfig& typeConfig,
+                           const ImportParameter& parameter,
+                           Progress& progress);
 
 #endif

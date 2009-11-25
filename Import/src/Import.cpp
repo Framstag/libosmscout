@@ -17,30 +17,21 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <cerrno>
 #include <cstring>
+#include <cstdio>
 #include <iostream>
 
-#include <osmscout/TypeConfig.h>
-#include <osmscout/TypeConfigLoader.h>
-
-#include <osmscout/Preprocess.h>
-#include <osmscout/GenAreaNodeIndex.h>
-#include <osmscout/GenAreaWayIndex.h>
-#include <osmscout/GenNodeIndex.h>
-#include <osmscout/GenNodeUseIndex.h>
-#include <osmscout/GenNodeDat.h>
-#include <osmscout/GenCityStreetIndex.h>
-#include <osmscout/GenWayDat.h>
-#include <osmscout/GenWayIndex.h>
-
-static size_t nodeIndexIntervalSize=50; // Must not be > max(uint16_t)!
-static size_t wayIndexIntervalSize=50;  // Must not be > max(uint16_t)!
+#include <osmscout/Import.h>
 
 int main(int argc, char* argv[])
 {
-  bool        parameterError=false;
-  size_t      startStep=1;
-  const char* mapfile=NULL;
+  ImportParameter parameter;
+  ConsoleProgress progress;
+  bool            parameterError=false;
+  size_t          startStep=parameter.GetStartStep();
+  size_t          endStep=parameter.GetEndStep();
+  const char*     mapfile=NULL;
 
   // Simple way to analyse command line parameters, but enough for now...
   int i=1;
@@ -49,34 +40,23 @@ int main(int argc, char* argv[])
       i++;
 
       if (i<argc) {
-        if (std::string(argv[i])=="1") {
-          startStep=1;
+        int res=sscanf(argv[i],"%zu",&startStep);
+
+        if (res!=1) {
+          parameterError=true;
         }
-        else if (std::string(argv[i])=="2") {
-          startStep=2;
-        }
-        else if (std::string(argv[i])=="3") {
-          startStep=3;
-        }
-        else if (std::string(argv[i])=="4") {
-          startStep=4;
-        }
-        else if (std::string(argv[i])=="5") {
-          startStep=5;
-        }
-        else if (std::string(argv[i])=="6") {
-          startStep=6;
-        }
-        else if (std::string(argv[i])=="7") {
-          startStep=7;
-        }
-        else if (std::string(argv[i])=="8") {
-          startStep=8;
-        }
-        else if (std::string(argv[i])=="9") {
-          startStep=9;
-        }
-        else {
+      }
+      else {
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"-e")==0) {
+      i++;
+
+      if (i<argc) {
+        int res=sscanf(argv[i],"%zu",&endStep);
+
+        if (res!=1) {
           parameterError=true;
         }
       }
@@ -94,112 +74,19 @@ int main(int argc, char* argv[])
 
     i++;
   }
+
   if (mapfile==NULL || parameterError) {
     std::cerr << "Import [-s <startstep>] <openstreetmapdata.osm>" << std::endl;
     return 1;
   }
 
-  TypeConfig typeConfig;
+  parameter.SetMapfile(mapfile);
+  parameter.SetSteps(startStep,endStep);
 
-  if (!LoadTypeConfig("map.ost.xml",typeConfig)) {
-    std::cerr << "Cannot load type configuration!" << std::endl;
+  if (Import(parameter,progress)) {
+    std::cout << "Import OK!" << std::endl;
   }
-
-  if (startStep==1) {
-    std::cout << "Preprocess..." << std::endl;
-    if (!Preprocess(mapfile,typeConfig)) {
-      std::cerr << "Cannot parse input file!" << std::endl;
-      return 1;
-    }
-
-    startStep++;
+  else {
+    std::cerr << "Import failed!" << std::endl;
   }
-
-  if (startStep==2) {
-    std::cout << "Generate 'nodes.dat'..." << std::endl;
-    if (!GenerateNodeDat()) {
-      std::cerr << "Cannot generate node data file!" << std::endl;
-      return 1;
-    }
-
-    startStep++;
-  }
-
-  if (startStep==3) {
-    std::cout << "Generate 'ways.dat'..." << std::endl;
-    if (!GenerateWayDat(typeConfig)) {
-      std::cerr << "Cannot generate way data file!" << std::endl;
-      return 1;
-    }
-
-    startStep++;
-  }
-
-  if (startStep==4) {
-    std::cout << "Generating 'node.idx'..." << std::endl;
-
-    if (!GenerateNodeIndex(nodeIndexIntervalSize)) {
-      std::cerr << "Cannot generate node index!" << std::endl;
-      return 1;
-    }
-
-    startStep++;
-  }
-
-  if (startStep==5) {
-    std::cout << "Generating 'areanode.idx'..." << std::endl;
-
-    if (!GenerateAreaNodeIndex(nodeIndexIntervalSize)) {
-      std::cerr << "Cannot generate area node index!" << std::endl;
-      return 1;
-    }
-
-    startStep++;
-  }
-
-  if (startStep==6) {
-    std::cout << "Generating 'way.idx'..." << std::endl;
-
-    if (!GenerateWayIndex(wayIndexIntervalSize)) {
-      std::cerr << "Cannot generate way index!" << std::endl;
-      return 1;
-    }
-
-    startStep++;
-  }
-
-  if (startStep==7) {
-    std::cout << "Generating 'areaway.idx'..." << std::endl;
-
-    if (!GenerateAreaWayIndex(wayIndexIntervalSize)) {
-      std::cerr << "Cannot generate area way index!" << std::endl;
-      return 1;
-    }
-
-    startStep++;
-  }
-
-  if (startStep==8) {
-    std::cout << "Generating 'citystreet.idx'..." << std::endl;
-
-    if (!GenerateCityStreetIndex(typeConfig)) {
-      std::cerr << "Cannot generate city street index!" << std::endl;
-      return 1;
-    }
-
-    startStep++;
-  }
-
-  if (startStep==9) {
-    std::cout << "Generating 'nodeuse.idx'..." << std::endl;
-
-    if (!GenerateNodeUseIndex(typeConfig,nodeIndexIntervalSize)) {
-      std::cerr << "Cannot generate node usage index!" << std::endl;
-      return 1;
-    }
-
-    startStep++;
-  }
-
-  std::cout << "done." << std::endl;
 }

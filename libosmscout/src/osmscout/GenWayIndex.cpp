@@ -19,28 +19,29 @@
 
 #include <osmscout/GenWayIndex.h>
 
-#include <cmath>
-#include <iostream>
 #include <map>
 
 #include <osmscout/FileScanner.h>
 #include <osmscout/FileWriter.h>
-#include <osmscout/Tiles.h>
+#include <osmscout/Util.h>
 #include <osmscout/Way.h>
 
-bool GenerateWayIndex(size_t intervalSize)
+bool GenerateWayIndex(const ImportParameter& parameter,
+                      Progress& progress)
 {
   //
   // Analysing distribution of ways in the given interval size
   //
 
-  std::cout << "Analysing distribution..." << std::endl;
+  progress.SetAction("Analysing distribution");
 
+  size_t                     intervalSize=parameter.GetWayIndexIntervalSize();
   FileScanner                scanner;
   std::map<size_t,NodeCount> intervalDist;
   std::map<size_t,size_t>    offsetMap;
 
   if (!scanner.Open("ways.dat")) {
+    progress.Error("Cannot open 'ways.dat'");
     return false;
   }
 
@@ -72,16 +73,19 @@ bool GenerateWayIndex(size_t intervalSize)
     std::cout << interval->first << ": " << interval->second << std::endl;
   }*/
 
-  std::cout << intervalDist.size() << " intervals filled" << std::endl;
+  progress.Info(NumberToString(intervalDist.size())+" intervals filled");
 
   //
   // Writing index file
   //
 
+  progress.SetAction("Generating 'way.idx'");
+
   FileWriter writer;
   size_t     intervalCount=offsetMap.size();
 
   if (!writer.Open("way.idx")) {
+    progress.Error("Cannot create 'ways.idx'");
     return false;
   }
 

@@ -19,8 +19,6 @@
 
 #include <osmscout/GenAreaNodeIndex.h>
 
-#include <cmath>
-#include <iostream>
 #include <map>
 #include <set>
 
@@ -28,15 +26,18 @@
 #include <osmscout/FileWriter.h>
 #include <osmscout/Node.h>
 #include <osmscout/Tiles.h>
+#include <osmscout/Util.h>
 
-bool GenerateAreaNodeIndex(size_t nodeIndexIntervalSize)
+bool GenerateAreaNodeIndex(const ImportParameter& parameter,
+                           Progress& progress)
 {
   //
   // Analysing nodes regarding draw type and matching tiles.
   //
 
-  std::cout << "Analysing distribution..." << std::endl;
+  progress.SetAction("Analysing distribution");
 
+  size_t                                         nodeIndexIntervalSize=parameter.GetNodeIndexIntervalSize();
   FileScanner                                    scanner;
   std::vector<size_t>                            drawTypeDist;
   std::vector<std::map<TileId,NodeCount> >       drawTypeTileNodeCount;
@@ -46,6 +47,7 @@ bool GenerateAreaNodeIndex(size_t nodeIndexIntervalSize)
   scanner.Open("nodes.dat");
 
   if (scanner.HasError()) {
+    progress.Error("Cannot open 'nodes.dat'");
     return false;
   }
 
@@ -83,7 +85,7 @@ bool GenerateAreaNodeIndex(size_t nodeIndexIntervalSize)
 
   scanner.Close();
 
-  std::cout << "Nodes scanned: " << nodeCount << std::endl;
+  progress.Info(std::string("Nodes scanned: ")+NumberToString(nodeCount));
 
   /*
   std::cout << "Distribution by type" << std::endl;
@@ -93,6 +95,8 @@ bool GenerateAreaNodeIndex(size_t nodeIndexIntervalSize)
       std::cout << styleTypes[i].GetType() << ": " << drawTypeDist[styleTypes[i].GetType()] << std::endl;
     }
   }*/
+
+  progress.SetAction("Calculating statistics");
 
   size_t drawTypeSum=0;
   size_t tileSum=0;
@@ -124,18 +128,21 @@ bool GenerateAreaNodeIndex(size_t nodeIndexIntervalSize)
     }
   }
 
-  std::cout << "Total number of draw types with tiles: " << drawTypeSum << std::endl;
-  std::cout << "Total number of tiles: " << tileSum << std::endl;
-  std::cout << "Total number of pages in tiles: " << pageSum << std::endl;
-  std::cout << "Total number of nodes in tiles: " << nodeSum << std::endl;
+  progress.Info(std::string("Total number of draw types with tiles: ")+NumberToString(drawTypeSum));
+  progress.Info(std::string("Total number of tiles: ")+NumberToString(tileSum));
+  progress.Info(std::string("Total number of pages in tiles: ")+NumberToString(pageSum));
+  progress.Info(std::string("Total number of nodes in tiles: ")+NumberToString(nodeSum));
 
   //
   // Writing index file
   //
 
+  progress.SetAction("Generating 'areanode.idx'");
+
   FileWriter writer;
 
   if (!writer.Open("areanode.idx")) {
+    progress.Error("Cannot create 'nodes.dat'");
     return false;
   }
 

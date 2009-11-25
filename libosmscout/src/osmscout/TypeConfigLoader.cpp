@@ -122,7 +122,7 @@ public:
       }
 
       if (config.GetTagId((const char*)valueValue)!=tagIgnore) {
-        std::cerr << "Tag '" << value << "' already internally defined, skipping..." << std::endl;
+        //std::cerr << "Tag '" << value << "' already internally defined, skipping..." << std::endl;
         return;
       }
 

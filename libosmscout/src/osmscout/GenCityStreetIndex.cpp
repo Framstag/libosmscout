@@ -21,7 +21,6 @@
 
 #include <cassert>
 #include <cmath>
-#include <iostream>
 #include <list>
 #include <set>
 
@@ -136,7 +135,8 @@ static void GetNodeIdsFromAreasAndRelations(const std::list<RawWay>& areas,
 }
 
 static void RemoveUnresolvedAreas(std::list<RawWay>& areas,
-                                  const std::map<Id,RawNode>& nodes)
+                                  const std::map<Id,RawNode>& nodes,
+                                  Progress& progress)
 {
   std::list<RawWay>::iterator area=areas.begin();
 
@@ -147,7 +147,7 @@ static void RemoveUnresolvedAreas(std::list<RawWay>& areas,
       std::map<Id,RawNode>::const_iterator node=nodes.find(area->nodes[i]);
 
       if (node==nodes.end()) {
-        std::cout << "Area " << area->id << " has at least one unresolved node, skipping..." << std::endl;
+        progress.Warning(std::string("Area ")+NumberToString(area->id)+" has at least one unresolved node, skipping");
         resolved=false;
         break;
       }
@@ -163,7 +163,8 @@ static void RemoveUnresolvedAreas(std::list<RawWay>& areas,
 }
 
 static void RemoveUnresolvedRelations(std::list<RawRelation>& relations,
-                                      const std::map<Id,RawNode>& nodes)
+                                      const std::map<Id,RawNode>& nodes,
+                                      Progress& progress)
 {
   std::list<RawRelation>::iterator rel=relations.begin();
 
@@ -172,7 +173,7 @@ static void RemoveUnresolvedRelations(std::list<RawRelation>& relations,
 
     for (size_t i=0; i<rel->members.size(); i++) {
       if (rel->members[i].type!=RawRelation::memberNode) {
-        std::cout << "Relation " << rel->id << " has unresolved way " << rel->members[i].id << " of relation, skipping..." << std::endl;
+        progress.Warning(std::string("Relation ")+NumberToString(rel->id)+" has unresolved way "+NumberToString(rel->members[i].id)+" of relation, skipping");
         resolved=false;
         break;
       }
@@ -180,7 +181,7 @@ static void RemoveUnresolvedRelations(std::list<RawRelation>& relations,
         std::map<Id,RawNode>::const_iterator node=nodes.find(rel->members[i].id);
 
         if (node==nodes.end()) {
-          std::cout << "Relation " << rel->id << " has unresolved node, skipping..." << std::endl;
+          progress.Warning(std::string("Relation ")+NumberToString(rel->id)+" has unresolved node, skipping");
           resolved=false;
           break;
         }
@@ -207,7 +208,8 @@ static void RemoveUnresolvedRelations(std::list<RawRelation>& relations,
   is of order O(n^2) where n is the number of ways.
  */
 static void ResolveWaysInRelations(std::list<RawRelation>& relations,
-                                   const std::map<Id,RawWay>& ways)
+                                   const std::map<Id,RawWay>& ways,
+                                   Progress& progress)
 {
   std::list<RawRelation>::iterator rel=relations.begin();
 
@@ -225,18 +227,18 @@ static void ResolveWaysInRelations(std::list<RawRelation>& relations,
           w.push_back(way->second);
         }
         else {
-          std::cout << "Cannot resolve way " << member->id << " in relation " << rel->id << std::endl;
+          progress.Warning(std::string("Cannot resolve way ")+NumberToString(member->id)+" in relation "+NumberToString(rel->id));
           convertable=false;
         }
       }
       else {
-          std::cout << "Member in relation " << rel->id << " is not of type way" << std::endl;
+          progress.Warning(std::string("Member in relation ")+NumberToString(rel->id)+" is not of type way");
         convertable=false;
       }
     }
 
     if (!convertable || w.size()<=1) {
-      std::cout << "Skipping relation " << rel->id << ", because it does not only consist of ways or no ways at all" << std::endl;
+      progress.Warning(std::string("Skipping relation ")+NumberToString(rel->id)+", because it does not only consist of ways or no ways at all");
       rel=relations.erase(rel);
       continue;
     }
@@ -300,18 +302,19 @@ static void ResolveWaysInRelations(std::list<RawRelation>& relations,
       }
 
       if (!found) {
-        std::cout << "Cannot find way with node " << ms.back().id << " as start or end node" << std::endl;
+        progress.Warning(std::string("Cannot find way with node ")+NumberToString(ms.back().id)+" as start or end node");
         break;
       }
     }
 
     if (w.size()>1) {
-      std::cout << "Cannot resolve ways in Relation " << rel->id << " to build an area boundary, skipping..." << std::endl;
+      progress.Warning(std::string("Cannot resolve ways in Relation ")+NumberToString(rel->id)+" to build an area boundary, skipping");
+      /*
       for (std::list<RawWay>::const_iterator iter=wb.begin();
            iter!=wb.end();
            ++iter) {
         std::cout << iter->id << " " << iter->nodes[0] << " " << iter->nodes[iter->nodes.size()-1] << std::endl;
-      }
+      }*/
       rel=relations.erase(rel);
       continue;
     }
@@ -345,13 +348,14 @@ static void ResolveWaysInRelations(std::list<RawRelation>& relations,
       w.erase(w.begin());
     }
     else {
-      std::cout << "Cannot find way with node " << ms.back().id << " as start or end node" << std::endl;
-      std::cout << "Cannot resolve ways in Relation " << rel->id << " to build an area boundary, skipping..." << std::endl;
+      progress.Warning(std::string("Cannot find way with node ")+NumberToString(ms.back().id)+" as start or end node");
+      progress.Warning(std::string("Cannot resolve ways in Relation ")+NumberToString(rel->id)+" to build an area boundary, skipping");
+      /*
       for (std::list<RawWay>::const_iterator iter=wb.begin();
            iter!=wb.end();
            ++iter) {
         std::cout << iter->id << " " << iter->nodes[0] << " " << iter->nodes[iter->nodes.size()-1] << std::endl;
-      }
+      }*/
       rel=relations.erase(rel);
       continue;
     }
@@ -365,16 +369,18 @@ static void ResolveWaysInRelations(std::list<RawRelation>& relations,
 }
 
 static bool GetNodesFromNodeIds(const std::set<Id> & ids,
-                                std::map<Id,RawNode>& nodes)
+                                std::map<Id,RawNode>& nodes,
+                                Progress& progress)
 {
   FileScanner scanner;
 
   nodes.clear();
 
   if (ids.size()!=0) {
-    std::cout << "Resolving " << ids.size() << " node ids..." << std::endl;
+    progress.Info(std::string("Resolving ")+NumberToString(ids.size())+" node ids");
 
     if (!scanner.Open("rawnodes.dat")) {
+      progress.Error("Cannot open 'rawnodes.dat'");
       return false;
     }
 
@@ -392,13 +398,13 @@ static bool GetNodesFromNodeIds(const std::set<Id> & ids,
 
     scanner.Close();
 
-    std::cout << ids.size() << " ids searched, " << nodes.size() << " nodes found" << std::endl;
+    progress.Info(NumberToString(ids.size())+" ids searched, "+NumberToString(nodes.size())+" nodes found");
 
     for (std::set<Id>::const_iterator id=ids.begin();
          id!=ids.end();
          ++id) {
       if (nodes.find(*id)==nodes.end()) {
-        std::cout << "Node Id " << *id << " not found!" << std::endl;
+        progress.Warning(std::string("Node Id ")+NumberToString(*id)+" not found!");
       }
     }
   }
@@ -407,16 +413,18 @@ static bool GetNodesFromNodeIds(const std::set<Id> & ids,
 }
 
 static bool GetWaysFromWayIds(const std::set<Id> & ids,
-                              std::map<Id,RawWay>& ways)
+                              std::map<Id,RawWay>& ways,
+                              Progress& progress)
 {
   FileScanner scanner;
 
   ways.clear();
 
   if (ids.size()!=0) {
-    std::cout << "Resolving " << ids.size() << " way ids..." << std::endl;
+    progress.Info(std::string("Resolving ")+NumberToString(ids.size())+" way ids");
 
     if (!scanner.Open("rawways.dat")) {
+      progress.Error("Cannot open 'rawways.dat'");
       return false;
     }
 
@@ -434,13 +442,13 @@ static bool GetWaysFromWayIds(const std::set<Id> & ids,
 
     scanner.Close();
 
-    std::cout << ids.size() << " ids searched, " << ways.size() << " way found" << std::endl;
+    progress.Info(NumberToString(ids.size())+" ids searched, "+NumberToString(ways.size())+" ways found");
 
     for (std::set<Id>::const_iterator id=ids.begin();
          id!=ids.end();
          ++id) {
       if (ways.find(*id)==ways.end()) {
-        std::cout << "Way Id " << *id << " not found!" << std::endl;
+        progress.Warning(std::string("Ways Id ")+NumberToString(*id)+" not found!");
       }
     }
   }
@@ -513,6 +521,7 @@ void AddOrUpdateUrban(std::map<Id,Urban>& urbans,
   }
 }
 
+/*
 bool FindDataForCityStreet(const std::map<Id,Urban>& urbans,
                            const std::string& cityName,
                            const std::string& streetName,
@@ -550,16 +559,12 @@ bool FindDataForCityStreet(const std::map<Id,Urban>& urbans,
   }
 
   return false;
-}
+}*/
 
-bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
+bool GenerateCityStreetIndex(const TypeConfig& typeConfig,
+                             const ImportParameter& parameter,
+                             Progress& progress)
 {
-  //
-  // Analysing distribution of areas in the given interval size
-  //
-
-  std::cout << "Analysing distribution..." << std::endl;
-
   std::set<TypeId>          cityIds;
   TypeId                    boundaryId=typeIgnore;
   TypeId                    typeId;
@@ -592,13 +597,14 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
   boundaryId=typeConfig.GetAreaTypeId(tagBoundary,"administrative");
   assert(boundaryId!=typeIgnore);
 
-  std::cout << "Scanning for cities of type 'node'..." << std::endl;
+  progress.SetAction("Scanning for cities of type 'node'");
 
   //
   // Getting all nodes of type place=*. We later need an area for these cities.
   //
 
   if (!scanner.Open("rawnodes.dat")) {
+    progress.Error("Cannot open 'rawnodes.dat'");
     return false;
   }
 
@@ -631,23 +637,18 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
 
   scanner.Close();
 
-  std::cout << "Found " << cityNodes.size() << " cities of type 'node'" << std::endl;
+  progress.Info(std::string("Found ")+NumberToString(cityNodes.size())+" cities of type 'node'");
 
   //
   // Getting all areas of type place=*.
   //
 
-  std::cout << "Scanning for cities of type 'area'..." << std::endl;
+  progress.SetAction("Scanning for cities of type 'area'");
 
   if (!scanner.Open("rawways.dat")) {
+    progress.Error("Cannot open 'rawways.dat'");
     return false;
   }
-  /*
-  in.open("rawways.dat",std::ios::in|std::ios::binary);
-
-  if (!in) {
-    return false;
-  }*/
 
   while (!scanner.HasError()) {
     RawWay way;
@@ -668,13 +669,13 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
 
   GetNodeIdsFromAreas(cityAreas,ids);
 
-  if (!GetNodesFromNodeIds(ids,nodes)) {
+  if (!GetNodesFromNodeIds(ids,nodes,progress)) {
     return false;
   }
 
-  RemoveUnresolvedAreas(cityAreas,nodes);
+  RemoveUnresolvedAreas(cityAreas,nodes,progress);
 
-  std::cout << "Found " << cityAreas.size() << " cities of type 'area'" << std::endl;
+  progress.Info(std::string("Found ")+NumberToString(cityAreas.size())+" cities of type 'area'");
 
   //
   // Directly convert all city areas to cities.
@@ -698,7 +699,7 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
     }
 
     if (name.empty()) {
-      std::cout << "City of type 'area' " << area->id << " has no name, skipping..." << std::endl;
+      progress.Warning(std::string("City of type 'area' and id ")+NumberToString(area->id)+" has no name, skipping");
       continue;
     }
 
@@ -721,17 +722,12 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
   // match urbans of type node against them to get an area for a city.
   //
 
-  std::cout << "Scanning for city boundaries of type 'area'..." << std::endl;
+  progress.SetAction("Scanning for city boundaries of type 'area'");
 
   if (!scanner.Open("rawways.dat")) {
+    progress.Error("Cannot open 'rawways.dat'");
     return false;
   }
-  /*
-  in.open("rawways.dat",std::ios::in|std::ios::binary);
-
-  if (!in) {
-    return false;
-  }*/
 
   while (!scanner.HasError()) {
     RawWay way;
@@ -780,9 +776,10 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
   // match urbans of type node against them to get an area for a city.
   //
 
-  std::cout << "Scanning for city boundaries of type 'relation'..." << std::endl;
+  progress.SetAction("Scanning for city boundaries of type 'relation'");
 
   if (!scanner.Open("rawrels.dat")) {
+    progress.Error("Cannot open 'rawrels.dat'");
     return false;
   }
 
@@ -827,7 +824,7 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
   GetRelationIdsFromRelations(boundaryRelations,ids);
 
   if (ids.size()>0) {
-    std::cout << "(Recursivly) resolving members of type 'relation' in relations is currently not supported!" << std::endl;
+    progress.Warning("(Recursivly) resolving members of type 'relation' in relations is currently not supported!");
   }
   /*
   while (ids.size()!=0) {
@@ -836,20 +833,20 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
   }*/
 
   GetWayIdsFromRelations(boundaryRelations,ids);
-  GetWaysFromWayIds(ids,ways);
-  ResolveWaysInRelations(boundaryRelations,ways);
+  GetWaysFromWayIds(ids,ways,progress);
+  ResolveWaysInRelations(boundaryRelations,ways,progress);
 
   GetNodeIdsFromAreasAndRelations(boundaryAreas,boundaryRelations,ids);
 
-  if (!GetNodesFromNodeIds(ids,nodes)) {
+  if (!GetNodesFromNodeIds(ids,nodes,progress)) {
     return false;
   }
 
-  RemoveUnresolvedAreas(boundaryAreas,nodes);
-  RemoveUnresolvedRelations(boundaryRelations,nodes);
+  RemoveUnresolvedAreas(boundaryAreas,nodes,progress);
+  RemoveUnresolvedRelations(boundaryRelations,nodes,progress);
 
-  std::cout << "Found " << boundaryAreas.size() << " areas of type 'administrative boundary' and admin level 6 or 8" << std::endl;
-  std::cout << "Found " << boundaryRelations.size() << " relations of type 'administrative boundary' and admin level 6 or 8" << std::endl;
+  progress.Info(std::string("Found ")+NumberToString(boundaryAreas.size())+" areas of type 'administrative boundary' and admin level 6 or 8");
+  progress.Info(std::string("Found ")+NumberToString(boundaryRelations.size())+" relations of type 'administrative boundary' and admin level 6 or 8");
 
   // Admin level 8
   for (std::list<RawWay>::const_iterator area=boundaryAreas.begin();
@@ -897,7 +894,7 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
             }
           }
 
-          std::cout << "Found area of city " << city->id << " " << name << " => " << area->id << std::endl;
+          progress.Info(std::string("Found area of city ")+NumberToString(city->id)+" "+name+" => "+NumberToString(area->id));
 
           AddOrUpdateUrban(urbans,area->id,city->id,refNode,name,ns);
 
@@ -956,7 +953,7 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
             }
           }
 
-          std::cout << "Found area of city " << city->id << " " << name << " => " << rel->id << std::endl;
+          progress.Info(std::string("Found area of city ")+NumberToString(city->id)+" "+name+" => "+NumberToString(rel->id));
 
           AddOrUpdateUrban(urbans,rel->id,city->id,refNode,name,ns);
 
@@ -1015,7 +1012,7 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
             }
           }
 
-          std::cout << "Found area of city " << city->id << " " << name << " => " << area->id << std::endl;
+          progress.Info(std::string("Found area of city ")+NumberToString(city->id)+" "+name+" => "+NumberToString(area->id));
 
           AddOrUpdateUrban(urbans,area->id,city->id,refNode,name,ns);
 
@@ -1072,7 +1069,7 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
             }
           }
 
-          std::cout << "Found area of city " << city->id << " " << name << " => " << rel->id << std::endl;
+          progress.Info(std::string("Found area of city ")+NumberToString(city->id)+" "+name+" => "+NumberToString(rel->id));
 
           AddOrUpdateUrban(urbans,rel->id,city->id,refNode,name,ns);
 
@@ -1086,9 +1083,9 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
   // Now start to build up our list of urbans...
   //
 
-  std::cout << "Found " << urbans.size() << " city areas" << std::endl;
+  progress.Info(std::string("Found ")+NumberToString(urbans.size())+" city areas");
 
-  std::cout << "Delete temporary data..." << std::endl;
+  progress.SetAction("Delete temporary data");
 
   cityNodes.clear();
   cityAreas.clear();
@@ -1098,7 +1095,7 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
   nodes.clear();
   ways.clear();
 
-  std::cout << "Calculating bounds of city areas..." << std::endl;
+  progress.SetAction("Calculating bounds of city areas");
 
   for (std::map<Id,Urban>::iterator urban=urbans.begin();
        urban!=urbans.end();
@@ -1118,23 +1115,25 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
     }
   }
 
-  std::cout << "Get types of ways..." << std::endl;
+  progress.SetAction("Getting ways with name in found cities");
 
   std::set<TypeId> wayTypes;
 
   typeConfig.GetWaysWithKey(tagHighway,wayTypes);
 
+  /*
   for (std::set<TypeId>::const_iterator type=wayTypes.begin();
        type!=wayTypes.end();
        ++type) {
     std::cout << "  Way type: " << *type << std::endl;
-  }
+  }*/
 
   // We currently scan Ways instead of RawWays because for Ways we have the nodes already
   // resolved (later we have to rethink this, but why should we index ways that are not
   // part fo the database (...but should we index urbans that are not in the database?)?)
 
   if (!scanner.Open("ways.dat")) {
+    progress.Error("Cannot open 'ways.dat'");
     return false;
   }
 
@@ -1196,15 +1195,16 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
 
   scanner.Close();
 
-  std::cout << "Generating 'citysteet.idx'..." << std::endl;
+  progress.SetAction("Generating 'citysteet.idx'");
 
   FileWriter writer;
 
   if (!writer.Open("citystreet.idx")) {
+    progress.Error("Cannot open 'citystreet.idx'");
     return false;
   }
 
-  std::cout << "Storing cities..." << std::endl;
+  //std::cout << "Storing cities..." << std::endl;
 
   std::map<std::string,City> cities;
 
@@ -1235,7 +1235,7 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig)
 
   cities.clear();
 
-  std::cout << "Storing urbans..." << std::endl;
+  //std::cout << "Storing urbans..." << std::endl;
 
 
   writer.WriteNumber(urbans.size()); // Number of urbans

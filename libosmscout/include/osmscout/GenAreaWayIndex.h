@@ -20,8 +20,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/Preprocess.h>
+#include <osmscout/Import.h>
+#include <osmscout/Progress.h>
 
-extern bool GenerateAreaWayIndex(size_t wayIndexIntervalSize);
+extern bool GenerateAreaWayIndex(const ImportParameter& parameter,
+                                 Progress& progress);
 
 #endif

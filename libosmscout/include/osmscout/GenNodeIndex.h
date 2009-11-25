@@ -20,9 +20,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-// For size_t
-#include <cstdio>
+#include <osmscout/Import.h>
+#include <osmscout/Progress.h>
 
-extern bool GenerateNodeIndex(size_t intervalSize);
+extern bool GenerateNodeIndex(const ImportParameter& parameter,
+                              Progress& progress);
 
 #endif
