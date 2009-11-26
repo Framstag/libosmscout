@@ -42,6 +42,7 @@ static const size_t defaultEndStep=9;
 ImportParameter::ImportParameter()
  : startStep(defaultStartStep),
    endStep(defaultEndStep),
+   indexPageSize(1024),
    nodeIndexIntervalSize(50),
    wayIndexIntervalSize(50)
 {
@@ -61,6 +62,11 @@ size_t ImportParameter::GetStartStep() const
 size_t ImportParameter::GetEndStep() const
 {
   return endStep;
+}
+
+size_t ImportParameter::GetIndexPageSize() const
+{
+  return indexPageSize;
 }
 
 size_t ImportParameter::GetNodeIndexIntervalSize() const

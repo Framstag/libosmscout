@@ -382,7 +382,6 @@ bool Database::GetNodes(const StyleConfig& styleConfig,
   // Loading relevant nodes
   //
 
-
   if (!nodeReader.IsOpen()) {
     if (!nodeReader.Open(file)) {
       std::cerr << "Error while opening nodes.dat file!" << std::endl;

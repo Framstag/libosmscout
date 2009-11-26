@@ -30,6 +30,7 @@ private:
   std::string mapfile;
   size_t      startStep;
   size_t      endStep;
+  size_t      indexPageSize;
   size_t      nodeIndexIntervalSize;
   size_t      wayIndexIntervalSize;
 
@@ -39,6 +40,7 @@ public:
   std::string GetMapfile() const;
   size_t GetStartStep() const;
   size_t GetEndStep() const;
+  size_t GetIndexPageSize() const;
   size_t GetNodeIndexIntervalSize() const;
   size_t GetWayIndexIntervalSize() const;
 
