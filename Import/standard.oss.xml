@@ -164,6 +164,11 @@
     <label style="contour" minMag="detail"/>
   </way>
 
+  <way key="highway" value="construction" prio="11">
+    <line color="99cccc" minPixel="0.5" maxPixel="0.5" width="2" />
+    <label style="contour" minMag="detail"/>
+  </way>
+
   <node key="highway" value="bus_stop" prio="11">
     <!-- sybol -->
     <!--<label  minMag="veryClose"/>-->
@@ -299,6 +304,7 @@
   </area>
 
   <area key="landuse" value="retail" prio="8">
+    <fill filter="building" color="bca9a9" layer="2"/>
     <fill color="feeaea"/>
     <label minMag="city"/>
   </area>
@@ -434,7 +440,9 @@
   </area>
 
   <area key="aeroway" value="terminal" prio="20">
+    <fill filter="building" color="cc99ff" layer="2"/>
     <fill color="d5ddbd"/>
+    <border color="b265ff" minPixel="1" maxPixel="1" width="1"/>
     <label minMag="detail"/>
   </area>
 
@@ -444,17 +452,17 @@
   </area>
 
   <way key="aeroway" value="runway" prio="20">
-    <line color="d5ddbd" minPixel="2" maxPixel="20" width="5" />
+    <line color="bbbbcc" minPixel="2" maxPixel="20" width="20" />
     <label style="contour" minMag="close"/>
   </way>
 
   <way key="aeroway" value="taxiway" prio="20">
-    <line color="d5ddbd" minPixel="2" maxPixel="20" width="5" />
+    <line color="bbbbcc" minPixel="2" maxPixel="20" width="15" />
     <label style="contour" minMag="close"/>
   </way>
 
   <area key="aeroway" value="apron" prio="20">
-    <fill color="d5ddbd"/>
+    <fill color="e8d1fe"/>
     <label minMag="detail"/>
   </area>
 
