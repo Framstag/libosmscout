@@ -7,5 +7,5 @@ includedir=@includedir@
 Name: libosmscout-map                   # human-readable name
 Description: osm navigation library     # human-readable description
 Version: @VERSION@
-Libs: @CAIRO_LIBS@ -L${libdir} -losmscoutmap
+Libs: @LIBCAIRO_LIBS@ -L${libdir} -losmscoutmap
 Cflags: -I${includedir}
