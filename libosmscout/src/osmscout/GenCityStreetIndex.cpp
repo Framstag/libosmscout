@@ -221,18 +221,22 @@ static void ResolveWaysInRelations(std::list<RawRelation>& relations,
          member!=rel->members.end();
          ++member) {
       if (member->type==RawRelation::memberWay) {
-        std::map<Id,RawWay>::const_iterator way=ways.find(member->id);
+        // We currently on check the outer bound and ignore ways in any other role
+        // especially role "inner"
+        if (member->role.empty() || member->role=="outer") {
+          std::map<Id,RawWay>::const_iterator way=ways.find(member->id);
 
-        if (way!=ways.end()) {
-          w.push_back(way->second);
-        }
-        else {
-          progress.Warning(std::string("Cannot resolve way ")+NumberToString(member->id)+" in relation "+NumberToString(rel->id));
-          convertable=false;
+          if (way!=ways.end()) {
+            w.push_back(way->second);
+          }
+          else {
+            progress.Warning(std::string("Cannot resolve way ")+NumberToString(member->id)+" in relation "+NumberToString(rel->id));
+            convertable=false;
+          }
         }
       }
       else {
-          progress.Warning(std::string("Member in relation ")+NumberToString(rel->id)+" is not of type way");
+        progress.Warning(std::string("Member in relation ")+NumberToString(rel->id)+" is not of type way");
         convertable=false;
       }
     }
@@ -629,7 +633,11 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig,
         }
 
         if (!name.empty()) {
+          //std::cout << "Found node of type city: " << node.id << " " << name << std::endl;
           cityNodes.push_back(node);
+        }
+        else {
+          progress.Warning(std::string("node ")+NumberToString(node.id)+" has no name, skipping");
         }
       }
     }
@@ -658,9 +666,26 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig,
     if (!scanner.HasError()) {
 
       if (way.IsArea() && cityIds.find(way.type)!=cityIds.end()) {
-        //std::cout << "Found area of type city: " << area.id << " " << name << std::endl;
+        std::string name;
 
-        cityAreas.push_back(way);
+        for (size_t i=0; i<way.tags.size(); i++) {
+          if (way.tags[i].key==tagPlaceName) {
+            name=way.tags[i].value;
+            break;
+          }
+          else if (way.tags[i].key==tagName && name.empty()) {
+            name=way.tags[i].value;
+          }
+        }
+
+        if (!name.empty()) {
+          //std::cout << "Found area of type city: " << way.id << " " << name << std::endl;
+
+          cityAreas.push_back(way);
+        }
+        else {
+          progress.Warning(std::string("area ")+NumberToString(way.id)+" has no name, skipping");
+        }
       }
     }
   }
