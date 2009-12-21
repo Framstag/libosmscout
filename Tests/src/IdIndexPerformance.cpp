@@ -22,6 +22,7 @@
 
 #include <osmscout/FileReader.h>
 #include <osmscout/FileScanner.h>
+#include <osmscout/NumericIndex.h>
 #include <osmscout/Way.h>
 #include <osmscout/WayIndex.h>
 #include <osmscout/Util.h>
@@ -34,7 +35,7 @@
   Call this program repeately to avoid different timing because of OS file caching.
 */
 
-#define QUERY_COUNT 10000000
+#define QUERY_COUNT 1000000
 
 int main(int argc, char* argv[])
 {
@@ -90,12 +91,14 @@ int main(int argc, char* argv[])
 
   WayIndex wayIndex;
 
-  StopClock indexTimer;
-
   if (!wayIndex.LoadWayIndex(".")) {
     std::cerr << "Cannot open way index file!" << std::endl;
     return 1;
   }
+
+  std::cout << "Starting way index test..." << std::endl;
+
+  StopClock indexTimer;
 
   for (size_t i=0; i<queries.size(); i++) {
     std::set<Id>             ids;
@@ -112,7 +115,34 @@ int main(int argc, char* argv[])
 
   indexTimer.Stop();
 
+  NumericIndex<Id,Way> way2Index("way2.idx");
+
+  if (!way2Index.LoadIndex(".")) {
+    std::cerr << "Cannot open way index file!" << std::endl;
+    return 1;
+  }
+
+  std::cout << "Starting numeric index test..." << std::endl;
+
+  StopClock index2Timer;
+
+  for (size_t i=0; i<queries.size(); i++) {
+    std::set<Id>      ids;
+    std::vector<long> offsets;
+
+    ids.insert(queries[i]);
+
+    way2Index.GetOffsets(ids,offsets);
+
+    if (offsets.size()!=1) {
+      std::cerr << "Cannot read way id " << queries[i] << " from index!" << std::endl;
+    }
+  }
+
+  index2Timer.Stop();
+
   std::cout << "Reading " << queries.size() << " random way ids from index took " << indexTimer << std::endl;
+  std::cout << "Reading " << queries.size() << " random way ids from index2 took " << index2Timer << std::endl;
 
   return 0;
 }

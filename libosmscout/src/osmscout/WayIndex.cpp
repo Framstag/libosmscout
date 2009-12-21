@@ -67,6 +67,66 @@ bool WayIndex::LoadWayIndex(const std::string& path)
   }
 
   return !reader.HasError() && reader.Close();
+
+  /*
+  file=path+"/"+"way2.idx";
+
+  FileScanner scanner;
+  size_t      ways;
+  size_t      lastLevelPageStart;
+
+  if (!scanner.Open(file)) {
+    return false;
+  }
+
+  scanner.ReadNumber(levels);
+  scanner.ReadNumber(indexPageSize);
+  scanner.Read(ways);
+  scanner.Read(lastLevelPageStart);
+
+  std::cout << "way2.idx: " << levels << " " << indexPageSize << " " << ways << " " << lastLevelPageStart << std::endl;
+
+  size_t levelEntries;
+
+  levelEntries=ways/indexPageSize;
+
+  if (ways%indexPageSize!=0) {
+    levelEntries++;
+  }
+
+  size_t sio=0;
+  size_t poo=0;
+
+  std::cout << levelEntries << " entries in first level" << std::endl;
+
+  scanner.SetPos(lastLevelPageStart);
+
+  for (size_t i=0; i<levelEntries; i++) {
+    Index2Entry entry;
+    size_t si;
+    size_t po;
+
+    scanner.ReadNumber(si);
+    scanner.ReadNumber(po);
+
+    //std::cout << si << " " << po << std::endl;
+
+    sio+=si;
+    poo+=po;
+
+    //std::cout << sio << " " << poo << std::endl;
+
+    entry.startId=sio;
+    entry.fileOffset=poo;
+
+    root.push_back(entry);
+  }
+
+  for (size_t i=1; i<=levels-1; i++) {
+    leafs.push_back(PageCache(1000000));
+  }
+
+  return !scanner.HasError() && scanner.Close();*/
 }
 
 size_t WayIndex::GetIntervalSize() const
@@ -111,6 +171,111 @@ void WayIndex::GetWayIndexEntries(const std::set<Id>& wayIds, std::list<WayIndex
     entries.push_back(tmp);
   }
 }
+
+/*
+bool WayIndex::GetWayIndexEntries(const std::set<Id>& wayIds,
+                                  std::vector<long>& offsets) const
+{
+  offsets.reserve(wayIds.size());
+  offsets.clear();
+
+  if (wayIds.size()==0) {
+    return true;
+  }
+
+  for (std::set<Id>::const_iterator way=wayIds.begin();
+       way!=wayIds.end();
+       ++way) {
+    size_t r=0;
+
+    //std::cout << "Way id " << *way << std::endl;
+
+    while (r+1<root.size() && root[r+1].startId<=*way) {
+      r++;
+    }
+
+    if (r<root.size()) {
+      //std::cout << "Way id " << *way <<" => " << r << " " << root[r].fileOffset << std::endl;
+
+      size_t startId=root[r].startId;
+      long   offset=root[r].fileOffset;
+
+      for (size_t level=0; level<levels-1; level++) {
+        PageCache::CacheRef cacheRef;
+
+        if (!leafs[level].GetEntry(startId,cacheRef)) {
+          PageCache::CacheEntry cacheEntry(startId);
+
+          cacheRef=leafs[level].SetEntry(cacheEntry);
+
+          //std::cout << "Loading " << level << " " << startId << " " << offset << std::endl;
+
+          if (!scanner.IsOpen() &&
+              !scanner.Open("way2.idx")) {
+            return false;
+          }
+
+          scanner.SetPos(offset);
+
+          cacheRef->value.reserve(indexPageSize);
+
+          size_t j=0;
+          Index2Entry entry;
+
+          entry.startId=0;
+          entry.fileOffset=0;
+
+          while (j<indexPageSize && !scanner.HasError()) {
+            size_t cidx;
+            size_t coff;
+
+            scanner.ReadNumber(coff);
+            scanner.ReadNumber(cidx);
+
+            entry.fileOffset+=coff;
+            entry.startId+=cidx;
+
+            //std::cout << j << " " << entry.startId << " " << entry.fileOffset << std::endl;
+
+            cacheRef->value.push_back(entry);
+
+            j++;
+          }
+
+          assert(level<cacheRef->value.size());
+        }
+
+        size_t i=0;
+        while (i+1<cacheRef->value.size() &&
+               cacheRef->value[i+1].startId<=*way) {
+          i++;
+        }
+
+        if (i<cacheRef->value.size()) {
+          startId=cacheRef->value[i].startId;
+          offset=cacheRef->value[i].fileOffset;
+          //std::cout << " Way id " << *way <<" => " << i << " " << startId << " " << offset << std::endl;
+        }
+        else {
+          std::cerr << "Way id " << *way << " not found in sub page index!" << std::endl;
+        }
+      }
+
+      if (*way==startId) {
+        offsets.push_back(offset);
+      }
+      else {
+        std::cerr << "Way id " << *way << " not found in sub index!" << std::endl;
+      }
+      //std::cout << "=> Way id " << *way <<" => " << startId << " " << offset << std::endl;
+    }
+    else {
+      std::cerr << "Way id " << *way << " not found in root index!" << std::endl;
+    }
+  }
+
+  return true;
+}*/
 
 void WayIndex::GetWayPagesIndexEntries(const std::set<Page>& pages,
                                        std::list<WayIndexEntry>& entries) const

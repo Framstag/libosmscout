@@ -23,6 +23,9 @@
 #include <list>
 #include <set>
 
+#include <osmscout/Cache.h>
+#include <osmscout/FileScanner.h>
+
 #include <osmscout/TypeConfig.h>
 
 struct WayIndexEntry
@@ -36,12 +39,12 @@ struct WayIndexEntry
 class WayIndex
 {
 private:
+
   struct IndexEntry
   {
     size_t    offset;
     NodeCount count;
   };
-
 private:
   std::map<size_t,IndexEntry> wayIndex;
   size_t                      intervalSize;

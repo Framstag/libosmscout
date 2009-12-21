@@ -19,6 +19,7 @@ nobase_include_HEADERS= osmscout/Util.h \
                         osmscout/Tag.h \
                         osmscout/Way.h \
                         osmscout/Reference.h \
+                        osmscout/NumericIndex.h \
                         osmscout/Import.h \
                         osmscout/Preprocess.h \
                         osmscout/GenAreaNodeIndex.h \

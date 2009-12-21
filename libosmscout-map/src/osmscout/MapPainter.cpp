@@ -697,16 +697,20 @@ static void OptimizeWay(const Way& way,
   }
 
   // Drop all points that do not differ in position from the previous node
-  for (size_t i=1; i<way.nodes.size()-1; i++) {
-    if (drawNode[i]) {
-      size_t j=i+1;
-      while (!drawNode[j]) {
-        j++;
-      }
+  if (way.nodes.size()>2) {
+    for (size_t i=1; i<way.nodes.size()-1; i++) {
+      if (drawNode[i]) {
+        size_t j=i+1;
 
-      if (std::fabs(x[j]-x[i])<=relevantPosDeriviation &&
-          std::fabs(y[j]-y[i])<=relevantPosDeriviation) {
-        drawNode[i]=false;
+        while (j+1<way.nodes.size() &&
+               !drawNode[j]) {
+          j++;
+        }
+
+        if (std::fabs(x[j]-x[i])<=relevantPosDeriviation &&
+            std::fabs(y[j]-y[i])<=relevantPosDeriviation) {
+          drawNode[i]=false;
+        }
       }
     }
   }
@@ -786,7 +790,7 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
 
   double              gradtorad=2*M_PI/360;
 
-  std::cout << "Showing " << lon <<", " << lat << " with magnification " << magnification << "x" << std::endl;
+  std::cout << "Showing " << lon <<", " << lat << " with magnification " << magnification << "x" << " for area " << width << "x" << height << std::endl;
 
   timeval startTime;
   timeval dataFetchedTime;
@@ -809,6 +813,8 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   // Get bounding dimensions and copy them to the context information, too
   GetDimensions(lon,lat,magnification,width,height,lonMin,latMin,lonMax,latMax);
 
+  std::cout << "Dimension: " << lonMin << " " << latMin << " " << lonMax << " " << latMax << std::endl;
+
   hmin=lonMin*gradtorad;
   hmax=lonMax*gradtorad;
   vmin=atanh(sin(latMin*gradtorad));
@@ -818,7 +824,8 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   vscale=(height-1)/(vmax-vmin);
 
   // Width of an pixel in meter
-  double pixelSize=(lonMax-lonMin)*gradtorad*180*60/M_PI*1852.216/width;
+  double d=(lonMax-lonMin)*gradtorad;
+  double pixelSize=d*180*60/M_PI*1852.216/width;
 
   /*
   std::cout << "Box (grad) h: " << lonMin << "-" << lonMax << " v: " << latMin <<"-" << latMax << std::endl;

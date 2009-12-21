@@ -34,6 +34,7 @@
 #include <osmscout/Way.h>
 
 // By Id index
+#include <osmscout/NumericIndex.h>
 #include <osmscout/NodeIndex.h>
 #include <osmscout/WayIndex.h>
 
@@ -62,6 +63,8 @@ public: // Fix this
   typedef Cache<size_t,std::vector<Way> >     WayCache;
   typedef Cache<size_t,std::vector<NodeUse> > NodeUseCache;
 
+  typedef NumericIndex<Id,Way>                Way2Index;
+
   typedef const Node*                         NodeRef;
   typedef const Way*                          WayRef;
 
@@ -69,6 +72,7 @@ private:
   bool                  isOpen;
   NodeIndex             nodeIndex;
   WayIndex              wayIndex;
+  Way2Index             way2Index;
 
   AreaNodeIndex         areaNodeIndex;
   AreaWayIndex          areaWayIndex;
@@ -86,6 +90,9 @@ private:
   mutable FileReader    nodeReader;    //! File stream to the node.dat file
   mutable FileReader    wayReader;     //! File stream to the way.dat file
   mutable FileReader    nodeUseReader; //! File stream to the nodeuse.idx file
+
+  mutable FileScanner   wayScanner;    //! File stream to the way.dat file
+
   TypeConfig            *typeConfig;   //! Type config for the currently opened map
 
 private:
@@ -111,6 +118,8 @@ private:
                 size_t maxPriority,
                 std::list<Node>& nodes) const;
 
+  bool GetWays(const std::set<Id>& ids, std::list<Way>& ways) const;
+
 public:
   Database();
   virtual ~Database();
@@ -131,7 +140,6 @@ public:
 
   bool GetNode(const Id& id, Node& node) const;
   bool GetWay(const Id& id, Way& way) const;
-  bool GetWays(const std::set<Id>& ids, std::list<Way>& ways) const;
 
   bool GetMatchingCities(const std::string& name,
                          std::list<City>& cities,

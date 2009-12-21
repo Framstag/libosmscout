@@ -26,6 +26,7 @@ libosmscout_la_SOURCES= osmscout/Util.cpp \
                         osmscout/Tag.cpp \
                         osmscout/Way.cpp \
                         osmscout/Reference.cpp \
+                        osmscout/NumericIndex.cpp \
                         osmscout/Import.cpp \
                         osmscout/Preprocess.cpp \
                         osmscout/GenAreaNodeIndex.cpp \

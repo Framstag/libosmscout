@@ -71,6 +71,7 @@ struct NodeUseCacheValueSizer : public Database::NodeUseCache::ValueSizer
 
 Database::Database()
  : isOpen(false),
+   way2Index("way2.idx"),
    nodeCache(2000),
    wayCache(6000),
    nodeUseCache(10), // Seems like the cache is more expensive than direct loading!?
@@ -114,6 +115,13 @@ bool Database::Open(const std::string& path)
     return false;
   }
   std::cout << "Loading way index done." << std::endl;
+
+  std::cout << "Loading way2 index..." << std::endl;
+  if (!way2Index.LoadIndex(path)) {
+    std::cerr << "Cannot load Way2Index!" << std::endl;
+    return false;
+  }
+  std::cout << "Loading way2 index done." << std::endl;
 
   std::cout << "Loading area node index..." << std::endl;
   if (!areaNodeIndex.LoadAreaNodeIndex(path)) {
@@ -267,19 +275,24 @@ bool Database::GetWays(const StyleConfig& styleConfig,
 
   if (!wayReader.IsOpen()) {
     if (!wayReader.Open(file)){
-      std::cerr << "Error while opening ways.dat file!" << std::endl;
+      std::cerr << "Error while opening ways.dat file for reading ways by area!" << std::endl;
+
+      return false;
     }
   }
 
   for (std::list<WayIndexEntry>::iterator indexEntry=wayIndexEntries.begin();
        indexEntry!=wayIndexEntries.end();
        ++indexEntry) {
-    Cache<size_t,std::vector<Way> >::CacheRef cacheRef;
+   WayCache::CacheRef cacheRef;
 
     if (!wayCache.GetEntry(indexEntry->interval,cacheRef)) {
       if (!wayReader.ReadPageToBuffer(indexEntry->offset,indexEntry->size)) {
         std::cerr << "Error while reading page from ways.dat file!" << std::endl;
+        wayReader.Close();
+        return false;
       }
+
       diskCount++;
 
       Cache<size_t, std::vector<Way> >::CacheEntry cacheEntry(indexEntry->interval);
@@ -293,7 +306,7 @@ bool Database::GetWays(const StyleConfig& styleConfig,
         if (wayReader.HasError()) {
           std::cerr << "Error while reading data from ways.dat page!" << std::endl;
           wayReader.Close();
-          break;
+          return false;
         }
       }
     }
@@ -582,7 +595,7 @@ bool Database::GetWays(const std::set<Id>& ids, std::list<Way>& ways) const
 
   if (!wayReader.IsOpen()) {
     if (!wayReader.Open(file)) {
-      std::cerr << "Error while opening ways.dat file!" << std::endl;
+      std::cerr << "Error while opening ways.dat file for reading ways by id!" << std::endl;
       return false;
     }
   }
@@ -637,7 +650,7 @@ bool Database::GetMatchingStreets(Id urbanId, const std::string& name,
   return cityStreetIndex.GetMatchingStreets(urbanId,name,streets,limit,limitReached);
 }
 
-bool GetWays(const WayIndex& index,
+bool GetWays(const Database::Way2Index& index,
              const std::string& path,
              std::map<Id,Way>& cache,
              const std::set<Id>& ids,
@@ -664,37 +677,45 @@ bool GetWays(const WayIndex& index,
   }
 
   if (remaining.size()>0) {
-    std::list<WayIndexEntry> indexEntries;
-    FileReader               wayReader;
-    std::string              file=path+"/"+"ways.dat";
+    std::vector<long>  offsets;
+    static FileScanner wayScanner;
+    std::string        file=path+"/"+"ways.dat";
 
-    if (!wayReader.Open(file)){
-      std::cerr << "Error while opening ways.dat file!" << std::endl;
+    if (!wayScanner.IsOpen()) {
+      if (!wayScanner.Open(file)){
+        std::cerr << "Error while opening ways.dat for routing file!" << std::endl;
+
+        return false;
+      }
+      /*
+      long fileSize;
+
+      if (!GetFileSize(file,fileSize)) {
+        return false;
+      }
+
+      wayScanner.ReadPageToBuffer(0,fileSize);*/
     }
 
-    index.GetWayIndexEntries(remaining,indexEntries);
+    if (!index.GetOffsets(remaining,offsets)) {
+      return false;
+    }
 
-    for (std::list<WayIndexEntry>::const_iterator entry=indexEntries.begin();
-         entry!=indexEntries.end();
+    for (std::vector<long>::const_iterator entry=offsets.begin();
+         entry!=offsets.end();
          ++entry) {
-      if (!wayReader.ReadPageToBuffer(entry->offset,entry->size)) {
-        std::cerr << "Error while reading page from ways.dat file!" << std::endl;
-      }
+      wayScanner.SetPos(*entry);
 
-      for (size_t i=0; i<entry->count; i++) {
-        Way way;
+      Way way;
 
-        way.Read(wayReader);
+      way.Read(wayScanner);
 
-        std::pair<std::map<Id,Way>::iterator,bool> result=cache.insert(std::pair<Id,Way>(way.id,way));
+      std::pair<std::map<Id,Way>::iterator,bool> result=cache.insert(std::pair<Id,Way>(way.id,way));
 
-        if (ids.find(way.id)!=ids.end()) {
-          refs.push_back(&result.first->second);
-        }
-      }
+      refs.push_back(&result.first->second);
     }
 
-    result=!wayReader.HasError() && wayReader.Close();
+    result=!wayScanner.HasError()/* && wayScanner.Close()*/;
   }
 
   assert(ids.size()==refs.size());
@@ -702,7 +723,7 @@ bool GetWays(const WayIndex& index,
   return result;
 }
 
-bool GetWay(const WayIndex& index,
+bool GetWay(const Database::Way2Index& index,
             const std::string& path,
             std::map<Id,Way>& cache,
             Id id,
@@ -932,6 +953,8 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
   std::vector<size_t> costs;
   RoutingProfile      profile;
 
+  std::cout << startWayId << " " << startNodeId << " => " << targetWayId << " " << targetNodeId << std::endl;
+
   std::cout << "=========== Routing start =============" << std::endl;
 
   StopClock clock;
@@ -996,21 +1019,25 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
   assert(type!=typeIgnore);
   profile.SetTypeCostFactor(type,1/30.0);
 
-  if (!::GetWay(wayIndex,
+  if (!::GetWay(way2Index,
                 path,
                 waysCache,
                 startWayId,
                 startWay)) {
+    std::cerr << "Cannot get start way!" << std::endl;
     return false;
   }
 
-  if (!::GetWay(wayIndex,
+  if (!::GetWay(way2Index,
                 path,
                 waysCache,
                 targetWayId,
                 targetWay)) {
+    std::cerr << "Cannot get end way!" << std::endl;
     return false;
   }
+
+  std::cout << "Searching for node " << startNodeId << " in way " << startWayId << "..." << std::endl;
 
   size_t index=0;
   while (index<startWay->nodes.size()) {
@@ -1024,6 +1051,8 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
   }
 
   assert(index<startWay->nodes.size());
+
+  std::cout << "Searching for node " << targetNodeId << " in way " << targetWayId << "..." << std::endl;
 
   index=0;
   while (index<targetWay->nodes.size()) {
@@ -1090,7 +1119,7 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
 
     // Get joint nodes in same way/area
     if (currentWay->id!=current.ref.id) {
-      if (!::GetWay(wayIndex,
+      if (!::GetWay(way2Index,
                     path,
                     waysCache,
                     current.ref.id,
@@ -1172,7 +1201,7 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
         cacheEntry=result.first;
       }
 
-      if (!::GetWays(wayIndex,
+      if (!::GetWays(way2Index,
                      path,
                      waysCache,
                      cacheEntry->second.ways,
