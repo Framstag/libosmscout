@@ -60,6 +60,8 @@ void FileReader::FreeBuffer()
 #else
     delete [] buffer;
 #endif
+
+    buffer=NULL;
   }
 }
 

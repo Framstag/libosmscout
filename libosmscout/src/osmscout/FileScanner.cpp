@@ -57,6 +57,8 @@ void FileScanner::FreeBuffer()
     if (munmap(buffer,size)!=0) {
       std::cerr << "Error while calling munmap: "<< strerror(errno) << std::endl;
     }
+
+    buffer=NULL;
   }
 #endif
 }
