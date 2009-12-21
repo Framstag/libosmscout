@@ -245,15 +245,23 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
 #if defined(HTML)
       std::cout << "<tr><td>";
 #endif
-      std::cout << std::fixed << std::setprecision(1);
+      std::cout.setf(std::ios::right);
+      std::cout.fill(' ');
+      std::cout.width(5);
+      std::cout.setf(std::ios::fixed);
+      std::cout.precision(1);
       std::cout << step->GetDistance() << "km ";
 
       if (step->GetDistance()-lastDistance!=0.0) {
-        std::cout << std::fixed << std::setprecision(1);
+        std::cout.setf(std::ios::right);
+        std::cout.fill(' ');
+        std::cout.width(5);
+        std::cout.setf(std::ios::fixed);
+        std::cout.precision(1);
         std::cout << step->GetDistance()-lastDistance << "km ";
       }
       else {
-        std::cout << "      ";
+        std::cout << "        ";
       }
 
 #if defined(HTML)
@@ -338,6 +346,8 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
 
       lastDistance=step->GetDistance();
     }
+
+    std::cout << std::setprecision(6); // back to default
 
     databaseTask->TransformRouteDataToWay(routeData,way);
     databaseTask->ClearRoute();
