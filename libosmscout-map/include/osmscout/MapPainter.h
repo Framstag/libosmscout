@@ -116,6 +116,16 @@ public:
                             double& lonMin, double& latMin,
                             double& lonMax, double& latMax);
 
+  static bool transformPixelToGeo(int x, int y,
+                                  double centerLon, double centerLat,
+                                  double magnification,
+                                  size_t width, size_t height,
+                                  double& outLon, double& outLat);
+  static bool transformGeoToPixel(double lon, double lat,
+                                  double centerLon, double centerLat,
+                                  double magnification,
+                                  size_t width, size_t height,
+                                  double &x, double& y);
 };
 
 #endif

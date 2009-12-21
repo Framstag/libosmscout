@@ -283,8 +283,8 @@ MapPainter::~MapPainter()
 bool MapPainter::transformPixelToGeo(int x, int y,
                                      double& lon, double& lat)
 {
-  lon=(lonMax-lonMin)*x/width;
-  lat=(latMax-latMin)*y/height;
+  lon=lonMin+(lonMax-lonMin)*x/width;
+  lat=latMin+(latMax-latMin)*y/height;
 
   return true;
 }
@@ -1638,6 +1638,55 @@ bool MapPainter::PrintMap(const StyleConfig& styleConfig,
 
   cairo_destroy(draw);
   cairo_surface_destroy(image);
+
+  return true;
+}
+
+bool MapPainter::transformPixelToGeo(int x, int y,
+                                     double centerLon, double centerLat,
+                                     double magnification,
+                                     size_t width, size_t height,
+                                     double& outLon, double& outLat)
+{
+  double lonMin,latMin,lonMax,latMax;
+
+  GetDimensions(centerLon,centerLat,
+                magnification,
+                width,height,
+                lonMin,latMin,lonMax,latMax);
+
+  outLon=lonMin+(lonMax-lonMin)*x/width;
+
+  // This transformation is currently only valid from big magnifications
+  // since it does not take the mercator transformation into account!
+  outLat=latMin+(latMax-latMin)*y/height;
+
+  return true;
+}
+
+bool MapPainter::transformGeoToPixel(double lon, double lat,
+                                     double centerLon, double centerLat,
+                                     double magnification,
+                                     size_t width, size_t height,
+                                     double &x, double& y)
+{
+  double lonMin,latMin,lonMax,latMax,hmin,hmax,vmin,vmax,hscale,vscale;
+
+  GetDimensions(centerLon,centerLat,
+                magnification,
+                width,height,
+                lonMin,latMin,lonMax,latMax);
+
+  hmin=lonMin*gradtorad;
+  hmax=lonMax*gradtorad;
+  vmin=atanh(sin(latMin*gradtorad));
+  vmax=atanh(sin(latMax*gradtorad));
+
+  hscale=(width-1)/(hmax-hmin);
+  vscale=(height-1)/(vmax-vmin);
+
+  x=(lon*gradtorad-hmin)*hscale;
+  y=height-(atanh(sin(lat*gradtorad))-vmin)*vscale;
 
   return true;
 }

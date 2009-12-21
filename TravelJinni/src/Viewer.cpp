@@ -160,15 +160,25 @@ public:
 
   void HandleMouseMove(const Lum::OS::MouseEvent& event)
   {
-    double lonMin,latMin,lonMax,latMax;
+    double olon, olat;
+    double tlon, tlat;
 
-    MapPainter::GetDimensions(lon,lat,
-                              magnification,
-                              width,height,
-                              lonMin,latMin,lonMax,latMax);
+    // Get origin coordinates
+    MapPainter::transformPixelToGeo(0,0,
+                                    lon,lat,
+                                    magnification,
+                                    width,height,
+                                    olon,olat);
 
-    lon=startLon-(lonMax-lonMin)*(event.x-startX)/width;
-    lat=startLat+(latMax-latMin)*(event.y-startY)/height;
+    // Get current mouse pos coordinates (relative to drag start)
+    MapPainter::transformPixelToGeo((event.x-startX),(event.y-startY),
+                                    lon,lat,
+                                    magnification,
+                                    width,height,
+                                    tlon,tlat);
+
+    lon=startLon-(tlon-olon);
+    lat=startLat+(tlat-olat);
   }
 
   void ZoomIn(double zoomFactor)
