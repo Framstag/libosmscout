@@ -1657,8 +1657,8 @@ bool MapPainter::transformPixelToGeo(int x, int y,
 
   outLon=lonMin+(lonMax-lonMin)*x/width;
 
-  // This transformation is currently only valid from big magnifications
-  // since it does not take the mercator transformation into account!
+  // This transformation is currently only valid for big magnifications
+  // since it does not take the mercator (back-)transformation into account!
   outLat=latMin+(latMax-latMin)*y/height;
 
   return true;
