@@ -34,15 +34,33 @@ class MapPainter
 private:
   const Database& database;
 
+  // current drawing context information
+  // These values are valid until the next image gets drawn
+  double              lon;           //! Longitude coordinate of the center of the image
+  double              lat;           //! Latitude coordinate of the center of the image
+  double              lonMin;        //! Longitude of the upper left corner of the image
+  double              latMin;        //! Latitude of the upper left corner of the image
+  double              lonMax;        //! Longitude of the lower right corner of the image
+  double              latMax;        //! Latitude of the lower right corner of the image
+  double              magnification; //! Current maginification
+  size_t              width;         //! Width fo image
+  size_t              height;        //! Height of image
+  double              hmin;
+  double              hmax;
+  double              vmin;
+  double              vmax;
+
+  double              hscale;
+  double              vscale;
+
   // helper struct for drawing
-  std::vector<bool>   drawNode; // This node will be drawn
-  std::vector<bool>   outNode; // This nodes is out of the visible area
+  std::vector<bool>   drawNode;      //! This nodes will be drawn
+  std::vector<bool>   outNode;       //! This nodes is out of the visible area
   std::vector<double> nodeX;
   std::vector<double> nodeY;
-  std::vector<double> lineWidth; // line with for this way line style
-  std::vector<bool>   outline; // We draw an outline for this way line style
-  std::vector<double> borderWidth; // border with for this way (area) border style
-
+  std::vector<double> lineWidth;     //! line with for this way line style
+  std::vector<bool>   outline;       //! We draw an outline for this way line style
+  std::vector<double> borderWidth;   //! border with for this way (area) border style
 
   void DrawLabel(cairo_t* draw,
                  double magnification,
@@ -53,10 +71,7 @@ private:
   void DrawContourLabel(cairo_t* draw,
                         const LabelStyle& style,
                         const std::string& text,
-                        const std::vector<Point>& nodes,
-                        double hmin, double vmin,
-                        double hscale, double vscale,
-                        double height);
+                        const std::vector<Point>& nodes);
 
   void DrawSymbol(cairo_t* draw,
                   const SymbolStyle* style,
@@ -89,11 +104,18 @@ public:
                 double magnification,
                 size_t width, size_t height);
 
+  bool transformPixelToGeo(int x, int y,
+                           double& lon, double& lat);
+
+  bool transformGeoToPixel(double lon, double lat,
+                           int& x, int& y);
+
   static void GetDimensions(double lon, double lat,
                             double magnification,
                             size_t width, size_t height,
                             double& lonMin, double& latMin,
                             double& lonMax, double& latMax);
+
 };
 
 #endif

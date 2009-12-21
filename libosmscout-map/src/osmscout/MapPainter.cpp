@@ -233,7 +233,7 @@ static void map_path_onto (cairo_t *cr, cairo_path_t *path)
 
 typedef void (*draw_path_func_t) (cairo_t *cr);
 
-static void draw_twisted (cairo_t *cr, double x, double y, const char *text)
+static void draw_twisted(cairo_t *cr, double x, double y, const char *text)
 {
   cairo_path_t *path;
 
@@ -278,6 +278,24 @@ MapPainter::MapPainter(const Database& database)
 MapPainter::~MapPainter()
 {
   // no code
+}
+
+bool MapPainter::transformPixelToGeo(int x, int y,
+                                     double& lon, double& lat)
+{
+  lon=(lonMax-lonMin)*x/width;
+  lat=(latMax-latMin)*y/height;
+
+  return true;
+}
+
+bool MapPainter::transformGeoToPixel(double lon, double lat,
+                                     int& x, int& y)
+{
+  x=(lon*gradtorad-hmin)*hscale;
+  y=height-(atanh(sin(lat*gradtorad))-vmin)*vscale;
+
+  return true;
 }
 
 void MapPainter::DrawLabel(cairo_t* draw,
@@ -426,10 +444,7 @@ void MapPainter::DrawLabel(cairo_t* draw,
 void MapPainter::DrawContourLabel(cairo_t* draw,
                                   const LabelStyle& style,
                                   const std::string& text,
-                                  const std::vector<Point>& nodes,
-                                  double hmin, double vmin,
-                                  double hscale, double vscale,
-                                  double height)
+                                  const std::vector<Point>& nodes)
 {
   cairo_font_extents_t fontExtents;
 
@@ -768,11 +783,6 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   size_t              nodesDrawnCount=0;
   bool                areaLayers[11];
   bool                wayLayers[11];
-  double              lonMin,lonMax,latMin,latMax;
-  double              hmin,hmax;
-  double              vmin,vmax;
-
-  double              hscale,vscale;
 
   double              gradtorad=2*M_PI/360;
 
@@ -789,6 +799,14 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   // calculation of bounds and scaling factors
   //
 
+  // Make a copy of the context information
+  this->lon=lon;
+  this->lat=lat;
+  this->width=width;
+  this->height=height;
+  this->magnification=magnification;
+
+  // Get bounding dimensions and copy them to the context information, too
   GetDimensions(lon,lat,magnification,width,height,lonMin,latMin,lonMax,latMax);
 
   hmin=lonMin*gradtorad;
@@ -799,8 +817,8 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   hscale=(width-1)/(hmax-hmin);
   vscale=(height-1)/(vmax-vmin);
 
-  double d=(lonMax-lonMin)*gradtorad;
-  double pixelSize=d*180*60/M_PI*1852.216/width;
+  // Width of an pixel in meter
+  double pixelSize=(lonMax-lonMin)*gradtorad*180*60/M_PI*1852.216/width;
 
   /*
   std::cout << "Box (grad) h: " << lonMin << "-" << lonMax << " v: " << latMin <<"-" << latMax << std::endl;
@@ -1233,8 +1251,7 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
         DrawContourLabel(draw,
                          *style,
                          way->GetRefName(),
-                         way->nodes,
-                         hmin,vmin,hscale,vscale,height);
+                         way->nodes);
       }
     }
     else if (!way->GetName().empty()) {
@@ -1250,8 +1267,7 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
         DrawContourLabel(draw,
                          *style,
                          way->GetName(),
-                         way->nodes,
-                         hmin,vmin,hscale,vscale,height);
+                         way->nodes);
       }
     }
   }

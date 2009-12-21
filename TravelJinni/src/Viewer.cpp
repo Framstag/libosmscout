@@ -107,7 +107,7 @@ public:
 #if defined(LUM_HAVE_LIB_HILDON)
     width=200;
     height=200;
-#else	
+#else
     width=800;
     height=480;
 #endif
