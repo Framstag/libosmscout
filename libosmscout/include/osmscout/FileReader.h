@@ -25,6 +25,21 @@
 
 #include <osmscout/TypeConfig.h>
 
+/**
+  FileReader implements platform independend access to blocks of data
+  in files.
+
+  It is assumed that blocks fit into memory. FileReader offers read methods
+  for various datatypes. The data first must be loaded into memory by
+  ReadPageIntoBuffer and then will be parsed by using the various Read methods.
+
+  Note that FileReader works but still should be avoided, because working with
+  OSM data often result in huge amounts of data that cannot be loaded
+  into memory. So using FileReader might signal that something will fail for
+  huge amounts of data. Try to use FileScanner instead!
+
+  FileReader will use mmap if available.
+  */
 class FileReader
 {
 private:
@@ -46,6 +61,9 @@ public:
 
   bool IsOpen() const;
   bool HasError() const;
+
+  bool SetPos(long pos);
+  bool GetPos(long &pos);
 
   bool ReadFileToBuffer();
   bool ReadPageToBuffer(unsigned long offset, unsigned long size);

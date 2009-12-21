@@ -26,7 +26,9 @@
 
 FileScanner::FileScanner()
  : file(NULL),
-   hasError(true)
+   hasError(true),
+   buffer(NULL),
+   offset(0)
 {
   // no code
 }
@@ -36,6 +38,17 @@ FileScanner::~FileScanner()
   if (file!=NULL) {
     fclose(file);
   }
+}
+
+void FileScanner::FreeBuffer()
+{
+#if defined(HAVE_MMAP)
+  if (buffer!=NULL) {
+    if (munmap(buffer,size)!=0) {
+      std::cerr << "Error while calling munmap: "<< strerror(errno) << std::endl;
+    }
+  }
+#endif
 }
 
 bool FileScanner::Open(const std::string& filename, bool readOnly)
@@ -53,6 +66,36 @@ bool FileScanner::Open(const std::string& filename, bool readOnly)
     file=fopen(filename.c_str(),"r+b");
   }
 
+#if defined(HAVE_MMAP)
+  if (file!=NULL) {
+    FreeBuffer();
+
+    long size;
+
+    if (fseek(file,0L,SEEK_END)!=0) {
+      hasError=true;
+      return false;
+    }
+
+    size=ftell(file);
+
+    if (size==-1) {
+      hasError=true;
+      return false;
+    }
+
+    buffer=(char*)mmap(NULL,size,PROT_READ,MAP_SHARED,fileno(file),0);
+    if (buffer==MAP_FAILED) {
+      std::cerr << "Cannot mmap complete file: " << strerror(errno) << std::endl;
+      buffer=NULL;
+    }
+    else {
+      this->size=(size_t)size;
+      this->offset=0;
+    }
+  }
+#endif
+
   hasError=file==NULL;
 
   return !hasError;
@@ -66,6 +109,8 @@ bool FileScanner::Close()
     return false;
   }
 
+  FreeBuffer();
+
   result=fclose(file)==0;
 
   if (result) {
@@ -73,6 +118,11 @@ bool FileScanner::Close()
   }
 
   return result;
+}
+
+bool FileScanner::IsOpen() const
+{
+  return file!=NULL;
 }
 
 bool FileScanner::HasError() const
@@ -86,6 +136,18 @@ bool FileScanner::SetPos(long pos)
     return false;
   }
 
+#if defined(HAVE_MMAP)
+  if (buffer!=NULL) {
+    if (pos>=size) {
+      return false;
+    }
+
+    offset=pos;
+
+    return true;
+  }
+#endif
+
   hasError=fseek(file,pos,SEEK_SET)!=0;
 
   return !hasError;
@@ -96,6 +158,13 @@ bool FileScanner::GetPos(long& pos)
   if (file==NULL || hasError) {
     return false;
   }
+
+#if defined(HAVE_MMAP)
+  if (buffer!=NULL) {
+    pos=offset;
+    return true;
+  }
+#endif
 
   pos=ftell(file);
 
@@ -111,6 +180,22 @@ bool FileScanner::Read(std::string& value)
   }
 
   value.clear();
+
+#if defined(HAVE_MMAP)
+  if (buffer!=NULL) {
+    size_t start=offset;
+
+    while (offset<size && buffer[offset]!='\0') {
+      offset++;
+    }
+
+    value.assign(&buffer[start],offset-start);
+
+    offset++;
+
+    return true;
+  }
+#endif
 
   char character;
 
@@ -139,6 +224,20 @@ bool FileScanner::Read(bool& boolean)
     return false;
   }
 
+#if defined(HAVE_MMAP)
+  if (buffer!=NULL) {
+    if (offset+sizeof(char)>size) {
+      return false;
+    }
+
+    boolean=buffer[offset]!=0;
+
+    offset+=sizeof(char);
+
+    return true;
+  }
+#endif
+
   char value;
 
   hasError=fread(&value,sizeof(char),1,file)!=1;
@@ -158,13 +257,29 @@ bool FileScanner::Read(unsigned long& number)
     return false;
   }
 
+  number=0;
+
+#if defined(HAVE_MMAP)
+  if (buffer!=NULL) {
+    if (offset+sizeof(unsigned long)>size) {
+      return false;
+    }
+
+    for (size_t i=0; i<sizeof(unsigned long); i++) {
+    number=number | (((unsigned char)buffer[offset+i]) << (i*8));
+    }
+
+    offset+=sizeof(unsigned long);
+
+    return true;
+  }
+#endif
+
   unsigned char buffer[sizeof(unsigned long)];
 
   hasError=fread(&buffer,sizeof(char),sizeof(unsigned long),file)!=sizeof(unsigned long);
 
   if (!hasError) {
-    number=0;
-
     for (size_t i=0; i<sizeof(unsigned long); i++) {
 
       number=number | (buffer[i] << (i*8));
@@ -180,13 +295,29 @@ bool FileScanner::Read(unsigned int& number)
     return false;
   }
 
+  number=0;
+
+#if defined(HAVE_MMAP)
+  if (buffer!=NULL) {
+    if (offset+sizeof(unsigned int)>size) {
+      return false;
+    }
+
+    for (size_t i=0; i<sizeof(unsigned int); i++) {
+    number=number | (((unsigned char)buffer[offset+i]) << (i*8));
+    }
+
+    offset+=sizeof(unsigned int);
+
+    return true;
+  }
+#endif
+
   unsigned char buffer[sizeof(unsigned int)];
 
   hasError=fread(&buffer,sizeof(char),sizeof(unsigned int),file)!=sizeof(unsigned int);
 
   if (!hasError) {
-    number=0;
-
     for (size_t i=0; i<sizeof(unsigned int); i++) {
       number=number | (buffer[i] << (i*8));
     }
@@ -201,14 +332,35 @@ bool FileScanner::ReadNumber(unsigned long& number)
     return false;
   }
 
+  number=0;
+
+#if defined(HAVE_MMAP)
+  if (buffer!=NULL) {
+    if (offset>=size) {
+      return false;
+    }
+
+    size_t bytes;
+
+    if (DecodeNumber(&buffer[offset],number,bytes)) {
+      offset+=bytes;
+
+      return true;
+    }
+    else {
+      hasError=true;
+
+      return false;
+    }
+  }
+#endif
+
   char buffer;
 
   if (fread(&buffer,sizeof(char),1,file)!=1) {
     hasError=true;
     return false;
   }
-
-  number=0;
 
   if (buffer==0) {
     return true;

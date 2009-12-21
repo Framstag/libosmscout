@@ -105,6 +105,28 @@ bool FileReader::HasError() const
   return file==NULL || buffer==NULL || hasError;
 }
 
+bool FileReader::SetPos(long pos)
+{
+  if (file==NULL || buffer==NULL || hasError || pos>=size) {
+    return false;
+  }
+
+  offset=pos;
+
+  return true;
+}
+
+bool FileReader::GetPos(long& pos)
+{
+  if (file==NULL || buffer==NULL || hasError) {
+    return false;
+  }
+
+  pos=offset;
+
+  return true;
+}
+
 bool FileReader::ReadFileToBuffer()
 {
   if (file==NULL) {

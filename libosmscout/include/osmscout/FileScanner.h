@@ -25,12 +25,30 @@
 
 #include <osmscout/TypeConfig.h>
 
+/**
+  FileScanner implements platform independend sequential
+  scanning-like access to data in files. File access is buffered.
+
+  FileScanner will use mmap in read-only mode if available (and will
+  fall back to normal buffered IO if available but failing), resulting in
+  mapping the complete file into the memory of the process (without
+  allocating real memory) resulting in measurable speed increase because of
+  exchanging buffered file access with in memory array access.
+  */
 class FileScanner
 {
 private:
   FILE   *file;
   bool   hasError;
   bool   readOnly;
+
+  // For mmap usage
+  char   *buffer;
+  size_t size;
+  size_t offset;
+
+private:
+  void FreeBuffer();
 
 public:
   FileScanner();
@@ -39,6 +57,7 @@ public:
   bool Open(const std::string& filename, bool readOnly=true);
   bool Close();
 
+  bool IsOpen() const;
   bool HasError() const;
 
   bool SetPos(long pos);
