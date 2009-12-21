@@ -17,26 +17,32 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <cstdlib>
 #include <iostream>
 
 #include <osmscout/FileReader.h>
 #include <osmscout/FileScanner.h>
 #include <osmscout/Way.h>
+#include <osmscout/WayIndex.h>
 #include <osmscout/Util.h>
 
 /**
-  Sequentially read the ways.dat file in the current directory first using
-  FileReader and then using FileScanner and compare execution time.
+  Sequentially read the ways.dat file in the current directory to collect
+  way ids. Then take a subset of ids randomly and call the IdIndex.
+  Measure execution time.
 
   Call this program repeately to avoid different timing because of OS file caching.
 */
 
+#define QUERY_COUNT 10000000
+
 int main(int argc, char* argv[])
 {
-  std::string filename="ways.dat";
-  long        filesize=0;
-  size_t      readerWayCount;
-  size_t      scannerWayCount;
+  std::vector<Id> ids;
+  std::vector<Id> queries;
+  std::string     filename="ways.dat";
+  long            filesize=0;
+  size_t          readerWayCount;
 
   if (!GetFileSize(filename,filesize)) {
     std::cerr << "Cannot get file size of file '" << filename << "'!" << std::endl;
@@ -64,6 +70,7 @@ int main(int argc, char* argv[])
     Way way;
 
     if (way.Read(reader)) {
+      ids.push_back(way.id);
       readerWayCount++;
     }
   }
@@ -72,32 +79,40 @@ int main(int argc, char* argv[])
 
   readerTimer.Stop();
 
-  StopClock scannerTimer;
+  std::cout << "Reading " << readerWayCount << " ways via FileReader took " << readerTimer << std::endl;
 
-  FileScanner scanner;
+  queries.reserve(QUERY_COUNT);
 
-  if (!scanner.Open(filename)) {
-    std::cerr << "Cannot open of file '" << filename << "'!" << std::endl;
+  for (size_t i=0; i<QUERY_COUNT; i++) {
+    queries.push_back(ids[(int)(QUERY_COUNT*rand()/(RAND_MAX+1.0))]);
+  }
+
+
+  WayIndex wayIndex;
+
+  StopClock indexTimer;
+
+  if (!wayIndex.LoadWayIndex(".")) {
+    std::cerr << "Cannot open way index file!" << std::endl;
     return 1;
   }
 
-  std::cout << "Start reading files using FileScanner..." << std::endl;
+  for (size_t i=0; i<queries.size(); i++) {
+    std::set<Id>             ids;
+    std::list<WayIndexEntry> entries;
 
-  scannerWayCount=0;
-  while (!scanner.HasError()) {
-    Way way;
+    ids.insert(queries[i]);
 
-    if (way.Read(scanner)) {
-      scannerWayCount++;
+    wayIndex.GetWayIndexEntries(ids,entries);
+
+    if (entries.size()!=1) {
+      std::cerr << "Cannot read way id " << queries[i] << " from index!" << std::endl;
     }
   }
 
-  scanner.Close();
+  indexTimer.Stop();
 
-  scannerTimer.Stop();
-
-  std::cout << "Reading " << readerWayCount << " ways via FileReader took " << readerTimer << std::endl;
-  std::cout << "Reading " << scannerWayCount << " ways via FileScanner took " << scannerTimer << std::endl;
+  std::cout << "Reading " << queries.size() << " random way ids from index took " << indexTimer << std::endl;
 
   return 0;
 }
