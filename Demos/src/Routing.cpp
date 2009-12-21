@@ -24,7 +24,7 @@
 
 /*
   Example for the nordrhein-westfalen.osm:
-  time src/Routing ../TravelJinni/ 14331559 138190834 10414977 254429626
+  time src/Routing ../TravelJinni/ 14332719 138190834 10414977 283372120
 */
 
 int main(int argc, char* argv[])
