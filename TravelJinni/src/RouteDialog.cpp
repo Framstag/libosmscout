@@ -66,7 +66,7 @@ RouteDialog::RouteDialog(DatabaseTask* databaseTask,
 
   if (result.startCity.empty()) {
     result.startCity="Bonn";
-    result.startWay=14331559;
+    result.startWay=14332719;
     result.startNode=138190834;
     result.startStreet="Promenadenweg";
     start->Set(L"Bonn, Promenadenweg");
@@ -75,7 +75,7 @@ RouteDialog::RouteDialog(DatabaseTask* databaseTask,
     result.endCity="Dortmund";
     result.endStreet="Am Birkenbaum";
     result.endWay=10414977;
-    result.endNode=254429626;
+    result.endNode=283372120;
     end->Set(L"Dortmund, Am Birkenbaum");
     hasEnd=true;
   }
