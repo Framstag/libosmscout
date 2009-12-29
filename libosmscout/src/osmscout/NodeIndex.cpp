@@ -68,46 +68,6 @@ size_t NodeIndex::GetIntervalSize() const
   return intervalSize;
 }
 
-void NodeIndex::GetNodeIndexEntries(const std::set<Id>& nodeIds,
-                                    std::list<NodeIndexEntry>& entries) const
-{
-  std::set<size_t> intervals;
-
-  for (std::set<Id>::const_iterator node=nodeIds.begin();
-       node!=nodeIds.end();
-       ++node) {
-    intervals.insert(*node/intervalSize);
-  }
-
-  for (std::set<size_t>::const_iterator interval=intervals.begin();
-       interval!=intervals.end();
-       ++interval) {
-
-    std::map<size_t,IndexEntry>::const_iterator entry;
-
-    entry=nodeIndex.find(*interval);
-
-    assert(entry!=nodeIndex.end());
-
-    NodeIndexEntry tmp;
-
-    tmp.interval=entry->first;;
-    tmp.offset=entry->second.offset;
-    tmp.nodeCount=entry->second.nodeCount;
-
-    entry++;
-
-    if (entry!=nodeIndex.end()) {
-      tmp.size=entry->second.offset-tmp.offset;
-    }
-    else {
-      tmp.size=datSize-tmp.offset;
-    }
-
-    entries.push_back(tmp);
-  }
-}
-
 void NodeIndex::GetNodePagesIndexEntries(const std::set<Page>& pages,
                                          std::list<NodeIndexEntry>& entries) const
 {

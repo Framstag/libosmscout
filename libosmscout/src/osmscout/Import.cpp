@@ -27,6 +27,7 @@
 #include <osmscout/TypeConfigLoader.h>
 
 #include <osmscout/NumericIndex.h>
+#include <osmscout/Node.h>
 #include <osmscout/Way.h>
 
 #include <osmscout/Preprocess.h>
@@ -40,7 +41,7 @@
 #include <osmscout/GenWayIndex.h>
 
 static const size_t defaultStartStep=1;
-static const size_t defaultEndStep=10;
+static const size_t defaultEndStep=11;
 
 ImportParameter::ImportParameter()
  : startStep(defaultStartStep),
@@ -189,7 +190,25 @@ bool Import(const ImportParameter& parameter,
   }
 
   if (startStep==5) {
-    progress.SetStep("5 Generating 'areanode.idx'");
+    progress.SetStep("5 Generating 'node2.idx'");
+
+    if (!GenerateNumericIndex<Id,Node>(parameter,
+                                       progress,
+                                       "nodes.dat",
+                                       "node2.idx")) {
+      progress.Error("Cannot generate node2 index!");
+      return false;
+    }
+
+    startStep++;
+  }
+
+  if (startStep>endStep) {
+    return true;
+  }
+
+  if (startStep==6) {
+    progress.SetStep("6 Generating 'areanode.idx'");
 
     if (!GenerateAreaNodeIndex(parameter,
                                progress)) {
@@ -204,8 +223,8 @@ bool Import(const ImportParameter& parameter,
     return true;
   }
 
-  if (startStep==6) {
-    progress.SetStep("6 Generating 'way.idx'");
+  if (startStep==7) {
+    progress.SetStep("7 Generating 'way.idx'");
 
     if (!GenerateWayIndex(parameter,
                           progress)) {
@@ -220,8 +239,8 @@ bool Import(const ImportParameter& parameter,
     return true;
   }
 
-  if (startStep==7) {
-    progress.SetStep("6 Generating 'way2.idx'");
+  if (startStep==8) {
+    progress.SetStep("8 Generating 'way2.idx'");
 
     if (!GenerateNumericIndex<Id,Way>(parameter,
                                       progress,
@@ -238,8 +257,8 @@ bool Import(const ImportParameter& parameter,
     return true;
   }
 
-  if (startStep==8) {
-    progress.SetStep("8 Generating 'areaway.idx'");
+  if (startStep==9) {
+    progress.SetStep("9 Generating 'areaway.idx'");
 
     if (!GenerateAreaWayIndex(parameter,
                               progress)) {
@@ -254,8 +273,8 @@ bool Import(const ImportParameter& parameter,
     return true;
   }
 
-  if (startStep==9) {
-    progress.SetStep("9 Generating 'citystreet.idx'");
+  if (startStep==10) {
+    progress.SetStep("10 Generating 'citystreet.idx'");
 
     if (!GenerateCityStreetIndex(typeConfig,
                                  parameter,
@@ -271,8 +290,8 @@ bool Import(const ImportParameter& parameter,
     return true;
   }
 
-  if (startStep==10) {
-    progress.SetStep("10 Generating 'nodeuse.idx'");
+  if (startStep==11) {
+    progress.SetStep("11 Generating 'nodeuse.idx'");
 
     if (!GenerateNodeUseIndex(typeConfig,
                               parameter,

@@ -88,33 +88,6 @@ int main(int argc, char* argv[])
     queries.push_back(ids[(int)(QUERY_COUNT*rand()/(RAND_MAX+1.0))]);
   }
 
-
-  WayIndex wayIndex;
-
-  if (!wayIndex.LoadWayIndex(".")) {
-    std::cerr << "Cannot open way index file!" << std::endl;
-    return 1;
-  }
-
-  std::cout << "Starting way index test..." << std::endl;
-
-  StopClock indexTimer;
-
-  for (size_t i=0; i<queries.size(); i++) {
-    std::set<Id>             ids;
-    std::list<WayIndexEntry> entries;
-
-    ids.insert(queries[i]);
-
-    wayIndex.GetWayIndexEntries(ids,entries);
-
-    if (entries.size()!=1) {
-      std::cerr << "Cannot read way id " << queries[i] << " from index!" << std::endl;
-    }
-  }
-
-  indexTimer.Stop();
-
   NumericIndex<Id,Way> way2Index("way2.idx");
 
   if (!way2Index.LoadIndex(".")) {
@@ -141,7 +114,7 @@ int main(int argc, char* argv[])
 
   index2Timer.Stop();
 
-  std::cout << "Reading " << queries.size() << " random way ids from index took " << indexTimer << std::endl;
+  //std::cout << "Reading " << queries.size() << " random way ids from index took " << indexTimer << std::endl;
   std::cout << "Reading " << queries.size() << " random way ids from index2 took " << index2Timer << std::endl;
 
   return 0;

@@ -184,6 +184,7 @@ bool NumericIndex<N,T>::GetOffsets(const std::set<N>& ids,
 
           if (!scanner.IsOpen() &&
               !scanner.Open(filename)) {
+            std::cerr << "Cannot open '" << filename << "'!" << std::endl;
             return false;
           }
 

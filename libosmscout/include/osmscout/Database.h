@@ -60,9 +60,12 @@ public: // Fix this
   };
 
   typedef Cache<size_t,std::vector<Node> >    NodeCache;
+  typedef Cache<long,Node>                    Node2Cache;
   typedef Cache<size_t,std::vector<Way> >     WayCache;
+  typedef Cache<long,Way>                     Way2Cache;
   typedef Cache<size_t,std::vector<NodeUse> > NodeUseCache;
 
+  typedef NumericIndex<Id,Node>               Node2Index;
   typedef NumericIndex<Id,Way>                Way2Index;
 
   typedef const Node*                         NodeRef;
@@ -71,6 +74,7 @@ public: // Fix this
 private:
   bool                  isOpen;
   NodeIndex             nodeIndex;
+  Node2Index            node2Index;
   WayIndex              wayIndex;
   Way2Index             way2Index;
 
@@ -84,13 +88,16 @@ private:
   std::string           path;          //! Path to the directory containing all files
 
   mutable NodeCache     nodeCache;     //! Cache for node data
+  mutable Node2Cache    node2Cache;    //! Cache for node data
   mutable WayCache      wayCache;      //! Cache for way data
+  mutable Way2Cache     way2Cache;     //! Cache for way data
   mutable NodeUseCache  nodeUseCache;  //! Cache for node use data
 
   mutable FileReader    nodeReader;    //! File stream to the node.dat file
   mutable FileReader    wayReader;     //! File stream to the way.dat file
   mutable FileReader    nodeUseReader; //! File stream to the nodeuse.idx file
 
+  mutable FileScanner   nodeScanner;   //! File stream to the node.dat file
   mutable FileScanner   wayScanner;    //! File stream to the way.dat file
 
   TypeConfig            *typeConfig;   //! Type config for the currently opened map
@@ -118,8 +125,6 @@ private:
                 size_t maxPriority,
                 std::list<Node>& nodes) const;
 
-  bool GetWays(const std::set<Id>& ids, std::list<Way>& ways) const;
-
 public:
   Database();
   virtual ~Database();
@@ -139,7 +144,9 @@ public:
                   std::list<Way>& ways) const;
 
   bool GetNode(const Id& id, Node& node) const;
+  bool GetNodes(const std::set<Id>& ids, std::list<Node>& nodes) const;
   bool GetWay(const Id& id, Way& way) const;
+  bool GetWays(const std::set<Id>& ids, std::list<Way>& ways) const;
 
   bool GetMatchingCities(const std::string& name,
                          std::list<City>& cities,

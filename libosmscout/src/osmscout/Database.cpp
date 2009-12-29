@@ -71,9 +71,12 @@ struct NodeUseCacheValueSizer : public Database::NodeUseCache::ValueSizer
 
 Database::Database()
  : isOpen(false),
+   node2Index("node2.idx"),
    way2Index("way2.idx"),
    nodeCache(2000),
+   node2Cache(1000000),
    wayCache(6000),
+   way2Cache(1000000),
    nodeUseCache(10), // Seems like the cache is more expensive than direct loading!?
    typeConfig(NULL)
 {
@@ -108,6 +111,13 @@ bool Database::Open(const std::string& path)
     return false;
   }
   std::cout << "Loading node index done." << std::endl;
+
+  std::cout << "Loading node2 index..." << std::endl;
+  if (!node2Index.LoadIndex(path)) {
+    std::cerr << "Cannot load Node2Index!" << std::endl;
+    return false;
+  }
+  std::cout << "Loading node2 index done." << std::endl;
 
   std::cout << "Loading way index..." << std::endl;
   if (!wayIndex.LoadWayIndex(path)) {
@@ -166,6 +176,7 @@ void Database::Close()
 {
   nodeCache.Flush();
   wayCache.Flush();
+  way2Cache.Flush();
   nodeUseCache.Flush();
 
   isOpen=false;
@@ -502,66 +513,62 @@ bool Database::GetObjects(const StyleConfig& styleConfig,
 
 bool Database::GetNode(const Id& id, Node& node) const
 {
-  std::set<Id>              ids;
-  std::list<NodeIndexEntry> indexEntries;
-  std::string               file=path+"/"+"nodes.dat";
+  std::set<Id>    ids;
+  std::list<Node> nodes;
 
   ids.insert(id);
 
-  nodeIndex.GetNodeIndexEntries(ids,indexEntries);
-
-  if (indexEntries.size()==0) {
-    return false;
-  }
-
-  if (!nodeReader.IsOpen()) {
-    if (!nodeReader.Open(file)) {
-      std::cerr << "Error while opening nodes.dat file!" << std::endl;
-      return false;
-    }
-  }
-
-  Cache<size_t,std::vector<Node> >::CacheRef cacheRef;
-
-  const NodeIndexEntry& indexEntry=indexEntries.front();
-
-  if (!nodeCache.GetEntry(indexEntry.interval,cacheRef)) {
-    if (!nodeReader.ReadPageToBuffer(indexEntry.offset,indexEntry.size)) {
-      std::cerr << "Error while reading page from nodes.dat file!" << std::endl;
-      nodeReader.Close();
-      return false;
-    }
-
-    Cache<size_t, std::vector<Node> >::CacheEntry cacheEntry(indexEntry.interval);
-
-    cacheRef=nodeCache.SetEntry(cacheEntry);
-    cacheRef->value.reserve(indexEntry.nodeCount);
-
-    for (size_t i=1; i<=indexEntry.nodeCount; i++) {
-      Node node;
-
-      node.Read(nodeReader);
-
-      if (nodeReader.HasError()) {
-        std::cerr << "Error while reading data from nodes.dat page!" << std::endl;
-        nodeReader.Close();
-        return false;
-      }
-
-      cacheRef->value.push_back(node);
-    }
-  }
-
-  for (std::vector<Node>::const_iterator n=cacheRef->value.begin();
-       n!=cacheRef->value.end();
-       ++n) {
-    if (n->id==id) {
-      node=*n;
+  if (GetNodes(ids,nodes)) {
+    if (nodes.size()>0) {
+      node=*nodes.begin();
       return true;
     }
   }
 
   return false;
+}
+
+bool Database::GetNodes(const std::set<Id>& ids, std::list<Node>& nodes) const
+{
+  std::vector<long> offsets;
+  std::string       file=path+"/"+"nodes.dat";
+
+  if (!node2Index.GetOffsets(ids,offsets)) {
+    std::cout << "GetNodes(): Ids not found in index" << std::endl;
+    return false;
+  }
+
+  if (!nodeScanner.IsOpen()) {
+    if (!nodeScanner.Open(file)) {
+      std::cerr << "Error while opening '" << file << "' for reading nodes by id!" << std::endl;
+      return false;
+    }
+  }
+
+  Node2Cache::CacheRef cacheRef;
+
+  for (std::vector<long>::const_iterator offset=offsets.begin();
+       offset!=offsets.end();
+       ++offset) {
+    if (!node2Cache.GetEntry(*offset,cacheRef)) {
+      Node2Cache::CacheEntry cacheEntry(*offset);
+
+      cacheRef=node2Cache.SetEntry(cacheEntry);
+
+      nodeScanner.SetPos(*offset);
+      cacheRef->value.Read(nodeScanner);
+
+      if (nodeScanner.HasError()) {
+        std::cerr << "Error while reading from file '" << file << "!" << std::endl;
+        nodeScanner.Close();
+        return false;
+      }
+    }
+
+    nodes.push_back(cacheRef->value);
+  }
+
+  return true;
 }
 
 bool Database::GetWay(const Id& id, Way& way) const
@@ -583,54 +590,42 @@ bool Database::GetWay(const Id& id, Way& way) const
 
 bool Database::GetWays(const std::set<Id>& ids, std::list<Way>& ways) const
 {
-  std::list<WayIndexEntry> indexEntries;
-  std::string              file=path+"/"+"ways.dat";
+  std::vector<long> offsets;
+  std::string       file=path+"/"+"ways.dat";
 
-  wayIndex.GetWayIndexEntries(ids,indexEntries);
-
-  if (indexEntries.size()==0) {
+  if (!way2Index.GetOffsets(ids,offsets)) {
     std::cout << "GetWays(): Ids not found in index" << std::endl;
     return false;
   }
 
-  if (!wayReader.IsOpen()) {
-    if (!wayReader.Open(file)) {
+  if (!wayScanner.IsOpen()) {
+    if (!wayScanner.Open(file)) {
       std::cerr << "Error while opening ways.dat file for reading ways by id!" << std::endl;
       return false;
     }
   }
 
-  Cache<size_t,std::vector<Way> >::CacheRef cacheRef;
+  Way2Cache::CacheRef cacheRef;
 
-  for (std::list<WayIndexEntry>::const_iterator indexEntry=indexEntries.begin();
-       indexEntry!=indexEntries.end();
-       ++indexEntry) {
-    if (!wayCache.GetEntry(indexEntry->interval,cacheRef)) {
-      wayReader.ReadPageToBuffer(indexEntry->offset,indexEntry->size);
+  for (std::vector<long>::const_iterator offset=offsets.begin();
+       offset!=offsets.end();
+       ++offset) {
+    if (!way2Cache.GetEntry(*offset,cacheRef)) {
+      Way2Cache::CacheEntry cacheEntry(*offset);
 
-      Cache<size_t, std::vector<Way> >::CacheEntry cacheEntry(indexEntry->interval);
+      cacheRef=way2Cache.SetEntry(cacheEntry);
 
-      cacheRef=wayCache.SetEntry(cacheEntry);
-      cacheRef->value.resize(indexEntry->count);
+      wayScanner.SetPos(*offset);
+      cacheRef->value.Read(wayScanner);
 
-      for (size_t i=0; i<indexEntry->count; i++) {
-        cacheRef->value[i].Read(wayReader);
-
-        if (wayReader.HasError()) {
-          std::cerr << "Error while reading from ways.dat file!" << std::endl;
-          wayReader.Close();
-          return false;
-        }
+      if (wayScanner.HasError()) {
+        std::cerr << "Error while reading from ways.dat file!" << std::endl;
+        wayScanner.Close();
+        return false;
       }
     }
 
-    for (std::vector<Way>::const_iterator w=cacheRef->value.begin();
-         w!=cacheRef->value.end();
-         ++w) {
-      if (ids.find(w->id)!=ids.end()) {
-        ways.push_back(*w);
-      }
-    }
+    ways.push_back(cacheRef->value);
   }
 
   return true;

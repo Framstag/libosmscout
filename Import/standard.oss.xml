@@ -233,17 +233,17 @@
     <label style="contour" minMag="close"/>
   </way>
 
-  <way key="waterway" value="river" prio="5">
-    <line color="b5d0d0" minPixel="2" maxPixel="3" width="5" />
+  <way key="waterway" value="river" prio="1">
+    <line color="b5d0d0" minPixel="0.5" maxPixel="3" width="15" />
     <label style="contour" minMag="proximity"/>
   </way>
 
-  <way key="waterway" value="canal" prio="5">
+  <way key="waterway" value="canal" prio="1">
     <line color="b5d0d0" minPixel="0.5" maxPixel="1" width="15" />
     <label style="contour" minMag="proximity"/>
   </way>
 
-  <area key="waterway" value="riverbank" prio="5">
+  <area key="waterway" value="riverbank" prio="2">
     <fill color="b5d0d0"/>
     <label minMag="proximity"/>
   </area>

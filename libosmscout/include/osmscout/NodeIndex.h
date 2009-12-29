@@ -51,7 +51,6 @@ public:
   bool LoadNodeIndex(const std::string& path);
 
   size_t GetIntervalSize() const;
-  void GetNodeIndexEntries(const std::set<Id>& nodeIds, std::list<NodeIndexEntry>& entries) const;
   void GetNodePagesIndexEntries(const std::set<Page>& pages, std::list<NodeIndexEntry>& entries) const;
 
   void DumpStatistics();
