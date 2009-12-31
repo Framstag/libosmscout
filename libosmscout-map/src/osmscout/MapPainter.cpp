@@ -280,6 +280,33 @@ MapPainter::~MapPainter()
   // no code
 }
 
+bool MapPainter::IsVisible(const Way& way) const
+{
+  if (way.nodes.size()==0) {
+    return false;
+  }
+
+  // Bounding box
+  double lonMin=way.nodes[0].lon;
+  double lonMax=way.nodes[0].lon;
+  double latMin=way.nodes[0].lat;
+  double latMax=way.nodes[0].lat;
+
+  for (size_t i=1; i<way.nodes.size(); i++) {
+    lonMin=std::min(lonMin,way.nodes[i].lon);
+    lonMax=std::max(lonMax,way.nodes[i].lon);
+    latMin=std::min(latMin,way.nodes[i].lat);
+    latMax=std::max(latMax,way.nodes[i].lat);
+  }
+
+  // If bounding box is neither left or right nor above or below
+  // it must somehow cover the map area.
+  return !(lonMin>this->lonMax ||
+           lonMax<this->lonMin ||
+           latMin>this->latMax ||
+           latMax<this->latMin);
+}
+
 bool MapPainter::transformPixelToGeo(int x, int y,
                                      double& lon, double& lat)
 {
@@ -298,6 +325,44 @@ bool MapPainter::transformGeoToPixel(double lon, double lat,
   return true;
 }
 
+cairo_scaled_font_t* MapPainter::GetScaledFont(cairo_t* draw,
+                                               size_t fontSize)
+{
+  std::map<size_t,cairo_scaled_font_t*>::const_iterator f;
+
+  f=font.find(fontSize);
+
+  if (f==font.end()) {
+    cairo_matrix_t       scaleMatrix;
+    cairo_matrix_t       transformMatrix;
+    cairo_font_options_t *options;
+    cairo_scaled_font_t  *scaledFont;
+
+    cairo_matrix_init_scale(&scaleMatrix,fontSize,fontSize);
+    cairo_get_matrix(draw,&transformMatrix);
+    options=cairo_font_options_create();
+    cairo_font_options_set_hint_style (options,CAIRO_HINT_STYLE_NONE);
+    cairo_font_options_set_hint_metrics (options,CAIRO_HINT_METRICS_OFF);
+
+    cairo_select_font_face(draw,
+                           "sans-serif",
+                           CAIRO_FONT_SLANT_NORMAL,
+                           CAIRO_FONT_WEIGHT_NORMAL);
+
+    scaledFont=cairo_scaled_font_create(cairo_get_font_face(draw),
+                                        &scaleMatrix,
+                                        &transformMatrix,
+                                        options);
+
+    cairo_font_options_destroy(options);
+
+    return font.insert(std::pair<size_t,cairo_scaled_font_t*>(fontSize,scaledFont)).first->second;
+  }
+  else {
+    return f->second;
+  }
+}
+
 void MapPainter::DrawLabel(cairo_t* draw,
                            double magnification,
                            const LabelStyle& style,
@@ -307,13 +372,10 @@ void MapPainter::DrawLabel(cairo_t* draw,
   // TODO: If the point is offscreen move it into the screen...
 
   if (style.GetStyle()==LabelStyle::normal) {
+    cairo_scaled_font_t *font;
+
     cairo_font_extents_t fontExtents;
     cairo_text_extents_t textExtents;
-
-    cairo_select_font_face(draw,
-                           "sans-serif",
-                           CAIRO_FONT_SLANT_NORMAL,
-                           CAIRO_FONT_WEIGHT_NORMAL);
 
     double fontSize=style.GetSize()*9.0;
     double r=style.GetTextR();
@@ -327,11 +389,21 @@ void MapPainter::DrawLabel(cairo_t* draw,
       a=a/factor;
     }
 
-    cairo_set_font_size(draw,fontSize);
-    cairo_font_extents(draw,&fontExtents);
-    cairo_text_extents(draw,text.c_str(),&textExtents);
+    font=GetScaledFont(draw,fontSize);
+
+    cairo_set_scaled_font(draw,font);
+
+    cairo_scaled_font_extents(font,&fontExtents);
+    cairo_scaled_font_text_extents(font,text.c_str(),&textExtents);
 
     cairo_set_source_rgba(draw,r,g,b,a);
+
+    if (x-textExtents.width/2+textExtents.x_bearing>=width ||
+        x+textExtents.width/2+textExtents.x_bearing<0 ||
+        y-textExtents.height/2+textExtents.x_bearing>=height ||
+        y+textExtents.width/2+textExtents.x_bearing<0) {
+      return;
+    }
 
     cairo_move_to(draw,x-textExtents.width/2+textExtents.x_bearing,
                   y-textExtents.height/2-textExtents.y_bearing);
@@ -342,16 +414,24 @@ void MapPainter::DrawLabel(cairo_t* draw,
     static const double outerWidth = 4;
     static const double innerWidth = 2;
 
+    cairo_scaled_font_t *font;
+
+    font=GetScaledFont(draw,style.GetSize()*9.0);
+
+    cairo_set_scaled_font(draw,font);
+
     cairo_font_extents_t fontExtents;
     cairo_text_extents_t textExtents;
 
-    cairo_select_font_face(draw,
-                           "sans-serif",
-                           CAIRO_FONT_SLANT_NORMAL,
-                           CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size(draw,style.GetSize()*9.0);
-    cairo_font_extents(draw,&fontExtents);
-    cairo_text_extents(draw,text.c_str(),&textExtents);
+    cairo_scaled_font_extents(font,&fontExtents);
+    cairo_scaled_font_text_extents(font,text.c_str(),&textExtents);
+
+    if (x-textExtents.width/2+textExtents.x_bearing-outerWidth>=width ||
+        x+textExtents.width/2+textExtents.x_bearing-outerWidth<0 ||
+        y-textExtents.height/2+textExtents.x_bearing+outerWidth>=height ||
+        y+textExtents.width/2+textExtents.x_bearing+outerWidth<0) {
+      return;
+    }
 
     cairo_set_line_width(draw,1);
 
@@ -393,23 +473,10 @@ void MapPainter::DrawLabel(cairo_t* draw,
     cairo_stroke(draw);
   }
   else if (style.GetStyle()==LabelStyle::emphasize) {
-    cairo_font_options_t *font_options;
     cairo_font_extents_t fontExtents;
     cairo_text_extents_t textExtents;
 
     cairo_save(draw);
-
-    font_options = cairo_font_options_create();
-    cairo_font_options_set_hint_style(font_options,CAIRO_HINT_STYLE_DEFAULT);
-    cairo_font_options_set_hint_metrics(font_options,CAIRO_HINT_METRICS_DEFAULT);
-
-    cairo_set_font_options (draw,font_options);
-    cairo_font_options_destroy(font_options);
-
-    cairo_select_font_face(draw,
-                           "sans-serif",
-                           CAIRO_FONT_SLANT_NORMAL,
-                           CAIRO_FONT_WEIGHT_NORMAL);
 
     double fontSize=style.GetSize()*9.0;
     double r=style.GetTextR();
@@ -423,9 +490,21 @@ void MapPainter::DrawLabel(cairo_t* draw,
       a=a/factor;
     }
 
-    cairo_set_font_size(draw,fontSize);
-    cairo_font_extents(draw,&fontExtents);
-    cairo_text_extents(draw,text.c_str(),&textExtents);
+    cairo_scaled_font_t *font;
+
+    font=GetScaledFont(draw,fontSize);
+
+    cairo_set_scaled_font(draw,font);
+
+    cairo_scaled_font_extents(font,&fontExtents);
+    cairo_scaled_font_text_extents(font,text.c_str(),&textExtents);
+
+    if (x-textExtents.width/2+textExtents.x_bearing>=width ||
+        x+textExtents.width/2+textExtents.x_bearing<0 ||
+        y-textExtents.height/2+textExtents.x_bearing>=height ||
+        y+textExtents.width/2+textExtents.x_bearing<0) {
+      return;
+    }
 
     cairo_move_to(draw,x-textExtents.width/2+textExtents.x_bearing,
                   y-textExtents.height/2-textExtents.y_bearing);
@@ -446,11 +525,11 @@ void MapPainter::DrawContourLabel(cairo_t* draw,
                                   const std::string& text,
                                   const std::vector<Point>& nodes)
 {
+  cairo_scaled_font_t *font;
 
-  cairo_select_font_face(draw,"sans-serif",
-                         CAIRO_FONT_SLANT_NORMAL,
-                         CAIRO_FONT_WEIGHT_NORMAL);
-  cairo_set_font_size(draw,style.GetSize()*9.0);
+  font=GetScaledFont(draw,style.GetSize()*9.0);
+
+  cairo_set_scaled_font(draw,font);
 
   cairo_new_path(draw);
   double length=0;
@@ -493,12 +572,12 @@ void MapPainter::DrawContourLabel(cairo_t* draw,
 
   cairo_text_extents_t textExtents;
 
-  cairo_text_extents(draw,text.c_str(),&textExtents);
+  cairo_scaled_font_text_extents(font,text.c_str(),&textExtents);
 
   if (length>=textExtents.width) {
     cairo_font_extents_t fontExtents;
 
-    cairo_font_extents(draw,&fontExtents);
+    cairo_scaled_font_extents(font,&fontExtents);
 
     cairo_set_source_rgba(draw,
                           style.GetTextR(),
@@ -787,6 +866,7 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   size_t              styleCount=styleConfig.GetStyleCount();
   std::vector<Node>   nodes;
   std::vector<Way>    ways;
+  size_t              pathDrawn=0;
   size_t              nodesOutCount=0;
   size_t              nodesAllCount=0;
   size_t              nodesDrawnCount=0;
@@ -949,21 +1029,6 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   cairo_rectangle(draw,0,0,width,height);
   cairo_fill(draw);
 
-  cairo_font_options_t *font_options;
-  cairo_font_extents_t fontExtents;
-
-  font_options = cairo_font_options_create ();
-  cairo_font_options_set_hint_style (font_options, CAIRO_HINT_STYLE_NONE);
-  cairo_font_options_set_hint_metrics (font_options, CAIRO_HINT_METRICS_OFF);
-
-  cairo_set_font_options (draw, font_options);
-  cairo_font_options_destroy (font_options);
-
-  cairo_font_extents(draw,&fontExtents);
-
-  cairo_select_font_face(draw,"sans-serif",CAIRO_FONT_SLANT_NORMAL,CAIRO_FONT_WEIGHT_NORMAL);
-  cairo_set_font_size(draw,9);
-
   presetTimer.Stop();
 
   StopClock drawingTimer;
@@ -997,7 +1062,12 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
       const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(area->type,
                                                               area->flags & Way::isBuilding);
 
-      if (fillStyle==NULL || fillStyle->GetLayer()!=layer) {
+      if (fillStyle==NULL ||
+          fillStyle->GetLayer()!=layer) {
+        continue;
+      }
+
+      if (!IsVisible(*area)) {
         continue;
       }
 
@@ -1029,6 +1099,8 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
 
         nodesAllCount++;
       }
+
+      pathDrawn++;
 
       cairo_fill(draw);
 
@@ -1099,6 +1171,10 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
       const LineStyle *style=styleConfig.GetWayLineStyle(way->type);
 
       if (style==NULL) {
+        continue;
+      }
+
+      if (!IsVisible(*way)) {
         continue;
       }
 
@@ -1199,13 +1275,24 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
          way!=ways.end();
          ++way) {
 
-      if (way->IsArea() || way->layer!=layer) {
+      if (way->IsArea() ||
+          way->layer!=layer) {
         continue;
       }
 
       const LineStyle *style=styleConfig.GetWayLineStyle(way->type);
 
       if (style==NULL) {
+        continue;
+      }
+
+      if (style->GetLineA()==0.0) {
+        continue;
+      }
+
+      //std::cout << "w** " << way->GetName() << std::endl;
+
+      if (!IsVisible(*way)) {
         continue;
       }
 
@@ -1217,31 +1304,29 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
                   hmin,vmin,
                   height,
                   hscale,vscale);
+      SetLineStyle(draw,lineWidth[(size_t)way->type],*style);
 
-      if (style->GetLineA()!=0.0) {
-        SetLineStyle(draw,lineWidth[(size_t)way->type],*style);
-
-        bool start=true;
-        for (size_t i=0; i<way->nodes.size(); i++) {
-          if (drawNode[i]) {
-            if (start) {
-              cairo_move_to(draw,nodeX[i],nodeY[i]);
-              start=false;
-            }
-            else {
-              cairo_line_to(draw,nodeX[i],nodeY[i]);
-            }
-
-            nodesDrawnCount++;
+      bool start=true;
+      for (size_t i=0; i<way->nodes.size(); i++) {
+        if (drawNode[i]) {
+          if (start) {
+            cairo_move_to(draw,nodeX[i],nodeY[i]);
+            start=false;
           }
           else {
-            nodesOutCount++;
+            cairo_line_to(draw,nodeX[i],nodeY[i]);
           }
-        }
-        cairo_stroke(draw);
 
-        nodesAllCount+=way->nodes.size();
+          nodesDrawnCount++;
+        }
+        else {
+          nodesOutCount++;
+        }
       }
+      cairo_stroke(draw);
+
+      pathDrawn++;
+      nodesAllCount+=way->nodes.size();
     }
     cairo_restore(draw);
   }
@@ -1274,10 +1359,14 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
         continue;
       }
 
-        DrawContourLabel(draw,
-                         *style,
-                         way->GetRefName(),
-                         way->nodes);
+      if (!IsVisible(*way)) {
+        continue;
+      }
+
+      DrawContourLabel(draw,
+                       *style,
+                       way->GetRefName(),
+                       way->nodes);
     }
     else if (!way->GetName().empty()) {
       const LabelStyle *style=styleConfig.GetWayNameLabelStyle(way->type);
@@ -1289,10 +1378,14 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
         continue;
       }
 
+      if (!IsVisible(*way)) {
+        continue;
+      }
+
       DrawContourLabel(draw,
-                         *style,
-                         way->GetName(),
-                         way->nodes);
+                       *style,
+                       way->GetName(),
+                       way->nodes);
     }
   }
 
@@ -1314,6 +1407,10 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
           magnification>style->GetMaxMag() ||
           style->GetStyle()==LabelStyle::contour) {
           continue;
+      }
+
+      if (!IsVisible(*way)) {
+        continue;
       }
 
       double x,y;
@@ -1368,6 +1465,10 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
         continue;
       }
 
+      if (!IsVisible(*way)) {
+        continue;
+      }
+
       double xmin=way->nodes[0].lon;
       double xmax=way->nodes[0].lon;
       double ymin=way->nodes[0].lat;
@@ -1410,7 +1511,8 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
        ++node) {
     const SymbolStyle *style=styleConfig.GetNodeSymbolStyle(node->type);
 
-    if (style==NULL || magnification<style->GetMinMag()) {
+    if (style==NULL ||
+        magnification<style->GetMinMag()) {
       continue;
     }
 
@@ -1506,6 +1608,10 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
     }
 
     if (!area->GetName().empty()) {
+      if (!IsVisible(*area)) {
+        continue;
+      }
+
       double xmin=area->nodes[0].lon;
       double xmax=area->nodes[0].lon;
       double ymin=area->nodes[0].lat;
@@ -1532,6 +1638,10 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
                 ymin+(ymax-ymin)/2);
     }
     else if (!area->GetRefName().empty()) {
+      if (!IsVisible(*area)) {
+        continue;
+      }
+
       double xmin=area->nodes[0].lon;
       double xmax=area->nodes[0].lon;
       double ymin=area->nodes[0].lat;
@@ -1582,6 +1692,10 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
 
     if (style==NULL) {
       std::cerr << "POI way of type " << way->type << " has no line style,skipping..." << std::endl;
+      continue;
+    }
+
+    if (!IsVisible(*way)) {
       continue;
     }
 
@@ -1644,19 +1758,13 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   drawingTimer.Stop();
   overallTimer.Stop();
 
-  std::cout << "Nodes drawn: " << nodesDrawnCount << "/" << nodesAllCount << " (" << nodesOutCount << " out)" << std::endl;
-  std::cout << "Drawing (done)." << std::endl;
+  std::cout << "Nodes: " << nodesDrawnCount << "/" << nodesAllCount << " (" << nodesOutCount << " out)" << " ways: " << pathDrawn <<"/" << ways.size() << std::endl;
 
   std::cout << "Over all: " << overallTimer << std::endl;
   std::cout << "Data retrieval: " << dataRetrievalTimer << std::endl;
   std::cout << "Preset: " << presetTimer << std::endl;
   std::cout << "Drawing: " << drawingTimer << std::endl;
-  std::cout << "Areas: " << areasTimer << std::endl;
-  std::cout << "Paths: " << pathsTimer << std::endl;
-  std::cout << "Path labels: " << pathLabelsTimer << std::endl;
-  std::cout << "Nodes: " << nodesTimer << std::endl;
-  std::cout << "Area labels: " << areaLabelsTimer << std::endl;
-  std::cout << "Routes: " << routesTimer << std::endl;
+  std::cout << "Area: " << areasTimer <<"/" << areaLabelsTimer << " Path: " << pathsTimer << "/" << pathLabelsTimer << " Node: " << nodesTimer << " Route: " << routesTimer << std::endl;
 
   return true;
 }

@@ -1169,23 +1169,23 @@
   </area>
 
   <node key="place" value="continent">
-    <label style="emphasize" minMag="world"/>
+    <label style="emphasize" minMag="world" maxMag="city"/>
   </node>
 
   <node key="place" value="country">
-    <label style="emphasize" minMag="stateOver"/>
+    <label style="emphasize" minMag="stateOver" maxMag="city"/>
   </node>
 
   <node key="place" value="state">
-    <label style="emphasize" minMag="state"/>
+    <label style="emphasize" minMag="state" maxMag="city"/>
   </node>
 
   <node key="place" value="region">
-    <label style="emphasize" minMag="region"/>
+    <label style="emphasize" minMag="region" maxMag="city"/>
   </node>
 
   <node key="place" value="county">
-    <label style="emphasize" minMag="county"/>
+    <label style="emphasize" minMag="county" maxMag="city"/>
   </node>
 
   <node key="place" value="city">
@@ -1197,15 +1197,15 @@
   </node>
 
   <node key="place" value="village">
-    <label style="emphasize" minMag="cityOver" scaleAndFadeMag="suburb" size="1.2"/>
+    <label style="emphasize" minMag="cityOver" scaleAndFadeMag="suburb" maxMag="veryClose" size="1.2"/>
   </node>
 
   <node key="place" value="hamlet">
-    <label style="emphasize" minMag="city" size="1.0"/>
+    <label style="emphasize" minMag="city" maxMag="veryClose" size="1.0"/>
   </node>
 
   <node key="place" value="suburb">
-    <label style="emphasize" minMag="city" scaleAndFadeMag="suburb" size="1.2"/>
+    <label style="emphasize" minMag="city" scaleAndFadeMag="suburb" maxMag="veryClose" size="1.2"/>
   </node>
 
   <node key="place" value="locality">
@@ -1213,7 +1213,7 @@
   </node>
 
   <node key="place" value="island">
-    <label style="emphasize" minMag="region"/>
+    <label style="emphasize" minMag="region" maxMag="veryClose"/>
   </node>
 
   <way key="internal" value="route" prio="1">
