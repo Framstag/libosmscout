@@ -780,8 +780,8 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
                          cairo_t *draw)
 {
   size_t              styleCount=styleConfig.GetStyleCount();
-  std::list<Node>     nodes;
-  std::list<Way>      ways;
+  std::vector<Node>   nodes;
+  std::vector<Way>    ways;
   size_t              nodesOutCount=0;
   size_t              nodesAllCount=0;
   size_t              nodesDrawnCount=0;
@@ -914,7 +914,7 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   }
 
 
-  for (std::list<Way>::const_iterator area=ways.begin();
+  for (std::vector<Way>::const_iterator area=ways.begin();
        area!=ways.end();
        ++area) {
     if (area->IsArea()) {
@@ -979,7 +979,7 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
 
     //std::cout << "Drawing layer " << layer << std::endl;
 
-    for (std::list<Way>::const_iterator area=ways.begin();
+    for (std::vector<Way>::const_iterator area=ways.begin();
          area!=ways.end();
          ++area) {
 
@@ -1073,7 +1073,7 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
     //std::cout << "Drawing layer " << (int)layer << std::endl;
 
     cairo_save(draw);
-    for (std::list<Way>::const_iterator way=ways.begin();
+    for (std::vector<Way>::const_iterator way=ways.begin();
          way!=ways.end();
          ++way) {
 
@@ -1184,7 +1184,7 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
     }
 
     cairo_save(draw);
-    for (std::list<Way>::const_iterator way=ways.begin();
+    for (std::vector<Way>::const_iterator way=ways.begin();
          way!=ways.end();
          ++way) {
 
@@ -1241,7 +1241,7 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
 
   cairo_save(draw);
 
-  for (std::list<Way>::const_iterator way=ways.begin();
+  for (std::vector<Way>::const_iterator way=ways.begin();
        way!=ways.end();
        ++way) {
 
@@ -1285,7 +1285,7 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
 
   std::set<size_t> labelMap;
 
-  for (std::list<Way>::const_iterator way=ways.begin();
+  for (std::vector<Way>::const_iterator way=ways.begin();
        way!=ways.end();
        ++way) {
 
@@ -1388,7 +1388,7 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   //std::cout << "Draw nodes..." << std::endl;
 
   cairo_save(draw);
-  for (std::list<Node>::const_iterator node=nodes.begin();
+  for (std::vector<Node>::const_iterator node=nodes.begin();
        node!=nodes.end();
        ++node) {
     const SymbolStyle *style=styleConfig.GetNodeSymbolStyle(node->type);
@@ -1414,7 +1414,7 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   //std::cout << "Draw node labels..." << std::endl;
 
   cairo_save(draw);
-  for (std::list<Node>::const_iterator node=nodes.begin();
+  for (std::vector<Node>::const_iterator node=nodes.begin();
        node!=nodes.end();
        ++node) {
     for (size_t i=0; i<node->tags.size(); i++) {
@@ -1469,7 +1469,7 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   //std::cout << "Draw area labels..." << std::endl;
 
   cairo_save(draw);
-  for (std::list<Way>::const_iterator area=ways.begin();
+  for (std::vector<Way>::const_iterator area=ways.begin();
        area!=ways.end();
        ++area) {
 

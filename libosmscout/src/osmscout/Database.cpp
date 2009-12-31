@@ -232,7 +232,7 @@ bool Database::GetWays(const StyleConfig& styleConfig,
                        double lonMax, double latMax,
                        double magnification,
                        size_t maxPriority,
-                       std::list<Way>& ways) const
+                       std::vector<Way>& ways) const
 {
   std::set<Id>             ids;
   std::vector<Id>          idList;
@@ -258,7 +258,7 @@ bool Database::GetNodes(const StyleConfig& styleConfig,
                         double lonMax, double latMax,
                         double magnification,
                         size_t maxPriority,
-                        std::list<Node>& nodes) const
+                        std::vector<Node>& nodes) const
 {
   std::vector<Id> ids;
 
@@ -276,8 +276,8 @@ bool Database::GetObjects(const StyleConfig& styleConfig,
                           double lonMax, double latMax,
                           double magnification,
                           size_t maxNodes,
-                          std::list<Node>& nodes,
-                          std::list<Way>& ways) const
+                          std::vector<Node>& nodes,
+                          std::vector<Way>& ways) const
 {
   std::cout << "Getting objects from index..." << std::endl;
 
@@ -313,8 +313,8 @@ bool Database::GetObjects(const StyleConfig& styleConfig,
 
 bool Database::GetNode(const Id& id, Node& node) const
 {
-  std::vector<Id> ids;
-  std::list<Node> nodes;
+  std::vector<Id>   ids;
+  std::vector<Node> nodes;
 
   ids.push_back(id);
 
@@ -328,7 +328,7 @@ bool Database::GetNode(const Id& id, Node& node) const
   return false;
 }
 
-bool Database::GetNodes(const std::vector<Id>& ids, std::list<Node>& nodes) const
+bool Database::GetNodes(const std::vector<Id>& ids, std::vector<Node>& nodes) const
 {
   std::vector<long> offsets;
   std::string       file=path+"/"+"nodes.dat";
@@ -344,6 +344,8 @@ bool Database::GetNodes(const std::vector<Id>& ids, std::list<Node>& nodes) cons
       return false;
     }
   }
+
+  nodes.reserve(ids.size());
 
   NodeCache::CacheRef cacheRef;
 
@@ -374,8 +376,8 @@ bool Database::GetNodes(const std::vector<Id>& ids, std::list<Node>& nodes) cons
 
 bool Database::GetWay(const Id& id, Way& way) const
 {
-  std::vector<Id> ids;
-  std::list<Way>  ways;
+  std::vector<Id>  ids;
+  std::vector<Way> ways;
 
   ids.push_back(id);
 
@@ -389,7 +391,7 @@ bool Database::GetWay(const Id& id, Way& way) const
   return false;
 }
 
-bool Database::GetWays(const std::vector<Id>& ids, std::list<Way>& ways) const
+bool Database::GetWays(const std::vector<Id>& ids, std::vector<Way>& ways) const
 {
   std::vector<long> offsets;
   std::string       file=path+"/"+"ways.dat";
@@ -405,6 +407,8 @@ bool Database::GetWays(const std::vector<Id>& ids, std::list<Way>& ways) const
       return false;
     }
   }
+
+  ways.reserve(ids.size());
 
   WayCache::CacheRef cacheRef;
 
