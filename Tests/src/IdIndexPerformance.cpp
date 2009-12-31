@@ -24,7 +24,6 @@
 #include <osmscout/FileScanner.h>
 #include <osmscout/NumericIndex.h>
 #include <osmscout/Way.h>
-#include <osmscout/WayIndex.h>
 #include <osmscout/Util.h>
 
 /**

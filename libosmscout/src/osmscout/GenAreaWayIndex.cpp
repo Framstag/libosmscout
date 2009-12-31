@@ -51,12 +51,11 @@ bool GenerateAreaWayIndex(const ImportParameter& parameter,
 
   progress.SetAction("Analysing distribution");
 
-  size_t                                         wayIndexIntervalSize=parameter.GetWayIndexIntervalSize();
-  FileScanner                                    scanner;
-  std::vector<size_t>                            drawTypeDist;
-  std::vector<std::map<TileId,NodeCount > >      drawTypeTileNodeCount;
-  std::vector<std::map<TileId,std::set<Page> > > drawTypeTilePages;
-  size_t                                         wayCount=0;
+  FileScanner                                   scanner;
+  std::vector<size_t>                           drawTypeDist;
+  std::vector<std::map<TileId,NodeCount > >     drawTypeTileNodeCount;
+  std::vector<std::map<TileId,std::list<Id> > > drawTypeTileIds;
+  size_t                                        wayCount=0;
 
   //
   // * Go through the list of ways
@@ -97,7 +96,7 @@ bool GenerateAreaWayIndex(const ImportParameter& parameter,
       if ((size_t)way.type>=drawTypeDist.size()) {
         drawTypeDist.resize(way.type+1,0);
         drawTypeTileNodeCount.resize(way.type+1);
-        drawTypeTilePages.resize(way.type+1);
+        drawTypeTileIds.resize(way.type+1);
       }
       drawTypeDist[way.type]++;
 
@@ -114,7 +113,7 @@ bool GenerateAreaWayIndex(const ImportParameter& parameter,
             drawTypeTileNodeCount[way.type][GetTileId(x,y)]=way.nodes.size();
           }
 
-          drawTypeTilePages[way.type][GetTileId(x,y)].insert(way.id/wayIndexIntervalSize);
+          drawTypeTileIds[way.type][GetTileId(x,y)].push_back(way.id);
         }
       }
     }
@@ -139,16 +138,16 @@ bool GenerateAreaWayIndex(const ImportParameter& parameter,
   size_t pageSum=0;
 
   //std::cout << "Number of tiles per type" << std::endl;
-  for (size_t i=0; i<drawTypeTilePages.size(); i++) {
-    if (i!=typeIgnore && drawTypeTilePages[i].size()>0) {
+  for (size_t i=0; i<drawTypeTileIds.size(); i++) {
+    if (i!=typeIgnore && drawTypeTileIds[i].size()>0) {
 
       drawTypeSum++;
 
       //std::cout << styleTypes[i].GetType() << ": " << drawTypeTileDist[styleTypes[i].GetType()].size();
-      tileSum+=drawTypeTilePages[i].size();
+      tileSum+=drawTypeTileIds[i].size();
 
-      for (std::map<size_t,std::set<Page> >::const_iterator tile=drawTypeTilePages[i].begin();
-           tile!=drawTypeTilePages[i].end();
+      for (std::map<size_t,std::list<Id> >::const_iterator tile=drawTypeTileIds[i].begin();
+           tile!=drawTypeTileIds[i].end();
            ++tile) {
         pageSum+=tile->second.size();
       }
@@ -184,26 +183,24 @@ bool GenerateAreaWayIndex(const ImportParameter& parameter,
   // The number of draw types we have an index for
   writer.WriteNumber(drawTypeSum); // Number of entries
 
-  for (TypeId i=0; i<drawTypeTilePages.size(); i++) {
-    size_t tiles=drawTypeTilePages[i].size();
+  for (TypeId i=0; i<drawTypeTileIds.size(); i++) {
+    size_t tiles=drawTypeTileIds[i].size();
 
     if (i!=typeIgnore && tiles>0) {
       writer.WriteNumber(i);     // The draw type id
       writer.WriteNumber(tiles); // The number of tiles
 
-      for (std::map<TileId,std::set<Page> >::const_iterator tile=drawTypeTilePages[i].begin();
-           tile!=drawTypeTilePages[i].end();
+      for (std::map<TileId,std::list<Id> >::const_iterator tile=drawTypeTileIds[i].begin();
+           tile!=drawTypeTileIds[i].end();
            ++tile) {
         writer.WriteNumber(tile->first);                           // The tile id
         writer.WriteNumber(drawTypeTileNodeCount[i][tile->first]); // The number of nodes
         writer.WriteNumber(tile->second.size());                   // The number of pages
 
-        for (std::set<Page>::const_iterator page=tile->second.begin();
-             page!=tile->second.end();
-             ++page) {
-          Page p=*page;
-
-          writer.WriteNumber(p); // The id of the page
+        for (std::list<Id>::const_iterator id=tile->second.begin();
+             id!=tile->second.end();
+             ++id) {
+          writer.WriteNumber(*id); // The id of the node
         }
       }
     }

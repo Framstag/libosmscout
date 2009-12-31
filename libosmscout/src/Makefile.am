@@ -35,12 +35,10 @@ libosmscout_la_SOURCES= osmscout/Util.cpp \
                         osmscout/GenNodeDat.cpp \
                         osmscout/GenNodeUseIndex.cpp \
                         osmscout/GenWayDat.cpp \
-                        osmscout/GenWayIndex.cpp \
                         osmscout/AreaNodeIndex.cpp \
                         osmscout/AreaWayIndex.cpp \
                         osmscout/CityStreetIndex.cpp \
                         osmscout/NodeUseIndex.cpp \
-                        osmscout/WayIndex.cpp \
                         osmscout/Route.cpp \
                         osmscout/RoutingProfile.cpp \
                         osmscout/Database.cpp

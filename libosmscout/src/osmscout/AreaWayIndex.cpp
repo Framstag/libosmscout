@@ -50,19 +50,19 @@ bool AreaWayIndex::LoadAreaWayIndex(const std::string& path)
     for (size_t t=0; t<tiles; t++) {
       IndexEntry entry;
       TileId     tileId;
-      size_t     pageCount;
+      size_t     idCount;
 
       reader.ReadNumber(tileId);          // The tile id
       reader.ReadNumber(entry.nodeCount); // The number of nodes
-      reader.ReadNumber(pageCount);       // The number of pages
+      reader.ReadNumber(idCount);       // The number of pages
 
-      entry.pages.reserve(pageCount);
+      entry.ids.reserve(idCount);
 
-      for (size_t p=0; p<pageCount; p++) {
-        Page page;
+      for (size_t i=0; i<idCount; i++) {
+        Id id;
 
-        reader.ReadNumber(page); // The id of the page
-        entry.pages.push_back(page);
+        reader.ReadNumber(id); // The id of the page
+        entry.ids.push_back(id);
       }
 
       areaWayIndex[type][tileId]=entry;
@@ -99,12 +99,12 @@ size_t AreaWayIndex::GetNodes(TypeId drawType,
   return nodes;
 }
 
-void AreaWayIndex::GetPages(const StyleConfig& styleConfig,
-                            double minlon, double minlat,
-                            double maxlon, double maxlat,
-                            double magnification,
-                            size_t maxPriority,
-                            std::set<Page>& pages) const
+void AreaWayIndex::GetIds(const StyleConfig& styleConfig,
+                          double minlon, double minlat,
+                          double maxlon, double maxlat,
+                          double magnification,
+                          size_t maxPriority,
+                          std::set<Id>& ids) const
 {
   std::set<TypeId> types;
 
@@ -130,8 +130,8 @@ void AreaWayIndex::GetPages(const StyleConfig& styleConfig,
         std::map<TileId,IndexEntry>::const_iterator tile=typeEntry->second.lower_bound(startTileId);
 
         while (tile->first<=endTileId && tile!=typeEntry->second.end()) {
-          for (size_t j=0; j<tile->second.pages.size(); j++) {
-            pages.insert(tile->second.pages[j]);
+          for (size_t j=0; j<tile->second.ids.size(); j++) {
+            ids.insert(tile->second.ids[j]);
           }
 
           ++tile;
@@ -140,7 +140,7 @@ void AreaWayIndex::GetPages(const StyleConfig& styleConfig,
     }
   }
 
-  std::cout << "Found " << pages.size() << " ways pages in area way index with maximum priority " << maxPriority << std::endl;
+  std::cout << "Found " << ids.size() << " ways ids in area way index with maximum priority " << maxPriority << std::endl;
 }
 
 void AreaWayIndex::DumpStatistics()
@@ -156,7 +156,7 @@ void AreaWayIndex::DumpStatistics()
          j!=i->second.end();
          j++) {
       entries++;
-      memory+=sizeof(j->first)+sizeof(j->second)+j->second.pages.size()*sizeof(Page);
+      memory+=sizeof(j->first)+sizeof(j->second)+j->second.ids.size()*sizeof(Id);
     }
   }
 

@@ -27,31 +27,19 @@
 #include <osmscout/TypeConfigLoader.h>
 #include <osmscout/Util.h>
 
-struct NodeCacheValueSizer : public Database::NodeCache::ValueSizer
+struct NodeCacheValueSizer : public Database::Node2Cache::ValueSizer
 {
-  size_t GetSize(const std::vector<Node>& value) const
+  size_t GetSize(const Node& value) const
   {
-    size_t memory=0;
-
-    for (size_t i=0; i<value.size(); i++) {
-      memory+=sizeof(Node)+value[i].tags.size()*sizeof(Tag);
-    }
-
-    return memory;
+    return sizeof(value);
   }
 };
 
-struct WayCacheValueSizer : public Database::WayCache::ValueSizer
+struct WayCacheValueSizer : public Database::Way2Cache::ValueSizer
 {
-  size_t GetSize(const std::vector<Way>& value) const
+  size_t GetSize(const Way& value) const
   {
-    size_t memory=0;
-
-    for (size_t i=0; i<value.size(); i++) {
-      memory+=sizeof(Way)+value[i].nodes.size()*sizeof(Point)+value[i].tags.size()*sizeof(Tag);
-    }
-
-    return memory;
+    return sizeof(value);
   }
 };
 
@@ -73,9 +61,7 @@ Database::Database()
  : isOpen(false),
    node2Index("node2.idx"),
    way2Index("way2.idx"),
-   nodeCache(2000),
    node2Cache(1000000),
-   wayCache(6000),
    way2Cache(1000000),
    nodeUseCache(10), // Seems like the cache is more expensive than direct loading!?
    typeConfig(NULL)
@@ -111,13 +97,6 @@ bool Database::Open(const std::string& path)
     return false;
   }
   std::cout << "Loading node2 index done." << std::endl;
-
-  std::cout << "Loading way index..." << std::endl;
-  if (!wayIndex.LoadWayIndex(path)) {
-    std::cerr << "Cannot load WayIndex!" << std::endl;
-    return false;
-  }
-  std::cout << "Loading way index done." << std::endl;
 
   std::cout << "Loading way2 index..." << std::endl;
   if (!way2Index.LoadIndex(path)) {
@@ -167,8 +146,7 @@ bool Database::IsOpen() const
 
 void Database::Close()
 {
-  nodeCache.Flush();
-  wayCache.Flush();
+  node2Cache.Flush();
   way2Cache.Flush();
   nodeUseCache.Flush();
 
@@ -256,118 +234,23 @@ bool Database::GetWays(const StyleConfig& styleConfig,
                        size_t maxPriority,
                        std::list<Way>& ways) const
 {
-  std::set<Page>           pages;
-  std::list<WayIndexEntry> wayIndexEntries;
-  size_t                   wayAllCount=0;
-  size_t                   waySelectedCount=0;
-  size_t                   maxNodesCount=0;
-  size_t                   cacheCount=0;
-  size_t                   diskCount=0;
-  std::string              file=path+"/"+"ways.dat";
+  std::set<Id>             ids;
+  std::vector<Id>          idList;
 
-  areaWayIndex.GetPages(styleConfig,
-                        lonMin,latMin,lonMax,latMax,
-                        magnification,
-                        maxPriority,
-                        pages);
+  areaWayIndex.GetIds(styleConfig,
+                      lonMin,latMin,lonMax,latMax,
+                      magnification,
+                      maxPriority,
+                      ids);
 
-  wayIndex.GetWayPagesIndexEntries(pages,wayIndexEntries);
-
-  //
-  // Loading relevant ways
-  //
-
-  if (!wayReader.IsOpen()) {
-    if (!wayReader.Open(file)){
-      std::cerr << "Error while opening ways.dat file for reading ways by area!" << std::endl;
-
-      return false;
-    }
+  idList.reserve(ids.size());
+  for (std::set<Id>::const_iterator id=ids.begin();
+       id!=ids.end();
+       ++id) {
+    idList.push_back(*id);
   }
 
-  for (std::list<WayIndexEntry>::iterator indexEntry=wayIndexEntries.begin();
-       indexEntry!=wayIndexEntries.end();
-       ++indexEntry) {
-   WayCache::CacheRef cacheRef;
-
-    if (!wayCache.GetEntry(indexEntry->interval,cacheRef)) {
-      if (!wayReader.ReadPageToBuffer(indexEntry->offset,indexEntry->size)) {
-        std::cerr << "Error while reading page from ways.dat file!" << std::endl;
-        wayReader.Close();
-        return false;
-      }
-
-      diskCount++;
-
-      Cache<size_t, std::vector<Way> >::CacheEntry cacheEntry(indexEntry->interval);
-
-      cacheRef=wayCache.SetEntry(cacheEntry);
-      cacheRef->value.resize(indexEntry->count);
-
-      for (size_t i=0; i<indexEntry->count; i++) {
-        cacheRef->value[i].Read(wayReader);
-
-        if (wayReader.HasError()) {
-          std::cerr << "Error while reading data from ways.dat page!" << std::endl;
-          wayReader.Close();
-          return false;
-        }
-      }
-    }
-    else {
-      cacheCount++;
-    }
-
-    // Filter ways based on priority, type and covered area
-    for (std::vector<Way>::const_iterator way=cacheRef->value.begin();
-         way!=cacheRef->value.end();
-         ++way) {
-      if ((!way->IsArea() && styleConfig.IsWayVisible(way->type,maxPriority)) ||
-          (way->IsArea() && styleConfig.IsAreaVisible(way->type,maxPriority))) {
-        maxNodesCount=std::max(maxNodesCount,way->nodes.size());
-
-        double wLonMin=way->nodes[0].lon;
-        double wLonMax=way->nodes[0].lon;
-        double wLatMin=way->nodes[0].lat;
-        double wLatMax=way->nodes[0].lat;
-        double match=false;
-
-        for (size_t i=0; i<way->nodes.size(); i++) {
-          wLonMin=std::min(wLonMin,way->nodes[i].lon);
-          wLatMin=std::min(wLatMin,way->nodes[i].lat);
-          wLonMax=std::max(wLonMax,way->nodes[i].lon);
-          wLatMax=std::max(wLatMax,way->nodes[i].lat);
-
-          if (way->nodes[i].lon>=lonMin && way->nodes[i].lon<=lonMax &&
-              way->nodes[i].lat>=latMin && way->nodes[i].lat<=latMax) {
-            match=true;
-            break;
-          }
-        }
-
-        if (way->IsArea()) {
-          // Check that to be drawn area is completely in area
-          if (!match &&
-              lonMin>=wLonMin && latMin>=wLatMin &&
-              lonMax<=wLonMax && latMax<=wLatMax) {
-            match=true;
-          }
-        }
-
-        if (match) {
-          ways.push_back(*way);
-          waySelectedCount++;
-        }
-      }
-      wayAllCount++;
-    }
-  }
-
-  std::cout << "Ways scanned: " << wayAllCount << " selected: " << waySelectedCount << std::endl;
-  std::cout << "Maximum nodes per way: " << maxNodesCount << std::endl;
-  std::cout << "Way cache: " << cacheCount << " disk: " << diskCount << " cache size: " << wayCache.GetSize() << std::endl;
-
-  return true;
+  return GetWays(idList,ways);
 }
 
 bool Database::GetNodes(const StyleConfig& styleConfig,
@@ -477,6 +360,7 @@ bool Database::GetNodes(const std::vector<Id>& ids, std::list<Node>& nodes) cons
 
       if (nodeScanner.HasError()) {
         std::cerr << "Error while reading from file '" << file << "!" << std::endl;
+        // TODO: Remove broken entry from cache
         nodeScanner.Close();
         return false;
       }
@@ -537,6 +421,7 @@ bool Database::GetWays(const std::vector<Id>& ids, std::list<Way>& ways) const
 
       if (wayScanner.HasError()) {
         std::cerr << "Error while reading from ways.dat file!" << std::endl;
+        // TODO: Remove broken entry from cache
         wayScanner.Close();
         return false;
       }
@@ -1422,12 +1307,11 @@ bool Database::TransformRouteDataToWay(const RouteData& data,
 }
 void Database::DumpStatistics()
 {
-  nodeCache.DumpStatistics("Node cache",NodeCacheValueSizer());
-  wayCache.DumpStatistics("Way cache",WayCacheValueSizer());
+  node2Cache.DumpStatistics("Node cache",NodeCacheValueSizer());
+  way2Cache.DumpStatistics("Way cache",WayCacheValueSizer());
   nodeUseCache.DumpStatistics("Node use cache",NodeUseCacheValueSizer());
 
   node2Index.DumpStatistics();
-  wayIndex.DumpStatistics();
   way2Index.DumpStatistics();
 
   areaNodeIndex.DumpStatistics();

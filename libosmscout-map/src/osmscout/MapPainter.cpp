@@ -790,7 +790,7 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
 
   double              gradtorad=2*M_PI/360;
 
-  std::cout << "Showing " << lon <<", " << lat << " with magnification " << magnification << "x" << " for area " << width << "x" << height << std::endl;
+  std::cout << "--- Showing " << lon <<", " << lat << " with magnification " << magnification << "x" << " for area " << width << "x" << height << std::endl;
 
   timeval startTime;
   timeval dataFetchedTime;

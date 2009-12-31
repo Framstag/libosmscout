@@ -33,9 +33,8 @@
 #include <osmscout/Node.h>
 #include <osmscout/Way.h>
 
-// By Id index
+// Fileoffset by Id index
 #include <osmscout/NumericIndex.h>
-#include <osmscout/WayIndex.h>
 
 // In area index
 #include <osmscout/AreaNodeIndex.h>
@@ -58,9 +57,7 @@ public: // Fix this
     std::vector<Id> references;
   };
 
-  typedef Cache<size_t,std::vector<Node> >    NodeCache;
   typedef Cache<long,Node>                    Node2Cache;
-  typedef Cache<size_t,std::vector<Way> >     WayCache;
   typedef Cache<long,Way>                     Way2Cache;
   typedef Cache<size_t,std::vector<NodeUse> > NodeUseCache;
 
@@ -73,7 +70,6 @@ public: // Fix this
 private:
   bool                  isOpen;
   Node2Index            node2Index;
-  WayIndex              wayIndex;
   Way2Index             way2Index;
 
   AreaNodeIndex         areaNodeIndex;
@@ -85,14 +81,10 @@ private:
 
   std::string           path;          //! Path to the directory containing all files
 
-  mutable NodeCache     nodeCache;     //! Cache for node data
   mutable Node2Cache    node2Cache;    //! Cache for node data
-  mutable WayCache      wayCache;      //! Cache for way data
   mutable Way2Cache     way2Cache;     //! Cache for way data
   mutable NodeUseCache  nodeUseCache;  //! Cache for node use data
 
-  mutable FileReader    nodeReader;    //! File stream to the node.dat file
-  mutable FileReader    wayReader;     //! File stream to the way.dat file
   mutable FileReader    nodeUseReader; //! File stream to the nodeuse.idx file
 
   mutable FileScanner   nodeScanner;   //! File stream to the node.dat file

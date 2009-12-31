@@ -47,6 +47,15 @@ private:
 
   typedef Cache<long,std::vector<IndexEntry> > PageCache;
 
+  struct NumericIndexCacheValueSizer : public PageCache::ValueSizer
+  {
+    size_t GetSize(const std::vector<IndexEntry>& value) const
+    {
+
+      return sizeof(IndexEntry)*value.size();
+    }
+  };
+
 private:
   std::string                    filepart;
   std::string                    filename;
@@ -253,7 +262,20 @@ bool NumericIndex<N,T>::GetOffsets(const std::vector<N>& ids,
 template <class N,class T>
 void NumericIndex<N,T>::DumpStatistics()
 {
-  std::cout << "Index " << filepart << ": TODO!" << std::endl;
+  size_t memory=0;
+  size_t entries=0;
+
+  entries+=root.size();
+  memory+=root.size()+sizeof(IndexEntry);
+
+  for (size_t i=0; i<leafs.size(); i++) {
+    entries+=leafs[i].GetSize();
+    memory+=leafs[i].GetSize()+leafs[i].GetMemory(NumericIndexCacheValueSizer());
+
+    // TODO: Calculate size of cache
+  }
+
+  std::cout << "Index " << filepart << ": " << entries << " entries, " << memory << std::endl;
 }
 
 template <class N,class T>

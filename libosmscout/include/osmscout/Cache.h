@@ -199,10 +199,7 @@ public:
     return order.size();
   }
 
-  /**
-    Dump some cache statistics to std::cout.
-    */
-  void DumpStatistics(const char* cacheName, const ValueSizer& sizer)
+  size_t GetMemory(const ValueSizer& sizer) const
   {
     size_t memory=0;
 
@@ -215,7 +212,15 @@ public:
       memory+=sizer.GetSize(entry->value);
     }
 
-    std::cout << cacheName << " entries: " << order.size() << ", memory " << memory << std::endl;
+    return memory;
+  }
+
+  /**
+    Dump some cache statistics to std::cout.
+    */
+  void DumpStatistics(const char* cacheName, const ValueSizer& sizer)
+  {
+    std::cout << cacheName << " entries: " << order.size() << ", memory " << GetMemory(sizer) << std::endl;
   }
 };
 
