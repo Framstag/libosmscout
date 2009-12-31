@@ -446,11 +446,11 @@ void MapPainter::DrawContourLabel(cairo_t* draw,
                                   const std::string& text,
                                   const std::vector<Point>& nodes)
 {
-  cairo_font_extents_t fontExtents;
 
-  cairo_select_font_face(draw,"sans-serif",CAIRO_FONT_SLANT_NORMAL,CAIRO_FONT_WEIGHT_NORMAL);
+  cairo_select_font_face(draw,"sans-serif",
+                         CAIRO_FONT_SLANT_NORMAL,
+                         CAIRO_FONT_WEIGHT_NORMAL);
   cairo_set_font_size(draw,style.GetSize()*9.0);
-  cairo_font_extents(draw,&fontExtents);
 
   cairo_new_path(draw);
   double length=0;
@@ -496,13 +496,18 @@ void MapPainter::DrawContourLabel(cairo_t* draw,
   cairo_text_extents(draw,text.c_str(),&textExtents);
 
   if (length>=textExtents.width) {
+    cairo_font_extents_t fontExtents;
+
+    cairo_font_extents(draw,&fontExtents);
+
     cairo_set_source_rgba(draw,
                           style.GetTextR(),
                           style.GetTextG(),
                           style.GetTextB(),
                           style.GetTextA());
 
-    draw_twisted(draw,(length-textExtents.width)/2+textExtents.x_bearing,
+    draw_twisted(draw,
+                 (length-textExtents.width)/2+textExtents.x_bearing,
                  fontExtents.ascent+textExtents.y_bearing,
                  text.c_str());
   }
@@ -1264,32 +1269,30 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
 
       if (style==NULL ||
           magnification<style->GetMinMag() ||
-          magnification>style->GetMaxMag()) {
+          magnification>style->GetMaxMag() ||
+          style->GetStyle()!=LabelStyle::contour) {
         continue;
       }
 
-      if (style->GetStyle()==LabelStyle::contour) {
         DrawContourLabel(draw,
                          *style,
                          way->GetRefName(),
                          way->nodes);
-      }
     }
     else if (!way->GetName().empty()) {
       const LabelStyle *style=styleConfig.GetWayNameLabelStyle(way->type);
 
       if (style==NULL ||
           magnification<style->GetMinMag() ||
-          magnification>style->GetMaxMag()) {
+          magnification>style->GetMaxMag() ||
+          style->GetStyle()!=LabelStyle::contour) {
         continue;
       }
 
-      if (style->GetStyle()==LabelStyle::contour) {
-        DrawContourLabel(draw,
+      DrawContourLabel(draw,
                          *style,
                          way->GetName(),
                          way->nodes);
-      }
     }
   }
 
