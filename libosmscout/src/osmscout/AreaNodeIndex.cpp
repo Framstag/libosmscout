@@ -52,20 +52,19 @@ bool AreaNodeIndex::LoadAreaNodeIndex(const std::string& path)
     for (size_t t=0; t<tiles; t++) {
       IndexEntry entry;
       TileId     tileId;
-      size_t     pageCount;
+      size_t     nodeCount;
 
       reader.ReadNumber(tileId);          // The tile id
-      reader.ReadNumber(entry.nodeCount); // The number of nodes
-      reader.ReadNumber(pageCount);       // The number of pages
+      reader.ReadNumber(nodeCount); // The number of nodes
 
-      entry.pages.reserve(pageCount);
+      entry.ids.reserve(nodeCount);
 
-      for (size_t p=0; p<pageCount; p++) {
-        Page page;
+      for (size_t i=0; i<nodeCount; i++) {
+        Id id;
 
-        reader.ReadNumber(page); // The id of the page
+        reader.ReadNumber(id); // The id of the node
 
-        entry.pages.push_back(page);
+        entry.ids.push_back(id);
 
       }
 
@@ -93,7 +92,7 @@ size_t AreaNodeIndex::GetNodes(TypeId drawType,
       std::map<TileId,IndexEntry>::const_iterator tile=drawTypeEntry->second.lower_bound(startTileId);
 
       while (tile->first<=endTileId && tile!=drawTypeEntry->second.end()) {
-        nodes+=tile->second.nodeCount;
+        nodes+=tile->second.ids.size();
 
         ++tile;
       }
@@ -103,12 +102,12 @@ size_t AreaNodeIndex::GetNodes(TypeId drawType,
   return nodes;
 }
 
-void AreaNodeIndex::GetPages(const StyleConfig& styleConfig,
-                             double minlon, double minlat,
-                             double maxlon, double maxlat,
-                             double magnification,
-                             size_t maxPriority,
-                             std::set<Page>& pages) const
+void AreaNodeIndex::GetIds(const StyleConfig& styleConfig,
+                           double minlon, double minlat,
+                           double maxlon, double maxlat,
+                           double magnification,
+                           size_t maxPriority,
+                           std::vector<Id>& ids) const
 {
   std::set<TypeId> types;
 
@@ -136,8 +135,8 @@ void AreaNodeIndex::GetPages(const StyleConfig& styleConfig,
         std::map<TileId,IndexEntry>::const_iterator tile=typeEntry->second.lower_bound(startTileId);
 
         while (tile->first<=endTileId && tile!=typeEntry->second.end()) {
-          for (size_t j=0; j<tile->second.pages.size(); j++) {
-            pages.insert(tile->second.pages[j]);
+          for (size_t j=0; j<tile->second.ids.size(); j++) {
+            ids.push_back(tile->second.ids[j]);
           }
 
           ++tile;
@@ -146,7 +145,7 @@ void AreaNodeIndex::GetPages(const StyleConfig& styleConfig,
     }
   }
 
-  std::cout << "Found " << pages.size() << " node pages in area node index with maximum priority " << maxPriority << std::endl;
+  std::cout << "Found " << ids.size() << " node ids in area node index with maximum priority " << maxPriority << std::endl;
 }
 
 void AreaNodeIndex::DumpStatistics()
@@ -162,7 +161,7 @@ void AreaNodeIndex::DumpStatistics()
          j!=i->second.end();
          j++) {
       entries++;
-      memory+=sizeof(j->first)+sizeof(j->second)+j->second.pages.size()*sizeof(Page);
+      memory+=sizeof(j->first)+sizeof(j->second)+j->second.ids.size()*sizeof(Id);
     }
   }
 

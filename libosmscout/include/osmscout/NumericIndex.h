@@ -62,7 +62,7 @@ public:
 
   bool LoadIndex(const std::string& path);
 
-  bool GetOffsets(const std::set<N>& ids, std::vector<long>& offsets) const;
+  bool GetOffsets(const std::vector<N>& ids, std::vector<long>& offsets) const;
 
   void DumpStatistics();
 };
@@ -145,7 +145,7 @@ bool NumericIndex<N,T>::LoadIndex(const std::string& path)
 }
 
 template <class N, class T>
-bool NumericIndex<N,T>::GetOffsets(const std::set<N>& ids,
+bool NumericIndex<N,T>::GetOffsets(const std::vector<N>& ids,
                                    std::vector<long>& offsets) const
 {
   offsets.reserve(ids.size());
@@ -155,7 +155,7 @@ bool NumericIndex<N,T>::GetOffsets(const std::set<N>& ids,
     return true;
   }
 
-  for (typename std::set<N>::const_iterator id=ids.begin();
+  for (typename std::vector<N>::const_iterator id=ids.begin();
        id!=ids.end();
        ++id) {
     size_t r=0;
@@ -248,6 +248,12 @@ bool NumericIndex<N,T>::GetOffsets(const std::set<N>& ids,
   }
 
   return true;
+}
+
+template <class N,class T>
+void NumericIndex<N,T>::DumpStatistics()
+{
+  std::cout << "Index " << filepart << ": TODO!" << std::endl;
 }
 
 template <class N,class T>

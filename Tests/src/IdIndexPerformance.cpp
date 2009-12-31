@@ -100,10 +100,10 @@ int main(int argc, char* argv[])
   StopClock index2Timer;
 
   for (size_t i=0; i<queries.size(); i++) {
-    std::set<Id>      ids;
+    std::vector<Id>   ids;
     std::vector<long> offsets;
 
-    ids.insert(queries[i]);
+    ids.push_back(queries[i]);
 
     way2Index.GetOffsets(ids,offsets);
 

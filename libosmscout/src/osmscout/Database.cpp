@@ -105,13 +105,6 @@ bool Database::Open(const std::string& path)
     return false;
   }
 
-  std::cout << "Loading node index..." << std::endl;
-  if (!nodeIndex.LoadNodeIndex(path)) {
-    std::cerr << "Cannot load NodeIndex!" << std::endl;
-    return false;
-  }
-  std::cout << "Loading node index done." << std::endl;
-
   std::cout << "Loading node2 index..." << std::endl;
   if (!node2Index.LoadIndex(path)) {
     std::cerr << "Cannot load Node2Index!" << std::endl;
@@ -384,91 +377,15 @@ bool Database::GetNodes(const StyleConfig& styleConfig,
                         size_t maxPriority,
                         std::list<Node>& nodes) const
 {
-  std::set<Page>            pages;
-  std::list<NodeIndexEntry> nodeIndexEntries;
-  size_t                    nodeAllCount=0;
-  size_t                    nodeSelectedCount=0;
-  size_t                    cacheCount=0;
-  size_t                    diskCount=0;
-  std::string               file=path+"/"+"nodes.dat";
+  std::vector<Id> ids;
 
-  // Nodes
+  areaNodeIndex.GetIds(styleConfig,
+                       lonMin,latMin,lonMax,latMax,
+                       magnification,
+                       maxPriority,
+                       ids);
 
-  areaNodeIndex.GetPages(styleConfig,
-                         lonMin,latMin,lonMax,latMax,
-                         magnification,
-                         maxPriority,
-                         pages);
-
-  nodeIndex.GetNodePagesIndexEntries(pages,nodeIndexEntries);
-
-  //
-  // Loading relevant nodes
-  //
-
-  if (!nodeReader.IsOpen()) {
-    if (!nodeReader.Open(file)) {
-      std::cerr << "Error while opening nodes.dat file!" << std::endl;
-      return false;
-    }
-  }
-
-  for (std::list<NodeIndexEntry>::iterator indexEntry=nodeIndexEntries.begin();
-       indexEntry!=nodeIndexEntries.end();
-       ++indexEntry) {
-    Cache<size_t,std::vector<Node> >::CacheRef cacheRef;
-
-    if (!nodeCache.GetEntry(indexEntry->interval,cacheRef)) {
-      diskCount++;
-      if (!nodeReader.ReadPageToBuffer(indexEntry->offset,indexEntry->size)) {
-        std::cerr << "Error while reading page from nodes.dat file!" << std::endl;
-        nodeReader.Close();
-        return false;
-      }
-
-      Cache<size_t, std::vector<Node> >::CacheEntry cacheEntry(indexEntry->interval);
-
-      cacheRef=nodeCache.SetEntry(cacheEntry);
-      //cacheRef->value.resize(indexEntry->nodeCount);
-      cacheRef->value.reserve(indexEntry->nodeCount);
-
-      for (size_t i=0; i<indexEntry->nodeCount; i++) {
-        Node node;
-
-        node.Read(nodeReader);
-        //cacheRef->value[i].Read(nodeStream);
-
-        if (nodeReader.HasError()) {
-          std::cerr << "Error while reading data from nodes.dat page!" << std::endl;
-          nodeReader.Close();
-          break;
-        }
-
-        cacheRef->value.push_back(node);
-      }
-    }
-    else {
-      cacheCount++;
-    }
-
-    for (std::vector<Node>::const_iterator node=cacheRef->value.begin();
-         node!=cacheRef->value.end();
-         ++node) {
-      if (styleConfig.IsNodeVisible(node->type,magnification)) {
-        if (node->lon>=lonMin && node->lon<=lonMax &&
-            node->lat>=latMin && node->lat<=latMax) {
-          nodes.push_back(*node);
-          nodeSelectedCount++;
-        }
-      }
-      nodeAllCount++;
-    }
-  }
-
-  std::cout << "Nodes scanned: " << nodeAllCount << " selected: " << nodeSelectedCount << std::endl;
-  std::cout << "Node cache: " << cacheCount << " disk: " << diskCount << " cache size: " << nodeCache.GetSize() << std::endl;
-
-  return true;
+  return GetNodes(ids,nodes);
 }
 
 bool Database::GetObjects(const StyleConfig& styleConfig,
@@ -513,10 +430,10 @@ bool Database::GetObjects(const StyleConfig& styleConfig,
 
 bool Database::GetNode(const Id& id, Node& node) const
 {
-  std::set<Id>    ids;
+  std::vector<Id> ids;
   std::list<Node> nodes;
 
-  ids.insert(id);
+  ids.push_back(id);
 
   if (GetNodes(ids,nodes)) {
     if (nodes.size()>0) {
@@ -528,7 +445,7 @@ bool Database::GetNode(const Id& id, Node& node) const
   return false;
 }
 
-bool Database::GetNodes(const std::set<Id>& ids, std::list<Node>& nodes) const
+bool Database::GetNodes(const std::vector<Id>& ids, std::list<Node>& nodes) const
 {
   std::vector<long> offsets;
   std::string       file=path+"/"+"nodes.dat";
@@ -573,10 +490,10 @@ bool Database::GetNodes(const std::set<Id>& ids, std::list<Node>& nodes) const
 
 bool Database::GetWay(const Id& id, Way& way) const
 {
-  std::set<Id>   ids;
-  std::list<Way> ways;
+  std::vector<Id> ids;
+  std::list<Way>  ways;
 
-  ids.insert(id);
+  ids.push_back(id);
 
   if (GetWays(ids,ways)) {
     if (ways.size()>0) {
@@ -588,7 +505,7 @@ bool Database::GetWay(const Id& id, Way& way) const
   return false;
 }
 
-bool Database::GetWays(const std::set<Id>& ids, std::list<Way>& ways) const
+bool Database::GetWays(const std::vector<Id>& ids, std::list<Way>& ways) const
 {
   std::vector<long> offsets;
   std::string       file=path+"/"+"ways.dat";
@@ -656,7 +573,7 @@ bool GetWays(const Database::Way2Index& index,
   refs.clear();
   refs.reserve(ids.size());
 
-  std::set<Id> remaining;
+  std::vector<Id> remaining;
 
   for (std::set<Id>::const_iterator id=ids.begin();
        id!=ids.end();
@@ -667,7 +584,7 @@ bool GetWays(const Database::Way2Index& index,
       refs.push_back(&ref->second);
     }
     else {
-      remaining.insert(*id);
+      remaining.push_back(*id);
     }
   }
 
@@ -1509,8 +1426,9 @@ void Database::DumpStatistics()
   wayCache.DumpStatistics("Way cache",WayCacheValueSizer());
   nodeUseCache.DumpStatistics("Node use cache",NodeUseCacheValueSizer());
 
-  nodeIndex.DumpStatistics();
+  node2Index.DumpStatistics();
   wayIndex.DumpStatistics();
+  way2Index.DumpStatistics();
 
   areaNodeIndex.DumpStatistics();
   areaWayIndex.DumpStatistics();

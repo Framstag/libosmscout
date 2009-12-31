@@ -37,11 +37,9 @@ bool GenerateAreaNodeIndex(const ImportParameter& parameter,
 
   progress.SetAction("Analysing distribution");
 
-  size_t                                         nodeIndexIntervalSize=parameter.GetNodeIndexIntervalSize();
   FileScanner                                    scanner;
   std::vector<size_t>                            drawTypeDist;
-  std::vector<std::map<TileId,NodeCount> >       drawTypeTileNodeCount;
-  std::vector<std::map<TileId,std::set<Page> > > drawTypeTilePages;
+  std::vector<std::map<TileId,std::list<Id> > >  drawTypeTileIds;
   size_t                                         nodeCount=0;
 
   scanner.Open("nodes.dat");
@@ -61,25 +59,16 @@ bool GenerateAreaNodeIndex(const ImportParameter& parameter,
 
       nodeCount++;
 
-      // By Type
-
       if ((size_t)node.type>=drawTypeDist.size()) {
         drawTypeDist.resize(node.type+1,0);
-        drawTypeTileNodeCount.resize(node.type+1);
-        drawTypeTilePages.resize(node.type+1);
+        drawTypeTileIds.resize(node.type+1);
       }
+
+      // Node count by draw type
       drawTypeDist[node.type]++;
 
-      // By Type and tile
-
-      if (drawTypeTileNodeCount[node.type].find(tileId)==drawTypeTileNodeCount[node.type].end()) {
-        drawTypeTileNodeCount[node.type][tileId]=1;
-      }
-      else {
-        drawTypeTileNodeCount[node.type][tileId]++;
-      }
-
-      drawTypeTilePages[node.type][tileId].insert(node.id/nodeIndexIntervalSize);
+      // Node ids by Type and tile
+      drawTypeTileIds[node.type][tileId].push_back(node.id);
     }
   }
 
@@ -101,36 +90,30 @@ bool GenerateAreaNodeIndex(const ImportParameter& parameter,
   size_t drawTypeSum=0;
   size_t tileSum=0;
   size_t nodeSum=0;
-  size_t pageSum=0;
 
   //std::cout << "Number of tiles per type" << std::endl;
-  for (size_t i=0; i<drawTypeTilePages.size(); i++) {
-    if (i!=typeIgnore && drawTypeTilePages[i].size()>0) {
+
+  // For every draw type...
+  for (size_t i=0; i<drawTypeTileIds.size(); i++) {
+    // if the draw types is used...
+    if (i!=typeIgnore && drawTypeTileIds[i].size()>0) {
 
       drawTypeSum++;
 
       //std::cout << styleTypes[i].GetType() << ": " << drawTypeTileDist[styleTypes[i].GetType()].size();
-      tileSum+=drawTypeTilePages[i].size();
+      tileSum+=drawTypeTileIds[i].size();
 
-      for (std::map<TileId,std::set<Page> >::const_iterator tile=drawTypeTilePages[i].begin();
-           tile!=drawTypeTilePages[i].end();
+      for (std::map<TileId,std::list<Id> >::const_iterator tile=drawTypeTileIds[i].begin();
+           tile!=drawTypeTileIds[i].end();
            ++tile) {
-        pageSum+=tile->second.size();
+        nodeSum+=tile->second.size();
       }
-
-      for (std::map<size_t,NodeCount>::const_iterator tile=drawTypeTileNodeCount[i].begin();
-           tile!=drawTypeTileNodeCount[i].end();
-           ++tile) {
-        nodeSum+=tile->second;
-      }
-
       //std::cout << " " << nodes << std::endl;
     }
   }
 
   progress.Info(std::string("Total number of draw types with tiles: ")+NumberToString(drawTypeSum));
   progress.Info(std::string("Total number of tiles: ")+NumberToString(tileSum));
-  progress.Info(std::string("Total number of pages in tiles: ")+NumberToString(pageSum));
   progress.Info(std::string("Total number of nodes in tiles: ")+NumberToString(nodeSum));
 
   //
@@ -149,24 +132,22 @@ bool GenerateAreaNodeIndex(const ImportParameter& parameter,
   // The number of draw types we have an index for
   writer.WriteNumber(drawTypeSum); // Number of entries
 
-  for (TypeId i=0; i<drawTypeTilePages.size(); i++) {
-    if (i!=typeIgnore && drawTypeTilePages[i].size()>0) {
+  for (TypeId i=0; i<drawTypeTileIds.size(); i++) {
+    if (i!=typeIgnore && drawTypeTileIds[i].size()>0) {
       writer.WriteNumber(i);                           // The draw type id
-      writer.WriteNumber(drawTypeTilePages[i].size()); // The number of tiles
+      writer.WriteNumber(drawTypeTileIds[i].size()); // The number of tiles
 
-      for (std::map<TileId,std::set<Page> >::const_iterator tile=drawTypeTilePages[i].begin();
-           tile!=drawTypeTilePages[i].end();
+      for (std::map<TileId,std::list<Id> >::const_iterator tile=drawTypeTileIds[i].begin();
+           tile!=drawTypeTileIds[i].end();
            ++tile) {
         writer.WriteNumber(tile->first);                           // The tile id
-        writer.WriteNumber(drawTypeTileNodeCount[i][tile->first]); // The number of nodes
-        writer.WriteNumber(tile->second.size());                   // The number of pages
+        writer.WriteNumber(tile->second.size());                   // The number of nodes
 
-        for (std::set<Page>::const_iterator page=tile->second.begin();
-             page!=tile->second.end();
-             ++page) {
-          Page p=*page;
-
-          writer.WriteNumber(p); // The id of the page
+        // List of node ids in tile with given draw type...
+        for (std::list<Id>::const_iterator id=tile->second.begin();
+             id!=tile->second.end();
+             ++id) {
+          writer.WriteNumber(*id); // The id of the node
         }
       }
     }

@@ -35,7 +35,6 @@
 
 // By Id index
 #include <osmscout/NumericIndex.h>
-#include <osmscout/NodeIndex.h>
 #include <osmscout/WayIndex.h>
 
 // In area index
@@ -73,7 +72,6 @@ public: // Fix this
 
 private:
   bool                  isOpen;
-  NodeIndex             nodeIndex;
   Node2Index            node2Index;
   WayIndex              wayIndex;
   Way2Index             way2Index;
@@ -116,8 +114,6 @@ private:
                size_t maxPriority,
                std::list<Way>& ways) const;
 
-  bool GetNodes(std::list<NodeIndexEntry>& indexEntries) const;
-
   bool GetNodes(const StyleConfig& styleConfig,
                 double lonMin, double latMin,
                 double lonMax, double latMax,
@@ -144,9 +140,9 @@ public:
                   std::list<Way>& ways) const;
 
   bool GetNode(const Id& id, Node& node) const;
-  bool GetNodes(const std::set<Id>& ids, std::list<Node>& nodes) const;
+  bool GetNodes(const std::vector<Id>& ids, std::list<Node>& nodes) const;
   bool GetWay(const Id& id, Way& way) const;
-  bool GetWays(const std::set<Id>& ids, std::list<Way>& ways) const;
+  bool GetWays(const std::vector<Id>& ids, std::list<Way>& ways) const;
 
   bool GetMatchingCities(const std::string& name,
                          std::list<City>& cities,
