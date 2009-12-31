@@ -793,13 +793,7 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   std::cout << "---" << std::endl;
   std::cout << "Showing " << lon <<", " << lat << " with magnification " << magnification << "x" << " for area " << width << "x" << height << std::endl;
 
-  timeval startTime;
-  timeval dataFetchedTime;
-  timeval presetTime;
-  timeval mapDrawnTime;
-  timeval timespan;
-
-  gettimeofday(&startTime,NULL);
+  StopClock           overallTimer;
 
   //
   // calculation of bounds and scaling factors
@@ -839,6 +833,8 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   std::cout << "20 meters are " << 20/(d*180*60/M_PI*1852.216/width) << " pixels" << std::endl;
   */
 
+  StopClock dataRetrievalTimer;
+
   database.GetObjects(styleConfig,
                       lonMin,latMin,lonMax,latMax,
                       magnification,
@@ -846,9 +842,11 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
                       nodes,
                       ways);
 
+  dataRetrievalTimer.Stop();
+
   std::cout << "Nodes: " << nodes.size() << " ways: " << ways.size() << std::endl;
 
-  gettimeofday(&dataFetchedTime,NULL);
+  StopClock presetTimer;
 
   //
   // Setup and Precalculation
@@ -961,11 +959,15 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   cairo_select_font_face(draw,"sans-serif",CAIRO_FONT_SLANT_NORMAL,CAIRO_FONT_WEIGHT_NORMAL);
   cairo_set_font_size(draw,9);
 
-  gettimeofday(&presetTime,NULL);
+  presetTimer.Stop();
+
+  StopClock drawingTimer;
 
   //
   // Draw areas
   //
+
+  StopClock areasTimer;
 
   //std::cout << "Draw areas..." << std::endl;
 
@@ -1056,9 +1058,13 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
 
   cairo_restore(draw);
 
+  areasTimer.Stop();
+
   //
   // Drawing paths
   //
+
+  StopClock pathsTimer;
 
   //std::cout << "Draw path outlines..." << std::endl;
 
@@ -1235,7 +1241,11 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
     cairo_restore(draw);
   }
 
+  pathsTimer.Stop();
+
   // Path labels
+
+  StopClock pathLabelsTimer;
 
   //std::cout << "Draw path labels..." << std::endl;
 
@@ -1383,7 +1393,11 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   }
   cairo_restore(draw);
 
+  pathLabelsTimer.Stop();
+
   // Nodes
+
+  StopClock nodesTimer;
 
   //std::cout << "Draw nodes..." << std::endl;
 
@@ -1463,8 +1477,11 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   }
   cairo_restore(draw);
 
+  nodesTimer.Stop();
 
   // Area labels
+
+  StopClock areaLabelsTimer;
 
   //std::cout << "Draw area labels..." << std::endl;
 
@@ -1540,8 +1557,12 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   }
   cairo_restore(draw);
 
+  areaLabelsTimer.Stop();
+
   // Way POIs (aka routes)
   cairo_save(draw);
+
+  StopClock routesTimer;
 
   for (std::list<Way>::const_iterator way=poiWays.begin();
        way!=poiWays.end();
@@ -1615,22 +1636,24 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   }
   cairo_restore(draw);
 
-  gettimeofday(&mapDrawnTime,NULL);
+  routesTimer.Stop();
+
+  drawingTimer.Stop();
+  overallTimer.Stop();
 
   std::cout << "Nodes drawn: " << nodesDrawnCount << "/" << nodesAllCount << " (" << nodesOutCount << " out)" << std::endl;
   std::cout << "Drawing (done)." << std::endl;
 
-  timersub(&dataFetchedTime,&startTime,&timespan);
-
-  std::cout << "Data fetched time:" << timespan.tv_sec << "." << std::setw(6) << std::setfill('0') << timespan.tv_usec << std::endl;
-
-  timersub(&presetTime,&startTime,&timespan);
-
-  std::cout << "Preset time:" << timespan.tv_sec << "." << std::setw(6) << std::setfill('0') << timespan.tv_usec << std::endl;
-
-  timersub(&mapDrawnTime,&dataFetchedTime,&timespan);
-
-  std::cout << "Map drawn time:" << timespan.tv_sec << "." << std::setw(6) << std::setfill('0') << timespan.tv_usec << std::endl;
+  std::cout << "Over all: " << overallTimer << std::endl;
+  std::cout << "Data retrieval: " << dataRetrievalTimer << std::endl;
+  std::cout << "Preset: " << presetTimer << std::endl;
+  std::cout << "Drawing: " << drawingTimer << std::endl;
+  std::cout << "Areas: " << areasTimer << std::endl;
+  std::cout << "Paths: " << pathsTimer << std::endl;
+  std::cout << "Path labels: " << pathLabelsTimer << std::endl;
+  std::cout << "Nodes: " << nodesTimer << std::endl;
+  std::cout << "Area labels: " << areaLabelsTimer << std::endl;
+  std::cout << "Routes: " << routesTimer << std::endl;
 
   return true;
 }

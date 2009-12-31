@@ -21,6 +21,7 @@
 
 #include <cstdio>
 #include <cmath>
+#include <iomanip>
 #include <iostream>
 
 #ifndef timersub
@@ -157,7 +158,7 @@ std::ostream& operator<<(std::ostream& stream, const StopClock& clock)
 
   timersub(&clock.stop,&clock.start,&diff);
 
-  stream << diff.tv_sec << "." << diff.tv_usec;
+  stream << diff.tv_sec << "." << std::setw(6) << std::setfill('0') << diff.tv_usec;
 
   return stream;
 }
