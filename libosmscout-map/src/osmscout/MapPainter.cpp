@@ -790,10 +790,12 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
 
   double              gradtorad=2*M_PI/360;
 
-  std::cout << "--- Showing " << lon <<", " << lat << " with magnification " << magnification << "x" << " for area " << width << "x" << height << std::endl;
+  std::cout << "---" << std::endl;
+  std::cout << "Showing " << lon <<", " << lat << " with magnification " << magnification << "x" << " for area " << width << "x" << height << std::endl;
 
   timeval startTime;
   timeval dataFetchedTime;
+  timeval presetTime;
   timeval mapDrawnTime;
   timeval timespan;
 
@@ -958,6 +960,8 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
 
   cairo_select_font_face(draw,"sans-serif",CAIRO_FONT_SLANT_NORMAL,CAIRO_FONT_WEIGHT_NORMAL);
   cairo_set_font_size(draw,9);
+
+  gettimeofday(&presetTime,NULL);
 
   //
   // Draw areas
@@ -1619,6 +1623,10 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   timersub(&dataFetchedTime,&startTime,&timespan);
 
   std::cout << "Data fetched time:" << timespan.tv_sec << "." << std::setw(6) << std::setfill('0') << timespan.tv_usec << std::endl;
+
+  timersub(&presetTime,&startTime,&timespan);
+
+  std::cout << "Preset time:" << timespan.tv_sec << "." << std::setw(6) << std::setfill('0') << timespan.tv_usec << std::endl;
 
   timersub(&mapDrawnTime,&dataFetchedTime,&timespan);
 

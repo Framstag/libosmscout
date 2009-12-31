@@ -57,20 +57,20 @@ public: // Fix this
     std::vector<Id> references;
   };
 
-  typedef Cache<long,Node>                    Node2Cache;
-  typedef Cache<long,Way>                     Way2Cache;
+  typedef Cache<long,Node>                    NodeCache;
+  typedef Cache<long,Way>                     WayCache;
   typedef Cache<size_t,std::vector<NodeUse> > NodeUseCache;
 
-  typedef NumericIndex<Id,Node>               Node2Index;
-  typedef NumericIndex<Id,Way>                Way2Index;
+  typedef NumericIndex<Id,Node>               NodeIndex;
+  typedef NumericIndex<Id,Way>                WayIndex;
 
   typedef const Node*                         NodeRef;
   typedef const Way*                          WayRef;
 
 private:
   bool                  isOpen;
-  Node2Index            node2Index;
-  Way2Index             way2Index;
+  NodeIndex             nodeIndex;
+  WayIndex              wayIndex;
 
   AreaNodeIndex         areaNodeIndex;
   AreaWayIndex          areaWayIndex;
@@ -81,8 +81,8 @@ private:
 
   std::string           path;          //! Path to the directory containing all files
 
-  mutable Node2Cache    node2Cache;    //! Cache for node data
-  mutable Way2Cache     way2Cache;     //! Cache for way data
+  mutable NodeCache     nodeCache;    //! Cache for node data
+  mutable WayCache      wayCache;     //! Cache for way data
   mutable NodeUseCache  nodeUseCache;  //! Cache for node use data
 
   mutable FileReader    nodeUseReader; //! File stream to the nodeuse.idx file

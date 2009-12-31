@@ -175,12 +175,12 @@ bool Import(const ImportParameter& parameter,
   }
 
   if (startStep==4) {
-    progress.SetStep("4 Generating 'node2.idx'");
+    progress.SetStep("4 Generating 'node.idx'");
 
     if (!GenerateNumericIndex<Id,Node>(parameter,
                                        progress,
                                        "nodes.dat",
-                                       "node2.idx")) {
+                                       "node.idx")) {
       progress.Error("Cannot generate node2 index!");
       return false;
     }
@@ -209,13 +209,13 @@ bool Import(const ImportParameter& parameter,
   }
 
   if (startStep==6) {
-    progress.SetStep("6 Generating 'way2.idx'");
+    progress.SetStep("6 Generating 'way.idx'");
 
     if (!GenerateNumericIndex<Id,Way>(parameter,
                                       progress,
                                       "ways.dat",
-                                      "way2.idx")) {
-      progress.Error("Cannot generate way2 index!");
+                                      "way.idx")) {
+      progress.Error("Cannot generate way index!");
       return false;
     }
 

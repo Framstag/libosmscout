@@ -27,7 +27,7 @@
 #include <osmscout/TypeConfigLoader.h>
 #include <osmscout/Util.h>
 
-struct NodeCacheValueSizer : public Database::Node2Cache::ValueSizer
+struct NodeCacheValueSizer : public Database::NodeCache::ValueSizer
 {
   size_t GetSize(const Node& value) const
   {
@@ -35,7 +35,7 @@ struct NodeCacheValueSizer : public Database::Node2Cache::ValueSizer
   }
 };
 
-struct WayCacheValueSizer : public Database::Way2Cache::ValueSizer
+struct WayCacheValueSizer : public Database::WayCache::ValueSizer
 {
   size_t GetSize(const Way& value) const
   {
@@ -59,10 +59,10 @@ struct NodeUseCacheValueSizer : public Database::NodeUseCache::ValueSizer
 
 Database::Database()
  : isOpen(false),
-   node2Index("node2.idx"),
-   way2Index("way2.idx"),
-   node2Cache(1000000),
-   way2Cache(1000000),
+   nodeIndex("node.idx"),
+   wayIndex("way.idx"),
+   nodeCache(1000000),
+   wayCache(1000000),
    nodeUseCache(10), // Seems like the cache is more expensive than direct loading!?
    typeConfig(NULL)
 {
@@ -91,19 +91,19 @@ bool Database::Open(const std::string& path)
     return false;
   }
 
-  std::cout << "Loading node2 index..." << std::endl;
-  if (!node2Index.LoadIndex(path)) {
-    std::cerr << "Cannot load Node2Index!" << std::endl;
+  std::cout << "Loading node index..." << std::endl;
+  if (!nodeIndex.LoadIndex(path)) {
+    std::cerr << "Cannot load NodeIndex!" << std::endl;
     return false;
   }
-  std::cout << "Loading node2 index done." << std::endl;
+  std::cout << "Loading node index done." << std::endl;
 
-  std::cout << "Loading way2 index..." << std::endl;
-  if (!way2Index.LoadIndex(path)) {
-    std::cerr << "Cannot load Way2Index!" << std::endl;
+  std::cout << "Loading way index..." << std::endl;
+  if (!wayIndex.LoadIndex(path)) {
+    std::cerr << "Cannot load WayIndex!" << std::endl;
     return false;
   }
-  std::cout << "Loading way2 index done." << std::endl;
+  std::cout << "Loading way index done." << std::endl;
 
   std::cout << "Loading area node index..." << std::endl;
   if (!areaNodeIndex.LoadAreaNodeIndex(path)) {
@@ -146,8 +146,8 @@ bool Database::IsOpen() const
 
 void Database::Close()
 {
-  node2Cache.Flush();
-  way2Cache.Flush();
+  nodeCache.Flush();
+  wayCache.Flush();
   nodeUseCache.Flush();
 
   isOpen=false;
@@ -333,7 +333,7 @@ bool Database::GetNodes(const std::vector<Id>& ids, std::list<Node>& nodes) cons
   std::vector<long> offsets;
   std::string       file=path+"/"+"nodes.dat";
 
-  if (!node2Index.GetOffsets(ids,offsets)) {
+  if (!nodeIndex.GetOffsets(ids,offsets)) {
     std::cout << "GetNodes(): Ids not found in index" << std::endl;
     return false;
   }
@@ -345,15 +345,15 @@ bool Database::GetNodes(const std::vector<Id>& ids, std::list<Node>& nodes) cons
     }
   }
 
-  Node2Cache::CacheRef cacheRef;
+  NodeCache::CacheRef cacheRef;
 
   for (std::vector<long>::const_iterator offset=offsets.begin();
        offset!=offsets.end();
        ++offset) {
-    if (!node2Cache.GetEntry(*offset,cacheRef)) {
-      Node2Cache::CacheEntry cacheEntry(*offset);
+    if (!nodeCache.GetEntry(*offset,cacheRef)) {
+      NodeCache::CacheEntry cacheEntry(*offset);
 
-      cacheRef=node2Cache.SetEntry(cacheEntry);
+      cacheRef=nodeCache.SetEntry(cacheEntry);
 
       nodeScanner.SetPos(*offset);
       cacheRef->value.Read(nodeScanner);
@@ -394,7 +394,7 @@ bool Database::GetWays(const std::vector<Id>& ids, std::list<Way>& ways) const
   std::vector<long> offsets;
   std::string       file=path+"/"+"ways.dat";
 
-  if (!way2Index.GetOffsets(ids,offsets)) {
+  if (!wayIndex.GetOffsets(ids,offsets)) {
     std::cout << "GetWays(): Ids not found in index" << std::endl;
     return false;
   }
@@ -406,15 +406,15 @@ bool Database::GetWays(const std::vector<Id>& ids, std::list<Way>& ways) const
     }
   }
 
-  Way2Cache::CacheRef cacheRef;
+  WayCache::CacheRef cacheRef;
 
   for (std::vector<long>::const_iterator offset=offsets.begin();
        offset!=offsets.end();
        ++offset) {
-    if (!way2Cache.GetEntry(*offset,cacheRef)) {
-      Way2Cache::CacheEntry cacheEntry(*offset);
+    if (!wayCache.GetEntry(*offset,cacheRef)) {
+      WayCache::CacheEntry cacheEntry(*offset);
 
-      cacheRef=way2Cache.SetEntry(cacheEntry);
+      cacheRef=wayCache.SetEntry(cacheEntry);
 
       wayScanner.SetPos(*offset);
       cacheRef->value.Read(wayScanner);
@@ -447,7 +447,7 @@ bool Database::GetMatchingStreets(Id urbanId, const std::string& name,
   return cityStreetIndex.GetMatchingStreets(urbanId,name,streets,limit,limitReached);
 }
 
-bool GetWays(const Database::Way2Index& index,
+bool GetWays(const Database::WayIndex& index,
              const std::string& path,
              std::map<Id,Way>& cache,
              const std::set<Id>& ids,
@@ -520,7 +520,7 @@ bool GetWays(const Database::Way2Index& index,
   return result;
 }
 
-bool GetWay(const Database::Way2Index& index,
+bool GetWay(const Database::WayIndex& index,
             const std::string& path,
             std::map<Id,Way>& cache,
             Id id,
@@ -816,7 +816,7 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
   assert(type!=typeIgnore);
   profile.SetTypeCostFactor(type,1/30.0);
 
-  if (!::GetWay(way2Index,
+  if (!::GetWay(wayIndex,
                 path,
                 waysCache,
                 startWayId,
@@ -825,7 +825,7 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
     return false;
   }
 
-  if (!::GetWay(way2Index,
+  if (!::GetWay(wayIndex,
                 path,
                 waysCache,
                 targetWayId,
@@ -916,7 +916,7 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
 
     // Get joint nodes in same way/area
     if (currentWay->id!=current.ref.id) {
-      if (!::GetWay(way2Index,
+      if (!::GetWay(wayIndex,
                     path,
                     waysCache,
                     current.ref.id,
@@ -998,7 +998,7 @@ bool Database::CalculateRoute(Id startWayId, Id startNodeId,
         cacheEntry=result.first;
       }
 
-      if (!::GetWays(way2Index,
+      if (!::GetWays(wayIndex,
                      path,
                      waysCache,
                      cacheEntry->second.ways,
@@ -1307,12 +1307,12 @@ bool Database::TransformRouteDataToWay(const RouteData& data,
 }
 void Database::DumpStatistics()
 {
-  node2Cache.DumpStatistics("Node cache",NodeCacheValueSizer());
-  way2Cache.DumpStatistics("Way cache",WayCacheValueSizer());
+  nodeCache.DumpStatistics("Node cache",NodeCacheValueSizer());
+  wayCache.DumpStatistics("Way cache",WayCacheValueSizer());
   nodeUseCache.DumpStatistics("Node use cache",NodeUseCacheValueSizer());
 
-  node2Index.DumpStatistics();
-  way2Index.DumpStatistics();
+  nodeIndex.DumpStatistics();
+  wayIndex.DumpStatistics();
 
   areaNodeIndex.DumpStatistics();
   areaWayIndex.DumpStatistics();
