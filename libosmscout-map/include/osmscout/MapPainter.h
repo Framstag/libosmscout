@@ -92,6 +92,7 @@ private:
 
 public:
   std::list<Way> poiWays;
+  std::list<Node> poiNodes;
 
 public:
   MapPainter(const Database& database);

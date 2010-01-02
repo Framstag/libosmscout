@@ -1755,16 +1755,118 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
 
   routesTimer.Stop();
 
+  // POI Nodes
+
+  StopClock poisTimer;
+
+  //std::cout << "Draw nodes..." << std::endl;
+
+  cairo_save(draw);
+  for (std::list<Node>::const_iterator node=poiNodes.begin();
+       node!=poiNodes.end();
+       ++node) {
+    if (node->lon<lonMin ||
+        node->lon>lonMax ||
+        node->lat<latMin ||
+        node->lat>latMax) {
+      continue;
+    }
+
+    const SymbolStyle *style=styleConfig.GetNodeSymbolStyle(node->type);
+
+    if (style==NULL ||
+        magnification<style->GetMinMag()) {
+      continue;
+    }
+
+    double x,y;
+
+    x=(node->lon*gradtorad-hmin)*hscale;
+    y=height-(atanh(sin(node->lat*gradtorad))-vmin)*vscale;
+
+    DrawSymbol(draw,style,x,y);
+  }
+
+  nodesAllCount+=nodes.size();
+
+  cairo_restore(draw);
+
+  // POI Node labels
+
+  //std::cout << "Draw node labels..." << std::endl;
+
+  cairo_save(draw);
+  for (std::list<Node>::const_iterator node=poiNodes.begin();
+       node!=poiNodes.end();
+       ++node) {
+    if (node->lon<lonMin ||
+        node->lon>lonMax ||
+        node->lat<latMin ||
+        node->lat>latMax) {
+      continue;
+    }
+
+    for (size_t i=0; i<node->tags.size(); i++) {
+      // TODO: We should make sure we prefer one over the other
+      if (node->tags[i].key==tagName) {
+        const LabelStyle *style=styleConfig.GetNodeLabelStyle(node->type);
+
+        if (style==NULL ||
+            magnification<style->GetMinMag() ||
+            magnification>style->GetMaxMag()) {
+          continue;
+        }
+
+        double x,y;
+
+        x=(node->lon*gradtorad-hmin)*hscale;
+        y=height-(atanh(sin(node->lat*gradtorad))-vmin)*vscale;
+
+        DrawLabel(draw,
+                  magnification,
+                  *style,
+                  node->tags[i].value,
+                  x,y);
+      }
+      else if (node->tags[i].key==tagRef)  {
+        const LabelStyle *style=styleConfig.GetNodeRefLabelStyle(node->type);
+
+        if (style==NULL ||
+            magnification<style->GetMinMag() ||
+            magnification>style->GetMaxMag()) {
+          continue;
+        }
+
+        double x,y;
+
+        x=(node->lon*gradtorad-hmin)*hscale;
+        y=height-(atanh(sin(node->lat*gradtorad))-vmin)*vscale;
+
+        DrawLabel(draw,
+                  magnification,
+                  *style,
+                  node->tags[i].value,
+                  x,y);
+      }
+    }
+  }
+  cairo_restore(draw);
+
+  poisTimer.Stop();
+
   drawingTimer.Stop();
   overallTimer.Stop();
 
   std::cout << "Nodes: " << nodesDrawnCount << "/" << nodesAllCount << " (" << nodesOutCount << " out)" << " ways: " << pathDrawn <<"/" << ways.size() << std::endl;
 
-  std::cout << "Over all: " << overallTimer << std::endl;
-  std::cout << "Data retrieval: " << dataRetrievalTimer << std::endl;
-  std::cout << "Preset: " << presetTimer << std::endl;
-  std::cout << "Drawing: " << drawingTimer << std::endl;
-  std::cout << "Area: " << areasTimer <<"/" << areaLabelsTimer << " Path: " << pathsTimer << "/" << pathLabelsTimer << " Node: " << nodesTimer << " Route: " << routesTimer << std::endl;
+  std::cout << "All: " << overallTimer;
+  std::cout << " Data: " << dataRetrievalTimer;
+  std::cout << " Preset: " << presetTimer;
+  std::cout << " Draw: " << drawingTimer << std::endl;
+  std::cout << "Areas: " << areasTimer <<"/" << areaLabelsTimer;
+  std::cout << " Paths: " << pathsTimer << "/" << pathLabelsTimer;
+  std::cout << " Nodes: " << nodesTimer;
+  std::cout << " POIs: " << poisTimer << "/" << routesTimer << std::endl;
 
   return true;
 }
