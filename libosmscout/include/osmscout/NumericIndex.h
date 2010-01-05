@@ -223,8 +223,6 @@ bool NumericIndex<N,T>::GetOffsets(const std::vector<N>& ids,
 
             j++;
           }
-
-          assert(level<cacheRef->value.size());
         }
 
         size_t i=0;
