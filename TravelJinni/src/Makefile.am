@@ -13,15 +13,13 @@ TravelJinni_SOURCES = DatabaseTask.h \
                       Viewer.cpp
 
 TravelJinni_CXXFLAGS=-I. \
-                      $(ILLUMINATION_CFLAGS) \
+                      $(LIBILLUMINATION_CFLAGS) \
                       $(LIBOSMSCOUT_CFLAGS) \
                       $(LIBOSMSCOUTMAP_CFLAGS) \
-                      $(LIBCAIRO_CFLAGS) \
-                      $(LIBPNG_CFLAGS)
+                      $(LIBCAIRO_CFLAGS)
 
-TravelJinni_LDADD=$(ILLUMINATION_LIBS) \
+TravelJinni_LDADD=$(LIBILLUMINATION_LIBS) \
                   $(LIBOSMSCOUT_LIBS) \
                   $(LIBOSMSCOUTMAP_LIBS) \
-                  $(LIBCAIRO_LIBS) \
-                  $(LIBPNG_LIBS)
+                  $(LIBCAIRO_LIBS)
 

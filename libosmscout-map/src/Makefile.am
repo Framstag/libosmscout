@@ -1,7 +1,11 @@
 AM_CPPFLAGS = $(LIB_CXXFLAGS) -DOSMSCDLL -I$(top_srcdir)/include \
-              $(OSMSCOUT_CFLAGS) $(CAIRO_CFLAGS)
+              $(LIBOSMSCOUT_CFLAGS) \
+              $(LIBCAIRO_CFLAGS) \
+              $(LIBPNG_CFLAGS)
 
-AM_LDFLAGS  = $(OSMSCOUT_LIBS) $(CAIRO_LIBS)
+AM_LDFLAGS  = $(LIBOSMSCOUT_LIBS) \
+              $(LIBCAIRO_LIBS) \
+              $(LIBPNG_LIBS)
 
 lib_LTLIBRARIES = libosmscoutmap.la
 libosmscoutmap_la_SOURCES= osmscout/MapPainter.cpp
