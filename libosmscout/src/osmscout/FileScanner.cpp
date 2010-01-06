@@ -442,7 +442,7 @@ bool FileScanner::ReadNumber(NodeCount& number)
 /**
   TODO: Handle real negative numbers!
   */
-bool FileScanner::ReadNumber(long number)
+bool FileScanner::ReadNumber(long& number)
 {
   unsigned long value;
 
