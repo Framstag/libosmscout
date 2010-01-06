@@ -119,6 +119,13 @@ bool Database::Open(const std::string& path)
   }
   std::cout << "Loading area way index done." << std::endl;
 
+  std::cout << "Loading area way index 2..." << std::endl;
+  if (!areaWayIndex2.LoadAreaWayIndex(path)) {
+    std::cerr << "Cannot load AreaWayIndex2!" << std::endl;
+    return false;
+  }
+  std::cout << "Loading area way index 2 done." << std::endl;
+
   std::cout << "Loading city street index..." << std::endl;
   if (!cityStreetIndex.LoadCityStreetIndex(path)) {
     std::cerr << "Cannot load CityStreetIndex!" << std::endl;

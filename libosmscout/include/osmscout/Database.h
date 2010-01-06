@@ -39,6 +39,7 @@
 // In area index
 #include <osmscout/AreaNodeIndex.h>
 #include <osmscout/AreaWayIndex.h>
+#include <osmscout/AreaWayIndex2.h>
 
 // Location index
 #include <osmscout/CityStreetIndex.h>
@@ -74,6 +75,7 @@ private:
 
   AreaNodeIndex         areaNodeIndex;
   AreaWayIndex          areaWayIndex;
+  AreaWayIndex2         areaWayIndex2;
 
   CityStreetIndex       cityStreetIndex;
 

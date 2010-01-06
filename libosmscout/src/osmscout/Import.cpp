@@ -38,18 +38,19 @@
 
 #include <osmscout/GenAreaNodeIndex.h>
 #include <osmscout/GenAreaWayIndex.h>
+#include <osmscout/GenAreaWayIndex2.h>
 #include <osmscout/GenNodeUseIndex.h>
 #include <osmscout/GenCityStreetIndex.h>
 
 static const size_t defaultStartStep=1;
-static const size_t defaultEndStep=11;
+static const size_t defaultEndStep=10;
 
 ImportParameter::ImportParameter()
  : startStep(defaultStartStep),
    endStep(defaultEndStep),
-   indexPageSize(1024),
    nodeIndexIntervalSize(50),
-   wayIndexIntervalSize(50)
+   numericIndexLevelSize(1024),
+   areaAreaIndexMaxMag(14)
 {
   // no code
 }
@@ -69,19 +70,19 @@ size_t ImportParameter::GetEndStep() const
   return endStep;
 }
 
-size_t ImportParameter::GetIndexPageSize() const
-{
-  return indexPageSize;
-}
-
 size_t ImportParameter::GetNodeIndexIntervalSize() const
 {
   return nodeIndexIntervalSize;
 }
 
-size_t ImportParameter::GetWayIndexIntervalSize() const
+size_t ImportParameter::GetNumericIndexLevelSize() const
 {
-  return wayIndexIntervalSize;
+  return numericIndexLevelSize;
+}
+
+size_t ImportParameter::GetAreaAreaIndexMaxMag() const
+{
+  return areaAreaIndexMaxMag;
 }
 
 void ImportParameter::SetMapfile(const std::string& mapfile)
@@ -104,11 +105,6 @@ void ImportParameter::SetSteps(size_t startStep, size_t endStep)
 void ImportParameter::SetNodeIndexIntervalSize(size_t nodeIndexIntervalSize)
 {
   this->nodeIndexIntervalSize=nodeIndexIntervalSize;
-}
-
-void ImportParameter::SetWayIndexIntervalSize(size_t wayIndexIntervalSize)
-{
-  this->wayIndexIntervalSize=wayIndexIntervalSize;
 }
 
 bool Import(const ImportParameter& parameter,
@@ -266,6 +262,18 @@ bool Import(const ImportParameter& parameter,
                               parameter,
                               progress)) {
       progress.Error("Cannot generate node usage index!");
+      return false;
+    }
+
+    startStep++;
+  }
+
+  if (startStep==10) {
+    progress.SetStep("10 Generating 'areaway2.idx'");
+
+    if (!GenerateAreaWayIndex2(parameter,
+                               progress)) {
+      progress.Error("Cannot generate area way index 2!");
       return false;
     }
 

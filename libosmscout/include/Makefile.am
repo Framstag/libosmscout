@@ -24,12 +24,14 @@ nobase_include_HEADERS= osmscout/Util.h \
                         osmscout/Preprocess.h \
                         osmscout/GenAreaNodeIndex.h \
                         osmscout/GenAreaWayIndex.h \
+                        osmscout/GenAreaWayIndex2.h \
                         osmscout/GenCityStreetIndex.h \
                         osmscout/GenNodeDat.h \
                         osmscout/GenNodeUseIndex.h \
                         osmscout/GenWayDat.h \
                         osmscout/AreaNodeIndex.h \
                         osmscout/AreaWayIndex.h \
+                        osmscout/AreaWayIndex2.h \
                         osmscout/CityStreetIndex.h \
                         osmscout/NodeUseIndex.h \
                         osmscout/Route.h \

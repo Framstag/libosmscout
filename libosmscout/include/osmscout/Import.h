@@ -30,9 +30,9 @@ private:
   std::string mapfile;
   size_t      startStep;
   size_t      endStep;
-  size_t      indexPageSize;
   size_t      nodeIndexIntervalSize;
-  size_t      wayIndexIntervalSize;
+  size_t      numericIndexLevelSize;
+  size_t      areaAreaIndexMaxMag;
 
 public:
   ImportParameter();
@@ -40,15 +40,14 @@ public:
   std::string GetMapfile() const;
   size_t GetStartStep() const;
   size_t GetEndStep() const;
-  size_t GetIndexPageSize() const;
   size_t GetNodeIndexIntervalSize() const;
-  size_t GetWayIndexIntervalSize() const;
+  size_t GetNumericIndexLevelSize() const;
+  size_t GetAreaAreaIndexMaxMag() const;
 
   void SetMapfile(const std::string& mapfile);
   void SetStartStep(size_t startStep);
   void SetSteps(size_t startStep, size_t endStep);
   void SetNodeIndexIntervalSize(size_t nodeIndexIntervalSize);
-  void SetWayIndexIntervalSize(size_t wayIndexIntervalSize);
 };
 
 extern bool Import(const ImportParameter& parameter,

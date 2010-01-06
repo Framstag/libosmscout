@@ -61,7 +61,7 @@ private:
   std::string                    filename;
   mutable FileScanner            scanner;
   size_t                         levels;
-  size_t                         indexPageSize;
+  size_t                         levelSize;
   std::vector<IndexEntry>        root;
   mutable std::vector<PageCache> leafs;
 
@@ -80,7 +80,7 @@ template <class N, class T>
 NumericIndex<N,T>::NumericIndex(const std::string& filename)
  : filepart(filename),
    levels(0),
-   indexPageSize(0)
+   levelSize(0)
 {
   // no code
 }
@@ -104,17 +104,17 @@ bool NumericIndex<N,T>::LoadIndex(const std::string& path)
   }
 
   scanner.ReadNumber(levels);
-  scanner.ReadNumber(indexPageSize);
+  scanner.ReadNumber(levelSize);
   scanner.Read(entries);
   scanner.Read(lastLevelPageStart);
 
-  std::cout << filepart <<": " << levels << " " << indexPageSize << " " << entries << " " << lastLevelPageStart << std::endl;
+  std::cout << filepart <<": " << levels << " " << levelSize << " " << entries << " " << lastLevelPageStart << std::endl;
 
   size_t levelEntries;
 
-  levelEntries=entries/indexPageSize;
+  levelEntries=entries/levelSize;
 
-  if (entries%indexPageSize!=0) {
+  if (entries%levelSize!=0) {
     levelEntries++;
   }
 
@@ -133,12 +133,8 @@ bool NumericIndex<N,T>::LoadIndex(const std::string& path)
     scanner.ReadNumber(si);
     scanner.ReadNumber(po);
 
-    //std::cout << si << " " << po << std::endl;
-
     sio+=si;
     poo+=po;
-
-    //std::cout << sio << " " << poo << std::endl;
 
     entry.startId=sio;
     entry.fileOffset=poo;
@@ -169,15 +165,11 @@ bool NumericIndex<N,T>::GetOffsets(const std::vector<N>& ids,
        ++id) {
     size_t r=0;
 
-    //std::cout << "Id " << *id << std::endl;
-
     while (r+1<root.size() && root[r+1].startId<=*id) {
       r++;
     }
 
     if (r<root.size()) {
-      //std::cout << "Id " << *id <<" => " << r << " " << root[r].fileOffset << std::endl;
-
       size_t startId=root[r].startId;
       long   offset=root[r].fileOffset;
 
@@ -189,8 +181,6 @@ bool NumericIndex<N,T>::GetOffsets(const std::vector<N>& ids,
 
           cacheRef=leafs[level].SetEntry(cacheEntry);
 
-          //std::cout << "Loading " << level << " " << startId << " " << offset << std::endl;
-
           if (!scanner.IsOpen() &&
               !scanner.Open(filename)) {
             std::cerr << "Cannot open '" << filename << "'!" << std::endl;
@@ -199,7 +189,7 @@ bool NumericIndex<N,T>::GetOffsets(const std::vector<N>& ids,
 
           scanner.SetPos(offset);
 
-          cacheRef->value.reserve(indexPageSize);
+          cacheRef->value.reserve(levelSize);
 
           size_t     j=0;
           IndexEntry entry;
@@ -207,7 +197,7 @@ bool NumericIndex<N,T>::GetOffsets(const std::vector<N>& ids,
           entry.startId=0;
           entry.fileOffset=0;
 
-          while (j<indexPageSize && !scanner.HasError()) {
+          while (j<levelSize && !scanner.HasError()) {
             size_t cidx;
             size_t coff;
 
@@ -217,14 +207,10 @@ bool NumericIndex<N,T>::GetOffsets(const std::vector<N>& ids,
             entry.fileOffset+=coff;
             entry.startId+=cidx;
 
-            //std::cout << j << " " << entry.startId << " " << entry.fileOffset << std::endl;
-
             cacheRef->value.push_back(entry);
 
             j++;
           }
-
-          assert(level<cacheRef->value.size());
         }
 
         size_t i=0;
@@ -328,13 +314,13 @@ bool GenerateNumericIndex(const ImportParameter& parameter,
   size_t tmp;
 
   tmp=dataCount;
-  while (tmp/parameter.GetIndexPageSize()>0) {
-    tmp=tmp/parameter.GetIndexPageSize();
+  while (tmp/parameter.GetNumericIndexLevelSize()>0) {
+    tmp=tmp/parameter.GetNumericIndexLevelSize();
     levels++;
   }
 
   writer.WriteNumber(levels); // Number of levels
-  writer.WriteNumber(parameter.GetIndexPageSize()); // Size of index page
+  writer.WriteNumber(parameter.GetNumericIndexLevelSize()); // Size of index page
   writer.Write(dataCount);        // Number of nodes
 
   writer.GetPos(lastLevelPageStart);
@@ -357,16 +343,13 @@ bool GenerateNumericIndex(const ImportParameter& parameter,
     data.Read(scanner);
 
     if (!scanner.HasError()) {
-      if (currentEntry%parameter.GetIndexPageSize()==0) {
+      if (currentEntry%parameter.GetNumericIndexLevelSize()==0) {
         long pageStart;
 
         writer.GetPos(pageStart);
 
-        //std::cout << levels << "-" << pageStart << " " << way.id << " " << pos << std::endl;
         writer.WriteNumber((unsigned long)pos);
         writer.WriteNumber(data.id);
-        //writer.Write((unsigned long)pos);
-        //writer.Write(way.id);
         startingIds.push_back(data.id);
         pageStarts.push_back(pageStart);
       }
@@ -375,11 +358,8 @@ bool GenerateNumericIndex(const ImportParameter& parameter,
 
         writer.GetPos(pageStart);
 
-        //std::cout << levels << " " << pageStart << " " << way.id << " " << lastId << " " << pos << " " << lastPos << std::endl;
         writer.WriteNumber((unsigned long)(pos-lastPos));
         writer.WriteNumber(data.id-lastId);
-        //writer.Write((unsigned long)(pos-lastPos));
-        //writer.Write(way.id-lastId);
       }
 
       lastPos=pos;
@@ -401,7 +381,7 @@ bool GenerateNumericIndex(const ImportParameter& parameter,
     progress.Info(std::string("Level ")+NumberToString(levels)+" entries "+NumberToString(si.size()));
 
     for (size_t i=0; i<si.size(); i++) {
-      if (i%parameter.GetIndexPageSize()==0) {
+      if (i%parameter.GetNumericIndexLevelSize()==0) {
         long pos;
 
         writer.GetPos(pos);
@@ -411,18 +391,12 @@ bool GenerateNumericIndex(const ImportParameter& parameter,
       }
 
       if (i==0) {
-        //std::cout << levels << " " << si[i] << " " << po[i] << std::endl;
         writer.WriteNumber(si[i]);
         writer.WriteNumber(po[i]);
-        //writer.Write(si[i]);
-        //writer.Write(po[i]);
       }
       else {
-        //std::cout << levels << " " << si[i] << " " << po[i] << " " << po[i]-po[i-1] << std::endl;
         writer.WriteNumber(si[i]-si[i-1]);
         writer.WriteNumber(po[i]-po[i-1]);
-        //writer.Write(si[i]-si[i-1]);
-        //writer.Write(po[i]-po[i-1]);
       }
     }
 
@@ -431,7 +405,6 @@ bool GenerateNumericIndex(const ImportParameter& parameter,
 
   writer.SetPos(lastLevelPageStart);
 
-  std::cout << "Starting pos of last level index is " << pageStarts[0] << std::endl;
   writer.Write((unsigned long)pageStarts[0]);
 
   scanner.Close();
