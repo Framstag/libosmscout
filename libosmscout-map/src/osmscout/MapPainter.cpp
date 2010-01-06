@@ -28,6 +28,8 @@
 #include <list>
 #include <cstdlib>
 
+#include <osmscout/LoaderPNG.h>
+
 static const double gradtorad=2*M_PI/360;
 
 static double longDash[]= {7,3};
@@ -1867,6 +1869,19 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   std::cout << " Paths: " << pathsTimer << "/" << pathLabelsTimer;
   std::cout << " Nodes: " << nodesTimer;
   std::cout << " POIs: " << poisTimer << "/" << routesTimer << std::endl;
+
+  /*
+  cairo_surface_t *testImage=osmscout::LoadPNG("alphatest.png");
+
+  if (testImage!=NULL) {
+    std::cout << "Test image loaded..." << std::endl;
+    cairo_save(draw);
+    cairo_set_source_surface(draw,testImage,0,0);
+    cairo_paint(draw);
+    cairo_restore(draw);
+
+    cairo_surface_destroy(testImage);
+  }*/
 
   return true;
 }

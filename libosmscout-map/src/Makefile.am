@@ -8,4 +8,8 @@ AM_LDFLAGS  = $(LIBOSMSCOUT_LIBS) \
               $(LIBPNG_LIBS)
 
 lib_LTLIBRARIES = libosmscoutmap.la
-libosmscoutmap_la_SOURCES= osmscout/MapPainter.cpp
+
+libosmscoutmap_la_SOURCES = osmscout/LoaderPNG.h \
+                            osmscout/LoaderPNG.cpp \
+                            osmscout/MapPainter.h \
+                            osmscout/MapPainter.cpp
