@@ -120,10 +120,12 @@ std::string NumberToString(const A& a)
   return res;
 }
 
-double GetSphericalDistance(double aLon, double aLat,
-                            double bLon, double bLat);
-double GetEllipsoidalDistance(double aLon, double aLat,
-                              double bLon, double bLat);
+extern double Log2(double x);
+extern size_t Pow(size_t a, size_t b);
+extern double GetSphericalDistance(double aLon, double aLat,
+                                   double bLon, double bLat);
+extern double GetEllipsoidalDistance(double aLon, double aLat,
+                                     double bLon, double bLat);
 
 
 

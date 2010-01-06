@@ -303,6 +303,27 @@ bool GetFileSize(const std::string& filename, long& size)
   return true;
 }
 
+double Log2(double x)
+{
+  return log(x)/log(2);
+}
+
+size_t Pow(size_t a, size_t b)
+{
+  if (b==0) {
+    return 1;
+  }
+
+  size_t res=a;
+
+  while (b>1) {
+    res=res*a;
+    b--;
+  }
+
+  return res;
+}
+
 /**
   Calculating basic cost for the A* algorithm based on the
   spherical distance of two points on earth
