@@ -1006,7 +1006,9 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
       const FillStyle *style=styleConfig.GetAreaFillStyle(area->type,
                                                           area->flags & Way::isBuilding);
 
-      if (style->GetLayer()>=-5 && style->GetLayer()<=5) {
+      if (style!=NULL &&
+          style->GetLayer()>=-5 &&
+          style->GetLayer()<=5) {
         areaLayers[style->GetLayer()+5]=true;
       }
     }
