@@ -71,6 +71,7 @@ public:
   bool ReadNumber(unsigned long& number);
   bool ReadNumber(unsigned int& number);
   bool ReadNumber(NodeCount& number);
+  bool ReadNumber(long number);
 };
 
 #endif

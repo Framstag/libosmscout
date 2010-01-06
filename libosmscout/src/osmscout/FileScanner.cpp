@@ -439,3 +439,24 @@ bool FileScanner::ReadNumber(NodeCount& number)
   return true;
 }
 
+/**
+  TODO: Handle real negative numbers!
+  */
+bool FileScanner::ReadNumber(long number)
+{
+  unsigned long value;
+
+  if (!ReadNumber(value)) {
+    return false;
+  }
+
+  if (value>(long)std::numeric_limits<long>::max()) {
+    hasError=true;
+    return false;
+  }
+
+  number=(long)value;
+
+  return true;
+}
+
