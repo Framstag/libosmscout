@@ -243,6 +243,11 @@
     <label style="contour" minMag="proximity"/>
   </way>
 
+  <way key="waterway" value="drain" prio="1">
+    <line color="b5d0d0" minPixel="0.5" maxPixel="1" width="3" />
+    <label style="contour" minMag="proximity"/>
+  </way>
+
   <area key="waterway" value="riverbank" prio="2">
     <fill color="b5d0d0"/>
     <label minMag="proximity"/>

@@ -104,6 +104,7 @@
     <type id="301" name="waterway" value="river" way="true" route="true"/>
     <type id="302" name="waterway" value="riverbank" area="true" route="true"/>
     <type id="303" name="waterway" value="canal" way="true" route="true"/>
+    <type id="303" name="waterway" value="drain" way="true" route="true"/>
 
     <!--
       Railway
