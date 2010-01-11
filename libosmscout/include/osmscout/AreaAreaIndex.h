@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_AREAWAYINDEX2_H
-#define OSMSCOUT_AREAWAYINDEX2_H
+#ifndef OSMSCOUT_AREAAREAINDEX_H
+#define OSMSCOUT_AREAAREAINDEX_H
 
 /*
   TravelJinni - Openstreetmap offline viewer
@@ -26,27 +26,30 @@
 
 #include <osmscout/StyleConfig.h>
 
-class AreaWayIndex2
+class AreaAreaIndex
 {
 private:
   struct IndexEntry
   {
     std::vector<long> dataOffsets;
     long              children[4];
-    std::vector<long> offsets;
   };
 
   typedef std::map<size_t,IndexEntry> IndexLevel;
 
 private:
+  std::vector<double>     cellWidth;
+  std::vector<double>     cellHeight;
+  size_t                  maxLevel;
   std::vector<IndexLevel> index;
 
 public:
-  bool LoadAreaWayIndex(const std::string& path);
+  bool Load(const std::string& path);
 
   void GetOffsets(const StyleConfig& styleConfig,
                   double minlon, double minlat,
                   double maxlon, double maxlat,
+                  size_t maxLevel,
                   size_t maxCount,
                   std::set<long>& offsets) const;
 

@@ -320,7 +320,7 @@
   </area>
 
   <area key="landuse" value="industrial" prio="8">
-    <fill color="dfd1d6"/>
+    <fill color="dfd1d6" layer="2"/>
     <label style="emphasize" minMag="close"/>
   </area>
 

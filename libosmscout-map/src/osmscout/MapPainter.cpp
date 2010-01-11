@@ -868,14 +868,15 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   size_t              styleCount=styleConfig.GetStyleCount();
   std::vector<Node>   nodes;
   std::vector<Way>    ways;
-  size_t              pathDrawn=0;
-  size_t              nodesOutCount=0;
-  size_t              nodesAllCount=0;
-  size_t              nodesDrawnCount=0;
+  std::vector<Way>    areas;
   bool                areaLayers[11];
   bool                wayLayers[11];
 
   double              gradtorad=2*M_PI/360;
+
+  size_t              nodesDrawnCount=0;
+  size_t              areasDrawnCount=0;
+  size_t              waysDrawnCount=0;
 
   std::cout << "---" << std::endl;
   std::cout << "Showing " << lon <<", " << lat << " with magnification " << magnification << "x" << "/" << log(magnification)/log(2) << " for area " << width << "x" << height << std::endl;
@@ -925,13 +926,14 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   database.GetObjects(styleConfig,
                       lonMin,latMin,lonMax,latMax,
                       magnification,
+                      ((size_t)ceil(Log2(magnification)))+4,
+                      2000,
                       2000,
                       nodes,
-                      ways);
+                      ways,
+                      areas);
 
   dataRetrievalTimer.Stop();
-
-  std::cout << "Nodes: " << nodes.size() << " ways: " << ways.size() << std::endl;
 
   StopClock presetTimer;
 
@@ -988,42 +990,46 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
     }
   }
 
-  // Calculate available layers for ways and areas
-
-  for (size_t i=0; i<11; i++) {
-    areaLayers[i]=false;
-  }
+  //
+  // Calculate available layers for ways
+  //
 
   for (size_t i=0; i<11; i++) {
     wayLayers[i]=false;
   }
 
-
-  for (std::vector<Way>::const_iterator area=ways.begin();
-       area!=ways.end();
-       ++area) {
-    if (area->IsArea()) {
-      const FillStyle *style=styleConfig.GetAreaFillStyle(area->type,
-                                                          area->flags & Way::isBuilding);
-
-      if (style!=NULL &&
-          style->GetLayer()>=-5 &&
-          style->GetLayer()<=5) {
-        areaLayers[style->GetLayer()+5]=true;
-      }
+  for (std::vector<Way>::const_iterator way=ways.begin();
+       way!=ways.end();
+       ++way) {
+    if (way->layer>=-5 && way->layer<=5) {
+      wayLayers[way->layer+5]=true;
     }
-    else {
-      if (area->layer>=-5 && area->layer<=5) {
-        wayLayers[area->layer+5]=true;
-      }
+  }
+
+  //
+  // Calculate available layers for areas
+  //
+
+  for (size_t i=0; i<11; i++) {
+    areaLayers[i]=false;
+  }
+
+  for (std::vector<Way>::const_iterator area=areas.begin();
+       area!=areas.end();
+       ++area) {
+    const FillStyle *style=styleConfig.GetAreaFillStyle(area->type,
+                                                        area->flags & Way::isBuilding);
+
+    if (style!=NULL &&
+        style->GetLayer()>=-5 &&
+        style->GetLayer()<=5) {
+      areaLayers[style->GetLayer()+5]=true;
     }
   }
 
   //
   //
   // Drawing setup
-
-  //std::cout << "Drawing..." << std::endl;
 
   cairo_save(draw);
 
@@ -1043,8 +1049,6 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
 
   StopClock areasTimer;
 
-  //std::cout << "Draw areas..." << std::endl;
-
   cairo_save(draw);
   for (size_t l=0; l<11; l++) {
     int layer=l-5;
@@ -1055,13 +1059,9 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
 
     //std::cout << "Drawing layer " << layer << std::endl;
 
-    for (std::vector<Way>::const_iterator area=ways.begin();
-         area!=ways.end();
+    for (std::vector<Way>::const_iterator area=areas.begin();
+         area!=areas.end();
          ++area) {
-
-      if (!area->IsArea()) {
-        continue;
-      }
 
       const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(area->type,
                                                               area->flags & Way::isBuilding);
@@ -1098,13 +1098,13 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
           else {
             cairo_line_to(draw,nodeX[i],nodeY[i]);
           }
-          nodesDrawnCount++;
+          //nodesDrawnCount++;
         }
 
-        nodesAllCount++;
+        //nodesAllCount++;
       }
 
-      pathDrawn++;
+      areasDrawnCount++;
 
       cairo_fill(draw);
 
@@ -1126,10 +1126,10 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
           else {
             cairo_line_to(draw,nodeX[i],nodeY[i]);
           }
-          nodesDrawnCount++;
+          //nodesDrawnCount++;
         }
 
-        nodesAllCount++;
+        //nodesAllCount++;
       }
 
       cairo_stroke(draw);
@@ -1142,7 +1142,7 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   areasTimer.Stop();
 
   //
-  // Drawing paths
+  // Drawing ways
   //
 
   StopClock pathsTimer;
@@ -1164,8 +1164,7 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
          way!=ways.end();
          ++way) {
 
-      if (way->IsArea() ||
-          (!outline[(size_t)way->type] &&
+      if ((!outline[(size_t)way->type] &&
            !(way->flags & Way::isBridge && magnification>=magCity) &&
            !(way->flags & Way::isTunnel && magnification>=magCity)) ||
            way->layer!=layer) {
@@ -1233,13 +1232,13 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
             cairo_line_to(draw,nodeX[i],nodeY[i]);
           }
 
-          nodesDrawnCount++;
+          //nodesDrawnCount++;
         }
         else {
-          nodesOutCount++;
+          //nodesOutCount++;
         }
       }
-      nodesAllCount+=way->nodes.size();
+      //nodesAllCount+=way->nodes.size();
 
       cairo_stroke(draw);
 
@@ -1279,8 +1278,7 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
          way!=ways.end();
          ++way) {
 
-      if (way->IsArea() ||
-          way->layer!=layer) {
+      if (way->layer!=layer) {
         continue;
       }
 
@@ -1321,16 +1319,16 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
             cairo_line_to(draw,nodeX[i],nodeY[i]);
           }
 
-          nodesDrawnCount++;
+          //nodesDrawnCount++;
         }
         else {
-          nodesOutCount++;
+          //nodesOutCount++;
         }
       }
       cairo_stroke(draw);
 
-      pathDrawn++;
-      nodesAllCount+=way->nodes.size();
+      waysDrawnCount++;
+      //nodesAllCount+=way->nodes.size();
     }
     cairo_restore(draw);
   }
@@ -1348,10 +1346,6 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   for (std::vector<Way>::const_iterator way=ways.begin();
        way!=ways.end();
        ++way) {
-
-    if (way->IsArea()) {
-      continue;
-    }
 
     if (!way->GetRefName().empty()) {
       const LabelStyle *style=styleConfig.GetWayRefLabelStyle(way->type);
@@ -1398,10 +1392,6 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   for (std::vector<Way>::const_iterator way=ways.begin();
        way!=ways.end();
        ++way) {
-
-    if (way->IsArea()) {
-      continue;
-    }
 
     if (!way->GetRefName().empty()) {
       const LabelStyle *style=styleConfig.GetWayRefLabelStyle(way->type);
@@ -1526,9 +1516,11 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
     y=height-(atanh(sin(node->lat*gradtorad))-vmin)*vscale;
 
     DrawSymbol(draw,style,x,y);
+
+    nodesDrawnCount++;
   }
 
-  nodesAllCount+=nodes.size();
+  //nodesAllCount+=nodes.size();
 
   cairo_restore(draw);
 
@@ -1595,13 +1587,9 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   //std::cout << "Draw area labels..." << std::endl;
 
   cairo_save(draw);
-  for (std::vector<Way>::const_iterator area=ways.begin();
-       area!=ways.end();
+  for (std::vector<Way>::const_iterator area=areas.begin();
+       area!=areas.end();
        ++area) {
-
-    if (!area->IsArea()) {
-      continue;
-    }
 
     const LabelStyle *style=styleConfig.GetAreaLabelStyle(area->type);
 
@@ -1725,13 +1713,16 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
           cairo_line_to(draw,nodeX[i],nodeY[i]);
         }
 
-        nodesDrawnCount++;
+        //nodesDrawnCount++;
       }
       else {
-        nodesOutCount++;
+        //nodesOutCount++;
       }
     }
-    nodesAllCount+=way->nodes.size();
+
+    waysDrawnCount++;
+
+    //nodesAllCount+=way->nodes.size();
 
     cairo_stroke(draw);
 
@@ -1789,9 +1780,11 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
     y=height-(atanh(sin(node->lat*gradtorad))-vmin)*vscale;
 
     DrawSymbol(draw,style,x,y);
+
+    nodesDrawnCount++;
   }
 
-  nodesAllCount+=nodes.size();
+  //nodesAllCount+=nodes.size();
 
   cairo_restore(draw);
 
@@ -1861,7 +1854,10 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   drawingTimer.Stop();
   overallTimer.Stop();
 
-  std::cout << "Nodes: " << nodesDrawnCount << "/" << nodesAllCount << " (" << nodesOutCount << " out)" << " ways: " << pathDrawn <<"/" << ways.size() << std::endl;
+  std::cout << "Nodes: " << nodesDrawnCount << "/" << nodes.size()+poiNodes.size() << " (" << nodesDrawnCount*100/(nodes.size()+poiNodes.size()) << "%) ";
+  std::cout << " ways: " << waysDrawnCount << "/" << ways.size()+poiWays.size() << " (" << waysDrawnCount*100/(ways.size()+poiWays.size()) << "%) ";
+  std::cout << " areas: " << areasDrawnCount << "/" << areas.size() << " (" << areasDrawnCount*100/areas.size() << "%) ";
+  std::cout << std::endl;
 
   std::cout << "All: " << overallTimer;
   std::cout << " Data: " << dataRetrievalTimer;

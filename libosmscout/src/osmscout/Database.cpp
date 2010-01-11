@@ -119,12 +119,12 @@ bool Database::Open(const std::string& path)
   }
   std::cout << "Loading area way index done." << std::endl;
 
-  std::cout << "Loading area way index 2..." << std::endl;
-  if (!areaWayIndex2.LoadAreaWayIndex(path)) {
-    std::cerr << "Cannot load AreaWayIndex2!" << std::endl;
+  std::cout << "Loading area area index..." << std::endl;
+  if (!areaAreaIndex.Load(path)) {
+    std::cerr << "Cannot load AreaAreaIndex!" << std::endl;
     return false;
   }
-  std::cout << "Loading area way index 2 done." << std::endl;
+  std::cout << "Loading area way area index done." << std::endl;
 
   std::cout << "Loading city street index..." << std::endl;
   if (!cityStreetIndex.LoadCityStreetIndex(path)) {
@@ -234,32 +234,6 @@ size_t Database::GetMaximumPriority(const StyleConfig& styleConfig,
   return maxPriority;
 }
 
-bool Database::GetWays(const StyleConfig& styleConfig,
-                       double lonMin, double latMin,
-                       double lonMax, double latMax,
-                       double magnification,
-                       size_t maxPriority,
-                       std::vector<Way>& ways) const
-{
-  std::set<Id>             ids;
-  std::vector<Id>          idList;
-
-  areaWayIndex.GetIds(styleConfig,
-                      lonMin,latMin,lonMax,latMax,
-                      magnification,
-                      maxPriority,
-                      ids);
-
-  idList.reserve(ids.size());
-  for (std::set<Id>::const_iterator id=ids.begin();
-       id!=ids.end();
-       ++id) {
-    idList.push_back(*id);
-  }
-
-  return GetWays(idList,ways);
-}
-
 bool Database::GetNodes(const StyleConfig& styleConfig,
                         double lonMin, double latMin,
                         double lonMax, double latMax,
@@ -278,26 +252,81 @@ bool Database::GetNodes(const StyleConfig& styleConfig,
   return GetNodes(ids,nodes);
 }
 
+bool Database::GetWays(const StyleConfig& styleConfig,
+                       double lonMin, double latMin,
+                       double lonMax, double latMax,
+                       double magnification,
+                       size_t maxPriority,
+                       std::vector<Way>& ways) const
+{
+  std::set<Id>      ids;
+  std::vector<Id>   idList;
+
+  areaWayIndex.GetIds(styleConfig,
+                      lonMin,latMin,lonMax,latMax,
+                      magnification,
+                      maxPriority,
+                      ids);
+
+  idList.reserve(ids.size());
+  for (std::set<Id>::const_iterator id=ids.begin();
+       id!=ids.end();
+       ++id) {
+    idList.push_back(*id);
+  }
+
+  return GetWays(idList,ways);
+}
+
+bool Database::GetAreas(const StyleConfig& styleConfig,
+                        double lonMin, double latMin,
+                        double lonMax, double latMax,
+                        size_t maxLevel,
+                        size_t maxCount,
+                        std::vector<Way>& areas) const
+{
+  std::set<long>    offsets;
+  std::vector<long> offsetList;
+
+  areaAreaIndex.GetOffsets(styleConfig,
+                           lonMin,latMin,lonMax,latMax,
+                           maxLevel,
+                           2000,
+                           offsets);
+
+  offsetList.reserve(offsets.size());
+  for (std::set<long>::const_iterator offset=offsets.begin();
+       offset!=offsets.end();
+       ++offset) {
+    offsetList.push_back(*offset);
+  }
+
+  return GetWays(offsetList,areas);
+}
+
 bool Database::GetObjects(const StyleConfig& styleConfig,
                           double lonMin, double latMin,
                           double lonMax, double latMax,
                           double magnification,
+                          size_t maxAreaLevel,
                           size_t maxNodes,
+                          size_t maxAreas,
                           std::vector<Node>& nodes,
-                          std::vector<Way>& ways) const
+                          std::vector<Way>& ways,
+                          std::vector<Way>& areas) const
 {
-  std::cout << "Getting objects from index..." << std::endl;
-
   size_t maxPriority;
 
-  std::cout << "Analysing distribution for maximum priority..." << std::endl;
+  StopClock maxPrioTimer;
 
   maxPriority=GetMaximumPriority(styleConfig,
                                  lonMin,latMin,lonMax,latMax,
                                  magnification,
                                  maxNodes);
 
-  std::cout << "Maximum priority is: " << maxPriority << std::endl;
+  maxPrioTimer.Stop();
+
+  StopClock waysTimer;
 
   if (!GetWays(styleConfig,
                lonMin,latMin,lonMax,latMax,
@@ -307,6 +336,22 @@ bool Database::GetObjects(const StyleConfig& styleConfig,
     return false;
   }
 
+  waysTimer.Stop();
+
+  StopClock areasTimer;
+
+  if (!GetAreas(styleConfig,
+               lonMin,latMin,lonMax,latMax,
+               maxAreaLevel,
+               maxAreas,
+               areas)) {
+    return false;
+  }
+
+  areasTimer.Stop();
+
+  StopClock nodesTimer;
+
   if (!GetNodes(styleConfig,
                 lonMin,latMin,lonMax,latMax,
                 magnification,
@@ -314,6 +359,10 @@ bool Database::GetObjects(const StyleConfig& styleConfig,
                 nodes)) {
     return false;
   }
+
+  nodesTimer.Stop();
+
+  std::cout << "Max Prio: " << maxPrioTimer << " Nodes: " << nodesTimer << " ways: " << waysTimer << " areas: " << areasTimer << std::endl;
 
   return true;
 }
@@ -341,7 +390,7 @@ bool Database::GetNodes(const std::vector<Id>& ids, std::vector<Node>& nodes) co
   std::string       file=path+"/"+"nodes.dat";
 
   if (!nodeIndex.GetOffsets(ids,offsets)) {
-    std::cout << "GetNodes(): Ids not found in index" << std::endl;
+    std::cerr << "GetNodes(): Ids not found in index" << std::endl;
     return false;
   }
 
@@ -381,32 +430,10 @@ bool Database::GetNodes(const std::vector<Id>& ids, std::vector<Node>& nodes) co
   return true;
 }
 
-bool Database::GetWay(const Id& id, Way& way) const
+bool Database::GetWays(std::vector<long>& offsets,
+                       std::vector<Way>& ways) const
 {
-  std::vector<Id>  ids;
-  std::vector<Way> ways;
-
-  ids.push_back(id);
-
-  if (GetWays(ids,ways)) {
-    if (ways.size()>0) {
-      way=*ways.begin();
-      return true;
-    }
-  }
-
-  return false;
-}
-
-bool Database::GetWays(const std::vector<Id>& ids, std::vector<Way>& ways) const
-{
-  std::vector<long> offsets;
-  std::string       file=path+"/"+"ways.dat";
-
-  if (!wayIndex.GetOffsets(ids,offsets)) {
-    std::cout << "GetWays(): Ids not found in index" << std::endl;
-    return false;
-  }
+  std::string file=path+"/"+"ways.dat";
 
   if (!wayScanner.IsOpen()) {
     if (!wayScanner.Open(file)) {
@@ -415,7 +442,7 @@ bool Database::GetWays(const std::vector<Id>& ids, std::vector<Way>& ways) const
     }
   }
 
-  ways.reserve(ids.size());
+  ways.reserve(ways.size()+offsets.size());
 
   WayCache::CacheRef cacheRef;
 
@@ -442,6 +469,35 @@ bool Database::GetWays(const std::vector<Id>& ids, std::vector<Way>& ways) const
   }
 
   return true;
+}
+
+bool Database::GetWay(const Id& id, Way& way) const
+{
+  std::vector<Id>  ids;
+  std::vector<Way> ways;
+
+  ids.push_back(id);
+
+  if (GetWays(ids,ways)) {
+    if (ways.size()>0) {
+      way=*ways.begin();
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool Database::GetWays(const std::vector<Id>& ids, std::vector<Way>& ways) const
+{
+  std::vector<long> offsets;
+
+  if (!wayIndex.GetOffsets(ids,offsets)) {
+    std::cout << "GetWays(): Ids not found in index" << std::endl;
+    return false;
+  }
+
+  return GetWays(offsets,ways);
 }
 
 bool Database::GetMatchingCities(const std::string& name,
@@ -1326,6 +1382,7 @@ void Database::DumpStatistics()
   wayIndex.DumpStatistics();
 
   areaNodeIndex.DumpStatistics();
+  areaAreaIndex.DumpStatistics();
   areaWayIndex.DumpStatistics();
 
   cityStreetIndex.DumpStatistics();

@@ -36,9 +36,9 @@
 
 #include <osmscout/NumericIndex.h>
 
+#include <osmscout/GenAreaAreaIndex.h>
 #include <osmscout/GenAreaNodeIndex.h>
 #include <osmscout/GenAreaWayIndex.h>
-#include <osmscout/GenAreaWayIndex2.h>
 #include <osmscout/GenNodeUseIndex.h>
 #include <osmscout/GenCityStreetIndex.h>
 
@@ -50,7 +50,7 @@ ImportParameter::ImportParameter()
    endStep(defaultEndStep),
    nodeIndexIntervalSize(50),
    numericIndexLevelSize(1024),
-   areaAreaIndexMaxMag(14)
+   areaAreaIndexMaxMag(18)
 {
   // no code
 }
@@ -223,7 +223,23 @@ bool Import(const ImportParameter& parameter,
   }
 
   if (startStep==7) {
-    progress.SetStep("7 Generating 'areaway.idx'");
+    progress.SetStep("7 Generating 'areaarea.idx'");
+
+    if (!GenerateAreaAreaIndex(parameter,
+                               progress)) {
+      progress.Error("Cannot generate area area index!");
+      return false;
+    }
+
+    startStep++;
+  }
+
+  if (startStep>endStep) {
+    return true;
+  }
+
+  if (startStep==8) {
+    progress.SetStep("8 Generating 'areaway.idx'");
 
     if (!GenerateAreaWayIndex(parameter,
                               progress)) {
@@ -238,8 +254,8 @@ bool Import(const ImportParameter& parameter,
     return true;
   }
 
-  if (startStep==8) {
-    progress.SetStep("8 Generating 'citystreet.idx'");
+  if (startStep==9) {
+    progress.SetStep("9 Generating 'citystreet.idx'");
 
     if (!GenerateCityStreetIndex(typeConfig,
                                  parameter,
@@ -255,25 +271,13 @@ bool Import(const ImportParameter& parameter,
     return true;
   }
 
-  if (startStep==9) {
-    progress.SetStep("9 Generating 'nodeuse.idx'");
+  if (startStep==10) {
+    progress.SetStep("10 Generating 'nodeuse.idx'");
 
     if (!GenerateNodeUseIndex(typeConfig,
                               parameter,
                               progress)) {
       progress.Error("Cannot generate node usage index!");
-      return false;
-    }
-
-    startStep++;
-  }
-
-  if (startStep==10) {
-    progress.SetStep("10 Generating 'areaway2.idx'");
-
-    if (!GenerateAreaWayIndex2(parameter,
-                               progress)) {
-      progress.Error("Cannot generate area way index 2!");
       return false;
     }
 

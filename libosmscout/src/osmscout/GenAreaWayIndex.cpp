@@ -75,6 +75,10 @@ bool GenerateAreaWayIndex(const ImportParameter& parameter,
     way.Read(scanner);
 
     if (!scanner.HasError()) {
+      if (way.IsArea()) {
+        continue;
+      }
+
       wayCount++;
 
       double xmin,xmax,ymin,ymax;

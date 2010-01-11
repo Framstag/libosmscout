@@ -29,16 +29,16 @@ libosmscout_la_SOURCES= osmscout/Util.cpp \
                         osmscout/NumericIndex.cpp \
                         osmscout/Import.cpp \
                         osmscout/Preprocess.cpp \
+                        osmscout/GenAreaAreaIndex.cpp \
                         osmscout/GenAreaNodeIndex.cpp \
                         osmscout/GenAreaWayIndex.cpp \
-                        osmscout/GenAreaWayIndex2.cpp \
                         osmscout/GenCityStreetIndex.cpp \
                         osmscout/GenNodeDat.cpp \
                         osmscout/GenNodeUseIndex.cpp \
                         osmscout/GenWayDat.cpp \
+                        osmscout/AreaAreaIndex.cpp \
                         osmscout/AreaNodeIndex.cpp \
                         osmscout/AreaWayIndex.cpp \
-                        osmscout/AreaWayIndex2.cpp \
                         osmscout/CityStreetIndex.cpp \
                         osmscout/NodeUseIndex.cpp \
                         osmscout/Route.cpp \

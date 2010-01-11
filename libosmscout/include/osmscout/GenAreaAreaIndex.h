@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_GENAREAWAYINDEX2_H
-#define OSMSCOUT_GENAREAWAYINDEX2_H
+#ifndef OSMSCOUT_GENAREAAREAINDEX_H
+#define OSMSCOUT_GENAREAAREAINDEX_H
 
 /*
   Import/TravelJinni - Openstreetmap offline viewer
@@ -23,7 +23,7 @@
 #include <osmscout/Import.h>
 #include <osmscout/Progress.h>
 
-extern bool GenerateAreaWayIndex2(const ImportParameter& parameter,
+extern bool GenerateAreaAreaIndex(const ImportParameter& parameter,
                                   Progress& progress);
 
 #endif

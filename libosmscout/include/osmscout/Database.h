@@ -39,7 +39,7 @@
 // In area index
 #include <osmscout/AreaNodeIndex.h>
 #include <osmscout/AreaWayIndex.h>
-#include <osmscout/AreaWayIndex2.h>
+#include <osmscout/AreaAreaIndex.h>
 
 // Location index
 #include <osmscout/CityStreetIndex.h>
@@ -74,8 +74,8 @@ private:
   WayIndex              wayIndex;
 
   AreaNodeIndex         areaNodeIndex;
+  AreaAreaIndex         areaAreaIndex;
   AreaWayIndex          areaWayIndex;
-  AreaWayIndex2         areaWayIndex2;
 
   CityStreetIndex       cityStreetIndex;
 
@@ -101,11 +101,7 @@ private:
                             double magnification,
                             size_t maxNodes) const;
 
-  bool GetWays(const StyleConfig& styleConfig,
-               double lonMin, double latMin,
-               double lonMax, double latMax,
-               double magnification,
-               size_t maxPriority,
+  bool GetWays(std::vector<long>& offsets,
                std::vector<Way>& ways) const;
 
   bool GetNodes(const StyleConfig& styleConfig,
@@ -114,6 +110,20 @@ private:
                 double magnification,
                 size_t maxPriority,
                 std::vector<Node>& nodes) const;
+
+  bool GetWays(const StyleConfig& styleConfig,
+               double lonMin, double latMin,
+               double lonMax, double latMax,
+               double magnification,
+               size_t maxPriority,
+               std::vector<Way>& ways) const;
+
+  bool GetAreas(const StyleConfig& styleConfig,
+                double lonMin, double latMin,
+                double lonMax, double latMax,
+                size_t maxLevel,
+                size_t maxCount,
+                std::vector<Way>& areas) const;
 
 public:
   Database();
@@ -129,14 +139,21 @@ public:
                   double lonMin, double latMin,
                   double lonMax, double latMax,
                   double magnification,
+                  size_t maxAreaLevel,
                   size_t maxNodes,
+                  size_t maxAreas,
                   std::vector<Node>& nodes,
-                  std::vector<Way>& ways) const;
+                  std::vector<Way>& ways,
+                  std::vector<Way>& areas) const;
 
-  bool GetNode(const Id& id, Node& node) const;
-  bool GetNodes(const std::vector<Id>& ids, std::vector<Node>& nodes) const;
-  bool GetWay(const Id& id, Way& way) const;
-  bool GetWays(const std::vector<Id>& ids, std::vector<Way>& ways) const;
+  bool GetNode(const Id& id,
+               Node& node) const;
+  bool GetNodes(const std::vector<Id>& ids,
+                std::vector<Node>& nodes) const;
+  bool GetWay(const Id& id,
+              Way& way) const;
+  bool GetWays(const std::vector<Id>& ids,
+               std::vector<Way>& ways) const;
 
   bool GetMatchingCities(const std::string& name,
                          std::list<City>& cities,
