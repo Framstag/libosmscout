@@ -70,7 +70,7 @@ bool AreaAreaIndex::Load(const std::string& path)
     std::cout << "Reading " << entries << " entries for level " << l << std::endl;
 
     for (size_t i=0; i<entries; i++) {
-      long       offset;
+      FileOffset offset;
       IndexEntry entry;
 
       if (!scanner.GetPos(offset)) {
@@ -105,7 +105,7 @@ bool AreaAreaIndex::Load(const std::string& path)
 
       entry.dataOffsets.reserve(offsetCount);
       for (size_t c=0; c<offsetCount; c++) {
-        long o;
+        FileOffset o;
 
         if (!scanner.ReadNumber(o)) {
           std::cerr << "Cannot read data (6), level " << l << " entry " << i << std::endl;
@@ -131,15 +131,15 @@ void AreaAreaIndex::GetOffsets(const StyleConfig& styleConfig,
                                double maxlon, double maxlat,
                                size_t maxLevel,
                                size_t maxCount,
-                               std::set<long>& offsets) const
+                               std::set<FileOffset>& offsets) const
 {
-  std::vector<size_t> ctx; // tile x coordinates in this level
-  std::vector<size_t> cty; // tile y coordinates in this level
-  std::vector<long>   co;  // offsets in this level
+  std::vector<size_t>     ctx; // tile x coordinates in this level
+  std::vector<size_t>     cty; // tile y coordinates in this level
+  std::vector<FileOffset> co;  // offsets in this level
 
-  std::vector<size_t> ntx; // tile x coordinates in next level
-  std::vector<size_t> nty; // tile y coordinates in next level
-  std::vector<long>   no;  // offsets in next level
+  std::vector<size_t>     ntx; // tile x coordinates in next level
+  std::vector<size_t>     nty; // tile y coordinates in next level
+  std::vector<FileOffset> no;  // offsets in next level
 
   minlon+=180;
   maxlon+=180;
@@ -180,7 +180,7 @@ void AreaAreaIndex::GetOffsets(const StyleConfig& styleConfig,
         return;
       }
 
-      for (std::vector<long>::const_iterator o=entry->second.dataOffsets.begin();
+      for (std::vector<FileOffset>::const_iterator o=entry->second.dataOffsets.begin();
            o!=entry->second.dataOffsets.end();
            ++o) {
         offsets.insert(*o);

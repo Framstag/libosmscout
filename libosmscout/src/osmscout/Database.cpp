@@ -259,23 +259,23 @@ bool Database::GetWays(const StyleConfig& styleConfig,
                        size_t maxPriority,
                        std::vector<Way>& ways) const
 {
-  std::set<Id>      ids;
-  std::vector<Id>   idList;
+  std::set<FileOffset>    offsets;
+  std::vector<FileOffset> offsetList;
 
-  areaWayIndex.GetIds(styleConfig,
+  areaWayIndex.GetOffsets(styleConfig,
                       lonMin,latMin,lonMax,latMax,
                       magnification,
                       maxPriority,
-                      ids);
+                      offsets);
 
-  idList.reserve(ids.size());
-  for (std::set<Id>::const_iterator id=ids.begin();
-       id!=ids.end();
-       ++id) {
-    idList.push_back(*id);
+  offsetList.reserve(offsets.size());
+  for (std::set<FileOffset>::const_iterator offset=offsets.begin();
+       offset!=offsets.end();
+       ++offset) {
+    offsetList.push_back(*offset);
   }
 
-  return GetWays(idList,ways);
+  return GetWays(offsetList,ways);
 }
 
 bool Database::GetAreas(const StyleConfig& styleConfig,
@@ -285,8 +285,8 @@ bool Database::GetAreas(const StyleConfig& styleConfig,
                         size_t maxCount,
                         std::vector<Way>& areas) const
 {
-  std::set<long>    offsets;
-  std::vector<long> offsetList;
+  std::set<FileOffset>    offsets;
+  std::vector<FileOffset> offsetList;
 
   areaAreaIndex.GetOffsets(styleConfig,
                            lonMin,latMin,lonMax,latMax,
@@ -295,7 +295,7 @@ bool Database::GetAreas(const StyleConfig& styleConfig,
                            offsets);
 
   offsetList.reserve(offsets.size());
-  for (std::set<long>::const_iterator offset=offsets.begin();
+  for (std::set<FileOffset>::const_iterator offset=offsets.begin();
        offset!=offsets.end();
        ++offset) {
     offsetList.push_back(*offset);
@@ -386,8 +386,8 @@ bool Database::GetNode(const Id& id, Node& node) const
 
 bool Database::GetNodes(const std::vector<Id>& ids, std::vector<Node>& nodes) const
 {
-  std::vector<long> offsets;
-  std::string       file=path+"/"+"nodes.dat";
+  std::vector<FileOffset> offsets;
+  std::string             file=path+"/"+"nodes.dat";
 
   if (!nodeIndex.GetOffsets(ids,offsets)) {
     std::cerr << "GetNodes(): Ids not found in index" << std::endl;
@@ -405,7 +405,7 @@ bool Database::GetNodes(const std::vector<Id>& ids, std::vector<Node>& nodes) co
 
   NodeCache::CacheRef cacheRef;
 
-  for (std::vector<long>::const_iterator offset=offsets.begin();
+  for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
        offset!=offsets.end();
        ++offset) {
     if (!nodeCache.GetEntry(*offset,cacheRef)) {
@@ -430,7 +430,7 @@ bool Database::GetNodes(const std::vector<Id>& ids, std::vector<Node>& nodes) co
   return true;
 }
 
-bool Database::GetWays(std::vector<long>& offsets,
+bool Database::GetWays(std::vector<FileOffset>& offsets,
                        std::vector<Way>& ways) const
 {
   std::string file=path+"/"+"ways.dat";
@@ -446,7 +446,7 @@ bool Database::GetWays(std::vector<long>& offsets,
 
   WayCache::CacheRef cacheRef;
 
-  for (std::vector<long>::const_iterator offset=offsets.begin();
+  for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
        offset!=offsets.end();
        ++offset) {
     if (!wayCache.GetEntry(*offset,cacheRef)) {
@@ -490,7 +490,7 @@ bool Database::GetWay(const Id& id, Way& way) const
 
 bool Database::GetWays(const std::vector<Id>& ids, std::vector<Way>& ways) const
 {
-  std::vector<long> offsets;
+  std::vector<FileOffset> offsets;
 
   if (!wayIndex.GetOffsets(ids,offsets)) {
     std::cout << "GetWays(): Ids not found in index" << std::endl;
@@ -541,9 +541,9 @@ bool GetWays(const Database::WayIndex& index,
   }
 
   if (remaining.size()>0) {
-    std::vector<long>  offsets;
-    static FileScanner wayScanner;
-    std::string        file=path+"/"+"ways.dat";
+    std::vector<FileOffset> offsets;
+    static FileScanner      wayScanner;
+    std::string             file=path+"/"+"ways.dat";
 
     if (!wayScanner.IsOpen()) {
       if (!wayScanner.Open(file)){
@@ -551,21 +551,13 @@ bool GetWays(const Database::WayIndex& index,
 
         return false;
       }
-      /*
-      long fileSize;
-
-      if (!GetFileSize(file,fileSize)) {
-        return false;
-      }
-
-      wayScanner.ReadPageToBuffer(0,fileSize);*/
     }
 
     if (!index.GetOffsets(remaining,offsets)) {
       return false;
     }
 
-    for (std::vector<long>::const_iterator entry=offsets.begin();
+    for (std::vector<FileOffset>::const_iterator entry=offsets.begin();
          entry!=offsets.end();
          ++entry) {
       wayScanner.SetPos(*entry);

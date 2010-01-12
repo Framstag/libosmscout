@@ -51,11 +51,11 @@ bool GenerateAreaWayIndex(const ImportParameter& parameter,
 
   progress.SetAction("Analysing distribution");
 
-  FileScanner                                   scanner;
-  std::vector<size_t>                           drawTypeDist;
-  std::vector<std::map<TileId,NodeCount > >     drawTypeTileNodeCount;
-  std::vector<std::map<TileId,std::list<Id> > > drawTypeTileIds;
-  size_t                                        wayCount=0;
+  FileScanner                                           scanner;
+  std::vector<size_t>                                   drawTypeDist;
+  std::vector<std::map<TileId,NodeCount > >             drawTypeTileNodeCount;
+  std::vector<std::map<TileId,std::list<FileOffset> > > drawTypeTileIds;
+  size_t                                                 wayCount=0;
 
   //
   // * Go through the list of ways
@@ -70,8 +70,10 @@ bool GenerateAreaWayIndex(const ImportParameter& parameter,
   }
 
   while (!scanner.HasError()) {
-    Way way;
+    FileOffset offset;
+    Way        way;
 
+    scanner.GetPos(offset);
     way.Read(scanner);
 
     if (!scanner.HasError()) {
@@ -117,7 +119,7 @@ bool GenerateAreaWayIndex(const ImportParameter& parameter,
             drawTypeTileNodeCount[way.type][GetTileId(x,y)]=way.nodes.size();
           }
 
-          drawTypeTileIds[way.type][GetTileId(x,y)].push_back(way.id);
+          drawTypeTileIds[way.type][GetTileId(x,y)].push_back(offset);
         }
       }
     }
@@ -150,7 +152,7 @@ bool GenerateAreaWayIndex(const ImportParameter& parameter,
       //std::cout << styleTypes[i].GetType() << ": " << drawTypeTileDist[styleTypes[i].GetType()].size();
       tileSum+=drawTypeTileIds[i].size();
 
-      for (std::map<size_t,std::list<Id> >::const_iterator tile=drawTypeTileIds[i].begin();
+      for (std::map<size_t,std::list<FileOffset> >::const_iterator tile=drawTypeTileIds[i].begin();
            tile!=drawTypeTileIds[i].end();
            ++tile) {
         pageSum+=tile->second.size();
@@ -194,17 +196,17 @@ bool GenerateAreaWayIndex(const ImportParameter& parameter,
       writer.WriteNumber(i);     // The draw type id
       writer.WriteNumber(tiles); // The number of tiles
 
-      for (std::map<TileId,std::list<Id> >::const_iterator tile=drawTypeTileIds[i].begin();
+      for (std::map<TileId,std::list<FileOffset> >::const_iterator tile=drawTypeTileIds[i].begin();
            tile!=drawTypeTileIds[i].end();
            ++tile) {
         writer.WriteNumber(tile->first);                           // The tile id
         writer.WriteNumber(drawTypeTileNodeCount[i][tile->first]); // The number of nodes
         writer.WriteNumber(tile->second.size());                   // The number of pages
 
-        for (std::list<Id>::const_iterator id=tile->second.begin();
-             id!=tile->second.end();
-             ++id) {
-          writer.WriteNumber(*id); // The id of the node
+        for (std::list<FileOffset>::const_iterator offset=tile->second.begin();
+             offset!=tile->second.end();
+             ++offset) {
+          writer.WriteNumber(*offset); // The id of the node
         }
       }
     }

@@ -31,8 +31,8 @@ class AreaAreaIndex
 private:
   struct IndexEntry
   {
-    std::vector<long> dataOffsets;
-    long              children[4];
+    std::vector<FileOffset> dataOffsets;
+    FileOffset              children[4];
   };
 
   typedef std::map<size_t,IndexEntry> IndexLevel;
@@ -51,7 +51,7 @@ public:
                   double maxlon, double maxlat,
                   size_t maxLevel,
                   size_t maxCount,
-                  std::set<long>& offsets) const;
+                  std::set<FileOffset>& offsets) const;
 
   void DumpStatistics();
 };

@@ -58,8 +58,8 @@ public: // Fix this
     std::vector<Id> references;
   };
 
-  typedef Cache<long,Node>                    NodeCache;
-  typedef Cache<long,Way>                     WayCache;
+  typedef Cache<FileOffset,Node>              NodeCache;
+  typedef Cache<FileOffset,Way>               WayCache;
   typedef Cache<size_t,std::vector<NodeUse> > NodeUseCache;
 
   typedef NumericIndex<Id,Node>               NodeIndex;
@@ -101,7 +101,7 @@ private:
                             double magnification,
                             size_t maxNodes) const;
 
-  bool GetWays(std::vector<long>& offsets,
+  bool GetWays(std::vector<FileOffset>& offsets,
                std::vector<Way>& ways) const;
 
   bool GetNodes(const StyleConfig& styleConfig,

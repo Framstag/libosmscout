@@ -22,21 +22,21 @@
 #include <iostream>
 #include <map>
 
-#include <osmscout/FileReader.h>
+#include <osmscout/FileScanner.h>
 
 bool AreaWayIndex::LoadAreaWayIndex(const std::string& path)
 {
-  FileReader  reader;
+  FileScanner scanner;
   std::string file=path+"/"+"areaway.idx";
 
-  if (!reader.Open(file) || !reader.ReadFileToBuffer()) {
+  if (!scanner.Open(file)) {
     return false;
   }
 
   size_t drawTypes;
 
   // The number of draw types we have an index for
-  reader.ReadNumber(drawTypes); // Number of entries
+  scanner.ReadNumber(drawTypes); // Number of entries
 
   std::cout << drawTypes << " entries in area way index..." << std::endl;
 
@@ -44,32 +44,32 @@ bool AreaWayIndex::LoadAreaWayIndex(const std::string& path)
     TypeId type;
     size_t tiles;
 
-    reader.ReadNumber(type);  // The draw type id
-    reader.ReadNumber(tiles); // The number of tiles
+    scanner.ReadNumber(type);  // The draw type id
+    scanner.ReadNumber(tiles); // The number of tiles
 
     for (size_t t=0; t<tiles; t++) {
       IndexEntry entry;
       TileId     tileId;
-      size_t     idCount;
+      size_t     offsetCount;
 
-      reader.ReadNumber(tileId);          // The tile id
-      reader.ReadNumber(entry.nodeCount); // The number of nodes
-      reader.ReadNumber(idCount);       // The number of pages
+      scanner.ReadNumber(tileId);          // The tile id
+      scanner.ReadNumber(entry.nodeCount); // The number of nodes
+      scanner.ReadNumber(offsetCount);     // The number of offsets
 
-      entry.ids.reserve(idCount);
+      entry.offsets.reserve(offsetCount);
 
-      for (size_t i=0; i<idCount; i++) {
-        Id id;
+      for (size_t i=0; i<offsetCount; i++) {
+        FileOffset offset;
 
-        reader.ReadNumber(id); // The id of the page
-        entry.ids.push_back(id);
+        scanner.ReadNumber(offset); // The way offset
+        entry.offsets.push_back(offset);
       }
 
       areaWayIndex[type][tileId]=entry;
     }
   }
 
-  return !reader.HasError() && reader.Close();
+  return !scanner.HasError() && scanner.Close();
 }
 
 size_t AreaWayIndex::GetNodes(TypeId drawType,
@@ -99,12 +99,12 @@ size_t AreaWayIndex::GetNodes(TypeId drawType,
   return nodes;
 }
 
-void AreaWayIndex::GetIds(const StyleConfig& styleConfig,
-                          double minlon, double minlat,
-                          double maxlon, double maxlat,
-                          double magnification,
-                          size_t maxPriority,
-                          std::set<Id>& ids) const
+void AreaWayIndex::GetOffsets(const StyleConfig& styleConfig,
+                              double minlon, double minlat,
+                              double maxlon, double maxlat,
+                              double magnification,
+                              size_t maxPriority,
+                              std::set<FileOffset>& offsets) const
 {
   std::set<TypeId> types;
 
@@ -130,8 +130,8 @@ void AreaWayIndex::GetIds(const StyleConfig& styleConfig,
         std::map<TileId,IndexEntry>::const_iterator tile=typeEntry->second.lower_bound(startTileId);
 
         while (tile->first<=endTileId && tile!=typeEntry->second.end()) {
-          for (size_t j=0; j<tile->second.ids.size(); j++) {
-            ids.insert(tile->second.ids[j]);
+          for (size_t j=0; j<tile->second.offsets.size(); j++) {
+            offsets.insert(tile->second.offsets[j]);
           }
 
           ++tile;
@@ -140,7 +140,7 @@ void AreaWayIndex::GetIds(const StyleConfig& styleConfig,
     }
   }
 
-  std::cout << "Found " << ids.size() << " ways ids in area way index with maximum priority " << maxPriority << std::endl;
+  std::cout << "Found " << offsets.size() << " ways in area way index with maximum priority " << maxPriority << std::endl;
 }
 
 void AreaWayIndex::DumpStatistics()
@@ -156,7 +156,7 @@ void AreaWayIndex::DumpStatistics()
          j!=i->second.end();
          j++) {
       entries++;
-      memory+=sizeof(j->first)+sizeof(j->second)+j->second.ids.size()*sizeof(Id);
+      memory+=sizeof(j->first)+sizeof(j->second)+j->second.offsets.size()*sizeof(FileOffset);
     }
   }
 

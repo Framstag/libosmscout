@@ -1,4 +1,5 @@
-nobase_include_HEADERS= osmscout/Util.h \
+nobase_include_HEADERS= osmscout/Types.h \
+                        osmscout/Util.h \
                         osmscout/Progress.h \
                         osmscout/FileReader.h \
                         osmscout/FileScanner.h \

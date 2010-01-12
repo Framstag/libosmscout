@@ -45,7 +45,7 @@ private:
     size_t fileOffset;
   };
 
-  typedef Cache<long,std::vector<IndexEntry> > PageCache;
+  typedef Cache<FileOffset,std::vector<IndexEntry> > PageCache;
 
   struct NumericIndexCacheValueSizer : public PageCache::ValueSizer
   {
@@ -71,7 +71,7 @@ public:
 
   bool LoadIndex(const std::string& path);
 
-  bool GetOffsets(const std::vector<N>& ids, std::vector<long>& offsets) const;
+  bool GetOffsets(const std::vector<N>& ids, std::vector<FileOffset>& offsets) const;
 
   void DumpStatistics();
 };
@@ -151,7 +151,7 @@ bool NumericIndex<N,T>::LoadIndex(const std::string& path)
 
 template <class N, class T>
 bool NumericIndex<N,T>::GetOffsets(const std::vector<N>& ids,
-                                   std::vector<long>& offsets) const
+                                   std::vector<FileOffset>& offsets) const
 {
   offsets.reserve(ids.size());
   offsets.clear();
@@ -170,8 +170,8 @@ bool NumericIndex<N,T>::GetOffsets(const std::vector<N>& ids,
     }
 
     if (r<root.size()) {
-      size_t startId=root[r].startId;
-      long   offset=root[r].fileOffset;
+      size_t     startId=root[r].startId;
+      FileOffset offset=root[r].fileOffset;
 
       for (size_t level=0; level<levels-1; level++) {
         class PageCache::CacheRef cacheRef;
@@ -276,12 +276,12 @@ bool GenerateNumericIndex(const ImportParameter& parameter,
 
   progress.SetAction(std::string("Generating '")+indexfile+"'");
 
-  FileScanner                scanner;
-  FileWriter                 writer;
-  size_t                     dataCount=0;
-  std::vector<Id>            startingIds;
-  std::vector<unsigned long> pageStarts;
-  long                       lastLevelPageStart;
+  FileScanner             scanner;
+  FileWriter              writer;
+  size_t                  dataCount=0;
+  std::vector<Id>         startingIds;
+  std::vector<FileOffset> pageStarts;
+  FileOffset              lastLevelPageStart;
 
   if (!scanner.Open(datafile)) {
     progress.Error(std::string("Cannot open '")+datafile+"'");
@@ -327,14 +327,14 @@ bool GenerateNumericIndex(const ImportParameter& parameter,
 
   writer.Write((unsigned long)0); // Write the starting position of the last page
 
-  size_t currentEntry=0;
-  size_t lastId=0;
-  long   lastPos=0;
+  size_t     currentEntry=0;
+  size_t     lastId=0;
+  FileOffset lastPos=0;
 
   progress.Info(std::string("Level ")+NumberToString(levels)+" entries "+NumberToString(dataCount));
 
   while (!scanner.HasError()) {
-    long pos;
+    FileOffset pos;
 
     scanner.GetPos(pos);
 
@@ -344,21 +344,21 @@ bool GenerateNumericIndex(const ImportParameter& parameter,
 
     if (!scanner.HasError()) {
       if (currentEntry%parameter.GetNumericIndexLevelSize()==0) {
-        long pageStart;
+        FileOffset pageStart;
 
         writer.GetPos(pageStart);
 
-        writer.WriteNumber((unsigned long)pos);
+        writer.WriteNumber(pos);
         writer.WriteNumber(data.id);
         startingIds.push_back(data.id);
         pageStarts.push_back(pageStart);
       }
       else {
-        long pageStart;
+        FileOffset pageStart;
 
         writer.GetPos(pageStart);
 
-        writer.WriteNumber((unsigned long)(pos-lastPos));
+        writer.WriteNumber(pos-lastPos);
         writer.WriteNumber(data.id-lastId);
       }
 
@@ -372,8 +372,8 @@ bool GenerateNumericIndex(const ImportParameter& parameter,
   levels--;
 
   while (levels>0) {
-    std::vector<Id>            si(startingIds);
-    std::vector<unsigned long> po(pageStarts);
+    std::vector<Id>         si(startingIds);
+    std::vector<FileOffset> po(pageStarts);
 
     startingIds.clear();
     pageStarts.clear();
@@ -382,7 +382,7 @@ bool GenerateNumericIndex(const ImportParameter& parameter,
 
     for (size_t i=0; i<si.size(); i++) {
       if (i%parameter.GetNumericIndexLevelSize()==0) {
-        long pos;
+        FileOffset pos;
 
         writer.GetPos(pos);
 

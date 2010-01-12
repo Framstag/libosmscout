@@ -30,8 +30,8 @@ class AreaWayIndex
 private:
   struct IndexEntry
   {
-    NodeCount       nodeCount;
-    std::vector<Id> ids;
+    NodeCount               nodeCount;
+    std::vector<FileOffset> offsets;
   };
 
 private:
@@ -44,12 +44,12 @@ public:
                   size_t tileMinX, size_t tileMinY,
                   size_t tileMaxX, size_t tileMaxY) const;
 
-  void GetIds(const StyleConfig& styleConfig,
-              double minlon, double minlat,
-              double maxlon, double maxlat,
-              double magnification,
-              size_t maxPriority,
-              std::set<Id>& ids) const;
+  void GetOffsets(const StyleConfig& styleConfig,
+                  double minlon, double minlat,
+                  double maxlon, double maxlat,
+                  double magnification,
+                  size_t maxPriority,
+                  std::set<FileOffset>& offsets) const;
 
   void DumpStatistics();
 };

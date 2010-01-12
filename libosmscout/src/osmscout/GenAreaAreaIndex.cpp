@@ -55,9 +55,9 @@ struct Coord
 
 struct Leaf
 {
-  long            offset;
-  std::list<long> dataOffsets;
-  long            children[4];
+  FileOffset            offset;
+  std::list<FileOffset> dataOffsets;
+  FileOffset            children[4];
 
   Leaf()
   {
@@ -173,8 +173,8 @@ bool GenerateAreaAreaIndex(const ImportParameter& parameter,
 
       ways=0;
       while (!scanner.HasError()) {
-        long offset;
-        Way   way;
+        FileOffset offset;
+        Way        way;
 
         scanner.GetPos(offset);
         way.Read(scanner);

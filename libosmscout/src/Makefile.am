@@ -5,7 +5,8 @@ AM_CPPFLAGS = $(LIB_CXXFLAGS) -DOSMSCDLL -I$(top_srcdir)/include \
 AM_LDFLAGS  = $(XML2_LIBS) $(CAIRO_LIBS)
 
 lib_LTLIBRARIES = libosmscout.la
-libosmscout_la_SOURCES= osmscout/Util.cpp \
+libosmscout_la_SOURCES= osmscout/Types.cpp \
+                        osmscout/Util.cpp \
                         osmscout/Progress.cpp \
                         osmscout/FileReader.cpp \
                         osmscout/FileScanner.cpp \
