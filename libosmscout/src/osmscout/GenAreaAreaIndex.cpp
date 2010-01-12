@@ -283,7 +283,7 @@ bool GenerateAreaAreaIndex(const ImportParameter& parameter,
       }
 
       writer.WriteNumber(leaf->second.dataOffsets.size());
-      for (std::list<long>::const_iterator o=leaf->second.dataOffsets.begin();
+      for (std::list<FileOffset>::const_iterator o=leaf->second.dataOffsets.begin();
            o!=leaf->second.dataOffsets.end();
            o++) {
         // TODO: Is writer.Write better?
