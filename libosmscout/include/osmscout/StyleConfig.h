@@ -423,7 +423,6 @@ private:
   std::vector<LineStyle*>   areaBorderStyles;
 
   std::vector<size_t>       wayPrio;
-  std::vector<size_t>       areaPrio;
   std::vector<size_t>       priorities;
 
 public:
@@ -435,7 +434,6 @@ public:
   TypeConfig* GetTypeConfig() const;
 
   StyleConfig& SetWayPrio(TypeId type, size_t prio);
-  StyleConfig& SetAreaPrio(TypeId type, size_t prio);
 
   StyleConfig& SetNodeSymbolStyle(TypeId type, const SymbolStyle& style);
   StyleConfig& SetNodeRefLabelStyle(TypeId type, const LabelStyle& style);
@@ -470,8 +468,8 @@ public:
 
   bool IsAreaVisible(TypeId type, size_t prio) const
   {
-    if (type<areaFillStyles.size() && type<areaPrio.size()) {
-      return areaFillStyles[type]!=NULL && areaPrio[type]<=prio;
+    if (type<areaFillStyles.size()) {
+      return areaFillStyles[type]!=NULL;
     }
     else {
       return false;

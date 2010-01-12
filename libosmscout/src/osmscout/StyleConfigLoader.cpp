@@ -319,13 +319,18 @@ public:
         }
       }
 
-      if ((context==contextWay || context==contextArea) &&
+      if (context==contextWay &&
           (keyValue==NULL || valueValue==NULL || prioValue==NULL)) {
         std::cerr << "Not all required attributes for way found" << std::endl;
         return;
       }
+      else if (context==contextArea &&
+          (keyValue==NULL || valueValue==NULL)) {
+        std::cerr << "Not all required attributes for area found" << std::endl;
+        return;
+      }
       else if (keyValue==NULL || valueValue==NULL) {
-        std::cerr << "Not all required attributes for way found" << std::endl;
+        std::cerr << "Not all required attributes for node found" << std::endl;
         return;
       }
 
@@ -333,7 +338,7 @@ public:
       value=(const char*)valueValue;
 
 
-      if (context==contextWay || context==contextArea) {
+      if (context==contextWay) {
         if (sscanf((const char*)prioValue,"%u",&prio)!=1) {
           std::cerr << "Cannot parse prio: '" << prioValue << "'" << std::endl;
           return;
@@ -359,9 +364,6 @@ public:
 
       if (context==contextWay) {
         styleConfig.SetWayPrio(type,prio);
-      }
-      else if (context==contextArea) {
-        styleConfig.SetAreaPrio(type,prio);
       }
 
       /*

@@ -105,7 +105,7 @@
     <label style="contour" minMag="close"/>
   </way>
 
-  <area key="highway" value="pedestrian" prio="9">
+  <area key="highway" value="pedestrian">
     <fill color="ededed"/>
     <label minMag="close"/>
     <border color="c5c5c5" minPixel="1" maxPixel="1" width="1"/>
@@ -115,7 +115,7 @@
     <label style="normal" minMag="detail"/>
   </node>
 
-  <area key="highway" value="services" prio="9">
+  <area key="highway" value="services">
     <fill color="cb9999"/>
     <label minMag="close"/>
   </area>
@@ -210,7 +210,7 @@
     <symbol style="box" fillColor="7885b0" minMag="close"/>
   </node>
 
-  <area key="railway" value="station" prio="5">
+  <area key="railway" value="station">
     <fill color="cb4040"/>
     <label style="emphasize" textColor="8888fd" minMag="detail"/>
     <symbol style="box" fillColor="7885b0" minMag="close"/>
@@ -248,210 +248,203 @@
     <label style="contour" minMag="proximity"/>
   </way>
 
-  <area key="waterway" value="riverbank" prio="2">
+  <area key="waterway" value="riverbank">
     <fill color="b5d0d0"/>
     <label minMag="proximity"/>
   </area>
 
-  <area key="landuse" value="farm" prio="6">
+  <area key="landuse" value="farm">
     <fill color="ead8bd" layer="2"/>
     <label minMag="city"/>
   </area>
 
-  <area key="landuse" value="farmland" prio="6">
+  <area key="landuse" value="farmland">
     <fill color="ead8bd"/>
     <label minMag="city"/>
   </area>
 
-  <area key="landuse" value="farmyard" prio="6">
+  <area key="landuse" value="farmyard">
     <fill color="dcbe92" layer="1"/>
     <label minMag="city"/>
   </area>
 
-  <area key="landuse" value="quarry" prio="6">
+  <area key="landuse" value="quarry">
     <fill color="b3b3b3"/>
     <label minMag="city"/>
   </area>
 
-  <area key="landuse" value="landfill" prio="6">
+  <area key="landuse" value="landfill">
     <fill color="b3b3b3"/>
     <label minMag="city"/>
   </area>
 
-  <area key="landuse" value="basin" prio="6">
+  <area key="landuse" value="basin">
     <fill color="b3d1d4" layer="1"/>
     <label minMag="detail"/>
   </area>
 
-  <area key="landuse" value="reservoir" prio="6">
+  <area key="landuse" value="reservoir">
     <fill color="b4d5f0" layer="1"/>
     <label minMag="detail"/>
   </area>
 
-  <area key="landuse" value="forest" prio="4">
+  <area key="landuse" value="forest">
     <fill color="8dc56c" layer="1"/>
     <label style="emphasize" minMag="city"/>
   </area>
 
-  <area key="landuse" value="allotments" prio="8">
+  <area key="landuse" value="allotments">
     <fill color="c8b084"/>
     <label style="emphasize" minMag="detail"/>
   </area>
 
-  <area key="landuse" value="vineyard" prio="8">
+  <area key="landuse" value="vineyard">
     <fill color="b3e2a8"/>
     <label minMag="detail"/>
   </area>
 
-  <area key="landuse" value="residential" prio="5">
+  <area key="landuse" value="residential">
     <fill color="dcdcdc"/>
     <label minMag="city"/>
   </area>
 
-  <area key="landuse" value="retail" prio="8">
+  <area key="landuse" value="retail">
     <fill filter="building" color="bca9a9" layer="2"/>
     <fill color="feeaea"/>
     <label minMag="city"/>
   </area>
 
-  <area key="landuse" value="commercial" prio="8">
+  <area key="landuse" value="commercial">
     <fill color="fbfec8"/>
     <label minMag="city"/>
   </area>
 
-  <area key="landuse" value="industrial" prio="8">
+  <area key="landuse" value="industrial">
     <fill color="dfd1d6" layer="2"/>
     <label style="emphasize" minMag="close"/>
   </area>
 
-  <area key="landuse" value="brownfield" prio="8">
+  <area key="landuse" value="brownfield">
     <fill color="ebd7fe"/>
     <label minMag="city"/>
   </area>
 
-  <area key="landuse" value="greenfield" prio="8">
+  <area key="landuse" value="greenfield">
     <fill color="dcdcc8"/>
     <label minMag="city"/>
   </area>
 
-  <area key="landuse" value="railway" prio="8">
+  <area key="landuse" value="railway">
     <fill color="dcdcc8" layer="1"/>
     <label minMag="city"/>
   </area>
 
-  <area key="landuse" value="construction" prio="8">
+  <area key="landuse" value="construction">
     <fill color="9d9d6c"/>
     <label minMag="city"/>
   </area>
 
-  <area key="landuse" value="military" prio="8">
+  <area key="landuse" value="military">
     <fill color="ff0000" layer="1"/>
 <!--    <fill color="f59897"/>-->
     <label minMag="city"/>
   </area>
 
-  <area key="landuse" value="cemetery" prio="8">
+  <area key="landuse" value="cemetery">
     <fill color="a9caae"/>
     <label minMag="close"/>
   </area>
 
-  <area key="landuse" value="meadow" prio="8">
+  <area key="landuse" value="meadow">
     <fill color="cfeca8" layer="1"/>
     <label minMag="close"/>
   </area>
 
-  <area key="landuse" value="village_green" prio="8">
+  <area key="landuse" value="village_green">
     <fill color="cfeca8"/>
     <label minMag="detail"/>
   </area>
 
-  <area key="landuse" value="recreation_ground" prio="8">
+  <area key="landuse" value="recreation_ground">
     <fill color="bce2ca"/>
     <label minMag="detail"/>
   </area>
 
-  <area key="natural" value="glacier" prio="6">
+  <area key="natural" value="glacier">
     <fill color="ddecec"/>
     <label minMag="detail"/>
   </area>
 
   <!--
-  <area key="natural" value="cliff" prio="6">
+  <area key="natural" value="cliff">
     <fill color="ddecec"/>
     <label minMag="city"/>
   </area>
   -->
 
-  <area key="natural" value="scrub" prio="6">
+  <area key="natural" value="scrub">
     <fill color="b5e2b5"/>
     <label minMag="city"/>
   </area>
 
-  <area key="natural" value="fell" prio="6">
+  <area key="natural" value="fell">
     <fill color="f9f9f9"/>
     <label minMag="city"/>
   </area>
 
-  <area key="natural" value="heath" prio="6">
+  <area key="natural" value="heath">
     <fill color="ffffc0"/>
     <label minMag="city"/>
   </area>
 
-  <area key="natural" value="wood" prio="5">
+  <area key="natural" value="wood">
     <fill color="aed1a0" layer="1"/>
     <label minMag="proximity"/>
   </area>
 
-  <area key="natural" value="marsh" prio="6">
+  <area key="natural" value="marsh">
     <fill color="f7f9f5"/>
     <label minMag="city"/>
   </area>
 
-  <area key="natural" value="wetland" prio="6">
+  <area key="natural" value="wetland">
     <fill color="f7f9f5"/>
     <label minMag="city"/>
   </area>
 
-  <area key="natural" value="water" prio="5">
+  <area key="natural" value="water">
     <fill color="b5d0d0" layer="1"/>
     <label minMag="close"/>
   </area>
 
-  <area key="natural" value="coastline" prio="5">
+  <area key="natural" value="coastline">
     <fill color="b5d6f1"/>
     <label minMag="region"/>
   </area>
 
-  <!--
-  <area key="natural" value="coastline" prio="5">
-    <fill color="b5d6f1"/>
-    <label minMag="region"/>
-  </area>
-  -->
-
-  <area key="natural" value="beach" prio="6">
+  <area key="natural" value="beach">
     <fill color="eecc55"/>
     <label minMag="detail"/>
   </area>
 
-  <area key="natural" value="land" prio="5">
+  <area key="natural" value="land">
     <fill color="ffffff"/>
     <label minMag="region"/>
   </area>
 
-  <area key="aeroway" value="aerodrome" prio="20">
+  <area key="aeroway" value="aerodrome">
     <fill color="d5ddbd"/>
     <label minMag="detail"/>
   </area>
 
-  <area key="aeroway" value="terminal" prio="20">
+  <area key="aeroway" value="terminal">
     <fill filter="building" color="cc99ff" layer="2"/>
     <fill color="d5ddbd"/>
     <border color="b265ff" minPixel="1" maxPixel="1" width="1"/>
     <label minMag="detail"/>
   </area>
 
-  <area key="aeroway" value="helipad" prio="20">
+  <area key="aeroway" value="helipad">
     <fill color="d5ddbd"/>
     <label minMag="detail"/>
   </area>
@@ -466,22 +459,22 @@
     <label style="contour" minMag="close"/>
   </way>
 
-  <area key="aeroway" value="apron" prio="20">
+  <area key="aeroway" value="apron">
     <fill color="e8d1fe"/>
     <label minMag="detail"/>
   </area>
 
-  <area key="leisure" value="sports_centre" prio="8">
+  <area key="leisure" value="sports_centre">
     <fill color="bde3cb"/>
     <label minMag="close"/>
   </area>
 
-  <area key="leisure" value="golf_course" prio="8">
+  <area key="leisure" value="golf_course">
     <fill color="c7f1a3"/>
     <label minMag="close"/>
   </area>
 
-  <area key="leisure" value="stadium" prio="6">
+  <area key="leisure" value="stadium">
     <fill color="bde3cb"/>
     <label minMag="close"/>
   </area>
@@ -491,63 +484,63 @@
     <label style="contour" minMag="city"/>
   </way>
 
-  <area key="leisure" value="track" prio="8">
+  <area key="leisure" value="track">
     <fill color="bde3cb"/>
     <label minMag="close"/>
   </area>
 
-  <area key="leisure" value="pitch" prio="8">
+  <area key="leisure" value="pitch">
     <fill color="89d2ae"/>
     <label minMag="close"/>
     <border color="b0b0b0" minPixel="1" maxPixel="1" width="1"/>
   </area>
 
-  <area key="leisure" value="water_park" prio="8">
+  <area key="leisure" value="water_park">
     <fill color="b5d6f1"/>
     <label minMag="close"/>
   </area>
 
-  <area key="leisure" value="marina" prio="8">
+  <area key="leisure" value="marina">
     <fill color="b5d6f1"/>
     <label minMag="close"/>
   </area>
 
-  <area key="leisure" value="fishing" prio="8">
+  <area key="leisure" value="fishing">
     <fill color="b5d6f1"/>
     <label minMag="close"/>
   </area>
 
-  <area key="leisure" value="nature_reserve" prio="6">
+  <area key="leisure" value="nature_reserve">
     <fill color="bde3cb"/>
     <label minMag="region"/>
   </area>
 
-  <area key="leisure" value="park" prio="6">
+  <area key="leisure" value="park">
     <fill color="b6fcb6"/>
     <label minMag="close"/>
   </area>
 
-  <area key="leisure" value="playground" prio="8">
+  <area key="leisure" value="playground">
     <fill color="ccffff"/>
     <label minMag="close"/>
   </area>
 
-  <area key="leisure" value="garden" prio="8">
+  <area key="leisure" value="garden">
     <fill color="ceeca8"/>
     <label minMag="close"/>
   </area>
 
-  <area key="leisure" value="common" prio="8">
+  <area key="leisure" value="common">
     <fill color="bde3cb"/>
     <label minMag="close"/>
   </area>
 
-  <area key="leisure" value="ice_rink" prio="8">
+  <area key="leisure" value="ice_rink">
     <fill color="b5d6f1"/>
     <label minMag="close"/>
   </area>
 
-  <area key="amenity" value="arts_centre" prio="9">
+  <area key="amenity" value="arts_centre">
     <fill color="cb4040"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
@@ -558,617 +551,617 @@
     <label minMag="close"/>
   </area>-->
 
-  <area key="amenity" value="baby_hatch" prio="9">
+  <area key="amenity" value="baby_hatch">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="bank" prio="9">
+  <area key="amenity" value="bank">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="biergarten" prio="9">
+  <area key="amenity" value="biergarten">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="bicycle_parking" prio="9">
+  <area key="amenity" value="bicycle_parking">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="bicycle_rental" prio="9">
+  <area key="amenity" value="bicycle_rental">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
   <!--
-  <area key="amenity" value="bureau_de_change" prio="9">
+  <area key="amenity" value="bureau_de_change">
     <fill color="cb4040"/>
     <label minMag="close"/>
   </area>-->
 
-  <area key="amenity" value="bus_station" prio="9">
+  <area key="amenity" value="bus_station">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="brothel" prio="9">
+  <area key="amenity" value="brothel">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="cafe" prio="9">
+  <area key="amenity" value="cafe">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="car_rental" prio="9">
+  <area key="amenity" value="car_rental">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="car_sharing" prio="9">
+  <area key="amenity" value="car_sharing">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="cinema" prio="9">
+  <area key="amenity" value="cinema">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="college" prio="9">
+  <area key="amenity" value="college">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="courthouse" prio="9">
+  <area key="amenity" value="courthouse">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="crematorium" prio="9">
+  <area key="amenity" value="crematorium">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="dentist" prio="9">
+  <area key="amenity" value="dentist">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="doctors" prio="9">
+  <area key="amenity" value="doctors">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="embassy" prio="9">
+  <area key="amenity" value="embassy">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="fast_food" prio="9">
+  <area key="amenity" value="fast_food">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="ferry_terminal" prio="9">
+  <area key="amenity" value="ferry_terminal">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="fire_station" prio="9">
+  <area key="amenity" value="fire_station">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="food_court" prio="9">
+  <area key="amenity" value="food_court">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="fountain" prio="9">
+  <area key="amenity" value="fountain">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="fuel" prio="9">
+  <area key="amenity" value="fuel">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="grave_yard" prio="9">
+  <area key="amenity" value="grave_yard">
     <fill color="bde3cb" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="hospital" prio="9">
+  <area key="amenity" value="hospital">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="hunting_stand" prio="9">
+  <area key="amenity" value="hunting_stand">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="kindergarten" prio="9">
+  <area key="amenity" value="kindergarten">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="library" prio="9">
+  <area key="amenity" value="library">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="nightclub" prio="9">
+  <area key="amenity" value="nightclub">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="parking" prio="9">
+  <area key="amenity" value="parking">
     <fill color="f6eeb6"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="pharmacy" prio="9">
+  <area key="amenity" value="pharmacy">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="place_of_worship" prio="9">
+  <area key="amenity" value="place_of_worship">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="police" prio="9">
+  <area key="amenity" value="police">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="post_office" prio="9">
+  <area key="amenity" value="post_office">
     <fill filter="building" color="ffcc00" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <node key="amenity" value="post_box" prio="11">
+  <node key="amenity" value="post_box">
     <symbol style="circle" size="4" fillColor="ffcc00" minMag="veryClose"/>
   </node>
 
-  <node key="amenity" value="post_office" prio="11">
+  <node key="amenity" value="post_office">
     <symbol style="box" fillColor="ffcc00" minMag="veryClose"/>
   </node>
 
-  <area key="amenity" value="prison" prio="9">
+  <area key="amenity" value="prison">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="pub" prio="9">
+  <area key="amenity" value="pub">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="public_building" prio="9">
+  <area key="amenity" value="public_building">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="recycling" prio="9">
+  <area key="amenity" value="recycling">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="restaurant" prio="9">
+  <area key="amenity" value="restaurant">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="school" prio="9">
+  <area key="amenity" value="school">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
     <border color="c5a0a0" minPixel="1" maxPixel="1" width="1"/>
   </area>
 
-  <area key="amenity" value="shelter" prio="9">
+  <area key="amenity" value="shelter">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="studio" prio="9">
+  <area key="amenity" value="studio">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="taxi" prio="9">
+  <area key="amenity" value="taxi">
     <fill color="d2d2d2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="theatre" prio="9">
+  <area key="amenity" value="theatre">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="townhall" prio="9">
+  <area key="amenity" value="townhall">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="university" prio="9">
+  <area key="amenity" value="university">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="amenity" value="veterinary" prio="9">
+  <area key="amenity" value="veterinary">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="tourism" value="alpine_hut" prio="9">
+  <area key="tourism" value="alpine_hut">
     <fill color="7172db" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="tourism" value="attraction" prio="9">
+  <area key="tourism" value="attraction">
     <fill color="7172db" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="tourism" value="artwork" prio="9">
+  <area key="tourism" value="artwork">
     <fill color="7172db" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="tourism" value="camp_site" prio="9">
+  <area key="tourism" value="camp_site">
     <fill color="7172db" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="tourism" value="caravan_site" prio="9">
+  <area key="tourism" value="caravan_site">
     <fill color="7172db" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="tourism" value="chalet" prio="9">
+  <area key="tourism" value="chalet">
     <fill color="7172db" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="tourism" value="guest_house" prio="9">
+  <area key="tourism" value="guest_house">
     <fill color="7172db" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="tourism" value="hotel" prio="9">
+  <area key="tourism" value="hotel">
     <fill color="7172db" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="tourism" value="information" prio="9">
+  <area key="tourism" value="information">
     <fill color="7172db" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="tourism" value="motel" prio="9">
+  <area key="tourism" value="motel">
     <fill color="7172db" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="tourism" value="museum" prio="9">
+  <area key="tourism" value="museum">
     <fill color="7172db" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="tourism" value="picnic_site" prio="9">
+  <area key="tourism" value="picnic_site">
     <fill color="7172db" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="tourism" value="theme_park" prio="9">
+  <area key="tourism" value="theme_park">
     <fill color="7172db" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="tourism" value="zoo" prio="9">
+  <area key="tourism" value="zoo">
     <fill color="7172db" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
 
-  <area key="historic" value="castle" prio="9">
+  <area key="historic" value="castle">
     <fill color="9f5eb4" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="historic" value="monument" prio="9">
+  <area key="historic" value="monument">
     <fill color="9f5eb4" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="historic" value="memorial" prio="9">
+  <area key="historic" value="memorial">
     <fill color="9f5eb4" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="historic" value="archaeological_site" prio="9">
+  <area key="historic" value="archaeological_site">
     <fill color="9f5eb4" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="historic" value="ruins" prio="9">
+  <area key="historic" value="ruins">
     <fill color="9f5eb4" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="historic" value="battlefield" prio="9">
+  <area key="historic" value="battlefield">
     <fill color="9f5eb4"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="historic" value="wreck" prio="9">
+  <area key="historic" value="wreck">
     <fill color="9f5eb4" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="alcohol" prio="9">
+  <area key="shop" value="alcohol">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="bakery" prio="9">
+  <area key="shop" value="bakery">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="beverages" prio="9">
+  <area key="shop" value="beverages">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="bicycle" prio="9">
+  <area key="shop" value="bicycle">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="books" prio="9">
+  <area key="shop" value="books">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="butcher" prio="9">
+  <area key="shop" value="butcher">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="car" prio="9">
+  <area key="shop" value="car">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="car_repair" prio="9">
+  <area key="shop" value="car_repair">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="chemist" prio="9">
+  <area key="shop" value="chemist">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="clothes" prio="9">
+  <area key="shop" value="clothes">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="computer" prio="9">
+  <area key="shop" value="computer">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="convenience" prio="9">
+  <area key="shop" value="convenience">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="department_store" prio="9">
+  <area key="shop" value="department_store">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="dry_cleaning" prio="9">
+  <area key="shop" value="dry_cleaning">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="doityourself" prio="9">
+  <area key="shop" value="doityourself">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="electronics" prio="9">
+  <area key="shop" value="electronics">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="florist" prio="9">
+  <area key="shop" value="florist">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="furniture" prio="9">
+  <area key="shop" value="furniture">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="garden_centre" prio="9">
+  <area key="shop" value="garden_centre">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="hairdresser" prio="9">
+  <area key="shop" value="hairdresser">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="hardware" prio="9">
+  <area key="shop" value="hardware">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="hifi" prio="9">
+  <area key="shop" value="hifi">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="kiosk" prio="9">
+  <area key="shop" value="kiosk">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="laundry" prio="9">
+  <area key="shop" value="laundry">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="mall" prio="9">
+  <area key="shop" value="mall">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="motorcycle" prio="9">
+  <area key="shop" value="motorcycle">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="optician" prio="9">
+  <area key="shop" value="optician">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="organic" prio="9">
+  <area key="shop" value="organic">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="outdoor" prio="9">
+  <area key="shop" value="outdoor">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="sports" prio="9">
+  <area key="shop" value="sports">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="stationery" prio="9">
+  <area key="shop" value="stationery">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="supermarket" prio="9">
+  <area key="shop" value="supermarket">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="shoes" prio="9">
+  <area key="shop" value="shoes">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="toys" prio="9">
+  <area key="shop" value="toys">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="shop" value="video" prio="9">
+  <area key="shop" value="video">
     <fill color="cb8440" layer="2"/>
     <label minMag="veryClose"/>
   </area>
 
-  <area key="military" value="airfield" prio="8">
+  <area key="military" value="airfield">
     <fill color="f59897"/>
     <label minMag="city"/>
   </area>
 
-  <area key="military" value="bunker" prio="8">
+  <area key="military" value="bunker">
     <fill color="f59897" layer="2"/>
     <label minMag="city"/>
   </area>
 
-  <area key="military" value="baracks" prio="8">
+  <area key="military" value="baracks">
     <fill color="f59897" layer="2"/>
     <label minMag="city"/>
   </area>
 
-  <area key="military" value="danger_area" prio="8">
+  <area key="military" value="danger_area">
     <fill color="f59897"/>
     <label minMag="city"/>
   </area>
 
-  <area key="military" value="range" prio="8">
+  <area key="military" value="range">
     <fill color="f59897"/>
     <label minMag="city"/>
   </area>
 
-  <area key="military" value="naval_base" prio="8">
+  <area key="military" value="naval_base">
     <fill color="f59897"/>
     <label minMag="city"/>
   </area>
 
-  <area key="building" value="yes" prio="21">
+  <area key="building" value="yes">
     <fill color="bca9a9" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <area key="building" value="true" prio="21">
+  <area key="building" value="true">
     <fill color="bca9a9" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>

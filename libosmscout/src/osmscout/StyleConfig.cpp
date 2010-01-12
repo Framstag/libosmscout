@@ -312,12 +312,6 @@ void StyleConfig::Postprocess()
   std::set<size_t > prios;
   priorities.clear();
 
-  for (size_t i=0; i<areaFillStyles.size() && i<areaPrio.size(); i++) {
-    if (areaFillStyles[i]!=NULL || areaBuildingFillStyles[i]!=NULL) {
-      prios.insert(areaPrio[i]);
-    }
-  }
-
   for (size_t i=0; i<wayLineStyles.size() && i<wayPrio.size(); i++) {
     if (wayLineStyles[i]!=NULL) {
       prios.insert(wayPrio[i]);
@@ -373,22 +367,6 @@ StyleConfig& StyleConfig::SetWayPrio(TypeId type, size_t prio)
   }
 
   wayPrio[type]=prio;
-
-  return *this;
-}
-
-StyleConfig& StyleConfig::SetAreaPrio(TypeId type, size_t prio)
-{
-  if (type>=areaPrio.size()) {
-    areaPrio.resize(type+1);
-    areaFillStyles.resize(type+1);
-    areaBuildingFillStyles.resize(type+1);
-    areaSymbolStyles.resize(type+1);
-    areaLabelStyles.resize(type+1);
-    areaBorderStyles.resize(type+1);
-  }
-
-  areaPrio[type]=prio;
 
   return *this;
 }
@@ -494,8 +472,7 @@ StyleConfig& StyleConfig::SetWayNameLabelStyle(TypeId type, const LabelStyle& st
 
 StyleConfig& StyleConfig::SetAreaFillStyle(TypeId type, const FillStyle& style)
 {
-  if (type>=areaPrio.size()) {
-    areaPrio.resize(type+1,10000); // TODO: max(size_t)
+  if (type>=areaFillStyles.size()) {
     areaFillStyles.resize(type+1,NULL);
     areaBuildingFillStyles.resize(type+1,NULL);
     areaSymbolStyles.resize(type+1,NULL);
@@ -513,8 +490,7 @@ StyleConfig& StyleConfig::SetAreaFillStyle(TypeId type, const FillStyle& style)
 
 StyleConfig& StyleConfig::SetAreaBuildingFillStyle(TypeId type, const FillStyle& style)
 {
-  if (type>=areaPrio.size()) {
-    areaPrio.resize(type+1,10000); // TODO: max(size_t)
+  if (type>=areaFillStyles.size()) {
     areaFillStyles.resize(type+1,NULL);
     areaBuildingFillStyles.resize(type+1,NULL);
     areaSymbolStyles.resize(type+1,NULL);
@@ -532,8 +508,7 @@ StyleConfig& StyleConfig::SetAreaBuildingFillStyle(TypeId type, const FillStyle&
 
 StyleConfig& StyleConfig::SetAreaLabelStyle(TypeId type, const LabelStyle& style)
 {
-  if (type>=areaPrio.size()) {
-    areaPrio.resize(type+1,10000); // TODO: max(size_t)
+  if (type>=areaFillStyles.size()) {
     areaFillStyles.resize(type+1,NULL);
     areaBuildingFillStyles.resize(type+1,NULL);
     areaSymbolStyles.resize(type+1,NULL);
@@ -551,8 +526,7 @@ StyleConfig& StyleConfig::SetAreaLabelStyle(TypeId type, const LabelStyle& style
 
 StyleConfig& StyleConfig::SetAreaSymbolStyle(TypeId type, const SymbolStyle& style)
 {
-  if (type>=areaPrio.size()) {
-    areaPrio.resize(type+1,10000); // TODO: max(size_t)
+  if (type>=areaFillStyles.size()) {
     areaFillStyles.resize(type+1,NULL);
     areaBuildingFillStyles.resize(type+1,NULL);
     areaSymbolStyles.resize(type+1,NULL);
@@ -570,8 +544,7 @@ StyleConfig& StyleConfig::SetAreaSymbolStyle(TypeId type, const SymbolStyle& sty
 
 StyleConfig& StyleConfig::SetAreaBorderStyle(TypeId type, const LineStyle& style)
 {
-  if (type>=areaPrio.size()) {
-    areaPrio.resize(type+1,10000); // TODO: max(size_t)
+  if (type>=areaFillStyles.size()) {
     areaFillStyles.resize(type+1,NULL);
     areaBuildingFillStyles.resize(type+1,NULL);
     areaSymbolStyles.resize(type+1,NULL);
@@ -600,13 +573,6 @@ size_t StyleConfig::GetStyleCount() const
 
 void StyleConfig::GetWayTypesWithPrio(size_t prio, std::set<TypeId>& types) const
 {
-  for (size_t i=0; i<areaFillStyles.size() && i<areaPrio.size(); i++) {
-    if ((areaFillStyles[i]!=NULL && areaPrio[i]==prio) ||
-        (areaBuildingFillStyles[i]!=NULL && areaPrio[i]==prio)) {
-      types.insert(i);
-    }
-  }
-
   for (size_t i=0; i<wayLineStyles.size() && i<wayPrio.size(); i++) {
     if (wayLineStyles[i]!=NULL && wayPrio[i]==prio) {
       types.insert(i);
@@ -616,13 +582,6 @@ void StyleConfig::GetWayTypesWithPrio(size_t prio, std::set<TypeId>& types) cons
 
 void StyleConfig::GetWayTypesWithMaxPrio(size_t prio, std::set<TypeId>& types) const
 {
-  for (size_t i=0; i<areaFillStyles.size() && i<areaPrio.size(); i++) {
-    if ((areaFillStyles[i]!=NULL && areaPrio[i]<=prio) ||
-        (areaBuildingFillStyles[i]!=NULL && areaPrio[i]<=prio)) {
-      types.insert(i);
-    }
-  }
-
   for (size_t i=0; i<wayLineStyles.size() && i<wayPrio.size(); i++) {
     if (wayLineStyles[i]!=NULL && wayPrio[i]<=prio) {
       types.insert(i);
