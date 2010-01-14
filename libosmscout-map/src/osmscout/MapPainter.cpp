@@ -1854,9 +1854,20 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
   drawingTimer.Stop();
   overallTimer.Stop();
 
-  std::cout << "Nodes: " << nodesDrawnCount << "/" << nodes.size()+poiNodes.size() << " (" << nodesDrawnCount*100/(nodes.size()+poiNodes.size()) << "%) ";
-  std::cout << " ways: " << waysDrawnCount << "/" << ways.size()+poiWays.size() << " (" << waysDrawnCount*100/(ways.size()+poiWays.size()) << "%) ";
-  std::cout << " areas: " << areasDrawnCount << "/" << areas.size() << " (" << areasDrawnCount*100/areas.size() << "%) ";
+  std::cout << "Nodes: " << nodesDrawnCount << "/" << nodes.size()+poiNodes.size() << " ";
+  if (nodes.size()+poiNodes.size()>0) {
+    std::cout << "(" << nodesDrawnCount*100/(nodes.size()+poiNodes.size()) << "%) ";
+  }
+
+  std::cout << " ways: " << waysDrawnCount << "/" << ways.size()+poiWays.size() << " ";
+  if (ways.size()+poiWays.size()>0) {
+    std::cout << "(" << waysDrawnCount*100/(ways.size()+poiWays.size()) << "%) ";
+  }
+
+  std::cout << " areas: " << areasDrawnCount << "/" << areas.size() << " ";
+  if (areas.size()>0) {
+    std::cout << "(" << areasDrawnCount*100/areas.size() << "%) ";
+  }
   std::cout << std::endl;
 
   std::cout << "All: " << overallTimer;
