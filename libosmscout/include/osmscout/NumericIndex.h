@@ -110,12 +110,16 @@ bool NumericIndex<N,T>::LoadIndex(const std::string& path)
 
   std::cout << filepart <<": " << levels << " " << levelSize << " " << entries << " " << lastLevelPageStart << std::endl;
 
-  size_t levelEntries;
+  // Calculate the number of entries in the first level
+  size_t levelEntries=entries;
 
-  levelEntries=entries/levelSize;
-
-  if (entries%levelSize!=0) {
-    levelEntries++;
+  for (size_t l=1;l<levels; l++) {
+    if (levelEntries%levelSize!=0) {
+      levelEntries=levelEntries/levelSize+1;
+    }
+    else {
+      levelEntries=levelEntries/levelSize;
+    }
   }
 
   size_t sio=0;
@@ -318,6 +322,8 @@ bool GenerateNumericIndex(const ImportParameter& parameter,
     tmp=tmp/parameter.GetNumericIndexLevelSize();
     levels++;
   }
+
+  progress.Info(NumberToString(dataCount)+" entries will be stored in "+NumberToString(levels)+ " levels using index level size of "+NumberToString(parameter.GetNumericIndexLevelSize()));
 
   writer.WriteNumber(levels); // Number of levels
   writer.WriteNumber(parameter.GetNumericIndexLevelSize()); // Size of index page
