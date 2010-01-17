@@ -704,6 +704,7 @@
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
+    <icon icon="hospital" />
   </area>
 
   <area key="amenity" value="hunting_stand">
@@ -1213,6 +1214,15 @@
   <node key="place" value="island">
     <label style="emphasize" minMag="region" maxMag="veryClose"/>
   </node>
+
+  <!--
+  <node key="internal" value="start">
+    <icon icon="start"/>
+  </node>
+
+  <node key="internal" value="target">
+    <icon icon="target"/>
+  </node> -->
 
   <way key="internal" value="route" prio="1">
     <line color="ff000088" minPixel="2" maxPixel="17" width="20"/>

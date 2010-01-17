@@ -217,8 +217,16 @@ LabelStyle& LabelStyle::SetBorderColor(double r, double g, double b, double a)
 }
 
 IconStyle::IconStyle()
+ : icon(iconNone)
 {
   // no code
+}
+
+IconStyle& IconStyle::SetIcon(Icon icon)
+{
+  this->icon=icon;
+
+  return *this;
 }
 
 IconStyle& IconStyle::SetIconName(const std::string& iconName)

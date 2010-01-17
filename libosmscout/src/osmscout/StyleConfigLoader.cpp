@@ -47,6 +47,7 @@ class StyleConfigParser
     contextNodeSymbol,
     contextNodeRefLabel,
     contextNodeLabel,
+    contextNodeIcon,
     contextWay,
     contextWayLine,
     contextWayRefLabel,
@@ -56,6 +57,7 @@ class StyleConfigParser
     contextAreaSymbol,
     contextAreaLabel,
     contextAreaBorder,
+    contextAreaIcon,
   };
 
 private:
@@ -130,6 +132,29 @@ public:
     }
     else if (name=="circle") {
       style=SymbolStyle::circle;
+    }
+    else {
+      return false;
+    }
+
+    return true;
+  }
+
+  bool GetIconStyle(const std::string& name, IconStyle::Icon& icon) {
+    if (name=="none") {
+      icon=IconStyle::iconNone;
+    }
+    else if (name=="start") {
+      icon=IconStyle::iconStart;
+    }
+    else if (name=="target") {
+      icon=IconStyle::iconTarget;
+    }
+    else if (name=="hospital") {
+      icon=IconStyle::iconHospital;
+    }
+    else if (name=="custom") {
+      icon=IconStyle::iconCustom;
     }
     else {
       return false;
@@ -258,6 +283,9 @@ public:
       else if (strcmp((const char*)name,"ref")==0) {
         context=contextNodeRefLabel;
       }
+      else if (strcmp((const char*)name,"icon")==0) {
+        context=contextNodeIcon;
+      }
       else {
         std::cerr << "Expected one of tags 'symbol' or 'label'" << std::endl;
         return;
@@ -290,6 +318,9 @@ public:
       }
       else if (strcmp((const char*)name,"border")==0) {
         context=contextAreaBorder;
+      }
+      else if (strcmp((const char*)name,"icon")==0) {
+        context=contextAreaIcon;
       }
       else {
         std::cerr << "Expected one of tags 'fill', 'symbol' or 'label'" << std::endl;
@@ -833,6 +864,59 @@ public:
         styleConfig.SetAreaSymbolStyle(type,symbol);
       }
     }
+    else if (context==contextNodeIcon || context==contextAreaIcon) {
+      const xmlChar   *iconValue=NULL;
+      const xmlChar   *iconNameValue=NULL;
+      IconStyle::Icon icon=IconStyle::iconNone;
+      std::string     iconName;
+
+      if (atts!=NULL) {
+        for (size_t i=0; atts[i]!=NULL && atts[i+1]!=NULL; i+=2) {
+          if (strcmp((const char*)atts[i],"icon")==0) {
+            iconValue=atts[i+1];
+          }
+          else if (strcmp((const char*)atts[i],"iconName")==0) {
+            iconNameValue=atts[i+1];
+          }
+        }
+      }
+
+      if (iconValue==NULL) {
+        std::cerr << "Not all required attributes found" << std::endl;
+        return;
+      }
+
+      if (!GetIconStyle((const char*)iconValue,icon)) {
+        std::cerr << "Unknown attribute icon value '" << (const char*)iconValue << "' for style type 'icon'" << std::endl;
+        return;
+      }
+
+      if (iconNameValue!=NULL) {
+        iconName=(const char*)iconNameValue;
+      }
+
+      if (icon==IconStyle::iconCustom && iconName.empty()){
+        std::cerr << "Icon style 'custom' requires non-empty attribute 'iconName'!" << std::endl;
+        return;
+      }
+
+      if (icon!=IconStyle::iconCustom && !iconName.empty()){
+        std::cerr << "For Standard icon style attribute 'iconName' must not be set!" << std::endl;
+        return;
+      }
+
+      IconStyle  iconStyle;
+
+      iconStyle.SetIcon(icon);
+      iconStyle.SetIconName(iconName);
+
+      if (context==contextNodeIcon) {
+        styleConfig.SetNodeIconStyle(type,iconStyle);
+      }
+      else if (context==contextAreaIcon) {
+        styleConfig.SetAreaIconStyle(type,iconStyle);
+      }
+    }
   }
 
   void EndElement(const xmlChar *name)
@@ -872,6 +956,11 @@ public:
         context=contextNode;
       }
     }
+    else if (context==contextNodeIcon) {
+      if (strcmp((const char*)name,"icon")==0) {
+        context=contextNode;
+      }
+    }
     else if (context==contextWayLine) {
       if (strcmp((const char*)name,"line")==0) {
         context=contextWay;
@@ -904,6 +993,11 @@ public:
     }
     else if (context==contextAreaBorder) {
       if (strcmp((const char*)name,"border")==0) {
+        context=contextArea;
+      }
+    }
+    else if (context==contextAreaIcon) {
+      if (strcmp((const char*)name,"icon")==0) {
         context=contextArea;
       }
     }

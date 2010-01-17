@@ -402,17 +402,35 @@ public:
 
 class IconStyle
 {
+public:
+  enum Icon {
+    iconNone,
+
+    iconStart,
+    iconTarget,
+
+    iconHospital,
+
+    iconCustom
+  };
 private:
+  Icon        icon;
   std::string iconName;
 
 public:
   IconStyle();
 
+  IconStyle& SetIcon(Icon icon);
   IconStyle& SetIconName(const std::string& iconName);
 
   inline bool IsVisible() const
   {
     return !iconName.empty();
+  }
+
+  inline Icon GetIcon() const
+  {
+    return icon;
   }
 
   inline std::string GetIconName() const
