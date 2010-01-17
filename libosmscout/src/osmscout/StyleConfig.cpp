@@ -216,6 +216,18 @@ LabelStyle& LabelStyle::SetBorderColor(double r, double g, double b, double a)
   return *this;
 }
 
+IconStyle::IconStyle()
+{
+  // no code
+}
+
+IconStyle& IconStyle::SetIconName(const std::string& iconName)
+{
+  this->iconName=iconName;
+
+  return *this;
+}
+
 SymbolStyle::SymbolStyle()
  : style(none),
    minMag(magWorld),
@@ -278,6 +290,10 @@ StyleConfig::~StyleConfig()
     delete nodeLabelStyles[i];
   }
 
+  for (size_t i=0; i<nodeIconStyles.size(); i++) {
+    delete nodeIconStyles[i];
+  }
+
   for (size_t i=0; i<wayLineStyles.size(); i++) {
     delete wayLineStyles[i];
   }
@@ -304,6 +320,10 @@ StyleConfig::~StyleConfig()
 
   for (size_t i=0; i<areaLabelStyles.size(); i++) {
     delete areaLabelStyles[i];
+  }
+
+  for (size_t i=0; i<areaIconStyles.size(); i++) {
+    delete areaIconStyles[i];
   }
 }
 
@@ -377,6 +397,7 @@ StyleConfig& StyleConfig::SetNodeSymbolStyle(TypeId type, const SymbolStyle& sty
     nodeSymbolStyles.resize(type+1,NULL);
     nodeRefLabelStyles.resize(type+1,NULL);
     nodeLabelStyles.resize(type+1,NULL);
+    nodeIconStyles.resize(type+1,NULL);
   }
 
   SymbolStyle *s=new SymbolStyle();
@@ -393,6 +414,7 @@ StyleConfig& StyleConfig::SetNodeLabelStyle(TypeId type, const LabelStyle& style
     nodeSymbolStyles.resize(type+1,NULL);
     nodeRefLabelStyles.resize(type+1,NULL);
     nodeLabelStyles.resize(type+1,NULL);
+    nodeIconStyles.resize(type+1,NULL);
   }
 
   LabelStyle *l=new LabelStyle();
@@ -409,12 +431,30 @@ StyleConfig& StyleConfig::SetNodeRefLabelStyle(TypeId type, const LabelStyle& st
     nodeSymbolStyles.resize(type+1,NULL);
     nodeRefLabelStyles.resize(type+1,NULL);
     nodeLabelStyles.resize(type+1,NULL);
+    nodeIconStyles.resize(type+1,NULL);
   }
 
   LabelStyle *l=new LabelStyle();
   *l=style;
 
   nodeRefLabelStyles[type]=l;
+
+  return *this;
+}
+
+StyleConfig& StyleConfig::SetNodeIconStyle(TypeId type, const IconStyle& style)
+{
+  if (type>=nodeSymbolStyles.size()) {
+    nodeSymbolStyles.resize(type+1,NULL);
+    nodeRefLabelStyles.resize(type+1,NULL);
+    nodeLabelStyles.resize(type+1,NULL);
+    nodeIconStyles.resize(type+1,NULL);
+  }
+
+  IconStyle *i=new IconStyle();
+  *i=style;
+
+  nodeIconStyles[type]=i;
 
   return *this;
 }
@@ -478,6 +518,7 @@ StyleConfig& StyleConfig::SetAreaFillStyle(TypeId type, const FillStyle& style)
     areaSymbolStyles.resize(type+1,NULL);
     areaLabelStyles.resize(type+1,NULL);
     areaBorderStyles.resize(type+1,NULL);
+    areaIconStyles.resize(type+1,NULL);
   }
 
   FillStyle *f=new FillStyle();
@@ -496,6 +537,7 @@ StyleConfig& StyleConfig::SetAreaBuildingFillStyle(TypeId type, const FillStyle&
     areaSymbolStyles.resize(type+1,NULL);
     areaLabelStyles.resize(type+1,NULL);
     areaBorderStyles.resize(type+1,NULL);
+    areaIconStyles.resize(type+1,NULL);
   }
 
   FillStyle *f=new FillStyle();
@@ -514,6 +556,7 @@ StyleConfig& StyleConfig::SetAreaLabelStyle(TypeId type, const LabelStyle& style
     areaSymbolStyles.resize(type+1,NULL);
     areaLabelStyles.resize(type+1,NULL);
     areaBorderStyles.resize(type+1,NULL);
+    areaIconStyles.resize(type+1,NULL);
   }
 
   LabelStyle *l=new LabelStyle();
@@ -532,6 +575,7 @@ StyleConfig& StyleConfig::SetAreaSymbolStyle(TypeId type, const SymbolStyle& sty
     areaSymbolStyles.resize(type+1,NULL);
     areaLabelStyles.resize(type+1,NULL);
     areaBorderStyles.resize(type+1,NULL);
+    areaIconStyles.resize(type+1,NULL);
   }
 
   SymbolStyle *s=new SymbolStyle();
@@ -550,12 +594,32 @@ StyleConfig& StyleConfig::SetAreaBorderStyle(TypeId type, const LineStyle& style
     areaSymbolStyles.resize(type+1,NULL);
     areaLabelStyles.resize(type+1,NULL);
     areaBorderStyles.resize(type+1,NULL);
+    areaIconStyles.resize(type+1,NULL);
   }
 
   LineStyle *s=new LineStyle();
   *s=style;
 
   areaBorderStyles[type]=s;
+
+  return *this;
+}
+
+StyleConfig& StyleConfig::SetAreaIconStyle(TypeId type, const IconStyle& style)
+{
+  if (type>=areaFillStyles.size()) {
+    areaFillStyles.resize(type+1,NULL);
+    areaBuildingFillStyles.resize(type+1,NULL);
+    areaSymbolStyles.resize(type+1,NULL);
+    areaLabelStyles.resize(type+1,NULL);
+    areaBorderStyles.resize(type+1,NULL);
+    areaIconStyles.resize(type+1,NULL);
+  }
+
+  IconStyle *s=new IconStyle();
+  *s=style;
+
+  areaIconStyles[type]=s;
 
   return *this;
 }

@@ -400,6 +400,27 @@ public:
   }
 };
 
+class IconStyle
+{
+private:
+  std::string iconName;
+
+public:
+  IconStyle();
+
+  IconStyle& SetIconName(const std::string& iconName);
+
+  inline bool IsVisible() const
+  {
+    return !iconName.empty();
+  }
+
+  inline std::string GetIconName() const
+  {
+    return iconName;
+  }
+};
+
 /**
  * A complete style definition
  */
@@ -408,19 +429,27 @@ class StyleConfig
 private:
   TypeConfig                *typeConfig;
 
+  // Node
+
   std::vector<SymbolStyle*> nodeSymbolStyles;
   std::vector<LabelStyle*>  nodeRefLabelStyles;
   std::vector<LabelStyle*>  nodeLabelStyles;
+  std::vector<IconStyle*>   nodeIconStyles;
+
+  // Way
 
   std::vector<LineStyle*>   wayLineStyles;
   std::vector<LabelStyle*>  wayRefLabelStyles;
   std::vector<LabelStyle*>  wayNameLabelStyles;
+
+  // Area
 
   std::vector<FillStyle*>   areaFillStyles;
   std::vector<FillStyle*>   areaBuildingFillStyles;
   std::vector<SymbolStyle*> areaSymbolStyles;
   std::vector<LabelStyle*>  areaLabelStyles;
   std::vector<LineStyle*>   areaBorderStyles;
+  std::vector<IconStyle*>   areaIconStyles;
 
   std::vector<size_t>       wayPrio;
   std::vector<size_t>       priorities;
@@ -438,6 +467,7 @@ public:
   StyleConfig& SetNodeSymbolStyle(TypeId type, const SymbolStyle& style);
   StyleConfig& SetNodeRefLabelStyle(TypeId type, const LabelStyle& style);
   StyleConfig& SetNodeLabelStyle(TypeId type, const LabelStyle& style);
+  StyleConfig& SetNodeIconStyle(TypeId type, const IconStyle& style);
 
   StyleConfig& SetWayLineStyle(TypeId type, const LineStyle& style);
   StyleConfig& SetWayRefLabelStyle(TypeId type, const LabelStyle& style);
@@ -448,6 +478,7 @@ public:
   StyleConfig& SetAreaLabelStyle(TypeId type, const LabelStyle& style);
   StyleConfig& SetAreaSymbolStyle(TypeId type, const SymbolStyle& style);
   StyleConfig& SetAreaBorderStyle(TypeId type, const LineStyle& style);
+  StyleConfig& SetAreaIconStyle(TypeId type, const IconStyle& style);
 
   size_t GetStyleCount() const;
 
