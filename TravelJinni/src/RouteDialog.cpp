@@ -63,7 +63,7 @@ RouteDialog::RouteDialog(DatabaseTask* databaseTask,
   start->Disable();
   end->Disable();
   okAction->Disable();
-
+  /*
   if (result.startCity.empty()) {
     result.startCity="Bonn";
     result.startWay=14332719;
@@ -96,7 +96,7 @@ RouteDialog::RouteDialog(DatabaseTask* databaseTask,
 
   if (result.IsStartValid() && result.IsEndValid()) {
     okAction->Enable();
-  }
+  } */
 }
 
 Lum::Object* RouteDialog::GetContent()
