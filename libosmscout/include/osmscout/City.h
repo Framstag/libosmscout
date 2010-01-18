@@ -27,6 +27,7 @@ struct City
   Reference   reference;
   Id          urbanId;
   std::string name;
+  std::string hash;
 };
 
 #endif

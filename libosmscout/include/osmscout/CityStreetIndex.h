@@ -27,11 +27,19 @@
 #include <osmscout/Street.h>
 #include <osmscout/TypeConfig.h>
 
+// This name isn't really good, but I've no better idea...
+struct UrbanData
+{
+  std::string name;
+  std::string hash;
+  std::list<Id> ids;
+};
+
 struct Urban
 {
-  Id                                   id;
-  std::map<std::string,std::list<Id> > ways;
-  std::map<std::string,std::list<Id> > areas;
+  Id             id;
+  std::list<UrbanData> ways;
+  std::list<UrbanData> areas;
 };
 
 class CityStreetIndex
@@ -42,6 +50,7 @@ private:
   std::map<Id,size_t> urbanOffsets;
   mutable Urban       urban;
   mutable bool        urbanLoaded;
+  std::string         (*hashFunction) (std::string);
 
 private:
   bool LoadUrban(Id id) const;
@@ -49,15 +58,17 @@ private:
 public:
   CityStreetIndex();
   virtual ~CityStreetIndex();
-
-  bool LoadCityStreetIndex(const std::string& path);
-
+  
+  bool LoadCityStreetIndex(const std::string& path, std::string (*hashFunction) (std::string) = NULL);
+  
   bool GetMatchingCities(const std::string& name,
                          std::list<City>& cities,
-                         size_t limit, bool& limitReached) const;
+                         size_t limit, bool& limitReached, bool startWith) const;
+  
   bool GetMatchingStreets(Id urbanId, const std::string& name,
                           std::list<Street>& streets,
-                          size_t limit, bool& limitReached) const;
+                          size_t limit, bool& limitReached,
+                          bool startWith) const;
 
   void DumpStatistics();
 };
