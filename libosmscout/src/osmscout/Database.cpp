@@ -113,7 +113,7 @@ bool Database::Open(const std::string& path)
   std::cout << "Loading area node index done." << std::endl;
 
   std::cout << "Loading area way index..." << std::endl;
-  if (!areaWayIndex.LoadAreaWayIndex(path)) {
+  if (!areaWayIndex.Load(path)) {
     std::cerr << "Cannot load AreaWayIndex!" << std::endl;
     return false;
   }
@@ -187,7 +187,6 @@ size_t Database::GetMaximumPriority(const StyleConfig& styleConfig,
   effectiveNodes=(size_t)maxNodes*(tileArea/realArea);
   std::cout << "Nodes: " << maxNodes << ", effective => " << effectiveNodes << std::endl;
 
-  size_t           optional=false; // if true, we are not required to ftech and add more nodes...
   size_t           nodes=0;
   std::set<TypeId> drawTypes;
 
@@ -203,32 +202,6 @@ size_t Database::GetMaximumPriority(const StyleConfig& styleConfig,
     nodes+=areaNodeIndex.GetNodes(*drawType,
                                  GetTileX(minlon),GetTileY(minlat),
                                  GetTileX(maxlon),GetTileY(maxlat));
-  }
-
-  // Number of way and area nodes is dependend on the priority
-
-  for (size_t priority=0; priority<priorities.size(); priority++) {
-    optional=true;
-    drawTypes.clear();
-
-    styleConfig.GetWayTypesWithPrio(maxPriority,drawTypes);
-
-    size_t newNodes=0;
-
-    for (std::set<TypeId>::const_iterator drawType=drawTypes.begin();
-         drawType!=drawTypes.end();
-         ++drawType) {
-      newNodes+=areaWayIndex.GetNodes(*drawType,
-                                      GetTileX(minlon),GetTileY(minlat),
-                                      GetTileX(maxlon),GetTileY(maxlat));
-    }
-
-    if (optional && nodes+newNodes>=effectiveNodes) {
-      break;
-    }
-
-    maxPriority=priorities[priority];
-    nodes+=newNodes;
   }
 
   return maxPriority;
@@ -255,18 +228,18 @@ bool Database::GetNodes(const StyleConfig& styleConfig,
 bool Database::GetWays(const StyleConfig& styleConfig,
                        double lonMin, double latMin,
                        double lonMax, double latMax,
-                       double magnification,
-                       size_t maxPriority,
+                       const std::vector<TypeId>& types,
+                       size_t maxCount,
                        std::vector<Way>& ways) const
 {
   std::set<FileOffset>    offsets;
   std::vector<FileOffset> offsetList;
 
   areaWayIndex.GetOffsets(styleConfig,
-                      lonMin,latMin,lonMax,latMax,
-                      magnification,
-                      maxPriority,
-                      offsets);
+                          lonMin,latMin,lonMax,latMax,
+                          types,
+                          maxCount,
+                          offsets);
 
   offsetList.reserve(offsets.size());
   for (std::set<FileOffset>::const_iterator offset=offsets.begin();
@@ -328,11 +301,15 @@ bool Database::GetObjects(const StyleConfig& styleConfig,
 
   StopClock waysTimer;
 
+  std::vector<TypeId> types;
+
+  styleConfig.GetWayTypesByPrio(types);
+
   if (!GetWays(styleConfig,
-               lonMin,latMin,lonMax,latMax,
-               magnification,
-               maxPriority,
-               ways)) {
+                lonMin,latMin,lonMax,latMax,
+                types,
+                2000,
+                ways)) {
     return false;
   }
 
@@ -341,10 +318,10 @@ bool Database::GetObjects(const StyleConfig& styleConfig,
   StopClock areasTimer;
 
   if (!GetAreas(styleConfig,
-               lonMin,latMin,lonMax,latMax,
-               maxAreaLevel,
-               maxAreas,
-               areas)) {
+                lonMin,latMin,lonMax,latMax,
+                maxAreaLevel,
+                maxAreas,
+                areas)) {
     return false;
   }
 
@@ -362,7 +339,10 @@ bool Database::GetObjects(const StyleConfig& styleConfig,
 
   nodesTimer.Stop();
 
-  std::cout << "Max Prio: " << maxPrioTimer << " Nodes: " << nodesTimer << " ways: " << waysTimer << " areas: " << areasTimer << std::endl;
+  std::cout << "Max Prio: " << maxPrioTimer << " ";
+  std::cout << "Nodes: " << nodesTimer << " ";
+  std::cout << "Ways: " << waysTimer << " ";
+  std::cout << "Areas: " << areasTimer << std::endl;
 
   return true;
 }

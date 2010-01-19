@@ -50,7 +50,8 @@ ImportParameter::ImportParameter()
    endStep(defaultEndStep),
    nodeIndexIntervalSize(50),
    numericIndexLevelSize(1024),
-   areaAreaIndexMaxMag(18)
+   areaAreaIndexMaxMag(18),
+   areaWayIndexMaxMag(18)
 {
   // no code
 }
@@ -83,6 +84,11 @@ size_t ImportParameter::GetNumericIndexLevelSize() const
 size_t ImportParameter::GetAreaAreaIndexMaxMag() const
 {
   return areaAreaIndexMaxMag;
+}
+
+size_t ImportParameter::GetAreaWayIndexMaxMag() const
+{
+  return areaWayIndexMaxMag;
 }
 
 void ImportParameter::SetMapfile(const std::string& mapfile)

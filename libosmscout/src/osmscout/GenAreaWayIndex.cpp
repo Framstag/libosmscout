@@ -1,6 +1,6 @@
 /*
   TravelJinni - Openstreetmap offline viewer
-  Copyright (C) 2009  Tim Teulings
+  Copyright (C) 2010  Tim Teulings
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,159 +19,86 @@
 
 #include <osmscout/GenAreaWayIndex.h>
 
+#include <cassert>
+#include <cmath>
+#include <list>
 #include <map>
-#include <set>
+#include <vector>
 
 #include <osmscout/FileScanner.h>
 #include <osmscout/FileWriter.h>
-#include <osmscout/Tiles.h>
 #include <osmscout/Util.h>
 #include <osmscout/Way.h>
 
-bool GenerateAreaWayIndex(const ImportParameter& parameter,
-                                 Progress& progress)
-{
-  /*
-  std::cout << "Tile -180 -90   : " << GetTileId(-180.0,-90.0) << std::endl;
-  std::cout << "Tile -180 -89.91: " << GetTileId(-180.0,-89.91) << std::endl;
-  std::cout << "Tile -180 -89.9 : " << GetTileId(-180.0,-89.9) << std::endl;
-  std::cout << "Tile -180 -89.89: " << GetTileId(-180.0,-89.89) << std::endl;
-  std::cout << "Tile -180 -89.85: " << GetTileId(-180.0,-89.85) << std::endl;
-  std::cout << "Tile -180 -89.8 : " << GetTileId(-180.0,-89.8) << std::endl;
-  std::cout << "Tile -180  89.9 : " << GetTileId(-180.0,89.9) << std::endl;
-  std::cout << "Tile -180  89.8 : " << GetTileId(-180.0,89.8) << std::endl;
-  std::cout << "Tile -180  89.85: " << GetTileId(-180.0,89.85) << std::endl;
-  std::cout << "Tile -180  89.89: " << GetTileId(-180.0,89.89) << std::endl;
-  std::cout << "Tile -180  89.91: " << GetTileId(-180.0,89.91) << std::endl;
-  std::cout << "Tile  180  90   : " << GetTileId( 180.0,90.0) << std::endl;*/
+#include <iostream>
 
+struct Coord
+{
+  size_t x;
+  size_t y;
+
+  Coord(size_t x, size_t y)
+   :x(x),y(y)
+  {
+    // no code
+  }
+
+  bool operator==(const Coord& other) const
+  {
+    return x==other.x && y==other.y;
+  }
+
+  bool operator<(const Coord& other) const
+  {
+    return y<other.y ||
+    ( y==other.y && x<other.x);
+  }
+};
+
+
+struct WayLeaf
+{
+  FileOffset                              offset;
+  FileOffset                              children[4];
+  std::map<TypeId,std::list<FileOffset> > dataOffsets;
+
+  WayLeaf()
+  : offset(0)
+  {
+    children[0]=0;
+    children[1]=0;
+    children[2]=0;
+    children[3]=0;
+  }
+};
+
+bool GenerateAreaWayIndex(const ImportParameter& parameter,
+                          Progress& progress)
+{
   //
-  // Analysing ways regarding draw type and matching tiles.
+  // Count the number of objects per index level
   //
 
   progress.SetAction("Analysing distribution");
 
-  FileScanner                                           scanner;
-  std::vector<size_t>                                   drawTypeDist;
-  std::vector<std::map<TileId,NodeCount > >             drawTypeTileNodeCount;
-  std::vector<std::map<TileId,std::list<FileOffset> > > drawTypeTileIds;
-  size_t                                                 wayCount=0;
+  FileScanner             scanner;
+  size_t                  ways=0;     // Number of ways found
+  size_t                  consumed=0; // Number of ways consumed
+  std::vector<double>     cellWidth;
+  std::vector<double>     cellHeight;
+  std::map<Coord,WayLeaf> leafs;
+  std::map<Coord,WayLeaf> newLeafs;
 
-  //
-  // * Go through the list of ways
-  // * For every way detect the tiles it covers (rectangular min-max region over nodes)
-  // * For every type/tile combnation get the node index pages (node.id/wayIndexIntervalSize)
-  //   that hold the matching ways for this type/tile combination
-  //
+  cellWidth.resize(parameter.GetAreaWayIndexMaxMag()+1);
+  cellHeight.resize(parameter.GetAreaWayIndexMaxMag()+1);
 
-  if (!scanner.Open("ways.dat")) {
-    progress.Error("Cannot open 'ways.dat'");
-    return false;
+  for (size_t i=0; i<cellWidth.size(); i++) {
+    cellWidth[i]=360/pow(2,i);
   }
 
-  while (!scanner.HasError()) {
-    FileOffset offset;
-    Way        way;
-
-    scanner.GetPos(offset);
-    way.Read(scanner);
-
-    if (!scanner.HasError()) {
-      if (way.IsArea()) {
-        continue;
-      }
-
-      wayCount++;
-
-      double xmin,xmax,ymin,ymax;
-
-      xmin=way.nodes[0].lon;
-      xmax=way.nodes[0].lon;
-      ymin=way.nodes[0].lat;
-      ymax=way.nodes[0].lat;
-
-      for (size_t i=1; i<way.nodes.size(); i++) {
-        xmin=std::min(xmin,way.nodes[i].lon);
-        xmax=std::max(xmax,way.nodes[i].lon);
-        ymin=std::min(ymin,way.nodes[i].lat);
-        ymax=std::max(ymax,way.nodes[i].lat);
-      }
-
-      // By Type
-
-      if ((size_t)way.type>=drawTypeDist.size()) {
-        drawTypeDist.resize(way.type+1,0);
-        drawTypeTileNodeCount.resize(way.type+1);
-        drawTypeTileIds.resize(way.type+1);
-      }
-      drawTypeDist[way.type]++;
-
-      // By Type and tile
-
-      for (size_t y=GetTileY(ymin); y<=GetTileY(ymax); y++) {
-        for (size_t x=GetTileX(xmin); x<=GetTileX(xmax); x++) {
-          std::map<size_t,NodeCount>::iterator tile=drawTypeTileNodeCount[way.type].find(GetTileId(x,y));
-
-          if (tile!=drawTypeTileNodeCount[way.type].end()) {
-            drawTypeTileNodeCount[way.type][GetTileId(x,y)]+=way.nodes.size();
-          }
-          else {
-            drawTypeTileNodeCount[way.type][GetTileId(x,y)]=way.nodes.size();
-          }
-
-          drawTypeTileIds[way.type][GetTileId(x,y)].push_back(offset);
-        }
-      }
-    }
+  for (size_t i=0; i<cellHeight.size(); i++) {
+    cellHeight[i]=180/pow(2,i);
   }
-
-  scanner.Close();
-
-  progress.Info(std::string("Ways scanned: ")+NumberToString(wayCount));
-  /*
-  std::cout << "Distribution by type" << std::endl;
-  for (size_t i=0; i<styleTypes.size(); i++) {
-    if ((size_t)styleTypes[i].GetType()<drawTypeDist.size() && drawTypeDist[styleTypes[i].GetType()]>0) {
-      std::cout << styleTypes[i].GetType() << ": " << drawTypeDist[styleTypes[i].GetType()] << std::endl;
-    }
-  }*/
-
-  progress.SetAction("Calculating statistics");
-
-  size_t drawTypeSum=0;
-  size_t tileSum=0;
-  size_t nodeSum=0;
-  size_t pageSum=0;
-
-  //std::cout << "Number of tiles per type" << std::endl;
-  for (size_t i=0; i<drawTypeTileIds.size(); i++) {
-    if (i!=typeIgnore && drawTypeTileIds[i].size()>0) {
-
-      drawTypeSum++;
-
-      //std::cout << styleTypes[i].GetType() << ": " << drawTypeTileDist[styleTypes[i].GetType()].size();
-      tileSum+=drawTypeTileIds[i].size();
-
-      for (std::map<size_t,std::list<FileOffset> >::const_iterator tile=drawTypeTileIds[i].begin();
-           tile!=drawTypeTileIds[i].end();
-           ++tile) {
-        pageSum+=tile->second.size();
-      }
-
-      for (std::map<size_t,NodeCount>::const_iterator tile=drawTypeTileNodeCount[i].begin();
-           tile!=drawTypeTileNodeCount[i].end();
-           ++tile) {
-        nodeSum+=tile->second;
-      }
-
-      //std::cout << " " << ways << std::endl;
-    }
-  }
-
-  progress.Info(std::string("Total number of draw types with tiles: ")+NumberToString(drawTypeSum));
-  progress.Info(std::string("Total number of tiles: ")+NumberToString(tileSum));
-  progress.Info(std::string("Total number of pages in tiles: ")+NumberToString(pageSum));
-  progress.Info(std::string("Total number of nodes in tiles: ")+NumberToString(nodeSum));
 
   //
   // Writing index file
@@ -186,33 +113,207 @@ bool GenerateAreaWayIndex(const ImportParameter& parameter,
     return false;
   }
 
-  // The number of draw types we have an index for
-  writer.WriteNumber(drawTypeSum); // Number of entries
+  writer.WriteNumber(parameter.GetAreaWayIndexMaxMag()); // MaxMag
 
-  for (TypeId i=0; i<drawTypeTileIds.size(); i++) {
-    size_t tiles=drawTypeTileIds[i].size();
+  int l=parameter.GetAreaWayIndexMaxMag();
 
-    if (i!=typeIgnore && tiles>0) {
-      writer.WriteNumber(i);     // The draw type id
-      writer.WriteNumber(tiles); // The number of tiles
+  while (l>=0) {
+    size_t levelEntries=0;
 
-      for (std::map<TileId,std::list<FileOffset> >::const_iterator tile=drawTypeTileIds[i].begin();
-           tile!=drawTypeTileIds[i].end();
-           ++tile) {
-        writer.WriteNumber(tile->first);                           // The tile id
-        writer.WriteNumber(drawTypeTileNodeCount[i][tile->first]); // The number of nodes
-        writer.WriteNumber(tile->second.size());                   // The number of pages
+    progress.Info(std::string("Storing level ")+NumberToString(l)+"...");
 
-        for (std::list<FileOffset>::const_iterator offset=tile->second.begin();
-             offset!=tile->second.end();
-             ++offset) {
-          writer.WriteNumber(*offset); // The id of the node
+    newLeafs.clear();
+
+    // For every cell that had entries in one of its childrenwe create
+    // an index entry.
+    for (std::map<Coord,WayLeaf>::iterator leaf=leafs.begin();
+         leaf!=leafs.end();
+         ++leaf) {
+      // Coordinates of the children in "children dimension" calculated from the tile id
+      size_t xc=leaf->first.x;
+      size_t yc=leaf->first.y;
+
+      size_t index;
+
+      //
+      // child index is build as folowing (y-axis is from bottom to top!):
+      //   01
+      //   23
+
+      if (yc%2!=0) {
+        if (xc%2==0) {
+          index=0;
+        }
+        else {
+          index=1;
+        }
+      }
+      else {
+        if (xc%2==0) {
+          index=2;
+        }
+        else {
+          index=3;
+        }
+      }
+
+      assert(leaf->second.offset!=0);
+
+      newLeafs[Coord(xc/2,yc/2)].children[index]=leaf->second.offset;
+    }
+
+    leafs=newLeafs;
+
+    if (ways==0 ||
+        (ways>0 && ways>consumed)) {
+
+      progress.Info(std::string("Scanning ways.dat for ways of index level ")+NumberToString(l)+"...");
+
+      if (!scanner.Open("ways.dat")) {
+        progress.Error("Cannot open 'ways.dat'");
+        return false;
+      }
+
+      ways=0;
+      while (!scanner.HasError()) {
+        FileOffset offset;
+        Way        way;
+
+        scanner.GetPos(offset);
+        way.Read(scanner);
+
+        if (scanner.HasError()) {
+          continue;
+        }
+
+        if (way.IsArea()) {
+          continue;
+        }
+
+        ways++;
+
+        //
+        // Bounding box calculation
+        //
+
+        double minLon=way.nodes[0].lon;
+        double maxLon=way.nodes[0].lon;
+        double minLat=way.nodes[0].lat;
+        double maxLat=way.nodes[0].lat;
+
+        for (size_t i=1; i<way.nodes.size(); i++) {
+          minLon=std::min(minLon,way.nodes[i].lon);
+          maxLon=std::max(maxLon,way.nodes[i].lon);
+          minLat=std::min(minLat,way.nodes[i].lat);
+          maxLat=std::max(maxLat,way.nodes[i].lat);
+        }
+
+        //
+        // Renormated coordinate space (everything is >=0)
+        //
+
+        minLon+=180;
+        maxLon+=180;
+        minLat+=90;
+        maxLat+=90;
+
+        //
+        // Calculate highest level where the bounding box completely
+        // fits in the cell size and in one cell for this level.
+        //
+
+        // TODO: We can possibly do faster
+        // ...in calculating level
+        //...in detecting if this way is relevant for this level
+        int    level=parameter.GetAreaWayIndexMaxMag();
+        size_t minxc=0;
+        size_t maxxc=0;
+        size_t minyc=0;
+        size_t maxyc=0;
+
+        while (level>=l) {
+          minxc=floor(minLon/cellWidth[level]);
+          maxxc=floor(maxLon/cellWidth[level]);
+          minyc=floor(minLat/cellHeight[level]);
+          maxyc=floor(maxLat/cellHeight[level]);
+
+          /*
+          if (way.id==4698697) {
+            std::cout << minLon-180 <<"," << minLat-90 << " - " << maxLon-180 <<"," << maxLat-90 << std::endl;
+
+            for (size_t i=0; i<way.nodes.size(); i++) {
+              std::cout << "Node: " << way.nodes[i].lon << "," << way.nodes[i].lat << std::endl;
+            }
+
+            std::cout << "Box: " << cellWidth[level] << "x" << cellHeight[level] << std::endl;
+            std::cout << "Cells: " << minxc << "," << minyc << " - " << maxxc << "," << maxyc << std::endl;
+          } */
+
+          if (maxLon-minLon<=cellWidth[level] &&
+              maxLat-minLat<=cellHeight[level]) {
+            break;
+          }
+
+          level--;
+        }
+
+        if (level==l) {
+          for (size_t yc=minyc; yc<=maxyc; yc++) {
+            for (size_t xc=minxc; xc<=maxxc; xc++) {
+              leafs[Coord(xc,yc)].dataOffsets[way.type].push_back(offset);
+              levelEntries++;
+            }
+          }
+
+          levelEntries++;
+          consumed++;
+        }
+      }
+
+      scanner.Close();
+    }
+
+    progress.Debug(std::string("Writing ")+NumberToString(leafs.size())+" entries with "+NumberToString(levelEntries)+" ways to index of level "+NumberToString(l)+"...");
+    //
+    // Store all index entries for this level and store their file offset
+    //
+    writer.WriteNumber(leafs.size()); // Number of leafs
+    for (std::map<Coord,WayLeaf>::iterator leaf=leafs.begin();
+         leaf!=leafs.end();
+         ++leaf) {
+      writer.GetPos(leaf->second.offset);
+
+      assert(leaf->second.dataOffsets.size()>0 ||
+             leaf->second.children[0]!=0 ||
+             leaf->second.children[1]!=0 ||
+             leaf->second.children[2]!=0 ||
+             leaf->second.children[3]!=0);
+
+      if (l<parameter.GetAreaWayIndexMaxMag()) {
+        // TODO: Is writer.Write better?
+        for (size_t c=0; c<4; c++) {
+          writer.WriteNumber(leaf->second.children[c]);
+        }
+      }
+
+      writer.WriteNumber(leaf->second.dataOffsets.size());
+      for (std::map<TypeId, std::list<FileOffset> >::const_iterator entry=leaf->second.dataOffsets.begin();
+           entry!=leaf->second.dataOffsets.end();
+           ++entry) {
+        writer.WriteNumber(entry->first);
+        writer.WriteNumber(entry->second.size());
+
+        for (std::list<FileOffset>::const_iterator o=entry->second.begin();
+             o!=entry->second.end();
+             o++) {
+          // TODO: Is writer.Write better?
+          writer.WriteNumber((size_t)*o);
         }
       }
     }
+
+    l--;
   }
 
   return !writer.HasError() && writer.Close();
-
-  return true;
 }

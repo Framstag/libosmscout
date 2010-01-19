@@ -114,8 +114,8 @@ private:
   bool GetWays(const StyleConfig& styleConfig,
                double lonMin, double latMin,
                double lonMax, double latMax,
-               double magnification,
-               size_t maxPriority,
+               const std::vector<TypeId>& types,
+               size_t maxCount,
                std::vector<Way>& ways) const;
 
   bool GetAreas(const StyleConfig& styleConfig,

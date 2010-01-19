@@ -33,6 +33,7 @@ nobase_include_HEADERS= osmscout/Types.h \
                         osmscout/AreaAreaIndex.h \
                         osmscout/AreaNodeIndex.h \
                         osmscout/AreaWayIndex.h \
+                        osmscout/AreaWayIndex2.h \
                         osmscout/CityStreetIndex.h \
                         osmscout/NodeUseIndex.h \
                         osmscout/Route.h \

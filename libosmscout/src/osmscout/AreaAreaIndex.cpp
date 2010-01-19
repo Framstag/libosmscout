@@ -176,7 +176,7 @@ void AreaAreaIndex::GetOffsets(const StyleConfig& styleConfig,
       }
 
       if (offsets.size()+entry->second.dataOffsets.size()>maxCount) {
-        std::cout << "Found " << offsets.size() << " ways ids in area area index with maximum level " << maxLevel << std::endl;
+        std::cout << "Found " << offsets.size() << " way offsets in area area index with maximum level " << maxLevel << std::endl;
         return;
       }
 
@@ -256,7 +256,7 @@ void AreaAreaIndex::GetOffsets(const StyleConfig& styleConfig,
     co=no;
   }
 
-  std::cout << "Found " << offsets.size() << " ways ids in area area index with maximum level " << maxLevel << std::endl;
+  std::cout << "Found " << offsets.size() << " way offsets in area area index with maximum level " << maxLevel << std::endl;
 }
 
 void AreaAreaIndex::DumpStatistics()

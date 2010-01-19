@@ -19,146 +19,277 @@
 
 #include <osmscout/AreaWayIndex.h>
 
-#include <iostream>
-#include <map>
+#include <cassert>
+#include <cmath>
 
 #include <osmscout/FileScanner.h>
+#include <osmscout/Util.h>
+#include <iostream>
 
-bool AreaWayIndex::LoadAreaWayIndex(const std::string& path)
+bool AreaWayIndex::Load(const std::string& path)
 {
   FileScanner scanner;
   std::string file=path+"/"+"areaway.idx";
 
   if (!scanner.Open(file)) {
+    std::cerr << "Cannot open file areaway.idx" << std::endl;
     return false;
   }
 
-  size_t drawTypes;
+  if (!scanner.ReadNumber(maxLevel)) {
+    std::cerr << "Cannot read data (1)" << std::endl;
+    return false;
+  }
 
-  // The number of draw types we have an index for
-  scanner.ReadNumber(drawTypes); // Number of entries
+  std::cout << "Max level is: " << maxLevel << std::endl;
 
-  std::cout << drawTypes << " entries in area way index..." << std::endl;
+  cellWidth.resize(maxLevel+1);
+  cellHeight.resize(maxLevel+1);
 
-  for (size_t i=0; i<drawTypes; i++) {
-    TypeId type;
-    size_t tiles;
+  for (size_t i=0; i<cellWidth.size(); i++) {
+    cellWidth[i]=360/pow(2,i);
+  }
 
-    scanner.ReadNumber(type);  // The draw type id
-    scanner.ReadNumber(tiles); // The number of tiles
+  for (size_t i=0; i<cellHeight.size(); i++) {
+    cellHeight[i]=180/pow(2,i);
+  }
 
-    for (size_t t=0; t<tiles; t++) {
+  index.resize(maxLevel+1);
+
+  int l=maxLevel;
+
+  while (l>=0) {
+    size_t children=0;
+    size_t entries;
+
+    if (!scanner.ReadNumber(entries)) {
+      std::cerr << "Cannot read data (2)" << std::endl;
+      return false;
+    }
+
+    std::cout << "Reading " << entries << " entries for level " << l << std::endl;
+
+    for (size_t i=0; i<entries; i++) {
+      FileOffset offset;
       IndexEntry entry;
-      TileId     tileId;
-      size_t     offsetCount;
 
-      scanner.ReadNumber(tileId);          // The tile id
-      scanner.ReadNumber(entry.nodeCount); // The number of nodes
-      scanner.ReadNumber(offsetCount);     // The number of offsets
-
-      entry.offsets.reserve(offsetCount);
-
-      for (size_t i=0; i<offsetCount; i++) {
-        FileOffset offset;
-
-        scanner.ReadNumber(offset); // The way offset
-        entry.offsets.push_back(offset);
+      if (!scanner.GetPos(offset)) {
+        std::cerr << "Cannot read data (3)" << std::endl;
+        return false;
       }
 
-      areaWayIndex[type][tileId]=entry;
+      if (l<maxLevel) {
+        for (size_t c=0; c<4; c++) {
+          if (!scanner.ReadNumber(entry.children[c])) {
+            std::cerr << "Cannot read data (4)" << std::endl;
+            return false;
+          }
+
+          if (entry.children[c]!=0) {
+            children++;
+          }
+        }
+      }
+      else {
+        for (size_t c=0; c<4; c++) {
+          entry.children[c]=0;
+        }
+      }
+
+      size_t typeCount;
+
+      if (!scanner.ReadNumber(typeCount)) {
+        std::cerr << "Cannot read data (5)" << std::endl;
+        return false;
+      }
+
+      for (size_t t=0; t<typeCount; t++) {
+        TypeId type;
+        size_t offsetCount;
+
+        if (!scanner.ReadNumber(type)) {
+          std::cerr << "Cannot read data (6)" << std::endl;
+          return false;
+        }
+
+        if (!scanner.ReadNumber(offsetCount)) {
+          std::cerr << "Cannot read data (7)" << std::endl;
+          return false;
+        }
+
+        //std::cout << l << " " << i << " " << type << " " << offsetCount << std::endl;
+
+        entry.dataOffsets[type].reserve(offsetCount);
+        for (size_t c=0; c<offsetCount; c++) {
+          FileOffset o;
+
+          if (!scanner.ReadNumber(o)) {
+            std::cerr << "Cannot read data (8), level " << l << " entry " << i << std::endl;
+            return false;
+          }
+
+          entry.dataOffsets[type].push_back(o);
+        }
+      }
+      index[l][offset]=entry;
     }
+
+    l--;
   }
+
+  assert(index[0].size()==1);
 
   return !scanner.HasError() && scanner.Close();
 }
 
-size_t AreaWayIndex::GetNodes(TypeId drawType,
-                              size_t tileMinX, size_t tileMinY,
-                              size_t tileMaxX, size_t tileMaxY) const
-{
-  size_t nodes=0;
-
-  std::map<TypeId,std::map<TileId,IndexEntry > >::const_iterator drawTypeEntry;
-
-  drawTypeEntry=areaWayIndex.find(drawType);
-
-  if (drawTypeEntry!=areaWayIndex.end()) {
-    for (size_t y=tileMinY; y<=tileMaxY; y++) {
-      TileId                                      startTileId=GetTileId(tileMinX,y);
-      TileId                                      endTileId=GetTileId(tileMaxX,y);
-      std::map<TileId,IndexEntry>::const_iterator tile=drawTypeEntry->second.lower_bound(startTileId);
-
-      while (tile->first<=endTileId && tile!=drawTypeEntry->second.end()) {
-        nodes+=tile->second.nodeCount;
-
-        ++tile;
-      }
-    }
-  }
-
-  return nodes;
-}
-
 void AreaWayIndex::GetOffsets(const StyleConfig& styleConfig,
-                              double minlon, double minlat,
-                              double maxlon, double maxlat,
-                              double magnification,
-                              size_t maxPriority,
-                              std::set<FileOffset>& offsets) const
+                               double minlon, double minlat,
+                               double maxlon, double maxlat,
+                               const std::vector<TypeId>& types,
+                               size_t maxCount,
+                               std::set<FileOffset>& offsets) const
 {
-  std::set<TypeId> types;
+  //std::cout << "ArayWayIndex2: " << types.size() << " " << maxCount << std::endl;
+  offsets.clear();
 
-  styleConfig.GetWayTypesWithMaxPrio(maxPriority,types);
+  std::vector<FileOffset> newOffsets;
 
-  size_t minTileX=GetTileX(minlon);
-  size_t maxTileX=GetTileX(maxlon);
-  size_t minTileY=GetTileY(minlat);
-  size_t maxTileY=GetTileY(maxlat);
+  minlon+=180;
+  maxlon+=180;
+  minlat+=90;
+  maxlat+=90;
 
-  for (std::set<TypeId>::const_iterator type=types.begin();
-       type!=types.end();
-       ++type) {
+  for (size_t t=0; t<types.size(); t++) {
+    std::vector<size_t>     ctx; // tile x coordinates in this level
+    std::vector<size_t>     cty; // tile y coordinates in this level
+    std::vector<FileOffset> co;  // offsets in this level
 
-    std::map<TypeId,std::map<TileId,IndexEntry> >::const_iterator typeEntry;
+    std::vector<size_t>     ntx; // tile x coordinates in next level
+    std::vector<size_t>     nty; // tile y coordinates in next level
+    std::vector<FileOffset> no;  // offsets in next level
 
-    typeEntry=areaWayIndex.find(*type);
+    ctx.push_back(0);
+    cty.push_back(0);
+    co.push_back(index[0].begin()->first);
 
-    if (typeEntry!=areaWayIndex.end()) {
-      for (size_t y=minTileY; y<=maxTileY; y++) {
-        TileId                                      startTileId=GetTileId(minTileX,y);
-        TileId                                      endTileId=GetTileId(maxTileX,y);
-        std::map<TileId,IndexEntry>::const_iterator tile=typeEntry->second.lower_bound(startTileId);
+    newOffsets.clear();
 
-        while (tile->first<=endTileId && tile!=typeEntry->second.end()) {
-          for (size_t j=0; j<tile->second.offsets.size(); j++) {
-            offsets.insert(tile->second.offsets[j]);
+    // For all levels:
+    // * Take the tiles and offsets of the last level
+    // * Calculate the new tiles and offsets that still interfer with given area
+    // * Add the new way offsets to the list of way offset and finish if we have
+    //   reached maxCount.
+    // * copy no, ntx, nty to ctx, cty, co and go to next iteration
+    for (size_t level=0; level<=maxLevel && level<=this->maxLevel && co.size()>0; level++) {
+      //std::cout << "Level: " << level << std::endl;
+      ntx.clear();
+      nty.clear();
+      no.clear();
+
+      for (size_t i=0; i<co.size(); i++) {
+        IndexLevel::const_iterator entry=index[level].find(co[i]);
+
+        if (entry==index[level].end()) {
+          std::cerr << "Cannot find offset " << co[i] << " in level " << level << ", => aborting!" << std::endl;
+          return;
+        }
+
+        std::map<TypeId,std::vector<FileOffset> >::const_iterator typeOffsets=entry->second.dataOffsets.find(types[t]);
+
+        if (typeOffsets!=entry->second.dataOffsets.end()) {
+          if (offsets.size()+newOffsets.size()+typeOffsets->second.size()>maxCount) {
+            std::cout << "Maximum limit hit: " << offsets.size() << "+" << newOffsets.size() << "+" << typeOffsets->second.size() << ">" << maxCount << std::endl;
+            std::cout << "Found " << offsets.size() << " way offsets in area way index with maximum level " << maxLevel << std::endl;
+            return;
           }
 
-          ++tile;
+          for (std::vector<FileOffset>::const_iterator o=typeOffsets->second.begin();
+               o!=typeOffsets->second.end();
+               ++o) {
+            newOffsets.push_back(*o);
+          }
+        }
+
+        size_t cx=ctx[i]*2;
+        size_t cy=cty[i]*2;
+
+        if (entry->second.children[0]!=0) {
+          // top left
+
+          double x=cx*cellWidth[level+1];
+          double y=(cy+1)*cellHeight[level+1];
+
+          if (!(x>maxlon ||
+                y>maxlat ||
+                x+cellWidth[level+1]<minlon ||
+                y+cellHeight[level+1]<minlat)) {
+            ntx.push_back(cx);
+            nty.push_back(cy+1);
+            no.push_back(entry->second.children[0]);
+          }
+        }
+
+        if (entry->second.children[1]!=0) {
+          // top right
+          double x=(cx+1)*cellWidth[level+1];
+          double y=(cy+1)*cellHeight[level+1];
+
+          if (!(x>maxlon ||
+                y>maxlat ||
+                x+cellWidth[level+1]<minlon ||
+                y+cellHeight[level+1]<minlat)) {
+            ntx.push_back(cx+1);
+            nty.push_back(cy+1);
+            no.push_back(entry->second.children[1]);
+          }
+        }
+
+        if (entry->second.children[2]!=0) {
+          // bottom left
+          double x=cx*cellWidth[level+1];
+          double y=cy*cellHeight[level+1];
+
+          if (!(x>maxlon ||
+                y>maxlat ||
+                x+cellWidth[level+1]<minlon ||
+                y+cellHeight[level+1]<minlat)) {
+            ntx.push_back(cx);
+            nty.push_back(cy);
+            no.push_back(entry->second.children[2]);
+          }
+        }
+
+        if (entry->second.children[3]!=0) {
+          // bottom right
+          double x=(cx+1)*cellWidth[level+1];
+          double y=cy*cellHeight[level+1];
+
+          if (!(x>maxlon ||
+                y>maxlat ||
+                x+cellWidth[level+1]<minlon ||
+                y+cellHeight[level+1]<minlat)) {
+            ntx.push_back(cx+1);
+            nty.push_back(cy);
+            no.push_back(entry->second.children[3]);
+          }
         }
       }
+
+      ctx=ntx;
+      cty=nty;
+      co=no;
+    }
+
+    for (std::vector<FileOffset>::const_iterator o=newOffsets.begin();
+         o!=newOffsets.end();
+         ++o) {
+      offsets.insert(*o);
     }
   }
 
-  std::cout << "Found " << offsets.size() << " ways in area way index with maximum priority " << maxPriority << std::endl;
+  std::cout << "Found " << offsets.size() << " ways offsets in area way index with maximum level " << maxLevel << std::endl;
 }
 
 void AreaWayIndex::DumpStatistics()
 {
-  size_t memory=0;
-  size_t entries=0;
-
-  for (std::map<TypeId,std::map<TileId,IndexEntry > >::const_iterator i=areaWayIndex.begin();
-       i!=areaWayIndex.end();
-       i++) {
-    memory+=sizeof(i->first)+sizeof(i->second);
-    for (std::map<TileId,IndexEntry >::const_iterator j=i->second.begin();
-         j!=i->second.end();
-         j++) {
-      entries++;
-      memory+=sizeof(j->first)+sizeof(j->second)+j->second.offsets.size()*sizeof(FileOffset);
-    }
-  }
-
-  std::cout << "Area way index size " << entries << ", memory " << memory << std::endl;
 }

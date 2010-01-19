@@ -338,7 +338,6 @@ StyleConfig::~StyleConfig()
 void StyleConfig::Postprocess()
 {
   std::set<size_t > prios;
-  priorities.clear();
 
   for (size_t i=0; i<wayLineStyles.size() && i<wayPrio.size(); i++) {
     if (wayLineStyles[i]!=NULL) {
@@ -346,11 +345,22 @@ void StyleConfig::Postprocess()
     }
   }
 
+  priorities.clear();
   priorities.reserve(prios.size());
   for (std::set<size_t>::const_iterator prio=prios.begin();
        prio!=prios.end();
        ++prio) {
     priorities.push_back(*prio);
+  }
+
+  wayTypes.clear();
+  wayTypes.reserve(priorities.size());
+  for (size_t p=0; p<priorities.size(); p++) {
+    for (size_t i=0; i<wayLineStyles.size() && i<wayPrio.size(); i++) {
+      if (wayLineStyles[i]!=NULL && wayPrio[i]==priorities[p]) {
+        wayTypes.push_back(i);
+      }
+    }
   }
 
   std::set<Mag> magnifications;
@@ -641,6 +651,11 @@ size_t StyleConfig::GetStyleCount() const
   result=std::max(result,areaFillStyles.size());
 
   return result;
+}
+
+void StyleConfig::GetWayTypesByPrio(std::vector<TypeId>& types) const
+{
+  types=wayTypes;
 }
 
 void StyleConfig::GetWayTypesWithPrio(size_t prio, std::set<TypeId>& types) const

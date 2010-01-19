@@ -295,6 +295,4 @@ bool GenerateAreaAreaIndex(const ImportParameter& parameter,
   }
 
   return !writer.HasError() && writer.Close();
-
-  return true;
 }

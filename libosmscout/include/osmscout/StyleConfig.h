@@ -471,6 +471,7 @@ private:
 
   std::vector<size_t>       wayPrio;
   std::vector<size_t>       priorities;
+  std::vector<TypeId>       wayTypes;
 
 public:
   StyleConfig(TypeConfig* typeConfig);
@@ -500,6 +501,7 @@ public:
 
   size_t GetStyleCount() const;
 
+  void GetWayTypesByPrio(std::vector<TypeId>& types) const;
   void GetWayTypesWithPrio(size_t prio, std::set<TypeId>& types) const;
   void GetWayTypesWithMaxPrio(size_t prio, std::set<TypeId>& types) const;
   void GetNodeTypesWithMag(double mag, std::set<TypeId>& types) const;

@@ -33,6 +33,7 @@ private:
   size_t      nodeIndexIntervalSize;
   size_t      numericIndexLevelSize;
   size_t      areaAreaIndexMaxMag;
+  size_t      areaWayIndexMaxMag;
 
 public:
   ImportParameter();
@@ -43,6 +44,7 @@ public:
   size_t GetNodeIndexIntervalSize() const;
   size_t GetNumericIndexLevelSize() const;
   size_t GetAreaAreaIndexMaxMag() const;
+  size_t GetAreaWayIndexMaxMag() const;
 
   void SetMapfile(const std::string& mapfile);
   void SetStartStep(size_t startStep);

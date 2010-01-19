@@ -20,9 +20,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <map>
 #include <set>
+#include <vector>
 
-#include <osmscout/Tiles.h>
 #include <osmscout/StyleConfig.h>
 
 class AreaWayIndex
@@ -30,25 +31,26 @@ class AreaWayIndex
 private:
   struct IndexEntry
   {
-    NodeCount               nodeCount;
-    std::vector<FileOffset> offsets;
+    std::map<TypeId,std::vector<FileOffset> > dataOffsets;
+    FileOffset                                children[4];
   };
 
+  typedef std::map<size_t,IndexEntry> IndexLevel;
+
 private:
-  std::map<TypeId,std::map<TileId,IndexEntry > > areaWayIndex;
+  std::vector<double>     cellWidth;
+  std::vector<double>     cellHeight;
+  size_t                  maxLevel;
+  std::vector<IndexLevel> index;
 
 public:
-  bool LoadAreaWayIndex(const std::string& path);
-
-  size_t GetNodes(TypeId drawType,
-                  size_t tileMinX, size_t tileMinY,
-                  size_t tileMaxX, size_t tileMaxY) const;
+  bool Load(const std::string& path);
 
   void GetOffsets(const StyleConfig& styleConfig,
                   double minlon, double minlat,
                   double maxlon, double maxlat,
-                  double magnification,
-                  size_t maxPriority,
+                  const std::vector<TypeId>& types,
+                  size_t maxCount,
                   std::set<FileOffset>& offsets) const;
 
   void DumpStatistics();
