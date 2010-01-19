@@ -234,7 +234,7 @@ bool DatabaseTask::GetMatchingCities(const std::wstring& name,
 
   return database->GetMatchingCities(Lum::Base::WStringToUTF8(name),
                                      cities,
-                                     limit,limitReached);
+                                     limit,limitReached, false);
 }
 
 bool DatabaseTask::GetMatchingStreets(Id urbanId, const std::wstring& name,
@@ -250,7 +250,7 @@ bool DatabaseTask::GetMatchingStreets(Id urbanId, const std::wstring& name,
   return database->GetMatchingStreets(urbanId,
                                       Lum::Base::WStringToUTF8(name),
                                       streets,
-                                      limit,limitReached);
+                                      limit,limitReached, false);
 }
 
 bool DatabaseTask::CalculateRoute(Id startWayId, Id startNodeId,

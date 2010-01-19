@@ -64,7 +64,8 @@ Database::Database()
    nodeCache(1000000),
    wayCache(1000000),
    nodeUseCache(10), // Seems like the cache is more expensive than direct loading!?
-   typeConfig(NULL)
+   typeConfig(NULL),
+   hashFunction(NULL)
 {
   // no code
 }
@@ -74,11 +75,13 @@ Database::~Database()
   // no code
 }
 
-bool Database::Open(const std::string& path)
+bool Database::Open(const std::string& path, std::string (*hashFunction) (std::string))
 {
   assert(!path.empty());
 
   this->path=path;
+  
+  this->hashFunction=hashFunction;
 
   std::string typeConfigFileName=path+"/"+"map.ost.xml";
 
@@ -127,7 +130,7 @@ bool Database::Open(const std::string& path)
   std::cout << "Loading area way area index done." << std::endl;
 
   std::cout << "Loading city street index..." << std::endl;
-  if (!cityStreetIndex.LoadCityStreetIndex(path)) {
+  if (!cityStreetIndex.LoadCityStreetIndex(path, hashFunction)) {
     std::cerr << "Cannot load CityStreetIndex!" << std::endl;
     return false;
   }
@@ -482,16 +485,17 @@ bool Database::GetWays(const std::vector<Id>& ids, std::vector<Way>& ways) const
 
 bool Database::GetMatchingCities(const std::string& name,
                                  std::list<City>& cities,
-                                 size_t limit, bool& limitReached) const
+                                 size_t limit, bool& limitReached, bool startWith) const
 {
-  return cityStreetIndex.GetMatchingCities(name,cities,limit,limitReached);
+  return cityStreetIndex.GetMatchingCities(name,cities,limit,limitReached, startWith);
 }
 
 bool Database::GetMatchingStreets(Id urbanId, const std::string& name,
                                   std::list<Street>& streets,
-                                  size_t limit, bool& limitReached) const
+                                  size_t limit, bool& limitReached,
+                                  bool startWith) const
 {
-  return cityStreetIndex.GetMatchingStreets(urbanId,name,streets,limit,limitReached);
+  return cityStreetIndex.GetMatchingStreets(urbanId,name,streets,limit,limitReached, startWith);
 }
 
 bool GetWays(const Database::WayIndex& index,

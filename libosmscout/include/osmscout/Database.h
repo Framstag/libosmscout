@@ -93,6 +93,8 @@ private:
   mutable FileScanner   wayScanner;    //! File stream to the way.dat file
 
   TypeConfig            *typeConfig;   //! Type config for the currently opened map
+  
+  std::string           (*hashFunction) (std::string);
 
 private:
   size_t GetMaximumPriority(const StyleConfig& styleConfig,
@@ -129,7 +131,7 @@ public:
   Database();
   virtual ~Database();
 
-  bool Open(const std::string& path);
+  bool Open(const std::string& path, std::string (*hashFunction) (std::string) = NULL);
   bool IsOpen() const;
   void Close();
 
@@ -157,10 +159,12 @@ public:
 
   bool GetMatchingCities(const std::string& name,
                          std::list<City>& cities,
-                         size_t limit, bool& limitReached) const;
+                         size_t limit, bool& limitReached, bool startWith) const;
+  
   bool GetMatchingStreets(Id urbanId, const std::string& name,
                           std::list<Street>& streets,
-                          size_t limit, bool& limitReached) const;
+                          size_t limit, bool& limitReached,
+                          bool startWith) const;
   bool GetJoints(Id id,
                  std::set<Id>& wayIds) const;
   bool GetJoints(const std::set<Id>& ids,
