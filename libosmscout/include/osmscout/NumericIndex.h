@@ -195,25 +195,31 @@ bool NumericIndex<N,T>::GetOffsets(const std::vector<N>& ids,
 
           cacheRef->value.reserve(levelSize);
 
-          size_t     j=0;
           IndexEntry entry;
 
           entry.startId=0;
           entry.fileOffset=0;
 
-          while (j<levelSize && !scanner.HasError()) {
+          for (size_t j=0; j<levelSize; j++) {
             size_t cidx;
             size_t coff;
 
-            scanner.ReadNumber(coff);
             scanner.ReadNumber(cidx);
+            scanner.ReadNumber(coff);
 
-            entry.fileOffset+=coff;
+            if (scanner.HasError()) {
+              // This is a hack, for the last page we simply ran behind the end of file and
+              // create an error condition. We should add an IsEOF method to the FileScanner
+              // and thus avoid creating EOFconditions at all. However until that time
+              // we simply close the file (and reopen it later) to clear the error flag.
+              scanner.Close();
+              break;
+            }
+
             entry.startId+=cidx;
+            entry.fileOffset+=coff;
 
             cacheRef->value.push_back(entry);
-
-            j++;
           }
         }
 
@@ -333,13 +339,12 @@ bool GenerateNumericIndex(const ImportParameter& parameter,
 
   writer.Write((unsigned long)0); // Write the starting position of the last page
 
-  size_t     currentEntry=0;
   size_t     lastId=0;
   FileOffset lastPos=0;
 
   progress.Info(std::string("Level ")+NumberToString(levels)+" entries "+NumberToString(dataCount));
 
-  while (!scanner.HasError()) {
+  for (size_t i=0; i<dataCount; i++) {
     FileOffset pos;
 
     scanner.GetPos(pos);
@@ -348,31 +353,27 @@ bool GenerateNumericIndex(const ImportParameter& parameter,
 
     data.Read(scanner);
 
-    if (!scanner.HasError()) {
-      if (currentEntry%parameter.GetNumericIndexLevelSize()==0) {
-        FileOffset pageStart;
-
-        writer.GetPos(pageStart);
-
-        writer.WriteNumber(pos);
-        writer.WriteNumber(data.id);
-        startingIds.push_back(data.id);
-        pageStarts.push_back(pageStart);
-      }
-      else {
-        FileOffset pageStart;
-
-        writer.GetPos(pageStart);
-
-        writer.WriteNumber(pos-lastPos);
-        writer.WriteNumber(data.id-lastId);
-      }
-
-      lastPos=pos;
-      lastId=data.id;
-
-      currentEntry++;
+    if (scanner.HasError()) {
+      return false;
     }
+
+    if (i%parameter.GetNumericIndexLevelSize()==0) {
+      FileOffset pageStart;
+
+      writer.GetPos(pageStart);
+
+      writer.WriteNumber(data.id);
+      writer.WriteNumber(pos);
+      startingIds.push_back(data.id);
+      pageStarts.push_back(pageStart);
+    }
+    else {
+      writer.WriteNumber(data.id-lastId);
+      writer.WriteNumber(pos-lastPos);
+    }
+
+    lastPos=pos;
+    lastId=data.id;
   }
 
   levels--;
@@ -388,15 +389,15 @@ bool GenerateNumericIndex(const ImportParameter& parameter,
 
     for (size_t i=0; i<si.size(); i++) {
       if (i%parameter.GetNumericIndexLevelSize()==0) {
-        FileOffset pos;
+        FileOffset pageStart;
 
-        writer.GetPos(pos);
+        writer.GetPos(pageStart);
 
         startingIds.push_back(si[i]);
-        pageStarts.push_back(pos);
+        pageStarts.push_back(pageStart);
       }
 
-      if (i==0) {
+      if (i%parameter.GetNumericIndexLevelSize()==0) {
         writer.WriteNumber(si[i]);
         writer.WriteNumber(po[i]);
       }
