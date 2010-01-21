@@ -136,16 +136,16 @@
   <way key="highway" value="cycleway" prio="11">
     <line style="dotted"
           outlineColor="ffffff80" color="4645fa"
-          minPixel="2" maxPixel="2" width="3"
-          outline="1"/>
+          minPixel="1.5" maxPixel="1.5" width="3"
+          outline="1.5"/>
     <label style="contour" minMag="detail"/>
   </way>
 
   <way key="highway" value="footway" prio="11">
     <line style="dotted"
           outlineColor="ffffff80" color="fe9897"
-          minPixel="2" maxPixel="2" width="3"
-          outline="2"/>
+          minPixel="1.5" maxPixel="1.5" width="3"
+          outline="1.5"/>
     <label style="contour" minMag="detail"/>
   </way>
 
@@ -465,6 +465,7 @@
   </area>
 
   <area key="leisure" value="sports_centre">
+    <fill filter="building" color="bca9a9" layer="2"/>
     <fill color="bde3cb"/>
     <label minMag="close"/>
   </area>
@@ -516,7 +517,7 @@
   </area>
 
   <area key="leisure" value="park">
-    <fill color="b6fcb6"/>
+    <fill color="c6f0cf"/>
     <label minMag="close"/>
   </area>
 
@@ -703,9 +704,15 @@
   <area key="amenity" value="hospital">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
-    <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
-    <icon icon="hospital" />
+    <label style="emphasize" size="1.1" textColor="da0092" minMag="veryClose"/>
+    <icon icon="hospital" minMag="close"/>
   </area>
+
+  <node key="amenity" value="hospital">
+    <symbol style="circle" size="4" fillColor="da0092" minMag="close"/>
+    <icon icon="hospital" minMag="close"/>
+    <label style="emphasize" size="1.1" textColor="da0092" minMag="veryClose"/>
+  </node>
 
   <area key="amenity" value="hunting_stand">
     <fill filter="building" color="cb4040" layer="2"/>
@@ -733,8 +740,15 @@
 
   <area key="amenity" value="parking">
     <fill color="f6eeb6"/>
-    <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
+    <icon icon="parking" minMag="close"/>
+    <label style="emphasize" size="1.1" textColor="4bb2da" minMag="veryClose"/>
   </area>
+
+  <node key="amenity" value="parking">
+    <symbol style="circle" size="4" fillColor="4bb2da" minMag="close"/>
+    <icon icon="parking" minMag="close"/>
+    <label style="emphasize" size="1.1" textColor="4bb2da" minMag="veryClose"/>
+  </node>
 
   <area key="amenity" value="pharmacy">
     <fill filter="building" color="cb4040" layer="2"/>
@@ -760,12 +774,12 @@
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
-  <node key="amenity" value="post_box">
-    <symbol style="circle" size="4" fillColor="ffcc00" minMag="veryClose"/>
-  </node>
-
   <node key="amenity" value="post_office">
     <symbol style="box" fillColor="ffcc00" minMag="veryClose"/>
+  </node>
+
+  <node key="amenity" value="post_box">
+    <symbol style="circle" size="4" fillColor="ffcc00" minMag="veryClose"/>
   </node>
 
   <area key="amenity" value="prison">

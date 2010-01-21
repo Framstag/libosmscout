@@ -216,26 +216,6 @@ LabelStyle& LabelStyle::SetBorderColor(double r, double g, double b, double a)
   return *this;
 }
 
-IconStyle::IconStyle()
- : icon(iconNone)
-{
-  // no code
-}
-
-IconStyle& IconStyle::SetIcon(Icon icon)
-{
-  this->icon=icon;
-
-  return *this;
-}
-
-IconStyle& IconStyle::SetIconName(const std::string& iconName)
-{
-  this->iconName=iconName;
-
-  return *this;
-}
-
 SymbolStyle::SymbolStyle()
  : style(none),
    minMag(magWorld),
@@ -275,6 +255,34 @@ SymbolStyle& SymbolStyle::SetFillColor(double r, double g, double b, double a)
   fillG=g;
   fillB=b;
   fillA=a;
+
+  return *this;
+}
+
+IconStyle::IconStyle()
+ : icon(iconNone),
+   minMag(magWorld)
+{
+  // no code
+}
+
+IconStyle& IconStyle::SetIcon(Icon icon)
+{
+  this->icon=icon;
+
+  return *this;
+}
+
+IconStyle& IconStyle::SetIconName(const std::string& iconName)
+{
+  this->iconName=iconName;
+
+  return *this;
+}
+
+IconStyle& IconStyle::SetMinMag(Mag mag)
+{
+  this->minMag=mag;
 
   return *this;
 }

@@ -54,19 +54,23 @@ private:
   double              vscale;
 
   // helper struct for drawing
-  std::vector<bool>                 drawNode;    //! This nodes will be drawn
-  std::vector<bool>                 outNode;     //! This nodes is out of the visible area
-  std::vector<double>               nodeX;       //! static scratch buffer for calculation
-  std::vector<double>               nodeY;       //! static scratch buffer for calculation
-  std::vector<double>               lineWidth;   //! line with for this way line style
-  std::vector<bool>                 outline;     //! We draw an outline for this way line style
-  std::vector<double>               borderWidth; //! border with for this way (area) border style
-  std::map<size_t,cairo_scaled_font_t*> font;  //! Cached scaled font
+  std::vector<bool>                 drawNode;     //! This nodes will be drawn
+  std::vector<bool>                 outNode;      //! This nodes is out of the visible area
+  std::vector<double>               nodeX;        //! static scratch buffer for calculation
+  std::vector<double>               nodeY;        //! static scratch buffer for calculation
+  std::vector<double>               lineWidth;    //! line with for this way line style
+  std::vector<bool>                 outline;      //! We draw an outline for this way line style
+  std::vector<double>               borderWidth;  //! border with for this way (area) border style
+  std::map<size_t,cairo_scaled_font_t*> font;     //! Cached scaled font
+  std::vector<cairo_surface_t*>     image;        //! List of internal images
+  std::vector<bool>                 imageChecked; //! We have tried to load the internal image
 
   cairo_scaled_font_t* GetScaledFont(cairo_t* draw,
                                      size_t fontSize);
 
   bool IsVisible(const Way& way) const;
+
+  bool CheckImage(IconStyle::Icon icon);
 
   void DrawLabel(cairo_t* draw,
                  double magnification,
@@ -82,6 +86,10 @@ private:
   void DrawSymbol(cairo_t* draw,
                   const SymbolStyle* style,
                   double x, double y);
+
+  void DrawIcon(cairo_t* draw,
+                const IconStyle* style,
+                double x, double y);
 
   void SetLineStyle(cairo_t* draw,
                     double lineWidth,

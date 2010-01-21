@@ -53,8 +53,6 @@ public:
   size_t GetIntervalSize() const;
   void GetNodeIndexEntries(const std::set<Id>& ids,
                            std::list<NodeUseIndexEntry>& entries) const;
-  void GetNodePagesIndexEntries(const std::set<Page>& pages,
-                                std::list<NodeUseIndexEntry>& entries) const;
 
   void DumpStatistics();
 };

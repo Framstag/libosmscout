@@ -103,38 +103,6 @@ void NodeUseIndex::GetNodeIndexEntries(const std::set<Id>& ids,
   }
 }
 
-void NodeUseIndex::GetNodePagesIndexEntries(const std::set<Page>& pages,
-                                            std::list<NodeUseIndexEntry>& entries) const
-{
-  for (std::set<size_t>::const_iterator interval=pages.begin();
-       interval!=pages.end();
-       ++interval) {
-
-    std::map<size_t,IndexEntry>::const_iterator entry;
-
-    entry=nodeUseIndex.find(*interval);
-
-    assert(entry!=nodeUseIndex.end());
-
-    NodeUseIndexEntry tmp;
-
-    tmp.interval=entry->first;;
-    tmp.offset=entry->second.offset;
-    tmp.count=entry->second.count;
-
-    entry++;
-
-    if (entry!=nodeUseIndex.end()) {
-      tmp.size=entry->second.offset-tmp.offset;
-    }
-    else {
-      tmp.size=datSize-tmp.offset;
-    }
-
-    entries.push_back(tmp);
-  }
-}
-
 void NodeUseIndex::DumpStatistics()
 {
   size_t memory=0;

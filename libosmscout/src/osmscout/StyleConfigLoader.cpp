@@ -153,6 +153,9 @@ public:
     else if (name=="hospital") {
       icon=IconStyle::iconHospital;
     }
+    else if (name=="parking") {
+      icon=IconStyle::iconParking;
+    }
     else if (name=="custom") {
       icon=IconStyle::iconCustom;
     }
@@ -391,7 +394,7 @@ public:
         return;
       }
 
-      std::cout << "Parsed: " << key << "/" << value << " => " << type << std::endl;
+      // std::cout << "Parsed: " << key << "/" << value << " => " << type << std::endl;
 
       if (context==contextWay) {
         styleConfig.SetWayPrio(type,prio);
@@ -867,6 +870,7 @@ public:
     else if (context==contextNodeIcon || context==contextAreaIcon) {
       const xmlChar   *iconValue=NULL;
       const xmlChar   *iconNameValue=NULL;
+      const xmlChar   *minMagValue=NULL;
       IconStyle::Icon icon=IconStyle::iconNone;
       std::string     iconName;
 
@@ -877,6 +881,9 @@ public:
           }
           else if (strcmp((const char*)atts[i],"iconName")==0) {
             iconNameValue=atts[i+1];
+          }
+          else if (strcmp((const char*)atts[i],"minMag")==0) {
+            minMagValue=atts[i+1];
           }
         }
       }
@@ -909,6 +916,20 @@ public:
 
       iconStyle.SetIcon(icon);
       iconStyle.SetIconName(iconName);
+
+      if (minMagValue!=NULL) {
+        std::string minMag;
+        Mag         m;
+
+        minMag=(const char*)minMagValue;
+
+        if (!GetMag(minMag,m)) {
+          std::cerr << "Unknown minimum magnification '" << minMag << "' for style type 'icon'" << std::endl;
+          return;
+        }
+
+        iconStyle.SetMinMag(m);
+      }
 
       if (context==contextNodeIcon) {
         styleConfig.SetNodeIconStyle(type,iconStyle);

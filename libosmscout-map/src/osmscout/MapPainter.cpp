@@ -32,6 +32,13 @@
 
 static const double gradtorad=2*M_PI/360;
 
+static const char* iconName[] = {
+                                 "start",
+                                 "target",
+                                 "hospital",
+                                 "parking"
+                               };
+
 static double longDash[]= {7,3};
 static double dotted[]= {1,3};
 static double lineDot[]= {7,3,1,3};
@@ -307,6 +314,30 @@ bool MapPainter::IsVisible(const Way& way) const
            lonMax<this->lonMin ||
            latMin>this->latMax ||
            latMax<this->latMin);
+}
+
+bool MapPainter::CheckImage(IconStyle::Icon icon)
+{
+  if (imageChecked.size()<=icon) {
+    imageChecked.resize(icon+1,false);
+    image.resize(icon+1,NULL);
+  }
+
+  if (imageChecked[icon]) {
+    return image[icon]!=NULL;
+  }
+
+  std::string filename=std::string("../libosmscout/data/icons/14x14/standard/")+iconName[icon]+".png";
+
+  image[icon]=osmscout::LoadPNG(filename);
+
+  if (image[icon]==NULL) {
+    std::cerr << "ERROR while loading icon file '" << filename << "'" << std::endl;
+  }
+
+  imageChecked[icon]=true;
+
+  return false;
 }
 
 bool MapPainter::transformPixelToGeo(int x, int y,
@@ -631,6 +662,16 @@ void MapPainter::DrawSymbol(cairo_t* draw,
     cairo_fill(draw);
     break;
   }
+}
+
+void MapPainter::DrawIcon(cairo_t* draw,
+                          const IconStyle* style,
+                          double x, double y)
+{
+  assert(image[style->GetIcon()]!=NULL);
+
+  cairo_set_source_surface(draw,image[style->GetIcon()],x-7,y-7);
+  cairo_paint(draw);
 }
 
 void MapPainter::GetDimensions(double lon, double lat,
@@ -1493,20 +1534,52 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
 
   pathLabelsTimer.Stop();
 
-  // Nodes
-
   StopClock nodesTimer;
 
-  //std::cout << "Draw nodes..." << std::endl;
+  // Nodes symbols & Node labels
+
+  //std::cout << "Draw node symbols & labels..." << std::endl;
 
   cairo_save(draw);
   for (std::vector<Node>::const_iterator node=nodes.begin();
        node!=nodes.end();
        ++node) {
-    const SymbolStyle *style=styleConfig.GetNodeSymbolStyle(node->type);
+    const LabelStyle  *labelStyle=styleConfig.GetNodeLabelStyle(node->type);
+    const IconStyle   *iconStyle=styleConfig.GetNodeIconStyle(node->type);
+    const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetNodeSymbolStyle(node->type);
 
-    if (style==NULL ||
-        magnification<style->GetMinMag()) {
+    bool hasLabel=labelStyle!=NULL &&
+                  magnification>=labelStyle->GetMinMag() &&
+                  magnification<=labelStyle->GetMaxMag();
+
+    bool hasSymbol=symbolStyle!=NULL &&
+                   magnification>=symbolStyle->GetMinMag();
+
+    bool hasIcon=iconStyle!=NULL &&
+                 magnification>=iconStyle->GetMinMag();
+
+    std::string label;
+
+    if (hasLabel) {
+      for (size_t i=0; i<node->tags.size(); i++) {
+        // TODO: We should make sure we prefer one over the other
+        if (node->tags[i].key==tagName) {
+          label=node->tags[i].value;
+          break;
+        }
+        else if (node->tags[i].key==tagRef)  {
+          label=node->tags[i].value;
+        }
+      }
+
+      hasLabel=!label.empty();
+    }
+
+    if (hasIcon) {
+      hasIcon=CheckImage(iconStyle->GetIcon());
+    }
+
+    if (!hasSymbol && !hasLabel && !hasIcon) {
       continue;
     }
 
@@ -1515,65 +1588,36 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
     x=(node->lon*gradtorad-hmin)*hscale;
     y=height-(atanh(sin(node->lat*gradtorad))-vmin)*vscale;
 
-    DrawSymbol(draw,style,x,y);
-
-    nodesDrawnCount++;
-  }
-
-  //nodesAllCount+=nodes.size();
-
-  cairo_restore(draw);
-
-  // Node labels
-
-  //std::cout << "Draw node labels..." << std::endl;
-
-  cairo_save(draw);
-  for (std::vector<Node>::const_iterator node=nodes.begin();
-       node!=nodes.end();
-       ++node) {
-    for (size_t i=0; i<node->tags.size(); i++) {
-      // TODO: We should make sure we prefer one over the other
-      if (node->tags[i].key==tagName) {
-        const LabelStyle *style=styleConfig.GetNodeLabelStyle(node->type);
-
-        if (style==NULL ||
-            magnification<style->GetMinMag() ||
-            magnification>style->GetMaxMag()) {
-          continue;
-        }
-
-        double x,y;
-
-        x=(node->lon*gradtorad-hmin)*hscale;
-        y=height-(atanh(sin(node->lat*gradtorad))-vmin)*vscale;
-
+    if (hasLabel) {
+      if (hasSymbol) {
         DrawLabel(draw,
                   magnification,
-                  *style,
-                  node->tags[i].value,
-                  x,y);
+                  *labelStyle,
+                  label,
+                  x,y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
       }
-      else if (node->tags[i].key==tagRef)  {
-        const LabelStyle *style=styleConfig.GetNodeRefLabelStyle(node->type);
-
-        if (style==NULL ||
-            magnification<style->GetMinMag() ||
-            magnification>style->GetMaxMag()) {
-          continue;
-        }
-
-        double x,y;
-
-        x=(node->lon*gradtorad-hmin)*hscale;
-        y=height-(atanh(sin(node->lat*gradtorad))-vmin)*vscale;
-
+      else if (hasIcon) {
         DrawLabel(draw,
                   magnification,
-                  *style,
-                  node->tags[i].value,
+                  *labelStyle,
+                  label,
+                  x,y+14+5); // TODO: Better layout to real size of icon
+      }
+      else {
+        DrawLabel(draw,
+                  magnification,
+                  *labelStyle,
+                  label,
                   x,y);
       }
+    }
+
+    if (hasIcon) {
+      DrawIcon(draw,iconStyle,x,y);
+    }
+
+    if (hasSymbol) {
+      DrawSymbol(draw,symbolStyle,x,y);
     }
   }
   cairo_restore(draw);

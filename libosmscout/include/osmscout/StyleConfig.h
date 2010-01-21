@@ -404,24 +404,26 @@ class IconStyle
 {
 public:
   enum Icon {
-    iconNone,
+    iconStart    = 0,
+    iconTarget   = 1,
 
-    iconStart,
-    iconTarget,
+    iconHospital = 2,
+    iconParking  = 3,
 
-    iconHospital,
-
-    iconCustom
+    iconCustom,
+    iconNone
   };
 private:
   Icon        icon;
   std::string iconName;
+  Mag         minMag;
 
 public:
   IconStyle();
 
   IconStyle& SetIcon(Icon icon);
   IconStyle& SetIconName(const std::string& iconName);
+  IconStyle& SetMinMag(Mag mag);
 
   inline bool IsVisible() const
   {
@@ -436,6 +438,11 @@ public:
   inline std::string GetIconName() const
   {
     return iconName;
+  }
+
+  inline const Mag& GetMinMag() const
+  {
+    return minMag;
   }
 };
 
@@ -547,6 +554,16 @@ public:
   {
     if (type<nodeSymbolStyles.size()) {
       return nodeSymbolStyles[type];
+    }
+    else {
+      return NULL;
+    }
+  }
+
+  inline const IconStyle* GetNodeIconStyle(TypeId type) const
+  {
+    if (type<nodeIconStyles.size()) {
+      return nodeIconStyles[type];
     }
     else {
       return NULL;
