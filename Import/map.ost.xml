@@ -75,21 +75,6 @@
     <type id="135" name="highway" value="roundabout" way="true" area="true" route="true"/>
     <type id="136" name="highway" value="motorway_junction" node="true" route="true"/>
 
-    <!--
-      Barrier
-    -->
-
-    <!-- Linear barrier -->
-    <type id="1600" name="barrier" value="hedge" way="true" area="true"/>
-    <type id="1601" name="barrier" value="fence" way="true" area="true"/>
-    <type id="1601" name="barrier" value="wall" way="true" area="true"/>
-    <type id="1601" name="barrier" value="ditch" way="true" area="true"/>
-
-    <!-- Linear barrier with sides -->
-    <type id="1602" name="barrier" value="retaining_wall" way="true" area="true"/>
-    <type id="1603" name="barrier" value="city_wall" way="true" area="true"/>
-
-    <!-- Node barrier -->
     <!-- Access node -->
 
     <!--
@@ -470,6 +455,22 @@
 
     <type id="2000" name="building" value="yes" area="true"/>
     <type id="2000" name="building" value="true" area="true"/>
+
+    <!--
+      Barrier
+    -->
+
+    <!-- Linear barrier -->
+    <type id="1600" name="barrier" value="hedge" way="true" area="true"/>
+    <type id="1601" name="barrier" value="fence" way="true" area="true"/>
+    <type id="1601" name="barrier" value="wall" way="true" area="true"/>
+    <type id="1601" name="barrier" value="ditch" way="true" area="true"/>
+
+    <!-- Linear barrier with sides -->
+    <type id="1602" name="barrier" value="retaining_wall" way="true" area="true"/>
+    <type id="1603" name="barrier" value="city_wall" way="true" area="true"/>
+
+    <!-- Node barrier -->
 
     <type id="2001" name="restriction" value="no_right_turn" relation="true"/>
     <type id="2001" name="restriction" value="no_left_turn" relation="true"/>

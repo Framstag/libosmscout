@@ -310,6 +310,7 @@
   <area key="landuse" value="retail">
     <fill filter="building" color="bca9a9" layer="2"/>
     <fill color="feeaea"/>
+    <border color="c5a0a0" minPixel="1" maxPixel="1" width="1"/>
     <label minMag="city"/>
   </area>
 
@@ -320,6 +321,7 @@
 
   <area key="landuse" value="industrial">
     <fill color="dfd1d6"/>
+    <border color="c5a0a0" minPixel="1" maxPixel="1" width="1"/>
     <label style="emphasize" minMag="close"/>
   </area>
 
@@ -1185,6 +1187,12 @@
     <fill color="bca9a9" layer="2"/>
     <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
+
+  <!--
+  <area key="barrier" value="fence">
+    <fill color="ff0000" layer="2"/>
+    <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
+  </area>-->
 
   <node key="place" value="continent">
     <label style="emphasize" minMag="world" maxMag="city"/>
