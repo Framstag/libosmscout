@@ -40,7 +40,6 @@ libosmscout_la_SOURCES= osmscout/Types.cpp \
                         osmscout/AreaAreaIndex.cpp \
                         osmscout/AreaNodeIndex.cpp \
                         osmscout/AreaWayIndex.cpp \
-                        osmscout/AreaWayIndex2.cpp \
                         osmscout/CityStreetIndex.cpp \
                         osmscout/NodeUseIndex.cpp \
                         osmscout/Route.cpp \
