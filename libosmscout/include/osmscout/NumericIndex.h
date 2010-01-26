@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <cmath>
 #include <list>
 #include <set>
 
@@ -322,17 +323,21 @@ bool GenerateNumericIndex(const ImportParameter& parameter,
 
   size_t levels=1;
   size_t tmp;
+  size_t indexLevelSize=parameter.GetNumericIndexLevelSize();
 
   tmp=dataCount;
-  while (tmp/parameter.GetNumericIndexLevelSize()>0) {
-    tmp=tmp/parameter.GetNumericIndexLevelSize();
+  while (tmp/indexLevelSize>0) {
+    tmp=tmp/indexLevelSize;
     levels++;
   }
 
-  progress.Info(NumberToString(dataCount)+" entries will be stored in "+NumberToString(levels)+ " levels using index level size of "+NumberToString(parameter.GetNumericIndexLevelSize()));
+  indexLevelSize=ceil(pow(dataCount,1.0/levels));
+
+  progress.Info(NumberToString(dataCount)+" entries will be stored in "+NumberToString(levels)+ " levels using index level size of "+NumberToString(indexLevelSize));
+
 
   writer.WriteNumber(levels); // Number of levels
-  writer.WriteNumber(parameter.GetNumericIndexLevelSize()); // Size of index page
+  writer.WriteNumber(indexLevelSize); // Size of index page
   writer.Write(dataCount);        // Number of nodes
 
   writer.GetPos(lastLevelPageStart);
@@ -357,7 +362,7 @@ bool GenerateNumericIndex(const ImportParameter& parameter,
       return false;
     }
 
-    if (i%parameter.GetNumericIndexLevelSize()==0) {
+    if (i%indexLevelSize==0) {
       FileOffset pageStart;
 
       writer.GetPos(pageStart);
@@ -388,7 +393,7 @@ bool GenerateNumericIndex(const ImportParameter& parameter,
     progress.Info(std::string("Level ")+NumberToString(levels)+" entries "+NumberToString(si.size()));
 
     for (size_t i=0; i<si.size(); i++) {
-      if (i%parameter.GetNumericIndexLevelSize()==0) {
+      if (i%indexLevelSize==0) {
         FileOffset pageStart;
 
         writer.GetPos(pageStart);
@@ -397,7 +402,7 @@ bool GenerateNumericIndex(const ImportParameter& parameter,
         pageStarts.push_back(pageStart);
       }
 
-      if (i%parameter.GetNumericIndexLevelSize()==0) {
+      if (i%indexLevelSize==0) {
         writer.WriteNumber(si[i]);
         writer.WriteNumber(po[i]);
       }
