@@ -23,6 +23,8 @@ static const char* iconName[] = {
                                  "start",
                                  "target",
 
+                                 "bus_stop",
+
                                  "hospital",
                                  "parking",
                                  "pharmacy",

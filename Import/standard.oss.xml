@@ -170,10 +170,9 @@
   </way>
 
   <node key="highway" value="bus_stop" prio="11">
-    <!-- sybol -->
     <!--<label  minMag="veryClose"/>-->
-    <!-- TODO: We need a bus symbol here! -->
     <symbol style="circle" size="4" fillColor="7885b0" minMag="close"/>
+    <icon icon="bus_stop" minMag="veryClose"/>
   </node>
 
   <node key="highway" value="motorway_junction" prio="11">
@@ -320,7 +319,7 @@
   </area>
 
   <area key="landuse" value="industrial">
-    <fill color="dfd1d6" layer="2"/>
+    <fill color="dfd1d6"/>
     <label style="emphasize" minMag="close"/>
   </area>
 

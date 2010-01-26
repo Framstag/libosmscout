@@ -407,12 +407,16 @@ public:
     iconStart    = 0,
     iconTarget   = 1,
 
-    iconHospital = 2,
-    iconParking  = 3,
-    iconPharmacy = 4,
+    // highway
+    iconBusStop  = 2,
 
-    iconCustom   = 5,
-    iconNone     = 6
+    // amenity
+    iconHospital = 3,
+    iconParking  = 4,
+    iconPharmacy = 5,
+
+    iconCustom   = 6,
+    iconNone     = 7
   };
 private:
   Icon        icon;
