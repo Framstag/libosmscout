@@ -409,9 +409,10 @@ public:
 
     iconHospital = 2,
     iconParking  = 3,
+    iconPharmacy = 4,
 
-    iconCustom,
-    iconNone
+    iconCustom   = 5,
+    iconNone     = 6
   };
 private:
   Icon        icon;
@@ -480,6 +481,8 @@ private:
   std::vector<size_t>       priorities;
   std::vector<TypeId>       wayTypes;
 
+  std::map<std::string, IconStyle::Icon> nameToIconMap;
+
 public:
   StyleConfig(TypeConfig* typeConfig);
   virtual ~StyleConfig();
@@ -487,6 +490,9 @@ public:
   void Postprocess();
 
   TypeConfig* GetTypeConfig() const;
+
+  bool GetIconByName(const std::string& name, IconStyle::Icon& icon) const;
+  std::string GetIconNameByIcon(const IconStyle::Icon& icon) const;
 
   StyleConfig& SetWayPrio(TypeId type, size_t prio);
 

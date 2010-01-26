@@ -72,7 +72,8 @@ public:
     context=contextUnknown;
   }
 
-  bool GetFillStyle(const std::string& name, FillStyle::Style& style) {
+  bool GetFillStyle(const std::string& name, FillStyle::Style& style)
+  {
     if (name=="plain") {
       style=FillStyle::plain;
     }
@@ -83,7 +84,8 @@ public:
     return true;
   }
 
-  bool GetLabelStyle(const std::string& name, LabelStyle::Style& style) {
+  bool GetLabelStyle(const std::string& name, LabelStyle::Style& style)
+  {
     if (name=="normal") {
       style=LabelStyle::normal;
     }
@@ -103,7 +105,8 @@ public:
     return true;
   }
 
-  bool GetLineStyle(const std::string& name, LineStyle::Style& style) {
+  bool GetLineStyle(const std::string& name, LineStyle::Style& style)
+  {
     if (name=="normal") {
       style=LineStyle::normal;
     }
@@ -123,7 +126,8 @@ public:
     return true;
   }
 
-  bool GetSymbolStyle(const std::string& name, SymbolStyle::Style& style) {
+  bool GetSymbolStyle(const std::string& name, SymbolStyle::Style& style)
+  {
     if (name=="none") {
       style=SymbolStyle::none;
     }
@@ -140,33 +144,13 @@ public:
     return true;
   }
 
-  bool GetIconStyle(const std::string& name, IconStyle::Icon& icon) {
-    if (name=="none") {
-      icon=IconStyle::iconNone;
-    }
-    else if (name=="start") {
-      icon=IconStyle::iconStart;
-    }
-    else if (name=="target") {
-      icon=IconStyle::iconTarget;
-    }
-    else if (name=="hospital") {
-      icon=IconStyle::iconHospital;
-    }
-    else if (name=="parking") {
-      icon=IconStyle::iconParking;
-    }
-    else if (name=="custom") {
-      icon=IconStyle::iconCustom;
-    }
-    else {
-      return false;
-    }
-
-    return true;
+  bool GetIconStyle(const std::string& name, IconStyle::Icon& icon)
+  {
+    return styleConfig.GetIconByName(name,icon);
   }
 
-  bool GetMag(const std::string& name, Mag& mag) {
+  bool GetMag(const std::string& name, Mag& mag)
+  {
     if (name=="world") {
       mag=magWorld;
     }

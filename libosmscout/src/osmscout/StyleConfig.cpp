@@ -19,6 +19,19 @@
 
 #include <osmscout/StyleConfig.h>
 
+static const char* iconName[] = {
+                                 "start",
+                                 "target",
+
+                                 "hospital",
+                                 "parking",
+                                 "pharmacy",
+
+                                 "custom",
+                                 "none",
+                                 NULL
+                               };
+
 LineStyle::LineStyle()
  : style(none),
    lineR(1),
@@ -290,6 +303,9 @@ IconStyle& IconStyle::SetMinMag(Mag mag)
 StyleConfig::StyleConfig(TypeConfig* typeConfig)
  : typeConfig(typeConfig)
 {
+  for (size_t i=0; iconName[i]!=NULL; i++) {
+    nameToIconMap[iconName[i]]=(IconStyle::Icon)i;
+  }
 }
 
 StyleConfig::~StyleConfig()
@@ -401,6 +417,26 @@ void StyleConfig::Postprocess()
 TypeConfig* StyleConfig::GetTypeConfig() const
 {
   return typeConfig;
+}
+
+bool StyleConfig::GetIconByName(const std::string& name, IconStyle::Icon& icon) const
+{
+  std::map<std::string, IconStyle::Icon>::const_iterator iter;
+
+  iter=nameToIconMap.find(name);
+
+  if (iter!=nameToIconMap.end())  {
+    icon=iter->second;
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+std::string StyleConfig::GetIconNameByIcon(const IconStyle::Icon& icon) const
+{
+  return iconName[icon];
 }
 
 StyleConfig& StyleConfig::SetWayPrio(TypeId type, size_t prio)

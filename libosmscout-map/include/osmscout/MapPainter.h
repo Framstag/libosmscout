@@ -70,7 +70,8 @@ private:
 
   bool IsVisible(const Way& way) const;
 
-  bool CheckImage(IconStyle::Icon icon);
+  bool CheckImage(const StyleConfig& styleConfig,
+                  IconStyle::Icon icon);
 
   void DrawLabel(cairo_t* draw,
                  double magnification,

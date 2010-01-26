@@ -753,8 +753,14 @@
   <area key="amenity" value="pharmacy">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
-    <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
+    <icon icon="pharmacy" minMag="veryClose"/>
+    <label style="emphasize" size="1.1" textColor="da0092" minMag="veryClose"/>
   </area>
+
+  <node key="amenity" value="pharmacy">
+    <icon icon="pharmacy" minMag="veryClose"/>
+    <label style="emphasize" size="1.1" textColor="da0092" minMag="veryClose"/>
+  </node>
 
   <area key="amenity" value="place_of_worship">
     <fill filter="building" color="cb4040" layer="2"/>

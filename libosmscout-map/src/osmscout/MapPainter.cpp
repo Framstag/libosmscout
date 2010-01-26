@@ -32,13 +32,6 @@
 
 static const double gradtorad=2*M_PI/360;
 
-static const char* iconName[] = {
-                                 "start",
-                                 "target",
-                                 "hospital",
-                                 "parking"
-                               };
-
 static double longDash[]= {7,3};
 static double dotted[]= {1,3};
 static double lineDot[]= {7,3,1,3};
@@ -316,7 +309,8 @@ bool MapPainter::IsVisible(const Way& way) const
            latMax<this->latMin);
 }
 
-bool MapPainter::CheckImage(IconStyle::Icon icon)
+bool MapPainter::CheckImage(const StyleConfig& styleConfig,
+                            IconStyle::Icon icon)
 {
   if (imageChecked.size()<=icon) {
     imageChecked.resize(icon+1,false);
@@ -327,7 +321,8 @@ bool MapPainter::CheckImage(IconStyle::Icon icon)
     return image[icon]!=NULL;
   }
 
-  std::string filename=std::string("../libosmscout/data/icons/14x14/standard/")+iconName[icon]+".png";
+  std::string filename=std::string("../libosmscout/data/icons/14x14/standard/")+
+                       styleConfig.GetIconNameByIcon(icon)+".png";
 
   image[icon]=osmscout::LoadPNG(filename);
 
@@ -1576,7 +1571,7 @@ bool MapPainter::DrawMap(const StyleConfig& styleConfig,
     }
 
     if (hasIcon) {
-      hasIcon=CheckImage(iconStyle->GetIcon());
+      hasIcon=CheckImage(styleConfig,iconStyle->GetIcon());
     }
 
     if (!hasSymbol && !hasLabel && !hasIcon) {
