@@ -97,11 +97,6 @@ public:
     // no code
   }
 
-  void Layout()
-  {
-    Object::Layout();
-  }
-
   void CalcSize()
   {
 #if defined(LUM_HAVE_LIB_HILDON)
@@ -114,9 +109,6 @@ public:
 
     minWidth=width;
     minHeight=height;
-
-    maxWidth=width;
-    maxHeight=height;
 
     Object::CalcSize();
   }
@@ -386,7 +378,8 @@ public:
      searchAddressAction(new Lum::Model::Action()),
      routeAction(new Lum::Model::Action()),
      debugStatisticsAction(new Lum::Model::Action()),
-     aboutAction(new Lum::Model::Action())
+     aboutAction(new Lum::Model::Action()),
+     map(NULL)
   {
     Observe(GetOpenedAction());
     Observe(GetClosedAction());
