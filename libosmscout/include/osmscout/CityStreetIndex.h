@@ -30,14 +30,14 @@
 // This name isn't really good, but I've no better idea...
 struct UrbanData
 {
-  std::string name;
-  std::string hash;
+  std::string   name;
+  std::string   hash;
   std::list<Id> ids;
 };
 
 struct Urban
 {
-  Id             id;
+  Id                   id;
   std::list<UrbanData> ways;
   std::list<UrbanData> areas;
 };
@@ -58,13 +58,13 @@ private:
 public:
   CityStreetIndex();
   virtual ~CityStreetIndex();
-  
+
   bool LoadCityStreetIndex(const std::string& path, std::string (*hashFunction) (std::string) = NULL);
-  
+
   bool GetMatchingCities(const std::string& name,
                          std::list<City>& cities,
                          size_t limit, bool& limitReached, bool startWith) const;
-  
+
   bool GetMatchingStreets(Id urbanId, const std::string& name,
                           std::list<Street>& streets,
                           size_t limit, bool& limitReached,

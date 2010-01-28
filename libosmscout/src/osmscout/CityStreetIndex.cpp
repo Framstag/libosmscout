@@ -76,7 +76,7 @@ bool CityStreetIndex::LoadUrban(Id id) const
 
     scanner.Read(name); // The name of the way
     way.name=name;
-    
+
     // if the user has supplied a hash function then use it to generate a hash value
     if (hashFunction)
     {
@@ -92,7 +92,7 @@ bool CityStreetIndex::LoadUrban(Id id) const
 
       way.ids.push_back(id);
     }
-    
+
     urban.ways.push_back(way);
   }
 
@@ -103,7 +103,7 @@ bool CityStreetIndex::LoadUrban(Id id) const
 
     scanner.Read(name); // The name of the way
     area.name=name;
-    
+
     // if the user has supplied a hash function then use it to generate a hash value
     if (hashFunction)
     {
@@ -119,7 +119,7 @@ bool CityStreetIndex::LoadUrban(Id id) const
 
       area.ids.push_back(id);
     }
-    
+
     urban.areas.push_back(area);
   }
 
@@ -141,7 +141,7 @@ bool CityStreetIndex::LoadCityStreetIndex(const std::string& path, std::string (
   std::string   file=path+"/"+"citystreet.idx";
 
   this->path=path;
-  
+
   this->hashFunction=hashFunction;
 
   if (!scanner.Open(file)) {
@@ -164,7 +164,7 @@ bool CityStreetIndex::LoadCityStreetIndex(const std::string& path, std::string (
     scanner.ReadNumber(refType); // Type of id
     scanner.Read(city.urbanId);  // The urban id
     scanner.Read(city.name);     // The name of the city
-    
+
     // if the user has supplied a hash function then use it to generate a hash value
     if (hashFunction)
     {
@@ -206,7 +206,7 @@ bool CityStreetIndex::GetMatchingCities(const std::string& name,
   bool found=false;
   std::string nameHash;
   std::string::size_type loc = std::string::npos;
-  
+
   // if the user supplied a special hash function call it and use the result
   if (hashFunction)
   {
@@ -217,14 +217,14 @@ bool CityStreetIndex::GetMatchingCities(const std::string& name,
        city!=this->cities.end();
        ++city) {
     found = false;
-    
+
     if (hashFunction && !city->hash.empty()) {
       loc = city->hash.find(nameHash);
     }
     else {
       loc = city->name.find(name);
     }
-    
+
     if (startWith) {
       if (loc==0) {
         found = true;
@@ -235,7 +235,7 @@ bool CityStreetIndex::GetMatchingCities(const std::string& name,
         found = true;
       }
     }
-     
+
     if (found) {
       if (cities.size()>=limit) {
         std::cout << "Limit reached!!!" << std::endl;
@@ -267,38 +267,37 @@ bool CityStreetIndex::GetMatchingStreets(Id urbanId, const std::string& name,
       return false;
     }
   }
-  
+
   // if the user supplied a special hash function call it and use the result
-  if (hashFunction)
-  {
-    nameHash = (*hashFunction) (name);
+  if (hashFunction) {
+    nameHash=(*hashFunction) (name);
   }
 
   for (std::list<UrbanData>::const_iterator way_it=urban.ways.begin();
        way_it!=urban.ways.end();
        ++way_it) {
-    const UrbanData &way = *way_it;
-         
-    found = false;
-    
+    const UrbanData &way=*way_it;
+
+    found=false;
+
     if (hashFunction && !way.hash.empty()) {
-      loc = way.hash.find(nameHash);
+      loc=way.hash.find(nameHash);
     }
     else {
-      loc = way.name.find(name);
+      loc=way.name.find(name);
     }
-    
+
     if (startWith) {
       if (loc==0) {
-        found = true;
+        found=true;
       }
     }
     else {
       if (loc!=std::string::npos) {
-        found = true;
+        found=true;
       }
     }
-     
+
     if (found) {
       if (streets.size()>=limit) {
         std::cout << "Limit reached!!!" << std::endl;
@@ -311,7 +310,7 @@ bool CityStreetIndex::GetMatchingStreets(Id urbanId, const std::string& name,
         street.reference.Set(*(way.ids.begin()),refWay);
         street.name=way.name;
 
-        streets.push_back(street);  
+        streets.push_back(street);
       }
     }
   }
@@ -319,28 +318,28 @@ bool CityStreetIndex::GetMatchingStreets(Id urbanId, const std::string& name,
   for (std::list<UrbanData>::const_iterator area_it=urban.areas.begin();
        area_it!=urban.areas.end();
        ++area_it) {
-    const UrbanData &area = *area_it;
-         
-    found = false;
-    
+    const UrbanData &area=*area_it;
+
+    found=false;
+
     if (hashFunction && !area.hash.empty()) {
-      loc = area.hash.find(nameHash);
+      loc=area.hash.find(nameHash);
     }
     else {
-      loc = area.name.find(name);
+      loc=area.name.find(name);
     }
-    
+
     if (startWith) {
       if (loc==0) {
-        found = true;
+        found=true;
       }
     }
     else {
       if (loc!=std::string::npos) {
-        found = true;
+        found=true;
       }
     }
-     
+
     if (found) {
       if (streets.size()>=limit) {
         std::cout << "Limit reached!!!" << std::endl;
@@ -353,11 +352,11 @@ bool CityStreetIndex::GetMatchingStreets(Id urbanId, const std::string& name,
         street.reference.Set(*(area.ids.begin()),refWay);
         street.name=area.name;
 
-        streets.push_back(street);  
+        streets.push_back(street);
       }
     }
   }
-  
+
   return true;
 }
 
