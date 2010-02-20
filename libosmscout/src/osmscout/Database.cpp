@@ -80,7 +80,7 @@ bool Database::Open(const std::string& path, std::string (*hashFunction) (std::s
   assert(!path.empty());
 
   this->path=path;
-  
+
   this->hashFunction=hashFunction;
 
   std::string typeConfigFileName=path+"/"+"map.ost.xml";
@@ -130,7 +130,7 @@ bool Database::Open(const std::string& path, std::string (*hashFunction) (std::s
   std::cout << "Loading area way area index done." << std::endl;
 
   std::cout << "Loading city street index..." << std::endl;
-  if (!cityStreetIndex.LoadCityStreetIndex(path, hashFunction)) {
+  if (!cityStreetIndex.Load(path, hashFunction)) {
     std::cerr << "Cannot load CityStreetIndex!" << std::endl;
     return false;
   }
@@ -483,19 +483,32 @@ bool Database::GetWays(const std::vector<Id>& ids, std::vector<Way>& ways) const
   return GetWays(offsets,ways);
 }
 
-bool Database::GetMatchingCities(const std::string& name,
-                                 std::list<City>& cities,
-                                 size_t limit, bool& limitReached, bool startWith) const
+bool Database::GetMatchingAdminRegions(const std::string& name,
+                                       std::list<AdminRegion>& regions,
+                                       size_t limit,
+                                       bool& limitReached,
+                                       bool startWith) const
 {
-  return cityStreetIndex.GetMatchingCities(name,cities,limit,limitReached, startWith);
+  return cityStreetIndex.GetMatchingAdminRegions(name,
+                                                 regions,
+                                                 limit,
+                                                 limitReached,
+                                                 startWith);
 }
 
-bool Database::GetMatchingStreets(Id urbanId, const std::string& name,
-                                  std::list<Street>& streets,
-                                  size_t limit, bool& limitReached,
-                                  bool startWith) const
+bool Database::GetMatchingLocations(const AdminRegion& region,
+                                    const std::string& name,
+                                    std::list<Location>& locations,
+                                    size_t limit,
+                                    bool& limitReached,
+                                    bool startWith) const
 {
-  return cityStreetIndex.GetMatchingStreets(urbanId,name,streets,limit,limitReached, startWith);
+  return cityStreetIndex.GetMatchingLocations(region,
+                                              name,
+                                              locations,
+                                              limit,
+                                              limitReached,
+                                              startWith);
 }
 
 bool GetWays(const Database::WayIndex& index,

@@ -29,17 +29,17 @@
 CitySearchDialog::CitySearchDialog(DatabaseTask* databaseTask)
  : databaseTask(databaseTask),
    okAction(new Lum::Model::Action()),
-   cityName(new Lum::Model::String(L"")),
+   regionName(new Lum::Model::String(L"")),
    searchTimerAction(new Lum::Model::Action()),
-   citiesModel(new CitiesModel(cities, new CitiesDataProvider())),
-   citySelection(new Lum::Model::SingleLineSelection()),
+   regionsModel(new RegionsModel(regions, new RegionsDataProvider())),
+   regionSelection(new Lum::Model::SingleLineSelection()),
    hasResult(false)
 {
   Observe(okAction);
   Observe(GetClosedAction());
-  Observe(cityName);
+  Observe(regionName);
   Observe(searchTimerAction);
-  Observe(citySelection);
+  Observe(regionSelection);
 
   okAction->Disable();
 }
@@ -53,7 +53,7 @@ Lum::Object* CitySearchDialog::GetContent()
 
   panel=Lum::VPanel::Create(true,true);
 
-  string=Lum::String::Create(cityName,25,true,false);
+  string=Lum::String::Create(regionName,25,true,false);
 
   panel->Add(string);
 
@@ -64,18 +64,18 @@ Lum::Object* CitySearchDialog::GetContent()
 
   table=new Lum::Table();
   table->SetFlex(true,true);
-  table->SetMinWidth(Lum::Base::Size::stdCharWidth,30);
-  table->SetMinHeight(Lum::Base::Size::stdCharHeight,5);
+  table->SetMinWidth(Lum::Base::Size::stdCharWidth,60);
+  table->SetMinHeight(Lum::Base::Size::stdCharHeight,6);
   table->SetShowHeader(true);
   table->GetTableView()->SetAutoFitColumns(true);
   table->GetTableView()->SetAutoVSize(true);
-  table->SetModel(citiesModel);
+  table->SetModel(regionsModel);
   table->SetHeaderModel(headerModel);
-  table->SetSelection(citySelection);
+  table->SetSelection(regionSelection);
   table->SetDoubleClickAction(okAction);
   panel->Add(table);
 
-  citiesModel->SetEmptyText(L"- no search criteria -");
+  regionsModel->SetEmptyText(L"- no search criteria -");
 
   return panel;
 }
@@ -85,32 +85,32 @@ void CitySearchDialog::GetActions(std::vector<Lum::Dlg::ActionInfo>& actions)
   Lum::Dlg::ActionDialog::CreateActionInfosOkCancel(actions,okAction,GetClosedAction());
 }
 
-void CitySearchDialog::FetchCities()
+void CitySearchDialog::FetchAdminRegions()
 {
   bool limitReached=true;
 
-  citiesModel->Off();
+  regionsModel->Off();
 
-  if (!cityName->Empty()) {
-    databaseTask->GetMatchingCities(cityName->Get(),cities,50,limitReached);
+  if (!regionName->Empty()) {
+    databaseTask->GetMatchingAdminRegions(regionName->Get(),regions,50,limitReached);
 
     if (limitReached) {
-      cities.clear();
-      citiesModel->SetEmptyText(L"- too many hits -");
+      regions.clear();
+      regionsModel->SetEmptyText(L"- too many hits -");
     }
-    else if (cities.size()>0) {
-      citiesModel->SetEmptyText(L"- no matches -");
+    else if (regions.size()>0) {
+      regionsModel->SetEmptyText(L"- no matches -");
     }
     else {
-      citiesModel->SetEmptyText(L"");
+      regionsModel->SetEmptyText(L"");
     }
   }
   else {
-    cities.clear();
-    citiesModel->SetEmptyText(L"- no search criteria -");
+    regions.clear();
+    regionsModel->SetEmptyText(L"- no search criteria -");
   }
 
-  citiesModel->On();
+  regionsModel->On();
 }
 
 void CitySearchDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& msg)
@@ -119,19 +119,19 @@ void CitySearchDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMs
     Exit();
   }
   else if (model==searchTimerAction && searchTimerAction->IsFinished()) {
-    FetchCities();
+    FetchAdminRegions();
   }
-  else if (model==cityName) {
-    if (cityName->Empty()) {
-      FetchCities();
+  else if (model==regionName) {
+    if (regionName->Empty()) {
+      FetchAdminRegions();
     }
     else {
       Lum::OS::display->RemoveTimer(searchTimerAction);
       Lum::OS::display->AddTimer(1,150000,searchTimerAction);
     }
   }
-  else if (model==citySelection) {
-    if (citySelection->HasSelection()) {
+  else if (model==regionSelection) {
+    if (regionSelection->HasSelection()) {
       okAction->Enable();
     }
     else {
@@ -139,9 +139,9 @@ void CitySearchDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMs
     }
   }
   else if (model==okAction && okAction->IsEnabled() && okAction->IsFinished()) {
-    assert(citySelection->HasSelection());
+    assert(regionSelection->HasSelection());
 
-    result=citiesModel->GetEntry(citySelection->GetLine());
+    result=regionsModel->GetEntry(regionSelection->GetLine());
     hasResult=true;
     Exit();
   }
@@ -155,7 +155,7 @@ bool CitySearchDialog::HasResult() const
   return hasResult;
 }
 
-const City& CitySearchDialog::GetResult() const
+const AdminRegion& CitySearchDialog::GetResult() const
 {
   return result;
 }

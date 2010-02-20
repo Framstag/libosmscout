@@ -1,6 +1,3 @@
-#ifndef OSMSCOUT_CITY_H
-#define OSMSCOUT_CITY_H
-
 /*
   TravelJinni - Openstreetmap offline viewer
   Copyright (C) 2009  Tim Teulings
@@ -20,14 +17,5 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <osmscout/Reference.h>
+#include <osmscout/Location.h>
 
-struct City
-{
-  Reference   reference;
-  Id          urbanId;
-  std::string name;
-  std::string hash;
-};
-
-#endif

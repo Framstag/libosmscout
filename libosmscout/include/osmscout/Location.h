@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_STREET_H
-#define OSMSCOUT_STREET_H
+#ifndef OSMSCOUT_LOCATION_H
+#define OSMSCOUT_LOCATION_H
 
 /*
   TravelJinni - Openstreetmap offline viewer
@@ -23,15 +23,13 @@
 #include <osmscout/Reference.h>
 
 /**
-  A street represented (normally) eitehr by a way or an area.
-
-  Street is in fact a bad name, since a place in form of an area can also
-  be a possible result.
+  A location is a named point, way, area or relation on the map. Something you can search for.
  */
-struct Street
+struct Location
 {
-  Reference   reference;
-  std::string name;
+  std::string          name;
+  std::string          path;
+  std::list<Reference> references;
 };
 
 #endif

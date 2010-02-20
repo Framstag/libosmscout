@@ -21,6 +21,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <limits>
 #include <list>
 #include <map>
 #include <set>
@@ -30,47 +31,52 @@
 #include <osmscout/RawRelation.h>
 #include <osmscout/RawWay.h>
 
+#include <osmscout/Node.h>
+#include <osmscout/Point.h>
 #include <osmscout/Reference.h>
 #include <osmscout/Way.h>
 
 #include <osmscout/Util.h>
+#include <iostream>
 
-struct Node
+/**
+  A location within an area
+  */
+struct Location
 {
-  Id     id;
-  double lon;
-  double lat;
+  Reference              reference;
+  std::string            name;
+};
+
+struct LocationRef
+{
+  FileOffset             offset;
+  Reference              reference;
 };
 
 /**
-  A city (of different size and kind)
+  An area
   */
-struct City
+struct Area
 {
-  Id          id;
-  RefType     refType;
-  Id          urbanId;
-  std::string name;
+  FileOffset                           offset;    //! Offset into the index file
+  Reference                            reference; //! The id for this area
+  std::string                          name;      //! The name of this area
+  std::list<Location>                  locations; //! Location that are represented by this area
+  std::vector<Point>                   area;      //! the geometric area of this area
+
+  double                               minlon;
+  double                               minlat;
+  double                               maxlon;
+  double                               maxlat;
+
+  std::map<std::string,std::list<Id> > nodes;     //! list of indexed nodes in this area
+  std::map<std::string,std::list<Id> > ways;      //! list of indexed ways in this area
+  std::map<std::string,std::list<Id> > as;        //! list of indexed areas in this area
+
+  std::list<Area>                      areas;     //! A list of sub areas
 };
 
-/**
-  An urban is a unnamed region that can contain one or more cities.
-  */
-struct Urban
-{
-  Id                     id;
-  std::vector<Node>      area;
-
-  std::list<City>        cities;
-
-  std::map<std::string,std::list<Id> > ways;
-  std::map<std::string,std::list<Id> > areas;
-
-  double                 minlon;
-  double                 minlat;
-  double                 maxlon;
-  double                 maxlat;
-};
 
 static void GetRelationIdsFromRelations(const std::list<RawRelation>& relations, std::set<Id>& ids)
 {
@@ -513,84 +519,81 @@ static bool GetWaysFromWayIds(const std::set<Id> & ids,
   return true;
 }
 
-/**
-  Returns true, if point in area.
-  */
-static bool IsPointInArea(double lon, double lat, const std::vector<RawNode>& nodes)
+template<typename N, typename M>
+double isLeft(const N& p0, const N& p1, const M& p2)
 {
-  int  i,j;
-  bool c = false;
-
-  for (i = 0, j = nodes.size()-1; i < nodes.size(); j = i++) {
-    if ( ((nodes[i].lat>lat) != (nodes[j].lat>lat)) &&
-        (lon < (nodes[j].lon-nodes[i].lon) * (lat-nodes[i].lat) / (nodes[j].lat-nodes[i].lat) + nodes[i].lon) )
-    c = !c;
+  if (p2.id==p0.id || p2.id==p1.id) {
+    return 0;
   }
 
-  return c;
+  return ((p1.lon-p0.lon)*(p2.lat-p0.lat)-(p2.lon-p0.lon)*(p1.lat-p0.lat));
 }
 
-/**
-  Returns true, if point in area.
-  */
-static bool IsPointInArea(double lon, double lat, const std::vector<Node>& nodes)
+template<typename N, typename M>
+bool IsPointInArea(const N& node,
+                   const std::vector<M>& nodes)
 {
-  int  i,j;
-  bool c = false;
-
-  for (i = 0, j = nodes.size()-1; i < nodes.size(); j = i++) {
-    if ( ((nodes[i].lat>lat) != (nodes[j].lat>lat)) &&
-        (lon < (nodes[j].lon-nodes[i].lon) * (lat-nodes[i].lat) / (nodes[j].lat-nodes[i].lat) + nodes[i].lon) )
-    c = !c;
-  }
-
-  return c;
-}
-
-/**
-  Add or update an urban.
-
-  urbanId  is the unique id of the urban
-  cityId   unique id of the city
-  refType  type of the cityId
-  name     name of the city
-  ns       list of nodes that make up the area
-  */
-static void AddOrUpdateUrban(std::map<Id,Urban>& urbans,
-                             Id urbanId,
-                             Id cityId,
-                             RefType refType,
-                             const std::string& name,
-                             const std::vector<RawNode>& ns)
-{
-  std::map<Id,Urban>::iterator iter=urbans.find(urbanId);
-
-  City city;
-
-  city.id=cityId;
-  city.refType=refType;
-  city.urbanId=urbanId;
-  city.name=name;
-
-  if (iter!=urbans.end()) {
-    iter->second.cities.push_back(city);
-  }
-  else {
-    Urban urban;
-
-    urban.id=urbanId;
-    urban.area.resize(ns.size());
-
-    for (size_t i=0; i<ns.size(); i++) {
-      urban.area[i].id=ns[i].id;
-      urban.area[i].lon=ns[i].lon;
-      urban.area[i].lat=ns[i].lat;
+  for (int i=0; i<nodes.size()-1; i++) {
+    if (node.id==nodes[i].id) {
+      return true;
     }
-
-    urban.cities.push_back(city);
-
-    urbans[urbanId]=urban;
   }
+
+  int wn=0;    // the winding number counter
+
+  // loop through all edges of the polygon
+  for (int i=0; i<nodes.size()-1; i++) {   // edge from V[i] to V[i+1]
+    if (nodes[i].lat <= node.lat) {         // start y <= P.y
+      if (nodes[i+1].lat > node.lat) {     // an upward crossing
+        if (isLeft( nodes[i], nodes[i+1], node) > 0) { // P left of edge
+          ++wn;            // have a valid up intersect
+        }
+      }
+    }
+    else {                       // start y > P.y (no test needed)
+      if (nodes[i+1].lat <= node.lat) {    // a downward crossing
+        if (isLeft( nodes[i], nodes[i+1], node) < 0) { // P right of edge
+          --wn;            // have a valid down intersect
+        }
+      }
+    }
+  }
+
+  return wn!=0;
+}
+
+/**
+  Returns true, if point in area.
+  */
+template<typename N>
+bool IsPointInArea(double lon, double lat,
+                   const std::vector<N>& nodes)
+{
+  int  i,j;
+  bool c=false;
+
+  for (i=0, j=nodes.size()-1; i<nodes.size(); j=i++) {
+    if (((nodes[i].lat>lat) != (nodes[j].lat>lat)) &&
+        (lon<(nodes[j].lon-nodes[i].lon)*(lat-nodes[i].lat) /
+         (nodes[j].lat-nodes[i].lat)+nodes[i].lon))  {
+      c=!c;
+    }
+  }
+
+  return c;
+}
+
+template<typename N,typename M>
+bool IsAreaInArea(const std::vector<N>& a,
+                  const std::vector<M>& b)
+{
+  for (typename std::vector<N>::const_iterator i=a.begin(); i!=a.end(); i++) {
+    if (!IsPointInArea(*i,b)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 /**
@@ -622,7 +625,8 @@ static bool GetCityNodes(const std::set<TypeId>& cityIds,
             name=node.tags[i].value;
             break;
           }
-          else if (node.tags[i].key==tagName && name.empty()) {
+          else if (node.tags[i].key==tagName &&
+                   name.empty()) {
             name=node.tags[i].value;
           }
         }
@@ -694,55 +698,303 @@ static bool GetCityAreas(const std::set<TypeId>& cityIds,
   return true;
 }
 
-/*
-bool FindDataForCityStreet(const std::map<Id,Urban>& urbans,
-                           const std::string& cityName,
-                           const std::string& streetName,
-                           City& c,
-                           std::list<Id>& ways,
-                           std::list<Id>& areas)
+static void AddArea(Area& parent, const Area& area)
 {
-  for (std::map<Id,Urban>::const_iterator urban=urbans.begin();
-       urban!=urbans.end();
-       ++urban) {
-    for (std::list<City>::const_iterator city=urban->second.cities.begin();
-         city!=urban->second.cities.end();
-         ++city) {
-      if (city->name==cityName) {
-        std::map<std::string,std::list<Id> >::const_iterator street;
+  for (std::list<Area>::iterator a=parent.areas.begin();
+       a!=parent.areas.end();
+       a++) {
+    if (IsAreaInArea(area.area,a->area)) {
+      // If we already have the same name and are a "minor" reference, we skip...
+      if (!(area.name==a->name &&
+            area.reference.type<a->reference.type)) {
+        AddArea(*a,area);
+      }
+      return;
+    }
+  }
 
-        street=urban->second.ways.find(streetName);
+  parent.areas.push_back(area);
+}
 
-        if (street!=urban->second.ways.end()) {
-          std::cout << city->name << ", " << street->first << ":" << std::endl;
-          for (std::list<Id>::const_iterator id=street->second.begin();
-               id!=street->second.end();
-               ++id) {
-            std::cout << "  Way: " << *id << std::endl;
-          }
+static void AddLocationToArea(Area& area,
+                              const Location& location,
+                              const Point& node)
+                              {
+  if (area.name==location.name) {
+    return;
+  }
 
-          c=*city;
-          ways=street->second;
-          areas.clear(); // TODO
+  for (std::list<Area>::iterator a=area.areas.begin();
+       a!=area.areas.end();
+       a++) {
+    if (IsPointInArea(node,a->area)) {
+      AddLocationToArea(*a,location,node);
+      return;
+    }
+  }
 
-          return true;
+  area.locations.push_back(location);
+}
+
+static void AddWayToArea(Area& area,
+                         const Way& way,
+                         double minlon,
+                         double minlat,
+                         double maxlon,
+                         double maxlat)
+{
+  bool inserted=false;
+
+  for (std::list<Area>::iterator a=area.areas.begin();
+       a!=area.areas.end();
+       a++) {
+    if (!(maxlon<a->minlon) &&
+        !(minlon>a->maxlon) &&
+        !(maxlat<a->minlat) &&
+        !(minlat>a->maxlat)) {
+      bool match=false;
+
+      for (size_t n=0; n<way.nodes.size(); n++) {
+        if (IsPointInArea(way.nodes[n].lon,way.nodes[n].lat,a->area)) {
+          match=true;
+          break;
         }
+      }
+
+      if (match) {
+        AddWayToArea(*a,way,minlon,minlat,maxlon,maxlat);
+        inserted=true;
       }
     }
   }
 
-  return false;
-}*/
+  if (!inserted) {
+    if (way.IsArea()) {
+      area.as[way.name].push_back(way.id);
+    }
+    else {
+      area.ways[way.name].push_back(way.id);
+    }
+  }
+}
+
+static void AddNodeToArea(Area& area,
+                          const Node& node,
+                          const std::string& name)
+{
+  for (std::list<Area>::iterator a=area.areas.begin();
+       a!=area.areas.end();
+       a++) {
+    if (IsPointInArea(node,a->area)) {
+      AddNodeToArea(*a,node,name);
+      return;
+    }
+  }
+
+  area.nodes[name].push_back(node.id);
+}
+
+static void DumpArea(const Area& parent, size_t indent)
+{
+  for (std::list<Area>::const_iterator a=parent.areas.begin();
+       a!=parent.areas.end();
+       a++) {
+    for (size_t i=0; i<indent; i++) {
+      std::cout << " ";
+    }
+    std::cout << a->name << std::endl;
+
+    for (std::list<Location>::const_iterator l=a->locations.begin();
+         l!=a->locations.end();
+         l++) {
+      for (size_t i=0; i<indent; i++) {
+        std::cout << " ";
+      }
+      std::cout << " =" << l->name << std::endl;
+    }
+
+    DumpArea(*a,indent+2);
+  }
+}
+
+static void CalculateAreaBounds(Area& parent)
+{
+  for (std::list<Area>::iterator area=parent.areas.begin();
+       area!=parent.areas.end();
+       ++area) {
+
+    area->minlon=area->area[0].lon;
+    area->maxlon=area->area[0].lon;
+    area->minlat=area->area[0].lat;
+    area->maxlat=area->area[0].lat;
+
+    for (size_t i=1; i<area->area.size(); i++) {
+      area->minlon=std::min(area->minlon,area->area[i].lon);
+      area->maxlon=std::max(area->maxlon,area->area[i].lon);
+      area->minlat=std::min(area->minlat,area->area[i].lat);
+      area->maxlat=std::max(area->maxlat,area->area[i].lat);
+    }
+
+    CalculateAreaBounds(*area);
+  }
+}
+
+static bool WriteArea(FileWriter& writer,
+                      Area& area, FileOffset parentOffset)
+{
+  writer.GetPos(area.offset);
+
+  writer.Write(area.name);
+  writer.WriteNumber(parentOffset);
+
+  writer.WriteNumber(area.areas.size());
+  for (std::list<Area>::iterator a=area.areas.begin();
+       a!=area.areas.end();
+       a++) {
+    if (!WriteArea(writer,*a,area.offset)) {
+      return false;
+    }
+  }
+
+  writer.WriteNumber(area.nodes.size());
+  for (std::map<std::string,std::list<Id> >::const_iterator node=area.nodes.begin();
+       node!=area.nodes.end();
+       ++node) {
+    Id lastId=0;
+
+    writer.Write(node->first);               // Node name
+    writer.WriteNumber(node->second.size()); // Number of ids
+
+    for (std::list<Id>::const_iterator id=node->second.begin();
+           id!=node->second.end();
+           ++id) {
+      writer.WriteNumber(*id-lastId); // Id of node
+      lastId=*id;
+    }
+  }
+
+  writer.WriteNumber(area.ways.size());
+  for (std::map<std::string,std::list<Id> >::const_iterator way=area.ways.begin();
+       way!=area.ways.end();
+       ++way) {
+    Id lastId=0;
+
+    writer.Write(way->first);               // Way name
+    writer.WriteNumber(way->second.size()); // Number of ids
+
+    for (std::list<Id>::const_iterator id=way->second.begin();
+         id!=way->second.end();
+         ++id) {
+      writer.WriteNumber(*id-lastId); // Id of way
+      lastId=*id;
+    }
+  }
+
+  writer.WriteNumber(area.as.size());
+  for (std::map<std::string,std::list<Id> >::const_iterator a=area.as.begin();
+       a!=area.as.end();
+       ++a) {
+    Id lastId=0;
+
+    writer.Write(a->first);               // Area name
+    writer.WriteNumber(a->second.size()); // Number of ids
+
+    for (std::list<Id>::const_iterator id=a->second.begin();
+         id!=a->second.end();
+         ++id) {
+      writer.WriteNumber(*id-lastId); // Id of area
+      lastId=*id;
+    }
+  }
+
+  return !writer.HasError();
+}
+
+static bool WriteAreas(FileWriter& writer,
+                       Area& root)
+{
+  for (std::list<Area>::iterator a=root.areas.begin();
+       a!=root.areas.end();
+       ++a) {
+    if (!WriteArea(writer,*a,0)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+static void GetLocationRefs(const Area& area,
+                            std::map<std::string,std::list<LocationRef> >& locationRefs)
+{
+  LocationRef locRef;
+
+  locRef.offset=area.offset;
+  locRef.reference=area.reference;
+
+  locationRefs[area.name].push_back(locRef);
+
+  for (std::list<Location>::const_iterator l=area.locations.begin();
+       l!=area.locations.end();
+       ++l) {
+    locRef.offset=area.offset;
+    locRef.reference=l->reference;
+
+    locationRefs[l->name].push_back(locRef);
+  }
+
+  for (std::list<Area>::const_iterator a=area.areas.begin();
+       a!=area.areas.end();
+       a++) {
+    GetLocationRefs(*a,locationRefs);
+  }
+}
+
+static bool WriteLocationRefs(FileWriter& writer,
+                              const std::map<std::string,std::list<LocationRef> >& locationRefs)
+{
+  writer.WriteNumber(locationRefs.size());
+
+  for (std::map<std::string,std::list<LocationRef> >::const_iterator n=locationRefs.begin();
+       n!=locationRefs.end();
+       ++n) {
+    if (!writer.Write(n->first)) {
+      return false;
+    }
+
+    if (!writer.WriteNumber(n->second.size())) {
+      return false;
+    }
+
+    for (std::list<LocationRef>::const_iterator o=n->second.begin();
+         o!=n->second.end();
+         ++o) {
+      if (!writer.WriteNumber(o->reference.type)) {
+        return false;
+      }
+
+      if (!writer.WriteNumber(o->reference.id)) {
+        return false;
+      }
+
+      if (!writer.WriteNumber(o->offset)) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
 
 bool GenerateCityStreetIndex(const TypeConfig& typeConfig,
                              const ImportParameter& parameter,
                              Progress& progress)
 {
   std::set<TypeId>          cityIds;
-  TypeId                    boundaryId=typeIgnore;
+  TypeId                    boundaryId;
   TypeId                    typeId;
   FileScanner               scanner;
-  std::map<Id,Urban>        urbans;
+  Area                      rootArea;
   std::list<RawNode>        cityNodes;
   std::list<RawWay>         cityAreas;
   std::list<RawWay>         boundaryAreas;
@@ -750,6 +1002,9 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig,
   std::set<Id>              ids;
   std::map<Id,RawNode>      nodes;
   std::map<Id,RawWay>       ways;
+
+  rootArea.name="<root>";
+  rootArea.offset=0;
 
   // We ignore (besides strange ones ;-)):
   // continent
@@ -760,7 +1015,6 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig,
   // region
   // square
   // state
-  // suburb
 
   typeId=typeConfig.GetNodeTypeId(tagPlace,"city");
   assert(typeId!=typeIgnore);
@@ -775,6 +1029,10 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig,
   cityIds.insert(typeId);
 
   typeId=typeConfig.GetNodeTypeId(tagPlace,"hamlet");
+  assert(typeId!=typeIgnore);
+  cityIds.insert(typeId);
+
+  typeId=typeConfig.GetNodeTypeId(tagPlace,"suburb");
   assert(typeId!=typeIgnore);
   cityIds.insert(typeId);
 
@@ -819,51 +1077,7 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig,
   progress.Info(std::string("Found ")+NumberToString(cityAreas.size())+" cities of type 'area'");
 
   //
-  // Directly convert all city areas to cities.
-  //
-
-  for (std::list<RawWay>::const_iterator area=cityAreas.begin();
-       area!=cityAreas.end();
-       ++area) {
-    std::string name;
-
-    for (size_t i=0; i<area->tags.size(); i++) {
-      if (area->tags[i].key==tagPlaceName) {
-        name=area->tags[i].value;
-        break;
-      }
-      else if (area->tags[i].key==tagName) {
-        name=area->tags[i].value;
-      }
-    }
-
-    if (name.empty()) {
-      progress.Warning(std::string("City of type 'area' and id ")+NumberToString(area->id)+" has no name, skipping");
-      continue;
-    }
-
-    std::vector<RawNode> ns;
-
-    ns.resize(area->nodes.size());
-    for (size_t i=0; i<area->nodes.size(); i++) {
-      std::map<Id,RawNode>::const_iterator node=nodes.find(area->nodes[i]);
-
-      ns[i].id=node->second.id;
-      ns[i].lon=node->second.lon;
-      ns[i].lat=node->second.lat;
-    }
-
-    AddOrUpdateUrban(urbans,
-                     area->id,
-                     area->id,
-                     refArea,
-                     name,
-                     ns);
-  }
-
-  //
-  // Getting all areas of type 'administrative boundary' of level 6 and 8.
-  // We use them to later match urbans of type node against them to get an area for a city.
+  // Getting all areas of type 'administrative boundary'.
   //
 
   progress.SetAction("Scanning for city boundaries of type 'area'");
@@ -883,32 +1097,13 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig,
         size_t level=0;
 
         for (size_t i=0; i<way.tags.size(); i++) {
-          if (way.tags[i].key==tagAdminLevel && way.tags[i].value=="8") {
-            level=8;
-            break;
-          }
-          else if (way.tags[i].key==tagAdminLevel && way.tags[i].value=="6") {
-            level=6;
-            break;
-          }
-        }
-
-        if (level!=0) {
-          std::string name;
-
-          for (size_t i=0; i<way.tags.size(); i++) {
-            if (way.tags[i].key==tagName) {
-              name=way.tags[i].value;
-              break;
-            }
-          }
-
-          if (level==8 || level==6) {
+          if (way.tags[i].key==tagAdminLevel &&
+            sscanf(way.tags[i].value.c_str(),"%d",&level)==1) {
             boundaryAreas.push_back(way);
+            break;
           }
-
-          //std::cout << "Found area boundary of admin level 6 or 8: " << area.id << " " << name << std::endl;
         }
+
       }
     }
   }
@@ -916,8 +1111,7 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig,
   scanner.Close();
 
   //
-  // Getting all relations of type 'administrative boundary' of level 6 and 8.
-  // We use them to later match urbans of type node against them to get an area for a city.
+  // Getting all relations of type 'administrative boundary'.
   //
 
   progress.SetAction("Scanning for city boundaries of type 'relation'");
@@ -935,35 +1129,23 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig,
     if (!scanner.HasError()) {
 
       if (relation.type==boundaryId) {
-        bool match=false;
+        size_t level=0;
 
         for (size_t i=0; i<relation.tags.size(); i++) {
-          if ((relation.tags[i].key==tagAdminLevel && relation.tags[i].value=="8") ||
-              (relation.tags[i].key==tagAdminLevel && relation.tags[i].value=="6")) {
-            match=true;
+          if (relation.tags[i].key==tagAdminLevel &&
+            sscanf(relation.tags[i].value.c_str(),"%d",&level)==1) {
+            boundaryRelations.push_back(relation);
             break;
           }
-        }
-
-        if (match) {
-          std::string name;
-
-          for (size_t i=0; i<relation.tags.size(); i++) {
-            if (relation.tags[i].key==tagName) {
-              name=relation.tags[i].value;
-              break;
-            }
-          }
-
-          boundaryRelations.push_back(relation);
-
-          //std::cout << "Found relation boundary of admin level 6 or 8: " << relation.id << " " << name << std::endl;
         }
       }
     }
   }
 
   scanner.Close();
+
+  progress.Info(std::string("Found ")+NumberToString(boundaryAreas.size())+" areas of type 'administrative boundary'");
+  progress.Info(std::string("Found ")+NumberToString(boundaryRelations.size())+" relations of type 'administrative boundary'");
 
   GetRelationIdsFromRelations(boundaryRelations,ids);
 
@@ -989,247 +1171,175 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig,
   RemoveUnresolvedAreas(boundaryAreas,nodes,progress);
   RemoveUnresolvedRelations(boundaryRelations,nodes,progress);
 
-  progress.Info(std::string("Found ")+NumberToString(boundaryAreas.size())+" areas of type 'administrative boundary' and admin level 6 or 8");
-  progress.Info(std::string("Found ")+NumberToString(boundaryRelations.size())+" relations of type 'administrative boundary' and admin level 6 or 8");
+  progress.Info(std::string("Resolved ")+NumberToString(boundaryAreas.size())+" areas of type 'administrative boundary'");
+  progress.Info(std::string("Resolved ")+NumberToString(boundaryRelations.size())+" relations of type 'administrative boundary'");
 
-  progress.SetAction("Resolve cities of type node based on boundary relations");
+  progress.SetAction("Inserting boundary relations and areas into area tree");
 
-  // Admin level 8
-  for (std::list<RawWay>::const_iterator area=boundaryAreas.begin();
-       area!=boundaryAreas.end();
-       ++area) {
+  for (size_t l=1; l<=10; l++) {
+    for (std::list<RawRelation>::const_iterator rel=boundaryRelations.begin();
+         rel!=boundaryRelations.end();
+         ++rel) {
 
-    size_t level=0;
+      size_t      level=0;
+      std::string name;
 
-    for (size_t i=0; i<area->tags.size(); i++) {
-      if (area->tags[i].key==tagAdminLevel && area->tags[i].value=="8") {
-        level=8;
-        break;
+      for (size_t i=0; i<rel->tags.size() && !(l!=0 && !name.empty()); i++) {
+        if (rel->tags[i].key==tagAdminLevel &&
+          sscanf(rel->tags[i].value.c_str(),"%d",&level)==1) {
+        }
+        else if (rel->tags[i].key==tagName) {
+          name=rel->tags[i].value;
+        }
       }
-      else if (area->tags[i].key==tagAdminLevel && area->tags[i].value=="6") {
-        level=6;
-        break;
+
+      if (level==l && !name.empty()) {
+        std::vector<Point> ns;
+
+        ns.resize(rel->members.size());
+        for (size_t i=0; i<rel->members.size(); i++) {
+          assert(rel->members[i].type==RawRelation::memberNode);
+          std::map<Id,RawNode>::const_iterator node=nodes.find(rel->members[i].id);
+
+          ns[i].id=node->second.id;
+          ns[i].lon=node->second.lon;
+          ns[i].lat=node->second.lat;
+        }
+
+        Area area;
+
+        area.reference.Set(rel->id,refRelation);
+        area.name=name;
+        area.area=ns;
+
+        AddArea(rootArea,area);
       }
     }
 
-    if (level==8) {
-      std::vector<RawNode> ns;
+    for (std::list<RawWay>::const_iterator a=boundaryAreas.begin();
+         a!=boundaryAreas.end();
+         ++a) {
 
-      ns.resize(area->nodes.size());
+      size_t      level=0;
+      std::string name;
 
-      for (size_t i=0; i<area->nodes.size(); i++) {
-        std::map<Id,RawNode>::const_iterator node;
-
-        node=nodes.find(area->nodes[i]);
-
-        assert(node!=nodes.end());
-
-        ns[i]=node->second;
+      for (size_t i=0; i<a->tags.size() && !(l!=0 && !name.empty()); i++) {
+        if (a->tags[i].key==tagAdminLevel &&
+          sscanf(a->tags[i].value.c_str(),"%d",&level)==1) {
+        }
+        else if (a->tags[i].key==tagName) {
+          name=a->tags[i].value;
+        }
       }
 
-      std::list<RawNode>::iterator city=cityNodes.begin();
-      while (city!=cityNodes.end()) {
-        if (IsPointInArea(city->lon,city->lat,ns)) {
+      if (level==l && !name.empty()) {
+        std::vector<Point> ns;
 
-          std::string name;
+        ns.resize(a->nodes.size());
+        for (size_t i=0; i<a->nodes.size(); i++) {
+          std::map<Id,RawNode>::const_iterator node=nodes.find(a->nodes[i]);
 
-          for (size_t i=0; i<city->tags.size(); i++) {
-            if (city->tags[i].key==tagName) {
-              name=city->tags[i].value;
-              break;
-            }
-          }
-
-          //progress.Info(std::string("Found area of city ")+NumberToString(city->id)+" "+name+" => "+NumberToString(area->id));
-
-          AddOrUpdateUrban(urbans,area->id,city->id,refNode,name,ns);
-
-          city=cityNodes.erase(city);
+          ns[i].id=node->second.id;
+          ns[i].lon=node->second.lon;
+          ns[i].lat=node->second.lat;
         }
-        else {
-          ++city;
-        }
+
+        Area area;
+
+        area.reference.Set(a->id,refArea);
+        area.name=name;
+        area.area=ns;
+
+        AddArea(rootArea,area);
       }
     }
   }
 
-  // Admin level 8
-  for (std::list<RawRelation>::const_iterator rel=boundaryRelations.begin();
-       rel!=boundaryRelations.end();
-       ++rel) {
+  progress.SetAction("Inserting cities of type area into area tree");
 
-    size_t level=0;
+  for (std::list<RawWay>::const_iterator a=cityAreas.begin();
+       a!=cityAreas.end();
+       ++a) {
+    std::string name;
 
-    for (size_t i=0; i<rel->tags.size(); i++) {
-      if (rel->tags[i].key==tagAdminLevel && rel->tags[i].value=="8") {
-        level=8;
+    for (size_t i=0; i<a->tags.size(); i++) {
+      if (a->tags[i].key==tagPlaceName) {
+        name=a->tags[i].value;
         break;
       }
-      else if (rel->tags[i].key==tagAdminLevel && rel->tags[i].value=="6") {
-        level=6;
+      else if (a->tags[i].key==tagName) {
+        name=a->tags[i].value;
+      }
+    }
+
+    if (name.empty()) {
+      progress.Warning(std::string("City of type 'area' and id ")+NumberToString(a->id)+" has no name, skipping");
+      continue;
+    }
+
+    std::vector<Point> ns;
+
+    ns.resize(a->nodes.size());
+    for (size_t i=0; i<a->nodes.size(); i++) {
+      std::map<Id,RawNode>::const_iterator node=nodes.find(a->nodes[i]);
+
+      ns[i].id=node->second.id;
+      ns[i].lon=node->second.lon;
+      ns[i].lat=node->second.lat;
+    }
+
+    Area area;
+
+    area.reference.Set(a->id,refArea);
+    area.name=name;
+    area.area=ns;
+
+    AddArea(rootArea,area);
+  }
+
+  progress.SetAction("Inserting cities of type node into area tree");
+
+  size_t count=0;
+  for (std::list<RawNode>::iterator city=cityNodes.begin();
+       city!=cityNodes.end();
+       ++city) {
+    count++;
+    std::string name;
+
+    for (size_t i=0; i<city->tags.size(); i++) {
+      if (city->tags[i].key==tagName) {
+        name=city->tags[i].value;
         break;
       }
     }
 
-    if (level==8) {
-      std::vector<RawNode> ns;
+    if (name.empty()) {
+      progress.Warning(std::string("City of type 'node' and id ")+NumberToString(city->id)+" has no name, skipping");
+      continue;
+    }
 
-      ns.resize(rel->members.size());
+    Location location;
 
-      for (size_t i=0; i<rel->members.size(); i++) {
-        std::map<Id,RawNode>::const_iterator node;
+    location.reference.Set(city->id,refNode);
+    location.name=name;
 
-        node=nodes.find(rel->members[i].id);
+    Point node;
 
-        assert(node!=nodes.end());
+    node.id=city->id;
+    node.lon=city->lon;
+    node.lat=city->lat;
 
-        ns[i]=node->second;
-      }
+    AddLocationToArea(rootArea,location,node);
 
-      std::list<RawNode>::iterator city=cityNodes.begin();
-      while (city!=cityNodes.end()) {
-        if (IsPointInArea(city->lon,city->lat,ns)) {
-
-          std::string name;
-
-          for (size_t i=0; i<city->tags.size(); i++) {
-            if (city->tags[i].key==tagName) {
-              name=city->tags[i].value;
-              break;
-            }
-          }
-
-          //progress.Info(std::string("Found area of city ")+NumberToString(city->id)+" "+name+" => "+NumberToString(rel->id));
-
-          AddOrUpdateUrban(urbans,rel->id,city->id,refNode,name,ns);
-
-          city=cityNodes.erase(city);
-        }
-        else {
-          ++city;
-        }
-      }
+    if (count%1000==0) {
+      std::cout << count << "/" << cityNodes.size() << std::endl;
     }
   }
 
-  // Admin level 6
-  for (std::list<RawWay>::const_iterator area=boundaryAreas.begin();
-       area!=boundaryAreas.end();
-       ++area) {
+  /*
+  progress.SetAction("Dumping areas");
 
-    size_t level=0;
-
-    for (size_t i=0; i<area->tags.size(); i++) {
-      if (area->tags[i].key==tagAdminLevel && area->tags[i].value=="8") {
-        level=8;
-        break;
-      }
-      else if (area->tags[i].key==tagAdminLevel && area->tags[i].value=="6") {
-        level=6;
-        break;
-      }
-    }
-
-    if (level==6) {
-      std::vector<RawNode> ns;
-
-      ns.resize(area->nodes.size());
-
-      for (size_t i=0; i<area->nodes.size(); i++) {
-        std::map<Id,RawNode>::const_iterator node;
-
-        node=nodes.find(area->nodes[i]);
-
-        assert(node!=nodes.end());
-
-        ns[i]=node->second;
-      }
-
-      for (std::list<RawNode>::iterator city=cityNodes.begin();
-           city!=cityNodes.end();
-           ++city) {
-        if (IsPointInArea(city->lon,city->lat,ns)) {
-          std::string name;
-
-          for (size_t i=0; i<city->tags.size(); i++) {
-            if (city->tags[i].key==tagName) {
-              name=city->tags[i].value;
-              break;
-            }
-          }
-
-          //progress.Info(std::string("Found area of city ")+NumberToString(city->id)+" "+name+" => "+NumberToString(area->id));
-
-          AddOrUpdateUrban(urbans,area->id,city->id,refNode,name,ns);
-
-          city=cityNodes.erase(city);
-        }
-      }
-    }
-  }
-
-  // Admin level 6
-  for (std::list<RawRelation>::const_iterator rel=boundaryRelations.begin();
-       rel!=boundaryRelations.end();
-       ++rel) {
-
-    size_t level=0;
-
-    for (size_t i=0; i<rel->tags.size(); i++) {
-      if (rel->tags[i].key==tagAdminLevel && rel->tags[i].value=="8") {
-        level=8;
-        break;
-      }
-      else if (rel->tags[i].key==tagAdminLevel && rel->tags[i].value=="6") {
-        level=6;
-        break;
-      }
-    }
-
-    if (level==6) {
-      std::vector<RawNode> ns;
-
-      ns.resize(rel->members.size());
-
-      for (size_t i=0; i<rel->members.size(); i++) {
-        std::map<Id,RawNode>::const_iterator node;
-
-        node=nodes.find(rel->members[i].id);
-
-        assert(node!=nodes.end());
-
-        ns[i]=node->second;
-      }
-
-      for (std::list<RawNode>::iterator city=cityNodes.begin();
-           city!=cityNodes.end();
-           ++city) {
-        if (IsPointInArea(city->lon,city->lat,ns)) {
-
-          std::string name;
-
-          for (size_t i=0; i<city->tags.size(); i++) {
-            if (city->tags[i].key==tagName) {
-              name=city->tags[i].value;
-              break;
-            }
-          }
-
-          //progress.Info(std::string("Found area of city ")+NumberToString(city->id)+" "+name+" => "+NumberToString(rel->id));
-
-          AddOrUpdateUrban(urbans,rel->id,city->id,refNode,name,ns);
-
-          city=cityNodes.erase(city);
-        }
-      }
-    }
-  }
-
-  //
-  // Now start to build up our list of urbans...
-  //
-
-  progress.Info(std::string("Found ")+NumberToString(urbans.size())+" urban areas");
+  DumpArea(rootArea,0);*/
 
   progress.SetAction("Delete temporary data");
 
@@ -1241,38 +1351,15 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig,
   nodes.clear();
   ways.clear();
 
-  progress.SetAction("Calculating bounds of urban areas");
+  progress.SetAction("Calculating bounds of areas");
 
-  for (std::map<Id,Urban>::iterator urban=urbans.begin();
-       urban!=urbans.end();
-       ++urban) {
-    urban->second.minlon=urban->second.area[0].lon;
-    urban->second.maxlon=urban->second.area[0].lon;
+  CalculateAreaBounds(rootArea);
 
-    urban->second.minlat=urban->second.area[0].lat;
-    urban->second.maxlat=urban->second.area[0].lat;
+  std::set<TypeId> indexables;
 
-    for (size_t i=1; i<urban->second.area.size(); i++) {
-      urban->second.minlon=std::min(urban->second.minlon,urban->second.area[i].lon);
-      urban->second.maxlon=std::max(urban->second.maxlon,urban->second.area[i].lon);
+  typeConfig.GetIndexables(indexables);
 
-      urban->second.minlat=std::min(urban->second.minlat,urban->second.area[i].lat);
-      urban->second.maxlat=std::max(urban->second.maxlat,urban->second.area[i].lat);
-    }
-  }
-
-  progress.SetAction("Getting ways with name in found cities");
-
-  std::set<TypeId> wayTypes;
-
-  typeConfig.GetWaysWithKey(tagHighway,wayTypes);
-
-  /*
-  for (std::set<TypeId>::const_iterator type=wayTypes.begin();
-       type!=wayTypes.end();
-       ++type) {
-    std::cout << "  Way type: " << *type << std::endl;
-  }*/
+  progress.SetAction("Resolve ways to areas");
 
   // We currently scan Ways instead of RawWays because for Ways we have the nodes already
   // resolved (later we have to rethink this, but why should we index ways that are not
@@ -1289,7 +1376,7 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig,
     way.Read(scanner);
 
     if (!scanner.HasError()) {
-      if (wayTypes.find(way.type)!=wayTypes.end()) {
+      if (indexables.find(way.type)!=indexables.end()) {
 
         std::string name=way.GetName();
 
@@ -1308,32 +1395,7 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig,
             maxlat=std::max(maxlat,way.nodes[n].lat);
           }
 
-          //std::cout << "Analysing way " << name << std::endl;
-
-          for (std::map<Id,Urban>::iterator urban=urbans.begin();
-               urban!=urbans.end();
-               ++urban) {
-            if (!(maxlon<urban->second.minlon) &&
-                !(minlon>urban->second.maxlon) &&
-                !(maxlat<urban->second.minlat) &&
-                !(minlat>urban->second.maxlat)) {
-              bool match=false;
-
-              for (size_t n=0; n<way.nodes.size(); n++) {
-                if (IsPointInArea(way.nodes[n].lon,way.nodes[n].lat,urban->second.area)) {
-                  match=true;
-                  break;
-                }
-              }
-
-              if (match) {
-                //std::cout << "Way " << way.id << " is in city " << city->second.id << std::endl;
-
-                urban->second.ways[name].push_back(way.id);
-                break;
-              }
-            }
-          }
+          AddWayToArea(rootArea,way,minlon,minlat,maxlon,maxlat);
         }
       }
     }
@@ -1341,108 +1403,100 @@ bool GenerateCityStreetIndex(const TypeConfig& typeConfig,
 
   scanner.Close();
 
-  progress.SetAction("Generating 'citysteet.idx'");
+  progress.SetAction("Resolve nodes to areas");
 
-  FileWriter writer;
-
-  if (!writer.Open("citystreet.idx")) {
-    progress.Error("Cannot open 'citystreet.idx'");
+  if (!scanner.Open("nodes.dat")) {
+    progress.Error("Cannot open 'nodes.dat'");
     return false;
   }
 
-  //std::cout << "Storing cities..." << std::endl;
+  while (!scanner.HasError()) {
+    Node node;
 
-  std::multimap<std::string,City> cities;
+    node.Read(scanner);
 
-  for (std::map<Id,Urban>::const_iterator urban=urbans.begin();
-       urban!=urbans.end();
-       ++urban) {
-    for (std::list<City>::const_iterator city=urban->second.cities.begin();
-         city!=urban->second.cities.end();
-         ++city) {
-      cities.insert(std::make_pair(city->name,*city));
-    }
-  }
+    if (!scanner.HasError()) {
+      if (indexables.find(node.type)!=indexables.end()) {
+        std::string name;
 
-  size_t cityEntries=cities.size();
+        for (std::vector<Tag>::iterator tag=node.tags.begin();
+             tag!=node.tags.end();
+             ++tag) {
+          if (tag->key==tagName) {
+            name=tag->value;
+            break;
+          }
+        }
 
-  writer.WriteNumber(cityEntries); // Number of cities
-
-  for (std::multimap<std::string,City>::const_iterator city=cities.begin();
-       city!=cities.end();
-       ++city) {
-    unsigned char refType=city->second.refType;
-
-    writer.Write(city->second.id);      // Id of city
-    writer.WriteNumber(refType);        // Type of id
-    writer.Write(city->second.urbanId); // Id of the urban area this city belongs to
-    writer.Write(city->first);          // city name
-  }
-
-  cities.clear();
-
-  //std::cout << "Storing urbans..." << std::endl;
-
-
-  writer.WriteNumber(urbans.size()); // Number of urbans
-
-  long urbanEntriesOffset;
-
-  writer.GetPos(urbanEntriesOffset);
-
-  for (std::map<Id,Urban>::const_iterator urban=urbans.begin();
-       urban!=urbans.end();
-       ++urban) {
-    size_t offset=0;
-
-    writer.Write(urban->first); // Id of urban
-    writer.Write(offset);       // Offset of urban data
-  }
-
-  size_t index=0;
-
-  for (std::map<Id,Urban>::const_iterator urban=urbans.begin();
-       urban!=urbans.end();
-       ++urban) {
-    long offset;
-
-    writer.GetPos(offset);
-
-    writer.SetPos(urbanEntriesOffset+index*(sizeof(Id)+sizeof(unsigned long))+sizeof(Id));
-    writer.Write((unsigned long)offset); // Offset to urban data
-    writer.SetPos(offset);
-
-    writer.WriteNumber(urban->second.ways.size());  // Number of ways in urban
-    writer.WriteNumber(urban->second.areas.size()); // Number of areas in urban
-
-    for (std::map<std::string,std::list<Id> >::const_iterator way=urban->second.ways.begin();
-         way!=urban->second.ways.end();
-         ++way) {
-      writer.Write(way->first);               // Way name
-      writer.WriteNumber(way->second.size()); // Number of ids
-
-      for (std::list<Id>::const_iterator id=way->second.begin();
-           id!=way->second.end();
-           ++id) {
-        writer.Write(*id); // Id of way
+        if (!name.empty()) {
+          AddNodeToArea(rootArea,node,name);
+        }
       }
     }
-
-    for (std::map<std::string,std::list<Id> >::const_iterator area=urban->second.areas.begin();
-         area!=urban->second.areas.end();
-         ++area) {
-      writer.Write(area->first);               // Area name
-      writer.WriteNumber(area->second.size()); // Number of ids
-
-      for (std::list<Id>::const_iterator id=area->second.begin();
-           id!=area->second.end();
-           ++id) {
-        writer.Write(*id); // Id of area
-      }
-    }
-
-    index++;
   }
+
+  if (!scanner.Close()) {
+    return false;
+  }
+
+  FileWriter writer;
+
+  //
+  // Generate file with all areas, where areas reference parent and children by offset
+  //
+
+  progress.SetAction("Write 'region.dat'");
+
+  if (!writer.Open("region.dat")) {
+    progress.Error("Cannot open 'region.dat'");
+    return false;
+  }
+
+  WriteAreas(writer,rootArea);
+
+  if (writer.HasError() || !writer.Close()) {
+    return false;
+  }
+
+  //
+  // Generate file with all area names, each referencing the areas where it is contained
+  //
+
+  std::map<std::string,std::list<LocationRef> > locationRefs;
+
+  progress.SetAction("Write 'nameregion.idx'");
+
+  for (std::list<Area>::const_iterator a=rootArea.areas.begin();
+       a!=rootArea.areas.end();
+       a++) {
+    GetLocationRefs(*a,locationRefs);
+  }
+
+  if (!writer.Open("nameregion.idx")) {
+    progress.Error("Cannot open 'nameregion.idx'");
+    return false;
+  }
+
+  WriteLocationRefs(writer,locationRefs);
+
+  /*
+  if (writer.HasError() || !writer.Close()) {
+    return false;
+  }*/
+
+  /*
+  //
+  // Generate file with hierachical structure of region
+  //
+
+  progress.SetAction("Write 'treeregion.idx'");
+
+  if (!writer.Open("treeregion.idx")) {
+    progress.Error("Cannot open 'treeregion.idx'");
+    return false;
+  }
+
+  WriteAreaTree(writer,areas);*/
 
   return !writer.HasError() && writer.Close();
 }

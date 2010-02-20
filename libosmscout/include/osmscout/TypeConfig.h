@@ -83,6 +83,7 @@ private:
   bool        canBeArea;
   bool        canBeRelation;
   bool        canBeRoute;
+  bool        canBeIndexed;
 
 public:
   TypeInfo();
@@ -164,6 +165,18 @@ public:
   {
     return canBeRoute;
   }
+
+  inline TypeInfo& CanBeIndexed(bool canBeIndexed)
+  {
+    this->canBeIndexed=canBeIndexed;
+
+    return *this;
+  }
+
+  inline bool CanBeIndexed() const
+  {
+    return canBeIndexed;
+  }
 };
 
 class TypeConfig
@@ -206,6 +219,9 @@ public:
   void GetWaysWithKey(TagId tagKey, std::set<TypeId>& types) const;
 
   void GetRoutables(std::set<TypeId>& types) const;
+
+  void GetIndexables(std::set<TypeId>& types) const;
+
 };
 
 #endif

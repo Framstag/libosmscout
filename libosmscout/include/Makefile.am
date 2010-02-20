@@ -13,10 +13,10 @@ nobase_include_HEADERS= osmscout/Types.h \
                         osmscout/RawNode.h \
                         osmscout/RawRelation.h \
                         osmscout/RawWay.h \
-                        osmscout/City.h \
+                        osmscout/AdminRegion.h \
                         osmscout/Node.h \
                         osmscout/Point.h \
-                        osmscout/Street.h \
+                        osmscout/Location.h \
                         osmscout/Tag.h \
                         osmscout/Way.h \
                         osmscout/Reference.h \

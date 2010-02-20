@@ -93,7 +93,7 @@ private:
   mutable FileScanner   wayScanner;    //! File stream to the way.dat file
 
   TypeConfig            *typeConfig;   //! Type config for the currently opened map
-  
+
   std::string           (*hashFunction) (std::string);
 
 private:
@@ -157,14 +157,19 @@ public:
   bool GetWays(const std::vector<Id>& ids,
                std::vector<Way>& ways) const;
 
-  bool GetMatchingCities(const std::string& name,
-                         std::list<City>& cities,
-                         size_t limit, bool& limitReached, bool startWith) const;
-  
-  bool GetMatchingStreets(Id urbanId, const std::string& name,
-                          std::list<Street>& streets,
-                          size_t limit, bool& limitReached,
-                          bool startWith) const;
+  bool GetMatchingAdminRegions(const std::string& name,
+                               std::list<AdminRegion>& regions,
+                               size_t limit,
+                               bool& limitReached,
+                               bool startWith) const;
+
+  bool GetMatchingLocations(const AdminRegion& region,
+                            const std::string& name,
+                            std::list<Location>& locations,
+                            size_t limit,
+                            bool& limitReached,
+                            bool startWith) const;
+
   bool GetJoints(Id id,
                  std::set<Id>& wayIds) const;
   bool GetJoints(const std::set<Id>& ids,

@@ -87,14 +87,16 @@ public:
 
   bool GetWay(Id id, Way& way) const;
 
-  bool GetMatchingCities(const std::wstring& name,
-                         std::list<City>& cities,
-                         size_t limit,
-                         bool& limitReached) const;
+  bool GetMatchingAdminRegions(const std::wstring& name,
+                               std::list<AdminRegion>& regions,
+                               size_t limit,
+                               bool& limitReached) const;
 
-  bool GetMatchingStreets(Id urbanId, const std::wstring& name,
-                          std::list<Street>& streets,
-                          size_t limit, bool& limitReached) const;
+  bool GetMatchingLocations(const AdminRegion& region,
+                            const std::wstring& name,
+                            std::list<Location>& locations,
+                            size_t limit,
+                            bool& limitReached) const;
 
   bool CalculateRoute(Id startWayId, Id startNodeId,
                       Id targetWayId, Id targetNodeId,

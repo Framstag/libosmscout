@@ -31,25 +31,25 @@ CityStreetSearchDialog::CityStreetSearchDialog(DatabaseTask* databaseTask)
  : databaseTask(databaseTask),
    searchStreetAction(new Lum::Model::Action()),
    okAction(new Lum::Model::Action()),
-   cityName(new Lum::Model::String(L"")),
-   citySearchTimerAction(new Lum::Model::Action()),
-   streetName(new Lum::Model::String(L"")),
-   streetSearchTimerAction(new Lum::Model::Action()),
-   citiesModel(new CitiesModel(cities, new CitiesDataProvider())),
-   citySelection(new Lum::Model::SingleLineSelection()),
-   streetsModel(new StreetsModel(streets, new StreetsDataProvider())),
-   streetSelection(new Lum::Model::SingleLineSelection()),
+   regionName(new Lum::Model::String(L"")),
+   regionSearchTimerAction(new Lum::Model::Action()),
+   locationName(new Lum::Model::String(L"")),
+   locationSearchTimerAction(new Lum::Model::Action()),
+   regionsModel(new RegionsModel(regions,new RegionsDataProvider())),
+   regionSelection(new Lum::Model::SingleLineSelection()),
+   locationsModel(new LocationsModel(locations,new LocationsDataProvider())),
+   locationSelection(new Lum::Model::SingleLineSelection()),
    hasResult(false)
 {
   Observe(searchStreetAction);
   Observe(okAction);
   Observe(GetClosedAction());
-  Observe(cityName);
-  Observe(citySearchTimerAction);
-  Observe(citySelection);
-  Observe(streetName);
-  Observe(streetSearchTimerAction);
-  Observe(streetSelection);
+  Observe(regionName);
+  Observe(regionSearchTimerAction);
+  Observe(regionSelection);
+  Observe(locationName);
+  Observe(locationSearchTimerAction);
+  Observe(locationSelection);
 
   okAction->Disable();
 }
@@ -67,7 +67,7 @@ void CityStreetSearchDialog::PreInit()
 
   panel=Lum::VPanel::Create(true,true);
 
-  string=Lum::String::Create(cityName,25,true,false);
+  string=Lum::String::Create(regionName,25,true,false);
 
   panel->Add(string);
 
@@ -78,22 +78,22 @@ void CityStreetSearchDialog::PreInit()
 
   table=new Lum::Table();
   table->SetFlex(true,true);
-  table->SetMinWidth(Lum::Base::Size::stdCharWidth,30);
-  table->SetMinHeight(Lum::Base::Size::stdCharHeight,5);
+  table->SetMinWidth(Lum::Base::Size::stdCharWidth,60);
+  table->SetMinHeight(Lum::Base::Size::stdCharHeight,6);
   table->SetShowHeader(true);
   table->GetTableView()->SetAutoFitColumns(true);
   table->GetTableView()->SetAutoVSize(true);
-  table->SetModel(citiesModel);
+  table->SetModel(regionsModel);
   table->SetHeaderModel(headerModel);
-  table->SetSelection(citySelection);
+  table->SetSelection(regionSelection);
   table->SetDoubleClickAction(okAction);
   panel->Add(table);
 
-  wizard->AddPage(L"Search city...",panel,searchStreetAction);
+  wizard->AddPage(L"Search region...",panel,searchStreetAction);
 
   panel=Lum::VPanel::Create(true,true);
 
-  string=Lum::String::Create(streetName,25,true,false);
+  string=Lum::String::Create(locationName,25,true,false);
 
   panel->Add(string);
 
@@ -104,86 +104,90 @@ void CityStreetSearchDialog::PreInit()
 
   table=new Lum::Table();
   table->SetFlex(true,true);
-  table->SetMinWidth(Lum::Base::Size::stdCharWidth,30);
-  table->SetMinHeight(Lum::Base::Size::stdCharHeight,5);
+  table->SetMinWidth(Lum::Base::Size::stdCharWidth,60);
+  table->SetMinHeight(Lum::Base::Size::stdCharHeight,6);
   table->SetShowHeader(true);
   table->GetTableView()->SetAutoFitColumns(true);
   table->GetTableView()->SetAutoVSize(true);
-  table->SetModel(streetsModel);
+  table->SetModel(locationsModel);
   table->SetHeaderModel(headerModel);
-  table->SetSelection(streetSelection);
+  table->SetSelection(locationSelection);
   table->SetDoubleClickAction(okAction);
   panel->Add(table);
 
-  wizard->AddPage(L"Search street...",panel,okAction);
+  wizard->AddPage(L"Search location...",panel,okAction);
 
-  citiesModel->SetEmptyText(L"- no search criteria -");
-  streetsModel->SetEmptyText(L"- no search criteria -");
+  regionsModel->SetEmptyText(L"- no search criteria -");
+  locationsModel->SetEmptyText(L"- no search criteria -");
 
   SetMain(wizard);
 }
 
-void CityStreetSearchDialog::FetchCities()
+void CityStreetSearchDialog::FetchAdminRegions()
 {
   bool limitReached=true;
 
-  citiesModel->Off();
+  regionsModel->Off();
 
-  if (!cityName->Empty()) {
-    databaseTask->GetMatchingCities(cityName->Get(),cities,50,limitReached);
+  if (!regionName->Empty()) {
+    databaseTask->GetMatchingAdminRegions(regionName->Get(),regions,50,limitReached);
 
     if (limitReached) {
-      cities.clear();
-      citiesModel->SetEmptyText(L"- too many hits -");
+      regions.clear();
+      regionsModel->SetEmptyText(L"- too many hits -");
     }
-    else if (cities.size()==0) {
-      citiesModel->SetEmptyText(L"- no matches -");
+    else if (regions.size()==0) {
+      regionsModel->SetEmptyText(L"- no matches -");
     }
     else {
-      citiesModel->SetEmptyText(L"");
+      regionsModel->SetEmptyText(L"");
     }
   }
   else {
-    cities.clear();
-    citiesModel->SetEmptyText(L"- no search criteria -");
+    regions.clear();
+    regionsModel->SetEmptyText(L"- no search criteria -");
   }
 
-  citiesModel->On();
+  regionsModel->On();
 }
 
-void CityStreetSearchDialog::FetchStreets()
+void CityStreetSearchDialog::FetchLocations()
 {
-  std::cout << "Fetching streets..." << std::endl;
+  std::cout << "Fetching locations..." << std::endl;
   bool limitReached=true;
 
-  streetsModel->Off();
+  locationsModel->Off();
 
-  if (!streetName->Empty()) {
+  if (!locationName->Empty()) {
     std::cout << "Calling database..." << std::endl;
 
-    databaseTask->GetMatchingStreets(resultCity.urbanId,streetName->Get(),streets,50,limitReached);
+    databaseTask->GetMatchingLocations(resultAdminRegion,
+                                       locationName->Get(),
+                                       locations,
+                                       50,
+                                       limitReached);
 
     if (limitReached) {
       std::cout << "Limit reached." << std::endl;
-      streets.clear();
-      streetsModel->SetEmptyText(L"- too many hits -");
+      locations.clear();
+      locationsModel->SetEmptyText(L"- too many hits -");
     }
-    else if (streets.size()==0) {
+    else if (locations.size()==0) {
       std::cout << "No matches." << std::endl;
-      streetsModel->SetEmptyText(L"- no matches -");
+      locationsModel->SetEmptyText(L"- no matches -");
     }
     else {
       std::cout << "Result>0." << std::endl;
-      streetsModel->SetEmptyText(L"");
+      locationsModel->SetEmptyText(L"");
     }
   }
   else {
     std::cout << "No search criteria." << std::endl;
-    streets.clear();
-    streetsModel->SetEmptyText(L"- no search criteria -");
+    locations.clear();
+    locationsModel->SetEmptyText(L"- no search criteria -");
   }
 
-  streetsModel->On();
+  locationsModel->On();
 }
 
 void CityStreetSearchDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& msg)
@@ -191,20 +195,20 @@ void CityStreetSearchDialog::Resync(Lum::Base::Model* model, const Lum::Base::Re
   if (model==GetClosedAction() &&  GetClosedAction()->IsFinished()) {
     Exit();
   }
-  else if (model==cityName) {
-    if (cityName->Empty()) {
-      FetchCities();
+  else if (model==regionName) {
+    if (regionName->Empty()) {
+      FetchAdminRegions();
     }
     else {
-      Lum::OS::display->RemoveTimer(citySearchTimerAction);
-      Lum::OS::display->AddTimer(1,150000,citySearchTimerAction);
+      Lum::OS::display->RemoveTimer(regionSearchTimerAction);
+      Lum::OS::display->AddTimer(1,150000,regionSearchTimerAction);
     }
   }
-  else if (model==citySearchTimerAction && citySearchTimerAction->IsFinished()) {
-    FetchCities();
+  else if (model==regionSearchTimerAction && regionSearchTimerAction->IsFinished()) {
+    FetchAdminRegions();
   }
-  else if (model==citySelection) {
-    if (citySelection->HasSelection()) {
+  else if (model==regionSelection) {
+    if (regionSelection->HasSelection()) {
       searchStreetAction->Enable();
     }
     else {
@@ -212,25 +216,25 @@ void CityStreetSearchDialog::Resync(Lum::Base::Model* model, const Lum::Base::Re
     }
   }
   else if (model==searchStreetAction && searchStreetAction->IsEnabled() && searchStreetAction->IsFinished()) {
-    assert(citySelection->HasSelection());
+    assert(regionSelection->HasSelection());
 
-    resultCity=citiesModel->GetEntry(citySelection->GetLine());
-    FetchStreets();
+    resultAdminRegion=regionsModel->GetEntry(regionSelection->GetLine());
+    FetchLocations();
   }
-  else if (model==streetName) {
-    if (streetName->Empty()) {
-      FetchStreets();
+  else if (model==locationName) {
+    if (locationName->Empty()) {
+      FetchLocations();
     }
     else {
-      Lum::OS::display->RemoveTimer(streetSearchTimerAction);
-      Lum::OS::display->AddTimer(1,150000,streetSearchTimerAction);
+      Lum::OS::display->RemoveTimer(locationSearchTimerAction);
+      Lum::OS::display->AddTimer(1,150000,locationSearchTimerAction);
     }
   }
-  else if (model==streetSearchTimerAction && streetSearchTimerAction->IsFinished()) {
-    FetchStreets();
+  else if (model==locationSearchTimerAction && locationSearchTimerAction->IsFinished()) {
+    FetchLocations();
   }
-  else if (model==streetSelection) {
-    if (streetSelection->HasSelection()) {
+  else if (model==locationSelection) {
+    if (locationSelection->HasSelection()) {
       okAction->Enable();
     }
     else {
@@ -238,9 +242,9 @@ void CityStreetSearchDialog::Resync(Lum::Base::Model* model, const Lum::Base::Re
     }
   }
   else if (model==okAction && okAction->IsEnabled() && okAction->IsFinished()) {
-    assert(streetSelection->HasSelection());
+    assert(locationSelection->HasSelection());
 
-    resultStreet=streetsModel->GetEntry(streetSelection->GetLine());
+    resultLocation=locationsModel->GetEntry(locationSelection->GetLine());
     hasResult=true;
     Exit();
   }
@@ -254,15 +258,15 @@ bool CityStreetSearchDialog::HasResult() const
   return hasResult;
 }
 
-const City& CityStreetSearchDialog::GetResultCity() const
+const AdminRegion& CityStreetSearchDialog::GetResultAdminRegion() const
 {
-  return resultCity;
+  return resultAdminRegion;
 }
 
 
-const Street& CityStreetSearchDialog::GetResultStreet() const
+const Location& CityStreetSearchDialog::GetResultLocation() const
 {
-  return resultStreet;
+  return resultLocation;
 }
 
 

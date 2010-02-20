@@ -355,6 +355,20 @@ public:
         RequestNewMap();
       }
     }
+    else if (reference.GetType()==refNode) {
+      Node node;
+
+      if (database->GetNode(reference.GetId(),node)) {
+        lon=node.lon;
+        lat=node.lat;
+        this->magnification=magnification;
+
+        RequestNewMap();
+      }
+    }
+    else if (reference.GetType()==refRelation) {
+      std::cout << "Showing relation " << reference.GetId() << std::endl;
+    }
     else {
       assert(false);
     }
@@ -466,8 +480,8 @@ public:
       SaveConfig();
     }
     else if (model==searchCityAction && searchCityAction->IsFinished()) {
-      City city;
-      bool hasResult=false;
+      AdminRegion region;
+      bool        hasResult=false;
 
       CitySearchDialog *dialog;
 
@@ -479,19 +493,19 @@ public:
 
         hasResult=dialog->HasResult();
         if (dialog->HasResult()) {
-          city=dialog->GetResult();
+          region=dialog->GetResult();
         }
       }
 
       delete dialog;
 
       if (hasResult) {
-        map->ShowReference(city.reference,magCity);
+        map->ShowReference(region.reference,magCity);
       }
     }
     else if (model==searchAddressAction && searchAddressAction->IsFinished()) {
-      Street street;
-      bool hasResult=false;
+      Location location;
+      bool     hasResult=false;
 
       CityStreetSearchDialog *dialog;
 
@@ -503,14 +517,14 @@ public:
 
         hasResult=dialog->HasResult();
         if (dialog->HasResult()) {
-          street=dialog->GetResultStreet();
+          location=dialog->GetResultLocation();
         }
       }
 
       delete dialog;
 
       if (hasResult) {
-        map->ShowReference(street.reference,magVeryClose);
+        map->ShowReference(location.references.front(),magVeryClose);
       }
     }
     else if (model==routeAction && routeAction->IsFinished()) {

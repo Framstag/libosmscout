@@ -146,13 +146,16 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
       dialog->Close();
 
       if (dialog->HasResult()) {
-        City   city=dialog->GetResultCity();
-        Street street=dialog->GetResultStreet();
-        Way    way;
+        AdminRegion   region=dialog->GetResultAdminRegion();
+        Location      location=dialog->GetResultLocation();
+        Way           way;
 
-        result.startCity=city.name;
-        result.startStreet=street.name;
-        result.startWay=street.reference.id;
+        assert(location.references.front().GetType()==refWay);
+
+        // TODO: Check that this is a way!
+        result.startCity=region.name;
+        result.startStreet=location.name;
+        result.startWay=location.references.front().GetId();
 
         if (databaseTask->GetWay(result.startWay,way)) {
           result.startNode=way.nodes[0].id;
@@ -188,13 +191,15 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
       dialog->Close();
 
       if (dialog->HasResult()) {
-        City   city=dialog->GetResultCity();
-        Street street=dialog->GetResultStreet();
-        Way    way;
+        AdminRegion   region=dialog->GetResultAdminRegion();
+        Location      location=dialog->GetResultLocation();
+        Way           way;
 
-        result.endCity=city.name;
-        result.endStreet=street.name;
-        result.endWay=street.reference.id;
+        assert(location.references.front().GetType()==refWay);
+
+        result.endCity=region.name;
+        result.endStreet=location.name;
+        result.endWay=location.references.front().GetId();
 
         if (databaseTask->GetWay(result.endWay,way)) {
           result.endNode=way.nodes[0].id;

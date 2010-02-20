@@ -144,12 +144,14 @@ public:
       const xmlChar *areaValue=NULL;
       const xmlChar *relationValue=NULL;
       const xmlChar *routeValue=NULL;
+      const xmlChar *indexValue=NULL;
       TypeId        id;
       bool          node=false;
       bool          way=false;
       bool          area=false;
       bool          relation=false;
       bool          route=false;
+      bool          index=false;
 
       if (atts!=NULL) {
         for (size_t i=0; atts[i]!=NULL && atts[i+1]!=NULL; i+=2) {
@@ -176,6 +178,9 @@ public:
           }
           else if (strcmp((const char*)atts[i],"route")==0) {
             routeValue=atts[i+1];
+          }
+          else if (strcmp((const char*)atts[i],"index")==0) {
+            indexValue=atts[i+1];
           }
         }
       }
@@ -205,6 +210,9 @@ public:
       if (routeValue!=NULL) {
         route=strcmp((const char*)routeValue,"true")==0;
       }
+      if (indexValue!=NULL) {
+        index=strcmp((const char*)indexValue,"true")==0;
+      }
 
       TagId tag=config.GetTagId((const char*)nameValue);
 
@@ -225,6 +233,7 @@ public:
       typeInfo.CanBeArea(area);
       typeInfo.CanBeRelation(relation);
       typeInfo.CanBeRoute(route);
+      typeInfo.CanBeIndexed(index);
 
       config.AddTypeInfo(typeInfo);
     }

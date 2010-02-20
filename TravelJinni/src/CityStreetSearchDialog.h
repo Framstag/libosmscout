@@ -32,8 +32,6 @@
 #include <Lum/String.h>
 #include <Lum/Table.h>
 
-#include <osmscout/City.h>
-
 #include "DatabaseTask.h"
 
 /**
@@ -45,30 +43,35 @@
 class CityStreetSearchDialog : public Lum::Dialog
 {
 private:
-  typedef Lum::Model::StdRefTable<City,std::list<City> > CitiesModel;
-  typedef Lum::Base::Reference<CitiesModel>              CitiesModelRef;
+  typedef Lum::Model::StdRefTable<AdminRegion,std::list<AdminRegion> > RegionsModel;
+  typedef Lum::Base::Reference<RegionsModel>                           RegionsModelRef;
 
-  class CitiesDataProvider : public CitiesModel::DataProvider
+  class RegionsDataProvider : public RegionsModel::DataProvider
   {
   public:
-    std::wstring GetString(const CitiesModel::Iterator& iter, size_t column) const
+    std::wstring GetString(const RegionsModel::Iterator& iter, size_t column) const
     {
       switch (column) {
       case 1:
-        return Lum::Base::UTF8ToWString(iter->name);
+        if (iter->path.empty()) {
+          return Lum::Base::UTF8ToWString(iter->name);
+        }
+        else {
+          return Lum::Base::UTF8ToWString(iter->name)+L" ("+Lum::Base::UTF8ToWString(iter->path)+L")";
+        }
       default:
         assert(false);
       }
     }
   };
 
-  typedef Lum::Model::StdRefTable<Street,std::list<Street> > StreetsModel;
-  typedef Lum::Base::Reference<StreetsModel>                 StreetsModelRef;
+  typedef Lum::Model::StdRefTable<Location,std::list<Location> > LocationsModel;
+  typedef Lum::Base::Reference<LocationsModel>                   LocationsModelRef;
 
-  class StreetsDataProvider : public StreetsModel::DataProvider
+  class LocationsDataProvider : public LocationsModel::DataProvider
   {
   public:
-    std::wstring GetString(const StreetsModel::Iterator& iter, size_t column) const
+    std::wstring GetString(const LocationsModel::Iterator& iter, size_t column) const
     {
       switch (column) {
       case 1:
@@ -80,26 +83,27 @@ private:
   };
 
 private:
-  DatabaseTask*         databaseTask;
-  Lum::Model::ActionRef searchStreetAction;
-  Lum::Model::ActionRef okAction;
-  Lum::Model::StringRef cityName;
-  Lum::Model::ActionRef citySearchTimerAction;
-  Lum::Model::StringRef streetName;
-  Lum::Model::ActionRef streetSearchTimerAction;
-  std::list<City>       cities;
-  CitiesModelRef        citiesModel;
-  Lum::Model::SingleLineSelectionRef citySelection;
-  std::list<Street>     streets;
-  StreetsModelRef       streetsModel;
-  Lum::Model::SingleLineSelectionRef streetSelection;
-  bool                  hasResult;
-  City                  resultCity;
-  Street                resultStreet;
+  DatabaseTask*          databaseTask;
+  Lum::Model::ActionRef  searchStreetAction;
+  Lum::Model::ActionRef  okAction;
+  Lum::Model::StringRef  regionName;
+  Lum::Model::ActionRef  regionSearchTimerAction;
+  Lum::Model::StringRef  locationName;
+  Lum::Model::ActionRef  locationSearchTimerAction;
+
+  std::list<AdminRegion> regions;
+  RegionsModelRef        regionsModel;
+  Lum::Model::SingleLineSelectionRef regionSelection;
+  std::list<Location>    locations;
+  LocationsModelRef      locationsModel;
+  Lum::Model::SingleLineSelectionRef locationSelection;
+  bool                   hasResult;
+  AdminRegion            resultAdminRegion;
+  Location               resultLocation;
 
 private:
-  void FetchCities();
-  void FetchStreets();
+  void FetchAdminRegions();
+  void FetchLocations();
 
 public:
   CityStreetSearchDialog(DatabaseTask* databaseTask);
@@ -108,8 +112,8 @@ public:
   void Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& msg);
 
   bool HasResult() const;
-  const City& GetResultCity() const;
-  const Street& GetResultStreet() const;
+  const AdminRegion& GetResultAdminRegion() const;
+  const Location& GetResultLocation() const;
 };
 
 #endif

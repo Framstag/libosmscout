@@ -221,10 +221,10 @@ bool DatabaseTask::GetWay(Id id, Way& way) const
   return database->GetWay(id,way);
 }
 
-bool DatabaseTask::GetMatchingCities(const std::wstring& name,
-                                     std::list<City>& cities,
-                                     size_t limit,
-                                     bool& limitReached) const
+bool DatabaseTask::GetMatchingAdminRegions(const std::wstring& name,
+                                           std::list<AdminRegion>& regions,
+                                           size_t limit,
+                                           bool& limitReached) const
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
@@ -232,14 +232,16 @@ bool DatabaseTask::GetMatchingCities(const std::wstring& name,
     return false;
   }
 
-  return database->GetMatchingCities(Lum::Base::WStringToUTF8(name),
-                                     cities,
-                                     limit,limitReached, false);
+  return database->GetMatchingAdminRegions(Lum::Base::WStringToUTF8(name),
+                                           regions,
+                                           limit,limitReached, false);
 }
 
-bool DatabaseTask::GetMatchingStreets(Id urbanId, const std::wstring& name,
-                                      std::list<Street>& streets,
-                                      size_t limit, bool& limitReached) const
+bool DatabaseTask::GetMatchingLocations(const AdminRegion& region,
+                                        const std::wstring& name,
+                                        std::list<Location>& locations,
+                                        size_t limit,
+                                        bool& limitReached) const
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
@@ -247,10 +249,12 @@ bool DatabaseTask::GetMatchingStreets(Id urbanId, const std::wstring& name,
     return false;
   }
 
-  return database->GetMatchingStreets(urbanId,
-                                      Lum::Base::WStringToUTF8(name),
-                                      streets,
-                                      limit,limitReached, false);
+  return database->GetMatchingLocations(region,
+                                        Lum::Base::WStringToUTF8(name),
+                                        locations,
+                                        limit,
+                                        limitReached,
+                                        false);
 }
 
 bool DatabaseTask::CalculateRoute(Id startWayId, Id startNodeId,

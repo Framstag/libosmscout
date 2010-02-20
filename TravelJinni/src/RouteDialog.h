@@ -27,8 +27,6 @@
 
 #include <Lum/Object.h>
 
-#include <osmscout/City.h>
-
 #include "DatabaseTask.h"
 
 /**

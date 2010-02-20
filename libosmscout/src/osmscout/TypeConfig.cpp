@@ -34,8 +34,15 @@ TagInfo::TagInfo(const std::string& name,
 }
 
 TypeInfo::TypeInfo()
- : id(typeIgnore)
+ : id(typeIgnore),
+   canBeNode(false),
+   canBeWay(false),
+   canBeArea(false),
+   canBeRelation(false),
+   canBeRoute(false),
+   canBeIndexed(false)
 {
+  // no code
 }
 
 TypeInfo::TypeInfo(TypeId id,
@@ -43,7 +50,14 @@ TypeInfo::TypeInfo(TypeId id,
                    const std::string tagValue)
  : id(id),
    tag(tag),
-   tagValue(tagValue)
+   tagValue(tagValue),
+   canBeNode(false),
+   canBeWay(false),
+   canBeArea(false),
+   canBeRelation(false),
+   canBeRoute(false),
+   canBeIndexed(false)
+
 {
   // no code
 }
@@ -279,6 +293,19 @@ void TypeConfig::GetRoutables(std::set<TypeId>& types) const
        type!=this->types.end();
        ++type) {
     if (type->CanBeRoute()) {
+      types.insert(type->GetId());
+    }
+  }
+}
+
+void TypeConfig::GetIndexables(std::set<TypeId>& types) const
+{
+  types.clear();
+
+  for (std::list<TypeInfo>::const_iterator type=this->types.begin();
+       type!=this->types.end();
+       ++type) {
+    if (type->CanBeIndexed()) {
       types.insert(type->GetId());
     }
   }

@@ -33,8 +33,6 @@
 #include <Lum/String.h>
 #include <Lum/Table.h>
 
-#include <osmscout/City.h>
-
 #include "DatabaseTask.h"
 
 /**
@@ -46,17 +44,22 @@
 class CitySearchDialog : public Lum::Dlg::ActionDialog
 {
 private:
-  typedef Lum::Model::StdRefTable<City,std::list<City> > CitiesModel;
-  typedef Lum::Base::Reference<CitiesModel>              CitiesModelRef;
+  typedef Lum::Model::StdRefTable<AdminRegion,std::list<AdminRegion> > RegionsModel;
+  typedef Lum::Base::Reference<RegionsModel>                           RegionsModelRef;
 
-  class CitiesDataProvider : public CitiesModel::DataProvider
+  class RegionsDataProvider : public RegionsModel::DataProvider
   {
   public:
-    std::wstring GetString(const CitiesModel::Iterator& iter, size_t column) const
+    std::wstring GetString(const RegionsModel::Iterator& iter, size_t column) const
     {
       switch (column) {
       case 1:
-        return Lum::Base::UTF8ToWString(iter->name);
+        if (iter->path.empty()) {
+          return Lum::Base::UTF8ToWString(iter->name);
+        }
+        else {
+          return Lum::Base::UTF8ToWString(iter->name)+L" ("+Lum::Base::UTF8ToWString(iter->path)+L")";
+        }
       default:
         assert(false);
       }
@@ -64,18 +67,18 @@ private:
   };
 
 private:
-  DatabaseTask*         databaseTask;
-  Lum::Model::ActionRef okAction;
-  Lum::Model::StringRef cityName;
-  Lum::Model::ActionRef searchTimerAction;
-  std::list<City>       cities;
-  CitiesModelRef        citiesModel;
-  Lum::Model::SingleLineSelectionRef citySelection;
-  bool                  hasResult;
-  City                  result;
+  DatabaseTask*          databaseTask;
+  Lum::Model::ActionRef  okAction;
+  Lum::Model::StringRef  regionName;
+  Lum::Model::ActionRef  searchTimerAction;
+  std::list<AdminRegion> regions;
+  RegionsModelRef        regionsModel;
+  Lum::Model::SingleLineSelectionRef regionSelection;
+  bool                   hasResult;
+  AdminRegion            result;
 
 private:
-  void FetchCities();
+  void FetchAdminRegions();
 
 public:
   CitySearchDialog(DatabaseTask* databaseTask);
@@ -85,7 +88,7 @@ public:
   void Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& msg);
 
   bool HasResult() const;
-  const City& GetResult() const;
+  const AdminRegion& GetResult() const;
 };
 
 #endif

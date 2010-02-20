@@ -29,23 +29,23 @@
     -->
 
     <!-- Roads -->
-    <type id="100" name="highway" value="motorway" way="true" route="true"/>
-    <type id="101" name="highway" value="motorway_link" way="true" route="true"/>
-    <type id="102" name="highway" value="trunk" way="true" route="true"/>
-    <type id="103" name="highway" value="trunk_link" way="true" route="true"/>
-    <type id="104" name="highway" value="primary" way="true" route="true"/>
-    <type id="105" name="highway" value="primary_link" way="true" route="true"/>
-    <type id="106" name="highway" value="secondary" way="true" route="true"/>
-    <type id="107" name="highway" value="secondary_link" way="true" route="true"/>
-    <type id="108" name="highway" value="tertiary" way="true" route="true"/>
-    <type id="109" name="highway" value="unclassified" way="true" route="true"/>
-    <type id="110" name="highway" value="road" way="true" route="true"/>
-    <type id="111" name="highway" value="residential" way="true" route="true"/>
-    <type id="112" name="highway" value="living_street" way="true" route="true"/>
-    <type id="113" name="highway" value="service" way="true" route="true"/>
-    <type id="114" name="highway" value="track" way="true" route="true"/>
-    <type id="115" name="highway" value="pedestrian" way="true" area="true" route="true"/>
-    <type id="116" name="highway" value="services" node="true" area="true" route="true"/>
+    <type id="100" name="highway" value="motorway" way="true" route="true" index="true"/>
+    <type id="101" name="highway" value="motorway_link" way="true" route="true" index="true"/>
+    <type id="102" name="highway" value="trunk" way="true" route="true" index="true"/>
+    <type id="103" name="highway" value="trunk_link" way="true" route="true" index="true"/>
+    <type id="104" name="highway" value="primary" way="true" route="true" index="true"/>
+    <type id="105" name="highway" value="primary_link" way="true" route="true" index="true"/>
+    <type id="106" name="highway" value="secondary" way="true" route="true" index="true"/>
+    <type id="107" name="highway" value="secondary_link" way="true" route="true" index="true"/>
+    <type id="108" name="highway" value="tertiary" way="true" route="true" index="true"/>
+    <type id="109" name="highway" value="unclassified" way="true" route="true" index="true"/>
+    <type id="110" name="highway" value="road" way="true" route="true" index="true"/>
+    <type id="111" name="highway" value="residential" way="true" route="true" index="true"/>
+    <type id="112" name="highway" value="living_street" way="true" route="true" index="true"/>
+    <type id="113" name="highway" value="service" way="true" route="true" index="true"/>
+    <type id="114" name="highway" value="track" way="true" route="true" index="true"/>
+    <type id="115" name="highway" value="pedestrian" way="true" area="true" route="true" index="true"/>
+    <type id="116" name="highway" value="services" node="true" area="true" route="true" index="true"/>
     <type id="117" name="highway" value="bus_guideway" way="true" route="true"/>
 
     <!-- Paths -->

@@ -1,3 +1,6 @@
+#ifndef OSMSCOUT_ADMINREGION_H
+#define OSMSCOUT_ADMINREGION_H
+
 /*
   TravelJinni - Openstreetmap offline viewer
   Copyright (C) 2009  Tim Teulings
@@ -17,5 +20,19 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <osmscout/City.h>
+#include <osmscout/Reference.h>
 
+/**
+  A named administrative region. It is used to build up hierachical, structured
+  containment information like "Streets in City".
+  */
+struct AdminRegion
+{
+  Reference   reference; //! Reference to the object defining the region
+  FileOffset  offset;    //! Offset into the region datafile
+  std::string name;      //! name of the region
+  std::string hash;      //! internal has for the name of the region
+  std::string path;      //! Containment path
+};
+
+#endif

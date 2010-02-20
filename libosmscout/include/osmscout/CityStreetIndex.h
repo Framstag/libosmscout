@@ -23,52 +23,53 @@
 #include <list>
 #include <set>
 
-#include <osmscout/City.h>
-#include <osmscout/Street.h>
+#include <osmscout/AdminRegion.h>
+#include <osmscout/Location.h>
 #include <osmscout/TypeConfig.h>
 
-// This name isn't really good, but I've no better idea...
-struct UrbanData
+#include <osmscout/FileScanner.h>
+struct Loc
 {
-  std::string   name;
-  std::string   hash;
-  std::list<Id> ids;
-};
-
-struct Urban
-{
-  Id                   id;
-  std::list<UrbanData> ways;
-  std::list<UrbanData> areas;
+  std::list<Id> nodes;
+  std::list<Id> ways;
+  std::list<Id> areas;
 };
 
 class CityStreetIndex
 {
 private:
-  std::string         path;
-  std::list<City>     cities;
-  std::map<Id,size_t> urbanOffsets;
-  mutable Urban       urban;
-  mutable bool        urbanLoaded;
-  std::string         (*hashFunction) (std::string);
+  std::string            path;
+
+  std::list<AdminRegion> areas;
+  mutable FileOffset     region;
+  mutable bool           regionLoaded;
+  mutable std::map<std::string,Loc> locations;
+
+  std::string            (*hashFunction)(std::string);
 
 private:
-  bool LoadUrban(Id id) const;
+  bool LoadRegion(FileScanner& scanner) const;
+  bool LoadRegion(FileOffset offset) const;
 
 public:
   CityStreetIndex();
   virtual ~CityStreetIndex();
 
-  bool LoadCityStreetIndex(const std::string& path, std::string (*hashFunction) (std::string) = NULL);
+  bool Load(const std::string& path,
+            std::string (*hashFunction) (std::string) = NULL);
 
-  bool GetMatchingCities(const std::string& name,
-                         std::list<City>& cities,
-                         size_t limit, bool& limitReached, bool startWith) const;
+  bool GetMatchingAdminRegions(const std::string& name,
+                               std::list<AdminRegion>& regions,
+                               size_t limit,
+                               bool& limitReached,
+                               bool startWith) const;
 
-  bool GetMatchingStreets(Id urbanId, const std::string& name,
-                          std::list<Street>& streets,
-                          size_t limit, bool& limitReached,
-                          bool startWith) const;
+  bool GetMatchingLocations(const AdminRegion& region,
+                            const std::string& name,
+                            std::list<Location>& locations,
+                            size_t limit,
+                            bool& limitReached,
+                            bool startWith) const;
 
   void DumpStatistics();
 };
