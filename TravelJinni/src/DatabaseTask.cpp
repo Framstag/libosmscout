@@ -210,6 +210,18 @@ void DatabaseTask::SetStyle(StyleConfig* styleConfig)
   this->styleConfig=styleConfig;
 }
 
+bool DatabaseTask::GetBoundingBox(double& minLat,double& minLon,
+                                  double& maxLat,double& maxLon) const
+{
+  Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
+
+  if (!database->IsOpen()) {
+    return false;
+  }
+
+  return database->GetBoundingBox(minLat,minLon,maxLat,maxLon);
+}
+
 bool DatabaseTask::GetWay(Id id, Way& way) const
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);

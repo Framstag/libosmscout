@@ -85,6 +85,10 @@ public:
   bool LoadStyleConfig(const std::wstring& filename, StyleConfig*& styleConfig);
   void SetStyle(StyleConfig* styleConfig);
 
+
+  bool GetBoundingBox(double& minLat,double& minLon,
+                      double& maxLat,double& maxLon) const;
+
   bool GetWay(Id id, Way& way) const;
 
   bool GetMatchingAdminRegions(const std::wstring& name,

@@ -27,6 +27,9 @@
 #include <osmscout/TypeConfigLoader.h>
 #include <osmscout/Util.h>
 
+// TODO: Move this to some more global place
+static double conversionFactor=10000000.0;
+
 struct NodeCacheValueSizer : public Database::NodeCache::ValueSizer
 {
   size_t GetSize(const Node& value) const
@@ -61,8 +64,8 @@ Database::Database()
  : isOpen(false),
    nodeIndex("node.idx"),
    wayIndex("way.idx"),
-   nodeCache(1000000),
-   wayCache(1000000),
+   nodeCache(10000000),
+   wayCache(10000000),
    nodeUseCache(10), // Seems like the cache is more expensive than direct loading!?
    typeConfig(NULL),
    hashFunction(NULL)
@@ -80,7 +83,6 @@ bool Database::Open(const std::string& path, std::string (*hashFunction) (std::s
   assert(!path.empty());
 
   this->path=path;
-
   this->hashFunction=hashFunction;
 
   std::string typeConfigFileName=path+"/"+"map.ost.xml";
@@ -93,6 +95,33 @@ bool Database::Open(const std::string& path, std::string (*hashFunction) (std::s
     std::cerr << "Cannot load map.ost.xml!" << std::endl;
     return false;
   }
+
+  FileScanner scanner;
+  std::string file=path+"/"+"bounding.dat";
+
+  if (!scanner.Open(file)) {
+    std::cerr << "Cannot open 'bounding.dat'" << std::endl;
+    return false;
+  }
+
+  unsigned long minLonDat;
+  unsigned long minLatDat;
+  unsigned long maxLonDat;
+  unsigned long maxLatDat;
+
+  scanner.ReadNumber(minLatDat);
+  scanner.ReadNumber(minLonDat);
+  scanner.ReadNumber(maxLatDat);
+  scanner.ReadNumber(maxLonDat);
+
+  minLon=minLonDat/conversionFactor-90.0;
+  minLat=minLatDat/conversionFactor-180.0;
+  maxLon=maxLonDat/conversionFactor-90.0;
+  maxLat=maxLatDat/conversionFactor-180.0;
+
+  std::cout << "Data bounding box: [" << minLon << "," << minLat << "] - [" << maxLon << "," << maxLat << "]" << std::endl;
+
+  scanner.Close();
 
   std::cout << "Loading node index..." << std::endl;
   if (!nodeIndex.LoadIndex(path)) {
@@ -166,6 +195,21 @@ void Database::Close()
 TypeConfig* Database::GetTypeConfig() const
 {
   return typeConfig;
+}
+
+bool Database::GetBoundingBox(double& minLat,double& minLon,
+                              double& maxLat,double& maxLon) const
+{
+  if (!isOpen) {
+    return false;
+  }
+
+  minLat=this->minLat;
+  minLon=this->minLon;
+  maxLat=this->maxLat;
+  maxLon=this->maxLon;
+
+  return true;
 }
 
 size_t Database::GetMaximumPriority(const StyleConfig& styleConfig,

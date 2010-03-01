@@ -71,6 +71,7 @@ static DatabaseTask          *databaseTask=NULL;
 class MapControl : public Lum::Object
 {
 private:
+  bool                  initial;
   double                lon;
   double                lat;
   double                magnification;
@@ -80,7 +81,8 @@ private:
 
 public:
   MapControl()
-  : lon(7.13601),
+  : initial(true),
+    lon(7.13601),
     lat(50.68924),
     magnification(/*2*2*2**/2*1024),
     requestNewMap(true)
@@ -140,6 +142,17 @@ public:
   void RequestNewMap()
   {
     Job *job=new Job();
+
+    if (initial) {
+      double minLat,minLon,maxLat,maxLon;
+
+      if (databaseTask->GetBoundingBox(minLat,minLon,maxLat,maxLon)) {
+        lat=minLat+(maxLat-minLat)/2;
+        lon=minLon+(maxLon-minLon)/2;
+
+        initial=false;
+      }
+    }
 
     job->lon=lon;
     job->lat=lat;

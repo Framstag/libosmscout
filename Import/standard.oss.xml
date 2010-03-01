@@ -418,10 +418,11 @@
     <label minMag="close"/>
   </area>
 
+  <!--
   <area key="natural" value="coastline">
     <fill color="b5d6f1"/>
     <label minMag="region"/>
-  </area>
+  </area>-->
 
   <area key="natural" value="beach">
     <fill color="eecc55"/>
@@ -1241,6 +1242,10 @@
   <node key="place" value="island">
     <label style="emphasize" minMag="region" maxMag="veryClose"/>
   </node>
+
+  <way key="boundary" value="administrative" prio="11">
+    <line color="d9269844" minPixel="3" maxPixel="3" width="1" />
+  </way>
 
   <!--
   <node key="internal" value="start">

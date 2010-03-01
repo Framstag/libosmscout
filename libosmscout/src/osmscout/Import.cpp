@@ -146,7 +146,7 @@ bool Import(const ImportParameter& parameter,
   }
 
   if (startStep==2) {
-    progress.SetStep("2 Generate 'nodes.dat'");
+    progress.SetStep("2 Generate 'nodes.dat' and bounding.dat");
     if (!GenerateNodeDat(parameter,
                          progress)) {
       progress.Error("Cannot generate node data file!");

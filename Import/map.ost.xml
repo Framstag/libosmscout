@@ -333,7 +333,7 @@
     <type id="510" name="natural" value="marsh" node="true" area="true"/>
     <type id="511" name="natural" value="wetland" node="true" area="true"/>
     <type id="512" name="natural" value="water" node="true" area="true"/>
-    <type id="513" name="natural" value="coastline" node="true" way="true" area="true"/>
+    <!--<type id="513" name="natural" value="coastline" area="true"/>-->
     <type id="514" name="natural" value="mud" node="true" area="true"/>
     <type id="515" name="natural" value="beach" node="true" area="true"/>
     <type id="516" name="natural" value="bay" node="true" area="true"/>
@@ -348,7 +348,7 @@
       Boundary
     -->
 
-    <type id="600" name="boundary" value="administrative" area="true" relation="true"/>
+    <type id="600" name="boundary" value="administrative" way="true" area="true" relation="true"/>
     <type id="601" name="boundary" value="civil" area="true"/>
     <type id="602" name="boundary" value="political" area="true"/>
 

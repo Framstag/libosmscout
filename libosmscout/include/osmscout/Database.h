@@ -70,6 +70,12 @@ public: // Fix this
 
 private:
   bool                  isOpen;
+
+  double                minLon;
+  double                minLat;
+  double                maxLon;
+  double                maxLat;
+
   NodeIndex             nodeIndex;
   WayIndex              wayIndex;
 
@@ -136,6 +142,9 @@ public:
   void Close();
 
   TypeConfig* GetTypeConfig() const;
+
+  bool GetBoundingBox(double& minLat,double& minLon,
+                      double& maxLat,double& maxLon) const;
 
   bool GetObjects(const StyleConfig& styleConfig,
                   double lonMin, double latMin,
