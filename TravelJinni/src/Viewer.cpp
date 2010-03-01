@@ -147,8 +147,20 @@ public:
       double minLat,minLon,maxLat,maxLon;
 
       if (databaseTask->GetBoundingBox(minLat,minLon,maxLat,maxLon)) {
+        size_t zoom=1;
+        double dlat=360;
+        double dlon=180;
+
         lat=minLat+(maxLat-minLat)/2;
         lon=minLon+(maxLon-minLon)/2;
+
+        while (dlat>maxLat-minLat && dlon>maxLon-minLon) {
+          zoom=zoom*2;
+          dlat=dlat/2;
+          dlon=dlon/2;
+        }
+
+        magnification=zoom;
 
         initial=false;
       }
