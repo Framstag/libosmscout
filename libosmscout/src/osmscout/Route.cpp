@@ -19,55 +19,58 @@
 
 #include <osmscout/Route.h>
 
-RouteData::RouteEntry::RouteEntry(Id wayId, Id nodeId)
- : wayId(wayId),
-   nodeId(nodeId)
-{
-  // no code
-}
+namespace osmscout {
 
-RouteData::RouteData()
-{
-  // no code
-}
+  RouteData::RouteEntry::RouteEntry(Id wayId, Id nodeId)
+   : wayId(wayId),
+     nodeId(nodeId)
+  {
+    // no code
+  }
 
-void RouteData::Clear()
-{
-  entries.clear();
-}
+  RouteData::RouteData()
+  {
+    // no code
+  }
 
-void RouteData::AddEntry(Id wayId, Id nodeId)
-{
-  entries.push_back(RouteEntry(wayId,nodeId));
-}
+  void RouteData::Clear()
+  {
+    entries.clear();
+  }
 
-RouteDescription::RouteStep::RouteStep(double distance,
-                                       Action action,
-                                       const std::string& name,
-                                       const std::string& refName)
- : distance(distance),
-   action(action),
-   name(name),
-   refName(refName)
-{
-  // no code
-}
+  void RouteData::AddEntry(Id wayId, Id nodeId)
+  {
+    entries.push_back(RouteEntry(wayId,nodeId));
+  }
 
-RouteDescription::RouteDescription()
-{
-  // no code
-}
+  RouteDescription::RouteStep::RouteStep(double distance,
+                                         Action action,
+                                         const std::string& name,
+                                         const std::string& refName)
+   : distance(distance),
+     action(action),
+     name(name),
+     refName(refName)
+  {
+    // no code
+  }
 
-void RouteDescription::Clear()
-{
-  steps.clear();
-}
+  RouteDescription::RouteDescription()
+  {
+    // no code
+  }
 
-void RouteDescription::AddStep(double distance,
-                               Action action,
-                               const std::string& name,
-                               const std::string& refName)
-{
-  steps.push_back(RouteStep(distance,action,name,refName));
+  void RouteDescription::Clear()
+  {
+    steps.clear();
+  }
+
+  void RouteDescription::AddStep(double distance,
+                                 Action action,
+                                 const std::string& name,
+                                 const std::string& refName)
+  {
+    steps.push_back(RouteStep(distance,action,name,refName));
+  }
 }
 

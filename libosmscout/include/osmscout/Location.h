@@ -22,14 +22,16 @@
 
 #include <osmscout/Reference.h>
 
-/**
-  A location is a named point, way, area or relation on the map. Something you can search for.
- */
-struct Location
-{
-  std::string          name;
-  std::string          path;
-  std::list<Reference> references;
-};
+namespace osmscout {
+  /**
+    A location is a named point, way, area or relation on the map. Something you can search for.
+   */
+  struct Location
+  {
+    std::string          name;
+    std::string          path;
+    std::list<Reference> references;
+  };
+}
 
 #endif

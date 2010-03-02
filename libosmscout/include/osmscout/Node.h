@@ -28,25 +28,28 @@
 #include <osmscout/Tag.h>
 #include <osmscout/TypeConfig.h>
 
-class Node
-{
-public:
-  Id                id;
-  TypeId            type;
-  double            lon;
-  double            lat;
-  std::vector<Tag>  tags;
+namespace osmscout {
 
-public:
-  inline Node()
-  : type(typeIgnore)
+  class Node
   {
-    // no code
-  }
+  public:
+    Id                id;
+    TypeId            type;
+    double            lon;
+    double            lat;
+    std::vector<Tag>  tags;
 
-  bool Read(FileReader& reader);
-  bool Read(FileScanner& scanner);
-  bool Write(FileWriter& writer) const;
-};
+  public:
+    inline Node()
+    : type(typeIgnore)
+    {
+      // no code
+    }
+
+    bool Read(FileReader& reader);
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer) const;
+  };
+}
 
 #endif

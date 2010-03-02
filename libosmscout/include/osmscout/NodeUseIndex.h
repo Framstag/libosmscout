@@ -25,36 +25,39 @@
 
 #include <osmscout/TypeConfig.h>
 
-struct NodeUseIndexEntry
-{
-  size_t interval;
-  size_t offset;
-  size_t size;
-  size_t count;
-};
+namespace osmscout {
 
-class NodeUseIndex
-{
-private:
-  struct IndexEntry
+  struct NodeUseIndexEntry
   {
+    size_t interval;
     size_t offset;
+    size_t size;
     size_t count;
   };
 
-private:
-  std::map<size_t,IndexEntry> nodeUseIndex; //! The index, mapping intervals to IndexEntry
-  unsigned long               intervalSize; //! The id range of an interval
-  long                        datSize;      //! The size of the nodeuse.dat file
+  class NodeUseIndex
+  {
+  private:
+    struct IndexEntry
+    {
+      size_t offset;
+      size_t count;
+    };
 
-public:
-  bool LoadNodeUseIndex(const std::string& path);
+  private:
+    std::map<size_t,IndexEntry> nodeUseIndex; //! The index, mapping intervals to IndexEntry
+    unsigned long               intervalSize; //! The id range of an interval
+    long                        datSize;      //! The size of the nodeuse.dat file
 
-  size_t GetIntervalSize() const;
-  void GetNodeIndexEntries(const std::set<Id>& ids,
-                           std::list<NodeUseIndexEntry>& entries) const;
+  public:
+    bool LoadNodeUseIndex(const std::string& path);
 
-  void DumpStatistics();
-};
+    size_t GetIntervalSize() const;
+    void GetNodeIndexEntries(const std::set<Id>& ids,
+                             std::list<NodeUseIndexEntry>& entries) const;
+
+    void DumpStatistics();
+  };
+}
 
 #endif

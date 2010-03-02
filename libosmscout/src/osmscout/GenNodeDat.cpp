@@ -29,96 +29,99 @@
 #include <osmscout/RawNode.h>
 #include <osmscout/Node.h>
 
-// TODO: Move this to some more global place
-static double conversionFactor=10000000.0;
+namespace osmscout {
 
-bool GenerateNodeDat(const ImportParameter& parameter,
-                     Progress& progress)
-{
-  double minLon=-10.0;
-  double minLat=-10.0;
-  double maxLon=10.0;
-  double maxLat=10.0;
-  size_t count=0;
+  // TODO: Move this to some more global place
+  static double conversionFactor=10000000.0;
 
-  //
-  // Iterator over all raw nodes, hcekc they type, and convert them from raw nodes
-  // to nodes if the type is interesting (!=typeIgnore).
-  //
-  // Count the bounding box by the way...
-  //
+  bool GenerateNodeDat(const ImportParameter& parameter,
+                       Progress& progress)
+  {
+    double minLon=-10.0;
+    double minLat=-10.0;
+    double maxLon=10.0;
+    double maxLat=10.0;
+    size_t count=0;
 
-  progress.SetAction("Generating nodes.dat");
+    //
+    // Iterator over all raw nodes, hcekc they type, and convert them from raw nodes
+    // to nodes if the type is interesting (!=typeIgnore).
+    //
+    // Count the bounding box by the way...
+    //
 
-  FileScanner scanner;
-  FileWriter  writer;
+    progress.SetAction("Generating nodes.dat");
 
-  if (!scanner.Open("rawnodes.dat")) {
-    progress.Error("Cannot open 'rawnodes.dat'");
-    return false;
-  }
+    FileScanner scanner;
+    FileWriter  writer;
 
-  if (!writer.Open("nodes.dat")) {
-    progress.Error("Cannot create 'nodes.dat'");
-    return false;
-  }
-
-  while (!scanner.HasError()) {
-    RawNode rawNode;
-    Node    node;
-
-    rawNode.Read(scanner);
-
-    if (count==0) {
-      minLat=rawNode.lat;
-      minLon=rawNode.lon;
-      maxLat=rawNode.lat;
-      maxLon=rawNode.lon;
-    }
-    else {
-      minLat=std::min(minLat,rawNode.lat);
-      minLon=std::min(minLon,rawNode.lon);
-      maxLat=std::max(maxLat,rawNode.lat);
-      maxLon=std::max(maxLon,rawNode.lon);
+    if (!scanner.Open("rawnodes.dat")) {
+      progress.Error("Cannot open 'rawnodes.dat'");
+      return false;
     }
 
-    if (rawNode.type!=typeIgnore) {
-      node.id=rawNode.id;
-      node.type=rawNode.type;
-      node.lat=rawNode.lat;
-      node.lon=rawNode.lon;
-      node.tags=rawNode.tags;
-
-      node.Write(writer);
+    if (!writer.Open("nodes.dat")) {
+      progress.Error("Cannot create 'nodes.dat'");
+      return false;
     }
 
-    count++;
+    while (!scanner.HasError()) {
+      RawNode rawNode;
+      Node    node;
+
+      rawNode.Read(scanner);
+
+      if (count==0) {
+        minLat=rawNode.lat;
+        minLon=rawNode.lon;
+        maxLat=rawNode.lat;
+        maxLon=rawNode.lon;
+      }
+      else {
+        minLat=std::min(minLat,rawNode.lat);
+        minLon=std::min(minLon,rawNode.lon);
+        maxLat=std::max(maxLat,rawNode.lat);
+        maxLon=std::max(maxLon,rawNode.lon);
+      }
+
+      if (rawNode.type!=typeIgnore) {
+        node.id=rawNode.id;
+        node.type=rawNode.type;
+        node.lat=rawNode.lat;
+        node.lon=rawNode.lon;
+        node.tags=rawNode.tags;
+
+        node.Write(writer);
+      }
+
+      count++;
+    }
+
+    scanner.Close();
+    writer.Close();
+
+    progress.SetAction("Generating bounding.dat");
+
+    if (!writer.Open("bounding.dat")) {
+      progress.Error("Cannot create 'bounding.dat'");
+      return false;
+    }
+
+    // TODO: Dump bounding box to debug
+
+    unsigned long minLatDat=round((minLat+180.0)*conversionFactor);
+    unsigned long minLonDat=round((minLon+90.0)*conversionFactor);
+    unsigned long maxLatDat=round((maxLat+180.0)*conversionFactor);
+    unsigned long maxLonDat=round((maxLon+90.0)*conversionFactor);
+
+    writer.WriteNumber(minLatDat);
+    writer.WriteNumber(minLonDat);
+    writer.WriteNumber(maxLatDat);
+    writer.WriteNumber(maxLonDat);
+
+    writer.Close();
+
+    return true;
   }
-
-  scanner.Close();
-  writer.Close();
-
-  progress.SetAction("Generating bounding.dat");
-
-  if (!writer.Open("bounding.dat")) {
-    progress.Error("Cannot create 'bounding.dat'");
-    return false;
-  }
-
-  // TODO: Dump bounding box to debug
-
-  unsigned long minLatDat=round((minLat+180.0)*conversionFactor);
-  unsigned long minLonDat=round((minLon+90.0)*conversionFactor);
-  unsigned long maxLatDat=round((maxLat+180.0)*conversionFactor);
-  unsigned long maxLonDat=round((maxLon+90.0)*conversionFactor);
-
-  writer.WriteNumber(minLatDat);
-  writer.WriteNumber(minLonDat);
-  writer.WriteNumber(maxLatDat);
-  writer.WriteNumber(maxLonDat);
-
-  writer.Close();
-
-  return true;
 }
 

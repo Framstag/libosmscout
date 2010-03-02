@@ -21,31 +21,34 @@
 
 #include <cassert>
 
-RoutingProfile::RoutingProfile()
- : minCostFactor(0),
-   turnCostFactor(0)
-{
-  // no code
-}
+namespace osmscout {
 
-void RoutingProfile::SetTurnCostFactor(double costFactor)
-{
-  turnCostFactor=costFactor;
-}
-
-void RoutingProfile::SetTypeCostFactor(TypeId type, double costFactor)
-{
-  if (costFactors.size()==0) {
-    minCostFactor=costFactor;
-  }
-  else {
-    minCostFactor=std::min(minCostFactor,costFactor);
+  RoutingProfile::RoutingProfile()
+   : minCostFactor(0),
+     turnCostFactor(0)
+  {
+    // no code
   }
 
-  if (type>=costFactors.size()) {
-    costFactors.resize(type+1,0.0);
+  void RoutingProfile::SetTurnCostFactor(double costFactor)
+  {
+    turnCostFactor=costFactor;
   }
 
-  costFactors[type]=costFactor;
+  void RoutingProfile::SetTypeCostFactor(TypeId type, double costFactor)
+  {
+    if (costFactors.size()==0) {
+      minCostFactor=costFactor;
+    }
+    else {
+      minCostFactor=std::min(minCostFactor,costFactor);
+    }
+
+    if (type>=costFactors.size()) {
+      costFactors.resize(type+1,0.0);
+    }
+
+    costFactors[type]=costFactor;
+  }
 }
 

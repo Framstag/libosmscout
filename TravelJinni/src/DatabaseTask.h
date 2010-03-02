@@ -47,32 +47,32 @@ struct Job
 class DatabaseTask : public Lum::OS::Thread
 {
 private:
-  Database           *database;
-  StyleConfig        *styleConfig;
-  Lum::OS::Condition condition;
+  osmscout::Database     *database;
+  osmscout::StyleConfig  *styleConfig;
+  Lum::OS::Condition     condition;
   mutable Lum::OS::Mutex mutex;
-  bool               finish;
-  Job                *newJob;
-  Job                *currentJob;
-  Job                *finishedJob;
-  Lum::Model::Action *jobFinishedAction;
-  cairo_surface_t    *currentSurface;
-  cairo_t            *currentCairo;
-  size_t             currentWidth,currentHeight;
-  double             currentLon,currentLat;
-  double             currentMagnification;
-  cairo_surface_t    *finishedSurface;
-  cairo_t            *finishedCairo;
-  size_t             finishedWidth,finishedHeight;
-  double             finishedLon,finishedLat;
-  double             finishedMagnification;
-  MapPainter         painter;
+  bool                   finish;
+  Job                    *newJob;
+  Job                    *currentJob;
+  Job                    *finishedJob;
+  Lum::Model::Action     *jobFinishedAction;
+  cairo_surface_t        *currentSurface;
+  cairo_t                *currentCairo;
+  size_t                 currentWidth,currentHeight;
+  double                 currentLon,currentLat;
+  double                 currentMagnification;
+  cairo_surface_t        *finishedSurface;
+  cairo_t                *finishedCairo;
+  size_t                 finishedWidth,finishedHeight;
+  double                 finishedLon,finishedLat;
+  double                 finishedMagnification;
+  osmscout::MapPainter   painter;
 
 private:
   void SignalRedraw();
 
 public:
-  DatabaseTask(Database* database,
+  DatabaseTask(osmscout::Database* database,
                Lum::Model::Action* jobFinishedAction);
 
   void Run();
@@ -82,35 +82,36 @@ public:
   bool IsOpen() const;
   void Close();
 
-  bool LoadStyleConfig(const std::wstring& filename, StyleConfig*& styleConfig);
-  void SetStyle(StyleConfig* styleConfig);
+  bool LoadStyleConfig(const std::wstring& filename,
+                       osmscout::StyleConfig*& styleConfig);
+  void SetStyle(osmscout::StyleConfig* styleConfig);
 
 
   bool GetBoundingBox(double& minLat,double& minLon,
                       double& maxLat,double& maxLon) const;
 
-  bool GetWay(Id id, Way& way) const;
+  bool GetWay(osmscout::Id id, osmscout::Way& way) const;
 
   bool GetMatchingAdminRegions(const std::wstring& name,
-                               std::list<AdminRegion>& regions,
+                               std::list<osmscout::AdminRegion>& regions,
                                size_t limit,
                                bool& limitReached) const;
 
-  bool GetMatchingLocations(const AdminRegion& region,
+  bool GetMatchingLocations(const osmscout::AdminRegion& region,
                             const std::wstring& name,
-                            std::list<Location>& locations,
+                            std::list<osmscout::Location>& locations,
                             size_t limit,
                             bool& limitReached) const;
 
-  bool CalculateRoute(Id startWayId, Id startNodeId,
-                      Id targetWayId, Id targetNodeId,
-                      RouteData& route);
-  bool TransformRouteDataToRouteDescription(const RouteData& data,
-                                            RouteDescription& description);
-  bool TransformRouteDataToWay(const RouteData& data,
-                               Way& way);
+  bool CalculateRoute(osmscout::Id startWayId, osmscout::Id startNodeId,
+                      osmscout::Id targetWayId, osmscout::Id targetNodeId,
+                      osmscout::RouteData& route);
+  bool TransformRouteDataToRouteDescription(const osmscout::RouteData& data,
+                                            osmscout::RouteDescription& description);
+  bool TransformRouteDataToWay(const osmscout::RouteData& data,
+                               osmscout::Way& way);
   void ClearRoute();
-  void AddRoute(const Way& way);
+  void AddRoute(const osmscout::Way& way);
 
   void PostJob(Job *job);
 

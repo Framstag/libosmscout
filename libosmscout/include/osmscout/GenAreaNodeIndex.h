@@ -23,7 +23,9 @@
 #include <osmscout/Import.h>
 #include <osmscout/Progress.h>
 
-extern bool GenerateAreaNodeIndex(const ImportParameter& parameter,
-                                  Progress& progress);
+namespace osmscout {
+  extern bool GenerateAreaNodeIndex(const ImportParameter& parameter,
+                                    Progress& progress);
+}
 
 #endif

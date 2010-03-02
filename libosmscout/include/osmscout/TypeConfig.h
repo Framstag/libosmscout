@@ -29,199 +29,202 @@
 #include <osmscout/Tag.h>
 #include <osmscout/Types.h>
 
-const static TagId tagPrivateBase   = 5000;
-const static TagId tagIgnore        = tagPrivateBase+ 0;
-const static TagId tagName          = tagPrivateBase+ 1;
-const static TagId tagRef           = tagPrivateBase+ 2;
-const static TagId tagOneway        = tagPrivateBase+ 3;
-const static TagId tagBridge        = tagPrivateBase+ 4;
-const static TagId tagTunnel        = tagPrivateBase+ 5;
-const static TagId tagLayer         = tagPrivateBase+ 6;
-const static TagId tagBuilding      = tagPrivateBase+ 7;
-const static TagId tagPlace         = tagPrivateBase+ 8;
-const static TagId tagPlaceName     = tagPrivateBase+ 9;
-const static TagId tagBoundary      = tagPrivateBase+10;
-const static TagId tagAdminLevel    = tagPrivateBase+11;
-const static TagId tagHighway       = tagPrivateBase+12;
-const static TagId tagRestriction   = tagPrivateBase+13;
-const static TagId tagInternal      = tagPrivateBase+14;
+namespace osmscout {
 
-const static TypeId typePrivateBase = 5000;
-const static TypeId typeIgnore      = typePrivateBase+0;
-const static TypeId typeRoute       = typePrivateBase+1;
+  const static TagId tagPrivateBase   = 5000;
+  const static TagId tagIgnore        = tagPrivateBase+ 0;
+  const static TagId tagName          = tagPrivateBase+ 1;
+  const static TagId tagRef           = tagPrivateBase+ 2;
+  const static TagId tagOneway        = tagPrivateBase+ 3;
+  const static TagId tagBridge        = tagPrivateBase+ 4;
+  const static TagId tagTunnel        = tagPrivateBase+ 5;
+  const static TagId tagLayer         = tagPrivateBase+ 6;
+  const static TagId tagBuilding      = tagPrivateBase+ 7;
+  const static TagId tagPlace         = tagPrivateBase+ 8;
+  const static TagId tagPlaceName     = tagPrivateBase+ 9;
+  const static TagId tagBoundary      = tagPrivateBase+10;
+  const static TagId tagAdminLevel    = tagPrivateBase+11;
+  const static TagId tagHighway       = tagPrivateBase+12;
+  const static TagId tagRestriction   = tagPrivateBase+13;
+  const static TagId tagInternal      = tagPrivateBase+14;
 
-class TagInfo
-{
-private:
-  std::string name;
-  TagId       id;
+  const static TypeId typePrivateBase = 5000;
+  const static TypeId typeIgnore      = typePrivateBase+0;
+  const static TypeId typeRoute       = typePrivateBase+1;
 
-public:
-  TagInfo();
-  TagInfo(const std::string& name,
-          TagId id);
-
-  inline std::string GetName() const
+  class TagInfo
   {
-    return name;
-  }
+  private:
+    std::string name;
+    TagId       id;
 
-  inline TagId GetId() const
+  public:
+    TagInfo();
+    TagInfo(const std::string& name,
+            TagId id);
+
+    inline std::string GetName() const
+    {
+      return name;
+    }
+
+    inline TagId GetId() const
+    {
+      return id;
+    }
+  };
+
+  class TypeInfo
   {
-    return id;
-  }
-};
+  private:
+    TypeId      id;
+    TagId       tag;
+    std::string tagValue;
+    bool        canBeNode;
+    bool        canBeWay;
+    bool        canBeArea;
+    bool        canBeRelation;
+    bool        canBeRoute;
+    bool        canBeIndexed;
 
-class TypeInfo
-{
-private:
-  TypeId      id;
-  TagId       tag;
-  std::string tagValue;
-  bool        canBeNode;
-  bool        canBeWay;
-  bool        canBeArea;
-  bool        canBeRelation;
-  bool        canBeRoute;
-  bool        canBeIndexed;
+  public:
+    TypeInfo();
+    TypeInfo(TypeId id,
+             TagId tag,
+             const std::string tagValue);
 
-public:
-  TypeInfo();
-  TypeInfo(TypeId id,
-           TagId tag,
-           const std::string tagValue);
+    inline TypeId GetId() const
+    {
+      return id;
+    }
 
-  inline TypeId GetId() const
+    inline TagId GetTag() const
+    {
+      return tag;
+    }
+
+    inline std::string GetTagValue() const
+    {
+      return tagValue;
+    }
+
+    inline TypeInfo& CanBeNode(bool canBeNode)
+    {
+      this->canBeNode=canBeNode;
+
+      return *this;
+    }
+
+    inline bool CanBeNode() const
+    {
+      return canBeNode;
+    }
+
+    inline TypeInfo& CanBeWay(bool canBeWay)
+    {
+      this->canBeWay=canBeWay;
+
+      return *this;
+    }
+
+    inline bool CanBeWay() const
+    {
+      return canBeWay;
+    }
+
+    inline TypeInfo& CanBeArea(bool canBeArea)
+    {
+      this->canBeArea=canBeArea;
+
+      return *this;
+    }
+
+    inline bool CanBeArea() const
+    {
+      return canBeArea;
+    }
+
+    inline TypeInfo& CanBeRelation(bool canBeRelation)
+    {
+      this->canBeRelation=canBeRelation;
+
+      return *this;
+    }
+
+    inline bool CanBeRelation() const
+    {
+      return canBeRelation;
+    }
+
+    inline TypeInfo& CanBeRoute(bool canBeRoute)
+    {
+      this->canBeRoute=canBeRoute;
+
+      return *this;
+    }
+
+    inline bool CanBeRoute() const
+    {
+      return canBeRoute;
+    }
+
+    inline TypeInfo& CanBeIndexed(bool canBeIndexed)
+    {
+      this->canBeIndexed=canBeIndexed;
+
+      return *this;
+    }
+
+    inline bool CanBeIndexed() const
+    {
+      return canBeIndexed;
+    }
+  };
+
+  class TypeConfig
   {
-    return id;
-  }
+  private:
+    std::list<TagInfo>                              tags;
+    std::list<TypeInfo>                             types;
 
-  inline TagId GetTag() const
-  {
-    return tag;
-  }
+    TypeId                                          maxTypeId;
 
-  inline std::string GetTagValue() const
-  {
-    return tagValue;
-  }
+    std::map<std::string,TagInfo>                   stringToTagMap;
+    std::map<TagId,std::map<std::string,TypeInfo> > tagToTypeMap;
 
-  inline TypeInfo& CanBeNode(bool canBeNode)
-  {
-    this->canBeNode=canBeNode;
+  public:
+    TypeConfig();
+    TypeConfig& AddTagInfo(const TagInfo& tagInfo);
+    TypeConfig& AddTypeInfo(const TypeInfo& typeInfo);
 
-    return *this;
-  }
+    TypeId GetMaxTypeId() const;
 
-  inline bool CanBeNode() const
-  {
-    return canBeNode;
-  }
+    TagId GetTagId(const char* name) const;
 
-  inline TypeInfo& CanBeWay(bool canBeWay)
-  {
-    this->canBeWay=canBeWay;
+    bool GetNodeTypeId(std::vector<Tag>& tags,
+                       std::vector<Tag>::iterator& tag,
+                       TypeId &typeId) const;
+    bool GetWayAreaTypeId(std::vector<Tag>& tags,
+                          std::vector<Tag>::iterator& wayTag,
+                          TypeId &wayType,
+                          std::vector<Tag>::iterator& areaTag,
+                          TypeId &areaType) const;
+    bool GetRelationTypeId(std::vector<Tag>& tags,
+                           std::vector<Tag>::iterator& tag,
+                           TypeId &typeId) const;
 
-    return *this;
-  }
+    TypeId GetNodeTypeId(TagId tagKey, const char* tagValue) const;
+    TypeId GetWayTypeId(TagId tagKey, const char* tagValue) const;
+    TypeId GetAreaTypeId(TagId tagKey, const char* tagValue) const;
+    TypeId GetRelationTypeId(TagId tagKey, const char* tagValue) const;
 
-  inline bool CanBeWay() const
-  {
-    return canBeWay;
-  }
+    void GetWaysWithKey(TagId tagKey, std::set<TypeId>& types) const;
 
-  inline TypeInfo& CanBeArea(bool canBeArea)
-  {
-    this->canBeArea=canBeArea;
+    void GetRoutables(std::set<TypeId>& types) const;
 
-    return *this;
-  }
+    void GetIndexables(std::set<TypeId>& types) const;
 
-  inline bool CanBeArea() const
-  {
-    return canBeArea;
-  }
-
-  inline TypeInfo& CanBeRelation(bool canBeRelation)
-  {
-    this->canBeRelation=canBeRelation;
-
-    return *this;
-  }
-
-  inline bool CanBeRelation() const
-  {
-    return canBeRelation;
-  }
-
-  inline TypeInfo& CanBeRoute(bool canBeRoute)
-  {
-    this->canBeRoute=canBeRoute;
-
-    return *this;
-  }
-
-  inline bool CanBeRoute() const
-  {
-    return canBeRoute;
-  }
-
-  inline TypeInfo& CanBeIndexed(bool canBeIndexed)
-  {
-    this->canBeIndexed=canBeIndexed;
-
-    return *this;
-  }
-
-  inline bool CanBeIndexed() const
-  {
-    return canBeIndexed;
-  }
-};
-
-class TypeConfig
-{
-private:
-  std::list<TagInfo>                              tags;
-  std::list<TypeInfo>                             types;
-
-  TypeId                                          maxTypeId;
-
-  std::map<std::string,TagInfo>                   stringToTagMap;
-  std::map<TagId,std::map<std::string,TypeInfo> > tagToTypeMap;
-
-public:
-  TypeConfig();
-  TypeConfig& AddTagInfo(const TagInfo& tagInfo);
-  TypeConfig& AddTypeInfo(const TypeInfo& typeInfo);
-
-  TypeId GetMaxTypeId() const;
-
-  TagId GetTagId(const char* name) const;
-
-  bool GetNodeTypeId(std::vector<Tag>& tags,
-                     std::vector<Tag>::iterator& tag,
-                     TypeId &typeId) const;
-  bool GetWayAreaTypeId(std::vector<Tag>& tags,
-                        std::vector<Tag>::iterator& wayTag,
-                        TypeId &wayType,
-                        std::vector<Tag>::iterator& areaTag,
-                        TypeId &areaType) const;
-  bool GetRelationTypeId(std::vector<Tag>& tags,
-                         std::vector<Tag>::iterator& tag,
-                         TypeId &typeId) const;
-
-  TypeId GetNodeTypeId(TagId tagKey, const char* tagValue) const;
-  TypeId GetWayTypeId(TagId tagKey, const char* tagValue) const;
-  TypeId GetAreaTypeId(TagId tagKey, const char* tagValue) const;
-  TypeId GetRelationTypeId(TagId tagKey, const char* tagValue) const;
-
-  void GetWaysWithKey(TagId tagKey, std::set<TypeId>& types) const;
-
-  void GetRoutables(std::set<TypeId>& types) const;
-
-  void GetIndexables(std::set<TypeId>& types) const;
-
-};
+  };
+}
 
 #endif

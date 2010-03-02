@@ -258,13 +258,13 @@ bool CityStreetSearchDialog::HasResult() const
   return hasResult;
 }
 
-const AdminRegion& CityStreetSearchDialog::GetResultAdminRegion() const
+const osmscout::AdminRegion& CityStreetSearchDialog::GetResultAdminRegion() const
 {
   return resultAdminRegion;
 }
 
 
-const Location& CityStreetSearchDialog::GetResultLocation() const
+const osmscout::Location& CityStreetSearchDialog::GetResultLocation() const
 {
   return resultLocation;
 }

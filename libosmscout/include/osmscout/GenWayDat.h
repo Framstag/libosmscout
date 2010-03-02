@@ -24,8 +24,10 @@
 #include <osmscout/Progress.h>
 #include <osmscout/TypeConfig.h>
 
-extern bool GenerateWayDat(const TypeConfig& typeConfig,
-                           const ImportParameter& parameter,
-                           Progress& progress);
+namespace osmscout {
+  extern bool GenerateWayDat(const TypeConfig& typeConfig,
+                             const ImportParameter& parameter,
+                             Progress& progress);
+}
 
 #endif

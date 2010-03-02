@@ -29,119 +29,122 @@
 
 #include <osmscout/Database.h>
 
-class MapPainter
-{
-private:
-  const Database& database;
+namespace osmscout {
 
-  // current drawing context information
-  // These values are valid until the next image gets drawn
-  double              lon;           //! Longitude coordinate of the center of the image
-  double              lat;           //! Latitude coordinate of the center of the image
-  double              lonMin;        //! Longitude of the upper left corner of the image
-  double              latMin;        //! Latitude of the upper left corner of the image
-  double              lonMax;        //! Longitude of the lower right corner of the image
-  double              latMax;        //! Latitude of the lower right corner of the image
-  double              magnification; //! Current maginification
-  size_t              width;         //! Width fo image
-  size_t              height;        //! Height of image
-  double              hmin;
-  double              hmax;
-  double              vmin;
-  double              vmax;
+  class MapPainter
+  {
+  private:
+    const Database& database;
 
-  double              hscale;
-  double              vscale;
+    // current drawing context information
+    // These values are valid until the next image gets drawn
+    double              lon;           //! Longitude coordinate of the center of the image
+    double              lat;           //! Latitude coordinate of the center of the image
+    double              lonMin;        //! Longitude of the upper left corner of the image
+    double              latMin;        //! Latitude of the upper left corner of the image
+    double              lonMax;        //! Longitude of the lower right corner of the image
+    double              latMax;        //! Latitude of the lower right corner of the image
+    double              magnification; //! Current maginification
+    size_t              width;         //! Width fo image
+    size_t              height;        //! Height of image
+    double              hmin;
+    double              hmax;
+    double              vmin;
+    double              vmax;
 
-  // helper struct for drawing
-  std::vector<bool>                 drawNode;     //! This nodes will be drawn
-  std::vector<bool>                 outNode;      //! This nodes is out of the visible area
-  std::vector<double>               nodeX;        //! static scratch buffer for calculation
-  std::vector<double>               nodeY;        //! static scratch buffer for calculation
-  std::vector<double>               lineWidth;    //! line with for this way line style
-  std::vector<bool>                 outline;      //! We draw an outline for this way line style
-  std::vector<double>               borderWidth;  //! border with for this way (area) border style
-  std::map<size_t,cairo_scaled_font_t*> font;     //! Cached scaled font
-  std::vector<cairo_surface_t*>     image;        //! List of internal images
-  std::vector<bool>                 imageChecked; //! We have tried to load the internal image
+    double              hscale;
+    double              vscale;
 
-  cairo_scaled_font_t* GetScaledFont(cairo_t* draw,
-                                     size_t fontSize);
+    // helper struct for drawing
+    std::vector<bool>                 drawNode;     //! This nodes will be drawn
+    std::vector<bool>                 outNode;      //! This nodes is out of the visible area
+    std::vector<double>               nodeX;        //! static scratch buffer for calculation
+    std::vector<double>               nodeY;        //! static scratch buffer for calculation
+    std::vector<double>               lineWidth;    //! line with for this way line style
+    std::vector<bool>                 outline;      //! We draw an outline for this way line style
+    std::vector<double>               borderWidth;  //! border with for this way (area) border style
+    std::map<size_t,cairo_scaled_font_t*> font;     //! Cached scaled font
+    std::vector<cairo_surface_t*>     image;        //! List of internal images
+    std::vector<bool>                 imageChecked; //! We have tried to load the internal image
 
-  bool IsVisible(const Way& way) const;
+    cairo_scaled_font_t* GetScaledFont(cairo_t* draw,
+                                       size_t fontSize);
 
-  bool CheckImage(const StyleConfig& styleConfig,
-                  IconStyle::Icon icon);
+    bool IsVisible(const Way& way) const;
 
-  void DrawLabel(cairo_t* draw,
-                 double magnification,
-                 const LabelStyle& style,
-                 const std::string& text,
-                 double x, double y);
+    bool CheckImage(const StyleConfig& styleConfig,
+                    IconStyle::Icon icon);
 
-  void DrawContourLabel(cairo_t* draw,
-                        const LabelStyle& style,
-                        const std::string& text,
-                        const std::vector<Point>& nodes);
+    void DrawLabel(cairo_t* draw,
+                   double magnification,
+                   const LabelStyle& style,
+                   const std::string& text,
+                   double x, double y);
 
-  void DrawSymbol(cairo_t* draw,
-                  const SymbolStyle* style,
+    void DrawContourLabel(cairo_t* draw,
+                          const LabelStyle& style,
+                          const std::string& text,
+                          const std::vector<Point>& nodes);
+
+    void DrawSymbol(cairo_t* draw,
+                    const SymbolStyle* style,
+                    double x, double y);
+
+    void DrawIcon(cairo_t* draw,
+                  const IconStyle* style,
                   double x, double y);
 
-  void DrawIcon(cairo_t* draw,
-                const IconStyle* style,
-                double x, double y);
+    void SetLineStyle(cairo_t* draw,
+                      double lineWidth,
+                      const LineStyle& style);
+    void SetLinePatternStyle(cairo_t* draw,
+                             double lineWidth,
+                             const LineStyle& style);
 
-  void SetLineStyle(cairo_t* draw,
-                    double lineWidth,
-                    const LineStyle& style);
-  void SetLinePatternStyle(cairo_t* draw,
-                           double lineWidth,
-                           const LineStyle& style);
+  public:
+    std::list<Way> poiWays;
+    std::list<Node> poiNodes;
 
-public:
-  std::list<Way> poiWays;
-  std::list<Node> poiNodes;
-
-public:
-  MapPainter(const Database& database);
-  virtual ~MapPainter();
+  public:
+    MapPainter(const Database& database);
+    virtual ~MapPainter();
 
 
-  bool DrawMap(const StyleConfig& styleConfig,
-               double lon, double lat,
-               double magnification,
-               size_t width, size_t height,
-               cairo_surface_t *image,
-               cairo_t *draw);
+    bool DrawMap(const StyleConfig& styleConfig,
+                 double lon, double lat,
+                 double magnification,
+                 size_t width, size_t height,
+                 cairo_surface_t *image,
+                 cairo_t *draw);
 
-  bool PrintMap(const StyleConfig& styleConfig,
-                double lon, double lat,
-                double magnification,
-                size_t width, size_t height);
+    bool PrintMap(const StyleConfig& styleConfig,
+                  double lon, double lat,
+                  double magnification,
+                  size_t width, size_t height);
 
-  bool transformPixelToGeo(int x, int y,
-                           double& lon, double& lat);
+    bool transformPixelToGeo(int x, int y,
+                             double& lon, double& lat);
 
-  bool transformGeoToPixel(double lon, double lat,
-                           int& x, int& y);
+    bool transformGeoToPixel(double lon, double lat,
+                             int& x, int& y);
 
-  static void GetDimensions(double lon, double lat,
-                            double magnification,
-                            size_t width, size_t height,
-                            double& lonMin, double& latMin,
-                            double& lonMax, double& latMax);
+    static void GetDimensions(double lon, double lat,
+                              double magnification,
+                              size_t width, size_t height,
+                              double& lonMin, double& latMin,
+                              double& lonMax, double& latMax);
 
-  static bool transformPixelToGeo(int x, int y,
-                                  double centerLon, double centerLat,
-                                  double magnification,
-                                  size_t width, size_t height,
-                                  double& outLon, double& outLat);
-  static bool transformGeoToPixel(double lon, double lat,
-                                  double centerLon, double centerLat,
-                                  double magnification,
-                                  size_t width, size_t height,
-                                  double &x, double& y);
-};
+    static bool transformPixelToGeo(int x, int y,
+                                    double centerLon, double centerLat,
+                                    double magnification,
+                                    size_t width, size_t height,
+                                    double& outLon, double& outLat);
+    static bool transformGeoToPixel(double lon, double lat,
+                                    double centerLon, double centerLat,
+                                    double magnification,
+                                    size_t width, size_t height,
+                                    double &x, double& y);
+  };
+}
 
 #endif

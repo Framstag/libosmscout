@@ -22,18 +22,21 @@
 
 #include <osmscout/TypeConfig.h>
 
-class Point
-{
-public:
-  Id     id;
-  double lon;
-  double lat;
+namespace osmscout {
 
-public:
-  inline Point()
+  class Point
   {
-    // no code
-  }
-};
+  public:
+    Id     id;
+    double lon;
+    double lat;
+
+  public:
+    inline Point()
+    {
+      // no code
+    }
+  };
+}
 
 #endif

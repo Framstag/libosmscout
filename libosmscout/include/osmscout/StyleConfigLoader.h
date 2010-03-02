@@ -23,7 +23,10 @@
 #include <osmscout/StyleConfig.h>
 #include <osmscout/TypeConfig.h>
 
-extern bool LoadStyleConfig(const char* styleFile,
-                            StyleConfig& styleConfig);
+namespace osmscout {
+
+  extern bool LoadStyleConfig(const char* styleFile,
+                              StyleConfig& styleConfig);
+}
 
 #endif

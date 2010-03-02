@@ -25,30 +25,33 @@
 #include <osmscout/Tag.h>
 #include <osmscout/TypeConfig.h>
 
-class RawWay
-{
-public:
-  Id               id;
-  TypeId           type;
-  bool             isArea;
-  std::vector<Tag> tags;
-  std::vector<Id>  nodes;
+namespace osmscout {
 
-public:
-  inline RawWay()
-  : type(typeIgnore),
-    isArea(false)
+  class RawWay
   {
-    // no code
-  }
+  public:
+    Id               id;
+    TypeId           type;
+    bool             isArea;
+    std::vector<Tag> tags;
+    std::vector<Id>  nodes;
 
-  inline bool IsArea() const
-  {
-    return isArea;
-  }
+  public:
+    inline RawWay()
+    : type(typeIgnore),
+      isArea(false)
+    {
+      // no code
+    }
 
-  bool Read(FileScanner& scanner);
-  bool Write(FileWriter& writer) const;
-};
+    inline bool IsArea() const
+    {
+      return isArea;
+    }
+
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer) const;
+  };
+}
 
 #endif

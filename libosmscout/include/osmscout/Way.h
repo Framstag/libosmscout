@@ -27,83 +27,86 @@
 #include <osmscout/Tag.h>
 #include <osmscout/TypeConfig.h>
 
-class Way
-{
-public:
-  enum RestrictionType
+namespace osmscout {
+
+  class Way
   {
-    rstrAllowTurn  = 0, //! 0th member will be to, rest via ids
-    rstrForbitTurn = 1  //! 0th member will be to, rest via ids
+  public:
+    enum RestrictionType
+    {
+      rstrAllowTurn  = 0, //! 0th member will be to, rest via ids
+      rstrForbitTurn = 1  //! 0th member will be to, rest via ids
+    };
+
+    struct Restriction
+    {
+      RestrictionType type;
+      std::vector<Id> members;
+    };
+
+  public:
+    // Common flags
+    const static uint16_t isArea          = 1 <<  0; //! We are an area
+    const static uint16_t hasTags         = 1 <<  1; //! We have additional tags store on disk
+    const static uint16_t hasName         = 1 <<  2; //! We have a name
+    const static uint16_t hasRef          = 1 <<  3; //! We have reference name
+    const static uint16_t hasRestrictions = 1 <<  4; //! We have restrictions
+
+    // Area flags
+    const static uint16_t isBuilding      = 1 << 15; //! We are a building
+
+    // Way flags
+    const static uint16_t hasLayer        = 1 << 10; //! We have optional layer information
+    const static uint16_t isBridge        = 1 << 11; //! We are a bridge
+    const static uint16_t isTunnel        = 1 << 12; //! We are a tunnel
+    const static uint16_t startIsJoint    = 1 << 13; //! Start node is a joint node
+    const static uint16_t endIsJoint      = 1 << 14; //! End node is a joint node
+    const static uint16_t isOneway        = 1 << 15; //! We are a oneway (in way direction)
+
+  public:
+    Id                        id;
+    TypeId                    type;
+    uint16_t                  flags;
+    std::vector<Point>        nodes;
+    std::string               name;
+    std::string               ref;
+    int8_t                    layer;
+    std::vector<Tag>          tags;
+    std::vector<Restriction>  restrictions;
+
+  public:
+    inline Way()
+    : type(typeIgnore),
+      flags(0),
+      layer(0)
+    {
+      // no code
+    }
+
+    inline bool IsArea() const
+    {
+      return flags & isArea;
+    }
+
+    inline std::string GetName() const
+    {
+      return name;
+    }
+
+    inline std::string GetRefName() const
+    {
+      return ref;
+    }
+
+    inline bool IsOneway() const
+    {
+      return flags & isOneway;
+    }
+
+    bool Read(FileReader& reader);
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer) const;
   };
-
-  struct Restriction
-  {
-    RestrictionType type;
-    std::vector<Id> members;
-  };
-
-public:
-  // Common flags
-  const static uint16_t isArea          = 1 <<  0; //! We are an area
-  const static uint16_t hasTags         = 1 <<  1; //! We have additional tags store on disk
-  const static uint16_t hasName         = 1 <<  2; //! We have a name
-  const static uint16_t hasRef          = 1 <<  3; //! We have reference name
-  const static uint16_t hasRestrictions = 1 <<  4; //! We have restrictions
-
-  // Area flags
-  const static uint16_t isBuilding      = 1 << 15; //! We are a building
-
-  // Way flags
-  const static uint16_t hasLayer        = 1 << 10; //! We have optional layer information
-  const static uint16_t isBridge        = 1 << 11; //! We are a bridge
-  const static uint16_t isTunnel        = 1 << 12; //! We are a tunnel
-  const static uint16_t startIsJoint    = 1 << 13; //! Start node is a joint node
-  const static uint16_t endIsJoint      = 1 << 14; //! End node is a joint node
-  const static uint16_t isOneway        = 1 << 15; //! We are a oneway (in way direction)
-
-public:
-  Id                        id;
-  TypeId                    type;
-  uint16_t                  flags;
-  std::vector<Point>        nodes;
-  std::string               name;
-  std::string               ref;
-  int8_t                    layer;
-  std::vector<Tag>          tags;
-  std::vector<Restriction>  restrictions;
-
-public:
-  inline Way()
-  : type(typeIgnore),
-    flags(0),
-    layer(0)
-  {
-    // no code
-  }
-
-  inline bool IsArea() const
-  {
-    return flags & isArea;
-  }
-
-  inline std::string GetName() const
-  {
-    return name;
-  }
-
-  inline std::string GetRefName() const
-  {
-    return ref;
-  }
-
-  inline bool IsOneway() const
-  {
-    return flags & isOneway;
-  }
-
-  bool Read(FileReader& reader);
-  bool Read(FileScanner& scanner);
-  bool Write(FileWriter& writer) const;
-};
+}
 
 #endif

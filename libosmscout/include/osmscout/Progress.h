@@ -22,33 +22,36 @@
 
 #include <string>
 
-class Progress
-{
-protected:
-  Progress();
+namespace osmscout {
 
-public:
-  virtual ~Progress();
+  class Progress
+  {
+  protected:
+    Progress();
 
-  virtual void SetStep(const std::string& step);
-  virtual void SetAction(const std::string& action);
+  public:
+    virtual ~Progress();
 
-  virtual void Debug(const std::string& text);
-  virtual void Info(const std::string& text);
-  virtual void Warning(const std::string& text);
-  virtual void Error(const std::string& text);
-};
+    virtual void SetStep(const std::string& step);
+    virtual void SetAction(const std::string& action);
 
-class ConsoleProgress : public Progress
-{
-public:
-  void SetStep(const std::string& step);
-  void SetAction(const std::string& action);
+    virtual void Debug(const std::string& text);
+    virtual void Info(const std::string& text);
+    virtual void Warning(const std::string& text);
+    virtual void Error(const std::string& text);
+  };
 
-  void Debug(const std::string& text);
-  void Info(const std::string& text);
-  void Warning(const std::string& text);
-  void Error(const std::string& text);
-};
+  class ConsoleProgress : public Progress
+  {
+  public:
+    void SetStep(const std::string& step);
+    void SetAction(const std::string& action);
+
+    void Debug(const std::string& text);
+    void Info(const std::string& text);
+    void Warning(const std::string& text);
+    void Error(const std::string& text);
+  };
+}
 
 #endif

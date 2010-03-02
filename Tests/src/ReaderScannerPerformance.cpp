@@ -38,14 +38,14 @@ int main(int argc, char* argv[])
   size_t      readerWayCount;
   size_t      scannerWayCount;
 
-  if (!GetFileSize(filename,filesize)) {
+  if (!osmscout::GetFileSize(filename,filesize)) {
     std::cerr << "Cannot get file size of file '" << filename << "'!" << std::endl;
     return 1;
   }
 
-  StopClock readerTimer;
+  osmscout::StopClock readerTimer;
 
-  FileReader reader;
+  osmscout::FileReader reader;
 
   if (!reader.Open(filename)) {
     std::cerr << "Cannot open file '" << filename << "'!" << std::endl;
@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
 
   readerWayCount=0;
   while (!reader.HasError()) {
-    Way way;
+    osmscout::Way way;
 
     if (way.Read(reader)) {
       readerWayCount++;
@@ -72,9 +72,9 @@ int main(int argc, char* argv[])
 
   readerTimer.Stop();
 
-  StopClock scannerTimer;
+  osmscout::StopClock scannerTimer;
 
-  FileScanner scanner;
+  osmscout::FileScanner scanner;
 
   if (!scanner.Open(filename)) {
     std::cerr << "Cannot open of file '" << filename << "'!" << std::endl;
@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
 
   scannerWayCount=0;
   while (!scanner.HasError()) {
-    Way way;
+    osmscout::Way way;
 
     if (way.Read(scanner)) {
       scannerWayCount++;

@@ -26,12 +26,12 @@
 
 int main(int argc, char* argv[])
 {
-  ImportParameter parameter;
-  ConsoleProgress progress;
-  bool            parameterError=false;
-  size_t          startStep=parameter.GetStartStep();
-  size_t          endStep=parameter.GetEndStep();
-  const char*     mapfile=NULL;
+  osmscout::ImportParameter parameter;
+  osmscout::ConsoleProgress progress;
+  bool                      parameterError=false;
+  size_t                    startStep=parameter.GetStartStep();
+  size_t                    endStep=parameter.GetEndStep();
+  const char*               mapfile=NULL;
 
   // Simple way to analyse command line parameters, but enough for now...
   int i=1;
@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
   parameter.SetMapfile(mapfile);
   parameter.SetSteps(startStep,endStep);
 
-  if (Import(parameter,progress)) {
+  if (osmscout::Import(parameter,progress)) {
     std::cout << "Import OK!" << std::endl;
   }
   else {

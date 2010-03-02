@@ -21,27 +21,30 @@
 */
 
 // will be <cstdint> in c++0x
-#include <stdint.h> 
+#include <stdint.h>
 
-typedef long     FileOffset;
-typedef uint32_t Id;
-typedef uint32_t Page;
-typedef uint16_t TypeId;
-typedef uint16_t NodeCount;
+namespace osmscout {
 
-enum Mag {
- magWorld     =              1, //  0
- magState     =             32, //  5
- magStateOver =             64, //  6
- magCounty    =            128, //  7
- magRegion    =            256, //  8
- magProximity =            512, //  9
- magCityOver  =           1024, // 10
- magCity      =         2*1024, // 11
- magSuburb    =       2*2*1014, // 12
- magDetail    =     2*2*2*1024, // 13
- magClose     =   2*2*2*2*1024, // 14
- magVeryClose = 2*2*2*2*2*1024  // 15
-};
+  typedef long     FileOffset;
+  typedef uint32_t Id;
+  typedef uint32_t Page;
+  typedef uint16_t TypeId;
+  typedef uint16_t NodeCount;
+
+  enum Mag {
+   magWorld     =              1, //  0
+   magState     =             32, //  5
+   magStateOver =             64, //  6
+   magCounty    =            128, //  7
+   magRegion    =            256, //  8
+   magProximity =            512, //  9
+   magCityOver  =           1024, // 10
+   magCity      =         2*1024, // 11
+   magSuburb    =       2*2*1014, // 12
+   magDetail    =     2*2*2*1024, // 13
+   magClose     =   2*2*2*2*1024, // 14
+   magVeryClose = 2*2*2*2*2*1024  // 15
+  };
+}
 
 #endif

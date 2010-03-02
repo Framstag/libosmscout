@@ -38,20 +38,20 @@
 
 int main(int argc, char* argv[])
 {
-  std::vector<Id> ids;
-  std::vector<Id> queries;
-  std::string     filename="ways.dat";
-  long            filesize=0;
-  size_t          readerWayCount;
+  std::vector<osmscout::Id> ids;
+  std::vector<osmscout::Id> queries;
+  std::string               filename="ways.dat";
+  long                      filesize=0;
+  size_t                    readerWayCount;
 
-  if (!GetFileSize(filename,filesize)) {
+  if (!osmscout::GetFileSize(filename,filesize)) {
     std::cerr << "Cannot get file size of file '" << filename << "'!" << std::endl;
     return 1;
   }
 
-  StopClock readerTimer;
+  osmscout::StopClock readerTimer;
 
-  FileReader reader;
+  osmscout::FileReader reader;
 
   if (!reader.Open(filename)) {
     std::cerr << "Cannot open file '" << filename << "'!" << std::endl;
@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
 
   readerWayCount=0;
   while (!reader.HasError()) {
-    Way way;
+    osmscout::Way way;
 
     if (way.Read(reader)) {
       ids.push_back(way.id);
@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
     queries.push_back(ids[(int)(QUERY_COUNT*rand()/(RAND_MAX+1.0))]);
   }
 
-  NumericIndex<Id,Way> way2Index("way2.idx");
+  osmscout::NumericIndex<osmscout::Id,osmscout::Way> way2Index("way2.idx");
 
   if (!way2Index.LoadIndex(".")) {
     std::cerr << "Cannot open way index file!" << std::endl;
@@ -96,11 +96,11 @@ int main(int argc, char* argv[])
 
   std::cout << "Starting numeric index test..." << std::endl;
 
-  StopClock index2Timer;
+  osmscout::StopClock index2Timer;
 
   for (size_t i=0; i<queries.size(); i++) {
-    std::vector<Id>   ids;
-    std::vector<long> offsets;
+    std::vector<osmscout::Id>   ids;
+    std::vector<long>           offsets;
 
     ids.push_back(queries[i]);
 

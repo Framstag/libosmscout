@@ -27,24 +27,27 @@
 #include <osmscout/Tag.h>
 #include <osmscout/TypeConfig.h>
 
-class RawNode
-{
-public:
-  Id                id;
-  TypeId            type;
-  double            lon;
-  double            lat;
-  std::vector<Tag>  tags;
+namespace osmscout {
 
-public:
-  inline RawNode()
-  : type(typeIgnore)
+  class RawNode
   {
-    // no code
-  }
+  public:
+    Id                id;
+    TypeId            type;
+    double            lon;
+    double            lat;
+    std::vector<Tag>  tags;
 
-  bool Read(FileScanner& scanner);
-  bool Write(FileWriter& writer) const;
-};
+  public:
+    inline RawNode()
+    : type(typeIgnore)
+    {
+      // no code
+    }
+
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer) const;
+  };
+}
 
 #endif

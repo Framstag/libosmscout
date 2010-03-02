@@ -27,119 +27,122 @@
 #include <osmscout/Util.h>
 #include <osmscout/Way.h>
 
-static size_t distributionGranuality = 1000000;
-static size_t nodesLoadSize          = 1000000;
+namespace osmscout {
 
-bool GenerateNodeUseIndex(const TypeConfig& typeConfig,
-                          const ImportParameter& parameter,
-                          Progress& progress)
-{
-  progress.SetAction("Analysing distribution");
+  static size_t distributionGranuality = 1000000;
+  static size_t nodesLoadSize          = 1000000;
 
-  std::set<TypeId>    types;
-  size_t              nodeCount=0;
-  std::vector<size_t> nodeDistribution;
-  FileScanner         scanner;
-  size_t              intervalSize=parameter.GetNodeIndexIntervalSize();
+  bool GenerateNodeUseIndex(const TypeConfig& typeConfig,
+                            const ImportParameter& parameter,
+                            Progress& progress)
+  {
+    progress.SetAction("Analysing distribution");
 
-  typeConfig.GetRoutables(types);
+    std::set<TypeId>    types;
+    size_t              nodeCount=0;
+    std::vector<size_t> nodeDistribution;
+    FileScanner         scanner;
+    size_t              intervalSize=parameter.GetNodeIndexIntervalSize();
 
-  if (!scanner.Open("rawnodes.dat")) {
-    return false;
-  }
+    typeConfig.GetRoutables(types);
 
-  while (!scanner.HasError()) {
-    RawNode node;
-
-    node.Read(scanner);
-
-    if (!scanner.HasError()) {
-      size_t index=node.id/distributionGranuality;
-
-      if (index>=nodeDistribution.size()) {
-        nodeDistribution.resize(index+1,0);
-      }
-
-      nodeDistribution[index]++;
-      nodeCount++;
-    }
-  }
-
-  scanner.Close();
-
-  //std::cout << "Nodes: " << nodeCount << std::endl;
-
-  progress.SetAction("Scanning node usage");
-
-  std::map<Id,std::set<Id> > wayWayMap;
-  size_t                     index=0;
-
-  while (index<nodeDistribution.size()) {
-    size_t bucketSize=0;
-    size_t newIndex=index;
-
-    while (newIndex<nodeDistribution.size() &&
-           bucketSize+nodeDistribution[newIndex]<nodesLoadSize) {
-      bucketSize+=nodeDistribution[newIndex];
-      newIndex++;
-    }
-
-    size_t                      start=index*distributionGranuality;
-    size_t                      end=newIndex*distributionGranuality;
-    std::map<Id,std::list<Id> > nodeWayMap;
-
-    progress.Info(std::string("Scanning for node ids ")+NumberToString(start)+">=id<"+NumberToString(end));
-
-    if (!scanner.Open("ways.dat")) {
-      progress.Error("Error while opening ways.dat!");
+    if (!scanner.Open("rawnodes.dat")) {
       return false;
     }
 
     while (!scanner.HasError()) {
-      Way way;
+      RawNode node;
 
-      way.Read(scanner);
+      node.Read(scanner);
 
-      if (!scanner.HasError())  {
-        if (types.find(way.type)!=types.end()) {
-          for (size_t i=0; i<way.nodes.size(); i++) {
-            if (way.nodes[i].id>=start && way.nodes[i].id<end) {
-              nodeWayMap[way.nodes[i].id].push_back(way.id);
-            }
-          }
+      if (!scanner.HasError()) {
+        size_t index=node.id/distributionGranuality;
+
+        if (index>=nodeDistribution.size()) {
+          nodeDistribution.resize(index+1,0);
         }
+
+        nodeDistribution[index]++;
+        nodeCount++;
       }
     }
 
     scanner.Close();
 
-    progress.Info(std::string("Resolving area/way references ")+NumberToString(start)+">=id<"+NumberToString(end));
+    //std::cout << "Nodes: " << nodeCount << std::endl;
 
-    if (!scanner.Open("ways.dat")) {
-      progress.Error("Error while opening ways.dat!");
-      return false;
-    }
+    progress.SetAction("Scanning node usage");
 
-    while (!scanner.HasError()) {
-      Way way;
+    std::map<Id,std::set<Id> > wayWayMap;
+    size_t                     index=0;
 
-      way.Read(scanner);
+    while (index<nodeDistribution.size()) {
+      size_t bucketSize=0;
+      size_t newIndex=index;
 
-      if (!scanner.HasError())  {
-        if (types.find(way.type)!=types.end()) {
-          for (size_t i=0; i<way.nodes.size(); i++) {
-            if (way.nodes[i].id>=start && way.nodes[i].id<end) {
-              std::map<Id, std::list<Id> >::const_iterator ways;
+      while (newIndex<nodeDistribution.size() &&
+             bucketSize+nodeDistribution[newIndex]<nodesLoadSize) {
+        bucketSize+=nodeDistribution[newIndex];
+        newIndex++;
+      }
 
-              ways=nodeWayMap.find(way.nodes[i].id);
+      size_t                      start=index*distributionGranuality;
+      size_t                      end=newIndex*distributionGranuality;
+      std::map<Id,std::list<Id> > nodeWayMap;
 
-              if (ways!=nodeWayMap.end()) {
-                for (std::list<Id>::const_iterator w=ways->second.begin();
-                     w!=ways->second.end();
-                     ++w) {
-                  if (*w!=way.id) {
-                    // TODO: Optimize performance
-                    wayWayMap[way.id].insert(*w);
+      progress.Info(std::string("Scanning for node ids ")+NumberToString(start)+">=id<"+NumberToString(end));
+
+      if (!scanner.Open("ways.dat")) {
+        progress.Error("Error while opening ways.dat!");
+        return false;
+      }
+
+      while (!scanner.HasError()) {
+        Way way;
+
+        way.Read(scanner);
+
+        if (!scanner.HasError())  {
+          if (types.find(way.type)!=types.end()) {
+            for (size_t i=0; i<way.nodes.size(); i++) {
+              if (way.nodes[i].id>=start && way.nodes[i].id<end) {
+                nodeWayMap[way.nodes[i].id].push_back(way.id);
+              }
+            }
+          }
+        }
+      }
+
+      scanner.Close();
+
+      progress.Info(std::string("Resolving area/way references ")+NumberToString(start)+">=id<"+NumberToString(end));
+
+      if (!scanner.Open("ways.dat")) {
+        progress.Error("Error while opening ways.dat!");
+        return false;
+      }
+
+      while (!scanner.HasError()) {
+        Way way;
+
+        way.Read(scanner);
+
+        if (!scanner.HasError())  {
+          if (types.find(way.type)!=types.end()) {
+            for (size_t i=0; i<way.nodes.size(); i++) {
+              if (way.nodes[i].id>=start && way.nodes[i].id<end) {
+                std::map<Id, std::list<Id> >::const_iterator ways;
+
+                ways=nodeWayMap.find(way.nodes[i].id);
+
+                if (ways!=nodeWayMap.end()) {
+                  for (std::list<Id>::const_iterator w=ways->second.begin();
+                       w!=ways->second.end();
+                       ++w) {
+                    if (*w!=way.id) {
+                      // TODO: Optimize performance
+                      wayWayMap[way.id].insert(*w);
+                    }
                   }
                 }
               }
@@ -147,103 +150,104 @@ bool GenerateNodeUseIndex(const TypeConfig& typeConfig,
           }
         }
       }
+
+      scanner.Close();
+
+      index=newIndex;
     }
 
-    scanner.Close();
+    std::vector<size_t> resultDistribution; // Number of entries in interval
+    std::vector<size_t> resultOffset;       // Offset for each interval
+    std::vector<size_t> resultOffsetCount;  // Number of entries for each interval
+    long                indexOffset;        // Start of the offset table in file
+    FileWriter          writer;
 
-    index=newIndex;
-  }
+    for (std::map<Id, std::set<Id> >::const_iterator res=wayWayMap.begin();
+         res!=wayWayMap.end();
+         ++res) {
+      size_t index=res->first/intervalSize;
 
-  std::vector<size_t> resultDistribution; // Number of entries in interval
-  std::vector<size_t> resultOffset;       // Offset for each interval
-  std::vector<size_t> resultOffsetCount;  // Number of entries for each interval
-  long                indexOffset;        // Start of the offset table in file
-  FileWriter          writer;
-
-  for (std::map<Id, std::set<Id> >::const_iterator res=wayWayMap.begin();
-       res!=wayWayMap.end();
-       ++res) {
-    size_t index=res->first/intervalSize;
-
-    if (index>=resultDistribution.size()) {
-      resultDistribution.resize(index+1,0);
-    }
-
-    resultDistribution[index]++;
-  }
-
-  resultOffset.resize(resultDistribution.size(),0);
-  resultOffsetCount.resize(resultDistribution.size(),0);
-
-  progress.SetAction("Writing 'nodeuse.idx'");
-
-  if (!writer.Open("nodeuse.idx")) {
-    progress.Error("Error while opening 'nodeuse.idx'!");
-    return false;
-  }
-
-  size_t intervalCount=0;
-
-  for (size_t i=0; i<resultDistribution.size(); i++) {
-    if (resultDistribution[i]>0) {
-      intervalCount++;
-    }
-  }
-
-  writer.WriteNumber(intervalSize);  // The size of the interval
-  writer.WriteNumber(intervalCount); // The number of intervals
-
-  writer.GetPos(indexOffset);
-
-  for (size_t i=0; i<intervalCount; i++) {
-    size_t offset=0;      // place holder
-    size_t offsetCount=0; // place holder
-
-    writer.Write(i);           // The interval
-    writer.Write(offset);      // The offset to the interval
-    writer.Write(offsetCount); // The number of entries in the interval
-  }
-
-  for (size_t i=0; i<resultDistribution.size(); i++) {
-    if (resultDistribution[i]==0) {
-      continue;
-    }
-
-    size_t entryCount=0;
-    long   offset;
-
-    writer.GetPos(offset);
-    resultOffset[i]=offset;
-
-    for (std::map<Id, std::set<Id> >::const_iterator id=wayWayMap.lower_bound(i*intervalSize);
-         id!=wayWayMap.end() && id->first<(i+1)*intervalSize;
-         ++id) {
-      writer.Write(id->first);          // The id of the way/area
-      writer.WriteNumber(id->second.size());  // The number of references
-
-      for (std::set<Id>::const_iterator ref=id->second.begin();
-           ref!=id->second.end();
-           ++ref) {
-        writer.Write(*ref); // The id of the references
+      if (index>=resultDistribution.size()) {
+        resultDistribution.resize(index+1,0);
       }
 
-      entryCount++;
+      resultDistribution[index]++;
     }
 
-    resultOffsetCount[i]=entryCount;
-  }
+    resultOffset.resize(resultDistribution.size(),0);
+    resultOffsetCount.resize(resultDistribution.size(),0);
 
-  writer.SetPos(indexOffset);
+    progress.SetAction("Writing 'nodeuse.idx'");
 
-  for (size_t i=0; i<resultDistribution.size(); i++) {
-    if (resultDistribution[i]==0) {
-      continue;
+    if (!writer.Open("nodeuse.idx")) {
+      progress.Error("Error while opening 'nodeuse.idx'!");
+      return false;
     }
 
-    writer.Write(i);                    // The interval (already written, but who cares)
-    writer.Write(resultOffset[i]);      // offset for this interval
-    writer.Write(resultOffsetCount[i]); // entry count for this interval
-  }
+    size_t intervalCount=0;
 
-  return !writer.HasError() && writer.Close();
+    for (size_t i=0; i<resultDistribution.size(); i++) {
+      if (resultDistribution[i]>0) {
+        intervalCount++;
+      }
+    }
+
+    writer.WriteNumber(intervalSize);  // The size of the interval
+    writer.WriteNumber(intervalCount); // The number of intervals
+
+    writer.GetPos(indexOffset);
+
+    for (size_t i=0; i<intervalCount; i++) {
+      size_t offset=0;      // place holder
+      size_t offsetCount=0; // place holder
+
+      writer.Write(i);           // The interval
+      writer.Write(offset);      // The offset to the interval
+      writer.Write(offsetCount); // The number of entries in the interval
+    }
+
+    for (size_t i=0; i<resultDistribution.size(); i++) {
+      if (resultDistribution[i]==0) {
+        continue;
+      }
+
+      size_t entryCount=0;
+      long   offset;
+
+      writer.GetPos(offset);
+      resultOffset[i]=offset;
+
+      for (std::map<Id, std::set<Id> >::const_iterator id=wayWayMap.lower_bound(i*intervalSize);
+           id!=wayWayMap.end() && id->first<(i+1)*intervalSize;
+           ++id) {
+        writer.Write(id->first);          // The id of the way/area
+        writer.WriteNumber(id->second.size());  // The number of references
+
+        for (std::set<Id>::const_iterator ref=id->second.begin();
+             ref!=id->second.end();
+             ++ref) {
+          writer.Write(*ref); // The id of the references
+        }
+
+        entryCount++;
+      }
+
+      resultOffsetCount[i]=entryCount;
+    }
+
+    writer.SetPos(indexOffset);
+
+    for (size_t i=0; i<resultDistribution.size(); i++) {
+      if (resultDistribution[i]==0) {
+        continue;
+      }
+
+      writer.Write(i);                    // The interval (already written, but who cares)
+      writer.Write(resultOffset[i]);      // offset for this interval
+      writer.Write(resultOffsetCount[i]); // entry count for this interval
+    }
+
+    return !writer.HasError() && writer.Close();
+  }
 }
+

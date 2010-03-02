@@ -36,14 +36,14 @@ class RouteDialog : public Lum::Dlg::ActionDialog
 public:
   struct RouteSelection
   {
-    std::string startCity;
-    std::string startStreet;
-    Id          startWay;
-    Id          startNode;
-    std::string endCity;
-    std::string endStreet;
-    Id          endWay;
-    Id          endNode;
+    std::string  startCity;
+    std::string  startStreet;
+    osmscout::Id startWay;
+    osmscout::Id startNode;
+    std::string  endCity;
+    std::string  endStreet;
+    osmscout::Id endWay;
+    osmscout::Id endNode;
 
     bool IsStartValid() const;
     bool IsEndValid() const;

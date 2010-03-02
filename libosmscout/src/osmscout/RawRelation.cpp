@@ -19,62 +19,66 @@
 
 #include <osmscout/RawRelation.h>
 
-bool RawRelation::Read(FileScanner& scanner)
-{
-  unsigned long tagCount;
-  unsigned long memberCount;
+namespace osmscout {
 
-  scanner.Read(id);
-  scanner.ReadNumber(type);
+  bool RawRelation::Read(FileScanner& scanner)
+  {
+    unsigned long tagCount;
+    unsigned long memberCount;
 
-  scanner.ReadNumber(tagCount);
+    scanner.Read(id);
+    scanner.ReadNumber(type);
 
-  if (scanner.HasError()) {
-    return false;
+    scanner.ReadNumber(tagCount);
+
+    if (scanner.HasError()) {
+      return false;
+    }
+
+    tags.resize(tagCount);
+    for (size_t i=0; i<tagCount; i++) {
+      scanner.ReadNumber(tags[i].key);
+      scanner.Read(tags[i].value);
+    }
+
+    scanner.ReadNumber(memberCount);
+
+    if (scanner.HasError()) {
+      return false;
+    }
+
+    members.resize(memberCount);
+    for (size_t i=0; i<memberCount; i++) {
+      unsigned long memberType;
+
+      scanner.ReadNumber(memberType);
+      members[i].type=(MemberType)memberType;
+      scanner.Read(members[i].id);
+      scanner.Read(members[i].role);
+    }
+
+    return !scanner.HasError();
   }
 
-  tags.resize(tagCount);
-  for (size_t i=0; i<tagCount; i++) {
-    scanner.ReadNumber(tags[i].key);
-    scanner.Read(tags[i].value);
+  bool RawRelation::Write(FileWriter& writer) const
+  {
+    writer.Write(id);
+    writer.WriteNumber(type);
+
+    writer.WriteNumber(tags.size());
+    for (size_t i=0; i<tags.size(); i++) {
+      writer.WriteNumber(tags[i].key);
+      writer.Write(tags[i].value);
+    }
+
+    writer.WriteNumber(members.size());
+    for (size_t i=0; i<members.size(); i++) {
+      writer.WriteNumber(members[i].type);
+      writer.Write(members[i].id);
+      writer.Write(members[i].role);
+    }
+
+    return !writer.HasError();
   }
-
-  scanner.ReadNumber(memberCount);
-
-  if (scanner.HasError()) {
-    return false;
-  }
-
-  members.resize(memberCount);
-  for (size_t i=0; i<memberCount; i++) {
-    unsigned long memberType;
-
-    scanner.ReadNumber(memberType);
-    members[i].type=(MemberType)memberType;
-    scanner.Read(members[i].id);
-    scanner.Read(members[i].role);
-  }
-
-  return !scanner.HasError();
 }
 
-bool RawRelation::Write(FileWriter& writer) const
-{
-  writer.Write(id);
-  writer.WriteNumber(type);
-
-  writer.WriteNumber(tags.size());
-  for (size_t i=0; i<tags.size(); i++) {
-    writer.WriteNumber(tags[i].key);
-    writer.Write(tags[i].value);
-  }
-
-  writer.WriteNumber(members.size());
-  for (size_t i=0; i<members.size(); i++) {
-    writer.WriteNumber(members[i].type);
-    writer.Write(members[i].id);
-    writer.Write(members[i].role);
-  }
-
-  return !writer.HasError();
-}

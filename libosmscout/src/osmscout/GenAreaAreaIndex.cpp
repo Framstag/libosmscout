@@ -30,269 +30,273 @@
 
 #include <iostream>
 
-struct Coord
-{
-  size_t x;
-  size_t y;
+namespace osmscout {
 
-  Coord(size_t x, size_t y)
-   :x(x),y(y)
+  struct Coord
   {
-    // no code
-  }
+    size_t x;
+    size_t y;
 
-  bool operator==(const Coord& other) const
-  {
-    return x==other.x && y==other.y;
-  }
-
-  bool operator<(const Coord& other) const
-  {
-    return y<other.y ||
-    ( y==other.y && x<other.x);
-  }
-};
-
-struct Leaf
-{
-  FileOffset            offset;
-  std::list<FileOffset> dataOffsets;
-  FileOffset            children[4];
-
-  Leaf()
-  {
-    offset=0;
-    children[0]=0;
-    children[1]=0;
-    children[2]=0;
-    children[3]=0;
-  }
-};
-
-bool GenerateAreaAreaIndex(const ImportParameter& parameter,
-                           Progress& progress)
-{
-  //
-  // Count the number of objects per index level
-  //
-
-  progress.SetAction("Analysing distribution");
-
-  FileScanner           scanner;
-  size_t                ways=0;     // Number of ways found
-  size_t                consumed=0; // Number of ways consumed
-  std::vector<double>   cellWidth;
-  std::vector<double>   cellHeight;
-  std::map<Coord,Leaf>  leafs;
-  std::map<Coord,Leaf>  newLeafs;
-
-  cellWidth.resize(parameter.GetAreaAreaIndexMaxMag()+1);
-  cellHeight.resize(parameter.GetAreaAreaIndexMaxMag()+1);
-
-  for (size_t i=0; i<cellWidth.size(); i++) {
-    cellWidth[i]=360/pow(2,i);
-  }
-
-  for (size_t i=0; i<cellHeight.size(); i++) {
-    cellHeight[i]=180/pow(2,i);
-  }
-
-  //
-  // Writing index file
-  //
-
-  progress.SetAction("Generating 'areaarea.idx'");
-
-  FileWriter writer;
-
-  if (!writer.Open("areaarea.idx")) {
-    progress.Error("Cannot create 'areaarea.idx'");
-    return false;
-  }
-
-  writer.WriteNumber(parameter.GetAreaAreaIndexMaxMag()); // MaxMag
-
-  int l=parameter.GetAreaAreaIndexMaxMag();
-
-  while (l>=0) {
-    size_t levelEntries=0;
-
-    progress.Info(std::string("Storing level ")+NumberToString(l)+"...");
-
-    newLeafs.clear();
-
-    // For every cell that had entries in one of its childrenwe create
-    // an index entry.
-    for (std::map<Coord,Leaf>::iterator leaf=leafs.begin();
-         leaf!=leafs.end();
-         ++leaf) {
-      // Coordinates of the children in "children dimension" calculated from the tile id
-      size_t xc=leaf->first.x;
-      size_t yc=leaf->first.y;
-
-      size_t index;
-
-      //
-      // child index is build as folowing (y-axis is from bottom to top!):
-      //   01
-      //   23
-
-      if (yc%2!=0) {
-        if (xc%2==0) {
-          index=0;
-        }
-        else {
-          index=1;
-        }
-      }
-      else {
-        if (xc%2==0) {
-          index=2;
-        }
-        else {
-          index=3;
-        }
-      }
-
-      assert(leaf->second.offset!=0);
-
-      newLeafs[Coord(xc/2,yc/2)].children[index]=leaf->second.offset;
+    Coord(size_t x, size_t y)
+     :x(x),y(y)
+    {
+      // no code
     }
 
-    leafs=newLeafs;
+    bool operator==(const Coord& other) const
+    {
+      return x==other.x && y==other.y;
+    }
 
-    if (ways==0 ||
-        (ways>0 && ways>consumed)) {
+    bool operator<(const Coord& other) const
+    {
+      return y<other.y ||
+      ( y==other.y && x<other.x);
+    }
+  };
 
-      progress.Info(std::string("Scanning ways.dat for ways of index level ")+NumberToString(l)+"...");
+  struct Leaf
+  {
+    FileOffset            offset;
+    std::list<FileOffset> dataOffsets;
+    FileOffset            children[4];
 
-      if (!scanner.Open("ways.dat")) {
-        progress.Error("Cannot open 'ways.dat'");
-        return false;
+    Leaf()
+    {
+      offset=0;
+      children[0]=0;
+      children[1]=0;
+      children[2]=0;
+      children[3]=0;
+    }
+  };
+
+  bool GenerateAreaAreaIndex(const ImportParameter& parameter,
+                             Progress& progress)
+  {
+    //
+    // Count the number of objects per index level
+    //
+
+    progress.SetAction("Analysing distribution");
+
+    FileScanner           scanner;
+    size_t                ways=0;     // Number of ways found
+    size_t                consumed=0; // Number of ways consumed
+    std::vector<double>   cellWidth;
+    std::vector<double>   cellHeight;
+    std::map<Coord,Leaf>  leafs;
+    std::map<Coord,Leaf>  newLeafs;
+
+    cellWidth.resize(parameter.GetAreaAreaIndexMaxMag()+1);
+    cellHeight.resize(parameter.GetAreaAreaIndexMaxMag()+1);
+
+    for (size_t i=0; i<cellWidth.size(); i++) {
+      cellWidth[i]=360/pow(2,i);
+    }
+
+    for (size_t i=0; i<cellHeight.size(); i++) {
+      cellHeight[i]=180/pow(2,i);
+    }
+
+    //
+    // Writing index file
+    //
+
+    progress.SetAction("Generating 'areaarea.idx'");
+
+    FileWriter writer;
+
+    if (!writer.Open("areaarea.idx")) {
+      progress.Error("Cannot create 'areaarea.idx'");
+      return false;
+    }
+
+    writer.WriteNumber(parameter.GetAreaAreaIndexMaxMag()); // MaxMag
+
+    int l=parameter.GetAreaAreaIndexMaxMag();
+
+    while (l>=0) {
+      size_t levelEntries=0;
+
+      progress.Info(std::string("Storing level ")+NumberToString(l)+"...");
+
+      newLeafs.clear();
+
+      // For every cell that had entries in one of its childrenwe create
+      // an index entry.
+      for (std::map<Coord,Leaf>::iterator leaf=leafs.begin();
+           leaf!=leafs.end();
+           ++leaf) {
+        // Coordinates of the children in "children dimension" calculated from the tile id
+        size_t xc=leaf->first.x;
+        size_t yc=leaf->first.y;
+
+        size_t index;
+
+        //
+        // child index is build as folowing (y-axis is from bottom to top!):
+        //   01
+        //   23
+
+        if (yc%2!=0) {
+          if (xc%2==0) {
+            index=0;
+          }
+          else {
+            index=1;
+          }
+        }
+        else {
+          if (xc%2==0) {
+            index=2;
+          }
+          else {
+            index=3;
+          }
+        }
+
+        assert(leaf->second.offset!=0);
+
+        newLeafs[Coord(xc/2,yc/2)].children[index]=leaf->second.offset;
       }
 
-      ways=0;
-      while (!scanner.HasError()) {
-        FileOffset offset;
-        Way        way;
+      leafs=newLeafs;
 
-        scanner.GetPos(offset);
-        way.Read(scanner);
+      if (ways==0 ||
+          (ways>0 && ways>consumed)) {
 
-        if (scanner.HasError()) {
-          continue;
+        progress.Info(std::string("Scanning ways.dat for ways of index level ")+NumberToString(l)+"...");
+
+        if (!scanner.Open("ways.dat")) {
+          progress.Error("Cannot open 'ways.dat'");
+          return false;
         }
 
-        if (!way.IsArea()) {
-          continue;
-        }
+        ways=0;
+        while (!scanner.HasError()) {
+          FileOffset offset;
+          Way        way;
 
-        ways++;
+          scanner.GetPos(offset);
+          way.Read(scanner);
 
-        //
-        // Bounding box calculation
-        //
-
-        double minLon=way.nodes[0].lon;
-        double maxLon=way.nodes[0].lon;
-        double minLat=way.nodes[0].lat;
-        double maxLat=way.nodes[0].lat;
-
-        for (size_t i=1; i<way.nodes.size(); i++) {
-          minLon=std::min(minLon,way.nodes[i].lon);
-          maxLon=std::max(maxLon,way.nodes[i].lon);
-          minLat=std::min(minLat,way.nodes[i].lat);
-          maxLat=std::max(maxLat,way.nodes[i].lat);
-        }
-
-        //
-        // Renormated coordinate space (everything is >=0)
-        //
-
-        minLon+=180;
-        maxLon+=180;
-        minLat+=90;
-        maxLat+=90;
-
-        //
-        // Calculate highest level where the bounding box completely
-        // fits in the cell size for this level.
-        //
-
-        // TODO: We can possibly do faster
-        // ...in calculating level
-        //...in detecting if this way is relevant for this level
-        int level=parameter.GetAreaAreaIndexMaxMag();
-        while (level>=0) {
-          if (maxLon-minLon<=cellWidth[level] &&
-              maxLat-minLat<=cellHeight[level]) {
-            break;
+          if (scanner.HasError()) {
+            continue;
           }
 
-          level--;
-        }
+          if (!way.IsArea()) {
+            continue;
+          }
 
-        if (level==l) {
-          //
-          // Calculate all tile ids that are covered
-          // by the area
-          //
-          size_t minyc=floor(minLat/cellHeight[level]);
-          size_t maxyc=floor(maxLat/cellHeight[level]);
-          size_t minxc=floor(minLon/cellWidth[level]);
-          size_t maxxc=floor(maxLon/cellWidth[level]);
+          ways++;
 
           //
-          // Add offset to all tiles in this level that coint (parts) of
-          // the bounding box
+          // Bounding box calculation
           //
-          for (size_t yc=minyc; yc<=maxyc; yc++) {
-            for (size_t xc=minxc; xc<=maxxc; xc++) {
-              leafs[Coord(xc,yc)].dataOffsets.push_back(offset);
-              levelEntries++;
+
+          double minLon=way.nodes[0].lon;
+          double maxLon=way.nodes[0].lon;
+          double minLat=way.nodes[0].lat;
+          double maxLat=way.nodes[0].lat;
+
+          for (size_t i=1; i<way.nodes.size(); i++) {
+            minLon=std::min(minLon,way.nodes[i].lon);
+            maxLon=std::max(maxLon,way.nodes[i].lon);
+            minLat=std::min(minLat,way.nodes[i].lat);
+            maxLat=std::max(maxLat,way.nodes[i].lat);
+          }
+
+          //
+          // Renormated coordinate space (everything is >=0)
+          //
+
+          minLon+=180;
+          maxLon+=180;
+          minLat+=90;
+          maxLat+=90;
+
+          //
+          // Calculate highest level where the bounding box completely
+          // fits in the cell size for this level.
+          //
+
+          // TODO: We can possibly do faster
+          // ...in calculating level
+          //...in detecting if this way is relevant for this level
+          int level=parameter.GetAreaAreaIndexMaxMag();
+          while (level>=0) {
+            if (maxLon-minLon<=cellWidth[level] &&
+                maxLat-minLat<=cellHeight[level]) {
+              break;
             }
+
+            level--;
           }
-          consumed++;
+
+          if (level==l) {
+            //
+            // Calculate all tile ids that are covered
+            // by the area
+            //
+            size_t minyc=floor(minLat/cellHeight[level]);
+            size_t maxyc=floor(maxLat/cellHeight[level]);
+            size_t minxc=floor(minLon/cellWidth[level]);
+            size_t maxxc=floor(maxLon/cellWidth[level]);
+
+            //
+            // Add offset to all tiles in this level that coint (parts) of
+            // the bounding box
+            //
+            for (size_t yc=minyc; yc<=maxyc; yc++) {
+              for (size_t xc=minxc; xc<=maxxc; xc++) {
+                leafs[Coord(xc,yc)].dataOffsets.push_back(offset);
+                levelEntries++;
+              }
+            }
+            consumed++;
+          }
+        }
+
+        scanner.Close();
+      }
+
+      progress.Debug(std::string("Writing ")+NumberToString(leafs.size())+" entries with "+NumberToString(levelEntries)+" ways to index of level "+NumberToString(l)+"...");
+      //
+      // Store all index entries for this level and store their file offset
+      //
+      writer.WriteNumber(leafs.size()); // Number of leafs
+      for (std::map<Coord,Leaf>::iterator leaf=leafs.begin();
+           leaf!=leafs.end();
+           ++leaf) {
+        writer.GetPos(leaf->second.offset);
+
+        assert(leaf->second.dataOffsets.size()>0 ||
+               leaf->second.children[0]!=0 ||
+               leaf->second.children[1]!=0 ||
+               leaf->second.children[2]!=0 ||
+               leaf->second.children[3]!=0);
+
+        if (l<parameter.GetAreaAreaIndexMaxMag()) {
+          // TODO: Is writer.Write better?
+          for (size_t c=0; c<4; c++) {
+            writer.WriteNumber(leaf->second.children[c]);
+          }
+        }
+
+        writer.WriteNumber(leaf->second.dataOffsets.size());
+        for (std::list<FileOffset>::const_iterator o=leaf->second.dataOffsets.begin();
+             o!=leaf->second.dataOffsets.end();
+             o++) {
+          // TODO: Is writer.Write better?
+          writer.WriteNumber((size_t)*o);
         }
       }
 
-      scanner.Close();
+      l--;
     }
 
-    progress.Debug(std::string("Writing ")+NumberToString(leafs.size())+" entries with "+NumberToString(levelEntries)+" ways to index of level "+NumberToString(l)+"...");
-    //
-    // Store all index entries for this level and store their file offset
-    //
-    writer.WriteNumber(leafs.size()); // Number of leafs
-    for (std::map<Coord,Leaf>::iterator leaf=leafs.begin();
-         leaf!=leafs.end();
-         ++leaf) {
-      writer.GetPos(leaf->second.offset);
-
-      assert(leaf->second.dataOffsets.size()>0 ||
-             leaf->second.children[0]!=0 ||
-             leaf->second.children[1]!=0 ||
-             leaf->second.children[2]!=0 ||
-             leaf->second.children[3]!=0);
-
-      if (l<parameter.GetAreaAreaIndexMaxMag()) {
-        // TODO: Is writer.Write better?
-        for (size_t c=0; c<4; c++) {
-          writer.WriteNumber(leaf->second.children[c]);
-        }
-      }
-
-      writer.WriteNumber(leaf->second.dataOffsets.size());
-      for (std::list<FileOffset>::const_iterator o=leaf->second.dataOffsets.begin();
-           o!=leaf->second.dataOffsets.end();
-           o++) {
-        // TODO: Is writer.Write better?
-        writer.WriteNumber((size_t)*o);
-      }
-    }
-
-    l--;
+    return !writer.HasError() && writer.Close();
   }
-
-  return !writer.HasError() && writer.Close();
 }
+

@@ -24,8 +24,10 @@
 #include <osmscout/Preprocess.h>
 #include <osmscout/Progress.h>
 
-extern bool GenerateCityStreetIndex(const TypeConfig& typeConfig,
-                                    const ImportParameter& parameter,
-                                    Progress& progress);
+namespace osmscout {
+  extern bool GenerateCityStreetIndex(const TypeConfig& typeConfig,
+                                      const ImportParameter& parameter,
+                                      Progress& progress);
+}
 
 #endif

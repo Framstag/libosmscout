@@ -21,57 +21,61 @@
 
 #include <cmath>
 
-bool RawWay::Read(FileScanner& scanner)
-{
-  scanner.Read(id);
-  scanner.ReadNumber(type);
-  scanner.Read(isArea);
+namespace osmscout {
 
-  unsigned long tagCount;
-  unsigned long nodeCount;
+  bool RawWay::Read(FileScanner& scanner)
+  {
+    scanner.Read(id);
+    scanner.ReadNumber(type);
+    scanner.Read(isArea);
 
-  scanner.ReadNumber(tagCount);
+    unsigned long tagCount;
+    unsigned long nodeCount;
 
-  if (scanner.HasError()) {
-    return false;
+    scanner.ReadNumber(tagCount);
+
+    if (scanner.HasError()) {
+      return false;
+    }
+
+    tags.resize(tagCount);
+    for (size_t i=0; i<tagCount; i++) {
+      scanner.ReadNumber(tags[i].key);
+      scanner.Read(tags[i].value);
+    }
+
+    scanner.ReadNumber(nodeCount);
+
+    if (scanner.HasError()) {
+      return false;
+    }
+
+    nodes.resize(nodeCount);
+    for (size_t i=0; i<nodeCount; i++) {
+      scanner.Read(nodes[i]);
+    }
+
+    return scanner.HasError();
   }
 
-  tags.resize(tagCount);
-  for (size_t i=0; i<tagCount; i++) {
-    scanner.ReadNumber(tags[i].key);
-    scanner.Read(tags[i].value);
+  bool RawWay::Write(FileWriter& writer) const
+  {
+    writer.Write(id);
+    writer.WriteNumber(type);
+    writer.Write(isArea);
+
+    writer.WriteNumber(tags.size());
+    for (size_t i=0; i<tags.size(); i++) {
+      writer.WriteNumber(tags[i].key);
+      writer.Write(tags[i].value);
+    }
+
+    writer.WriteNumber(nodes.size());
+    for (size_t i=0; i<nodes.size(); i++) {
+      writer.Write(nodes[i]);
+    }
+
+    return !writer.HasError();
   }
-
-  scanner.ReadNumber(nodeCount);
-
-  if (scanner.HasError()) {
-    return false;
-  }
-
-  nodes.resize(nodeCount);
-  for (size_t i=0; i<nodeCount; i++) {
-    scanner.Read(nodes[i]);
-  }
-
-  return scanner.HasError();
 }
 
-bool RawWay::Write(FileWriter& writer) const
-{
-  writer.Write(id);
-  writer.WriteNumber(type);
-  writer.Write(isArea);
-
-  writer.WriteNumber(tags.size());
-  for (size_t i=0; i<tags.size(); i++) {
-    writer.WriteNumber(tags[i].key);
-    writer.Write(tags[i].value);
-  }
-
-  writer.WriteNumber(nodes.size());
-  for (size_t i=0; i<nodes.size(); i++) {
-    writer.Write(nodes[i]);
-  }
-
-  return !writer.HasError();
-}

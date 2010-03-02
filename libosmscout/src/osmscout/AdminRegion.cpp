@@ -19,3 +19,7 @@
 
 #include <osmscout/AdminRegion.h>
 
+namespace osmscout {
+
+}
+

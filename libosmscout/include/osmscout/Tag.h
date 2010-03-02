@@ -24,24 +24,27 @@
 #include <stdint.h>
 #include <string>
 
-typedef uint16_t TagId;
+namespace osmscout {
 
-struct Tag
-{
-  TagId       key;
-  std::string value;
+  typedef uint16_t TagId;
 
-  inline Tag()
+  struct Tag
   {
-    // no code
-  }
+    TagId       key;
+    std::string value;
 
-  inline Tag(TagId key, const std::string& value)
-   : key(key),
-     value(value)
-  {
-    // no code
-  }
-};
+    inline Tag()
+    {
+      // no code
+    }
+
+    inline Tag(TagId key, const std::string& value)
+     : key(key),
+       value(value)
+    {
+      // no code
+    }
+  };
+}
 
 #endif

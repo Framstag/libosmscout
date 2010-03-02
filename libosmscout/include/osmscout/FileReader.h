@@ -25,57 +25,59 @@
 
 #include <osmscout/TypeConfig.h>
 
-/**
-  FileReader implements platform independend access to blocks of data
-  in files.
+namespace osmscout {
+  /**
+    FileReader implements platform independend access to blocks of data
+    in files.
 
-  It is assumed that blocks fit into memory. FileReader offers read methods
-  for various datatypes. The data first must be loaded into memory by
-  ReadPageIntoBuffer and then will be parsed by using the various Read methods.
+    It is assumed that blocks fit into memory. FileReader offers read methods
+    for various datatypes. The data first must be loaded into memory by
+    ReadPageIntoBuffer and then will be parsed by using the various Read methods.
 
-  Note that FileReader works but still should be avoided, because working with
-  OSM data often result in huge amounts of data that cannot be loaded
-  into memory. So using FileReader might signal that something will fail for
-  huge amounts of data. Try to use FileScanner instead!
+    Note that FileReader works but still should be avoided, because working with
+    OSM data often result in huge amounts of data that cannot be loaded
+    into memory. So using FileReader might signal that something will fail for
+    huge amounts of data. Try to use FileScanner instead!
 
-  FileReader will use mmap if available.
-  */
-class FileReader
-{
-private:
-  FILE   *file;
-  char   *buffer;
-  size_t size;
-  size_t offset;
-  bool   hasError;
+    FileReader will use mmap if available.
+    */
+  class FileReader
+  {
+  private:
+    FILE   *file;
+    char   *buffer;
+    size_t size;
+    size_t offset;
+    bool   hasError;
 
-private:
-  void FreeBuffer();
+  private:
+    void FreeBuffer();
 
-public:
-  FileReader();
-  virtual ~FileReader();
+  public:
+    FileReader();
+    virtual ~FileReader();
 
-  bool Open(const std::string& filename);
-  bool Close();
+    bool Open(const std::string& filename);
+    bool Close();
 
-  bool IsOpen() const;
-  bool HasError() const;
+    bool IsOpen() const;
+    bool HasError() const;
 
-  bool SetPos(long pos);
-  bool GetPos(long &pos);
+    bool SetPos(long pos);
+    bool GetPos(long &pos);
 
-  bool ReadFileToBuffer();
-  bool ReadPageToBuffer(unsigned long offset, unsigned long size);
+    bool ReadFileToBuffer();
+    bool ReadPageToBuffer(unsigned long offset, unsigned long size);
 
-  bool Read(std::string& value);
-  bool Read(bool& boolean);
-  bool Read(unsigned long& number);
-  bool Read(unsigned int& number);
+    bool Read(std::string& value);
+    bool Read(bool& boolean);
+    bool Read(unsigned long& number);
+    bool Read(unsigned int& number);
 
-  bool ReadNumber(unsigned long& number);
-  bool ReadNumber(unsigned int& number);
-  bool ReadNumber(NodeCount& number);
-};
+    bool ReadNumber(unsigned long& number);
+    bool ReadNumber(unsigned int& number);
+    bool ReadNumber(NodeCount& number);
+  };
+}
 
 #endif

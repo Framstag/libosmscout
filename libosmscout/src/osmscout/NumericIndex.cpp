@@ -19,4 +19,7 @@
 
 #include <osmscout/NumericIndex.h>
 
+namespace osmscout {
+
+}
 

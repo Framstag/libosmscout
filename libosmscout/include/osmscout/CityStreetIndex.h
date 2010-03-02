@@ -28,50 +28,53 @@
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/FileScanner.h>
-struct Loc
-{
-  std::list<Id> nodes;
-  std::list<Id> ways;
-  std::list<Id> areas;
-};
 
-class CityStreetIndex
-{
-private:
-  std::string            path;
+namespace osmscout {
+  struct Loc
+  {
+    std::list<Id> nodes;
+    std::list<Id> ways;
+    std::list<Id> areas;
+  };
 
-  std::list<AdminRegion> areas;
-  mutable FileOffset     region;
-  mutable bool           regionLoaded;
-  mutable std::map<std::string,Loc> locations;
+  class CityStreetIndex
+  {
+  private:
+    std::string            path;
 
-  std::string            (*hashFunction)(std::string);
+    std::list<AdminRegion> areas;
+    mutable FileOffset     region;
+    mutable bool           regionLoaded;
+    mutable std::map<std::string,Loc> locations;
 
-private:
-  bool LoadRegion(FileScanner& scanner) const;
-  bool LoadRegion(FileOffset offset) const;
+    std::string            (*hashFunction)(std::string);
 
-public:
-  CityStreetIndex();
-  virtual ~CityStreetIndex();
+  private:
+    bool LoadRegion(FileScanner& scanner) const;
+    bool LoadRegion(FileOffset offset) const;
 
-  bool Load(const std::string& path,
-            std::string (*hashFunction) (std::string) = NULL);
+  public:
+    CityStreetIndex();
+    virtual ~CityStreetIndex();
 
-  bool GetMatchingAdminRegions(const std::string& name,
-                               std::list<AdminRegion>& regions,
-                               size_t limit,
-                               bool& limitReached,
-                               bool startWith) const;
+    bool Load(const std::string& path,
+              std::string (*hashFunction) (std::string) = NULL);
 
-  bool GetMatchingLocations(const AdminRegion& region,
-                            const std::string& name,
-                            std::list<Location>& locations,
-                            size_t limit,
-                            bool& limitReached,
-                            bool startWith) const;
+    bool GetMatchingAdminRegions(const std::string& name,
+                                 std::list<AdminRegion>& regions,
+                                 size_t limit,
+                                 bool& limitReached,
+                                 bool startWith) const;
 
-  void DumpStatistics();
-};
+    bool GetMatchingLocations(const AdminRegion& region,
+                              const std::string& name,
+                              std::list<Location>& locations,
+                              size_t limit,
+                              bool& limitReached,
+                              bool startWith) const;
+
+    void DumpStatistics();
+  };
+}
 
 #endif

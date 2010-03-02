@@ -24,8 +24,10 @@
 #include <osmscout/Progress.h>
 #include <osmscout/TypeConfig.h>
 
-extern bool Preprocess(const TypeConfig& typeConfig,
-                       const ImportParameter& parameter,
-                       Progress& progress);
+namespace osmscout {
+  extern bool Preprocess(const TypeConfig& typeConfig,
+                         const ImportParameter& parameter,
+                         Progress& progress);
+}
 
 #endif

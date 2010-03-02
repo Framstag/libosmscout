@@ -24,109 +24,112 @@
 
 #include <osmscout/TypeConfig.h>
 
-class RouteData
-{
-public:
-  class RouteEntry
+namespace osmscout {
+
+  class RouteData
   {
+  public:
+    class RouteEntry
+    {
+    private:
+      Id wayId;
+      Id nodeId;
+
+    public:
+      RouteEntry(Id wayId, Id routeId);
+
+      inline Id GetWayId() const
+      {
+        return wayId;
+      }
+
+      inline Id GetNodeId() const
+      {
+        return nodeId;
+      }
+    };
+
   private:
-    Id wayId;
-    Id nodeId;
+    std::list<RouteEntry> entries;
 
   public:
-    RouteEntry(Id wayId, Id routeId);
+    RouteData();
 
-    inline Id GetWayId() const
-    {
-      return wayId;
-    }
+    void Clear();
 
-    inline Id GetNodeId() const
+    void AddEntry(Id wayId, Id nodeId);
+
+    inline const std::list<RouteEntry>& Entries() const
     {
-      return nodeId;
+      return entries;
     }
   };
 
-private:
-  std::list<RouteEntry> entries;
-
-public:
-  RouteData();
-
-  void Clear();
-
-  void AddEntry(Id wayId, Id nodeId);
-
-  inline const std::list<RouteEntry>& Entries() const
+  class RouteDescription
   {
-    return entries;
-  }
-};
+  public:
+    enum Action
+    {
+      start,
+      drive,
+      switchRoad, // TODO: make it more precise
+      pass,       // TODO: make it more precise
+      reachTarget
+    };
 
-class RouteDescription
-{
-public:
-  enum Action
-  {
-    start,
-    drive,
-    switchRoad, // TODO: make it more precise
-    pass,       // TODO: make it more precise
-    reachTarget
-  };
+    class RouteStep
+    {
+    private:
+      double      distance;
+      Action      action;
+      std::string name;
+      std::string refName;
 
-  class RouteStep
-  {
+    public:
+      RouteStep(double distance,
+                Action action,
+                const std::string& name,
+                const std::string& refName);
+
+      inline double GetDistance() const
+      {
+        return distance;
+      }
+
+      inline Action GetAction() const
+      {
+        return action;
+      }
+
+      inline std::string GetName() const
+      {
+        return name;
+      }
+
+      inline std::string GetRefName() const
+      {
+        return refName;
+      }
+    };
+
   private:
-    double      distance;
-    Action      action;
-    std::string name;
-    std::string refName;
+    std::list<RouteStep> steps;
 
   public:
-    RouteStep(double distance,
-              Action action,
-              const std::string& name,
-              const std::string& refName);
+    RouteDescription();
 
-    inline double GetDistance() const
-    {
-      return distance;
-    }
+    void Clear();
 
-    inline Action GetAction() const
-    {
-      return action;
-    }
+    void AddStep(double distance,
+                 Action action,
+                 const std::string& name,
+                 const std::string& refName);
 
-    inline std::string GetName() const
+    inline const std::list<RouteStep>& Steps() const
     {
-      return name;
-    }
-
-    inline std::string GetRefName() const
-    {
-      return refName;
+      return steps;
     }
   };
-
-private:
-  std::list<RouteStep> steps;
-
-public:
-  RouteDescription();
-
-  void Clear();
-
-  void AddStep(double distance,
-               Action action,
-               const std::string& name,
-               const std::string& refName);
-
-  inline const std::list<RouteStep>& Steps() const
-  {
-    return steps;
-  }
-};
+}
 
 #endif

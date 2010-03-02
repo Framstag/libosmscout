@@ -26,34 +26,36 @@
 
 #include <osmscout/StyleConfig.h>
 
-class AreaAreaIndex
-{
-private:
-  struct IndexEntry
+namespace osmscout {
+  class AreaAreaIndex
   {
-    std::vector<FileOffset> dataOffsets;
-    FileOffset              children[4];
+  private:
+    struct IndexEntry
+    {
+      std::vector<FileOffset> dataOffsets;
+      FileOffset              children[4];
+    };
+
+    typedef std::map<size_t,IndexEntry> IndexLevel;
+
+  private:
+    std::vector<double>     cellWidth;
+    std::vector<double>     cellHeight;
+    size_t                  maxLevel;
+    std::vector<IndexLevel> index;
+
+  public:
+    bool Load(const std::string& path);
+
+    void GetOffsets(const StyleConfig& styleConfig,
+                    double minlon, double minlat,
+                    double maxlon, double maxlat,
+                    size_t maxLevel,
+                    size_t maxCount,
+                    std::set<FileOffset>& offsets) const;
+
+    void DumpStatistics();
   };
-
-  typedef std::map<size_t,IndexEntry> IndexLevel;
-
-private:
-  std::vector<double>     cellWidth;
-  std::vector<double>     cellHeight;
-  size_t                  maxLevel;
-  std::vector<IndexLevel> index;
-
-public:
-  bool Load(const std::string& path);
-
-  void GetOffsets(const StyleConfig& styleConfig,
-                  double minlon, double minlat,
-                  double maxlon, double maxlat,
-                  size_t maxLevel,
-                  size_t maxCount,
-                  std::set<FileOffset>& offsets) const;
-
-  void DumpStatistics();
-};
+}
 
 #endif

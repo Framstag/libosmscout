@@ -21,74 +21,77 @@
 
 #include <iostream>
 
-Progress::Progress()
-{
-  // no code
-}
+namespace osmscout {
 
-Progress::~Progress()
-{
-  // no code
-}
+  Progress::Progress()
+  {
+    // no code
+  }
 
-void Progress::SetStep(const std::string& step)
-{
-  // no code
-}
+  Progress::~Progress()
+  {
+    // no code
+  }
 
-void Progress::SetAction(const std::string& action)
-{
-  // no code
-}
+  void Progress::SetStep(const std::string& step)
+  {
+    // no code
+  }
 
-void Progress::Debug(const std::string& text)
-{
-  // no code
-}
+  void Progress::SetAction(const std::string& action)
+  {
+    // no code
+  }
 
-void Progress::Info(const std::string& text)
-{
-  // no code
-}
+  void Progress::Debug(const std::string& text)
+  {
+    // no code
+  }
 
-void Progress::Warning(const std::string& text)
-{
-  // no code
-}
+  void Progress::Info(const std::string& text)
+  {
+    // no code
+  }
 
-void Progress::Error(const std::string& text)
-{
-  // no code
-}
+  void Progress::Warning(const std::string& text)
+  {
+    // no code
+  }
+
+  void Progress::Error(const std::string& text)
+  {
+    // no code
+  }
 
 
-void ConsoleProgress::SetStep(const std::string& step)
-{
-  std::cout << "+ " << step << "..." << std::endl;
-}
+  void ConsoleProgress::SetStep(const std::string& step)
+  {
+    std::cout << "+ " << step << "..." << std::endl;
+  }
 
-void ConsoleProgress::SetAction(const std::string& action)
-{
-  std::cout << " - " << action << "..." << std::endl;
-}
+  void ConsoleProgress::SetAction(const std::string& action)
+  {
+    std::cout << " - " << action << "..." << std::endl;
+  }
 
-void ConsoleProgress::Debug(const std::string& text)
-{
-  std::cout << "   " << text << std::endl;
-}
+  void ConsoleProgress::Debug(const std::string& text)
+  {
+    std::cout << "   " << text << std::endl;
+  }
 
-void ConsoleProgress::Info(const std::string& text)
-{
-  std::cout << "   " << text << std::endl;
-}
+  void ConsoleProgress::Info(const std::string& text)
+  {
+    std::cout << "   " << text << std::endl;
+  }
 
-void ConsoleProgress::Warning(const std::string& text)
-{
-  std::cout << "   WW " << text << std::endl;
-}
+  void ConsoleProgress::Warning(const std::string& text)
+  {
+    std::cout << "   WW " << text << std::endl;
+  }
 
-void ConsoleProgress::Error(const std::string& text)
-{
-  std::cout << "   !! " << text << std::endl;
+  void ConsoleProgress::Error(const std::string& text)
+  {
+    std::cout << "   !! " << text << std::endl;
+  }
 }
 

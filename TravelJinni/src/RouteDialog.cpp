@@ -146,11 +146,11 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
       dialog->Close();
 
       if (dialog->HasResult()) {
-        AdminRegion   region=dialog->GetResultAdminRegion();
-        Location      location=dialog->GetResultLocation();
-        Way           way;
+        osmscout::AdminRegion region=dialog->GetResultAdminRegion();
+        osmscout::Location    location=dialog->GetResultLocation();
+        osmscout::Way         way;
 
-        assert(location.references.front().GetType()==refWay);
+        assert(location.references.front().GetType()==osmscout::refWay);
 
         // TODO: Check that this is a way!
         result.startCity=region.name;
@@ -191,11 +191,11 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
       dialog->Close();
 
       if (dialog->HasResult()) {
-        AdminRegion   region=dialog->GetResultAdminRegion();
-        Location      location=dialog->GetResultLocation();
-        Way           way;
+        osmscout::AdminRegion region=dialog->GetResultAdminRegion();
+        osmscout::Location    location=dialog->GetResultLocation();
+        osmscout::Way         way;
 
-        assert(location.references.front().GetType()==refWay);
+        assert(location.references.front().GetType()==osmscout::refWay);
 
         result.endCity=region.name;
         result.endStreet=location.name;
@@ -226,9 +226,9 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
   else if (model==okAction && okAction->IsEnabled() && okAction->IsFinished()) {
     assert(hasStart && hasEnd);
 
-    RouteData        routeData;
-    RouteDescription routeDescription;
-    Way              way;
+    osmscout::RouteData        routeData;
+    osmscout::RouteDescription routeDescription;
+    osmscout::Way              way;
 
     if (!databaseTask->CalculateRoute(result.startWay,result.startNode,
                                       result.endWay,result.endNode,
@@ -244,7 +244,7 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
     databaseTask->TransformRouteDataToRouteDescription(routeData,routeDescription);
     double lastDistance = 0;
 
-    for (std::list<RouteDescription::RouteStep>::const_iterator step=routeDescription.Steps().begin();
+    for (std::list<osmscout::RouteDescription::RouteStep>::const_iterator step=routeDescription.Steps().begin();
          step!=routeDescription.Steps().end();
          ++step) {
 #if defined(HTML)
@@ -277,7 +277,7 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
       std::cout << "<td>";
 #endif
       switch (step->GetAction()) {
-      case RouteDescription::start:
+      case osmscout::RouteDescription::start:
         std::cout << "Start at ";
         if (!step->GetName().empty()) {
           std::cout << step->GetName();
@@ -290,7 +290,7 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
           std::cout << step->GetRefName();
         }
         break;
-      case RouteDescription::drive:
+      case osmscout::RouteDescription::drive:
         std::cout << "drive along ";
         if (!step->GetName().empty()) {
           std::cout << step->GetName();
@@ -303,7 +303,7 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
           std::cout << step->GetRefName();
         }
         break;
-      case RouteDescription::switchRoad:
+      case osmscout::RouteDescription::switchRoad:
         std::cout << "turn into ";
         if (!step->GetName().empty()) {
           std::cout << step->GetName();
@@ -316,7 +316,7 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
           std::cout << step->GetRefName();
         }
         break;
-      case RouteDescription::reachTarget:
+      case osmscout::RouteDescription::reachTarget:
         std::cout << "Arriving at ";
         if (!step->GetName().empty()) {
           std::cout << step->GetName();
@@ -329,7 +329,7 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
           std::cout << step->GetRefName();
         }
         break;
-      case RouteDescription::pass:
+      case osmscout::RouteDescription::pass:
         std::cout << "passing along ";
         if (!step->GetName().empty()) {
           std::cout << step->GetName();

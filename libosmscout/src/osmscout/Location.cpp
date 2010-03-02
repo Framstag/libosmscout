@@ -19,3 +19,7 @@
 
 #include <osmscout/Location.h>
 
+namespace osmscout {
+
+}
+

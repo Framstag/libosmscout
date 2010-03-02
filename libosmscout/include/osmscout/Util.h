@@ -28,105 +28,106 @@
 #include <set>
 #include <string>
 
-class NumberSet
-{
-  typedef unsigned long Number;
+namespace osmscout {
 
-  struct Data
+  class NumberSet
   {
-    virtual ~Data();
+    typedef unsigned long Number;
+
+    struct Data
+    {
+      virtual ~Data();
+    };
+
+    struct Refs : public Data
+    {
+      Data* refs[256];
+
+      Refs();
+      ~Refs();
+    };
+
+    struct Leaf : public Data
+    {
+      unsigned char values[32];
+
+      Leaf();
+    };
+
+  private:
+    Refs refs;
+
+  public:
+    NumberSet();
+    ~NumberSet();
+    void Insert(Number value);
+    bool IsSet(Number value) const;
   };
 
-  struct Refs : public Data
+  class StopClock
   {
-    Data* refs[256];
+  private:
+    timeval start;
+    timeval stop;
 
-    Refs();
-    ~Refs();
+  public:
+    StopClock();
+
+    void Stop();
+
+    friend std::ostream& operator<<(std::ostream& stream, const StopClock& clock);
   };
 
-  struct Leaf : public Data
+  extern std::ostream& operator<<(std::ostream& stream, const StopClock& clock);
+
+  extern void GetKeysForName(const std::string& name, std::set<uint32_t>& keys);
+
+  extern bool EncodeNumber(unsigned long number,
+                           size_t bufferLength,
+                           char* buffer,
+                           size_t& bytes);
+  extern bool DecodeNumber(const char* buffer, unsigned long& number, size_t& bytes);
+
+  extern bool GetFileSize(const std::string& filename, long& size);
+
+  template<typename A>
+  std::string NumberToString(const A& a)
   {
-    unsigned char values[32];
+    std::string res;
+    A           value(a);
+    bool        negative=false;
 
-    Leaf();
-  };
-
-private:
-  Refs refs;
-
-public:
-  NumberSet();
-  ~NumberSet();
-  void Insert(Number value);
-  bool IsSet(Number value) const;
-};
-
-class StopClock
-{
-private:
-  timeval start;
-  timeval stop;
-
-public:
-  StopClock();
-
-  void Stop();
-
-  friend std::ostream& operator<<(std::ostream& stream, const StopClock& clock);
-};
-
-extern std::ostream& operator<<(std::ostream& stream, const StopClock& clock);
-
-extern void GetKeysForName(const std::string& name, std::set<uint32_t>& keys);
-
-extern bool EncodeNumber(unsigned long number,
-                         size_t bufferLength,
-                         char* buffer,
-                         size_t& bytes);
-extern bool DecodeNumber(const char* buffer, unsigned long& number, size_t& bytes);
-
-extern bool GetFileSize(const std::string& filename, long& size);
-
-template<typename A>
-std::string NumberToString(const A& a)
-{
-  std::string res;
-  A           value(a);
-  bool        negative=false;
-
-  if (std::numeric_limits<A>::is_signed) {
-    if (value<0) {
-      negative=true;
-      value=-value;
+    if (std::numeric_limits<A>::is_signed) {
+      if (value<0) {
+        negative=true;
+        value=-value;
+      }
     }
+
+    res.reserve(20);
+
+    while (value!=0) {
+      res.insert(0,1,'0'+value%10);
+      value=value/10;
+    }
+
+    if (res.empty()) {
+      res.insert(0,1,'0');
+    }
+
+    if (negative) {
+      res.insert(0,1,'-');
+    }
+
+    return res;
   }
 
-  res.reserve(20);
-
-  while (value!=0) {
-    res.insert(0,1,'0'+value%10);
-    value=value/10;
-  }
-
-  if (res.empty()) {
-    res.insert(0,1,'0');
-  }
-
-  if (negative) {
-    res.insert(0,1,'-');
-  }
-
-  return res;
-}
-
-extern double Log2(double x);
-extern size_t Pow(size_t a, size_t b);
-extern double GetSphericalDistance(double aLon, double aLat,
-                                   double bLon, double bLat);
-extern double GetEllipsoidalDistance(double aLon, double aLat,
+  extern double Log2(double x);
+  extern size_t Pow(size_t a, size_t b);
+  extern double GetSphericalDistance(double aLon, double aLat,
                                      double bLon, double bLat);
-
-
+  extern double GetEllipsoidalDistance(double aLon, double aLat,
+                                       double bLon, double bLat);
+}
 
 #endif

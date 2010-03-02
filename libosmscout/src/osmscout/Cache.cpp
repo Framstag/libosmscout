@@ -19,7 +19,7 @@
 
 #include <osmscout/Cache.h>
 
+namespace osmscout {
 
-
-
+}
 

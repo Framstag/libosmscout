@@ -22,7 +22,10 @@
 
 #include <osmscout/TypeConfig.h>
 
-extern bool LoadTypeConfig(const char* typeFile,
-                           TypeConfig& config);
+namespace osmscout {
+
+  extern bool LoadTypeConfig(const char* typeFile,
+                             TypeConfig& config);
+}
 
 #endif

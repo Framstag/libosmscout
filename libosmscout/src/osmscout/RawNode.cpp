@@ -21,60 +21,63 @@
 
 #include <cmath>
 
-static double conversionFactor=10000000.0;
+namespace osmscout {
 
-bool RawNode::Read(FileScanner& scanner)
-{
-  scanner.Read(id);
+  static double conversionFactor=10000000.0;
 
-  if (scanner.HasError()) {
-    return false;
+  bool RawNode::Read(FileScanner& scanner)
+  {
+    scanner.Read(id);
+
+    if (scanner.HasError()) {
+      return false;
+    }
+
+    unsigned long tmpType;
+    unsigned long tagCount;
+    unsigned long latValue;
+    unsigned long lonValue;
+
+    scanner.ReadNumber(tmpType);
+    scanner.Read(latValue);
+    scanner.Read(lonValue);
+
+    type=(TypeId)tmpType;
+    lat=latValue/conversionFactor-180.0;
+    lon=lonValue/conversionFactor-90.0;
+
+    scanner.ReadNumber(tagCount);
+
+    if (scanner.HasError()) {
+      return false;
+    }
+
+    tags.resize(tagCount);
+    for (size_t i=0; i<tagCount; i++) {
+      scanner.ReadNumber(tags[i].key);
+      scanner.Read(tags[i].value);
+    }
+
+    return !scanner.HasError();
   }
 
-  unsigned long tmpType;
-  unsigned long tagCount;
-  unsigned long latValue;
-  unsigned long lonValue;
+  bool RawNode::Write(FileWriter& writer) const
+  {
+    uint32_t latValue=(uint32_t)round((lat+180.0)*conversionFactor);
+    uint32_t lonValue=(uint32_t)round((lon+90.0)*conversionFactor);
 
-  scanner.ReadNumber(tmpType);
-  scanner.Read(latValue);
-  scanner.Read(lonValue);
+    writer.Write(id);
+    writer.WriteNumber(type);
+    writer.Write(latValue);
+    writer.Write(lonValue);
 
-  type=(TypeId)tmpType;
-  lat=latValue/conversionFactor-180.0;
-  lon=lonValue/conversionFactor-90.0;
+    writer.WriteNumber(tags.size());
+    for (size_t i=0; i<tags.size(); i++) {
+      writer.WriteNumber(tags[i].key);
+      writer.Write(tags[i].value);
+    }
 
-  scanner.ReadNumber(tagCount);
-
-  if (scanner.HasError()) {
-    return false;
+    return !writer.HasError();
   }
-
-  tags.resize(tagCount);
-  for (size_t i=0; i<tagCount; i++) {
-    scanner.ReadNumber(tags[i].key);
-    scanner.Read(tags[i].value);
-  }
-
-  return !scanner.HasError();
-}
-
-bool RawNode::Write(FileWriter& writer) const
-{
-  uint32_t latValue=(uint32_t)round((lat+180.0)*conversionFactor);
-  uint32_t lonValue=(uint32_t)round((lon+90.0)*conversionFactor);
-
-  writer.Write(id);
-  writer.WriteNumber(type);
-  writer.Write(latValue);
-  writer.Write(lonValue);
-
-  writer.WriteNumber(tags.size());
-  for (size_t i=0; i<tags.size(); i++) {
-    writer.WriteNumber(tags[i].key);
-    writer.Write(tags[i].value);
-  }
-
-  return !writer.HasError();
 }
 

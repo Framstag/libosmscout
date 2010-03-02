@@ -25,44 +25,47 @@
 #include <osmscout/StyleConfig.h>
 #include <osmscout/TypeConfig.h>
 
-class RoutingProfile
-{
-private:
-  std::vector<double> costFactors;
-  double              minCostFactor;
-  double              turnCostFactor;
+namespace osmscout {
 
-public:
-  RoutingProfile();
-
-  void SetTurnCostFactor(double costFactor);
-
-  void SetTypeCostFactor(TypeId type, double costFactor);
-
-  inline double GetCostFactor(TypeId type) const
+  class RoutingProfile
   {
-    if (type>=costFactors.size()) {
-      return 0;
+  private:
+    std::vector<double> costFactors;
+    double              minCostFactor;
+    double              turnCostFactor;
+
+  public:
+    RoutingProfile();
+
+    void SetTurnCostFactor(double costFactor);
+
+    void SetTypeCostFactor(TypeId type, double costFactor);
+
+    inline double GetCostFactor(TypeId type) const
+    {
+      if (type>=costFactors.size()) {
+        return 0;
+      }
+      else {
+        return costFactors[type];
+      }
     }
-    else {
-      return costFactors[type];
+
+    inline bool CanUse(TypeId type) const
+    {
+      return type<costFactors.size() && costFactors[type]!=0.0;
     }
-  }
 
-  inline bool CanUse(TypeId type) const
-  {
-    return type<costFactors.size() && costFactors[type]!=0.0;
-  }
+    inline double GetMinCostFactor() const
+    {
+      return minCostFactor;
+    }
 
-  inline double GetMinCostFactor() const
-  {
-    return minCostFactor;
-  }
-
-  inline double GetTurnCostFactor() const
-  {
-    return turnCostFactor;
-  }
-};
+    inline double GetTurnCostFactor() const
+    {
+      return turnCostFactor;
+    }
+  };
+}
 
 #endif

@@ -34,7 +34,7 @@
 
 int main(int argc, char* argv[])
 {
-  std::vector<Id> ids;
+  std::vector<osmscout::Id> ids;
 
   ids.resize(ID_COUNT);
 
@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
     ids[i]=(int)(std::numeric_limits<unsigned long>::max()*rand()/(RAND_MAX+1.0));
   }
 
-  StopClock insertsetTimer;
+  osmscout::StopClock insertsetTimer;
 
   std::set<unsigned long> set;
 
@@ -52,9 +52,9 @@ int main(int argc, char* argv[])
 
   insertsetTimer.Stop();
 
-  StopClock insertnsetTimer;
+  osmscout::StopClock insertnsetTimer;
 
-  NumberSet nset;
+  osmscout::NumberSet nset;
 
   for (size_t i=0; i<ids.size(); i++) {
     nset.Insert(ids[i]);
@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
   insertnsetTimer.Stop();
 
 
-  StopClock stestsetTimer;
+  osmscout::StopClock stestsetTimer;
 
   for (size_t i=0; i<ids.size(); i++) {
     if (set.find(ids[i])==set.end()) {
@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
 
   stestsetTimer.Stop();
 
-  StopClock stestnsetTimer;
+  osmscout::StopClock stestnsetTimer;
 
   for (size_t i=0; i<ids.size(); i++) {
     if (!nset.IsSet(ids[i])) {

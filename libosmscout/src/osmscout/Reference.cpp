@@ -19,5 +19,7 @@
 
 #include <osmscout/Reference.h>
 
+namespace osmscout {
 
+}
 

@@ -44,7 +44,7 @@
 #endif
 #include <Lum/Base/Path.h>
 
-DatabaseTask::DatabaseTask(Database* database,
+DatabaseTask::DatabaseTask(osmscout::Database* database,
                            Lum::Model::Action* jobFinishedAction)
  : database(database),
    styleConfig(NULL),
@@ -175,7 +175,7 @@ void DatabaseTask::Close()
 }
 
 bool DatabaseTask::LoadStyleConfig(const std::wstring& filename,
-                                   StyleConfig*& styleConfig)
+                                   osmscout::StyleConfig*& styleConfig)
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
@@ -184,10 +184,10 @@ bool DatabaseTask::LoadStyleConfig(const std::wstring& filename,
   f.SetNativePath(filename);
 
   if (database->GetTypeConfig()!=NULL) {
-    styleConfig=new StyleConfig(database->GetTypeConfig());
+    styleConfig=new osmscout::StyleConfig(database->GetTypeConfig());
 
-    if (::LoadStyleConfig(Lum::Base::WStringToString(f.GetPath()).c_str(),
-                          *styleConfig)) {
+    if (osmscout::LoadStyleConfig(Lum::Base::WStringToString(f.GetPath()).c_str(),
+                                  *styleConfig)) {
       return true;
     }
     else {
@@ -203,7 +203,7 @@ bool DatabaseTask::LoadStyleConfig(const std::wstring& filename,
   }
 }
 
-void DatabaseTask::SetStyle(StyleConfig* styleConfig)
+void DatabaseTask::SetStyle(osmscout::StyleConfig* styleConfig)
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
@@ -222,7 +222,8 @@ bool DatabaseTask::GetBoundingBox(double& minLat,double& minLon,
   return database->GetBoundingBox(minLat,minLon,maxLat,maxLon);
 }
 
-bool DatabaseTask::GetWay(Id id, Way& way) const
+bool DatabaseTask::GetWay(osmscout::Id id,
+                          osmscout::Way& way) const
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
@@ -234,7 +235,7 @@ bool DatabaseTask::GetWay(Id id, Way& way) const
 }
 
 bool DatabaseTask::GetMatchingAdminRegions(const std::wstring& name,
-                                           std::list<AdminRegion>& regions,
+                                           std::list<osmscout::AdminRegion>& regions,
                                            size_t limit,
                                            bool& limitReached) const
 {
@@ -249,9 +250,9 @@ bool DatabaseTask::GetMatchingAdminRegions(const std::wstring& name,
                                            limit,limitReached, false);
 }
 
-bool DatabaseTask::GetMatchingLocations(const AdminRegion& region,
+bool DatabaseTask::GetMatchingLocations(const osmscout::AdminRegion& region,
                                         const std::wstring& name,
-                                        std::list<Location>& locations,
+                                        std::list<osmscout::Location>& locations,
                                         size_t limit,
                                         bool& limitReached) const
 {
@@ -269,9 +270,9 @@ bool DatabaseTask::GetMatchingLocations(const AdminRegion& region,
                                         false);
 }
 
-bool DatabaseTask::CalculateRoute(Id startWayId, Id startNodeId,
-                                  Id targetWayId, Id targetNodeId,
-                                  RouteData& route)
+bool DatabaseTask::CalculateRoute(osmscout::Id startWayId, osmscout::Id startNodeId,
+                                  osmscout::Id targetWayId, osmscout::Id targetNodeId,
+                                  osmscout::RouteData& route)
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
@@ -286,8 +287,8 @@ bool DatabaseTask::CalculateRoute(Id startWayId, Id startNodeId,
                                   route);
 }
 
-bool DatabaseTask::TransformRouteDataToRouteDescription(const RouteData& data,
-                                                        RouteDescription& description)
+bool DatabaseTask::TransformRouteDataToRouteDescription(const osmscout::RouteData& data,
+                                                        osmscout::RouteDescription& description)
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
@@ -298,8 +299,8 @@ bool DatabaseTask::TransformRouteDataToRouteDescription(const RouteData& data,
   return database->TransformRouteDataToRouteDescription(data,description);
 }
 
-bool DatabaseTask::TransformRouteDataToWay(const RouteData& data,
-                                           Way& way)
+bool DatabaseTask::TransformRouteDataToWay(const osmscout::RouteData& data,
+                                           osmscout::Way& way)
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
@@ -319,7 +320,7 @@ void DatabaseTask::ClearRoute()
   SignalRedraw();
 }
 
-void DatabaseTask::AddRoute(const Way& way)
+void DatabaseTask::AddRoute(const osmscout::Way& way)
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 

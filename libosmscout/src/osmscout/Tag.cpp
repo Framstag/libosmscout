@@ -19,4 +19,6 @@
 
 #include <osmscout/Tag.h>
 
+namespace osmscout {
 
+}

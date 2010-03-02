@@ -21,35 +21,37 @@
 
 #include <cmath>
 
-static double tileDiv = 20;
+namespace osmscout {
 
-double GetTileWidth()
-{
-  return 1/tileDiv;
+  static double tileDiv = 20;
+
+  double GetTileWidth()
+  {
+    return 1/tileDiv;
+  }
+
+  double GetTileHeight()
+  {
+    return 1/tileDiv;
+  }
+
+  size_t GetTileX(double lon)
+  {
+    return (size_t)ceil((lon+180)*tileDiv);
+  }
+
+  size_t GetTileY(double lat)
+  {
+    return (size_t)ceil((lat+90)*tileDiv);
+  }
+
+  TileId GetTileId(size_t x, size_t y)
+  {
+    return (size_t)y*360*tileDiv+x;
+  }
+
+  TileId GetTileId(double lon, double lat)
+  {
+    return GetTileId(GetTileX(lon),GetTileY(lat));
+  }
 }
-
-double GetTileHeight()
-{
-  return 1/tileDiv;
-}
-
-size_t GetTileX(double lon)
-{
-  return (size_t)ceil((lon+180)*tileDiv);
-}
-
-size_t GetTileY(double lat)
-{
-  return (size_t)ceil((lat+90)*tileDiv);
-}
-
-TileId GetTileId(size_t x, size_t y)
-{
-  return (size_t)y*360*tileDiv+x;
-}
-
-TileId GetTileId(double lon, double lat)
-{
-  return GetTileId(GetTileX(lon),GetTileY(lat));
-}
-

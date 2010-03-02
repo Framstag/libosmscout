@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  Database database;
+  osmscout::Database database;
 
   if (!database.Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
@@ -70,8 +70,8 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  RouteData        data;
-  RouteDescription description;
+  osmscout::RouteData        data;
+  osmscout::RouteDescription description;
 
   if (!database.CalculateRoute(startWayId,startNodeId,
                                targetWayId,targetNodeId,
@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
 
   double lastDistance = 0;
 
-  for (std::list<RouteDescription::RouteStep>::const_iterator step=description.Steps().begin();
+  for (std::list<osmscout::RouteDescription::RouteStep>::const_iterator step=description.Steps().begin();
        step!=description.Steps().end();
        ++step) {
 #if defined(HTML)
@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
     std::cout << "<td>";
 #endif
     switch (step->GetAction()) {
-    case RouteDescription::start:
+    case osmscout::RouteDescription::start:
       std::cout << "Start at ";
       if (!step->GetName().empty()) {
         std::cout << step->GetName();
@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
         std::cout << step->GetRefName();
       }
       break;
-    case RouteDescription::drive:
+    case osmscout::RouteDescription::drive:
       std::cout << "drive along ";
       if (!step->GetName().empty()) {
         std::cout << step->GetName();
@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
         std::cout << step->GetRefName();
       }
       break;
-    case RouteDescription::switchRoad:
+    case osmscout::RouteDescription::switchRoad:
       std::cout << "turn into ";
       if (!step->GetName().empty()) {
         std::cout << step->GetName();
@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
         std::cout << step->GetRefName();
       }
       break;
-    case RouteDescription::reachTarget:
+    case osmscout::RouteDescription::reachTarget:
       std::cout << "Arriving at ";
       if (!step->GetName().empty()) {
         std::cout << step->GetName();
@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
         std::cout << step->GetRefName();
       }
       break;
-    case RouteDescription::pass:
+    case osmscout::RouteDescription::pass:
       std::cout << "passing along ";
       if (!step->GetName().empty()) {
         std::cout << step->GetName();

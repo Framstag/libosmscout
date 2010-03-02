@@ -24,37 +24,40 @@
 #include <osmscout/FileWriter.h>
 #include <osmscout/TypeConfig.h>
 
-class RawRelation
-{
-public:
-  enum MemberType {
-    memberNode,
-    memberWay,
-    memberRelation
-  };
+namespace osmscout {
 
-  struct Member
+  class RawRelation
   {
-    MemberType  type;
-    Id          id;
-    std::string role;
+  public:
+    enum MemberType {
+      memberNode,
+      memberWay,
+      memberRelation
+    };
+
+    struct Member
+    {
+      MemberType  type;
+      Id          id;
+      std::string role;
+    };
+
+  public:
+    Id                  id;
+    TypeId              type;
+    std::vector<Tag>    tags;
+    std::vector<Member> members;
+
+  public:
+    inline RawRelation()
+    : type(typeIgnore)
+    {
+      // no code
+    }
+
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer) const;
   };
-
-public:
-  Id                  id;
-  TypeId              type;
-  std::vector<Tag>    tags;
-  std::vector<Member> members;
-
-public:
-  inline RawRelation()
-  : type(typeIgnore)
-  {
-    // no code
-  }
-
-  bool Read(FileScanner& scanner);
-  bool Write(FileWriter& writer) const;
-};
+}
 
 #endif

@@ -22,56 +22,59 @@
 
 #include <osmscout/TypeConfig.h>
 
-enum RefType
-{
-  refNone     = 0,
-  refNode     = 1,
-  refWay      = 2,
-  refArea     = 3,
-  refRelation = 4
-};
+namespace osmscout {
 
-class Reference
-{
-public:
-  Id      id;
-  RefType type;
-
-public:
-  inline Reference()
-  : id(0),
-    type(refNone)
+  enum RefType
   {
-    // no code
-  }
+    refNone     = 0,
+    refNode     = 1,
+    refWay      = 2,
+    refArea     = 3,
+    refRelation = 4
+  };
 
-  inline Reference(Id id, RefType type)
-  : id(id),
-    type(type)
+  class Reference
   {
-    // no code
-  }
+  public:
+    Id      id;
+    RefType type;
 
-  inline void Set(const Id& id, const RefType& type)
-  {
-    this->id=id;
-    this->type=type;
-  }
+  public:
+    inline Reference()
+    : id(0),
+      type(refNone)
+    {
+      // no code
+    }
 
-  inline const Id& GetId() const
-  {
-    return id;
-  }
+    inline Reference(Id id, RefType type)
+    : id(id),
+      type(type)
+    {
+      // no code
+    }
 
-  inline const RefType& GetType() const
-  {
-    return type;
-  }
+    inline void Set(const Id& id, const RefType& type)
+    {
+      this->id=id;
+      this->type=type;
+    }
 
-  inline bool operator<(const Reference& reference) const
-  {
-    return type<reference.type || (type==reference.type &&  id<reference.id);
-  }
-};
+    inline const Id& GetId() const
+    {
+      return id;
+    }
+
+    inline const RefType& GetType() const
+    {
+      return type;
+    }
+
+    inline bool operator<(const Reference& reference) const
+    {
+      return type<reference.type || (type==reference.type &&  id<reference.id);
+    }
+  };
+}
 
 #endif

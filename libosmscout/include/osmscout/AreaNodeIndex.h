@@ -25,32 +25,34 @@
 #include <osmscout/Tiles.h>
 #include <osmscout/StyleConfig.h>
 
-class AreaNodeIndex
-{
-private:
-struct IndexEntry
-{
-  std::vector<Id> ids;
-};
+namespace osmscout {
+  class AreaNodeIndex
+  {
+  private:
+  struct IndexEntry
+  {
+    std::vector<Id> ids;
+  };
 
-private:
-  std::map<TypeId,std::map<TileId,IndexEntry> > areaNodeIndex;
+  private:
+    std::map<TypeId,std::map<TileId,IndexEntry> > areaNodeIndex;
 
-public:
-  bool LoadAreaNodeIndex(const std::string& path);
+  public:
+    bool LoadAreaNodeIndex(const std::string& path);
 
-  size_t GetNodes(TypeId drawType,
-                  size_t tileMinX, size_t tileMinY,
-                  size_t tileMaxX, size_t tileMaxY) const;
+    size_t GetNodes(TypeId drawType,
+                    size_t tileMinX, size_t tileMinY,
+                    size_t tileMaxX, size_t tileMaxY) const;
 
-  void GetIds(const StyleConfig& styleConfig,
-              double minlon, double minlat,
-              double maxlon, double maxlat,
-              double magnification,
-              size_t maxPriority,
-              std::vector<Id>& ids) const;
+    void GetIds(const StyleConfig& styleConfig,
+                double minlon, double minlat,
+                double maxlon, double maxlat,
+                double magnification,
+                size_t maxPriority,
+                std::vector<Id>& ids) const;
 
-  void DumpStatistics();
-};
+    void DumpStatistics();
+  };
+}
 
 #endif

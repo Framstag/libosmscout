@@ -25,53 +25,55 @@
 
 #include <osmscout/TypeConfig.h>
 
-/**
-  FileScanner implements platform independend sequential
-  scanning-like access to data in files. File access is buffered.
+namespace osmscout {
+  /**
+    FileScanner implements platform independend sequential
+    scanning-like access to data in files. File access is buffered.
 
-  FileScanner will use mmap in read-only mode if available (and will
-  fall back to normal buffered IO if available but failing), resulting in
-  mapping the complete file into the memory of the process (without
-  allocating real memory) resulting in measurable speed increase because of
-  exchanging buffered file access with in memory array access.
-  */
-class FileScanner
-{
-private:
-  FILE   *file;
-  bool   hasError;
-  bool   readOnly;
+    FileScanner will use mmap in read-only mode if available (and will
+    fall back to normal buffered IO if available but failing), resulting in
+    mapping the complete file into the memory of the process (without
+    allocating real memory) resulting in measurable speed increase because of
+    exchanging buffered file access with in memory array access.
+    */
+  class FileScanner
+  {
+  private:
+    FILE   *file;
+    bool   hasError;
+    bool   readOnly;
 
-  // For mmap usage
-  char   *buffer;
-  size_t size;
-  size_t offset;
+    // For mmap usage
+    char   *buffer;
+    size_t size;
+    size_t offset;
 
-private:
-  void FreeBuffer();
+  private:
+    void FreeBuffer();
 
-public:
-  FileScanner();
-  virtual ~FileScanner();
+  public:
+    FileScanner();
+    virtual ~FileScanner();
 
-  bool Open(const std::string& filename, bool readOnly=true);
-  bool Close();
+    bool Open(const std::string& filename, bool readOnly=true);
+    bool Close();
 
-  bool IsOpen() const;
-  bool HasError() const;
+    bool IsOpen() const;
+    bool HasError() const;
 
-  bool SetPos(long pos);
-  bool GetPos(long &pos);
+    bool SetPos(long pos);
+    bool GetPos(long &pos);
 
-  bool Read(std::string& value);
-  bool Read(bool& boolean);
-  bool Read(unsigned long& number);
-  bool Read(unsigned int& number);
+    bool Read(std::string& value);
+    bool Read(bool& boolean);
+    bool Read(unsigned long& number);
+    bool Read(unsigned int& number);
 
-  bool ReadNumber(unsigned long& number);
-  bool ReadNumber(unsigned int& number);
-  bool ReadNumber(NodeCount& number);
-  bool ReadNumber(long& number);
-};
+    bool ReadNumber(unsigned long& number);
+    bool ReadNumber(unsigned int& number);
+    bool ReadNumber(NodeCount& number);
+    bool ReadNumber(long& number);
+  };
+}
 
 #endif

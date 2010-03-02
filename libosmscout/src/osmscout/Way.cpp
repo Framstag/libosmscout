@@ -22,251 +22,253 @@
 #include <cassert>
 #include <cmath>
 
-static double conversionFactor=10000000.0;
+namespace osmscout {
 
-bool Way::Read(FileReader& reader)
-{
-  unsigned long nodeCount;
-  unsigned long flags;
+  static double conversionFactor=10000000.0;
+
+  bool Way::Read(FileReader& reader)
+  {
+    unsigned long nodeCount;
+    unsigned long flags;
 
 
-  reader.Read(id);
-  reader.ReadNumber(type);
-  reader.Read(flags);
-  reader.ReadNumber(nodeCount);
-
-  if (reader.HasError()) {
-    return false;
-  }
-
-  this->flags=flags;
-  nodes.resize(nodeCount);
-  for (size_t i=0; i<nodeCount; i++) {
-    unsigned long latValue;
-    unsigned long lonValue;
-
-    reader.Read(nodes[i].id);
-    reader.Read(latValue);
-    reader.Read(lonValue);
-
-    nodes[i].lat=latValue/conversionFactor-180.0;
-    nodes[i].lon=lonValue/conversionFactor-90.0;
-  }
-
-  if (flags & hasName) {
-    reader.Read(name);
-  }
-
-  if (flags & hasRef) {
-    reader.Read(ref);
-  }
-
-  if (flags & hasLayer) {
-    unsigned long layer;
-
-    reader.ReadNumber(layer);
-
-    this->layer=layer;
-  }
-
-  if (flags & hasTags) {
-    unsigned long tagCount;
-
-    reader.ReadNumber(tagCount);
+    reader.Read(id);
+    reader.ReadNumber(type);
+    reader.Read(flags);
+    reader.ReadNumber(nodeCount);
 
     if (reader.HasError()) {
       return false;
     }
 
-    tags.resize(tagCount);
-    for (size_t i=0; i<tagCount; i++) {
-      reader.ReadNumber(tags[i].key);
-      reader.Read(tags[i].value);
-    }
-  }
+    this->flags=flags;
+    nodes.resize(nodeCount);
+    for (size_t i=0; i<nodeCount; i++) {
+      unsigned long latValue;
+      unsigned long lonValue;
 
-  if (flags & hasRestrictions) {
-    unsigned long restrictionCount;
+      reader.Read(nodes[i].id);
+      reader.Read(latValue);
+      reader.Read(lonValue);
 
-    reader.ReadNumber(restrictionCount);
-
-    if (reader.HasError()) {
-      return false;
+      nodes[i].lat=latValue/conversionFactor-180.0;
+      nodes[i].lon=lonValue/conversionFactor-90.0;
     }
 
-    restrictions.resize(restrictionCount);
+    if (flags & hasName) {
+      reader.Read(name);
+    }
 
-    for (size_t i=0; i<restrictionCount; i++) {
-      unsigned long type;
-      unsigned long memberCount;
+    if (flags & hasRef) {
+      reader.Read(ref);
+    }
 
-      reader.ReadNumber(type);
-      reader.ReadNumber(memberCount);
+    if (flags & hasLayer) {
+      unsigned long layer;
+
+      reader.ReadNumber(layer);
+
+      this->layer=layer;
+    }
+
+    if (flags & hasTags) {
+      unsigned long tagCount;
+
+      reader.ReadNumber(tagCount);
 
       if (reader.HasError()) {
         return false;
       }
 
-
-      restrictions[i].type=(Way::RestrictionType)type;
-      restrictions[i].members.resize(memberCount);
-
-      for (size_t j=0; j<memberCount; j++) {
-        reader.Read(restrictions[i].members[j]);
+      tags.resize(tagCount);
+      for (size_t i=0; i<tagCount; i++) {
+        reader.ReadNumber(tags[i].key);
+        reader.Read(tags[i].value);
       }
     }
+
+    if (flags & hasRestrictions) {
+      unsigned long restrictionCount;
+
+      reader.ReadNumber(restrictionCount);
+
+      if (reader.HasError()) {
+        return false;
+      }
+
+      restrictions.resize(restrictionCount);
+
+      for (size_t i=0; i<restrictionCount; i++) {
+        unsigned long type;
+        unsigned long memberCount;
+
+        reader.ReadNumber(type);
+        reader.ReadNumber(memberCount);
+
+        if (reader.HasError()) {
+          return false;
+        }
+
+
+        restrictions[i].type=(Way::RestrictionType)type;
+        restrictions[i].members.resize(memberCount);
+
+        for (size_t j=0; j<memberCount; j++) {
+          reader.Read(restrictions[i].members[j]);
+        }
+      }
+    }
+
+    return !reader.HasError();
   }
 
-  return !reader.HasError();
-}
+  bool Way::Read(FileScanner& scanner)
+  {
+    unsigned long nodeCount;
+    unsigned long flags;
 
-bool Way::Read(FileScanner& scanner)
-{
-  unsigned long nodeCount;
-  unsigned long flags;
-
-  scanner.Read(id);
-  scanner.ReadNumber(type);
-  scanner.Read(flags);
-  scanner.ReadNumber(nodeCount);
-
-  if (scanner.HasError()) {
-    return false;
-  }
-
-  this->flags=flags;
-  nodes.resize(nodeCount);
-  for (size_t i=0; i<nodeCount; i++) {
-    unsigned long latValue;
-    unsigned long lonValue;
-
-    scanner.Read(nodes[i].id);
-    scanner.Read(latValue);
-    scanner.Read(lonValue);
-
-    nodes[i].lat=latValue/conversionFactor-180.0;
-    nodes[i].lon=lonValue/conversionFactor-90.0;
-  }
-
-  if (flags & hasName) {
-    scanner.Read(name);
-  }
-
-  if (flags & hasRef) {
-    scanner.Read(ref);
-  }
-
-  if (flags & hasLayer) {
-    unsigned long layer;
-
-    scanner.ReadNumber(layer);
-
-    this->layer=layer;
-  }
-
-  if (flags & hasTags) {
-    unsigned long tagCount;
-
-    scanner.ReadNumber(tagCount);
+    scanner.Read(id);
+    scanner.ReadNumber(type);
+    scanner.Read(flags);
+    scanner.ReadNumber(nodeCount);
 
     if (scanner.HasError()) {
       return false;
     }
 
-    tags.resize(tagCount);
-    for (size_t i=0; i<tagCount; i++) {
-      scanner.ReadNumber(tags[i].key);
-      scanner.Read(tags[i].value);
-    }
-  }
+    this->flags=flags;
+    nodes.resize(nodeCount);
+    for (size_t i=0; i<nodeCount; i++) {
+      unsigned long latValue;
+      unsigned long lonValue;
 
-  if (flags & hasRestrictions) {
-    unsigned long restrictionCount;
+      scanner.Read(nodes[i].id);
+      scanner.Read(latValue);
+      scanner.Read(lonValue);
 
-    scanner.ReadNumber(restrictionCount);
-
-    if (scanner.HasError()) {
-      return false;
+      nodes[i].lat=latValue/conversionFactor-180.0;
+      nodes[i].lon=lonValue/conversionFactor-90.0;
     }
 
-    restrictions.resize(restrictionCount);
+    if (flags & hasName) {
+      scanner.Read(name);
+    }
 
-    for (size_t i=0; i<restrictionCount; i++) {
-      unsigned long type;
-      unsigned long memberCount;
+    if (flags & hasRef) {
+      scanner.Read(ref);
+    }
 
-      scanner.ReadNumber(type);
-      scanner.ReadNumber(memberCount);
+    if (flags & hasLayer) {
+      unsigned long layer;
+
+      scanner.ReadNumber(layer);
+
+      this->layer=layer;
+    }
+
+    if (flags & hasTags) {
+      unsigned long tagCount;
+
+      scanner.ReadNumber(tagCount);
 
       if (scanner.HasError()) {
         return false;
       }
 
-
-      restrictions[i].type=(Way::RestrictionType)type;
-      restrictions[i].members.resize(memberCount);
-
-      for (size_t j=0; j<memberCount; j++) {
-        scanner.Read(restrictions[i].members[j]);
+      tags.resize(tagCount);
+      for (size_t i=0; i<tagCount; i++) {
+        scanner.ReadNumber(tags[i].key);
+        scanner.Read(tags[i].value);
       }
     }
-  }
 
-  return !scanner.HasError();
-}
+    if (flags & hasRestrictions) {
+      unsigned long restrictionCount;
 
-bool Way::Write(FileWriter& writer) const
-{
-  writer.Write(id);
-  writer.WriteNumber(type);
-  writer.Write((unsigned long)flags);
+      scanner.ReadNumber(restrictionCount);
 
-  writer.WriteNumber(nodes.size());
+      if (scanner.HasError()) {
+        return false;
+      }
 
-  for (size_t i=0; i<nodes.size(); i++) {
-    unsigned long latValue=(unsigned long)round((nodes[i].lat+180.0)*conversionFactor);
-    unsigned long lonValue=(unsigned long)round((nodes[i].lon+90.0)*conversionFactor);
+      restrictions.resize(restrictionCount);
 
-    writer.Write(nodes[i].id);
-    writer.Write(latValue);
-    writer.Write(lonValue);
-  }
+      for (size_t i=0; i<restrictionCount; i++) {
+        unsigned long type;
+        unsigned long memberCount;
 
-  if (flags & hasName) {
-    writer.Write(name);
-  }
+        scanner.ReadNumber(type);
+        scanner.ReadNumber(memberCount);
 
-  if (flags & hasRef) {
-    writer.Write(ref);
-  }
+        if (scanner.HasError()) {
+          return false;
+        }
 
-  if (flags & hasLayer) {
-    writer.WriteNumber(layer);
-  }
 
-  if (flags & hasTags) {
-    writer.WriteNumber(tags.size());
+        restrictions[i].type=(Way::RestrictionType)type;
+        restrictions[i].members.resize(memberCount);
 
-    for (size_t i=0; i<tags.size(); i++) {
-      writer.WriteNumber(tags[i].key);
-      writer.Write(tags[i].value);
-    }
-  }
-
-  if (flags & hasRestrictions) {
-    writer.WriteNumber(restrictions.size());
-
-    for (size_t i=0; i<restrictions.size(); i++) {
-      writer.WriteNumber(restrictions[i].type);
-
-      writer.WriteNumber(restrictions[i].members.size());
-
-      for (size_t j=0; j<restrictions[i].members.size(); j++) {
-        writer.Write(restrictions[i].members[j]);
+        for (size_t j=0; j<memberCount; j++) {
+          scanner.Read(restrictions[i].members[j]);
+        }
       }
     }
+
+    return !scanner.HasError();
   }
 
-  return !writer.HasError();
-}
+  bool Way::Write(FileWriter& writer) const
+  {
+    writer.Write(id);
+    writer.WriteNumber(type);
+    writer.Write((unsigned long)flags);
 
+    writer.WriteNumber(nodes.size());
+
+    for (size_t i=0; i<nodes.size(); i++) {
+      unsigned long latValue=(unsigned long)round((nodes[i].lat+180.0)*conversionFactor);
+      unsigned long lonValue=(unsigned long)round((nodes[i].lon+90.0)*conversionFactor);
+
+      writer.Write(nodes[i].id);
+      writer.Write(latValue);
+      writer.Write(lonValue);
+    }
+
+    if (flags & hasName) {
+      writer.Write(name);
+    }
+
+    if (flags & hasRef) {
+      writer.Write(ref);
+    }
+
+    if (flags & hasLayer) {
+      writer.WriteNumber(layer);
+    }
+
+    if (flags & hasTags) {
+      writer.WriteNumber(tags.size());
+
+      for (size_t i=0; i<tags.size(); i++) {
+        writer.WriteNumber(tags[i].key);
+        writer.Write(tags[i].value);
+      }
+    }
+
+    if (flags & hasRestrictions) {
+      writer.WriteNumber(restrictions.size());
+
+      for (size_t i=0; i<restrictions.size(); i++) {
+        writer.WriteNumber(restrictions[i].type);
+
+        writer.WriteNumber(restrictions[i].members.size());
+
+        for (size_t j=0; j<restrictions[i].members.size(); j++) {
+          writer.Write(restrictions[i].members[j]);
+        }
+      }
+    }
+
+    return !writer.HasError();
+  }
+}

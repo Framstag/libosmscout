@@ -23,31 +23,33 @@
 #include <cstdio>
 #include <string>
 
-class FileWriter
-{
-private:
-  FILE *file;
-  bool hasError;
+namespace osmscout {
+  class FileWriter
+  {
+  private:
+    FILE *file;
+    bool hasError;
 
-public:
-  FileWriter();
-  virtual ~FileWriter();
+  public:
+    FileWriter();
+    virtual ~FileWriter();
 
-  bool Open(const std::string& filename);
-  bool Close();
-  bool IsOpen() const;
+    bool Open(const std::string& filename);
+    bool Close();
+    bool IsOpen() const;
 
-  bool HasError() const;
+    bool HasError() const;
 
-  bool GetPos(long &pos);
-  bool SetPos(long pos);
+    bool GetPos(long &pos);
+    bool SetPos(long pos);
 
-  bool Write(const std::string& value);
-  bool Write(bool boolean);
-  bool Write(unsigned long number);
-  bool Write(unsigned int number);
+    bool Write(const std::string& value);
+    bool Write(bool boolean);
+    bool Write(unsigned long number);
+    bool Write(unsigned int number);
 
-  bool WriteNumber(unsigned long number);
-};
+    bool WriteNumber(unsigned long number);
+  };
+}
 
 #endif

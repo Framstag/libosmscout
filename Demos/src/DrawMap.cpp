@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
 
   output=argv[8];
 
-  Database database;
+  osmscout::Database database;
 
   if (!database.Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
@@ -80,13 +80,13 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  StyleConfig styleConfig(database.GetTypeConfig());
+  osmscout::StyleConfig styleConfig(database.GetTypeConfig());
 
-  if (!LoadStyleConfig(style.c_str(),styleConfig)) {
+  if (!osmscout::LoadStyleConfig(style.c_str(),styleConfig)) {
     std::cerr << "Cannot open style" << std::endl;
   }
 
-  MapPainter painter(database);
+  osmscout::MapPainter painter(database);
 
   cairo_surface_t *surface;
   cairo_t         *cairo;

@@ -44,7 +44,7 @@
 class CitySearchDialog : public Lum::Dlg::ActionDialog
 {
 private:
-  typedef Lum::Model::StdRefTable<AdminRegion,std::list<AdminRegion> > RegionsModel;
+  typedef Lum::Model::StdRefTable<osmscout::AdminRegion,std::list<osmscout::AdminRegion> > RegionsModel;
   typedef Lum::Base::Reference<RegionsModel>                           RegionsModelRef;
 
   class RegionsDataProvider : public RegionsModel::DataProvider
@@ -71,11 +71,11 @@ private:
   Lum::Model::ActionRef  okAction;
   Lum::Model::StringRef  regionName;
   Lum::Model::ActionRef  searchTimerAction;
-  std::list<AdminRegion> regions;
+  std::list<osmscout::AdminRegion> regions;
   RegionsModelRef        regionsModel;
   Lum::Model::SingleLineSelectionRef regionSelection;
   bool                   hasResult;
-  AdminRegion            result;
+  osmscout::AdminRegion            result;
 
 private:
   void FetchAdminRegions();
@@ -88,7 +88,7 @@ public:
   void Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& msg);
 
   bool HasResult() const;
-  const AdminRegion& GetResult() const;
+  const osmscout::AdminRegion& GetResult() const;
 };
 
 #endif

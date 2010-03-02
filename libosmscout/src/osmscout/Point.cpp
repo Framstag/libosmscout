@@ -19,3 +19,6 @@
 
 #include <osmscout/Point.h>
 
+namespace osmscout {
+
+}

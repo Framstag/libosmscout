@@ -28,130 +28,134 @@
 #include <osmscout/Tiles.h>
 #include <osmscout/Util.h>
 
-bool GenerateAreaNodeIndex(const ImportParameter& parameter,
-                           Progress& progress)
-{
-  //
-  // Analysing nodes regarding draw type and matching tiles.
-  //
+namespace osmscout {
 
-  progress.SetAction("Analysing distribution");
+  bool GenerateAreaNodeIndex(const ImportParameter& parameter,
+                             Progress& progress)
+  {
+    //
+    // Analysing nodes regarding draw type and matching tiles.
+    //
 
-  FileScanner                                    scanner;
-  std::vector<size_t>                            drawTypeDist;
-  std::vector<std::map<TileId,std::list<Id> > >  drawTypeTileIds;
-  size_t                                         nodeCount=0;
+    progress.SetAction("Analysing distribution");
 
-  scanner.Open("nodes.dat");
+    FileScanner                                    scanner;
+    std::vector<size_t>                            drawTypeDist;
+    std::vector<std::map<TileId,std::list<Id> > >  drawTypeTileIds;
+    size_t                                         nodeCount=0;
 
-  if (scanner.HasError()) {
-    progress.Error("Cannot open 'nodes.dat'");
-    return false;
-  }
+    scanner.Open("nodes.dat");
 
-  while (!scanner.HasError()) {
-    Node node;
+    if (scanner.HasError()) {
+      progress.Error("Cannot open 'nodes.dat'");
+      return false;
+    }
 
-    node.Read(scanner);
+    while (!scanner.HasError()) {
+      Node node;
 
-    if (!scanner.HasError()) {
-      TileId tileId=GetTileId(node.lon,node.lat);
+      node.Read(scanner);
 
-      nodeCount++;
+      if (!scanner.HasError()) {
+        TileId tileId=GetTileId(node.lon,node.lat);
 
-      if ((size_t)node.type>=drawTypeDist.size()) {
-        drawTypeDist.resize(node.type+1,0);
-        drawTypeTileIds.resize(node.type+1);
+        nodeCount++;
+
+        if ((size_t)node.type>=drawTypeDist.size()) {
+          drawTypeDist.resize(node.type+1,0);
+          drawTypeTileIds.resize(node.type+1);
+        }
+
+        // Node count by draw type
+        drawTypeDist[node.type]++;
+
+        // Node ids by Type and tile
+        drawTypeTileIds[node.type][tileId].push_back(node.id);
       }
-
-      // Node count by draw type
-      drawTypeDist[node.type]++;
-
-      // Node ids by Type and tile
-      drawTypeTileIds[node.type][tileId].push_back(node.id);
     }
-  }
 
-  scanner.Close();
+    scanner.Close();
 
-  progress.Info(std::string("Nodes scanned: ")+NumberToString(nodeCount));
+    progress.Info(std::string("Nodes scanned: ")+NumberToString(nodeCount));
 
-  /*
-  std::cout << "Distribution by type" << std::endl;
-  for (size_t i=0; i<styleTypes.size(); i++) {
-    if ((size_t)styleTypes[i].GetType()<drawTypeDist.size() &&
-        drawTypeDist[styleTypes[i].GetType()]>0) {
-      std::cout << styleTypes[i].GetType() << ": " << drawTypeDist[styleTypes[i].GetType()] << std::endl;
-    }
-  }*/
-
-  progress.SetAction("Calculating statistics");
-
-  size_t drawTypeSum=0;
-  size_t tileSum=0;
-  size_t nodeSum=0;
-
-  //std::cout << "Number of tiles per type" << std::endl;
-
-  // For every draw type...
-  for (size_t i=0; i<drawTypeTileIds.size(); i++) {
-    // if the draw types is used...
-    if (i!=typeIgnore && drawTypeTileIds[i].size()>0) {
-
-      drawTypeSum++;
-
-      //std::cout << styleTypes[i].GetType() << ": " << drawTypeTileDist[styleTypes[i].GetType()].size();
-      tileSum+=drawTypeTileIds[i].size();
-
-      for (std::map<TileId,std::list<Id> >::const_iterator tile=drawTypeTileIds[i].begin();
-           tile!=drawTypeTileIds[i].end();
-           ++tile) {
-        nodeSum+=tile->second.size();
+    /*
+    std::cout << "Distribution by type" << std::endl;
+    for (size_t i=0; i<styleTypes.size(); i++) {
+      if ((size_t)styleTypes[i].GetType()<drawTypeDist.size() &&
+          drawTypeDist[styleTypes[i].GetType()]>0) {
+        std::cout << styleTypes[i].GetType() << ": " << drawTypeDist[styleTypes[i].GetType()] << std::endl;
       }
-      //std::cout << " " << nodes << std::endl;
+    }*/
+
+    progress.SetAction("Calculating statistics");
+
+    size_t drawTypeSum=0;
+    size_t tileSum=0;
+    size_t nodeSum=0;
+
+    //std::cout << "Number of tiles per type" << std::endl;
+
+    // For every draw type...
+    for (size_t i=0; i<drawTypeTileIds.size(); i++) {
+      // if the draw types is used...
+      if (i!=typeIgnore && drawTypeTileIds[i].size()>0) {
+
+        drawTypeSum++;
+
+        //std::cout << styleTypes[i].GetType() << ": " << drawTypeTileDist[styleTypes[i].GetType()].size();
+        tileSum+=drawTypeTileIds[i].size();
+
+        for (std::map<TileId,std::list<Id> >::const_iterator tile=drawTypeTileIds[i].begin();
+             tile!=drawTypeTileIds[i].end();
+             ++tile) {
+          nodeSum+=tile->second.size();
+        }
+        //std::cout << " " << nodes << std::endl;
+      }
     }
-  }
 
-  progress.Info(std::string("Total number of draw types with tiles: ")+NumberToString(drawTypeSum));
-  progress.Info(std::string("Total number of tiles: ")+NumberToString(tileSum));
-  progress.Info(std::string("Total number of nodes in tiles: ")+NumberToString(nodeSum));
+    progress.Info(std::string("Total number of draw types with tiles: ")+NumberToString(drawTypeSum));
+    progress.Info(std::string("Total number of tiles: ")+NumberToString(tileSum));
+    progress.Info(std::string("Total number of nodes in tiles: ")+NumberToString(nodeSum));
 
-  //
-  // Writing index file
-  //
+    //
+    // Writing index file
+    //
 
-  progress.SetAction("Generating 'areanode.idx'");
+    progress.SetAction("Generating 'areanode.idx'");
 
-  FileWriter writer;
+    FileWriter writer;
 
-  if (!writer.Open("areanode.idx")) {
-    progress.Error("Cannot create 'nodes.dat'");
-    return false;
-  }
+    if (!writer.Open("areanode.idx")) {
+      progress.Error("Cannot create 'nodes.dat'");
+      return false;
+    }
 
-  // The number of draw types we have an index for
-  writer.WriteNumber(drawTypeSum); // Number of entries
+    // The number of draw types we have an index for
+    writer.WriteNumber(drawTypeSum); // Number of entries
 
-  for (TypeId i=0; i<drawTypeTileIds.size(); i++) {
-    if (i!=typeIgnore && drawTypeTileIds[i].size()>0) {
-      writer.WriteNumber(i);                           // The draw type id
-      writer.WriteNumber(drawTypeTileIds[i].size()); // The number of tiles
+    for (TypeId i=0; i<drawTypeTileIds.size(); i++) {
+      if (i!=typeIgnore && drawTypeTileIds[i].size()>0) {
+        writer.WriteNumber(i);                           // The draw type id
+        writer.WriteNumber(drawTypeTileIds[i].size()); // The number of tiles
 
-      for (std::map<TileId,std::list<Id> >::const_iterator tile=drawTypeTileIds[i].begin();
-           tile!=drawTypeTileIds[i].end();
-           ++tile) {
-        writer.WriteNumber(tile->first);                           // The tile id
-        writer.WriteNumber(tile->second.size());                   // The number of nodes
+        for (std::map<TileId,std::list<Id> >::const_iterator tile=drawTypeTileIds[i].begin();
+             tile!=drawTypeTileIds[i].end();
+             ++tile) {
+          writer.WriteNumber(tile->first);                           // The tile id
+          writer.WriteNumber(tile->second.size());                   // The number of nodes
 
-        // List of node ids in tile with given draw type...
-        for (std::list<Id>::const_iterator id=tile->second.begin();
-             id!=tile->second.end();
-             ++id) {
-          writer.WriteNumber(*id); // The id of the node
+          // List of node ids in tile with given draw type...
+          for (std::list<Id>::const_iterator id=tile->second.begin();
+               id!=tile->second.end();
+               ++id) {
+            writer.WriteNumber(*id); // The id of the node
+          }
         }
       }
     }
-  }
 
-  return !writer.HasError() && writer.Close();
+    return !writer.HasError() && writer.Close();
+  }
 }
+

@@ -25,655 +25,658 @@
 
 #include <osmscout/TypeConfig.h>
 
-/**
- * Ways can have a line style
- */
-class LineStyle
-{
-public:
-  enum Style {
-    none,
-    normal,
-    longDash,
-    dotted,
-    lineDot
+namespace osmscout {
+
+  /**
+   * Ways can have a line style
+   */
+  class LineStyle
+  {
+  public:
+    enum Style {
+      none,
+      normal,
+      longDash,
+      dotted,
+      lineDot
+    };
+
+  private:
+    Style  style;
+    double lineR;
+    double lineG;
+    double lineB;
+    double lineA;
+    double outlineR;
+    double outlineG;
+    double outlineB;
+    double outlineA;
+    double minPixel;
+    double maxPixel;
+    double width;
+    double outline;
+
+  public:
+    LineStyle();
+
+    LineStyle& SetStyle(Style style);
+    LineStyle& SetLineColor(double r, double g, double b, double a);
+    LineStyle& SetOutlineColor(double r, double g, double b, double a);
+    LineStyle& SetMinPixel(double value);
+    LineStyle& SetMaxPixel(double value);
+    LineStyle& SetWidth(double value);
+    LineStyle& SetOutline(double value);
+
+    inline bool IsVisible() const
+    {
+      return style!=none;
+    }
+
+    inline const Style& GetStyle() const
+    {
+      return style;
+    }
+
+    inline double GetLineR() const
+    {
+      return lineR;
+    }
+
+    inline double GetLineG() const
+    {
+      return lineG;
+    }
+
+    inline double GetLineB() const
+    {
+      return lineB;
+    }
+
+    inline double GetLineA() const
+    {
+      return lineA;
+    }
+
+    inline double GetOutlineR() const
+    {
+      return outlineR;
+    }
+
+    inline double GetOutlineG() const
+    {
+      return outlineG;
+    }
+
+    inline double GetOutlineB() const
+    {
+      return outlineB;
+    }
+
+    inline double GetOutlineA() const
+    {
+      return outlineA;
+    }
+
+
+    inline double GetMinPixel() const
+    {
+      return minPixel;
+    }
+
+    inline double GetMaxPixel() const
+    {
+      return maxPixel;
+    }
+
+    inline double GetWidth() const
+    {
+      return width;
+    }
+
+    inline double GetOutline() const
+    {
+      return outline;
+    }
   };
 
-private:
-  Style  style;
-  double lineR;
-  double lineG;
-  double lineB;
-  double lineA;
-  double outlineR;
-  double outlineG;
-  double outlineB;
-  double outlineA;
-  double minPixel;
-  double maxPixel;
-  double width;
-  double outline;
-
-public:
-  LineStyle();
-
-  LineStyle& SetStyle(Style style);
-  LineStyle& SetLineColor(double r, double g, double b, double a);
-  LineStyle& SetOutlineColor(double r, double g, double b, double a);
-  LineStyle& SetMinPixel(double value);
-  LineStyle& SetMaxPixel(double value);
-  LineStyle& SetWidth(double value);
-  LineStyle& SetOutline(double value);
-
-  inline bool IsVisible() const
+  /**
+   * Areas can have a fill style
+   */
+  class FillStyle
   {
-    return style!=none;
-  }
+  public:
+    enum Style {
+      none,
+      plain
+    };
 
-  inline const Style& GetStyle() const
-  {
-    return style;
-  }
+  private:
+    Style  style;
+    int    layer;
+    double fillR;
+    double fillG;
+    double fillB;
+    double fillA;
 
-  inline double GetLineR() const
-  {
-    return lineR;
-  }
+  public:
+    FillStyle();
 
-  inline double GetLineG() const
-  {
-    return lineG;
-  }
+    FillStyle& SetStyle(Style style);
+    FillStyle& SetLayer(int layer);
+    FillStyle& SetColor(double r, double g, double b, double a);
 
-  inline double GetLineB() const
-  {
-    return lineB;
-  }
+    inline bool IsVisible() const
+    {
+      return style!=none;
+    }
 
-  inline double GetLineA() const
-  {
-    return lineA;
-  }
+    inline const Style& GetStyle() const
+    {
+      return style;
+    }
 
-  inline double GetOutlineR() const
-  {
-    return outlineR;
-  }
+    inline int GetLayer() const
+    {
+      return layer;
+    }
 
-  inline double GetOutlineG() const
-  {
-    return outlineG;
-  }
+    inline double GetFillR() const
+    {
+      return fillR;
+    }
 
-  inline double GetOutlineB() const
-  {
-    return outlineB;
-  }
+    inline double GetFillG() const
+    {
+      return fillG;
+    }
 
-  inline double GetOutlineA() const
-  {
-    return outlineA;
-  }
-
-
-  inline double GetMinPixel() const
-  {
-    return minPixel;
-  }
-
-  inline double GetMaxPixel() const
-  {
-    return maxPixel;
-  }
-
-  inline double GetWidth() const
-  {
-    return width;
-  }
-
-  inline double GetOutline() const
-  {
-    return outline;
-  }
-};
-
-/**
- * Areas can have a fill style
- */
-class FillStyle
-{
-public:
-  enum Style {
-    none,
-    plain
+    inline double GetFillB() const
+    {
+      return fillB;
+    }
   };
 
-private:
-  Style  style;
-  int    layer;
-  double fillR;
-  double fillG;
-  double fillB;
-  double fillA;
-
-public:
-  FillStyle();
-
-  FillStyle& SetStyle(Style style);
-  FillStyle& SetLayer(int layer);
-  FillStyle& SetColor(double r, double g, double b, double a);
-
-  inline bool IsVisible() const
+  /**
+   * Nodes, ways and areas can have a label style
+   */
+  class LabelStyle
   {
-    return style!=none;
-  }
+  public:
+    enum Style {
+      none,
+      normal,
+      contour,
+      plate,
+      emphasize
+    };
 
-  inline const Style& GetStyle() const
-  {
-    return style;
-  }
+  private:
+    Style style;
+    Mag   minMag;
+    Mag   scaleAndFadeMag;
+    Mag   maxMag;
+    double size;
+    double textR;
+    double textG;
+    double textB;
+    double textA;
+    double bgR;
+    double bgG;
+    double bgB;
+    double bgA;
+    double borderR;
+    double borderG;
+    double borderB;
+    double borderA;
 
-  inline int GetLayer() const
-  {
-    return layer;
-  }
+  public:
+    LabelStyle();
 
-  inline double GetFillR() const
-  {
-    return fillR;
-  }
+    LabelStyle& SetStyle(Style style);
+    LabelStyle& SetMinMag(Mag mag);
+    LabelStyle& SetScaleAndFadeMag(Mag mag);
+    LabelStyle& SetMaxMag(Mag mag);
+    LabelStyle& SetSize(double size);
+    LabelStyle& SetTextColor(double r, double g, double b, double a);
+    LabelStyle& SetBgColor(double r, double g, double b, double a);
+    LabelStyle& SetBorderColor(double r, double g, double b, double a);
 
-  inline double GetFillG() const
-  {
-    return fillG;
-  }
+    inline bool IsVisible() const
+    {
+      return style!=none;
+    }
 
-  inline double GetFillB() const
-  {
-    return fillB;
-  }
-};
+    inline const Style& GetStyle() const
+    {
+      return style;
+    }
 
-/**
- * Nodes, ways and areas can have a label style
- */
-class LabelStyle
-{
-public:
-  enum Style {
-    none,
-    normal,
-    contour,
-    plate,
-    emphasize
+    inline const Mag& GetMinMag() const
+    {
+      return minMag;
+    }
+
+    inline const Mag& GetScaleAndFadeMag() const
+    {
+      return scaleAndFadeMag;
+    }
+
+    inline const Mag& GetMaxMag() const
+    {
+      return maxMag;
+    }
+
+    inline double GetSize() const
+    {
+      return size;
+    }
+
+    inline double GetTextR() const
+    {
+      return textR;
+    }
+
+    inline double GetTextG() const
+    {
+      return textG;
+    }
+
+    inline double GetTextB() const
+    {
+      return textB;
+    }
+
+    inline double GetTextA() const
+    {
+      return textA;
+    }
+
+    inline double GetBgR() const
+    {
+      return bgR;
+    }
+
+    inline double GetBgG() const
+    {
+      return bgG;
+    }
+
+    inline double GetBgB() const
+    {
+      return bgB;
+    }
+
+    inline double GetBgA() const
+    {
+      return bgA;
+    }
+
+    inline double GetBorderR() const
+    {
+      return borderR;
+    }
+
+    inline double GetBorderG() const
+    {
+      return borderG;
+    }
+
+    inline double GetBorderB() const
+    {
+      return borderB;
+    }
+
+    inline double GetBorderA() const
+    {
+      return borderA;
+    }
   };
 
-private:
-  Style style;
-  Mag   minMag;
-  Mag   scaleAndFadeMag;
-  Mag   maxMag;
-  double size;
-  double textR;
-  double textG;
-  double textB;
-  double textA;
-  double bgR;
-  double bgG;
-  double bgB;
-  double bgA;
-  double borderR;
-  double borderG;
-  double borderB;
-  double borderA;
-
-public:
-  LabelStyle();
-
-  LabelStyle& SetStyle(Style style);
-  LabelStyle& SetMinMag(Mag mag);
-  LabelStyle& SetScaleAndFadeMag(Mag mag);
-  LabelStyle& SetMaxMag(Mag mag);
-  LabelStyle& SetSize(double size);
-  LabelStyle& SetTextColor(double r, double g, double b, double a);
-  LabelStyle& SetBgColor(double r, double g, double b, double a);
-  LabelStyle& SetBorderColor(double r, double g, double b, double a);
-
-  inline bool IsVisible() const
+  /**
+   * Nodes and areas can have a symbol style
+   */
+  class SymbolStyle
   {
-    return style!=none;
-  }
+  public:
+    enum Style {
+      none,
+      box,
+      circle
+    };
 
-  inline const Style& GetStyle() const
-  {
-    return style;
-  }
+  private:
+    Style  style;
+    Mag    minMag;
+    double size;
+    double fillR;
+    double fillG;
+    double fillB;
+    double fillA;
 
-  inline const Mag& GetMinMag() const
-  {
-    return minMag;
-  }
+  public:
+    SymbolStyle();
 
-  inline const Mag& GetScaleAndFadeMag() const
-  {
-    return scaleAndFadeMag;
-  }
+    SymbolStyle& SetStyle(Style style);
+    SymbolStyle& SetMinMag(Mag mag);
+    SymbolStyle& SetSize(double size);
+    SymbolStyle& SetFillColor(double r, double g, double b, double a);
 
-  inline const Mag& GetMaxMag() const
-  {
-    return maxMag;
-  }
+    inline bool IsVisible() const
+    {
+      return style!=none;
+    }
 
-  inline double GetSize() const
-  {
-    return size;
-  }
+    inline const Style& GetStyle() const
+    {
+      return style;
+    }
 
-  inline double GetTextR() const
-  {
-    return textR;
-  }
+    inline const Mag& GetMinMag() const
+    {
+      return minMag;
+    }
 
-  inline double GetTextG() const
-  {
-    return textG;
-  }
+    inline double GetSize() const
+    {
+      return size;
+    }
 
-  inline double GetTextB() const
-  {
-    return textB;
-  }
+    inline double GetFillR() const
+    {
+      return fillR;
+    }
 
-  inline double GetTextA() const
-  {
-    return textA;
-  }
+    inline double GetFillG() const
+    {
+      return fillG;
+    }
 
-  inline double GetBgR() const
-  {
-    return bgR;
-  }
+    inline double GetFillB() const
+    {
+      return fillB;
+    }
 
-  inline double GetBgG() const
-  {
-    return bgG;
-  }
-
-  inline double GetBgB() const
-  {
-    return bgB;
-  }
-
-  inline double GetBgA() const
-  {
-    return bgA;
-  }
-
-  inline double GetBorderR() const
-  {
-    return borderR;
-  }
-
-  inline double GetBorderG() const
-  {
-    return borderG;
-  }
-
-  inline double GetBorderB() const
-  {
-    return borderB;
-  }
-
-  inline double GetBorderA() const
-  {
-    return borderA;
-  }
-};
-
-/**
- * Nodes and areas can have a symbol style
- */
-class SymbolStyle
-{
-public:
-  enum Style {
-    none,
-    box,
-    circle
+    inline double GetFillA() const
+    {
+      return fillA;
+    }
   };
 
-private:
-  Style  style;
-  Mag    minMag;
-  double size;
-  double fillR;
-  double fillG;
-  double fillB;
-  double fillA;
-
-public:
-  SymbolStyle();
-
-  SymbolStyle& SetStyle(Style style);
-  SymbolStyle& SetMinMag(Mag mag);
-  SymbolStyle& SetSize(double size);
-  SymbolStyle& SetFillColor(double r, double g, double b, double a);
-
-  inline bool IsVisible() const
+  class IconStyle
   {
-    return style!=none;
-  }
+  public:
+    enum Icon {
+      iconStart    = 0,
+      iconTarget   = 1,
 
-  inline const Style& GetStyle() const
-  {
-    return style;
-  }
+      // highway
+      iconBusStop  = 2,
 
-  inline const Mag& GetMinMag() const
-  {
-    return minMag;
-  }
+      // amenity
+      iconHospital = 3,
+      iconParking  = 4,
+      iconPharmacy = 5,
 
-  inline double GetSize() const
-  {
-    return size;
-  }
+      iconCustom   = 6,
+      iconNone     = 7
+    };
+  private:
+    Icon        icon;
+    std::string iconName;
+    Mag         minMag;
 
-  inline double GetFillR() const
-  {
-    return fillR;
-  }
+  public:
+    IconStyle();
 
-  inline double GetFillG() const
-  {
-    return fillG;
-  }
+    IconStyle& SetIcon(Icon icon);
+    IconStyle& SetIconName(const std::string& iconName);
+    IconStyle& SetMinMag(Mag mag);
 
-  inline double GetFillB() const
-  {
-    return fillB;
-  }
+    inline bool IsVisible() const
+    {
+      return !iconName.empty();
+    }
 
-  inline double GetFillA() const
-  {
-    return fillA;
-  }
-};
+    inline Icon GetIcon() const
+    {
+      return icon;
+    }
 
-class IconStyle
-{
-public:
-  enum Icon {
-    iconStart    = 0,
-    iconTarget   = 1,
+    inline std::string GetIconName() const
+    {
+      return iconName;
+    }
 
-    // highway
-    iconBusStop  = 2,
-
-    // amenity
-    iconHospital = 3,
-    iconParking  = 4,
-    iconPharmacy = 5,
-
-    iconCustom   = 6,
-    iconNone     = 7
+    inline const Mag& GetMinMag() const
+    {
+      return minMag;
+    }
   };
-private:
-  Icon        icon;
-  std::string iconName;
-  Mag         minMag;
 
-public:
-  IconStyle();
-
-  IconStyle& SetIcon(Icon icon);
-  IconStyle& SetIconName(const std::string& iconName);
-  IconStyle& SetMinMag(Mag mag);
-
-  inline bool IsVisible() const
+  /**
+   * A complete style definition
+   */
+  class StyleConfig
   {
-    return !iconName.empty();
-  }
+  private:
+    TypeConfig                *typeConfig;
 
-  inline Icon GetIcon() const
-  {
-    return icon;
-  }
+    // Node
 
-  inline std::string GetIconName() const
-  {
-    return iconName;
-  }
+    std::vector<SymbolStyle*> nodeSymbolStyles;
+    std::vector<LabelStyle*>  nodeRefLabelStyles;
+    std::vector<LabelStyle*>  nodeLabelStyles;
+    std::vector<IconStyle*>   nodeIconStyles;
 
-  inline const Mag& GetMinMag() const
-  {
-    return minMag;
-  }
-};
+    // Way
 
-/**
- * A complete style definition
- */
-class StyleConfig
-{
-private:
-  TypeConfig                *typeConfig;
+    std::vector<LineStyle*>   wayLineStyles;
+    std::vector<LabelStyle*>  wayRefLabelStyles;
+    std::vector<LabelStyle*>  wayNameLabelStyles;
 
-  // Node
+    // Area
 
-  std::vector<SymbolStyle*> nodeSymbolStyles;
-  std::vector<LabelStyle*>  nodeRefLabelStyles;
-  std::vector<LabelStyle*>  nodeLabelStyles;
-  std::vector<IconStyle*>   nodeIconStyles;
+    std::vector<FillStyle*>   areaFillStyles;
+    std::vector<FillStyle*>   areaBuildingFillStyles;
+    std::vector<SymbolStyle*> areaSymbolStyles;
+    std::vector<LabelStyle*>  areaLabelStyles;
+    std::vector<LineStyle*>   areaBorderStyles;
+    std::vector<IconStyle*>   areaIconStyles;
 
-  // Way
+    std::vector<size_t>       wayPrio;
+    std::vector<size_t>       priorities;
+    std::vector<TypeId>       wayTypes;
 
-  std::vector<LineStyle*>   wayLineStyles;
-  std::vector<LabelStyle*>  wayRefLabelStyles;
-  std::vector<LabelStyle*>  wayNameLabelStyles;
+    std::map<std::string, IconStyle::Icon> nameToIconMap;
 
-  // Area
+  public:
+    StyleConfig(TypeConfig* typeConfig);
+    virtual ~StyleConfig();
 
-  std::vector<FillStyle*>   areaFillStyles;
-  std::vector<FillStyle*>   areaBuildingFillStyles;
-  std::vector<SymbolStyle*> areaSymbolStyles;
-  std::vector<LabelStyle*>  areaLabelStyles;
-  std::vector<LineStyle*>   areaBorderStyles;
-  std::vector<IconStyle*>   areaIconStyles;
+    void Postprocess();
 
-  std::vector<size_t>       wayPrio;
-  std::vector<size_t>       priorities;
-  std::vector<TypeId>       wayTypes;
+    TypeConfig* GetTypeConfig() const;
 
-  std::map<std::string, IconStyle::Icon> nameToIconMap;
+    bool GetIconByName(const std::string& name, IconStyle::Icon& icon) const;
+    std::string GetIconNameByIcon(const IconStyle::Icon& icon) const;
 
-public:
-  StyleConfig(TypeConfig* typeConfig);
-  virtual ~StyleConfig();
+    StyleConfig& SetWayPrio(TypeId type, size_t prio);
 
-  void Postprocess();
+    StyleConfig& SetNodeSymbolStyle(TypeId type, const SymbolStyle& style);
+    StyleConfig& SetNodeRefLabelStyle(TypeId type, const LabelStyle& style);
+    StyleConfig& SetNodeLabelStyle(TypeId type, const LabelStyle& style);
+    StyleConfig& SetNodeIconStyle(TypeId type, const IconStyle& style);
 
-  TypeConfig* GetTypeConfig() const;
+    StyleConfig& SetWayLineStyle(TypeId type, const LineStyle& style);
+    StyleConfig& SetWayRefLabelStyle(TypeId type, const LabelStyle& style);
+    StyleConfig& SetWayNameLabelStyle(TypeId type, const LabelStyle& style);
 
-  bool GetIconByName(const std::string& name, IconStyle::Icon& icon) const;
-  std::string GetIconNameByIcon(const IconStyle::Icon& icon) const;
+    StyleConfig& SetAreaFillStyle(TypeId type, const FillStyle& style);
+    StyleConfig& SetAreaBuildingFillStyle(TypeId type, const FillStyle& style);
+    StyleConfig& SetAreaLabelStyle(TypeId type, const LabelStyle& style);
+    StyleConfig& SetAreaSymbolStyle(TypeId type, const SymbolStyle& style);
+    StyleConfig& SetAreaBorderStyle(TypeId type, const LineStyle& style);
+    StyleConfig& SetAreaIconStyle(TypeId type, const IconStyle& style);
 
-  StyleConfig& SetWayPrio(TypeId type, size_t prio);
+    size_t GetStyleCount() const;
 
-  StyleConfig& SetNodeSymbolStyle(TypeId type, const SymbolStyle& style);
-  StyleConfig& SetNodeRefLabelStyle(TypeId type, const LabelStyle& style);
-  StyleConfig& SetNodeLabelStyle(TypeId type, const LabelStyle& style);
-  StyleConfig& SetNodeIconStyle(TypeId type, const IconStyle& style);
+    void GetWayTypesByPrio(std::vector<TypeId>& types) const;
+    void GetWayTypesWithPrio(size_t prio, std::set<TypeId>& types) const;
+    void GetWayTypesWithMaxPrio(size_t prio, std::set<TypeId>& types) const;
+    void GetNodeTypesWithMag(double mag, std::set<TypeId>& types) const;
+    void GetPriorities(std::vector<size_t>& priorities) const;
 
-  StyleConfig& SetWayLineStyle(TypeId type, const LineStyle& style);
-  StyleConfig& SetWayRefLabelStyle(TypeId type, const LabelStyle& style);
-  StyleConfig& SetWayNameLabelStyle(TypeId type, const LabelStyle& style);
-
-  StyleConfig& SetAreaFillStyle(TypeId type, const FillStyle& style);
-  StyleConfig& SetAreaBuildingFillStyle(TypeId type, const FillStyle& style);
-  StyleConfig& SetAreaLabelStyle(TypeId type, const LabelStyle& style);
-  StyleConfig& SetAreaSymbolStyle(TypeId type, const SymbolStyle& style);
-  StyleConfig& SetAreaBorderStyle(TypeId type, const LineStyle& style);
-  StyleConfig& SetAreaIconStyle(TypeId type, const IconStyle& style);
-
-  size_t GetStyleCount() const;
-
-  void GetWayTypesByPrio(std::vector<TypeId>& types) const;
-  void GetWayTypesWithPrio(size_t prio, std::set<TypeId>& types) const;
-  void GetWayTypesWithMaxPrio(size_t prio, std::set<TypeId>& types) const;
-  void GetNodeTypesWithMag(double mag, std::set<TypeId>& types) const;
-  void GetPriorities(std::vector<size_t>& priorities) const;
-
-  bool IsWayVisible(TypeId type, size_t prio) const
-  {
-    if (type<wayLineStyles.size() && type<wayPrio.size()) {
-      return wayLineStyles[type]!=NULL && wayPrio[type]<=prio;
-    }
-    else {
-      return false;
-    }
-  }
-
-  bool IsAreaVisible(TypeId type, size_t prio) const
-  {
-    if (type<areaFillStyles.size()) {
-      return areaFillStyles[type]!=NULL;
-    }
-    else {
-      return false;
-    }
-  }
-
-  bool IsNodeVisible(TypeId type, double mag) const
-  {
-    if (type<nodeSymbolStyles.size() &&
-        nodeSymbolStyles[type]!=NULL &&
-        nodeSymbolStyles[type]->GetMinMag()<=mag) {
-      return true;
-    }
-    else if (type<nodeLabelStyles.size() &&
-             nodeLabelStyles[type]!=NULL &&
-             nodeLabelStyles[type]->GetMinMag()<=mag) {
-      return true;
-    }
-
-    return false;
-  }
-
-  inline const SymbolStyle* GetNodeSymbolStyle(TypeId type) const
-  {
-    if (type<nodeSymbolStyles.size()) {
-      return nodeSymbolStyles[type];
-    }
-    else {
-      return NULL;
-    }
-  }
-
-  inline const IconStyle* GetNodeIconStyle(TypeId type) const
-  {
-    if (type<nodeIconStyles.size()) {
-      return nodeIconStyles[type];
-    }
-    else {
-      return NULL;
-    }
-  }
-
-  const LabelStyle* GetNodeRefLabelStyle(TypeId type) const
-  {
-    if (type<nodeRefLabelStyles.size()) {
-      return nodeRefLabelStyles[type];
-    }
-    else {
-      return NULL;
-    }
-  }
-
-  const LabelStyle* GetNodeLabelStyle(TypeId type) const
-  {
-    if (type<nodeLabelStyles.size()) {
-      return nodeLabelStyles[type];
-    }
-    else {
-      return NULL;
-    }
-  }
-
-  const LineStyle* GetWayLineStyle(TypeId type) const
-  {
-    if (type<wayLineStyles.size()) {
-      return wayLineStyles[type];
-    }
-    else {
-      return NULL;
-    }
-  }
-
-  const LabelStyle* GetWayRefLabelStyle(TypeId type) const
-  {
-    if (type<wayRefLabelStyles.size()) {
-      return wayRefLabelStyles[type];
-    }
-    else {
-      return NULL;
-    }
-  }
-
-  const LabelStyle* GetWayNameLabelStyle(TypeId type) const
-  {
-    if (type<wayNameLabelStyles.size()) {
-      return wayNameLabelStyles[type];
-    }
-    else {
-      return NULL;
-    }
-  }
-
-  const FillStyle* GetAreaFillStyle(TypeId type, bool building) const
-  {
-    if (type<areaFillStyles.size()) {
-      if (building && areaBuildingFillStyles[type]!=NULL) {
-        return areaBuildingFillStyles[type];
+    bool IsWayVisible(TypeId type, size_t prio) const
+    {
+      if (type<wayLineStyles.size() && type<wayPrio.size()) {
+        return wayLineStyles[type]!=NULL && wayPrio[type]<=prio;
       }
       else {
-        return areaFillStyles[type];
+        return false;
       }
     }
-    else {
-      return NULL;
-    }
-  }
 
-  const LabelStyle* GetAreaLabelStyle(TypeId type) const
-  {
-    if (type<areaLabelStyles.size()) {
-      return areaLabelStyles[type];
+    bool IsAreaVisible(TypeId type, size_t prio) const
+    {
+      if (type<areaFillStyles.size()) {
+        return areaFillStyles[type]!=NULL;
+      }
+      else {
+        return false;
+      }
     }
-    else {
-      return NULL;
-    }
-  }
 
-  const SymbolStyle* GetAreaSymbolStyle(TypeId type) const
-  {
-    if (type<areaSymbolStyles.size()) {
-      return areaSymbolStyles[type];
-    }
-    else {
-      return NULL;
-    }
-  }
+    bool IsNodeVisible(TypeId type, double mag) const
+    {
+      if (type<nodeSymbolStyles.size() &&
+          nodeSymbolStyles[type]!=NULL &&
+          nodeSymbolStyles[type]->GetMinMag()<=mag) {
+        return true;
+      }
+      else if (type<nodeLabelStyles.size() &&
+               nodeLabelStyles[type]!=NULL &&
+               nodeLabelStyles[type]->GetMinMag()<=mag) {
+        return true;
+      }
 
-  const LineStyle* GetAreaBorderStyle(TypeId type) const
-  {
-    if (type<areaBorderStyles.size()) {
-      return areaBorderStyles[type];
+      return false;
     }
-    else {
-      return NULL;
+
+    inline const SymbolStyle* GetNodeSymbolStyle(TypeId type) const
+    {
+      if (type<nodeSymbolStyles.size()) {
+        return nodeSymbolStyles[type];
+      }
+      else {
+        return NULL;
+      }
     }
-  }
-};
+
+    inline const IconStyle* GetNodeIconStyle(TypeId type) const
+    {
+      if (type<nodeIconStyles.size()) {
+        return nodeIconStyles[type];
+      }
+      else {
+        return NULL;
+      }
+    }
+
+    const LabelStyle* GetNodeRefLabelStyle(TypeId type) const
+    {
+      if (type<nodeRefLabelStyles.size()) {
+        return nodeRefLabelStyles[type];
+      }
+      else {
+        return NULL;
+      }
+    }
+
+    const LabelStyle* GetNodeLabelStyle(TypeId type) const
+    {
+      if (type<nodeLabelStyles.size()) {
+        return nodeLabelStyles[type];
+      }
+      else {
+        return NULL;
+      }
+    }
+
+    const LineStyle* GetWayLineStyle(TypeId type) const
+    {
+      if (type<wayLineStyles.size()) {
+        return wayLineStyles[type];
+      }
+      else {
+        return NULL;
+      }
+    }
+
+    const LabelStyle* GetWayRefLabelStyle(TypeId type) const
+    {
+      if (type<wayRefLabelStyles.size()) {
+        return wayRefLabelStyles[type];
+      }
+      else {
+        return NULL;
+      }
+    }
+
+    const LabelStyle* GetWayNameLabelStyle(TypeId type) const
+    {
+      if (type<wayNameLabelStyles.size()) {
+        return wayNameLabelStyles[type];
+      }
+      else {
+        return NULL;
+      }
+    }
+
+    const FillStyle* GetAreaFillStyle(TypeId type, bool building) const
+    {
+      if (type<areaFillStyles.size()) {
+        if (building && areaBuildingFillStyles[type]!=NULL) {
+          return areaBuildingFillStyles[type];
+        }
+        else {
+          return areaFillStyles[type];
+        }
+      }
+      else {
+        return NULL;
+      }
+    }
+
+    const LabelStyle* GetAreaLabelStyle(TypeId type) const
+    {
+      if (type<areaLabelStyles.size()) {
+        return areaLabelStyles[type];
+      }
+      else {
+        return NULL;
+      }
+    }
+
+    const SymbolStyle* GetAreaSymbolStyle(TypeId type) const
+    {
+      if (type<areaSymbolStyles.size()) {
+        return areaSymbolStyles[type];
+      }
+      else {
+        return NULL;
+      }
+    }
+
+    const LineStyle* GetAreaBorderStyle(TypeId type) const
+    {
+      if (type<areaBorderStyles.size()) {
+        return areaBorderStyles[type];
+      }
+      else {
+        return NULL;
+      }
+    }
+  };
+}
 
 #endif

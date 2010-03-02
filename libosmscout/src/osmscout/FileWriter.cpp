@@ -21,162 +21,164 @@
 
 #include <osmscout/Util.h>
 
-FileWriter::FileWriter()
- : file(NULL),
-   hasError(true)
-{
-  // no code
-}
+namespace osmscout {
 
-FileWriter::~FileWriter()
-{
-  if (file!=NULL) {
-    fclose(file);
-  }
-}
-
-bool FileWriter::Open(const std::string& filename)
-{
-  if (file!=NULL) {
-    return false;
+  FileWriter::FileWriter()
+   : file(NULL),
+     hasError(true)
+  {
+    // no code
   }
 
-  file=fopen(filename.c_str(),"w+b");
-
-  hasError=file==NULL;
-
-  return !hasError;
-}
-
-bool FileWriter::IsOpen() const
-{
-  return file!=NULL;
-}
-
-bool FileWriter::Close()
-{
-  if (file==NULL) {
-    return false;
+  FileWriter::~FileWriter()
+  {
+    if (file!=NULL) {
+      fclose(file);
+    }
   }
 
-  hasError=fclose(file)!=0;
+  bool FileWriter::Open(const std::string& filename)
+  {
+    if (file!=NULL) {
+      return false;
+    }
 
-  if (!hasError) {
-    file=NULL;
+    file=fopen(filename.c_str(),"w+b");
+
+    hasError=file==NULL;
+
+    return !hasError;
   }
 
-  return !hasError;
+  bool FileWriter::IsOpen() const
+  {
+    return file!=NULL;
+  }
+
+  bool FileWriter::Close()
+  {
+    if (file==NULL) {
+      return false;
+    }
+
+    hasError=fclose(file)!=0;
+
+    if (!hasError) {
+      file=NULL;
+    }
+
+    return !hasError;
+  }
+
+  bool FileWriter::HasError() const
+  {
+    return file==NULL || hasError;
+  }
+
+  bool FileWriter::GetPos(long& pos)
+  {
+    if (file==NULL || hasError) {
+      return false;
+    }
+
+    pos=ftell(file);
+
+    hasError=pos==-1;
+
+    return !hasError;
+  }
+
+  bool FileWriter::SetPos(long pos)
+  {
+    if (file==NULL || hasError) {
+      return false;
+    }
+
+    hasError=fseek(file,pos,SEEK_SET)!=0;
+
+    return !hasError;
+  }
+
+  bool FileWriter::Write(const std::string& value)
+  {
+    size_t length=value.length();
+
+    hasError=fwrite(value.c_str(),sizeof(char),length+1,file)!=length+1;
+
+    return !hasError;
+  }
+
+  bool FileWriter::Write(bool boolean)
+  {
+    if (file==NULL || hasError) {
+      return false;
+    }
+
+    char value=boolean ? 1 : 0;
+
+    hasError=fwrite((const char*)&value,sizeof(char),1,file)!=1;
+
+    return !hasError;
+  }
+
+  bool FileWriter::Write(unsigned long number)
+  {
+    if (file==NULL || hasError) {
+      return false;
+    }
+
+    char     buffer[sizeof(unsigned long)];
+    unsigned long mask=0xff;
+
+    for (size_t i=0; i<sizeof(unsigned long); i++) {
+      buffer[i]=(number >> (i*8)) & mask;
+    }
+
+    hasError=fwrite(buffer,sizeof(char),sizeof(unsigned long),file)!=sizeof(unsigned long);
+
+    return !hasError;
+  }
+
+  bool FileWriter::Write(unsigned int number)
+  {
+    if (file==NULL || hasError) {
+      return false;
+    }
+
+    char         buffer[sizeof(unsigned int)];
+    unsigned int mask=0xff;
+
+    for (size_t i=0; i<sizeof(unsigned int); i++) {
+      buffer[i]=(number >> (i*8)) & mask;
+    }
+
+    hasError=fwrite(buffer,sizeof(char),sizeof(unsigned int),file)!=sizeof(unsigned int);
+
+    return !hasError;
+  }
+
+  /**
+    Write a numeric value to the file using same internal encoding
+    to reduce storage size. Note that this works only if the average number
+    is small. Don't use this method for storing ids, latitude or longitude.
+    */
+  bool FileWriter::WriteNumber(unsigned long number)
+  {
+    char   buffer[5];
+    size_t bytes;
+
+    if (file==NULL || hasError) {
+      return false;
+    }
+
+    if (!EncodeNumber(number,5,buffer,bytes)) {
+      hasError=true;
+      return false;
+    }
+
+    hasError=fwrite(buffer,sizeof(char),bytes,file)!=bytes;
+
+    return !hasError;
+  }
 }
-
-bool FileWriter::HasError() const
-{
-  return file==NULL || hasError;
-}
-
-bool FileWriter::GetPos(long& pos)
-{
-  if (file==NULL || hasError) {
-    return false;
-  }
-
-  pos=ftell(file);
-
-  hasError=pos==-1;
-
-  return !hasError;
-}
-
-bool FileWriter::SetPos(long pos)
-{
-  if (file==NULL || hasError) {
-    return false;
-  }
-
-  hasError=fseek(file,pos,SEEK_SET)!=0;
-
-  return !hasError;
-}
-
-bool FileWriter::Write(const std::string& value)
-{
-  size_t length=value.length();
-
-  hasError=fwrite(value.c_str(),sizeof(char),length+1,file)!=length+1;
-
-  return !hasError;
-}
-
-bool FileWriter::Write(bool boolean)
-{
-  if (file==NULL || hasError) {
-    return false;
-  }
-
-  char value=boolean ? 1 : 0;
-
-  hasError=fwrite((const char*)&value,sizeof(char),1,file)!=1;
-
-  return !hasError;
-}
-
-bool FileWriter::Write(unsigned long number)
-{
-  if (file==NULL || hasError) {
-    return false;
-  }
-
-  char     buffer[sizeof(unsigned long)];
-  unsigned long mask=0xff;
-
-  for (size_t i=0; i<sizeof(unsigned long); i++) {
-    buffer[i]=(number >> (i*8)) & mask;
-  }
-
-  hasError=fwrite(buffer,sizeof(char),sizeof(unsigned long),file)!=sizeof(unsigned long);
-
-  return !hasError;
-}
-
-bool FileWriter::Write(unsigned int number)
-{
-  if (file==NULL || hasError) {
-    return false;
-  }
-
-  char         buffer[sizeof(unsigned int)];
-  unsigned int mask=0xff;
-
-  for (size_t i=0; i<sizeof(unsigned int); i++) {
-    buffer[i]=(number >> (i*8)) & mask;
-  }
-
-  hasError=fwrite(buffer,sizeof(char),sizeof(unsigned int),file)!=sizeof(unsigned int);
-
-  return !hasError;
-}
-
-/**
-  Write a numeric value to the file using same internal encoding
-  to reduce storage size. Note that this works only if the average number
-  is small. Don't use this method for storing ids, latitude or longitude.
-  */
-bool FileWriter::WriteNumber(unsigned long number)
-{
-  char   buffer[5];
-  size_t bytes;
-
-  if (file==NULL || hasError) {
-    return false;
-  }
-
-  if (!EncodeNumber(number,5,buffer,bytes)) {
-    hasError=true;
-    return false;
-  }
-
-  hasError=fwrite(buffer,sizeof(char),bytes,file)!=bytes;
-
-  return !hasError;
-}
-
 

@@ -63,8 +63,8 @@
 
 static Lum::Def::AppInfo info;
 
-static StyleConfig           *styleConfig;
-static Database              *database=NULL;
+static osmscout::StyleConfig *styleConfig;
+static osmscout::Database    *database=NULL;
 static Lum::Model::ActionRef jobFinishedAction;
 static DatabaseTask          *databaseTask=NULL;
 
@@ -181,18 +181,18 @@ public:
     double tlon, tlat;
 
     // Get origin coordinates
-    MapPainter::transformPixelToGeo(0,0,
-                                    lon,lat,
-                                    magnification,
-                                    width,height,
-                                    olon,olat);
+    osmscout::MapPainter::transformPixelToGeo(0,0,
+                                              lon,lat,
+                                              magnification,
+                                              width,height,
+                                              olon,olat);
 
     // Get current mouse pos coordinates (relative to drag start)
-    MapPainter::transformPixelToGeo((event.x-startX),(event.y-startY),
-                                    lon,lat,
-                                    magnification,
-                                    width,height,
-                                    tlon,tlat);
+    osmscout::MapPainter::transformPixelToGeo((event.x-startX),(event.y-startY),
+                                              lon,lat,
+                                              magnification,
+                                              width,height,
+                                              tlon,tlat);
 
     lon=startLon-(tlon-olon);
     lat=startLat+(tlat-olat);
@@ -273,10 +273,10 @@ public:
       if (event.key==Lum::OS::keyLeft) {
         double lonMin,latMin,lonMax,latMax;
 
-        MapPainter::GetDimensions(lon,lat,
-                                  magnification,
-                                  width,height,
-                                  lonMin,latMin,lonMax,latMax);
+        osmscout::MapPainter::GetDimensions(lon,lat,
+                                            magnification,
+                                            width,height,
+                                            lonMin,latMin,lonMax,latMax);
 
         lon-=(lonMax-lonMin)*0.3;
 
@@ -287,10 +287,10 @@ public:
       else if (event.key==Lum::OS::keyRight) {
         double lonMin,latMin,lonMax,latMax;
 
-        MapPainter::GetDimensions(lon,lat,
-                                  magnification,
-                                  width,height,
-                                  lonMin,latMin,lonMax,latMax);
+        osmscout::MapPainter::GetDimensions(lon,lat,
+                                            magnification,
+                                            width,height,
+                                            lonMin,latMin,lonMax,latMax);
 
         lon+=(lonMax-lonMin)*0.3;
 
@@ -301,10 +301,10 @@ public:
       else if (event.key==Lum::OS::keyUp) {
         double lonMin,latMin,lonMax,latMax;
 
-        MapPainter::GetDimensions(lon,lat,
-                                  magnification,
-                                  width,height,
-                                  lonMin,latMin,lonMax,latMax);
+        osmscout::MapPainter::GetDimensions(lon,lat,
+                                            magnification,
+                                            width,height,
+                                            lonMin,latMin,lonMax,latMax);
 
         lat+=(latMax-latMin)*0.3;
 
@@ -315,10 +315,10 @@ public:
       else if (event.key==Lum::OS::keyDown) {
         double lonMin,latMin,lonMax,latMax;
 
-        MapPainter::GetDimensions(lon,lat,
-                                  magnification,
-                                  width,height,
-                                  lonMin,latMin,lonMax,latMax);
+        osmscout::MapPainter::GetDimensions(lon,lat,
+                                            magnification,
+                                            width,height,
+                                            lonMin,latMin,lonMax,latMax);
 
         lat-=(latMax-latMin)*0.3;
 
@@ -352,10 +352,11 @@ public:
     Object::Resync(model,msg);
   }
 
-  void ShowReference(const Reference& reference, const Mag& magnification)
+  void ShowReference(const osmscout::Reference& reference,
+                     const osmscout::Mag& magnification)
   {
-    if (reference.GetType()==refNode) {
-      Node node;
+    if (reference.GetType()==osmscout::refNode) {
+      osmscout::Node node;
 
       if (database->GetNode(reference.GetId(),node)) {
         lon=node.lon;
@@ -365,12 +366,12 @@ public:
         RequestNewMap();
       }
     }
-    else if (reference.GetType()==refArea) {
+    else if (reference.GetType()==osmscout::refArea) {
       std::cout << "Showing area " << reference.GetId() << std::endl;
       assert(false);
     }
-    else if (reference.GetType()==refWay) {
-      Way way;
+    else if (reference.GetType()==osmscout::refWay) {
+      osmscout::Way way;
 
       if (database->GetWay(reference.GetId(),way)) {
         lon=way.nodes[0].lon;
@@ -380,8 +381,8 @@ public:
         RequestNewMap();
       }
     }
-    else if (reference.GetType()==refNode) {
-      Node node;
+    else if (reference.GetType()==osmscout::refNode) {
+      osmscout::Node node;
 
       if (database->GetNode(reference.GetId(),node)) {
         lon=node.lon;
@@ -391,7 +392,7 @@ public:
         RequestNewMap();
       }
     }
-    else if (reference.GetType()==refRelation) {
+    else if (reference.GetType()==osmscout::refRelation) {
       std::cout << "Showing relation " << reference.GetId() << std::endl;
     }
     else {
@@ -505,8 +506,8 @@ public:
       SaveConfig();
     }
     else if (model==searchCityAction && searchCityAction->IsFinished()) {
-      AdminRegion region;
-      bool        hasResult=false;
+      osmscout::AdminRegion region;
+      bool                  hasResult=false;
 
       CitySearchDialog *dialog;
 
@@ -525,12 +526,12 @@ public:
       delete dialog;
 
       if (hasResult) {
-        map->ShowReference(region.reference,magCity);
+        map->ShowReference(region.reference,osmscout::magCity);
       }
     }
     else if (model==searchAddressAction && searchAddressAction->IsFinished()) {
-      Location location;
-      bool     hasResult=false;
+      osmscout::Location location;
+      bool               hasResult=false;
 
       CityStreetSearchDialog *dialog;
 
@@ -549,7 +550,7 @@ public:
       delete dialog;
 
       if (hasResult) {
-        map->ShowReference(location.references.front(),magVeryClose);
+        map->ShowReference(location.references.front(),osmscout::magVeryClose);
       }
     }
     else if (model==routeAction && routeAction->IsFinished()) {
@@ -583,7 +584,7 @@ class Main : public Lum::OS::MainDialog<MainDialog>
 public:
   bool Prepare()
   {
-    database=new Database();
+    database=new osmscout::Database();
     jobFinishedAction=new Lum::Model::Action();
 
 #if defined(APP_DATADIR)

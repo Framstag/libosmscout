@@ -155,7 +155,7 @@ bool CitySearchDialog::HasResult() const
   return hasResult;
 }
 
-const AdminRegion& CitySearchDialog::GetResult() const
+const osmscout::AdminRegion& CitySearchDialog::GetResult() const
 {
   return result;
 }

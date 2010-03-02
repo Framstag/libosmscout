@@ -22,13 +22,16 @@
 
 #include <stdlib.h>
 
-typedef unsigned int TileId;
+namespace osmscout {
 
-extern double GetTileWidth();
-extern double GetTileHeight();
-extern size_t GetTileX(double lon);
-extern size_t GetTileY(double lat);
-extern TileId GetTileId(size_t x, size_t y);
-extern TileId GetTileId(double lon, double lat);
+  typedef unsigned int TileId;
+
+  extern double GetTileWidth();
+  extern double GetTileHeight();
+  extern size_t GetTileX(double lon);
+  extern size_t GetTileY(double lat);
+  extern TileId GetTileId(size_t x, size_t y);
+  extern TileId GetTileId(double lon, double lat);
+}
 
 #endif

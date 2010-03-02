@@ -49,151 +49,153 @@
 
 #include <osmscout/Route.h>
 
-class Database
-{
-public: // Fix this
-  struct NodeUse
+namespace osmscout {
+  class Database
   {
-    Id              id;
-    std::vector<Id> references;
-  };
+  public: // Fix this
+    struct NodeUse
+    {
+      Id              id;
+      std::vector<Id> references;
+    };
 
-  typedef Cache<FileOffset,Node>              NodeCache;
-  typedef Cache<FileOffset,Way>               WayCache;
-  typedef Cache<size_t,std::vector<NodeUse> > NodeUseCache;
+    typedef Cache<FileOffset,Node>              NodeCache;
+    typedef Cache<FileOffset,Way>               WayCache;
+    typedef Cache<size_t,std::vector<NodeUse> > NodeUseCache;
 
-  typedef NumericIndex<Id,Node>               NodeIndex;
-  typedef NumericIndex<Id,Way>                WayIndex;
+    typedef NumericIndex<Id,Node>               NodeIndex;
+    typedef NumericIndex<Id,Way>                WayIndex;
 
-  typedef const Node*                         NodeRef;
-  typedef const Way*                          WayRef;
+    typedef const Node*                         NodeRef;
+    typedef const Way*                          WayRef;
 
-private:
-  bool                  isOpen;
+  private:
+    bool                  isOpen;
 
-  double                minLon;
-  double                minLat;
-  double                maxLon;
-  double                maxLat;
+    double                minLon;
+    double                minLat;
+    double                maxLon;
+    double                maxLat;
 
-  NodeIndex             nodeIndex;
-  WayIndex              wayIndex;
+    NodeIndex             nodeIndex;
+    WayIndex              wayIndex;
 
-  AreaNodeIndex         areaNodeIndex;
-  AreaAreaIndex         areaAreaIndex;
-  AreaWayIndex          areaWayIndex;
+    AreaNodeIndex         areaNodeIndex;
+    AreaAreaIndex         areaAreaIndex;
+    AreaWayIndex          areaWayIndex;
 
-  CityStreetIndex       cityStreetIndex;
+    CityStreetIndex       cityStreetIndex;
 
-  NodeUseIndex          nodeUseIndex;
+    NodeUseIndex          nodeUseIndex;
 
-  std::string           path;          //! Path to the directory containing all files
+    std::string           path;          //! Path to the directory containing all files
 
-  mutable NodeCache     nodeCache;    //! Cache for node data
-  mutable WayCache      wayCache;     //! Cache for way data
-  mutable NodeUseCache  nodeUseCache;  //! Cache for node use data
+    mutable NodeCache     nodeCache;    //! Cache for node data
+    mutable WayCache      wayCache;     //! Cache for way data
+    mutable NodeUseCache  nodeUseCache;  //! Cache for node use data
 
-  mutable FileReader    nodeUseReader; //! File stream to the nodeuse.idx file
+    mutable FileReader    nodeUseReader; //! File stream to the nodeuse.idx file
 
-  mutable FileScanner   nodeScanner;   //! File stream to the node.dat file
-  mutable FileScanner   wayScanner;    //! File stream to the way.dat file
+    mutable FileScanner   nodeScanner;   //! File stream to the node.dat file
+    mutable FileScanner   wayScanner;    //! File stream to the way.dat file
 
-  TypeConfig            *typeConfig;   //! Type config for the currently opened map
+    TypeConfig            *typeConfig;   //! Type config for the currently opened map
 
-  std::string           (*hashFunction) (std::string);
+    std::string           (*hashFunction) (std::string);
 
-private:
-  size_t GetMaximumPriority(const StyleConfig& styleConfig,
-                            double minlon, double minlat,
-                            double maxlon, double maxlat,
-                            double magnification,
-                            size_t maxNodes) const;
+  private:
+    size_t GetMaximumPriority(const StyleConfig& styleConfig,
+                              double minlon, double minlat,
+                              double maxlon, double maxlat,
+                              double magnification,
+                              size_t maxNodes) const;
 
-  bool GetWays(std::vector<FileOffset>& offsets,
-               std::vector<Way>& ways) const;
+    bool GetWays(std::vector<FileOffset>& offsets,
+                 std::vector<Way>& ways) const;
 
-  bool GetNodes(const StyleConfig& styleConfig,
-                double lonMin, double latMin,
-                double lonMax, double latMax,
-                double magnification,
-                size_t maxPriority,
-                std::vector<Node>& nodes) const;
-
-  bool GetWays(const StyleConfig& styleConfig,
-               double lonMin, double latMin,
-               double lonMax, double latMax,
-               const std::vector<TypeId>& types,
-               size_t maxCount,
-               std::vector<Way>& ways) const;
-
-  bool GetAreas(const StyleConfig& styleConfig,
-                double lonMin, double latMin,
-                double lonMax, double latMax,
-                size_t maxLevel,
-                size_t maxCount,
-                std::vector<Way>& areas) const;
-
-public:
-  Database();
-  virtual ~Database();
-
-  bool Open(const std::string& path, std::string (*hashFunction) (std::string) = NULL);
-  bool IsOpen() const;
-  void Close();
-
-  TypeConfig* GetTypeConfig() const;
-
-  bool GetBoundingBox(double& minLat,double& minLon,
-                      double& maxLat,double& maxLon) const;
-
-  bool GetObjects(const StyleConfig& styleConfig,
+    bool GetNodes(const StyleConfig& styleConfig,
                   double lonMin, double latMin,
                   double lonMax, double latMax,
                   double magnification,
-                  size_t maxAreaLevel,
-                  size_t maxNodes,
-                  size_t maxAreas,
-                  std::vector<Node>& nodes,
-                  std::vector<Way>& ways,
+                  size_t maxPriority,
+                  std::vector<Node>& nodes) const;
+
+    bool GetWays(const StyleConfig& styleConfig,
+                 double lonMin, double latMin,
+                 double lonMax, double latMax,
+                 const std::vector<TypeId>& types,
+                 size_t maxCount,
+                 std::vector<Way>& ways) const;
+
+    bool GetAreas(const StyleConfig& styleConfig,
+                  double lonMin, double latMin,
+                  double lonMax, double latMax,
+                  size_t maxLevel,
+                  size_t maxCount,
                   std::vector<Way>& areas) const;
 
-  bool GetNode(const Id& id,
-               Node& node) const;
-  bool GetNodes(const std::vector<Id>& ids,
-                std::vector<Node>& nodes) const;
-  bool GetWay(const Id& id,
-              Way& way) const;
-  bool GetWays(const std::vector<Id>& ids,
-               std::vector<Way>& ways) const;
+  public:
+    Database();
+    virtual ~Database();
 
-  bool GetMatchingAdminRegions(const std::string& name,
-                               std::list<AdminRegion>& regions,
-                               size_t limit,
-                               bool& limitReached,
-                               bool startWith) const;
+    bool Open(const std::string& path, std::string (*hashFunction) (std::string) = NULL);
+    bool IsOpen() const;
+    void Close();
 
-  bool GetMatchingLocations(const AdminRegion& region,
-                            const std::string& name,
-                            std::list<Location>& locations,
-                            size_t limit,
-                            bool& limitReached,
-                            bool startWith) const;
+    TypeConfig* GetTypeConfig() const;
 
-  bool GetJoints(Id id,
-                 std::set<Id>& wayIds) const;
-  bool GetJoints(const std::set<Id>& ids,
-                 std::set<Id>& wayIds) const;
+    bool GetBoundingBox(double& minLat,double& minLon,
+                        double& maxLat,double& maxLon) const;
 
-  bool CalculateRoute(Id startWayId, Id startNodeId,
-                      Id targetWayId, Id targetNodeId,
-                      RouteData& route);
+    bool GetObjects(const StyleConfig& styleConfig,
+                    double lonMin, double latMin,
+                    double lonMax, double latMax,
+                    double magnification,
+                    size_t maxAreaLevel,
+                    size_t maxNodes,
+                    size_t maxAreas,
+                    std::vector<Node>& nodes,
+                    std::vector<Way>& ways,
+                    std::vector<Way>& areas) const;
 
-  bool TransformRouteDataToRouteDescription(const RouteData& data,
-                                            RouteDescription& description);
-  bool TransformRouteDataToWay(const RouteData& data,
-                               Way& way);
+    bool GetNode(const Id& id,
+                 Node& node) const;
+    bool GetNodes(const std::vector<Id>& ids,
+                  std::vector<Node>& nodes) const;
+    bool GetWay(const Id& id,
+                Way& way) const;
+    bool GetWays(const std::vector<Id>& ids,
+                 std::vector<Way>& ways) const;
 
-  void DumpStatistics();
-};
+    bool GetMatchingAdminRegions(const std::string& name,
+                                 std::list<AdminRegion>& regions,
+                                 size_t limit,
+                                 bool& limitReached,
+                                 bool startWith) const;
+
+    bool GetMatchingLocations(const AdminRegion& region,
+                              const std::string& name,
+                              std::list<Location>& locations,
+                              size_t limit,
+                              bool& limitReached,
+                              bool startWith) const;
+
+    bool GetJoints(Id id,
+                   std::set<Id>& wayIds) const;
+    bool GetJoints(const std::set<Id>& ids,
+                   std::set<Id>& wayIds) const;
+
+    bool CalculateRoute(Id startWayId, Id startNodeId,
+                        Id targetWayId, Id targetNodeId,
+                        RouteData& route);
+
+    bool TransformRouteDataToRouteDescription(const RouteData& data,
+                                              RouteDescription& description);
+    bool TransformRouteDataToWay(const RouteData& data,
+                                 Way& way);
+
+    void DumpStatistics();
+  };
+}
 
 #endif
