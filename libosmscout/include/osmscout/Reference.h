@@ -29,7 +29,6 @@ namespace osmscout {
     refNone     = 0,
     refNode     = 1,
     refWay      = 2,
-    refArea     = 3,
     refRelation = 4
   };
 

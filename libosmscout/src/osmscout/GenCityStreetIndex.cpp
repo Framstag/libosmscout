@@ -74,7 +74,6 @@ namespace osmscout {
 
     std::map<std::string,std::list<Id> > nodes;     //! list of indexed nodes in this area
     std::map<std::string,std::list<Id> > ways;      //! list of indexed ways in this area
-    std::map<std::string,std::list<Id> > as;        //! list of indexed areas in this area
 
     std::list<Area>                      areas;     //! A list of sub areas
   };
@@ -771,12 +770,7 @@ namespace osmscout {
     }
 
     if (!inserted) {
-      if (way.IsArea()) {
-        area.as[way.name].push_back(way.id);
-      }
-      else {
-        area.ways[way.name].push_back(way.id);
-      }
+      area.ways[way.name].push_back(way.id);
     }
   }
 
@@ -888,23 +882,6 @@ namespace osmscout {
            id!=way->second.end();
            ++id) {
         writer.WriteNumber(*id-lastId); // Id of way
-        lastId=*id;
-      }
-    }
-
-    writer.WriteNumber(area.as.size());
-    for (std::map<std::string,std::list<Id> >::const_iterator a=area.as.begin();
-         a!=area.as.end();
-         ++a) {
-      Id lastId=0;
-
-      writer.Write(a->first);               // Area name
-      writer.WriteNumber(a->second.size()); // Number of ids
-
-      for (std::list<Id>::const_iterator id=a->second.begin();
-           id!=a->second.end();
-           ++id) {
-        writer.WriteNumber(*id-lastId); // Id of area
         lastId=*id;
       }
     }
@@ -1248,7 +1225,7 @@ namespace osmscout {
 
           Area area;
 
-          area.reference.Set(a->id,refArea);
+          area.reference.Set(a->id,refWay);
           area.name=name;
           area.area=ns;
 
@@ -1292,7 +1269,7 @@ namespace osmscout {
 
       Area area;
 
-      area.reference.Set(a->id,refArea);
+      area.reference.Set(a->id,refWay);
       area.name=name;
       area.area=ns;
 
@@ -1480,25 +1457,6 @@ namespace osmscout {
     }
 
     WriteLocationRefs(writer,locationRefs);
-
-    /*
-    if (writer.HasError() || !writer.Close()) {
-      return false;
-    }*/
-
-    /*
-    //
-    // Generate file with hierachical structure of region
-    //
-
-    progress.SetAction("Write 'treeregion.idx'");
-
-    if (!writer.Open("treeregion.idx")) {
-      progress.Error("Cannot open 'treeregion.idx'");
-      return false;
-    }
-
-    WriteAreaTree(writer,areas);*/
 
     return !writer.HasError() && writer.Close();
   }

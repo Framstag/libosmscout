@@ -366,10 +366,6 @@ public:
         RequestNewMap();
       }
     }
-    else if (reference.GetType()==osmscout::refArea) {
-      std::cout << "Showing area " << reference.GetId() << std::endl;
-      assert(false);
-    }
     else if (reference.GetType()==osmscout::refWay) {
       osmscout::Way way;
 

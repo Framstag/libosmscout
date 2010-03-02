@@ -1134,7 +1134,7 @@ namespace osmscout {
               follower.push_back(RNode(way->nodes[i].id,
                                        way->nodes[i].lon,
                                        way->nodes[i].lat,
-                                       Reference(way->id,refArea),
+                                       Reference(way->id,refWay),
                                        current.id));
             }
           }

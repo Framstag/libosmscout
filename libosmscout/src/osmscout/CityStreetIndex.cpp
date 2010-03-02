@@ -46,7 +46,6 @@ namespace osmscout {
     size_t      childrenCount;
     size_t      nodeCount;
     size_t      wayCount;
-    size_t      areaCount;
 
     scanner.Read(name);
     scanner.ReadNumber(parentOffset);
@@ -91,25 +90,6 @@ namespace osmscout {
         scanner.ReadNumber(id);
 
         locations[name].ways.push_back(id+lastId);
-        lastId=id;
-      }
-    }
-
-    scanner.ReadNumber(areaCount);
-    for (size_t i=0; i<areaCount; i++) {
-      std::string name;
-      size_t      idCount;
-      Id          lastId=0;
-
-      scanner.Read(name);
-      scanner.ReadNumber(idCount);
-
-      for (size_t j=0; j<idCount; j++) {
-        Id id;
-
-        scanner.ReadNumber(id);
-
-        locations[name].areas.push_back(id+lastId);
         lastId=id;
       }
     }
@@ -305,6 +285,7 @@ namespace osmscout {
     locations.clear();
 
     if (!regionLoaded || this->region!=region.offset) {
+      std::cout << "Loading regions..." << std::endl;
       if (!LoadRegion(region.offset) || !regionLoaded) {
         return false;
       }
@@ -362,12 +343,6 @@ namespace osmscout {
             location.references.push_back(Reference(*i,refWay));
           }
 
-          for (std::list<Id>::const_iterator i=l->second.areas.begin();
-               i!=l->second.areas.end();
-               ++i) {
-            location.references.push_back(Reference(*i,refArea));
-          }
-
           locations.push_back(location);
         }
       }
@@ -388,7 +363,6 @@ namespace osmscout {
          ++l) {
       memory+=l->second.nodes.size()*sizeof(Id);
       memory+=l->second.ways.size()*sizeof(Id);
-      memory+=l->second.areas.size()*sizeof(Id);
     }
 
     std::cout << "AdminRegion size " << areas.size() << ", locations size" << locations.size() << ", memory " << memory << std::endl;

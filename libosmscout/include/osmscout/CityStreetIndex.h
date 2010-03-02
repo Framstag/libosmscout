@@ -34,7 +34,6 @@ namespace osmscout {
   {
     std::list<Id> nodes;
     std::list<Id> ways;
-    std::list<Id> areas;
   };
 
   class CityStreetIndex
