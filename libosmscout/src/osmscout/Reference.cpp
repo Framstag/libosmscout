@@ -1,5 +1,5 @@
 /*
-  Import/TravelJinni - Openstreetmap offline viewer
+  This source is part of the libosmscout library
   Copyright (C) 2009  Tim Teulings
 
   This library is free software; you can redistribute it and/or

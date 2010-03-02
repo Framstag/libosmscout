@@ -2,8 +2,8 @@
 #define OSMSCOUT_GENAREAWAYINDEX_H
 
 /*
-  Import/TravelJinni - Openstreetmap offline viewer
-  Copyright (C) 209  Tim Teulings
+  This source is part of the libosmscout library
+  Copyright (C) 2009  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
