@@ -30,11 +30,17 @@
 #include <osmscout/StyleConfig.h>
 #include <osmscout/TypeConfig.h>
 
+// Data primitives
 #include <osmscout/Node.h>
 #include <osmscout/Way.h>
 
+// Datafiles
+#include <osmscout/NodeDataFile.h>
+#include <osmscout/WayDataFile.h>
+
 // Fileoffset by Id index
-#include <osmscout/NumericIndex.h>
+#include <osmscout/NodeIndex.h>
+#include <osmscout/WayIndex.h>
 
 // In area index
 #include <osmscout/AreaNodeIndex.h>
@@ -59,26 +65,15 @@ namespace osmscout {
       std::vector<Id> references;
     };
 
-    typedef Cache<FileOffset,Node>              NodeCache;
-    typedef Cache<FileOffset,Way>               WayCache;
     typedef Cache<size_t,std::vector<NodeUse> > NodeUseCache;
 
-    typedef NumericIndex<Id,Node>               NodeIndex;
-    typedef NumericIndex<Id,Way>                WayIndex;
-
-    typedef const Node*                         NodeRef;
-    typedef const Way*                          WayRef;
-
-  private:
+  private:                               //! true, if opened
     bool                  isOpen;
 
-    double                minLon;
-    double                minLat;
-    double                maxLon;
-    double                maxLat;
-
-    NodeIndex             nodeIndex;
-    WayIndex              wayIndex;
+    double                minLon;        //! bounding box of data
+    double                minLat;        //! bounding box of data
+    double                maxLon;        //! bounding box of data
+    double                maxLat;        //! bounding box of data
 
     AreaNodeIndex         areaNodeIndex;
     AreaAreaIndex         areaAreaIndex;
@@ -90,14 +85,12 @@ namespace osmscout {
 
     std::string           path;          //! Path to the directory containing all files
 
-    mutable NodeCache     nodeCache;    //! Cache for node data
-    mutable WayCache      wayCache;     //! Cache for way data
+    NodeDataFile          nodeDataFile;  //! Cached access to the 'nodes.dat' file
+    WayDataFile           wayDataFile;   //! Cached access to the 'ways.dat' file
+
     mutable NodeUseCache  nodeUseCache;  //! Cache for node use data
 
     mutable FileReader    nodeUseReader; //! File stream to the nodeuse.idx file
-
-    mutable FileScanner   nodeScanner;   //! File stream to the node.dat file
-    mutable FileScanner   wayScanner;    //! File stream to the way.dat file
 
     TypeConfig            *typeConfig;   //! Type config for the currently opened map
 
@@ -165,6 +158,8 @@ namespace osmscout {
     bool GetWay(const Id& id,
                 Way& way) const;
     bool GetWays(const std::vector<Id>& ids,
+                 std::vector<Way>& ways) const;
+    bool GetWays(const std::set<Id>& ids,
                  std::vector<Way>& ways) const;
 
     bool GetMatchingAdminRegions(const std::string& name,

@@ -41,7 +41,9 @@ libosmscout_la_SOURCES= osmscout/Types.cpp \
                         osmscout/AreaNodeIndex.cpp \
                         osmscout/AreaWayIndex.cpp \
                         osmscout/CityStreetIndex.cpp \
+                        osmscout/NodeIndex.cpp \
                         osmscout/NodeUseIndex.cpp \
+                        osmscout/WayIndex.cpp \
                         osmscout/Route.cpp \
                         osmscout/RoutingProfile.cpp \
                         osmscout/Database.cpp

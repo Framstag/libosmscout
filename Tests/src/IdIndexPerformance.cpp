@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
 
   osmscout::NumericIndex<osmscout::Id,osmscout::Way> way2Index("way2.idx");
 
-  if (!way2Index.LoadIndex(".")) {
+  if (!way2Index.Load(".")) {
     std::cerr << "Cannot open way index file!" << std::endl;
     return 1;
   }

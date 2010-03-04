@@ -38,10 +38,17 @@
 
 namespace osmscout {
 
+  /**
+    Numeric index handles an index over instance of class <T> where the index criteria
+    is of type <N>, where <N> has a numeric nature (usually Id).
+    */
   template <class N, class T>
   class NumericIndex
   {
   private:
+    /**
+      an individual index entry.
+      */
     struct IndexEntry
     {
       size_t startId;
@@ -50,11 +57,13 @@ namespace osmscout {
 
     typedef Cache<FileOffset,std::vector<IndexEntry> > PageCache;
 
+    /**
+      Returns the size of a individual cache entry
+      */
     struct NumericIndexCacheValueSizer : public PageCache::ValueSizer
     {
       size_t GetSize(const std::vector<IndexEntry>& value) const
       {
-
         return sizeof(IndexEntry)*value.size();
       }
     };
@@ -72,11 +81,11 @@ namespace osmscout {
     NumericIndex(const std::string& filename);
     virtual ~NumericIndex();
 
-    bool LoadIndex(const std::string& path);
+    bool Load(const std::string& path);
 
     bool GetOffsets(const std::vector<N>& ids, std::vector<FileOffset>& offsets) const;
 
-    void DumpStatistics();
+    void DumpStatistics() const;
   };
 
   template <class N, class T>
@@ -95,7 +104,7 @@ namespace osmscout {
   }
 
   template <class N, class T>
-  bool NumericIndex<N,T>::LoadIndex(const std::string& path)
+  bool NumericIndex<N,T>::Load(const std::string& path)
   {
     size_t      entries;
     size_t      lastLevelPageStart;
@@ -259,7 +268,7 @@ namespace osmscout {
   }
 
   template <class N,class T>
-  void NumericIndex<N,T>::DumpStatistics()
+  void NumericIndex<N,T>::DumpStatistics() const
   {
     size_t memory=0;
     size_t entries=0;

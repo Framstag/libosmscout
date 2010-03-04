@@ -104,7 +104,7 @@ namespace osmscout {
     return nodes;
   }
 
-  void AreaNodeIndex::GetIds(const StyleConfig& styleConfig,
+  bool AreaNodeIndex::GetIds(const StyleConfig& styleConfig,
                              double minlon, double minlat,
                              double maxlon, double maxlat,
                              double magnification,
@@ -148,6 +148,8 @@ namespace osmscout {
     }
 
     std::cout << "Found " << ids.size() << " node ids in area node index with maximum priority " << maxPriority << std::endl;
+
+    return true;
   }
 
   void AreaNodeIndex::DumpStatistics()

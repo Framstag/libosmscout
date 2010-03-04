@@ -30,11 +30,16 @@ nobase_include_HEADERS= osmscout/Types.h \
                         osmscout/GenNodeDat.h \
                         osmscout/GenNodeUseIndex.h \
                         osmscout/GenWayDat.h \
+                        osmscout/DataFile.h \
+                        osmscout/NodeDataFile.h \
+                        osmscout/WayDataFile.h \
                         osmscout/AreaAreaIndex.h \
                         osmscout/AreaNodeIndex.h \
                         osmscout/AreaWayIndex.h \
                         osmscout/CityStreetIndex.h \
+                        osmscout/NodeIndex.h \
                         osmscout/NodeUseIndex.h \
+                        osmscout/WayIndex.h \
                         osmscout/Route.h \
                         osmscout/RoutingProfile.h \
                         osmscout/Database.h

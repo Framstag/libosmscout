@@ -29,24 +29,10 @@
 
 namespace osmscout {
 
+  typedef const Way* WayRef;
+
   // TODO: Move this to some more global place
   static double conversionFactor=10000000.0;
-
-  struct NodeCacheValueSizer : public Database::NodeCache::ValueSizer
-  {
-    size_t GetSize(const Node& value) const
-    {
-      return sizeof(value);
-    }
-  };
-
-  struct WayCacheValueSizer : public Database::WayCache::ValueSizer
-  {
-    size_t GetSize(const Way& value) const
-    {
-      return sizeof(value);
-    }
-  };
 
   struct NodeUseCacheValueSizer : public Database::NodeUseCache::ValueSizer
   {
@@ -64,10 +50,8 @@ namespace osmscout {
 
   Database::Database()
    : isOpen(false),
-     nodeIndex("node.idx"),
-     wayIndex("way.idx"),
-     nodeCache(10000000),
-     wayCache(10000000),
+     nodeDataFile("nodes.dat","node.idx",100000),
+     wayDataFile("ways.dat","way.idx",100000),
      nodeUseCache(10), // Seems like the cache is more expensive than direct loading!?
      typeConfig(NULL),
      hashFunction(NULL)
@@ -125,19 +109,19 @@ namespace osmscout {
 
     scanner.Close();
 
-    std::cout << "Loading node index..." << std::endl;
-    if (!nodeIndex.LoadIndex(path)) {
-      std::cerr << "Cannot load NodeIndex!" << std::endl;
+    std::cout << "Opening 'nodes.dat'..." << std::endl;
+    if (!nodeDataFile.Open(path)) {
+      std::cerr << "Cannot open 'nodes.dat'!" << std::endl;
       return false;
     }
-    std::cout << "Loading node index done." << std::endl;
+    std::cout << "Opening 'nodes.dat' done." << std::endl;
 
-    std::cout << "Loading way index..." << std::endl;
-    if (!wayIndex.LoadIndex(path)) {
-      std::cerr << "Cannot load WayIndex!" << std::endl;
+    std::cout << "Opening 'ways.dat'..." << std::endl;
+    if (!wayDataFile.Open(path)) {
+      std::cerr << "Cannot open 'ways.dat'!" << std::endl;
       return false;
     }
-    std::cout << "Loading way index done." << std::endl;
+    std::cout << "Opening 'ways.dat' done." << std::endl;
 
     std::cout << "Loading area node index..." << std::endl;
     if (!areaNodeIndex.LoadAreaNodeIndex(path)) {
@@ -187,8 +171,9 @@ namespace osmscout {
 
   void Database::Close()
   {
-    nodeCache.Flush();
-    wayCache.Flush();
+    nodeDataFile.Close();
+    wayDataFile.Close();
+
     nodeUseCache.Flush();
 
     isOpen=false;
@@ -265,11 +250,14 @@ namespace osmscout {
   {
     std::vector<Id> ids;
 
-    areaNodeIndex.GetIds(styleConfig,
-                         lonMin,latMin,lonMax,latMax,
-                         magnification,
-                         maxPriority,
-                         ids);
+    if (!areaNodeIndex.GetIds(styleConfig,
+                              lonMin,latMin,lonMax,latMax,
+                              magnification,
+                              maxPriority,
+                              ids)) {
+      std::cout << "Cannot got ids from area node index!" << std::endl;
+      return false;
+    }
 
     return GetNodes(ids,nodes);
   }
@@ -359,6 +347,7 @@ namespace osmscout {
                   types,
                   2000,
                   ways)) {
+      std::cout << "Error reading ways in area!" << std::endl;
       return false;
     }
 
@@ -371,6 +360,7 @@ namespace osmscout {
                   maxAreaLevel,
                   maxAreas,
                   areas)) {
+      std::cout << "Error reading areas in area!" << std::endl;
       return false;
     }
 
@@ -383,6 +373,7 @@ namespace osmscout {
                   magnification,
                   maxPriority,
                   nodes)) {
+      std::cout << "Error reading nodes in area!" << std::endl;
       return false;
     }
 
@@ -413,91 +404,16 @@ namespace osmscout {
     return false;
   }
 
-  bool Database::GetNodes(const std::vector<Id>& ids, std::vector<Node>& nodes) const
+  bool Database::GetNodes(const std::vector<Id>& ids,
+                          std::vector<Node>& nodes) const
   {
-    std::vector<FileOffset> offsets;
-    std::string             file=path+"/"+"nodes.dat";
-
-    if (!nodeIndex.GetOffsets(ids,offsets)) {
-      std::cerr << "GetNodes(): Ids not found in index" << std::endl;
-      return false;
-    }
-
-    if (!nodeScanner.IsOpen()) {
-      if (!nodeScanner.Open(file)) {
-        std::cerr << "Error while opening '" << file << "' for reading nodes by id!" << std::endl;
-        return false;
-      }
-    }
-
-    nodes.reserve(ids.size());
-
-    NodeCache::CacheRef cacheRef;
-
-    for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
-         offset!=offsets.end();
-         ++offset) {
-      if (!nodeCache.GetEntry(*offset,cacheRef)) {
-        NodeCache::CacheEntry cacheEntry(*offset);
-
-        cacheRef=nodeCache.SetEntry(cacheEntry);
-
-        nodeScanner.SetPos(*offset);
-        cacheRef->value.Read(nodeScanner);
-
-        if (nodeScanner.HasError()) {
-          std::cerr << "Error while reading from file '" << file << "!" << std::endl;
-          // TODO: Remove broken entry from cache
-          nodeScanner.Close();
-          return false;
-        }
-      }
-
-      nodes.push_back(cacheRef->value);
-    }
-
-    return true;
+    return nodeDataFile.Get(ids,nodes);
   }
 
   bool Database::GetWays(std::vector<FileOffset>& offsets,
                          std::vector<Way>& ways) const
   {
-    std::string file=path+"/"+"ways.dat";
-
-    if (!wayScanner.IsOpen()) {
-      if (!wayScanner.Open(file)) {
-        std::cerr << "Error while opening ways.dat file for reading ways by id!" << std::endl;
-        return false;
-      }
-    }
-
-    ways.reserve(ways.size()+offsets.size());
-
-    WayCache::CacheRef cacheRef;
-
-    for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
-         offset!=offsets.end();
-         ++offset) {
-      if (!wayCache.GetEntry(*offset,cacheRef)) {
-        WayCache::CacheEntry cacheEntry(*offset);
-
-        cacheRef=wayCache.SetEntry(cacheEntry);
-
-        wayScanner.SetPos(*offset);
-        cacheRef->value.Read(wayScanner);
-
-        if (wayScanner.HasError()) {
-          std::cerr << "Error while reading from ways.dat file!" << std::endl;
-          // TODO: Remove broken entry from cache
-          wayScanner.Close();
-          return false;
-        }
-      }
-
-      ways.push_back(cacheRef->value);
-    }
-
-    return true;
+    return wayDataFile.Get(offsets,ways);
   }
 
   bool Database::GetWay(const Id& id, Way& way) const
@@ -517,16 +433,16 @@ namespace osmscout {
     return false;
   }
 
-  bool Database::GetWays(const std::vector<Id>& ids, std::vector<Way>& ways) const
+  bool Database::GetWays(const std::vector<Id>& ids,
+                         std::vector<Way>& ways) const
   {
-    std::vector<FileOffset> offsets;
+    return wayDataFile.Get(ids,ways);
+  }
 
-    if (!wayIndex.GetOffsets(ids,offsets)) {
-      std::cout << "GetWays(): Ids not found in index" << std::endl;
-      return false;
-    }
-
-    return GetWays(offsets,ways);
+  bool Database::GetWays(const std::set<Id>& ids,
+                         std::vector<Way>& ways) const
+  {
+    return wayDataFile.Get(ids,ways);
   }
 
   bool Database::GetMatchingAdminRegions(const std::string& name,
@@ -555,91 +471,6 @@ namespace osmscout {
                                                 limit,
                                                 limitReached,
                                                 startWith);
-  }
-
-  bool GetWays(const Database::WayIndex& index,
-               const std::string& path,
-               std::map<Id,Way>& cache,
-               const std::set<Id>& ids,
-               std::vector<Database::WayRef>& refs)
-  {
-    bool result=true;
-
-    refs.clear();
-    refs.reserve(ids.size());
-
-    std::vector<Id> remaining;
-
-    for (std::set<Id>::const_iterator id=ids.begin();
-         id!=ids.end();
-         ++id) {
-      std::map<Id,Way>::const_iterator ref=cache.find(*id);
-
-      if (ref!=cache.end()) {
-        refs.push_back(&ref->second);
-      }
-      else {
-        remaining.push_back(*id);
-      }
-    }
-
-    if (remaining.size()>0) {
-      std::vector<FileOffset> offsets;
-      static FileScanner      wayScanner;
-      std::string             file=path+"/"+"ways.dat";
-
-      if (!wayScanner.IsOpen()) {
-        if (!wayScanner.Open(file)){
-          std::cerr << "Error while opening ways.dat for routing file!" << std::endl;
-
-          return false;
-        }
-      }
-
-      if (!index.GetOffsets(remaining,offsets)) {
-        return false;
-      }
-
-      for (std::vector<FileOffset>::const_iterator entry=offsets.begin();
-           entry!=offsets.end();
-           ++entry) {
-        wayScanner.SetPos(*entry);
-
-        Way way;
-
-        way.Read(wayScanner);
-
-        std::pair<std::map<Id,Way>::iterator,bool> result=cache.insert(std::pair<Id,Way>(way.id,way));
-
-        refs.push_back(&result.first->second);
-      }
-
-      result=!wayScanner.HasError()/* && wayScanner.Close()*/;
-    }
-
-    assert(ids.size()==refs.size());
-
-    return result;
-  }
-
-  bool GetWay(const Database::WayIndex& index,
-              const std::string& path,
-              std::map<Id,Way>& cache,
-              Id id,
-              Database::WayRef& ref)
-  {
-    std::set<Id>                  ids;
-    std::vector<Database::WayRef> refs;
-
-    ids.insert(id);
-
-    if (!GetWays(index,path,cache,ids,refs)) {
-      return false;
-    }
-
-    ref=refs[0];
-
-    return true;
   }
 
   bool Database::GetJoints(const std::set<Id>& ids,
@@ -715,8 +546,7 @@ namespace osmscout {
     return true;
   }
 
-  bool Database::GetJoints(Id id,
-                           std::set<Id>& wayIds) const
+  bool Database::GetJoints(Id id, std::set<Id>& wayIds) const
   {
     std::set<Id> ids;
 
@@ -724,6 +554,94 @@ namespace osmscout {
 
     return GetJoints(ids,wayIds);
   }
+
+  typedef const Way* WayRef;
+
+  static bool GetWays(const WayIndex& index,
+                      const std::string& path,
+                      std::map<Id,Way>& cache,
+                      const std::set<Id>& ids,
+                      std::vector<WayRef>& refs)
+  {
+    bool result=true;
+
+    refs.clear();
+    refs.reserve(ids.size());
+
+    std::vector<Id> remaining;
+
+    for (std::set<Id>::const_iterator id=ids.begin();
+         id!=ids.end();
+         ++id) {
+      std::map<Id,Way>::const_iterator ref=cache.find(*id);
+
+      if (ref!=cache.end()) {
+        refs.push_back(&ref->second);
+      }
+      else {
+        remaining.push_back(*id);
+      }
+    }
+
+    if (remaining.size()>0) {
+      std::vector<FileOffset> offsets;
+      static FileScanner      wayScanner;
+      std::string             file=path+"/"+"ways.dat";
+
+      if (!wayScanner.IsOpen()) {
+        if (!wayScanner.Open(file)){
+          std::cerr << "Error while opening ways.dat for routing file!" << std::endl;
+
+          return false;
+        }
+      }
+
+      if (!index.GetOffsets(remaining,offsets)) {
+        return false;
+      }
+
+      for (std::vector<FileOffset>::const_iterator entry=offsets.begin();
+           entry!=offsets.end();
+           ++entry) {
+        wayScanner.SetPos(*entry);
+
+        Way way;
+
+        way.Read(wayScanner);
+
+        std::pair<std::map<Id,Way>::iterator,bool> result=cache.insert(std::pair<Id,Way>(way.id,way));
+
+        refs.push_back(&result.first->second);
+      }
+
+      result=!wayScanner.HasError()/* && wayScanner.Close()*/;
+    }
+
+    assert(ids.size()==refs.size());
+
+    return result;
+  }
+
+  static bool GetWay(const WayIndex& index,
+                     const std::string& path,
+                     std::map<Id,Way>& cache,
+                     Id id,
+                     WayRef& ref)
+  {
+    std::set<Id>        ids;
+    std::vector<WayRef> refs;
+
+    ids.insert(id);
+
+    if (!GetWays(index,path,cache,ids,refs)) {
+      return false;
+    }
+
+    ref=refs[0];
+
+    return true;
+  }
+
 
   struct RNode
   {
@@ -851,6 +769,13 @@ namespace osmscout {
     std::set<Id>        loaded;
     std::vector<size_t> costs;
     RoutingProfile      profile;
+    WayIndex            wayIndex("way.idx");
+
+    std::cout << "Loading way index..." << std::endl;
+    if (!wayIndex.Load(path)) {
+      std::cerr << "Cannot load way index..." << std::endl;
+    }
+    std::cout << "Loading way index done." << std::endl;
 
     std::cout << startWayId << " " << startNodeId << " => " << targetWayId << " " << targetNodeId << std::endl;
 
@@ -1409,12 +1334,10 @@ namespace osmscout {
   }
   void Database::DumpStatistics()
   {
-    nodeCache.DumpStatistics("Node cache",NodeCacheValueSizer());
-    wayCache.DumpStatistics("Way cache",WayCacheValueSizer());
-    nodeUseCache.DumpStatistics("Node use cache",NodeUseCacheValueSizer());
+    nodeDataFile.DumpStatistics();
+    wayDataFile.DumpStatistics();
 
-    nodeIndex.DumpStatistics();
-    wayIndex.DumpStatistics();
+    nodeUseCache.DumpStatistics("Node use cache",NodeUseCacheValueSizer());
 
     areaNodeIndex.DumpStatistics();
     areaAreaIndex.DumpStatistics();

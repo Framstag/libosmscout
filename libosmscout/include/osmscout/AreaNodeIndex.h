@@ -44,7 +44,7 @@ namespace osmscout {
                     size_t tileMinX, size_t tileMinY,
                     size_t tileMaxX, size_t tileMaxY) const;
 
-    void GetIds(const StyleConfig& styleConfig,
+    bool GetIds(const StyleConfig& styleConfig,
                 double minlon, double minlat,
                 double maxlon, double maxlat,
                 double magnification,
