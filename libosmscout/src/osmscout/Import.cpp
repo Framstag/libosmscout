@@ -26,12 +26,17 @@
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeConfigLoader.h>
 
+#include <osmscout/RawNode.h>
+#include <osmscout/RawWay.h>
+
 #include <osmscout/Node.h>
+#include <osmscout/Relation.h>
 #include <osmscout/Way.h>
 
 #include <osmscout/Preprocess.h>
 
 #include <osmscout/GenNodeDat.h>
+#include <osmscout/GenRelationDat.h>
 #include <osmscout/GenWayDat.h>
 
 #include <osmscout/NumericIndex.h>
@@ -45,7 +50,7 @@
 namespace osmscout {
 
   static const size_t defaultStartStep=1;
-  static const size_t defaultEndStep=10;
+  static const size_t defaultEndStep=14;
 
   ImportParameter::ImportParameter()
    : startStep(defaultStartStep),
@@ -148,7 +153,78 @@ namespace osmscout {
     }
 
     if (startStep==2) {
-      progress.SetStep("2 Generate 'nodes.dat' and bounding.dat");
+      progress.SetStep("2 Generating 'rawnode.idx'");
+
+      if (!GenerateNumericIndex<Id,RawNode>(parameter,
+                                            progress,
+                                            "rawnodes.dat",
+                                            "rawnode.idx")) {
+        progress.Error("Cannot generate raw node index!");
+        return false;
+      }
+
+      startStep++;
+    }
+
+    if (startStep>endStep) {
+      return true;
+    }
+
+    if (startStep==3) {
+      progress.SetStep("3 Generating 'rawnode.idx'");
+
+      if (!GenerateNumericIndex<Id,RawWay>(parameter,
+                                           progress,
+                                           "rawways.dat",
+                                           "rawway.idx")) {
+        progress.Error("Cannot generate raw way index!");
+        return false;
+      }
+
+      startStep++;
+    }
+
+    if (startStep>endStep) {
+      return true;
+    }
+
+    if (startStep==4) {
+      progress.SetStep("4 Generate 'relations.dat'");
+      if (!GenerateRelationDat(typeConfig,
+                               parameter,
+                               progress)) {
+        progress.Error("Cannot generate relation data file!");
+        return false;
+      }
+
+      startStep++;
+    }
+
+    if (startStep>endStep) {
+      return true;
+    }
+
+    if (startStep==5) {
+      progress.SetStep("5 Generating 'relation.idx'");
+
+      if (!GenerateNumericIndex<Id,Relation>(parameter,
+                                             progress,
+                                             "relations.dat",
+                                             "relation.idx")) {
+        progress.Error("Cannot generate relation index!");
+        return false;
+      }
+
+      startStep++;
+    }
+
+
+    if (startStep>endStep) {
+      return true;
+    }
+
+    if (startStep==6) {
+      progress.SetStep("6 Generate 'nodes.dat' and bounding.dat");
       if (!GenerateNodeDat(parameter,
                            progress)) {
         progress.Error("Cannot generate node data file!");
@@ -162,24 +238,8 @@ namespace osmscout {
       return true;
     }
 
-    if (startStep==3) {
-      progress.SetStep("3 Generate 'ways.dat'");
-      if (!GenerateWayDat(typeConfig,
-                          parameter,
-                          progress)) {
-        progress.Error("Cannot generate way data file!");
-        return false;
-      }
-
-      startStep++;
-    }
-
-    if (startStep>endStep) {
-      return true;
-    }
-
-    if (startStep==4) {
-      progress.SetStep("4 Generating 'node.idx'");
+    if (startStep==7) {
+      progress.SetStep("7 Generating 'node.idx'");
 
       if (!GenerateNumericIndex<Id,Node>(parameter,
                                          progress,
@@ -196,8 +256,43 @@ namespace osmscout {
       return true;
     }
 
-    if (startStep==5) {
-      progress.SetStep("5 Generating 'areanode.idx'");
+    if (startStep==8) {
+      progress.SetStep("8 Generate 'ways.dat'");
+      if (!GenerateWayDat(typeConfig,
+                          parameter,
+                          progress)) {
+        progress.Error("Cannot generate way data file!");
+        return false;
+      }
+
+      startStep++;
+    }
+
+    if (startStep>endStep) {
+      return true;
+    }
+
+    if (startStep==9) {
+      progress.SetStep("9 Generating 'way.idx'");
+
+      if (!GenerateNumericIndex<Id,Way>(parameter,
+                                        progress,
+                                        "ways.dat",
+                                        "way.idx")) {
+        progress.Error("Cannot generate way index!");
+        return false;
+      }
+
+      startStep++;
+    }
+
+
+    if (startStep>endStep) {
+      return true;
+    }
+
+    if (startStep==10) {
+      progress.SetStep("10 Generating 'areanode.idx'");
 
       if (!GenerateAreaNodeIndex(parameter,
                                  progress)) {
@@ -212,26 +307,8 @@ namespace osmscout {
       return true;
     }
 
-    if (startStep==6) {
-      progress.SetStep("6 Generating 'way.idx'");
-
-      if (!GenerateNumericIndex<Id,Way>(parameter,
-                                        progress,
-                                        "ways.dat",
-                                        "way.idx")) {
-        progress.Error("Cannot generate way index!");
-        return false;
-      }
-
-      startStep++;
-    }
-
-    if (startStep>endStep) {
-      return true;
-    }
-
-    if (startStep==7) {
-      progress.SetStep("7 Generating 'areaarea.idx'");
+    if (startStep==11) {
+      progress.SetStep("11 Generating 'areaarea.idx'");
 
       if (!GenerateAreaAreaIndex(parameter,
                                  progress)) {
@@ -246,8 +323,8 @@ namespace osmscout {
       return true;
     }
 
-    if (startStep==8) {
-      progress.SetStep("8 Generating 'areaway.idx'");
+    if (startStep==12) {
+      progress.SetStep("12 Generating 'areaway.idx'");
 
       if (!GenerateAreaWayIndex(parameter,
                                 progress)) {
@@ -262,8 +339,8 @@ namespace osmscout {
       return true;
     }
 
-    if (startStep==9) {
-      progress.SetStep("9 Generating 'citystreet.idx'");
+    if (startStep==13) {
+      progress.SetStep("13 Generating 'citystreet.idx'");
 
       if (!GenerateCityStreetIndex(typeConfig,
                                    parameter,
@@ -279,8 +356,8 @@ namespace osmscout {
       return true;
     }
 
-    if (startStep==10) {
-      progress.SetStep("10 Generating 'nodeuse.idx'");
+    if (startStep==14) {
+      progress.SetStep("14 Generating 'nodeuse.idx'");
 
       if (!GenerateNodeUseIndex(typeConfig,
                                 parameter,

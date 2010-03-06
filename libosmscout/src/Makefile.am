@@ -23,6 +23,7 @@ libosmscout_la_SOURCES= osmscout/Types.cpp \
                         osmscout/AdminRegion.cpp \
                         osmscout/Node.cpp \
                         osmscout/Point.cpp \
+                        osmscout/Relation.cpp \
                         osmscout/Location.cpp \
                         osmscout/Tag.cpp \
                         osmscout/Way.cpp \
@@ -36,6 +37,7 @@ libosmscout_la_SOURCES= osmscout/Types.cpp \
                         osmscout/GenCityStreetIndex.cpp \
                         osmscout/GenNodeDat.cpp \
                         osmscout/GenNodeUseIndex.cpp \
+                        osmscout/GenRelationDat.cpp \
                         osmscout/GenWayDat.cpp \
                         osmscout/AreaAreaIndex.cpp \
                         osmscout/AreaNodeIndex.cpp \

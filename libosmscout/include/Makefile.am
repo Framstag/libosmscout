@@ -17,6 +17,7 @@ nobase_include_HEADERS= osmscout/Types.h \
                         osmscout/Node.h \
                         osmscout/Point.h \
                         osmscout/Location.h \
+                        osmscout/Relation.h \
                         osmscout/Tag.h \
                         osmscout/Way.h \
                         osmscout/Reference.h \
@@ -29,6 +30,7 @@ nobase_include_HEADERS= osmscout/Types.h \
                         osmscout/GenCityStreetIndex.h \
                         osmscout/GenNodeDat.h \
                         osmscout/GenNodeUseIndex.h \
+                        osmscout/GenRelationDat.h \
                         osmscout/GenWayDat.h \
                         osmscout/DataFile.h \
                         osmscout/NodeDataFile.h \
