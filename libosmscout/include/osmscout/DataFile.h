@@ -33,7 +33,7 @@ namespace osmscout {
   class DataFile
   {
   private:
-    typedef NumericIndex<Id,Node> DataIndex;
+    typedef NumericIndex<Id,N> DataIndex;
 
     typedef Cache<FileOffset,N> DataCache;
 
@@ -70,7 +70,7 @@ namespace osmscout {
     bool Get(const std::set<Id>& ids,
              std::vector<N>& data) const;
 
-    bool Get(const Id& ids, N& entry) const;
+    bool Get(const Id& id, N& entry) const;
 
     void DumpStatistics() const;
   };
