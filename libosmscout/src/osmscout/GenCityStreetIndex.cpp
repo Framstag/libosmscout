@@ -519,7 +519,7 @@ namespace osmscout {
 
     return true;
   }
-
+/*
   template<typename N, typename M>
   double isLeft(const N& p0, const N& p1, const M& p2)
   {
@@ -561,11 +561,12 @@ namespace osmscout {
     }
 
     return wn!=0;
-  }
+  }*/
 
   /**
     Returns true, if point in area.
     */
+  /*
   template<typename N>
   bool IsPointInArea(double lon, double lat,
                      const std::vector<N>& nodes)
@@ -595,7 +596,7 @@ namespace osmscout {
     }
 
     return true;
-  }
+  }*/
 
   /**
     Return the list of nodes ids with the given type.
@@ -756,7 +757,7 @@ namespace osmscout {
         bool match=false;
 
         for (size_t n=0; n<way.nodes.size(); n++) {
-          if (IsPointInArea(way.nodes[n].lon,way.nodes[n].lat,a->area)) {
+          if (IsPointInArea(way.nodes[n],a->area)) {
             match=true;
             break;
           }

@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_RELATION_H
-#define OSMSCOUT_RELATION_H
+#ifndef OSMSCOUT_RELATIONDATAFILE_H
+#define OSMSCOUT_RELATIONDATAFILE_H
 
 /*
   This source is part of the libosmscout library
@@ -20,46 +20,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/Point.h>
-
-#include <osmscout/FileScanner.h>
-#include <osmscout/FileWriter.h>
-#include <osmscout/TypeConfig.h>
+#include <osmscout/DataFile.h>
+#include <osmscout/Relation.h>
 
 namespace osmscout {
-
   /**
-    Representation of an relation
+    Abstraction for getting cached access to the 'relation.dat' file.
     */
-  class Relation
-  {
-  public:
-    struct Role
-    {
-      TypeId             type;
-      std::string        role;
-      std::vector<Point> nodes;
-    };
-
-  public:
-    Id                id;
-    TypeId            type;
-    std::string       relType;
-    std::vector<Tag>  tags;
-    std::vector<Role> roles;
-
-  public:
-    inline Relation()
-    : type(typeIgnore)
-    {
-      // no code
-    }
-
-    bool GetCenter(double& lat, double& lon) const;
-
-    bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer) const;
-  };
+  typedef DataFile<Relation> RelationDataFile;
 }
 
 #endif

@@ -31,6 +31,10 @@ namespace osmscout {
   typedef uint16_t TypeId;
   typedef uint16_t NodeCount;
 
+  /**
+    Named values for magnification values in the range 0..15.
+    a value change from x to x+1 means a zoom by the factor of two.
+    */
   enum Mag {
    magWorld     =              1, //  0
    magState     =             32, //  5
@@ -45,6 +49,14 @@ namespace osmscout {
    magClose     =   2*2*2*2*1024, // 14
    magVeryClose = 2*2*2*2*2*1024  // 15
   };
+
+  /**
+    Coordinates will be stored as unsigned long values in file.
+    For the conversion the float value is shifted to positive
+    value sand afterwards multiplied by conversion factor
+    to get long values without significant values after colon.
+    */
+  extern const double conversionFactor;
 }
 
 #endif

@@ -31,9 +31,6 @@
 
 namespace osmscout {
 
-  // TODO: Move this to some more global place
-  static double conversionFactor=10000000.0;
-
   bool GenerateNodeDat(const ImportParameter& parameter,
                        Progress& progress)
   {

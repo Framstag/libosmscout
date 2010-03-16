@@ -23,8 +23,6 @@
 
 namespace osmscout {
 
-  static double conversionFactor=10000000.0;
-
   bool RawNode::Read(FileScanner& scanner)
   {
     scanner.Read(id);

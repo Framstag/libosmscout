@@ -370,26 +370,23 @@ public:
       osmscout::Way way;
 
       if (database->GetWay(reference.GetId(),way)) {
-        lon=way.nodes[0].lon;
-        lat=way.nodes[0].lat;
-        this->magnification=magnification;
+        if (way.GetCenter(lat,lon)) {
+          this->magnification=magnification;
 
-        RequestNewMap();
-      }
-    }
-    else if (reference.GetType()==osmscout::refNode) {
-      osmscout::Node node;
-
-      if (database->GetNode(reference.GetId(),node)) {
-        lon=node.lon;
-        lat=node.lat;
-        this->magnification=magnification;
-
-        RequestNewMap();
+          RequestNewMap();
+        }
       }
     }
     else if (reference.GetType()==osmscout::refRelation) {
-      std::cout << "Showing relation " << reference.GetId() << std::endl;
+      osmscout::Relation relation;
+
+      if (database->GetRelation(reference.GetId(),relation)) {
+        if (relation.GetCenter(lat,lon)) {
+          this->magnification=magnification;
+
+          RequestNewMap();
+        }
+      }
     }
     else {
       assert(false);

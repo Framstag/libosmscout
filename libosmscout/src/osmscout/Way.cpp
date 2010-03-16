@@ -24,7 +24,29 @@
 
 namespace osmscout {
 
-  static double conversionFactor=10000000.0;
+  bool Way::GetCenter(double& lat, double& lon) const
+  {
+    if (nodes.size()==0) {
+      return false;
+    }
+
+    double minLat=nodes[0].lat;
+    double minLon=nodes[0].lon;
+    double maxLat=nodes[0].lat;
+    double maxLon=nodes[0].lon;
+
+    for (size_t i=1; i<nodes.size(); i++) {
+      minLat=std::min(minLat,nodes[i].lat);
+      minLon=std::min(minLon,nodes[i].lon);
+      maxLat=std::max(maxLat,nodes[i].lat);
+      maxLon=std::max(maxLon,nodes[i].lon);
+    }
+
+    lat=minLat+(maxLat-minLat)/2;
+    lon=minLon+(maxLon-minLon)/2;
+
+    return true;
+  }
 
   bool Way::Read(FileReader& reader)
   {

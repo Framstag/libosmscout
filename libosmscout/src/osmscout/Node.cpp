@@ -23,8 +23,6 @@
 
 namespace osmscout {
 
-  static double conversionFactor=10000000.0;
-
   bool Node::Read(FileReader& reader)
   {
     unsigned long tmpType;

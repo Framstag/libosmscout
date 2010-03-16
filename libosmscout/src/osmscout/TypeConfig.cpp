@@ -81,6 +81,7 @@ namespace osmscout {
     AddTagInfo(TagInfo("admin_level",tagAdminLevel));
     AddTagInfo(TagInfo("highway",tagHighway));
     AddTagInfo(TagInfo("restriction",tagRestriction));
+    AddTagInfo(TagInfo("type",tagType));
     AddTagInfo(TagInfo("internal",tagInternal));
 
     AddTypeInfo(TypeInfo(typeRoute,tagInternal,"route").CanBeWay(true));

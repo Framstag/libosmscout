@@ -31,9 +31,6 @@ namespace osmscout {
 
   typedef const Way* WayRef;
 
-  // TODO: Move this to some more global place
-  static double conversionFactor=10000000.0;
-
   struct NodeUseCacheValueSizer : public Database::NodeUseCache::ValueSizer
   {
     size_t GetSize(const std::vector<Database::NodeUse>& value) const
@@ -51,6 +48,7 @@ namespace osmscout {
   Database::Database()
    : isOpen(false),
      nodeDataFile("nodes.dat","node.idx",100000),
+     relationDataFile("relations.dat","relation.idx",10000),
      wayDataFile("ways.dat","way.idx",100000),
      nodeUseCache(10), // Seems like the cache is more expensive than direct loading!?
      typeConfig(NULL),
@@ -122,6 +120,13 @@ namespace osmscout {
       return false;
     }
     std::cout << "Opening 'ways.dat' done." << std::endl;
+
+    std::cout << "Opening 'relations.dat'..." << std::endl;
+    if (!relationDataFile.Open(path)) {
+      std::cerr << "Cannot open 'relations.dat'!" << std::endl;
+      return false;
+    }
+    std::cout << "Opening 'relations.dat' done." << std::endl;
 
     std::cout << "Loading area node index..." << std::endl;
     if (!areaNodeIndex.LoadAreaNodeIndex(path)) {
@@ -443,6 +448,18 @@ namespace osmscout {
                          std::vector<Way>& ways) const
   {
     return wayDataFile.Get(ids,ways);
+  }
+
+  bool Database::GetRelation(const Id& id,
+                             Relation& relation) const
+  {
+    return relationDataFile.Get(id,relation);
+  }
+
+  bool Database::GetRelations(const std::vector<Id>& ids,
+                              std::vector<Relation>& relations) const
+  {
+    return relationDataFile.Get(ids,relations);
   }
 
   bool Database::GetMatchingAdminRegions(const std::string& name,

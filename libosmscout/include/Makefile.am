@@ -34,6 +34,7 @@ nobase_include_HEADERS= osmscout/Types.h \
                         osmscout/GenWayDat.h \
                         osmscout/DataFile.h \
                         osmscout/NodeDataFile.h \
+                        osmscout/RelationDataFile.h \
                         osmscout/WayDataFile.h \
                         osmscout/AreaAreaIndex.h \
                         osmscout/AreaNodeIndex.h \

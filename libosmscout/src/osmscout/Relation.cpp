@@ -23,7 +23,46 @@
 
 namespace osmscout {
 
-  static double conversionFactor=10000000.0;
+  bool Relation::GetCenter(double& lat, double& lon) const
+  {
+    if (roles.size()==0) {
+      return false;
+    }
+
+    double minLat=0.0;
+    double minLon=0.0;
+    double maxLat=0.0;
+    double maxLon=0.0;
+
+    bool start=true;
+
+    for (size_t i=0; i<roles.size(); i++) {
+      for (size_t j=0; j<roles[i].nodes.size(); j++) {
+        if (start) {
+          minLat=roles[i].nodes[j].lat;
+          minLon=roles[i].nodes[j].lon;
+          maxLat=roles[i].nodes[j].lat;
+          maxLon=roles[i].nodes[j].lon;
+
+          start=false;
+        }
+
+        minLat=std::min(minLat,roles[i].nodes[j].lat);
+        minLon=std::min(minLon,roles[i].nodes[j].lon);
+        maxLat=std::max(maxLat,roles[i].nodes[j].lat);
+        maxLon=std::max(maxLon,roles[i].nodes[j].lon);
+      }
+    }
+
+    if (start) {
+      return false;
+    }
+
+    lat=minLat+(maxLat-minLat)/2;
+    lon=minLon+(maxLon-minLon)/2;
+
+    return true;
+  }
 
   bool Relation::Read(FileScanner& scanner)
   {
@@ -32,6 +71,7 @@ namespace osmscout {
 
     scanner.Read(id);
     scanner.ReadNumber(type);
+    scanner.Read(relType);
 
     scanner.ReadNumber(tagCount);
 
@@ -54,10 +94,14 @@ namespace osmscout {
     roles.resize(roleCount);
     for (size_t i=0; i<roleCount; i++) {
       unsigned long nodesCount;
+      unsigned long typeValue;
 
+      scanner.Read(typeValue);
+      roles[i].type=(TypeId)typeValue;
       scanner.Read(roles[i].role);
       scanner.ReadNumber(nodesCount);
 
+      roles[i].nodes.resize(nodesCount);
       for (size_t j=0; j<nodesCount; j++) {
         unsigned long latValue;
         unsigned long lonValue;
@@ -78,6 +122,7 @@ namespace osmscout {
   {
     writer.Write(id);
     writer.WriteNumber(type);
+    writer.Write(relType);
 
     writer.WriteNumber(tags.size());
     for (size_t i=0; i<tags.size(); i++) {
@@ -87,6 +132,7 @@ namespace osmscout {
 
     writer.WriteNumber(roles.size());
     for (size_t i=0; i<roles.size(); i++) {
+      writer.Write((unsigned long)roles[i].type);
       writer.Write(roles[i].role);
       writer.WriteNumber(roles[i].nodes.size());
 

@@ -30,12 +30,9 @@
 #include <osmscout/StyleConfig.h>
 #include <osmscout/TypeConfig.h>
 
-// Data primitives
-#include <osmscout/Node.h>
-#include <osmscout/Way.h>
-
 // Datafiles
 #include <osmscout/NodeDataFile.h>
+#include <osmscout/RelationDataFile.h>
 #include <osmscout/WayDataFile.h>
 
 // Fileoffset by Id index
@@ -86,6 +83,7 @@ namespace osmscout {
     std::string           path;          //! Path to the directory containing all files
 
     NodeDataFile          nodeDataFile;  //! Cached access to the 'nodes.dat' file
+    RelationDataFile      relationDataFile;//! Cached access to the 'relations.dat' file
     WayDataFile           wayDataFile;   //! Cached access to the 'ways.dat' file
 
     mutable NodeUseCache  nodeUseCache;  //! Cache for node use data
@@ -155,12 +153,18 @@ namespace osmscout {
                  Node& node) const;
     bool GetNodes(const std::vector<Id>& ids,
                   std::vector<Node>& nodes) const;
+
     bool GetWay(const Id& id,
                 Way& way) const;
     bool GetWays(const std::vector<Id>& ids,
                  std::vector<Way>& ways) const;
     bool GetWays(const std::set<Id>& ids,
                  std::vector<Way>& ways) const;
+
+    bool GetRelation(const Id& id,
+                     Relation& relation) const;
+    bool GetRelations(const std::vector<Id>& ids,
+                      std::vector<Relation>& relations) const;
 
     bool GetMatchingAdminRegions(const std::string& name,
                                  std::list<AdminRegion>& regions,

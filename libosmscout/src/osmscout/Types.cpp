@@ -20,5 +20,5 @@
 #include <osmscout/Types.h>
 
 namespace osmscout {
-
+  const double conversionFactor=10000000.0;
 }

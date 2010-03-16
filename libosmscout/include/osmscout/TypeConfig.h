@@ -31,7 +31,7 @@
 
 namespace osmscout {
 
-  const static TagId tagPrivateBase   = 5000;
+  const static TagId tagPrivateBase   = 1000;
   const static TagId tagIgnore        = tagPrivateBase+ 0;
   const static TagId tagName          = tagPrivateBase+ 1;
   const static TagId tagRef           = tagPrivateBase+ 2;
@@ -46,7 +46,8 @@ namespace osmscout {
   const static TagId tagAdminLevel    = tagPrivateBase+11;
   const static TagId tagHighway       = tagPrivateBase+12;
   const static TagId tagRestriction   = tagPrivateBase+13;
-  const static TagId tagInternal      = tagPrivateBase+14;
+  const static TagId tagType          = tagPrivateBase+14;
+  const static TagId tagInternal      = tagPrivateBase+15;
 
   const static TypeId typePrivateBase = 5000;
   const static TypeId typeIgnore      = typePrivateBase+0;

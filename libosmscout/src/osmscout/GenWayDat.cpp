@@ -28,10 +28,11 @@
 #include <osmscout/Util.h>
 #include <osmscout/Way.h>
 
+#include <osmscout/DataFile.h>
 namespace osmscout {
 
-  static size_t distributionGranuality = 100000;
-  static size_t waysLoadSize           = 250000;
+  static size_t distributionGranuality =  100000;
+  static size_t waysLoadSize           = 1000000;
 
   bool GenerateWayDat(const TypeConfig& typeConfig,
                       const ImportParameter& parameter,
@@ -48,6 +49,7 @@ namespace osmscout {
     TypeId                                      restrictionPosId;
     TypeId                                      restrictionNegId;
     std::map<Id,std::vector<Way::Restriction> > restrictions;
+    DataFile<RawNode>                           nodeDataFile("rawnodes.dat","rawnode.idx",10);
 
     restrictionPosId=typeConfig.GetRelationTypeId(tagRestriction,"only_straight_on");
     assert(restrictionPosId!=typeIgnore);
@@ -111,6 +113,41 @@ namespace osmscout {
     scanner.Close();
 
     progress.Info(std::string("Found ")+NumberToString(restrictions.size())+" restrictions");
+
+    if (!nodeDataFile.Open(".")) {
+      std::cerr << "Cannot open raw nodes data file!" << std::endl;
+      return false;
+    }
+
+    StopClock ac;
+
+    progress.Info("Resolving ways using rawnodes.idx");
+
+    if (!scanner.Open("rawways.dat")) {
+      progress.Error("Canot open 'rawways.dat'");
+      return false;
+    }
+
+    while (!scanner.HasError()) {
+      RawWay way;
+
+      way.Read(scanner);
+
+      if (way.type!=typeIgnore) {
+        std::vector<RawNode> nodes;
+
+        if (!nodeDataFile.Get(way.nodes,nodes)) {
+          std::cerr << "Cannot read nodes for way " << way.id << "!" << std::endl;
+          return false;
+        }
+      }
+    }
+
+    scanner.Close();
+
+    ac.Stop();
+
+    StopClock bc;
 
     std::vector<size_t> wayDistribution;
     size_t              wayCount=0;
@@ -412,6 +449,10 @@ namespace osmscout {
     // Cleaning up...
 
     restrictions.clear();
+
+    bc.Stop();
+
+    std::cout << ac << " <=> " << bc << std::endl;
 
     return true;
   }

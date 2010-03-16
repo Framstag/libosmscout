@@ -103,6 +103,8 @@ namespace osmscout {
       return flags & isOneway;
     }
 
+    bool GetCenter(double& lat, double& lon) const;
+
     bool Read(FileReader& reader);
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;

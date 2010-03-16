@@ -27,8 +27,101 @@
 #include <limits>
 #include <set>
 #include <string>
+#include <vector>
 
 namespace osmscout {
+
+  /**
+    Returns true, if point in area.
+
+    http://softsurfer.com/Archive/algorithm_0103/algorithm_0103.htm
+   */
+  /*
+  template<typename N, typename M>
+  double IsLeft(const N& p0, const N& p1, const M& p2)
+  {
+    if (p2.id==p0.id || p2.id==p1.id) {
+      return 0;
+    }
+
+    return (p1.lon-p0.lon)*(p2.lat-p0.lat)-(p2.lon-p0.lon)*(p1.lat-p0.lat);
+  }
+
+  template<typename N, typename M>
+  bool IsPointInArea(const N& point,
+                     const std::vector<M>& nodes)
+  {
+    for (int i=0; i<nodes.size()-1; i++) {
+      if (point.id==nodes[i].id) {
+        return true;
+      }
+    }
+
+    int wn=0;    // the winding number counter
+
+    // loop through all edges of the polygon
+    for (int i=0; i<nodes.size()-1; i++) {   // edge from V[i] to V[i+1]
+      if (nodes[i].lat<=point.lat) {         // start y <= P.y
+        if (nodes[i+1].lat>point.lat) {     // an upward crossing
+          if (IsLeft(nodes[i],nodes[i+1],point) > 0) { // P left of edge
+            ++wn;            // have a valid up intersect
+          }
+        }
+      }
+      else {                       // start y > P.y (no test needed)
+        if (nodes[i+1].lat<=point.lat) {    // a downward crossing
+          if (IsLeft(nodes[i],nodes[i+1],point) < 0) { // P right of edge
+            --wn;            // have a valid down intersect
+          }
+        }
+      }
+    }
+
+    return wn!=0;
+  }*/
+
+  /**
+    Returns true, if point in area.
+
+    See http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+    */
+  template<typename N, typename M>
+  bool IsPointInArea(const N& point,
+                     const std::vector<M>& nodes)
+  {
+    int  i,j;
+    bool c=false;
+
+    for (i=0, j=nodes.size()-1; i<nodes.size(); j=i++) {
+      if (point.id==nodes[i].id) {
+        return true;
+      }
+
+      if ((nodes[i].lat>point.lat)!=(nodes[j].lat>point.lat) &&
+          (point.lon<(nodes[j].lon-nodes[i].lon)*(point.lat-nodes[i].lat) /
+           (nodes[j].lat-nodes[i].lat)+nodes[i].lon))  {
+        c=!c;
+      }
+    }
+
+    return c;
+  }
+
+  /**
+    Return true, if area a is in area b
+    */
+  template<typename N,typename M>
+  bool IsAreaInArea(const std::vector<N>& a,
+                    const std::vector<M>& b)
+  {
+    for (typename std::vector<N>::const_iterator i=a.begin(); i!=a.end(); i++) {
+      if (!IsPointInArea(*i,b)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 
   class NumberSet
   {

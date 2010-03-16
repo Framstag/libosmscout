@@ -20,6 +20,7 @@
     <tag value="place"       id="18"/>
     <tag value="building"    id="19"/>
     <tag value="restriction" id="20"/>
+    <tag value="route"       id="21"/>
   </tags>
 
   <types>
@@ -29,12 +30,12 @@
     -->
 
     <!-- Roads -->
-    <type id="100" name="highway" value="motorway" way="true" relation="true" overview="true" route="true" index="true"/>
-    <type id="101" name="highway" value="motorway_link" way="true" relation="true" overview="true" route="true" index="true"/>
-    <type id="102" name="highway" value="trunk" way="true" relation="true" overview="true" route="true" index="true"/>
-    <type id="103" name="highway" value="trunk_link" way="true" relation="true" overview="true" route="true" index="true"/>
-    <type id="104" name="highway" value="primary" way="true" relation="true" overview="true" route="true" index="true"/>
-    <type id="105" name="highway" value="primary_link" way="true" relation="true" overview="true" route="true" index="true"/>
+    <type id="100" name="highway" value="motorway" way="true" relation="true" route="true" index="true"/>
+    <type id="101" name="highway" value="motorway_link" way="true" relation="true" route="true" index="true"/>
+    <type id="102" name="highway" value="trunk" way="true" relation="true" route="true" index="true"/>
+    <type id="103" name="highway" value="trunk_link" way="true" relation="true" route="true" index="true"/>
+    <type id="104" name="highway" value="primary" way="true" relation="true" route="true" index="true"/>
+    <type id="105" name="highway" value="primary_link" way="true" relation="true" route="true" index="true"/>
     <type id="106" name="highway" value="secondary" way="true" route="true" index="true"/>
     <type id="107" name="highway" value="secondary_link" way="true" route="true" index="true"/>
     <type id="108" name="highway" value="tertiary" way="true" route="true" index="true"/>
@@ -74,6 +75,8 @@
     <!-- Junctions -->
     <type id="135" name="highway" value="roundabout" way="true" area="true" route="true"/>
     <type id="136" name="highway" value="motorway_junction" node="true" route="true"/>
+
+    <type id="137" name="route" value="road" relation="true"/>
 
     <!-- Access node -->
 
@@ -348,7 +351,7 @@
       Boundary
     -->
 
-    <type id="600" name="boundary" value="administrative" way="true" area="true" relation="true"/>
+    <type id="600" name="boundary" value="administrative" area="true" relation="true"/>
     <type id="601" name="boundary" value="civil" area="true"/>
     <type id="602" name="boundary" value="political" area="true"/>
 
