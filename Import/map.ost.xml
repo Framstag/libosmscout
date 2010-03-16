@@ -29,12 +29,12 @@
     -->
 
     <!-- Roads -->
-    <type id="100" name="highway" value="motorway" way="true" route="true" index="true"/>
-    <type id="101" name="highway" value="motorway_link" way="true" route="true" index="true"/>
-    <type id="102" name="highway" value="trunk" way="true" route="true" index="true"/>
-    <type id="103" name="highway" value="trunk_link" way="true" route="true" index="true"/>
-    <type id="104" name="highway" value="primary" way="true" route="true" index="true"/>
-    <type id="105" name="highway" value="primary_link" way="true" route="true" index="true"/>
+    <type id="100" name="highway" value="motorway" way="true" relation="true" overview="true" route="true" index="true"/>
+    <type id="101" name="highway" value="motorway_link" way="true" relation="true" overview="true" route="true" index="true"/>
+    <type id="102" name="highway" value="trunk" way="true" relation="true" overview="true" route="true" index="true"/>
+    <type id="103" name="highway" value="trunk_link" way="true" relation="true" overview="true" route="true" index="true"/>
+    <type id="104" name="highway" value="primary" way="true" relation="true" overview="true" route="true" index="true"/>
+    <type id="105" name="highway" value="primary_link" way="true" relation="true" overview="true" route="true" index="true"/>
     <type id="106" name="highway" value="secondary" way="true" route="true" index="true"/>
     <type id="107" name="highway" value="secondary_link" way="true" route="true" index="true"/>
     <type id="108" name="highway" value="tertiary" way="true" route="true" index="true"/>
@@ -85,17 +85,17 @@
       Waterway
     -->
 
-    <type id="300" name="waterway" value="stream" way="true" route="true"/>
-    <type id="301" name="waterway" value="river" way="true" route="true"/>
-    <type id="302" name="waterway" value="riverbank" area="true" route="true"/>
-    <type id="303" name="waterway" value="canal" way="true" route="true"/>
-    <type id="303" name="waterway" value="drain" way="true" route="true"/>
+    <type id="300" name="waterway" value="stream" way="true" relation="true" overview="true" route="true"/>
+    <type id="301" name="waterway" value="river" way="true" relation="true" overview="true" route="true"/>
+    <type id="302" name="waterway" value="riverbank" area="true" relation="true" overview="true" route="true"/>
+    <type id="303" name="waterway" value="canal" way="true" relation="true" overview="true" route="true"/>
+    <type id="303" name="waterway" value="drain" way="true" relation="true" overview="true" route="true"/>
 
     <!--
       Railway
     -->
 
-    <type id="200" name="railway" value="rail" way="true" route="true"/>
+    <type id="200" name="railway" value="rail" way="true" relation="true" overview="true" route="true"/>
     <type id="201" name="railway" value="tram" way="true" route="true"/>
     <type id="202" name="railway" value="light_rail" way="true" route="true"/>
     <type id="203" name="railway" value="subway" way="true" route="true"/>
@@ -291,30 +291,30 @@
       Landuse
     -->
 
-    <type id="400" name="landuse" value="farm" area="true"/>
-    <type id="400" name="landuse" value="farmland" area="true"/>
-    <type id="401" name="landuse" value="farmyard" area="true"/>
-    <type id="402" name="landuse" value="quarry" node="true" area="true"/>
-    <type id="403" name="landuse" value="landfill" node="true" area="true"/>
-    <type id="404" name="landuse" value="basin" node="true" area="true"/>
-    <type id="405" name="landuse" value="reservoir" node="true" area="true"/>
-    <type id="406" name="landuse" value="forest" node="true" area="true"/>
-    <type id="407" name="landuse" value="allotments" node="true" area="true"/>
-    <type id="408" name="landuse" value="vineyard" node="true" area="true"/>
-    <type id="409" name="landuse" value="residential" node="true" area="true"/>
-    <type id="410" name="landuse" value="retail" node="true" area="true"/>
-    <type id="411" name="landuse" value="commercial" node="true" area="true"/>
-    <type id="412" name="landuse" value="industrial" node="true" area="true"/>
-    <type id="413" name="landuse" value="brownfield" node="true" area="true"/>
-    <type id="414" name="landuse" value="greenfield" node="true" area="true"/>
-    <type id="415" name="landuse" value="railway" area="true" route="true"/>
-    <type id="416" name="landuse" value="construction" node="true" area="true"/>
-    <type id="417" name="landuse" value="military" node="true" area="true"/>
-    <type id="418" name="landuse" value="cemetery" area="true"/>
-    <type id="419" name="landuse" value="meadow" node="true" area="true"/>
-    <type id="420" name="landuse" value="village_green" node="true" area="true"/>
-    <type id="422" name="landuse" value="wood" node="true" area="true"/>
-    <type id="421" name="landuse" value="recreation_ground" node="true" area="true"/>
+    <type id="400" name="landuse" value="farm" area="true" relation="true" overview="true"/>
+    <type id="400" name="landuse" value="farmland" area="true" relation="true" overview="true"/>
+    <type id="401" name="landuse" value="farmyard" area="true" relation="true" overview="true"/>
+    <type id="402" name="landuse" value="quarry" node="true" area="true" relation="true" overview="true"/>
+    <type id="403" name="landuse" value="landfill" node="true" area="true" relation="true" overview="true"/>
+    <type id="404" name="landuse" value="basin" node="true" area="true" relation="true" overview="true"/>
+    <type id="405" name="landuse" value="reservoir" node="true" area="true" relation="true" overview="true"/>
+    <type id="406" name="landuse" value="forest" node="true" area="true" relation="true" overview="true"/>
+    <type id="407" name="landuse" value="allotments" node="true" area="true" relation="true" overview="true"/>
+    <type id="408" name="landuse" value="vineyard" node="true" area="true" relation="true" overview="true"/>
+    <type id="409" name="landuse" value="residential" node="true" area="true" relation="true" overview="true"/>
+    <type id="410" name="landuse" value="retail" node="true" area="true" relation="true" overview="true"/>
+    <type id="411" name="landuse" value="commercial" node="true" area="true" relation="true" overview="true"/>
+    <type id="412" name="landuse" value="industrial" node="true" area="true" relation="true" overview="true"/>
+    <type id="413" name="landuse" value="brownfield" node="true" area="true" relation="true" overview="true"/>
+    <type id="414" name="landuse" value="greenfield" node="true" area="true" relation="true" overview="true"/>
+    <type id="415" name="landuse" value="railway" area="true" route="true" relation="true" overview="true"/>
+    <type id="416" name="landuse" value="construction" node="true" area="true" relation="true" overview="true"/>
+    <type id="417" name="landuse" value="military" node="true" area="true" relation="true" overview="true"/>
+    <type id="418" name="landuse" value="cemetery" area="true" relation="true" overview="true"/>
+    <type id="419" name="landuse" value="meadow" node="true" area="true" relation="true" overview="true"/>
+    <type id="420" name="landuse" value="village_green" node="true" area="true" relation="true" overview="true"/>
+    <type id="422" name="landuse" value="wood" node="true" area="true" relation="true" overview="true"/>
+    <type id="421" name="landuse" value="recreation_ground" node="true" area="true" relation="true" overview="true"/>
 
     <!--
       Natural
@@ -322,23 +322,23 @@
 
     <type id="500" name="natural" value="spring" node="true"/>
     <type id="501" name="natural" value="peak" node="true"/>
-    <type id="502" name="natural" value="glacier" node="true" area="true"/>
+    <type id="502" name="natural" value="glacier" node="true" area="true" relation="true" overview="true"/>
     <type id="503" name="natural" value="volcano" node="true"/>
-    <type id="504" name="natural" value="cliff" node="true" way="true" area="true"/>
-    <type id="505" name="natural" value="scree" node="true" area="true"/>
-    <type id="506" name="natural" value="scrub" node="true" area="true"/>
-    <type id="507" name="natural" value="fell" node="true" area="true"/>
-    <type id="508" name="natural" value="heath" node="true" area="true"/>
-    <type id="509" name="natural" value="wood" node="true" area="true"/>
-    <type id="510" name="natural" value="marsh" node="true" area="true"/>
-    <type id="511" name="natural" value="wetland" node="true" area="true"/>
-    <type id="512" name="natural" value="water" node="true" area="true"/>
+    <type id="504" name="natural" value="cliff" node="true" way="true" area="true" relation="true" overview="true"/>
+    <type id="505" name="natural" value="scree" node="true" area="true" relation="true" overview="true"/>
+    <type id="506" name="natural" value="scrub" node="true" area="true" relation="true" overview="true"/>
+    <type id="507" name="natural" value="fell" node="true" area="true" relation="true" overview="true"/>
+    <type id="508" name="natural" value="heath" node="true" area="true" relation="true" overview="true"/>
+    <type id="509" name="natural" value="wood" node="true" area="true" relation="true" overview="true"/>
+    <type id="510" name="natural" value="marsh" node="true" area="true" relation="true" overview="true"/>
+    <type id="511" name="natural" value="wetland" node="true" area="true" relation="true" overview="true"/>
+    <type id="512" name="natural" value="water" node="true" area="true" relation="true" overview="true"/>
     <!--<type id="513" name="natural" value="coastline" area="true"/>-->
-    <type id="514" name="natural" value="mud" node="true" area="true"/>
-    <type id="515" name="natural" value="beach" node="true" area="true"/>
-    <type id="516" name="natural" value="bay" node="true" area="true"/>
-    <type id="517" name="natural" value="land" node="true" area="true"/>
-    <type id="518" name="natural" value="cave_entrance" node="true" area="true"/>
+    <type id="514" name="natural" value="mud" node="true" area="true" relation="true" overview="true"/>
+    <type id="515" name="natural" value="beach" node="true" area="true" relation="true" overview="true"/>
+    <type id="516" name="natural" value="bay" node="true" area="true" relation="true" overview="true"/>
+    <type id="517" name="natural" value="land" node="true" area="true" relation="true" overview="true"/>
+    <type id="518" name="natural" value="cave_entrance" node="true" area="true" relation="true" overview="true"/>
 
     <!--
       Route

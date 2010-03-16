@@ -145,6 +145,7 @@ namespace osmscout {
         const xmlChar *wayValue=NULL;
         const xmlChar *areaValue=NULL;
         const xmlChar *relationValue=NULL;
+        const xmlChar *overviewValue=NULL;
         const xmlChar *routeValue=NULL;
         const xmlChar *indexValue=NULL;
         TypeId        id;
@@ -152,6 +153,7 @@ namespace osmscout {
         bool          way=false;
         bool          area=false;
         bool          relation=false;
+        bool          overview=false;
         bool          route=false;
         bool          index=false;
 
@@ -177,6 +179,9 @@ namespace osmscout {
             }
             else if (strcmp((const char*)atts[i],"relation")==0) {
               relationValue=atts[i+1];
+            }
+            else if (strcmp((const char*)atts[i],"overview")==0) {
+              overviewValue=atts[i+1];
             }
             else if (strcmp((const char*)atts[i],"route")==0) {
               routeValue=atts[i+1];
@@ -209,6 +214,9 @@ namespace osmscout {
         if (relationValue!=NULL) {
           relation=strcmp((const char*)relationValue,"true")==0;
         }
+        if (overviewValue!=NULL) {
+          overview=strcmp((const char*)overviewValue,"true")==0;
+        }
         if (routeValue!=NULL) {
           route=strcmp((const char*)routeValue,"true")==0;
         }
@@ -234,6 +242,7 @@ namespace osmscout {
         typeInfo.CanBeWay(way);
         typeInfo.CanBeArea(area);
         typeInfo.CanBeRelation(relation);
+        typeInfo.CanBeOverview(relation);
         typeInfo.CanBeRoute(route);
         typeInfo.CanBeIndexed(index);
 

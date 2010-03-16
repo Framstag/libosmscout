@@ -84,6 +84,7 @@ namespace osmscout {
     bool        canBeWay;
     bool        canBeArea;
     bool        canBeRelation;
+    bool        canBeOverview;
     bool        canBeRoute;
     bool        canBeIndexed;
 
@@ -155,6 +156,19 @@ namespace osmscout {
     {
       return canBeRelation;
     }
+
+    inline TypeInfo& CanBeOverview(bool canBeOverview)
+    {
+      this->canBeOverview=canBeOverview;
+
+      return *this;
+    }
+
+    inline bool CanBeOverview() const
+    {
+      return canBeOverview;
+    }
+
 
     inline TypeInfo& CanBeRoute(bool canBeRoute)
     {
