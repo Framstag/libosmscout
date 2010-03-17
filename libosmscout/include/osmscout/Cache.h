@@ -97,14 +97,14 @@ namespace osmscout {
     }
 
     /**
-      Getting the value witht he given key from cache.
+      Getting the value with the given key from cache.
 
       If there is no valued stored with the given key, false will be
       returned and the reference will be untouched.
 
       If there is a value with the given key, reference will return
-      a reference to the value and the value will move to the
-      from position of the cache to assure FIFO behaviour.
+      a reference to the value and the value will moved to the
+      front position of the cache to assure FIFO behaviour.
       */
     bool GetEntry(const K& key, CacheRef& reference)
     {
@@ -134,7 +134,7 @@ namespace osmscout {
     }
 
     /**
-      Set or update the cache witht he given value for the given key.
+      Set or update the cache with the given value for the given key.
 
       If the key is not available in the cache the value will be added
       to the front of the cache (FIFO semantic) else the value will be updated
