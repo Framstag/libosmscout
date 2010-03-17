@@ -432,6 +432,7 @@ namespace osmscout {
         }
 
         Relation              rel;
+        std::string           name;
         std::set<std::string> roles;
         bool                  error=false;
 
@@ -443,7 +444,9 @@ namespace osmscout {
         for (size_t i=0; i<rawRel.tags.size(); i++) {
           if (rawRel.tags[i].key==tagType) {
             rel.relType=rawRel.tags[i].value;
-            break;
+          }
+          else if (rawRel.tags[i].key==tagName) {
+            name=rawRel.tags[i].value;
           }
         }
 
@@ -464,7 +467,7 @@ namespace osmscout {
             progress.Error("Cannot resolve relation member with id "+
                            NumberToString(rawRel.members[m].id)+
                            " for relation "+
-                           NumberToString(rawRel.id));
+                           NumberToString(rawRel.id)+" "+name);
             error=true;
             break;
           }
@@ -476,11 +479,16 @@ namespace osmscout {
           continue;
         }
 
-        if (rel.relType=="multipolygon") {
+        if (rel.relType=="multipolygon" ||
+            rel.relType=="boundary") {
           if (!ResolveMultipolygon(rel,progress)) {
+            progress.Error("Cannot resolve multipolygon relation "+
+                           NumberToString(rawRel.id)+" "+name);
             continue;
           }
         }
+
+        std::cout << "Storing relation " << rel.relType << " " << rel.type << " " << name << std::endl;
 
         rel.id=rawRel.id;
         rel.tags=rawRel.tags;

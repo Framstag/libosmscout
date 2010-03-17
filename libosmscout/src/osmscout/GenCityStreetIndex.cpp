@@ -27,12 +27,10 @@
 #include <set>
 
 #include <osmscout/FileWriter.h>
-#include <osmscout/RawNode.h>
-#include <osmscout/RawRelation.h>
-#include <osmscout/RawWay.h>
 
 #include <osmscout/Node.h>
 #include <osmscout/Point.h>
+#include <osmscout/Relation.h>
 #include <osmscout/Reference.h>
 #include <osmscout/Way.h>
 
@@ -78,542 +76,22 @@ namespace osmscout {
     std::list<Area>                      areas;     //! A list of sub areas
   };
 
-
-  static void GetRelationIdsFromRelations(const std::list<RawRelation>& relations, std::set<Id>& ids)
-  {
-    ids.clear();
-
-    for (std::list<RawRelation>::const_iterator iter=relations.begin();
-         iter!=relations.end();
-         ++iter) {
-      for (size_t i=0; i<iter->members.size(); i++) {
-        if (iter->members[i].type==RawRelation::memberRelation) {
-          ids.insert(iter->members[i].id);
-        }
-      }
-    }
-  }
-
-  static void GetWayIdsFromRelations(const std::list<RawRelation>& relations, std::set<Id>& ids)
-  {
-    ids.clear();
-
-    for (std::list<RawRelation>::const_iterator iter=relations.begin();
-         iter!=relations.end();
-         ++iter) {
-      for (size_t i=0; i<iter->members.size(); i++) {
-        if (iter->members[i].type==RawRelation::memberWay) {
-          ids.insert(iter->members[i].id);
-        }
-      }
-    }
-  }
-
-  /**
-    Return the consolidated and unique list of node ids from the given list of
-    ways/areas.
-    */
-  static void GetNodeIdsFromAreas(const std::list<RawWay>& areas,
-                                  std::set<Id>& ids)
-  {
-    ids.clear();
-
-    for (std::list<RawWay>::const_iterator iter=areas.begin();
-         iter!=areas.end();
-         ++iter) {
-      for (size_t i=0; i<iter->nodes.size(); i++) {
-        ids.insert(iter->nodes[i]);
-      }
-    }
-  }
-
-  static void GetNodeIdsFromAreasAndRelations(const std::list<RawWay>& areas,
-                                              const std::list<RawRelation>& relations,
-                                              std::set<Id>& ids)
-  {
-    ids.clear();
-
-    for (std::list<RawWay>::const_iterator iter=areas.begin();
-         iter!=areas.end();
-         ++iter) {
-      for (size_t i=0; i<iter->nodes.size(); i++) {
-        ids.insert(iter->nodes[i]);
-      }
-    }
-
-    for (std::list<RawRelation>::const_iterator iter=relations.begin();
-         iter!=relations.end();
-         ++iter) {
-      for (size_t i=0; i<iter->members.size(); i++) {
-        if (iter->members[i].type==RawRelation::memberNode) {
-          ids.insert(iter->members[i].id);
-        }
-      }
-    }
-  }
-
-  /**
-    Remove all areas from the given list of areas, where we do not have
-    a RawNode for one (or multiple) of the node ids that will up the area.
-    */
-  static void RemoveUnresolvedAreas(std::list<RawWay>& areas,
-                                    const std::map<Id,RawNode>& nodes,
-                                    Progress& progress)
-  {
-    std::list<RawWay>::iterator area=areas.begin();
-
-    while (area!=areas.end()) {
-      bool resolved=true;
-
-      for (size_t i=0; i<area->nodes.size(); i++) {
-        std::map<Id,RawNode>::const_iterator node=nodes.find(area->nodes[i]);
-
-        if (node==nodes.end()) {
-          progress.Warning(std::string("Area ")+NumberToString(area->id)+" has at least one unresolved node, skipping");
-          resolved=false;
-          break;
-        }
-      }
-
-      if (resolved) {
-        ++area;
-      }
-      else {
-        area=areas.erase(area);
-      }
-    }
-  }
-
-  static void RemoveUnresolvedRelations(std::list<RawRelation>& relations,
-                                        const std::map<Id,RawNode>& nodes,
-                                        Progress& progress)
-  {
-    std::list<RawRelation>::iterator rel=relations.begin();
-
-    while (rel!=relations.end()) {
-      bool resolved=true;
-
-      for (size_t i=0; i<rel->members.size(); i++) {
-        if (rel->members[i].type!=RawRelation::memberNode) {
-          progress.Warning(std::string("Relation ")+NumberToString(rel->id)+" has unresolved way "+NumberToString(rel->members[i].id)+" of relation, skipping");
-          resolved=false;
-          break;
-        }
-        else {
-          std::map<Id,RawNode>::const_iterator node=nodes.find(rel->members[i].id);
-
-          if (node==nodes.end()) {
-            progress.Warning(std::string("Relation ")+NumberToString(rel->id)+" has unresolved node, skipping");
-            resolved=false;
-            break;
-          }
-        }
-      }
-
-      if (resolved) {
-        ++rel;
-      }
-      else {
-        rel=relations.erase(rel);
-      }
-    }
-  }
-
-  /**
-    This method replaces all references in a relation with their corresponding
-    nodes. The method assures that nodes are inserted in an order that they build up an
-    full area boundary. We can however not assure that the ordering is clockwise. It might
-    be just the other way round (for the "is point in area" problem this is not a problem!).
-
-    For the transformation to succeed it must be assured that there is no member referencing
-    relations or nodes at the start of the replaces. Such relation will be skiped. The replacement
-    is of order O(n^2) where n is the number of ways.
-   */
-  static void ResolveWaysInRelations(std::list<RawRelation>& relations,
-                                     const std::map<Id,RawWay>& ways,
-                                     Progress& progress)
-  {
-    std::list<RawRelation>::iterator rel=relations.begin();
-
-    while (rel!=relations.end()) {
-      bool              convertable=true;
-      std::list<RawWay> w;
-      std::string       name;
-
-      // Get name for debugging
-      for (std::vector<Tag>::iterator tag=rel->tags.begin();
-           tag!=rel->tags.end();
-           ++tag) {
-        if (tag->key==tagName) {
-          name=tag->value;
-          break;
-        }
-      }
-
-      // Find out, if we just take every memebr rin account or only member
-      // of the role outer...
-
-      std::string role;
-
-      for (std::vector<RawRelation::Member>::iterator member=rel->members.begin();
-           member!=rel->members.end();
-           ++member) {
-        if (member->type==RawRelation::memberWay) {
-          if (member->role=="inner" || member->role=="outer") {
-            role="outer";
-            break;
-          }
-        }
-      }
-
-      for (std::vector<RawRelation::Member>::iterator member=rel->members.begin();
-           member!=rel->members.end();
-           ++member) {
-        if (member->type==RawRelation::memberWay) {
-          if (member->role==role) {
-            std::map<Id,RawWay>::const_iterator way=ways.find(member->id);
-
-            if (way!=ways.end()) {
-              w.push_back(way->second);
-            }
-            else {
-              progress.Warning(std::string("Cannot resolve way ")+NumberToString(member->id)+" in relation "+NumberToString(rel->id)+" "+name);
-              convertable=false;
-            }
-          }
-        }
-        /*
-        else {
-          progress.Warning(std::string("Member in relation ")+NumberToString(rel->id)+" "+name+" is not of type way");
-          convertable=false;
-        }*/
-      }
-
-      if (!convertable || w.size()==0) {
-        progress.Warning(std::string("Skipping relation ")+NumberToString(rel->id)+" "+name+", because it does not only consist of ways or no ways at all");
-        rel=relations.erase(rel);
-        continue;
-      }
-
-      //std::cout << "Resolving relation " << rel->id << " starting with way " << w.begin()->id << std::endl;
-      // Just copy the first way into the relation as list of nodes
-
-      std::list<RawWay>                wb=w;
-      std::vector<RawRelation::Member> ms;
-
-      for (size_t i=0; i<w.begin()->nodes.size(); i++) {
-        RawRelation::Member m;
-
-        m.type=RawRelation::memberNode;
-        m.id=w.begin()->nodes[i];
-
-        ms.push_back(m);
-      }
-
-      w.erase(w.begin());
-
-      // Now, while ways available, find the way that either has the last node in relation
-      // as start or end
-      // Copy all nodes but the first/last one (which is already in the list)
-      while (w.size()>1) {
-        bool found=false;
-
-        for (std::list<RawWay>::iterator cw=w.begin();
-             cw!=w.end();
-             ++cw) {
-          if (ms.back().id==cw->nodes[0]) {
-            //std::cout << "Continuing with way " << cw->id << std::endl;
-            for (size_t i=1; i<cw->nodes.size(); i++) {
-              RawRelation::Member m;
-
-              m.type=RawRelation::memberNode;
-              m.id=cw->nodes[i];
-
-              ms.push_back(m);
-            }
-
-            w.erase(cw);
-            found=true;
-            break;
-          }
-          else if (ms.back().id==cw->nodes[cw->nodes.size()-1]) {
-            //std::cout << "Continuing with way " << cw->id << " (reverse)" << std::endl;
-            for (int i=cw->nodes.size()-2; i>=0; i--) {
-              RawRelation::Member m;
-
-              m.type=RawRelation::memberNode;
-              m.id=cw->nodes[i];
-
-              ms.push_back(m);
-            }
-
-            w.erase(cw);
-            found=true;
-            break;
-          }
-        }
-
-        if (!found) {
-          progress.Warning(std::string("Cannot find way with node ")+NumberToString(ms.back().id)+" as start or end node");
-          break;
-        }
-      }
-
-      if (w.size()>1) {
-        progress.Warning(std::string("Cannot resolve ways in Relation ")+NumberToString(rel->id)+" "+name+" to build an area boundary, skipping");
-        /*
-        for (std::list<RawWay>::const_iterator iter=wb.begin();
-             iter!=wb.end();
-             ++iter) {
-          std::cout << iter->id << " " << iter->nodes[0] << " " << iter->nodes[iter->nodes.size()-1] << std::endl;
-        }*/
-        rel=relations.erase(rel);
-        continue;
-      }
-
-      if (ms.back().id==w.begin()->nodes[0] &&
-          ms.front().id==w.begin()->nodes[w.begin()->nodes.size()-1]) {
-        //std::cout << "Finishing with way " << w.begin()->id << std::endl;
-        for (size_t i=1; i<w.begin()->nodes.size()-1; i++) {
-          RawRelation::Member m;
-
-          m.type=RawRelation::memberNode;
-          m.id=w.begin()->nodes[i];
-
-          ms.push_back(m);
-        }
-
-        w.erase(w.begin());
-      }
-      else if (ms.back().id==w.begin()->nodes[w.begin()->nodes.size()-1] &&
-        ms.front().id==w.begin()->nodes[0]) {
-        //std::cout << "Finishing with way " << w.begin()->id << " (reverse)" << std::endl;
-        for (int i=w.begin()->nodes.size()-2; i>=1; i--) {
-          RawRelation::Member m;
-
-          m.type=RawRelation::memberNode;
-          m.id=w.begin()->nodes[i];
-
-          ms.push_back(m);
-        }
-
-        w.erase(w.begin());
-      }
-      else {
-        progress.Warning(std::string("Cannot find way with node ")+NumberToString(ms.back().id)+" as start or end node");
-        progress.Warning(std::string("Cannot resolve ways in Relation ")+NumberToString(rel->id)+" "+name+" to build an area boundary, skipping");
-        /*
-        for (std::list<RawWay>::const_iterator iter=wb.begin();
-             iter!=wb.end();
-             ++iter) {
-          std::cout << iter->id << " " << iter->nodes[0] << " " << iter->nodes[iter->nodes.size()-1] << std::endl;
-        }*/
-        rel=relations.erase(rel);
-        continue;
-      }
-
-      // Remove everything but nodes
-
-      rel->members=ms;
-
-      ++rel;
-    }
-  }
-
-  /**
-    Load all nodes for the given list of node ids. Ignore ids we cannot load a RawNode
-    for.
-
-    Returns false, if the wass a file io error.
-    */
-  static bool GetNodesFromNodeIds(const std::set<Id> & ids,
-                                  std::map<Id,RawNode>& nodes,
-                                  Progress& progress)
-  {
-    FileScanner scanner;
-
-    nodes.clear();
-
-    if (ids.size()!=0) {
-      progress.Info(std::string("Resolving ")+NumberToString(ids.size())+" node ids");
-
-      if (!scanner.Open("rawnodes.dat")) {
-        progress.Error("Cannot open 'rawnodes.dat'");
-        return false;
-      }
-
-      while (!scanner.HasError()) {
-        RawNode node;
-
-        node.Read(scanner);
-
-        if (!scanner.HasError()) {
-          if (ids.find(node.id)!=ids.end()) {
-            nodes[node.id]=node;
-          }
-        }
-      }
-
-      scanner.Close();
-
-      progress.Info(NumberToString(ids.size())+" ids searched, "+NumberToString(nodes.size())+" nodes found");
-
-      for (std::set<Id>::const_iterator id=ids.begin();
-           id!=ids.end();
-           ++id) {
-        if (nodes.find(*id)==nodes.end()) {
-          progress.Warning(std::string("Node Id ")+NumberToString(*id)+" not found!");
-        }
-      }
-    }
-
-    return true;
-  }
-
-  /**
-    Load all ways for the given list of way ids. Ignore ids we cannot load a RawWay
-    for.
-
-    Returns false, if the was a file io error.
-    */
-  static bool GetWaysFromWayIds(const std::set<Id> & ids,
-                                std::map<Id,RawWay>& ways,
-                                Progress& progress)
-  {
-    FileScanner scanner;
-
-    ways.clear();
-
-    if (ids.size()!=0) {
-      progress.Info(std::string("Resolving ")+NumberToString(ids.size())+" way ids");
-
-      if (!scanner.Open("rawways.dat")) {
-        progress.Error("Cannot open 'rawways.dat'");
-        return false;
-      }
-
-      while (!scanner.HasError()) {
-        RawWay way;
-
-        way.Read(scanner);
-
-        if (!scanner.HasError()) {
-          if (ids.find(way.id)!=ids.end()) {
-            ways[way.id]=way;
-          }
-        }
-      }
-
-      scanner.Close();
-
-      progress.Info(NumberToString(ids.size())+" ids searched, "+NumberToString(ways.size())+" ways found");
-
-      for (std::set<Id>::const_iterator id=ids.begin();
-           id!=ids.end();
-           ++id) {
-        if (ways.find(*id)==ways.end()) {
-          progress.Warning(std::string("Ways Id ")+NumberToString(*id)+" not found!");
-        }
-      }
-    }
-
-    return true;
-  }
-/*
-  template<typename N, typename M>
-  double isLeft(const N& p0, const N& p1, const M& p2)
-  {
-    if (p2.id==p0.id || p2.id==p1.id) {
-      return 0;
-    }
-
-    return ((p1.lon-p0.lon)*(p2.lat-p0.lat)-(p2.lon-p0.lon)*(p1.lat-p0.lat));
-  }
-
-  template<typename N, typename M>
-  bool IsPointInArea(const N& node,
-                     const std::vector<M>& nodes)
-  {
-    for (int i=0; i<nodes.size()-1; i++) {
-      if (node.id==nodes[i].id) {
-        return true;
-      }
-    }
-
-    int wn=0;    // the winding number counter
-
-    // loop through all edges of the polygon
-    for (int i=0; i<nodes.size()-1; i++) {   // edge from V[i] to V[i+1]
-      if (nodes[i].lat <= node.lat) {         // start y <= P.y
-        if (nodes[i+1].lat > node.lat) {     // an upward crossing
-          if (isLeft( nodes[i], nodes[i+1], node) > 0) { // P left of edge
-            ++wn;            // have a valid up intersect
-          }
-        }
-      }
-      else {                       // start y > P.y (no test needed)
-        if (nodes[i+1].lat <= node.lat) {    // a downward crossing
-          if (isLeft( nodes[i], nodes[i+1], node) < 0) { // P right of edge
-            --wn;            // have a valid down intersect
-          }
-        }
-      }
-    }
-
-    return wn!=0;
-  }*/
-
-  /**
-    Returns true, if point in area.
-    */
-  /*
-  template<typename N>
-  bool IsPointInArea(double lon, double lat,
-                     const std::vector<N>& nodes)
-  {
-    int  i,j;
-    bool c=false;
-
-    for (i=0, j=nodes.size()-1; i<nodes.size(); j=i++) {
-      if (((nodes[i].lat>lat) != (nodes[j].lat>lat)) &&
-          (lon<(nodes[j].lon-nodes[i].lon)*(lat-nodes[i].lat) /
-           (nodes[j].lat-nodes[i].lat)+nodes[i].lon))  {
-        c=!c;
-      }
-    }
-
-    return c;
-  }
-
-  template<typename N,typename M>
-  bool IsAreaInArea(const std::vector<N>& a,
-                    const std::vector<M>& b)
-  {
-    for (typename std::vector<N>::const_iterator i=a.begin(); i!=a.end(); i++) {
-      if (!IsPointInArea(*i,b)) {
-        return false;
-      }
-    }
-
-    return true;
-  }*/
-
   /**
     Return the list of nodes ids with the given type.
     */
   static bool GetCityNodes(const std::set<TypeId>& cityIds,
-                           std::list<RawNode>& cityNodes,
+                           std::list<Node>& cityNodes,
                            Progress& progress)
                            {
     FileScanner scanner;
 
-    if (!scanner.Open("rawnodes.dat")) {
-      progress.Error("Cannot open 'rawnodes.dat'");
+    if (!scanner.Open("nodes.dat")) {
+      progress.Error("Cannot open 'nodes.dat'");
       return false;
     }
 
     while (!scanner.HasError()) {
-      RawNode node;
+      Node node;
 
       node.Read(scanner);
 
@@ -633,13 +111,13 @@ namespace osmscout {
             }
           }
 
-          if (!name.empty()) {
-            //std::cout << "Found node of type city: " << node.id << " " << name << std::endl;
-            cityNodes.push_back(node);
-          }
-          else {
+          if (name.empty()) {
             progress.Warning(std::string("node ")+NumberToString(node.id)+" has no name, skipping");
+            continue;
           }
+
+          //std::cout << "Found node of type city: " << node.id << " " << name << std::endl;
+          cityNodes.push_back(node);
         }
       }
     }
@@ -653,44 +131,40 @@ namespace osmscout {
     Return the list of nodes ids with the given type.
     */
   static bool GetCityAreas(const std::set<TypeId>& cityIds,
-                           std::list<RawWay>& cityAreas,
+                           std::list<Way>& cityAreas,
                            Progress& progress)
   {
       FileScanner scanner;
 
-    if (!scanner.Open("rawways.dat")) {
-      progress.Error("Cannot open 'rawways.dat'");
+    if (!scanner.Open("ways.dat")) {
+      progress.Error("Cannot open 'ways.dat'");
       return false;
     }
 
     while (!scanner.HasError()) {
-      RawWay way;
+      Way way;
 
       way.Read(scanner);
 
       if (!scanner.HasError()) {
-
         if (way.IsArea() && cityIds.find(way.type)!=cityIds.end()) {
-          std::string name;
+          std::string name=way.GetName();
 
           for (size_t i=0; i<way.tags.size(); i++) {
             if (way.tags[i].key==tagPlaceName) {
               name=way.tags[i].value;
               break;
             }
-            else if (way.tags[i].key==tagName && name.empty()) {
-              name=way.tags[i].value;
-            }
           }
 
-          if (!name.empty()) {
-            //std::cout << "Found area of type city: " << way.id << " " << name << std::endl;
-
-            cityAreas.push_back(way);
-          }
-          else {
+          if (name.empty()) {
             progress.Warning(std::string("area ")+NumberToString(way.id)+" has no name, skipping");
+            continue;
           }
+
+          //std::cout << "Found area of type city: " << way.id << " " << name << std::endl;
+
+          cityAreas.push_back(way);
         }
       }
     }
@@ -975,13 +449,10 @@ namespace osmscout {
     TypeId                    typeId;
     FileScanner               scanner;
     Area                      rootArea;
-    std::list<RawNode>        cityNodes;
-    std::list<RawWay>         cityAreas;
-    std::list<RawWay>         boundaryAreas;
-    std::list<RawRelation>    boundaryRelations;
-    std::set<Id>              ids;
-    std::map<Id,RawNode>      nodes;
-    std::map<Id,RawWay>       ways;
+    std::list<Node>           cityNodes;
+    std::list<Way>            cityAreas;
+    std::list<Way>            boundaryAreas;
+    std::list<Relation>       boundaryRelations;
 
     rootArea.name="<root>";
     rootArea.offset=0;
@@ -1043,17 +514,6 @@ namespace osmscout {
       return false;
     }
 
-    // Get all node ids for all areas in list
-    GetNodeIdsFromAreas(cityAreas,ids);
-
-    // No load all RawNodes based on the list of node ids
-    if (!GetNodesFromNodeIds(ids,nodes,progress)) {
-      return false;
-    }
-
-    // Now remove all areas where we do not have all nodes to build up their area
-    RemoveUnresolvedAreas(cityAreas,nodes,progress);
-
     progress.Info(std::string("Found ")+NumberToString(cityAreas.size())+" cities of type 'area'");
 
     //
@@ -1062,13 +522,13 @@ namespace osmscout {
 
     progress.SetAction("Scanning for city boundaries of type 'area'");
 
-    if (!scanner.Open("rawways.dat")) {
-      progress.Error("Cannot open 'rawways.dat'");
+    if (!scanner.Open("ways.dat")) {
+      progress.Error("Cannot open 'ways.dat'");
       return false;
     }
 
     while (!scanner.HasError()) {
-      RawWay way;
+      Way way;
 
       way.Read(scanner);
 
@@ -1077,9 +537,15 @@ namespace osmscout {
           size_t level=0;
 
           for (size_t i=0; i<way.tags.size(); i++) {
-            if (way.tags[i].key==tagAdminLevel &&
-              sscanf(way.tags[i].value.c_str(),"%d",&level)==1) {
-              boundaryAreas.push_back(way);
+            if (way.tags[i].key==tagAdminLevel) {
+              if (sscanf(way.tags[i].value.c_str(),"%d",&level)==1) {
+                boundaryAreas.push_back(way);
+              }
+              else {
+                progress.Info("Could not parse admin_level of way "+
+                              NumberToString(way.type )+" "+NumberToString(way.id));
+              }
+
               break;
             }
           }
@@ -1096,13 +562,13 @@ namespace osmscout {
 
     progress.SetAction("Scanning for city boundaries of type 'relation'");
 
-    if (!scanner.Open("rawrels.dat")) {
-      progress.Error("Cannot open 'rawrels.dat'");
+    if (!scanner.Open("relations.dat")) {
+      progress.Error("Cannot open 'relations.dat'");
       return false;
     }
 
     while (!scanner.HasError()) {
-      RawRelation relation;
+      Relation relation;
 
       relation.Read(scanner);
 
@@ -1112,11 +578,22 @@ namespace osmscout {
           size_t level=0;
 
           for (size_t i=0; i<relation.tags.size(); i++) {
-            if (relation.tags[i].key==tagAdminLevel &&
-              sscanf(relation.tags[i].value.c_str(),"%d",&level)==1) {
-              boundaryRelations.push_back(relation);
+            if (relation.tags[i].key==tagAdminLevel) {
+              if (sscanf(relation.tags[i].value.c_str(),"%d",&level)==1) {
+                boundaryRelations.push_back(relation);
+              }
+              else {
+                progress.Info("Could not parse admin_level of relation "+relation.relType+" "+
+                              NumberToString(relation.type )+" "+NumberToString(relation.id));
+              }
+
               break;
             }
+          }
+
+          if (level==0) {
+            progress.Info("No tag 'admin_level' for relation "+relation.relType+" "+
+                          NumberToString(relation.type )+" "+NumberToString(relation.id));
           }
         }
       }
@@ -1127,37 +604,10 @@ namespace osmscout {
     progress.Info(std::string("Found ")+NumberToString(boundaryAreas.size())+" areas of type 'administrative boundary'");
     progress.Info(std::string("Found ")+NumberToString(boundaryRelations.size())+" relations of type 'administrative boundary'");
 
-    GetRelationIdsFromRelations(boundaryRelations,ids);
-
-    if (ids.size()>0) {
-      progress.Warning("(Recursivly) resolving members of type 'relation' in relations is currently not supported!");
-    }
-    /*
-    while (ids.size()!=0) {
-      std::cout << "Resolving " << ids.size() << " relation ids from relation members..." << std::endl;
-      GetRelationIdsFromRelations(boundaryRelations,ids);
-    }*/
-
-    GetWayIdsFromRelations(boundaryRelations,ids);
-    GetWaysFromWayIds(ids,ways,progress);
-    ResolveWaysInRelations(boundaryRelations,ways,progress);
-
-    GetNodeIdsFromAreasAndRelations(boundaryAreas,boundaryRelations,ids);
-
-    if (!GetNodesFromNodeIds(ids,nodes,progress)) {
-      return false;
-    }
-
-    RemoveUnresolvedAreas(boundaryAreas,nodes,progress);
-    RemoveUnresolvedRelations(boundaryRelations,nodes,progress);
-
-    progress.Info(std::string("Resolved ")+NumberToString(boundaryAreas.size())+" areas of type 'administrative boundary'");
-    progress.Info(std::string("Resolved ")+NumberToString(boundaryRelations.size())+" relations of type 'administrative boundary'");
-
     progress.SetAction("Inserting boundary relations and areas into area tree");
 
     for (size_t l=1; l<=10; l++) {
-      for (std::list<RawRelation>::const_iterator rel=boundaryRelations.begin();
+      for (std::list<Relation>::const_iterator rel=boundaryRelations.begin();
            rel!=boundaryRelations.end();
            ++rel) {
 
@@ -1176,27 +626,21 @@ namespace osmscout {
         if (level==l && !name.empty()) {
           std::vector<Point> ns;
 
-          ns.resize(rel->members.size());
-          for (size_t i=0; i<rel->members.size(); i++) {
-            assert(rel->members[i].type==RawRelation::memberNode);
-            std::map<Id,RawNode>::const_iterator node=nodes.find(rel->members[i].id);
+          for (size_t i=0; i<rel->roles.size(); i++) {
+            if (rel->roles[i].role=="0") {
+              Area area;
 
-            ns[i].id=node->second.id;
-            ns[i].lon=node->second.lon;
-            ns[i].lat=node->second.lat;
+              area.reference.Set(rel->id,refRelation);
+              area.name=name;
+              area.area=rel->roles[i].nodes;
+
+              AddArea(rootArea,area);
+            }
           }
-
-          Area area;
-
-          area.reference.Set(rel->id,refRelation);
-          area.name=name;
-          area.area=ns;
-
-          AddArea(rootArea,area);
         }
       }
 
-      for (std::list<RawWay>::const_iterator a=boundaryAreas.begin();
+      for (std::list<Way>::const_iterator a=boundaryAreas.begin();
            a!=boundaryAreas.end();
            ++a) {
 
@@ -1213,22 +657,11 @@ namespace osmscout {
         }
 
         if (level==l && !name.empty()) {
-          std::vector<Point> ns;
-
-          ns.resize(a->nodes.size());
-          for (size_t i=0; i<a->nodes.size(); i++) {
-            std::map<Id,RawNode>::const_iterator node=nodes.find(a->nodes[i]);
-
-            ns[i].id=node->second.id;
-            ns[i].lon=node->second.lon;
-            ns[i].lat=node->second.lat;
-          }
-
           Area area;
 
           area.reference.Set(a->id,refWay);
           area.name=name;
-          area.area=ns;
+          area.area=a->nodes;
 
           AddArea(rootArea,area);
         }
@@ -1237,18 +670,15 @@ namespace osmscout {
 
     progress.SetAction("Inserting cities of type area into area tree");
 
-    for (std::list<RawWay>::const_iterator a=cityAreas.begin();
+    for (std::list<Way>::const_iterator a=cityAreas.begin();
          a!=cityAreas.end();
          ++a) {
-      std::string name;
+      std::string name=a->GetName();
 
       for (size_t i=0; i<a->tags.size(); i++) {
         if (a->tags[i].key==tagPlaceName) {
           name=a->tags[i].value;
           break;
-        }
-        else if (a->tags[i].key==tagName) {
-          name=a->tags[i].value;
         }
       }
 
@@ -1257,22 +687,11 @@ namespace osmscout {
         continue;
       }
 
-      std::vector<Point> ns;
-
-      ns.resize(a->nodes.size());
-      for (size_t i=0; i<a->nodes.size(); i++) {
-        std::map<Id,RawNode>::const_iterator node=nodes.find(a->nodes[i]);
-
-        ns[i].id=node->second.id;
-        ns[i].lon=node->second.lon;
-        ns[i].lat=node->second.lat;
-      }
-
       Area area;
 
       area.reference.Set(a->id,refWay);
       area.name=name;
-      area.area=ns;
+      area.area=a->nodes;
 
       AddArea(rootArea,area);
     }
@@ -1280,7 +699,7 @@ namespace osmscout {
     progress.SetAction("Inserting cities of type node into area tree");
 
     size_t count=0;
-    for (std::list<RawNode>::iterator city=cityNodes.begin();
+    for (std::list<Node>::iterator city=cityNodes.begin();
          city!=cityNodes.end();
          ++city) {
       count++;
@@ -1311,9 +730,10 @@ namespace osmscout {
 
       AddLocationToArea(rootArea,location,node);
 
+      /*
       if (count%1000==0) {
         std::cout << count << "/" << cityNodes.size() << std::endl;
-      }
+      }*/
     }
 
     /*
@@ -1327,9 +747,6 @@ namespace osmscout {
     cityAreas.clear();
     boundaryAreas.clear();
     boundaryRelations.clear();
-    ids.clear();
-    nodes.clear();
-    ways.clear();
 
     progress.SetAction("Calculating bounds of areas");
 
@@ -1339,11 +756,7 @@ namespace osmscout {
 
     typeConfig.GetIndexables(indexables);
 
-    progress.SetAction("Resolve ways to areas");
-
-    // We currently scan Ways instead of RawWays because for Ways we have the nodes already
-    // resolved (later we have to rethink this, but why should we index ways that are not
-    // part fo the database (...but should we index urbans that are not in the database?)?)
+    progress.SetAction("Resolve ways and areas to areas");
 
     if (!scanner.Open("ways.dat")) {
       progress.Error("Cannot open 'ways.dat'");
