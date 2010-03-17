@@ -87,16 +87,16 @@ int main(int argc, char* argv[])
     queries.push_back(ids[(int)(QUERY_COUNT*rand()/(RAND_MAX+1.0))]);
   }
 
-  osmscout::NumericIndex<osmscout::Id,osmscout::Way> way2Index("way2.idx");
+  osmscout::NumericIndex<osmscout::Id,osmscout::Way> wayIndex("way.idx");
 
-  if (!way2Index.Load(".")) {
+  if (!wayIndex.Load(".")) {
     std::cerr << "Cannot open way index file!" << std::endl;
     return 1;
   }
 
   std::cout << "Starting numeric index test..." << std::endl;
 
-  osmscout::StopClock index2Timer;
+  osmscout::StopClock indexTimer;
 
   for (size_t i=0; i<queries.size(); i++) {
     std::vector<osmscout::Id>   ids;
@@ -104,17 +104,16 @@ int main(int argc, char* argv[])
 
     ids.push_back(queries[i]);
 
-    way2Index.GetOffsets(ids,offsets);
+    wayIndex.GetOffsets(ids,offsets);
 
     if (offsets.size()!=1) {
       std::cerr << "Cannot read way id " << queries[i] << " from index!" << std::endl;
     }
   }
 
-  index2Timer.Stop();
+  indexTimer.Stop();
 
-  //std::cout << "Reading " << queries.size() << " random way ids from index took " << indexTimer << std::endl;
-  std::cout << "Reading " << queries.size() << " random way ids from index2 took " << index2Timer << std::endl;
+  std::cout << "Reading " << queries.size() << " random way ids from index took " << indexTimer << std::endl;
 
   return 0;
 }
