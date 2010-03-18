@@ -89,7 +89,7 @@ namespace osmscout {
           ++iter;
         }
 
-        assert(iter==map[index].end());
+        assert(iter!=map[index].end());
 
         // Remove it from map
         map[index].erase(iter);
@@ -208,6 +208,13 @@ namespace osmscout {
       order.clear();
       map.clear();
       size=0;
+
+      if(maxSize>=10) {
+        map.resize(maxSize/5);
+      }
+      else {
+        map.resize(1);
+      }
     }
 
     /**

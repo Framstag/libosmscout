@@ -25,6 +25,8 @@
 #include <osmscout/WayDataFile.h>
 #include <osmscout/Util.h>
 
+static size_t retryCount = 20;
+
 /**
   Sequentially read the ways.dat file in the current directory to collect
   way ids. Then take a subset of ids randomly and call the Cache via WayDataFile for
@@ -85,7 +87,7 @@ int main(int argc, char* argv[])
 
     osmscout::StopClock cacheTimer;
 
-    for (size_t r=1; r<=20; r++) {
+    for (size_t r=1; r<=retryCount; r++) {
       for (size_t i=0; i<queries.size(); i++) {
         size_t        idx=(int)(queries.size()*rand()/(RAND_MAX+1.0));
         osmscout::Way way;
@@ -100,7 +102,7 @@ int main(int argc, char* argv[])
 
     osmscout::StopClock cacheMissTimer;
 
-    for (size_t r=1; r<=20; r++) {
+    for (size_t r=1; r<=retryCount; r++) {
       for (size_t i=0; i<queries.size(); i++) {
         osmscout::Way way;
 
@@ -113,8 +115,8 @@ int main(int argc, char* argv[])
     cacheMissTimer.Stop();
 
 
-    std::cout << "Reading " << queries.size() << " random ways from data file with cache size " << cacheSize << " took " << cacheTimer << std::endl;
-    std::cout << "Reading " << queries.size() << " misses from data file with cache size " << cacheSize << " took " << cacheMissTimer << std::endl;
+    std::cout << "Reading " << retryCount*queries.size() << " random ways from data file with cache size " << cacheSize << " took " << cacheTimer << std::endl;
+    std::cout << "Reading " << retryCount*queries.size() << " misses from data file with cache size " << cacheSize << " took " << cacheMissTimer << std::endl;
 
     wayDataFile.Close();
 
