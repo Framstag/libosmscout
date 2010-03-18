@@ -26,83 +26,82 @@
 #include <osmscout/Util.h>
 
 /**
-  Sequentially read the ways.dat file in the current directory to collect
-  way ids. Then take a subset of ids randomly and call the Cache via WayDataFile for
-  different cache sizes. Measure execution time.
-
-  Call this program repeately to avoid different timing because of OS file caching.
+  Check performance of
+  * cache insertion
+  * cache hit
+  * cache miss
 */
+
+/**
+  Empty fake data object
+  */
+struct Data
+{
+};
+
+static const size_t cacheSize=1000000;
+
+typedef osmscout::Cache<osmscout::Id,Data> Cache;
 
 int main(int argc, char* argv[])
 {
-  std::vector<osmscout::Id> ids;
-  std::vector<osmscout::Id> queries;
-  std::string               filename="ways.dat";
-  size_t                    readerWayCount;
+  Cache  cache(cacheSize);
 
-  osmscout::StopClock readerTimer;
+  osmscout::StopClock insertTimer;
 
-  osmscout::FileScanner scanner;
+  std::cout << "Inserting values from " << cacheSize << " to " << 2*cacheSize-1 << " into cache..." << std::endl;
 
-  if (!scanner.Open(filename)) {
-    std::cerr << "Cannot open file '" << filename << "'!" << std::endl;
-    return 1;
+  for (size_t i=cacheSize; i<2*cacheSize; i++) {
+    Cache::CacheEntry entry(i,Data());
+
+    Cache::CacheRef ref=cache.SetEntry(entry);
   }
 
-  std::cout << "Start reading files using FileReader..." << std::endl;
+  insertTimer.Stop();
 
-  readerWayCount=0;
-  while (!scanner.HasError()) {
-    osmscout::Way way;
+  std::cout << "Cache size: " << cache.GetSize() << std::endl;
 
-    if (way.Read(scanner)) {
-      ids.push_back(way.id);
-      readerWayCount++;
+  osmscout::StopClock missTimer;
+
+  std::cout << "Searching for entries not in cache..." << std::endl;
+
+  for (size_t i=0; i<cacheSize; i++) {
+    Cache::CacheRef entry;
+
+    if (cache.GetEntry(i,entry)) {
+      assert(false);
     }
   }
 
-  scanner.Close();
+  for (size_t i=2*cacheSize; i<3*cacheSize; i++) {
+    Cache::CacheRef entry;
 
-  readerTimer.Stop();
-
-  std::cout << "Reading " << readerWayCount << " ways via FileReader took " << readerTimer << std::endl;
-
-  queries.reserve(readerWayCount/10);
-
-  for (size_t i=0; i<readerWayCount/10; i++) {
-    queries.push_back(ids[(int)(readerWayCount/10*rand()/(RAND_MAX+1.0))]);
+    if (cache.GetEntry(i,entry)) {
+      assert(false);
+    }
   }
 
-  size_t cacheSize=1;
+  missTimer.Stop();
 
-  for (size_t i=1; i<=7; i++) {
-    osmscout::WayDataFile wayDataFile("ways.dat","way.idx",cacheSize);
+  osmscout::StopClock hitTimer;
 
-    if (!wayDataFile.Open(".")) {
-      std::cerr << "Cannot open way data file!" << std::endl;
-      return 1;
-    }
+  std::cout << "Searching for entries in cache..." << std::endl;
 
-    osmscout::StopClock cacheTimer;
+  for (size_t t=1; t<=2; t++) {
+    for (size_t i=cacheSize; i<2*cacheSize; i++) {
+      Cache::CacheRef entry;
 
-    for (size_t r=0; r<10; r++) {
-      for (size_t idx=0; idx<queries.size(); idx++) {
-        osmscout::Way way;
-
-        if (!wayDataFile.Get(queries[idx],way)) {
-          std::cerr << "Cannot read way with id " << queries[idx] << " from data file!" << std::endl;
-        }
+      if (!cache.GetEntry(i,entry)) {
+        assert(false);
       }
     }
-
-    cacheTimer.Stop();
-
-    std::cout << "Reading " << queries.size() << " random ways from data file with cache size " << cacheSize << " took " << cacheTimer << std::endl;
-
-    wayDataFile.Close();
-
-    cacheSize=cacheSize*10;
   }
+
+  hitTimer.Stop();
+
+  std::cout << "Insert time: "  << insertTimer << std::endl;
+  std::cout << "Miss time: "  << missTimer << std::endl;
+  std::cout << "Hit time: "  << hitTimer << std::endl;
 
   return 0;
 }

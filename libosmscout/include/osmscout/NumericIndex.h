@@ -247,7 +247,7 @@ namespace osmscout {
             //std::cout << "id " << *id <<" => " << i << " " << startId << " " << offset << std::endl;
           }
           else {
-            std::cerr << "Id " << *id << " not found in sub page index!" << std::endl;
+            //std::cerr << "Id " << *id << " not found in sub page index!" << std::endl;
           }
         }
 
@@ -255,12 +255,12 @@ namespace osmscout {
           offsets.push_back(offset);
         }
         else {
-          std::cerr << "Id " << *id << " not found in sub index!" << std::endl;
+          //std::cerr << "Id " << *id << " not found in sub index!" << std::endl;
         }
         //std::cout << "=> Id " << *id <<" => " << startId << " " << offset << std::endl;
       }
       else {
-        std::cerr << "Id " << *id << " not found in root index!" << std::endl;
+        //std::cerr << "Id " << *id << " not found in root index!" << std::endl;
       }
     }
 

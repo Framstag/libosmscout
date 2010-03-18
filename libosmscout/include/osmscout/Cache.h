@@ -23,7 +23,7 @@
 #include <cassert>
 #include <iostream>
 #include <list>
-#include <map>
+#include <vector>
 
 namespace osmscout {
 
@@ -58,12 +58,16 @@ namespace osmscout {
       virtual size_t GetSize(const V& value) const = 0;
     };
 
-    typedef typename std::list<CacheEntry>::iterator CacheRef;
+    typedef std::list<CacheEntry>                   OrderList;
+    typedef typename OrderList::iterator            CacheRef;
+    typedef std::list<typename OrderList::iterator> CacheRefList;
+    typedef std::vector<CacheRefList>               Map;
 
   private:
-    size_t                maxSize;
-    std::list<CacheEntry> order;
-    std::map<K,CacheRef>  map;
+    size_t    size;
+    size_t    maxSize;
+    OrderList order;
+    Map       map;
 
   private:
     /**
@@ -72,17 +76,27 @@ namespace osmscout {
       */
     void StripCache()
     {
-      while (order.size()>maxSize) {
+      while (size>maxSize) {
         // Remove oldest entry from cache...
 
         // Get oldest entry
         typename std::list<CacheEntry>::reverse_iterator lastEntry=order.rbegin();
 
+        size_t index=lastEntry->key%map.size();
+
+        typename CacheRefList::iterator iter=map[index].begin();
+        while (iter!=map[index].end() && (*iter)->key!=lastEntry->key) {
+          ++iter;
+        }
+
+        assert(iter==map[index].end());
+
         // Remove it from map
-        map.erase(lastEntry->key);
+        map[index].erase(iter);
 
         // Remove it from order list
         order.pop_back();
+        size--;
       }
     }
 
@@ -91,9 +105,17 @@ namespace osmscout {
      Create a new cache object with the given max size.
       */
     Cache(size_t maxSize)
-     : maxSize(maxSize)
+     : size(0),
+       maxSize(maxSize)
     {
       assert(maxSize>0);
+
+      if(maxSize>=10) {
+        map.resize(maxSize/5);
+      }
+      else {
+        map.resize(1);
+      }
     }
 
     /**
@@ -108,27 +130,25 @@ namespace osmscout {
       */
     bool GetEntry(const K& key, CacheRef& reference)
     {
-      typename std::map<K,CacheRef>::iterator iter=map.find(key);
+      size_t index=key%map.size();
 
-      if (iter==map.end()) {
+      typename CacheRefList::iterator iter=map[index].begin();
+      while (iter!=map[index].end() && (*iter)->key!=key) {
+        ++iter;
+      }
+
+      if (iter==map[index].end()) {
         return false;
       }
 
-      CacheRef next=iter->second;
-
-      next++;
-
-      // Place key/value to the start of the order list
-      order.insert(order.begin(),iter->second,next);
-
-      // Erase the entry from its current order list position
-      order.erase(iter->second);
-
+      // Move key/value to the start of the order list
+      order.splice(order.begin(),order,*iter);
 
       // Update the map with the new iterator into the order list
-      iter->second=order.begin();
+      map[index].erase(iter);
+      map[index].push_front(order.begin());
 
-      reference=iter->second;
+      reference=order.begin();
 
       return true;
     }
@@ -142,29 +162,25 @@ namespace osmscout {
       */
     typename Cache::CacheRef SetEntry(const CacheEntry& entry)
     {
-      typename std::map<K,CacheRef>::iterator iter=map.find(entry.key);
+      size_t index=entry.key%map.size();
 
-      if (iter==map.end()) {
-        //Insert
-
-        // Place key/value to the start of the order list
-        order.push_front(entry);
-
-        // Insert entry into the map
-        map[entry.key]=order.begin();
+      typename CacheRefList::iterator iter=map[index].begin();
+      while (iter!=map[index].end() && (*iter)->key!=entry.key) {
+        ++iter;
       }
-      else {
-        // Update
 
+      if (iter!=map[index].end()) {
         // Erase the entry from its current order list position
-        order.erase(iter->second);
-
-        // Place key/value to the start of the order list
-        order.push_front(entry);
-
-        // Update the map with the new iterator into the order list
-        iter->second=order.begin();
+        order.erase(*iter);
+        size--;
+        map[index].erase(iter);
       }
+
+      // Place key/value to the start of the order list
+      order.push_front(entry);
+      size++;
+      // Update the map with the new iterator into the order list
+      map[index].push_front(order.begin());
 
       StripCache();
 
@@ -191,6 +207,7 @@ namespace osmscout {
     {
       order.clear();
       map.clear();
+      size=0;
     }
 
     /**
@@ -198,15 +215,19 @@ namespace osmscout {
       */
     size_t GetSize() const
     {
-      return order.size();
+      return size;
     }
 
     size_t GetMemory(const ValueSizer& sizer) const
     {
       size_t memory=0;
 
-      memory+=order.size()*sizeof(CacheEntry);
-      memory+=map.size()*sizeof(K)+map.size()*sizeof(CacheRef);
+      memory+=map.size()*sizeof(CacheRefList);
+      memory+=size*sizeof(CacheEntry);
+
+      for (size_t i=0; i<map.size(); i++) {
+        memory+=map[i].size()*sizeof(CacheRef);
+      }
 
       for (typename std::list<CacheEntry>::const_iterator entry=order.begin();
            entry!=order.end();
@@ -222,7 +243,7 @@ namespace osmscout {
       */
     void DumpStatistics(const char* cacheName, const ValueSizer& sizer)
     {
-      std::cout << cacheName << " entries: " << order.size() << ", memory " << GetMemory(sizer) << std::endl;
+      std::cout << cacheName << " entries: " << size << ", memory " << GetMemory(sizer) << std::endl;
     }
   };
 }
