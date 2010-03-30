@@ -305,6 +305,68 @@ namespace osmscout {
     return true;
   }
 
+  bool GetDigitValue(char digit, size_t& result)
+  {
+    switch (digit) {
+    case '1':
+      result=1;
+      return true;
+    case '2':
+      result=2;
+      return true;
+    case '3':
+      result=3;
+      return true;
+    case '4':
+      result=4;
+      return true;
+    case '5':
+      result=5;
+      return true;
+    case '6':
+      result=6;
+      return true;
+    case '7':
+      result=7;
+      return true;
+    case '8':
+      result=8;
+      return true;
+    case '9':
+      result=9;
+      return true;
+    case '0':
+      result=0;
+      return true;
+    case 'a':
+    case 'A':
+      result=10;
+      return true;
+    case 'b':
+    case 'B':
+      result=11;
+      return true;
+    case 'c':
+    case 'C':
+      result=12;
+      return true;
+    case 'd':
+    case 'D':
+      result=13;
+      return true;
+    case 'e':
+    case 'E':
+      result=14;
+      return true;
+    case 'f':
+    case 'F':
+      result=15;
+      return true;
+    default:
+      return false;
+    }
+  }
+
   double Log2(double x)
   {
     return log(x)/log(2);

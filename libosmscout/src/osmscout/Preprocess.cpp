@@ -231,7 +231,7 @@ namespace osmscout {
           std::cerr << "Not all required attributes found" << std::endl;
         }
 
-        if (sscanf((const char*)idValue,"%lu",&id)!=1) {
+        if (!StringToNumber((const char*)idValue,id)) {
           std::cerr << "Cannot parse id: '" << idValue << "'" << std::endl;
           return;
         }
@@ -258,7 +258,7 @@ namespace osmscout {
           }
         }
 
-        if (sscanf((const char*)idValue,"%lu",&id)!=1) {
+        if (!StringToNumber((const char*)idValue,id)) {
           std::cerr << "Cannot parse id: '" << idValue << "'" << std::endl;
           return;
         }
@@ -267,9 +267,9 @@ namespace osmscout {
         const xmlChar *idValue=NULL;
 
         context=contextRelation;
+        tags.clear();
         nodes.clear();
         members.clear();
-        tags.clear();
 
         for (size_t i=0; atts[i]!=NULL && atts[i+1]!=NULL; i+=2) {
           if (strcmp((const char*)atts[i],"id")==0) {
@@ -277,7 +277,7 @@ namespace osmscout {
           }
         }
 
-        if (sscanf((const char*)idValue,"%lu",&id)!=1) {
+        if (!StringToNumber((const char*)idValue,id)) {
           std::cerr << "Cannot parse id: '" << idValue << "'" << std::endl;
           return;
         }
@@ -331,7 +331,7 @@ namespace osmscout {
           }
         }
 
-        if (sscanf((const char*)idValue,"%lu",&node)!=1) {
+        if (!StringToNumber((const char*)idValue,node)) {
           std::cerr << "Cannot parse id: '" << idValue << "'" << std::endl;
           return;
         }
@@ -360,6 +360,21 @@ namespace osmscout {
           }
         }
 
+	if (typeValue==NULL) {
+          std::cerr << "Member of relation " << id << " does not have a type" << std::endl;
+          return;
+        }
+
+	if (refValue==NULL) {
+          std::cerr << "Member of relation " << id << " does not have a valid reference" << std::endl;
+          return;
+        }
+
+	if (roleValue==NULL) {
+          std::cerr << "Member of relation " << id << " does not have a valid role" << std::endl;
+          return;
+        }
+
         if (strcmp((const char*)typeValue,"node")==0) {
           member.type=RawRelation::memberNode;
         }
@@ -374,9 +389,8 @@ namespace osmscout {
           return;
         }
 
-        if (sscanf((const char*)refValue,"%lu",&member.id)!=1) {
-          std::cerr << "Cannot parse ref: '" << refValue << "'" << std::endl;
-          return;
+        if (!StringToNumber((const char*)refValue,member.id)) {
+          std::cerr << "Cannot parse ref '" << refValue << "' for relation " << id << std::endl;
         }
 
         if (roleValue!=NULL) {

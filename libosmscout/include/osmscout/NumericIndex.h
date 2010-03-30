@@ -293,7 +293,7 @@ namespace osmscout {
                             const std::string& indexfile)
   {
     //
-    // Writing index2 file
+    // Writing index file
     //
 
     progress.SetAction(std::string("Generating '")+indexfile+"'");

@@ -24,6 +24,7 @@
 
 #include <sys/time.h>
 
+#include <cassert>
 #include <limits>
 #include <set>
 #include <string>
@@ -183,6 +184,26 @@ namespace osmscout {
 
   extern bool GetFileSize(const std::string& filename, long& size);
 
+  extern bool GetDigitValue(char digit, size_t& result);
+
+  template<typename A>
+  size_t NumberDigits(const A& a,size_t base=10)
+  {
+    A      value(a);
+    size_t res=0;
+
+    if (value<0) {
+      res++;
+    }
+
+    while (value!=0) {
+      res++;
+      value=value/base;
+    }
+
+    return res;
+  }
+
   template<typename A>
   std::string NumberToString(const A& a)
   {
@@ -213,6 +234,85 @@ namespace osmscout {
     }
 
     return res;
+  }
+
+  template<typename A>
+  bool StringToNumber(const std::string& string, A& a, size_t base=10)
+  {
+    assert(base<=16);
+
+    std::string::size_type pos=0;
+    bool                   minus=false;
+
+    a=0;
+
+    if (string.empty()) {
+      return false;
+    }
+
+    if (!std::numeric_limits<A>::is_signed && string[0]=='-') {
+      return false;
+    }
+
+    /*
+      Special handling for the first symbol/digit (could be negative)
+      */
+    if (base==10 && string[0]=='-') {
+      minus=true;
+      pos=1;
+    }
+    else {
+      size_t digitValue;
+
+      if (!GetDigitValue(string[pos],digitValue)) {
+        return false;
+      }
+
+      if (digitValue>=base) {
+        return false;
+      }
+
+      /*
+        For signed values with base!=10 we assume a negative value
+      */
+      if (digitValue==base-1 &&
+          std::numeric_limits<A>::is_signed &&
+          string.length()==NumberDigits(std::numeric_limits<A>::max())) {
+        minus=true;
+        a=base/2;
+      }
+      else {
+        a=digitValue;
+      }
+
+      pos=1;
+    }
+
+    while (pos<string.length()) {
+      size_t digitValue;
+
+      if (!GetDigitValue(string[pos],digitValue)) {
+        return false;
+      }
+
+      if (digitValue>=base) {
+        return false;
+      }
+
+      if (std::numeric_limits<A>::max()/base-(A)digitValue<a) {
+        return false;
+      }
+
+      a=a*base+digitValue;
+
+      pos++;
+    }
+
+    if (minus) {
+      a=-a;
+    }
+
+    return true;
   }
 
   extern double Log2(double x);
