@@ -139,6 +139,9 @@ namespace osmscout {
       else if (name=="circle") {
         style=SymbolStyle::circle;
       }
+      else if (name=="triangle") {
+        style=SymbolStyle::triangle;
+      }
       else {
         return false;
       }

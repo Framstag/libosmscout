@@ -341,7 +341,8 @@ namespace osmscout {
     enum Style {
       none,
       box,
-      circle
+      circle,
+      triangle
     };
 
   private:

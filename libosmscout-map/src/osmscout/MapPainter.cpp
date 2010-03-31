@@ -658,6 +658,21 @@ namespace osmscout {
                 0,2*M_PI);
       cairo_fill(draw);
       break;
+    case SymbolStyle::triangle:
+      cairo_set_source_rgba(draw,
+                            style->GetFillR(),
+                            style->GetFillG(),
+                            style->GetFillB(),
+                            style->GetFillA());
+      cairo_set_line_width(draw,1);
+
+      cairo_new_path(draw);
+      cairo_move_to(draw,x-style->GetSize()/2,y+style->GetSize()/2);
+      cairo_line_to(draw,x,y-style->GetSize()/2);
+      cairo_line_to(draw,x+style->GetSize()/2,y+style->GetSize()/2);
+      cairo_line_to(draw,x-style->GetSize()/2,y+style->GetSize()/2);
+      cairo_fill(draw);
+      break;
     }
   }
 

@@ -371,6 +371,11 @@
     <label minMag="detail"/>
   </area>
 
+  <node key="natural" value="peak" prio="20">
+    <symbol style="triangle" size="8" fillColor="9c5e29" minMag="city"/>
+    <label minMag="detail"/>
+  </node>
+
   <area key="natural" value="glacier">
     <fill color="ddecec"/>
     <label minMag="detail"/>
