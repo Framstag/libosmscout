@@ -98,7 +98,7 @@ void CitySearchDialog::FetchAdminRegions()
       regions.clear();
       regionsModel->SetEmptyText(L"- too many hits -");
     }
-    else if (regions.size()>0) {
+    else if (regions.size()==0) {
       regionsModel->SetEmptyText(L"- no matches -");
     }
     else {
