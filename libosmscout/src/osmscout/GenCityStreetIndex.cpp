@@ -540,7 +540,7 @@ namespace osmscout {
 
           for (size_t i=0; i<way.tags.size(); i++) {
             if (way.tags[i].key==tagAdminLevel) {
-              if (sscanf(way.tags[i].value.c_str(),"%d",&level)==1) {
+              if (StringToNumber(way.tags[i].value,level)) {
                 boundaryAreas.push_back(way);
               }
               else {
@@ -581,7 +581,7 @@ namespace osmscout {
 
           for (size_t i=0; i<relation.tags.size(); i++) {
             if (relation.tags[i].key==tagAdminLevel) {
-              if (sscanf(relation.tags[i].value.c_str(),"%d",&level)==1) {
+              if (StringToNumber(relation.tags[i].value,level)) {
                 boundaryRelations.push_back(relation);
               }
               else {
@@ -617,8 +617,7 @@ namespace osmscout {
         std::string name;
 
         for (size_t i=0; i<rel->tags.size() && !(l!=0 && !name.empty()); i++) {
-          if (rel->tags[i].key==tagAdminLevel &&
-            sscanf(rel->tags[i].value.c_str(),"%d",&level)==1) {
+          if (rel->tags[i].key==tagAdminLevel && StringToNumber(rel->tags[i].value,level)) {
           }
           else if (rel->tags[i].key==tagName) {
             name=rel->tags[i].value;
@@ -650,8 +649,7 @@ namespace osmscout {
         std::string name;
 
         for (size_t i=0; i<a->tags.size() && !(l!=0 && !name.empty()); i++) {
-          if (a->tags[i].key==tagAdminLevel &&
-            sscanf(a->tags[i].value.c_str(),"%d",&level)==1) {
+          if (a->tags[i].key==tagAdminLevel && StringToNumber(a->tags[i].value,level)) {
           }
           else if (a->tags[i].key==tagName) {
             name=a->tags[i].value;
@@ -861,6 +859,7 @@ namespace osmscout {
 
     progress.SetAction("Write 'nameregion.idx'");
 
+    GetLocationRefs(rootArea,locationRefs);
     for (std::list<Area>::const_iterator a=rootArea.areas.begin();
          a!=rootArea.areas.end();
          a++) {
