@@ -74,7 +74,6 @@ namespace osmscout {
     scanner.Read(relType);
 
     scanner.ReadNumber(tagCount);
-
     if (scanner.HasError()) {
       return false;
     }
@@ -86,7 +85,6 @@ namespace osmscout {
     }
 
     scanner.ReadNumber(roleCount);
-
     if (scanner.HasError()) {
       return false;
     }
@@ -94,10 +92,8 @@ namespace osmscout {
     roles.resize(roleCount);
     for (size_t i=0; i<roleCount; i++) {
       uint32_t nodesCount;
-      uint32_t typeValue;
 
-      scanner.Read(typeValue);
-      roles[i].type=(TypeId)typeValue;
+      scanner.ReadNumber(roles[i].type);
       scanner.Read(roles[i].role);
       scanner.ReadNumber(nodesCount);
 
@@ -132,7 +128,7 @@ namespace osmscout {
 
     writer.WriteNumber((unsigned long)roles.size());
     for (size_t i=0; i<roles.size(); i++) {
-      writer.Write(roles[i].type);
+      writer.WriteNumber((unsigned long)roles[i].type);
       writer.Write(roles[i].role);
       writer.WriteNumber((unsigned long)roles[i].nodes.size());
 
