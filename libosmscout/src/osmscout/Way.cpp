@@ -239,7 +239,7 @@ namespace osmscout {
     writer.WriteNumber((unsigned long)type);
     writer.Write((uint32_t)flags);
 
-    writer.WriteNumber(nodes.size());
+    writer.WriteNumber((unsigned long)nodes.size());
 
     for (size_t i=0; i<nodes.size(); i++) {
       uint32_t latValue=(uint32_t)round((nodes[i].lat+180.0)*conversionFactor);
@@ -263,7 +263,7 @@ namespace osmscout {
     }
 
     if (flags & hasTags) {
-      writer.WriteNumber(tags.size());
+      writer.WriteNumber((unsigned long)tags.size());
 
       for (size_t i=0; i<tags.size(); i++) {
         writer.WriteNumber((unsigned long)tags[i].key);
@@ -272,12 +272,12 @@ namespace osmscout {
     }
 
     if (flags & hasRestrictions) {
-      writer.WriteNumber(restrictions.size());
+      writer.WriteNumber((unsigned long)restrictions.size());
 
       for (size_t i=0; i<restrictions.size(); i++) {
         writer.WriteNumber((unsigned long)restrictions[i].type);
 
-        writer.WriteNumber(restrictions[i].members.size());
+        writer.WriteNumber((unsigned long)restrictions[i].members.size());
 
         for (size_t j=0; j<restrictions[i].members.size(); j++) {
           writer.Write(restrictions[i].members[j]);

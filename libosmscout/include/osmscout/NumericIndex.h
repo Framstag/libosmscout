@@ -332,9 +332,9 @@ namespace osmscout {
       return false;
     }
 
-    size_t levels=1;
-    size_t tmp;
-    size_t indexLevelSize=parameter.GetNumericIndexLevelSize();
+    uint32_t levels=1;
+    size_t   tmp;
+    size_t   indexLevelSize=parameter.GetNumericIndexLevelSize();
 
     tmp=dataCount;
     while (tmp/indexLevelSize>0) {
@@ -347,8 +347,8 @@ namespace osmscout {
     progress.Info(NumberToString(dataCount)+" entries will be stored in "+NumberToString(levels)+ " levels using index level size of "+NumberToString(indexLevelSize));
 
 
-    writer.WriteNumber(levels);         // Number of levels
-    writer.WriteNumber(indexLevelSize); // Size of index page
+    writer.WriteNumber((unsigned long)levels);         // Number of levels
+    writer.WriteNumber((unsigned long)indexLevelSize); // Size of index page
     writer.WriteNumber((unsigned long)dataCount); // Number of nodes
 
     writer.GetPos(lastLevelPageStart);

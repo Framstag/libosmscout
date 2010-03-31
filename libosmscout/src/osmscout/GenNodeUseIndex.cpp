@@ -38,11 +38,11 @@ namespace osmscout {
   {
     progress.SetAction("Analysing distribution");
 
-    std::set<TypeId>    types;
-    size_t              nodeCount=0;
-    std::vector<size_t> nodeDistribution;
-    FileScanner         scanner;
-    size_t              intervalSize=parameter.GetNodeIndexIntervalSize();
+    std::set<TypeId>      types;
+    size_t                nodeCount=0;
+    std::vector<uint32_t> nodeDistribution;
+    FileScanner           scanner;
+    uint32_t              intervalSize=parameter.GetNodeIndexIntervalSize();
 
     typeConfig.GetRoutables(types);
 
@@ -156,11 +156,11 @@ namespace osmscout {
       index=newIndex;
     }
 
-    std::vector<uint32_t> resultDistribution; // Number of entries in interval
-    std::vector<uint32_t/*FileOffset*/> resultOffset;       // Offset for each interval
-    std::vector<uint32_t> resultOffsetCount;  // Number of entries for each interval
-    FileOffset            indexOffset;        // Start of the offset table in file
-    FileWriter          writer;
+    std::vector<uint32_t>   resultDistribution; // Number of entries in interval
+    std::vector<FileOffset> resultOffset;       // Offset for each interval
+    std::vector<uint32_t>   resultOffsetCount;  // Number of entries for each interval
+    FileOffset              indexOffset;        // Start of the offset table in file
+    FileWriter              writer;
 
     for (std::map<Id, std::set<Id> >::const_iterator res=wayWayMap.begin();
          res!=wayWayMap.end();
@@ -184,7 +184,7 @@ namespace osmscout {
       return false;
     }
 
-    size_t intervalCount=0;
+    uint32_t intervalCount=0;
 
     for (size_t i=0; i<resultDistribution.size(); i++) {
       if (resultDistribution[i]>0) {
@@ -192,8 +192,8 @@ namespace osmscout {
       }
     }
 
-    writer.WriteNumber(intervalSize);  // The size of the interval
-    writer.WriteNumber(intervalCount); // The number of intervals
+    writer.WriteNumber((unsigned long)intervalSize);  // The size of the interval
+    writer.WriteNumber((unsigned long)intervalCount); // The number of intervals
 
     writer.GetPos(indexOffset);
 
@@ -221,7 +221,7 @@ namespace osmscout {
            id!=wayWayMap.end() && id->first<(i+1)*intervalSize;
            ++id) {
         writer.Write(id->first);          // The id of the way/area
-        writer.WriteNumber(id->second.size());  // The number of references
+        writer.WriteNumber((unsigned long)id->second.size());  // The number of references
 
         for (std::set<Id>::const_iterator ref=id->second.begin();
              ref!=id->second.end();

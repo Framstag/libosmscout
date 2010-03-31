@@ -56,7 +56,7 @@ namespace osmscout {
     for (size_t i=0; i<nodeCount; i++) {
       scanner.Read(nodes[i]);
     }
-  
+
     return scanner.HasError();
   }
 
@@ -66,13 +66,13 @@ namespace osmscout {
     writer.WriteNumber((unsigned long)type);
     writer.Write(isArea);
 
-    writer.WriteNumber(tags.size());
+    writer.WriteNumber((unsigned long)tags.size());
     for (size_t i=0; i<tags.size(); i++) {
       writer.WriteNumber((unsigned long)tags[i].key);
       writer.Write(tags[i].value);
     }
 
-    writer.WriteNumber(nodes.size());
+    writer.WriteNumber((unsigned long)nodes.size());
     for (size_t i=0; i<nodes.size(); i++) {
       writer.Write(nodes[i]);
     }

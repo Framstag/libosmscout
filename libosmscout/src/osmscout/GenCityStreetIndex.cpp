@@ -320,7 +320,7 @@ namespace osmscout {
     writer.Write(area.name);
     writer.WriteNumber((long)parentOffset);
 
-    writer.WriteNumber(area.areas.size());
+    writer.WriteNumber((unsigned long)area.areas.size());
     for (std::list<Area>::iterator a=area.areas.begin();
          a!=area.areas.end();
          a++) {
@@ -329,14 +329,14 @@ namespace osmscout {
       }
     }
 
-    writer.WriteNumber(area.nodes.size());
+    writer.WriteNumber((unsigned long)area.nodes.size());
     for (std::map<std::string,std::list<Id> >::const_iterator node=area.nodes.begin();
          node!=area.nodes.end();
          ++node) {
       Id lastId=0;
 
       writer.Write(node->first);               // Node name
-      writer.WriteNumber(node->second.size()); // Number of ids
+      writer.WriteNumber((unsigned long)node->second.size()); // Number of ids
 
       for (std::list<Id>::const_iterator id=node->second.begin();
              id!=node->second.end();
@@ -346,14 +346,14 @@ namespace osmscout {
       }
     }
 
-    writer.WriteNumber(area.ways.size());
+    writer.WriteNumber((unsigned long)area.ways.size());
     for (std::map<std::string,std::list<Id> >::const_iterator way=area.ways.begin();
          way!=area.ways.end();
          ++way) {
       Id lastId=0;
 
       writer.Write(way->first);               // Way name
-      writer.WriteNumber(way->second.size()); // Number of ids
+      writer.WriteNumber((unsigned long)way->second.size()); // Number of ids
 
       for (std::list<Id>::const_iterator id=way->second.begin();
            id!=way->second.end();
@@ -409,7 +409,7 @@ namespace osmscout {
   static bool WriteLocationRefs(FileWriter& writer,
                                 const std::map<std::string,std::list<LocationRef> >& locationRefs)
   {
-    writer.WriteNumber(locationRefs.size());
+    writer.WriteNumber((unsigned long)locationRefs.size());
 
     for (std::map<std::string,std::list<LocationRef> >::const_iterator n=locationRefs.begin();
          n!=locationRefs.end();
@@ -418,7 +418,7 @@ namespace osmscout {
         return false;
       }
 
-      if (!writer.WriteNumber(n->second.size())) {
+      if (!writer.WriteNumber((unsigned long)n->second.size())) {
         return false;
       }
 

@@ -69,7 +69,7 @@ namespace osmscout {
     writer.Write(latValue);
     writer.Write(lonValue);
 
-    writer.WriteNumber(tags.size());
+    writer.WriteNumber((unsigned long)tags.size());
     for (size_t i=0; i<tags.size(); i++) {
       writer.WriteNumber((unsigned long)tags[i].key);
       writer.Write(tags[i].value);

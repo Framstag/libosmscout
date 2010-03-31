@@ -65,13 +65,13 @@ namespace osmscout {
     writer.Write(id);
     writer.WriteNumber((unsigned long)type);
 
-    writer.WriteNumber(tags.size());
+    writer.WriteNumber((unsigned long)tags.size());
     for (size_t i=0; i<tags.size(); i++) {
       writer.WriteNumber((unsigned long)tags[i].key);
       writer.Write(tags[i].value);
     }
 
-    writer.WriteNumber(members.size());
+    writer.WriteNumber((unsigned long)members.size());
     for (size_t i=0; i<members.size(); i++) {
       writer.WriteNumber((unsigned long)members[i].type);
       writer.Write(members[i].id);

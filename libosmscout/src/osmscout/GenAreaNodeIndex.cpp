@@ -89,9 +89,9 @@ namespace osmscout {
 
     progress.SetAction("Calculating statistics");
 
-    size_t drawTypeSum=0;
-    size_t tileSum=0;
-    size_t nodeSum=0;
+    uint32_t drawTypeSum=0;
+    size_t   tileSum=0;
+    size_t   nodeSum=0;
 
     //std::cout << "Number of tiles per type" << std::endl;
 
@@ -132,18 +132,18 @@ namespace osmscout {
     }
 
     // The number of draw types we have an index for
-    writer.WriteNumber(drawTypeSum); // Number of entries
+    writer.WriteNumber((unsigned long)drawTypeSum); // Number of entries
 
     for (TypeId i=0; i<drawTypeTileIds.size(); i++) {
       if (i!=typeIgnore && drawTypeTileIds[i].size()>0) {
         writer.WriteNumber((unsigned long)i);          // The draw type id
-        writer.WriteNumber(drawTypeTileIds[i].size()); // The number of tiles
+        writer.WriteNumber((unsigned long)drawTypeTileIds[i].size()); // The number of tiles
 
         for (std::map<TileId,std::list<Id> >::const_iterator tile=drawTypeTileIds[i].begin();
              tile!=drawTypeTileIds[i].end();
              ++tile) {
           writer.WriteNumber((unsigned long)tile->first);            // The tile id
-          writer.WriteNumber(tile->second.size());                   // The number of nodes
+          writer.WriteNumber((unsigned long)tile->second.size());                   // The number of nodes
 
           // List of node ids in tile with given draw type...
           for (std::list<Id>::const_iterator id=tile->second.begin();

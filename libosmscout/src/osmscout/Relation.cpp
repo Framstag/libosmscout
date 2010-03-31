@@ -124,17 +124,17 @@ namespace osmscout {
     writer.WriteNumber((unsigned long)type);
     writer.Write(relType);
 
-    writer.WriteNumber(tags.size());
+    writer.WriteNumber((unsigned long)tags.size());
     for (size_t i=0; i<tags.size(); i++) {
       writer.WriteNumber((unsigned long)tags[i].key);
       writer.Write(tags[i].value);
     }
 
-    writer.WriteNumber(roles.size());
+    writer.WriteNumber((unsigned long)roles.size());
     for (size_t i=0; i<roles.size(); i++) {
       writer.Write(roles[i].type);
       writer.Write(roles[i].role);
-      writer.WriteNumber(roles[i].nodes.size());
+      writer.WriteNumber((unsigned long)roles[i].nodes.size());
 
       for (size_t j=0; j<roles[i].nodes.size(); j++) {
         uint32_t latValue=(uint32_t)round((roles[i].nodes[j].lat+180.0)*conversionFactor);

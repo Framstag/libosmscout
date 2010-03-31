@@ -112,7 +112,7 @@ namespace osmscout {
       return false;
     }
 
-    writer.WriteNumber(parameter.GetAreaAreaIndexMaxMag()); // MaxMag
+    writer.WriteNumber((unsigned long)parameter.GetAreaAreaIndexMaxMag()); // MaxMag
 
     int l=parameter.GetAreaAreaIndexMaxMag();
 
@@ -265,7 +265,7 @@ namespace osmscout {
       //
       // Store all index entries for this level and store their file offset
       //
-      writer.WriteNumber(leafs.size()); // Number of leafs
+      writer.WriteNumber((unsigned long)leafs.size()); // Number of leafs
       for (std::map<Coord,Leaf>::iterator leaf=leafs.begin();
            leaf!=leafs.end();
            ++leaf) {
@@ -284,12 +284,12 @@ namespace osmscout {
           }
         }
 
-        writer.WriteNumber(leaf->second.dataOffsets.size());
+        writer.WriteNumber((unsigned long)leaf->second.dataOffsets.size());
         for (std::list<FileOffset>::const_iterator o=leaf->second.dataOffsets.begin();
              o!=leaf->second.dataOffsets.end();
              o++) {
           // TODO: Is writer.Write better?
-          writer.WriteNumber((size_t)*o);
+          writer.WriteNumber((unsigned long)*o);
         }
       }
 
