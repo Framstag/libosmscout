@@ -488,7 +488,7 @@ namespace osmscout {
           }
         }
 
-        std::cout << "Storing relation " << rel.relType << " " << rel.type << " " << name << std::endl;
+        //progress.Debug("Storing relation "+rel.relType+" "+NumberToString(rel.type)+" "+name);
 
         rel.id=rawRel.id;
         rel.tags=rawRel.tags;
