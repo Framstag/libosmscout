@@ -51,8 +51,8 @@ namespace osmscout {
       */
     struct IndexEntry
     {
-      size_t startId;
-      size_t fileOffset;
+      Id         startId;
+      FileOffset fileOffset;
     };
 
     typedef Cache<FileOffset,std::vector<IndexEntry> > PageCache;
@@ -72,8 +72,8 @@ namespace osmscout {
     std::string                    filepart;
     std::string                    filename;
     mutable FileScanner            scanner;
-    size_t                         levels;
-    size_t                         levelSize;
+    uint32_t                       levels;
+    uint32_t                       levelSize;
     std::vector<IndexEntry>        root;
     mutable std::vector<PageCache> leafs;
 
@@ -106,8 +106,8 @@ namespace osmscout {
   template <class N, class T>
   bool NumericIndex<N,T>::Load(const std::string& path)
   {
-    size_t      entries;
-    size_t      lastLevelPageStart;
+    uint32_t    entries;
+    FileOffset  lastLevelPageStart;
 
     filename=path+"/"+filepart;
 
@@ -117,7 +117,7 @@ namespace osmscout {
 
     scanner.ReadNumber(levels);
     scanner.ReadNumber(levelSize);
-    scanner.Read(entries);
+    scanner.ReadNumber(entries);
     scanner.Read(lastLevelPageStart);
 
     std::cout << filepart <<": " << levels << " " << levelSize << " " << entries << " " << lastLevelPageStart << std::endl;
@@ -134,8 +134,8 @@ namespace osmscout {
       }
     }
 
-    size_t sio=0;
-    size_t poo=0;
+    Id         sio=0;
+    FileOffset poo=0;
 
     std::cout << levelEntries << " entries in first level" << std::endl;
 
@@ -143,8 +143,8 @@ namespace osmscout {
 
     for (size_t i=0; i<levelEntries; i++) {
       IndexEntry entry;
-      size_t     si;
-      size_t     po;
+      Id         si;
+      FileOffset po;
 
       scanner.ReadNumber(si);
       scanner.ReadNumber(po);
@@ -186,7 +186,7 @@ namespace osmscout {
       }
 
       if (r<root.size()) {
-        size_t     startId=root[r].startId;
+        Id         startId=root[r].startId;
         FileOffset offset=root[r].fileOffset;
 
         for (size_t level=0; level<levels-1; level++) {
@@ -213,8 +213,8 @@ namespace osmscout {
             entry.fileOffset=0;
 
             for (size_t j=0; j<levelSize; j++) {
-              size_t cidx;
-              size_t coff;
+              Id         cidx;
+              FileOffset coff;
 
               scanner.ReadNumber(cidx);
               scanner.ReadNumber(coff);
@@ -300,7 +300,7 @@ namespace osmscout {
 
     FileScanner             scanner;
     FileWriter              writer;
-    size_t                  dataCount=0;
+    uint32_t                dataCount=0;
     std::vector<Id>         startingIds;
     std::vector<FileOffset> pageStarts;
     FileOffset              lastLevelPageStart;
@@ -347,15 +347,15 @@ namespace osmscout {
     progress.Info(NumberToString(dataCount)+" entries will be stored in "+NumberToString(levels)+ " levels using index level size of "+NumberToString(indexLevelSize));
 
 
-    writer.WriteNumber(levels); // Number of levels
+    writer.WriteNumber(levels);         // Number of levels
     writer.WriteNumber(indexLevelSize); // Size of index page
-    writer.Write(dataCount);        // Number of nodes
+    writer.WriteNumber((unsigned long)dataCount); // Number of nodes
 
     writer.GetPos(lastLevelPageStart);
 
-    writer.Write((unsigned long)0); // Write the starting position of the last page
+    writer.Write((FileOffset)0); // Write the starting position of the last page
 
-    size_t     lastId=0;
+    Id         lastId=0;
     FileOffset lastPos=0;
 
     progress.Info(std::string("Level ")+NumberToString(levels)+" entries "+NumberToString(dataCount));
@@ -378,14 +378,14 @@ namespace osmscout {
 
         writer.GetPos(pageStart);
 
-        writer.WriteNumber(data.id);
-        writer.WriteNumber(pos);
+        writer.WriteNumber((unsigned long)data.id);
+        writer.WriteNumber((long)pos);
         startingIds.push_back(data.id);
         pageStarts.push_back(pageStart);
       }
       else {
-        writer.WriteNumber(data.id-lastId);
-        writer.WriteNumber(pos-lastPos);
+        writer.WriteNumber((unsigned long)(data.id-lastId));
+        writer.WriteNumber((long)(pos-lastPos));
       }
 
       lastPos=pos;
@@ -414,12 +414,12 @@ namespace osmscout {
         }
 
         if (i%indexLevelSize==0) {
-          writer.WriteNumber(si[i]);
-          writer.WriteNumber(po[i]);
+          writer.WriteNumber((unsigned long)si[i]);
+          writer.WriteNumber((long)po[i]);
         }
         else {
-          writer.WriteNumber(si[i]-si[i-1]);
-          writer.WriteNumber(po[i]-po[i-1]);
+          writer.WriteNumber((unsigned long)(si[i]-si[i-1]));
+          writer.WriteNumber((long)po[i]-po[i-1]);
         }
       }
 
@@ -428,7 +428,7 @@ namespace osmscout {
 
     writer.SetPos(lastLevelPageStart);
 
-    writer.Write((unsigned long)pageStarts[0]);
+    writer.Write(pageStarts[0]);
 
     scanner.Close();
 

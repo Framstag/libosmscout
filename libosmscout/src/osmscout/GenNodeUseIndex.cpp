@@ -156,10 +156,10 @@ namespace osmscout {
       index=newIndex;
     }
 
-    std::vector<size_t> resultDistribution; // Number of entries in interval
-    std::vector<size_t> resultOffset;       // Offset for each interval
-    std::vector<size_t> resultOffsetCount;  // Number of entries for each interval
-    long                indexOffset;        // Start of the offset table in file
+    std::vector<uint32_t> resultDistribution; // Number of entries in interval
+    std::vector<uint32_t/*FileOffset*/> resultOffset;       // Offset for each interval
+    std::vector<uint32_t> resultOffsetCount;  // Number of entries for each interval
+    FileOffset            indexOffset;        // Start of the offset table in file
     FileWriter          writer;
 
     for (std::map<Id, std::set<Id> >::const_iterator res=wayWayMap.begin();
@@ -198,10 +198,10 @@ namespace osmscout {
     writer.GetPos(indexOffset);
 
     for (size_t i=0; i<intervalCount; i++) {
-      size_t offset=0;      // place holder
-      size_t offsetCount=0; // place holder
+      uint32_t/*FileOffset*/ offset=0;      // place holder
+      uint32_t offsetCount=0; // place holder
 
-      writer.Write(i);           // The interval
+      writer.Write((uint32_t)i); // The interval
       writer.Write(offset);      // The offset to the interval
       writer.Write(offsetCount); // The number of entries in the interval
     }
@@ -211,8 +211,8 @@ namespace osmscout {
         continue;
       }
 
-      size_t entryCount=0;
-      long   offset;
+      size_t     entryCount=0;
+      FileOffset offset;
 
       writer.GetPos(offset);
       resultOffset[i]=offset;
@@ -242,7 +242,7 @@ namespace osmscout {
         continue;
       }
 
-      writer.Write(i);                    // The interval (already written, but who cares)
+      writer.Write((uint32_t)i);          // The interval (already written, but who cares)
       writer.Write(resultOffset[i]);      // offset for this interval
       writer.Write(resultOffsetCount[i]); // entry count for this interval
     }

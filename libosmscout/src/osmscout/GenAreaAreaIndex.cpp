@@ -280,7 +280,7 @@ namespace osmscout {
         if (l<parameter.GetAreaAreaIndexMaxMag()) {
           // TODO: Is writer.Write better?
           for (size_t c=0; c<4; c++) {
-            writer.WriteNumber(leaf->second.children[c]);
+            writer.WriteNumber((long)leaf->second.children[c]);
           }
         }
 

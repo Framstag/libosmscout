@@ -304,7 +304,7 @@ namespace osmscout {
     return true;
   }
 
-  bool FileReader::ReadNumber(unsigned long& number)
+  bool FileReader::ReadNumber(uint32_t& number)
   {
     if (file==NULL || buffer==NULL || hasError || offset>=size) {
       hasError=true;
@@ -325,52 +325,24 @@ namespace osmscout {
     }
   }
 
-  bool FileReader::ReadNumber(unsigned int& number)
+  bool FileReader::ReadNumber(uint16_t& number)
   {
     if (file==NULL || buffer==NULL || hasError || offset>=size) {
       hasError=true;
       return false;
     }
 
-    unsigned long value;
-    size_t        bytes;
+    uint32_t value;
+    size_t   bytes;
 
     if (DecodeNumber(&buffer[offset],value,bytes)) {
       offset+=bytes;
 
-      if (value>(unsigned long)std::numeric_limits<unsigned int>::max()) {
+      if (value>(uint32_t)std::numeric_limits<uint16_t>::max()) {
         return false;
       }
 
-      number=(unsigned int)value;
-
-      return true;
-    }
-    else {
-      hasError=true;
-
-      return false;
-    }
-  }
-
-  bool FileReader::ReadNumber(NodeCount& number)
-  {
-    if (file==NULL || buffer==NULL || hasError || offset>=size) {
-      hasError=true;
-      return false;
-    }
-
-    unsigned long value;
-    size_t        bytes;
-
-    if (DecodeNumber(&buffer[offset],value,bytes)) {
-      offset+=bytes;
-
-      if (value>(unsigned long)std::numeric_limits<NodeCount>::max()) {
-        return false;
-      }
-
-      number=(unsigned int)value;
+      number=(uint16_t)value;
 
       return true;
     }

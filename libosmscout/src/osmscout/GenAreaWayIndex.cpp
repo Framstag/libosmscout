@@ -294,7 +294,7 @@ namespace osmscout {
         if (l<parameter.GetAreaWayIndexMaxMag()) {
           // TODO: Is writer.Write better?
           for (size_t c=0; c<4; c++) {
-            writer.WriteNumber(leaf->second.children[c]);
+            writer.WriteNumber((long)leaf->second.children[c]);
           }
         }
 
@@ -302,7 +302,7 @@ namespace osmscout {
         for (std::map<TypeId, std::list<FileOffset> >::const_iterator entry=leaf->second.dataOffsets.begin();
              entry!=leaf->second.dataOffsets.end();
              ++entry) {
-          writer.WriteNumber(entry->first);
+          writer.WriteNumber((unsigned long)entry->first);
           writer.WriteNumber(entry->second.size());
 
           for (std::list<FileOffset>::const_iterator o=entry->second.begin();

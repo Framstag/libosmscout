@@ -50,8 +50,8 @@ namespace osmscout {
 
   bool Way::Read(FileReader& reader)
   {
-    unsigned long nodeCount;
-    unsigned long flags;
+    uint32_t nodeCount;
+    uint32_t flags;
 
 
     reader.Read(id);
@@ -66,8 +66,8 @@ namespace osmscout {
     this->flags=flags;
     nodes.resize(nodeCount);
     for (size_t i=0; i<nodeCount; i++) {
-      unsigned long latValue;
-      unsigned long lonValue;
+      uint32_t latValue;
+      uint32_t lonValue;
 
       reader.Read(nodes[i].id);
       reader.Read(latValue);
@@ -86,7 +86,7 @@ namespace osmscout {
     }
 
     if (flags & hasLayer) {
-      unsigned long layer;
+      uint32_t layer;
 
       reader.ReadNumber(layer);
 
@@ -94,7 +94,7 @@ namespace osmscout {
     }
 
     if (flags & hasTags) {
-      unsigned long tagCount;
+      uint32_t tagCount;
 
       reader.ReadNumber(tagCount);
 
@@ -110,7 +110,7 @@ namespace osmscout {
     }
 
     if (flags & hasRestrictions) {
-      unsigned long restrictionCount;
+      uint32_t restrictionCount;
 
       reader.ReadNumber(restrictionCount);
 
@@ -121,8 +121,8 @@ namespace osmscout {
       restrictions.resize(restrictionCount);
 
       for (size_t i=0; i<restrictionCount; i++) {
-        unsigned long type;
-        unsigned long memberCount;
+        uint32_t type;
+        uint32_t memberCount;
 
         reader.ReadNumber(type);
         reader.ReadNumber(memberCount);
@@ -146,8 +146,8 @@ namespace osmscout {
 
   bool Way::Read(FileScanner& scanner)
   {
-    unsigned long nodeCount;
-    unsigned long flags;
+    uint32_t nodeCount;
+    uint32_t flags;
 
     scanner.Read(id);
     scanner.ReadNumber(type);
@@ -161,8 +161,8 @@ namespace osmscout {
     this->flags=flags;
     nodes.resize(nodeCount);
     for (size_t i=0; i<nodeCount; i++) {
-      unsigned long latValue;
-      unsigned long lonValue;
+      uint32_t latValue;
+      uint32_t lonValue;
 
       scanner.Read(nodes[i].id);
       scanner.Read(latValue);
@@ -181,18 +181,13 @@ namespace osmscout {
     }
 
     if (flags & hasLayer) {
-      unsigned long layer;
-
-      scanner.ReadNumber(layer);
-
-      this->layer=layer;
+      scanner.Read(layer);
     }
 
     if (flags & hasTags) {
-      unsigned long tagCount;
+      uint32_t tagCount;
 
       scanner.ReadNumber(tagCount);
-
       if (scanner.HasError()) {
         return false;
       }
@@ -205,10 +200,9 @@ namespace osmscout {
     }
 
     if (flags & hasRestrictions) {
-      unsigned long restrictionCount;
+      uint32_t restrictionCount;
 
       scanner.ReadNumber(restrictionCount);
-
       if (scanner.HasError()) {
         return false;
       }
@@ -216,8 +210,8 @@ namespace osmscout {
       restrictions.resize(restrictionCount);
 
       for (size_t i=0; i<restrictionCount; i++) {
-        unsigned long type;
-        unsigned long memberCount;
+        uint32_t type;
+        uint32_t memberCount;
 
         scanner.ReadNumber(type);
         scanner.ReadNumber(memberCount);
@@ -242,14 +236,14 @@ namespace osmscout {
   bool Way::Write(FileWriter& writer) const
   {
     writer.Write(id);
-    writer.WriteNumber(type);
-    writer.Write((unsigned long)flags);
+    writer.WriteNumber((unsigned long)type);
+    writer.Write((uint32_t)flags);
 
     writer.WriteNumber(nodes.size());
 
     for (size_t i=0; i<nodes.size(); i++) {
-      unsigned long latValue=(unsigned long)round((nodes[i].lat+180.0)*conversionFactor);
-      unsigned long lonValue=(unsigned long)round((nodes[i].lon+90.0)*conversionFactor);
+      uint32_t latValue=(uint32_t)round((nodes[i].lat+180.0)*conversionFactor);
+      uint32_t lonValue=(uint32_t)round((nodes[i].lon+90.0)*conversionFactor);
 
       writer.Write(nodes[i].id);
       writer.Write(latValue);
@@ -265,14 +259,14 @@ namespace osmscout {
     }
 
     if (flags & hasLayer) {
-      writer.WriteNumber(layer);
+      writer.Write(layer);
     }
 
     if (flags & hasTags) {
       writer.WriteNumber(tags.size());
 
       for (size_t i=0; i<tags.size(); i++) {
-        writer.WriteNumber(tags[i].key);
+        writer.WriteNumber((unsigned long)tags[i].key);
         writer.Write(tags[i].value);
       }
     }
@@ -281,7 +275,7 @@ namespace osmscout {
       writer.WriteNumber(restrictions.size());
 
       for (size_t i=0; i<restrictions.size(); i++) {
-        writer.WriteNumber(restrictions[i].type);
+        writer.WriteNumber((unsigned long)restrictions[i].type);
 
         writer.WriteNumber(restrictions[i].members.size());
 

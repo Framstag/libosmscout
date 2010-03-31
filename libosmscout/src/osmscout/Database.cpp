@@ -88,10 +88,10 @@ namespace osmscout {
       return false;
     }
 
-    unsigned long minLonDat;
-    unsigned long minLatDat;
-    unsigned long maxLonDat;
-    unsigned long maxLatDat;
+    uint32_t minLonDat;
+    uint32_t minLatDat;
+    uint32_t maxLonDat;
+    uint32_t maxLatDat;
 
     scanner.ReadNumber(minLatDat);
     scanner.ReadNumber(minLonDat);
@@ -530,7 +530,7 @@ namespace osmscout {
         cacheRef->value.resize(indexEntry->count);
 
         for (size_t i=0; i<indexEntry->count; i++) {
-          size_t  count;
+          uint32_t count;
 
           nodeUseReader.Read(cacheRef->value[i].id);
           nodeUseReader.ReadNumber(count);

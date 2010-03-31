@@ -61,18 +61,19 @@ namespace osmscout {
     bool IsOpen() const;
     bool HasError() const;
 
-    bool SetPos(long pos);
-    bool GetPos(long &pos);
+    bool SetPos(FileOffset pos);
+    bool GetPos(FileOffset &pos);
 
     bool Read(std::string& value);
     bool Read(bool& boolean);
-    bool Read(unsigned long& number);
-    bool Read(unsigned int& number);
+    bool Read(uint16_t& number);
+    bool Read(uint32_t& number);
+    bool Read(int8_t& number);
+    bool Read(int32_t& number);
 
-    bool ReadNumber(unsigned long& number);
-    bool ReadNumber(unsigned int& number);
-    bool ReadNumber(NodeCount& number);
-    bool ReadNumber(long& number);
+    bool ReadNumber(uint32_t& number);
+    bool ReadNumber(uint16_t& number);
+    bool ReadNumber(int32_t& number);
   };
 }
 

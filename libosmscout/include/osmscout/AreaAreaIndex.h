@@ -41,7 +41,7 @@ namespace osmscout {
   private:
     std::vector<double>     cellWidth;
     std::vector<double>     cellHeight;
-    size_t                  maxLevel;
+    uint32_t                maxLevel;
     std::vector<IndexLevel> index;
 
   public:

@@ -25,10 +25,10 @@ namespace osmscout {
 
   bool Node::Read(FileReader& reader)
   {
-    unsigned long tmpType;
-    unsigned long tagCount;
-    unsigned long latValue;
-    unsigned long lonValue;
+    uint32_t tmpType;
+    uint32_t tagCount;
+    uint32_t latValue;
+    uint32_t lonValue;
 
     reader.Read(id);
     reader.ReadNumber(tmpType);
@@ -56,10 +56,10 @@ namespace osmscout {
 
   bool Node::Read(FileScanner& scanner)
   {
-    unsigned long tmpType;
-    unsigned long tagCount;
-    unsigned long latValue;
-    unsigned long lonValue;
+    uint32_t tmpType;
+    uint32_t tagCount;
+    uint32_t latValue;
+    uint32_t lonValue;
 
     scanner.Read(id);
     scanner.ReadNumber(tmpType);
@@ -91,13 +91,13 @@ namespace osmscout {
     uint32_t lonValue=(uint32_t)round((lon+90.0)*conversionFactor);
 
     writer.Write(id);
-    writer.WriteNumber(type);
+    writer.WriteNumber((unsigned long)type);
     writer.Write(latValue);
     writer.Write(lonValue);
 
     writer.WriteNumber(tags.size());
     for (size_t i=0; i<tags.size(); i++) {
-      writer.WriteNumber(tags[i].key);
+      writer.WriteNumber((unsigned long)tags[i].key);
       writer.Write(tags[i].value);
     }
 

@@ -465,10 +465,11 @@ namespace osmscout {
 
     xmlSAXUserParseFile(&saxParser,&parser,parameter.GetMapfile().c_str());
 
-    progress.Info(std::string("Nodes: ")+NumberToString(pp.nodeCount));
-    progress.Info(std::string("Ways:  ")+NumberToString(pp.wayCount));
-    progress.Info(std::string("Areas: ")+NumberToString(pp.areaCount));
-    progress.Info(std::string("Relations: ")+NumberToString(pp.relationCount));
+    progress.Info(std::string("Nodes:          ")+NumberToString(pp.nodeCount));
+    progress.Info(std::string("Ways/Areas/Sum: ")+NumberToString(pp.wayCount)+" "+
+                  NumberToString(pp.areaCount)+" "+
+                  NumberToString(pp.wayCount+pp.areaCount));
+    progress.Info(std::string("Relations:      ")+NumberToString(pp.relationCount));
 
     return true;
   }

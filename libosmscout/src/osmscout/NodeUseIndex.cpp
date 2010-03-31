@@ -22,7 +22,7 @@
 #include <cassert>
 #include <iostream>
 
-#include <osmscout/FileReader.h>
+#include <osmscout/FileScanner.h>
 #include <osmscout/Util.h>
 
 namespace osmscout {
@@ -30,35 +30,35 @@ namespace osmscout {
   bool NodeUseIndex::LoadNodeUseIndex(const std::string& path)
   {
     std::string file=path+"/"+"nodeuse.idx";
-    FileReader  reader;
+    FileScanner scanner;
 
     if (!GetFileSize(file,datSize)) {
       return false;
     }
 
-    if (!reader.Open(file) || !reader.ReadFileToBuffer()) {
+    if (!scanner.Open(file)) {
       return false;
     }
 
-    size_t intervalCount;
+    uint32_t intervalCount;
 
-    reader.ReadNumber(intervalSize);  // Size of interval
-    reader.ReadNumber(intervalCount); // Number of intervals
+    scanner.ReadNumber(intervalSize);  // Size of interval
+    scanner.ReadNumber(intervalCount); // Number of intervals
 
     std::cout << intervalCount << " entries of page size " << intervalSize << "..." << std::endl;
 
     for (size_t i=0; i<intervalCount; i++) {
       IndexEntry entry;
-      size_t     interval;
+      uint32_t   interval;
 
-      reader.Read(interval);     // The interval
-      reader.Read(entry.offset); // The offset into the way.dat file
-      reader.Read(entry.count);  // The number of entries in the interval
+      scanner.Read(interval);     // The interval
+      scanner.Read(entry.offset); // The offset into the way.dat file
+      scanner.Read(entry.count);  // The number of entries in the interval
 
       nodeUseIndex[interval]=entry;
     }
 
-   return !reader.HasError() && reader.Close();
+   return !scanner.HasError() && scanner.Close();
   }
 
   size_t NodeUseIndex::GetIntervalSize() const

@@ -61,8 +61,8 @@ namespace osmscout {
     int l=maxLevel;
 
     while (l>=0) {
-      size_t children=0;
-      size_t entries;
+      size_t   children=0;
+      uint32_t entries;
 
       if (!scanner.ReadNumber(entries)) {
         std::cerr << "Cannot read data (2)" << std::endl;
@@ -98,7 +98,7 @@ namespace osmscout {
           }
         }
 
-        size_t typeCount;
+        uint32_t typeCount;
 
         if (!scanner.ReadNumber(typeCount)) {
           std::cerr << "Cannot read data (5)" << std::endl;
@@ -106,8 +106,8 @@ namespace osmscout {
         }
 
         for (size_t t=0; t<typeCount; t++) {
-          TypeId type;
-          size_t offsetCount;
+          TypeId   type;
+          uint32_t offsetCount;
 
           if (!scanner.ReadNumber(type)) {
             std::cerr << "Cannot read data (6)" << std::endl;

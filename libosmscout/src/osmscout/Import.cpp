@@ -171,7 +171,7 @@ namespace osmscout {
     }
 
     if (startStep==3) {
-      progress.SetStep("3 Generating 'rawnode.idx'");
+      progress.SetStep("3 Generating 'rawway.idx'");
 
       if (!GenerateNumericIndex<Id,RawWay>(parameter,
                                            progress,

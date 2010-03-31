@@ -43,9 +43,9 @@ namespace osmscout {
   {
     std::string name;
     FileOffset  parentOffset;
-    size_t      childrenCount;
-    size_t      nodeCount;
-    size_t      wayCount;
+    uint32_t    childrenCount;
+    uint32_t    nodeCount;
+    uint32_t    wayCount;
 
     scanner.Read(name);
     scanner.ReadNumber(parentOffset);
@@ -59,7 +59,7 @@ namespace osmscout {
     scanner.ReadNumber(nodeCount);
     for (size_t i=0; i<nodeCount; i++) {
       std::string name;
-      size_t      idCount;
+      uint32_t    idCount;
       Id          lastId=0;
 
       scanner.Read(name);
@@ -78,7 +78,7 @@ namespace osmscout {
     scanner.ReadNumber(wayCount);
     for (size_t i=0; i<wayCount; i++) {
       std::string name;
-      size_t      idCount;
+      uint32_t    idCount;
       Id          lastId=0;
 
       scanner.Read(name);
@@ -133,7 +133,7 @@ namespace osmscout {
       return false;
     }
 
-    size_t areaRefs;
+    uint32_t areaRefs;
 
     if (!scanner.ReadNumber(areaRefs)) {
       return false;
@@ -143,7 +143,7 @@ namespace osmscout {
 
     for (size_t i=0; i<areaRefs; i++) {
       std::string name;
-      std::size_t entries;
+      uint32_t    entries;
 
       if (!scanner.Read(name)) {
         return false;
@@ -154,8 +154,8 @@ namespace osmscout {
       }
 
       for (size_t j=0; j<entries; j++) {
-        AdminRegion   l;
-        unsigned long type;
+        AdminRegion l;
+        uint32_t    type;
 
         l.name=name;
 

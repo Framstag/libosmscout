@@ -74,9 +74,8 @@ namespace osmscout {
     bool Read(unsigned long& number);
     bool Read(unsigned int& number);
 
-    bool ReadNumber(unsigned long& number);
-    bool ReadNumber(unsigned int& number);
-    bool ReadNumber(NodeCount& number);
+    bool ReadNumber(uint32_t& number);
+    bool ReadNumber(uint16_t& number);
   };
 }
 

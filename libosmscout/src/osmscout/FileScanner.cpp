@@ -54,7 +54,7 @@ namespace osmscout {
 
   void FileScanner::FreeBuffer()
   {
-  #if defined(HAVE_MMAP)
+#if defined(HAVE_MMAP)
     if (buffer!=NULL) {
       if (munmap(buffer,size)!=0) {
         std::cerr << "Error while calling munmap: "<< strerror(errno) << std::endl;
@@ -62,7 +62,7 @@ namespace osmscout {
 
       buffer=NULL;
     }
-  #endif
+#endif
   }
 
   bool FileScanner::Open(const std::string& filename, bool readOnly)
@@ -80,7 +80,7 @@ namespace osmscout {
       file=fopen(filename.c_str(),"r+b");
     }
 
-  #if defined(HAVE_MMAP)
+#if defined(HAVE_MMAP)
     if (file!=NULL && readOnly) {
       FreeBuffer();
 
@@ -106,11 +106,11 @@ namespace osmscout {
         this->offset=0;
       }
       else {
-        std::cerr << "Cannot mmap complete file: " << strerror(errno) << std::endl;
+        std::cerr << "Cannot mmap file " << filename << " of size " << size << ": " << strerror(errno) << std::endl;
         buffer=NULL;
       }
     }
-  #endif
+#endif
 
     hasError=file==NULL;
 
@@ -146,13 +146,13 @@ namespace osmscout {
     return file==NULL || hasError;
   }
 
-  bool FileScanner::SetPos(long pos)
+  bool FileScanner::SetPos(FileOffset pos)
   {
     if (file==NULL || hasError) {
       return false;
     }
 
-  #if defined(HAVE_MMAP)
+#if defined(HAVE_MMAP)
     if (buffer!=NULL) {
       if (pos>=size) {
         return false;
@@ -162,24 +162,24 @@ namespace osmscout {
 
       return true;
     }
-  #endif
+#endif
 
     hasError=fseek(file,pos,SEEK_SET)!=0;
 
     return !hasError;
   }
 
-  bool FileScanner::GetPos(long& pos)
+  bool FileScanner::GetPos(FileOffset& pos)
   {
     if (file==NULL || hasError) {
     }
 
-  #if defined(HAVE_MMAP)
+#if defined(HAVE_MMAP)
     if (buffer!=NULL) {
       pos=offset;
       return true;
     }
-  #endif
+#endif
 
     pos=ftell(file);
 
@@ -196,7 +196,7 @@ namespace osmscout {
 
     value.clear();
 
-  #if defined(HAVE_MMAP)
+#if defined(HAVE_MMAP)
     if (buffer!=NULL) {
       size_t start=offset;
 
@@ -210,7 +210,7 @@ namespace osmscout {
 
       return true;
     }
-  #endif
+#endif
 
     char character;
 
@@ -239,7 +239,7 @@ namespace osmscout {
       return false;
     }
 
-  #if defined(HAVE_MMAP)
+#if defined(HAVE_MMAP)
     if (buffer!=NULL) {
       if (offset+sizeof(char)>size) {
         hasError=true;
@@ -252,7 +252,7 @@ namespace osmscout {
 
       return true;
     }
-  #endif
+#endif
 
     char value;
 
@@ -267,7 +267,7 @@ namespace osmscout {
     return true;
   }
 
-  bool FileScanner::Read(unsigned long& number)
+  bool FileScanner::Read(uint16_t& number)
   {
     if (file==NULL || hasError) {
       return false;
@@ -275,67 +275,29 @@ namespace osmscout {
 
     number=0;
 
-  #if defined(HAVE_MMAP)
+#if defined(HAVE_MMAP)
     if (buffer!=NULL) {
-      if (offset+sizeof(unsigned long)>size) {
+      if (offset+sizeof(uint16_t)>size) {
         hasError=true;
         return false;
       }
 
-      for (size_t i=0; i<sizeof(unsigned long); i++) {
-      number=number | (((unsigned char)buffer[offset+i]) << (i*8));
-      }
-
-      offset+=sizeof(unsigned long);
-
-      return true;
-    }
-  #endif
-
-    unsigned char buffer[sizeof(unsigned long)];
-
-    hasError=fread(&buffer,sizeof(char),sizeof(unsigned long),file)!=sizeof(unsigned long);
-
-    if (!hasError) {
-      for (size_t i=0; i<sizeof(unsigned long); i++) {
-        number=number | (buffer[i] << (i*8));
-      }
-    }
-
-    return !hasError;
-  }
-
-  bool FileScanner::Read(unsigned int& number)
-  {
-    if (file==NULL || hasError) {
-      return false;
-    }
-
-    number=0;
-
-  #if defined(HAVE_MMAP)
-    if (buffer!=NULL) {
-      if (offset+sizeof(unsigned int)>size) {
-        hasError=true;
-        return false;
-      }
-
-      for (size_t i=0; i<sizeof(unsigned int); i++) {
+      for (size_t i=0; i<sizeof(uint16_t); i++) {
         number=number | (((unsigned char)buffer[offset+i]) << (i*8));
       }
 
-      offset+=sizeof(unsigned int);
+      offset+=sizeof(uint16_t);
 
       return true;
     }
-  #endif
+#endif
 
-    unsigned char buffer[sizeof(unsigned int)];
+    unsigned char buffer[sizeof(uint16_t)];
 
-    hasError=fread(&buffer,sizeof(char),sizeof(unsigned int),file)!=sizeof(unsigned int);
+    hasError=fread(&buffer,sizeof(char),sizeof(uint16_t),file)!=sizeof(uint16_t);
 
     if (!hasError) {
-      for (size_t i=0; i<sizeof(unsigned int); i++) {
+      for (size_t i=0; i<sizeof(uint16_t); i++) {
         number=number | (buffer[i] << (i*8));
       }
     }
@@ -343,7 +305,7 @@ namespace osmscout {
     return true;
   }
 
-  bool FileScanner::ReadNumber(unsigned long& number)
+  bool FileScanner::Read(uint32_t& number)
   {
     if (file==NULL || hasError) {
       return false;
@@ -351,7 +313,121 @@ namespace osmscout {
 
     number=0;
 
-  #if defined(HAVE_MMAP)
+#if defined(HAVE_MMAP)
+    if (buffer!=NULL) {
+      if (offset+sizeof(uint32_t)>size) {
+        hasError=true;
+        return false;
+      }
+
+      for (size_t i=0; i<sizeof(uint32_t); i++) {
+      number=number | (((unsigned char)buffer[offset+i]) << (i*8));
+      }
+
+      offset+=sizeof(uint32_t);
+
+      return true;
+    }
+#endif
+
+    unsigned char buffer[sizeof(uint32_t)];
+
+    hasError=fread(&buffer,sizeof(char),sizeof(uint32_t),file)!=sizeof(uint32_t);
+
+    if (!hasError) {
+      for (size_t i=0; i<sizeof(uint32_t); i++) {
+        number=number | (buffer[i] << (i*8));
+      }
+    }
+
+    return !hasError;
+  }
+
+  bool FileScanner::Read(int8_t& number)
+  {
+    if (file==NULL || hasError) {
+      return false;
+    }
+
+    number=0;
+
+#if defined(HAVE_MMAP)
+    if (buffer!=NULL) {
+      if (offset+sizeof(int8_t)>size) {
+        hasError=true;
+        return false;
+      }
+
+      for (size_t i=0; i<sizeof(int8_t); i++) {
+        number=number | (((unsigned char)buffer[offset+i]) << (i*8));
+      }
+
+      offset+=sizeof(int8_t);
+
+      return true;
+    }
+#endif
+
+    unsigned char buffer[sizeof(int8_t)];
+
+    hasError=fread(&buffer,sizeof(char),sizeof(int8_t),file)!=sizeof(int8_t);
+
+    if (!hasError) {
+      for (size_t i=0; i<sizeof(int8_t); i++) {
+        number=number | (buffer[i] << (i*8));
+      }
+    }
+
+    return true;
+  }
+
+  bool FileScanner::Read(int32_t& number)
+  {
+    if (file==NULL || hasError) {
+      return false;
+    }
+
+    number=0;
+
+#if defined(HAVE_MMAP)
+    if (buffer!=NULL) {
+      if (offset+sizeof(FileOffset)>size) {
+        hasError=true;
+        return false;
+      }
+
+      for (size_t i=0; i<sizeof(FileOffset); i++) {
+        number=number | (((unsigned char)buffer[offset+i]) << (i*8));
+      }
+
+      offset+=sizeof(FileOffset);
+
+      return true;
+    }
+#endif
+
+    unsigned char buffer[sizeof(FileOffset)];
+
+    hasError=fread(&buffer,sizeof(char),sizeof(FileOffset),file)!=sizeof(FileOffset);
+
+    if (!hasError) {
+      for (size_t i=0; i<sizeof(FileOffset); i++) {
+        number=number | (buffer[i] << (i*8));
+      }
+    }
+
+    return true;
+  }
+
+  bool FileScanner::ReadNumber(uint32_t& number)
+  {
+    if (file==NULL || hasError) {
+      return false;
+    }
+
+    number=0;
+
+#if defined(HAVE_MMAP)
     if (buffer!=NULL) {
       if (offset>=size) {
         hasError=true;
@@ -371,7 +447,7 @@ namespace osmscout {
         return false;
       }
     }
-  #endif
+#endif
 
     char buffer;
 
@@ -387,7 +463,7 @@ namespace osmscout {
       size_t idx=0;
 
       while (true) {
-        unsigned long add=(buffer & 0x7f);
+        uint32_t add=(buffer & 0x7f);
 
         number=number | (add << (idx*7));
 
@@ -405,38 +481,20 @@ namespace osmscout {
     }
   }
 
-  bool FileScanner::ReadNumber(unsigned int& number)
+  bool FileScanner::ReadNumber(uint16_t& number)
   {
-    unsigned long value;
+    uint32_t value;
 
     if (!ReadNumber(value)) {
       return false;
     }
 
-    if (value>(unsigned long)std::numeric_limits<int>::max()) {
+    if (value>(uint32_t)std::numeric_limits<uint16_t>::max()) {
       hasError=true;
       return false;
     }
 
-    number=(unsigned int)value;
-
-    return true;
-  }
-
-  bool FileScanner::ReadNumber(NodeCount& number)
-  {
-    unsigned long value;
-
-    if (!ReadNumber(value)) {
-      return false;
-    }
-
-    if (value>(unsigned long)std::numeric_limits<NodeCount>::max()) {
-      hasError=true;
-      return false;
-    }
-
-    number=(NodeCount)value;
+    number=(uint16_t)value;
 
     return true;
   }
@@ -444,20 +502,20 @@ namespace osmscout {
   /**
     TODO: Handle real negative numbers!
     */
-  bool FileScanner::ReadNumber(long& number)
+  bool FileScanner::ReadNumber(int32_t& number)
   {
-    unsigned long value;
+    uint32_t value;
 
     if (!ReadNumber(value)) {
       return false;
     }
 
-    if (value>(long)std::numeric_limits<long>::max()) {
+    if (value>(int32_t)std::numeric_limits<int32_t>::max()) {
       hasError=true;
       return false;
     }
 
-    number=(long)value;
+    number=(int32_t)value;
 
     return true;
   }

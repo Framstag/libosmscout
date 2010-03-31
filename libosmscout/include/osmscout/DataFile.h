@@ -142,7 +142,7 @@ namespace osmscout {
         cacheRef->value.Read(scanner);
 
         if (scanner.HasError()) {
-          std::cerr << "Error while reading from file " << datafilename << "!" << std::endl;
+          std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
           // TODO: Remove broken entry from cache
           scanner.Close();
           return false;

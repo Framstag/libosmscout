@@ -26,14 +26,17 @@ namespace osmscout {
   bool RawWay::Read(FileScanner& scanner)
   {
     scanner.Read(id);
+    if (scanner.HasError()) {
+      return false;
+    }
+
     scanner.ReadNumber(type);
     scanner.Read(isArea);
 
-    unsigned long tagCount;
-    unsigned long nodeCount;
+    uint32_t tagCount;
+    uint32_t nodeCount;
 
     scanner.ReadNumber(tagCount);
-
     if (scanner.HasError()) {
       return false;
     }
@@ -45,7 +48,6 @@ namespace osmscout {
     }
 
     scanner.ReadNumber(nodeCount);
-
     if (scanner.HasError()) {
       return false;
     }
@@ -54,19 +56,19 @@ namespace osmscout {
     for (size_t i=0; i<nodeCount; i++) {
       scanner.Read(nodes[i]);
     }
-
+  
     return scanner.HasError();
   }
 
   bool RawWay::Write(FileWriter& writer) const
   {
     writer.Write(id);
-    writer.WriteNumber(type);
+    writer.WriteNumber((unsigned long)type);
     writer.Write(isArea);
 
     writer.WriteNumber(tags.size());
     for (size_t i=0; i<tags.size(); i++) {
-      writer.WriteNumber(tags[i].key);
+      writer.WriteNumber((unsigned long)tags[i].key);
       writer.Write(tags[i].value);
     }
 

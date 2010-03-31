@@ -294,16 +294,18 @@ namespace osmscout {
          area!=parent.areas.end();
          ++area) {
 
-      area->minlon=area->area[0].lon;
-      area->maxlon=area->area[0].lon;
-      area->minlat=area->area[0].lat;
-      area->maxlat=area->area[0].lat;
+      if (area->area.size()>0) {
+        area->minlon=area->area[0].lon;
+        area->maxlon=area->area[0].lon;
+        area->minlat=area->area[0].lat;
+        area->maxlat=area->area[0].lat;
 
-      for (size_t i=1; i<area->area.size(); i++) {
-        area->minlon=std::min(area->minlon,area->area[i].lon);
-        area->maxlon=std::max(area->maxlon,area->area[i].lon);
-        area->minlat=std::min(area->minlat,area->area[i].lat);
-        area->maxlat=std::max(area->maxlat,area->area[i].lat);
+        for (size_t i=1; i<area->area.size(); i++) {
+          area->minlon=std::min(area->minlon,area->area[i].lon);
+          area->maxlon=std::max(area->maxlon,area->area[i].lon);
+          area->minlat=std::min(area->minlat,area->area[i].lat);
+          area->maxlat=std::max(area->maxlat,area->area[i].lat);
+        }
       }
 
       CalculateAreaBounds(*area);
@@ -316,7 +318,7 @@ namespace osmscout {
     writer.GetPos(area.offset);
 
     writer.Write(area.name);
-    writer.WriteNumber(parentOffset);
+    writer.WriteNumber((long)parentOffset);
 
     writer.WriteNumber(area.areas.size());
     for (std::list<Area>::iterator a=area.areas.begin();
@@ -339,7 +341,7 @@ namespace osmscout {
       for (std::list<Id>::const_iterator id=node->second.begin();
              id!=node->second.end();
              ++id) {
-        writer.WriteNumber(*id-lastId); // Id of node
+        writer.WriteNumber((unsigned long)(*id-lastId)); // Id of node
         lastId=*id;
       }
     }
@@ -356,7 +358,7 @@ namespace osmscout {
       for (std::list<Id>::const_iterator id=way->second.begin();
            id!=way->second.end();
            ++id) {
-        writer.WriteNumber(*id-lastId); // Id of way
+        writer.WriteNumber((unsigned long)(*id-lastId)); // Id of way
         lastId=*id;
       }
     }
@@ -423,15 +425,15 @@ namespace osmscout {
       for (std::list<LocationRef>::const_iterator o=n->second.begin();
            o!=n->second.end();
            ++o) {
-        if (!writer.WriteNumber(o->reference.type)) {
+        if (!writer.WriteNumber((unsigned long)o->reference.type)) {
           return false;
         }
 
-        if (!writer.WriteNumber(o->reference.id)) {
+        if (!writer.WriteNumber((unsigned long)o->reference.id)) {
           return false;
         }
 
-        if (!writer.WriteNumber(o->offset)) {
+        if (!writer.WriteNumber((long)o->offset)) {
           return false;
         }
       }

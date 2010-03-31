@@ -25,7 +25,7 @@
 
 namespace osmscout {
 
-  typedef long     FileOffset;
+  typedef int32_t  FileOffset;
   typedef uint32_t Id;
   typedef uint32_t Page;
   typedef uint16_t TypeId;

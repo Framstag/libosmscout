@@ -66,8 +66,8 @@ namespace osmscout {
 
   bool Relation::Read(FileScanner& scanner)
   {
-    unsigned long tagCount;
-    unsigned long roleCount;
+    uint32_t tagCount;
+    uint32_t roleCount;
 
     scanner.Read(id);
     scanner.ReadNumber(type);
@@ -93,8 +93,8 @@ namespace osmscout {
 
     roles.resize(roleCount);
     for (size_t i=0; i<roleCount; i++) {
-      unsigned long nodesCount;
-      unsigned long typeValue;
+      uint32_t nodesCount;
+      uint32_t typeValue;
 
       scanner.Read(typeValue);
       roles[i].type=(TypeId)typeValue;
@@ -103,8 +103,8 @@ namespace osmscout {
 
       roles[i].nodes.resize(nodesCount);
       for (size_t j=0; j<nodesCount; j++) {
-        unsigned long latValue;
-        unsigned long lonValue;
+        uint32_t latValue;
+        uint32_t lonValue;
 
         scanner.Read(roles[i].nodes[j].id);
         scanner.Read(latValue);
@@ -121,24 +121,24 @@ namespace osmscout {
   bool Relation::Write(FileWriter& writer) const
   {
     writer.Write(id);
-    writer.WriteNumber(type);
+    writer.WriteNumber((unsigned long)type);
     writer.Write(relType);
 
     writer.WriteNumber(tags.size());
     for (size_t i=0; i<tags.size(); i++) {
-      writer.WriteNumber(tags[i].key);
+      writer.WriteNumber((unsigned long)tags[i].key);
       writer.Write(tags[i].value);
     }
 
     writer.WriteNumber(roles.size());
     for (size_t i=0; i<roles.size(); i++) {
-      writer.Write((unsigned long)roles[i].type);
+      writer.Write(roles[i].type);
       writer.Write(roles[i].role);
       writer.WriteNumber(roles[i].nodes.size());
 
       for (size_t j=0; j<roles[i].nodes.size(); j++) {
-        unsigned long latValue=(unsigned long)round((roles[i].nodes[j].lat+180.0)*conversionFactor);
-        unsigned long lonValue=(unsigned long)round((roles[i].nodes[j].lon+90.0)*conversionFactor);
+        uint32_t latValue=(uint32_t)round((roles[i].nodes[j].lat+180.0)*conversionFactor);
+        uint32_t lonValue=(uint32_t)round((roles[i].nodes[j].lon+90.0)*conversionFactor);
 
         writer.Write(roles[i].nodes[j].id);
         writer.Write(latValue);

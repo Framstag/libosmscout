@@ -29,10 +29,10 @@ namespace osmscout {
 
   struct NodeUseIndexEntry
   {
-    size_t interval;
-    size_t offset;
-    size_t size;
-    size_t count;
+    uint32_t   interval;
+    FileOffset offset;
+    uint32_t   size;
+    uint32_t   count;
   };
 
   class NodeUseIndex
@@ -40,13 +40,13 @@ namespace osmscout {
   private:
     struct IndexEntry
     {
-      size_t offset;
-      size_t count;
+      FileOffset offset;
+      uint32_t   count;
     };
 
   private:
     std::map<size_t,IndexEntry> nodeUseIndex; //! The index, mapping intervals to IndexEntry
-    unsigned long               intervalSize; //! The id range of an interval
+    uint32_t                    intervalSize; //! The id range of an interval
     long                        datSize;      //! The size of the nodeuse.dat file
 
   public:

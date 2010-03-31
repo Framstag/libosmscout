@@ -23,6 +23,10 @@
 #include <cstdio>
 #include <string>
 
+#include <stdint.h>
+
+#include <osmscout/Types.h>
+
 namespace osmscout {
   class FileWriter
   {
@@ -40,15 +44,18 @@ namespace osmscout {
 
     bool HasError() const;
 
-    bool GetPos(long &pos);
-    bool SetPos(long pos);
+    bool GetPos(FileOffset &pos);
+    bool SetPos(FileOffset pos);
 
     bool Write(const std::string& value);
     bool Write(bool boolean);
-    bool Write(unsigned long number);
-    bool Write(unsigned int number);
+    bool Write(uint16_t number);
+    bool Write(uint32_t number);
+    bool Write(int8_t number);
+    bool Write(int32_t number);
 
     bool WriteNumber(unsigned long number);
+    bool WriteNumber(long number);
   };
 }
 

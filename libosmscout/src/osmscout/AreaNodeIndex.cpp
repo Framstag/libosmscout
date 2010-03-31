@@ -24,47 +24,47 @@
 #include <iostream>
 #include <map>
 
-#include <osmscout/FileReader.h>
+#include <osmscout/FileScanner.h>
 
 namespace osmscout {
 
   bool AreaNodeIndex::LoadAreaNodeIndex(const std::string& path)
   {
-    FileReader  reader;
+    FileScanner scanner;
     std::string file=path+"/"+"areanode.idx";
 
-    if (!reader.Open(file) || !reader.ReadFileToBuffer()) {
+    if (!scanner.Open(file)) {
       return false;
     }
 
-    size_t drawTypes;
+    uint32_t drawTypes;
 
     // The number of draw types we have an index for
-    reader.ReadNumber(drawTypes); // Number of entries
+    scanner.ReadNumber(drawTypes); // Number of entries
 
     std::cout << drawTypes << " area node index entries..." << std::endl;
 
     for (size_t i=0; i<drawTypes; i++) {
-      TypeId type;
-      size_t tiles;
+      TypeId   type;
+      uint32_t tiles;
 
-      reader.ReadNumber(type);  // The draw type id
-      reader.ReadNumber(tiles); // The number of tiles
+      scanner.ReadNumber(type);  // The draw type id
+      scanner.ReadNumber(tiles); // The number of tiles
 
       for (size_t t=0; t<tiles; t++) {
         IndexEntry entry;
         TileId     tileId;
-        size_t     nodeCount;
+        uint32_t   nodeCount;
 
-        reader.ReadNumber(tileId);          // The tile id
-        reader.ReadNumber(nodeCount); // The number of nodes
+        scanner.ReadNumber(tileId);          // The tile id
+        scanner.ReadNumber(nodeCount); // The number of nodes
 
         entry.ids.reserve(nodeCount);
 
         for (size_t i=0; i<nodeCount; i++) {
           Id id;
 
-          reader.ReadNumber(id); // The id of the node
+          scanner.ReadNumber(id); // The id of the node
 
           entry.ids.push_back(id);
 
@@ -74,7 +74,7 @@ namespace osmscout {
       }
     }
 
-    return !reader.HasError() && reader.Close();
+    return !scanner.HasError() && scanner.Close();
   }
 
   size_t AreaNodeIndex::GetNodes(TypeId drawType,

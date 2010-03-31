@@ -23,8 +23,8 @@ namespace osmscout {
 
   bool RawRelation::Read(FileScanner& scanner)
   {
-    unsigned long tagCount;
-    unsigned long memberCount;
+    uint32_t tagCount;
+    uint32_t memberCount;
 
     scanner.Read(id);
     scanner.ReadNumber(type);
@@ -49,7 +49,7 @@ namespace osmscout {
 
     members.resize(memberCount);
     for (size_t i=0; i<memberCount; i++) {
-      unsigned long memberType;
+      uint32_t memberType;
 
       scanner.ReadNumber(memberType);
       members[i].type=(MemberType)memberType;
@@ -63,17 +63,17 @@ namespace osmscout {
   bool RawRelation::Write(FileWriter& writer) const
   {
     writer.Write(id);
-    writer.WriteNumber(type);
+    writer.WriteNumber((unsigned long)type);
 
     writer.WriteNumber(tags.size());
     for (size_t i=0; i<tags.size(); i++) {
-      writer.WriteNumber(tags[i].key);
+      writer.WriteNumber((unsigned long)tags[i].key);
       writer.Write(tags[i].value);
     }
 
     writer.WriteNumber(members.size());
     for (size_t i=0; i<members.size(); i++) {
-      writer.WriteNumber(members[i].type);
+      writer.WriteNumber((unsigned long)members[i].type);
       writer.Write(members[i].id);
       writer.Write(members[i].role);
     }

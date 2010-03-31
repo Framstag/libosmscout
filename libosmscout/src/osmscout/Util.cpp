@@ -250,7 +250,7 @@ namespace osmscout {
     return true;
   }
 
-  bool DecodeNumber(const char* buffer, unsigned long& number, size_t& bytes)
+  bool DecodeNumber(const char* buffer, uint32_t& number, size_t& bytes)
   {
     number=0;
     bytes=1;
@@ -262,7 +262,7 @@ namespace osmscout {
       size_t idx=0;
 
       while (true) {
-        size_t add=(buffer[idx] & 0x7f) << (idx*7);
+        uint32_t add=(buffer[idx] & 0x7f) << (idx*7);
 
         number=number | add;
 

@@ -75,7 +75,7 @@ namespace osmscout {
     return file==NULL || hasError;
   }
 
-  bool FileWriter::GetPos(long& pos)
+  bool FileWriter::GetPos(FileOffset& pos)
   {
     if (file==NULL || hasError) {
       return false;
@@ -88,7 +88,7 @@ namespace osmscout {
     return !hasError;
   }
 
-  bool FileWriter::SetPos(long pos)
+  bool FileWriter::SetPos(FileOffset pos)
   {
     if (file==NULL || hasError) {
       return false;
@@ -121,38 +121,74 @@ namespace osmscout {
     return !hasError;
   }
 
-  bool FileWriter::Write(unsigned long number)
+  bool FileWriter::Write(int8_t number)
   {
     if (file==NULL || hasError) {
       return false;
     }
 
-    char     buffer[sizeof(unsigned long)];
-    unsigned long mask=0xff;
+    char         buffer[sizeof(int8_t)];
+    unsigned int mask=0xff;
 
-    for (size_t i=0; i<sizeof(unsigned long); i++) {
+    for (size_t i=0; i<sizeof(int8_t); i++) {
       buffer[i]=(number >> (i*8)) & mask;
     }
 
-    hasError=fwrite(buffer,sizeof(char),sizeof(unsigned long),file)!=sizeof(unsigned long);
+    hasError=fwrite(buffer,sizeof(char),sizeof(int8_t),file)!=sizeof(int8_t);
 
     return !hasError;
   }
 
-  bool FileWriter::Write(unsigned int number)
+  bool FileWriter::Write(uint16_t number)
   {
     if (file==NULL || hasError) {
       return false;
     }
 
-    char         buffer[sizeof(unsigned int)];
-    unsigned int mask=0xff;
+    char     buffer[sizeof(uint16_t)];
+    uint16_t mask=0xff;
 
-    for (size_t i=0; i<sizeof(unsigned int); i++) {
+    for (size_t i=0; i<sizeof(uint16_t); i++) {
       buffer[i]=(number >> (i*8)) & mask;
     }
 
-    hasError=fwrite(buffer,sizeof(char),sizeof(unsigned int),file)!=sizeof(unsigned int);
+    hasError=fwrite(buffer,sizeof(char),sizeof(uint16_t),file)!=sizeof(uint16_t);
+
+    return !hasError;
+  }
+
+  bool FileWriter::Write(uint32_t number)
+  {
+    if (file==NULL || hasError) {
+      return false;
+    }
+
+    char     buffer[sizeof(uint32_t)];
+    uint32_t mask=0xff;
+
+    for (size_t i=0; i<sizeof(uint32_t); i++) {
+      buffer[i]=(number >> (i*8)) & mask;
+    }
+
+    hasError=fwrite(buffer,sizeof(char),sizeof(uint32_t),file)!=sizeof(uint32_t);
+
+    return !hasError;
+  }
+
+  bool FileWriter::Write(int32_t number)
+  {
+    if (file==NULL || hasError) {
+      return false;
+    }
+
+    char         buffer[sizeof(FileOffset)];
+    unsigned int mask=0xff;
+
+    for (size_t i=0; i<sizeof(FileOffset); i++) {
+      buffer[i]=(number >> (i*8)) & mask;
+    }
+
+    hasError=fwrite(buffer,sizeof(char),sizeof(FileOffset),file)!=sizeof(FileOffset);
 
     return !hasError;
   }
@@ -163,6 +199,30 @@ namespace osmscout {
     is small. Don't use this method for storing ids, latitude or longitude.
     */
   bool FileWriter::WriteNumber(unsigned long number)
+  {
+    char   buffer[5];
+    size_t bytes;
+
+    if (file==NULL || hasError) {
+      return false;
+    }
+
+    if (!EncodeNumber(number,5,buffer,bytes)) {
+      hasError=true;
+      return false;
+    }
+
+    hasError=fwrite(buffer,sizeof(char),bytes,file)!=bytes;
+
+    return !hasError;
+  }
+
+  /**
+    Write a numeric value to the file using same internal encoding
+    to reduce storage size. Note that this works only if the average number
+    is small. Don't use this method for storing ids, latitude or longitude.
+    */
+  bool FileWriter::WriteNumber(long number)
   {
     char   buffer[5];
     size_t bytes;
