@@ -65,13 +65,13 @@ namespace osmscout {
     uint32_t lonValue=(uint32_t)round((lon+90.0)*conversionFactor);
 
     writer.Write(id);
-    writer.WriteNumber((unsigned long)type);
+    writer.WriteNumber(type);
     writer.Write(latValue);
     writer.Write(lonValue);
 
-    writer.WriteNumber((unsigned long)tags.size());
+    writer.WriteNumber((uint32_t)tags.size());
     for (size_t i=0; i<tags.size(); i++) {
-      writer.WriteNumber((unsigned long)tags[i].key);
+      writer.WriteNumber(tags[i].key);
       writer.Write(tags[i].value);
     }
 

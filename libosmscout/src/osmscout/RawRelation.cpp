@@ -63,17 +63,17 @@ namespace osmscout {
   bool RawRelation::Write(FileWriter& writer) const
   {
     writer.Write(id);
-    writer.WriteNumber((unsigned long)type);
+    writer.WriteNumber(type);
 
-    writer.WriteNumber((unsigned long)tags.size());
+    writer.WriteNumber((uint32_t)tags.size());
     for (size_t i=0; i<tags.size(); i++) {
-      writer.WriteNumber((unsigned long)tags[i].key);
+      writer.WriteNumber(tags[i].key);
       writer.Write(tags[i].value);
     }
 
-    writer.WriteNumber((unsigned long)members.size());
+    writer.WriteNumber((uint32_t)members.size());
     for (size_t i=0; i<members.size(); i++) {
-      writer.WriteNumber((unsigned long)members[i].type);
+      writer.WriteNumber(members[i].type);
       writer.Write(members[i].id);
       writer.Write(members[i].role);
     }

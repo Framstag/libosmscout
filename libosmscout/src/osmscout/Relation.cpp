@@ -117,20 +117,20 @@ namespace osmscout {
   bool Relation::Write(FileWriter& writer) const
   {
     writer.Write(id);
-    writer.WriteNumber((unsigned long)type);
+    writer.WriteNumber(type);
     writer.Write(relType);
 
-    writer.WriteNumber((unsigned long)tags.size());
+    writer.WriteNumber((uint32_t)tags.size());
     for (size_t i=0; i<tags.size(); i++) {
-      writer.WriteNumber((unsigned long)tags[i].key);
+      writer.WriteNumber(tags[i].key);
       writer.Write(tags[i].value);
     }
 
-    writer.WriteNumber((unsigned long)roles.size());
+    writer.WriteNumber((uint32_t)roles.size());
     for (size_t i=0; i<roles.size(); i++) {
-      writer.WriteNumber((unsigned long)roles[i].type);
+      writer.WriteNumber(roles[i].type);
       writer.Write(roles[i].role);
-      writer.WriteNumber((unsigned long)roles[i].nodes.size());
+      writer.WriteNumber((uint32_t)roles[i].nodes.size());
 
       for (size_t j=0; j<roles[i].nodes.size(); j++) {
         uint32_t latValue=(uint32_t)round((roles[i].nodes[j].lat+180.0)*conversionFactor);

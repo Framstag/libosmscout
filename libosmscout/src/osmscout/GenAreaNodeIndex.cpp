@@ -132,24 +132,24 @@ namespace osmscout {
     }
 
     // The number of draw types we have an index for
-    writer.WriteNumber((unsigned long)drawTypeSum); // Number of entries
+    writer.WriteNumber(drawTypeSum); // Number of entries
 
     for (TypeId i=0; i<drawTypeTileIds.size(); i++) {
       if (i!=typeIgnore && drawTypeTileIds[i].size()>0) {
-        writer.WriteNumber((unsigned long)i);          // The draw type id
-        writer.WriteNumber((unsigned long)drawTypeTileIds[i].size()); // The number of tiles
+        writer.WriteNumber(i);                                   // The draw type id
+        writer.WriteNumber((uint32_t)drawTypeTileIds[i].size()); // The number of tiles
 
         for (std::map<TileId,std::list<Id> >::const_iterator tile=drawTypeTileIds[i].begin();
              tile!=drawTypeTileIds[i].end();
              ++tile) {
-          writer.WriteNumber((unsigned long)tile->first);            // The tile id
-          writer.WriteNumber((unsigned long)tile->second.size());                   // The number of nodes
+          writer.WriteNumber(tile->first);                   // The tile id
+          writer.WriteNumber((uint32_t)tile->second.size()); // The number of nodes
 
           // List of node ids in tile with given draw type...
           for (std::list<Id>::const_iterator id=tile->second.begin();
                id!=tile->second.end();
                ++id) {
-            writer.WriteNumber((unsigned long)*id); // The id of the node
+            writer.WriteNumber(*id); // The id of the node
           }
         }
       }

@@ -236,10 +236,10 @@ namespace osmscout {
   bool Way::Write(FileWriter& writer) const
   {
     writer.Write(id);
-    writer.WriteNumber((unsigned long)type);
+    writer.WriteNumber(type);
     writer.Write((uint32_t)flags);
 
-    writer.WriteNumber((unsigned long)nodes.size());
+    writer.WriteNumber((uint32_t)nodes.size());
 
     for (size_t i=0; i<nodes.size(); i++) {
       uint32_t latValue=(uint32_t)round((nodes[i].lat+180.0)*conversionFactor);
@@ -263,21 +263,21 @@ namespace osmscout {
     }
 
     if (flags & hasTags) {
-      writer.WriteNumber((unsigned long)tags.size());
+      writer.WriteNumber((uint32_t)tags.size());
 
       for (size_t i=0; i<tags.size(); i++) {
-        writer.WriteNumber((unsigned long)tags[i].key);
+        writer.WriteNumber(tags[i].key);
         writer.Write(tags[i].value);
       }
     }
 
     if (flags & hasRestrictions) {
-      writer.WriteNumber((unsigned long)restrictions.size());
+      writer.WriteNumber((uint32_t)restrictions.size());
 
       for (size_t i=0; i<restrictions.size(); i++) {
-        writer.WriteNumber((unsigned long)restrictions[i].type);
+        writer.WriteNumber(restrictions[i].type);
 
-        writer.WriteNumber((unsigned long)restrictions[i].members.size());
+        writer.WriteNumber((uint32_t)restrictions[i].members.size());
 
         for (size_t j=0; j<restrictions[i].members.size(); j++) {
           writer.Write(restrictions[i].members[j]);

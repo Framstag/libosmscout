@@ -63,16 +63,16 @@ namespace osmscout {
   bool RawWay::Write(FileWriter& writer) const
   {
     writer.Write(id);
-    writer.WriteNumber((unsigned long)type);
+    writer.WriteNumber(type);
     writer.Write(isArea);
 
-    writer.WriteNumber((unsigned long)tags.size());
+    writer.WriteNumber((uint32_t)tags.size());
     for (size_t i=0; i<tags.size(); i++) {
-      writer.WriteNumber((unsigned long)tags[i].key);
+      writer.WriteNumber(tags[i].key);
       writer.Write(tags[i].value);
     }
 
-    writer.WriteNumber((unsigned long)nodes.size());
+    writer.WriteNumber((uint32_t)nodes.size());
     for (size_t i=0; i<nodes.size(); i++) {
       writer.Write(nodes[i]);
     }

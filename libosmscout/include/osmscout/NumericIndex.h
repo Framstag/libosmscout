@@ -334,7 +334,7 @@ namespace osmscout {
 
     uint32_t levels=1;
     size_t   tmp;
-    size_t   indexLevelSize=parameter.GetNumericIndexLevelSize();
+    uint32_t indexLevelSize=parameter.GetNumericIndexLevelSize();
 
     tmp=dataCount;
     while (tmp/indexLevelSize>0) {
@@ -347,9 +347,9 @@ namespace osmscout {
     progress.Info(NumberToString(dataCount)+" entries will be stored in "+NumberToString(levels)+ " levels using index level size of "+NumberToString(indexLevelSize));
 
 
-    writer.WriteNumber((unsigned long)levels);         // Number of levels
-    writer.WriteNumber((unsigned long)indexLevelSize); // Size of index page
-    writer.WriteNumber((unsigned long)dataCount); // Number of nodes
+    writer.WriteNumber(levels);         // Number of levels
+    writer.WriteNumber(indexLevelSize); // Size of index page
+    writer.WriteNumber(dataCount); // Number of nodes
 
     writer.GetPos(lastLevelPageStart);
 
@@ -378,14 +378,14 @@ namespace osmscout {
 
         writer.GetPos(pageStart);
 
-        writer.WriteNumber((unsigned long)data.id);
-        writer.WriteNumber((long)pos);
+        writer.WriteNumber(data.id);
+        writer.WriteNumber(pos);
         startingIds.push_back(data.id);
         pageStarts.push_back(pageStart);
       }
       else {
-        writer.WriteNumber((unsigned long)(data.id-lastId));
-        writer.WriteNumber((long)(pos-lastPos));
+        writer.WriteNumber((data.id-lastId));
+        writer.WriteNumber((pos-lastPos));
       }
 
       lastPos=pos;
@@ -414,12 +414,12 @@ namespace osmscout {
         }
 
         if (i%indexLevelSize==0) {
-          writer.WriteNumber((unsigned long)si[i]);
-          writer.WriteNumber((long)po[i]);
+          writer.WriteNumber(si[i]);
+          writer.WriteNumber(po[i]);
         }
         else {
-          writer.WriteNumber((unsigned long)(si[i]-si[i-1]));
-          writer.WriteNumber((long)po[i]-po[i-1]);
+          writer.WriteNumber((si[i]-si[i-1]));
+          writer.WriteNumber(po[i]-po[i-1]);
         }
       }
 

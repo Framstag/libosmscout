@@ -54,8 +54,9 @@ namespace osmscout {
     bool Write(int8_t number);
     bool Write(int32_t number);
 
-    bool WriteNumber(unsigned long number);
-    bool WriteNumber(long number);
+    bool WriteNumber(uint32_t number);
+    bool WriteNumber(uint16_t number);
+    bool WriteNumber(int32_t number);
   };
 }
 

@@ -318,9 +318,9 @@ namespace osmscout {
     writer.GetPos(area.offset);
 
     writer.Write(area.name);
-    writer.WriteNumber((long)parentOffset);
+    writer.WriteNumber(parentOffset);
 
-    writer.WriteNumber((unsigned long)area.areas.size());
+    writer.WriteNumber((uint32_t)area.areas.size());
     for (std::list<Area>::iterator a=area.areas.begin();
          a!=area.areas.end();
          a++) {
@@ -329,36 +329,36 @@ namespace osmscout {
       }
     }
 
-    writer.WriteNumber((unsigned long)area.nodes.size());
+    writer.WriteNumber((uint32_t)area.nodes.size());
     for (std::map<std::string,std::list<Id> >::const_iterator node=area.nodes.begin();
          node!=area.nodes.end();
          ++node) {
       Id lastId=0;
 
       writer.Write(node->first);               // Node name
-      writer.WriteNumber((unsigned long)node->second.size()); // Number of ids
+      writer.WriteNumber((uint32_t)node->second.size()); // Number of ids
 
       for (std::list<Id>::const_iterator id=node->second.begin();
              id!=node->second.end();
              ++id) {
-        writer.WriteNumber((unsigned long)(*id-lastId)); // Id of node
+        writer.WriteNumber(*id-lastId); // Id of node
         lastId=*id;
       }
     }
 
-    writer.WriteNumber((unsigned long)area.ways.size());
+    writer.WriteNumber((uint32_t)area.ways.size());
     for (std::map<std::string,std::list<Id> >::const_iterator way=area.ways.begin();
          way!=area.ways.end();
          ++way) {
       Id lastId=0;
 
       writer.Write(way->first);               // Way name
-      writer.WriteNumber((unsigned long)way->second.size()); // Number of ids
+      writer.WriteNumber((uint32_t)way->second.size()); // Number of ids
 
       for (std::list<Id>::const_iterator id=way->second.begin();
            id!=way->second.end();
            ++id) {
-        writer.WriteNumber((unsigned long)(*id-lastId)); // Id of way
+        writer.WriteNumber(*id-lastId); // Id of way
         lastId=*id;
       }
     }
@@ -409,7 +409,7 @@ namespace osmscout {
   static bool WriteLocationRefs(FileWriter& writer,
                                 const std::map<std::string,std::list<LocationRef> >& locationRefs)
   {
-    writer.WriteNumber((unsigned long)locationRefs.size());
+    writer.WriteNumber((uint32_t)locationRefs.size());
 
     for (std::map<std::string,std::list<LocationRef> >::const_iterator n=locationRefs.begin();
          n!=locationRefs.end();
@@ -418,22 +418,22 @@ namespace osmscout {
         return false;
       }
 
-      if (!writer.WriteNumber((unsigned long)n->second.size())) {
+      if (!writer.WriteNumber((uint32_t)n->second.size())) {
         return false;
       }
 
       for (std::list<LocationRef>::const_iterator o=n->second.begin();
            o!=n->second.end();
            ++o) {
-        if (!writer.WriteNumber((unsigned long)o->reference.type)) {
+        if (!writer.WriteNumber(o->reference.type)) {
           return false;
         }
 
-        if (!writer.WriteNumber((unsigned long)o->reference.id)) {
+        if (!writer.WriteNumber(o->reference.id)) {
           return false;
         }
 
-        if (!writer.WriteNumber((long)o->offset)) {
+        if (!writer.WriteNumber(o->offset)) {
           return false;
         }
       }
