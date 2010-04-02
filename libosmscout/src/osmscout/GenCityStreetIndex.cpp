@@ -860,11 +860,6 @@ namespace osmscout {
     progress.SetAction("Write 'nameregion.idx'");
 
     GetLocationRefs(rootArea,locationRefs);
-    for (std::list<Area>::const_iterator a=rootArea.areas.begin();
-         a!=rootArea.areas.end();
-         a++) {
-      GetLocationRefs(*a,locationRefs);
-    }
 
     if (!writer.Open("nameregion.idx")) {
       progress.Error("Cannot open 'nameregion.idx'");
