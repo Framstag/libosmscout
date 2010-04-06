@@ -35,7 +35,7 @@ namespace osmscout {
   static const double gradtorad=2*M_PI/360;
 
   static double longDash[]= {7,3};
-  static double dotted[]= {1,3};
+  static double dotted[]= {1,2};
   static double lineDot[]= {7,3,1,3};
 
   /* Returns Euclidean distance between two points */
@@ -889,7 +889,6 @@ namespace osmscout {
                           style.GetLineA());
 
     cairo_set_line_width(draw,lineWidth);
-    cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
 
     switch (style.GetStyle()) {
     case LineStyle::none:
@@ -897,15 +896,19 @@ namespace osmscout {
       assert(false);
       break;
     case LineStyle::normal:
+      cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
       cairo_set_dash(draw,NULL,0,0);
       break;
     case LineStyle::longDash:
+      cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
       cairo_set_dash(draw,longDash,2,0);
       break;
     case LineStyle::dotted:
+      cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
       cairo_set_dash(draw,dotted,2,0);
       break;
     case LineStyle::lineDot:
+      cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
       cairo_set_dash(draw,lineDot,4,0);
       break;
     }

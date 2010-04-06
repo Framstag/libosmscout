@@ -160,7 +160,7 @@
   </way>
 
   <way key="highway" value="steps" prio="11">
-    <line color="90570c" minPixel="0.5" maxPixel="0.5" width="2" />
+    <line style="dotted" color="fe9897" minPixel="4" maxPixel="4" width="2" />
     <label style="contour" minMag="detail"/>
   </way>
 
