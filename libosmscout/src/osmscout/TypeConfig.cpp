@@ -59,7 +59,6 @@ namespace osmscout {
      canBeRelation(false),
      canBeRoute(false),
      canBeIndexed(false)
-
   {
     // no code
   }
@@ -191,8 +190,20 @@ namespace osmscout {
 
   bool TypeConfig::GetRelationTypeId(std::vector<Tag> &tags,
                                      std::vector<Tag>::iterator& tag,
-                                     TypeId &type) const
+                                     TypeId &type,
+                                     bool& isArea) const
   {
+    std::string relType;
+
+    for (tag=tags.begin();
+         tag!=tags.end();
+         ++tag) {
+      if (tag->key==tagType) {
+        relType=tag->value;
+        break;
+      }
+    }
+
     type=typeIgnore;
 
     for (std::list<TypeInfo>::const_iterator t=types.begin();
@@ -205,6 +216,13 @@ namespace osmscout {
             tag->value==t->GetTagValue() &&
             t->CanBeRelation()) {
           type=t->GetId();
+          if (t->CanBeArea() &&
+              relType=="multipolygon") {
+            isArea=true;
+          }
+          else {
+            isArea=false;
+          }
           return true;
         }
       }

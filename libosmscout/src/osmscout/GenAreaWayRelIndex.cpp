@@ -17,7 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/GenAreaWayIndex.h>
+#include <osmscout/GenAreaWayRelIndex.h>
 
 #include <cassert>
 #include <cmath>
@@ -27,8 +27,8 @@
 
 #include <osmscout/FileScanner.h>
 #include <osmscout/FileWriter.h>
+#include <osmscout/Relation.h>
 #include <osmscout/Util.h>
-#include <osmscout/Way.h>
 
 #include <iostream>
 
@@ -58,13 +58,13 @@ namespace osmscout {
   };
 
 
-  struct WayLeaf
+  struct WayRelLeaf
   {
     FileOffset                              offset;
     FileOffset                              children[4];
     std::map<TypeId,std::list<FileOffset> > dataOffsets;
 
-    WayLeaf()
+    WayRelLeaf()
     : offset(0)
     {
       children[0]=0;
@@ -74,26 +74,31 @@ namespace osmscout {
     }
   };
 
-  std::string AreaWayIndexGenerator::GetDescription() const
+  std::string AreaWayRelIndexGenerator::GetDescription() const
   {
-    return "Generate 'areaway.idx'";
+    return "Generate 'areawayrel.idx'";
   }
 
-  bool AreaWayIndexGenerator::Import(const ImportParameter& parameter,
-                                     Progress& progress,
-                                     const TypeConfig& typeConfig)
+  bool AreaWayRelIndexGenerator::Import(const ImportParameter& parameter,
+                                        Progress& progress,
+                                        const TypeConfig& typeConfig)
   {
-    FileScanner             scanner;
-    std::set<Id>            blacklist;  // Ids of ways that should not be in index
-    size_t                  ways=0;     // Number of ways found
-    size_t                  consumed=0; // Number of ways consumed
-    std::vector<double>     cellWidth;
-    std::vector<double>     cellHeight;
-    std::map<Coord,WayLeaf> leafs;
-    std::map<Coord,WayLeaf> newLeafs;
+    //
+    // Count the number of objects per index level
+    //
 
-    cellWidth.resize(parameter.GetAreaWayIndexMaxMag()+1);
-    cellHeight.resize(parameter.GetAreaWayIndexMaxMag()+1);
+    progress.SetAction("Analysing distribution");
+
+    FileScanner                scanner;
+    size_t                     relations=0;     // Number of relations found
+    size_t                     consumed=0; // Number of relations consumed
+    std::vector<double>        cellWidth;
+    std::vector<double>        cellHeight;
+    std::map<Coord,WayRelLeaf> leafs;
+    std::map<Coord,WayRelLeaf> newLeafs;
+
+    cellWidth.resize(parameter.GetAreaWayRelIndexMaxMag()+1);
+    cellHeight.resize(parameter.GetAreaWayRelIndexMaxMag()+1);
 
     for (size_t i=0; i<cellWidth.size(); i++) {
       cellWidth[i]=360/pow(2,i);
@@ -104,47 +109,21 @@ namespace osmscout {
     }
 
     //
-    // Loading blacklist
-    //
-
-    progress.SetAction("Loading blacklist");
-
-    if (!scanner.Open("wayblack.dat")) {
-      progress.Error("Cannot open 'wayblack.dat'");
-      return false;
-    }
-
-
-    while (!scanner.HasError()) {
-      Id id;
-
-      scanner.Read(id);
-
-      if (!scanner.HasError()){
-        blacklist.insert(id);
-      }
-    }
-
-    if (!scanner.Close()) {
-      return false;
-    }
-
-    //
     // Writing index file
     //
 
-    progress.SetAction("Generating 'areaway.idx'");
+    progress.SetAction("Generating 'areawayrel.idx'");
 
     FileWriter writer;
 
-    if (!writer.Open("areaway.idx")) {
-      progress.Error("Cannot create 'areaway.idx'");
+    if (!writer.Open("areawayrel.idx")) {
+      progress.Error("Cannot create 'areawayrel.idx'");
       return false;
     }
 
-    writer.WriteNumber((uint32_t)parameter.GetAreaWayIndexMaxMag()); // MaxMag
+    writer.WriteNumber((uint32_t)parameter.GetAreaWayRelIndexMaxMag()); // MaxMag
 
-    int l=parameter.GetAreaWayIndexMaxMag();
+    int l=parameter.GetAreaWayRelIndexMaxMag();
 
     while (l>=0) {
       size_t levelEntries=0;
@@ -155,7 +134,7 @@ namespace osmscout {
 
       // For every cell that had entries in one of its childrenwe create
       // an index entry.
-      for (std::map<Coord,WayLeaf>::iterator leaf=leafs.begin();
+      for (std::map<Coord,WayRelLeaf>::iterator leaf=leafs.begin();
            leaf!=leafs.end();
            ++leaf) {
         // Coordinates of the children in "children dimension" calculated from the tile id
@@ -193,54 +172,52 @@ namespace osmscout {
 
       leafs=newLeafs;
 
-      if (ways==0 ||
-          (ways>0 && ways>consumed)) {
+      if (relations==0 ||
+          (relations>0 && relations>consumed)) {
 
-        progress.Info(std::string("Scanning ways.dat for ways of index level ")+NumberToString(l)+"...");
+        progress.Info(std::string("Scanning relations.dat for relations of index level ")+NumberToString(l)+"...");
 
-        if (!scanner.Open("ways.dat")) {
-          progress.Error("Cannot open 'ways.dat'");
+        if (!scanner.Open("relations.dat")) {
+          progress.Error("Cannot open 'relations.dat'");
           return false;
         }
 
-        ways=0;
+        relations=0;
         while (!scanner.HasError()) {
           FileOffset offset;
-          Way        way;
+          Relation    relation;
 
           scanner.GetPos(offset);
-          way.Read(scanner);
+          relation.Read(scanner);
 
           if (scanner.HasError()) {
             continue;
           }
 
-          // We do not index areas, only ways
-          if (way.IsArea()) {
+          if (relation.IsArea()) {
             continue;
           }
 
-          // We do not index a way that is in the blacklist
-          if (blacklist.find(way.id)!=blacklist.end()) {
-            continue;
-          }
-
-          ways++;
+          relations++;
 
           //
           // Bounding box calculation
           //
 
-          double minLon=way.nodes[0].lon;
-          double maxLon=way.nodes[0].lon;
-          double minLat=way.nodes[0].lat;
-          double maxLat=way.nodes[0].lat;
+          double minLon=relation.roles[0].nodes[0].lon;
+          double maxLon=relation.roles[0].nodes[0].lon;
+          double minLat=relation.roles[0].nodes[0].lat;
+          double maxLat=relation.roles[0].nodes[0].lat;
 
-          for (size_t i=1; i<way.nodes.size(); i++) {
-            minLon=std::min(minLon,way.nodes[i].lon);
-            maxLon=std::max(maxLon,way.nodes[i].lon);
-            minLat=std::min(minLat,way.nodes[i].lat);
-            maxLat=std::max(maxLat,way.nodes[i].lat);
+          for (std::vector<Relation::Role>::const_iterator role=relation.roles.begin();
+               role!=relation.roles.end();
+               ++role) {
+            for (size_t i=0; i<role->nodes.size(); i++) {
+              minLon=std::min(minLon,role->nodes[i].lon);
+              maxLon=std::max(maxLon,role->nodes[i].lon);
+              minLat=std::min(minLat,role->nodes[i].lat);
+              maxLat=std::max(maxLat,role->nodes[i].lat);
+            }
           }
 
           //
@@ -272,18 +249,6 @@ namespace osmscout {
             minyc=floor(minLat/cellHeight[level]);
             maxyc=floor(maxLat/cellHeight[level]);
 
-            /*
-            if (way.id==4698697) {
-              std::cout << minLon-180 <<"," << minLat-90 << " - " << maxLon-180 <<"," << maxLat-90 << std::endl;
-
-              for (size_t i=0; i<way.nodes.size(); i++) {
-                std::cout << "Node: " << way.nodes[i].lon << "," << way.nodes[i].lat << std::endl;
-              }
-
-              std::cout << "Box: " << cellWidth[level] << "x" << cellHeight[level] << std::endl;
-              std::cout << "Cells: " << minxc << "," << minyc << " - " << maxxc << "," << maxyc << std::endl;
-            } */
-
             if (maxLon-minLon<=cellWidth[level] &&
                 maxLat-minLat<=cellHeight[level]) {
               break;
@@ -295,7 +260,7 @@ namespace osmscout {
           if (level==l) {
             for (size_t yc=minyc; yc<=maxyc; yc++) {
               for (size_t xc=minxc; xc<=maxxc; xc++) {
-                leafs[Coord(xc,yc)].dataOffsets[way.type].push_back(offset);
+                leafs[Coord(xc,yc)].dataOffsets[relation.type].push_back(offset);
                 levelEntries++;
               }
             }
@@ -308,12 +273,12 @@ namespace osmscout {
         scanner.Close();
       }
 
-      progress.Debug(std::string("Writing ")+NumberToString(leafs.size())+" entries with "+NumberToString(levelEntries)+" ways to index of level "+NumberToString(l)+"...");
+      progress.Debug(std::string("Writing ")+NumberToString(leafs.size())+" entries with "+NumberToString(levelEntries)+" relations to index of level "+NumberToString(l)+"...");
       //
       // Store all index entries for this level and store their file offset
       //
       writer.WriteNumber((uint32_t)leafs.size()); // Number of leafs
-      for (std::map<Coord,WayLeaf>::iterator leaf=leafs.begin();
+      for (std::map<Coord,WayRelLeaf>::iterator leaf=leafs.begin();
            leaf!=leafs.end();
            ++leaf) {
         writer.GetPos(leaf->second.offset);
@@ -324,7 +289,7 @@ namespace osmscout {
                leaf->second.children[2]!=0 ||
                leaf->second.children[3]!=0);
 
-        if (l<parameter.GetAreaWayIndexMaxMag()) {
+        if (l<parameter.GetAreaWayRelIndexMaxMag()) {
           // TODO: Is writer.Write better?
           for (size_t c=0; c<4; c++) {
             writer.WriteNumber(leaf->second.children[c]);

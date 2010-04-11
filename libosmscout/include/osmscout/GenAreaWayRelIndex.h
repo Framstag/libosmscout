@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_GENWAYDAT_H
-#define OSMSCOUT_GENWAYDAT_H
+#ifndef OSMSCOUT_GENAREAWAYRELINDEX_H
+#define OSMSCOUT_GENAREAWAYRELINDEX_H
 
 /*
   This source is part of the libosmscout library
@@ -24,7 +24,7 @@
 
 namespace osmscout {
 
-  class WayDataGenerator : public ImportModule
+  class AreaWayRelIndexGenerator : public ImportModule
   {
   public:
     std::string GetDescription() const;

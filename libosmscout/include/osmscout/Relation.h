@@ -42,9 +42,16 @@ namespace osmscout {
     };
 
   public:
+    const static uint16_t isArea   = 1 << 0; //! We are an area
+    const static uint16_t hasTags  = 1 << 1; //! We have additional tags store on disk
+    const static uint16_t hasLayer = 1 << 2; //! We have optional layer information
+
+  public:
     Id                id;
     TypeId            type;
     std::string       relType;
+    uint16_t          flags;
+    int8_t            layer;
     std::vector<Tag>  tags;
     std::vector<Role> roles;
 
@@ -53,6 +60,11 @@ namespace osmscout {
     : type(typeIgnore)
     {
       // no code
+    }
+
+    inline bool IsArea() const
+    {
+      return flags & isArea;
     }
 
     bool GetCenter(double& lat, double& lon) const;

@@ -23,7 +23,6 @@
 
 #include <osmscout/Progress.h>
 
-#include <osmscout/TypeConfig.h>
 #include <osmscout/TypeConfigLoader.h>
 
 #include <osmscout/RawNode.h>
@@ -42,15 +41,17 @@
 #include <osmscout/NumericIndex.h>
 
 #include <osmscout/GenAreaAreaIndex.h>
+#include <osmscout/GenAreaAreaRelIndex.h>
 #include <osmscout/GenAreaNodeIndex.h>
 #include <osmscout/GenAreaWayIndex.h>
+#include <osmscout/GenAreaWayRelIndex.h>
 #include <osmscout/GenNodeUseIndex.h>
 #include <osmscout/GenCityStreetIndex.h>
 
 namespace osmscout {
 
   static const size_t defaultStartStep=1;
-  static const size_t defaultEndStep=14;
+  static const size_t defaultEndStep=16;
 
   ImportParameter::ImportParameter()
    : startStep(defaultStartStep),
@@ -58,7 +59,9 @@ namespace osmscout {
      nodeIndexIntervalSize(50),
      numericIndexLevelSize(1024),
      areaAreaIndexMaxMag(18),
-     areaWayIndexMaxMag(18)
+     areaAreaRelIndexMaxMag(18),
+     areaWayIndexMaxMag(18),
+     areaWayRelIndexMaxMag(18)
   {
     // no code
   }
@@ -93,9 +96,19 @@ namespace osmscout {
     return areaAreaIndexMaxMag;
   }
 
+  size_t ImportParameter::GetAreaAreaRelIndexMaxMag() const
+  {
+    return areaAreaRelIndexMaxMag;
+  }
+
   size_t ImportParameter::GetAreaWayIndexMaxMag() const
   {
     return areaWayIndexMaxMag;
+  }
+
+  size_t ImportParameter::GetAreaWayRelIndexMaxMag() const
+  {
+    return areaWayRelIndexMaxMag;
   }
 
   void ImportParameter::SetMapfile(const std::string& mapfile)
@@ -120,14 +133,38 @@ namespace osmscout {
     this->nodeIndexIntervalSize=nodeIndexIntervalSize;
   }
 
+  bool ExecuteModules(std::list<ImportModule*>& modules,
+                      const ImportParameter& parameter,
+                      Progress& progress,
+                      const TypeConfig& typeConfig)
+  {
+    size_t currentStep=1;
+
+    for (std::list<ImportModule*>::const_iterator module=modules.begin();
+         module!=modules.end();
+         ++module) {
+      if (currentStep>=parameter.GetStartStep() &&
+          currentStep<=parameter.GetEndStep()) {
+        progress.SetStep(NumberToString(currentStep)+" "+(*module)->GetDescription());
+        if (!(*module)->Import(parameter,progress,typeConfig)) {
+          progress.Error(std::string("Error while executing step ")+(*module)->GetDescription()+"!");
+          return false;
+        }
+      }
+
+      currentStep++;
+    }
+
+    return true;
+  }
+
   bool Import(const ImportParameter& parameter,
               Progress& progress)
   {
     // TODO: verify parameter
 
-    TypeConfig typeConfig;
-    size_t     startStep=parameter.GetStartStep();
-    size_t     endStep=parameter.GetEndStep();
+    TypeConfig               typeConfig;
+    std::list<ImportModule*> modules;
 
     progress.SetStep("Loading type config");
 
@@ -136,240 +173,42 @@ namespace osmscout {
       return false;
     }
 
-    if (startStep==1) {
-      progress.SetStep("1 Preprocess");
-      if (!Preprocess(typeConfig,
-                      parameter,
-                      progress)) {
-        progress.Error("Cannot parse input file!");
-        return false;
-      }
+    modules.push_back(new Preprocess());
+    modules.push_back(new NumericIndexGenerator<Id,RawNode>("Generating 'rawnode.idx'",
+                                                            "rawnodes.dat",
+                                                            "rawnode.idx"));
+    modules.push_back(new NumericIndexGenerator<Id,RawWay>("Generating 'rawway.idx'",
+                                                           "rawways.dat",
+                                                           "rawway.idx"));
+    modules.push_back(new RelationDataGenerator());
+    modules.push_back(new NumericIndexGenerator<Id,Relation>("Generating 'relation.idx'",
+                                                             "relations.dat",
+                                                             "relation.idx"));
+    modules.push_back(new NodeDataGenerator());
+    modules.push_back(new NumericIndexGenerator<Id,Node>("Generating 'node.idx'",
+                                                         "nodes.dat",
+                                                         "node.idx"));
+    modules.push_back(new WayDataGenerator());
+    modules.push_back(new NumericIndexGenerator<Id,Way>("Generating 'way.idx'",
+                                                        "ways.dat",
+                                                        "way.idx"));
+    modules.push_back(new AreaNodeIndexGenerator());
+    modules.push_back(new AreaAreaIndexGenerator());
+    modules.push_back(new AreaWayIndexGenerator());
+    modules.push_back(new AreaAreaRelIndexGenerator());
+    modules.push_back(new AreaWayRelIndexGenerator());
+    modules.push_back(new CityStreetIndexGenerator());
+    modules.push_back(new NodeUseIndexGenerator());
 
-      startStep++;
+    bool result=ExecuteModules(modules,parameter,progress,typeConfig);
+
+    for (std::list<ImportModule*>::iterator module=modules.begin();
+         module!=modules.end();
+         ++module) {
+      delete *module;
     }
 
-    if (startStep>endStep) {
-      return true;
-    }
-
-    if (startStep==2) {
-      progress.SetStep("2 Generating 'rawnode.idx'");
-
-      if (!GenerateNumericIndex<Id,RawNode>(parameter,
-                                            progress,
-                                            "rawnodes.dat",
-                                            "rawnode.idx")) {
-        progress.Error("Cannot generate raw node index!");
-        return false;
-      }
-
-      startStep++;
-    }
-
-    if (startStep>endStep) {
-      return true;
-    }
-
-    if (startStep==3) {
-      progress.SetStep("3 Generating 'rawway.idx'");
-
-      if (!GenerateNumericIndex<Id,RawWay>(parameter,
-                                           progress,
-                                           "rawways.dat",
-                                           "rawway.idx")) {
-        progress.Error("Cannot generate raw way index!");
-        return false;
-      }
-
-      startStep++;
-    }
-
-    if (startStep>endStep) {
-      return true;
-    }
-
-    if (startStep==4) {
-      progress.SetStep("4 Generate 'relations.dat'");
-      if (!GenerateRelationDat(typeConfig,
-                               parameter,
-                               progress)) {
-        progress.Error("Cannot generate relation data file!");
-        return false;
-      }
-
-      startStep++;
-    }
-
-    if (startStep>endStep) {
-      return true;
-    }
-
-    if (startStep==5) {
-      progress.SetStep("5 Generating 'relation.idx'");
-
-      if (!GenerateNumericIndex<Id,Relation>(parameter,
-                                             progress,
-                                             "relations.dat",
-                                             "relation.idx")) {
-        progress.Error("Cannot generate relation index!");
-        return false;
-      }
-
-      startStep++;
-    }
-
-
-    if (startStep>endStep) {
-      return true;
-    }
-
-    if (startStep==6) {
-      progress.SetStep("6 Generate 'nodes.dat' and bounding.dat");
-      if (!GenerateNodeDat(parameter,
-                           progress)) {
-        progress.Error("Cannot generate node data file!");
-        return false;
-      }
-
-      startStep++;
-    }
-
-    if (startStep>endStep) {
-      return true;
-    }
-
-    if (startStep==7) {
-      progress.SetStep("7 Generating 'node.idx'");
-
-      if (!GenerateNumericIndex<Id,Node>(parameter,
-                                         progress,
-                                         "nodes.dat",
-                                         "node.idx")) {
-        progress.Error("Cannot generate node2 index!");
-        return false;
-      }
-
-      startStep++;
-    }
-
-    if (startStep>endStep) {
-      return true;
-    }
-
-    if (startStep==8) {
-      progress.SetStep("8 Generate 'ways.dat'");
-      if (!GenerateWayDat(typeConfig,
-                          parameter,
-                          progress)) {
-        progress.Error("Cannot generate way data file!");
-        return false;
-      }
-
-      startStep++;
-    }
-
-    if (startStep>endStep) {
-      return true;
-    }
-
-    if (startStep==9) {
-      progress.SetStep("9 Generating 'way.idx'");
-
-      if (!GenerateNumericIndex<Id,Way>(parameter,
-                                        progress,
-                                        "ways.dat",
-                                        "way.idx")) {
-        progress.Error("Cannot generate way index!");
-        return false;
-      }
-
-      startStep++;
-    }
-
-
-    if (startStep>endStep) {
-      return true;
-    }
-
-    if (startStep==10) {
-      progress.SetStep("10 Generating 'areanode.idx'");
-
-      if (!GenerateAreaNodeIndex(parameter,
-                                 progress)) {
-        progress.Error("Cannot generate area node index!");
-        return false;
-      }
-
-      startStep++;
-    }
-
-    if (startStep>endStep) {
-      return true;
-    }
-
-    if (startStep==11) {
-      progress.SetStep("11 Generating 'areaarea.idx'");
-
-      if (!GenerateAreaAreaIndex(parameter,
-                                 progress)) {
-        progress.Error("Cannot generate area area index!");
-        return false;
-      }
-
-      startStep++;
-    }
-
-    if (startStep>endStep) {
-      return true;
-    }
-
-    if (startStep==12) {
-      progress.SetStep("12 Generating 'areaway.idx'");
-
-      if (!GenerateAreaWayIndex(parameter,
-                                progress)) {
-        progress.Error("Cannot generate area way index!");
-        return false;
-      }
-
-      startStep++;
-    }
-
-    if (startStep>endStep) {
-      return true;
-    }
-
-    if (startStep==13) {
-      progress.SetStep("13 Generating 'citystreet.idx'");
-
-      if (!GenerateCityStreetIndex(typeConfig,
-                                   parameter,
-                                   progress)) {
-        progress.Error("Cannot generate city street index!");
-        return false;
-      }
-
-      startStep++;
-    }
-
-    if (startStep>endStep) {
-      return true;
-    }
-
-    if (startStep==14) {
-      progress.SetStep("14 Generating 'nodeuse.idx'");
-
-      if (!GenerateNodeUseIndex(typeConfig,
-                                parameter,
-                                progress)) {
-        progress.Error("Cannot generate node usage index!");
-        return false;
-      }
-
-      startStep++;
-    }
-
-    return true;
+    return result;
   }
 }
 

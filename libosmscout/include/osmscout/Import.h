@@ -23,9 +23,17 @@
 #include <string>
 
 #include <osmscout/Progress.h>
+#include <osmscout/TypeConfig.h>
 
 namespace osmscout {
 
+  /**
+    Collects all parameter that have influence on the import.
+
+    TODO:
+    * Add variable defining the output directory (and make all import modules
+      respect this parameter).
+    */
   class ImportParameter
   {
   private:
@@ -35,7 +43,9 @@ namespace osmscout {
     size_t      nodeIndexIntervalSize;
     size_t      numericIndexLevelSize;
     size_t      areaAreaIndexMaxMag;
+    size_t      areaAreaRelIndexMaxMag;
     size_t      areaWayIndexMaxMag;
+    size_t      areaWayRelIndexMaxMag;
 
   public:
     ImportParameter();
@@ -46,7 +56,9 @@ namespace osmscout {
     size_t GetNodeIndexIntervalSize() const;
     size_t GetNumericIndexLevelSize() const;
     size_t GetAreaAreaIndexMaxMag() const;
+    size_t GetAreaAreaRelIndexMaxMag() const;
     size_t GetAreaWayIndexMaxMag() const;
+    size_t GetAreaWayRelIndexMaxMag() const;
 
     void SetMapfile(const std::string& mapfile);
     void SetStartStep(size_t startStep);
@@ -54,6 +66,26 @@ namespace osmscout {
     void SetNodeIndexIntervalSize(size_t nodeIndexIntervalSize);
   };
 
+  /**
+    A single import module representing a single import step.
+
+    An import consists of a number of sequentially executed steps. A step normally
+    works on one object type and generates one output file (though this is just
+    an suggestion). Such a step is realized by a ImportModule.
+    */
+  class ImportModule
+  {
+  public:
+    virtual std::string GetDescription() const = 0;
+    virtual bool Import(const ImportParameter& parameter,
+                        Progress& progress,
+                        const TypeConfig& typeConfig) = 0;
+  };
+
+  /**
+    Does the import based on the given parameters. Feedback about the import progress
+    is given by the indivudal import modules calling the Progress instance as appropriate.
+    */
   extern bool Import(const ImportParameter& parameter,
                      Progress& progress);
 }

@@ -442,9 +442,14 @@ namespace osmscout {
     return true;
   }
 
-  bool GenerateCityStreetIndex(const TypeConfig& typeConfig,
-                               const ImportParameter& parameter,
-                               Progress& progress)
+  std::string CityStreetIndexGenerator::GetDescription() const
+  {
+    return "Generate 'region.dat' and 'nameregion.idx'";
+  }
+
+  bool CityStreetIndexGenerator::Import(const ImportParameter& parameter,
+                                        Progress& progress,
+                                        const TypeConfig& typeConfig)
   {
     std::set<TypeId>          cityIds;
     TypeId                    boundaryId;

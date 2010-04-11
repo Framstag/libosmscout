@@ -45,6 +45,7 @@ namespace osmscout {
   public:
     Id                  id;
     TypeId              type;
+    bool                isArea;
     std::vector<Tag>    tags;
     std::vector<Member> members;
 
@@ -53,6 +54,11 @@ namespace osmscout {
     : type(typeIgnore)
     {
       // no code
+    }
+
+    inline bool IsArea() const
+    {
+      return isArea;
     }
 
     bool Read(FileScanner& scanner);

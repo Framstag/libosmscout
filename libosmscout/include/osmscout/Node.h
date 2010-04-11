@@ -22,7 +22,6 @@
 
 #include <vector>
 
-#include <osmscout/FileReader.h>
 #include <osmscout/FileScanner.h>
 #include <osmscout/FileWriter.h>
 #include <osmscout/Tag.h>
@@ -46,7 +45,6 @@ namespace osmscout {
       // no code
     }
 
-    bool Read(FileReader& reader);
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;
   };

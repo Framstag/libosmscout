@@ -72,16 +72,26 @@ namespace osmscout {
     scanner.Read(id);
     scanner.ReadNumber(type);
     scanner.Read(relType);
+    scanner.Read(flags);
 
-    scanner.ReadNumber(tagCount);
-    if (scanner.HasError()) {
-      return false;
+    if (flags & hasLayer) {
+      scanner.Read(layer);
+    }
+    else {
+      layer=0;
     }
 
-    tags.resize(tagCount);
-    for (size_t i=0; i<tagCount; i++) {
-      scanner.ReadNumber(tags[i].key);
-      scanner.Read(tags[i].value);
+    if (flags & hasTags) {
+      scanner.ReadNumber(tagCount);
+      if (scanner.HasError()) {
+        return false;
+      }
+
+      tags.resize(tagCount);
+      for (size_t i=0; i<tagCount; i++) {
+        scanner.ReadNumber(tags[i].key);
+        scanner.Read(tags[i].value);
+      }
     }
 
     scanner.ReadNumber(roleCount);
@@ -119,11 +129,18 @@ namespace osmscout {
     writer.Write(id);
     writer.WriteNumber(type);
     writer.Write(relType);
+    writer.Write(flags);
 
-    writer.WriteNumber((uint32_t)tags.size());
-    for (size_t i=0; i<tags.size(); i++) {
-      writer.WriteNumber(tags[i].key);
-      writer.Write(tags[i].value);
+    if (flags & hasLayer) {
+      writer.Write(layer);
+    }
+
+    if (flags & hasTags) {
+      writer.WriteNumber((uint32_t)tags.size());
+      for (size_t i=0; i<tags.size(); i++) {
+        writer.WriteNumber(tags[i].key);
+        writer.Write(tags[i].value);
+      }
     }
 
     writer.WriteNumber((uint32_t)roles.size());

@@ -30,8 +30,14 @@
 
 namespace osmscout {
 
-  bool GenerateAreaNodeIndex(const ImportParameter& parameter,
-                             Progress& progress)
+  std::string AreaNodeIndexGenerator::GetDescription() const
+  {
+    return "Generate 'areanode.idx'";
+  }
+
+  bool AreaNodeIndexGenerator::Import(const ImportParameter& parameter,
+                                      Progress& progress,
+                                      const TypeConfig& typeConfig)
   {
     //
     // Analysing nodes regarding draw type and matching tiles.

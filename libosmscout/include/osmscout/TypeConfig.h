@@ -226,7 +226,8 @@ namespace osmscout {
                           TypeId &areaType) const;
     bool GetRelationTypeId(std::vector<Tag>& tags,
                            std::vector<Tag>::iterator& tag,
-                           TypeId &typeId) const;
+                           TypeId &typeId,
+                           bool& isArea) const;
 
     TypeId GetNodeTypeId(TagId tagKey, const char* tagValue) const;
     TypeId GetWayTypeId(TagId tagKey, const char* tagValue) const;

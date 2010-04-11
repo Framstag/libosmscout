@@ -112,6 +112,7 @@ namespace osmscout {
     filename=path+"/"+filepart;
 
     if (!scanner.Open(filename)) {
+      std::cerr << "Cannot open file '" << filename << "'" << std::endl;
       return false;
     }
 
@@ -287,10 +288,45 @@ namespace osmscout {
   }
 
   template <class N,class T>
-  bool GenerateNumericIndex(const ImportParameter& parameter,
-                            Progress& progress,
-                            const std::string& datafile,
-                            const std::string& indexfile)
+  class NumericIndexGenerator : public ImportModule
+  {
+  private:
+    std::string description;
+    std::string datafile;
+    std::string indexfile;
+
+  public:
+    NumericIndexGenerator(const std::string& description,
+                          const std::string& datafile,
+                          const std::string& indexfile);
+
+    std::string GetDescription() const;
+    bool Import(const ImportParameter& parameter,
+                Progress& progress,
+                const TypeConfig& typeConfig);
+  };
+
+  template <class N,class T>
+  NumericIndexGenerator<N,T>::NumericIndexGenerator(const std::string& description,
+                                                    const std::string& datafile,
+                                                    const std::string& indexfile)
+   : description(description),
+     datafile(datafile),
+     indexfile(indexfile)
+  {
+    // no code
+  }
+
+  template <class N,class T>
+  std::string NumericIndexGenerator<N,T>::GetDescription() const
+  {
+    return description;
+  }
+
+  template <class N,class T>
+  bool NumericIndexGenerator<N,T>::Import(const ImportParameter& parameter,
+                                          Progress& progress,
+                                          const TypeConfig& typeConfig)
   {
     //
     // Writing index file

@@ -234,9 +234,15 @@ namespace osmscout {
 
     // Try to consume all roles
     while (roles.size()>0) {
+      TypeId type=typeIgnore;
+
       // Take the first unused roles and copy all its points
       for (size_t i=0; i<roles.front().nodes.size(); i++) {
         points.push_back(roles.front().nodes[i]);
+      }
+
+      if (roles.begin()->type!=typeIgnore) {
+        type=roles.begin()->type;
       }
       roles.erase(roles.begin());
 
@@ -254,6 +260,10 @@ namespace osmscout {
             for (size_t i=1; i<role->nodes.size(); i++) {
               points.push_back(role->nodes[i]);
             }
+
+            if (roles.begin()->type!=typeIgnore) {
+              type=roles.begin()->type;
+            }
             roles.erase(role);
 
             found=true;
@@ -262,6 +272,10 @@ namespace osmscout {
           else if (points.back().id==role->nodes.back().id) {
             for (size_t i=1; i<role->nodes.size(); i++) {
               points.push_back(role->nodes[role->nodes.size()-i-1]);
+            }
+
+            if (roles.begin()->type!=typeIgnore) {
+              type=roles.begin()->type;
             }
             roles.erase(role);
             found=true;
@@ -288,6 +302,8 @@ namespace osmscout {
 
       // Add the found points the our new (internal) list of merges roles
       Relation::Role role;
+
+      role.type=type;
 
       role.nodes.reserve(points.size());
 
@@ -374,10 +390,17 @@ namespace osmscout {
     return true;
   }
 
-  bool GenerateRelationDat(const TypeConfig& typeConfig,
-                           const ImportParameter& parameter,
-                           Progress& progress)
+  std::string RelationDataGenerator::GetDescription() const
   {
+    return "Generate 'relations.dat'";
+  }
+
+  bool RelationDataGenerator::Import(const ImportParameter& parameter,
+                                     Progress& progress,
+                                     const TypeConfig& typeConfig)
+  {
+    std::set<Id> wayAreaIndexBlacklist;
+
     DataFile<RawNode> nodeDataFile("rawnodes.dat","rawnode.idx",10);
     DataFile<RawWay>  wayDataFile("rawways.dat","rawway.idx",10);
 
@@ -421,10 +444,6 @@ namespace osmscout {
       if (!scanner.HasError()) {
         allRelationCount++;
 
-        if (rawRel.type==typeIgnore) {
-          continue;
-        }
-
         if (rawRel.members.size()==0) {
           progress.Warning("Relation "+
                            NumberToString(rawRel.id)+
@@ -440,13 +459,31 @@ namespace osmscout {
 
         rel.id=rawRel.id;
         rel.type=rawRel.type;
+        rel.flags=0;
+        rel.layer=0;
 
-        for (size_t i=0; i<rawRel.tags.size(); i++) {
-          if (rawRel.tags[i].key==tagType) {
-            rel.relType=rawRel.tags[i].value;
+        if (rawRel.IsArea()) {
+          rel.flags|=Relation::isArea;
+        }
+
+        std::vector<Tag>::iterator tag=rawRel.tags.begin();
+        while (tag!=rawRel.tags.end()) {
+          if (tag->key==tagType) {
+            rel.relType=tag->value;
+            tag=rawRel.tags.erase(tag);
           }
-          else if (rawRel.tags[i].key==tagName) {
-            name=rawRel.tags[i].value;
+          else if (tag->key==tagName) {
+            name=tag->value;
+            tag++;
+          }
+          else if (tag->key==tagLayer) {
+            if (sscanf(tag->value.c_str(),"%hhd",&rel.layer)!=1) {
+              progress.Warning(std::string("Layer tag value '")+tag->value+"' for relation "+NumberToString(rawRel.id)+" is not numeric!");
+            }
+            tag=rawRel.tags.erase(tag);
+          }
+          else {
+            tag++;
           }
         }
 
@@ -479,6 +516,74 @@ namespace osmscout {
           continue;
         }
 
+        // Resolve type of multipolygon/boundary relations if the relation does not have
+        // a type
+        if (rel.type==typeIgnore &&
+            (rel.relType=="multipolygon" ||
+             rel.relType=="boundary")) {
+          for (size_t m=0; m<rel.roles.size(); m++) {
+            if (rel.roles[m].role=="outer") {
+              if (rel.type==typeIgnore &&
+                  rel.roles[m].type!=typeIgnore) {
+                rel.type=rel.roles[m].type;
+                progress.Debug("Autodetecting type of relation "+NumberToString(rel.id)+" as "+NumberToString(rel.type));
+              }
+              else if (rel.type!=typeIgnore &&
+                       rel.roles[m].type!=typeIgnore &&
+                       rel.type!=rel.roles[m].type) {
+                progress.Warning("Relation "+NumberToString(rel.id)+" has conflicting types for outer boundary ("+
+                                 NumberToString(rawRel.members[m].id)+","+NumberToString(rel.type)+","+NumberToString(rel.roles[m].type)+")");
+              }
+            }
+          }
+        }
+        else {
+          bool correct=true;
+
+          TypeId type=rel.roles[0].type;
+
+          for (size_t m=1; m<rel.roles.size(); m++) {
+            if (rel.roles[m].type!=type) {
+              correct=false;
+              break;
+            }
+          }
+
+          if (correct && type!=rel.type) {
+            progress.Warning("Autocorrecting type of relation "+NumberToString(rel.id)+
+                             " from "+NumberToString(rel.type)+" to "+NumberToString(type));
+            rel.type=type;
+          }
+        }
+
+        // Blacklist all relation members that have the same type as relation itself
+        // from the areaWayIndex to assure that a way will not be returned twice,
+        // once as part of the relation and once as wy itself
+        //
+        // For multipolygon and boundary relations we restrict blacklisting to the
+        // outer boundaries
+        if (rel.relType=="multipolygon" ||
+            rel.relType=="boundary") {
+          for (size_t m=0; m<rel.roles.size(); m++) {
+            if (rel.roles[m].role=="outer" ||
+                rel.roles[m].role=="") {
+              if (rel.type==rel.roles[m].type) {
+                wayAreaIndexBlacklist.insert(rawRel.members[m].id);
+              }
+            }
+          }
+        }
+        else {
+          for (size_t m=0; m<rel.roles.size(); m++) {
+            if (rel.type==rel.roles[m].type) {
+              wayAreaIndexBlacklist.insert(rawRel.members[m].id);
+            }
+          }
+        }
+
+        // Reconstruct multiploygon relation by applying the multipolygon resolving
+        // algorithm as destribed at
+        // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
         if (rel.relType=="multipolygon" ||
             rel.relType=="boundary") {
           if (!ResolveMultipolygon(rel,progress)) {
@@ -486,6 +591,25 @@ namespace osmscout {
                            NumberToString(rawRel.id)+" "+name);
             continue;
           }
+
+          /*
+          if (rel.type==typeIgnore) {
+            for (size_t m=0; m<rel.roles.size(); m++) {
+              if (rel.roles[m].role=="0") {
+                if (rel.type==typeIgnore &&
+                    rel.roles[m].type!=typeIgnore) {
+                  rel.type=rel.roles[m].type;
+                  progress.Debug("Autodetecting type of relation "+NumberToString(rel.id)+" as "+NumberToString(rel.type));
+                }
+                else if (rel.type!=typeIgnore &&
+                         rel.roles[m].type!=typeIgnore &&
+                         rel.type!=rel.roles[m].type) {
+                  progress.Warning("Relation "+NumberToString(rel.id)+" has conflicting types for outer boundary ("+
+                                   NumberToString(rawRel.members[m].id)+","+NumberToString(rel.type)+","+NumberToString(rel.roles[m].type)+")");
+                }
+              }
+            }
+          }*/
         }
 
         //progress.Debug("Storing relation "+rel.relType+" "+NumberToString(rel.type)+" "+name);
@@ -493,9 +617,18 @@ namespace osmscout {
         rel.id=rawRel.id;
         rel.tags=rawRel.tags;
 
-        rel.Write(writer);
+        if (rel.layer!=0) {
+          rel.flags|=Relation::hasLayer;
+        }
 
-        writtenRelationCount++;
+        if (rel.tags.size()>0) {
+          rel.flags|=Relation::hasTags;
+        }
+
+        if (rel.type!=typeIgnore) {
+          rel.Write(writer);
+          writtenRelationCount++;
+        }
       }
     }
 
@@ -503,7 +636,26 @@ namespace osmscout {
                   ", "+NumberToString(selectedRelationCount)+" relation selected"+
                   ", "+NumberToString(writtenRelationCount)+" relations written");
 
-    return scanner.Close() && writer.Close() && wayDataFile.Close() && nodeDataFile.Close();
+    if (!(scanner.Close() && writer.Close() && wayDataFile.Close() && nodeDataFile.Close())) {
+      return false;
+    }
+
+    progress.SetAction("Generate wayblack.dat");
+
+    if (!writer.Open("wayblack.dat")) {
+      progress.Error("Canot create 'wayblack.dat'");
+      return false;
+    }
+
+    for (std::set<Id>::const_iterator id=wayAreaIndexBlacklist.begin();
+         id!=wayAreaIndexBlacklist.end();
+         ++id) {
+      writer.Write(*id);
+    }
+
+    progress.Info(NumberToString(wayAreaIndexBlacklist.size())+" ways written to blacklist");
+
+    return writer.Close();
   }
 }
 

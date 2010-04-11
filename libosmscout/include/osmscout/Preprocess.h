@@ -21,13 +21,16 @@
 */
 
 #include <osmscout/Import.h>
-#include <osmscout/Progress.h>
-#include <osmscout/TypeConfig.h>
 
 namespace osmscout {
-  extern bool Preprocess(const TypeConfig& typeConfig,
-                         const ImportParameter& parameter,
-                         Progress& progress);
+  class Preprocess : public ImportModule
+  {
+  public:
+    std::string GetDescription() const;
+    bool Import(const ImportParameter& parameter,
+                Progress& progress,
+                const TypeConfig& typeConfig);
+  };
 }
 
 #endif

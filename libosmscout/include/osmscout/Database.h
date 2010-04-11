@@ -42,7 +42,9 @@
 // In area index
 #include <osmscout/AreaNodeIndex.h>
 #include <osmscout/AreaWayIndex.h>
+#include <osmscout/AreaWayRelIndex.h>
 #include <osmscout/AreaAreaIndex.h>
+#include <osmscout/AreaAreaRelIndex.h>
 
 // Location index
 #include <osmscout/CityStreetIndex.h>
@@ -76,6 +78,9 @@ namespace osmscout {
     AreaAreaIndex         areaAreaIndex;
     AreaWayIndex          areaWayIndex;
 
+    AreaAreaRelIndex      areaAreaRelIndex;
+    AreaWayRelIndex       areaWayRelIndex;
+
     CityStreetIndex       cityStreetIndex;
 
     NodeUseIndex          nodeUseIndex;
@@ -104,6 +109,9 @@ namespace osmscout {
     bool GetWays(std::vector<FileOffset>& offsets,
                  std::vector<Way>& ways) const;
 
+    bool GetRelations(std::vector<FileOffset>& offsets,
+                      std::vector<Relation>& relations) const;
+
     bool GetNodes(const StyleConfig& styleConfig,
                   double lonMin, double latMin,
                   double lonMax, double latMax,
@@ -125,6 +133,20 @@ namespace osmscout {
                   size_t maxCount,
                   std::vector<Way>& areas) const;
 
+    bool GetRelationWays(const StyleConfig& styleConfig,
+                         double lonMin, double latMin,
+                         double lonMax, double latMax,
+                         const std::vector<TypeId>& types,
+                         size_t maxCount,
+                         std::vector<Relation>& relationWays) const;
+
+    bool GetRelationAreas(const StyleConfig& styleConfig,
+                          double lonMin, double latMin,
+                          double lonMax, double latMax,
+                          size_t maxLevel,
+                          size_t maxCount,
+                          std::vector<Relation>& relationAreas) const;
+
   public:
     Database();
     virtual ~Database();
@@ -144,10 +166,13 @@ namespace osmscout {
                     double magnification,
                     size_t maxAreaLevel,
                     size_t maxNodes,
+                    size_t maxWays,
                     size_t maxAreas,
                     std::vector<Node>& nodes,
                     std::vector<Way>& ways,
-                    std::vector<Way>& areas) const;
+                    std::vector<Way>& areas,
+                    std::vector<Relation>& relationWays,
+                    std::vector<Relation>& realtionAreas) const;
 
     bool GetNode(const Id& id,
                  Node& node) const;

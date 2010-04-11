@@ -20,16 +20,18 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <cstdio>
-
 #include <osmscout/Import.h>
-#include <osmscout/Progress.h>
-#include <osmscout/TypeConfig.h>
 
 namespace osmscout {
-  extern bool GenerateNodeUseIndex(const TypeConfig& typeConfig,
-                                   const ImportParameter& parameter,
-                                   Progress& progress);
+
+  class NodeUseIndexGenerator : public ImportModule
+  {
+  public:
+    std::string GetDescription() const;
+    bool Import(const ImportParameter& parameter,
+                Progress& progress,
+                const TypeConfig& typeConfig);
+  };
 }
 
 #endif

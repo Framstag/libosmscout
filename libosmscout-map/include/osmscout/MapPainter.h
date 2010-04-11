@@ -70,7 +70,7 @@ namespace osmscout {
     cairo_scaled_font_t* GetScaledFont(cairo_t* draw,
                                        size_t fontSize);
 
-    bool IsVisible(const Way& way) const;
+    bool IsVisible(const std::vector<Point>& nodes) const;
 
     bool CheckImage(const StyleConfig& styleConfig,
                     IconStyle::Icon icon);

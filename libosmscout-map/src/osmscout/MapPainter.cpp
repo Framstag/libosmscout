@@ -39,7 +39,7 @@ namespace osmscout {
   static double lineDot[]= {7,3,1,3};
 
   /* Returns Euclidean distance between two points */
-  static double two_points_distance (cairo_path_data_t *a, cairo_path_data_t *b)
+  static double two_points_distance(cairo_path_data_t *a, cairo_path_data_t *b)
   {
     double dx, dy;
 
@@ -54,7 +54,7 @@ namespace osmscout {
   /* Compute parametrization info. That is, for each part of the
     * cairo path, tags it with its length.
   */
-  static parametrization_t* parametrize_path (cairo_path_t *path)
+  static parametrization_t* parametrize_path(cairo_path_t *path)
   {
     int i;
     cairo_path_data_t *data, last_move_to, current_point;
@@ -91,12 +91,12 @@ namespace osmscout {
   }
 
 
-  typedef void (*transform_point_func_t) (void *closure, double *x, double *y);
+  typedef void (*transform_point_func_t)(void *closure, double *x, double *y);
 
   /* Project a path using a function. Each point of the path (including
     * Bezier control points) is passed to the function for transformation.
   */
-  static void transform_path (cairo_path_t *path, transform_point_func_t f, void *closure)
+  static void transform_path(cairo_path_t *path, transform_point_func_t f, void *closure)
   {
     int i;
     cairo_path_data_t *data;
@@ -148,7 +148,7 @@ namespace osmscout {
     * the question of "where will I be if then I stop, rotate left for 90
     * degrees and walk straight for a distance of Y".
   */
-  static void point_on_path (parametrized_path_t *param, double *x, double *y)
+  static void point_on_path(parametrized_path_t *param, double *x, double *y)
   {
     int i;
     double ratio, the_y = *y, the_x = *x, dx, dy;
@@ -217,7 +217,7 @@ namespace osmscout {
   }
 
   /* Projects the current path of cr onto the provided path. */
-  static void map_path_onto (cairo_t *cr, cairo_path_t *path)
+  static void map_path_onto(cairo_t *cr, cairo_path_t *path)
   {
     cairo_path_t *current_path;
     parametrized_path_t param;
@@ -284,23 +284,23 @@ namespace osmscout {
     // no code
   }
 
-  bool MapPainter::IsVisible(const Way& way) const
+  bool MapPainter::IsVisible(const std::vector<Point>& nodes) const
   {
-    if (way.nodes.size()==0) {
+    if (nodes.size()==0) {
       return false;
     }
 
     // Bounding box
-    double lonMin=way.nodes[0].lon;
-    double lonMax=way.nodes[0].lon;
-    double latMin=way.nodes[0].lat;
-    double latMax=way.nodes[0].lat;
+    double lonMin=nodes[0].lon;
+    double lonMax=nodes[0].lon;
+    double latMin=nodes[0].lat;
+    double latMax=nodes[0].lat;
 
-    for (size_t i=1; i<way.nodes.size(); i++) {
-      lonMin=std::min(lonMin,way.nodes[i].lon);
-      lonMax=std::max(lonMax,way.nodes[i].lon);
-      latMin=std::min(latMin,way.nodes[i].lat);
-      latMax=std::max(latMax,way.nodes[i].lat);
+    for (size_t i=1; i<nodes.size(); i++) {
+      lonMin=std::min(lonMin,nodes[i].lon);
+      lonMax=std::max(lonMax,nodes[i].lon);
+      latMin=std::min(latMin,nodes[i].lat);
+      latMax=std::max(latMax,nodes[i].lat);
     }
 
     // If bounding box is neither left or right nor above or below
@@ -704,7 +704,7 @@ namespace osmscout {
     latMax=atan(sinh(atanh(sin(lat*gradtorad))+boxHeight/2*gradtorad))/gradtorad;
   }
 
-  static void OptimizeArea(const Way& area,
+  static void OptimizeArea(const std::vector<Point>& nodes,
                            std::vector<bool>& drawNode,
                            std::vector<double>& x,
                            std::vector<double>& y,
@@ -715,26 +715,26 @@ namespace osmscout {
                            double vscale)
   {
     drawNode[0]=true;
-    drawNode[area.nodes.size()-1]=true;
+    drawNode[nodes.size()-1]=true;
 
     // Drop every point that is on direct line between two points A and B
-    for (size_t i=1; i+1<area.nodes.size(); i++) {
-      drawNode[i]=std::abs((area.nodes[i].lon-area.nodes[i-1].lon)/
-                           (area.nodes[i].lat-area.nodes[i-1].lat)-
-                           (area.nodes[i+1].lon-area.nodes[i].lon)/
-                           (area.nodes[i+1].lat-area.nodes[i].lat))>=relevantSlopeDeriviation;
+    for (size_t i=1; i+1<nodes.size(); i++) {
+      drawNode[i]=std::abs((nodes[i].lon-nodes[i-1].lon)/
+                           (nodes[i].lat-nodes[i-1].lat)-
+                           (nodes[i+1].lon-nodes[i].lon)/
+                           (nodes[i+1].lat-nodes[i].lat))>=relevantSlopeDeriviation;
     }
 
     // Calculate screen position
-    for (size_t i=0; i<area.nodes.size(); i++) {
+    for (size_t i=0; i<nodes.size(); i++) {
       if (drawNode[i]) {
-        x[i]=(area.nodes[i].lon*gradtorad-hmin)*hscale;
-        y[i]=height-(atanh(sin(area.nodes[i].lat*gradtorad))-vmin)*vscale;
+        x[i]=(nodes[i].lon*gradtorad-hmin)*hscale;
+        y[i]=height-(atanh(sin(nodes[i].lat*gradtorad))-vmin)*vscale;
       }
     }
 
     // Drop all points that do not differ in position from the previous node
-    for (size_t i=1; i<area.nodes.size()-1; i++) {
+    for (size_t i=1; i<nodes.size()-1; i++) {
       if (drawNode[i]) {
         size_t j=i+1;
         while (!drawNode[j]) {
@@ -749,7 +749,7 @@ namespace osmscout {
     }
   }
 
-  static void OptimizeWay(const Way& way,
+  static void OptimizeWay(const std::vector<Point>& nodes,
                            std::vector<bool>& drawNode,
                            std::vector<double>& x,
                            std::vector<double>& y,
@@ -765,15 +765,15 @@ namespace osmscout {
   {
     size_t a;
 
-    for (size_t i=0; i<way.nodes.size(); i++) {
+    for (size_t i=0; i<nodes.size(); i++) {
       drawNode[i]=true;
     }
 
-    if (way.nodes.size()>=3) {
+    if (nodes.size()>=3) {
       a=0;
-      while (a+1<way.nodes.size()) {
-        if (way.nodes[a].lon>=lonMin && way.nodes[a].lon<=lonMax &&
-            way.nodes[a].lat>=latMin && way.nodes[a].lat<=latMax) {
+      while (a+1<nodes.size()) {
+        if (nodes[a].lon>=lonMin && nodes[a].lon<=lonMax &&
+            nodes[a].lat>=latMin && nodes[a].lat<=latMax) {
           break;
         }
 
@@ -787,61 +787,61 @@ namespace osmscout {
       }
     }
 
-    if (way.nodes.size()>=3) {
-      a=way.nodes.size()-1;
+    if (nodes.size()>=3) {
+      a=nodes.size()-1;
       while (a>0) {
-        if (way.nodes[a].lon>=lonMin && way.nodes[a].lon<=lonMax &&
-            way.nodes[a].lat>=latMin && way.nodes[a].lat<=latMax) {
+        if (nodes[a].lon>=lonMin && nodes[a].lon<=lonMax &&
+            nodes[a].lat>=latMin && nodes[a].lat<=latMax) {
           break;
         }
 
         a--;
       }
 
-      if (a<way.nodes.size()-2) {
-        for (size_t i=a+2; i<way.nodes.size(); i++) {
+      if (a<nodes.size()-2) {
+        for (size_t i=a+2; i<nodes.size(); i++) {
           drawNode[i]=false;
         }
       }
     }
 
     // Drop every point that is on direct line between two points A and B
-    for (size_t i=0; i+2<way.nodes.size(); i++) {
+    for (size_t i=0; i+2<nodes.size(); i++) {
       if (drawNode[i]) {
         size_t j=i+1;
-        while (j<way.nodes.size() && !drawNode[j]) {
+        while (j<nodes.size() && !drawNode[j]) {
           j++;
         }
 
         size_t k=j+1;
-        while (k<way.nodes.size() && !drawNode[k]) {
+        while (k<nodes.size() && !drawNode[k]) {
           k++;
         }
 
-        if (j<way.nodes.size() && k<way.nodes.size()) {
-          drawNode[j]=std::abs((way.nodes[j].lon-way.nodes[i].lon)/
-                               (way.nodes[j].lat-way.nodes[i].lat)-
-                               (way.nodes[k].lon-way.nodes[j].lon)/
-                               (way.nodes[k].lat-way.nodes[j].lat))>=relevantSlopeDeriviation;
+        if (j<nodes.size() && k<nodes.size()) {
+          drawNode[j]=std::abs((nodes[j].lon-nodes[i].lon)/
+                               (nodes[j].lat-nodes[i].lat)-
+                               (nodes[k].lon-nodes[j].lon)/
+                               (nodes[k].lat-nodes[j].lat))>=relevantSlopeDeriviation;
         }
       }
     }
 
     // Calculate screen position
-    for (size_t i=0; i<way.nodes.size(); i++) {
+    for (size_t i=0; i<nodes.size(); i++) {
       if (drawNode[i]) {
-        x[i]=(way.nodes[i].lon*gradtorad-hmin)*hscale;
-        y[i]=height-(atanh(sin(way.nodes[i].lat*gradtorad))-vmin)*vscale;
+        x[i]=(nodes[i].lon*gradtorad-hmin)*hscale;
+        y[i]=height-(atanh(sin(nodes[i].lat*gradtorad))-vmin)*vscale;
       }
     }
 
     // Drop all points that do not differ in position from the previous node
-    if (way.nodes.size()>2) {
-      for (size_t i=1; i<way.nodes.size()-1; i++) {
+    if (nodes.size()>2) {
+      for (size_t i=1; i<nodes.size()-1; i++) {
         if (drawNode[i]) {
           size_t j=i+1;
 
-          while (j+1<way.nodes.size() &&
+          while (j+1<nodes.size() &&
                  !drawNode[j]) {
             j++;
           }
@@ -921,18 +921,22 @@ namespace osmscout {
                            cairo_surface_t *image,
                            cairo_t *draw)
   {
-    size_t              styleCount=styleConfig.GetStyleCount();
-    std::vector<Node>   nodes;
-    std::vector<Way>    ways;
-    std::vector<Way>    areas;
-    bool                areaLayers[11];
-    bool                wayLayers[11];
+    size_t                styleCount=styleConfig.GetStyleCount();
+    std::vector<Node>     nodes;
+    std::vector<Way>      ways;
+    std::vector<Way>      areas;
+    std::vector<Relation> relationWays;
+    std::vector<Relation> relationAreas;
+    bool                  areaLayers[11];
+    bool                  wayLayers[11];
+    bool                  relationAreaLayers[11];
+    bool                  relationWayLayers[11];
 
-    double              gradtorad=2*M_PI/360;
+    double                gradtorad=2*M_PI/360;
 
-    size_t              nodesDrawnCount=0;
-    size_t              areasDrawnCount=0;
-    size_t              waysDrawnCount=0;
+    size_t                nodesDrawnCount=0;
+    size_t                areasDrawnCount=0;
+    size_t                waysDrawnCount=0;
 
     std::cout << "---" << std::endl;
     std::cout << "Showing " << lon <<", " << lat << " with magnification " << magnification << "x" << "/" << log(magnification)/log(2) << " for area " << width << "x" << height << std::endl;
@@ -984,10 +988,13 @@ namespace osmscout {
                         magnification,
                         ((size_t)ceil(Log2(magnification)))+4,
                         2000,
+                        3000,
                         2000,
                         nodes,
                         ways,
-                        areas);
+                        areas,
+                        relationWays,
+                        relationAreas);
 
     dataRetrievalTimer.Stop();
 
@@ -1010,15 +1017,12 @@ namespace osmscout {
         lineWidth[i]=lineStyle->GetWidth()/pixelSize;
         if (lineWidth[i]<lineStyle->GetMinPixel()) {
           lineWidth[i]=lineStyle->GetMinPixel();
-          outline[i]=lineStyle->GetOutline()>0 && magnification>=magRegion;
         }
         else if (lineWidth[i]>lineStyle->GetMaxPixel()) {
           lineWidth[i]=lineStyle->GetMaxPixel();
-          outline[i]=lineStyle->GetOutline()>0 && magnification>=magRegion;
         }
-        else {
-          outline[i]=lineStyle->GetOutline()>0 && magnification>=magRegion;
-        }
+
+        outline[i]=lineStyle->GetOutline()>0 && magnification>=magRegion;
 
         const LabelStyle *labelStyle=styleConfig.GetWayNameLabelStyle(i);
 
@@ -1062,6 +1066,18 @@ namespace osmscout {
       }
     }
 
+    for (size_t i=0; i<11; i++) {
+      relationWayLayers[i]=false;
+    }
+
+    for (std::vector<Relation>::const_iterator relation=relationWays.begin();
+         relation!=relationWays.end();
+         ++relation) {
+      if (relation->layer>=-5 && relation->layer<=5) {
+        relationWayLayers[relation->layer+5]=true;
+      }
+    }
+
     //
     // Calculate available layers for areas
     //
@@ -1080,6 +1096,23 @@ namespace osmscout {
           style->GetLayer()>=-5 &&
           style->GetLayer()<=5) {
         areaLayers[style->GetLayer()+5]=true;
+      }
+    }
+
+    for (size_t i=0; i<11; i++) {
+      relationAreaLayers[i]=false;
+    }
+
+    for (std::vector<Relation>::const_iterator relation=relationAreas.begin();
+         relation!=relationAreas.end();
+         ++relation) {
+      const FillStyle *style=styleConfig.GetAreaFillStyle(relation->type,
+                                                          false/*relation->flags & Way::isBuilding*/);
+
+      if (style!=NULL &&
+          style->GetLayer()>=-5 &&
+          style->GetLayer()<=5) {
+        relationAreaLayers[style->GetLayer()+5]=true;
       }
     }
 
@@ -1106,92 +1139,146 @@ namespace osmscout {
     StopClock areasTimer;
 
     cairo_save(draw);
+
     for (size_t l=0; l<11; l++) {
       int layer=l-5;
 
-      if (!areaLayers[l]) {
-        continue;
+      if (areaLayers[l]) {
+        for (std::vector<Way>::const_iterator area=areas.begin();
+             area!=areas.end();
+             ++area) {
+          const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(area->type,
+                                                                  area->flags & Way::isBuilding);
+
+          if (fillStyle==NULL ||
+              fillStyle->GetLayer()!=layer) {
+            continue;
+          }
+
+          if (!IsVisible(area->nodes)) {
+            continue;
+          }
+
+          cairo_set_source_rgb(draw,
+                               fillStyle->GetFillR(),
+                               fillStyle->GetFillG(),
+                               fillStyle->GetFillB());
+          cairo_set_line_width(draw,1);
+
+          OptimizeArea(area->nodes,
+                       drawNode,
+                       nodeX,nodeY,
+                       hmin,vmin,
+                       height,
+                       hscale,vscale);
+
+          bool start=true;
+          for (size_t i=0; i<area->nodes.size(); i++) {
+            if (drawNode[i]) {
+              if (start) {
+                cairo_move_to(draw,nodeX[i],nodeY[i]);
+                start=false;
+              }
+              else {
+                cairo_line_to(draw,nodeX[i],nodeY[i]);
+              }
+              //nodesDrawnCount++;
+            }
+
+            //nodesAllCount++;
+          }
+
+          areasDrawnCount++;
+
+          cairo_fill(draw);
+
+          const LineStyle *lineStyle=styleConfig.GetAreaBorderStyle(area->type);
+
+          if (lineStyle==NULL) {
+            continue;
+          }
+
+          SetLineStyle(draw,borderWidth[(size_t)area->type],*lineStyle);
+
+          start=false;
+          for (size_t i=0; i<area->nodes.size(); i++) {
+            if (drawNode[i]) {
+              if (start) {
+                cairo_move_to(draw,nodeX[i],nodeY[i]);
+                start=false;
+              }
+              else {
+                cairo_line_to(draw,nodeX[i],nodeY[i]);
+              }
+              //nodesDrawnCount++;
+            }
+
+            //nodesAllCount++;
+          }
+
+          cairo_stroke(draw);
+        }
       }
 
-      //std::cout << "Drawing layer " << layer << std::endl;
+      if (relationAreaLayers[l]) {
+        for (std::vector<Relation>::const_iterator relation=relationAreas.begin();
+             relation!=relationAreas.end();
+             ++relation) {
+          const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(relation->type,
+                                                                  false/*area->flags & Way::isBuilding*/);
 
-      for (std::vector<Way>::const_iterator area=areas.begin();
-           area!=areas.end();
-           ++area) {
-
-        const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(area->type,
-                                                                area->flags & Way::isBuilding);
-
-        if (fillStyle==NULL ||
-            fillStyle->GetLayer()!=layer) {
-          continue;
-        }
-
-        if (!IsVisible(*area)) {
-          continue;
-        }
-
-        cairo_set_source_rgb(draw,
-                             fillStyle->GetFillR(),
-                             fillStyle->GetFillG(),
-                             fillStyle->GetFillB());
-        cairo_set_line_width(draw,1);
-
-        OptimizeArea(*area,
-                     drawNode,
-                     nodeX,nodeY,
-                     hmin,vmin,
-                     height,
-                     hscale,vscale);
-
-        bool start=true;
-        for (size_t i=0; i<area->nodes.size(); i++) {
-          if (drawNode[i]) {
-            if (start) {
-              cairo_move_to(draw,nodeX[i],nodeY[i]);
-              start=false;
-            }
-            else {
-              cairo_line_to(draw,nodeX[i],nodeY[i]);
-            }
-            //nodesDrawnCount++;
+          if (fillStyle==NULL ||
+              fillStyle->GetLayer()!=layer) {
+            continue;
           }
 
-          //nodesAllCount++;
-        }
+          //std::cout << "Drawing area relation " << relation->id << std::endl;
 
-        areasDrawnCount++;
+          cairo_set_source_rgb(draw,
+                               fillStyle->GetFillR(),
+                               fillStyle->GetFillG(),
+                               fillStyle->GetFillB());
+          cairo_set_line_width(draw,1);
 
-        cairo_fill(draw);
+          bool drawn=false;
+          for (size_t m=0; m<relation->roles.size(); m++) {
+            if (relation->roles[m].role=="0") {
 
-        const LineStyle *lineStyle=styleConfig.GetAreaBorderStyle(area->type);
+              if (!IsVisible(relation->roles[m].nodes)) {
+                continue;
+              }
 
-        if (lineStyle==NULL) {
-          continue;
-        }
+              drawn=true;
 
-        SetLineStyle(draw,borderWidth[(size_t)area->type],*lineStyle);
+              OptimizeArea(relation->roles[m].nodes,
+                           drawNode,
+                           nodeX,nodeY,
+                           hmin,vmin,
+                           height,
+                           hscale,vscale);
 
-        start=false;
-        for (size_t i=0; i<area->nodes.size(); i++) {
-          if (drawNode[i]) {
-            if (start) {
-              cairo_move_to(draw,nodeX[i],nodeY[i]);
-              start=false;
+              bool start=true;
+              for (size_t i=0; i<relation->roles[m].nodes.size(); i++) {
+                if (drawNode[i]) {
+                  if (start) {
+                    cairo_move_to(draw,nodeX[i],nodeY[i]);
+                    start=false;
+                  }
+                  else {
+                    cairo_line_to(draw,nodeX[i],nodeY[i]);
+                  }
+                }
+              }
+              cairo_fill(draw);
             }
-            else {
-              cairo_line_to(draw,nodeX[i],nodeY[i]);
-            }
-            //nodesDrawnCount++;
           }
 
-          //nodesAllCount++;
+          if (!drawn) {
+            std::cout << " Something is wrong with area relation " << relation->id << std::endl;
+          }
         }
-
-        cairo_stroke(draw);
       }
     }
-
 
     cairo_restore(draw);
 
@@ -1205,189 +1292,330 @@ namespace osmscout {
 
     //std::cout << "Draw path outlines..." << std::endl;
 
+    cairo_save(draw);
+
     for (size_t l=0; l<11; l++) {
       int8_t layer=l-5;
       // Potential path outline
 
-      if (!wayLayers[l]) {
-        continue;
-      }
+      if (wayLayers[l]) {
+        for (std::vector<Way>::const_iterator way=ways.begin();
+             way!=ways.end();
+             ++way) {
 
-      //std::cout << "Drawing layer " << (int)layer << std::endl;
-
-      cairo_save(draw);
-      for (std::vector<Way>::const_iterator way=ways.begin();
-           way!=ways.end();
-           ++way) {
-
-        if ((!outline[(size_t)way->type] &&
-             !(way->flags & Way::isBridge && magnification>=magCity) &&
-             !(way->flags & Way::isTunnel && magnification>=magCity)) ||
-             way->layer!=layer) {
-          continue;
-        }
-
-        const LineStyle *style=styleConfig.GetWayLineStyle(way->type);
-
-        if (style==NULL) {
-          continue;
-        }
-
-        if (!IsVisible(*way)) {
-          continue;
-        }
-
-        if (way->flags & Way::isBridge && magnification>=magCity) {
-          cairo_set_dash(draw,NULL,0,0);
-          cairo_set_source_rgb(draw,0.0,0.0,0.0);
-          cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
-        }
-        else if (way->flags & Way::isTunnel && magnification>=magCity) {
-          double tunnel[2];
-
-          tunnel[0]=7+lineWidth[(size_t)way->type]+2*style->GetOutline();
-          tunnel[1]=7+lineWidth[(size_t)way->type]+2*style->GetOutline();
-
-          cairo_set_dash(draw,tunnel,2,0);
-          if (magnification>=10000) {
-            cairo_set_source_rgb(draw,0.75,0.75,0.75);
+          if ((!outline[(size_t)way->type] &&
+               !(way->flags & Way::isBridge && magnification>=magCity) &&
+               !(way->flags & Way::isTunnel && magnification>=magCity)) ||
+               way->layer!=layer) {
+            continue;
           }
-          else {
-            cairo_set_source_rgb(draw,0.5,0.5,0.5);
+
+          const LineStyle *style=styleConfig.GetWayLineStyle(way->type);
+
+          if (style==NULL) {
+            continue;
           }
-          cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
-        }
-        else {
-          cairo_set_dash(draw,NULL,0,0);
-          cairo_set_source_rgba(draw,
-                                style->GetOutlineR(),
-                                style->GetOutlineG(),
-                                style->GetOutlineB(),
-                                style->GetOutlineA());
-          cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
-        }
-        cairo_set_line_width(draw,lineWidth[(size_t)way->type]+2*style->GetOutline());
 
-        OptimizeWay(*way,
-                    drawNode,
-                    nodeX,nodeY,
-                    lonMin,lonMax,
-                    latMin,latMax,
-                    hmin,vmin,
-                    height,
-                    hscale,vscale);
+          if (!IsVisible(way->nodes)) {
+            continue;
+          }
 
-        bool start=true;
-        for (size_t i=0; i<way->nodes.size(); i++) {
-          if (drawNode[i]) {
-            if (start) {
-              cairo_move_to(draw,nodeX[i],nodeY[i]);
-              start=false;
+          if (way->flags & Way::isBridge && magnification>=magCity) {
+            cairo_set_dash(draw,NULL,0,0);
+            cairo_set_source_rgb(draw,0.0,0.0,0.0);
+            cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
+          }
+          else if (way->flags & Way::isTunnel && magnification>=magCity) {
+            double tunnel[2];
+
+            tunnel[0]=7+lineWidth[(size_t)way->type]+2*style->GetOutline();
+            tunnel[1]=7+lineWidth[(size_t)way->type]+2*style->GetOutline();
+
+            cairo_set_dash(draw,tunnel,2,0);
+            if (magnification>=10000) {
+              cairo_set_source_rgb(draw,0.75,0.75,0.75);
             }
             else {
-              cairo_line_to(draw,nodeX[i],nodeY[i]);
+              cairo_set_source_rgb(draw,0.5,0.5,0.5);
             }
-
-            //nodesDrawnCount++;
+            cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
           }
           else {
-            //nodesOutCount++;
+            cairo_set_dash(draw,NULL,0,0);
+            cairo_set_source_rgba(draw,
+                                  style->GetOutlineR(),
+                                  style->GetOutlineG(),
+                                  style->GetOutlineB(),
+                                  style->GetOutlineA());
+            cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
           }
-        }
-        //nodesAllCount+=way->nodes.size();
-
-        cairo_stroke(draw);
-
-        if (!(way->flags & Way::startIsJoint)) {
-          cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
-          cairo_set_dash(draw,NULL,0,0);
-          cairo_set_source_rgba(draw,
-                                style->GetOutlineR(),
-                                style->GetOutlineG(),
-                                style->GetOutlineB(),
-                                style->GetOutlineA());
           cairo_set_line_width(draw,lineWidth[(size_t)way->type]+2*style->GetOutline());
 
-          cairo_move_to(draw,nodeX[0],nodeY[0]);
-          cairo_line_to(draw,nodeX[0],nodeY[0]);
-          cairo_stroke(draw);
-        }
+          OptimizeWay(way->nodes,
+                      drawNode,
+                      nodeX,nodeY,
+                      lonMin,lonMax,
+                      latMin,latMax,
+                      hmin,vmin,
+                      height,
+                      hscale,vscale);
 
-        if (!(way->flags & Way::endIsJoint)) {
-          cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
-          cairo_set_dash(draw,NULL,0,0);
-          cairo_set_source_rgba(draw,
-                                style->GetOutlineR(),
-                                style->GetOutlineG(),
-                                style->GetOutlineB(),
-                                style->GetOutlineA());
-          cairo_set_line_width(draw,lineWidth[(size_t)way->type]+2*style->GetOutline());
+          bool start=true;
+          for (size_t i=0; i<way->nodes.size(); i++) {
+            if (drawNode[i]) {
+              if (start) {
+                cairo_move_to(draw,nodeX[i],nodeY[i]);
+                start=false;
+              }
+              else {
+                cairo_line_to(draw,nodeX[i],nodeY[i]);
+              }
 
-          cairo_move_to(draw,nodeX[way->nodes.size()-1],nodeY[way->nodes.size()-1]);
-          cairo_line_to(draw,nodeX[way->nodes.size()-1],nodeY[way->nodes.size()-1]);
-          cairo_stroke(draw);
-        }
-      }
-
-      cairo_save(draw);
-      for (std::vector<Way>::const_iterator way=ways.begin();
-           way!=ways.end();
-           ++way) {
-
-        if (way->layer!=layer) {
-          continue;
-        }
-
-        const LineStyle *style=styleConfig.GetWayLineStyle(way->type);
-
-        if (style==NULL) {
-          continue;
-        }
-
-        if (style->GetLineA()==0.0) {
-          continue;
-        }
-
-        //std::cout << "w** " << way->GetName() << std::endl;
-
-        if (!IsVisible(*way)) {
-          continue;
-        }
-
-        OptimizeWay(*way,
-                    drawNode,
-                    nodeX,nodeY,
-                    lonMin,lonMax,
-                    latMin,latMax,
-                    hmin,vmin,
-                    height,
-                    hscale,vscale);
-        SetLineStyle(draw,lineWidth[(size_t)way->type],*style);
-
-        bool start=true;
-        for (size_t i=0; i<way->nodes.size(); i++) {
-          if (drawNode[i]) {
-            if (start) {
-              cairo_move_to(draw,nodeX[i],nodeY[i]);
-              start=false;
+              //nodesDrawnCount++;
             }
             else {
-              cairo_line_to(draw,nodeX[i],nodeY[i]);
+              //nodesOutCount++;
             }
-
-            //nodesDrawnCount++;
           }
-          else {
-            //nodesOutCount++;
+          //nodesAllCount+=way->nodes.size();
+
+          cairo_stroke(draw);
+
+          if (!(way->flags & Way::startIsJoint)) {
+            cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
+            cairo_set_dash(draw,NULL,0,0);
+            cairo_set_source_rgba(draw,
+                                  style->GetOutlineR(),
+                                  style->GetOutlineG(),
+                                  style->GetOutlineB(),
+                                  style->GetOutlineA());
+            cairo_set_line_width(draw,lineWidth[(size_t)way->type]+2*style->GetOutline());
+
+            cairo_move_to(draw,nodeX[0],nodeY[0]);
+            cairo_line_to(draw,nodeX[0],nodeY[0]);
+            cairo_stroke(draw);
+          }
+
+          if (!(way->flags & Way::endIsJoint)) {
+            cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
+            cairo_set_dash(draw,NULL,0,0);
+            cairo_set_source_rgba(draw,
+                                  style->GetOutlineR(),
+                                  style->GetOutlineG(),
+                                  style->GetOutlineB(),
+                                  style->GetOutlineA());
+            cairo_set_line_width(draw,lineWidth[(size_t)way->type]+2*style->GetOutline());
+
+            cairo_move_to(draw,nodeX[way->nodes.size()-1],nodeY[way->nodes.size()-1]);
+            cairo_line_to(draw,nodeX[way->nodes.size()-1],nodeY[way->nodes.size()-1]);
+            cairo_stroke(draw);
           }
         }
-        cairo_stroke(draw);
 
-        waysDrawnCount++;
-        //nodesAllCount+=way->nodes.size();
+        for (std::vector<Way>::const_iterator way=ways.begin();
+             way!=ways.end();
+             ++way) {
+
+          if (way->layer!=layer) {
+            continue;
+          }
+
+          const LineStyle *style=styleConfig.GetWayLineStyle(way->type);
+
+          if (style==NULL) {
+            continue;
+          }
+
+          if (style->GetLineA()==0.0) {
+            continue;
+          }
+
+          //std::cout << "w** " << way->GetName() << std::endl;
+
+          if (!IsVisible(way->nodes)) {
+            continue;
+          }
+
+          OptimizeWay(way->nodes,
+                      drawNode,
+                      nodeX,nodeY,
+                      lonMin,lonMax,
+                      latMin,latMax,
+                      hmin,vmin,
+                      height,
+                      hscale,vscale);
+
+          SetLineStyle(draw,lineWidth[(size_t)way->type],*style);
+
+          bool start=true;
+          for (size_t i=0; i<way->nodes.size(); i++) {
+            if (drawNode[i]) {
+              if (start) {
+                cairo_move_to(draw,nodeX[i],nodeY[i]);
+                start=false;
+              }
+              else {
+                cairo_line_to(draw,nodeX[i],nodeY[i]);
+              }
+
+              //nodesDrawnCount++;
+            }
+            else {
+              //nodesOutCount++;
+            }
+          }
+          cairo_stroke(draw);
+
+          waysDrawnCount++;
+          //nodesAllCount+=way->nodes.size();
+        }
       }
-      cairo_restore(draw);
+
+      if (relationWayLayers[l]) {
+        for (std::vector<Relation>::const_iterator relation=relationWays.begin();
+             relation!=relationWays.end();
+             ++relation) {
+          if (relation->layer!=layer) {
+            continue;
+          }
+
+          for (size_t m=0; m<relation->roles.size(); m++) {
+            TypeId type=relation->roles[m].type==typeIgnore ? relation->type : relation->roles[m].type;
+
+            if ((!outline[(size_t)type]/* &&
+                   !(way->flags & Way::isBridge && magnification>=magCity) &&
+                   !(way->flags & Way::isTunnel && magnification>=magCity)*/) ||
+                   relation->layer!=layer) {
+              continue;
+            }
+
+            //std::cout << "Draw outline of way relation " << relation->id << std::endl;
+
+            if (!outline[(size_t)type] /*&&
+                   !(relation->flags & Relation::isBridge && magnification>=magCity) &&
+                   !(relation->flags & Relation::isTunnel && magnification>=magCity)*/) {
+              continue;
+            }
+
+            const LineStyle *style=styleConfig.GetWayLineStyle(type);
+
+            if (style==NULL) {
+              continue;
+            }
+
+            if (!IsVisible(relation->roles[m].nodes)) {
+              continue;
+            }
+
+            cairo_set_dash(draw,NULL,0,0);
+            cairo_set_source_rgba(draw,
+                                  style->GetOutlineR(),
+                                  style->GetOutlineG(),
+                                  style->GetOutlineB(),
+                                  style->GetOutlineA());
+            cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
+            cairo_set_line_width(draw,lineWidth[(size_t)relation->type]+2*style->GetOutline());
+
+            OptimizeWay(relation->roles[m].nodes,
+                        drawNode,
+                        nodeX,nodeY,
+                        lonMin,lonMax,
+                        latMin,latMax,
+                        hmin,vmin,
+                        height,
+                        hscale,vscale);
+
+            bool start=true;
+            for (size_t i=0; i<relation->roles[m].nodes.size(); i++) {
+              if (drawNode[i]) {
+                if (start) {
+                  cairo_move_to(draw,nodeX[i],nodeY[i]);
+                  start=false;
+                }
+                else {
+                  cairo_line_to(draw,nodeX[i],nodeY[i]);
+                }
+
+                //nodesDrawnCount++;
+              }
+              else {
+                //nodesOutCount++;
+              }
+            }
+            //nodesAllCount+=way->nodes.size();
+
+            cairo_stroke(draw);
+          }
+        }
+
+        for (std::vector<Relation>::const_iterator relation=relationWays.begin();
+             relation!=relationWays.end();
+             ++relation) {
+          if (relation->layer!=layer) {
+            continue;
+          }
+
+          //std::cout << "Draw way relation " << relation->id << std::endl;
+          for (size_t m=0; m<relation->roles.size(); m++) {
+            TypeId type=relation->roles[m].type==typeIgnore ? relation->type : relation->roles[m].type;
+
+            const LineStyle *style=styleConfig.GetWayLineStyle(type);
+
+            if (style==NULL) {
+              continue;
+            }
+
+            if (!IsVisible(relation->roles[m].nodes)) {
+              continue;
+            }
+
+            //std::cout << type << " " << relation->id << " " << relation->type << " " << relation->roles[m].type << std::endl;
+            //SetLineStyle(draw,lineWidth[(size_t)type],*style);
+
+            cairo_set_dash(draw,NULL,0,0);
+            cairo_set_source_rgba(draw,
+                                  style->GetLineR(),
+                                  style->GetLineG(),
+                                  style->GetLineB(),
+                                  style->GetLineA());
+            cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
+            cairo_set_line_width(draw,lineWidth[(size_t)type]);
+
+            OptimizeWay(relation->roles[m].nodes,
+                        drawNode,
+                        nodeX,nodeY,
+                        lonMin,lonMax,
+                        latMin,latMax,
+                        hmin,vmin,
+                        height,
+                        hscale,vscale);
+
+            bool start=true;
+            for (size_t i=0; i<relation->roles[m].nodes.size(); i++) {
+              if (drawNode[i]) {
+                if (start) {
+                  cairo_move_to(draw,nodeX[i],nodeY[i]);
+                  start=false;
+                }
+                else {
+                  cairo_line_to(draw,nodeX[i],nodeY[i]);
+                }
+
+                //nodesDrawnCount++;
+              }
+              else {
+                //nodesOutCount++;
+              }
+            }
+            //nodesAllCount+=way->nodes.size();
+
+            cairo_stroke(draw);
+          }
+        }
+      }
     }
+
+    cairo_restore(draw);
 
     pathsTimer.Stop();
 
@@ -1413,7 +1641,7 @@ namespace osmscout {
           continue;
         }
 
-        if (!IsVisible(*way)) {
+        if (!IsVisible(way->nodes)) {
           continue;
         }
 
@@ -1432,7 +1660,7 @@ namespace osmscout {
           continue;
         }
 
-        if (!IsVisible(*way)) {
+        if (!IsVisible(way->nodes)) {
           continue;
         }
 
@@ -1459,7 +1687,7 @@ namespace osmscout {
             continue;
         }
 
-        if (!IsVisible(*way)) {
+        if (!IsVisible(way->nodes)) {
           continue;
         }
 
@@ -1515,7 +1743,7 @@ namespace osmscout {
           continue;
         }
 
-        if (!IsVisible(*way)) {
+        if (!IsVisible(way->nodes)) {
           continue;
         }
 
@@ -1659,7 +1887,7 @@ namespace osmscout {
       }
 
       if (!area->GetName().empty()) {
-        if (!IsVisible(*area)) {
+        if (!IsVisible(area->nodes)) {
           continue;
         }
 
@@ -1689,7 +1917,7 @@ namespace osmscout {
                   ymin+(ymax-ymin)/2);
       }
       else if (!area->GetRefName().empty()) {
-        if (!IsVisible(*area)) {
+        if (!IsVisible(area->nodes)) {
           continue;
         }
 
@@ -1746,13 +1974,13 @@ namespace osmscout {
         continue;
       }
 
-      if (!IsVisible(*way)) {
+      if (!IsVisible(way->nodes)) {
         continue;
       }
 
       SetLineStyle(draw,lineWidth[(size_t)way->type],*style);
 
-      OptimizeWay(*way,
+      OptimizeWay(way->nodes,
                   drawNode,
                   nodeX,nodeY,
                   lonMin,lonMax,

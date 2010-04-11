@@ -1,6 +1,3 @@
-#ifndef OSMSCOUT_GENWAYDAT_H
-#define OSMSCOUT_GENWAYDAT_H
-
 /*
   This source is part of the libosmscout library
   Copyright (C) 2009  Tim Teulings
@@ -20,18 +17,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/Import.h>
+#include <osmscout/AreaWayRelIndex.h>
 
 namespace osmscout {
 
-  class WayDataGenerator : public ImportModule
+  AreaWayRelIndex::AreaWayRelIndex()
+  : WayInAreaIndex("areawayrel.idx")
   {
-  public:
-    std::string GetDescription() const;
-    bool Import(const ImportParameter& parameter,
-                Progress& progress,
-                const TypeConfig& typeConfig);
-  };
+    // no code
+  }
 }
 
-#endif

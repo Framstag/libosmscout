@@ -17,98 +17,98 @@
  -->
 
   <way key="highway" value="motorway" prio="1">
-    <line color="809bc0" minPixel="3.5" maxPixel="17" width="20" outline="1" />
+    <line color="809bc0" minPixel="2.5" width="20" outline="1" />
     <label style="contour" minMag="detail"/>
     <ref style="plate" textColor="ffffff" bgColor="809bc0" borderColor="ffffff" minMag="world"/>
   </way>
 
   <way key="highway" value="motorway_link" prio="3">
-    <line color="809bc0" minPixel="3.5" maxPixel="17" width="20" outline="1" />
+    <line color="809bc0" minPixel="2.5" width="20" outline="1" />
     <label style="contour" minMag="detail"/>
     <ref style="plate" textColor="ffffff" bgColor="809bc0" borderColor="ffffff" minMag="world"/>
   </way>
 
   <way key="highway" value="trunk" prio="2">
-    <line color="a8daa8" minPixel="3.5" maxPixel="15" width="18" outline="1" />
+    <line color="a8daa8" minPixel="2.5" width="18" outline="1" />
     <label style="contour" minMag="detail"/>
     <ref style="plate" textColor="ffffff" bgColor="7ec87e" borderColor="ffffff" minMag="world"/>
   </way>
 
   <way key="highway" value="trunk_link" prio="2">
-    <line color="a8daa8" minPixel="3.5" maxPixel="15" width="18" outline="1" />
+    <line color="a8daa8" minPixel="2.5" width="18" outline="1" />
     <label style="contour" minMag="detail"/>
     <ref style="plate" textColor="ffffff" bgColor="7ec87e" borderColor="ffffff" minMag="world"/>
   </way>
 
   <way key="highway" value="primary" prio="3">
-    <line color="ec989a" minPixel="2.5" maxPixel="12" width="14" outline="1" />
+    <line color="ec989a" minPixel="1.5" width="14" outline="1" />
     <label style="contour" minMag="detail"/>
     <ref style="plate" textColor="ffffff" bgColor="e46d71" borderColor="ffffff" minMag="proximity"/>
   </way>
 
   <way key="highway" value="primary_link" prio="3">
-    <line color="ec989a" minPixel="2.5" maxPixel="12" width="14" outline="1" />
+    <line color="ec989a" minPixel="1.5" width="14" outline="1" />
     <label style="contour" minMag="detail"/>
     <ref style="plate" textColor="ffffff" bgColor="e46d71" borderColor="ffffff" minMag="proximity"/>
   </way>
 
   <way key="highway" value="secondary" prio="4">
-    <line color="fdd6a4" minPixel="2.5" maxPixel="10" width="12" outline="1" />
+    <line color="fdd6a4" minPixel="1.5" width="12" outline="1" />
     <label style="contour" minMag="detail"/>
   </way>
 
   <way key="highway" value="secondary_link" prio="4">
-    <line color="fdd6a4" minPixel="2.5" maxPixel="10" width="12" outline="1" />
+    <line color="fdd6a4" minPixel="1.5" width="12" outline="1" />
     <label style="contour" minMag="detail"/>
   </way>
 
   <way key="highway" value="tertiary" prio="5">
-    <line color="fefeb3" minPixel="2.5" maxPixel="9" width="10" outline="1" />
+    <line color="fefeb3" minPixel="1.5" width="10" outline="1" />
     <label style="contour" minMag="detail"/>
   </way>
 
   <way key="highway" value="unclassified" prio="6">
-    <line color="ffffff" minPixel="2" maxPixel="8" width="8" outline="1" />
+    <line color="ffffff" minPixel="1" width="8" outline="1" />
     <label style="contour" minMag="detail"/>
   </way>
 
   <way key="highway" value="road" prio="7">
-    <line color="ffffff" minPixel="2" maxPixel="8" width="8" outline="1" />
+    <line color="ffffff" minPixel="1" width="8" outline="1" />
     <label style="contour" minMag="detail"/>
   </way>
 
   <way key="highway" value="residential" prio="8">
-    <line color="ffffff" minPixel="2" maxPixel="8" width="8" outline="1" />
+    <line color="ffffff" minPixel="1" width="8" outline="1" />
     <label style="contour" minMag="detail"/>
   </way>
 
   <way key="highway" value="living_street" prio="9">
-    <line color="bababa" minPixel="2" maxPixel="8" width="8" outline="1" />
+    <line color="bababa" minPixel="1" width="8" outline="1" />
     <label style="contour" minMag="detail"/>
   </way>
 
   <way key="highway" value="service" prio="10">
-    <line color="ffffff" minPixel="1.5" maxPixel="8" width="8" outline="1" />
+    <line color="ffffff" minPixel="0.5" width="8" outline="1" />
     <label style="contour" minMag="veryClose"/>
   </way>
 
   <way key="highway" value="track" prio="11">
     <line style="longDash"
           outlineColor="ffffff80" color="90570c"
-          minPixel="1" maxPixel="1" width="3"
+          minPixel="0.5" width="3"
           outline="1.5"/>
     <label style="contour" minMag="detail"/>
   </way>
 
   <way key="highway" value="pedestrian" prio="11">
-    <line color="ebeaea" minPixel="1.5" maxPixel="8" width="8" outline="1"/>
+    <line color="ebeaea" minPixel="0.5" width="8" outline="1"/>
     <label style="contour" minMag="close"/>
   </way>
 
   <area key="highway" value="pedestrian">
     <fill color="ededed"/>
     <label minMag="close"/>
-    <border color="c5c5c5" minPixel="1" maxPixel="1" width="1"/>
+    <border color="c5c5c5" minPixel="1" width="1"/>
   </area>
 
   <node key="highway" value="services" prio="12">
@@ -121,14 +121,14 @@
   </area>
 
   <way key="highway" value="bus_guideway" prio="11">
-    <line color="90570c" minPixel="0.5" maxPixel="0.5" width="2" />
+    <line color="90570c" minPixel="0.5" width="2" />
     <label style="contour" minMag="close"/>
   </way>
 
   <way key="highway" value="path" prio="11">
     <line style="longDash"
           outlineColor="ffffff80" color="4b4b4b"
-          minPixel="0.5" maxPixel="1" width="3"
+          minPixel="0.5" width="3"
           outline="1"/>
     <label style="contour" minMag="detail"/>
   </way>
@@ -136,7 +136,7 @@
   <way key="highway" value="cycleway" prio="11">
     <line style="dotted"
           outlineColor="ffffff80" color="4645fa"
-          minPixel="1.5" maxPixel="1.5" width="3"
+          minPixel="0.5" width="3"
           outline="1.5"/>
     <label style="contour" minMag="detail"/>
   </way>
@@ -144,28 +144,28 @@
   <way key="highway" value="footway" prio="11">
     <line style="dotted"
           outlineColor="ffffff80" color="fe9897"
-          minPixel="1.5" maxPixel="1.5" width="3"
+          minPixel="0.5" width="3"
           outline="1.5"/>
     <label style="contour" minMag="detail"/>
   </way>
 
   <way key="highway" value="bridleway" prio="11">
-    <line color="90570c" minPixel="0.5" maxPixel="0.5" width="2" />
+    <line color="90570c" minPixel="0.5" width="2" />
     <label style="contour" minMag="detail"/>
   </way>
 
   <way key="highway" value="byway" prio="11">
-    <line color="90570c" minPixel="0.5" maxPixel="0.5" width="2" />
+    <line color="90570c" minPixel="0.5" width="2" />
     <label style="contour" minMag="detail"/>
   </way>
 
   <way key="highway" value="steps" prio="11">
-    <line style="dotted" color="fe9897" minPixel="4" maxPixel="4" width="2" />
+    <line style="dotted" color="fe9897" minPixel="3" width="2" />
     <label style="contour" minMag="detail"/>
   </way>
 
   <way key="highway" value="construction" prio="11">
-    <line color="99cccc" minPixel="0.5" maxPixel="0.5" width="2" />
+    <line color="99cccc" minPixel="0.5" width="2" />
     <label style="contour" minMag="detail"/>
   </way>
 
@@ -181,24 +181,24 @@
   </node>
 
   <way key="railway" value="rail" prio="20">
-    <line color="b3b3b3" minPixel="1" maxPixel="2" width="5" />
+    <line color="b3b3b3" minPixel="1" width="5" />
     <label style="contour" minMag="close"/>
   </way>
 
   <way key="railway" value="tram" prio="20">
-    <line color="444444" minPixel="1" maxPixel="2" width="5" />
+    <line color="444444" minPixel="1" width="5" />
     <label style="contour" minMag="close"/>
   </way>
 
   <way key="railway" value="light_rail" prio="20">
-    <line color="b3b3b3" minPixel="1" maxPixel="2" width="5" />
+    <line color="b3b3b3" minPixel="1" width="5" />
     <label style="contour" minMag="close"/>
   </way>
 
   <way key="railway" value="subway" prio="20">
     <line style="longDash"
           outlineColor="ffffff80" color="b3b3b3"
-          minPixel="1" maxPixel="2" width="5"
+          minPixel="1" width="5"
           outline="1"/>
     <label style="contour" minMag="close"/>
   </way>
@@ -228,22 +228,22 @@
   </node>
 
   <way key="waterway" value="stream" prio="20">
-    <line color="b5d0d0" minPixel="1" maxPixel="2" width="2" />
+    <line color="b5d0d0" minPixel="1" width="2" />
     <label style="contour" minMag="close"/>
   </way>
 
   <way key="waterway" value="river" prio="1">
-    <line color="b5d0d0" minPixel="0.5" maxPixel="3" width="15" />
+    <line color="b5d0d0" minPixel="0.5" width="15" />
     <label style="contour" minMag="proximity"/>
   </way>
 
   <way key="waterway" value="canal" prio="1">
-    <line color="b5d0d0" minPixel="0.5" maxPixel="1" width="15" />
+    <line color="b5d0d0" minPixel="0.5" width="15" />
     <label style="contour" minMag="proximity"/>
   </way>
 
   <way key="waterway" value="drain" prio="1">
-    <line color="b5d0d0" minPixel="0.5" maxPixel="1" width="3" />
+    <line color="b5d0d0" minPixel="0.5" width="3" />
     <label style="contour" minMag="proximity"/>
   </way>
 
@@ -455,12 +455,12 @@
   </area>
 
   <way key="aeroway" value="runway" prio="20">
-    <line color="bbbbcc" minPixel="2" maxPixel="20" width="20" />
+    <line color="bbbbcc" minPixel="2" width="20" />
     <label style="contour" minMag="close"/>
   </way>
 
   <way key="aeroway" value="taxiway" prio="20">
-    <line color="bbbbcc" minPixel="2" maxPixel="20" width="15" />
+    <line color="bbbbcc" minPixel="2" width="15" />
     <label style="contour" minMag="close"/>
   </way>
 
@@ -486,7 +486,7 @@
   </area>
 
   <way key="leisure" value="track" prio="11">
-    <line color="bde3cb" minPixel="1" maxPixel="1" width="2" />
+    <line color="bde3cb" minPixel="1" width="2" />
     <label style="contour" minMag="city"/>
   </way>
 
@@ -498,7 +498,7 @@
   <area key="leisure" value="pitch">
     <fill color="89d2ae"/>
     <label minMag="close"/>
-    <border color="b0b0b0" minPixel="1" maxPixel="1" width="1"/>
+    <border color="b0b0b0" minPixel="1" width="1"/>
   </area>
 
   <area key="leisure" value="water_park">
@@ -1162,7 +1162,7 @@
     <label minMag="city"/>
   </area>
 
-  <area key="military" value="baracks">
+  <area key="military" value="barracks">
     <fill color="f59897" layer="2"/>
     <label minMag="city"/>
   </area>
@@ -1260,7 +1260,7 @@
   </node> -->
 
   <way key="internal" value="route" prio="1">
-    <line color="ff000088" minPixel="2" maxPixel="17" width="20"/>
+    <line color="ff000088" minPixel="2" width="20"/>
   </way>
 
 </TravelJinni-Style>

@@ -21,13 +21,17 @@
 */
 
 #include <osmscout/Import.h>
-#include <osmscout/Progress.h>
-#include <osmscout/TypeConfig.h>
 
 namespace osmscout {
-  extern bool GenerateRelationDat(const TypeConfig& typeConfig,
-                                  const ImportParameter& parameter,
-                                  Progress& progress);
+
+  class RelationDataGenerator : public ImportModule
+  {
+  public:
+    std::string GetDescription() const;
+    bool Import(const ImportParameter& parameter,
+                Progress& progress,
+                const TypeConfig& typeConfig);
+  };
 }
 
 #endif

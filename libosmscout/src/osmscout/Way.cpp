@@ -48,102 +48,6 @@ namespace osmscout {
     return true;
   }
 
-  bool Way::Read(FileReader& reader)
-  {
-    uint32_t nodeCount;
-    uint32_t flags;
-
-
-    reader.Read(id);
-    reader.ReadNumber(type);
-    reader.Read(flags);
-    reader.ReadNumber(nodeCount);
-
-    if (reader.HasError()) {
-      return false;
-    }
-
-    this->flags=flags;
-    nodes.resize(nodeCount);
-    for (size_t i=0; i<nodeCount; i++) {
-      uint32_t latValue;
-      uint32_t lonValue;
-
-      reader.Read(nodes[i].id);
-      reader.Read(latValue);
-      reader.Read(lonValue);
-
-      nodes[i].lat=latValue/conversionFactor-180.0;
-      nodes[i].lon=lonValue/conversionFactor-90.0;
-    }
-
-    if (flags & hasName) {
-      reader.Read(name);
-    }
-
-    if (flags & hasRef) {
-      reader.Read(ref);
-    }
-
-    if (flags & hasLayer) {
-      uint32_t layer;
-
-      reader.ReadNumber(layer);
-
-      this->layer=layer;
-    }
-
-    if (flags & hasTags) {
-      uint32_t tagCount;
-
-      reader.ReadNumber(tagCount);
-
-      if (reader.HasError()) {
-        return false;
-      }
-
-      tags.resize(tagCount);
-      for (size_t i=0; i<tagCount; i++) {
-        reader.ReadNumber(tags[i].key);
-        reader.Read(tags[i].value);
-      }
-    }
-
-    if (flags & hasRestrictions) {
-      uint32_t restrictionCount;
-
-      reader.ReadNumber(restrictionCount);
-
-      if (reader.HasError()) {
-        return false;
-      }
-
-      restrictions.resize(restrictionCount);
-
-      for (size_t i=0; i<restrictionCount; i++) {
-        uint32_t type;
-        uint32_t memberCount;
-
-        reader.ReadNumber(type);
-        reader.ReadNumber(memberCount);
-
-        if (reader.HasError()) {
-          return false;
-        }
-
-
-        restrictions[i].type=(Way::RestrictionType)type;
-        restrictions[i].members.resize(memberCount);
-
-        for (size_t j=0; j<memberCount; j++) {
-          reader.Read(restrictions[i].members[j]);
-        }
-      }
-    }
-
-    return !reader.HasError();
-  }
-
   bool Way::Read(FileScanner& scanner)
   {
     uint32_t nodeCount;
@@ -182,6 +86,9 @@ namespace osmscout {
 
     if (flags & hasLayer) {
       scanner.Read(layer);
+    }
+    else {
+      layer=0;
     }
 
     if (flags & hasTags) {

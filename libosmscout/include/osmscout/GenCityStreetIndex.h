@@ -21,13 +21,17 @@
 */
 
 #include <osmscout/Import.h>
-#include <osmscout/Preprocess.h>
-#include <osmscout/Progress.h>
 
 namespace osmscout {
-  extern bool GenerateCityStreetIndex(const TypeConfig& typeConfig,
-                                      const ImportParameter& parameter,
-                                      Progress& progress);
+
+  class CityStreetIndexGenerator : public ImportModule
+  {
+  public:
+    std::string GetDescription() const;
+    bool Import(const ImportParameter& parameter,
+                Progress& progress,
+                const TypeConfig& typeConfig);
+  };
 }
 
 #endif

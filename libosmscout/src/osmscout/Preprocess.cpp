@@ -127,7 +127,14 @@ namespace osmscout {
     else if (wayType!=typeIgnore) {
       t.erase(wayTag);
     }
-
+    else if (areaType==typeIgnore && wayType==typeIgnore) {
+      // Unidentified way
+      /*
+      std::cout << "--- " << id << std::endl;
+      for (size_t tag=0; tag<tags.size(); tag++) {
+        std::cout << tags[tag].key << "/" << tags[tag].value << std::endl;
+      }*/
+    }
 
     RawWay way;
 
@@ -160,7 +167,9 @@ namespace osmscout {
     relation.members=members;
     relation.tags=tags;
 
-    if (config.GetRelationTypeId(relation.tags,tag,relation.type))  {
+    if (config.GetRelationTypeId(relation.tags,tag,
+                                 relation.type,
+                                 relation.isArea))  {
       relation.tags.erase(tag);
     }
 
@@ -447,9 +456,14 @@ namespace osmscout {
     std::cerr << "XML error, line " << error->line << ": " << error->message << std::endl;
   }
 
-  bool Preprocess(const TypeConfig& typeConfig,
-                  const ImportParameter& parameter,
-                  Progress& progress)
+  std::string Preprocess::GetDescription() const
+  {
+    return "Preprocess";
+  }
+
+  bool Preprocess::Import(const ImportParameter& parameter,
+                          Progress& progress,
+                          const TypeConfig& typeConfig)
   {
     Preprocessor  pp(typeConfig);
     Parser        parser(pp,typeConfig);

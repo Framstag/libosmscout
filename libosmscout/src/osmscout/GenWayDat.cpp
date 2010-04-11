@@ -34,9 +34,14 @@ namespace osmscout {
   static size_t distributionGranuality =  100000;
   static size_t waysLoadSize           = 1000000;
 
-  bool GenerateWayDat(const TypeConfig& typeConfig,
-                      const ImportParameter& parameter,
-                      Progress& progress)
+  std::string WayDataGenerator::GetDescription() const
+  {
+    return "Generate 'ways.dat'";
+  }
+
+  bool WayDataGenerator::Import(const ImportParameter& parameter,
+                                Progress& progress,
+                                const TypeConfig& typeConfig)
   {
     //
     // Analysing distribution of nodes in the given interval size

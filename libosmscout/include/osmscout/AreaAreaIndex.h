@@ -20,41 +20,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <map>
-#include <set>
-#include <vector>
-
-#include <osmscout/StyleConfig.h>
+#include <osmscout/AreaIndex.h>
 
 namespace osmscout {
-  class AreaAreaIndex
+
+  class AreaAreaIndex : public AreaInAreaIndex
   {
-  private:
-    struct IndexEntry
-    {
-      std::vector<FileOffset> dataOffsets;
-      FileOffset              children[4];
-    };
-
-    typedef std::map<size_t,IndexEntry> IndexLevel;
-
-  private:
-    std::vector<double>     cellWidth;
-    std::vector<double>     cellHeight;
-    uint32_t                maxLevel;
-    std::vector<IndexLevel> index;
-
   public:
-    bool Load(const std::string& path);
-
-    void GetOffsets(const StyleConfig& styleConfig,
-                    double minlon, double minlat,
-                    double maxlon, double maxlat,
-                    size_t maxLevel,
-                    size_t maxCount,
-                    std::set<FileOffset>& offsets) const;
-
-    void DumpStatistics();
+    AreaAreaIndex();
   };
 }
 

@@ -31,8 +31,14 @@
 
 namespace osmscout {
 
-  bool GenerateNodeDat(const ImportParameter& parameter,
-                       Progress& progress)
+  std::string NodeDataGenerator::GetDescription() const
+  {
+    return "Generate 'nodes.dat'";
+  }
+
+  bool NodeDataGenerator::Import(const ImportParameter& parameter,
+                                 Progress& progress,
+                                 const TypeConfig& typeConfig)
   {
     double minLon=-10.0;
     double minLat=-10.0;

@@ -23,37 +23,6 @@
 
 namespace osmscout {
 
-  bool Node::Read(FileReader& reader)
-  {
-    uint32_t tmpType;
-    uint32_t tagCount;
-    uint32_t latValue;
-    uint32_t lonValue;
-
-    reader.Read(id);
-    reader.ReadNumber(tmpType);
-    reader.Read(latValue);
-    reader.Read(lonValue);
-
-    type=(TypeId)tmpType;
-    lat=latValue/conversionFactor-180.0;
-    lon=lonValue/conversionFactor-90.0;
-
-    reader.ReadNumber(tagCount);
-
-    if (reader.HasError()) {
-      return false;
-    }
-
-    tags.resize(tagCount);
-    for (size_t i=0; i<tagCount; i++) {
-      reader.ReadNumber(tags[i].key);
-      reader.Read(tags[i].value);
-    }
-
-    return !reader.HasError();
-  }
-
   bool Node::Read(FileScanner& scanner)
   {
     uint32_t tmpType;

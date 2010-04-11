@@ -20,7 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/FileReader.h>
 #include <osmscout/FileScanner.h>
 #include <osmscout/FileWriter.h>
 #include <osmscout/Point.h>
@@ -105,7 +104,6 @@ namespace osmscout {
 
     bool GetCenter(double& lat, double& lon) const;
 
-    bool Read(FileReader& reader);
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;
   };

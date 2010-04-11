@@ -21,11 +21,17 @@
 */
 
 #include <osmscout/Import.h>
-#include <osmscout/Progress.h>
 
 namespace osmscout {
-  extern bool GenerateNodeDat(const ImportParameter& parameter,
-                              Progress& progress);
+
+  class NodeDataGenerator : public ImportModule
+  {
+  public:
+    std::string GetDescription() const;
+    bool Import(const ImportParameter& parameter,
+                Progress& progress,
+                const TypeConfig& typeConfig);
+  };
 }
 
 #endif

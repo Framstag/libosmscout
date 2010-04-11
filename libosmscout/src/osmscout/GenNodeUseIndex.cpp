@@ -32,9 +32,15 @@ namespace osmscout {
   static size_t distributionGranuality = 1000000;
   static size_t nodesLoadSize          = 1000000;
 
-  bool GenerateNodeUseIndex(const TypeConfig& typeConfig,
-                            const ImportParameter& parameter,
-                            Progress& progress)
+  std::string NodeUseIndexGenerator::GetDescription() const
+  {
+    return "Generate 'nodeuse.idx'";
+
+  }
+
+  bool NodeUseIndexGenerator::Import(const ImportParameter& parameter,
+                                     Progress& progress,
+                                     const TypeConfig& typeConfig)
   {
     progress.SetAction("Analysing distribution");
 

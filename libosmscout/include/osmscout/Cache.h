@@ -29,11 +29,21 @@ namespace osmscout {
 
   /**
     Generic FIFO cache implementation with O(n log n) semantic.
+
+    Template parameter class K holds the key value (normally a numerical value),
+    parameter class V holds the data class that is to be cached.
+
+    * The cache is not threadsafe.
+    * It uses a std::map for data lookup
+    * It uses an std::list for implementing FIFO characteristics.
    */
   template <class K, class V>
   class Cache
   {
   public:
+    /**
+      An individual entry in the cache.
+      */
     struct CacheEntry
     {
       K key;
@@ -53,6 +63,11 @@ namespace osmscout {
       }
     };
 
+    /**
+      ValueSizer returns the size (in bytes) of an individual cache value.
+      An implementation of ValueSizer has to be passed in the constructor of the cache
+      to implement the GetSize() method.
+      */
     struct ValueSizer
     {
       virtual size_t GetSize(const V& value) const = 0;
