@@ -34,43 +34,7 @@
 int main(int argc, char* argv[])
 {
   std::string filename="ways.dat";
-  long        filesize=0;
-  size_t      readerWayCount;
   size_t      scannerWayCount;
-
-  if (!osmscout::GetFileSize(filename,filesize)) {
-    std::cerr << "Cannot get file size of file '" << filename << "'!" << std::endl;
-    return 1;
-  }
-
-  osmscout::StopClock readerTimer;
-
-  osmscout::FileReader reader;
-
-  if (!reader.Open(filename)) {
-    std::cerr << "Cannot open file '" << filename << "'!" << std::endl;
-    return 1;
-  }
-
-  if (!reader.ReadPageToBuffer(0,filesize)) {
-    std::cerr << "Cannot read file '" << filename << "' into memory!" << std::endl;
-    return 1;
-  }
-
-  std::cout << "Start reading files using FileReader..." << std::endl;
-
-  readerWayCount=0;
-  while (!reader.HasError()) {
-    osmscout::Way way;
-
-    if (way.Read(reader)) {
-      readerWayCount++;
-    }
-  }
-
-  reader.Close();
-
-  readerTimer.Stop();
 
   osmscout::StopClock scannerTimer;
 
@@ -96,7 +60,6 @@ int main(int argc, char* argv[])
 
   scannerTimer.Stop();
 
-  std::cout << "Reading " << readerWayCount << " ways via FileReader took " << readerTimer << std::endl;
   std::cout << "Reading " << scannerWayCount << " ways via FileScanner took " << scannerTimer << std::endl;
 
   return 0;

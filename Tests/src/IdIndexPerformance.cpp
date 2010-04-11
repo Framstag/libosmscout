@@ -51,31 +51,26 @@ int main(int argc, char* argv[])
 
   osmscout::StopClock readerTimer;
 
-  osmscout::FileReader reader;
+  osmscout::FileScanner scanner;
 
-  if (!reader.Open(filename)) {
+  if (!scanner.Open(filename)) {
     std::cerr << "Cannot open file '" << filename << "'!" << std::endl;
     return 1;
   }
 
-  if (!reader.ReadPageToBuffer(0,filesize)) {
-    std::cerr << "Cannot read file '" << filename << "' into memory!" << std::endl;
-    return 1;
-  }
-
-  std::cout << "Start reading files using FileReader..." << std::endl;
+  std::cout << "Start reading files using FileScanner..." << std::endl;
 
   readerWayCount=0;
-  while (!reader.HasError()) {
+  while (!scanner.HasError()) {
     osmscout::Way way;
 
-    if (way.Read(reader)) {
+    if (way.Read(scanner)) {
       ids.push_back(way.id);
       readerWayCount++;
     }
   }
 
-  reader.Close();
+  scanner.Close();
 
   readerTimer.Stop();
 
@@ -99,8 +94,8 @@ int main(int argc, char* argv[])
   osmscout::StopClock indexTimer;
 
   for (size_t i=0; i<queries.size(); i++) {
-    std::vector<osmscout::Id>   ids;
-    std::vector<long>           offsets;
+    std::vector<osmscout::Id>         ids;
+    std::vector<osmscout::FileOffset> offsets;
 
     ids.push_back(queries[i]);
 
