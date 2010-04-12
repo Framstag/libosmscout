@@ -25,8 +25,6 @@
 
 #include <osmscout/Cache.h>
 
-#include <osmscout/FileReader.h>
-
 #include <osmscout/StyleConfig.h>
 #include <osmscout/TypeConfig.h>
 
@@ -93,7 +91,7 @@ namespace osmscout {
 
     mutable NodeUseCache  nodeUseCache;  //! Cache for node use data
 
-    mutable FileReader    nodeUseReader; //! File stream to the nodeuse.idx file
+    mutable FileScanner   nodeUseScanner;//! File stream to the nodeuse.idx file
 
     TypeConfig            *typeConfig;   //! Type config for the currently opened map
 

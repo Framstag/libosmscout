@@ -19,7 +19,6 @@
 
 #include <iostream>
 
-#include <osmscout/FileReader.h>
 #include <osmscout/FileScanner.h>
 #include <osmscout/Way.h>
 #include <osmscout/Util.h>

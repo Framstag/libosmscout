@@ -609,8 +609,8 @@ namespace osmscout {
       return false;
     }
 
-    if (!nodeUseReader.IsOpen()) {
-      if (!nodeUseReader.Open(file)) {
+    if (!nodeUseScanner.IsOpen()) {
+      if (!nodeUseScanner.Open(file)) {
         std::cerr << "Cannot open nodeuse.idx file!" << std::endl;
         return false;
       }
@@ -622,9 +622,9 @@ namespace osmscout {
          indexEntry!=indexEntries.end();
          ++indexEntry) {
       if (!nodeUseCache.GetEntry(indexEntry->interval,cacheRef)) {
-        if (!nodeUseReader.ReadPageToBuffer(indexEntry->offset,indexEntry->size)) {
+        if (!nodeUseScanner.SetPos(indexEntry->offset)) {
           std::cerr << "Cannot read nodeuse.idx page from file!" << std::endl;
-          nodeUseReader.Close();
+          nodeUseScanner.Close();
           return false;
         }
 
@@ -636,19 +636,19 @@ namespace osmscout {
         for (size_t i=0; i<indexEntry->count; i++) {
           uint32_t count;
 
-          nodeUseReader.Read(cacheRef->value[i].id);
-          nodeUseReader.ReadNumber(count);
+          nodeUseScanner.Read(cacheRef->value[i].id);
+          nodeUseScanner.ReadNumber(count);
 
-          if (nodeUseReader.HasError()) {
+          if (nodeUseScanner.HasError()) {
             std::cerr << "Error while reading from nodeuse.idx file!" << std::endl;
-            nodeUseReader.Close();
+            nodeUseScanner.Close();
             return false;
           }
 
           cacheRef->value[i].references.resize(count);
 
           for (size_t j=0; j<count; j++) {
-            nodeUseReader.Read(cacheRef->value[i].references[j]);
+            nodeUseScanner.Read(cacheRef->value[i].references[j]);
           }
         }
       }

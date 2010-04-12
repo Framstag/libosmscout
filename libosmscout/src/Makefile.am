@@ -8,7 +8,6 @@ lib_LTLIBRARIES = libosmscout.la
 libosmscout_la_SOURCES= osmscout/Types.cpp \
                         osmscout/Util.cpp \
                         osmscout/Progress.cpp \
-                        osmscout/FileReader.cpp \
                         osmscout/FileScanner.cpp \
                         osmscout/FileWriter.cpp \
                         osmscout/Cache.cpp \
