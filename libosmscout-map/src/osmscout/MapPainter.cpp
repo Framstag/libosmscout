@@ -1243,12 +1243,11 @@ namespace osmscout {
           bool drawn=false;
           for (size_t m=0; m<relation->roles.size(); m++) {
             if (relation->roles[m].role=="0") {
+              drawn=true;
 
               if (!IsVisible(relation->roles[m].nodes)) {
                 continue;
               }
-
-              drawn=true;
 
               OptimizeArea(relation->roles[m].nodes,
                            drawNode,

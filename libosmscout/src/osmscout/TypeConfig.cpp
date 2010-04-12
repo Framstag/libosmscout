@@ -19,6 +19,8 @@
 
 #include <osmscout/TypeConfig.h>
 
+#include <cassert>
+
 namespace osmscout {
 
   TagInfo::TagInfo()
@@ -101,6 +103,7 @@ namespace osmscout {
     types.push_back(typeInfo);
 
     tagToTypeMap[typeInfo.GetTag()][typeInfo.GetTagValue()]=typeInfo;
+    idToTypeMap[typeInfo.GetId()]=typeInfo;
 
     return *this;
   }
@@ -120,6 +123,15 @@ namespace osmscout {
     else {
       return tagIgnore;
     }
+  }
+
+  const TypeInfo& TypeConfig::GetTypeInfo(TypeId id) const
+  {
+    std::map<TypeId,TypeInfo>::const_iterator iter=idToTypeMap.find(id);
+
+    assert(iter!=idToTypeMap.end());
+
+    return iter->second;
   }
 
   bool TypeConfig::GetNodeTypeId(std::vector<Tag> &tags,
@@ -190,8 +202,7 @@ namespace osmscout {
 
   bool TypeConfig::GetRelationTypeId(std::vector<Tag> &tags,
                                      std::vector<Tag>::iterator& tag,
-                                     TypeId &type,
-                                     bool& isArea) const
+                                     TypeId &type) const
   {
     std::string relType;
 
@@ -216,13 +227,6 @@ namespace osmscout {
             tag->value==t->GetTagValue() &&
             t->CanBeRelation()) {
           type=t->GetId();
-          if (t->CanBeArea() &&
-              relType=="multipolygon") {
-            isArea=true;
-          }
-          else {
-            isArea=false;
-          }
           return true;
         }
       }

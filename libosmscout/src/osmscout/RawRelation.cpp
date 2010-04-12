@@ -29,8 +29,6 @@ namespace osmscout {
     scanner.Read(id);
     scanner.ReadNumber(type);
 
-    scanner.Read(isArea);
-
     scanner.ReadNumber(tagCount);
 
     if (scanner.HasError()) {
@@ -66,8 +64,6 @@ namespace osmscout {
   {
     writer.Write(id);
     writer.WriteNumber(type);
-
-    writer.Write(isArea);
 
     writer.WriteNumber((uint32_t)tags.size());
     for (size_t i=0; i<tags.size(); i++) {

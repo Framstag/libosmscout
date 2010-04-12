@@ -206,6 +206,7 @@ namespace osmscout {
 
     std::map<std::string,TagInfo>                   stringToTagMap;
     std::map<TagId,std::map<std::string,TypeInfo> > tagToTypeMap;
+    std::map<TypeId,TypeInfo>                       idToTypeMap;
 
   public:
     TypeConfig();
@@ -215,6 +216,8 @@ namespace osmscout {
     TypeId GetMaxTypeId() const;
 
     TagId GetTagId(const char* name) const;
+
+    const TypeInfo& GetTypeInfo(TypeId id) const;
 
     bool GetNodeTypeId(std::vector<Tag>& tags,
                        std::vector<Tag>::iterator& tag,
@@ -226,8 +229,7 @@ namespace osmscout {
                           TypeId &areaType) const;
     bool GetRelationTypeId(std::vector<Tag>& tags,
                            std::vector<Tag>::iterator& tag,
-                           TypeId &typeId,
-                           bool& isArea) const;
+                           TypeId &typeId) const;
 
     TypeId GetNodeTypeId(TagId tagKey, const char* tagValue) const;
     TypeId GetWayTypeId(TagId tagKey, const char* tagValue) const;

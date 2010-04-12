@@ -462,10 +462,6 @@ namespace osmscout {
         rel.flags=0;
         rel.layer=0;
 
-        if (rawRel.IsArea()) {
-          rel.flags|=Relation::isArea;
-        }
-
         std::vector<Tag>::iterator tag=rawRel.tags.begin();
         while (tag!=rawRel.tags.end()) {
           if (tag->key==tagType) {
@@ -593,31 +589,18 @@ namespace osmscout {
                            NumberToString(rawRel.id)+" "+name);
             continue;
           }
-
-          /*
-          if (rel.type==typeIgnore) {
-            for (size_t m=0; m<rel.roles.size(); m++) {
-              if (rel.roles[m].role=="0") {
-                if (rel.type==typeIgnore &&
-                    rel.roles[m].type!=typeIgnore) {
-                  rel.type=rel.roles[m].type;
-                  progress.Debug("Autodetecting type of relation "+NumberToString(rel.id)+" as "+NumberToString(rel.type));
-                }
-                else if (rel.type!=typeIgnore &&
-                         rel.roles[m].type!=typeIgnore &&
-                         rel.type!=rel.roles[m].type) {
-                  progress.Warning("Relation "+NumberToString(rel.id)+" has conflicting types for outer boundary ("+
-                                   NumberToString(rawRel.members[m].id)+","+NumberToString(rel.type)+","+NumberToString(rel.roles[m].type)+")");
-                }
-              }
-            }
-          }*/
         }
 
         //progress.Debug("Storing relation "+rel.relType+" "+NumberToString(rel.type)+" "+name);
 
         rel.id=rawRel.id;
         rel.tags=rawRel.tags;
+
+        if (rel.relType=="multipolygon" &&
+            rel.type!=typeIgnore &&
+            typeConfig.GetTypeInfo(rel.type).CanBeArea()) {
+          rel.flags|=Relation::isArea;
+        }
 
         if (rel.layer!=0) {
           rel.flags|=Relation::hasLayer;

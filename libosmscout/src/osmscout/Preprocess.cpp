@@ -168,8 +168,7 @@ namespace osmscout {
     relation.tags=tags;
 
     if (config.GetRelationTypeId(relation.tags,tag,
-                                 relation.type,
-                                 relation.isArea))  {
+                                 relation.type))  {
       relation.tags.erase(tag);
     }
 
