@@ -549,7 +549,9 @@ namespace osmscout {
             }
           }
 
-          if (correct && type!=rel.type) {
+          if (correct &&
+              type!=rel.type &&
+              type!=typeIgnore) {
             progress.Warning("Autocorrecting type of relation "+NumberToString(rel.id)+
                              " from "+NumberToString(rel.type)+" to "+NumberToString(type));
             rel.type=type;
