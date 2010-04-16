@@ -1518,8 +1518,7 @@ namespace osmscout {
 
       double x,y;
 
-      x=(node->lon*gradtorad-hmin)*hscale;
-      y=height-(atanh(sin(node->lat*gradtorad))-vmin)*vscale;
+      TransformGeoToPixel(node->lon,node->lat,x,y);
 
       if (hasLabel) {
         if (hasSymbol) {
