@@ -74,13 +74,6 @@ namespace osmscout {
     scanner.Read(relType);
     scanner.Read(flags);
 
-    if (flags & hasLayer) {
-      scanner.Read(layer);
-    }
-    else {
-      layer=0;
-    }
-
     if (flags & hasTags) {
       scanner.ReadNumber(tagCount);
       if (scanner.HasError()) {
@@ -104,9 +97,25 @@ namespace osmscout {
       uint32_t nodesCount;
 
       scanner.ReadNumber(roles[i].type);
+      scanner.Read(flags);
       scanner.Read(roles[i].role);
-      scanner.ReadNumber(nodesCount);
 
+      if (flags & Role::hasName) {
+        scanner.Read(roles[i].name);
+      }
+
+      if (flags & Role::hasRef) {
+        scanner.Read(roles[i].ref);
+      }
+
+      if (flags & Role::hasLayer) {
+        scanner.Read(roles[i].layer);
+      }
+      else {
+        roles[i].layer=0;
+      }
+
+      scanner.ReadNumber(nodesCount);
       roles[i].nodes.resize(nodesCount);
       for (size_t j=0; j<nodesCount; j++) {
         uint32_t latValue;
@@ -131,10 +140,6 @@ namespace osmscout {
     writer.Write(relType);
     writer.Write(flags);
 
-    if (flags & hasLayer) {
-      writer.Write(layer);
-    }
-
     if (flags & hasTags) {
       writer.WriteNumber((uint32_t)tags.size());
       for (size_t i=0; i<tags.size(); i++) {
@@ -146,9 +151,23 @@ namespace osmscout {
     writer.WriteNumber((uint32_t)roles.size());
     for (size_t i=0; i<roles.size(); i++) {
       writer.WriteNumber(roles[i].type);
-      writer.Write(roles[i].role);
-      writer.WriteNumber((uint32_t)roles[i].nodes.size());
+      writer.Write(flags);
 
+      writer.Write(roles[i].role);
+
+      if (flags & Role::hasName) {
+        writer.Write(roles[i].name);
+      }
+
+      if (flags & Role::hasRef) {
+        writer.Write(roles[i].ref);
+      }
+
+      if (flags & Role::hasLayer) {
+        writer.Write(roles[i].layer);
+      }
+
+      writer.WriteNumber((uint32_t)roles[i].nodes.size());
       for (size_t j=0; j<roles[i].nodes.size(); j++) {
         uint32_t latValue=(uint32_t)round((roles[i].nodes[j].lat+180.0)*conversionFactor);
         uint32_t lonValue=(uint32_t)round((roles[i].nodes[j].lon+90.0)*conversionFactor);

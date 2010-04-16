@@ -36,22 +36,31 @@ namespace osmscout {
   public:
     struct Role
     {
+      // Common flags
+      const static uint16_t hasName         = 1 <<  0; //! We have a name
+      const static uint16_t hasRef          = 1 <<  1; //! We have reference name
+
+      // Way flags
+      const static uint16_t hasLayer        = 1 <<  2; //! We have optional layer information
+
       TypeId             type;
+      uint16_t           flags;
       std::string        role;
+      std::string        name;
+      std::string        ref;
+      int8_t             layer;
       std::vector<Point> nodes;
     };
 
   public:
     const static uint16_t isArea   = 1 << 0; //! We are an area
-    const static uint16_t hasTags  = 1 << 1; //! We have additional tags store on disk
-    const static uint16_t hasLayer = 1 << 2; //! We have optional layer information
+    const static uint16_t hasTags  = 1 << 1; //! We have additional tags stored on disk
 
   public:
     Id                id;
     TypeId            type;
     std::string       relType;
     uint16_t          flags;
-    int8_t            layer;
     std::vector<Tag>  tags;
     std::vector<Role> roles;
 

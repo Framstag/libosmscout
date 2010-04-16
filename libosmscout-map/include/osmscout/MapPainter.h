@@ -99,6 +99,9 @@ namespace osmscout {
     void TransformArea(const std::vector<Point>& nodes);
     void TransformWay(const std::vector<Point>& nodes);
 
+    bool GetBoundingBox(const std::vector<Point>& nodes,
+                        double& xmin, double& ymin,
+                        double& xmax, double& ymax);
     bool GetCenterPixel(const std::vector<Point>& nodes,
                         double& cx,
                         double& cy);
@@ -111,6 +114,13 @@ namespace osmscout {
                    const LabelStyle& style,
                    const std::string& text,
                    double x, double y);
+
+    void DrawTiledLabel(cairo_t* draw,
+                   double magnification,
+                   const LabelStyle& style,
+                   const std::string& label,
+                   const std::vector<Point>& nodes,
+                   std::set<size_t>& tileBlacklist);
 
     void DrawContourLabel(cairo_t* draw,
                           const LabelStyle& style,
@@ -147,7 +157,7 @@ namespace osmscout {
 
     void DrawArea(const StyleConfig& styleConfig,
                   TypeId type,
-                  size_t layer,
+                  int layer,
                   bool isBuilding,
                   const std::vector<Point>& nodes);
 

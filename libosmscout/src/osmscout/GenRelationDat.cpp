@@ -34,16 +34,30 @@
 
 namespace osmscout {
 
-  bool ResolveMember(const RawRelation::Member& member,
+  bool ResolveMember(Id id,
+                     const std::string& name,
+                     const RawRelation::Member& member,
                      DataFile<RawNode>& nodeDataFile,
                      DataFile<RawWay>& wayDataFile,
-                     std::vector<Point>& nodes,
-                     TypeId& type)
+                     Relation::Role& role,
+                     TypeId& type,
+                     Progress& progress)
   {
+    // We currently do not support referencing relations
+    if (member.type==RawRelation::memberRelation) {
+      progress.Warning("Relation "+NumberToString(id)+" "+name+
+                       " references a relation => ignoring");
+      return false;
+    }
+
     if (member.type==RawRelation::memberNode) {
       RawNode node;
 
       if (!nodeDataFile.Get(member.id,node)) {
+        progress.Error("Cannot resolve relation member of type node with id "+
+                       NumberToString(member.id)+
+                       " for relation "+
+                       NumberToString(id)+" "+name);
         return false;
       }
 
@@ -53,16 +67,18 @@ namespace osmscout {
       point.lat=node.lat;
       point.lon=node.lon;
 
-      nodes.push_back(point);
+      role.nodes.push_back(point);
 
       type=node.type;
-
-      return true;
     }
     else if (member.type==RawRelation::memberWay) {
       RawWay way;
 
       if (!wayDataFile.Get(member.id,way)) {
+        progress.Error("Cannot resolve relation member of type way with id "+
+                       NumberToString(member.id)+
+                       " for relation "+
+                       NumberToString(id)+" "+name);
         return false;
       }
 
@@ -71,7 +87,46 @@ namespace osmscout {
       std::vector<RawNode> ns;
 
       if (!nodeDataFile.Get(way.nodes,ns)) {
+        progress.Error("Cannot resolve nodes of relation member of type way with id "+
+                       NumberToString(member.id)+
+                       " for relation "+
+                       NumberToString(id)+" "+name);
         return false;
+      }
+
+      for (std::vector<Tag>::iterator tag=way.tags.begin();
+           tag!=way.tags.end();
+           ++tag) {
+        if (tag->key==tagName) {
+          role.name=tag->value;
+        }
+        else if (tag->key==tagRef) {
+          role.ref=tag->value;
+          }
+        else if (tag->key==tagLayer) {
+          if (sscanf(tag->value.c_str(),"%hhd",&role.layer)!=1) {
+            progress.Warning(std::string("Layer tag value '")+tag->value+"' for way "+NumberToString(way.id)+" is not numeric!");
+          }
+        }
+        /*
+        else if (tag->key==tagBridge) {
+          isBridge=!(tag->value=="no" || tag->value=="false" || tag->value=="0");
+        }
+        else if (tag->key==tagTunnel) {
+          isTunnel=!(tag->value=="no" || tag->value=="false" || tag->value=="0");
+        }
+        else if (tag->key==tagBuilding) {
+          isBuilding=!(tag->value=="no" || tag->value=="false" || tag->value=="0");
+        }
+        else if (tag->key==tagOneway) {
+          if (tag->value=="-1") {
+            isOneway=true;
+            reverseNodes=true;
+          }
+          else {
+            isOneway=!(tag->value=="no" || tag->value=="false" || tag->value=="0");
+          }
+        } */
       }
 
       for (size_t i=0; i<ns.size(); i++) {
@@ -81,14 +136,11 @@ namespace osmscout {
         point.lat=ns[i].lat;
         point.lon=ns[i].lon;
 
-        nodes.push_back(point);
+        role.nodes.push_back(point);
       }
+    }
 
-      return true;
-    }
-    else {
-      return false;
-    }
+    return true;
   }
 
   /**
@@ -286,17 +338,17 @@ namespace osmscout {
         // if we havn't found another way and we have not closed
         // the current way we have to give up
         if (!found) {
-          progress.Warning("Multipolygon relation "+NumberToString(relation.id)+
-                           ": Cannot find matching node for node id "+
-                           NumberToString(points.back().id));
+          progress.Error("Multipolygon relation "+NumberToString(relation.id)+
+                         ": Cannot find matching node for node id "+
+                         NumberToString(points.back().id));
           return false;
         }
       }
 
       // All roles have been consumed and we still have not closed the current way
       if (points.front().id!=points.back().id) {
-        progress.Warning("Multipolygon relation "+NumberToString(relation.id)+
-                         ": No ways left to close current ring");
+        progress.Error("Multipolygon relation "+NumberToString(relation.id)+
+                       ": No ways left to close current ring");
         return false;
       }
 
@@ -454,13 +506,13 @@ namespace osmscout {
         std::string           name;
         std::set<std::string> roles;
         bool                  error=false;
+        int8_t                layer=0;
 
         selectedRelationCount++;
 
         rel.id=rawRel.id;
         rel.type=rawRel.type;
         rel.flags=0;
-        rel.layer=0;
 
         std::vector<Tag>::iterator tag=rawRel.tags.begin();
         while (tag!=rawRel.tags.end()) {
@@ -473,7 +525,7 @@ namespace osmscout {
             tag++;
           }
           else if (tag->key==tagLayer) {
-            if (sscanf(tag->value.c_str(),"%hhd",&rel.layer)!=1) {
+            if (sscanf(tag->value.c_str(),"%hhd",&layer)!=1) {
               progress.Warning(std::string("Layer tag value '")+tag->value+"' for relation "+NumberToString(rawRel.id)+" is not numeric!");
             }
             tag=rawRel.tags.erase(tag);
@@ -493,14 +545,14 @@ namespace osmscout {
           TypeId type;
 
           rel.roles[m].role=rawRel.members[m].role;
+          rel.roles[m].layer=layer;
 
-          if (!ResolveMember(rawRel.members[m],nodeDataFile,
+          if (!ResolveMember(rawRel.id,
+                             name,
+                             rawRel.members[m],nodeDataFile,
                              wayDataFile,
-                             rel.roles[m].nodes,type)) {
-            progress.Error("Cannot resolve relation member with id "+
-                           NumberToString(rawRel.members[m].id)+
-                           " for relation "+
-                           NumberToString(rawRel.id)+" "+name);
+                             rel.roles[m],type,
+                             progress)) {
             error=true;
             break;
           }
@@ -522,7 +574,7 @@ namespace osmscout {
               if (rel.type==typeIgnore &&
                   rel.roles[m].type!=typeIgnore) {
                 rel.type=rel.roles[m].type;
-                progress.Debug("Autodetecting type of relation "+NumberToString(rel.id)+" as "+NumberToString(rel.type));
+                //progress.Debug("Autodetecting type of relation "+NumberToString(rel.id)+" as "+NumberToString(rel.type));
               }
               else if (rel.type!=typeIgnore &&
                        rel.roles[m].type!=typeIgnore &&
@@ -602,12 +654,14 @@ namespace osmscout {
           rel.flags|=Relation::isArea;
         }
 
-        if (rel.layer!=0) {
-          rel.flags|=Relation::hasLayer;
-        }
-
         if (rel.tags.size()>0) {
           rel.flags|=Relation::hasTags;
+        }
+
+        for (size_t m=0; m<rel.roles.size(); m++) {
+          if (rel.roles[m].layer!=0) {
+            rel.roles[m].flags|=Relation::Role::hasLayer;
+          }
         }
 
         if (rel.type!=typeIgnore) {
