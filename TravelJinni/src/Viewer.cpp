@@ -181,14 +181,14 @@ public:
     double tlon, tlat;
 
     // Get origin coordinates
-    osmscout::MapPainter::transformPixelToGeo(0,0,
+    osmscout::MapPainter::TransformPixelToGeo(0,0,
                                               lon,lat,
                                               magnification,
                                               width,height,
                                               olon,olat);
 
     // Get current mouse pos coordinates (relative to drag start)
-    osmscout::MapPainter::transformPixelToGeo((event.x-startX),(event.y-startY),
+    osmscout::MapPainter::TransformPixelToGeo((event.x-startX),(event.y-startY),
                                               lon,lat,
                                               magnification,
                                               width,height,

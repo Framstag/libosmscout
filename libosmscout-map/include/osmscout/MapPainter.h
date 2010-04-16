@@ -67,10 +67,41 @@ namespace osmscout {
     std::vector<cairo_surface_t*>     image;        //! List of internal images
     std::vector<bool>                 imageChecked; //! We have tried to load the internal image
 
+    size_t                styleCount;
+
+    std::vector<Node>     nodes;
+    std::vector<Way>      ways;
+    std::vector<Way>      areas;
+    std::vector<Relation> relationWays;
+    std::vector<Relation> relationAreas;
+
+    bool                  areaLayers[11];
+    bool                  wayLayers[11];
+    bool                  relationAreaLayers[11];
+    bool                  relationWayLayers[11];
+
+    size_t                nodesDrawnCount;
+    size_t                areasDrawnCount;
+    size_t                waysDrawnCount;
+
+    cairo_t               *draw;
+
+  public:
+    std::list<Way>        poiWays;
+    std::list<Node>       poiNodes;
+
+  private:
     cairo_scaled_font_t* GetScaledFont(cairo_t* draw,
                                        size_t fontSize);
 
     bool IsVisible(const std::vector<Point>& nodes) const;
+
+    void TransformArea(const std::vector<Point>& nodes);
+    void TransformWay(const std::vector<Point>& nodes);
+
+    bool GetCenterPixel(const std::vector<Point>& nodes,
+                        double& cx,
+                        double& cy);
 
     bool CheckImage(const StyleConfig& styleConfig,
                     IconStyle::Icon icon);
@@ -94,16 +125,40 @@ namespace osmscout {
                   const IconStyle* style,
                   double x, double y);
 
-    void SetLineStyle(cairo_t* draw,
-                      double lineWidth,
-                      const LineStyle& style);
-    void SetLinePatternStyle(cairo_t* draw,
-                             double lineWidth,
-                             const LineStyle& style);
+    void DrawPath(const std::vector<Point>& nodes,
+                  const LineStyle& style,
+                  double width);
 
-  public:
-    std::list<Way> poiWays;
-    std::list<Node> poiNodes;
+    void FillRegion(const std::vector<Point>& nodes,
+                    const FillStyle& style);
+
+    void DrawWayOutline(const StyleConfig& styleConfig,
+                        TypeId type,
+                        bool isBridge,
+                        bool isTunnel,
+                        bool startIsJoint,
+                        bool endIsJoint,
+                        const std::vector<Point>& nodes);
+    void DrawWay(const StyleConfig& styleConfig,
+                 TypeId type,
+                 bool isBridge,
+                 bool isTunnel,
+                 const std::vector<Point>& nodes);
+
+    void DrawArea(const StyleConfig& styleConfig,
+                  TypeId type,
+                  size_t layer,
+                  bool isBuilding,
+                  const std::vector<Point>& nodes);
+
+    void DrawAreas(const StyleConfig& styleConfig);
+    void DrawWays(const StyleConfig& styleConfig);
+    void DrawWayLabels(const StyleConfig& styleConfig);
+    void DrawNodes(const StyleConfig& styleConfig);
+    void DrawAreaLabels(const StyleConfig& styleConfig);
+    void DrawPOIWays(const StyleConfig& styleConfig);
+    void DrawPOINodes(const StyleConfig& styleConfig);
+    void DrawPOINodeLabels(const StyleConfig& styleConfig);
 
   public:
     MapPainter(const Database& database);
@@ -122,11 +177,11 @@ namespace osmscout {
                   double magnification,
                   size_t width, size_t height);
 
-    bool transformPixelToGeo(int x, int y,
+    bool TransformPixelToGeo(double x, double y,
                              double& lon, double& lat);
 
-    bool transformGeoToPixel(double lon, double lat,
-                             int& x, int& y);
+    bool TransformGeoToPixel(double lon, double lat,
+                             double& x, double& y);
 
     static void GetDimensions(double lon, double lat,
                               double magnification,
@@ -134,12 +189,12 @@ namespace osmscout {
                               double& lonMin, double& latMin,
                               double& lonMax, double& latMax);
 
-    static bool transformPixelToGeo(int x, int y,
+    static bool TransformPixelToGeo(int x, int y,
                                     double centerLon, double centerLat,
                                     double magnification,
                                     size_t width, size_t height,
                                     double& outLon, double& outLat);
-    static bool transformGeoToPixel(double lon, double lat,
+    static bool TransformGeoToPixel(double lon, double lat,
                                     double centerLon, double centerLat,
                                     double magnification,
                                     size_t width, size_t height,
