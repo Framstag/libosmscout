@@ -30,7 +30,9 @@
 
 #include <osmscout/LoaderPNG.h>
 
-#define OPTIMIZE_LIMIT 512
+static size_t optimizeLimit=512;
+static double relevantPosDeriviation=2.0;
+static double relevantSlopeDeriviation=0.1;
 
 namespace osmscout {
 
@@ -269,9 +271,6 @@ namespace osmscout {
     cairo_restore (cr);
   }
 
-  static double relevantPosDeriviation=2.0;
-  static double relevantSlopeDeriviation=0.1;
-
   MapPainter::MapPainter(const Database& database)
    : database(database)
   {
@@ -315,7 +314,7 @@ namespace osmscout {
 
   void MapPainter::TransformArea(const std::vector<Point>& nodes)
   {
-    if (magnification>OPTIMIZE_LIMIT) {
+    if (magnification>optimizeLimit) {
       for (size_t i=0; i<nodes.size(); i++) {
         drawNode[i]=true;
         TransformGeoToPixel(nodes[i].lon,nodes[i].lat,
@@ -361,7 +360,7 @@ namespace osmscout {
 
   void MapPainter::TransformWay(const std::vector<Point>& nodes)
   {
-    if (magnification>OPTIMIZE_LIMIT) {
+    if (magnification>optimizeLimit) {
       for (size_t i=0; i<nodes.size(); i++) {
         drawNode[i]=true;
         TransformGeoToPixel(nodes[i].lon,nodes[i].lat,
