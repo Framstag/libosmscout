@@ -1075,10 +1075,6 @@ namespace osmscout {
       return;
     }
 
-    if (!IsVisible(nodes)) {
-      return;
-    }
-
     if (isBridge && magnification>=magCity) {
       cairo_set_dash(draw,NULL,0,0);
       cairo_set_source_rgb(draw,0.0,0.0,0.0);
@@ -1181,10 +1177,6 @@ namespace osmscout {
       return;
     }
 
-    if (!IsVisible(nodes)) {
-      return;
-    }
-
     DrawPath(nodes,*style,lineWidth[(size_t)type]);
 
     waysDrawnCount++;
@@ -1200,10 +1192,6 @@ namespace osmscout {
 
     if (fillStyle==NULL ||
         fillStyle->GetLayer()!=layer) {
-      return;
-    }
-
-    if (!IsVisible(nodes)) {
       return;
     }
 
@@ -1367,8 +1355,7 @@ namespace osmscout {
 
         if (style!=NULL &&
             magnification>=style->GetMinMag() &&
-            magnification<=style->GetMaxMag() &&
-            IsVisible(way->nodes)) {
+            magnification<=style->GetMaxMag()) {
 
           if (style->GetStyle()==LabelStyle::contour) {
             DrawContourLabel(draw,
@@ -1392,8 +1379,7 @@ namespace osmscout {
 
         if (style!=NULL &&
             magnification>=style->GetMinMag() &&
-            magnification<=style->GetMaxMag() &&
-            IsVisible(way->nodes)) {
+            magnification<=style->GetMaxMag()) {
 
           if (style->GetStyle()==LabelStyle::contour) {
             DrawContourLabel(draw,
@@ -1422,8 +1408,7 @@ namespace osmscout {
 
           if (style!=NULL &&
               magnification>=style->GetMinMag() &&
-              magnification<=style->GetMaxMag() &&
-              IsVisible(relation->roles[m].nodes)) {
+              magnification<=style->GetMaxMag()) {
 
             if (style->GetStyle()==LabelStyle::contour) {
               DrawContourLabel(draw,
@@ -1447,8 +1432,7 @@ namespace osmscout {
 
           if (style!=NULL &&
               magnification>=style->GetMinMag() &&
-              magnification<=style->GetMaxMag() &&
-              IsVisible(relation->roles[m].nodes)) {
+              magnification<=style->GetMaxMag()) {
 
             if (style->GetStyle()==LabelStyle::contour) {
               DrawContourLabel(draw,
@@ -1569,10 +1553,6 @@ namespace osmscout {
       }
 
       if (!area->GetName().empty()) {
-        if (!IsVisible(area->nodes)) {
-          continue;
-        }
-
         double x,y;
 
         if (!GetCenterPixel(area->nodes,x,y)) {
@@ -1586,10 +1566,6 @@ namespace osmscout {
                   x,y);
       }
       else if (!area->GetRefName().empty()) {
-        if (!IsVisible(area->nodes)) {
-          continue;
-        }
-
         double x,y;
 
         if (!GetCenterPixel(area->nodes,x,y)) {
@@ -1789,7 +1765,7 @@ namespace osmscout {
                         magnification,
                         ((size_t)ceil(Log2(magnification)))+4,
                         2000,
-                        3000,
+                        2000,
                         2000,
                         nodes,
                         ways,
