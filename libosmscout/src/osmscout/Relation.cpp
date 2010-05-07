@@ -20,6 +20,7 @@
 #include <osmscout/Relation.h>
 
 #include <cmath>
+#include <limits>
 
 namespace osmscout {
 
@@ -117,16 +118,23 @@ namespace osmscout {
 
       scanner.ReadNumber(nodesCount);
       roles[i].nodes.resize(nodesCount);
+
+      uint32_t minLat;
+      uint32_t minLon;
+
+      scanner.Read(minLat);
+      scanner.Read(minLon);
+
       for (size_t j=0; j<nodesCount; j++) {
         uint32_t latValue;
         uint32_t lonValue;
 
         scanner.Read(roles[i].nodes[j].id);
-        scanner.Read(latValue);
-        scanner.Read(lonValue);
+        scanner.ReadNumber(latValue);
+        scanner.ReadNumber(lonValue);
 
-        roles[i].nodes[j].lat=latValue/conversionFactor-180.0;
-        roles[i].nodes[j].lon=lonValue/conversionFactor-90.0;
+        roles[i].nodes[j].lat=(minLat+latValue)/conversionFactor-180.0;
+        roles[i].nodes[j].lon=(minLon+lonValue)/conversionFactor-90.0;
       }
     }
 
@@ -168,13 +176,25 @@ namespace osmscout {
       }
 
       writer.WriteNumber((uint32_t)roles[i].nodes.size());
+
+      uint32_t minLat=std::numeric_limits<uint32_t>::max();
+      uint32_t minLon=std::numeric_limits<uint32_t>::max();
+
+      for (size_t j=0; j<roles[i].nodes.size(); j++) {
+        minLat=std::min(minLat,(uint32_t)round((roles[i].nodes[j].lat+180.0)*conversionFactor));
+        minLon=std::min(minLon,(uint32_t)round((roles[i].nodes[j].lon+90.0)*conversionFactor));
+      }
+
+      writer.Write(minLat);
+      writer.Write(minLon);
+
       for (size_t j=0; j<roles[i].nodes.size(); j++) {
         uint32_t latValue=(uint32_t)round((roles[i].nodes[j].lat+180.0)*conversionFactor);
         uint32_t lonValue=(uint32_t)round((roles[i].nodes[j].lon+90.0)*conversionFactor);
 
         writer.Write(roles[i].nodes[j].id);
-        writer.Write(latValue);
-        writer.Write(lonValue);
+        writer.WriteNumber(latValue-minLat);
+        writer.WriteNumber(lonValue-minLon);
       }
     }
 

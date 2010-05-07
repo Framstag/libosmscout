@@ -21,6 +21,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <limits>
 
 namespace osmscout {
 
@@ -63,17 +64,24 @@ namespace osmscout {
     }
 
     this->flags=flags;
+
+    uint32_t minLat;
+    uint32_t minLon;
+
+    scanner.Read(minLat);
+    scanner.Read(minLon);
+
     nodes.resize(nodeCount);
     for (size_t i=0; i<nodeCount; i++) {
       uint32_t latValue;
       uint32_t lonValue;
 
       scanner.Read(nodes[i].id);
-      scanner.Read(latValue);
-      scanner.Read(lonValue);
+      scanner.ReadNumber(latValue);
+      scanner.ReadNumber(lonValue);
 
-      nodes[i].lat=latValue/conversionFactor-180.0;
-      nodes[i].lon=lonValue/conversionFactor-90.0;
+      nodes[i].lat=(minLat+latValue)/conversionFactor-180.0;
+      nodes[i].lon=(minLon+lonValue)/conversionFactor-90.0;
     }
 
     if (flags & hasName) {
@@ -148,13 +156,24 @@ namespace osmscout {
 
     writer.WriteNumber((uint32_t)nodes.size());
 
+    uint32_t minLat=std::numeric_limits<uint32_t>::max();
+    uint32_t minLon=std::numeric_limits<uint32_t>::max();
+
+    for (size_t i=0; i<nodes.size(); i++) {
+      minLat=std::min(minLat,(uint32_t)round((nodes[i].lat+180.0)*conversionFactor));
+      minLon=std::min(minLon,(uint32_t)round((nodes[i].lon+90.0)*conversionFactor));
+    }
+
+    writer.Write(minLat);
+    writer.Write(minLon);
+
     for (size_t i=0; i<nodes.size(); i++) {
       uint32_t latValue=(uint32_t)round((nodes[i].lat+180.0)*conversionFactor);
       uint32_t lonValue=(uint32_t)round((nodes[i].lon+90.0)*conversionFactor);
 
       writer.Write(nodes[i].id);
-      writer.Write(latValue);
-      writer.Write(lonValue);
+      writer.WriteNumber(latValue-minLat);
+      writer.WriteNumber(lonValue-minLon);
     }
 
     if (flags & hasName) {
