@@ -410,6 +410,19 @@ namespace osmscout {
 
     maxPrioTimer.Stop();
 
+    StopClock nodesTimer;
+
+    if (!GetNodes(styleConfig,
+                  lonMin,latMin,lonMax,latMax,
+                  magnification,
+                  maxPriority,
+                  nodes)) {
+      std::cout << "Error reading nodes in area!" << std::endl;
+      return false;
+    }
+
+    nodesTimer.Stop();
+
     StopClock waysTimer;
 
     std::vector<TypeId> types;
@@ -427,19 +440,6 @@ namespace osmscout {
 
     waysTimer.Stop();
 
-    StopClock areasTimer;
-
-    if (!GetAreas(styleConfig,
-                  lonMin,latMin,lonMax,latMax,
-                  maxAreaLevel,
-                  maxAreas,
-                  areas)) {
-      std::cout << "Error reading areas in area!" << std::endl;
-      return false;
-    }
-
-    areasTimer.Stop();
-
     StopClock relationWaysTimer;
 
     if (!GetRelationWays(styleConfig,
@@ -453,6 +453,19 @@ namespace osmscout {
 
     relationWaysTimer.Stop();
 
+    StopClock areasTimer;
+
+    if (!GetAreas(styleConfig,
+                  lonMin,latMin,lonMax,latMax,
+                  maxAreaLevel,
+                  maxAreas,
+                  areas)) {
+      std::cout << "Error reading areas in area!" << std::endl;
+      return false;
+    }
+
+    areasTimer.Stop();
+
     StopClock relationAreasTimer;
 
     if (!GetRelationAreas(styleConfig,
@@ -465,19 +478,6 @@ namespace osmscout {
     }
 
     relationAreasTimer.Stop();
-
-    StopClock nodesTimer;
-
-    if (!GetNodes(styleConfig,
-                  lonMin,latMin,lonMax,latMax,
-                  magnification,
-                  maxPriority,
-                  nodes)) {
-      std::cout << "Error reading nodes in area!" << std::endl;
-      return false;
-    }
-
-    nodesTimer.Stop();
 
     std::cout << "Max Prio: " << maxPrioTimer << " ";
     std::cout << "nodes: " << nodesTimer << " ";
