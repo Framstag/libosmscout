@@ -93,7 +93,7 @@ namespace osmscout {
     int  i,j;
     bool c=false;
 
-    for (i=0, j=nodes.size()-1; i<nodes.size(); j=i++) {
+    for (i=0, j=nodes.size()-1; i<(int)nodes.size(); j=i++) {
       if (point.id==nodes[i].id) {
         return true;
       }
