@@ -442,6 +442,101 @@ namespace osmscout {
     return true;
   }
 
+  /**
+    Merge relations roles where nodes build a connected way (start/end nodes match)
+    and where all relevant relations values are the same (no visible difference in drawing)
+    thus reducing the number of roles and increasing the number of points per role
+    (which gives us the change to optimize better for low magnification).
+    */
+  bool CompactRelation(Relation& relation,
+                       const std::string& name,
+                       Progress& progress)
+  {
+    size_t oldSize=relation.roles.size();
+
+    if (oldSize<=1) {
+      return true;
+    }
+
+    std::vector<Relation::Role>::iterator role=relation.roles.begin();
+    while (role!=relation.roles.end()) {
+      bool merged=false;
+
+      std::vector<Relation::Role>::iterator cand=role;
+
+      ++cand;
+
+      while (cand!=relation.roles.end()) {
+        if (role->type!=cand->type ||
+            role->flags!=cand->flags ||
+            role->layer!=cand->layer ||
+            role->role!=cand->role ||
+            role->name!=cand->name ||
+            role->ref!=cand->ref) {
+          ++cand;
+          continue;
+        }
+
+        if (role->nodes.front().id==cand->nodes.front().id) {
+          role->nodes.reserve(role->nodes.size()+
+                              cand->nodes.size()-1);
+          for (size_t i=1; i<cand->nodes.size(); i++) {
+            role->nodes.insert(role->nodes.begin(),cand->nodes[i]);
+          }
+          merged=true;
+          relation.roles.erase(cand);
+        }
+        else if (role->nodes.front().id==cand->nodes.back().id) {
+          role->nodes.reserve(role->nodes.size()+
+                              cand->nodes.size()-1);
+          for (size_t i=0; i<cand->nodes.size()-1; i++) {
+            role->nodes.insert(role->nodes.begin(),cand->nodes[cand->nodes.size()-1-i]);
+          }
+          merged=true;
+          relation.roles.erase(cand);
+        }
+        else if (role->nodes.back().id==cand->nodes.front().id) {
+          role->nodes.reserve(role->nodes.size()+
+                              cand->nodes.size()-1);
+          for (size_t i=1; i<cand->nodes.size(); i++) {
+            role->nodes.push_back(cand->nodes[i]);
+          }
+          merged=true;
+          relation.roles.erase(cand);
+        }
+        else if (role->nodes.back().id==cand->nodes.back().id) {
+          role->nodes.reserve(role->nodes.size()+
+                              cand->nodes.size()-1);
+          for (size_t i=0; i<cand->nodes.size()-1; i++) {
+            role->nodes.push_back(cand->nodes[cand->nodes.size()-1-i]);
+          }
+          merged=true;
+          relation.roles.erase(cand);
+        }
+        else {
+          ++cand;
+        }
+      }
+
+      if (!merged) {
+        //std::cout << ".";
+        ++role;
+      }
+      else {
+        //std::cout << "+";
+      }
+    }
+
+    //std::cout << std::endl;
+
+    if (oldSize!=relation.roles.size()) {
+      progress.Info("Compacted number of roles of relation "+NumberToString(relation.id)+" "+name+
+                    " from "+NumberToString(oldSize)+" to "+NumberToString(relation.roles.size()));
+    }
+
+    return true;
+  }
+
   std::string RelationDataGenerator::GetDescription() const
   {
     return "Generate 'relations.dat'";
@@ -586,6 +681,13 @@ namespace osmscout {
           }
         }
         else {
+          if (!CompactRelation(rel,name,progress)) {
+            progress.Error("Relation "+NumberToString(rel.id)+
+                           " cannot be compacted");
+
+            continue;
+          }
+
           bool correct=true;
 
           TypeId type=rel.roles[0].type;
