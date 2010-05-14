@@ -681,13 +681,6 @@ namespace osmscout {
           }
         }
         else {
-          if (!CompactRelation(rel,name,progress)) {
-            progress.Error("Relation "+NumberToString(rel.id)+
-                           " cannot be compacted");
-
-            continue;
-          }
-
           bool correct=true;
 
           TypeId type=rel.roles[0].type;
@@ -764,6 +757,13 @@ namespace osmscout {
           if (rel.roles[m].layer!=0) {
             rel.roles[m].flags|=Relation::Role::hasLayer;
           }
+        }
+
+        if (!CompactRelation(rel,name,progress)) {
+          progress.Error("Relation "+NumberToString(rel.id)+
+                         " cannot be compacted");
+
+          continue;
         }
 
         if (rel.type!=typeIgnore) {
