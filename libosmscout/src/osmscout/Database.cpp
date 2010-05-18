@@ -128,40 +128,19 @@ namespace osmscout {
     }
     std::cout << "Opening 'relations.dat' done." << std::endl;
 
+    std::cout << "Loading area index..." << std::endl;
+    if (!areaIndex.Load(path)) {
+      std::cerr << "Cannot load AreaIndex!" << std::endl;
+      return false;
+    }
+    std::cout << "Loading area index done." << std::endl;
+
     std::cout << "Loading area node index..." << std::endl;
     if (!areaNodeIndex.LoadAreaNodeIndex(path)) {
       std::cerr << "Cannot load AreaNodeIndex!" << std::endl;
       return false;
     }
     std::cout << "Loading area node index done." << std::endl;
-
-    std::cout << "Loading area way index..." << std::endl;
-    if (!areaWayIndex.Load(path)) {
-      std::cerr << "Cannot load AreaWayIndex!" << std::endl;
-      return false;
-    }
-    std::cout << "Loading area way index done." << std::endl;
-
-    std::cout << "Loading area area index..." << std::endl;
-    if (!areaAreaIndex.Load(path)) {
-      std::cerr << "Cannot load AreaAreaIndex!" << std::endl;
-      return false;
-    }
-    std::cout << "Loading area way area index done." << std::endl;
-
-    std::cout << "Loading area way relation index..." << std::endl;
-    if (!areaWayRelIndex.Load(path)) {
-      std::cerr << "Cannot load AreaWayRelIndex!" << std::endl;
-      return false;
-    }
-    std::cout << "Loading area way relation index done." << std::endl;
-
-    std::cout << "Loading area area relation index..." << std::endl;
-    if (!areaAreaRelIndex.Load(path)) {
-      std::cerr << "Cannot load AreaAreaRelIndex!" << std::endl;
-      return false;
-    }
-    std::cout << "Loading area way area relation index done." << std::endl;
 
     std::cout << "Loading city street index..." << std::endl;
     if (!cityStreetIndex.Load(path, hashFunction)) {
@@ -281,110 +260,6 @@ namespace osmscout {
     return GetNodes(ids,nodes);
   }
 
-  bool Database::GetWays(const StyleConfig& styleConfig,
-                         double lonMin, double latMin,
-                         double lonMax, double latMax,
-                         const std::vector<TypeId>& types,
-                         size_t maxCount,
-                         std::vector<Way>& ways) const
-  {
-    std::set<FileOffset>    offsets;
-    std::vector<FileOffset> offsetList;
-
-    areaWayIndex.GetOffsets(styleConfig,
-                            lonMin,latMin,lonMax,latMax,
-                            types,
-                            maxCount,
-                            offsets);
-
-    offsetList.reserve(offsets.size());
-    for (std::set<FileOffset>::const_iterator offset=offsets.begin();
-         offset!=offsets.end();
-         ++offset) {
-      offsetList.push_back(*offset);
-    }
-
-    return GetWays(offsetList,ways);
-  }
-
-  bool Database::GetAreas(const StyleConfig& styleConfig,
-                          double lonMin, double latMin,
-                          double lonMax, double latMax,
-                          size_t maxLevel,
-                          size_t maxCount,
-                          std::vector<Way>& areas) const
-  {
-    std::set<FileOffset>    offsets;
-    std::vector<FileOffset> offsetList;
-
-    areaAreaIndex.GetOffsets(styleConfig,
-                             lonMin,latMin,lonMax,latMax,
-                             maxLevel,
-                             2000,
-                             offsets);
-
-    offsetList.reserve(offsets.size());
-    for (std::set<FileOffset>::const_iterator offset=offsets.begin();
-         offset!=offsets.end();
-         ++offset) {
-      offsetList.push_back(*offset);
-    }
-
-    return GetWays(offsetList,areas);
-  }
-
-  bool Database::GetRelationWays(const StyleConfig& styleConfig,
-                                 double lonMin, double latMin,
-                                 double lonMax, double latMax,
-                                 const std::vector<TypeId>& types,
-                                 size_t maxCount,
-                                 std::vector<Relation>& relationWays) const
-  {
-    std::set<FileOffset>    offsets;
-    std::vector<FileOffset> offsetList;
-
-    areaWayRelIndex.GetOffsets(styleConfig,
-                               lonMin,latMin,lonMax,latMax,
-                               types,
-                               maxCount,
-                               offsets);
-
-    offsetList.reserve(offsets.size());
-    for (std::set<FileOffset>::const_iterator offset=offsets.begin();
-         offset!=offsets.end();
-         ++offset) {
-      offsetList.push_back(*offset);
-    }
-
-    return GetRelations(offsetList,relationWays);
-  }
-
-  bool Database::GetRelationAreas(const StyleConfig& styleConfig,
-                                  double lonMin, double latMin,
-                                  double lonMax, double latMax,
-                                  size_t maxLevel,
-                                  size_t maxCount,
-                                  std::vector<Relation>& relationAreas) const
-  {
-    std::set<FileOffset>    offsets;
-    std::vector<FileOffset> offsetList;
-
-    areaAreaRelIndex.GetOffsets(styleConfig,
-                                lonMin,latMin,lonMax,latMax,
-                                maxLevel,
-                                2000,
-                                offsets);
-
-    offsetList.reserve(offsets.size());
-    for (std::set<FileOffset>::const_iterator offset=offsets.begin();
-         offset!=offsets.end();
-         ++offset) {
-      offsetList.push_back(*offset);
-    }
-
-    return GetRelations(offsetList,relationAreas);
-  }
-
   bool Database::GetObjects(const StyleConfig& styleConfig,
                             double lonMin, double latMin,
                             double lonMax, double latMax,
@@ -423,17 +298,40 @@ namespace osmscout {
 
     nodesTimer.Stop();
 
-    StopClock waysTimer;
+    StopClock indexTimer;
 
     std::vector<TypeId> types;
+    std::set<FileOffset> wayWayOffsets;
+    std::set<FileOffset> relationWayOffsets;
+    std::set<FileOffset> wayAreaOffsets;
+    std::set<FileOffset> relationAreaOffsets;
 
     styleConfig.GetWayTypesByPrio(types);
 
-    if (!GetWays(styleConfig,
-                  lonMin,latMin,lonMax,latMax,
-                  types,
-                  maxWays,
-                  ways)) {
+    if (!areaIndex.GetOffsets(styleConfig,
+                              lonMin,
+                              latMin,
+                              lonMax,
+                              latMax,
+                              maxAreaLevel,
+                              maxAreas,
+                              types,
+                              maxWays,
+                              wayWayOffsets,
+                              relationWayOffsets,
+                              wayAreaOffsets,
+                              relationAreaOffsets)) {
+      std::cout << "Error getting ways and relations from area index!" << std::endl;
+    }
+
+    indexTimer.Stop();
+
+    StopClock waysTimer;
+
+    styleConfig.GetWayTypesByPrio(types);
+
+    if (!GetWays(wayWayOffsets,
+                 ways)) {
       std::cout << "Error reading ways in area!" << std::endl;
       return false;
     }
@@ -442,11 +340,8 @@ namespace osmscout {
 
     StopClock relationWaysTimer;
 
-    if (!GetRelationWays(styleConfig,
-                  lonMin,latMin,lonMax,latMax,
-                  types,
-                  maxWays,
-                  relationWays)) {
+    if (!GetRelations(relationWayOffsets,
+                      relationWays)) {
       std::cout << "Error reading relation ways in area!" << std::endl;
       return false;
     }
@@ -455,11 +350,8 @@ namespace osmscout {
 
     StopClock areasTimer;
 
-    if (!GetAreas(styleConfig,
-                  lonMin,latMin,lonMax,latMax,
-                  maxAreaLevel,
-                  maxAreas,
-                  areas)) {
+    if (!GetWays(wayAreaOffsets,
+                 areas)) {
       std::cout << "Error reading areas in area!" << std::endl;
       return false;
     }
@@ -468,11 +360,8 @@ namespace osmscout {
 
     StopClock relationAreasTimer;
 
-    if (!GetRelationAreas(styleConfig,
-                          lonMin,latMin,lonMax,latMax,
-                          maxAreaLevel,
-                          maxAreas,
-                          relationAreas)) {
+    if (!GetRelations(relationAreaOffsets,
+                      relationAreas)) {
       std::cout << "Error reading relation areas in area!" << std::endl;
       return false;
     }
@@ -481,10 +370,12 @@ namespace osmscout {
 
     std::cout << "Max Prio: " << maxPrioTimer << " ";
     std::cout << "nodes: " << nodesTimer << " ";
+    std::cout << "index: " << indexTimer << " ";
     std::cout << "ways: " << waysTimer << " ";
     std::cout << "areas: " << areasTimer << " ";
     std::cout << "rel. ways: " << relationWaysTimer << " ";
-    std::cout << "rel. areas: " << relationAreasTimer << std::endl;
+    std::cout << "rel. areas: " << relationAreasTimer;
+    std::cout << std::endl;
 
     return true;
   }
@@ -518,12 +409,23 @@ namespace osmscout {
     return wayDataFile.Get(offsets,ways);
   }
 
+  bool Database::GetWays(std::set<FileOffset>& offsets,
+                         std::vector<Way>& ways) const
+  {
+    return wayDataFile.Get(offsets,ways);
+  }
+
   bool Database::GetRelations(std::vector<FileOffset>& offsets,
                               std::vector<Relation>& relations) const
   {
     return relationDataFile.Get(offsets,relations);
   }
 
+  bool Database::GetRelations(std::set<FileOffset>& offsets,
+                              std::vector<Relation>& relations) const
+  {
+    return relationDataFile.Get(offsets,relations);
+  }
 
   bool Database::GetWay(const Id& id, Way& way) const
   {
@@ -1460,9 +1362,9 @@ namespace osmscout {
 
     nodeUseCache.DumpStatistics("Node use cache",NodeUseCacheValueSizer());
 
+    areaIndex.DumpStatistics();
+
     areaNodeIndex.DumpStatistics();
-    areaAreaIndex.DumpStatistics();
-    areaWayIndex.DumpStatistics();
 
     cityStreetIndex.DumpStatistics();
 

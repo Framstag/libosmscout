@@ -25,6 +25,7 @@
 #include <cmath>
 #include <iostream>
 #include <iomanip>
+#include <limits>
 #include <list>
 #include <cstdlib>
 
@@ -1766,7 +1767,7 @@ namespace osmscout {
                         ((size_t)ceil(Log2(magnification)))+4,
                         2000,
                         2000,
-                        2000,
+                        std::numeric_limits<size_t>::max(),
                         nodes,
                         ways,
                         areas,

@@ -40,11 +40,8 @@
 
 #include <osmscout/NumericIndex.h>
 
-#include <osmscout/GenAreaAreaIndex.h>
-#include <osmscout/GenAreaAreaRelIndex.h>
+#include <osmscout/GenAreaIndex.h>
 #include <osmscout/GenAreaNodeIndex.h>
-#include <osmscout/GenAreaWayIndex.h>
-#include <osmscout/GenAreaWayRelIndex.h>
 #include <osmscout/GenNodeUseIndex.h>
 #include <osmscout/GenCityStreetIndex.h>
 
@@ -192,11 +189,8 @@ namespace osmscout {
     modules.push_back(new NumericIndexGenerator<Id,Way>("Generating 'way.idx'",
                                                         "ways.dat",
                                                         "way.idx"));
+    modules.push_back(new AreaIndexGenerator());
     modules.push_back(new AreaNodeIndexGenerator());
-    modules.push_back(new AreaAreaIndexGenerator());
-    modules.push_back(new AreaWayIndexGenerator());
-    modules.push_back(new AreaAreaRelIndexGenerator());
-    modules.push_back(new AreaWayRelIndexGenerator());
     modules.push_back(new CityStreetIndexGenerator());
     modules.push_back(new NodeUseIndexGenerator());
 

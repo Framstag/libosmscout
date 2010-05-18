@@ -34,56 +34,17 @@
 namespace osmscout {
 
   /**
-    Area index handles an index over instance of <class T> where T contains a list of
-    nodes that build an area that can be abstracted by a bounding box. The index will
-    return file offsets of all instances of <class T> that intersect a given area.
     */
-  class AreaInAreaIndex
+  class AreaIndex
   {
   private:
     struct IndexEntry
     {
-      std::vector<FileOffset> dataOffsets;
-      FileOffset              children[4];
-    };
-
-    typedef std::map<size_t,IndexEntry> IndexLevel;
-
-  private:
-    std::string             filepart;
-    std::vector<double>     cellWidth;
-    std::vector<double>     cellHeight;
-    uint32_t                maxLevel;
-    std::vector<IndexLevel> index;
-
-  public:
-    AreaInAreaIndex(const std::string& filename);
-
-    bool Load(const std::string& path);
-
-    void GetOffsets(const StyleConfig& styleConfig,
-                    double minlon, double minlat,
-                    double maxlon, double maxlat,
-                    size_t maxLevel,
-                    size_t maxCount,
-                    std::set<FileOffset>& offsets) const;
-
-    void DumpStatistics();
-  };
-
-
-  /**
-    Way index handles an index over instance of <class T> where T contains a list of
-    nodes that build an way that can be abstracted by a bounding box. The index will
-    return file offsets of all instances of <class T> that intersect a given way.
-    */
-  class WayInAreaIndex
-  {
-  private:
-    struct IndexEntry
-    {
-      std::map<TypeId,std::vector<FileOffset> > dataOffsets;
       FileOffset                                children[4];
+      std::map<TypeId,std::vector<FileOffset> > ways;
+      std::map<TypeId,std::vector<FileOffset> > relWays;
+      std::vector<FileOffset>                   areas;
+      std::vector<FileOffset>                   relAreas;
     };
 
     typedef std::map<size_t,IndexEntry> IndexLevel;
@@ -96,16 +57,23 @@ namespace osmscout {
     std::vector<IndexLevel> index;
 
   public:
-    WayInAreaIndex(const std::string& filename);
+    AreaIndex();
 
     bool Load(const std::string& path);
 
-    void GetOffsets(const StyleConfig& styleConfig,
-                    double minlon, double minlat,
-                    double maxlon, double maxlat,
-                    const std::vector<TypeId>& types,
-                    size_t maxCount,
-                    std::set<FileOffset>& offsets) const;
+    bool GetOffsets(const StyleConfig& styleConfig,
+                    double minlon,
+                    double minlat,
+                    double maxlon,
+                    double maxlat,
+                    size_t maxAreaLevel,
+                    size_t maxAreaCount,
+                    const std::vector<TypeId>& wayTypes,
+                    size_t maxWayCount,
+                    std::set<FileOffset>& wayWayOffsets,
+                    std::set<FileOffset>& relationWayOffsets,
+                    std::set<FileOffset>& wayAreaOffsets,
+                    std::set<FileOffset>& relationAreaOffsets) const;
 
     void DumpStatistics();
   };

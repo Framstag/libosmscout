@@ -741,10 +741,9 @@ namespace osmscout {
       }*/
     }
 
-    /*
     progress.SetAction("Dumping areas");
 
-    DumpArea(rootArea,0);*/
+    DumpArea(rootArea,0);
 
     progress.SetAction("Delete temporary data");
 

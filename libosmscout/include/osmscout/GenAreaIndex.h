@@ -1,9 +1,9 @@
-#ifndef OSMSCOUT_AREAWAYINDEX_H
-#define OSMSCOUT_AREAWAYINDEX_H
+#ifndef OSMSCOUT_GENAREAINDEX_H
+#define OSMSCOUT_GENAREAINDEX_H
 
 /*
   This source is part of the libosmscout library
-  Copyright (C) 2009  Tim Teulings
+  Copyright (C) 2010  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,14 +20,17 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/AreaIndex.h>
+#include <osmscout/Import.h>
 
 namespace osmscout {
 
-  class AreaWayIndex : public WayInAreaIndex
+  class AreaIndexGenerator : public ImportModule
   {
   public:
-    AreaWayIndex();
+    std::string GetDescription() const;
+    bool Import(const ImportParameter& parameter,
+                Progress& progress,
+                const TypeConfig& typeConfig);
   };
 }
 

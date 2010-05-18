@@ -38,11 +38,8 @@
 #include <osmscout/WayIndex.h>
 
 // In area index
+#include <osmscout/AreaIndex.h>
 #include <osmscout/AreaNodeIndex.h>
-#include <osmscout/AreaWayIndex.h>
-#include <osmscout/AreaWayRelIndex.h>
-#include <osmscout/AreaAreaIndex.h>
-#include <osmscout/AreaAreaRelIndex.h>
 
 // Location index
 #include <osmscout/CityStreetIndex.h>
@@ -72,12 +69,9 @@ namespace osmscout {
     double                maxLon;        //! bounding box of data
     double                maxLat;        //! bounding box of data
 
-    AreaNodeIndex         areaNodeIndex;
-    AreaAreaIndex         areaAreaIndex;
-    AreaWayIndex          areaWayIndex;
+    AreaIndex             areaIndex;
 
-    AreaAreaRelIndex      areaAreaRelIndex;
-    AreaWayRelIndex       areaWayRelIndex;
+    AreaNodeIndex         areaNodeIndex;
 
     CityStreetIndex       cityStreetIndex;
 
@@ -107,6 +101,12 @@ namespace osmscout {
     bool GetWays(std::vector<FileOffset>& offsets,
                  std::vector<Way>& ways) const;
 
+    bool GetWays(std::set<FileOffset>& offsets,
+                 std::vector<Way>& ways) const;
+
+    bool GetRelations(std::set<FileOffset>& offsets,
+                      std::vector<Relation>& relations) const;
+
     bool GetRelations(std::vector<FileOffset>& offsets,
                       std::vector<Relation>& relations) const;
 
@@ -116,34 +116,6 @@ namespace osmscout {
                   double magnification,
                   size_t maxPriority,
                   std::vector<Node>& nodes) const;
-
-    bool GetWays(const StyleConfig& styleConfig,
-                 double lonMin, double latMin,
-                 double lonMax, double latMax,
-                 const std::vector<TypeId>& types,
-                 size_t maxCount,
-                 std::vector<Way>& ways) const;
-
-    bool GetAreas(const StyleConfig& styleConfig,
-                  double lonMin, double latMin,
-                  double lonMax, double latMax,
-                  size_t maxLevel,
-                  size_t maxCount,
-                  std::vector<Way>& areas) const;
-
-    bool GetRelationWays(const StyleConfig& styleConfig,
-                         double lonMin, double latMin,
-                         double lonMax, double latMax,
-                         const std::vector<TypeId>& types,
-                         size_t maxCount,
-                         std::vector<Relation>& relationWays) const;
-
-    bool GetRelationAreas(const StyleConfig& styleConfig,
-                          double lonMin, double latMin,
-                          double lonMax, double latMax,
-                          size_t maxLevel,
-                          size_t maxCount,
-                          std::vector<Relation>& relationAreas) const;
 
   public:
     Database();
