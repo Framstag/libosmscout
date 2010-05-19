@@ -517,7 +517,7 @@ namespace osmscout {
     double ymin;
     double ymax;
 
-    if (GetBoundingBox(nodes,xmin,ymin,xmax,ymax)) {
+    if (!GetBoundingBox(nodes,xmin,ymin,xmax,ymax)) {
       return false;
     }
 
