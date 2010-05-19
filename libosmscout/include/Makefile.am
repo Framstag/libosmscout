@@ -17,6 +17,7 @@ nobase_include_HEADERS= osmscout/Types.h \
                         osmscout/Point.h \
                         osmscout/Location.h \
                         osmscout/Relation.h \
+                        osmscout/SegmentAttributes.h \
                         osmscout/Tag.h \
                         osmscout/Way.h \
                         osmscout/Reference.h \

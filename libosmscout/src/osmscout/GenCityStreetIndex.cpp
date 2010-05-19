@@ -147,12 +147,12 @@ namespace osmscout {
       way.Read(scanner);
 
       if (!scanner.HasError()) {
-        if (way.IsArea() && cityIds.find(way.type)!=cityIds.end()) {
+        if (way.IsArea() && cityIds.find(way.GetType())!=cityIds.end()) {
           std::string name=way.GetName();
 
-          for (size_t i=0; i<way.tags.size(); i++) {
-            if (way.tags[i].key==tagPlaceName) {
-              name=way.tags[i].value;
+          for (size_t i=0; i<way.attributes.tags.size(); i++) {
+            if (way.attributes.tags[i].key==tagPlaceName) {
+              name=way.attributes.tags[i].value;
               break;
             }
           }
@@ -245,7 +245,7 @@ namespace osmscout {
     }
 
     if (!inserted) {
-      area.ways[way.name].push_back(way.id);
+      area.ways[way.GetName()].push_back(way.id);
     }
   }
 
@@ -540,17 +540,17 @@ namespace osmscout {
       way.Read(scanner);
 
       if (!scanner.HasError()) {
-        if (way.IsArea() && way.type==boundaryId) {
+        if (way.IsArea() && way.GetType()==boundaryId) {
           size_t level=0;
 
-          for (size_t i=0; i<way.tags.size(); i++) {
-            if (way.tags[i].key==tagAdminLevel) {
-              if (StringToNumber(way.tags[i].value,level)) {
+          for (size_t i=0; i<way.attributes.tags.size(); i++) {
+            if (way.attributes.tags[i].key==tagAdminLevel) {
+              if (StringToNumber(way.attributes.tags[i].value,level)) {
                 boundaryAreas.push_back(way);
               }
               else {
                 progress.Info("Could not parse admin_level of way "+
-                              NumberToString(way.type )+" "+NumberToString(way.id));
+                              NumberToString(way.GetType() )+" "+NumberToString(way.id));
               }
 
               break;
@@ -653,11 +653,11 @@ namespace osmscout {
         size_t      level=0;
         std::string name;
 
-        for (size_t i=0; i<a->tags.size() && !(l!=0 && !name.empty()); i++) {
-          if (a->tags[i].key==tagAdminLevel && StringToNumber(a->tags[i].value,level)) {
+        for (size_t i=0; i<a->attributes.tags.size() && !(l!=0 && !name.empty()); i++) {
+          if (a->attributes.tags[i].key==tagAdminLevel && StringToNumber(a->attributes.tags[i].value,level)) {
           }
-          else if (a->tags[i].key==tagName) {
-            name=a->tags[i].value;
+          else if (a->attributes.tags[i].key==tagName) {
+            name=a->attributes.tags[i].value;
           }
         }
 
@@ -680,9 +680,9 @@ namespace osmscout {
          ++a) {
       std::string name=a->GetName();
 
-      for (size_t i=0; i<a->tags.size(); i++) {
-        if (a->tags[i].key==tagPlaceName) {
-          name=a->tags[i].value;
+      for (size_t i=0; i<a->attributes.tags.size(); i++) {
+        if (a->attributes.tags[i].key==tagPlaceName) {
+          name=a->attributes.tags[i].value;
           break;
         }
       }
@@ -773,7 +773,7 @@ namespace osmscout {
       way.Read(scanner);
 
       if (!scanner.HasError()) {
-        if (indexables.find(way.type)!=indexables.end()) {
+        if (indexables.find(way.GetType())!=indexables.end()) {
 
           std::string name=way.GetName();
 

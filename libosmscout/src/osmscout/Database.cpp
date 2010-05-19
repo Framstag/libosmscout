@@ -977,7 +977,7 @@ namespace osmscout {
         cachedFollower=false;
       }
 
-      if (!profile.CanUse(currentWay->type)) {
+      if (!profile.CanUse(currentWay->GetType())) {
         continue;
       }
 
@@ -1066,7 +1066,7 @@ namespace osmscout {
            ++iter) {
         const Way* way=*iter;
 
-        if (!profile.CanUse(way->type)) {
+        if (!profile.CanUse(way->GetType())) {
           continue;
         }
 
@@ -1125,7 +1125,7 @@ namespace osmscout {
            iter!=follower.end();
            ++iter) {
         double currentCost=current.currentCost+
-                           profile.GetCostFactor(currentWay->type)*
+                           profile.GetCostFactor(currentWay->GetType())*
                            GetSphericalDistance(current.lon,
                                                 current.lat,
                                                 iter->lon,
@@ -1325,10 +1325,10 @@ namespace osmscout {
                                          Way& way)
   {
     way.id=0;
-    way.type=typeRoute;
-    way.flags=0;
-    way.layer=5;
-    way.tags.clear();
+    way.attributes.type=typeRoute;
+    way.attributes.flags=0;
+    way.attributes.layer=5;
+    way.attributes.tags.clear();
     way.nodes.clear();
     way.nodes.reserve(data.Entries().size());
 

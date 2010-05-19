@@ -94,39 +94,15 @@ namespace osmscout {
         return false;
       }
 
-      for (std::vector<Tag>::iterator tag=way.tags.begin();
-           tag!=way.tags.end();
-           ++tag) {
-        if (tag->key==tagName) {
-          role.name=tag->value;
-        }
-        else if (tag->key==tagRef) {
-          role.ref=tag->value;
-          }
-        else if (tag->key==tagLayer) {
-          if (sscanf(tag->value.c_str(),"%hhd",&role.layer)!=1) {
-            progress.Warning(std::string("Layer tag value '")+tag->value+"' for way "+NumberToString(way.id)+" is not numeric!");
-          }
-        }
-        /*
-        else if (tag->key==tagBridge) {
-          isBridge=!(tag->value=="no" || tag->value=="false" || tag->value=="0");
-        }
-        else if (tag->key==tagTunnel) {
-          isTunnel=!(tag->value=="no" || tag->value=="false" || tag->value=="0");
-        }
-        else if (tag->key==tagBuilding) {
-          isBuilding=!(tag->value=="no" || tag->value=="false" || tag->value=="0");
-        }
-        else if (tag->key==tagOneway) {
-          if (tag->value=="-1") {
-            isOneway=true;
-            reverseNodes=true;
-          }
-          else {
-            isOneway=!(tag->value=="no" || tag->value=="false" || tag->value=="0");
-          }
-        } */
+      bool reverseNodes=false;
+
+      if (!role.attributes.Assign(progress,
+                                 way.id,
+                                 way.type,
+                                 way.IsArea(),
+                                 way.tags,
+                                 reverseNodes)) {
+        return false;
       }
 
       for (size_t i=0; i<ns.size(); i++) {
@@ -293,8 +269,8 @@ namespace osmscout {
         points.push_back(roles.front().nodes[i]);
       }
 
-      if (roles.begin()->type!=typeIgnore) {
-        type=roles.begin()->type;
+      if (roles.begin()->GetType()!=typeIgnore) {
+        type=roles.begin()->GetType();
       }
       roles.erase(roles.begin());
 
@@ -313,8 +289,8 @@ namespace osmscout {
               points.push_back(role->nodes[i]);
             }
 
-            if (roles.begin()->type!=typeIgnore) {
-              type=roles.begin()->type;
+            if (roles.begin()->GetType()!=typeIgnore) {
+              type=roles.begin()->GetType();
             }
             roles.erase(role);
 
@@ -326,8 +302,8 @@ namespace osmscout {
               points.push_back(role->nodes[role->nodes.size()-i-1]);
             }
 
-            if (roles.begin()->type!=typeIgnore) {
-              type=roles.begin()->type;
+            if (roles.begin()->GetType()!=typeIgnore) {
+              type=roles.begin()->GetType();
             }
             roles.erase(role);
             found=true;
@@ -355,7 +331,7 @@ namespace osmscout {
       // Add the found points the our new (internal) list of merges roles
       Relation::Role role;
 
-      role.type=type;
+      role.attributes.type=type;
 
       role.nodes.reserve(points.size());
 
@@ -467,12 +443,12 @@ namespace osmscout {
       ++cand;
 
       while (cand!=relation.roles.end()) {
-        if (role->type!=cand->type ||
-            role->flags!=cand->flags ||
-            role->layer!=cand->layer ||
+        if (role->GetType()!=cand->GetType() ||
+            role->GetFlags()!=cand->GetFlags() ||
+            role->GetLayer()!=cand->GetLayer() ||
             role->role!=cand->role ||
-            role->name!=cand->name ||
-            role->ref!=cand->ref) {
+            role->GetName()!=cand->GetName() ||
+            role->GetRefName()!=cand->GetRefName()) {
           ++cand;
           continue;
         }
@@ -640,7 +616,7 @@ namespace osmscout {
           TypeId type;
 
           rel.roles[m].role=rawRel.members[m].role;
-          rel.roles[m].layer=layer;
+          rel.roles[m].attributes.layer=layer;
 
           if (!ResolveMember(rawRel.id,
                              name,
@@ -652,7 +628,7 @@ namespace osmscout {
             break;
           }
 
-          rel.roles[m].type=type;
+          rel.roles[m].attributes.type=type;
         }
 
         if (error) {
@@ -667,15 +643,15 @@ namespace osmscout {
           for (size_t m=0; m<rel.roles.size(); m++) {
             if (rel.roles[m].role=="outer") {
               if (rel.type==typeIgnore &&
-                  rel.roles[m].type!=typeIgnore) {
-                rel.type=rel.roles[m].type;
+                  rel.roles[m].GetType()!=typeIgnore) {
+                rel.type=rel.roles[m].GetType();
                 //progress.Debug("Autodetecting type of relation "+NumberToString(rel.id)+" as "+NumberToString(rel.type));
               }
               else if (rel.type!=typeIgnore &&
-                       rel.roles[m].type!=typeIgnore &&
-                       rel.type!=rel.roles[m].type) {
+                       rel.roles[m].GetType()!=typeIgnore &&
+                       rel.type!=rel.roles[m].GetType()) {
                 progress.Warning("Relation "+NumberToString(rel.id)+" has conflicting types for outer boundary ("+
-                                 NumberToString(rawRel.members[m].id)+","+NumberToString(rel.type)+","+NumberToString(rel.roles[m].type)+")");
+                                 NumberToString(rawRel.members[m].id)+","+NumberToString(rel.type)+","+NumberToString(rel.roles[m].GetType())+")");
               }
             }
           }
@@ -683,10 +659,10 @@ namespace osmscout {
         else {
           bool correct=true;
 
-          TypeId type=rel.roles[0].type;
+          TypeId type=rel.roles[0].GetType();
 
           for (size_t m=1; m<rel.roles.size(); m++) {
-            if (rel.roles[m].type!=type) {
+            if (rel.roles[m].GetType()!=type) {
               correct=false;
               break;
             }
@@ -712,7 +688,7 @@ namespace osmscout {
           for (size_t m=0; m<rel.roles.size(); m++) {
             if (rel.roles[m].role=="outer" ||
                 rel.roles[m].role=="") {
-              if (rel.type==rel.roles[m].type) {
+              if (rel.type==rel.roles[m].GetType()) {
                 wayAreaIndexBlacklist.insert(rawRel.members[m].id);
               }
             }
@@ -720,7 +696,7 @@ namespace osmscout {
         }
         else {
           for (size_t m=0; m<rel.roles.size(); m++) {
-            if (rel.type==rel.roles[m].type) {
+            if (rel.type==rel.roles[m].GetType()) {
               wayAreaIndexBlacklist.insert(rawRel.members[m].id);
             }
           }
@@ -754,8 +730,8 @@ namespace osmscout {
         }
 
         for (size_t m=0; m<rel.roles.size(); m++) {
-          if (rel.roles[m].layer!=0) {
-            rel.roles[m].flags|=Relation::Role::hasLayer;
+          if (rel.roles[m].attributes.layer!=0) {
+            rel.roles[m].attributes.flags|=SegmentAttributes::hasLayer;
           }
         }
 

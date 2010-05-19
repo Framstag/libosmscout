@@ -301,101 +301,18 @@ namespace osmscout {
            ++w) {
         RawWay rawWay=w->second;
         Way    way;
-        int8_t layer=0;
-        bool   isBridge=false;
-        bool   isTunnel=false;
-        bool   isBuilding=false;
-        bool   isOneway=false;
+
         bool   reverseNodes=false;
 
         way.id=rawWay.id;
-        way.type=rawWay.type;
 
-        std::vector<Tag>::iterator tag=rawWay.tags.begin();
-        while (tag!=rawWay.tags.end()) {
-          if (tag->key==tagName) {
-            way.name=tag->value;
-            tag=rawWay.tags.erase(tag);
-          }
-          else if (tag->key==tagRef) {
-            way.ref=tag->value;
-            tag=rawWay.tags.erase(tag);
-          }
-          else if (tag->key==tagLayer) {
-            if (sscanf(tag->value.c_str(),"%hhd",&layer)!=1) {
-              progress.Warning(std::string("Layer tag value '")+tag->value+"' for way "+NumberToString(rawWay.id)+" is not numeric!");
-            }
-            tag=rawWay.tags.erase(tag);
-          }
-          else if (tag->key==tagBridge) {
-            isBridge=!(tag->value=="no" || tag->value=="false" || tag->value=="0");
-            tag=rawWay.tags.erase(tag);
-          }
-          else if (tag->key==tagTunnel) {
-            isTunnel=!(tag->value=="no" || tag->value=="false" || tag->value=="0");
-            tag=rawWay.tags.erase(tag);
-          }
-          else if (tag->key==tagBuilding) {
-            isBuilding=!(tag->value=="no" || tag->value=="false" || tag->value=="0");
-
-            tag=rawWay.tags.erase(tag);
-          }
-          else if (tag->key==tagOneway) {
-            if (tag->value=="-1") {
-              isOneway=true;
-              reverseNodes=true;
-            }
-            else {
-              isOneway=!(tag->value=="no" || tag->value=="false" || tag->value=="0");
-            }
-
-            tag=rawWay.tags.erase(tag);
-          }
-          else {
-            ++tag;
-          }
-        }
-
-        // Flags
-
-        if (rawWay.IsArea()) {
-          way.flags|=Way::isArea;
-        }
-
-        if (!way.name.empty()) {
-          way.flags|=Way::hasName;
-        }
-
-        if (!way.ref.empty()) {
-          way.flags|=Way::hasRef;
-        }
-
-        if (layer!=0) {
-          way.flags|=Way::hasLayer;
-          way.layer=layer;
-        }
-
-        if (isBridge) {
-          way.flags|=Way::isBridge;
-        }
-
-        if (isTunnel) {
-          way.flags|=Way::isTunnel;
-        }
-
-        if (isBuilding) {
-          way.flags|=Way::isBuilding;
-        }
-
-        if (isOneway) {
-          way.flags|=Way::isOneway;
-        }
-
-        // tags
-
-        way.tags=rawWay.tags;
-        if (way.tags.size()>0) {
-          way.flags|=Way::hasTags;
+        if (!way.attributes.Assign(progress,
+                                   rawWay.id,
+                                   rawWay.type,
+                                   rawWay.IsArea(),
+                                   rawWay.tags,
+                                   reverseNodes)) {
+          continue;
         }
 
         // Nodes
@@ -423,13 +340,13 @@ namespace osmscout {
           nodeUse=nodeUses.find(way.nodes[0].id);
 
           if (nodeUse!=nodeUses.end() && nodeUse->second>=2) {
-            way.flags|=Way::startIsJoint;
+            way.attributes.flags|=SegmentAttributes::startIsJoint;
           }
 
           nodeUse=nodeUses.find(way.nodes[way.nodes.size()-1].id);
 
           if (nodeUse!=nodeUses.end() && nodeUse->second>=2) {
-            way.flags|=Way::endIsJoint;
+            way.attributes.flags|=SegmentAttributes::endIsJoint;
           }
         }
 
@@ -438,7 +355,7 @@ namespace osmscout {
         std::map<Id,std::vector<Way::Restriction> >::iterator iter=restrictions.find(way.id);
 
         if (iter!=restrictions.end()) {
-          way.flags|=Way::hasRestrictions;
+          way.attributes.flags|=SegmentAttributes::hasRestrictions;
 
           way.restrictions=iter->second;
         }

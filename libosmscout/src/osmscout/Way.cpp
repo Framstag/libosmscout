@@ -52,18 +52,18 @@ namespace osmscout {
   bool Way::Read(FileScanner& scanner)
   {
     uint32_t nodeCount;
-    uint32_t flags;
 
     scanner.Read(id);
-    scanner.ReadNumber(type);
-    scanner.Read(flags);
+
+    if (!attributes.Read(scanner)) {
+      return false;
+    }
+
     scanner.ReadNumber(nodeCount);
 
     if (scanner.HasError()) {
       return false;
     }
-
-    this->flags=flags;
 
     uint32_t minLat;
     uint32_t minLon;
@@ -84,37 +84,7 @@ namespace osmscout {
       nodes[i].lon=(minLon+lonValue)/conversionFactor-90.0;
     }
 
-    if (flags & hasName) {
-      scanner.Read(name);
-    }
-
-    if (flags & hasRef) {
-      scanner.Read(ref);
-    }
-
-    if (flags & hasLayer) {
-      scanner.Read(layer);
-    }
-    else {
-      layer=0;
-    }
-
-    if (flags & hasTags) {
-      uint32_t tagCount;
-
-      scanner.ReadNumber(tagCount);
-      if (scanner.HasError()) {
-        return false;
-      }
-
-      tags.resize(tagCount);
-      for (size_t i=0; i<tagCount; i++) {
-        scanner.ReadNumber(tags[i].key);
-        scanner.Read(tags[i].value);
-      }
-    }
-
-    if (flags & hasRestrictions) {
+    if (attributes.HasRestrictions()) {
       uint32_t restrictionCount;
 
       scanner.ReadNumber(restrictionCount);
@@ -151,8 +121,10 @@ namespace osmscout {
   bool Way::Write(FileWriter& writer) const
   {
     writer.Write(id);
-    writer.WriteNumber(type);
-    writer.Write((uint32_t)flags);
+
+    if (!attributes.Write(writer)) {
+      return false;
+    }
 
     writer.WriteNumber((uint32_t)nodes.size());
 
@@ -176,28 +148,7 @@ namespace osmscout {
       writer.WriteNumber(lonValue-minLon);
     }
 
-    if (flags & hasName) {
-      writer.Write(name);
-    }
-
-    if (flags & hasRef) {
-      writer.Write(ref);
-    }
-
-    if (flags & hasLayer) {
-      writer.Write(layer);
-    }
-
-    if (flags & hasTags) {
-      writer.WriteNumber((uint32_t)tags.size());
-
-      for (size_t i=0; i<tags.size(); i++) {
-        writer.WriteNumber(tags[i].key);
-        writer.Write(tags[i].value);
-      }
-    }
-
-    if (flags & hasRestrictions) {
+    if (attributes.HasRestrictions()) {
       writer.WriteNumber((uint32_t)restrictions.size());
 
       for (size_t i=0; i<restrictions.size(); i++) {

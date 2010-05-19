@@ -249,6 +249,10 @@ namespace osmscout {
     wayWayOffsets.clear();
     relationAreaOffsets.clear();
 
+    //
+    // Ways
+    //
+
     stopWay=false;
     for (size_t t=0; !stopWay && t<wayTypes.size(); t++) {
       ctx.clear();
@@ -415,6 +419,10 @@ namespace osmscout {
       }
     }
 
+    //
+    // Areas
+    //
+
     ctx.clear();
     cty.clear();
     co.clear();
@@ -449,6 +457,9 @@ namespace osmscout {
           std::cerr << "Cannot find offset " << co[i] << " in level " << level << ", => aborting!" << std::endl;
           return false;
         }
+
+        // TODO: First collect all areas for a level, then - afte rthe level is scanned -
+        // add it to the result
 
         if (level>maxAreaLevel) {
           stopArea=true;

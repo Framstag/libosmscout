@@ -97,24 +97,11 @@ namespace osmscout {
     for (size_t i=0; i<roleCount; i++) {
       uint32_t nodesCount;
 
-      scanner.ReadNumber(roles[i].type);
-      scanner.Read(flags);
+      if (!roles[i].attributes.Read(scanner)) {
+        return false;
+      }
+
       scanner.Read(roles[i].role);
-
-      if (flags & Role::hasName) {
-        scanner.Read(roles[i].name);
-      }
-
-      if (flags & Role::hasRef) {
-        scanner.Read(roles[i].ref);
-      }
-
-      if (flags & Role::hasLayer) {
-        scanner.Read(roles[i].layer);
-      }
-      else {
-        roles[i].layer=0;
-      }
 
       scanner.ReadNumber(nodesCount);
       roles[i].nodes.resize(nodesCount);
@@ -158,22 +145,11 @@ namespace osmscout {
 
     writer.WriteNumber((uint32_t)roles.size());
     for (size_t i=0; i<roles.size(); i++) {
-      writer.WriteNumber(roles[i].type);
-      writer.Write(flags);
+      if (!roles[i].attributes.Write(writer)) {
+        return false;
+      }
 
       writer.Write(roles[i].role);
-
-      if (flags & Role::hasName) {
-        writer.Write(roles[i].name);
-      }
-
-      if (flags & Role::hasRef) {
-        writer.Write(roles[i].ref);
-      }
-
-      if (flags & Role::hasLayer) {
-        writer.Write(roles[i].layer);
-      }
 
       writer.WriteNumber((uint32_t)roles[i].nodes.size());
 

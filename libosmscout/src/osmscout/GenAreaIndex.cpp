@@ -358,7 +358,7 @@ namespace osmscout {
 
               for (size_t yc=minyc; yc<=maxyc; yc++) {
                 for (size_t xc=minxc; xc<=maxxc; xc++) {
-                  leafs[Coord(xc,yc)].ways[way.type].push_back(offset);
+                  leafs[Coord(xc,yc)].ways[way.GetType()].push_back(offset);
                   wayLevelEntries++;
                 }
               }

@@ -109,7 +109,7 @@ namespace osmscout {
         way.Read(scanner);
 
         if (!scanner.HasError())  {
-          if (types.find(way.type)!=types.end()) {
+          if (types.find(way.GetType())!=types.end()) {
             for (size_t i=0; i<way.nodes.size(); i++) {
               if (way.nodes[i].id>=start && way.nodes[i].id<end) {
                 nodeWayMap[way.nodes[i].id].push_back(way.id);
@@ -134,7 +134,7 @@ namespace osmscout {
         way.Read(scanner);
 
         if (!scanner.HasError())  {
-          if (types.find(way.type)!=types.end()) {
+          if (types.find(way.GetType())!=types.end()) {
             for (size_t i=0; i<way.nodes.size(); i++) {
               if (way.nodes[i].id>=start && way.nodes[i].id<end) {
                 std::map<Id, std::list<Id> >::const_iterator ways;

@@ -20,10 +20,11 @@ libosmscout_la_SOURCES= osmscout/Types.cpp \
                         osmscout/RawRelation.cpp \
                         osmscout/RawWay.cpp \
                         osmscout/AdminRegion.cpp \
+                        osmscout/Location.cpp \
                         osmscout/Node.cpp \
                         osmscout/Point.cpp \
                         osmscout/Relation.cpp \
-                        osmscout/Location.cpp \
+                        osmscout/SegmentAttributes.cpp \
                         osmscout/Tag.cpp \
                         osmscout/Way.cpp \
                         osmscout/Reference.cpp \

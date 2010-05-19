@@ -24,6 +24,7 @@
 
 #include <osmscout/FileScanner.h>
 #include <osmscout/FileWriter.h>
+#include <osmscout/SegmentAttributes.h>
 #include <osmscout/TypeConfig.h>
 
 namespace osmscout {
@@ -34,22 +35,63 @@ namespace osmscout {
   class Relation
   {
   public:
-    struct Role
+    class Role
     {
-      // Common flags
-      const static uint16_t hasName         = 1 <<  0; //! We have a name
-      const static uint16_t hasRef          = 1 <<  1; //! We have reference name
-
-      // Way flags
-      const static uint16_t hasLayer        = 1 <<  2; //! We have optional layer information
-
-      TypeId             type;
-      uint16_t           flags;
+    public:
+      SegmentAttributes  attributes;
       std::string        role;
-      std::string        name;
-      std::string        ref;
-      int8_t             layer;
       std::vector<Point> nodes;
+
+    public:
+      inline TypeId GetType() const
+      {
+        return attributes.GetType();
+      }
+
+      inline uint16_t GetFlags() const
+      {
+        return attributes.GetFlags();
+      }
+
+      inline bool IsArea() const
+      {
+        return attributes.IsArea();
+      }
+
+      inline std::string GetName() const
+      {
+        return attributes.GetName();
+      }
+
+      inline std::string GetRefName() const
+      {
+        return attributes.GetRefName();
+      }
+
+      inline int8_t GetLayer() const
+      {
+        return attributes.GetLayer();
+      }
+
+      inline bool IsBuilding() const
+      {
+        return attributes.IsBuilding();
+      }
+
+      inline bool IsBridge() const
+      {
+        return attributes.IsBridge();
+      }
+
+      inline bool IsTunnel() const
+      {
+        return attributes.IsTunnel();
+      }
+
+      inline bool IsOneway() const
+      {
+        return attributes.IsOneway();
+      }
     };
 
   public:

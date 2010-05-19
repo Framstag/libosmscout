@@ -1225,9 +1225,9 @@ namespace osmscout {
              area!=areas.end();
              ++area) {
           DrawArea(styleConfig,
-                   area->type,
+                   area->GetType(),
                    layer,
-                   area->flags & Way::isBuilding,
+                   area->IsBuilding(),
                    area->nodes);
         }
       }
@@ -1242,7 +1242,7 @@ namespace osmscout {
               drawn=true;
 
               DrawArea(styleConfig,
-                       relation->roles[m].type,
+                       relation->roles[m].GetType(),
                        layer,
                        false,
                        relation->roles[m].nodes);
@@ -1268,16 +1268,16 @@ namespace osmscout {
              way!=ways.end();
              ++way) {
 
-          if (way->layer!=layer) {
+          if (way->GetLayer()!=layer) {
             continue;
           }
 
           DrawWayOutline(styleConfig,
-                         way->type,
-                         way->flags & Way::isBridge,
-                         way->flags & Way::isTunnel,
-                         way->flags & Way::startIsJoint,
-                         way->flags & Way::endIsJoint,
+                         way->GetType(),
+                         way->IsBridge(),
+                         way->IsTunnel(),
+                         way->StartIsJoint(),
+                         way->EndIsJoint(),
                          way->nodes);
         }
       }
@@ -1287,16 +1287,16 @@ namespace osmscout {
              relation!=relationWays.end();
              ++relation) {
           for (size_t m=0; m<relation->roles.size(); m++) {
-            TypeId type=relation->roles[m].type==typeIgnore ? relation->type : relation->roles[m].type;
+            TypeId type=relation->roles[m].GetType()==typeIgnore ? relation->type : relation->roles[m].GetType();
 
-            if (relation->roles[m].layer!=layer) {
+            if (relation->roles[m].GetLayer()!=layer) {
               continue;
             }
 
             DrawWayOutline(styleConfig,
                            type,
-                           false,
-                           false,
+                           relation->roles[m].IsBridge(),
+                           relation->roles[m].IsTunnel(),
                            false,
                            false,
                            relation->roles[m].nodes);
@@ -1309,14 +1309,14 @@ namespace osmscout {
              way!=ways.end();
              ++way) {
 
-          if (way->layer!=layer) {
+          if (way->GetLayer()!=layer) {
             continue;
           }
 
           DrawWay(styleConfig,
-                         way->type,
-                         way->flags & Way::isBridge,
-                         way->flags & Way::isTunnel,
+                         way->GetType(),
+                         way->IsBridge(),
+                         way->IsTunnel(),
                          way->nodes);
         }
       }
@@ -1327,16 +1327,16 @@ namespace osmscout {
              ++relation) {
           //std::cout << "Draw way relation " << relation->id << std::endl;
           for (size_t m=0; m<relation->roles.size(); m++) {
-            TypeId type=relation->roles[m].type==typeIgnore ? relation->type : relation->roles[m].type;
+            TypeId type=relation->roles[m].GetType()==typeIgnore ? relation->type : relation->roles[m].GetType();
 
-            if (relation->roles[m].layer!=layer) {
+            if (relation->roles[m].GetLayer()!=layer) {
               continue;
             }
 
             DrawWay(styleConfig,
                     type,
-                    false,
-                    false,
+                    relation->roles[m].IsBridge(),
+                    relation->roles[m].IsTunnel(),
                     relation->roles[m].nodes);
           }
         }
@@ -1352,7 +1352,7 @@ namespace osmscout {
          way!=ways.end();
          ++way) {
       if (!way->GetName().empty()) {
-        const LabelStyle *style=styleConfig.GetWayNameLabelStyle(way->type);
+        const LabelStyle *style=styleConfig.GetWayNameLabelStyle(way->GetType());
 
         if (style!=NULL &&
             magnification>=style->GetMinMag() &&
@@ -1376,7 +1376,7 @@ namespace osmscout {
       }
 
       if (!way->GetRefName().empty()) {
-        const LabelStyle *style=styleConfig.GetWayRefLabelStyle(way->type);
+        const LabelStyle *style=styleConfig.GetWayRefLabelStyle(way->GetType());
 
         if (style!=NULL &&
             magnification>=style->GetMinMag() &&
@@ -1404,8 +1404,8 @@ namespace osmscout {
          relation!=relationWays.end();
          ++relation) {
       for (size_t m=0; m<relation->roles.size(); m++) {
-        if (!relation->roles[m].name.empty()) {
-          const LabelStyle *style=styleConfig.GetWayNameLabelStyle(relation->roles[m].type);
+        if (!relation->roles[m].GetName().empty()) {
+          const LabelStyle *style=styleConfig.GetWayNameLabelStyle(relation->roles[m].GetType());
 
           if (style!=NULL &&
               magnification>=style->GetMinMag() &&
@@ -1414,22 +1414,22 @@ namespace osmscout {
             if (style->GetStyle()==LabelStyle::contour) {
               DrawContourLabel(draw,
                                *style,
-                               relation->roles[m].name,
+                               relation->roles[m].GetName(),
                                relation->roles[m].nodes);
             }
             else {
               DrawTiledLabel(draw,
                              magnification,
                              *style,
-                             relation->roles[m].name,
+                             relation->roles[m].GetName(),
                              relation->roles[m].nodes,
                              tileBlacklist);
             }
           }
         }
 
-        if (!relation->roles[m].ref.empty()) {
-          const LabelStyle *style=styleConfig.GetWayRefLabelStyle(relation->roles[m].type);
+        if (!relation->roles[m].GetRefName().empty()) {
+          const LabelStyle *style=styleConfig.GetWayRefLabelStyle(relation->roles[m].GetType());
 
           if (style!=NULL &&
               magnification>=style->GetMinMag() &&
@@ -1438,14 +1438,14 @@ namespace osmscout {
             if (style->GetStyle()==LabelStyle::contour) {
               DrawContourLabel(draw,
                                *style,
-                               relation->roles[m].ref,
+                               relation->roles[m].GetRefName(),
                                relation->roles[m].nodes);
             }
             else {
               DrawTiledLabel(draw,
                              magnification,
                              *style,
-                             relation->roles[m].ref,
+                             relation->roles[m].GetRefName(),
                              relation->roles[m].nodes,
                              tileBlacklist);
             }
@@ -1545,7 +1545,7 @@ namespace osmscout {
          area!=areas.end();
          ++area) {
 
-      const LabelStyle *style=styleConfig.GetAreaLabelStyle(area->type);
+      const LabelStyle *style=styleConfig.GetAreaLabelStyle(area->GetType());
 
       if (style==NULL ||
           magnification<style->GetMinMag() ||
@@ -1594,9 +1594,9 @@ namespace osmscout {
       }
 
       DrawWay(styleConfig,
-              way->type,
-              way->flags & Way::isBridge,
-              way->flags & Way::isTunnel,
+              way->GetType(),
+              way->IsBridge(),
+              way->IsTunnel(),
               way->nodes);
 
 
@@ -1839,8 +1839,8 @@ namespace osmscout {
     for (std::vector<Way>::const_iterator way=ways.begin();
          way!=ways.end();
          ++way) {
-      if (way->layer>=-5 && way->layer<=5) {
-        wayLayers[way->layer+5]=true;
+      if (way->GetLayer()>=-5 && way->GetLayer()<=5) {
+        wayLayers[way->GetLayer()+5]=true;
       }
     }
 
@@ -1852,8 +1852,8 @@ namespace osmscout {
          relation!=relationWays.end();
          ++relation) {
       for (size_t m=0; m<relation->roles.size(); m++) {
-        if (relation->roles[m].layer>=-5 && relation->roles[m].layer<=5) {
-          relationWayLayers[relation->roles[m].layer+5]=true;
+        if (relation->roles[m].GetLayer()>=-5 && relation->roles[m].GetLayer()<=5) {
+          relationWayLayers[relation->roles[m].GetLayer()+5]=true;
         }
       }
     }
@@ -1870,8 +1870,8 @@ namespace osmscout {
     for (std::vector<Way>::const_iterator area=areas.begin();
          area!=areas.end();
          ++area) {
-      const FillStyle *style=styleConfig.GetAreaFillStyle(area->type,
-                                                          area->flags & Way::isBuilding);
+      const FillStyle *style=styleConfig.GetAreaFillStyle(area->GetType(),
+                                                          area->IsBuilding());
 
       if (style!=NULL &&
           style->GetLayer()>=-5 &&
