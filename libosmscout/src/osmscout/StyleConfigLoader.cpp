@@ -398,6 +398,7 @@ namespace osmscout {
                context==contextAreaBorder) {
         const xmlChar *styleValue=NULL;
         const xmlChar *colorValue=NULL;
+        const xmlChar *alternateColorValue=NULL;
         const xmlChar *outlineColorValue=NULL;
         const xmlChar *minPixelValue=NULL;
         const xmlChar *widthValue=NULL;
@@ -415,6 +416,9 @@ namespace osmscout {
             }
             else if (strcmp((const char*)atts[i],"color")==0) {
               colorValue=atts[i+1];
+            }
+            else if (strcmp((const char*)atts[i],"alternateColor")==0) {
+              alternateColorValue=atts[i+1];
             }
             else if (strcmp((const char*)atts[i],"outlineColor")==0) {
               outlineColorValue=atts[i+1];
@@ -459,6 +463,17 @@ namespace osmscout {
             }
 
             line.SetLineColor(r,g,b,a);
+          }
+
+          if (alternateColorValue!=NULL) {
+            color=(const char*)alternateColorValue;
+
+            if (!GetColor(color,r,g,b,a)) {
+              std::cerr << "Cannot parse color value '" << color << "'" << std::endl;
+              return;
+            }
+
+            line.SetAlternateColor(r,g,b,a);
           }
 
           if (outlineColorValue!=NULL) {

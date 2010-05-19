@@ -47,6 +47,10 @@ namespace osmscout {
     double lineG;
     double lineB;
     double lineA;
+    double alternateR;
+    double alternateG;
+    double alternateB;
+    double alternateA;
     double outlineR;
     double outlineG;
     double outlineB;
@@ -60,6 +64,7 @@ namespace osmscout {
 
     LineStyle& SetStyle(Style style);
     LineStyle& SetLineColor(double r, double g, double b, double a);
+    LineStyle& SetAlternateColor(double r, double g, double b, double a);
     LineStyle& SetOutlineColor(double r, double g, double b, double a);
     LineStyle& SetMinPixel(double value);
     LineStyle& SetWidth(double value);
@@ -95,6 +100,26 @@ namespace osmscout {
       return lineA;
     }
 
+    inline double GetAlternateR() const
+    {
+      return alternateR;
+    }
+
+    inline double GetAlternateG() const
+    {
+      return alternateG;
+    }
+
+    inline double GetAlternateB() const
+    {
+      return alternateB;
+    }
+
+    inline double GetAlternateA() const
+    {
+      return alternateA;
+    }
+
     inline double GetOutlineR() const
     {
       return outlineR;
@@ -114,7 +139,6 @@ namespace osmscout {
     {
       return outlineA;
     }
-
 
     inline double GetMinPixel() const
     {

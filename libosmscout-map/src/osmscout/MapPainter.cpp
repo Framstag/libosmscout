@@ -34,6 +34,7 @@
 static size_t optimizeLimit=512;
 static double relevantPosDeriviation=2.0;
 static double relevantSlopeDeriviation=0.1;
+static double outlineMinWidth=1;
 
 namespace osmscout {
 
@@ -906,7 +907,6 @@ namespace osmscout {
       cairo_fill(draw);
       break;
     case SymbolStyle::circle:
-      std::cout << "Draw circle symbol" << std::endl;
       cairo_set_source_rgba(draw,
                             style->GetFillR(),
                             style->GetFillG(),
@@ -949,19 +949,16 @@ namespace osmscout {
     cairo_paint(draw);
   }
 
-  void MapPainter::DrawPath(const std::vector<Point>& nodes,
-                            const LineStyle& style,
-                            double width)
+  void MapPainter::DrawPath(LineStyle::Style style,
+                            double r, double g, double b, double a,
+                            double width,
+                            const std::vector<Point>& nodes)
   {
-    cairo_set_source_rgba(draw,
-                          style.GetLineR(),
-                          style.GetLineG(),
-                          style.GetLineB(),
-                          style.GetLineA());
+    cairo_set_source_rgba(draw,r,g,b,a);
 
     cairo_set_line_width(draw,width);
 
-    switch (style.GetStyle()) {
+    switch (style) {
     case LineStyle::none:
       // way should not be visible in this case!
       assert(false);
@@ -1084,8 +1081,8 @@ namespace osmscout {
     else if (isTunnel && magnification>=magCity) {
       double tunnel[2];
 
-      tunnel[0]=7+lineWidth[(size_t)type]+2*style->GetOutline();
-      tunnel[1]=7+lineWidth[(size_t)type]+2*style->GetOutline();
+      tunnel[0]=7+lineWidth[(size_t)type];
+      tunnel[1]=7+lineWidth[(size_t)type];
 
       cairo_set_dash(draw,tunnel,2,0);
       if (magnification>=10000) {
@@ -1106,7 +1103,7 @@ namespace osmscout {
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
     }
 
-    cairo_set_line_width(draw,lineWidth[(size_t)type]+2*style->GetOutline());
+    cairo_set_line_width(draw,lineWidth[(size_t)type]);
 
     TransformWay(nodes);
 
@@ -1139,7 +1136,7 @@ namespace osmscout {
                             style->GetOutlineG(),
                             style->GetOutlineB(),
                             style->GetOutlineA());
-      cairo_set_line_width(draw,lineWidth[(size_t)type]+2*style->GetOutline());
+      cairo_set_line_width(draw,lineWidth[(size_t)type]);
 
       cairo_move_to(draw,nodeX[0],nodeY[0]);
       cairo_line_to(draw,nodeX[0],nodeY[0]);
@@ -1154,7 +1151,7 @@ namespace osmscout {
                             style->GetOutlineG(),
                             style->GetOutlineB(),
                             style->GetOutlineA());
-      cairo_set_line_width(draw,lineWidth[(size_t)type]+2*style->GetOutline());
+      cairo_set_line_width(draw,lineWidth[(size_t)type]);
 
       cairo_move_to(draw,nodeX[nodes.size()-1],nodeY[nodes.size()-1]);
       cairo_line_to(draw,nodeX[nodes.size()-1],nodeY[nodes.size()-1]);
@@ -1178,7 +1175,30 @@ namespace osmscout {
       return;
     }
 
-    DrawPath(nodes,*style,lineWidth[(size_t)type]);
+    if (style->GetOutline()>0 &&
+        !outline[(size_t)type] &&
+        !(isBridge && magnification>=magCity) &&
+        !(isTunnel && magnification>=magCity)) {
+      // Should draw outline, but resolution is too low
+      DrawPath(style->GetStyle(),
+               style->GetAlternateR(),style->GetAlternateG(),style->GetAlternateB(),style->GetAlternateA(),
+               lineWidth[(size_t)type],
+               nodes);
+    }
+    else if (outline[(size_t)type]) {
+      // Draw outline
+      DrawPath(style->GetStyle(),
+               style->GetLineR(),style->GetLineG(),style->GetLineB(),style->GetLineA(),
+               lineWidth[(size_t)type]-2*style->GetOutline(),
+               nodes);
+    }
+    else {
+      // Draw without outline
+      DrawPath(style->GetStyle(),
+               style->GetLineR(),style->GetLineG(),style->GetLineB(),style->GetLineA(),
+               lineWidth[(size_t)type],
+               nodes);
+    }
 
     waysDrawnCount++;
   }
@@ -1210,9 +1230,10 @@ namespace osmscout {
       return;
     }
 
-    DrawPath(nodes,
-             *lineStyle,
-             borderWidth[(size_t)type]);
+    DrawPath(lineStyle->GetStyle(),
+             lineStyle->GetLineR(),lineStyle->GetLineG(),lineStyle->GetLineB(),lineStyle->GetLineA(),
+             borderWidth[(size_t)type],
+             nodes);
   }
 
   void MapPainter::DrawAreas(const StyleConfig& styleConfig)
@@ -1297,8 +1318,8 @@ namespace osmscout {
                            type,
                            relation->roles[m].IsBridge(),
                            relation->roles[m].IsTunnel(),
-                           false,
-                           false,
+                           false,//relation->roles[m].StartIsJoint(),
+                           false,//relation->roles[m].EndIsJoint(),
                            relation->roles[m].nodes);
           }
         }
@@ -1314,10 +1335,10 @@ namespace osmscout {
           }
 
           DrawWay(styleConfig,
-                         way->GetType(),
-                         way->IsBridge(),
-                         way->IsTunnel(),
-                         way->nodes);
+                  way->GetType(),
+                  way->IsBridge(),
+                  way->IsTunnel(),
+                  way->nodes);
         }
       }
 
@@ -1797,19 +1818,8 @@ namespace osmscout {
           lineWidth[i]=lineStyle->GetMinPixel();
         }
 
-        outline[i]=lineStyle->GetOutline()>0 && magnification>=magRegion;
-
-        const LabelStyle *labelStyle=styleConfig.GetWayNameLabelStyle(i);
-
-        if (lineStyle->GetStyle()==LineStyle::normal &&
-            labelStyle!=NULL &&
-            labelStyle->GetStyle()==LabelStyle::contour &&
-            labelStyle->GetMinMag()<=magnification &&
-            labelStyle->GetMaxMag()>=magnification &&
-            lineWidth[i]<9.0 &&
-            outline[i]) {
-          lineWidth[i]=9.0;
-        }
+        outline[i]=lineStyle->GetOutline()>0 &&
+                   lineWidth[i]-2*lineStyle->GetOutline()>=outlineMinWidth;
       }
 
       const LineStyle *borderStyle=styleConfig.GetAreaBorderStyle(i);

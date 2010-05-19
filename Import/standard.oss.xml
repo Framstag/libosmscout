@@ -68,17 +68,17 @@
   </way>
 
   <way key="highway" value="unclassified" prio="6">
-    <line color="ffffff" minPixel="1" width="8" outline="1" />
+    <line color="ffffff" alternateColor="888888" minPixel="1" width="8" outline="1" />
     <label style="contour" minMag="detail"/>
   </way>
 
   <way key="highway" value="road" prio="7">
-    <line color="ffffff" minPixel="1" width="8" outline="1" />
+    <line color="ffffff" alternateColor="888888" minPixel="1" width="8" outline="1" />
     <label style="contour" minMag="detail"/>
   </way>
 
   <way key="highway" value="residential" prio="8">
-    <line color="ffffff" minPixel="1" width="8" outline="1" />
+    <line color="ffffff" alternateColor="888888" minPixel="1" width="8" outline="1" />
     <label style="contour" minMag="detail"/>
   </way>
 
@@ -88,8 +88,8 @@
   </way>
 
   <way key="highway" value="service" prio="10">
-    <line color="ffffff" minPixel="0.5" width="8" outline="1" />
-    <label style="contour" minMag="veryClose"/>
+    <line color="ffffff" alternateColor="888888" minPixel="0.5" width="8" outline="1" />
+    <label style="contour" minMag="detail"/>
   </way>
 
   <way key="highway" value="track" prio="11">
@@ -102,7 +102,7 @@
 
   <way key="highway" value="pedestrian" prio="11">
     <line color="ebeaea" minPixel="0.5" width="8" outline="1"/>
-    <label style="contour" minMag="close"/>
+    <label style="contour" minMag="detail"/>
   </way>
 
   <area key="highway" value="pedestrian">
@@ -1180,6 +1180,21 @@
   <area key="military" value="naval_base">
     <fill color="f59897"/>
     <label minMag="city"/>
+  </area>
+
+  <area key="power" value="station">
+    <fill color="bca9a9" layer="2"/>
+    <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
+  </area>
+
+  <area key="power" value="sub_station">
+    <fill color="bca9a9" layer="2"/>
+    <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
+  </area>
+
+  <area key="power" value="generator">
+    <fill color="bca9a9" layer="2"/>
+    <label style="emphasize" size="1.1" textColor="000000" minMag="veryClose"/>
   </area>
 
   <area key="building" value="yes">

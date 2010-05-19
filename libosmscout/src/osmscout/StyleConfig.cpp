@@ -42,6 +42,10 @@ namespace osmscout {
      lineG(1),
      lineB(1),
      lineA(1),
+     alternateR(0.5),
+     alternateG(0.5),
+     alternateB(0.5),
+     alternateA(0.5),
      outlineR(0.5),
      outlineG(0.5),
      outlineB(0.5),
@@ -66,6 +70,21 @@ namespace osmscout {
     lineG=g;
     lineB=b;
     lineA=a;
+
+    alternateR=r;
+    alternateG=g;
+    alternateB=b;
+    alternateA=a;
+
+    return *this;
+  }
+
+  LineStyle& LineStyle::SetAlternateColor(double r, double g, double b, double a)
+  {
+    alternateR=r;
+    alternateG=g;
+    alternateB=b;
+    alternateA=a;
 
     return *this;
   }

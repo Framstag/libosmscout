@@ -135,9 +135,10 @@ namespace osmscout {
                   const IconStyle* style,
                   double x, double y);
 
-    void DrawPath(const std::vector<Point>& nodes,
-                  const LineStyle& style,
-                  double width);
+    void DrawPath(LineStyle::Style style,
+                  double r, double g, double b, double a,
+                  double width,
+                  const std::vector<Point>& nodes);
 
     void FillRegion(const std::vector<Point>& nodes,
                     const FillStyle& style);
