@@ -19,8 +19,6 @@
 
 #include <osmscout/StyleConfig.h>
 
-#include <limits>
-
 namespace osmscout {
 
   static const char* iconName[] = {
@@ -49,7 +47,6 @@ namespace osmscout {
      outlineB(0.5),
      outlineA(0.5),
      minPixel(2),
-     maxPixel(std::numeric_limits<double>::max()),
      width(5),
      outline(0)
   {
@@ -86,13 +83,6 @@ namespace osmscout {
   LineStyle& LineStyle::SetMinPixel(double value)
   {
     minPixel=value;
-
-    return *this;
-  }
-
-  LineStyle& LineStyle::SetMaxPixel(double value)
-  {
-    maxPixel=value;
 
     return *this;
   }

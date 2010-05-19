@@ -1796,9 +1796,6 @@ namespace osmscout {
         if (lineWidth[i]<lineStyle->GetMinPixel()) {
           lineWidth[i]=lineStyle->GetMinPixel();
         }
-        else if (lineWidth[i]>lineStyle->GetMaxPixel()) {
-          lineWidth[i]=lineStyle->GetMaxPixel();
-        }
 
         outline[i]=lineStyle->GetOutline()>0 && magnification>=magRegion;
 
@@ -1821,9 +1818,6 @@ namespace osmscout {
         borderWidth[i]=borderStyle->GetWidth()/pixelSize;
         if (borderWidth[i]<borderStyle->GetMinPixel()) {
           borderWidth[i]=borderStyle->GetMinPixel();
-        }
-        else if (lineWidth[i]>borderStyle->GetMaxPixel()) {
-          borderWidth[i]=borderStyle->GetMaxPixel();
         }
       }
     }

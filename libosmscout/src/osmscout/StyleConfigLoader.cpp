@@ -400,13 +400,11 @@ namespace osmscout {
         const xmlChar *colorValue=NULL;
         const xmlChar *outlineColorValue=NULL;
         const xmlChar *minPixelValue=NULL;
-        const xmlChar *maxPixelValue=NULL;
         const xmlChar *widthValue=NULL;
         const xmlChar *outlineValue=NULL;
         std::string   style="normal";
         std::string   color;
         double        minPixel;
-        double        maxPixel;
         double        width;
         double        outline;
 
@@ -423,9 +421,6 @@ namespace osmscout {
             }
             else if (strcmp((const char*)atts[i],"minPixel")==0) {
               minPixelValue=atts[i+1];
-            }
-            else if (strcmp((const char*)atts[i],"maxPixel")==0) {
-              maxPixelValue=atts[i+1];
             }
             else if (strcmp((const char*)atts[i],"width")==0) {
               widthValue=atts[i+1];
@@ -484,15 +479,6 @@ namespace osmscout {
             }
 
             line.SetMinPixel(minPixel);
-          }
-
-          if (maxPixelValue!=NULL) {
-            if (!StringToDouble((const char*)maxPixelValue,maxPixel)) {
-              std::cerr << "Numeric value '" << (const char*)maxPixelValue << "' has wrong value" << std::endl;
-              return;
-            }
-
-            line.SetMaxPixel(maxPixel);
           }
 
           if (widthValue!=NULL) {

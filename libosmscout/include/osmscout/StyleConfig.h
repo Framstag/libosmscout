@@ -52,7 +52,6 @@ namespace osmscout {
     double outlineB;
     double outlineA;
     double minPixel;
-    double maxPixel;
     double width;
     double outline;
 
@@ -63,7 +62,6 @@ namespace osmscout {
     LineStyle& SetLineColor(double r, double g, double b, double a);
     LineStyle& SetOutlineColor(double r, double g, double b, double a);
     LineStyle& SetMinPixel(double value);
-    LineStyle& SetMaxPixel(double value);
     LineStyle& SetWidth(double value);
     LineStyle& SetOutline(double value);
 
@@ -121,11 +119,6 @@ namespace osmscout {
     inline double GetMinPixel() const
     {
       return minPixel;
-    }
-
-    inline double GetMaxPixel() const
-    {
-      return maxPixel;
     }
 
     inline double GetWidth() const
