@@ -81,6 +81,11 @@ namespace osmscout {
       return attributes.GetLayer();
     }
 
+    inline uint8_t GetWidth() const
+    {
+      return attributes.GetWidth();
+    }
+
     inline bool IsBuilding() const
     {
       return attributes.IsBuilding();

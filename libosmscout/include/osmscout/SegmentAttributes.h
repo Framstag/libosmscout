@@ -41,7 +41,8 @@ namespace osmscout {
     const static uint16_t isBuilding      = 1 << 15; //! We are a building
 
     // Way flags
-    const static uint16_t hasRestrictions = 1 <<  9; //! We have restrictions
+    const static uint16_t hasRestrictions = 1 <<  8; //! We have restrictions
+    const static uint16_t hasWidth        = 1 <<  9; //! We have width
     const static uint16_t hasLayer        = 1 << 10; //! We have optional layer information
     const static uint16_t isBridge        = 1 << 11; //! We are a bridge
     const static uint16_t isTunnel        = 1 << 12; //! We are a tunnel
@@ -50,18 +51,20 @@ namespace osmscout {
     const static uint16_t isOneway        = 1 << 15; //! We are a oneway (in way direction)
 
   public:
-    TypeId                    type;
+    TypeId                    type;  //! type of the way/relation
     uint16_t                  flags;
-    std::string               name;
-    std::string               ref;
-    int8_t                    layer;
-    std::vector<Tag>          tags;
+    std::string               name;  //! name
+    std::string               ref;   //! reference name (normally drawn in a plate)
+    int8_t                    layer; //! layer to draw on
+    uint8_t                   width; //! width of way
+    std::vector<Tag>          tags;  //! list of preparsed tags
 
   public:
     inline SegmentAttributes()
     : type(typeIgnore),
       flags(0),
-      layer(0)
+      layer(0),
+      width(0)
     {
       // no code
     }
@@ -94,6 +97,11 @@ namespace osmscout {
     inline int8_t GetLayer() const
     {
       return layer;
+    }
+
+    inline uint8_t GetWidth() const
+    {
+      return width;
     }
 
     inline bool IsBuilding() const

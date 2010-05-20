@@ -49,6 +49,7 @@ namespace osmscout {
 
     bool Write(const std::string& value);
     bool Write(bool boolean);
+    bool Write(uint8_t number);
     bool Write(uint16_t number);
     bool Write(uint32_t number);
     bool Write(int8_t number);

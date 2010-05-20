@@ -55,13 +55,13 @@ namespace osmscout {
     double              hscale;
     double              vscale;
 
+    double              pixelSize;     //! Size of a pxiel in meter
+
     // helper struct for drawing
     std::vector<bool>                 drawNode;     //! This nodes will be drawn
     std::vector<bool>                 outNode;      //! This nodes is out of the visible area
     std::vector<double>               nodeX;        //! static scratch buffer for calculation
     std::vector<double>               nodeY;        //! static scratch buffer for calculation
-    std::vector<double>               lineWidth;    //! line with for this way line style
-    std::vector<bool>                 outline;      //! We draw an outline for this way line style
     std::vector<double>               borderWidth;  //! border with for this way (area) border style
     std::map<size_t,cairo_scaled_font_t*> font;     //! Cached scaled font
     std::vector<cairo_surface_t*>     image;        //! List of internal images
@@ -145,6 +145,7 @@ namespace osmscout {
 
     void DrawWayOutline(const StyleConfig& styleConfig,
                         TypeId type,
+                        double width,
                         bool isBridge,
                         bool isTunnel,
                         bool startIsJoint,
@@ -152,6 +153,7 @@ namespace osmscout {
                         const std::vector<Point>& nodes);
     void DrawWay(const StyleConfig& styleConfig,
                  TypeId type,
+                 double width,
                  bool isBridge,
                  bool isTunnel,
                  const std::vector<Point>& nodes);

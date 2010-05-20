@@ -247,7 +247,12 @@
     <label style="contour" minMag="proximity"/>
   </way>
 
-  <area key="waterway" value="riverbank">
+ <area key="waterway" value="dock">
+    <fill color="b5d0d0"/>
+    <label minMag="proximity"/>
+  </area>
+
+ <area key="waterway" value="riverbank">
     <fill color="b5d0d0"/>
     <label minMag="proximity"/>
   </area>
@@ -315,7 +320,7 @@
   </area>
 
   <area key="landuse" value="commercial">
-    <fill color="fbfec8"/>
+    <fill color="efc8c8"/>
     <label minMag="city"/>
   </area>
 
@@ -327,6 +332,11 @@
 
   <area key="landuse" value="brownfield">
     <fill color="ebd7fe"/>
+    <label minMag="city"/>
+  </area>
+
+  <area key="landuse" value="grass">
+    <fill color="cfeca8"/>
     <label minMag="city"/>
   </area>
 
@@ -517,7 +527,7 @@
   </area>
 
   <area key="leisure" value="nature_reserve">
-    <fill color="bde3cb"/>
+    <fill color="abde96"/>
     <label minMag="region"/>
   </area>
 

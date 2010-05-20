@@ -84,6 +84,7 @@ namespace osmscout {
     AddTagInfo(TagInfo("restriction",tagRestriction));
     AddTagInfo(TagInfo("type",tagType));
     AddTagInfo(TagInfo("internal",tagInternal));
+    AddTagInfo(TagInfo("width",tagWidth));
 
     AddTypeInfo(TypeInfo(typeRoute,tagInternal,"route").CanBeWay(true));
   }

@@ -66,13 +66,15 @@ namespace osmscout {
 
     bool Read(std::string& value);
     bool Read(bool& boolean);
+    bool Read(uint8_t& number);
     bool Read(uint16_t& number);
     bool Read(uint32_t& number);
     bool Read(int8_t& number);
     bool Read(int32_t& number);
 
-    bool ReadNumber(uint32_t& number);
+    bool ReadNumber(uint8_t& number);
     bool ReadNumber(uint16_t& number);
+    bool ReadNumber(uint32_t& number);
     bool ReadNumber(int32_t& number);
   };
 }

@@ -41,6 +41,7 @@ namespace osmscout {
     ref.clear();
     flags=0;
     layer=0;
+    width=0;
     reverseNodes=false;
 
     if (isArea) {
@@ -72,26 +73,26 @@ namespace osmscout {
         }
         tag=tags.erase(tag);
       }
-      else if (tag->key==tagBridge) {
+      else if (!isArea && tag->key==tagBridge) {
         if (!(tag->value=="no" || tag->value=="false" || tag->value=="0")) {
           flags|=SegmentAttributes::isBridge;
         }
         tag=tags.erase(tag);
       }
-      else if (tag->key==tagTunnel) {
+      else if (!isArea && tag->key==tagTunnel) {
         if (!(tag->value=="no" || tag->value=="false" || tag->value=="0")) {
           flags|=SegmentAttributes::isTunnel;
         }
         tag=tags.erase(tag);
       }
-      else if (tag->key==tagBuilding) {
+      else if (isArea && tag->key==tagBuilding) {
         if (!(tag->value=="no" || tag->value=="false" || tag->value=="0")) {
           flags|=SegmentAttributes::isBuilding;
         }
 
         tag=tags.erase(tag);
       }
-      else if (tag->key==tagOneway) {
+      else if (!isArea && tag->key==tagOneway) {
         if (tag->value=="-1") {
           isOneway=true;
           reverseNodes=true;
@@ -101,6 +102,21 @@ namespace osmscout {
           flags|=SegmentAttributes::isOneway;
         }
 
+        tag=tags.erase(tag);
+      }
+      else if (!isArea && tag->key==tagWidth) {
+        double w;
+
+        if (sscanf(tag->value.c_str(),"%lf",&w)!=1) {
+          progress.Warning(std::string("Width tag value '")+tag->value+"' for "+NumberToString(id)+" is no double!");
+        }
+        else if (w<0 && w>255.5) {
+          progress.Warning(std::string("Width tag value '")+tag->value+"' for "+NumberToString(id)+" value is too small or too big!");
+        }
+        else {
+          width=lround(w);
+          flags|=SegmentAttributes::hasWidth;
+        }
         tag=tags.erase(tag);
       }
       else {
@@ -146,6 +162,13 @@ namespace osmscout {
       layer=0;
     }
 
+    if (flags & hasWidth) {
+      scanner.Read(width);
+    }
+    else {
+      width=0;
+    }
+
     if (flags & hasTags) {
       uint32_t tagCount;
 
@@ -179,6 +202,10 @@ namespace osmscout {
 
     if (flags & hasLayer) {
       writer.Write(layer);
+    }
+
+    if (flags & hasWidth) {
+      writer.Write(width);
     }
 
     if (flags & hasTags) {

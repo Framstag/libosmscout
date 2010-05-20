@@ -1055,21 +1055,37 @@ namespace osmscout {
 
   void MapPainter::DrawWayOutline(const StyleConfig& styleConfig,
                                   TypeId type,
+                                  double width,
                                   bool isBridge,
                                   bool isTunnel,
                                   bool startIsJoint,
                                   bool endIsJoint,
                                   const std::vector<Point>& nodes)
   {
-    if (!outline[(size_t)type] &&
-        !(isBridge && magnification>=magCity) &&
-        !(isTunnel && magnification>=magCity)) {
-      return;
-    }
-
     const LineStyle *style=styleConfig.GetWayLineStyle(type);
 
     if (style==NULL) {
+      return;
+    }
+
+    double lineWidth=width;
+
+    if (lineWidth==0) {
+      lineWidth=style->GetWidth();
+    }
+
+    lineWidth=lineWidth/pixelSize;
+
+    if (lineWidth<style->GetMinPixel()) {
+      lineWidth=style->GetMinPixel();
+    }
+
+    bool outline=style->GetOutline()>0 &&
+                 lineWidth-2*style->GetOutline()>=outlineMinWidth;
+
+    if (!(isBridge && magnification>=magCity) &&
+        !(isTunnel && magnification>=magCity) &&
+        !outline) {
       return;
     }
 
@@ -1081,8 +1097,8 @@ namespace osmscout {
     else if (isTunnel && magnification>=magCity) {
       double tunnel[2];
 
-      tunnel[0]=7+lineWidth[(size_t)type];
-      tunnel[1]=7+lineWidth[(size_t)type];
+      tunnel[0]=7+lineWidth;
+      tunnel[1]=7+lineWidth;
 
       cairo_set_dash(draw,tunnel,2,0);
       if (magnification>=10000) {
@@ -1103,7 +1119,7 @@ namespace osmscout {
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
     }
 
-    cairo_set_line_width(draw,lineWidth[(size_t)type]);
+    cairo_set_line_width(draw,lineWidth);
 
     TransformWay(nodes);
 
@@ -1136,7 +1152,7 @@ namespace osmscout {
                             style->GetOutlineG(),
                             style->GetOutlineB(),
                             style->GetOutlineA());
-      cairo_set_line_width(draw,lineWidth[(size_t)type]);
+      cairo_set_line_width(draw,lineWidth);
 
       cairo_move_to(draw,nodeX[0],nodeY[0]);
       cairo_line_to(draw,nodeX[0],nodeY[0]);
@@ -1151,7 +1167,7 @@ namespace osmscout {
                             style->GetOutlineG(),
                             style->GetOutlineB(),
                             style->GetOutlineA());
-      cairo_set_line_width(draw,lineWidth[(size_t)type]);
+      cairo_set_line_width(draw,lineWidth);
 
       cairo_move_to(draw,nodeX[nodes.size()-1],nodeY[nodes.size()-1]);
       cairo_line_to(draw,nodeX[nodes.size()-1],nodeY[nodes.size()-1]);
@@ -1161,6 +1177,7 @@ namespace osmscout {
 
   void MapPainter::DrawWay(const StyleConfig& styleConfig,
                            TypeId type,
+                           double width,
                            bool isBridge,
                            bool isTunnel,
                            const std::vector<Point>& nodes)
@@ -1175,28 +1192,43 @@ namespace osmscout {
       return;
     }
 
+    double lineWidth=width;
+
+    if (lineWidth==0) {
+      lineWidth=style->GetWidth();
+    }
+
+    lineWidth=lineWidth/pixelSize;
+
+    if (lineWidth<style->GetMinPixel()) {
+      lineWidth=style->GetMinPixel();
+    }
+
+    bool outline=style->GetOutline()>0 &&
+                 lineWidth-2*style->GetOutline()>=outlineMinWidth;
+
     if (style->GetOutline()>0 &&
-        !outline[(size_t)type] &&
+        !outline &&
         !(isBridge && magnification>=magCity) &&
         !(isTunnel && magnification>=magCity)) {
       // Should draw outline, but resolution is too low
       DrawPath(style->GetStyle(),
                style->GetAlternateR(),style->GetAlternateG(),style->GetAlternateB(),style->GetAlternateA(),
-               lineWidth[(size_t)type],
+               lineWidth,
                nodes);
     }
-    else if (outline[(size_t)type]) {
+    else if (outline) {
       // Draw outline
       DrawPath(style->GetStyle(),
                style->GetLineR(),style->GetLineG(),style->GetLineB(),style->GetLineA(),
-               lineWidth[(size_t)type]-2*style->GetOutline(),
+               lineWidth-2*style->GetOutline(),
                nodes);
     }
     else {
       // Draw without outline
       DrawPath(style->GetStyle(),
                style->GetLineR(),style->GetLineG(),style->GetLineB(),style->GetLineA(),
-               lineWidth[(size_t)type],
+               lineWidth,
                nodes);
     }
 
@@ -1295,6 +1327,7 @@ namespace osmscout {
 
           DrawWayOutline(styleConfig,
                          way->GetType(),
+                         way->GetWidth(),
                          way->IsBridge(),
                          way->IsTunnel(),
                          way->StartIsJoint(),
@@ -1316,6 +1349,7 @@ namespace osmscout {
 
             DrawWayOutline(styleConfig,
                            type,
+                           0,
                            relation->roles[m].IsBridge(),
                            relation->roles[m].IsTunnel(),
                            false,//relation->roles[m].StartIsJoint(),
@@ -1336,6 +1370,7 @@ namespace osmscout {
 
           DrawWay(styleConfig,
                   way->GetType(),
+                  way->GetWidth(),
                   way->IsBridge(),
                   way->IsTunnel(),
                   way->nodes);
@@ -1356,6 +1391,7 @@ namespace osmscout {
 
             DrawWay(styleConfig,
                     type,
+                    0,//relation->roles[m].GetWidth(),
                     relation->roles[m].IsBridge(),
                     relation->roles[m].IsTunnel(),
                     relation->roles[m].nodes);
@@ -1616,6 +1652,7 @@ namespace osmscout {
 
       DrawWay(styleConfig,
               way->GetType(),
+              0,
               way->IsBridge(),
               way->IsTunnel(),
               way->nodes);
@@ -1762,7 +1799,8 @@ namespace osmscout {
 
     // Width of an pixel in meter
     double d=(lonMax-lonMin)*gradtorad;
-    double pixelSize=d*180*60/M_PI*1852.216/width;
+
+    pixelSize=d*180*60/M_PI*1852.216/width;
 
     /*
     std::cout << "Box (grad) h: " << lonMin << "-" << lonMax << " v: " << latMin <<"-" << latMax << std::endl;
@@ -1785,7 +1823,7 @@ namespace osmscout {
     database.GetObjects(styleConfig,
                         lonMin,latMin,lonMax,latMax,
                         magnification,
-                        ((size_t)ceil(Log2(magnification)))+4,
+                        ((size_t)ceil(Log2(magnification)))+6,
                         2000,
                         2000,
                         std::numeric_limits<size_t>::max(),
@@ -1803,25 +1841,11 @@ namespace osmscout {
     // Setup and Precalculation
     //
 
-    lineWidth.resize(styleCount,0);
     borderWidth.resize(styleCount,0);
-    outline.resize(styleCount,false);
 
     // Calculate real line width and outline size for each way line style
 
     for (size_t i=0; i<styleCount; i++) {
-      const LineStyle *lineStyle=styleConfig.GetWayLineStyle(i);
-
-      if (lineStyle!=NULL) {
-        lineWidth[i]=lineStyle->GetWidth()/pixelSize;
-        if (lineWidth[i]<lineStyle->GetMinPixel()) {
-          lineWidth[i]=lineStyle->GetMinPixel();
-        }
-
-        outline[i]=lineStyle->GetOutline()>0 &&
-                   lineWidth[i]-2*lineStyle->GetOutline()>=outlineMinWidth;
-      }
-
       const LineStyle *borderStyle=styleConfig.GetAreaBorderStyle(i);
 
       if (borderStyle!=NULL) {

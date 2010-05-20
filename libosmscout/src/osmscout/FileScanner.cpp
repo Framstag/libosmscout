@@ -267,6 +267,34 @@ namespace osmscout {
     return true;
   }
 
+  bool FileScanner::Read(uint8_t& number)
+  {
+    if (file==NULL || hasError) {
+      return false;
+    }
+
+    number=0;
+
+#if defined(HAVE_MMAP)
+    if (buffer!=NULL) {
+      if (offset+sizeof(uint8_t)>size) {
+        hasError=true;
+        return false;
+      }
+
+        number=buffer[offset];
+
+      offset+=sizeof(uint8_t);
+
+      return true;
+    }
+#endif
+
+    hasError=fread(&number,sizeof(char),sizeof(uint8_t),file)!=sizeof(uint8_t);
+
+    return !hasError;
+  }
+
   bool FileScanner::Read(uint16_t& number)
   {
     if (file==NULL || hasError) {
@@ -495,6 +523,24 @@ namespace osmscout {
     }
 
     number=(uint16_t)value;
+
+    return true;
+  }
+
+  bool FileScanner::ReadNumber(uint8_t& number)
+  {
+    uint32_t value;
+
+    if (!ReadNumber(value)) {
+      return false;
+    }
+
+    if (value>(uint32_t)std::numeric_limits<uint8_t>::max()) {
+      hasError=true;
+      return false;
+    }
+
+    number=(uint8_t)value;
 
     return true;
   }

@@ -48,6 +48,7 @@ namespace osmscout {
   const static TagId tagRestriction   = tagPrivateBase+13;
   const static TagId tagType          = tagPrivateBase+14;
   const static TagId tagInternal      = tagPrivateBase+15;
+  const static TagId tagWidth         = tagPrivateBase+16;
 
   const static TypeId typePrivateBase = 5000;
   const static TypeId typeIgnore      = typePrivateBase+0;

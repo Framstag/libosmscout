@@ -139,6 +139,17 @@ namespace osmscout {
     return !hasError;
   }
 
+  bool FileWriter::Write(uint8_t number)
+  {
+    if (file==NULL || hasError) {
+      return false;
+    }
+
+    hasError=fwrite(&number,sizeof(char),sizeof(uint8_t),file)!=sizeof(uint8_t);
+
+    return !hasError;
+  }
+
   bool FileWriter::Write(uint16_t number)
   {
     if (file==NULL || hasError) {
