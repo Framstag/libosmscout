@@ -34,7 +34,7 @@
 static size_t optimizeLimit=512;
 static double relevantPosDeriviation=2.0;
 static double relevantSlopeDeriviation=0.1;
-static double outlineMinWidth=1;
+static double outlineMinWidth=0.5;
 
 namespace osmscout {
 
@@ -532,31 +532,72 @@ namespace osmscout {
   }
 
   bool MapPainter::CheckImage(const StyleConfig& styleConfig,
-                              IconStyle& iconStyle)
+                              IconStyle& style)
   {
-    if (iconStyle.GetId()==std::numeric_limits<size_t>::max()) {
+    if (style.GetId()==std::numeric_limits<size_t>::max()) {
       return false;
     }
 
-    if (iconStyle.GetId()!=0) {
+    if (style.GetId()!=0) {
       return true;
     }
 
     std::string filename=std::string("../libosmscout/data/icons/14x14/standard/")+
-                         iconStyle.GetIconName()+".png";
+                         style.GetIconName()+".png";
 
     cairo_surface_t *image=osmscout::LoadPNG(filename);
 
     if (image!=NULL) {
       images.resize(images.size()+1,image);
-      iconStyle.SetId(images.size());
-      std::cout << "Loaded image " << filename << " => id " << iconStyle.GetId() << std::endl;
+      style.SetId(images.size());
+      std::cout << "Loaded image " << filename << " => id " << style.GetId() << std::endl;
 
       return true;
     }
     else {
       std::cerr << "ERROR while loading icon file '" << filename << "'" << std::endl;
-      iconStyle.SetId(std::numeric_limits<size_t>::max());
+      style.SetId(std::numeric_limits<size_t>::max());
+
+      return false;
+    }
+  }
+
+  bool MapPainter::CheckImage(const StyleConfig& styleConfig,
+                              PatternStyle& style)
+  {
+    if (style.GetId()==std::numeric_limits<size_t>::max()) {
+      return false;
+    }
+
+    if (style.GetId()!=0) {
+      return true;
+    }
+
+    std::string filename=std::string("../libosmscout/data/icons/14x14/standard/")+
+                         style.GetPatternName()+".png";
+
+    cairo_surface_t *image=osmscout::LoadPNG(filename);
+
+    if (image!=NULL) {
+      images.resize(images.size()+1,image);
+      style.SetId(images.size());
+      patterns.resize(images.size(),NULL);
+
+      patterns[patterns.size()-1]=cairo_pattern_create_for_surface(images[images.size()-1]);
+      cairo_pattern_set_extend(patterns[patterns.size()-1],CAIRO_EXTEND_REPEAT);
+
+      cairo_matrix_t matrix;
+
+      cairo_matrix_init_scale(&matrix,1,1);
+      cairo_pattern_set_matrix(patterns[patterns.size()-1],&matrix);
+
+      std::cout << "Loaded image " << filename << " => id " << style.GetId() << std::endl;
+
+      return true;
+    }
+    else {
+      std::cerr << "ERROR while loading icon file '" << filename << "'" << std::endl;
+      style.SetId(std::numeric_limits<size_t>::max());
 
       return false;
     }
@@ -1016,11 +1057,43 @@ namespace osmscout {
   void MapPainter::FillRegion(const std::vector<Point>& nodes,
                               const FillStyle& style)
   {
-    cairo_set_source_rgb(draw,
-                         style.GetFillR(),
-                         style.GetFillG(),
-                         style.GetFillB());
+    cairo_set_source_rgba(draw,
+                          style.GetFillR(),
+                          style.GetFillG(),
+                          style.GetFillB(),
+                          1);
     cairo_set_line_width(draw,1);
+
+    TransformArea(nodes);
+
+    bool start=true;
+    for (size_t i=0; i<nodes.size(); i++) {
+      if (drawNode[i]) {
+        if (start) {
+          cairo_move_to(draw,nodeX[i],nodeY[i]);
+          start=false;
+        }
+        else {
+          cairo_line_to(draw,nodeX[i],nodeY[i]);
+        }
+        //nodesDrawnCount++;
+      }
+
+      //nodesAllCount++;
+    }
+
+    cairo_fill(draw);
+  }
+
+  void MapPainter::FillRegion(const std::vector<Point>& nodes,
+                              PatternStyle& style)
+  {
+    assert(style.GetId()>0);
+    assert(style.GetId()!=std::numeric_limits<size_t>::max());
+    assert(style.GetId()<=images.size());
+    assert(images[style.GetId()-1]!=NULL);
+
+    cairo_set_source(draw,patterns[style.GetId()-1]);
 
     TransformArea(nodes);
 
@@ -1099,7 +1172,7 @@ namespace osmscout {
 
     if (isBridge && magnification>=magCity) {
       cairo_set_dash(draw,NULL,0,0);
-      cairo_set_source_rgb(draw,0.0,0.0,0.0);
+      cairo_set_source_rgba(draw,0.0,0.0,0.0,1.0);
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
     }
     else if (isTunnel && magnification>=magCity) {
@@ -1110,10 +1183,10 @@ namespace osmscout {
 
       cairo_set_dash(draw,tunnel,2,0);
       if (magnification>=10000) {
-        cairo_set_source_rgb(draw,0.75,0.75,0.75);
+        cairo_set_source_rgba(draw,0.75,0.75,0.75,1.0);
       }
       else {
-        cairo_set_source_rgb(draw,0.5,0.5,0.5);
+        cairo_set_source_rgba(draw,0.5,0.5,0.5,1.0);
       }
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
     }
@@ -1249,14 +1322,25 @@ namespace osmscout {
                             bool isBuilding,
                             const std::vector<Point>& nodes)
   {
+    PatternStyle    *patternStyle=styleConfig.GetAreaPatternStyle(type);
     const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(type,isBuilding);
 
-    if (fillStyle==NULL ||
-        fillStyle->GetLayer()!=layer) {
-      return;
+    bool               hasPattern=patternStyle!=NULL &&
+                                  patternStyle->GetLayer()==layer &&
+                                  magnification>=patternStyle->GetMinMag();
+    bool               hasFill=fillStyle!=NULL &&
+                               fillStyle->GetLayer()==layer;
+
+    if (hasPattern) {
+      hasPattern=CheckImage(styleConfig,*patternStyle);
     }
 
-    FillRegion(nodes,*fillStyle);
+    if (hasPattern) {
+      FillRegion(nodes,*patternStyle);
+    }
+    else if (hasFill) {
+      FillRegion(nodes,*fillStyle);
+    }
 
     areasDrawnCount++;
 
@@ -1978,7 +2062,7 @@ namespace osmscout {
 
     cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
 
-    cairo_set_source_rgb(draw,241.0/255,238.0/255,233.0/255);
+    cairo_set_source_rgba(draw,241.0/255,238.0/255,233.0/255,1.0);
     cairo_rectangle(draw,0,0,width,height);
     cairo_fill(draw);
 

@@ -66,7 +66,8 @@ namespace osmscout {
     std::map<size_t,cairo_scaled_font_t*> font;     //! Cached scaled font
 
     // Image handling
-    std::vector<cairo_surface_t*>     images;       //! List of internal images
+    std::vector<cairo_surface_t*>     images;       //! vector of cairo surfaces for images and patterns
+    std::vector<cairo_pattern_t*>     patterns;     //! cairo pattern structure for patterns
 
     size_t                styleCount;
 
@@ -108,7 +109,9 @@ namespace osmscout {
                         double& cy);
 
     bool CheckImage(const StyleConfig& styleConfig,
-                    IconStyle& iconStyle);
+                    IconStyle& style);
+    bool CheckImage(const StyleConfig& styleConfig,
+                    PatternStyle& style);
 
     void DrawLabel(cairo_t* draw,
                    double magnification,
@@ -143,6 +146,9 @@ namespace osmscout {
 
     void FillRegion(const std::vector<Point>& nodes,
                     const FillStyle& style);
+
+    void FillRegion(const std::vector<Point>& nodes,
+                    PatternStyle& style);
 
     void DrawWayOutline(const StyleConfig& styleConfig,
                         TypeId type,

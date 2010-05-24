@@ -157,7 +157,7 @@ namespace osmscout {
   };
 
   /**
-   * Areas can have a fill style
+   * Areas can have a fill style, filling the area with one color
    */
   class FillStyle
   {
@@ -168,12 +168,12 @@ namespace osmscout {
     };
 
   private:
-    Style  style;
-    int    layer;
-    double fillR;
-    double fillG;
-    double fillB;
-    double fillA;
+    Style       style;
+    int         layer;
+    double      fillR;
+    double      fillG;
+    double      fillB;
+    double      fillA;
 
   public:
     FillStyle();
@@ -210,6 +210,46 @@ namespace osmscout {
     inline double GetFillB() const
     {
       return fillB;
+    }
+  };
+
+  /**
+   * Areas can have a pattern style, filling the area with an repeated image pattern
+   */
+  class PatternStyle
+  {
+  private:
+    int         layer;
+    size_t      id;
+    std::string pattern;
+    Mag         minMag;
+
+  public:
+    PatternStyle();
+
+    PatternStyle& SetLayer(int layer);
+    PatternStyle& SetId(size_t id);
+    PatternStyle& SetPattern(const std::string& pattern);
+    PatternStyle& SetMinMag(Mag mag);
+
+    inline int GetLayer() const
+    {
+      return layer;
+    }
+
+    inline size_t GetId() const
+    {
+      return id;
+    }
+
+    inline std::string GetPatternName() const
+    {
+      return pattern;
+    }
+
+    inline const Mag& GetMinMag() const
+    {
+      return minMag;
     }
   };
 
@@ -471,29 +511,30 @@ namespace osmscout {
 
     // Node
 
-    std::vector<SymbolStyle*> nodeSymbolStyles;
-    std::vector<LabelStyle*>  nodeRefLabelStyles;
-    std::vector<LabelStyle*>  nodeLabelStyles;
-    std::vector<IconStyle*>   nodeIconStyles;
+    std::vector<SymbolStyle*>  nodeSymbolStyles;
+    std::vector<LabelStyle*>   nodeRefLabelStyles;
+    std::vector<LabelStyle*>   nodeLabelStyles;
+    std::vector<IconStyle*>    nodeIconStyles;
 
     // Way
 
-    std::vector<LineStyle*>   wayLineStyles;
-    std::vector<LabelStyle*>  wayRefLabelStyles;
-    std::vector<LabelStyle*>  wayNameLabelStyles;
+    std::vector<LineStyle*>    wayLineStyles;
+    std::vector<LabelStyle*>   wayRefLabelStyles;
+    std::vector<LabelStyle*>   wayNameLabelStyles;
 
     // Area
 
-    std::vector<FillStyle*>   areaFillStyles;
-    std::vector<FillStyle*>   areaBuildingFillStyles;
-    std::vector<SymbolStyle*> areaSymbolStyles;
-    std::vector<LabelStyle*>  areaLabelStyles;
-    std::vector<LineStyle*>   areaBorderStyles;
-    std::vector<IconStyle*>   areaIconStyles;
+    std::vector<FillStyle*>    areaFillStyles;
+    std::vector<FillStyle*>    areaBuildingFillStyles;
+    std::vector<PatternStyle*> areaPatternStyles;
+    std::vector<SymbolStyle*>  areaSymbolStyles;
+    std::vector<LabelStyle*>   areaLabelStyles;
+    std::vector<LineStyle*>    areaBorderStyles;
+    std::vector<IconStyle*>    areaIconStyles;
 
-    std::vector<size_t>       wayPrio;
-    std::vector<size_t>       priorities;
-    std::vector<TypeId>       wayTypes;
+    std::vector<size_t>        wayPrio;
+    std::vector<size_t>        priorities;
+    std::vector<TypeId>        wayTypes;
 
   public:
     StyleConfig(TypeConfig* typeConfig);
@@ -516,6 +557,7 @@ namespace osmscout {
 
     StyleConfig& SetAreaFillStyle(TypeId type, const FillStyle& style);
     StyleConfig& SetAreaBuildingFillStyle(TypeId type, const FillStyle& style);
+    StyleConfig& SetAreaPatternStyle(TypeId type, const PatternStyle& style);
     StyleConfig& SetAreaLabelStyle(TypeId type, const LabelStyle& style);
     StyleConfig& SetAreaSymbolStyle(TypeId type, const SymbolStyle& style);
     StyleConfig& SetAreaBorderStyle(TypeId type, const LineStyle& style);
@@ -543,6 +585,9 @@ namespace osmscout {
     {
       if (type<areaFillStyles.size()) {
         return areaFillStyles[type]!=NULL;
+      }
+      else if (type<areaPatternStyles.size()) {
+        return areaPatternStyles[type]!=NULL;
       }
       else {
         return false;
@@ -644,6 +689,16 @@ namespace osmscout {
         else {
           return areaFillStyles[type];
         }
+      }
+      else {
+        return NULL;
+      }
+    }
+
+    PatternStyle* GetAreaPatternStyle(TypeId type) const
+    {
+      if (type<areaPatternStyles.size()) {
+        return areaPatternStyles[type];
       }
       else {
         return NULL;

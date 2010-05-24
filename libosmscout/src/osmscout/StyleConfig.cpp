@@ -142,6 +142,41 @@ namespace osmscout {
     return *this;
   }
 
+  PatternStyle::PatternStyle()
+   : layer(0),
+     id(0)
+  {
+    // no code
+  }
+
+  PatternStyle& PatternStyle::SetLayer(int layer)
+  {
+    this->layer=layer;
+
+    return *this;
+  }
+
+  PatternStyle& PatternStyle::SetId(size_t id)
+  {
+    this->id=id;
+
+    return *this;
+  }
+
+  PatternStyle& PatternStyle::SetPattern(const std::string& pattern)
+  {
+    this->pattern=pattern;
+
+    return *this;
+  }
+
+  PatternStyle& PatternStyle::SetMinMag(Mag mag)
+  {
+    this->minMag=mag;
+
+    return *this;
+  }
+
   LabelStyle::LabelStyle()
    : style(none),
      minMag(magWorld),
@@ -342,6 +377,10 @@ namespace osmscout {
 
     for (size_t i=0; i<areaBuildingFillStyles.size(); i++) {
       delete areaBuildingFillStyles[i];
+    }
+
+    for (size_t i=0; i<areaPatternStyles.size(); i++) {
+      delete areaPatternStyles[i];
     }
 
     for (size_t i=0; i<areaSymbolStyles.size(); i++) {
@@ -555,6 +594,7 @@ namespace osmscout {
     if (type>=areaFillStyles.size()) {
       areaFillStyles.resize(type+1,NULL);
       areaBuildingFillStyles.resize(type+1,NULL);
+      areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
       areaBorderStyles.resize(type+1,NULL);
@@ -574,6 +614,7 @@ namespace osmscout {
     if (type>=areaFillStyles.size()) {
       areaFillStyles.resize(type+1,NULL);
       areaBuildingFillStyles.resize(type+1,NULL);
+      areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
       areaBorderStyles.resize(type+1,NULL);
@@ -588,11 +629,32 @@ namespace osmscout {
     return *this;
   }
 
+  StyleConfig& StyleConfig::SetAreaPatternStyle(TypeId type, const PatternStyle& style)
+  {
+    if (type>=areaFillStyles.size()) {
+      areaFillStyles.resize(type+1,NULL);
+      areaBuildingFillStyles.resize(type+1,NULL);
+      areaPatternStyles.resize(type+1,NULL);
+      areaSymbolStyles.resize(type+1,NULL);
+      areaLabelStyles.resize(type+1,NULL);
+      areaBorderStyles.resize(type+1,NULL);
+      areaIconStyles.resize(type+1,NULL);
+    }
+
+    PatternStyle *f=new PatternStyle();
+    *f=style;
+
+    areaPatternStyles[type]=f;
+
+    return *this;
+  }
+
   StyleConfig& StyleConfig::SetAreaLabelStyle(TypeId type, const LabelStyle& style)
   {
     if (type>=areaFillStyles.size()) {
       areaFillStyles.resize(type+1,NULL);
       areaBuildingFillStyles.resize(type+1,NULL);
+      areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
       areaBorderStyles.resize(type+1,NULL);
@@ -612,6 +674,7 @@ namespace osmscout {
     if (type>=areaFillStyles.size()) {
       areaFillStyles.resize(type+1,NULL);
       areaBuildingFillStyles.resize(type+1,NULL);
+      areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
       areaBorderStyles.resize(type+1,NULL);
@@ -631,6 +694,7 @@ namespace osmscout {
     if (type>=areaFillStyles.size()) {
       areaFillStyles.resize(type+1,NULL);
       areaBuildingFillStyles.resize(type+1,NULL);
+      areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
       areaBorderStyles.resize(type+1,NULL);
@@ -650,6 +714,7 @@ namespace osmscout {
     if (type>=areaFillStyles.size()) {
       areaFillStyles.resize(type+1,NULL);
       areaBuildingFillStyles.resize(type+1,NULL);
+      areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
       areaBorderStyles.resize(type+1,NULL);
@@ -671,6 +736,8 @@ namespace osmscout {
     result=std::max(result,nodeSymbolStyles.size());
     result=std::max(result,wayLineStyles.size());
     result=std::max(result,areaFillStyles.size());
+    result=std::max(result,areaBuildingFillStyles.size());
+    result=std::max(result,areaPatternStyles.size());
 
     return result;
   }

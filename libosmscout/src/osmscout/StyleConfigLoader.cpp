@@ -56,6 +56,7 @@ namespace osmscout {
       contextWayLabel,
       contextArea,
       contextAreaFill,
+      contextAreaPattern,
       contextAreaSymbol,
       contextAreaLabel,
       contextAreaBorder,
@@ -297,6 +298,9 @@ namespace osmscout {
         if (strcmp((const char*)name,"fill")==0) {
           context=contextAreaFill;
         }
+        else if (strcmp((const char*)name,"pattern")==0) {
+          context=contextAreaPattern;
+        }
         else if (strcmp((const char*)name,"symbol")==0) {
           context=contextAreaSymbol;
         }
@@ -310,7 +314,7 @@ namespace osmscout {
           context=contextAreaIcon;
         }
         else {
-          std::cerr << "Expected one of tags 'fill', 'symbol' or 'label'" << std::endl;
+          std::cerr << "Expected one of tags 'fill', 'pattern', 'symbol' or 'label'" << std::endl;
           return;
         }
       }
@@ -575,7 +579,7 @@ namespace osmscout {
             int layer=0;
 
             if (sscanf((const char*)layerValue,"%d",&layer)!=1) {
-              std::cerr << "layer value '" << colorValue << "' for style value layer cannot be parsed" << std::endl;
+              std::cerr << "layer value '" << layerValue << "' for style value layer cannot be parsed" << std::endl;
               return;
             }
 
@@ -594,6 +598,68 @@ namespace osmscout {
             else {
               styleConfig.SetAreaFillStyle(type,fill);
             }
+          }
+        }
+      }
+      else if (context==contextAreaPattern) {
+        const xmlChar *nameValue=NULL;
+        const xmlChar *layerValue=NULL;
+        const xmlChar *minMagValue=NULL;
+
+        if (atts!=NULL) {
+          for (size_t i=0; atts[i]!=NULL && atts[i+1]!=NULL; i+=2) {
+            if (strcmp((const char*)atts[i],"name")==0) {
+              nameValue=atts[i+1];
+            }
+            else if (strcmp((const char*)atts[i],"layer")==0) {
+              layerValue=atts[i+1];
+            }
+            else if (strcmp((const char*)atts[i],"minMag")==0) {
+              minMagValue=atts[i+1];
+            }
+          }
+
+          std::string name;
+
+          if (nameValue!=NULL) {
+            name=(const char*)nameValue;
+          }
+
+          PatternStyle pattern;
+
+          if (name.empty())  {
+            std::cerr << "Mandatory attribute 'name' missing" << std::endl;
+          }
+
+          pattern.SetPattern(name);
+
+          if (layerValue!=NULL) {
+            int layer=0;
+
+            if (sscanf((const char*)layerValue,"%d",&layer)!=1) {
+              std::cerr << "layer value '" << layerValue << "' for style value layer cannot be parsed" << std::endl;
+              return;
+            }
+
+            pattern.SetLayer(layer);
+          }
+
+          if (minMagValue!=NULL) {
+            std::string minMag;
+            Mag         m;
+
+            minMag=(const char*)minMagValue;
+
+            if (!GetMag(minMag,m)) {
+              std::cerr << "Unknown minimum magnification '" << minMag << "' for style type 'pattern'" << std::endl;
+              return;
+            }
+
+            pattern.SetMinMag(m);
+          }
+
+          if (context==contextAreaPattern) {
+            styleConfig.SetAreaPatternStyle(type,pattern);
           }
         }
       }
@@ -961,6 +1027,11 @@ namespace osmscout {
       }
       else if (context==contextAreaFill) {
         if (strcmp((const char*)name,"fill")==0) {
+          context=contextArea;
+        }
+      }
+      else if (context==contextAreaPattern) {
+        if (strcmp((const char*)name,"pattern")==0) {
           context=contextArea;
         }
       }

@@ -293,6 +293,7 @@
   </area>
 
   <area key="landuse" value="forest">
+    <pattern name="forest" layer="1" minMag="detail"/>
     <fill color="8dc56c" layer="1"/>
     <label style="emphasize" minMag="city"/>
   </area>
@@ -362,6 +363,7 @@
   </area>
 
   <area key="landuse" value="cemetery">
+    <pattern name="cemetery" minMag="detail"/>
     <fill color="a9caae"/>
     <label minMag="close"/>
   </area>
@@ -399,6 +401,7 @@
   -->
 
   <area key="natural" value="scrub">
+    <pattern name="scrub" minMag="detail"/>
     <fill color="b5e2b5"/>
     <label minMag="city"/>
   </area>
@@ -506,7 +509,7 @@
   </area>
 
   <area key="leisure" value="pitch">
-    <fill color="89d2ae"/>
+    <fill color="90d3b9" layer="1"/>
     <label minMag="close"/>
     <border color="b0b0b0" minPixel="1" width="1"/>
   </area>
