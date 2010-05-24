@@ -532,29 +532,34 @@ namespace osmscout {
   }
 
   bool MapPainter::CheckImage(const StyleConfig& styleConfig,
-                              IconStyle::Icon icon)
+                              IconStyle& iconStyle)
   {
-    if (imageChecked.size()<=(size_t)icon) {
-      imageChecked.resize(icon+1,false);
-      image.resize(icon+1,NULL);
+    if (iconStyle.GetId()==std::numeric_limits<size_t>::max()) {
+      return false;
     }
 
-    if (imageChecked[icon]) {
-      return image[icon]!=NULL;
+    if (iconStyle.GetId()!=0) {
+      return true;
     }
 
     std::string filename=std::string("../libosmscout/data/icons/14x14/standard/")+
-                         styleConfig.GetIconNameByIcon(icon)+".png";
+                         iconStyle.GetIconName()+".png";
 
-    image[icon]=osmscout::LoadPNG(filename);
+    cairo_surface_t *image=osmscout::LoadPNG(filename);
 
-    if (image[icon]==NULL) {
-      std::cerr << "ERROR while loading icon file '" << filename << "'" << std::endl;
+    if (image!=NULL) {
+      images.resize(images.size()+1,image);
+      iconStyle.SetId(images.size());
+      std::cout << "Loaded image " << filename << " => id " << iconStyle.GetId() << std::endl;
+
+      return true;
     }
+    else {
+      std::cerr << "ERROR while loading icon file '" << filename << "'" << std::endl;
+      iconStyle.SetId(std::numeric_limits<size_t>::max());
 
-    imageChecked[icon]=true;
-
-    return false;
+      return false;
+    }
   }
 
   bool MapPainter::TransformPixelToGeo(double x, double y,
@@ -943,9 +948,12 @@ namespace osmscout {
                             const IconStyle* style,
                             double x, double y)
   {
-    assert(image[style->GetIcon()]!=NULL);
+    assert(style->GetId()>0);
+    assert(style->GetId()!=std::numeric_limits<size_t>::max());
+    assert(style->GetId()<=images.size());
+    assert(images[style->GetId()-1]!=NULL);
 
-    cairo_set_source_surface(draw,image[style->GetIcon()],x-7,y-7);
+    cairo_set_source_surface(draw,images[style->GetId()-1],x-7,y-7);
     cairo_paint(draw);
   }
 
@@ -1518,7 +1526,7 @@ namespace osmscout {
          node!=nodes.end();
          ++node) {
       const LabelStyle  *labelStyle=styleConfig.GetNodeLabelStyle(node->type);
-      const IconStyle   *iconStyle=styleConfig.GetNodeIconStyle(node->type);
+      IconStyle         *iconStyle=styleConfig.GetNodeIconStyle(node->type);
       const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetNodeSymbolStyle(node->type);
 
       bool hasLabel=labelStyle!=NULL &&
@@ -1551,7 +1559,7 @@ namespace osmscout {
       }
 
       if (hasIcon) {
-        hasIcon=CheckImage(styleConfig,iconStyle->GetIcon());
+        hasIcon=CheckImage(styleConfig,*iconStyle);
       }
 
       if (!hasSymbol && !hasLabel && !hasIcon) {
@@ -1601,40 +1609,81 @@ namespace osmscout {
     for (std::vector<Way>::const_iterator area=areas.begin();
          area!=areas.end();
          ++area) {
+      const LabelStyle  *labelStyle=styleConfig.GetAreaLabelStyle(area->GetType());
+      IconStyle         *iconStyle=styleConfig.GetAreaIconStyle(area->GetType());
+      const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetAreaSymbolStyle(area->GetType());
 
-      const LabelStyle *style=styleConfig.GetAreaLabelStyle(area->GetType());
+      bool hasLabel=labelStyle!=NULL &&
+                    magnification>=labelStyle->GetMinMag() &&
+                    magnification<=labelStyle->GetMaxMag();
 
-      if (style==NULL ||
-          magnification<style->GetMinMag() ||
-          magnification>style->GetMaxMag()) {
+      bool hasSymbol=symbolStyle!=NULL &&
+                     magnification>=symbolStyle->GetMinMag();
+
+      bool hasIcon=iconStyle!=NULL &&
+                   magnification>=iconStyle->GetMinMag();
+
+      std::string label;
+
+      if (hasIcon) {
+        hasIcon=CheckImage(styleConfig,*iconStyle);
+      }
+
+      if (!hasSymbol && !hasLabel && !hasIcon) {
         continue;
       }
 
-      if (!area->GetName().empty()) {
-        double x,y;
-
-        if (!GetCenterPixel(area->nodes,x,y)) {
-          continue;
+      if (hasLabel) {
+        if (!area->GetRefName().empty()) {
+          label=area->GetRefName();
+        }
+        else if (!area->GetName().empty()) {
+          label=area->GetName();
         }
 
-        DrawLabel(draw,
-                  magnification,
-                  *style,
-                  area->GetName(),
-                  x,y);
+        hasLabel=!label.empty();
       }
-      else if (!area->GetRefName().empty()) {
-        double x,y;
 
-        if (!GetCenterPixel(area->nodes,x,y)) {
-          continue;
+      if (!hasSymbol && !hasLabel && !hasIcon) {
+        continue;
+      }
+
+      double x,y;
+
+      if (!GetCenterPixel(area->nodes,x,y)) {
+        continue;
+      }
+
+      if (hasLabel) {
+        if (hasSymbol) {
+          DrawLabel(draw,
+                    magnification,
+                    *labelStyle,
+                    label,
+                    x,y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
         }
+        else if (hasIcon) {
+          DrawLabel(draw,
+                    magnification,
+                    *labelStyle,
+                    label,
+                    x,y+14+5); // TODO: Better layout to real size of icon
+        }
+        else {
+          DrawLabel(draw,
+                    magnification,
+                    *labelStyle,
+                    label,
+                    x,y);
+        }
+      }
 
-        DrawLabel(draw,
-                  magnification,
-                  *style,
-                  area->GetRefName(),
-                  x,y);
+      if (hasIcon) {
+        DrawIcon(draw,iconStyle,x,y);
+      }
+
+      if (hasSymbol) {
+        DrawSymbol(draw,symbolStyle,x,y);
       }
     }
   }

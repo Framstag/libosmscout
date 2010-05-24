@@ -214,7 +214,8 @@ namespace osmscout {
   };
 
   /**
-   * Nodes, ways and areas can have a label style
+    Nodes, ways and areas can have a label style for drawing text. Text can be formatted
+    in different ways.
    */
   class LabelStyle
   {
@@ -350,7 +351,9 @@ namespace osmscout {
   };
 
   /**
-   * Nodes and areas can have a symbol style
+    Nodes and areas can have a symbol style.A symbol is a internal predefined simple
+    iconic image, most of the time simple geometric forms lice circles, crosses and
+    similar.
    */
   class SymbolStyle
   {
@@ -420,33 +423,20 @@ namespace osmscout {
     }
   };
 
+  /**
+    IconStyle is for define drawing of external images as icons for nodes and areas
+    */
   class IconStyle
   {
-  public:
-    enum Icon {
-      iconStart    = 0,
-      iconTarget   = 1,
-
-      // highway
-      iconBusStop  = 2,
-
-      // amenity
-      iconHospital = 3,
-      iconParking  = 4,
-      iconPharmacy = 5,
-
-      iconCustom   = 6,
-      iconNone     = 7
-    };
   private:
-    Icon        icon;
-    std::string iconName;
-    Mag         minMag;
+    size_t      id;       //! Internal id for fast lookup. 0 == no id defined (yet), max(size_t) == error
+    std::string iconName; //! name of the icon as given in style
+    Mag         minMag;   //! minimum magnification to show icon
 
   public:
     IconStyle();
 
-    IconStyle& SetIcon(Icon icon);
+    IconStyle& SetId(size_t id);
     IconStyle& SetIconName(const std::string& iconName);
     IconStyle& SetMinMag(Mag mag);
 
@@ -455,9 +445,9 @@ namespace osmscout {
       return !iconName.empty();
     }
 
-    inline Icon GetIcon() const
+    inline size_t GetId() const
     {
-      return icon;
+      return id;
     }
 
     inline std::string GetIconName() const
@@ -505,8 +495,6 @@ namespace osmscout {
     std::vector<size_t>       priorities;
     std::vector<TypeId>       wayTypes;
 
-    std::map<std::string, IconStyle::Icon> nameToIconMap;
-
   public:
     StyleConfig(TypeConfig* typeConfig);
     virtual ~StyleConfig();
@@ -514,9 +502,6 @@ namespace osmscout {
     void Postprocess();
 
     TypeConfig* GetTypeConfig() const;
-
-    bool GetIconByName(const std::string& name, IconStyle::Icon& icon) const;
-    std::string GetIconNameByIcon(const IconStyle::Icon& icon) const;
 
     StyleConfig& SetWayPrio(TypeId type, size_t prio);
 
@@ -590,7 +575,7 @@ namespace osmscout {
       }
     }
 
-    inline const IconStyle* GetNodeIconStyle(TypeId type) const
+    inline IconStyle* GetNodeIconStyle(TypeId type) const
     {
       if (type<nodeIconStyles.size()) {
         return nodeIconStyles[type];
@@ -694,6 +679,17 @@ namespace osmscout {
         return NULL;
       }
     }
+
+    inline IconStyle* GetAreaIconStyle(TypeId type) const
+    {
+      if (type<areaIconStyles.size()) {
+        return areaIconStyles[type];
+      }
+      else {
+        return NULL;
+      }
+    }
+
   };
 }
 

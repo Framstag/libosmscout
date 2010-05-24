@@ -64,8 +64,9 @@ namespace osmscout {
     std::vector<double>               nodeY;        //! static scratch buffer for calculation
     std::vector<double>               borderWidth;  //! border with for this way (area) border style
     std::map<size_t,cairo_scaled_font_t*> font;     //! Cached scaled font
-    std::vector<cairo_surface_t*>     image;        //! List of internal images
-    std::vector<bool>                 imageChecked; //! We have tried to load the internal image
+
+    // Image handling
+    std::vector<cairo_surface_t*>     images;       //! List of internal images
 
     size_t                styleCount;
 
@@ -107,7 +108,7 @@ namespace osmscout {
                         double& cy);
 
     bool CheckImage(const StyleConfig& styleConfig,
-                    IconStyle::Icon icon);
+                    IconStyle& iconStyle);
 
     void DrawLabel(cairo_t* draw,
                    double magnification,

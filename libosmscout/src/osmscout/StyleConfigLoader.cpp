@@ -149,11 +149,6 @@ namespace osmscout {
       return true;
     }
 
-    bool GetIconStyle(const std::string& name, IconStyle::Icon& icon)
-    {
-      return styleConfig.GetIconByName(name,icon);
-    }
-
     bool GetMag(const std::string& name, Mag& mag)
     {
       if (name=="world") {
@@ -858,18 +853,13 @@ namespace osmscout {
         }
       }
       else if (context==contextNodeIcon || context==contextAreaIcon) {
-        const xmlChar   *iconValue=NULL;
         const xmlChar   *iconNameValue=NULL;
         const xmlChar   *minMagValue=NULL;
-        IconStyle::Icon icon=IconStyle::iconNone;
         std::string     iconName;
 
         if (atts!=NULL) {
           for (size_t i=0; atts[i]!=NULL && atts[i+1]!=NULL; i+=2) {
-            if (strcmp((const char*)atts[i],"icon")==0) {
-              iconValue=atts[i+1];
-            }
-            else if (strcmp((const char*)atts[i],"iconName")==0) {
+            if (strcmp((const char*)atts[i],"name")==0) {
               iconNameValue=atts[i+1];
             }
             else if (strcmp((const char*)atts[i],"minMag")==0) {
@@ -878,33 +868,15 @@ namespace osmscout {
           }
         }
 
-        if (iconValue==NULL) {
+        if (iconNameValue==NULL) {
           std::cerr << "Not all required attributes found" << std::endl;
           return;
         }
 
-        if (!GetIconStyle((const char*)iconValue,icon)) {
-          std::cerr << "Unknown attribute icon value '" << (const char*)iconValue << "' for style type 'icon'" << std::endl;
-          return;
-        }
-
-        if (iconNameValue!=NULL) {
-          iconName=(const char*)iconNameValue;
-        }
-
-        if (icon==IconStyle::iconCustom && iconName.empty()){
-          std::cerr << "Icon style 'custom' requires non-empty attribute 'iconName'!" << std::endl;
-          return;
-        }
-
-        if (icon!=IconStyle::iconCustom && !iconName.empty()){
-          std::cerr << "For Standard icon style attribute 'iconName' must not be set!" << std::endl;
-          return;
-        }
+        iconName=(const char*)iconNameValue;
 
         IconStyle  iconStyle;
 
-        iconStyle.SetIcon(icon);
         iconStyle.SetIconName(iconName);
 
         if (minMagValue!=NULL) {

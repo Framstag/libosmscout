@@ -172,7 +172,7 @@
   <node key="highway" value="bus_stop" prio="11">
     <!--<label  minMag="veryClose"/>-->
     <symbol style="circle" size="4" fillColor="7885b0" minMag="close"/>
-    <icon icon="bus_stop" minMag="veryClose"/>
+    <icon name="bus_stop" minMag="veryClose"/>
   </node>
 
   <node key="highway" value="motorway_junction" prio="11">
@@ -717,16 +717,22 @@
   </area>
 
   <area key="amenity" value="hospital">
-    <fill filter="building" color="cb4040" layer="2"/>
+    <!--
+     Since we have an icon for the building, we use the normal building color.
+     Also red icons on red background are just not really visible ;-)
+     Perhaps later we give them a lighter shade of red?
+     -->
+
+    <fill filter="building" color="bca9a9" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
     <label style="emphasize" size="1.1" textColor="da0092" minMag="veryClose"/>
-    <icon icon="hospital" minMag="close"/>
+    <icon name="hospital" minMag="close"/>
   </area>
 
   <node key="amenity" value="hospital">
     <symbol style="circle" size="4" fillColor="da0092" minMag="close"/>
-    <icon icon="hospital" minMag="close"/>
     <label style="emphasize" size="1.1" textColor="da0092" minMag="veryClose"/>
+    <icon name="hospital" minMag="close"/>
   </node>
 
   <area key="amenity" value="hunting_stand">
@@ -755,25 +761,25 @@
 
   <area key="amenity" value="parking">
     <fill color="f6eeb6"/>
-    <icon icon="parking" minMag="close"/>
+    <icon name="parking" minMag="close"/>
     <label style="emphasize" size="1.1" textColor="4bb2da" minMag="veryClose"/>
   </area>
 
   <node key="amenity" value="parking">
     <symbol style="circle" size="4" fillColor="4bb2da" minMag="close"/>
-    <icon icon="parking" minMag="close"/>
+    <icon name="parking" minMag="close"/>
     <label style="emphasize" size="1.1" textColor="4bb2da" minMag="veryClose"/>
   </node>
 
   <area key="amenity" value="pharmacy">
     <fill filter="building" color="cb4040" layer="2"/>
     <fill color="f0f0d8" layer="-1"/>
-    <icon icon="pharmacy" minMag="veryClose"/>
+    <icon name="pharmacy" minMag="veryClose"/>
     <label style="emphasize" size="1.1" textColor="da0092" minMag="veryClose"/>
   </area>
 
   <node key="amenity" value="pharmacy">
-    <icon icon="pharmacy" minMag="veryClose"/>
+    <icon name="pharmacy" minMag="veryClose"/>
     <label style="emphasize" size="1.1" textColor="da0092" minMag="veryClose"/>
   </node>
 
@@ -1277,11 +1283,11 @@
 
   <!--
   <node key="internal" value="start">
-    <icon icon="start"/>
+    <icon name="start"/>
   </node>
 
   <node key="internal" value="target">
-    <icon icon="target"/>
+    <icon name="target"/>
   </node> -->
 
   <way key="internal" value="route" prio="1">
