@@ -200,8 +200,8 @@ public:
 
   void ZoomIn(double zoomFactor)
   {
-    if (magnification*zoomFactor>100000) {
-      magnification=100000;
+    if (magnification*zoomFactor>200000) {
+      magnification=200000;
     }
     else {
       magnification*=zoomFactor;

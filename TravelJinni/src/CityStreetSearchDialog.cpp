@@ -35,9 +35,9 @@ CityStreetSearchDialog::CityStreetSearchDialog(DatabaseTask* databaseTask)
    regionSearchTimerAction(new Lum::Model::Action()),
    locationName(new Lum::Model::String(L"")),
    locationSearchTimerAction(new Lum::Model::Action()),
-   regionsModel(new RegionsModel(regions,new RegionsDataProvider())),
+   regionsModel(new RegionsModel(regions)),
    regionSelection(new Lum::Model::SingleLineSelection()),
-   locationsModel(new LocationsModel(locations,new LocationsDataProvider())),
+   locationsModel(new LocationsModel(locations)),
    locationSelection(new Lum::Model::SingleLineSelection()),
    hasResult(false)
 {
@@ -81,9 +81,10 @@ void CityStreetSearchDialog::PreInit()
   table->SetMinWidth(Lum::Base::Size::stdCharWidth,60);
   table->SetMinHeight(Lum::Base::Size::stdCharHeight,6);
   table->SetShowHeader(true);
-  table->GetTableView()->SetAutoFitColumns(true);
-  table->GetTableView()->SetAutoVSize(true);
+  table->SetAutoFitColumns(true);
+  table->SetAutoVSize(true);
   table->SetModel(regionsModel);
+  table->SetTablePainter(new RegionsModelPainter());
   table->SetHeaderModel(headerModel);
   table->SetSelection(regionSelection);
   table->SetDoubleClickAction(okAction);
@@ -107,9 +108,10 @@ void CityStreetSearchDialog::PreInit()
   table->SetMinWidth(Lum::Base::Size::stdCharWidth,60);
   table->SetMinHeight(Lum::Base::Size::stdCharHeight,6);
   table->SetShowHeader(true);
-  table->GetTableView()->SetAutoFitColumns(true);
-  table->GetTableView()->SetAutoVSize(true);
+  table->SetAutoFitColumns(true);
+  table->SetAutoVSize(true);
   table->SetModel(locationsModel);
+  table->SetTablePainter(new LocationsModelPainter());
   table->SetHeaderModel(headerModel);
   table->SetSelection(locationSelection);
   table->SetDoubleClickAction(okAction);

@@ -44,21 +44,25 @@
 class CitySearchDialog : public Lum::Dlg::ActionDialog
 {
 private:
-  typedef Lum::Model::StdRefTable<osmscout::AdminRegion,std::list<osmscout::AdminRegion> > RegionsModel;
-  typedef Lum::Base::Reference<RegionsModel>                           RegionsModelRef;
+  typedef Lum::Model::StdRefTable<osmscout::AdminRegion,
+                                  std::list<osmscout::AdminRegion> > RegionsModel;
+  typedef Lum::Base::Reference<RegionsModel>                         RegionsModelRef;
 
-  class RegionsDataProvider : public RegionsModel::DataProvider
+  class RegionsModelPainter : public Lum::SimplePainter
   {
   public:
-    std::wstring GetString(const RegionsModel::Iterator& iter, size_t column) const
+    std::wstring GetCellData(const Lum::Model::Table* model,
+                             size_t column, size_t row) const
     {
+      const osmscout::AdminRegion region=dynamic_cast<const RegionsModel*>(model)->GetEntry(row);
+
       switch (column) {
       case 1:
-        if (iter->path.empty()) {
-          return Lum::Base::UTF8ToWString(iter->name);
+        if (region.path.empty()) {
+          return Lum::Base::UTF8ToWString(region.name);
         }
         else {
-          return Lum::Base::UTF8ToWString(iter->name)+L" ("+Lum::Base::UTF8ToWString(iter->path)+L")";
+          return Lum::Base::UTF8ToWString(region.name)+L" ("+Lum::Base::UTF8ToWString(region.path)+L")";
         }
       default:
         assert(false);

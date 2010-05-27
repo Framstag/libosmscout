@@ -31,7 +31,7 @@ CitySearchDialog::CitySearchDialog(DatabaseTask* databaseTask)
    okAction(new Lum::Model::Action()),
    regionName(new Lum::Model::String(L"")),
    searchTimerAction(new Lum::Model::Action()),
-   regionsModel(new RegionsModel(regions, new RegionsDataProvider())),
+   regionsModel(new RegionsModel(regions)),
    regionSelection(new Lum::Model::SingleLineSelection()),
    hasResult(false)
 {
@@ -70,6 +70,7 @@ Lum::Object* CitySearchDialog::GetContent()
   table->GetTableView()->SetAutoFitColumns(true);
   table->GetTableView()->SetAutoVSize(true);
   table->SetModel(regionsModel);
+  table->SetTablePainter(new RegionsModelPainter());
   table->SetHeaderModel(headerModel);
   table->SetSelection(regionSelection);
   table->SetDoubleClickAction(okAction);
