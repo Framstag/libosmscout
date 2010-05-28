@@ -115,17 +115,15 @@ public:
     Object::CalcSize();
   }
 
-  void Draw(int x, int y, size_t w, size_t h)
+  void Draw(Lum::OS::DrawInfo* draw, int x, int y, size_t w, size_t h)
   {
-    Object::Draw(x,y,w,h);
+    Object::Draw(draw,x,y,w,h);
 
     if (!OIntersect(x,y,w,h)) {
       return;
     }
 
     /* --- */
-
-    Lum::OS::DrawInfo *draw=GetDrawInfo();
 
     if (!databaseTask->DrawResult(GetWindow(),
                                   draw,
