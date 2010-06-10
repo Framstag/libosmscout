@@ -75,6 +75,7 @@ namespace osmscout {
 
     bool Get(const Id& id, N& entry) const;
 
+    void FlushCache();
     void DumpStatistics() const;
   };
 
@@ -258,6 +259,12 @@ namespace osmscout {
     else {
       return false;
     }
+  }
+
+  template <class N>
+  void DataFile<N>::FlushCache()
+  {
+    cache.Flush();
   }
 
   template <class N>

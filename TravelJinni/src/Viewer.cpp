@@ -179,18 +179,18 @@ public:
     double tlon, tlat;
 
     // Get origin coordinates
-    osmscout::MapPainter::TransformPixelToGeo(0,0,
-                                              lon,lat,
-                                              magnification,
-                                              width,height,
-                                              olon,olat);
+    osmscout::MapPainterCairo::TransformPixelToGeo(0,0,
+                                                   lon,lat,
+                                                   magnification,
+                                                   width,height,
+                                                   olon,olat);
 
     // Get current mouse pos coordinates (relative to drag start)
-    osmscout::MapPainter::TransformPixelToGeo((event.x-startX),(event.y-startY),
-                                              lon,lat,
-                                              magnification,
-                                              width,height,
-                                              tlon,tlat);
+    osmscout::MapPainterCairo::TransformPixelToGeo((event.x-startX),(event.y-startY),
+                                                   lon,lat,
+                                                   magnification,
+                                                   width,height,
+                                                   tlon,tlat);
 
     lon=startLon-(tlon-olon);
     lat=startLat+(tlat-olat);
@@ -271,10 +271,10 @@ public:
       if (event.key==Lum::OS::keyLeft) {
         double lonMin,latMin,lonMax,latMax;
 
-        osmscout::MapPainter::GetDimensions(lon,lat,
-                                            magnification,
-                                            width,height,
-                                            lonMin,latMin,lonMax,latMax);
+        osmscout::MapPainterCairo::GetDimensions(lon,lat,
+                                                 magnification,
+                                                 width,height,
+                                                 lonMin,latMin,lonMax,latMax);
 
         lon-=(lonMax-lonMin)*0.3;
 
@@ -285,10 +285,10 @@ public:
       else if (event.key==Lum::OS::keyRight) {
         double lonMin,latMin,lonMax,latMax;
 
-        osmscout::MapPainter::GetDimensions(lon,lat,
-                                            magnification,
-                                            width,height,
-                                            lonMin,latMin,lonMax,latMax);
+        osmscout::MapPainterCairo::GetDimensions(lon,lat,
+                                                 magnification,
+                                                 width,height,
+                                                 lonMin,latMin,lonMax,latMax);
 
         lon+=(lonMax-lonMin)*0.3;
 
@@ -299,10 +299,10 @@ public:
       else if (event.key==Lum::OS::keyUp) {
         double lonMin,latMin,lonMax,latMax;
 
-        osmscout::MapPainter::GetDimensions(lon,lat,
-                                            magnification,
-                                            width,height,
-                                            lonMin,latMin,lonMax,latMax);
+        osmscout::MapPainterCairo::GetDimensions(lon,lat,
+                                                 magnification,
+                                                 width,height,
+                                                 lonMin,latMin,lonMax,latMax);
 
         lat+=(latMax-latMin)*0.3;
 
@@ -313,10 +313,10 @@ public:
       else if (event.key==Lum::OS::keyDown) {
         double lonMin,latMin,lonMax,latMax;
 
-        osmscout::MapPainter::GetDimensions(lon,lat,
-                                            magnification,
-                                            width,height,
-                                            lonMin,latMin,lonMax,latMax);
+        osmscout::MapPainterCairo::GetDimensions(lon,lat,
+                                                 magnification,
+                                                 width,height,
+                                                 lonMin,latMin,lonMax,latMax);
 
         lat-=(latMax-latMin)*0.3;
 
@@ -398,6 +398,7 @@ private:
   Lum::Model::ActionRef       searchCityAction;
   Lum::Model::ActionRef       searchAddressAction;
   Lum::Model::ActionRef       routeAction;
+  Lum::Model::ActionRef       debugFlushCacheAction;
   Lum::Model::ActionRef       debugStatisticsAction;
   Lum::Model::ActionRef       aboutAction;
   MapControl                  *map;
@@ -408,6 +409,7 @@ public:
    : searchCityAction(new Lum::Model::Action()),
      searchAddressAction(new Lum::Model::Action()),
      routeAction(new Lum::Model::Action()),
+     debugFlushCacheAction(new Lum::Model::Action()),
      debugStatisticsAction(new Lum::Model::Action()),
      aboutAction(new Lum::Model::Action()),
      map(NULL)
@@ -417,6 +419,7 @@ public:
     Observe(searchCityAction);
     Observe(searchAddressAction);
     Observe(routeAction);
+    Observe(debugFlushCacheAction);
     Observe(debugStatisticsAction);
     Observe(aboutAction);
   }
@@ -447,6 +450,9 @@ public:
                                   routeAction))
       ->End()
       ->Group(L"Debug")
+        ->Action(Lum::Def::Action(Lum::Def::Desc(L"_Flush Cache")
+                                  .SetShortcut(Lum::OS::qualifierControl,L"f"),
+                                  debugFlushCacheAction))
         ->Action(Lum::Def::Action(Lum::Def::Desc(L"Dump _statistics")
                                   .SetShortcut(Lum::OS::qualifierControl,L"s"),
                                   debugStatisticsAction))
@@ -557,6 +563,9 @@ public:
       }
 
       delete dialog;
+    }
+    else if (model==debugFlushCacheAction && debugFlushCacheAction->IsFinished()) {
+      database->FlushCache();
     }
     else if (model==debugStatisticsAction && debugStatisticsAction->IsFinished()) {
       database->DumpStatistics();

@@ -33,7 +33,7 @@ namespace osmscout {
 
   class MapPainter
   {
-  private:
+  protected:
     const Database& database;
 
     // current drawing context information
@@ -55,147 +55,20 @@ namespace osmscout {
     double              hscale;
     double              vscale;
 
-    double              pixelSize;     //! Size of a pxiel in meter
-
-    // helper struct for drawing
-    std::vector<bool>                 drawNode;     //! This nodes will be drawn
-    std::vector<bool>                 outNode;      //! This nodes is out of the visible area
-    std::vector<double>               nodeX;        //! static scratch buffer for calculation
-    std::vector<double>               nodeY;        //! static scratch buffer for calculation
-    std::vector<double>               borderWidth;  //! border with for this way (area) border style
-    std::map<size_t,cairo_scaled_font_t*> font;     //! Cached scaled font
-
-    // Image handling
-    std::vector<cairo_surface_t*>     images;       //! vector of cairo surfaces for images and patterns
-    std::vector<cairo_pattern_t*>     patterns;     //! cairo pattern structure for patterns
-
-    size_t                styleCount;
-
-    std::vector<Node>     nodes;
-    std::vector<Way>      ways;
-    std::vector<Way>      areas;
-    std::vector<Relation> relationWays;
-    std::vector<Relation> relationAreas;
-
-    bool                  areaLayers[11];
-    bool                  wayLayers[11];
-    bool                  relationAreaLayers[11];
-    bool                  relationWayLayers[11];
-
-    size_t                nodesDrawnCount;
-    size_t                areasDrawnCount;
-    size_t                waysDrawnCount;
-
-    cairo_t               *draw;
+    double              pixelSize;     //! Size of a pixel in meter
 
   public:
     std::list<Way>        poiWays;
     std::list<Node>       poiNodes;
 
-  private:
-    cairo_scaled_font_t* GetScaledFont(cairo_t* draw,
-                                       size_t fontSize);
-
-    bool IsVisible(const std::vector<Point>& nodes) const;
-
-    void TransformArea(const std::vector<Point>& nodes);
-    void TransformWay(const std::vector<Point>& nodes);
-
-    bool GetBoundingBox(const std::vector<Point>& nodes,
-                        double& xmin, double& ymin,
-                        double& xmax, double& ymax);
-    bool GetCenterPixel(const std::vector<Point>& nodes,
-                        double& cx,
-                        double& cy);
-
-    bool CheckImage(const StyleConfig& styleConfig,
-                    IconStyle& style);
-    bool CheckImage(const StyleConfig& styleConfig,
-                    PatternStyle& style);
-
-    void DrawLabel(cairo_t* draw,
-                   double magnification,
-                   const LabelStyle& style,
-                   const std::string& text,
-                   double x, double y);
-
-    void DrawTiledLabel(cairo_t* draw,
-                   double magnification,
-                   const LabelStyle& style,
-                   const std::string& label,
-                   const std::vector<Point>& nodes,
-                   std::set<size_t>& tileBlacklist);
-
-    void DrawContourLabel(cairo_t* draw,
-                          const LabelStyle& style,
-                          const std::string& text,
-                          const std::vector<Point>& nodes);
-
-    void DrawSymbol(cairo_t* draw,
-                    const SymbolStyle* style,
-                    double x, double y);
-
-    void DrawIcon(cairo_t* draw,
-                  const IconStyle* style,
-                  double x, double y);
-
-    void DrawPath(LineStyle::Style style,
-                  double r, double g, double b, double a,
-                  double width,
-                  const std::vector<Point>& nodes);
-
-    void FillRegion(const std::vector<Point>& nodes,
-                    const FillStyle& style);
-
-    void FillRegion(const std::vector<Point>& nodes,
-                    PatternStyle& style);
-
-    void DrawWayOutline(const StyleConfig& styleConfig,
-                        TypeId type,
-                        double width,
-                        bool isBridge,
-                        bool isTunnel,
-                        bool startIsJoint,
-                        bool endIsJoint,
-                        const std::vector<Point>& nodes);
-    void DrawWay(const StyleConfig& styleConfig,
-                 TypeId type,
-                 double width,
-                 bool isBridge,
-                 bool isTunnel,
-                 const std::vector<Point>& nodes);
-
-    void DrawArea(const StyleConfig& styleConfig,
-                  TypeId type,
-                  int layer,
-                  bool isBuilding,
-                  const std::vector<Point>& nodes);
-
-    void DrawAreas(const StyleConfig& styleConfig);
-    void DrawWays(const StyleConfig& styleConfig);
-    void DrawWayLabels(const StyleConfig& styleConfig);
-    void DrawNodes(const StyleConfig& styleConfig);
-    void DrawAreaLabels(const StyleConfig& styleConfig);
-    void DrawPOIWays(const StyleConfig& styleConfig);
-    void DrawPOINodes(const StyleConfig& styleConfig);
-    void DrawPOINodeLabels(const StyleConfig& styleConfig);
+  protected:
+    void RecalculateData(double lon, double lat,
+                         double magnification,
+                         size_t width, size_t height);
 
   public:
     MapPainter(const Database& database);
     virtual ~MapPainter();
-
-
-    bool DrawMap(const StyleConfig& styleConfig,
-                 double lon, double lat,
-                 double magnification,
-                 size_t width, size_t height,
-                 cairo_surface_t *image,
-                 cairo_t *draw);
-
-    bool PrintMap(const StyleConfig& styleConfig,
-                  double lon, double lat,
-                  double magnification,
-                  size_t width, size_t height);
 
     bool TransformPixelToGeo(double x, double y,
                              double& lon, double& lat);
@@ -203,17 +76,25 @@ namespace osmscout {
     bool TransformGeoToPixel(double lon, double lat,
                              double& x, double& y);
 
+    virtual bool DrawMap(const StyleConfig& styleConfig,
+                         double lon, double lat,
+                         double magnification,
+                         size_t width, size_t height,
+                         cairo_surface_t *image,
+                         cairo_t *draw) = 0;
+                         
     static void GetDimensions(double lon, double lat,
                               double magnification,
                               size_t width, size_t height,
                               double& lonMin, double& latMin,
                               double& lonMax, double& latMax);
-
+                         
     static bool TransformPixelToGeo(int x, int y,
                                     double centerLon, double centerLat,
                                     double magnification,
                                     size_t width, size_t height,
                                     double& outLon, double& outLat);
+                                    
     static bool TransformGeoToPixel(double lon, double lat,
                                     double centerLon, double centerLat,
                                     double magnification,

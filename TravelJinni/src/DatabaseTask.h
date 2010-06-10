@@ -33,7 +33,7 @@
 #include <osmscout/StyleConfig.h>
 #include <osmscout/TypeConfig.h>
 
-#include <osmscout/MapPainter.h>
+#include <osmscout/MapPainterCairo.h>
 
 struct Job
 {
@@ -47,26 +47,26 @@ struct Job
 class DatabaseTask : public Lum::OS::Thread
 {
 private:
-  osmscout::Database     *database;
-  osmscout::StyleConfig  *styleConfig;
-  Lum::OS::Condition     condition;
-  mutable Lum::OS::Mutex mutex;
-  bool                   finish;
-  Job                    *newJob;
-  Job                    *currentJob;
-  Job                    *finishedJob;
-  Lum::Model::Action     *jobFinishedAction;
-  cairo_surface_t        *currentSurface;
-  cairo_t                *currentCairo;
-  size_t                 currentWidth,currentHeight;
-  double                 currentLon,currentLat;
-  double                 currentMagnification;
-  cairo_surface_t        *finishedSurface;
-  cairo_t                *finishedCairo;
-  size_t                 finishedWidth,finishedHeight;
-  double                 finishedLon,finishedLat;
-  double                 finishedMagnification;
-  osmscout::MapPainter   painter;
+  osmscout::Database        *database;
+  osmscout::StyleConfig     *styleConfig;
+  Lum::OS::Condition        condition;
+  mutable Lum::OS::Mutex    mutex;
+  bool                      finish;
+  Job                       *newJob;
+  Job                       *currentJob;
+  Job                       *finishedJob;
+  Lum::Model::Action        *jobFinishedAction;
+  cairo_surface_t           *currentSurface;
+  cairo_t                   *currentCairo;
+  size_t                    currentWidth,currentHeight;
+  double                    currentLon,currentLat;
+  double                    currentMagnification;
+  cairo_surface_t           *finishedSurface;
+  cairo_t                   *finishedCairo;
+  size_t                    finishedWidth,finishedHeight;
+  double                    finishedLon,finishedLat;
+  double                    finishedMagnification;
+  osmscout::MapPainterCairo painter;
 
 private:
   void SignalRedraw();
@@ -81,6 +81,8 @@ public:
   bool Open(const std::wstring& path);
   bool IsOpen() const;
   void Close();
+
+  void FlushCache();
 
   bool LoadStyleConfig(const std::wstring& filename,
                        osmscout::StyleConfig*& styleConfig);

@@ -125,6 +125,8 @@ namespace osmscout {
     bool IsOpen() const;
     void Close();
 
+    void FlushCache();
+
     TypeConfig* GetTypeConfig() const;
 
     bool GetBoundingBox(double& minLat,double& minLon,

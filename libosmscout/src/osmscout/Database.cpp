@@ -177,6 +177,14 @@ namespace osmscout {
     isOpen=false;
   }
 
+  void Database::FlushCache()
+  {
+    nodeDataFile.FlushCache();
+    wayDataFile.FlushCache();
+    relationDataFile.FlushCache();
+    nodeUseCache.Flush();
+  }
+  
   TypeConfig* Database::GetTypeConfig() const
   {
     return typeConfig;
@@ -1359,15 +1367,13 @@ namespace osmscout {
   {
     nodeDataFile.DumpStatistics();
     wayDataFile.DumpStatistics();
+    relationDataFile.DumpStatistics();
 
     nodeUseCache.DumpStatistics("Node use cache",NodeUseCacheValueSizer());
 
     areaIndex.DumpStatistics();
-
     areaNodeIndex.DumpStatistics();
-
     cityStreetIndex.DumpStatistics();
-
     nodeUseIndex.DumpStatistics();
   }
 }

@@ -1,1 +1,3 @@
-nobase_include_HEADERS= osmscout/MapPainter.h
+nobase_include_HEADERS= osmscout/LoaderPNG.h \
+                        osmscout/MapPainter.h \
+                        osmscout/MapPainterCairo.h

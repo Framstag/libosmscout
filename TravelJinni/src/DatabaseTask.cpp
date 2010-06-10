@@ -174,6 +174,14 @@ void DatabaseTask::Close()
   database->Close();
 }
 
+
+void DatabaseTask::FlushCache()
+{
+  Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
+
+  database->FlushCache();
+}
+
 bool DatabaseTask::LoadStyleConfig(const std::wstring& filename,
                                    osmscout::StyleConfig*& styleConfig)
 {
