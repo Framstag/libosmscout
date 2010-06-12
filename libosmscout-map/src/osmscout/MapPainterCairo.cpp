@@ -225,19 +225,22 @@ namespace osmscout {
   /* Projects the current path of cr onto the provided path. */
   static void map_path_onto(cairo_t *cr, cairo_path_t *path)
   {
-    cairo_path_t *current_path;
+    cairo_path_t        *current_path;
     parametrized_path_t param;
 
-    param.path = path;
-    param.parametrization = parametrize_path (path);
+    param.path=path;
+    param.parametrization=parametrize_path(path);
 
-    current_path = cairo_copy_path (cr);
-    cairo_new_path (cr);
+    current_path=cairo_copy_path(cr);
+    cairo_new_path(cr);
 
-    transform_path (current_path,
-                    (transform_point_func_t) point_on_path, &param);
+    transform_path(current_path,
+                   (transform_point_func_t) point_on_path,
+                   &param);
 
-    cairo_append_path (cr, current_path);
+    cairo_append_path(cr,current_path);
+    
+    cairo_path_destroy(current_path);
   }
 
 
@@ -247,7 +250,7 @@ namespace osmscout {
   {
     cairo_path_t *path;
 
-    cairo_save (cr);
+    cairo_save(cr);
 
     /* Decrease tolerance a bit, since it's going to be magnified */
     //cairo_set_tolerance (cr, 0.01);
@@ -260,17 +263,19 @@ namespace osmscout {
       * tolerance for that reason. Increase tolerance to see that
       * artifact.
     */
-    path = cairo_copy_path_flat (cr);
-    //path = cairo_copy_path (cr);
+    path=cairo_copy_path_flat(cr);
+    //path=cairo_copy_path(cr);
 
-    cairo_new_path (cr);
+    cairo_new_path(cr);
 
     cairo_move_to(cr,x,y);
-    cairo_text_path (cr, text);
-    map_path_onto (cr, path);
-    cairo_fill (cr);
+    cairo_text_path(cr,text);
+    map_path_onto(cr,path);
+    cairo_fill(cr);
 
-    cairo_restore (cr);
+    cairo_path_destroy(path);
+
+    cairo_restore(cr);
   }
 
   MapPainterCairo::MapPainterCairo(const Database& database)
@@ -308,19 +313,16 @@ namespace osmscout {
 
     // If bounding box is neither left or right nor above or below
     // it must somehow cover the map area.
-    return !(lonMin>this->lonMax ||
-             lonMax<this->lonMin ||
-             latMin>this->latMax ||
-             latMax<this->latMin);
+    return projection->GeoIsIn(lonMin,latMin,lonMax,latMax);
   }
 
   void MapPainterCairo::TransformArea(const std::vector<Point>& nodes)
   {
-    if (magnification>optimizeLimit) {
+    if (projection->GetMagnification()>optimizeLimit) {
       for (size_t i=0; i<nodes.size(); i++) {
         drawNode[i]=true;
-        TransformGeoToPixel(nodes[i].lon,nodes[i].lat,
-                            nodeX[i],nodeY[i]);
+        projection->GeoToPixel(nodes[i].lon,nodes[i].lat,
+                               nodeX[i],nodeY[i]);
       }
     }
     else {
@@ -338,8 +340,8 @@ namespace osmscout {
       // Calculate screen position
       for (size_t i=0; i<nodes.size(); i++) {
         if (drawNode[i]) {
-          TransformGeoToPixel(nodes[i].lon,nodes[i].lat,
-                              nodeX[i],nodeY[i]);
+          projection->GeoToPixel(nodes[i].lon,nodes[i].lat,
+                                nodeX[i],nodeY[i]);
         }
       }
 
@@ -362,11 +364,11 @@ namespace osmscout {
 
   void MapPainterCairo::TransformWay(const std::vector<Point>& nodes)
   {
-    if (magnification>optimizeLimit) {
+    if (projection->GetMagnification()>optimizeLimit) {
       for (size_t i=0; i<nodes.size(); i++) {
         drawNode[i]=true;
-        TransformGeoToPixel(nodes[i].lon,nodes[i].lat,
-                            nodeX[i],nodeY[i]);
+        projection->GeoToPixel(nodes[i].lon,nodes[i].lat,
+                               nodeX[i],nodeY[i]);
       }
     }
     else {
@@ -379,8 +381,7 @@ namespace osmscout {
       if (nodes.size()>=3) {
         a=0;
         while (a+1<nodes.size()) {
-          if (nodes[a].lon>=lonMin && nodes[a].lon<=lonMax &&
-              nodes[a].lat>=latMin && nodes[a].lat<=latMax) {
+          if (projection->GeoIsIn(nodes[a].lon,nodes[a].lat)) {
             break;
           }
 
@@ -397,8 +398,7 @@ namespace osmscout {
       if (nodes.size()>=3) {
         a=nodes.size()-1;
         while (a>0) {
-          if (nodes[a].lon>=lonMin && nodes[a].lon<=lonMax &&
-              nodes[a].lat>=latMin && nodes[a].lat<=latMax) {
+          if (projection->GeoIsIn(nodes[a].lon,nodes[a].lat)) {
             break;
           }
 
@@ -437,8 +437,8 @@ namespace osmscout {
       // Calculate screen position
       for (size_t i=0; i<nodes.size(); i++) {
         if (drawNode[i]) {
-          TransformGeoToPixel(nodes[i].lon,nodes[i].lat,
-                              nodeX[i],nodeY[i]);
+          projection->GeoToPixel(nodes[i].lon,nodes[i].lat,
+                                 nodeX[i],nodeY[i]);
         }
       }
 
@@ -522,8 +522,8 @@ namespace osmscout {
       return false;
     }
 
-    TransformGeoToPixel(xmin,ymin,xmin,ymin);
-    TransformGeoToPixel(xmax,ymax,xmax,ymax);
+    projection->GeoToPixel(xmin,ymin,xmin,ymin);
+    projection->GeoToPixel(xmax,ymax,xmax,ymax);
 
     cx=xmin+(xmax-xmin)/2;
     cy=ymin+(ymax-ymin)/2;
@@ -676,9 +676,9 @@ namespace osmscout {
 
       cairo_set_source_rgba(draw,r,g,b,a);
 
-      if (x-textExtents.width/2+textExtents.x_bearing>=width ||
+      if (x-textExtents.width/2+textExtents.x_bearing>=projection->GetWidth() ||
           x+textExtents.width/2+textExtents.x_bearing<0 ||
-          y-textExtents.height/2+textExtents.x_bearing>=height ||
+          y-textExtents.height/2+textExtents.x_bearing>=projection->GetHeight() ||
           y+textExtents.width/2+textExtents.x_bearing<0) {
         return;
       }
@@ -704,9 +704,9 @@ namespace osmscout {
       cairo_scaled_font_extents(font,&fontExtents);
       cairo_scaled_font_text_extents(font,text.c_str(),&textExtents);
 
-      if (x-textExtents.width/2+textExtents.x_bearing-outerWidth>=width ||
+      if (x-textExtents.width/2+textExtents.x_bearing-outerWidth>=projection->GetWidth() ||
           x+textExtents.width/2+textExtents.x_bearing-outerWidth<0 ||
-          y-textExtents.height/2+textExtents.x_bearing+outerWidth>=height ||
+          y-textExtents.height/2+textExtents.x_bearing+outerWidth>=projection->GetHeight() ||
           y+textExtents.width/2+textExtents.x_bearing+outerWidth<0) {
         return;
       }
@@ -777,9 +777,9 @@ namespace osmscout {
       cairo_scaled_font_extents(font,&fontExtents);
       cairo_scaled_font_text_extents(font,text.c_str(),&textExtents);
 
-      if (x-textExtents.width/2+textExtents.x_bearing>=width ||
+      if (x-textExtents.width/2+textExtents.x_bearing>=projection->GetWidth() ||
           x+textExtents.width/2+textExtents.x_bearing<0 ||
-          y-textExtents.height/2+textExtents.x_bearing>=height ||
+          y-textExtents.height/2+textExtents.x_bearing>=projection->GetHeight() ||
           y+textExtents.width/2+textExtents.x_bearing<0) {
         return;
       }
@@ -815,8 +815,8 @@ namespace osmscout {
       return;
     }
 
-    TransformGeoToPixel(xmin,ymin,xmin,ymin);
-    TransformGeoToPixel(xmax,ymax,xmax,ymax);
+    projection->GeoToPixel(xmin,ymin,xmin,ymin);
+    projection->GeoToPixel(xmax,ymax,xmax,ymax);
 
     x=xmin+(xmax-xmin)/2;
     y=ymin+(ymax-ymin)/2;
@@ -862,8 +862,8 @@ namespace osmscout {
         xo=x;
         yo=y;
 
-        TransformGeoToPixel(nodes[j].lon,nodes[j].lat,
-                            x,y);
+        projection->GeoToPixel(nodes[j].lon,nodes[j].lat,
+                               x,y);
         if (j==0) {
           cairo_move_to(draw,x,y);
         }
@@ -878,8 +878,8 @@ namespace osmscout {
         xo=x;
         yo=y;
 
-        TransformGeoToPixel(nodes[nodes.size()-j-1].lon,nodes[nodes.size()-j-1].lat,
-                            x,y);
+        projection->GeoToPixel(nodes[nodes.size()-j-1].lon,nodes[nodes.size()-j-1].lat,
+                               x,y);
 
         if (j==0) {
           cairo_move_to(draw,x,y);
@@ -1119,7 +1119,7 @@ namespace osmscout {
       lineWidth=style->GetWidth();
     }
 
-    lineWidth=lineWidth/pixelSize;
+    lineWidth=lineWidth/projection->GetPixelSize();
 
     if (lineWidth<style->GetMinPixel()) {
       lineWidth=style->GetMinPixel();
@@ -1128,25 +1128,25 @@ namespace osmscout {
     bool outline=style->GetOutline()>0 &&
                  lineWidth-2*style->GetOutline()>=outlineMinWidth;
 
-    if (!(isBridge && magnification>=magCity) &&
-        !(isTunnel && magnification>=magCity) &&
+    if (!(isBridge && projection->GetMagnification()>=magCity) &&
+        !(isTunnel && projection->GetMagnification()>=magCity) &&
         !outline) {
       return;
     }
 
-    if (isBridge && magnification>=magCity) {
+    if (isBridge && projection->GetMagnification()>=magCity) {
       cairo_set_dash(draw,NULL,0,0);
       cairo_set_source_rgba(draw,0.0,0.0,0.0,1.0);
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
     }
-    else if (isTunnel && magnification>=magCity) {
+    else if (isTunnel && projection->GetMagnification()>=magCity) {
       double tunnel[2];
 
       tunnel[0]=7+lineWidth;
       tunnel[1]=7+lineWidth;
 
       cairo_set_dash(draw,tunnel,2,0);
-      if (magnification>=10000) {
+      if (projection->GetMagnification()>=10000) {
         cairo_set_source_rgba(draw,0.75,0.75,0.75,1.0);
       }
       else {
@@ -1243,7 +1243,7 @@ namespace osmscout {
       lineWidth=style->GetWidth();
     }
 
-    lineWidth=lineWidth/pixelSize;
+    lineWidth=lineWidth/projection->GetPixelSize();
 
     if (lineWidth<style->GetMinPixel()) {
       lineWidth=style->GetMinPixel();
@@ -1254,8 +1254,8 @@ namespace osmscout {
 
     if (style->GetOutline()>0 &&
         !outline &&
-        !(isBridge && magnification>=magCity) &&
-        !(isTunnel && magnification>=magCity)) {
+        !(isBridge && projection->GetMagnification()>=magCity) &&
+        !(isTunnel && projection->GetMagnification()>=magCity)) {
       // Should draw outline, but resolution is too low
       DrawPath(style->GetStyle(),
                style->GetAlternateR(),style->GetAlternateG(),style->GetAlternateB(),style->GetAlternateA(),
@@ -1291,7 +1291,7 @@ namespace osmscout {
 
     bool               hasPattern=patternStyle!=NULL &&
                                   patternStyle->GetLayer()==layer &&
-                                  magnification>=patternStyle->GetMinMag();
+                                  projection->GetMagnification()>=patternStyle->GetMinMag();
     bool               hasFill=fillStyle!=NULL &&
                                fillStyle->GetLayer()==layer;
 
@@ -1468,8 +1468,8 @@ namespace osmscout {
         const LabelStyle *style=styleConfig.GetWayNameLabelStyle(way->GetType());
 
         if (style!=NULL &&
-            magnification>=style->GetMinMag() &&
-            magnification<=style->GetMaxMag()) {
+            projection->GetMagnification()>=style->GetMinMag() &&
+            projection->GetMagnification()<=style->GetMaxMag()) {
 
           if (style->GetStyle()==LabelStyle::contour) {
             DrawContourLabel(draw,
@@ -1479,7 +1479,7 @@ namespace osmscout {
           }
           else {
             DrawTiledLabel(draw,
-                           magnification,
+                           projection->GetMagnification(),
                            *style,
                            way->GetName(),
                            way->nodes,
@@ -1492,8 +1492,8 @@ namespace osmscout {
         const LabelStyle *style=styleConfig.GetWayRefLabelStyle(way->GetType());
 
         if (style!=NULL &&
-            magnification>=style->GetMinMag() &&
-            magnification<=style->GetMaxMag()) {
+            projection->GetMagnification()>=style->GetMinMag() &&
+            projection->GetMagnification()<=style->GetMaxMag()) {
 
           if (style->GetStyle()==LabelStyle::contour) {
             DrawContourLabel(draw,
@@ -1503,7 +1503,7 @@ namespace osmscout {
           }
           else {
             DrawTiledLabel(draw,
-                           magnification,
+                           projection->GetMagnification(),
                            *style,
                            way->GetRefName(),
                            way->nodes,
@@ -1521,8 +1521,8 @@ namespace osmscout {
           const LabelStyle *style=styleConfig.GetWayNameLabelStyle(relation->roles[m].GetType());
 
           if (style!=NULL &&
-              magnification>=style->GetMinMag() &&
-              magnification<=style->GetMaxMag()) {
+              projection->GetMagnification()>=style->GetMinMag() &&
+              projection->GetMagnification()<=style->GetMaxMag()) {
 
             if (style->GetStyle()==LabelStyle::contour) {
               DrawContourLabel(draw,
@@ -1532,7 +1532,7 @@ namespace osmscout {
             }
             else {
               DrawTiledLabel(draw,
-                             magnification,
+                             projection->GetMagnification(),
                              *style,
                              relation->roles[m].GetName(),
                              relation->roles[m].nodes,
@@ -1545,8 +1545,8 @@ namespace osmscout {
           const LabelStyle *style=styleConfig.GetWayRefLabelStyle(relation->roles[m].GetType());
 
           if (style!=NULL &&
-              magnification>=style->GetMinMag() &&
-              magnification<=style->GetMaxMag()) {
+              projection->GetMagnification()>=style->GetMinMag() &&
+              projection->GetMagnification()<=style->GetMaxMag()) {
 
             if (style->GetStyle()==LabelStyle::contour) {
               DrawContourLabel(draw,
@@ -1556,7 +1556,7 @@ namespace osmscout {
             }
             else {
               DrawTiledLabel(draw,
-                             magnification,
+                             projection->GetMagnification(),
                              *style,
                              relation->roles[m].GetRefName(),
                              relation->roles[m].nodes,
@@ -1578,14 +1578,14 @@ namespace osmscout {
       const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetNodeSymbolStyle(node->type);
 
       bool hasLabel=labelStyle!=NULL &&
-                    magnification>=labelStyle->GetMinMag() &&
-                    magnification<=labelStyle->GetMaxMag();
+                    projection->GetMagnification()>=labelStyle->GetMinMag() &&
+                    projection->GetMagnification()<=labelStyle->GetMaxMag();
 
       bool hasSymbol=symbolStyle!=NULL &&
-                     magnification>=symbolStyle->GetMinMag();
+                     projection->GetMagnification()>=symbolStyle->GetMinMag();
 
       bool hasIcon=iconStyle!=NULL &&
-                   magnification>=iconStyle->GetMinMag();
+                   projection->GetMagnification()>=iconStyle->GetMinMag();
 
       std::string label;
 
@@ -1616,26 +1616,26 @@ namespace osmscout {
 
       double x,y;
 
-      TransformGeoToPixel(node->lon,node->lat,x,y);
+      projection->GeoToPixel(node->lon,node->lat,x,y);
 
       if (hasLabel) {
         if (hasSymbol) {
           DrawLabel(draw,
-                    magnification,
+                    projection->GetMagnification(),
                     *labelStyle,
                     label,
                     x,y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
         }
         else if (hasIcon) {
           DrawLabel(draw,
-                    magnification,
+                    projection->GetMagnification(),
                     *labelStyle,
                     label,
                     x,y+14+5); // TODO: Better layout to real size of icon
         }
         else {
           DrawLabel(draw,
-                    magnification,
+                    projection->GetMagnification(),
                     *labelStyle,
                     label,
                     x,y);
@@ -1662,14 +1662,14 @@ namespace osmscout {
       const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetAreaSymbolStyle(area->GetType());
 
       bool hasLabel=labelStyle!=NULL &&
-                    magnification>=labelStyle->GetMinMag() &&
-                    magnification<=labelStyle->GetMaxMag();
+                    projection->GetMagnification()>=labelStyle->GetMinMag() &&
+                    projection->GetMagnification()<=labelStyle->GetMaxMag();
 
       bool hasSymbol=symbolStyle!=NULL &&
-                     magnification>=symbolStyle->GetMinMag();
+                     projection->GetMagnification()>=symbolStyle->GetMinMag();
 
       bool hasIcon=iconStyle!=NULL &&
-                   magnification>=iconStyle->GetMinMag();
+                   projection->GetMagnification()>=iconStyle->GetMinMag();
 
       std::string label;
 
@@ -1705,21 +1705,21 @@ namespace osmscout {
       if (hasLabel) {
         if (hasSymbol) {
           DrawLabel(draw,
-                    magnification,
+                    projection->GetMagnification(),
                     *labelStyle,
                     label,
                     x,y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
         }
         else if (hasIcon) {
           DrawLabel(draw,
-                    magnification,
+                    projection->GetMagnification(),
                     *labelStyle,
                     label,
                     x,y+14+5); // TODO: Better layout to real size of icon
         }
         else {
           DrawLabel(draw,
-                    magnification,
+                    projection->GetMagnification(),
                     *labelStyle,
                     label,
                     x,y);
@@ -1768,23 +1768,20 @@ namespace osmscout {
     for (std::list<Node>::const_iterator node=poiNodes.begin();
          node!=poiNodes.end();
          ++node) {
-      if (node->lon<lonMin ||
-          node->lon>lonMax ||
-          node->lat<latMin ||
-          node->lat>latMax) {
+      if (!projection->GeoIsIn(node->lon,node->lat)) {
         continue;
       }
 
       const SymbolStyle *style=styleConfig.GetNodeSymbolStyle(node->type);
 
       if (style==NULL ||
-          magnification<style->GetMinMag()) {
+          projection->GetMagnification()<style->GetMinMag()) {
         continue;
       }
 
       double x,y;
 
-      TransformGeoToPixel(node->lon,node->lat,x,y);
+      projection->GeoToPixel(node->lon,node->lat,x,y);
 
       DrawSymbol(draw,style,x,y);
 
@@ -1797,10 +1794,7 @@ namespace osmscout {
     for (std::list<Node>::const_iterator node=poiNodes.begin();
          node!=poiNodes.end();
          ++node) {
-      if (node->lon<lonMin ||
-          node->lon>lonMax ||
-          node->lat<latMin ||
-          node->lat>latMax) {
+      if (!projection->GeoIsIn(node->lon,node->lat)) {
         continue;
       }
 
@@ -1810,17 +1804,17 @@ namespace osmscout {
           const LabelStyle *style=styleConfig.GetNodeLabelStyle(node->type);
 
           if (style==NULL ||
-              magnification<style->GetMinMag() ||
-              magnification>style->GetMaxMag()) {
+              projection->GetMagnification()<style->GetMinMag() ||
+              projection->GetMagnification()>style->GetMaxMag()) {
             continue;
           }
 
           double x,y;
 
-          TransformGeoToPixel(node->lon,node->lat,x,y);
+          projection->GeoToPixel(node->lon,node->lat,x,y);
 
           DrawLabel(draw,
-                    magnification,
+                    projection->GetMagnification(),
                     *style,
                     node->tags[i].value,
                     x,y);
@@ -1829,17 +1823,17 @@ namespace osmscout {
           const LabelStyle *style=styleConfig.GetNodeRefLabelStyle(node->type);
 
           if (style==NULL ||
-              magnification<style->GetMinMag() ||
-              magnification>style->GetMaxMag()) {
+              projection->GetMagnification()<style->GetMinMag() ||
+              projection->GetMagnification()>style->GetMaxMag()) {
             continue;
           }
 
           double x,y;
 
-          TransformGeoToPixel(node->lon,node->lat,x,y);
+          projection->GeoToPixel(node->lon,node->lat,x,y);
 
           DrawLabel(draw,
-                    magnification,
+                    projection->GetMagnification(),
                     *style,
                     node->tags[i].value,
                     x,y);
@@ -1849,15 +1843,15 @@ namespace osmscout {
   }
 
   bool MapPainterCairo::DrawMap(const StyleConfig& styleConfig,
-                           double lon, double lat,
-                           double magnification,
-                           size_t width, size_t height,
-                           cairo_surface_t *image,
-                           cairo_t *draw)
+                                double lon, double lat,
+                                double magnification,
+                                size_t width, size_t height,
+                                cairo_surface_t *image,
+                                cairo_t *draw)
   {
     StopClock           overallTimer;
     
-    RecalculateData(lon,lat,magnification,width,height);
+    projection->Set(lon,lat,magnification,width,height);
 
     nodesDrawnCount=0;
     areasDrawnCount=0;
@@ -1880,7 +1874,10 @@ namespace osmscout {
     relationAreas.clear();
 
     database.GetObjects(styleConfig,
-                        lonMin,latMin,lonMax,latMax,
+                        projection->GetLonMin(),
+                        projection->GetLatMin(),
+                        projection->GetLonMax(),
+                        projection->GetLatMax(),
                         magnification,
                         ((size_t)ceil(Log2(magnification)))+6,
                         2000,
@@ -1908,7 +1905,7 @@ namespace osmscout {
       const LineStyle *borderStyle=styleConfig.GetAreaBorderStyle(i);
 
       if (borderStyle!=NULL) {
-        borderWidth[i]=borderStyle->GetWidth()/pixelSize;
+        borderWidth[i]=borderStyle->GetWidth()/projection->GetPixelSize();
         if (borderWidth[i]<borderStyle->GetMinPixel()) {
           borderWidth[i]=borderStyle->GetMinPixel();
         }
@@ -1983,8 +1980,6 @@ namespace osmscout {
     //
     //
     // Drawing setup
-
-    cairo_save(draw);
 
     cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
 
@@ -2074,8 +2069,6 @@ namespace osmscout {
 
     DrawPOINodeLabels(styleConfig);
 
-    //cairo_restore(draw);
-
     poisTimer.Stop();
 
     drawingTimer.Stop();
@@ -2110,9 +2103,9 @@ namespace osmscout {
   }
 
   bool MapPainterCairo::PrintMap(const StyleConfig& styleConfig,
-                            double lon, double lat,
-                            double magnification,
-                            size_t width, size_t height)
+                                 double lon, double lat,
+                                 double magnification,
+                                 size_t width, size_t height)
   {
     cairo_surface_t *image=cairo_image_surface_create(CAIRO_FORMAT_RGB24,width,height);
     cairo_t         *draw=cairo_create(image);

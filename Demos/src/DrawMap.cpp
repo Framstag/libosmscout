@@ -21,7 +21,7 @@
 #include <iomanip>
 
 #include <osmscout/Database.h>
-#include <osmscout/MapPainter.h>
+#include <osmscout/MapPainterCairo.h>
 #include <osmscout/StyleConfigLoader.h>
 
 /*
@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
     std::cerr << "Cannot open style" << std::endl;
   }
 
-  osmscout::MapPainter painter(database);
+  osmscout::MapPainterCairo painter(database);
 
   cairo_surface_t *surface;
   cairo_t         *cairo;

@@ -196,6 +196,11 @@ namespace osmscout {
 
     value.clear();
 
+    if (offset+sizeof(char)>size) {
+      hasError=true;
+      return false;
+    }
+
 #if defined(HAVE_MMAP)
     if (buffer!=NULL) {
       size_t start=offset;

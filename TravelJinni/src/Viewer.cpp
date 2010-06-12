@@ -53,6 +53,8 @@
 #include <Lum/String.h>
 #include <Lum/Table.h>
 
+#include <osmscout/Projection.h>
+
 #include "config.h"
 
 #include "Configuration.h"
@@ -175,22 +177,21 @@ public:
 
   void HandleMouseMove(const Lum::OS::MouseEvent& event)
   {
-    double olon, olat;
-    double tlon, tlat;
+    double                       olon, olat;
+    double                       tlon, tlat;
+    osmscout::MercatorProjection projection;
+
+    projection.Set(lon,lat,
+                   magnification,
+                   width,height);
 
     // Get origin coordinates
-    osmscout::MapPainterCairo::TransformPixelToGeo(0,0,
-                                                   lon,lat,
-                                                   magnification,
-                                                   width,height,
-                                                   olon,olat);
+    projection.PixelToGeo(0,0,
+                          olon,olat);
 
     // Get current mouse pos coordinates (relative to drag start)
-    osmscout::MapPainterCairo::TransformPixelToGeo((event.x-startX),(event.y-startY),
-                                                   lon,lat,
-                                                   magnification,
-                                                   width,height,
-                                                   tlon,tlat);
+    projection.PixelToGeo(event.x-startX,event.y-startY,
+                          tlon,tlat);
 
     lon=startLon-(tlon-olon);
     lat=startLat+(tlat-olat);
@@ -269,12 +270,15 @@ public:
   {
     if (event.type==Lum::OS::KeyEvent::down) {
       if (event.key==Lum::OS::keyLeft) {
-        double lonMin,latMin,lonMax,latMax;
+        osmscout::MercatorProjection projection;
+        double                       lonMin,latMin,lonMax,latMax;
 
-        osmscout::MapPainterCairo::GetDimensions(lon,lat,
-                                                 magnification,
-                                                 width,height,
-                                                 lonMin,latMin,lonMax,latMax);
+        projection.Set(lon,lat,
+                       magnification,
+                       width,height);
+      
+
+        projection.GetDimensions(lonMin,latMin,lonMax,latMax);
 
         lon-=(lonMax-lonMin)*0.3;
 
@@ -283,12 +287,14 @@ public:
         return true;
       }
       else if (event.key==Lum::OS::keyRight) {
-        double lonMin,latMin,lonMax,latMax;
+        osmscout::MercatorProjection projection;
+        double                       lonMin,latMin,lonMax,latMax;
 
-        osmscout::MapPainterCairo::GetDimensions(lon,lat,
-                                                 magnification,
-                                                 width,height,
-                                                 lonMin,latMin,lonMax,latMax);
+        projection.Set(lon,lat,
+                       magnification,
+                       width,height);
+
+        projection.GetDimensions(lonMin,latMin,lonMax,latMax);
 
         lon+=(lonMax-lonMin)*0.3;
 
@@ -297,12 +303,14 @@ public:
         return true;
       }
       else if (event.key==Lum::OS::keyUp) {
-        double lonMin,latMin,lonMax,latMax;
+        osmscout::MercatorProjection projection;
+        double                       lonMin,latMin,lonMax,latMax;
 
-        osmscout::MapPainterCairo::GetDimensions(lon,lat,
-                                                 magnification,
-                                                 width,height,
-                                                 lonMin,latMin,lonMax,latMax);
+        projection.Set(lon,lat,
+                       magnification,
+                       width,height);
+
+        projection.GetDimensions(lonMin,latMin,lonMax,latMax);
 
         lat+=(latMax-latMin)*0.3;
 
@@ -311,12 +319,14 @@ public:
         return true;
       }
       else if (event.key==Lum::OS::keyDown) {
-        double lonMin,latMin,lonMax,latMax;
+        osmscout::MercatorProjection projection;
+        double                       lonMin,latMin,lonMax,latMax;
 
-        osmscout::MapPainterCairo::GetDimensions(lon,lat,
-                                                 magnification,
-                                                 width,height,
-                                                 lonMin,latMin,lonMax,latMax);
+        projection.Set(lon,lat,
+                       magnification,
+                       width,height);
+
+        projection.GetDimensions(lonMin,latMin,lonMax,latMax);
 
         lat-=(latMax-latMin)*0.3;
 

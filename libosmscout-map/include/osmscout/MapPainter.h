@@ -22,12 +22,8 @@
 
 #include <set>
 
-#include <cairo/cairo.h>
-
-#include <osmscout/StyleConfig.h>
-#include <osmscout/TypeConfig.h>
-
 #include <osmscout/Database.h>
+#include <osmscout/Projection.h>
 
 namespace osmscout {
 
@@ -36,26 +32,7 @@ namespace osmscout {
   protected:
     const Database& database;
 
-    // current drawing context information
-    // These values are valid until the next image gets drawn
-    double              lon;           //! Longitude coordinate of the center of the image
-    double              lat;           //! Latitude coordinate of the center of the image
-    double              lonMin;        //! Longitude of the upper left corner of the image
-    double              latMin;        //! Latitude of the upper left corner of the image
-    double              lonMax;        //! Longitude of the lower right corner of the image
-    double              latMax;        //! Latitude of the lower right corner of the image
-    double              magnification; //! Current maginification
-    size_t              width;         //! Width fo image
-    size_t              height;        //! Height of image
-    double              hmin;
-    double              hmax;
-    double              vmin;
-    double              vmax;
-
-    double              hscale;
-    double              vscale;
-
-    double              pixelSize;     //! Size of a pixel in meter
+    Projection          *projection;   //! Projection to use
 
   public:
     std::list<Way>        poiWays;
@@ -70,36 +47,7 @@ namespace osmscout {
     MapPainter(const Database& database);
     virtual ~MapPainter();
 
-    bool TransformPixelToGeo(double x, double y,
-                             double& lon, double& lat);
-
-    bool TransformGeoToPixel(double lon, double lat,
-                             double& x, double& y);
-
-    virtual bool DrawMap(const StyleConfig& styleConfig,
-                         double lon, double lat,
-                         double magnification,
-                         size_t width, size_t height,
-                         cairo_surface_t *image,
-                         cairo_t *draw) = 0;
-                         
-    static void GetDimensions(double lon, double lat,
-                              double magnification,
-                              size_t width, size_t height,
-                              double& lonMin, double& latMin,
-                              double& lonMax, double& latMax);
-                         
-    static bool TransformPixelToGeo(int x, int y,
-                                    double centerLon, double centerLat,
-                                    double magnification,
-                                    size_t width, size_t height,
-                                    double& outLon, double& outLat);
-                                    
-    static bool TransformGeoToPixel(double lon, double lat,
-                                    double centerLon, double centerLat,
-                                    double magnification,
-                                    size_t width, size_t height,
-                                    double &x, double& y);
+    void SetProjection(Projection* projection);
   };
 }
 
