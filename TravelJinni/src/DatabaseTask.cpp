@@ -22,7 +22,11 @@
 #include <cmath>
 #include <iostream>
 
-#include <cairo/cairo.h>
+#if defined(__WIN32__) || defined(WIN32) || defined(__APPLE__)
+  #include <cairo.h>
+#else
+  #include <cairo/cairo.h>
+#endif
 
 #include <osmscout/StyleConfigLoader.h>
 
@@ -32,8 +36,15 @@
   #include <Lum/OS/Cairo/Display.h>
 #endif
 
-#include <Lum/OS/X11/DrawInfo.h>
-#include <Lum/OS/X11/Display.h>
+#if defined(LUM_HAVE_LIB_X)
+  #include <Lum/OS/X11/DrawInfo.h>
+  #include <Lum/OS/X11/Display.h>
+#endif  
+
+#if defined(LUM_HAVE_LIB_WIN32)
+  #include <Lum/OS/Win32/DrawInfo.h>
+  #include <Lum/OS/Win32/Display.h>
+#endif
 
 #include <Lum/OS/Display.h>
 #include <Lum/OS/Driver.h>
@@ -462,6 +473,22 @@ bool DatabaseTask::DrawResult(Lum::OS::Window* window,
                                                        x11Draw->drawable,
                                                        dynamic_cast<Lum::OS::X11::Display*>(Lum::OS::display)->visual,
                                                        window->GetWidth(),window->GetHeight());
+
+    cairo_t* cairo=cairo_create(surface);
+
+    cairo_set_source_surface(cairo,finishedSurface,x-dx,y+dy);
+    cairo_rectangle(cairo,x,y,finishedWidth,finishedHeight);
+    cairo_fill(cairo);
+
+    cairo_destroy(cairo),
+    cairo_surface_destroy(surface);
+  }
+#endif
+#if defined(LUM_HAVE_LIB_WIN32)
+  if (dynamic_cast<Lum::OS::Win32::DrawInfo*>(draw)!=NULL) {
+    Lum::OS::Win32::DrawInfo *win32Draw=dynamic_cast<Lum::OS::Win32::DrawInfo*>(draw);
+
+    cairo_surface_t *surface=cairo_win32_surface_create(win32Draw->dc);
 
     cairo_t* cairo=cairo_create(surface);
 
