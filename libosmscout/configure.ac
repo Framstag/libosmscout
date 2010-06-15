@@ -7,7 +7,6 @@ AC_CONFIG_MACRO_DIR([m4])
 
 AC_CONFIG_HEADERS([include/osmscout/private/Config.h])
 AM_INIT_AUTOMAKE([no-define nostdinc subdir-objects dist-bzip2])
-AC_GNU_SOURCE
 AC_PROG_CXX
 AC_LANG(C++)
 AC_LIBTOOL_WIN32_DLL

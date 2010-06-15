@@ -495,15 +495,9 @@ namespace osmscout {
       }
 
       if (!merged) {
-        //std::cout << ".";
         ++role;
       }
-      else {
-        //std::cout << "+";
-      }
     }
-
-    //std::cout << std::endl;
 
     if (oldSize!=relation.roles.size()) {
       progress.Info("Compacted number of roles of relation "+NumberToString(relation.id)+" "+name+
@@ -714,8 +708,6 @@ namespace osmscout {
           }
         }
 
-        //progress.Debug("Storing relation "+rel.relType+" "+NumberToString(rel.type)+" "+name);
-
         rel.id=rawRel.id;
         rel.tags=rawRel.tags;
 
@@ -738,10 +730,11 @@ namespace osmscout {
         if (!CompactRelation(rel,name,progress)) {
           progress.Error("Relation "+NumberToString(rel.id)+
                          " cannot be compacted");
-
           continue;
         }
 
+        //progress.Debug("Storing relation "+rel.relType+" "+NumberToString(rel.type)+" "+name);
+        
         if (rel.type!=typeIgnore) {
           rel.Write(writer);
           writtenRelationCount++;

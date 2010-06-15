@@ -23,6 +23,7 @@
 #include <iostream>
 
 #include <osmscout/Import.h>
+#include <osmscout/Util.h>
 
 int main(int argc, char* argv[])
 {
@@ -40,13 +41,13 @@ int main(int argc, char* argv[])
       i++;
 
       if (i<argc) {
-        int res=sscanf(argv[i],"%zu",&startStep);
-
-        if (res!=1) {
+        if (!osmscout::StringToNumber(argv[i],startStep)) {
+          std::cerr << "Cannot parse start step '" << argv[i] << "'" << std::endl;
           parameterError=true;
         }
       }
       else {
+        std::cerr << "Missing parameter after -s option" << std::endl;
         parameterError=true;
       }
     }
@@ -54,13 +55,13 @@ int main(int argc, char* argv[])
       i++;
 
       if (i<argc) {
-        int res=sscanf(argv[i],"%zu",&endStep);
-
-        if (res!=1) {
+        if (!osmscout::StringToNumber(argv[i],endStep)) {
+          std::cerr << "Cannot parse end step '" << argv[i] << "'" << std::endl;
           parameterError=true;
         }
       }
       else {
+        std::cerr << "Missing parameter after -e option" << std::endl;
         parameterError=true;
       }
     }

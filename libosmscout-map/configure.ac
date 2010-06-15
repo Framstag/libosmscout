@@ -1,13 +1,12 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.56)
-AC_INIT([libosmscout-map],[0.1],[tim@teulings.org],[libosmscout])
+AC_INIT([libosmscout-map],[0.1],[tim@teulings.org],[libosmscout-map])
 
 AC_CONFIG_SRCDIR(src/osmscout/MapPainter.cpp)
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_CONFIG_HEADERS([include/osmscout/private/Config.h])
 AM_INIT_AUTOMAKE([no-define nostdinc subdir-objects dist-bzip2])
-AC_GNU_SOURCE
 AC_PROG_CXX
 AC_LANG(C++)
 AC_LIBTOOL_WIN32_DLL

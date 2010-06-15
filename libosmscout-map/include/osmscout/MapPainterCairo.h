@@ -22,7 +22,11 @@
 
 #include <set>
 
-#include <cairo/cairo.h>
+#if defined(__WIN32__) || defined(WIN32) || defined(__APPLE__)
+  #include <cairo.h>
+#else
+  #include <cairo/cairo.h>
+#endif
 
 #include <osmscout/MapPainter.h>
 

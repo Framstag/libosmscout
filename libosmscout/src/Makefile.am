@@ -2,9 +2,10 @@ AM_CPPFLAGS = $(LIB_CXXFLAGS) -DOSMSCDLL -I$(top_srcdir)/include \
               $(XML2_CFLAGS) $(CAIRO_CFLAGS)
 
 # We disable $(X_PRE_LIBS) until we need them somewhere
-AM_LDFLAGS  = $(XML2_LIBS) $(CAIRO_LIBS)
 
 lib_LTLIBRARIES = libosmscout.la
+libosmscout_la_LDFLAGS  = $(XML2_LIBS) \
+                          $(CAIRO_LIBS)
 libosmscout_la_SOURCES= osmscout/Types.cpp \
                         osmscout/Util.cpp \
                         osmscout/Progress.cpp \
