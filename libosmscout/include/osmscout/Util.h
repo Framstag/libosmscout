@@ -89,8 +89,8 @@ namespace osmscout {
     See http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
     */
   template<typename N, typename M>
-  bool OSMSCOUT_API IsPointInArea(const N& point,
-                                  const std::vector<M>& nodes)
+  bool IsPointInArea(const N& point,
+                     const std::vector<M>& nodes)
   {
     int  i,j;
     bool c=false;
@@ -114,8 +114,8 @@ namespace osmscout {
     Return true, if area a is in area b
     */
   template<typename N,typename M>
-  bool OSMSCOUT_API IsAreaInArea(const std::vector<N>& a,
-                                 const std::vector<M>& b)
+  bool IsAreaInArea(const std::vector<N>& a,
+                    const std::vector<M>& b)
   {
     for (typename std::vector<N>::const_iterator i=a.begin(); i!=a.end(); i++) {
       if (!IsPointInArea(*i,b)) {
@@ -189,7 +189,7 @@ namespace osmscout {
   extern OSMSCOUT_API bool GetDigitValue(char digit, size_t& result);
 
   template<typename A>
-  OSMSCOUT_API size_t NumberDigits(const A& a,size_t base=10)
+  size_t NumberDigits(const A& a,size_t base=10)
   {
     A      value(a);
     size_t res=0;
@@ -207,7 +207,7 @@ namespace osmscout {
   }
 
   template<typename A>
-  OSMSCOUT_API std::string NumberToString(const A& a)
+  std::string NumberToString(const A& a)
   {
     std::string res;
     A           value(a);
@@ -239,7 +239,7 @@ namespace osmscout {
   }
 
   template<typename A>
-  OSMSCOUT_API bool StringToNumber(const std::string& string, A& a, size_t base=10)
+  bool StringToNumber(const std::string& string, A& a, size_t base=10)
   {
     assert(base<=16);
 
