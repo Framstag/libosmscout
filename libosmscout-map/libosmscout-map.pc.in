@@ -8,4 +8,4 @@ Name: libosmscout-map                   # human-readable name
 Description: osm navigation library     # human-readable description
 Version: @VERSION@
 Libs: @LIBCAIRO_LIBS@ -L${libdir} -losmscoutmap
-Cflags: -I${includedir}
+Cflags: @LIBCAIRO_CFLAGS@ -I${includedir}

@@ -1,5 +1,5 @@
-Name: libosmscouti-map                  # human-readable name
+Name: libosmscout-map                   # human-readable name
 Description: osm navigation library     # human-readable description
 Version: @VERSION@
 Libs: @LIBCAIRO_LIBS@ -L@abs_builddir@/src/.libs -losmscoutmap
-Cflags: -I@abs_builddir@/include
+Cflags: @LIBCAIRO_CFLAGS@ -I@abs_builddir@/include
