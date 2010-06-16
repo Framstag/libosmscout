@@ -30,6 +30,8 @@
 #include <string>
 #include <vector>
 
+#include <osmscout/Private/CoreImportExport.h>
+
 namespace osmscout {
 
   /**
@@ -87,8 +89,8 @@ namespace osmscout {
     See http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
     */
   template<typename N, typename M>
-  bool IsPointInArea(const N& point,
-                     const std::vector<M>& nodes)
+  bool OSMSCOUT_API IsPointInArea(const N& point,
+                                  const std::vector<M>& nodes)
   {
     int  i,j;
     bool c=false;
@@ -112,8 +114,8 @@ namespace osmscout {
     Return true, if area a is in area b
     */
   template<typename N,typename M>
-  bool IsAreaInArea(const std::vector<N>& a,
-                    const std::vector<M>& b)
+  bool OSMSCOUT_API IsAreaInArea(const std::vector<N>& a,
+                                 const std::vector<M>& b)
   {
     for (typename std::vector<N>::const_iterator i=a.begin(); i!=a.end(); i++) {
       if (!IsPointInArea(*i,b)) {
@@ -124,7 +126,7 @@ namespace osmscout {
     return true;
   }
 
-  class NumberSet
+  class OSMSCOUT_API NumberSet
   {
     typedef unsigned long Number;
 
@@ -158,7 +160,7 @@ namespace osmscout {
     bool IsSet(Number value) const;
   };
 
-  class StopClock
+  class OSMSCOUT_API StopClock
   {
   private:
     timeval start;
@@ -172,22 +174,22 @@ namespace osmscout {
     friend std::ostream& operator<<(std::ostream& stream, const StopClock& clock);
   };
 
-  extern std::ostream& operator<<(std::ostream& stream, const StopClock& clock);
+  extern OSMSCOUT_API std::ostream& operator<<(std::ostream& stream, const StopClock& clock);
 
-  extern void GetKeysForName(const std::string& name, std::set<uint32_t>& keys);
+  extern OSMSCOUT_API void GetKeysForName(const std::string& name, std::set<uint32_t>& keys);
 
-  extern bool EncodeNumber(unsigned long number,
-                           size_t bufferLength,
-                           char* buffer,
-                           size_t& bytes);
-  extern bool DecodeNumber(const char* buffer, uint32_t& number, size_t& bytes);
+  extern OSMSCOUT_API bool EncodeNumber(unsigned long number,
+                                        size_t bufferLength,
+                                        char* buffer,
+                                        size_t& bytes);
+  extern OSMSCOUT_API bool DecodeNumber(const char* buffer, uint32_t& number, size_t& bytes);
 
-  extern bool GetFileSize(const std::string& filename, long& size);
+  extern OSMSCOUT_API bool GetFileSize(const std::string& filename, long& size);
 
-  extern bool GetDigitValue(char digit, size_t& result);
+  extern OSMSCOUT_API bool GetDigitValue(char digit, size_t& result);
 
   template<typename A>
-  size_t NumberDigits(const A& a,size_t base=10)
+  OSMSCOUT_API size_t NumberDigits(const A& a,size_t base=10)
   {
     A      value(a);
     size_t res=0;
@@ -205,7 +207,7 @@ namespace osmscout {
   }
 
   template<typename A>
-  std::string NumberToString(const A& a)
+  OSMSCOUT_API std::string NumberToString(const A& a)
   {
     std::string res;
     A           value(a);
@@ -237,7 +239,7 @@ namespace osmscout {
   }
 
   template<typename A>
-  bool StringToNumber(const std::string& string, A& a, size_t base=10)
+  OSMSCOUT_API bool StringToNumber(const std::string& string, A& a, size_t base=10)
   {
     assert(base<=16);
 
@@ -315,12 +317,12 @@ namespace osmscout {
     return true;
   }
 
-  extern double Log2(double x);
-  extern size_t Pow(size_t a, size_t b);
-  extern double GetSphericalDistance(double aLon, double aLat,
-                                     double bLon, double bLat);
-  extern double GetEllipsoidalDistance(double aLon, double aLat,
-                                       double bLon, double bLat);
+  extern OSMSCOUT_API double Log2(double x);
+  extern OSMSCOUT_API size_t Pow(size_t a, size_t b);
+  extern OSMSCOUT_API double GetSphericalDistance(double aLon, double aLat,
+                                                  double bLon, double bLat);
+  extern OSMSCOUT_API double GetEllipsoidalDistance(double aLon, double aLat,
+                                                   double bLon, double bLat);
 }
 
 #endif

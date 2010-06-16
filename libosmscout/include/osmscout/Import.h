@@ -34,7 +34,7 @@ namespace osmscout {
     * Add variable defining the output directory (and make all import modules
       respect this parameter).
     */
-  class ImportParameter
+  class OSMSCOUT_API ImportParameter
   {
   private:
     std::string mapfile;
@@ -73,7 +73,7 @@ namespace osmscout {
     works on one object type and generates one output file (though this is just
     an suggestion). Such a step is realized by a ImportModule.
     */
-  class ImportModule
+  class OSMSCOUT_API ImportModule
   {
   public:
     virtual std::string GetDescription() const = 0;
@@ -86,8 +86,8 @@ namespace osmscout {
     Does the import based on the given parameters. Feedback about the import progress
     is given by the indivudal import modules calling the Progress instance as appropriate.
     */
-  extern bool Import(const ImportParameter& parameter,
-                     Progress& progress);
+  extern OSMSCOUT_API bool Import(const ImportParameter& parameter,
+                                  Progress& progress);
 }
 
 #endif

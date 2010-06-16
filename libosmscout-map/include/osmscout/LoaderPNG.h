@@ -1,5 +1,5 @@
-#ifndef LOADERPNG_H
-#define LOADERPNG_H
+#ifndef OSMSCOUT_MAP_LOADERPNG_H
+#define OSMSCOUT_MAP_LOADERPNG_H
 
 /*
   This source is part of the libosmscout-map library
@@ -24,9 +24,11 @@
 
 #include <cairo/cairo.h>
 
+#include <osmscout/Private/MapImportExport.h>
+
 namespace osmscout {
 
-  cairo_surface_t* LoadPNG(const std::string& filename);
+  OSMSCOUT_MAP_API cairo_surface_t* LoadPNG(const std::string& filename);
 }
 
 #endif

@@ -54,7 +54,7 @@ namespace osmscout {
   const static TypeId typeIgnore      = typePrivateBase+0;
   const static TypeId typeRoute       = typePrivateBase+1;
 
-  class TagInfo
+  class OSMSCOUT_API TagInfo
   {
   private:
     std::string name;
@@ -76,7 +76,7 @@ namespace osmscout {
     }
   };
 
-  class TypeInfo
+  class OSMSCOUT_API TypeInfo
   {
   private:
     TypeId      id;
@@ -197,7 +197,7 @@ namespace osmscout {
     }
   };
 
-  class TypeConfig
+  class OSMSCOUT_API TypeConfig
   {
   private:
     std::list<TagInfo>                              tags;
@@ -242,7 +242,6 @@ namespace osmscout {
     void GetRoutables(std::set<TypeId>& types) const;
 
     void GetIndexables(std::set<TypeId>& types) const;
-
   };
 }
 

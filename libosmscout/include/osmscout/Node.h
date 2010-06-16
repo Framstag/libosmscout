@@ -29,7 +29,7 @@
 
 namespace osmscout {
 
-  class Node
+  class OSMSCOUT_API Node
   {
   public:
     Id                id;

@@ -24,11 +24,13 @@
 #include <stdint.h>
 #include <string>
 
+#include <osmscout/Private/CoreImportExport.h>
+
 namespace osmscout {
 
   typedef uint16_t TagId;
 
-  struct Tag
+  struct OSMSCOUT_API Tag
   {
     TagId       key;
     std::string value;

@@ -23,6 +23,8 @@
 // will be <cstdint> in c++0x
 #include <stdint.h>
 
+#include <osmscout/Private/CoreImportExport.h>
+
 namespace osmscout {
 
   typedef int32_t  FileOffset;
@@ -56,7 +58,7 @@ namespace osmscout {
     value sand afterwards multiplied by conversion factor
     to get long values without significant values after colon.
     */
-  extern const double conversionFactor;
+  extern OSMSCOUT_API const double conversionFactor;
 }
 
 #endif

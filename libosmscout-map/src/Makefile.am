@@ -1,4 +1,4 @@
-AM_CPPFLAGS = $(LIB_CXXFLAGS) -DOSMSCDLL -I$(top_srcdir)/include \
+AM_CPPFLAGS = $(LIB_CXXFLAGS) -DOSMSCOUTMAPDLL -I$(top_srcdir)/include \
               $(LIBOSMSCOUT_CFLAGS) \
               $(LIBCAIRO_CFLAGS) \
               $(LIBPNG_CFLAGS)

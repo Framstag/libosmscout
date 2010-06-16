@@ -29,7 +29,7 @@
 
 namespace osmscout {
 
-  class Way
+  class OSMSCOUT_API Way
   {
   public:
     enum RestrictionType

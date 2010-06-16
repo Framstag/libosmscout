@@ -1,5 +1,5 @@
-#ifndef PROJECTION_H
-#define PROJECTION_H
+#ifndef OSMSCOUT_MAP_PROJECTION_H
+#define OSMSCOUT_MAP_PROJECTION_H
 
 /*
   This source is part of the libosmscout-map library
@@ -22,9 +22,11 @@
 
 #include <cstdlib>
 
+#include <osmscout/Private/MapImportExport.h>
+
 namespace osmscout {
 
-  class Projection
+  class OSMSCOUT_MAP_API Projection
   {
   public:
     virtual ~Projection();
@@ -57,7 +59,7 @@ namespace osmscout {
     virtual double GetPixelSize() const = 0;                   
   };
   
-  class MercatorProjection : public Projection
+  class OSMSCOUT_MAP_API MercatorProjection : public Projection
   {
     bool                valid;         //! projects is valid
     double              lon;           //! Longitude coordinate of the center of the image

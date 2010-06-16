@@ -5,7 +5,7 @@ AC_INIT([libosmscout-map],[0.1],[tim@teulings.org],[libosmscout])
 AC_CONFIG_SRCDIR(src/osmscout/MapPainter.cpp)
 AC_CONFIG_MACRO_DIR([m4])
 
-AC_CONFIG_HEADERS([include/osmscout/private/Config.h])
+AC_CONFIG_HEADERS([include/osmscout/Private/Config.h include/osmscout/MapFeatures.h])
 AM_INIT_AUTOMAKE([no-define nostdinc subdir-objects dist-bzip2])
 AC_GNU_SOURCE
 AC_PROG_CXX
@@ -26,17 +26,17 @@ fi
 
 dnl Selfmade tests
 
-dnl AC_MSG_CHECKING([for gcc symbol visibility support])
-dnl OLDCXXFLAGS="$CXXFLAGS"
-dnl CXXFLAGS="$CXXFLAGS -fvisibility=hidden -fvisibility-inlines-hidden"
-dnl AC_TRY_COMPILE([],
-dnl                [],
-dnl                [LIB_CXXFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden"
-dnl                 AC_SUBST(LIB_CXXFLAGS)
-dnl                 AC_MSG_RESULT(yes)
-dnl                 AC_DEFINE(LIBOSMSCOUT_EXPORT_SYMBOLS,1,[libosmscout uses special gcc compiler features to export symbols])],
-dnl                [AC_MSG_RESULT(no)])
-dnl CXXFLAGS="$OLDCXXFLAGS"
+AC_MSG_CHECKING([for gcc symbol visibility support])
+OLDCXXFLAGS="$CXXFLAGS"
+CXXFLAGS="$CXXFLAGS -fvisibility=hidden -fvisibility-inlines-hidden"
+AC_TRY_COMPILE([],
+               [],
+               [LIB_CXXFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden"
+                AC_SUBST(LIB_CXXFLAGS)
+                AC_MSG_RESULT(yes)
+                AC_DEFINE(OSMSCOUT_MAP_EXPORT_SYMBOLS,1,[libosmscout uses special gcc compiler features to export symbols])],
+               [AC_MSG_RESULT(no)])
+CXXFLAGS="$OLDCXXFLAGS"
 
 dnl Check for libosmscout
 PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout],

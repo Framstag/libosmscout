@@ -1,5 +1,5 @@
-#ifndef MAPPAINTER_H
-#define MAPPAINTER_H
+#ifndef OSMSCOUT_MAP_MAPPAINTER_H
+#define OSMSCOUT_MAP_MAPPAINTER_H
 
 /*
   This source is part of the libosmscout-map library
@@ -25,18 +25,20 @@
 #include <osmscout/Database.h>
 #include <osmscout/Projection.h>
 
+#include <osmscout/Private/MapImportExport.h>
+
 namespace osmscout {
 
-  class MapPainter
+  class OSMSCOUT_MAP_API MapPainter
   {
   protected:
     const Database& database;
 
-    Projection          *projection;   //! Projection to use
+    Projection      *projection;   //! Projection to use
 
   public:
-    std::list<Way>        poiWays;
-    std::list<Node>       poiNodes;
+    std::list<Way>  poiWays;
+    std::list<Node> poiNodes;
 
   protected:
     void RecalculateData(double lon, double lat,

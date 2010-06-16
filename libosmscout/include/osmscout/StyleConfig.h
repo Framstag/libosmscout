@@ -30,7 +30,7 @@ namespace osmscout {
   /**
    * Ways can have a line style
    */
-  class LineStyle
+  class OSMSCOUT_API LineStyle
   {
   public:
     enum Style {
@@ -159,7 +159,7 @@ namespace osmscout {
   /**
    * Areas can have a fill style, filling the area with one color
    */
-  class FillStyle
+  class OSMSCOUT_API FillStyle
   {
   public:
     enum Style {
@@ -216,7 +216,7 @@ namespace osmscout {
   /**
    * Areas can have a pattern style, filling the area with an repeated image pattern
    */
-  class PatternStyle
+  class OSMSCOUT_API PatternStyle
   {
   private:
     int         layer;
@@ -257,7 +257,7 @@ namespace osmscout {
     Nodes, ways and areas can have a label style for drawing text. Text can be formatted
     in different ways.
    */
-  class LabelStyle
+  class OSMSCOUT_API LabelStyle
   {
   public:
     enum Style {
@@ -395,7 +395,7 @@ namespace osmscout {
     iconic image, most of the time simple geometric forms lice circles, crosses and
     similar.
    */
-  class SymbolStyle
+  class OSMSCOUT_API SymbolStyle
   {
   public:
     enum Style {
@@ -466,7 +466,7 @@ namespace osmscout {
   /**
     IconStyle is for define drawing of external images as icons for nodes and areas
     */
-  class IconStyle
+  class OSMSCOUT_API IconStyle
   {
   private:
     size_t      id;       //! Internal id for fast lookup. 0 == no id defined (yet), max(size_t) == error
@@ -504,7 +504,7 @@ namespace osmscout {
   /**
    * A complete style definition
    */
-  class StyleConfig
+  class OSMSCOUT_API StyleConfig
   {
   private:
     TypeConfig                *typeConfig;

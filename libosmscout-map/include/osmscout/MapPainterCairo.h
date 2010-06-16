@@ -1,5 +1,5 @@
-#ifndef MAPPAINTERCAIRO_H
-#define MAPPAINTERCAIRO_H
+#ifndef OSMSCOUT_MAP_MAPPAINTERCAIRO_H
+#define OSMSCOUT_MAP_MAPPAINTERCAIRO_H
 
 /*
   This source is part of the libosmscout-map library
@@ -24,11 +24,13 @@
 
 #include <cairo/cairo.h>
 
+#include <osmscout/Private/MapImportExport.h>
+
 #include <osmscout/MapPainter.h>
 
 namespace osmscout {
 
-  class MapPainterCairo : public MapPainter
+  class OSMSCOUT_MAP_API MapPainterCairo : public MapPainter
   {
   private:
     // helper struct for drawing
@@ -152,7 +154,7 @@ namespace osmscout {
 
   public:
     MapPainterCairo(const Database& database);
-    virtual ~MapPainterCairo();
+    ~MapPainterCairo();
 
 
     bool DrawMap(const StyleConfig& styleConfig,

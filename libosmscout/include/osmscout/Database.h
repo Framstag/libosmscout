@@ -50,7 +50,7 @@
 #include <osmscout/Route.h>
 
 namespace osmscout {
-  class Database
+  class OSMSCOUT_API Database
   {
   public: // Fix this
     struct NodeUse

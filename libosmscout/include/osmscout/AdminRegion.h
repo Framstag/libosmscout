@@ -27,7 +27,7 @@ namespace osmscout {
     A named administrative region. It is used to build up hierachical, structured
     containment information like "Streets in City".
   */
-  struct AdminRegion
+  struct OSMSCOUT_API AdminRegion
   {
     Reference   reference; //! Reference to the object defining the region
     FileOffset  offset;    //! Offset into the region datafile

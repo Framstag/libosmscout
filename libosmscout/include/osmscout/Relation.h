@@ -32,7 +32,7 @@ namespace osmscout {
   /**
     Representation of an relation
     */
-  class Relation
+  class OSMSCOUT_API Relation
   {
   public:
     class Role

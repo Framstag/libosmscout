@@ -22,9 +22,11 @@
 
 #include <string>
 
+#include <osmscout/Private/CoreImportExport.h>
+
 namespace osmscout {
 
-  class Progress
+  class OSMSCOUT_API Progress
   {
   protected:
     Progress();
@@ -41,7 +43,7 @@ namespace osmscout {
     virtual void Error(const std::string& text);
   };
 
-  class ConsoleProgress : public Progress
+  class OSMSCOUT_API ConsoleProgress : public Progress
   {
   public:
     void SetStep(const std::string& step);

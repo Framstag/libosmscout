@@ -28,7 +28,8 @@
 #include <osmscout/Types.h>
 
 namespace osmscout {
-  class FileWriter
+
+  class OSMSCOUT_API FileWriter
   {
   private:
     FILE *file;

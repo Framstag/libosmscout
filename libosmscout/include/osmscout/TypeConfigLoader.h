@@ -24,8 +24,8 @@
 
 namespace osmscout {
 
-  extern bool LoadTypeConfig(const char* typeFile,
-                             TypeConfig& config);
+  extern OSMSCOUT_API bool LoadTypeConfig(const char* typeFile,
+                                          TypeConfig& config);
 }
 
 #endif
