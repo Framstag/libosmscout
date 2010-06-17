@@ -188,6 +188,8 @@ namespace osmscout {
 
   extern OSMSCOUT_API bool GetDigitValue(char digit, size_t& result);
 
+  extern OSMSCOUT_API std::string AppendFileToDir(const std::string& dir, const std::string& file);
+  
   template<typename A>
   size_t NumberDigits(const A& a,size_t base=10)
   {

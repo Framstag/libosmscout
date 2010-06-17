@@ -26,6 +26,7 @@
 #include <osmscout/Cache.h>
 #include <osmscout/FileScanner.h>
 #include <osmscout/NumericIndex.h>
+#include <osmscout/Util.h>
 
 namespace osmscout {
 
@@ -94,7 +95,7 @@ namespace osmscout {
   template <class N>
   bool DataFile<N>::Open(const std::string& path)
   {
-    datafilename=path+"/"+datafile;
+    datafilename=AppendFileToDir(path,datafile);
 
     isOpen=scanner.Open(datafilename) && index.Load(path);
 

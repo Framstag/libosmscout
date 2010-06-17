@@ -509,5 +509,3 @@ bool DatabaseTask::DrawResult(Lum::OS::Window* window,
   finishedLat==lat &&
   finishedMagnification==magnification;
 }
-
-
