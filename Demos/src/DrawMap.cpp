@@ -23,9 +23,12 @@
 #include <osmscout/Database.h>
 #include <osmscout/MapPainterCairo.h>
 #include <osmscout/StyleConfigLoader.h>
+#include <osmscout/Util.h>
 
 /*
-  Example for the nordrhein-westfalen.osm:
+  Example for the nordrhein-westfalen.osm (to be executed in the Demos top
+  level directory):
+  
   DrawMap ../TravelJinni/ ../TravelJinni/standard.oss.xml 640 480 7.13 50.69 10000 test.png
 */
 
@@ -45,12 +48,12 @@ int main(int argc, char* argv[])
   map=argv[1];
   style=argv[2];
 
-  if (sscanf(argv[3],"%ld",&width)!=1) {
+  if (!osmscout::StringToNumber(argv[3],width)) {
     std::cerr << "wisth is not numeric!" << std::endl;
     return 1;
   }
 
-  if (sscanf(argv[4],"%ld",&height)!=1) {
+  if (!osmscout::StringToNumber(argv[4],height)) {
     std::cerr << "height is not numeric!" << std::endl;
     return 1;
   }
