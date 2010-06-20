@@ -709,7 +709,10 @@ namespace osmscout {
 
   void MapPainterCairo::DrawPath(LineStyle::Style style,
                                  const Projection& projection,
-                                 double r, double g, double b, double a,
+                                 double r,
+                                 double g,
+                                 double b,
+                                 double a,
                                  double width,
                                  const std::vector<Point>& nodes)
   {
