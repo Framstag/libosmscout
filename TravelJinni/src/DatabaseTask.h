@@ -30,6 +30,7 @@
 #include <Lum/OS/Bitmap.h>
 #include <Lum/OS/Thread.h>
 
+#include <osmscout/Database.h>
 #include <osmscout/StyleConfig.h>
 #include <osmscout/TypeConfig.h>
 
@@ -49,7 +50,10 @@ class DatabaseTask : public Lum::OS::Thread
 private:
   osmscout::Database        *database;
   osmscout::StyleConfig     *styleConfig;
+  osmscout::MapData         data;
   Lum::OS::Condition        condition;
+  osmscout::MapPainterCairo painter;
+  
   mutable Lum::OS::Mutex    mutex;
   bool                      finish;
   Job                       *newJob;
@@ -66,7 +70,6 @@ private:
   size_t                    finishedWidth,finishedHeight;
   double                    finishedLon,finishedLat;
   double                    finishedMagnification;
-  osmscout::MapPainterCairo painter;
 
 private:
   void SignalRedraw();

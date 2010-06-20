@@ -22,34 +22,61 @@
 
 #include <set>
 
-#include <osmscout/Database.h>
-#include <osmscout/Projection.h>
-
 #include <osmscout/Private/MapImportExport.h>
 
+#include <osmscout/Projection.h>
+#include <osmscout/Node.h>
+#include <osmscout/Relation.h>
+#include <osmscout/StyleConfig.h>
+#include <osmscout/Way.h>
+
 namespace osmscout {
+
+  class OSMSCOUT_MAP_API MapParameter
+  {
+  public:
+    MapParameter();
+    virtual ~MapParameter();
+  };
+
+  struct OSMSCOUT_MAP_API MapData
+  {
+    std::vector<Node>     nodes;
+    std::vector<Way>      ways;
+    std::vector<Way>      areas;
+    std::vector<Relation> relationWays;
+    std::vector<Relation> relationAreas;
+    std::list<Way>        poiWays;
+    std::list<Node>       poiNodes;
+  };
 
   class OSMSCOUT_MAP_API MapPainter
   {
   protected:
-    const Database& database;
-
-    Projection      *projection;   //! Projection to use
-
-  public:
-    std::list<Way>  poiWays;
-    std::list<Node> poiNodes;
+    std::vector<bool>   drawNode;     //! This nodes will be drawn
+    std::vector<double> nodeX;        //! static scratch buffer for calculation
+    std::vector<double> nodeY;        //! static scratch buffer for calculation
 
   protected:
-    void RecalculateData(double lon, double lat,
-                         double magnification,
-                         size_t width, size_t height);
+    bool IsVisible(const Projection& projection,
+                   const std::vector<Point>& nodes) const;
 
+    void TransformArea(const Projection& projection,
+                       const std::vector<Point>& nodes);
+    void TransformWay(const Projection& projection,
+                      const std::vector<Point>& nodes);
+
+    bool GetBoundingBox(const std::vector<Point>& nodes,
+                        double& xmin, double& ymin,
+                        double& xmax, double& ymax);
+    bool GetCenterPixel(const Projection& projection,
+                        const std::vector<Point>& nodes,
+                        double& cx,
+                        double& cy);
+  
   public:
-    MapPainter(const Database& database);
+    MapPainter();
     virtual ~MapPainter();
-
-    void SetProjection(Projection* projection);
   };
 }
 

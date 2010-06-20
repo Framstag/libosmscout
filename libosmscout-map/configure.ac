@@ -42,9 +42,23 @@ PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout],
                   [AC_SUBST(LIBOSMSCOUT_CFLAGS)
                    AC_SUBST(LIBOSMSCOUT_LIBS)])
 
-PKG_CHECK_MODULES(LIBCAIRO, cairo)
-AC_SUBST(LIBCAIRO_CFLAGS)
-AC_SUBST(LIBCAIRO_LIBS)
+PKG_CHECK_MODULES(LIBCAIRO, cairo,
+                  HASCAIRO=true
+                  [AC_SUBST(LIBCAIRO_CFLAGS)
+                   AC_SUBST(LIBCAIRO_LIBS)
+                   AC_DEFINE(HAVE_LIB_CAIRO,1,[libcairo found])],
+                   [])
+                   
+AM_CONDITIONAL(HAVE_LIB_CAIRO,[test -n "$HASCAIRO"])
+
+PKG_CHECK_MODULES(LIBQTGUI, QtGui > 4.6.0,
+                  HASQTGUI=true
+                  [AC_SUBST(LIBQTGUI_CFLAGS)
+                   AC_SUBST(LIBQTGUI_LIBS)
+                   AC_DEFINE(HAVE_LIB_QTGUI,1,[libQtGui found])],
+                   [])
+                   
+AM_CONDITIONAL(HAVE_LIB_QTGUI,[test -n "$HASQTGUI"])
 
 PKG_CHECK_MODULES(LIBPNG,libpng)
 AC_SUBST(LIBPNG_CFLAGS)

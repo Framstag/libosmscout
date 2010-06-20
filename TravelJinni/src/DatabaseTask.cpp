@@ -69,8 +69,7 @@ DatabaseTask::DatabaseTask(osmscout::Database* database,
    currentWidth(0),
    currentHeight(0),
    finishedSurface(NULL),
-   finishedCairo(NULL),
-   painter(*database)
+   finishedCairo(NULL)
 {
     // no code
 }
@@ -116,10 +115,50 @@ void DatabaseTask::Run()
       currentMagnification=currentJob->magnification;
 
       if (database->IsOpen() && styleConfig!=NULL) {
+        osmscout::MercatorProjection projection;
+        osmscout::MapParameter       parameter;
+        
+        osmscout::StopClock overallTimer;
+        
+        projection.Set(currentLon,
+                       currentLat,
+                       currentMagnification,
+                       currentWidth,
+                       currentHeight);
+      
+        osmscout::StopClock dataRetrievalTimer;
+
+        database->GetObjects(*styleConfig,
+                             projection.GetLonMin(),
+                             projection.GetLatMin(),
+                             projection.GetLonMax(),
+                             projection.GetLatMax(),
+                             projection.GetMagnification(),
+                             ((size_t)ceil(osmscout::Log2(projection.GetMagnification())))+6,
+                             2000,
+                             2000,
+                             std::numeric_limits<size_t>::max(),
+                             data.nodes,
+                             data.ways,
+                             data.areas,
+                             data.relationWays,
+                             data.relationAreas);
+    
+        dataRetrievalTimer.Stop();
+      
+        osmscout::StopClock drawTimer;
+        
         painter.DrawMap(*styleConfig,
-                      currentLon,currentLat,currentMagnification,
-                      currentWidth,currentHeight,
-                      currentSurface,currentCairo);
+                        projection,
+                        parameter,
+                        data,
+                        currentSurface,
+                        currentCairo);
+        
+        drawTimer.Stop();          
+        overallTimer.Stop();          
+                        
+        std::cout << "All: " << overallTimer << " Data: " << dataRetrievalTimer << " Draw: " << drawTimer << std::endl;
       }
       else {
         std::cout << "Cannot draw map: " << database->IsOpen() << " " << (styleConfig!=NULL) << std::endl;
@@ -334,7 +373,7 @@ void DatabaseTask::ClearRoute()
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
-  painter.poiWays.clear();
+  data.poiWays.clear();
 
   SignalRedraw();
 }
@@ -343,7 +382,7 @@ void DatabaseTask::AddRoute(const osmscout::Way& way)
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
-  painter.poiWays.push_back(way);
+  data.poiWays.push_back(way);
 
   SignalRedraw();
 }

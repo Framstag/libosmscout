@@ -282,6 +282,12 @@ namespace osmscout {
                             std::vector<Relation>& relationWays,
                             std::vector<Relation>& relationAreas) const
   {
+    nodes.clear();
+    ways.clear();
+    areas.clear();
+    relationWays.clear();
+    relationAreas.clear();
+  
     size_t maxPriority;
 
     StopClock maxPrioTimer;

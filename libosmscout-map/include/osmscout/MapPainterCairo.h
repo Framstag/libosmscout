@@ -38,24 +38,12 @@ namespace osmscout {
   {
   private:
     // helper struct for drawing
-    std::vector<bool>                 drawNode;     //! This nodes will be drawn
-    std::vector<bool>                 outNode;      //! This nodes is out of the visible area
-    std::vector<double>               nodeX;        //! static scratch buffer for calculation
-    std::vector<double>               nodeY;        //! static scratch buffer for calculation
     std::vector<double>               borderWidth;  //! border with for this way (area) border style
     std::map<size_t,cairo_scaled_font_t*> font;     //! Cached scaled font
 
     // Image handling
     std::vector<cairo_surface_t*>     images;       //! vector of cairo surfaces for images and patterns
     std::vector<cairo_pattern_t*>     patterns;     //! cairo pattern structure for patterns
-
-    size_t                styleCount;
-
-    std::vector<Node>     nodes;
-    std::vector<Way>      ways;
-    std::vector<Way>      areas;
-    std::vector<Relation> relationWays;
-    std::vector<Relation> relationAreas;
 
     bool                  areaLayers[11];
     bool                  wayLayers[11];
@@ -72,37 +60,26 @@ namespace osmscout {
     cairo_scaled_font_t* GetScaledFont(cairo_t* draw,
                                        size_t fontSize);
 
-    bool IsVisible(const std::vector<Point>& nodes) const;
-
-    void TransformArea(const std::vector<Point>& nodes);
-    void TransformWay(const std::vector<Point>& nodes);
-
-    bool GetBoundingBox(const std::vector<Point>& nodes,
-                        double& xmin, double& ymin,
-                        double& xmax, double& ymax);
-    bool GetCenterPixel(const std::vector<Point>& nodes,
-                        double& cx,
-                        double& cy);
-
     bool CheckImage(const StyleConfig& styleConfig,
                     IconStyle& style);
     bool CheckImage(const StyleConfig& styleConfig,
                     PatternStyle& style);
 
     void DrawLabel(cairo_t* draw,
-                   double magnification,
+                   const Projection& projection,
                    const LabelStyle& style,
                    const std::string& text,
                    double x, double y);
 
     void DrawTiledLabel(cairo_t* draw,
-                   double magnification,
-                   const LabelStyle& style,
-                   const std::string& label,
-                   const std::vector<Point>& nodes,
-                   std::set<size_t>& tileBlacklist);
+                        const Projection& projection,
+                        const LabelStyle& style,
+                        const std::string& label,
+                        const std::vector<Point>& nodes,
+                        std::set<size_t>& tileBlacklist);
 
     void DrawContourLabel(cairo_t* draw,
+                          const Projection& projection,
                           const LabelStyle& style,
                           const std::string& text,
                           const std::vector<Point>& nodes);
@@ -116,17 +93,21 @@ namespace osmscout {
                   double x, double y);
 
     void DrawPath(LineStyle::Style style,
+                  const Projection& projection,
                   double r, double g, double b, double a,
                   double width,
                   const std::vector<Point>& nodes);
 
     void FillRegion(const std::vector<Point>& nodes,
+                    const Projection& projection,
                     const FillStyle& style);
 
     void FillRegion(const std::vector<Point>& nodes,
+                    const Projection& projection,
                     PatternStyle& style);
 
     void DrawWayOutline(const StyleConfig& styleConfig,
+                        const Projection& projection,
                         TypeId type,
                         double width,
                         bool isBridge,
@@ -135,6 +116,7 @@ namespace osmscout {
                         bool endIsJoint,
                         const std::vector<Point>& nodes);
     void DrawWay(const StyleConfig& styleConfig,
+                 const Projection& projection,
                  TypeId type,
                  double width,
                  bool isBridge,
@@ -142,36 +124,55 @@ namespace osmscout {
                  const std::vector<Point>& nodes);
 
     void DrawArea(const StyleConfig& styleConfig,
+                  const Projection& projection,
                   TypeId type,
                   int layer,
                   bool isBuilding,
                   const std::vector<Point>& nodes);
 
-    void DrawAreas(const StyleConfig& styleConfig);
-    void DrawWays(const StyleConfig& styleConfig);
-    void DrawWayLabels(const StyleConfig& styleConfig);
-    void DrawNodes(const StyleConfig& styleConfig);
-    void DrawAreaLabels(const StyleConfig& styleConfig);
-    void DrawPOIWays(const StyleConfig& styleConfig);
-    void DrawPOINodes(const StyleConfig& styleConfig);
-    void DrawPOINodeLabels(const StyleConfig& styleConfig);
+    void DrawAreas(const StyleConfig& styleConfig,
+                   const Projection& projection,
+                   const std::vector<Way>& areas,
+                   const std::vector<Relation>& relationAreas);
+    void DrawAreaLabels(const StyleConfig& styleConfig,
+                        const Projection& projection,
+                        const std::vector<Way>& areas,
+                        const std::vector<Relation>& relationAreas);
+                        
+    void DrawWays(const StyleConfig& styleConfig,
+                  const Projection& projection,
+                  const std::vector<Way>& ways,
+                  const std::vector<Relation>& relationWays);
+    void DrawWayLabels(const StyleConfig& styleConfig,
+                       const Projection& projection,
+                       const std::vector<Way>& ways,
+                       const std::vector<Relation>& relationWays);
+                        
+    void DrawNodes(const StyleConfig& styleConfig,
+                   const Projection& projection,
+                   const std::vector<Node>& areas);
+                   
+    void DrawPOIWays(const StyleConfig& styleConfig,
+                     const Projection& projection,
+                     const std::list<Way>& poiWays);
+    void DrawPOINodes(const StyleConfig& styleConfig,
+                      const Projection& projection,
+                      const std::list<Node>& poiNodes);
+    void DrawPOINodeLabels(const StyleConfig& styleConfig,
+                           const Projection& projection,
+                           const std::list<Node>& poiNodes);
 
   public:
-    MapPainterCairo(const Database& database);
+    MapPainterCairo();
     ~MapPainterCairo();
 
 
     bool DrawMap(const StyleConfig& styleConfig,
-                 double lon, double lat,
-                 double magnification,
-                 size_t width, size_t height,
+                 const Projection& projection,
+                 const MapParameter& parameter,
+                 const MapData& data,
                  cairo_surface_t *image,
                  cairo_t *draw);
-
-    bool PrintMap(const StyleConfig& styleConfig,
-                  double lon, double lat,
-                  double magnification,
-                  size_t width, size_t height);
   };
 }
 

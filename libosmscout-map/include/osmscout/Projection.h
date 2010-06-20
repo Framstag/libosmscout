@@ -31,6 +31,8 @@ namespace osmscout {
   public:
     virtual ~Projection();
 
+    virtual double GetLon() const = 0;
+    virtual double GetLat() const = 0;
     virtual double GetWidth() const = 0;
     virtual double GetHeight() const = 0;
     virtual double GetLonMin() const = 0;
@@ -83,6 +85,16 @@ namespace osmscout {
 
   public:
     MercatorProjection();
+
+    inline double GetLon() const
+    {
+      return lon;
+    }
+    
+    inline double GetLat() const
+    {
+      return lat;
+    }
 
     inline double GetWidth() const
     {

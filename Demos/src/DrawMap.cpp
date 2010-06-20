@@ -86,8 +86,6 @@ int main(int argc, char* argv[])
     std::cerr << "Cannot open style" << std::endl;
   }
 
-  osmscout::MapPainterCairo painter(database);
-
   cairo_surface_t *surface;
   cairo_t         *cairo;
 
@@ -97,10 +95,40 @@ int main(int argc, char* argv[])
     cairo=cairo_create(surface);
 
     if (cairo!=NULL) {
+      osmscout::MercatorProjection projection;
+      osmscout::MapParameter       parameter;
+      osmscout::MapData            data;
+      osmscout::MapPainterCairo    painter;
+    
+      projection.Set(lon,
+                     lat,
+                     zoom,
+                     width,
+                     height);
+
+
+      database.GetObjects(styleConfig,
+                          projection.GetLonMin(),
+                          projection.GetLatMin(),
+                          projection.GetLonMax(),
+                          projection.GetLatMax(),
+                          projection.GetMagnification(),
+                          ((size_t)ceil(osmscout::Log2(projection.GetMagnification())))+6,
+                          2000,
+                          2000,
+                          std::numeric_limits<size_t>::max(),
+                          data.nodes,
+                          data.ways,
+                          data.areas,
+                          data.relationWays,
+                          data.relationAreas);
+  
       if (painter.DrawMap(styleConfig,
-                          lon,lat,zoom,
-                          width,height,
-                          surface,cairo)) {
+                          projection,
+                          parameter,
+                          data,
+                          surface,
+                          cairo)) {
         if (cairo_surface_write_to_png(surface,output.c_str())!=CAIRO_STATUS_SUCCESS) {
           std::cerr << "Cannot write PNG" << std::endl;
         }

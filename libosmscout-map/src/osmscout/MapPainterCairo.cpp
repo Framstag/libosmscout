@@ -30,14 +30,12 @@
 #include <cstdlib>
 
 #include <osmscout/LoaderPNG.h>
+#include <osmscout/Util.h>
 
 namespace osmscout {
 
   static const double gradtorad=2*M_PI/360;
 
-  static size_t optimizeLimit=512;
-  static double relevantPosDeriviation=2.0;
-  static double relevantSlopeDeriviation=0.1;
   static double outlineMinWidth=0.5;
 
   static double longDash[]= {7,3};
@@ -278,11 +276,9 @@ namespace osmscout {
     cairo_restore(cr);
   }
 
-  MapPainterCairo::MapPainterCairo(const Database& database)
-   : MapPainter(database)
+  MapPainterCairo::MapPainterCairo()
   {
     drawNode.resize(10000); // TODO: Calculate matching size
-    outNode.resize(10000); // TODO: Calculate matching size
     nodeX.resize(10000);
     nodeY.resize(10000);
   }
@@ -290,245 +286,6 @@ namespace osmscout {
   MapPainterCairo::~MapPainterCairo()
   {
     // no code
-  }
-
-  bool MapPainterCairo::IsVisible(const std::vector<Point>& nodes) const
-  {
-    if (nodes.size()==0) {
-      return false;
-    }
-
-    // Bounding box
-    double lonMin=nodes[0].lon;
-    double lonMax=nodes[0].lon;
-    double latMin=nodes[0].lat;
-    double latMax=nodes[0].lat;
-
-    for (size_t i=1; i<nodes.size(); i++) {
-      lonMin=std::min(lonMin,nodes[i].lon);
-      lonMax=std::max(lonMax,nodes[i].lon);
-      latMin=std::min(latMin,nodes[i].lat);
-      latMax=std::max(latMax,nodes[i].lat);
-    }
-
-    // If bounding box is neither left or right nor above or below
-    // it must somehow cover the map area.
-    return projection->GeoIsIn(lonMin,latMin,lonMax,latMax);
-  }
-
-  void MapPainterCairo::TransformArea(const std::vector<Point>& nodes)
-  {
-    if (projection->GetMagnification()>optimizeLimit) {
-      for (size_t i=0; i<nodes.size(); i++) {
-        drawNode[i]=true;
-        projection->GeoToPixel(nodes[i].lon,nodes[i].lat,
-                               nodeX[i],nodeY[i]);
-      }
-    }
-    else {
-      drawNode[0]=true;
-      drawNode[nodes.size()-1]=true;
-
-      // Drop every point that is on direct line between two points A and B
-      for (size_t i=1; i+1<nodes.size(); i++) {
-        drawNode[i]=std::abs((nodes[i].lon-nodes[i-1].lon)/
-                             (nodes[i].lat-nodes[i-1].lat)-
-                             (nodes[i+1].lon-nodes[i].lon)/
-                             (nodes[i+1].lat-nodes[i].lat))>=relevantSlopeDeriviation;
-      }
-
-      // Calculate screen position
-      for (size_t i=0; i<nodes.size(); i++) {
-        if (drawNode[i]) {
-          projection->GeoToPixel(nodes[i].lon,nodes[i].lat,
-                                nodeX[i],nodeY[i]);
-        }
-      }
-
-      // Drop all points that do not differ in position from the previous node
-      for (size_t i=1; i<nodes.size()-1; i++) {
-        if (drawNode[i]) {
-          size_t j=i+1;
-          while (!drawNode[j]) {
-            j++;
-          }
-
-          if (std::fabs(nodeX[j]-nodeX[i])<=relevantPosDeriviation &&
-              std::fabs(nodeY[j]-nodeY[i])<=relevantPosDeriviation) {
-            drawNode[i]=false;
-          }
-        }
-      }
-    }
-  }
-
-  void MapPainterCairo::TransformWay(const std::vector<Point>& nodes)
-  {
-    if (projection->GetMagnification()>optimizeLimit) {
-      for (size_t i=0; i<nodes.size(); i++) {
-        drawNode[i]=true;
-        projection->GeoToPixel(nodes[i].lon,nodes[i].lat,
-                               nodeX[i],nodeY[i]);
-      }
-    }
-    else {
-      size_t a;
-
-      for (size_t i=0; i<nodes.size(); i++) {
-        drawNode[i]=true;
-      }
-
-      if (nodes.size()>=3) {
-        a=0;
-        while (a+1<nodes.size()) {
-          if (projection->GeoIsIn(nodes[a].lon,nodes[a].lat)) {
-            break;
-          }
-
-          a++;
-        }
-
-        if (a>1) {
-          for (size_t i=0; i<a-1; i++) {
-            drawNode[i]=false;
-          }
-        }
-      }
-
-      if (nodes.size()>=3) {
-        a=nodes.size()-1;
-        while (a>0) {
-          if (projection->GeoIsIn(nodes[a].lon,nodes[a].lat)) {
-            break;
-          }
-
-          a--;
-        }
-
-        if (a<nodes.size()-2) {
-          for (size_t i=a+2; i<nodes.size(); i++) {
-            drawNode[i]=false;
-          }
-        }
-      }
-
-      // Drop every point that is on direct line between two points A and B
-      for (size_t i=0; i+2<nodes.size(); i++) {
-        if (drawNode[i]) {
-          size_t j=i+1;
-          while (j<nodes.size() && !drawNode[j]) {
-            j++;
-          }
-
-          size_t k=j+1;
-          while (k<nodes.size() && !drawNode[k]) {
-            k++;
-          }
-
-          if (j<nodes.size() && k<nodes.size()) {
-            drawNode[j]=std::abs((nodes[j].lon-nodes[i].lon)/
-                               (nodes[j].lat-nodes[i].lat)-
-                               (nodes[k].lon-nodes[j].lon)/
-                               (nodes[k].lat-nodes[j].lat))>=relevantSlopeDeriviation;
-          }
-        }
-      }
-
-      // Calculate screen position
-      for (size_t i=0; i<nodes.size(); i++) {
-        if (drawNode[i]) {
-          projection->GeoToPixel(nodes[i].lon,nodes[i].lat,
-                                 nodeX[i],nodeY[i]);
-        }
-      }
-
-      // Drop all points that do not differ in position from the previous node
-      if (nodes.size()>2) {
-        for (size_t i=1; i<nodes.size()-1; i++) {
-          if (drawNode[i]) {
-            size_t j=i+1;
-
-            while (j+1<nodes.size() &&
-                   !drawNode[j]) {
-              j++;
-            }
-
-            if (std::fabs(nodeX[j]-nodeX[i])<=relevantPosDeriviation &&
-                std::fabs(nodeY[j]-nodeY[i])<=relevantPosDeriviation) {
-              drawNode[i]=false;
-            }
-          }
-        }
-      }
-
-      /*
-      // Check which nodes or not visible in the given way
-      for (size_t i=0; i<way->nodes.size(); i++) {
-        if (way->nodes[i].lon<lonMin || way->nodes[i].lon>lonMax ||
-            way->nodes[i].lat<latMin || way->nodes[i].lat>latMax){
-          outNode[i]=true;
-        }
-      }
-
-      if (outNode[1]) {
-        drawNode[0]=false;
-      }
-
-      for (size_t i=1; i<way->nodes.size()-1; i++) {
-        if (outNode[i-1] && outNode[i+1]) {
-          drawNode[i]=false;
-        }
-      }
-
-      if (outNode[way->nodes.size()-2]) {
-        drawNode[way->nodes.size()-1]=false;
-      }*/
-    }
-  }
-
-  bool MapPainterCairo::GetBoundingBox(const std::vector<Point>& nodes,
-                                       double& xmin, double& ymin,
-                                       double& xmax, double& ymax)
-  {
-    if (nodes.size()==0) {
-      return false;
-    }
-
-    xmin=nodes[0].lon;
-    xmax=nodes[0].lon;
-    ymin=nodes[0].lat;
-    ymax=nodes[0].lat;
-
-    for (size_t j=1; j<nodes.size(); j++) {
-      xmin=std::min(xmin,nodes[j].lon);
-      xmax=std::max(xmax,nodes[j].lon);
-      ymin=std::min(ymin,nodes[j].lat);
-      ymax=std::max(ymax,nodes[j].lat);
-    }
-
-    return true;
-  }
-
-  bool MapPainterCairo::GetCenterPixel(const std::vector<Point>& nodes,
-                                       double& cx,
-                                       double& cy)
-  {
-    double xmin;
-    double xmax;
-    double ymin;
-    double ymax;
-
-    if (!GetBoundingBox(nodes,xmin,ymin,xmax,ymax)) {
-      return false;
-    }
-
-    projection->GeoToPixel(xmin,ymin,xmin,ymin);
-    projection->GeoToPixel(xmax,ymax,xmax,ymax);
-
-    cx=xmin+(xmax-xmin)/2;
-    cy=ymin+(ymax-ymin)/2;
-
-    return true;
   }
 
   bool MapPainterCairo::CheckImage(const StyleConfig& styleConfig,
@@ -642,7 +399,7 @@ namespace osmscout {
   }
 
   void MapPainterCairo::DrawLabel(cairo_t* draw,
-                                  double magnification,
+                                  const Projection& projection,
                                   const LabelStyle& style,
                                   const std::string& text,
                                   double x, double y)
@@ -661,8 +418,8 @@ namespace osmscout {
       double b=style.GetTextB();
       double a=style.GetTextA();
 
-      if (magnification>style.GetScaleAndFadeMag()) {
-        double factor=log2(magnification)-log2(style.GetScaleAndFadeMag());
+      if (projection.GetMagnification()>style.GetScaleAndFadeMag()) {
+        double factor=log2(projection.GetMagnification())-log2(style.GetScaleAndFadeMag());
         fontSize=fontSize*pow(2,factor);
         a=a/factor;
       }
@@ -676,9 +433,9 @@ namespace osmscout {
 
       cairo_set_source_rgba(draw,r,g,b,a);
 
-      if (x-textExtents.width/2+textExtents.x_bearing>=projection->GetWidth() ||
+      if (x-textExtents.width/2+textExtents.x_bearing>=projection.GetWidth() ||
           x+textExtents.width/2+textExtents.x_bearing<0 ||
-          y-textExtents.height/2+textExtents.x_bearing>=projection->GetHeight() ||
+          y-textExtents.height/2+textExtents.x_bearing>=projection.GetHeight() ||
           y+textExtents.width/2+textExtents.x_bearing<0) {
         return;
       }
@@ -704,9 +461,9 @@ namespace osmscout {
       cairo_scaled_font_extents(font,&fontExtents);
       cairo_scaled_font_text_extents(font,text.c_str(),&textExtents);
 
-      if (x-textExtents.width/2+textExtents.x_bearing-outerWidth>=projection->GetWidth() ||
+      if (x-textExtents.width/2+textExtents.x_bearing-outerWidth>=projection.GetWidth() ||
           x+textExtents.width/2+textExtents.x_bearing-outerWidth<0 ||
-          y-textExtents.height/2+textExtents.x_bearing+outerWidth>=projection->GetHeight() ||
+          y-textExtents.height/2+textExtents.x_bearing+outerWidth>=projection.GetHeight() ||
           y+textExtents.width/2+textExtents.x_bearing+outerWidth<0) {
         return;
       }
@@ -762,8 +519,8 @@ namespace osmscout {
       double b=style.GetTextB();
       double a=style.GetTextA();
 
-      if (magnification>style.GetScaleAndFadeMag()) {
-        double factor=log2(magnification)-log2(style.GetScaleAndFadeMag());
+      if (projection.GetMagnification()>style.GetScaleAndFadeMag()) {
+        double factor=log2(projection.GetMagnification())-log2(style.GetScaleAndFadeMag());
         fontSize=fontSize*pow(2,factor);
         a=a/factor;
       }
@@ -777,9 +534,9 @@ namespace osmscout {
       cairo_scaled_font_extents(font,&fontExtents);
       cairo_scaled_font_text_extents(font,text.c_str(),&textExtents);
 
-      if (x-textExtents.width/2+textExtents.x_bearing>=projection->GetWidth() ||
+      if (x-textExtents.width/2+textExtents.x_bearing>=projection.GetWidth() ||
           x+textExtents.width/2+textExtents.x_bearing<0 ||
-          y-textExtents.height/2+textExtents.x_bearing>=projection->GetHeight() ||
+          y-textExtents.height/2+textExtents.x_bearing>=projection.GetHeight() ||
           y+textExtents.width/2+textExtents.x_bearing<0) {
         return;
       }
@@ -799,7 +556,7 @@ namespace osmscout {
   }
 
   void MapPainterCairo::DrawTiledLabel(cairo_t* draw,
-                                       double magnification,
+                                       const Projection& projection,
                                        const LabelStyle& style,
                                        const std::string& label,
                                        const std::vector<Point>& nodes,
@@ -815,8 +572,8 @@ namespace osmscout {
       return;
     }
 
-    projection->GeoToPixel(xmin,ymin,xmin,ymin);
-    projection->GeoToPixel(xmax,ymax,xmax,ymax);
+    projection.GeoToPixel(xmin,ymin,xmin,ymin);
+    projection.GeoToPixel(xmax,ymax,xmax,ymax);
 
     x=xmin+(xmax-xmin)/2;
     y=ymin+(ymax-ymin)/2;
@@ -833,7 +590,7 @@ namespace osmscout {
     }
 
     DrawLabel(draw,
-              magnification,
+              projection,
               style,
               label,
               x,y);
@@ -842,6 +599,7 @@ namespace osmscout {
   }
 
   void MapPainterCairo::DrawContourLabel(cairo_t* draw,
+                                         const Projection& projection,
                                          const LabelStyle& style,
                                          const std::string& text,
                                          const std::vector<Point>& nodes)
@@ -862,7 +620,7 @@ namespace osmscout {
         xo=x;
         yo=y;
 
-        projection->GeoToPixel(nodes[j].lon,nodes[j].lat,
+        projection.GeoToPixel(nodes[j].lon,nodes[j].lat,
                                x,y);
         if (j==0) {
           cairo_move_to(draw,x,y);
@@ -878,7 +636,7 @@ namespace osmscout {
         xo=x;
         yo=y;
 
-        projection->GeoToPixel(nodes[nodes.size()-j-1].lon,nodes[nodes.size()-j-1].lat,
+        projection.GeoToPixel(nodes[nodes.size()-j-1].lon,nodes[nodes.size()-j-1].lat,
                                x,y);
 
         if (j==0) {
@@ -981,6 +739,7 @@ namespace osmscout {
   }
 
   void MapPainterCairo::DrawPath(LineStyle::Style style,
+                                 const Projection& projection,
                                  double r, double g, double b, double a,
                                  double width,
                                  const std::vector<Point>& nodes)
@@ -1012,7 +771,7 @@ namespace osmscout {
       break;
     }
 
-    TransformWay(nodes);
+    TransformWay(projection,nodes);
 
     bool start=true;
     for (size_t i=0; i<nodes.size(); i++) {
@@ -1037,6 +796,7 @@ namespace osmscout {
   }
 
   void MapPainterCairo::FillRegion(const std::vector<Point>& nodes,
+                                   const Projection& projection,
                                    const FillStyle& style)
   {
     cairo_set_source_rgba(draw,
@@ -1046,7 +806,7 @@ namespace osmscout {
                           1);
     cairo_set_line_width(draw,1);
 
-    TransformArea(nodes);
+    TransformArea(projection,nodes);
 
     bool start=true;
     for (size_t i=0; i<nodes.size(); i++) {
@@ -1068,6 +828,7 @@ namespace osmscout {
   }
 
   void MapPainterCairo::FillRegion(const std::vector<Point>& nodes,
+                                   const Projection& projection,
                                    PatternStyle& style)
   {
     assert(style.GetId()>0);
@@ -1077,7 +838,7 @@ namespace osmscout {
 
     cairo_set_source(draw,patterns[style.GetId()-1]);
 
-    TransformArea(nodes);
+    TransformArea(projection,nodes);
 
     bool start=true;
     for (size_t i=0; i<nodes.size(); i++) {
@@ -1099,6 +860,7 @@ namespace osmscout {
   }
 
   void MapPainterCairo::DrawWayOutline(const StyleConfig& styleConfig,
+                                       const Projection& projection,
                                        TypeId type,
                                        double width,
                                        bool isBridge,
@@ -1119,7 +881,7 @@ namespace osmscout {
       lineWidth=style->GetWidth();
     }
 
-    lineWidth=lineWidth/projection->GetPixelSize();
+    lineWidth=lineWidth/projection.GetPixelSize();
 
     if (lineWidth<style->GetMinPixel()) {
       lineWidth=style->GetMinPixel();
@@ -1128,25 +890,25 @@ namespace osmscout {
     bool outline=style->GetOutline()>0 &&
                  lineWidth-2*style->GetOutline()>=outlineMinWidth;
 
-    if (!(isBridge && projection->GetMagnification()>=magCity) &&
-        !(isTunnel && projection->GetMagnification()>=magCity) &&
+    if (!(isBridge && projection.GetMagnification()>=magCity) &&
+        !(isTunnel && projection.GetMagnification()>=magCity) &&
         !outline) {
       return;
     }
 
-    if (isBridge && projection->GetMagnification()>=magCity) {
+    if (isBridge && projection.GetMagnification()>=magCity) {
       cairo_set_dash(draw,NULL,0,0);
       cairo_set_source_rgba(draw,0.0,0.0,0.0,1.0);
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
     }
-    else if (isTunnel && projection->GetMagnification()>=magCity) {
+    else if (isTunnel && projection.GetMagnification()>=magCity) {
       double tunnel[2];
 
       tunnel[0]=7+lineWidth;
       tunnel[1]=7+lineWidth;
 
       cairo_set_dash(draw,tunnel,2,0);
-      if (projection->GetMagnification()>=10000) {
+      if (projection.GetMagnification()>=10000) {
         cairo_set_source_rgba(draw,0.75,0.75,0.75,1.0);
       }
       else {
@@ -1166,7 +928,7 @@ namespace osmscout {
 
     cairo_set_line_width(draw,lineWidth);
 
-    TransformWay(nodes);
+    TransformWay(projection,nodes);
 
     bool start=true;
     for (size_t i=0; i<nodes.size(); i++) {
@@ -1221,6 +983,7 @@ namespace osmscout {
   }
 
   void MapPainterCairo::DrawWay(const StyleConfig& styleConfig,
+                                const Projection& projection,
                                 TypeId type,
                                 double width,
                                 bool isBridge,
@@ -1243,7 +1006,7 @@ namespace osmscout {
       lineWidth=style->GetWidth();
     }
 
-    lineWidth=lineWidth/projection->GetPixelSize();
+    lineWidth=lineWidth/projection.GetPixelSize();
 
     if (lineWidth<style->GetMinPixel()) {
       lineWidth=style->GetMinPixel();
@@ -1254,10 +1017,11 @@ namespace osmscout {
 
     if (style->GetOutline()>0 &&
         !outline &&
-        !(isBridge && projection->GetMagnification()>=magCity) &&
-        !(isTunnel && projection->GetMagnification()>=magCity)) {
+        !(isBridge && projection.GetMagnification()>=magCity) &&
+        !(isTunnel && projection.GetMagnification()>=magCity)) {
       // Should draw outline, but resolution is too low
       DrawPath(style->GetStyle(),
+               projection,
                style->GetAlternateR(),style->GetAlternateG(),style->GetAlternateB(),style->GetAlternateA(),
                lineWidth,
                nodes);
@@ -1265,6 +1029,7 @@ namespace osmscout {
     else if (outline) {
       // Draw outline
       DrawPath(style->GetStyle(),
+               projection,
                style->GetLineR(),style->GetLineG(),style->GetLineB(),style->GetLineA(),
                lineWidth-2*style->GetOutline(),
                nodes);
@@ -1272,6 +1037,7 @@ namespace osmscout {
     else {
       // Draw without outline
       DrawPath(style->GetStyle(),
+               projection,
                style->GetLineR(),style->GetLineG(),style->GetLineB(),style->GetLineA(),
                lineWidth,
                nodes);
@@ -1281,6 +1047,7 @@ namespace osmscout {
   }
 
   void MapPainterCairo::DrawArea(const StyleConfig& styleConfig,
+                                 const Projection& projection,
                                  TypeId type,
                                  int layer,
                                  bool isBuilding,
@@ -1291,7 +1058,7 @@ namespace osmscout {
 
     bool               hasPattern=patternStyle!=NULL &&
                                   patternStyle->GetLayer()==layer &&
-                                  projection->GetMagnification()>=patternStyle->GetMinMag();
+                                  projection.GetMagnification()>=patternStyle->GetMinMag();
     bool               hasFill=fillStyle!=NULL &&
                                fillStyle->GetLayer()==layer;
 
@@ -1300,10 +1067,10 @@ namespace osmscout {
     }
 
     if (hasPattern) {
-      FillRegion(nodes,*patternStyle);
+      FillRegion(nodes,projection,*patternStyle);
     }
     else if (hasFill) {
-      FillRegion(nodes,*fillStyle);
+      FillRegion(nodes,projection,*fillStyle);
     }
 
     areasDrawnCount++;
@@ -1319,12 +1086,16 @@ namespace osmscout {
     }
 
     DrawPath(lineStyle->GetStyle(),
+             projection,
              lineStyle->GetLineR(),lineStyle->GetLineG(),lineStyle->GetLineB(),lineStyle->GetLineA(),
              borderWidth[(size_t)type],
              nodes);
   }
 
-  void MapPainterCairo::DrawAreas(const StyleConfig& styleConfig)
+  void MapPainterCairo::DrawAreas(const StyleConfig& styleConfig,
+                                  const Projection& projection,
+                                  const std::vector<Way>& areas,
+                                  const std::vector<Relation>& relationAreas)
   {
     for (size_t l=0; l<11; l++) {
       int layer=l-5;
@@ -1334,6 +1105,7 @@ namespace osmscout {
              area!=areas.end();
              ++area) {
           DrawArea(styleConfig,
+                   projection,
                    area->GetType(),
                    layer,
                    area->IsBuilding(),
@@ -1351,6 +1123,7 @@ namespace osmscout {
               drawn=true;
 
               DrawArea(styleConfig,
+                       projection,
                        relation->roles[m].GetType(),
                        layer,
                        false,
@@ -1366,7 +1139,10 @@ namespace osmscout {
     }
   }
 
-  void MapPainterCairo::DrawWays(const StyleConfig& styleConfig)
+  void MapPainterCairo::DrawWays(const StyleConfig& styleConfig,
+                                 const Projection& projection,
+                                 const std::vector<Way>& ways,
+                                 const std::vector<Relation>& relationWays)
   {
     for (size_t l=0; l<11; l++) {
       int8_t layer=l-5;
@@ -1382,6 +1158,7 @@ namespace osmscout {
           }
 
           DrawWayOutline(styleConfig,
+                         projection,
                          way->GetType(),
                          way->GetWidth(),
                          way->IsBridge(),
@@ -1404,6 +1181,7 @@ namespace osmscout {
             }
 
             DrawWayOutline(styleConfig,
+                           projection,
                            type,
                            0,
                            relation->roles[m].IsBridge(),
@@ -1425,6 +1203,7 @@ namespace osmscout {
           }
 
           DrawWay(styleConfig,
+                  projection,
                   way->GetType(),
                   way->GetWidth(),
                   way->IsBridge(),
@@ -1446,6 +1225,7 @@ namespace osmscout {
             }
 
             DrawWay(styleConfig,
+                    projection,
                     type,
                     0,//relation->roles[m].GetWidth(),
                     relation->roles[m].IsBridge(),
@@ -1457,7 +1237,10 @@ namespace osmscout {
     }
   }
 
-  void MapPainterCairo::DrawWayLabels(const StyleConfig& styleConfig)
+  void MapPainterCairo::DrawWayLabels(const StyleConfig& styleConfig,
+                                      const Projection& projection,
+                                     const std::vector<Way>& ways,
+                                      const std::vector<Relation>& relationWays)
   {
     std::set<size_t> tileBlacklist;
 
@@ -1468,18 +1251,19 @@ namespace osmscout {
         const LabelStyle *style=styleConfig.GetWayNameLabelStyle(way->GetType());
 
         if (style!=NULL &&
-            projection->GetMagnification()>=style->GetMinMag() &&
-            projection->GetMagnification()<=style->GetMaxMag()) {
+            projection.GetMagnification()>=style->GetMinMag() &&
+            projection.GetMagnification()<=style->GetMaxMag()) {
 
           if (style->GetStyle()==LabelStyle::contour) {
             DrawContourLabel(draw,
+                             projection,
                              *style,
                              way->GetName(),
                              way->nodes);
           }
           else {
             DrawTiledLabel(draw,
-                           projection->GetMagnification(),
+                           projection,
                            *style,
                            way->GetName(),
                            way->nodes,
@@ -1492,18 +1276,19 @@ namespace osmscout {
         const LabelStyle *style=styleConfig.GetWayRefLabelStyle(way->GetType());
 
         if (style!=NULL &&
-            projection->GetMagnification()>=style->GetMinMag() &&
-            projection->GetMagnification()<=style->GetMaxMag()) {
+            projection.GetMagnification()>=style->GetMinMag() &&
+            projection.GetMagnification()<=style->GetMaxMag()) {
 
           if (style->GetStyle()==LabelStyle::contour) {
             DrawContourLabel(draw,
+                             projection,
                              *style,
                              way->GetRefName(),
                              way->nodes);
           }
           else {
             DrawTiledLabel(draw,
-                           projection->GetMagnification(),
+                           projection,
                            *style,
                            way->GetRefName(),
                            way->nodes,
@@ -1521,18 +1306,19 @@ namespace osmscout {
           const LabelStyle *style=styleConfig.GetWayNameLabelStyle(relation->roles[m].GetType());
 
           if (style!=NULL &&
-              projection->GetMagnification()>=style->GetMinMag() &&
-              projection->GetMagnification()<=style->GetMaxMag()) {
+              projection.GetMagnification()>=style->GetMinMag() &&
+              projection.GetMagnification()<=style->GetMaxMag()) {
 
             if (style->GetStyle()==LabelStyle::contour) {
               DrawContourLabel(draw,
+                               projection,
                                *style,
                                relation->roles[m].GetName(),
                                relation->roles[m].nodes);
             }
             else {
               DrawTiledLabel(draw,
-                             projection->GetMagnification(),
+                             projection,
                              *style,
                              relation->roles[m].GetName(),
                              relation->roles[m].nodes,
@@ -1545,18 +1331,19 @@ namespace osmscout {
           const LabelStyle *style=styleConfig.GetWayRefLabelStyle(relation->roles[m].GetType());
 
           if (style!=NULL &&
-              projection->GetMagnification()>=style->GetMinMag() &&
-              projection->GetMagnification()<=style->GetMaxMag()) {
+              projection.GetMagnification()>=style->GetMinMag() &&
+              projection.GetMagnification()<=style->GetMaxMag()) {
 
             if (style->GetStyle()==LabelStyle::contour) {
               DrawContourLabel(draw,
+                               projection,
                                *style,
                                relation->roles[m].GetRefName(),
                                relation->roles[m].nodes);
             }
             else {
               DrawTiledLabel(draw,
-                             projection->GetMagnification(),
+                             projection,
                              *style,
                              relation->roles[m].GetRefName(),
                              relation->roles[m].nodes,
@@ -1568,7 +1355,9 @@ namespace osmscout {
     }
   }
 
-  void MapPainterCairo::DrawNodes(const StyleConfig& styleConfig)
+  void MapPainterCairo::DrawNodes(const StyleConfig& styleConfig,
+                                  const Projection& projection,
+                                  const std::vector<Node>& nodes)
   {
     for (std::vector<Node>::const_iterator node=nodes.begin();
          node!=nodes.end();
@@ -1578,14 +1367,14 @@ namespace osmscout {
       const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetNodeSymbolStyle(node->type);
 
       bool hasLabel=labelStyle!=NULL &&
-                    projection->GetMagnification()>=labelStyle->GetMinMag() &&
-                    projection->GetMagnification()<=labelStyle->GetMaxMag();
+                    projection.GetMagnification()>=labelStyle->GetMinMag() &&
+                    projection.GetMagnification()<=labelStyle->GetMaxMag();
 
       bool hasSymbol=symbolStyle!=NULL &&
-                     projection->GetMagnification()>=symbolStyle->GetMinMag();
+                     projection.GetMagnification()>=symbolStyle->GetMinMag();
 
       bool hasIcon=iconStyle!=NULL &&
-                   projection->GetMagnification()>=iconStyle->GetMinMag();
+                   projection.GetMagnification()>=iconStyle->GetMinMag();
 
       std::string label;
 
@@ -1616,26 +1405,26 @@ namespace osmscout {
 
       double x,y;
 
-      projection->GeoToPixel(node->lon,node->lat,x,y);
+      projection.GeoToPixel(node->lon,node->lat,x,y);
 
       if (hasLabel) {
         if (hasSymbol) {
           DrawLabel(draw,
-                    projection->GetMagnification(),
+                    projection,
                     *labelStyle,
                     label,
                     x,y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
         }
         else if (hasIcon) {
           DrawLabel(draw,
-                    projection->GetMagnification(),
+                    projection,
                     *labelStyle,
                     label,
                     x,y+14+5); // TODO: Better layout to real size of icon
         }
         else {
           DrawLabel(draw,
-                    projection->GetMagnification(),
+                    projection,
                     *labelStyle,
                     label,
                     x,y);
@@ -1652,7 +1441,10 @@ namespace osmscout {
     }
   }
 
-  void MapPainterCairo::DrawAreaLabels(const StyleConfig& styleConfig)
+  void MapPainterCairo::DrawAreaLabels(const StyleConfig& styleConfig,
+                                       const Projection& projection,
+                                       const std::vector<Way>& areas,
+                                       const std::vector<Relation>& relationAreas)
   {
     for (std::vector<Way>::const_iterator area=areas.begin();
          area!=areas.end();
@@ -1662,14 +1454,14 @@ namespace osmscout {
       const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetAreaSymbolStyle(area->GetType());
 
       bool hasLabel=labelStyle!=NULL &&
-                    projection->GetMagnification()>=labelStyle->GetMinMag() &&
-                    projection->GetMagnification()<=labelStyle->GetMaxMag();
+                    projection.GetMagnification()>=labelStyle->GetMinMag() &&
+                    projection.GetMagnification()<=labelStyle->GetMaxMag();
 
       bool hasSymbol=symbolStyle!=NULL &&
-                     projection->GetMagnification()>=symbolStyle->GetMinMag();
+                     projection.GetMagnification()>=symbolStyle->GetMinMag();
 
       bool hasIcon=iconStyle!=NULL &&
-                   projection->GetMagnification()>=iconStyle->GetMinMag();
+                   projection.GetMagnification()>=iconStyle->GetMinMag();
 
       std::string label;
 
@@ -1698,28 +1490,28 @@ namespace osmscout {
 
       double x,y;
 
-      if (!GetCenterPixel(area->nodes,x,y)) {
+      if (!GetCenterPixel(projection,area->nodes,x,y)) {
         continue;
       }
 
       if (hasLabel) {
         if (hasSymbol) {
           DrawLabel(draw,
-                    projection->GetMagnification(),
+                    projection,
                     *labelStyle,
                     label,
                     x,y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
         }
         else if (hasIcon) {
           DrawLabel(draw,
-                    projection->GetMagnification(),
+                    projection,
                     *labelStyle,
                     label,
                     x,y+14+5); // TODO: Better layout to real size of icon
         }
         else {
           DrawLabel(draw,
-                    projection->GetMagnification(),
+                    projection,
                     *labelStyle,
                     label,
                     x,y);
@@ -1736,7 +1528,9 @@ namespace osmscout {
     }
   }
 
-  void MapPainterCairo::DrawPOIWays(const StyleConfig& styleConfig)
+  void MapPainterCairo::DrawPOIWays(const StyleConfig& styleConfig,
+                                    const Projection& projection,
+                                    const std::list<Way>& poiWays)
   {
     for (std::list<Way>::const_iterator way=poiWays.begin();
          way!=poiWays.end();
@@ -1748,6 +1542,7 @@ namespace osmscout {
       }
 
       DrawWay(styleConfig,
+              projection,
               way->GetType(),
               0,
               way->IsBridge(),
@@ -1763,25 +1558,27 @@ namespace osmscout {
     }
   }
 
-  void MapPainterCairo::DrawPOINodes(const StyleConfig& styleConfig)
+  void MapPainterCairo::DrawPOINodes(const StyleConfig& styleConfig,
+                                     const Projection& projection,
+                                     const std::list<Node>& poiNodes)
   {
     for (std::list<Node>::const_iterator node=poiNodes.begin();
          node!=poiNodes.end();
          ++node) {
-      if (!projection->GeoIsIn(node->lon,node->lat)) {
+      if (!projection.GeoIsIn(node->lon,node->lat)) {
         continue;
       }
 
       const SymbolStyle *style=styleConfig.GetNodeSymbolStyle(node->type);
 
       if (style==NULL ||
-          projection->GetMagnification()<style->GetMinMag()) {
+          projection.GetMagnification()<style->GetMinMag()) {
         continue;
       }
 
       double x,y;
 
-      projection->GeoToPixel(node->lon,node->lat,x,y);
+      projection.GeoToPixel(node->lon,node->lat,x,y);
 
       DrawSymbol(draw,style,x,y);
 
@@ -1789,12 +1586,14 @@ namespace osmscout {
     }
   }
 
-  void MapPainterCairo::DrawPOINodeLabels(const StyleConfig& styleConfig)
+  void MapPainterCairo::DrawPOINodeLabels(const StyleConfig& styleConfig,
+                                          const Projection& projection,
+                                          const std::list<Node>& poiNodes)
   {
     for (std::list<Node>::const_iterator node=poiNodes.begin();
          node!=poiNodes.end();
          ++node) {
-      if (!projection->GeoIsIn(node->lon,node->lat)) {
+      if (!projection.GeoIsIn(node->lon,node->lat)) {
         continue;
       }
 
@@ -1804,17 +1603,17 @@ namespace osmscout {
           const LabelStyle *style=styleConfig.GetNodeLabelStyle(node->type);
 
           if (style==NULL ||
-              projection->GetMagnification()<style->GetMinMag() ||
-              projection->GetMagnification()>style->GetMaxMag()) {
+              projection.GetMagnification()<style->GetMinMag() ||
+              projection.GetMagnification()>style->GetMaxMag()) {
             continue;
           }
 
           double x,y;
 
-          projection->GeoToPixel(node->lon,node->lat,x,y);
+          projection.GeoToPixel(node->lon,node->lat,x,y);
 
           DrawLabel(draw,
-                    projection->GetMagnification(),
+                    projection,
                     *style,
                     node->tags[i].value,
                     x,y);
@@ -1823,17 +1622,17 @@ namespace osmscout {
           const LabelStyle *style=styleConfig.GetNodeRefLabelStyle(node->type);
 
           if (style==NULL ||
-              projection->GetMagnification()<style->GetMinMag() ||
-              projection->GetMagnification()>style->GetMaxMag()) {
+              projection.GetMagnification()<style->GetMinMag() ||
+              projection.GetMagnification()>style->GetMaxMag()) {
             continue;
           }
 
           double x,y;
 
-          projection->GeoToPixel(node->lon,node->lat,x,y);
+          projection.GeoToPixel(node->lon,node->lat,x,y);
 
           DrawLabel(draw,
-                    projection->GetMagnification(),
+                    projection,
                     *style,
                     node->tags[i].value,
                     x,y);
@@ -1843,69 +1642,39 @@ namespace osmscout {
   }
 
   bool MapPainterCairo::DrawMap(const StyleConfig& styleConfig,
-                                double lon, double lat,
-                                double magnification,
-                                size_t width, size_t height,
+                                const Projection& projection,
+                                const MapParameter& parameter,
+                                const MapData& data,
                                 cairo_surface_t *image,
                                 cairo_t *draw)
   {
-    StopClock           overallTimer;
     
-    projection->Set(lon,lat,magnification,width,height);
-
     nodesDrawnCount=0;
     areasDrawnCount=0;
     waysDrawnCount=0;
 
-    styleCount=styleConfig.GetStyleCount();
-
     this->draw=draw;
 
-    std::cout << "---" << std::endl;
-    std::cout << "Showing " << lon <<", " << lat << " with magnification " << magnification << "x" << "/" << log(magnification)/log(2) << " for area " << width << "x" << height << std::endl;
-
-
-    StopClock dataRetrievalTimer;
-
-    nodes.clear();
-    ways.clear();
-    areas.clear();
-    relationWays.clear();
-    relationAreas.clear();
-
-    database.GetObjects(styleConfig,
-                        projection->GetLonMin(),
-                        projection->GetLatMin(),
-                        projection->GetLonMax(),
-                        projection->GetLatMax(),
-                        magnification,
-                        ((size_t)ceil(Log2(magnification)))+6,
-                        2000,
-                        2000,
-                        std::numeric_limits<size_t>::max(),
-                        nodes,
-                        ways,
-                        areas,
-                        relationWays,
-                        relationAreas);
-
-    dataRetrievalTimer.Stop();
-
-    StopClock presetTimer;
+    std::cout << std::endl;
+    std::cout << "Draw ";
+    std::cout << projection.GetLon() <<", ";
+    std::cout << projection.GetLat() << " with magnification ";
+    std::cout << projection.GetMagnification() << "x" << "/" << log(projection.GetMagnification())/log(2);
+    std::cout << " for area " << projection.GetWidth() << "x" << projection.GetHeight() << std::endl;
 
     //
     // Setup and Precalculation
     //
 
-    borderWidth.resize(styleCount,0);
+    borderWidth.resize(styleConfig.GetStyleCount(),0);
 
     // Calculate real line width and outline size for each way line style
 
-    for (size_t i=0; i<styleCount; i++) {
+    for (size_t i=0; i<styleConfig.GetStyleCount(); i++) {
       const LineStyle *borderStyle=styleConfig.GetAreaBorderStyle(i);
 
       if (borderStyle!=NULL) {
-        borderWidth[i]=borderStyle->GetWidth()/projection->GetPixelSize();
+        borderWidth[i]=borderStyle->GetWidth()/projection.GetPixelSize();
         if (borderWidth[i]<borderStyle->GetMinPixel()) {
           borderWidth[i]=borderStyle->GetMinPixel();
         }
@@ -1920,8 +1689,8 @@ namespace osmscout {
       wayLayers[i]=false;
     }
 
-    for (std::vector<Way>::const_iterator way=ways.begin();
-         way!=ways.end();
+    for (std::vector<Way>::const_iterator way=data.ways.begin();
+         way!=data.ways.end();
          ++way) {
       if (way->GetLayer()>=-5 && way->GetLayer()<=5) {
         wayLayers[way->GetLayer()+5]=true;
@@ -1932,8 +1701,8 @@ namespace osmscout {
       relationWayLayers[i]=false;
     }
 
-    for (std::vector<Relation>::const_iterator relation=relationWays.begin();
-         relation!=relationWays.end();
+    for (std::vector<Relation>::const_iterator relation=data.relationWays.begin();
+         relation!=data.relationWays.end();
          ++relation) {
       for (size_t m=0; m<relation->roles.size(); m++) {
         if (relation->roles[m].GetLayer()>=-5 && relation->roles[m].GetLayer()<=5) {
@@ -1951,8 +1720,8 @@ namespace osmscout {
       relationAreaLayers[i]=false;
     }
 
-    for (std::vector<Way>::const_iterator area=areas.begin();
-         area!=areas.end();
+    for (std::vector<Way>::const_iterator area=data.areas.begin();
+         area!=data.areas.end();
          ++area) {
       const FillStyle *style=styleConfig.GetAreaFillStyle(area->GetType(),
                                                           area->IsBuilding());
@@ -1964,8 +1733,8 @@ namespace osmscout {
       }
     }
 
-    for (std::vector<Relation>::const_iterator relation=relationAreas.begin();
-         relation!=relationAreas.end();
+    for (std::vector<Relation>::const_iterator relation=data.relationAreas.begin();
+         relation!=data.relationAreas.end();
          ++relation) {
       const FillStyle *style=styleConfig.GetAreaFillStyle(relation->type,
                                                           false/*relation->flags & Way::isBuilding*/);
@@ -1978,18 +1747,17 @@ namespace osmscout {
     }
 
     //
-    //
     // Drawing setup
+    //
 
     cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
 
     cairo_set_source_rgba(draw,241.0/255,238.0/255,233.0/255,1.0);
-    cairo_rectangle(draw,0,0,width,height);
+    cairo_rectangle(draw,
+                    0,0,
+                    projection.GetWidth(),
+                    projection.GetHeight());
     cairo_fill(draw);
-
-    presetTimer.Stop();
-
-    StopClock drawingTimer;
 
     //
     // Draw areas
@@ -1997,7 +1765,10 @@ namespace osmscout {
 
     StopClock areasTimer;
 
-    DrawAreas(styleConfig);
+    DrawAreas(styleConfig,
+              projection,
+              data.areas,
+              data.relationAreas);
 
     areasTimer.Stop();
 
@@ -2007,7 +1778,10 @@ namespace osmscout {
 
     StopClock pathsTimer;
 
-    DrawWays(styleConfig);
+    DrawWays(styleConfig,
+             projection,
+             data.ways,
+             data.relationWays);
 
     pathsTimer.Stop();
 
@@ -2020,7 +1794,10 @@ namespace osmscout {
 
     StopClock pathLabelsTimer;
 
-    DrawWayLabels(styleConfig);
+    DrawWayLabels(styleConfig,
+                  projection,
+                  data.ways,
+                  data.relationWays);
 
     pathLabelsTimer.Stop();
 
@@ -2030,7 +1807,9 @@ namespace osmscout {
 
     StopClock nodesTimer;
 
-    DrawNodes(styleConfig);
+    DrawNodes(styleConfig,
+              projection,
+              data.nodes);
 
     nodesTimer.Stop();
 
@@ -2040,7 +1819,10 @@ namespace osmscout {
 
     StopClock areaLabelsTimer;
 
-    DrawAreaLabels(styleConfig);
+    DrawAreaLabels(styleConfig,
+                   projection,
+                   data.areas,
+                   data.relationAreas);
 
     areaLabelsTimer.Stop();
 
@@ -2051,7 +1833,9 @@ namespace osmscout {
 
     StopClock routesTimer;
 
-    DrawPOIWays(styleConfig);
+    DrawPOIWays(styleConfig,
+                projection,
+                data.poiWays);
 
     routesTimer.Stop();
 
@@ -2061,39 +1845,36 @@ namespace osmscout {
 
     StopClock poisTimer;
 
-    DrawPOINodes(styleConfig);
+    DrawPOINodes(styleConfig,
+                 projection,
+                 data.poiNodes);
 
     //
     // POI Node labels
     //
 
-    DrawPOINodeLabels(styleConfig);
+    DrawPOINodeLabels(styleConfig,
+                      projection,
+                      data.poiNodes);
 
     poisTimer.Stop();
 
-    drawingTimer.Stop();
-    overallTimer.Stop();
-
-    std::cout << "Nodes: " << nodesDrawnCount << "/" << nodes.size()+poiNodes.size() << " ";
-    if (nodes.size()+poiNodes.size()>0) {
-      std::cout << "(" << nodesDrawnCount*100/(nodes.size()+poiNodes.size()) << "%) ";
+    std::cout << "Nodes: " << nodesDrawnCount << "/" << data.nodes.size()+data.poiNodes.size() << " ";
+    if (data.nodes.size()+data.poiNodes.size()>0) {
+      std::cout << "(" << nodesDrawnCount*100/(data.nodes.size()+data.poiNodes.size()) << "%) ";
     }
 
-    std::cout << " ways: " << waysDrawnCount << "/" << ways.size()+poiWays.size() << " ";
-    if (ways.size()+poiWays.size()>0) {
-      std::cout << "(" << waysDrawnCount*100/(ways.size()+poiWays.size()) << "%) ";
+    std::cout << " ways: " << waysDrawnCount << "/" << data.ways.size()+data.poiWays.size() << " ";
+    if (data.ways.size()+data.poiWays.size()>0) {
+      std::cout << "(" << waysDrawnCount*100/(data.ways.size()+data.poiWays.size()) << "%) ";
     }
 
-    std::cout << " areas: " << areasDrawnCount << "/" << areas.size() << " ";
-    if (areas.size()>0) {
-      std::cout << "(" << areasDrawnCount*100/areas.size() << "%) ";
+    std::cout << " areas: " << areasDrawnCount << "/" << data.areas.size() << " ";
+    if (data.areas.size()>0) {
+      std::cout << "(" << areasDrawnCount*100/data.areas.size() << "%) ";
     }
     std::cout << std::endl;
 
-    std::cout << "All: " << overallTimer;
-    std::cout << " Data: " << dataRetrievalTimer;
-    std::cout << " Preset: " << presetTimer;
-    std::cout << " Draw: " << drawingTimer << std::endl;
     std::cout << "Areas: " << areasTimer <<"/" << areaLabelsTimer;
     std::cout << " Paths: " << pathsTimer << "/" << pathLabelsTimer;
     std::cout << " Nodes: " << nodesTimer;
@@ -2102,6 +1883,7 @@ namespace osmscout {
     return true;
   }
 
+/*
   bool MapPainterCairo::PrintMap(const StyleConfig& styleConfig,
                                  double lon, double lat,
                                  double magnification,
@@ -2122,6 +1904,6 @@ namespace osmscout {
     cairo_surface_destroy(image);
 
     return true;
-  }
+  }*/
 }
 
