@@ -494,7 +494,11 @@ namespace osmscout {
     assert(typeId!=typeIgnore);
     cityIds.insert(typeId);
 
-    boundaryId=typeConfig.GetAreaTypeId(tagBoundary,"administrative");
+    // We do not yet know if we handle borders as ways or areas
+    boundaryId=typeConfig.GetWayTypeId(tagBoundary,"administrative");
+    if (boundaryId==typeIgnore) {
+      boundaryId=typeConfig.GetAreaTypeId(tagBoundary,"administrative");
+    }
     assert(boundaryId!=typeIgnore);
 
     progress.SetAction("Scanning for cities of type 'node'");
