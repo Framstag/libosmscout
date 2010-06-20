@@ -367,6 +367,31 @@ namespace osmscout {
     }
   }
 
+  std::string AppendFileToDir(const std::string& dir, const std::string& file)
+  {
+#if defined(__WIN32__) || defined(WIN32)
+    std::string result(dir);
+
+    if (result.length()>0 && result[result.length()-1]!='\\') {
+      result.append("\\");
+    }
+    
+    result.append(file);
+    
+    return result;
+#else
+    std::string result(dir);
+
+    if (result.length()>0 && result[result.length()-1]!='/') {
+      result.append("/");
+    }
+    
+    result.append(file);
+    
+    return result;
+#endif  
+  }
+  
   double Log2(double x)
   {
     return log(x)/log(2);

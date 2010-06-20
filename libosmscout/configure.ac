@@ -37,6 +37,14 @@ AC_TRY_COMPILE([],
                [AC_MSG_RESULT(no)])
 CXXFLAGS="$OLDCXXFLAGS"
 
+AC_MSG_CHECKING([for WIN32])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[#include <windows.h>]],
+                    [[GetModuleHandleA(0);]])],
+    [AC_MSG_RESULT(yes);
+     LDFLAGS="$LDFLAGS -no-undefined"],
+    [AC_MSG_RESULT(no)])
+
 dnl Check for libxml2
 PKG_CHECK_MODULES(XML2,[libxml-2.0 >= 2.6.0],
                   [AC_SUBST(XML2_CFLAGS)

@@ -135,8 +135,6 @@ public:
                                   magnification) && requestNewMap) {
       RequestNewMap();
     }
-
-
   }
 
   void RequestNewMap()
@@ -480,6 +478,7 @@ public:
   void Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& msg)
   {
     if (model==GetOpenedAction() && GetOpenedAction()->IsFinished()) {
+      std::cout << "GetOpenedAction!" << std::endl;
       if (!LoadConfig()) {
         Lum::Dlg::Msg::ShowOk(this,
                               L"Cannot load configuration!",
