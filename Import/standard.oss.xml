@@ -247,15 +247,23 @@
     <label style="contour" minMag="proximity"/>
   </way>
 
- <area key="waterway" value="dock">
+  <area key="waterway" value="dock">
     <fill color="b5d0d0"/>
     <label minMag="proximity"/>
   </area>
 
- <area key="waterway" value="riverbank">
+  <area key="waterway" value="riverbank">
     <fill color="b5d0d0"/>
     <label minMag="proximity"/>
   </area>
+
+  <way key="route" value="ferry" prio="11">
+    <line style="dotted"
+          outlineColor="ffffff80" color="0000ff"
+          minPixel="0.5" width="3"
+          outline="1.5"/>
+    <label style="contour" minMag="detail"/>
+  </way>
 
   <area key="landuse" value="farm">
     <fill color="ead8bd" layer="2"/>
@@ -353,12 +361,11 @@
 
   <area key="landuse" value="construction">
     <fill color="9d9d6c"/>
-    <label minMag="city"/>
+    <label minMag="detail"/>
   </area>
 
   <area key="landuse" value="military">
-    <fill color="ff0000" layer="1"/>
-<!--    <fill color="f59897"/>-->
+    <fill color="fe9898" layer="1"/>
     <label minMag="city"/>
   </area>
 
@@ -385,7 +392,7 @@
 
   <node key="natural" value="peak" prio="20">
     <symbol style="triangle" size="8" fillColor="9c5e29" minMag="city"/>
-    <label minMag="detail"/>
+    <label minMag="detail" style="emphasize" textColor="9c5329"/>
   </node>
 
   <area key="natural" value="glacier">
@@ -1279,19 +1286,23 @@
   <node key="place" value="island">
     <label style="emphasize" minMag="region" maxMag="veryClose"/>
   </node>
+<!--
+   We do not currently draw borders, because we can only draw
+   all or none of them, making the prio the only trigger. We wouls
+   like boundaries of different admin level with different 
+   priorities and styles.
 
-  <way key="boundary" value="administrative" prio="11">
+  <way key="boundary" value="administrative" prio="6">
     <line color="d9269844" minPixel="3" maxPixel="3" width="1" />
-  </way>
+  </way> -->
 
-  <!--
   <node key="internal" value="start">
     <icon name="start"/>
   </node>
 
   <node key="internal" value="target">
     <icon name="target"/>
-  </node> -->
+  </node> 
 
   <way key="internal" value="route" prio="1">
     <line color="ff000088" minPixel="2" width="20"/>

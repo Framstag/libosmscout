@@ -278,9 +278,7 @@ namespace osmscout {
 
   MapPainterCairo::MapPainterCairo()
   {
-    drawNode.resize(10000); // TODO: Calculate matching size
-    nodeX.resize(10000);
-    nodeY.resize(10000);
+    // no code
   }
 
   MapPainterCairo::~MapPainterCairo()
