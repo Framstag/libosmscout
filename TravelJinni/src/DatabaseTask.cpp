@@ -154,7 +154,6 @@ void DatabaseTask::Run()
                         projection,
                         parameter,
                         data,
-                        currentSurface,
                         currentCairo);
         
         drawTimer.Stop();          

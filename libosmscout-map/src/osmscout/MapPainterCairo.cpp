@@ -1060,7 +1060,6 @@ namespace osmscout {
                                 const Projection& projection,
                                 const MapParameter& parameter,
                                 const MapData& data,
-                                cairo_surface_t *image,
                                 cairo_t *draw)
   {
     this->draw=draw;

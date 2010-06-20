@@ -127,7 +127,6 @@ int main(int argc, char* argv[])
                           projection,
                           parameter,
                           data,
-                          surface,
                           cairo)) {
         if (cairo_surface_write_to_png(surface,output.c_str())!=CAIRO_STATUS_SUCCESS) {
           std::cerr << "Cannot write PNG" << std::endl;
