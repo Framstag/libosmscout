@@ -43,6 +43,11 @@ namespace osmscout {
       std::vector<Point> nodes;
 
     public:
+      inline const SegmentAttributes& GetAttributes() const
+      {
+        return attributes;
+      }
+    
       inline TypeId GetType() const
       {
         return attributes.GetType();

@@ -56,6 +56,11 @@ namespace osmscout {
       // no code
     }
 
+    inline const SegmentAttributes& GetAttributes() const
+    {
+      return attributes;
+    }
+
     inline TypeId GetType() const
     {
       return attributes.GetType();

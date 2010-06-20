@@ -53,17 +53,17 @@
   </way>
 
   <way key="highway" value="secondary" prio="4">
-    <line color="fdd6a4" minPixel="1.5" width="12" outline="1" />
+    <line color="fdd6a4" alternateColor="fdd654" minPixel="1.5" width="12" outline="1" />
     <label style="contour" minMag="detail"/>
   </way>
 
   <way key="highway" value="secondary_link" prio="4">
-    <line color="fdd6a4" minPixel="1.5" width="12" outline="1" />
+    <line color="fdd6a4" alternateColor="fdd654" minPixel="1.5" width="12" outline="1" />
     <label style="contour" minMag="detail"/>
   </way>
 
   <way key="highway" value="tertiary" prio="5">
-    <line color="fefeb3" minPixel="1.5" width="10" outline="1" />
+    <line color="fefeb3" alternateColor="fefe73" minPixel="1.5" width="10" outline="1" />
     <label style="contour" minMag="detail"/>
   </way>
 
@@ -293,7 +293,7 @@
   </area>
 
   <area key="landuse" value="forest">
-    <pattern name="forest" layer="1" minMag="detail"/>
+    <pattern name="forest" layer="1" minMag="proximity"/>
     <fill color="8dc56c" layer="1"/>
     <label style="emphasize" minMag="city"/>
   </area>
@@ -401,7 +401,7 @@
   -->
 
   <area key="natural" value="scrub">
-    <pattern name="scrub" minMag="detail"/>
+    <pattern name="scrub" minMag="proximity"/>
     <fill color="b5e2b5"/>
     <label minMag="city"/>
   </area>

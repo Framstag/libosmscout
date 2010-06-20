@@ -212,9 +212,7 @@ namespace osmscout {
     virtual void DrawWay(const StyleConfig& styleConfig,
                          const Projection& projection,
                          TypeId type,
-                         double width,
-                         bool isBridge,
-                         bool isTunnel,
+                         const SegmentAttributes& attributes,
                          const std::vector<Point>& nodes) = 0;
                  
     /**
@@ -225,11 +223,7 @@ namespace osmscout {
     virtual void DrawWayOutline(const StyleConfig& styleConfig,
                                 const Projection& projection,
                                 TypeId type,
-                                double width,
-                                bool isBridge,
-                                bool isTunnel,
-                                bool startIsJoint,
-                                bool endIsJoint,
+                                const SegmentAttributes& attributes,
                                 const std::vector<Point>& nodes) = 0;
 
     /**
@@ -241,7 +235,7 @@ namespace osmscout {
                           const Projection& projection,
                           TypeId type,
                           int layer,
-                          bool isBuilding,
+                          const SegmentAttributes& attributes,
                           const std::vector<Point>& nodes) = 0;
     //@}
   

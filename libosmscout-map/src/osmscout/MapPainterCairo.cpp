@@ -516,7 +516,8 @@ namespace osmscout {
                             style.GetTextB(),
                             style.GetTextA());
 
-      cairo_move_to(draw,x-textExtents.width/2+textExtents.x_bearing,
+      cairo_move_to(draw,
+                    x-textExtents.width/2+textExtents.x_bearing,
                     y-fontExtents.height/2+fontExtents.ascent);
       cairo_show_text(draw,text.c_str());
       cairo_stroke(draw);
@@ -830,11 +831,7 @@ namespace osmscout {
   void MapPainterCairo::DrawWayOutline(const StyleConfig& styleConfig,
                                        const Projection& projection,
                                        TypeId type,
-                                       double width,
-                                       bool isBridge,
-                                       bool isTunnel,
-                                       bool startIsJoint,
-                                       bool endIsJoint,
+                                       const SegmentAttributes& attributes,
                                        const std::vector<Point>& nodes)
   {
     const LineStyle *style=styleConfig.GetWayLineStyle(type);
@@ -843,7 +840,7 @@ namespace osmscout {
       return;
     }
 
-    double lineWidth=width;
+    double lineWidth=attributes.GetWidth();
 
     if (lineWidth==0) {
       lineWidth=style->GetWidth();
@@ -858,18 +855,22 @@ namespace osmscout {
     bool outline=style->GetOutline()>0 &&
                  lineWidth-2*style->GetOutline()>=outlineMinWidth;
 
-    if (!(isBridge && projection.GetMagnification()>=magCity) &&
-        !(isTunnel && projection.GetMagnification()>=magCity) &&
+    if (!(attributes.IsBridge() &&
+          projection.GetMagnification()>=magCity) &&
+        !(attributes.IsTunnel() &&
+          projection.GetMagnification()>=magCity) &&
         !outline) {
       return;
     }
 
-    if (isBridge && projection.GetMagnification()>=magCity) {
+    if (attributes.IsBridge() &&
+        projection.GetMagnification()>=magCity) {
       cairo_set_dash(draw,NULL,0,0);
       cairo_set_source_rgba(draw,0.0,0.0,0.0,1.0);
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
     }
-    else if (isTunnel && projection.GetMagnification()>=magCity) {
+    else if (attributes.IsTunnel() &&
+             projection.GetMagnification()>=magCity) {
       double tunnel[2];
 
       tunnel[0]=7+lineWidth;
@@ -919,7 +920,7 @@ namespace osmscout {
 
     cairo_stroke(draw);
 
-    if (!startIsJoint) {
+    if (!attributes.StartIsJoint()) {
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
       cairo_set_dash(draw,NULL,0,0);
       cairo_set_source_rgba(draw,
@@ -934,7 +935,7 @@ namespace osmscout {
       cairo_stroke(draw);
     }
 
-    if (!endIsJoint) {
+    if (!attributes.EndIsJoint()) {
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
       cairo_set_dash(draw,NULL,0,0);
       cairo_set_source_rgba(draw,
@@ -953,9 +954,7 @@ namespace osmscout {
   void MapPainterCairo::DrawWay(const StyleConfig& styleConfig,
                                 const Projection& projection,
                                 TypeId type,
-                                double width,
-                                bool isBridge,
-                                bool isTunnel,
+                                const SegmentAttributes& attributes,
                                 const std::vector<Point>& nodes)
   {
     const LineStyle *style=styleConfig.GetWayLineStyle(type);
@@ -968,7 +967,7 @@ namespace osmscout {
       return;
     }
 
-    double lineWidth=width;
+    double lineWidth=attributes.GetWidth();
 
     if (lineWidth==0) {
       lineWidth=style->GetWidth();
@@ -985,12 +984,17 @@ namespace osmscout {
 
     if (style->GetOutline()>0 &&
         !outline &&
-        !(isBridge && projection.GetMagnification()>=magCity) &&
-        !(isTunnel && projection.GetMagnification()>=magCity)) {
+        !(attributes.IsBridge() &&
+          projection.GetMagnification()>=magCity) &&
+        !(attributes.IsTunnel() &&
+          projection.GetMagnification()>=magCity)) {
       // Should draw outline, but resolution is too low
       DrawPath(style->GetStyle(),
                projection,
-               style->GetAlternateR(),style->GetAlternateG(),style->GetAlternateB(),style->GetAlternateA(),
+               style->GetAlternateR(),
+               style->GetAlternateG(),
+               style->GetAlternateB(),
+               style->GetAlternateA(),
                lineWidth,
                nodes);
     }
@@ -998,7 +1002,10 @@ namespace osmscout {
       // Draw outline
       DrawPath(style->GetStyle(),
                projection,
-               style->GetLineR(),style->GetLineG(),style->GetLineB(),style->GetLineA(),
+               style->GetLineR(),
+               style->GetLineG(),
+               style->GetLineB(),
+               style->GetLineA(),
                lineWidth-2*style->GetOutline(),
                nodes);
     }
@@ -1006,7 +1013,10 @@ namespace osmscout {
       // Draw without outline
       DrawPath(style->GetStyle(),
                projection,
-               style->GetLineR(),style->GetLineG(),style->GetLineB(),style->GetLineA(),
+               style->GetLineR(),
+               style->GetLineG(),
+               style->GetLineB(),
+               style->GetLineA(),
                lineWidth,
                nodes);
     }
@@ -1016,11 +1026,12 @@ namespace osmscout {
                                  const Projection& projection,
                                  TypeId type,
                                  int layer,
-                                 bool isBuilding,
+                                 const SegmentAttributes& attributes,
                                  const std::vector<Point>& nodes)
   {
     PatternStyle    *patternStyle=styleConfig.GetAreaPatternStyle(type);
-    const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(type,isBuilding);
+    const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(type,
+                                                            attributes.IsBuilding());
 
     bool               hasPattern=patternStyle!=NULL &&
                                   patternStyle->GetLayer()==layer &&
@@ -1051,7 +1062,10 @@ namespace osmscout {
 
     DrawPath(lineStyle->GetStyle(),
              projection,
-             lineStyle->GetLineR(),lineStyle->GetLineG(),lineStyle->GetLineB(),lineStyle->GetLineA(),
+             lineStyle->GetLineR(),
+             lineStyle->GetLineG(),
+             lineStyle->GetLineB(),
+             lineStyle->GetLineA(),
              borderWidth[(size_t)type],
              nodes);
   }

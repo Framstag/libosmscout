@@ -90,26 +90,20 @@ namespace osmscout {
     void DrawWay(const StyleConfig& styleConfig,
                  const Projection& projection,
                  TypeId type,
-                 double width,
-                 bool isBridge,
-                 bool isTunnel,
+                 const SegmentAttributes& attributes,
                  const std::vector<Point>& nodes);
                  
     void DrawWayOutline(const StyleConfig& styleConfig,
                         const Projection& projection,
                         TypeId type,
-                        double width,
-                        bool isBridge,
-                        bool isTunnel,
-                        bool startIsJoint,
-                        bool endIsJoint,
+                        const SegmentAttributes& attributes,
                         const std::vector<Point>& nodes);
 
     void DrawArea(const StyleConfig& styleConfig,
                   const Projection& projection,
                   TypeId type,
                   int layer,
-                  bool isBuilding,
+                  const SegmentAttributes& attributes,
                   const std::vector<Point>& nodes);
                                            
   public:

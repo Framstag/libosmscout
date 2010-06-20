@@ -522,7 +522,7 @@ namespace osmscout {
                    projection,
                    area->GetType(),
                    layer,
-                   area->IsBuilding(),
+                   area->GetAttributes(),
                    area->nodes);
         }
       }
@@ -540,7 +540,7 @@ namespace osmscout {
                        projection,
                        relation->roles[m].GetType(),
                        layer,
-                       false,
+                       relation->roles[m].GetAttributes(),
                        relation->roles[m].nodes);
             }
 
@@ -740,11 +740,7 @@ namespace osmscout {
           DrawWayOutline(styleConfig,
                          projection,
                          way->GetType(),
-                         way->GetWidth(),
-                         way->IsBridge(),
-                         way->IsTunnel(),
-                         way->StartIsJoint(),
-                         way->EndIsJoint(),
+                         way->GetAttributes(),
                          way->nodes);
         }
       }
@@ -763,11 +759,7 @@ namespace osmscout {
             DrawWayOutline(styleConfig,
                            projection,
                            type,
-                           0,
-                           relation->roles[m].IsBridge(),
-                           relation->roles[m].IsTunnel(),
-                           false,//relation->roles[m].StartIsJoint(),
-                           false,//relation->roles[m].EndIsJoint(),
+                           relation->roles[m].GetAttributes(),
                            relation->roles[m].nodes);
           }
         }
@@ -785,9 +777,7 @@ namespace osmscout {
           DrawWay(styleConfig,
                   projection,
                   way->GetType(),
-                  way->GetWidth(),
-                  way->IsBridge(),
-                  way->IsTunnel(),
+                  way->GetAttributes(),
                   way->nodes);
         }
       }
@@ -807,9 +797,7 @@ namespace osmscout {
             DrawWay(styleConfig,
                     projection,
                     type,
-                    0,//relation->roles[m].GetWidth(),
-                    relation->roles[m].IsBridge(),
-                    relation->roles[m].IsTunnel(),
+                    relation->roles[m].GetAttributes(),
                     relation->roles[m].nodes);
           }
         }
@@ -944,9 +932,7 @@ namespace osmscout {
       DrawWay(styleConfig,
               projection,
               way->GetType(),
-              0,
-              way->IsBridge(),
-              way->IsTunnel(),
+              way->GetAttributes(),
               way->nodes);
 
 
