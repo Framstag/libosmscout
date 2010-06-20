@@ -20,8 +20,11 @@
 #include <iostream>
 #include <iomanip>
 
+#include <qt4/QtGui/QPixmap>
+#include <qt4/QtGui/QApplication>
+
 #include <osmscout/Database.h>
-#include <osmscout/MapPainterCairo.h>
+#include <osmscout/MapPainterQt.h>
 #include <osmscout/StyleConfigLoader.h>
 #include <osmscout/Util.h>
 
@@ -29,7 +32,7 @@
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
   level directory):
   
-  DrawMap ../TravelJinni/ ../TravelJinni/standard.oss.xml 640 480 7.13 50.69 10000 test.png
+  src/DrawMapQt ../TravelJinni/ ../TravelJinni/standard.oss.xml 640 480 7.13 50.69 10000 test.png
 */
 
 int main(int argc, char* argv[])
@@ -41,7 +44,7 @@ int main(int argc, char* argv[])
   double        lon,lat,zoom;
 
   if (argc!=9) {
-    std::cerr << "DrawMap <map directory> <style-file> <width> <height> <lon> <lat> <zoom> <output>" << std::endl;
+    std::cerr << "DrawMapQt <map directory> <style-file> <width> <height> <lon> <lat> <zoom> <output>" << std::endl;
     return 1;
   }
 
@@ -49,7 +52,7 @@ int main(int argc, char* argv[])
   style=argv[2];
 
   if (!osmscout::StringToNumber(argv[3],width)) {
-    std::cerr << "wisth is not numeric!" << std::endl;
+    std::cerr << "width is not numeric!" << std::endl;
     return 1;
   }
 
@@ -75,6 +78,8 @@ int main(int argc, char* argv[])
 
   output=argv[8];
 
+  QApplication application(argc,argv,true);
+
   osmscout::Database database;
 
   if (!database.Open(map.c_str())) {
@@ -89,20 +94,17 @@ int main(int argc, char* argv[])
     std::cerr << "Cannot open style" << std::endl;
   }
 
-  cairo_surface_t *surface;
-  cairo_t         *cairo;
+  QPixmap *pixmap=new QPixmap(width,height);
 
-  surface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,width,height);
-
-  if (surface!=NULL) {
-    cairo=cairo_create(surface);
-
-    if (cairo!=NULL) {
+  if (pixmap!=NULL) {
+    QPainter* painter=new QPainter(pixmap);
+  
+    if (painter!=NULL) {
       osmscout::MercatorProjection projection;
       osmscout::MapParameter       parameter;
       osmscout::MapData            data;
-      osmscout::MapPainterCairo    painter;
-    
+      osmscout::MapPainterQt       mapPainter;
+
       projection.Set(lon,
                      lat,
                      zoom,
@@ -125,27 +127,28 @@ int main(int argc, char* argv[])
                           data.areas,
                           data.relationWays,
                           data.relationAreas);
-  
-      if (painter.DrawMap(styleConfig,
-                          projection,
-                          parameter,
-                          data,
-                          cairo)) {
-        if (cairo_surface_write_to_png(surface,output.c_str())!=CAIRO_STATUS_SUCCESS) {
+
+      if (mapPainter.DrawMap(styleConfig,
+                             projection,
+                             parameter,
+                             data,
+                             painter)) {
+        if (!pixmap->save(output.c_str(),"PNG",-1)) {
           std::cerr << "Cannot write PNG" << std::endl;
         }
+        
       }
-
-      cairo_destroy(cairo);
+      
+      delete painter;
     }
     else {
-      std::cerr << "Cannot create cairo cairo" << std::endl;
+      std::cout << "Cannot create QPainter" << std::endl;
     }
 
-    cairo_surface_destroy(surface);
+    delete pixmap;
   }
   else {
-    std::cerr << "Cannot create cairo surface" << std::endl;
+    std::cerr << "Cannot create QPixmap" << std::endl;
   }
 
   return 0;

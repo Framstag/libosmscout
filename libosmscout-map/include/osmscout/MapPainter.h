@@ -95,6 +95,16 @@ namespace osmscout {
                    const MapParameter& parameter,
                    const MapData& data);
             
+    /**
+      Draw the way using LineStyle for the given type, the given style modification
+      attributes and the given path.
+     */
+    void DrawWay(const StyleConfig& styleConfig,
+                 const Projection& projection,
+                 TypeId type,
+                 const SegmentAttributes& attributes,
+                 const std::vector<Point>& nodes);
+            
     void DrawWays(const StyleConfig& styleConfig,
                   const Projection& projection,
                   const MapParameter& parameter,
@@ -204,17 +214,20 @@ namespace osmscout {
      */
     virtual void DrawSymbol(const SymbolStyle* style,
                             double x, double y) = 0;
-                          
+
     /**
-      Draw the way using LineStyle for the given type, the given style modification
-      attributes and the given path.
-     */
-    virtual void DrawWay(const StyleConfig& styleConfig,
-                         const Projection& projection,
-                         TypeId type,
-                         const SegmentAttributes& attributes,
-                         const std::vector<Point>& nodes) = 0;
-                 
+      Draw simple line with the given style,the given color, the given width
+      and the given untransformed nodes.
+     */                          
+    virtual void DrawPath(LineStyle::Style style,
+                          const Projection& projection,
+                          double r,
+                          double g,
+                          double b,
+                          double a,
+                          double width,
+                          const std::vector<Point>& nodes) = 0;
+                                           
     /**
       Draw the outline of the way using LineStyle for the given type, the given
       style modification attributes and the given path. Also draw sensfull

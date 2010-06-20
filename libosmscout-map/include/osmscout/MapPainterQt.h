@@ -20,7 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <qt4/QtGui/QPixmap>
+#include <qt4/QtGui/QPainter>
 
 #include <osmscout/Private/MapImportExport.h>
 
@@ -30,6 +30,60 @@ namespace osmscout {
 
   class OSMSCOUT_MAP_API MapPainterQt : public MapPainter
   {
+    QPainter *painter;
+    
+  protected:
+    bool HasIcon(const StyleConfig& styleConfig,
+                         IconStyle& style);
+    
+    void ClearArea(const StyleConfig& styleConfig,
+                           const Projection& projection,
+                           const MapParameter& parameter,
+                           const MapData& data);
+                                                      
+    void DrawLabel(const Projection& projection,
+                           const LabelStyle& style,
+                           const std::string& text,
+                           double x, double y);
+
+    void DrawContourLabel(const Projection& projection,
+                                  const LabelStyle& style,
+                                  const std::string& text,
+                                  const std::vector<Point>& nodes);
+                           
+    void DrawIcon(const IconStyle* style,
+                          double x, double y);
+                          
+    void DrawSymbol(const SymbolStyle* style,
+                            double x, double y);
+                          
+    void DrawPath(LineStyle::Style style,
+                  const Projection& projection,
+                  double r,
+                  double g,
+                  double b,
+                  double a,
+                  double width,
+                  const std::vector<Point>& nodes);
+                          
+    void DrawWay(const StyleConfig& styleConfig,
+                         const Projection& projection,
+                         TypeId type,
+                         const SegmentAttributes& attributes,
+                         const std::vector<Point>& nodes);
+                 
+    void DrawWayOutline(const StyleConfig& styleConfig,
+                                const Projection& projection,
+                                TypeId type,
+                                const SegmentAttributes& attributes,
+                                const std::vector<Point>& nodes);
+
+    void DrawArea(const StyleConfig& styleConfig,
+                          const Projection& projection,
+                          TypeId type,
+                          int layer,
+                          const SegmentAttributes& attributes,
+                          const std::vector<Point>& nodes);  
   public:
     MapPainterQt();
     ~MapPainterQt();
@@ -39,7 +93,7 @@ namespace osmscout {
                  const Projection& projection,
                  const MapParameter& parameter,
                  const MapData& data,
-                 QPixmap* pixmap);
+                 QPainter* painter);
   };
 }
 

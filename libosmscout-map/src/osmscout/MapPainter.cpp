@@ -30,6 +30,7 @@ namespace osmscout {
   static size_t optimizeLimit=512;
   static double relevantPosDeriviation=2.0;
   static double relevantSlopeDeriviation=0.1;
+  static double outlineMinWidth=0.5;
 
   MapParameter::MapParameter()
   {
@@ -718,6 +719,77 @@ namespace osmscout {
           }
         }
       }
+    }
+  }
+  
+  void MapPainter::DrawWay(const StyleConfig& styleConfig,
+                           const Projection& projection,
+                           TypeId type,
+                           const SegmentAttributes& attributes,
+                           const std::vector<Point>& nodes)
+  {
+    const LineStyle *style=styleConfig.GetWayLineStyle(type);
+
+    if (style==NULL) {
+      return;
+    }
+
+    if (style->GetLineA()==0.0) {
+      return;
+    }
+
+    double lineWidth=attributes.GetWidth();
+
+    if (lineWidth==0) {
+      lineWidth=style->GetWidth();
+    }
+
+    lineWidth=lineWidth/projection.GetPixelSize();
+
+    if (lineWidth<style->GetMinPixel()) {
+      lineWidth=style->GetMinPixel();
+    }
+
+    bool outline=style->GetOutline()>0 &&
+                 lineWidth-2*style->GetOutline()>=outlineMinWidth;
+
+    if (style->GetOutline()>0 &&
+        !outline &&
+        !(attributes.IsBridge() &&
+          projection.GetMagnification()>=magCity) &&
+        !(attributes.IsTunnel() &&
+          projection.GetMagnification()>=magCity)) {
+      // Should draw outline, but resolution is too low
+      DrawPath(style->GetStyle(),
+               projection,
+               style->GetAlternateR(),
+               style->GetAlternateG(),
+               style->GetAlternateB(),
+               style->GetAlternateA(),
+               lineWidth,
+               nodes);
+    }
+    else if (outline) {
+      // Draw outline
+      DrawPath(style->GetStyle(),
+               projection,
+               style->GetLineR(),
+               style->GetLineG(),
+               style->GetLineB(),
+               style->GetLineA(),
+               lineWidth-2*style->GetOutline(),
+               nodes);
+    }
+    else {
+      // Draw without outline
+      DrawPath(style->GetStyle(),
+               projection,
+               style->GetLineR(),
+               style->GetLineG(),
+               style->GetLineB(),
+               style->GetLineA(),
+               lineWidth,
+               nodes);
     }
   }
   

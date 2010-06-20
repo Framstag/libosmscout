@@ -86,12 +86,6 @@ namespace osmscout {
     void FillRegion(const std::vector<Point>& nodes,
                     const Projection& projection,
                     PatternStyle& style);
-
-    void DrawWay(const StyleConfig& styleConfig,
-                 const Projection& projection,
-                 TypeId type,
-                 const SegmentAttributes& attributes,
-                 const std::vector<Point>& nodes);
                  
     void DrawWayOutline(const StyleConfig& styleConfig,
                         const Projection& projection,

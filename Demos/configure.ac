@@ -25,5 +25,23 @@ PKG_CHECK_MODULES(LIBOSMSCOUTMAP,[libosmscout-map])
 AC_SUBST(LIBOSMSCOUTMAP_CFLAGS)
 AC_SUBST(LIBOSMSCOUTMAP_LIBS)
 
+PKG_CHECK_MODULES(LIBCAIRO, cairo,
+                  HASCAIRO=true
+                  [AC_SUBST(LIBCAIRO_CFLAGS)
+                   AC_SUBST(LIBCAIRO_LIBS)
+                   AC_DEFINE(HAVE_LIB_CAIRO,1,[libcairo found])],
+                   [HASCAIRO=false])
+                   
+AM_CONDITIONAL(HAVE_LIB_CAIRO,[test "$HASCAIRO" = "true"])
+
+PKG_CHECK_MODULES(LIBQTGUI, QtGui > 4.6.0,
+                  HASQTGUI=true
+                  [AC_SUBST(LIBQTGUI_CFLAGS)
+                   AC_SUBST(LIBQTGUI_LIBS)
+                   AC_DEFINE(HAVE_LIB_QTGUI,1,[libQtGui found])],
+                   [HASQTGUI=false])
+                   
+AM_CONDITIONAL(HAVE_LIB_QTGUI,[test "$HASQTGUI" = "true"])
+
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT
