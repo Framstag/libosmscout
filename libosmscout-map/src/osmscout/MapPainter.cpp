@@ -43,7 +43,9 @@ namespace osmscout {
   
   MapPainter::MapPainter()
   {
-    // no code
+    drawNode.resize(100000); // TODO: Calculate matching size
+    nodeX.resize(100000);
+    nodeY.resize(100000);
   }
 
   MapPainter::~MapPainter()
