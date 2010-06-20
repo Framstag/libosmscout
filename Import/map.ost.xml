@@ -124,6 +124,8 @@
     <type id="215" name="railway" value="turntable" node="true" area="true"/>
     <type id="216" name="railway" value="platform" way="true" area="true"/>
 
+    <type id="217" name="route" value="ferry" way="true"/>
+
     <!--
       Aeroway
     -->
@@ -367,7 +369,7 @@
       Boundary
     -->
 
-    <type id="600" name="boundary" value="administrative" area="true" relation="true"/>
+    <type id="600" name="boundary" value="administrative" way="true" relation="true"/>
     <type id="601" name="boundary" value="civil" area="true"/>
     <type id="602" name="boundary" value="political" area="true"/>
 
