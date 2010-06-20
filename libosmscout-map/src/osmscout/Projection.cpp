@@ -34,7 +34,12 @@ namespace osmscout {
   }
 
   MercatorProjection::MercatorProjection()
-  : valid(false)
+  : valid(false),
+    lon(0),
+    lat(0),
+    magnification(1),
+    width(0),
+    height(0)
   {
     Set(lon,lat,magnification,width,height);
   }
