@@ -118,6 +118,8 @@ void DatabaseTask::Run()
         osmscout::MercatorProjection projection;
         osmscout::MapParameter       parameter;
         
+        std::cout << std::endl;
+        
         osmscout::StopClock overallTimer;
         
         projection.Set(currentLon,
