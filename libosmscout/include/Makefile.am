@@ -21,7 +21,6 @@ nobase_include_HEADERS= osmscout/Types.h \
                         osmscout/Tag.h \
                         osmscout/Way.h \
                         osmscout/Reference.h \
-                        osmscout/AreaIndex.h \
                         osmscout/NumericIndex.h \
                         osmscout/Import.h \
                         osmscout/Preprocess.h \
