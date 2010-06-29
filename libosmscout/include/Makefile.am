@@ -1,5 +1,6 @@
 nobase_include_HEADERS= osmscout/Private/Config.h \
                         osmscout/Private/CoreImportExport.h \
+                        osmscout/CoreFeatures.h \
                         osmscout/Types.h \
                         osmscout/Util.h \
                         osmscout/Progress.h \
