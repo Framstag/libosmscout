@@ -6,7 +6,7 @@ int errors=0;
 
 int main()
 {
-  NumberSet set;
+  osmscout::NumberSet set;
 
   if (set.IsSet(0)) {
     std::cerr << "0 found in set!" << std::endl;

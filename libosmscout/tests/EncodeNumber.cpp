@@ -11,7 +11,7 @@ bool CheckEncode(unsigned long value,
   char         buffer[bufferLength];
   size_t       bytes;
 
-  if (!EncodeNumber(value,bufferLength,buffer,bytes)) {
+  if (!osmscout::EncodeNumber(value,bufferLength,buffer,bytes)) {
     std::cerr << "Encoding of '" << value << "' failed!" << std::endl;
     return false;
   }
@@ -34,10 +34,10 @@ bool CheckEncode(unsigned long value,
 
 bool CheckDecode(const char* buffer, unsigned long expected, size_t bytesExpected)
 {
-  unsigned long value;
-  size_t        bytes;
+  uint32_t value;
+  size_t   bytes;
 
-  if (!DecodeNumber(buffer,value,bytes)) {
+  if (!osmscout::DecodeNumber(buffer,value,bytes)) {
     std::cerr << "Decoding of '" << expected << "' failed!" << std::endl;
     return false;
   }

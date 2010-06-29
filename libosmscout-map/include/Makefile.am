@@ -1,4 +1,14 @@
-nobase_include_HEADERS= osmscout/LoaderPNG.h \
+nobase_include_HEADERS= osmscout/Private/Config.h \
+                        osmscout/Private/MapImportExport.h \
+                        osmscout/LoaderPNG.h \
                         osmscout/Projection.h \
-                        osmscout/MapPainter.h \
-                        osmscout/MapPainterCairo.h
+                        osmscout/MapPainter.h
+
+if HAVE_LIB_CAIRO
+nobase_include_HEADERS += osmscout/MapPainterCairo.h
+endif
+
+if HAVE_LIB_QTGUI
+nobase_include_HEADERS += osmscout/MapPainterQt.h
+endif
+

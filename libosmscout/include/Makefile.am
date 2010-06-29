@@ -1,4 +1,6 @@
-nobase_include_HEADERS= osmscout/Types.h \
+nobase_include_HEADERS= osmscout/Private/Config.h \
+                        osmscout/Private/CoreImportExport.h \
+                        osmscout/Types.h \
                         osmscout/Util.h \
                         osmscout/Progress.h \
                         osmscout/FileScanner.h \
