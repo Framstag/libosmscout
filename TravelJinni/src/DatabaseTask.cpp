@@ -102,12 +102,12 @@ void DatabaseTask::Run()
         cairo_destroy(currentCairo);
         cairo_surface_destroy(currentSurface);
 
-        currentSurface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,
-                                                  currentJob->width,currentJob->height);
-        currentCairo=cairo_create(currentSurface);
-
         currentWidth=currentJob->width;
         currentHeight=currentJob->height;
+
+        currentSurface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,
+                                                  currentWidth,currentHeight);
+        currentCairo=cairo_create(currentSurface);
       }
 
       currentLon=currentJob->lon;
@@ -180,12 +180,12 @@ void DatabaseTask::Run()
 
       std::swap(currentSurface,finishedSurface);
       std::swap(currentCairo,finishedCairo);
-      std::swap(finishedWidth,currentWidth);
-      std::swap(finishedHeight,currentHeight);
+      std::swap(currentWidth,finishedWidth);
+      std::swap(currentHeight,finishedHeight);
+      std::swap(currentLon,finishedLon);
+      std::swap(currentLat,finishedLat);
+      std::swap(currentMagnification,finishedMagnification);
 
-      finishedLon=currentLon;
-      finishedLat=currentLat;
-      finishedMagnification=currentMagnification;
       Lum::OS::display->QueueActionForAsyncNotification(jobFinishedAction);
 
       mutex.Unlock();
@@ -471,15 +471,14 @@ bool DatabaseTask::DrawResult(Lum::OS::Window* window,
 
   draw->PushClip(x,y,width,height);
 
+
 #if defined(LUM_HAVE_LIB_CAIRO)
   if (dynamic_cast<Lum::OS::Cairo::DrawInfo*>(draw)!=NULL) {
     cairo_t* cairo=dynamic_cast<Lum::OS::Cairo::DrawInfo*>(draw)->cairo;
 
-    cairo_save(cairo);
     cairo_set_source_surface(cairo,finishedSurface,x-dx,y+dy);
     cairo_rectangle(cairo,x,y,finishedWidth,finishedHeight);
     cairo_fill(cairo);
-    cairo_restore(cairo);
 
     // Scale
 
@@ -505,6 +504,7 @@ bool DatabaseTask::DrawResult(Lum::OS::Window* window,
 
   }
 #endif
+
 #if defined(LUM_HAVE_LIB_X)
   if (dynamic_cast<Lum::OS::X11::DrawInfo*>(draw)!=NULL) {
     Lum::OS::X11::DrawInfo *x11Draw=dynamic_cast<Lum::OS::X11::DrawInfo*>(draw);
@@ -544,8 +544,8 @@ bool DatabaseTask::DrawResult(Lum::OS::Window* window,
   draw->PopClip();
 
   return finishedWidth==width &&
-  finishedHeight==height &&
-  finishedLon==lon &&
-  finishedLat==lat &&
-  finishedMagnification==magnification;
+         finishedHeight==height &&
+         finishedLon==lon &&
+         finishedLat==lat &&
+         finishedMagnification==magnification;
 }
