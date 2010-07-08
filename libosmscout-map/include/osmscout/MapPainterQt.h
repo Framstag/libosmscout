@@ -32,6 +32,12 @@ namespace osmscout {
   {
     QPainter *painter;
     
+    std::map<size_t,QFont*> fonts; //! Cached fonts
+    
+  private:    
+    QFont* GetFont(const MapParameter& parameter,
+                   double fontSize);
+  
   protected:
     bool HasIcon(const StyleConfig& styleConfig,
                          IconStyle& style);
@@ -42,14 +48,16 @@ namespace osmscout {
                            const MapData& data);
                                                       
     void DrawLabel(const Projection& projection,
-                           const LabelStyle& style,
-                           const std::string& text,
-                           double x, double y);
+                   const MapParameter& parameter,
+                   const LabelStyle& style,
+                   const std::string& text,
+                   double x, double y);
 
     void DrawContourLabel(const Projection& projection,
-                                  const LabelStyle& style,
-                                  const std::string& text,
-                                  const std::vector<Point>& nodes);
+                          const MapParameter& parameter,
+                          const LabelStyle& style,
+                          const std::string& text,
+                          const std::vector<Point>& nodes);
                            
     void DrawIcon(const IconStyle* style,
                           double x, double y);
@@ -65,25 +73,25 @@ namespace osmscout {
                   double a,
                   double width,
                   const std::vector<Point>& nodes);
-                          
-    void DrawWay(const StyleConfig& styleConfig,
-                         const Projection& projection,
-                         TypeId type,
-                         const SegmentAttributes& attributes,
-                         const std::vector<Point>& nodes);
-                 
+                                           
     void DrawWayOutline(const StyleConfig& styleConfig,
-                                const Projection& projection,
-                                TypeId type,
-                                const SegmentAttributes& attributes,
-                                const std::vector<Point>& nodes);
+                        const Projection& projection,
+                        const MapParameter& parameter,
+                        TypeId type,
+                        const SegmentAttributes& attributes,
+                        const std::vector<Point>& nodes);
 
     void DrawArea(const StyleConfig& styleConfig,
-                          const Projection& projection,
-                          TypeId type,
-                          int layer,
-                          const SegmentAttributes& attributes,
-                          const std::vector<Point>& nodes);  
+                  const Projection& projection,
+                  TypeId type,
+                  int layer,
+                  const SegmentAttributes& attributes,
+                  const std::vector<Point>& nodes);  
+                          
+    void SetPen(const LineStyle* style, double lineWidth);                      
+    void SetBrush();
+    void SetBrush(const FillStyle* fillStyle);
+    
   public:
     MapPainterQt();
     ~MapPainterQt();

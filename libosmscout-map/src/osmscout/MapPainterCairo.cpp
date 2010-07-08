@@ -36,8 +36,6 @@ namespace osmscout {
 
   static const double gradtorad=2*M_PI/360;
 
-  static double outlineMinWidth=0.5;
-
   static double longDash[]= {7,3};
   static double dotted[]= {1,2};
   static double lineDot[]= {7,3,1,3};
@@ -358,42 +356,44 @@ namespace osmscout {
     }
   }
 
-  cairo_scaled_font_t* MapPainterCairo::GetScaledFont(cairo_t* draw,
+  cairo_scaled_font_t* MapPainterCairo::GetScaledFont(const MapParameter& parameter,
+                                                      cairo_t* draw, 
                                                       size_t fontSize)
   {
     std::map<size_t,cairo_scaled_font_t*>::const_iterator f;
 
     f=font.find(fontSize);
 
-    if (f==font.end()) {
-      cairo_matrix_t       scaleMatrix;
-      cairo_matrix_t       transformMatrix;
-      cairo_font_options_t *options;
-      cairo_scaled_font_t  *scaledFont;
-
-      cairo_matrix_init_scale(&scaleMatrix,fontSize,fontSize);
-      cairo_get_matrix(draw,&transformMatrix);
-      options=cairo_font_options_create();
-      cairo_font_options_set_hint_style (options,CAIRO_HINT_STYLE_NONE);
-      cairo_font_options_set_hint_metrics (options,CAIRO_HINT_METRICS_OFF);
-
-      cairo_select_font_face(draw,
-                             "sans-serif",
-                             CAIRO_FONT_SLANT_NORMAL,
-                             CAIRO_FONT_WEIGHT_NORMAL);
-
-      scaledFont=cairo_scaled_font_create(cairo_get_font_face(draw),
-                                          &scaleMatrix,
-                                          &transformMatrix,
-                                          options);
-
-      cairo_font_options_destroy(options);
-
-      return font.insert(std::pair<size_t,cairo_scaled_font_t*>(fontSize,scaledFont)).first->second;
-    }
-    else {
+    if (f!=font.end()) {
       return f->second;
     }
+    
+    cairo_matrix_t       scaleMatrix;
+    cairo_matrix_t       transformMatrix;
+    cairo_font_options_t *options;
+    cairo_scaled_font_t  *scaledFont;
+
+    cairo_matrix_init_scale(&scaleMatrix,
+                            parameter.GetFontSize()*fontSize,
+                            parameter.GetFontSize()*fontSize);
+    cairo_get_matrix(draw,&transformMatrix);
+    options=cairo_font_options_create();
+    cairo_font_options_set_hint_style (options,CAIRO_HINT_STYLE_NONE);
+    cairo_font_options_set_hint_metrics (options,CAIRO_HINT_METRICS_OFF);
+
+    cairo_select_font_face(draw,
+                           parameter.GetFontName().c_str(),
+                           CAIRO_FONT_SLANT_NORMAL,
+                           CAIRO_FONT_WEIGHT_NORMAL);
+
+    scaledFont=cairo_scaled_font_create(cairo_get_font_face(draw),
+                                        &scaleMatrix,
+                                        &transformMatrix,
+                                        options);
+
+    cairo_font_options_destroy(options);
+
+    return font.insert(std::pair<size_t,cairo_scaled_font_t*>(fontSize,scaledFont)).first->second;
   }
 
   void MapPainterCairo::ClearArea(const StyleConfig& styleConfig,
@@ -410,6 +410,7 @@ namespace osmscout {
   }                                
 
   void MapPainterCairo::DrawLabel(const Projection& projection,
+                                  const MapParameter& parameter,
                                   const LabelStyle& style,
                                   const std::string& text,
                                   double x, double y)
@@ -419,10 +420,9 @@ namespace osmscout {
     if (style.GetStyle()==LabelStyle::normal) {
       cairo_scaled_font_t *font;
 
-      cairo_font_extents_t fontExtents;
       cairo_text_extents_t textExtents;
 
-      double fontSize=style.GetSize()*9.0;
+      double fontSize=style.GetSize();
       double r=style.GetTextR();
       double g=style.GetTextG();
       double b=style.GetTextB();
@@ -434,11 +434,12 @@ namespace osmscout {
         a=a/factor;
       }
 
-      font=GetScaledFont(draw,fontSize);
+      font=GetScaledFont(parameter,
+                         draw,
+                         fontSize);
 
       cairo_set_scaled_font(draw,font);
 
-      cairo_scaled_font_extents(font,&fontExtents);
       cairo_scaled_font_text_extents(font,text.c_str(),&textExtents);
 
       cairo_set_source_rgba(draw,r,g,b,a);
@@ -461,7 +462,9 @@ namespace osmscout {
 
       cairo_scaled_font_t *font;
 
-      font=GetScaledFont(draw,style.GetSize()*9.0);
+      font=GetScaledFont(parameter,
+                         draw,
+                         style.GetSize());
 
       cairo_set_scaled_font(draw,font);
 
@@ -519,12 +522,11 @@ namespace osmscout {
       cairo_stroke(draw);
     }
     else if (style.GetStyle()==LabelStyle::emphasize) {
-      cairo_font_extents_t fontExtents;
       cairo_text_extents_t textExtents;
 
       cairo_save(draw);
 
-      double fontSize=style.GetSize()*9.0;
+      double fontSize=style.GetSize();
       double r=style.GetTextR();
       double g=style.GetTextG();
       double b=style.GetTextB();
@@ -538,11 +540,12 @@ namespace osmscout {
 
       cairo_scaled_font_t *font;
 
-      font=GetScaledFont(draw,fontSize);
+      font=GetScaledFont(parameter,
+                         draw,
+                         fontSize);
 
       cairo_set_scaled_font(draw,font);
 
-      cairo_scaled_font_extents(font,&fontExtents);
       cairo_scaled_font_text_extents(font,text.c_str(),&textExtents);
 
       if (x-textExtents.width/2+textExtents.x_bearing>=projection.GetWidth() ||
@@ -567,13 +570,16 @@ namespace osmscout {
   }
 
   void MapPainterCairo::DrawContourLabel(const Projection& projection,
+                                         const MapParameter& parameter,
                                          const LabelStyle& style,
                                          const std::string& text,
                                          const std::vector<Point>& nodes)
   {
     cairo_scaled_font_t *font;
 
-    font=GetScaledFont(draw,style.GetSize()*9.0);
+    font=GetScaledFont(parameter,
+                       draw,
+                       style.GetSize());
 
     cairo_set_scaled_font(draw,font);
 
@@ -829,6 +835,7 @@ namespace osmscout {
 
   void MapPainterCairo::DrawWayOutline(const StyleConfig& styleConfig,
                                        const Projection& projection,
+                                       const MapParameter& parameter,
                                        TypeId type,
                                        const SegmentAttributes& attributes,
                                        const std::vector<Point>& nodes)
@@ -852,7 +859,7 @@ namespace osmscout {
     }
 
     bool outline=style->GetOutline()>0 &&
-                 lineWidth-2*style->GetOutline()>=outlineMinWidth;
+                 lineWidth-2*style->GetOutline()>=parameter.GetOutlineMinWidth();
 
     if (!(attributes.IsBridge() &&
           projection.GetMagnification()>=magCity) &&
@@ -866,7 +873,6 @@ namespace osmscout {
         projection.GetMagnification()>=magCity) {
       cairo_set_dash(draw,NULL,0,0);
       cairo_set_source_rgba(draw,0.0,0.0,0.0,1.0);
-      cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
     }
     else if (attributes.IsTunnel() &&
              projection.GetMagnification()>=magCity) {
@@ -882,7 +888,6 @@ namespace osmscout {
       else {
         cairo_set_source_rgba(draw,0.5,0.5,0.5,1.0);
       }
-      cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
     }
     else {
       cairo_set_dash(draw,NULL,0,0);
@@ -891,9 +896,9 @@ namespace osmscout {
                             style->GetOutlineG(),
                             style->GetOutlineB(),
                             style->GetOutlineA());
-      cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
     }
 
+    cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
     cairo_set_line_width(draw,lineWidth);
 
     TransformWay(projection,nodes);

@@ -30,9 +30,11 @@ namespace osmscout {
   static size_t optimizeLimit=512;
   static double relevantPosDeriviation=2.0;
   static double relevantSlopeDeriviation=0.1;
-  static double outlineMinWidth=0.5;
 
   MapParameter::MapParameter()
+  : fontName("sans-serif"),
+    fontSize(9.0),
+    outlineMinWidth(0.5)
   {
     // no code
   }  
@@ -40,6 +42,21 @@ namespace osmscout {
   MapParameter::~MapParameter()
   {
     // no code
+  }
+
+  void MapParameter::SetFontName(const std::string& fontName)
+  {
+    this->fontName=fontName;
+  }
+  
+  void MapParameter::SetFontSize(double fontSize)
+  {
+    this->fontSize=fontSize;
+  }
+
+  void MapParameter::SetOutlineMinWidth(double outlineMinWidth)
+  {
+    this->outlineMinWidth=outlineMinWidth;
   }
   
   MapPainter::MapPainter()
@@ -298,6 +315,7 @@ namespace osmscout {
   }
 
   void MapPainter::DrawTiledLabel(const Projection& projection,
+                                  const MapParameter& parameter,
                                   const LabelStyle& style,
                                   const std::string& label,
                                   const std::vector<Point>& nodes,
@@ -331,6 +349,7 @@ namespace osmscout {
     }
 
     DrawLabel(projection,
+              parameter,
               style,
               label,
               x,y);
@@ -481,18 +500,21 @@ namespace osmscout {
       if (hasLabel) {
         if (hasSymbol) {
           DrawLabel(projection,
+                    parameter,
                     *labelStyle,
                     label,
                     x,y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
         }
         else if (hasIcon) {
           DrawLabel(projection,
+                    parameter,
                     *labelStyle,
                     label,
                     x,y+14+5); // TODO: Better layout to real size of icon
         }
         else {
           DrawLabel(projection,
+                    parameter,
                     *labelStyle,
                     label,
                     x,y);
@@ -612,18 +634,21 @@ namespace osmscout {
       if (hasLabel) {
         if (hasSymbol) {
           DrawLabel(projection,
+                    parameter,
                     *labelStyle,
                     label,
                     x,y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
         }
         else if (hasIcon) {
           DrawLabel(projection,
+                    parameter,
                     *labelStyle,
                     label,
                     x,y+14+5); // TODO: Better layout to real size of icon
         }
         else {
           DrawLabel(projection,
+                    parameter,
                     *labelStyle,
                     label,
                     x,y);
@@ -692,18 +717,21 @@ namespace osmscout {
           if (hasLabel) {
             if (hasSymbol) {
               DrawLabel(projection,
+                        parameter,
                         *labelStyle,
                         label,
                         x,y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
             }
             else if (hasIcon) {
               DrawLabel(projection,
+                        parameter,
                         *labelStyle,
                         label,
                         x,y+14+5); // TODO: Better layout to real size of icon
             }
             else {
               DrawLabel(projection,
+                        parameter,
                         *labelStyle,
                         label,
                         x,y);
@@ -724,6 +752,7 @@ namespace osmscout {
   
   void MapPainter::DrawWay(const StyleConfig& styleConfig,
                            const Projection& projection,
+                           const MapParameter& parameter,
                            TypeId type,
                            const SegmentAttributes& attributes,
                            const std::vector<Point>& nodes)
@@ -731,10 +760,6 @@ namespace osmscout {
     const LineStyle *style=styleConfig.GetWayLineStyle(type);
 
     if (style==NULL) {
-      return;
-    }
-
-    if (style->GetLineA()==0.0) {
       return;
     }
 
@@ -751,7 +776,7 @@ namespace osmscout {
     }
 
     bool outline=style->GetOutline()>0 &&
-                 lineWidth-2*style->GetOutline()>=outlineMinWidth;
+                 lineWidth-2*style->GetOutline()>=parameter.GetOutlineMinWidth();
 
     if (style->GetOutline()>0 &&
         !outline &&
@@ -813,6 +838,7 @@ namespace osmscout {
 
           DrawWayOutline(styleConfig,
                          projection,
+                         parameter,
                          way->GetType(),
                          way->GetAttributes(),
                          way->nodes);
@@ -832,6 +858,7 @@ namespace osmscout {
 
             DrawWayOutline(styleConfig,
                            projection,
+                           parameter,
                            type,
                            relation->roles[m].GetAttributes(),
                            relation->roles[m].nodes);
@@ -850,6 +877,7 @@ namespace osmscout {
 
           DrawWay(styleConfig,
                   projection,
+                  parameter,
                   way->GetType(),
                   way->GetAttributes(),
                   way->nodes);
@@ -870,6 +898,7 @@ namespace osmscout {
 
             DrawWay(styleConfig,
                     projection,
+                    parameter,
                     type,
                     relation->roles[m].GetAttributes(),
                     relation->roles[m].nodes);
@@ -898,12 +927,14 @@ namespace osmscout {
 
           if (style->GetStyle()==LabelStyle::contour) {
             DrawContourLabel(projection,
+                             parameter,
                              *style,
                              way->GetName(),
                              way->nodes);
           }
           else {
             DrawTiledLabel(projection,
+                           parameter,
                            *style,
                            way->GetName(),
                            way->nodes,
@@ -921,12 +952,14 @@ namespace osmscout {
 
           if (style->GetStyle()==LabelStyle::contour) {
             DrawContourLabel(projection,
+                             parameter,
                              *style,
                              way->GetRefName(),
                              way->nodes);
           }
           else {
             DrawTiledLabel(projection,
+                           parameter,
                            *style,
                            way->GetRefName(),
                            way->nodes,
@@ -949,12 +982,14 @@ namespace osmscout {
 
             if (style->GetStyle()==LabelStyle::contour) {
               DrawContourLabel(projection,
+                               parameter,
                                *style,
                                relation->roles[m].GetName(),
                                relation->roles[m].nodes);
             }
             else {
               DrawTiledLabel(projection,
+                             parameter,
                              *style,
                              relation->roles[m].GetName(),
                              relation->roles[m].nodes,
@@ -972,12 +1007,14 @@ namespace osmscout {
 
             if (style->GetStyle()==LabelStyle::contour) {
               DrawContourLabel(projection,
+                               parameter,
                                *style,
                                relation->roles[m].GetRefName(),
                                relation->roles[m].nodes);
             }
             else {
               DrawTiledLabel(projection,
+                             parameter,
                              *style,
                              relation->roles[m].GetRefName(),
                              relation->roles[m].nodes,
@@ -1005,6 +1042,7 @@ namespace osmscout {
 
       DrawWay(styleConfig,
               projection,
+              parameter,
               way->GetType(),
               way->GetAttributes(),
               way->nodes);
@@ -1073,6 +1111,7 @@ namespace osmscout {
           projection.GeoToPixel(node->lon,node->lat,x,y);
 
           DrawLabel(projection,
+                    parameter,
                     *style,
                     node->tags[i].value,
                     x,y);
@@ -1091,6 +1130,7 @@ namespace osmscout {
           projection.GeoToPixel(node->lon,node->lat,x,y);
 
           DrawLabel(projection,
+                    parameter,
                     *style,
                     node->tags[i].value,
                     x,y);
@@ -1111,9 +1151,9 @@ namespace osmscout {
   
     std::cout << "Draw ";
     std::cout << projection.GetLon() <<", ";
-    std::cout << projection.GetLat() << " with magnification ";
+    std::cout << projection.GetLat() << " with mag. ";
     std::cout << projection.GetMagnification() << "x" << "/" << log(projection.GetMagnification())/log(2);
-    std::cout << " for area " << projection.GetWidth() << "x" << projection.GetHeight() << std::endl;
+    std::cout << " area " << projection.GetWidth() << "x" << projection.GetHeight() << std::endl;
 
     //
     // Setup and Precalculation

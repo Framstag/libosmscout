@@ -20,6 +20,7 @@
 #include <osmscout/MapPainterQt.h>
 
 #include <cassert>
+#include <cmath>
 #include <iostream>
 
 namespace osmscout {
@@ -32,6 +33,26 @@ namespace osmscout {
   MapPainterQt::~MapPainterQt()
   {
     // no code
+    // TODO: Clean up fonts
+  }
+
+  QFont* MapPainterQt::GetFont(const MapParameter& parameter,
+                               double fontSize)
+  {
+    std::map<size_t,QFont*>::const_iterator f;
+
+    f=fonts.find(fontSize);
+
+    if (f!=fonts.end()) {
+      return f->second;
+    }
+
+    QFont* font=new QFont(parameter.GetFontName().c_str());
+    
+    font->setPixelSize(parameter.GetFontSize()*fontSize);
+    font->setStyleStrategy(QFont::PreferAntialias);
+    
+    return fonts.insert(std::pair<size_t,QFont*>(fontSize,font)).first->second;
   }
 
   bool MapPainterQt::HasIcon(const StyleConfig& styleConfig,
@@ -53,17 +74,91 @@ namespace osmscout {
   }                             
                                                     
   void MapPainterQt::DrawLabel(const Projection& projection,
+                               const MapParameter& parameter,
                                const LabelStyle& style,
                                const std::string& text,
                                double x, double y)
   {
+    double fontSize=style.GetSize();
+    double r=style.GetTextR();
+    double g=style.GetTextG();
+    double b=style.GetTextB();
+    double a=style.GetTextA();
+  
+    if (projection.GetMagnification()>style.GetScaleAndFadeMag()) {
+      double factor=log2(projection.GetMagnification())-log2(style.GetScaleAndFadeMag());
+      fontSize=fontSize*pow(2,factor);
+      a=a/factor;
+    }
+  
+    QPen pen;
+
+    pen.setColor(QColor::fromRgbF(r,g,b,a));
+    painter->setPen(pen);
+    
+    QFont* font=GetFont(parameter,fontSize);
+    
+    painter->setFont(*font);
+  
+    QFontMetrics metrics=QFontMetrics(*font);
+  
+    QString string=QString::fromUtf8(text.c_str());
+  
+    QRect extents=metrics.boundingRect(string);
+                                  
+    painter->drawText(QPointF(x-extents.width()/2,
+                              y+metrics.ascent()-extents.height()/2),
+                      string);
   }                             
 
   void MapPainterQt::DrawContourLabel(const Projection& projection,
+                                      const MapParameter& parameter,
                                       const LabelStyle& style,
                                       const std::string& text,
                                       const std::vector<Point>& nodes)
   {
+    double fontSize=style.GetSize();
+    double r=style.GetTextR();
+    double g=style.GetTextG();
+    double b=style.GetTextB();
+    double a=style.GetTextA();
+  
+    if (projection.GetMagnification()>style.GetScaleAndFadeMag()) {
+      double factor=log2(projection.GetMagnification())-log2(style.GetScaleAndFadeMag());
+      fontSize=fontSize*pow(2,factor);
+      a=a/factor;
+    }
+  
+    QPen pen;
+
+    pen.setColor(QColor::fromRgbF(r,g,b,a));
+    painter->setPen(pen);
+    
+    QFont* font=GetFont(parameter,fontSize);
+    
+    painter->setFont(*font);
+  
+    QFontMetrics metrics=QFontMetrics(*font);
+  
+    QString string=QString::fromUtf8(text.c_str());
+  
+    QRect extents=metrics.boundingRect(string);
+
+    TransformWay(projection,nodes);
+
+    QPainterPath path;
+
+    for (size_t i=0; i<nodes.size(); i++) {
+      if (drawNode[i]) {
+        path.moveTo(nodeX[i],nodeY[i]);
+      }
+    }
+
+    painter->strokePath(path,pen);
+                                /*
+    painter->drawText(QPointF(x-extents.width()/2,
+                              y+metrics.ascent()-extents.height()/2),
+                      string);*/
   }                             
                          
   void MapPainterQt::DrawIcon(const IconStyle* style,
@@ -133,20 +228,125 @@ namespace osmscout {
     painter->strokePath(path,pen);
   }
                         
-  void MapPainterQt::DrawWay(const StyleConfig& styleConfig,
-                             const Projection& projection,
-                             TypeId type,
-                             const SegmentAttributes& attributes,
-                             const std::vector<Point>& nodes)
-  {
-  }                             
-               
   void MapPainterQt::DrawWayOutline(const StyleConfig& styleConfig,
                                     const Projection& projection,
+                                    const MapParameter& parameter,
                                     TypeId type,
                                     const SegmentAttributes& attributes,
                                     const std::vector<Point>& nodes)
   {
+    const LineStyle *style=styleConfig.GetWayLineStyle(type);
+
+    if (style==NULL) {
+      return;
+    }
+
+    double lineWidth=attributes.GetWidth();
+
+    if (lineWidth==0) {
+      lineWidth=style->GetWidth();
+    }
+
+    lineWidth=lineWidth/projection.GetPixelSize();
+
+    if (lineWidth<style->GetMinPixel()) {
+      lineWidth=style->GetMinPixel();
+    }
+
+    bool outline=style->GetOutline()>0 &&
+                 lineWidth-2*style->GetOutline()>=parameter.GetOutlineMinWidth();
+
+    if (!(attributes.IsBridge() &&
+          projection.GetMagnification()>=magCity) &&
+        !(attributes.IsTunnel() &&
+          projection.GetMagnification()>=magCity) &&
+        !outline) {
+      return;
+    }
+
+    QPen pen;
+
+    if (attributes.IsBridge() &&
+        projection.GetMagnification()>=magCity) {
+
+      pen.setColor(QColor::fromRgbF(0.0,0.0,0.0,1.0));        
+      pen.setStyle(Qt::SolidLine);
+    }
+    else if (attributes.IsTunnel() &&
+             projection.GetMagnification()>=magCity) {
+      double tunnel[2];
+
+      tunnel[0]=7+lineWidth;
+      tunnel[1]=7+lineWidth;
+
+      if (projection.GetMagnification()>=10000) {
+        pen.setColor(QColor::fromRgbF(0.75,0.75,0.75,1.0));        
+      }
+      else {
+        pen.setColor(QColor::fromRgbF(0.5,0.5,0.5,1.0));        
+      }
+      pen.setStyle(Qt::DashLine);
+    }
+    else {
+      pen.setStyle(Qt::SolidLine);
+      pen.setColor(QColor::fromRgbF(style->GetOutlineR(),
+                                    style->GetOutlineG(),
+                                    style->GetOutlineB(),
+                                    style->GetOutlineA()));
+    }
+    pen.setCapStyle(Qt::FlatCap);
+
+    pen.setWidthF(lineWidth);
+
+    TransformWay(projection,nodes);
+
+    QPainterPath path;
+
+    bool start=true;
+    for (size_t i=0; i<nodes.size(); i++) {
+      if (drawNode[i]) {
+        if (start) {
+          path.moveTo(nodeX[i],nodeY[i]);
+          start=false;
+        }
+        else {
+          path.lineTo(nodeX[i],nodeY[i]);
+        }
+      }
+    }
+
+    painter->strokePath(path,pen);
+
+    /*
+    if (!attributes.StartIsJoint()) {
+      cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
+      cairo_set_dash(draw,NULL,0,0);
+      cairo_set_source_rgba(draw,
+                            style->GetOutlineR(),
+                            style->GetOutlineG(),
+                            style->GetOutlineB(),
+                            style->GetOutlineA());
+      cairo_set_line_width(draw,lineWidth);
+
+      cairo_move_to(draw,nodeX[0],nodeY[0]);
+      cairo_line_to(draw,nodeX[0],nodeY[0]);
+      cairo_stroke(draw);
+    }
+
+    if (!attributes.EndIsJoint()) {
+      cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
+      cairo_set_dash(draw,NULL,0,0);
+      cairo_set_source_rgba(draw,
+                            style->GetOutlineR(),
+                            style->GetOutlineG(),
+                            style->GetOutlineB(),
+                            style->GetOutlineA());
+      cairo_set_line_width(draw,lineWidth);
+
+      cairo_move_to(draw,nodeX[nodes.size()-1],nodeY[nodes.size()-1]);
+      cairo_line_to(draw,nodeX[nodes.size()-1],nodeY[nodes.size()-1]);
+      cairo_stroke(draw);
+    }*/
   }                             
 
   void MapPainterQt::DrawArea(const StyleConfig& styleConfig,
@@ -156,7 +356,109 @@ namespace osmscout {
                               const SegmentAttributes& attributes,
                               const std::vector<Point>& nodes)
   {
+    PatternStyle    *patternStyle=styleConfig.GetAreaPatternStyle(type);
+    const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(type,
+                                                            attributes.IsBuilding());
+
+    bool               hasPattern=patternStyle!=NULL &&
+                                  patternStyle->GetLayer()==layer &&
+                                  projection.GetMagnification()>=patternStyle->GetMinMag();
+    bool               hasFill=fillStyle!=NULL &&
+                               fillStyle->GetLayer()==layer;
+
+    TransformArea(projection,nodes);
+
+    QPainterPath path;
+
+    bool start=true;
+    for (size_t i=0; i<nodes.size(); i++) {
+      if (drawNode[i]) {
+        if (start) {
+          path.moveTo(nodeX[i],nodeY[i]);
+          start=false;
+        }
+        else {
+          path.lineTo(nodeX[i],nodeY[i]);
+        }
+      }
+    }
+
+    SetPen(styleConfig.GetAreaBorderStyle(type),
+           borderWidth[(size_t)type]);
+
+    /*
+    if (hasPattern) {
+      hasPattern=HasPattern(styleConfig,*patternStyle);
+    }*/
+    hasPattern=false;
+
+    if (hasPattern) {
+      painter->setBrush(Qt::NoBrush);
+      //FillRegion(nodes,projection,*patternStyle);
+    }
+    else if (hasFill) {
+      SetBrush(fillStyle);
+    }
+    else {
+      SetBrush();
+    }
+    
+    painter->drawPath(path);
   }                             
+
+  void MapPainterQt::SetPen(const LineStyle* style, double lineWidth)
+  {
+    if (style==NULL) {
+      painter->setPen(Qt::NoPen);
+    }
+    else {
+      QPen pen;
+
+      pen.setColor(QColor::fromRgbF(style->GetLineR(),
+                                    style->GetLineG(),
+                                    style->GetLineB(),
+                                    style->GetLineA()));
+      pen.setWidthF(lineWidth);
+      
+      switch (style->GetStyle()) {
+      case LineStyle::none:
+        // way should not be visible in this case!
+        assert(false);
+        break;
+      case LineStyle::normal:
+        pen.setStyle(Qt::SolidLine);
+        pen.setCapStyle(Qt::RoundCap);
+        break;
+      case LineStyle::longDash:
+        pen.setStyle(Qt::DashLine);
+        pen.setCapStyle(Qt::FlatCap);
+        break;
+      case LineStyle::dotted:
+        pen.setStyle(Qt::DotLine);
+        pen.setCapStyle(Qt::FlatCap);
+        break;
+      case LineStyle::lineDot:
+        pen.setStyle(Qt::DashDotLine);
+        pen.setCapStyle(Qt::FlatCap);
+        break;
+      }
+      
+      painter->setPen(pen);
+    }
+  }
+
+  void MapPainterQt::SetBrush()
+  {
+    painter->setBrush(Qt::NoBrush);
+  }
+  
+  void MapPainterQt::SetBrush(const FillStyle* fillStyle)
+  {
+    painter->setBrush(QBrush(QColor::fromRgbF(fillStyle->GetFillR(),
+                                              fillStyle->GetFillG(),
+                                              fillStyle->GetFillB(),
+                                              1)));
+  }
 
   bool MapPainterQt::DrawMap(const StyleConfig& styleConfig,
                              const Projection& projection,
@@ -165,6 +467,9 @@ namespace osmscout {
                              QPainter* painter)
   {
     this->painter=painter;
+
+    painter->setRenderHint(QPainter::Antialiasing);
+    painter->setRenderHint(QPainter::TextAntialiasing);
   
     Draw(styleConfig,
          projection,

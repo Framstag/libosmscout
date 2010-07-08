@@ -127,6 +127,10 @@ public:
 
     /* --- */
 
+    draw->PushForeground(Lum::OS::Display::blackColor);
+    draw->FillRectangle(this->x,this->y,this->width,this->height);
+    draw->PopForeground();
+
     if (!databaseTask->DrawResult(GetWindow(),
                                   draw,
                                   this->x,this->y,

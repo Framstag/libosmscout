@@ -34,9 +34,34 @@ namespace osmscout {
 
   class OSMSCOUT_MAP_API MapParameter
   {
+  private:
+    std::string fontName;        //! Name of the font to use
+    double      fontSize;        //! Pixel size of base font
+    double      outlineMinWidth; //! Minimum width of an outline to be drawn
+    
   public:
     MapParameter();
     virtual ~MapParameter();
+
+    void SetFontName(const std::string& fontName);
+    void SetFontSize(double fontSize);
+
+    void SetOutlineMinWidth(double outlineMinWidth);
+    
+    inline std::string GetFontName() const
+    {
+      return fontName;
+    }
+    
+    inline double GetFontSize() const
+    {
+      return fontSize;
+    }
+    
+    inline double GetOutlineMinWidth() const
+    {
+      return outlineMinWidth;
+    }
   };
 
   struct OSMSCOUT_MAP_API MapData
@@ -80,6 +105,7 @@ namespace osmscout {
      */
     //@{
     void DrawTiledLabel(const Projection& projection,
+                        const MapParameter& parameter,
                         const LabelStyle& style,
                         const std::string& label,
                         const std::vector<Point>& nodes,
@@ -101,6 +127,7 @@ namespace osmscout {
      */
     void DrawWay(const StyleConfig& styleConfig,
                  const Projection& projection,
+                 const MapParameter& parameter,
                  TypeId type,
                  const SegmentAttributes& attributes,
                  const std::vector<Point>& nodes);
@@ -190,6 +217,7 @@ namespace osmscout {
       by the given LabelStyle.
      */
     virtual void DrawLabel(const Projection& projection,
+                           const MapParameter& parameter,
                            const LabelStyle& style,
                            const std::string& text,
                            double x, double y) = 0;
@@ -199,6 +227,7 @@ namespace osmscout {
       by the given LabelStyle.
      */
     virtual void DrawContourLabel(const Projection& projection,
+                                  const MapParameter& parameter,
                                   const LabelStyle& style,
                                   const std::string& text,
                                   const std::vector<Point>& nodes) = 0;
@@ -235,6 +264,7 @@ namespace osmscout {
      */
     virtual void DrawWayOutline(const StyleConfig& styleConfig,
                                 const Projection& projection,
+                                const MapParameter& parameter,
                                 TypeId type,
                                 const SegmentAttributes& attributes,
                                 const std::vector<Point>& nodes) = 0;

@@ -43,7 +43,8 @@ namespace osmscout {
     std::map<size_t,cairo_scaled_font_t*> font;     //! Cached scaled font
 
   private:
-    cairo_scaled_font_t* GetScaledFont(cairo_t* draw,
+    cairo_scaled_font_t* GetScaledFont(const MapParameter& parameter,
+                                       cairo_t* draw,
                                        size_t fontSize);
 
     bool HasIcon(const StyleConfig& styleConfig,
@@ -58,11 +59,13 @@ namespace osmscout {
                    const MapData& data);
 
     void DrawLabel(const Projection& projection,
+                   const MapParameter& parameter,
                    const LabelStyle& style,
                    const std::string& text,
                    double x, double y);
 
     void DrawContourLabel(const Projection& projection,
+                          const MapParameter& parameter,
                           const LabelStyle& style,
                           const std::string& text,
                           const std::vector<Point>& nodes);
@@ -89,6 +92,7 @@ namespace osmscout {
                  
     void DrawWayOutline(const StyleConfig& styleConfig,
                         const Projection& projection,
+                        const MapParameter& parameter,
                         TypeId type,
                         const SegmentAttributes& attributes,
                         const std::vector<Point>& nodes);
