@@ -47,10 +47,11 @@ namespace osmscout {
       return f->second;
     }
 
-    QFont* font=new QFont(parameter.GetFontName().c_str());
+    QFont* font=new QFont(parameter.GetFontName().c_str(), QFont::Normal, false);
     
     font->setPixelSize(parameter.GetFontSize()*fontSize);
     font->setStyleStrategy(QFont::PreferAntialias);
+    font->setStyleStrategy(QFont::PreferMatch);
     
     return fonts.insert(std::pair<size_t,QFont*>(fontSize,font)).first->second;
   }
@@ -122,43 +123,84 @@ namespace osmscout {
     double g=style.GetTextG();
     double b=style.GetTextB();
     double a=style.GetTextA();
-  
-    if (projection.GetMagnification()>style.GetScaleAndFadeMag()) {
-      double factor=log2(projection.GetMagnification())-log2(style.GetScaleAndFadeMag());
-      fontSize=fontSize*pow(2,factor);
-      a=a/factor;
-    }
-  
-    QPen pen;
+
+    QPen         pen;
+    QFont*       font=GetFont(parameter,fontSize);
+    QFontMetrics metrics=QFontMetrics(*font);
+    QString      string=QString::fromUtf8(text.c_str());
+    QRect        extents=metrics.boundingRect(string);
 
     pen.setColor(QColor::fromRgbF(r,g,b,a));
     painter->setPen(pen);
-    
-    QFont* font=GetFont(parameter,fontSize);
-    
     painter->setFont(*font);
-  
-    QFontMetrics metrics=QFontMetrics(*font);
-  
-    QString string=QString::fromUtf8(text.c_str());
-  
-    QRect extents=metrics.boundingRect(string);
-
-    TransformWay(projection,nodes);
 
     QPainterPath path;
 
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
-        path.moveTo(nodeX[i],nodeY[i]);
+    double x,y;
+
+    if (nodes[0].lon<nodes[nodes.size()-1].lon) {
+      for (size_t j=0; j<nodes.size(); j++) {
+        projection.GeoToPixel(nodes[j].lon,nodes[j].lat,x,y);
+        if (j==0) {
+          path.moveTo(x,y);
+        }
+        else {
+          path.lineTo(x,y);
+        }
+      }
+    }
+    else {
+      for (size_t j=0; j<nodes.size(); j++) {
+        projection.GeoToPixel(nodes[nodes.size()-j-1].lon,nodes[nodes.size()-j
+            -1].lat,x,y);
+
+        if (j==0) {
+          path.moveTo(x,y);
+        }
+        else {
+          path.lineTo(x,y);
+        }
       }
     }
 
-    painter->strokePath(path,pen);
-                                /*
-    painter->drawText(QPointF(x-extents.width()/2,
-                              y+metrics.ascent()-extents.height()/2),
-                      string);*/
+    if (path.length()<extents.width()) {
+      // Text is longer than path to draw on
+      return;
+    }
+
+    qreal offset=(path.length()-extents.width())/2;
+
+    for (int i=0; i<string.size(); i++) {
+      QPointF point=path.pointAtPercent(path.percentAtLength(offset));
+      qreal angle=path.angleAtPercent(path.percentAtLength(offset));
+
+      qreal rad=-qreal(0.017453292519943295769)*angle; // PI/180
+
+      // rotation matrix components
+      qreal sina=std::sin(rad);
+      qreal cosa=std::cos(rad);
+
+      // Rotation
+      qreal newX=(cosa*point.x())-(sina*point.y());
+      qreal newY=(cosa*point.y())+(sina*point.x());
+
+      // Aditional offseting
+      qreal deltaPenX=cosa*pen.width();
+      qreal deltaPenY=sina*pen.width();
+
+      // Getting the delta distance for the translation part of the transformation
+      qreal deltaX=newX-point.x();
+      qreal deltaY=newY-point.y();
+      // Applying rotation and translation.
+      QTransform tran(cosa,sina,-sina,cosa,-deltaX+deltaPenX,-deltaY-deltaPenY);
+
+      painter->setWorldTransform(tran);
+      painter->drawText(point,QString(string[i]));
+
+      offset+=metrics.width(string[i]);
+    }
+
+    painter->resetTransform();
   }                             
                          
   void MapPainterQt::DrawIcon(const IconStyle* style,

@@ -593,7 +593,8 @@ namespace osmscout {
         xo=x;
         yo=y;
 
-        projection.GeoToPixel(nodes[j].lon,nodes[j].lat,
+        projection.GeoToPixel(nodes[j].lon,
+                              nodes[j].lat,
                                x,y);
         if (j==0) {
           cairo_move_to(draw,x,y);
@@ -609,7 +610,8 @@ namespace osmscout {
         xo=x;
         yo=y;
 
-        projection.GeoToPixel(nodes[nodes.size()-j-1].lon,nodes[nodes.size()-j-1].lat,
+        projection.GeoToPixel(nodes[nodes.size()-j-1].lon,
+                              nodes[nodes.size()-j-1].lat,
                                x,y);
 
         if (j==0) {
@@ -626,22 +628,25 @@ namespace osmscout {
 
     cairo_scaled_font_text_extents(font,text.c_str(),&textExtents);
 
-    if (length>=textExtents.width) {
-      cairo_font_extents_t fontExtents;
-
-      cairo_scaled_font_extents(font,&fontExtents);
-
-      cairo_set_source_rgba(draw,
-                            style.GetTextR(),
-                            style.GetTextG(),
-                            style.GetTextB(),
-                            style.GetTextA());
-
-      draw_twisted(draw,
-                   (length-textExtents.width)/2+textExtents.x_bearing,
-                   fontExtents.ascent+textExtents.y_bearing,
-                   text.c_str());
+    if (length<textExtents.width) {
+      // Text is longer than path to draw on
+      return;
     }
+
+    cairo_font_extents_t fontExtents;
+
+    cairo_scaled_font_extents(font,&fontExtents);
+
+    cairo_set_source_rgba(draw,
+                          style.GetTextR(),
+                          style.GetTextG(),
+                          style.GetTextB(),
+                          style.GetTextA());
+
+    draw_twisted(draw,
+                 (length-textExtents.width)/2+textExtents.x_bearing,
+                 fontExtents.ascent+textExtents.y_bearing,
+                 text.c_str());
   }
 
   void MapPainterCairo::DrawSymbol(const SymbolStyle* style,
