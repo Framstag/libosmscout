@@ -38,7 +38,7 @@ namespace osmscout {
   {
   private:
     cairo_t                               *draw;    //! The cairo cairo_t to draw into
-    std::vector<cairo_surface_t*>         images;   //! vector of cairo surfaces for images and patterns
+    std::vector<cairo_surface_t*>         images;   //! vector of cairo surfaces for icons
     std::vector<cairo_pattern_t*>         patterns; //! cairo pattern structure for patterns
     std::map<size_t,cairo_scaled_font_t*> font;     //! Cached scaled font
 

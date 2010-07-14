@@ -88,6 +88,41 @@ namespace osmscout {
     }
   }                           
   
+  bool MapPainterQt::HasPattern(const StyleConfig& styleConfig,
+                                PatternStyle& style)
+  {
+    if (style.GetId()==std::numeric_limits<size_t>::max()) {
+      return false;
+    }
+
+    if (style.GetId()!=0) {
+      return true;
+    }
+
+    std::string filename=std::string("../libosmscout/data/icons/14x14/standard/")+
+                         style.GetPatternName()+".png";
+
+    QImage image;
+
+    if (image.load(filename.c_str())) {
+      images.resize(images.size()+1,image);
+      style.SetId(images.size());
+      patterns.resize(images.size());
+
+      patterns[patterns.size()-1].setTextureImage(image);
+
+      std::cout << "Loaded image " << filename << " => id " << style.GetId() << std::endl;
+
+      return true;
+    }
+    else {
+      std::cerr << "ERROR while loading icon file '" << filename << "'" << std::endl;
+      style.SetId(std::numeric_limits<size_t>::max());
+
+      return false;
+    }
+  }
+
   void MapPainterQt::ClearArea(const StyleConfig& styleConfig,
                                const Projection& projection,
                                const MapParameter& parameter,
@@ -462,15 +497,12 @@ namespace osmscout {
     SetPen(styleConfig.GetAreaBorderStyle(type),
            borderWidth[(size_t)type]);
 
-    /*
     if (hasPattern) {
       hasPattern=HasPattern(styleConfig,*patternStyle);
-    }*/
-    hasPattern=false;
+    }
 
     if (hasPattern) {
-      painter->setBrush(Qt::NoBrush);
-      //FillRegion(nodes,projection,*patternStyle);
+      painter->setBrush(patterns[patternStyle->GetId()-1]);
     }
     else if (hasFill) {
       SetBrush(fillStyle);

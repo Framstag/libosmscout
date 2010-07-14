@@ -32,8 +32,9 @@ namespace osmscout {
   {
     QPainter *painter;
     
-    std::vector<QImage>     images;   //! vector of cairo surfaces for images and patterns
-    std::map<size_t,QFont*> fonts; //! Cached fonts
+    std::vector<QImage>     images;   //! vector of QImage for icons
+    std::vector<QBrush>     patterns; //! vector of QBrush for fill patterns
+    std::map<size_t,QFont*> fonts;    //! Cached fonts
     
   private:    
     QFont* GetFont(const MapParameter& parameter,
@@ -43,6 +44,9 @@ namespace osmscout {
     bool HasIcon(const StyleConfig& styleConfig,
                          IconStyle& style);
     
+    bool HasPattern(const StyleConfig& styleConfig,
+                    PatternStyle& style);
+
     void ClearArea(const StyleConfig& styleConfig,
                            const Projection& projection,
                            const MapParameter& parameter,
