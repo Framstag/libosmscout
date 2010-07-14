@@ -22,6 +22,7 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
+#include <limits>
 
 namespace osmscout {
 
@@ -59,7 +60,32 @@ namespace osmscout {
   bool MapPainterQt::HasIcon(const StyleConfig& styleConfig,
                              IconStyle& style)
   {
-    return false;
+    if (style.GetId()==std::numeric_limits<size_t>::max()) {
+      return false;
+    }
+
+    if (style.GetId()!=0) {
+      return true;
+    }
+
+    std::string filename=std::string("../libosmscout/data/icons/14x14/standard/")+
+                         style.GetIconName()+".png";
+
+    QImage image;
+
+    if (image.load(filename.c_str())) {
+      images.resize(images.size()+1,image);
+      style.SetId(images.size());
+      std::cout << "Loaded image " << filename << " => id " << style.GetId() << std::endl;
+
+      return true;
+    }
+    else {
+      std::cerr << "ERROR while loading icon file '" << filename << "'" << std::endl;
+      style.SetId(std::numeric_limits<size_t>::max());
+
+      return false;
+    }
   }                           
   
   void MapPainterQt::ClearArea(const StyleConfig& styleConfig,
@@ -206,6 +232,14 @@ namespace osmscout {
   void MapPainterQt::DrawIcon(const IconStyle* style,
                               double x, double y)
   {
+    assert(style->GetId()>0);
+    assert(style->GetId()!=std::numeric_limits<size_t>::max());
+    assert(style->GetId()<=images.size());
+    assert(!images[style->GetId()-1].isNull());
+
+    painter->drawImage(QPointF(x-images[style->GetId()-1].width()/2,
+                               y-images[style->GetId()-1].height()/2),
+                       images[style->GetId()-1]);
   }                             
                         
   void MapPainterQt::DrawSymbol(const SymbolStyle* style,

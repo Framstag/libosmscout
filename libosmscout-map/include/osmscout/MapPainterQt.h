@@ -32,6 +32,7 @@ namespace osmscout {
   {
     QPainter *painter;
     
+    std::vector<QImage>     images;   //! vector of cairo surfaces for images and patterns
     std::map<size_t,QFont*> fonts; //! Cached fonts
     
   private:    
