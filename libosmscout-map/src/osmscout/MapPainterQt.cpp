@@ -277,9 +277,42 @@ namespace osmscout {
                        images[style->GetId()-1]);
   }                             
                         
-  void MapPainterQt::DrawSymbol(const SymbolStyle* style,
-                                double x, double y)
+  void MapPainterQt::DrawSymbol(const SymbolStyle* style, double x, double y)
   {
+    QPainterPath path;
+
+    switch (style->GetStyle()) {
+    case SymbolStyle::none:
+      break;
+    case SymbolStyle::box:
+      path.addRect(x-style->GetSize()/2,y-style->GetSize()/2,
+                   style->GetSize(),style->GetSize());
+      painter->fillPath(path,QBrush(QColor::fromRgbF(style->GetFillR(),
+                                                     style->GetFillG(),
+                                                     style->GetFillB(),
+                                                     style->GetFillA())));
+      break;
+    case SymbolStyle::circle:
+      path.addEllipse(QPointF(x,y),
+                      (double)style->GetSize(),
+                      (double)style->GetSize());
+      painter->fillPath(path,QBrush(QColor::fromRgbF(style->GetFillR(),
+                                                     style->GetFillG(),
+                                                     style->GetFillB(),
+                                                     style->GetFillA())));
+      break;
+    case SymbolStyle::triangle: {
+      path.moveTo(x-style->GetSize()/2,y+style->GetSize()/2);
+      path.lineTo(x,y-style->GetSize()/2);
+      path.lineTo(x+style->GetSize()/2,y+style->GetSize()/2);
+      path.lineTo(x-style->GetSize()/2,y+style->GetSize()/2);
+      painter->fillPath(path,QBrush(QColor::fromRgbF(style->GetFillR(),
+                                                     style->GetFillG(),
+                                                     style->GetFillB(),
+                                                     style->GetFillA())));
+    }
+      break;
+    }
   }                             
 
   void MapPainterQt::DrawPath(LineStyle::Style style,
