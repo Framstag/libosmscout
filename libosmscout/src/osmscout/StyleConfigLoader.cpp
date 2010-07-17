@@ -227,7 +227,7 @@ namespace osmscout {
         a=(16*GetHexDigitValue(color[6])+GetHexDigitValue(color[7]))/255.0;
       }
       else {
-        a=1;
+        a=1.0;
       }
 
       return true;
