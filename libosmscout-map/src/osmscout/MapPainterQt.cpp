@@ -427,8 +427,25 @@ namespace osmscout {
       break;
     }
 
-    TransformWay(projection,nodes);
 
+    TransformWay(projection,nodes);
+/*
+    painter->setPen(pen);
+    size_t last=0;
+    bool start=true;
+    for (size_t i=0; i<nodes.size(); i++) {
+      if (drawNode[i]) {
+        if (start) {
+          start=false;
+        }
+        else {
+          painter->drawLine(QPointF(nodeX[last],nodeY[last]),QPointF(nodeX[i],nodeY[i]));
+        }
+
+        last=i;
+      }
+    }*/
+/*
     QPainterPath path;
 
     bool start=true;
@@ -444,7 +461,17 @@ namespace osmscout {
       }
     }
 
-    painter->strokePath(path,pen);
+    painter->strokePath(path,pen);*/
+
+    QPolygonF polygon;
+    for (size_t i=0; i<nodes.size(); i++) {
+      if (drawNode[i]) {
+        polygon << QPointF(nodeX[i],nodeY[i]);
+      }
+    }
+
+    painter->setPen(pen);
+    painter->drawPolyline(polygon);
   }
                         
   void MapPainterQt::DrawWayOutline(const StyleConfig& styleConfig,
@@ -513,12 +540,27 @@ namespace osmscout {
                                     style->GetOutlineB(),
                                     style->GetOutlineA()));
     }
-    pen.setCapStyle(Qt::FlatCap);
 
+    pen.setCapStyle(Qt::FlatCap);
     pen.setWidthF(lineWidth);
 
     TransformWay(projection,nodes);
+/*
+    size_t last=0;
+    bool start=true;
+    for (size_t i=0; i<nodes.size(); i++) {
+      if (drawNode[i]) {
+        if (start) {
+          start=false;
+        }
+        else {
+          painter->drawLine(QPointF(nodeX[last],nodeY[last]),QPointF(nodeX[i],nodeY[i]));
+        }
 
+        last=i;
+      }
+    }*/
+/*
     QPainterPath path;
 
     bool start=true;
@@ -534,7 +576,16 @@ namespace osmscout {
       }
     }
 
-    painter->strokePath(path,pen);
+    painter->strokePath(path,pen);*/
+    QPolygonF polygon;
+    for (size_t i=0; i<nodes.size(); i++) {
+      if (drawNode[i]) {
+        polygon << QPointF(nodeX[i],nodeY[i]);
+      }
+    }
+
+    painter->setPen(pen);
+    painter->drawPolyline(polygon);
 
     /*
     if (!attributes.StartIsJoint()) {
@@ -587,18 +638,11 @@ namespace osmscout {
 
     TransformArea(projection,nodes);
 
-    QPainterPath path;
+    QPolygonF polygon;
 
-    bool start=true;
     for (size_t i=0; i<nodes.size(); i++) {
       if (drawNode[i]) {
-        if (start) {
-          path.moveTo(nodeX[i],nodeY[i]);
-          start=false;
-        }
-        else {
-          path.lineTo(nodeX[i],nodeY[i]);
-        }
+        polygon << QPointF(nodeX[i],nodeY[i]);
       }
     }
 
@@ -619,7 +663,7 @@ namespace osmscout {
       SetBrush();
     }
     
-    painter->drawPath(path);
+    painter->drawPolygon(polygon);
   }                             
 
   void MapPainterQt::SetPen(const LineStyle* style, double lineWidth)
