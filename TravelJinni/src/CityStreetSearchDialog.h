@@ -67,7 +67,8 @@ private:
           return Lum::Base::UTF8ToWString(region.name);
         }
         else {
-          return Lum::Base::UTF8ToWString(region.name)+L" ("+Lum::Base::UTF8ToWString(region.path)+L")";
+          return Lum::Base::UTF8ToWString(region.name)+
+              L" ("+Lum::Base::UTF8ToWString(osmscout::StringListToString(region.path))+L")";
         }
       default:
         assert(false);
@@ -85,7 +86,13 @@ private:
 
       switch (column) {
       case 1:
-        return Lum::Base::UTF8ToWString(location.name);
+        if (location.path.empty()) {
+          return Lum::Base::UTF8ToWString(location.name);
+        }
+        else {
+          return Lum::Base::UTF8ToWString(location.name)+
+              L" ("+Lum::Base::UTF8ToWString(osmscout::StringListToString(location.path))+L")";
+        }
       default:
         assert(false);
       }

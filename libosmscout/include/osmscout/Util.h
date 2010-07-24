@@ -26,6 +26,7 @@
 
 #include <cassert>
 #include <limits>
+#include <list>
 #include <set>
 #include <string>
 #include <vector>
@@ -318,6 +319,9 @@ namespace osmscout {
 
     return true;
   }
+
+  extern OSMSCOUT_API std::string StringListToString(const std::list<std::string>& list,
+                                                     const std::string& separator="/");
 
   extern OSMSCOUT_API double Log2(double x);
   extern OSMSCOUT_API size_t Pow(size_t a, size_t b);

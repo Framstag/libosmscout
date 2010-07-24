@@ -392,6 +392,26 @@ namespace osmscout {
 #endif  
   }
   
+  std::string StringListToString(const std::list<std::string>& list,
+                                 const std::string& separator)
+  {
+    std::string result;
+
+    for (std::list<std::string>::const_iterator element=list.begin();
+        element!=list.end();
+        ++element) {
+      if (element==list.begin()) {
+       result.append(*element);
+      }
+      else {
+        result.append(separator);
+        result.append(*element);
+      }
+    }
+
+    return result;
+  }
+
   double Log2(double x)
   {
     return log(x)/log(2);

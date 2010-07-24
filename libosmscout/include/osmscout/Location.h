@@ -31,9 +31,9 @@ namespace osmscout {
    */
   struct Location
   {
-    std::string          name;
-    std::string          path;
-    std::list<Reference> references;
+    std::string            name;
+    std::list<std::string> path;
+    std::list<Reference>   references;
   };
 }
 

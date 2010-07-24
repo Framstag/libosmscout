@@ -43,25 +43,34 @@ namespace osmscout {
   class CityStreetIndex
   {
   private:
+    struct Region
+    {
+      Reference   reference;       //! Reference to the object defining the region
+      FileOffset  offset;          //! Offset into the region datafile
+      std::string name;            //! name of the region
+      std::string hash;            //! internal has for the name of the region
+    };
+
     struct Loc
     {
-      std::list<Id> nodes;
-      std::list<Id> ways;
+      FileOffset    offset; //! Offset of the admin region this location is in
+      std::list<Id> nodes;  //! List of node ids that belong to this location
+      std::list<Id> ways;   //! List of way ids that belong to this location
     };
 
   private:
-    std::string            path;
+    std::string                       path;
 
-    std::list<AdminRegion> areas;
-    mutable FileOffset     region;
-    mutable bool           regionLoaded;
+    std::list<Region>                 areas;
+    mutable FileOffset                region;
+    mutable bool                      regionLoaded;
     mutable std::map<std::string,Loc> locations;
 
     std::string            (*hashFunction)(std::string);
 
   private:
     bool LoadRegion(FileScanner& scanner) const;
-    bool LoadRegion(FileOffset offset) const;
+    bool LoadRegion(FileScanner& scanner, FileOffset offset) const;
 
   public:
     CityStreetIndex();

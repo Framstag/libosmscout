@@ -62,7 +62,8 @@ private:
           return Lum::Base::UTF8ToWString(region.name);
         }
         else {
-          return Lum::Base::UTF8ToWString(region.name)+L" ("+Lum::Base::UTF8ToWString(region.path)+L")";
+          return Lum::Base::UTF8ToWString(region.name)+
+              L" ("+Lum::Base::UTF8ToWString(osmscout::StringListToString(region.path))+L")";
         }
       default:
         assert(false);

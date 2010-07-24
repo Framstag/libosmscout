@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
     std::cout << "+ " << area->name;
 
     if (!area->path.empty()) {
-      std::cout << " (" << area->path << ")";
+      std::cout << " (" << osmscout::StringListToString(area->path) << ")";
     }
 
     std::cout << " ~ ";
@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
       std::cout <<"  => " << location->name;
 
       if (!location->path.empty()) {
-        std::cout << " (" << location->path << ")";
+        std::cout << " (" << osmscout::StringListToString(location->path) << ")";
       }
 
       std::cout << std::endl;

@@ -42,18 +42,24 @@ namespace osmscout {
   bool CityStreetIndex::LoadRegion(FileScanner& scanner) const
   {
     std::string name;
+    FileOffset  offset;
     FileOffset  parentOffset;
     uint32_t    childrenCount;
     uint32_t    nodeCount;
     uint32_t    wayCount;
 
+    if (!scanner.GetPos(offset)) {
+      return false;
+    }
+
     scanner.Read(name);
     scanner.ReadNumber(parentOffset);
 
     scanner.ReadNumber(childrenCount);
-
     for (size_t i=0; i<childrenCount; i++) {
-      LoadRegion(scanner);
+      if (!LoadRegion(scanner)) {
+        return false;
+      }
     }
 
     scanner.ReadNumber(nodeCount);
@@ -70,6 +76,7 @@ namespace osmscout {
 
         scanner.ReadNumber(id);
 
+        locations[name].offset=offset;
         locations[name].nodes.push_back(id+lastId);
         lastId=id;
       }
@@ -89,6 +96,7 @@ namespace osmscout {
 
         scanner.ReadNumber(id);
 
+        locations[name].offset=offset;
         locations[name].ways.push_back(id+lastId);
         lastId=id;
       }
@@ -97,18 +105,10 @@ namespace osmscout {
     return true;
   }
 
-  bool CityStreetIndex::LoadRegion(FileOffset offset) const
+  bool CityStreetIndex::LoadRegion(FileScanner& scanner,
+                                   FileOffset offset) const
   {
-    FileScanner   scanner;
-    std::string   file=path+"/"+"region.dat";
-    std::list<FileOffset> offsets;
-
     locations.clear();
-
-    if (!scanner.Open(file)) {
-      std::cerr << "Cannot open file '" << file << "'!" << std::endl;
-      return false;
-    }
 
     scanner.SetPos(offset);
 
@@ -116,7 +116,7 @@ namespace osmscout {
 
     regionLoaded=true;
 
-    return !scanner.HasError() && scanner.Close();
+    return !scanner.HasError();
   }
 
   bool CityStreetIndex::Load(const std::string& path,
@@ -139,8 +139,6 @@ namespace osmscout {
       return false;
     }
 
-    std::cout << areaRefs << " areas..." << std::endl;
-
     for (size_t i=0; i<areaRefs; i++) {
       std::string name;
       uint32_t    entries;
@@ -154,31 +152,31 @@ namespace osmscout {
       }
 
       for (size_t j=0; j<entries; j++) {
-        AdminRegion l;
-        uint32_t    type;
+        Region   region;
+        uint32_t type;
 
-        l.name=name;
+        region.name=name;
 
         if (!scanner.ReadNumber(type)) {
           return false;
         }
 
-        l.reference.type=(RefType)type;
+        region.reference.type=(RefType)type;
 
-        if (!scanner.ReadNumber(l.reference.id)) {
+        if (!scanner.ReadNumber(region.reference.id)) {
           return false;
         }
 
-        if (!scanner.ReadNumber(l.offset)) {
+        if (!scanner.ReadNumber(region.offset)) {
           return false;
         }
 
         // if the user has supplied a hash function then use it to generate a hash value
         if (hashFunction) {
-          l.hash=(*hashFunction)(l.name);
+          region.hash=(*hashFunction)(region.name);
         }
 
-        areas.push_back(l);
+        areas.push_back(region);
       }
     }
 
@@ -202,7 +200,7 @@ namespace osmscout {
       nameHash=(*hashFunction)(name);
     }
 
-    for (std::list<AdminRegion>::const_iterator area=this->areas.begin();
+    for (std::list<Region>::const_iterator area=this->areas.begin();
          area!=this->areas.end() && !limitReached;
          ++area) {
       bool                   found=false;
@@ -224,11 +222,17 @@ namespace osmscout {
 
       if (found) {
         if (regions.size()>=limit) {
-          std::cout << "Limit reached!!!" << std::endl;
           limitReached=true;
         }
         else {
-          regions.push_back(*area);
+          AdminRegion adminRegion;
+
+          adminRegion.reference=area->reference;
+          adminRegion.offset=area->offset;
+          adminRegion.name=area->name;
+          adminRegion.hash=area->hash;
+
+          regions.push_back(adminRegion);
         }
       }
     }
@@ -259,12 +263,12 @@ namespace osmscout {
 
         if (area->path.empty()) {
           if (name!=area->name) {
-            area->path=name;
+            area->path.push_back(name);
           }
         }
         else {
-          area->path.append("/");
-          area->path.append(name);
+
+          area->path.push_back(name);
         }
       }
     }
@@ -284,8 +288,16 @@ namespace osmscout {
     limitReached=false;
     locations.clear();
 
+    FileScanner scanner;
+    std::string file=path+"/"+"region.dat";
+
+    if (!scanner.Open(file)) {
+      std::cerr << "Cannot open file '" << file << "'!" << std::endl;
+      return false;
+    }
+
     if (!regionLoaded || this->region!=region.offset) {
-      if (!LoadRegion(region.offset) || !regionLoaded) {
+      if (!LoadRegion(scanner,region.offset) || !regionLoaded) {
         return false;
       }
     }
@@ -296,7 +308,7 @@ namespace osmscout {
     }
 
     for (std::map<std::string,Loc>::const_iterator l=this->locations.begin();
-         l!=this->locations.end();
+         l!=this->locations.end() && !limitReached;
          ++l) {
       bool                   found=false;
       std::string::size_type pos;
@@ -322,14 +334,12 @@ namespace osmscout {
 
       if (found) {
         if (locations.size()>=limit) {
-          std::cout << "Limit reached!!!" << std::endl;
           limitReached=true;
-          return true;
         }
         else {
           Location location;
+
           location.name=l->first;
-          location.path=region.path;
 
           for (std::list<Id>::const_iterator i=l->second.nodes.begin();
                i!=l->second.nodes.end();
@@ -341,6 +351,25 @@ namespace osmscout {
                i!=l->second.ways.end();
                ++i) {
             location.references.push_back(Reference(*i,refWay));
+          }
+
+          FileOffset offset=l->second.offset;
+
+          while (offset!=0) {
+            std::string name;
+
+            scanner.SetPos(offset);
+            scanner.Read(name);
+            scanner.ReadNumber(offset);
+
+            if (location.path.empty()) {
+              if (name!=l->first) {
+                location.path.push_back(name);
+              }
+            }
+            else {
+              location.path.push_back(name);
+            }
           }
 
           locations.push_back(location);
