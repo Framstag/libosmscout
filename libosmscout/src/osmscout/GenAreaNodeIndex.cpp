@@ -57,7 +57,7 @@ namespace osmscout {
       return false;
     }
 
-    while (!scanner.HasError()) {
+    while (!scanner.IsEOF()) {
       Node node;
 
       node.Read(scanner);

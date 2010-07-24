@@ -39,14 +39,14 @@ namespace osmscout {
   class OSMSCOUT_API FileScanner
   {
   private:
-    FILE   *file;
-    bool   hasError;
-    bool   readOnly;
+    FILE         *file;
+    mutable bool hasError;
+    bool         readOnly;
 
     // For mmap usage
-    char   *buffer;
-    size_t size;
-    size_t offset;
+    char         *buffer;
+    size_t       size;
+    FileOffset   offset;
 
   private:
     void FreeBuffer();
@@ -59,10 +59,11 @@ namespace osmscout {
     bool Close();
 
     bool IsOpen() const;
+    bool IsEOF() const;
     bool HasError() const;
 
     bool SetPos(FileOffset pos);
-    bool GetPos(FileOffset &pos);
+    bool GetPos(FileOffset &pos) const;
 
     bool Read(std::string& value);
     bool Read(bool& boolean);

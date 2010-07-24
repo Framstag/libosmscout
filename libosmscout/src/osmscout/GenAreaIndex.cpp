@@ -120,7 +120,7 @@ namespace osmscout {
     }
 
 
-    while (!scanner.HasError()) {
+    while (!scanner.IsEOF()) {
       Id id;
 
       scanner.Read(id);
@@ -214,7 +214,7 @@ namespace osmscout {
         }
 
         ways=0;
-        while (!scanner.HasError()) {
+        while (!scanner.IsEOF()) {
           FileOffset offset;
           Way        way;
 
@@ -384,7 +384,7 @@ namespace osmscout {
         }
 
         rels=0;
-        while (!scanner.HasError()) {
+        while (!scanner.IsEOF()) {
           FileOffset offset;
           Relation   relation;
 

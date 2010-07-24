@@ -553,7 +553,7 @@ namespace osmscout {
       return false;
     }
 
-    while (!scanner.HasError()) {
+    while (!scanner.IsEOF()) {
       RawRelation rawRel;
 
       rawRel.Read(scanner);
@@ -768,4 +768,3 @@ namespace osmscout {
     return writer.Close();
   }
 }
-

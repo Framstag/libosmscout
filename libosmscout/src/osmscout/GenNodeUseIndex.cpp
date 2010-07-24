@@ -56,7 +56,7 @@ namespace osmscout {
       return false;
     }
 
-    while (!scanner.HasError()) {
+    while (!scanner.IsEOF()) {
       RawNode node;
 
       node.Read(scanner);
@@ -103,7 +103,7 @@ namespace osmscout {
         return false;
       }
 
-      while (!scanner.HasError()) {
+      while (!scanner.IsEOF()) {
         Way way;
 
         way.Read(scanner);
@@ -128,7 +128,7 @@ namespace osmscout {
         return false;
       }
 
-      while (!scanner.HasError()) {
+      while (!scanner.IsEOF()) {
         Way way;
 
         way.Read(scanner);

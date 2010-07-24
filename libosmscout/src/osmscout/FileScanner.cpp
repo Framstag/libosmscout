@@ -143,6 +143,17 @@ namespace osmscout {
     return file!=NULL;
   }
 
+  bool FileScanner::IsEOF() const
+  {
+    FileOffset offset;
+
+    if (!GetPos(offset)) {
+      return true;
+    }
+
+    return offset>=(FileOffset)size;
+  }
+
   bool FileScanner::HasError() const
   {
     return file==NULL || hasError;
@@ -156,7 +167,7 @@ namespace osmscout {
 
 #if defined(HAVE_MMAP)
     if (buffer!=NULL) {
-      if (pos>=size) {
+      if (pos>=(FileOffset)size) {
         return false;
       }
 
@@ -171,7 +182,7 @@ namespace osmscout {
     return !hasError;
   }
 
-  bool FileScanner::GetPos(FileOffset& pos)
+  bool FileScanner::GetPos(FileOffset& pos) const
   {
     if (file==NULL || hasError) {
       return false;
@@ -209,7 +220,7 @@ namespace osmscout {
     
       size_t start=offset;
 
-      while (offset<size && buffer[offset]!='\0') {
+      while (offset<(FileOffset)size && buffer[offset]!='\0') {
         offset++;
       }
 
@@ -491,7 +502,7 @@ namespace osmscout {
 
 #if defined(HAVE_MMAP)
     if (buffer!=NULL) {
-      if (offset>=size) {
+      if (offset>=(FileOffset)size) {
         std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
         hasError=true;
         return false;
@@ -593,7 +604,7 @@ namespace osmscout {
       return false;
     }
 
-    if (value>(int32_t)std::numeric_limits<int32_t>::max()) {
+    if ((int32_t)value>(int32_t)std::numeric_limits<int32_t>::max()) {
       hasError=true;
       return false;
     }

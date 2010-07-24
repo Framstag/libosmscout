@@ -69,7 +69,7 @@ namespace osmscout {
       return false;
     }
 
-    while (!scanner.HasError()) {
+    while (!scanner.IsEOF()) {
       RawRelation relation;
 
       relation.Read(scanner);
@@ -133,7 +133,7 @@ namespace osmscout {
       return false;
     }
 
-    while (!scanner.HasError()) {
+    while (!scanner.IsEOF()) {
       RawWay way;
 
       way.Read(scanner);
@@ -165,7 +165,7 @@ namespace osmscout {
       return false;
     }
 
-    while (!scanner.HasError()) {
+    while (!scanner.IsEOF()) {
       RawWay way;
 
       way.Read(scanner);
@@ -225,7 +225,7 @@ namespace osmscout {
         return false;
       }
 
-      while (!scanner.HasError()) {
+      while (!scanner.IsEOF()) {
         RawWay way;
 
         way.Read(scanner);
@@ -257,7 +257,7 @@ namespace osmscout {
         return false;
       }
 
-      while (!scanner.HasError()) {
+      while (!scanner.IsEOF()) {
         RawNode node;
 
         node.Read(scanner);
@@ -276,7 +276,7 @@ namespace osmscout {
         return false;
       }
 
-      while (!scanner.HasError()) {
+      while (!scanner.IsEOF()) {
         RawWay way;
 
         way.Read(scanner);

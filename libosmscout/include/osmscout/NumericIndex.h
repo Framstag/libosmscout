@@ -346,7 +346,7 @@ namespace osmscout {
       return false;
     }
 
-    while (!scanner.HasError()) {
+    while (!scanner.IsEOF()) {
       T data;
 
       data.Read(scanner);
