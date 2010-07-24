@@ -8,7 +8,7 @@ LDADD=$(LIBOSMSCOUT_LIBS) \
       $(LIBCAIRO_LIBS) \
       $(LIBQTGUI_LIBS)
 
-bin_PROGRAMS = Routing
+bin_PROGRAMS = AddressLookup Routing
 
 if HAVE_LIB_CAIRO
 bin_PROGRAMS += DrawMapCairo
@@ -17,6 +17,8 @@ endif
 if HAVE_LIB_QTGUI
 bin_PROGRAMS += DrawMapQt
 endif
+
+AddressLookup_SOURCES = AddressLookup.cpp
 
 DrawMapCairo_SOURCES = DrawMapCairo.cpp
 

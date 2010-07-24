@@ -24,9 +24,15 @@
 
 namespace osmscout {
   /**
-    A named administrative region. It is used to build up hierachical, structured
-    containment information like "Streets in City".
-  */
+   A named administrative region. It is used to build up hierarchical,
+   structured containment information like "Streets in City". Most of
+   the time an administrative region is just the area of a city, but
+   depending on the data quality it may also be parts of the city
+   or bigger administrative regions like states.
+
+   AdminRegions are currently returned by
+   Database.GetMatchingAdminRegions() using the CityStreetIndex.
+   */
   struct OSMSCOUT_API AdminRegion
   {
     Reference   reference; //! Reference to the object defining the region

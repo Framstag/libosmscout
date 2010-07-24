@@ -24,7 +24,10 @@
 
 namespace osmscout {
   /**
-    A location is a named point, way, area or relation on the map. Something you can search for.
+    A location is a named point, way, area or relation on the map.
+    Something you can search for. Location are currently returned
+    by Database.GetMatchingLocations() which uses CityStreetIndex
+    internally.
    */
   struct Location
   {

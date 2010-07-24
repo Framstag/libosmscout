@@ -30,14 +30,25 @@
 #include <osmscout/FileScanner.h>
 
 namespace osmscout {
-  struct Loc
-  {
-    std::list<Id> nodes;
-    std::list<Id> ways;
-  };
 
+  /**
+   * City street index returns objects by names (the name should be changed). You
+   * can currently either search for regions like 'cities' or for named locations in
+   * areas like 'streets in city'.
+   *
+   * Currently everything that has 'index="true"' in the map.ost.xml is indexed as
+   * location. Areas are currently build by scanning administrative boundaries and the
+   * various sized city typed locations and areas.
+   */
   class CityStreetIndex
   {
+  private:
+    struct Loc
+    {
+      std::list<Id> nodes;
+      std::list<Id> ways;
+    };
+
   private:
     std::string            path;
 

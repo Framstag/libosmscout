@@ -285,7 +285,6 @@ namespace osmscout {
     locations.clear();
 
     if (!regionLoaded || this->region!=region.offset) {
-      std::cout << "Loading regions..." << std::endl;
       if (!LoadRegion(region.offset) || !regionLoaded) {
         return false;
       }
@@ -330,6 +329,7 @@ namespace osmscout {
         else {
           Location location;
           location.name=l->first;
+          location.path=region.path;
 
           for (std::list<Id>::const_iterator i=l->second.nodes.begin();
                i!=l->second.nodes.end();

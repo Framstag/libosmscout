@@ -471,6 +471,7 @@ namespace osmscout {
     }
 
     painter->setPen(pen);
+    painter->setBrush(Qt::NoBrush);
     painter->drawPolyline(polygon);
   }
                         
@@ -585,6 +586,7 @@ namespace osmscout {
     }
 
     painter->setPen(pen);
+    painter->setBrush(Qt::NoBrush);
     painter->drawPolyline(polygon);
 
     /*
