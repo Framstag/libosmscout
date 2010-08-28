@@ -85,6 +85,7 @@ namespace osmscout {
     AddTagInfo(TagInfo("type",tagType));
     AddTagInfo(TagInfo("internal",tagInternal));
     AddTagInfo(TagInfo("width",tagWidth));
+    AddTagInfo(TagInfo("natural",tagNatural));
 
     AddTypeInfo(TypeInfo(typeRoute,tagInternal,"route").CanBeWay(true));
   }
