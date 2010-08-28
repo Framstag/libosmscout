@@ -81,30 +81,31 @@ namespace osmscout {
       file=fopen(filename.c_str(),"r+b");
     }
 
+    long size;
+
+    if (fseek(file,0L,SEEK_END)!=0) {
+      std::cerr << "Cannot seek to end of file!" << std::endl;
+      hasError=true;
+      return false;
+    }
+
+    size=ftell(file);
+
+    if (size==-1) {
+      std::cerr << "Cannot get size of file!" << std::endl;
+      hasError=true;
+      return false;
+    }
+
+    this->size=(size_t)size;
+
 #if defined(HAVE_MMAP)
-    if (file!=NULL && readOnly) {
+    if (file!=NULL && readOnly && this->size>0) {
       FreeBuffer();
-
-      long size;
-
-      if (fseek(file,0L,SEEK_END)!=0) {
-        std::cerr << "Cannot seek to end of file!" << std::endl;
-        hasError=true;
-        return false;
-      }
-
-      size=ftell(file);
-
-      if (size==-1) {
-        std::cerr << "Cannot get size of file!" << std::endl;
-        hasError=true;
-        return false;
-      }
 
       buffer=(char*)mmap(NULL,size,PROT_READ,MAP_SHARED,fileno(file),0);
       if (buffer!=MAP_FAILED) {
-        this->size=(size_t)size;
-        this->offset=0;
+        offset=0;
       }
       else {
         std::cerr << "Cannot mmap file " << filename << " of size " << size << ": " << strerror(errno) << std::endl;
@@ -115,12 +116,18 @@ namespace osmscout {
 
     hasError=file==NULL;
 
+    if (!hasError) {
+      this->filename=filename;
+    }
+
     return !hasError;
   }
 
   bool FileScanner::Close()
   {
     bool result;
+
+    filename.clear();
 
     if (file==NULL) {
       std::cerr << "File already closed, cannot close it again!" << std::endl;
@@ -157,6 +164,11 @@ namespace osmscout {
   bool FileScanner::HasError() const
   {
     return file==NULL || hasError;
+  }
+
+  std::string FileScanner::GetFilename() const
+  {
+    return filename;
   }
 
   bool FileScanner::SetPos(FileOffset pos)
@@ -199,6 +211,10 @@ namespace osmscout {
 
     hasError=pos==-1;
 
+    if (hasError) {
+      std::cerr << "Cannot read file pos:" << strerror(errno) << std::endl;
+    }
+
     return !hasError;
   }
 
@@ -217,7 +233,7 @@ namespace osmscout {
         hasError=true;
         return false;
       }
-    
+
       size_t start=offset;
 
       while (offset<(FileOffset)size && buffer[offset]!='\0') {
@@ -320,7 +336,7 @@ namespace osmscout {
       std::cerr << "Cannot read uint8_t beyond file end!" << std::endl;
       return false;
     }
-    
+
     return true;
   }
 
@@ -358,11 +374,11 @@ namespace osmscout {
       std::cerr << "Cannot read uint16_t beyond file end!" << std::endl;
       return false;
     }
-    
+
     for (size_t i=0; i<sizeof(uint16_t); i++) {
       number=number | (buffer[i] << (i*8));
     }
- 
+
     return true;
   }
 
@@ -400,7 +416,7 @@ namespace osmscout {
       std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
       return false;
     }
-    
+
     for (size_t i=0; i<sizeof(uint32_t); i++) {
       number=number | (buffer[i] << (i*8));
     }
@@ -442,7 +458,7 @@ namespace osmscout {
       std::cerr << "Cannot read int8_t beyond file end!" << std::endl;
       return false;
     }
-    
+
     for (size_t i=0; i<sizeof(int8_t); i++) {
       number=number | (buffer[i] << (i*8));
     }
@@ -460,32 +476,32 @@ namespace osmscout {
 
 #if defined(HAVE_MMAP)
     if (buffer!=NULL) {
-      if (offset+sizeof(int32_t)>size) {
-        std::cerr << "Cannot read int32_t beyond file end!" << std::endl;
+      if (offset+sizeof(uint32_t)>size) {
+        std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
         hasError=true;
         return false;
       }
 
-      for (size_t i=0; i<sizeof(FileOffset); i++) {
+      for (size_t i=0; i<sizeof(uint32_t); i++) {
         number=number | (((unsigned char)buffer[offset+i]) << (i*8));
       }
 
-      offset+=sizeof(FileOffset);
+      offset+=sizeof(uint32_t);
 
       return true;
     }
 #endif
 
-    unsigned char buffer[sizeof(FileOffset)];
+    unsigned char buffer[sizeof(uint32_t)];
 
-    hasError=fread(&buffer,sizeof(char),sizeof(FileOffset),file)!=sizeof(FileOffset);
+    hasError=fread(&buffer,sizeof(char),sizeof(uint32_t),file)!=sizeof(uint32_t);
 
     if (hasError) {
-      std::cerr << "Cannot read int32_t beyond file end!" << std::endl;
+      std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
       return false;
     }
-    
-    for (size_t i=0; i<sizeof(FileOffset); i++) {
+
+    for (size_t i=0; i<sizeof(uint32_t); i++) {
       number=number | (buffer[i] << (i*8));
     }
 

@@ -39,6 +39,7 @@ namespace osmscout {
   class OSMSCOUT_API FileScanner
   {
   private:
+    std::string  filename;
     FILE         *file;
     mutable bool hasError;
     bool         readOnly;
@@ -61,6 +62,8 @@ namespace osmscout {
     bool IsOpen() const;
     bool IsEOF() const;
     bool HasError() const;
+
+    std::string GetFilename() const;
 
     bool SetPos(FileOffset pos);
     bool GetPos(FileOffset &pos) const;
