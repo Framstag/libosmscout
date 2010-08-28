@@ -82,43 +82,53 @@ namespace osmscout {
   static bool GetCityNodes(const std::set<TypeId>& cityIds,
                            std::list<Node>& cityNodes,
                            Progress& progress)
-                           {
+  {
     FileScanner scanner;
+    uint32_t    nodeCount;
 
     if (!scanner.Open("nodes.dat")) {
       progress.Error("Cannot open 'nodes.dat'");
       return false;
     }
 
-    while (!scanner.IsEOF()) {
+    if (!scanner.Read(nodeCount)) {
+      progress.Error("Error while reading number of data entries in file");
+      return false;
+    }
+
+    for (uint32_t n=1; n<=nodeCount; n++) {
       Node node;
 
-      node.Read(scanner);
+      if (!node.Read(scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(n)+" of "+
+                       NumberToString(nodeCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+        return false;
+      }
 
-      if (!scanner.HasError()) {
+      if (cityIds.find(node.type)!=cityIds.end()) {
+        std::string name;
 
-        if (cityIds.find(node.type)!=cityIds.end()) {
-          std::string name;
-
-          for (size_t i=0; i<node.tags.size(); i++) {
-            if (node.tags[i].key==tagPlaceName) {
-              name=node.tags[i].value;
-              break;
-            }
-            else if (node.tags[i].key==tagName &&
-                     name.empty()) {
-              name=node.tags[i].value;
-            }
+        for (size_t i=0; i<node.tags.size(); i++) {
+          if (node.tags[i].key==tagPlaceName) {
+            name=node.tags[i].value;
+            break;
           }
-
-          if (name.empty()) {
-            progress.Warning(std::string("node ")+NumberToString(node.id)+" has no name, skipping");
-            continue;
+          else if (node.tags[i].key==tagName &&
+                   name.empty()) {
+            name=node.tags[i].value;
           }
-
-          //std::cout << "Found node of type city: " << node.id << " " << name << std::endl;
-          cityNodes.push_back(node);
         }
+
+        if (name.empty()) {
+          progress.Warning(std::string("node ")+NumberToString(node.id)+" has no name, skipping");
+          continue;
+        }
+
+        //std::cout << "Found node of type city: " << node.id << " " << name << std::endl;
+        cityNodes.push_back(node);
       }
     }
 
@@ -134,38 +144,49 @@ namespace osmscout {
                            std::list<Way>& cityAreas,
                            Progress& progress)
   {
-      FileScanner scanner;
+    FileScanner scanner;
+    uint32_t    wayCount;
 
     if (!scanner.Open("ways.dat")) {
       progress.Error("Cannot open 'ways.dat'");
       return false;
     }
 
-    while (!scanner.IsEOF()) {
+    if (!scanner.Read(wayCount)) {
+      progress.Error("Error while reading number of data entries in file");
+      return false;
+    }
+
+    for (uint32_t w=1; w<=wayCount; w++) {
       Way way;
 
-      way.Read(scanner);
+      if (!way.Read(scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(w)+" of "+
+                       NumberToString(wayCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+        return false;
+      }
 
-      if (!scanner.HasError()) {
-        if (way.IsArea() && cityIds.find(way.GetType())!=cityIds.end()) {
-          std::string name=way.GetName();
+      if (way.IsArea() && cityIds.find(way.GetType())!=cityIds.end()) {
+        std::string name=way.GetName();
 
-          for (size_t i=0; i<way.attributes.tags.size(); i++) {
-            if (way.attributes.tags[i].key==tagPlaceName) {
-              name=way.attributes.tags[i].value;
-              break;
-            }
+        for (size_t i=0; i<way.attributes.tags.size(); i++) {
+          if (way.attributes.tags[i].key==tagPlaceName) {
+            name=way.attributes.tags[i].value;
+            break;
           }
-
-          if (name.empty()) {
-            progress.Warning(std::string("area ")+NumberToString(way.id)+" has no name, skipping");
-            continue;
-          }
-
-          //std::cout << "Found area of type city: " << way.id << " " << name << std::endl;
-
-          cityAreas.push_back(way);
         }
+
+        if (name.empty()) {
+          progress.Warning(std::string("area ")+NumberToString(way.id)+" has no name, skipping");
+          continue;
+        }
+
+        //std::cout << "Found area of type city: " << way.id << " " << name << std::endl;
+
+        cityAreas.push_back(way);
       }
     }
 
@@ -460,6 +481,9 @@ namespace osmscout {
     std::list<Way>            cityAreas;
     std::list<Way>            boundaryAreas;
     std::list<Relation>       boundaryRelations;
+    uint32_t                  nodeCount;
+    uint32_t                  relCount;
+    uint32_t                  wayCount;
 
     rootArea.name="<root>";
     rootArea.offset=0;
@@ -538,29 +562,38 @@ namespace osmscout {
       return false;
     }
 
-    while (!scanner.IsEOF()) {
+    if (!scanner.Read(wayCount)) {
+      progress.Error("Error while reading number of data entries in file");
+      return false;
+    }
+
+    for (uint32_t w=1; w<=wayCount; w++) {
       Way way;
 
-      way.Read(scanner);
+      if (!way.Read(scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(w)+" of "+
+                       NumberToString(wayCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+        return false;
+      }
 
-      if (!scanner.HasError()) {
-        if (way.IsArea() && way.GetType()==boundaryId) {
-          size_t level=0;
+      if (way.IsArea() && way.GetType()==boundaryId) {
+        size_t level=0;
 
-          for (size_t i=0; i<way.attributes.tags.size(); i++) {
-            if (way.attributes.tags[i].key==tagAdminLevel) {
-              if (StringToNumber(way.attributes.tags[i].value,level)) {
-                boundaryAreas.push_back(way);
-              }
-              else {
-                progress.Info("Could not parse admin_level of way "+
-                              NumberToString(way.GetType() )+" "+NumberToString(way.id));
-              }
-
-              break;
+        for (size_t i=0; i<way.attributes.tags.size(); i++) {
+          if (way.attributes.tags[i].key==tagAdminLevel) {
+            if (StringToNumber(way.attributes.tags[i].value,level)) {
+              boundaryAreas.push_back(way);
             }
-          }
+            else {
+              progress.Info("Could not parse admin_level of way "+
+                            NumberToString(way.GetType() )+" "+NumberToString(way.id));
+            }
 
+            break;
+          }
         }
       }
     }
@@ -578,34 +611,43 @@ namespace osmscout {
       return false;
     }
 
-    while (!scanner.IsEOF()) {
+    if (!scanner.Read(relCount)) {
+      progress.Error("Error while reading number of data entries in file");
+      return false;
+    }
+
+    for (uint32_t r=1; r<=relCount; r++) {
       Relation relation;
 
-      relation.Read(scanner);
+      if (!relation.Read(scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(r)+" of "+
+                       NumberToString(relCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+        return false;
+      }
 
-      if (!scanner.HasError()) {
+      if (relation.type==boundaryId) {
+        size_t level=0;
 
-        if (relation.type==boundaryId) {
-          size_t level=0;
-
-          for (size_t i=0; i<relation.tags.size(); i++) {
-            if (relation.tags[i].key==tagAdminLevel) {
-              if (StringToNumber(relation.tags[i].value,level)) {
-                boundaryRelations.push_back(relation);
-              }
-              else {
-                progress.Info("Could not parse admin_level of relation "+relation.relType+" "+
-                              NumberToString(relation.type )+" "+NumberToString(relation.id));
-              }
-
-              break;
+        for (size_t i=0; i<relation.tags.size(); i++) {
+          if (relation.tags[i].key==tagAdminLevel) {
+            if (StringToNumber(relation.tags[i].value,level)) {
+              boundaryRelations.push_back(relation);
             }
-          }
+            else {
+              progress.Info("Could not parse admin_level of relation "+relation.relType+" "+
+                            NumberToString(relation.type )+" "+NumberToString(relation.id));
+            }
 
-          if (level==0) {
-            progress.Info("No tag 'admin_level' for relation "+relation.relType+" "+
-                          NumberToString(relation.type )+" "+NumberToString(relation.id));
+            break;
           }
+        }
+
+        if (level==0) {
+          progress.Info("No tag 'admin_level' for relation "+relation.relType+" "+
+                        NumberToString(relation.type )+" "+NumberToString(relation.id));
         }
       }
     }
@@ -771,33 +813,42 @@ namespace osmscout {
       return false;
     }
 
-    while (!scanner.IsEOF()) {
+    if (!scanner.Read(wayCount)) {
+      progress.Error("Error while reading number of data entries in file");
+      return false;
+    }
+
+    for (uint32_t w=1; w<=wayCount; w++) {
       Way way;
 
-      way.Read(scanner);
+      if (!way.Read(scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(w)+" of "+
+                       NumberToString(wayCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+        return false;
+      }
 
-      if (!scanner.HasError()) {
-        if (indexables.find(way.GetType())!=indexables.end()) {
+      if (indexables.find(way.GetType())!=indexables.end()) {
+        std::string name=way.GetName();
 
-          std::string name=way.GetName();
+        if (!name.empty()) {
+          double minlon=way.nodes[0].lon;
+          double maxlon=way.nodes[0].lon;
 
-          if (!name.empty()) {
-            double minlon=way.nodes[0].lon;
-            double maxlon=way.nodes[0].lon;
+          double minlat=way.nodes[0].lat;
+          double maxlat=way.nodes[0].lat;
 
-            double minlat=way.nodes[0].lat;
-            double maxlat=way.nodes[0].lat;
+          for (size_t n=0; n<way.nodes.size(); n++) {
+            minlon=std::min(minlon,way.nodes[n].lon);
+            maxlon=std::max(maxlon,way.nodes[n].lon);
 
-            for (size_t n=0; n<way.nodes.size(); n++) {
-              minlon=std::min(minlon,way.nodes[n].lon);
-              maxlon=std::max(maxlon,way.nodes[n].lon);
-
-              minlat=std::min(minlat,way.nodes[n].lat);
-              maxlat=std::max(maxlat,way.nodes[n].lat);
-            }
-
-            AddWayToArea(rootArea,way,minlon,minlat,maxlon,maxlat);
+            minlat=std::min(minlat,way.nodes[n].lat);
+            maxlat=std::max(maxlat,way.nodes[n].lat);
           }
+
+          AddWayToArea(rootArea,way,minlon,minlat,maxlon,maxlat);
         }
       }
     }
@@ -811,27 +862,37 @@ namespace osmscout {
       return false;
     }
 
-    while (!scanner.IsEOF()) {
+    if (!scanner.Read(nodeCount)) {
+      progress.Error("Error while reading number of data entries in file");
+      return false;
+    }
+
+    for (uint32_t n=1; n<=nodeCount; n++) {
       Node node;
 
-      node.Read(scanner);
+      if (!node.Read(scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(n)+" of "+
+                       NumberToString(nodeCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+        return false;
+      }
 
-      if (!scanner.HasError()) {
-        if (indexables.find(node.type)!=indexables.end()) {
-          std::string name;
+      if (indexables.find(node.type)!=indexables.end()) {
+        std::string name;
 
-          for (std::vector<Tag>::iterator tag=node.tags.begin();
-               tag!=node.tags.end();
-               ++tag) {
-            if (tag->key==tagName) {
-              name=tag->value;
-              break;
-            }
+        for (std::vector<Tag>::iterator tag=node.tags.begin();
+             tag!=node.tags.end();
+             ++tag) {
+          if (tag->key==tagName) {
+            name=tag->value;
+            break;
           }
+        }
 
-          if (!name.empty()) {
-            AddNodeToArea(rootArea,node,name);
-          }
+        if (!name.empty()) {
+          AddNodeToArea(rootArea,node,name);
         }
       }
     }

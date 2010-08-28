@@ -83,8 +83,8 @@ namespace osmscout {
   }
 
   bool AreaIndexGenerator::Import(const ImportParameter& parameter,
-                                      Progress& progress,
-                                      const TypeConfig& typeConfig)
+                                  Progress& progress,
+                                  const TypeConfig& typeConfig)
   {
     FileScanner               scanner;
     std::set<Id>              wayBlacklist;   // Ids of ways that should not be in index
@@ -118,7 +118,6 @@ namespace osmscout {
       progress.Error("Cannot open 'wayblack.dat'");
       return false;
     }
-
 
     while (!scanner.IsEOF()) {
       Id id;
@@ -205,6 +204,7 @@ namespace osmscout {
 
       if (ways==0 ||
           (ways>0 && ways>waysConsumed)) {
+        uint32_t wayCount=0;
 
         progress.Info(std::string("Scanning ways.dat for ways of index level ")+NumberToString(l)+"...");
 
@@ -213,16 +213,24 @@ namespace osmscout {
           return false;
         }
 
+        if (!scanner.Read(wayCount)) {
+          progress.Error("Error while reading number of data entries in file");
+          return false;
+        }
+
         ways=0;
-        while (!scanner.IsEOF()) {
+        for (uint32_t w=1; w<=wayCount; w++) {
           FileOffset offset;
           Way        way;
 
           scanner.GetPos(offset);
-          way.Read(scanner);
-
-          if (scanner.HasError()) {
-            continue;
+          if (!way.Read(scanner)) {
+            progress.Error(std::string("Error while reading data entry ")+
+                           NumberToString(w)+" of "+
+                           NumberToString(wayCount)+
+                           " in file '"+
+                           scanner.GetFilename()+"'");
+            return false;
           }
 
           // We do not index a way that is in the blacklist
@@ -232,8 +240,7 @@ namespace osmscout {
 
           ways++;
 
-          // We do not index ways, only areas
-          if (way.IsArea()) {
+          if (way.IsArea()) { // Areas
             //
             // Bounding box calculation
             //
@@ -301,7 +308,7 @@ namespace osmscout {
               waysConsumed++;
             }
           }
-          else {
+          else { // Ways
             //
             // Bounding box calculation
             //
@@ -356,6 +363,9 @@ namespace osmscout {
               size_t minxc=floor(minLon/cellWidth[level]);
               size_t maxxc=floor(maxLon/cellWidth[level]);
 
+              // Now index the way for all cells in the bounding box
+              // TODO: We could do better by only indexing the way for all cells that it
+              // really intersects, thus reducing the number of (false) entries in the index
               for (size_t yc=minyc; yc<=maxyc; yc++) {
                 for (size_t xc=minxc; xc<=maxxc; xc++) {
                   leafs[Coord(xc,yc)].ways[way.GetType()].push_back(offset);
@@ -375,6 +385,7 @@ namespace osmscout {
 
       if (rels==0 ||
           (rels>0 && rels>relsConsumed)) {
+        uint32_t relCount=0;
 
         progress.Info(std::string("Scanning relations.dat for relations of index level ")+NumberToString(l)+"...");
 
@@ -383,16 +394,25 @@ namespace osmscout {
           return false;
         }
 
+        if (!scanner.Read(relCount)) {
+          progress.Error("Error while reading number of data entries in file");
+          return false;
+        }
+
         rels=0;
-        while (!scanner.IsEOF()) {
+        for (uint32_t r=1; r<=relCount; r++) {
           FileOffset offset;
           Relation   relation;
 
           scanner.GetPos(offset);
-          relation.Read(scanner);
 
-          if (scanner.HasError()) {
-            continue;
+          if (!relation.Read(scanner)) {
+            progress.Error(std::string("Error while reading data entry ")+
+                           NumberToString(r)+" of "+
+                           NumberToString(relCount)+
+                           " in file '"+
+                           scanner.GetFilename()+"'");
+            return false;
           }
 
           rels++;

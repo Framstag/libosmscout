@@ -45,13 +45,15 @@ namespace osmscout {
     FileWriter        relationWriter;
 
   public:
-    size_t nodeCount;
-    size_t wayCount;
-    size_t areaCount;
-    size_t relationCount;
+    uint32_t nodeCount;
+    uint32_t wayCount;
+    uint32_t areaCount;
+    uint32_t relationCount;
 
   public:
     Preprocessor(const TypeConfig& config);
+    virtual ~Preprocessor();
+
     void Process(const Id& id,
                  const double& lon, const double& lat,
                  const std::vector<Tag>& tags);
@@ -73,8 +75,18 @@ namespace osmscout {
      relationCount(0)
   {
     nodeWriter.Open("rawnodes.dat");
+    nodeWriter.Write(nodeCount);
+
     wayWriter.Open("rawways.dat");
+    wayWriter.Write(wayCount+areaCount);
+
     relationWriter.Open("rawrels.dat");
+    relationWriter.Write(relationCount);
+  }
+
+  Preprocessor::~Preprocessor()
+  {
+    // no code
   }
 
   void Preprocessor::Process(const Id& id,
@@ -178,6 +190,15 @@ namespace osmscout {
 
   void Preprocessor::Cleanup()
   {
+    nodeWriter.SetPos(0);
+    nodeWriter.Write(nodeCount);
+
+    wayWriter.SetPos(0);
+    wayWriter.Write(wayCount+areaCount);
+
+    relationWriter.SetPos(0);
+    relationWriter.Write(relationCount);
+
     nodeWriter.Close();
     wayWriter.Close();
     relationWriter.Close();
@@ -477,6 +498,8 @@ namespace osmscout {
     saxParser.serror=StructuredErrorHandler;
 
     xmlSAXUserParseFile(&saxParser,&parser,parameter.GetMapfile().c_str());
+
+    pp.Cleanup();
 
     progress.Info(std::string("Nodes:          ")+NumberToString(pp.nodeCount));
     progress.Info(std::string("Ways/Areas/Sum: ")+NumberToString(pp.wayCount)+" "+

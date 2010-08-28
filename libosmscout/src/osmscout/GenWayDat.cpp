@@ -51,6 +51,9 @@ namespace osmscout {
 
     FileScanner                                 scanner;
     FileWriter                                  writer;
+    uint32_t                                    rawNodeCount=0;
+    uint32_t                                    rawRelCount=0;
+    uint32_t                                    rawWayCount=0;
     TypeId                                      restrictionPosId;
     TypeId                                      restrictionNegId;
     std::map<Id,std::vector<Way::Restriction> > restrictions;
@@ -69,53 +72,66 @@ namespace osmscout {
       return false;
     }
 
-    while (!scanner.IsEOF()) {
+    if (!scanner.Read(rawRelCount)) {
+      progress.Error("Error while reading number of data entries in file");
+      return false;
+    }
+
+    for (uint32_t r=1; r<=rawRelCount; r++) {
       RawRelation relation;
 
-      relation.Read(scanner);
+      if (!relation.Read(scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(r)+" of "+
+                       NumberToString(rawRelCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+        return false;
+      }
 
-      if (!scanner.HasError()) {
-        if (relation.type==restrictionPosId || relation.type==restrictionNegId) {
-          Id               from=0;
-          Way::Restriction restriction;
+      if (relation.type==restrictionPosId || relation.type==restrictionNegId) {
+        Id               from=0;
+        Way::Restriction restriction;
 
-          restriction.members.resize(1,0);
+        restriction.members.resize(1,0);
 
-          if (relation.type==restrictionPosId) {
-            restriction.type=Way::rstrAllowTurn;
-          }
-          else if (relation.type==restrictionNegId) {
-            restriction.type=Way::rstrForbitTurn;
-          }
-          else {
-            continue;
-          }
+        if (relation.type==restrictionPosId) {
+          restriction.type=Way::rstrAllowTurn;
+        }
+        else if (relation.type==restrictionNegId) {
+          restriction.type=Way::rstrForbitTurn;
+        }
+        else {
+          continue;
+        }
 
-          for (size_t i=0; i<relation.members.size(); i++) {
-            if (relation.members[i].type==RawRelation::memberWay &&
-                relation.members[i].role=="from") {
-              from=relation.members[i].id;
-            }
-            else if (relation.members[i].type==RawRelation::memberWay &&
-                     relation.members[i].role=="to") {
-              restriction.members[0]=relation.members[i].id;
-            }
-            else if (relation.members[i].type==RawRelation::memberNode &&
-                     relation.members[i].role=="via") {
-              restriction.members.push_back(relation.members[i].id);
-            }
+        for (size_t i=0; i<relation.members.size(); i++) {
+          if (relation.members[i].type==RawRelation::memberWay &&
+              relation.members[i].role=="from") {
+            from=relation.members[i].id;
           }
+          else if (relation.members[i].type==RawRelation::memberWay &&
+                   relation.members[i].role=="to") {
+            restriction.members[0]=relation.members[i].id;
+          }
+          else if (relation.members[i].type==RawRelation::memberNode &&
+                   relation.members[i].role=="via") {
+            restriction.members.push_back(relation.members[i].id);
+          }
+        }
 
-          if (from!=0 &&
-              restriction.members[1]!=0 &&
-              restriction.members.size()>1) {
-            restrictions[from].push_back(restriction);
-          }
+        if (from!=0 &&
+            restriction.members[1]!=0 &&
+            restriction.members.size()>1) {
+          restrictions[from].push_back(restriction);
         }
       }
     }
 
-    scanner.Close();
+    if (!scanner.Close()) {
+      progress.Error("Cannot close file 'rawrels.dat'");
+      return false;
+    }
 
     progress.Info(std::string("Found ")+NumberToString(restrictions.size())+" restrictions");
 
@@ -133,10 +149,22 @@ namespace osmscout {
       return false;
     }
 
-    while (!scanner.IsEOF()) {
+    if (!scanner.Read(rawWayCount)) {
+      progress.Error("Error while reading number of data entries in file");
+      return false;
+    }
+
+    for (uint32_t w=1; w<=rawWayCount; w++) {
       RawWay way;
 
-      way.Read(scanner);
+      if (!way.Read(scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(w)+" of "+
+                       NumberToString(rawWayCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+        return false;
+      }
 
       if (way.type!=typeIgnore) {
         std::vector<RawNode> nodes;
@@ -148,7 +176,10 @@ namespace osmscout {
       }
     }
 
-    scanner.Close();
+    if (!scanner.Close()) {
+      progress.Error("Cannot close file 'rawways.dat'");
+      return false;
+    }
 
     ac.Stop();
 
@@ -157,6 +188,7 @@ namespace osmscout {
     std::vector<size_t> wayDistribution;
     size_t              wayCount=0;
     size_t              sum=0;
+    uint32_t            writtenWayCount=0;
 
     progress.SetAction("Analysing distribution");
 
@@ -165,10 +197,22 @@ namespace osmscout {
       return false;
     }
 
-    while (!scanner.IsEOF()) {
+    if (!scanner.Read(rawWayCount)) {
+      progress.Error("Error while reading number of data entries in file");
+      return false;
+    }
+
+    for (uint32_t w=1; w<=rawWayCount; w++) {
       RawWay way;
 
-      way.Read(scanner);
+      if (!way.Read(scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(w)+" of "+
+                       NumberToString(rawWayCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+        return false;
+      }
 
       if (way.type!=typeIgnore) {
         size_t index=way.id/distributionGranuality;
@@ -182,7 +226,10 @@ namespace osmscout {
       }
     }
 
-    scanner.Close();
+    if (!scanner.Close()) {
+      progress.Error("Cannot close file 'rawways.dat'");
+      return false;
+    }
 
     progress.Info(std::string("Ways: ")+NumberToString(wayCount));
     for (size_t i=0; i<wayDistribution.size(); i++) {
@@ -199,6 +246,8 @@ namespace osmscout {
       progress.Error("Canot create 'ways.dat'");
       return false;
     }
+
+    writer.Write(writtenWayCount);
 
     size_t index=0;
     while (index<wayDistribution.size()) {
@@ -225,10 +274,22 @@ namespace osmscout {
         return false;
       }
 
-      while (!scanner.IsEOF()) {
+      if (!scanner.Read(rawWayCount)) {
+        progress.Error("Error while reading number of data entries in file");
+        return false;
+      }
+
+      for (uint32_t w=1; w<=rawWayCount; w++) {
         RawWay way;
 
-        way.Read(scanner);
+        if (!way.Read(scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(w)+" of "+
+                       NumberToString(rawWayCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+          return false;
+        }
 
         if (way.type!=typeIgnore && way.id>=start && way.id<end) {
           ways[way.id]=way;
@@ -240,7 +301,10 @@ namespace osmscout {
         }
       }
 
-      scanner.Close();
+      if (!scanner.Close()) {
+        progress.Error("Cannot close file 'rawways.dat'");
+        return false;
+      }
 
       if (bucketSize!=ways.size()) {
         progress.Info(std::string("Number of loaded ways does not match expected number of ways (")+NumberToString(ways.size())+"!="+NumberToString(bucketSize)+")!");
@@ -257,17 +321,32 @@ namespace osmscout {
         return false;
       }
 
-      while (!scanner.IsEOF()) {
+      if (!scanner.Read(rawNodeCount)) {
+        progress.Error("Error while reading number of data entries in file");
+        return false;
+      }
+
+      for (uint32_t n=1; n<=rawNodeCount; n++) {
         RawNode node;
 
-        node.Read(scanner);
+        if (!node.Read(scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(n)+" of "+
+                       NumberToString(rawNodeCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+          return false;
+        }
 
         if (nodeIds.find(node.id)!=nodeIds.end()) {
           nodes[node.id]=node;
         }
       }
 
-      scanner.Close();
+      if (!scanner.Close()) {
+        progress.Error("Cannot close file 'rawnodes.dat'");
+        return false;
+      }
 
       progress.Info("Scanning way node usage");
 
@@ -276,10 +355,22 @@ namespace osmscout {
         return false;
       }
 
-      while (!scanner.IsEOF()) {
+      if (!scanner.Read(rawWayCount)) {
+        progress.Error("Error while reading number of data entries in file");
+        return false;
+      }
+
+      for (uint32_t w=1; w<=rawWayCount; w++) {
         RawWay way;
 
-        way.Read(scanner);
+        if (!way.Read(scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(w)+" of "+
+                         NumberToString(rawWayCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
 
         if (way.type!=typeIgnore) {
           for (size_t j=0; j<way.nodes.size(); j++) {
@@ -292,7 +383,10 @@ namespace osmscout {
         }
       }
 
-      scanner.Close();
+      if (!scanner.Close()) {
+        progress.Error("Cannot close file 'rawways.dat'");
+        return false;
+      }
 
       progress.Info("Writing ways");
 
@@ -361,12 +455,19 @@ namespace osmscout {
         }
 
         way.Write(writer);
+        writtenWayCount++;
       }
 
       index=newIndex;
     }
 
-    writer.Close();
+
+    writer.SetPos(0);
+    writer.Write(writtenWayCount);
+
+    if (!writer.Close()) {
+      return false;
+    }
 
     // Cleaning up...
 

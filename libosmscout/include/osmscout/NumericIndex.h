@@ -346,17 +346,23 @@ namespace osmscout {
       return false;
     }
 
-    while (!scanner.IsEOF()) {
+    if (!scanner.Read(dataCount)) {
+      progress.Error("Error while reading number of data entries in file");
+      return false;
+    }
+
+    for (uint32_t d=1; d<=dataCount; d++) {
       T data;
 
-      data.Read(scanner);
-
-      if (!scanner.HasError()) {
-        dataCount++;
+      if (!data.Read(scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+NumberToString(d));
+        return false;
       }
     }
 
-    scanner.Close();
+    if (!scanner.Close()) {
+      return false;
+    }
 
     if (!writer.Open(indexfile)) {
       progress.Error(std::string("Cannot create '")+indexfile+"'");
@@ -365,6 +371,11 @@ namespace osmscout {
 
     if (!scanner.Open(datafile)) {
       progress.Error(std::string("Cannot open '")+datafile+"'");
+      return false;
+    }
+
+    if (!scanner.Read(dataCount)) {
+      progress.Error("Error while reading number of data entries in file");
       return false;
     }
 
@@ -381,7 +392,6 @@ namespace osmscout {
     indexLevelSize=ceil(pow(dataCount,1.0/levels));
 
     progress.Info(NumberToString(dataCount)+" entries will be stored in "+NumberToString(levels)+ " levels using index level size of "+NumberToString(indexLevelSize));
-
 
     writer.WriteNumber(levels);         // Number of levels
     writer.WriteNumber(indexLevelSize); // Size of index page
@@ -403,9 +413,8 @@ namespace osmscout {
 
       T data;
 
-      data.Read(scanner);
-
-      if (scanner.HasError()) {
+      if (!data.Read(scanner)) {
+        progress.Error("Error while reading data file");
         return false;
       }
 
@@ -464,11 +473,14 @@ namespace osmscout {
 
     writer.SetPos(lastLevelPageStart);
 
-    writer.Write(pageStarts[0]);
+    if (indexLevelSize>0) {
+      writer.Write(pageStarts[0]);
+    }
 
-    scanner.Close();
-
-    return !writer.HasError() && writer.Close();
+    return !scanner.HasError() &&
+           scanner.Close() &&
+           !writer.HasError() &&
+           writer.Close();
   }
 }
 

@@ -25,9 +25,7 @@ namespace osmscout {
 
   bool RawNode::Read(FileScanner& scanner)
   {
-    scanner.Read(id);
-
-    if (scanner.HasError()) {
+    if (!scanner.Read(id)) {
       return false;
     }
 
@@ -36,24 +34,35 @@ namespace osmscout {
     uint32_t latValue;
     uint32_t lonValue;
 
-    scanner.ReadNumber(tmpType);
-    scanner.Read(latValue);
-    scanner.Read(lonValue);
+    if (!scanner.ReadNumber(tmpType)) {
+      return false;
+    }
+
+    if (!scanner.Read(latValue)) {
+      return false;
+    }
+
+    if (!scanner.Read(lonValue)) {
+      return false;
+    }
 
     type=(TypeId)tmpType;
     lat=latValue/conversionFactor-180.0;
     lon=lonValue/conversionFactor-90.0;
 
-    scanner.ReadNumber(tagCount);
-
-    if (scanner.HasError()) {
+    if (!scanner.ReadNumber(tagCount)) {
       return false;
     }
 
     tags.resize(tagCount);
     for (size_t i=0; i<tagCount; i++) {
-      scanner.ReadNumber(tags[i].key);
-      scanner.Read(tags[i].value);
+      if (!scanner.ReadNumber(tags[i].key)) {
+        return false;
+      }
+
+      if (!scanner.Read(tags[i].value)) {
+        return false;
+      }
     }
 
     return !scanner.HasError();
@@ -65,6 +74,7 @@ namespace osmscout {
     uint32_t lonValue=(uint32_t)round((lon+90.0)*conversionFactor);
 
     writer.Write(id);
+
     writer.WriteNumber(type);
     writer.Write(latValue);
     writer.Write(lonValue);

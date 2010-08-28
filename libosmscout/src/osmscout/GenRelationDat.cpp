@@ -539,212 +539,233 @@ namespace osmscout {
 
     FileScanner scanner;
     FileWriter  writer;
-    size_t      allRelationCount=0;
+    uint32_t    rawRelationCount=0;
     size_t      selectedRelationCount=0;
-    size_t      writtenRelationCount=0;
+    uint32_t    writtenRelationCount=0;
 
     if (!scanner.Open("rawrels.dat")) {
-      progress.Error("Canot open 'rawrels.dat'");
+      progress.Error("Cannot open 'rawrels.dat'");
+      return false;
+    }
+
+    if (!scanner.Read(rawRelationCount)) {
+      progress.Error("Cannot read nunber of raw relations from data file");
       return false;
     }
 
     if (!writer.Open("relations.dat")) {
-      progress.Error("Canot create 'relations.dat'");
+      progress.Error("Cannot create 'relations.dat'");
       return false;
     }
 
-    while (!scanner.IsEOF()) {
+    writer.Write(writtenRelationCount);
+
+    for (uint32_t r=1; r<=rawRelationCount; r++) {
       RawRelation rawRel;
 
-      rawRel.Read(scanner);
+      if (!rawRel.Read(scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(r)+" of "+
+                       NumberToString(rawRelationCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+        return false;
+      }
 
-      if (!scanner.HasError()) {
-        allRelationCount++;
+      if (rawRel.members.size()==0) {
+        progress.Warning("Relation "+
+                         NumberToString(rawRel.id)+
+                         " does not have any members!");
+      }
 
-        if (rawRel.members.size()==0) {
-          progress.Warning("Relation "+
-                           NumberToString(rawRel.id)+
-                           " does not have any members!");
+      Relation              rel;
+      std::string           name;
+      std::set<std::string> roles;
+      bool                  error=false;
+      int8_t                layer=0;
+
+      selectedRelationCount++;
+
+      rel.id=rawRel.id;
+      rel.type=rawRel.type;
+      rel.flags=0;
+
+      std::vector<Tag>::iterator tag=rawRel.tags.begin();
+      while (tag!=rawRel.tags.end()) {
+        if (tag->key==tagType) {
+          rel.relType=tag->value;
+          tag=rawRel.tags.erase(tag);
+        }
+        else if (tag->key==tagName) {
+          name=tag->value;
+          tag++;
+        }
+        else if (tag->key==tagLayer) {
+          if (sscanf(tag->value.c_str(),"%hhd",&layer)!=1) {
+            progress.Warning(std::string("Layer tag value '")+tag->value+"' for relation "+NumberToString(rawRel.id)+" is not numeric!");
+          }
+          tag=rawRel.tags.erase(tag);
+        }
+        else {
+          tag++;
+        }
+      }
+
+      for (size_t i=0; i<rawRel.members.size(); i++) {
+        roles.insert(rawRel.members[i].role);
+      }
+
+      rel.roles.resize(rawRel.members.size());
+
+      for (size_t m=0; m<rawRel.members.size(); m++) {
+        TypeId type;
+
+        rel.roles[m].role=rawRel.members[m].role;
+        rel.roles[m].attributes.layer=layer;
+
+        if (!ResolveMember(rawRel.id,
+                           name,
+                           rawRel.members[m],nodeDataFile,
+                           wayDataFile,
+                           rel.roles[m],type,
+                           progress)) {
+          error=true;
+          break;
         }
 
-        Relation              rel;
-        std::string           name;
-        std::set<std::string> roles;
-        bool                  error=false;
-        int8_t                layer=0;
+        rel.roles[m].attributes.type=type;
+      }
 
-        selectedRelationCount++;
+      if (error) {
+        continue;
+      }
 
-        rel.id=rawRel.id;
-        rel.type=rawRel.type;
-        rel.flags=0;
+      // Resolve type of multipolygon/boundary relations if the relation does not have
+      // a type
+      if (rel.type==typeIgnore &&
+          (rel.relType=="multipolygon" ||
+           rel.relType=="boundary")) {
+        bool   correct=true;
+        TypeId typeId=typeIgnore;
 
-        std::vector<Tag>::iterator tag=rawRel.tags.begin();
-        while (tag!=rawRel.tags.end()) {
-          if (tag->key==tagType) {
-            rel.relType=tag->value;
-            tag=rawRel.tags.erase(tag);
-          }
-          else if (tag->key==tagName) {
-            name=tag->value;
-            tag++;
-          }
-          else if (tag->key==tagLayer) {
-            if (sscanf(tag->value.c_str(),"%hhd",&layer)!=1) {
-              progress.Warning(std::string("Layer tag value '")+tag->value+"' for relation "+NumberToString(rawRel.id)+" is not numeric!");
+        for (size_t m=0; m<rel.roles.size(); m++) {
+          if (rel.roles[m].role=="outer") {
+            if (typeId==typeIgnore &&
+                rel.roles[m].GetType()!=typeIgnore) {
+              typeId=rel.roles[m].GetType();
+              //progress.Debug("Autodetecting type of relation "+NumberToString(rel.id)+" as "+NumberToString(rel.type));
             }
-            tag=rawRel.tags.erase(tag);
-          }
-          else {
-            tag++;
+            else if (typeId!=typeIgnore &&
+                     rel.roles[m].GetType()!=typeIgnore &&
+                     typeId!=rel.roles[m].GetType()) {
+              progress.Warning("Multipolygon/boundary relation "+NumberToString(rel.id)+" has conflicting types for outer boundary ("+
+                               NumberToString(rawRel.members[m].id)+","+NumberToString(rel.type)+","+NumberToString(rel.roles[m].GetType())+")");
+              correct=false;
+            }
           }
         }
 
-        for (size_t i=0; i<rawRel.members.size(); i++) {
-          roles.insert(rawRel.members[i].role);
+        if (correct) {
+          rel.type=typeId;
         }
+      }
+      else {
+        bool correct=true;
 
-        rel.roles.resize(rawRel.members.size());
+        TypeId type=rel.roles[0].GetType();
 
-        for (size_t m=0; m<rawRel.members.size(); m++) {
-          TypeId type;
-
-          rel.roles[m].role=rawRel.members[m].role;
-          rel.roles[m].attributes.layer=layer;
-
-          if (!ResolveMember(rawRel.id,
-                             name,
-                             rawRel.members[m],nodeDataFile,
-                             wayDataFile,
-                             rel.roles[m],type,
-                             progress)) {
-            error=true;
+        for (size_t m=1; m<rel.roles.size(); m++) {
+          if (rel.roles[m].GetType()!=type) {
+            correct=false;
             break;
           }
-
-          rel.roles[m].attributes.type=type;
         }
 
-        if (error) {
-          continue;
+        if (correct &&
+            type!=rel.type &&
+            type!=typeIgnore) {
+          progress.Warning("Autocorrecting type of relation "+NumberToString(rel.id)+
+                           " from "+NumberToString(rel.type)+" to "+NumberToString(type));
+          rel.type=type;
         }
+      }
 
-        // Resolve type of multipolygon/boundary relations if the relation does not have
-        // a type
-        if (rel.type==typeIgnore &&
-            (rel.relType=="multipolygon" ||
-             rel.relType=="boundary")) {
-          for (size_t m=0; m<rel.roles.size(); m++) {
-            if (rel.roles[m].role=="outer") {
-              if (rel.type==typeIgnore &&
-                  rel.roles[m].GetType()!=typeIgnore) {
-                rel.type=rel.roles[m].GetType();
-                //progress.Debug("Autodetecting type of relation "+NumberToString(rel.id)+" as "+NumberToString(rel.type));
-              }
-              else if (rel.type!=typeIgnore &&
-                       rel.roles[m].GetType()!=typeIgnore &&
-                       rel.type!=rel.roles[m].GetType()) {
-                progress.Warning("Relation "+NumberToString(rel.id)+" has conflicting types for outer boundary ("+
-                                 NumberToString(rawRel.members[m].id)+","+NumberToString(rel.type)+","+NumberToString(rel.roles[m].GetType())+")");
-              }
-            }
-          }
-        }
-        else {
-          bool correct=true;
-
-          TypeId type=rel.roles[0].GetType();
-
-          for (size_t m=1; m<rel.roles.size(); m++) {
-            if (rel.roles[m].GetType()!=type) {
-              correct=false;
-              break;
-            }
-          }
-
-          if (correct &&
-              type!=rel.type &&
-              type!=typeIgnore) {
-            progress.Warning("Autocorrecting type of relation "+NumberToString(rel.id)+
-                             " from "+NumberToString(rel.type)+" to "+NumberToString(type));
-            rel.type=type;
-          }
-        }
-
-        // Blacklist all relation members that have the same type as relation itself
-        // from the areaWayIndex to assure that a way will not be returned twice,
-        // once as part of the relation and once as wy itself
-        //
-        // For multipolygon and boundary relations we restrict blacklisting to the
-        // outer boundaries
-        if (rel.relType=="multipolygon" ||
-            rel.relType=="boundary") {
-          for (size_t m=0; m<rel.roles.size(); m++) {
-            if (rel.roles[m].role=="outer" ||
-                rel.roles[m].role=="") {
-              if (rel.type==rel.roles[m].GetType()) {
-                wayAreaIndexBlacklist.insert(rawRel.members[m].id);
-              }
-            }
-          }
-        }
-        else {
-          for (size_t m=0; m<rel.roles.size(); m++) {
+      // Blacklist all relation members that have the same type as relation itself
+      // from the areaWayIndex to assure that a way will not be returned twice,
+      // once as part of the relation and once as way itself
+      //
+      // For multipolygon and boundary relations we restrict blacklisting to the
+      // outer boundaries
+      if (rel.relType=="multipolygon" ||
+          rel.relType=="boundary") {
+        for (size_t m=0; m<rel.roles.size(); m++) {
+          if (rel.roles[m].role=="outer" ||
+              rel.roles[m].role=="") {
             if (rel.type==rel.roles[m].GetType()) {
               wayAreaIndexBlacklist.insert(rawRel.members[m].id);
             }
           }
         }
-
-        // Reconstruct multiploygon relation by applying the multipolygon resolving
-        // algorithm as destribed at
-        // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
-        if (rel.relType=="multipolygon" ||
-            rel.relType=="boundary") {
-          if (!ResolveMultipolygon(rel,progress)) {
-            progress.Error("Cannot resolve multipolygon relation "+
-                           NumberToString(rawRel.id)+" "+name);
-            continue;
-          }
-        }
-
-        rel.id=rawRel.id;
-        rel.tags=rawRel.tags;
-
-        if (rel.relType=="multipolygon" &&
-            rel.type!=typeIgnore &&
-            typeConfig.GetTypeInfo(rel.type).CanBeArea()) {
-          rel.flags|=Relation::isArea;
-        }
-
-        if (rel.tags.size()>0) {
-          rel.flags|=Relation::hasTags;
-        }
-
+      }
+      else {
         for (size_t m=0; m<rel.roles.size(); m++) {
-          if (rel.roles[m].attributes.layer!=0) {
-            rel.roles[m].attributes.flags|=SegmentAttributes::hasLayer;
+          if (rel.type==rel.roles[m].GetType()) {
+            wayAreaIndexBlacklist.insert(rawRel.members[m].id);
           }
         }
+      }
 
-        if (!CompactRelation(rel,name,progress)) {
-          progress.Error("Relation "+NumberToString(rel.id)+
-                         " cannot be compacted");
+      // Reconstruct multiploygon relation by applying the multipolygon resolving
+      // algorithm as destribed at
+      // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
+      if (rel.relType=="multipolygon" ||
+          rel.relType=="boundary") {
+        if (!ResolveMultipolygon(rel,progress)) {
+          progress.Error("Cannot resolve multipolygon relation "+
+                         NumberToString(rawRel.id)+" "+name);
           continue;
         }
+      }
 
-        //progress.Debug("Storing relation "+rel.relType+" "+NumberToString(rel.type)+" "+name);
-        
-        if (rel.type!=typeIgnore) {
-          rel.Write(writer);
-          writtenRelationCount++;
+      rel.id=rawRel.id;
+      rel.tags=rawRel.tags;
+
+      if (rel.relType=="multipolygon" &&
+          rel.type!=typeIgnore &&
+          typeConfig.GetTypeInfo(rel.type).CanBeArea()) {
+        rel.flags|=Relation::isArea;
+      }
+
+      if (rel.tags.size()>0) {
+        rel.flags|=Relation::hasTags;
+      }
+
+      for (size_t m=0; m<rel.roles.size(); m++) {
+        if (rel.roles[m].attributes.layer!=0) {
+          rel.roles[m].attributes.flags|=SegmentAttributes::hasLayer;
         }
+      }
+
+      if (!CompactRelation(rel,name,progress)) {
+        progress.Error("Relation "+NumberToString(rel.id)+
+                       " cannot be compacted");
+        continue;
+      }
+
+      //progress.Debug("Storing relation "+rel.relType+" "+NumberToString(rel.type)+" "+name);
+
+      if (rel.type!=typeIgnore) {
+        rel.Write(writer);
+        writtenRelationCount++;
       }
     }
 
-    progress.Info(NumberToString(allRelationCount)+" relations read"+
+    progress.Info(NumberToString(rawRelationCount)+" relations read"+
                   ", "+NumberToString(selectedRelationCount)+" relation selected"+
                   ", "+NumberToString(writtenRelationCount)+" relations written");
+
+    writer.SetPos(0);
+    writer.Write(writtenRelationCount);
 
     if (!(scanner.Close() && writer.Close() && wayDataFile.Close() && nodeDataFile.Close())) {
       return false;

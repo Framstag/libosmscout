@@ -28,6 +28,7 @@
 #include <osmscout/Tiles.h>
 #include <osmscout/RawNode.h>
 #include <osmscout/Node.h>
+#include <osmscout/Util.h>
 
 namespace osmscout {
 
@@ -40,11 +41,13 @@ namespace osmscout {
                                  Progress& progress,
                                  const TypeConfig& typeConfig)
   {
-    double minLon=-10.0;
-    double minLat=-10.0;
-    double maxLon=10.0;
-    double maxLat=10.0;
-    size_t count=0;
+    double   minLon=-10.0;
+    double   minLat=-10.0;
+    double   maxLon=10.0;
+    double   maxLat=10.0;
+    uint32_t rawNodeCount=0;
+    uint32_t nodesReadCount=0;
+    uint32_t nodesWrittenCount=0;
 
     //
     // Iterator over all raw nodes, hcekc they type, and convert them from raw nodes
@@ -63,18 +66,32 @@ namespace osmscout {
       return false;
     }
 
+    if (!scanner.Read(rawNodeCount)) {
+      progress.Error("Error while reading number of data entries in file");
+      return false;
+    }
+
     if (!writer.Open("nodes.dat")) {
       progress.Error("Cannot create 'nodes.dat'");
       return false;
     }
 
-    while (!scanner.IsEOF()) {
+    writer.Write(nodesWrittenCount);
+
+    for (uint32_t n=1; n<=rawNodeCount; n++) {
       RawNode rawNode;
       Node    node;
 
-      rawNode.Read(scanner);
+      if (!rawNode.Read(scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(n)+" of "+
+                       NumberToString(rawNodeCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+        return false;
+      }
 
-      if (count==0) {
+      if (nodesReadCount==0) {
         minLat=rawNode.lat;
         minLon=rawNode.lon;
         maxLat=rawNode.lat;
@@ -87,6 +104,8 @@ namespace osmscout {
         maxLon=std::max(maxLon,rawNode.lon);
       }
 
+      nodesReadCount++;
+
       if (rawNode.type!=typeIgnore) {
         node.id=rawNode.id;
         node.type=rawNode.type;
@@ -95,13 +114,23 @@ namespace osmscout {
         node.tags=rawNode.tags;
 
         node.Write(writer);
+        nodesWrittenCount++;
       }
 
-      count++;
     }
 
-    scanner.Close();
-    writer.Close();
+    if (!scanner.Close()) {
+      return false;
+    }
+
+    writer.SetPos(0);
+    writer.Write(nodesWrittenCount);
+
+    if (!writer.Close()) {
+      return false;
+    }
+
+    progress.Info(std::string("Read "+NumberToString(nodesReadCount)+" nodes, wrote "+NumberToString(nodesWrittenCount)+" nodes"));
 
     progress.SetAction("Generating bounding.dat");
 
@@ -112,10 +141,10 @@ namespace osmscout {
 
     // TODO: Dump bounding box to debug
 
-    uint32_t minLatDat=round((minLat+180.0)*conversionFactor);
-    uint32_t minLonDat=round((minLon+90.0)*conversionFactor);
-    uint32_t maxLatDat=round((maxLat+180.0)*conversionFactor);
-    uint32_t maxLonDat=round((maxLon+90.0)*conversionFactor);
+    uint32_t minLatDat=round((minLat+90.0)*conversionFactor);
+    uint32_t minLonDat=round((minLon+180.0)*conversionFactor);
+    uint32_t maxLatDat=round((maxLat+90.0)*conversionFactor);
+    uint32_t maxLonDat=round((maxLon+180.0)*conversionFactor);
 
     writer.WriteNumber(minLatDat);
     writer.WriteNumber(minLonDat);

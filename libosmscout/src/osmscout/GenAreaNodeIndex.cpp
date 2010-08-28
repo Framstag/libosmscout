@@ -48,36 +48,42 @@ namespace osmscout {
     FileScanner                                    scanner;
     std::vector<size_t>                            drawTypeDist;
     std::vector<std::map<TileId,std::list<Id> > >  drawTypeTileIds;
-    size_t                                         nodeCount=0;
+    uint32_t                                       nodeCount=0;
 
-    scanner.Open("nodes.dat");
-
-    if (scanner.HasError()) {
+    if (!scanner.Open("nodes.dat")) {
       progress.Error("Cannot open 'nodes.dat'");
       return false;
     }
 
-    while (!scanner.IsEOF()) {
+    if (!scanner.Read(nodeCount)) {
+      progress.Error("Error while reading number of data entries in file");
+      return false;
+    }
+
+    for (uint32_t n=1; n<=nodeCount; n++) {
       Node node;
 
-      node.Read(scanner);
-
-      if (!scanner.HasError()) {
-        TileId tileId=GetTileId(node.lon,node.lat);
-
-        nodeCount++;
-
-        if ((size_t)node.type>=drawTypeDist.size()) {
-          drawTypeDist.resize(node.type+1,0);
-          drawTypeTileIds.resize(node.type+1);
-        }
-
-        // Node count by draw type
-        drawTypeDist[node.type]++;
-
-        // Node ids by Type and tile
-        drawTypeTileIds[node.type][tileId].push_back(node.id);
+      if (!node.Read(scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(n)+" of "+
+                       NumberToString(nodeCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+        return false;
       }
+
+      TileId tileId=GetTileId(node.lon,node.lat);
+
+      if ((size_t)node.type>=drawTypeDist.size()) {
+        drawTypeDist.resize(node.type+1,0);
+        drawTypeTileIds.resize(node.type+1);
+      }
+
+      // Node count by draw type
+      drawTypeDist[node.type]++;
+
+      // Node ids by Type and tile
+      drawTypeTileIds[node.type][tileId].push_back(node.id);
     }
 
     scanner.Close();
