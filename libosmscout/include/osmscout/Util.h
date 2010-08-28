@@ -33,6 +33,8 @@
 
 #include <osmscout/Private/CoreImportExport.h>
 
+#include <osmscout/Point.h>
+
 namespace osmscout {
 
   /**
@@ -329,6 +331,22 @@ namespace osmscout {
                                                   double bLon, double bLat);
   extern OSMSCOUT_API double GetEllipsoidalDistance(double aLon, double aLat,
                                                    double bLon, double bLat);
+
+  struct OSMSCOUT_API ScanCell
+  {
+    int x;
+    int y;
+
+    ScanCell(int x, int y);
+  };
+
+  void OSMSCOUT_API ScanConvertLine(int x1, int y1,
+                                    int x2, int y2,
+                                    std::vector<ScanCell>& cells);
+  void OSMSCOUT_API ScanConvertLine(const std::vector<Point>& points,
+                                    double xTrans, double cellWidth,
+                                    double yTrans, double cellHeight,
+                                    std::vector<ScanCell>& cells);
 }
 
 #endif

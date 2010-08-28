@@ -20,6 +20,7 @@
 #include <osmscout/Util.h>
 
 #include <cstdio>
+#include <cstdlib>
 #include <cmath>
 #include <iomanip>
 #include <iostream>
@@ -375,9 +376,9 @@ namespace osmscout {
     if (result.length()>0 && result[result.length()-1]!='\\') {
       result.append("\\");
     }
-    
+
     result.append(file);
-    
+
     return result;
 #else
     std::string result(dir);
@@ -385,13 +386,13 @@ namespace osmscout {
     if (result.length()>0 && result[result.length()-1]!='/') {
       result.append("/");
     }
-    
+
     result.append(file);
-    
+
     return result;
-#endif  
+#endif
   }
-  
+
   std::string StringListToString(const std::list<std::string>& list,
                                  const std::string& separator)
   {
@@ -545,5 +546,87 @@ namespace osmscout {
     }
 
     return b * A * (sigma - deltasigma)/1000; // We want the distance in Km
+  }
+
+  ScanCell::ScanCell(int x, int y)
+  : x(x),
+    y(y)
+  {
+    // no code
+  }
+
+  /**
+   * This functions does a scan conversion of a line with the given start and end points.
+   * This problem is equals to the following problem:
+   * Assuming an index that works by referencing lines by linking them to all cells in a cell
+   * grid that contain or are crossed by the line. Which cells does the line cross?
+   *
+   * The given vector for the result data is not cleared on start, to allow multiple calls
+   * to this method with different line segments.
+   *
+   * The algorithm of Bresenham is used together with some checks for special cases.
+   */
+  void ScanConvertLine(int x1, int y1,
+                       int x2, int y2,
+                       std::vector<ScanCell>& cells)
+  {
+    bool steep=std::abs(y2-y1)>std::abs(x2-x1);
+
+    if (steep) {
+      std::swap(x1,y1);
+      std::swap(x2,y2);
+    }
+
+    if (x1>x2) {
+      std::swap(x1,x2);
+      std::swap(y1,y2);
+    }
+
+    int dx=x2-x1;
+    int dy=std::abs(y2-y1);
+    int error=dx/2;
+    int ystep;
+
+    int y=y1;
+
+    if (y1<y2) {
+      ystep=1;
+    }
+    else {
+      ystep=-1;
+    }
+
+    for (int x=x1; x<=x2; x++) {
+      if (steep) {
+        cells.push_back(ScanCell(y,x));
+      }
+      else {
+        cells.push_back(ScanCell(x,y));
+      }
+
+      error-=dy;
+
+      if (error<0) {
+        y+=ystep;
+        error+=dx;
+      }
+    }
+  }
+
+  void ScanConvertLine(const std::vector<Point>& points,
+                       double xTrans, double cellWidth,
+                       double yTrans, double cellHeight,
+                       std::vector<ScanCell>& cells)
+  {
+    assert(points.size()>=2);
+
+    for (size_t i=0; i<points.size()-2; i++) {
+      int x1=int((points[i].lon-xTrans)/cellWidth);
+      int x2=int((points[i+1].lon-xTrans)/cellWidth);
+      int y1=int((points[i].lat-yTrans)/cellHeight);
+      int y2=int((points[i+1].lat-yTrans)/cellHeight);
+
+      ScanConvertLine(x1,y1,x2,y2,cells);
+    }
   }
 }
