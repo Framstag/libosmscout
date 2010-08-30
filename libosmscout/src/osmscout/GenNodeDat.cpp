@@ -141,10 +141,10 @@ namespace osmscout {
 
     // TODO: Dump bounding box to debug
 
-    uint32_t minLatDat=round((minLat+90.0)*conversionFactor);
-    uint32_t minLonDat=round((minLon+180.0)*conversionFactor);
-    uint32_t maxLatDat=round((maxLat+90.0)*conversionFactor);
-    uint32_t maxLonDat=round((maxLon+180.0)*conversionFactor);
+    uint32_t minLatDat=(uint32_t)floor((minLat+90.0)*conversionFactor+0.5);
+    uint32_t minLonDat=(uint32_t)floor((minLon+180.0)*conversionFactor+0.5);
+    uint32_t maxLatDat=(uint32_t)floor((maxLat+90.0)*conversionFactor+0.5);
+    uint32_t maxLonDat=(uint32_t)floor((maxLon+180.0)*conversionFactor+0.5);
 
     writer.WriteNumber(minLatDat);
     writer.WriteNumber(minLonDat);

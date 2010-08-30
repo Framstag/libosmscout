@@ -81,7 +81,7 @@ namespace osmscout {
 
     inline bool IsArea() const
     {
-      return flags & isArea;
+      return (flags & isArea)!=0;
     }
 
     inline std::string GetName() const
@@ -106,37 +106,37 @@ namespace osmscout {
 
     inline bool IsBuilding() const
     {
-      return flags & isBuilding;
+      return (flags & isBuilding)!=0;
     }
 
     inline bool IsBridge() const
     {
-      return flags & isBridge;
+      return (flags & isBridge)!=0;
     }
 
     inline bool IsTunnel() const
     {
-      return flags & isTunnel;
+      return (flags & isTunnel)!=0;
     }
 
     inline bool IsOneway() const
     {
-      return flags & isOneway;
+      return (flags & isOneway)!=0;
     }
 
     inline bool StartIsJoint() const
     {
-      return flags & startIsJoint;
+      return (flags & startIsJoint)!=0;
     }
 
     inline bool EndIsJoint() const
     {
-      return flags & endIsJoint;
+      return (flags & endIsJoint)!=0;
     }
 
     inline bool HasRestrictions() const
     {
-      return flags & hasRestrictions;
+      return (flags & hasRestrictions)!=0;
     }
 
     bool Assign(Progress& progress,

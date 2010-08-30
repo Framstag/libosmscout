@@ -22,7 +22,10 @@
 
 #include <stdint.h>
 
-#include <sys/time.h>
+#if defined(__WIN32__) || defined(WIN32)
+#else
+  #include <sys/time.h>
+#endif
 
 #include <cassert>
 #include <limits>
@@ -166,15 +169,17 @@ namespace osmscout {
   class OSMSCOUT_API StopClock
   {
   private:
+#if defined(__WIN32__) || defined(WIN32)
+#else
     timeval start;
     timeval stop;
-
+#endif
   public:
     StopClock();
 
     void Stop();
 
-    friend std::ostream& operator<<(std::ostream& stream, const StopClock& clock);
+    friend OSMSCOUT_API std::ostream& operator<<(std::ostream& stream, const StopClock& clock);
   };
 
   extern OSMSCOUT_API std::ostream& operator<<(std::ostream& stream, const StopClock& clock);
