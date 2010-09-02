@@ -21,12 +21,20 @@
 
 #include <cstdio>
 #include <cstdlib>
+
+#if defined(__WIN32__) || defined(WIN32)
+  #define _USE_MATH_DEFINES
+  #include <math.h>
+#endif
+
 #include <cmath>
 #include <iomanip>
 #include <iostream>
 
 namespace osmscout {
 
+#if defined(__WIN32__) || defined(WIN32)
+#else
   #ifndef timersub
       # define timersub(a, b, result) \
             do { \
@@ -38,6 +46,7 @@ namespace osmscout {
                   } \
             } while (0)
   #endif
+#endif
 
   NumberSet::Data::~Data()
   {
@@ -147,21 +156,30 @@ namespace osmscout {
 
   StopClock::StopClock()
   {
-    gettimeofday(&start,NULL);
+#if defined(__WIN32__) || defined(WIN32)
+#else
+	gettimeofday(&start,NULL);
+#endif
   }
 
   void StopClock::Stop()
   {
-    gettimeofday(&stop,NULL);
+#if defined(__WIN32__) || defined(WIN32)
+#else
+	gettimeofday(&stop,NULL);
+#endif
   }
 
   std::ostream& operator<<(std::ostream& stream, const StopClock& clock)
   {
-    timeval diff;
+#if defined(__WIN32__) || defined(WIN32)
+#else
+	timeval diff;
 
     timersub(&clock.stop,&clock.start,&diff);
 
     stream << diff.tv_sec << "." << std::setw(3) << std::setfill('0') << diff.tv_usec/1000;
+#endif
 
     return stream;
   }
@@ -415,7 +433,7 @@ namespace osmscout {
 
   double Log2(double x)
   {
-    return log(x)/log(2);
+    return log(x)/log(2.0l);
   }
 
   size_t Pow(size_t a, size_t b)

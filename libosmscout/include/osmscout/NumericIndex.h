@@ -191,10 +191,10 @@ namespace osmscout {
         FileOffset offset=root[r].fileOffset;
 
         for (size_t level=0; level<levels-1; level++) {
-          class PageCache::CacheRef cacheRef;
+          typename PageCache::CacheRef cacheRef;
 
           if (!leafs[level].GetEntry(startId,cacheRef)) {
-            class PageCache::CacheEntry cacheEntry(startId);
+            typename PageCache::CacheEntry cacheEntry(startId);
 
             cacheRef=leafs[level].SetEntry(cacheEntry);
 
@@ -299,7 +299,8 @@ namespace osmscout {
     NumericIndexGenerator(const std::string& description,
                           const std::string& datafile,
                           const std::string& indexfile);
-
+    virtual ~NumericIndexGenerator();
+    
     std::string GetDescription() const;
     bool Import(const ImportParameter& parameter,
                 Progress& progress,
@@ -317,6 +318,12 @@ namespace osmscout {
     // no code
   }
 
+  template <class N,class T>
+  NumericIndexGenerator<N,T>::~NumericIndexGenerator()
+  {
+    // no code
+  }
+  
   template <class N,class T>
   std::string NumericIndexGenerator<N,T>::GetDescription() const
   {
@@ -355,7 +362,11 @@ namespace osmscout {
       T data;
 
       if (!data.Read(scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+NumberToString(d));
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(d)+" of "+
+                       NumberToString(dataCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
         return false;
       }
     }
@@ -379,6 +390,8 @@ namespace osmscout {
       return false;
     }
 
+    std::cout << "Reading " << dataCount << " nodes in *.dat file..." << std::endl;
+    
     uint32_t levels=1;
     size_t   tmp;
     uint32_t indexLevelSize=parameter.GetNumericIndexLevelSize();
@@ -389,7 +402,7 @@ namespace osmscout {
       levels++;
     }
 
-    indexLevelSize=ceil(pow(dataCount,1.0/levels));
+    indexLevelSize=(uint32_t)ceil(pow(dataCount,1.0/levels));
 
     progress.Info(NumberToString(dataCount)+" entries will be stored in "+NumberToString(levels)+ " levels using index level size of "+NumberToString(indexLevelSize));
 
@@ -406,7 +419,7 @@ namespace osmscout {
 
     progress.Info(std::string("Level ")+NumberToString(levels)+" entries "+NumberToString(dataCount));
 
-    for (size_t i=0; i<dataCount; i++) {
+    for (uint32_t d=0; d<dataCount; d++) {
       FileOffset pos;
 
       scanner.GetPos(pos);
@@ -414,11 +427,15 @@ namespace osmscout {
       T data;
 
       if (!data.Read(scanner)) {
-        progress.Error("Error while reading data file");
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(d+1)+" of "+
+                       NumberToString(dataCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
         return false;
       }
 
-      if (i%indexLevelSize==0) {
+      if (d%indexLevelSize==0) {
         FileOffset pageStart;
 
         writer.GetPos(pageStart);

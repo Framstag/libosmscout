@@ -48,11 +48,11 @@ namespace osmscout {
     cellHeight.resize(maxLevel+1);
 
     for (size_t i=0; i<cellWidth.size(); i++) {
-      cellWidth[i]=360/pow(2,i);
+      cellWidth[i]=360.0/pow(2.0,(int)i);
     }
 
     for (size_t i=0; i<cellHeight.size(); i++) {
-      cellHeight[i]=180/pow(2,i);
+      cellHeight[i]=180.0/pow(2.0,(int)i);
     }
 
     index.resize(maxLevel+1);

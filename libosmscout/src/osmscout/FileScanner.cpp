@@ -99,6 +99,12 @@ namespace osmscout {
 
     this->size=(size_t)size;
 
+    if (fseek(file,0L,SEEK_SET)!=0) {
+      std::cerr << "Cannot seek to start of file!" << std::endl;
+      hasError=true;
+      return false;
+    }
+    
 #if defined(HAVE_MMAP)
     if (file!=NULL && readOnly && this->size>0) {
       FreeBuffer();
@@ -409,9 +415,9 @@ namespace osmscout {
 #endif
 
     unsigned char buffer[sizeof(uint32_t)];
-
-    hasError=fread(&buffer,sizeof(char),sizeof(uint32_t),file)!=sizeof(uint32_t);
-
+    
+    hasError=fread(&buffer,sizeof(unsigned char),sizeof(uint32_t),file)!=sizeof(uint32_t);
+    
     if (hasError) {
       std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
       return false;
