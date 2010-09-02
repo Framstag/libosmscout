@@ -1,3 +1,6 @@
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
+
 /*
   OSMScout - a Qt backend for libosmscout and libosmscout-map
   Copyright (C) 2010  Tim Teulings
@@ -17,27 +20,23 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <QApplication>
+#include <QMainWindow>
 
 #include "MapWidget.h"
-#include "MainWindow.h"
 
-int main(int argc, char* argv[])
+class MainWindow : public QMainWindow
 {
-  QApplication app(argc,argv);
-  MainWindow   window;
-  int          result;
+  Q_OBJECT
 
-  qRegisterMetaType<RenderMapRequest>();
+public slots:
+  void SearchCity();
 
-  dbThread.start();
+private:
+  MapWidget * map;
 
-  window.setWindowTitle("OSMScout");
-  window.resize(800,480);
-  window.show();
+public:
+  MainWindow();
+  ~MainWindow();
+};
 
-  result=app.exec();
-
-  dbThread.quit();
-  return result;
-}
+#endif

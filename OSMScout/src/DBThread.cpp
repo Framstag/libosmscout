@@ -70,6 +70,7 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
       currentPixmap->height()!=(int)request.height) {
     delete currentPixmap;
 
+    //currentPixmap=new QGLPixelBuffer(QSize(request.width,request.height));
     currentPixmap=new QPixmap(QSize(request.width,request.height));
   }
 
@@ -95,7 +96,7 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
     osmscout::StopClock dataRetrievalTimer;
 
     database.GetObjects(*styleConfig,
-                       projection.GetLonMin(),
+                        projection.GetLonMin(),
                         projection.GetLatMin(),
                         projection.GetLonMax(),
                         projection.GetLatMax(),
@@ -109,6 +110,12 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
                         data.areas,
                         data.relationWays,
                         data.relationAreas);
+
+    database.GetGroundTiles(projection.GetLonMin(),
+                            projection.GetLatMin(),
+                            projection.GetLonMax(),
+                            projection.GetLatMax(),
+                            data.groundTiles);
 
     dataRetrievalTimer.Stop();
 
@@ -131,16 +138,20 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
   }
   else {
     std::cout << "Cannot draw map: " << database.IsOpen() << " " << (styleConfig!=NULL) << std::endl;
+
     QPainter *p=new QPainter(currentPixmap);
 
     p->fillRect(0,0,request.width,request.height,
                 QColor::fromRgbF(0.0,0.0,0.0,1.0));
 
-    p->setPen(QColor::fromRgbF(1.0,0.0,0.0,1.0));
+    p->setPen(QColor::fromRgbF(1.0,1.0,1.0,1.0));
 
     QString text("not initialized (yet)");
 
-    p->drawText(QRect(0,0,request.width,request.height),0,text,NULL);
+    p->drawText(QRect(0,0,request.width,request.height),
+                Qt::AlignCenter|Qt::AlignVCenter,
+                text,
+                NULL);
 
     delete p;
   }

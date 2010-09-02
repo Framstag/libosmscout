@@ -17,27 +17,36 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <QApplication>
-
-#include "MapWidget.h"
 #include "MainWindow.h"
 
-int main(int argc, char* argv[])
+#include <QMenuBar>
+
+#include "CitySearchDialog.h"
+
+MainWindow::MainWindow()
+ : map(new MapWidget())
 {
-  QApplication app(argc,argv);
-  MainWindow   window;
-  int          result;
+  QMenu *menu;
 
-  qRegisterMetaType<RenderMapRequest>();
+  menu=menuBar()->addMenu("&File");
+  menu->addAction("&Quit",this,SLOT(close()),QKeySequence("Ctrl+Q"));
 
-  dbThread.start();
+  menu=menuBar()->addMenu("&Search");
+  menu->addAction("Search &city",this,SLOT(SearchCity()),QKeySequence("Ctrl+C"));
 
-  window.setWindowTitle("OSMScout");
-  window.resize(800,480);
-  window.show();
-
-  result=app.exec();
-
-  dbThread.quit();
-  return result;
+  setCentralWidget(map);
 }
+
+MainWindow::~MainWindow()
+{
+  // no code
+}
+
+void MainWindow::SearchCity()
+{
+  CitySearchDialog dialog(this);
+
+  dialog.exec();
+}
+
+#include "moc_MainWindow.cpp"

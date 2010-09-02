@@ -17,27 +17,25 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <QApplication>
+#include <QDialog>
+#include <QLineEdit>
+#include <QListView>
+#include <QTimer>
 
-#include "MapWidget.h"
-#include "MainWindow.h"
-
-int main(int argc, char* argv[])
+class CitySearchDialog : public QDialog
 {
-  QApplication app(argc,argv);
-  MainWindow   window;
-  int          result;
+  Q_OBJECT
 
-  qRegisterMetaType<RenderMapRequest>();
+public slots:
+  void OnCityNameChange(const QString& text);
+  void RequestResults();
 
-  dbThread.start();
+private:
+  QLineEdit *cityName;
+  QListView *results;
+  QTimer    requestResultTimer;
 
-  window.setWindowTitle("OSMScout");
-  window.resize(800,480);
-  window.show();
-
-  result=app.exec();
-
-  dbThread.quit();
-  return result;
-}
+public:
+  CitySearchDialog(QWidget* parentWindow);
+  ~CitySearchDialog();
+};
