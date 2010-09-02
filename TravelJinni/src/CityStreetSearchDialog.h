@@ -53,48 +53,36 @@ private:
                                   std::list<osmscout::Location> >    LocationsModel;
   typedef Lum::Base::Reference<LocationsModel>                       LocationsModelRef;
 
-  class RegionsModelPainter : public Lum::SimplePainter
+  class RegionsModelPainter : public Lum::StringCellPainter
   {
   public:
-    std::wstring GetCellData(const Lum::Model::Table* model,
-                             size_t column, size_t row) const
+    std::wstring GetCellData() const
     {
-      const osmscout::AdminRegion region=dynamic_cast<const RegionsModel*>(model)->GetEntry(row);
+      const osmscout::AdminRegion region=dynamic_cast<const RegionsModel*>(GetModel())->GetEntry(GetRow());
 
-      switch (column) {
-      case 1:
-        if (region.path.empty()) {
-          return Lum::Base::UTF8ToWString(region.name);
-        }
-        else {
-          return Lum::Base::UTF8ToWString(region.name)+
-              L" ("+Lum::Base::UTF8ToWString(osmscout::StringListToString(region.path))+L")";
-        }
-      default:
-        assert(false);
+      if (region.path.empty()) {
+        return Lum::Base::UTF8ToWString(region.name);
+      }
+      else {
+        return Lum::Base::UTF8ToWString(region.name)+
+        L" ("+Lum::Base::UTF8ToWString(osmscout::StringListToString(region.path))+L")";
       }
     }
   };
 
-  class LocationsModelPainter : public Lum::SimplePainter
+  class LocationsModelPainter : public Lum::StringCellPainter
   {
   public:
-    std::wstring GetCellData(const Lum::Model::Table* model,
-                             size_t column, size_t row) const
+    std::wstring GetCellData() const
     {
-      const osmscout::Location location=dynamic_cast<const LocationsModel*>(model)->GetEntry(row);
+      const osmscout::Location location=dynamic_cast<const LocationsModel*>(GetModel())->GetEntry(GetRow());
 
-      switch (column) {
-      case 1:
-        if (location.path.empty()) {
-          return Lum::Base::UTF8ToWString(location.name);
-        }
-        else {
-          return Lum::Base::UTF8ToWString(location.name)+
-              L" ("+Lum::Base::UTF8ToWString(osmscout::StringListToString(location.path))+L")";
-        }
-      default:
-        assert(false);
+      if (location.path.empty()) {
+        return Lum::Base::UTF8ToWString(location.name);
+      }
+      else {
+        return Lum::Base::UTF8ToWString(location.name)+
+        L" ("+Lum::Base::UTF8ToWString(osmscout::StringListToString(location.path))+L")";
       }
     }
   };

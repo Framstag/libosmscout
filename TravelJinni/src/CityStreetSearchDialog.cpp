@@ -84,7 +84,7 @@ void CityStreetSearchDialog::PreInit()
   table->SetAutoFitColumns(true);
   table->SetAutoVSize(true);
   table->SetModel(regionsModel);
-  table->SetTablePainter(new RegionsModelPainter());
+  table->SetPainter(new RegionsModelPainter());
   table->SetHeaderModel(headerModel);
   table->SetSelection(regionSelection);
   table->SetDoubleClickAction(okAction);
@@ -111,7 +111,7 @@ void CityStreetSearchDialog::PreInit()
   table->SetAutoFitColumns(true);
   table->SetAutoVSize(true);
   table->SetModel(locationsModel);
-  table->SetTablePainter(new LocationsModelPainter());
+  table->SetPainter(new LocationsModelPainter());
   table->SetHeaderModel(headerModel);
   table->SetSelection(locationSelection);
   table->SetDoubleClickAction(okAction);

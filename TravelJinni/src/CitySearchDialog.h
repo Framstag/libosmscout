@@ -48,25 +48,19 @@ private:
                                   std::list<osmscout::AdminRegion> > RegionsModel;
   typedef Lum::Base::Reference<RegionsModel>                         RegionsModelRef;
 
-  class RegionsModelPainter : public Lum::SimplePainter
+  class RegionsModelPainter : public Lum::StringCellPainter
   {
   public:
-    std::wstring GetCellData(const Lum::Model::Table* model,
-                             size_t column, size_t row) const
+    std::wstring GetCellData() const
     {
-      const osmscout::AdminRegion region=dynamic_cast<const RegionsModel*>(model)->GetEntry(row);
+      const osmscout::AdminRegion region=dynamic_cast<const RegionsModel*>(GetModel())->GetEntry(GetRow());
 
-      switch (column) {
-      case 1:
-        if (region.path.empty()) {
-          return Lum::Base::UTF8ToWString(region.name);
-        }
-        else {
-          return Lum::Base::UTF8ToWString(region.name)+
-              L" ("+Lum::Base::UTF8ToWString(osmscout::StringListToString(region.path))+L")";
-        }
-      default:
-        assert(false);
+      if (region.path.empty()) {
+        return Lum::Base::UTF8ToWString(region.name);
+      }
+      else {
+        return Lum::Base::UTF8ToWString(region.name)+
+        L" ("+Lum::Base::UTF8ToWString(osmscout::StringListToString(region.path))+L")";
       }
     }
   };
