@@ -70,7 +70,7 @@ Lum::Object* CitySearchDialog::GetContent()
   table->GetTableView()->SetAutoFitColumns(true);
   table->GetTableView()->SetAutoVSize(true);
   table->SetModel(regionsModel);
-  table->SetTablePainter(new RegionsModelPainter());
+  table->SetPainter(new RegionsModelPainter());
   table->SetHeaderModel(headerModel);
   table->SetSelection(regionSelection);
   table->SetDoubleClickAction(okAction);
