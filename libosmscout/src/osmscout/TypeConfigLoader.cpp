@@ -25,6 +25,8 @@
 
 #include <iostream>
 
+#include <osmscout/Util.h>
+
 namespace osmscout {
 
   class TypeConfigParser
@@ -118,7 +120,8 @@ namespace osmscout {
         }
 
         value=(const char*)valueValue;
-        if (sscanf((const char*)idValue,"%u",&id)!=1) {
+
+        if (!StringToNumber((const char*)idValue,id)) {
           std::cerr << "Cannot parse id: '" << idValue << "'" << std::endl;
           return;
         }
@@ -148,7 +151,7 @@ namespace osmscout {
         const xmlChar *overviewValue=NULL;
         const xmlChar *routeValue=NULL;
         const xmlChar *indexValue=NULL;
-        TypeId        id;
+        TypeId        id=0;
         bool          node=false;
         bool          way=false;
         bool          area=false;
@@ -197,7 +200,7 @@ namespace osmscout {
           return;
         }
 
-        if (sscanf((const char*)idValue,"%u",&id)!=1) {
+        if (!StringToNumber((const char*)idValue,id)) {
           std::cerr << "Cannot parse id: '" << idValue << "'" << std::endl;
           return;
         }
