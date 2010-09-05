@@ -98,14 +98,17 @@ namespace osmscout {
     scanner.ReadNumber(maxLatDat);
     scanner.ReadNumber(maxLonDat);
 
-    minLon=minLonDat/conversionFactor-90.0;
-    minLat=minLatDat/conversionFactor-180.0;
-    maxLon=maxLonDat/conversionFactor-90.0;
-    maxLat=maxLatDat/conversionFactor-180.0;
+    if (scanner.HasError() || !scanner.Close()) {
+      std::cerr << "Error while reading/closing '" << file << "'" << std::endl;
+      return false;
+    }
 
-    std::cout << "Data bounding box: [" << minLon << "," << minLat << "] - [" << maxLon << "," << maxLat << "]" << std::endl;
+    minLon=minLonDat/conversionFactor-180.0;
+    minLat=minLatDat/conversionFactor-90.0;
+    maxLon=maxLonDat/conversionFactor-180.0;
+    maxLat=maxLatDat/conversionFactor-90.0;
 
-    scanner.Close();
+    std::cout << "Data bounding box: [" << minLat << "," << minLon << "] - [" << maxLat << "," << maxLon << "]" << std::endl;
 
     std::cout << "Opening 'nodes.dat'..." << std::endl;
     if (!nodeDataFile.Open(path)) {
@@ -130,31 +133,38 @@ namespace osmscout {
 
     std::cout << "Loading area index..." << std::endl;
     if (!areaIndex.Load(path)) {
-      std::cerr << "Cannot load AreaIndex!" << std::endl;
+      std::cerr << "Cannot load area index!" << std::endl;
       return false;
     }
     std::cout << "Loading area index done." << std::endl;
 
     std::cout << "Loading area node index..." << std::endl;
     if (!areaNodeIndex.LoadAreaNodeIndex(path)) {
-      std::cerr << "Cannot load AreaNodeIndex!" << std::endl;
+      std::cerr << "Cannot load area node index!" << std::endl;
       return false;
     }
     std::cout << "Loading area node index done." << std::endl;
 
     std::cout << "Loading city street index..." << std::endl;
     if (!cityStreetIndex.Load(path, hashFunction)) {
-      std::cerr << "Cannot load CityStreetIndex!" << std::endl;
+      std::cerr << "Cannot load city street index!" << std::endl;
       return false;
     }
     std::cout << "Loading city street index done." << std::endl;
 
     std::cout << "Loading node use index..." << std::endl;
     if (!nodeUseIndex.LoadNodeUseIndex(path)) {
-      std::cerr << "Cannot load NodeUseIndex!" << std::endl;
+      std::cerr << "Cannot load node use index!" << std::endl;
       return false;
     }
     std::cout << "Loading node use index done." << std::endl;
+
+    std::cout << "Loading water index..." << std::endl;
+    if (!waterIndex.Load(path)) {
+      std::cerr << "Cannot load water index!" << std::endl;
+      return false;
+    }
+    std::cout << "Loading water index done." << std::endl;
 
     isOpen=true;
 
@@ -376,7 +386,7 @@ namespace osmscout {
 
     if (!GetRelations(relationAreaOffsets,
                       relationAreas)) {
-      std::cout << "Error reading relation areas in area!" << std::endl;
+      std::cerr << "Error reading relation areas in area!" << std::endl;
       return false;
     }
 
@@ -390,6 +400,24 @@ namespace osmscout {
     std::cout << "rel. ways: " << relationWaysTimer << " ";
     std::cout << "rel. areas: " << relationAreasTimer;
     std::cout << std::endl;
+
+    return true;
+  }
+
+  bool Database::GetGroundTiles(double lonMin, double latMin,
+                                double lonMax, double latMax,
+                                std::list<GroundTile>& tiles) const
+  {
+    StopClock timer;
+
+    if (!waterIndex.GetRegions(lonMin, latMin, lonMax, latMax, tiles)) {
+      std::cerr << "Error reading ground tiles in area!" << std::endl;
+      return false;
+    }
+
+    timer.Stop();
+
+    std::cout << "Found " << tiles.size() << " ground tiles " << timer << std::endl;
 
     return true;
   }

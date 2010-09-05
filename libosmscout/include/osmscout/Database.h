@@ -47,6 +47,9 @@
 // Reverse index
 #include <osmscout/NodeUseIndex.h>
 
+// Water index
+#include <osmscout/WaterIndex.h>
+
 #include <osmscout/Route.h>
 
 namespace osmscout {
@@ -76,6 +79,8 @@ namespace osmscout {
     CityStreetIndex       cityStreetIndex;
 
     NodeUseIndex          nodeUseIndex;
+
+    WaterIndex            waterIndex;
 
     std::string           path;          //! Path to the directory containing all files
 
@@ -146,6 +151,10 @@ namespace osmscout {
                     std::vector<Way>& areas,
                     std::vector<Relation>& relationWays,
                     std::vector<Relation>& realtionAreas) const;
+
+    bool GetGroundTiles(double lonMin, double latMin,
+                        double lonMax, double latMax,
+                        std::list<GroundTile>& tiles) const;
 
     bool GetNode(const Id& id,
                  Node& node) const;
