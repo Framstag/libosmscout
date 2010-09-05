@@ -543,7 +543,7 @@ namespace osmscout {
     maxLat=maxLatDat/conversionFactor-90.0;
     maxLon=maxLonDat/conversionFactor-180.0;
 
-    std::cout << "Data bounding box: [" << minLon << "," << minLat << "] - [" << maxLon << "," << maxLat << "]" << std::endl;
+    std::cout << "Data bounding box: [" << minLat << "," << minLon << "] - [" << maxLat << "," << maxLon << "]" << std::endl;
 
     cellXStart=floor((minLon+180.0)/cellWidth);
     cellXEnd=floor((maxLon+180.0)/cellWidth);
