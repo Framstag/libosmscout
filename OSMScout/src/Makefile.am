@@ -6,10 +6,16 @@ OSMScout_SOURCES = OSMScout.cpp \
                    DBThread.h \
                    DBThread.cpp \
                    MapWidget.h \
-                   MapWidget.cpp
+                   MapWidget.cpp \
+                   CitySearchDialog.h \
+                   CitySearchDialog.cpp \
+                   MainWindow.h \
+                   MainWindow.cpp
 
 $(OSMScout_OBJECTS) : moc_DBThread.cpp \
-                      moc_MapWidget.cpp
+                      moc_MapWidget.cpp \
+                      moc_CitySearchDialog.cpp \
+                      moc_MainWindow.cpp
 
 OSMScout_CXXFLAGS=-I. \
                   $(LIBQTGUI_CFLAGS) \
