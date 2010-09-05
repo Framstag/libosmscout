@@ -411,6 +411,28 @@ namespace osmscout {
 #endif
   }
 
+  bool StringToNumber(const char* string, double& value)
+  {
+    std::istringstream stream(string);
+
+    stream.imbue(std::locale("C"));
+
+    stream >> value;
+
+    return stream.eof();
+  }
+
+  bool StringToNumber(const std::string& string, double& value)
+  {
+    std::istringstream stream(string);
+
+    stream.imbue(std::locale("C"));
+
+    stream >> value;
+
+    return stream.eof();
+  }
+
   std::string StringListToString(const std::list<std::string>& list,
                                  const std::string& separator)
   {
