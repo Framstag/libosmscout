@@ -46,6 +46,7 @@ namespace osmscout {
     size_t      areaAreaRelIndexMaxMag;
     size_t      areaWayIndexMaxMag;
     size_t      areaWayRelIndexMaxMag;
+    size_t      waterIndexMaxMag;
 
   public:
     ImportParameter();
@@ -59,6 +60,7 @@ namespace osmscout {
     size_t GetAreaAreaRelIndexMaxMag() const;
     size_t GetAreaWayIndexMaxMag() const;
     size_t GetAreaWayRelIndexMaxMag() const;
+    size_t GetWaterIndexMaxMag() const;
 
     void SetMapfile(const std::string& mapfile);
     void SetStartStep(size_t startStep);

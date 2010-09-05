@@ -44,6 +44,7 @@
 #include <osmscout/GenAreaNodeIndex.h>
 #include <osmscout/GenNodeUseIndex.h>
 #include <osmscout/GenCityStreetIndex.h>
+#include <osmscout/GenWaterIndex.h>
 
 namespace osmscout {
 
@@ -58,7 +59,8 @@ namespace osmscout {
      areaAreaIndexMaxMag(18),
      areaAreaRelIndexMaxMag(18),
      areaWayIndexMaxMag(18),
-     areaWayRelIndexMaxMag(18)
+     areaWayRelIndexMaxMag(18),
+     waterIndexMaxMag(14)
   {
     // no code
   }
@@ -106,6 +108,11 @@ namespace osmscout {
   size_t ImportParameter::GetAreaWayRelIndexMaxMag() const
   {
     return areaWayRelIndexMaxMag;
+  }
+
+  size_t ImportParameter::GetWaterIndexMaxMag() const
+  {
+    return waterIndexMaxMag;
   }
 
   void ImportParameter::SetMapfile(const std::string& mapfile)
@@ -193,6 +200,7 @@ namespace osmscout {
     modules.push_back(new AreaNodeIndexGenerator());
     modules.push_back(new CityStreetIndexGenerator());
     modules.push_back(new NodeUseIndexGenerator());
+    modules.push_back(new WaterIndexGenerator());
 
     bool result=ExecuteModules(modules,parameter,progress,typeConfig);
 
