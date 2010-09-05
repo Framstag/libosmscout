@@ -16,6 +16,7 @@ nobase_include_HEADERS= osmscout/Private/Config.h \
                         osmscout/RawRelation.h \
                         osmscout/RawWay.h \
                         osmscout/AdminRegion.h \
+                        osmscout/GroundTile.h \
                         osmscout/Node.h \
                         osmscout/Point.h \
                         osmscout/Location.h \
@@ -33,6 +34,7 @@ nobase_include_HEADERS= osmscout/Private/Config.h \
                         osmscout/GenNodeDat.h \
                         osmscout/GenNodeUseIndex.h \
                         osmscout/GenRelationDat.h \
+                        osmscout/GenWaterIndex.h \
                         osmscout/GenWayDat.h \
                         osmscout/DataFile.h \
                         osmscout/NodeDataFile.h \
@@ -43,6 +45,7 @@ nobase_include_HEADERS= osmscout/Private/Config.h \
                         osmscout/CityStreetIndex.h \
                         osmscout/NodeIndex.h \
                         osmscout/NodeUseIndex.h \
+                        osmscout/WaterIndex.h \
                         osmscout/WayIndex.h \
                         osmscout/Route.h \
                         osmscout/RoutingProfile.h \

@@ -21,6 +21,7 @@ libosmscout_la_SOURCES= osmscout/Types.cpp \
                         osmscout/RawRelation.cpp \
                         osmscout/RawWay.cpp \
                         osmscout/AdminRegion.cpp \
+                        osmscout/GroundTile.cpp \
                         osmscout/Location.cpp \
                         osmscout/Node.cpp \
                         osmscout/Point.cpp \
@@ -38,12 +39,14 @@ libosmscout_la_SOURCES= osmscout/Types.cpp \
                         osmscout/GenNodeDat.cpp \
                         osmscout/GenNodeUseIndex.cpp \
                         osmscout/GenRelationDat.cpp \
+                        osmscout/GenWaterIndex.cpp \
                         osmscout/GenWayDat.cpp \
                         osmscout/AreaIndex.cpp \
                         osmscout/AreaNodeIndex.cpp \
                         osmscout/CityStreetIndex.cpp \
                         osmscout/NodeIndex.cpp \
                         osmscout/NodeUseIndex.cpp \
+                        osmscout/WaterIndex.cpp \
                         osmscout/WayIndex.cpp \
                         osmscout/Route.cpp \
                         osmscout/RoutingProfile.cpp \
