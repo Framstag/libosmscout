@@ -27,6 +27,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <osmscout/Util.h>
+
 namespace osmscout {
 
   static bool StringToDouble(const char* string, double& value)
@@ -325,7 +327,7 @@ namespace osmscout {
         const xmlChar *prioValue=NULL;
         std::string   key;
         std::string   value;
-        size_t        prio;
+        size_t        prio=0;
 
         if (atts!=NULL) {
           for (size_t i=0; atts[i]!=NULL && atts[i+1]!=NULL; i+=2) {
@@ -361,7 +363,7 @@ namespace osmscout {
 
 
         if (context==contextWay) {
-          if (sscanf((const char*)prioValue,"%u",&prio)!=1) {
+          if (!StringToNumber((const char*)prioValue,prio)) {
             std::cerr << "Cannot parse prio: '" << prioValue << "'" << std::endl;
             return;
           }
@@ -578,7 +580,7 @@ namespace osmscout {
           if (layerValue!=NULL) {
             int layer=0;
 
-            if (sscanf((const char*)layerValue,"%d",&layer)!=1) {
+            if (!StringToNumber((const char*)layerValue,layer)) {
               std::cerr << "layer value '" << layerValue << "' for style value layer cannot be parsed" << std::endl;
               return;
             }
@@ -636,7 +638,7 @@ namespace osmscout {
           if (layerValue!=NULL) {
             int layer=0;
 
-            if (sscanf((const char*)layerValue,"%d",&layer)!=1) {
+            if (!StringToNumber((const char*)layerValue,layer)) {
               std::cerr << "layer value '" << layerValue << "' for style value layer cannot be parsed" << std::endl;
               return;
             }

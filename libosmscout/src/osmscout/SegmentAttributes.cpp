@@ -65,7 +65,7 @@ namespace osmscout {
         tag=tags.erase(tag);
       }
       else if (tag->key==tagLayer) {
-        if (sscanf(tag->value.c_str(),"%hhd",&layer)!=1) {
+        if (!StringToNumber(tag->value.c_str(),layer)) {
           progress.Warning(std::string("Layer tag value '")+tag->value+"' for "+NumberToString(id)+" is not numeric!");
         }
         else if (layer!=0) {
@@ -107,7 +107,7 @@ namespace osmscout {
       else if (!isArea && tag->key==tagWidth) {
         double w;
 
-        if (sscanf(tag->value.c_str(),"%lf",&w)!=1) {
+        if (!StringToNumber(tag->value,w)) {
           progress.Warning(std::string("Width tag value '")+tag->value+"' for "+NumberToString(id)+" is no double!");
         }
         else if (w<0 && w>255.5) {

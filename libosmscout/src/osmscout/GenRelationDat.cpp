@@ -601,7 +601,7 @@ namespace osmscout {
           tag++;
         }
         else if (tag->key==tagLayer) {
-          if (sscanf(tag->value.c_str(),"%hhd",&layer)!=1) {
+          if (!StringToNumber(tag->value,layer)) {
             progress.Warning(std::string("Layer tag value '")+tag->value+"' for relation "+NumberToString(rawRel.id)+" is not numeric!");
           }
           tag=rawRel.tags.erase(tag);

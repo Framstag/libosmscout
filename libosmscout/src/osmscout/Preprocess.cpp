@@ -264,11 +264,11 @@ namespace osmscout {
           std::cerr << "Cannot parse id: '" << idValue << "'" << std::endl;
           return;
         }
-        if (sscanf((const char*)latValue,"%lf",&lat)!=1) {
+        if (!StringToNumber((const char*)latValue,lat)) {
           std::cerr << "Cannot parse latitude: '" << latValue << "'" << std::endl;
           return;
         }
-        if (sscanf((const char*)lonValue,"%lf",&lon)!=1) {
+        if (!StringToNumber((const char*)lonValue,lon)) {
           std::cerr << "Cannot parse longitude: '" << lonValue << "'" << std::endl;
           return;
         }
