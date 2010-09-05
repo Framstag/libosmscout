@@ -164,6 +164,10 @@ public:
 
         magnification=zoom;
 
+        std::cout << "Showing initial bounding box [";
+        std::cout << minLat <<"," << minLon << " - " << maxLat << "," << maxLon << "]";
+        std::cout << ", mag. " << magnification << "x" << std::endl;
+
         initial=false;
       }
     }
@@ -278,7 +282,7 @@ public:
         projection.Set(lon,lat,
                        magnification,
                        width,height);
-      
+
 
         projection.GetDimensions(lonMin,latMin,lonMax,latMax);
 

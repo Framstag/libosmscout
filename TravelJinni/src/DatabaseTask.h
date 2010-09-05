@@ -38,11 +38,11 @@
 
 struct Job
 {
-  double          lon;
-  double          lat;
-  double          magnification;
-  size_t          width;
-  size_t          height;
+  double lon;
+  double lat;
+  double magnification;
+  size_t width;
+  size_t height;
 };
 
 class DatabaseTask : public Lum::OS::Thread
@@ -53,7 +53,7 @@ private:
   osmscout::MapData         data;
   Lum::OS::Condition        condition;
   osmscout::MapPainterCairo painter;
-  
+
   mutable Lum::OS::Mutex    mutex;
   bool                      finish;
   Job                       *newJob;

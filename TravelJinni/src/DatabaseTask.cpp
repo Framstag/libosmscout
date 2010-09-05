@@ -146,6 +146,12 @@ void DatabaseTask::Run()
                              data.relationWays,
                              data.relationAreas);
     
+        database->GetGroundTiles(projection.GetLonMin(),
+                                 projection.GetLatMin(),
+                                 projection.GetLonMax(),
+                                 projection.GetLatMax(),
+                                 data.groundTiles);
+
         dataRetrievalTimer.Stop();
       
         osmscout::StopClock drawTimer;
