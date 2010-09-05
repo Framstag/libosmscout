@@ -123,18 +123,6 @@ namespace osmscout {
     }
   }
 
-  void MapPainterQt::ClearArea(const StyleConfig& styleConfig,
-                               const Projection& projection,
-                               const MapParameter& parameter,
-                               const MapData& data)
-  {
-    painter->fillRect(0,
-                      0,
-                      projection.GetWidth(),
-                      projection.GetHeight(),
-                      QColor::fromRgbF(241.0/255,238.0/255,233.0/255,1.0));
-  }                             
-                                                    
   void MapPainterQt::DrawLabel(const Projection& projection,
                                const MapParameter& parameter,
                                const LabelStyle& style,
@@ -667,6 +655,20 @@ namespace osmscout {
     
     painter->drawPolygon(polygon);
   }                             
+
+  void MapPainterQt::DrawArea(const FillStyle& style,
+                              const MapParameter& parameter,
+                              double x,
+                              double y,
+                              double width,
+                              double height)
+  {
+    painter->fillRect(QRectF(x,y,width,height),
+                      QBrush(QColor::fromRgbF(style.GetFillR(),
+                                              style.GetFillG(),
+                                              style.GetFillB(),
+                                              1)));
+  }
 
   void MapPainterQt::SetPen(const LineStyle* style, double lineWidth)
   {

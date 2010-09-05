@@ -444,7 +444,7 @@
   </area>
 
   <way key="natural" value="coastline" prio="1">
-    <line color="000000" minPixel="0.5" maxPixel="2" width="1" />
+    <line color="000000" minPixel="3" maxPixel="3" width="1" />
   </way>
 
   <area key="natural" value="beach">

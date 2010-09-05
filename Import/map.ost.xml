@@ -343,7 +343,7 @@
     <type id="501" name="natural" value="beach" node="true" area="true" relation="true" overview="true"/>
     <type id="502" name="natural" value="cave_entrance" node="true" area="true" relation="true" overview="true"/>
     <type id="503" name="natural" value="cliff" node="true" way="true" area="true" relation="true" overview="true"/>
-    <type id="504" name="natural" value="coastline" way="true"/>
+    <type id="504" name="natural" value="coastline" way="true" relation="true"/>
     <type id="505" name="natural" value="fell" node="true" area="true" relation="true" overview="true"/>
     <type id="506" name="natural" value="glacier" node="true" area="true" relation="true" overview="true"/>
     <type id="507" name="natural" value="heath" node="true" area="true" relation="true" overview="true"/>

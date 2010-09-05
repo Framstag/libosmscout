@@ -396,19 +396,6 @@ namespace osmscout {
     return font.insert(std::pair<size_t,cairo_scaled_font_t*>(fontSize,scaledFont)).first->second;
   }
 
-  void MapPainterCairo::ClearArea(const StyleConfig& styleConfig,
-                                  const Projection& projection,
-                                  const MapParameter& parameter,
-                                  const MapData& data)
-  {
-    cairo_set_source_rgba(draw,241.0/255,238.0/255,233.0/255,1.0);
-    cairo_rectangle(draw,
-                    0,0,
-                    projection.GetWidth(),
-                    projection.GetHeight());
-    cairo_fill(draw);
-  }                                
-
   void MapPainterCairo::DrawLabel(const Projection& projection,
                                   const MapParameter& parameter,
                                   const LabelStyle& style,
@@ -1006,6 +993,23 @@ namespace osmscout {
              lineStyle->GetLineA(),
              borderWidth[(size_t)type],
              nodes);
+  }
+
+  void MapPainterCairo::DrawArea(const FillStyle& style,
+                                 const MapParameter& parameter,
+                                 double x,
+                                 double y,
+                                 double width,
+                                 double height)
+  {
+    cairo_set_source_rgba(draw,
+                          style.GetFillR(),
+                          style.GetFillG(),
+                          style.GetFillB(),
+                          1);
+
+    cairo_rectangle(draw,x,y,width,height);
+    cairo_fill(draw);
   }
 
   bool MapPainterCairo::DrawMap(const StyleConfig& styleConfig,

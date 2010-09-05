@@ -53,11 +53,6 @@ namespace osmscout {
     bool HasPattern(const StyleConfig& styleConfig,
                    PatternStyle& style);
 
-    void ClearArea(const StyleConfig& styleConfig,
-                   const Projection& projection,
-                   const MapParameter& parameter,
-                   const MapData& data);
-
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
                    const LabelStyle& style,
@@ -103,6 +98,13 @@ namespace osmscout {
                   int layer,
                   const SegmentAttributes& attributes,
                   const std::vector<Point>& nodes);
+
+    void DrawArea(const FillStyle& style,
+                  const MapParameter& parameter,
+                  double x,
+                  double y,
+                  double width,
+                  double height);
                                            
   public:
     MapPainterCairo();

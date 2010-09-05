@@ -37,8 +37,8 @@ namespace osmscout {
     outlineMinWidth(0.5)
   {
     // no code
-  }  
-  
+  }
+
   MapParameter::~MapParameter()
   {
     // no code
@@ -48,7 +48,7 @@ namespace osmscout {
   {
     this->fontName=fontName;
   }
-  
+
   void MapParameter::SetFontSize(double fontSize)
   {
     this->fontSize=fontSize;
@@ -58,7 +58,7 @@ namespace osmscout {
   {
     this->outlineMinWidth=outlineMinWidth;
   }
-  
+
   MapPainter::MapPainter()
   {
     drawNode.resize(100000); // TODO: Calculate matching size
@@ -70,7 +70,7 @@ namespace osmscout {
   {
     // no code
   }
-  
+
   bool MapPainter::IsVisible(const Projection& projection,
                              const std::vector<Point>& nodes) const
   {
@@ -314,6 +314,80 @@ namespace osmscout {
     return true;
   }
 
+  void MapPainter::DrawGroundTiles(const StyleConfig& styleConfig,
+                                   const Projection& projection,
+                                   const MapParameter& parameter,
+                                   const MapData& data)
+  {
+    FillStyle landFill;
+    FillStyle seeFill;
+    FillStyle coastFill;
+    FillStyle unknownFill;
+    LabelStyle labelStyle;
+
+    landFill.SetColor(241.0/255,238.0/255,233.0/255,1.0);
+    seeFill.SetColor(181.0/255,208.0/255,208.0/255,1.0);
+    coastFill.SetColor(255.0/255,192.0/255,203.0/255,1.0);
+    unknownFill.SetColor(255.0/255,255.0/255,173.0/255,1.0);
+
+    labelStyle.SetStyle(LabelStyle::normal);
+    labelStyle.SetMinMag(magCity);
+
+    DrawArea(landFill,
+             parameter,
+             0,0,projection.GetWidth(),projection.GetHeight());
+
+    return;
+/*
+    double cellWidth=360.0;
+    double cellHeight=180.0;
+
+    for (size_t i=2; i<=14; i++) {
+      cellWidth=cellWidth/2;
+      cellHeight=cellHeight/2;
+    }*/
+
+    for (std::list<GroundTile>::const_iterator tile=data.groundTiles.begin();
+        tile!=data.groundTiles.end();
+        ++tile) {
+      double x1,x2,y1,y2;
+
+      projection.GeoToPixel(tile->minlon,tile->minlat,x1,y1);
+      projection.GeoToPixel(tile->maxlon,tile->maxlat,x2,y2);
+
+      switch (tile->type) {
+      case GroundTile::land:
+        DrawArea(landFill,
+                 parameter,
+                 x1,y1,x2-x1,y2-y1);
+        break;
+      case GroundTile::water:
+        DrawArea(seeFill,
+                 parameter,
+                 x1,y1,x2-x1,y2-y1);
+        break;
+      case GroundTile::coast:
+        DrawArea(coastFill,
+                 parameter,
+                 x1,y1,x2-x1,y2-y1);
+        break;
+      case GroundTile::unknown:
+        DrawArea(unknownFill,
+                 parameter,
+                 x1,y1,x2-x1,y2-y1);
+        break;
+      }
+/*
+      std::string label;
+
+      label=NumberToString((long)((tile->minlon+180)/cellWidth));
+      label+=",";
+      label+=NumberToString((long)((tile->minlat+90)/cellHeight));
+
+      DrawLabel(projection,parameter,labelStyle,label,x1+(x2-x1)/2,y1+(y2-y1)/2);*/
+    }
+  }
+
   void MapPainter::DrawTiledLabel(const Projection& projection,
                                   const MapParameter& parameter,
                                   const LabelStyle& style,
@@ -356,7 +430,7 @@ namespace osmscout {
 
     tileBlacklist.insert(tile);
   }
-  
+
   void MapPainter::PrecalculateStyleData(const StyleConfig& styleConfig,
                                          const Projection& projection,
                                          const MapParameter& parameter,
@@ -663,7 +737,7 @@ namespace osmscout {
         DrawSymbol(symbolStyle,x,y);
       }
     }
-    
+
     for (std::vector<Relation>::const_iterator relation=data.relationAreas.begin();
          relation!=data.relationAreas.end();
          ++relation) {
@@ -749,7 +823,7 @@ namespace osmscout {
       }
     }
   }
-  
+
   void MapPainter::DrawWay(const StyleConfig& styleConfig,
                            const Projection& projection,
                            const MapParameter& parameter,
@@ -817,7 +891,7 @@ namespace osmscout {
                nodes);
     }
   }
-  
+
   void MapPainter::DrawWays(const StyleConfig& styleConfig,
                             const Projection& projection,
                             const MapParameter& parameter,
@@ -907,7 +981,7 @@ namespace osmscout {
       }
     }
   }
-  
+
   void MapPainter::DrawWayLabels(const StyleConfig& styleConfig,
                                  const Projection& projection,
                                  const MapParameter& parameter,
@@ -1148,10 +1222,10 @@ namespace osmscout {
     nodesDrawnCount=0;
     areasDrawnCount=0;
     waysDrawnCount=0;*/
-  
+
     std::cout << "Draw ";
-    std::cout << projection.GetLon() <<", ";
-    std::cout << projection.GetLat() << " with mag. ";
+    std::cout << projection.GetLat() <<",";
+    std::cout << projection.GetLon() << " with mag. ";
     std::cout << projection.GetMagnification() << "x" << "/" << log(projection.GetMagnification())/log(2);
     std::cout << " area " << projection.GetWidth() << "x" << projection.GetHeight() << std::endl;
 
@@ -1168,10 +1242,10 @@ namespace osmscout {
     // Clear area with background color
     //
 
-    ClearArea(styleConfig,
-              projection,
-              parameter,
-              data);
+    DrawGroundTiles(styleConfig,
+                    projection,
+                    parameter,
+                    data);
 
     //
     // Draw areas
@@ -1297,6 +1371,6 @@ namespace osmscout {
     std::cout << " Paths: " << pathsTimer << "/" << pathLabelsTimer;
     std::cout << " Nodes: " << nodesTimer;
     std::cout << " POIs: " << poisTimer << "/" << routesTimer << std::endl;
-  }                      
+  }
 }
 

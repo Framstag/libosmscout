@@ -24,8 +24,9 @@
 
 #include <osmscout/Private/MapImportExport.h>
 
-#include <osmscout/Projection.h>
+#include <osmscout/GroundTile.h>
 #include <osmscout/Node.h>
+#include <osmscout/Projection.h>
 #include <osmscout/Relation.h>
 #include <osmscout/StyleConfig.h>
 #include <osmscout/Way.h>
@@ -73,6 +74,7 @@ namespace osmscout {
     std::vector<Relation> relationAreas;
     std::list<Way>        poiWays;
     std::list<Node>       poiNodes;
+    std::list<GroundTile> groundTiles;
   };
 
   class OSMSCOUT_MAP_API MapPainter
@@ -101,9 +103,14 @@ namespace osmscout {
 
   private:
     /**
-      Private draw algortihm implementation routines.
+      Private draw algorithm implementation routines.
      */
     //@{
+    void DrawGroundTiles(const StyleConfig& styleConfig,
+                         const Projection& projection,
+                         const MapParameter& parameter,
+                         const MapData& data);
+
     void DrawTiledLabel(const Projection& projection,
                         const MapParameter& parameter,
                         const LabelStyle& style,
@@ -203,16 +210,6 @@ namespace osmscout {
                          IconStyle& style)= 0;
     
     /**
-      Draw the complete area in a global preset color (currently the color
-      for "normal" background, later on, if we support water/earth detection
-      this would be the color for water.
-     */
-    virtual void ClearArea(const StyleConfig& styleConfig,
-                           const Projection& projection,
-                           const MapParameter& parameter,
-                           const MapData& data) = 0;
-                                                      
-    /**
       Draw the given text at the given pixel coordinate in a style defined
       by the given LabelStyle.
      */
@@ -280,6 +277,20 @@ namespace osmscout {
                           int layer,
                           const SegmentAttributes& attributes,
                           const std::vector<Point>& nodes) = 0;
+
+    /**
+      Draw the given area in using the given fill. This is currently done to
+      complete fill the map area with ground color,
+      later on, if we support water/earth detection it would be used for drawing
+      water and ground tiles.
+     */
+    virtual void DrawArea(const FillStyle& style,
+                          const MapParameter& parameter,
+                          double x,
+                          double y,
+                          double width,
+                          double height) = 0;
+
     //@}
   
     void Draw(const StyleConfig& styleConfig,
