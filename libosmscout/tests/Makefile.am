@@ -2,7 +2,8 @@ AM_CPPFLAGS = -I$(top_srcdir)/include
 AM_LDFLAGS  = ../src/libosmscout.la
 
 check_PROGRAMS = EncodeNumber \
-                 NumberSet
+                 NumberSet \
+                 ScanConversion
 
 TESTS = $(check_PROGRAMS)
 
@@ -11,4 +12,7 @@ EncodeNumber_DEPENDENCIES = $(top_srcdir)/src/libosmscout.la
 
 NumberSet_SOURCES = NumberSet.cpp
 NumberSet_DEPENDENCIES = $(top_srcdir)/src/libosmscout.la
+
+ScanConversion_SOURCES = ScanConversion.cpp
+ScanConversion_DEPENDENCIES = $(top_srcdir)/src/libosmscout.la
 
