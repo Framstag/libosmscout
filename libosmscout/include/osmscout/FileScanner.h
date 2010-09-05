@@ -25,6 +25,12 @@
 
 #include <osmscout/TypeConfig.h>
 
+#if defined(__WIN32__) || defined(WIN32)
+  #include <windows.h>
+  #undef max
+  #undef min
+#endif
+
 namespace osmscout {
   /**
     FileScanner implements platform independend sequential
@@ -49,6 +55,11 @@ namespace osmscout {
     size_t       size;
     FileOffset   offset;
 
+    // For Windows mmap usage
+#if defined(__WIN32__) || defined(WIN32)
+    HANDLE       mmfHandle;
+#endif
+    
   private:
     void FreeBuffer();
 
