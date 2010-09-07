@@ -35,7 +35,7 @@
 
 namespace osmscout {
 
-  void WaterIndexGenerator::Area::SetSize(size_t cellXCount, size_t cellYCount)
+  void WaterIndexGenerator::Area::SetSize(uint32_t cellXCount, uint32_t cellYCount)
   {
     this->cellXCount=cellXCount;
     this->cellYCount=cellYCount;
@@ -43,20 +43,20 @@ namespace osmscout {
     area.resize(cellXCount*cellYCount/4,0x00);
   }
 
-  WaterIndexGenerator::State WaterIndexGenerator::Area::GetState(size_t x, size_t y) const
+  WaterIndexGenerator::State WaterIndexGenerator::Area::GetState(uint32_t x, uint32_t y) const
   {
-    size_t cellId=y*cellXCount+x;
-    size_t index=cellId/4;
-    size_t offset=2*(cellId%4);
+    uint32_t cellId=y*cellXCount+x;
+    uint32_t index=cellId/4;
+    uint32_t offset=2*(cellId%4);
 
     return (State)((area[index] >> offset) & 3);
   }
 
-  void WaterIndexGenerator::Area::SetState(size_t x, size_t y, State state)
+  void WaterIndexGenerator::Area::SetState(uint32_t x, uint32_t y, State state)
   {
-    size_t cellId=y*cellXCount+x;
-    size_t index=cellId/4;
-    size_t offset=2*(cellId%4);
+    uint32_t cellId=y*cellXCount+x;
+    uint32_t index=cellId/4;
+    uint32_t offset=2*(cellId%4);
 
     area[index]=(area[index] & ~(3 << offset));
     area[index]=(area[index] | (state << offset));

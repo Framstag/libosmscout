@@ -30,11 +30,11 @@ namespace osmscout {
     // no code
   }
 
-  GroundTile::Type WaterIndex::GetType(size_t x, size_t y) const
+  GroundTile::Type WaterIndex::GetType(uint32_t x, uint32_t y) const
   {
-    size_t cellId=y*cellXCount+x;
-    size_t index=cellId/4;
-    size_t offset=2*(cellId%4);
+    uint32_t cellId=y*cellXCount+x;
+    uint32_t index=cellId/4;
+    uint32_t offset=2*(cellId%4);
 
     return (GroundTile::Type)((area[index] >> offset) & 3);
   }
@@ -96,7 +96,7 @@ namespace osmscout {
                               double maxlat,
                               std::list<GroundTile>& tiles) const
   {
-    size_t cx1,cx2,cy1,cy2;
+    uint32_t cx1,cx2,cy1,cy2;
 
     tiles.clear();
 
