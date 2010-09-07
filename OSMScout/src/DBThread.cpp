@@ -54,7 +54,15 @@ void DBThread::run()
     std::cerr<<"Cannot open database!"<<std::endl;
   }
 
-  emit InitialisationFinished();
+
+  DatabaseLoadedResponse response;
+
+  database.GetBoundingBox(response.minLat,
+                          response.minLon,
+                          response.maxLat,
+                          response.maxLon);
+
+  emit InitialisationFinished(response);
 
   exec();
 
@@ -262,42 +270,6 @@ bool DBThread::RenderMap(QPainter& painter,
 
     cairo_restore(cairo);
 
-  }
-#endif
-
-#if defined(LUM_HAVE_LIB_X)
-  if (dynamic_cast<Lum::OS::X11::DrawInfo*>(draw)!=NULL) {
-    Lum::OS::X11::DrawInfo *x11Draw=dynamic_cast<Lum::OS::X11::DrawInfo*>(draw);
-
-    cairo_surface_t *surface=cairo_xlib_surface_create(x11Draw->display,
-                                                       x11Draw->drawable,
-                                                       dynamic_cast<Lum::OS::X11::Display*>(Lum::OS::display)->visual,
-                                                       window->GetWidth(),window->GetHeight());
-
-    cairo_t* cairo=cairo_create(surface);
-
-    cairo_set_source_surface(cairo,finishedSurface,x-dx,y+dy);
-    cairo_rectangle(cairo,x,y,finishedWidth,finishedHeight);
-    cairo_fill(cairo);
-
-    cairo_destroy(cairo),
-    cairo_surface_destroy(surface);
-  }
-#endif
-#if defined(LUM_HAVE_LIB_WIN32)
-  if (dynamic_cast<Lum::OS::Win32::DrawInfo*>(draw)!=NULL) {
-    Lum::OS::Win32::DrawInfo *win32Draw=dynamic_cast<Lum::OS::Win32::DrawInfo*>(draw);
-
-    cairo_surface_t *surface=cairo_win32_surface_create(win32Draw->dc);
-
-    cairo_t* cairo=cairo_create(surface);
-
-    cairo_set_source_surface(cairo,finishedSurface,x-dx,y+dy);
-    cairo_rectangle(cairo,x,y,finishedWidth,finishedHeight);
-    cairo_fill(cairo);
-
-    cairo_destroy(cairo),
-    cairo_surface_destroy(surface);
   }
 #endif
 */

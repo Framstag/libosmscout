@@ -39,12 +39,22 @@ struct RenderMapRequest
 
 Q_DECLARE_METATYPE(RenderMapRequest)
 
+struct DatabaseLoadedResponse
+{
+  double minLat;
+  double minLon;
+  double maxLat;
+  double maxLon;
+};
+
+Q_DECLARE_METATYPE(DatabaseLoadedResponse)
+
 class DBThread : public QThread
 {
   Q_OBJECT
 
 signals:
-  void InitialisationFinished();
+  void InitialisationFinished(const DatabaseLoadedResponse& response);
   void HandleMapRenderingResult();
 
 public slots:

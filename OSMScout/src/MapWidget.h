@@ -43,7 +43,7 @@ signals:
   void TriggerMapRendering(const RenderMapRequest& request);
 
 public slots:
-  void InitialisationFinished();
+  void InitialisationFinished(const DatabaseLoadedResponse& response);
   void DrawRenderResult();
 
 private:

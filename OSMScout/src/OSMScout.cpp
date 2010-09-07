@@ -29,6 +29,7 @@ int main(int argc, char* argv[])
   int          result;
 
   qRegisterMetaType<RenderMapRequest>();
+  qRegisterMetaType<DatabaseLoadedResponse>();
 
   dbThread.start();
 

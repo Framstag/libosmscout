@@ -27,12 +27,12 @@ MapWidget::MapWidget(QWidget *parent) :
 {
   setFocusPolicy(Qt::StrongFocus);
 
-  connect(&dbThread,SIGNAL(InitialisationFinished()),this,SLOT(InitialisationFinished()));
+  connect(&dbThread,SIGNAL(InitialisationFinished(DatabaseLoadedResponse)),this,SLOT(InitialisationFinished(DatabaseLoadedResponse)));
   connect(this,SIGNAL(TriggerMapRendering(RenderMapRequest)),&dbThread,SLOT(TriggerMapRendering(RenderMapRequest)));
   connect(&dbThread,SIGNAL(HandleMapRenderingResult()),this,SLOT(DrawRenderResult()));
 
-  lon=7.67016;
-  lat=51.4281;
+  lon=0;
+  lat=0;
   magnification=64;
 }
 
@@ -41,8 +41,27 @@ MapWidget::~MapWidget()
   // no code
 }
 
-void MapWidget::InitialisationFinished()
+void MapWidget::InitialisationFinished(const DatabaseLoadedResponse& response)
 {
+  size_t zoom=1;
+  double dlat=360;
+  double dlon=180;
+
+  lat=response.minLat+(response.maxLat-response.minLat)/2;
+  lon=response.minLon+(response.maxLon-response.minLon)/2;
+
+  while (dlat>response.maxLat-response.minLat && dlon>response.maxLon-response.minLon) {
+    zoom=zoom*2;
+    dlat=dlat/2;
+    dlon=dlon/2;
+  }
+
+  magnification=zoom;
+
+  std::cout << "Showing initial bounding box [";
+  std::cout << response.minLat <<"," << response.minLon << " - " << response.maxLat << "," << response.maxLon << "]";
+  std::cout << ", mag. " << magnification << "x" << std::endl;
+
   TriggerMapRendering();
 }
 
@@ -160,8 +179,6 @@ void MapWidget::HandleMouseMove(QMouseEvent* event)
 
 void MapWidget::mousePressEvent(QMouseEvent* event)
 {
-  std::cout << "Mouse press: " << event->button() << std::endl;
-
   if (event->button()==1) {
     startLon=lon;
     startLat=lat;
@@ -172,7 +189,6 @@ void MapWidget::mousePressEvent(QMouseEvent* event)
 
 void MapWidget::mouseMoveEvent(QMouseEvent* event)
 {
-  std::cout << "Mouse move: " << event->button() << std::endl;
   HandleMouseMove(event);
   requestNewMap=false;
   update();
@@ -180,8 +196,6 @@ void MapWidget::mouseMoveEvent(QMouseEvent* event)
 
 void MapWidget::mouseReleaseEvent(QMouseEvent* event)
 {
-  std::cout << "Mouse release: " << event->button() << std::endl;
-
   if (event->button()==1) {
     HandleMouseMove(event);
     update();
