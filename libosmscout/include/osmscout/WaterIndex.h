@@ -36,12 +36,12 @@ namespace osmscout {
 
     double                     cellWidth;
     double                     cellHeight;
-    size_t                     cellXStart;
-    size_t                     cellXEnd;
-    size_t                     cellYStart;
-    size_t                     cellYEnd;
-    size_t                     cellXCount;
-    size_t                     cellYCount;
+    uint32_t                   cellXStart;
+    uint32_t                   cellXEnd;
+    uint32_t                   cellYStart;
+    uint32_t                   cellYEnd;
+    uint32_t                   cellXCount;
+    uint32_t                   cellYCount;
 
     std::vector<unsigned char> area;
 
