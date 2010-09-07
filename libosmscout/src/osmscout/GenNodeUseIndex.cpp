@@ -53,24 +53,34 @@ namespace osmscout {
     typeConfig.GetRoutables(types);
 
     if (!scanner.Open("rawnodes.dat")) {
+      progress.Error("Canot open 'rawnodes.dat'");
       return false;
     }
 
-    while (!scanner.IsEOF()) {
+    if (!scanner.Read(nodeCount)) {
+      progress.Error("Error while reading number of data entries in file");
+      return false;
+    }
+
+    for (uint32_t n=1; n<=nodeCount; n++) {
       RawNode node;
 
-      node.Read(scanner);
-
-      if (!scanner.HasError()) {
-        size_t index=node.id/distributionGranuality;
-
-        if (index>=nodeDistribution.size()) {
-          nodeDistribution.resize(index+1,0);
-        }
-
-        nodeDistribution[index]++;
-        nodeCount++;
+      if (!node.Read(scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(n)+" of "+
+                       NumberToString(nodeCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+        return false;
       }
+
+      size_t index=node.id/distributionGranuality;
+
+      if (index>=nodeDistribution.size()) {
+        nodeDistribution.resize(index+1,0);
+      }
+
+      nodeDistribution[index]++;
     }
 
     scanner.Close();
@@ -94,6 +104,7 @@ namespace osmscout {
 
       size_t                      start=index*distributionGranuality;
       size_t                      end=newIndex*distributionGranuality;
+      size_t                      wayCount;
       std::map<Id,std::list<Id> > nodeWayMap;
 
       progress.Info(std::string("Scanning for node ids ")+NumberToString(start)+">=id<"+NumberToString(end));
@@ -103,18 +114,28 @@ namespace osmscout {
         return false;
       }
 
-      while (!scanner.IsEOF()) {
+      if (!scanner.Read(wayCount)) {
+        progress.Error("Error while reading number of data entries in file");
+        return false;
+      }
+
+      for (uint32_t w=1; w<=wayCount; w++) {
         Way way;
 
-        way.Read(scanner);
+        if (!way.Read(scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(w)+" of "+
+                         NumberToString(wayCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
 
-        if (!scanner.HasError())  {
-          if (types.find(way.GetType())!=types.end()) {
-            for (size_t i=0; i<way.nodes.size(); i++) {
-              if (way.nodes[i].id>=start && way.nodes[i].id<end) {
-                nodeWayMap[way.nodes[i].id].push_back(way.id);
+        if (types.find(way.GetType())!=types.end()) {
+          for (size_t i=0; i<way.nodes.size(); i++) {
+            if (way.nodes[i].id>=start && way.nodes[i].id<end) {
+              nodeWayMap[way.nodes[i].id].push_back(way.id);
               }
-            }
           }
         }
       }
@@ -128,27 +149,37 @@ namespace osmscout {
         return false;
       }
 
-      while (!scanner.IsEOF()) {
+      if (!scanner.Read(wayCount)) {
+        progress.Error("Error while reading number of data entries in file");
+        return false;
+      }
+
+      for (uint32_t w=1; w<=wayCount; w++) {
         Way way;
 
-        way.Read(scanner);
+        if (!way.Read(scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(w)+" of "+
+                         NumberToString(wayCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
 
-        if (!scanner.HasError())  {
-          if (types.find(way.GetType())!=types.end()) {
-            for (size_t i=0; i<way.nodes.size(); i++) {
-              if (way.nodes[i].id>=start && way.nodes[i].id<end) {
-                std::map<Id, std::list<Id> >::const_iterator ways;
+        if (types.find(way.GetType())!=types.end()) {
+          for (size_t i=0; i<way.nodes.size(); i++) {
+            if (way.nodes[i].id>=start && way.nodes[i].id<end) {
+              std::map<Id, std::list<Id> >::const_iterator ways;
 
-                ways=nodeWayMap.find(way.nodes[i].id);
+              ways=nodeWayMap.find(way.nodes[i].id);
 
-                if (ways!=nodeWayMap.end()) {
-                  for (std::list<Id>::const_iterator w=ways->second.begin();
-                       w!=ways->second.end();
-                       ++w) {
-                    if (*w!=way.id) {
-                      // TODO: Optimize performance
-                      wayWayMap[way.id].insert(*w);
-                    }
+              if (ways!=nodeWayMap.end()) {
+                for (std::list<Id>::const_iterator w=ways->second.begin();
+                     w!=ways->second.end();
+                     ++w) {
+                  if (*w!=way.id) {
+                    // TODO: Optimize performance
+                    wayWayMap[way.id].insert(*w);
                   }
                 }
               }
