@@ -177,29 +177,43 @@ namespace osmscout {
       return false;
     }
 
+    /* 1 */
     modules.push_back(new Preprocess());
+    /* 2 */
     modules.push_back(new NumericIndexGenerator<Id,RawNode>("Generating 'rawnode.idx'",
                                                             "rawnodes.dat",
                                                             "rawnode.idx"));
+    /* 3 */
     modules.push_back(new NumericIndexGenerator<Id,RawWay>("Generating 'rawway.idx'",
                                                            "rawways.dat",
                                                            "rawway.idx"));
+    /* 4 */
     modules.push_back(new RelationDataGenerator());
+    /* 5 */
     modules.push_back(new NumericIndexGenerator<Id,Relation>("Generating 'relation.idx'",
                                                              "relations.dat",
                                                              "relation.idx"));
+    /* 6 */
     modules.push_back(new NodeDataGenerator());
+    /* 7 */
     modules.push_back(new NumericIndexGenerator<Id,Node>("Generating 'node.idx'",
                                                          "nodes.dat",
                                                          "node.idx"));
+    /* 8 */
     modules.push_back(new WayDataGenerator());
+    /* 9 */
     modules.push_back(new NumericIndexGenerator<Id,Way>("Generating 'way.idx'",
                                                         "ways.dat",
                                                         "way.idx"));
+    /* 10 */
     modules.push_back(new AreaIndexGenerator());
+    /* 11 */
     modules.push_back(new AreaNodeIndexGenerator());
+    /* 12 */
     modules.push_back(new CityStreetIndexGenerator());
+    /* 13 */
     modules.push_back(new NodeUseIndexGenerator());
+    /* 14 */
     modules.push_back(new WaterIndexGenerator());
 
     bool result=ExecuteModules(modules,parameter,progress,typeConfig);
