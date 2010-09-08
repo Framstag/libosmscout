@@ -22,6 +22,14 @@ OSMScout_CXXFLAGS=-I. \
                   $(LIBOSMSCOUT_CFLAGS) \
                   $(LIBOSMSCOUTMAP_CFLAGS)
 
-OSMScout_LDADD=$(LIBQTGUI_LIBS) \
+
+OSMScout_LDADD= \
+               $(LIBQTGUI_LIBS) \
                $(LIBOSMSCOUT_LIBS) \
                $(LIBOSMSCOUTMAP_LIBS)
+
+if HAVE_LIB_QTOPENGL
+OSMScout_CXXFLAGS += $(LIBQTOPENGL_CFLAGS)
+OSMScout_LDADD += $(LIBQTOPENGL_LIBS)
+endif
+

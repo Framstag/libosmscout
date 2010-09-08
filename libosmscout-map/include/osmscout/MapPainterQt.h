@@ -30,20 +30,20 @@ namespace osmscout {
 
   class OSMSCOUT_MAP_API MapPainterQt : public MapPainter
   {
-    QPainter *painter;
-    
-    std::vector<QImage>     images;   //! vector of QImage for icons
-    std::vector<QBrush>     patterns; //! vector of QBrush for fill patterns
-    std::map<size_t,QFont*> fonts;    //! Cached fonts
-    
-  private:    
-    QFont* GetFont(const MapParameter& parameter,
-                   double fontSize);
-  
+    QPainter               *painter;
+
+    std::vector<QImage>    images;   //! vector of QImage for icons
+    std::vector<QBrush>    patterns; //! vector of QBrush for fill patterns
+    std::map<size_t,QFont> fonts;    //! Cached fonts
+
+  private:
+    QFont GetFont(const MapParameter& parameter,
+                  double fontSize);
+
   protected:
     bool HasIcon(const StyleConfig& styleConfig,
                          IconStyle& style);
-    
+
     bool HasPattern(const StyleConfig& styleConfig,
                     PatternStyle& style);
 
@@ -58,13 +58,13 @@ namespace osmscout {
                           const LabelStyle& style,
                           const std::string& text,
                           const std::vector<Point>& nodes);
-                           
+
     void DrawIcon(const IconStyle* style,
                           double x, double y);
-                          
+
     void DrawSymbol(const SymbolStyle* style,
                             double x, double y);
-                          
+
     void DrawPath(LineStyle::Style style,
                   const Projection& projection,
                   double r,
@@ -73,7 +73,7 @@ namespace osmscout {
                   double a,
                   double width,
                   const std::vector<Point>& nodes);
-                                           
+
     void DrawWayOutline(const StyleConfig& styleConfig,
                         const Projection& projection,
                         const MapParameter& parameter,
@@ -86,7 +86,7 @@ namespace osmscout {
                   TypeId type,
                   int layer,
                   const SegmentAttributes& attributes,
-                  const std::vector<Point>& nodes);  
+                  const std::vector<Point>& nodes);
 
     void DrawArea(const FillStyle& style,
                   const MapParameter& parameter,
@@ -95,10 +95,10 @@ namespace osmscout {
                   double width,
                   double height);
 
-    void SetPen(const LineStyle* style, double lineWidth);                      
+    void SetPen(const LineStyle* style, double lineWidth);
     void SetBrush();
     void SetBrush(const FillStyle* fillStyle);
-    
+
   public:
     MapPainterQt();
     ~MapPainterQt();

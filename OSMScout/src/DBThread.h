@@ -25,6 +25,12 @@
 #include <QMetaType>
 #include <QMutex>
 
+#include "config.h"
+
+#if defined(HAVE_LIB_QTOPENGL)
+ #include <QGLPixelBuffer>
+#endif
+
 #include <osmscout/Database.h>
 #include <osmscout/MapPainterQt.h>
 
@@ -68,11 +74,18 @@ private:
   osmscout::MapPainterQt    painter;
 
   bool                      finish;
+
   QPixmap                   *currentPixmap;
+#if defined(HAVE_LIB_QTOPENGL)
+  QGLPixelBuffer            *currentGLPixmap;
+#endif
   double                    currentLon,currentLat;
   double                    currentMagnification;
 
   QPixmap                   *finishedPixmap;
+#if defined(HAVE_LIB_QTOPENGL)
+  QGLPixelBuffer            *finishedGLPixmap;
+#endif
   double                    finishedLon,finishedLat;
   double                    finishedMagnification;
 

@@ -40,5 +40,7 @@ int main(int argc, char* argv[])
   result=app.exec();
 
   dbThread.quit();
+  dbThread.wait();
+
   return result;
 }

@@ -28,8 +28,14 @@
 DBThread dbThread;
 
 DBThread::DBThread()
- : currentPixmap(NULL),
-   finishedPixmap(NULL)
+ : currentPixmap(NULL)
+#if defined(HAVE_LIB_QTOPENGL)
+   ,currentGLPixmap(NULL)
+#endif
+   ,finishedPixmap(NULL)
+#if defined(HAVE_LIB_QTOPENGL)
+   ,finishedGLPixmap(NULL)
+#endif
 {
   // no code
 }
@@ -69,18 +75,66 @@ void DBThread::run()
   if (database.IsOpen()) {
     database.Close();
   }
+
+#if defined(HAVE_LIB_QTOPENGL)
+  if (currentGLPixmap!=NULL) {
+    delete currentGLPixmap;
+    currentGLPixmap=NULL;
+  }
+
+  if (finishedGLPixmap!=NULL) {
+    delete finishedGLPixmap;
+    finishedGLPixmap=NULL;
+  }
+#endif
+
+  if (currentPixmap!=NULL) {
+    delete currentPixmap;
+    currentPixmap=NULL;
+  }
+
+  if (finishedPixmap!=NULL) {
+    delete finishedPixmap;
+    finishedPixmap=NULL;
+  }
 }
 
 void DBThread::TriggerMapRendering(const RenderMapRequest& request)
 {
+
+#if defined(HAVE_LIB_QTOPENGL)
+    QGLFormat format;
+
+    format.setAlpha(true);
+    format.setDepth(false);
+    format.setDoubleBuffer(false);
+    format.setSampleBuffers(true);
+
+    if (QGLFormat::hasOpenGL()) {
+      if (currentGLPixmap==NULL ||
+          currentGLPixmap->width()!=(int)request.width ||
+          currentGLPixmap->height()!=(int)request.height) {
+        delete currentGLPixmap;
+        currentGLPixmap=new QGLPixelBuffer(QSize(request.width,request.height),format);
+      }
+    }
+    else {
+      if (currentPixmap==NULL ||
+          currentPixmap->width()!=(int)request.width ||
+          currentPixmap->height()!=(int)request.height) {
+        delete currentPixmap;
+        currentPixmap=new QPixmap(QSize(request.width,request.height));
+      }
+    }
+#else
   if (currentPixmap==NULL ||
       currentPixmap->width()!=(int)request.width ||
       currentPixmap->height()!=(int)request.height) {
     delete currentPixmap;
 
-    //currentPixmap=new QGLPixelBuffer(QSize(request.width,request.height));
     currentPixmap=new QPixmap(QSize(request.width,request.height));
   }
+#endif
 
   currentLon=request.lon;
   currentLat=request.lat;
@@ -129,7 +183,22 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
 
     osmscout::StopClock drawTimer;
 
-    QPainter *p=new QPainter(currentPixmap);
+    QPainter *p=NULL;
+
+#if defined(HAVE_LIB_QTOPENGL)
+    if (currentGLPixmap!=NULL) {
+      p=new QPainter(currentGLPixmap);
+    }
+    else {
+      p=new QPainter(currentPixmap);
+    }
+#else
+    p=new QPainter(currentPixmap);
+#endif
+
+    p->setRenderHint(QPainter::Antialiasing);
+    p->setRenderHint(QPainter::TextAntialiasing);
+    p->setRenderHint(QPainter::SmoothPixmapTransform);
 
     painter.DrawMap(*styleConfig,
                     projection,
@@ -147,7 +216,22 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
   else {
     std::cout << "Cannot draw map: " << database.IsOpen() << " " << (styleConfig!=NULL) << std::endl;
 
-    QPainter *p=new QPainter(currentPixmap);
+    QPainter *p=NULL;
+
+#if defined(HAVE_LIB_QTOPENGL)
+    if (currentGLPixmap!=NULL) {
+      p=new QPainter(currentGLPixmap);
+    }
+    else {
+      p=new QPainter(currentPixmap);
+    }
+#else
+    p=new QPainter(currentPixmap);
+#endif
+
+    p->setRenderHint(QPainter::Antialiasing);
+    p->setRenderHint(QPainter::TextAntialiasing);
+    p->setRenderHint(QPainter::SmoothPixmapTransform);
 
     p->fillRect(0,0,request.width,request.height,
                 QColor::fromRgbF(0.0,0.0,0.0,1.0));
@@ -167,6 +251,9 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
   QMutexLocker locker(&mutex);
 
   std::swap(currentPixmap,finishedPixmap);
+#if defined(HAVE_LIB_QTOPENGL)
+  std::swap(currentGLPixmap,finishedGLPixmap);
+#endif
   std::swap(currentLon,finishedLon);
   std::swap(currentLat,finishedLat);
   std::swap(currentMagnification,finishedMagnification);
@@ -179,7 +266,11 @@ bool DBThread::RenderMap(QPainter& painter,
 {
   QMutexLocker locker(&mutex);
 
+#if defined(HAVE_LIB_QTOPENGL)
+  if (finishedPixmap==NULL && finishedGLPixmap==NULL) {
+#else
   if (finishedPixmap==NULL) {
+#endif
     painter.fillRect(0,0,request.width,request.height,
                      QColor::fromRgbF(0.0,0.0,0.0,1.0));
 
@@ -196,9 +287,22 @@ bool DBThread::RenderMap(QPainter& painter,
 
   osmscout::MercatorProjection projection;
 
+#if defined(HAVE_LIB_QTOPENGL)
+  if (finishedGLPixmap!=NULL) {
+    projection.Set(finishedLon,finishedLat,
+                   finishedMagnification,
+                   finishedGLPixmap->width(),finishedGLPixmap->height());
+  }
+  else {
+    projection.Set(finishedLon,finishedLat,
+                   finishedMagnification,
+                   finishedPixmap->width(),finishedPixmap->height());
+  }
+#else
   projection.Set(finishedLon,finishedLat,
                  finishedMagnification,
                  finishedPixmap->width(),finishedPixmap->height());
+#endif
 
   double lonMin,lonMax,latMin,latMax;
 
@@ -237,7 +341,17 @@ bool DBThread::RenderMap(QPainter& painter,
     dy+=(request.lat-finishedLat)*request.height/(latMax-latMin);
   }
 
+#if defined(HAVE_LIB_QTOPENGL)
+  if (finishedGLPixmap!=NULL) {
+    QImage image=finishedGLPixmap->toImage();
+    painter.drawImage(dx,dy,image);
+  }
+  else {
+    painter.drawPixmap(dx,dy,*finishedPixmap);
+  }
+#else
   painter.drawPixmap(dx,dy,*finishedPixmap);
+#endif
 
 /*
 #if defined(LUM_HAVE_LIB_CAIRO)
@@ -274,11 +388,28 @@ bool DBThread::RenderMap(QPainter& painter,
 #endif
 */
 
-  return finishedPixmap->width()==(int)request.width &&
-         finishedPixmap->height()==(int)request.height &&
-         finishedLon==request.lon &&
-         finishedLat==request.lat &&
-         finishedMagnification==request.magnification;
+#if defined(HAVE_LIB_QTOPENGL)
+  if (finishedGLPixmap!=NULL) {
+    return finishedGLPixmap->width()==(int)request.width &&
+           finishedGLPixmap->height()==(int)request.height &&
+           finishedLon==request.lon &&
+           finishedLat==request.lat &&
+           finishedMagnification==request.magnification;
+  }
+  else {
+    return finishedPixmap->width()==(int)request.width &&
+           finishedPixmap->height()==(int)request.height &&
+           finishedLon==request.lon &&
+           finishedLat==request.lat &&
+           finishedMagnification==request.magnification;
+  }
+#else
+    return finishedPixmap->width()==(int)request.width &&
+           finishedPixmap->height()==(int)request.height &&
+           finishedLon==request.lon &&
+           finishedLat==request.lat &&
+           finishedMagnification==request.magnification;
+#endif
 }
 
 #include "moc_DBThread.cpp"

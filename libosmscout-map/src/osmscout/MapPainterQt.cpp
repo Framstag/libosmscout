@@ -37,10 +37,10 @@ namespace osmscout {
     // TODO: Clean up fonts
   }
 
-  QFont* MapPainterQt::GetFont(const MapParameter& parameter,
-                               double fontSize)
+  QFont MapPainterQt::GetFont(const MapParameter& parameter,
+                              double fontSize)
   {
-    std::map<size_t,QFont*>::const_iterator f;
+    std::map<size_t,QFont>::const_iterator f;
 
     f=fonts.find(fontSize);
 
@@ -48,13 +48,13 @@ namespace osmscout {
       return f->second;
     }
 
-    QFont* font=new QFont(parameter.GetFontName().c_str(), QFont::Normal, false);
-    
-    font->setPixelSize(parameter.GetFontSize()*fontSize);
-    font->setStyleStrategy(QFont::PreferAntialias);
-    font->setStyleStrategy(QFont::PreferMatch);
-    
-    return fonts.insert(std::pair<size_t,QFont*>(fontSize,font)).first->second;
+    QFont font(parameter.GetFontName().c_str(),QFont::Normal,false);
+
+    font.setPixelSize(parameter.GetFontSize()*fontSize);
+    font.setStyleStrategy(QFont::PreferAntialias);
+    font.setStyleStrategy(QFont::PreferMatch);
+
+    return fonts.insert(std::pair<size_t,QFont>(fontSize,font)).first->second;
   }
 
   bool MapPainterQt::HasIcon(const StyleConfig& styleConfig,
@@ -86,8 +86,8 @@ namespace osmscout {
 
       return false;
     }
-  }                           
-  
+  }
+
   bool MapPainterQt::HasPattern(const StyleConfig& styleConfig,
                                 PatternStyle& style)
   {
@@ -142,14 +142,14 @@ namespace osmscout {
         a=a/factor;
       }
 
-      QFont*       font=GetFont(parameter,fontSize);
-      QFontMetrics metrics=QFontMetrics(*font);
+      QFont        font(GetFont(parameter,fontSize));
+      QFontMetrics metrics=QFontMetrics(font);
       QString      string=QString::fromUtf8(text.c_str());
       QRect        extents=metrics.boundingRect(string);
 
       painter->setPen(QColor::fromRgbF(r,g,b,a));
       painter->setBrush(Qt::NoBrush);
-      painter->setFont(*font);
+      painter->setFont(font);
       painter->drawText(QPointF(x-extents.width()/2,
                                 y+metrics.ascent()-extents.height()/2),
                         string);
@@ -159,8 +159,8 @@ namespace osmscout {
       static const double innerWidth = 2;
 
       double       fontSize=style.GetSize();
-      QFont*       font=GetFont(parameter,fontSize);
-      QFontMetrics metrics=QFontMetrics(*font);
+      QFont        font(GetFont(parameter,fontSize));
+      QFontMetrics metrics=QFontMetrics(font);
       QString      string=QString::fromUtf8(text.c_str());
       QRect        extents=metrics.boundingRect(string);
 
@@ -215,8 +215,8 @@ namespace osmscout {
         }
       }
 
-      QFont*       font=GetFont(parameter,fontSize);
-      QFontMetrics metrics=QFontMetrics(*font);
+      QFont        font(GetFont(parameter,fontSize));
+      QFontMetrics metrics=QFontMetrics(font);
       QString      string=QString::fromUtf8(text.c_str());
       QRect        extents=metrics.boundingRect(string);
       QPainterPath path;
@@ -228,13 +228,13 @@ namespace osmscout {
 
       path.addText(QPointF(x-extents.width()/2,
                            y+metrics.ascent()-extents.height()/2),
-                   *font,
+                   font,
                    string);
 
       painter->drawPath(path);
       painter->fillPath(path,QBrush(QColor::fromRgbF(r,g,b,a)));
     }
-  }                             
+  }
 
   void MapPainterQt::DrawContourLabel(const Projection& projection,
                                       const MapParameter& parameter,
@@ -249,14 +249,14 @@ namespace osmscout {
     double a=style.GetTextA();
 
     QPen         pen;
-    QFont*       font=GetFont(parameter,fontSize);
-    QFontMetrics metrics=QFontMetrics(*font);
+    QFont        font(GetFont(parameter,fontSize));
+    QFontMetrics metrics=QFontMetrics(font);
     QString      string=QString::fromUtf8(text.c_str());
     QRect        extents=metrics.boundingRect(string);
 
     pen.setColor(QColor::fromRgbF(r,g,b,a));
     painter->setPen(pen);
-    painter->setFont(*font);
+    painter->setFont(font);
 
     QPainterPath path;
 
@@ -325,8 +325,8 @@ namespace osmscout {
     }
 
     painter->resetTransform();
-  }                             
-                         
+  }
+
   void MapPainterQt::DrawIcon(const IconStyle* style,
                               double x, double y)
   {
@@ -338,8 +338,8 @@ namespace osmscout {
     painter->drawImage(QPointF(x-images[style->GetId()-1].width()/2,
                                y-images[style->GetId()-1].height()/2),
                        images[style->GetId()-1]);
-  }                             
-                        
+  }
+
   void MapPainterQt::DrawSymbol(const SymbolStyle* style, double x, double y)
   {
     QPainterPath path;
@@ -376,7 +376,7 @@ namespace osmscout {
     }
       break;
     }
-  }                             
+  }
 
   void MapPainterQt::DrawPath(LineStyle::Style style,
                               const Projection& projection,
@@ -391,7 +391,7 @@ namespace osmscout {
 
     pen.setColor(QColor::fromRgbF(r,g,b,a));
     pen.setWidthF(width);
-    
+
     switch (style) {
     case LineStyle::none:
       // way should not be visible in this case!
@@ -462,7 +462,7 @@ namespace osmscout {
     painter->setBrush(Qt::NoBrush);
     painter->drawPolyline(polygon);
   }
-                        
+
   void MapPainterQt::DrawWayOutline(const StyleConfig& styleConfig,
                                     const Projection& projection,
                                     const MapParameter& parameter,
@@ -504,7 +504,7 @@ namespace osmscout {
     if (attributes.IsBridge() &&
         projection.GetMagnification()>=magCity) {
 
-      pen.setColor(QColor::fromRgbF(0.0,0.0,0.0,1.0));        
+      pen.setColor(QColor::fromRgbF(0.0,0.0,0.0,1.0));
       pen.setStyle(Qt::SolidLine);
     }
     else if (attributes.IsTunnel() &&
@@ -515,10 +515,10 @@ namespace osmscout {
       tunnel[1]=7+lineWidth;
 
       if (projection.GetMagnification()>=10000) {
-        pen.setColor(QColor::fromRgbF(0.75,0.75,0.75,1.0));        
+        pen.setColor(QColor::fromRgbF(0.75,0.75,0.75,1.0));
       }
       else {
-        pen.setColor(QColor::fromRgbF(0.5,0.5,0.5,1.0));        
+        pen.setColor(QColor::fromRgbF(0.5,0.5,0.5,1.0));
       }
       pen.setStyle(Qt::DashLine);
     }
@@ -607,7 +607,7 @@ namespace osmscout {
       cairo_line_to(draw,nodeX[nodes.size()-1],nodeY[nodes.size()-1]);
       cairo_stroke(draw);
     }*/
-  }                             
+  }
 
   void MapPainterQt::DrawArea(const StyleConfig& styleConfig,
                               const Projection& projection,
@@ -652,9 +652,9 @@ namespace osmscout {
     else {
       SetBrush();
     }
-    
+
     painter->drawPolygon(polygon);
-  }                             
+  }
 
   void MapPainterQt::DrawArea(const FillStyle& style,
                               const MapParameter& parameter,
@@ -683,7 +683,7 @@ namespace osmscout {
                                     style->GetLineB(),
                                     style->GetLineA()));
       pen.setWidthF(lineWidth);
-      
+
       switch (style->GetStyle()) {
       case LineStyle::none:
         // way should not be visible in this case!
@@ -706,7 +706,7 @@ namespace osmscout {
         pen.setCapStyle(Qt::FlatCap);
         break;
       }
-      
+
       painter->setPen(pen);
     }
   }
@@ -715,7 +715,7 @@ namespace osmscout {
   {
     painter->setBrush(Qt::NoBrush);
   }
-  
+
   void MapPainterQt::SetBrush(const FillStyle* fillStyle)
   {
     painter->setBrush(QBrush(QColor::fromRgbF(fillStyle->GetFillR(),
@@ -734,12 +734,12 @@ namespace osmscout {
 
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setRenderHint(QPainter::TextAntialiasing);
-  
+
     Draw(styleConfig,
          projection,
          parameter,
          data);
-  
+
     return true;
   }
 }
