@@ -73,6 +73,11 @@ namespace osmscout {
     {
       return type<reference.type || (type==reference.type &&  id<reference.id);
     }
+
+    inline bool operator==(const Reference& reference) const
+    {
+      return type==reference.type && id==reference.id;
+    }
   };
 }
 
