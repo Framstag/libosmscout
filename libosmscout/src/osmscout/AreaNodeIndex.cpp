@@ -93,7 +93,7 @@ namespace osmscout {
         TileId                                      endTileId=GetTileId(tileMaxX,y);
         std::map<TileId,IndexEntry>::const_iterator tile=drawTypeEntry->second.lower_bound(startTileId);
 
-        while (tile->first<=endTileId && tile!=drawTypeEntry->second.end()) {
+        while (tile!=drawTypeEntry->second.end() && tile->first<=endTileId) {
           nodes+=tile->second.ids.size();
 
           ++tile;
