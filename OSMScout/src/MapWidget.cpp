@@ -198,6 +198,7 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* event)
 {
   if (event->button()==1) {
     HandleMouseMove(event);
+    requestNewMap=true;
     update();
   }
 }
