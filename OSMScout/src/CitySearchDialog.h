@@ -1,3 +1,6 @@
+#ifndef CITYSEARCHDIALOG_H
+#define CITYSEARCHDIALOG_H
+
 /*
   OSMScout - a Qt backend for libosmscout and libosmscout-map
   Copyright (C) 2010  Tim Teulings
@@ -39,3 +42,5 @@ public:
   CitySearchDialog(QWidget* parentWindow);
   ~CitySearchDialog();
 };
+
+#endif
