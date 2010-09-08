@@ -4,10 +4,8 @@ TravelJinni_SOURCES = DatabaseTask.h \
                       DatabaseTask.cpp \
                       Configuration.h \
                       Configuration.cpp \
-                      CitySearchDialog.h \
-                      CitySearchDialog.cpp \
-                      CityStreetSearchDialog.h \
-                      CityStreetSearchDialog.cpp \
+                      LocationSearchDialog.h \
+                      LocationSearchDialog.cpp \
                       RouteDialog.h \
                       RouteDialog.cpp \
                       Viewer.cpp

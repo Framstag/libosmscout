@@ -1,9 +1,9 @@
-#ifndef CITYSTREETDIALOG_H
-#define CITYSTREETDIALOG_H
+#ifndef LOCATIONSEARCHDIALOG_H
+#define LOCATIONSEARCHDIALOG_H
 
 /*
   TravelJinni - Openstreetmap offline viewer
-  Copyright (C) 2009  Tim Teulings
+  Copyright (C) 2010  Tim Teulings
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -20,15 +20,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <list>
-
 #include <Lum/Base/L10N.h>
 #include <Lum/Base/String.h>
+
+#include <Lum/Dlg/ActionDialog.h>
 
 #include <Lum/Model/String.h>
 #include <Lum/Model/Table.h>
 
-#include <Lum/Dialog.h>
 #include <Lum/Object.h>
 #include <Lum/Panel.h>
 #include <Lum/String.h>
@@ -42,33 +41,12 @@
   * We should map key and down in the string field to make an search result
     selectable via keyboard.
  */
-class CityStreetSearchDialog : public Lum::Dialog
+class LocationSearchDialog : public Lum::Dlg::ActionDialog
 {
 private:
-  typedef Lum::Model::StdRefTable<osmscout::AdminRegion,
-                                  std::list<osmscout::AdminRegion> > RegionsModel;
-  typedef Lum::Base::Reference<RegionsModel>                         RegionsModelRef;
-
   typedef Lum::Model::StdRefTable<osmscout::Location,
                                   std::list<osmscout::Location> >    LocationsModel;
   typedef Lum::Base::Reference<LocationsModel>                       LocationsModelRef;
-
-  class RegionsModelPainter : public Lum::StringCellPainter
-  {
-  public:
-    std::wstring GetCellData() const
-    {
-      const osmscout::AdminRegion region=dynamic_cast<const RegionsModel*>(GetModel())->GetEntry(GetRow());
-
-      if (region.path.empty()) {
-        return Lum::Base::UTF8ToWString(region.name);
-      }
-      else {
-        return Lum::Base::UTF8ToWString(region.name)+
-        L" ("+Lum::Base::UTF8ToWString(osmscout::StringListToString(region.path))+L")";
-      }
-    }
-  };
 
   class LocationsModelPainter : public Lum::StringCellPainter
   {
@@ -88,37 +66,28 @@ private:
   };
 
 private:
-  DatabaseTask*          databaseTask;
-  Lum::Model::ActionRef  searchStreetAction;
-  Lum::Model::ActionRef  okAction;
-  Lum::Model::StringRef  regionName;
-  Lum::Model::ActionRef  regionSearchTimerAction;
-  Lum::Model::StringRef  locationName;
-  Lum::Model::ActionRef  locationSearchTimerAction;
-
-  std::list<osmscout::AdminRegion> regions;
-  RegionsModelRef        regionsModel;
-  Lum::Model::SingleLineSelectionRef regionSelection;
-  std::list<osmscout::Location>    locations;
-  LocationsModelRef      locationsModel;
+  DatabaseTask*                      databaseTask;
+  Lum::Model::ActionRef              okAction;
+  Lum::Model::StringRef              locationName;
+  Lum::Model::ActionRef              searchTimerAction;
+  std::list<osmscout::Location>      locations;
+  LocationsModelRef                  locationsModel;
   Lum::Model::SingleLineSelectionRef locationSelection;
-  bool                   hasResult;
-  osmscout::AdminRegion  resultAdminRegion;
-  osmscout::Location     resultLocation;
+  bool                               hasResult;
+  osmscout::Location                 resultLocation;
 
 private:
-  void FetchAdminRegions();
-  void FetchLocations();
+  void Search();
 
 public:
-  CityStreetSearchDialog(DatabaseTask* databaseTask);
+  LocationSearchDialog(DatabaseTask* databaseTask);
 
-  void PreInit();
+  Lum::Object* GetContent();
+  void GetActions(std::vector<Lum::Dlg::ActionInfo>& actions);
   void Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& msg);
 
   bool HasResult() const;
-  const osmscout::AdminRegion& GetResultAdminRegion() const;
-  const osmscout::Location& GetResultLocation() const;
+  const osmscout::Location& GetResult() const;
 };
 
 #endif

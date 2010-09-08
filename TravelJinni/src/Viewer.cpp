@@ -58,8 +58,7 @@
 #include "config.h"
 
 #include "Configuration.h"
-#include "CitySearchDialog.h"
-#include "CityStreetSearchDialog.h"
+#include "LocationSearchDialog.h"
 #include "RouteDialog.h"
 #include "DatabaseTask.h"
 
@@ -411,8 +410,7 @@ public:
 class MainDialog : public Lum::Dialog
 {
 private:
-  Lum::Model::ActionRef       searchCityAction;
-  Lum::Model::ActionRef       searchAddressAction;
+  Lum::Model::ActionRef       locationSearchAction;
   Lum::Model::ActionRef       routeAction;
   Lum::Model::ActionRef       debugFlushCacheAction;
   Lum::Model::ActionRef       debugStatisticsAction;
@@ -422,8 +420,7 @@ private:
 
 public:
   MainDialog()
-   : searchCityAction(new Lum::Model::Action()),
-     searchAddressAction(new Lum::Model::Action()),
+   : locationSearchAction(new Lum::Model::Action()),
      routeAction(new Lum::Model::Action()),
      debugFlushCacheAction(new Lum::Model::Action()),
      debugStatisticsAction(new Lum::Model::Action()),
@@ -432,8 +429,7 @@ public:
   {
     Observe(GetOpenedAction());
     Observe(GetClosedAction());
-    Observe(searchCityAction);
-    Observe(searchAddressAction);
+    Observe(locationSearchAction);
     Observe(routeAction);
     Observe(debugFlushCacheAction);
     Observe(debugStatisticsAction);
@@ -454,20 +450,16 @@ public:
         ->ActionQuit(GetClosedAction())
       ->End()
       ->Group(L"_Search")
-        ->Action(Lum::Def::Action(Lum::Def::Desc(L"Search _city")
-                                  .SetShortcut(Lum::OS::qualifierControl,L"c"),
-                                  searchCityAction))
-        ->Action(Lum::Def::Action(Lum::Def::Desc(L"Search _address")
-                                  .SetShortcut(Lum::OS::qualifierControl,L"a"),
-                                  searchAddressAction))
+        ->Action(Lum::Def::Action(Lum::Def::Desc(L"Search _location")
+                                  .SetShortcut(Lum::OS::qualifierControl,L"f"),
+                                  locationSearchAction))
         ->Separator()
         ->Action(Lum::Def::Action(Lum::Def::Desc(L"_Route")
                                   .SetShortcut(Lum::OS::qualifierControl,L"r"),
                                   routeAction))
       ->End()
       ->Group(L"Debug")
-        ->Action(Lum::Def::Action(Lum::Def::Desc(L"_Flush Cache")
-                                  .SetShortcut(Lum::OS::qualifierControl,L"f"),
+        ->Action(Lum::Def::Action(Lum::Def::Desc(L"_Flush Cache"),
                                   debugFlushCacheAction))
         ->Action(Lum::Def::Action(Lum::Def::Desc(L"Dump _statistics")
                                   .SetShortcut(Lum::OS::qualifierControl,L"s"),
@@ -519,37 +511,13 @@ public:
     else if (model==GetClosedAction() && GetClosedAction()->IsFinished()) {
       SaveConfig();
     }
-    else if (model==searchCityAction && searchCityAction->IsFinished()) {
-      osmscout::AdminRegion region;
-      bool                  hasResult=false;
-
-      CitySearchDialog *dialog;
-
-      dialog=new CitySearchDialog(databaseTask);
-      dialog->SetParent(this);
-      if (dialog->Open()) {
-        dialog->EventLoop();
-        dialog->Close();
-
-        hasResult=dialog->HasResult();
-        if (dialog->HasResult()) {
-          region=dialog->GetResult();
-        }
-      }
-
-      delete dialog;
-
-      if (hasResult) {
-        map->ShowReference(region.reference,osmscout::magCity);
-      }
-    }
-    else if (model==searchAddressAction && searchAddressAction->IsFinished()) {
+    else if (model==locationSearchAction && locationSearchAction->IsFinished()) {
       osmscout::Location location;
       bool               hasResult=false;
 
-      CityStreetSearchDialog *dialog;
+      LocationSearchDialog *dialog;
 
-      dialog=new CityStreetSearchDialog(databaseTask);
+      dialog=new LocationSearchDialog(databaseTask);
       dialog->SetParent(this);
       if (dialog->Open()) {
         dialog->EventLoop();
@@ -557,7 +525,7 @@ public:
 
         hasResult=dialog->HasResult();
         if (dialog->HasResult()) {
-          location=dialog->GetResultLocation();
+          location=dialog->GetResult();
         }
       }
 

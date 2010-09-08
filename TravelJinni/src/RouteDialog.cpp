@@ -30,7 +30,7 @@
 
 #include <osmscout/Database.h>
 
-#include "CityStreetSearchDialog.h"
+#include "LocationSearchDialog.h"
 
 bool RouteDialog::RouteSelection::IsStartValid() const
 {
@@ -137,23 +137,24 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
   else if (model==startAction && startAction->IsEnabled() && startAction->IsFinished()) {
     bool hasResult=false;
 
-    CityStreetSearchDialog *dialog;
+    LocationSearchDialog *dialog;
 
-    dialog=new CityStreetSearchDialog(databaseTask);
+    dialog=new LocationSearchDialog(databaseTask);
     dialog->SetParent(this);
     if (dialog->Open()) {
       dialog->EventLoop();
       dialog->Close();
 
       if (dialog->HasResult()) {
-        osmscout::AdminRegion region=dialog->GetResultAdminRegion();
-        osmscout::Location    location=dialog->GetResultLocation();
+        osmscout::Location    location=dialog->GetResult();
         osmscout::Way         way;
 
         assert(location.references.front().GetType()==osmscout::refWay);
 
         // TODO: Check that this is a way!
-        result.startCity=region.name;
+        if (!location.path.empty()) {
+          result.startCity=location.path.front();
+        }
         result.startStreet=location.name;
         result.startWay=location.references.front().GetId();
 
@@ -182,22 +183,23 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
   else if (model==endAction && endAction->IsEnabled() && endAction->IsFinished()) {
     bool hasResult=false;
 
-    CityStreetSearchDialog *dialog;
+    LocationSearchDialog *dialog;
 
-    dialog=new CityStreetSearchDialog(databaseTask);
+    dialog=new LocationSearchDialog(databaseTask);
     dialog->SetParent(this);
     if (dialog->Open()) {
       dialog->EventLoop();
       dialog->Close();
 
       if (dialog->HasResult()) {
-        osmscout::AdminRegion region=dialog->GetResultAdminRegion();
-        osmscout::Location    location=dialog->GetResultLocation();
+        osmscout::Location    location=dialog->GetResult();
         osmscout::Way         way;
 
         assert(location.references.front().GetType()==osmscout::refWay);
 
-        result.endCity=region.name;
+        if (!location.path.empty()) {
+          result.endCity=location.path.front();
+        }
         result.endStreet=location.name;
         result.endWay=location.references.front().GetId();
 
