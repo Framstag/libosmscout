@@ -24,6 +24,8 @@
 #include <iostream>
 #include <limits>
 
+#include <osmscout/Util.h>
+
 namespace osmscout {
 
   MapPainterQt::MapPainterQt()
@@ -137,7 +139,7 @@ namespace osmscout {
       double a=style.GetTextA();
 
       if (projection.GetMagnification()>style.GetScaleAndFadeMag()) {
-        double factor=log2(projection.GetMagnification())-log2(style.GetScaleAndFadeMag());
+        double factor=Log2(projection.GetMagnification())-Log2(style.GetScaleAndFadeMag());
         fontSize=fontSize*pow(2,factor);
         a=a/factor;
       }
@@ -207,7 +209,7 @@ namespace osmscout {
       double a=style.GetTextA();
 
       if (projection.GetMagnification()>style.GetScaleAndFadeMag()) {
-        double factor=log2(projection.GetMagnification())-log2(style.GetScaleAndFadeMag());
+        double factor=Log2(projection.GetMagnification())-Log2(style.GetScaleAndFadeMag());
 
         fontSize=fontSize*pow(2,factor);
         if (factor>=1) {
