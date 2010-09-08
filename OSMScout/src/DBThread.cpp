@@ -103,29 +103,30 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
 {
 
 #if defined(HAVE_LIB_QTOPENGL)
-    QGLFormat format;
+  QGLFormat format;
 
-    format.setAlpha(true);
-    format.setDepth(false);
-    format.setDoubleBuffer(false);
-    format.setSampleBuffers(true);
+  format.setAlpha(true);
+  format.setDepth(false);
+  format.setDoubleBuffer(false);
+  format.setSampleBuffers(true);
 
-    if (QGLFormat::hasOpenGL()) {
-      if (currentGLPixmap==NULL ||
-          currentGLPixmap->width()!=(int)request.width ||
-          currentGLPixmap->height()!=(int)request.height) {
-        delete currentGLPixmap;
-        currentGLPixmap=new QGLPixelBuffer(QSize(request.width,request.height),format);
-      }
+  if (QGLFormat::hasOpenGL()) {
+    if (currentGLPixmap==NULL ||
+        currentGLPixmap->width()!=(int)request.width ||
+        currentGLPixmap->height()!=(int)request.height) {
+      delete currentGLPixmap;
+      currentGLPixmap=new QGLPixelBuffer(QSize(request.width,request.height),format);
     }
-    else {
-      if (currentPixmap==NULL ||
-          currentPixmap->width()!=(int)request.width ||
-          currentPixmap->height()!=(int)request.height) {
-        delete currentPixmap;
-        currentPixmap=new QPixmap(QSize(request.width,request.height));
-      }
+  }
+
+  if (currentGLPixmap==NULL || !currentGLPixmap->isValid()) {
+    if (currentPixmap==NULL ||
+        currentPixmap->width()!=(int)request.width ||
+        currentPixmap->height()!=(int)request.height) {
+      delete currentPixmap;
+      currentPixmap=new QPixmap(QSize(request.width,request.height));
     }
+  }
 #else
   if (currentPixmap==NULL ||
       currentPixmap->width()!=(int)request.width ||
@@ -186,7 +187,7 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
     QPainter *p=NULL;
 
 #if defined(HAVE_LIB_QTOPENGL)
-    if (currentGLPixmap!=NULL) {
+    if (currentGLPixmap!=NULL && currentGLPixmap->isValid()) {
       p=new QPainter(currentGLPixmap);
     }
     else {
@@ -219,7 +220,7 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
     QPainter *p=NULL;
 
 #if defined(HAVE_LIB_QTOPENGL)
-    if (currentGLPixmap!=NULL) {
+    if (currentGLPixmap!=NULL && currentGLPixmap->isValid()) {
       p=new QPainter(currentGLPixmap);
     }
     else {
@@ -342,7 +343,7 @@ bool DBThread::RenderMap(QPainter& painter,
   }
 
 #if defined(HAVE_LIB_QTOPENGL)
-  if (finishedGLPixmap!=NULL) {
+  if (finishedGLPixmap!=NULL && finishedGLPixmap->isValid()) {
     QImage image=finishedGLPixmap->toImage();
     painter.drawImage(dx,dy,image);
   }
@@ -389,7 +390,7 @@ bool DBThread::RenderMap(QPainter& painter,
 */
 
 #if defined(HAVE_LIB_QTOPENGL)
-  if (finishedGLPixmap!=NULL) {
+  if (finishedGLPixmap!=NULL && finishedGLPixmap->isValid()) {
     return finishedGLPixmap->width()==(int)request.width &&
            finishedGLPixmap->height()==(int)request.height &&
            finishedLon==request.lon &&
