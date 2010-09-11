@@ -413,4 +413,40 @@ bool DBThread::RenderMap(QPainter& painter,
 #endif
 }
 
+bool DBThread::GetMatchingAdminRegions(const QString& name,
+                                       std::list<osmscout::AdminRegion>& regions,
+                                       size_t limit,
+                                       bool& limitReached) const
+{
+  QMutexLocker locker(&mutex);
+
+  if (!database.IsOpen()) {
+    return false;
+  }
+
+  return database.GetMatchingAdminRegions(name.toUtf8().data(),
+                                          regions,
+                                          limit,limitReached, false);
+}
+
+bool DBThread::GetMatchingLocations(const osmscout::AdminRegion& region,
+                                    const QString& name,
+                                    std::list<osmscout::Location>& locations,
+                                    size_t limit,
+                                    bool& limitReached) const
+{
+  QMutexLocker locker(&mutex);
+
+  if (!database.IsOpen()) {
+    return false;
+  }
+
+  return database.GetMatchingLocations(region,
+                                       name.toUtf8().data(),
+                                       locations,
+                                       limit,
+                                       limitReached,
+                                       false);
+}
+
 #include "moc_DBThread.cpp"

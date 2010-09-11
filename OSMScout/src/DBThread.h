@@ -67,7 +67,7 @@ public slots:
   void TriggerMapRendering(const RenderMapRequest& request);
 
 private:
-  QMutex                    mutex;
+  mutable QMutex            mutex;
   osmscout::Database        database;
   osmscout::StyleConfig     *styleConfig;
   osmscout::MapData         data;
@@ -96,6 +96,18 @@ public:
 
   bool RenderMap(QPainter& painter,
                  const RenderMapRequest& request);
+
+
+  bool GetMatchingAdminRegions(const QString& name,
+                               std::list<osmscout::AdminRegion>& regions,
+                               size_t limit,
+                               bool& limitReached) const;
+
+  bool GetMatchingLocations(const osmscout::AdminRegion& region,
+                            const QString& name,
+                            std::list<osmscout::Location>& locations,
+                            size_t limit,
+                            bool& limitReached) const;
 };
 
 extern DBThread dbThread;

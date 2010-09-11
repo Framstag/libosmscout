@@ -1,5 +1,5 @@
-#ifndef CITYSEARCHDIALOG_H
-#define CITYSEARCHDIALOG_H
+#ifndef SEARCHLOCATIONDIALOG_H
+#define SEARCHLOCATIONDIALOG_H
 
 /*
   OSMScout - a Qt backend for libosmscout and libosmscout-map
@@ -23,24 +23,30 @@
 #include <QDialog>
 #include <QLineEdit>
 #include <QListView>
+#include <QPushButton>
+#include <QStandardItemModel>
 #include <QTimer>
 
-class CitySearchDialog : public QDialog
+class SearchLocationDialog : public QDialog
 {
   Q_OBJECT
 
 public slots:
-  void OnCityNameChange(const QString& text);
-  void RequestResults();
+  void OnLocationNameChange(const QString& text);
+  void OnSelectionChanged(const QItemSelection& selected,
+                          const QItemSelection& deselected);
+  void Search();
 
 private:
-  QLineEdit *cityName;
-  QListView *results;
-  QTimer    requestResultTimer;
+  QLineEdit          *locationName;
+  QListView          *results;
+  QStandardItemModel *locations;
+  QPushButton        *okButton;
+  QTimer             requestResultTimer;
 
 public:
-  CitySearchDialog(QWidget* parentWindow);
-  ~CitySearchDialog();
+  SearchLocationDialog(QWidget* parentWindow);
+  ~SearchLocationDialog();
 };
 
 #endif

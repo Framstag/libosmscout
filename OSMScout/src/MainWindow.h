@@ -29,7 +29,7 @@ class MainWindow : public QMainWindow
   Q_OBJECT
 
 public slots:
-  void SearchCity();
+  void SearchLocation();
 
 private:
   MapWidget * map;

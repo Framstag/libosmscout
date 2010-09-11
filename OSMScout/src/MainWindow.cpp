@@ -21,7 +21,7 @@
 
 #include <QMenuBar>
 
-#include "CitySearchDialog.h"
+#include "SearchLocationDialog.h"
 
 MainWindow::MainWindow()
  : map(new MapWidget())
@@ -32,7 +32,7 @@ MainWindow::MainWindow()
   menu->addAction("&Quit",this,SLOT(close()),QKeySequence("Ctrl+Q"));
 
   menu=menuBar()->addMenu("&Search");
-  menu->addAction("Search &city",this,SLOT(SearchCity()),QKeySequence("Ctrl+C"));
+  menu->addAction("Search &location",this,SLOT(SearchLocation()),QKeySequence("Ctrl+F"));
 
   setCentralWidget(map);
 }
@@ -42,9 +42,9 @@ MainWindow::~MainWindow()
   // no code
 }
 
-void MainWindow::SearchCity()
+void MainWindow::SearchLocation()
 {
-  CitySearchDialog dialog(this);
+  SearchLocationDialog dialog(this);
 
   dialog.exec();
 }
