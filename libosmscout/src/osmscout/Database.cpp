@@ -194,7 +194,7 @@ namespace osmscout {
     relationDataFile.FlushCache();
     nodeUseCache.Flush();
   }
-  
+
   TypeConfig* Database::GetTypeConfig() const
   {
     return typeConfig;
@@ -203,7 +203,7 @@ namespace osmscout {
   bool Database::GetBoundingBox(double& minLat,double& minLon,
                                 double& maxLat,double& maxLon) const
   {
-    if (!isOpen) {
+    if (!IsOpen()) {
       return false;
     }
 
@@ -221,6 +221,10 @@ namespace osmscout {
                                       double magnification,
                                       size_t maxNodes) const
   {
+    if (!IsOpen()) {
+      return false;
+    }
+
     size_t              effectiveNodes;
     std::vector<size_t> priorities;
     size_t              maxPriority=0;
@@ -264,6 +268,10 @@ namespace osmscout {
                           size_t maxPriority,
                           std::vector<Node>& nodes) const
   {
+    if (!IsOpen()) {
+      return false;
+    }
+
     std::vector<Id> ids;
 
     if (!areaNodeIndex.GetIds(styleConfig,
@@ -292,12 +300,16 @@ namespace osmscout {
                             std::vector<Relation>& relationWays,
                             std::vector<Relation>& relationAreas) const
   {
+    if (!IsOpen()) {
+      return false;
+    }
+
     nodes.clear();
     ways.clear();
     areas.clear();
     relationWays.clear();
     relationAreas.clear();
-  
+
     size_t maxPriority;
 
     StopClock maxPrioTimer;
@@ -408,6 +420,10 @@ namespace osmscout {
                                 double lonMax, double latMax,
                                 std::list<GroundTile>& tiles) const
   {
+    if (!IsOpen()) {
+      return false;
+    }
+
     StopClock timer;
 
     if (!waterIndex.GetRegions(lonMin, latMin, lonMax, latMax, tiles)) {
@@ -424,6 +440,10 @@ namespace osmscout {
 
   bool Database::GetNode(const Id& id, Node& node) const
   {
+    if (!IsOpen()) {
+      return false;
+    }
+
     std::vector<Id>   ids;
     std::vector<Node> nodes;
 
@@ -442,35 +462,59 @@ namespace osmscout {
   bool Database::GetNodes(const std::vector<Id>& ids,
                           std::vector<Node>& nodes) const
   {
+    if (!IsOpen()) {
+      return false;
+    }
+
     return nodeDataFile.Get(ids,nodes);
   }
 
   bool Database::GetWays(std::vector<FileOffset>& offsets,
                          std::vector<Way>& ways) const
   {
+    if (!IsOpen()) {
+      return false;
+    }
+
     return wayDataFile.Get(offsets,ways);
   }
 
   bool Database::GetWays(std::set<FileOffset>& offsets,
                          std::vector<Way>& ways) const
   {
+    if (!IsOpen()) {
+      return false;
+    }
+
     return wayDataFile.Get(offsets,ways);
   }
 
   bool Database::GetRelations(std::vector<FileOffset>& offsets,
                               std::vector<Relation>& relations) const
   {
+    if (!IsOpen()) {
+      return false;
+    }
+
     return relationDataFile.Get(offsets,relations);
   }
 
   bool Database::GetRelations(std::set<FileOffset>& offsets,
                               std::vector<Relation>& relations) const
   {
+    if (!IsOpen()) {
+      return false;
+    }
+
     return relationDataFile.Get(offsets,relations);
   }
 
   bool Database::GetWay(const Id& id, Way& way) const
   {
+    if (!IsOpen()) {
+      return false;
+    }
+
     std::vector<Id>  ids;
     std::vector<Way> ways;
 
@@ -489,24 +533,40 @@ namespace osmscout {
   bool Database::GetWays(const std::vector<Id>& ids,
                          std::vector<Way>& ways) const
   {
+    if (!IsOpen()) {
+      return false;
+    }
+
     return wayDataFile.Get(ids,ways);
   }
 
   bool Database::GetWays(const std::set<Id>& ids,
                          std::vector<Way>& ways) const
   {
+    if (!IsOpen()) {
+      return false;
+    }
+
     return wayDataFile.Get(ids,ways);
   }
 
   bool Database::GetRelation(const Id& id,
                              Relation& relation) const
   {
+    if (!IsOpen()) {
+      return false;
+    }
+
     return relationDataFile.Get(id,relation);
   }
 
   bool Database::GetRelations(const std::vector<Id>& ids,
                               std::vector<Relation>& relations) const
   {
+    if (!IsOpen()) {
+      return false;
+    }
+
     return relationDataFile.Get(ids,relations);
   }
 
@@ -516,6 +576,10 @@ namespace osmscout {
                                          bool& limitReached,
                                          bool startWith) const
   {
+    if (!IsOpen()) {
+      return false;
+    }
+
     return cityStreetIndex.GetMatchingAdminRegions(name,
                                                    regions,
                                                    limit,
@@ -530,6 +594,10 @@ namespace osmscout {
                                       bool& limitReached,
                                       bool startWith) const
   {
+    if (!IsOpen()) {
+      return false;
+    }
+
     return cityStreetIndex.GetMatchingLocations(region,
                                                 name,
                                                 locations,
@@ -541,6 +609,10 @@ namespace osmscout {
   bool Database::GetJoints(const std::set<Id>& ids,
                            std::set<Id>& wayIds) const
   {
+    if (!IsOpen()) {
+      return false;
+    }
+
     std::list<NodeUseIndexEntry> indexEntries;
     std::string                  file=path+"/"+"nodeuse.idx";
 
@@ -613,6 +685,10 @@ namespace osmscout {
 
   bool Database::GetJoints(Id id, std::set<Id>& wayIds) const
   {
+    if (!IsOpen()) {
+      return false;
+    }
+
     std::set<Id> ids;
 
     ids.insert(id);
@@ -1282,6 +1358,10 @@ namespace osmscout {
   bool Database::TransformRouteDataToRouteDescription(const RouteData& data,
                                                       RouteDescription& description)
   {
+    if (!IsOpen()) {
+      return false;
+    }
+
     Way                                              way,newWay;
     Id                                               node=0,newNode=0;
     std::list<RouteData::RouteEntry>::const_iterator iter;
