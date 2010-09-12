@@ -57,16 +57,23 @@ void DBThread::run()
     }
   }
   else {
-    std::cerr<<"Cannot open database!"<<std::endl;
+    std::cerr << "Cannot open database!" << std::endl;
+    return;
   }
 
 
   DatabaseLoadedResponse response;
 
-  database.GetBoundingBox(response.minLat,
-                          response.minLon,
-                          response.maxLat,
-                          response.maxLon);
+  if (!database.GetBoundingBox(response.minLat,
+                               response.minLon,
+                               response.maxLat,
+                               response.maxLon)) {
+    std::cerr << "Cannot read initial bounding box" << std::endl;
+    return;
+  }
+
+  std::cout << "Initial bounding box [";
+  std::cout << response.minLat <<"," << response.minLon << " - " << response.maxLat << "," << response.maxLon << "]" << std::endl;
 
   emit InitialisationFinished(response);
 
@@ -413,16 +420,33 @@ bool DBThread::RenderMap(QPainter& painter,
 #endif
 }
 
+bool DBThread::GetNode(osmscout::Id id, osmscout::Node& node) const
+{
+  QMutexLocker locker(&mutex);
+
+  return database.GetNode(id,node);
+}
+
+bool DBThread::GetWay(osmscout::Id id, osmscout::Way& way) const
+{
+  QMutexLocker locker(&mutex);
+
+  return database.GetWay(id,way);
+}
+
+bool DBThread::GetRelation(osmscout::Id id, osmscout::Relation& relation) const
+{
+  QMutexLocker locker(&mutex);
+
+  return database.GetRelation(id,relation);
+}
+
 bool DBThread::GetMatchingAdminRegions(const QString& name,
                                        std::list<osmscout::AdminRegion>& regions,
                                        size_t limit,
                                        bool& limitReached) const
 {
   QMutexLocker locker(&mutex);
-
-  if (!database.IsOpen()) {
-    return false;
-  }
 
   return database.GetMatchingAdminRegions(name.toUtf8().data(),
                                           regions,

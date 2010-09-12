@@ -47,6 +47,9 @@ void MapWidget::InitialisationFinished(const DatabaseLoadedResponse& response)
   double dlat=360;
   double dlon=180;
 
+  std::cout << "Initial bounding box [";
+  std::cout << response.minLat <<"," << response.minLon << " - " << response.maxLat << "," << response.maxLon << "]" << std::endl;
+
   lat=response.minLat+(response.maxLat-response.minLat)/2;
   lon=response.minLon+(response.maxLon-response.minLon)/2;
 
@@ -58,9 +61,7 @@ void MapWidget::InitialisationFinished(const DatabaseLoadedResponse& response)
 
   magnification=zoom;
 
-  std::cout << "Showing initial bounding box [";
-  std::cout << response.minLat <<"," << response.minLon << " - " << response.maxLat << "," << response.maxLon << "]";
-  std::cout << ", mag. " << magnification << "x" << std::endl;
+  std::cout << "Magnification: " << magnification << "x" << std::endl;
 
   TriggerMapRendering();
 }
@@ -265,6 +266,47 @@ void MapWidget::ZoomOut(double zoomFactor)
   }
 
   TriggerMapRendering();
+}
+
+void MapWidget::ShowReference(const osmscout::Reference& reference,
+                              const osmscout::Mag& magnification)
+{
+  if (reference.GetType()==osmscout::refNode) {
+    osmscout::Node node;
+
+    if (dbThread.GetNode(reference.GetId(),node)) {
+      lon=node.lon;
+      lat=node.lat;
+      this->magnification=magnification;
+
+      TriggerMapRendering();
+    }
+  }
+  else if (reference.GetType()==osmscout::refWay) {
+    osmscout::Way way;
+
+    if (dbThread.GetWay(reference.GetId(),way)) {
+      if (way.GetCenter(lat,lon)) {
+        this->magnification=magnification;
+
+        TriggerMapRendering();
+      }
+    }
+  }
+  else if (reference.GetType()==osmscout::refRelation) {
+    osmscout::Relation relation;
+
+    if (dbThread.GetRelation(reference.GetId(),relation)) {
+      if (relation.GetCenter(lat,lon)) {
+        this->magnification=magnification;
+
+        TriggerMapRendering();
+      }
+    }
+  }
+  else {
+    assert(false);
+  }
 }
 
 #include "moc_MapWidget.cpp"

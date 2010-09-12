@@ -27,6 +27,8 @@
 #include <QStandardItemModel>
 #include <QTimer>
 
+#include <osmscout/Location.h>
+
 class SearchLocationDialog : public QDialog
 {
   Q_OBJECT
@@ -35,6 +37,7 @@ public slots:
   void OnLocationNameChange(const QString& text);
   void OnSelectionChanged(const QItemSelection& selected,
                           const QItemSelection& deselected);
+  void OnDoubleClick(const QModelIndex& index);
   void Search();
 
 private:
@@ -44,9 +47,13 @@ private:
   QPushButton        *okButton;
   QTimer             requestResultTimer;
 
+  osmscout::Location locationResult;
+
 public:
   SearchLocationDialog(QWidget* parentWindow);
   ~SearchLocationDialog();
+
+  osmscout::Location GetLocationResult() const;
 };
 
 #endif

@@ -98,6 +98,10 @@ public:
                  const RenderMapRequest& request);
 
 
+  bool GetNode(osmscout::Id id, osmscout::Node& node) const;
+  bool GetWay(osmscout::Id id, osmscout::Way& way) const;
+  bool GetRelation(osmscout::Id id, osmscout::Relation& relation) const;
+
   bool GetMatchingAdminRegions(const QString& name,
                                std::list<osmscout::AdminRegion>& regions,
                                size_t limit,

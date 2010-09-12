@@ -65,6 +65,8 @@ public:
 
   void ZoomIn(double zoomFactor);
   void ZoomOut(double zoomFactor);
+  void ShowReference(const osmscout::Reference& reference,
+                     const osmscout::Mag& magnification);
 
 };
 

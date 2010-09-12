@@ -19,8 +19,6 @@
 
 #include "SearchLocationDialog.h"
 
-#include <iostream>
-
 #include <QDialogButtonBox>
 #include <QFormLayout>
 #include <QVBoxLayout>
@@ -90,6 +88,10 @@ SearchLocationDialog::SearchLocationDialog(QWidget* parentWindow)
           SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
           this,
           SLOT(OnSelectionChanged(QItemSelection,QItemSelection)));
+  connect(results,
+          SIGNAL(doubleClicked(QModelIndex)),
+          this,
+          SLOT(OnDoubleClick(QModelIndex)));
 }
 
 SearchLocationDialog::~SearchLocationDialog()
@@ -106,15 +108,26 @@ void SearchLocationDialog::OnLocationNameChange(const QString& text)
 void SearchLocationDialog::OnSelectionChanged(const QItemSelection& selected,
                                               const QItemSelection& deselected)
 {
-  std::cout << "Selection changed" << std::endl;
-
-  if (results->selectionModel()->hasSelection()) {
+  if (results->selectionModel()->hasSelection() &&
+      results->selectionModel()->selection().indexes().size()==1) {
     okButton->setEnabled(true);
+
+    QModelIndex  index=results->selectionModel()->selection().indexes().front();
+    LocationItem *item=dynamic_cast<LocationItem*>(locations->itemFromIndex(index));
+
+    locationResult=item->location;
   }
   else {
     okButton->setEnabled(false);
   }
 
+}
+
+void SearchLocationDialog::OnDoubleClick(const QModelIndex& index)
+{
+  if (okButton->isEnabled()) {
+    accept();
+  }
 }
 
 void SearchLocationDialog::Search()
@@ -256,4 +269,8 @@ void SearchLocationDialog::Search()
   }
 }
 
+osmscout::Location SearchLocationDialog::GetLocationResult() const
+{
+  return locationResult;
+}
 #include "moc_SearchLocationDialog.cpp"

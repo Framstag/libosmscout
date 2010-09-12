@@ -47,6 +47,14 @@ void MainWindow::SearchLocation()
   SearchLocationDialog dialog(this);
 
   dialog.exec();
+
+  if (dialog.result()==QDialog::Accepted) {
+    osmscout::Location location;
+
+    location=dialog.GetLocationResult();
+
+    map->ShowReference(location.references.front(),osmscout::magVeryClose);
+  }
 }
 
 #include "moc_MainWindow.cpp"
