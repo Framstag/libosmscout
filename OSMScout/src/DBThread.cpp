@@ -505,6 +505,8 @@ void DBThread::ClearRoute()
 {
   QMutexLocker locker(&mutex);
 
+  data.poiWays.clear();
+
   emit HandleMapRenderingResult();
 }
 
