@@ -29,11 +29,18 @@ namespace osmscout {
     by Database.GetMatchingLocations() which uses CityStreetIndex
     internally.
    */
-  struct Location
+  class OSMSCOUT_API Location
   {
+  public:
     std::string            name;
     std::list<std::string> path;
     std::list<Reference>   references;
+
+  public:
+    Location();
+
+    bool IsValid() const;
+    void Invalidate();
   };
 }
 

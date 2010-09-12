@@ -21,5 +21,22 @@
 
 namespace osmscout {
 
+  Location::Location()
+  {
+    // no code
+  }
+
+  bool Location::IsValid() const
+  {
+    return references.size()>0;
+  }
+
+  void Location::Invalidate()
+  {
+    name.clear();
+    path.clear();
+    references.clear();
+  }
+
 }
 
