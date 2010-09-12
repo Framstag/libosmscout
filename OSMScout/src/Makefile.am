@@ -9,12 +9,15 @@ OSMScout_SOURCES = OSMScout.cpp \
                    MapWidget.cpp \
                    SearchLocationDialog.h \
                    SearchLocationDialog.cpp \
+                   RoutingDialog.h \
+                   RoutingDialog.cpp \
                    MainWindow.h \
                    MainWindow.cpp
 
 $(OSMScout_OBJECTS) : moc_DBThread.cpp \
                       moc_MapWidget.cpp \
                       moc_SearchLocationDialog.cpp \
+                      moc_RoutingDialog.cpp \
                       moc_MainWindow.cpp
 
 OSMScout_CXXFLAGS=-I. \

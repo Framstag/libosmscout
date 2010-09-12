@@ -112,6 +112,20 @@ public:
                             std::list<osmscout::Location>& locations,
                             size_t limit,
                             bool& limitReached) const;
+
+  bool CalculateRoute(osmscout::Id startWayId,
+                      osmscout::Id startNodeId,
+                      osmscout::Id targetWayId,
+                      osmscout::Id targetNodeId,
+                      osmscout::RouteData& route);
+
+  bool TransformRouteDataToRouteDescription(const osmscout::RouteData& data,
+                                            osmscout::RouteDescription& description);
+  bool TransformRouteDataToWay(const osmscout::RouteData& data,
+                               osmscout::Way& way);
+
+  void ClearRoute();
+  void AddRoute(const osmscout::Way& way);
 };
 
 extern DBThread dbThread;

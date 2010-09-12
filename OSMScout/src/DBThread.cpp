@@ -461,16 +461,60 @@ bool DBThread::GetMatchingLocations(const osmscout::AdminRegion& region,
 {
   QMutexLocker locker(&mutex);
 
-  if (!database.IsOpen()) {
-    return false;
-  }
-
   return database.GetMatchingLocations(region,
                                        name.toUtf8().data(),
                                        locations,
                                        limit,
                                        limitReached,
                                        false);
+}
+
+bool DBThread::CalculateRoute(osmscout::Id startWayId,
+                              osmscout::Id startNodeId,
+                              osmscout::Id targetWayId,
+                              osmscout::Id targetNodeId,
+                              osmscout::RouteData& route)
+{
+  QMutexLocker locker(&mutex);
+
+  return database.CalculateRoute(startWayId,
+                                 startNodeId,
+                                 targetWayId,
+                                 targetNodeId,
+                                 route);
+}
+
+bool DBThread::TransformRouteDataToRouteDescription(const osmscout::RouteData& data,
+                                                    osmscout::RouteDescription& description)
+{
+  QMutexLocker locker(&mutex);
+
+  return database.TransformRouteDataToRouteDescription(data,description);
+}
+
+bool DBThread::TransformRouteDataToWay(const osmscout::RouteData& data,
+                                       osmscout::Way& way)
+{
+  QMutexLocker locker(&mutex);
+
+  return database.TransformRouteDataToWay(data,way);
+}
+
+
+void DBThread::ClearRoute()
+{
+  QMutexLocker locker(&mutex);
+
+  emit HandleMapRenderingResult();
+}
+
+void DBThread::AddRoute(const osmscout::Way& way)
+{
+  QMutexLocker locker(&mutex);
+
+  data.poiWays.push_back(way);
+
+  emit HandleMapRenderingResult();
 }
 
 #include "moc_DBThread.cpp"

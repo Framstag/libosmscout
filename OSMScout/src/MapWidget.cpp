@@ -241,7 +241,7 @@ void MapWidget::paintEvent(QPaintEvent* event)
 
 void MapWidget::resizeEvent(QResizeEvent* event)
 {
-  std::cout<<"resizeEvent..."<<std::endl;
+  // no code
 }
 
 void MapWidget::ZoomIn(double zoomFactor)

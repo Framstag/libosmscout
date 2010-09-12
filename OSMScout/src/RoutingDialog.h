@@ -1,5 +1,5 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef ROUTINGDIALOG_H
+#define ROUTINGDIALOG_H
 
 /*
   OSMScout - a Qt backend for libosmscout and libosmscout-map
@@ -20,24 +20,31 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <QMainWindow>
+#include <QDialog>
+#include <QLineEdit>
+#include <QPushButton>
 
-#include "MapWidget.h"
+#include <osmscout/Location.h>
 
-class MainWindow : public QMainWindow
+class RoutingDialog : public QDialog
 {
   Q_OBJECT
 
 public slots:
-  void SearchLocation();
-  void Routing();
+  void SelectFrom();
+  void SelectTo();
+  void Route();
 
 private:
-  MapWidget * map;
+  QLineEdit          *from;
+  QLineEdit          *to;
+  QPushButton        *routeButton;
+  osmscout::Location fromLocation;
+  osmscout::Location toLocation;
 
 public:
-  MainWindow();
-  ~MainWindow();
+  RoutingDialog(QWidget* parentWindow);
+  ~RoutingDialog();
 };
 
 #endif

@@ -22,6 +22,7 @@
 #include <QMenuBar>
 
 #include "SearchLocationDialog.h"
+#include "RoutingDialog.h"
 
 MainWindow::MainWindow()
  : map(new MapWidget())
@@ -33,6 +34,7 @@ MainWindow::MainWindow()
 
   menu=menuBar()->addMenu("&Search");
   menu->addAction("Search &location",this,SLOT(SearchLocation()),QKeySequence("Ctrl+F"));
+  menu->addAction("&Routing",this,SLOT(Routing()),QKeySequence("Ctrl+R"));
 
   setCentralWidget(map);
 }
@@ -55,6 +57,13 @@ void MainWindow::SearchLocation()
 
     map->ShowReference(location.references.front(),osmscout::magVeryClose);
   }
+}
+
+void MainWindow::Routing()
+{
+  RoutingDialog dialog(this);
+
+  dialog.exec();
 }
 
 #include "moc_MainWindow.cpp"
