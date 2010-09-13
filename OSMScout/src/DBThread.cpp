@@ -40,6 +40,23 @@ DBThread::DBThread()
   // no code
 }
 
+void DBThread::FreeMaps()
+{
+#if defined(HAVE_LIB_QTOPENGL)
+  delete currentGLPixmap;
+  currentGLPixmap=NULL;
+
+  delete finishedGLPixmap;
+  finishedGLPixmap=NULL;
+#endif
+
+  delete currentPixmap;
+  currentPixmap=NULL;
+
+  delete finishedPixmap;
+  finishedPixmap=NULL;
+}
+
 void DBThread::run()
 {
   if (database.Open("../TravelJinni")) {
@@ -507,7 +524,9 @@ void DBThread::ClearRoute()
 
   data.poiWays.clear();
 
-  emit HandleMapRenderingResult();
+  FreeMaps();
+
+  emit Redraw();
 }
 
 void DBThread::AddRoute(const osmscout::Way& way)
@@ -516,7 +535,9 @@ void DBThread::AddRoute(const osmscout::Way& way)
 
   data.poiWays.push_back(way);
 
-  emit HandleMapRenderingResult();
+  FreeMaps();
+
+  emit Redraw();
 }
 
 #include "moc_DBThread.cpp"

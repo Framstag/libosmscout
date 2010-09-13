@@ -62,6 +62,7 @@ class DBThread : public QThread
 signals:
   void InitialisationFinished(const DatabaseLoadedResponse& response);
   void HandleMapRenderingResult();
+  void Redraw();
 
 public slots:
   void TriggerMapRendering(const RenderMapRequest& request);
@@ -88,6 +89,9 @@ private:
 #endif
   double                    finishedLon,finishedLat;
   double                    finishedMagnification;
+
+private:
+  void FreeMaps();
 
 public:
   DBThread();

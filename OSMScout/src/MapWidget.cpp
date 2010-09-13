@@ -30,6 +30,7 @@ MapWidget::MapWidget(QWidget *parent) :
   connect(&dbThread,SIGNAL(InitialisationFinished(DatabaseLoadedResponse)),this,SLOT(InitialisationFinished(DatabaseLoadedResponse)));
   connect(this,SIGNAL(TriggerMapRendering(RenderMapRequest)),&dbThread,SLOT(TriggerMapRendering(RenderMapRequest)));
   connect(&dbThread,SIGNAL(HandleMapRenderingResult()),this,SLOT(DrawRenderResult()));
+  connect(&dbThread,SIGNAL(Redraw()),this,SLOT(Redraw()));
 
   lon=0;
   lat=0;
@@ -39,6 +40,11 @@ MapWidget::MapWidget(QWidget *parent) :
 MapWidget::~MapWidget()
 {
   // no code
+}
+
+void MapWidget::Redraw()
+{
+  update();
 }
 
 void MapWidget::InitialisationFinished(const DatabaseLoadedResponse& response)

@@ -45,6 +45,7 @@ signals:
 public slots:
   void InitialisationFinished(const DatabaseLoadedResponse& response);
   void DrawRenderResult();
+  void Redraw();
 
 private:
   void TriggerMapRendering();
