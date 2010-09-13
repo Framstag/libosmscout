@@ -31,13 +31,18 @@ class MainWindow : public QMainWindow
 public slots:
   void SearchLocation();
   void Routing();
+  void InitialisationFinished(const DatabaseLoadedResponse& response);
 
 private:
-  MapWidget * map;
+  MapWidget *map;
+  QAction   *searchLocationAction;
+  QAction   *routingAction;
 
 public:
   MainWindow();
   ~MainWindow();
+
+
 };
 
 #endif

@@ -33,15 +33,27 @@ MainWindow::MainWindow()
   menu->addAction("&Quit",this,SLOT(close()),QKeySequence("Ctrl+Q"));
 
   menu=menuBar()->addMenu("&Search");
-  menu->addAction("Search &location",this,SLOT(SearchLocation()),QKeySequence("Ctrl+F"));
-  menu->addAction("&Routing",this,SLOT(Routing()),QKeySequence("Ctrl+R"));
+  searchLocationAction=menu->addAction("Search &location",this,SLOT(SearchLocation()),QKeySequence("Ctrl+F"));
+  routingAction=menu->addAction("&Routing",this,SLOT(Routing()),QKeySequence("Ctrl+R"));
+
+  searchLocationAction->setEnabled(false);
+  routingAction->setEnabled(false);
 
   setCentralWidget(map);
+
+  connect(&dbThread,SIGNAL(InitialisationFinished(DatabaseLoadedResponse)),
+          this,SLOT(InitialisationFinished(DatabaseLoadedResponse)));
 }
 
 MainWindow::~MainWindow()
 {
   // no code
+}
+
+void MainWindow::InitialisationFinished(const DatabaseLoadedResponse& response)
+{
+  searchLocationAction->setEnabled(true);
+  routingAction->setEnabled(true);
 }
 
 void MainWindow::SearchLocation()
