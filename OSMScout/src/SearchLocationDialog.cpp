@@ -60,6 +60,7 @@ SearchLocationDialog::SearchLocationDialog(QWidget* parentWindow)
   results->setViewMode(QListView::ListMode);
   results->setSelectionMode(QAbstractItemView::SingleSelection);
   results->setSelectionBehavior(QAbstractItemView::SelectRows);
+  results->setMinimumWidth(QApplication::fontMetrics().width("mlxi")/4*70);
 
   QVBoxLayout *mainLayout=new QVBoxLayout();
   QFormLayout *formLayout=new QFormLayout();
