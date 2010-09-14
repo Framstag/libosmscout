@@ -25,6 +25,15 @@
 #include <osmscout/Import.h>
 #include <osmscout/Util.h>
 
+void DumpHelp()
+{
+  std::cout << "Import -h -d -s <start step> -e <end step> <openstreetmapdata.osm>" << std::endl;
+  std::cout << " -h              show this help" << std::endl;
+  std::cout << " -d              show debug output" << std::endl;
+  std::cout << " -s <start step> set starting step" << std::endl;
+  std::cout << " -s <end step>   set finial step" << std::endl;
+}
+
 int main(int argc, char* argv[])
 {
   osmscout::ImportParameter parameter;
@@ -65,6 +74,13 @@ int main(int argc, char* argv[])
         parameterError=true;
       }
     }
+    else if (strcmp(argv[i],"-d")==0) {
+      progress.SetOutputDebug(true);
+    }
+    else if (strcmp(argv[i],"-h")==0) {
+      DumpHelp();
+      return 0;
+    }
     else if (mapfile==NULL) {
       mapfile=argv[i];
     }
@@ -77,7 +93,7 @@ int main(int argc, char* argv[])
   }
 
   if (mapfile==NULL || parameterError) {
-    std::cerr << "Import [-s <startstep>] <openstreetmapdata.osm>" << std::endl;
+    DumpHelp();
     return 1;
   }
 
