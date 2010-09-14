@@ -300,7 +300,7 @@ namespace osmscout {
                           const std::string& datafile,
                           const std::string& indexfile);
     virtual ~NumericIndexGenerator();
-    
+
     std::string GetDescription() const;
     bool Import(const ImportParameter& parameter,
                 Progress& progress,
@@ -323,7 +323,7 @@ namespace osmscout {
   {
     // no code
   }
-  
+
   template <class N,class T>
   std::string NumericIndexGenerator<N,T>::GetDescription() const
   {
@@ -348,33 +348,6 @@ namespace osmscout {
     std::vector<FileOffset> pageStarts;
     FileOffset              lastLevelPageStart;
 
-    if (!scanner.Open(datafile)) {
-      progress.Error(std::string("Cannot open '")+datafile+"'");
-      return false;
-    }
-
-    if (!scanner.Read(dataCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t d=1; d<=dataCount; d++) {
-      T data;
-
-      if (!data.Read(scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(d)+" of "+
-                       NumberToString(dataCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-        return false;
-      }
-    }
-
-    if (!scanner.Close()) {
-      return false;
-    }
-
     if (!writer.Open(indexfile)) {
       progress.Error(std::string("Cannot create '")+indexfile+"'");
       return false;
@@ -390,8 +363,6 @@ namespace osmscout {
       return false;
     }
 
-    std::cout << "Reading " << dataCount << " nodes in *.dat file..." << std::endl;
-    
     uint32_t levels=1;
     size_t   tmp;
     uint32_t indexLevelSize=parameter.GetNumericIndexLevelSize();
@@ -404,7 +375,7 @@ namespace osmscout {
 
     indexLevelSize=(uint32_t)ceil(pow(dataCount,1.0/levels));
 
-    progress.Info(NumberToString(dataCount)+" entries will be stored in "+NumberToString(levels)+ " levels using index level size of "+NumberToString(indexLevelSize));
+    progress.Info(NumberToString(dataCount)+" index entries will be stored in "+NumberToString(levels)+ " levels using index level size of "+NumberToString(indexLevelSize));
 
     writer.WriteNumber(levels);         // Number of levels
     writer.WriteNumber(indexLevelSize); // Size of index page
@@ -417,7 +388,7 @@ namespace osmscout {
     Id         lastId=0;
     FileOffset lastPos=0;
 
-    progress.Info(std::string("Level ")+NumberToString(levels)+" entries "+NumberToString(dataCount));
+    progress.Info(std::string("Writing level ")+NumberToString(levels)+" ("+NumberToString(dataCount)+" entries)");
 
     for (uint32_t d=0; d<dataCount; d++) {
       FileOffset pos;
@@ -463,7 +434,7 @@ namespace osmscout {
       startingIds.clear();
       pageStarts.clear();
 
-      progress.Info(std::string("Level ")+NumberToString(levels)+" entries "+NumberToString(si.size()));
+      progress.Info(std::string("Writing level ")+NumberToString(levels)+" ("+NumberToString(si.size())+" entries)");
 
       for (size_t i=0; i<si.size(); i++) {
         if (i%indexLevelSize==0) {
