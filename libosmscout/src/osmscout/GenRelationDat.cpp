@@ -500,8 +500,9 @@ namespace osmscout {
     }
 
     if (oldSize!=relation.roles.size()) {
+      /*
       progress.Info("Compacted number of roles of relation "+NumberToString(relation.id)+" "+name+
-                    " from "+NumberToString(oldSize)+" to "+NumberToString(relation.roles.size()));
+                    " from "+NumberToString(oldSize)+" to "+NumberToString(relation.roles.size()));*/
     }
 
     return true;
