@@ -180,6 +180,8 @@ namespace osmscout {
 
     void Stop();
 
+    std::string ResultString() const;
+
     friend OSMSCOUT_API std::ostream& operator<<(std::ostream& stream, const StopClock& clock);
   };
 

@@ -173,8 +173,9 @@ namespace osmscout {
   std::ostream& operator<<(std::ostream& stream, const StopClock& clock)
   {
 #if defined(__WIN32__) || defined(WIN32)
+    stream << "X.XXX" << std::endl;
 #else
-	timeval diff;
+    timeval diff;
 
     timersub(&clock.stop,&clock.start,&diff);
 
@@ -184,6 +185,33 @@ namespace osmscout {
     return stream;
   }
 
+  std::string StopClock::ResultString() const
+  {
+#if defined(__WIN32__) || defined(WIN32)
+    return "X.XXX";
+#else
+    timeval     diff;
+    std::string result;
+    std::string seconds;
+    std::string millis;
+
+    timersub(&stop,&start,&diff);
+
+    seconds=NumberToString(diff.tv_sec);
+    millis=NumberToString(diff.tv_usec/1000);
+
+    result=seconds;
+    result+=".";
+
+    for (size_t i=millis.length()+1; i<=3; i++) {
+      result+="0";
+    }
+
+    result+=millis;
+
+    return result;
+#endif
+  }
 
   void GetKeysForName(const std::string& name, std::set<uint32_t>& keys)
   {
