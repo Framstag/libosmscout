@@ -43,14 +43,16 @@ namespace osmscout {
     entries.push_back(RouteEntry(wayId,nodeId));
   }
 
-  RouteDescription::RouteStep::RouteStep(double distance,
+  RouteDescription::RouteStep::RouteStep(double at,
+                                         double after,
                                          Action action,
                                          const std::string& name,
                                          const std::string& refName)
-   : distance(distance),
-     action(action),
-     name(name),
-     refName(refName)
+  : at(at),
+    after(after),
+    action(action),
+    name(name),
+    refName(refName)
   {
     // no code
   }
@@ -65,12 +67,13 @@ namespace osmscout {
     steps.clear();
   }
 
-  void RouteDescription::AddStep(double distance,
+  void RouteDescription::AddStep(double at,
+                                 double after,
                                  Action action,
                                  const std::string& name,
                                  const std::string& refName)
   {
-    steps.push_back(RouteStep(distance,action,name,refName));
+    steps.push_back(RouteStep(at,after,action,name,refName));
   }
 }
 

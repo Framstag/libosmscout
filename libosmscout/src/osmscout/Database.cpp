@@ -1366,6 +1366,7 @@ namespace osmscout {
     Id                                               node=0,newNode=0;
     std::list<RouteData::RouteEntry>::const_iterator iter;
     double                                           distance=0.0;
+    double                                           lastDistance=0.0;
 
     description.Clear();
 
@@ -1388,8 +1389,8 @@ namespace osmscout {
     }
 
     // Lets start at the starting node (suprise, suprise ;-))
-    description.AddStep(0.0,RouteDescription::start,way.GetName(),way.GetRefName());
-    description.AddStep(0.0,RouteDescription::drive,way.GetName(),way.GetRefName());
+    description.AddStep(0.0,0.0,RouteDescription::start,way.GetName(),way.GetRefName());
+    description.AddStep(0.0,0.0,RouteDescription::drive,way.GetName(),way.GetRefName());
 
     iter++;
 
@@ -1433,12 +1434,13 @@ namespace osmscout {
         continue;
       }
 
-      description.AddStep(distance,RouteDescription::switchRoad,newWay.GetName(),newWay.GetRefName());
-      description.AddStep(distance,RouteDescription::drive,newWay.GetName(),newWay.GetRefName());
+      description.AddStep(distance,distance-lastDistance,RouteDescription::switchRoad,newWay.GetName(),newWay.GetRefName());
+      description.AddStep(distance,distance-lastDistance,RouteDescription::drive,newWay.GetName(),newWay.GetRefName());
+      lastDistance=distance;
     }
 
     // We reached the destination!
-    description.AddStep(distance,RouteDescription::reachTarget,newWay.GetName(),newWay.GetRefName());
+    description.AddStep(distance,distance-lastDistance,RouteDescription::reachTarget,newWay.GetName(),newWay.GetRefName());
 
     return true;
   }
