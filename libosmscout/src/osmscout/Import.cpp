@@ -46,6 +46,8 @@
 #include <osmscout/GenCityStreetIndex.h>
 #include <osmscout/GenWaterIndex.h>
 
+#include <osmscout/Util.h>
+
 namespace osmscout {
 
   static const size_t defaultStartStep=1;
@@ -149,8 +151,18 @@ namespace osmscout {
          ++module) {
       if (currentStep>=parameter.GetStartStep() &&
           currentStep<=parameter.GetEndStep()) {
+        StopClock timer;
+        bool      success;
+
         progress.SetStep(NumberToString(currentStep)+" "+(*module)->GetDescription());
-        if (!(*module)->Import(parameter,progress,typeConfig)) {
+
+        success=(*module)->Import(parameter,progress,typeConfig);
+
+        timer.Stop();
+
+        progress.Info(std::string("=> ")+timer.ResultString()+" second(s)");
+
+        if (!success) {
           progress.Error(std::string("Error while executing step ")+(*module)->GetDescription()+"!");
           return false;
         }
