@@ -154,7 +154,10 @@ namespace osmscout {
         StopClock timer;
         bool      success;
 
-        progress.SetStep(NumberToString(currentStep)+") "+(*module)->GetDescription());
+        progress.SetStep(std::string("Step #")+
+                         NumberToString(currentStep)+
+                         " - "+
+                         (*module)->GetDescription());
 
         success=(*module)->Import(parameter,progress,typeConfig);
 
