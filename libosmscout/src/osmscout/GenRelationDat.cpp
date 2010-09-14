@@ -500,9 +500,10 @@ namespace osmscout {
     }
 
     if (oldSize!=relation.roles.size()) {
-      /*
-      progress.Info("Compacted number of roles of relation "+NumberToString(relation.id)+" "+name+
-                    " from "+NumberToString(oldSize)+" to "+NumberToString(relation.roles.size()));*/
+      if (progress.OutputDebug()) {
+        progress.Debug("Compacted number of roles of relation "+NumberToString(relation.id)+" "+name+
+                       " from "+NumberToString(oldSize)+" to "+NumberToString(relation.roles.size()));
+      }
     }
 
     return true;
@@ -562,6 +563,8 @@ namespace osmscout {
     writer.Write(writtenRelationCount);
 
     for (uint32_t r=1; r<=rawRelationCount; r++) {
+      progress.SetProgress(r,rawRelationCount);
+
       RawRelation rawRel;
 
       if (!rawRel.Read(scanner)) {
@@ -577,6 +580,7 @@ namespace osmscout {
         progress.Warning("Relation "+
                          NumberToString(rawRel.id)+
                          " does not have any members!");
+        continue;
       }
 
       Relation              rel;
@@ -654,13 +658,17 @@ namespace osmscout {
             if (typeId==typeIgnore &&
                 rel.roles[m].GetType()!=typeIgnore) {
               typeId=rel.roles[m].GetType();
-              //progress.Debug("Autodetecting type of relation "+NumberToString(rel.id)+" as "+NumberToString(rel.type));
+              if (progress.OutputDebug()) {
+                progress.Debug("Autodetecting type of relation "+NumberToString(rel.id)+" as "+NumberToString(rel.type));
+              }
             }
             else if (typeId!=typeIgnore &&
                      rel.roles[m].GetType()!=typeIgnore &&
                      typeId!=rel.roles[m].GetType()) {
-              progress.Warning("Multipolygon/boundary relation "+NumberToString(rel.id)+" has conflicting types for outer boundary ("+
+              if (progress.OutputDebug()) {
+                progress.Debug("Multipolygon/boundary relation "+NumberToString(rel.id)+" has conflicting types for outer boundary ("+
                                NumberToString(rawRel.members[m].id)+","+NumberToString(rel.type)+","+NumberToString(rel.roles[m].GetType())+")");
+              }
               correct=false;
             }
           }
@@ -685,8 +693,10 @@ namespace osmscout {
         if (correct &&
             type!=rel.type &&
             type!=typeIgnore) {
-          progress.Warning("Autocorrecting type of relation "+NumberToString(rel.id)+
+          if (progress.OutputDebug()) {
+            progress.Debug("Autocorrecting type of relation "+NumberToString(rel.id)+
                            " from "+NumberToString(rel.type)+" to "+NumberToString(type));
+          }
           rel.type=type;
         }
       }
@@ -753,7 +763,9 @@ namespace osmscout {
         continue;
       }
 
-      //progress.Debug("Storing relation "+rel.relType+" "+NumberToString(rel.type)+" "+name);
+      if (progress.OutputDebug()) {
+        progress.Debug("Storing relation "+rel.relType+" "+NumberToString(rel.type)+" "+name);
+      }
 
       if (rel.type!=typeIgnore) {
         rel.Write(writer);
