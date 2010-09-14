@@ -78,6 +78,8 @@ namespace osmscout {
     }
 
     for (uint32_t r=1; r<=rawRelCount; r++) {
+      progress.SetProgress(r,rawRelCount);
+
       RawRelation relation;
 
       if (!relation.Read(scanner)) {
@@ -155,6 +157,8 @@ namespace osmscout {
     }
 
     for (uint32_t w=1; w<=rawWayCount; w++) {
+      progress.SetProgress(w,rawWayCount);
+
       RawWay way;
 
       if (!way.Read(scanner)) {
@@ -183,6 +187,8 @@ namespace osmscout {
 
     ac.Stop();
 
+    //std::cout << ac <<  std::endl;
+
     StopClock bc;
 
     std::vector<size_t> wayDistribution;
@@ -203,6 +209,8 @@ namespace osmscout {
     }
 
     for (uint32_t w=1; w<=rawWayCount; w++) {
+      progress.SetProgress(w,rawWayCount);
+
       RawWay way;
 
       if (!way.Read(scanner)) {
@@ -263,7 +271,7 @@ namespace osmscout {
       size_t start=index*distributionGranuality;
       size_t end=newIndex*distributionGranuality;
 
-      progress.Info(std::string("Loading way id ")+NumberToString(start)+">=id<"+NumberToString(end));
+      progress.Info(std::string("Loading way id ")+NumberToString(start)+">=id<"+NumberToString(end)+" (interval "+NumberToString(index+1)+" of "+NumberToString(wayDistribution.size())+")");
 
       std::map<Id,RawWay>  ways;
       std::set<Id>         nodeIds;
@@ -280,6 +288,8 @@ namespace osmscout {
       }
 
       for (uint32_t w=1; w<=rawWayCount; w++) {
+        progress.SetProgress(w,rawWayCount);
+
         RawWay way;
 
         if (!way.Read(scanner)) {
@@ -298,6 +308,12 @@ namespace osmscout {
             nodeIds.insert(way.nodes[j]);
             nodeUses[way.nodes[j]]=0;
           }
+        }
+
+        if (way.id>end) {
+          // ways are stored in increasing id order, so we can stop after we have reached
+          // the last id for this interval.
+          break;
         }
       }
 
@@ -327,6 +343,8 @@ namespace osmscout {
       }
 
       for (uint32_t n=1; n<=rawNodeCount; n++) {
+        progress.SetProgress(n,rawNodeCount);
+
         RawNode node;
 
         if (!node.Read(scanner)) {
@@ -361,6 +379,8 @@ namespace osmscout {
       }
 
       for (uint32_t w=1; w<=rawWayCount; w++) {
+        progress.SetProgress(w,rawWayCount);
+
         RawWay way;
 
         if (!way.Read(scanner)) {
@@ -415,7 +435,12 @@ namespace osmscout {
         for (size_t i=0; i<rawWay.nodes.size(); i++) {
           std::map<Id,RawNode>::iterator node=nodes.find(rawWay.nodes[i]);
 
-          assert(node!=nodes.end());
+          if (node==nodes.end()) {
+            progress.Error(std::string("Cannot find node ")+
+                           NumberToString(rawWay.nodes[i])+" for way "+
+                           NumberToString(rawWay.id));
+            continue;
+          }
 
           way.nodes[i].id=rawWay.nodes[i];
           way.nodes[i].lat=node->second.lat;
@@ -475,7 +500,7 @@ namespace osmscout {
 
     bc.Stop();
 
-    std::cout << ac << " <=> " << bc << std::endl;
+    //std::cout << ac << " <=> " << bc << std::endl;
 
     return true;
   }
