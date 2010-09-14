@@ -20,10 +20,12 @@
 #include <osmscout/Progress.h>
 
 #include <iostream>
+#include <iomanip>
 
 namespace osmscout {
 
   Progress::Progress()
+  : outputDebug(false)
   {
     // no code
   }
@@ -33,12 +35,27 @@ namespace osmscout {
     // no code
   }
 
+  void Progress::SetOutputDebug(bool outputDebug)
+  {
+    this->outputDebug=outputDebug;
+  }
+
+  bool Progress::OutputDebug() const
+  {
+    return outputDebug;
+  }
+
   void Progress::SetStep(const std::string& step)
   {
     // no code
   }
 
   void Progress::SetAction(const std::string& action)
+  {
+    // no code
+  }
+
+  void Progress::SetProgress(double current, double total)
   {
     // no code
   }
@@ -67,16 +84,39 @@ namespace osmscout {
   void ConsoleProgress::SetStep(const std::string& step)
   {
     std::cout << "+ " << step << "..." << std::endl;
+
+    lastProgressDump=0;
   }
 
   void ConsoleProgress::SetAction(const std::string& action)
   {
     std::cout << " - " << action << "..." << std::endl;
+
+    lastProgressDump=0;
+  }
+
+  void ConsoleProgress::SetProgress(double current, double total)
+  {
+    if (lastProgressDump==0) {
+      lastProgressDump=time(NULL);
+      return;
+    }
+
+    time_t now=time(NULL);
+
+    if (now-lastProgressDump>=10) {
+      std::cout << "   % " << std::setiosflags(std::ios::fixed) << std::setprecision(2) << current/total*100 << " (" << current << "/" << total << ")" << std::endl;
+
+      lastProgressDump=now;
+    }
+
   }
 
   void ConsoleProgress::Debug(const std::string& text)
   {
-    std::cout << "   " << text << std::endl;
+    if (OutputDebug()) {
+      std::cout << "   " << text << std::endl;
+    }
   }
 
   void ConsoleProgress::Info(const std::string& text)

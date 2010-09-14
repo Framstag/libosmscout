@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <ctime>
 #include <string>
 
 #include <osmscout/Private/CoreImportExport.h>
@@ -28,14 +29,21 @@ namespace osmscout {
 
   class OSMSCOUT_API Progress
   {
+  private:
+    bool outputDebug;
+
   protected:
     Progress();
 
   public:
     virtual ~Progress();
 
+    void SetOutputDebug(bool outputDebug);
+    bool OutputDebug() const;
+
     virtual void SetStep(const std::string& step);
     virtual void SetAction(const std::string& action);
+    virtual void SetProgress(double current, double total);
 
     virtual void Debug(const std::string& text);
     virtual void Info(const std::string& text);
@@ -45,9 +53,13 @@ namespace osmscout {
 
   class OSMSCOUT_API ConsoleProgress : public Progress
   {
+  private:
+    time_t lastProgressDump;
+
   public:
     void SetStep(const std::string& step);
     void SetAction(const std::string& action);
+    void SetProgress(double current, double total);
 
     void Debug(const std::string& text);
     void Info(const std::string& text);
