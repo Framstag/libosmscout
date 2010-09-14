@@ -391,6 +391,8 @@ namespace osmscout {
     progress.Info(std::string("Writing level ")+NumberToString(levels)+" ("+NumberToString(dataCount)+" entries)");
 
     for (uint32_t d=0; d<dataCount; d++) {
+      progress.SetProgress(d,dataCount);
+
       FileOffset pos;
 
       scanner.GetPos(pos);
