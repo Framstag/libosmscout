@@ -92,11 +92,11 @@ int main(int argc, char* argv[])
     std::cout << "<tr><td>";
 #endif
     std::cout << std::fixed << std::setprecision(1);
-    std::cout << step->GetDistance() << "km ";
+    std::cout << step->GetAt() << "km ";
 
-    if (step->GetDistance()-lastDistance!=0.0) {
+    if (step->GetAfter()!=0.0) {
       std::cout << std::fixed << std::setprecision(1);
-      std::cout << step->GetDistance()-lastDistance << "km ";
+      std::cout << step->GetAfter() << "km ";
     }
     else {
       std::cout << "      ";
@@ -182,7 +182,7 @@ int main(int argc, char* argv[])
 #endif
     std::cout << std::endl;
 
-    lastDistance=step->GetDistance();
+    lastDistance=step->GetAt();
   }
 
 
