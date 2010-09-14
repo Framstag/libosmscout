@@ -79,6 +79,8 @@ namespace osmscout {
     writer.Write(nodesWrittenCount);
 
     for (uint32_t n=1; n<=rawNodeCount; n++) {
+      progress.SetProgress(n,rawNodeCount);
+
       RawNode rawNode;
       Node    node;
 
