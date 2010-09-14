@@ -27,50 +27,42 @@
 
 #include <Lum/Object.h>
 
+#include <osmscout/Route.h>
+
 #include "DatabaseTask.h"
 
 /**
  */
 class RouteDialog : public Lum::Dlg::ActionDialog
 {
-public:
-  struct RouteSelection
-  {
-    std::string  startCity;
-    std::string  startStreet;
-    osmscout::Id startWay;
-    osmscout::Id startNode;
-    std::string  endCity;
-    std::string  endStreet;
-    osmscout::Id endWay;
-    osmscout::Id endNode;
+private:
+  typedef Lum::Model::StdRefTable<osmscout::RouteDescription::RouteStep,
+          std::list<osmscout::RouteDescription::RouteStep> >             RouteModel;
+  typedef Lum::Base::Reference<RouteModel>                               RouteModelRef;
 
-    bool IsStartValid() const;
-    bool IsEndValid() const;
+  class RouteModelPainter : public Lum::StringCellPainter
+  {
+  public:
+    std::wstring GetCellData() const;
   };
 
 private:
   DatabaseTask*         databaseTask;
-  Lum::Model::ActionRef okAction;
+  Lum::Model::ActionRef routeAction;
   Lum::Model::StringRef start;
   bool                  hasStart;
   Lum::Model::ActionRef startAction;
   Lum::Model::StringRef end;
   bool                  hasEnd;
   Lum::Model::ActionRef endAction;
-  RouteSelection        result;
-  bool                  hasResult;
+  RouteModelRef         routeModel;
 
 public:
-  RouteDialog(DatabaseTask* databaseTask,
-              const RouteSelection& selection);
+  RouteDialog(DatabaseTask* databaseTask);
 
   Lum::Object* GetContent();
   void GetActions(std::vector<Lum::Dlg::ActionInfo>& actions);
   void Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& msg);
-
-  bool HasResult() const;
-  const RouteSelection& GetResult() const;
 };
 
 #endif

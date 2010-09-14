@@ -416,7 +416,6 @@ private:
   Lum::Model::ActionRef       debugStatisticsAction;
   Lum::Model::ActionRef       aboutAction;
   MapControl                  *map;
-  RouteDialog::RouteSelection routeSelection;
 
 public:
   MainDialog()
@@ -538,13 +537,11 @@ public:
     else if (model==routeAction && routeAction->IsFinished()) {
       RouteDialog *dialog;
 
-      dialog=new RouteDialog(databaseTask,routeSelection);
+      dialog=new RouteDialog(databaseTask);
       dialog->SetParent(this);
       if (dialog->Open()) {
         dialog->EventLoop();
         dialog->Close();
-
-        routeSelection=dialog->GetResult();
       }
 
       delete dialog;
