@@ -143,7 +143,7 @@ namespace osmscout {
     }
 
     StopClock ac;
-
+/*
     progress.Info("Resolving ways using rawnodes.idx");
 
     if (!scanner.Open("rawways.dat")) {
@@ -183,7 +183,7 @@ namespace osmscout {
     if (!scanner.Close()) {
       progress.Error("Cannot close file 'rawways.dat'");
       return false;
-    }
+    }*/
 
     ac.Stop();
 
@@ -430,6 +430,14 @@ namespace osmscout {
         }
 
         // Nodes
+
+        if (rawWay.nodes.size()<2) {
+          progress.Error(std::string("Way ")+
+                         NumberToString(rawWay.id)+" has only "+
+                         NumberToString(rawWay.nodes.size())+
+                         " node(s) but requires at least 2 nodes");
+          continue;
+        }
 
         way.nodes.resize(rawWay.nodes.size());
         for (size_t i=0; i<rawWay.nodes.size(); i++) {
