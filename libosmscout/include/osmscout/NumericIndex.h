@@ -121,7 +121,7 @@ namespace osmscout {
     scanner.ReadNumber(entries);
     scanner.Read(lastLevelPageStart);
 
-    std::cout << filepart <<": " << levels << " " << levelSize << " " << entries << " " << lastLevelPageStart << std::endl;
+    //std::cout << filepart <<": " << levels << " " << levelSize << " " << entries << " " << lastLevelPageStart << std::endl;
 
     // Calculate the number of entries in the first level
     size_t levelEntries=entries;
@@ -138,7 +138,7 @@ namespace osmscout {
     Id         sio=0;
     FileOffset poo=0;
 
-    std::cout << levelEntries << " entries in first level" << std::endl;
+    //std::cout << levelEntries << " entries in first level" << std::endl;
 
     scanner.SetPos(lastLevelPageStart);
 
