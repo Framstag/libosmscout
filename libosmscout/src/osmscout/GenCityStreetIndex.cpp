@@ -97,6 +97,8 @@ namespace osmscout {
     }
 
     for (uint32_t n=1; n<=nodeCount; n++) {
+      progress.SetProgress(n,nodeCount);
+
       Node node;
 
       if (!node.Read(scanner)) {
@@ -158,6 +160,8 @@ namespace osmscout {
     }
 
     for (uint32_t w=1; w<=wayCount; w++) {
+      progress.SetProgress(w,wayCount);
+
       Way way;
 
       if (!way.Read(scanner)) {
@@ -819,6 +823,8 @@ namespace osmscout {
     }
 
     for (uint32_t w=1; w<=wayCount; w++) {
+      progress.SetProgress(w,wayCount);
+
       Way way;
 
       if (!way.Read(scanner)) {
@@ -868,6 +874,8 @@ namespace osmscout {
     }
 
     for (uint32_t n=1; n<=nodeCount; n++) {
+      progress.SetProgress(n,nodeCount);
+
       Node node;
 
       if (!node.Read(scanner)) {

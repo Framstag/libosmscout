@@ -63,6 +63,8 @@ namespace osmscout {
     }
 
     for (uint32_t n=1; n<=nodeCount; n++) {
+      progress.SetProgress(n,nodeCount);
+
       RawNode node;
 
       if (!node.Read(scanner)) {
@@ -107,7 +109,7 @@ namespace osmscout {
       size_t                      wayCount;
       std::map<Id,std::list<Id> > nodeWayMap;
 
-      progress.Info(std::string("Scanning for node ids ")+NumberToString(start)+">=id<"+NumberToString(end));
+      progress.Info(std::string("Scanning for node ids ")+NumberToString(start)+">=id<"+NumberToString(end)+" (interval "+NumberToString(index+1)+" of "+NumberToString(nodeDistribution.size())+")");
 
       if (!scanner.Open("ways.dat")) {
         progress.Error("Error while opening ways.dat!");
@@ -120,6 +122,8 @@ namespace osmscout {
       }
 
       for (uint32_t w=1; w<=wayCount; w++) {
+        progress.SetProgress(w,wayCount);
+
         Way way;
 
         if (!way.Read(scanner)) {
@@ -155,6 +159,8 @@ namespace osmscout {
       }
 
       for (uint32_t w=1; w<=wayCount; w++) {
+        progress.SetProgress(w,wayCount);
+
         Way way;
 
         if (!way.Read(scanner)) {

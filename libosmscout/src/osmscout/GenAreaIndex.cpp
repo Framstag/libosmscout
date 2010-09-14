@@ -220,6 +220,8 @@ namespace osmscout {
 
         ways=0;
         for (uint32_t w=1; w<=wayCount; w++) {
+          progress.SetProgress(w,wayCount);
+
           FileOffset offset;
           Way        way;
 
@@ -354,9 +356,10 @@ namespace osmscout {
             }
 
             if (level==l) {
+              // TODO: Use ScanConversion to reduce number of index entries
               //
               // Calculate all tile ids that are covered
-              // by the area
+              // by the way boundary
               //
               size_t minyc=floor(minLat/cellHeight[level]);
               size_t maxyc=floor(maxLat/cellHeight[level]);
@@ -401,6 +404,8 @@ namespace osmscout {
 
         rels=0;
         for (uint32_t r=1; r<=relCount; r++) {
+          progress.SetProgress(r,relCount);
+
           FileOffset offset;
           Relation   relation;
 
@@ -584,7 +589,7 @@ namespace osmscout {
                leaf->second.children[2]!=0 ||
                leaf->second.children[3]!=0);
 
-        if (l<parameter.GetAreaAreaIndexMaxMag()) {
+        if (l<(int)parameter.GetAreaAreaIndexMaxMag()) {
           // TODO: Is writer.Write better?
           for (size_t c=0; c<4; c++) {
             writer.WriteNumber(leaf->second.children[c]);
