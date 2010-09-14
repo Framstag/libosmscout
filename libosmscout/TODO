@@ -1,9 +1,9 @@
-* Move code into namespace "osmscout"
 * Improve RouteData and RouteDescription
 * Remove asserts from code (at leats where asserts can be provoked by user)
 * Define a error code concept (possibly copy class Status form Illumination)
 * Add text only interactive demo applications.
 * Improve routing algorithm to check for routing to non-rechable targets
-* Use DLL export to reduce visible symbols.
 * Think about virtual vs. non-virtual methods.
-* Move bounding box calculation to Way class.
+* GenRelationDat: It seems that the resolving step is the most time consuming.
+  Thus first detect type of Relation and decide if relation is relevant. Only
+  if relation is relevant resolve the relation.
