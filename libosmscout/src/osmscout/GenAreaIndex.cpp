@@ -356,24 +356,18 @@ namespace osmscout {
             }
 
             if (level==l) {
-              // TODO: Use ScanConversion to reduce number of index entries
-              //
-              // Calculate all tile ids that are covered
-              // by the way boundary
-              //
-              size_t minyc=floor(minLat/cellHeight[level]);
-              size_t maxyc=floor(maxLat/cellHeight[level]);
-              size_t minxc=floor(minLon/cellWidth[level]);
-              size_t maxxc=floor(maxLon/cellWidth[level]);
+              std::vector<ScanCell> cells;
 
-              // Now index the way for all cells in the bounding box
-              // TODO: We could do better by only indexing the way for all cells that it
-              // really intersects, thus reducing the number of (false) entries in the index
-              for (size_t yc=minyc; yc<=maxyc; yc++) {
-                for (size_t xc=minxc; xc<=maxxc; xc++) {
-                  leafs[Coord(xc,yc)].ways[way.GetType()].push_back(offset);
-                  wayLevelEntries++;
-                }
+              ScanConvertLine(way.nodes,
+                              -180.0,
+                              cellWidth[level],
+                              -90.0,
+                              cellHeight[level],
+                              cells);
+
+              for (size_t i=0; i<cells.size(); i++) {
+                leafs[Coord(cells[i].x,cells[i].y)].ways[way.GetType()].push_back(offset);
+                wayLevelEntries++;
               }
 
               waysConsumed++;
