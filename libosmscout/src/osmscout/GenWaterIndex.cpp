@@ -634,7 +634,7 @@ namespace osmscout {
       return false;
     }
 
-    writer.WriteNumber(parameter.GetWaterIndexMaxMag());
+    writer.WriteNumber((uint32_t)parameter.GetWaterIndexMaxMag());
     writer.WriteNumber(cellXStart);
     writer.WriteNumber(cellXEnd);
     writer.WriteNumber(cellYStart);

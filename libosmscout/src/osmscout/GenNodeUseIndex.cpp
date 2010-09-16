@@ -45,7 +45,7 @@ namespace osmscout {
     progress.SetAction("Analysing distribution");
 
     std::set<TypeId>      types;
-    size_t                nodeCount=0;
+    uint32_t              nodeCount=0;
     std::vector<uint32_t> nodeDistribution;
     FileScanner           scanner;
     uint32_t              intervalSize=parameter.GetNodeIndexIntervalSize();
@@ -106,7 +106,7 @@ namespace osmscout {
 
       size_t                      start=index*distributionGranuality;
       size_t                      end=newIndex*distributionGranuality;
-      size_t                      wayCount;
+      uint32_t                    wayCount;
       std::map<Id,std::list<Id> > nodeWayMap;
 
       progress.Info(std::string("Scanning for node ids ")+NumberToString(start)+">=id<"+NumberToString(end)+" (interval "+NumberToString(index+1)+" of "+NumberToString(nodeDistribution.size())+")");

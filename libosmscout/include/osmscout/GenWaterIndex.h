@@ -43,10 +43,10 @@ namespace osmscout {
       size_t                     cellYCount;
       std::vector<unsigned char> area;
 
-      void SetSize(size_t cellXCount, size_t cellYCount);
+      void SetSize(uint32_t cellXCount, uint32_t cellYCount);
 
-      State GetState(size_t x, size_t y) const;
-      void SetState(size_t x, size_t y, State state);
+      State GetState(uint32_t x, uint32_t y) const;
+      void SetState(uint32_t x, uint32_t y, State state);
     };
 
     struct Coast

@@ -46,7 +46,7 @@ namespace osmscout {
     std::vector<unsigned char> area;
 
   private:
-    GroundTile::Type GetType(size_t x, size_t y) const;
+    GroundTile::Type GetType(uint32_t x, uint32_t y) const;
 
   public:
     WaterIndex();
