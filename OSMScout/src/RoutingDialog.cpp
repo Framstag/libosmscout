@@ -30,6 +30,17 @@
 #include <iostream>
 #include <iomanip>
 
+static std::string DistanceToString(double distance)
+{
+  std::ostringstream stream;
+
+  stream.setf(std::ios::fixed);
+  stream.precision(1);
+  stream << distance << "km";
+
+  return stream.str();
+}
+
 struct RouteSelection
 {
   QString                    start;
@@ -44,12 +55,122 @@ struct RouteSelection
 
 RouteSelection route;
 
+RouteModel::RouteModel(QObject *parent)
+ :QAbstractTableModel(parent)
+{
+  // no code
+}
+
+int RouteModel::rowCount(const QModelIndex &parent) const
+{
+  return route.routeDescription.Steps().size();
+}
+
+int RouteModel::columnCount(const QModelIndex &parent) const
+{
+  return 3;
+}
+
+QVariant RouteModel::data(const QModelIndex &index, int role) const
+{
+  if (!index.isValid()) {
+    return QVariant();
+  }
+
+  if (index.row()<0 || index.row()>=(int)route.routeDescription.Steps().size()) {
+    return QVariant();
+  }
+
+  if (role==Qt::DisplayRole) {
+    std::list<osmscout::RouteDescription::RouteStep>::const_iterator step=route.routeDescription.Steps().begin();
+
+    // Not fast, but hopefully fast enough for small lists
+    std::advance(step,index.row());
+
+    if (index.column()==0) {
+      return DistanceToString(step->GetAt()).c_str();
+    }
+    else if (index.column()==1) {
+      return DistanceToString(step->GetAfter()).c_str();
+    }
+    else if (index.column()==2) {
+      QString action;
+      switch (step->GetAction()) {
+      case osmscout::RouteDescription::start:
+        action="Start at ";
+        break;
+      case osmscout::RouteDescription::drive:
+        action="Drive along ";
+        break;
+      case osmscout::RouteDescription::switchRoad:
+        action="Turn into ";
+        break;
+      case osmscout::RouteDescription::reachTarget:
+        action="Arriving at ";
+        break;
+      case osmscout::RouteDescription::pass:
+        action="Passing along ";
+        break;
+      }
+
+      if (!step->GetName().empty()) {
+        action+=QString::fromUtf8(step->GetName().c_str());
+
+        if (!step->GetRefName().empty()) {
+          action+=" ("+QString::fromUtf8(step->GetRefName().c_str())+")";
+        }
+      }
+      else {
+        action+=QString::fromUtf8(step->GetRefName().c_str());
+      }
+
+      return action;
+    }
+  }
+  else if (role==Qt::TextAlignmentRole) {
+    if (index.column()==0  || index.column()==1) {
+      return int(Qt::AlignRight|Qt::AlignVCenter);
+    }
+    else {
+      return int(Qt::AlignLeft|Qt::AlignVCenter);
+    }
+  }
+
+  return QVariant();
+}
+
+QVariant RouteModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+  if (role==Qt::DisplayRole && orientation==Qt::Horizontal) {
+    switch (section) {
+    case 0:
+      return "At";
+    case 1:
+      return "After";
+    case 2:
+      return "Instruction";
+    default:
+      return QVariant();
+    }
+  }
+
+  return QVariant();
+}
+
+void RouteModel::refresh()
+{
+  beginResetModel();
+  endResetModel();
+}
+
 RoutingDialog::RoutingDialog(QWidget* parentWindow)
  : QDialog(parentWindow,Qt::Dialog),
    from(new QLineEdit()),
    hasStart(false),
    to(new QLineEdit()),
    hasEnd(false),
+   routeView(new QTableView()),
+   routeModel(new RouteModel()),
    routeButton(new QPushButton("&Route"))
 {
   QVBoxLayout *mainLayout=new QVBoxLayout();
@@ -82,6 +203,20 @@ RoutingDialog::RoutingDialog(QWidget* parentWindow)
   formLayout->addRow("To:",toBoxLayout);
 
   mainLayout->addLayout(formLayout);
+
+  routeView->setModel(routeModel);
+  routeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+  routeView->setSelectionMode(QAbstractItemView::SingleSelection);
+  routeView->setSelectionBehavior(QAbstractItemView::SelectRows);
+  routeView->setShowGrid(false);
+  routeView->setMinimumWidth(QApplication::fontMetrics().width("mlxi")/4*70);
+  routeView->horizontalHeader()->setStretchLastSection(true);
+  routeView->horizontalHeader()->setHighlightSections (false);
+  routeView->verticalHeader()->hide();
+  routeView->setColumnWidth(0,QApplication::fontMetrics().width("mlxi")/4*12);
+  routeView->setColumnWidth(1,QApplication::fontMetrics().width("mlxi")/4*12);
+
+  mainLayout->addWidget(routeView);
 
   QDialogButtonBox *buttonBox=new QDialogButtonBox();
 
@@ -212,7 +347,6 @@ void RoutingDialog::Route()
   std::cout << "Route" << std::endl;
 
   osmscout::RouteData        routeData;
-  osmscout::RouteDescription routeDescription;
   osmscout::Way              startWay;
   osmscout::Way              endWay;
   osmscout::Way              routeWay;
@@ -234,12 +368,12 @@ void RoutingDialog::Route()
     return;
   }
 
-  //databaseTask->DumpStatistics();
+  dbThread.TransformRouteDataToRouteDescription(routeData,route.routeDescription);
 
-  dbThread.TransformRouteDataToRouteDescription(routeData,routeDescription);
+  routeModel->refresh();
 
-  for (std::list<osmscout::RouteDescription::RouteStep>::const_iterator step=routeDescription.Steps().begin();
-       step!=routeDescription.Steps().end();
+  for (std::list<osmscout::RouteDescription::RouteStep>::const_iterator step=route.routeDescription.Steps().begin();
+       step!=route.routeDescription.Steps().end();
        ++step) {
 #if defined(HTML)
     std::cout << "<tr><td>";
