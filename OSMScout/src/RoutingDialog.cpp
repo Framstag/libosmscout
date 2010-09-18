@@ -187,7 +187,6 @@ void RoutingDialog::Route()
   //databaseTask->DumpStatistics();
 
   dbThread.TransformRouteDataToRouteDescription(routeData,routeDescription);
-  double lastDistance = 0;
 
   for (std::list<osmscout::RouteDescription::RouteStep>::const_iterator step=routeDescription.Steps().begin();
        step!=routeDescription.Steps().end();
@@ -200,15 +199,15 @@ void RoutingDialog::Route()
     std::cout.width(5);
     std::cout.setf(std::ios::fixed);
     std::cout.precision(1);
-    std::cout << step->GetDistance() << "km ";
+    std::cout << step->GetAt() << "km ";
 
-    if (step->GetDistance()-lastDistance!=0.0) {
+    if (step->GetAfter()!=0.0) {
       std::cout.setf(std::ios::right);
       std::cout.fill(' ');
       std::cout.width(5);
       std::cout.setf(std::ios::fixed);
       std::cout.precision(1);
-      std::cout << step->GetDistance()-lastDistance << "km ";
+      std::cout << step->GetAfter() << "km ";
     }
     else {
       std::cout << "        ";
@@ -293,8 +292,6 @@ void RoutingDialog::Route()
     std::cout << "</td></tr>";
 #endif
     std::cout << std::endl;
-
-    lastDistance=step->GetDistance();
   }
 
   std::cout << std::setprecision(6); // back to default
