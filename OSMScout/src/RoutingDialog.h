@@ -37,10 +37,10 @@ public slots:
 
 private:
   QLineEdit          *from;
+  bool                hasStart;
   QLineEdit          *to;
+  bool                hasEnd;
   QPushButton        *routeButton;
-  osmscout::Location fromLocation;
-  osmscout::Location toLocation;
 
 public:
   RoutingDialog(QWidget* parentWindow);

@@ -30,10 +30,26 @@
 #include <iostream>
 #include <iomanip>
 
+struct RouteSelection
+{
+  QString                    start;
+  osmscout::Id               startWay;
+  osmscout::Id               startNode;
+  QString                    end;
+  osmscout::Id               endWay;
+  osmscout::Id               endNode;
+  osmscout::RouteData        routeData;
+  osmscout::RouteDescription routeDescription;
+};
+
+RouteSelection route;
+
 RoutingDialog::RoutingDialog(QWidget* parentWindow)
  : QDialog(parentWindow,Qt::Dialog),
    from(new QLineEdit()),
+   hasStart(false),
    to(new QLineEdit()),
+   hasEnd(false),
    routeButton(new QPushButton("&Route"))
 {
   QVBoxLayout *mainLayout=new QVBoxLayout();
@@ -82,6 +98,20 @@ RoutingDialog::RoutingDialog(QWidget* parentWindow)
   connect(selectToButton,SIGNAL(clicked()),this,SLOT(SelectTo()));
   connect(routeButton,SIGNAL(clicked()),this,SLOT(Route()));
   connect(buttonBox->button(QDialogButtonBox::Close),SIGNAL(clicked()),this,SLOT(reject()));
+
+  if (!route.start.isEmpty()) {
+    from->setText(route.start);
+    hasStart=true;
+  }
+
+  if (!route.end.isEmpty()) {
+    to->setText(route.end);
+    hasEnd=true;
+  }
+
+  if (hasStart && hasEnd) {
+    routeButton->setEnabled(true);
+  }
 }
 
 RoutingDialog::~RoutingDialog()
@@ -100,26 +130,36 @@ void RoutingDialog::SelectFrom()
   if (dialog.result()==QDialog::Accepted) {
     osmscout::Location location;
     std::string        label;
+    osmscout::Way      way;
 
-    fromLocation=dialog.GetLocationResult();
+    location=dialog.GetLocationResult();
 
-    if (fromLocation.path.empty()) {
-      label=fromLocation.name;
+    route.startWay=location.references.front().GetId();
+
+    if (dbThread.GetWay(route.startWay,way)) {
+      route.startNode=way.nodes[0].id;
+
+      if (location.path.empty()) {
+        route.start=QString::fromUtf8(location.name.c_str());
+      }
+      else {
+        route.start=QString::fromUtf8(location.name.c_str())+
+                     " ("+QString::fromUtf8(osmscout::StringListToString(location.path).c_str())+")";
+      }
+
+      from->setText(route.start);
+       // Make sure, start of text is visible
+      from->setCursorPosition(0);
+
+      hasStart=true;
+      if (hasStart && hasEnd) {
+        routeButton->setEnabled(true);
+      }
     }
     else {
-      label=fromLocation.name+" ("+osmscout::StringListToString(fromLocation.path)+")";
+      route.start.clear();
+      from->setText("");
     }
-
-    from->setText(QString::fromUtf8(label.c_str()));
-    // Make sure, start of text is visible
-    from->setCursorPosition(0);
-  }
-
-  if (fromLocation.IsValid() &&
-      toLocation.IsValid() &&
-      fromLocation.references.front().GetType()==osmscout::refWay &&
-      toLocation.references.front().GetType()==osmscout::refWay) {
-    routeButton->setEnabled(true);
   }
 }
 
@@ -132,28 +172,38 @@ void RoutingDialog::SelectTo()
   dialog.exec();
 
   if (dialog.result()==QDialog::Accepted) {
-    osmscout::Location location;
-    std::string        label;
+    osmscout::Location   location;
+    std::string          label;
+    osmscout::Way        way;
 
-    toLocation=dialog.GetLocationResult();
+    location=dialog.GetLocationResult();
 
-    if (toLocation.path.empty()) {
-      label=toLocation.name;
+    route.endWay=location.references.front().GetId();
+
+    if (dbThread.GetWay(route.endWay,way)) {
+      route.endNode=way.nodes[0].id;
+
+      if (location.path.empty()) {
+        route.end=QString::fromUtf8(location.name.c_str());
+      }
+      else {
+        route.end=QString::fromUtf8(location.name.c_str())+
+                  " ("+QString::fromUtf8(osmscout::StringListToString(location.path).c_str())+")";
+      }
+
+      to->setText(route.end);
+      // Make sure, start of text is visible
+      to->setCursorPosition(0);
+
+      hasEnd=true;
+      if (hasStart && hasEnd) {
+        routeButton->setEnabled(true);
+      }
     }
     else {
-      label=toLocation.name+" ("+osmscout::StringListToString(toLocation.path)+")";
+      route.start.clear();
+      from->setText("");
     }
-
-    to->setText(QString::fromUtf8(label.c_str()));
-    // Make sure, start of text is visible
-    to->setCursorPosition(0);
-  }
-
-  if (fromLocation.IsValid() &&
-      toLocation.IsValid() &&
-      fromLocation.references.front().GetType()==osmscout::refWay &&
-      toLocation.references.front().GetType()==osmscout::refWay) {
-    routeButton->setEnabled(true);
   }
 }
 
@@ -167,12 +217,12 @@ void RoutingDialog::Route()
   osmscout::Way              endWay;
   osmscout::Way              routeWay;
 
-  if (!dbThread.GetWay(fromLocation.references.front().id,startWay)) {
+  if (!dbThread.GetWay(route.startWay,startWay)) {
     std::cerr << "Cannot load start way" << std::endl;
     return;
   }
 
-  if (!dbThread.GetWay(toLocation.references.front().id,endWay)) {
+  if (!dbThread.GetWay(route.endWay,endWay)) {
     std::cerr << "Cannot load end way" << std::endl;
     return;
   }
