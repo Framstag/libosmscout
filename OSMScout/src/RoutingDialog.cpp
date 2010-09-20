@@ -30,10 +30,147 @@
 #include <iostream>
 #include <iomanip>
 
+static std::string DistanceToString(double distance)
+{
+  std::ostringstream stream;
+
+  stream.setf(std::ios::fixed);
+  stream.precision(1);
+  stream << distance << "km";
+
+  return stream.str();
+}
+
+struct RouteSelection
+{
+  QString                    start;
+  osmscout::Id               startWay;
+  osmscout::Id               startNode;
+  QString                    end;
+  osmscout::Id               endWay;
+  osmscout::Id               endNode;
+  osmscout::RouteData        routeData;
+  osmscout::RouteDescription routeDescription;
+};
+
+RouteSelection route;
+
+RouteModel::RouteModel(QObject *parent)
+ :QAbstractTableModel(parent)
+{
+  // no code
+}
+
+int RouteModel::rowCount(const QModelIndex &parent) const
+{
+  return route.routeDescription.Steps().size();
+}
+
+int RouteModel::columnCount(const QModelIndex &parent) const
+{
+  return 3;
+}
+
+QVariant RouteModel::data(const QModelIndex &index, int role) const
+{
+  if (!index.isValid()) {
+    return QVariant();
+  }
+
+  if (index.row()<0 || index.row()>=(int)route.routeDescription.Steps().size()) {
+    return QVariant();
+  }
+
+  if (role==Qt::DisplayRole) {
+    std::list<osmscout::RouteDescription::RouteStep>::const_iterator step=route.routeDescription.Steps().begin();
+
+    // Not fast, but hopefully fast enough for small lists
+    std::advance(step,index.row());
+
+    if (index.column()==0) {
+      return DistanceToString(step->GetAt()).c_str();
+    }
+    else if (index.column()==1) {
+      return DistanceToString(step->GetAfter()).c_str();
+    }
+    else if (index.column()==2) {
+      QString action;
+      switch (step->GetAction()) {
+      case osmscout::RouteDescription::start:
+        action="Start at ";
+        break;
+      case osmscout::RouteDescription::drive:
+        action="Drive along ";
+        break;
+      case osmscout::RouteDescription::switchRoad:
+        action="Turn into ";
+        break;
+      case osmscout::RouteDescription::reachTarget:
+        action="Arriving at ";
+        break;
+      case osmscout::RouteDescription::pass:
+        action="Passing along ";
+        break;
+      }
+
+      if (!step->GetName().empty()) {
+        action+=QString::fromUtf8(step->GetName().c_str());
+
+        if (!step->GetRefName().empty()) {
+          action+=" ("+QString::fromUtf8(step->GetRefName().c_str())+")";
+        }
+      }
+      else {
+        action+=QString::fromUtf8(step->GetRefName().c_str());
+      }
+
+      return action;
+    }
+  }
+  else if (role==Qt::TextAlignmentRole) {
+    if (index.column()==0  || index.column()==1) {
+      return int(Qt::AlignRight|Qt::AlignVCenter);
+    }
+    else {
+      return int(Qt::AlignLeft|Qt::AlignVCenter);
+    }
+  }
+
+  return QVariant();
+}
+
+QVariant RouteModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+  if (role==Qt::DisplayRole && orientation==Qt::Horizontal) {
+    switch (section) {
+    case 0:
+      return "At";
+    case 1:
+      return "After";
+    case 2:
+      return "Instruction";
+    default:
+      return QVariant();
+    }
+  }
+
+  return QVariant();
+}
+
+void RouteModel::refresh()
+{
+  beginResetModel();
+  endResetModel();
+}
+
 RoutingDialog::RoutingDialog(QWidget* parentWindow)
  : QDialog(parentWindow,Qt::Dialog),
    from(new QLineEdit()),
+   hasStart(false),
    to(new QLineEdit()),
+   hasEnd(false),
+   routeView(new QTableView()),
+   routeModel(new RouteModel()),
    routeButton(new QPushButton("&Route"))
 {
   QVBoxLayout *mainLayout=new QVBoxLayout();
@@ -67,6 +204,20 @@ RoutingDialog::RoutingDialog(QWidget* parentWindow)
 
   mainLayout->addLayout(formLayout);
 
+  routeView->setModel(routeModel);
+  routeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+  routeView->setSelectionMode(QAbstractItemView::SingleSelection);
+  routeView->setSelectionBehavior(QAbstractItemView::SelectRows);
+  routeView->setShowGrid(false);
+  routeView->setMinimumWidth(QApplication::fontMetrics().width("mlxi")/4*70);
+  routeView->horizontalHeader()->setStretchLastSection(true);
+  routeView->horizontalHeader()->setHighlightSections (false);
+  routeView->verticalHeader()->hide();
+  routeView->setColumnWidth(0,QApplication::fontMetrics().width("mlxi")/4*12);
+  routeView->setColumnWidth(1,QApplication::fontMetrics().width("mlxi")/4*12);
+
+  mainLayout->addWidget(routeView);
+
   QDialogButtonBox *buttonBox=new QDialogButtonBox();
 
   buttonBox->addButton(routeButton,QDialogButtonBox::ApplyRole);
@@ -82,6 +233,20 @@ RoutingDialog::RoutingDialog(QWidget* parentWindow)
   connect(selectToButton,SIGNAL(clicked()),this,SLOT(SelectTo()));
   connect(routeButton,SIGNAL(clicked()),this,SLOT(Route()));
   connect(buttonBox->button(QDialogButtonBox::Close),SIGNAL(clicked()),this,SLOT(reject()));
+
+  if (!route.start.isEmpty()) {
+    from->setText(route.start);
+    hasStart=true;
+  }
+
+  if (!route.end.isEmpty()) {
+    to->setText(route.end);
+    hasEnd=true;
+  }
+
+  if (hasStart && hasEnd) {
+    routeButton->setEnabled(true);
+  }
 }
 
 RoutingDialog::~RoutingDialog()
@@ -100,26 +265,36 @@ void RoutingDialog::SelectFrom()
   if (dialog.result()==QDialog::Accepted) {
     osmscout::Location location;
     std::string        label;
+    osmscout::Way      way;
 
-    fromLocation=dialog.GetLocationResult();
+    location=dialog.GetLocationResult();
 
-    if (fromLocation.path.empty()) {
-      label=fromLocation.name;
+    route.startWay=location.references.front().GetId();
+
+    if (dbThread.GetWay(route.startWay,way)) {
+      route.startNode=way.nodes[0].id;
+
+      if (location.path.empty()) {
+        route.start=QString::fromUtf8(location.name.c_str());
+      }
+      else {
+        route.start=QString::fromUtf8(location.name.c_str())+
+                     " ("+QString::fromUtf8(osmscout::StringListToString(location.path).c_str())+")";
+      }
+
+      from->setText(route.start);
+       // Make sure, start of text is visible
+      from->setCursorPosition(0);
+
+      hasStart=true;
+      if (hasStart && hasEnd) {
+        routeButton->setEnabled(true);
+      }
     }
     else {
-      label=fromLocation.name+" ("+osmscout::StringListToString(fromLocation.path)+")";
+      route.start.clear();
+      from->setText("");
     }
-
-    from->setText(QString::fromUtf8(label.c_str()));
-    // Make sure, start of text is visible
-    from->setCursorPosition(0);
-  }
-
-  if (fromLocation.IsValid() &&
-      toLocation.IsValid() &&
-      fromLocation.references.front().GetType()==osmscout::refWay &&
-      toLocation.references.front().GetType()==osmscout::refWay) {
-    routeButton->setEnabled(true);
   }
 }
 
@@ -132,28 +307,38 @@ void RoutingDialog::SelectTo()
   dialog.exec();
 
   if (dialog.result()==QDialog::Accepted) {
-    osmscout::Location location;
-    std::string        label;
+    osmscout::Location   location;
+    std::string          label;
+    osmscout::Way        way;
 
-    toLocation=dialog.GetLocationResult();
+    location=dialog.GetLocationResult();
 
-    if (toLocation.path.empty()) {
-      label=toLocation.name;
+    route.endWay=location.references.front().GetId();
+
+    if (dbThread.GetWay(route.endWay,way)) {
+      route.endNode=way.nodes[0].id;
+
+      if (location.path.empty()) {
+        route.end=QString::fromUtf8(location.name.c_str());
+      }
+      else {
+        route.end=QString::fromUtf8(location.name.c_str())+
+                  " ("+QString::fromUtf8(osmscout::StringListToString(location.path).c_str())+")";
+      }
+
+      to->setText(route.end);
+      // Make sure, start of text is visible
+      to->setCursorPosition(0);
+
+      hasEnd=true;
+      if (hasStart && hasEnd) {
+        routeButton->setEnabled(true);
+      }
     }
     else {
-      label=toLocation.name+" ("+osmscout::StringListToString(toLocation.path)+")";
+      route.start.clear();
+      from->setText("");
     }
-
-    to->setText(QString::fromUtf8(label.c_str()));
-    // Make sure, start of text is visible
-    to->setCursorPosition(0);
-  }
-
-  if (fromLocation.IsValid() &&
-      toLocation.IsValid() &&
-      fromLocation.references.front().GetType()==osmscout::refWay &&
-      toLocation.references.front().GetType()==osmscout::refWay) {
-    routeButton->setEnabled(true);
   }
 }
 
@@ -162,17 +347,16 @@ void RoutingDialog::Route()
   std::cout << "Route" << std::endl;
 
   osmscout::RouteData        routeData;
-  osmscout::RouteDescription routeDescription;
   osmscout::Way              startWay;
   osmscout::Way              endWay;
   osmscout::Way              routeWay;
 
-  if (!dbThread.GetWay(fromLocation.references.front().id,startWay)) {
+  if (!dbThread.GetWay(route.startWay,startWay)) {
     std::cerr << "Cannot load start way" << std::endl;
     return;
   }
 
-  if (!dbThread.GetWay(toLocation.references.front().id,endWay)) {
+  if (!dbThread.GetWay(route.endWay,endWay)) {
     std::cerr << "Cannot load end way" << std::endl;
     return;
   }
@@ -184,13 +368,12 @@ void RoutingDialog::Route()
     return;
   }
 
-  //databaseTask->DumpStatistics();
+  dbThread.TransformRouteDataToRouteDescription(routeData,route.routeDescription);
 
-  dbThread.TransformRouteDataToRouteDescription(routeData,routeDescription);
-  double lastDistance = 0;
+  routeModel->refresh();
 
-  for (std::list<osmscout::RouteDescription::RouteStep>::const_iterator step=routeDescription.Steps().begin();
-       step!=routeDescription.Steps().end();
+  for (std::list<osmscout::RouteDescription::RouteStep>::const_iterator step=route.routeDescription.Steps().begin();
+       step!=route.routeDescription.Steps().end();
        ++step) {
 #if defined(HTML)
     std::cout << "<tr><td>";
@@ -200,15 +383,15 @@ void RoutingDialog::Route()
     std::cout.width(5);
     std::cout.setf(std::ios::fixed);
     std::cout.precision(1);
-    std::cout << step->GetDistance() << "km ";
+    std::cout << step->GetAt() << "km ";
 
-    if (step->GetDistance()-lastDistance!=0.0) {
+    if (step->GetAfter()!=0.0) {
       std::cout.setf(std::ios::right);
       std::cout.fill(' ');
       std::cout.width(5);
       std::cout.setf(std::ios::fixed);
       std::cout.precision(1);
-      std::cout << step->GetDistance()-lastDistance << "km ";
+      std::cout << step->GetAfter() << "km ";
     }
     else {
       std::cout << "        ";
@@ -293,8 +476,6 @@ void RoutingDialog::Route()
     std::cout << "</td></tr>";
 #endif
     std::cout << std::endl;
-
-    lastDistance=step->GetDistance();
   }
 
   std::cout << std::setprecision(6); // back to default

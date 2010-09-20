@@ -140,20 +140,7 @@ struct RouteSelection
   osmscout::Id               endNode;
   osmscout::RouteData        routeData;
   osmscout::RouteDescription routeDescription;
-
-  bool IsStartValid() const;
-  bool IsEndValid() const;
 };
-
-bool RouteSelection::IsStartValid() const
-{
-  return !start.empty() && startWay!=0 && startNode!=0;
-}
-
-bool RouteSelection::IsEndValid() const
-{
-  return !end.empty() && endWay!=0 && endNode!=0;
-}
 
 RouteSelection result;
 

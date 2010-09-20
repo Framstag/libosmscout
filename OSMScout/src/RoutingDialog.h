@@ -23,8 +23,25 @@
 #include <QDialog>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QStandardItemModel>
+#include <QTableView>
 
 #include <osmscout/Location.h>
+
+class RouteModel : public QAbstractTableModel
+{
+  Q_OBJECT
+
+public:
+  RouteModel(QObject *parent=0);
+
+  int rowCount(const QModelIndex &parent) const;
+  int columnCount(const QModelIndex &parent) const;
+  QVariant data(const QModelIndex &index, int role) const;
+  QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+
+  void refresh();
+};
 
 class RoutingDialog : public QDialog
 {
@@ -36,11 +53,13 @@ public slots:
   void Route();
 
 private:
-  QLineEdit          *from;
-  QLineEdit          *to;
-  QPushButton        *routeButton;
-  osmscout::Location fromLocation;
-  osmscout::Location toLocation;
+  QLineEdit   *from;
+  bool        hasStart;
+  QLineEdit   *to;
+  bool        hasEnd;
+  QTableView  *routeView;
+  RouteModel  *routeModel;
+  QPushButton *routeButton;
 
 public:
   RoutingDialog(QWidget* parentWindow);
