@@ -22,12 +22,8 @@
 
 #include <stdint.h>
 
-#if defined(__WIN32__) || defined(WIN32)
-#else
-  #include <sys/time.h>
-#endif
-
 #include <cassert>
+#include <ctime>
 #include <limits>
 #include <list>
 #include <set>

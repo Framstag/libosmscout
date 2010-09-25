@@ -114,7 +114,7 @@ namespace osmscout {
           progress.Warning(std::string("Width tag value '")+tag->value+"' for "+NumberToString(id)+" value is too small or too big!");
         }
         else {
-          width=floor(w+0.5);
+          width=(uint8_t)floor(w+0.5);
           flags|=SegmentAttributes::hasWidth;
         }
         tag=tags.erase(tag);

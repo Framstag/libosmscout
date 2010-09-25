@@ -109,10 +109,10 @@ namespace osmscout {
         ++line) {
       std::vector<ScanCell> cells;
 
-      ScanConvertLine((line->a.lon+180.0)/cellWidth,
-                      (line->a.lat+90.0)/cellHeight,
-                      (line->b.lon+180.0)/cellWidth,
-                      (line->b.lat+90.0)/cellHeight,
+      ScanConvertLine((int)((line->a.lon+180.0)/cellWidth),
+                      (int)((line->a.lat+90.0)/cellHeight),
+                      (int)((line->b.lon+180.0)/cellWidth),
+                      (int)((line->b.lat+90.0)/cellHeight),
                       cells);
 
       if (line->b.lat>line->a.lat) {
@@ -153,10 +153,10 @@ namespace osmscout {
         ++line) {
       std::vector<ScanCell> cells;
 
-      ScanConvertLine((line->a.lon+180.0)/cellWidth,
-                      (line->a.lat+90.0)/cellHeight,
-                      (line->b.lon+180.0)/cellWidth,
-                      (line->b.lat+90.0)/cellHeight,
+      ScanConvertLine((int)((line->a.lon+180.0)/cellWidth),
+                      (int)((line->a.lat+90.0)/cellHeight),
+                      (int)((line->b.lon+180.0)/cellWidth),
+                      (int)((line->b.lat+90.0)/cellHeight),
                       cells);
       if (line->b.lat>line->a.lat) {
         // up
@@ -213,10 +213,10 @@ namespace osmscout {
         ++line) {
       std::vector<ScanCell> cells;
 
-      ScanConvertLine((line->a.lon+180.0)/cellWidth,
-                      (line->a.lat+90.0)/cellHeight,
-                      (line->b.lon+180.0)/cellWidth,
-                      (line->b.lat+90.0)/cellHeight,
+      ScanConvertLine((int)((line->a.lon+180.0)/cellWidth),
+                      (int)((line->a.lat+90.0)/cellHeight),
+                      (int)((line->b.lon+180.0)/cellWidth),
+                      (int)((line->b.lat+90.0)/cellHeight),
                       cells);
 
       if (line->b.lon>line->a.lon) {
@@ -257,10 +257,10 @@ namespace osmscout {
         ++line) {
       std::vector<ScanCell> cells;
 
-      ScanConvertLine((line->a.lon+180.0)/cellWidth,
-                      (line->a.lat+90.0)/cellHeight,
-                      (line->b.lon+180.0)/cellWidth,
-                      (line->b.lat+90.0)/cellHeight,
+      ScanConvertLine((int)((line->a.lon+180.0)/cellWidth),
+                      (int)((line->a.lat+90.0)/cellHeight),
+                      (int)((line->b.lon+180.0)/cellWidth),
+                      (int)((line->b.lat+90.0)/cellHeight),
                       cells);
       if (line->b.lon>line->a.lon) {
         // right
@@ -547,10 +547,10 @@ namespace osmscout {
 
     std::cout << "Data bounding box: [" << minLat << "," << minLon << "] - [" << maxLat << "," << maxLon << "]" << std::endl;
 
-    cellXStart=floor((minLon+180.0)/cellWidth);
-    cellXEnd=floor((maxLon+180.0)/cellWidth);
-    cellYStart=floor((minLat+90.0)/cellHeight);
-    cellYEnd=floor((maxLat+90.0)/cellHeight);
+    cellXStart=(uint32_t)floor((minLon+180.0)/cellWidth);
+    cellXEnd=(uint32_t)floor((maxLon+180.0)/cellWidth);
+    cellYStart=(uint32_t)floor((minLat+90.0)/cellHeight);
+    cellYEnd=(uint32_t)floor((maxLat+90.0)/cellHeight);
 
     cellXCount=cellXEnd-cellXStart+1;
     cellYCount=cellYEnd-cellYStart+1;
