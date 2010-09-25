@@ -100,10 +100,10 @@ namespace osmscout {
 
     tiles.clear();
 
-    cx1=floor((minlon+180.0)/cellWidth);
-    cx2=floor((maxlon+180.0)/cellWidth);
-    cy1=floor((minlat+90.0)/cellHeight);
-    cy2=floor((maxlat+90.0)/cellHeight);
+    cx1=(uint32_t)floor((minlon+180.0)/cellWidth);
+    cx2=(uint32_t)floor((maxlon+180.0)/cellWidth);
+    cy1=(uint32_t)floor((minlat+90.0)/cellHeight);
+    cy2=(uint32_t)floor((maxlat+90.0)/cellHeight);
 
     std::cout << "Cell rectangle: [" << cx1 << "," << cy1 << "]x[" << cx2 << "," << cy2 << "]" << std::endl;
 

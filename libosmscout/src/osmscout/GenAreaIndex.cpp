@@ -291,10 +291,10 @@ namespace osmscout {
               // Calculate all tile ids that are covered
               // by the area
               //
-              size_t minyc=floor(minLat/cellHeight[level]);
-              size_t maxyc=floor(maxLat/cellHeight[level]);
-              size_t minxc=floor(minLon/cellWidth[level]);
-              size_t maxxc=floor(maxLon/cellWidth[level]);
+              size_t minyc=(size_t)floor(minLat/cellHeight[level]);
+              size_t maxyc=(size_t)floor(maxLat/cellHeight[level]);
+              size_t minxc=(size_t)floor(minLon/cellWidth[level]);
+              size_t maxxc=(size_t)floor(maxLon/cellWidth[level]);
 
               //
               // Add offset to all tiles in this level that coint (parts) of
@@ -470,10 +470,10 @@ namespace osmscout {
               // Calculate all tile ids that are covered
               // by the area
               //
-              size_t minyc=floor(minLat/cellHeight[level]);
-              size_t maxyc=floor(maxLat/cellHeight[level]);
-              size_t minxc=floor(minLon/cellWidth[level]);
-              size_t maxxc=floor(maxLon/cellWidth[level]);
+              size_t minyc=(size_t)floor(minLat/cellHeight[level]);
+              size_t maxyc=(size_t)floor(maxLat/cellHeight[level]);
+              size_t minxc=(size_t)floor(minLon/cellWidth[level]);
+              size_t maxxc=(size_t)floor(maxLon/cellWidth[level]);
 
               for (size_t yc=minyc; yc<=maxyc; yc++) {
                 for (size_t xc=minxc; xc<=maxxc; xc++) {
@@ -539,10 +539,10 @@ namespace osmscout {
               // Calculate all tile ids that are covered
               // by the area
               //
-              size_t minyc=floor(minLat/cellHeight[level]);
-              size_t maxyc=floor(maxLat/cellHeight[level]);
-              size_t minxc=floor(minLon/cellWidth[level]);
-              size_t maxxc=floor(maxLon/cellWidth[level]);
+              size_t minyc=(size_t)floor(minLat/cellHeight[level]);
+              size_t maxyc=(size_t)floor(maxLat/cellHeight[level]);
+              size_t minxc=(size_t)floor(minLon/cellWidth[level]);
+              size_t maxxc=(size_t)floor(maxLon/cellWidth[level]);
 
               for (size_t yc=minyc; yc<=maxyc; yc++) {
                 for (size_t xc=minxc; xc<=maxxc; xc++) {
