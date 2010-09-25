@@ -32,6 +32,11 @@
 #include <vector>
 
 #include <osmscout/Private/CoreImportExport.h>
+#include <osmscout/Private/Config.h>
+
+#if defined(HAVE_SYS_TIME_H)
+  #include <sys/time.h>
+#endif
 
 #include <osmscout/Point.h>
 
@@ -166,8 +171,7 @@ namespace osmscout {
   class OSMSCOUT_API StopClock
   {
   private:
-#if defined(__WIN32__) || defined(WIN32)
-#else
+#if defined(HAVE_SYS_TIME_H)
     timeval start;
     timeval stop;
 #endif

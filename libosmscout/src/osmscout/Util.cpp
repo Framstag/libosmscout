@@ -156,30 +156,28 @@ namespace osmscout {
 
   StopClock::StopClock()
   {
-#if defined(__WIN32__) || defined(WIN32)
-#else
+#if defined(HAVE_SYS_TIME_H)
 	gettimeofday(&start,NULL);
 #endif
   }
 
   void StopClock::Stop()
   {
-#if defined(__WIN32__) || defined(WIN32)
-#else
+#if defined(HAVE_SYS_TIME_H)
 	gettimeofday(&stop,NULL);
 #endif
   }
 
   std::ostream& operator<<(std::ostream& stream, const StopClock& clock)
   {
-#if defined(__WIN32__) || defined(WIN32)
-    stream << "X.XXX" << std::endl;
-#else
+#if defined(HAVE_SYS_TIME_H)
     timeval diff;
 
     timersub(&clock.stop,&clock.start,&diff);
 
     stream << diff.tv_sec << "." << std::setw(3) << std::setfill('0') << diff.tv_usec/1000;
+#else
+    stream << "X.XXX" << std::endl;
 #endif
 
     return stream;
@@ -187,9 +185,7 @@ namespace osmscout {
 
   std::string StopClock::ResultString() const
   {
-#if defined(__WIN32__) || defined(WIN32)
-    return "X.XXX";
-#else
+#if defined(HAVE_SYS_TIME_H)
     timeval     diff;
     std::string result;
     std::string seconds;
@@ -210,6 +206,8 @@ namespace osmscout {
     result+=millis;
 
     return result;
+#else
+    return "X.XXX";
 #endif
   }
 
