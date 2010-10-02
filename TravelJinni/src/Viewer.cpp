@@ -42,11 +42,11 @@
 #include <Lum/OS/Bitmap.h>
 #include <Lum/OS/Display.h>
 #include <Lum/OS/Driver.h>
-#include <Lum/OS/Main.h>
 #include <Lum/OS/Thread.h>
 
 #include <Lum/Features.h>
 
+#include <Lum/Application.h>
 #include <Lum/Dialog.h>
 #include <Lum/Object.h>
 #include <Lum/Panel.h>
@@ -561,7 +561,7 @@ public:
 };
 
 
-class Main : public Lum::OS::MainDialog<MainDialog>
+class Main : public Lum::GUIApplication<MainDialog>
 {
 public:
   bool Prepare()
@@ -581,7 +581,7 @@ public:
     info.SetCopyright(L"(c) 2009, Tim Teulings");
     info.SetLicense(L"GNU Public License");
 
-    if (!Lum::OS::MainDialog<MainDialog>::Prepare()) {
+    if (!Lum::GUIApplication<MainDialog>::Prepare()) {
       return false;
     }
 
@@ -603,7 +603,7 @@ public:
       databaseTask=NULL;
     }
 
-    Lum::OS::MainDialog<MainDialog>::Cleanup();
+    Lum::GUIApplication<MainDialog>::Cleanup();
 
     if (database->IsOpen()) {
       database->Close();
