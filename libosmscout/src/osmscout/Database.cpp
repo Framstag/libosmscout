@@ -238,7 +238,7 @@ namespace osmscout {
     std::cout << "Real region: " << maxlon-minlon << "x" << maxlat-minlat << " = " << realArea << std::endl;
     std::cout << "Tile area: " << tileArea << ", with one tile " << GetTileWidth()*GetTileHeight();
     std::cout << " => " << (GetTileY(maxlat)-GetTileY(minlat)+1)*(GetTileX(maxlon)-GetTileX(minlon)+1) << " tiles " << std::endl;
-    effectiveNodes=(size_t)maxNodes*(tileArea/realArea);
+    effectiveNodes=(size_t)(maxNodes*(tileArea/realArea));
     std::cout << "Nodes: " << maxNodes << ", effective => " << effectiveNodes << std::endl;
 
     size_t           nodes=0;

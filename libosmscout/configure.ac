@@ -14,6 +14,7 @@ AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 
 AC_TYPE_SIZE_T
+AC_CHECK_HEADERS([sys/time.h])
 
 AC_CHECK_FUNCS([mmap])
 
@@ -25,17 +26,19 @@ fi
 
 dnl Selfmade tests
 
-AC_MSG_CHECKING([for gcc symbol visibility support])
-OLDCXXFLAGS="$CXXFLAGS"
-CXXFLAGS="$CXXFLAGS -fvisibility=hidden -fvisibility-inlines-hidden"
-AC_TRY_COMPILE([],
-               [],
-               [LIB_CXXFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden"
-                AC_SUBST(LIB_CXXFLAGS)
-                AC_MSG_RESULT(yes)
-                AC_DEFINE(OSMSCOUT_EXPORT_SYMBOLS,1,[libosmscout uses special gcc compiler features to export symbols])],
-               [AC_MSG_RESULT(no)])
-CXXFLAGS="$OLDCXXFLAGS"
+if test "$build_os" != "mingw32"; then
+  AC_MSG_CHECKING([for gcc symbol visibility support])
+  OLDCXXFLAGS="$CXXFLAGS"
+  CXXFLAGS="$CXXFLAGS -fvisibility=hidden -fvisibility-inlines-hidden"
+  AC_TRY_COMPILE([],
+                 [],
+                 [LIB_CXXFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden"
+                  AC_SUBST(LIB_CXXFLAGS)
+                  AC_MSG_RESULT(yes)
+                  AC_DEFINE(OSMSCOUT_EXPORT_SYMBOLS,1,[libosmscout uses special gcc compiler features to export symbols])],
+                 [AC_MSG_RESULT(no)])
+  CXXFLAGS="$OLDCXXFLAGS"
+fi  
 
 AC_MSG_CHECKING([for WIN32])
   AC_LINK_IFELSE([

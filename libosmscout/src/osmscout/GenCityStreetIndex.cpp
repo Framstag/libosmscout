@@ -42,13 +42,13 @@ namespace osmscout {
   /**
     A location within an area
     */
-  struct Location
+  struct Loc
   {
     Reference              reference;
     std::string            name;
   };
 
-  struct LocationRef
+  struct LocRef
   {
     FileOffset             offset;
     Reference              reference;
@@ -62,7 +62,7 @@ namespace osmscout {
     FileOffset                           offset;    //! Offset into the index file
     Reference                            reference; //! The id for this area
     std::string                          name;      //! The name of this area
-    std::list<Location>                  locations; //! Location that are represented by this area
+    std::list<Loc>                       locations; //! Location that are represented by this area
     std::vector<Point>                   area;      //! the geometric area of this area
 
     double                               minlon;
@@ -218,7 +218,7 @@ namespace osmscout {
   }
 
   static void AddLocationToArea(Area& area,
-                                const Location& location,
+                                const Loc& location,
                                 const Point& node)
                                 {
     if (area.name==location.name) {
@@ -300,7 +300,7 @@ namespace osmscout {
       }
       std::cout << a->name << std::endl;
 
-      for (std::list<Location>::const_iterator l=a->locations.begin();
+      for (std::list<Loc>::const_iterator l=a->locations.begin();
            l!=a->locations.end();
            l++) {
         for (size_t i=0; i<indent; i++) {
@@ -406,16 +406,16 @@ namespace osmscout {
   }
 
   static void GetLocationRefs(const Area& area,
-                              std::map<std::string,std::list<LocationRef> >& locationRefs)
+                              std::map<std::string,std::list<LocRef> >& locationRefs)
   {
-    LocationRef locRef;
+    LocRef locRef;
 
     locRef.offset=area.offset;
     locRef.reference=area.reference;
 
     locationRefs[area.name].push_back(locRef);
 
-    for (std::list<Location>::const_iterator l=area.locations.begin();
+    for (std::list<Loc>::const_iterator l=area.locations.begin();
          l!=area.locations.end();
          ++l) {
       locRef.offset=area.offset;
@@ -432,11 +432,11 @@ namespace osmscout {
   }
 
   static bool WriteLocationRefs(FileWriter& writer,
-                                const std::map<std::string,std::list<LocationRef> >& locationRefs)
+                                const std::map<std::string,std::list<LocRef> >& locationRefs)
   {
     writer.WriteNumber((uint32_t)locationRefs.size());
 
-    for (std::map<std::string,std::list<LocationRef> >::const_iterator n=locationRefs.begin();
+    for (std::map<std::string,std::list<LocRef> >::const_iterator n=locationRefs.begin();
          n!=locationRefs.end();
          ++n) {
       if (!writer.Write(n->first)) {
@@ -447,7 +447,7 @@ namespace osmscout {
         return false;
       }
 
-      for (std::list<LocationRef>::const_iterator o=n->second.begin();
+      for (std::list<LocRef>::const_iterator o=n->second.begin();
            o!=n->second.end();
            ++o) {
         if (!writer.WriteNumber(o->reference.type)) {
@@ -772,7 +772,7 @@ namespace osmscout {
         continue;
       }
 
-      Location location;
+      Loc location;
 
       location.reference.Set(city->id,refNode);
       location.name=name;
@@ -932,7 +932,7 @@ namespace osmscout {
     // Generate file with all area names, each referencing the areas where it is contained
     //
 
-    std::map<std::string,std::list<LocationRef> > locationRefs;
+    std::map<std::string,std::list<LocRef> > locationRefs;
 
     progress.SetAction("Write 'nameregion.idx'");
 

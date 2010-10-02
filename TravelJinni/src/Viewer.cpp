@@ -564,7 +564,7 @@ public:
 class Main : public Lum::GUIApplication<MainDialog>
 {
 public:
-  bool Prepare()
+  bool Initialize()
   {
     database=new osmscout::Database();
     jobFinishedAction=new Lum::Model::Action();
@@ -581,7 +581,7 @@ public:
     info.SetCopyright(L"(c) 2009, Tim Teulings");
     info.SetLicense(L"GNU Public License");
 
-    if (!Lum::GUIApplication<MainDialog>::Prepare()) {
+    if (!Lum::GUIApplication<MainDialog>::Initialize()) {
       return false;
     }
 
