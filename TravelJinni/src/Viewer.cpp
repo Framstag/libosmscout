@@ -35,10 +35,6 @@
 #include <Lum/Model/String.h>
 #include <Lum/Model/Table.h>
 
-#include <Lum/OS/Cairo/Bitmap.h>
-#include <Lum/OS/Cairo/Display.h>
-#include <Lum/OS/Cairo/DrawInfo.h>
-
 #include <Lum/OS/Bitmap.h>
 #include <Lum/OS/Display.h>
 #include <Lum/OS/Driver.h>

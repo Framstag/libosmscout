@@ -33,13 +33,8 @@
 #include <Lum/Base/String.h>
 
 #if defined(LUM_HAVE_LIB_CAIRO)
-  #include <Lum/OS/Cairo/Display.h>
+  #include <Lum/OS/Cairo/Driver.h>
 #endif
-
-#if defined(LUM_HAVE_LIB_X)
-  #include <Lum/OS/X11/DrawInfo.h>
-  #include <Lum/OS/X11/Display.h>
-#endif  
 
 #if defined(LUM_HAVE_LIB_WIN32)
   #include <Lum/OS/Win32/DrawInfo.h>
@@ -511,25 +506,6 @@ bool DatabaseTask::DrawResult(Lum::OS::Window* window,
   }
 #endif
 
-#if defined(LUM_HAVE_LIB_X)
-  if (dynamic_cast<Lum::OS::X11::DrawInfo*>(draw)!=NULL) {
-    Lum::OS::X11::DrawInfo *x11Draw=dynamic_cast<Lum::OS::X11::DrawInfo*>(draw);
-
-    cairo_surface_t *surface=cairo_xlib_surface_create(x11Draw->display,
-                                                       x11Draw->drawable,
-                                                       dynamic_cast<Lum::OS::X11::Display*>(Lum::OS::display)->visual,
-                                                       window->GetWidth(),window->GetHeight());
-
-    cairo_t* cairo=cairo_create(surface);
-
-    cairo_set_source_surface(cairo,finishedSurface,x-dx,y+dy);
-    cairo_rectangle(cairo,x,y,finishedWidth,finishedHeight);
-    cairo_fill(cairo);
-
-    cairo_destroy(cairo),
-    cairo_surface_destroy(surface);
-  }
-#endif
 #if defined(LUM_HAVE_LIB_WIN32)
   if (dynamic_cast<Lum::OS::Win32::DrawInfo*>(draw)!=NULL) {
     Lum::OS::Win32::DrawInfo *win32Draw=dynamic_cast<Lum::OS::Win32::DrawInfo*>(draw);
