@@ -177,7 +177,7 @@ namespace osmscout {
 
     stream << diff.tv_sec << "." << std::setw(3) << std::setfill('0') << diff.tv_usec/1000;
 #else
-    stream << "X.XXX" << std::endl;
+    stream << "X.XXX";
 #endif
 
     return stream;

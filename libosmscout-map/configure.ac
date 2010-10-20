@@ -7,6 +7,7 @@ AC_CONFIG_MACRO_DIR([m4])
 
 AC_CONFIG_HEADERS([include/osmscout/Private/Config.h include/osmscout/MapFeatures.h])
 AM_INIT_AUTOMAKE([no-define nostdinc subdir-objects dist-bzip2])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 AC_PROG_CXX
 AC_LANG(C++)
 AC_LIBTOOL_WIN32_DLL
