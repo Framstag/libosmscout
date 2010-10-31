@@ -32,7 +32,6 @@
 namespace osmscout {
 
   static size_t distributionGranuality =  100000;
-  static size_t waysLoadSize           = 1000000;
 
   std::string WayDataGenerator::GetDescription() const
   {
@@ -263,7 +262,7 @@ namespace osmscout {
       size_t newIndex=index;
 
       while (newIndex<wayDistribution.size() &&
-             bucketSize+wayDistribution[newIndex]<waysLoadSize) {
+             bucketSize+wayDistribution[newIndex]<parameter.GetWaysLoadSize()) {
         bucketSize+=wayDistribution[newIndex];
         newIndex++;
       }

@@ -30,7 +30,6 @@
 namespace osmscout {
 
   static size_t distributionGranuality = 1000000;
-  static size_t nodesLoadSize          = 1000000;
 
   std::string NodeUseIndexGenerator::GetDescription() const
   {
@@ -99,7 +98,7 @@ namespace osmscout {
       size_t newIndex=index;
 
       while (newIndex<nodeDistribution.size() &&
-             bucketSize+nodeDistribution[newIndex]<nodesLoadSize) {
+             bucketSize+nodeDistribution[newIndex]<parameter.GetNodesLoadSize()) {
         bucketSize+=nodeDistribution[newIndex];
         newIndex++;
       }

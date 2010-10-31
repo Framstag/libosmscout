@@ -280,8 +280,6 @@ namespace osmscout {
     for (size_t i=0; i<leafs.size(); i++) {
       entries+=leafs[i].GetSize();
       memory+=leafs[i].GetSize()+leafs[i].GetMemory(NumericIndexCacheValueSizer());
-
-      // TODO: Calculate size of cache
     }
 
     std::cout << "Index " << filepart << ": " << entries << " entries, " << memory << std::endl;

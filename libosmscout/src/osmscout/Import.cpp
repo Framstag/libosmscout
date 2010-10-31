@@ -56,6 +56,8 @@ namespace osmscout {
   ImportParameter::ImportParameter()
    : startStep(defaultStartStep),
      endStep(defaultEndStep),
+     nodesLoadSize(10000000),
+     waysLoadSize(1000000),
      nodeIndexIntervalSize(50),
      numericIndexLevelSize(1024),
      areaAreaIndexMaxMag(18),
@@ -80,6 +82,16 @@ namespace osmscout {
   size_t ImportParameter::GetEndStep() const
   {
     return endStep;
+  }
+
+  size_t ImportParameter::GetNodesLoadSize() const
+  {
+    return nodesLoadSize;
+  }
+
+  size_t ImportParameter::GetWaysLoadSize() const
+  {
+    return waysLoadSize;
   }
 
   size_t ImportParameter::GetNodeIndexIntervalSize() const
@@ -132,6 +144,16 @@ namespace osmscout {
   {
     this->startStep=startStep;
     this->endStep=endStep;
+  }
+
+  void ImportParameter::SetNodesLoadSize(size_t nodesLoadSize)
+  {
+    this->nodesLoadSize=nodesLoadSize;
+  }
+
+  void ImportParameter::SetWaysLoadSize(size_t waysLoadSize)
+  {
+    this->waysLoadSize=waysLoadSize;
   }
 
   void ImportParameter::SetNodeIndexIntervalSize(size_t nodeIndexIntervalSize)
