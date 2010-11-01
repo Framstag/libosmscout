@@ -29,7 +29,6 @@
 
 #include <cmath>
 #include <iomanip>
-#include <iostream>
 
 namespace osmscout {
 
@@ -154,17 +153,31 @@ namespace osmscout {
     return l->values[by] & (1 << bi);
   }
 
-  StopClock::StopClock()
+  struct StopClock::StopClockPIMPL
   {
 #if defined(HAVE_SYS_TIME_H)
-	gettimeofday(&start,NULL);
+    timeval start;
+    timeval stop;
 #endif
+  };
+
+  StopClock::StopClock()
+    : pimpl(new StopClockPIMPL())
+  {
+#if defined(HAVE_SYS_TIME_H)
+    gettimeofday(&pimpl->start,NULL);
+#endif
+  }
+
+  StopClock::~StopClock()
+  {
+    delete pimpl;
   }
 
   void StopClock::Stop()
   {
 #if defined(HAVE_SYS_TIME_H)
-	gettimeofday(&stop,NULL);
+    gettimeofday(&pimpl->stop,NULL);
 #endif
   }
 
@@ -173,7 +186,7 @@ namespace osmscout {
 #if defined(HAVE_SYS_TIME_H)
     timeval diff;
 
-    timersub(&clock.stop,&clock.start,&diff);
+    timersub(&clock.pimpl->stop,&clock.pimpl->start,&diff);
 
     stream << diff.tv_sec << "." << std::setw(3) << std::setfill('0') << diff.tv_usec/1000;
 #else
@@ -191,7 +204,7 @@ namespace osmscout {
     std::string seconds;
     std::string millis;
 
-    timersub(&stop,&start,&diff);
+    timersub(&pimpl->stop,&pimpl->start,&diff);
 
     seconds=NumberToString(diff.tv_sec);
     millis=NumberToString(diff.tv_usec/1000);

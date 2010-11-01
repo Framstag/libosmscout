@@ -171,12 +171,13 @@ namespace osmscout {
   class OSMSCOUT_API StopClock
   {
   private:
-#if defined(HAVE_SYS_TIME_H)
-    timeval start;
-    timeval stop;
-#endif
+    struct StopClockPIMPL;
+
+    StopClockPIMPL *pimpl;
+
   public:
     StopClock();
+    virtual ~StopClock();
 
     void Stop();
 
