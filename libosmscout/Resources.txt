@@ -1,0 +1,140 @@
+Import of germany.osm (~11G) from http://download.geofabrik.de/osm/.
+
+As one can see the following steps are the relevant, most time-consuming
+steps:
+
+* Calculation the objects in areas index. "object in areas" calculation must be
+  improved by improved the "point is area" algorithm.
+* Parsing of the XML file. XML parsing could be improved by using
+  the new binary OSM raw data format.
+* Generation of ways.dat file. This is time consuming because the nodes of a way
+  are resolved. Since data is too big to keep everything in memory and
+  on-disk algortihm must be used, repeately scanning data files. Instead of this
+  the nod eindex file could be used, but we need some performance tests first.
+
+egrep -h "(^\+ Step|^   =>)" <logfile>
+
++ Step #1 - Preprocess...
+   => 780.165 second(s)
++ Step #2 - Generating 'rawnode.idx'...
+   => 38.972 second(s)
++ Step #3 - Generating 'rawway.idx'...
+   => 13.544 second(s)
++ Step #4 - Generate 'relations.dat'...
+   => 69.570 second(s)
++ Step #5 - Generating 'relation.idx'...
+   => 1.460 second(s)
++ Step #6 - Generate 'nodes.dat'...
+   => 22.113 second(s)
++ Step #7 - Generating 'node.idx'...
+   => 1.056 second(s)
++ Step #8 - Generate 'ways.dat'...
+   => 652.622 second(s)
++ Step #9 - Generating 'way.idx'...
+   => 18.070 second(s)
++ Step #10 - Generate 'area.idx'...
+   => 210.686 second(s)
++ Step #11 - Generate 'areanode.idx'...
+   => 2.310 second(s)
++ Step #12 - Generate 'region.dat' and 'nameregion.idx'...
+   => 1802.233 second(s)
++ Step #13 - Generate 'nodeuse.idx'...
+   => 227.378 second(s)
++ Step #14 - Generate 'water.idx'...
+   => 26.315 second(s)
+
+The following files have been generated:
+169M area.idx
+8,0M areanode.idx
+  20 bounding.dat
+1,5M nameregion.idx
+3,2M node.idx
+ 31M nodes.dat
+ 88M nodeuse.idx
+ 98M rawnode.idx
+729M rawnodes.dat
+ 21M rawrels.dat
+ 15M rawway.idx
+330M rawways.dat
+ 21M region.dat
+197K relation.idx
+110M relations.dat
+ 19K water.idx
+1,2M wayblack.dat
+ 15M way.idx
+634M ways.dat
+
+Of these the following are necessary at application runtime:
+169M area.idx
+8,0M areanode.idx
+  20 bounding.dat
+1,5M nameregion.idx
+3,2M node.idx
+ 31M nodes.dat
+ 88M nodeuse.idx
+ 21M region.dat
+197K relation.idx
+110M relations.dat
+ 19K water.idx
+ 15M way.idx
+634M ways.dat
+
+Where the nodeuse.idx currently is only interesting for the internal routing
+solution. However some code change is required to do not make the database
+class require it. The water.idx is not finished and will likely increase
+in future (not not in a way that it changes the overall calculation
+drastically).
+
+So the overall size required on disk for a gemrany map without routing
+would be:
+
+du --total -h area.idx areanode.idx bounding.dat nameregion.idx node.idx \
+nodes.dat region.dat relation.idx relations.dat water.idx way.idx ways.dat 
+
+169M	area.idx
+8.0M	areanode.idx
+4.0K	bounding.dat
+1.5M	nameregion.idx
+3.2M	node.idx
+31M	  nodes.dat
+21M	  region.dat
+204K	relation.idx
+110M	relations.dat
+20K	  water.idx
+15M	  way.idx
+635M	ways.dat
+991M	total
+
+Memory usage:
+Open the germany map, search for Bonn, search for Dortmund:
+
+  PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND
+ 2325 tim       20   0 1810m 967m  39m S    0 31.9   0:14.41 lt-TravelJinni
+ 2422 tim       20   0 1752m 964m  41m S    0 31.8   0:20.92 lt-OSMScout
+  
+Most of the memory useage however comes from opening the data files
+using memory maped files. 
+
+The same, if no memory maped files are used:
+
+12659 tim       20   0 1034m 943m  14m S    0 31.1   0:22.05 lt-TravelJinni
+
+This is the result of the internal statistics dump. It shows that the memory
+usage is high and seems to match the memory footprint seens with "top".
+Problem is not the in memory cache but the various indexes. The by far biggest
+index is the area index, indexing all areas and ways in a certain area. Goal
+should be to reduce the in memory footprint of the various indexes and avoid
+keeping all indexes completely in memory. This esepcially true for above area 
+index.
+
+nodes.dat entries: 12, memory 160960
+Index node.idx: 120 entries, memory 3209208
+ways.dat entries: 1336, memory 320320
+Index way.idx: 191 entries, memory 3200199
+relations.dat entries: 1144, memory 116672
+Index relation.idx: 259 entries, memory 1600267
+Node use cache entries: 0, memory 16
+Area index size 4618855, memory usage 605820570
+Area node index size 351882, memory 11039966
+AdminRegion size 77176, locations size 0, memory 2160928
+Node index use size 601636, memory usage 7219632

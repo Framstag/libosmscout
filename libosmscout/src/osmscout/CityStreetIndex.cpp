@@ -394,7 +394,7 @@ namespace osmscout {
       memory+=l->second.ways.size()*sizeof(Id);
     }
 
-    std::cout << "AdminRegion size " << areas.size() << ", locations size" << locations.size() << ", memory " << memory << std::endl;
+    std::cout << "AdminRegion size " << areas.size() << ", locations size " << locations.size() << ", memory " << memory << std::endl;
   }
 }
 

@@ -282,7 +282,7 @@ namespace osmscout {
       memory+=leafs[i].GetSize()+leafs[i].GetMemory(NumericIndexCacheValueSizer());
     }
 
-    std::cout << "Index " << filepart << ": " << entries << " entries, " << memory << std::endl;
+    std::cout << "Index " << filepart << ": " << entries << " entries, memory " << memory << std::endl;
   }
 
   template <class N,class T>

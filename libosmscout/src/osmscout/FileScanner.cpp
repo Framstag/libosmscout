@@ -69,7 +69,7 @@ namespace osmscout {
 
       buffer=NULL;
     }
-#elif  defined(__WIN32__) || defined(WIN32)    
+#elif  defined(__WIN32__) || defined(WIN32)
       if (buffer!=NULL) {
         UnmapViewOfFile(buffer);
         buffer=NULL;
@@ -120,7 +120,7 @@ namespace osmscout {
       hasError=true;
       return false;
     }
-    
+
 #if defined(HAVE_MMAP)
     if (file!=NULL && readOnly && this->size>0) {
       FreeBuffer();
@@ -137,27 +137,27 @@ namespace osmscout {
 #elif  defined(__WIN32__) || defined(WIN32)
     if (file!=NULL && readOnly && this->size>0) {
       FreeBuffer();
-      
+
       mmfHandle=CreateFileMapping((HANDLE)_get_osfhandle(_fileno(file)),
                                   (LPSECURITY_ATTRIBUTES)NULL,
                                   PAGE_READONLY,
                                   0,0,
                                   (LPCTSTR)NULL);
-                                  
+
       if (mmfHandle!=NULL) {
-        buffer=(char*)MapViewOfFile(mmfHandle, 
-                                    FILE_MAP_READ, 
-                                    0, 
-                                    0, 
+        buffer=(char*)MapViewOfFile(mmfHandle,
+                                    FILE_MAP_READ,
+                                    0,
+                                    0,
                                     0);
-  
+
         if (buffer!=NULL) {
           offset=0;
         }
         else {
           std::cerr << "Cannot map view for file " << filename << " of size " << size << ": " << GetLastError() << std::endl;
         }
-      }      
+      }
       else {
         std::cerr << "Cannot create file mapping for file " << filename << " of size " << size << ": " << GetLastError() << std::endl;
       }
@@ -459,9 +459,9 @@ namespace osmscout {
 #endif
 
     unsigned char buffer[sizeof(uint32_t)];
-    
+
     hasError=fread(&buffer,sizeof(unsigned char),sizeof(uint32_t),file)!=sizeof(uint32_t);
-    
+
     if (hasError) {
       std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
       return false;

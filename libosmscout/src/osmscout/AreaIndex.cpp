@@ -561,7 +561,45 @@ namespace osmscout {
 
   void AreaIndex::DumpStatistics()
   {
-    // TODO
+    size_t size=0;
+    size_t memory=0;
+
+    memory+=sizeof(index)+index.size()*sizeof(IndexLevel);
+    for (size_t i=0; i<index.size(); i++) {
+      memory+=index[i].size()*(sizeof(size_t)+sizeof(IndexEntry));
+
+      for (IndexLevel::const_iterator iter=index[i].begin();
+           iter!=index[i].end();
+           ++iter) {
+        size++;
+
+        // Ways
+        memory+=iter->second.ways.size()*(sizeof(TypeId)+sizeof(std::vector<FileOffset>));
+
+        for (std::map<TypeId,std::vector<FileOffset> >::const_iterator iter2=iter->second.ways.begin();
+             iter2!=iter->second.ways.end();
+             ++iter2) {
+          memory+=iter2->second.size()*sizeof(FileOffset);
+        }
+
+        // RelWays
+        memory+=iter->second.relWays.size()*(sizeof(TypeId)+sizeof(std::vector<FileOffset>));
+
+        for (std::map<TypeId,std::vector<FileOffset> >::const_iterator iter2=iter->second.relWays.begin();
+             iter2!=iter->second.relWays.end();
+             ++iter2) {
+          memory+=iter2->second.size()*sizeof(FileOffset);
+        }
+
+        // Areas
+        memory+=iter->second.areas.size()*sizeof(FileOffset);
+
+        // RelAreas
+        memory+=iter->second.relAreas.size()*sizeof(FileOffset);
+      }
+    }
+
+    std::cout << "Area index size " << size << ", memory usage " << memory << std::endl;
   }
 }
 

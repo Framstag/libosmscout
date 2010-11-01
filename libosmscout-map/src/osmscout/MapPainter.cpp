@@ -1224,7 +1224,7 @@ namespace osmscout {
     waysDrawnCount=0;*/
 
     std::cout << "Draw ";
-    std::cout << projection.GetLat() <<",";
+    std::cout << projection.GetLat() <<", ";
     std::cout << projection.GetLon() << " with mag. ";
     std::cout << projection.GetMagnification() << "x" << "/" << log(projection.GetMagnification())/log(2);
     std::cout << " area " << projection.GetWidth() << "x" << projection.GetHeight() << std::endl;
