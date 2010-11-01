@@ -30,6 +30,12 @@
 #include <cmath>
 #include <iomanip>
 
+#include <osmscout/Private/Config.h>
+
+#if defined(HAVE_SYS_TIME_H)
+  #include <sys/time.h>
+#endif
+
 namespace osmscout {
 
 #if defined(__WIN32__) || defined(WIN32)
