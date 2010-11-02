@@ -44,6 +44,7 @@ namespace osmscout {
 
     std::cout << "Max level is: " << maxLevel << std::endl;
 
+    // Calculate the size of a cell in each index level
     cellWidth.resize(maxLevel+1);
     cellHeight.resize(maxLevel+1);
 
@@ -60,8 +61,9 @@ namespace osmscout {
     int l=maxLevel;
 
     while (l>=0) {
-      size_t   children=0;
       uint32_t entries;
+
+      // Read the number of entries in this level...
 
       if (!scanner.ReadNumber(entries)) {
         std::cerr << "Cannot read data, level " << l << std::endl;
@@ -79,15 +81,13 @@ namespace osmscout {
           return false;
         }
 
-        if (l<maxLevel) {
+        // Read offsets of children if not in the bottom level
+
+        if ((uint32_t)l<maxLevel) {
           for (size_t c=0; c<4; c++) {
             if (!scanner.ReadNumber(entry.children[c])) {
               std::cerr << "Cannot read index data, level " << l << " entry " << i << std::endl;
               return false;
-            }
-
-            if (entry.children[c]!=0) {
-              children++;
             }
           }
         }
@@ -97,7 +97,7 @@ namespace osmscout {
           }
         }
 
-        // Ways
+        // Now read the way offsets by type in this index entry
 
         uint32_t typeCount;
         uint32_t offsetCount;
@@ -107,8 +107,8 @@ namespace osmscout {
           return false;
         }
 
-        for (size_t t=0; t<typeCount; t++) {
-          TypeId   type;
+        for (uint32_t t=0; t<typeCount; t++) {
+          TypeId                  type;
 
           if (!scanner.ReadNumber(type)) {
             std::cerr << "Cannot read index way data, level " << l << " entry " << i << std::endl;
@@ -120,19 +120,21 @@ namespace osmscout {
             return false;
           }
 
-          for (size_t c=0; c<offsetCount; c++) {
-            FileOffset o;
+          if (offsetCount>0) {
+            std::vector<FileOffset> &vector=entry.ways[type];
 
-            if (!scanner.Read(o)) {
-              std::cerr << "Cannot read index way data, level " << l << " entry " << i << std::endl;
-              return false;
+            vector.resize(offsetCount);
+
+            for (size_t c=0; c<offsetCount; c++) {
+              if (!scanner.Read(vector[c])) {
+                std::cerr << "Cannot read index way data, level " << l << " entry " << i << std::endl;
+                return false;
+              }
             }
-
-            entry.ways[type].push_back(o);
           }
         }
 
-        // Relation ways
+        // Now read the way relation offsets by type in this index entry
 
         if (!scanner.ReadNumber(typeCount)) {
           std::cerr << "Cannot read index way relation data, level " << l << " entry " << i << std::endl;
@@ -152,15 +154,17 @@ namespace osmscout {
             return false;
           }
 
-          for (size_t c=0; c<offsetCount; c++) {
-            FileOffset o;
+          if (offsetCount>0) {
+            std::vector<FileOffset> &vector=entry.relWays[type];
 
-            if (!scanner.Read(o)) {
-              std::cerr << "Cannot read index way relation data, level " << l << " entry " << i << std::endl;
-              return false;
+            vector.resize(offsetCount);
+
+            for (size_t c=0; c<offsetCount; c++) {
+              if (!scanner.Read(vector[c])) {
+                std::cerr << "Cannot read index way relation data, level " << l << " entry " << i << std::endl;
+                return false;
+              }
             }
-
-            entry.relWays[type].push_back(o);
           }
         }
 
@@ -171,15 +175,13 @@ namespace osmscout {
           return false;
         }
 
-        for (size_t c=0; c<offsetCount; c++) {
-          FileOffset o;
+        entry.areas.resize(offsetCount);
 
-          if (!scanner.Read(o)) {
+        for (size_t c=0; c<offsetCount; c++) {
+          if (!scanner.Read(entry.areas[c])) {
             std::cerr << "Cannot read index area data, level " << l << " entry " << i << std::endl;
             return false;
           }
-
-          entry.areas.push_back(o);
         }
 
         // Relation areas
@@ -189,15 +191,13 @@ namespace osmscout {
           return false;
         }
 
-        for (size_t c=0; c<offsetCount; c++) {
-          FileOffset o;
+        entry.relAreas.resize(offsetCount);
 
-          if (!scanner.Read(o)) {
+        for (size_t c=0; c<offsetCount; c++) {
+          if (!scanner.Read(entry.relAreas[c])) {
             std::cerr << "Cannot read index area relation data, level " << l << " entry " << i << std::endl;
             return false;
           }
-
-          entry.relAreas.push_back(o);
         }
 
         index[l][offset]=entry;
@@ -206,6 +206,7 @@ namespace osmscout {
       l--;
     }
 
+    // The top level index level consists of exactly 1 entry
     assert(index[0].size()==1);
 
     return !scanner.HasError() && scanner.Close();
@@ -244,6 +245,7 @@ namespace osmscout {
     minlat+=90;
     maxlat+=90;
 
+    // Clear result datastructures
     wayWayOffsets.clear();
     relationAreaOffsets.clear();
     wayWayOffsets.clear();
@@ -253,15 +255,21 @@ namespace osmscout {
     // Ways
     //
 
+    // For every way type (ordered by priority)...
     stopWay=false;
     for (size_t t=0; !stopWay && t<wayTypes.size(); t++) {
       ctx.clear();
       cty.clear();
       co.clear();
 
+      // Clear lists of offsets we found in this iteration
+      // We must store all hits in a temporary storage because we either take
+      // all of the hits or none of them for a given type (else we would show
+      // more details in the top left cordener than in the bottom right corner of the map)
       newWayWayOffsets.clear();
       newRelationWayOffsets.clear();
 
+      // Start at the top of the index
       ctx.push_back(0);
       cty.push_back(0);
       co.push_back(index[0].begin()->first);
@@ -270,17 +278,19 @@ namespace osmscout {
       // * Take the tiles and offsets of the last level
       // * Calculate the new tiles and offsets that still interfer with given area
       // * Add the new offsets to the list of offsets and finish if we have
-      //   reached maxCount.
-      // * copy no, ntx, nty to ctx, cty, co and go to next iteration
+      //   reached maxLevel or maxWayCount.
+      // * copy no, ntx, nty to ctx, cty, co and go to next iteration ('n' = 'new')
       stopWay=false;
       for (size_t level=0;
            !stopWay &&
            level<=this->maxLevel && co.size()>0;
            level++) {
+        // Clear the list of new index tiles
         ntx.clear();
         nty.clear();
         no.clear();
 
+        // For all tiles...
         for (size_t i=0; !stopWay && i<co.size(); i++) {
           size_t cx;
           size_t cy;
@@ -293,9 +303,12 @@ namespace osmscout {
             return false;
           }
 
+          // Find the list of way and way relation offsets for the given type
           std::map<TypeId,std::vector<FileOffset> >::const_iterator wayTypeOffsets=entry->second.ways.find(wayTypes[t]);
           std::map<TypeId,std::vector<FileOffset> >::const_iterator relationTypeOffsets=entry->second.relWays.find(wayTypes[t]);
 
+          // Calculate the number of ways and way relations we found in this index tile
+          // for the given type
           size_t newWaysCount=0;
           size_t newRelsCount=0;
 
@@ -307,6 +320,7 @@ namespace osmscout {
             newRelsCount=relationTypeOffsets->second.size();
           }
 
+          // Se if we reached the limit
           if (newWaysCount>0 || newRelsCount>0) {
             if (wayWayOffsets.size()+relationWayOffsets.size()+
                 newWayWayOffsets.size()+
@@ -318,6 +332,10 @@ namespace osmscout {
               break;
             }
             else {
+              // if not, copy them over
+              // TODO: Perhaps we should just store the iterators until we are sure,
+              // that we want to copy the data into the result set?
+
               if (wayTypeOffsets!=entry->second.ways.end()) {
                 for (std::vector<FileOffset>::const_iterator o=wayTypeOffsets->second.begin();
                      o!=wayTypeOffsets->second.end();
@@ -335,6 +353,13 @@ namespace osmscout {
               }
             }
           }
+
+          if (level==this->maxLevel) {
+            // No need to calculate the new index tiles, since we stop anyway
+            break;
+          }
+
+          // Now calculate the new index tiles for the next level
 
           cx=ctx[i]*2;
           cy=cty[i]*2;
@@ -406,6 +431,7 @@ namespace osmscout {
         co=no;
       }
 
+      // Now copy the result for this type into the result
       for (std::vector<FileOffset>::const_iterator o=newWayWayOffsets.begin();
            o!=newWayWayOffsets.end();
            ++o) {
@@ -435,7 +461,7 @@ namespace osmscout {
     // * Take the tiles and offsets of the last level
     // * Calculate the new tiles and offsets that still interfer with given area
     // * Add the new offsets to the list of offsets and finish if we have
-    //   reached maxCount.
+    //   reached maxLevel or maxAreaCount.
     // * copy no, ntx, nty to ctx, cty, co and go to next iteration
     stopArea=false;
     for (size_t level=0;

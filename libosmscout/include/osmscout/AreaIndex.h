@@ -34,27 +34,45 @@
 namespace osmscout {
 
   /**
+    AreaIndex allows you to find areas, ways, area relations and way releations in
+    a given area.
+
+    For area structure result can be limited by the maximum level (which in turn defines
+    the mimimum size of the resultng areas since and area in a given level must fit into
+    the cell size (but can cross cell borders)) and the maximum number of areas found.
+
+    Way in turn can be limited by type and result count.
+
+    Internal the index is implemented as quadtree. As a result each index entry has 4
+    children (besides entries in the lowest level).
     */
   class AreaIndex
   {
   private:
+    /**
+      Datastructure for every index entry of our index.
+      */
     struct IndexEntry
     {
-      FileOffset                                children[4];
+      FileOffset                                children[4]; //! File index of each of the four children, or 0 if there is no child
       std::map<TypeId,std::vector<FileOffset> > ways;
       std::map<TypeId,std::vector<FileOffset> > relWays;
       std::vector<FileOffset>                   areas;
       std::vector<FileOffset>                   relAreas;
     };
 
-    typedef std::map<size_t,IndexEntry> IndexLevel;
+    /**
+      Each level consists of a map, holding all index entries for this level
+      by their file offset.
+      */
+    typedef std::map<FileOffset,IndexEntry> IndexLevel;
 
   private:
     std::string             filepart;
     std::vector<double>     cellWidth;
     std::vector<double>     cellHeight;
-    uint32_t                maxLevel;
-    std::vector<IndexLevel> index;
+    uint32_t                maxLevel; //! Maximum level in index
+    std::vector<IndexLevel> index;    //! An area of IndexLevel datastructures, one for each level
 
   public:
     AreaIndex();

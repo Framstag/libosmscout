@@ -377,7 +377,7 @@ namespace osmscout {
 
     writer.WriteNumber(levels);         // Number of levels
     writer.WriteNumber(indexLevelSize); // Size of index page
-    writer.WriteNumber(dataCount); // Number of nodes
+    writer.WriteNumber(dataCount);      // Number of nodes
 
     writer.GetPos(lastLevelPageStart);
 
