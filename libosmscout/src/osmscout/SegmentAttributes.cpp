@@ -106,6 +106,30 @@ namespace osmscout {
       }
       else if (!isArea && tag->key==tagWidth) {
         double w;
+        size_t pos=0;
+        size_t count=0;
+
+        // We expect that float values use '.' as separator, but many values use ',' instead.
+        // Try try fix this if string looks reasonable
+        for (size_t i=0; i<tag->value.length() && count<=1; i++) {
+          if (tag->value[i]==',') {
+            pos=i;
+            count++;
+          }
+        }
+
+        if (count==1) {
+          tag->value[pos]='.';
+        }
+
+        // Some width tagvalues add an 'm' to hint that the unit is meter, remove it.
+        if (tag->value.length()>=2) {
+          if (tag->value[tag->value.length()-1]=='m' &&
+              tag->value[tag->value.length()-2]>='0' &&
+              tag->value[tag->value.length()-2]<='9') {
+            tag->value.erase(tag->value.length()-1);
+          }
+        }
 
         if (!StringToNumber(tag->value,w)) {
           progress.Warning(std::string("Width tag value '")+tag->value+"' for "+NumberToString(id)+" is no double!");
