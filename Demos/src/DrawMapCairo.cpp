@@ -28,7 +28,7 @@
 /*
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
   level directory):
-  
+
   src/DrawMapCairo ../TravelJinni/ ../TravelJinni/standard.oss.xml 640 480 7.13 50.69 10000 test.png
 */
 
@@ -98,11 +98,12 @@ int main(int argc, char* argv[])
     cairo=cairo_create(surface);
 
     if (cairo!=NULL) {
-      osmscout::MercatorProjection projection;
-      osmscout::MapParameter       parameter;
-      osmscout::MapData            data;
-      osmscout::MapPainterCairo    painter;
-    
+      osmscout::MercatorProjection  projection;
+      osmscout::MapParameter        drawParameter;
+      osmscout::AreaSearchParameter searchParameter;
+      osmscout::MapData             data;
+      osmscout::MapPainterCairo     painter;
+
       projection.Set(lon,
                      lat,
                      zoom,
@@ -116,19 +117,16 @@ int main(int argc, char* argv[])
                           projection.GetLonMax(),
                           projection.GetLatMax(),
                           projection.GetMagnification(),
-                          ((size_t)ceil(osmscout::Log2(projection.GetMagnification())))+6,
-                          2000,
-                          2000,
-                          std::numeric_limits<size_t>::max(),
+                          searchParameter,
                           data.nodes,
                           data.ways,
                           data.areas,
                           data.relationWays,
                           data.relationAreas);
-  
+
       if (painter.DrawMap(styleConfig,
                           projection,
-                          parameter,
+                          drawParameter,
                           data,
                           cairo)) {
         if (cairo_surface_write_to_png(surface,output.c_str())!=CAIRO_STATUS_SUCCESS) {

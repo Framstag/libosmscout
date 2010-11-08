@@ -45,6 +45,66 @@ namespace osmscout {
     }
   };
 
+  AreaSearchParameter::AreaSearchParameter()
+  : maxWayLevel(5),
+    maxAreaLevel(4),
+    maxNodes(2000),
+    maxWays(2000),
+    maxAreas(std::numeric_limits<unsigned long>::max())
+  {
+    // no code
+  }
+
+  void AreaSearchParameter::SetMaximumWayLevel(unsigned long maxWayLevel)
+  {
+    this->maxWayLevel=maxWayLevel;
+  }
+
+  void AreaSearchParameter::SetMaximumAreaLevel(unsigned long maxAreaLevel)
+  {
+    this->maxAreaLevel=maxAreaLevel;
+  }
+
+  void AreaSearchParameter::SetMaximumNodes(unsigned long maxNodes)
+  {
+    this->maxNodes=maxNodes;
+  }
+
+  void AreaSearchParameter::SetMaximumWays(unsigned long maxWays)
+  {
+    this->maxWays=maxWays;
+  }
+
+  void AreaSearchParameter::SetMaximumAreas(unsigned long maxAreas)
+  {
+    this->maxAreas=maxAreas;
+  }
+
+  unsigned long AreaSearchParameter::GetMaximumWayLevel() const
+  {
+    return maxWayLevel;
+  }
+
+  unsigned long AreaSearchParameter::GetMaximumAreaLevel() const
+  {
+    return maxAreaLevel;
+  }
+
+  unsigned long AreaSearchParameter::GetMaximumNodes() const
+  {
+    return maxNodes;
+  }
+
+  unsigned long AreaSearchParameter::GetMaximumWays() const
+  {
+    return maxWays;
+  }
+
+  unsigned long AreaSearchParameter::GetMaximumAreas() const
+  {
+    return maxAreas;
+  }
+
   Database::Database()
    : isOpen(false),
      nodeDataFile("nodes.dat","node.idx",100000),
@@ -290,10 +350,7 @@ namespace osmscout {
                             double lonMin, double latMin,
                             double lonMax, double latMax,
                             double magnification,
-                            size_t maxAreaLevel,
-                            size_t maxNodes,
-                            size_t maxWays,
-                            size_t maxAreas,
+                            const AreaSearchParameter& parameter,
                             std::vector<Node>& nodes,
                             std::vector<Way>& ways,
                             std::vector<Way>& areas,
@@ -317,7 +374,7 @@ namespace osmscout {
     maxPriority=GetMaximumPriority(styleConfig,
                                    lonMin,latMin,lonMax,latMax,
                                    magnification,
-                                   maxNodes);
+                                   parameter.GetMaximumNodes());
 
     maxPrioTimer.Stop();
 
@@ -336,11 +393,11 @@ namespace osmscout {
 
     StopClock indexTimer;
 
-    std::vector<TypeId> types;
-    std::set<FileOffset> wayWayOffsets;
-    std::set<FileOffset> relationWayOffsets;
-    std::set<FileOffset> wayAreaOffsets;
-    std::set<FileOffset> relationAreaOffsets;
+    std::vector<TypeId>     types;
+    std::vector<FileOffset> wayWayOffsets;
+    std::vector<FileOffset> relationWayOffsets;
+    std::vector<FileOffset> wayAreaOffsets;
+    std::vector<FileOffset> relationAreaOffsets;
 
     styleConfig.GetWayTypesByPrio(types);
 
@@ -349,10 +406,13 @@ namespace osmscout {
                               latMin,
                               lonMax,
                               latMax,
-                              maxAreaLevel,
-                              maxAreas,
+                              ((size_t)ceil(osmscout::Log2(magnification)))+
+                              parameter.GetMaximumWayLevel(),
+                              ((size_t)ceil(osmscout::Log2(magnification)))+
+                              parameter.GetMaximumAreaLevel(),
+                              parameter.GetMaximumAreas(),
                               types,
-                              maxWays,
+                              parameter.GetMaximumWays(),
                               wayWayOffsets,
                               relationWayOffsets,
                               wayAreaOffsets,
@@ -400,6 +460,14 @@ namespace osmscout {
                       relationAreas)) {
       std::cerr << "Error reading relation areas in area!" << std::endl;
       return false;
+    }
+
+    for (std::vector<Relation>::const_iterator iter=relationWays.begin();
+         iter!=relationWays.end();
+         ++iter) {
+      if (iter->id==21032) {
+        std::cout << "Found relation " << iter->id << std::endl;
+      }
     }
 
     relationAreasTimer.Stop();
@@ -479,7 +547,7 @@ namespace osmscout {
     return wayDataFile.Get(offsets,ways);
   }
 
-  bool Database::GetWays(std::set<FileOffset>& offsets,
+  bool Database::GetWays(std::list<FileOffset>& offsets,
                          std::vector<Way>& ways) const
   {
     if (!IsOpen()) {
@@ -499,7 +567,7 @@ namespace osmscout {
     return relationDataFile.Get(offsets,relations);
   }
 
-  bool Database::GetRelations(std::set<FileOffset>& offsets,
+  bool Database::GetRelations(std::list<FileOffset>& offsets,
                               std::vector<Relation>& relations) const
   {
     if (!IsOpen()) {

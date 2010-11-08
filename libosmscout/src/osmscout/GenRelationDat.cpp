@@ -431,6 +431,7 @@ namespace osmscout {
     size_t oldSize=relation.roles.size();
 
     if (oldSize<=1) {
+      // Nothing to compact
       return true;
     }
 
@@ -438,7 +439,7 @@ namespace osmscout {
     while (role!=relation.roles.end()) {
       bool merged=false;
 
-      std::vector<Relation::Role>::iterator cand=role;
+      std::vector<Relation::Role>::iterator cand=role; // candidate role
 
       ++cand;
 

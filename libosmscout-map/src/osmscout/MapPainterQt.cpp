@@ -382,6 +382,7 @@ namespace osmscout {
 
   void MapPainterQt::DrawPath(LineStyle::Style style,
                               const Projection& projection,
+                              const MapParameter& parameter,
                               double r,
                               double g,
                               double b,
@@ -418,7 +419,7 @@ namespace osmscout {
     }
 
 
-    TransformWay(projection,nodes);
+    TransformWay(projection,parameter,nodes);
 /*
     painter->setPen(pen);
     size_t last=0;
@@ -535,7 +536,7 @@ namespace osmscout {
     pen.setCapStyle(Qt::FlatCap);
     pen.setWidthF(lineWidth);
 
-    TransformWay(projection,nodes);
+    TransformWay(projection,parameter,nodes);
 /*
     size_t last=0;
     bool start=true;
@@ -613,6 +614,7 @@ namespace osmscout {
 
   void MapPainterQt::DrawArea(const StyleConfig& styleConfig,
                               const Projection& projection,
+                              const MapParameter& parameter,
                               TypeId type,
                               int layer,
                               const SegmentAttributes& attributes,
@@ -628,7 +630,7 @@ namespace osmscout {
     bool               hasFill=fillStyle!=NULL &&
                                fillStyle->GetLayer()==layer;
 
-    TransformArea(projection,nodes);
+    TransformArea(projection,parameter,nodes);
 
     QPolygonF polygon;
 

@@ -53,6 +53,38 @@
 #include <osmscout/Route.h>
 
 namespace osmscout {
+
+  /**
+    Parameter to influence th search result for searching for (drawable)
+    objects in a given area.
+    */
+  class OSMSCOUT_API AreaSearchParameter
+  {
+  private:
+    unsigned long maxWayLevel;
+    unsigned long maxAreaLevel;
+    unsigned long maxNodes;
+    unsigned long maxWays;
+    unsigned long maxAreas;
+
+  public:
+    AreaSearchParameter();
+
+    void SetMaximumWayLevel(unsigned long maxWayLevel);
+    void SetMaximumAreaLevel(unsigned long maxAreaLevel);
+
+    void SetMaximumNodes(unsigned long maxNodes);
+    void SetMaximumWays(unsigned long maxWays);
+    void SetMaximumAreas(unsigned long maxAreas);
+
+    unsigned long GetMaximumWayLevel() const;
+    unsigned long GetMaximumAreaLevel() const;
+
+    unsigned long GetMaximumNodes() const;
+    unsigned long GetMaximumWays() const;
+    unsigned long GetMaximumAreas() const;
+  };
+
   class OSMSCOUT_API Database
   {
   public: // Fix this
@@ -106,13 +138,13 @@ namespace osmscout {
     bool GetWays(std::vector<FileOffset>& offsets,
                  std::vector<Way>& ways) const;
 
-    bool GetWays(std::set<FileOffset>& offsets,
+    bool GetWays(std::list<FileOffset>& offsets,
                  std::vector<Way>& ways) const;
 
-    bool GetRelations(std::set<FileOffset>& offsets,
+    bool GetRelations(std::vector<FileOffset>& offsets,
                       std::vector<Relation>& relations) const;
 
-    bool GetRelations(std::vector<FileOffset>& offsets,
+    bool GetRelations(std::list<FileOffset>& offsets,
                       std::vector<Relation>& relations) const;
 
     bool GetNodes(const StyleConfig& styleConfig,
@@ -142,10 +174,7 @@ namespace osmscout {
                     double lonMin, double latMin,
                     double lonMax, double latMax,
                     double magnification,
-                    size_t maxAreaLevel,
-                    size_t maxNodes,
-                    size_t maxWays,
-                    size_t maxAreas,
+                    const AreaSearchParameter& parameter,
                     std::vector<Node>& nodes,
                     std::vector<Way>& ways,
                     std::vector<Way>& areas,

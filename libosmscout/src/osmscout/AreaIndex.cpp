@@ -56,8 +56,6 @@ namespace osmscout {
       cellHeight[i]=180.0/pow(2.0,(int)i);
     }
 
-    index.resize(maxLevel+1);
-
     int l=maxLevel;
 
     while (l>=0) {
@@ -79,6 +77,10 @@ namespace osmscout {
         if (!scanner.GetPos(offset)) {
           std::cerr << "Cannot read index data, level " << l << " entry " << i << std::endl;
           return false;
+        }
+
+        if ((uint32_t)l==0) {
+          topLevelOffset=offset;
         }
 
         // Read offsets of children if not in the bottom level
@@ -108,7 +110,7 @@ namespace osmscout {
         }
 
         for (uint32_t t=0; t<typeCount; t++) {
-          TypeId                  type;
+          TypeId type;
 
           if (!scanner.ReadNumber(type)) {
             std::cerr << "Cannot read index way data, level " << l << " entry " << i << std::endl;
@@ -200,14 +202,11 @@ namespace osmscout {
           }
         }
 
-        index[l][offset]=entry;
+        index[offset]=entry;
       }
 
       l--;
     }
-
-    // The top level index level consists of exactly 1 entry
-    assert(index[0].size()==1);
 
     return !scanner.HasError() && scanner.Close();
   }
@@ -217,14 +216,15 @@ namespace osmscout {
                              double minlat,
                              double maxlon,
                              double maxlat,
+                             size_t maxWayLevel,
                              size_t maxAreaLevel,
                              size_t maxAreaCount,
                              const std::vector<TypeId>& wayTypes,
                              size_t maxWayCount,
-                             std::set<FileOffset>& wayWayOffsets,
-                             std::set<FileOffset>& relationWayOffsets,
-                             std::set<FileOffset>& wayAreaOffsets,
-                             std::set<FileOffset>& relationAreaOffsets) const
+                             std::vector<FileOffset>& wayWayOffsets,
+                             std::vector<FileOffset>& relationWayOffsets,
+                             std::vector<FileOffset>& wayAreaOffsets,
+                             std::vector<FileOffset>& relationAreaOffsets) const
   {
     std::vector<size_t>     ctx;  // tile x coordinates in this level
     std::vector<size_t>     cty;  // tile y coordinates in this level
@@ -247,9 +247,19 @@ namespace osmscout {
 
     // Clear result datastructures
     wayWayOffsets.clear();
+    relationWayOffsets.clear();
+    wayAreaOffsets.clear();
     relationAreaOffsets.clear();
-    wayWayOffsets.clear();
-    relationAreaOffsets.clear();
+
+    // Make the vector preallocate memory for the expected data size
+    // This should void reallocation
+    wayWayOffsets.reserve(std::min(100000u,maxWayCount));
+    relationWayOffsets.reserve(std::min(100000u,maxWayCount));
+    wayAreaOffsets.reserve(std::min(100000u,maxAreaCount));
+    relationAreaOffsets.reserve(std::min(100000u,maxAreaCount));
+
+    newWayWayOffsets.reserve(std::min(100000u,maxWayCount));
+    newRelationWayOffsets.reserve(std::min(100000u,maxWayCount));
 
     //
     // Ways
@@ -258,10 +268,6 @@ namespace osmscout {
     // For every way type (ordered by priority)...
     stopWay=false;
     for (size_t t=0; !stopWay && t<wayTypes.size(); t++) {
-      ctx.clear();
-      cty.clear();
-      co.clear();
-
       // Clear lists of offsets we found in this iteration
       // We must store all hits in a temporary storage because we either take
       // all of the hits or none of them for a given type (else we would show
@@ -270,9 +276,12 @@ namespace osmscout {
       newRelationWayOffsets.clear();
 
       // Start at the top of the index
+      ctx.clear();
+      cty.clear();
+      co.clear();
       ctx.push_back(0);
       cty.push_back(0);
-      co.push_back(index[0].begin()->first);
+      co.push_back(topLevelOffset);
 
       // For all levels:
       // * Take the tiles and offsets of the last level
@@ -280,10 +289,9 @@ namespace osmscout {
       // * Add the new offsets to the list of offsets and finish if we have
       //   reached maxLevel or maxWayCount.
       // * copy no, ntx, nty to ctx, cty, co and go to next iteration ('n' = 'new')
-      stopWay=false;
       for (size_t level=0;
            !stopWay &&
-           level<=this->maxLevel && co.size()>0;
+           level<=this->maxLevel && co.size()>0 && level<=maxWayLevel;
            level++) {
         // Clear the list of new index tiles
         ntx.clear();
@@ -296,9 +304,9 @@ namespace osmscout {
           size_t cy;
           double x;
           double y;
-          IndexLevel::const_iterator entry=index[level].find(co[i]);
+          std::map<FileOffset,IndexEntry>::const_iterator entry=index.find(co[i]);
 
-          if (entry==index[level].end()) {
+          if (entry==index.end()) {
             std::cerr << "Cannot find offset " << co[i] << " in level " << level << ", => aborting!" << std::endl;
             return false;
           }
@@ -307,121 +315,113 @@ namespace osmscout {
           std::map<TypeId,std::vector<FileOffset> >::const_iterator wayTypeOffsets=entry->second.ways.find(wayTypes[t]);
           std::map<TypeId,std::vector<FileOffset> >::const_iterator relationTypeOffsets=entry->second.relWays.find(wayTypes[t]);
 
-          // Calculate the number of ways and way relations we found in this index tile
-          // for the given type
-          size_t newWaysCount=0;
-          size_t newRelsCount=0;
-
+          size_t nw=0;
           if (wayTypeOffsets!=entry->second.ways.end()) {
-            newWaysCount=wayTypeOffsets->second.size();
+            nw=wayTypeOffsets->second.size();
           }
 
+          size_t nr=0;
           if (relationTypeOffsets!=entry->second.relWays.end()) {
-            newRelsCount=relationTypeOffsets->second.size();
+            nr=relationTypeOffsets->second.size();
           }
 
-          // Se if we reached the limit
-          if (newWaysCount>0 || newRelsCount>0) {
-            if (wayWayOffsets.size()+relationWayOffsets.size()+
-                newWayWayOffsets.size()+
-                newRelationWayOffsets.size()+
-                newWaysCount+
-                newRelsCount>maxWayCount) {
-              std::cout << "Maximum limit hit: " << wayWayOffsets.size() << "+" << relationWayOffsets.size() << "+" << newWayWayOffsets.size() << "+" << newRelationWayOffsets.size() << "+" << newWaysCount << "+" << newRelsCount << ">" << maxWayCount << std::endl;
-              stopWay=true;
-              break;
-            }
-            else {
-              // if not, copy them over
-              // TODO: Perhaps we should just store the iterators until we are sure,
-              // that we want to copy the data into the result set?
-
-              if (wayTypeOffsets!=entry->second.ways.end()) {
-                for (std::vector<FileOffset>::const_iterator o=wayTypeOffsets->second.begin();
-                     o!=wayTypeOffsets->second.end();
-                     ++o) {
-                  newWayWayOffsets.push_back(*o);
-                }
-              }
-
-              if (relationTypeOffsets!=entry->second.relWays.end()) {
-                for (std::vector<FileOffset>::const_iterator o=relationTypeOffsets->second.begin();
-                     o!=relationTypeOffsets->second.end();
-                     ++o) {
-                  newRelationWayOffsets.push_back(*o);
-                }
-              }
-            }
-          }
-
-          if (level==this->maxLevel) {
-            // No need to calculate the new index tiles, since we stop anyway
+          if (wayWayOffsets.size()+relationWayOffsets.size()+
+              newWayWayOffsets.size()+
+              newRelationWayOffsets.size()+
+              nw+nr>maxWayCount) {
+            std::cout << "Maximum limit hit: " << wayWayOffsets.size();
+            std::cout << "+" << relationWayOffsets.size();
+            std::cout << "+" << newWayWayOffsets.size();
+            std::cout << "+" << newRelationWayOffsets.size();
+            std::cout << "+" << nw;
+            std::cout << "+" << nr;
+            std::cout << ">" << maxWayCount << " for type " << wayTypes[t] << std::endl;
+            stopWay=true;
             break;
           }
 
-          // Now calculate the new index tiles for the next level
-
-          cx=ctx[i]*2;
-          cy=cty[i]*2;
-
-          if (entry->second.children[0]!=0) {
-            // top left
-
-            x=cx*cellWidth[level+1];
-            y=(cy+1)*cellHeight[level+1];
-
-            if (!(x>maxlon ||
-                  y>maxlat ||
-                  x+cellWidth[level+1]<minlon ||
-                  y+cellHeight[level+1]<minlat)) {
-              ntx.push_back(cx);
-              nty.push_back(cy+1);
-              no.push_back(entry->second.children[0]);
+          if (wayTypeOffsets!=entry->second.ways.end()) {
+            for (std::vector<FileOffset>::const_iterator o=wayTypeOffsets->second.begin();
+                 o!=wayTypeOffsets->second.end();
+                 ++o) {
+              newWayWayOffsets.push_back(*o);
             }
           }
 
-          if (entry->second.children[1]!=0) {
-            // top right
-            x=(cx+1)*cellWidth[level+1];
-            y=(cy+1)*cellHeight[level+1];
-
-            if (!(x>maxlon ||
-                  y>maxlat ||
-                  x+cellWidth[level+1]<minlon ||
-                  y+cellHeight[level+1]<minlat)) {
-              ntx.push_back(cx+1);
-              nty.push_back(cy+1);
-              no.push_back(entry->second.children[1]);
+          if (relationTypeOffsets!=entry->second.relWays.end()) {
+            for (std::vector<FileOffset>::const_iterator o=relationTypeOffsets->second.begin();
+                 o!=relationTypeOffsets->second.end();
+                 ++o) {
+              newRelationWayOffsets.push_back(*o);
             }
           }
 
-          if (entry->second.children[2]!=0) {
-            // bottom left
-            x=cx*cellWidth[level+1];
-            y=cy*cellHeight[level+1];
+          // No need to calculate the new index tiles, since we stop anyway
+          if (level<this->maxLevel) {
+            // Now calculate the new index tiles for the next level
 
-            if (!(x>maxlon ||
-                  y>maxlat ||
-                  x+cellWidth[level+1]<minlon ||
-                  y+cellHeight[level+1]<minlat)) {
-              ntx.push_back(cx);
-              nty.push_back(cy);
-              no.push_back(entry->second.children[2]);
+            cx=ctx[i]*2;
+            cy=cty[i]*2;
+
+            if (entry->second.children[0]!=0) {
+              // top left
+
+              x=cx*cellWidth[level+1];
+              y=(cy+1)*cellHeight[level+1];
+
+              if (!(x>maxlon+cellWidth[level+1]/2 ||
+                    y>maxlat+cellHeight[level+1]/2 ||
+                    x+cellWidth[level+1]<minlon-cellWidth[level+1]/2 ||
+                    y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
+                ntx.push_back(cx);
+                nty.push_back(cy+1);
+                no.push_back(entry->second.children[0]);
+              }
             }
-          }
 
-          if (entry->second.children[3]!=0) {
-            // bottom right
-            x=(cx+1)*cellWidth[level+1];
-            y=cy*cellHeight[level+1];
+            if (entry->second.children[1]!=0) {
+              // top right
+              x=(cx+1)*cellWidth[level+1];
+              y=(cy+1)*cellHeight[level+1];
 
-            if (!(x>maxlon ||
-                  y>maxlat ||
-                  x+cellWidth[level+1]<minlon ||
-                  y+cellHeight[level+1]<minlat)) {
-              ntx.push_back(cx+1);
-              nty.push_back(cy);
-              no.push_back(entry->second.children[3]);
+              if (!(x>maxlon+cellWidth[level+1]/2 ||
+                    y>maxlat+cellHeight[level+1]/2 ||
+                    x+cellWidth[level+1]<minlon-cellWidth[level+1]/2 ||
+                    y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
+                ntx.push_back(cx+1);
+                nty.push_back(cy+1);
+                no.push_back(entry->second.children[1]);
+              }
+            }
+
+            if (entry->second.children[2]!=0) {
+              // bottom left
+              x=cx*cellWidth[level+1];
+              y=cy*cellHeight[level+1];
+
+              if (!(x>maxlon+cellWidth[level+1]/2 ||
+                    y>maxlat+cellHeight[level+1]/2 ||
+                    x+cellWidth[level+1]<minlon-cellWidth[level+1]/2 ||
+                    y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
+                ntx.push_back(cx);
+                nty.push_back(cy);
+                no.push_back(entry->second.children[2]);
+              }
+            }
+
+            if (entry->second.children[3]!=0) {
+              // bottom right
+              x=(cx+1)*cellWidth[level+1];
+              y=cy*cellHeight[level+1];
+
+              if (!(x>maxlon+cellWidth[level+1]/2 ||
+                    y>maxlat+cellHeight[level+1]/2 ||
+                    x+cellWidth[level+1]<minlon-cellWidth[level+1]/2 ||
+                    y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
+                ntx.push_back(cx+1);
+                nty.push_back(cy);
+                no.push_back(entry->second.children[3]);
+              }
             }
           }
         }
@@ -431,17 +431,21 @@ namespace osmscout {
         co=no;
       }
 
-      // Now copy the result for this type into the result
-      for (std::vector<FileOffset>::const_iterator o=newWayWayOffsets.begin();
-           o!=newWayWayOffsets.end();
-           ++o) {
-        wayWayOffsets.insert(*o);
-      }
+      if (!stopWay) {
+        if (newWayWayOffsets.size()>0 || newRelationWayOffsets.size()>0) {
+          // Now copy the result for this type into the result
+          for (std::vector<FileOffset>::const_iterator o=newWayWayOffsets.begin();
+               o!=newWayWayOffsets.end();
+               ++o) {
+            wayWayOffsets.push_back(*o);
+          }
 
-      for (std::vector<FileOffset>::const_iterator o=newRelationWayOffsets.begin();
-           o!=newRelationWayOffsets.end();
-           ++o) {
-        relationWayOffsets.insert(*o);
+          for (std::vector<FileOffset>::const_iterator o=newRelationWayOffsets.begin();
+               o!=newRelationWayOffsets.end();
+               ++o) {
+            relationWayOffsets.push_back(*o);
+          }
+        }
       }
     }
 
@@ -455,7 +459,7 @@ namespace osmscout {
 
     ctx.push_back(0);
     cty.push_back(0);
-    co.push_back(index[0].begin()->first);
+    co.push_back(topLevelOffset);
 
     // For all levels:
     // * Take the tiles and offsets of the last level
@@ -466,7 +470,7 @@ namespace osmscout {
     stopArea=false;
     for (size_t level=0;
          !stopArea &&
-         level<=this->maxLevel && co.size()>0;
+         level<=this->maxLevel && co.size()>0 && level<=maxAreaLevel;
          level++) {
       ntx.clear();
       nty.clear();
@@ -477,9 +481,9 @@ namespace osmscout {
         size_t cy;
         double x;
         double y;
-        IndexLevel::const_iterator entry=index[level].find(co[i]);
+        std::map<FileOffset,IndexEntry>::const_iterator entry=index.find(co[i]);
 
-        if (entry==index[level].end()) {
+        if (entry==index.end()) {
           std::cerr << "Cannot find offset " << co[i] << " in level " << level << ", => aborting!" << std::endl;
           return false;
         }
@@ -487,10 +491,7 @@ namespace osmscout {
         // TODO: First collect all areas for a level, then - afte rthe level is scanned -
         // add it to the result
 
-        if (level>maxAreaLevel) {
-          stopArea=true;
-        }
-        else if (wayAreaOffsets.size()+relationAreaOffsets.size()+
+        if (wayAreaOffsets.size()+relationAreaOffsets.size()+
                  entry->second.areas.size()+
                  entry->second.relAreas.size()>=maxAreaCount) {
           stopArea=true;
@@ -499,13 +500,13 @@ namespace osmscout {
           for (std::vector<FileOffset>::const_iterator o=entry->second.areas.begin();
                o!=entry->second.areas.end();
                ++o) {
-            wayAreaOffsets.insert(*o);
+            wayAreaOffsets.push_back(*o);
           }
 
           for (std::vector<FileOffset>::const_iterator o=entry->second.relAreas.begin();
                o!=entry->second.relAreas.end();
                ++o) {
-            relationAreaOffsets.insert(*o);
+            relationAreaOffsets.push_back(*o);
           }
         }
 
@@ -518,10 +519,10 @@ namespace osmscout {
           x=cx*cellWidth[level+1];
           y=(cy+1)*cellHeight[level+1];
 
-          if (!(x>maxlon ||
-                y>maxlat ||
-                x+cellWidth[level+1]<minlon ||
-                y+cellHeight[level+1]<minlat)) {
+          if (!(x>maxlon+cellWidth[level+1]/2 ||
+                y>maxlat+cellHeight[level+1]/2 ||
+                x+cellWidth[level+1]<minlon-cellWidth[level+1]/2 ||
+                y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
             ntx.push_back(cx);
             nty.push_back(cy+1);
             no.push_back(entry->second.children[0]);
@@ -533,10 +534,10 @@ namespace osmscout {
           x=(cx+1)*cellWidth[level+1];
           y=(cy+1)*cellHeight[level+1];
 
-          if (!(x>maxlon ||
-                y>maxlat ||
-                x+cellWidth[level+1]<minlon ||
-                y+cellHeight[level+1]<minlat)) {
+          if (!(x>maxlon+cellWidth[level+1]/2 ||
+                y>maxlat+cellHeight[level+1]/2 ||
+                x+cellWidth[level+1]<minlon-cellWidth[level+1]/2 ||
+                y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
             ntx.push_back(cx+1);
             nty.push_back(cy+1);
             no.push_back(entry->second.children[1]);
@@ -548,10 +549,10 @@ namespace osmscout {
           x=cx*cellWidth[level+1];
           y=cy*cellHeight[level+1];
 
-          if (!(x>maxlon ||
-                y>maxlat ||
-                x+cellWidth[level+1]<minlon ||
-                y+cellHeight[level+1]<minlat)) {
+          if (!(x>maxlon+cellWidth[level+1]/2 ||
+                y>maxlat+cellHeight[level+1]/2 ||
+                x+cellWidth[level+1]<minlon-cellWidth[level+1]/2 ||
+                y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
             ntx.push_back(cx);
             nty.push_back(cy);
             no.push_back(entry->second.children[2]);
@@ -563,10 +564,10 @@ namespace osmscout {
           x=(cx+1)*cellWidth[level+1];
           y=cy*cellHeight[level+1];
 
-          if (!(x>maxlon ||
-                y>maxlat ||
-                x+cellWidth[level+1]<minlon ||
-                y+cellHeight[level+1]<minlat)) {
+          if (!(x>maxlon+cellWidth[level+1]/2 ||
+                y>maxlat+cellHeight[level+1]/2 ||
+                x+cellWidth[level+1]<minlon-cellWidth[level+1]/2 ||
+                y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
             ntx.push_back(cx+1);
             nty.push_back(cy);
             no.push_back(entry->second.children[3]);
@@ -590,39 +591,35 @@ namespace osmscout {
     size_t size=0;
     size_t memory=0;
 
-    memory+=sizeof(index)+index.size()*sizeof(IndexLevel);
-    for (size_t i=0; i<index.size(); i++) {
-      memory+=index[i].size()*(sizeof(size_t)+sizeof(IndexEntry));
+    memory+=sizeof(index)+index.size()*(sizeof(FileOffset)+sizeof(IndexEntry));
+    for (std::map<FileOffset,IndexEntry>::const_iterator iter=index.begin();
+         iter!=index.end();
+         ++iter) {
+      size++;
 
-      for (IndexLevel::const_iterator iter=index[i].begin();
-           iter!=index[i].end();
-           ++iter) {
-        size++;
+      // Ways
+      memory+=iter->second.ways.size()*(sizeof(TypeId)+sizeof(std::vector<FileOffset>));
 
-        // Ways
-        memory+=iter->second.ways.size()*(sizeof(TypeId)+sizeof(std::vector<FileOffset>));
+      for (std::map<TypeId,std::vector<FileOffset> >::const_iterator iter2=iter->second.ways.begin();
+           iter2!=iter->second.ways.end();
+           ++iter2) {
+        memory+=iter2->second.size()*sizeof(FileOffset);
+      }
 
-        for (std::map<TypeId,std::vector<FileOffset> >::const_iterator iter2=iter->second.ways.begin();
-             iter2!=iter->second.ways.end();
-             ++iter2) {
-          memory+=iter2->second.size()*sizeof(FileOffset);
+      // RelWays
+      memory+=iter->second.relWays.size()*(sizeof(TypeId)+sizeof(std::vector<FileOffset>));
+
+      for (std::map<TypeId,std::vector<FileOffset> >::const_iterator iter2=iter->second.relWays.begin();
+           iter2!=iter->second.relWays.end();
+           ++iter2) {
+        memory+=iter2->second.size()*sizeof(FileOffset);
         }
 
-        // RelWays
-        memory+=iter->second.relWays.size()*(sizeof(TypeId)+sizeof(std::vector<FileOffset>));
-
-        for (std::map<TypeId,std::vector<FileOffset> >::const_iterator iter2=iter->second.relWays.begin();
-             iter2!=iter->second.relWays.end();
-             ++iter2) {
-          memory+=iter2->second.size()*sizeof(FileOffset);
-        }
-
-        // Areas
+      // Areas
         memory+=iter->second.areas.size()*sizeof(FileOffset);
 
-        // RelAreas
-        memory+=iter->second.relAreas.size()*sizeof(FileOffset);
-      }
+      // RelAreas
+      memory+=iter->second.relAreas.size()*sizeof(FileOffset);
     }
 
     std::cout << "Area index size " << size << ", memory usage " << memory << std::endl;

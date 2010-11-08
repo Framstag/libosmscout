@@ -36,10 +36,12 @@ namespace osmscout {
   class OSMSCOUT_MAP_API MapParameter
   {
   private:
-    std::string fontName;        //! Name of the font to use
-    double      fontSize;        //! Pixel size of base font
-    double      outlineMinWidth; //! Minimum width of an outline to be drawn
-    
+    std::string fontName;          //! Name of the font to use
+    double      fontSize;          //! Pixel size of base font
+    double      outlineMinWidth;   //! Minimum width of an outline to be drawn
+    bool        optimizeWayNodes;  //! Try to reduce the number of nodes for a way
+    bool        optimizeAreaNodes; //! Try to reduce the number of nodes for an area
+
   public:
     MapParameter();
     virtual ~MapParameter();
@@ -48,20 +50,33 @@ namespace osmscout {
     void SetFontSize(double fontSize);
 
     void SetOutlineMinWidth(double outlineMinWidth);
-    
+
+    void SetOptimizeWayNodes(bool optimize);
+    void SetOptimizeAreaNodes(bool optimize);
+
     inline std::string GetFontName() const
     {
       return fontName;
     }
-    
+
     inline double GetFontSize() const
     {
       return fontSize;
     }
-    
+
     inline double GetOutlineMinWidth() const
     {
       return outlineMinWidth;
+    }
+
+    inline bool GetOptimizeWayNodes() const
+    {
+      return optimizeWayNodes;
+    }
+
+    inline bool GetOptimizeAreaNodes() const
+    {
+      return optimizeAreaNodes;
     }
   };
 
@@ -83,7 +98,7 @@ namespace osmscout {
     /**
        Scratch variables for path optimization algortihm
      */
-    //@{ 
+    //@{
     std::vector<bool>   drawNode;     //! This nodes will be drawn
     std::vector<double> nodeX;        //! static scratch buffer for calculation
     std::vector<double> nodeY;        //! static scratch buffer for calculation
@@ -117,17 +132,17 @@ namespace osmscout {
                         const std::string& label,
                         const std::vector<Point>& nodes,
                         std::set<size_t>& tileBlacklist);
-    
+
     void PrecalculateStyleData(const StyleConfig& styleConfig,
                                const Projection& projection,
                                const MapParameter& parameter,
-                               const MapData& data);        
+                               const MapData& data);
 
     void DrawNodes(const StyleConfig& styleConfig,
                    const Projection& projection,
                    const MapParameter& parameter,
                    const MapData& data);
-            
+
     /**
       Draw the way using LineStyle for the given type, the given style modification
       attributes and the given path.
@@ -138,7 +153,7 @@ namespace osmscout {
                  TypeId type,
                  const SegmentAttributes& attributes,
                  const std::vector<Point>& nodes);
-            
+
     void DrawWays(const StyleConfig& styleConfig,
                   const Projection& projection,
                   const MapParameter& parameter,
@@ -148,17 +163,17 @@ namespace osmscout {
                        const Projection& projection,
                        const MapParameter& parameter,
                        const MapData& data);
-            
+
     void DrawAreas(const StyleConfig& styleConfig,
                    const Projection& projection,
                    const MapParameter& parameter,
                    const MapData& data);
-                               
+
     void DrawAreaLabels(const StyleConfig& styleConfig,
                         const Projection& projection,
                         const MapParameter& parameter,
                         const MapData& data);
-                                                
+
     void DrawPOIWays(const StyleConfig& styleConfig,
                      const Projection& projection,
                      const MapParameter& parameter,
@@ -172,18 +187,20 @@ namespace osmscout {
                            const MapParameter& parameter,
                            const MapData& data);
     //@}
-  
+
   protected:
     /**
-       Useful global helper functions. 
+       Useful global helper functions.
      */
     //@{
     bool IsVisible(const Projection& projection,
                    const std::vector<Point>& nodes) const;
 
     void TransformArea(const Projection& projection,
+                       const MapParameter& parameter,
                        const std::vector<Point>& nodes);
     void TransformWay(const Projection& projection,
+                      const MapParameter& parameter,
                       const std::vector<Point>& nodes);
 
     bool GetBoundingBox(const std::vector<Point>& nodes,
@@ -193,14 +210,14 @@ namespace osmscout {
                         const std::vector<Point>& nodes,
                         double& cx,
                         double& cy);
-    //@}                    
+    //@}
 
     /**
       Low level drawing routines that have to be implemented by
       the concrete drawing engine.
      */
     //@{
-    
+
     /**
       Return true, if the icon in the IconStyle is available and can be drawn.
       If this method returns false, possibly a fallback (using a Symbol)
@@ -208,7 +225,7 @@ namespace osmscout {
      */
     virtual bool HasIcon(const StyleConfig& styleConfig,
                          IconStyle& style)= 0;
-    
+
     /**
       Draw the given text at the given pixel coordinate in a style defined
       by the given LabelStyle.
@@ -228,13 +245,13 @@ namespace osmscout {
                                   const LabelStyle& style,
                                   const std::string& text,
                                   const std::vector<Point>& nodes) = 0;
-                           
+
     /**
       Draw the Icon as defined by the IconStyle at the givcen pixel coordinate.
      */
     virtual void DrawIcon(const IconStyle* style,
                           double x, double y) = 0;
-                          
+
     /**
       Draw the Symbol as defined by the SymbolStyle at the givcen pixel coordinate.
      */
@@ -244,16 +261,17 @@ namespace osmscout {
     /**
       Draw simple line with the given style,the given color, the given width
       and the given untransformed nodes.
-     */                          
+     */
     virtual void DrawPath(LineStyle::Style style,
                           const Projection& projection,
+                          const MapParameter& parameter,
                           double r,
                           double g,
                           double b,
                           double a,
                           double width,
                           const std::vector<Point>& nodes) = 0;
-                                           
+
     /**
       Draw the outline of the way using LineStyle for the given type, the given
       style modification attributes and the given path. Also draw sensfull
@@ -270,9 +288,10 @@ namespace osmscout {
       Draw the given area, evaluating Fill- and PatternStyle as returned by the
       StyleConfig for the given type. Take into account that Fill- and
       PatternStyle have the layer as passed to the function.
-     */                        
+     */
     virtual void DrawArea(const StyleConfig& styleConfig,
                           const Projection& projection,
+                          const MapParameter& parameter,
                           TypeId type,
                           int layer,
                           const SegmentAttributes& attributes,
@@ -292,12 +311,12 @@ namespace osmscout {
                           double height) = 0;
 
     //@}
-  
+
     void Draw(const StyleConfig& styleConfig,
               const Projection& projection,
               const MapParameter& parameter,
               const MapData& data);
-  
+
   public:
     MapPainter();
     virtual ~MapPainter();

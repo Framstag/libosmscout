@@ -110,19 +110,20 @@ void DatabaseTask::Run()
       currentMagnification=currentJob->magnification;
 
       if (database->IsOpen() && styleConfig!=NULL) {
-        osmscout::MercatorProjection projection;
-        osmscout::MapParameter       parameter;
-        
+        osmscout::MercatorProjection  projection;
+        osmscout::MapParameter        drawParameter;
+        osmscout::AreaSearchParameter searchParameter;
+
         std::cout << std::endl;
-        
+
         osmscout::StopClock overallTimer;
-        
+
         projection.Set(currentLon,
                        currentLat,
                        currentMagnification,
                        currentWidth,
                        currentHeight);
-      
+
         osmscout::StopClock dataRetrievalTimer;
 
         database->GetObjects(*styleConfig,
@@ -131,16 +132,13 @@ void DatabaseTask::Run()
                              projection.GetLonMax(),
                              projection.GetLatMax(),
                              projection.GetMagnification(),
-                             ((size_t)ceil(osmscout::Log2(projection.GetMagnification())))+6,
-                             2000,
-                             2000,
-                             std::numeric_limits<size_t>::max(),
+                             searchParameter,
                              data.nodes,
                              data.ways,
                              data.areas,
                              data.relationWays,
                              data.relationAreas);
-    
+
         database->GetGroundTiles(projection.GetLonMin(),
                                  projection.GetLatMin(),
                                  projection.GetLonMax(),
@@ -148,18 +146,18 @@ void DatabaseTask::Run()
                                  data.groundTiles);
 
         dataRetrievalTimer.Stop();
-      
+
         osmscout::StopClock drawTimer;
-        
+
         painter.DrawMap(*styleConfig,
                         projection,
-                        parameter,
+                        drawParameter,
                         data,
                         currentCairo);
-        
-        drawTimer.Stop();          
-        overallTimer.Stop();          
-                        
+
+        drawTimer.Stop();
+        overallTimer.Stop();
+
         std::cout << "All: " << overallTimer << " Data: " << dataRetrievalTimer << " Draw: " << drawTimer << std::endl;
       }
       else {

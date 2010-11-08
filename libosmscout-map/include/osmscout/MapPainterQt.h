@@ -67,6 +67,7 @@ namespace osmscout {
 
     void DrawPath(LineStyle::Style style,
                   const Projection& projection,
+                  const MapParameter& parameter,
                   double r,
                   double g,
                   double b,
@@ -83,6 +84,7 @@ namespace osmscout {
 
     void DrawArea(const StyleConfig& styleConfig,
                   const Projection& projection,
+                  const MapParameter& parameter,
                   TypeId type,
                   int layer,
                   const SegmentAttributes& attributes,

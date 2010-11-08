@@ -31,7 +31,7 @@
 /*
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
   level directory):
-  
+
   src/DrawMapQt ../TravelJinni/ ../TravelJinni/standard.oss.xml 640 480 7.13 50.69 10000 test.png
 */
 
@@ -98,12 +98,13 @@ int main(int argc, char* argv[])
 
   if (pixmap!=NULL) {
     QPainter* painter=new QPainter(pixmap);
-  
+
     if (painter!=NULL) {
-      osmscout::MercatorProjection projection;
-      osmscout::MapParameter       parameter;
-      osmscout::MapData            data;
-      osmscout::MapPainterQt       mapPainter;
+      osmscout::MercatorProjection  projection;
+      osmscout::MapParameter        drawParameter;
+      osmscout::AreaSearchParameter searchParameter;
+      osmscout::MapData             data;
+      osmscout::MapPainterQt        mapPainter;
 
       projection.Set(lon,
                      lat,
@@ -118,10 +119,7 @@ int main(int argc, char* argv[])
                           projection.GetLonMax(),
                           projection.GetLatMax(),
                           projection.GetMagnification(),
-                          ((size_t)ceil(osmscout::Log2(projection.GetMagnification())))+6,
-                          2000,
-                          2000,
-                          std::numeric_limits<size_t>::max(),
+                          searchParameter,
                           data.nodes,
                           data.ways,
                           data.areas,
@@ -130,15 +128,15 @@ int main(int argc, char* argv[])
 
       if (mapPainter.DrawMap(styleConfig,
                              projection,
-                             parameter,
+                             drawParameter,
                              data,
                              painter)) {
         if (!pixmap->save(output.c_str(),"PNG",-1)) {
           std::cerr << "Cannot write PNG" << std::endl;
         }
-        
+
       }
-      
+
       delete painter;
     }
     else {

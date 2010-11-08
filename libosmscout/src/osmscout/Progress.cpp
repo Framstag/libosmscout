@@ -104,10 +104,9 @@ namespace osmscout {
 
     time_t now=time(NULL);
 
-    if (now-lastProgressDump>=10) {
-      std::cout << "   % " << std::setiosflags(std::ios::fixed) << std::setprecision(2) << current/total*100 << " (" << std::setprecision(0) << current << "/" << std::setprecision(0) << total << ")" << std::endl;
-
+    if (now-lastProgressDump>=5) {
       lastProgressDump=now;
+      std::cout << "   % " << std::setiosflags(std::ios::fixed) << std::setprecision(2) << current/total*100 << " (" << std::setprecision(0) << current << "/" << std::setprecision(0) << total << ")" << std::endl;
     }
 
   }

@@ -49,7 +49,7 @@ namespace osmscout {
 
     bool HasIcon(const StyleConfig& styleConfig,
                  IconStyle& style);
-                 
+
     bool HasPattern(const StyleConfig& styleConfig,
                    PatternStyle& style);
 
@@ -73,18 +73,21 @@ namespace osmscout {
 
     void DrawPath(LineStyle::Style style,
                   const Projection& projection,
+                  const MapParameter& parameter,
                   double r, double g, double b, double a,
                   double width,
                   const std::vector<Point>& nodes);
 
     void FillRegion(const std::vector<Point>& nodes,
                     const Projection& projection,
+                    const MapParameter& parameter,
                     const FillStyle& style);
 
     void FillRegion(const std::vector<Point>& nodes,
                     const Projection& projection,
+                    const MapParameter& parameter,
                     PatternStyle& style);
-                 
+
     void DrawWayOutline(const StyleConfig& styleConfig,
                         const Projection& projection,
                         const MapParameter& parameter,
@@ -94,6 +97,7 @@ namespace osmscout {
 
     void DrawArea(const StyleConfig& styleConfig,
                   const Projection& projection,
+                  const MapParameter& parameter,
                   TypeId type,
                   int layer,
                   const SegmentAttributes& attributes,
@@ -105,7 +109,7 @@ namespace osmscout {
                   double y,
                   double width,
                   double height);
-                                           
+
   public:
     MapPainterCairo();
     ~MapPainterCairo();

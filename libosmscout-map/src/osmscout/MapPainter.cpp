@@ -27,14 +27,15 @@
 namespace osmscout {
 
   static const double gradtorad=2*M_PI/360;
-  static size_t optimizeLimit=512;
   static double relevantPosDeriviation=2.0;
   static double relevantSlopeDeriviation=0.1;
 
   MapParameter::MapParameter()
   : fontName("sans-serif"),
     fontSize(9.0),
-    outlineMinWidth(0.5)
+    outlineMinWidth(1.0),
+    optimizeWayNodes(false),
+    optimizeAreaNodes(false)
   {
     // no code
   }
@@ -57,6 +58,16 @@ namespace osmscout {
   void MapParameter::SetOutlineMinWidth(double outlineMinWidth)
   {
     this->outlineMinWidth=outlineMinWidth;
+  }
+
+  void MapParameter::SetOptimizeWayNodes(bool optimize)
+  {
+    optimizeWayNodes=optimize;
+  }
+
+  void MapParameter::SetOptimizeAreaNodes(bool optimize)
+  {
+    optimizeAreaNodes=optimize;
   }
 
   MapPainter::MapPainter()
@@ -97,9 +108,10 @@ namespace osmscout {
   }
 
   void MapPainter::TransformArea(const Projection& projection,
+                                 const MapParameter& parameter,
                                  const std::vector<Point>& nodes)
   {
-    if (projection.GetMagnification()>optimizeLimit) {
+    if (!parameter.GetOptimizeAreaNodes()) {
       for (size_t i=0; i<nodes.size(); i++) {
         drawNode[i]=true;
         projection.GeoToPixel(nodes[i].lon,nodes[i].lat,
@@ -144,9 +156,10 @@ namespace osmscout {
   }
 
   void MapPainter::TransformWay(const Projection& projection,
+                                const MapParameter& parameter,
                                 const std::vector<Point>& nodes)
   {
-    if (projection.GetMagnification()>optimizeLimit) {
+    if (parameter.GetOptimizeWayNodes()) {
       for (size_t i=0; i<nodes.size(); i++) {
         drawNode[i]=true;
         projection.GeoToPixel(nodes[i].lon,nodes[i].lat,
@@ -209,9 +222,9 @@ namespace osmscout {
 
           if (j<nodes.size() && k<nodes.size()) {
             drawNode[j]=std::abs((nodes[j].lon-nodes[i].lon)/
-                               (nodes[j].lat-nodes[i].lat)-
-                               (nodes[k].lon-nodes[j].lon)/
-                               (nodes[k].lat-nodes[j].lat))>=relevantSlopeDeriviation;
+                                 (nodes[j].lat-nodes[i].lat)-
+                                 (nodes[k].lon-nodes[j].lon)/
+                                 (nodes[k].lat-nodes[j].lat))>=relevantSlopeDeriviation;
           }
         }
       }
@@ -619,6 +632,7 @@ namespace osmscout {
              ++area) {
           DrawArea(styleConfig,
                    projection,
+                   parameter,
                    area->GetType(),
                    layer,
                    area->GetAttributes(),
@@ -637,6 +651,7 @@ namespace osmscout {
 
               DrawArea(styleConfig,
                        projection,
+                       parameter,
                        relation->roles[m].GetType(),
                        layer,
                        relation->roles[m].GetAttributes(),
@@ -843,11 +858,8 @@ namespace osmscout {
       lineWidth=style->GetWidth();
     }
 
-    lineWidth=lineWidth/projection.GetPixelSize();
-
-    if (lineWidth<style->GetMinPixel()) {
-      lineWidth=style->GetMinPixel();
-    }
+    lineWidth=std::max(style->GetMinPixel(),
+                       lineWidth/projection.GetPixelSize());
 
     bool outline=style->GetOutline()>0 &&
                  lineWidth-2*style->GetOutline()>=parameter.GetOutlineMinWidth();
@@ -861,6 +873,7 @@ namespace osmscout {
       // Should draw outline, but resolution is too low
       DrawPath(style->GetStyle(),
                projection,
+               parameter,
                style->GetAlternateR(),
                style->GetAlternateG(),
                style->GetAlternateB(),
@@ -872,6 +885,7 @@ namespace osmscout {
       // Draw outline
       DrawPath(style->GetStyle(),
                projection,
+               parameter,
                style->GetLineR(),
                style->GetLineG(),
                style->GetLineB(),
@@ -883,6 +897,7 @@ namespace osmscout {
       // Draw without outline
       DrawPath(style->GetStyle(),
                projection,
+               parameter,
                style->GetLineR(),
                style->GetLineG(),
                style->GetLineB(),

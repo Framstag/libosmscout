@@ -31,8 +31,6 @@
 
 #include <osmscout/Util.h>
 
-#include <iostream>
-
 namespace osmscout {
 
   struct Coord
@@ -124,7 +122,7 @@ namespace osmscout {
 
       scanner.Read(id);
 
-      if (!scanner.HasError()){
+      if (!scanner.HasError()) {
         wayBlacklist.insert(id);
       }
     }
@@ -270,12 +268,10 @@ namespace osmscout {
 
             //
             // Calculate highest level where the bounding box completely
-            // fits in the cell size for this level.
+            // fits in the cell size and assign area to the tiles that
+            // hold the geometric center of the tile.
             //
 
-            // TODO: We can possibly do faster
-            // ...in calculating level
-            //...in detecting if this way is relevant for this level
             int level=parameter.GetAreaAreaIndexMaxMag();
             while (level>=0) {
               if (maxLon-minLon<=cellWidth[level] &&
@@ -288,7 +284,7 @@ namespace osmscout {
 
             if (level==l) {
               //
-              // Calculate all tile ids that are covered
+              // Calculate minimum and maximum tile ids that are covered
               // by the area
               //
               size_t minyc=(size_t)floor(minLat/cellHeight[level]);
@@ -296,16 +292,9 @@ namespace osmscout {
               size_t minxc=(size_t)floor(minLon/cellWidth[level]);
               size_t maxxc=(size_t)floor(maxLon/cellWidth[level]);
 
-              //
-              // Add offset to all tiles in this level that coint (parts) of
-              // the bounding box
-              //
-              for (size_t yc=minyc; yc<=maxyc; yc++) {
-                for (size_t xc=minxc; xc<=maxxc; xc++) {
-                  leafs[Coord(xc,yc)].areas.push_back(offset);
-                  areaLevelEntries++;
-                }
-              }
+              // Add this area to the tile where the center of the area lies in.
+              leafs[Coord((minxc+maxxc)/2,(minyc+maxyc)/2)].areas.push_back(offset);
+              areaLevelEntries++;
 
               waysConsumed++;
             }
@@ -315,12 +304,15 @@ namespace osmscout {
             // Bounding box calculation
             //
 
+            double length=0.0;
             double minLon=way.nodes[0].lon;
             double maxLon=way.nodes[0].lon;
             double minLat=way.nodes[0].lat;
             double maxLat=way.nodes[0].lat;
 
             for (size_t i=1; i<way.nodes.size(); i++) {
+              length+=sqrt(pow(way.nodes[i].lon-way.nodes[i-1].lon,2)+
+                           pow(way.nodes[i].lat-way.nodes[i-1].lat,2));
               minLon=std::min(minLon,way.nodes[i].lon);
               maxLon=std::max(maxLon,way.nodes[i].lon);
               minLat=std::min(minLat,way.nodes[i].lat);
@@ -337,18 +329,17 @@ namespace osmscout {
             maxLat+=90;
 
             //
-            // Calculate highest level where the bounding box completely
-            // fits in the cell size and in one cell for this level.
+            // Calculate highest level where the way (length) completely
+            // fits in the cell size. Assign the way to the tile with contains
+            // it geometric middle
             //
 
-            // TODO: We can possibly do faster
-            // ...in calculating level
-            //...in detecting if this way is relevant for this level
-            int    level=parameter.GetAreaWayIndexMaxMag();
+            int level=parameter.GetAreaWayIndexMaxMag();
 
+            // Way length must be smaller than cell
             while (level>=l) {
-              if (maxLon-minLon<=cellWidth[level] &&
-                  maxLat-minLat<=cellHeight[level]) {
+              if (length<=cellWidth[level] &&
+                  length<=cellHeight[level]) {
                 break;
               }
 
@@ -356,19 +347,18 @@ namespace osmscout {
             }
 
             if (level==l) {
-              std::vector<ScanCell> cells;
+              //
+              // Calculate minum and maximum tile ids that are covered
+              // by the way
+              //
+              size_t minyc=(size_t)floor(minLat/cellHeight[level]);
+              size_t maxyc=(size_t)floor(maxLat/cellHeight[level]);
+              size_t minxc=(size_t)floor(minLon/cellWidth[level]);
+              size_t maxxc=(size_t)floor(maxLon/cellWidth[level]);
 
-              ScanConvertLine(way.nodes,
-                              -180.0,
-                              cellWidth[level],
-                              -90.0,
-                              cellHeight[level],
-                              cells);
-
-              for (size_t i=0; i<cells.size(); i++) {
-                leafs[Coord(cells[i].x,cells[i].y)].ways[way.GetType()].push_back(offset);
-                wayLevelEntries++;
-              }
+              // Add this way to the tile where the center of the way lies in.
+              leafs[Coord((minxc+maxxc)/2,(minyc+maxyc)/2)].ways[way.GetType()].push_back(offset);
+              wayLevelEntries++;
 
               waysConsumed++;
             }
@@ -448,13 +438,11 @@ namespace osmscout {
 
             //
             // Calculate highest level where the bounding box completely
-            // fits in the cell size and in one cell for this level.
+            // fits in the cell size and assign area to the tiles that
+            // hold the geometric center of the tile.
             //
 
-            // TODO: We can possibly do faster
-            // ...in calculating level
-            //...in detecting if this way is relevant for this level
-            int    level=parameter.GetAreaWayIndexMaxMag();
+            int level=parameter.GetAreaWayIndexMaxMag();
 
             while (level>=l) {
               if (maxLon-minLon<=cellWidth[level] &&
@@ -467,7 +455,7 @@ namespace osmscout {
 
             if (level==l) {
               //
-              // Calculate all tile ids that are covered
+              // Calculate minimum and maximum tile ids that are covered
               // by the area
               //
               size_t minyc=(size_t)floor(minLat/cellHeight[level]);
@@ -475,12 +463,9 @@ namespace osmscout {
               size_t minxc=(size_t)floor(minLon/cellWidth[level]);
               size_t maxxc=(size_t)floor(maxLon/cellWidth[level]);
 
-              for (size_t yc=minyc; yc<=maxyc; yc++) {
-                for (size_t xc=minxc; xc<=maxxc; xc++) {
-                  leafs[Coord(xc,yc)].relAreas.push_back(offset);
-                  relAreaLevelEntries++;
-                }
-              }
+              // Add this area to the tile where the center of the area lies in.
+              leafs[Coord((minxc+maxxc)/2,(minyc+maxyc)/2)].relAreas.push_back(offset);
+              relAreaLevelEntries++;
 
               relsConsumed++;
             }
@@ -515,19 +500,24 @@ namespace osmscout {
             minLat+=90;
             maxLat+=90;
 
+            // For relation we just take the diagonal of the bounding box,
+            // since we cannot be sure that we just can sum up the length of all
+            // role paths
+            double length=sqrt(pow(maxLon-minLon,2)+
+                               pow(maxLat-minLat,2));
+
             //
-            // Calculate highest level where the bounding box completely
-            // fits in the cell size and in one cell for this level.
+            // Calculate highest level where the way (length) completely
+            // fits in the cell size. Assign the way to the tile with contains
+            // it geometric middle
             //
 
-            // TODO: We can possibly do faster
-            // ...in calculating level
-            //...in detecting if this way is relevant for this level
-            int    level=parameter.GetAreaWayIndexMaxMag();
+            int level=parameter.GetAreaWayIndexMaxMag();
 
+            // Way length must be smaller than cell
             while (level>=l) {
-              if (maxLon-minLon<=cellWidth[level] &&
-                  maxLat-minLat<=cellHeight[level]) {
+              if (length<=cellWidth[level] &&
+                  length<=cellHeight[level]) {
                 break;
               }
 
@@ -536,20 +526,17 @@ namespace osmscout {
 
             if (level==l) {
               //
-              // Calculate all tile ids that are covered
-              // by the area
+              // Calculate minum and maximum tile ids that are covered
+              // by the way
               //
-              size_t minyc=(size_t)floor(minLat/cellHeight[level]);
-              size_t maxyc=(size_t)floor(maxLat/cellHeight[level]);
               size_t minxc=(size_t)floor(minLon/cellWidth[level]);
               size_t maxxc=(size_t)floor(maxLon/cellWidth[level]);
+              size_t minyc=(size_t)floor(minLat/cellHeight[level]);
+              size_t maxyc=(size_t)floor(maxLat/cellHeight[level]);
 
-              for (size_t yc=minyc; yc<=maxyc; yc++) {
-                for (size_t xc=minxc; xc<=maxxc; xc++) {
-                  leafs[Coord(xc,yc)].relWays[relation.type].push_back(offset);
-                  relWayLevelEntries++;
-                }
-              }
+              // Add this way to the tile where the center of the way lies in.
+              leafs[Coord((minxc+maxxc)/2,(minyc+maxyc)/2)].relWays[relation.type].push_back(offset);
+              relWayLevelEntries++;
 
               relsConsumed++;
             }

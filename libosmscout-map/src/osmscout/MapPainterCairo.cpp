@@ -235,7 +235,7 @@ namespace osmscout {
                    &param);
 
     cairo_append_path(cr,current_path);
-    
+
     cairo_path_destroy(current_path);
   }
 
@@ -357,7 +357,7 @@ namespace osmscout {
   }
 
   cairo_scaled_font_t* MapPainterCairo::GetScaledFont(const MapParameter& parameter,
-                                                      cairo_t* draw, 
+                                                      cairo_t* draw,
                                                       size_t fontSize)
   {
     std::map<size_t,cairo_scaled_font_t*>::const_iterator f;
@@ -367,7 +367,7 @@ namespace osmscout {
     if (f!=font.end()) {
       return f->second;
     }
-    
+
     cairo_matrix_t       scaleMatrix;
     cairo_matrix_t       transformMatrix;
     cairo_font_options_t *options;
@@ -570,11 +570,11 @@ namespace osmscout {
 
     cairo_set_scaled_font(draw,font);
 
-    cairo_new_path(draw);
     double length=0;
     double xo=0,yo=0;
     double x=0,y=0;
 
+    cairo_new_path(draw);
     if (nodes[0].lon<nodes[nodes.size()-1].lon) {
       for (size_t j=0; j<nodes.size(); j++) {
         xo=x;
@@ -643,6 +643,7 @@ namespace osmscout {
     case SymbolStyle::none:
       break;
     case SymbolStyle::box:
+      cairo_new_path(draw);
       cairo_set_source_rgba(draw,
                             style->GetFillR(),
                             style->GetFillG(),
@@ -650,13 +651,13 @@ namespace osmscout {
                             style->GetFillA());
       cairo_set_line_width(draw,1);
 
-      cairo_new_path(draw);
       cairo_rectangle(draw,
                       x-style->GetSize()/2,y-style->GetSize()/2,
                       style->GetSize(),style->GetSize());
       cairo_fill(draw);
       break;
     case SymbolStyle::circle:
+      cairo_new_path(draw);
       cairo_set_source_rgba(draw,
                             style->GetFillR(),
                             style->GetFillG(),
@@ -664,7 +665,6 @@ namespace osmscout {
                             style->GetFillA());
       cairo_set_line_width(draw,1);
 
-      cairo_new_path(draw);
       cairo_arc(draw,
                 x,y,
                 style->GetSize(),
@@ -672,6 +672,7 @@ namespace osmscout {
       cairo_fill(draw);
       break;
     case SymbolStyle::triangle:
+      cairo_new_path(draw);
       cairo_set_source_rgba(draw,
                             style->GetFillR(),
                             style->GetFillG(),
@@ -679,7 +680,6 @@ namespace osmscout {
                             style->GetFillA());
       cairo_set_line_width(draw,1);
 
-      cairo_new_path(draw);
       cairo_move_to(draw,x-style->GetSize()/2,y+style->GetSize()/2);
       cairo_line_to(draw,x,y-style->GetSize()/2);
       cairo_line_to(draw,x+style->GetSize()/2,y+style->GetSize()/2);
@@ -703,6 +703,7 @@ namespace osmscout {
 
   void MapPainterCairo::DrawPath(LineStyle::Style style,
                                  const Projection& projection,
+                                 const MapParameter& parameter,
                                  double r,
                                  double g,
                                  double b,
@@ -737,12 +738,13 @@ namespace osmscout {
       break;
     }
 
-    TransformWay(projection,nodes);
+    TransformWay(projection,parameter,nodes);
 
     bool start=true;
     for (size_t i=0; i<nodes.size(); i++) {
       if (drawNode[i]) {
         if (start) {
+          cairo_new_path(draw);
           cairo_move_to(draw,nodeX[i],nodeY[i]);
           start=false;
         }
@@ -763,6 +765,7 @@ namespace osmscout {
 
   void MapPainterCairo::FillRegion(const std::vector<Point>& nodes,
                                    const Projection& projection,
+                                   const MapParameter& parameter,
                                    const FillStyle& style)
   {
     cairo_set_source_rgba(draw,
@@ -772,12 +775,13 @@ namespace osmscout {
                           1);
     cairo_set_line_width(draw,1);
 
-    TransformArea(projection,nodes);
+    TransformArea(projection,parameter,nodes);
 
     bool start=true;
     for (size_t i=0; i<nodes.size(); i++) {
       if (drawNode[i]) {
         if (start) {
+          cairo_new_path(draw);
           cairo_move_to(draw,nodeX[i],nodeY[i]);
           start=false;
         }
@@ -795,6 +799,7 @@ namespace osmscout {
 
   void MapPainterCairo::FillRegion(const std::vector<Point>& nodes,
                                    const Projection& projection,
+                                   const MapParameter& parameter,
                                    PatternStyle& style)
   {
     assert(style.GetId()>0);
@@ -804,12 +809,13 @@ namespace osmscout {
 
     cairo_set_source(draw,patterns[style.GetId()-1]);
 
-    TransformArea(projection,nodes);
+    TransformArea(projection,parameter,nodes);
 
     bool start=true;
     for (size_t i=0; i<nodes.size(); i++) {
       if (drawNode[i]) {
         if (start) {
+          cairo_new_path(draw);
           cairo_move_to(draw,nodeX[i],nodeY[i]);
           start=false;
         }
@@ -844,11 +850,8 @@ namespace osmscout {
       lineWidth=style->GetWidth();
     }
 
-    lineWidth=lineWidth/projection.GetPixelSize();
-
-    if (lineWidth<style->GetMinPixel()) {
-      lineWidth=style->GetMinPixel();
-    }
+    lineWidth=std::max(style->GetMinPixel(),
+                       lineWidth/projection.GetPixelSize());
 
     bool outline=style->GetOutline()>0 &&
                  lineWidth-2*style->GetOutline()>=parameter.GetOutlineMinWidth();
@@ -893,12 +896,13 @@ namespace osmscout {
     cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
     cairo_set_line_width(draw,lineWidth);
 
-    TransformWay(projection,nodes);
+    TransformWay(projection,parameter,nodes);
 
     bool start=true;
     for (size_t i=0; i<nodes.size(); i++) {
       if (drawNode[i]) {
         if (start) {
+          cairo_new_path(draw);
           cairo_move_to(draw,nodeX[i],nodeY[i]);
           start=false;
         }
@@ -917,6 +921,8 @@ namespace osmscout {
     cairo_stroke(draw);
 
     if (!attributes.StartIsJoint()) {
+      /*
+      cairo_new_path(draw);
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
       cairo_set_dash(draw,NULL,0,0);
       cairo_set_source_rgba(draw,
@@ -928,10 +934,12 @@ namespace osmscout {
 
       cairo_move_to(draw,nodeX[0],nodeY[0]);
       cairo_line_to(draw,nodeX[0],nodeY[0]);
-      cairo_stroke(draw);
+      cairo_stroke(draw);*/
     }
 
     if (!attributes.EndIsJoint()) {
+      /*
+      cairo_new_path(draw);
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
       cairo_set_dash(draw,NULL,0,0);
       cairo_set_source_rgba(draw,
@@ -943,12 +951,13 @@ namespace osmscout {
 
       cairo_move_to(draw,nodeX[nodes.size()-1],nodeY[nodes.size()-1]);
       cairo_line_to(draw,nodeX[nodes.size()-1],nodeY[nodes.size()-1]);
-      cairo_stroke(draw);
+      cairo_stroke(draw);*/
     }
   }
 
   void MapPainterCairo::DrawArea(const StyleConfig& styleConfig,
                                  const Projection& projection,
+                                 const MapParameter& parameter,
                                  TypeId type,
                                  int layer,
                                  const SegmentAttributes& attributes,
@@ -969,10 +978,10 @@ namespace osmscout {
     }
 
     if (hasPattern) {
-      FillRegion(nodes,projection,*patternStyle);
+      FillRegion(nodes,projection,parameter,*patternStyle);
     }
     else if (hasFill) {
-      FillRegion(nodes,projection,*fillStyle);
+      FillRegion(nodes,projection,parameter,*fillStyle);
     }
 
     //
@@ -987,6 +996,7 @@ namespace osmscout {
 
     DrawPath(lineStyle->GetStyle(),
              projection,
+             parameter,
              lineStyle->GetLineR(),
              lineStyle->GetLineG(),
              lineStyle->GetLineB(),
@@ -1024,31 +1034,8 @@ namespace osmscout {
          projection,
          parameter,
          data);
-         
+
     return true;
   }
-
-/*
-  bool MapPainterCairo::PrintMap(const StyleConfig& styleConfig,
-                                 double lon, double lat,
-                                 double magnification,
-                                 size_t width, size_t height)
-  {
-    cairo_surface_t *image=cairo_image_surface_create(CAIRO_FORMAT_RGB24,width,height);
-    cairo_t         *draw=cairo_create(image);
-
-    DrawMap(styleConfig,
-            lon,lat,magnification,width,height,
-            image,draw);
-
-    std::cout << "Saving..." << std::endl;
-
-    cairo_surface_write_to_png(image,"map.png");
-
-    cairo_destroy(draw);
-    cairo_surface_destroy(image);
-
-    return true;
-  }*/
 }
 

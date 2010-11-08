@@ -21,7 +21,6 @@
 */
 
 #include <map>
-#include <set>
 #include <vector>
 #include <cassert>
 #include <cmath>
@@ -61,18 +60,13 @@ namespace osmscout {
       std::vector<FileOffset>                   relAreas;
     };
 
-    /**
-      Each level consists of a map, holding all index entries for this level
-      by their file offset.
-      */
-    typedef std::map<FileOffset,IndexEntry> IndexLevel;
-
   private:
-    std::string             filepart;
-    std::vector<double>     cellWidth;
-    std::vector<double>     cellHeight;
-    uint32_t                maxLevel; //! Maximum level in index
-    std::vector<IndexLevel> index;    //! An area of IndexLevel datastructures, one for each level
+    std::string                     filepart;
+    std::vector<double>             cellWidth;
+    std::vector<double>             cellHeight;
+    uint32_t                        maxLevel;       //! Maximum level in index
+    FileOffset                      topLevelOffset; //! Offset o fthe top level index entry
+    std::map<FileOffset,IndexEntry> index;
 
   public:
     AreaIndex();
@@ -84,14 +78,15 @@ namespace osmscout {
                     double minlat,
                     double maxlon,
                     double maxlat,
+                    size_t maxWayLevel,
                     size_t maxAreaLevel,
                     size_t maxAreaCount,
                     const std::vector<TypeId>& wayTypes,
                     size_t maxWayCount,
-                    std::set<FileOffset>& wayWayOffsets,
-                    std::set<FileOffset>& relationWayOffsets,
-                    std::set<FileOffset>& wayAreaOffsets,
-                    std::set<FileOffset>& relationAreaOffsets) const;
+                    std::vector<FileOffset>& wayWayOffsets,
+                    std::vector<FileOffset>& relationWayOffsets,
+                    std::vector<FileOffset>& wayAreaOffsets,
+                    std::vector<FileOffset>& relationAreaOffsets) const;
 
     void DumpStatistics();
   };
