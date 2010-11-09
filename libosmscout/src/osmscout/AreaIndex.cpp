@@ -21,19 +21,160 @@
 
 namespace osmscout {
 
-  AreaIndex::AreaIndex()
-  : filepart("area.idx")
+  AreaIndex::AreaIndex(size_t cacheSize)
+  : filepart("area.idx"),
+    indexCache(cacheSize)
   {
     // no code
   }
 
+  bool AreaIndex::GetIndexEntry(uint32_t level,
+                                FileOffset offset,
+                                IndexCache::CacheRef& cacheRef) const
+  {
+    if (!indexCache.GetEntry(offset,cacheRef)) {
+      IndexCache::CacheEntry cacheEntry(offset);
+
+      cacheRef=indexCache.SetEntry(cacheEntry);
+
+      if (!scanner.IsOpen()) {
+        if (!scanner.Open(datafilename)) {
+          std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
+          return false;
+        }
+      }
+
+      scanner.SetPos(offset);
+
+      // Read offsets of children if not in the bottom level
+
+      if (level<maxLevel) {
+        for (size_t c=0; c<4; c++) {
+          if (!scanner.ReadNumber(cacheRef->value.children[c])) {
+            std::cerr << "Cannot read index data at offset " << offset << std::endl;
+            return false;
+          }
+        }
+      }
+      else {
+        for (size_t c=0; c<4; c++) {
+          cacheRef->value.children[c]=0;
+        }
+      }
+
+      // Now read the way offsets by type in this index entry
+
+      uint32_t typeCount;
+      uint32_t offsetCount;
+
+      if (!scanner.ReadNumber(typeCount)) {
+        std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
+        return false;
+      }
+
+      for (uint32_t t=0; t<typeCount; t++) {
+        TypeId type;
+
+        if (!scanner.ReadNumber(type)) {
+          std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
+          return false;
+        }
+
+        if (!scanner.ReadNumber(offsetCount)) {
+          std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
+          return false;
+        }
+
+        if (offsetCount>0) {
+          std::vector<FileOffset> &vector=cacheRef->value.ways[type];
+
+          vector.resize(offsetCount);
+
+          for (size_t c=0; c<offsetCount; c++) {
+            if (!scanner.Read(vector[c])) {
+              std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
+              return false;
+            }
+          }
+        }
+      }
+
+      // Now read the way relation offsets by type in this index entry
+
+      if (!scanner.ReadNumber(typeCount)) {
+        std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
+        return false;
+      }
+
+      for (size_t t=0; t<typeCount; t++) {
+        TypeId type;
+
+        if (!scanner.ReadNumber(type)) {
+          std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
+          return false;
+        }
+
+        if (!scanner.ReadNumber(offsetCount)) {
+          std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
+          return false;
+        }
+
+        if (offsetCount>0) {
+          std::vector<FileOffset> &vector=cacheRef->value.relWays[type];
+
+          vector.resize(offsetCount);
+
+          for (size_t c=0; c<offsetCount; c++) {
+            if (!scanner.Read(vector[c])) {
+              std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
+              return false;
+            }
+          }
+        }
+      }
+
+      // Areas
+
+      if (!scanner.ReadNumber(offsetCount)) {
+        std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
+        return false;
+      }
+
+      cacheRef->value.areas.resize(offsetCount);
+
+      for (size_t c=0; c<offsetCount; c++) {
+        if (!scanner.Read(cacheRef->value.areas[c])) {
+          std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
+          return false;
+        }
+      }
+
+      // Relation areas
+
+      if (!scanner.ReadNumber(offsetCount)) {
+        std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
+        return false;
+      }
+
+      cacheRef->value.relAreas.resize(offsetCount);
+
+      for (size_t c=0; c<offsetCount; c++) {
+        if (!scanner.Read(cacheRef->value.relAreas[c])) {
+          std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
   bool AreaIndex::Load(const std::string& path)
   {
-    FileScanner scanner;
-    std::string file=path+"/"+filepart;
+    datafilename=path+"/"+filepart;
 
-    if (!scanner.Open(file)) {
-      std::cerr << "Cannot open file '" << file << "'" << std::endl;
+    if (!scanner.Open(datafilename)) {
+      std::cerr << "Cannot open file '" << datafilename << "'" << std::endl;
       return false;
     }
 
@@ -59,154 +200,6 @@ namespace osmscout {
 
     for (size_t i=0; i<cellHeight.size(); i++) {
       cellHeight[i]=180.0/pow(2.0,(int)i);
-    }
-
-    int l=maxLevel;
-
-    while (l>=0) {
-      uint32_t entries;
-
-      // Read the number of entries in this level...
-
-      if (!scanner.ReadNumber(entries)) {
-        std::cerr << "Cannot read data, level " << l << std::endl;
-        return false;
-      }
-
-      std::cout << "Reading " << entries << " entries for level " << l << std::endl;
-
-      for (size_t i=0; i<entries; i++) {
-        FileOffset offset;
-        IndexEntry entry;
-
-        if (!scanner.GetPos(offset)) {
-          std::cerr << "Cannot read index data, level " << l << " entry " << i << std::endl;
-          return false;
-        }
-
-        // Read offsets of children if not in the bottom level
-
-        if ((uint32_t)l<maxLevel) {
-          for (size_t c=0; c<4; c++) {
-            if (!scanner.ReadNumber(entry.children[c])) {
-              std::cerr << "Cannot read index data, level " << l << " entry " << i << std::endl;
-              return false;
-            }
-          }
-        }
-        else {
-          for (size_t c=0; c<4; c++) {
-            entry.children[c]=0;
-          }
-        }
-
-        // Now read the way offsets by type in this index entry
-
-        uint32_t typeCount;
-        uint32_t offsetCount;
-
-        if (!scanner.ReadNumber(typeCount)) {
-          std::cerr << "Cannot read index way data, level " << l << " entry " << i << std::endl;
-          return false;
-        }
-
-        for (uint32_t t=0; t<typeCount; t++) {
-          TypeId type;
-
-          if (!scanner.ReadNumber(type)) {
-            std::cerr << "Cannot read index way data, level " << l << " entry " << i << std::endl;
-            return false;
-          }
-
-          if (!scanner.ReadNumber(offsetCount)) {
-            std::cerr << "Cannot read index way data, level " << l << " entry " << i << std::endl;
-            return false;
-          }
-
-          if (offsetCount>0) {
-            std::vector<FileOffset> &vector=entry.ways[type];
-
-            vector.resize(offsetCount);
-
-            for (size_t c=0; c<offsetCount; c++) {
-              if (!scanner.Read(vector[c])) {
-                std::cerr << "Cannot read index way data, level " << l << " entry " << i << std::endl;
-                return false;
-              }
-            }
-          }
-        }
-
-        // Now read the way relation offsets by type in this index entry
-
-        if (!scanner.ReadNumber(typeCount)) {
-          std::cerr << "Cannot read index way relation data, level " << l << " entry " << i << std::endl;
-          return false;
-        }
-
-        for (size_t t=0; t<typeCount; t++) {
-          TypeId type;
-
-          if (!scanner.ReadNumber(type)) {
-            std::cerr << "Cannot read index way relation data, level " << l << " entry " << i << std::endl;
-            return false;
-          }
-
-          if (!scanner.ReadNumber(offsetCount)) {
-            std::cerr << "Cannot read index way relation data, level " << l << " entry " << i << std::endl;
-            return false;
-          }
-
-          if (offsetCount>0) {
-            std::vector<FileOffset> &vector=entry.relWays[type];
-
-            vector.resize(offsetCount);
-
-            for (size_t c=0; c<offsetCount; c++) {
-              if (!scanner.Read(vector[c])) {
-                std::cerr << "Cannot read index way relation data, level " << l << " entry " << i << std::endl;
-                return false;
-              }
-            }
-          }
-        }
-
-        // Areas
-
-        if (!scanner.ReadNumber(offsetCount)) {
-          std::cerr << "Cannot read index area data, level " << l << " entry " << i << std::endl;
-          return false;
-        }
-
-        entry.areas.resize(offsetCount);
-
-        for (size_t c=0; c<offsetCount; c++) {
-          if (!scanner.Read(entry.areas[c])) {
-            std::cerr << "Cannot read index area data, level " << l << " entry " << i << std::endl;
-            return false;
-          }
-        }
-
-        // Relation areas
-
-        if (!scanner.ReadNumber(offsetCount)) {
-          std::cerr << "Cannot read index area relation data, level " << l << " entry " << i << std::endl;
-          return false;
-        }
-
-        entry.relAreas.resize(offsetCount);
-
-        for (size_t c=0; c<offsetCount; c++) {
-          if (!scanner.Read(entry.relAreas[c])) {
-            std::cerr << "Cannot read index area relation data, level " << l << " entry " << i << std::endl;
-            return false;
-          }
-        }
-
-        index[offset]=entry;
-      }
-
-      l--;
     }
 
     return !scanner.HasError() && scanner.Close();
@@ -305,24 +298,25 @@ namespace osmscout {
           size_t cy;
           double x;
           double y;
-          std::map<FileOffset,IndexEntry>::const_iterator entry=index.find(co[i]);
 
-          if (entry==index.end()) {
+          IndexCache::CacheRef entry;
+
+          if (!GetIndexEntry(level,co[i],entry)) {
             std::cerr << "Cannot find offset " << co[i] << " in level " << level << ", => aborting!" << std::endl;
             return false;
           }
 
           // Find the list of way and way relation offsets for the given type
-          std::map<TypeId,std::vector<FileOffset> >::const_iterator wayTypeOffsets=entry->second.ways.find(wayTypes[t]);
-          std::map<TypeId,std::vector<FileOffset> >::const_iterator relationTypeOffsets=entry->second.relWays.find(wayTypes[t]);
+          std::map<TypeId,std::vector<FileOffset> >::const_iterator wayTypeOffsets=entry->value.ways.find(wayTypes[t]);
+          std::map<TypeId,std::vector<FileOffset> >::const_iterator relationTypeOffsets=entry->value.relWays.find(wayTypes[t]);
 
           size_t nw=0;
-          if (wayTypeOffsets!=entry->second.ways.end()) {
+          if (wayTypeOffsets!=entry->value.ways.end()) {
             nw=wayTypeOffsets->second.size();
           }
 
           size_t nr=0;
-          if (relationTypeOffsets!=entry->second.relWays.end()) {
+          if (relationTypeOffsets!=entry->value.relWays.end()) {
             nr=relationTypeOffsets->second.size();
           }
 
@@ -341,7 +335,7 @@ namespace osmscout {
             break;
           }
 
-          if (wayTypeOffsets!=entry->second.ways.end()) {
+          if (wayTypeOffsets!=entry->value.ways.end()) {
             for (std::vector<FileOffset>::const_iterator o=wayTypeOffsets->second.begin();
                  o!=wayTypeOffsets->second.end();
                  ++o) {
@@ -349,7 +343,7 @@ namespace osmscout {
             }
           }
 
-          if (relationTypeOffsets!=entry->second.relWays.end()) {
+          if (relationTypeOffsets!=entry->value.relWays.end()) {
             for (std::vector<FileOffset>::const_iterator o=relationTypeOffsets->second.begin();
                  o!=relationTypeOffsets->second.end();
                  ++o) {
@@ -364,7 +358,7 @@ namespace osmscout {
             cx=ctx[i]*2;
             cy=cty[i]*2;
 
-            if (entry->second.children[0]!=0) {
+            if (entry->value.children[0]!=0) {
               // top left
 
               x=cx*cellWidth[level+1];
@@ -376,11 +370,11 @@ namespace osmscout {
                     y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
                 ntx.push_back(cx);
                 nty.push_back(cy+1);
-                no.push_back(entry->second.children[0]);
+                no.push_back(entry->value.children[0]);
               }
             }
 
-            if (entry->second.children[1]!=0) {
+            if (entry->value.children[1]!=0) {
               // top right
               x=(cx+1)*cellWidth[level+1];
               y=(cy+1)*cellHeight[level+1];
@@ -391,11 +385,11 @@ namespace osmscout {
                     y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
                 ntx.push_back(cx+1);
                 nty.push_back(cy+1);
-                no.push_back(entry->second.children[1]);
+                no.push_back(entry->value.children[1]);
               }
             }
 
-            if (entry->second.children[2]!=0) {
+            if (entry->value.children[2]!=0) {
               // bottom left
               x=cx*cellWidth[level+1];
               y=cy*cellHeight[level+1];
@@ -406,11 +400,11 @@ namespace osmscout {
                     y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
                 ntx.push_back(cx);
                 nty.push_back(cy);
-                no.push_back(entry->second.children[2]);
+                no.push_back(entry->value.children[2]);
               }
             }
 
-            if (entry->second.children[3]!=0) {
+            if (entry->value.children[3]!=0) {
               // bottom right
               x=(cx+1)*cellWidth[level+1];
               y=cy*cellHeight[level+1];
@@ -421,7 +415,7 @@ namespace osmscout {
                     y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
                 ntx.push_back(cx+1);
                 nty.push_back(cy);
-                no.push_back(entry->second.children[3]);
+                no.push_back(entry->value.children[3]);
               }
             }
           }
@@ -482,9 +476,9 @@ namespace osmscout {
         size_t cy;
         double x;
         double y;
-        std::map<FileOffset,IndexEntry>::const_iterator entry=index.find(co[i]);
+        IndexCache::CacheRef entry;
 
-        if (entry==index.end()) {
+        if (!GetIndexEntry(level,co[i],entry)) {
           std::cerr << "Cannot find offset " << co[i] << " in level " << level << ", => aborting!" << std::endl;
           return false;
         }
@@ -493,19 +487,19 @@ namespace osmscout {
         // add it to the result
 
         if (wayAreaOffsets.size()+relationAreaOffsets.size()+
-                 entry->second.areas.size()+
-                 entry->second.relAreas.size()>=maxAreaCount) {
+                 entry->value.areas.size()+
+                 entry->value.relAreas.size()>=maxAreaCount) {
           stopArea=true;
         }
         else {
-          for (std::vector<FileOffset>::const_iterator o=entry->second.areas.begin();
-               o!=entry->second.areas.end();
+          for (std::vector<FileOffset>::const_iterator o=entry->value.areas.begin();
+               o!=entry->value.areas.end();
                ++o) {
             wayAreaOffsets.push_back(*o);
           }
 
-          for (std::vector<FileOffset>::const_iterator o=entry->second.relAreas.begin();
-               o!=entry->second.relAreas.end();
+          for (std::vector<FileOffset>::const_iterator o=entry->value.relAreas.begin();
+               o!=entry->value.relAreas.end();
                ++o) {
             relationAreaOffsets.push_back(*o);
           }
@@ -514,7 +508,7 @@ namespace osmscout {
         cx=ctx[i]*2;
         cy=cty[i]*2;
 
-        if (entry->second.children[0]!=0) {
+        if (entry->value.children[0]!=0) {
           // top left
 
           x=cx*cellWidth[level+1];
@@ -526,11 +520,11 @@ namespace osmscout {
                 y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
             ntx.push_back(cx);
             nty.push_back(cy+1);
-            no.push_back(entry->second.children[0]);
+            no.push_back(entry->value.children[0]);
           }
         }
 
-        if (entry->second.children[1]!=0) {
+        if (entry->value.children[1]!=0) {
           // top right
           x=(cx+1)*cellWidth[level+1];
           y=(cy+1)*cellHeight[level+1];
@@ -541,11 +535,11 @@ namespace osmscout {
                 y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
             ntx.push_back(cx+1);
             nty.push_back(cy+1);
-            no.push_back(entry->second.children[1]);
+            no.push_back(entry->value.children[1]);
           }
         }
 
-        if (entry->second.children[2]!=0) {
+        if (entry->value.children[2]!=0) {
           // bottom left
           x=cx*cellWidth[level+1];
           y=cy*cellHeight[level+1];
@@ -556,11 +550,11 @@ namespace osmscout {
                 y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
             ntx.push_back(cx);
             nty.push_back(cy);
-            no.push_back(entry->second.children[2]);
+            no.push_back(entry->value.children[2]);
           }
         }
 
-        if (entry->second.children[3]!=0) {
+        if (entry->value.children[3]!=0) {
           // bottom right
           x=(cx+1)*cellWidth[level+1];
           y=cy*cellHeight[level+1];
@@ -571,7 +565,7 @@ namespace osmscout {
                 y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
             ntx.push_back(cx+1);
             nty.push_back(cy);
-            no.push_back(entry->second.children[3]);
+            no.push_back(entry->value.children[3]);
           }
         }
       }
@@ -582,48 +576,14 @@ namespace osmscout {
     }
 
     std::cout << "Found " << wayWayOffsets.size() << "/" << relationWayOffsets.size() << "/"
-    << wayAreaOffsets.size() << "/" << relationAreaOffsets.size() << " offsets in '" << filepart << "' with maximum level " << maxLevel << std::endl;
+    << wayAreaOffsets.size() << "/" << relationAreaOffsets.size() << " offsets in '" << filepart << "'" << std::endl;
 
     return true;
   }
 
   void AreaIndex::DumpStatistics()
   {
-    size_t size=0;
-    size_t memory=0;
-
-    memory+=sizeof(index)+index.size()*(sizeof(FileOffset)+sizeof(IndexEntry));
-    for (std::map<FileOffset,IndexEntry>::const_iterator iter=index.begin();
-         iter!=index.end();
-         ++iter) {
-      size++;
-
-      // Ways
-      memory+=iter->second.ways.size()*(sizeof(TypeId)+sizeof(std::vector<FileOffset>));
-
-      for (std::map<TypeId,std::vector<FileOffset> >::const_iterator iter2=iter->second.ways.begin();
-           iter2!=iter->second.ways.end();
-           ++iter2) {
-        memory+=iter2->second.size()*sizeof(FileOffset);
-      }
-
-      // RelWays
-      memory+=iter->second.relWays.size()*(sizeof(TypeId)+sizeof(std::vector<FileOffset>));
-
-      for (std::map<TypeId,std::vector<FileOffset> >::const_iterator iter2=iter->second.relWays.begin();
-           iter2!=iter->second.relWays.end();
-           ++iter2) {
-        memory+=iter2->second.size()*sizeof(FileOffset);
-        }
-
-      // Areas
-        memory+=iter->second.areas.size()*sizeof(FileOffset);
-
-      // RelAreas
-      memory+=iter->second.relAreas.size()*sizeof(FileOffset);
-    }
-
-    std::cout << "Area index size " << size << ", memory usage " << memory << std::endl;
+    indexCache.DumpStatistics(filepart.c_str(),IndexCacheValueSizer());
   }
 }
 

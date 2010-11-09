@@ -107,6 +107,7 @@ namespace osmscout {
 
   Database::Database()
    : isOpen(false),
+     areaIndex(10000),
      nodeDataFile("nodes.dat","node.idx",100000),
      relationDataFile("relations.dat","relation.idx",10000),
      wayDataFile("ways.dat","way.idx",100000),

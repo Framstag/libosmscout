@@ -26,6 +26,7 @@
 #include <cmath>
 #include <iostream>
 
+#include <osmscout/Cache.h>
 #include <osmscout/FileScanner.h>
 #include <osmscout/StyleConfig.h>
 #include <osmscout/Util.h>
@@ -60,16 +61,63 @@ namespace osmscout {
       std::vector<FileOffset>                   relAreas;
     };
 
+    typedef Cache<FileOffset,IndexEntry> IndexCache;
+
+    struct IndexCacheValueSizer : public IndexCache::ValueSizer
+    {
+      size_t GetSize(const IndexEntry& value) const
+      {
+        size_t memory=0;
+
+        memory+=sizeof(value);
+
+        // Ways
+        memory+=value.ways.size()*(sizeof(TypeId)+sizeof(std::vector<FileOffset>));
+
+        for (std::map<TypeId,std::vector<FileOffset> >::const_iterator iter2=value.ways.begin();
+             iter2!=value.ways.end();
+             ++iter2) {
+          memory+=iter2->second.size()*sizeof(FileOffset);
+        }
+
+        // RelWays
+        memory+=value.relWays.size()*(sizeof(TypeId)+sizeof(std::vector<FileOffset>));
+
+        for (std::map<TypeId,std::vector<FileOffset> >::const_iterator iter2=value.relWays.begin();
+             iter2!=value.relWays.end();
+             ++iter2) {
+          memory+=iter2->second.size()*sizeof(FileOffset);
+        }
+
+        // Areas
+        memory+=value.areas.size()*sizeof(FileOffset);
+
+        // RelAreas
+        memory+=value.relAreas.size()*sizeof(FileOffset);
+
+        return memory;
+      }
+    };
+
   private:
     std::string                     filepart;
+    std::string                     datafilename;
+    mutable FileScanner             scanner;
+
     std::vector<double>             cellWidth;
     std::vector<double>             cellHeight;
     uint32_t                        maxLevel;       //! Maximum level in index
     FileOffset                      topLevelOffset; //! Offset o fthe top level index entry
-    std::map<FileOffset,IndexEntry> index;
+
+    mutable IndexCache              indexCache;     //! Cached map of all index entries by file offset
+
+  private:
+    bool GetIndexEntry(uint32_t level,
+                       FileOffset offset,
+                       IndexCache::CacheRef& cacheRef) const;
 
   public:
-    AreaIndex();
+    AreaIndex(size_t cacheSize);
 
     bool Load(const std::string& path);
 
