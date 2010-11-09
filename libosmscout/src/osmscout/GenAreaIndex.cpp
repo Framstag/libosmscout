@@ -564,10 +564,6 @@ namespace osmscout {
                      NumberToString(areaLevelEntries)+"/"+
                      NumberToString(relAreaLevelEntries)+") "+
                      "to index of level "+NumberToString(l)+"...");
-      //
-      // Store all index entries for this level and store their file offset
-      //
-      writer.WriteNumber((uint32_t)leafs.size()); // Number of leafs
 
       // Remember the offset of one cell in level '0'
       if (l==0) {
