@@ -138,6 +138,8 @@ namespace osmscout {
     progress.SetAction("Generating 'area.idx'");
 
     FileWriter writer;
+    FileOffset topLevelOffset=0;
+    FileOffset topLevelOffsetOffset; // Offset of the toplevel entry
 
     if (!writer.Open("area.idx")) {
       progress.Error("Cannot create 'area.idx'");
@@ -145,6 +147,16 @@ namespace osmscout {
     }
 
     writer.WriteNumber((uint32_t)parameter.GetAreaAreaIndexMaxMag()); // MaxMag
+
+    if (!writer.GetPos(topLevelOffsetOffset)) {
+      progress.Error("Cannot read current file position");
+      return false;
+    }
+
+    if (!writer.Write(topLevelOffset)) {
+      progress.Error("Cannot write top level entry offset");
+      return false;
+    }
 
     int l=parameter.GetAreaAreaIndexMaxMag();
 
@@ -556,6 +568,15 @@ namespace osmscout {
       // Store all index entries for this level and store their file offset
       //
       writer.WriteNumber((uint32_t)leafs.size()); // Number of leafs
+
+      // Remember the offset of one cell in level '0'
+      if (l==0) {
+        if (!writer.GetPos(topLevelOffset)) {
+          progress.Error("Cannot read top level entry offset");
+          return false;
+        }
+      }
+
       for (std::map<Coord,AreaLeaf>::iterator leaf=leafs.begin();
            leaf!=leafs.end();
            ++leaf) {
@@ -630,6 +651,9 @@ namespace osmscout {
 
       l--;
     }
+
+    writer.SetPos(topLevelOffsetOffset);
+    writer.Write(topLevelOffset);
 
     return !writer.HasError() && writer.Close();
   }

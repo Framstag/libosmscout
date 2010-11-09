@@ -42,6 +42,11 @@ namespace osmscout {
       return false;
     }
 
+    if (!scanner.Read(topLevelOffset)) {
+      std::cerr << "Cannot read data" << std::endl;
+      return false;
+    }
+
     std::cout << "Max level is: " << maxLevel << std::endl;
 
     // Calculate the size of a cell in each index level
@@ -77,10 +82,6 @@ namespace osmscout {
         if (!scanner.GetPos(offset)) {
           std::cerr << "Cannot read index data, level " << l << " entry " << i << std::endl;
           return false;
-        }
-
-        if ((uint32_t)l==0) {
-          topLevelOffset=offset;
         }
 
         // Read offsets of children if not in the bottom level
