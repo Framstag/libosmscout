@@ -898,16 +898,21 @@ namespace osmscout {
 
     TransformWay(projection,parameter,nodes);
 
-    bool start=true;
+    size_t firstNode=0;
+    size_t lastNode=0;
+    bool   start=true;
     for (size_t i=0; i<nodes.size(); i++) {
       if (drawNode[i]) {
         if (start) {
           cairo_new_path(draw);
           cairo_move_to(draw,nodeX[i],nodeY[i]);
           start=false;
+          firstNode=i;
+          lastNode=i;
         }
         else {
           cairo_line_to(draw,nodeX[i],nodeY[i]);
+          lastNode=i;
         }
 
         //nodesDrawnCount++;
@@ -921,7 +926,6 @@ namespace osmscout {
     cairo_stroke(draw);
 
     if (!attributes.StartIsJoint()) {
-      /*
       cairo_new_path(draw);
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
       cairo_set_dash(draw,NULL,0,0);
@@ -932,13 +936,12 @@ namespace osmscout {
                             style->GetOutlineA());
       cairo_set_line_width(draw,lineWidth);
 
-      cairo_move_to(draw,nodeX[0],nodeY[0]);
-      cairo_line_to(draw,nodeX[0],nodeY[0]);
-      cairo_stroke(draw);*/
+      cairo_move_to(draw,nodeX[firstNode],nodeY[firstNode]);
+      cairo_line_to(draw,nodeX[firstNode],nodeY[firstNode]);
+      cairo_stroke(draw);
     }
 
     if (!attributes.EndIsJoint()) {
-      /*
       cairo_new_path(draw);
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
       cairo_set_dash(draw,NULL,0,0);
@@ -949,9 +952,9 @@ namespace osmscout {
                             style->GetOutlineA());
       cairo_set_line_width(draw,lineWidth);
 
-      cairo_move_to(draw,nodeX[nodes.size()-1],nodeY[nodes.size()-1]);
-      cairo_line_to(draw,nodeX[nodes.size()-1],nodeY[nodes.size()-1]);
-      cairo_stroke(draw);*/
+      cairo_move_to(draw,nodeX[lastNode],nodeY[lastNode]);
+      cairo_line_to(draw,nodeX[lastNode],nodeY[lastNode]);
+      cairo_stroke(draw);
     }
   }
 
@@ -966,12 +969,11 @@ namespace osmscout {
     PatternStyle    *patternStyle=styleConfig.GetAreaPatternStyle(type);
     const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(type,
                                                             attributes.IsBuilding());
-
-    bool               hasPattern=patternStyle!=NULL &&
-                                  patternStyle->GetLayer()==layer &&
-                                  projection.GetMagnification()>=patternStyle->GetMinMag();
-    bool               hasFill=fillStyle!=NULL &&
-                               fillStyle->GetLayer()==layer;
+    bool            hasPattern=patternStyle!=NULL &&
+                               patternStyle->GetLayer()==layer &&
+                               projection.GetMagnification()>=patternStyle->GetMinMag();
+    bool            hasFill=fillStyle!=NULL &&
+                            fillStyle->GetLayer()==layer;
 
     if (hasPattern) {
       hasPattern=HasPattern(styleConfig,*patternStyle);

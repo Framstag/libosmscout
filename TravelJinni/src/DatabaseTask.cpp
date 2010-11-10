@@ -500,7 +500,6 @@ bool DatabaseTask::DrawResult(Lum::OS::Window* window,
     cairo_stroke(cairo);
 
     cairo_restore(cairo);
-
   }
 #endif
 
