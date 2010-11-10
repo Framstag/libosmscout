@@ -15,69 +15,70 @@ steps:
 egrep -h "(^\+ Step|^   =>)" <logfile>
 
 + Step #1 - Preprocess...
-   => 780.165 second(s)
+   => 1059.368 second(s)
 + Step #2 - Generating 'rawnode.idx'...
-   => 38.972 second(s)
+   => 39.817 second(s)
 + Step #3 - Generating 'rawway.idx'...
-   => 13.544 second(s)
+   => 16.968 second(s)
 + Step #4 - Generate 'relations.dat'...
-   => 69.570 second(s)
+   => 68.446 second(s)
 + Step #5 - Generating 'relation.idx'...
-   => 1.460 second(s)
+   => 1.684 second(s)
 + Step #6 - Generate 'nodes.dat'...
-   => 22.113 second(s)
+   => 21.374 second(s)
 + Step #7 - Generating 'node.idx'...
-   => 1.056 second(s)
+   => 1.017 second(s)
 + Step #8 - Generate 'ways.dat'...
-   => 652.622 second(s)
+   => 551.607 second(s)
 + Step #9 - Generating 'way.idx'...
-   => 18.070 second(s)
+   => 16.397 second(s)
 + Step #10 - Generate 'area.idx'...
-   => 210.686 second(s)
+   => 211.280 second(s)
 + Step #11 - Generate 'areanode.idx'...
-   => 2.310 second(s)
+   => 2.221 second(s)
 + Step #12 - Generate 'region.dat' and 'nameregion.idx'...
-   => 1802.233 second(s)
+   => 1789.602 second(s)
 + Step #13 - Generate 'nodeuse.idx'...
-   => 227.378 second(s)
+   => 208.395 second(s)
 + Step #14 - Generate 'water.idx'...
-   => 26.315 second(s)
+   => 26.706 second(s)
 
-The following files have been generated:
-169M area.idx
-8,0M areanode.idx
-  20 bounding.dat
-1,5M nameregion.idx
-3,2M node.idx
- 31M nodes.dat
- 88M nodeuse.idx
- 98M rawnode.idx
-729M rawnodes.dat
- 21M rawrels.dat
- 15M rawway.idx
-330M rawways.dat
- 21M region.dat
-197K relation.idx
-110M relations.dat
- 19K water.idx
-1,2M wayblack.dat
- 15M way.idx
-634M ways.dat
+The following files have been generated (du --total -h *.idx *.dat):
+67M	area.idx
+8,0M	areanode.idx
+1,5M	nameregion.idx
+3,2M	node.idx
+88M	nodeuse.idx
+98M	rawnode.idx
+15M	rawway.idx
+204K	relation.idx
+20K	water.idx
+15M	way.idx
+4,0K	bounding.dat
+31M	nodes.dat
+730M	rawnodes.dat
+22M	rawrels.dat
+331M	rawways.dat
+21M	region.dat
+110M	relations.dat
+1,2M	wayblack.dat
+635M	ways.dat
+2,2G	insgesamt
 
 Of these the following are necessary at application runtime:
-169M area.idx
-8,0M areanode.idx
-  20 bounding.dat
-1,5M nameregion.idx
-3,2M node.idx
- 31M nodes.dat
- 88M nodeuse.idx
- 21M region.dat
-197K relation.idx
-110M relations.dat
- 19K water.idx
- 15M way.idx
-634M ways.dat
+67M	area.idx
+8,0M	areanode.idx
+1,5M	nameregion.idx
+3,2M	node.idx
+88M	nodeuse.idx
+204K	relation.idx
+20K	water.idx
+15M	way.idx
+4,0K	bounding.dat
+31M	nodes.dat
+21M	region.dat
+110M	relations.dat
+635M	ways.dat
 
 Where the nodeuse.idx currently is only interesting for the internal routing
 solution. However some code change is required to do not make the database
@@ -91,50 +92,58 @@ would be:
 du --total -h area.idx areanode.idx bounding.dat nameregion.idx node.idx \
 nodes.dat region.dat relation.idx relations.dat water.idx way.idx ways.dat 
 
-169M	area.idx
-8.0M	areanode.idx
-4.0K	bounding.dat
-1.5M	nameregion.idx
-3.2M	node.idx
-31M	  nodes.dat
-21M	  region.dat
+67M	area.idx
+8,0M	areanode.idx
+4,0K	bounding.dat
+1,5M	nameregion.idx
+3,2M	node.idx
+31M	nodes.dat
+21M	region.dat
 204K	relation.idx
 110M	relations.dat
-20K	  water.idx
-15M	  way.idx
+20K	water.idx
+15M	way.idx
 635M	ways.dat
-991M	total
+888M	insgesamt
 
 Memory usage:
-Open the germany map, search for Bonn, search for Dortmund:
+Open the germany map, search for Bonn, search for Dortmund
+(top -b | grep <processname>):
 
   PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND
- 2325 tim       20   0 1810m 967m  39m S    0 31.9   0:14.41 lt-TravelJinni
- 2422 tim       20   0 1752m 964m  41m S    0 31.8   0:20.92 lt-OSMScout
+ 7788 tim       20   0 1061m 148m  34m S    0  4.9   0:06.03 lt-TravelJinni  
+ 9066 tim       20   0  987m 128m  37m S    0  4.2   0:09.55 lt-OSMScout
   
-Most of the memory useage however comes from opening the data files
-using memory maped files. 
+Most of the memory useage however comes from opening the data files using memory
+maped files. 
 
 The same, if no memory maped files are used:
 
-12659 tim       20   0 1034m 943m  14m S    0 31.1   0:22.05 lt-TravelJinni
+ 9276 tim       20   0  219m 127m  13m S    0  4.2   0:02.97 lt-TravelJinni
 
-This is the result of the internal statistics dump. It shows that the memory
-usage is high and seems to match the memory footprint seens with "top".
-Problem is not the in memory cache but the various indexes. The by far biggest
-index is the area index, indexing all areas and ways in a certain area. Goal
-should be to reduce the in memory footprint of the various indexes and avoid
-keeping all indexes completely in memory. This esepcially true for above area 
-index.
+This is the result of the internal statistics dump. Memory usage is rather
+high (but was much higher in the past). There is not yet any real measurement
+regarding optimal/minimal cache sizes, so possibly by just reducing the cache
+sizes some memory can be saved.
+
+Problem is not the in memory cache for nodes, ways/areas and relations but the
+various indexes. The currently biggest index is the area node index and should
+be next target for optimizations. After that most memory saving can be gained by
+improving the NumericIndex that is used for accessing all date files. Possibly
+using caching to hold only used index pages in memory is possible here, too.
+
+The "node index use" index is only used for routing and should be made
+optional.
 
 nodes.dat entries: 12, memory 160960
 Index node.idx: 120 entries, memory 3209208
-ways.dat entries: 1336, memory 320320
+ways.dat entries: 752, memory 250240
 Index way.idx: 191 entries, memory 3200199
-relations.dat entries: 1144, memory 116672
+relations.dat entries: 755, memory 82440
 Index relation.idx: 259 entries, memory 1600267
 Node use cache entries: 0, memory 16
-Area index size 4618855, memory usage 605820570
+area.idx entries: 839, memory 293640
 Area node index size 351882, memory 11039966
 AdminRegion size 77176, locations size 0, memory 2160928
 Node index use size 601636, memory usage 7219632
+
