@@ -28,6 +28,7 @@ nobase_include_HEADERS= osmscout/Private/Config.h \
                         osmscout/NumericIndex.h \
                         osmscout/Import.h \
                         osmscout/Preprocess.h \
+                        osmscout/PreprocessOSM.h \
                         osmscout/GenAreaIndex.h \
                         osmscout/GenAreaNodeIndex.h \
                         osmscout/GenCityStreetIndex.h \
@@ -51,3 +52,8 @@ nobase_include_HEADERS= osmscout/Private/Config.h \
                         osmscout/RoutingProfile.h \
                         osmscout/Database.h
 
+if HAVE_LIB_PROTOBUF
+nobase_include_HEADERS += osmscout/pbf/fileformat.pb.h \
+                          osmscout/pbf/osmformat.pb.h \
+                          osmscout/PreprocessPBF.h
+endif

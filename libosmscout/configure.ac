@@ -5,7 +5,7 @@ AC_INIT([libosmscout],[0.1],[tim@teulings.org],[libosmscout])
 AC_CONFIG_SRCDIR(src/osmscout/Database.cpp)
 AC_CONFIG_MACRO_DIR([m4])
 
-AC_CONFIG_HEADERS([include/osmscout/Private/Config.h include/osmscout/CoreFeatures.h])
+AC_CONFIG_HEADERS([include/osmscout/private/Config.h include/osmscout/CoreFeatures.h])
 AM_INIT_AUTOMAKE([no-define nostdinc subdir-objects dist-bzip2])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 AC_PROG_CXX
@@ -39,7 +39,7 @@ if test "$build_os" != "mingw32"; then
                   AC_DEFINE(OSMSCOUT_EXPORT_SYMBOLS,1,[libosmscout uses special gcc compiler features to export symbols])],
                  [AC_MSG_RESULT(no)])
   CXXFLAGS="$OLDCXXFLAGS"
-fi  
+fi
 
 AC_MSG_CHECKING([for WIN32])
   AC_LINK_IFELSE([
@@ -50,9 +50,20 @@ AC_MSG_CHECKING([for WIN32])
     [AC_MSG_RESULT(no)])
 
 dnl Check for libxml2
-PKG_CHECK_MODULES(XML2,[libxml-2.0 >= 2.6.0],
+PKG_CHECK_MODULES(XML2,
+                  [libxml-2.0 >= 2.6.0],
                   [AC_SUBST(XML2_CFLAGS)
                    AC_SUBST(XML2_LIBS)])
+
+PKG_CHECK_MODULES(PROTOBUF,
+                  [protobuf],
+                  [AC_SUBST(PROTOBUF_CFLAGS)
+                   AC_SUBST(PROTOBUF_LIBS)
+                   AC_DEFINE(HAVE_LIB_PROTOBUF,1,[libprotobuf detected])
+                   LIB_PROTOBUF_FOUND=true],
+                   [])
+
+AM_CONDITIONAL(HAVE_LIB_PROTOBUF,[test "$LIB_PROTOBUF_FOUND" = true])
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 

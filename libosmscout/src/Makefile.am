@@ -1,11 +1,11 @@
 AM_CPPFLAGS = $(LIB_CXXFLAGS) -DOSMSCOUTDLL -I$(top_srcdir)/include \
-              $(XML2_CFLAGS) $(CAIRO_CFLAGS)
-
-# We disable $(X_PRE_LIBS) until we need them somewhere
+              $(XML2_CFLAGS) \
+              $(PROTOBUF_CFLAGS)
 
 lib_LTLIBRARIES = libosmscout.la
 libosmscout_la_LDFLAGS  = $(XML2_LIBS) \
-                          $(CAIRO_LIBS)
+                          $(PROTOBUF_LIBS)
+
 libosmscout_la_SOURCES= osmscout/Types.cpp \
                         osmscout/Util.cpp \
                         osmscout/Progress.cpp \
@@ -33,6 +33,7 @@ libosmscout_la_SOURCES= osmscout/Types.cpp \
                         osmscout/NumericIndex.cpp \
                         osmscout/Import.cpp \
                         osmscout/Preprocess.cpp \
+                        osmscout/PreprocessOSM.cpp \
                         osmscout/GenAreaIndex.cpp \
                         osmscout/GenAreaNodeIndex.cpp \
                         osmscout/GenCityStreetIndex.cpp \
@@ -51,4 +52,10 @@ libosmscout_la_SOURCES= osmscout/Types.cpp \
                         osmscout/Route.cpp \
                         osmscout/RoutingProfile.cpp \
                         osmscout/Database.cpp
+
+if HAVE_LIB_PROTOBUF
+libosmscout_la_SOURCES += osmscout/pbf/fileformat.pb.cc \
+                          osmscout/pbf/osmformat.pb.cc \
+                          osmscout/PreprocessPBF.cpp
+endif
 
