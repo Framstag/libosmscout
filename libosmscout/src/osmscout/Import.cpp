@@ -166,7 +166,8 @@ namespace osmscout {
                       Progress& progress,
                       const TypeConfig& typeConfig)
   {
-    size_t currentStep=1;
+    StopClock overAllTimer;
+    size_t    currentStep=1;
 
     for (std::list<ImportModule*>::const_iterator module=modules.begin();
          module!=modules.end();
@@ -195,6 +196,9 @@ namespace osmscout {
 
       currentStep++;
     }
+
+    overAllTimer.Stop();
+    progress.Info(std::string("=> ")+overAllTimer.ResultString()+" second(s)");
 
     return true;
   }
