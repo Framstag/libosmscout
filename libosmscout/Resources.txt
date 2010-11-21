@@ -15,33 +15,34 @@ steps:
 egrep -h "(^\+ Step|^   =>)" <logfile>
 
 + Step #1 - Preprocess...
-   => 1059.368 second(s)
+   => 221.802 second(s)
 + Step #2 - Generating 'rawnode.idx'...
-   => 39.817 second(s)
+   => 29.594 second(s)
 + Step #3 - Generating 'rawway.idx'...
-   => 16.968 second(s)
+   => 8.851 second(s)
 + Step #4 - Generate 'relations.dat'...
-   => 68.446 second(s)
+   => 87.823 second(s)
 + Step #5 - Generating 'relation.idx'...
-   => 1.684 second(s)
+   => 1.502 second(s)
 + Step #6 - Generate 'nodes.dat'...
-   => 21.374 second(s)
+   => 22.687 second(s)
 + Step #7 - Generating 'node.idx'...
-   => 1.017 second(s)
+   => 1.005 second(s)
 + Step #8 - Generate 'ways.dat'...
-   => 551.607 second(s)
+   => 580.221 second(s)
 + Step #9 - Generating 'way.idx'...
-   => 16.397 second(s)
+   => 17.454 second(s)
 + Step #10 - Generate 'area.idx'...
-   => 211.280 second(s)
+   => 218.048 second(s)
 + Step #11 - Generate 'areanode.idx'...
-   => 2.221 second(s)
+   => 3.659 second(s)
 + Step #12 - Generate 'region.dat' and 'nameregion.idx'...
-   => 1789.602 second(s)
+   => 1896.465 second(s)
 + Step #13 - Generate 'nodeuse.idx'...
-   => 208.395 second(s)
+   => 218.284 second(s)
 + Step #14 - Generate 'water.idx'...
-   => 26.706 second(s)
+   => 27.459 second(s)
+   => 3334.879 second(s)
 
 The following files have been generated (du --total -h *.idx *.dat):
 67M	area.idx
@@ -90,7 +91,7 @@ So the overall size required on disk for a gemrany map without routing
 would be:
 
 du --total -h area.idx areanode.idx bounding.dat nameregion.idx node.idx \
-nodes.dat region.dat relation.idx relations.dat water.idx way.idx ways.dat 
+nodes.dat region.dat relation.idx relations.dat water.idx way.idx ways.dat
 
 67M	area.idx
 8,0M	areanode.idx
@@ -111,11 +112,11 @@ Open the germany map, search for Bonn, search for Dortmund
 (top -b | grep <processname>):
 
   PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND
- 7788 tim       20   0 1061m 148m  34m S    0  4.9   0:06.03 lt-TravelJinni  
+ 7788 tim       20   0 1061m 148m  34m S    0  4.9   0:06.03 lt-TravelJinni
  9066 tim       20   0  987m 128m  37m S    0  4.2   0:09.55 lt-OSMScout
-  
+
 Most of the memory useage however comes from opening the data files using memory
-maped files. 
+maped files.
 
 The same, if no memory maped files are used:
 
