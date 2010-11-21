@@ -30,7 +30,7 @@
 #include <cmath>
 #include <iomanip>
 
-#include <osmscout/Private/Config.h>
+#include <osmscout/private/Config.h>
 
 #if defined(HAVE_SYS_TIME_H)
   #include <sys/time.h>

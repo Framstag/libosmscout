@@ -31,7 +31,7 @@
 #include <string>
 #include <vector>
 
-#include <osmscout/Private/CoreImportExport.h>
+#include <osmscout/private/CoreImportExport.h>
 
 #include <osmscout/Point.h>
 

@@ -23,7 +23,7 @@
 #include <ctime>
 #include <string>
 
-#include <osmscout/Private/CoreImportExport.h>
+#include <osmscout/private/CoreImportExport.h>
 
 namespace osmscout {
 

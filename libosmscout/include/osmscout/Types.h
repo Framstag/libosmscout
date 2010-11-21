@@ -23,7 +23,7 @@
 // will be <cstdint> in c++0x
 #include <stdint.h>
 
-#include <osmscout/Private/CoreImportExport.h>
+#include <osmscout/private/CoreImportExport.h>
 
 namespace osmscout {
 

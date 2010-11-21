@@ -1,5 +1,5 @@
-nobase_include_HEADERS= osmscout/Private/Config.h \
-                        osmscout/Private/CoreImportExport.h \
+nobase_include_HEADERS= osmscout/private/Config.h \
+                        osmscout/private/CoreImportExport.h \
                         osmscout/CoreFeatures.h \
                         osmscout/Types.h \
                         osmscout/Util.h \

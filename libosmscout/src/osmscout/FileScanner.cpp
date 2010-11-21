@@ -25,7 +25,7 @@
 #include <iostream>
 #include <limits>
 
-#include <osmscout/Private/Config.h>
+#include <osmscout/private/Config.h>
 
 #if defined(HAVE_MMAP)
   #include <unistd.h>

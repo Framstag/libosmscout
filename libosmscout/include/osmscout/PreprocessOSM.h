@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_TAG_H
-#define OSMSCOUT_TAG_H
+#ifndef OSMSCOUT_PREPROCESS_OSM_H
+#define OSMSCOUT_PREPROCESS_OSM_H
 
 /*
   This source is part of the libosmscout library
@@ -20,32 +20,16 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-// Use <cstdint> for c++0x
-#include <stdint.h>
-#include <string>
-
-#include <osmscout/private/CoreImportExport.h>
+#include <osmscout/Import.h>
 
 namespace osmscout {
-
-  typedef uint16_t TagId;
-
-  struct OSMSCOUT_API Tag
+  class PreprocessOSM : public ImportModule
   {
-    TagId       key;
-    std::string value;
-
-    inline Tag()
-    {
-      // no code
-    }
-
-    inline Tag(TagId key, const std::string& value)
-     : key(key),
-       value(value)
-    {
-      // no code
-    }
+  public:
+    std::string GetDescription() const;
+    bool Import(const ImportParameter& parameter,
+                Progress& progress,
+                const TypeConfig& typeConfig);
   };
 }
 
