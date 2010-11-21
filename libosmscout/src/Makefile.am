@@ -1,10 +1,12 @@
 AM_CPPFLAGS = $(LIB_CXXFLAGS) -DOSMSCOUTDLL -I$(top_srcdir)/include \
               $(XML2_CFLAGS) \
-              $(PROTOBUF_CFLAGS)
+              $(PROTOBUF_CFLAGS) \
+              $(ZLIB_CFLAGS)
 
 lib_LTLIBRARIES = libosmscout.la
 libosmscout_la_LDFLAGS  = $(XML2_LIBS) \
-                          $(PROTOBUF_LIBS)
+                          $(PROTOBUF_LIBS) \
+                          $(ZLIB_LIBS)
 
 libosmscout_la_SOURCES= osmscout/Types.cpp \
                         osmscout/Util.cpp \

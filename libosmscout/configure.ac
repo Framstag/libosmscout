@@ -65,6 +65,16 @@ PKG_CHECK_MODULES(PROTOBUF,
 
 AM_CONDITIONAL(HAVE_LIB_PROTOBUF,[test "$LIB_PROTOBUF_FOUND" = true])
 
+PKG_CHECK_MODULES(ZLIB,
+                  [protobuf],
+                  [AC_SUBST(ZLIB_CFLAGS)
+                   AC_SUBST(ZLIB_LIBS)
+                   AC_DEFINE(HAVE_LIB_ZLIB,1,[zlib detected])
+                   LIB_ZLIB_FOUND=true],
+                   [])
+
+AM_CONDITIONAL(HAVE_LIB_ZLIB,[test "$LIB_ZLIB_FOUND" = true])
+
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
 AC_CONFIG_FILES([Makefile src/Makefile include/Makefile tests/Makefile libosmscout.pc libosmscout-uninstalled.pc])

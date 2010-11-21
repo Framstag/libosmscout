@@ -71,29 +71,29 @@ class HeaderBlock : public ::google::protobuf::Message {
  public:
   HeaderBlock();
   virtual ~HeaderBlock();
-  
+
   HeaderBlock(const HeaderBlock& from);
-  
+
   inline HeaderBlock& operator=(const HeaderBlock& from) {
     CopyFrom(from);
     return *this;
   }
-  
+
   inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
     return _unknown_fields_;
   }
-  
+
   inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
     return &_unknown_fields_;
   }
-  
+
   static const ::google::protobuf::Descriptor* descriptor();
   static const HeaderBlock& default_instance();
-  
+
   void Swap(HeaderBlock* other);
-  
+
   // implements Message ----------------------------------------------
-  
+
   HeaderBlock* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
@@ -101,7 +101,7 @@ class HeaderBlock : public ::google::protobuf::Message {
   void MergeFrom(const HeaderBlock& from);
   void Clear();
   bool IsInitialized() const;
-  
+
   int ByteSize() const;
   bool MergePartialFromCodedStream(
       ::google::protobuf::io::CodedInputStream* input);
@@ -114,20 +114,20 @@ class HeaderBlock : public ::google::protobuf::Message {
   void SharedDtor();
   void SetCachedSize(int size) const;
   public:
-  
+
   ::google::protobuf::Metadata GetMetadata() const;
-  
+
   // nested types ----------------------------------------------------
-  
+
   // accessors -------------------------------------------------------
-  
+
   // optional .PBF.HeaderBBox bbox = 1;
   inline bool has_bbox() const;
   inline void clear_bbox();
   static const int kBboxFieldNumber = 1;
   inline const ::PBF::HeaderBBox& bbox() const;
   inline ::PBF::HeaderBBox* mutable_bbox();
-  
+
   // repeated string required_features = 4;
   inline int required_features_size() const;
   inline void clear_required_features();
@@ -143,7 +143,7 @@ class HeaderBlock : public ::google::protobuf::Message {
   inline void add_required_features(const char* value, size_t size);
   inline const ::google::protobuf::RepeatedPtrField< ::std::string>& required_features() const;
   inline ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_required_features();
-  
+
   // repeated string optional_features = 5;
   inline int optional_features_size() const;
   inline void clear_optional_features();
@@ -159,7 +159,7 @@ class HeaderBlock : public ::google::protobuf::Message {
   inline void add_optional_features(const char* value, size_t size);
   inline const ::google::protobuf::RepeatedPtrField< ::std::string>& optional_features() const;
   inline ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_optional_features();
-  
+
   // optional string writingprogram = 16;
   inline bool has_writingprogram() const;
   inline void clear_writingprogram();
@@ -169,7 +169,7 @@ class HeaderBlock : public ::google::protobuf::Message {
   inline void set_writingprogram(const char* value);
   inline void set_writingprogram(const char* value, size_t size);
   inline ::std::string* mutable_writingprogram();
-  
+
   // optional string source = 17;
   inline bool has_source() const;
   inline void clear_source();
@@ -179,12 +179,12 @@ class HeaderBlock : public ::google::protobuf::Message {
   inline void set_source(const char* value);
   inline void set_source(const char* value, size_t size);
   inline ::std::string* mutable_source();
-  
+
   // @@protoc_insertion_point(class_scope:PBF.HeaderBlock)
  private:
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   mutable int _cached_size_;
-  
+
   ::PBF::HeaderBBox* bbox_;
   ::google::protobuf::RepeatedPtrField< ::std::string> required_features_;
   ::google::protobuf::RepeatedPtrField< ::std::string> optional_features_;
@@ -195,9 +195,9 @@ class HeaderBlock : public ::google::protobuf::Message {
   friend void  protobuf_AddDesc_osmformat_2eproto();
   friend void protobuf_AssignDesc_osmformat_2eproto();
   friend void protobuf_ShutdownFile_osmformat_2eproto();
-  
+
   ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
-  
+
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
     return (_has_bits_[index / 32] & (1u << (index % 32))) != 0;
@@ -208,7 +208,7 @@ class HeaderBlock : public ::google::protobuf::Message {
   inline void _clear_bit(int index) {
     _has_bits_[index / 32] &= ~(1u << (index % 32));
   }
-  
+
   void InitAsDefaultInstance();
   static HeaderBlock* default_instance_;
 };
@@ -218,29 +218,29 @@ class HeaderBBox : public ::google::protobuf::Message {
  public:
   HeaderBBox();
   virtual ~HeaderBBox();
-  
+
   HeaderBBox(const HeaderBBox& from);
-  
+
   inline HeaderBBox& operator=(const HeaderBBox& from) {
     CopyFrom(from);
     return *this;
   }
-  
+
   inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
     return _unknown_fields_;
   }
-  
+
   inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
     return &_unknown_fields_;
   }
-  
+
   static const ::google::protobuf::Descriptor* descriptor();
   static const HeaderBBox& default_instance();
-  
+
   void Swap(HeaderBBox* other);
-  
+
   // implements Message ----------------------------------------------
-  
+
   HeaderBBox* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
@@ -248,7 +248,7 @@ class HeaderBBox : public ::google::protobuf::Message {
   void MergeFrom(const HeaderBBox& from);
   void Clear();
   bool IsInitialized() const;
-  
+
   int ByteSize() const;
   bool MergePartialFromCodedStream(
       ::google::protobuf::io::CodedInputStream* input);
@@ -261,46 +261,46 @@ class HeaderBBox : public ::google::protobuf::Message {
   void SharedDtor();
   void SetCachedSize(int size) const;
   public:
-  
+
   ::google::protobuf::Metadata GetMetadata() const;
-  
+
   // nested types ----------------------------------------------------
-  
+
   // accessors -------------------------------------------------------
-  
+
   // required sint64 left = 1;
   inline bool has_left() const;
   inline void clear_left();
   static const int kLeftFieldNumber = 1;
   inline ::google::protobuf::int64 left() const;
   inline void set_left(::google::protobuf::int64 value);
-  
+
   // required sint64 right = 2;
   inline bool has_right() const;
   inline void clear_right();
   static const int kRightFieldNumber = 2;
   inline ::google::protobuf::int64 right() const;
   inline void set_right(::google::protobuf::int64 value);
-  
+
   // required sint64 top = 3;
   inline bool has_top() const;
   inline void clear_top();
   static const int kTopFieldNumber = 3;
   inline ::google::protobuf::int64 top() const;
   inline void set_top(::google::protobuf::int64 value);
-  
+
   // required sint64 bottom = 4;
   inline bool has_bottom() const;
   inline void clear_bottom();
   static const int kBottomFieldNumber = 4;
   inline ::google::protobuf::int64 bottom() const;
   inline void set_bottom(::google::protobuf::int64 value);
-  
+
   // @@protoc_insertion_point(class_scope:PBF.HeaderBBox)
  private:
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   mutable int _cached_size_;
-  
+
   ::google::protobuf::int64 left_;
   ::google::protobuf::int64 right_;
   ::google::protobuf::int64 top_;
@@ -308,9 +308,9 @@ class HeaderBBox : public ::google::protobuf::Message {
   friend void  protobuf_AddDesc_osmformat_2eproto();
   friend void protobuf_AssignDesc_osmformat_2eproto();
   friend void protobuf_ShutdownFile_osmformat_2eproto();
-  
+
   ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
-  
+
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
     return (_has_bits_[index / 32] & (1u << (index % 32))) != 0;
@@ -321,7 +321,7 @@ class HeaderBBox : public ::google::protobuf::Message {
   inline void _clear_bit(int index) {
     _has_bits_[index / 32] &= ~(1u << (index % 32));
   }
-  
+
   void InitAsDefaultInstance();
   static HeaderBBox* default_instance_;
 };
@@ -331,29 +331,29 @@ class PrimitiveBlock : public ::google::protobuf::Message {
  public:
   PrimitiveBlock();
   virtual ~PrimitiveBlock();
-  
+
   PrimitiveBlock(const PrimitiveBlock& from);
-  
+
   inline PrimitiveBlock& operator=(const PrimitiveBlock& from) {
     CopyFrom(from);
     return *this;
   }
-  
+
   inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
     return _unknown_fields_;
   }
-  
+
   inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
     return &_unknown_fields_;
   }
-  
+
   static const ::google::protobuf::Descriptor* descriptor();
   static const PrimitiveBlock& default_instance();
-  
+
   void Swap(PrimitiveBlock* other);
-  
+
   // implements Message ----------------------------------------------
-  
+
   PrimitiveBlock* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
@@ -361,7 +361,7 @@ class PrimitiveBlock : public ::google::protobuf::Message {
   void MergeFrom(const PrimitiveBlock& from);
   void Clear();
   bool IsInitialized() const;
-  
+
   int ByteSize() const;
   bool MergePartialFromCodedStream(
       ::google::protobuf::io::CodedInputStream* input);
@@ -374,20 +374,20 @@ class PrimitiveBlock : public ::google::protobuf::Message {
   void SharedDtor();
   void SetCachedSize(int size) const;
   public:
-  
+
   ::google::protobuf::Metadata GetMetadata() const;
-  
+
   // nested types ----------------------------------------------------
-  
+
   // accessors -------------------------------------------------------
-  
+
   // required .PBF.StringTable stringtable = 1;
   inline bool has_stringtable() const;
   inline void clear_stringtable();
   static const int kStringtableFieldNumber = 1;
   inline const ::PBF::StringTable& stringtable() const;
   inline ::PBF::StringTable* mutable_stringtable();
-  
+
   // repeated .PBF.PrimitiveGroup primitivegroup = 2;
   inline int primitivegroup_size() const;
   inline void clear_primitivegroup();
@@ -399,40 +399,40 @@ class PrimitiveBlock : public ::google::protobuf::Message {
       primitivegroup() const;
   inline ::google::protobuf::RepeatedPtrField< ::PBF::PrimitiveGroup >*
       mutable_primitivegroup();
-  
+
   // optional int32 granularity = 17 [default = 100];
   inline bool has_granularity() const;
   inline void clear_granularity();
   static const int kGranularityFieldNumber = 17;
   inline ::google::protobuf::int32 granularity() const;
   inline void set_granularity(::google::protobuf::int32 value);
-  
+
   // optional int64 lat_offset = 19 [default = 0];
   inline bool has_lat_offset() const;
   inline void clear_lat_offset();
   static const int kLatOffsetFieldNumber = 19;
   inline ::google::protobuf::int64 lat_offset() const;
   inline void set_lat_offset(::google::protobuf::int64 value);
-  
+
   // optional int64 lon_offset = 20 [default = 0];
   inline bool has_lon_offset() const;
   inline void clear_lon_offset();
   static const int kLonOffsetFieldNumber = 20;
   inline ::google::protobuf::int64 lon_offset() const;
   inline void set_lon_offset(::google::protobuf::int64 value);
-  
+
   // optional int32 date_granularity = 18 [default = 1000];
   inline bool has_date_granularity() const;
   inline void clear_date_granularity();
   static const int kDateGranularityFieldNumber = 18;
   inline ::google::protobuf::int32 date_granularity() const;
   inline void set_date_granularity(::google::protobuf::int32 value);
-  
+
   // @@protoc_insertion_point(class_scope:PBF.PrimitiveBlock)
  private:
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   mutable int _cached_size_;
-  
+
   ::PBF::StringTable* stringtable_;
   ::google::protobuf::RepeatedPtrField< ::PBF::PrimitiveGroup > primitivegroup_;
   ::google::protobuf::int32 granularity_;
@@ -442,9 +442,9 @@ class PrimitiveBlock : public ::google::protobuf::Message {
   friend void  protobuf_AddDesc_osmformat_2eproto();
   friend void protobuf_AssignDesc_osmformat_2eproto();
   friend void protobuf_ShutdownFile_osmformat_2eproto();
-  
+
   ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
-  
+
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
     return (_has_bits_[index / 32] & (1u << (index % 32))) != 0;
@@ -455,7 +455,7 @@ class PrimitiveBlock : public ::google::protobuf::Message {
   inline void _clear_bit(int index) {
     _has_bits_[index / 32] &= ~(1u << (index % 32));
   }
-  
+
   void InitAsDefaultInstance();
   static PrimitiveBlock* default_instance_;
 };
@@ -465,29 +465,29 @@ class PrimitiveGroup : public ::google::protobuf::Message {
  public:
   PrimitiveGroup();
   virtual ~PrimitiveGroup();
-  
+
   PrimitiveGroup(const PrimitiveGroup& from);
-  
+
   inline PrimitiveGroup& operator=(const PrimitiveGroup& from) {
     CopyFrom(from);
     return *this;
   }
-  
+
   inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
     return _unknown_fields_;
   }
-  
+
   inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
     return &_unknown_fields_;
   }
-  
+
   static const ::google::protobuf::Descriptor* descriptor();
   static const PrimitiveGroup& default_instance();
-  
+
   void Swap(PrimitiveGroup* other);
-  
+
   // implements Message ----------------------------------------------
-  
+
   PrimitiveGroup* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
@@ -495,7 +495,7 @@ class PrimitiveGroup : public ::google::protobuf::Message {
   void MergeFrom(const PrimitiveGroup& from);
   void Clear();
   bool IsInitialized() const;
-  
+
   int ByteSize() const;
   bool MergePartialFromCodedStream(
       ::google::protobuf::io::CodedInputStream* input);
@@ -508,13 +508,13 @@ class PrimitiveGroup : public ::google::protobuf::Message {
   void SharedDtor();
   void SetCachedSize(int size) const;
   public:
-  
+
   ::google::protobuf::Metadata GetMetadata() const;
-  
+
   // nested types ----------------------------------------------------
-  
+
   // accessors -------------------------------------------------------
-  
+
   // repeated .PBF.Node nodes = 1;
   inline int nodes_size() const;
   inline void clear_nodes();
@@ -526,14 +526,14 @@ class PrimitiveGroup : public ::google::protobuf::Message {
       nodes() const;
   inline ::google::protobuf::RepeatedPtrField< ::PBF::Node >*
       mutable_nodes();
-  
+
   // optional .PBF.DenseNodes dense = 2;
   inline bool has_dense() const;
   inline void clear_dense();
   static const int kDenseFieldNumber = 2;
   inline const ::PBF::DenseNodes& dense() const;
   inline ::PBF::DenseNodes* mutable_dense();
-  
+
   // repeated .PBF.Way ways = 3;
   inline int ways_size() const;
   inline void clear_ways();
@@ -545,7 +545,7 @@ class PrimitiveGroup : public ::google::protobuf::Message {
       ways() const;
   inline ::google::protobuf::RepeatedPtrField< ::PBF::Way >*
       mutable_ways();
-  
+
   // repeated .PBF.Relation relations = 4;
   inline int relations_size() const;
   inline void clear_relations();
@@ -557,7 +557,7 @@ class PrimitiveGroup : public ::google::protobuf::Message {
       relations() const;
   inline ::google::protobuf::RepeatedPtrField< ::PBF::Relation >*
       mutable_relations();
-  
+
   // repeated .PBF.ChangeSet changesets = 5;
   inline int changesets_size() const;
   inline void clear_changesets();
@@ -569,12 +569,12 @@ class PrimitiveGroup : public ::google::protobuf::Message {
       changesets() const;
   inline ::google::protobuf::RepeatedPtrField< ::PBF::ChangeSet >*
       mutable_changesets();
-  
+
   // @@protoc_insertion_point(class_scope:PBF.PrimitiveGroup)
  private:
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   mutable int _cached_size_;
-  
+
   ::google::protobuf::RepeatedPtrField< ::PBF::Node > nodes_;
   ::PBF::DenseNodes* dense_;
   ::google::protobuf::RepeatedPtrField< ::PBF::Way > ways_;
@@ -583,9 +583,9 @@ class PrimitiveGroup : public ::google::protobuf::Message {
   friend void  protobuf_AddDesc_osmformat_2eproto();
   friend void protobuf_AssignDesc_osmformat_2eproto();
   friend void protobuf_ShutdownFile_osmformat_2eproto();
-  
+
   ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
-  
+
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
     return (_has_bits_[index / 32] & (1u << (index % 32))) != 0;
@@ -596,7 +596,7 @@ class PrimitiveGroup : public ::google::protobuf::Message {
   inline void _clear_bit(int index) {
     _has_bits_[index / 32] &= ~(1u << (index % 32));
   }
-  
+
   void InitAsDefaultInstance();
   static PrimitiveGroup* default_instance_;
 };
@@ -606,29 +606,29 @@ class StringTable : public ::google::protobuf::Message {
  public:
   StringTable();
   virtual ~StringTable();
-  
+
   StringTable(const StringTable& from);
-  
+
   inline StringTable& operator=(const StringTable& from) {
     CopyFrom(from);
     return *this;
   }
-  
+
   inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
     return _unknown_fields_;
   }
-  
+
   inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
     return &_unknown_fields_;
   }
-  
+
   static const ::google::protobuf::Descriptor* descriptor();
   static const StringTable& default_instance();
-  
+
   void Swap(StringTable* other);
-  
+
   // implements Message ----------------------------------------------
-  
+
   StringTable* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
@@ -636,7 +636,7 @@ class StringTable : public ::google::protobuf::Message {
   void MergeFrom(const StringTable& from);
   void Clear();
   bool IsInitialized() const;
-  
+
   int ByteSize() const;
   bool MergePartialFromCodedStream(
       ::google::protobuf::io::CodedInputStream* input);
@@ -649,13 +649,13 @@ class StringTable : public ::google::protobuf::Message {
   void SharedDtor();
   void SetCachedSize(int size) const;
   public:
-  
+
   ::google::protobuf::Metadata GetMetadata() const;
-  
+
   // nested types ----------------------------------------------------
-  
+
   // accessors -------------------------------------------------------
-  
+
   // repeated bytes s = 1;
   inline int s_size() const;
   inline void clear_s();
@@ -671,19 +671,19 @@ class StringTable : public ::google::protobuf::Message {
   inline void add_s(const void* value, size_t size);
   inline const ::google::protobuf::RepeatedPtrField< ::std::string>& s() const;
   inline ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_s();
-  
+
   // @@protoc_insertion_point(class_scope:PBF.StringTable)
  private:
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   mutable int _cached_size_;
-  
+
   ::google::protobuf::RepeatedPtrField< ::std::string> s_;
   friend void  protobuf_AddDesc_osmformat_2eproto();
   friend void protobuf_AssignDesc_osmformat_2eproto();
   friend void protobuf_ShutdownFile_osmformat_2eproto();
-  
+
   ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
-  
+
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
     return (_has_bits_[index / 32] & (1u << (index % 32))) != 0;
@@ -694,7 +694,7 @@ class StringTable : public ::google::protobuf::Message {
   inline void _clear_bit(int index) {
     _has_bits_[index / 32] &= ~(1u << (index % 32));
   }
-  
+
   void InitAsDefaultInstance();
   static StringTable* default_instance_;
 };
@@ -704,29 +704,29 @@ class Info : public ::google::protobuf::Message {
  public:
   Info();
   virtual ~Info();
-  
+
   Info(const Info& from);
-  
+
   inline Info& operator=(const Info& from) {
     CopyFrom(from);
     return *this;
   }
-  
+
   inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
     return _unknown_fields_;
   }
-  
+
   inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
     return &_unknown_fields_;
   }
-  
+
   static const ::google::protobuf::Descriptor* descriptor();
   static const Info& default_instance();
-  
+
   void Swap(Info* other);
-  
+
   // implements Message ----------------------------------------------
-  
+
   Info* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
@@ -734,7 +734,7 @@ class Info : public ::google::protobuf::Message {
   void MergeFrom(const Info& from);
   void Clear();
   bool IsInitialized() const;
-  
+
   int ByteSize() const;
   bool MergePartialFromCodedStream(
       ::google::protobuf::io::CodedInputStream* input);
@@ -747,53 +747,53 @@ class Info : public ::google::protobuf::Message {
   void SharedDtor();
   void SetCachedSize(int size) const;
   public:
-  
+
   ::google::protobuf::Metadata GetMetadata() const;
-  
+
   // nested types ----------------------------------------------------
-  
+
   // accessors -------------------------------------------------------
-  
+
   // optional int32 version = 1 [default = -1];
   inline bool has_version() const;
   inline void clear_version();
   static const int kVersionFieldNumber = 1;
   inline ::google::protobuf::int32 version() const;
   inline void set_version(::google::protobuf::int32 value);
-  
+
   // optional int64 timestamp = 2;
   inline bool has_timestamp() const;
   inline void clear_timestamp();
   static const int kTimestampFieldNumber = 2;
   inline ::google::protobuf::int64 timestamp() const;
   inline void set_timestamp(::google::protobuf::int64 value);
-  
+
   // optional int64 changeset = 3;
   inline bool has_changeset() const;
   inline void clear_changeset();
   static const int kChangesetFieldNumber = 3;
   inline ::google::protobuf::int64 changeset() const;
   inline void set_changeset(::google::protobuf::int64 value);
-  
+
   // optional int32 uid = 4;
   inline bool has_uid() const;
   inline void clear_uid();
   static const int kUidFieldNumber = 4;
   inline ::google::protobuf::int32 uid() const;
   inline void set_uid(::google::protobuf::int32 value);
-  
+
   // optional int32 user_sid = 5;
   inline bool has_user_sid() const;
   inline void clear_user_sid();
   static const int kUserSidFieldNumber = 5;
   inline ::google::protobuf::int32 user_sid() const;
   inline void set_user_sid(::google::protobuf::int32 value);
-  
+
   // @@protoc_insertion_point(class_scope:PBF.Info)
  private:
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   mutable int _cached_size_;
-  
+
   ::google::protobuf::int32 version_;
   ::google::protobuf::int64 timestamp_;
   ::google::protobuf::int64 changeset_;
@@ -802,9 +802,9 @@ class Info : public ::google::protobuf::Message {
   friend void  protobuf_AddDesc_osmformat_2eproto();
   friend void protobuf_AssignDesc_osmformat_2eproto();
   friend void protobuf_ShutdownFile_osmformat_2eproto();
-  
+
   ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
-  
+
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
     return (_has_bits_[index / 32] & (1u << (index % 32))) != 0;
@@ -815,7 +815,7 @@ class Info : public ::google::protobuf::Message {
   inline void _clear_bit(int index) {
     _has_bits_[index / 32] &= ~(1u << (index % 32));
   }
-  
+
   void InitAsDefaultInstance();
   static Info* default_instance_;
 };
@@ -825,29 +825,29 @@ class DenseInfo : public ::google::protobuf::Message {
  public:
   DenseInfo();
   virtual ~DenseInfo();
-  
+
   DenseInfo(const DenseInfo& from);
-  
+
   inline DenseInfo& operator=(const DenseInfo& from) {
     CopyFrom(from);
     return *this;
   }
-  
+
   inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
     return _unknown_fields_;
   }
-  
+
   inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
     return &_unknown_fields_;
   }
-  
+
   static const ::google::protobuf::Descriptor* descriptor();
   static const DenseInfo& default_instance();
-  
+
   void Swap(DenseInfo* other);
-  
+
   // implements Message ----------------------------------------------
-  
+
   DenseInfo* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
@@ -855,7 +855,7 @@ class DenseInfo : public ::google::protobuf::Message {
   void MergeFrom(const DenseInfo& from);
   void Clear();
   bool IsInitialized() const;
-  
+
   int ByteSize() const;
   bool MergePartialFromCodedStream(
       ::google::protobuf::io::CodedInputStream* input);
@@ -868,13 +868,13 @@ class DenseInfo : public ::google::protobuf::Message {
   void SharedDtor();
   void SetCachedSize(int size) const;
   public:
-  
+
   ::google::protobuf::Metadata GetMetadata() const;
-  
+
   // nested types ----------------------------------------------------
-  
+
   // accessors -------------------------------------------------------
-  
+
   // repeated int32 version = 1 [packed = true];
   inline int version_size() const;
   inline void clear_version();
@@ -886,7 +886,7 @@ class DenseInfo : public ::google::protobuf::Message {
       version() const;
   inline ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
       mutable_version();
-  
+
   // repeated sint64 timestamp = 2 [packed = true];
   inline int timestamp_size() const;
   inline void clear_timestamp();
@@ -898,7 +898,7 @@ class DenseInfo : public ::google::protobuf::Message {
       timestamp() const;
   inline ::google::protobuf::RepeatedField< ::google::protobuf::int64 >*
       mutable_timestamp();
-  
+
   // repeated sint64 changeset = 3 [packed = true];
   inline int changeset_size() const;
   inline void clear_changeset();
@@ -910,7 +910,7 @@ class DenseInfo : public ::google::protobuf::Message {
       changeset() const;
   inline ::google::protobuf::RepeatedField< ::google::protobuf::int64 >*
       mutable_changeset();
-  
+
   // repeated sint32 uid = 4 [packed = true];
   inline int uid_size() const;
   inline void clear_uid();
@@ -922,7 +922,7 @@ class DenseInfo : public ::google::protobuf::Message {
       uid() const;
   inline ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
       mutable_uid();
-  
+
   // repeated sint32 user_sid = 5 [packed = true];
   inline int user_sid_size() const;
   inline void clear_user_sid();
@@ -934,12 +934,12 @@ class DenseInfo : public ::google::protobuf::Message {
       user_sid() const;
   inline ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
       mutable_user_sid();
-  
+
   // @@protoc_insertion_point(class_scope:PBF.DenseInfo)
  private:
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   mutable int _cached_size_;
-  
+
   ::google::protobuf::RepeatedField< ::google::protobuf::int32 > version_;
   mutable int _version_cached_byte_size_;
   ::google::protobuf::RepeatedField< ::google::protobuf::int64 > timestamp_;
@@ -953,9 +953,9 @@ class DenseInfo : public ::google::protobuf::Message {
   friend void  protobuf_AddDesc_osmformat_2eproto();
   friend void protobuf_AssignDesc_osmformat_2eproto();
   friend void protobuf_ShutdownFile_osmformat_2eproto();
-  
+
   ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
-  
+
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
     return (_has_bits_[index / 32] & (1u << (index % 32))) != 0;
@@ -966,7 +966,7 @@ class DenseInfo : public ::google::protobuf::Message {
   inline void _clear_bit(int index) {
     _has_bits_[index / 32] &= ~(1u << (index % 32));
   }
-  
+
   void InitAsDefaultInstance();
   static DenseInfo* default_instance_;
 };
@@ -976,29 +976,29 @@ class ChangeSet : public ::google::protobuf::Message {
  public:
   ChangeSet();
   virtual ~ChangeSet();
-  
+
   ChangeSet(const ChangeSet& from);
-  
+
   inline ChangeSet& operator=(const ChangeSet& from) {
     CopyFrom(from);
     return *this;
   }
-  
+
   inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
     return _unknown_fields_;
   }
-  
+
   inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
     return &_unknown_fields_;
   }
-  
+
   static const ::google::protobuf::Descriptor* descriptor();
   static const ChangeSet& default_instance();
-  
+
   void Swap(ChangeSet* other);
-  
+
   // implements Message ----------------------------------------------
-  
+
   ChangeSet* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
@@ -1006,7 +1006,7 @@ class ChangeSet : public ::google::protobuf::Message {
   void MergeFrom(const ChangeSet& from);
   void Clear();
   bool IsInitialized() const;
-  
+
   int ByteSize() const;
   bool MergePartialFromCodedStream(
       ::google::protobuf::io::CodedInputStream* input);
@@ -1019,32 +1019,32 @@ class ChangeSet : public ::google::protobuf::Message {
   void SharedDtor();
   void SetCachedSize(int size) const;
   public:
-  
+
   ::google::protobuf::Metadata GetMetadata() const;
-  
+
   // nested types ----------------------------------------------------
-  
+
   // accessors -------------------------------------------------------
-  
+
   // required int64 id = 1;
   inline bool has_id() const;
   inline void clear_id();
   static const int kIdFieldNumber = 1;
   inline ::google::protobuf::int64 id() const;
   inline void set_id(::google::protobuf::int64 value);
-  
+
   // @@protoc_insertion_point(class_scope:PBF.ChangeSet)
  private:
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   mutable int _cached_size_;
-  
+
   ::google::protobuf::int64 id_;
   friend void  protobuf_AddDesc_osmformat_2eproto();
   friend void protobuf_AssignDesc_osmformat_2eproto();
   friend void protobuf_ShutdownFile_osmformat_2eproto();
-  
+
   ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
-  
+
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
     return (_has_bits_[index / 32] & (1u << (index % 32))) != 0;
@@ -1055,7 +1055,7 @@ class ChangeSet : public ::google::protobuf::Message {
   inline void _clear_bit(int index) {
     _has_bits_[index / 32] &= ~(1u << (index % 32));
   }
-  
+
   void InitAsDefaultInstance();
   static ChangeSet* default_instance_;
 };
@@ -1065,29 +1065,29 @@ class Node : public ::google::protobuf::Message {
  public:
   Node();
   virtual ~Node();
-  
+
   Node(const Node& from);
-  
+
   inline Node& operator=(const Node& from) {
     CopyFrom(from);
     return *this;
   }
-  
+
   inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
     return _unknown_fields_;
   }
-  
+
   inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
     return &_unknown_fields_;
   }
-  
+
   static const ::google::protobuf::Descriptor* descriptor();
   static const Node& default_instance();
-  
+
   void Swap(Node* other);
-  
+
   // implements Message ----------------------------------------------
-  
+
   Node* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
@@ -1095,7 +1095,7 @@ class Node : public ::google::protobuf::Message {
   void MergeFrom(const Node& from);
   void Clear();
   bool IsInitialized() const;
-  
+
   int ByteSize() const;
   bool MergePartialFromCodedStream(
       ::google::protobuf::io::CodedInputStream* input);
@@ -1108,20 +1108,20 @@ class Node : public ::google::protobuf::Message {
   void SharedDtor();
   void SetCachedSize(int size) const;
   public:
-  
+
   ::google::protobuf::Metadata GetMetadata() const;
-  
+
   // nested types ----------------------------------------------------
-  
+
   // accessors -------------------------------------------------------
-  
+
   // required sint64 id = 1;
   inline bool has_id() const;
   inline void clear_id();
   static const int kIdFieldNumber = 1;
   inline ::google::protobuf::int64 id() const;
   inline void set_id(::google::protobuf::int64 value);
-  
+
   // repeated uint32 keys = 2 [packed = true];
   inline int keys_size() const;
   inline void clear_keys();
@@ -1133,7 +1133,7 @@ class Node : public ::google::protobuf::Message {
       keys() const;
   inline ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
       mutable_keys();
-  
+
   // repeated uint32 vals = 3 [packed = true];
   inline int vals_size() const;
   inline void clear_vals();
@@ -1145,33 +1145,33 @@ class Node : public ::google::protobuf::Message {
       vals() const;
   inline ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
       mutable_vals();
-  
+
   // optional .PBF.Info info = 4;
   inline bool has_info() const;
   inline void clear_info();
   static const int kInfoFieldNumber = 4;
   inline const ::PBF::Info& info() const;
   inline ::PBF::Info* mutable_info();
-  
+
   // required sint64 lat = 8;
   inline bool has_lat() const;
   inline void clear_lat();
   static const int kLatFieldNumber = 8;
   inline ::google::protobuf::int64 lat() const;
   inline void set_lat(::google::protobuf::int64 value);
-  
+
   // required sint64 lon = 9;
   inline bool has_lon() const;
   inline void clear_lon();
   static const int kLonFieldNumber = 9;
   inline ::google::protobuf::int64 lon() const;
   inline void set_lon(::google::protobuf::int64 value);
-  
+
   // @@protoc_insertion_point(class_scope:PBF.Node)
  private:
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   mutable int _cached_size_;
-  
+
   ::google::protobuf::int64 id_;
   ::google::protobuf::RepeatedField< ::google::protobuf::uint32 > keys_;
   mutable int _keys_cached_byte_size_;
@@ -1183,9 +1183,9 @@ class Node : public ::google::protobuf::Message {
   friend void  protobuf_AddDesc_osmformat_2eproto();
   friend void protobuf_AssignDesc_osmformat_2eproto();
   friend void protobuf_ShutdownFile_osmformat_2eproto();
-  
+
   ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
-  
+
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
     return (_has_bits_[index / 32] & (1u << (index % 32))) != 0;
@@ -1196,7 +1196,7 @@ class Node : public ::google::protobuf::Message {
   inline void _clear_bit(int index) {
     _has_bits_[index / 32] &= ~(1u << (index % 32));
   }
-  
+
   void InitAsDefaultInstance();
   static Node* default_instance_;
 };
@@ -1206,29 +1206,29 @@ class DenseNodes : public ::google::protobuf::Message {
  public:
   DenseNodes();
   virtual ~DenseNodes();
-  
+
   DenseNodes(const DenseNodes& from);
-  
+
   inline DenseNodes& operator=(const DenseNodes& from) {
     CopyFrom(from);
     return *this;
   }
-  
+
   inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
     return _unknown_fields_;
   }
-  
+
   inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
     return &_unknown_fields_;
   }
-  
+
   static const ::google::protobuf::Descriptor* descriptor();
   static const DenseNodes& default_instance();
-  
+
   void Swap(DenseNodes* other);
-  
+
   // implements Message ----------------------------------------------
-  
+
   DenseNodes* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
@@ -1236,7 +1236,7 @@ class DenseNodes : public ::google::protobuf::Message {
   void MergeFrom(const DenseNodes& from);
   void Clear();
   bool IsInitialized() const;
-  
+
   int ByteSize() const;
   bool MergePartialFromCodedStream(
       ::google::protobuf::io::CodedInputStream* input);
@@ -1249,13 +1249,13 @@ class DenseNodes : public ::google::protobuf::Message {
   void SharedDtor();
   void SetCachedSize(int size) const;
   public:
-  
+
   ::google::protobuf::Metadata GetMetadata() const;
-  
+
   // nested types ----------------------------------------------------
-  
+
   // accessors -------------------------------------------------------
-  
+
   // repeated sint64 id = 1 [packed = true];
   inline int id_size() const;
   inline void clear_id();
@@ -1267,14 +1267,14 @@ class DenseNodes : public ::google::protobuf::Message {
       id() const;
   inline ::google::protobuf::RepeatedField< ::google::protobuf::int64 >*
       mutable_id();
-  
+
   // optional .PBF.DenseInfo denseinfo = 5;
   inline bool has_denseinfo() const;
   inline void clear_denseinfo();
   static const int kDenseinfoFieldNumber = 5;
   inline const ::PBF::DenseInfo& denseinfo() const;
   inline ::PBF::DenseInfo* mutable_denseinfo();
-  
+
   // repeated sint64 lat = 8 [packed = true];
   inline int lat_size() const;
   inline void clear_lat();
@@ -1286,7 +1286,7 @@ class DenseNodes : public ::google::protobuf::Message {
       lat() const;
   inline ::google::protobuf::RepeatedField< ::google::protobuf::int64 >*
       mutable_lat();
-  
+
   // repeated sint64 lon = 9 [packed = true];
   inline int lon_size() const;
   inline void clear_lon();
@@ -1298,7 +1298,7 @@ class DenseNodes : public ::google::protobuf::Message {
       lon() const;
   inline ::google::protobuf::RepeatedField< ::google::protobuf::int64 >*
       mutable_lon();
-  
+
   // repeated int32 keys_vals = 10 [packed = true];
   inline int keys_vals_size() const;
   inline void clear_keys_vals();
@@ -1310,12 +1310,12 @@ class DenseNodes : public ::google::protobuf::Message {
       keys_vals() const;
   inline ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
       mutable_keys_vals();
-  
+
   // @@protoc_insertion_point(class_scope:PBF.DenseNodes)
  private:
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   mutable int _cached_size_;
-  
+
   ::google::protobuf::RepeatedField< ::google::protobuf::int64 > id_;
   mutable int _id_cached_byte_size_;
   ::PBF::DenseInfo* denseinfo_;
@@ -1328,9 +1328,9 @@ class DenseNodes : public ::google::protobuf::Message {
   friend void  protobuf_AddDesc_osmformat_2eproto();
   friend void protobuf_AssignDesc_osmformat_2eproto();
   friend void protobuf_ShutdownFile_osmformat_2eproto();
-  
+
   ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
-  
+
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
     return (_has_bits_[index / 32] & (1u << (index % 32))) != 0;
@@ -1341,7 +1341,7 @@ class DenseNodes : public ::google::protobuf::Message {
   inline void _clear_bit(int index) {
     _has_bits_[index / 32] &= ~(1u << (index % 32));
   }
-  
+
   void InitAsDefaultInstance();
   static DenseNodes* default_instance_;
 };
@@ -1351,29 +1351,29 @@ class Way : public ::google::protobuf::Message {
  public:
   Way();
   virtual ~Way();
-  
+
   Way(const Way& from);
-  
+
   inline Way& operator=(const Way& from) {
     CopyFrom(from);
     return *this;
   }
-  
+
   inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
     return _unknown_fields_;
   }
-  
+
   inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
     return &_unknown_fields_;
   }
-  
+
   static const ::google::protobuf::Descriptor* descriptor();
   static const Way& default_instance();
-  
+
   void Swap(Way* other);
-  
+
   // implements Message ----------------------------------------------
-  
+
   Way* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
@@ -1381,7 +1381,7 @@ class Way : public ::google::protobuf::Message {
   void MergeFrom(const Way& from);
   void Clear();
   bool IsInitialized() const;
-  
+
   int ByteSize() const;
   bool MergePartialFromCodedStream(
       ::google::protobuf::io::CodedInputStream* input);
@@ -1394,20 +1394,20 @@ class Way : public ::google::protobuf::Message {
   void SharedDtor();
   void SetCachedSize(int size) const;
   public:
-  
+
   ::google::protobuf::Metadata GetMetadata() const;
-  
+
   // nested types ----------------------------------------------------
-  
+
   // accessors -------------------------------------------------------
-  
+
   // required int64 id = 1;
   inline bool has_id() const;
   inline void clear_id();
   static const int kIdFieldNumber = 1;
   inline ::google::protobuf::int64 id() const;
   inline void set_id(::google::protobuf::int64 value);
-  
+
   // repeated uint32 keys = 2 [packed = true];
   inline int keys_size() const;
   inline void clear_keys();
@@ -1419,7 +1419,7 @@ class Way : public ::google::protobuf::Message {
       keys() const;
   inline ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
       mutable_keys();
-  
+
   // repeated uint32 vals = 3 [packed = true];
   inline int vals_size() const;
   inline void clear_vals();
@@ -1431,14 +1431,14 @@ class Way : public ::google::protobuf::Message {
       vals() const;
   inline ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
       mutable_vals();
-  
+
   // optional .PBF.Info info = 4;
   inline bool has_info() const;
   inline void clear_info();
   static const int kInfoFieldNumber = 4;
   inline const ::PBF::Info& info() const;
   inline ::PBF::Info* mutable_info();
-  
+
   // repeated sint64 refs = 8 [packed = true];
   inline int refs_size() const;
   inline void clear_refs();
@@ -1450,12 +1450,12 @@ class Way : public ::google::protobuf::Message {
       refs() const;
   inline ::google::protobuf::RepeatedField< ::google::protobuf::int64 >*
       mutable_refs();
-  
+
   // @@protoc_insertion_point(class_scope:PBF.Way)
  private:
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   mutable int _cached_size_;
-  
+
   ::google::protobuf::int64 id_;
   ::google::protobuf::RepeatedField< ::google::protobuf::uint32 > keys_;
   mutable int _keys_cached_byte_size_;
@@ -1467,9 +1467,9 @@ class Way : public ::google::protobuf::Message {
   friend void  protobuf_AddDesc_osmformat_2eproto();
   friend void protobuf_AssignDesc_osmformat_2eproto();
   friend void protobuf_ShutdownFile_osmformat_2eproto();
-  
+
   ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
-  
+
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
     return (_has_bits_[index / 32] & (1u << (index % 32))) != 0;
@@ -1480,7 +1480,7 @@ class Way : public ::google::protobuf::Message {
   inline void _clear_bit(int index) {
     _has_bits_[index / 32] &= ~(1u << (index % 32));
   }
-  
+
   void InitAsDefaultInstance();
   static Way* default_instance_;
 };
@@ -1490,29 +1490,29 @@ class Relation : public ::google::protobuf::Message {
  public:
   Relation();
   virtual ~Relation();
-  
+
   Relation(const Relation& from);
-  
+
   inline Relation& operator=(const Relation& from) {
     CopyFrom(from);
     return *this;
   }
-  
+
   inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
     return _unknown_fields_;
   }
-  
+
   inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
     return &_unknown_fields_;
   }
-  
+
   static const ::google::protobuf::Descriptor* descriptor();
   static const Relation& default_instance();
-  
+
   void Swap(Relation* other);
-  
+
   // implements Message ----------------------------------------------
-  
+
   Relation* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
@@ -1520,7 +1520,7 @@ class Relation : public ::google::protobuf::Message {
   void MergeFrom(const Relation& from);
   void Clear();
   bool IsInitialized() const;
-  
+
   int ByteSize() const;
   bool MergePartialFromCodedStream(
       ::google::protobuf::io::CodedInputStream* input);
@@ -1533,11 +1533,11 @@ class Relation : public ::google::protobuf::Message {
   void SharedDtor();
   void SetCachedSize(int size) const;
   public:
-  
+
   ::google::protobuf::Metadata GetMetadata() const;
-  
+
   // nested types ----------------------------------------------------
-  
+
   typedef Relation_MemberType MemberType;
   static const MemberType NODE = Relation_MemberType_NODE;
   static const MemberType WAY = Relation_MemberType_WAY;
@@ -1562,16 +1562,16 @@ class Relation : public ::google::protobuf::Message {
       MemberType* value) {
     return Relation_MemberType_Parse(name, value);
   }
-  
+
   // accessors -------------------------------------------------------
-  
+
   // required int64 id = 1;
   inline bool has_id() const;
   inline void clear_id();
   static const int kIdFieldNumber = 1;
   inline ::google::protobuf::int64 id() const;
   inline void set_id(::google::protobuf::int64 value);
-  
+
   // repeated uint32 keys = 2 [packed = true];
   inline int keys_size() const;
   inline void clear_keys();
@@ -1583,7 +1583,7 @@ class Relation : public ::google::protobuf::Message {
       keys() const;
   inline ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
       mutable_keys();
-  
+
   // repeated uint32 vals = 3 [packed = true];
   inline int vals_size() const;
   inline void clear_vals();
@@ -1595,14 +1595,14 @@ class Relation : public ::google::protobuf::Message {
       vals() const;
   inline ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
       mutable_vals();
-  
+
   // optional .PBF.Info info = 4;
   inline bool has_info() const;
   inline void clear_info();
   static const int kInfoFieldNumber = 4;
   inline const ::PBF::Info& info() const;
   inline ::PBF::Info* mutable_info();
-  
+
   // repeated int32 roles_sid = 8 [packed = true];
   inline int roles_sid_size() const;
   inline void clear_roles_sid();
@@ -1614,7 +1614,7 @@ class Relation : public ::google::protobuf::Message {
       roles_sid() const;
   inline ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
       mutable_roles_sid();
-  
+
   // repeated sint64 memids = 9 [packed = true];
   inline int memids_size() const;
   inline void clear_memids();
@@ -1626,7 +1626,7 @@ class Relation : public ::google::protobuf::Message {
       memids() const;
   inline ::google::protobuf::RepeatedField< ::google::protobuf::int64 >*
       mutable_memids();
-  
+
   // repeated .PBF.Relation.MemberType types = 10 [packed = true];
   inline int types_size() const;
   inline void clear_types();
@@ -1636,12 +1636,12 @@ class Relation : public ::google::protobuf::Message {
   inline void add_types(::PBF::Relation_MemberType value);
   inline const ::google::protobuf::RepeatedField<int>& types() const;
   inline ::google::protobuf::RepeatedField<int>* mutable_types();
-  
+
   // @@protoc_insertion_point(class_scope:PBF.Relation)
  private:
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   mutable int _cached_size_;
-  
+
   ::google::protobuf::int64 id_;
   ::google::protobuf::RepeatedField< ::google::protobuf::uint32 > keys_;
   mutable int _keys_cached_byte_size_;
@@ -1657,9 +1657,9 @@ class Relation : public ::google::protobuf::Message {
   friend void  protobuf_AddDesc_osmformat_2eproto();
   friend void protobuf_AssignDesc_osmformat_2eproto();
   friend void protobuf_ShutdownFile_osmformat_2eproto();
-  
+
   ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
-  
+
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
     return (_has_bits_[index / 32] & (1u << (index % 32))) != 0;
@@ -1670,7 +1670,7 @@ class Relation : public ::google::protobuf::Message {
   inline void _clear_bit(int index) {
     _has_bits_[index / 32] &= ~(1u << (index % 32));
   }
-  
+
   void InitAsDefaultInstance();
   static Relation* default_instance_;
 };
