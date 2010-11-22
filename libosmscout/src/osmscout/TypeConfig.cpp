@@ -142,18 +142,13 @@ namespace osmscout {
   {
     type=typeIgnore;
 
-    for (std::list<TypeInfo>::const_iterator t=types.begin();
-         t!=types.end();
-         ++t) {
-      for (tag=tags.begin();
-           tag!=tags.end();
-           ++tag) {
-        if (tag->key==t->GetTag() &&
-            tag->value==t->GetTagValue() &&
-            t->CanBeNode()) {
-          type=t->GetId();
-          return true;
-        }
+    for (tag=tags.begin();
+         tag!=tags.end();
+         ++tag) {
+      type=GetNodeTypeId(tag->key,tag->value.c_str());
+
+      if (type!=typeIgnore) {
+        return true;
       }
     }
 
@@ -171,31 +166,25 @@ namespace osmscout {
     wayTag=tags.end();
     areaTag=tags.end();
 
-    for (std::list<TypeInfo>::const_iterator type=types.begin();
-         type!=types.end();
-         ++type) {
-      for (std::vector<Tag>::iterator tag=tags.begin();
-           tag!=tags.end();
-           ++tag) {
-        if (wayType==typeIgnore &&
-            tag->key==type->GetTag() &&
-            tag->value==type->GetTagValue() &&
-            type->CanBeWay()) {
+    for (std::vector<Tag>::iterator tag=tags.begin();
+         tag!=tags.end();
+         ++tag) {
+      if (wayType==typeIgnore) {
+        wayType=GetWayTypeId(tag->key,tag->value.c_str());
+        if (wayType!=typeIgnore) {
           wayTag=tag;
-          wayType=type->GetId();
         }
+      }
 
-        if (areaType==typeIgnore &&
-            tag->key==type->GetTag() &&
-            tag->value==type->GetTagValue() &&
-            type->CanBeArea()) {
+      if (areaType==typeIgnore) {
+        areaType=GetAreaTypeId(tag->key,tag->value.c_str());
+        if (areaType!=typeIgnore) {
           areaTag=tag;
-          areaType=type->GetId();
         }
+      }
 
-        if (wayType!=typeIgnore && areaType!=typeIgnore) {
-          return true;
-        }
+      if (wayType!=typeIgnore && areaType!=typeIgnore) {
+        return true;
       }
     }
 
@@ -219,18 +208,15 @@ namespace osmscout {
 
     type=typeIgnore;
 
-    for (std::list<TypeInfo>::const_iterator t=types.begin();
-         t!=types.end();
-         ++t) {
-      for (tag=tags.begin();
-           tag!=tags.end();
-           ++tag) {
-        if (tag->key==t->GetTag() &&
-            tag->value==t->GetTagValue() &&
-            t->CanBeRelation()) {
-          type=t->GetId();
-          return true;
-        }
+    type=typeIgnore;
+
+    for (tag=tags.begin();
+         tag!=tags.end();
+         ++tag) {
+      type=GetRelationTypeId(tag->key,tag->value.c_str());
+
+      if (type!=typeIgnore) {
+        return true;
       }
     }
 

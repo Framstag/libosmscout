@@ -15,7 +15,7 @@ steps:
 egrep -h "(^\+ Step|^   =>)" <logfile>
 
 + Step #1 - Preprocess...
-   => 221.802 second(s)
+   => 75.948 second(s)
 + Step #2 - Generating 'rawnode.idx'...
    => 29.594 second(s)
 + Step #3 - Generating 'rawway.idx'...
@@ -42,7 +42,6 @@ egrep -h "(^\+ Step|^   =>)" <logfile>
    => 218.284 second(s)
 + Step #14 - Generate 'water.idx'...
    => 27.459 second(s)
-   => 3334.879 second(s)
 
 The following files have been generated (du --total -h *.idx *.dat):
 67M	area.idx

@@ -40,25 +40,33 @@
 
 #include <iostream>
 
-#define NANO ( 1000.0 * 1000.0 * 1000.0 )
+#define MAX_BLOCK_HEADER_SIZE (64*1024)
+#define MAX_BLOB_SIZE         (32*1024*1024)
+#define NANO                  (1000.0*1000.0*1000.0)
 
 namespace osmscout {
 
   bool ReadBlockHeader(Progress& progress,
                        FILE* file,
-                       PBF::BlockHeader& blockHeader)
+                       PBF::BlockHeader& blockHeader,
+                       bool silent)
   {
     char blockHeaderLength[4];
 
     if (fread(blockHeaderLength,sizeof(char),4,file)!=4) {
-      progress.Error("Cannot read block header length!");
+      if (!silent) {
+        progress.Error("Cannot read block header length!");
+      }
       return false;
     }
 
     // ugly!
     uint32_t length=ntohl(*((uint32_t*)&blockHeaderLength));
 
-    // TODO: Check size
+    if (length==0 || length>MAX_BLOCK_HEADER_SIZE) {
+      progress.Error("Block header size invalid!");
+      return false;
+    }
 
     char *buffer=new char[length];
 
@@ -88,7 +96,10 @@ namespace osmscout {
 
     uint32_t length = blockHeader.datasize();
 
-    // TODO: Check size
+    if (length==0 || length>MAX_BLOB_SIZE) {
+      progress.Error("Blob size invalid!");
+      return false;
+    }
 
     char *buffer=new char[length];
 
@@ -177,7 +188,10 @@ namespace osmscout {
 
     uint32_t length = blockHeader.datasize();
 
-    // TODO: Check size
+    if (length==0 || length>MAX_BLOB_SIZE) {
+      progress.Error("Blob size invalid!");
+      return false;
+    }
 
     char *buffer=new char[length];
 
@@ -299,7 +313,7 @@ namespace osmscout {
 
     PBF::BlockHeader blockHeader;
 
-    if (!ReadBlockHeader(progress,file,blockHeader)) {
+    if (!ReadBlockHeader(progress,file,blockHeader,false)) {
       fclose(file);
       return false;
     }
@@ -345,7 +359,7 @@ namespace osmscout {
     while (true) {
       PBF::BlockHeader blockHeader;
 
-      if (!ReadBlockHeader(progress,file,blockHeader)) {
+      if (!ReadBlockHeader(progress,file,blockHeader,true)) {
         fclose(file);
         break;
       }
@@ -433,7 +447,9 @@ namespace osmscout {
             std::vector<Tag>::iterator wayTag=rawWay.tags.end();
             std::vector<Tag>::iterator areaTag=rawWay.tags.end();
 
-            typeConfig.GetWayAreaTypeId(rawWay.tags,wayTag,wayType,areaTag,areaType);
+            if (rawWay.tags.size()>0) {
+              typeConfig.GetWayAreaTypeId(rawWay.tags,wayTag,wayType,areaTag,areaType);
+            }
 
             if (areaType!=typeIgnore &&
                 rawWay.nodes.size()>1 &&
@@ -476,6 +492,7 @@ namespace osmscout {
             rawRel.members.clear();
 
             rawRel.id=inputRelation.id();
+            rawRel.type=typeIgnore;
 
             for (int t=0; t<inputRelation.keys_size(); t++) {
               TagId tagId=typeConfig.GetTagId(block.stringtable().s(inputRelation.keys(t)).c_str());
@@ -516,14 +533,14 @@ namespace osmscout {
               rawRel.members.push_back(member);
             }
 
-            std::vector<Tag>::iterator tag;
+            if (rawRel.tags.size()>0) {
+              std::vector<Tag>::iterator tag;
 
-            rawRel.type=typeIgnore;
-
-            if (typeConfig.GetRelationTypeId(rawRel.tags,
-                                             tag,
-                                             rawRel.type))  {
-              rawRel.tags.erase(tag);
+              if (typeConfig.GetRelationTypeId(rawRel.tags,
+                                               tag,
+                                               rawRel.type))  {
+                rawRel.tags.erase(tag);
+              }
             }
 
             rawRel.Write(relationWriter);
@@ -544,6 +561,7 @@ namespace osmscout {
             dLon+=dense.lon(d);
 
             rawNode.id=dId;
+            rawNode.type=typeIgnore;
             rawNode.lat=(dLat*block.granularity()+block.lat_offset())/NANO;
             rawNode.lon=(dLon*block.granularity()+block.lon_offset())/NANO;
 
@@ -576,10 +594,12 @@ namespace osmscout {
               rawNode.tags.push_back(tag);
             }
 
-            std::vector<Tag>::iterator tag;
+            if (rawNode.tags.size()>0) {
+              std::vector<Tag>::iterator tag;
 
-            if (typeConfig.GetNodeTypeId(rawNode.tags,tag,rawNode.type))  {
-              rawNode.tags.erase(tag);
+              if (typeConfig.GetNodeTypeId(rawNode.tags,tag,rawNode.type))  {
+                rawNode.tags.erase(tag);
+              }
             }
 
             rawNode.Write(nodeWriter);
