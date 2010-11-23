@@ -25,13 +25,15 @@
 #include <osmscout/Import.h>
 #include <osmscout/Util.h>
 
-void DumpHelp()
+void DumpHelp(osmscout::ImportParameter& parameter)
 {
-  std::cout << "Import -h -d -s <start step> -e <end step> <openstreetmapdata.osm>" << std::endl;
-  std::cout << " -h              show this help" << std::endl;
-  std::cout << " -d              show debug output" << std::endl;
-  std::cout << " -s <start step> set starting step" << std::endl;
-  std::cout << " -s <end step>   set finial step" << std::endl;
+  std::cout << "Import -h -d -s <start step> -e <end step> [openstreetmapdata.osm|openstreetmapdata.osm.pbf]" << std::endl;
+  std::cout << " -h                       show this help" << std::endl;
+  std::cout << " -d                       show debug output" << std::endl;
+  std::cout << " -s <start step>          set starting step" << std::endl;
+  std::cout << " -s <end step>            set final step" << std::endl;
+  std::cout << " --nodesLoadSize <number> number of nodes to load in one step (default: " << parameter.GetNodesLoadSize() << ")" << std::endl;
+  std::cout << " --waysLoadSize <number>  number of ways to load in one step (default: " << parameter.GetWaysLoadSize() << ")" << std::endl;
 }
 
 int main(int argc, char* argv[])
@@ -41,6 +43,8 @@ int main(int argc, char* argv[])
   bool                      parameterError=false;
   size_t                    startStep=parameter.GetStartStep();
   size_t                    endStep=parameter.GetEndStep();
+  size_t                    nodesLoadSize=parameter.GetNodesLoadSize();
+  size_t                    waysLoadSize=parameter.GetWaysLoadSize();
   std::string               mapfile;
 
   // Simple way to analyse command line parameters, but enough for now...
@@ -78,8 +82,36 @@ int main(int argc, char* argv[])
       progress.SetOutputDebug(true);
     }
     else if (strcmp(argv[i],"-h")==0) {
-      DumpHelp();
+      DumpHelp(parameter);
       return 0;
+    }
+    else if (strcmp(argv[i],"--nodesLoadSize")==0) {
+      i++;
+
+      if (i<argc) {
+        if (!osmscout::StringToNumber(argv[i],nodesLoadSize)) {
+          std::cerr << "Cannot parse nodesLoadSize '" << argv[i] << "'" << std::endl;
+          parameterError=true;
+        }
+      }
+      else {
+        std::cerr << "Missing parameter after --nodesLoadSize option" << std::endl;
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--waysLoadSize")==0) {
+      i++;
+
+      if (i<argc) {
+        if (!osmscout::StringToNumber(argv[i],waysLoadSize)) {
+          std::cerr << "Cannot parse waysLoadSize '" << argv[i] << "'" << std::endl;
+          parameterError=true;
+        }
+      }
+      else {
+        std::cerr << "Missing parameter after --waysLoadSize option" << std::endl;
+        parameterError=true;
+      }
     }
     else if (mapfile.empty()) {
       mapfile=argv[i];
@@ -98,12 +130,14 @@ int main(int argc, char* argv[])
   }
 
   if (parameterError) {
-    DumpHelp();
+    DumpHelp(parameter);
     return 1;
   }
 
   parameter.SetMapfile(mapfile);
   parameter.SetSteps(startStep,endStep);
+  parameter.SetNodesLoadSize(nodesLoadSize);
+  parameter.SetWaysLoadSize(waysLoadSize);
 
   if (osmscout::Import(parameter,progress)) {
     std::cout << "Import OK!" << std::endl;

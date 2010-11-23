@@ -40,10 +40,10 @@ namespace osmscout {
     std::string mapfile;
     size_t      startStep;             //! Starting step for import
     size_t      endStep;               //! End step for mport
-    size_t      nodesLoadSize;         //! Maximum number of ways loaded into memory in one go
+    size_t      nodesLoadSize;         //! Maximum number of nodes loaded into memory in one go
     size_t      waysLoadSize;          //! Maximum number of ways loaded into memory in one go
-    size_t      nodeIndexIntervalSize; //! The soze of the index interval of the noduse index
-    size_t      numericIndexLevelSize; //! The size of one index page inone index level for numerical indexes
+    size_t      nodeIndexIntervalSize; //! The size of the index interval of the noduse index
+    size_t      numericIndexLevelSize; //! The size of one index page in one index level for numerical indexes
     size_t      areaAreaIndexMaxMag;
     size_t      areaAreaRelIndexMaxMag;
     size_t      areaWayIndexMaxMag;
