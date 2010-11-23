@@ -170,7 +170,7 @@ namespace osmscout {
     for (size_t i=0; i<levels; i++) {
       unsigned long resultingCacheSize=levelCacheSize;
 
-      if (cacheSize==0) {
+      if (originalCacheSize==0) {
         resultingCacheSize=1;
       }
       else if (levelCacheSize>originalCacheSize) {
@@ -182,7 +182,7 @@ namespace osmscout {
         originalCacheSize-=levelCacheSize;
       }
 
-      std::cout << "setting cache size for level " << i+1 << " to " << resultingCacheSize << std::endl;
+      std::cout << "Setting cache size for level " << i+1 << " to " << resultingCacheSize << std::endl;
 
       leafs.push_back(PageCache(resultingCacheSize));
 
