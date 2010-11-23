@@ -521,8 +521,14 @@ namespace osmscout {
   {
     std::set<Id> wayAreaIndexBlacklist;
 
-    DataFile<RawNode> nodeDataFile("rawnodes.dat","rawnode.idx",10);
-    DataFile<RawWay>  wayDataFile("rawways.dat","rawway.idx",10);
+    DataFile<RawNode> nodeDataFile("rawnodes.dat",
+                                   "rawnode.idx",
+                                   10,
+                                   100000);
+    DataFile<RawWay>  wayDataFile("rawways.dat",
+                                  "rawway.idx",
+                                  10,
+                                  100000);
 
     if (!nodeDataFile.Open(".")) {
       std::cerr << "Cannot open raw nodes data files!" << std::endl;

@@ -70,7 +70,7 @@ namespace osmscout {
       */
     struct ValueSizer
     {
-      virtual size_t GetSize(const V& value) const = 0;
+      virtual unsigned long GetSize(const V& value) const = 0;
     };
 
     typedef std::list<CacheEntry>                   OrderList;
@@ -79,10 +79,10 @@ namespace osmscout {
     typedef std::vector<CacheRefList>               Map;
 
   private:
-    size_t    size;
-    size_t    maxSize;
-    OrderList order;
-    Map       map;
+    unsigned long size;
+    unsigned long maxSize;
+    OrderList     order;
+    Map           map;
 
   private:
     /**
@@ -97,7 +97,7 @@ namespace osmscout {
         // Get oldest entry
         typename std::list<CacheEntry>::reverse_iterator lastEntry=order.rbegin();
 
-        size_t index=lastEntry->key%map.size();
+        unsigned long index=lastEntry->key%map.size();
 
         typename CacheRefList::iterator iter=map[index].begin();
         while (iter!=map[index].end() && (*iter)->key!=lastEntry->key) {
@@ -119,7 +119,7 @@ namespace osmscout {
     /**
      Create a new cache object with the given max size.
       */
-    Cache(size_t maxSize)
+    Cache(unsigned long maxSize)
      : size(0),
        maxSize(maxSize)
     {
@@ -145,7 +145,7 @@ namespace osmscout {
       */
     bool GetEntry(const K& key, CacheRef& reference)
     {
-      size_t index=key%map.size();
+      unsigned long index=key%map.size();
 
       typename CacheRefList::iterator iter=map[index].begin();
       while (iter!=map[index].end() && (*iter)->key!=key) {
@@ -177,7 +177,7 @@ namespace osmscout {
       */
     typename Cache::CacheRef SetEntry(const CacheEntry& entry)
     {
-      size_t index=entry.key%map.size();
+      unsigned long index=entry.key%map.size();
 
       typename CacheRefList::iterator iter=map[index].begin();
       while (iter!=map[index].end() && (*iter)->key!=entry.key) {
@@ -206,7 +206,7 @@ namespace osmscout {
       Set a new cache max size, possible striping the oldest entries
       from cache if the new size is smaller than the old one.
       */
-    void SetMaxSize(size_t maxSize)
+    void SetMaxSize(unsigned long maxSize)
     {
       assert(maxSize>0);
 
@@ -235,19 +235,19 @@ namespace osmscout {
     /**
       Returns the current size of the cache.
       */
-    size_t GetSize() const
+    unsigned long GetSize() const
     {
       return size;
     }
 
-    size_t GetMemory(const ValueSizer& sizer) const
+    unsigned long GetMemory(const ValueSizer& sizer) const
     {
-      size_t memory=0;
+      unsigned long memory=0;
 
       memory+=map.size()*sizeof(CacheRefList);
       memory+=size*sizeof(CacheEntry);
 
-      for (size_t i=0; i<map.size(); i++) {
+      for (unsigned long i=0; i<map.size(); i++) {
         memory+=map[i].size()*sizeof(CacheRef);
       }
 

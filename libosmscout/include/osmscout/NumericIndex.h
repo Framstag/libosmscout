@@ -55,14 +55,14 @@ namespace osmscout {
       FileOffset fileOffset;
     };
 
-    typedef Cache<FileOffset,std::vector<IndexEntry> > PageCache;
+    typedef Cache<Id,std::vector<IndexEntry> > PageCache;
 
     /**
       Returns the size of a individual cache entry
       */
     struct NumericIndexCacheValueSizer : public PageCache::ValueSizer
     {
-      size_t GetSize(const std::vector<IndexEntry>& value) const
+      unsigned long GetSize(const std::vector<IndexEntry>& value) const
       {
         return sizeof(IndexEntry)*value.size();
       }
@@ -71,6 +71,7 @@ namespace osmscout {
   private:
     std::string                    filepart;
     std::string                    filename;
+    unsigned long                  cacheSize;
     mutable FileScanner            scanner;
     uint32_t                       levels;
     uint32_t                       levelSize;
@@ -78,7 +79,8 @@ namespace osmscout {
     mutable std::vector<PageCache> leafs;
 
   public:
-    NumericIndex(const std::string& filename);
+    NumericIndex(const std::string& filename,
+                 unsigned long cacheSize);
     virtual ~NumericIndex();
 
     bool Load(const std::string& path);
@@ -89,8 +91,10 @@ namespace osmscout {
   };
 
   template <class N, class T>
-  NumericIndex<N,T>::NumericIndex(const std::string& filename)
+  NumericIndex<N,T>::NumericIndex(const std::string& filename,
+                                  unsigned long cacheSize)
    : filepart(filename),
+     cacheSize(cacheSize),
      levels(0),
      levelSize(0)
   {
@@ -140,6 +144,8 @@ namespace osmscout {
 
     //std::cout << levelEntries << " entries in first level" << std::endl;
 
+    root.reserve(levelEntries);
+
     scanner.SetPos(lastLevelPageStart);
 
     for (size_t i=0; i<levelEntries; i++) {
@@ -159,8 +165,28 @@ namespace osmscout {
       root.push_back(entry);
     }
 
-    for (size_t i=1; i<=levels-1; i++) {
-      leafs.push_back(PageCache(1000000));
+    unsigned long originalCacheSize=cacheSize;
+    unsigned long levelCacheSize=levelSize;
+    for (size_t i=0; i<levels; i++) {
+      unsigned long resultingCacheSize=levelCacheSize;
+
+      if (cacheSize==0) {
+        resultingCacheSize=1;
+      }
+      else if (levelCacheSize>originalCacheSize) {
+        resultingCacheSize=originalCacheSize;
+        originalCacheSize=0;
+      }
+      else {
+        resultingCacheSize=levelCacheSize;
+        originalCacheSize-=levelCacheSize;
+      }
+
+      std::cout << "setting cache size for level " << i+1 << " to " << resultingCacheSize << std::endl;
+
+      leafs.push_back(PageCache(resultingCacheSize));
+
+      levelCacheSize=levelCacheSize*levelSize;
     }
 
     return !scanner.HasError() && scanner.Close();
@@ -186,83 +212,74 @@ namespace osmscout {
         r++;
       }
 
-      if (r<root.size()) {
-        Id         startId=root[r].startId;
-        FileOffset offset=root[r].fileOffset;
+      if (r>=root.size()) {
+        //std::cerr << "Id " << *id << " not found in root index!" << std::endl;
+        continue;
+      }
 
-        for (size_t level=0; level<levels-1; level++) {
-          typename PageCache::CacheRef cacheRef;
+      Id         startId=root[r].startId;
+      FileOffset offset=root[r].fileOffset;
 
-          if (!leafs[level].GetEntry(startId,cacheRef)) {
-            typename PageCache::CacheEntry cacheEntry(startId);
+      for (size_t level=0; level<levels-1; level++) {
+        typename PageCache::CacheRef cacheRef;
 
-            cacheRef=leafs[level].SetEntry(cacheEntry);
+        if (!leafs[level].GetEntry(startId,cacheRef)) {
+          typename PageCache::CacheEntry cacheEntry(startId);
 
-            if (!scanner.IsOpen() &&
-                !scanner.Open(filename)) {
-              std::cerr << "Cannot open '" << filename << "'!" << std::endl;
-              return false;
-            }
+          cacheRef=leafs[level].SetEntry(cacheEntry);
 
-            scanner.SetPos(offset);
-
-            cacheRef->value.reserve(levelSize);
-
-            IndexEntry entry;
-
-            entry.startId=0;
-            entry.fileOffset=0;
-
-            for (size_t j=0; j<levelSize; j++) {
-              Id         cidx;
-              FileOffset coff;
-
-              scanner.ReadNumber(cidx);
-              scanner.ReadNumber(coff);
-
-              if (scanner.HasError()) {
-                // This is a hack, for the last page we simply ran behind the end of file and
-                // create an error condition. We should add an IsEOF method to the FileScanner
-                // and thus avoid creating EOFconditions at all. However until that time
-                // we simply close the file (and reopen it later) to clear the error flag.
-                scanner.Close();
-                break;
-              }
-
-              entry.startId+=cidx;
-              entry.fileOffset+=coff;
-
-              cacheRef->value.push_back(entry);
-            }
+          if (!scanner.IsOpen() &&
+              !scanner.Open(filename)) {
+            std::cerr << "Cannot open '" << filename << "'!" << std::endl;
+            return false;
           }
 
-          size_t i=0;
-          while (i+1<cacheRef->value.size() &&
-                 cacheRef->value[i+1].startId<=*id) {
-            i++;
-          }
+          scanner.SetPos(offset);
 
-          if (i<cacheRef->value.size()) {
-            startId=cacheRef->value[i].startId;
-            offset=cacheRef->value[i].fileOffset;
-            //std::cout << "id " << *id <<" => " << i << " " << startId << " " << offset << std::endl;
-          }
-          else {
-            //std::cerr << "Id " << *id << " not found in sub page index!" << std::endl;
+          cacheRef->value.reserve(levelSize);
+
+          IndexEntry entry;
+
+          entry.startId=0;
+          entry.fileOffset=0;
+
+          for (size_t j=0; j<levelSize && !scanner.IsEOF(); j++) {
+            Id         cidx;
+            FileOffset coff;
+
+            scanner.ReadNumber(cidx);
+            scanner.ReadNumber(coff);
+
+            entry.startId+=cidx;
+            entry.fileOffset+=coff;
+
+            cacheRef->value.push_back(entry);
           }
         }
 
-        if (*id==startId) {
-          offsets.push_back(offset);
+        size_t i=0;
+        while (i+1<cacheRef->value.size() &&
+               cacheRef->value[i+1].startId<=*id) {
+          i++;
         }
-        else {
-          //std::cerr << "Id " << *id << " not found in sub index!" << std::endl;
+
+        if (i>=cacheRef->value.size()) {
+          //std::cerr << "Id " << *id << " not found in sub page index!" << std::endl;
+          continue;
         }
-        //std::cout << "=> Id " << *id <<" => " << startId << " " << offset << std::endl;
+
+        startId=cacheRef->value[i].startId;
+        offset=cacheRef->value[i].fileOffset;
+        //std::cout << "id " << *id <<" => " << i << " " << startId << " " << offset << std::endl;
+      }
+
+      if (startId==*id) {
+        offsets.push_back(offset);
       }
       else {
-        //std::cerr << "Id " << *id << " not found in root index!" << std::endl;
+        //std::cerr << "Id " << *id << " not found in sub index!" << std::endl;
       }
+      //std::cout << "=> Id " << *id <<" => " << startId << " " << offset << std::endl;
     }
 
     return true;

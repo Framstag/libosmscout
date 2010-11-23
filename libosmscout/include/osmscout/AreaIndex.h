@@ -65,9 +65,9 @@ namespace osmscout {
 
     struct IndexCacheValueSizer : public IndexCache::ValueSizer
     {
-      size_t GetSize(const IndexEntry& value) const
+      unsigned long GetSize(const IndexEntry& value) const
       {
-        size_t memory=0;
+        unsigned long memory=0;
 
         memory+=sizeof(value);
 

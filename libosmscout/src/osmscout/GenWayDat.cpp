@@ -56,7 +56,11 @@ namespace osmscout {
     TypeId                                      restrictionPosId;
     TypeId                                      restrictionNegId;
     std::map<Id,std::vector<Way::Restriction> > restrictions;
-    DataFile<RawNode>                           nodeDataFile("rawnodes.dat","rawnode.idx",10);
+    /*
+    DataFile<RawNode>                           nodeDataFile("rawnodes.dat",
+                                                             "rawnode.idx",
+                                                             10,
+                                                             100000);*/
 
     restrictionPosId=typeConfig.GetRelationTypeId(tagRestriction,"only_straight_on");
     assert(restrictionPosId!=typeIgnore);
@@ -136,13 +140,14 @@ namespace osmscout {
 
     progress.Info(std::string("Found ")+NumberToString(restrictions.size())+" restrictions");
 
+/*
     if (!nodeDataFile.Open(".")) {
       std::cerr << "Cannot open raw nodes data file!" << std::endl;
       return false;
     }
 
     StopClock ac;
-/*
+
     progress.Info("Resolving ways using rawnodes.idx");
 
     if (!scanner.Open("rawways.dat")) {
@@ -182,11 +187,11 @@ namespace osmscout {
     if (!scanner.Close()) {
       progress.Error("Cannot close file 'rawways.dat'");
       return false;
-    }*/
+    }
 
     ac.Stop();
 
-    //std::cout << ac <<  std::endl;
+    //std::cout << ac <<  std::endl;*/
 
     StopClock bc;
 
@@ -221,8 +226,7 @@ namespace osmscout {
         return false;
       }
 
-      if (way.type!=typeIgnore &&
-          way.nodes.size()>=2) {
+      if (way.type!=typeIgnore) {
         size_t index=way.id/distributionGranuality;
 
         if (index>=wayDistribution.size()) {
@@ -301,21 +305,13 @@ namespace osmscout {
           return false;
         }
 
-        if (way.type!=typeIgnore &&
-            way.id>=start &&
-            way.id<end) {
-
-          if (way.nodes.size()>=2) {
-            ways[way.id]=way;
-            for (size_t j=0; j<way.nodes.size(); j++) {
-              nodeIds.insert(way.nodes[j]);
-            }
-          }
+        if (way.type!=typeIgnore && way.id>=start && way.id<end) {
+          ways[way.id]=way;
 
           for (size_t j=0; j<way.nodes.size(); j++) {
+            nodeIds.insert(way.nodes[j]);
             nodeUses[way.nodes[j]]=0;
           }
-
         }
 
         if (way.id>end) {

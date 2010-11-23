@@ -33,9 +33,9 @@ namespace osmscout {
 
   struct NodeUseCacheValueSizer : public Database::NodeUseCache::ValueSizer
   {
-    size_t GetSize(const std::vector<Database::NodeUse>& value) const
+    unsigned long GetSize(const std::vector<Database::NodeUse>& value) const
     {
-      size_t memory=0;
+      unsigned long memory=0;
 
       for (size_t i=0; i<value.size(); i++) {
         memory+=sizeof(Database::NodeUse);
@@ -108,9 +108,9 @@ namespace osmscout {
   Database::Database()
    : isOpen(false),
      areaIndex(10000),
-     nodeDataFile("nodes.dat","node.idx",100000),
-     relationDataFile("relations.dat","relation.idx",10000),
-     wayDataFile("ways.dat","way.idx",100000),
+     nodeDataFile("nodes.dat","node.idx",100000,100000),
+     relationDataFile("relations.dat","relation.idx",10000,100000),
+     wayDataFile("ways.dat","way.idx",100000,100000),
      nodeUseCache(10), // Seems like the cache is more expensive than direct loading!?
      typeConfig(NULL),
      hashFunction(NULL)
@@ -461,14 +461,6 @@ namespace osmscout {
                       relationAreas)) {
       std::cerr << "Error reading relation areas in area!" << std::endl;
       return false;
-    }
-
-    for (std::vector<Relation>::const_iterator iter=relationWays.begin();
-         iter!=relationWays.end();
-         ++iter) {
-      if (iter->id==21032) {
-        std::cout << "Found relation " << iter->id << std::endl;
-      }
     }
 
     relationAreasTimer.Stop();
@@ -979,7 +971,7 @@ namespace osmscout {
     std::set<Id>        loaded;
     std::vector<size_t> costs;
     RoutingProfile      profile;
-    WayIndex            wayIndex("way.idx");
+    WayIndex            wayIndex("way.idx",100000);
 
     std::cout << "Loading way index..." << std::endl;
     if (!wayIndex.Load(path)) {

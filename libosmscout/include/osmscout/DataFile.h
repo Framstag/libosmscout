@@ -40,7 +40,7 @@ namespace osmscout {
 
     struct DataCacheValueSizer : public DataCache::ValueSizer
     {
-      size_t GetSize(const N& value) const
+      unsigned long GetSize(const N& value) const
       {
         return sizeof(value);
       }
@@ -57,7 +57,8 @@ namespace osmscout {
   public:
     DataFile(const std::string& datafile,
              const std::string& indexfile,
-             size_t cacheSize);
+             unsigned long dataCacheSize,
+             unsigned long indexCacheSize);
 
     bool Open(const std::string& path);
     bool Close();
@@ -83,11 +84,12 @@ namespace osmscout {
   template <class N>
   DataFile<N>::DataFile(const std::string& datafile,
                         const std::string& indexfile,
-                        size_t cacheSize)
+                        unsigned long dataCacheSize,
+                        unsigned long indexCacheSize)
   : isOpen(false),
     datafile(datafile),
-    cache(cacheSize),
-    index(indexfile)
+    cache(dataCacheSize),
+    index(indexfile,indexCacheSize)
   {
     // no code
   }
