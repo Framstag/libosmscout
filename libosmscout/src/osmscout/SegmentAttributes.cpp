@@ -125,8 +125,15 @@ namespace osmscout {
         // Some width tagvalues add an 'm' to hint that the unit is meter, remove it.
         if (tag->value.length()>=2) {
           if (tag->value[tag->value.length()-1]=='m' &&
-              tag->value[tag->value.length()-2]>='0' &&
-              tag->value[tag->value.length()-2]<='9') {
+              ((tag->value[tag->value.length()-2]>='0' &&
+                tag->value[tag->value.length()-2]<='9') ||
+                tag->value[tag->value.length()-2]<=' ')) {
+            tag->value.erase(tag->value.length()-1);
+          }
+
+          // Trim possible trailing spaces
+          while (tag->value.length()>0 &&
+                 tag->value[tag->value.length()-1]==' ') {
             tag->value.erase(tag->value.length()-1);
           }
         }
