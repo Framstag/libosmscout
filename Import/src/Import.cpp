@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
   bool                      parameterError=false;
   size_t                    startStep=parameter.GetStartStep();
   size_t                    endStep=parameter.GetEndStep();
-  const char*               mapfile=NULL;
+  std::string               mapfile;
 
   // Simple way to analyse command line parameters, but enough for now...
   int i=1;
@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
       DumpHelp();
       return 0;
     }
-    else if (mapfile==NULL) {
+    else if (mapfile.empty()) {
       mapfile=argv[i];
     }
     else {
@@ -92,7 +92,12 @@ int main(int argc, char* argv[])
     i++;
   }
 
-  if (mapfile==NULL || parameterError) {
+  if (startStep==1 &&
+      mapfile.empty()) {
+    parameterError=true;
+  }
+
+  if (parameterError) {
     DumpHelp();
     return 1;
   }
