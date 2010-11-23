@@ -221,7 +221,8 @@ namespace osmscout {
         return false;
       }
 
-      if (way.type!=typeIgnore) {
+      if (way.type!=typeIgnore &&
+          way.nodes.size()>=2) {
         size_t index=way.id/distributionGranuality;
 
         if (index>=wayDistribution.size()) {
@@ -300,13 +301,21 @@ namespace osmscout {
           return false;
         }
 
-        if (way.type!=typeIgnore && way.id>=start && way.id<end) {
-          ways[way.id]=way;
+        if (way.type!=typeIgnore &&
+            way.id>=start &&
+            way.id<end) {
+
+          if (way.nodes.size()>=2) {
+            ways[way.id]=way;
+            for (size_t j=0; j<way.nodes.size(); j++) {
+              nodeIds.insert(way.nodes[j]);
+            }
+          }
 
           for (size_t j=0; j<way.nodes.size(); j++) {
-            nodeIds.insert(way.nodes[j]);
             nodeUses[way.nodes[j]]=0;
           }
+
         }
 
         if (way.id>end) {
