@@ -80,8 +80,6 @@ int main(int argc, char* argv[])
   int arg=5;
 
   while (arg<argc) {
-    std::cout << arg << " " << argc << std::endl;
-
     Action action;
 
     if (sscanf(argv[arg],"%lf",&action.lat)!=1) {
