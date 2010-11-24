@@ -15,7 +15,8 @@ bin_PROGRAMS += DrawMapCairo
 endif
 
 if HAVE_LIB_QTGUI
-bin_PROGRAMS += DrawMapQt
+bin_PROGRAMS += DrawMapQt \
+                ResourceConsumptionQt
 endif
 
 AddressLookup_SOURCES = AddressLookup.cpp
@@ -23,6 +24,8 @@ AddressLookup_SOURCES = AddressLookup.cpp
 DrawMapCairo_SOURCES = DrawMapCairo.cpp
 
 DrawMapQt_SOURCES = DrawMapQt.cpp
+
+ResourceConsumptionQt_SOURCES = ResourceConsumptionQt.cpp
 
 Routing_SOURCES = Routing.cpp
 

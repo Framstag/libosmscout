@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.56)
 AC_INIT(libosmscout-demos,
         [0.1],
-        [Send bugreports to <tim@teulings.org>],
+        [tim@teulings.org],
         [libosmscout-demos])
 
 AC_CONFIG_SRCDIR(src/Routing.cpp)
