@@ -110,8 +110,6 @@ namespace osmscout {
 
     CityStreetIndex       cityStreetIndex;
 
-    NodeUseIndex          nodeUseIndex;
-
     WaterIndex            waterIndex;
 
     std::string           path;          //! Path to the directory containing all files
@@ -119,8 +117,6 @@ namespace osmscout {
     NodeDataFile          nodeDataFile;  //! Cached access to the 'nodes.dat' file
     RelationDataFile      relationDataFile;//! Cached access to the 'relations.dat' file
     WayDataFile           wayDataFile;   //! Cached access to the 'ways.dat' file
-
-    mutable NodeUseCache  nodeUseCache;  //! Cache for node use data
 
     mutable FileScanner   nodeUseScanner;//! File stream to the nodeuse.idx file
 
@@ -153,6 +149,15 @@ namespace osmscout {
                   double magnification,
                   size_t maxPriority,
                   std::vector<Node>& nodes) const;
+
+    bool GetJoints(NodeUseIndex& nodeUseIndex,
+                   NodeUseCache& nodeUseCache,
+                   Id id,
+                   std::set<Id>& wayIds) const;
+    bool GetJoints(NodeUseIndex& nodeUseIndex,
+                   NodeUseCache& nodeUseCache,
+                   const std::set<Id>& ids,
+                   std::set<Id>& wayIds) const;
 
   public:
     Database();
@@ -214,11 +219,6 @@ namespace osmscout {
                               size_t limit,
                               bool& limitReached,
                               bool startWith) const;
-
-    bool GetJoints(Id id,
-                   std::set<Id>& wayIds) const;
-    bool GetJoints(const std::set<Id>& ids,
-                   std::set<Id>& wayIds) const;
 
     bool CalculateRoute(Id startWayId, Id startNodeId,
                         Id targetWayId, Id targetNodeId,

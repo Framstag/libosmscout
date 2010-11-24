@@ -111,7 +111,6 @@ namespace osmscout {
      nodeDataFile("nodes.dat","node.idx",100000,100000),
      relationDataFile("relations.dat","relation.idx",10000,100000),
      wayDataFile("ways.dat","way.idx",100000,100000),
-     nodeUseCache(10), // Seems like the cache is more expensive than direct loading!?
      typeConfig(NULL),
      hashFunction(NULL)
   {
@@ -213,13 +212,6 @@ namespace osmscout {
     }
     std::cout << "Loading city street index done." << std::endl;
 
-    std::cout << "Loading node use index..." << std::endl;
-    if (!nodeUseIndex.LoadNodeUseIndex(path)) {
-      std::cerr << "Cannot load node use index!" << std::endl;
-      return false;
-    }
-    std::cout << "Loading node use index done." << std::endl;
-
     std::cout << "Loading water index..." << std::endl;
     if (!waterIndex.Load(path)) {
       std::cerr << "Cannot load water index!" << std::endl;
@@ -243,8 +235,6 @@ namespace osmscout {
     nodeDataFile.Close();
     wayDataFile.Close();
 
-    nodeUseCache.Flush();
-
     isOpen=false;
   }
 
@@ -253,7 +243,6 @@ namespace osmscout {
     nodeDataFile.FlushCache();
     wayDataFile.FlushCache();
     relationDataFile.FlushCache();
-    nodeUseCache.Flush();
   }
 
   TypeConfig* Database::GetTypeConfig() const
@@ -667,7 +656,9 @@ namespace osmscout {
                                                 startWith);
   }
 
-  bool Database::GetJoints(const std::set<Id>& ids,
+  bool Database::GetJoints(NodeUseIndex& nodeUseIndex,
+                           NodeUseCache& nodeUseCache,
+                           const std::set<Id>& ids,
                            std::set<Id>& wayIds) const
   {
     if (!IsOpen()) {
@@ -744,7 +735,10 @@ namespace osmscout {
     return true;
   }
 
-  bool Database::GetJoints(Id id, std::set<Id>& wayIds) const
+  bool Database::GetJoints(NodeUseIndex& nodeUseIndex,
+                           NodeUseCache& nodeUseCache,
+                           Id id,
+                           std::set<Id>& wayIds) const
   {
     if (!IsOpen()) {
       return false;
@@ -754,7 +748,7 @@ namespace osmscout {
 
     ids.insert(id);
 
-    return GetJoints(ids,wayIds);
+    return GetJoints(nodeUseIndex,nodeUseCache,ids,wayIds);
   }
 
   typedef const Way* WayRef;
@@ -971,7 +965,16 @@ namespace osmscout {
     std::set<Id>        loaded;
     std::vector<size_t> costs;
     RoutingProfile      profile;
+    NodeUseCache        nodeUseCache(10);  //! Cache for node use data, seems like the cache is more expensive than direct loading!?
+    NodeUseIndex        nodeUseIndex;
     WayIndex            wayIndex("way.idx",100000);
+
+    std::cout << "Loading node use index..." << std::endl;
+    if (!nodeUseIndex.LoadNodeUseIndex(path)) {
+      std::cerr << "Cannot load node use index!" << std::endl;
+      return false;
+    }
+    std::cout << "Loading node use index done." << std::endl;
 
     std::cout << "Loading way index..." << std::endl;
     if (!wayIndex.Load(path)) {
@@ -1220,7 +1223,10 @@ namespace osmscout {
 
           result=candidatesCache.insert(std::pair<Id,Follower>(current.ref.id,Follower()));
 
-          if (!GetJoints(current.ref.id,result.first->second.ways)) {
+          if (!GetJoints(nodeUseIndex,
+                         nodeUseCache,
+                         current.ref.id,
+                         result.first->second.ways)) {
             return false;
           }
 
@@ -1546,12 +1552,10 @@ namespace osmscout {
     wayDataFile.DumpStatistics();
     relationDataFile.DumpStatistics();
 
-    nodeUseCache.DumpStatistics("Node use cache",NodeUseCacheValueSizer());
-
     areaIndex.DumpStatistics();
     areaNodeIndex.DumpStatistics();
     cityStreetIndex.DumpStatistics();
-    nodeUseIndex.DumpStatistics();
+    waterIndex.DumpStatistics();
   }
 }
 
