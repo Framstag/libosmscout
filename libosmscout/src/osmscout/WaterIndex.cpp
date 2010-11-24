@@ -134,7 +134,7 @@ namespace osmscout {
 
   void WaterIndex::DumpStatistics()
   {
-    // TODO
+    std::cout << "WaterIndex size " << area.size() << ", memory " << area.size() << std::endl;
   }
 }
 
