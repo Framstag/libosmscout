@@ -74,6 +74,25 @@ namespace osmscout {
     std::map<std::string,std::list<Id> > ways;      //! list of indexed ways in this area
 
     std::list<Area>                      areas;     //! A list of sub areas
+
+    void CalculateMinMax()
+    {
+      if (area.size()>0) {
+        minlon=area[0].lon;
+        maxlon=area[0].lon;
+
+        minlat=area[0].lat;
+        maxlat=area[0].lat;
+
+        for (size_t n=1; n<area.size(); n++) {
+          minlon=std::min(minlon,area[n].lon);
+          maxlon=std::max(maxlon,area[n].lon);
+
+          minlat=std::min(minlat,area[n].lat);
+          maxlat=std::max(maxlat,area[n].lat);
+        }
+      }
+    }
   };
 
   /**
@@ -199,18 +218,24 @@ namespace osmscout {
     return true;
   }
 
-  static void AddArea(Area& parent, const Area& area)
+  static void AddArea(Area& parent,
+                      const Area& area)
   {
     for (std::list<Area>::iterator a=parent.areas.begin();
          a!=parent.areas.end();
          a++) {
-      if (IsAreaInArea(area.area,a->area)) {
-        // If we already have the same name and are a "minor" reference, we skip...
-        if (!(area.name==a->name &&
-              area.reference.type<a->reference.type)) {
-          AddArea(*a,area);
+      if (!(area.maxlon<a->minlon) &&
+          !(area.minlon>a->maxlon) &&
+          !(area.maxlat<a->minlat) &&
+          !(area.minlat>a->maxlat)) {
+        if (IsAreaInArea(area.area,a->area)) {
+          // If we already have the same name and are a "minor" reference, we skip...
+          if (!(area.name==a->name &&
+                area.reference.type<a->reference.type)) {
+            AddArea(*a,area);
+          }
+          return;
         }
-        return;
       }
     }
 
@@ -313,27 +338,30 @@ namespace osmscout {
     }
   }
 
-  static void CalculateAreaBounds(Area& parent)
+  static unsigned long GetAreaTreeDepth(const Area& area)
   {
-    for (std::list<Area>::iterator area=parent.areas.begin();
-         area!=parent.areas.end();
-         ++area) {
+    unsigned long depth=0;
 
-      if (area->area.size()>0) {
-        area->minlon=area->area[0].lon;
-        area->maxlon=area->area[0].lon;
-        area->minlat=area->area[0].lat;
-        area->maxlat=area->area[0].lat;
+    for (std::list<Area>::const_iterator a=area.areas.begin();
+         a!=area.areas.end();
+         a++) {
+      depth=std::max(depth,GetAreaTreeDepth(*a));
+    }
 
-        for (size_t i=1; i<area->area.size(); i++) {
-          area->minlon=std::min(area->minlon,area->area[i].lon);
-          area->maxlon=std::max(area->maxlon,area->area[i].lon);
-          area->minlat=std::min(area->minlat,area->area[i].lat);
-          area->maxlat=std::max(area->maxlat,area->area[i].lat);
-        }
-      }
+    return depth+1;
+  }
 
-      CalculateAreaBounds(*area);
+
+  static void SortInArea(Area& area,
+                         std::vector<std::list<Area*> >& areaTree,
+                         unsigned long level)
+  {
+    areaTree[level].push_back(&area);
+
+    for (std::list<Area>::iterator a=area.areas.begin();
+         a!=area.areas.end();
+         a++) {
+      SortInArea(*a,areaTree,level+1);
     }
   }
 
@@ -476,18 +504,19 @@ namespace osmscout {
                                         Progress& progress,
                                         const TypeConfig& typeConfig)
   {
-    std::set<TypeId>          cityIds;
-    TypeId                    boundaryId;
-    TypeId                    typeId;
-    FileScanner               scanner;
-    Area                      rootArea;
-    std::list<Node>           cityNodes;
-    std::list<Way>            cityAreas;
-    std::list<Way>            boundaryAreas;
-    std::list<Relation>       boundaryRelations;
-    uint32_t                  nodeCount;
-    uint32_t                  relCount;
-    uint32_t                  wayCount;
+    std::set<TypeId>               cityIds;
+    TypeId                         boundaryId;
+    TypeId                         typeId;
+    FileScanner                    scanner;
+    Area                           rootArea;
+    std::list<Node>                cityNodes;
+    std::list<Way>                 cityAreas;
+    std::list<Way>                 boundaryAreas;
+    std::list<Relation>            boundaryRelations;
+    uint32_t                       nodeCount;
+    uint32_t                       relCount;
+    uint32_t                       wayCount;
+    std::vector<std::list<Area*> > areaTree;
 
     rootArea.name="<root>";
     rootArea.offset=0;
@@ -663,6 +692,8 @@ namespace osmscout {
 
     progress.SetAction("Inserting boundary relations and areas into area tree");
 
+    StopClock insertAClock;
+
     for (size_t l=1; l<=10; l++) {
       for (std::list<Relation>::const_iterator rel=boundaryRelations.begin();
            rel!=boundaryRelations.end();
@@ -689,6 +720,8 @@ namespace osmscout {
               area.reference.Set(rel->id,refRelation);
               area.name=name;
               area.area=rel->roles[i].nodes;
+
+              area.CalculateMinMax();
 
               AddArea(rootArea,area);
             }
@@ -718,10 +751,16 @@ namespace osmscout {
           area.name=name;
           area.area=a->nodes;
 
+          area.CalculateMinMax();
+
           AddArea(rootArea,area);
         }
       }
     }
+
+    insertAClock.Stop();
+
+    //std::cout << "Took " << insertAClock << std::endl;
 
     progress.SetAction("Inserting cities of type area into area tree");
 
@@ -747,6 +786,8 @@ namespace osmscout {
       area.reference.Set(a->id,refWay);
       area.name=name;
       area.area=a->nodes;
+
+      area.CalculateMinMax();
 
       AddArea(rootArea,area);
     }
@@ -804,13 +845,27 @@ namespace osmscout {
 
     progress.SetAction("Calculating bounds of areas");
 
-    CalculateAreaBounds(rootArea);
+    areaTree.resize(GetAreaTreeDepth(rootArea));
+
+    progress.Info(std::string("Area tree depth: ")+NumberToString(areaTree.size()));
+
+    progress.SetAction("Sorting areas in levels");
+
+    SortInArea(rootArea,areaTree,0);
+
+    for (size_t i=0; i<areaTree.size(); i++) {
+      progress.Info(std::string("Area tree index ")+NumberToString(i)+" size: "+NumberToString(areaTree[i].size()));
+    }
+
+    progress.SetAction("Get indexable object types");
 
     std::set<TypeId> indexables;
 
     typeConfig.GetIndexables(indexables);
 
     progress.SetAction("Resolve ways and areas to areas");
+
+    StopClock waToAClock;
 
     if (!scanner.Open("ways.dat")) {
       progress.Error("Cannot open 'ways.dat'");
@@ -846,7 +901,7 @@ namespace osmscout {
           double minlat=way.nodes[0].lat;
           double maxlat=way.nodes[0].lat;
 
-          for (size_t n=0; n<way.nodes.size(); n++) {
+          for (size_t n=1; n<way.nodes.size(); n++) {
             minlon=std::min(minlon,way.nodes[n].lon);
             maxlon=std::max(maxlon,way.nodes[n].lon);
 
@@ -860,6 +915,21 @@ namespace osmscout {
     }
 
     scanner.Close();
+
+    waToAClock.Stop();
+
+    //std::cout << "Took " << waToAClock << std::endl;
+
+    for (size_t i=0; i<areaTree.size(); i++) {
+      unsigned long count=0;
+
+      for (std::list<Area*>::const_iterator iter=areaTree[i].begin();
+           iter!=areaTree[i].end();
+           ++iter) {
+        count+=(*iter)->ways.size();
+      }
+      progress.Info(std::string("Area tree index ")+NumberToString(i)+" way count size: "+NumberToString(count));
+    }
 
     progress.SetAction("Resolve nodes to areas");
 
