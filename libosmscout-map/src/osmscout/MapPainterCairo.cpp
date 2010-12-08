@@ -154,7 +154,7 @@ namespace osmscout {
   {
     int i;
     double ratio, the_y = *y, the_x = *x, dx, dy;
-                         cairo_path_data_t *data, last_move_to, current_point;
+    cairo_path_data_t *data, last_move_to, current_point;
     cairo_path_t *path = param->path;
     parametrization_t *parametrization = param->parametrization;
 
