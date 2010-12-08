@@ -765,14 +765,24 @@ namespace osmscout {
     }
   }
 
-  void StyleConfig::GetNodeTypesWithMag(double mag, std::set<TypeId>& types) const
+  void StyleConfig::GetNodeTypesWithMag(double mag, std::vector<TypeId>& types) const
   {
     for (size_t i=0; i<nodeSymbolStyles.size(); i++) {
-      if (nodeLabelStyles[i]!=NULL && mag>=nodeLabelStyles[i]->GetMinMag()) {
-        types.insert(i);
+      if (nodeLabelStyles[i]!=NULL &&
+          mag>=nodeLabelStyles[i]->GetMinMag()) {
+        types.push_back(i);
       }
-      else if (nodeSymbolStyles[i]!=NULL && mag>=nodeSymbolStyles[i]->GetMinMag()) {
-        types.insert(i);
+      else if (nodeRefLabelStyles[i]!=NULL &&
+          mag>=nodeRefLabelStyles[i]->GetMinMag()) {
+        types.push_back(i);
+      }
+      else if (nodeSymbolStyles[i]!=NULL &&
+               mag>=nodeSymbolStyles[i]->GetMinMag()) {
+        types.push_back(i);
+      }
+      else if (nodeIconStyles[i]!=NULL &&
+               mag>=nodeIconStyles[i]->GetMinMag()) {
+        types.push_back(i);
       }
     }
   }

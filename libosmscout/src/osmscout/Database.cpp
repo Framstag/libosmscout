@@ -107,10 +107,11 @@ namespace osmscout {
 
   Database::Database()
    : isOpen(false),
-     areaIndex(10000),
-     nodeDataFile("nodes.dat","node.idx",100000,100000),
-     relationDataFile("relations.dat","relation.idx",10000,100000),
-     wayDataFile("ways.dat","way.idx",100000,100000),
+     areaIndex(1000),
+     areaNodeIndex(1000),
+     nodeDataFile("nodes.dat","node.idx",1000,1000),
+     relationDataFile("relations.dat","relation.idx",1000,1000),
+     wayDataFile("ways.dat","way.idx",1000,1000),
      typeConfig(NULL),
      hashFunction(NULL)
   {
@@ -265,77 +266,6 @@ namespace osmscout {
     return true;
   }
 
-  size_t Database::GetMaximumPriority(const StyleConfig& styleConfig,
-                                      double minlon, double minlat,
-                                      double maxlon, double maxlat,
-                                      double magnification,
-                                      size_t maxNodes) const
-  {
-    if (!IsOpen()) {
-      return false;
-    }
-
-    size_t              effectiveNodes;
-    std::vector<size_t> priorities;
-    size_t              maxPriority=0;
-
-    double realArea=(maxlon-minlon)*(maxlat-minlat);
-    double tileArea=(GetTileY(maxlat)-GetTileY(minlat)+1)*
-                    (GetTileX(maxlon)-GetTileX(minlon)+1)*
-                    (GetTileWidth()*GetTileHeight());
-
-
-    std::cout << "Real region: " << maxlon-minlon << "x" << maxlat-minlat << " = " << realArea << std::endl;
-    std::cout << "Tile area: " << tileArea << ", with one tile " << GetTileWidth()*GetTileHeight();
-    std::cout << " => " << (GetTileY(maxlat)-GetTileY(minlat)+1)*(GetTileX(maxlon)-GetTileX(minlon)+1) << " tiles " << std::endl;
-    effectiveNodes=(size_t)(maxNodes*(tileArea/realArea));
-    std::cout << "Nodes: " << maxNodes << ", effective => " << effectiveNodes << std::endl;
-
-    size_t           nodes=0;
-    std::set<TypeId> drawTypes;
-
-    styleConfig.GetPriorities(priorities);
-
-    styleConfig.GetNodeTypesWithMag(magnification,drawTypes);
-
-    // Number of node nodes is only dependend on the magnification level
-
-    for (std::set<TypeId>::const_iterator drawType=drawTypes.begin();
-         drawType!=drawTypes.end();
-         ++drawType) {
-      nodes+=areaNodeIndex.GetNodes(*drawType,
-                                   GetTileX(minlon),GetTileY(minlat),
-                                   GetTileX(maxlon),GetTileY(maxlat));
-    }
-
-    return maxPriority;
-  }
-
-  bool Database::GetNodes(const StyleConfig& styleConfig,
-                          double lonMin, double latMin,
-                          double lonMax, double latMax,
-                          double magnification,
-                          size_t maxPriority,
-                          std::vector<Node>& nodes) const
-  {
-    if (!IsOpen()) {
-      return false;
-    }
-
-    std::vector<Id> ids;
-
-    if (!areaNodeIndex.GetIds(styleConfig,
-                              lonMin,latMin,lonMax,latMax,
-                              magnification,
-                              maxPriority,
-                              ids)) {
-      std::cout << "Cannot got ids from area node index!" << std::endl;
-      return false;
-    }
-
-    return GetNodes(ids,nodes);
-  }
-
   bool Database::GetObjects(const StyleConfig& styleConfig,
                             double lonMin, double latMin,
                             double lonMax, double latMax,
@@ -351,12 +281,22 @@ namespace osmscout {
       return false;
     }
 
+    std::vector<TypeId>     wayTypes;
+    std::vector<TypeId>     nodeTypes;
+    std::vector<FileOffset> nodeOffsets;
+    std::vector<FileOffset> wayWayOffsets;
+    std::vector<FileOffset> relationWayOffsets;
+    std::vector<FileOffset> wayAreaOffsets;
+    std::vector<FileOffset> relationAreaOffsets;
+
     nodes.clear();
     ways.clear();
     areas.clear();
     relationWays.clear();
     relationAreas.clear();
 
+
+    /*
     size_t maxPriority;
 
     StopClock maxPrioTimer;
@@ -366,14 +306,22 @@ namespace osmscout {
                                    magnification,
                                    parameter.GetMaximumNodes());
 
-    maxPrioTimer.Stop();
+    maxPrioTimer.Stop();*/
 
     StopClock nodesTimer;
 
-    if (!GetNodes(styleConfig,
-                  lonMin,latMin,lonMax,latMax,
-                  magnification,
-                  maxPriority,
+    styleConfig.GetNodeTypesWithMag(magnification,nodeTypes);
+
+    if (!areaNodeIndex.GetOffsets(styleConfig,
+                                  lonMin,latMin,lonMax,latMax,
+                                  nodeTypes,
+                                  parameter.GetMaximumNodes(),
+                                  nodeOffsets)) {
+      std::cout << "Error getting nodes from area node index!" << std::endl;
+      return false;
+    }
+
+    if (!GetNodes(nodeOffsets,
                   nodes)) {
       std::cout << "Error reading nodes in area!" << std::endl;
       return false;
@@ -383,13 +331,7 @@ namespace osmscout {
 
     StopClock indexTimer;
 
-    std::vector<TypeId>     types;
-    std::vector<FileOffset> wayWayOffsets;
-    std::vector<FileOffset> relationWayOffsets;
-    std::vector<FileOffset> wayAreaOffsets;
-    std::vector<FileOffset> relationAreaOffsets;
-
-    styleConfig.GetWayTypesByPrio(types);
+    styleConfig.GetWayTypesByPrio(wayTypes);
 
     if (!areaIndex.GetOffsets(styleConfig,
                               lonMin,
@@ -401,7 +343,7 @@ namespace osmscout {
                               ((size_t)ceil(osmscout::Log2(magnification)))+
                               parameter.GetMaximumAreaLevel(),
                               parameter.GetMaximumAreas(),
-                              types,
+                              wayTypes,
                               parameter.GetMaximumWays(),
                               wayWayOffsets,
                               relationWayOffsets,
@@ -413,8 +355,6 @@ namespace osmscout {
     indexTimer.Stop();
 
     StopClock waysTimer;
-
-    styleConfig.GetWayTypesByPrio(types);
 
     if (!GetWays(wayWayOffsets,
                  ways)) {
@@ -454,7 +394,7 @@ namespace osmscout {
 
     relationAreasTimer.Stop();
 
-    std::cout << "Max Prio: " << maxPrioTimer << " ";
+    //std::cout << "Max Prio: " << maxPrioTimer << " ";
     std::cout << "nodes: " << nodesTimer << " ";
     std::cout << "index: " << indexTimer << " ";
     std::cout << "ways: " << waysTimer << " ";
@@ -509,6 +449,16 @@ namespace osmscout {
     return false;
   }
 
+  bool Database::GetNodes(const std::vector<FileOffset>& offsets,
+                          std::vector<Node>& nodes) const
+  {
+    if (!IsOpen()) {
+      return false;
+    }
+
+    return nodeDataFile.Get(offsets,nodes);
+  }
+
   bool Database::GetNodes(const std::vector<Id>& ids,
                           std::vector<Node>& nodes) const
   {
@@ -519,7 +469,7 @@ namespace osmscout {
     return nodeDataFile.Get(ids,nodes);
   }
 
-  bool Database::GetWays(std::vector<FileOffset>& offsets,
+  bool Database::GetWays(const std::vector<FileOffset>& offsets,
                          std::vector<Way>& ways) const
   {
     if (!IsOpen()) {
@@ -529,7 +479,7 @@ namespace osmscout {
     return wayDataFile.Get(offsets,ways);
   }
 
-  bool Database::GetWays(std::list<FileOffset>& offsets,
+  bool Database::GetWays(const std::list<FileOffset>& offsets,
                          std::vector<Way>& ways) const
   {
     if (!IsOpen()) {
@@ -539,7 +489,7 @@ namespace osmscout {
     return wayDataFile.Get(offsets,ways);
   }
 
-  bool Database::GetRelations(std::vector<FileOffset>& offsets,
+  bool Database::GetRelations(const std::vector<FileOffset>& offsets,
                               std::vector<Relation>& relations) const
   {
     if (!IsOpen()) {
@@ -549,7 +499,7 @@ namespace osmscout {
     return relationDataFile.Get(offsets,relations);
   }
 
-  bool Database::GetRelations(std::list<FileOffset>& offsets,
+  bool Database::GetRelations(const std::list<FileOffset>& offsets,
                               std::vector<Relation>& relations) const
   {
     if (!IsOpen()) {

@@ -22,34 +22,64 @@
 
 #include <set>
 
-#include <osmscout/Tiles.h>
+#include <osmscout/Cache.h>
+#include <osmscout/FileScanner.h>
 #include <osmscout/StyleConfig.h>
 
 namespace osmscout {
+
   class AreaNodeIndex
   {
   private:
-  struct IndexEntry
-  {
-    std::vector<Id> ids;
-  };
+    struct Leaf
+    {
+      FileOffset              children[4];
+      std::vector<FileOffset> offsets;
+    };
+
+    typedef Cache<FileOffset,Leaf> LeafCache;
+
+    struct LeafCacheValueSizer : public LeafCache::ValueSizer
+    {
+      unsigned long GetSize(const Leaf& value) const
+      {
+        unsigned long memory=0;
+
+        memory+=sizeof(value);
+
+        memory+=value.offsets.size()*sizeof(FileOffset);
+
+        return memory;
+      }
+    };
 
   private:
-    std::map<TypeId,std::map<TileId,IndexEntry> > areaNodeIndex;
+    std::string             filepart;
+    std::string             datafilename;
+    mutable FileScanner     scanner;
+
+    std::vector<double>     cellWidth;
+    std::vector<double>     cellHeight;
+    mutable LeafCache       leafCache;
+    std::vector<FileOffset> topLevelOffsets;
+
+  private:
+    bool GetIndexEntry(FileOffset offset,
+                       LeafCache::CacheRef& cacheRef) const;
 
   public:
+    AreaNodeIndex(size_t cacheSize);
+
     bool LoadAreaNodeIndex(const std::string& path);
 
-    size_t GetNodes(TypeId drawType,
-                    size_t tileMinX, size_t tileMinY,
-                    size_t tileMaxX, size_t tileMaxY) const;
-
-    bool GetIds(const StyleConfig& styleConfig,
-                double minlon, double minlat,
-                double maxlon, double maxlat,
-                double magnification,
-                size_t maxPriority,
-                std::vector<Id>& ids) const;
+    bool GetOffsets(const StyleConfig& styleConfig,
+                    double minlon,
+                    double minlat,
+                    double maxlon,
+                    double maxlat,
+                    const std::vector<TypeId>& types,
+                    size_t maxNodeCount,
+                    std::vector<FileOffset>& nodeOffsets) const;
 
     void DumpStatistics();
   };

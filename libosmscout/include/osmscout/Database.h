@@ -125,30 +125,35 @@ namespace osmscout {
     std::string           (*hashFunction) (std::string);
 
   private:
+    /*
     size_t GetMaximumPriority(const StyleConfig& styleConfig,
                               double minlon, double minlat,
                               double maxlon, double maxlat,
                               double magnification,
-                              size_t maxNodes) const;
+                              size_t maxNodes) const;*/
 
-    bool GetWays(std::vector<FileOffset>& offsets,
+    bool GetNodes(const std::vector<FileOffset>& offsets,
+                  std::vector<Node>& nodes) const;
+
+    bool GetWays(const std::vector<FileOffset>& offsets,
                  std::vector<Way>& ways) const;
 
-    bool GetWays(std::list<FileOffset>& offsets,
+    bool GetWays(const std::list<FileOffset>& offsets,
                  std::vector<Way>& ways) const;
 
-    bool GetRelations(std::vector<FileOffset>& offsets,
+    bool GetRelations(const std::vector<FileOffset>& offsets,
                       std::vector<Relation>& relations) const;
 
-    bool GetRelations(std::list<FileOffset>& offsets,
+    bool GetRelations(const std::list<FileOffset>& offsets,
                       std::vector<Relation>& relations) const;
 
+    /*
     bool GetNodes(const StyleConfig& styleConfig,
                   double lonMin, double latMin,
                   double lonMax, double latMax,
                   double magnification,
                   size_t maxPriority,
-                  std::vector<Node>& nodes) const;
+                  std::vector<Node>& nodes) const;*/
 
     bool GetJoints(NodeUseIndex& nodeUseIndex,
                    NodeUseCache& nodeUseCache,

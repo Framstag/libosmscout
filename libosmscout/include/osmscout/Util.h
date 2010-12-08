@@ -42,7 +42,7 @@ namespace osmscout {
 
     http://softsurfer.com/Archive/algorithm_0103/algorithm_0103.htm
    */
-  /*
+/*
   template<typename N, typename M>
   double IsLeft(const N& p0, const N& p1, const M& p2)
   {
@@ -91,6 +91,7 @@ namespace osmscout {
 
     See http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
     */
+
   template<typename N, typename M>
   bool IsPointInArea(const N& point,
                      const std::vector<M>& nodes)
@@ -114,7 +115,7 @@ namespace osmscout {
   }
 
   /**
-    Return true, if area a is in area b
+    Return true, if area a is completely in area b
     */
   template<typename N,typename M>
   bool IsAreaInArea(const std::vector<N>& a,
@@ -161,6 +162,29 @@ namespace osmscout {
     ~NumberSet();
     void Insert(Number value);
     bool IsSet(Number value) const;
+  };
+
+  struct OSMSCOUT_API Coord
+  {
+    size_t x;
+    size_t y;
+
+    Coord(size_t x, size_t y)
+     :x(x),y(y)
+    {
+      // no code
+    }
+
+    bool operator==(const Coord& other) const
+    {
+      return x==other.x && y==other.y;
+    }
+
+    bool operator<(const Coord& other) const
+    {
+      return y<other.y ||
+      ( y==other.y && x<other.x);
+    }
   };
 
   class OSMSCOUT_API StopClock
@@ -313,7 +337,7 @@ namespace osmscout {
         return false;
       }
 
-      if (std::numeric_limits<A>::max()/base-(A)digitValue<a) {
+      if (std::numeric_limits<A>::max()/(A)base-(A)digitValue<a) {
         return false;
       }
 

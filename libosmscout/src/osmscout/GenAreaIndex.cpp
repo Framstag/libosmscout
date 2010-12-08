@@ -33,29 +33,6 @@
 
 namespace osmscout {
 
-  struct Coord
-  {
-    size_t x;
-    size_t y;
-
-    Coord(size_t x, size_t y)
-     :x(x),y(y)
-    {
-      // no code
-    }
-
-    bool operator==(const Coord& other) const
-    {
-      return x==other.x && y==other.y;
-    }
-
-    bool operator<(const Coord& other) const
-    {
-      return y<other.y ||
-      ( y==other.y && x<other.x);
-    }
-  };
-
   struct AreaLeaf
   {
     FileOffset                              offset;

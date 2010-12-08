@@ -20,6 +20,7 @@
 #include <osmscout/AreaNodeIndex.h>
 
 #include <cerrno>
+#include <cmath>
 #include <cstring>
 #include <iostream>
 #include <map>
@@ -28,148 +29,276 @@
 
 namespace osmscout {
 
+  AreaNodeIndex::AreaNodeIndex(size_t cacheSize)
+  : filepart("areanode.idx"),
+    leafCache(cacheSize)
+  {
+    // no code
+  }
+
   bool AreaNodeIndex::LoadAreaNodeIndex(const std::string& path)
   {
-    FileScanner scanner;
-    std::string file=path+"/"+"areanode.idx";
+    datafilename=path+"/"+filepart;
 
-    if (!scanner.Open(file)) {
+    if (!scanner.Open(datafilename)) {
       return false;
     }
 
-    uint32_t drawTypes;
+    uint32_t types;
+    uint32_t maxType;
+    uint32_t maxLevel;
 
     // The number of draw types we have an index for
-    scanner.ReadNumber(drawTypes); // Number of entries
+    scanner.ReadNumber(types);    // Number of entries
 
-    std::cout << drawTypes << " area node index entries..." << std::endl;
+    scanner.ReadNumber(maxType);
+    scanner.ReadNumber(maxLevel);
 
-    for (size_t i=0; i<drawTypes; i++) {
-      TypeId   type;
-      uint32_t tiles;
+    std::cout << types << " area node index entries..." << std::endl;
 
-      scanner.ReadNumber(type);  // The draw type id
-      scanner.ReadNumber(tiles); // The number of tiles
+    // Calculate the size of a cell in each index level
+    cellWidth.resize(maxLevel+1);
+    cellHeight.resize(maxLevel+1);
 
-      for (size_t t=0; t<tiles; t++) {
-        IndexEntry entry;
-        TileId     tileId;
-        uint32_t   nodeCount;
+    for (size_t i=0; i<cellWidth.size(); i++) {
+      cellWidth[i]=360.0/pow(2.0,(int)i);
+    }
 
-        scanner.ReadNumber(tileId);          // The tile id
-        scanner.ReadNumber(nodeCount); // The number of nodes
+    for (size_t i=0; i<cellHeight.size(); i++) {
+      cellHeight[i]=180.0/pow(2.0,(int)i);
+    }
 
-        entry.ids.reserve(nodeCount);
+    topLevelOffsets.resize(maxType+1);
 
-        for (size_t i=0; i<nodeCount; i++) {
-          Id id;
+    for (size_t i=0; i<topLevelOffsets.size(); i++) {
+      topLevelOffsets[i]=0;
+    }
 
-          scanner.ReadNumber(id); // The id of the node
+    for (size_t i=0; i<types; i++) {
+      TypeId     type;
+      FileOffset offset;
 
-          entry.ids.push_back(id);
+      scanner.Read(type);
+      scanner.Read(offset);
 
+      topLevelOffsets[type]=offset;
+    }
+
+    return !scanner.HasError();
+  }
+
+  bool AreaNodeIndex::GetIndexEntry(FileOffset offset,
+                                    LeafCache::CacheRef& cacheRef) const
+  {
+    if (!leafCache.GetEntry(offset,cacheRef)) {
+      LeafCache::CacheEntry cacheEntry(offset);
+
+      cacheRef=leafCache.SetEntry(cacheEntry);
+
+      if (!scanner.IsOpen()) {
+        if (!scanner.Open(datafilename)) {
+          std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
+          return false;
         }
+      }
 
-        areaNodeIndex[type][tileId]=entry;
+      scanner.SetPos(offset);
+
+      size_t     offsetCount;
+
+      scanner.ReadNumber(cacheRef->value.children[0]);
+      scanner.ReadNumber(cacheRef->value.children[1]);
+      scanner.ReadNumber(cacheRef->value.children[2]);
+      scanner.ReadNumber(cacheRef->value.children[3]);
+
+      scanner.ReadNumber(offsetCount);
+
+      cacheRef->value.offsets.resize(offsetCount);
+
+      for (size_t i=0; i<offsetCount; i++) {
+        scanner.ReadNumber(cacheRef->value.offsets[i]);
       }
     }
 
-    return !scanner.HasError() && scanner.Close();
+    return !scanner.HasError();
   }
 
-  size_t AreaNodeIndex::GetNodes(TypeId drawType,
-                                 size_t tileMinX, size_t tileMinY,
-                                 size_t tileMaxX, size_t tileMaxY) const
+
+  bool AreaNodeIndex::GetOffsets(const StyleConfig& styleConfig,
+                                 double minlon,
+                                 double minlat,
+                                 double maxlon,
+                                 double maxlat,
+                                 const std::vector<TypeId>& types,
+                                 size_t maxNodeCount,
+                                 std::vector<FileOffset>& nodeOffsets) const
   {
-    size_t nodes=0;
+    std::vector<FileOffset> newNodeOffsets;
+    bool                    stop;
+    std::vector<size_t>     ctx;  // tile x coordinates in this level
+    std::vector<size_t>     cty;  // tile y coordinates in this level
+    std::vector<FileOffset> co;   // offsets in this level
 
-    std::map<TypeId,std::map<TileId,IndexEntry > >::const_iterator drawTypeEntry;
+    std::vector<size_t>     ntx;  // tile x coordinates in next level
+    std::vector<size_t>     nty;  // tile y coordinates in next level
+    std::vector<FileOffset> no;   // offsets in next level
 
-    drawTypeEntry=areaNodeIndex.find(drawType);
+    nodeOffsets.clear();
+    nodeOffsets.reserve(std::min(100000u,maxNodeCount));
+    newNodeOffsets.reserve(std::min(100000u,maxNodeCount));
 
-    if (drawTypeEntry!=areaNodeIndex.end()) {
-      for (size_t y=tileMinY; y<=tileMaxY; y++) {
-        TileId                                      startTileId=GetTileId(tileMinX,y);
-        TileId                                      endTileId=GetTileId(tileMaxX,y);
-        std::map<TileId,IndexEntry>::const_iterator tile=drawTypeEntry->second.lower_bound(startTileId);
+    minlon+=180;
+    maxlon+=180;
+    minlat+=90;
+    maxlat+=90;
 
-        while (tile!=drawTypeEntry->second.end() && tile->first<=endTileId) {
-          nodes+=tile->second.ids.size();
-
-          ++tile;
-        }
-      }
-    }
-
-    return nodes;
-  }
-
-  bool AreaNodeIndex::GetIds(const StyleConfig& styleConfig,
-                             double minlon, double minlat,
-                             double maxlon, double maxlat,
-                             double magnification,
-                             size_t maxPriority,
-                             std::vector<Id>& ids) const
-  {
-    std::set<TypeId> types;
-
-    styleConfig.GetNodeTypesWithMag(magnification,types);
-
-    size_t minTileX=GetTileX(minlon);
-    size_t maxTileX=GetTileX(maxlon);
-    size_t minTileY=GetTileY(minlat);
-    size_t maxTileY=GetTileY(maxlat);
-
-    for (std::set<TypeId>::const_iterator type=types.begin();
-         type!=types.end();
+    stop=false;
+    for (std::vector<TypeId>::const_iterator type=types.begin();
+         !stop && type!=types.end();
          ++type) {
+      if (*type>=topLevelOffsets.size() ||
+          topLevelOffsets[*type]==0) {
+        continue;
+      }
 
-      //std::cout << "Displaying draw type: " << *type << std::endl;
+      newNodeOffsets.clear();
 
-      std::map<TypeId,std::map<TileId,IndexEntry> >::const_iterator typeEntry;
+      // Start at the top of the index
+      ctx.clear();
+      cty.clear();
+      co.clear();
+      ctx.push_back(0);
+      cty.push_back(0);
+      co.push_back(topLevelOffsets[*type]);
 
-      typeEntry=areaNodeIndex.find(*type);
+      for (size_t level=0;
+           !stop &&
+           co.size()>0;
+           level++) {
+        // Clear the list of new index tiles
+        ntx.clear();
+        nty.clear();
+        no.clear();
 
-      if (typeEntry!=areaNodeIndex.end()) {
-        for (size_t y=minTileY; y<=maxTileY; y++) {
-          TileId                                      startTileId=GetTileId(minTileX,y);
-          TileId                                      endTileId=GetTileId(maxTileX,y);
-          std::map<TileId,IndexEntry>::const_iterator tile=typeEntry->second.lower_bound(startTileId);
+        // For all tiles...
+        for (size_t i=0; !stop && i<co.size(); i++) {
+          size_t cx;
+          size_t cy;
+          double x;
+          double y;
 
-          while (tile->first<=endTileId && tile!=typeEntry->second.end()) {
-            for (size_t j=0; j<tile->second.ids.size(); j++) {
-              ids.push_back(tile->second.ids[j]);
+          LeafCache::CacheRef entry;
+
+          if (!GetIndexEntry(co[i],entry)) {
+            std::cerr << "Cannot find offset " << co[i] << " in level " << level << ", => aborting!" << std::endl;
+            return false;
+          }
+
+          // Evaluate data
+
+          if (nodeOffsets.size()+
+              newNodeOffsets.size()+entry->value.offsets.size()>maxNodeCount) {
+            std::cout << "Maximum node limit hit: " << nodeOffsets.size();
+            std::cout << "+" << newNodeOffsets.size();
+            std::cout << "+" << entry->value.offsets.size();
+            std::cout << ">" << maxNodeCount << " for type " << types[*type] << std::endl;
+            stop=true;
+            break;
+          }
+
+          for (std::vector<FileOffset>::const_iterator offset=entry->value.offsets.begin();
+               offset!=entry->value.offsets.end();
+               ++offset) {
+            newNodeOffsets.push_back(*offset);
+          }
+
+          // Now calculate the new index tiles for the next level
+
+          cx=ctx[i]*2;
+          cy=cty[i]*2;
+
+          if (entry->value.children[0]!=0) {
+            // top left
+
+            x=cx*cellWidth[level+1];
+            y=(cy+1)*cellHeight[level+1];
+
+            if (!(x>maxlon ||
+                  y>maxlat ||
+                  x+cellWidth[level+1]<minlon ||
+                  y+cellHeight[level+1]<minlat)) {
+              ntx.push_back(cx);
+              nty.push_back(cy+1);
+              no.push_back(entry->value.children[0]);
             }
+          }
 
-            ++tile;
+          if (entry->value.children[1]!=0) {
+            // top right
+            x=(cx+1)*cellWidth[level+1];
+            y=(cy+1)*cellHeight[level+1];
+
+            if (!(x>maxlon ||
+                  y>maxlat ||
+                  x+cellWidth[level+1]<minlon ||
+                  y+cellHeight[level+1]<minlat)) {
+              ntx.push_back(cx+1);
+              nty.push_back(cy+1);
+              no.push_back(entry->value.children[1]);
+            }
+          }
+
+          if (entry->value.children[2]!=0) {
+            // bottom left
+            x=cx*cellWidth[level+1];
+            y=cy*cellHeight[level+1];
+
+            if (!(x>maxlon ||
+                  y>maxlat ||
+                  x+cellWidth[level+1]<minlon ||
+                  y+cellHeight[level+1]<minlat)) {
+              ntx.push_back(cx);
+              nty.push_back(cy);
+              no.push_back(entry->value.children[2]);
+              }
+          }
+
+          if (entry->value.children[3]!=0) {
+            // bottom right
+            x=(cx+1)*cellWidth[level+1];
+            y=cy*cellHeight[level+1];
+
+            if (!(x>maxlon ||
+                  y>maxlat ||
+                  x+cellWidth[level+1]<minlon ||
+                  y+cellHeight[level+1]<minlat)) {
+              ntx.push_back(cx+1);
+              nty.push_back(cy);
+              no.push_back(entry->value.children[3]);
+            }
           }
         }
+
+        ctx=ntx;
+        cty=nty;
+        co=no;
+      }
+
+      if (!stop) {
+        for (std::vector<FileOffset>::const_iterator offset=newNodeOffsets.begin();
+             offset!=newNodeOffsets.end();
+             ++offset) {
+          nodeOffsets.push_back(*offset);
+        }
       }
     }
-
-    std::cout << "Found " << ids.size() << " node ids in area node index with maximum priority " << maxPriority << std::endl;
 
     return true;
   }
 
   void AreaNodeIndex::DumpStatistics()
   {
-    size_t memory=0;
-    size_t entries=0;
-
-    for (std::map<TypeId,std::map<TileId,IndexEntry> >::const_iterator i=areaNodeIndex.begin();
-         i!=areaNodeIndex.end();
-         i++) {
-      memory+=sizeof(i->first)+sizeof(i->second);
-      for (std::map<TileId,IndexEntry>::const_iterator j=i->second.begin();
-           j!=i->second.end();
-           j++) {
-        entries++;
-        memory+=sizeof(j->first)+sizeof(j->second)+j->second.ids.size()*sizeof(Id);
-      }
-    }
-
-    std::cout << "Area node index size " << entries << ", memory " << memory << std::endl;
+    leafCache.DumpStatistics(filepart.c_str(),LeafCacheValueSizer());
   }
 }
 
