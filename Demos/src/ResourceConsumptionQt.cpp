@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  std::cout << "# Qt resources initialized, press return to start rednering" << std::endl;
+  std::cout << "# Qt resources initialized, press return to start rendering!" << std::endl;
 
   std::cin.get();
 
@@ -189,6 +189,8 @@ int main(int argc, char* argv[])
 
     std::cout << "# DB access time " << dbTimer << " render time: " << renderTimer << std::endl;
   }
+
+  database.DumpStatistics();
 
   delete painter;
   delete pixmap;
