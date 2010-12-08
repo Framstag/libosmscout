@@ -324,7 +324,7 @@ namespace osmscout {
               newWayWayOffsets.size()+
               newRelationWayOffsets.size()+
               nw+nr>maxWayCount) {
-            std::cout << "Maximum limit hit: " << wayWayOffsets.size();
+            std::cout << "Maximum area way limit hit: " << wayWayOffsets.size();
             std::cout << "+" << relationWayOffsets.size();
             std::cout << "+" << newWayWayOffsets.size();
             std::cout << "+" << newRelationWayOffsets.size();
