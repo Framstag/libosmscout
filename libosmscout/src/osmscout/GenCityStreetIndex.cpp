@@ -228,7 +228,7 @@ namespace osmscout {
           !(area.minlon>a->maxlon) &&
           !(area.maxlat<a->minlat) &&
           !(area.minlat>a->maxlat)) {
-        if (IsAreaInArea(area.area,a->area)) {
+        if (IsAreaSubOfArea(area.area,a->area)) {
           // If we already have the same name and are a "minor" reference, we skip...
           if (!(area.name==a->name &&
                 area.reference.type<a->reference.type)) {
@@ -603,6 +603,8 @@ namespace osmscout {
     for (uint32_t w=1; w<=wayCount; w++) {
       Way way;
 
+      progress.SetProgress(w,wayCount);
+
       if (!way.Read(scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(w)+" of "+
@@ -652,6 +654,8 @@ namespace osmscout {
     for (uint32_t r=1; r<=relCount; r++) {
       Relation relation;
 
+      progress.SetProgress(r,relCount);
+
       if (!relation.Read(scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(r)+" of "+
@@ -695,15 +699,24 @@ namespace osmscout {
     StopClock insertAClock;
 
     for (size_t l=1; l<=10; l++) {
+      size_t count;
+
+      progress.Info(std::string("Admin level ")+NumberToString(l));
+
+      count=0;
       for (std::list<Relation>::const_iterator rel=boundaryRelations.begin();
            rel!=boundaryRelations.end();
            ++rel) {
-
         size_t      level=0;
         std::string name;
 
+        count++;
+
+        progress.SetProgress((l-1)*boundaryRelations.size()+count,10*boundaryRelations.size());
+
         for (size_t i=0; i<rel->tags.size() && !(l!=0 && !name.empty()); i++) {
-          if (rel->tags[i].key==tagAdminLevel && StringToNumber(rel->tags[i].value,level)) {
+          if (rel->tags[i].key==tagAdminLevel &&
+              StringToNumber(rel->tags[i].value,level)) {
           }
           else if (rel->tags[i].key==tagName) {
             name=rel->tags[i].value;
@@ -729,12 +742,17 @@ namespace osmscout {
         }
       }
 
+      count=0;
       for (std::list<Way>::const_iterator a=boundaryAreas.begin();
            a!=boundaryAreas.end();
            ++a) {
 
         size_t      level=0;
         std::string name;
+
+        count++;
+
+        progress.SetProgress((l-1)*boundaryAreas.size()+count,10*boundaryAreas.size());
 
         for (size_t i=0; i<a->attributes.tags.size() && !(l!=0 && !name.empty()); i++) {
           if (a->attributes.tags[i].key==tagAdminLevel && StringToNumber(a->attributes.tags[i].value,level)) {
@@ -760,14 +778,21 @@ namespace osmscout {
 
     insertAClock.Stop();
 
-    //std::cout << "Took " << insertAClock << std::endl;
+    progress.Info(std::string("Time for insertion: ")+insertAClock.ResultString());
+
+    size_t count;
 
     progress.SetAction("Inserting cities of type area into area tree");
 
+    count=0;
     for (std::list<Way>::const_iterator a=cityAreas.begin();
          a!=cityAreas.end();
          ++a) {
       std::string name=a->GetName();
+
+      count++;
+
+      progress.SetProgress(count+1,cityAreas.size());
 
       for (size_t i=0; i<a->attributes.tags.size(); i++) {
         if (a->attributes.tags[i].key==tagPlaceName) {
@@ -794,12 +819,15 @@ namespace osmscout {
 
     progress.SetAction("Inserting cities of type node into area tree");
 
-    size_t count=0;
+    count=0;
     for (std::list<Node>::iterator city=cityNodes.begin();
          city!=cityNodes.end();
          ++city) {
-      count++;
       std::string name;
+
+      count++;
+
+      progress.SetProgress(count+1,cityNodes.size());
 
       for (size_t i=0; i<city->tags.size(); i++) {
         if (city->tags[i].key==tagName) {
@@ -825,11 +853,6 @@ namespace osmscout {
       node.lat=city->lat;
 
       AddLocationToArea(rootArea,location,node);
-
-      /*
-      if (count%1000==0) {
-        std::cout << count << "/" << cityNodes.size() << std::endl;
-      }*/
     }
 
     progress.SetAction("Dumping areas");
@@ -917,6 +940,8 @@ namespace osmscout {
     scanner.Close();
 
     waToAClock.Stop();
+
+    progress.Info(std::string("Time for resolving: ")+waToAClock.ResultString());
 
     //std::cout << "Took " << waToAClock << std::endl;
 

@@ -115,7 +115,35 @@ namespace osmscout {
   }
 
   /**
-    Return true, if area a is completely in area b
+    Gives information about the position of the point in relation to the area.
+
+    If -1 returned, the point is outside the area, if 0, the point is on the area boundary, 1
+    the point is within the area.
+   */
+  template<typename N, typename M>
+  int GetRelationOfPointToArea(const N& point,
+                               const std::vector<M>& nodes)
+  {
+    int  i,j;
+    bool c=false;
+
+    for (i=0, j=nodes.size()-1; i<(int)nodes.size(); j=i++) {
+      if (point.id==nodes[i].id) {
+        return 0;
+      }
+
+      if ((nodes[i].lat>point.lat)!=(nodes[j].lat>point.lat) &&
+          (point.lon<(nodes[j].lon-nodes[i].lon)*(point.lat-nodes[i].lat) /
+           (nodes[j].lat-nodes[i].lat)+nodes[i].lon))  {
+        c=!c;
+      }
+    }
+
+    return c ? 1 : -1;
+  }
+
+  /**
+    Return true, if area a is in area b
     */
   template<typename N,typename M>
   bool IsAreaInArea(const std::vector<N>& a,
@@ -128,6 +156,28 @@ namespace osmscout {
     }
 
     return true;
+  }
+
+  /**
+    Returns true, if area a is completely in area b under the assumption that the area a is either
+    completely within or outside the area b.
+    */
+  template<typename N,typename M>
+  bool IsAreaSubOfArea(const std::vector<N>& a,
+                       const std::vector<M>& b)
+  {
+    for (typename std::vector<N>::const_iterator i=a.begin(); i!=a.end(); i++) {
+      int relPos=GetRelationOfPointToArea(*i,b);
+
+      if (relPos>0) {
+        return true;
+      }
+      else if (relPos<0) {
+        return false;
+      }
+    }
+
+    return false;
   }
 
   class OSMSCOUT_API NumberSet
@@ -187,6 +237,9 @@ namespace osmscout {
     }
   };
 
+  /**
+    Simple stop clock implementation.
+    */
   class OSMSCOUT_API StopClock
   {
   private:
