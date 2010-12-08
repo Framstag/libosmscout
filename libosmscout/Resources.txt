@@ -135,15 +135,16 @@ using caching to hold only used index pages in memory is possible here, too.
 The "node index use" index is only used for routing and should be made
 optional.
 
-nodes.dat entries: 12, memory 160960
-Index node.idx: 120 entries, memory 3209208
-ways.dat entries: 752, memory 250240
-Index way.idx: 191 entries, memory 3200199
-relations.dat entries: 755, memory 82440
-Index relation.idx: 259 entries, memory 1600267
+nodes.dat entries: 947, memory 235760
+Index node.idx: 599 entries, memory 608515
+ways.dat entries: 2958, memory 514960
+Index way.idx: 192 entries, memory 160184
+relations.dat entries: 884, memory 93792
+Index relation.idx: 268 entries, memory 115612
 Node use cache entries: 0, memory 16
-area.idx entries: 839, memory 293640
-Area node index size 351882, memory 11039966
-AdminRegion size 77176, locations size 0, memory 2160928
-Node index use size 601636, memory usage 7219632
+area.idx entries: 1127, memory 371564
+Area node index size 356125, memory 11200762
+AdminRegion size 77988, locations size 0, memory 2183664
+Node index use size 614356, memory usage 7372272
+
 
