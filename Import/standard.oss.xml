@@ -1248,7 +1248,7 @@
   </node>
 
   <node key="place" value="state">
-    <label style="emphasize" minMag="state" maxMag="city"/>
+    <label style="emphasize" minMag="state" scaleAndFadeMag="state" maxMag="county" size="1.7"/>
   </node>
 
   <node key="place" value="region">
@@ -1260,11 +1260,11 @@
   </node>
 
   <node key="place" value="city">
-    <label style="emphasize" minMag="stateOver" scaleAndFadeMag="region" maxMag="detail" size="1.5"/>
+    <label style="emphasize" minMag="stateOver" scaleAndFadeMag="county" maxMag="city" size="1.3"/>
   </node>
 
   <node key="place" value="town">
-    <label style="emphasize" minMag="proximity" scaleAndFadeMag="cityOver" maxMag="detail" size="1.3"/>
+    <label style="emphasize" minMag="region" scaleAndFadeMag="region" maxMag="city" size="1.2"/>
   </node>
 
   <node key="place" value="village">
@@ -1272,11 +1272,11 @@
   </node>
 
   <node key="place" value="hamlet">
-    <label style="emphasize" minMag="city" maxMag="veryClose" size="1.0"/>
+    <label style="emphasize" minMag="city" scaleAndFadeMag="city" maxMag="veryClose" size="1.0"/>
   </node>
 
   <node key="place" value="suburb">
-    <label style="emphasize" minMag="city" scaleAndFadeMag="suburb" maxMag="veryClose" size="1.2"/>
+    <label style="emphasize" minMag="cityOver" scaleAndFadeMag="city" maxMag="veryClose" size="1.3"/>
   </node>
 
   <node key="place" value="locality">
@@ -1288,8 +1288,8 @@
   </node>
 <!--
    We do not currently draw borders, because we can only draw
-   all or none of them, making the prio the only trigger. We wouls
-   like boundaries of different admin level with different 
+   all or none of them, making the prio the only trigger. We would
+   like to have boundaries of different admin level with different
    priorities and styles.
 
   <way key="boundary" value="administrative" prio="6">
@@ -1302,7 +1302,7 @@
 
   <node key="internal" value="target">
     <icon name="target"/>
-  </node> 
+  </node>
 
   <way key="internal" value="route" prio="1">
     <line color="ff000088" minPixel="2" width="20"/>
