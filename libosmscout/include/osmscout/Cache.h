@@ -30,7 +30,7 @@ namespace osmscout {
   /**
     Generic FIFO cache implementation with O(n log n) semantic.
 
-    Template parameter class K holds the key value (normally a numerical value),
+    Template parameter class K holds the key value (must be an unsigned numerical value),
     parameter class V holds the data class that is to be cached.
 
     * The cache is not threadsafe.
@@ -100,7 +100,8 @@ namespace osmscout {
         unsigned long index=lastEntry->key%map.size();
 
         typename CacheRefList::iterator iter=map[index].begin();
-        while (iter!=map[index].end() && (*iter)->key!=lastEntry->key) {
+        while (iter!=map[index].end() &&
+               (*iter)->key!=lastEntry->key) {
           ++iter;
         }
 
@@ -148,7 +149,8 @@ namespace osmscout {
       unsigned long index=key%map.size();
 
       typename CacheRefList::iterator iter=map[index].begin();
-      while (iter!=map[index].end() && (*iter)->key!=key) {
+      while (iter!=map[index].end() &&
+             (*iter)->key!=key) {
         ++iter;
       }
 
@@ -180,7 +182,8 @@ namespace osmscout {
       unsigned long index=entry.key%map.size();
 
       typename CacheRefList::iterator iter=map[index].begin();
-      while (iter!=map[index].end() && (*iter)->key!=entry.key) {
+      while (iter!=map[index].end() &&
+             (*iter)->key!=entry.key) {
         ++iter;
       }
 
