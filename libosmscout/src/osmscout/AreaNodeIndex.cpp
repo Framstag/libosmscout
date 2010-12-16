@@ -29,6 +29,14 @@
 
 namespace osmscout {
 
+  AreaNodeIndex::AreaNodeIndex::Leaf()
+  {
+    children[0]=0;
+    children[1]=0;
+    children[2]=0;
+    children[3]=0;
+  }
+
   AreaNodeIndex::AreaNodeIndex(size_t cacheSize)
   : filepart("areanode.idx"),
     leafCache(cacheSize)
