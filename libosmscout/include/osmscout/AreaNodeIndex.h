@@ -35,6 +35,9 @@ namespace osmscout {
     {
       FileOffset              children[4];
       std::vector<FileOffset> offsets;
+
+
+      Leaf();
     };
 
     typedef Cache<FileOffset,Leaf> LeafCache;
