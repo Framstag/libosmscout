@@ -29,7 +29,7 @@
 
 namespace osmscout {
 
-  AreaNodeIndex::AreaNodeIndex::Leaf()
+  AreaNodeIndex::Leaf::Leaf()
   {
     children[0]=0;
     children[1]=0;
