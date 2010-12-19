@@ -1,4 +1,8 @@
-AM_CPPFLAGS = $(LIB_CXXFLAGS) -DOSMSCOUTDLL -I$(top_srcdir)/include \
+SUBDIRS = protobuf
+
+AM_CPPFLAGS = $(LIB_CXXFLAGS) -DOSMSCOUTDLL \
+              -I$(top_srcdir)/include \
+              -I$(top_srcdir)/include/osmscout/pbf \
               $(XML2_CFLAGS) \
               $(PROTOBUF_CFLAGS) \
               $(ZLIB_CFLAGS)
@@ -56,8 +60,10 @@ libosmscout_la_SOURCES= osmscout/Types.cpp \
                         osmscout/Database.cpp
 
 if HAVE_LIB_PROTOBUF
+if HAVE_PROG_PROTOC
 libosmscout_la_SOURCES += osmscout/pbf/fileformat.pb.cc \
                           osmscout/pbf/osmformat.pb.cc \
                           osmscout/PreprocessPBF.cpp
+endif
 endif
 

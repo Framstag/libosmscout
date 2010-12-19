@@ -14,6 +14,15 @@ AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 
+AC_ARG_WITH(protoc,
+            AC_HELP_STRING([--with-protoc=PATH],
+                           [Specify a specific path to protoc]),
+            [protoc=$with_protoc;
+             AC_MSG_NOTICE(Setting protoc to $protoc)],
+            [protoc=;
+             AC_MSG_NOTICE(protoc not set)])
+
+AC_SUBST(protoc)
 AC_TYPE_SIZE_T
 AC_CHECK_HEADERS([sys/time.h])
 
@@ -66,17 +75,20 @@ PKG_CHECK_MODULES(PROTOBUF,
 AM_CONDITIONAL(HAVE_LIB_PROTOBUF,[test "$LIB_PROTOBUF_FOUND" = true])
 
 PKG_CHECK_MODULES(ZLIB,
-                  [protobuf],
+                  [zlib],
                   [AC_SUBST(ZLIB_CFLAGS)
                    AC_SUBST(ZLIB_LIBS)
                    AC_DEFINE(HAVE_LIB_ZLIB,1,[zlib detected])
                    LIB_ZLIB_FOUND=true],
                    [])
-
 AM_CONDITIONAL(HAVE_LIB_ZLIB,[test "$LIB_ZLIB_FOUND" = true])
+
+dnl Checking for protoc
+AC_PATH_PROG(protoc,protoc)
+AM_CONDITIONAL(HAVE_PROG_PROTOC,[test -n "$protoc"])
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
-AC_CONFIG_FILES([Makefile src/Makefile include/Makefile tests/Makefile libosmscout.pc libosmscout-uninstalled.pc])
+AC_CONFIG_FILES([Makefile src/Makefile src/protobuf/Makefile include/Makefile tests/Makefile libosmscout.pc libosmscout-uninstalled.pc])
 AC_OUTPUT
 
