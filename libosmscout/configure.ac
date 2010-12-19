@@ -17,10 +17,7 @@ AC_PROG_INSTALL
 AC_ARG_WITH(protoc,
             AC_HELP_STRING([--with-protoc=PATH],
                            [Specify a specific path to protoc]),
-            [protoc=$with_protoc;
-             AC_MSG_NOTICE(Setting protoc to $protoc)],
-            [protoc=;
-             AC_MSG_NOTICE(protoc not set)])
+            [protoc=$with_protoc])
 
 AC_SUBST(protoc)
 AC_TYPE_SIZE_T
