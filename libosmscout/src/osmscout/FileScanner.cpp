@@ -97,6 +97,11 @@ namespace osmscout {
       file=fopen(filename.c_str(),"r+b");
     }
 
+    if (file==NULL) {
+      hasError=true;
+      return false;
+    }
+
     long size;
 
     if (fseek(file,0L,SEEK_END)!=0) {
