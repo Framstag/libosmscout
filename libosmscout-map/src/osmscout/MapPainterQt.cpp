@@ -30,7 +30,11 @@ namespace osmscout {
 
   MapPainterQt::MapPainterQt()
   {
-    // no code
+    sin.resize(360*10);
+
+    for (size_t i=0; i<sin.size(); i++) {
+      sin[i]=std::sin(M_PI/180*i/(sin.size()/360));
+    }
   }
 
   MapPainterQt::~MapPainterQt()
@@ -250,11 +254,11 @@ namespace osmscout {
     double b=style.GetTextB();
     double a=style.GetTextA();
 
-    QPen         pen;
-    QFont        font(GetFont(parameter,fontSize));
-    QFontMetrics metrics=QFontMetrics(font);
-    QString      string=QString::fromUtf8(text.c_str());
-    QRect        extents=metrics.boundingRect(string);
+    QPen          pen;
+    QFont         font(GetFont(parameter,fontSize));
+    QFontMetricsF metrics=QFontMetricsF(font,painter->device());
+    QString       string=QString::fromUtf8(text.c_str());
+    double        stringLength=metrics.width(string);
 
     pen.setColor(QColor::fromRgbF(r,g,b,a));
     painter->setPen(pen);
@@ -289,22 +293,23 @@ namespace osmscout {
       }
     }
 
-    if (path.length()<extents.width()) {
+    if (path.length()<stringLength) {
       // Text is longer than path to draw on
       return;
     }
 
-    qreal offset=(path.length()-extents.width())/2;
+    qreal offset=(path.length()-stringLength)/2;
+
+    QTransform tran;
 
     for (int i=0; i<string.size(); i++) {
       QPointF point=path.pointAtPercent(path.percentAtLength(offset));
       qreal angle=path.angleAtPercent(path.percentAtLength(offset));
 
-      qreal rad=-qreal(0.017453292519943295769)*angle; // PI/180
-
       // rotation matrix components
-      qreal sina=std::sin(rad);
-      qreal cosa=std::cos(rad);
+
+      qreal sina=sin[lround((360-angle)*10)%sin.size()];
+      qreal cosa=sin[lround((360-angle+90)*10)%sin.size()];
 
       // Rotation
       qreal newX=(cosa*point.x())-(sina*point.y());
@@ -317,10 +322,14 @@ namespace osmscout {
       // Getting the delta distance for the translation part of the transformation
       qreal deltaX=newX-point.x();
       qreal deltaY=newY-point.y();
-      // Applying rotation and translation.
-      QTransform tran(cosa,sina,-sina,cosa,-deltaX+deltaPenX,-deltaY-deltaPenY);
 
-      painter->setWorldTransform(tran);
+      // Applying rotation and translation.
+      tran.setMatrix(cosa,sina,0.0,
+                     -sina,cosa,0.0,
+                     -deltaX+deltaPenX,-deltaY-deltaPenY,1.0);
+
+      painter->setTransform(tran);
+
       painter->drawText(point,QString(string[i]));
 
       offset+=metrics.width(string[i]);

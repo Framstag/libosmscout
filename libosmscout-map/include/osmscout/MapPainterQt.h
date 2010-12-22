@@ -35,6 +35,7 @@ namespace osmscout {
     std::vector<QImage>    images;   //! vector of QImage for icons
     std::vector<QBrush>    patterns; //! vector of QBrush for fill patterns
     std::map<size_t,QFont> fonts;    //! Cached fonts
+    std::vector<double>    sin;      //! Lookup table for sin calculation
 
   private:
     QFont GetFont(const MapParameter& parameter,
