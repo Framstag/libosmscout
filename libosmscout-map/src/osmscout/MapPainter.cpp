@@ -159,7 +159,7 @@ namespace osmscout {
                                 const MapParameter& parameter,
                                 const std::vector<Point>& nodes)
   {
-    if (parameter.GetOptimizeWayNodes()) {
+    if (!parameter.GetOptimizeWayNodes()) {
       for (size_t i=0; i<nodes.size(); i++) {
         drawNode[i]=true;
         projection.GeoToPixel(nodes[i].lon,nodes[i].lat,
