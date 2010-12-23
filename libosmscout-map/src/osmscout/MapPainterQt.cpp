@@ -266,29 +266,37 @@ namespace osmscout {
 
     QPainterPath path;
 
-    double x,y;
+    TransformWay(projection,parameter,nodes);
 
     if (nodes[0].lon<nodes[nodes.size()-1].lon) {
+      bool start=true;
+
       for (size_t j=0; j<nodes.size(); j++) {
-        projection.GeoToPixel(nodes[j].lon,nodes[j].lat,x,y);
-        if (j==0) {
-          path.moveTo(x,y);
-        }
-        else {
-          path.lineTo(x,y);
+        if (drawNode[j]) {
+          if (start) {
+            path.moveTo(nodeX[j],nodeY[j]);
+            start=false;
+          }
+          else {
+            path.lineTo(nodeX[j],nodeY[j]);
+          }
         }
       }
     }
     else {
-      for (size_t j=0; j<nodes.size(); j++) {
-        projection.GeoToPixel(nodes[nodes.size()-j-1].lon,nodes[nodes.size()-j
-            -1].lat,x,y);
+      bool start=true;
 
-        if (j==0) {
-          path.moveTo(x,y);
-        }
-        else {
-          path.lineTo(x,y);
+      for (size_t j=0; j<nodes.size(); j++) {
+        if (drawNode[nodes.size()-j-1]) {
+          if (start) {
+            path.moveTo(nodeX[nodes.size()-j-1],
+                        nodeY[nodes.size()-j-1]);
+            start=false;
+          }
+          else {
+            path.lineTo(nodeX[nodes.size()-j-1],
+                        nodeY[nodes.size()-j-1]);
+          }
         }
       }
     }
