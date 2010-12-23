@@ -47,7 +47,7 @@ namespace osmscout {
       {
         return attributes;
       }
-    
+
       inline TypeId GetType() const
       {
         return attributes.GetType();
@@ -116,6 +116,16 @@ namespace osmscout {
     : type(typeIgnore)
     {
       // no code
+    }
+
+    inline Id GetId() const
+    {
+      return id;
+    }
+
+    inline TypeId GetType() const
+    {
+      return type;
     }
 
     inline bool IsArea() const

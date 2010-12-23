@@ -56,6 +56,11 @@ namespace osmscout {
       // no code
     }
 
+    inline Id GetId() const
+    {
+      return id;
+    }
+
     inline const SegmentAttributes& GetAttributes() const
     {
       return attributes;
