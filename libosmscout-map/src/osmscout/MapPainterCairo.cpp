@@ -712,7 +712,7 @@ namespace osmscout {
     cairo_paint(draw);
   }
 
-  void MapPainterCairo::DrawPath(LineStyle::Style style,
+  void MapPainterCairo::DrawPath(const LineStyle::Style& style,
                                  const Projection& projection,
                                  const MapParameter& parameter,
                                  double r,

@@ -265,7 +265,7 @@ namespace osmscout {
       Draw simple line with the given style,the given color, the given width
       and the given untransformed nodes.
      */
-    virtual void DrawPath(LineStyle::Style style,
+    virtual void DrawPath(const LineStyle::Style& style,
                           const Projection& projection,
                           const MapParameter& parameter,
                           double r,

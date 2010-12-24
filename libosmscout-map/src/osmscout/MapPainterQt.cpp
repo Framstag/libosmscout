@@ -397,7 +397,7 @@ namespace osmscout {
     }
   }
 
-  void MapPainterQt::DrawPath(LineStyle::Style style,
+  void MapPainterQt::DrawPath(const LineStyle::Style& style,
                               const Projection& projection,
                               const MapParameter& parameter,
                               double r,
