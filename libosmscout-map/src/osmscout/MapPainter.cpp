@@ -107,6 +107,59 @@ namespace osmscout {
     return projection.GeoIsIn(lonMin,latMin,lonMax,latMax);
   }
 
+  bool MapPainter::IsVisible(const Projection& projection,
+                             const std::vector<Point>& nodes,
+                             double pixelOffset) const
+  {
+    if (nodes.size()==0) {
+      return false;
+    }
+
+    // Bounding box
+    double lonMin=nodes[0].lon;
+    double lonMax=nodes[0].lon;
+    double latMin=nodes[0].lat;
+    double latMax=nodes[0].lat;
+
+    for (size_t i=1; i<nodes.size(); i++) {
+      lonMin=std::min(lonMin,nodes[i].lon);
+      lonMax=std::max(lonMax,nodes[i].lon);
+      latMin=std::min(latMin,nodes[i].lat);
+      latMax=std::max(latMax,nodes[i].lat);
+    }
+
+
+    double xMin;
+    double xMax;
+    double yMin;
+    double yMax;
+
+    if (!projection.GeoToPixel(lonMin,
+                               latMin,
+                               xMin,
+                               yMin)) {
+      return false;
+    }
+
+    if (!projection.GeoToPixel(lonMax,
+                               latMax,
+                               xMax,
+                               yMax)) {
+      return false;
+    }
+
+    xMin+=pixelOffset;
+    yMin+=pixelOffset;
+
+    xMax-=pixelOffset;
+    yMax-=pixelOffset;
+
+    return !(xMin>=projection.GetWidth() ||
+             yMin>=projection.GetHeight() ||
+             xMax<0 ||
+             yMax<0);
+  }
+
   void MapPainter::TransformArea(const Projection& projection,
                                  const MapParameter& parameter,
                                  const std::vector<Point>& nodes)
@@ -839,69 +892,62 @@ namespace osmscout {
     }
   }
 
-  void MapPainter::DrawWay(const StyleConfig& styleConfig,
-                           const Projection& projection,
+  void MapPainter::DrawWay(const Projection& projection,
                            const MapParameter& parameter,
-                           TypeId type,
+                           const LineStyle& style,
                            const SegmentAttributes& attributes,
                            const std::vector<Point>& nodes)
   {
-    const LineStyle *style=styleConfig.GetWayLineStyle(type);
-
-    if (style==NULL) {
-      return;
-    }
-
     double lineWidth=attributes.GetWidth();
 
     if (lineWidth==0) {
-      lineWidth=style->GetWidth();
+      lineWidth=style.GetWidth();
     }
 
-    lineWidth=std::max(style->GetMinPixel(),
+    lineWidth=std::max(style.GetMinPixel(),
                        lineWidth/projection.GetPixelSize());
 
-    bool outline=style->GetOutline()>0 &&
-                 lineWidth-2*style->GetOutline()>=parameter.GetOutlineMinWidth();
+    bool outline=style.GetOutline()>0 &&
+                 lineWidth-2*style.GetOutline()>=parameter.GetOutlineMinWidth();
 
-    if (style->GetOutline()>0 &&
+    if (style.GetOutline()>0 &&
         !outline &&
         !(attributes.IsBridge() &&
           projection.GetMagnification()>=magCity) &&
         !(attributes.IsTunnel() &&
           projection.GetMagnification()>=magCity)) {
       // Should draw outline, but resolution is too low
-      DrawPath(style->GetStyle(),
+      DrawPath(style.GetStyle(),
                projection,
                parameter,
-               style->GetAlternateR(),
-               style->GetAlternateG(),
-               style->GetAlternateB(),
-               style->GetAlternateA(),
+               style.GetAlternateR(),
+               style.GetAlternateG(),
+               style.GetAlternateB(),
+               style.GetAlternateA(),
                lineWidth,
                nodes);
     }
     else if (outline) {
       // Draw outline
-      DrawPath(style->GetStyle(),
+      DrawPath(style.GetStyle(),
                projection,
                parameter,
-               style->GetLineR(),
-               style->GetLineG(),
-               style->GetLineB(),
-               style->GetLineA(),
-               lineWidth-2*style->GetOutline(),
+               style.GetLineR(),
+               style.GetLineG(),
+               style.GetLineB(),
+               style.GetLineA(),
+               lineWidth-2*style.GetOutline(),
                nodes);
     }
     else {
       // Draw without outline
-      DrawPath(style->GetStyle(),
+      DrawPath(style.GetStyle(),
                projection,
                parameter,
-               style->GetLineR(),
-               style->GetLineG(),
-               style->GetLineB(),
-               style->GetLineA(),
+               style.GetLineR(),
+               style.GetLineG(),
+               style.GetLineB(),
+               style.GetLineA(),
                lineWidth,
                nodes);
     }
@@ -964,10 +1010,15 @@ namespace osmscout {
             continue;
           }
 
-          DrawWay(styleConfig,
-                  projection,
+          const LineStyle *style=styleConfig.GetWayLineStyle(way->GetType());
+
+          if (style==NULL) {
+            continue;
+          }
+
+          DrawWay(projection,
                   parameter,
-                  way->GetType(),
+                  *style,
                   way->GetAttributes(),
                   way->nodes);
         }
@@ -985,12 +1036,21 @@ namespace osmscout {
               continue;
             }
 
-            DrawWay(styleConfig,
-                    projection,
-                    parameter,
-                    type,
-                    relation->roles[m].GetAttributes(),
-                    relation->roles[m].nodes);
+            const LineStyle *style=styleConfig.GetWayLineStyle(type);
+
+            if (style==NULL) {
+              continue;
+            }
+
+            if (IsVisible(projection,
+                          relation->roles[m].nodes,
+                          style->GetWidth())) {
+              DrawWay(projection,
+                      parameter,
+                      *style,
+                      relation->roles[m].GetAttributes(),
+                      relation->roles[m].nodes);
+            }
           }
         }
       }
@@ -1070,11 +1130,15 @@ namespace osmscout {
               projection.GetMagnification()<=style->GetMaxMag()) {
 
             if (style->GetStyle()==LabelStyle::contour) {
-              DrawContourLabel(projection,
-                               parameter,
-                               *style,
-                               relation->roles[m].GetName(),
-                               relation->roles[m].nodes);
+              if (IsVisible(projection,
+                            relation->roles[m].nodes,
+                            style->GetSize())) {
+                DrawContourLabel(projection,
+                                 parameter,
+                                 *style,
+                                 relation->roles[m].GetName(),
+                                 relation->roles[m].nodes);
+              }
             }
             else {
               DrawTiledLabel(projection,
@@ -1095,11 +1159,15 @@ namespace osmscout {
               projection.GetMagnification()<=style->GetMaxMag()) {
 
             if (style->GetStyle()==LabelStyle::contour) {
-              DrawContourLabel(projection,
-                               parameter,
-                               *style,
-                               relation->roles[m].GetRefName(),
-                               relation->roles[m].nodes);
+              if (IsVisible(projection,
+                            relation->roles[m].nodes,
+                            style->GetSize())) {
+                DrawContourLabel(projection,
+                                 parameter,
+                                 *style,
+                                 relation->roles[m].GetRefName(),
+                                 relation->roles[m].nodes);
+              }
             }
             else {
               DrawTiledLabel(projection,
@@ -1129,13 +1197,21 @@ namespace osmscout {
         continue;
       }
 
-      DrawWay(styleConfig,
-              projection,
-              parameter,
-              way->GetType(),
-              way->GetAttributes(),
-              way->nodes);
+      const LineStyle *style=styleConfig.GetWayLineStyle(way->GetType());
 
+      if (style==NULL) {
+        continue;
+      }
+
+      if (IsVisible(projection,
+                    way->nodes,
+                    style->GetWidth())) {
+        DrawWay(projection,
+                parameter,
+                *style,
+                way->GetAttributes(),
+                way->nodes);
+      }
 
       //waysDrawnCount++;
 

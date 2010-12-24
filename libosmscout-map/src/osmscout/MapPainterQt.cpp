@@ -301,10 +301,6 @@ namespace osmscout {
       }
     }
 
-    if (!path.boundingRect().intersects(painter->window())) {
-      return;
-    }
-
     if (path.length()<stringLength) {
       // Text is longer than path to draw on
       return;

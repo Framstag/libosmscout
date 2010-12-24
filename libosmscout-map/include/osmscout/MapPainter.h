@@ -147,10 +147,9 @@ namespace osmscout {
       Draw the way using LineStyle for the given type, the given style modification
       attributes and the given path.
      */
-    void DrawWay(const StyleConfig& styleConfig,
-                 const Projection& projection,
+    void DrawWay(const Projection& projection,
                  const MapParameter& parameter,
-                 TypeId type,
+                 const LineStyle& style,
                  const SegmentAttributes& attributes,
                  const std::vector<Point>& nodes);
 
@@ -195,6 +194,10 @@ namespace osmscout {
     //@{
     bool IsVisible(const Projection& projection,
                    const std::vector<Point>& nodes) const;
+
+    bool IsVisible(const Projection& projection,
+                   const std::vector<Point>& nodes,
+                   double pixelOffset) const;
 
     void TransformArea(const Projection& projection,
                        const MapParameter& parameter,
