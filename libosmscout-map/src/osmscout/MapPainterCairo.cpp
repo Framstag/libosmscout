@@ -571,42 +571,53 @@ namespace osmscout {
     cairo_set_scaled_font(draw,font);
 
     double length=0;
-    double xo=0,yo=0;
-    double x=0,y=0;
+    double xo=0;
+    double yo=0;
+
+    TransformWay(projection,parameter,nodes);
 
     cairo_new_path(draw);
     if (nodes[0].lon<nodes[nodes.size()-1].lon) {
-      for (size_t j=0; j<nodes.size(); j++) {
-        xo=x;
-        yo=y;
+      bool start=true;
 
-        projection.GeoToPixel(nodes[j].lon,
-                              nodes[j].lat,
-                               x,y);
-        if (j==0) {
-          cairo_move_to(draw,x,y);
-        }
-        else {
-          cairo_line_to(draw,x,y);
-          length+=sqrt(pow(x-xo,2)+pow(y-yo,2));
+      for (size_t j=0; j<nodes.size(); j++) {
+        if (drawNode[j]) {
+          if (start) {
+            cairo_move_to(draw,nodeX[j],nodeY[j]);
+            start=false;
+          }
+          else {
+            cairo_line_to(draw,nodeX[j],nodeY[j]);
+            length+=sqrt(pow(nodeX[j]-xo,2)+
+                         pow(nodeY[j]-yo,2));
+          }
+
+          xo=nodeX[j];
+          yo=nodeY[j];
         }
       }
     }
     else {
+      bool start=true;
+
       for (size_t j=0; j<nodes.size(); j++) {
-        xo=x;
-        yo=y;
+        if (drawNode[nodes.size()-j-1]) {
+          if (start) {
+            cairo_move_to(draw,
+                          nodeX[nodes.size()-j-1],
+                          nodeY[nodes.size()-j-1]);
+            start=false;
+          }
+          else {
+            cairo_line_to(draw,
+                          nodeX[nodes.size()-j-1],
+                          nodeY[nodes.size()-j-1]);
+            length+=sqrt(pow(nodeX[nodes.size()-j-1]-xo,2)+
+                         pow(nodeY[nodes.size()-j-1]-yo,2));
+          }
 
-        projection.GeoToPixel(nodes[nodes.size()-j-1].lon,
-                              nodes[nodes.size()-j-1].lat,
-                               x,y);
-
-        if (j==0) {
-          cairo_move_to(draw,x,y);
-        }
-        else {
-          cairo_line_to(draw,x,y);
-          length+=sqrt(pow(x-xo,2)+pow(y-yo,2));
+          xo=nodeX[nodes.size()-j-1];
+          yo=nodeY[nodes.size()-j-1];
         }
       }
     }
