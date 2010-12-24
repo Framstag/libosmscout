@@ -483,33 +483,26 @@ namespace osmscout {
     painter->drawPolyline(polygon);
   }
 
-  void MapPainterQt::DrawWayOutline(const StyleConfig& styleConfig,
-                                    const Projection& projection,
+  void MapPainterQt::DrawWayOutline(const Projection& projection,
                                     const MapParameter& parameter,
-                                    TypeId type,
+                                    const LineStyle& style,
                                     const SegmentAttributes& attributes,
                                     const std::vector<Point>& nodes)
   {
-    const LineStyle *style=styleConfig.GetWayLineStyle(type);
-
-    if (style==NULL) {
-      return;
-    }
-
     double lineWidth=attributes.GetWidth();
 
     if (lineWidth==0) {
-      lineWidth=style->GetWidth();
+      lineWidth=style.GetWidth();
     }
 
     lineWidth=lineWidth/projection.GetPixelSize();
 
-    if (lineWidth<style->GetMinPixel()) {
-      lineWidth=style->GetMinPixel();
+    if (lineWidth<style.GetMinPixel()) {
+      lineWidth=style.GetMinPixel();
     }
 
-    bool outline=style->GetOutline()>0 &&
-                 lineWidth-2*style->GetOutline()>=parameter.GetOutlineMinWidth();
+    bool outline=style.GetOutline()>0 &&
+                 lineWidth-2*style.GetOutline()>=parameter.GetOutlineMinWidth();
 
     if (!(attributes.IsBridge() &&
           projection.GetMagnification()>=magCity) &&
@@ -544,10 +537,10 @@ namespace osmscout {
     }
     else {
       pen.setStyle(Qt::SolidLine);
-      pen.setColor(QColor::fromRgbF(style->GetOutlineR(),
-                                    style->GetOutlineG(),
-                                    style->GetOutlineB(),
-                                    style->GetOutlineA()));
+      pen.setColor(QColor::fromRgbF(style.GetOutlineR(),
+                                    style.GetOutlineG(),
+                                    style.GetOutlineB(),
+                                    style.GetOutlineA()));
     }
 
     pen.setCapStyle(Qt::FlatCap);

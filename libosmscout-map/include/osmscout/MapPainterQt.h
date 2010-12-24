@@ -76,10 +76,9 @@ namespace osmscout {
                   double width,
                   const std::vector<Point>& nodes);
 
-    void DrawWayOutline(const StyleConfig& styleConfig,
-                        const Projection& projection,
+    void DrawWayOutline(const Projection& projection,
                         const MapParameter& parameter,
-                        TypeId type,
+                        const LineStyle& style,
                         const SegmentAttributes& attributes,
                         const std::vector<Point>& nodes);
 

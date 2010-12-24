@@ -842,30 +842,23 @@ namespace osmscout {
     cairo_fill(draw);
   }
 
-  void MapPainterCairo::DrawWayOutline(const StyleConfig& styleConfig,
-                                       const Projection& projection,
+  void MapPainterCairo::DrawWayOutline(const Projection& projection,
                                        const MapParameter& parameter,
-                                       TypeId type,
+                                       const LineStyle& style,
                                        const SegmentAttributes& attributes,
                                        const std::vector<Point>& nodes)
   {
-    const LineStyle *style=styleConfig.GetWayLineStyle(type);
-
-    if (style==NULL) {
-      return;
-    }
-
     double lineWidth=attributes.GetWidth();
 
     if (lineWidth==0) {
-      lineWidth=style->GetWidth();
+      lineWidth=style.GetWidth();
     }
 
-    lineWidth=std::max(style->GetMinPixel(),
+    lineWidth=std::max(style.GetMinPixel(),
                        lineWidth/projection.GetPixelSize());
 
-    bool outline=style->GetOutline()>0 &&
-                 lineWidth-2*style->GetOutline()>=parameter.GetOutlineMinWidth();
+    bool outline=style.GetOutline()>0 &&
+                 lineWidth-2*style.GetOutline()>=parameter.GetOutlineMinWidth();
 
     if (!(attributes.IsBridge() &&
           projection.GetMagnification()>=magCity) &&
@@ -898,10 +891,10 @@ namespace osmscout {
     else {
       cairo_set_dash(draw,NULL,0,0);
       cairo_set_source_rgba(draw,
-                            style->GetOutlineR(),
-                            style->GetOutlineG(),
-                            style->GetOutlineB(),
-                            style->GetOutlineA());
+                            style.GetOutlineR(),
+                            style.GetOutlineG(),
+                            style.GetOutlineB(),
+                            style.GetOutlineA());
     }
 
     cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
@@ -941,10 +934,10 @@ namespace osmscout {
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
       cairo_set_dash(draw,NULL,0,0);
       cairo_set_source_rgba(draw,
-                            style->GetOutlineR(),
-                            style->GetOutlineG(),
-                            style->GetOutlineB(),
-                            style->GetOutlineA());
+                            style.GetOutlineR(),
+                            style.GetOutlineG(),
+                            style.GetOutlineB(),
+                            style.GetOutlineA());
       cairo_set_line_width(draw,lineWidth);
 
       cairo_move_to(draw,nodeX[firstNode],nodeY[firstNode]);
@@ -957,10 +950,10 @@ namespace osmscout {
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
       cairo_set_dash(draw,NULL,0,0);
       cairo_set_source_rgba(draw,
-                            style->GetOutlineR(),
-                            style->GetOutlineG(),
-                            style->GetOutlineB(),
-                            style->GetOutlineA());
+                            style.GetOutlineR(),
+                            style.GetOutlineG(),
+                            style.GetOutlineB(),
+                            style.GetOutlineA());
       cairo_set_line_width(draw,lineWidth);
 
       cairo_move_to(draw,nodeX[lastNode],nodeY[lastNode]);

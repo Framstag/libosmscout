@@ -280,10 +280,9 @@ namespace osmscout {
       style modification attributes and the given path. Also draw sensfull
       line end given that the path has joints with other pathes or not.
      */
-    virtual void DrawWayOutline(const StyleConfig& styleConfig,
-                                const Projection& projection,
+    virtual void DrawWayOutline(const Projection& projection,
                                 const MapParameter& parameter,
-                                TypeId type,
+                                const LineStyle& style,
                                 const SegmentAttributes& attributes,
                                 const std::vector<Point>& nodes) = 0;
 

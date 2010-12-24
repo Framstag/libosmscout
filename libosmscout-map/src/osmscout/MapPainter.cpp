@@ -971,10 +971,15 @@ namespace osmscout {
             continue;
           }
 
-          DrawWayOutline(styleConfig,
-                         projection,
+          const LineStyle *style=styleConfig.GetWayLineStyle(way->GetType());
+
+          if (style==NULL) {
+            continue;
+          }
+
+          DrawWayOutline(projection,
                          parameter,
-                         way->GetType(),
+                         *style,
                          way->GetAttributes(),
                          way->nodes);
         }
@@ -991,12 +996,21 @@ namespace osmscout {
               continue;
             }
 
-            DrawWayOutline(styleConfig,
-                           projection,
-                           parameter,
-                           type,
-                           relation->roles[m].GetAttributes(),
-                           relation->roles[m].nodes);
+            const LineStyle *style=styleConfig.GetWayLineStyle(type);
+
+            if (style==NULL) {
+              continue;
+            }
+
+            if (IsVisible(projection,
+                          relation->roles[m].nodes,
+                          style->GetWidth())) {
+              DrawWayOutline(projection,
+                             parameter,
+                             *style,
+                             relation->roles[m].GetAttributes(),
+                             relation->roles[m].nodes);
+            }
           }
         }
       }
