@@ -128,21 +128,20 @@ namespace osmscout {
       latMax=std::max(latMax,nodes[i].lat);
     }
 
-
     double xMin;
     double xMax;
     double yMin;
     double yMax;
 
     if (!projection.GeoToPixel(lonMin,
-                               latMin,
+                               latMax,
                                xMin,
                                yMin)) {
       return false;
     }
 
     if (!projection.GeoToPixel(lonMax,
-                               latMax,
+                               latMin,
                                xMax,
                                yMax)) {
       return false;
@@ -215,8 +214,10 @@ namespace osmscout {
     if (!parameter.GetOptimizeWayNodes()) {
       for (size_t i=0; i<nodes.size(); i++) {
         drawNode[i]=true;
-        projection.GeoToPixel(nodes[i].lon,nodes[i].lat,
-                              nodeX[i],nodeY[i]);
+        projection.GeoToPixel(nodes[i].lon,
+                              nodes[i].lat,
+                              nodeX[i],
+                              nodeY[i]);
       }
     }
     else {
@@ -698,6 +699,7 @@ namespace osmscout {
              relation!=data.relationAreas.end();
              ++relation) {
           bool drawn=false;
+
           for (size_t m=0; m<relation->roles.size(); m++) {
             if (relation->roles[m].role=="0") {
               drawn=true;
@@ -710,10 +712,10 @@ namespace osmscout {
                        relation->roles[m].GetAttributes(),
                        relation->roles[m].nodes);
             }
+          }
 
-            if (!drawn) {
-              std::cout << " Something is wrong with area relation " << relation->id << std::endl;
-            }
+          if (!drawn) {
+            std::cout << " Something is wrong with area relation " << relation->id << std::endl;
           }
         }
       }
