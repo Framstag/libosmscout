@@ -74,20 +74,22 @@ namespace osmscout {
                   double b,
                   double a,
                   double width,
+                  CapStyle startCap,
+                  CapStyle endCap,
                   const std::vector<Point>& nodes);
 
-    void DrawWayOutline(const Projection& projection,
-                        const MapParameter& parameter,
-                        const LineStyle& style,
-                        const SegmentAttributes& attributes,
-                        const std::vector<Point>& nodes);
-
-    void DrawArea(const StyleConfig& styleConfig,
-                  const Projection& projection,
+    void DrawArea(const Projection& projection,
                   const MapParameter& parameter,
                   TypeId type,
-                  int layer,
-                  const SegmentAttributes& attributes,
+                  const FillStyle& fillStyle,
+                  const LineStyle* lineStyle,
+                  const std::vector<Point>& nodes);
+
+    void DrawArea(const Projection& projection,
+                  const MapParameter& parameter,
+                  TypeId type,
+                  const PatternStyle& patternStyle,
+                  const LineStyle* lineStyle,
                   const std::vector<Point>& nodes);
 
     void DrawArea(const FillStyle& style,
@@ -97,9 +99,10 @@ namespace osmscout {
                   double width,
                   double height);
 
-    void SetPen(const LineStyle* style, double lineWidth);
+    void SetPen(const LineStyle& style,
+                double lineWidth);
     void SetBrush();
-    void SetBrush(const FillStyle* fillStyle);
+    void SetBrush(const FillStyle& fillStyle);
 
   public:
     MapPainterQt();

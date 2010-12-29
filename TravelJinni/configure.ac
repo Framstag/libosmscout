@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.56)
 AC_INIT([TravelJinni],
         [0.1],
-        [Send bugreports to <tim@teulings.org>],
+        [tim@teulings.org],
         [TravelJinni])
 
 AC_CONFIG_SRCDIR(src/Viewer.cpp)

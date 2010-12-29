@@ -11,6 +11,7 @@ TravelJinni_SOURCES = DatabaseTask.h \
                       Viewer.cpp
 
 TravelJinni_CXXFLAGS=-I. \
+                      -DAPP_DATADIR=\"$(pkgdatadir)\" \
                       $(LIBILLUMINATION_CFLAGS) \
                       $(LIBOSMSCOUT_CFLAGS) \
                       $(LIBOSMSCOUTMAP_CFLAGS) \

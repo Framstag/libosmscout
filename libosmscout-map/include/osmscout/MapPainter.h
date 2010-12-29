@@ -94,6 +94,13 @@ namespace osmscout {
 
   class OSMSCOUT_MAP_API MapPainter
   {
+  public:
+    enum CapStyle
+    {
+      capButt,
+      capRound
+    };
+
   protected:
     /**
        Scratch variables for path optimization algortihm
@@ -152,6 +159,17 @@ namespace osmscout {
                  const LineStyle& style,
                  const SegmentAttributes& attributes,
                  const std::vector<Point>& nodes);
+
+    /**
+      Draw the outline of the way using LineStyle for the given type, the given
+      style modification attributes and the given path. Also draw sensfull
+      line end given that the path has joints with other pathes or not.
+     */
+    void DrawWayOutline(const Projection& projection,
+                        const MapParameter& parameter,
+                        const LineStyle& style,
+                        const SegmentAttributes& attributes,
+                        const std::vector<Point>& nodes);
 
     void DrawWays(const StyleConfig& styleConfig,
                   const Projection& projection,
@@ -230,6 +248,14 @@ namespace osmscout {
                          IconStyle& style)= 0;
 
     /**
+      Return true, if the pattern in the PatternStyle is available and can be drawn.
+      If this method returns false, possibly a fallback (e.g. using a also defined FillStyle)
+      will be chosen.
+     */
+    virtual bool HasPattern(const StyleConfig& styleConfig,
+                            PatternStyle& style) = 0;
+
+    /**
       Draw the given text at the given pixel coordinate in a style defined
       by the given LabelStyle.
      */
@@ -273,30 +299,30 @@ namespace osmscout {
                           double b,
                           double a,
                           double width,
+                          CapStyle startCap,
+                          CapStyle endCap,
                           const std::vector<Point>& nodes) = 0;
 
     /**
-      Draw the outline of the way using LineStyle for the given type, the given
-      style modification attributes and the given path. Also draw sensfull
-      line end given that the path has joints with other pathes or not.
+      Draw the given area using the given FillStyle and (optionally) the given LineStyle
+      for the area outline.
      */
-    virtual void DrawWayOutline(const Projection& projection,
-                                const MapParameter& parameter,
-                                const LineStyle& style,
-                                const SegmentAttributes& attributes,
-                                const std::vector<Point>& nodes) = 0;
-
-    /**
-      Draw the given area, evaluating Fill- and PatternStyle as returned by the
-      StyleConfig for the given type. Take into account that Fill- and
-      PatternStyle have the layer as passed to the function.
-     */
-    virtual void DrawArea(const StyleConfig& styleConfig,
-                          const Projection& projection,
+    virtual void DrawArea(const Projection& projection,
                           const MapParameter& parameter,
                           TypeId type,
-                          int layer,
-                          const SegmentAttributes& attributes,
+                          const FillStyle& fillStyle,
+                          const LineStyle* lineStyle,
+                          const std::vector<Point>& nodes) = 0;
+
+    /**
+      Draw the given area using the given PatternStyle and (optionally) the given LineStyle
+      for the area outline.
+     */
+    virtual void DrawArea(const Projection& projection,
+                          const MapParameter& parameter,
+                          TypeId type,
+                          const PatternStyle& patternStyle,
+                          const LineStyle* lineStyle,
                           const std::vector<Point>& nodes) = 0;
 
     /**

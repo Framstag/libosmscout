@@ -720,11 +720,22 @@ namespace osmscout {
                                  double b,
                                  double a,
                                  double width,
+                                 CapStyle startCap,
+                                 CapStyle endCap,
                                  const std::vector<Point>& nodes)
   {
     cairo_set_source_rgba(draw,r,g,b,a);
 
     cairo_set_line_width(draw,width);
+
+    if (startCap==capRound &&
+        endCap==capRound &&
+        style==LineStyle::normal) {
+      cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
+    }
+    else {
+      cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
+    }
 
     switch (style) {
     case LineStyle::none:
@@ -732,173 +743,18 @@ namespace osmscout {
       assert(false);
       break;
     case LineStyle::normal:
-      cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
       cairo_set_dash(draw,NULL,0,0);
       break;
     case LineStyle::longDash:
-      cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
       cairo_set_dash(draw,longDash,2,0);
       break;
     case LineStyle::dotted:
-      cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
       cairo_set_dash(draw,dotted,2,0);
       break;
     case LineStyle::lineDot:
-      cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
       cairo_set_dash(draw,lineDot,4,0);
       break;
     }
-
-    TransformWay(projection,parameter,nodes);
-
-    bool start=true;
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
-        if (start) {
-          cairo_new_path(draw);
-          cairo_move_to(draw,nodeX[i],nodeY[i]);
-          start=false;
-        }
-        else {
-          cairo_line_to(draw,nodeX[i],nodeY[i]);
-        }
-
-        //nodesDrawnCount++;
-      }
-      else {
-        //nodesOutCount++;
-      }
-    }
-    //nodesAllCount+=way->nodes.size();
-
-    cairo_stroke(draw);
-  }
-
-  void MapPainterCairo::FillRegion(const std::vector<Point>& nodes,
-                                   const Projection& projection,
-                                   const MapParameter& parameter,
-                                   const FillStyle& style)
-  {
-    cairo_set_source_rgba(draw,
-                          style.GetFillR(),
-                          style.GetFillG(),
-                          style.GetFillB(),
-                          1);
-    cairo_set_line_width(draw,1);
-
-    TransformArea(projection,parameter,nodes);
-
-    bool start=true;
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
-        if (start) {
-          cairo_new_path(draw);
-          cairo_move_to(draw,nodeX[i],nodeY[i]);
-          start=false;
-        }
-        else {
-          cairo_line_to(draw,nodeX[i],nodeY[i]);
-        }
-        //nodesDrawnCount++;
-      }
-
-      //nodesAllCount++;
-    }
-
-    cairo_fill(draw);
-  }
-
-  void MapPainterCairo::FillRegion(const std::vector<Point>& nodes,
-                                   const Projection& projection,
-                                   const MapParameter& parameter,
-                                   PatternStyle& style)
-  {
-    assert(style.GetId()>0);
-    assert(style.GetId()!=std::numeric_limits<size_t>::max());
-    assert(style.GetId()<=images.size());
-    assert(images[style.GetId()-1]!=NULL);
-
-    cairo_set_source(draw,patterns[style.GetId()-1]);
-
-    TransformArea(projection,parameter,nodes);
-
-    bool start=true;
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
-        if (start) {
-          cairo_new_path(draw);
-          cairo_move_to(draw,nodeX[i],nodeY[i]);
-          start=false;
-        }
-        else {
-          cairo_line_to(draw,nodeX[i],nodeY[i]);
-        }
-        //nodesDrawnCount++;
-      }
-
-      //nodesAllCount++;
-    }
-
-    cairo_fill(draw);
-  }
-
-  void MapPainterCairo::DrawWayOutline(const Projection& projection,
-                                       const MapParameter& parameter,
-                                       const LineStyle& style,
-                                       const SegmentAttributes& attributes,
-                                       const std::vector<Point>& nodes)
-  {
-    double lineWidth=attributes.GetWidth();
-
-    if (lineWidth==0) {
-      lineWidth=style.GetWidth();
-    }
-
-    lineWidth=std::max(style.GetMinPixel(),
-                       lineWidth/projection.GetPixelSize());
-
-    bool outline=style.GetOutline()>0 &&
-                 lineWidth-2*style.GetOutline()>=parameter.GetOutlineMinWidth();
-
-    if (!(attributes.IsBridge() &&
-          projection.GetMagnification()>=magCity) &&
-        !(attributes.IsTunnel() &&
-          projection.GetMagnification()>=magCity) &&
-        !outline) {
-      return;
-    }
-
-    if (attributes.IsBridge() &&
-        projection.GetMagnification()>=magCity) {
-      cairo_set_dash(draw,NULL,0,0);
-      cairo_set_source_rgba(draw,0.0,0.0,0.0,1.0);
-    }
-    else if (attributes.IsTunnel() &&
-             projection.GetMagnification()>=magCity) {
-      double tunnel[2];
-
-      tunnel[0]=7+lineWidth;
-      tunnel[1]=7+lineWidth;
-
-      cairo_set_dash(draw,tunnel,2,0);
-      if (projection.GetMagnification()>=10000) {
-        cairo_set_source_rgba(draw,0.75,0.75,0.75,1.0);
-      }
-      else {
-        cairo_set_source_rgba(draw,0.5,0.5,0.5,1.0);
-      }
-    }
-    else {
-      cairo_set_dash(draw,NULL,0,0);
-      cairo_set_source_rgba(draw,
-                            style.GetOutlineR(),
-                            style.GetOutlineG(),
-                            style.GetOutlineB(),
-                            style.GetOutlineA());
-    }
-
-    cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
-    cairo_set_line_width(draw,lineWidth);
 
     TransformWay(projection,parameter,nodes);
 
@@ -929,32 +785,26 @@ namespace osmscout {
 
     cairo_stroke(draw);
 
-    if (!attributes.StartIsJoint()) {
+    if (style==LineStyle::normal &&
+      startCap==capRound &&
+      endCap!=capRound) {
       cairo_new_path(draw);
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
       cairo_set_dash(draw,NULL,0,0);
-      cairo_set_source_rgba(draw,
-                            style.GetOutlineR(),
-                            style.GetOutlineG(),
-                            style.GetOutlineB(),
-                            style.GetOutlineA());
-      cairo_set_line_width(draw,lineWidth);
+      cairo_set_line_width(draw,width);
 
       cairo_move_to(draw,nodeX[firstNode],nodeY[firstNode]);
       cairo_line_to(draw,nodeX[firstNode],nodeY[firstNode]);
       cairo_stroke(draw);
     }
 
-    if (!attributes.EndIsJoint()) {
+    if (style==LineStyle::normal &&
+      endCap==capRound &&
+      startCap!=capRound) {
       cairo_new_path(draw);
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
       cairo_set_dash(draw,NULL,0,0);
-      cairo_set_source_rgba(draw,
-                            style.GetOutlineR(),
-                            style.GetOutlineG(),
-                            style.GetOutlineB(),
-                            style.GetOutlineA());
-      cairo_set_line_width(draw,lineWidth);
+      cairo_set_line_width(draw,width);
 
       cairo_move_to(draw,nodeX[lastNode],nodeY[lastNode]);
       cairo_line_to(draw,nodeX[lastNode],nodeY[lastNode]);
@@ -962,53 +812,104 @@ namespace osmscout {
     }
   }
 
-  void MapPainterCairo::DrawArea(const StyleConfig& styleConfig,
-                                 const Projection& projection,
+  void MapPainterCairo::DrawArea(const Projection& projection,
                                  const MapParameter& parameter,
                                  TypeId type,
-                                 int layer,
-                                 const SegmentAttributes& attributes,
+                                 const FillStyle& fillStyle,
+                                 const LineStyle* lineStyle,
                                  const std::vector<Point>& nodes)
   {
-    PatternStyle    *patternStyle=styleConfig.GetAreaPatternStyle(type);
-    const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(type,
-                                                            attributes.IsBuilding());
-    bool            hasPattern=patternStyle!=NULL &&
-                               patternStyle->GetLayer()==layer &&
-                               projection.GetMagnification()>=patternStyle->GetMinMag();
-    bool            hasFill=fillStyle!=NULL &&
-                            fillStyle->GetLayer()==layer;
+    cairo_set_source_rgba(draw,
+                          fillStyle.GetFillR(),
+                          fillStyle.GetFillG(),
+                          fillStyle.GetFillB(),
+                          1);
+    cairo_set_line_width(draw,1);
 
-    if (hasPattern) {
-      hasPattern=HasPattern(styleConfig,*patternStyle);
+    TransformArea(projection,parameter,nodes);
+
+    bool start=true;
+    for (size_t i=0; i<nodes.size(); i++) {
+      if (drawNode[i]) {
+        if (start) {
+          cairo_new_path(draw);
+          cairo_move_to(draw,nodeX[i],nodeY[i]);
+          start=false;
+        }
+        else {
+          cairo_line_to(draw,nodeX[i],nodeY[i]);
+        }
+        //nodesDrawnCount++;
+      }
+
+      //nodesAllCount++;
     }
 
-    if (hasPattern) {
-      FillRegion(nodes,projection,parameter,*patternStyle);
+    cairo_fill(draw);
+
+    if (lineStyle!=NULL) {
+      DrawPath(lineStyle->GetStyle(),
+               projection,
+               parameter,
+               lineStyle->GetLineR(),
+               lineStyle->GetLineG(),
+               lineStyle->GetLineB(),
+               lineStyle->GetLineA(),
+               borderWidth[(size_t)type],
+               capRound,
+               capRound,
+               nodes);
     }
-    else if (hasFill) {
-      FillRegion(nodes,projection,parameter,*fillStyle);
+  }
+
+  void MapPainterCairo::DrawArea(const Projection& projection,
+                                 const MapParameter& parameter,
+                                 TypeId type,
+                                 const PatternStyle& patternStyle,
+                                 const LineStyle* lineStyle,
+                                 const std::vector<Point>& nodes)
+  {
+    assert(patternStyle.GetId()>0);
+    assert(patternStyle.GetId()!=std::numeric_limits<size_t>::max());
+    assert(patternStyle.GetId()<=images.size());
+    assert(images[patternStyle.GetId()-1]!=NULL);
+
+    cairo_set_source(draw,patterns[patternStyle.GetId()-1]);
+
+    TransformArea(projection,parameter,nodes);
+
+    bool start=true;
+    for (size_t i=0; i<nodes.size(); i++) {
+      if (drawNode[i]) {
+        if (start) {
+          cairo_new_path(draw);
+          cairo_move_to(draw,nodeX[i],nodeY[i]);
+          start=false;
+        }
+        else {
+          cairo_line_to(draw,nodeX[i],nodeY[i]);
+        }
+        //nodesDrawnCount++;
+      }
+
+      //nodesAllCount++;
     }
 
-    //
-    // Outline
-    //
+    cairo_fill(draw);
 
-    const LineStyle *lineStyle=styleConfig.GetAreaBorderStyle(type);
-
-    if (lineStyle==NULL) {
-      return;
+    if (lineStyle!=NULL) {
+      DrawPath(lineStyle->GetStyle(),
+               projection,
+               parameter,
+               lineStyle->GetLineR(),
+               lineStyle->GetLineG(),
+               lineStyle->GetLineB(),
+               lineStyle->GetLineA(),
+               borderWidth[(size_t)type],
+               capRound,
+               capRound,
+               nodes);
     }
-
-    DrawPath(lineStyle->GetStyle(),
-             projection,
-             parameter,
-             lineStyle->GetLineR(),
-             lineStyle->GetLineG(),
-             lineStyle->GetLineB(),
-             lineStyle->GetLineA(),
-             borderWidth[(size_t)type],
-             nodes);
   }
 
   void MapPainterCairo::DrawArea(const FillStyle& style,

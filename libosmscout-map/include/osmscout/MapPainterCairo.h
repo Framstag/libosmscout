@@ -76,30 +76,22 @@ namespace osmscout {
                   const MapParameter& parameter,
                   double r, double g, double b, double a,
                   double width,
+                  CapStyle startCap,
+                  CapStyle endCap,
                   const std::vector<Point>& nodes);
 
-    void FillRegion(const std::vector<Point>& nodes,
-                    const Projection& projection,
-                    const MapParameter& parameter,
-                    const FillStyle& style);
-
-    void FillRegion(const std::vector<Point>& nodes,
-                    const Projection& projection,
-                    const MapParameter& parameter,
-                    PatternStyle& style);
-
-    void DrawWayOutline(const Projection& projection,
-                        const MapParameter& parameter,
-                        const LineStyle& style,
-                        const SegmentAttributes& attributes,
-                        const std::vector<Point>& nodes);
-
-    void DrawArea(const StyleConfig& styleConfig,
-                  const Projection& projection,
+    void DrawArea(const Projection& projection,
                   const MapParameter& parameter,
                   TypeId type,
-                  int layer,
-                  const SegmentAttributes& attributes,
+                  const FillStyle& fillStyle,
+                  const LineStyle* lineStyle,
+                  const std::vector<Point>& nodes);
+
+    void DrawArea(const Projection& projection,
+                  const MapParameter& parameter,
+                  TypeId type,
+                  const PatternStyle& patternStyle,
+                  const LineStyle* lineStyle,
                   const std::vector<Point>& nodes);
 
     void DrawArea(const FillStyle& style,

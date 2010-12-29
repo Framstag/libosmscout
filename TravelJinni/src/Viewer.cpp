@@ -32,6 +32,8 @@
 #include <Lum/Dlg/About.h>
 #include <Lum/Dlg/Msg.h>
 
+#include <Lum/Manager/FileSystem.h>
+
 #include <Lum/Model/String.h>
 #include <Lum/Model/Table.h>
 
@@ -562,12 +564,12 @@ class Main : public Lum::GUIApplication<MainDialog>
 public:
   bool Initialize()
   {
+#if defined(APP_DATADIR)
+    Lum::Manager::FileSystem::Instance()->SetApplicationDataDir(Lum::Base::StringToWString(APP_DATADIR));
+#endif
+
     database=new osmscout::Database();
     jobFinishedAction=new Lum::Model::Action();
-
-#if defined(APP_DATADIR)
-    Lum::Base::Path::SetApplicationDataDir(Lum::Base::StringToWString(APP_DATADIR));
-#endif
 
     info.SetProgram(Lum::Base::StringToWString(PACKAGE_NAME));
     info.SetVersion(Lum::Base::StringToWString(PACKAGE_VERSION));

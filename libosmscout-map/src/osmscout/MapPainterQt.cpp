@@ -405,14 +405,203 @@ namespace osmscout {
                               double b,
                               double a,
                               double width,
+                              CapStyle startCap,
+                              CapStyle endCap,
                               const std::vector<Point>& nodes)
   {
     QPen pen;
 
     pen.setColor(QColor::fromRgbF(r,g,b,a));
     pen.setWidthF(width);
+    pen.setJoinStyle(Qt::RoundJoin);
+
+    if (startCap==capRound &&
+        endCap==capRound &&
+        style==LineStyle::normal) {
+      pen.setCapStyle(Qt::RoundCap);
+    }
+    else {
+      pen.setCapStyle(Qt::FlatCap);
+    }
 
     switch (style) {
+    case LineStyle::none:
+      // way should not be visible in this case!
+      assert(false);
+      break;
+    case LineStyle::normal:
+      pen.setStyle(Qt::SolidLine);
+      break;
+    case LineStyle::longDash:
+      pen.setStyle(Qt::DashLine);
+      break;
+    case LineStyle::dotted:
+      pen.setStyle(Qt::DotLine);
+      break;
+    case LineStyle::lineDot:
+      pen.setStyle(Qt::DashDotLine);
+      break;
+    }
+
+    TransformWay(projection,parameter,nodes);
+
+    size_t firstNode=0;
+    size_t lastNode=0;
+
+/*
+    painter->setPen(pen);
+    size_t last=0;
+    bool start=true;
+    for (size_t i=0; i<nodes.size(); i++) {
+      if (drawNode[i]) {
+        if (start) {
+          start=false;
+        }
+        else {
+          painter->drawLine(QPointF(nodeX[last],nodeY[last]),QPointF(nodeX[i],nodeY[i]));
+        }
+
+        last=i;
+      }
+    }*/
+
+    QPainterPath path;
+
+    bool start=true;
+    for (size_t i=0; i<nodes.size(); i++) {
+      if (drawNode[i]) {
+        if (start) {
+          path.moveTo(nodeX[i],nodeY[i]);
+          start=false;
+          firstNode=i;
+          lastNode=i;
+        }
+        else {
+          path.lineTo(nodeX[i],nodeY[i]);
+          lastNode=i;
+        }
+      }
+    }
+
+    painter->strokePath(path,pen);
+/*
+    QPolygonF polygon;
+    for (size_t i=0; i<nodes.size(); i++) {
+      if (drawNode[i]) {
+        polygon << QPointF(nodeX[i],nodeY[i]);
+      }
+    }
+
+    painter->setPen(pen);
+    painter->drawPolyline(polygon);*/
+
+    if (style==LineStyle::normal &&
+      startCap==capRound &&
+      endCap!=capRound) {
+      painter->setBrush(QBrush(QColor::fromRgbF(r,g,b,a)));
+
+      painter->drawEllipse(QPointF(nodeX[firstNode],
+                                   nodeY[firstNode]),
+                                   width/2,width/2);
+    }
+
+    if (style==LineStyle::normal &&
+      endCap==capRound &&
+      startCap!=capRound) {
+      painter->setBrush(QBrush(QColor::fromRgbF(r,g,b,a)));
+
+      painter->drawEllipse(QPointF(nodeX[lastNode],
+                                   nodeY[lastNode]),
+                                   width/2,width/2);
+    }
+  }
+
+  void MapPainterQt::DrawArea(const Projection& projection,
+                              const MapParameter& parameter,
+                              TypeId type,
+                              const FillStyle& fillStyle,
+                              const LineStyle* lineStyle,
+                              const std::vector<Point>& nodes)
+  {
+    TransformArea(projection,parameter,nodes);
+
+    QPolygonF polygon;
+
+    for (size_t i=0; i<nodes.size(); i++) {
+      if (drawNode[i]) {
+        polygon << QPointF(nodeX[i],nodeY[i]);
+      }
+    }
+
+    if (lineStyle!=NULL) {
+      SetPen(*lineStyle,
+             borderWidth[(size_t)type]);
+    }
+    else {
+      painter->setPen(Qt::NoPen);
+    }
+
+    SetBrush(fillStyle);
+
+    painter->drawPolygon(polygon);
+  }
+
+  void MapPainterQt::DrawArea(const Projection& projection,
+                              const MapParameter& parameter,
+                              TypeId type,
+                              const PatternStyle& patternStyle,
+                              const LineStyle* lineStyle,
+                              const std::vector<Point>& nodes)
+  {
+    TransformArea(projection,parameter,nodes);
+
+    QPolygonF polygon;
+
+    for (size_t i=0; i<nodes.size(); i++) {
+      if (drawNode[i]) {
+        polygon << QPointF(nodeX[i],nodeY[i]);
+      }
+    }
+
+    if (lineStyle!=NULL) {
+      SetPen(*lineStyle,
+             borderWidth[(size_t)type]);
+    }
+    else {
+      painter->setPen(Qt::NoPen);
+    }
+
+    painter->setBrush(patterns[patternStyle.GetId()-1]);
+
+    painter->drawPolygon(polygon);
+  }
+
+  void MapPainterQt::DrawArea(const FillStyle& style,
+                              const MapParameter& parameter,
+                              double x,
+                              double y,
+                              double width,
+                              double height)
+  {
+    painter->fillRect(QRectF(x,y,width,height),
+                      QBrush(QColor::fromRgbF(style.GetFillR(),
+                                              style.GetFillG(),
+                                              style.GetFillB(),
+                                              1)));
+  }
+
+  void MapPainterQt::SetPen(const LineStyle& style,
+                            double lineWidth)
+  {
+    QPen pen;
+
+    pen.setColor(QColor::fromRgbF(style.GetLineR(),
+                                  style.GetLineG(),
+                                  style.GetLineB(),
+                                  style.GetLineA()));
+    pen.setWidthF(lineWidth);
+
+    switch (style.GetStyle()) {
     case LineStyle::none:
       // way should not be visible in this case!
       assert(false);
@@ -435,294 +624,7 @@ namespace osmscout {
       break;
     }
 
-
-    TransformWay(projection,parameter,nodes);
-/*
     painter->setPen(pen);
-    size_t last=0;
-    bool start=true;
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
-        if (start) {
-          start=false;
-        }
-        else {
-          painter->drawLine(QPointF(nodeX[last],nodeY[last]),QPointF(nodeX[i],nodeY[i]));
-        }
-
-        last=i;
-      }
-    }*/
-/*
-    QPainterPath path;
-
-    bool start=true;
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
-        if (start) {
-          path.moveTo(nodeX[i],nodeY[i]);
-          start=false;
-        }
-        else {
-          path.lineTo(nodeX[i],nodeY[i]);
-        }
-      }
-    }
-
-    painter->strokePath(path,pen);*/
-
-    QPolygonF polygon;
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
-        polygon << QPointF(nodeX[i],nodeY[i]);
-      }
-    }
-
-    painter->setPen(pen);
-    painter->setBrush(Qt::NoBrush);
-    painter->drawPolyline(polygon);
-  }
-
-  void MapPainterQt::DrawWayOutline(const Projection& projection,
-                                    const MapParameter& parameter,
-                                    const LineStyle& style,
-                                    const SegmentAttributes& attributes,
-                                    const std::vector<Point>& nodes)
-  {
-    double lineWidth=attributes.GetWidth();
-
-    if (lineWidth==0) {
-      lineWidth=style.GetWidth();
-    }
-
-    lineWidth=lineWidth/projection.GetPixelSize();
-
-    if (lineWidth<style.GetMinPixel()) {
-      lineWidth=style.GetMinPixel();
-    }
-
-    bool outline=style.GetOutline()>0 &&
-                 lineWidth-2*style.GetOutline()>=parameter.GetOutlineMinWidth();
-
-    if (!(attributes.IsBridge() &&
-          projection.GetMagnification()>=magCity) &&
-        !(attributes.IsTunnel() &&
-          projection.GetMagnification()>=magCity) &&
-        !outline) {
-      return;
-    }
-
-    QPen pen;
-
-    if (attributes.IsBridge() &&
-        projection.GetMagnification()>=magCity) {
-
-      pen.setColor(QColor::fromRgbF(0.0,0.0,0.0,1.0));
-      pen.setStyle(Qt::SolidLine);
-    }
-    else if (attributes.IsTunnel() &&
-             projection.GetMagnification()>=magCity) {
-      double tunnel[2];
-
-      tunnel[0]=7+lineWidth;
-      tunnel[1]=7+lineWidth;
-
-      if (projection.GetMagnification()>=10000) {
-        pen.setColor(QColor::fromRgbF(0.75,0.75,0.75,1.0));
-      }
-      else {
-        pen.setColor(QColor::fromRgbF(0.5,0.5,0.5,1.0));
-      }
-      pen.setStyle(Qt::DashLine);
-    }
-    else {
-      pen.setStyle(Qt::SolidLine);
-      pen.setColor(QColor::fromRgbF(style.GetOutlineR(),
-                                    style.GetOutlineG(),
-                                    style.GetOutlineB(),
-                                    style.GetOutlineA()));
-    }
-
-    pen.setCapStyle(Qt::FlatCap);
-    pen.setWidthF(lineWidth);
-
-    TransformWay(projection,parameter,nodes);
-/*
-    size_t last=0;
-    bool start=true;
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
-        if (start) {
-          start=false;
-        }
-        else {
-          painter->drawLine(QPointF(nodeX[last],nodeY[last]),QPointF(nodeX[i],nodeY[i]));
-        }
-
-        last=i;
-      }
-    }*/
-/*
-    QPainterPath path;
-
-    bool start=true;
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
-        if (start) {
-          path.moveTo(nodeX[i],nodeY[i]);
-          start=false;
-        }
-        else {
-          path.lineTo(nodeX[i],nodeY[i]);
-        }
-      }
-    }
-
-    painter->strokePath(path,pen);*/
-    QPolygonF polygon;
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
-        polygon << QPointF(nodeX[i],nodeY[i]);
-      }
-    }
-
-    painter->setPen(pen);
-    painter->setBrush(Qt::NoBrush);
-    painter->drawPolyline(polygon);
-
-    /*
-    if (!attributes.StartIsJoint()) {
-      cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
-      cairo_set_dash(draw,NULL,0,0);
-      cairo_set_source_rgba(draw,
-                            style->GetOutlineR(),
-                            style->GetOutlineG(),
-                            style->GetOutlineB(),
-                            style->GetOutlineA());
-      cairo_set_line_width(draw,lineWidth);
-
-      cairo_move_to(draw,nodeX[0],nodeY[0]);
-      cairo_line_to(draw,nodeX[0],nodeY[0]);
-      cairo_stroke(draw);
-    }
-
-    if (!attributes.EndIsJoint()) {
-      cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
-      cairo_set_dash(draw,NULL,0,0);
-      cairo_set_source_rgba(draw,
-                            style->GetOutlineR(),
-                            style->GetOutlineG(),
-                            style->GetOutlineB(),
-                            style->GetOutlineA());
-      cairo_set_line_width(draw,lineWidth);
-
-      cairo_move_to(draw,nodeX[nodes.size()-1],nodeY[nodes.size()-1]);
-      cairo_line_to(draw,nodeX[nodes.size()-1],nodeY[nodes.size()-1]);
-      cairo_stroke(draw);
-    }*/
-  }
-
-  void MapPainterQt::DrawArea(const StyleConfig& styleConfig,
-                              const Projection& projection,
-                              const MapParameter& parameter,
-                              TypeId type,
-                              int layer,
-                              const SegmentAttributes& attributes,
-                              const std::vector<Point>& nodes)
-  {
-    PatternStyle    *patternStyle=styleConfig.GetAreaPatternStyle(type);
-    const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(type,
-                                                            attributes.IsBuilding());
-
-    bool               hasPattern=patternStyle!=NULL &&
-                                  patternStyle->GetLayer()==layer &&
-                                  projection.GetMagnification()>=patternStyle->GetMinMag();
-    bool               hasFill=fillStyle!=NULL &&
-                               fillStyle->GetLayer()==layer;
-
-    TransformArea(projection,parameter,nodes);
-
-    QPolygonF polygon;
-
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
-        polygon << QPointF(nodeX[i],nodeY[i]);
-      }
-    }
-
-    SetPen(styleConfig.GetAreaBorderStyle(type),
-           borderWidth[(size_t)type]);
-
-    if (hasPattern) {
-      hasPattern=HasPattern(styleConfig,*patternStyle);
-    }
-
-    if (hasPattern) {
-      painter->setBrush(patterns[patternStyle->GetId()-1]);
-    }
-    else if (hasFill) {
-      SetBrush(fillStyle);
-    }
-    else {
-      SetBrush();
-    }
-
-    painter->drawPolygon(polygon);
-  }
-
-  void MapPainterQt::DrawArea(const FillStyle& style,
-                              const MapParameter& parameter,
-                              double x,
-                              double y,
-                              double width,
-                              double height)
-  {
-    painter->fillRect(QRectF(x,y,width,height),
-                      QBrush(QColor::fromRgbF(style.GetFillR(),
-                                              style.GetFillG(),
-                                              style.GetFillB(),
-                                              1)));
-  }
-
-  void MapPainterQt::SetPen(const LineStyle* style, double lineWidth)
-  {
-    if (style==NULL) {
-      painter->setPen(Qt::NoPen);
-    }
-    else {
-      QPen pen;
-
-      pen.setColor(QColor::fromRgbF(style->GetLineR(),
-                                    style->GetLineG(),
-                                    style->GetLineB(),
-                                    style->GetLineA()));
-      pen.setWidthF(lineWidth);
-
-      switch (style->GetStyle()) {
-      case LineStyle::none:
-        // way should not be visible in this case!
-        assert(false);
-        break;
-      case LineStyle::normal:
-        pen.setStyle(Qt::SolidLine);
-        pen.setCapStyle(Qt::RoundCap);
-        break;
-      case LineStyle::longDash:
-        pen.setStyle(Qt::DashLine);
-        pen.setCapStyle(Qt::FlatCap);
-        break;
-      case LineStyle::dotted:
-        pen.setStyle(Qt::DotLine);
-        pen.setCapStyle(Qt::FlatCap);
-        break;
-      case LineStyle::lineDot:
-        pen.setStyle(Qt::DashDotLine);
-        pen.setCapStyle(Qt::FlatCap);
-        break;
-      }
-
-      painter->setPen(pen);
-    }
   }
 
   void MapPainterQt::SetBrush()
@@ -730,11 +632,11 @@ namespace osmscout {
     painter->setBrush(Qt::NoBrush);
   }
 
-  void MapPainterQt::SetBrush(const FillStyle* fillStyle)
+  void MapPainterQt::SetBrush(const FillStyle& fillStyle)
   {
-    painter->setBrush(QBrush(QColor::fromRgbF(fillStyle->GetFillR(),
-                                              fillStyle->GetFillG(),
-                                              fillStyle->GetFillB(),
+    painter->setBrush(QBrush(QColor::fromRgbF(fillStyle.GetFillR(),
+                                              fillStyle.GetFillG(),
+                                              fillStyle.GetFillB(),
                                               1)));
   }
 

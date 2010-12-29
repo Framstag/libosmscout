@@ -684,13 +684,37 @@ namespace osmscout {
         for (std::vector<Way>::const_iterator area=data.areas.begin();
              area!=data.areas.end();
              ++area) {
-          DrawArea(styleConfig,
-                   projection,
-                   parameter,
-                   area->GetType(),
-                   layer,
-                   area->GetAttributes(),
-                   area->nodes);
+          PatternStyle    *patternStyle=styleConfig.GetAreaPatternStyle(area->GetType());
+          const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(area->GetType(),
+                                                                  area->GetAttributes().IsBuilding());
+          const LineStyle *lineStyle=styleConfig.GetAreaBorderStyle(area->GetType());
+
+          bool            hasPattern=patternStyle!=NULL &&
+                                     patternStyle->GetLayer()==layer &&
+                                     projection.GetMagnification()>=patternStyle->GetMinMag();
+          bool            hasFill=fillStyle!=NULL &&
+                                  fillStyle->GetLayer()==layer;
+
+          if (hasPattern) {
+            hasPattern=HasPattern(styleConfig,*patternStyle);
+          }
+
+          if (hasPattern) {
+            DrawArea(projection,
+                     parameter,
+                     area->GetType(),
+                     *patternStyle,
+                     lineStyle,
+                     area->nodes);
+          }
+          else if (hasFill) {
+            DrawArea(projection,
+                     parameter,
+                     area->GetType(),
+                     *fillStyle,
+                     lineStyle,
+                     area->nodes);
+          }
         }
       }
 
@@ -702,20 +726,44 @@ namespace osmscout {
 
           for (size_t m=0; m<relation->roles.size(); m++) {
             if (relation->roles[m].role=="0") {
-              drawn=true;
+              PatternStyle    *patternStyle=styleConfig.GetAreaPatternStyle(relation->roles[m].GetType());
+              const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(relation->roles[m].GetType(),
+                                                                      relation->roles[m].GetAttributes().IsBuilding());
+              const LineStyle *lineStyle=styleConfig.GetAreaBorderStyle(relation->roles[m].GetType());
 
-              DrawArea(styleConfig,
-                       projection,
-                       parameter,
-                       relation->roles[m].GetType(),
-                       layer,
-                       relation->roles[m].GetAttributes(),
-                       relation->roles[m].nodes);
+              bool            hasPattern=patternStyle!=NULL &&
+                                         patternStyle->GetLayer()==layer &&
+                                         projection.GetMagnification()>=patternStyle->GetMinMag();
+              bool            hasFill=fillStyle!=NULL &&
+                                      fillStyle->GetLayer()==layer;
+
+              if (hasPattern) {
+                hasPattern=HasPattern(styleConfig,*patternStyle);
+              }
+
+              if (hasPattern) {
+                DrawArea(projection,
+                         parameter,
+                         relation->roles[m].GetType(),
+                         *patternStyle,
+                         lineStyle,
+                         relation->roles[m].nodes);
+                drawn=true;
+              }
+              else if (hasFill) {
+                DrawArea(projection,
+                         parameter,
+                         relation->roles[m].GetType(),
+                         *fillStyle,
+                         lineStyle,
+                         relation->roles[m].nodes);
+                drawn=true;
+              }
+
+              if (!drawn) {
+                std::cout << " Something is wrong with area relation " << relation->id << " " << relation->GetType() << std::endl;
+              }
             }
-          }
-
-          if (!drawn) {
-            std::cout << " Something is wrong with area relation " << relation->id << std::endl;
           }
         }
       }
@@ -919,6 +967,7 @@ namespace osmscout {
         !(attributes.IsTunnel() &&
           projection.GetMagnification()>=magCity)) {
       // Should draw outline, but resolution is too low
+      // Draw line with alternate color
       DrawPath(style.GetStyle(),
                projection,
                parameter,
@@ -927,10 +976,13 @@ namespace osmscout {
                style.GetAlternateB(),
                style.GetAlternateA(),
                lineWidth,
+               capRound,
+               capRound,
                nodes);
     }
     else if (outline) {
       // Draw outline
+      // Draw line with normal color but reduced with
       DrawPath(style.GetStyle(),
                projection,
                parameter,
@@ -939,10 +991,13 @@ namespace osmscout {
                style.GetLineB(),
                style.GetLineA(),
                lineWidth-2*style.GetOutline(),
+               capRound,
+               capRound,
                nodes);
     }
     else {
       // Draw without outline
+      // Draw line with normal color and normal width
       DrawPath(style.GetStyle(),
                projection,
                parameter,
@@ -951,9 +1006,89 @@ namespace osmscout {
                style.GetLineB(),
                style.GetLineA(),
                lineWidth,
+               capRound,
+               capRound,
                nodes);
     }
   }
+
+  void MapPainter::DrawWayOutline(const Projection& projection,
+                                  const MapParameter& parameter,
+                                  const LineStyle& style,
+                                  const SegmentAttributes& attributes,
+                                  const std::vector<Point>& nodes)
+  {
+    double lineWidth=attributes.GetWidth();
+    double r;
+    double g;
+    double b;
+    double a;
+    LineStyle::Style lineStyle=LineStyle::normal;
+
+    if (lineWidth==0) {
+      lineWidth=style.GetWidth();
+    }
+
+    lineWidth=std::max(style.GetMinPixel(),
+                       lineWidth/projection.GetPixelSize());
+
+    bool outline=style.GetOutline()>0 &&
+                 lineWidth-2*style.GetOutline()>=parameter.GetOutlineMinWidth();
+
+    if (!(attributes.IsBridge() &&
+          projection.GetMagnification()>=magCity) &&
+        !(attributes.IsTunnel() &&
+          projection.GetMagnification()>=magCity) &&
+        !outline) {
+      return;
+    }
+
+    if (attributes.IsBridge() &&
+        projection.GetMagnification()>=magCity) {
+      r=0.0;
+      g=0.0;
+      b=0.0;
+      a=1.0;
+    }
+    else if (attributes.IsTunnel() &&
+             projection.GetMagnification()>=magCity) {
+      lineStyle=LineStyle::longDash;
+      /*
+      double tunnel[2];
+
+      tunnel[0]=7+lineWidth;
+      tunnel[1]=7+lineWidth;*/
+
+      if (projection.GetMagnification()>=10000) {
+        r=0.75;
+        g=0.75;
+        b=0.75;
+        a=1.0;
+      }
+      else {
+        r=0.5;
+        g=0.5;
+        b=0.5;
+        a=1.0;
+      }
+    }
+    else {
+      r=style.GetOutlineR();
+      g=style.GetOutlineG();
+      b=style.GetOutlineB();
+      a=style.GetOutlineA();
+    }
+
+    DrawPath(lineStyle,
+             projection,
+             parameter,
+             r,g,b,a,
+             lineWidth,
+             attributes.StartIsJoint() ? capButt : capRound,
+             attributes.EndIsJoint() ? capButt : capRound,
+             nodes);
+  }
+
 
   void MapPainter::DrawWays(const StyleConfig& styleConfig,
                             const Projection& projection,
