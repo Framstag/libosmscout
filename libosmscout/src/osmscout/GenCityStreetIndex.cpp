@@ -262,41 +262,54 @@ namespace osmscout {
     area.locations.push_back(location);
   }
 
-  static void AddWayToArea(Area& area,
-                           const Way& way,
-                           double minlon,
-                           double minlat,
-                           double maxlon,
-                           double maxlat)
-  {
-    bool inserted=false;
+  /**
+    Add the given object (currently only a way) to
+    the hioerachical area index.
 
+    If the method returns true, the objects was completely contained
+    by the passed area (or one of its sub areas), else it returns false.
+    If it returns false, not all points of the object were covered by the area
+    and the parent area should add the object, too.
+
+    The code is designed to minimize the number of "point in area" checks, it assume that
+    if one point of an object is in a area it is very likely that all points of the object
+    are in the area.
+    */
+  static bool AddObjectToArea(Area& area,
+                              const Way& way,
+                              double minlon,
+                              double minlat,
+                              double maxlon,
+                              double maxlat)
+  {
     for (std::list<Area>::iterator a=area.areas.begin();
          a!=area.areas.end();
          a++) {
+      // Fast check, if the object is in the bounds of the area
       if (!(maxlon<a->minlon) &&
           !(minlon>a->maxlon) &&
           !(maxlat<a->minlat) &&
           !(minlat>a->maxlat)) {
-        bool match=false;
-
-        for (size_t n=0; n<way.nodes.size(); n++) {
-          if (IsPointInArea(way.nodes[n],a->area)) {
-            match=true;
-            break;
-          }
-        }
+        // Check if one point is in the area
+        bool match=IsPointInArea(way.nodes[0],a->area);
 
         if (match) {
-          AddWayToArea(*a,way,minlon,minlat,maxlon,maxlat);
-          inserted=true;
+          bool completeMatch=AddObjectToArea(*a,way,minlon,minlat,maxlon,maxlat);
+
+          if (completeMatch) {
+            // We are done, the object is completely enclosed by one of our sub areas
+            return true;
+          }
         }
       }
     }
 
-    if (!inserted) {
-      area.ways[way.GetName()].push_back(way.id);
-    }
+    // We partly contain it, add it to the area but continue
+    area.ways[way.GetName()].push_back(way.id);
+
+    bool completeMatch=IsAreaInArea(way.nodes,area.area);
+
+    return completeMatch;
   }
 
   static void AddNodeToArea(Area& area,
@@ -932,7 +945,7 @@ namespace osmscout {
             maxlat=std::max(maxlat,way.nodes[n].lat);
           }
 
-          AddWayToArea(rootArea,way,minlon,minlat,maxlon,maxlat);
+          AddObjectToArea(rootArea,way,minlon,minlat,maxlon,maxlat);
         }
       }
     }
