@@ -761,7 +761,7 @@ namespace osmscout {
               }
 
               if (!drawn) {
-                std::cout << " Something is wrong with area relation " << relation->id << " " << relation->GetType() << std::endl;
+                //std::cout << " Something is wrong with area relation " << relation->id << " " << relation->GetType() << std::endl;
               }
             }
           }
