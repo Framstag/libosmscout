@@ -41,8 +41,12 @@ namespace osmscout {
     size_t      startStep;             //! Starting step for import
     size_t      endStep;               //! End step for mport
     size_t      nodesLoadSize;         //! Maximum number of nodes loaded into memory in one go
-    size_t      waysLoadSize;          //! Maximum number of ways loaded into memory in one go
     size_t      nodeIndexIntervalSize; //! The size of the index interval of the noduse index
+    size_t      nodeDataCacheSize;     //! Size of the node data cache
+    size_t      nodeIndexCacheSize;    //! Size of the node index cache
+    size_t      waysLoadSize;          //! Maximum number of ways loaded into memory in one go
+    size_t      wayDataCacheSize;      //! Size of the way data cache
+    size_t      wayIndexCacheSize;     //! Size of the way index cache
     size_t      numericIndexLevelSize; //! The size of one index page in one index level for numerical indexes
     size_t      areaAreaIndexMaxMag;
     size_t      areaAreaRelIndexMaxMag;
@@ -57,8 +61,12 @@ namespace osmscout {
     size_t GetStartStep() const;
     size_t GetEndStep() const;
     size_t GetNodesLoadSize() const;
-    size_t GetWaysLoadSize() const;
     size_t GetNodeIndexIntervalSize() const;
+    size_t GetNodeDataCacheSize() const;
+    size_t GetNodeIndexCacheSize() const;
+    size_t GetWaysLoadSize() const;
+    size_t GetWayDataCacheSize() const;
+    size_t GetWayIndexCacheSize() const;
     size_t GetNumericIndexLevelSize() const;
     size_t GetAreaAreaIndexMaxMag() const;
     size_t GetAreaAreaRelIndexMaxMag() const;
@@ -70,8 +78,12 @@ namespace osmscout {
     void SetStartStep(size_t startStep);
     void SetSteps(size_t startStep, size_t endStep);
     void SetNodesLoadSize(size_t nodesLoadSize);
-    void SetWaysLoadSize(size_t waysLoadSize);
     void SetNodeIndexIntervalSize(size_t nodeIndexIntervalSize);
+    void SetNodeDataCacheSize(size_t nodeDataCacheSize);
+    void SetNodeIndexCacheSize(size_t nodeIndexCacheSize);
+    void SetWaysLoadSize(size_t waysLoadSize);
+    void SetWayDataCacheSize(size_t wayDataCacheSize);
+    void SetWayIndexCacheSize(size_t wayIndexCacheSize);
   };
 
   /**

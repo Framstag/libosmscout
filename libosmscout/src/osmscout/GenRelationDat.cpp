@@ -523,12 +523,12 @@ namespace osmscout {
 
     DataFile<RawNode> nodeDataFile("rawnodes.dat",
                                    "rawnode.idx",
-                                   10,
-                                   500000);
+                                   parameter.GetNodeDataCacheSize(),
+                                   parameter.GetNodeIndexCacheSize());
     DataFile<RawWay>  wayDataFile("rawways.dat",
                                   "rawway.idx",
-                                  10,
-                                  500000);
+                                   parameter.GetWayDataCacheSize(),
+                                   parameter.GetWayIndexCacheSize());
 
     if (!nodeDataFile.Open(".")) {
       std::cerr << "Cannot open raw nodes data files!" << std::endl;

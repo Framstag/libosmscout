@@ -28,12 +28,16 @@
 void DumpHelp(osmscout::ImportParameter& parameter)
 {
   std::cout << "Import -h -d -s <start step> -e <end step> [openstreetmapdata.osm|openstreetmapdata.osm.pbf]" << std::endl;
-  std::cout << " -h                       show this help" << std::endl;
-  std::cout << " -d                       show debug output" << std::endl;
-  std::cout << " -s <start step>          set starting step" << std::endl;
-  std::cout << " -s <end step>            set final step" << std::endl;
-  std::cout << " --nodesLoadSize <number> number of nodes to load in one step (default: " << parameter.GetNodesLoadSize() << ")" << std::endl;
-  std::cout << " --waysLoadSize <number>  number of ways to load in one step (default: " << parameter.GetWaysLoadSize() << ")" << std::endl;
+  std::cout << " -h                            show this help" << std::endl;
+  std::cout << " -d                            show debug output" << std::endl;
+  std::cout << " -s <start step>               set starting step" << std::endl;
+  std::cout << " -s <end step>                 set final step" << std::endl;
+  std::cout << " --nodesLoadSize <number>      number of nodes to load in one step (default: " << parameter.GetNodesLoadSize() << ")" << std::endl;
+  std::cout << " --nodeDataCacheSize <number>  node data cache size (default: " << parameter.GetNodeDataCacheSize() << ")" << std::endl;
+  std::cout << " --nodeIndexCacheSize <number> node index cache size (default: " << parameter.GetNodeIndexCacheSize() << ")" << std::endl;
+  std::cout << " --waysLoadSize <number>       number of ways to load in one step (default: " << parameter.GetWaysLoadSize() << ")" << std::endl;
+  std::cout << " --wayDataCacheSize <number>   way data cache size (default: " << parameter.GetWayDataCacheSize() << ")" << std::endl;
+  std::cout << " --wayIndexCacheSize <number>  way index cache size (default: " << parameter.GetWayIndexCacheSize() << ")" << std::endl;
 }
 
 int main(int argc, char* argv[])
@@ -44,7 +48,11 @@ int main(int argc, char* argv[])
   size_t                    startStep=parameter.GetStartStep();
   size_t                    endStep=parameter.GetEndStep();
   size_t                    nodesLoadSize=parameter.GetNodesLoadSize();
+  size_t                    nodeDataCacheSize=parameter.GetNodeDataCacheSize();
+  size_t                    nodeIndexCacheSize=parameter.GetNodeIndexCacheSize();
   size_t                    waysLoadSize=parameter.GetWaysLoadSize();
+  size_t                    wayDataCacheSize=parameter.GetWayDataCacheSize();
+  size_t                    wayIndexCacheSize=parameter.GetWayIndexCacheSize();
   std::string               mapfile;
 
   // Simple way to analyse command line parameters, but enough for now...
@@ -99,6 +107,34 @@ int main(int argc, char* argv[])
         parameterError=true;
       }
     }
+    else if (strcmp(argv[i],"--nodeDataCacheSize")==0) {
+      i++;
+
+      if (i<argc) {
+        if (!osmscout::StringToNumber(argv[i],nodeDataCacheSize)) {
+          std::cerr << "Cannot parse nodeDataCacheSize '" << argv[i] << "'" << std::endl;
+          parameterError=true;
+        }
+      }
+      else {
+        std::cerr << "Missing parameter after --nodeDataCacheSize option" << std::endl;
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--nodeIndexCacheSize")==0) {
+      i++;
+
+      if (i<argc) {
+        if (!osmscout::StringToNumber(argv[i],nodeIndexCacheSize)) {
+          std::cerr << "Cannot parse nodeIndexCacheSize '" << argv[i] << "'" << std::endl;
+          parameterError=true;
+        }
+      }
+      else {
+        std::cerr << "Missing parameter after --nodeIndexCacheSize option" << std::endl;
+        parameterError=true;
+      }
+    }
     else if (strcmp(argv[i],"--waysLoadSize")==0) {
       i++;
 
@@ -110,6 +146,34 @@ int main(int argc, char* argv[])
       }
       else {
         std::cerr << "Missing parameter after --waysLoadSize option" << std::endl;
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--wayDataCacheSize")==0) {
+      i++;
+
+      if (i<argc) {
+        if (!osmscout::StringToNumber(argv[i],wayDataCacheSize)) {
+          std::cerr << "Cannot parse wayDataCacheSize '" << argv[i] << "'" << std::endl;
+          parameterError=true;
+        }
+      }
+      else {
+        std::cerr << "Missing parameter after --wayDataCacheSize option" << std::endl;
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--wayIndexCacheSize")==0) {
+      i++;
+
+      if (i<argc) {
+        if (!osmscout::StringToNumber(argv[i],wayIndexCacheSize)) {
+          std::cerr << "Cannot parse wayIndexCacheSize '" << argv[i] << "'" << std::endl;
+          parameterError=true;
+        }
+      }
+      else {
+        std::cerr << "Missing parameter after --wayIndexCacheSize option" << std::endl;
         parameterError=true;
       }
     }
@@ -137,7 +201,30 @@ int main(int argc, char* argv[])
   parameter.SetMapfile(mapfile);
   parameter.SetSteps(startStep,endStep);
   parameter.SetNodesLoadSize(nodesLoadSize);
+  parameter.SetNodeDataCacheSize(nodeDataCacheSize);
+  parameter.SetNodeIndexCacheSize(nodeIndexCacheSize);
   parameter.SetWaysLoadSize(waysLoadSize);
+  parameter.SetWayDataCacheSize(wayDataCacheSize);
+  parameter.SetWayIndexCacheSize(wayIndexCacheSize);
+
+  progress.SetStep("Dump parameter");
+  progress.Info(std::string("Mapfile: ")+parameter.GetMapfile());
+  progress.Info(std::string("Steps: ")+
+                osmscout::NumberToString(parameter.GetStartStep())+
+                " - "+
+                osmscout::NumberToString(parameter.GetEndStep()));
+  progress.Info(std::string("NodesLoadSize: ")+
+                osmscout::NumberToString(parameter.GetNodesLoadSize()));
+  progress.Info(std::string("NodeDataCacheSize: ")+
+                osmscout::NumberToString(parameter.GetNodeDataCacheSize()));
+  progress.Info(std::string("NodeIndexCacheSize: ")+
+                osmscout::NumberToString(parameter.GetNodeIndexCacheSize()));
+  progress.Info(std::string("WaysLoadSize: ")+
+                osmscout::NumberToString(parameter.GetWaysLoadSize()));
+  progress.Info(std::string("WayDataCacheSize: ")+
+                osmscout::NumberToString(parameter.GetWayDataCacheSize()));
+  progress.Info(std::string("WayIndexCacheSize: ")+
+                osmscout::NumberToString(parameter.GetWayIndexCacheSize()));
 
   if (osmscout::Import(parameter,progress)) {
     std::cout << "Import OK!" << std::endl;

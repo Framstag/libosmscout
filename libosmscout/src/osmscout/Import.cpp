@@ -57,8 +57,12 @@ namespace osmscout {
    : startStep(defaultStartStep),
      endStep(defaultEndStep),
      nodesLoadSize(10000000),
-     waysLoadSize(1000000),
      nodeIndexIntervalSize(50),
+     nodeDataCacheSize(10),
+     nodeIndexCacheSize(60000000),
+     waysLoadSize(1000000),
+     wayDataCacheSize(10),
+     wayIndexCacheSize(10000000),
      numericIndexLevelSize(1024),
      areaAreaIndexMaxMag(18),
      areaAreaRelIndexMaxMag(18),
@@ -89,14 +93,34 @@ namespace osmscout {
     return nodesLoadSize;
   }
 
+  size_t ImportParameter::GetNodeIndexIntervalSize() const
+  {
+    return nodeIndexIntervalSize;
+  }
+
+  size_t ImportParameter::GetNodeDataCacheSize() const
+  {
+    return nodeDataCacheSize;
+  }
+
+  size_t ImportParameter::GetNodeIndexCacheSize() const
+  {
+    return nodeIndexCacheSize;
+  }
+
   size_t ImportParameter::GetWaysLoadSize() const
   {
     return waysLoadSize;
   }
 
-  size_t ImportParameter::GetNodeIndexIntervalSize() const
+  size_t ImportParameter::GetWayDataCacheSize() const
   {
-    return nodeIndexIntervalSize;
+    return wayDataCacheSize;
+  }
+
+  size_t ImportParameter::GetWayIndexCacheSize() const
+  {
+    return wayIndexCacheSize;
   }
 
   size_t ImportParameter::GetNumericIndexLevelSize() const
@@ -151,14 +175,34 @@ namespace osmscout {
     this->nodesLoadSize=nodesLoadSize;
   }
 
+  void ImportParameter::SetNodeIndexIntervalSize(size_t nodeIndexIntervalSize)
+  {
+    this->nodeIndexIntervalSize=nodeIndexIntervalSize;
+  }
+
+  void ImportParameter::SetNodeDataCacheSize(size_t nodeDataCacheSize)
+  {
+    this->nodeDataCacheSize=nodeDataCacheSize;
+  }
+
+  void ImportParameter::SetNodeIndexCacheSize(size_t nodeIndexCacheSize)
+  {
+    this->nodeIndexCacheSize=nodeIndexCacheSize;
+  }
+
   void ImportParameter::SetWaysLoadSize(size_t waysLoadSize)
   {
     this->waysLoadSize=waysLoadSize;
   }
 
-  void ImportParameter::SetNodeIndexIntervalSize(size_t nodeIndexIntervalSize)
+  void ImportParameter::SetWayDataCacheSize(size_t wayDataCacheSize)
   {
-    this->nodeIndexIntervalSize=nodeIndexIntervalSize;
+    this->wayDataCacheSize=wayDataCacheSize;
+  }
+
+  void ImportParameter::SetWayIndexCacheSize(size_t wayIndexCacheSize)
+  {
+    this->wayIndexCacheSize=wayIndexCacheSize;
   }
 
   bool ExecuteModules(std::list<ImportModule*>& modules,
