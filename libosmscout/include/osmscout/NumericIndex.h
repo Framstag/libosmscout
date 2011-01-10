@@ -113,6 +113,8 @@ namespace osmscout {
     uint32_t    entries;
     FileOffset  lastLevelPageStart;
 
+    std::cout << "Index " << filepart << ":" << std::endl;
+
     filename=path+"/"+filepart;
 
     if (!scanner.Open(filename)) {
@@ -142,7 +144,7 @@ namespace osmscout {
     Id         sio=0;
     FileOffset poo=0;
 
-    //std::cout << levelEntries << " entries in first level" << std::endl;
+    std::cout << entries << " entries to index, cach size " << cacheSize << ", " << levelEntries << " index entries in first level" << std::endl;
 
     root.reserve(levelEntries);
 
@@ -165,28 +167,28 @@ namespace osmscout {
       root.push_back(entry);
     }
 
-    unsigned long originalCacheSize=cacheSize;
-    unsigned long levelCacheSize=levelSize;
+    unsigned long currentCacheSize=cacheSize;
+    unsigned long currentLevelSize=levelEntries;
     for (size_t i=0; i<levels; i++) {
-      unsigned long resultingCacheSize=levelCacheSize;
+      unsigned long resultingCacheSize=currentLevelSize;
 
-      if (originalCacheSize==0) {
+      if (currentCacheSize==0) {
         resultingCacheSize=1;
       }
-      else if (levelCacheSize>originalCacheSize) {
-        resultingCacheSize=originalCacheSize;
-        originalCacheSize=0;
+      else if (currentLevelSize>currentCacheSize) {
+        resultingCacheSize=currentCacheSize;
+        currentCacheSize=0;
       }
       else {
-        resultingCacheSize=levelCacheSize;
-        originalCacheSize-=levelCacheSize;
+        resultingCacheSize=currentLevelSize;
+        currentCacheSize-=currentLevelSize;
       }
 
-      std::cout << "Setting cache size for level " << i+1 << " to " << resultingCacheSize << std::endl;
+      std::cout << "Setting cache size for level " << i+1 << " with " << currentLevelSize << " entries to " << resultingCacheSize << std::endl;
 
       leafs.push_back(PageCache(resultingCacheSize));
 
-      levelCacheSize=levelCacheSize*levelSize;
+      currentLevelSize=currentLevelSize*levelSize;
     }
 
     return !scanner.HasError() && scanner.Close();
@@ -244,14 +246,14 @@ namespace osmscout {
           entry.fileOffset=0;
 
           for (size_t j=0; j<levelSize && !scanner.IsEOF(); j++) {
-            Id         cidx;
-            FileOffset coff;
+            Id         idOffset;
+            FileOffset fileOffset;
 
-            scanner.ReadNumber(cidx);
-            scanner.ReadNumber(coff);
+            scanner.ReadNumber(idOffset);
+            scanner.ReadNumber(fileOffset);
 
-            entry.startId+=cidx;
-            entry.fileOffset+=coff;
+            entry.startId+=idOffset;
+            entry.fileOffset+=fileOffset;
 
             cacheRef->value.push_back(entry);
           }
@@ -390,7 +392,7 @@ namespace osmscout {
 
     indexLevelSize=(uint32_t)ceil(pow(dataCount,1.0/levels));
 
-    progress.Info(NumberToString(dataCount)+" index entries will be stored in "+NumberToString(levels)+ " levels using index level size of "+NumberToString(indexLevelSize));
+    progress.Info(std::string("Index for ")+NumberToString(dataCount)+" data elements will be stored in "+NumberToString(levels)+ " levels using index level size of "+NumberToString(indexLevelSize));
 
     writer.WriteNumber(levels);         // Number of levels
     writer.WriteNumber(indexLevelSize); // Size of index page
