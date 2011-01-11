@@ -266,7 +266,10 @@ namespace osmscout {
                                         size_t bufferLength,
                                         char* buffer,
                                         size_t& bytes);
-  extern OSMSCOUT_API bool DecodeNumber(const char* buffer, uint32_t& number, size_t& bytes);
+
+  extern OSMSCOUT_API bool DecodeNumber(const char* buffer,
+                                        uint32_t& number,
+                                        size_t& bytes);
 
   extern OSMSCOUT_API bool GetFileSize(const std::string& filename, long& size);
 

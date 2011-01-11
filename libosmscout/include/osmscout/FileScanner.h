@@ -52,14 +52,14 @@ namespace osmscout {
 
     // For mmap usage
     char         *buffer;
-    size_t       size;
+    FileOffset   size;
     FileOffset   offset;
 
     // For Windows mmap usage
 #if defined(__WIN32__) || defined(WIN32)
     HANDLE       mmfHandle;
 #endif
-    
+
   private:
     void FreeBuffer();
 

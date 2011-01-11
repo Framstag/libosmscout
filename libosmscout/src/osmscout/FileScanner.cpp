@@ -207,13 +207,17 @@ namespace osmscout {
 
   bool FileScanner::IsEOF() const
   {
-    FileOffset offset;
-
-    if (!GetPos(offset)) {
-      return true;
+    if (file==NULL || hasError) {
+      return false;
     }
 
-    return offset>=(FileOffset)size;
+#if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
+    if (buffer!=NULL) {
+      return offset>=size;
+    }
+#endif
+
+    return feof(file);
   }
 
   bool FileScanner::HasError() const
@@ -244,6 +248,7 @@ namespace osmscout {
     }
 #endif
 
+    clearerr(file);
     hasError=fseek(file,pos,SEEK_SET)!=0;
 
     return !hasError;
@@ -283,7 +288,7 @@ namespace osmscout {
 
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
-      if (offset+sizeof(char)>size) {
+      if (offset+(FileOffset)sizeof(char)>size) {
         std::cerr << "Cannot read string beyond file end!" << std::endl;
         hasError=true;
         return false;
@@ -333,7 +338,7 @@ namespace osmscout {
 
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
-      if (offset+sizeof(char)>size) {
+      if (offset+(FileOffset)sizeof(char)>size) {
         std::cerr << "Cannot read bool beyond file end!" << std::endl;
         hasError=true;
         return false;
@@ -371,7 +376,7 @@ namespace osmscout {
 
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
-      if (offset+sizeof(uint8_t)>size) {
+      if (offset+(FileOffset)sizeof(uint8_t)>size) {
         std::cerr << "Cannot read uint8_t beyond file end!" << std::endl;
         hasError=true;
         return false;
@@ -405,7 +410,7 @@ namespace osmscout {
 
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
-      if (offset+sizeof(uint16_t)>size) {
+      if (offset+(FileOffset)sizeof(uint16_t)>size) {
         std::cerr << "Cannot read uint16_t beyond file end!" << std::endl;
         hasError=true;
         return false;
@@ -447,7 +452,7 @@ namespace osmscout {
 
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
-      if (offset+sizeof(uint32_t)>size) {
+      if (offset+(FileOffset)sizeof(uint32_t)>size) {
         std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
         hasError=true;
         return false;
@@ -489,7 +494,7 @@ namespace osmscout {
 
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
-      if (offset+sizeof(int8_t)>size) {
+      if (offset+(FileOffset)sizeof(int8_t)>size) {
         std::cerr << "Cannot read int8_t beyond file end!" << std::endl;
         hasError=true;
         return false;
@@ -531,7 +536,7 @@ namespace osmscout {
 
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
-      if (offset+sizeof(uint32_t)>size) {
+      if (offset+(FileOffset)sizeof(uint32_t)>size) {
         std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
         hasError=true;
         return false;

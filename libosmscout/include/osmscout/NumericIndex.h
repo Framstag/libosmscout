@@ -78,6 +78,10 @@ namespace osmscout {
     std::vector<IndexEntry>        root;
     mutable std::vector<PageCache> leafs;
 
+  private:
+    size_t GetPageIndex(const std::vector<IndexEntry>& index,
+                        Id id) const;
+
   public:
     NumericIndex(const std::string& filename,
                  unsigned long cacheSize);
@@ -105,6 +109,35 @@ namespace osmscout {
   NumericIndex<N,T>::~NumericIndex()
   {
     // no code
+  }
+
+  /**
+    Binary search for index page for given id
+    */
+  template <class N, class T>
+  inline size_t NumericIndex<N,T>::GetPageIndex(const std::vector<IndexEntry>& index,
+                                                Id id) const
+  {
+    size_t size=index.size();
+    size_t left=0;
+    size_t right=index.size()-1;
+    size_t mid;
+
+    while (left<=right) {
+      mid=(left+right)/2;
+      if (index[mid].startId<=id &&
+          (mid+1>=size || index[mid+1].startId>id)) {
+        return mid;
+      }
+      else if (index[mid].startId<id) {
+        left=mid+1;
+      }
+      else {
+        right=mid-1;
+      }
+    }
+
+    return size;
   }
 
   template <class N, class T>
@@ -208,11 +241,8 @@ namespace osmscout {
     for (typename std::vector<N>::const_iterator id=ids.begin();
          id!=ids.end();
          ++id) {
-      size_t r=0;
 
-      while (r+1<root.size() && root[r+1].startId<=*id) {
-        r++;
-      }
+      size_t r=GetPageIndex(root,*id);
 
       if (r>=root.size()) {
         //std::cerr << "Id " << *id << " not found in root index!" << std::endl;
@@ -245,25 +275,21 @@ namespace osmscout {
           entry.startId=0;
           entry.fileOffset=0;
 
-          for (size_t j=0; j<levelSize && !scanner.IsEOF(); j++) {
+          for (size_t j=0; j<levelSize; j++) {
             Id         idOffset;
             FileOffset fileOffset;
 
-            scanner.ReadNumber(idOffset);
-            scanner.ReadNumber(fileOffset);
+            if (scanner.ReadNumber(idOffset) &&
+                scanner.ReadNumber(fileOffset)) {
+              entry.startId+=idOffset;
+              entry.fileOffset+=fileOffset;
 
-            entry.startId+=idOffset;
-            entry.fileOffset+=fileOffset;
-
-            cacheRef->value.push_back(entry);
+              cacheRef->value.push_back(entry);
+            }
           }
         }
 
-        size_t i=0;
-        while (i+1<cacheRef->value.size() &&
-               cacheRef->value[i+1].startId<=*id) {
-          i++;
-        }
+        size_t i=GetPageIndex(cacheRef->value,*id);
 
         if (i>=cacheRef->value.size()) {
           //std::cerr << "Id " << *id << " not found in sub page index!" << std::endl;
@@ -430,10 +456,11 @@ namespace osmscout {
 
         writer.GetPos(pageStart);
 
+        pageStarts.push_back(pageStart);
+        startingIds.push_back(data.id);
+
         writer.WriteNumber(data.id);
         writer.WriteNumber(pos);
-        startingIds.push_back(data.id);
-        pageStarts.push_back(pageStart);
       }
       else {
         writer.WriteNumber((data.id-lastId));

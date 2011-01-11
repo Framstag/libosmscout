@@ -314,29 +314,26 @@ namespace osmscout {
     return true;
   }
 
+
   bool DecodeNumber(const char* buffer, uint32_t& number, size_t& bytes)
   {
+    uint32_t mult=0;
+
     number=0;
     bytes=1;
 
-    if (buffer[0]==0) {
-      return true;
-    }
-    else {
-      size_t idx=0;
+    while (true) {
+      uint32_t add=((*buffer) & 0x7f) << mult;
 
-      while (true) {
-        uint32_t add=(buffer[idx] & 0x7f) << (idx*7);
+      number=number | add;
 
-        number=number | add;
+      if (((*buffer) & 0x80)==0) {
+        return true;
+      }
 
-        if ((buffer[idx] & 0x80)==0) {
-          return true;
-        }
-
-        bytes++;
-        idx++;
-      };
+      bytes++;
+      buffer++;
+      mult+=7;
     }
   }
 
