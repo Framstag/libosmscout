@@ -1,12 +1,14 @@
 AM_CXXFLAGS=$(LIBOSMSCOUT_CFLAGS) \
             $(LIBOSMSCOUTMAP_CFLAGS) \
             $(LIBCAIRO_CFLAGS) \
-            $(LIBQTGUI_CFLAGS)
-            
+            $(LIBQTGUI_CFLAGS) \
+            $(LIBQTAGG_CFLAGS)
+
 LDADD=$(LIBOSMSCOUT_LIBS) \
       $(LIBOSMSCOUTMAP_LIBS) \
       $(LIBCAIRO_LIBS) \
-      $(LIBQTGUI_LIBS)
+      $(LIBQTGUI_LIBS) \
+      $(LIBQTAGG_LIBS)
 
 bin_PROGRAMS = AddressLookup Routing
 
@@ -19,13 +21,20 @@ bin_PROGRAMS += DrawMapQt \
                 ResourceConsumptionQt
 endif
 
+if HAVE_LIB_AGG
+bin_PROGRAMS += DrawMapAgg
+endif
+
 AddressLookup_SOURCES = AddressLookup.cpp
 
 DrawMapCairo_SOURCES = DrawMapCairo.cpp
 
 DrawMapQt_SOURCES = DrawMapQt.cpp
 
+DrawMapAgg_SOURCES = DrawMapAgg.cpp
+
 ResourceConsumptionQt_SOURCES = ResourceConsumptionQt.cpp
 
 Routing_SOURCES = Routing.cpp
+
 

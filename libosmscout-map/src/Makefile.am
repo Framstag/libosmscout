@@ -23,3 +23,7 @@ endif
 if HAVE_LIB_QTGUI
 libosmscoutmap_la_SOURCES += osmscout/MapPainterQt.cpp
 endif
+
+if HAVE_LIB_AGG
+libosmscoutmap_la_SOURCES += osmscout/MapPainterAgg.cpp
+endif

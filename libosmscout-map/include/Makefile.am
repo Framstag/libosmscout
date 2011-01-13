@@ -13,3 +13,7 @@ if HAVE_LIB_QTGUI
 nobase_include_HEADERS += osmscout/MapPainterQt.h
 endif
 
+if HAVE_LIB_AGG
+nobase_include_HEADERS += osmscout/MapPainterAgg.h
+endif
+
