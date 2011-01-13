@@ -824,7 +824,6 @@ namespace osmscout {
                           fillStyle.GetFillG(),
                           fillStyle.GetFillB(),
                           1);
-    cairo_set_line_width(draw,1);
 
     TransformArea(projection,parameter,nodes);
 
