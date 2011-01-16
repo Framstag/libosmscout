@@ -5,44 +5,42 @@ steps:
 
 * Calculation the objects in areas index. "object in areas" calculation must be
   improved by improved the "point is area" algorithm.
-* Parsing of the XML file. XML parsing could be improved by using
-  the new binary OSM raw data format.
 * Generation of ways.dat file. This is time consuming because the nodes of a way
   are resolved. Since data is too big to keep everything in memory and
-  on-disk algortihm must be used, repeately scanning data files. Instead of this
-  the nod eindex file could be used, but we need some performance tests first.
+  on-disk algorithm must be used, repeately scanning data files. Instead of this
+  the node index file could be used, but we need some performance tests first.
 
 egrep -h "(^\+ Step|^   =>)" <logfile>
 
 + Step #1 - Preprocess...
-   => 138.570 second(s)
+   => 128.146 second(s)
 + Step #2 - Generating 'rawnode.idx'...
-   => 28.406 second(s)
+   => 32.002 second(s)
 + Step #3 - Generating 'rawway.idx'...
-   => 6.536 second(s)
+   => 8.849 second(s)
 + Step #4 - Generate 'relations.dat'...
-   => 72.410 second(s)
+   => 67.382 second(s)
 + Step #5 - Generating 'relation.idx'...
-   => 1.753 second(s)
+   => 1.530 second(s)
 + Step #6 - Generate 'nodes.dat'...
-   => 22.945 second(s)
+   => 25.975 second(s)
 + Step #7 - Generating 'node.idx'...
-   => 1.056 second(s)
+   => 1.052 second(s)
 + Step #8 - Generate 'ways.dat'...
-   => 573.381 second(s)
+   => 752.376 second(s)
 + Step #9 - Generating 'way.idx'...
-   => 16.316 second(s)
+   => 17.741 second(s)
 + Step #10 - Generate 'area.idx'...
-   => 215.423 second(s)
+   => 252.107 second(s)
 + Step #11 - Generate 'areanode.idx'...
-   => 4.538 second(s)
+   => 5.262 second(s)
 + Step #12 - Generate 'region.dat' and 'nameregion.idx'...
-   => 1679.730 second(s)
+   => 774.346 second(s)
 + Step #13 - Generate 'nodeuse.idx'...
-   => 204.811 second(s)
+   => 229.044 second(s)
 + Step #14 - Generate 'water.idx'...
-   => 27.331 second(s)
-   => 1916.416 second(s)
+   => 29.784 second(s)
+   => 2325.608 second(s)
 
 The following files have been generated (du --total -h *.idx *.dat):
 67M	area.idx
