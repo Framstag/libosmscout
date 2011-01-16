@@ -27,6 +27,8 @@
 
 namespace osmscout {
 
+  cairo_user_data_key_t imageDataKey;
+
   static bool IsLowerByteSet(unsigned char *bytes)
   {
     return bytes[0]!=0;
@@ -163,7 +165,7 @@ namespace osmscout {
 #else
     int stride = width*4;
 #endif
-    data=new unsigned char[stride*height];
+    data=(unsigned char *)malloc(stride*height);
 
     // TODO: Handle stride offsets
 
@@ -224,6 +226,13 @@ namespace osmscout {
     image=cairo_image_surface_create_for_data(data,
                                               CAIRO_FORMAT_ARGB32,
                                               width,height,stride);
+    if (image!=NULL) {
+      cairo_surface_set_user_data(image,&imageDataKey,
+                                  data,&free);
+    }
+    else {
+      free(data);
+    }
 
     png_destroy_read_struct(&png_ptr,&info_ptr,NULL);
     free(image_data);
