@@ -20,7 +20,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <list>
 #include <set>
+#include <string>
 
 #include <osmscout/Private/MapImportExport.h>
 
@@ -36,11 +38,13 @@ namespace osmscout {
   class OSMSCOUT_MAP_API MapParameter
   {
   private:
-    std::string fontName;          //! Name of the font to use
-    double      fontSize;          //! Pixel size of base font
-    double      outlineMinWidth;   //! Minimum width of an outline to be drawn
-    bool        optimizeWayNodes;  //! Try to reduce the number of nodes for a way
-    bool        optimizeAreaNodes; //! Try to reduce the number of nodes for an area
+    std::string            fontName;          //! Name of the font to use
+    double                 fontSize;          //! Pixel size of base font (aka font size 100%)
+    std::list<std::string> iconPaths;         //! List of paths to search for images for icons
+    std::list<std::string> patternPaths;      //! List of paths to search for images for patterns
+    double                 outlineMinWidth;   //! Minimum width of an outline to be drawn
+    bool                   optimizeWayNodes;  //! Try to reduce the number of nodes for a way
+    bool                   optimizeAreaNodes; //! Try to reduce the number of nodes for an area
 
   public:
     MapParameter();
@@ -48,6 +52,9 @@ namespace osmscout {
 
     void SetFontName(const std::string& fontName);
     void SetFontSize(double fontSize);
+
+    void SetIconPaths(const std::list<std::string>& paths);
+    void SetPatternPaths(const std::list<std::string>& paths);
 
     void SetOutlineMinWidth(double outlineMinWidth);
 
@@ -62,6 +69,16 @@ namespace osmscout {
     inline double GetFontSize() const
     {
       return fontSize;
+    }
+
+    inline const std::list<std::string>& GetIconPaths() const
+    {
+      return iconPaths;
+    }
+
+    inline const std::list<std::string>& GetPatternPaths() const
+    {
+      return patternPaths;
     }
 
     inline double GetOutlineMinWidth() const
@@ -245,6 +262,7 @@ namespace osmscout {
       will be chosen.
      */
     virtual bool HasIcon(const StyleConfig& styleConfig,
+                         const MapParameter& parameter,
                          IconStyle& style)= 0;
 
     /**
@@ -253,6 +271,7 @@ namespace osmscout {
       will be chosen.
      */
     virtual bool HasPattern(const StyleConfig& styleConfig,
+                            const MapParameter& parameter,
                             PatternStyle& style) = 0;
 
     /**

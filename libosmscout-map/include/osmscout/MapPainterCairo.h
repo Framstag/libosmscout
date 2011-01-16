@@ -48,9 +48,11 @@ namespace osmscout {
                                        size_t fontSize);
 
     bool HasIcon(const StyleConfig& styleConfig,
+                 const MapParameter& parameter,
                  IconStyle& style);
 
     bool HasPattern(const StyleConfig& styleConfig,
+                   const MapParameter& parameter,
                    PatternStyle& style);
 
     void DrawLabel(const Projection& projection,

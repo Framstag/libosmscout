@@ -64,6 +64,7 @@ namespace osmscout {
   }
 
   bool MapPainterQt::HasIcon(const StyleConfig& styleConfig,
+                             const MapParameter& parameter,
                              IconStyle& style)
   {
     if (style.GetId()==std::numeric_limits<size_t>::max()) {
@@ -74,27 +75,31 @@ namespace osmscout {
       return true;
     }
 
-    std::string filename=std::string("../libosmscout/data/icons/14x14/standard/")+
-                         style.GetIconName()+".png";
+    for (std::list<std::string>::const_iterator path=parameter.GetIconPaths().begin();
+         path!=parameter.GetIconPaths().end();
+         ++path) {
 
-    QImage image;
+      std::string filename=*path+style.GetIconName()+".png";
 
-    if (image.load(filename.c_str())) {
-      images.resize(images.size()+1,image);
-      style.SetId(images.size());
-      std::cout << "Loaded image " << filename << " => id " << style.GetId() << std::endl;
+      QImage image;
 
-      return true;
+      if (image.load(filename.c_str())) {
+        images.resize(images.size()+1,image);
+        style.SetId(images.size());
+        std::cout << "Loaded image " << filename << " => id " << style.GetId() << std::endl;
+
+        return true;
+      }
     }
-    else {
-      std::cerr << "ERROR while loading icon file '" << filename << "'" << std::endl;
-      style.SetId(std::numeric_limits<size_t>::max());
 
-      return false;
-    }
+    std::cerr << "ERROR while loading icon file '" << style.GetIconName() << "'" << std::endl;
+    style.SetId(std::numeric_limits<size_t>::max());
+
+    return false;
   }
 
   bool MapPainterQt::HasPattern(const StyleConfig& styleConfig,
+                                const MapParameter& parameter,
                                 PatternStyle& style)
   {
     if (style.GetId()==std::numeric_limits<size_t>::max()) {
@@ -105,28 +110,30 @@ namespace osmscout {
       return true;
     }
 
-    std::string filename=std::string("../libosmscout/data/icons/14x14/standard/")+
-                         style.GetPatternName()+".png";
+    for (std::list<std::string>::const_iterator path=parameter.GetPatternPaths().begin();
+         path!=parameter.GetPatternPaths().end();
+         ++path) {
+      std::string filename=*path+style.GetPatternName()+".png";
 
-    QImage image;
+      QImage image;
 
-    if (image.load(filename.c_str())) {
-      images.resize(images.size()+1,image);
-      style.SetId(images.size());
-      patterns.resize(images.size());
+      if (image.load(filename.c_str())) {
+        images.resize(images.size()+1,image);
+        style.SetId(images.size());
+        patterns.resize(images.size());
 
-      patterns[patterns.size()-1].setTextureImage(image);
+        patterns[patterns.size()-1].setTextureImage(image);
 
-      std::cout << "Loaded image " << filename << " => id " << style.GetId() << std::endl;
+        std::cout << "Loaded image " << filename << " => id " << style.GetId() << std::endl;
 
-      return true;
+        return true;
+      }
     }
-    else {
-      std::cerr << "ERROR while loading icon file '" << filename << "'" << std::endl;
-      style.SetId(std::numeric_limits<size_t>::max());
 
-      return false;
-    }
+    std::cerr << "ERROR while loading icon file '" << style.GetPatternName() << "'" << std::endl;
+    style.SetId(std::numeric_limits<size_t>::max());
+
+    return false;
   }
 
   void MapPainterQt::DrawLabel(const Projection& projection,

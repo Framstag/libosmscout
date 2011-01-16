@@ -55,6 +55,16 @@ namespace osmscout {
     this->fontSize=fontSize;
   }
 
+  void MapParameter::SetIconPaths(const std::list<std::string>& paths)
+  {
+    this->iconPaths=paths;
+  }
+
+  void MapParameter::SetPatternPaths(const std::list<std::string>& paths)
+  {
+    this->patternPaths=paths;
+  }
+
   void MapParameter::SetOutlineMinWidth(double outlineMinWidth)
   {
     this->outlineMinWidth=outlineMinWidth;
@@ -627,7 +637,9 @@ namespace osmscout {
       }
 
       if (hasIcon) {
-        hasIcon=HasIcon(styleConfig,*iconStyle);
+        hasIcon=HasIcon(styleConfig,
+                        parameter,
+                        *iconStyle);
       }
 
       if (!hasSymbol && !hasLabel && !hasIcon) {
@@ -696,7 +708,9 @@ namespace osmscout {
                                   fillStyle->GetLayer()==layer;
 
           if (hasPattern) {
-            hasPattern=HasPattern(styleConfig,*patternStyle);
+            hasPattern=HasPattern(styleConfig,
+                                  parameter,
+                                  *patternStyle);
           }
 
           if (hasPattern) {
@@ -738,7 +752,9 @@ namespace osmscout {
                                       fillStyle->GetLayer()==layer;
 
               if (hasPattern) {
-                hasPattern=HasPattern(styleConfig,*patternStyle);
+                hasPattern=HasPattern(styleConfig,
+                                      parameter,
+                                      *patternStyle);
               }
 
               if (hasPattern) {
@@ -795,7 +811,9 @@ namespace osmscout {
       std::string label;
 
       if (hasIcon) {
-        hasIcon=HasIcon(styleConfig,*iconStyle);
+        hasIcon=HasIcon(styleConfig,
+                        parameter,
+                        *iconStyle);
       }
 
       if (!hasSymbol && !hasLabel && !hasIcon) {
@@ -878,7 +896,9 @@ namespace osmscout {
           std::string label;
 
           if (hasIcon) {
-            hasIcon=HasIcon(styleConfig,*iconStyle);
+            hasIcon=HasIcon(styleConfig,
+                            parameter,
+                            *iconStyle);
           }
 
           if (!hasSymbol && !hasLabel && !hasIcon) {

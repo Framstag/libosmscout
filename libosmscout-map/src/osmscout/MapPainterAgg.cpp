@@ -43,6 +43,7 @@ namespace osmscout {
   }
 
   bool MapPainterAgg::HasIcon(const StyleConfig& styleConfig,
+                             const MapParameter& parameter,
                              IconStyle& style)
   {
     if (style.GetId()==std::numeric_limits<size_t>::max()) {
@@ -62,6 +63,7 @@ namespace osmscout {
   }
 
   bool MapPainterAgg::HasPattern(const StyleConfig& styleConfig,
+                                const MapParameter& parameter,
                                 PatternStyle& style)
   {
     if (style.GetId()==std::numeric_limits<size_t>::max()) {

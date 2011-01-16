@@ -308,6 +308,7 @@ namespace osmscout {
   }
 
   bool MapPainterCairo::HasIcon(const StyleConfig& styleConfig,
+                                const MapParameter& parameter,
                                 IconStyle& style)
   {
     if (style.GetId()==std::numeric_limits<size_t>::max()) {
@@ -318,27 +319,30 @@ namespace osmscout {
       return true;
     }
 
-    std::string filename=std::string("../libosmscout/data/icons/14x14/standard/")+
-                         style.GetIconName()+".png";
+    for (std::list<std::string>::const_iterator path=parameter.GetIconPaths().begin();
+         path!=parameter.GetIconPaths().end();
+         ++path) {
+      std::string filename=*path+style.GetIconName()+".png";
 
-    cairo_surface_t *image=osmscout::LoadPNG(filename);
+      cairo_surface_t *image=osmscout::LoadPNG(filename);
 
-    if (image!=NULL) {
-      images.resize(images.size()+1,image);
-      style.SetId(images.size());
-      std::cout << "Loaded image " << filename << " => id " << style.GetId() << std::endl;
+      if (image!=NULL) {
+        images.resize(images.size()+1,image);
+        style.SetId(images.size());
+        std::cout << "Loaded image " << filename << " => id " << style.GetId() << std::endl;
 
-      return true;
+        return true;
+      }
     }
-    else {
-      std::cerr << "ERROR while loading icon file '" << filename << "'" << std::endl;
-      style.SetId(std::numeric_limits<size_t>::max());
 
-      return false;
-    }
+    std::cerr << "ERROR while loading icon '" << style.GetIconName() << "'" << std::endl;
+    style.SetId(std::numeric_limits<size_t>::max());
+
+    return false;
   }
 
   bool MapPainterCairo::HasPattern(const StyleConfig& styleConfig,
+                                   const MapParameter& parameter,
                                    PatternStyle& style)
   {
     if (style.GetId()==std::numeric_limits<size_t>::max()) {
@@ -349,34 +353,36 @@ namespace osmscout {
       return true;
     }
 
-    std::string filename=std::string("../libosmscout/data/icons/14x14/standard/")+
-                         style.GetPatternName()+".png";
+    for (std::list<std::string>::const_iterator path=parameter.GetPatternPaths().begin();
+         path!=parameter.GetPatternPaths().end();
+         ++path) {
+      std::string filename=*path+style.GetPatternName()+".png";
 
-    cairo_surface_t *image=osmscout::LoadPNG(filename);
+      cairo_surface_t *image=osmscout::LoadPNG(filename);
 
-    if (image!=NULL) {
-      images.resize(images.size()+1,image);
-      style.SetId(images.size());
-      patterns.resize(images.size(),NULL);
+      if (image!=NULL) {
+        images.resize(images.size()+1,image);
+        style.SetId(images.size());
+        patterns.resize(images.size(),NULL);
 
-      patterns[patterns.size()-1]=cairo_pattern_create_for_surface(images[images.size()-1]);
-      cairo_pattern_set_extend(patterns[patterns.size()-1],CAIRO_EXTEND_REPEAT);
+        patterns[patterns.size()-1]=cairo_pattern_create_for_surface(images[images.size()-1]);
+        cairo_pattern_set_extend(patterns[patterns.size()-1],CAIRO_EXTEND_REPEAT);
 
-      cairo_matrix_t matrix;
+        cairo_matrix_t matrix;
 
-      cairo_matrix_init_scale(&matrix,1,1);
-      cairo_pattern_set_matrix(patterns[patterns.size()-1],&matrix);
+        cairo_matrix_init_scale(&matrix,1,1);
+        cairo_pattern_set_matrix(patterns[patterns.size()-1],&matrix);
 
-      std::cout << "Loaded image " << filename << " => id " << style.GetId() << std::endl;
+        std::cout << "Loaded image " << filename << " => id " << style.GetId() << std::endl;
 
-      return true;
+        return true;
+      }
     }
-    else {
-      std::cerr << "ERROR while loading icon file '" << filename << "'" << std::endl;
-      style.SetId(std::numeric_limits<size_t>::max());
 
-      return false;
-    }
+    std::cerr << "ERROR while loading icon file '" << style.GetPatternName() << "'" << std::endl;
+    style.SetId(std::numeric_limits<size_t>::max());
+
+    return false;
   }
 
   cairo_scaled_font_t* MapPainterCairo::GetScaledFont(const MapParameter& parameter,

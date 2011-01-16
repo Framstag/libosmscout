@@ -43,9 +43,11 @@ namespace osmscout {
 
   protected:
     bool HasIcon(const StyleConfig& styleConfig,
-                         IconStyle& style);
+                 const MapParameter& parameter,
+                 IconStyle& style);
 
     bool HasPattern(const StyleConfig& styleConfig,
+                    const MapParameter& parameter,
                     PatternStyle& style);
 
     void DrawLabel(const Projection& projection,

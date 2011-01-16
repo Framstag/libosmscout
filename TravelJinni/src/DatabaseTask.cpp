@@ -109,10 +109,18 @@ void DatabaseTask::Run()
       currentLat=currentJob->lat;
       currentMagnification=currentJob->magnification;
 
-      if (database->IsOpen() && styleConfig!=NULL) {
+      if (database->IsOpen() &&
+          styleConfig!=NULL) {
         osmscout::MercatorProjection  projection;
         osmscout::MapParameter        drawParameter;
         osmscout::AreaSearchParameter searchParameter;
+
+        std::list<std::string>        paths;
+
+        paths.push_back("../libosmscout/data/icons/14x14/standard/");
+
+        drawParameter.SetIconPaths(paths);
+        drawParameter.SetPatternPaths(paths);
 
         std::cout << std::endl;
 
