@@ -237,6 +237,7 @@ namespace osmscout {
     cairo_append_path(cr,current_path);
 
     cairo_path_destroy(current_path);
+    free(param.parametrization);
   }
 
 
@@ -824,6 +825,7 @@ namespace osmscout {
                           fillStyle.GetFillG(),
                           fillStyle.GetFillB(),
                           1);
+    cairo_set_line_width(draw,1);
 
     TransformArea(projection,parameter,nodes);
 
