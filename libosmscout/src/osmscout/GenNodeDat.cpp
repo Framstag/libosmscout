@@ -61,7 +61,8 @@ namespace osmscout {
     FileScanner scanner;
     FileWriter  writer;
 
-    if (!scanner.Open("rawnodes.dat")) {
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "rawnodes.dat"))) {
       progress.Error("Cannot open 'rawnodes.dat'");
       return false;
     }
@@ -71,7 +72,8 @@ namespace osmscout {
       return false;
     }
 
-    if (!writer.Open("nodes.dat")) {
+    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     "nodes.dat"))) {
       progress.Error("Cannot create 'nodes.dat'");
       return false;
     }
@@ -136,7 +138,8 @@ namespace osmscout {
 
     progress.SetAction("Generating bounding.dat");
 
-    if (!writer.Open("bounding.dat")) {
+    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     "bounding.dat"))) {
       progress.Error("Cannot create 'bounding.dat'");
       return false;
     }

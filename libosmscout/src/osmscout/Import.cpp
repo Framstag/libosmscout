@@ -54,7 +54,8 @@ namespace osmscout {
   static const size_t defaultEndStep=16;
 
   ImportParameter::ImportParameter()
-   : startStep(defaultStartStep),
+   : typefile("map.ost.xml"),
+     startStep(defaultStartStep),
      endStep(defaultEndStep),
      nodesLoadSize(10000000),
      nodeIndexIntervalSize(50),
@@ -76,6 +77,16 @@ namespace osmscout {
   std::string ImportParameter::GetMapfile() const
   {
     return mapfile;
+  }
+
+  std::string ImportParameter::GetTypefile() const
+  {
+    return typefile;
+  }
+
+  std::string ImportParameter::GetDestinationDirectory() const
+  {
+    return destinationDirectory;
   }
 
   size_t ImportParameter::GetStartStep() const
@@ -156,6 +167,16 @@ namespace osmscout {
   void ImportParameter::SetMapfile(const std::string& mapfile)
   {
     this->mapfile=mapfile;
+  }
+
+  void ImportParameter::SetTypefile(const std::string& typefile)
+  {
+    this->typefile=typefile;
+  }
+
+  void ImportParameter::SetDestinationDirectory(const std::string& destinationDirectory)
+  {
+    this->destinationDirectory=destinationDirectory;
   }
 
   void ImportParameter::SetStartStep(size_t startStep)
@@ -257,7 +278,7 @@ namespace osmscout {
 
     progress.SetStep("Loading type config");
 
-    if (!LoadTypeConfig("map.ost.xml",typeConfig)) {
+    if (!LoadTypeConfig(parameter.GetTypefile().c_str(),typeConfig)) {
       progress.Error("Cannot load type configuration!");
       return false;
     }
@@ -266,30 +287,40 @@ namespace osmscout {
     modules.push_back(new Preprocess());
     /* 2 */
     modules.push_back(new NumericIndexGenerator<Id,RawNode>("Generating 'rawnode.idx'",
-                                                            "rawnodes.dat",
-                                                            "rawnode.idx"));
+                                                            AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                            "rawnodes.dat"),
+                                                            AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                            "rawnode.idx")));
     /* 3 */
     modules.push_back(new NumericIndexGenerator<Id,RawWay>("Generating 'rawway.idx'",
-                                                           "rawways.dat",
-                                                           "rawway.idx"));
+                                                           AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                           "rawways.dat"),
+                                                           AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                           "rawway.idx")));
     /* 4 */
     modules.push_back(new RelationDataGenerator());
     /* 5 */
     modules.push_back(new NumericIndexGenerator<Id,Relation>("Generating 'relation.idx'",
-                                                             "relations.dat",
-                                                             "relation.idx"));
+                                                             AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                             "relations.dat"),
+                                                             AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                             "relation.idx")));
     /* 6 */
     modules.push_back(new NodeDataGenerator());
     /* 7 */
     modules.push_back(new NumericIndexGenerator<Id,Node>("Generating 'node.idx'",
-                                                         "nodes.dat",
-                                                         "node.idx"));
+                                                         AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                         "nodes.dat"),
+                                                         AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                         "node.idx")));
     /* 8 */
     modules.push_back(new WayDataGenerator());
     /* 9 */
     modules.push_back(new NumericIndexGenerator<Id,Way>("Generating 'way.idx'",
-                                                        "ways.dat",
-                                                        "way.idx"));
+                                                        AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                        "ways.dat"),
+                                                        AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                        "way.idx")));
     /* 10 */
     modules.push_back(new AreaIndexGenerator());
     /* 11 */

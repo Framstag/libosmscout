@@ -37,7 +37,9 @@ namespace osmscout {
   class OSMSCOUT_API ImportParameter
   {
   private:
-    std::string mapfile;
+    std::string mapfile;               //! Name of the file containing the map (either *.osm or *.osm.pbf)
+    std::string typefile;              //! Name and path ff type definition file (map.ost.xml)
+    std::string destinationDirectory;  //! Name of the destination directory
     size_t      startStep;             //! Starting step for import
     size_t      endStep;               //! End step for mport
     size_t      nodesLoadSize;         //! Maximum number of nodes loaded into memory in one go
@@ -48,18 +50,22 @@ namespace osmscout {
     size_t      wayDataCacheSize;      //! Size of the way data cache
     size_t      wayIndexCacheSize;     //! Size of the way index cache
     size_t      numericIndexLevelSize; //! The size of one index page in one index level for numerical indexes
-    size_t      areaAreaIndexMaxMag;
-    size_t      areaAreaRelIndexMaxMag;
-    size_t      areaWayIndexMaxMag;
-    size_t      areaWayRelIndexMaxMag;
-    size_t      waterIndexMaxMag;
+    size_t      areaAreaIndexMaxMag;   //! Maximum depth of the index generated
+    size_t      areaAreaRelIndexMaxMag;//! Maximum depth of the index generated
+    size_t      areaWayIndexMaxMag;    //! Maximum depth of the index generated
+    size_t      areaWayRelIndexMaxMag; //! Maximum depth of the index generated
+    size_t      waterIndexMaxMag;      //! Maximum depth of the index generated
 
   public:
     ImportParameter();
 
     std::string GetMapfile() const;
+    std::string GetTypefile() const;
+    std::string GetDestinationDirectory() const;
+
     size_t GetStartStep() const;
     size_t GetEndStep() const;
+
     size_t GetNodesLoadSize() const;
     size_t GetNodeIndexIntervalSize() const;
     size_t GetNodeDataCacheSize() const;
@@ -75,8 +81,12 @@ namespace osmscout {
     size_t GetWaterIndexMaxMag() const;
 
     void SetMapfile(const std::string& mapfile);
+    void SetTypefile(const std::string& typefile);
+    void SetDestinationDirectory(const std::string& destinationDirectory);
+
     void SetStartStep(size_t startStep);
     void SetSteps(size_t startStep, size_t endStep);
+
     void SetNodesLoadSize(size_t nodesLoadSize);
     void SetNodeIndexIntervalSize(size_t nodeIndexIntervalSize);
     void SetNodeDataCacheSize(size_t nodeDataCacheSize);

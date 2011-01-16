@@ -407,7 +407,8 @@ namespace osmscout {
     coastlineWayId=typeConfig.GetWayTypeId(tagNatural,"coastline");
     assert(coastlineWayId!=typeIgnore);
 
-    if (!scanner.Open("ways.dat")) {
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "ways.dat"))) {
       progress.Error("Cannot open 'ways.dat'");
       return false;
     }
@@ -525,7 +526,8 @@ namespace osmscout {
 
     std::cout << "Cell dimension: " << cellWidth << "x" << cellHeight << std::endl;
 
-    if (!scanner.Open("bounding.dat")) {
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "bounding.dat"))) {
       progress.Error("Cannot open 'bounding.dat'");
       return false;
     }
@@ -565,7 +567,8 @@ namespace osmscout {
 
     progress.SetAction("Scanning ways");
 
-    if (!scanner.Open("ways.dat")) {
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "ways.dat"))) {
       progress.Error("Cannot open 'ways.dat'");
       return false;
     }
@@ -629,7 +632,8 @@ namespace osmscout {
 
     FileWriter writer;
 
-    if (!writer.Open("water.idx")) {
+    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     "water.idx"))) {
       progress.Error("Error while opening 'water.idx' for writing");
       return false;
     }

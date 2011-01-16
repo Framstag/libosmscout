@@ -300,13 +300,16 @@ namespace osmscout {
       return false;
     }
 
-    nodeWriter.Open("rawnodes.dat");
+    nodeWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                    "rawnodes.dat"));
     nodeWriter.Write(nodeCount);
 
-    wayWriter.Open("rawways.dat");
+    wayWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   "rawways.dat"));
     wayWriter.Write(wayCount+areaCount);
 
-    relationWriter.Open("rawrels.dat");
+    relationWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                        "rawrels.dat"));
     relationWriter.Write(relationCount);
 
     // BlockHeader

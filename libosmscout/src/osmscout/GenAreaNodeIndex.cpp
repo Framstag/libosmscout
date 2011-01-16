@@ -175,7 +175,8 @@ namespace osmscout {
       cellHeightHalf[i]=cellHeight[i]/2;
     }
 
-    if (!scanner.Open("nodes.dat")) {
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "nodes.dat"))) {
       progress.Error("Cannot open 'nodes.dat'");
       return false;
     }
@@ -243,7 +244,8 @@ namespace osmscout {
 
     FileWriter writer;
 
-    if (!writer.Open("areanode.idx")) {
+    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     "areanode.idx"))) {
       progress.Error("Cannot create 'nodes.dat'");
       return false;
     }

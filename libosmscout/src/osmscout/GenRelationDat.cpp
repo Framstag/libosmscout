@@ -530,12 +530,12 @@ namespace osmscout {
                                    parameter.GetWayDataCacheSize(),
                                    parameter.GetWayIndexCacheSize());
 
-    if (!nodeDataFile.Open(".")) {
+    if (!nodeDataFile.Open(parameter.GetDestinationDirectory())) {
       std::cerr << "Cannot open raw nodes data files!" << std::endl;
       return false;
     }
 
-    if (!wayDataFile.Open(".")) {
+    if (!wayDataFile.Open(parameter.GetDestinationDirectory())) {
       std::cerr << "Cannot open raw way data files!" << std::endl;
       return false;
     }
@@ -552,7 +552,8 @@ namespace osmscout {
     size_t      selectedRelationCount=0;
     uint32_t    writtenRelationCount=0;
 
-    if (!scanner.Open("rawrels.dat")) {
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "rawrels.dat"))) {
       progress.Error("Cannot open 'rawrels.dat'");
       return false;
     }
@@ -562,7 +563,8 @@ namespace osmscout {
       return false;
     }
 
-    if (!writer.Open("relations.dat")) {
+    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     "relations.dat"))) {
       progress.Error("Cannot create 'relations.dat'");
       return false;
     }
@@ -793,7 +795,8 @@ namespace osmscout {
 
     progress.SetAction("Generate wayblack.dat");
 
-    if (!writer.Open("wayblack.dat")) {
+    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     "wayblack.dat"))) {
       progress.Error("Canot create 'wayblack.dat'");
       return false;
     }

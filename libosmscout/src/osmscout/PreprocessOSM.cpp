@@ -51,7 +51,8 @@ namespace osmscout {
     uint32_t relationCount;
 
   public:
-    Preprocessor(const TypeConfig& config);
+    Preprocessor(const ImportParameter& parameter,
+                 const TypeConfig& config);
     virtual ~Preprocessor();
 
     void Process(const Id& id,
@@ -67,20 +68,24 @@ namespace osmscout {
     void Cleanup();
   };
 
-  Preprocessor::Preprocessor(const TypeConfig& config)
+  Preprocessor::Preprocessor(const ImportParameter& parameter,
+                             const TypeConfig& config)
    : config(config),
      nodeCount(0),
      wayCount(0),
      areaCount(0),
      relationCount(0)
   {
-    nodeWriter.Open("rawnodes.dat");
+    nodeWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                    "rawnodes.dat"));
     nodeWriter.Write(nodeCount);
 
-    wayWriter.Open("rawways.dat");
+    wayWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                   "rawways.dat"));
     wayWriter.Write(wayCount+areaCount);
 
-    relationWriter.Open("rawrels.dat");
+    relationWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                        "rawrels.dat"));
     relationWriter.Write(relationCount);
   }
 
@@ -485,7 +490,8 @@ namespace osmscout {
                              Progress& progress,
                              const TypeConfig& typeConfig)
   {
-    Preprocessor  pp(typeConfig);
+    Preprocessor  pp(parameter,
+                     typeConfig);
     Parser        parser(pp,typeConfig);
 
     xmlSAXHandler saxParser;

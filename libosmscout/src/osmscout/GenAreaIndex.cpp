@@ -89,7 +89,8 @@ namespace osmscout {
 
     progress.SetAction("Loading way blacklist");
 
-    if (!scanner.Open("wayblack.dat")) {
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "wayblack.dat"))) {
       progress.Error("Cannot open 'wayblack.dat'");
       return false;
     }
@@ -118,7 +119,8 @@ namespace osmscout {
     FileOffset topLevelOffset=0;
     FileOffset topLevelOffsetOffset; // Offset of the toplevel entry
 
-    if (!writer.Open("area.idx")) {
+    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     "area.idx"))) {
       progress.Error("Cannot create 'area.idx'");
       return false;
     }
@@ -195,7 +197,8 @@ namespace osmscout {
 
         progress.Info(std::string("Scanning ways.dat for ways of index level ")+NumberToString(l)+"...");
 
-        if (!scanner.Open("ways.dat")) {
+        if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                          "ways.dat"))) {
           progress.Error("Cannot open 'ways.dat'");
           return false;
         }
@@ -365,7 +368,8 @@ namespace osmscout {
 
         progress.Info(std::string("Scanning relations.dat for relations of index level ")+NumberToString(l)+"...");
 
-        if (!scanner.Open("relations.dat")) {
+        if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                          "relations.dat"))) {
           progress.Error("Cannot open 'relations.dat'");
           return false;
         }

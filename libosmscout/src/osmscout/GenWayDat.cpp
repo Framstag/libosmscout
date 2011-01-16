@@ -70,7 +70,8 @@ namespace osmscout {
 
     progress.SetAction("Scanning for restriction relations");
 
-    if (!scanner.Open("rawrels.dat")) {
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "rawrels.dat"))) {
       progress.Error("Canot open 'rawrels.dat'");
       return false;
     }
@@ -202,7 +203,8 @@ namespace osmscout {
 
     progress.SetAction("Analysing distribution");
 
-    if (!scanner.Open("rawways.dat")) {
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "rawways.dat"))) {
       progress.Error("Canot open 'rawways.dat'");
       return false;
     }
@@ -254,7 +256,8 @@ namespace osmscout {
       return false;
     }
 
-    if (!writer.Open("ways.dat")) {
+    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     "ways.dat"))) {
       progress.Error("Canot create 'ways.dat'");
       return false;
     }
@@ -281,7 +284,8 @@ namespace osmscout {
       std::set<Id>         nodeIds;
       std::map<Id,uint8_t> nodeUses;
 
-      if (!scanner.Open("rawways.dat")) {
+      if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                        "rawways.dat"))) {
         progress.Error("Canot open 'rawways.dat'");
         return false;
       }
@@ -336,7 +340,8 @@ namespace osmscout {
 
       std::map<Id,RawNode> nodes;
 
-      if (!scanner.Open("rawnodes.dat")) {
+      if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                        "rawnodes.dat"))) {
         progress.Error("Canot open 'rawnodes.dat'");
         return false;
       }
@@ -372,7 +377,8 @@ namespace osmscout {
 
       progress.Info("Scanning way node usage");
 
-      if (!scanner.Open("rawways.dat")) {
+      if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                        "rawways.dat"))) {
         progress.Error("Canot open 'rawways.dat'");
         return false;
       }

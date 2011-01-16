@@ -51,7 +51,8 @@ namespace osmscout {
 
     typeConfig.GetRoutables(types);
 
-    if (!scanner.Open("rawnodes.dat")) {
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "rawnodes.dat"))) {
       progress.Error("Canot open 'rawnodes.dat'");
       return false;
     }
@@ -110,7 +111,8 @@ namespace osmscout {
 
       progress.Info(std::string("Scanning for node ids ")+NumberToString(start)+">=id<"+NumberToString(end)+" (interval "+NumberToString(index+1)+" of "+NumberToString(nodeDistribution.size())+")");
 
-      if (!scanner.Open("ways.dat")) {
+      if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                        "ways.dat"))) {
         progress.Error("Error while opening ways.dat!");
         return false;
       }
@@ -147,7 +149,8 @@ namespace osmscout {
 
       progress.Info(std::string("Resolving area/way references ")+NumberToString(start)+">=id<"+NumberToString(end));
 
-      if (!scanner.Open("ways.dat")) {
+      if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                        "ways.dat"))) {
         progress.Error("Error while opening ways.dat!");
         return false;
       }
@@ -221,7 +224,8 @@ namespace osmscout {
 
     progress.SetAction("Writing 'nodeuse.idx'");
 
-    if (!writer.Open("nodeuse.idx")) {
+    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     "nodeuse.idx"))) {
       progress.Error("Error while opening 'nodeuse.idx'!");
       return false;
     }

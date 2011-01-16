@@ -98,14 +98,16 @@ namespace osmscout {
   /**
     Return the list of nodes ids with the given type.
     */
-  static bool GetCityNodes(const std::set<TypeId>& cityIds,
+  static bool GetCityNodes(const ImportParameter& parameter,
+                           const std::set<TypeId>& cityIds,
                            std::list<Node>& cityNodes,
                            Progress& progress)
   {
     FileScanner scanner;
     uint32_t    nodeCount;
 
-    if (!scanner.Open("nodes.dat")) {
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "nodes.dat"))) {
       progress.Error("Cannot open 'nodes.dat'");
       return false;
     }
@@ -161,14 +163,16 @@ namespace osmscout {
   /**
     Return the list of nodes ids with the given type.
     */
-  static bool GetCityAreas(const std::set<TypeId>& cityIds,
+  static bool GetCityAreas(const ImportParameter& parameter,
+                           const std::set<TypeId>& cityIds,
                            std::list<Way>& cityAreas,
                            Progress& progress)
   {
     FileScanner scanner;
     uint32_t    wayCount;
 
-    if (!scanner.Open("ways.dat")) {
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "ways.dat"))) {
       progress.Error("Cannot open 'ways.dat'");
       return false;
     }
@@ -578,7 +582,10 @@ namespace osmscout {
     //
 
     // Get nodes of one of the types in cityIds
-    if (!GetCityNodes(cityIds,cityNodes,progress)) {
+    if (!GetCityNodes(parameter,
+                      cityIds,
+                      cityNodes,
+                      progress)) {
       return false;
     }
 
@@ -591,7 +598,10 @@ namespace osmscout {
     progress.SetAction("Scanning for cities of type 'area'");
 
     // Get areas of one of the types in cityIds
-    if (!GetCityAreas(cityIds,cityAreas,progress)) {
+    if (!GetCityAreas(parameter,
+                      cityIds,
+                      cityAreas,
+                      progress)) {
       return false;
     }
 
@@ -603,7 +613,8 @@ namespace osmscout {
 
     progress.SetAction("Scanning for city boundaries of type 'area'");
 
-    if (!scanner.Open("ways.dat")) {
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "ways.dat"))) {
       progress.Error("Cannot open 'ways.dat'");
       return false;
     }
@@ -654,7 +665,8 @@ namespace osmscout {
 
     progress.SetAction("Scanning for city boundaries of type 'relation'");
 
-    if (!scanner.Open("relations.dat")) {
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "relations.dat"))) {
       progress.Error("Cannot open 'relations.dat'");
       return false;
     }
@@ -903,7 +915,8 @@ namespace osmscout {
 
     StopClock waToAClock;
 
-    if (!scanner.Open("ways.dat")) {
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "ways.dat"))) {
       progress.Error("Cannot open 'ways.dat'");
       return false;
     }
@@ -971,7 +984,8 @@ namespace osmscout {
 
     progress.SetAction("Resolve nodes to areas");
 
-    if (!scanner.Open("nodes.dat")) {
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "nodes.dat"))) {
       progress.Error("Cannot open 'nodes.dat'");
       return false;
     }
@@ -1025,7 +1039,8 @@ namespace osmscout {
 
     progress.SetAction("Write 'region.dat'");
 
-    if (!writer.Open("region.dat")) {
+    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     "region.dat"))) {
       progress.Error("Cannot open 'region.dat'");
       return false;
     }
@@ -1046,7 +1061,8 @@ namespace osmscout {
 
     GetLocationRefs(rootArea,locationRefs);
 
-    if (!writer.Open("nameregion.idx")) {
+    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     "nameregion.idx"))) {
       progress.Error("Cannot open 'nameregion.idx'");
       return false;
     }

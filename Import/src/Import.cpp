@@ -28,16 +28,18 @@
 void DumpHelp(osmscout::ImportParameter& parameter)
 {
   std::cout << "Import -h -d -s <start step> -e <end step> [openstreetmapdata.osm|openstreetmapdata.osm.pbf]" << std::endl;
-  std::cout << " -h                            show this help" << std::endl;
-  std::cout << " -d                            show debug output" << std::endl;
-  std::cout << " -s <start step>               set starting step" << std::endl;
-  std::cout << " -s <end step>                 set final step" << std::endl;
-  std::cout << " --nodesLoadSize <number>      number of nodes to load in one step (default: " << parameter.GetNodesLoadSize() << ")" << std::endl;
-  std::cout << " --nodeDataCacheSize <number>  node data cache size (default: " << parameter.GetNodeDataCacheSize() << ")" << std::endl;
-  std::cout << " --nodeIndexCacheSize <number> node index cache size (default: " << parameter.GetNodeIndexCacheSize() << ")" << std::endl;
-  std::cout << " --waysLoadSize <number>       number of ways to load in one step (default: " << parameter.GetWaysLoadSize() << ")" << std::endl;
-  std::cout << " --wayDataCacheSize <number>   way data cache size (default: " << parameter.GetWayDataCacheSize() << ")" << std::endl;
-  std::cout << " --wayIndexCacheSize <number>  way index cache size (default: " << parameter.GetWayIndexCacheSize() << ")" << std::endl;
+  std::cout << " -h                             show this help" << std::endl;
+  std::cout << " -d                             show debug output" << std::endl;
+  std::cout << " -s <start step>                set starting step" << std::endl;
+  std::cout << " -s <end step>                  set final step" << std::endl;
+  std::cout << " --typefile <path>              path and name of the map.ost.xml file (default: " << parameter.GetTypefile() << ")" << std::endl;
+  std::cout << " --destinationDirectory <path>  destination for generated map files (default: " << parameter.GetDestinationDirectory() << ")" << std::endl;
+  std::cout << " --nodesLoadSize <number>       number of nodes to load in one step (default: " << parameter.GetNodesLoadSize() << ")" << std::endl;
+  std::cout << " --nodeDataCacheSize <number>   node data cache size (default: " << parameter.GetNodeDataCacheSize() << ")" << std::endl;
+  std::cout << " --nodeIndexCacheSize <number>  node index cache size (default: " << parameter.GetNodeIndexCacheSize() << ")" << std::endl;
+  std::cout << " --waysLoadSize <number>        number of ways to load in one step (default: " << parameter.GetWaysLoadSize() << ")" << std::endl;
+  std::cout << " --wayDataCacheSize <number>    way data cache size (default: " << parameter.GetWayDataCacheSize() << ")" << std::endl;
+  std::cout << " --wayIndexCacheSize <number>   way index cache size (default: " << parameter.GetWayIndexCacheSize() << ")" << std::endl;
 }
 
 int main(int argc, char* argv[])
@@ -45,6 +47,9 @@ int main(int argc, char* argv[])
   osmscout::ImportParameter parameter;
   osmscout::ConsoleProgress progress;
   bool                      parameterError=false;
+  std::string               mapfile=parameter.GetMapfile();
+  std::string               typefile=parameter.GetTypefile();
+  std::string               destinationDirectory=parameter.GetDestinationDirectory();
   size_t                    startStep=parameter.GetStartStep();
   size_t                    endStep=parameter.GetEndStep();
   size_t                    nodesLoadSize=parameter.GetNodesLoadSize();
@@ -53,7 +58,6 @@ int main(int argc, char* argv[])
   size_t                    waysLoadSize=parameter.GetWaysLoadSize();
   size_t                    wayDataCacheSize=parameter.GetWayDataCacheSize();
   size_t                    wayIndexCacheSize=parameter.GetWayIndexCacheSize();
-  std::string               mapfile;
 
   // Simple way to analyse command line parameters, but enough for now...
   int i=1;
@@ -92,6 +96,28 @@ int main(int argc, char* argv[])
     else if (strcmp(argv[i],"-h")==0) {
       DumpHelp(parameter);
       return 0;
+    }
+    else if (strcmp(argv[i],"--typefile")==0) {
+      i++;
+
+      if (i<argc) {
+        typefile=argv[i];
+      }
+      else {
+        std::cerr << "Missing parameter after --typefile option" << std::endl;
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--destinationDirectory")==0) {
+      i++;
+
+      if (i<argc) {
+        destinationDirectory=argv[i];
+      }
+      else {
+        std::cerr << "Missing parameter after --destinationDirectory option" << std::endl;
+        parameterError=true;
+      }
     }
     else if (strcmp(argv[i],"--nodesLoadSize")==0) {
       i++;
@@ -199,6 +225,8 @@ int main(int argc, char* argv[])
   }
 
   parameter.SetMapfile(mapfile);
+  parameter.SetTypefile(typefile);
+  parameter.SetDestinationDirectory(destinationDirectory);
   parameter.SetSteps(startStep,endStep);
   parameter.SetNodesLoadSize(nodesLoadSize);
   parameter.SetNodeDataCacheSize(nodeDataCacheSize);
@@ -209,6 +237,8 @@ int main(int argc, char* argv[])
 
   progress.SetStep("Dump parameter");
   progress.Info(std::string("Mapfile: ")+parameter.GetMapfile());
+  progress.Info(std::string("typefile: ")+parameter.GetTypefile());
+  progress.Info(std::string("Destination directory: ")+parameter.GetDestinationDirectory());
   progress.Info(std::string("Steps: ")+
                 osmscout::NumberToString(parameter.GetStartStep())+
                 " - "+
