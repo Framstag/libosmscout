@@ -391,6 +391,10 @@ namespace osmscout {
       delete areaLabelStyles[i];
     }
 
+    for (size_t i=0; i<areaBorderStyles.size(); i++) {
+      delete areaBorderStyles[i];
+    }
+
     for (size_t i=0; i<areaIconStyles.size(); i++) {
       delete areaIconStyles[i];
     }
