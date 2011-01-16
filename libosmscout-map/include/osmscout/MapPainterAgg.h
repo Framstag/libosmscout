@@ -40,11 +40,12 @@ namespace osmscout {
   class OSMSCOUT_MAP_API MapPainterAgg : public MapPainter
   {
   private:
-    agg::pixfmt_rgb24                                  *pf;
-    agg::renderer_base<agg::pixfmt_rgb24>              *renderer_base;
-    agg::rasterizer_scanline_aa<>                      *rasterizer;
-    agg::scanline_p8                                   *scanlineP8 ;
-    agg::renderer_scanline_aa_solid<agg::pixfmt_rgb24> *renderer_aa;
+    agg::pixfmt_rgb24                                                       *pf;
+    agg::renderer_base<agg::pixfmt_rgb24>                                   *renderer_base;
+    agg::rasterizer_scanline_aa<>                                           *rasterizer;
+    agg::scanline_p8                                                        *scanlineP8;
+    agg::renderer_scanline_aa_solid<agg::renderer_base<agg::pixfmt_rgb24> > *renderer_aa;
+
 
   protected:
     bool HasIcon(const StyleConfig& styleConfig,

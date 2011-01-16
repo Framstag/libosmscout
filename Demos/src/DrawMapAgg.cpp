@@ -37,7 +37,7 @@ bool write_ppm(const unsigned char* buf,
                unsigned height,
                const char* file_name)
 {
-  FILE* fd = fopen(file_name, "wb");
+  FILE* fd=fopen(file_name, "wb");
 
   if (fd) {
     fprintf(fd, "P6 %d %d 255 ", width, height);

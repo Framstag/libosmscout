@@ -24,6 +24,9 @@
 #include <iostream>
 #include <limits>
 
+#include <agg2/agg_conv_stroke.h>
+#include <agg2/agg_path_storage.h>
+
 #include <osmscout/Util.h>
 
 namespace osmscout {
@@ -167,7 +170,48 @@ namespace osmscout {
                               CapStyle endCap,
                               const std::vector<Point>& nodes)
   {
-    // TODO
+    TransformWay(projection,parameter,nodes);
+
+    agg::path_storage path;
+
+    bool start=true;
+    for (size_t i=0; i<nodes.size(); i++) {
+      if (drawNode[i]) {
+        if (start) {
+          path.move_to(nodeX[i],nodeY[i]);
+          start=false;
+        }
+        else {
+          path.line_to(nodeX[i],nodeY[i]);
+        }
+        //nodesDrawnCount++;
+      }
+
+      //nodesAllCount++;
+    }
+
+    agg::conv_stroke<agg::path_storage> stroke(path);
+
+    stroke.width(width);
+
+    if (startCap==capRound &&
+        endCap==capRound &&
+        style==LineStyle::normal) {
+      stroke.line_cap(agg::round_cap);
+    }
+    else {
+      stroke.line_cap(agg::butt_cap);
+    }
+
+    // TODO  Dash
+
+    rasterizer->add_path(stroke);
+
+    renderer_aa->color(agg::rgba(r,g,b,a));
+
+    agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
+
+    // TODO: End point caps "dots"
   }
 
   void MapPainterAgg::DrawArea(const Projection& projection,
@@ -177,9 +221,6 @@ namespace osmscout {
                               const LineStyle* lineStyle,
                               const std::vector<Point>& nodes)
   {
-    agg::renderer_base<agg::pixfmt_rgb24>                                   renderer_base(*pf);
-    agg::renderer_scanline_aa_solid<agg::renderer_base<agg::pixfmt_rgb24> > renderer_aa(renderer_base);
-
     TransformArea(projection,parameter,nodes);
 
     agg::path_storage path;
@@ -202,10 +243,10 @@ namespace osmscout {
 
     path.close_polygon();
 
-    renderer_aa.color(agg::rgba(fillStyle.GetFillR(),
-                                fillStyle.GetFillG(),
-                                fillStyle.GetFillB(),
-                                1));
+    renderer_aa->color(agg::rgba(fillStyle.GetFillR(),
+                                 fillStyle.GetFillG(),
+                                 fillStyle.GetFillB(),
+                                 1));
 
     rasterizer->add_path(path);
 
@@ -213,7 +254,7 @@ namespace osmscout {
       // TODO: Draw outline
     }
 
-    agg::render_scanlines(*rasterizer,*scanlineP8,renderer_aa);
+    agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
   }
 
   void MapPainterAgg::DrawArea(const Projection& projection,
@@ -235,9 +276,6 @@ namespace osmscout {
                               double width,
                               double height)
   {
-    agg::renderer_base<agg::pixfmt_rgb24>                                   renderer_base(*pf);
-    agg::renderer_scanline_aa_solid<agg::renderer_base<agg::pixfmt_rgb24> > renderer_aa(renderer_base);
-
     agg::path_storage path;
 
     path.move_to(x,y);
@@ -246,13 +284,13 @@ namespace osmscout {
     path.line_to(x, y+height-1);
     path.close_polygon();
 
-    renderer_aa.color(agg::rgba(style.GetFillR(),
-                                style.GetFillG(),
-                                style.GetFillB(),
-                                1));
+    renderer_aa->color(agg::rgba(style.GetFillR(),
+                                 style.GetFillG(),
+                                 style.GetFillB(),
+                                 1));
 
     rasterizer->add_path(path);
-    agg::render_scanlines(*rasterizer,*scanlineP8,renderer_aa);
+    agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
   }
 
   bool MapPainterAgg::DrawMap(const StyleConfig& styleConfig,
@@ -266,7 +304,7 @@ namespace osmscout {
     renderer_base=new agg::renderer_base<agg::pixfmt_rgb24>(*pf);
     rasterizer=new agg::rasterizer_scanline_aa<>();
     scanlineP8=new agg::scanline_p8();
-    renderer_aa=new agg::renderer_scanline_aa_solid<agg::pixfmt_rgb24>(*pf);
+    renderer_aa=new agg::renderer_scanline_aa_solid<agg::renderer_base<agg::pixfmt_rgb24> >(*renderer_base);
 
     Draw(styleConfig,
          projection,
