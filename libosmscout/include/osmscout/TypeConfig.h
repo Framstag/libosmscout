@@ -214,6 +214,7 @@ namespace osmscout {
     TypeConfig();
     TypeConfig& AddTagInfo(const TagInfo& tagInfo);
     TypeConfig& AddTypeInfo(const TypeInfo& typeInfo);
+    virtual ~TypeConfig();
 
     TypeId GetMaxTypeId() const;
 

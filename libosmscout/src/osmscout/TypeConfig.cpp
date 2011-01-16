@@ -90,6 +90,11 @@ namespace osmscout {
     AddTypeInfo(TypeInfo(typeRoute,tagInternal,"route").CanBeWay(true));
   }
 
+  TypeConfig::~TypeConfig()
+  {
+    // no code
+  }
+
   TypeConfig& TypeConfig::AddTagInfo(const TagInfo& tagInfo)
   {
     tags.push_back(tagInfo);
