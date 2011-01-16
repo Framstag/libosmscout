@@ -120,7 +120,7 @@ namespace osmscout {
 
   Database::~Database()
   {
-    // no code
+    delete typeConfig;
   }
 
   bool Database::Open(const std::string& path, std::string (*hashFunction) (std::string))
@@ -135,9 +135,9 @@ namespace osmscout {
     typeConfig=new TypeConfig();
 
     if (!LoadTypeConfig(typeConfigFileName.c_str(),*typeConfig)) {
+      std::cerr << "Cannot load map.ost.xml!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
-      std::cerr << "Cannot load map.ost.xml!" << std::endl;
       return false;
     }
 
@@ -146,6 +146,8 @@ namespace osmscout {
 
     if (!scanner.Open(file)) {
       std::cerr << "Cannot open 'bounding.dat'" << std::endl;
+      delete typeConfig;
+      typeConfig=NULL;
       return false;
     }
 
@@ -161,6 +163,8 @@ namespace osmscout {
 
     if (scanner.HasError() || !scanner.Close()) {
       std::cerr << "Error while reading/closing '" << file << "'" << std::endl;
+      delete typeConfig;
+      typeConfig=NULL;
       return false;
     }
 
@@ -174,6 +178,8 @@ namespace osmscout {
     std::cout << "Opening 'nodes.dat'..." << std::endl;
     if (!nodeDataFile.Open(path)) {
       std::cerr << "Cannot open 'nodes.dat'!" << std::endl;
+      delete typeConfig;
+      typeConfig=NULL;
       return false;
     }
     std::cout << "Opening 'nodes.dat' done." << std::endl;
@@ -181,6 +187,8 @@ namespace osmscout {
     std::cout << "Opening 'ways.dat'..." << std::endl;
     if (!wayDataFile.Open(path)) {
       std::cerr << "Cannot open 'ways.dat'!" << std::endl;
+      delete typeConfig;
+      typeConfig=NULL;
       return false;
     }
     std::cout << "Opening 'ways.dat' done." << std::endl;
@@ -188,6 +196,8 @@ namespace osmscout {
     std::cout << "Opening 'relations.dat'..." << std::endl;
     if (!relationDataFile.Open(path)) {
       std::cerr << "Cannot open 'relations.dat'!" << std::endl;
+      delete typeConfig;
+      typeConfig=NULL;
       return false;
     }
     std::cout << "Opening 'relations.dat' done." << std::endl;
@@ -195,6 +205,8 @@ namespace osmscout {
     std::cout << "Loading area index..." << std::endl;
     if (!areaIndex.Load(path)) {
       std::cerr << "Cannot load area index!" << std::endl;
+      delete typeConfig;
+      typeConfig=NULL;
       return false;
     }
     std::cout << "Loading area index done." << std::endl;
@@ -202,6 +214,8 @@ namespace osmscout {
     std::cout << "Loading area node index..." << std::endl;
     if (!areaNodeIndex.LoadAreaNodeIndex(path)) {
       std::cerr << "Cannot load area node index!" << std::endl;
+      delete typeConfig;
+      typeConfig=NULL;
       return false;
     }
     std::cout << "Loading area node index done." << std::endl;
@@ -209,6 +223,8 @@ namespace osmscout {
     std::cout << "Loading city street index..." << std::endl;
     if (!cityStreetIndex.Load(path, hashFunction)) {
       std::cerr << "Cannot load city street index!" << std::endl;
+      delete typeConfig;
+      typeConfig=NULL;
       return false;
     }
     std::cout << "Loading city street index done." << std::endl;
@@ -216,6 +232,8 @@ namespace osmscout {
     std::cout << "Loading water index..." << std::endl;
     if (!waterIndex.Load(path)) {
       std::cerr << "Cannot load water index!" << std::endl;
+      delete typeConfig;
+      typeConfig=NULL;
       return false;
     }
     std::cout << "Loading water index done." << std::endl;
