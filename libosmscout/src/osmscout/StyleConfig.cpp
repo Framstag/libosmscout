@@ -474,7 +474,8 @@ namespace osmscout {
     return *this;
   }
 
-  StyleConfig& StyleConfig::SetNodeSymbolStyle(TypeId type, const SymbolStyle& style)
+  StyleConfig& StyleConfig::SetNodeSymbolStyle(TypeId type,
+                                               const SymbolStyle& style)
   {
     if (type>=nodeSymbolStyles.size()) {
       nodeSymbolStyles.resize(type+1,NULL);
@@ -483,15 +484,14 @@ namespace osmscout {
       nodeIconStyles.resize(type+1,NULL);
     }
 
-    SymbolStyle *s=new SymbolStyle();
-    *s=style;
-
-    nodeSymbolStyles[type]=s;
+    delete nodeSymbolStyles[type];
+    nodeSymbolStyles[type]=new SymbolStyle(style);
 
     return *this;
   }
 
-  StyleConfig& StyleConfig::SetNodeLabelStyle(TypeId type, const LabelStyle& style)
+  StyleConfig& StyleConfig::SetNodeLabelStyle(TypeId type,
+                                              const LabelStyle& style)
   {
     if (type>=nodeSymbolStyles.size()) {
       nodeSymbolStyles.resize(type+1,NULL);
@@ -500,15 +500,14 @@ namespace osmscout {
       nodeIconStyles.resize(type+1,NULL);
     }
 
-    LabelStyle *l=new LabelStyle();
-    *l=style;
-
-    nodeLabelStyles[type]=l;
+    delete nodeLabelStyles[type];
+    nodeLabelStyles[type]=new LabelStyle(style);
 
     return *this;
   }
 
-  StyleConfig& StyleConfig::SetNodeRefLabelStyle(TypeId type, const LabelStyle& style)
+  StyleConfig& StyleConfig::SetNodeRefLabelStyle(TypeId type,
+                                                 const LabelStyle& style)
   {
     if (type>=nodeSymbolStyles.size()) {
       nodeSymbolStyles.resize(type+1,NULL);
@@ -517,15 +516,14 @@ namespace osmscout {
       nodeIconStyles.resize(type+1,NULL);
     }
 
-    LabelStyle *l=new LabelStyle();
-    *l=style;
-
-    nodeRefLabelStyles[type]=l;
+    delete nodeRefLabelStyles[type];
+    nodeRefLabelStyles[type]=new LabelStyle(style);
 
     return *this;
   }
 
-  StyleConfig& StyleConfig::SetNodeIconStyle(TypeId type, const IconStyle& style)
+  StyleConfig& StyleConfig::SetNodeIconStyle(TypeId type,
+                                             const IconStyle& style)
   {
     if (type>=nodeSymbolStyles.size()) {
       nodeSymbolStyles.resize(type+1,NULL);
@@ -534,15 +532,14 @@ namespace osmscout {
       nodeIconStyles.resize(type+1,NULL);
     }
 
-    IconStyle *i=new IconStyle();
-    *i=style;
-
-    nodeIconStyles[type]=i;
+    delete nodeIconStyles[type];
+    nodeIconStyles[type]=new IconStyle(style);
 
     return *this;
   }
 
-  StyleConfig& StyleConfig::SetWayLineStyle(TypeId type, const LineStyle& style)
+  StyleConfig& StyleConfig::SetWayLineStyle(TypeId type,
+                                            const LineStyle& style)
   {
     if (type>=wayPrio.size()) {
       wayPrio.resize(type+1,10000); // TODO: max(size_t)
@@ -551,15 +548,14 @@ namespace osmscout {
       wayNameLabelStyles.resize(type+1,NULL);
     }
 
-    LineStyle *l=new LineStyle();
-    *l=style;
-
-    wayLineStyles[type]=l;
+    delete wayLineStyles[type];
+    wayLineStyles[type]=new LineStyle(style);
 
     return *this;
   }
 
-  StyleConfig& StyleConfig::SetWayRefLabelStyle(TypeId type, const LabelStyle& style)
+  StyleConfig& StyleConfig::SetWayRefLabelStyle(TypeId type,
+                                                const LabelStyle& style)
   {
     if (type>=wayPrio.size()) {
       wayPrio.resize(type+1,10000); // TODO: max(size_t)
@@ -568,15 +564,14 @@ namespace osmscout {
       wayNameLabelStyles.resize(type+1,NULL);
     }
 
-    LabelStyle *l=new LabelStyle();
-    *l=style;
-
-    wayRefLabelStyles[type]=l;
+    delete wayRefLabelStyles[type];
+    wayRefLabelStyles[type]=new LabelStyle(style);
 
     return *this;
   }
 
-  StyleConfig& StyleConfig::SetWayNameLabelStyle(TypeId type, const LabelStyle& style)
+  StyleConfig& StyleConfig::SetWayNameLabelStyle(TypeId type,
+                                                 const LabelStyle& style)
   {
     if (type>=wayPrio.size()) {
       wayPrio.resize(type+1,10000); // TODO: max(size_t)
@@ -585,15 +580,14 @@ namespace osmscout {
       wayNameLabelStyles.resize(type+1,NULL);
     }
 
-    LabelStyle *l=new LabelStyle();
-    *l=style;
-
-    wayNameLabelStyles[type]=l;
+    delete wayNameLabelStyles[type];
+    wayNameLabelStyles[type]=new LabelStyle(style);
 
     return *this;
   }
 
-  StyleConfig& StyleConfig::SetAreaFillStyle(TypeId type, const FillStyle& style)
+  StyleConfig& StyleConfig::SetAreaFillStyle(TypeId type,
+                                             const FillStyle& style)
   {
     if (type>=areaFillStyles.size()) {
       areaFillStyles.resize(type+1,NULL);
@@ -605,15 +599,14 @@ namespace osmscout {
       areaIconStyles.resize(type+1,NULL);
     }
 
-    FillStyle *f=new FillStyle();
-    *f=style;
-
-    areaFillStyles[type]=f;
+    delete areaFillStyles[type];
+    areaFillStyles[type]=new FillStyle(style);
 
     return *this;
   }
 
-  StyleConfig& StyleConfig::SetAreaBuildingFillStyle(TypeId type, const FillStyle& style)
+  StyleConfig& StyleConfig::SetAreaBuildingFillStyle(TypeId type,
+                                                     const FillStyle& style)
   {
     if (type>=areaFillStyles.size()) {
       areaFillStyles.resize(type+1,NULL);
@@ -625,15 +618,14 @@ namespace osmscout {
       areaIconStyles.resize(type+1,NULL);
     }
 
-    FillStyle *f=new FillStyle();
-    *f=style;
-
-    areaBuildingFillStyles[type]=f;
+    delete areaBuildingFillStyles[type];
+    areaBuildingFillStyles[type]=new FillStyle(style);
 
     return *this;
   }
 
-  StyleConfig& StyleConfig::SetAreaPatternStyle(TypeId type, const PatternStyle& style)
+  StyleConfig& StyleConfig::SetAreaPatternStyle(TypeId type,
+                                                const PatternStyle& style)
   {
     if (type>=areaFillStyles.size()) {
       areaFillStyles.resize(type+1,NULL);
@@ -645,15 +637,14 @@ namespace osmscout {
       areaIconStyles.resize(type+1,NULL);
     }
 
-    PatternStyle *f=new PatternStyle();
-    *f=style;
-
-    areaPatternStyles[type]=f;
+    delete areaPatternStyles[type];
+    areaPatternStyles[type]=new PatternStyle(style);
 
     return *this;
   }
 
-  StyleConfig& StyleConfig::SetAreaLabelStyle(TypeId type, const LabelStyle& style)
+  StyleConfig& StyleConfig::SetAreaLabelStyle(TypeId type,
+                                              const LabelStyle& style)
   {
     if (type>=areaFillStyles.size()) {
       areaFillStyles.resize(type+1,NULL);
@@ -665,15 +656,14 @@ namespace osmscout {
       areaIconStyles.resize(type+1,NULL);
     }
 
-    LabelStyle *l=new LabelStyle();
-    *l=style;
-
-    areaLabelStyles[type]=l;
+    delete areaLabelStyles[type];
+    areaLabelStyles[type]=new LabelStyle(style);
 
     return *this;
   }
 
-  StyleConfig& StyleConfig::SetAreaSymbolStyle(TypeId type, const SymbolStyle& style)
+  StyleConfig& StyleConfig::SetAreaSymbolStyle(TypeId type,
+                                               const SymbolStyle& style)
   {
     if (type>=areaFillStyles.size()) {
       areaFillStyles.resize(type+1,NULL);
@@ -685,15 +675,14 @@ namespace osmscout {
       areaIconStyles.resize(type+1,NULL);
     }
 
-    SymbolStyle *s=new SymbolStyle();
-    *s=style;
-
-    areaSymbolStyles[type]=s;
+    delete areaSymbolStyles[type];
+    areaSymbolStyles[type]=new SymbolStyle(style);
 
     return *this;
   }
 
-  StyleConfig& StyleConfig::SetAreaBorderStyle(TypeId type, const LineStyle& style)
+  StyleConfig& StyleConfig::SetAreaBorderStyle(TypeId type,
+                                               const LineStyle& style)
   {
     if (type>=areaFillStyles.size()) {
       areaFillStyles.resize(type+1,NULL);
@@ -705,15 +694,14 @@ namespace osmscout {
       areaIconStyles.resize(type+1,NULL);
     }
 
-    LineStyle *s=new LineStyle();
-    *s=style;
-
-    areaBorderStyles[type]=s;
+    delete areaBorderStyles[type];
+    areaBorderStyles[type]=new LineStyle(style);
 
     return *this;
   }
 
-  StyleConfig& StyleConfig::SetAreaIconStyle(TypeId type, const IconStyle& style)
+  StyleConfig& StyleConfig::SetAreaIconStyle(TypeId type,
+                                             const IconStyle& style)
   {
     if (type>=areaFillStyles.size()) {
       areaFillStyles.resize(type+1,NULL);
@@ -725,10 +713,8 @@ namespace osmscout {
       areaIconStyles.resize(type+1,NULL);
     }
 
-    IconStyle *s=new IconStyle();
-    *s=style;
-
-    areaIconStyles[type]=s;
+    delete areaIconStyles[type];
+    areaIconStyles[type]=new IconStyle(style);
 
     return *this;
   }
