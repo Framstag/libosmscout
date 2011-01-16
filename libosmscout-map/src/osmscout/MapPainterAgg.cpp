@@ -250,11 +250,21 @@ namespace osmscout {
 
     rasterizer->add_path(path);
 
-    if (lineStyle!=NULL) {
-      // TODO: Draw outline
-    }
-
     agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
+
+    if (lineStyle!=NULL) {
+      DrawPath(lineStyle->GetStyle(),
+               projection,
+               parameter,
+               lineStyle->GetLineR(),
+               lineStyle->GetLineG(),
+               lineStyle->GetLineB(),
+               lineStyle->GetLineA(),
+               borderWidth[(size_t)type],
+               capRound,
+               capRound,
+               nodes);
+    }
   }
 
   void MapPainterAgg::DrawArea(const Projection& projection,
