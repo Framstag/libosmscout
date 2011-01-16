@@ -282,7 +282,29 @@ namespace osmscout {
 
   MapPainterCairo::~MapPainterCairo()
   {
-    // no code
+    for (std::vector<cairo_surface_t*>::iterator image=images.begin();
+         image!=images.end();
+         ++image) {
+      if (*image!=NULL) {
+        cairo_surface_destroy(*image);
+      }
+    }
+
+    for (std::vector<cairo_pattern_t*>::iterator pattern=patterns.begin();
+         pattern!=patterns.end();
+         ++pattern) {
+      if (*pattern!=NULL) {
+        cairo_pattern_destroy(*pattern);
+      }
+    }
+
+    for (std::map<size_t,cairo_scaled_font_t*>::const_iterator entry=font.begin();
+         entry!=font.end();
+         ++entry) {
+      if (entry->second!=NULL) {
+        cairo_scaled_font_destroy(entry->second);
+      }
+    }
   }
 
   bool MapPainterCairo::HasIcon(const StyleConfig& styleConfig,
