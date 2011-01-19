@@ -75,10 +75,11 @@ int main(int argc, char* argv[])
     queries.push_back(ids[(int)(readerWayCount/10*rand()/(RAND_MAX+1.0))]);
   }
 
-  size_t cacheSize=1;
+  size_t dataCacheSize=1;
+  size_t indexCacheSize=1;
 
   for (size_t i=1; i<=7; i++) {
-    osmscout::WayDataFile wayDataFile("ways.dat","way.idx",cacheSize);
+    osmscout::WayDataFile wayDataFile("ways.dat","way.idx",dataCacheSize,indexCacheSize);
 
     if (!wayDataFile.Open(".")) {
       std::cerr << "Cannot open way data file!" << std::endl;
@@ -115,12 +116,13 @@ int main(int argc, char* argv[])
     cacheMissTimer.Stop();
 
 
-    std::cout << "Reading " << retryCount*queries.size() << " random ways from data file with cache size " << cacheSize << " took " << cacheTimer << std::endl;
-    std::cout << "Reading " << retryCount*queries.size() << " misses from data file with cache size " << cacheSize << " took " << cacheMissTimer << std::endl;
+    std::cout << "Reading " << retryCount*queries.size() << " random ways from data file with cache size " << dataCacheSize << "," << indexCacheSize << " took " << cacheTimer << std::endl;
+    std::cout << "Reading " << retryCount*queries.size() << " misses from data file with cache size " << dataCacheSize << "," << indexCacheSize << " took " << cacheMissTimer << std::endl;
 
     wayDataFile.Close();
 
-    cacheSize=cacheSize*10;
+    dataCacheSize=dataCacheSize*10;
+    indexCacheSize=indexCacheSize*10;
   }
 
   return 0;
