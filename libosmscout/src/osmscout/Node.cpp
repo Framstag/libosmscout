@@ -23,6 +23,27 @@
 
 namespace osmscout {
 
+  void Node::SetId(Id id)
+  {
+    this->id=id;
+  }
+
+  void Node::SetType(TypeId type)
+  {
+    this->type=type;
+  }
+
+  void Node::SetCoordinates(double lon, double lat)
+  {
+    this->lon=lon;
+    this->lat=lat;
+  }
+
+  void Node::SetTags(const std::vector<Tag>& tags)
+  {
+    this->tags=tags;
+  }
+
   bool Node::Read(FileScanner& scanner)
   {
     uint32_t tmpType;

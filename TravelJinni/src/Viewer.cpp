@@ -370,8 +370,8 @@ public:
       osmscout::Node node;
 
       if (database->GetNode(reference.GetId(),node)) {
-        lon=node.lon;
-        lat=node.lat;
+        lon=node.GetLon();
+        lat=node.GetLat();
         this->magnification=magnification;
 
         RequestNewMap();

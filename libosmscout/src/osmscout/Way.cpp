@@ -49,6 +49,54 @@ namespace osmscout {
     return true;
   }
 
+  void Way::SetId(Id id)
+  {
+    this->id=id;
+  }
+
+  void Way::SetType(TypeId type)
+  {
+    attributes.type=type;
+  }
+
+  void Way::SetIsArea(bool isArea)
+  {
+    attributes.SetIsArea(isArea);
+  }
+
+  bool Way::SetTags(Progress& progress,
+                    std::vector<Tag>& tags,
+                    bool& reverseNodes)
+  {
+    return attributes.SetTags(progress,
+                              id,
+                              tags,
+                              reverseNodes);
+  }
+
+  void Way::SetRestrictions(const std::vector<Way::Restriction>& restrictions)
+  {
+    this->restrictions=restrictions;
+
+    if (!restrictions.empty()) {
+      attributes.flags|=SegmentAttributes::hasRestrictions;
+    }
+  }
+
+  void Way::SetStartIsJoint(bool isJoint)
+  {
+    if (isJoint) {
+      attributes.flags|=SegmentAttributes::startIsJoint;
+    }
+  }
+
+  void Way::SetEndIsJoint(bool isJoint)
+  {
+    if (isJoint) {
+      attributes.flags|=SegmentAttributes::endIsJoint;
+    }
+  }
+
   bool Way::Read(FileScanner& scanner)
   {
     uint32_t nodeCount;

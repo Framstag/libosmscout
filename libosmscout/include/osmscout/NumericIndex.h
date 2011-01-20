@@ -148,7 +148,7 @@ namespace osmscout {
 
     std::cout << "Index " << filepart << ":" << std::endl;
 
-    filename=path+"/"+filepart;
+    filename=AppendFileToDir(path,filepart);
 
     if (!scanner.Open(filename)) {
       std::cerr << "Cannot open file '" << filename << "'" << std::endl;
@@ -457,18 +457,18 @@ namespace osmscout {
         writer.GetPos(pageStart);
 
         pageStarts.push_back(pageStart);
-        startingIds.push_back(data.id);
+        startingIds.push_back(data.GetId());
 
-        writer.WriteNumber(data.id);
+        writer.WriteNumber(data.GetId());
         writer.WriteNumber(pos);
       }
       else {
-        writer.WriteNumber((data.id-lastId));
+        writer.WriteNumber((data.GetId()-lastId));
         writer.WriteNumber((pos-lastPos));
       }
 
       lastPos=pos;
-      lastId=data.id;
+      lastId=data.GetId();
     }
 
     levels--;

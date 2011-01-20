@@ -428,14 +428,13 @@ namespace osmscout {
 
         bool   reverseNodes=false;
 
-        way.id=rawWay.id;
+        way.SetId(rawWay.GetId());
+        way.SetType(rawWay.type);
+        way.SetIsArea(rawWay.IsArea());
 
-        if (!way.attributes.Assign(progress,
-                                   rawWay.id,
-                                   rawWay.type,
-                                   rawWay.IsArea(),
-                                   rawWay.tags,
-                                   reverseNodes)) {
+        if (!way.SetTags(progress,
+                         rawWay.tags,
+                         reverseNodes)) {
           continue;
         }
 
@@ -476,25 +475,19 @@ namespace osmscout {
 
           nodeUse=nodeUses.find(way.nodes[0].id);
 
-          if (nodeUse!=nodeUses.end() && nodeUse->second>=2) {
-            way.attributes.flags|=SegmentAttributes::startIsJoint;
-          }
+          way.SetStartIsJoint(nodeUse!=nodeUses.end() && nodeUse->second>=2);
 
           nodeUse=nodeUses.find(way.nodes[way.nodes.size()-1].id);
 
-          if (nodeUse!=nodeUses.end() && nodeUse->second>=2) {
-            way.attributes.flags|=SegmentAttributes::endIsJoint;
-          }
+          way.SetStartIsJoint(nodeUse!=nodeUses.end() && nodeUse->second>=2);
         }
 
         // Restrictions
 
-        std::map<Id,std::vector<Way::Restriction> >::iterator iter=restrictions.find(way.id);
+        std::map<Id,std::vector<Way::Restriction> >::iterator iter=restrictions.find(way.GetId());
 
         if (iter!=restrictions.end()) {
-          way.attributes.flags|=SegmentAttributes::hasRestrictions;
-
-          way.restrictions=iter->second;
+          way.SetRestrictions(iter->second);
         }
 
         way.Write(writer);

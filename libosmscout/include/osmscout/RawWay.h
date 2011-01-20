@@ -44,9 +44,29 @@ namespace osmscout {
       // no code
     }
 
+    inline Id GetId() const
+    {
+      return id;
+    }
+
+    inline TypeId GetType() const
+    {
+      return type;
+    }
+
     inline bool IsArea() const
     {
       return isArea;
+    }
+
+    inline const std::vector<Tag>& GetTags() const
+    {
+      return tags;
+    }
+
+    inline const std::vector<Id>& GetNodes() const
+    {
+      return nodes;
     }
 
     bool Read(FileScanner& scanner);

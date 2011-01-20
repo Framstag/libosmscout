@@ -773,7 +773,7 @@ namespace osmscout {
 
         way.Read(wayScanner);
 
-        std::pair<std::map<Id,Way>::iterator,bool> result=cache.insert(std::pair<Id,Way>(way.id,way));
+        std::pair<std::map<Id,Way>::iterator,bool> result=cache.insert(std::pair<Id,Way>(way.GetId(),way));
 
         refs.push_back(&result.first->second);
       }
@@ -1115,7 +1115,7 @@ namespace osmscout {
       follower.clear();
 
       // Get joint nodes in same way/area
-      if (currentWay->id!=current.ref.id) {
+      if (currentWay->GetId()!=current.ref.id) {
         if (!osmscout::GetWay(wayIndex,
                               path,
                               waysCache,
@@ -1144,7 +1144,7 @@ namespace osmscout {
             follower.push_back(RNode(currentWay->nodes[i].id,
                                      currentWay->nodes[i].lon,
                                      currentWay->nodes[i].lat,
-                                     Reference(currentWay->id,refWay),
+                                     Reference(currentWay->GetId(),refWay),
                                      current.id));
           }
         }
@@ -1159,7 +1159,7 @@ namespace osmscout {
                 follower.push_back(RNode(currentWay->nodes[i-1].id,
                                          currentWay->nodes[i-1].lon,
                                          currentWay->nodes[i-1].lat,
-                                         Reference(currentWay->id,refWay),
+                                         Reference(currentWay->GetId(),refWay),
                                          current.id));
               }
             }
@@ -1171,7 +1171,7 @@ namespace osmscout {
                 follower.push_back(RNode(currentWay->nodes[i+1].id,
                                          currentWay->nodes[i+1].lon,
                                          currentWay->nodes[i+1].lat,
-                                         Reference(currentWay->id,refWay),
+                                         Reference(currentWay->GetId(),refWay),
                                          current.id));
               }
             }
@@ -1235,14 +1235,15 @@ namespace osmscout {
               follower.push_back(RNode(way->nodes[i].id,
                                        way->nodes[i].lon,
                                        way->nodes[i].lat,
-                                       Reference(way->id,refWay),
+                                       Reference(way->GetId(),refWay),
                                        current.id));
             }
           }
         }
         else {
           for (size_t i=0; i<way->nodes.size(); ++i) {
-            if (way->nodes[i].id==current.id  && CanBeTurnedInto(*currentWay,way->nodes[i].id,way->id)) {
+            if (way->nodes[i].id==current.id  &&
+                CanBeTurnedInto(*currentWay,way->nodes[i].id,way->GetId())) {
 
               if (i>0 && !way->IsOneway()) {
                 std::map<Id,RNode>::iterator closeEntry=closeMap.find(way->nodes[i-1].id);
@@ -1251,7 +1252,7 @@ namespace osmscout {
                   follower.push_back(RNode(way->nodes[i-1].id,
                                            way->nodes[i-1].lon,
                                            way->nodes[i-1].lat,
-                                           Reference(way->id,refWay),
+                                           Reference(way->GetId(),refWay),
                                            current.id));
                 }
               }
@@ -1263,7 +1264,7 @@ namespace osmscout {
                   follower.push_back(RNode(way->nodes[i+1].id,
                                            way->nodes[i+1].lon,
                                            way->nodes[i+1].lat,
-                                           Reference(way->id,refWay),
+                                           Reference(way->GetId(),refWay),
                                            current.id));
                 }
               }
@@ -1284,7 +1285,7 @@ namespace osmscout {
                                                 iter->lon,
                                                 iter->lat);
 
-        if (currentWay->id!=iter->id) {
+        if (currentWay->GetId()!=iter->id) {
           currentCost+=profile.GetTurnCostFactor();
         }
 
@@ -1432,7 +1433,7 @@ namespace osmscout {
     // For every step in the route...
     for ( /* no code */ ;iter!=data.Entries().end(); ++iter, way=newWay, node=newNode) {
       // Find the corresponding way (which may be the old way?)
-      if (iter->GetWayId()!=way.id) {
+      if (iter->GetWayId()!=way.GetId()) {
         if (!GetWay(iter->GetWayId(),newWay)) {
           return false;
         }
@@ -1483,12 +1484,12 @@ namespace osmscout {
   bool Database::TransformRouteDataToWay(const RouteData& data,
                                          Way& way)
   {
-    way.id=0;
-    way.attributes.type=typeRoute;
-    way.attributes.flags=0;
-    way.attributes.layer=5;
-    way.attributes.tags.clear();
-    way.nodes.clear();
+    Way tmp;
+
+    way=tmp;
+
+    way.SetId(0);
+    way.SetType(typeRoute);
     way.nodes.reserve(data.Entries().size());
 
     if (data.Entries().size()==0) {

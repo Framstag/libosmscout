@@ -31,7 +31,7 @@ namespace osmscout {
 
   class OSMSCOUT_API Node
   {
-  public:
+  private:
     Id                id;
     TypeId            type;
     double            lon;
@@ -44,6 +44,46 @@ namespace osmscout {
     {
       // no code
     }
+
+    inline Id GetId() const
+    {
+      return id;
+    }
+
+    inline TypeId GetType() const
+    {
+      return type;
+    }
+
+    inline double GetLon() const
+    {
+      return lon;
+    }
+
+    inline double GetLat() const
+    {
+      return lat;
+    }
+
+    inline size_t GetTagCount() const
+    {
+      return tags.size();
+    }
+
+    inline TagId GetTagKey(size_t idx) const
+    {
+      return tags[idx].key;
+    }
+
+    inline const std::string& GetTagValue(size_t idx) const
+    {
+      return tags[idx].value;
+    }
+
+    void SetId(Id id);
+    void SetType(TypeId type);
+    void SetCoordinates(double lon, double lat);
+    void SetTags(const std::vector<Tag>& tags);
 
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;

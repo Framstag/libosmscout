@@ -139,12 +139,12 @@ namespace osmscout {
       return (flags & hasRestrictions)!=0;
     }
 
-    bool Assign(Progress& progress,
-                Id id,
-                TypeId type,
-                bool isArea,
-                std::vector<Tag>& tags,
-                bool& reverseNodes);
+    void SetIsArea(bool isArea);
+
+    bool SetTags(Progress& progress,
+                 Id id,
+                 std::vector<Tag>& tags,
+                 bool& reverseNodes);
 
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;

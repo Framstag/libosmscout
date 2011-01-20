@@ -36,6 +36,21 @@ namespace osmscout {
     {
       // no code
     }
+
+    inline Id GetId() const
+    {
+      return id;
+    }
+
+    inline double GetLon() const
+    {
+      return lon;
+    }
+
+    inline double GetLat() const
+    {
+      return lat;
+    }
   };
 }
 

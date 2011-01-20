@@ -226,7 +226,7 @@ namespace osmscout {
           }
 
           // We do not index a way that is in the blacklist
-          if (wayBlacklist.find(way.id)!=wayBlacklist.end()) {
+          if (wayBlacklist.find(way.GetId())!=wayBlacklist.end()) {
             continue;
           }
 

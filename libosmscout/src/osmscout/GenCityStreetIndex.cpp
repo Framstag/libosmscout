@@ -131,22 +131,22 @@ namespace osmscout {
         return false;
       }
 
-      if (cityIds.find(node.type)!=cityIds.end()) {
+      if (cityIds.find(node.GetType())!=cityIds.end()) {
         std::string name;
 
-        for (size_t i=0; i<node.tags.size(); i++) {
-          if (node.tags[i].key==tagPlaceName) {
-            name=node.tags[i].value;
+        for (size_t i=0; i<node.GetTagCount(); i++) {
+          if (node.GetTagKey(i)==tagPlaceName) {
+            name=node.GetTagValue(i);
             break;
           }
-          else if (node.tags[i].key==tagName &&
+          else if (node.GetTagKey(i)==tagName &&
                    name.empty()) {
-            name=node.tags[i].value;
+            name=node.GetTagValue(i);
           }
         }
 
         if (name.empty()) {
-          progress.Warning(std::string("node ")+NumberToString(node.id)+" has no name, skipping");
+          progress.Warning(std::string("node ")+NumberToString(node.GetId())+" has no name, skipping");
           continue;
         }
 
@@ -199,15 +199,15 @@ namespace osmscout {
       if (way.IsArea() && cityIds.find(way.GetType())!=cityIds.end()) {
         std::string name=way.GetName();
 
-        for (size_t i=0; i<way.attributes.tags.size(); i++) {
-          if (way.attributes.tags[i].key==tagPlaceName) {
-            name=way.attributes.tags[i].value;
+        for (size_t i=0; i<way.GetTagCount(); i++) {
+          if (way.GetTagKey(i)==tagPlaceName) {
+            name=way.GetTagValue(i);
             break;
           }
         }
 
         if (name.empty()) {
-          progress.Warning(std::string("area ")+NumberToString(way.id)+" has no name, skipping");
+          progress.Warning(std::string("area ")+NumberToString(way.GetId())+" has no name, skipping");
           continue;
         }
 
@@ -309,7 +309,7 @@ namespace osmscout {
     }
 
     // We partly contain it, add it to the area but continue
-    area.ways[way.GetName()].push_back(way.id);
+    area.ways[way.GetName()].push_back(way.GetId());
 
     bool completeMatch=IsAreaInArea(way.nodes,area.area);
 
@@ -329,7 +329,7 @@ namespace osmscout {
       }
     }
 
-    area.nodes[name].push_back(node.id);
+    area.nodes[name].push_back(node.GetId());
   }
 
   static void DumpArea(const Area& parent, size_t indent)
@@ -641,14 +641,14 @@ namespace osmscout {
       if (way.IsArea() && way.GetType()==boundaryId) {
         size_t level=0;
 
-        for (size_t i=0; i<way.attributes.tags.size(); i++) {
-          if (way.attributes.tags[i].key==tagAdminLevel) {
-            if (StringToNumber(way.attributes.tags[i].value,level)) {
+        for (size_t i=0; i<way.GetTagCount(); i++) {
+          if (way.GetTagKey(i)==tagAdminLevel) {
+            if (StringToNumber(way.GetTagValue(i),level)) {
               boundaryAreas.push_back(way);
             }
             else {
               progress.Info("Could not parse admin_level of way "+
-                            NumberToString(way.GetType() )+" "+NumberToString(way.id));
+                            NumberToString(way.GetType() )+" "+NumberToString(way.GetId()));
             }
 
             break;
@@ -779,18 +779,19 @@ namespace osmscout {
 
         progress.SetProgress((l-1)*boundaryAreas.size()+count,10*boundaryAreas.size());
 
-        for (size_t i=0; i<a->attributes.tags.size() && !(l!=0 && !name.empty()); i++) {
-          if (a->attributes.tags[i].key==tagAdminLevel && StringToNumber(a->attributes.tags[i].value,level)) {
+        for (size_t i=0; i<a->GetTagCount() && !(l!=0 && !name.empty()); i++) {
+          if (a->GetTagKey(i)==tagAdminLevel &&
+              StringToNumber(a->GetTagValue(i),level)) {
           }
-          else if (a->attributes.tags[i].key==tagName) {
-            name=a->attributes.tags[i].value;
+          else if (a->GetTagKey(i)==tagName) {
+            name=a->GetTagValue(i);
           }
         }
 
         if (level==l && !name.empty()) {
           Area area;
 
-          area.reference.Set(a->id,refWay);
+          area.reference.Set(a->GetId(),refWay);
           area.name=name;
           area.area=a->nodes;
 
@@ -819,21 +820,21 @@ namespace osmscout {
 
       progress.SetProgress(count+1,cityAreas.size());
 
-      for (size_t i=0; i<a->attributes.tags.size(); i++) {
-        if (a->attributes.tags[i].key==tagPlaceName) {
-          name=a->attributes.tags[i].value;
+      for (size_t i=0; i<a->GetTagCount(); i++) {
+        if (a->GetTagKey(i)==tagPlaceName) {
+          name=a->GetTagValue(i);
           break;
         }
       }
 
       if (name.empty()) {
-        progress.Warning(std::string("City of type 'area' and id ")+NumberToString(a->id)+" has no name, skipping");
+        progress.Warning(std::string("City of type 'area' and id ")+NumberToString(a->GetId())+" has no name, skipping");
         continue;
       }
 
       Area area;
 
-      area.reference.Set(a->id,refWay);
+      area.reference.Set(a->GetId(),refWay);
       area.name=name;
       area.area=a->nodes;
 
@@ -854,28 +855,28 @@ namespace osmscout {
 
       progress.SetProgress(count+1,cityNodes.size());
 
-      for (size_t i=0; i<city->tags.size(); i++) {
-        if (city->tags[i].key==tagName) {
-          name=city->tags[i].value;
+      for (size_t i=0; i<city->GetTagCount(); i++) {
+        if (city->GetTagKey(i)==tagName) {
+          name=city->GetTagValue(i);
           break;
         }
       }
 
       if (name.empty()) {
-        progress.Warning(std::string("City of type 'node' and id ")+NumberToString(city->id)+" has no name, skipping");
+        progress.Warning(std::string("City of type 'node' and id ")+NumberToString(city->GetId())+" has no name, skipping");
         continue;
       }
 
       Loc location;
 
-      location.reference.Set(city->id,refNode);
+      location.reference.Set(city->GetId(),refNode);
       location.name=name;
 
       Point node;
 
-      node.id=city->id;
-      node.lon=city->lon;
-      node.lat=city->lat;
+      node.id=city->GetId();
+      node.lon=city->GetLon();
+      node.lat=city->GetLat();
 
       AddLocationToArea(rootArea,location,node);
     }
@@ -1009,14 +1010,12 @@ namespace osmscout {
         return false;
       }
 
-      if (indexables.find(node.type)!=indexables.end()) {
+      if (indexables.find(node.GetType())!=indexables.end()) {
         std::string name;
 
-        for (std::vector<Tag>::iterator tag=node.tags.begin();
-             tag!=node.tags.end();
-             ++tag) {
-          if (tag->key==tagName) {
-            name=tag->value;
+        for (size_t i=0; i<node.GetTagCount(); i++) {
+          if (node.GetTagKey(i)==tagName) {
+            name=node.GetTagValue(i);
             break;
           }
         }

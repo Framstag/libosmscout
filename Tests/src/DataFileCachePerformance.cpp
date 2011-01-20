@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
     osmscout::Way way;
 
     if (way.Read(scanner)) {
-      ids.push_back(way.id);
+      ids.push_back(way.GetId());
       readerWayCount++;
     }
   }

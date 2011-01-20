@@ -111,11 +111,10 @@ namespace osmscout {
       nodesReadCount++;
 
       if (rawNode.type!=typeIgnore) {
-        node.id=rawNode.id;
-        node.type=rawNode.type;
-        node.lat=rawNode.lat;
-        node.lon=rawNode.lon;
-        node.tags=rawNode.tags;
+        node.SetId(rawNode.GetId());
+        node.SetType(rawNode.GetType());
+        node.SetCoordinates(rawNode.lon,rawNode.lat);
+        node.SetTags(rawNode.tags);
 
         node.Write(writer);
         nodesWrittenCount++;

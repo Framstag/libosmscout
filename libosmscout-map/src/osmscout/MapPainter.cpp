@@ -603,9 +603,9 @@ namespace osmscout {
     for (std::vector<Node>::const_iterator node=data.nodes.begin();
          node!=data.nodes.end();
          ++node) {
-      const LabelStyle  *labelStyle=styleConfig.GetNodeLabelStyle(node->type);
-      IconStyle         *iconStyle=styleConfig.GetNodeIconStyle(node->type);
-      const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetNodeSymbolStyle(node->type);
+      const LabelStyle  *labelStyle=styleConfig.GetNodeLabelStyle(node->GetType());
+      IconStyle         *iconStyle=styleConfig.GetNodeIconStyle(node->GetType());
+      const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetNodeSymbolStyle(node->GetType());
 
       bool hasLabel=labelStyle!=NULL &&
                     projection.GetMagnification()>=labelStyle->GetMinMag() &&
@@ -622,14 +622,14 @@ namespace osmscout {
       //nodesDrawnCount++;
 
       if (hasLabel) {
-        for (size_t i=0; i<node->tags.size(); i++) {
+        for (size_t i=0; i<node->GetTagCount(); i++) {
           // TODO: We should make sure we prefer one over the other
-          if (node->tags[i].key==tagName) {
-            label=node->tags[i].value;
+          if (node->GetTagKey(i)==tagName) {
+            label=node->GetTagValue(i);
             break;
           }
-          else if (node->tags[i].key==tagRef)  {
-            label=node->tags[i].value;
+          else if (node->GetTagKey(i)==tagRef)  {
+            label=node->GetTagValue(i);
           }
         }
 
@@ -648,7 +648,8 @@ namespace osmscout {
 
       double x,y;
 
-      projection.GeoToPixel(node->lon,node->lat,x,y);
+      projection.GeoToPixel(node->GetLon(),node->GetLat(),
+                            x,y);
 
       if (hasLabel) {
         if (hasSymbol) {
@@ -1398,11 +1399,11 @@ namespace osmscout {
     for (std::list<Node>::const_iterator node=data.poiNodes.begin();
          node!=data.poiNodes.end();
          ++node) {
-      if (!projection.GeoIsIn(node->lon,node->lat)) {
+      if (!projection.GeoIsIn(node->GetLon(),node->GetLat())) {
         continue;
       }
 
-      const SymbolStyle *style=styleConfig.GetNodeSymbolStyle(node->type);
+      const SymbolStyle *style=styleConfig.GetNodeSymbolStyle(node->GetType());
 
       if (style==NULL ||
           projection.GetMagnification()<style->GetMinMag()) {
@@ -1411,7 +1412,8 @@ namespace osmscout {
 
       double x,y;
 
-      projection.GeoToPixel(node->lon,node->lat,x,y);
+      projection.GeoToPixel(node->GetLon(),node->GetLat(),
+                            x,y);
 
       DrawSymbol(style,x,y);
 
@@ -1427,14 +1429,14 @@ namespace osmscout {
     for (std::list<Node>::const_iterator node=data.poiNodes.begin();
          node!=data.poiNodes.end();
          ++node) {
-      if (!projection.GeoIsIn(node->lon,node->lat)) {
+      if (!projection.GeoIsIn(node->GetLon(),node->GetLat())) {
         continue;
       }
 
-      for (size_t i=0; i<node->tags.size(); i++) {
+      for (size_t i=0; i<node->GetTagCount(); i++) {
         // TODO: We should make sure we prefer one over the other
-        if (node->tags[i].key==tagName) {
-          const LabelStyle *style=styleConfig.GetNodeLabelStyle(node->type);
+        if (node->GetTagKey(i)==tagName) {
+          const LabelStyle *style=styleConfig.GetNodeLabelStyle(node->GetType());
 
           if (style==NULL ||
               projection.GetMagnification()<style->GetMinMag() ||
@@ -1444,16 +1446,17 @@ namespace osmscout {
 
           double x,y;
 
-          projection.GeoToPixel(node->lon,node->lat,x,y);
+          projection.GeoToPixel(node->GetLon(),node->GetLat(),
+                                x,y);
 
           DrawLabel(projection,
                     parameter,
                     *style,
-                    node->tags[i].value,
+                    node->GetTagValue(i),
                     x,y);
         }
-        else if (node->tags[i].key==tagRef)  {
-          const LabelStyle *style=styleConfig.GetNodeRefLabelStyle(node->type);
+        else if (node->GetTagKey(i)==tagRef)  {
+          const LabelStyle *style=styleConfig.GetNodeRefLabelStyle(node->GetType());
 
           if (style==NULL ||
               projection.GetMagnification()<style->GetMinMag() ||
@@ -1463,12 +1466,13 @@ namespace osmscout {
 
           double x,y;
 
-          projection.GeoToPixel(node->lon,node->lat,x,y);
+          projection.GeoToPixel(node->GetLon(),node->GetLat(),
+                                x,y);
 
           DrawLabel(projection,
                     parameter,
                     *style,
-                    node->tags[i].value,
+                    node->GetTagValue(i),
                     x,y);
         }
       }

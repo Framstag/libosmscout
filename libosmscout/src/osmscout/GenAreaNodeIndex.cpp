@@ -206,17 +206,17 @@ namespace osmscout {
         return false;
       }
 
-      if (node.type>=leafs.size()) {
-        leafs.resize(node.type+1);
+      if (node.GetType()>=leafs.size()) {
+        leafs.resize(node.GetType()+1);
       }
-      if (leafs[node.type].size()==0){
-        leafs[node.type].resize(1);
+      if (leafs[node.GetType()].size()==0){
+        leafs[node.GetType()].resize(1);
       }
 
       AddEntry(0,
-               leafs[node.type],
-               node.lat+90,
-               node.lon+180,
+               leafs[node.GetType()],
+               node.GetLat()+90,
+               node.GetLon()+180,
                offset,
                0);
     }

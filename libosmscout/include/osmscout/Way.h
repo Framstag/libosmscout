@@ -44,9 +44,11 @@ namespace osmscout {
       std::vector<Id> members;
     };
 
-  public:
+  private:
     Id                        id;
     SegmentAttributes         attributes;
+
+  public:
     std::vector<Point>        nodes;
     std::vector<Restriction>  restrictions;
 
@@ -126,8 +128,35 @@ namespace osmscout {
       return attributes.EndIsJoint();
     }
 
+    inline size_t GetTagCount() const
+    {
+      return attributes.tags.size();
+    }
+
+    inline TagId GetTagKey(size_t idx) const
+    {
+      return attributes.tags[idx].key;
+    }
+
+    inline const std::string& GetTagValue(size_t idx) const
+    {
+      return attributes.tags[idx].value;
+    }
 
     bool GetCenter(double& lat, double& lon) const;
+
+    void SetId(Id id);
+    void SetType(TypeId type);
+    void SetIsArea(bool isArea);
+
+    bool SetTags(Progress& progress,
+                 std::vector<Tag>& tags,
+                 bool& reverseNodes);
+
+    void SetRestrictions(const std::vector<Way::Restriction>& restrictions);
+
+    void SetStartIsJoint(bool isJoint);
+    void SetEndIsJoint(bool isJoint);
 
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;

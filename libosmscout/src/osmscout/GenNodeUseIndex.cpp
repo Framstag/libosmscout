@@ -139,7 +139,7 @@ namespace osmscout {
         if (types.find(way.GetType())!=types.end()) {
           for (size_t i=0; i<way.nodes.size(); i++) {
             if (way.nodes[i].id>=start && way.nodes[i].id<end) {
-              nodeWayMap[way.nodes[i].id].push_back(way.id);
+              nodeWayMap[way.nodes[i].id].push_back(way.GetId());
               }
           }
         }
@@ -185,9 +185,9 @@ namespace osmscout {
                 for (std::list<Id>::const_iterator w=ways->second.begin();
                      w!=ways->second.end();
                      ++w) {
-                  if (*w!=way.id) {
+                  if (*w!=way.GetId()) {
                     // TODO: Optimize performance
-                    wayWayMap[way.id].insert(*w);
+                    wayWayMap[way.GetId()].insert(*w);
                   }
                 }
               }

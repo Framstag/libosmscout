@@ -96,12 +96,13 @@ namespace osmscout {
 
       bool reverseNodes=false;
 
-      if (!role.attributes.Assign(progress,
-                                 way.id,
-                                 way.type,
-                                 way.IsArea(),
-                                 way.tags,
-                                 reverseNodes)) {
+      role.attributes.type=way.type;
+      role.attributes.SetIsArea(way.IsArea());
+
+      if (!role.attributes.SetTags(progress,
+                                   way.id,
+                                   way.tags,
+                                   reverseNodes)) {
         return false;
       }
 
