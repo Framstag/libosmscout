@@ -31,7 +31,7 @@ namespace osmscout {
 
   class RawNode
   {
-  public:
+  private:
     Id                id;
     TypeId            type;
     double            lon;
@@ -69,6 +69,11 @@ namespace osmscout {
     {
       return tags;
     }
+
+    void SetId(Id id);
+    void SetType(TypeId type);
+    void SetCoordinates(double lon, double lat);
+    void SetTags(const std::vector<Tag>& tags);
 
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;

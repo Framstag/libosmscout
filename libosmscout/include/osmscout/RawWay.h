@@ -29,12 +29,14 @@ namespace osmscout {
 
   class RawWay
   {
-  public:
+  private:
     Id               id;
     TypeId           type;
     bool             isArea;
     std::vector<Tag> tags;
     std::vector<Id>  nodes;
+
+  public:
 
   public:
     inline RawWay()
@@ -68,6 +70,21 @@ namespace osmscout {
     {
       return nodes;
     }
+
+    inline size_t GetNodeCount() const
+    {
+      return nodes.size();
+    }
+
+    inline Id GetNodeId(size_t idx) const
+    {
+      return nodes[idx];
+    }
+
+    void SetId(Id id);
+    void SetType(TypeId type, bool isArea);
+    void SetTags(const std::vector<Tag>& tags);
+    void SetNodes(const std::vector<Id>& nodes);
 
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;

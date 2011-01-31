@@ -96,25 +96,25 @@ namespace osmscout {
       }
 
       if (nodesReadCount==0) {
-        minLat=rawNode.lat;
-        minLon=rawNode.lon;
-        maxLat=rawNode.lat;
-        maxLon=rawNode.lon;
+        minLat=rawNode.GetLat();
+        minLon=rawNode.GetLon();
+        maxLat=rawNode.GetLat();
+        maxLon=rawNode.GetLon();
       }
       else {
-        minLat=std::min(minLat,rawNode.lat);
-        minLon=std::min(minLon,rawNode.lon);
-        maxLat=std::max(maxLat,rawNode.lat);
-        maxLon=std::max(maxLon,rawNode.lon);
+        minLat=std::min(minLat,rawNode.GetLat());
+        minLon=std::min(minLon,rawNode.GetLon());
+        maxLat=std::max(maxLat,rawNode.GetLat());
+        maxLon=std::max(maxLon,rawNode.GetLon());
       }
 
       nodesReadCount++;
 
-      if (rawNode.type!=typeIgnore) {
+      if (rawNode.GetType()!=typeIgnore) {
         node.SetId(rawNode.GetId());
         node.SetType(rawNode.GetType());
-        node.SetCoordinates(rawNode.lon,rawNode.lat);
-        node.SetTags(rawNode.tags);
+        node.SetCoordinates(rawNode.GetLon(),rawNode.GetLat());
+        node.SetTags(rawNode.GetTags());
 
         node.Write(writer);
         nodesWrittenCount++;

@@ -57,7 +57,7 @@ namespace osmscout {
 
     void Process(const Id& id,
                  const double& lon, const double& lat,
-                 const std::vector<Tag>& tags);
+                 std::vector<Tag>& tags);
     void Process(const Id& id,
                  const std::vector<Id>& nodes,
                  const std::vector<Tag>& tags);
@@ -96,20 +96,21 @@ namespace osmscout {
 
   void Preprocessor::Process(const Id& id,
                              const double& lon, const double& lat,
-                             const std::vector<Tag>& tags)
+                             std::vector<Tag>& tags)
   {
     RawNode                    node;
     std::vector<Tag>::iterator tag;
+    TypeId                     type=typeIgnore;
 
-    node.type=typeIgnore;
-    node.id=id;
-    node.lon=lon;
-    node.lat=lat;
-    node.tags=tags;
-
-    if (config.GetNodeTypeId(node.tags,tag,node.type))  {
-      node.tags.erase(tag);
+    if (config.GetNodeTypeId(tags,tag,type))  {
+      tags.erase(tag);
     }
+
+    node.SetId(id);
+    node.SetType(type);
+    node.SetCoordinates(lon,lat);
+    node.SetTags(tags);
+
 
     node.Write(nodeWriter);
     nodeCount++;
@@ -155,19 +156,19 @@ namespace osmscout {
 
     RawWay way;
 
+    way.SetId(id);
+
     if (isArea) {
-      way.type=areaType;
+      way.SetType(areaType,true);
       areaCount++;
     }
     else {
-      way.type=wayType;
+      way.SetType(wayType,false);
       wayCount++;
     }
 
-    way.id=id;
-    way.isArea=isArea;
-    way.nodes=nodes;
-    way.tags=t;
+    way.SetNodes(nodes);
+    way.SetTags(t);
 
     way.Write(wayWriter);
   }
@@ -178,14 +179,16 @@ namespace osmscout {
   {
     RawRelation                relation;
     std::vector<Tag>::iterator tag;
+    TypeId                     type;
 
-    relation.type=typeIgnore;
-    relation.id=id;
+    relation.SetId(id);
+    relation.SetType(typeIgnore);
     relation.members=members;
     relation.tags=tags;
 
     if (config.GetRelationTypeId(relation.tags,tag,
-                                 relation.type))  {
+                                 type))  {
+      relation.SetType(type);
       relation.tags.erase(tag);
     }
 

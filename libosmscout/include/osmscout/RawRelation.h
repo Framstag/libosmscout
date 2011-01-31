@@ -42,9 +42,11 @@ namespace osmscout {
       std::string role;
     };
 
-  public:
+  private:
     Id                  id;
     TypeId              type;
+
+  public:
     std::vector<Tag>    tags;
     std::vector<Member> members;
 
@@ -54,6 +56,19 @@ namespace osmscout {
     {
       // no code
     }
+
+    inline Id GetId() const
+    {
+      return id;
+    }
+
+    inline TypeId GetType() const
+    {
+      return type;
+    }
+
+    void SetId(Id id);
+    void SetType(TypeId type);
 
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;

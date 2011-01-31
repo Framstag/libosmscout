@@ -95,16 +95,17 @@ namespace osmscout {
         return false;
       }
 
-      if (relation.type==restrictionPosId || relation.type==restrictionNegId) {
+      if (relation.GetType()==restrictionPosId ||
+          relation.GetType()==restrictionNegId) {
         Id               from=0;
         Way::Restriction restriction;
 
         restriction.members.resize(1,0);
 
-        if (relation.type==restrictionPosId) {
+        if (relation.GetType()==restrictionPosId) {
           restriction.type=Way::rstrAllowTurn;
         }
-        else if (relation.type==restrictionNegId) {
+        else if (relation.GetType()==restrictionNegId) {
           restriction.type=Way::rstrForbitTurn;
         }
         else {
@@ -228,8 +229,8 @@ namespace osmscout {
         return false;
       }
 
-      if (way.type!=typeIgnore) {
-        size_t index=way.id/distributionGranuality;
+      if (way.GetType()!=typeIgnore) {
+        size_t index=way.GetId()/distributionGranuality;
 
         if (index>=wayDistribution.size()) {
           wayDistribution.resize(index+1,0);
@@ -309,16 +310,18 @@ namespace osmscout {
           return false;
         }
 
-        if (way.type!=typeIgnore && way.id>=start && way.id<end) {
-          ways[way.id]=way;
+        if (way.GetType()!=typeIgnore &&
+            way.GetId()>=start &&
+            way.GetId()<end) {
+          ways[way.GetId()]=way;
 
-          for (size_t j=0; j<way.nodes.size(); j++) {
-            nodeIds.insert(way.nodes[j]);
-            nodeUses[way.nodes[j]]=0;
+          for (size_t j=0; j<way.GetNodeCount(); j++) {
+            nodeIds.insert(way.GetNodeId(j));
+            nodeUses[way.GetNodeId(j)]=0;
           }
         }
 
-        if (way.id>end) {
+        if (way.GetId()>end) {
           // ways are stored in increasing id order, so we can stop after we have reached
           // the last id for this interval.
           break;
@@ -365,8 +368,8 @@ namespace osmscout {
           return false;
         }
 
-        if (nodeIds.find(node.id)!=nodeIds.end()) {
-          nodes[node.id]=node;
+        if (nodeIds.find(node.GetId())!=nodeIds.end()) {
+          nodes[node.GetId()]=node;
         }
       }
 
@@ -402,9 +405,9 @@ namespace osmscout {
           return false;
         }
 
-        if (way.type!=typeIgnore) {
-          for (size_t j=0; j<way.nodes.size(); j++) {
-            std::map<Id,uint8_t>::iterator nodeUse=nodeUses.find(way.nodes[j]);
+        if (way.GetType()!=typeIgnore) {
+          for (size_t j=0; j<way.GetNodeCount(); j++) {
+            std::map<Id,uint8_t>::iterator nodeUse=nodeUses.find(way.GetNodeId(j));
 
             if (nodeUse!=nodeUses.end()) {
               nodeUse->second++;
@@ -423,45 +426,45 @@ namespace osmscout {
       for (std::map<Id,RawWay>::iterator w=ways.begin();
            w!=ways.end();
            ++w) {
-        RawWay rawWay=w->second;
-        Way    way;
-
-        bool   reverseNodes=false;
+        RawWay           rawWay=w->second;
+        std::vector<Tag> tags(rawWay.GetTags());
+        Way              way;
+        bool             reverseNodes=false;
 
         way.SetId(rawWay.GetId());
-        way.SetType(rawWay.type);
+        way.SetType(rawWay.GetType());
         way.SetIsArea(rawWay.IsArea());
 
         if (!way.SetTags(progress,
-                         rawWay.tags,
+                         tags,
                          reverseNodes)) {
           continue;
         }
 
         // Nodes
 
-        if (rawWay.nodes.size()<2) {
+        if (rawWay.GetNodeCount()<2) {
           progress.Error(std::string("Way ")+
-                         NumberToString(rawWay.id)+" has only "+
-                         NumberToString(rawWay.nodes.size())+
+                         NumberToString(rawWay.GetId())+" has only "+
+                         NumberToString(rawWay.GetNodeCount())+
                          " node(s) but requires at least 2 nodes");
           continue;
         }
 
-        way.nodes.resize(rawWay.nodes.size());
-        for (size_t i=0; i<rawWay.nodes.size(); i++) {
-          std::map<Id,RawNode>::iterator node=nodes.find(rawWay.nodes[i]);
+        way.nodes.resize(rawWay.GetNodeCount());
+        for (size_t i=0; i<rawWay.GetNodeCount(); i++) {
+          std::map<Id,RawNode>::iterator node=nodes.find(rawWay.GetNodeId(i));
 
           if (node==nodes.end()) {
             progress.Error(std::string("Cannot find node ")+
-                           NumberToString(rawWay.nodes[i])+" for way "+
-                           NumberToString(rawWay.id));
+                           NumberToString(rawWay.GetNodeId(i))+" for way "+
+                           NumberToString(rawWay.GetId()));
             continue;
           }
 
-          way.nodes[i].id=rawWay.nodes[i];
-          way.nodes[i].lat=node->second.lat;
-          way.nodes[i].lon=node->second.lon;
+          way.nodes[i].id=rawWay.GetNodeId(i);
+          way.nodes[i].lat=node->second.GetLat();
+          way.nodes[i].lon=node->second.GetLon();
         }
 
         if (reverseNodes) {

@@ -76,7 +76,7 @@ namespace osmscout {
         return false;
       }
 
-      size_t index=node.id/distributionGranuality;
+      size_t index=node.GetId()/distributionGranuality;
 
       if (index>=nodeDistribution.size()) {
         nodeDistribution.resize(index+1,0);

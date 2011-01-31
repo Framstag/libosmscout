@@ -21,6 +21,16 @@
 
 namespace osmscout {
 
+  void RawRelation::SetId(Id id)
+  {
+    this->id=id;
+  }
+
+  void RawRelation::SetType(TypeId type)
+  {
+    this->type=type;
+  }
+
   bool RawRelation::Read(FileScanner& scanner)
   {
     uint32_t tagCount;

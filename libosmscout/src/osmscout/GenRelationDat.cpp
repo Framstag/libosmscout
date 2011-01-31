@@ -63,13 +63,13 @@ namespace osmscout {
 
       Point point;
 
-      point.id=node.id;
-      point.lat=node.lat;
-      point.lon=node.lon;
+      point.id=node.GetId();
+      point.lat=node.GetLat();
+      point.lon=node.GetLon();
 
       role.nodes.push_back(point);
 
-      type=node.type;
+      type=node.GetType();
     }
     else if (member.type==RawRelation::memberWay) {
       RawWay way;
@@ -82,11 +82,11 @@ namespace osmscout {
         return false;
       }
 
-      type=way.type;
+      type=way.GetType();
 
       std::vector<RawNode> ns;
 
-      if (!nodeDataFile.Get(way.nodes,ns)) {
+      if (!nodeDataFile.Get(way.GetNodes(),ns)) {
         progress.Error("Cannot resolve nodes of relation member of type way with id "+
                        NumberToString(member.id)+
                        " for relation "+
@@ -96,12 +96,14 @@ namespace osmscout {
 
       bool reverseNodes=false;
 
-      role.attributes.type=way.type;
+      role.attributes.type=way.GetType();
       role.attributes.SetIsArea(way.IsArea());
 
+      std::vector<Tag> tags(way.GetTags());
+
       if (!role.attributes.SetTags(progress,
-                                   way.id,
-                                   way.tags,
+                                   way.GetId(),
+                                   tags,
                                    reverseNodes)) {
         return false;
       }
@@ -109,9 +111,9 @@ namespace osmscout {
       for (size_t i=0; i<ns.size(); i++) {
         Point point;
 
-        point.id=ns[i].id;
-        point.lat=ns[i].lat;
-        point.lon=ns[i].lon;
+        point.id=ns[i].GetId();
+        point.lat=ns[i].GetLat();
+        point.lon=ns[i].GetLon();
 
         role.nodes.push_back(point);
       }
@@ -588,7 +590,7 @@ namespace osmscout {
 
       if (rawRel.members.size()==0) {
         progress.Warning("Relation "+
-                         NumberToString(rawRel.id)+
+                         NumberToString(rawRel.GetId())+
                          " does not have any members!");
         continue;
       }
@@ -601,8 +603,8 @@ namespace osmscout {
 
       selectedRelationCount++;
 
-      rel.id=rawRel.id;
-      rel.type=rawRel.type;
+      rel.id=rawRel.GetId();
+      rel.type=rawRel.GetType();
       rel.flags=0;
 
       std::vector<Tag>::iterator tag=rawRel.tags.begin();
@@ -617,7 +619,7 @@ namespace osmscout {
         }
         else if (tag->key==tagLayer) {
           if (!StringToNumber(tag->value,layer)) {
-            progress.Warning(std::string("Layer tag value '")+tag->value+"' for relation "+NumberToString(rawRel.id)+" is not numeric!");
+            progress.Warning(std::string("Layer tag value '")+tag->value+"' for relation "+NumberToString(rawRel.GetId())+" is not numeric!");
           }
           tag=rawRel.tags.erase(tag);
         }
@@ -638,7 +640,7 @@ namespace osmscout {
         rel.roles[m].role=rawRel.members[m].role;
         rel.roles[m].attributes.layer=layer;
 
-        if (!ResolveMember(rawRel.id,
+        if (!ResolveMember(rawRel.GetId(),
                            name,
                            rawRel.members[m],nodeDataFile,
                            wayDataFile,
@@ -743,12 +745,12 @@ namespace osmscout {
           rel.relType=="boundary") {
         if (!ResolveMultipolygon(rel,progress)) {
           progress.Error("Cannot resolve multipolygon relation "+
-                         NumberToString(rawRel.id)+" "+name);
+                         NumberToString(rawRel.GetId())+" "+name);
           continue;
         }
       }
 
-      rel.id=rawRel.id;
+      rel.id=rawRel.GetId();
       rel.tags=rawRel.tags;
 
       if (rel.relType=="multipolygon" &&

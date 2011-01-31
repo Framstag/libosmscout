@@ -347,14 +347,14 @@ namespace osmscout {
       }
     }
 
-    RawNode     rawNode;
-    RawWay      rawWay;
-    RawRelation rawRel;
+    RawNode          rawNode;
+    RawWay           rawWay;
+    RawRelation      rawRel;
+    std::vector<Tag> tags;
+    std::vector<Id>  nodes;
 
-    rawNode.tags.reserve(20);
-
-    rawWay.tags.reserve(20);
-    rawWay.nodes.reserve(2000);
+    tags.reserve(20);
+    nodes.reserve(20000);
 
     rawRel.tags.reserve(20);
     rawRel.members.reserve(2000);
@@ -390,13 +390,14 @@ namespace osmscout {
 
         if (group.nodes_size()>0) {
           for (int n=0; n<group.nodes_size(); n++) {
+            TypeId          type=typeIgnore;
             const PBF::Node &inputNode=group.nodes(n);
 
-            rawNode.id=inputNode.id();
-            rawNode.lat=(inputNode.lat()*block.granularity()+block.lat_offset())/NANO;
-            rawNode.lon=(inputNode.lon()*block.granularity()+block.lon_offset())/NANO;
+            rawNode.SetId(inputNode.id());
+            rawNode.SetCoordinates((inputNode.lon()*block.granularity()+block.lon_offset())/NANO,
+                                   (inputNode.lat()*block.granularity()+block.lat_offset())/NANO);
 
-            rawNode.tags.clear();
+            tags.clear();
 
             for (int t=0; t<inputNode.keys_size(); t++) {
               TagId tagId=typeConfig.GetTagId(block.stringtable().s(inputNode.keys(t)).c_str());
@@ -410,18 +411,33 @@ namespace osmscout {
               tag.key=tagId;
               tag.value=block.stringtable().s(inputNode.vals(t));
 
-              rawNode.tags.push_back(tag);
+              tags.push_back(tag);
             }
+
+            if (tags.size()>0) {
+              std::vector<Tag>::iterator tag;
+
+              if (typeConfig.GetNodeTypeId(tags,tag,type))  {
+                tags.erase(tag);
+              }
+            }
+
+            rawNode.SetType(type);
+            rawNode.SetTags(tags);
+
+            rawNode.Write(nodeWriter);
+            nodeCount++;
+
           }
         }
         else if (group.ways_size()>0) {
           for (int w=0; w<group.ways_size(); w++) {
             const PBF::Way &inputWay=group.ways(w);
 
-            rawWay.nodes.clear();
-            rawWay.tags.clear();
+            nodes.clear();
+            tags.clear();
 
-            rawWay.id=inputWay.id();
+            rawWay.SetId(inputWay.id());
 
             for (int t=0; t<inputWay.keys_size(); t++) {
               TagId tagId=typeConfig.GetTagId(block.stringtable().s(inputWay.keys(t)).c_str());
@@ -435,38 +451,43 @@ namespace osmscout {
               tag.key=tagId;
               tag.value=block.stringtable().s(inputWay.vals(t));
 
-              rawWay.tags.push_back(tag);
+              tags.push_back(tag);
             }
 
             long ref=0;
             for (int r=0; r<inputWay.refs_size();r++) {
               ref+=inputWay.refs(r);
 
-              rawWay.nodes.push_back(ref);
+              nodes.push_back(ref);
             }
 
             TypeId                     areaType=typeIgnore;
             TypeId                     wayType=typeIgnore;
-            std::vector<Tag>::iterator wayTag=rawWay.tags.end();
-            std::vector<Tag>::iterator areaTag=rawWay.tags.end();
+            std::vector<Tag>::iterator wayTag=tags.end();
+            std::vector<Tag>::iterator areaTag=tags.end();
 
-            if (rawWay.tags.size()>0) {
-              typeConfig.GetWayAreaTypeId(rawWay.tags,wayTag,wayType,areaTag,areaType);
+            if (tags.size()>0) {
+              typeConfig.GetWayAreaTypeId(tags,wayTag,wayType,areaTag,areaType);
             }
 
             if (areaType!=typeIgnore &&
-                rawWay.nodes.size()>1 &&
-                rawWay.nodes[0]==rawWay.nodes[rawWay.nodes.size()-1]) {
-              rawWay.isArea=true;
-              rawWay.tags.erase(areaTag);
+                nodes.size()>1 &&
+                nodes[0]==nodes[nodes.size()-1]) {
+              tags.erase(areaTag);
+
+              rawWay.SetType(areaType,true);
+              areaCount++;
             }
             else if (wayType!=typeIgnore) {
-              rawWay.isArea=false;
-              rawWay.tags.erase(wayTag);
+              tags.erase(wayTag);
+
+              rawWay.SetType(wayType,false);
+              wayCount++;
             }
             else if (areaType==typeIgnore &&
                      wayType==typeIgnore) {
-              rawWay.isArea=false;
+              rawWay.SetType(typeIgnore,false);
+              wayCount++;
               // Unidentified way
               /*
               std::cout << "--- " << id << std::endl;
@@ -475,14 +496,8 @@ namespace osmscout {
               }*/
             }
 
-            if (rawWay.isArea) {
-              rawWay.type=areaType;
-              areaCount++;
-            }
-            else {
-              rawWay.type=wayType;
-              wayCount++;
-            }
+            rawWay.SetTags(tags);
+            rawWay.SetNodes(nodes);
 
             rawWay.Write(wayWriter);
           }
@@ -494,8 +509,8 @@ namespace osmscout {
             rawRel.tags.clear();
             rawRel.members.clear();
 
-            rawRel.id=inputRelation.id();
-            rawRel.type=typeIgnore;
+            rawRel.SetId(inputRelation.id());
+            rawRel.SetType(typeIgnore);
 
             for (int t=0; t<inputRelation.keys_size(); t++) {
               TagId tagId=typeConfig.GetTagId(block.stringtable().s(inputRelation.keys(t)).c_str());
@@ -537,11 +552,14 @@ namespace osmscout {
             }
 
             if (rawRel.tags.size()>0) {
+              TypeId                     type;
               std::vector<Tag>::iterator tag;
 
               if (typeConfig.GetRelationTypeId(rawRel.tags,
                                                tag,
-                                               rawRel.type))  {
+                                               type))  {
+                rawRel.SetType(type);
+
                 rawRel.tags.erase(tag);
               }
             }
@@ -559,16 +577,17 @@ namespace osmscout {
           int           t=0;
 
           for (int d=0; d<dense.id_size();d++) {
+            TypeId type=typeIgnore;
+
             dId+=dense.id(d);
             dLat+=dense.lat(d);
             dLon+=dense.lon(d);
 
-            rawNode.id=dId;
-            rawNode.type=typeIgnore;
-            rawNode.lat=(dLat*block.granularity()+block.lat_offset())/NANO;
-            rawNode.lon=(dLon*block.granularity()+block.lon_offset())/NANO;
+            rawNode.SetId(dId);
+            rawNode.SetCoordinates((dLon*block.granularity()+block.lon_offset())/NANO,
+                                   (dLat*block.granularity()+block.lat_offset())/NANO);
 
-            rawNode.tags.clear();
+            tags.clear();
 
             while (true) {
               if (t>=dense.keys_vals_size()) {
@@ -594,16 +613,19 @@ namespace osmscout {
 
               t+=2;
 
-              rawNode.tags.push_back(tag);
+              tags.push_back(tag);
             }
 
-            if (rawNode.tags.size()>0) {
+            if (tags.size()>0) {
               std::vector<Tag>::iterator tag;
 
-              if (typeConfig.GetNodeTypeId(rawNode.tags,tag,rawNode.type))  {
-                rawNode.tags.erase(tag);
+              if (typeConfig.GetNodeTypeId(tags,tag,type))  {
+                tags.erase(tag);
               }
             }
+
+            rawNode.SetType(type);
+            rawNode.SetTags(tags);
 
             rawNode.Write(nodeWriter);
             nodeCount++;

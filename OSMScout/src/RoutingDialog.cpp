@@ -361,8 +361,8 @@ void RoutingDialog::Route()
     return;
   }
 
-  if (!dbThread.CalculateRoute(startWay.id,startWay.nodes.front().id,
-                               endWay.id,endWay.nodes.back().id,
+  if (!dbThread.CalculateRoute(startWay.GetId(),startWay.nodes.front().id,
+                               endWay.GetId(),endWay.nodes.back().id,
                                routeData)) {
     std::cerr << "There was an error while routing!" << std::endl;
     return;

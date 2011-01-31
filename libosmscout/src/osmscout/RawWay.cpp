@@ -23,6 +23,27 @@
 
 namespace osmscout {
 
+  void RawWay::SetId(Id id)
+  {
+    this->id=id;
+  }
+
+  void RawWay::SetType(TypeId type, bool isArea)
+  {
+    this->type=type;
+    this->isArea=isArea;
+  }
+
+  void RawWay::SetTags(const std::vector<Tag>& tags)
+  {
+    this->tags=tags;
+  }
+
+  void RawWay::SetNodes(const std::vector<Id>& nodes)
+  {
+    this->nodes=nodes;
+  }
+
   bool RawWay::Read(FileScanner& scanner)
   {
     if (!scanner.Read(id)) {
