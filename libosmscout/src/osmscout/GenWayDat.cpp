@@ -433,13 +433,14 @@ namespace osmscout {
 
         way.SetId(rawWay.GetId());
         way.SetType(rawWay.GetType());
-        way.SetIsArea(rawWay.IsArea());
 
         if (!way.SetTags(progress,
                          tags,
                          reverseNodes)) {
           continue;
         }
+
+        way.SetIsArea(rawWay.IsArea());
 
         // Nodes
 
