@@ -1,0 +1,576 @@
+#include <iostream>
+#include <sstream>
+
+#include <osmscout/TypeConfig.h>
+#include <osmscout/Util.h>
+
+COMPILER OSS
+
+std::string Destring(const char* str)
+{
+  std::string result(str);
+
+  if (result.length()>=2 &&
+      result[0]=='"' &&
+      result[result.length()-1]=='"') {
+    result=result.substr(1,result.length()-2);
+  }
+
+  return result;
+}
+
+bool StringToDouble(const char* string, double& value)
+{
+  std::istringstream buffer(string);
+
+  buffer.imbue(std::locale::classic());
+
+  buffer >> value;
+
+  return !buffer.fail() && !buffer.bad() && buffer.eof();
+}
+
+size_t GetHexDigitValue(char c)
+{
+  if (c>='0' && c<='9') {
+    return c-'0';
+  }
+  else if (c>='a' && c<='f') {
+    return 10+(c-'a');
+  }
+
+  assert(false);
+}
+
+void ToRGBA(const char* str, double& r, double& g, double& b, double& a)
+{
+  r=(16*GetHexDigitValue(str[1])+GetHexDigitValue(str[2]))/255.0;
+  g=(16*GetHexDigitValue(str[3])+GetHexDigitValue(str[4]))/255.0;
+  b=(16*GetHexDigitValue(str[5])+GetHexDigitValue(str[6]))/255.0;
+
+  if (strlen(str)==9) {
+    a=(16*GetHexDigitValue(str[7])+GetHexDigitValue(str[8]))/255.0;
+  }
+  else {
+    a=1.0;
+  }
+}
+
+CHARACTERS
+  letter     = 'a'..'z' + 'A'..'Z'.
+  digit      = '0'..'9'.
+  hexdigit   = 'a'..'f' + '0'..'9'.
+  eol        = '\n'.
+  stringchar = ANY - '"'.
+  quotchar   = ANY.
+
+TOKENS
+  ident      = letter {letter | '_'}.
+  number     = ['-'] digit {digit}.
+  double     = ['-'] digit {digit} '.' digit {digit}.
+  color      = "#" hexdigit hexdigit hexdigit hexdigit hexdigit hexdigit [hexdigit hexdigit].
+  string     = '"' {stringchar | '\\' quotchar} '"'.
+
+COMMENTS FROM "/*" TO "*/" NESTED
+COMMENTS FROM "//" TO eol
+
+IGNORE ' ' + '\t' + '\r' + '\n'
+
+PRODUCTIONS
+  OSS         = SYNC "OSS" {STYLE} "END".
+  STYLE       = NODESTYLE | WAYSTYLE | AREASTYLE.
+
+  NODESTYLE   = (.
+                  TypeId      type=typeIgnore;
+                  std::string key;
+                  std::string value;
+                .)
+                SYNC "NODE"
+                "KEY" string (. key=Destring(t->val); .)
+                "VALUE" string (. value=Destring(t->val); .)
+                (.
+                  type=config.GetTypeConfig()->GetNodeTypeId(config.GetTypeConfig()->GetTagId(key.c_str()),
+                                                            value.c_str());
+
+                  if (type==typeIgnore) {
+                    std::string e="Unknown type '"+key+"/"+value+"'";
+
+                    SemErr(e.c_str());
+                  }
+
+                .)
+                {
+                  (. LabelStyle labelStyle; .)
+                  LABELDEF<labelStyle>
+                  (. config.SetNodeLabelStyle(type,labelStyle); .)
+                | (. LabelStyle refStyle; .)
+                  REFDEF<refStyle>
+                  (. config.SetNodeRefLabelStyle(type,refStyle); .)
+                | (. SymbolStyle symbolStyle; .)
+                  SYMBOLDEF<symbolStyle>
+                  (. config.SetNodeSymbolStyle(type,symbolStyle); .)
+                | (. IconStyle iconStyle; .)
+                  ICONDEF<iconStyle>
+                  (. config.SetNodeIconStyle(type,iconStyle); .)
+                }.
+  WAYSTYLE    = (.
+                  TypeId      type=typeIgnore;
+                  std::string key;
+                  std::string value;
+                  size_t      prio;
+                .)
+                SYNC "WAY"
+                "KEY" string   (. key=Destring(t->val); .)
+                "VALUE" string (. value=Destring(t->val); .)
+                "PRIO" number
+                (.
+                  type=config.GetTypeConfig()->GetWayTypeId(config.GetTypeConfig()->GetTagId(key.c_str()),
+                                                            value.c_str());
+
+                  if (type==typeIgnore) {
+                    std::string e="Unknown type '"+key+"/"+value+"'";
+
+                    SemErr(e.c_str());
+                  }
+                  else if (!StringToNumber(t->val,prio)) {
+                    std::string e="Cannot parse priority '"+std::string(t->val)+"'";
+
+                    SemErr(e.c_str());
+                  }
+                  else {
+                    config.SetWayPrio(type,prio);
+                  }
+                .)
+                {
+                  (. LineStyle lineStyle; .)
+                  LINEDEF<lineStyle>
+                  (.
+                  config.SetWayLineStyle(type,lineStyle); .)
+                | (. LabelStyle labelStyle; .)
+                  LABELDEF<labelStyle>
+                  (. config.SetWayNameLabelStyle(type,labelStyle); .)
+                | (. LabelStyle refStyle; .)
+                  REFDEF<refStyle>
+                  (. config.SetWayRefLabelStyle(type,refStyle); .)
+                }.
+  AREASTYLE   = (.
+                  TypeId      type=typeIgnore;
+                  std::string key;
+                  std::string value;
+                .)
+                SYNC "AREA"
+                "KEY" string (. key=Destring(t->val); .)
+                "VALUE" string (. value=Destring(t->val); .)
+                (.
+                  type=config.GetTypeConfig()->GetAreaTypeId(config.GetTypeConfig()->GetTagId(key.c_str()),
+                                                             value.c_str());
+
+                  if (type==typeIgnore) {
+                    std::string e="Unknown type '"+key+"/"+value+"'";
+
+                    SemErr(e.c_str());
+                  }
+
+                .)
+                {
+                  (.
+                    FillStyle   fillStyle;
+                    std::string filter;
+                  .)
+                  FILLDEF<fillStyle,filter>
+                  (.
+                    if (filter=="building") {
+                      config.SetAreaBuildingFillStyle(type,fillStyle);
+                    }
+                    else {
+                      config.SetAreaFillStyle(type,fillStyle);
+                    }
+                  .)
+                | (. PatternStyle patternStyle; .)
+                  PATTERNDEF<patternStyle>
+                  (. config.SetAreaPatternStyle(type,patternStyle); .)
+                | (. LineStyle lineStyle; .)
+                  BORDERDEF<lineStyle>
+                  (. config.SetAreaBorderStyle(type,lineStyle); .)
+                | (. LabelStyle labelStyle; .)
+                  LABELDEF<labelStyle>
+                  (. config.SetAreaLabelStyle(type,labelStyle); .)
+/*
+                | (. LabelStyle labelStyle; .)
+                  REFDEF<labelStyle>
+                  (. config.SetAreaRefLabelStyle(type,labelStyle); .)
+*/
+                | (. SymbolStyle symbolStyle; .)
+                  SYMBOLDEF<symbolStyle>
+                  (. config.SetAreaSymbolStyle(type,symbolStyle); .)
+                | (. IconStyle iconStyle; .)
+                  ICONDEF<iconStyle>
+                  (. config.SetAreaIconStyle(type,iconStyle); .)
+                }.
+
+  LINEDEF<LineStyle& style>
+              = (.
+                  double r,g,b,a;
+                .)
+                SYNC "LINE"
+                COLOR<r,g,b,a>
+                (. style.SetLineColor(r,g,b,a); .)
+
+                [SYNC "WITH"
+                  [
+                    (. LineStyle::Style s=style.GetStyle(); .)
+                    LINESTYLE<s>
+                    (. style.SetStyle(s); .)
+                  ]
+
+                  [
+                    (. double cr,cg,cb,ca; .)
+                    "ALTCOLOR"
+                    COLOR<cr,cg,cb,ca>
+                    (. style.SetAlternateColor(cr,cg,cb,ca); .)
+                  ]
+
+                  [
+                    (. double cr,cg,cb,ca; .)
+                    "OUTLINECOLOR"
+                    COLOR<cr,cg,cb,ca>
+                    (. style.SetOutlineColor(cr,cg,cb,ca); .)
+                  ]
+
+                  [
+                    (. double minPixel=style.GetMinPixel(); .)
+                    MINPIXEL<minPixel>
+                    (. style.SetMinPixel(minPixel); .)
+                  ]
+
+                  [
+                    (. double width=style.GetWidth(); .)
+                    WIDTH<width>
+                    (. style.SetWidth(width); .)
+                  ]
+
+                  [
+                    (. double outline=style.GetOutline(); .)
+                    OUTLINE<outline>
+                    (. style.SetOutline(outline); .)
+                  ]
+                ].
+
+  FILLDEF<FillStyle& style, std::string& filter>
+              = (.
+                  double r,g,b,a;
+                .)
+                SYNC "FILL"
+                COLOR<r,g,b,a>
+                (. style.SetColor(r,g,b,a); .)
+
+                [SYNC "WITH"
+                  [
+                    (. int layer=style.GetLayer(); .)
+                    LAYER<layer>
+                    (. style.SetLayer(layer); .)
+                  ]
+
+                  [
+                    FILTER<filter>
+                  ]
+                ].
+
+  PATTERNDEF<PatternStyle& style>
+              =
+                SYNC "PATTERN"
+                string (. style.SetPattern(Destring(t->val)); .)
+
+                [SYNC "WITH"
+                  [
+                    (. Mag minMag=style.GetMinMag(); .)
+                    MINMAG<minMag>
+                    (. style.SetMinMag(minMag); .)
+                  ]
+
+                  [
+                    (. int layer=style.GetLayer(); .)
+                    LAYER<layer>
+                    (. style.SetLayer(layer); .)
+                  ]
+                ].
+
+  BORDERDEF<LineStyle& style>
+              = (.
+                  double r,g,b,a;
+                .)
+                SYNC "BORDER"
+                COLOR<r,g,b,a> (. style.SetLineColor(r,g,b,a); .)
+
+                [SYNC "WITH"
+                  [
+                    (. LineStyle::Style s=style.GetStyle(); .)
+                    LINESTYLE<s>
+                    (. style.SetStyle(s); .)
+                  ]
+
+                  [
+                    (. double minPixel=style.GetMinPixel(); .)
+                    MINPIXEL<minPixel>
+                    (. style.SetMinPixel(minPixel); .)
+                  ]
+
+                  [
+                    (. double width=style.GetWidth(); .)
+                    WIDTH<width>
+                    (. style.SetWidth(width); .)
+                  ]
+                ].
+
+  LABELDEF<LabelStyle& style>
+              = SYNC "LABEL"
+
+                [SYNC "WITH"
+                  [
+                    (. LabelStyle::Style s; .)
+                    LABELSTYLE<s>
+                    (. style.SetStyle(s); .)
+                  ]
+
+                  [
+                    (. double cr,cg,cb,ca; .)
+                    "COLOR"
+                    COLOR<cr,cg,cb,ca>
+                    (. style.SetTextColor(cr,cg,cb,ca); .)
+                  ]
+
+                  [
+                    (. double cr,cg,cb,ca; .)
+                    "BGCOLOR"
+                    COLOR<cr,cg,cb,ca>
+                    (. style.SetBgColor(cr,cg,cb,ca); .)
+                  ]
+
+                  [
+                    (. double cr,cg,cb,ca; .)
+                    "BORDERCOLOR"
+                    COLOR<cr,cg,cb,ca>
+                    (. style.SetBorderColor(cr,cg,cb,ca); .)
+                  ]
+
+                  [
+                    (. double size=style.GetSize(); .)
+                    SIZE<size>
+                    (. style.SetSize(size); .)
+                  ]
+
+                  [
+                    (. Mag minMag=style.GetMinMag(); .)
+                    MINMAG<minMag>
+                    (. style.SetMinMag(minMag); .)
+                  ]
+
+                  [ (. Mag maxMag=style.GetMaxMag(); .)
+                    MAXMAG<maxMag>
+                    (. style.SetMaxMag(maxMag); .)
+                  ]
+
+                  [ (. Mag scaleMag=style.GetScaleAndFadeMag(); .)
+                    SCALEMAG<scaleMag>
+                    (. style.SetScaleAndFadeMag(scaleMag); .)
+                  ]
+                ].
+
+  REFDEF<LabelStyle& style>
+              = SYNC "REF"
+
+                [SYNC "WITH"
+                  [
+                    (. LabelStyle::Style s; .)
+                    LABELSTYLE<s>
+                    (. style.SetStyle(s); .)
+                  ]
+
+                  [
+                    (. double cr,cg,cb,ca; .)
+                    "COLOR"
+                    COLOR<cr,cg,cb,ca>
+                    (. style.SetTextColor(cr,cg,cb,ca); .)
+                  ]
+
+                  [
+                    (. double cr,cg,cb,ca; .)
+                    "BGCOLOR"
+                    COLOR<cr,cg,cb,ca>
+                    (. style.SetBgColor(cr,cg,cb,ca); .)
+                  ]
+
+                  [
+                    (. double cr,cg,cb,ca; .)
+                    "BORDERCOLOR"
+                    COLOR<cr,cg,cb,ca>
+                    (. style.SetBorderColor(cr,cg,cb,ca); .)
+                  ]
+
+                  [ (. double size=style.GetSize(); .)
+                    SIZE<size>
+                    (. style.SetSize(size); .)
+                  ]
+
+                  [
+                    (. Mag minMag=style.GetMinMag(); .)
+                    MINMAG<minMag>
+                    (. style.SetMinMag(minMag); .)
+                  ]
+
+                  [ (. Mag maxMag=style.GetMaxMag(); .)
+                    MAXMAG<maxMag>
+                    (. style.SetMaxMag(maxMag); .)
+                  ]
+
+                  [ (. Mag scaleMag=style.GetScaleAndFadeMag(); .)
+                    SCALEMAG<scaleMag>
+                    (. style.SetScaleAndFadeMag(scaleMag); .)
+                  ]
+                ].
+
+  SYMBOLDEF<SymbolStyle& style>
+              = (.
+                  SymbolStyle::Style s;
+                  double             r,g,b,a;
+                  double             size=style.GetSize();
+                .)
+                SYNC "SYMBOL"
+                SYMBOLSTYLE<s> (. style.SetStyle(s); .)
+                COLOR<r,g,b,a> (. style.SetFillColor(r,g,b,a); .)
+                DOUBLE<size>   (. style.SetSize(size); .)
+
+                [SYNC "WITH"
+
+                  [
+                    (. Mag minMag=style.GetMinMag(); .)
+                    MINMAG<minMag>
+                    (. style.SetMinMag(minMag); .)
+                  ]
+                ].
+
+  ICONDEF<IconStyle& style>
+              = SYNC "ICON"
+                ident (. style.SetIconName(t->val); .)
+
+                [SYNC "WITH"
+                  [
+                    (. Mag minMag=style.GetMinMag(); .)
+                    MINMAG<minMag>
+                    (. style.SetMinMag(minMag); .)
+                  ]
+                ].
+
+  LINESTYLE<LineStyle::Style& style>
+              = "STYLE"
+                 (
+                   "none"      (. style=LineStyle::none; .)
+                 | "normal"    (. style=LineStyle::normal; .)
+                 | "longDash"  (. style=LineStyle::longDash; .)
+                 | "dotted"    (. style=LineStyle::dotted; .)
+                 | "lineDot"   (. style=LineStyle::lineDot; .)
+                 ).
+
+  LABELSTYLE<LabelStyle::Style& style>
+              = "STYLE"
+                (
+                  "normal"    (. style=LabelStyle::normal; .)
+                | "contour"   (. style=LabelStyle::contour; .)
+                | "plate"     (. style=LabelStyle::plate; .)
+                | "emphasize" (. style=LabelStyle::emphasize; .)
+                ).
+
+  SYMBOLSTYLE<SymbolStyle::Style& style>
+              = (
+                  "none"      (. style=SymbolStyle::none; .)
+                | "box"       (. style=SymbolStyle::box; .)
+                | "triangle"  (. style=SymbolStyle::triangle; .)
+                | "circle"    (. style=SymbolStyle::circle; .)
+                ).
+
+  COLOR<double& r, double& g, double& b, double& a>
+              = color
+                (.
+                  if (strlen(t->val)==7 ||
+                      strlen(t->val)==9) {
+                    ToRGBA(t->val,r,g,b,a);
+                  }
+                  else {
+                    r=1.0;
+                    g=0.0;
+                    b=0.0;
+                    a=1.0;
+                  }
+                .).
+
+  LAYER<int& layer>
+              = "LAYER" number
+                  (.
+                    if (!StringToNumber(t->val,layer)) {
+                      std::string e="Cannot parse number '"+std::string(t->val)+"'";
+
+                      SemErr(e.c_str());
+                    }
+                  .)
+                 .
+
+  FILTER<std::string& filter>
+              = "FILTER" string (. filter=Destring(t->val); .).
+
+  MINMAG<Mag& mag>
+              = "MINMAG" MAG<mag>.
+
+  MAXMAG<Mag& mag>
+              = "MAXMAG" MAG<mag>.
+
+  SCALEMAG<Mag& mag>
+              = "FADE" "AT" MAG<mag>.
+
+  MAG<Mag& mag>
+              =  "world"     (. mag=magWorld; .)
+               | "state"     (. mag=magState; .)
+               | "stateOver" (. mag=magStateOver; .)
+               | "county"    (. mag=magCounty; .)
+               | "region"    (. mag=magRegion; .)
+               | "proximity" (. mag=magProximity; .)
+               | "cityOver"  (. mag=magCityOver; .)
+               | "city"      (. mag=magCity; .)
+               | "suburb"    (. mag=magSuburb; .)
+               | "detail"    (. mag=magDetail; .)
+               | "close"     (. mag=magClose; .)
+               | "veryClose" (. mag=magVeryClose; .)
+               .
+
+
+  SIZE<double& value>
+              = "SIZE" DOUBLE<value>.
+
+  MINPIXEL<double& value>
+              = "MINPIXEL" DOUBLE<value>.
+
+  WIDTH<double& value>
+              = "WIDTH" DOUBLE<value>.
+
+  OUTLINE<double& value>
+              = "OUTLINE" DOUBLE<value>.
+
+  DOUBLE<double& value>
+              = (  number
+                  (.
+                    if (!StringToDouble(t->val,value)) {
+                      std::string e="Cannot parse double '"+std::string(t->val)+"'";
+
+                      SemErr(e.c_str());
+                    }
+                  .)
+                | double
+                  (.
+                    if (!StringToDouble(t->val,value)) {
+                      std::string e="Cannot parse double '"+std::string(t->val)+"'";
+
+                      SemErr(e.c_str());
+                    }
+                  .)
+                ).
+END OSS.
+

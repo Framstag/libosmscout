@@ -10,6 +10,10 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/StyleConfig.h \
                         osmscout/StyleConfigLoader.h \
                         osmscout/TypeConfig.h \
+                        osmscout/oss/Scanner.h \
+                        osmscout/oss/Parser.h \
+                        osmscout/ost/Scanner.h \
+                        osmscout/ost/Parser.h \
                         osmscout/TypeConfigLoader.h \
                         osmscout/Tiles.h \
                         osmscout/RawNode.h \

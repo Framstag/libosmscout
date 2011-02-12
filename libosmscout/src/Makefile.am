@@ -21,6 +21,10 @@ libosmscout_la_SOURCES= osmscout/Types.cpp \
                         osmscout/StyleConfig.cpp \
                         osmscout/StyleConfigLoader.cpp \
                         osmscout/TypeConfig.cpp \
+                        osmscout/oss/Scanner.cpp \
+                        osmscout/oss/Parser.cpp \
+                        osmscout/ost/Scanner.cpp \
+                        osmscout/ost/Parser.cpp \
                         osmscout/TypeConfigLoader.cpp \
                         osmscout/Tiles.cpp \
                         osmscout/RawNode.cpp \

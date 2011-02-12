@@ -54,7 +54,7 @@ namespace osmscout {
   static const size_t defaultEndStep=16;
 
   ImportParameter::ImportParameter()
-   : typefile("map.ost.xml"),
+   : typefile("map.ost"),
      startStep(defaultStartStep),
      endStep(defaultEndStep),
      nodesLoadSize(10000000),

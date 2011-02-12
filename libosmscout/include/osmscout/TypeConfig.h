@@ -97,6 +97,15 @@ namespace osmscout {
              TagId tag,
              const std::string tagValue);
 
+    TypeInfo& SetType(TypeId id,
+                      TagId tag,
+                      const std::string tagValue);
+
+    inline bool IsValid() const
+    {
+      return id!=typeIgnore;
+    }
+
     inline TypeId GetId() const
     {
       return id;
@@ -171,7 +180,6 @@ namespace osmscout {
     {
       return canBeOverview;
     }
-
 
     inline TypeInfo& CanBeRoute(bool canBeRoute)
     {

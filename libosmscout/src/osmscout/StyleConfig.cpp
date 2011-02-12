@@ -22,7 +22,7 @@
 namespace osmscout {
 
   LineStyle::LineStyle()
-   : style(none),
+   : style(normal),
      lineR(1),
      lineG(1),
      lineB(1),

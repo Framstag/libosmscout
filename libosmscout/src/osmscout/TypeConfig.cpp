@@ -65,6 +65,17 @@ namespace osmscout {
     // no code
   }
 
+  TypeInfo& TypeInfo::SetType(TypeId id,
+                              TagId tag,
+                              const std::string tagValue)
+  {
+    this->id=id;
+    this->tag=tag;
+    this->tagValue=tagValue;
+
+    return *this;
+  }
+
   TypeConfig::TypeConfig()
    : maxTypeId(0)
   {

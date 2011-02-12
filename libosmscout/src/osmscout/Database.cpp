@@ -130,12 +130,12 @@ namespace osmscout {
     this->path=path;
     this->hashFunction=hashFunction;
 
-    std::string typeConfigFileName=path+"/"+"map.ost.xml";
+    std::string typeConfigFileName=path+"/"+"map.ost";
 
     typeConfig=new TypeConfig();
 
     if (!LoadTypeConfig(typeConfigFileName.c_str(),*typeConfig)) {
-      std::cerr << "Cannot load map.ost.xml!" << std::endl;
+      std::cerr << "Cannot load map.ost!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
