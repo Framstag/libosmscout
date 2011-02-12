@@ -435,12 +435,11 @@ namespace osmscout {
         way.SetType(rawWay.GetType());
 
         if (!way.SetTags(progress,
+                         rawWay.IsArea(),
                          tags,
                          reverseNodes)) {
           continue;
         }
-
-        way.SetIsArea(rawWay.IsArea());
 
         // Nodes
 

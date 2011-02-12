@@ -27,15 +27,9 @@
 
 namespace osmscout {
 
-  void SegmentAttributes::SetIsArea(bool isArea)
-  {
-    if (isArea) {
-      flags|=SegmentAttributes::isArea;
-    }
-  }
-
   bool SegmentAttributes::SetTags(Progress& progress,
                                   Id id,
+                                  bool isArea,
                                   std::vector<Tag>& tags,
                                   bool& reverseNodes)
   {
@@ -47,6 +41,10 @@ namespace osmscout {
     layer=0;
     width=0;
     reverseNodes=false;
+
+    if (isArea) {
+      flags|=SegmentAttributes::isArea;
+    }
 
     std::vector<Tag>::iterator tag=tags.begin();
     while (tag!=tags.end()) {

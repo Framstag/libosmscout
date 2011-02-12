@@ -139,10 +139,9 @@ namespace osmscout {
       return (flags & hasRestrictions)!=0;
     }
 
-    void SetIsArea(bool isArea);
-
     bool SetTags(Progress& progress,
                  Id id,
+                 bool isArea,
                  std::vector<Tag>& tags,
                  bool& reverseNodes);
 

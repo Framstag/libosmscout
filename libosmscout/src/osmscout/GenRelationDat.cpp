@@ -97,12 +97,12 @@ namespace osmscout {
       bool reverseNodes=false;
 
       role.attributes.type=way.GetType();
-      role.attributes.SetIsArea(way.IsArea());
 
       std::vector<Tag> tags(way.GetTags());
 
       if (!role.attributes.SetTags(progress,
                                    way.GetId(),
+                                   way.IsArea(),
                                    tags,
                                    reverseNodes)) {
         return false;

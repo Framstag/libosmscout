@@ -59,17 +59,14 @@ namespace osmscout {
     attributes.type=type;
   }
 
-  void Way::SetIsArea(bool isArea)
-  {
-    attributes.SetIsArea(isArea);
-  }
-
   bool Way::SetTags(Progress& progress,
+                    bool isArea,
                     std::vector<Tag>& tags,
                     bool& reverseNodes)
   {
     return attributes.SetTags(progress,
                               id,
+                              isArea,
                               tags,
                               reverseNodes);
   }
