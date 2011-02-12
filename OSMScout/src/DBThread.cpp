@@ -63,7 +63,7 @@ void DBThread::run()
     if (database.GetTypeConfig()!=NULL) {
       styleConfig=new osmscout::StyleConfig(database.GetTypeConfig());
 
-      if (!osmscout::LoadStyleConfig("../TravelJinni/standard.oss.xml",
+      if (!osmscout::LoadStyleConfig("../TravelJinni/standard.oss",
                                      *styleConfig)) {
         delete styleConfig;
         styleConfig=NULL;
