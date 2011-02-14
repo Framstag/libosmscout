@@ -24,21 +24,26 @@
 namespace osmscout {
 
   TagInfo::TagInfo()
-   : name("ignore"),
-     id(tagIgnore)
+   : id(0)
   {
   }
 
-  TagInfo::TagInfo(const std::string& name,
-                   TagId id)
-   : name(name),
-     id(id)
+  TagInfo::TagInfo(const std::string& name)
+   : id(0),
+     name(name)
   {
     // no code
+  }
+
+  TagInfo& TagInfo::SetId(TagId id)
+  {
+    this->id=id;
+
+    return *this;
   }
 
   TypeInfo::TypeInfo()
-   : id(typeIgnore),
+   : id(0),
      canBeNode(false),
      canBeWay(false),
      canBeArea(false),
@@ -49,27 +54,18 @@ namespace osmscout {
     // no code
   }
 
-  TypeInfo::TypeInfo(TypeId id,
-                     TagId tag,
-                     const std::string tagValue)
-   : id(id),
-     tag(tag),
-     tagValue(tagValue),
-     canBeNode(false),
-     canBeWay(false),
-     canBeArea(false),
-     canBeRelation(false),
-     canBeRoute(false),
-     canBeIndexed(false)
+  TypeInfo& TypeInfo::SetId(TypeId id)
   {
-    // no code
+    this->id=id;
+
+    return *this;
   }
 
-  TypeInfo& TypeInfo::SetType(TypeId id,
+  TypeInfo& TypeInfo::SetType(const std::string& name,
                               TagId tag,
                               const std::string tagValue)
   {
-    this->id=id;
+    this->name=name;
     this->tag=tag;
     this->tagValue=tagValue;
 
@@ -77,28 +73,73 @@ namespace osmscout {
   }
 
   TypeConfig::TypeConfig()
-   : maxTypeId(0)
+   : nextTagId(0),
+     nextTypeId(0)
   {
-    AddTagInfo(TagInfo("ignore",tagIgnore));
-    AddTagInfo(TagInfo("name",tagName));
-    AddTagInfo(TagInfo("ref",tagRef));
-    AddTagInfo(TagInfo("oneway",tagOneway));
-    AddTagInfo(TagInfo("bridge",tagBridge));
-    AddTagInfo(TagInfo("tunnel",tagTunnel));
-    AddTagInfo(TagInfo("layer",tagLayer));
-    AddTagInfo(TagInfo("building",tagBuilding));
-    AddTagInfo(TagInfo("place",tagPlace));
-    AddTagInfo(TagInfo("place_name",tagPlaceName));
-    AddTagInfo(TagInfo("boundary",tagBoundary));
-    AddTagInfo(TagInfo("admin_level",tagAdminLevel));
-    AddTagInfo(TagInfo("highway",tagHighway));
-    AddTagInfo(TagInfo("restriction",tagRestriction));
-    AddTagInfo(TagInfo("type",tagType));
-    AddTagInfo(TagInfo("internal",tagInternal));
-    AddTagInfo(TagInfo("width",tagWidth));
-    AddTagInfo(TagInfo("natural",tagNatural));
+    // Make sure, that this is always registered first.
+    // It assures that id 0 is always reserved for tagIgnore
+    AddTagInfo(TagInfo(""));
 
-    AddTypeInfo(TypeInfo(typeRoute,tagInternal,"route").CanBeWay(true));
+    AddTagInfo(TagInfo("admin_level"));
+    AddTagInfo(TagInfo("boundary"));
+    AddTagInfo(TagInfo("building"));
+    AddTagInfo(TagInfo("bridge"));
+    AddTagInfo(TagInfo("highway"));
+    AddTagInfo(TagInfo("layer"));
+    AddTagInfo(TagInfo("name"));
+    AddTagInfo(TagInfo("natural"));
+    AddTagInfo(TagInfo("oneway"));
+    AddTagInfo(TagInfo("place"));
+    AddTagInfo(TagInfo("place_name"));
+    AddTagInfo(TagInfo("ref"));
+    AddTagInfo(TagInfo("restriction"));
+    AddTagInfo(TagInfo("tunnel"));
+    AddTagInfo(TagInfo("type"));
+    AddTagInfo(TagInfo("width"));
+
+    TypeInfo ignore;
+    TypeInfo route;
+
+    // Make sure, that this is always registered first.
+    // It assures that id 0 is always reserved for typeIgnore
+    ignore.SetType("",
+                   0,"");
+
+    AddTypeInfo(ignore);
+
+    route.SetType("_route",
+                  0,"")
+         .CanBeWay(true);
+
+    AddTypeInfo(route);
+
+    tagAdminLevel=GetTagId("admin_level");
+    tagBoundary=GetTagId("boundary");
+    tagBuilding=GetTagId("building");
+    tagBridge=GetTagId("bridge");
+    tagLayer=GetTagId("layer");
+    tagName=GetTagId("name");
+    tagOneway=GetTagId("oneway");
+    tagPlace=GetTagId("place");
+    tagPlaceName=GetTagId("place_name");
+    tagRef=GetTagId("ref");
+    tagTunnel=GetTagId("tunnel");
+    tagType=GetTagId("type");
+    tagWidth=GetTagId("width");
+
+    assert(tagAdminLevel!=tagIgnore);
+    assert(tagBoundary!=tagIgnore);
+    assert(tagBuilding!=tagIgnore);
+    assert(tagBridge!=tagIgnore);
+    assert(tagLayer!=tagIgnore);
+    assert(tagName!=tagIgnore);
+    assert(tagOneway!=tagIgnore);
+    assert(tagPlace!=tagIgnore);
+    assert(tagPlaceName!=tagIgnore);
+    assert(tagRef!=tagIgnore);
+    assert(tagTunnel!=tagIgnore);
+    assert(tagType!=tagIgnore);
+    assert(tagWidth!=tagIgnore);
   }
 
   TypeConfig::~TypeConfig()
@@ -106,29 +147,73 @@ namespace osmscout {
     // no code
   }
 
+  const std::list<TagInfo>& TypeConfig::GetTags() const
+  {
+    return tags;
+  }
+
+  const std::list<TypeInfo>& TypeConfig::GetTypes() const
+  {
+    return types;
+  }
+
   TypeConfig& TypeConfig::AddTagInfo(const TagInfo& tagInfo)
   {
-    tags.push_back(tagInfo);
-    stringToTagMap[tagInfo.GetName()]=tagInfo;
+    TagInfo ti(tagInfo);
+
+    if (stringToTagMap.find(ti.GetName())!=stringToTagMap.end()) {
+      // Tag was already (internally?) defined, we ignore the second definition
+      return *this;
+    }
+
+    if (ti.GetId()==0) {
+      ti.SetId(nextTagId);
+
+      nextTagId++;
+    }
+    else {
+      nextTagId=std::max(nextTagId,(TagId)(ti.GetId()+1));
+    }
+
+    tags.push_back(ti);
+    stringToTagMap[ti.GetName()]=ti;
 
     return *this;
   }
 
-  TypeConfig& TypeConfig::AddTypeInfo(const TypeInfo& typeInfo)
+  TypeConfig& TypeConfig::AddTypeInfo(TypeInfo& typeInfo)
   {
-    maxTypeId=std::max(maxTypeId,typeInfo.GetId());
+    if (typeInfo.GetId()==0) {
+      typeInfo.SetId(nextTypeId);
 
-    types.push_back(typeInfo);
+      nextTypeId++;
+    }
+    else {
+      nextTypeId=std::max(nextTypeId,(TypeId)(typeInfo.GetId()+1));
+    }
+
+    if (nameToTypeMap.find(typeInfo.GetName())==nameToTypeMap.end()) {
+      types.push_back(typeInfo);
+      nameToTypeMap[typeInfo.GetName()]=typeInfo;
+    }
+
+    if (idToTypeMap.find(typeInfo.GetId())==idToTypeMap.end()) {
+      idToTypeMap[typeInfo.GetId()]=typeInfo;
+    }
 
     tagToTypeMap[typeInfo.GetTag()][typeInfo.GetTagValue()]=typeInfo;
-    idToTypeMap[typeInfo.GetId()]=typeInfo;
 
     return *this;
   }
 
   TypeId TypeConfig::GetMaxTypeId() const
   {
-    return maxTypeId;
+    if (nextTypeId==0) {
+      return 0;
+    }
+    else {
+      return nextTypeId-1;
+    }
   }
 
   TagId TypeConfig::GetTagId(const char* name) const
@@ -246,7 +331,8 @@ namespace osmscout {
     if (iter!=tagToTypeMap.end()) {
       std::map<std::string,TypeInfo>::const_iterator iter2=iter->second.find(tagValue);
 
-      if (iter2!=iter->second.end() && iter2->second.CanBeNode()) {
+      if (iter2!=iter->second.end() &&
+          iter2->second.CanBeNode()) {
         return iter2->second.GetId();
       }
     }
@@ -261,7 +347,8 @@ namespace osmscout {
     if (iter!=tagToTypeMap.end()) {
       std::map<std::string,TypeInfo>::const_iterator iter2=iter->second.find(tagValue);
 
-      if (iter2!=iter->second.end() && iter2->second.CanBeWay()) {
+      if (iter2!=iter->second.end() &&
+          iter2->second.CanBeWay()) {
         return iter2->second.GetId();
       }
     }
@@ -276,7 +363,8 @@ namespace osmscout {
     if (iter!=tagToTypeMap.end()) {
       std::map<std::string,TypeInfo>::const_iterator iter2=iter->second.find(tagValue);
 
-      if (iter2!=iter->second.end() && iter2->second.CanBeArea()) {
+      if (iter2!=iter->second.end() &&
+          iter2->second.CanBeArea()) {
         return iter2->second.GetId();
       }
     }
@@ -291,9 +379,58 @@ namespace osmscout {
     if (iter!=tagToTypeMap.end()) {
       std::map<std::string,TypeInfo>::const_iterator iter2=iter->second.find(tagValue);
 
-      if (iter2!=iter->second.end() && iter2->second.CanBeRelation()) {
+      if (iter2!=iter->second.end() &&
+          iter2->second.CanBeRelation()) {
         return iter2->second.GetId();
       }
+    }
+
+    return typeIgnore;
+  }
+
+  TypeId TypeConfig::GetNodeTypeId(const std::string& name) const
+  {
+    std::map<std::string,TypeInfo>::const_iterator iter=nameToTypeMap.find(name);
+
+    if (iter!=nameToTypeMap.end() &&
+        iter->second.CanBeNode()) {
+      return iter->second.GetId();
+    }
+
+    return typeIgnore;
+  }
+
+  TypeId TypeConfig::GetWayTypeId(const std::string& name) const
+  {
+    std::map<std::string,TypeInfo>::const_iterator iter=nameToTypeMap.find(name);
+
+    if (iter!=nameToTypeMap.end() &&
+        iter->second.CanBeWay()) {
+      return iter->second.GetId();
+    }
+
+    return typeIgnore;
+  }
+
+  TypeId TypeConfig::GetAreaTypeId(const std::string& name) const
+  {
+    std::map<std::string,TypeInfo>::const_iterator iter=nameToTypeMap.find(name);
+
+    if (iter!=nameToTypeMap.end() &&
+        iter->second.CanBeArea()) {
+      return iter->second.GetId();
+    }
+
+    return typeIgnore;
+  }
+
+  TypeId TypeConfig::GetRelationTypeId(const std::string& name) const
+  {
+    std::map<std::string,TypeInfo>::const_iterator iter=nameToTypeMap.find(name);
+
+    if (iter!=nameToTypeMap.end() &&
+        iter->second.CanBeRelation()) {
+      return iter->second.GetId();
     }
 
     return typeIgnore;
@@ -307,7 +444,8 @@ namespace osmscout {
       for (std::map<std::string,TypeInfo>::const_iterator iter2=iter->second.begin();
            iter2!=iter->second.end();
            ++iter2) {
-        if (iter2!=iter->second.end() && iter2->second.CanBeWay()) {
+        if (iter2!=iter->second.end() &&
+            iter2->second.CanBeWay()) {
           types.insert(iter2->second.GetId());
         }
       }

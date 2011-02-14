@@ -32,6 +32,8 @@
 #include <osmscout/Relation.h>
 #include <osmscout/Way.h>
 
+#include <osmscout/GenTypeDat.h>
+
 #include <osmscout/Preprocess.h>
 
 #include <osmscout/GenNodeDat.h>
@@ -284,52 +286,56 @@ namespace osmscout {
     }
 
     /* 1 */
-    modules.push_back(new Preprocess());
+    modules.push_back(new TypeDataGenerator());
+
     /* 2 */
+    modules.push_back(new Preprocess());
+
+    /* 3 */
     modules.push_back(new NumericIndexGenerator<Id,RawNode>("Generating 'rawnode.idx'",
                                                             AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                             "rawnodes.dat"),
                                                             AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                             "rawnode.idx")));
-    /* 3 */
+    /* 4 */
     modules.push_back(new NumericIndexGenerator<Id,RawWay>("Generating 'rawway.idx'",
                                                            AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                            "rawways.dat"),
                                                            AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                            "rawway.idx")));
-    /* 4 */
-    modules.push_back(new RelationDataGenerator());
     /* 5 */
+    modules.push_back(new RelationDataGenerator());
+    /* 6 */
     modules.push_back(new NumericIndexGenerator<Id,Relation>("Generating 'relation.idx'",
                                                              AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                              "relations.dat"),
                                                              AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                              "relation.idx")));
-    /* 6 */
-    modules.push_back(new NodeDataGenerator());
     /* 7 */
+    modules.push_back(new NodeDataGenerator());
+    /* 8 */
     modules.push_back(new NumericIndexGenerator<Id,Node>("Generating 'node.idx'",
                                                          AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                          "nodes.dat"),
                                                          AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                          "node.idx")));
-    /* 8 */
-    modules.push_back(new WayDataGenerator());
     /* 9 */
+    modules.push_back(new WayDataGenerator());
+    /* 10 */
     modules.push_back(new NumericIndexGenerator<Id,Way>("Generating 'way.idx'",
                                                         AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                         "ways.dat"),
                                                         AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                         "way.idx")));
-    /* 10 */
-    modules.push_back(new AreaIndexGenerator());
     /* 11 */
-    modules.push_back(new AreaNodeIndexGenerator());
+    modules.push_back(new AreaIndexGenerator());
     /* 12 */
-    modules.push_back(new CityStreetIndexGenerator());
+    modules.push_back(new AreaNodeIndexGenerator());
     /* 13 */
-    modules.push_back(new NodeUseIndexGenerator());
+    modules.push_back(new CityStreetIndexGenerator());
     /* 14 */
+    modules.push_back(new NodeUseIndexGenerator());
+    /* 15 */
     modules.push_back(new WaterIndexGenerator());
 
     bool result=ExecuteModules(modules,parameter,progress,typeConfig);

@@ -5,28 +5,11 @@
 
 COMPILER OST
 
-void HandleTag(const std::string& idValue,
-               const std::string& nameValue)
+void HandleTag(const std::string& nameValue)
 {
-  TagId        id;
   std::string  name(nameValue);
 
-  if (!StringToNumber(idValue,id)) {
-    SemErr("Cannot parse tag id");
-    return;
-  }
-
-  if (config.GetTagId(nameValue.c_str())!=tagIgnore) {
-    return;
-  }
-
-  if (id>=tagPrivateBase) {
-    SemErr("Illegal tag id");
-    //std::cerr << "Tag '" << value << "' has id in illegal range (must be <" << tagPrivateBase << ")!" << std::endl;
-    return;
-  }
-
-  TagInfo tagInfo(name,id);
+  TagInfo tagInfo(name);
 
   config.AddTagInfo(tagInfo);
 }
@@ -65,39 +48,28 @@ PRODUCTIONS
   OST         = SYNC "OST" [TAGS] [TYPES] "END".
   TAGS        = SYNC "TAGS" TAG {TAG}.
   TAG         = (.
-                  std::string  idValue;
-                  std::string  nameValue;
+                  std::string  valueValue;
                 .)
                 SYNC "TAG"
-                "ID" number (. idValue=Destring(t->val); .)
-                "VALUE" string (. nameValue=Destring(t->val); .)
+                string (. valueValue=Destring(t->val); .)
                 (.
-                  if (!errors->hasErrors) {
-                    HandleTag(idValue,nameValue);
+                  if (t->val!=NULL &&
+                      strlen(t->val)>0) {
+                    HandleTag(valueValue);
                   }
                 .).
   TYPES       = SYNC "TYPES" TYPE {TYPE}.
   TYPE        = (.
                   std::string idValue;
+                  std::string typeValue;
                   std::string nameValue;
                   std::string valueValue;
-                  TypeId      id=0;
                   TypeInfo    typeInfo;
                 .)
                 SYNC "TYPE"
-                "ID" number
+                string
                 (.
-                  idValue=t->val;
-
-                  if (!StringToNumber(idValue.c_str(),id)) {
-                    SemErr("Cannot parse type id");
-                    //std::cerr << "Cannot parse id: '" << idValue << "'" << std::endl;
-                  }
-
-                  if (id>=typePrivateBase) {
-                    SemErr("Illegal tag value");
-                    //std::cerr << "Type '" << nameValue << "/" << valueValue << "' has id in illegal range (must be <" << typePrivateBase << ")!" << std::endl;
-                  }
+                  typeValue=Destring(t->val);
                 .)
                 "WHERE" string (. nameValue=Destring(t->val); .) "==" string (. valueValue=Destring(t->val); .)
                 (.
@@ -111,17 +83,15 @@ PRODUCTIONS
                     SemErr(e.c_str());
                   }
                   else {
-                    typeInfo.SetType(id,tag,valueValue);
+                    typeInfo.SetType(typeValue,
+                                     tag,valueValue);
                   }
                 .)
 
                 TYPEKINDS<typeInfo>
                 [TYPEOPTIONS<typeInfo>]
                 (.
-                  if (!errors->hasErrors &&
-                      typeInfo.IsValid()) {
-                    config.AddTypeInfo(typeInfo);
-                  }
+                  config.AddTypeInfo(typeInfo);
                 .)
                 .
   /*

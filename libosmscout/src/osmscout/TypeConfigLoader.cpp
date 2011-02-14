@@ -27,6 +27,9 @@
 #include <osmscout/ost/Parser.h>
 #include <osmscout/ost/Scanner.h>
 
+#include <osmscout/FileScanner.h>
+
+#include <iostream>
 namespace osmscout {
 
   bool LoadTypeConfig(const char* typeFile,
@@ -71,5 +74,95 @@ namespace osmscout {
     delete scanner;
 
     return success;
+  }
+
+  bool LoadTypeData(const std::string& path,
+                    TypeConfig& config)
+  {
+    FileScanner scanner;
+
+    if (!scanner.Open(AppendFileToDir(path,"types.dat"))) {
+      std::cerr << "Cannot open file '" << scanner.GetFilename() << "'" << std::endl;
+     return false;
+    }
+
+    size_t tagCount;
+
+    if (!scanner.ReadNumber(tagCount)) {
+      std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+      return false;
+    }
+
+    for (size_t i=1; i<=tagCount; i++) {
+      TagId       id;
+      std::string name;
+
+      if (!(scanner.ReadNumber(id) &&
+            scanner.Read(name))) {
+        std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+      }
+
+      TagInfo tagInfo(name);
+
+      tagInfo.SetId(id);
+
+      config.AddTagInfo(tagInfo);
+    }
+
+    size_t typeCount;
+
+    if (!scanner.ReadNumber(typeCount)) {
+      std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+      return false;
+    }
+
+    for (size_t i=1; i<=typeCount; i++) {
+      TypeId      id;
+      std::string name;
+      TagId       tag;
+      std::string tagValue;
+      bool        canBeNode;
+      bool        canBeWay;
+      bool        canBeArea;
+      bool        canBeRelation;
+      bool        canBeOverview;
+      bool        canBeRoute;
+      bool        canBeIndexed;
+
+      if (!(scanner.ReadNumber(id) &&
+            scanner.Read(name) &&
+            scanner.ReadNumber(tag) &&
+            scanner.Read(tagValue) &&
+            scanner.Read(canBeNode) &&
+            scanner.Read(canBeWay) &&
+            scanner.Read(canBeArea) &&
+            scanner.Read(canBeRelation) &&
+            scanner.Read(canBeOverview) &&
+            scanner.Read(canBeRoute) &&
+            scanner.Read(canBeIndexed))) {
+
+        std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+        return false;
+      }
+
+      TypeInfo typeInfo;
+
+      typeInfo.SetId(id);
+
+      typeInfo.SetType(name,
+                       tag,tagValue);
+
+      typeInfo.CanBeNode(canBeNode);
+      typeInfo.CanBeWay(canBeWay);
+      typeInfo.CanBeArea(canBeArea);
+      typeInfo.CanBeRelation(canBeRelation);
+      typeInfo.CanBeOverview(canBeOverview);
+      typeInfo.CanBeRoute(canBeRoute);
+      typeInfo.CanBeIndexed(canBeIndexed);
+
+      config.AddTypeInfo(typeInfo);
+    }
+
+    return !scanner.HasError() && scanner.Close();
   }
 }

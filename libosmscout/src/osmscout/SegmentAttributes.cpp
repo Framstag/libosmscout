@@ -28,6 +28,7 @@
 namespace osmscout {
 
   bool SegmentAttributes::SetTags(Progress& progress,
+                                  const TypeConfig& typeConfig,
                                   Id id,
                                   bool isArea,
                                   std::vector<Tag>& tags,
@@ -48,21 +49,21 @@ namespace osmscout {
 
     std::vector<Tag>::iterator tag=tags.begin();
     while (tag!=tags.end()) {
-      if (tag->key==tagName) {
+      if (tag->key==typeConfig.tagName) {
         name=tag->value;
         if (!name.empty()) {
           flags|=SegmentAttributes::hasName;
         }
         tag=tags.erase(tag);
       }
-      else if (tag->key==tagRef) {
+      else if (tag->key==typeConfig.tagRef) {
         ref=tag->value;
         if (!ref.empty()) {
           flags|=SegmentAttributes::hasRef;
         }
         tag=tags.erase(tag);
       }
-      else if (tag->key==tagLayer) {
+      else if (tag->key==typeConfig.tagLayer) {
         if (!StringToNumber(tag->value.c_str(),layer)) {
           progress.Warning(std::string("Layer tag value '")+tag->value+"' for "+NumberToString(id)+" is not numeric!");
         }
@@ -71,26 +72,26 @@ namespace osmscout {
         }
         tag=tags.erase(tag);
       }
-      else if (!IsArea() && tag->key==tagBridge) {
+      else if (!IsArea() && tag->key==typeConfig.tagBridge) {
         if (!(tag->value=="no" || tag->value=="false" || tag->value=="0")) {
           flags|=SegmentAttributes::isBridge;
         }
         tag=tags.erase(tag);
       }
-      else if (!IsArea() && tag->key==tagTunnel) {
+      else if (!IsArea() && tag->key==typeConfig.tagTunnel) {
         if (!(tag->value=="no" || tag->value=="false" || tag->value=="0")) {
           flags|=SegmentAttributes::isTunnel;
         }
         tag=tags.erase(tag);
       }
-      else if (IsArea() && tag->key==tagBuilding) {
+      else if (IsArea() && tag->key==typeConfig.tagBuilding) {
         if (!(tag->value=="no" || tag->value=="false" || tag->value=="0")) {
           flags|=SegmentAttributes::isBuilding;
         }
 
         tag=tags.erase(tag);
       }
-      else if (!IsArea() && tag->key==tagOneway) {
+      else if (!IsArea() && tag->key==typeConfig.tagOneway) {
         if (tag->value=="-1") {
           isOneway=true;
           reverseNodes=true;
@@ -102,7 +103,7 @@ namespace osmscout {
 
         tag=tags.erase(tag);
       }
-      else if (!IsArea() && tag->key==tagWidth) {
+      else if (!IsArea() && tag->key==typeConfig.tagWidth) {
         double w;
         size_t pos=0;
         size_t count=0;

@@ -31,40 +31,21 @@
 
 namespace osmscout {
 
-  const static TagId tagPrivateBase   = 1000;
-  const static TagId tagIgnore        = tagPrivateBase+ 0;
-  const static TagId tagName          = tagPrivateBase+ 1;
-  const static TagId tagRef           = tagPrivateBase+ 2;
-  const static TagId tagOneway        = tagPrivateBase+ 3;
-  const static TagId tagBridge        = tagPrivateBase+ 4;
-  const static TagId tagTunnel        = tagPrivateBase+ 5;
-  const static TagId tagLayer         = tagPrivateBase+ 6;
-  const static TagId tagBuilding      = tagPrivateBase+ 7;
-  const static TagId tagPlace         = tagPrivateBase+ 8;
-  const static TagId tagPlaceName     = tagPrivateBase+ 9;
-  const static TagId tagBoundary      = tagPrivateBase+10;
-  const static TagId tagAdminLevel    = tagPrivateBase+11;
-  const static TagId tagHighway       = tagPrivateBase+12;
-  const static TagId tagRestriction   = tagPrivateBase+13;
-  const static TagId tagType          = tagPrivateBase+14;
-  const static TagId tagInternal      = tagPrivateBase+15;
-  const static TagId tagWidth         = tagPrivateBase+16;
-  const static TagId tagNatural       = tagPrivateBase+17;
+  const static TagId tagIgnore        = 0;
 
-  const static TypeId typePrivateBase = 5000;
-  const static TypeId typeIgnore      = typePrivateBase+0;
-  const static TypeId typeRoute       = typePrivateBase+1;
+  const static TypeId typeIgnore      = 0;
 
   class OSMSCOUT_API TagInfo
   {
   private:
-    std::string name;
     TagId       id;
+    std::string name;
 
   public:
     TagInfo();
-    TagInfo(const std::string& name,
-            TagId id);
+    TagInfo(const std::string& name);
+
+    TagInfo& SetId(TagId id);
 
     inline std::string GetName() const
     {
@@ -81,6 +62,7 @@ namespace osmscout {
   {
   private:
     TypeId      id;
+    std::string name;
     TagId       tag;
     std::string tagValue;
     bool        canBeNode;
@@ -93,22 +75,21 @@ namespace osmscout {
 
   public:
     TypeInfo();
-    TypeInfo(TypeId id,
-             TagId tag,
-             const std::string tagValue);
 
-    TypeInfo& SetType(TypeId id,
+    TypeInfo& SetId(TypeId id);
+
+    TypeInfo& SetType(const std::string& name,
                       TagId tag,
                       const std::string tagValue);
-
-    inline bool IsValid() const
-    {
-      return id!=typeIgnore;
-    }
 
     inline TypeId GetId() const
     {
       return id;
+    }
+
+    inline std::string GetName() const
+    {
+      return name;
     }
 
     inline TagId GetTag() const
@@ -212,17 +193,38 @@ namespace osmscout {
     std::list<TagInfo>                              tags;
     std::list<TypeInfo>                             types;
 
-    TypeId                                          maxTypeId;
+    TagId                                           nextTagId;
+    TypeId                                          nextTypeId;
 
     std::map<std::string,TagInfo>                   stringToTagMap;
     std::map<TagId,std::map<std::string,TypeInfo> > tagToTypeMap;
+    std::map<std::string,TypeInfo>                  nameToTypeMap;
     std::map<TypeId,TypeInfo>                       idToTypeMap;
 
   public:
+    TagId                                           tagAdminLevel;
+    TagId                                           tagBoundary;
+    TagId                                           tagBuilding;
+    TagId                                           tagBridge;
+    TagId                                           tagLayer;
+    TagId                                           tagName;
+    TagId                                           tagOneway;
+    TagId                                           tagPlace;
+    TagId                                           tagPlaceName;
+    TagId                                           tagRef;
+    TagId                                           tagTunnel;
+    TagId                                           tagType;
+    TagId                                           tagWidth;
+
+  public:
     TypeConfig();
-    TypeConfig& AddTagInfo(const TagInfo& tagInfo);
-    TypeConfig& AddTypeInfo(const TypeInfo& typeInfo);
     virtual ~TypeConfig();
+
+    TypeConfig& AddTagInfo(const TagInfo& tagInfo);
+    TypeConfig& AddTypeInfo(TypeInfo& typeInfo);
+
+    const std::list<TagInfo>& GetTags() const;
+    const std::list<TypeInfo>& GetTypes() const;
 
     TypeId GetMaxTypeId() const;
 
@@ -246,6 +248,11 @@ namespace osmscout {
     TypeId GetWayTypeId(TagId tagKey, const char* tagValue) const;
     TypeId GetAreaTypeId(TagId tagKey, const char* tagValue) const;
     TypeId GetRelationTypeId(TagId tagKey, const char* tagValue) const;
+
+    TypeId GetNodeTypeId(const std::string& name) const;
+    TypeId GetWayTypeId(const std::string& name) const;
+    TypeId GetAreaTypeId(const std::string& name) const;
+    TypeId GetRelationTypeId(const std::string& name) const;
 
     void GetWaysWithKey(TagId tagKey, std::set<TypeId>& types) const;
 

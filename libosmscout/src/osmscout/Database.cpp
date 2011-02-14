@@ -130,19 +130,17 @@ namespace osmscout {
     this->path=path;
     this->hashFunction=hashFunction;
 
-    std::string typeConfigFileName=path+"/"+"map.ost";
-
     typeConfig=new TypeConfig();
 
-    if (!LoadTypeConfig(typeConfigFileName.c_str(),*typeConfig)) {
-      std::cerr << "Cannot load map.ost!" << std::endl;
+    if (!LoadTypeData(path,*typeConfig)) {
+      std::cerr << "Cannot load 'types.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
     }
 
     FileScanner scanner;
-    std::string file=path+"/"+"bounding.dat";
+    std::string file=AppendFileToDir(path,"bounding.dat");
 
     if (!scanner.Open(file)) {
       std::cerr << "Cannot open 'bounding.dat'" << std::endl;
@@ -960,59 +958,59 @@ namespace osmscout {
 
     profile.SetTurnCostFactor(1/60/2); // 30 seconds
 
-    type=typeConfig->GetWayTypeId(tagHighway,"motorway");
+    type=typeConfig->GetWayTypeId("highway_motorway");
     assert(type!=typeIgnore);
     profile.SetTypeCostFactor(type,1/110.0);
 
-    type=typeConfig->GetWayTypeId(tagHighway,"motorway_link");
+    type=typeConfig->GetWayTypeId("highway_motorway_link");
     assert(type!=typeIgnore);
     profile.SetTypeCostFactor(type,1/60.0);
 
-    type=typeConfig->GetWayTypeId(tagHighway,"trunk");
+    type=typeConfig->GetWayTypeId("highway_trunk");
     assert(type!=typeIgnore);
     profile.SetTypeCostFactor(type,1/70.0);
 
-    type=typeConfig->GetWayTypeId(tagHighway,"trunk_link");
+    type=typeConfig->GetWayTypeId("highway_trunk_link");
     assert(type!=typeIgnore);
     profile.SetTypeCostFactor(type,1/70.0);
 
-    type=typeConfig->GetWayTypeId(tagHighway,"primary");
+    type=typeConfig->GetWayTypeId("highway_primary");
     assert(type!=typeIgnore);
     profile.SetTypeCostFactor(type,1/70.0);
 
-    type=typeConfig->GetWayTypeId(tagHighway,"primary_link");
+    type=typeConfig->GetWayTypeId("highway_primary_link");
     assert(type!=typeIgnore);
     profile.SetTypeCostFactor(type,1/60.0);
 
-    type=typeConfig->GetWayTypeId(tagHighway,"secondary");
+    type=typeConfig->GetWayTypeId("highway_secondary");
     assert(type!=typeIgnore);
     profile.SetTypeCostFactor(type,1/60.0);
 
-    type=typeConfig->GetWayTypeId(tagHighway,"secondary_link");
+    type=typeConfig->GetWayTypeId("highway_secondary_link");
     assert(type!=typeIgnore);
     profile.SetTypeCostFactor(type,1/50.0);
 
-    type=typeConfig->GetWayTypeId(tagHighway,"tertiary");
+    type=typeConfig->GetWayTypeId("highway_tertiary");
     assert(type!=typeIgnore);
     profile.SetTypeCostFactor(type,1/55.0);
 
-    type=typeConfig->GetWayTypeId(tagHighway,"unclassified");
+    type=typeConfig->GetWayTypeId("highway_unclassified");
     assert(type!=typeIgnore);
     profile.SetTypeCostFactor(type,1/50.0);
 
-    type=typeConfig->GetWayTypeId(tagHighway,"road");
+    type=typeConfig->GetWayTypeId("highway_road");
     assert(type!=typeIgnore);
     profile.SetTypeCostFactor(type,1/50.0);
 
-    type=typeConfig->GetWayTypeId(tagHighway,"residential");
+    type=typeConfig->GetWayTypeId("highway_residential");
     assert(type!=typeIgnore);
     profile.SetTypeCostFactor(type,1/40.0);
 
-    type=typeConfig->GetWayTypeId(tagHighway,"living_street");
+    type=typeConfig->GetWayTypeId("highway_living_street");
     assert(type!=typeIgnore);
     profile.SetTypeCostFactor(type,1/10.0);
 
-    type=typeConfig->GetWayTypeId(tagHighway,"service");
+    type=typeConfig->GetWayTypeId("highway_service");
     assert(type!=typeIgnore);
     profile.SetTypeCostFactor(type,1/30.0);
 
@@ -1484,12 +1482,17 @@ namespace osmscout {
   bool Database::TransformRouteDataToWay(const RouteData& data,
                                          Way& way)
   {
-    Way tmp;
+    TypeId routeType;
+    Way    tmp;
+
+    routeType=typeConfig->GetWayTypeId("_route");
+
+    assert(routeType!=typeIgnore);
 
     way=tmp;
 
     way.SetId(0);
-    way.SetType(typeRoute);
+    way.SetType(routeType);
     way.nodes.reserve(data.Entries().size());
 
     if (data.Entries().size()==0) {

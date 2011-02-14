@@ -60,11 +60,13 @@ namespace osmscout {
   }
 
   bool Way::SetTags(Progress& progress,
+                    const TypeConfig& typeConfig,
                     bool isArea,
                     std::vector<Tag>& tags,
                     bool& reverseNodes)
   {
     return attributes.SetTags(progress,
+                              typeConfig,
                               id,
                               isArea,
                               tags,

@@ -53,8 +53,8 @@ namespace osmscout {
     uint32_t                                    rawNodeCount=0;
     uint32_t                                    rawRelCount=0;
     uint32_t                                    rawWayCount=0;
-    TypeId                                      restrictionPosId;
-    TypeId                                      restrictionNegId;
+    TypeId                                      restrictionPosId=typeConfig.GetRelationTypeId("restriction_only_straight_on");
+    TypeId                                      restrictionNegId=typeConfig.GetRelationTypeId("restriction_no_straight_on");
     std::map<Id,std::vector<Way::Restriction> > restrictions;
     /*
     DataFile<RawNode>                           nodeDataFile("rawnodes.dat",
@@ -62,10 +62,7 @@ namespace osmscout {
                                                              10,
                                                              100000);*/
 
-    restrictionPosId=typeConfig.GetRelationTypeId(tagRestriction,"only_straight_on");
     assert(restrictionPosId!=typeIgnore);
-
-    restrictionNegId=typeConfig.GetRelationTypeId(tagRestriction,"no_straight_on");
     assert(restrictionNegId!=typeIgnore);
 
     progress.SetAction("Scanning for restriction relations");
@@ -435,6 +432,7 @@ namespace osmscout {
         way.SetType(rawWay.GetType());
 
         if (!way.SetTags(progress,
+                         typeConfig,
                          rawWay.IsArea(),
                          tags,
                          reverseNodes)) {

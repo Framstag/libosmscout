@@ -624,11 +624,11 @@ namespace osmscout {
       if (hasLabel) {
         for (size_t i=0; i<node->GetTagCount(); i++) {
           // TODO: We should make sure we prefer one over the other
-          if (node->GetTagKey(i)==tagName) {
+          if (node->GetTagKey(i)==styleConfig.GetTypeConfig()->tagName) {
             label=node->GetTagValue(i);
             break;
           }
-          else if (node->GetTagKey(i)==tagRef)  {
+          else if (node->GetTagKey(i)==styleConfig.GetTypeConfig()->tagRef)  {
             label=node->GetTagValue(i);
           }
         }
@@ -1435,7 +1435,7 @@ namespace osmscout {
 
       for (size_t i=0; i<node->GetTagCount(); i++) {
         // TODO: We should make sure we prefer one over the other
-        if (node->GetTagKey(i)==tagName) {
+        if (node->GetTagKey(i)==styleConfig.GetTypeConfig()->tagName) {
           const LabelStyle *style=styleConfig.GetNodeLabelStyle(node->GetType());
 
           if (style==NULL ||
@@ -1455,7 +1455,7 @@ namespace osmscout {
                     node->GetTagValue(i),
                     x,y);
         }
-        else if (node->GetTagKey(i)==tagRef)  {
+        else if (node->GetTagKey(i)==styleConfig.GetTypeConfig()->tagRef)  {
           const LabelStyle *style=styleConfig.GetNodeRefLabelStyle(node->GetType());
 
           if (style==NULL ||

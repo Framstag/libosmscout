@@ -82,18 +82,15 @@ PRODUCTIONS
 
   NODESTYLE   = (.
                   TypeId      type=typeIgnore;
-                  std::string key;
-                  std::string value;
+                  std::string name;
                 .)
                 SYNC "NODE"
-                "KEY" string (. key=Destring(t->val); .)
-                "VALUE" string (. value=Destring(t->val); .)
+                string (. name=Destring(t->val); .)
                 (.
-                  type=config.GetTypeConfig()->GetNodeTypeId(config.GetTypeConfig()->GetTagId(key.c_str()),
-                                                            value.c_str());
+                  type=config.GetTypeConfig()->GetNodeTypeId(name);
 
                   if (type==typeIgnore) {
-                    std::string e="Unknown type '"+key+"/"+value+"'";
+                    std::string e="Unknown type '"+name+"'";
 
                     SemErr(e.c_str());
                   }
@@ -115,20 +112,17 @@ PRODUCTIONS
                 }.
   WAYSTYLE    = (.
                   TypeId      type=typeIgnore;
-                  std::string key;
-                  std::string value;
+                  std::string name;
                   size_t      prio;
                 .)
                 SYNC "WAY"
-                "KEY" string   (. key=Destring(t->val); .)
-                "VALUE" string (. value=Destring(t->val); .)
+                string (. name=Destring(t->val); .)
                 "PRIO" number
                 (.
-                  type=config.GetTypeConfig()->GetWayTypeId(config.GetTypeConfig()->GetTagId(key.c_str()),
-                                                            value.c_str());
+                  type=config.GetTypeConfig()->GetWayTypeId(name);
 
                   if (type==typeIgnore) {
-                    std::string e="Unknown type '"+key+"/"+value+"'";
+                    std::string e="Unknown type '"+name+"'";
 
                     SemErr(e.c_str());
                   }
@@ -155,18 +149,16 @@ PRODUCTIONS
                 }.
   AREASTYLE   = (.
                   TypeId      type=typeIgnore;
-                  std::string key;
+                  std::string name;
                   std::string value;
                 .)
                 SYNC "AREA"
-                "KEY" string (. key=Destring(t->val); .)
-                "VALUE" string (. value=Destring(t->val); .)
+                string (. name=Destring(t->val); .)
                 (.
-                  type=config.GetTypeConfig()->GetAreaTypeId(config.GetTypeConfig()->GetTagId(key.c_str()),
-                                                             value.c_str());
+                  type=config.GetTypeConfig()->GetAreaTypeId(name);
 
                   if (type==typeIgnore) {
-                    std::string e="Unknown type '"+key+"/"+value+"'";
+                    std::string e="Unknown type '"+name+"'";
 
                     SemErr(e.c_str());
                   }

@@ -101,28 +101,11 @@ private:
 public:
   Errors  *errors;
 
-void HandleTag(const std::string& idValue,
-               const std::string& nameValue)
+void HandleTag(const std::string& nameValue)
 {
-  TagId        id;
   std::string  name(nameValue);
 
-  if (!StringToNumber(idValue,id)) {
-    SemErr("Cannot parse tag id");
-    return;
-  }
-
-  if (config.GetTagId(nameValue.c_str())!=tagIgnore) {
-    return;
-  }
-
-  if (id>=tagPrivateBase) {
-    SemErr("Illegal tag id");
-    //std::cerr << "Tag '" << value << "' has id in illegal range (must be <" << tagPrivateBase << ")!" << std::endl;
-    return;
-  }
-
-  TagInfo tagInfo(name,id);
+  TagInfo tagInfo(name);
 
   config.AddTagInfo(tagInfo);
 }

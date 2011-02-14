@@ -400,12 +400,14 @@ namespace osmscout {
   {
     FileScanner scanner;
 
-    TypeId      coastlineWayId;
+    TagId       tagNatural=typeConfig.GetTagId("natural");
+    TypeId      coastlineWayId=typeConfig.GetWayTypeId(tagNatural,"coastline");
     uint32_t    wayCount=0;
 
-    // We do not yet know if we handle borders as ways or areas
-    coastlineWayId=typeConfig.GetWayTypeId(tagNatural,"coastline");
+    assert(tagNatural!=tagIgnore);
     assert(coastlineWayId!=typeIgnore);
+
+    // We do not yet know if we handle borders as ways or areas
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "ways.dat"))) {
@@ -501,7 +503,8 @@ namespace osmscout {
   {
     FileScanner scanner;
 
-    TypeId      coastlineWayId;
+    TagId       tagNatural=typeConfig.GetTagId("natural");
+    TypeId      coastlineWayId=typeConfig.GetWayTypeId(tagNatural,"coastline");
 
     uint32_t    minLonDat;
     uint32_t    minLatDat;
@@ -513,7 +516,7 @@ namespace osmscout {
     progress.SetAction("Setup");
 
     // We do not yet know if we handle borders as ways or areas
-    coastlineWayId=typeConfig.GetWayTypeId(tagNatural,"coastline");
+    assert(tagNatural!=tagIgnore);
     assert(coastlineWayId!=typeIgnore);
 
     cellWidth=360.0;

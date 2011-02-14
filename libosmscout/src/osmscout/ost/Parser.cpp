@@ -109,19 +109,19 @@ bool Parser::WeakSeparator(int n, int syFol, int repFol)
 }
 
 void Parser::OST() {
-		while (!(la->kind == 0 || la->kind == 4)) {SynErr(24); Get();}
+		while (!(la->kind == 0 || la->kind == 4)) {SynErr(22); Get();}
 		Expect(4);
 		if (la->kind == 6) {
 			TAGS();
 		}
-		if (la->kind == 10) {
+		if (la->kind == 8) {
 			TYPES();
 		}
 		Expect(5);
 }
 
 void Parser::TAGS() {
-		while (!(la->kind == 0 || la->kind == 6)) {SynErr(25); Get();}
+		while (!(la->kind == 0 || la->kind == 6)) {SynErr(23); Get();}
 		Expect(6);
 		TAG();
 		while (la->kind == 7) {
@@ -130,59 +130,44 @@ void Parser::TAGS() {
 }
 
 void Parser::TYPES() {
-		while (!(la->kind == 0 || la->kind == 10)) {SynErr(26); Get();}
-		Expect(10);
+		while (!(la->kind == 0 || la->kind == 8)) {SynErr(24); Get();}
+		Expect(8);
 		TYPE();
-		while (la->kind == 11) {
+		while (la->kind == 9) {
 			TYPE();
 		}
 }
 
 void Parser::TAG() {
-		std::string  idValue;
-		std::string  nameValue;
+		std::string  valueValue;
 		
-		while (!(la->kind == 0 || la->kind == 7)) {SynErr(27); Get();}
+		while (!(la->kind == 0 || la->kind == 7)) {SynErr(25); Get();}
 		Expect(7);
-		Expect(8);
-		Expect(2);
-		idValue=Destring(t->val); 
-		Expect(9);
 		Expect(3);
-		nameValue=Destring(t->val); 
-		if (!errors->hasErrors) {
-		 HandleTag(idValue,nameValue);
+		valueValue=Destring(t->val); 
+		if (t->val!=NULL &&
+		   strlen(t->val)>0) {
+		 HandleTag(valueValue);
 		}
 		
 }
 
 void Parser::TYPE() {
 		std::string idValue;
+		std::string typeValue;
 		std::string nameValue;
 		std::string valueValue;
-		TypeId      id=0;
 		TypeInfo    typeInfo;
 		
-		while (!(la->kind == 0 || la->kind == 11)) {SynErr(28); Get();}
-		Expect(11);
-		Expect(8);
-		Expect(2);
-		idValue=t->val;
+		while (!(la->kind == 0 || la->kind == 9)) {SynErr(26); Get();}
+		Expect(9);
+		Expect(3);
+		typeValue=Destring(t->val);
 		
-		                  if (!StringToNumber(idValue.c_str(),id)) {
-		                    SemErr("Cannot parse type id");
-		                    //std::cerr << "Cannot parse id: '" << idValue << "'" << std::endl;
-		                  }
-		
-		                  if (id>=typePrivateBase) {
-		                    SemErr("Illegal tag value");
-		                    //std::cerr << "Type '" << nameValue << "/" << valueValue << "' has id in illegal range (must be <" << typePrivateBase << ")!" << std::endl;
-		                  }
-		                
-		Expect(12);
+		Expect(10);
 		Expect(3);
 		nameValue=Destring(t->val); 
-		Expect(13);
+		Expect(11);
 		Expect(3);
 		valueValue=Destring(t->val); 
 		TagId tag=config.GetTagId(nameValue.c_str());
@@ -195,23 +180,21 @@ void Parser::TYPE() {
 		                    SemErr(e.c_str());
 		                  }
 		                  else {
-		                    typeInfo.SetType(id,tag,valueValue);
+		                    typeInfo.SetType(typeValue,
+		                                     tag,valueValue);
 		                  }
 		                
 		TYPEKINDS(typeInfo);
-		if (la->kind == 20) {
+		if (la->kind == 18) {
 			TYPEOPTIONS(typeInfo);
 		}
-		if (!errors->hasErrors &&
-		   typeInfo.IsValid()) {
-		 config.AddTypeInfo(typeInfo);
-		}
+		config.AddTypeInfo(typeInfo);
 		
 }
 
 void Parser::TYPEKINDS(TypeInfo& typeInfo) {
-		Expect(14);
-		Expect(15);
+		Expect(12);
+		Expect(13);
 		TYPEKIND(typeInfo);
 		while (StartOf(1)) {
 			TYPEKIND(typeInfo);
@@ -219,37 +202,37 @@ void Parser::TYPEKINDS(TypeInfo& typeInfo) {
 }
 
 void Parser::TYPEOPTIONS(TypeInfo& typeInfo) {
-		Expect(20);
+		Expect(18);
 		TYPEOPTION(typeInfo);
-		while (la->kind == 21 || la->kind == 22) {
+		while (la->kind == 19 || la->kind == 20) {
 			TYPEOPTION(typeInfo);
 		}
 }
 
 void Parser::TYPEKIND(TypeInfo& typeInfo) {
-		if (la->kind == 16) {
+		if (la->kind == 14) {
 			Get();
 			typeInfo.CanBeNode(true); 
-		} else if (la->kind == 17) {
+		} else if (la->kind == 15) {
 			Get();
 			typeInfo.CanBeWay(true); 
-		} else if (la->kind == 18) {
+		} else if (la->kind == 16) {
 			Get();
 			typeInfo.CanBeArea(true); 
-		} else if (la->kind == 19) {
+		} else if (la->kind == 17) {
 			Get();
 			typeInfo.CanBeRelation(true); 
-		} else SynErr(29);
+		} else SynErr(27);
 }
 
 void Parser::TYPEOPTION(TypeInfo& typeInfo) {
-		if (la->kind == 21) {
+		if (la->kind == 19) {
 			Get();
 			typeInfo.CanBeRoute(true); 
-		} else if (la->kind == 22) {
+		} else if (la->kind == 20) {
 			Get();
 			typeInfo.CanBeIndexed(true); 
-		} else SynErr(30);
+		} else SynErr(28);
 }
 
 
@@ -269,7 +252,7 @@ Parser::Parser(Scanner *scanner,
                TypeConfig& config)
  : config(config)
 {
-	maxT = 23;
+	maxT = 21;
 
   dummyToken = NULL;
   t = la = NULL;
@@ -284,9 +267,9 @@ bool Parser::StartOf(int s)
   const bool T = true;
   const bool x = false;
 
-	static bool set[2][25] = {
-		{T,x,x,x, T,x,T,T, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,T,T, x,x,x,x, x}
+	static bool set[2][23] = {
+		{T,x,x,x, T,x,T,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,x,x, x,x,x}
 	};
 
 
@@ -318,29 +301,27 @@ void Errors::SynErr(int line, int col, int n)
 			case 5: s = coco_string_create("\"END\" expected"); break;
 			case 6: s = coco_string_create("\"TAGS\" expected"); break;
 			case 7: s = coco_string_create("\"TAG\" expected"); break;
-			case 8: s = coco_string_create("\"ID\" expected"); break;
-			case 9: s = coco_string_create("\"VALUE\" expected"); break;
-			case 10: s = coco_string_create("\"TYPES\" expected"); break;
-			case 11: s = coco_string_create("\"TYPE\" expected"); break;
-			case 12: s = coco_string_create("\"WHERE\" expected"); break;
-			case 13: s = coco_string_create("\"==\" expected"); break;
-			case 14: s = coco_string_create("\"CAN\" expected"); break;
-			case 15: s = coco_string_create("\"BE\" expected"); break;
-			case 16: s = coco_string_create("\"NODE\" expected"); break;
-			case 17: s = coco_string_create("\"WAY\" expected"); break;
-			case 18: s = coco_string_create("\"AREA\" expected"); break;
-			case 19: s = coco_string_create("\"RELATION\" expected"); break;
-			case 20: s = coco_string_create("\"OPTIONS\" expected"); break;
-			case 21: s = coco_string_create("\"ROUTE\" expected"); break;
-			case 22: s = coco_string_create("\"INDEX\" expected"); break;
-			case 23: s = coco_string_create("??? expected"); break;
-			case 24: s = coco_string_create("this symbol not expected in OST"); break;
-			case 25: s = coco_string_create("this symbol not expected in TAGS"); break;
-			case 26: s = coco_string_create("this symbol not expected in TYPES"); break;
-			case 27: s = coco_string_create("this symbol not expected in TAG"); break;
-			case 28: s = coco_string_create("this symbol not expected in TYPE"); break;
-			case 29: s = coco_string_create("invalid TYPEKIND"); break;
-			case 30: s = coco_string_create("invalid TYPEOPTION"); break;
+			case 8: s = coco_string_create("\"TYPES\" expected"); break;
+			case 9: s = coco_string_create("\"TYPE\" expected"); break;
+			case 10: s = coco_string_create("\"WHERE\" expected"); break;
+			case 11: s = coco_string_create("\"==\" expected"); break;
+			case 12: s = coco_string_create("\"CAN\" expected"); break;
+			case 13: s = coco_string_create("\"BE\" expected"); break;
+			case 14: s = coco_string_create("\"NODE\" expected"); break;
+			case 15: s = coco_string_create("\"WAY\" expected"); break;
+			case 16: s = coco_string_create("\"AREA\" expected"); break;
+			case 17: s = coco_string_create("\"RELATION\" expected"); break;
+			case 18: s = coco_string_create("\"OPTIONS\" expected"); break;
+			case 19: s = coco_string_create("\"ROUTE\" expected"); break;
+			case 20: s = coco_string_create("\"INDEX\" expected"); break;
+			case 21: s = coco_string_create("??? expected"); break;
+			case 22: s = coco_string_create("this symbol not expected in OST"); break;
+			case 23: s = coco_string_create("this symbol not expected in TAGS"); break;
+			case 24: s = coco_string_create("this symbol not expected in TYPES"); break;
+			case 25: s = coco_string_create("this symbol not expected in TAG"); break;
+			case 26: s = coco_string_create("this symbol not expected in TYPE"); break;
+			case 27: s = coco_string_create("invalid TYPEKIND"); break;
+			case 28: s = coco_string_create("invalid TYPEOPTION"); break;
 
     default:
     {

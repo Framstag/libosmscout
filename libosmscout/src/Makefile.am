@@ -50,6 +50,7 @@ libosmscout_la_SOURCES= osmscout/Types.cpp \
                         osmscout/GenNodeDat.cpp \
                         osmscout/GenNodeUseIndex.cpp \
                         osmscout/GenRelationDat.cpp \
+                        osmscout/GenTypeDat.cpp \
                         osmscout/GenWaterIndex.cpp \
                         osmscout/GenWayDat.cpp \
                         osmscout/AreaIndex.cpp \

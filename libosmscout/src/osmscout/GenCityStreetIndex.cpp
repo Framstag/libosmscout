@@ -99,6 +99,7 @@ namespace osmscout {
     Return the list of nodes ids with the given type.
     */
   static bool GetCityNodes(const ImportParameter& parameter,
+                           const TypeConfig& typeConfig,
                            const std::set<TypeId>& cityIds,
                            std::list<Node>& cityNodes,
                            Progress& progress)
@@ -135,11 +136,11 @@ namespace osmscout {
         std::string name;
 
         for (size_t i=0; i<node.GetTagCount(); i++) {
-          if (node.GetTagKey(i)==tagPlaceName) {
+          if (node.GetTagKey(i)==typeConfig.tagPlaceName) {
             name=node.GetTagValue(i);
             break;
           }
-          else if (node.GetTagKey(i)==tagName &&
+          else if (node.GetTagKey(i)==typeConfig.tagName &&
                    name.empty()) {
             name=node.GetTagValue(i);
           }
@@ -164,6 +165,7 @@ namespace osmscout {
     Return the list of nodes ids with the given type.
     */
   static bool GetCityAreas(const ImportParameter& parameter,
+                           const TypeConfig& typeConfig,
                            const std::set<TypeId>& cityIds,
                            std::list<Way>& cityAreas,
                            Progress& progress)
@@ -200,7 +202,7 @@ namespace osmscout {
         std::string name=way.GetName();
 
         for (size_t i=0; i<way.GetTagCount(); i++) {
-          if (way.GetTagKey(i)==tagPlaceName) {
+          if (way.GetTagKey(i)==typeConfig.tagPlaceName) {
             name=way.GetTagValue(i);
             break;
           }
@@ -548,30 +550,30 @@ namespace osmscout {
     // square
     // state
 
-    typeId=typeConfig.GetNodeTypeId(tagPlace,"city");
+    typeId=typeConfig.GetNodeTypeId("place_city");
     assert(typeId!=typeIgnore);
     cityIds.insert(typeId);
 
-    typeId=typeConfig.GetNodeTypeId(tagPlace,"town");
+    typeId=typeConfig.GetNodeTypeId("place_town");
     assert(typeId!=typeIgnore);
     cityIds.insert(typeId);
 
-    typeId=typeConfig.GetNodeTypeId(tagPlace,"village");
+    typeId=typeConfig.GetNodeTypeId("place_village");
     assert(typeId!=typeIgnore);
     cityIds.insert(typeId);
 
-    typeId=typeConfig.GetNodeTypeId(tagPlace,"hamlet");
+    typeId=typeConfig.GetNodeTypeId("place_hamlet");
     assert(typeId!=typeIgnore);
     cityIds.insert(typeId);
 
-    typeId=typeConfig.GetNodeTypeId(tagPlace,"suburb");
+    typeId=typeConfig.GetNodeTypeId("place_suburb");
     assert(typeId!=typeIgnore);
     cityIds.insert(typeId);
 
     // We do not yet know if we handle borders as ways or areas
-    boundaryId=typeConfig.GetWayTypeId(tagBoundary,"administrative");
+    boundaryId=typeConfig.GetWayTypeId("boundary_administrative");
     if (boundaryId==typeIgnore) {
-      boundaryId=typeConfig.GetAreaTypeId(tagBoundary,"administrative");
+      boundaryId=typeConfig.GetAreaTypeId("boundary_administrative");
     }
     assert(boundaryId!=typeIgnore);
 
@@ -583,6 +585,7 @@ namespace osmscout {
 
     // Get nodes of one of the types in cityIds
     if (!GetCityNodes(parameter,
+                      typeConfig,
                       cityIds,
                       cityNodes,
                       progress)) {
@@ -599,6 +602,7 @@ namespace osmscout {
 
     // Get areas of one of the types in cityIds
     if (!GetCityAreas(parameter,
+                      typeConfig,
                       cityIds,
                       cityAreas,
                       progress)) {
@@ -642,7 +646,7 @@ namespace osmscout {
         size_t level=0;
 
         for (size_t i=0; i<way.GetTagCount(); i++) {
-          if (way.GetTagKey(i)==tagAdminLevel) {
+          if (way.GetTagKey(i)==typeConfig.tagAdminLevel) {
             if (StringToNumber(way.GetTagValue(i),level)) {
               boundaryAreas.push_back(way);
             }
@@ -694,7 +698,7 @@ namespace osmscout {
         size_t level=0;
 
         for (size_t i=0; i<relation.tags.size(); i++) {
-          if (relation.tags[i].key==tagAdminLevel) {
+          if (relation.tags[i].key==typeConfig.tagAdminLevel) {
             if (StringToNumber(relation.tags[i].value,level)) {
               boundaryRelations.push_back(relation);
             }
@@ -740,10 +744,10 @@ namespace osmscout {
         progress.SetProgress((l-1)*boundaryRelations.size()+count,10*boundaryRelations.size());
 
         for (size_t i=0; i<rel->tags.size() && !(l!=0 && !name.empty()); i++) {
-          if (rel->tags[i].key==tagAdminLevel &&
+          if (rel->tags[i].key==typeConfig.tagAdminLevel &&
               StringToNumber(rel->tags[i].value,level)) {
           }
-          else if (rel->tags[i].key==tagName) {
+          else if (rel->tags[i].key==typeConfig.tagName) {
             name=rel->tags[i].value;
           }
         }
@@ -780,10 +784,10 @@ namespace osmscout {
         progress.SetProgress((l-1)*boundaryAreas.size()+count,10*boundaryAreas.size());
 
         for (size_t i=0; i<a->GetTagCount() && !(l!=0 && !name.empty()); i++) {
-          if (a->GetTagKey(i)==tagAdminLevel &&
+          if (a->GetTagKey(i)==typeConfig.tagAdminLevel &&
               StringToNumber(a->GetTagValue(i),level)) {
           }
-          else if (a->GetTagKey(i)==tagName) {
+          else if (a->GetTagKey(i)==typeConfig.tagName) {
             name=a->GetTagValue(i);
           }
         }
@@ -821,7 +825,7 @@ namespace osmscout {
       progress.SetProgress(count+1,cityAreas.size());
 
       for (size_t i=0; i<a->GetTagCount(); i++) {
-        if (a->GetTagKey(i)==tagPlaceName) {
+        if (a->GetTagKey(i)==typeConfig.tagPlaceName) {
           name=a->GetTagValue(i);
           break;
         }
@@ -856,7 +860,7 @@ namespace osmscout {
       progress.SetProgress(count+1,cityNodes.size());
 
       for (size_t i=0; i<city->GetTagCount(); i++) {
-        if (city->GetTagKey(i)==tagName) {
+        if (city->GetTagKey(i)==typeConfig.tagName) {
           name=city->GetTagValue(i);
           break;
         }
@@ -1014,7 +1018,7 @@ namespace osmscout {
         std::string name;
 
         for (size_t i=0; i<node.GetTagCount(); i++) {
-          if (node.GetTagKey(i)==tagName) {
+          if (node.GetTagKey(i)==typeConfig.tagName) {
             name=node.GetTagValue(i);
             break;
           }

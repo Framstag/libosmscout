@@ -149,8 +149,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 23;
-	noSym = 23;
+	maxT = 21;
+	noSym = 21;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
@@ -162,20 +162,18 @@ void Scanner::Init() {
 	keywords.set("END", 5);
 	keywords.set("TAGS", 6);
 	keywords.set("TAG", 7);
-	keywords.set("ID", 8);
-	keywords.set("VALUE", 9);
-	keywords.set("TYPES", 10);
-	keywords.set("TYPE", 11);
-	keywords.set("WHERE", 12);
-	keywords.set("CAN", 14);
-	keywords.set("BE", 15);
-	keywords.set("NODE", 16);
-	keywords.set("WAY", 17);
-	keywords.set("AREA", 18);
-	keywords.set("RELATION", 19);
-	keywords.set("OPTIONS", 20);
-	keywords.set("ROUTE", 21);
-	keywords.set("INDEX", 22);
+	keywords.set("TYPES", 8);
+	keywords.set("TYPE", 9);
+	keywords.set("WHERE", 10);
+	keywords.set("CAN", 12);
+	keywords.set("BE", 13);
+	keywords.set("NODE", 14);
+	keywords.set("WAY", 15);
+	keywords.set("AREA", 16);
+	keywords.set("RELATION", 17);
+	keywords.set("OPTIONS", 18);
+	keywords.set("ROUTE", 19);
+	keywords.set("INDEX", 20);
 
 
   tvalLength = 128;
@@ -386,7 +384,7 @@ Token* Scanner::NextToken() {
 			else {t->kind = noSym; break;}
 		case 8:
 			case_8:
-			{t->kind = 13; break;}
+			{t->kind = 11; break;}
 
   }
   AppendVal(t);

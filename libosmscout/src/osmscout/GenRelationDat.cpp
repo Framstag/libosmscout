@@ -34,7 +34,8 @@
 
 namespace osmscout {
 
-  bool ResolveMember(Id id,
+  bool ResolveMember(const TypeConfig& typeConfig,
+                     Id id,
                      const std::string& name,
                      const RawRelation::Member& member,
                      DataFile<RawNode>& nodeDataFile,
@@ -101,6 +102,7 @@ namespace osmscout {
       std::vector<Tag> tags(way.GetTags());
 
       if (!role.attributes.SetTags(progress,
+                                   typeConfig,
                                    way.GetId(),
                                    way.IsArea(),
                                    tags,
@@ -609,15 +611,15 @@ namespace osmscout {
 
       std::vector<Tag>::iterator tag=rawRel.tags.begin();
       while (tag!=rawRel.tags.end()) {
-        if (tag->key==tagType) {
+        if (tag->key==typeConfig.tagType) {
           rel.relType=tag->value;
           tag=rawRel.tags.erase(tag);
         }
-        else if (tag->key==tagName) {
+        else if (tag->key==typeConfig.tagName) {
           name=tag->value;
           tag++;
         }
-        else if (tag->key==tagLayer) {
+        else if (tag->key==typeConfig.tagLayer) {
           if (!StringToNumber(tag->value,layer)) {
             progress.Warning(std::string("Layer tag value '")+tag->value+"' for relation "+NumberToString(rawRel.GetId())+" is not numeric!");
           }
@@ -640,7 +642,8 @@ namespace osmscout {
         rel.roles[m].role=rawRel.members[m].role;
         rel.roles[m].attributes.layer=layer;
 
-        if (!ResolveMember(rawRel.GetId(),
+        if (!ResolveMember(typeConfig,
+                           rawRel.GetId(),
                            name,
                            rawRel.members[m],nodeDataFile,
                            wayDataFile,

@@ -1,994 +1,990 @@
 OSS
-  WAY KEY "highway" VALUE "motorway" PRIO 1
+  WAY "highway_motorway" PRIO 1
     LINE #809bc0 WITH MINPIXEL 2.5 WIDTH 20 OUTLINE 1
     LABEL WITH STYLE contour MINMAG detail
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #809bc0 BORDERCOLOR #ffffff MINMAG world
 
-  WAY KEY "highway" VALUE "motorway_link" PRIO 3
+  WAY "highway_motorway_link" PRIO 3
     LINE #809bc0 WITH MINPIXEL 2.5 WIDTH 20 OUTLINE 1
     LABEL WITH STYLE contour MINMAG detail
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #809bc0 BORDERCOLOR #ffffff MINMAG world
 
-  WAY KEY "highway" VALUE "trunk" PRIO 2
+  WAY "highway_trunk" PRIO 2
     LINE #a8daa8 WITH MINPIXEL 2.5 WIDTH 18 OUTLINE 1
     LABEL WITH STYLE contour MINMAG detail
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #7ec87e BORDERCOLOR #ffffff MINMAG world
 
-  WAY KEY "highway" VALUE "trunk_link" PRIO 2
+  WAY "highway_trunk_link" PRIO 2
     LINE #a8daa8 WITH MINPIXEL 2.5 WIDTH 18 OUTLINE 1
     LABEL WITH STYLE contour MINMAG detail
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #7ec87e BORDERCOLOR #ffffff MINMAG world
 
-  WAY KEY "highway" VALUE "primary" PRIO 3
+  WAY "highway_primary" PRIO 3
     LINE #ec989a WITH MINPIXEL 1.5 WIDTH 14 OUTLINE 1
     LABEL WITH STYLE contour MINMAG detail
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #e46d71 BORDERCOLOR #ffffff MINMAG proximity
 
-  WAY KEY "highway" VALUE "primary_link" PRIO 3
+  WAY "highway_primary_link" PRIO 3
     LINE #ec989a WITH MINPIXEL 1.5 WIDTH 14 OUTLINE 1
     LABEL WITH STYLE contour MINMAG detail
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #e46d71 BORDERCOLOR #ffffff MINMAG proximity
 
-  WAY KEY "highway" VALUE "secondary" PRIO 4
+  WAY "highway_secondary" PRIO 4
     LINE #fdd6a4 WITH ALTCOLOR #fdd654 MINPIXEL 1.5 WIDTH 12 OUTLINE 1
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY KEY "highway" VALUE "secondary_link" PRIO 4
+  WAY "highway_secondary_link" PRIO 4
     LINE #fdd6a4 WITH ALTCOLOR #fdd654 MINPIXEL 1.5 WIDTH 12 OUTLINE 1
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY KEY "highway" VALUE "tertiary" PRIO 5
+  WAY "highway_tertiary" PRIO 5
     LINE #fefeb3 WITH ALTCOLOR #fefe73 MINPIXEL 1.5 WIDTH 10 OUTLINE 1
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY KEY "highway" VALUE "unclassified" PRIO 6
+  WAY "highway_unclassified" PRIO 6
     LINE #ffffff WITH ALTCOLOR #888888 MINPIXEL 1 WIDTH 8 OUTLINE 1
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY KEY "highway" VALUE "road" PRIO 7
+  WAY "highway_road" PRIO 7
     LINE #ffffff WITH ALTCOLOR #888888 MINPIXEL 1 WIDTH 8 OUTLINE 1
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY KEY "highway" VALUE "residential" PRIO 8
+  WAY "highway_residential" PRIO 8
     LINE #ffffff WITH ALTCOLOR #888888 MINPIXEL 1 WIDTH 8 OUTLINE 1
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY KEY "highway" VALUE "living_street" PRIO 9
+  WAY "highway_living_street" PRIO 9
     LINE #bababa WITH MINPIXEL 1 WIDTH 8 OUTLINE 1
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY KEY "highway" VALUE "service" PRIO 10
+  WAY "highway_service" PRIO 10
     LINE #ffffff WITH ALTCOLOR #888888 MINPIXEL 0.5 WIDTH 8 OUTLINE 1
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY KEY "highway" VALUE "track" PRIO 11
+  WAY "highway_track" PRIO 11
     LINE #90570c WITH STYLE longDash OUTLINECOLOR #ffffff80 MINPIXEL 0.5 WIDTH 3 OUTLINE 1.5
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY KEY "highway" VALUE "pedestrian" PRIO 11
+  WAY "highway_pedestrian" PRIO 11
     LINE #ebeaea WITH MINPIXEL 0.5 WIDTH 8 OUTLINE 1
     LABEL WITH STYLE contour MINMAG detail
 
-  AREA KEY "highway" VALUE "pedestrian"
+  AREA "highway_pedestrian"
     FILL #ededed
     LABEL WITH MINMAG close
     BORDER #c5c5c5 WITH MINPIXEL 1 WIDTH 1
 
-  NODE KEY "highway" VALUE "services"
+  NODE "highway_services"
     LABEL WITH STYLE normal MINMAG detail
 
-  AREA KEY "highway" VALUE "services"
+  AREA "highway_services"
     FILL #cb9999
     LABEL WITH MINMAG close
 
-  WAY KEY "highway" VALUE "bus_guideway" PRIO 11
+  WAY "highway_bus_guideway" PRIO 11
     LINE #90570c WITH MINPIXEL 0.5 WIDTH 2
     LABEL WITH STYLE contour MINMAG close
 
-  WAY KEY "highway" VALUE "path" PRIO 11
+  WAY "highway_path" PRIO 11
     LINE #4b4b4b WITH STYLE longDash OUTLINECOLOR #ffffff80 MINPIXEL 0.5 WIDTH 3 OUTLINE 1
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY KEY "highway" VALUE "cycleway" PRIO 11
+  WAY "highway_cycleway" PRIO 11
     LINE #4645fa WITH STYLE dotted OUTLINECOLOR #ffffff80 MINPIXEL 0.5 WIDTH 3 OUTLINE 1.5
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY KEY "highway" VALUE "footway" PRIO 11
+  WAY "highway_footway" PRIO 11
     LINE #fe9897 WITH STYLE dotted OUTLINECOLOR #ffffff80 MINPIXEL 0.5 WIDTH 3 OUTLINE 1.5
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY KEY "highway" VALUE "bridleway" PRIO 11
+  WAY "highway_bridleway" PRIO 11
     LINE #90570c WITH MINPIXEL 0.5 WIDTH 2
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY KEY "highway" VALUE "byway" PRIO 11
+  WAY "highway_byway" PRIO 11
     LINE #90570c WITH MINPIXEL 0.5 WIDTH 2
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY KEY "highway" VALUE "steps" PRIO 11
+  WAY "highway_steps" PRIO 11
     LINE #fe9897 WITH MINPIXEL 3 WIDTH 2
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY KEY "highway" VALUE "construction" PRIO 11
+  WAY "highway_construction" PRIO 11
     LINE #99cccc WITH MINPIXEL 0.5 WIDTH 2
     LABEL WITH STYLE contour MINMAG detail
 
-  NODE KEY "highway" VALUE "bus_stop"
+  NODE "highway_bus_stop"
     SYMBOL circle #7885b0 4 WITH MINMAG close
     ICON bus_stop WITH MINMAG veryClose
 
-  NODE KEY "highway" VALUE "motorway_junction"
+  NODE "highway_motorway_junction"
     LABEL WITH STYLE emphasize COLOR #809bc0 MINMAG city
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #e46d71 BORDERCOLOR #ffffff MINMAG detail
 
-  WAY KEY "railway" VALUE "rail" PRIO 20
+  WAY "railway_rail" PRIO 20
     LINE #b3b3b3 WITH MINPIXEL 1 WIDTH 5
     LABEL WITH STYLE contour MINMAG close
 
-  WAY KEY "railway" VALUE "tram" PRIO 20
+  WAY "railway_tram" PRIO 20
     LINE #444444 WITH MINPIXEL 1 WIDTH 5
     LABEL WITH STYLE contour MINMAG close
 
-  WAY KEY "railway" VALUE "light_rail" PRIO 20
+  WAY "railway_light_rail" PRIO 20
     LINE #b3b3b3 WITH MINPIXEL 1 WIDTH 5
     LABEL WITH STYLE contour MINMAG close
 
-  WAY KEY "railway" VALUE "subway" PRIO 20
+  WAY "railway_subway" PRIO 20
     LINE #b3b3b3 WITH STYLE longDash OUTLINECOLOR #ffffff80 MINPIXEL 1 WIDTH 5 OUTLINE 1
     LABEL WITH STYLE contour MINMAG close
 
-  NODE KEY "railway" VALUE "station"
+  NODE "railway_station"
     LABEL WITH STYLE emphasize COLOR #8888fd MINMAG detail
     SYMBOL box #7885b0 8 WITH MINMAG close
 
-  AREA KEY "railway" VALUE "station"
+  AREA "railway_station"
     FILL #cb4040
     LABEL WITH STYLE emphasize COLOR #8888fd MINMAG detail
     SYMBOL box #7885b0 8 WITH MINMAG close
 
-  NODE KEY "railway" VALUE "halt"
+  NODE "railway_halt"
     LABEL WITH STYLE emphasize COLOR #8888fd MINMAG close
     SYMBOL box #7885b0 8 WITH MINMAG close
 
-  NODE KEY "railway" VALUE "tram_stop"
+  NODE "railway_tram_stop"
     LABEL WITH STYLE emphasize COLOR #8888fd MINMAG close
     SYMBOL box #7885b0 8 WITH MINMAG close
 
-  WAY KEY "waterway" VALUE "stream" PRIO 20
+  WAY "waterway_stream" PRIO 20
     LINE #b5d0d0 WITH MINPIXEL 1 WIDTH 2
     LABEL WITH STYLE contour MINMAG close
 
-  WAY KEY "waterway" VALUE "river" PRIO 1
+  WAY "waterway_river" PRIO 1
     LINE #b5d0d0 WITH MINPIXEL 0.5 WIDTH 15
     LABEL WITH STYLE contour MINMAG proximity
 
-  WAY KEY "waterway" VALUE "canal" PRIO 1
+  WAY "waterway_canal" PRIO 1
     LINE #b5d0d0 WITH MINPIXEL 0.5 WIDTH 15
     LABEL WITH STYLE contour MINMAG proximity
 
-  WAY KEY "waterway" VALUE "drain" PRIO 1
+  WAY "waterway_drain" PRIO 1
     LINE #b5d0d0 WITH MINPIXEL 0.5 WIDTH 3
     LABEL WITH STYLE contour MINMAG proximity
 
-  AREA KEY "waterway" VALUE "dock"
+  AREA "waterway_dock"
     FILL #b5d0d0
     LABEL WITH MINMAG proximity
 
-  AREA KEY "waterway" VALUE "riverbank"
+  AREA "waterway_riverbank"
     FILL #b5d0d0
     LABEL WITH MINMAG proximity
 
-  WAY KEY "route" VALUE "ferry" PRIO 11
+  WAY "route_ferry" PRIO 11
     LINE #0000ff WITH STYLE dotted OUTLINECOLOR #ffffff80 MINPIXEL 0.5 WIDTH 3 OUTLINE 1.5
     LABEL WITH STYLE contour MINMAG detail
 
-  AREA KEY "landuse" VALUE "farm"
+  AREA "landuse_farm"
     FILL #ead8bd WITH LAYER 2
     LABEL WITH MINMAG city
 
-  AREA KEY "landuse" VALUE "farmland"
+  AREA "landuse_farmland"
     FILL #ead8bd
     LABEL WITH MINMAG city
 
-  AREA KEY "landuse" VALUE "farmyard"
+  AREA "landuse_farmyard"
     FILL #dcbe92 WITH LAYER 1
     LABEL WITH MINMAG city
 
-  AREA KEY "landuse" VALUE "quarry"
+  AREA "landuse_quarry"
     FILL #b3b3b3
     LABEL WITH MINMAG city
 
-  AREA KEY "landuse" VALUE "landfill"
+  AREA "landuse_landfill"
     FILL #b3b3b3
     LABEL WITH MINMAG city
 
-  AREA KEY "landuse" VALUE "basin"
+  AREA "landuse_basin"
     FILL #b3d1d4 WITH LAYER 1
     LABEL WITH MINMAG detail
 
-  AREA KEY "landuse" VALUE "reservoir"
+  AREA "landuse_reservoir"
     FILL #b4d5f0 WITH LAYER 1
     LABEL WITH MINMAG detail
 
-  AREA KEY "landuse" VALUE "forest"
+  AREA "landuse_forest"
     PATTERN "forest" WITH MINMAG proximity LAYER 1
     FILL #8dc56c WITH LAYER 1
     LABEL WITH STYLE emphasize MINMAG city
 
-  AREA KEY "landuse" VALUE "allotments"
+  AREA "landuse_allotments"
     FILL #c8b084
     LABEL WITH STYLE emphasize MINMAG detail
 
-  AREA KEY "landuse" VALUE "vineyard"
+  AREA "landuse_vineyard"
     FILL #b3e2a8
     LABEL WITH MINMAG detail
 
-  AREA KEY "landuse" VALUE "residential"
+  AREA "landuse_residential"
     FILL #dcdcdc
     LABEL WITH MINMAG city
 
-  AREA KEY "landuse" VALUE "retail"
+  AREA "landuse_retail"
     FILL #bca9a9 WITH LAYER 2 FILTER "building"
     FILL #feeaea
     BORDER #c5a0a0 WITH MINPIXEL 1 WIDTH 1
     LABEL WITH MINMAG city
 
-  AREA KEY "landuse" VALUE "commercial"
+  AREA "landuse_commercial"
     FILL #efc8c8
     LABEL WITH MINMAG city
 
-  AREA KEY "landuse" VALUE "industrial"
+  AREA "landuse_industrial"
     FILL #dfd1d6
     BORDER #c5a0a0 WITH MINPIXEL 1 WIDTH 1
     LABEL WITH STYLE emphasize MINMAG close
 
-  AREA KEY "landuse" VALUE "brownfield"
+  AREA "landuse_brownfield"
     FILL #ebd7fe
     LABEL WITH MINMAG city
 
-  AREA KEY "landuse" VALUE "grass"
+  AREA "landuse_grass"
     FILL #cfeca8
     LABEL WITH MINMAG city
 
-  AREA KEY "landuse" VALUE "greenfield"
+  AREA "landuse_greenfield"
     FILL #dcdcc8
     LABEL WITH MINMAG city
 
-  AREA KEY "landuse" VALUE "railway"
+  AREA "landuse_railway"
     FILL #dcdcc8 WITH LAYER 1
     LABEL WITH MINMAG city
 
-  AREA KEY "landuse" VALUE "construction"
+  AREA "landuse_construction"
     FILL #9d9d6c
     LABEL WITH MINMAG detail
 
-  AREA KEY "landuse" VALUE "military"
+  AREA "landuse_military"
     FILL #fe9898 WITH LAYER 1
     LABEL WITH MINMAG city
 
-  AREA KEY "landuse" VALUE "cemetery"
+  AREA "landuse_cemetery"
     PATTERN "cemetery" WITH MINMAG detail
     FILL #a9caae
     LABEL WITH MINMAG close
 
-  AREA KEY "landuse" VALUE "meadow"
+  AREA "landuse_meadow"
     FILL #cfeca8 WITH LAYER 1
     LABEL WITH MINMAG close
 
-  AREA KEY "landuse" VALUE "village_green"
+  AREA "landuse_village_green"
     FILL #cfeca8
     LABEL WITH MINMAG detail
 
-  AREA KEY "landuse" VALUE "recreation_ground"
+  AREA "landuse_recreation_ground"
     FILL #bce2ca
     LABEL WITH MINMAG detail
 
-  NODE KEY "natural" VALUE "peak"
+  NODE "natural_peak"
     SYMBOL triangle #9c5e29 8 WITH MINMAG city
     LABEL WITH STYLE emphasize COLOR #9c5329 MINMAG detail
 
-  AREA KEY "natural" VALUE "glacier"
+  AREA "natural_glacier"
     FILL #ddecec
     LABEL WITH MINMAG detail
 
-  AREA KEY "natural" VALUE "scrub"
+  AREA "natural_scrub"
     PATTERN "scrub" WITH MINMAG proximity
     FILL #b5e2b5
     LABEL WITH MINMAG city
 
-  AREA KEY "natural" VALUE "fell"
+  AREA "natural_fell"
     FILL #f9f9f9
     LABEL WITH MINMAG city
 
-  AREA KEY "natural" VALUE "heath"
+  AREA "natural_heath"
     FILL #ffffc0
     LABEL WITH MINMAG city
 
-  AREA KEY "natural" VALUE "wood"
+  AREA "natural_wood"
     FILL #aed1a0 WITH LAYER 1
     LABEL WITH MINMAG proximity
 
-  AREA KEY "natural" VALUE "marsh"
+  AREA "natural_marsh"
     FILL #f7f9f5
     LABEL WITH MINMAG city
 
-  AREA KEY "natural" VALUE "wetland"
+  AREA "natural_wetland"
     FILL #f7f9f5
     LABEL WITH MINMAG city
 
-  AREA KEY "natural" VALUE "water"
+  AREA "natural_water"
     FILL #b5d0d0 WITH LAYER 1
     LABEL WITH MINMAG close
 
-  WAY KEY "natural" VALUE "coastline" PRIO 1
+  WAY "natural_coastline" PRIO 1
     LINE #000000 WITH MINPIXEL 3 WIDTH 1
 
-  AREA KEY "natural" VALUE "beach"
+  AREA "natural_beach"
     FILL #eecc55
     LABEL WITH MINMAG detail
 
-  AREA KEY "natural" VALUE "land"
+  AREA "natural_land"
     FILL #ffffff
     LABEL WITH MINMAG region
 
-  AREA KEY "aeroway" VALUE "aerodrome"
+  AREA "aeroway_aerodrome"
     FILL #d5ddbd
     LABEL WITH MINMAG detail
 
-  AREA KEY "aeroway" VALUE "terminal"
+  AREA "aeroway_terminal"
     FILL #cc99ff WITH LAYER 2 FILTER "building"
     FILL #d5ddbd
     BORDER #b265ff WITH MINPIXEL 1 WIDTH 1
     LABEL WITH MINMAG detail
 
-  AREA KEY "aeroway" VALUE "helipad"
+  AREA "aeroway_helipad"
     FILL #d5ddbd
     LABEL WITH MINMAG detail
 
-  WAY KEY "aeroway" VALUE "runway" PRIO 20
+  WAY "aeroway_runway" PRIO 20
     LINE #bbbbcc WITH MINPIXEL 2 WIDTH 20
     LABEL WITH STYLE contour MINMAG close
 
-  WAY KEY "aeroway" VALUE "taxiway" PRIO 20
+  WAY "aeroway_taxiway" PRIO 20
     LINE #bbbbcc WITH MINPIXEL 2 WIDTH 15
     LABEL WITH STYLE contour MINMAG close
 
-  AREA KEY "aeroway" VALUE "apron"
+  AREA "aeroway_apron"
     FILL #e8d1fe
     LABEL WITH MINMAG detail
 
-  AREA KEY "leisure" VALUE "sports_centre"
+  AREA "leisure_sports_centre"
     FILL #bca9a9 WITH LAYER 2 FILTER "building"
     FILL #bde3cb
     LABEL WITH MINMAG close
 
-  AREA KEY "leisure" VALUE "golf_course"
+  AREA "leisure_golf_course"
     FILL #c7f1a3
     LABEL WITH MINMAG close
 
-  AREA KEY "leisure" VALUE "stadium"
+  AREA "leisure_stadium"
     FILL #bde3cb WITH LAYER 2
     LABEL WITH MINMAG close
 
-  WAY KEY "leisure" VALUE "track" PRIO 11
+  WAY "leisure_track" PRIO 11
     LINE #bde3cb WITH MINPIXEL 1 WIDTH 3
     LABEL WITH STYLE contour MINMAG city
 
-  AREA KEY "leisure" VALUE "track"
+  AREA "leisure_track"
     FILL #bde3cb
     LABEL WITH MINMAG close
 
-  AREA KEY "leisure" VALUE "pitch"
+  AREA "leisure_pitch"
     FILL #90d3b9 WITH LAYER 3
     LABEL WITH MINMAG close
     BORDER #b0b0b0 WITH MINPIXEL 1 WIDTH 1
 
-  AREA KEY "leisure" VALUE "water_park"
+  AREA "leisure_water_park"
     FILL #b5d6f1
     LABEL WITH MINMAG close
 
-  AREA KEY "leisure" VALUE "marina"
+  AREA "leisure_marina"
     FILL #b5d6f1
     LABEL WITH MINMAG close
 
-  AREA KEY "leisure" VALUE "fishing"
+  AREA "leisure_fishing"
     FILL #b5d6f1
     LABEL WITH MINMAG close
 
-  AREA KEY "leisure" VALUE "nature_reserve"
+  AREA "leisure_nature_reserve"
     FILL #abde96
     LABEL WITH MINMAG region
 
-  AREA KEY "leisure" VALUE "park"
+  AREA "leisure_park"
     FILL #c6f0cf
     LABEL WITH MINMAG close
 
-  AREA KEY "leisure" VALUE "playground"
+  AREA "leisure_playground"
     FILL #ccffff
     LABEL WITH MINMAG close
 
-  AREA KEY "leisure" VALUE "garden"
+  AREA "leisure_garden"
     FILL #ceeca8
     LABEL WITH MINMAG close
 
-  AREA KEY "leisure" VALUE "common"
+  AREA "leisure_common"
     FILL #bde3cb
     LABEL WITH MINMAG close
 
-  AREA KEY "leisure" VALUE "ice_rink"
+  AREA "leisure_ice_rink"
     FILL #b5d6f1
     LABEL WITH MINMAG close
 
-  AREA KEY "amenity" VALUE "arts_centre"
+  AREA "amenity_arts_centre"
     FILL #cb4040
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "baby_hatch"
+  AREA "amenity_baby_hatch"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "bank"
+  AREA "amenity_bank"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "biergarten"
+  AREA "amenity_biergarten"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "bicycle_parking"
+  AREA "amenity_bicycle_parking"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "bicycle_rental"
+  AREA "amenity_bicycle_rental"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "bus_station"
+  AREA "amenity_bus_station"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "brothel"
+  AREA "amenity_brothel"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "cafe"
+  AREA "amenity_cafe"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "car_rental"
+  AREA "amenity_car_rental"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "car_sharing"
+  AREA "amenity_car_sharing"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "cinema"
+  AREA "amenity_cinema"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "college"
+  AREA "amenity_college"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "courthouse"
+  AREA "amenity_courthouse"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "crematorium"
+  AREA "amenity_crematorium"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "dentist"
+  AREA "amenity_dentist"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "doctors"
+  AREA "amenity_doctors"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "embassy"
+  AREA "amenity_embassy"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "fast_food"
+  AREA "amenity_fast_food"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "ferry_terminal"
+  AREA "amenity_ferry_terminal"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "fire_station"
+  AREA "amenity_fire_station"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "food_court"
+  AREA "amenity_food_court"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "fountain"
+  AREA "amenity_fountain"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "fuel"
+  AREA "amenity_fuel"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "grave_yard"
+  AREA "amenity_grave_yard"
     FILL #bde3cb WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "hospital"
+  AREA "amenity_hospital"
     FILL #bca9a9 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #da0092 SIZE 1.1 MINMAG veryClose
     ICON hospital WITH MINMAG close
 
-  NODE KEY "amenity" VALUE "hospital"
+  NODE "amenity_hospital"
     SYMBOL circle #da0092 4 WITH MINMAG close
     LABEL WITH STYLE emphasize COLOR #da0092 SIZE 1.1 MINMAG veryClose
     ICON hospital WITH MINMAG close
 
-  AREA KEY "amenity" VALUE "hunting_stand"
+  AREA "amenity_hunting_stand"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "kindergarten"
+  AREA "amenity_kindergarten"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "library"
+  AREA "amenity_library"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "nightclub"
+  AREA "amenity_nightclub"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "parking"
+  AREA "amenity_parking"
     FILL #f6eeb6
     ICON parking WITH MINMAG close
     LABEL WITH STYLE emphasize COLOR #4bb2da SIZE 1.1 MINMAG veryClose
 
-  NODE KEY "amenity" VALUE "parking"
+  NODE "amenity_parking"
     SYMBOL circle #4bb2da 4 WITH MINMAG close
     ICON parking WITH MINMAG close
     LABEL WITH STYLE emphasize COLOR #4bb2da SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "pharmacy"
+  AREA "amenity_pharmacy"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     ICON pharmacy WITH MINMAG veryClose
     LABEL WITH STYLE emphasize COLOR #da0092 SIZE 1.1 MINMAG veryClose
 
-  NODE KEY "amenity" VALUE "pharmacy"
+  NODE "amenity_pharmacy"
     ICON pharmacy WITH MINMAG veryClose
     LABEL WITH STYLE emphasize COLOR #da0092 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "place_of_worship"
+  AREA "amenity_place_of_worship"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "police"
+  AREA "amenity_police"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "post_office"
+  AREA "amenity_post_office"
     FILL #ffcc00 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  NODE KEY "amenity" VALUE "post_office"
+  NODE "amenity_post_office"
     SYMBOL box #ffcc00 8 WITH MINMAG veryClose
 
-  NODE KEY "amenity" VALUE "post_box"
+  NODE "amenity_post_box"
     SYMBOL circle #ffcc00 4 WITH MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "prison"
+  AREA "amenity_prison"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "pub"
+  AREA "amenity_pub"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "public_building"
+  AREA "amenity_public_building"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "recycling"
+  AREA "amenity_recycling"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "restaurant"
+  AREA "amenity_restaurant"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "school"
+  AREA "amenity_school"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
     BORDER #c5a0a0 WITH MINPIXEL 1 WIDTH 1
 
-  AREA KEY "amenity" VALUE "shelter"
+  AREA "amenity_shelter"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "studio"
+  AREA "amenity_studio"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "taxi"
+  AREA "amenity_taxi"
     FILL #d2d2d2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "theatre"
+  AREA "amenity_theatre"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "townhall"
+  AREA "amenity_townhall"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "university"
+  AREA "amenity_university"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "amenity" VALUE "veterinary"
+  AREA "amenity_veterinary"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "tourism" VALUE "alpine_hut"
+  AREA "tourism_alpine_hut"
     FILL #7172db WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "tourism" VALUE "attraction"
+  AREA "tourism_attraction"
     FILL #7172db WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "tourism" VALUE "artwork"
+  AREA "tourism_artwork"
     FILL #7172db WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "tourism" VALUE "camp_site"
+  AREA "tourism_camp_site"
     FILL #7172db WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "tourism" VALUE "caravan_site"
+  AREA "tourism_caravan_site"
     FILL #7172db WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "tourism" VALUE "chalet"
+  AREA "tourism_chalet"
     FILL #7172db WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "tourism" VALUE "guest_house"
+  AREA "tourism_guest_house"
     FILL #7172db WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "tourism" VALUE "hotel"
+  AREA "tourism_hotel"
     FILL #7172db WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "tourism" VALUE "information"
+  AREA "tourism_information"
     FILL #7172db WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "tourism" VALUE "motel"
+  AREA "tourism_motel"
     FILL #7172db WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "tourism" VALUE "museum"
+  AREA "tourism_museum"
     FILL #7172db WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "tourism" VALUE "picnic_site"
+  AREA "tourism_picnic_site"
     FILL #7172db WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "tourism" VALUE "theme_park"
+  AREA "tourism_theme_park"
     FILL #7172db WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "tourism" VALUE "zoo"
+  AREA "tourism_zoo"
     FILL #7172db WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "historic" VALUE "castle"
+  AREA "historic_castle"
     FILL #9f5eb4 WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "historic" VALUE "monument"
+  AREA "historic_monument"
     FILL #9f5eb4 WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "historic" VALUE "memorial"
+  AREA "historic_memorial"
     FILL #9f5eb4 WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "historic" VALUE "archaeological_site"
+  AREA "historic_archaeological_site"
     FILL #9f5eb4 WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "historic" VALUE "ruins"
+  AREA "historic_ruins"
     FILL #9f5eb4 WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "historic" VALUE "battlefield"
+  AREA "historic_battlefield"
     FILL #9f5eb4
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "historic" VALUE "wreck"
+  AREA "historic_wreck"
     FILL #9f5eb4 WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "shop" VALUE "alcohol"
+  AREA "shop_alcohol"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "bakery"
+  AREA "shop_bakery"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "beverages"
+  AREA "shop_beverages"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "bicycle"
+  AREA "shop_bicycle"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "books"
+  AREA "shop_books"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "butcher"
+  AREA "shop_butcher"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "car"
+  AREA "shop_car"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "car_repair"
+  AREA "shop_car_repair"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "chemist"
+  AREA "shop_chemist"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "clothes"
+  AREA "shop_clothes"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "computer"
+  AREA "shop_computer"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "convenience"
+  AREA "shop_convenience"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "department_store"
+  AREA "shop_department_store"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "dry_cleaning"
+  AREA "shop_dry_cleaning"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "doityourself"
+  AREA "shop_doityourself"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "electronics"
+  AREA "shop_electronics"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "florist"
+  AREA "shop_florist"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "furniture"
+  AREA "shop_furniture"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "garden_centre"
+  AREA "shop_garden_centre"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "hairdresser"
+  AREA "shop_hairdresser"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "hardware"
+  AREA "shop_hardware"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "hifi"
+  AREA "shop_hifi"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "kiosk"
+  AREA "shop_kiosk"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "laundry"
+  AREA "shop_laundry"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "mall"
+  AREA "shop_mall"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "motorcycle"
+  AREA "shop_motorcycle"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "optician"
+  AREA "shop_optician"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "organic"
+  AREA "shop_organic"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "outdoor"
+  AREA "shop_outdoor"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "sports"
+  AREA "shop_sports"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "stationery"
+  AREA "shop_stationery"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "supermarket"
+  AREA "shop_supermarket"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "shoes"
+  AREA "shop_shoes"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "toys"
+  AREA "shop_toys"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "shop" VALUE "video"
+  AREA "shop_video"
     FILL #cb8440 WITH LAYER 2
     LABEL WITH MINMAG veryClose
 
-  AREA KEY "military" VALUE "airfield"
+  AREA "military_airfield"
     FILL #f59897
     LABEL WITH MINMAG city
 
-  AREA KEY "military" VALUE "bunker"
+  AREA "military_bunker"
     FILL #f59897 WITH LAYER 2
     LABEL WITH MINMAG city
 
-  AREA KEY "military" VALUE "barracks"
+  AREA "military_barracks"
     FILL #f59897 WITH LAYER 2
     LABEL WITH MINMAG city
 
-  AREA KEY "military" VALUE "danger_area"
+  AREA "military_danger_area"
     FILL #f59897
     LABEL WITH MINMAG city
 
-  AREA KEY "military" VALUE "range"
+  AREA "military_range"
     FILL #f59897
     LABEL WITH MINMAG city
 
-  AREA KEY "military" VALUE "naval_base"
+  AREA "military_naval_base"
     FILL #f59897
     LABEL WITH MINMAG city
 
-  AREA KEY "power" VALUE "station"
+  AREA "power_station"
     FILL #bca9a9 WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "power" VALUE "sub_station"
+  AREA "power_sub_station"
     FILL #bca9a9 WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "power" VALUE "generator"
+  AREA "power_generator"
     FILL #bca9a9 WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "building" VALUE "yes"
+  AREA "building"
     FILL #bca9a9 WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA KEY "building" VALUE "true"
-    FILL #bca9a9 WITH LAYER 2
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  NODE KEY "place" VALUE "continent"
+  NODE "place_continent"
     LABEL WITH STYLE emphasize MINMAG world MAXMAG city
 
-  NODE KEY "place" VALUE "country"
+  NODE "place_country"
     LABEL WITH STYLE emphasize MINMAG stateOver MAXMAG city
 
-  NODE KEY "place" VALUE "state"
+  NODE "place_state"
     LABEL WITH STYLE emphasize SIZE 1.7 MINMAG state MAXMAG county FADE AT state
 
-  NODE KEY "place" VALUE "region"
+  NODE "place_region"
     LABEL WITH STYLE emphasize MINMAG region MAXMAG city
 
-  NODE KEY "place" VALUE "county"
+  NODE "place_county"
     LABEL WITH STYLE emphasize MINMAG county MAXMAG city
 
-  NODE KEY "place" VALUE "city"
+  NODE "place_city"
     LABEL WITH STYLE emphasize SIZE 1.3 MINMAG stateOver MAXMAG city FADE AT county
 
-  NODE KEY "place" VALUE "town"
+  NODE "place_town"
     LABEL WITH STYLE emphasize SIZE 1.2 MINMAG region MAXMAG city FADE AT region
 
-  NODE KEY "place" VALUE "village"
+  NODE "place_village"
     LABEL WITH STYLE emphasize SIZE 1.2 MINMAG cityOver MAXMAG veryClose FADE AT suburb
 
-  NODE KEY "place" VALUE "hamlet"
+  NODE "place_hamlet"
     LABEL WITH STYLE emphasize SIZE 1.0 MINMAG city MAXMAG veryClose FADE AT city
 
-  NODE KEY "place" VALUE "suburb"
+  NODE "place_suburb"
     LABEL WITH STYLE emphasize SIZE 1.3 MINMAG cityOver MAXMAG veryClose FADE AT city
 
-  NODE KEY "place" VALUE "locality"
+  NODE "place_locality"
     LABEL WITH STYLE emphasize SIZE 1.1 MINMAG detail
 
-  NODE KEY "place" VALUE "island"
+  NODE "place_island"
     LABEL WITH STYLE emphasize MINMAG region MAXMAG veryClose
   /*
-  NODE KEY "internal" VALUE "start"
+  NODE "internal_start"
     ICON start
 
-  NODE KEY "internal" VALUE "target"
+  NODE "internal_target"
     ICON target*/
 
-  WAY KEY "internal" VALUE "route" PRIO 1
+  WAY "_route" PRIO 1
     LINE #ff000088 WITH MINPIXEL 2 WIDTH 20
 END

@@ -39,6 +39,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/GenNodeDat.h \
                         osmscout/GenNodeUseIndex.h \
                         osmscout/GenRelationDat.h \
+                        osmscout/GenTypeDat.h \
                         osmscout/GenWaterIndex.h \
                         osmscout/GenWayDat.h \
                         osmscout/DataFile.h \

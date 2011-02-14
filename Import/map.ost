@@ -1,400 +1,400 @@
-OST 
+OST
 TAGS
-  TAG ID 1 VALUE "highway"
-  TAG ID 2 VALUE "junction"
-  TAG ID 3 VALUE "railway"
-  TAG ID 4 VALUE "aeroway"
-  TAG ID 5 VALUE "waterway"
-  TAG ID 6 VALUE "landuse"
-  TAG ID 7 VALUE "natural"
-  TAG ID 8 VALUE "boundary"
-  TAG ID 9 VALUE "power"
-  TAG ID 10 VALUE "amenity"
-  TAG ID 11 VALUE "shop"
-  TAG ID 12 VALUE "tourism"
-  TAG ID 13 VALUE "historic"
-  TAG ID 14 VALUE "military"
-  TAG ID 15 VALUE "sport"
-  TAG ID 16 VALUE "leisure"
-  TAG ID 17 VALUE "barrier"
-  TAG ID 18 VALUE "place"
-  TAG ID 19 VALUE "building"
-  TAG ID 20 VALUE "restriction"
-  TAG ID 21 VALUE "route"
-  
+  TAG "highway"
+  TAG "junction"
+  TAG "railway"
+  TAG "aeroway"
+  TAG "waterway"
+  TAG "landuse"
+  TAG "natural"
+  TAG "boundary"
+  TAG "power"
+  TAG "amenity"
+  TAG "shop"
+  TAG "tourism"
+  TAG "historic"
+  TAG "military"
+  TAG "sport"
+  TAG "leisure"
+  TAG "barrier"
+  TAG "place"
+  TAG "building"
+  TAG "restriction"
+  TAG "route"
+
 TYPES
-  TYPE ID 100 WHERE "highway"=="motorway" CAN BE WAY RELATION OPTIONS ROUTE INDEX
-  TYPE ID 101 WHERE "highway"=="motorway_link" CAN BE WAY RELATION OPTIONS ROUTE INDEX
-  TYPE ID 102 WHERE "highway"=="trunk" CAN BE WAY RELATION OPTIONS ROUTE INDEX
-  TYPE ID 103 WHERE "highway"=="trunk_link" CAN BE WAY RELATION OPTIONS ROUTE INDEX
-  TYPE ID 104 WHERE "highway"=="primary" CAN BE WAY RELATION OPTIONS ROUTE INDEX
-  TYPE ID 105 WHERE "highway"=="primary_link" CAN BE WAY RELATION OPTIONS ROUTE INDEX
-  TYPE ID 106 WHERE "highway"=="secondary" CAN BE WAY OPTIONS ROUTE INDEX
-  TYPE ID 107 WHERE "highway"=="secondary_link" CAN BE WAY OPTIONS ROUTE INDEX
-  TYPE ID 108 WHERE "highway"=="tertiary" CAN BE WAY OPTIONS ROUTE INDEX
-  TYPE ID 109 WHERE "highway"=="unclassified" CAN BE WAY OPTIONS ROUTE INDEX
-  TYPE ID 110 WHERE "highway"=="road" CAN BE WAY OPTIONS ROUTE INDEX
-  TYPE ID 111 WHERE "highway"=="residential" CAN BE WAY OPTIONS ROUTE INDEX
-  TYPE ID 112 WHERE "highway"=="living_street" CAN BE WAY OPTIONS ROUTE INDEX
-  TYPE ID 113 WHERE "highway"=="service" CAN BE WAY OPTIONS ROUTE INDEX
-  TYPE ID 114 WHERE "highway"=="track" CAN BE WAY OPTIONS ROUTE INDEX
-  TYPE ID 115 WHERE "highway"=="pedestrian" CAN BE WAY AREA OPTIONS ROUTE INDEX
-  TYPE ID 116 WHERE "highway"=="services" CAN BE NODE AREA OPTIONS ROUTE INDEX
-  TYPE ID 117 WHERE "highway"=="bus_guideway" CAN BE WAY OPTIONS ROUTE
-  TYPE ID 118 WHERE "highway"=="path" CAN BE WAY OPTIONS ROUTE
-  TYPE ID 119 WHERE "highway"=="cycleway" CAN BE WAY OPTIONS ROUTE
-  TYPE ID 120 WHERE "highway"=="footway" CAN BE WAY OPTIONS ROUTE
-  TYPE ID 121 WHERE "highway"=="bridleway" CAN BE WAY OPTIONS ROUTE
-  TYPE ID 122 WHERE "highway"=="byway" CAN BE WAY OPTIONS ROUTE
-  TYPE ID 123 WHERE "highway"=="steps" CAN BE WAY OPTIONS ROUTE
-  TYPE ID 124 WHERE "highway"=="mini_roundabout" CAN BE NODE
-  TYPE ID 131 WHERE "highway"=="bus_stop" CAN BE NODE
-  TYPE ID 132 WHERE "highway"=="turning_cycle" CAN BE NODE
-  TYPE ID 133 WHERE "highway"=="construction" CAN BE WAY
-  TYPE ID 135 WHERE "highway"=="roundabout" CAN BE WAY AREA OPTIONS ROUTE
-  TYPE ID 136 WHERE "highway"=="motorway_junction" CAN BE NODE OPTIONS ROUTE
-  TYPE ID 137 WHERE "route"=="road" CAN BE RELATION
-  TYPE ID 300 WHERE "waterway"=="stream" CAN BE WAY RELATION OPTIONS ROUTE
-  TYPE ID 301 WHERE "waterway"=="river" CAN BE WAY RELATION OPTIONS ROUTE
-  TYPE ID 302 WHERE "waterway"=="riverbank" CAN BE AREA RELATION OPTIONS ROUTE
-  TYPE ID 303 WHERE "waterway"=="canal" CAN BE WAY RELATION OPTIONS ROUTE
-  TYPE ID 304 WHERE "waterway"=="ditch" CAN BE WAY RELATION OPTIONS ROUTE
-  TYPE ID 305 WHERE "waterway"=="drain" CAN BE WAY RELATION OPTIONS ROUTE
-  TYPE ID 306 WHERE "waterway"=="dock" CAN BE NODE AREA RELATION OPTIONS ROUTE
-  TYPE ID 307 WHERE "waterway"=="lock_gate" CAN BE NODE
-  TYPE ID 308 WHERE "waterway"=="turning_point" CAN BE NODE
-  TYPE ID 309 WHERE "waterway"=="boat_yard" CAN BE NODE
-  TYPE ID 310 WHERE "waterway"=="weir" CAN BE NODE WAY RELATION
-  TYPE ID 311 WHERE "waterway"=="rapits" CAN BE NODE WAY RELATION
-  TYPE ID 312 WHERE "waterway"=="dam" CAN BE WAY AREA RELATION
-  TYPE ID 200 WHERE "railway"=="rail" CAN BE WAY RELATION OPTIONS ROUTE
-  TYPE ID 201 WHERE "railway"=="tram" CAN BE WAY OPTIONS ROUTE
-  TYPE ID 202 WHERE "railway"=="light_rail" CAN BE WAY OPTIONS ROUTE
-  TYPE ID 203 WHERE "railway"=="subway" CAN BE WAY OPTIONS ROUTE
-  TYPE ID 204 WHERE "railway"=="preserved" CAN BE WAY OPTIONS ROUTE
-  TYPE ID 205 WHERE "railway"=="disused" CAN BE WAY
-  TYPE ID 206 WHERE "railway"=="abandoned" CAN BE WAY
-  TYPE ID 207 WHERE "railway"=="narrow_gauge" CAN BE WAY
-  TYPE ID 208 WHERE "railway"=="monorail" CAN BE WAY
-  TYPE ID 209 WHERE "railway"=="station" CAN BE NODE AREA
-  TYPE ID 210 WHERE "railway"=="halt" CAN BE NODE
-  TYPE ID 211 WHERE "railway"=="tram_stop" CAN BE NODE
-  TYPE ID 212 WHERE "railway"=="crossing" CAN BE NODE
-  TYPE ID 213 WHERE "railway"=="level_crossing" CAN BE NODE
-  TYPE ID 214 WHERE "railway"=="subway_entrance" CAN BE NODE
-  TYPE ID 215 WHERE "railway"=="turntable" CAN BE NODE AREA
-  TYPE ID 216 WHERE "railway"=="platform" CAN BE WAY AREA
-  TYPE ID 217 WHERE "route"=="ferry" CAN BE WAY
-  TYPE ID 700 WHERE "aeroway"=="aerodrome" CAN BE NODE AREA
-  TYPE ID 701 WHERE "aeroway"=="terminal" CAN BE NODE AREA
-  TYPE ID 702 WHERE "aeroway"=="helipad" CAN BE NODE AREA
-  TYPE ID 703 WHERE "aeroway"=="runway" CAN BE WAY
-  TYPE ID 704 WHERE "aeroway"=="taxiway" CAN BE WAY
-  TYPE ID 705 WHERE "aeroway"=="apron" CAN BE AREA
-  TYPE ID 706 WHERE "aeroway"=="gate" CAN BE NODE
-  TYPE ID 900 WHERE "leisure"=="sports_centre" CAN BE NODE AREA
-  TYPE ID 901 WHERE "leisure"=="golf_course" CAN BE NODE AREA
-  TYPE ID 902 WHERE "leisure"=="stadium" CAN BE NODE AREA
-  TYPE ID 903 WHERE "leisure"=="track" CAN BE NODE WAY AREA
-  TYPE ID 904 WHERE "leisure"=="pitch" CAN BE NODE AREA
-  TYPE ID 905 WHERE "leisure"=="water_park" CAN BE NODE AREA
-  TYPE ID 906 WHERE "leisure"=="marina" CAN BE NODE AREA
-  TYPE ID 907 WHERE "leisure"=="slipway" CAN BE NODE
-  TYPE ID 908 WHERE "leisure"=="fishing" CAN BE NODE AREA
-  TYPE ID 909 WHERE "leisure"=="nature_reserve" CAN BE NODE AREA
-  TYPE ID 910 WHERE "leisure"=="park" CAN BE NODE AREA
-  TYPE ID 911 WHERE "leisure"=="playground" CAN BE NODE AREA
-  TYPE ID 912 WHERE "leisure"=="garden" CAN BE NODE AREA
-  TYPE ID 913 WHERE "leisure"=="common" CAN BE NODE AREA
-  TYPE ID 914 WHERE "leisure"=="ice_rink" CAN BE NODE AREA
-  TYPE ID 1000 WHERE "amenity"=="arts_centre" CAN BE NODE AREA
-  TYPE ID 1001 WHERE "amenity"=="atm" CAN BE NODE
-  TYPE ID 1002 WHERE "amenity"=="baby_hatch" CAN BE NODE AREA
-  TYPE ID 1003 WHERE "amenity"=="bank" CAN BE NODE AREA
-  TYPE ID 1004 WHERE "amenity"=="bbq" CAN BE NODE
-  TYPE ID 1005 WHERE "amenity"=="bench" CAN BE NODE
-  TYPE ID 1006 WHERE "amenity"=="biergarten" CAN BE NODE AREA
-  TYPE ID 1007 WHERE "amenity"=="bicycle_parking" CAN BE NODE AREA
-  TYPE ID 1008 WHERE "amenity"=="bicycle_rental" CAN BE NODE AREA
-  TYPE ID 1009 WHERE "amenity"=="buerau_de_change" CAN BE NODE
-  TYPE ID 1010 WHERE "amenity"=="bus_station" CAN BE NODE AREA
-  TYPE ID 1011 WHERE "amenity"=="brothel" CAN BE NODE AREA
-  TYPE ID 1012 WHERE "amenity"=="cafe" CAN BE NODE AREA
-  TYPE ID 1013 WHERE "amenity"=="car_rental" CAN BE NODE AREA
-  TYPE ID 1014 WHERE "amenity"=="car_sharing" CAN BE NODE AREA
-  TYPE ID 1063 WHERE "amenity"=="car_wash" CAN BE NODE AREA
-  TYPE ID 1015 WHERE "amenity"=="cinema" CAN BE NODE AREA
-  TYPE ID 1016 WHERE "amenity"=="college" CAN BE NODE AREA
-  TYPE ID 1017 WHERE "amenity"=="courthouse" CAN BE NODE AREA
-  TYPE ID 1018 WHERE "amenity"=="crematorium" CAN BE NODE AREA
-  TYPE ID 1019 WHERE "amenity"=="dentist" CAN BE NODE AREA
-  TYPE ID 1020 WHERE "amenity"=="doctors" CAN BE NODE AREA
-  TYPE ID 1021 WHERE "amenity"=="drinking_water" CAN BE NODE
-  TYPE ID 1022 WHERE "amenity"=="embassy" CAN BE NODE AREA
-  TYPE ID 1023 WHERE "amenity"=="emergency_phone" CAN BE NODE
-  TYPE ID 1024 WHERE "amenity"=="fast_food" CAN BE NODE AREA
-  TYPE ID 1025 WHERE "amenity"=="ferry_terminal" CAN BE NODE AREA
-  TYPE ID 1026 WHERE "amenity"=="fire_station" CAN BE NODE AREA
-  TYPE ID 1027 WHERE "amenity"=="food_court" CAN BE NODE AREA
-  TYPE ID 1028 WHERE "amenity"=="fountain" CAN BE NODE AREA
-  TYPE ID 1029 WHERE "amenity"=="fuel" CAN BE NODE AREA
-  TYPE ID 1030 WHERE "amenity"=="grave_yard" CAN BE NODE AREA
-  TYPE ID 1031 WHERE "amenity"=="grid_bin" CAN BE NODE
-  TYPE ID 1032 WHERE "amenity"=="hospital" CAN BE NODE AREA
-  TYPE ID 1033 WHERE "amenity"=="hunting_stand" CAN BE NODE AREA
-  TYPE ID 1034 WHERE "amenity"=="kindergarten" CAN BE NODE AREA
-  TYPE ID 1035 WHERE "amenity"=="library" CAN BE NODE AREA
-  TYPE ID 1036 WHERE "amenity"=="marketplace" CAN BE WAY AREA
-  TYPE ID 1037 WHERE "amenity"=="nightclub" CAN BE NODE AREA
-  TYPE ID 1038 WHERE "amenity"=="parking" CAN BE NODE AREA
-  TYPE ID 1039 WHERE "amenity"=="pharmacy" CAN BE NODE AREA
-  TYPE ID 1040 WHERE "amenity"=="place_of_worship" CAN BE NODE AREA
-  TYPE ID 1041 WHERE "amenity"=="police" CAN BE NODE AREA
-  TYPE ID 1042 WHERE "amenity"=="post_box" CAN BE NODE
-  TYPE ID 1043 WHERE "amenity"=="post_office" CAN BE NODE AREA
-  TYPE ID 1044 WHERE "amenity"=="prison" CAN BE NODE AREA
-  TYPE ID 1045 WHERE "amenity"=="pub" CAN BE NODE AREA
-  TYPE ID 1046 WHERE "amenity"=="public_building" CAN BE NODE AREA
-  TYPE ID 1047 WHERE "amenity"=="recycling" CAN BE NODE AREA
-  TYPE ID 1048 WHERE "amenity"=="restaurant" CAN BE NODE AREA
-  TYPE ID 1049 WHERE "amenity"=="school" CAN BE NODE AREA
-  TYPE ID 1050 WHERE "amenity"=="shelter" CAN BE NODE AREA
-  TYPE ID 1051 WHERE "amenity"=="signpost" CAN BE NODE
-  TYPE ID 1052 WHERE "amenity"=="studio" CAN BE NODE AREA
-  TYPE ID 1053 WHERE "amenity"=="taxi" CAN BE NODE AREA
-  TYPE ID 1054 WHERE "amenity"=="telefon" CAN BE NODE
-  TYPE ID 1055 WHERE "amenity"=="theatre" CAN BE NODE AREA
-  TYPE ID 1056 WHERE "amenity"=="toilets" CAN BE NODE
-  TYPE ID 1057 WHERE "amenity"=="townhall" CAN BE NODE AREA
-  TYPE ID 1058 WHERE "amenity"=="university" CAN BE NODE AREA
-  TYPE ID 1059 WHERE "amenity"=="vending_machine" CAN BE NODE
-  TYPE ID 1060 WHERE "amenity"=="veterinary" CAN BE NODE AREA
-  TYPE ID 1061 WHERE "amenity"=="waste_basket" CAN BE NODE
-  TYPE ID 1062 WHERE "amenity"=="waste_disposal" CAN BE NODE
-  TYPE ID 1100 WHERE "shop"=="alcohol" CAN BE NODE AREA
-  TYPE ID 1101 WHERE "shop"=="bakery" CAN BE NODE AREA
-  TYPE ID 1102 WHERE "shop"=="beverages" CAN BE NODE AREA
-  TYPE ID 1103 WHERE "shop"=="bicycle" CAN BE NODE AREA
-  TYPE ID 1104 WHERE "shop"=="books" CAN BE NODE AREA
-  TYPE ID 1105 WHERE "shop"=="butcher" CAN BE NODE AREA
-  TYPE ID 1106 WHERE "shop"=="car" CAN BE NODE AREA
-  TYPE ID 1107 WHERE "shop"=="car_repair" CAN BE NODE AREA
-  TYPE ID 1108 WHERE "shop"=="chemist" CAN BE NODE AREA
-  TYPE ID 1109 WHERE "shop"=="clothes" CAN BE NODE AREA
-  TYPE ID 1110 WHERE "shop"=="computer" CAN BE NODE AREA
-  TYPE ID 1111 WHERE "shop"=="convenience" CAN BE NODE AREA
-  TYPE ID 1112 WHERE "shop"=="department_store" CAN BE NODE AREA
-  TYPE ID 1113 WHERE "shop"=="dry_cleaning" CAN BE NODE AREA
-  TYPE ID 1114 WHERE "shop"=="doityourself" CAN BE NODE AREA
-  TYPE ID 1115 WHERE "shop"=="electronics" CAN BE NODE AREA
-  TYPE ID 1116 WHERE "shop"=="florist" CAN BE NODE AREA
-  TYPE ID 1117 WHERE "shop"=="furniture" CAN BE NODE AREA
-  TYPE ID 1118 WHERE "shop"=="garden_centre" CAN BE NODE AREA
-  TYPE ID 1119 WHERE "shop"=="hairdresser" CAN BE NODE AREA
-  TYPE ID 1120 WHERE "shop"=="hardware" CAN BE NODE AREA
-  TYPE ID 1121 WHERE "shop"=="hifi" CAN BE NODE AREA
-  TYPE ID 1122 WHERE "shop"=="kiosk" CAN BE NODE AREA
-  TYPE ID 1123 WHERE "shop"=="laundry" CAN BE NODE AREA
-  TYPE ID 1124 WHERE "shop"=="mall" CAN BE NODE AREA
-  TYPE ID 1125 WHERE "shop"=="motorcycle" CAN BE NODE AREA
-  TYPE ID 1126 WHERE "shop"=="optician" CAN BE NODE AREA
-  TYPE ID 1127 WHERE "shop"=="organic" CAN BE NODE AREA
-  TYPE ID 1128 WHERE "shop"=="outdoor" CAN BE NODE AREA
-  TYPE ID 1129 WHERE "shop"=="sports" CAN BE NODE AREA
-  TYPE ID 1130 WHERE "shop"=="stationery" CAN BE NODE AREA
-  TYPE ID 1131 WHERE "shop"=="supermarket" CAN BE NODE AREA
-  TYPE ID 1132 WHERE "shop"=="shoes" CAN BE NODE AREA
-  TYPE ID 1133 WHERE "shop"=="toys" CAN BE NODE AREA
-  TYPE ID 1134 WHERE "shop"=="video" CAN BE NODE AREA
-  TYPE ID 1200 WHERE "tourism"=="alpine_hut" CAN BE NODE AREA
-  TYPE ID 1201 WHERE "tourism"=="aquarium" CAN BE NODE AREA
-  TYPE ID 1202 WHERE "tourism"=="attraction" CAN BE NODE AREA
-  TYPE ID 1203 WHERE "tourism"=="artwork" CAN BE NODE WAY AREA
-  TYPE ID 1204 WHERE "tourism"=="camp_site" CAN BE NODE AREA
-  TYPE ID 1205 WHERE "tourism"=="caravan_site" CAN BE NODE AREA
-  TYPE ID 1206 WHERE "tourism"=="chalet" CAN BE NODE AREA
-  TYPE ID 1207 WHERE "tourism"=="guest_house" CAN BE NODE AREA
-  TYPE ID 1208 WHERE "tourism"=="hostel" CAN BE NODE AREA
-  TYPE ID 1209 WHERE "tourism"=="hotel" CAN BE NODE AREA
-  TYPE ID 1210 WHERE "tourism"=="information" CAN BE NODE AREA
-  TYPE ID 1211 WHERE "tourism"=="motel" CAN BE NODE AREA
-  TYPE ID 1212 WHERE "tourism"=="museum" CAN BE NODE AREA
-  TYPE ID 1213 WHERE "tourism"=="picnic_site" CAN BE NODE AREA
-  TYPE ID 1214 WHERE "tourism"=="theme_park" CAN BE NODE AREA
-  TYPE ID 1215 WHERE "tourism"=="viewpoint" CAN BE NODE
-  TYPE ID 1216 WHERE "tourism"=="zoo" CAN BE NODE AREA
-  TYPE ID 400 WHERE "landuse"=="allotments" CAN BE NODE AREA RELATION
-  TYPE ID 401 WHERE "landuse"=="basin" CAN BE NODE AREA RELATION
-  TYPE ID 402 WHERE "landuse"=="brownfield" CAN BE NODE AREA RELATION
-  TYPE ID 403 WHERE "landuse"=="cemetery" CAN BE AREA RELATION
-  TYPE ID 404 WHERE "landuse"=="commercial" CAN BE NODE AREA RELATION
-  TYPE ID 405 WHERE "landuse"=="construction" CAN BE NODE AREA RELATION
-  TYPE ID 406 WHERE "landuse"=="farm" CAN BE AREA RELATION
-  TYPE ID 407 WHERE "landuse"=="farmland" CAN BE AREA RELATION
-  TYPE ID 408 WHERE "landuse"=="farmyard" CAN BE AREA RELATION
-  TYPE ID 409 WHERE "landuse"=="forest" CAN BE NODE AREA RELATION
-  TYPE ID 410 WHERE "landuse"=="garages" CAN BE AREA RELATION
-  TYPE ID 411 WHERE "landuse"=="grass" CAN BE NODE AREA RELATION
-  TYPE ID 412 WHERE "landuse"=="greenfield" CAN BE NODE AREA RELATION
-  TYPE ID 413 WHERE "landuse"=="greenhouse_horticulture" CAN BE AREA RELATION
-  TYPE ID 414 WHERE "landuse"=="industrial" CAN BE NODE AREA RELATION
-  TYPE ID 415 WHERE "landuse"=="landfill" CAN BE NODE AREA RELATION
-  TYPE ID 416 WHERE "landuse"=="meadow" CAN BE NODE AREA RELATION
-  TYPE ID 417 WHERE "landuse"=="military" CAN BE NODE AREA RELATION
-  TYPE ID 418 WHERE "landuse"=="orchard" CAN BE NODE AREA RELATION
-  TYPE ID 419 WHERE "landuse"=="quarry" CAN BE NODE AREA RELATION
-  TYPE ID 420 WHERE "landuse"=="railway" CAN BE AREA RELATION OPTIONS ROUTE
-  TYPE ID 421 WHERE "landuse"=="recreation_ground" CAN BE NODE AREA RELATION
-  TYPE ID 422 WHERE "landuse"=="reservoir" CAN BE NODE AREA RELATION
-  TYPE ID 423 WHERE "landuse"=="residential" CAN BE NODE AREA RELATION
-  TYPE ID 424 WHERE "landuse"=="retail" CAN BE NODE AREA RELATION
-  TYPE ID 425 WHERE "landuse"=="salt_pond" CAN BE AREA RELATION
-  TYPE ID 426 WHERE "landuse"=="village_green" CAN BE NODE AREA RELATION
-  TYPE ID 427 WHERE "landuse"=="vineyard" CAN BE NODE AREA RELATION
-  TYPE ID 428 WHERE "landuse"=="wood" CAN BE NODE AREA RELATION
-  TYPE ID 500 WHERE "natural"=="bay" CAN BE NODE AREA RELATION
-  TYPE ID 501 WHERE "natural"=="beach" CAN BE NODE AREA RELATION
-  TYPE ID 502 WHERE "natural"=="cave_entrance" CAN BE NODE AREA RELATION
-  TYPE ID 503 WHERE "natural"=="cliff" CAN BE NODE WAY AREA RELATION
-  TYPE ID 504 WHERE "natural"=="coastline" CAN BE WAY RELATION
-  TYPE ID 505 WHERE "natural"=="fell" CAN BE NODE AREA RELATION
-  TYPE ID 506 WHERE "natural"=="glacier" CAN BE NODE AREA RELATION
-  TYPE ID 507 WHERE "natural"=="heath" CAN BE NODE AREA RELATION
-  TYPE ID 508 WHERE "natural"=="land" CAN BE NODE AREA RELATION
-  TYPE ID 509 WHERE "natural"=="marsh" CAN BE NODE AREA RELATION
-  TYPE ID 510 WHERE "natural"=="mud" CAN BE NODE AREA RELATION
-  TYPE ID 511 WHERE "natural"=="peak" CAN BE NODE
-  TYPE ID 512 WHERE "natural"=="sand" CAN BE NODE AREA RELATION
-  TYPE ID 513 WHERE "natural"=="scree" CAN BE NODE AREA RELATION
-  TYPE ID 514 WHERE "natural"=="scrub" CAN BE NODE AREA RELATION
-  TYPE ID 515 WHERE "natural"=="spring" CAN BE NODE
-  TYPE ID 516 WHERE "natural"=="tree" CAN BE NODE
-  TYPE ID 517 WHERE "natural"=="volcano" CAN BE NODE
-  TYPE ID 518 WHERE "natural"=="water" CAN BE NODE AREA RELATION
-  TYPE ID 519 WHERE "natural"=="wetland" CAN BE NODE AREA RELATION
-  TYPE ID 520 WHERE "natural"=="wood" CAN BE NODE AREA RELATION
-  TYPE ID 600 WHERE "boundary"=="administrative" CAN BE WAY RELATION
-  TYPE ID 601 WHERE "boundary"=="civil" CAN BE AREA
-  TYPE ID 602 WHERE "boundary"=="political" CAN BE AREA
-  TYPE ID 1700 WHERE "place"=="continent" CAN BE NODE AREA
-  TYPE ID 1701 WHERE "place"=="country" CAN BE NODE
-  TYPE ID 1702 WHERE "place"=="state" CAN BE NODE AREA
-  TYPE ID 1703 WHERE "place"=="region" CAN BE NODE AREA
-  TYPE ID 1704 WHERE "place"=="county" CAN BE NODE AREA
-  TYPE ID 1705 WHERE "place"=="city" CAN BE NODE AREA
-  TYPE ID 1706 WHERE "place"=="town" CAN BE NODE AREA
-  TYPE ID 1707 WHERE "place"=="village" CAN BE NODE AREA
-  TYPE ID 1708 WHERE "place"=="hamlet" CAN BE NODE AREA
-  TYPE ID 1709 WHERE "place"=="suburb" CAN BE NODE AREA
-  TYPE ID 1710 WHERE "place"=="locality" CAN BE NODE AREA
-  TYPE ID 1711 WHERE "place"=="island" CAN BE NODE AREA
-  TYPE ID 1300 WHERE "historic"=="castle" CAN BE NODE AREA
-  TYPE ID 1301 WHERE "historic"=="manor" CAN BE NODE AREA
-  TYPE ID 1302 WHERE "historic"=="monument" CAN BE NODE AREA
-  TYPE ID 1303 WHERE "historic"=="memorial" CAN BE NODE AREA
-  TYPE ID 1304 WHERE "historic"=="archaeological_site" CAN BE NODE AREA
-  TYPE ID 1305 WHERE "historic"=="ruins" CAN BE NODE AREA
-  TYPE ID 1306 WHERE "historic"=="battlefield" CAN BE NODE AREA
-  TYPE ID 1307 WHERE "historic"=="wreck" CAN BE NODE AREA
-  TYPE ID 1400 WHERE "military"=="airfield" CAN BE NODE AREA
-  TYPE ID 1401 WHERE "military"=="bunker" CAN BE NODE AREA
-  TYPE ID 1402 WHERE "military"=="barracks" CAN BE NODE AREA
-  TYPE ID 1403 WHERE "military"=="danger_area" CAN BE NODE AREA
-  TYPE ID 1404 WHERE "military"=="range" CAN BE NODE AREA
-  TYPE ID 1405 WHERE "military"=="naval_base" CAN BE NODE AREA
-  TYPE ID 800 WHERE "sport"=="9pin" CAN BE NODE AREA
-  TYPE ID 801 WHERE "sport"=="10pin" CAN BE NODE AREA
-  TYPE ID 802 WHERE "sport"=="archery" CAN BE NODE AREA
-  TYPE ID 803 WHERE "sport"=="athletics" CAN BE NODE AREA
-  TYPE ID 803 WHERE "sport"=="australian_football" CAN BE NODE AREA
-  TYPE ID 804 WHERE "sport"=="baseball" CAN BE NODE AREA
-  TYPE ID 805 WHERE "sport"=="basketball" CAN BE NODE AREA
-  TYPE ID 806 WHERE "sport"=="beachvolleyball" CAN BE NODE AREA
-  TYPE ID 807 WHERE "sport"=="boules" CAN BE NODE AREA
-  TYPE ID 808 WHERE "sport"=="bowls" CAN BE NODE AREA
-  TYPE ID 809 WHERE "sport"=="canoe" CAN BE NODE AREA
-  TYPE ID 810 WHERE "sport"=="chess" CAN BE NODE AREA
-  TYPE ID 811 WHERE "sport"=="climbing" CAN BE NODE AREA
-  TYPE ID 812 WHERE "sport"=="cricket" CAN BE NODE AREA
-  TYPE ID 813 WHERE "sport"=="cricket_nets" CAN BE NODE AREA
-  TYPE ID 814 WHERE "sport"=="croquet" CAN BE NODE AREA
-  TYPE ID 815 WHERE "sport"=="cycling" CAN BE NODE AREA
-  TYPE ID 816 WHERE "sport"=="diving" CAN BE NODE AREA
-  TYPE ID 817 WHERE "sport"=="dog_racing" CAN BE NODE AREA
-  TYPE ID 818 WHERE "sport"=="equestrian" CAN BE NODE AREA
-  TYPE ID 819 WHERE "sport"=="football" CAN BE NODE AREA
-  TYPE ID 820 WHERE "sport"=="golf" CAN BE NODE AREA
-  TYPE ID 821 WHERE "sport"=="gymnastics" CAN BE NODE AREA
-  TYPE ID 822 WHERE "sport"=="hockey" CAN BE NODE AREA
-  TYPE ID 823 WHERE "sport"=="horse_racing" CAN BE NODE AREA
-  TYPE ID 824 WHERE "sport"=="motor" CAN BE NODE AREA
-  TYPE ID 825 WHERE "sport"=="multi" CAN BE NODE AREA
-  TYPE ID 826 WHERE "sport"=="orienteering" CAN BE NODE AREA
-  TYPE ID 827 WHERE "sport"=="paddle_tennis" CAN BE NODE AREA
-  TYPE ID 828 WHERE "sport"=="pelota" CAN BE NODE AREA
-  TYPE ID 829 WHERE "sport"=="raquet" CAN BE NODE AREA
-  TYPE ID 830 WHERE "sport"=="rowing" CAN BE NODE AREA
-  TYPE ID 831 WHERE "sport"=="rugby" CAN BE NODE AREA
-  TYPE ID 832 WHERE "sport"=="shooting" CAN BE NODE AREA
-  TYPE ID 833 WHERE "sport"=="skating" CAN BE NODE AREA
-  TYPE ID 834 WHERE "sport"=="skateboard" CAN BE NODE AREA
-  TYPE ID 835 WHERE "sport"=="skiing" CAN BE NODE AREA
-  TYPE ID 836 WHERE "sport"=="soccer" CAN BE NODE AREA
-  TYPE ID 837 WHERE "sport"=="swimming" CAN BE NODE AREA
-  TYPE ID 838 WHERE "sport"=="table_tenis" CAN BE NODE AREA
-  TYPE ID 839 WHERE "sport"=="team_handball" CAN BE NODE AREA
-  TYPE ID 840 WHERE "sport"=="tennis" CAN BE NODE AREA
-  TYPE ID 841 WHERE "sport"=="volleyball" CAN BE NODE AREA
-  TYPE ID 1500 WHERE "power"=="tower" CAN BE NODE
-  TYPE ID 1501 WHERE "power"=="pole" CAN BE NODE
-  TYPE ID 1502 WHERE "power"=="line" CAN BE WAY
-  TYPE ID 1503 WHERE "power"=="minor_line" CAN BE WAY
-  TYPE ID 1504 WHERE "power"=="station" CAN BE NODE AREA
-  TYPE ID 1505 WHERE "power"=="sub_station" CAN BE NODE AREA
-  TYPE ID 1506 WHERE "power"=="generator" CAN BE NODE AREA
-  TYPE ID 2000 WHERE "building"=="yes" CAN BE AREA
-  TYPE ID 2000 WHERE "building"=="true" CAN BE AREA
-  TYPE ID 2000 WHERE "building"=="arena" CAN BE AREA
-  TYPE ID 2000 WHERE "building"=="bank" CAN BE AREA
-  TYPE ID 2000 WHERE "building"=="barn" CAN BE AREA
-  TYPE ID 2000 WHERE "building"=="block" CAN BE AREA
-  TYPE ID 2000 WHERE "building"=="brewery" CAN BE AREA
-  TYPE ID 2000 WHERE "building"=="cafe" CAN BE AREA
-  TYPE ID 2000 WHERE "building"=="castle" CAN BE AREA
-  TYPE ID 2000 WHERE "building"=="cathedral" CAN BE AREA
-  TYPE ID 2000 WHERE "building"=="chapel" CAN BE AREA
-  TYPE ID 2000 WHERE "building"=="church" CAN BE AREA
-  TYPE ID 2000 WHERE "building"=="cinema" CAN BE AREA
-  TYPE ID 2000 WHERE "building"=="city_hall" CAN BE AREA
-  TYPE ID 2000 WHERE "building"=="clubhouse" CAN BE AREA
-  TYPE ID 2000 WHERE "building"=="commercial" CAN BE AREA
-  TYPE ID 2000 WHERE "building"=="construction" CAN BE AREA
-  TYPE ID 2000 WHERE "building"=="garage" CAN BE AREA
-  TYPE ID 2000 WHERE "building"=="garages" CAN BE AREA
-  TYPE ID 2000 WHERE "building"=="farm" CAN BE AREA
-  TYPE ID 1600 WHERE "barrier"=="hedge" CAN BE WAY AREA
-  TYPE ID 1602 WHERE "barrier"=="fence" CAN BE WAY AREA
-  TYPE ID 1603 WHERE "barrier"=="wall" CAN BE WAY AREA
-  TYPE ID 1604 WHERE "barrier"=="ditch" CAN BE WAY AREA
-  TYPE ID 1605 WHERE "barrier"=="retaining_wall" CAN BE WAY AREA
-  TYPE ID 1606 WHERE "barrier"=="city_wall" CAN BE WAY AREA
-  TYPE ID 1607 WHERE "barrier"=="bollard" CAN BE NODE WAY
-  TYPE ID 1608 WHERE "barrier"=="cycle_barrier" CAN BE NODE
-  TYPE ID 1609 WHERE "barrier"=="block" CAN BE NODE
-  TYPE ID 1610 WHERE "barrier"=="cattle_grid" CAN BE NODE
-  TYPE ID 1611 WHERE "barrier"=="toll_booth" CAN BE NODE
-  TYPE ID 1612 WHERE "barrier"=="entrance" CAN BE NODE
-  TYPE ID 1613 WHERE "barrier"=="gate" CAN BE NODE WAY
-  TYPE ID 1614 WHERE "barrier"=="lift_gate" CAN BE NODE
-  TYPE ID 1615 WHERE "barrier"=="stile" CAN BE NODE
-  TYPE ID 1616 WHERE "barrier"=="sally_port" CAN BE NODE
-  TYPE ID 1617 WHERE "barrier"=="kent_carriage_gate" CAN BE NODE
-  TYPE ID 2001 WHERE "restriction"=="no_right_turn" CAN BE RELATION
-  TYPE ID 2001 WHERE "restriction"=="no_left_turn" CAN BE RELATION
-  TYPE ID 2001 WHERE "restriction"=="no_u_turn" CAN BE RELATION
-  TYPE ID 2001 WHERE "restriction"=="no_straight_on" CAN BE RELATION
-  TYPE ID 2002 WHERE "restriction"=="only_right_turn" CAN BE RELATION
-  TYPE ID 2002 WHERE "restriction"=="only_right_turn" CAN BE RELATION
-  TYPE ID 2002 WHERE "restriction"=="only_left_turn" CAN BE RELATION
-  TYPE ID 2002 WHERE "restriction"=="only_straight_on" CAN BE RELATION
+  TYPE "highway_motorway" WHERE "highway"=="motorway" CAN BE WAY RELATION OPTIONS ROUTE INDEX
+  TYPE "highway_motorway_link" WHERE "highway"=="motorway_link" CAN BE WAY RELATION OPTIONS ROUTE INDEX
+  TYPE "highway_trunk" WHERE "highway"=="trunk" CAN BE WAY RELATION OPTIONS ROUTE INDEX
+  TYPE "highway_trunk_link" WHERE "highway"=="trunk_link" CAN BE WAY RELATION OPTIONS ROUTE INDEX
+  TYPE "highway_primary" WHERE "highway"=="primary" CAN BE WAY RELATION OPTIONS ROUTE INDEX
+  TYPE "highway_primary_link" WHERE "highway"=="primary_link" CAN BE WAY RELATION OPTIONS ROUTE INDEX
+  TYPE "highway_secondary" WHERE "highway"=="secondary" CAN BE WAY OPTIONS ROUTE INDEX
+  TYPE "highway_secondary_link" WHERE "highway"=="secondary_link" CAN BE WAY OPTIONS ROUTE INDEX
+  TYPE "highway_tertiary" WHERE "highway"=="tertiary" CAN BE WAY OPTIONS ROUTE INDEX
+  TYPE "highway_unclassified" WHERE "highway"=="unclassified" CAN BE WAY OPTIONS ROUTE INDEX
+  TYPE "highway_road" WHERE "highway"=="road" CAN BE WAY OPTIONS ROUTE INDEX
+  TYPE "highway_residential" WHERE "highway"=="residential" CAN BE WAY OPTIONS ROUTE INDEX
+  TYPE "highway_living_street" WHERE "highway"=="living_street" CAN BE WAY OPTIONS ROUTE INDEX
+  TYPE "highway_service" WHERE "highway"=="service" CAN BE WAY OPTIONS ROUTE INDEX
+  TYPE "highway_track" WHERE "highway"=="track" CAN BE WAY OPTIONS ROUTE INDEX
+  TYPE "highway_pedestrian" WHERE "highway"=="pedestrian" CAN BE WAY AREA OPTIONS ROUTE INDEX
+  TYPE "highway_services" WHERE "highway"=="services" CAN BE NODE AREA OPTIONS ROUTE INDEX
+  TYPE "highway_bus_guideway" WHERE "highway"=="bus_guideway" CAN BE WAY OPTIONS ROUTE
+  TYPE "highway_path" WHERE "highway"=="path" CAN BE WAY OPTIONS ROUTE
+  TYPE "highway_cycleway" WHERE "highway"=="cycleway" CAN BE WAY OPTIONS ROUTE
+  TYPE "highway_footway" WHERE "highway"=="footway" CAN BE WAY OPTIONS ROUTE
+  TYPE "highway_bridleway" WHERE "highway"=="bridleway" CAN BE WAY OPTIONS ROUTE
+  TYPE "highway_byway" WHERE "highway"=="byway" CAN BE WAY OPTIONS ROUTE
+  TYPE "highway_steps" WHERE "highway"=="steps" CAN BE WAY OPTIONS ROUTE
+  TYPE "highway_mini_roundabout" WHERE "highway"=="mini_roundabout" CAN BE NODE
+  TYPE "highway_bus_stop" WHERE "highway"=="bus_stop" CAN BE NODE
+  TYPE "highway_turning_cycle" WHERE "highway"=="turning_cycle" CAN BE NODE
+  TYPE "highway_construction" WHERE "highway"=="construction" CAN BE WAY
+  TYPE "highway_roundabout" WHERE "highway"=="roundabout" CAN BE WAY AREA OPTIONS ROUTE
+  TYPE "highway_motorway_junction" WHERE "highway"=="motorway_junction" CAN BE NODE OPTIONS ROUTE
+  TYPE "route_road" WHERE "route"=="road" CAN BE RELATION
+  TYPE "waterway_stream" WHERE "waterway"=="stream" CAN BE WAY RELATION OPTIONS ROUTE
+  TYPE "waterway_river" WHERE "waterway"=="river" CAN BE WAY RELATION OPTIONS ROUTE
+  TYPE "waterway_riverbank" WHERE "waterway"=="riverbank" CAN BE AREA RELATION OPTIONS ROUTE
+  TYPE "waterway_canal" WHERE "waterway"=="canal" CAN BE WAY RELATION OPTIONS ROUTE
+  TYPE "waterway_ditch" WHERE "waterway"=="ditch" CAN BE WAY RELATION OPTIONS ROUTE
+  TYPE "waterway_drain" WHERE "waterway"=="drain" CAN BE WAY RELATION OPTIONS ROUTE
+  TYPE "waterway_dock" WHERE "waterway"=="dock" CAN BE NODE AREA RELATION OPTIONS ROUTE
+  TYPE "waterway_lock_gate" WHERE "waterway"=="lock_gate" CAN BE NODE
+  TYPE "waterway_turning_point" WHERE "waterway"=="turning_point" CAN BE NODE
+  TYPE "waterway_boat_yard" WHERE "waterway"=="boat_yard" CAN BE NODE
+  TYPE "waterway_weir" WHERE "waterway"=="weir" CAN BE NODE WAY RELATION
+  TYPE "waterway_rapits" WHERE "waterway"=="rapits" CAN BE NODE WAY RELATION
+  TYPE "waterway_dam" WHERE "waterway"=="dam" CAN BE WAY AREA RELATION
+  TYPE "railway_rail" WHERE "railway"=="rail" CAN BE WAY RELATION OPTIONS ROUTE
+  TYPE "railway_tram" WHERE "railway"=="tram" CAN BE WAY OPTIONS ROUTE
+  TYPE "railway_light_rail" WHERE "railway"=="light_rail" CAN BE WAY OPTIONS ROUTE
+  TYPE "railway_subway" WHERE "railway"=="subway" CAN BE WAY OPTIONS ROUTE
+  TYPE "railway_preserved" WHERE "railway"=="preserved" CAN BE WAY OPTIONS ROUTE
+  TYPE "railway_disused" WHERE "railway"=="disused" CAN BE WAY
+  TYPE "railway_abandoned" WHERE "railway"=="abandoned" CAN BE WAY
+  TYPE "railway_narrow_gauge" WHERE "railway"=="narrow_gauge" CAN BE WAY
+  TYPE "railway_monorail" WHERE "railway"=="monorail" CAN BE WAY
+  TYPE "railway_station" WHERE "railway"=="station" CAN BE NODE AREA
+  TYPE "railway_halt" WHERE "railway"=="halt" CAN BE NODE
+  TYPE "railway_tram_stop" WHERE "railway"=="tram_stop" CAN BE NODE
+  TYPE "railway_crossing" WHERE "railway"=="crossing" CAN BE NODE
+  TYPE "railway_level_crossing" WHERE "railway"=="level_crossing" CAN BE NODE
+  TYPE "railway_subway_entrance" WHERE "railway"=="subway_entrance" CAN BE NODE
+  TYPE "railway_turntable" WHERE "railway"=="turntable" CAN BE NODE AREA
+  TYPE "railway_platform" WHERE "railway"=="platform" CAN BE WAY AREA
+  TYPE "route_ferry" WHERE "route"=="ferry" CAN BE WAY
+  TYPE "aeroway_aerodrome" WHERE "aeroway"=="aerodrome" CAN BE NODE AREA
+  TYPE "aeroway_terminal" WHERE "aeroway"=="terminal" CAN BE NODE AREA
+  TYPE "aeroway_helipad" WHERE "aeroway"=="helipad" CAN BE NODE AREA
+  TYPE "aeroway_runway" WHERE "aeroway"=="runway" CAN BE WAY
+  TYPE "aeroway_taxiway" WHERE "aeroway"=="taxiway" CAN BE WAY
+  TYPE "aeroway_apron" WHERE "aeroway"=="apron" CAN BE AREA
+  TYPE "aeroway_gate" WHERE "aeroway"=="gate" CAN BE NODE
+  TYPE "leisure_sports_centre" WHERE "leisure"=="sports_centre" CAN BE NODE AREA
+  TYPE "leisure_golf_course" WHERE "leisure"=="golf_course" CAN BE NODE AREA
+  TYPE "leisure_stadium" WHERE "leisure"=="stadium" CAN BE NODE AREA
+  TYPE "leisure_track" WHERE "leisure"=="track" CAN BE NODE WAY AREA
+  TYPE "leisure_pitch" WHERE "leisure"=="pitch" CAN BE NODE AREA
+  TYPE "leisure_water_park" WHERE "leisure"=="water_park" CAN BE NODE AREA
+  TYPE "leisure_marina" WHERE "leisure"=="marina" CAN BE NODE AREA
+  TYPE "leisure_slipway" WHERE "leisure"=="slipway" CAN BE NODE
+  TYPE "leisure_fishing" WHERE "leisure"=="fishing" CAN BE NODE AREA
+  TYPE "leisure_nature_reserve" WHERE "leisure"=="nature_reserve" CAN BE NODE AREA
+  TYPE "leisure_park" WHERE "leisure"=="park" CAN BE NODE AREA
+  TYPE "leisure_playground" WHERE "leisure"=="playground" CAN BE NODE AREA
+  TYPE "leisure_garden" WHERE "leisure"=="garden" CAN BE NODE AREA
+  TYPE "leisure_common" WHERE "leisure"=="common" CAN BE NODE AREA
+  TYPE "leisure_ice_rink" WHERE "leisure"=="ice_rink" CAN BE NODE AREA
+  TYPE "amenity_arts_centre" WHERE "amenity"=="arts_centre" CAN BE NODE AREA
+  TYPE "amenity_atm" WHERE "amenity"=="atm" CAN BE NODE
+  TYPE "amenity_baby_hatch" WHERE "amenity"=="baby_hatch" CAN BE NODE AREA
+  TYPE "amenity_bank" WHERE "amenity"=="bank" CAN BE NODE AREA
+  TYPE "amenity_bbq" WHERE "amenity"=="bbq" CAN BE NODE
+  TYPE "amenity_bench" WHERE "amenity"=="bench" CAN BE NODE
+  TYPE "amenity_biergarten" WHERE "amenity"=="biergarten" CAN BE NODE AREA
+  TYPE "amenity_bicycle_parking" WHERE "amenity"=="bicycle_parking" CAN BE NODE AREA
+  TYPE "amenity_bicycle_rental" WHERE "amenity"=="bicycle_rental" CAN BE NODE AREA
+  TYPE "amenity_buerau_de_change" WHERE "amenity"=="buerau_de_change" CAN BE NODE
+  TYPE "amenity_bus_station" WHERE "amenity"=="bus_station" CAN BE NODE AREA
+  TYPE "amenity_brothel" WHERE "amenity"=="brothel" CAN BE NODE AREA
+  TYPE "amenity_cafe" WHERE "amenity"=="cafe" CAN BE NODE AREA
+  TYPE "amenity_car_rental" WHERE "amenity"=="car_rental" CAN BE NODE AREA
+  TYPE "amenity_car_sharing" WHERE "amenity"=="car_sharing" CAN BE NODE AREA
+  TYPE "amenity_car_wash" WHERE "amenity"=="car_wash" CAN BE NODE AREA
+  TYPE "amenity_cinema" WHERE "amenity"=="cinema" CAN BE NODE AREA
+  TYPE "amenity_college" WHERE "amenity"=="college" CAN BE NODE AREA
+  TYPE "amenity_courthouse" WHERE "amenity"=="courthouse" CAN BE NODE AREA
+  TYPE "amenity_crematorium" WHERE "amenity"=="crematorium" CAN BE NODE AREA
+  TYPE "amenity_dentist" WHERE "amenity"=="dentist" CAN BE NODE AREA
+  TYPE "amenity_doctors" WHERE "amenity"=="doctors" CAN BE NODE AREA
+  TYPE "amenity_drinking_water" WHERE "amenity"=="drinking_water" CAN BE NODE
+  TYPE "amenity_embassy" WHERE "amenity"=="embassy" CAN BE NODE AREA
+  TYPE "amenity_emergency_phone" WHERE "amenity"=="emergency_phone" CAN BE NODE
+  TYPE "amenity_fast_food" WHERE "amenity"=="fast_food" CAN BE NODE AREA
+  TYPE "amenity_ferry_terminal" WHERE "amenity"=="ferry_terminal" CAN BE NODE AREA
+  TYPE "amenity_fire_station" WHERE "amenity"=="fire_station" CAN BE NODE AREA
+  TYPE "amenity_food_court" WHERE "amenity"=="food_court" CAN BE NODE AREA
+  TYPE "amenity_fountain" WHERE "amenity"=="fountain" CAN BE NODE AREA
+  TYPE "amenity_fuel" WHERE "amenity"=="fuel" CAN BE NODE AREA
+  TYPE "amenity_grave_yard" WHERE "amenity"=="grave_yard" CAN BE NODE AREA
+  TYPE "amenity_grid_bin" WHERE "amenity"=="grid_bin" CAN BE NODE
+  TYPE "amenity_hospital" WHERE "amenity"=="hospital" CAN BE NODE AREA
+  TYPE "amenity_hunting_stand" WHERE "amenity"=="hunting_stand" CAN BE NODE AREA
+  TYPE "amenity_kindergarten" WHERE "amenity"=="kindergarten" CAN BE NODE AREA
+  TYPE "amenity_library" WHERE "amenity"=="library" CAN BE NODE AREA
+  TYPE "amenity_marketplace" WHERE "amenity"=="marketplace" CAN BE WAY AREA
+  TYPE "amenity_nightclub" WHERE "amenity"=="nightclub" CAN BE NODE AREA
+  TYPE "amenity_parking" WHERE "amenity"=="parking" CAN BE NODE AREA
+  TYPE "amenity_pharmacy" WHERE "amenity"=="pharmacy" CAN BE NODE AREA
+  TYPE "amenity_place_of_worship" WHERE "amenity"=="place_of_worship" CAN BE NODE AREA
+  TYPE "amenity_police" WHERE "amenity"=="police" CAN BE NODE AREA
+  TYPE "amenity_post_box" WHERE "amenity"=="post_box" CAN BE NODE
+  TYPE "amenity_post_office" WHERE "amenity"=="post_office" CAN BE NODE AREA
+  TYPE "amenity_prison" WHERE "amenity"=="prison" CAN BE NODE AREA
+  TYPE "amenity_pub" WHERE "amenity"=="pub" CAN BE NODE AREA
+  TYPE "amenity_public_building" WHERE "amenity"=="public_building" CAN BE NODE AREA
+  TYPE "amenity_recycling" WHERE "amenity"=="recycling" CAN BE NODE AREA
+  TYPE "amenity_restaurant" WHERE "amenity"=="restaurant" CAN BE NODE AREA
+  TYPE "amenity_school" WHERE "amenity"=="school" CAN BE NODE AREA
+  TYPE "amenity_shelter" WHERE "amenity"=="shelter" CAN BE NODE AREA
+  TYPE "amenity_signpost" WHERE "amenity"=="signpost" CAN BE NODE
+  TYPE "amenity_studio" WHERE "amenity"=="studio" CAN BE NODE AREA
+  TYPE "amenity_taxi" WHERE "amenity"=="taxi" CAN BE NODE AREA
+  TYPE "amenity_telefon" WHERE "amenity"=="telefon" CAN BE NODE
+  TYPE "amenity_theatre" WHERE "amenity"=="theatre" CAN BE NODE AREA
+  TYPE "amenity_toilets" WHERE "amenity"=="toilets" CAN BE NODE
+  TYPE "amenity_townhall" WHERE "amenity"=="townhall" CAN BE NODE AREA
+  TYPE "amenity_university" WHERE "amenity"=="university" CAN BE NODE AREA
+  TYPE "amenity_vending_machine" WHERE "amenity"=="vending_machine" CAN BE NODE
+  TYPE "amenity_veterinary" WHERE "amenity"=="veterinary" CAN BE NODE AREA
+  TYPE "amenity_waste_basket" WHERE "amenity"=="waste_basket" CAN BE NODE
+  TYPE "amenity_waste_disposal" WHERE "amenity"=="waste_disposal" CAN BE NODE
+  TYPE "shop_alcohol" WHERE "shop"=="alcohol" CAN BE NODE AREA
+  TYPE "shop_bakery" WHERE "shop"=="bakery" CAN BE NODE AREA
+  TYPE "shop_beverages" WHERE "shop"=="beverages" CAN BE NODE AREA
+  TYPE "shop_bicycle" WHERE "shop"=="bicycle" CAN BE NODE AREA
+  TYPE "shop_books" WHERE "shop"=="books" CAN BE NODE AREA
+  TYPE "shop_butcher" WHERE "shop"=="butcher" CAN BE NODE AREA
+  TYPE "shop_car" WHERE "shop"=="car" CAN BE NODE AREA
+  TYPE "shop_car_repair" WHERE "shop"=="car_repair" CAN BE NODE AREA
+  TYPE "shop_chemist" WHERE "shop"=="chemist" CAN BE NODE AREA
+  TYPE "shop_clothes" WHERE "shop"=="clothes" CAN BE NODE AREA
+  TYPE "shop_computer" WHERE "shop"=="computer" CAN BE NODE AREA
+  TYPE "shop_convenience" WHERE "shop"=="convenience" CAN BE NODE AREA
+  TYPE "shop_department_store" WHERE "shop"=="department_store" CAN BE NODE AREA
+  TYPE "shop_dry_cleaning" WHERE "shop"=="dry_cleaning" CAN BE NODE AREA
+  TYPE "shop_doityourself" WHERE "shop"=="doityourself" CAN BE NODE AREA
+  TYPE "shop_electronics" WHERE "shop"=="electronics" CAN BE NODE AREA
+  TYPE "shop_florist" WHERE "shop"=="florist" CAN BE NODE AREA
+  TYPE "shop_furniture" WHERE "shop"=="furniture" CAN BE NODE AREA
+  TYPE "shop_garden_centre" WHERE "shop"=="garden_centre" CAN BE NODE AREA
+  TYPE "shop_hairdresser" WHERE "shop"=="hairdresser" CAN BE NODE AREA
+  TYPE "shop_hardware" WHERE "shop"=="hardware" CAN BE NODE AREA
+  TYPE "shop_hifi" WHERE "shop"=="hifi" CAN BE NODE AREA
+  TYPE "shop_kiosk" WHERE "shop"=="kiosk" CAN BE NODE AREA
+  TYPE "shop_laundry" WHERE "shop"=="laundry" CAN BE NODE AREA
+  TYPE "shop_mall" WHERE "shop"=="mall" CAN BE NODE AREA
+  TYPE "shop_motorcycle" WHERE "shop"=="motorcycle" CAN BE NODE AREA
+  TYPE "shop_optician" WHERE "shop"=="optician" CAN BE NODE AREA
+  TYPE "shop_organic" WHERE "shop"=="organic" CAN BE NODE AREA
+  TYPE "shop_outdoor" WHERE "shop"=="outdoor" CAN BE NODE AREA
+  TYPE "shop_sports" WHERE "shop"=="sports" CAN BE NODE AREA
+  TYPE "shop_stationery" WHERE "shop"=="stationery" CAN BE NODE AREA
+  TYPE "shop_supermarket" WHERE "shop"=="supermarket" CAN BE NODE AREA
+  TYPE "shop_shoes" WHERE "shop"=="shoes" CAN BE NODE AREA
+  TYPE "shop_toys" WHERE "shop"=="toys" CAN BE NODE AREA
+  TYPE "shop_video" WHERE "shop"=="video" CAN BE NODE AREA
+  TYPE "tourism_alpine_hut" WHERE "tourism"=="alpine_hut" CAN BE NODE AREA
+  TYPE "tourism_aquarium" WHERE "tourism"=="aquarium" CAN BE NODE AREA
+  TYPE "tourism_attraction" WHERE "tourism"=="attraction" CAN BE NODE AREA
+  TYPE "tourism_artwork" WHERE "tourism"=="artwork" CAN BE NODE WAY AREA
+  TYPE "tourism_camp_site" WHERE "tourism"=="camp_site" CAN BE NODE AREA
+  TYPE "tourism_caravan_site" WHERE "tourism"=="caravan_site" CAN BE NODE AREA
+  TYPE "tourism_chalet" WHERE "tourism"=="chalet" CAN BE NODE AREA
+  TYPE "tourism_guest_house" WHERE "tourism"=="guest_house" CAN BE NODE AREA
+  TYPE "tourism_hostel" WHERE "tourism"=="hostel" CAN BE NODE AREA
+  TYPE "tourism_hotel" WHERE "tourism"=="hotel" CAN BE NODE AREA
+  TYPE "tourism_information" WHERE "tourism"=="information" CAN BE NODE AREA
+  TYPE "tourism_motel" WHERE "tourism"=="motel" CAN BE NODE AREA
+  TYPE "tourism_museum" WHERE "tourism"=="museum" CAN BE NODE AREA
+  TYPE "tourism_picnic_site" WHERE "tourism"=="picnic_site" CAN BE NODE AREA
+  TYPE "tourism_theme_park" WHERE "tourism"=="theme_park" CAN BE NODE AREA
+  TYPE "tourism_viewpoint" WHERE "tourism"=="viewpoint" CAN BE NODE
+  TYPE "tourism_zoo" WHERE "tourism"=="zoo" CAN BE NODE AREA
+  TYPE "landuse_allotments" WHERE "landuse"=="allotments" CAN BE NODE AREA RELATION
+  TYPE "landuse_basin" WHERE "landuse"=="basin" CAN BE NODE AREA RELATION
+  TYPE "landuse_brownfield" WHERE "landuse"=="brownfield" CAN BE NODE AREA RELATION
+  TYPE "landuse_cemetery" WHERE "landuse"=="cemetery" CAN BE AREA RELATION
+  TYPE "landuse_commercial" WHERE "landuse"=="commercial" CAN BE NODE AREA RELATION
+  TYPE "landuse_construction" WHERE "landuse"=="construction" CAN BE NODE AREA RELATION
+  TYPE "landuse_farm" WHERE "landuse"=="farm" CAN BE AREA RELATION
+  TYPE "landuse_farmland" WHERE "landuse"=="farmland" CAN BE AREA RELATION
+  TYPE "landuse_farmyard" WHERE "landuse"=="farmyard" CAN BE AREA RELATION
+  TYPE "landuse_forest" WHERE "landuse"=="forest" CAN BE NODE AREA RELATION
+  TYPE "landuse_garages" WHERE "landuse"=="garages" CAN BE AREA RELATION
+  TYPE "landuse_grass" WHERE "landuse"=="grass" CAN BE NODE AREA RELATION
+  TYPE "landuse_greenfield" WHERE "landuse"=="greenfield" CAN BE NODE AREA RELATION
+  TYPE "landuse_greenhouse_horticulture" WHERE "landuse"=="greenhouse_horticulture" CAN BE AREA RELATION
+  TYPE "landuse_industrial" WHERE "landuse"=="industrial" CAN BE NODE AREA RELATION
+  TYPE "landuse_landfill" WHERE "landuse"=="landfill" CAN BE NODE AREA RELATION
+  TYPE "landuse_meadow" WHERE "landuse"=="meadow" CAN BE NODE AREA RELATION
+  TYPE "landuse_military" WHERE "landuse"=="military" CAN BE NODE AREA RELATION
+  TYPE "landuse_orchard" WHERE "landuse"=="orchard" CAN BE NODE AREA RELATION
+  TYPE "landuse_quarry" WHERE "landuse"=="quarry" CAN BE NODE AREA RELATION
+  TYPE "landuse_railway" WHERE "landuse"=="railway" CAN BE AREA RELATION OPTIONS ROUTE
+  TYPE "landuse_recreation_ground" WHERE "landuse"=="recreation_ground" CAN BE NODE AREA RELATION
+  TYPE "landuse_reservoir" WHERE "landuse"=="reservoir" CAN BE NODE AREA RELATION
+  TYPE "landuse_residential" WHERE "landuse"=="residential" CAN BE NODE AREA RELATION
+  TYPE "landuse_retail" WHERE "landuse"=="retail" CAN BE NODE AREA RELATION
+  TYPE "landuse_salt_pond" WHERE "landuse"=="salt_pond" CAN BE AREA RELATION
+  TYPE "landuse_village_green" WHERE "landuse"=="village_green" CAN BE NODE AREA RELATION
+  TYPE "landuse_vineyard" WHERE "landuse"=="vineyard" CAN BE NODE AREA RELATION
+  TYPE "landuse_wood" WHERE "landuse"=="wood" CAN BE NODE AREA RELATION
+  TYPE "natural_bay" WHERE "natural"=="bay" CAN BE NODE AREA RELATION
+  TYPE "natural_beach" WHERE "natural"=="beach" CAN BE NODE AREA RELATION
+  TYPE "natural_cave_entrance" WHERE "natural"=="cave_entrance" CAN BE NODE AREA RELATION
+  TYPE "natural_cliff" WHERE "natural"=="cliff" CAN BE NODE WAY AREA RELATION
+  TYPE "natural_coastline" WHERE "natural"=="coastline" CAN BE WAY RELATION
+  TYPE "natural_fell" WHERE "natural"=="fell" CAN BE NODE AREA RELATION
+  TYPE "natural_glacier" WHERE "natural"=="glacier" CAN BE NODE AREA RELATION
+  TYPE "natural_heath" WHERE "natural"=="heath" CAN BE NODE AREA RELATION
+  TYPE "natural_land" WHERE "natural"=="land" CAN BE NODE AREA RELATION
+  TYPE "natural_marsh" WHERE "natural"=="marsh" CAN BE NODE AREA RELATION
+  TYPE "natural_mud" WHERE "natural"=="mud" CAN BE NODE AREA RELATION
+  TYPE "natural_peak" WHERE "natural"=="peak" CAN BE NODE
+  TYPE "natural_sand" WHERE "natural"=="sand" CAN BE NODE AREA RELATION
+  TYPE "natural_scree" WHERE "natural"=="scree" CAN BE NODE AREA RELATION
+  TYPE "natural_scrub" WHERE "natural"=="scrub" CAN BE NODE AREA RELATION
+  TYPE "natural_spring" WHERE "natural"=="spring" CAN BE NODE
+  TYPE "natural_tree" WHERE "natural"=="tree" CAN BE NODE
+  TYPE "natural_volcano" WHERE "natural"=="volcano" CAN BE NODE
+  TYPE "natural_water" WHERE "natural"=="water" CAN BE NODE AREA RELATION
+  TYPE "natural_wetland" WHERE "natural"=="wetland" CAN BE NODE AREA RELATION
+  TYPE "natural_wood" WHERE "natural"=="wood" CAN BE NODE AREA RELATION
+  TYPE "boundary_administrative" WHERE "boundary"=="administrative" CAN BE WAY RELATION
+  TYPE "boundary_civil" WHERE "boundary"=="civil" CAN BE AREA
+  TYPE "boundary_political" WHERE "boundary"=="political" CAN BE AREA
+  TYPE "place_continent" WHERE "place"=="continent" CAN BE NODE AREA
+  TYPE "place_country" WHERE "place"=="country" CAN BE NODE
+  TYPE "place_state" WHERE "place"=="state" CAN BE NODE AREA
+  TYPE "place_region" WHERE "place"=="region" CAN BE NODE AREA
+  TYPE "place_county" WHERE "place"=="county" CAN BE NODE AREA
+  TYPE "place_city" WHERE "place"=="city" CAN BE NODE AREA
+  TYPE "place_town" WHERE "place"=="town" CAN BE NODE AREA
+  TYPE "place_village" WHERE "place"=="village" CAN BE NODE AREA
+  TYPE "place_hamlet" WHERE "place"=="hamlet" CAN BE NODE AREA
+  TYPE "place_suburb" WHERE "place"=="suburb" CAN BE NODE AREA
+  TYPE "place_locality" WHERE "place"=="locality" CAN BE NODE AREA
+  TYPE "place_island" WHERE "place"=="island" CAN BE NODE AREA
+  TYPE "historic_castle" WHERE "historic"=="castle" CAN BE NODE AREA
+  TYPE "historic_manor" WHERE "historic"=="manor" CAN BE NODE AREA
+  TYPE "historic_monument" WHERE "historic"=="monument" CAN BE NODE AREA
+  TYPE "historic_memorial" WHERE "historic"=="memorial" CAN BE NODE AREA
+  TYPE "historic_archaeological_site" WHERE "historic"=="archaeological_site" CAN BE NODE AREA
+  TYPE "historic_ruins" WHERE "historic"=="ruins" CAN BE NODE AREA
+  TYPE "historic_battlefield" WHERE "historic"=="battlefield" CAN BE NODE AREA
+  TYPE "historic_wreck" WHERE "historic"=="wreck" CAN BE NODE AREA
+  TYPE "military_airfield" WHERE "military"=="airfield" CAN BE NODE AREA
+  TYPE "military_bunker" WHERE "military"=="bunker" CAN BE NODE AREA
+  TYPE "military_barracks" WHERE "military"=="barracks" CAN BE NODE AREA
+  TYPE "military_danger_area" WHERE "military"=="danger_area" CAN BE NODE AREA
+  TYPE "military_range" WHERE "military"=="range" CAN BE NODE AREA
+  TYPE "military_naval_base" WHERE "military"=="naval_base" CAN BE NODE AREA
+  TYPE "sport_9pin" WHERE "sport"=="9pin" CAN BE NODE AREA
+  TYPE "sport_10pin" WHERE "sport"=="10pin" CAN BE NODE AREA
+  TYPE "sport_archery" WHERE "sport"=="archery" CAN BE NODE AREA
+  TYPE "sport_athletics" WHERE "sport"=="athletics" CAN BE NODE AREA
+  TYPE "sport_australian_football" WHERE "sport"=="australian_football" CAN BE NODE AREA
+  TYPE "sport_baseball" WHERE "sport"=="baseball" CAN BE NODE AREA
+  TYPE "sport_basketball" WHERE "sport"=="basketball" CAN BE NODE AREA
+  TYPE "sport_beachvolleyball" WHERE "sport"=="beachvolleyball" CAN BE NODE AREA
+  TYPE "sport_boules" WHERE "sport"=="boules" CAN BE NODE AREA
+  TYPE "sport_bowls" WHERE "sport"=="bowls" CAN BE NODE AREA
+  TYPE "sport_canoe" WHERE "sport"=="canoe" CAN BE NODE AREA
+  TYPE "sport_chess" WHERE "sport"=="chess" CAN BE NODE AREA
+  TYPE "sport_climbing" WHERE "sport"=="climbing" CAN BE NODE AREA
+  TYPE "sport_cricket" WHERE "sport"=="cricket" CAN BE NODE AREA
+  TYPE "sport_cricket_nets" WHERE "sport"=="cricket_nets" CAN BE NODE AREA
+  TYPE "sport_croquet" WHERE "sport"=="croquet" CAN BE NODE AREA
+  TYPE "sport_cycling" WHERE "sport"=="cycling" CAN BE NODE AREA
+  TYPE "sport_diving" WHERE "sport"=="diving" CAN BE NODE AREA
+  TYPE "sport_dog_racing" WHERE "sport"=="dog_racing" CAN BE NODE AREA
+  TYPE "sport_equestrian" WHERE "sport"=="equestrian" CAN BE NODE AREA
+  TYPE "sport_football" WHERE "sport"=="football" CAN BE NODE AREA
+  TYPE "sport_golf" WHERE "sport"=="golf" CAN BE NODE AREA
+  TYPE "sport_gymnastics" WHERE "sport"=="gymnastics" CAN BE NODE AREA
+  TYPE "sport_hockey" WHERE "sport"=="hockey" CAN BE NODE AREA
+  TYPE "sport_horse_racing" WHERE "sport"=="horse_racing" CAN BE NODE AREA
+  TYPE "sport_motor" WHERE "sport"=="motor" CAN BE NODE AREA
+  TYPE "sport_multi" WHERE "sport"=="multi" CAN BE NODE AREA
+  TYPE "sport_orienteering" WHERE "sport"=="orienteering" CAN BE NODE AREA
+  TYPE "sport_paddle_tennis" WHERE "sport"=="paddle_tennis" CAN BE NODE AREA
+  TYPE "sport_pelota" WHERE "sport"=="pelota" CAN BE NODE AREA
+  TYPE "sport_raquet" WHERE "sport"=="raquet" CAN BE NODE AREA
+  TYPE "sport_rowing" WHERE "sport"=="rowing" CAN BE NODE AREA
+  TYPE "sport_rugby" WHERE "sport"=="rugby" CAN BE NODE AREA
+  TYPE "sport_shooting" WHERE "sport"=="shooting" CAN BE NODE AREA
+  TYPE "sport_skating" WHERE "sport"=="skating" CAN BE NODE AREA
+  TYPE "sport_skateboard" WHERE "sport"=="skateboard" CAN BE NODE AREA
+  TYPE "sport_skiing" WHERE "sport"=="skiing" CAN BE NODE AREA
+  TYPE "sport_soccer" WHERE "sport"=="soccer" CAN BE NODE AREA
+  TYPE "sport_swimming" WHERE "sport"=="swimming" CAN BE NODE AREA
+  TYPE "sport_table_tenis" WHERE "sport"=="table_tenis" CAN BE NODE AREA
+  TYPE "sport_team_handball" WHERE "sport"=="team_handball" CAN BE NODE AREA
+  TYPE "sport_tennis" WHERE "sport"=="tennis" CAN BE NODE AREA
+  TYPE "sport_volleyball" WHERE "sport"=="volleyball" CAN BE NODE AREA
+  TYPE "power_tower" WHERE "power"=="tower" CAN BE NODE
+  TYPE "power_pole" WHERE "power"=="pole" CAN BE NODE
+  TYPE "power_line" WHERE "power"=="line" CAN BE WAY
+  TYPE "power_minor_line" WHERE "power"=="minor_line" CAN BE WAY
+  TYPE "power_station" WHERE "power"=="station" CAN BE NODE AREA
+  TYPE "power_sub_station" WHERE "power"=="sub_station" CAN BE NODE AREA
+  TYPE "power_generator" WHERE "power"=="generator" CAN BE NODE AREA
+  TYPE "building" WHERE "building"=="yes" CAN BE AREA
+  TYPE "building" WHERE "building"=="true" CAN BE AREA
+  TYPE "building" WHERE "building"=="arena" CAN BE AREA
+  TYPE "building" WHERE "building"=="bank" CAN BE AREA
+  TYPE "building" WHERE "building"=="barn" CAN BE AREA
+  TYPE "building" WHERE "building"=="block" CAN BE AREA
+  TYPE "building" WHERE "building"=="brewery" CAN BE AREA
+  TYPE "building" WHERE "building"=="cafe" CAN BE AREA
+  TYPE "building" WHERE "building"=="castle" CAN BE AREA
+  TYPE "building" WHERE "building"=="cathedral" CAN BE AREA
+  TYPE "building" WHERE "building"=="chapel" CAN BE AREA
+  TYPE "building" WHERE "building"=="church" CAN BE AREA
+  TYPE "building" WHERE "building"=="cinema" CAN BE AREA
+  TYPE "building" WHERE "building"=="city_hall" CAN BE AREA
+  TYPE "building" WHERE "building"=="clubhouse" CAN BE AREA
+  TYPE "building" WHERE "building"=="commercial" CAN BE AREA
+  TYPE "building" WHERE "building"=="construction" CAN BE AREA
+  TYPE "building" WHERE "building"=="garage" CAN BE AREA
+  TYPE "building" WHERE "building"=="garages" CAN BE AREA
+  TYPE "building" WHERE "building"=="farm" CAN BE AREA
+  TYPE "barrier_hedge" WHERE "barrier"=="hedge" CAN BE WAY AREA
+  TYPE "barrier_fence" WHERE "barrier"=="fence" CAN BE WAY AREA
+  TYPE "barrier_wall" WHERE "barrier"=="wall" CAN BE WAY AREA
+  TYPE "barrier_ditch" WHERE "barrier"=="ditch" CAN BE WAY AREA
+  TYPE "barrier_retaining_wall" WHERE "barrier"=="retaining_wall" CAN BE WAY AREA
+  TYPE "barrier_city_wall" WHERE "barrier"=="city_wall" CAN BE WAY AREA
+  TYPE "barrier_bollard" WHERE "barrier"=="bollard" CAN BE NODE WAY
+  TYPE "barrier_cycle_barrier" WHERE "barrier"=="cycle_barrier" CAN BE NODE
+  TYPE "barrier_block" WHERE "barrier"=="block" CAN BE NODE
+  TYPE "barrier_cattle_grid" WHERE "barrier"=="cattle_grid" CAN BE NODE
+  TYPE "barrier_toll_booth" WHERE "barrier"=="toll_booth" CAN BE NODE
+  TYPE "barrier_entrance" WHERE "barrier"=="entrance" CAN BE NODE
+  TYPE "barrier_gate" WHERE "barrier"=="gate" CAN BE NODE WAY
+  TYPE "barrier_lift_gate" WHERE "barrier"=="lift_gate" CAN BE NODE
+  TYPE "barrier_stile" WHERE "barrier"=="stile" CAN BE NODE
+  TYPE "barrier_sally_port" WHERE "barrier"=="sally_port" CAN BE NODE
+  TYPE "barrier_kent_carriage_gate" WHERE "barrier"=="kent_carriage_gate" CAN BE NODE
+  TYPE "restriction_no_right_turn" WHERE "restriction"=="no_right_turn" CAN BE RELATION
+  TYPE "restriction_no_left_turn" WHERE "restriction"=="no_left_turn" CAN BE RELATION
+  TYPE "restriction_no_u_turn" WHERE "restriction"=="no_u_turn" CAN BE RELATION
+  TYPE "restriction_no_straight_on" WHERE "restriction"=="no_straight_on" CAN BE RELATION
+  TYPE "restriction_only_right_turn" WHERE "restriction"=="only_right_turn" CAN BE RELATION
+  TYPE "restriction_only_right_turn" WHERE "restriction"=="only_right_turn" CAN BE RELATION
+  TYPE "restriction_only_left_turn" WHERE "restriction"=="only_left_turn" CAN BE RELATION
+  TYPE "restriction_only_straight_on" WHERE "restriction"=="only_straight_on" CAN BE RELATION
 END
