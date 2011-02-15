@@ -193,6 +193,9 @@ namespace osmscout {
 
         writer.WriteNumber(data.GetId());
         writer.WriteNumber(readPos);
+
+        writer.GetPos(writePos);
+        currentPageSize=writePos%pageSize;
       }
 
       lastId=data.GetId();
@@ -211,12 +214,9 @@ namespace osmscout {
 
       progress.Info(std::string("Writing level ")+NumberToString(indexPageCounts.size()+1)+" ("+NumberToString(si.size())+" entries)");
 
+      uint32_t currentPageSize=0;
+
       for (size_t i=0; i<si.size(); i++) {
-        FileOffset writePos;
-
-        writer.GetPos(writePos);
-
-        uint32_t currentPageSize=writePos%pageSize;
 
         if (currentPageSize>0) {
           char   b1[5];
@@ -231,21 +231,29 @@ namespace osmscout {
             // Fill rest of first index page with zeros
             writer.FlushCurrentBlockWithZeros(pageSize);
 
-            writer.GetPos(writePos);
             currentPageSize=0;
           }
           else {
             writer.Write(b1,b1size);
             writer.Write(b2,b2size);
+
+            currentPageSize+=b1size+b2size;
           }
         }
 
         if (currentPageSize==0) {
+          FileOffset writePos;
+
+          writer.GetPos(writePos);
+
           startingIds.push_back(si[i]);
           pageStarts.push_back(writePos);
 
           writer.WriteNumber(si[i]);
           writer.WriteNumber(po[i]);
+
+          writer.GetPos(writePos);
+          currentPageSize=writePos%pageSize;
         }
       }
 

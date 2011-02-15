@@ -40,7 +40,7 @@
 #include <osmscout/GenRelationDat.h>
 #include <osmscout/GenWayDat.h>
 
-#include <osmscout/NumericIndex.h>
+#include <osmscout/GenNumericIndex.h>
 
 #include <osmscout/GenAreaIndex.h>
 #include <osmscout/GenAreaNodeIndex.h>
@@ -59,14 +59,14 @@ namespace osmscout {
    : typefile("map.ost"),
      startStep(defaultStartStep),
      endStep(defaultEndStep),
+     numericIndexPageSize(4096),
      nodesLoadSize(10000000),
      nodeIndexIntervalSize(50),
      nodeDataCacheSize(10),
-     nodeIndexCacheSize(60000000),
+     nodeIndexCacheSize(6000),
      waysLoadSize(1000000),
      wayDataCacheSize(10),
-     wayIndexCacheSize(10000000),
-     numericIndexLevelSize(1024),
+     wayIndexCacheSize(1000),
      areaAreaIndexMaxMag(18),
      areaAreaRelIndexMaxMag(18),
      areaWayIndexMaxMag(18),
@@ -99,6 +99,11 @@ namespace osmscout {
   size_t ImportParameter::GetEndStep() const
   {
     return endStep;
+  }
+
+  size_t ImportParameter::GetNumericIndexPageSize() const
+  {
+    return numericIndexPageSize;
   }
 
   size_t ImportParameter::GetNodesLoadSize() const
@@ -134,11 +139,6 @@ namespace osmscout {
   size_t ImportParameter::GetWayIndexCacheSize() const
   {
     return wayIndexCacheSize;
-  }
-
-  size_t ImportParameter::GetNumericIndexLevelSize() const
-  {
-    return numericIndexLevelSize;
   }
 
   size_t ImportParameter::GetAreaAreaIndexMaxMag() const
@@ -191,6 +191,11 @@ namespace osmscout {
   {
     this->startStep=startStep;
     this->endStep=endStep;
+  }
+
+  void ImportParameter::SetNumericIndexPageSize(size_t numericIndexPageSize)
+  {
+    this->numericIndexPageSize=numericIndexPageSize;
   }
 
   void ImportParameter::SetNodesLoadSize(size_t nodesLoadSize)

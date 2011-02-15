@@ -47,6 +47,7 @@ libosmscout_la_SOURCES= osmscout/Types.cpp \
                         osmscout/GenAreaIndex.cpp \
                         osmscout/GenAreaNodeIndex.cpp \
                         osmscout/GenCityStreetIndex.cpp \
+                        osmscout/GenNumericIndex.cpp \
                         osmscout/GenNodeDat.cpp \
                         osmscout/GenNodeUseIndex.cpp \
                         osmscout/GenRelationDat.cpp \

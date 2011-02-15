@@ -19,6 +19,8 @@
 
 #include <osmscout/FileWriter.h>
 
+#include <cstring>
+
 #include <osmscout/Util.h>
 
 namespace osmscout {
@@ -99,11 +101,18 @@ namespace osmscout {
     return !hasError;
   }
 
+  bool FileWriter::Write(const char* buffer, size_t bytes)
+  {
+    hasError=fwrite(buffer,sizeof(char),bytes,file)!=bytes;
+
+    return !hasError;
+  }
+
   bool FileWriter::Write(const std::string& value)
   {
-    size_t length=value.length();
+    size_t length=value.length()+1;
 
-    hasError=fwrite(value.c_str(),sizeof(char),length+1,file)!=length+1;
+    hasError=fwrite(value.c_str(),sizeof(char),length,file)!=length;
 
     return !hasError;
   }
@@ -272,6 +281,34 @@ namespace osmscout {
     }
 
     hasError=fwrite(buffer,sizeof(char),bytes,file)!=bytes;
+
+    return !hasError;
+  }
+
+  bool FileWriter::FlushCurrentBlockWithZeros(size_t blockSize)
+  {
+    FileOffset currentPos;
+    size_t     bytesToWrite;
+
+    if (file==NULL || hasError) {
+      return false;
+    }
+
+    if (!GetPos(currentPos)) {
+      return false;
+    }
+
+    if (currentPos%blockSize==0) {
+      return true;
+    }
+
+    bytesToWrite=blockSize-(currentPos%blockSize);
+
+    char buffer[blockSize];
+
+    memset(buffer,0,bytesToWrite);
+
+    hasError=fwrite(buffer,sizeof(char),bytesToWrite,file)!=bytesToWrite;
 
     return !hasError;
   }

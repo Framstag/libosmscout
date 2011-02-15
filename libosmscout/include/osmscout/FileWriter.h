@@ -48,6 +48,8 @@ namespace osmscout {
     bool GetPos(FileOffset &pos);
     bool SetPos(FileOffset pos);
 
+    bool Write(const char* buffer, size_t bytes);
+
     bool Write(const std::string& value);
     bool Write(bool boolean);
     bool Write(uint8_t number);
@@ -59,6 +61,8 @@ namespace osmscout {
     bool WriteNumber(uint32_t number);
     bool WriteNumber(uint16_t number);
     bool WriteNumber(int32_t number);
+
+    bool FlushCurrentBlockWithZeros(size_t blockSize);
   };
 }
 

@@ -20,19 +20,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <cmath>
-#include <list>
-#include <set>
+#include <vector>
 
 // Index
 #include <osmscout/Cache.h>
 #include <osmscout/FileScanner.h>
 #include <osmscout/TypeConfig.h>
-
-// Index generation
-#include <osmscout/FileWriter.h>
-#include <osmscout/Import.h>
-#include <osmscout/Progress.h>
 
 #include <osmscout/Util.h>
 
@@ -64,7 +57,7 @@ namespace osmscout {
     {
       unsigned long GetSize(const std::vector<IndexEntry>& value) const
       {
-        return sizeof(IndexEntry)*value.size();
+        return sizeof(value)+sizeof(IndexEntry)*value.size();
       }
     };
 
@@ -73,14 +66,18 @@ namespace osmscout {
     std::string                    filename;
     unsigned long                  cacheSize;
     mutable FileScanner            scanner;
+    uint32_t                       pageSize;
     uint32_t                       levels;
-    uint32_t                       levelSize;
+    std::vector<uint32_t>          pageCounts;
+    char                           *buffer;
     std::vector<IndexEntry>        root;
     mutable std::vector<PageCache> leafs;
 
   private:
     size_t GetPageIndex(const std::vector<IndexEntry>& index,
                         Id id) const;
+    bool ReadPage(FileOffset offset,
+                  std::vector<IndexEntry>& index) const;
 
   public:
     NumericIndex(const std::string& filename,
@@ -99,8 +96,9 @@ namespace osmscout {
                                   unsigned long cacheSize)
    : filepart(filename),
      cacheSize(cacheSize),
+     pageSize(0),
      levels(0),
-     levelSize(0)
+     buffer(NULL)
   {
     // no code
   }
@@ -108,7 +106,7 @@ namespace osmscout {
   template <class N, class T>
   NumericIndex<N,T>::~NumericIndex()
   {
-    // no code
+    delete buffer;
   }
 
   /**
@@ -118,22 +116,25 @@ namespace osmscout {
   inline size_t NumericIndex<N,T>::GetPageIndex(const std::vector<IndexEntry>& index,
                                                 Id id) const
   {
-    size_t size=index.size();
-    size_t left=0;
-    size_t right=index.size()-1;
-    size_t mid;
+    int size=index.size();
 
-    while (left<=right) {
-      mid=(left+right)/2;
-      if (index[mid].startId<=id &&
-          (mid+1>=size || index[mid+1].startId>id)) {
-        return mid;
-      }
-      else if (index[mid].startId<id) {
-        left=mid+1;
-      }
-      else {
-        right=mid-1;
+    if (size>0) {
+      int left=0;
+      int right=size-1;
+      int mid;
+
+      while (left<=right) {
+        mid=(left+right)/2;
+        if (index[mid].startId<=id &&
+            (mid+1>=size || index[mid+1].startId>id)) {
+          return mid;
+        }
+        else if (index[mid].startId<id) {
+          left=mid+1;
+        }
+        else {
+          right=mid-1;
+        }
       }
     }
 
@@ -141,54 +142,35 @@ namespace osmscout {
   }
 
   template <class N, class T>
-  bool NumericIndex<N,T>::Load(const std::string& path)
+  inline bool NumericIndex<N,T>::ReadPage(FileOffset offset,
+                                          std::vector<IndexEntry>& index) const
   {
-    uint32_t    entries;
-    FileOffset  lastLevelPageStart;
-
-    std::cout << "Index " << filepart << ":" << std::endl;
-
-    filename=AppendFileToDir(path,filepart);
-
-    if (!scanner.Open(filename)) {
-      std::cerr << "Cannot open file '" << filename << "'" << std::endl;
-      return false;
-    }
-
-    scanner.ReadNumber(levels);
-    scanner.ReadNumber(levelSize);
-    scanner.ReadNumber(entries);
-    scanner.Read(lastLevelPageStart);
-
-    //std::cout << filepart <<": " << levels << " " << levelSize << " " << entries << " " << lastLevelPageStart << std::endl;
-
-    // Calculate the number of entries in the first level
-    size_t levelEntries=entries;
-
-    for (size_t l=1;l<levels; l++) {
-      if (levelEntries%levelSize!=0) {
-        levelEntries=levelEntries/levelSize+1;
-      }
-      else {
-        levelEntries=levelEntries/levelSize;
-      }
-    }
-
+    FileOffset currentPos;
     Id         sio=0;
     FileOffset poo=0;
 
-    std::cout << entries << " entries to index, cach size " << cacheSize << ", " << levelEntries << " index entries in first level" << std::endl;
+    index.clear();
 
-    root.reserve(levelEntries);
+    if (!scanner.IsOpen() &&
+        !scanner.Open(filename)) {
+      std::cerr << "Cannot open '" << filename << "'!" << std::endl;
+      return false;
+    }
 
-    scanner.SetPos(lastLevelPageStart);
+    scanner.SetPos(offset);
 
-    for (size_t i=0; i<levelEntries; i++) {
+    while (scanner.GetPos(currentPos) &&
+           currentPos<offset+(FileOffset)pageSize) {
       IndexEntry entry;
       Id         si;
       FileOffset po;
 
       scanner.ReadNumber(si);
+
+      if (si==0)  {
+        return !scanner.HasError();
+      }
+
       scanner.ReadNumber(po);
 
       sio+=si;
@@ -197,31 +179,73 @@ namespace osmscout {
       entry.startId=sio;
       entry.fileOffset=poo;
 
-      root.push_back(entry);
+      index.push_back(entry);
     }
 
-    unsigned long currentCacheSize=cacheSize;
-    unsigned long currentLevelSize=levelEntries;
+    return !scanner.HasError();
+  }
+
+  template <class N, class T>
+  bool NumericIndex<N,T>::Load(const std::string& path)
+  {
+    uint32_t    entries;
+    FileOffset  lastLevelPageStart;
+    FileOffset  indexPageCountsOffset;
+
+    filename=AppendFileToDir(path,filepart);
+
+    if (!scanner.Open(filename)) {
+      std::cerr << "Cannot open index file '" << filename << "'" << std::endl;
+      return false;
+    }
+
+    scanner.ReadNumber(pageSize);        // Size of one index page
+    scanner.ReadNumber(entries);         // Number of entries in data file
+
+    scanner.Read(levels);                // Number of levels
+    scanner.Read(lastLevelPageStart);    // Start of top level index page
+    scanner.Read(indexPageCountsOffset); // Start of list of sizes of index levels
+
+    if (scanner.HasError()) {
+      std::cerr << "Error while loading header data of index file '" << filename << "'" << std::endl;
+      return false;
+    }
+
+    pageCounts.resize(levels);
+
+    scanner.SetPos(indexPageCountsOffset);
     for (size_t i=0; i<levels; i++) {
-      unsigned long resultingCacheSize=currentLevelSize;
+      scanner.ReadNumber(pageCounts[pageCounts.size()-1-i]);
+    }
+
+    delete buffer;
+    buffer=new char[pageSize];
+
+    std::cout << entries << " entries to index, " << levels << " levels, pageSize " << pageSize << ", cache size " << cacheSize << std::endl;
+
+    root.reserve(pageSize);
+
+    ReadPage(lastLevelPageStart,root);
+
+    unsigned long currentCacheSize=cacheSize;
+    for (size_t i=1; i<pageCounts.size(); i++) {
+      unsigned long resultingCacheSize;
 
       if (currentCacheSize==0) {
         resultingCacheSize=1;
       }
-      else if (currentLevelSize>currentCacheSize) {
+      else if (pageCounts[i]>currentCacheSize) {
         resultingCacheSize=currentCacheSize;
         currentCacheSize=0;
       }
       else {
-        resultingCacheSize=currentLevelSize;
-        currentCacheSize-=currentLevelSize;
+        resultingCacheSize=pageCounts[i];
+        currentCacheSize-=pageCounts[i];
       }
 
-      std::cout << "Setting cache size for level " << i+1 << " with " << currentLevelSize << " entries to " << resultingCacheSize << std::endl;
+      std::cout << "Setting cache size for level " << i+1 << " with " << pageCounts[i] << " entries to " << resultingCacheSize << std::endl;
 
       leafs.push_back(PageCache(resultingCacheSize));
-
-      currentLevelSize=currentLevelSize*levelSize;
     }
 
     return !scanner.HasError() && scanner.Close();
@@ -234,14 +258,9 @@ namespace osmscout {
     offsets.reserve(ids.size());
     offsets.clear();
 
-    if (ids.size()==0) {
-      return true;
-    }
-
     for (typename std::vector<N>::const_iterator id=ids.begin();
          id!=ids.end();
          ++id) {
-
       size_t r=GetPageIndex(root,*id);
 
       if (r>=root.size()) {
@@ -251,8 +270,9 @@ namespace osmscout {
 
       Id         startId=root[r].startId;
       FileOffset offset=root[r].fileOffset;
+      bool       error=false;
 
-      for (size_t level=0; level<levels-1; level++) {
+      for (size_t level=0; level<=levels-2 && !error; level++) {
         typename PageCache::CacheRef cacheRef;
 
         if (!leafs[level].GetEntry(startId,cacheRef)) {
@@ -260,54 +280,27 @@ namespace osmscout {
 
           cacheRef=leafs[level].SetEntry(cacheEntry);
 
-          if (!scanner.IsOpen() &&
-              !scanner.Open(filename)) {
-            std::cerr << "Cannot open '" << filename << "'!" << std::endl;
-            return false;
-          }
+          cacheRef->value.reserve(pageSize);
 
-          scanner.SetPos(offset);
-
-          cacheRef->value.reserve(levelSize);
-
-          IndexEntry entry;
-
-          entry.startId=0;
-          entry.fileOffset=0;
-
-          for (size_t j=0; j<levelSize; j++) {
-            Id         idOffset;
-            FileOffset fileOffset;
-
-            if (scanner.ReadNumber(idOffset) &&
-                scanner.ReadNumber(fileOffset)) {
-              entry.startId+=idOffset;
-              entry.fileOffset+=fileOffset;
-
-              cacheRef->value.push_back(entry);
-            }
-          }
+          ReadPage(offset,cacheRef->value);
         }
 
         size_t i=GetPageIndex(cacheRef->value,*id);
 
         if (i>=cacheRef->value.size()) {
-          //std::cerr << "Id " << *id << " not found in sub page index!" << std::endl;
+          //std::cerr << "Id " << *id << " not found in index level " << level+2 << "!" << std::endl;
+          error=true;
           continue;
         }
 
         startId=cacheRef->value[i].startId;
         offset=cacheRef->value[i].fileOffset;
-        //std::cout << "id " << *id <<" => " << i << " " << startId << " " << offset << std::endl;
       }
 
-      if (startId==*id) {
+      if (!error &&
+          startId==*id) {
         offsets.push_back(offset);
       }
-      else {
-        //std::cerr << "Id " << *id << " not found in sub index!" << std::endl;
-      }
-      //std::cout << "=> Id " << *id <<" => " << startId << " " << offset << std::endl;
     }
 
     return true;
@@ -320,201 +313,14 @@ namespace osmscout {
     size_t entries=0;
 
     entries+=root.size();
-    memory+=root.size()+sizeof(IndexEntry);
+    memory+=root.size()*sizeof(IndexEntry);
 
     for (size_t i=0; i<leafs.size(); i++) {
       entries+=leafs[i].GetSize();
-      memory+=leafs[i].GetSize()+leafs[i].GetMemory(NumericIndexCacheValueSizer());
+      memory+=sizeof(leafs[i])+leafs[i].GetMemory(NumericIndexCacheValueSizer());
     }
 
     std::cout << "Index " << filepart << ": " << entries << " entries, memory " << memory << std::endl;
-  }
-
-  template <class N,class T>
-  class NumericIndexGenerator : public ImportModule
-  {
-  private:
-    std::string description;
-    std::string datafile;
-    std::string indexfile;
-
-  public:
-    NumericIndexGenerator(const std::string& description,
-                          const std::string& datafile,
-                          const std::string& indexfile);
-    virtual ~NumericIndexGenerator();
-
-    std::string GetDescription() const;
-    bool Import(const ImportParameter& parameter,
-                Progress& progress,
-                const TypeConfig& typeConfig);
-  };
-
-  template <class N,class T>
-  NumericIndexGenerator<N,T>::NumericIndexGenerator(const std::string& description,
-                                                    const std::string& datafile,
-                                                    const std::string& indexfile)
-   : description(description),
-     datafile(datafile),
-     indexfile(indexfile)
-  {
-    // no code
-  }
-
-  template <class N,class T>
-  NumericIndexGenerator<N,T>::~NumericIndexGenerator()
-  {
-    // no code
-  }
-
-  template <class N,class T>
-  std::string NumericIndexGenerator<N,T>::GetDescription() const
-  {
-    return description;
-  }
-
-  template <class N,class T>
-  bool NumericIndexGenerator<N,T>::Import(const ImportParameter& parameter,
-                                          Progress& progress,
-                                          const TypeConfig& typeConfig)
-  {
-    //
-    // Writing index file
-    //
-
-    progress.SetAction(std::string("Generating '")+indexfile+"'");
-
-    FileScanner             scanner;
-    FileWriter              writer;
-    uint32_t                dataCount=0;
-    std::vector<Id>         startingIds;
-    std::vector<FileOffset> pageStarts;
-    FileOffset              lastLevelPageStart;
-
-    if (!writer.Open(indexfile)) {
-      progress.Error(std::string("Cannot create '")+indexfile+"'");
-      return false;
-    }
-
-    if (!scanner.Open(datafile)) {
-      progress.Error(std::string("Cannot open '")+datafile+"'");
-      return false;
-    }
-
-    if (!scanner.Read(dataCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    uint32_t levels=1;
-    size_t   tmp;
-    uint32_t indexLevelSize=parameter.GetNumericIndexLevelSize();
-
-    tmp=dataCount;
-    while (tmp/indexLevelSize>0) {
-      tmp=tmp/indexLevelSize;
-      levels++;
-    }
-
-    indexLevelSize=(uint32_t)ceil(pow(dataCount,1.0/levels));
-
-    progress.Info(std::string("Index for ")+NumberToString(dataCount)+" data elements will be stored in "+NumberToString(levels)+ " levels using index level size of "+NumberToString(indexLevelSize));
-
-    writer.WriteNumber(levels);         // Number of levels
-    writer.WriteNumber(indexLevelSize); // Size of index page
-    writer.WriteNumber(dataCount);      // Number of nodes
-
-    writer.GetPos(lastLevelPageStart);
-
-    writer.Write((FileOffset)0); // Write the starting position of the last page
-
-    Id         lastId=0;
-    FileOffset lastPos=0;
-
-    progress.Info(std::string("Writing level ")+NumberToString(levels)+" ("+NumberToString(dataCount)+" entries)");
-
-    for (uint32_t d=0; d<dataCount; d++) {
-      progress.SetProgress(d,dataCount);
-
-      FileOffset pos;
-
-      scanner.GetPos(pos);
-
-      T data;
-
-      if (!data.Read(scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(d+1)+" of "+
-                       NumberToString(dataCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-        return false;
-      }
-
-      if (d%indexLevelSize==0) {
-        FileOffset pageStart;
-
-        writer.GetPos(pageStart);
-
-        pageStarts.push_back(pageStart);
-        startingIds.push_back(data.GetId());
-
-        writer.WriteNumber(data.GetId());
-        writer.WriteNumber(pos);
-      }
-      else {
-        writer.WriteNumber((data.GetId()-lastId));
-        writer.WriteNumber((pos-lastPos));
-      }
-
-      lastPos=pos;
-      lastId=data.GetId();
-    }
-
-    levels--;
-
-    while (levels>0) {
-      std::vector<Id>         si(startingIds);
-      std::vector<FileOffset> po(pageStarts);
-
-      startingIds.clear();
-      pageStarts.clear();
-
-      progress.Info(std::string("Writing level ")+NumberToString(levels)+" ("+NumberToString(si.size())+" entries)");
-
-      for (size_t i=0; i<si.size(); i++) {
-        if (i%indexLevelSize==0) {
-          FileOffset pageStart;
-
-          writer.GetPos(pageStart);
-
-          startingIds.push_back(si[i]);
-          pageStarts.push_back(pageStart);
-        }
-
-        if (i%indexLevelSize==0) {
-          writer.WriteNumber(si[i]);
-          writer.WriteNumber(po[i]);
-        }
-        else {
-          writer.WriteNumber((si[i]-si[i-1]));
-          writer.WriteNumber(po[i]-po[i-1]);
-        }
-      }
-
-      levels--;
-    }
-
-    writer.SetPos(lastLevelPageStart);
-
-    if (indexLevelSize>0) {
-      writer.Write(pageStarts[0]);
-    }
-
-    return !scanner.HasError() &&
-           scanner.Close() &&
-           !writer.HasError() &&
-           writer.Close();
   }
 }
 

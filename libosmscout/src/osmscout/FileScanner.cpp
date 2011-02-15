@@ -278,6 +278,34 @@ namespace osmscout {
     return !hasError;
   }
 
+  bool FileScanner::Read(char* buffer, size_t bytes)
+  {
+#if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
+    if (this->buffer!=NULL) {
+      if (offset+(FileOffset)bytes>size) {
+        std::cerr << "Cannot read byte array beyond file end!" << std::endl;
+        hasError=true;
+        return false;
+      }
+
+      memcpy(buffer,&this->buffer[offset],bytes);
+
+      offset+=bytes;
+
+      return true;
+    }
+#endif
+
+    hasError=fread(buffer,sizeof(char),bytes,file)!=bytes;
+
+    if (hasError) {
+      std::cerr << "Cannot read byte array beyond file end!" << std::endl;
+      return false;
+    }
+
+    return true;
+  }
+
   bool FileScanner::Read(std::string& value)
   {
     if (file==NULL || hasError) {
@@ -323,6 +351,7 @@ namespace osmscout {
       hasError=fread(&character,sizeof(char),1,file)!=1;
 
       if (hasError) {
+        // TODO: Should this not be 'false'?
         return true;
       }
     }

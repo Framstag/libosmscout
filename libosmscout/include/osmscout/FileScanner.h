@@ -79,6 +79,8 @@ namespace osmscout {
     bool SetPos(FileOffset pos);
     bool GetPos(FileOffset &pos) const;
 
+    bool Read(char* buffer, size_t bytes);
+
     bool Read(std::string& value);
     bool Read(bool& boolean);
     bool Read(uint8_t& number);

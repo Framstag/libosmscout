@@ -36,6 +36,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/GenAreaIndex.h \
                         osmscout/GenAreaNodeIndex.h \
                         osmscout/GenCityStreetIndex.h \
+                        osmscout/GenNumericIndex.h \
                         osmscout/GenNodeDat.h \
                         osmscout/GenNodeUseIndex.h \
                         osmscout/GenRelationDat.h \
