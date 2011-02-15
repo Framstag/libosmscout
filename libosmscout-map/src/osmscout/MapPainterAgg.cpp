@@ -24,6 +24,7 @@
 #include <iostream>
 #include <limits>
 
+#include <agg2/agg_conv_dash.h>
 #include <agg2/agg_conv_stroke.h>
 #include <agg2/agg_path_storage.h>
 
@@ -192,26 +193,63 @@ namespace osmscout {
       //nodesAllCount++;
     }
 
-    agg::conv_stroke<agg::path_storage> stroke(path);
-
-    stroke.width(width);
-
-    if (startCap==capRound &&
-        endCap==capRound &&
-        style==LineStyle::normal) {
-      stroke.line_cap(agg::round_cap);
-    }
-    else {
-      stroke.line_cap(agg::butt_cap);
-    }
-
-    // TODO  Dash
-
-    rasterizer->add_path(stroke);
-
     renderer_aa->color(agg::rgba(r,g,b,a));
 
-    agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
+    if (style==LineStyle::normal) {
+      agg::conv_stroke<agg::path_storage> stroke(path);
+
+      stroke.width(width);
+
+      if (startCap==capRound &&
+          endCap==capRound &&
+          style==LineStyle::normal) {
+        stroke.line_cap(agg::round_cap);
+      }
+      else {
+        stroke.line_cap(agg::butt_cap);
+      }
+
+      rasterizer->add_path(stroke);
+
+      agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
+    }
+    else {
+      agg::conv_dash<agg::path_storage>                    dash(path);
+      agg::conv_stroke<agg::conv_dash<agg::path_storage> > stroke(dash);
+
+      stroke.width(width);
+
+      if (startCap==capRound &&
+          endCap==capRound &&
+          style==LineStyle::normal) {
+        stroke.line_cap(agg::round_cap);
+      }
+      else {
+        stroke.line_cap(agg::butt_cap);
+      }
+
+      switch (style) {
+      case LineStyle::none:
+        break;
+      case LineStyle::normal:
+        dash.add_dash(1,0);
+        break;
+      case LineStyle::longDash:
+        dash.add_dash(7,3);
+        break;
+      case LineStyle::dotted:
+        dash.add_dash(1,2);
+        break;
+      case LineStyle::lineDot:
+        dash.add_dash(7,3);
+        dash.add_dash(1,3);
+        break;
+      }
+
+      rasterizer->add_path(stroke);
+
+      agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
+    }
 
     // TODO: End point caps "dots"
   }
