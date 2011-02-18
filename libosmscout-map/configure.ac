@@ -69,9 +69,21 @@ PKG_CHECK_MODULES(LIBQTGUI, QtGui > 4.6.0,
 
 AM_CONDITIONAL(HAVE_LIB_QTGUI,[test "$HASQTGUI" = "true"])
 
+PKG_CHECK_MODULES(LIBFREETYPE, freetype2,
+                  HASLIBFREETYPE=true
+                  [AC_SUBST(LIBFREETYPE_CFLAGS)
+                   AC_SUBST(LIBFREETYPE_LIBS)
+                   AC_DEFINE(HAVE_LIB_FREETYPE,1,[libfreetype found])],
+                   [HASQTGUI=false])
+
+AM_CONDITIONAL(HAVE_LIB_FREETYPE,[test "$HASLIBFREETYPE" = "true"])
+
 PKG_CHECK_MODULES(LIBAGG, libagg,
                   HASAGG=true
                   [AC_SUBST(LIBAGG_CFLAGS)
+                   if test "$HASLIBFREETYPE" = "true"; then
+                     LIBAGG_LIBS="-laggfontfreetype_pic $LIBAGG_LIBS"
+                   fi
                    AC_SUBST(LIBAGG_LIBS)
                    AC_DEFINE(HAVE_LIB_AGG,1,[libagg found])],
                    [HASAGG=false])

@@ -2,13 +2,13 @@ AM_CXXFLAGS=$(LIBOSMSCOUT_CFLAGS) \
             $(LIBOSMSCOUTMAP_CFLAGS) \
             $(LIBCAIRO_CFLAGS) \
             $(LIBQTGUI_CFLAGS) \
-            $(LIBQTAGG_CFLAGS)
+            $(LIBAGG_CFLAGS)
 
 LDADD=$(LIBOSMSCOUT_LIBS) \
       $(LIBOSMSCOUTMAP_LIBS) \
       $(LIBCAIRO_LIBS) \
       $(LIBQTGUI_LIBS) \
-      $(LIBQTAGG_LIBS)
+      $(LIBAGG_LIBS)
 
 bin_PROGRAMS = AddressLookup Routing
 
