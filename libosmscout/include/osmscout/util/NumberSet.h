@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_UTIL_H
-#define OSMSCOUT_UTIL_H
+#ifndef OSMSCOUT_UTIL_NUMBERSET_H
+#define OSMSCOUT_UTIL_NUMBERSET_H
 
 /*
   This source is part of the libosmscout library
@@ -20,29 +20,43 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <stdint.h>
-
-#include <set>
-#include <string>
-
 #include <osmscout/private/CoreImportExport.h>
 
 namespace osmscout {
 
-  extern OSMSCOUT_API void GetKeysForName(const std::string& name, std::set<uint32_t>& keys);
+  class OSMSCOUT_API NumberSet
+  {
+    typedef unsigned long Number;
 
-  extern OSMSCOUT_API bool EncodeNumber(unsigned long number,
-                                        size_t bufferLength,
-                                        char* buffer,
-                                        size_t& bytes);
+    struct Data
+    {
+      virtual ~Data();
+    };
 
-  extern OSMSCOUT_API bool DecodeNumber(const char* buffer,
-                                        uint32_t& number,
-                                        size_t& bytes);
+    struct Refs : public Data
+    {
+      Data* refs[256];
 
-  extern OSMSCOUT_API bool GetFileSize(const std::string& filename, long& size);
+      Refs();
+      ~Refs();
+    };
 
-  extern OSMSCOUT_API std::string AppendFileToDir(const std::string& dir, const std::string& file);
+    struct Leaf : public Data
+    {
+      unsigned char values[32];
+
+      Leaf();
+    };
+
+  private:
+    Refs refs;
+
+  public:
+    NumberSet();
+    ~NumberSet();
+    void Insert(Number value);
+    bool IsSet(Number value) const;
+  };
 }
 
 #endif
