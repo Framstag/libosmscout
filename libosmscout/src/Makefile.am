@@ -12,7 +12,8 @@ libosmscout_la_LDFLAGS  = $(XML2_LIBS) \
                           $(PROTOBUF_LIBS) \
                           $(ZLIB_LIBS)
 
-libosmscout_la_SOURCES= osmscout/Types.cpp \
+libosmscout_la_SOURCES= osmscout/util/String.cpp \
+                        osmscout/Types.cpp \
                         osmscout/Util.cpp \
                         osmscout/Progress.cpp \
                         osmscout/FileScanner.cpp \

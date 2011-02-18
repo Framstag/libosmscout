@@ -21,6 +21,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <iostream>
 #include <limits>
 #include <list>
 #include <map>
@@ -35,7 +36,8 @@
 #include <osmscout/Way.h>
 
 #include <osmscout/Util.h>
-#include <iostream>
+
+#include <osmscout/util/String.h>
 
 namespace osmscout {
 

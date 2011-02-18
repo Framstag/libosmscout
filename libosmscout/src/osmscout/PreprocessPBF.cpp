@@ -36,7 +36,10 @@
 #include <osmscout/RawNode.h>
 #include <osmscout/RawRelation.h>
 #include <osmscout/RawWay.h>
+
 #include <osmscout/Util.h>
+
+#include <osmscout/util/String.h>
 
 #include <iostream>
 

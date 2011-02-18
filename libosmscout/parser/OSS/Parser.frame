@@ -125,10 +125,10 @@ public:
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <wchar.h>
 #include <osmscout/oss/Scanner.h>
 #include <osmscout/oss/Parser.h>
 
+#include <osmscout/util/String.h>
 
 -->namespace_open
 

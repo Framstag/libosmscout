@@ -27,6 +27,7 @@
 #include <osmscout/FileScanner.h>
 #include <osmscout/TypeConfig.h>
 
+#include <osmscout/util/String.h>
 #include <osmscout/Util.h>
 
 namespace osmscout {
