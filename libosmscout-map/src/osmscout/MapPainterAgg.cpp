@@ -24,9 +24,12 @@
 #include <iostream>
 #include <limits>
 
+#include <agg2/agg_conv_bspline.h>
 #include <agg2/agg_conv_dash.h>
+#include <agg2/agg_conv_segmentator.h>
 #include <agg2/agg_conv_stroke.h>
 #include <agg2/agg_path_storage.h>
+#include <agg2/agg_trans_single_path.h>
 
 #include <osmscout/Util.h>
 
@@ -41,6 +44,161 @@ namespace osmscout {
   {
     // no code
     // TODO: Clean up fonts
+  }
+
+  void MapPainterAgg::SetFont(const MapParameter& parameter,
+                              double size)
+  {
+    if (!fontEngine->load_font(parameter.GetFontName().c_str(),
+                               0,
+                               agg::glyph_ren_native_gray8)) {
+      std::cout << "Cannot load font '" << parameter.GetFontName() << "'" << std::endl;
+      return;
+
+    }
+
+    //fontEngine->resolution(72);
+    fontEngine->width(size*8);  // We need to clearify this value, likely DPI depend?
+    fontEngine->height(size*8); // We need to clearify this value, likely DPI depend?
+    fontEngine->hinting(true);
+    fontEngine->flip_y(true);
+  }
+
+  void MapPainterAgg::SetOutlineFont(const MapParameter& parameter,
+                                     double size)
+  {
+    if (!fontEngine->load_font(parameter.GetFontName().c_str(),
+                               0,
+                               agg::glyph_ren_outline)) {
+      std::cout << "Cannot load font '" << parameter.GetFontName() << "'" << std::endl;
+      return;
+
+    }
+
+    //fontEngine->resolution(72);
+    fontEngine->width(size*8);  // We need to clearify this value, likely DPI depend?
+    fontEngine->height(size*8); // We need to clearify this value, likely DPI depend?
+    fontEngine->hinting(true);
+    fontEngine->flip_y(true);
+  }
+
+  void MapPainterAgg::GetTextDimension(const std::wstring& text,
+                                       double& width,
+                                       double& height)
+  {
+    width=0;
+    height=fontEngine->height();
+
+    for (size_t i=0; i<text.length(); i++) {
+      const agg::glyph_cache* glyph=fontCacheManager->glyph(text[i]);
+
+      if (glyph!=NULL) {
+        width+=glyph->advance_x;
+      }
+    }
+  }
+
+  void MapPainterAgg::DrawText(double x,
+                               double y,
+                               const std::wstring& text)
+  {
+    for (size_t i=0; i<text.length(); i++) {
+      const agg::glyph_cache* glyph = fontCacheManager->glyph(text[i]);
+
+      if (glyph!=NULL) {
+        if (true) {
+          fontCacheManager->add_kerning(&x, &y);
+        }
+
+        fontCacheManager->init_embedded_adaptors(glyph,x,y);
+
+        switch (glyph->data_type) {
+        default:
+          break;
+        case agg::glyph_data_mono:
+          agg::render_scanlines(fontCacheManager->mono_adaptor(),
+                                fontCacheManager->mono_scanline(),
+                                *renderer_bin);
+          break;
+
+        case agg::glyph_data_gray8:
+          agg::render_scanlines(fontCacheManager->gray8_adaptor(),
+                                fontCacheManager->gray8_scanline(),
+                                *renderer_aa);
+          break;
+
+        case agg::glyph_data_outline:
+          rasterizer->reset();
+
+          if(convTextContours->width() <= 0.01) {
+            rasterizer->add_path(*convTextCurves);
+          }
+          else {
+            rasterizer->add_path(*convTextContours);
+          }
+          agg::render_scanlines(*rasterizer,
+                                *scanlineP8,
+                                *renderer_aa);
+          break;
+        }
+
+        // increment pen position
+        x += glyph->advance_x;
+        y += glyph->advance_y;
+      }
+    }
+  }
+
+  void MapPainterAgg::DrawOutlineText(double x,
+                                      double y,
+                                      const std::wstring& text,
+                                      double width)
+  {
+    convTextContours->width(width);
+
+    for (size_t i=0; i<text.length(); i++) {
+      const agg::glyph_cache* glyph = fontCacheManager->glyph(text[i]);
+
+      if (glyph!=NULL) {
+        if (true) {
+          fontCacheManager->add_kerning(&x, &y);
+        }
+
+        fontCacheManager->init_embedded_adaptors(glyph,x,y);
+
+        switch (glyph->data_type) {
+        default:
+          break;
+        case agg::glyph_data_mono:
+          agg::render_scanlines(fontCacheManager->mono_adaptor(),
+                                fontCacheManager->mono_scanline(),
+                                *renderer_bin);
+          break;
+        case agg::glyph_data_gray8:
+          agg::render_scanlines(fontCacheManager->gray8_adaptor(),
+                                fontCacheManager->gray8_scanline(),
+                                *renderer_aa);
+          break;
+        case agg::glyph_data_outline:
+          rasterizer->reset();
+
+          if(convTextContours->width() <= 0.01) {
+            rasterizer->add_path(*convTextCurves);
+          }
+          else {
+            rasterizer->add_path(*convTextContours);
+          }
+          agg::render_scanlines(*rasterizer,
+                                *scanlineP8,
+                                *renderer_aa);
+          break;
+        }
+
+        // increment pen position
+        x += glyph->advance_x;
+        y += glyph->advance_y;
+      }
+    }
   }
 
   bool MapPainterAgg::HasIcon(const StyleConfig& styleConfig,
@@ -64,8 +222,8 @@ namespace osmscout {
   }
 
   bool MapPainterAgg::HasPattern(const StyleConfig& styleConfig,
-                                const MapParameter& parameter,
-                                PatternStyle& style)
+                                 const MapParameter& parameter,
+                                 PatternStyle& style)
   {
     if (style.GetId()==std::numeric_limits<size_t>::max()) {
       return false;
@@ -90,11 +248,12 @@ namespace osmscout {
                                double x, double y)
   {
     if (style.GetStyle()==LabelStyle::normal) {
-      double fontSize=style.GetSize();
-      double r=style.GetTextR();
-      double g=style.GetTextG();
-      double b=style.GetTextB();
-      double a=style.GetTextA();
+      double       fontSize=style.GetSize();
+      double       r=style.GetTextR();
+      double       g=style.GetTextG();
+      double       b=style.GetTextB();
+      double       a=style.GetTextA();
+      std::wstring wideText(UTF8StringToWString(text));
 
       if (projection.GetMagnification()>style.GetScaleAndFadeMag()) {
         double factor=Log2(projection.GetMagnification())-Log2(style.GetScaleAndFadeMag());
@@ -102,7 +261,21 @@ namespace osmscout {
         a=a/factor;
       }
 
-      // TODO
+      SetFont(parameter,
+              fontSize);
+
+      double width;
+      double height;
+
+      GetTextDimension(wideText,width,height);
+
+      x=x-width/2;
+      y=y+-height/2+fontEngine->ascender();
+
+      //renderer_bin->color(agg::rgba(r,g,b,a));
+      renderer_aa->color(agg::rgba(r,g,b,a));
+
+      DrawText(x,y,wideText);
     }
     else if (style.GetStyle()==LabelStyle::plate) {
       static const double outerWidth = 4;
@@ -111,11 +284,12 @@ namespace osmscout {
       // TODO
     }
     else if (style.GetStyle()==LabelStyle::emphasize) {
-      double fontSize=style.GetSize();
-      double r=style.GetTextR();
-      double g=style.GetTextG();
-      double b=style.GetTextB();
-      double a=style.GetTextA();
+      double       fontSize=style.GetSize();
+      double       r=style.GetTextR();
+      double       g=style.GetTextG();
+      double       b=style.GetTextB();
+      double       a=style.GetTextA();
+      std::wstring wideText(UTF8StringToWString(text));
 
       if (projection.GetMagnification()>style.GetScaleAndFadeMag()) {
         double factor=Log2(projection.GetMagnification())-Log2(style.GetScaleAndFadeMag());
@@ -126,7 +300,30 @@ namespace osmscout {
         }
       }
 
-      // TODO
+      SetOutlineFont(parameter,
+                     fontSize);
+
+      double width;
+      double height;
+
+      GetTextDimension(wideText,width,height);
+
+      x=x-width/2;
+      y=y+-height/2+fontEngine->ascender();
+
+      //renderer_bin->color(agg::rgba(r,g,b,a));
+      renderer_aa->color(agg::rgba(1,1,1,a));
+
+      DrawOutlineText(x,y,wideText,2);
+
+      SetFont(parameter,
+              fontSize);
+
+      //renderer_bin->color(agg::rgba(r,g,b,a));
+      renderer_aa->color(agg::rgba(r,g,b,a));
+
+      DrawText(x,y,wideText);
+
     }
   }
 
@@ -136,13 +333,129 @@ namespace osmscout {
                                       const std::string& text,
                                       const std::vector<Point>& nodes)
   {
-    double fontSize=style.GetSize();
-    double r=style.GetTextR();
-    double g=style.GetTextG();
-    double b=style.GetTextB();
-    double a=style.GetTextA();
+    double       fontSize=style.GetSize();
+    double       r=style.GetTextR();
+    double       g=style.GetTextG();
+    double       b=style.GetTextB();
+    double       a=style.GetTextA();
+    std::wstring wideText(UTF8StringToWString(text));
 
-    // TODO
+    TransformWay(projection,parameter,nodes);
+
+    SetOutlineFont(parameter,
+                   fontSize);
+
+    //renderer_bin->color(agg::rgba(r,g,b,a));
+    renderer_aa->color(agg::rgba(r,g,b,a));
+
+    agg::path_storage path;
+
+    double length=0;
+    double xs=0;
+    double ys=0;
+    double xo=0;
+    double yo=0;
+
+    if (nodes[0].lon<nodes[nodes.size()-1].lon) {
+      bool start=true;
+
+      for (size_t j=0; j<nodes.size(); j++) {
+        if (drawNode[j]) {
+          if (start) {
+            path.move_to(nodeX[j],
+                           nodeY[j]);
+            xs=nodeX[j];
+            ys=nodeY[j];
+            start=false;
+          }
+          else {
+            path.line_to(nodeX[j],
+                           nodeY[j]);
+            length+=sqrt(pow(nodeX[j]-xo,2)+
+                         pow(nodeY[j]-yo,2));
+          }
+
+          xo=nodeX[j];
+          yo=nodeY[j];
+        }
+      }
+    }
+    else {
+      bool start=true;
+
+      for (size_t j=0; j<nodes.size(); j++) {
+        if (drawNode[nodes.size()-j-1]) {
+          if (start) {
+            path.move_to(nodeX[nodes.size()-j-1],
+                           nodeY[nodes.size()-j-1]);
+            xs=nodeX[j];
+            ys=nodeY[j];
+            start=false;
+          }
+          else {
+            path.line_to(nodeX[nodes.size()-j-1],
+                           nodeY[nodes.size()-j-1]);
+            length+=sqrt(pow(nodeX[nodes.size()-j-1]-xo,2)+
+                         pow(nodeY[nodes.size()-j-1]-yo,2));
+          }
+
+          xo=nodeX[nodes.size()-j-1];
+          yo=nodeY[nodes.size()-j-1];
+        }
+      }
+    }
+
+    double width;
+    double height;
+
+    GetTextDimension(wideText,width,height);
+
+    if (width>length) {
+      return;
+    }
+
+    /*
+    typedef agg::conv_bspline<agg::path_storage> conv_bspline_type;
+
+    conv_bspline_type bspline(path);
+    bspline.interpolation_step(1.0 / path.total_vertices());*/
+
+    agg::trans_single_path tcurve;
+    tcurve.add_path(path); // bspline
+
+    typedef agg::conv_segmentator<AggTextCurveConverter> conv_font_segm_type;
+    typedef agg::conv_transform<conv_font_segm_type,
+    agg::trans_single_path>                              conv_font_trans_type;
+
+    conv_font_segm_type  fsegm(*convTextCurves);
+    conv_font_trans_type ftrans(fsegm, tcurve);
+
+    fsegm.approximation_scale(3.0);
+
+    double x=(length-width)/2;
+    double y=-height/2+fontEngine->ascender();
+
+    for (size_t i=0; i<wideText.length(); i++) {
+      const agg::glyph_cache* glyph = fontCacheManager->glyph(wideText[i]);
+
+      if (glyph!=NULL) {
+        fontCacheManager->add_kerning(&x, &y);
+        fontCacheManager->init_embedded_adaptors(glyph,x,y);
+
+        if (glyph->data_type==agg::glyph_data_outline) {
+          rasterizer->reset();
+          rasterizer->add_path(ftrans);
+          renderer_aa->color(agg::rgba(r,g,b,a));
+          agg::render_scanlines(*rasterizer,
+                                *scanlineP8,
+                                *renderer_aa);
+        }
+
+        // increment pen position
+        x += glyph->advance_x;
+        y += glyph->advance_y;
+      }
+    }
   }
 
   void MapPainterAgg::DrawIcon(const IconStyle* style,
@@ -347,20 +660,33 @@ namespace osmscout {
                              const Projection& projection,
                              const MapParameter& parameter,
                              const MapData& data,
-                             agg::pixfmt_rgb24* pf)
+                             AggPixelFormat* pf)
   {
     this->pf=pf;
 
-    renderer_base=new agg::renderer_base<agg::pixfmt_rgb24>(*pf);
-    rasterizer=new agg::rasterizer_scanline_aa<>();
-    scanlineP8=new agg::scanline_p8();
-    renderer_aa=new agg::renderer_scanline_aa_solid<agg::renderer_base<agg::pixfmt_rgb24> >(*renderer_base);
+    renderer_base=new AggRenderBase(*pf);
+    rasterizer=new AggScanlineRasterizer();
+    scanlineP8=new AggScanline();
+    renderer_aa=new AggScanlineRendererAA(*renderer_base);
+    renderer_bin=new AggScanlineRendererBin(*renderer_base);
+    fontEngine=new AggFontEngine();
+    fontCacheManager=new AggFontManager(*fontEngine);
+
+    convTextCurves=new AggTextCurveConverter(fontCacheManager->path_adaptor());
+    convTextCurves->approximation_scale(2.0);
+
+    convTextContours= new AggTextContourConverter(*convTextCurves);
 
     Draw(styleConfig,
          projection,
          parameter,
          data);
 
+    delete convTextCurves;
+    delete convTextContours;
+    delete fontEngine;
+    delete fontCacheManager;
+    delete renderer_bin;
     delete renderer_aa;
     delete scanlineP8;
     delete rasterizer;
