@@ -31,8 +31,7 @@
 #include <agg2/agg_path_storage.h>
 #include <agg2/agg_trans_single_path.h>
 
-#include <osmscout/Util.h>
-
+#include <osmscout/util/Geometry.h>
 #include <osmscout/util/String.h>
 
 namespace osmscout {

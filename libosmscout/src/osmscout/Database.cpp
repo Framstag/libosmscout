@@ -26,8 +26,7 @@
 #include <osmscout/RoutingProfile.h>
 #include <osmscout/TypeConfigLoader.h>
 
-//#include <osmscout/Util.h>
-
+#include <osmscout/util/Geometry.h>
 #include <osmscout/util/StopClock.h>
 
 namespace osmscout {

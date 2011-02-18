@@ -27,8 +27,6 @@
 #include <osmscout/MapPainterQt.h>
 #include <osmscout/StyleConfigLoader.h>
 
-//#include <osmscout/Util.h>
-
 #include <osmscout/util/StopClock.h>
 
 /*

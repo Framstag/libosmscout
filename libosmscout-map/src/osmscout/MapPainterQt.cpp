@@ -24,7 +24,7 @@
 #include <iostream>
 #include <limits>
 
-#include <osmscout/Util.h>
+#include <osmscout/util/Geometry.h>
 
 namespace osmscout {
 
