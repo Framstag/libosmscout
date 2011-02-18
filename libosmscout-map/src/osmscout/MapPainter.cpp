@@ -22,7 +22,7 @@
 #include <cmath>
 #include <iostream>
 
-#include <osmscout/Util.h>
+#include <osmscout/util/StopClock.h>
 
 namespace osmscout {
 

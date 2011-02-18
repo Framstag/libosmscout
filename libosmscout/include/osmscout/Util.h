@@ -237,29 +237,6 @@ namespace osmscout {
     }
   };
 
-  /**
-    Simple stop clock implementation.
-    */
-  class OSMSCOUT_API StopClock
-  {
-  private:
-    struct StopClockPIMPL;
-
-    StopClockPIMPL *pimpl;
-
-  public:
-    StopClock();
-    virtual ~StopClock();
-
-    void Stop();
-
-    std::string ResultString() const;
-
-    friend OSMSCOUT_API std::ostream& operator<<(std::ostream& stream, const StopClock& clock);
-  };
-
-  extern OSMSCOUT_API std::ostream& operator<<(std::ostream& stream, const StopClock& clock);
-
   extern OSMSCOUT_API void GetKeysForName(const std::string& name, std::set<uint32_t>& keys);
 
   extern OSMSCOUT_API bool EncodeNumber(unsigned long number,

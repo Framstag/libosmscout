@@ -34,26 +34,7 @@
 
 #include <osmscout/util/String.h>
 
-#if defined(HAVE_SYS_TIME_H)
-  #include <sys/time.h>
-#endif
-
 namespace osmscout {
-
-#if defined(__WIN32__) || defined(WIN32)
-#else
-  #ifndef timersub
-      # define timersub(a, b, result) \
-            do { \
-                  (result)->tv_sec = (a)->tv_sec - (b)->tv_sec; \
-                  (result)->tv_usec = (a)->tv_usec - (b)->tv_usec; \
-                  if ((result)->tv_usec < 0) { \
-                        --(result)->tv_sec; \
-                    (result)->tv_usec += 1000000; \
-                  } \
-            } while (0)
-  #endif
-#endif
 
   NumberSet::Data::~Data()
   {
@@ -159,77 +140,6 @@ namespace osmscout {
     size_t bi=byte%8;
 
     return l->values[by] & (1 << bi);
-  }
-
-  struct StopClock::StopClockPIMPL
-  {
-#if defined(HAVE_SYS_TIME_H)
-    timeval start;
-    timeval stop;
-#endif
-  };
-
-  StopClock::StopClock()
-    : pimpl(new StopClockPIMPL())
-  {
-#if defined(HAVE_SYS_TIME_H)
-    gettimeofday(&pimpl->start,NULL);
-#endif
-  }
-
-  StopClock::~StopClock()
-  {
-    delete pimpl;
-  }
-
-  void StopClock::Stop()
-  {
-#if defined(HAVE_SYS_TIME_H)
-    gettimeofday(&pimpl->stop,NULL);
-#endif
-  }
-
-  std::ostream& operator<<(std::ostream& stream, const StopClock& clock)
-  {
-#if defined(HAVE_SYS_TIME_H)
-    timeval diff;
-
-    timersub(&clock.pimpl->stop,&clock.pimpl->start,&diff);
-
-    stream << diff.tv_sec << "." << std::setw(3) << std::setfill('0') << diff.tv_usec/1000;
-#else
-    stream << "X.XXX";
-#endif
-
-    return stream;
-  }
-
-  std::string StopClock::ResultString() const
-  {
-#if defined(HAVE_SYS_TIME_H)
-    timeval     diff;
-    std::string result;
-    std::string seconds;
-    std::string millis;
-
-    timersub(&pimpl->stop,&pimpl->start,&diff);
-
-    seconds=NumberToString(diff.tv_sec);
-    millis=NumberToString(diff.tv_usec/1000);
-
-    result=seconds;
-    result+=".";
-
-    for (size_t i=millis.length()+1; i<=3; i++) {
-      result+="0";
-    }
-
-    result+=millis;
-
-    return result;
-#else
-    return "X.XXX";
-#endif
   }
 
   void GetKeysForName(const std::string& name, std::set<uint32_t>& keys)

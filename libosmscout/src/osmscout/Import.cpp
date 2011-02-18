@@ -48,7 +48,7 @@
 #include <osmscout/GenCityStreetIndex.h>
 #include <osmscout/GenWaterIndex.h>
 
-#include <osmscout/Util.h>
+#include <osmscout/util/StopClock.h>
 
 namespace osmscout {
 

@@ -26,7 +26,10 @@
 #include <osmscout/Database.h>
 #include <osmscout/MapPainterQt.h>
 #include <osmscout/StyleConfigLoader.h>
-#include <osmscout/Util.h>
+
+//#include <osmscout/Util.h>
+
+#include <osmscout/util/StopClock.h>
 
 /*
   Example for the germany.osm, show germany overview, then zooms into Bonn city
