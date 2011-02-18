@@ -26,6 +26,7 @@
 
 #include <osmscout/Util.h>
 
+#include <osmscout/util/NumberSet.h>
 #include <osmscout/util/StopClock.h>
 
 /**
