@@ -21,7 +21,8 @@
 
 #include <osmscout/FileScanner.h>
 #include <osmscout/Way.h>
-#include <osmscout/Util.h>
+
+#include <osmscout/util/StopClock.h>
 
 /**
   Sequentially read the ways.dat file in the current directory first using

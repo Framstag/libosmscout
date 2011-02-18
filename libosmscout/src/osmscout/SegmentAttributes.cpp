@@ -23,7 +23,7 @@
 #include <cmath>
 #include <limits>
 
-#include <osmscout/Util.h>
+#include <osmscout/util/String.h>
 
 namespace osmscout {
 

@@ -30,6 +30,8 @@
 
 #include <osmscout/StyleConfigLoader.h>
 
+#include <osmscout/util/StopClock.h>
+
 #include <Lum/Base/String.h>
 
 #if defined(LUM_HAVE_LIB_CAIRO)

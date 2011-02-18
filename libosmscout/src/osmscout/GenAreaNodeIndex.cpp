@@ -27,7 +27,10 @@
 #include <osmscout/FileWriter.h>
 #include <osmscout/Node.h>
 #include <osmscout/Tiles.h>
+
 #include <osmscout/Util.h>
+
+#include <osmscout/util/String.h>
 
 namespace osmscout {
 

@@ -23,7 +23,8 @@
 #include <osmscout/FileScanner.h>
 #include <osmscout/NumericIndex.h>
 #include <osmscout/Way.h>
-#include <osmscout/Util.h>
+
+#include <osmscout/util/StopClock.h>
 
 /**
   Sequentially read the ways.dat file in the current directory to collect

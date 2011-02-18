@@ -23,7 +23,8 @@
 #include <osmscout/FileScanner.h>
 #include <osmscout/Way.h>
 #include <osmscout/WayDataFile.h>
-#include <osmscout/Util.h>
+
+#include <osmscout/util/StopClock.h>
 
 static size_t retryCount = 20;
 

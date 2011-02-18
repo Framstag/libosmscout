@@ -32,7 +32,7 @@
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
   level directory):
 
-  src/DrawMapQt ../TravelJinni/ ../TravelJinni/standard.oss.xml 640 480 7.13 50.69 10000 test.png
+  src/DrawMapQt ../TravelJinni/ ../TravelJinni/standard.oss 640 480 7.13 50.69 10000 test.png
 */
 
 int main(int argc, char* argv[])

@@ -26,13 +26,14 @@
 #include <osmscout/Database.h>
 #include <osmscout/MapPainterQt.h>
 #include <osmscout/StyleConfigLoader.h>
-#include <osmscout/Util.h>
+
+#include <osmscout/util/StopClock.h>
 
 /*
   Example for the germany.osm, show germany overview, then zooms into Bonn city
   and then zoom into Dortmund city and then zomm into München overview.
 
-  ./ResourceConsumptionQt ../../TravelJinni/ ../../TravelJinni/standard.oss.xml 640 480 51.1924, 10.4567 32 50.7345, 7.09993 32768  51.5114, 7.46517 32768 48.1061 11.6186  1024
+  ./ResourceConsumptionQt ../../TravelJinni/ ../../TravelJinni/standard.oss 640 480 51.1924, 10.4567 32 50.7345, 7.09993 32768  51.5114, 7.46517 32768 48.1061 11.6186  1024
 */
 
 struct Action

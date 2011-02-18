@@ -23,7 +23,10 @@
 #include <iostream>
 
 #include <osmscout/Import.h>
+
 #include <osmscout/Util.h>
+
+#include <osmscout/util/String.h>
 
 void DumpHelp(osmscout::ImportParameter& parameter)
 {

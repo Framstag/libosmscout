@@ -1,5 +1,8 @@
 nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/private/CoreImportExport.h \
+                        osmscout/util/Geometry.h \
+                        osmscout/util/StopClock.h \
+                        osmscout/util/String.h \
                         osmscout/CoreFeatures.h \
                         osmscout/Types.h \
                         osmscout/Util.h \

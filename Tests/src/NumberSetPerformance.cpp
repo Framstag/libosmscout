@@ -23,7 +23,10 @@
 #include <vector>
 
 #include <osmscout/TypeConfig.h>
+
 #include <osmscout/Util.h>
+
+#include <osmscout/util/StopClock.h>
 
 /**
   Generate a number of random potential node ids in the range 0...max(long)

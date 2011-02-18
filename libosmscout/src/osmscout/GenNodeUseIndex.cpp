@@ -24,8 +24,11 @@
 #include <osmscout/FileScanner.h>
 #include <osmscout/FileWriter.h>
 #include <osmscout/RawNode.h>
-#include <osmscout/Util.h>
 #include <osmscout/Way.h>
+
+#include <osmscout/Util.h>
+
+#include <osmscout/util/String.h>
 
 namespace osmscout {
 

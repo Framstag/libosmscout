@@ -21,6 +21,9 @@ AC_ARG_WITH(protoc,
 
 AC_SUBST(protoc)
 AC_TYPE_SIZE_T
+
+AC_CHECK_SIZEOF([wchar_t])
+
 AC_CHECK_HEADERS([sys/time.h])
 
 AC_CHECK_FUNCS([mmap])

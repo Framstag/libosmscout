@@ -26,11 +26,12 @@
 #include <osmscout/RawRelation.h>
 #include <osmscout/RawWay.h>
 
-#include <osmscout/Util.h>
-
 #include <osmscout/DataFile.h>
 
 #include <osmscout/Relation.h>
+
+#include <osmscout/Util.h>
+#include <osmscout/util/Geometry.h>
 
 namespace osmscout {
 

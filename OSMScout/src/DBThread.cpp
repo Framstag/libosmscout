@@ -25,6 +25,8 @@
 
 #include <osmscout/StyleConfigLoader.h>
 
+#include <osmscout/util/StopClock.h>
+
 DBThread dbThread;
 
 DBThread::DBThread()

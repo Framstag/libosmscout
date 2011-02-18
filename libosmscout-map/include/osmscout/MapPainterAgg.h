@@ -23,12 +23,17 @@
 #include <climits>
 #include <cstdlib>
 
-#include <agg2/agg_rendering_buffer.h>
+#include <agg2/agg_conv_curve.h>
+#include <agg2/agg_conv_contour.h>
 #include <agg2/agg_pixfmt_rgb.h>
-#include <agg2/agg_renderer_base.h>
 #include <agg2/agg_rasterizer_scanline_aa.h>
-#include <agg2/agg_scanline_p.h>
+#include <agg2/agg_renderer_base.h>
+#include <agg2/agg_rendering_buffer.h>
 #include <agg2/agg_renderer_scanline.h>
+#include <agg2/agg_scanline_p.h>
+
+// TODO: This one is likely not available under Windows!
+#include <agg2/agg_font_freetype.h>
 
 #include <osmscout/Private/MapImportExport.h>
 
@@ -38,13 +43,51 @@ namespace osmscout {
 
   class OSMSCOUT_MAP_API MapPainterAgg : public MapPainter
   {
-  private:
-    agg::pixfmt_rgb24                                                       *pf;
-    agg::renderer_base<agg::pixfmt_rgb24>                                   *renderer_base;
-    agg::rasterizer_scanline_aa<>                                           *rasterizer;
-    agg::scanline_p8                                                        *scanlineP8;
-    agg::renderer_scanline_aa_solid<agg::renderer_base<agg::pixfmt_rgb24> > *renderer_aa;
+  public:
+    typedef agg::pixfmt_rgb24                                  AggPixelFormat;
 
+  private:
+    typedef agg::renderer_base<AggPixelFormat>                 AggRenderBase;
+    typedef agg::rasterizer_scanline_aa<>                      AggScanlineRasterizer;
+    typedef agg::scanline_p8                                   AggScanline;
+    typedef agg::renderer_scanline_aa_solid<AggRenderBase>     AggScanlineRendererAA;
+    typedef agg::renderer_scanline_bin_solid<AggRenderBase>    AggScanlineRendererBin;
+
+    typedef agg::font_engine_freetype_int32                    AggFontEngine;
+    typedef agg::font_cache_manager<AggFontEngine>             AggFontManager;
+    typedef agg::conv_curve<AggFontManager::path_adaptor_type> AggTextCurveConverter;
+    typedef agg::conv_contour<AggTextCurveConverter>           AggTextContourConverter;
+
+  private:
+    AggPixelFormat                                                           *pf;
+    AggRenderBase                                                            *renderer_base;
+    AggScanlineRasterizer                                                    *rasterizer;
+    AggScanline                                                              *scanlineP8;
+    AggScanlineRendererAA  *renderer_aa;
+    AggScanlineRendererBin *renderer_bin;
+    AggFontEngine                                          *fontEngine;
+    AggFontManager                 *fontCacheManager;
+    AggTextCurveConverter *convTextCurves;
+    AggTextContourConverter *convTextContours;
+
+  private:
+    void SetFont(const MapParameter& parameter,
+                 double size);
+
+    void SetOutlineFont(const MapParameter& parameter,
+                        double size);
+
+    void GetTextDimension(const std::wstring& text,
+                          double& width,
+                          double& height);
+    void DrawText(double x,
+                  double y,
+                  const std::wstring& text);
+
+    void DrawOutlineText(double x,
+                         double y,
+                         const std::wstring& text,
+                         double width);
 
   protected:
     bool HasIcon(const StyleConfig& styleConfig,
@@ -115,7 +158,7 @@ namespace osmscout {
                  const Projection& projection,
                  const MapParameter& parameter,
                  const MapData& data,
-                 agg::pixfmt_rgb24* pf);
+                 AggPixelFormat* pf);
   };
 }
 

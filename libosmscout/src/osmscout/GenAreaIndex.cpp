@@ -31,6 +31,9 @@
 
 #include <osmscout/Util.h>
 
+#include <osmscout/util/Geometry.h>
+#include <osmscout/util/String.h>
+
 namespace osmscout {
 
   struct AreaLeaf

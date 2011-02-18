@@ -28,7 +28,10 @@
 #include <osmscout/Tiles.h>
 #include <osmscout/RawNode.h>
 #include <osmscout/Node.h>
+
 #include <osmscout/Util.h>
+
+#include <osmscout/util/String.h>
 
 namespace osmscout {
 

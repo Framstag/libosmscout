@@ -25,10 +25,13 @@
 #include <osmscout/RawNode.h>
 #include <osmscout/RawRelation.h>
 #include <osmscout/RawWay.h>
-#include <osmscout/Util.h>
 #include <osmscout/Way.h>
 
-#include <osmscout/DataFile.h>
+#include <osmscout/Util.h>
+
+#include <osmscout/util/StopClock.h>
+#include <osmscout/util/String.h>
+
 namespace osmscout {
 
   static size_t distributionGranuality =  100000;
