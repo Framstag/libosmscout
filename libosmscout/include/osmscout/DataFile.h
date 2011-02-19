@@ -23,12 +23,12 @@
 #include <set>
 #include <vector>
 
-#include <osmscout/FileScanner.h>
 #include <osmscout/NumericIndex.h>
 
 #include <osmscout/Util.h>
 
 #include <osmscout/util/Cache.h>
+#include <osmscout/util/FileScanner.h>
 
 namespace osmscout {
 

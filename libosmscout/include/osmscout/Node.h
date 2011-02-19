@@ -22,10 +22,11 @@
 
 #include <vector>
 
-#include <osmscout/FileScanner.h>
-#include <osmscout/FileWriter.h>
 #include <osmscout/Tag.h>
 #include <osmscout/TypeConfig.h>
+
+#include <osmscout/util/FileScanner.h>
+#include <osmscout/util/FileWriter.h>
 
 namespace osmscout {
 

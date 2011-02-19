@@ -22,13 +22,13 @@
 
 #include <vector>
 
-// Index
-#include <osmscout/FileScanner.h>
 #include <osmscout/TypeConfig.h>
 
-#include <osmscout/util/Cache.h>
-#include <osmscout/util/String.h>
 #include <osmscout/Util.h>
+
+#include <osmscout/util/Cache.h>
+#include <osmscout/util/FileScanner.h>
+#include <osmscout/util/String.h>
 
 namespace osmscout {
 

@@ -19,8 +19,9 @@
 
 #include <osmscout/GenTypeDat.h>
 
-#include <osmscout/FileWriter.h>
 #include <osmscout/Util.h>
+
+#include <osmscout/util/FileWriter.h>
 
 namespace osmscout {
 
