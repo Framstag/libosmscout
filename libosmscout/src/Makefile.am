@@ -14,6 +14,7 @@ libosmscout_la_LDFLAGS  = $(XML2_LIBS) \
 
 libosmscout_la_SOURCES= osmscout/util/Geometry.cpp \
                         osmscout/util/NumberSet.cpp \
+                        osmscout/util/Reference.cpp \
                         osmscout/util/StopClock.cpp \
                         osmscout/util/String.cpp \
                         osmscout/Types.cpp \
