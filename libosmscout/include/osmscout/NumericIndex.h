@@ -22,13 +22,13 @@
 
 #include <vector>
 
-// Index
-#include <osmscout/Cache.h>
-#include <osmscout/FileScanner.h>
 #include <osmscout/TypeConfig.h>
 
-#include <osmscout/util/String.h>
 #include <osmscout/Util.h>
+
+#include <osmscout/util/Cache.h>
+#include <osmscout/util/FileScanner.h>
+#include <osmscout/util/String.h>
 
 namespace osmscout {
 
@@ -43,22 +43,27 @@ namespace osmscout {
     /**
       an individual index entry.
       */
-    struct IndexEntry
+    struct Entry
     {
       Id         startId;
       FileOffset fileOffset;
     };
 
-    typedef Cache<Id,std::vector<IndexEntry> > PageCache;
+    struct Page
+    {
+      std::vector<Entry> entries;
+    };
+
+    typedef Cache<Id,Page> PageCache;
 
     /**
       Returns the size of a individual cache entry
       */
     struct NumericIndexCacheValueSizer : public PageCache::ValueSizer
     {
-      unsigned long GetSize(const std::vector<IndexEntry>& value) const
+      unsigned long GetSize(const Page& value) const
       {
-        return sizeof(value)+sizeof(IndexEntry)*value.size();
+        return sizeof(value)+sizeof(Entry)*value.entries.size();
       }
     };
 
@@ -71,14 +76,12 @@ namespace osmscout {
     uint32_t                       levels;
     std::vector<uint32_t>          pageCounts;
     char                           *buffer;
-    std::vector<IndexEntry>        root;
+    Page                           root;
     mutable std::vector<PageCache> leafs;
 
   private:
-    size_t GetPageIndex(const std::vector<IndexEntry>& index,
-                        Id id) const;
-    bool ReadPage(FileOffset offset,
-                  std::vector<IndexEntry>& index) const;
+    size_t GetPageIndex(const Page& page, Id id) const;
+    bool ReadPage(FileOffset offset, Page& page) const;
 
   public:
     NumericIndex(const std::string& filename,
@@ -114,10 +117,9 @@ namespace osmscout {
     Binary search for index page for given id
     */
   template <class N, class T>
-  inline size_t NumericIndex<N,T>::GetPageIndex(const std::vector<IndexEntry>& index,
-                                                Id id) const
+  inline size_t NumericIndex<N,T>::GetPageIndex(const Page& page, Id id) const
   {
-    int size=index.size();
+    int size=page.entries.size();
 
     if (size>0) {
       int left=0;
@@ -126,11 +128,11 @@ namespace osmscout {
 
       while (left<=right) {
         mid=(left+right)/2;
-        if (index[mid].startId<=id &&
-            (mid+1>=size || index[mid+1].startId>id)) {
+        if (page.entries[mid].startId<=id &&
+            (mid+1>=size || page.entries[mid+1].startId>id)) {
           return mid;
         }
-        else if (index[mid].startId<id) {
+        else if (page.entries[mid].startId<id) {
           left=mid+1;
         }
         else {
@@ -143,14 +145,9 @@ namespace osmscout {
   }
 
   template <class N, class T>
-  inline bool NumericIndex<N,T>::ReadPage(FileOffset offset,
-                                          std::vector<IndexEntry>& index) const
+  inline bool NumericIndex<N,T>::ReadPage(FileOffset offset, Page& page) const
   {
-    FileOffset currentPos;
-    Id         sio=0;
-    FileOffset poo=0;
-
-    index.clear();
+    page.entries.clear();
 
     if (!scanner.IsOpen() &&
         !scanner.Open(filename)) {
@@ -160,19 +157,36 @@ namespace osmscout {
 
     scanner.SetPos(offset);
 
-    while (scanner.GetPos(currentPos) &&
-           currentPos<offset+(FileOffset)pageSize) {
-      IndexEntry entry;
+    if (!scanner.Read(buffer,pageSize)) {
+      std::cerr << "Cannot read index page from file '" << filename << "'!" << std::endl;
+      return false;
+    }
+
+    size_t     currentPos=0;
+    Id         sio=0;
+    FileOffset poo=0;
+
+    while (currentPos<pageSize &&
+           buffer[currentPos]!=0) {
+      uint32_t   data;
+      size_t     bytes;
       Id         si;
       FileOffset po;
+      Entry      entry;
 
-      scanner.ReadNumber(si);
+      DecodeNumber(&buffer[currentPos],
+                   data,
+                   bytes);
 
-      if (si==0)  {
-        return !scanner.HasError();
-      }
+      si=(Id)data;
+      currentPos+=bytes;
 
-      scanner.ReadNumber(po);
+      DecodeNumber(&buffer[currentPos],
+                   data,
+                   bytes);
+
+      po=(FileOffset)data;
+      currentPos+=bytes;
 
       sio+=si;
       poo+=po;
@@ -180,7 +194,7 @@ namespace osmscout {
       entry.startId=sio;
       entry.fileOffset=poo;
 
-      index.push_back(entry);
+      page.entries.push_back(entry);
     }
 
     return !scanner.HasError();
@@ -224,7 +238,7 @@ namespace osmscout {
 
     std::cout << entries << " entries to index, " << levels << " levels, pageSize " << pageSize << ", cache size " << cacheSize << std::endl;
 
-    root.reserve(pageSize);
+    root.entries.reserve(pageSize);
 
     ReadPage(lastLevelPageStart,root);
 
@@ -264,13 +278,13 @@ namespace osmscout {
          ++id) {
       size_t r=GetPageIndex(root,*id);
 
-      if (r>=root.size()) {
+      if (r>=root.entries.size()) {
         //std::cerr << "Id " << *id << " not found in root index!" << std::endl;
         continue;
       }
 
-      Id         startId=root[r].startId;
-      FileOffset offset=root[r].fileOffset;
+      Id         startId=root.entries[r].startId;
+      FileOffset offset=root.entries[r].fileOffset;
       bool       error=false;
 
       for (size_t level=0; level<=levels-2 && !error; level++) {
@@ -281,21 +295,21 @@ namespace osmscout {
 
           cacheRef=leafs[level].SetEntry(cacheEntry);
 
-          cacheRef->value.reserve(pageSize);
+          cacheRef->value.entries.reserve(pageSize);
 
           ReadPage(offset,cacheRef->value);
         }
 
         size_t i=GetPageIndex(cacheRef->value,*id);
 
-        if (i>=cacheRef->value.size()) {
+        if (i>=cacheRef->value.entries.size()) {
           //std::cerr << "Id " << *id << " not found in index level " << level+2 << "!" << std::endl;
           error=true;
           continue;
         }
 
-        startId=cacheRef->value[i].startId;
-        offset=cacheRef->value[i].fileOffset;
+        startId=cacheRef->value.entries[i].startId;
+        offset=cacheRef->value.entries[i].fileOffset;
       }
 
       if (!error &&
@@ -313,8 +327,8 @@ namespace osmscout {
     size_t memory=0;
     size_t entries=0;
 
-    entries+=root.size();
-    memory+=root.size()*sizeof(IndexEntry);
+    entries+=root.entries.size();
+    memory+=root.entries.size()*sizeof(Entry);
 
     for (size_t i=0; i<leafs.size(); i++) {
       entries+=leafs[i].GetSize();

@@ -20,9 +20,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <list>
+#include <string>
 #include <vector>
 
-#include <osmscout/FileScanner.h>
+#include <stdint.h>
+
 #include <osmscout/GroundTile.h>
 
 namespace osmscout {

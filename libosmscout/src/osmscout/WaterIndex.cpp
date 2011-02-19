@@ -22,6 +22,8 @@
 #include <cmath>
 #include <iostream>
 
+#include <osmscout/util/FileScanner.h>
+
 namespace osmscout {
 
   WaterIndex::WaterIndex()

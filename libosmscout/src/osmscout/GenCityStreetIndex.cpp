@@ -27,8 +27,6 @@
 #include <map>
 #include <set>
 
-#include <osmscout/FileWriter.h>
-
 #include <osmscout/Node.h>
 #include <osmscout/Point.h>
 #include <osmscout/Relation.h>
@@ -37,6 +35,8 @@
 
 #include <osmscout/Util.h>
 
+#include <osmscout/util/FileScanner.h>
+#include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/String.h>

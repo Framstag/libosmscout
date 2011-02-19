@@ -22,10 +22,9 @@
 #include <cassert>
 #include <iostream>
 
-#include <osmscout/FileScanner.h>
-
 #include <osmscout/Util.h>
 
+#include <osmscout/util/FileScanner.h>
 #include <osmscout/util/String.h>
 
 namespace osmscout {

@@ -22,12 +22,12 @@
 #include <cstdio>
 #include <iostream>
 
-#include <osmscout/Util.h>
-
 #include <osmscout/ost/Parser.h>
 #include <osmscout/ost/Scanner.h>
 
-#include <osmscout/FileScanner.h>
+#include <osmscout/Util.h>
+
+#include <osmscout/util/FileScanner.h>
 
 #include <iostream>
 namespace osmscout {

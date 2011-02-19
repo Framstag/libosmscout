@@ -20,9 +20,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/FileScanner.h>
-#include <osmscout/FileWriter.h>
 #include <osmscout/TypeConfig.h>
+
+#include <osmscout/util/FileScanner.h>
+#include <osmscout/util/FileWriter.h>
 
 namespace osmscout {
 

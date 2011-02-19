@@ -23,13 +23,13 @@
 #include <map>
 #include <set>
 
-#include <osmscout/FileScanner.h>
-#include <osmscout/FileWriter.h>
 #include <osmscout/Node.h>
 #include <osmscout/Tiles.h>
 
 #include <osmscout/Util.h>
 
+#include <osmscout/util/FileScanner.h>
+#include <osmscout/util/FileWriter.h>
 #include <osmscout/util/String.h>
 
 namespace osmscout {

@@ -12,7 +12,10 @@ libosmscout_la_LDFLAGS  = $(XML2_LIBS) \
                           $(PROTOBUF_LIBS) \
                           $(ZLIB_LIBS)
 
-libosmscout_la_SOURCES= osmscout/util/Geometry.cpp \
+libosmscout_la_SOURCES= osmscout/util/Cache.cpp \
+                        osmscout/util/FileScanner.cpp \
+                        osmscout/util/FileWriter.cpp \
+                        osmscout/util/Geometry.cpp \
                         osmscout/util/NumberSet.cpp \
                         osmscout/util/Reference.cpp \
                         osmscout/util/StopClock.cpp \
@@ -20,9 +23,6 @@ libosmscout_la_SOURCES= osmscout/util/Geometry.cpp \
                         osmscout/Types.cpp \
                         osmscout/Util.cpp \
                         osmscout/Progress.cpp \
-                        osmscout/FileScanner.cpp \
-                        osmscout/FileWriter.cpp \
-                        osmscout/Cache.cpp \
                         osmscout/StyleConfig.cpp \
                         osmscout/StyleConfigLoader.cpp \
                         osmscout/TypeConfig.cpp \

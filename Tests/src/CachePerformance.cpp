@@ -20,10 +20,10 @@
 #include <cstdlib>
 #include <iostream>
 
-#include <osmscout/FileScanner.h>
 #include <osmscout/Way.h>
 #include <osmscout/WayDataFile.h>
 
+#include <osmscout/util/FileScanner.h>
 #include <osmscout/util/StopClock.h>
 
 /**

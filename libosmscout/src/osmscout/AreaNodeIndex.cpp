@@ -25,8 +25,6 @@
 #include <iostream>
 #include <map>
 
-#include <osmscout/FileScanner.h>
-
 namespace osmscout {
 
   AreaNodeIndex::Leaf::Leaf()
