@@ -146,10 +146,6 @@ namespace osmscout {
   inline bool NumericIndex<N,T>::ReadPage(FileOffset offset,
                                           std::vector<IndexEntry>& index) const
   {
-    FileOffset currentPos;
-    Id         sio=0;
-    FileOffset poo=0;
-
     index.clear();
 
     if (!scanner.IsOpen() &&
@@ -160,19 +156,36 @@ namespace osmscout {
 
     scanner.SetPos(offset);
 
-    while (scanner.GetPos(currentPos) &&
-           currentPos<offset+(FileOffset)pageSize) {
-      IndexEntry entry;
+    if (!scanner.Read(buffer,pageSize)) {
+      std::cerr << "Cannot read index page from file '" << filename << "'!" << std::endl;
+      return false;
+    }
+
+    size_t     currentPos=0;
+    Id         sio=0;
+    FileOffset poo=0;
+
+    while (currentPos<pageSize &&
+           buffer[currentPos]!=0) {
+      uint32_t   data;
+      size_t     bytes;
       Id         si;
       FileOffset po;
+      IndexEntry entry;
 
-      scanner.ReadNumber(si);
+      DecodeNumber(&buffer[currentPos],
+                   data,
+                   bytes);
 
-      if (si==0)  {
-        return !scanner.HasError();
-      }
+      si=(Id)data;
+      currentPos+=bytes;
 
-      scanner.ReadNumber(po);
+      DecodeNumber(&buffer[currentPos],
+                   data,
+                   bytes);
+
+      po=(FileOffset)data;
+      currentPos+=bytes;
 
       sio+=si;
       poo+=po;
