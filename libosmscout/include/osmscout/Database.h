@@ -23,8 +23,7 @@
 #include <list>
 #include <set>
 
-#include <osmscout/Cache.h>
-
+// Type and style sheet configuration
 #include <osmscout/StyleConfig.h>
 #include <osmscout/TypeConfig.h>
 
@@ -51,6 +50,8 @@
 #include <osmscout/WaterIndex.h>
 
 #include <osmscout/Route.h>
+
+#include <osmscout/util/Cache.h>
 
 namespace osmscout {
 

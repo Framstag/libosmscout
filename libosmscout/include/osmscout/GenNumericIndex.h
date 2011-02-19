@@ -23,7 +23,6 @@
 #include <vector>
 
 // Index
-#include <osmscout/Cache.h>
 #include <osmscout/FileScanner.h>
 
 // Index generation
@@ -33,6 +32,7 @@
 
 #include <osmscout/Util.h>
 
+#include <osmscout/util/Cache.h>
 #include <osmscout/util/String.h>
 
 namespace osmscout {

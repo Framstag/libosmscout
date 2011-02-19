@@ -22,9 +22,10 @@
 
 #include <set>
 
-#include <osmscout/Cache.h>
 #include <osmscout/FileScanner.h>
 #include <osmscout/StyleConfig.h>
+
+#include <osmscout/util/Cache.h>
 
 namespace osmscout {
 

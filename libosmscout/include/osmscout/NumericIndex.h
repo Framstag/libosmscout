@@ -23,10 +23,10 @@
 #include <vector>
 
 // Index
-#include <osmscout/Cache.h>
 #include <osmscout/FileScanner.h>
 #include <osmscout/TypeConfig.h>
 
+#include <osmscout/util/Cache.h>
 #include <osmscout/util/String.h>
 #include <osmscout/Util.h>
 

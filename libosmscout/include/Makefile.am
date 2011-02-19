@@ -1,5 +1,6 @@
 nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/private/CoreImportExport.h \
+                        osmscout/util/Cache.h \
                         osmscout/util/Geometry.h \
                         osmscout/util/NumberSet.h \
                         osmscout/util/Reference.h \
@@ -11,7 +12,6 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/Progress.h \
                         osmscout/FileScanner.h \
                         osmscout/FileWriter.h \
-                        osmscout/Cache.h \
                         osmscout/StyleConfig.h \
                         osmscout/StyleConfigLoader.h \
                         osmscout/TypeConfig.h \
