@@ -45,7 +45,7 @@ namespace osmscout {
   private:
     struct Region
     {
-      Reference   reference;       //! Reference to the object defining the region
+      ObjectRef   reference;       //! Reference to the object defining the region
       FileOffset  offset;          //! Offset into the region datafile
       std::string name;            //! name of the region
       std::string hash;            //! internal has for the name of the region

@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_REFERENCE_H
-#define OSMSCOUT_REFERENCE_H
+#ifndef OSMSCOUT_OBJECTREF_H
+#define OSMSCOUT_OBJECTREF_H
 
 /*
   This source is part of the libosmscout library
@@ -32,21 +32,21 @@ namespace osmscout {
     refRelation = 4
   };
 
-  class OSMSCOUT_API Reference
+  class OSMSCOUT_API ObjectRef
   {
   public:
     Id      id;
     RefType type;
 
   public:
-    inline Reference()
+    inline ObjectRef()
     : id(0),
       type(refNone)
     {
       // no code
     }
 
-    inline Reference(Id id, RefType type)
+    inline ObjectRef(Id id, RefType type)
     : id(id),
       type(type)
     {
@@ -69,12 +69,12 @@ namespace osmscout {
       return type;
     }
 
-    inline bool operator<(const Reference& reference) const
+    inline bool operator<(const ObjectRef& reference) const
     {
       return type<reference.type || (type==reference.type &&  id<reference.id);
     }
 
-    inline bool operator==(const Reference& reference) const
+    inline bool operator==(const ObjectRef& reference) const
     {
       return type==reference.type && id==reference.id;
     }

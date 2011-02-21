@@ -20,7 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/Reference.h>
+#include <osmscout/ObjectRef.h>
 
 namespace osmscout {
   /**
@@ -35,7 +35,7 @@ namespace osmscout {
    */
   struct OSMSCOUT_API AdminRegion
   {
-    Reference   reference;       //! Reference to the object defining the region
+    ObjectRef   reference;       //! Reference to the object defining the region
     FileOffset  offset;          //! Offset into the region datafile
     std::string name;            //! name of the region
     std::string hash;            //! internal has for the name of the region

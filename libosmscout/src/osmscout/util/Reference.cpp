@@ -21,29 +21,4 @@
 
 namespace osmscout {
 
-  /**
-    Increment the internal reference counter
-  */
-  void Referencable::AddReference()
-  {
-    ++count;
-  }
-
-  /**
-    Decrement the internal reference counter
-  */
-  void Referencable::RemoveReference()
-  {
-    assert(count>0);
-
-    --count;
-    if (count==0) {
-      delete this;
-    }
-  }
-
-  unsigned long Referencable::GetReferenceCount() const
-  {
-    return count;
-  }
 }

@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
 
       std::cout << std::endl;
 
-      for (std::list<osmscout::Reference>::const_iterator reference=location->references.begin();
+      for (std::list<osmscout::ObjectRef>::const_iterator reference=location->references.begin();
           reference!=location->references.end();
           ++reference) {
         std::cout << "     ~ ";
