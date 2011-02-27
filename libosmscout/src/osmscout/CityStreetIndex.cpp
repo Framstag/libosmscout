@@ -122,7 +122,7 @@ namespace osmscout {
                              std::string (*hashFunction) (std::string))
   {
     FileScanner   scanner;
-    std::string   file=path+"/"+"nameregion.idx";
+    std::string   file=AppendFileToDir(path,"nameregion.idx");
 
     this->path=path;
     this->hashFunction=hashFunction;
@@ -199,8 +199,8 @@ namespace osmscout {
       nameHash=(*hashFunction)(name);
     }
 
-    for (std::list<Region>::const_iterator area=this->areas.begin();
-         area!=this->areas.end() && !limitReached;
+    for (std::list<Region>::const_iterator area=areas.begin();
+         area!=areas.end() && !limitReached;
          ++area) {
       bool                   found=false;
       std::string::size_type loc;
@@ -241,7 +241,7 @@ namespace osmscout {
     }
 
     FileScanner scanner;
-    std::string file=path+"/"+"region.dat";
+    std::string file=AppendFileToDir(path,"region.dat");
 
     if (!scanner.Open(file)) {
       std::cerr << "Cannot open file '" << file << "'!" << std::endl;
@@ -288,7 +288,7 @@ namespace osmscout {
     locations.clear();
 
     FileScanner scanner;
-    std::string file=path+"/"+"region.dat";
+    std::string file=AppendFileToDir(path,"region.dat");
 
     if (!scanner.Open(file)) {
       std::cerr << "Cannot open file '" << file << "'!" << std::endl;
