@@ -136,6 +136,8 @@ int main(int argc, char* argv[])
     return 1;
   }
 
+  database.DumpStatistics();
+
   osmscout::StyleConfig styleConfig(database.GetTypeConfig());
 
   if (!osmscout::LoadStyleConfig(style.c_str(),styleConfig)) {
@@ -189,12 +191,17 @@ int main(int argc, char* argv[])
     renderTimer.Stop();
 
     std::cout << "# DB access time " << dbTimer << " render time: " << renderTimer << std::endl;
+    database.DumpStatistics();
   }
-
-  database.DumpStatistics();
 
   delete painter;
   delete pixmap;
+
+  std::cout << "# Press return to flush caches" << std::endl;
+
+  std::cin.get();
+
+  database.FlushCache();
 
   std::cout << "# Press return to end application" << std::endl;
 
