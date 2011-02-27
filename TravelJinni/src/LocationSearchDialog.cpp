@@ -26,6 +26,8 @@
 
 #include <osmscout/Database.h>
 
+#include <osmscout/util/StopClock.h>
+
 LocationSearchDialog::LocationSearchDialog(DatabaseTask* databaseTask)
  : databaseTask(databaseTask),
    okAction(new Lum::Model::Action()),
@@ -125,9 +127,13 @@ void LocationSearchDialog::Search()
   locations.clear();
 
   if (!locationName->Empty()) {
+    osmscout::StopClock stopClock;
+
     databaseTask->GetMatchingAdminRegions(city,regions,50,limitReached);
 
-    std::cout << "Result of search for region " << Lum::Base::WStringToString(city) << ": " << regions.size() << std::endl;
+    stopClock.Stop();
+
+    std::cout << "Number of hits for region " << Lum::Base::WStringToString(city) << ": " << regions.size() << ", time: " << stopClock << std::endl;
 
     if (limitReached) {
       locationsModel->SetEmptyText(L"- too many hits -");
@@ -174,6 +180,7 @@ void LocationSearchDialog::Search()
        region!=regions.end();
        ++region) {
     std::list<osmscout::Location> locs;
+    osmscout::StopClock           stopClock;
 
     databaseTask->GetMatchingLocations(*region,
                                        street,
@@ -181,7 +188,9 @@ void LocationSearchDialog::Search()
                                        50,
                                        limitReached);
 
-    std::cout << "Result of search for street " << Lum::Base::WStringToString(street) << " in region " << region->name << ": " << locs.size() << std::endl;
+    stopClock.Stop();
+
+    std::cout << "Number of hits for location " << Lum::Base::WStringToString(street) << " in region " << region->name << ": " << locs.size() << ", time: " << stopClock << std::endl;
 
     if (limitReached) {
       std::cout << "Limit reached." << std::endl;
