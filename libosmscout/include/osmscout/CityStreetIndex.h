@@ -58,19 +58,39 @@ namespace osmscout {
       std::list<Id> ways;   //! List of way ids that belong to this location
     };
 
+    struct LocationVisitor
+    {
+      std::string               name;
+      bool                      startWith;
+      size_t                    limit;
+      bool                      limitReached;
+
+      std::string               nameHash;
+      std::string               (*hashFunction)(std::string);
+
+      std::list<Location>       locations;
+
+      FileScanner&              scanner;
+
+      LocationVisitor(FileScanner& scanner);
+
+      bool Visit(const std::string& locationName,
+                 const Loc &location);
+    };
+
   private:
     std::string                       path;
 
     std::list<Region>                 areas;
-    mutable FileOffset                region;
-    mutable bool                      regionLoaded;
-    mutable std::map<std::string,Loc> locations;
 
     std::string            (*hashFunction)(std::string);
 
   private:
-    bool LoadRegion(FileScanner& scanner) const;
-    bool LoadRegion(FileScanner& scanner, FileOffset offset) const;
+    bool LoadRegion(FileScanner& scanner,
+                    LocationVisitor& visitor) const;
+    bool LoadRegion(FileScanner& scanner,
+                    FileOffset offset,
+                    LocationVisitor& visitor) const;
 
   public:
     CityStreetIndex();

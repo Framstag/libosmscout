@@ -23,12 +23,100 @@
 #include <iostream>
 
 #include <osmscout/Util.h>
+#include <osmscout/util/StopClock.h>
 
 namespace osmscout {
 
+  CityStreetIndex::LocationVisitor::LocationVisitor(FileScanner& scanner)
+  : scanner(scanner)
+  {
+    // no code
+  }
+
+  bool CityStreetIndex::LocationVisitor::Visit(const std::string& locationName,
+                                               const Loc &loc)
+  {
+    std::string::size_type pos;
+    bool                   found;
+
+    if (hashFunction!=NULL) {
+      std::string hash=(*hashFunction)(locationName);
+
+      if (!hash.empty()) {
+        pos=hash.find(nameHash);
+      }
+      else {
+        pos=locationName.find(name);
+      }
+    }
+    else {
+      pos=locationName.find(name);
+    }
+
+    if (startWith) {
+      found=pos==0;
+    }
+    else {
+      found=pos!=std::string::npos;
+    }
+
+    if (!found) {
+      return true;
+    }
+
+    if (locations.size()>=limit) {
+      limitReached=true;
+
+      return false;
+    }
+
+    Location location;
+
+    location.name=locationName;
+
+    for (std::list<Id>::const_iterator i=loc.nodes.begin();
+         i!=loc.nodes.end();
+         ++i) {
+      location.references.push_back(ObjectRef(*i,refNode));
+    }
+
+    for (std::list<Id>::const_iterator i=loc.ways.begin();
+         i!=loc.ways.end();
+         ++i) {
+      location.references.push_back(ObjectRef(*i,refWay));
+    }
+
+    // Build up path for each hit by following
+    // the parent relation up to the top of the tree.
+
+    FileOffset offset=loc.offset;
+
+    while (!scanner.HasError() &&
+           offset!=0) {
+      std::string name;
+
+      scanner.SetPos(offset);
+      scanner.Read(name);
+      scanner.ReadNumber(offset);
+
+      if (location.path.empty()) {
+        // We dot not want something like "'Dortmund' in 'Dortmund'"!
+        if (name!=locationName) {
+          location.path.push_back(name);
+        }
+      }
+      else {
+        location.path.push_back(name);
+      }
+    }
+
+    locations.push_back(location);
+
+    return true;
+  }
+
   CityStreetIndex::CityStreetIndex()
-   : regionLoaded(false),
-     hashFunction(NULL)
+   : hashFunction(NULL)
   {
     // no code
   }
@@ -38,84 +126,115 @@ namespace osmscout {
     // no code
   }
 
-  bool CityStreetIndex::LoadRegion(FileScanner& scanner) const
+  bool CityStreetIndex::LoadRegion(FileScanner& scanner,
+                                   LocationVisitor& visitor) const
   {
-    std::string name;
-    FileOffset  offset;
-    FileOffset  parentOffset;
-    uint32_t    childrenCount;
-    uint32_t    nodeCount;
-    uint32_t    wayCount;
+    std::string               name;
+    FileOffset                offset;
+    FileOffset                parentOffset;
+    uint32_t                  childrenCount;
+    uint32_t                  nodeCount;
+    uint32_t                  wayCount;
+    std::map<std::string,Loc> locations;
 
-    if (!scanner.GetPos(offset)) {
+    if (!scanner.GetPos(offset) ||
+      !scanner.Read(name) ||
+      !scanner.ReadNumber(parentOffset)) {
       return false;
     }
 
-    scanner.Read(name);
-    scanner.ReadNumber(parentOffset);
-
-    scanner.ReadNumber(childrenCount);
-    for (size_t i=0; i<childrenCount; i++) {
-      if (!LoadRegion(scanner)) {
-        return false;
-      }
+    if (!scanner.ReadNumber(childrenCount)) {
+      return false;
     }
 
-    scanner.ReadNumber(nodeCount);
+    std::cout << offset << " " << parentOffset << " " <<  name << " " << childrenCount << std::endl;
+
+    for (size_t i=0; i<childrenCount; i++) {
+      std::cout << "Loading child #" << i+1 << " of " << childrenCount << " of " << name << "..." << std::endl;
+      if (!LoadRegion(scanner,visitor)) {
+        return false;
+      }
+      std::cout << "Loading child #" << i+1 << " of " << childrenCount << " done" << std::endl;
+    }
+
+    if (!scanner.ReadNumber(nodeCount)) {
+      return false;
+    }
+
     for (size_t i=0; i<nodeCount; i++) {
       std::string name;
       uint32_t    idCount;
       Id          lastId=0;
 
-      scanner.Read(name);
-      scanner.ReadNumber(idCount);
+      if (!scanner.Read(name) ||
+          !scanner.ReadNumber(idCount)) {
+        return false;
+      }
+
+      locations[name].offset=offset;
 
       for (size_t j=0; j<idCount; j++) {
         Id id;
 
-        scanner.ReadNumber(id);
+        if (!scanner.ReadNumber(id)) {
+          return false;
+        }
 
-        locations[name].offset=offset;
         locations[name].nodes.push_back(id+lastId);
+
         lastId=id;
       }
     }
 
-    scanner.ReadNumber(wayCount);
+    if (!scanner.ReadNumber(wayCount)) {
+      return false;
+    }
+
     for (size_t i=0; i<wayCount; i++) {
       std::string name;
       uint32_t    idCount;
       Id          lastId=0;
 
-      scanner.Read(name);
-      scanner.ReadNumber(idCount);
+      if (!scanner.Read(name) ||
+          !scanner.ReadNumber(idCount)) {
+        return false;
+      }
+
+      locations[name].offset=offset;
 
       for (size_t j=0; j<idCount; j++) {
         Id id;
 
-        scanner.ReadNumber(id);
+        if (!scanner.ReadNumber(id)) {
+          return false;
+        }
 
-        locations[name].offset=offset;
         locations[name].ways.push_back(id+lastId);
+
         lastId=id;
       }
     }
 
-    return true;
+    //std::cout << offset << " " << parentOffset << " " <<  name << " " << locations.size() << " " << childrenCount << " " << nodeCount << " " << wayCount << std::endl;
+
+    for (std::map<std::string,Loc>::const_iterator l=locations.begin();
+         l!=locations.end();
+         ++l) {
+      if (!visitor.Visit(l->first,l->second)) {
+        return true;
+      }
+    }
+
+    return !scanner.HasError();
   }
 
   bool CityStreetIndex::LoadRegion(FileScanner& scanner,
-                                   FileOffset offset) const
+                                   FileOffset offset,
+                                   LocationVisitor& visitor) const
   {
-    locations.clear();
-
     scanner.SetPos(offset);
 
-    LoadRegion(scanner);
-
-    regionLoaded=true;
-
-    return !scanner.HasError();
+    return LoadRegion(scanner,visitor);
   }
 
   bool CityStreetIndex::Load(const std::string& path,
@@ -123,6 +242,7 @@ namespace osmscout {
   {
     FileScanner   scanner;
     std::string   file=AppendFileToDir(path,"nameregion.idx");
+    StopClock     indexLoadTime;
 
     this->path=path;
     this->hashFunction=hashFunction;
@@ -179,6 +299,10 @@ namespace osmscout {
       }
     }
 
+    indexLoadTime.Stop();
+
+    std::cout << "Time for loading tree of regions: " << indexLoadTime << std::endl;
+
     return !scanner.HasError() && scanner.Close();
   }
 
@@ -205,7 +329,10 @@ namespace osmscout {
       bool                   found=false;
       std::string::size_type loc;
 
-      if (hashFunction && !area->hash.empty()) {
+      // Calculate match
+
+      if (hashFunction &&
+          !area->hash.empty()) {
         loc=area->hash.find(nameHash);
       }
       else {
@@ -218,6 +345,8 @@ namespace osmscout {
       else {
         found=loc!=std::string::npos;
       }
+
+      // If match, Add to result
 
       if (found) {
         if (regions.size()>=limit) {
@@ -247,6 +376,9 @@ namespace osmscout {
       std::cerr << "Cannot open file '" << file << "'!" << std::endl;
       return false;
     }
+
+    // If there are results, build up path for each hit by following
+    // the parent relation up to the top of the tree.
 
     for (std::list<AdminRegion>::iterator area=regions.begin();
          area!=regions.end();
@@ -282,11 +414,6 @@ namespace osmscout {
                                              bool& limitReached,
                                              bool startWith) const
   {
-    std::string nameHash;
-
-    limitReached=false;
-    locations.clear();
-
     FileScanner scanner;
     std::string file=AppendFileToDir(path,"region.dat");
 
@@ -295,86 +422,28 @@ namespace osmscout {
       return false;
     }
 
-    if (!regionLoaded || this->region!=region.offset) {
-      if (!LoadRegion(scanner,region.offset) || !regionLoaded) {
-        return false;
-      }
+    LocationVisitor locVisitor(scanner);
+
+    locVisitor.name=name;
+    locVisitor.startWith=startWith;
+    locVisitor.limit=limit;
+    locVisitor.limitReached=false;
+
+    locVisitor.hashFunction=hashFunction;
+
+    if (hashFunction!=NULL) {
+      locVisitor.nameHash=(*hashFunction)(name);
     }
 
-    // if the user supplied a special hash function call it and use the result
-    if (hashFunction) {
-      nameHash=(*hashFunction)(name);
+
+    if (!LoadRegion(locVisitor.scanner,
+                    region.offset,
+                    locVisitor)) {
+      return false;
     }
 
-    for (std::map<std::string,Loc>::const_iterator l=this->locations.begin();
-         l!=this->locations.end() && !limitReached;
-         ++l) {
-      bool                   found=false;
-      std::string::size_type pos;
-      std::string            hash;
-
-      if (hashFunction) {
-          hash=(*hashFunction)(l->first);
-        }
-
-      if (hashFunction && !hash.empty()) {
-        pos=hash.find(nameHash);
-      }
-      else {
-        pos=l->first.find(name);
-      }
-
-      if (startWith) {
-        found=pos==0;
-      }
-      else {
-        found=pos!=std::string::npos;
-      }
-
-      if (found) {
-        if (locations.size()>=limit) {
-          limitReached=true;
-        }
-        else {
-          Location location;
-
-          location.name=l->first;
-
-          for (std::list<Id>::const_iterator i=l->second.nodes.begin();
-               i!=l->second.nodes.end();
-               ++i) {
-            location.references.push_back(ObjectRef(*i,refNode));
-          }
-
-          for (std::list<Id>::const_iterator i=l->second.ways.begin();
-               i!=l->second.ways.end();
-               ++i) {
-            location.references.push_back(ObjectRef(*i,refWay));
-          }
-
-          FileOffset offset=l->second.offset;
-
-          while (offset!=0) {
-            std::string name;
-
-            scanner.SetPos(offset);
-            scanner.Read(name);
-            scanner.ReadNumber(offset);
-
-            if (location.path.empty()) {
-              if (name!=l->first) {
-                location.path.push_back(name);
-              }
-            }
-            else {
-              location.path.push_back(name);
-            }
-          }
-
-          locations.push_back(location);
-        }
-      }
-    }
+    locations=locVisitor.locations;
+    limitReached=locVisitor.limitReached;
 
     return true;
   }
@@ -384,16 +453,8 @@ namespace osmscout {
     size_t memory=0;
 
     memory+=areas.size()*sizeof(AdminRegion);
-    memory+=locations.size()*sizeof(Location);
 
-    for (std::map<std::string,Loc>::const_iterator l=this->locations.begin();
-         l!=this->locations.end();
-         ++l) {
-      memory+=l->second.nodes.size()*sizeof(Id);
-      memory+=l->second.ways.size()*sizeof(Id);
-    }
-
-    std::cout << "AdminRegion size " << areas.size() << ", locations size " << locations.size() << ", memory " << memory << std::endl;
+    std::cout << "AdminRegion size " << areas.size() << ", memory " << memory << std::endl;
   }
 }
 
