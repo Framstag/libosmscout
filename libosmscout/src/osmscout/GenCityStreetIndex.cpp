@@ -346,7 +346,7 @@ namespace osmscout {
       for (size_t i=0; i<indent; i++) {
         std::cout << " ";
       }
-      std::cout << a->name << std::endl;
+      std::cout << a->name << " " << parent.offset << " " << a->offset << " " << a->areas.size() << " " << a->nodes.size() << " " << a->ways.size() << " " << a->locations.size() << std::endl;
 
       for (std::list<Loc>::const_iterator l=a->locations.begin();
            l!=a->locations.end();
@@ -895,10 +895,6 @@ namespace osmscout {
       AddLocationToArea(rootArea,location,node);
     }
 
-    progress.SetAction("Dumping areas");
-
-    DumpArea(rootArea,0);
-
     progress.SetAction("Delete temporary data");
 
     cityNodes.clear();
@@ -1065,6 +1061,10 @@ namespace osmscout {
     if (writer.HasError() || !writer.Close()) {
       return false;
     }
+
+    progress.SetAction("Dumping areas");
+
+    DumpArea(rootArea,0);
 
     //
     // Generate file with all area names, each referencing the areas where it is contained
