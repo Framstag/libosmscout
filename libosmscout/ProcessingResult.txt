@@ -1,0 +1,85 @@
+This document list the files that are processed as part of an import.
+For each file its content is described. Later version of this document
+should also describe the internal format of each of these files. The
+text in the brackets after the files name give information if this file
+is required during import only ("import only") or are also part of the
+official export data ("export").
+
+
+rawnodes.dat (import only):
+ * Raw dump of all nodes in import data
+
+rawnode.idx (import only):
+ * Index by numeric id over all nodes in 'rawnodes.dat'. Required
+   for resolving nodes during way/area and relation preprocessing.
+
+rawways.dat (import only):
+ * Raw dump of all ways and areas in import data
+
+rawway.idx (import only):
+ * Index by numeric id over all ways/areas in 'rawways.dat'.
+   Required for resolving nodes during relation preprocessing.
+
+rawrels.dat (import only):
+ * Raw dump of all relations in import data
+
+nodeuse.idx (import only):
+* index of nodes that areapart of a way/area. Influences
+  drawing of way ends.
+
+wayblack.dat (import only):
+ * List of way ids that are already part of a outer member
+   of a multipolygon region. This ids will not be part of
+   area.idx, because they would then be drawn twice. Once as way
+   and once as part of the relation.
+
+types.dat (export):
+ * Mapping of internal type ids to type names
+ * Mapping of internal tag ids to tag names
+
+bounding.dat(export):
+ * Holds the bounding rectangle of the preprocessed data
+
+nodes.dat (export):
+ * All nodes that have a matching type during preprocessing.
+
+node.idx (export):
+ * Index by numeric id over all nodes in 'nodes.dat'.
+
+ways.dat (export):
+ * All ways/areas that have a matching type during preprocessing.
+
+way.idx (export):
+ * Index by numeric id over all ways/areas in 'ways.dat'.
+
+relations.dat (export):
+ * All relations that have a matching type during preprocessing.
+ * For all relations of type multipolygon members have been
+   merged by type.
+
+relation.idx (export):
+ * Index by numeric id over all relations in 'relations.dat'.
+
+area.idx (export):
+ * Area index returning all ways/areas in a given bounding box
+   that are of a given list of types and (for areas) have at least
+   a given size.
+
+areanode.idx (export):
+ * Area index returning all nodes in a given bounding box
+   that are of a given list of types and.
+
+region.dat (export):
+ * Holds the tree of areas that build up the hierachical
+   administrative regions.
+
+nameregion.idx (export):
+ * Index on top of region.dat to look up administrative
+   areas (e.g. cities) and indexed objects within these areas
+   (e.g. streets).
+
+water.idx (export, unfinished):
+  * Index that for a given region returns tiles that are either
+    of ground type 'water' or of ground type 'land' or ground type
+    'both'. This will in future allow to correctly use the correct
+    background color.
