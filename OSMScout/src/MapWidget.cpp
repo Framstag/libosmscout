@@ -274,7 +274,7 @@ void MapWidget::ZoomOut(double zoomFactor)
   TriggerMapRendering();
 }
 
-void MapWidget::ShowReference(const osmscout::Reference& reference,
+void MapWidget::ShowReference(const osmscout::ObjectRef& reference,
                               const osmscout::Mag& magnification)
 {
   if (reference.GetType()==osmscout::refNode) {

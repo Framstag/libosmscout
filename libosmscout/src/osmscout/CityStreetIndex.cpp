@@ -343,13 +343,13 @@ namespace osmscout {
           for (std::list<Id>::const_iterator i=l->second.nodes.begin();
                i!=l->second.nodes.end();
                ++i) {
-            location.references.push_back(Reference(*i,refNode));
+            location.references.push_back(ObjectRef(*i,refNode));
           }
 
           for (std::list<Id>::const_iterator i=l->second.ways.begin();
                i!=l->second.ways.end();
                ++i) {
-            location.references.push_back(Reference(*i,refWay));
+            location.references.push_back(ObjectRef(*i,refWay));
           }
 
           FileOffset offset=l->second.offset;

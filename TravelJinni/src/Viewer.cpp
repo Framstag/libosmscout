@@ -363,7 +363,7 @@ public:
     Object::Resync(model,msg);
   }
 
-  void ShowReference(const osmscout::Reference& reference,
+  void ShowReference(const osmscout::ObjectRef& reference,
                      const osmscout::Mag& magnification)
   {
     if (reference.GetType()==osmscout::refNode) {

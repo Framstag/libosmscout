@@ -44,7 +44,7 @@ libosmscout_la_SOURCES= osmscout/util/Cache.cpp \
                         osmscout/SegmentAttributes.cpp \
                         osmscout/Tag.cpp \
                         osmscout/Way.cpp \
-                        osmscout/Reference.cpp \
+                        osmscout/ObjectRef.cpp \
                         osmscout/NumericIndex.cpp \
                         osmscout/Import.cpp \
                         osmscout/Preprocess.cpp \

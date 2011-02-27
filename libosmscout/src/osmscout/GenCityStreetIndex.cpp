@@ -28,9 +28,9 @@
 #include <set>
 
 #include <osmscout/Node.h>
+#include <osmscout/ObjectRef.h>
 #include <osmscout/Point.h>
 #include <osmscout/Relation.h>
-#include <osmscout/Reference.h>
 #include <osmscout/Way.h>
 
 #include <osmscout/Util.h>
@@ -48,14 +48,14 @@ namespace osmscout {
     */
   struct Loc
   {
-    Reference              reference;
+    ObjectRef              reference;
     std::string            name;
   };
 
   struct LocRef
   {
     FileOffset             offset;
-    Reference              reference;
+    ObjectRef              reference;
   };
 
   /**
@@ -64,7 +64,7 @@ namespace osmscout {
   struct Area
   {
     FileOffset                           offset;    //! Offset into the index file
-    Reference                            reference; //! The id for this area
+    ObjectRef                            reference; //! The id for this area
     std::string                          name;      //! The name of this area
     std::list<Loc>                       locations; //! Location that are represented by this area
     std::vector<Point>                   area;      //! the geometric area of this area

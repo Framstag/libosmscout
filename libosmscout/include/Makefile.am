@@ -33,7 +33,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/SegmentAttributes.h \
                         osmscout/Tag.h \
                         osmscout/Way.h \
-                        osmscout/Reference.h \
+                        osmscout/ObjectRef.h \
                         osmscout/NumericIndex.h \
                         osmscout/Import.h \
                         osmscout/Preprocess.h \

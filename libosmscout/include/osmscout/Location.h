@@ -20,7 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/Reference.h>
+#include <osmscout/ObjectRef.h>
 
 namespace osmscout {
   /**
@@ -34,7 +34,7 @@ namespace osmscout {
   public:
     std::string            name;
     std::list<std::string> path;
-    std::list<Reference>   references;
+    std::list<ObjectRef>   references;
 
   public:
     Location();

@@ -815,7 +815,7 @@ namespace osmscout {
     double    currentCost;
     double    estimateCost;
     double    overallCost;
-    Reference ref;
+    ObjectRef ref;
     Id        prev;
 
     RNode()
@@ -825,7 +825,7 @@ namespace osmscout {
 
     RNode(Id id,
           double lon, double lat,
-          const Reference& reference,
+          const ObjectRef& reference,
           Id prev)
      : id(id),
        lon(lon),
@@ -1067,7 +1067,7 @@ namespace osmscout {
     RNode node=RNode(startNodeId,
                      startLon,
                      startLat,
-                     Reference(startWayId,refWay),
+                     ObjectRef(startWayId,refWay),
                      0);
 
     node.currentCost=0.0;
@@ -1144,7 +1144,7 @@ namespace osmscout {
             follower.push_back(RNode(currentWay->nodes[i].id,
                                      currentWay->nodes[i].lon,
                                      currentWay->nodes[i].lat,
-                                     Reference(currentWay->GetId(),refWay),
+                                     ObjectRef(currentWay->GetId(),refWay),
                                      current.id));
           }
         }
@@ -1159,7 +1159,7 @@ namespace osmscout {
                 follower.push_back(RNode(currentWay->nodes[i-1].id,
                                          currentWay->nodes[i-1].lon,
                                          currentWay->nodes[i-1].lat,
-                                         Reference(currentWay->GetId(),refWay),
+                                         ObjectRef(currentWay->GetId(),refWay),
                                          current.id));
               }
             }
@@ -1171,7 +1171,7 @@ namespace osmscout {
                 follower.push_back(RNode(currentWay->nodes[i+1].id,
                                          currentWay->nodes[i+1].lon,
                                          currentWay->nodes[i+1].lat,
-                                         Reference(currentWay->GetId(),refWay),
+                                         ObjectRef(currentWay->GetId(),refWay),
                                          current.id));
               }
             }
@@ -1235,7 +1235,7 @@ namespace osmscout {
               follower.push_back(RNode(way->nodes[i].id,
                                        way->nodes[i].lon,
                                        way->nodes[i].lat,
-                                       Reference(way->GetId(),refWay),
+                                       ObjectRef(way->GetId(),refWay),
                                        current.id));
             }
           }
@@ -1252,7 +1252,7 @@ namespace osmscout {
                   follower.push_back(RNode(way->nodes[i-1].id,
                                            way->nodes[i-1].lon,
                                            way->nodes[i-1].lat,
-                                           Reference(way->GetId(),refWay),
+                                           ObjectRef(way->GetId(),refWay),
                                            current.id));
                 }
               }
@@ -1264,7 +1264,7 @@ namespace osmscout {
                   follower.push_back(RNode(way->nodes[i+1].id,
                                            way->nodes[i+1].lon,
                                            way->nodes[i+1].lat,
-                                           Reference(way->GetId(),refWay),
+                                           ObjectRef(way->GetId(),refWay),
                                            current.id));
                 }
               }

@@ -49,13 +49,21 @@ namespace osmscout {
       K key;
       V value;
 
+      CacheEntry(const CacheEntry& entry)
+      : key(entry.key),
+        value(entry.value)
+      {
+        // no code
+      }
+
       CacheEntry(const K& key)
       : key(key)
       {
         // no code
       }
 
-      CacheEntry(const K& key, const V& value)
+      CacheEntry(const K& key,
+                 const V& value)
       : key(key),
         value(value)
       {
@@ -144,30 +152,30 @@ namespace osmscout {
       a reference to the value and the value will moved to the
       front position of the cache to assure FIFO behaviour.
       */
-    bool GetEntry(const K& key, CacheRef& reference)
+    bool GetEntry(const K& key,
+                  CacheRef& reference)
     {
-      unsigned long index=key%map.size();
+      unsigned long index(key%map.size());
+      CacheRefList  *refList=&map[index];
 
-      typename CacheRefList::iterator iter=map[index].begin();
-      while (iter!=map[index].end() &&
-             (*iter)->key!=key) {
-        ++iter;
+      for (typename CacheRefList::iterator iter(refList->begin());
+           iter!=refList->end();
+           ++iter) {
+        if ((*iter)->key==key) {
+          // Move key/value to the start of the order list
+          order.splice(order.begin(),order,*iter);
+
+          // Update the map with the new iterator into the order list
+          refList->push_front(order.begin());
+          refList->erase(iter);
+
+          reference=order.begin();
+
+          return true;
+        }
       }
 
-      if (iter==map[index].end()) {
-        return false;
-      }
-
-      // Move key/value to the start of the order list
-      order.splice(order.begin(),order,*iter);
-
-      // Update the map with the new iterator into the order list
-      map[index].erase(iter);
-      map[index].push_front(order.begin());
-
-      reference=order.begin();
-
-      return true;
+      return false;
     }
 
     /**
@@ -180,27 +188,34 @@ namespace osmscout {
     typename Cache::CacheRef SetEntry(const CacheEntry& entry)
     {
       unsigned long index=entry.key%map.size();
+      CacheRefList  *refList=&map[index];
 
-      typename CacheRefList::iterator iter=map[index].begin();
-      while (iter!=map[index].end() &&
+      typename CacheRefList::iterator iter=refList->begin();
+      while (iter!=refList->end() &&
              (*iter)->key!=entry.key) {
         ++iter;
       }
 
-      if (iter!=map[index].end()) {
-        // Erase the entry from its current order list position
-        order.erase(*iter);
-        size--;
-        map[index].erase(iter);
+     if (iter!=refList->end()) {
+       // Move key/value to the start of the order list
+       order.splice(order.begin(),order,*iter);
+
+       // Update the map with the new iterator into the order list
+       refList->push_front(order.begin());
+       // Delete the old entry in the ref list
+       refList->erase(iter);
+
+       order.front().value=entry.value;
       }
+      else {
+        // Place key/value to the start of the order list
+        order.push_front(entry);
+        size++;
+        // Update the map with the new iterator into the order list
+        refList->push_front(order.begin());
 
-      // Place key/value to the start of the order list
-      order.push_front(entry);
-      size++;
-      // Update the map with the new iterator into the order list
-      map[index].push_front(order.begin());
-
-      StripCache();
+        StripCache();
+      }
 
       return order.begin();
     }

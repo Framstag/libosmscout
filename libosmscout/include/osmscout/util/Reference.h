@@ -20,9 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <stdio.h>
-
-#include <cassert>
+#include <cstdio>
 
 #include <osmscout/private/CoreImportExport.h>
 
@@ -41,19 +39,34 @@ namespace osmscout {
     }
 
     /**
-      Add a reference to this object
+      Add a reference to this object.
+
+      Increments the internal reference counter.
     */
-    void AddReference();
+    inline void AddReference()
+    {
+      ++count;
+    }
 
     /**
-      Remove a reference from this object
+      Remove a reference from this object.
+
+      Decrements the internal reference counter.
     */
-    void RemoveReference();
+    inline unsigned long RemoveReference()
+    {
+      count--;
+
+      return count;
+    }
 
     /**
       Returns the current reference count.
     */
-    unsigned long GetReferenceCount() const;
+    inline unsigned long GetReferenceCount() const
+    {
+      return count;
+    }
 
   private:
     unsigned long count;
@@ -65,11 +78,14 @@ namespace osmscout {
   template <typename T>
   class OSMSCOUT_API Reference
   {
+  private:
+    mutable T* ptr;
+
   public:
     /**
       Default constructor. Creates an empty reference.
     */
-    Reference()
+    inline Reference()
       : ptr(NULL)
     {
       // no code
@@ -87,33 +103,10 @@ namespace osmscout {
     }
 
     /**
-      Copy constructor
+      Copy constructor for the same type of reference.
     */
-    Reference(const Reference<T>& other)
+    inline Reference(const Reference<T>& other)
       : ptr(other.ptr)
-    {
-      if (ptr!=NULL) {
-        ptr->AddReference();
-      }
-    }
-
-    /**
-      Access operator.
-
-      Returns the underlying pointer. Note that the object is still
-      hold by the Reference.
-    */
-    T* Get() const
-    {
-      return ptr;
-    }
-
-    /**
-      Copy constructor
-    */
-    template<typename T1>
-    Reference(const Reference<T1>& other)
-      : ptr(other.Get())
     {
       if (ptr!=NULL) {
         ptr->AddReference();
@@ -123,34 +116,11 @@ namespace osmscout {
     /**
       Destructor
     */
-    ~Reference()
+    inline ~Reference()
     {
-      if (ptr!=NULL) {
-        ptr->RemoveReference();
-      }
-    }
-
-    /**
-      Assignment operator.
-
-      Assigns a new value to the reference. The reference count of the
-      new object - if the pointer is not NULL - will be incremented.
-      The reference count of the old value will be decremented and freed,
-      if the count reached 0.
-    */
-    void operator=(T* pointer)
-    {
-      if (ptr!=pointer) {
-
-        if (pointer!=NULL) {
-          pointer->AddReference();
-        }
-
-        if (ptr!=NULL) {
-          ptr->RemoveReference();
-        }
-
-        ptr=pointer;
+      if (ptr!=NULL &&
+          ptr->RemoveReference()==0) {
+        delete ptr;
       }
     }
 
@@ -164,9 +134,10 @@ namespace osmscout {
     */
     void operator=(const Reference<T>& other)
     {
-      if (&other!=this && this->ptr!=other.ptr) {
-        if (ptr!=NULL) {
-          ptr->RemoveReference();
+      if (ptr!=other.ptr) {
+        if (ptr!=NULL &&
+            ptr->RemoveReference()==0) {
+          delete ptr;
         }
 
         ptr=other.ptr;
@@ -177,52 +148,6 @@ namespace osmscout {
       }
     }
 
-    template<typename T1>
-    void operator=(const Reference<T1>& other)
-    {
-      if (&other!=this && this->ptr!=other.Get()) {
-        if (ptr!=NULL) {
-          ptr->RemoveReference();
-        }
-
-        ptr=other.Get();
-
-        if (ptr!=NULL) {
-          ptr->AddReference();
-        }
-      }
-    }
-
-    bool operator==(const T* other) const
-    {
-      return ptr==other;
-    }
-
-    bool operator==(const Reference<T>& other) const
-    {
-      return ptr==other.ptr;
-    }
-
-    bool operator!=(const Reference<T>& other) const
-    {
-      return ptr!=other.ptr;
-    }
-
-    bool operator<(const Reference<T>& other) const
-    {
-      return ptr<other.ptr;
-    }
-
-    bool Valid() const
-    {
-      return ptr!=NULL;
-    }
-
-    bool Invalid() const
-    {
-      return ptr==NULL;
-    }
-
     /**
       arrow operator.
 
@@ -230,47 +155,13 @@ namespace osmscout {
     */
     T* operator->() const
     {
-      assert(ptr!=NULL); // Method calling on NULL pointer is forbidden
+      if (ptr==NULL) {
+        ptr=new T();
+        ptr->AddReference();
+      }
+
       return ptr;
     }
-
-    /**
-      Dereference operator.
-
-      Returns a reference to the underlying object. Makes the reference behave
-      like a pointer.
-    */
-    T& operator*() const
-    {
-      assert(ptr!=NULL);
-
-      return *ptr;
-    }
-
-    /**
-      Type conversion operator.
-
-      Returns the underlying pointer. Allows reference to be
-      passed as a parameter where the base pointer type is required.
-    */
-    operator T*() const
-    {
-      return ptr;
-    }
-
-    /**
-      Type conversion operator.
-
-      Returns the underlying pointer. Allows reference to be
-      passed as a parameter where the base pointer type is required.
-    */
-    operator T&() const
-    {
-      return ptr;
-    }
-
-  private:
-    T* ptr;
   };
 }
 

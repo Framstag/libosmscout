@@ -19,11 +19,11 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <vector>
 
-#include <osmscout/Way.h>
-#include <osmscout/WayDataFile.h>
-
+#include <osmscout/util/Cache.h>
 #include <osmscout/util/FileScanner.h>
+#include <osmscout/util/Reference.h>
 #include <osmscout/util/StopClock.h>
 
 /**
@@ -38,36 +38,85 @@
   */
 struct Data
 {
+  size_t              value;
+  std::vector<size_t> value2;
 };
 
-static const size_t cacheSize=1000000;
-
-typedef osmscout::Cache<osmscout::Id,Data> Cache;
-
-int main(int argc, char* argv[])
+struct Data2 : public osmscout::Referencable
 {
-  Cache  cache(cacheSize);
+  size_t              value;
+  std::vector<size_t> value2;
+
+public:
+  Data2()
+  {
+  }
+
+private:
+  Data2(Data2& other)
+  {
+  }
+
+  void operator=(Data2& other)
+  {
+  }
+
+};
+
+typedef osmscout::Reference<Data2> Data2Ref;
+
+static const size_t cacheSize=2000000;
+
+typedef osmscout::Cache<osmscout::Id,Data>     DataCache;
+typedef osmscout::Cache<osmscout::Id,Data2Ref> Data2Cache;
+
+void TestData()
+{
+  std::cout << "*** Caching of struct ***" << std::endl;
+
+  DataCache cache(cacheSize);
+
+  std::cout << "Inserting values into cache..." << std::endl;
 
   osmscout::StopClock insertTimer;
 
-  std::cout << "Inserting values from " << cacheSize << " to " << 2*cacheSize-1 << " into cache..." << std::endl;
-
   for (size_t i=cacheSize; i<2*cacheSize; i++) {
-    Cache::CacheEntry entry(i,Data());
+    Data data;
+    data.value=i;
+    data.value2.resize(10,i);
 
-    Cache::CacheRef ref=cache.SetEntry(entry);
+    DataCache::CacheEntry entry(i,data);
+
+    DataCache::CacheRef ref(cache.SetEntry(entry));
   }
 
   insertTimer.Stop();
 
-  std::cout << "Cache size: " << cache.GetSize() << std::endl;
+  assert(cache.GetSize()==cacheSize);
 
-  osmscout::StopClock missTimer;
+  std::cout << "Updating values  in cache..." << std::endl;
+
+  osmscout::StopClock updateTimer;
+
+  for (size_t i=cacheSize; i<2*cacheSize; i++) {
+    DataCache::CacheEntry entry(i);
+
+    entry.value.value=i;
+    entry.value.value2.resize(10,i);
+
+    DataCache::CacheRef ref(cache.SetEntry(entry));
+  }
+
+  updateTimer.Stop();
+
+  assert(cache.GetSize()==cacheSize);
 
   std::cout << "Searching for entries not in cache..." << std::endl;
 
+  osmscout::StopClock missTimer;
+
   for (size_t i=0; i<cacheSize; i++) {
-    Cache::CacheRef entry;
+    DataCache::CacheRef entry;
 
     if (cache.GetEntry(i,entry)) {
       assert(false);
@@ -75,7 +124,7 @@ int main(int argc, char* argv[])
   }
 
   for (size_t i=2*cacheSize; i<3*cacheSize; i++) {
-    Cache::CacheRef entry;
+    DataCache::CacheRef entry;
 
     if (cache.GetEntry(i,entry)) {
       assert(false);
@@ -84,13 +133,13 @@ int main(int argc, char* argv[])
 
   missTimer.Stop();
 
-  osmscout::StopClock hitTimer;
-
   std::cout << "Searching for entries in cache..." << std::endl;
+
+  osmscout::StopClock hitTimer;
 
   for (size_t t=1; t<=2; t++) {
     for (size_t i=cacheSize; i<2*cacheSize; i++) {
-      Cache::CacheRef entry;
+      DataCache::CacheRef entry;
 
       if (!cache.GetEntry(i,entry)) {
         assert(false);
@@ -100,9 +149,139 @@ int main(int argc, char* argv[])
 
   hitTimer.Stop();
 
+  std::cout << "Copying entries from cache..." << std::endl;
+
+  osmscout::StopClock copyTimer;
+
+  for (size_t t=1; t<=2; t++) {
+    for (size_t i=cacheSize; i<2*cacheSize; i++) {
+      DataCache::CacheRef entry;
+
+      if (!cache.GetEntry(i,entry)) {
+        assert(false);
+      }
+
+      Data data=entry->value;
+    }
+  }
+
+  copyTimer.Stop();
+
   std::cout << "Insert time: "  << insertTimer << std::endl;
+  std::cout << "Update time: "  << updateTimer << std::endl;
   std::cout << "Miss time: "  << missTimer << std::endl;
   std::cout << "Hit time: "  << hitTimer << std::endl;
+  std::cout << "Copy time: "  << copyTimer << std::endl;
+}
+
+void TestData2()
+{
+  std::cout << "*** Caching of Reference<struct> ***" << std::endl;
+
+  Data2Cache cache(cacheSize);
+
+  std::cout << "Inserting values into cache..." << std::endl;
+
+  osmscout::StopClock insertTimer;
+
+  for (size_t i=cacheSize; i<2*cacheSize; i++) {
+    Data2Ref data;
+    data->value=i;
+    data->value2.resize(10,i);
+
+    Data2Cache::CacheEntry entry(i,data);
+
+    Data2Cache::CacheRef ref(cache.SetEntry(entry));
+  }
+
+  insertTimer.Stop();
+
+  assert(cache.GetSize()==cacheSize);
+
+  std::cout << "Updating values in cache..." << std::endl;
+
+  osmscout::StopClock updateTimer;
+
+  for (size_t i=cacheSize; i<2*cacheSize; i++) {
+    Data2Cache::CacheEntry entry(i);
+
+    entry.value->value=i;
+    entry.value->value2.resize(10,i);
+
+    Data2Cache::CacheRef ref(cache.SetEntry(entry));
+  }
+
+  updateTimer.Stop();
+
+  assert(cache.GetSize()==cacheSize);
+
+  std::cout << "Searching for entries not in cache..." << std::endl;
+
+  osmscout::StopClock missTimer;
+
+  for (size_t i=0; i<cacheSize; i++) {
+    Data2Cache::CacheRef entry;
+
+    if (cache.GetEntry(i,entry)) {
+      assert(false);
+    }
+  }
+
+  for (size_t i=2*cacheSize; i<3*cacheSize; i++) {
+    Data2Cache::CacheRef entry;
+
+    if (cache.GetEntry(i,entry)) {
+      assert(false);
+    }
+  }
+
+  missTimer.Stop();
+
+  std::cout << "Searching for entries in cache..." << std::endl;
+
+  osmscout::StopClock hitTimer;
+
+  for (size_t t=1; t<=2; t++) {
+    for (size_t i=cacheSize; i<2*cacheSize; i++) {
+      Data2Cache::CacheRef entry;
+
+      if (!cache.GetEntry(i,entry)) {
+        assert(false);
+      }
+    }
+  }
+
+  hitTimer.Stop();
+
+  osmscout::StopClock copyTimer;
+
+  std::cout << "Copying entries from cache..." << std::endl;
+
+  for (size_t t=1; t<=2; t++) {
+    for (size_t i=cacheSize; i<2*cacheSize; i++) {
+      Data2Cache::CacheRef entry;
+
+      if (!cache.GetEntry(i,entry)) {
+        assert(false);
+      }
+
+      Data2Ref data=entry->value;
+    }
+  }
+
+  copyTimer.Stop();
+
+  std::cout << "Insert time: "  << insertTimer << std::endl;
+  std::cout << "Update time: "  << updateTimer << std::endl;
+  std::cout << "Miss time: "  << missTimer << std::endl;
+  std::cout << "Hit time: "  << hitTimer << std::endl;
+  std::cout << "Copy time: "  << copyTimer << std::endl;
+}
+
+int main(int argc, char* argv[])
+{
+  TestData();
+  TestData2();
 
   return 0;
 }
