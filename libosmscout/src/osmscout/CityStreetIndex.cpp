@@ -89,15 +89,20 @@ namespace osmscout {
     // Build up path for each hit by following
     // the parent relation up to the top of the tree.
 
-    FileOffset offset=loc.offset;
+    FileOffset currentOffset;
+    FileOffset regionOffset=loc.offset;
+
+    if (!scanner.GetPos(currentOffset)) {
+      return false;
+    }
 
     while (!scanner.HasError() &&
-           offset!=0) {
+           regionOffset!=0) {
       std::string name;
 
-      scanner.SetPos(offset);
+      scanner.SetPos(regionOffset);
       scanner.Read(name);
-      scanner.ReadNumber(offset);
+      scanner.ReadNumber(regionOffset);
 
       if (location.path.empty()) {
         // We dot not want something like "'Dortmund' in 'Dortmund'"!
@@ -112,7 +117,7 @@ namespace osmscout {
 
     locations.push_back(location);
 
-    return true;
+    return scanner.SetPos(currentOffset);
   }
 
   CityStreetIndex::CityStreetIndex()
@@ -147,14 +152,10 @@ namespace osmscout {
       return false;
     }
 
-    std::cout << offset << " " << parentOffset << " " <<  name << " " << childrenCount << std::endl;
-
     for (size_t i=0; i<childrenCount; i++) {
-      std::cout << "Loading child #" << i+1 << " of " << childrenCount << " of " << name << "..." << std::endl;
       if (!LoadRegion(scanner,visitor)) {
         return false;
       }
-      std::cout << "Loading child #" << i+1 << " of " << childrenCount << " done" << std::endl;
     }
 
     if (!scanner.ReadNumber(nodeCount)) {
@@ -214,8 +215,6 @@ namespace osmscout {
         lastId=id;
       }
     }
-
-    //std::cout << offset << " " << parentOffset << " " <<  name << " " << locations.size() << " " << childrenCount << " " << nodeCount << " " << wayCount << std::endl;
 
     for (std::map<std::string,Loc>::const_iterator l=locations.begin();
          l!=locations.end();
