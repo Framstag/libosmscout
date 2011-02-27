@@ -239,70 +239,10 @@ namespace osmscout {
   bool CityStreetIndex::Load(const std::string& path,
                              std::string (*hashFunction) (std::string))
   {
-    FileScanner   scanner;
-    std::string   file=AppendFileToDir(path,"nameregion.idx");
-    StopClock     indexLoadTime;
-
     this->path=path;
     this->hashFunction=hashFunction;
 
-    if (!scanner.Open(file)) {
-      std::cerr << "Cannot open file '" << file << "'!" << std::endl;
-      return false;
-    }
-
-    uint32_t areaRefs;
-
-    if (!scanner.ReadNumber(areaRefs)) {
-      return false;
-    }
-
-    for (size_t i=0; i<areaRefs; i++) {
-      std::string name;
-      uint32_t    entries;
-
-      if (!scanner.Read(name)) {
-        return false;
-      }
-
-      if (!scanner.ReadNumber(entries)) {
-        return false;
-      }
-
-      for (size_t j=0; j<entries; j++) {
-        Region   region;
-        uint32_t type;
-
-        region.name=name;
-
-        if (!scanner.ReadNumber(type)) {
-          return false;
-        }
-
-        region.reference.type=(RefType)type;
-
-        if (!scanner.ReadNumber(region.reference.id)) {
-          return false;
-        }
-
-        if (!scanner.ReadNumber(region.offset)) {
-          return false;
-        }
-
-        // if the user has supplied a hash function then use it to generate a hash value
-        if (hashFunction) {
-          region.hash=(*hashFunction)(region.name);
-        }
-
-        areas.push_back(region);
-      }
-    }
-
-    indexLoadTime.Stop();
-
-    std::cout << "Time for loading tree of regions: " << indexLoadTime << std::endl;
-
-    return !scanner.HasError() && scanner.Close();
+    return true;
   }
 
 
@@ -318,61 +258,114 @@ namespace osmscout {
     regions.clear();
 
     // if the user supplied a special hash function call it and use the result
-    if (hashFunction) {
+    if (hashFunction!=NULL) {
       nameHash=(*hashFunction)(name);
     }
 
-    for (std::list<Region>::const_iterator area=areas.begin();
-         area!=areas.end() && !limitReached;
-         ++area) {
-      bool                   found=false;
-      std::string::size_type loc;
+    FileScanner   scanner;
+    std::string   indexFile=AppendFileToDir(path,"nameregion.idx");
 
-      // Calculate match
+    if (!scanner.Open(indexFile)) {
+      std::cerr << "Cannot open file '" << indexFile << "'!" << std::endl;
+      return false;
+    }
 
-      if (hashFunction &&
-          !area->hash.empty()) {
-        loc=area->hash.find(nameHash);
+    uint32_t areaRefs;
+
+    if (!scanner.ReadNumber(areaRefs)) {
+      return false;
+    }
+
+    for (size_t i=0; i<areaRefs; i++) {
+      std::string regionName;
+      uint32_t    entries;
+
+      if (!scanner.Read(regionName)) {
+        return false;
       }
-      else {
-        loc=area->name.find(name);
+
+      if (!scanner.ReadNumber(entries)) {
+        return false;
       }
 
-      if (startWith) {
-        found=loc==0;
-      }
-      else {
-        found=loc!=std::string::npos;
-      }
+      for (size_t j=0; j<entries; j++) {
+        Region   region;
+        uint32_t type;
 
-      // If match, Add to result
+        region.name=regionName;
 
-      if (found) {
-        if (regions.size()>=limit) {
-          limitReached=true;
+        if (!scanner.ReadNumber(type)) {
+          return false;
+        }
+
+        region.reference.type=(RefType)type;
+
+        if (!scanner.ReadNumber(region.reference.id)) {
+          return false;
+        }
+
+        if (!scanner.ReadNumber(region.offset)) {
+          return false;
+        }
+
+
+        bool                   found=false;
+        std::string::size_type loc;
+
+        // Calculate match
+
+        if (hashFunction!=NULL) {
+          std::string hash=(*hashFunction)(region.name);
+
+          if (!hash.empty()) {
+            loc=hash.find(nameHash);
+          }
+          else {
+            loc=region.name.find(name);
+          }
         }
         else {
-          AdminRegion adminRegion;
+          loc=region.name.find(name);
+        }
 
-          adminRegion.reference=area->reference;
-          adminRegion.offset=area->offset;
-          adminRegion.name=area->name;
-          adminRegion.hash=area->hash;
+        if (startWith) {
+          found=loc==0;
+        }
+        else {
+          found=loc!=std::string::npos;
+        }
 
-          regions.push_back(adminRegion);
+        // If match, Add to result
+
+        if (found) {
+          if (regions.size()>=limit) {
+            limitReached=true;
+          }
+          else {
+            AdminRegion adminRegion;
+
+            adminRegion.reference=region.reference;
+            adminRegion.offset=region.offset;
+            adminRegion.name=region.name;
+
+            regions.push_back(adminRegion);
+          }
         }
       }
+    }
+
+    if (!scanner.Close()) {
+      return false;
     }
 
     if (regions.size()==0) {
       return true;
     }
 
-    FileScanner scanner;
-    std::string file=AppendFileToDir(path,"region.dat");
+    std::string regionFile=AppendFileToDir(path,"region.dat");
 
-    if (!scanner.Open(file)) {
-      std::cerr << "Cannot open file '" << file << "'!" << std::endl;
+    if (!scanner.Open(regionFile)) {
+      std::cerr << "Cannot open file '" << regionFile << "'!" << std::endl;
       return false;
     }
 
@@ -397,7 +390,6 @@ namespace osmscout {
           }
         }
         else {
-
           area->path.push_back(name);
         }
       }
@@ -451,9 +443,7 @@ namespace osmscout {
   {
     size_t memory=0;
 
-    memory+=areas.size()*sizeof(AdminRegion);
-
-    std::cout << "AdminRegion size " << areas.size() << ", memory " << memory << std::endl;
+    std::cout << "Memory " << memory << std::endl;
   }
 }
 

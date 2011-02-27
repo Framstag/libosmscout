@@ -48,7 +48,6 @@ namespace osmscout {
       ObjectRef   reference;       //! Reference to the object defining the region
       FileOffset  offset;          //! Offset into the region datafile
       std::string name;            //! name of the region
-      std::string hash;            //! internal has for the name of the region
     };
 
     struct Loc
@@ -79,11 +78,8 @@ namespace osmscout {
     };
 
   private:
-    std::string                       path;
-
-    std::list<Region>                 areas;
-
-    std::string            (*hashFunction)(std::string);
+    std::string path;
+    std::string (*hashFunction)(std::string);
 
   private:
     bool LoadRegion(FileScanner& scanner,
