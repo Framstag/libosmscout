@@ -417,7 +417,10 @@ namespace osmscout {
       for (std::list<Id>::const_iterator id=node->second.begin();
              id!=node->second.end();
              ++id) {
+        assert(*id>lastId);
+
         writer.WriteNumber(*id-lastId); // Id of node
+
         lastId=*id;
       }
     }
@@ -434,7 +437,10 @@ namespace osmscout {
       for (std::list<Id>::const_iterator id=way->second.begin();
            id!=way->second.end();
            ++id) {
+        assert(*id>lastId);
+
         writer.WriteNumber(*id-lastId); // Id of way
+
         lastId=*id;
       }
     }
@@ -1052,7 +1058,9 @@ namespace osmscout {
       return false;
     }
 
-    WriteAreas(writer,rootArea);
+    if (!WriteAreas(writer,rootArea)) {
+      return false;
+    }
 
     if (writer.HasError() || !writer.Close()) {
       return false;
