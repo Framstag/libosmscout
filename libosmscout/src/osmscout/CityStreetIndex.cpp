@@ -443,7 +443,7 @@ namespace osmscout {
   {
     size_t memory=0;
 
-    std::cout << "Memory " << memory << std::endl;
+    std::cout << "CityStreetIndex: Memory " << memory << std::endl;
   }
 }
 
