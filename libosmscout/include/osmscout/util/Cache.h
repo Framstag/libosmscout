@@ -132,13 +132,16 @@ namespace osmscout {
      : size(0),
        maxSize(maxSize)
     {
-      assert(maxSize>0);
+      /*
+      if (maxSize==0) {
+        maxSize=1;
+      }*/
 
       if(maxSize>=10) {
         map.resize(maxSize/5);
       }
       else {
-        map.resize(1);
+        map.resize(maxSize);
       }
     }
 
@@ -155,6 +158,10 @@ namespace osmscout {
     bool GetEntry(const K& key,
                   CacheRef& reference)
     {
+      if (map.size()==0) {
+        return false;
+      }
+
       unsigned long index(key%map.size());
       CacheRefList  *refList=&map[index];
 
@@ -187,25 +194,33 @@ namespace osmscout {
       */
     typename Cache::CacheRef SetEntry(const CacheEntry& entry)
     {
-      unsigned long index=entry.key%map.size();
-      CacheRefList  *refList=&map[index];
+      if (map.size()==0) {
+        order.clear();
 
+        order.push_front(entry);
+
+        return order.begin();
+      }
+
+      unsigned long                   index=entry.key%map.size();
+      CacheRefList                    *refList=&map[index];
       typename CacheRefList::iterator iter=refList->begin();
+
       while (iter!=refList->end() &&
              (*iter)->key!=entry.key) {
         ++iter;
       }
 
-     if (iter!=refList->end()) {
-       // Move key/value to the start of the order list
-       order.splice(order.begin(),order,*iter);
+      if (iter!=refList->end()) {
+        // Move key/value to the start of the order list
+        order.splice(order.begin(),order,*iter);
 
-       // Update the map with the new iterator into the order list
-       refList->push_front(order.begin());
-       // Delete the old entry in the ref list
-       refList->erase(iter);
+        // Update the map with the new iterator into the order list
+        refList->push_front(order.begin());
+        // Delete the old entry in the ref list
+        refList->erase(iter);
 
-       order.front().value=entry.value;
+        order.front().value=entry.value;
       }
       else {
         // Place key/value to the start of the order list
@@ -226,7 +241,10 @@ namespace osmscout {
       */
     void SetMaxSize(unsigned long maxSize)
     {
-      assert(maxSize>0);
+      /*
+      if (maxSize==0) {
+        maxSize=1;
+      }*/
 
       this->maxSize=maxSize;
 
@@ -246,7 +264,7 @@ namespace osmscout {
         map.resize(maxSize/5);
       }
       else {
-        map.resize(1);
+        map.resize(maxSize);
       }
     }
 

@@ -253,10 +253,7 @@ namespace osmscout {
     for (size_t i=1; i<pageCounts.size(); i++) {
       unsigned long resultingCacheSize;
 
-      if (currentCacheSize==0) {
-        resultingCacheSize=1;
-      }
-      else if (pageCounts[i]>currentCacheSize) {
+      if (pageCounts[i]>currentCacheSize) {
         resultingCacheSize=currentCacheSize;
         currentCacheSize=0;
       }
@@ -330,17 +327,18 @@ namespace osmscout {
   void NumericIndex<N,T>::DumpStatistics() const
   {
     size_t memory=0;
-    size_t entries=0;
+    size_t pages=0;
 
-    entries+=root->entries.size();
+    pages+=1;
     memory+=root->entries.size()*sizeof(Entry);
 
+
     for (size_t i=0; i<leafs.size(); i++) {
-      entries+=leafs[i].GetSize();
+      pages+=leafs[i].GetSize();
       memory+=sizeof(leafs[i])+leafs[i].GetMemory(NumericIndexCacheValueSizer());
     }
 
-    std::cout << "Index " << filepart << ": " << entries << " entries, memory " << memory << std::endl;
+    std::cout << "Index " << filepart << ": " << pages << " pages, memory " << memory << std::endl;
   }
 }
 
