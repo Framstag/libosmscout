@@ -69,6 +69,7 @@ public slots:
 
 private:
   mutable QMutex            mutex;
+  osmscout::DatabaseParameter databaseParameter;
   osmscout::Database        database;
   osmscout::StyleConfig     *styleConfig;
   osmscout::MapData         data;

@@ -568,7 +568,9 @@ public:
     Lum::Manager::FileSystem::Instance()->SetApplicationDataDir(Lum::Base::StringToWString(APP_DATADIR));
 #endif
 
-    database=new osmscout::Database();
+    osmscout::DatabaseParameter databaseParameter;
+
+    database=new osmscout::Database(databaseParameter);
     jobFinishedAction=new Lum::Model::Action();
 
     info.SetProgram(Lum::Base::StringToWString(PACKAGE_NAME));

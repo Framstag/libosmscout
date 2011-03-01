@@ -30,7 +30,9 @@
 DBThread dbThread;
 
 DBThread::DBThread()
- : currentPixmap(NULL)
+ : database(databaseParameter),
+   styleConfig(NULL),
+   currentPixmap(NULL)
 #if defined(HAVE_LIB_QTOPENGL)
    ,currentGLPixmap(NULL)
 #endif

@@ -80,7 +80,8 @@ int main(int argc, char* argv[])
 
   QApplication application(argc,argv,true);
 
-  osmscout::Database database;
+  osmscout::DatabaseParameter databaseParameter;
+  osmscout::Database          database(databaseParameter);
 
   if (!database.Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;

@@ -128,7 +128,16 @@ int main(int argc, char* argv[])
 
   std::cin.get();
 
-  osmscout::Database database;
+  osmscout::DatabaseParameter databaseParameter;
+
+  databaseParameter.SetNodeIndexCacheSize(161);
+  databaseParameter.SetNodeCacheSize(0);
+  databaseParameter.SetWayIndexCacheSize(2);
+  databaseParameter.SetWayCacheSize(0);
+  databaseParameter.SetRelationIndexCacheSize(10);
+  databaseParameter.SetRelationCacheSize(0);
+
+  osmscout::Database          database(databaseParameter);
 
   if (!database.Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;

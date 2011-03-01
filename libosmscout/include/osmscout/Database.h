@@ -56,7 +56,57 @@
 namespace osmscout {
 
   /**
-    Parameter to influence th search result for searching for (drawable)
+    Database instance initialisation parameter to influence the behaviour of the database
+    instance.
+
+    The following groups attributes are currently available:
+    * cache sizes.
+    */
+  class OSMSCOUT_API DatabaseParameter
+  {
+  private:
+    unsigned long areaIndexCacheSize;
+    unsigned long areaNodeIndexCacheSize;
+
+    unsigned long nodeIndexCacheSize;
+    unsigned long nodeCacheSize;
+
+    unsigned long wayIndexCacheSize;
+    unsigned long wayCacheSize;
+
+    unsigned long relationIndexCacheSize;
+    unsigned long relationCacheSize;
+
+  public:
+    DatabaseParameter();
+
+    void SetAreaIndexCacheSize(unsigned long areaIndexCacheSize);
+    void SetAreaNodeIndexCacheSize(unsigned long areaNodeIndexCacheSize);
+
+    void SetNodeIndexCacheSize(unsigned long nodeIndexCacheSize);
+    void SetNodeCacheSize(unsigned long nodeCacheSize);
+
+    void SetWayIndexCacheSize(unsigned long wayIndexCacheSize);
+    void SetWayCacheSize(unsigned long wayCacheSize);
+
+    void SetRelationIndexCacheSize(unsigned long relationIndexCacheSize);
+    void SetRelationCacheSize(unsigned long relationCacheSize);
+
+    unsigned long GetAreaIndexCacheSize() const;
+    unsigned long GetAreaNodeIndexCacheSize() const;
+
+    unsigned long GetNodeIndexCacheSize() const;
+    unsigned long GetNodeCacheSize() const;
+
+    unsigned long GetWayIndexCacheSize() const;
+    unsigned long GetWayCacheSize() const;
+
+    unsigned long GetRelationIndexCacheSize() const;
+    unsigned long GetRelationCacheSize() const;
+  };
+
+  /**
+    Parameter to influence the search result for searching for (drawable)
     objects in a given area.
     */
   class OSMSCOUT_API AreaSearchParameter
@@ -166,7 +216,7 @@ namespace osmscout {
                    std::set<Id>& wayIds) const;
 
   public:
-    Database();
+    Database(const DatabaseParameter& parameter);
     virtual ~Database();
 
     bool Open(const std::string& path,
