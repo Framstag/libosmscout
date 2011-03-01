@@ -190,14 +190,14 @@ namespace osmscout {
   class OSMSCOUT_API TypeConfig
   {
   private:
-    std::list<TagInfo>                              tags;
-    std::list<TypeInfo>                             types;
+    std::vector<TagInfo>                            tags;
+    std::vector<TypeInfo>                           types;
 
     TagId                                           nextTagId;
     TypeId                                          nextTypeId;
 
     std::map<std::string,TagInfo>                   stringToTagMap;
-    std::map<TagId,std::map<std::string,TypeInfo> > tagToTypeMap;
+    std::vector<std::map<std::string,TypeInfo> >    tagToTypeMaps;
     std::map<std::string,TypeInfo>                  nameToTypeMap;
     std::map<TypeId,TypeInfo>                       idToTypeMap;
 
@@ -223,8 +223,8 @@ namespace osmscout {
     TypeConfig& AddTagInfo(const TagInfo& tagInfo);
     TypeConfig& AddTypeInfo(TypeInfo& typeInfo);
 
-    const std::list<TagInfo>& GetTags() const;
-    const std::list<TypeInfo>& GetTypes() const;
+    const std::vector<TagInfo>& GetTags() const;
+    const std::vector<TypeInfo>& GetTypes() const;
 
     TypeId GetMaxTypeId() const;
 

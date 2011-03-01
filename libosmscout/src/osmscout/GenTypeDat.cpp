@@ -50,7 +50,7 @@ namespace osmscout {
 
     writer.WriteNumber(typeConfig.GetTags().size());
 
-    for (std::list<TagInfo>::const_iterator tag=typeConfig.GetTags().begin();
+    for (std::vector<TagInfo>::const_iterator tag=typeConfig.GetTags().begin();
          tag!=typeConfig.GetTags().end();
          ++tag) {
       writer.WriteNumber(tag->GetId());
@@ -59,7 +59,7 @@ namespace osmscout {
 
     writer.WriteNumber(typeConfig.GetTypes().size());
 
-    for (std::list<TypeInfo>::const_iterator type=typeConfig.GetTypes().begin();
+    for (std::vector<TypeInfo>::const_iterator type=typeConfig.GetTypes().begin();
          type!=typeConfig.GetTypes().end();
          ++type) {
       writer.WriteNumber(type->GetId());

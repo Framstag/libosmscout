@@ -147,12 +147,12 @@ namespace osmscout {
     // no code
   }
 
-  const std::list<TagInfo>& TypeConfig::GetTags() const
+  const std::vector<TagInfo>& TypeConfig::GetTags() const
   {
     return tags;
   }
 
-  const std::list<TypeInfo>& TypeConfig::GetTypes() const
+  const std::vector<TypeInfo>& TypeConfig::GetTypes() const
   {
     return types;
   }
@@ -201,7 +201,11 @@ namespace osmscout {
       idToTypeMap[typeInfo.GetId()]=typeInfo;
     }
 
-    tagToTypeMap[typeInfo.GetTag()][typeInfo.GetTagValue()]=typeInfo;
+    if (typeInfo.GetTag()>=tagToTypeMaps.size()) {
+      tagToTypeMaps.resize(typeInfo.GetTag()+1);
+    }
+
+    tagToTypeMaps[typeInfo.GetTag()][typeInfo.GetTagValue()]=typeInfo;
 
     return *this;
   }
@@ -326,15 +330,15 @@ namespace osmscout {
 
   TypeId TypeConfig::GetNodeTypeId(TagId tagKey, const char* tagValue) const
   {
-    std::map<TagId,std::map<std::string,TypeInfo> >::const_iterator iter=tagToTypeMap.find(tagKey);
+    if (tagKey>=tagToTypeMaps.size()) {
+      return typeIgnore;
+    }
 
-    if (iter!=tagToTypeMap.end()) {
-      std::map<std::string,TypeInfo>::const_iterator iter2=iter->second.find(tagValue);
+    std::map<std::string,TypeInfo>::const_iterator iter=tagToTypeMaps[tagKey].find(tagValue);
 
-      if (iter2!=iter->second.end() &&
-          iter2->second.CanBeNode()) {
-        return iter2->second.GetId();
-      }
+    if (iter!=tagToTypeMaps[tagKey].end() &&
+        iter->second.CanBeNode()) {
+      return iter->second.GetId();
     }
 
     return typeIgnore;
@@ -342,15 +346,15 @@ namespace osmscout {
 
   TypeId TypeConfig::GetWayTypeId(TagId tagKey, const char* tagValue) const
   {
-    std::map<TagId,std::map<std::string,TypeInfo> >::const_iterator iter=tagToTypeMap.find(tagKey);
+    if (tagKey>=tagToTypeMaps.size()) {
+      return typeIgnore;
+    }
 
-    if (iter!=tagToTypeMap.end()) {
-      std::map<std::string,TypeInfo>::const_iterator iter2=iter->second.find(tagValue);
+    std::map<std::string,TypeInfo>::const_iterator iter=tagToTypeMaps[tagKey].find(tagValue);
 
-      if (iter2!=iter->second.end() &&
-          iter2->second.CanBeWay()) {
-        return iter2->second.GetId();
-      }
+    if (iter!=tagToTypeMaps[tagKey].end() &&
+        iter->second.CanBeWay()) {
+      return iter->second.GetId();
     }
 
     return typeIgnore;
@@ -358,15 +362,15 @@ namespace osmscout {
 
   TypeId TypeConfig::GetAreaTypeId(TagId tagKey, const char* tagValue) const
   {
-    std::map<TagId,std::map<std::string,TypeInfo> >::const_iterator iter=tagToTypeMap.find(tagKey);
+    if (tagKey>=tagToTypeMaps.size()) {
+      return typeIgnore;
+    }
 
-    if (iter!=tagToTypeMap.end()) {
-      std::map<std::string,TypeInfo>::const_iterator iter2=iter->second.find(tagValue);
+    std::map<std::string,TypeInfo>::const_iterator iter=tagToTypeMaps[tagKey].find(tagValue);
 
-      if (iter2!=iter->second.end() &&
-          iter2->second.CanBeArea()) {
-        return iter2->second.GetId();
-      }
+    if (iter!=tagToTypeMaps[tagKey].end() &&
+        iter->second.CanBeArea()) {
+      return iter->second.GetId();
     }
 
     return typeIgnore;
@@ -374,15 +378,15 @@ namespace osmscout {
 
   TypeId TypeConfig::GetRelationTypeId(TagId tagKey, const char* tagValue) const
   {
-    std::map<TagId,std::map<std::string,TypeInfo> >::const_iterator iter=tagToTypeMap.find(tagKey);
+    if (tagKey>=tagToTypeMaps.size()) {
+      return typeIgnore;
+    }
 
-    if (iter!=tagToTypeMap.end()) {
-      std::map<std::string,TypeInfo>::const_iterator iter2=iter->second.find(tagValue);
+    std::map<std::string,TypeInfo>::const_iterator iter=tagToTypeMaps[tagKey].find(tagValue);
 
-      if (iter2!=iter->second.end() &&
-          iter2->second.CanBeRelation()) {
-        return iter2->second.GetId();
-      }
+    if (iter!=tagToTypeMaps[tagKey].end() &&
+        iter->second.CanBeRelation()) {
+      return iter->second.GetId();
     }
 
     return typeIgnore;
@@ -438,16 +442,11 @@ namespace osmscout {
 
   void TypeConfig::GetWaysWithKey(TagId tagKey, std::set<TypeId>& types) const
   {
-    std::map<TagId,std::map<std::string,TypeInfo> >::const_iterator iter=tagToTypeMap.find(tagKey);
-
-    if (iter!=tagToTypeMap.end()) {
-      for (std::map<std::string,TypeInfo>::const_iterator iter2=iter->second.begin();
-           iter2!=iter->second.end();
-           ++iter2) {
-        if (iter2!=iter->second.end() &&
-            iter2->second.CanBeWay()) {
-          types.insert(iter2->second.GetId());
-        }
+    for (std::map<std::string,TypeInfo>::const_iterator iter=tagToTypeMaps[tagKey].begin();
+         iter!=tagToTypeMaps[tagKey].end();
+         ++iter) {
+      if (iter->second.CanBeWay()) {
+        types.insert(iter->second.GetId());
       }
     }
   }
@@ -456,7 +455,7 @@ namespace osmscout {
   {
     types.clear();
 
-    for (std::list<TypeInfo>::const_iterator type=this->types.begin();
+    for (std::vector<TypeInfo>::const_iterator type=this->types.begin();
          type!=this->types.end();
          ++type) {
       if (type->CanBeRoute()) {
@@ -469,7 +468,7 @@ namespace osmscout {
   {
     types.clear();
 
-    for (std::list<TypeInfo>::const_iterator type=this->types.begin();
+    for (std::vector<TypeInfo>::const_iterator type=this->types.begin();
          type!=this->types.end();
          ++type) {
       if (type->CanBeIndexed()) {

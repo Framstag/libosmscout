@@ -130,6 +130,9 @@ int main(int argc, char* argv[])
 
   osmscout::DatabaseParameter databaseParameter;
 
+  databaseParameter.SetAreaIndexCacheSize(0);
+  databaseParameter.SetAreaNodeIndexCacheSize(0);
+
   databaseParameter.SetNodeIndexCacheSize(161);
   databaseParameter.SetNodeCacheSize(0);
   databaseParameter.SetWayIndexCacheSize(2);
