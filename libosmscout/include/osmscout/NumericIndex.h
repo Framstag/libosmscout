@@ -118,7 +118,7 @@ namespace osmscout {
   template <class N, class T>
   NumericIndex<N,T>::~NumericIndex()
   {
-    delete buffer;
+    delete [] buffer;
   }
 
   /**
