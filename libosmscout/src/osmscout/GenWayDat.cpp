@@ -483,7 +483,7 @@ namespace osmscout {
 
           nodeUse=nodeUses.find(way.nodes[way.nodes.size()-1].id);
 
-          way.SetStartIsJoint(nodeUse!=nodeUses.end() && nodeUse->second>=2);
+          way.SetEndIsJoint(nodeUse!=nodeUses.end() && nodeUse->second>=2);
         }
 
         // Restrictions
