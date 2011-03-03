@@ -39,14 +39,15 @@ namespace osmscout {
     AreaIndex allows you to find areas, ways, area relations and way releations in
     a given area.
 
-    For area structure result can be limited by the maximum level (which in turn defines
-    the mimimum size of the resultng areas since and area in a given level must fit into
-    the cell size (but can cross cell borders)) and the maximum number of areas found.
+    For area structure result can be limited by the maximum level (which in turn
+    defines the mimimum size of the resulting areas since and area in a given
+    level must fit into the cell size (but can cross cell borders)) and the
+    maximum number of areas found.
 
     Way in turn can be limited by type and result count.
 
-    Internal the index is implemented as quadtree. As a result each index entry has 4
-    children (besides entries in the lowest level).
+    Internally the index is implemented as quadtree. As a result each index entry
+    has 4 children (besides entries in the lowest level).
     */
   class AreaIndex
   {
@@ -102,12 +103,12 @@ namespace osmscout {
     };
 
   private:
-    std::string                     filepart;
-    std::string                     datafilename;
-    mutable FileScanner             scanner;
+    std::string                     filepart;       //! name of the data file
+    std::string                     datafilename;   //! Fullpath and name of the data file
+    mutable FileScanner             scanner;        //! Scanner instance for reading this file
 
-    std::vector<double>             cellWidth;
-    std::vector<double>             cellHeight;
+    std::vector<double>             cellWidth;      //! Precalculated cellWidth for each level of the quadtree
+    std::vector<double>             cellHeight;     //! Precalculated cellHeight for each level of the quadtree
     uint32_t                        maxLevel;       //! Maximum level in index
     FileOffset                      topLevelOffset; //! Offset o fthe top level index entry
 
