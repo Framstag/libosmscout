@@ -60,13 +60,13 @@ namespace osmscout {
 
     void Process(const Id& id,
                  const double& lon, const double& lat,
-                 std::vector<Tag>& tags);
+                 const std::map<TagId,std::string>& tags);
     void Process(const Id& id,
                  const std::vector<Id>& nodes,
-                 const std::vector<Tag>& tags);
+                 const std::map<TagId,std::string>& tags);
     void Process(const Id& id,
                  const std::vector<RawRelation::Member>& members,
-                 const std::vector<Tag>& tags);
+                 const std::map<TagId,std::string>& tags);
 
     void Cleanup();
   };
@@ -99,21 +99,17 @@ namespace osmscout {
 
   void Preprocessor::Process(const Id& id,
                              const double& lon, const double& lat,
-                             std::vector<Tag>& tags)
+                             const std::map<TagId,std::string>& tags)
   {
-    RawNode                    node;
-    std::vector<Tag>::iterator tag;
-    TypeId                     type=typeIgnore;
+    RawNode node;
+    TypeId  type=typeIgnore;
 
-    if (config.GetNodeTypeId(tags,tag,type))  {
-      tags.erase(tag);
-    }
+    config.GetNodeTypeId(tags,type);
 
     node.SetId(id);
     node.SetType(type);
     node.SetCoordinates(lon,lat);
-    node.SetTags(tags);
-
+    //node.SetTags(tags);
 
     node.Write(nodeWriter);
     nodeCount++;
@@ -121,32 +117,20 @@ namespace osmscout {
 
   void Preprocessor::Process(const Id& id,
                              const std::vector<Id>& nodes,
-                             const std::vector<Tag>& tags)
+                             const std::map<TagId,std::string>& tags)
   {
-    TypeId                     areaType=typeIgnore;
-    TypeId                     wayType=typeIgnore;
-    std::vector<Tag>           t=tags;
-    std::vector<Tag>::iterator wayTag=t.end();
-    std::vector<Tag>::iterator areaTag=t.end();
-    /*
-    int8_t                     layer=0;
-    bool                       isBridge=false;
-    bool                       isTunnel=false;
-    bool                       isBuilding=false;*/
-    bool                       isArea=false;
-    /*
-    bool                       isOneway=false;
-    bool                       reverseNodes=false;*/
+    TypeId areaType=typeIgnore;
+    TypeId wayType=typeIgnore;
+    bool   isArea=false;
 
-    config.GetWayAreaTypeId(t,wayTag,wayType,areaTag,areaType);
+    config.GetWayAreaTypeId(tags,wayType,areaType);
 
     if (areaType!=typeIgnore &&
         nodes.size()>1 && nodes[0]==nodes[nodes.size()-1]) {
       isArea=true;
-      t.erase(areaTag);
     }
     else if (wayType!=typeIgnore) {
-      t.erase(wayTag);
+      // no code
     }
     else if (areaType==typeIgnore && wayType==typeIgnore) {
       // Unidentified way
@@ -171,29 +155,25 @@ namespace osmscout {
     }
 
     way.SetNodes(nodes);
-    way.SetTags(t);
+    //way.SetTags(t);
 
     way.Write(wayWriter);
   }
 
   void Preprocessor::Process(const Id& id,
                              const std::vector<RawRelation::Member>& members,
-                             const std::vector<Tag>& tags)
+                             const std::map<TagId,std::string>& tags)
   {
-    RawRelation                relation;
-    std::vector<Tag>::iterator tag;
-    TypeId                     type;
+    RawRelation relation;
+    TypeId      type;
 
     relation.SetId(id);
-    relation.SetType(typeIgnore);
     relation.members=members;
-    relation.tags=tags;
+    //relation.tags=tags;
 
-    if (config.GetRelationTypeId(relation.tags,tag,
-                                 type))  {
-      relation.SetType(type);
-      relation.tags.erase(tag);
-    }
+    config.GetRelationTypeId(tags,type);
+
+    relation.SetType(type);
 
     relation.Write(relationWriter);
     relationCount++;
@@ -230,7 +210,7 @@ namespace osmscout {
     const TypeConfig&                typeConfig;
     Id                               id;
     double                           lon,lat;
-    std::vector<Tag>                 tags;
+    std::map<TagId,std::string>      tags;
     std::vector<Id>                  nodes;
     std::vector<RawRelation::Member> members;
 
@@ -240,8 +220,6 @@ namespace osmscout {
     : pp(pp),
       typeConfig(typeConfig)
     {
-      tags.reserve(20);
-
       context=contextUnknown;
     }
 
@@ -344,18 +322,11 @@ namespace osmscout {
           return;
         }
 
-        TagId tagId=typeConfig.GetTagId((const char*)keyValue);
+        TagId id=typeConfig.GetTagId((const char*)keyValue);
 
-        if (tagId==tagIgnore) {
-          return;
+        if (id!=tagIgnore) {
+          tags[id]=(const char*)valueValue;
         }
-
-        Tag tag;
-
-        tag.key=tagId;
-        tag.value=(const char*)valueValue;
-
-        tags.push_back(tag);
       }
       else if (strcmp((const char*)name,"nd")==0) {
         if (context!=contextWay) {

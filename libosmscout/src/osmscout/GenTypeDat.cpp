@@ -55,6 +55,7 @@ namespace osmscout {
          ++tag) {
       writer.WriteNumber(tag->GetId());
       writer.Write(tag->GetName());
+      writer.Write(tag->IsInternalOnly());
     }
 
     writer.WriteNumber(typeConfig.GetTypes().size());
@@ -64,8 +65,6 @@ namespace osmscout {
          ++type) {
       writer.WriteNumber(type->GetId());
       writer.Write(type->GetName());
-      writer.WriteNumber(type->GetTag());
-      writer.Write(type->GetTagValue());
       writer.Write(type->CanBeNode());
       writer.Write(type->CanBeWay());
       writer.Write(type->CanBeArea());

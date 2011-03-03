@@ -101,15 +101,6 @@ private:
 public:
   Errors  *errors;
 
-void HandleTag(const std::string& nameValue)
-{
-  std::string  name(nameValue);
-
-  TagInfo tagInfo(name);
-
-  config.AddTagInfo(tagInfo);
-}
-
 std::string Destring(const char* str)
 {
   std::string result(str);
@@ -131,10 +122,9 @@ std::string Destring(const char* str)
   void SemErr(const char* msg);
 
 	void OST();
-	void TAGS();
 	void TYPES();
-	void TAG();
 	void TYPE();
+	void CONDITION(Condition*& condition);
 	void TYPEKINDS(TypeInfo& typeInfo);
 	void TYPEOPTIONS(TypeInfo& typeInfo);
 	void TYPEKIND(TypeInfo& typeInfo);

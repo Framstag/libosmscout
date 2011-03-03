@@ -23,14 +23,47 @@
 
 namespace osmscout {
 
+  Condition::~Condition()
+  {
+    // no code
+  }
+
+  TagEquals::TagEquals(TagId tag,
+                       const std::string& tagValue)
+  : tag(tag),
+    tagValue(tagValue)
+  {
+    // no code
+  }
+
+  Condition* TagEquals::Copy() const
+  {
+    return new TagEquals(tag,tagValue);
+  }
+
+  bool TagEquals::Evaluate(const std::map<TagId,std::string>& tagMap)
+  {
+    std::map<TagId,std::string>::const_iterator t;
+
+    t=tagMap.find(tag);
+
+    if (t==tagMap.end()) {
+      return false;
+    }
+
+    return t->second==tagValue;
+  }
+
   TagInfo::TagInfo()
    : id(0)
   {
   }
 
-  TagInfo::TagInfo(const std::string& name)
+  TagInfo::TagInfo(const std::string& name,
+                   bool internalOnly)
    : id(0),
-     name(name)
+     name(name),
+     internalOnly(internalOnly)
   {
     // no code
   }
@@ -44,14 +77,70 @@ namespace osmscout {
 
   TypeInfo::TypeInfo()
    : id(0),
+     condition(NULL),
      canBeNode(false),
      canBeWay(false),
      canBeArea(false),
      canBeRelation(false),
+     canBeOverview(false),
      canBeRoute(false),
      canBeIndexed(false)
   {
     // no code
+  }
+
+  TypeInfo::TypeInfo(const TypeInfo& other)
+  {
+    this->id=other.id;
+    this->name=other.name;
+
+    if (other.condition!=NULL) {
+      this->condition=other.condition->Copy();
+    }
+    else {
+      this->condition=NULL;
+    }
+
+    this->canBeNode=other.canBeNode;
+    this->canBeWay=other.canBeWay;
+    this->canBeArea=other.canBeArea;
+    this->canBeRelation=other.canBeRelation;
+    this->canBeOverview=other.canBeOverview;
+    this->canBeRoute=other.canBeRoute;
+    this->canBeIndexed=other.canBeIndexed;
+  }
+
+  TypeInfo::~TypeInfo()
+  {
+    delete condition;
+  }
+
+  void TypeInfo::operator=(const TypeInfo& other)
+  {
+    // Check for self assignment!
+    if (this==&other) {
+      return;
+    }
+
+    delete this->condition;
+
+    this->id=other.id;
+    this->name=other.name;
+
+    if (other.condition!=NULL) {
+      this->condition=other.condition->Copy();
+    }
+    else {
+      this->condition=NULL;
+    }
+
+    this->canBeNode=other.canBeNode;
+    this->canBeWay=other.canBeWay;
+    this->canBeArea=other.canBeArea;
+    this->canBeRelation=other.canBeRelation;
+    this->canBeRoute=other.canBeRoute;
+    this->canBeOverview=other.canBeOverview;
+    this->canBeIndexed=other.canBeIndexed;
   }
 
   TypeInfo& TypeInfo::SetId(TypeId id)
@@ -62,12 +151,12 @@ namespace osmscout {
   }
 
   TypeInfo& TypeInfo::SetType(const std::string& name,
-                              TagId tag,
-                              const std::string tagValue)
+                              Condition* condition)
   {
     this->name=name;
-    this->tag=tag;
-    this->tagValue=tagValue;
+
+    delete this->condition;
+    this->condition=condition;
 
     return *this;
   }
@@ -78,37 +167,35 @@ namespace osmscout {
   {
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for tagIgnore
-    AddTagInfo(TagInfo(""));
+    RegisterTagForInternalUse("");
 
-    AddTagInfo(TagInfo("admin_level"));
-    AddTagInfo(TagInfo("boundary"));
-    AddTagInfo(TagInfo("building"));
-    AddTagInfo(TagInfo("bridge"));
-    AddTagInfo(TagInfo("highway"));
-    AddTagInfo(TagInfo("layer"));
-    AddTagInfo(TagInfo("name"));
-    AddTagInfo(TagInfo("natural"));
-    AddTagInfo(TagInfo("oneway"));
-    AddTagInfo(TagInfo("place"));
-    AddTagInfo(TagInfo("place_name"));
-    AddTagInfo(TagInfo("ref"));
-    AddTagInfo(TagInfo("restriction"));
-    AddTagInfo(TagInfo("tunnel"));
-    AddTagInfo(TagInfo("type"));
-    AddTagInfo(TagInfo("width"));
+    RegisterTagForExternalUse("admin_level");
+    RegisterTagForExternalUse("boundary");
+    RegisterTagForExternalUse("building");
+    RegisterTagForExternalUse("bridge");
+    RegisterTagForExternalUse("highway");
+    RegisterTagForExternalUse("layer");
+    RegisterTagForExternalUse("name");
+    RegisterTagForExternalUse("natural");
+    RegisterTagForExternalUse("oneway");
+    RegisterTagForExternalUse("place");
+    RegisterTagForExternalUse("place_name");
+    RegisterTagForExternalUse("ref");
+    RegisterTagForExternalUse("restriction");
+    RegisterTagForExternalUse("tunnel");
+    RegisterTagForExternalUse("type");
+    RegisterTagForExternalUse("width");
 
     TypeInfo ignore;
     TypeInfo route;
 
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for typeIgnore
-    ignore.SetType("",
-                   0,"");
+    ignore.SetType("",NULL);
 
     AddTypeInfo(ignore);
 
-    route.SetType("_route",
-                  0,"")
+    route.SetType("_route",NULL)
          .CanBeWay(true);
 
     AddTypeInfo(route);
@@ -157,28 +244,77 @@ namespace osmscout {
     return types;
   }
 
-  TypeConfig& TypeConfig::AddTagInfo(const TagInfo& tagInfo)
+  TagId TypeConfig::RegisterTagForInternalUse(const std::string& tagName)
   {
-    TagInfo ti(tagInfo);
+    std::map<std::string,TagId>::const_iterator mapping=stringToTagMap.find(tagName);
 
-    if (stringToTagMap.find(ti.GetName())!=stringToTagMap.end()) {
-      // Tag was already (internally?) defined, we ignore the second definition
-      return *this;
+    if (mapping!=stringToTagMap.end()) {
+      return mapping->second;
     }
 
-    if (ti.GetId()==0) {
-      ti.SetId(nextTagId);
+    TagInfo tagInfo(tagName,true);
+
+    if (tagInfo.GetId()==0) {
+      tagInfo.SetId(nextTagId);
 
       nextTagId++;
     }
     else {
-      nextTagId=std::max(nextTagId,(TagId)(ti.GetId()+1));
+      nextTagId=std::max(nextTagId,(TagId)(tagInfo.GetId()+1));
     }
 
-    tags.push_back(ti);
-    stringToTagMap[ti.GetName()]=ti;
+    tags.push_back(tagInfo);
+    stringToTagMap[tagInfo.GetName()]=tagInfo.GetId();
 
-    return *this;
+    return tagInfo.GetId();
+  }
+
+  TagId TypeConfig::RegisterTagForExternalUse(const std::string& tagName)
+  {
+    std::map<std::string,TagId>::const_iterator mapping=stringToTagMap.find(tagName);
+
+    if (mapping!=stringToTagMap.end()) {
+      // TODO: Set to externalUse!
+      return mapping->second;
+    }
+
+    TagInfo tagInfo(tagName,false);
+
+    if (tagInfo.GetId()==0) {
+      tagInfo.SetId(nextTagId);
+
+      nextTagId++;
+    }
+    else {
+      nextTagId=std::max(nextTagId,(TagId)(tagInfo.GetId()+1));
+    }
+
+    tags.push_back(tagInfo);
+    stringToTagMap[tagInfo.GetName()]=tagInfo.GetId();
+
+    return tagInfo.GetId();
+  }
+
+  void TypeConfig::RestoreTagInfo(const TagInfo& tagInfo)
+  {
+    // We have same tags, that are already and always
+    // registered in the constructor, we skip them here...
+    if (stringToTagMap.find(tagInfo.GetName())!=stringToTagMap.end()) {
+      return;
+    }
+
+    assert(stringToTagMap.find(tagInfo.GetName())==stringToTagMap.end());
+    assert(tagInfo.GetId()!=0 ||
+           (tagInfo.GetId()==0 && tagInfo.GetName().empty()));
+
+    nextTagId=std::max(nextTagId,(TagId)(tagInfo.GetId()+1));
+
+    if (tags.size()>=tagInfo.GetId()) {
+      tags.resize(tagInfo.GetId()+1);
+    }
+
+    tags[tagInfo.GetId()]=tagInfo;
+    stringToTagMap[tagInfo.GetName()]=tagInfo.GetId();
   }
 
   TypeConfig& TypeConfig::AddTypeInfo(TypeInfo& typeInfo)
@@ -201,12 +337,6 @@ namespace osmscout {
       idToTypeMap[typeInfo.GetId()]=typeInfo;
     }
 
-    if (typeInfo.GetTag()>=tagToTypeMaps.size()) {
-      tagToTypeMaps.resize(typeInfo.GetTag()+1);
-    }
-
-    tagToTypeMaps[typeInfo.GetTag()][typeInfo.GetTagValue()]=typeInfo;
-
     return *this;
   }
 
@@ -222,37 +352,68 @@ namespace osmscout {
 
   TagId TypeConfig::GetTagId(const char* name) const
   {
-    std::map<std::string,TagInfo>::const_iterator iter=stringToTagMap.find(name);
+    std::map<std::string,TagId>::const_iterator iter=stringToTagMap.find(name);
 
     if (iter!=stringToTagMap.end()) {
-      return iter->second.GetId();
+      return iter->second;
     }
     else {
       return tagIgnore;
     }
   }
 
-  const TypeInfo& TypeConfig::GetTypeInfo(TypeId id) const
+  const TagInfo& TypeConfig::GetTagInfo(TagId id) const
   {
-    std::map<TypeId,TypeInfo>::const_iterator iter=idToTypeMap.find(id);
+    assert(id<tags.size());
 
-    assert(iter!=idToTypeMap.end());
-
-    return iter->second;
+    return tags[id];
   }
 
-  bool TypeConfig::GetNodeTypeId(std::vector<Tag> &tags,
-                                 std::vector<Tag>::iterator& tag,
-                                 TypeId &type) const
+  const TypeInfo& TypeConfig::GetTypeInfo(TypeId id) const
   {
-    type=typeIgnore;
+    assert(id<types.size());
 
-    for (tag=tags.begin();
-         tag!=tags.end();
-         ++tag) {
-      type=GetNodeTypeId(tag->key,tag->value.c_str());
+    return types[id];
+  }
 
-      if (type!=typeIgnore) {
+  void TypeConfig::ResolveTags(const std::map<TagId,std::string>& map,
+                               std::vector<Tag>& tags) const
+  {
+    tags.clear();
+
+    for (std::map<TagId,std::string>::const_iterator t=map.begin();
+         t!=map.end();
+         ++t) {
+      if (GetTagInfo(t->first).IsInternalOnly()) {
+        continue;
+      }
+
+      Tag tag;
+
+      tag.key=t->first;
+      tag.value=t->second;
+
+      tags.push_back(tag);
+    }
+  }
+
+  bool TypeConfig::GetNodeTypeId(const std::map<TagId,std::string>& tagMap,
+                                 TypeId &typeId) const
+  {
+    typeId=typeIgnore;
+
+    if (tagMap.size()==0) {
+      return false;
+    }
+
+    for (size_t i=0; i<types.size(); i++) {
+      if (types[i].GetCondition()==NULL ||
+          !types[i].CanBeNode()) {
+        continue;
+      }
+
+      if (types[i].GetCondition()->Evaluate(tagMap)) {
+        typeId=types[i].GetId();
         return true;
       }
     }
@@ -260,136 +421,61 @@ namespace osmscout {
     return false;
   }
 
-  bool TypeConfig::GetWayAreaTypeId(std::vector<Tag>& tags,
-                                    std::vector<Tag>::iterator& wayTag,
+  bool TypeConfig::GetWayAreaTypeId(const std::map<TagId,std::string>& tagMap,
                                     TypeId &wayType,
-                                    std::vector<Tag>::iterator& areaTag,
                                     TypeId &areaType) const
   {
     wayType=typeIgnore;
     areaType=typeIgnore;
-    wayTag=tags.end();
-    areaTag=tags.end();
 
-    for (std::vector<Tag>::iterator tag=tags.begin();
-         tag!=tags.end();
-         ++tag) {
-      if (wayType==typeIgnore) {
-        wayType=GetWayTypeId(tag->key,tag->value.c_str());
-        if (wayType!=typeIgnore) {
-          wayTag=tag;
+    if (tagMap.size()==0) {
+      return false;
+    }
+
+    for (size_t i=0; i<types.size(); i++) {
+      if ((types[i].CanBeWay() || types[i].CanBeArea()) &&
+          types[i].GetCondition()!=NULL &&
+          types[i].GetCondition()->Evaluate(tagMap)) {
+        if (types[i].CanBeWay()) {
+          wayType=types[i].GetId();
         }
-      }
 
-      if (areaType==typeIgnore) {
-        areaType=GetAreaTypeId(tag->key,tag->value.c_str());
-        if (areaType!=typeIgnore) {
-          areaTag=tag;
+        if (types[i].CanBeArea()) {
+          areaType=types[i].GetId();
         }
-      }
 
-      if (wayType!=typeIgnore && areaType!=typeIgnore) {
-        return true;
+        if (wayType!=typeIgnore &&
+            areaType!=typeIgnore) {
+          return true;
+        }
       }
     }
 
     return wayType!=typeIgnore || areaType!=typeIgnore;
   }
 
-  bool TypeConfig::GetRelationTypeId(std::vector<Tag> &tags,
-                                     std::vector<Tag>::iterator& tag,
-                                     TypeId &type) const
+  bool TypeConfig::GetRelationTypeId(const std::map<TagId,std::string>& tagMap,
+                                     TypeId &typeId) const
   {
-    std::string relType;
+    typeId=typeIgnore;
 
-    for (tag=tags.begin();
-         tag!=tags.end();
-         ++tag) {
-      if (tag->key==tagType) {
-        relType=tag->value;
-        break;
-      }
+    if (tagMap.size()==0) {
+      return false;
     }
 
-    type=typeIgnore;
+    for (size_t i=0; i<types.size(); i++) {
+      if (types[i].GetCondition()==NULL ||
+          !types[i].CanBeRelation()) {
+        continue;
+      }
 
-    type=typeIgnore;
-
-    for (tag=tags.begin();
-         tag!=tags.end();
-         ++tag) {
-      type=GetRelationTypeId(tag->key,tag->value.c_str());
-
-      if (type!=typeIgnore) {
+      if (types[i].GetCondition()->Evaluate(tagMap)) {
+        typeId=types[i].GetId();
         return true;
       }
     }
 
     return false;
-  }
-
-  TypeId TypeConfig::GetNodeTypeId(TagId tagKey, const char* tagValue) const
-  {
-    if (tagKey>=tagToTypeMaps.size()) {
-      return typeIgnore;
-    }
-
-    std::map<std::string,TypeInfo>::const_iterator iter=tagToTypeMaps[tagKey].find(tagValue);
-
-    if (iter!=tagToTypeMaps[tagKey].end() &&
-        iter->second.CanBeNode()) {
-      return iter->second.GetId();
-    }
-
-    return typeIgnore;
-  }
-
-  TypeId TypeConfig::GetWayTypeId(TagId tagKey, const char* tagValue) const
-  {
-    if (tagKey>=tagToTypeMaps.size()) {
-      return typeIgnore;
-    }
-
-    std::map<std::string,TypeInfo>::const_iterator iter=tagToTypeMaps[tagKey].find(tagValue);
-
-    if (iter!=tagToTypeMaps[tagKey].end() &&
-        iter->second.CanBeWay()) {
-      return iter->second.GetId();
-    }
-
-    return typeIgnore;
-  }
-
-  TypeId TypeConfig::GetAreaTypeId(TagId tagKey, const char* tagValue) const
-  {
-    if (tagKey>=tagToTypeMaps.size()) {
-      return typeIgnore;
-    }
-
-    std::map<std::string,TypeInfo>::const_iterator iter=tagToTypeMaps[tagKey].find(tagValue);
-
-    if (iter!=tagToTypeMaps[tagKey].end() &&
-        iter->second.CanBeArea()) {
-      return iter->second.GetId();
-    }
-
-    return typeIgnore;
-  }
-
-  TypeId TypeConfig::GetRelationTypeId(TagId tagKey, const char* tagValue) const
-  {
-    if (tagKey>=tagToTypeMaps.size()) {
-      return typeIgnore;
-    }
-
-    std::map<std::string,TypeInfo>::const_iterator iter=tagToTypeMaps[tagKey].find(tagValue);
-
-    if (iter!=tagToTypeMaps[tagKey].end() &&
-        iter->second.CanBeRelation()) {
-      return iter->second.GetId();
-    }
-
-    return typeIgnore;
   }
 
   TypeId TypeConfig::GetNodeTypeId(const std::string& name) const
@@ -438,17 +524,6 @@ namespace osmscout {
     }
 
     return typeIgnore;
-  }
-
-  void TypeConfig::GetWaysWithKey(TagId tagKey, std::set<TypeId>& types) const
-  {
-    for (std::map<std::string,TypeInfo>::const_iterator iter=tagToTypeMaps[tagKey].begin();
-         iter!=tagToTypeMaps[tagKey].end();
-         ++iter) {
-      if (iter->second.CanBeWay()) {
-        types.insert(iter->second.GetId());
-      }
-    }
   }
 
   void TypeConfig::GetRoutables(std::set<TypeId>& types) const

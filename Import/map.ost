@@ -1,26 +1,4 @@
 OST
-TAGS
-  TAG "highway"
-  TAG "junction"
-  TAG "railway"
-  TAG "aeroway"
-  TAG "waterway"
-  TAG "landuse"
-  TAG "natural"
-  TAG "boundary"
-  TAG "power"
-  TAG "amenity"
-  TAG "shop"
-  TAG "tourism"
-  TAG "historic"
-  TAG "military"
-  TAG "sport"
-  TAG "leisure"
-  TAG "barrier"
-  TAG "place"
-  TAG "building"
-  TAG "restriction"
-  TAG "route"
 
 TYPES
   TYPE "highway_motorway" WHERE "highway"=="motorway" CAN BE WAY RELATION OPTIONS ROUTE INDEX

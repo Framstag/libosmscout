@@ -35,15 +35,40 @@ namespace osmscout {
 
   const static TypeId typeIgnore      = 0;
 
+  class OSMSCOUT_API Condition
+  {
+  public:
+    virtual ~Condition();
+
+    virtual Condition* Copy() const = 0;
+    virtual bool Evaluate(const std::map<TagId,std::string>& tagMap) = 0;
+  };
+
+  class OSMSCOUT_API TagEquals : public Condition
+  {
+  private:
+    TagId       tag;
+    std::string tagValue;
+
+  public:
+    TagEquals(TagId tag,
+              const std::string& tagValue);
+
+    Condition* Copy() const;
+    bool Evaluate(const std::map<TagId,std::string>& tagMap);
+  };
+
   class OSMSCOUT_API TagInfo
   {
   private:
     TagId       id;
     std::string name;
+    bool        internalOnly;
 
   public:
     TagInfo();
-    TagInfo(const std::string& name);
+    TagInfo(const std::string& name,
+            bool internalOnly);
 
     TagInfo& SetId(TagId id);
 
@@ -56,6 +81,11 @@ namespace osmscout {
     {
       return id;
     }
+
+    inline bool IsInternalOnly() const
+    {
+      return internalOnly;
+    }
   };
 
   class OSMSCOUT_API TypeInfo
@@ -63,8 +93,9 @@ namespace osmscout {
   private:
     TypeId      id;
     std::string name;
-    TagId       tag;
-    std::string tagValue;
+
+    Condition   *condition;
+
     bool        canBeNode;
     bool        canBeWay;
     bool        canBeArea;
@@ -75,12 +106,15 @@ namespace osmscout {
 
   public:
     TypeInfo();
+    TypeInfo(const TypeInfo& other);
+    virtual ~TypeInfo();
+
+    void operator=(const TypeInfo& other);
 
     TypeInfo& SetId(TypeId id);
 
     TypeInfo& SetType(const std::string& name,
-                      TagId tag,
-                      const std::string tagValue);
+                      Condition* condition);
 
     inline TypeId GetId() const
     {
@@ -92,14 +126,9 @@ namespace osmscout {
       return name;
     }
 
-    inline TagId GetTag() const
+    inline Condition* GetCondition() const
     {
-      return tag;
-    }
-
-    inline std::string GetTagValue() const
-    {
-      return tagValue;
+      return condition;
     }
 
     inline TypeInfo& CanBeNode(bool canBeNode)
@@ -196,8 +225,7 @@ namespace osmscout {
     TagId                                           nextTagId;
     TypeId                                          nextTypeId;
 
-    std::map<std::string,TagInfo>                   stringToTagMap;
-    std::vector<std::map<std::string,TypeInfo> >    tagToTypeMaps;
+    std::map<std::string,TagId>                     stringToTagMap;
     std::map<std::string,TypeInfo>                  nameToTypeMap;
     std::map<TypeId,TypeInfo>                       idToTypeMap;
 
@@ -220,7 +248,11 @@ namespace osmscout {
     TypeConfig();
     virtual ~TypeConfig();
 
-    TypeConfig& AddTagInfo(const TagInfo& tagInfo);
+    void RestoreTagInfo(const TagInfo& tagInfo);
+
+    TagId RegisterTagForInternalUse(const std::string& tagName);
+    TagId RegisterTagForExternalUse(const std::string& tagName);
+
     TypeConfig& AddTypeInfo(TypeInfo& typeInfo);
 
     const std::vector<TagInfo>& GetTags() const;
@@ -230,31 +262,24 @@ namespace osmscout {
 
     TagId GetTagId(const char* name) const;
 
+    const TagInfo& GetTagInfo(TagId id) const;
     const TypeInfo& GetTypeInfo(TypeId id) const;
 
-    bool GetNodeTypeId(std::vector<Tag>& tags,
-                       std::vector<Tag>::iterator& tag,
-                       TypeId &typeId) const;
-    bool GetWayAreaTypeId(std::vector<Tag>& tags,
-                          std::vector<Tag>::iterator& wayTag,
-                          TypeId &wayType,
-                          std::vector<Tag>::iterator& areaTag,
-                          TypeId &areaType) const;
-    bool GetRelationTypeId(std::vector<Tag>& tags,
-                           std::vector<Tag>::iterator& tag,
-                           TypeId &typeId) const;
+    void ResolveTags(const std::map<TagId,std::string>& map,
+                     std::vector<Tag>& tags) const;
 
-    TypeId GetNodeTypeId(TagId tagKey, const char* tagValue) const;
-    TypeId GetWayTypeId(TagId tagKey, const char* tagValue) const;
-    TypeId GetAreaTypeId(TagId tagKey, const char* tagValue) const;
-    TypeId GetRelationTypeId(TagId tagKey, const char* tagValue) const;
+    bool GetNodeTypeId(const std::map<TagId,std::string>& tagMap,
+                       TypeId &typeId) const;
+    bool GetWayAreaTypeId(const std::map<TagId,std::string>& tagMap,
+                          TypeId &wayType,
+                          TypeId &areaType) const;
+    bool GetRelationTypeId(const std::map<TagId,std::string>& tagMap,
+                           TypeId &typeId) const;
 
     TypeId GetNodeTypeId(const std::string& name) const;
     TypeId GetWayTypeId(const std::string& name) const;
     TypeId GetAreaTypeId(const std::string& name) const;
     TypeId GetRelationTypeId(const std::string& name) const;
-
-    void GetWaysWithKey(TagId tagKey, std::set<TypeId>& types) const;
 
     void GetRoutables(std::set<TypeId>& types) const;
 

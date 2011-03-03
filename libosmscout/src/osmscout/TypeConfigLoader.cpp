@@ -96,17 +96,19 @@ namespace osmscout {
     for (size_t i=1; i<=tagCount; i++) {
       TagId       id;
       std::string name;
+      bool        internalOnly;
 
       if (!(scanner.ReadNumber(id) &&
-            scanner.Read(name))) {
+            scanner.Read(name),
+            scanner.Read(internalOnly))) {
         std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
       }
 
-      TagInfo tagInfo(name);
+      TagInfo tagInfo(name,internalOnly);
 
       tagInfo.SetId(id);
 
-      config.AddTagInfo(tagInfo);
+      config.RestoreTagInfo(tagInfo);
     }
 
     size_t typeCount;
@@ -119,8 +121,6 @@ namespace osmscout {
     for (size_t i=1; i<=typeCount; i++) {
       TypeId      id;
       std::string name;
-      TagId       tag;
-      std::string tagValue;
       bool        canBeNode;
       bool        canBeWay;
       bool        canBeArea;
@@ -131,8 +131,6 @@ namespace osmscout {
 
       if (!(scanner.ReadNumber(id) &&
             scanner.Read(name) &&
-            scanner.ReadNumber(tag) &&
-            scanner.Read(tagValue) &&
             scanner.Read(canBeNode) &&
             scanner.Read(canBeWay) &&
             scanner.Read(canBeArea) &&
@@ -149,8 +147,7 @@ namespace osmscout {
 
       typeInfo.SetId(id);
 
-      typeInfo.SetType(name,
-                       tag,tagValue);
+      typeInfo.SetType(name,NULL);
 
       typeInfo.CanBeNode(canBeNode);
       typeInfo.CanBeWay(canBeWay);

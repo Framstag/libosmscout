@@ -5,15 +5,6 @@
 
 COMPILER OST
 
-void HandleTag(const std::string& nameValue)
-{
-  std::string  name(nameValue);
-
-  TagInfo tagInfo(name);
-
-  config.AddTagInfo(tagInfo);
-}
-
 std::string Destring(const char* str)
 {
   std::string result(str);
@@ -45,25 +36,12 @@ COMMENTS FROM "//" TO eol
 IGNORE '\t' + '\r' + '\n'
 
 PRODUCTIONS
-  OST         = SYNC "OST" [TAGS] [TYPES] "END".
-  TAGS        = SYNC "TAGS" TAG {TAG}.
-  TAG         = (.
-                  std::string  valueValue;
-                .)
-                SYNC "TAG"
-                string (. valueValue=Destring(t->val); .)
-                (.
-                  if (t->val!=NULL &&
-                      strlen(t->val)>0) {
-                    HandleTag(valueValue);
-                  }
-                .).
+  OST         = SYNC "OST" [TYPES] "END".
   TYPES       = SYNC "TYPES" TYPE {TYPE}.
   TYPE        = (.
                   std::string idValue;
                   std::string typeValue;
-                  std::string nameValue;
-                  std::string valueValue;
+                  Condition   *condition=NULL;
                   TypeInfo    typeInfo;
                 .)
                 SYNC "TYPE"
@@ -71,21 +49,10 @@ PRODUCTIONS
                 (.
                   typeValue=Destring(t->val);
                 .)
-                "WHERE" string (. nameValue=Destring(t->val); .) "==" string (. valueValue=Destring(t->val); .)
+                "WHERE"
+                CONDITION<condition>
                 (.
-                  TagId tag=config.GetTagId(nameValue.c_str());
-
-                  if (tag==tagIgnore) {
-                    std::string e;
-
-                    e="Type with tag '"+nameValue+"/"+valueValue+"' has no corresponding tag definition, skipping!";
-
-                    SemErr(e.c_str());
-                  }
-                  else {
-                    typeInfo.SetType(typeValue,
-                                     tag,valueValue);
-                  }
+                  typeInfo.SetType(typeValue,condition);
                 .)
 
                 TYPEKINDS<typeInfo>
@@ -93,6 +60,22 @@ PRODUCTIONS
                 (.
                   config.AddTypeInfo(typeInfo);
                 .)
+                .
+
+  CONDITION<Condition*& condition>
+              = (.
+                  std::string nameValue;
+                  std::string valueValue;
+                .)
+                string (. nameValue=Destring(t->val); .)
+                "=="
+                string (. valueValue=Destring(t->val); .)
+                (.
+                  TagId tagId=config.RegisterTagForInternalUse(nameValue);
+
+                  condition=new TagEquals(tagId,valueValue);
+                .)
+
                 .
   /*
   CONDITIONS  = ANDCOND { "OR" ANDCOND} .
