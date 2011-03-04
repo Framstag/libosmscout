@@ -549,14 +549,14 @@ namespace osmscout {
         dash.add_dash(1,0);
         break;
       case LineStyle::longDash:
-        dash.add_dash(7,3);
+        dash.add_dash(3*width,width);
         break;
       case LineStyle::dotted:
-        dash.add_dash(1,2);
+        dash.add_dash(width,width);
         break;
       case LineStyle::lineDot:
-        dash.add_dash(7,3);
-        dash.add_dash(1,3);
+        dash.add_dash(2*width,width);
+        dash.add_dash(width,width);
         break;
       }
 

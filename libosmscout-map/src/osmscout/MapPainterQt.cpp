@@ -439,14 +439,26 @@ namespace osmscout {
     case LineStyle::normal:
       pen.setStyle(Qt::SolidLine);
       break;
-    case LineStyle::longDash:
-      pen.setStyle(Qt::DashLine);
+    case LineStyle::longDash: {
+        QVector<qreal> dashes;
+
+        dashes << 3 << 1;
+        pen.setDashPattern(dashes);
+      }
       break;
-    case LineStyle::dotted:
-      pen.setStyle(Qt::DotLine);
+    case LineStyle::dotted: {
+        QVector<qreal> dashes;
+
+        dashes << 1 << 1;
+        pen.setDashPattern(dashes);
+      }
       break;
-    case LineStyle::lineDot:
-      pen.setStyle(Qt::DashDotLine);
+    case LineStyle::lineDot: {
+        QVector<qreal> dashes;
+
+        dashes << 2 << 1 << 1 << 1;
+        pen.setDashPattern(dashes);
+      }
       break;
     }
 

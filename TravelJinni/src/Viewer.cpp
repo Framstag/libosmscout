@@ -153,7 +153,8 @@ public:
         lat=minLat+(maxLat-minLat)/2;
         lon=minLon+(maxLon-minLon)/2;
 
-        while (dlat>maxLat-minLat && dlon>maxLon-minLon) {
+        while (dlat>maxLat-minLat &&
+               dlon>maxLon-minLon) {
           zoom=zoom*2;
           dlat=dlat/2;
           dlon=dlon/2;
@@ -193,7 +194,8 @@ public:
                           olon,olat);
 
     // Get current mouse pos coordinates (relative to drag start)
-    projection.PixelToGeo(event.x-startX,event.y-startY,
+    projection.PixelToGeo(event.x-startX,
+                          event.y-startY,
                           tlon,tlat);
 
     lon=startLon-(tlon-olon);
@@ -239,7 +241,8 @@ public:
       startY=event.y;
       return true;
     }
-    else if (event.IsGrabEnd() && event.button==Lum::OS::MouseEvent::button1) {
+    else if (event.IsGrabEnd() &&
+             event.button==Lum::OS::MouseEvent::button1) {
       HandleMouseMove(event);
       Redraw();
     }

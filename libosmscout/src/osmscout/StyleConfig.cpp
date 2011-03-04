@@ -37,6 +37,7 @@ namespace osmscout {
      outlineA(1),
      minPixel(2),
      width(5),
+     fixedWidth(false),
      outline(0)
   {
     // no code
@@ -94,6 +95,13 @@ namespace osmscout {
   LineStyle& LineStyle::SetWidth(double value)
   {
     width=value;
+
+    return *this;
+  }
+
+  LineStyle& LineStyle::SetFixedWidth(bool fixedWidth)
+  {
+    this->fixedWidth=fixedWidth;
 
     return *this;
   }

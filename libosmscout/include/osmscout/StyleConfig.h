@@ -57,6 +57,7 @@ namespace osmscout {
     double outlineA;
     double minPixel;
     double width;
+    double fixedWidth;
     double outline;
 
   public:
@@ -68,6 +69,7 @@ namespace osmscout {
     LineStyle& SetOutlineColor(double r, double g, double b, double a);
     LineStyle& SetMinPixel(double value);
     LineStyle& SetWidth(double value);
+    LineStyle& SetFixedWidth(bool fixedWidth);
     LineStyle& SetOutline(double value);
 
     inline bool IsVisible() const
@@ -148,6 +150,11 @@ namespace osmscout {
     inline double GetWidth() const
     {
       return width;
+    }
+
+    inline bool GetFixedWidth() const
+    {
+      return fixedWidth;
     }
 
     inline double GetOutline() const

@@ -242,6 +242,11 @@ PRODUCTIONS
                   ]
 
                   [
+                    "FIXEDWIDTH"
+                    (. style.SetFixedWidth(true); .)
+                  ]
+
+                  [
                     (. double outline=style.GetOutline(); .)
                     OUTLINE<outline>
                     (. style.SetOutline(outline); .)

@@ -971,12 +971,22 @@ namespace osmscout {
   {
     double lineWidth=attributes.GetWidth();
 
-    if (lineWidth==0) {
+    if (style.GetFixedWidth()) {
       lineWidth=style.GetWidth();
-    }
 
-    lineWidth=std::max(style.GetMinPixel(),
-                       lineWidth/projection.GetPixelSize());
+      lineWidth=std::max(style.GetMinPixel(),
+                         lineWidth/projection.GetPixelSize());
+    }
+    else {
+      lineWidth=attributes.GetWidth();
+
+      if (lineWidth==0) {
+        lineWidth=style.GetWidth();
+      }
+
+      lineWidth=std::max(style.GetMinPixel(),
+                         lineWidth/projection.GetPixelSize());
+    }
 
     bool outline=style.GetOutline()>0 &&
                  lineWidth-2*style.GetOutline()>=parameter.GetOutlineMinWidth();
@@ -1050,8 +1060,14 @@ namespace osmscout {
       lineWidth=style.GetWidth();
     }
 
-    lineWidth=std::max(style.GetMinPixel(),
-                       lineWidth/projection.GetPixelSize());
+    if (style.GetFixedWidth()) {
+      lineWidth=std::max(style.GetMinPixel(),
+                         lineWidth);
+    }
+    else {
+      lineWidth=std::max(style.GetMinPixel(),
+                         lineWidth/projection.GetPixelSize());
+    }
 
     bool outline=style.GetOutline()>0 &&
                  lineWidth-2*style.GetOutline()>=parameter.GetOutlineMinWidth();

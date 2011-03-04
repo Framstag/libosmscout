@@ -36,10 +36,6 @@ namespace osmscout {
 
   static const double gradtorad=2*M_PI/360;
 
-  static double longDash[]= {7,3};
-  static double dotted[]= {1,2};
-  static double lineDot[]= {7,3,1,3};
-
   /* Returns Euclidean distance between two points */
   static double two_points_distance(cairo_path_data_t *a, cairo_path_data_t *b)
   {
@@ -753,6 +749,8 @@ namespace osmscout {
                                  CapStyle endCap,
                                  const std::vector<Point>& nodes)
   {
+    double dashArray[4];
+
     cairo_set_source_rgba(draw,r,g,b,a);
 
     cairo_set_line_width(draw,width);
@@ -775,13 +773,21 @@ namespace osmscout {
       cairo_set_dash(draw,NULL,0,0);
       break;
     case LineStyle::longDash:
-      cairo_set_dash(draw,longDash,2,0);
+      dashArray[0]=3*width;
+      dashArray[1]=1*width;
+      cairo_set_dash(draw,dashArray,2,0);
       break;
     case LineStyle::dotted:
-      cairo_set_dash(draw,dotted,2,0);
+      dashArray[0]=1*width;
+      dashArray[1]=1*width;
+      cairo_set_dash(draw,dashArray,2,0);
       break;
     case LineStyle::lineDot:
-      cairo_set_dash(draw,lineDot,4,0);
+      dashArray[0]=2*width;
+      dashArray[1]=1*width;
+      dashArray[2]=1*width;
+      dashArray[3]=1*width;
+      cairo_set_dash(draw,dashArray,4,0);
       break;
     }
 

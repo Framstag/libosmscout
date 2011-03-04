@@ -59,7 +59,8 @@ void MapWidget::InitialisationFinished(const DatabaseLoadedResponse& response)
   lat=response.minLat+(response.maxLat-response.minLat)/2;
   lon=response.minLon+(response.maxLon-response.minLon)/2;
 
-  while (dlat>response.maxLat-response.minLat && dlon>response.maxLon-response.minLon) {
+  while (dlat>response.maxLat-response.minLat &&
+         dlon>response.maxLon-response.minLon) {
     zoom=zoom*2;
     dlat=dlat/2;
     dlon=dlon/2;
@@ -177,7 +178,8 @@ void MapWidget::HandleMouseMove(QMouseEvent* event)
                         olon,olat);
 
   // Get current mouse pos coordinates (relative to drag start)
-  projection.PixelToGeo(event->x()-startX,event->y()-startY,
+  projection.PixelToGeo(event->x()-startX,
+                        event->y()-startY,
                         tlon,tlat);
 
   lon=startLon-(tlon-olon);
