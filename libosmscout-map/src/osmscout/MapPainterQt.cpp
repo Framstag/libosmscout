@@ -404,14 +404,14 @@ namespace osmscout {
     }
   }
 
-  void MapPainterQt::DrawPath(const LineStyle::Style& style,
-                              const Projection& projection,
+  void MapPainterQt::DrawPath(const Projection& projection,
                               const MapParameter& parameter,
                               double r,
                               double g,
                               double b,
                               double a,
                               double width,
+                              const std::vector<double>& dash,
                               CapStyle startCap,
                               CapStyle endCap,
                               const std::vector<Point>& nodes)
@@ -424,42 +424,24 @@ namespace osmscout {
 
     if (startCap==capRound &&
         endCap==capRound &&
-        style==LineStyle::normal) {
+        dash.size()==0) {
       pen.setCapStyle(Qt::RoundCap);
     }
     else {
       pen.setCapStyle(Qt::FlatCap);
     }
 
-    switch (style) {
-    case LineStyle::none:
-      // way should not be visible in this case!
-      assert(false);
-      break;
-    case LineStyle::normal:
+    if (dash.size()==0) {
       pen.setStyle(Qt::SolidLine);
-      break;
-    case LineStyle::longDash: {
-        QVector<qreal> dashes;
+    }
+    else {
+      QVector<qreal> dashes;
 
-        dashes << 3 << 1;
-        pen.setDashPattern(dashes);
+      for (size_t i=0; i<dash.size(); i++) {
+        dashes << dash[i];
       }
-      break;
-    case LineStyle::dotted: {
-        QVector<qreal> dashes;
 
-        dashes << 1 << 1;
-        pen.setDashPattern(dashes);
-      }
-      break;
-    case LineStyle::lineDot: {
-        QVector<qreal> dashes;
-
-        dashes << 2 << 1 << 1 << 1;
-        pen.setDashPattern(dashes);
-      }
-      break;
+      pen.setDashPattern(dashes);
     }
 
     TransformWay(projection,parameter,nodes);
@@ -514,9 +496,9 @@ namespace osmscout {
     painter->setPen(pen);
     painter->drawPolyline(polygon);*/
 
-    if (style==LineStyle::normal &&
-      startCap==capRound &&
-      endCap!=capRound) {
+    if (dash.size()==0 &&
+        startCap==capRound &&
+        endCap!=capRound) {
       painter->setBrush(QBrush(QColor::fromRgbF(r,g,b,a)));
 
       painter->drawEllipse(QPointF(nodeX[firstNode],
@@ -524,7 +506,7 @@ namespace osmscout {
                                    width/2,width/2);
     }
 
-    if (style==LineStyle::normal &&
+    if (dash.size()==0 &&
       endCap==capRound &&
       startCap!=capRound) {
       painter->setBrush(QBrush(QColor::fromRgbF(r,g,b,a)));
@@ -620,27 +602,19 @@ namespace osmscout {
                                   style.GetLineA()));
     pen.setWidthF(lineWidth);
 
-    switch (style.GetStyle()) {
-    case LineStyle::none:
-      // way should not be visible in this case!
-      assert(false);
-      break;
-    case LineStyle::normal:
+    if (style.GetDash().size()==0) {
       pen.setStyle(Qt::SolidLine);
       pen.setCapStyle(Qt::RoundCap);
-      break;
-    case LineStyle::longDash:
-      pen.setStyle(Qt::DashLine);
+    }
+    else {
+      QVector<qreal> dashes;
+
+      for (size_t i=0; i<style.GetDash().size(); i++) {
+        dashes << style.GetDash()[i];
+      }
+
+      pen.setDashPattern(dashes);
       pen.setCapStyle(Qt::FlatCap);
-      break;
-    case LineStyle::dotted:
-      pen.setStyle(Qt::DotLine);
-      pen.setCapStyle(Qt::FlatCap);
-      break;
-    case LineStyle::lineDot:
-      pen.setStyle(Qt::DashDotLine);
-      pen.setCapStyle(Qt::FlatCap);
-      break;
     }
 
     painter->setPen(pen);

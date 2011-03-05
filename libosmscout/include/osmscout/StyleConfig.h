@@ -32,38 +32,28 @@ namespace osmscout {
    */
   class OSMSCOUT_API LineStyle
   {
-  public:
-    enum Style {
-      none,
-      normal,
-      longDash,
-      dotted,
-      lineDot
-    };
-
   private:
-    Style  style;
-    double lineR;
-    double lineG;
-    double lineB;
-    double lineA;
-    double alternateR;
-    double alternateG;
-    double alternateB;
-    double alternateA;
-    double outlineR;
-    double outlineG;
-    double outlineB;
-    double outlineA;
-    double minPixel;
-    double width;
-    double fixedWidth;
-    double outline;
+    double              lineR;
+    double              lineG;
+    double              lineB;
+    double              lineA;
+    double              alternateR;
+    double              alternateG;
+    double              alternateB;
+    double              alternateA;
+    double              outlineR;
+    double              outlineG;
+    double              outlineB;
+    double              outlineA;
+    double              minPixel;
+    double              width;
+    double              fixedWidth;
+    double              outline;
+    std::vector<double> dash;
 
   public:
     LineStyle();
 
-    LineStyle& SetStyle(Style style);
     LineStyle& SetLineColor(double r, double g, double b, double a);
     LineStyle& SetAlternateColor(double r, double g, double b, double a);
     LineStyle& SetOutlineColor(double r, double g, double b, double a);
@@ -71,15 +61,11 @@ namespace osmscout {
     LineStyle& SetWidth(double value);
     LineStyle& SetFixedWidth(bool fixedWidth);
     LineStyle& SetOutline(double value);
+    LineStyle& AddDashValue(double dashValue);
 
     inline bool IsVisible() const
     {
-      return style!=none;
-    }
-
-    inline const Style& GetStyle() const
-    {
-      return style;
+      return width>0.0;
     }
 
     inline double GetLineR() const
@@ -160,6 +146,16 @@ namespace osmscout {
     inline double GetOutline() const
     {
       return outline;
+    }
+
+    inline bool HasDashValues() const
+    {
+      return dash.size()>0;
+    }
+
+    inline const std::vector<double>& GetDash() const
+    {
+      return dash;
     }
   };
 

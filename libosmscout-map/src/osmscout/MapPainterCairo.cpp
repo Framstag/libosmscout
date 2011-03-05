@@ -737,19 +737,21 @@ namespace osmscout {
     cairo_paint(draw);
   }
 
-  void MapPainterCairo::DrawPath(const LineStyle::Style& style,
-                                 const Projection& projection,
+  void MapPainterCairo::DrawPath(const Projection& projection,
                                  const MapParameter& parameter,
                                  double r,
                                  double g,
                                  double b,
                                  double a,
                                  double width,
+                                 const std::vector<double>& dash,
                                  CapStyle startCap,
                                  CapStyle endCap,
                                  const std::vector<Point>& nodes)
   {
-    double dashArray[4];
+    double dashArray[10];
+
+    assert(dash.size()<=10);
 
     cairo_set_source_rgba(draw,r,g,b,a);
 
@@ -757,38 +759,21 @@ namespace osmscout {
 
     if (startCap==capRound &&
         endCap==capRound &&
-        style==LineStyle::normal) {
+        dash.size()==0) {
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
     }
     else {
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
     }
 
-    switch (style) {
-    case LineStyle::none:
-      // way should not be visible in this case!
-      assert(false);
-      break;
-    case LineStyle::normal:
+    if (dash.size()==0) {
       cairo_set_dash(draw,NULL,0,0);
-      break;
-    case LineStyle::longDash:
-      dashArray[0]=3*width;
-      dashArray[1]=1*width;
-      cairo_set_dash(draw,dashArray,2,0);
-      break;
-    case LineStyle::dotted:
-      dashArray[0]=1*width;
-      dashArray[1]=1*width;
-      cairo_set_dash(draw,dashArray,2,0);
-      break;
-    case LineStyle::lineDot:
-      dashArray[0]=2*width;
-      dashArray[1]=1*width;
-      dashArray[2]=1*width;
-      dashArray[3]=1*width;
-      cairo_set_dash(draw,dashArray,4,0);
-      break;
+    }
+    else {
+      for (size_t i=0; i<dash.size(); i++) {
+        dashArray[i]=dash[i]*width;
+      }
+      cairo_set_dash(draw,dashArray,dash.size(),0);
     }
 
     TransformWay(projection,parameter,nodes);
@@ -820,7 +805,7 @@ namespace osmscout {
 
     cairo_stroke(draw);
 
-    if (style==LineStyle::normal &&
+    if (dash.size()==0 &&
       startCap==capRound &&
       endCap!=capRound) {
       cairo_new_path(draw);
@@ -833,7 +818,7 @@ namespace osmscout {
       cairo_stroke(draw);
     }
 
-    if (style==LineStyle::normal &&
+    if (dash.size()==0 &&
       endCap==capRound &&
       startCap!=capRound) {
       cairo_new_path(draw);
@@ -883,14 +868,14 @@ namespace osmscout {
     cairo_fill(draw);
 
     if (lineStyle!=NULL) {
-      DrawPath(lineStyle->GetStyle(),
-               projection,
+      DrawPath(projection,
                parameter,
                lineStyle->GetLineR(),
                lineStyle->GetLineG(),
                lineStyle->GetLineB(),
                lineStyle->GetLineA(),
                borderWidth[(size_t)type],
+               lineStyle->GetDash(),
                capRound,
                capRound,
                nodes);
@@ -933,14 +918,14 @@ namespace osmscout {
     cairo_fill(draw);
 
     if (lineStyle!=NULL) {
-      DrawPath(lineStyle->GetStyle(),
-               projection,
+      DrawPath(projection,
                parameter,
                lineStyle->GetLineR(),
                lineStyle->GetLineG(),
                lineStyle->GetLineB(),
                lineStyle->GetLineA(),
                borderWidth[(size_t)type],
+               lineStyle->GetDash(),
                capRound,
                capRound,
                nodes);

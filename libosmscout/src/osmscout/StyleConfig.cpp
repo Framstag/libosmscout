@@ -22,8 +22,7 @@
 namespace osmscout {
 
   LineStyle::LineStyle()
-   : style(normal),
-     lineR(1),
+   : lineR(1),
      lineG(1),
      lineB(1),
      lineA(1),
@@ -36,18 +35,11 @@ namespace osmscout {
      outlineB(0.75),
      outlineA(1),
      minPixel(2),
-     width(5),
+     width(0),
      fixedWidth(false),
      outline(0)
   {
     // no code
-  }
-
-  LineStyle& LineStyle::SetStyle(Style style)
-  {
-    this->style=style;
-
-    return *this;
   }
 
   LineStyle& LineStyle::SetLineColor(double r, double g, double b, double a)
@@ -113,6 +105,10 @@ namespace osmscout {
     return *this;
   }
 
+  LineStyle& LineStyle::AddDashValue(double dashValue)
+  {
+    dash.push_back(dashValue);
+  }
 
 
   FillStyle::FillStyle()

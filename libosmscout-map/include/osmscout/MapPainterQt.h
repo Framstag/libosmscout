@@ -68,14 +68,14 @@ namespace osmscout {
     void DrawSymbol(const SymbolStyle* style,
                             double x, double y);
 
-    void DrawPath(const LineStyle::Style& style,
-                  const Projection& projection,
+    void DrawPath(const Projection& projection,
                   const MapParameter& parameter,
                   double r,
                   double g,
                   double b,
                   double a,
                   double width,
+                  const std::vector<double>& dash,
                   CapStyle startCap,
                   CapStyle endCap,
                   const std::vector<Point>& nodes);

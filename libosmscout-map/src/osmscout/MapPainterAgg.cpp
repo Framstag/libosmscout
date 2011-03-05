@@ -475,17 +475,17 @@ namespace osmscout {
     // TODO
   }
 
-  void MapPainterAgg::DrawPath(const LineStyle::Style& style,
-                              const Projection& projection,
-                              const MapParameter& parameter,
-                              double r,
-                              double g,
-                              double b,
-                              double a,
-                              double width,
-                              CapStyle startCap,
-                              CapStyle endCap,
-                              const std::vector<Point>& nodes)
+  void MapPainterAgg::DrawPath(const Projection& projection,
+                               const MapParameter& parameter,
+                               double r,
+                               double g,
+                               double b,
+                               double a,
+                               double width,
+                               const std::vector<double>& dash,
+                               CapStyle startCap,
+                               CapStyle endCap,
+                               const std::vector<Point>& nodes)
   {
     TransformWay(projection,parameter,nodes);
 
@@ -509,14 +509,13 @@ namespace osmscout {
 
     renderer_aa->color(agg::rgba(r,g,b,a));
 
-    if (style==LineStyle::normal) {
+    if (dash.size()==0) {
       agg::conv_stroke<agg::path_storage> stroke(path);
 
       stroke.width(width);
 
       if (startCap==capRound &&
-          endCap==capRound &&
-          style==LineStyle::normal) {
+          endCap==capRound) {
         stroke.line_cap(agg::round_cap);
       }
       else {
@@ -528,36 +527,15 @@ namespace osmscout {
       agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
     }
     else {
-      agg::conv_dash<agg::path_storage>                    dash(path);
-      agg::conv_stroke<agg::conv_dash<agg::path_storage> > stroke(dash);
+      agg::conv_dash<agg::path_storage>                    dasher(path);
+      agg::conv_stroke<agg::conv_dash<agg::path_storage> > stroke(dasher);
 
       stroke.width(width);
 
-      if (startCap==capRound &&
-          endCap==capRound &&
-          style==LineStyle::normal) {
-        stroke.line_cap(agg::round_cap);
-      }
-      else {
-        stroke.line_cap(agg::butt_cap);
-      }
+      stroke.line_cap(agg::butt_cap);
 
-      switch (style) {
-      case LineStyle::none:
-        break;
-      case LineStyle::normal:
-        dash.add_dash(1,0);
-        break;
-      case LineStyle::longDash:
-        dash.add_dash(3*width,width);
-        break;
-      case LineStyle::dotted:
-        dash.add_dash(width,width);
-        break;
-      case LineStyle::lineDot:
-        dash.add_dash(2*width,width);
-        dash.add_dash(width,width);
-        break;
+      for (size_t i=0; i<dash.size(); i+=2) {
+        dasher.add_dash(dash[i]*width,dash[i+1]*width);
       }
 
       rasterizer->add_path(stroke);
@@ -607,14 +585,14 @@ namespace osmscout {
     agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
 
     if (lineStyle!=NULL) {
-      DrawPath(lineStyle->GetStyle(),
-               projection,
+      DrawPath(projection,
                parameter,
                lineStyle->GetLineR(),
                lineStyle->GetLineG(),
                lineStyle->GetLineB(),
                lineStyle->GetLineA(),
                borderWidth[(size_t)type],
+               lineStyle->GetDash(),
                capRound,
                capRound,
                nodes);

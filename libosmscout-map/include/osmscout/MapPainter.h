@@ -140,6 +140,14 @@ namespace osmscout {
     bool                relationWayLayers[11];
     //@}
 
+    /**
+      Preset dashes
+     */
+    //@{
+    std::vector<double>    emptyDash;         //! Empty dash array
+    std::vector<double>    tunnelDash;        //! Dash array for drawing tunnel border
+    //@}
+
   private:
     /**
       Private draw algorithm implementation routines.
@@ -310,14 +318,14 @@ namespace osmscout {
       Draw simple line with the given style,the given color, the given width
       and the given untransformed nodes.
      */
-    virtual void DrawPath(const LineStyle::Style& style,
-                          const Projection& projection,
+    virtual void DrawPath(const Projection& projection,
                           const MapParameter& parameter,
                           double r,
                           double g,
                           double b,
                           double a,
                           double width,
+                          const std::vector<double>& dash,
                           CapStyle startCap,
                           CapStyle endCap,
                           const std::vector<Point>& nodes) = 0;

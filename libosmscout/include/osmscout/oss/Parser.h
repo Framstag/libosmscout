@@ -175,7 +175,7 @@ void ToRGBA(const char* str, double& r, double& g, double& b, double& a)
 	void PATTERNDEF(PatternStyle& style);
 	void BORDERDEF(LineStyle& style);
 	void COLOR(double& r, double& g, double& b, double& a);
-	void LINESTYLE(LineStyle::Style& style);
+	void DOUBLE(double& value);
 	void MINPIXEL(double& value);
 	void WIDTH(double& value);
 	void OUTLINE(double& value);
@@ -187,7 +187,6 @@ void ToRGBA(const char* str, double& r, double& g, double& b, double& a)
 	void MAXMAG(Mag& mag);
 	void SCALEMAG(Mag& mag);
 	void SYMBOLSTYLE(SymbolStyle::Style& style);
-	void DOUBLE(double& value);
 	void MAG(Mag& mag);
 
   void Parse();

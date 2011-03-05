@@ -210,12 +210,6 @@ PRODUCTIONS
 
                 [SYNC "WITH"
                   [
-                    (. LineStyle::Style s=style.GetStyle(); .)
-                    LINESTYLE<s>
-                    (. style.SetStyle(s); .)
-                  ]
-
-                  [
                     (. double cr,cg,cb,ca; .)
                     "ALTCOLOR"
                     COLOR<cr,cg,cb,ca>
@@ -227,6 +221,16 @@ PRODUCTIONS
                     "OUTLINECOLOR"
                     COLOR<cr,cg,cb,ca>
                     (. style.SetOutlineColor(cr,cg,cb,ca); .)
+                  ]
+
+                  [
+                    (. double dash; .)
+                    "DASH"
+                    DOUBLE<dash>   (. style.AddDashValue(dash); .)
+                    {
+                      ","
+                      DOUBLE<dash> (. style.AddDashValue(dash); .)
+                    }
                   ]
 
                   [
@@ -301,9 +305,13 @@ PRODUCTIONS
 
                 [SYNC "WITH"
                   [
-                    (. LineStyle::Style s=style.GetStyle(); .)
-                    LINESTYLE<s>
-                    (. style.SetStyle(s); .)
+                    (. double dash; .)
+                    "DASH"
+                    DOUBLE<dash>   (. style.AddDashValue(dash); .)
+                    {
+                      ","
+                      DOUBLE<dash> (. style.AddDashValue(dash); .)
+                    }
                   ]
 
                   [
@@ -457,16 +465,6 @@ PRODUCTIONS
                     (. style.SetMinMag(minMag); .)
                   ]
                 ].
-
-  LINESTYLE<LineStyle::Style& style>
-              = "STYLE"
-                 (
-                   "none"      (. style=LineStyle::none; .)
-                 | "normal"    (. style=LineStyle::normal; .)
-                 | "longDash"  (. style=LineStyle::longDash; .)
-                 | "dotted"    (. style=LineStyle::dotted; .)
-                 | "lineDot"   (. style=LineStyle::lineDot; .)
-                 ).
 
   LABELSTYLE<LabelStyle::Style& style>
               = "STYLE"

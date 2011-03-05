@@ -85,6 +85,9 @@ namespace osmscout {
     drawNode.resize(100000); // TODO: Calculate matching size
     nodeX.resize(100000);
     nodeY.resize(100000);
+
+    tunnelDash.push_back(3);
+    tunnelDash.push_back(3);
   }
 
   MapPainter::~MapPainter()
@@ -999,14 +1002,14 @@ namespace osmscout {
           projection.GetMagnification()>=magCity)) {
       // Should draw outline, but resolution is too low
       // Draw line with alternate color
-      DrawPath(style.GetStyle(),
-               projection,
+      DrawPath(projection,
                parameter,
                style.GetAlternateR(),
                style.GetAlternateG(),
                style.GetAlternateB(),
                style.GetAlternateA(),
                lineWidth,
+               style.GetDash(),
                capRound,
                capRound,
                nodes);
@@ -1014,14 +1017,14 @@ namespace osmscout {
     else if (outline) {
       // Draw outline
       // Draw line with normal color but reduced with
-      DrawPath(style.GetStyle(),
-               projection,
+      DrawPath(projection,
                parameter,
                style.GetLineR(),
                style.GetLineG(),
                style.GetLineB(),
                style.GetLineA(),
                lineWidth-2*style.GetOutline(),
+               style.GetDash(),
                capRound,
                capRound,
                nodes);
@@ -1029,14 +1032,14 @@ namespace osmscout {
     else {
       // Draw without outline
       // Draw line with normal color and normal width
-      DrawPath(style.GetStyle(),
-               projection,
+      DrawPath(projection,
                parameter,
                style.GetLineR(),
                style.GetLineG(),
                style.GetLineB(),
                style.GetLineA(),
                lineWidth,
+               style.GetDash(),
                capRound,
                capRound,
                nodes);
@@ -1054,7 +1057,6 @@ namespace osmscout {
     double g;
     double b;
     double a;
-    LineStyle::Style lineStyle=LineStyle::normal;
 
     if (lineWidth==0) {
       lineWidth=style.GetWidth();
@@ -1089,7 +1091,6 @@ namespace osmscout {
     }
     else if (attributes.IsTunnel() &&
              projection.GetMagnification()>=magCity) {
-      lineStyle=LineStyle::longDash;
       /*
       double tunnel[2];
 
@@ -1108,6 +1109,17 @@ namespace osmscout {
         b=0.5;
         a=1.0;
       }
+
+      DrawPath(projection,
+               parameter,
+               r,g,b,a,
+               lineWidth,
+               tunnelDash,
+               attributes.StartIsJoint() ? capButt : capRound,
+               attributes.EndIsJoint() ? capButt : capRound,
+               nodes);
+
+      return;
     }
     else {
       r=style.GetOutlineR();
@@ -1116,11 +1128,11 @@ namespace osmscout {
       a=style.GetOutlineA();
     }
 
-    DrawPath(lineStyle,
-             projection,
+    DrawPath(projection,
              parameter,
              r,g,b,a,
              lineWidth,
+             emptyDash,
              attributes.StartIsJoint() ? capButt : capRound,
              attributes.EndIsJoint() ? capButt : capRound,
              nodes);
