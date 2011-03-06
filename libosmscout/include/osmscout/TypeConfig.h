@@ -29,20 +29,23 @@
 #include <osmscout/Tag.h>
 #include <osmscout/Types.h>
 
+#include <osmscout/util/Reference.h>
+
 namespace osmscout {
 
   const static TagId tagIgnore        = 0;
 
   const static TypeId typeIgnore      = 0;
 
-  class OSMSCOUT_API Condition
+  class OSMSCOUT_API Condition : public Referencable
   {
   public:
     virtual ~Condition();
 
-    virtual Condition* Copy() const = 0;
     virtual bool Evaluate(const std::map<TagId,std::string>& tagMap) = 0;
   };
+
+  typedef Ref<Condition> ConditionRef;
 
   class OSMSCOUT_API TagEquals : public Condition
   {
@@ -54,7 +57,6 @@ namespace osmscout {
     TagEquals(TagId tag,
               const std::string& tagValue);
 
-    Condition* Copy() const;
     bool Evaluate(const std::map<TagId,std::string>& tagMap);
   };
 
@@ -68,7 +70,6 @@ namespace osmscout {
     TagNotEquals(TagId tag,
                  const std::string& tagValue);
 
-    Condition* Copy() const;
     bool Evaluate(const std::map<TagId,std::string>& tagMap);
   };
 
@@ -105,25 +106,22 @@ namespace osmscout {
   class OSMSCOUT_API TypeInfo
   {
   private:
-    TypeId      id;
-    std::string name;
+    TypeId       id;
+    std::string  name;
 
-    Condition   *condition;
+    ConditionRef condition;
 
-    bool        canBeNode;
-    bool        canBeWay;
-    bool        canBeArea;
-    bool        canBeRelation;
-    bool        canBeOverview;
-    bool        canBeRoute;
-    bool        canBeIndexed;
+    bool         canBeNode;
+    bool         canBeWay;
+    bool         canBeArea;
+    bool         canBeRelation;
+    bool         canBeOverview;
+    bool         canBeRoute;
+    bool         canBeIndexed;
 
   public:
     TypeInfo();
-    TypeInfo(const TypeInfo& other);
     virtual ~TypeInfo();
-
-    void operator=(const TypeInfo& other);
 
     TypeInfo& SetId(TypeId id);
 

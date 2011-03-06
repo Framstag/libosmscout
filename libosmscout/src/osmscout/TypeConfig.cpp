@@ -36,11 +36,6 @@ namespace osmscout {
     // no code
   }
 
-  Condition* TagEquals::Copy() const
-  {
-    return new TagEquals(tag,tagValue);
-  }
-
   bool TagEquals::Evaluate(const std::map<TagId,std::string>& tagMap)
   {
     std::map<TagId,std::string>::const_iterator t;
@@ -60,11 +55,6 @@ namespace osmscout {
     tagValue(tagValue)
   {
     // no code
-  }
-
-  Condition* TagNotEquals::Copy() const
-  {
-    return new TagNotEquals(tag,tagValue);
   }
 
   bool TagNotEquals::Evaluate(const std::map<TagId,std::string>& tagMap)
@@ -115,58 +105,9 @@ namespace osmscout {
     // no code
   }
 
-  TypeInfo::TypeInfo(const TypeInfo& other)
-  {
-    this->id=other.id;
-    this->name=other.name;
-
-    if (other.condition!=NULL) {
-      this->condition=other.condition->Copy();
-    }
-    else {
-      this->condition=NULL;
-    }
-
-    this->canBeNode=other.canBeNode;
-    this->canBeWay=other.canBeWay;
-    this->canBeArea=other.canBeArea;
-    this->canBeRelation=other.canBeRelation;
-    this->canBeOverview=other.canBeOverview;
-    this->canBeRoute=other.canBeRoute;
-    this->canBeIndexed=other.canBeIndexed;
-  }
-
   TypeInfo::~TypeInfo()
   {
-    delete condition;
-  }
-
-  void TypeInfo::operator=(const TypeInfo& other)
-  {
-    // Check for self assignment!
-    if (this==&other) {
-      return;
-    }
-
-    delete this->condition;
-
-    this->id=other.id;
-    this->name=other.name;
-
-    if (other.condition!=NULL) {
-      this->condition=other.condition->Copy();
-    }
-    else {
-      this->condition=NULL;
-    }
-
-    this->canBeNode=other.canBeNode;
-    this->canBeWay=other.canBeWay;
-    this->canBeArea=other.canBeArea;
-    this->canBeRelation=other.canBeRelation;
-    this->canBeRoute=other.canBeRoute;
-    this->canBeOverview=other.canBeOverview;
-    this->canBeIndexed=other.canBeIndexed;
+    // no code
   }
 
   TypeInfo& TypeInfo::SetId(TypeId id)
