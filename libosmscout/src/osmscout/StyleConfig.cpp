@@ -743,15 +743,6 @@ namespace osmscout {
     types=wayTypes;
   }
 
-  void StyleConfig::GetWayTypesWithPrio(size_t prio, std::set<TypeId>& types) const
-  {
-    for (size_t i=0; i<wayLineStyles.size() && i<wayPrio.size(); i++) {
-      if (wayLineStyles[i]!=NULL && wayPrio[i]==prio) {
-        types.insert(i);
-      }
-    }
-  }
-
   void StyleConfig::GetWayTypesWithMaxPrio(size_t prio, std::set<TypeId>& types) const
   {
     for (size_t i=0; i<wayLineStyles.size() && i<wayPrio.size(); i++) {

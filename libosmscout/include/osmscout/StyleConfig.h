@@ -569,7 +569,6 @@ namespace osmscout {
     size_t GetStyleCount() const;
 
     void GetWayTypesByPrio(std::vector<TypeId>& types) const;
-    void GetWayTypesWithPrio(size_t prio, std::set<TypeId>& types) const;
     void GetWayTypesWithMaxPrio(size_t prio, std::set<TypeId>& types) const;
     void GetNodeTypesWithMag(double mag, std::vector<TypeId>& types) const;
     void GetPriorities(std::vector<size_t>& priorities) const;
