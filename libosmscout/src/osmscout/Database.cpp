@@ -141,7 +141,7 @@ namespace osmscout {
   }
 
   AreaSearchParameter::AreaSearchParameter()
-  : maxWayLevel(5),
+  : maxWayLevel(4),
     maxAreaLevel(4),
     maxNodes(2000),
     maxWays(3000),
