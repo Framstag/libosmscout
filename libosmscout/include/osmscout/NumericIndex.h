@@ -60,7 +60,7 @@ namespace osmscout {
       }
     };
 
-    typedef Reference<Page> PageRef;
+    typedef LazyRef<Page> PageRef;
 
     typedef Cache<Id,PageRef> PageCache;
 

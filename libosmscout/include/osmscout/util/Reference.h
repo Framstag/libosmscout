@@ -73,10 +73,19 @@ namespace osmscout {
   };
 
   /**
-    Autopointer like container class fo classes derived from Referencable
+    LazyRef does delay the allocation fo the referenced object of type T. It also
+    implements references counting on copy and assignment, allow to exchange
+    costly copy operations with cheaper reference assignment operations. Using LazyRef
+    is useful if you reference objects at multiple locations where the object is only
+    destroyed if all locations delete the object and where copying the object is expensive.
+
+    LazyRef allocates a new object instance the first time the reference is dereferenced and
+    the object instanc eof type T accessed.
+
+    Note that type T must inherit from class Referencable!
   */
   template <typename T>
-  class OSMSCOUT_API Reference
+  class OSMSCOUT_API LazyRef
   {
   private:
     mutable T* ptr;
@@ -85,7 +94,7 @@ namespace osmscout {
     /**
       Default constructor. Creates an empty reference.
     */
-    inline Reference()
+    inline LazyRef()
       : ptr(NULL)
     {
       // no code
@@ -94,7 +103,7 @@ namespace osmscout {
     /**
       Creates an reference holding an instance of T.
     */
-    Reference(T* pointer)
+    LazyRef(T* pointer)
       : ptr(pointer)
     {
       if (ptr!=NULL) {
@@ -105,7 +114,7 @@ namespace osmscout {
     /**
       Copy constructor for the same type of reference.
     */
-    inline Reference(const Reference<T>& other)
+    inline LazyRef(const LazyRef<T>& other)
       : ptr(other.ptr)
     {
       if (ptr!=NULL) {
@@ -116,7 +125,7 @@ namespace osmscout {
     /**
       Destructor
     */
-    inline ~Reference()
+    inline ~LazyRef()
     {
       if (ptr!=NULL &&
           ptr->RemoveReference()==0) {
@@ -132,7 +141,7 @@ namespace osmscout {
       will be incremented. The reference count of the old value will be
       decremented and freed, if the count reached 0.
     */
-    void operator=(const Reference<T>& other)
+    void operator=(const LazyRef<T>& other)
     {
       if (ptr!=other.ptr) {
         if (ptr!=NULL &&
@@ -162,6 +171,206 @@ namespace osmscout {
 
       return ptr;
     }
+  };
+
+  /**
+    Ref handles references to object using reference counting semantic. The object of type
+    T is onbly deleted if all references have gone invalid.
+
+    Note that type T must inherit from class Referencable!
+  */
+  template <typename T> class Ref
+  {
+  public:
+    /**
+      Default constructor. Creates an empty reference.
+    */
+    inline Ref()
+      : ptr(NULL)
+    {
+      // no code
+    }
+
+    /**
+      Creates an reference holding an instance of T.
+    */
+    inline Ref(T* pointer)
+      : ptr(pointer)
+    {
+      if (ptr!=NULL) {
+        ptr->AddReference();
+      }
+    }
+
+    /**
+      Copy constructor
+    */
+    inline Ref(const Ref<T>& other)
+      : ptr(other.ptr)
+    {
+      if (ptr!=NULL) {
+        ptr->AddReference();
+      }
+    }
+
+    /**
+      Access operator.
+
+      Returns the underlying pointer. Note that the object is still
+      hold by the Reference.
+    */
+    T* Get() const
+    {
+      return ptr;
+    }
+
+    /**
+      Copy constructor
+    */
+    template<typename T1>
+    inline Ref(const Ref<T1>& other)
+      : ptr(other.Get())
+    {
+      if (ptr!=NULL) {
+        ptr->AddReference();
+      }
+    }
+
+    /**
+      Destructor
+    */
+    inline ~Ref()
+    {
+      if (ptr!=NULL &&
+          ptr->RemoveReference()==0) {
+        delete ptr;
+      }
+    }
+
+    /**
+      Assignment operator.
+
+      Assigns a new value to the reference. The reference count of the
+      new object - if the pointer is not NULL - will be incremented.
+      The reference count of the old value will be decremented and freed,
+      if the count reached 0.
+    */
+    void operator=(T* pointer)
+    {
+      if (ptr!=pointer) {
+
+        if (pointer!=NULL) {
+          pointer->AddReference();
+        }
+
+        if (ptr!=NULL &&
+            ptr->RemoveReference()==0) {
+          delete ptr;
+        }
+
+        ptr=pointer;
+      }
+    }
+
+    /**
+      Assignment operator.
+
+      Assigns a new value to the reference. The reference count of the
+      object hold by the handed reference - if the pointer is not NULL -
+      will be incremented. The reference count of the old value will be
+      decremented and freed, if the count reached 0.
+    */
+    void operator=(const Ref<T>& other)
+    {
+      if (&other!=this && this->ptr!=other.ptr) {
+        if (ptr!=NULL &&
+            ptr->RemoveReference()==0) {
+          delete ptr;
+        }
+
+        ptr=other.ptr;
+
+        if (ptr!=NULL) {
+          ptr->AddReference();
+        }
+      }
+    }
+
+    template<typename T1>
+    void operator=(const Ref<T1>& other)
+    {
+      if (&other!=this && this->ptr!=other.Get()) {
+        if (ptr!=NULL &&
+            ptr->RemoveReference()) {
+          delete ptr;
+        }
+
+        ptr=other.Get();
+
+        if (ptr!=NULL) {
+          ptr->AddReference();
+        }
+      }
+    }
+
+    bool Valid() const
+    {
+      return ptr!=NULL;
+    }
+
+    bool Invalid() const
+    {
+      return ptr==NULL;
+    }
+
+    /**
+      arrow operator.
+
+      Returns the underlying pointer. Makes the reference behave like a pointer.
+    */
+    T* operator->() const
+    {
+      assert(ptr!=NULL); // Method calling on NULL pointer is forbidden
+      return ptr;
+    }
+
+    /**
+      Dereference operator.
+
+      Returns a reference to the underlying object. Makes the reference behave
+      like a pointer.
+    */
+    T& operator*() const
+    {
+      assert(ptr!=NULL);
+
+      return *ptr;
+    }
+
+    /**
+      Type conversion operator.
+
+      Returns the underlying pointer. Allows reference to be
+      passed as a parameter where the base pointer type is required.
+    */
+    operator T*() const
+    {
+      return ptr;
+    }
+
+    /**
+      Type conversion operator.
+
+      Returns the underlying pointer. Allows reference to be
+      passed as a parameter where the base pointer type is required.
+    */
+    operator T&() const
+    {
+      return ptr;
+    }
+
+  private:
+    T* ptr;
   };
 }
 

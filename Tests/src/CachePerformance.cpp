@@ -63,7 +63,7 @@ private:
 
 };
 
-typedef osmscout::Reference<Data2> Data2Ref;
+typedef osmscout::LazyRef<Data2> Data2Ref;
 
 static const size_t cacheSize=2000000;
 
