@@ -1,5 +1,5 @@
 * Improve RouteData and RouteDescription
-* Remove asserts from code (at leats where asserts can be provoked by user)
+* Remove asserts from code (at least where asserts can be provoked by user)
 * Define a error code concept (possibly copy class Status form Illumination)
 * Add text only interactive demo applications.
 * Improve routing algorithm to check for routing to non-rechable targets
@@ -10,7 +10,3 @@
     relation is relevant resolve the relation.
 * GenWayDat:
   -  Improve performance of GenWayDat.
-* GenAreaIndex:
-  - Use ScanConversion for ways to reduce the number of index entries
-  - Implement cell based fill algorithm to only store cells for areas in index
-    that are really covered by area (similar handling to ScanConversion).
