@@ -19,6 +19,8 @@
 
 #include <osmscout/StyleConfig.h>
 
+#include <limits>
+#include <iostream>
 namespace osmscout {
 
   LineStyle::LineStyle()
@@ -424,12 +426,12 @@ namespace osmscout {
       priorities.push_back(*prio);
     }
 
-    wayTypes.clear();
-    wayTypes.reserve(priorities.size());
+    wayTypesByPrio.clear();
+    wayTypesByPrio.reserve(priorities.size());
     for (size_t p=0; p<priorities.size(); p++) {
       for (size_t i=0; i<wayLineStyles.size() && i<wayPrio.size(); i++) {
         if (wayLineStyles[i]!=NULL && wayPrio[i]==priorities[p]) {
-          wayTypes.push_back(i);
+          wayTypesByPrio.push_back(i);
         }
       }
     }
@@ -470,12 +472,28 @@ namespace osmscout {
   {
     if (type>=wayPrio.size()) {
       wayPrio.resize(type+1);
+      wayMag.resize(type+1,magVeryClose);
       wayLineStyles.resize(type+1);
       wayRefLabelStyles.resize(type+1);
       wayNameLabelStyles.resize(type+1);
     }
 
     wayPrio[type]=prio;
+
+    return *this;
+  }
+
+  StyleConfig& StyleConfig::SetWayMag(TypeId type, Mag mag)
+  {
+    if (type>=wayMag.size()) {
+      wayPrio.resize(type+1,std::numeric_limits<size_t>::max());
+      wayMag.resize(type+1);
+      wayLineStyles.resize(type+1);
+      wayRefLabelStyles.resize(type+1);
+      wayNameLabelStyles.resize(type+1);
+    }
+
+    wayMag[type]=mag;
 
     return *this;
   }
@@ -548,7 +566,8 @@ namespace osmscout {
                                             const LineStyle& style)
   {
     if (type>=wayPrio.size()) {
-      wayPrio.resize(type+1,10000); // TODO: max(size_t)
+      wayPrio.resize(type+1,std::numeric_limits<size_t>::max());
+      wayMag.resize(type+1,magVeryClose);
       wayLineStyles.resize(type+1,NULL);
       wayRefLabelStyles.resize(type+1,NULL);
       wayNameLabelStyles.resize(type+1,NULL);
@@ -564,7 +583,8 @@ namespace osmscout {
                                                 const LabelStyle& style)
   {
     if (type>=wayPrio.size()) {
-      wayPrio.resize(type+1,10000); // TODO: max(size_t)
+      wayPrio.resize(type+1,std::numeric_limits<size_t>::max());
+      wayMag.resize(type+1,magVeryClose);
       wayLineStyles.resize(type+1,NULL);
       wayRefLabelStyles.resize(type+1,NULL);
       wayNameLabelStyles.resize(type+1,NULL);
@@ -580,7 +600,8 @@ namespace osmscout {
                                                  const LabelStyle& style)
   {
     if (type>=wayPrio.size()) {
-      wayPrio.resize(type+1,10000); // TODO: max(size_t)
+      wayPrio.resize(type+1,std::numeric_limits<size_t>::max());
+      wayMag.resize(type+1,magVeryClose);
       wayLineStyles.resize(type+1,NULL);
       wayRefLabelStyles.resize(type+1,NULL);
       wayNameLabelStyles.resize(type+1,NULL);
@@ -738,13 +759,25 @@ namespace osmscout {
     return result;
   }
 
-  void StyleConfig::GetWayTypesByPrio(std::vector<TypeId>& types) const
+  void StyleConfig::GetWayTypesByPrioWithMag(double mag,
+                                             std::vector<TypeId>& types) const
   {
-    types=wayTypes;
+    types.clear();
+    types.reserve(wayTypesByPrio.size());
+
+    for (size_t i=0; i<wayTypesByPrio.size(); i++) {
+      if (mag>=wayMag[wayTypesByPrio[i]]) {
+        types.push_back(wayTypesByPrio[i]);
+      }
+    }
   }
 
-  void StyleConfig::GetNodeTypesWithMag(double mag, std::vector<TypeId>& types) const
+  void StyleConfig::GetNodeTypesWithMag(double mag,
+                                        std::vector<TypeId>& types) const
   {
+    types.clear();
+    types.reserve(nodeSymbolStyles.size());
+
     for (size_t i=0; i<nodeSymbolStyles.size(); i++) {
       if (nodeLabelStyles[i]!=NULL &&
           mag>=nodeLabelStyles[i]->GetMinMag()) {

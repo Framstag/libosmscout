@@ -536,8 +536,9 @@ namespace osmscout {
     std::vector<IconStyle*>    areaIconStyles;
 
     std::vector<size_t>        wayPrio;
+    std::vector<Mag>           wayMag;
     std::vector<size_t>        priorities;
-    std::vector<TypeId>        wayTypes;
+    std::vector<TypeId>        wayTypesByPrio;
 
   public:
     StyleConfig(TypeConfig* typeConfig);
@@ -548,6 +549,7 @@ namespace osmscout {
     TypeConfig* GetTypeConfig() const;
 
     StyleConfig& SetWayPrio(TypeId type, size_t prio);
+    StyleConfig& SetWayMag(TypeId type, Mag mag);
 
     StyleConfig& SetNodeSymbolStyle(TypeId type, const SymbolStyle& style);
     StyleConfig& SetNodeRefLabelStyle(TypeId type, const LabelStyle& style);
@@ -568,8 +570,10 @@ namespace osmscout {
 
     size_t GetStyleCount() const;
 
-    void GetWayTypesByPrio(std::vector<TypeId>& types) const;
-    void GetNodeTypesWithMag(double mag, std::vector<TypeId>& types) const;
+    void GetWayTypesByPrioWithMag(double mag,
+                                  std::vector<TypeId>& types) const;
+    void GetNodeTypesWithMag(double mag,
+                             std::vector<TypeId>& types) const;
     void GetPriorities(std::vector<size_t>& priorities) const;
 
     bool IsWayVisible(TypeId type, size_t prio) const

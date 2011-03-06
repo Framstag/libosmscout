@@ -144,7 +144,7 @@ namespace osmscout {
   : maxWayLevel(5),
     maxAreaLevel(4),
     maxNodes(2000),
-    maxWays(2000),
+    maxWays(3000),
     maxAreas(std::numeric_limits<unsigned long>::max())
   {
     // no code
@@ -409,6 +409,7 @@ namespace osmscout {
     std::vector<FileOffset> relationWayOffsets;
     std::vector<FileOffset> wayAreaOffsets;
     std::vector<FileOffset> relationAreaOffsets;
+    double                  magLevel=osmscout::Log2(magnification);
 
     nodes.clear();
     ways.clear();
@@ -431,7 +432,8 @@ namespace osmscout {
 
     StopClock nodesTimer;
 
-    styleConfig.GetNodeTypesWithMag(magnification,nodeTypes);
+    styleConfig.GetNodeTypesWithMag(magnification,
+                                    nodeTypes);
 
     if (!areaNodeIndex.GetOffsets(styleConfig,
                                   lonMin,latMin,lonMax,latMax,
@@ -452,16 +454,23 @@ namespace osmscout {
 
     StopClock indexTimer;
 
-    styleConfig.GetWayTypesByPrio(wayTypes);
+    styleConfig.GetWayTypesByPrioWithMag(magnification,
+                                         wayTypes);
+
+    /*
+    std::cout << "Ways for magnification: " << magLevel << std::endl;
+    for (size_t i=0; i<wayTypes.size(); i++) {
+      std::cout << "Drawing way of type: " << typeConfig->GetTypes()[wayTypes[i]].GetName() << " " << typeConfig->GetTypes()[wayTypes[i]].GetId() << std::endl;
+    }*/
 
     if (!areaIndex.GetOffsets(styleConfig,
                               lonMin,
                               latMin,
                               lonMax,
                               latMax,
-                              ((size_t)ceil(osmscout::Log2(magnification)))+
+                              ((size_t)ceil(magLevel))+
                               parameter.GetMaximumWayLevel(),
-                              ((size_t)ceil(osmscout::Log2(magnification)))+
+                              ((size_t)ceil(magLevel))+
                               parameter.GetMaximumAreaLevel(),
                               parameter.GetMaximumAreas(),
                               wayTypes,

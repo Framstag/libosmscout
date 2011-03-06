@@ -170,6 +170,8 @@ void ToRGBA(const char* str, double& r, double& g, double& b, double& a)
 	void REFDEF(LabelStyle& style);
 	void SYMBOLDEF(SymbolStyle& style);
 	void ICONDEF(IconStyle& style);
+	void INTEGER(size_t& value);
+	void MAG(Mag& mag);
 	void LINEDEF(LineStyle& style);
 	void FILLDEF(FillStyle& style, std::string& filter);
 	void PATTERNDEF(PatternStyle& style);
@@ -187,7 +189,6 @@ void ToRGBA(const char* str, double& r, double& g, double& b, double& a)
 	void MAXMAG(Mag& mag);
 	void SCALEMAG(Mag& mag);
 	void SYMBOLSTYLE(SymbolStyle::Style& style);
-	void MAG(Mag& mag);
 
   void Parse();
 

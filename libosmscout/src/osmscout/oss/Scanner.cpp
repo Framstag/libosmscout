@@ -149,8 +149,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 60;
-	noSym = 60;
+	maxT = 61;
+	noSym = 61;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
@@ -165,54 +165,55 @@ void Scanner::Init() {
 	keywords.set("NODE", 8);
 	keywords.set("WAY", 9);
 	keywords.set("PRIO", 10);
-	keywords.set("AREA", 11);
-	keywords.set("LINE", 12);
-	keywords.set("WITH", 13);
-	keywords.set("ALTCOLOR", 14);
-	keywords.set("OUTLINECOLOR", 15);
-	keywords.set("DASH", 16);
-	keywords.set("FIXEDWIDTH", 18);
-	keywords.set("FILL", 19);
-	keywords.set("PATTERN", 20);
-	keywords.set("BORDER", 21);
-	keywords.set("LABEL", 22);
-	keywords.set("COLOR", 23);
-	keywords.set("BGCOLOR", 24);
-	keywords.set("BORDERCOLOR", 25);
-	keywords.set("REF", 26);
-	keywords.set("SYMBOL", 27);
-	keywords.set("ICON", 28);
-	keywords.set("STYLE", 29);
-	keywords.set("normal", 30);
-	keywords.set("contour", 31);
-	keywords.set("plate", 32);
-	keywords.set("emphasize", 33);
-	keywords.set("none", 34);
-	keywords.set("box", 35);
-	keywords.set("triangle", 36);
-	keywords.set("circle", 37);
-	keywords.set("LAYER", 38);
-	keywords.set("FILTER", 39);
-	keywords.set("MINMAG", 40);
+	keywords.set("MINMAG", 11);
+	keywords.set("AREA", 12);
+	keywords.set("LINE", 13);
+	keywords.set("WITH", 14);
+	keywords.set("ALTCOLOR", 15);
+	keywords.set("OUTLINECOLOR", 16);
+	keywords.set("DASH", 17);
+	keywords.set("FIXEDWIDTH", 19);
+	keywords.set("FILL", 20);
+	keywords.set("PATTERN", 21);
+	keywords.set("BORDER", 22);
+	keywords.set("LABEL", 23);
+	keywords.set("COLOR", 24);
+	keywords.set("BGCOLOR", 25);
+	keywords.set("BORDERCOLOR", 26);
+	keywords.set("REF", 27);
+	keywords.set("SYMBOL", 28);
+	keywords.set("ICON", 29);
+	keywords.set("STYLE", 30);
+	keywords.set("normal", 31);
+	keywords.set("contour", 32);
+	keywords.set("plate", 33);
+	keywords.set("emphasize", 34);
+	keywords.set("none", 35);
+	keywords.set("box", 36);
+	keywords.set("triangle", 37);
+	keywords.set("circle", 38);
+	keywords.set("LAYER", 39);
+	keywords.set("FILTER", 40);
 	keywords.set("MAXMAG", 41);
 	keywords.set("FADE", 42);
 	keywords.set("AT", 43);
 	keywords.set("world", 44);
-	keywords.set("state", 45);
-	keywords.set("stateOver", 46);
-	keywords.set("county", 47);
-	keywords.set("region", 48);
-	keywords.set("proximity", 49);
-	keywords.set("cityOver", 50);
-	keywords.set("city", 51);
-	keywords.set("suburb", 52);
-	keywords.set("detail", 53);
-	keywords.set("close", 54);
-	keywords.set("veryClose", 55);
-	keywords.set("SIZE", 56);
-	keywords.set("MINPIXEL", 57);
-	keywords.set("WIDTH", 58);
-	keywords.set("OUTLINE", 59);
+	keywords.set("continent", 45);
+	keywords.set("state", 46);
+	keywords.set("stateOver", 47);
+	keywords.set("county", 48);
+	keywords.set("region", 49);
+	keywords.set("proximity", 50);
+	keywords.set("cityOver", 51);
+	keywords.set("city", 52);
+	keywords.set("suburb", 53);
+	keywords.set("detail", 54);
+	keywords.set("close", 55);
+	keywords.set("veryClose", 56);
+	keywords.set("SIZE", 57);
+	keywords.set("MINPIXEL", 58);
+	keywords.set("WIDTH", 59);
+	keywords.set("OUTLINE", 60);
 
 
   tvalLength = 128;
@@ -465,7 +466,7 @@ Token* Scanner::NextToken() {
 			else if (ch == 92) {AddCh(); goto case_17;}
 			else {t->kind = 5; break;}
 		case 19:
-			{t->kind = 17; break;}
+			{t->kind = 18; break;}
 
   }
   AppendVal(t);

@@ -114,10 +114,12 @@ PRODUCTIONS
                   TypeId      type=typeIgnore;
                   std::string name;
                   size_t      prio;
+                  Mag         mag;
                 .)
                 SYNC "WAY"
                 string (. name=Destring(t->val); .)
-                "PRIO" number
+                "PRIO" INTEGER<prio>
+                "MINMAG" MAG<mag>
                 (.
                   type=config.GetTypeConfig()->GetWayTypeId(name);
 
@@ -126,13 +128,9 @@ PRODUCTIONS
 
                     SemErr(e.c_str());
                   }
-                  else if (!StringToNumber(t->val,prio)) {
-                    std::string e="Cannot parse priority '"+std::string(t->val)+"'";
-
-                    SemErr(e.c_str());
-                  }
                   else {
                     config.SetWayPrio(type,prio);
+                    config.SetWayMag(type,mag);
                   }
                 .)
                 {
@@ -523,6 +521,7 @@ PRODUCTIONS
 
   MAG<Mag& mag>
               =  "world"     (. mag=magWorld; .)
+               | "continent" (. mag=magContinent; .)
                | "state"     (. mag=magState; .)
                | "stateOver" (. mag=magStateOver; .)
                | "county"    (. mag=magCounty; .)
@@ -562,6 +561,17 @@ PRODUCTIONS
                   (.
                     if (!StringToDouble(t->val,value)) {
                       std::string e="Cannot parse double '"+std::string(t->val)+"'";
+
+                      SemErr(e.c_str());
+                    }
+                  .)
+                ).
+
+  INTEGER<size_t& value>
+              = (  number
+                  (.
+                    if (!StringToNumber(t->val,value)) {
+                      std::string e="Cannot parse number '"+std::string(t->val)+"'";
 
                       SemErr(e.c_str());
                     }

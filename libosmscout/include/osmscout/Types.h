@@ -39,6 +39,7 @@ namespace osmscout {
     */
   enum Mag {
    magWorld     =              1, //  0
+   magContinent =             16, //  4
    magState     =             32, //  5
    magStateOver =             64, //  6
    magCounty    =            128, //  7
