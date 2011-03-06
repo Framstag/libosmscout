@@ -108,6 +108,8 @@ namespace osmscout {
   LineStyle& LineStyle::AddDashValue(double dashValue)
   {
     dash.push_back(dashValue);
+
+    return *this;
   }
 
 

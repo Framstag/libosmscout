@@ -54,6 +54,32 @@ namespace osmscout {
     return t->second==tagValue;
   }
 
+  TagNotEquals::TagNotEquals(TagId tag,
+                             const std::string& tagValue)
+  : tag(tag),
+    tagValue(tagValue)
+  {
+    // no code
+  }
+
+  Condition* TagNotEquals::Copy() const
+  {
+    return new TagNotEquals(tag,tagValue);
+  }
+
+  bool TagNotEquals::Evaluate(const std::map<TagId,std::string>& tagMap)
+  {
+    std::map<TagId,std::string>::const_iterator t;
+
+    t=tagMap.find(tag);
+
+    if (t==tagMap.end()) {
+      return false;
+    }
+
+    return t->second==tagValue;
+  }
+
   TagInfo::TagInfo()
    : id(0)
   {
@@ -319,6 +345,10 @@ namespace osmscout {
 
   TypeConfig& TypeConfig::AddTypeInfo(TypeInfo& typeInfo)
   {
+    if (nameToTypeMap.find(typeInfo.GetName())!=nameToTypeMap.end()) {
+      return *this;
+    }
+
     if (typeInfo.GetId()==0) {
       typeInfo.SetId(nextTypeId);
 
@@ -328,14 +358,10 @@ namespace osmscout {
       nextTypeId=std::max(nextTypeId,(TypeId)(typeInfo.GetId()+1));
     }
 
-    if (nameToTypeMap.find(typeInfo.GetName())==nameToTypeMap.end()) {
-      types.push_back(typeInfo);
-      nameToTypeMap[typeInfo.GetName()]=typeInfo;
-    }
+    types.push_back(typeInfo);
+    nameToTypeMap[typeInfo.GetName()]=typeInfo;
 
-    if (idToTypeMap.find(typeInfo.GetId())==idToTypeMap.end()) {
-      idToTypeMap[typeInfo.GetId()]=typeInfo;
-    }
+    idToTypeMap[typeInfo.GetId()]=typeInfo;
 
     return *this;
   }

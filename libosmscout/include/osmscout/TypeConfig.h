@@ -58,6 +58,20 @@ namespace osmscout {
     bool Evaluate(const std::map<TagId,std::string>& tagMap);
   };
 
+  class OSMSCOUT_API TagNotEquals : public Condition
+  {
+  private:
+    TagId       tag;
+    std::string tagValue;
+
+  public:
+    TagNotEquals(TagId tag,
+                 const std::string& tagValue);
+
+    Condition* Copy() const;
+    bool Evaluate(const std::map<TagId,std::string>& tagMap);
+  };
+
   class OSMSCOUT_API TagInfo
   {
   private:
