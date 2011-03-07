@@ -320,7 +320,7 @@ namespace osmscout {
         // if we havn't found another way and we have not closed
         // the current way we have to give up
         if (!found) {
-          progress.Error("Multipolygon relation "+NumberToString(relation.id)+
+          progress.Error("Multipolygon relation "+NumberToString(relation.GetId())+
                          ": Cannot find matching node for node id "+
                          NumberToString(points.back().id));
           return false;
@@ -329,7 +329,7 @@ namespace osmscout {
 
       // All roles have been consumed and we still have not closed the current way
       if (points.front().id!=points.back().id) {
-        progress.Error("Multipolygon relation "+NumberToString(relation.id)+
+        progress.Error("Multipolygon relation "+NumberToString(relation.GetId())+
                        ": No ways left to close current ring");
         return false;
       }
@@ -392,7 +392,7 @@ namespace osmscout {
       top=FindTopLevel(rings,includes,used,topIndex);
 
       if (top==rings.end()) {
-        progress.Warning("Multipolygon relation "+NumberToString(relation.id)+
+        progress.Warning("Multipolygon relation "+NumberToString(relation.GetId())+
                          ": Error during ring grouping");
         return false;
       }
@@ -508,7 +508,7 @@ namespace osmscout {
 
     if (oldSize!=relation.roles.size()) {
       if (progress.OutputDebug()) {
-        progress.Debug("Compacted number of roles of relation "+NumberToString(relation.id)+" "+name+
+        progress.Debug("Compacted number of roles of relation "+NumberToString(relation.GetId())+" "+name+
                        " from "+NumberToString(oldSize)+" to "+NumberToString(relation.roles.size()));
       }
     }
@@ -606,14 +606,14 @@ namespace osmscout {
 
       selectedRelationCount++;
 
-      rel.id=rawRel.GetId();
-      rel.type=rawRel.GetType();
+      rel.SetId(rawRel.GetId());
+      rel.SetType(rawRel.GetType());
       rel.flags=0;
 
       std::vector<Tag>::iterator tag=rawRel.tags.begin();
       while (tag!=rawRel.tags.end()) {
         if (tag->key==typeConfig.tagType) {
-          rel.relType=tag->value;
+          rel.SetRelType(tag->value);
           tag=rawRel.tags.erase(tag);
         }
         else if (tag->key==typeConfig.tagName) {
@@ -663,9 +663,9 @@ namespace osmscout {
 
       // Resolve type of multipolygon/boundary relations if the relation does not have
       // a type
-      if (rel.type==typeIgnore &&
-          (rel.relType=="multipolygon" ||
-           rel.relType=="boundary")) {
+      if (rel.GetType()==typeIgnore &&
+          (rel.GetRelType()=="multipolygon" ||
+           rel.GetRelType()=="boundary")) {
         bool   correct=true;
         TypeId typeId=typeIgnore;
 
@@ -675,15 +675,15 @@ namespace osmscout {
                 rel.roles[m].GetType()!=typeIgnore) {
               typeId=rel.roles[m].GetType();
               if (progress.OutputDebug()) {
-                progress.Debug("Autodetecting type of relation "+NumberToString(rel.id)+" as "+NumberToString(rel.type));
+                progress.Debug("Autodetecting type of relation "+NumberToString(rel.GetId())+" as "+NumberToString(rel.GetType()));
               }
             }
             else if (typeId!=typeIgnore &&
                      rel.roles[m].GetType()!=typeIgnore &&
                      typeId!=rel.roles[m].GetType()) {
               if (progress.OutputDebug()) {
-                progress.Debug("Multipolygon/boundary relation "+NumberToString(rel.id)+" has conflicting types for outer boundary ("+
-                               NumberToString(rawRel.members[m].id)+","+NumberToString(rel.type)+","+NumberToString(rel.roles[m].GetType())+")");
+                progress.Debug("Multipolygon/boundary relation "+NumberToString(rel.GetId())+" has conflicting types for outer boundary ("+
+                               NumberToString(rawRel.members[m].id)+","+NumberToString(rel.GetType())+","+NumberToString(rel.roles[m].GetType())+")");
               }
               correct=false;
             }
@@ -691,7 +691,7 @@ namespace osmscout {
         }
 
         if (correct) {
-          rel.type=typeId;
+          rel.SetType(typeId);
         }
       }
       else {
@@ -707,13 +707,13 @@ namespace osmscout {
         }
 
         if (correct &&
-            type!=rel.type &&
+            type!=rel.GetType() &&
             type!=typeIgnore) {
           if (progress.OutputDebug()) {
-            progress.Debug("Autocorrecting type of relation "+NumberToString(rel.id)+
-                           " from "+NumberToString(rel.type)+" to "+NumberToString(type));
+            progress.Debug("Autocorrecting type of relation "+NumberToString(rel.GetId())+
+                           " from "+NumberToString(rel.GetType())+" to "+NumberToString(type));
           }
-          rel.type=type;
+          rel.SetType(type);
         }
       }
 
@@ -723,12 +723,12 @@ namespace osmscout {
       //
       // For multipolygon and boundary relations we restrict blacklisting to the
       // outer boundaries
-      if (rel.relType=="multipolygon" ||
-          rel.relType=="boundary") {
+      if (rel.GetRelType()=="multipolygon" ||
+          rel.GetRelType()=="boundary") {
         for (size_t m=0; m<rel.roles.size(); m++) {
           if (rel.roles[m].role=="outer" ||
               rel.roles[m].role=="") {
-            if (rel.type==rel.roles[m].GetType()) {
+            if (rel.GetType()==rel.roles[m].GetType()) {
               wayAreaIndexBlacklist.insert(rawRel.members[m].id);
             }
           }
@@ -736,7 +736,7 @@ namespace osmscout {
       }
       else {
         for (size_t m=0; m<rel.roles.size(); m++) {
-          if (rel.type==rel.roles[m].GetType()) {
+          if (rel.GetType()==rel.roles[m].GetType()) {
             wayAreaIndexBlacklist.insert(rawRel.members[m].id);
           }
         }
@@ -745,8 +745,8 @@ namespace osmscout {
       // Reconstruct multiploygon relation by applying the multipolygon resolving
       // algorithm as destribed at
       // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
-      if (rel.relType=="multipolygon" ||
-          rel.relType=="boundary") {
+      if (rel.GetRelType()=="multipolygon" ||
+          rel.GetRelType()=="boundary") {
         if (!ResolveMultipolygon(rel,progress)) {
           progress.Error("Cannot resolve multipolygon relation "+
                          NumberToString(rawRel.GetId())+" "+name);
@@ -754,12 +754,12 @@ namespace osmscout {
         }
       }
 
-      rel.id=rawRel.GetId();
+      rel.SetId(rawRel.GetId());
       rel.tags=rawRel.tags;
 
-      if (rel.relType=="multipolygon" &&
-          rel.type!=typeIgnore &&
-          typeConfig.GetTypeInfo(rel.type).CanBeArea()) {
+      if (rel.GetRelType()=="multipolygon" &&
+          rel.GetType()!=typeIgnore &&
+          typeConfig.GetTypeInfo(rel.GetType()).CanBeArea()) {
         rel.flags|=Relation::isArea;
       }
 
@@ -774,16 +774,16 @@ namespace osmscout {
       }
 
       if (!CompactRelation(rel,name,progress)) {
-        progress.Error("Relation "+NumberToString(rel.id)+
+        progress.Error("Relation "+NumberToString(rel.GetId())+
                        " cannot be compacted");
         continue;
       }
 
       if (progress.OutputDebug()) {
-        progress.Debug("Storing relation "+rel.relType+" "+NumberToString(rel.type)+" "+name);
+        progress.Debug("Storing relation "+rel.GetRelType()+" "+NumberToString(rel.GetType())+" "+name);
       }
 
-      if (rel.type!=typeIgnore) {
+      if (rel.GetType()!=typeIgnore) {
         rel.Write(writer);
         writtenRelationCount++;
       }

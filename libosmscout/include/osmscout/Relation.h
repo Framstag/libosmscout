@@ -104,10 +104,12 @@ namespace osmscout {
     const static uint16_t isArea   = 1 << 0; //! We are an area
     const static uint16_t hasTags  = 1 << 1; //! We have additional tags stored on disk
 
-  public:
+  private:
     Id                id;
     TypeId            type;
     std::string       relType;
+
+  public:
     uint16_t          flags;
     std::vector<Tag>  tags;
     std::vector<Role> roles;
@@ -129,12 +131,21 @@ namespace osmscout {
       return type;
     }
 
+    inline std::string GetRelType() const
+    {
+      return relType;
+    }
+
     inline bool IsArea() const
     {
       return flags & isArea;
     }
 
     bool GetCenter(double& lat, double& lon) const;
+
+    void SetId(Id id);
+    void SetType(TypeId type);
+    void SetRelType(const std::string& relType);
 
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;

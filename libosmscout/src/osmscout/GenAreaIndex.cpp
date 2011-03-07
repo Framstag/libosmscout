@@ -530,7 +530,7 @@ namespace osmscout {
               size_t maxyc=(size_t)floor(maxLat/cellHeight[level]);
 
               // Add this way to the tile where the center of the way lies in.
-              leafs[Coord((minxc+maxxc)/2,(minyc+maxyc)/2)].relWays[relation.type].push_back(offset);
+              leafs[Coord((minxc+maxxc)/2,(minyc+maxyc)/2)].relWays[relation.GetType()].push_back(offset);
               relWayLevelEntries++;
 
               relsConsumed++;

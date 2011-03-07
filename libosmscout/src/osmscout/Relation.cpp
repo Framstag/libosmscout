@@ -65,6 +65,21 @@ namespace osmscout {
     return true;
   }
 
+  void Relation::SetId(Id id)
+  {
+    this->id=id;
+  }
+
+  void Relation::SetType(TypeId type)
+  {
+    this->type=type;
+  }
+
+  void Relation::SetRelType(const std::string& relType)
+  {
+    this->relType=relType;
+  }
+
   bool Relation::Read(FileScanner& scanner)
   {
     uint32_t tagCount;

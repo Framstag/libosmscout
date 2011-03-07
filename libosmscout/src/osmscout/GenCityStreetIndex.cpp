@@ -704,7 +704,7 @@ namespace osmscout {
         return false;
       }
 
-      if (relation.type==boundaryId) {
+      if (relation.GetType()==boundaryId) {
         size_t level=0;
 
         for (size_t i=0; i<relation.tags.size(); i++) {
@@ -713,8 +713,8 @@ namespace osmscout {
               boundaryRelations.push_back(relation);
             }
             else {
-              progress.Info("Could not parse admin_level of relation "+relation.relType+" "+
-                            NumberToString(relation.type )+" "+NumberToString(relation.id));
+              progress.Info("Could not parse admin_level of relation "+relation.GetRelType()+" "+
+                            NumberToString(relation.GetType())+" "+NumberToString(relation.GetId()));
             }
 
             break;
@@ -722,8 +722,8 @@ namespace osmscout {
         }
 
         if (level==0) {
-          progress.Info("No tag 'admin_level' for relation "+relation.relType+" "+
-                        NumberToString(relation.type )+" "+NumberToString(relation.id));
+          progress.Info("No tag 'admin_level' for relation "+relation.GetRelType()+" "+
+                        NumberToString(relation.GetType())+" "+NumberToString(relation.GetId()));
         }
       }
     }
@@ -769,7 +769,7 @@ namespace osmscout {
             if (rel->roles[i].role=="0") {
               Area area;
 
-              area.reference.Set(rel->id,refRelation);
+              area.reference.Set(rel->GetId(),refRelation);
               area.name=name;
               area.area=rel->roles[i].nodes;
 
