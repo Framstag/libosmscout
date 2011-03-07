@@ -1,0 +1,17 @@
+Rules of thumb:
+* Each import step has its own memory constraints depending on import data size and structure.
+  In general import has to be configured to work best on *your* system with *your* data.
+  Currently the importer is by default tuned to smoothly import germany.osm.pbf on my system
+  (dual core, 2GB main memory). This should make most of your imports smooth, too, but there is
+  no garantee.
+* See the command line options of Import for a list of options.
+* Take a look at each import module to see which options are used where (I'll add a list to this
+  file later).
+* Do not change options at random.
+* The import is fastest if each step runs with a minimum of iterations and by using all physical
+  memory available (of course if data set is very small not all physical memory might be needed).
+* Check Resources.txt to get a feeling how fast your import and each of its steps should be.
+  Note that some steps do not have linear behaviour.
+* If the import runs into swap, try to reduce memory consumption by reducing cache sizes and
+  increasing iterations. This will make the importer run slower than on systems with more memory
+  but still makes it way faster than if running into swap.
