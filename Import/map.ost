@@ -334,6 +334,7 @@ TYPES
         WHERE EXISTS "building" AND
               !("building" IN ["no","false","0"])
         CAN BE AREA
+        /*
   TYPE "barrier_hedge" WHERE "barrier"=="hedge" CAN BE WAY AREA
   TYPE "barrier_fence" WHERE "barrier"=="fence" CAN BE WAY AREA
   TYPE "barrier_wall" WHERE "barrier"=="wall" CAN BE WAY AREA
@@ -350,7 +351,7 @@ TYPES
   TYPE "barrier_lift_gate" WHERE "barrier"=="lift_gate" CAN BE NODE
   TYPE "barrier_stile" WHERE "barrier"=="stile" CAN BE NODE
   TYPE "barrier_sally_port" WHERE "barrier"=="sally_port" CAN BE NODE
-  TYPE "barrier_kent_carriage_gate" WHERE "barrier"=="kent_carriage_gate" CAN BE NODE
+  TYPE "barrier_kent_carriage_gate" WHERE "barrier"=="kent_carriage_gate" CAN BE NODE*/
   TYPE "restriction_no_right_turn" WHERE "restriction"=="no_right_turn" CAN BE RELATION
   TYPE "restriction_no_left_turn" WHERE "restriction"=="no_left_turn" CAN BE RELATION
   TYPE "restriction_no_u_turn" WHERE "restriction"=="no_u_turn" CAN BE RELATION

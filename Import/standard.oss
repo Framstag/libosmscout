@@ -941,6 +941,7 @@ OSS
 
   AREA "building"
     FILL #bca9a9 WITH LAYER 2
+    BORDER #887b7b WITH MINPIXEL 1 WIDTH 1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   NODE "place_continent"
