@@ -430,6 +430,7 @@ namespace osmscout {
         std::vector<Tag> tags(rawWay.GetTags());
         Way              way;
         bool             reverseNodes=false;
+        bool             error=false;
 
         way.SetId(rawWay.GetId());
         way.SetType(rawWay.GetType());
@@ -453,19 +454,24 @@ namespace osmscout {
         }
 
         way.nodes.resize(rawWay.GetNodeCount());
-        for (size_t i=0; i<rawWay.GetNodeCount(); i++) {
+        for (size_t i=0; i<rawWay.GetNodeCount() && !error; i++) {
           std::map<Id,RawNode>::iterator node=nodes.find(rawWay.GetNodeId(i));
 
           if (node==nodes.end()) {
             progress.Error(std::string("Cannot find node ")+
                            NumberToString(rawWay.GetNodeId(i))+" for way "+
                            NumberToString(rawWay.GetId()));
+            error=true;
             continue;
           }
 
           way.nodes[i].id=rawWay.GetNodeId(i);
           way.nodes[i].lat=node->second.GetLat();
           way.nodes[i].lon=node->second.GetLon();
+        }
+
+        if (error) {
+          continue;
         }
 
         if (reverseNodes) {
