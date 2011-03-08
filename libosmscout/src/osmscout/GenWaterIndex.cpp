@@ -441,8 +441,13 @@ namespace osmscout {
           ScanConvertLine(way.nodes,-180.0,cellWidth,-90.0,cellHeight,cells);
 
           for (size_t i=0; i<cells.size(); i++) {
-            if (area.GetState(cells[i].x-cellXStart,cells[i].y-cellYStart)==unknown) {
-              area.SetState(cells[i].x-cellXStart,cells[i].y-cellYStart,land);
+            if (cells[i].x>=cellXStart &&
+                cells[i].x<=cellXEnd &&
+                cells[i].y>=cellYStart &&
+                cells[i].y<=cellYEnd) {
+              if (area.GetState(cells[i].x-cellXStart,cells[i].y-cellYStart)==unknown) {
+                area.SetState(cells[i].x-cellXStart,cells[i].y-cellYStart,land);
+              }
             }
           }
        }
