@@ -86,7 +86,7 @@ namespace osmscout {
      return false;
     }
 
-    size_t tagCount;
+    uint32_t tagCount;
 
     if (!scanner.ReadNumber(tagCount)) {
       std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
@@ -111,7 +111,7 @@ namespace osmscout {
       config.RestoreTagInfo(tagInfo);
     }
 
-    size_t typeCount;
+    uint32_t typeCount;
 
     if (!scanner.ReadNumber(typeCount)) {
       std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;

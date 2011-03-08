@@ -271,7 +271,7 @@ namespace osmscout {
     writer.GetPos(indexPageCountsPos);
 
     writer.SetPos(levelsOffset);
-    writer.Write(indexPageCounts.size());
+    writer.Write((uint32_t)indexPageCounts.size());
 
     writer.SetPos(lastLevelPageStartOffset);
     writer.Write(pageStarts[0]);

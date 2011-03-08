@@ -247,13 +247,13 @@ namespace osmscout {
 
     // Make the vector preallocate memory for the expected data size
     // This should void reallocation
-    wayWayOffsets.reserve(std::min(100000u,maxWayCount));
-    relationWayOffsets.reserve(std::min(100000u,maxWayCount));
-    wayAreaOffsets.reserve(std::min(100000u,maxAreaCount));
-    relationAreaOffsets.reserve(std::min(100000u,maxAreaCount));
+    wayWayOffsets.reserve(std::min(100000u,(uint32_t)maxWayCount));
+    relationWayOffsets.reserve(std::min(100000u,(uint32_t)maxWayCount));
+    wayAreaOffsets.reserve(std::min(100000u,(uint32_t)maxAreaCount));
+    relationAreaOffsets.reserve(std::min(100000u,(uint32_t)maxAreaCount));
 
-    newWayWayOffsets.reserve(std::min(100000u,maxWayCount));
-    newRelationWayOffsets.reserve(std::min(100000u,maxWayCount));
+    newWayWayOffsets.reserve(std::min(100000u,(uint32_t)maxWayCount));
+    newRelationWayOffsets.reserve(std::min(100000u,(uint32_t)maxWayCount));
 
     //
     // Ways

@@ -253,9 +253,9 @@ namespace osmscout {
       return false;
     }
 
-    writer.WriteNumber(drawTypeCount);    // Number of entries
-    writer.WriteNumber(leafs.size()-1);   // Type id of highest entry
-    writer.WriteNumber(cellWidth.size()); // maximum level
+    writer.WriteNumber(drawTypeCount);              // Number of entries
+    writer.WriteNumber((uint32_t)leafs.size()-1);   // Type id of highest entry
+    writer.WriteNumber((uint32_t)cellWidth.size()); // maximum level
 
     FileOffset tableOffset;
 
@@ -312,7 +312,7 @@ namespace osmscout {
             writer.WriteNumber(0);
           }
 
-          writer.WriteNumber(leaf->nodes.size());
+          writer.WriteNumber((uint32_t)leaf->nodes.size());
 
           for (std::vector<NodeEntry>::const_iterator entry=leaf->nodes.begin();
                entry!=leaf->nodes.end();

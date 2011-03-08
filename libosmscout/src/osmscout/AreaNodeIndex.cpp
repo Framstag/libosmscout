@@ -110,7 +110,7 @@ namespace osmscout {
 
       scanner.SetPos(offset);
 
-      size_t     offsetCount;
+      uint32_t     offsetCount;
 
       scanner.ReadNumber(cacheRef->value.children[0]);
       scanner.ReadNumber(cacheRef->value.children[1]);
@@ -150,8 +150,8 @@ namespace osmscout {
     std::vector<FileOffset> no;   // offsets in next level
 
     nodeOffsets.clear();
-    nodeOffsets.reserve(std::min(100000u,maxNodeCount));
-    newNodeOffsets.reserve(std::min(100000u,maxNodeCount));
+    nodeOffsets.reserve(std::min(100000u,(uint32_t)maxNodeCount));
+    newNodeOffsets.reserve(std::min(100000u,(uint32_t)maxNodeCount));
 
     minlon+=180;
     maxlon+=180;

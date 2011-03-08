@@ -48,7 +48,7 @@ namespace osmscout {
       return false;
     }
 
-    writer.WriteNumber(typeConfig.GetTags().size());
+    writer.WriteNumber((uint32_t)typeConfig.GetTags().size());
 
     for (std::vector<TagInfo>::const_iterator tag=typeConfig.GetTags().begin();
          tag!=typeConfig.GetTags().end();
@@ -58,7 +58,7 @@ namespace osmscout {
       writer.Write(tag->IsInternalOnly());
     }
 
-    writer.WriteNumber(typeConfig.GetTypes().size());
+    writer.WriteNumber((uint32_t)typeConfig.GetTypes().size());
 
     for (std::vector<TypeInfo>::const_iterator type=typeConfig.GetTypes().begin();
          type!=typeConfig.GetTypes().end();
