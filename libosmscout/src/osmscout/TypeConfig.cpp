@@ -85,6 +85,17 @@ namespace osmscout {
     return false;
   }
 
+  ExistsCondition::ExistsCondition(TagId tag)
+  : tag(tag)
+  {
+    // no code
+  }
+
+  bool ExistsCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
+  {
+    return tagMap.find(tag)!=tagMap.end();
+  }
+
   EqualsCondition::EqualsCondition(TagId tag,
                                    const std::string& tagValue)
   : tag(tag),
@@ -125,6 +136,30 @@ namespace osmscout {
     }
 
     return t->second==tagValue;
+  }
+
+  IsInCondition::IsInCondition(TagId tag)
+  : tag(tag)
+  {
+    // no code
+  }
+
+  void IsInCondition::AddTagValue(const std::string& tagValue)
+  {
+    tagValues.insert(tagValue);
+  }
+
+  bool IsInCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
+  {
+    std::map<TagId,std::string>::const_iterator t;
+
+    t=tagMap.find(tag);
+
+    if (t==tagMap.end()) {
+      return false;
+    }
+
+    return tagValues.find(t->second)!=tagValues.end();
   }
 
   TagInfo::TagInfo()

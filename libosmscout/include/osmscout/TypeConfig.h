@@ -84,6 +84,17 @@ namespace osmscout {
     bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
   };
 
+  class OSMSCOUT_API ExistsCondition : public Condition
+  {
+  private:
+    TagId tag;
+
+  public:
+    ExistsCondition(TagId tag);
+
+    bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
+  };
+
   class OSMSCOUT_API EqualsCondition : public Condition
   {
   private:
@@ -106,6 +117,20 @@ namespace osmscout {
   public:
     NotEqualsCondition(TagId tag,
                        const std::string& tagValue);
+
+    bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
+  };
+
+  class OSMSCOUT_API IsInCondition : public Condition
+  {
+  private:
+    TagId                 tag;
+    std::set<std::string> tagValues;
+
+  public:
+    IsInCondition(TagId tag);
+
+    void AddTagValue(const std::string& tagValue);
 
     bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
   };

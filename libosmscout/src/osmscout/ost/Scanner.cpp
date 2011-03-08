@@ -149,8 +149,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 29;
-	noSym = 29;
+	maxT = 30;
+	noSym = 30;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
@@ -172,15 +172,16 @@ void Scanner::Init() {
 	keywords.set("OR", 9);
 	keywords.set("AND", 10);
 	keywords.set("IN", 16);
-	keywords.set("CAN", 20);
-	keywords.set("BE", 21);
-	keywords.set("NODE", 22);
-	keywords.set("WAY", 23);
-	keywords.set("AREA", 24);
-	keywords.set("RELATION", 25);
-	keywords.set("OPTIONS", 26);
-	keywords.set("ROUTE", 27);
-	keywords.set("INDEX", 28);
+	keywords.set("EXISTS", 20);
+	keywords.set("CAN", 21);
+	keywords.set("BE", 22);
+	keywords.set("NODE", 23);
+	keywords.set("WAY", 24);
+	keywords.set("AREA", 25);
+	keywords.set("RELATION", 26);
+	keywords.set("OPTIONS", 27);
+	keywords.set("ROUTE", 28);
+	keywords.set("INDEX", 29);
 
 
   tvalLength = 128;

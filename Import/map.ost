@@ -330,26 +330,10 @@ TYPES
   TYPE "power_station" WHERE "power"=="station" CAN BE NODE AREA
   TYPE "power_sub_station" WHERE "power"=="sub_station" CAN BE NODE AREA
   TYPE "power_generator" WHERE "power"=="generator" CAN BE NODE AREA
-  TYPE "building" WHERE "building"=="yes" CAN BE AREA
-  TYPE "building" WHERE "building"=="true" CAN BE AREA
-  TYPE "building" WHERE "building"=="arena" CAN BE AREA
-  TYPE "building" WHERE "building"=="bank" CAN BE AREA
-  TYPE "building" WHERE "building"=="barn" CAN BE AREA
-  TYPE "building" WHERE "building"=="block" CAN BE AREA
-  TYPE "building" WHERE "building"=="brewery" CAN BE AREA
-  TYPE "building" WHERE "building"=="cafe" CAN BE AREA
-  TYPE "building" WHERE "building"=="castle" CAN BE AREA
-  TYPE "building" WHERE "building"=="cathedral" CAN BE AREA
-  TYPE "building" WHERE "building"=="chapel" CAN BE AREA
-  TYPE "building" WHERE "building"=="church" CAN BE AREA
-  TYPE "building" WHERE "building"=="cinema" CAN BE AREA
-  TYPE "building" WHERE "building"=="city_hall" CAN BE AREA
-  TYPE "building" WHERE "building"=="clubhouse" CAN BE AREA
-  TYPE "building" WHERE "building"=="commercial" CAN BE AREA
-  TYPE "building" WHERE "building"=="construction" CAN BE AREA
-  TYPE "building" WHERE "building"=="garage" CAN BE AREA
-  TYPE "building" WHERE "building"=="garages" CAN BE AREA
-  TYPE "building" WHERE "building"=="farm" CAN BE AREA
+  TYPE "building"
+        WHERE EXISTS "building" AND
+              !("building" IN ["no", "false","0"])
+        CAN BE AREA
   TYPE "barrier_hedge" WHERE "barrier"=="hedge" CAN BE WAY AREA
   TYPE "barrier_fence" WHERE "barrier"=="fence" CAN BE WAY AREA
   TYPE "barrier_wall" WHERE "barrier"=="wall" CAN BE WAY AREA

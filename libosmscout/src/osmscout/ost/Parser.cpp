@@ -109,7 +109,7 @@ bool Parser::WeakSeparator(int n, int syFol, int repFol)
 }
 
 void Parser::OST() {
-		while (!(la->kind == 0 || la->kind == 4)) {SynErr(30); Get();}
+		while (!(la->kind == 0 || la->kind == 4)) {SynErr(31); Get();}
 		Expect(4);
 		if (la->kind == 6) {
 			TYPES();
@@ -118,7 +118,7 @@ void Parser::OST() {
 }
 
 void Parser::TYPES() {
-		while (!(la->kind == 0 || la->kind == 6)) {SynErr(31); Get();}
+		while (!(la->kind == 0 || la->kind == 6)) {SynErr(32); Get();}
 		Expect(6);
 		TYPE();
 		while (la->kind == 7) {
@@ -132,7 +132,7 @@ void Parser::TYPE() {
 		Condition   *condition=NULL;
 		TypeInfo    typeInfo;
 		
-		while (!(la->kind == 0 || la->kind == 7)) {SynErr(32); Get();}
+		while (!(la->kind == 0 || la->kind == 7)) {SynErr(33); Get();}
 		Expect(7);
 		Expect(3);
 		typeValue=Destring(t->val);
@@ -142,7 +142,7 @@ void Parser::TYPE() {
 		typeInfo.SetType(typeValue,condition);
 		
 		TYPEKINDS(typeInfo);
-		if (la->kind == 26) {
+		if (la->kind == 27) {
 			TYPEOPTIONS(typeInfo);
 		}
 		config.AddTypeInfo(typeInfo);
@@ -178,8 +178,8 @@ void Parser::CONDITION(Condition*& condition) {
 }
 
 void Parser::TYPEKINDS(TypeInfo& typeInfo) {
-		Expect(20);
 		Expect(21);
+		Expect(22);
 		TYPEKIND(typeInfo);
 		while (StartOf(1)) {
 			TYPEKIND(typeInfo);
@@ -187,9 +187,9 @@ void Parser::TYPEKINDS(TypeInfo& typeInfo) {
 }
 
 void Parser::TYPEOPTIONS(TypeInfo& typeInfo) {
-		Expect(26);
+		Expect(27);
 		TYPEOPTION(typeInfo);
-		while (la->kind == 27 || la->kind == 28) {
+		while (la->kind == 28 || la->kind == 29) {
 			TYPEOPTION(typeInfo);
 		}
 }
@@ -225,6 +225,8 @@ void Parser::ANDCOND(Condition*& condition) {
 void Parser::BOOLCOND(Condition*& condition) {
 		if (la->kind == 3) {
 			BINARYCOND(condition);
+		} else if (la->kind == 20) {
+			EXISTSCOND(condition);
 		} else if (la->kind == 11) {
 			Get();
 			CONDITION(condition);
@@ -233,7 +235,7 @@ void Parser::BOOLCOND(Condition*& condition) {
 			Get();
 			BOOLCOND(condition);
 			condition=new NotCondition(condition); 
-		} else SynErr(33);
+		} else SynErr(34);
 }
 
 void Parser::BINARYCOND(Condition*& condition) {
@@ -247,68 +249,96 @@ void Parser::BINARYCOND(Condition*& condition) {
 			NOTEQUALSCOND(nameValue,condition);
 		} else if (la->kind == 16) {
 			ISINCOND(nameValue,condition);
-		} else SynErr(34);
+		} else SynErr(35);
 }
 
-void Parser::EQUALSCOND(const std::string& nameValue,Condition*& condition) {
+void Parser::EXISTSCOND(Condition*& condition) {
+		Expect(20);
+		Expect(3);
+		condition=new ExistsCondition(config.RegisterTagForInternalUse(Destring(t->val)));
+		
+}
+
+void Parser::EQUALSCOND(const std::string& tagName,Condition*& condition) {
 		std::string valueValue;
 		
 		Expect(14);
 		Expect(3);
 		valueValue=Destring(t->val); 
-		TagId tagId=config.RegisterTagForInternalUse(nameValue);
+		TagId tagId=config.RegisterTagForInternalUse(tagName);
 		
 		                  condition=new EqualsCondition(tagId,valueValue);
 		                
 }
 
-void Parser::NOTEQUALSCOND(const std::string& nameValue,Condition*& condition) {
+void Parser::NOTEQUALSCOND(const std::string& tagName,Condition*& condition) {
 		std::string valueValue;
 		
 		Expect(15);
 		Expect(3);
 		valueValue=Destring(t->val); 
-		TagId tagId=config.RegisterTagForInternalUse(nameValue);
+		TagId tagId=config.RegisterTagForInternalUse(tagName);
 		
 		                  condition=new NotEqualsCondition(tagId,valueValue);
 		                
 }
 
-void Parser::ISINCOND(const std::string& nameValue,Condition*& condition) {
+void Parser::ISINCOND(const std::string& tagName,Condition*& condition) {
+		std::list<std::string> values;
+		
 		Expect(16);
 		Expect(17);
 		Expect(3);
+		values.push_back(Destring(t->val)); 
 		if (la->kind == 18) {
 			Get();
 			Expect(3);
+			values.push_back(Destring(t->val)); 
 		}
 		Expect(19);
+		TagId tagId=config.RegisterTagForInternalUse(tagName);
+		
+		                  if (values.size()==1) {
+		                    condition=new EqualsCondition(tagId,values.front());
+		                  }
+		                  else {
+		                    IsInCondition *isInCondition=new IsInCondition(tagId);
+		
+		                    for (std::list<std::string>::const_iterator s=values.begin();
+		                         s!=values.end();
+		                         ++s) {
+		                      isInCondition->AddTagValue(*s);
+		                    }
+		
+		                    condition=isInCondition;
+		                  }
+		                
 }
 
 void Parser::TYPEKIND(TypeInfo& typeInfo) {
-		if (la->kind == 22) {
+		if (la->kind == 23) {
 			Get();
 			typeInfo.CanBeNode(true); 
-		} else if (la->kind == 23) {
-			Get();
-			typeInfo.CanBeWay(true); 
 		} else if (la->kind == 24) {
 			Get();
-			typeInfo.CanBeArea(true); 
+			typeInfo.CanBeWay(true); 
 		} else if (la->kind == 25) {
 			Get();
+			typeInfo.CanBeArea(true); 
+		} else if (la->kind == 26) {
+			Get();
 			typeInfo.CanBeRelation(true); 
-		} else SynErr(35);
+		} else SynErr(36);
 }
 
 void Parser::TYPEOPTION(TypeInfo& typeInfo) {
-		if (la->kind == 27) {
+		if (la->kind == 28) {
 			Get();
 			typeInfo.CanBeRoute(true); 
-		} else if (la->kind == 28) {
+		} else if (la->kind == 29) {
 			Get();
 			typeInfo.CanBeIndexed(true); 
-		} else SynErr(36);
+		} else SynErr(37);
 }
 
 
@@ -328,7 +358,7 @@ Parser::Parser(Scanner *scanner,
                TypeConfig& config)
  : config(config)
 {
-	maxT = 29;
+	maxT = 30;
 
   dummyToken = NULL;
   t = la = NULL;
@@ -343,9 +373,9 @@ bool Parser::StartOf(int s)
   const bool T = true;
   const bool x = false;
 
-	static bool set[2][31] = {
-		{T,x,x,x, T,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,x,x, x,x,x}
+	static bool set[2][32] = {
+		{T,x,x,x, T,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,x, x,x,x,x}
 	};
 
 
@@ -389,23 +419,24 @@ void Errors::SynErr(int line, int col, int n)
 			case 17: s = coco_string_create("\"[\" expected"); break;
 			case 18: s = coco_string_create("\",\" expected"); break;
 			case 19: s = coco_string_create("\"]\" expected"); break;
-			case 20: s = coco_string_create("\"CAN\" expected"); break;
-			case 21: s = coco_string_create("\"BE\" expected"); break;
-			case 22: s = coco_string_create("\"NODE\" expected"); break;
-			case 23: s = coco_string_create("\"WAY\" expected"); break;
-			case 24: s = coco_string_create("\"AREA\" expected"); break;
-			case 25: s = coco_string_create("\"RELATION\" expected"); break;
-			case 26: s = coco_string_create("\"OPTIONS\" expected"); break;
-			case 27: s = coco_string_create("\"ROUTE\" expected"); break;
-			case 28: s = coco_string_create("\"INDEX\" expected"); break;
-			case 29: s = coco_string_create("??? expected"); break;
-			case 30: s = coco_string_create("this symbol not expected in OST"); break;
-			case 31: s = coco_string_create("this symbol not expected in TYPES"); break;
-			case 32: s = coco_string_create("this symbol not expected in TYPE"); break;
-			case 33: s = coco_string_create("invalid BOOLCOND"); break;
-			case 34: s = coco_string_create("invalid BINARYCOND"); break;
-			case 35: s = coco_string_create("invalid TYPEKIND"); break;
-			case 36: s = coco_string_create("invalid TYPEOPTION"); break;
+			case 20: s = coco_string_create("\"EXISTS\" expected"); break;
+			case 21: s = coco_string_create("\"CAN\" expected"); break;
+			case 22: s = coco_string_create("\"BE\" expected"); break;
+			case 23: s = coco_string_create("\"NODE\" expected"); break;
+			case 24: s = coco_string_create("\"WAY\" expected"); break;
+			case 25: s = coco_string_create("\"AREA\" expected"); break;
+			case 26: s = coco_string_create("\"RELATION\" expected"); break;
+			case 27: s = coco_string_create("\"OPTIONS\" expected"); break;
+			case 28: s = coco_string_create("\"ROUTE\" expected"); break;
+			case 29: s = coco_string_create("\"INDEX\" expected"); break;
+			case 30: s = coco_string_create("??? expected"); break;
+			case 31: s = coco_string_create("this symbol not expected in OST"); break;
+			case 32: s = coco_string_create("this symbol not expected in TYPES"); break;
+			case 33: s = coco_string_create("this symbol not expected in TYPE"); break;
+			case 34: s = coco_string_create("invalid BOOLCOND"); break;
+			case 35: s = coco_string_create("invalid BINARYCOND"); break;
+			case 36: s = coco_string_create("invalid TYPEKIND"); break;
+			case 37: s = coco_string_create("invalid TYPEOPTION"); break;
 
     default:
     {

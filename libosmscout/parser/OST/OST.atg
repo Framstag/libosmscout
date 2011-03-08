@@ -134,6 +134,7 @@ PRODUCTIONS
                 .
   BOOLCOND<Condition*& condition>
               =   BINARYCOND<condition>
+                | EXISTSCOND<condition>
                 | "(" CONDITION<condition> ")"
                 | "!" BOOLCOND<condition> (. condition=new NotCondition(condition); .)
                 .
@@ -150,41 +151,68 @@ PRODUCTIONS
                 )
                 .
 
-  EQUALSCOND<const std::string& nameValue,Condition*& condition>
+  EQUALSCOND<const std::string& tagName,Condition*& condition>
               = (.
                   std::string valueValue;
                 .)
                 "=="
                 string (. valueValue=Destring(t->val); .)
                 (.
-                  TagId tagId=config.RegisterTagForInternalUse(nameValue);
+                  TagId tagId=config.RegisterTagForInternalUse(tagName);
 
                   condition=new EqualsCondition(tagId,valueValue);
                 .)
                 .
-  NOTEQUALSCOND<const std::string& nameValue,Condition*& condition>
+  NOTEQUALSCOND<const std::string& tagName,Condition*& condition>
               = (.
                   std::string valueValue;
                 .)
                 "!="
                 string (. valueValue=Destring(t->val); .)
                 (.
-                  TagId tagId=config.RegisterTagForInternalUse(nameValue);
+                  TagId tagId=config.RegisterTagForInternalUse(tagName);
 
                   condition=new NotEqualsCondition(tagId,valueValue);
                 .)
                 .
-  ISINCOND<const std::string& nameValue,Condition*& condition>
-              =
+  ISINCOND<const std::string& tagName,Condition*& condition>
+              = (.
+                 std::list<std::string> values;
+                .)
                 "IN"
                 "["
-                string
+                string   (. values.push_back(Destring(t->val)); .)
                 [
                   ","
-                  string
+                  string (. values.push_back(Destring(t->val)); .)
                 ]
                 "]"
+                (.
+                  TagId tagId=config.RegisterTagForInternalUse(tagName);
+
+                  if (values.size()==1) {
+                    condition=new EqualsCondition(tagId,values.front());
+                  }
+                  else {
+                    IsInCondition *isInCondition=new IsInCondition(tagId);
+
+                    for (std::list<std::string>::const_iterator s=values.begin();
+                         s!=values.end();
+                         ++s) {
+                      isInCondition->AddTagValue(*s);
+                    }
+
+                    condition=isInCondition;
+                  }
+                .)
                 .
+  EXISTSCOND<Condition*& condition>
+              = "EXISTS"
+                 string
+                 (.
+                   condition=new ExistsCondition(config.RegisterTagForInternalUse(Destring(t->val)));
+                 .)
+                 .
 
   TYPEKINDS<TypeInfo& typeInfo>
               = "CAN" "BE" TYPEKIND<typeInfo> {TYPEKIND<typeInfo>}.
