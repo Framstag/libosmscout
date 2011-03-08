@@ -47,6 +47,8 @@ namespace osmscout {
     FileWriter        wayWriter;
     FileWriter        relationWriter;
 
+    std::vector<Tag>  tags;
+
   public:
     uint32_t nodeCount;
     uint32_t wayCount;
@@ -99,17 +101,18 @@ namespace osmscout {
 
   void Preprocessor::Process(const Id& id,
                              const double& lon, const double& lat,
-                             const std::map<TagId,std::string>& tags)
+                             const std::map<TagId,std::string>& tagMap)
   {
     RawNode node;
     TypeId  type=typeIgnore;
 
-    config.GetNodeTypeId(tags,type);
+    config.GetNodeTypeId(tagMap,type);
+    config.ResolveTags(tagMap,tags);
 
     node.SetId(id);
     node.SetType(type);
     node.SetCoordinates(lon,lat);
-    //node.SetTags(tags);
+    node.SetTags(tags);
 
     node.Write(nodeWriter);
     nodeCount++;
@@ -117,13 +120,14 @@ namespace osmscout {
 
   void Preprocessor::Process(const Id& id,
                              const std::vector<Id>& nodes,
-                             const std::map<TagId,std::string>& tags)
+                             const std::map<TagId,std::string>& tagMap)
   {
     TypeId areaType=typeIgnore;
     TypeId wayType=typeIgnore;
     bool   isArea=false;
 
-    config.GetWayAreaTypeId(tags,wayType,areaType);
+    config.GetWayAreaTypeId(tagMap,wayType,areaType);
+    config.ResolveTags(tagMap,tags);
 
     if (areaType!=typeIgnore &&
         nodes.size()>1 && nodes[0]==nodes[nodes.size()-1]) {
@@ -155,23 +159,23 @@ namespace osmscout {
     }
 
     way.SetNodes(nodes);
-    //way.SetTags(t);
+    way.SetTags(tags);
 
     way.Write(wayWriter);
   }
 
   void Preprocessor::Process(const Id& id,
                              const std::vector<RawRelation::Member>& members,
-                             const std::map<TagId,std::string>& tags)
+                             const std::map<TagId,std::string>& tagMap)
   {
     RawRelation relation;
     TypeId      type;
 
     relation.SetId(id);
     relation.members=members;
-    //relation.tags=tags;
 
-    config.GetRelationTypeId(tags,type);
+    config.GetRelationTypeId(tagMap,type);
+    config.ResolveTags(tagMap,tags);
 
     relation.SetType(type);
 
