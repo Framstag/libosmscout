@@ -290,7 +290,7 @@ void Parser::ISINCOND(const std::string& tagName,Condition*& condition) {
 		Expect(17);
 		Expect(3);
 		values.push_back(Destring(t->val)); 
-		if (la->kind == 18) {
+		while (la->kind == 18) {
 			Get();
 			Expect(3);
 			values.push_back(Destring(t->val)); 

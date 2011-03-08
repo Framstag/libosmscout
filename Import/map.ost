@@ -332,7 +332,7 @@ TYPES
   TYPE "power_generator" WHERE "power"=="generator" CAN BE NODE AREA
   TYPE "building"
         WHERE EXISTS "building" AND
-              !("building" IN ["no", "false","0"])
+              !("building" IN ["no","false","0"])
         CAN BE AREA
   TYPE "barrier_hedge" WHERE "barrier"=="hedge" CAN BE WAY AREA
   TYPE "barrier_fence" WHERE "barrier"=="fence" CAN BE WAY AREA
