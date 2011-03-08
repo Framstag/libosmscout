@@ -1,3 +1,4 @@
+#include <cassert>
 #include <iostream>
 
 #include <osmscout/TypeConfig.h>
@@ -61,7 +62,7 @@ PRODUCTIONS
                   config.AddTypeInfo(typeInfo);
                 .)
                 .
-
+/*
   CONDITION<Condition*& condition>
               = (.
                   std::string nameValue;
@@ -75,13 +76,115 @@ PRODUCTIONS
 
                   condition=new TagEquals(tagId,valueValue);
                 .)
+                .*/
 
+  CONDITION<Condition*& condition>
+              = (.
+                  std::list<Condition*> conditions;
+                  Condition             *subCond;
+                .)
+                ANDCOND<subCond>   (. conditions.push_back(subCond); .)
+                {
+                  "OR"
+                  ANDCOND<subCond> (. conditions.push_back(subCond); .)
+                }
+                (.
+                  if (conditions.size()==1) {
+                    condition=conditions.front();
+                  }
+                  else {
+                    OrCondition *orCondition=new OrCondition();
+
+                    for (std::list<Condition*>::const_iterator c=conditions.begin();
+                         c!=conditions.end();
+                         ++c) {
+                      orCondition->AddCondition(*c);
+                    }
+
+                    condition=orCondition;
+                  }
+                .)
                 .
-  /*
-  CONDITIONS  = ANDCOND { "OR" ANDCOND} .
-  ANDCOND     = BOOLCOND { "AND" BOOLCOND}.
-  BOOLCOND    = string BOOLOP string.
-  BOOLOP      = "==".*/
+  ANDCOND<Condition*& condition>
+              = (.
+                  std::list<Condition*> conditions;
+                  Condition             *subCond;
+                .)
+                BOOLCOND<subCond>     (. conditions.push_back(subCond); .)
+                {
+                  "AND"
+                  BOOLCOND<subCond>   (. conditions.push_back(subCond); .)
+                }
+                (.
+                  if (conditions.size()==1) {
+                    condition=conditions.front();
+                  }
+                  else {
+                    AndCondition *andCondition=new AndCondition();
+
+                    for (std::list<Condition*>::const_iterator c=conditions.begin();
+                         c!=conditions.end();
+                         ++c) {
+                      andCondition->AddCondition(*c);
+                    }
+
+                    condition=andCondition;
+                  }
+                .)
+                .
+  BOOLCOND<Condition*& condition>
+              =   BINARYCOND<condition>
+                | "(" CONDITION<condition> ")"
+                | "!" BOOLCOND<condition> (. condition=new NotCondition(condition); .)
+                .
+
+  BINARYCOND<Condition*& condition>
+              = (.
+                  std::string nameValue;
+                .)
+                string (. nameValue=Destring(t->val); .)
+                (
+                  EQUALSCOND<nameValue,condition>
+                | NOTEQUALSCOND<nameValue,condition>
+                | ISINCOND<nameValue,condition>
+                )
+                .
+
+  EQUALSCOND<const std::string& nameValue,Condition*& condition>
+              = (.
+                  std::string valueValue;
+                .)
+                "=="
+                string (. valueValue=Destring(t->val); .)
+                (.
+                  TagId tagId=config.RegisterTagForInternalUse(nameValue);
+
+                  condition=new EqualsCondition(tagId,valueValue);
+                .)
+                .
+  NOTEQUALSCOND<const std::string& nameValue,Condition*& condition>
+              = (.
+                  std::string valueValue;
+                .)
+                "!="
+                string (. valueValue=Destring(t->val); .)
+                (.
+                  TagId tagId=config.RegisterTagForInternalUse(nameValue);
+
+                  condition=new NotEqualsCondition(tagId,valueValue);
+                .)
+                .
+  ISINCOND<const std::string& nameValue,Condition*& condition>
+              =
+                "IN"
+                "["
+                string
+                [
+                  ","
+                  string
+                ]
+                "]"
+                .
 
   TYPEKINDS<TypeInfo& typeInfo>
               = "CAN" "BE" TYPEKIND<typeInfo> {TYPEKIND<typeInfo>}.

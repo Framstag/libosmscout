@@ -21,6 +21,7 @@
 #ifndef OSMSCOUT_OST_PARSER_H
 #define OSMSCOUT_OST_PARSER_H
 
+#include <cassert>
 #include <iostream>
 
 #include <osmscout/TypeConfig.h>
@@ -127,6 +128,12 @@ std::string Destring(const char* str)
 	void CONDITION(Condition*& condition);
 	void TYPEKINDS(TypeInfo& typeInfo);
 	void TYPEOPTIONS(TypeInfo& typeInfo);
+	void ANDCOND(Condition*& condition);
+	void BOOLCOND(Condition*& condition);
+	void BINARYCOND(Condition*& condition);
+	void EQUALSCOND(const std::string& nameValue,Condition*& condition);
+	void NOTEQUALSCOND(const std::string& nameValue,Condition*& condition);
+	void ISINCOND(const std::string& nameValue,Condition*& condition);
 	void TYPEKIND(TypeInfo& typeInfo);
 	void TYPEOPTION(TypeInfo& typeInfo);
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # OST (aka OSMScout types)
-cococpp OST/OST.atg -namespace osmscout:ost -frames OST -o OST
+cococpp OST/OST.atg -namespace osmscout:ost -frames OST -o OST 
 
 sed -i s/\(L\"/\(\"/g OST/Scanner.cpp
 sed -i s/L\'/\'/g OST/Scanner.cpp

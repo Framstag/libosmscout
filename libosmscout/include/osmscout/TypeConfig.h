@@ -42,35 +42,72 @@ namespace osmscout {
   public:
     virtual ~Condition();
 
-    virtual bool Evaluate(const std::map<TagId,std::string>& tagMap) = 0;
+    virtual bool Evaluate(const std::map<TagId,std::string>& tagMap) const = 0;
   };
 
   typedef Ref<Condition> ConditionRef;
 
-  class OSMSCOUT_API TagEquals : public Condition
+  class OSMSCOUT_API NotCondition : public Condition
   {
   private:
-    TagId       tag;
-    std::string tagValue;
+    ConditionRef condition;
 
   public:
-    TagEquals(TagId tag,
-              const std::string& tagValue);
+    NotCondition(Condition* condition);
 
-    bool Evaluate(const std::map<TagId,std::string>& tagMap);
+    bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
   };
 
-  class OSMSCOUT_API TagNotEquals : public Condition
+  class OSMSCOUT_API AndCondition : public Condition
+  {
+  private:
+    std::list<ConditionRef> conditions;
+
+  public:
+    AndCondition();
+
+    void AddCondition(Condition* condition);
+
+    bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
+  };
+
+  class OSMSCOUT_API OrCondition : public Condition
+  {
+  private:
+    std::list<ConditionRef> conditions;
+
+  public:
+    OrCondition();
+
+    void AddCondition(Condition* condition);
+
+    bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
+  };
+
+  class OSMSCOUT_API EqualsCondition : public Condition
   {
   private:
     TagId       tag;
     std::string tagValue;
 
   public:
-    TagNotEquals(TagId tag,
-                 const std::string& tagValue);
+    EqualsCondition(TagId tag,
+                    const std::string& tagValue);
 
-    bool Evaluate(const std::map<TagId,std::string>& tagMap);
+    bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
+  };
+
+  class OSMSCOUT_API NotEqualsCondition : public Condition
+  {
+  private:
+    TagId       tag;
+    std::string tagValue;
+
+  public:
+    NotEqualsCondition(TagId tag,
+                       const std::string& tagValue);
+
+    bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
   };
 
   class OSMSCOUT_API TagInfo

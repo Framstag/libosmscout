@@ -149,29 +149,38 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 19;
-	noSym = 19;
+	maxT = 29;
+	noSym = 29;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
 	for (i = 48; i <= 57; ++i) start.set(i, 2);
 	start.set(34, 3);
-	start.set(61, 7);
+	start.set(40, 7);
+	start.set(41, 8);
+	start.set(33, 15);
+	start.set(61, 9);
+	start.set(91, 12);
+	start.set(44, 13);
+	start.set(93, 14);
 		start.set(Buffer::EoF, -1);
 	keywords.set("OST", 4);
 	keywords.set("END", 5);
 	keywords.set("TYPES", 6);
 	keywords.set("TYPE", 7);
 	keywords.set("WHERE", 8);
-	keywords.set("CAN", 10);
-	keywords.set("BE", 11);
-	keywords.set("NODE", 12);
-	keywords.set("WAY", 13);
-	keywords.set("AREA", 14);
-	keywords.set("RELATION", 15);
-	keywords.set("OPTIONS", 16);
-	keywords.set("ROUTE", 17);
-	keywords.set("INDEX", 18);
+	keywords.set("OR", 9);
+	keywords.set("AND", 10);
+	keywords.set("IN", 16);
+	keywords.set("CAN", 20);
+	keywords.set("BE", 21);
+	keywords.set("NODE", 22);
+	keywords.set("WAY", 23);
+	keywords.set("AREA", 24);
+	keywords.set("RELATION", 25);
+	keywords.set("OPTIONS", 26);
+	keywords.set("ROUTE", 27);
+	keywords.set("INDEX", 28);
 
 
   tvalLength = 128;
@@ -378,11 +387,27 @@ Token* Scanner::NextToken() {
 			else if (ch == 92) {AddCh(); goto case_5;}
 			else {t->kind = 3; break;}
 		case 7:
-			if (ch == '=') {AddCh(); goto case_8;}
-			else {t->kind = noSym; break;}
+			{t->kind = 11; break;}
 		case 8:
-			case_8:
-			{t->kind = 9; break;}
+			{t->kind = 12; break;}
+		case 9:
+			if (ch == '=') {AddCh(); goto case_10;}
+			else {t->kind = noSym; break;}
+		case 10:
+			case_10:
+			{t->kind = 14; break;}
+		case 11:
+			case_11:
+			{t->kind = 15; break;}
+		case 12:
+			{t->kind = 17; break;}
+		case 13:
+			{t->kind = 18; break;}
+		case 14:
+			{t->kind = 19; break;}
+		case 15:
+			if (ch == '=') {AddCh(); goto case_11;}
+			else {t->kind = 13; break;}
 
   }
   AppendVal(t);

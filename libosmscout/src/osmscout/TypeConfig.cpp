@@ -28,15 +28,72 @@ namespace osmscout {
     // no code
   }
 
-  TagEquals::TagEquals(TagId tag,
-                       const std::string& tagValue)
+  NotCondition::NotCondition(Condition* condition)
+  : condition(condition)
+  {
+    // no code
+  }
+
+  bool NotCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
+  {
+    return !condition->Evaluate(tagMap);
+  }
+
+  AndCondition::AndCondition()
+  {
+    // no code
+  }
+
+  void AndCondition::AddCondition(Condition* condition)
+  {
+    conditions.push_back(condition);
+  }
+
+  bool AndCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
+  {
+    for (std::list<ConditionRef>::const_iterator condition=conditions.begin();
+         condition!=conditions.end();
+         ++condition) {
+      if (!(*condition)->Evaluate(tagMap)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  OrCondition::OrCondition()
+  {
+    // no code
+  }
+
+  void OrCondition::AddCondition(Condition* condition)
+  {
+    conditions.push_back(condition);
+  }
+
+  bool OrCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
+  {
+    for (std::list<ConditionRef>::const_iterator condition=conditions.begin();
+         condition!=conditions.end();
+         ++condition) {
+      if ((*condition)->Evaluate(tagMap)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  EqualsCondition::EqualsCondition(TagId tag,
+                                   const std::string& tagValue)
   : tag(tag),
     tagValue(tagValue)
   {
     // no code
   }
 
-  bool TagEquals::Evaluate(const std::map<TagId,std::string>& tagMap)
+  bool EqualsCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
   {
     std::map<TagId,std::string>::const_iterator t;
 
@@ -49,15 +106,15 @@ namespace osmscout {
     return t->second==tagValue;
   }
 
-  TagNotEquals::TagNotEquals(TagId tag,
-                             const std::string& tagValue)
+  NotEqualsCondition::NotEqualsCondition(TagId tag,
+                                         const std::string& tagValue)
   : tag(tag),
     tagValue(tagValue)
   {
     // no code
   }
 
-  bool TagNotEquals::Evaluate(const std::map<TagId,std::string>& tagMap)
+  bool NotEqualsCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
   {
     std::map<TagId,std::string>::const_iterator t;
 
