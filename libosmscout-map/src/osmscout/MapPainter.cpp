@@ -1053,10 +1053,8 @@ namespace osmscout {
                                   const std::vector<Point>& nodes)
   {
     double lineWidth=attributes.GetWidth();
-    double r;
-    double g;
-    double b;
-    double a;
+    bool   drawBridge=attributes.IsBridge();
+    bool   drawTunnel=attributes.IsTunnel();
 
     if (lineWidth==0) {
       lineWidth=style.GetWidth();
@@ -1074,68 +1072,80 @@ namespace osmscout {
     bool outline=style.GetOutline()>0 &&
                  lineWidth-2*style.GetOutline()>=parameter.GetOutlineMinWidth();
 
-    if (!(attributes.IsBridge() &&
-          projection.GetMagnification()>=magCity) &&
-        !(attributes.IsTunnel() &&
-          projection.GetMagnification()>=magCity) &&
-        !outline) {
+    if (drawBridge &&
+        projection.GetMagnification()<magCity) {
+      drawBridge=false;
+    }
+
+    if (drawTunnel &&
+        projection.GetMagnification()<magCity) {
+      drawTunnel=false;
+    }
+
+    if (!(drawBridge ||
+          drawTunnel ||
+          outline)) {
       return;
     }
 
-    if (attributes.IsBridge() &&
-        projection.GetMagnification()>=magCity) {
-      r=0.0;
-      g=0.0;
-      b=0.0;
-      a=1.0;
-    }
-    else if (attributes.IsTunnel() &&
-             projection.GetMagnification()>=magCity) {
-      /*
-      double tunnel[2];
-
-      tunnel[0]=7+lineWidth;
-      tunnel[1]=7+lineWidth;*/
-
-      if (projection.GetMagnification()>=10000) {
-        r=0.75;
-        g=0.75;
-        b=0.75;
-        a=1.0;
-      }
-      else {
-        r=0.5;
-        g=0.5;
-        b=0.5;
-        a=1.0;
-      }
-
+    if (drawBridge) {
+      // black outline for bridges
       DrawPath(projection,
                parameter,
-               r,g,b,a,
+               0.0,
+               0.0,
+               0.0,
+               1.0,
                lineWidth,
-               tunnelDash,
+               emptyDash,
                attributes.StartIsJoint() ? capButt : capRound,
                attributes.EndIsJoint() ? capButt : capRound,
                nodes);
-
-      return;
+    }
+    else if (drawTunnel) {
+      if (projection.GetMagnification()>=10000) {
+        // light grey dashes
+        DrawPath(projection,
+                 parameter,
+                 0.75,
+                 0.75,
+                 0.75,
+                 1.0,
+                 lineWidth,
+                 tunnelDash,
+                 attributes.StartIsJoint() ? capButt : capRound,
+                 attributes.EndIsJoint() ? capButt : capRound,
+                 nodes);
+      }
+      else {
+        // dark grey dashes
+        DrawPath(projection,
+                 parameter,
+                 0.5,
+                 0.5,
+                 0.5,
+                 1.0,
+                 lineWidth,
+                 tunnelDash,
+                 attributes.StartIsJoint() ? capButt : capRound,
+                 attributes.EndIsJoint() ? capButt : capRound,
+                 nodes);
+      }
     }
     else {
-      r=style.GetOutlineR();
-      g=style.GetOutlineG();
-      b=style.GetOutlineB();
-      a=style.GetOutlineA();
+      // normal path, notmal outline color
+      DrawPath(projection,
+               parameter,
+               style.GetOutlineR(),
+               style.GetOutlineG(),
+               style.GetOutlineB(),
+               style.GetOutlineA(),
+               lineWidth,
+               emptyDash,
+               attributes.StartIsJoint() ? capButt : capRound,
+               attributes.EndIsJoint() ? capButt : capRound,
+               nodes);
     }
-
-    DrawPath(projection,
-             parameter,
-             r,g,b,a,
-             lineWidth,
-             emptyDash,
-             attributes.StartIsJoint() ? capButt : capRound,
-             attributes.EndIsJoint() ? capButt : capRound,
-             nodes);
   }
 
 
