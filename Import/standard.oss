@@ -49,23 +49,23 @@ OSS
     LINE #ffffff WITH ALTCOLOR #888888 MINPIXEL 0.5 WIDTH 8 OUTLINE 1
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY "highway_residential" PRIO 8 MINMAG proximity
+  WAY "highway_residential" PRIO 8 MINMAG city
     LINE #ffffff WITH ALTCOLOR #888888 MINPIXEL 0.5 WIDTH 8 OUTLINE 1
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY "highway_living_street" PRIO 9 MINMAG proximity
+  WAY "highway_living_street" PRIO 9 MINMAG city
     LINE #bababa WITH MINPIXEL 1 WIDTH 8 OUTLINE 1
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY "highway_service" PRIO 10 MINMAG proximity
+  WAY "highway_service" PRIO 10 MINMAG city
     LINE #ffffff WITH ALTCOLOR #888888 MINPIXEL 0.5 WIDTH 8 OUTLINE 1
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY "highway_track" PRIO 11 MINMAG proximity
+  WAY "highway_track" PRIO 11 MINMAG city
     LINE #90570c WITH OUTLINECOLOR #ffffff80 DASH 3,1 MINPIXEL 1.5 FIXEDWIDTH OUTLINE 1.5
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY "highway_pedestrian" PRIO 11 MINMAG proximity
+  WAY "highway_pedestrian" PRIO 11 MINMAG city
     LINE #ebeaea WITH MINPIXEL 0.5 WIDTH 8 OUTLINE 1
     LABEL WITH STYLE contour MINMAG detail
 
@@ -81,31 +81,31 @@ OSS
     FILL #cb9999
     LABEL WITH MINMAG close
 
-  WAY "highway_bus_guideway" PRIO 11 MINMAG proximity
+  WAY "highway_bus_guideway" PRIO 11 MINMAG city
     LINE #90570c WITH MINPIXEL 0.5 WIDTH 2
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "highway_path" PRIO 11 MINMAG proximity
+  WAY "highway_path" PRIO 11 MINMAG city
     LINE #555555 WITH OUTLINECOLOR #ffffff80 DASH 8,2 MINPIXEL 1 FIXEDWIDTH OUTLINE 1
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY "highway_cycleway" PRIO 11 MINMAG proximity
+  WAY "highway_cycleway" PRIO 11 MINMAG city
     LINE #4645fa WITH OUTLINECOLOR #ffffff80 DASH 1,1 MINPIXEL 2 FIXEDWIDTH OUTLINE 1.5
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY "highway_footway" PRIO 11 MINMAG proximity
+  WAY "highway_footway" PRIO 11 MINMAG city
     LINE #fe9897 WITH OUTLINECOLOR #ffffff80 DASH 1,1 MINPIXEL 2 FIXEDWIDTH OUTLINE 1.5
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY "highway_bridleway" PRIO 11 MINMAG proximity
+  WAY "highway_bridleway" PRIO 11 MINMAG city
     LINE #90570c WITH MINPIXEL 0.5 WIDTH 2
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY "highway_byway" PRIO 11 MINMAG proximity
+  WAY "highway_byway" PRIO 11 MINMAG city
     LINE #90570c WITH MINPIXEL 0.5 WIDTH 2
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY "highway_steps" PRIO 11 MINMAG proximity
+  WAY "highway_steps" PRIO 11 MINMAG city
     LINE #fe9897 WITH DASH 0.25,0.25 MINPIXEL 5
     LABEL WITH STYLE contour MINMAG detail
 
@@ -125,15 +125,15 @@ OSS
     LINE #b3b3b3 WITH ALTCOLOR #777777 OUTLINECOLOR #b3b3b3 DASH 1.5,1.5 MINPIXEL 1.5 WIDTH 5 OUTLINE 0.5
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "railway_tram" PRIO 20 MINMAG proximity
+  WAY "railway_tram" PRIO 20 MINMAG city
     LINE #444444 WITH MINPIXEL 1 WIDTH 5
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "railway_light_rail" PRIO 20 MINMAG proximity
+  WAY "railway_light_rail" PRIO 20 MINMAG city
     LINE #b3b3b3 WITH MINPIXEL 1 WIDTH 5
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "railway_subway" PRIO 20 MINMAG proximity
+  WAY "railway_subway" PRIO 20 MINMAG city
     LINE #b3b3b3 WITH OUTLINECOLOR #ffffff80 MINPIXEL 1 WIDTH 5 OUTLINE 1
     LABEL WITH STYLE contour MINMAG close
 
@@ -345,11 +345,11 @@ OSS
     FILL #d5ddbd
     LABEL WITH MINMAG detail
 
-  WAY "aeroway_runway" PRIO 20 MINMAG proximity
+  WAY "aeroway_runway" PRIO 20 MINMAG city
     LINE #bbbbcc WITH MINPIXEL 2 WIDTH 20
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "aeroway_taxiway" PRIO 20 MINMAG proximity
+  WAY "aeroway_taxiway" PRIO 20 MINMAG city
     LINE #bbbbcc WITH MINPIXEL 2 WIDTH 15
     LABEL WITH STYLE contour MINMAG close
 
@@ -370,7 +370,7 @@ OSS
     FILL #bde3cb WITH LAYER 2
     LABEL WITH MINMAG close
 
-  WAY "leisure_track" PRIO 11 MINMAG proximity
+  WAY "leisure_track" PRIO 11 MINMAG city
     LINE #bde3cb WITH MINPIXEL 1 WIDTH 3
     LABEL WITH STYLE contour MINMAG city
 
