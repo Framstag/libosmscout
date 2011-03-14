@@ -42,7 +42,6 @@ namespace osmscout {
                      DataFile<RawNode>& nodeDataFile,
                      DataFile<RawWay>& wayDataFile,
                      Relation::Role& role,
-                     TypeId& type,
                      Progress& progress)
   {
     // We currently do not support referencing relations
@@ -71,7 +70,7 @@ namespace osmscout {
 
       role.nodes.push_back(point);
 
-      type=node.GetType();
+      role.attributes.type=node.GetType();
     }
     else if (member.type==RawRelation::memberWay) {
       RawWay way;
@@ -83,8 +82,6 @@ namespace osmscout {
                        NumberToString(id)+" "+name);
         return false;
       }
-
-      type=way.GetType();
 
       std::vector<RawNode> ns;
 
@@ -638,8 +635,6 @@ namespace osmscout {
       rel.roles.resize(rawRel.members.size());
 
       for (size_t m=0; m<rawRel.members.size(); m++) {
-        TypeId type;
-
         rel.roles[m].role=rawRel.members[m].role;
         rel.roles[m].attributes.layer=layer;
 
@@ -648,21 +643,19 @@ namespace osmscout {
                            name,
                            rawRel.members[m],nodeDataFile,
                            wayDataFile,
-                           rel.roles[m],type,
+                           rel.roles[m],
                            progress)) {
           error=true;
           break;
         }
-
-        rel.roles[m].attributes.type=type;
       }
 
       if (error) {
         continue;
       }
 
-      // Resolve type of multipolygon/boundary relations if the relation does not have
-      // a type
+      // Resolve type of multipolygon/boundary relations if the relation does
+      // not have a type
       if (rel.GetType()==typeIgnore &&
           (rel.GetRelType()=="multipolygon" ||
            rel.GetRelType()=="boundary")) {
