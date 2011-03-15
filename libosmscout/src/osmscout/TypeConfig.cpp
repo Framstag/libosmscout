@@ -20,7 +20,7 @@
 #include <osmscout/TypeConfig.h>
 
 #include <cassert>
-
+#include <iostream>
 namespace osmscout {
 
   Condition::~Condition()
@@ -390,6 +390,8 @@ namespace osmscout {
     else {
       nextTypeId=std::max(nextTypeId,(TypeId)(typeInfo.GetId()+1));
     }
+
+    //std::cout << "Type: " << typeInfo.GetId() << " " << typeInfo.GetName() << std::endl;
 
     types.push_back(typeInfo);
     nameToTypeMap[typeInfo.GetName()]=typeInfo;
