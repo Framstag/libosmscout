@@ -270,7 +270,7 @@ TYPES
   TYPE "historic_manor" WHERE "historic"=="manor" CAN BE NODE AREA
   TYPE "historic_monument" WHERE "historic"=="monument" CAN BE NODE AREA
   TYPE "historic_memorial" WHERE "historic"=="memorial" CAN BE NODE AREA
-  TYPE "historic_archaeological_site" WHERE "historic"=="archaeological_site" CAN BE NODE AREA
+  TYPE "historic_archaeological_site" WHERE "historic"=="archaeological_site" CAN BE NODE WAY AREA
   TYPE "historic_ruins" WHERE "historic"=="ruins" CAN BE NODE AREA
   TYPE "historic_battlefield" WHERE "historic"=="battlefield" CAN BE NODE AREA
   TYPE "historic_wreck" WHERE "historic"=="wreck" CAN BE NODE AREA
