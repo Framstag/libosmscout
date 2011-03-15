@@ -130,13 +130,21 @@ namespace osmscout {
     config.ResolveTags(tagMap,tags);
 
     if (areaType!=typeIgnore &&
-        nodes.size()>1 && nodes[0]==nodes[nodes.size()-1]) {
+        nodes.size()>1 &&
+        nodes[0]==nodes[nodes.size()-1]) {
+      isArea=true;
+    }
+    else if (areaType!=typeIgnore &&
+                     nodes.size()>1 &&
+                     wayType==typeIgnore) {
+      nodes.push_back(nodes[0]);
       isArea=true;
     }
     else if (wayType!=typeIgnore) {
       // no code
     }
-    else if (areaType==typeIgnore && wayType==typeIgnore) {
+    else if (areaType==typeIgnore &&
+             wayType==typeIgnore) {
       // Unidentified way
       /*
       std::cout << "--- " << id << std::endl;

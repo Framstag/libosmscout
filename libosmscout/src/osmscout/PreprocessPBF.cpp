@@ -41,8 +41,6 @@
 
 #include <osmscout/util/String.h>
 
-#include <iostream>
-
 #define MAX_BLOCK_HEADER_SIZE (64*1024)
 #define MAX_BLOB_SIZE         (32*1024*1024)
 #define NANO                  (1000.0*1000.0*1000.0)
@@ -461,12 +459,20 @@ namespace osmscout {
               rawWay.SetType(areaType,true);
               areaCount++;
             }
+            else if (areaType!=typeIgnore &&
+                     nodes.size()>1 &&
+                     wayType==typeIgnore) {
+
+              nodes.push_back(nodes[0]);
+
+              rawWay.SetType(areaType,true);
+              areaCount++;
+            }
             else if (wayType!=typeIgnore) {
               rawWay.SetType(wayType,false);
               wayCount++;
             }
-            else if (areaType==typeIgnore &&
-                     wayType==typeIgnore) {
+            else {
               rawWay.SetType(typeIgnore,false);
               wayCount++;
               // Unidentified way
@@ -527,7 +533,8 @@ namespace osmscout {
               rawRel.members.push_back(member);
             }
 
-            TypeId  type;
+            TypeId type;
+
             typeConfig.GetRelationTypeId(tagMap,type);
             typeConfig.ResolveTags(tagMap,rawRel.tags);
 
