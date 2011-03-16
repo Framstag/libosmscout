@@ -64,7 +64,7 @@ namespace osmscout {
                  const double& lon, const double& lat,
                  const std::map<TagId,std::string>& tags);
     void Process(const Id& id,
-                 const std::vector<Id>& nodes,
+                 std::vector<Id>& nodes,
                  const std::map<TagId,std::string>& tags);
     void Process(const Id& id,
                  const std::vector<RawRelation::Member>& members,
@@ -119,7 +119,7 @@ namespace osmscout {
   }
 
   void Preprocessor::Process(const Id& id,
-                             const std::vector<Id>& nodes,
+                             std::vector<Id>& nodes,
                              const std::map<TagId,std::string>& tagMap)
   {
     TypeId areaType=typeIgnore;
