@@ -40,8 +40,8 @@ bool write_ppm(const unsigned char* buf,
   FILE* fd=fopen(file_name, "wb");
 
   if (fd) {
-    fprintf(fd, "P6 %d %d 255 ", width, height);
-    fwrite(buf, 1, width * height * 3, fd);
+    fprintf(fd,"P6 %d %d 255\n", width,height);
+    fwrite(buf,1,width*height*3,fd);
     fclose(fd);
     return true;
   }
@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
     std::cerr << "Cannot open style" << std::endl;
   }
 
-  unsigned char* buffer = new unsigned char[width*height*3];
+  unsigned char *buffer=new unsigned char[width*height*3];
 
   memset(buffer,255,width*height*3);
 
@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
                       data.ways,
                       data.areas,
                       data.relationWays,
-                          data.relationAreas);
+                      data.relationAreas);
 
   if (painter.DrawMap(styleConfig,
                       projection,
