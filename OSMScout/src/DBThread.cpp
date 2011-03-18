@@ -100,30 +100,10 @@ void DBThread::run()
 
   exec();
 
+  FreeMaps();
+
   if (database.IsOpen()) {
     database.Close();
-  }
-
-#if defined(HAVE_LIB_QTOPENGL)
-  if (currentGLPixmap!=NULL) {
-    delete currentGLPixmap;
-    currentGLPixmap=NULL;
-  }
-
-  if (finishedGLPixmap!=NULL) {
-    delete finishedGLPixmap;
-    finishedGLPixmap=NULL;
-  }
-#endif
-
-  if (currentPixmap!=NULL) {
-    delete currentPixmap;
-    currentPixmap=NULL;
-  }
-
-  if (finishedPixmap!=NULL) {
-    delete finishedPixmap;
-    finishedPixmap=NULL;
   }
 }
 
@@ -206,12 +186,12 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
                         data.areas,
                         data.relationWays,
                         data.relationAreas);
-
+    /*
     database.GetGroundTiles(projection.GetLonMin(),
                             projection.GetLatMin(),
                             projection.GetLonMax(),
                             projection.GetLatMax(),
-                            data.groundTiles);
+                            data.groundTiles);*/
 
     dataRetrievalTimer.Stop();
 
