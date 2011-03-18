@@ -148,12 +148,12 @@ void DatabaseTask::Run()
                              data.areas,
                              data.relationWays,
                              data.relationAreas);
-
+        /*
         database->GetGroundTiles(projection.GetLonMin(),
                                  projection.GetLatMin(),
                                  projection.GetLonMax(),
                                  projection.GetLatMax(),
-                                 data.groundTiles);
+                                 data.groundTiles);*/
 
         dataRetrievalTimer.Stop();
 
