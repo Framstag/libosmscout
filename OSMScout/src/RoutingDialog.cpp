@@ -265,14 +265,14 @@ void RoutingDialog::SelectFrom()
   if (dialog.result()==QDialog::Accepted) {
     osmscout::Location location;
     std::string        label;
-    osmscout::Way      way;
+    osmscout::WayRef   way;
 
     location=dialog.GetLocationResult();
 
     route.startWay=location.references.front().GetId();
 
     if (dbThread.GetWay(route.startWay,way)) {
-      route.startNode=way.nodes[0].id;
+      route.startNode=way->nodes[0].id;
 
       if (location.path.empty()) {
         route.start=QString::fromUtf8(location.name.c_str());
@@ -309,14 +309,14 @@ void RoutingDialog::SelectTo()
   if (dialog.result()==QDialog::Accepted) {
     osmscout::Location   location;
     std::string          label;
-    osmscout::Way        way;
+    osmscout::WayRef     way;
 
     location=dialog.GetLocationResult();
 
     route.endWay=location.references.front().GetId();
 
     if (dbThread.GetWay(route.endWay,way)) {
-      route.endNode=way.nodes[0].id;
+      route.endNode=way->nodes[0].id;
 
       if (location.path.empty()) {
         route.end=QString::fromUtf8(location.name.c_str());
@@ -347,8 +347,8 @@ void RoutingDialog::Route()
   std::cout << "Route" << std::endl;
 
   osmscout::RouteData        routeData;
-  osmscout::Way              startWay;
-  osmscout::Way              endWay;
+  osmscout::WayRef           startWay;
+  osmscout::WayRef           endWay;
   osmscout::Way              routeWay;
 
   if (!dbThread.GetWay(route.startWay,startWay)) {
@@ -361,8 +361,8 @@ void RoutingDialog::Route()
     return;
   }
 
-  if (!dbThread.CalculateRoute(startWay.GetId(),startWay.nodes.front().id,
-                               endWay.GetId(),endWay.nodes.back().id,
+  if (!dbThread.CalculateRoute(startWay->GetId(),startWay->nodes.front().id,
+                               endWay->GetId(),endWay->nodes.back().id,
                                routeData)) {
     std::cerr << "There was an error while routing!" << std::endl;
     return;

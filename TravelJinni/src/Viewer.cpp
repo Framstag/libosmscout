@@ -370,21 +370,21 @@ public:
                      const osmscout::Mag& magnification)
   {
     if (reference.GetType()==osmscout::refNode) {
-      osmscout::Node node;
+      osmscout::NodeRef node;
 
       if (database->GetNode(reference.GetId(),node)) {
-        lon=node.GetLon();
-        lat=node.GetLat();
+        lon=node->GetLon();
+        lat=node->GetLat();
         this->magnification=magnification;
 
         RequestNewMap();
       }
     }
     else if (reference.GetType()==osmscout::refWay) {
-      osmscout::Way way;
+      osmscout::WayRef way;
 
       if (database->GetWay(reference.GetId(),way)) {
-        if (way.GetCenter(lat,lon)) {
+        if (way->GetCenter(lat,lon)) {
           this->magnification=magnification;
 
           RequestNewMap();
@@ -392,10 +392,10 @@ public:
       }
     }
     else if (reference.GetType()==osmscout::refRelation) {
-      osmscout::Relation relation;
+      osmscout::RelationRef relation;
 
       if (database->GetRelation(reference.GetId(),relation)) {
-        if (relation.GetCenter(lat,lon)) {
+        if (relation->GetCenter(lat,lon)) {
           this->magnification=magnification;
 
           RequestNewMap();

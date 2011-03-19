@@ -540,9 +540,11 @@ namespace osmscout {
       wayLayers[i]=false;
     }
 
-    for (std::vector<Way>::const_iterator way=data.ways.begin();
-         way!=data.ways.end();
-         ++way) {
+    for (std::vector<WayRef>::const_iterator w=data.ways.begin();
+         w!=data.ways.end();
+         ++w) {
+      const WayRef& way=*w;
+
       if (way->GetLayer()>=-5 && way->GetLayer()<=5) {
         wayLayers[way->GetLayer()+5]=true;
       }
@@ -552,9 +554,11 @@ namespace osmscout {
       relationWayLayers[i]=false;
     }
 
-    for (std::vector<Relation>::const_iterator relation=data.relationWays.begin();
-         relation!=data.relationWays.end();
-         ++relation) {
+    for (std::vector<RelationRef>::const_iterator r=data.relationWays.begin();
+         r!=data.relationWays.end();
+         ++r) {
+      const RelationRef& relation=*r;
+
       for (size_t m=0; m<relation->roles.size(); m++) {
         if (relation->roles[m].GetLayer()>=-5 && relation->roles[m].GetLayer()<=5) {
           relationWayLayers[relation->roles[m].GetLayer()+5]=true;
@@ -571,9 +575,11 @@ namespace osmscout {
       relationAreaLayers[i]=false;
     }
 
-    for (std::vector<Way>::const_iterator area=data.areas.begin();
-         area!=data.areas.end();
-         ++area) {
+    for (std::vector<WayRef>::const_iterator a=data.areas.begin();
+         a!=data.areas.end();
+         ++a) {
+      const WayRef& area=*a;
+
       const FillStyle *style=styleConfig.GetAreaFillStyle(area->GetType(),
                                                           area->IsBuilding());
 
@@ -584,9 +590,11 @@ namespace osmscout {
       }
     }
 
-    for (std::vector<Relation>::const_iterator relation=data.relationAreas.begin();
-         relation!=data.relationAreas.end();
-         ++relation) {
+    for (std::vector<RelationRef>::const_iterator r=data.relationAreas.begin();
+         r!=data.relationAreas.end();
+         ++r) {
+      const RelationRef& relation=*r;
+
       const FillStyle *style=styleConfig.GetAreaFillStyle(relation->GetType(),
                                                           false/*relation->flags & Way::isBuilding*/);
 
@@ -603,9 +611,11 @@ namespace osmscout {
                              const MapParameter& parameter,
                              const MapData& data)
   {
-    for (std::vector<Node>::const_iterator node=data.nodes.begin();
-         node!=data.nodes.end();
-         ++node) {
+    for (std::vector<NodeRef>::const_iterator n=data.nodes.begin();
+         n!=data.nodes.end();
+         ++n) {
+      const NodeRef& node=*n;
+
       const LabelStyle  *labelStyle=styleConfig.GetNodeLabelStyle(node->GetType());
       IconStyle         *iconStyle=styleConfig.GetNodeIconStyle(node->GetType());
       const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetNodeSymbolStyle(node->GetType());
@@ -697,9 +707,11 @@ namespace osmscout {
       int layer=l-5;
 
       if (areaLayers[l]) {
-        for (std::vector<Way>::const_iterator area=data.areas.begin();
-             area!=data.areas.end();
-             ++area) {
+        for (std::vector<WayRef>::const_iterator a=data.areas.begin();
+             a!=data.areas.end();
+             ++a) {
+          const WayRef& area=*a;
+
           PatternStyle    *patternStyle=styleConfig.GetAreaPatternStyle(area->GetType());
           const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(area->GetType(),
                                                                   area->GetAttributes().IsBuilding());
@@ -737,9 +749,11 @@ namespace osmscout {
       }
 
       if (relationAreaLayers[l]) {
-        for (std::vector<Relation>::const_iterator relation=data.relationAreas.begin();
-             relation!=data.relationAreas.end();
-             ++relation) {
+        for (std::vector<RelationRef>::const_iterator r=data.relationAreas.begin();
+             r!=data.relationAreas.end();
+             ++r) {
+          const RelationRef& relation=*r;
+
           bool drawn=false;
 
           for (size_t m=0; m<relation->roles.size(); m++) {
@@ -795,9 +809,11 @@ namespace osmscout {
                                   const MapParameter& parameter,
                                   const MapData& data)
   {
-    for (std::vector<Way>::const_iterator area=data.areas.begin();
-         area!=data.areas.end();
-         ++area) {
+    for (std::vector<WayRef>::const_iterator a=data.areas.begin();
+         a!=data.areas.end();
+         ++a) {
+      const WayRef& area=*a;
+
       const LabelStyle  *labelStyle=styleConfig.GetAreaLabelStyle(area->GetType());
       IconStyle         *iconStyle=styleConfig.GetAreaIconStyle(area->GetType());
       const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetAreaSymbolStyle(area->GetType());
@@ -878,9 +894,11 @@ namespace osmscout {
       }
     }
 
-    for (std::vector<Relation>::const_iterator relation=data.relationAreas.begin();
-         relation!=data.relationAreas.end();
-         ++relation) {
+    for (std::vector<RelationRef>::const_iterator r=data.relationAreas.begin();
+         r!=data.relationAreas.end();
+         ++r) {
+      const RelationRef& relation=*r;
+
       for (size_t m=0; m<relation->roles.size(); m++) {
         if (relation->roles[m].role=="0") {
           const LabelStyle  *labelStyle=styleConfig.GetAreaLabelStyle(relation->roles[m].GetType());
@@ -1159,9 +1177,10 @@ namespace osmscout {
       // Potential path outline
 
       if (wayLayers[l]) {
-        for (std::vector<Way>::const_iterator way=data.ways.begin();
-             way!=data. ways.end();
-             ++way) {
+        for (std::vector<WayRef>::const_iterator w=data.ways.begin();
+             w!=data. ways.end();
+             ++w) {
+          const WayRef& way=*w;
 
           if (way->GetLayer()!=layer) {
             continue;
@@ -1182,9 +1201,11 @@ namespace osmscout {
       }
 
       if (relationWayLayers[l]) {
-        for (std::vector<Relation>::const_iterator relation=data.relationWays.begin();
-             relation!=data.relationWays.end();
-             ++relation) {
+        for (std::vector<RelationRef>::const_iterator r=data.relationWays.begin();
+             r!=data.relationWays.end();
+             ++r) {
+          const RelationRef& relation=*r;
+
           for (size_t m=0; m<relation->roles.size(); m++) {
             TypeId type=relation->roles[m].GetType()==typeIgnore ? relation->GetType() : relation->roles[m].GetType();
 
@@ -1212,9 +1233,10 @@ namespace osmscout {
       }
 
       if (wayLayers[l]) {
-        for (std::vector<Way>::const_iterator way=data.ways.begin();
-             way!=data.ways.end();
-             ++way) {
+        for (std::vector<WayRef>::const_iterator w=data.ways.begin();
+             w!=data.ways.end();
+             ++w) {
+          const WayRef& way=*w;
 
           if (way->GetLayer()!=layer) {
             continue;
@@ -1235,9 +1257,11 @@ namespace osmscout {
       }
 
       if (relationWayLayers[l]) {
-        for (std::vector<Relation>::const_iterator relation=data.relationWays.begin();
-             relation!=data.relationWays.end();
-             ++relation) {
+        for (std::vector<RelationRef>::const_iterator r=data.relationWays.begin();
+             r!=data.relationWays.end();
+             ++r) {
+          const RelationRef& relation=*r;
+
           //std::cout << "Draw way relation " << relation->id << std::endl;
           for (size_t m=0; m<relation->roles.size(); m++) {
             TypeId type=relation->roles[m].GetType()==typeIgnore ? relation->GetType() : relation->roles[m].GetType();
@@ -1274,9 +1298,11 @@ namespace osmscout {
   {
     std::set<size_t> tileBlacklist;
 
-    for (std::vector<Way>::const_iterator way=data.ways.begin();
-         way!=data.ways.end();
-         ++way) {
+    for (std::vector<WayRef>::const_iterator w=data.ways.begin();
+         w!=data.ways.end();
+         ++w) {
+      const WayRef& way=*w;
+
       if (!way->GetName().empty()) {
         const LabelStyle *style=styleConfig.GetWayNameLabelStyle(way->GetType());
 
@@ -1328,9 +1354,11 @@ namespace osmscout {
       }
     }
 
-    for (std::vector<Relation>::const_iterator relation=data.relationWays.begin();
-         relation!=data.relationWays.end();
-         ++relation) {
+    for (std::vector<RelationRef>::const_iterator r=data.relationWays.begin();
+         r!=data.relationWays.end();
+         ++r) {
+      const RelationRef& relation=*r;
+
       for (size_t m=0; m<relation->roles.size(); m++) {
         if (!relation->roles[m].GetName().empty()) {
           const LabelStyle *style=styleConfig.GetWayNameLabelStyle(relation->roles[m].GetType());
@@ -1398,9 +1426,10 @@ namespace osmscout {
                                const MapParameter& parameter,
                                const MapData& data)
   {
-    for (std::list<Way>::const_iterator way=data.poiWays.begin();
-         way!=data.poiWays.end();
-         ++way) {
+    for (std::list<WayRef>::const_iterator w=data.poiWays.begin();
+         w!=data.poiWays.end();
+         ++w) {
+      const WayRef& way=*w;
 
       if (way->IsArea()) {
         std::cerr << "POI way is area, skipping..." << std::endl;
@@ -1434,9 +1463,11 @@ namespace osmscout {
                                 const MapParameter& parameter,
                                 const MapData& data)
   {
-    for (std::list<Node>::const_iterator node=data.poiNodes.begin();
-         node!=data.poiNodes.end();
-         ++node) {
+    for (std::list<NodeRef>::const_iterator n=data.poiNodes.begin();
+         n!=data.poiNodes.end();
+         ++n) {
+      const NodeRef& node=*n;
+
       if (!projection.GeoIsIn(node->GetLon(),node->GetLat())) {
         continue;
       }
@@ -1464,9 +1495,11 @@ namespace osmscout {
                                      const MapParameter& parameter,
                                      const MapData& data)
   {
-    for (std::list<Node>::const_iterator node=data.poiNodes.begin();
-         node!=data.poiNodes.end();
-         ++node) {
+    for (std::list<NodeRef>::const_iterator n=data.poiNodes.begin();
+         n!=data.poiNodes.end();
+         ++n) {
+      const NodeRef& node=*n;
+
       if (!projection.GeoIsIn(node->GetLon(),node->GetLat())) {
         continue;
       }

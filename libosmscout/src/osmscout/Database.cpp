@@ -31,8 +31,6 @@
 
 namespace osmscout {
 
-  typedef const Way* WayRef;
-
   struct NodeUseCacheValueSizer : public Database::NodeUseCache::ValueSizer
   {
     unsigned long GetSize(const std::vector<Database::NodeUse>& value) const
@@ -392,11 +390,11 @@ namespace osmscout {
                             double lonMax, double latMax,
                             double magnification,
                             const AreaSearchParameter& parameter,
-                            std::vector<Node>& nodes,
-                            std::vector<Way>& ways,
-                            std::vector<Way>& areas,
-                            std::vector<Relation>& relationWays,
-                            std::vector<Relation>& relationAreas) const
+                            std::vector<NodeRef>& nodes,
+                            std::vector<WayRef>& ways,
+                            std::vector<WayRef>& areas,
+                            std::vector<RelationRef>& relationWays,
+                            std::vector<RelationRef>& relationAreas) const
   {
     if (!IsOpen()) {
       return false;
@@ -558,14 +556,14 @@ namespace osmscout {
     return true;
   }
 
-  bool Database::GetNode(const Id& id, Node& node) const
+  bool Database::GetNode(const Id& id, NodeRef& node) const
   {
     if (!IsOpen()) {
       return false;
     }
 
-    std::vector<Id>   ids;
-    std::vector<Node> nodes;
+    std::vector<Id>      ids;
+    std::vector<NodeRef> nodes;
 
     ids.push_back(id);
 
@@ -580,7 +578,7 @@ namespace osmscout {
   }
 
   bool Database::GetNodes(const std::vector<FileOffset>& offsets,
-                          std::vector<Node>& nodes) const
+                          std::vector<NodeRef>& nodes) const
   {
     if (!IsOpen()) {
       return false;
@@ -590,7 +588,7 @@ namespace osmscout {
   }
 
   bool Database::GetNodes(const std::vector<Id>& ids,
-                          std::vector<Node>& nodes) const
+                          std::vector<NodeRef>& nodes) const
   {
     if (!IsOpen()) {
       return false;
@@ -600,7 +598,7 @@ namespace osmscout {
   }
 
   bool Database::GetWays(const std::vector<FileOffset>& offsets,
-                         std::vector<Way>& ways) const
+                         std::vector<WayRef>& ways) const
   {
     if (!IsOpen()) {
       return false;
@@ -610,7 +608,7 @@ namespace osmscout {
   }
 
   bool Database::GetWays(const std::list<FileOffset>& offsets,
-                         std::vector<Way>& ways) const
+                         std::vector<WayRef>& ways) const
   {
     if (!IsOpen()) {
       return false;
@@ -620,7 +618,7 @@ namespace osmscout {
   }
 
   bool Database::GetRelations(const std::vector<FileOffset>& offsets,
-                              std::vector<Relation>& relations) const
+                              std::vector<RelationRef>& relations) const
   {
     if (!IsOpen()) {
       return false;
@@ -630,7 +628,7 @@ namespace osmscout {
   }
 
   bool Database::GetRelations(const std::list<FileOffset>& offsets,
-                              std::vector<Relation>& relations) const
+                              std::vector<RelationRef>& relations) const
   {
     if (!IsOpen()) {
       return false;
@@ -639,14 +637,14 @@ namespace osmscout {
     return relationDataFile.Get(offsets,relations);
   }
 
-  bool Database::GetWay(const Id& id, Way& way) const
+  bool Database::GetWay(const Id& id, WayRef& way) const
   {
     if (!IsOpen()) {
       return false;
     }
 
-    std::vector<Id>  ids;
-    std::vector<Way> ways;
+    std::vector<Id>     ids;
+    std::vector<WayRef> ways;
 
     ids.push_back(id);
 
@@ -661,7 +659,7 @@ namespace osmscout {
   }
 
   bool Database::GetWays(const std::vector<Id>& ids,
-                         std::vector<Way>& ways) const
+                         std::vector<WayRef>& ways) const
   {
     if (!IsOpen()) {
       return false;
@@ -671,7 +669,7 @@ namespace osmscout {
   }
 
   bool Database::GetWays(const std::set<Id>& ids,
-                         std::vector<Way>& ways) const
+                         std::vector<WayRef>& ways) const
   {
     if (!IsOpen()) {
       return false;
@@ -681,7 +679,7 @@ namespace osmscout {
   }
 
   bool Database::GetRelation(const Id& id,
-                             Relation& relation) const
+                             RelationRef& relation) const
   {
     if (!IsOpen()) {
       return false;
@@ -691,7 +689,7 @@ namespace osmscout {
   }
 
   bool Database::GetRelations(const std::vector<Id>& ids,
-                              std::vector<Relation>& relations) const
+                              std::vector<RelationRef>& relations) const
   {
     if (!IsOpen()) {
       return false;
@@ -831,13 +829,13 @@ namespace osmscout {
     return GetJoints(nodeUseIndex,nodeUseCache,ids,wayIds);
   }
 
-  typedef const Way* WayRef;
+  typedef const Way* WayPtr;
 
   static bool GetWays(const WayIndex& index,
                       const std::string& path,
                       std::map<Id,Way>& cache,
                       const std::set<Id>& ids,
-                      std::vector<WayRef>& refs)
+                      std::vector<WayPtr>& refs)
   {
     bool result=true;
 
@@ -902,10 +900,10 @@ namespace osmscout {
                      const std::string& path,
                      std::map<Id,Way>& cache,
                      Id id,
-                     WayRef& ref)
+                     WayPtr& ref)
   {
     std::set<Id>        ids;
-    std::vector<WayRef> refs;
+    std::vector<WayPtr> refs;
 
     ids.insert(id);
 
@@ -1033,11 +1031,11 @@ namespace osmscout {
     TypeId              type;
     std::map<Id,Way>    waysCache;
     std::map<Id,Follower> candidatesCache;
-    std::vector<WayRef> followWays;
-    WayRef              startWay;
-    WayRef              currentWay;
+    std::vector<WayPtr> followWays;
+    WayPtr              startWay;
+    WayPtr              currentWay;
     double              startLon=0.0L,startLat=0.0L;
-    WayRef              targetWay;
+    WayPtr              targetWay;
     double              targetLon=0.0L,targetLat=0.0L;
     OpenList            openList;
     std::map<Id,RNodeRef> openMap;
@@ -1326,7 +1324,7 @@ namespace osmscout {
 
       // Get joint nodes in joint way/area
 
-      for (std::vector<WayRef>::const_iterator iter=followWays.begin();
+      for (std::vector<WayPtr>::const_iterator iter=followWays.begin();
            iter!=followWays.end();
            ++iter) {
         const Way* way=*iter;
@@ -1510,7 +1508,7 @@ namespace osmscout {
       return false;
     }
 
-    Way                                              way,newWay;
+    WayRef                                           way,newWay;
     Id                                               node=0,newNode=0;
     std::list<RouteData::RouteEntry>::const_iterator iter;
     double                                           distance=0.0;
@@ -1529,23 +1527,23 @@ namespace osmscout {
     }
 
     // Find the starting node
-    for (size_t i=0; i<way.nodes.size(); i++) {
-      if (way.nodes[i].id==iter->GetNodeId()) {
+    for (size_t i=0; i<way->nodes.size(); i++) {
+      if (way->nodes[i].id==iter->GetNodeId()) {
         node=i;
         break;
       }
     }
 
     // Lets start at the starting node (suprise, suprise ;-))
-    description.AddStep(0.0,0.0,RouteDescription::start,way.GetName(),way.GetRefName());
-    description.AddStep(0.0,0.0,RouteDescription::drive,way.GetName(),way.GetRefName());
+    description.AddStep(0.0,0.0,RouteDescription::start,way->GetName(),way->GetRefName());
+    description.AddStep(0.0,0.0,RouteDescription::drive,way->GetName(),way->GetRefName());
 
     iter++;
 
     // For every step in the route...
     for ( /* no code */ ;iter!=data.Entries().end(); ++iter, way=newWay, node=newNode) {
       // Find the corresponding way (which may be the old way?)
-      if (iter->GetWayId()!=way.GetId()) {
+      if (iter->GetWayId()!=way->GetId()) {
         if (!GetWay(iter->GetWayId(),newWay)) {
           return false;
         }
@@ -1556,39 +1554,39 @@ namespace osmscout {
 
       // Find the current node in the new way and calculate the distance
       // between the old point and the new point
-      for (size_t i=0; i<newWay.nodes.size(); i++) {
-        if (newWay.nodes[i].id==iter->GetNodeId()) {
-          distance+=GetEllipsoidalDistance(way.nodes[node].lon,way.nodes[node].lat,
-                                           newWay.nodes[i].lon,newWay.nodes[i].lat);
+      for (size_t i=0; i<newWay->nodes.size(); i++) {
+        if (newWay->nodes[i].id==iter->GetNodeId()) {
+          distance+=GetEllipsoidalDistance(way->nodes[node].lon,way->nodes[node].lat,
+                                           newWay->nodes[i].lon,newWay->nodes[i].lat);
           newNode=i;
         }
       }
 
       // We skip steps where street doe not have any names
-      if (newWay.GetName().empty() &&
-          newWay.GetRefName().empty()) {
+      if (newWay->GetName().empty() &&
+          newWay->GetRefName().empty()) {
         continue;
       }
 
       // We didn't change street name, so we do not create a new entry...
-      if (!way.GetName().empty() &&
-          way.GetName()==newWay.GetName()) {
+      if (!way->GetName().empty() &&
+          way->GetName()==newWay->GetName()) {
         continue;
       }
 
       // We didn't change ref name, so we do not create a new entry...
-      if (!way.GetRefName().empty()
-          && way.GetRefName()==newWay.GetRefName()) {
+      if (!way->GetRefName().empty()
+          && way->GetRefName()==newWay->GetRefName()) {
         continue;
       }
 
-      description.AddStep(distance,distance-lastDistance,RouteDescription::switchRoad,newWay.GetName(),newWay.GetRefName());
-      description.AddStep(distance,distance-lastDistance,RouteDescription::drive,newWay.GetName(),newWay.GetRefName());
+      description.AddStep(distance,distance-lastDistance,RouteDescription::switchRoad,newWay->GetName(),newWay->GetRefName());
+      description.AddStep(distance,distance-lastDistance,RouteDescription::drive,newWay->GetName(),newWay->GetRefName());
       lastDistance=distance;
     }
 
     // We reached the destination!
-    description.AddStep(distance,distance-lastDistance,RouteDescription::reachTarget,newWay.GetName(),newWay.GetRefName());
+    description.AddStep(distance,distance-lastDistance,RouteDescription::reachTarget,newWay->GetName(),newWay->GetRefName());
 
     return true;
   }
@@ -1616,15 +1614,15 @@ namespace osmscout {
     for (std::list<RouteData::RouteEntry>::const_iterator iter=data.Entries().begin();
          iter!=data.Entries().end();
          ++iter) {
-      Way w;
+      WayRef w;
 
       if (!GetWay(iter->GetWayId(),w)) {
         return false;
       }
 
-      for (size_t i=0; i<w.nodes.size(); i++) {
-        if (w.nodes[i].id==iter->GetNodeId()) {
-          way.nodes.push_back(w.nodes[i]);
+      for (size_t i=0; i<w->nodes.size(); i++) {
+        if (w->nodes[i].id==iter->GetNodeId()) {
+          way.nodes.push_back(w->nodes[i]);
           break;
         }
       }

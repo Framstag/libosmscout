@@ -103,9 +103,9 @@ public:
                  const RenderMapRequest& request);
 
 
-  bool GetNode(osmscout::Id id, osmscout::Node& node) const;
-  bool GetWay(osmscout::Id id, osmscout::Way& way) const;
-  bool GetRelation(osmscout::Id id, osmscout::Relation& relation) const;
+  bool GetNode(osmscout::Id id, osmscout::NodeRef& node) const;
+  bool GetWay(osmscout::Id id, osmscout::WayRef& way) const;
+  bool GetRelation(osmscout::Id id, osmscout::RelationRef& relation) const;
 
   bool GetMatchingAdminRegions(const QString& name,
                                std::list<osmscout::AdminRegion>& regions,

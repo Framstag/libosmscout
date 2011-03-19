@@ -91,8 +91,8 @@ int main(int argc, char* argv[])
 
     for (size_t r=1; r<=retryCount; r++) {
       for (size_t i=0; i<queries.size(); i++) {
-        size_t        idx=(int)(queries.size()*rand()/(RAND_MAX+1.0));
-        osmscout::Way way;
+        size_t           idx=(int)(queries.size()*rand()/(RAND_MAX+1.0));
+        osmscout::WayRef way;
 
         if (!wayDataFile.Get(queries[idx],way)) {
           std::cerr << "Cannot read way with id " << queries[idx] << " from data file!" << std::endl;
@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
 
     for (size_t r=1; r<=retryCount; r++) {
       for (size_t i=0; i<queries.size(); i++) {
-        osmscout::Way way;
+        osmscout::WayRef way;
 
         if (wayDataFile.Get((osmscout::Id)-1,way)) {
           std::cerr << "Unexpecte dsuccessful read from data file!" << std::endl;

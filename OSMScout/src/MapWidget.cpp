@@ -280,21 +280,21 @@ void MapWidget::ShowReference(const osmscout::ObjectRef& reference,
                               const osmscout::Mag& magnification)
 {
   if (reference.GetType()==osmscout::refNode) {
-    osmscout::Node node;
+    osmscout::NodeRef node;
 
     if (dbThread.GetNode(reference.GetId(),node)) {
-      lon=node.GetLon();
-      lat=node.GetLat();
+      lon=node->GetLon();
+      lat=node->GetLat();
       this->magnification=magnification;
 
       TriggerMapRendering();
     }
   }
   else if (reference.GetType()==osmscout::refWay) {
-    osmscout::Way way;
+    osmscout::WayRef way;
 
     if (dbThread.GetWay(reference.GetId(),way)) {
-      if (way.GetCenter(lat,lon)) {
+      if (way->GetCenter(lat,lon)) {
         this->magnification=magnification;
 
         TriggerMapRendering();
@@ -302,10 +302,10 @@ void MapWidget::ShowReference(const osmscout::ObjectRef& reference,
     }
   }
   else if (reference.GetType()==osmscout::refRelation) {
-    osmscout::Relation relation;
+    osmscout::RelationRef relation;
 
     if (dbThread.GetRelation(reference.GetId(),relation)) {
-      if (relation.GetCenter(lat,lon)) {
+      if (relation->GetCenter(lat,lon)) {
         this->magnification=magnification;
 
         TriggerMapRendering();

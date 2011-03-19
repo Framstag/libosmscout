@@ -27,10 +27,11 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
+#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
-  class OSMSCOUT_API Way
+  class OSMSCOUT_API Way : public Referencable
   {
   public:
     enum RestrictionType
@@ -163,6 +164,8 @@ namespace osmscout {
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;
   };
+
+  typedef Ref<Way> WayRef;
 }
 
 #endif

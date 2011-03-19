@@ -27,10 +27,11 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
+#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
-  class RawNode
+  class RawNode : public Referencable
   {
   private:
     Id                id;
@@ -79,6 +80,8 @@ namespace osmscout {
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;
   };
+
+  typedef Ref<RawNode> RawNodeRef;
 }
 
 #endif

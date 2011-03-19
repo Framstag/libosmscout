@@ -27,13 +27,14 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
+#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
   /**
     Representation of an relation
     */
-  class OSMSCOUT_API Relation
+  class OSMSCOUT_API Relation : public Referencable
   {
   public:
     class Role
@@ -150,6 +151,8 @@ namespace osmscout {
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;
   };
+
+  typedef Ref<Relation> RelationRef;
 }
 
 #endif

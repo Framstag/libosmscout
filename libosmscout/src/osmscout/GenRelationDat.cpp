@@ -52,7 +52,7 @@ namespace osmscout {
     }
 
     if (member.type==RawRelation::memberNode) {
-      RawNode node;
+      RawNodeRef node;
 
       if (!nodeDataFile.Get(member.id,node)) {
         progress.Error("Cannot resolve relation member of type node with id "+
@@ -64,16 +64,16 @@ namespace osmscout {
 
       Point point;
 
-      point.id=node.GetId();
-      point.lat=node.GetLat();
-      point.lon=node.GetLon();
+      point.id=node->GetId();
+      point.lat=node->GetLat();
+      point.lon=node->GetLon();
 
       role.nodes.push_back(point);
 
-      role.attributes.type=node.GetType();
+      role.attributes.type=node->GetType();
     }
     else if (member.type==RawRelation::memberWay) {
-      RawWay way;
+      RawWayRef way;
 
       if (!wayDataFile.Get(member.id,way)) {
         progress.Error("Cannot resolve relation member of type way with id "+
@@ -83,9 +83,9 @@ namespace osmscout {
         return false;
       }
 
-      std::vector<RawNode> ns;
+      std::vector<RawNodeRef> ns;
 
-      if (!nodeDataFile.Get(way.GetNodes(),ns)) {
+      if (!nodeDataFile.Get(way->GetNodes(),ns)) {
         progress.Error("Cannot resolve nodes of relation member of type way with id "+
                        NumberToString(member.id)+
                        " for relation "+
@@ -95,14 +95,14 @@ namespace osmscout {
 
       bool reverseNodes=false;
 
-      role.attributes.type=way.GetType();
+      role.attributes.type=way->GetType();
 
-      std::vector<Tag> tags(way.GetTags());
+      std::vector<Tag> tags(way->GetTags());
 
       if (!role.attributes.SetTags(progress,
                                    typeConfig,
-                                   way.GetId(),
-                                   way.IsArea(),
+                                   way->GetId(),
+                                   way->IsArea(),
                                    tags,
                                    reverseNodes)) {
         return false;
@@ -111,9 +111,9 @@ namespace osmscout {
       for (size_t i=0; i<ns.size(); i++) {
         Point point;
 
-        point.id=ns[i].GetId();
-        point.lat=ns[i].GetLat();
-        point.lon=ns[i].GetLon();
+        point.id=ns[i]->GetId();
+        point.lat=ns[i]->GetLat();
+        point.lon=ns[i]->GetLon();
 
         role.nodes.push_back(point);
       }

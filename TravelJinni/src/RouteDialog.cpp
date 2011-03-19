@@ -256,14 +256,14 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
 
       if (dialog->HasResult()) {
         osmscout::Location    location=dialog->GetResult();
-        osmscout::Way         way;
+        osmscout::WayRef      way;
 
         assert(location.references.front().GetType()==osmscout::refWay);
 
        result.startWay=location.references.front().GetId();
 
         if (databaseTask->GetWay(result.startWay,way)) {
-          result.startNode=way.nodes[0].id;
+          result.startNode=way->nodes[0].id;
 
           if (location.path.empty()) {
             result.start=Lum::Base::UTF8ToWString(location.name);
@@ -308,14 +308,14 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
 
       if (dialog->HasResult()) {
         osmscout::Location    location=dialog->GetResult();
-        osmscout::Way         way;
+        osmscout::WayRef      way;
 
         assert(location.references.front().GetType()==osmscout::refWay);
 
         result.endWay=location.references.front().GetId();
 
         if (databaseTask->GetWay(result.endWay,way)) {
-          result.endNode=way.nodes[0].id;
+          result.endNode=way->nodes[0].id;
 
           if (location.path.empty()) {
             result.end=Lum::Base::UTF8ToWString(location.name);

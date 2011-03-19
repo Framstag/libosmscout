@@ -426,21 +426,21 @@ bool DBThread::RenderMap(QPainter& painter,
 #endif
 }
 
-bool DBThread::GetNode(osmscout::Id id, osmscout::Node& node) const
+bool DBThread::GetNode(osmscout::Id id, osmscout::NodeRef& node) const
 {
   QMutexLocker locker(&mutex);
 
   return database.GetNode(id,node);
 }
 
-bool DBThread::GetWay(osmscout::Id id, osmscout::Way& way) const
+bool DBThread::GetWay(osmscout::Id id, osmscout::WayRef& way) const
 {
   QMutexLocker locker(&mutex);
 
   return database.GetWay(id,way);
 }
 
-bool DBThread::GetRelation(osmscout::Id id, osmscout::Relation& relation) const
+bool DBThread::GetRelation(osmscout::Id id, osmscout::RelationRef& relation) const
 {
   QMutexLocker locker(&mutex);
 

@@ -29,20 +29,24 @@
 
 #include <osmscout/util/Cache.h>
 #include <osmscout/util/FileScanner.h>
+#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
   template <class N>
   class DataFile
   {
-  private:
-    typedef NumericIndex<Id,N> DataIndex;
+  public:
+    typedef Ref<N> ValueType;
 
-    typedef Cache<FileOffset,N> DataCache;
+  private:
+    typedef NumericIndex<Id,ValueType> DataIndex;
+
+    typedef Cache<FileOffset,ValueType> DataCache;
 
     struct DataCacheValueSizer : public DataCache::ValueSizer
     {
-      unsigned long GetSize(const N& value) const
+      unsigned long GetSize(const ValueType& value) const
       {
         return sizeof(value);
       }
@@ -66,18 +70,18 @@ namespace osmscout {
     bool Close();
 
     bool Get(const std::vector<FileOffset>& offsets,
-             std::vector<N>& data) const;
+             std::vector<ValueType>& data) const;
     bool Get(const std::list<FileOffset>& offsets,
-             std::vector<N>& data) const;
+             std::vector<ValueType>& data) const;
     bool Get(const std::set<FileOffset>& offsets,
-             std::vector<N>& data) const;
+             std::vector<ValueType>& data) const;
 
     bool Get(const std::vector<Id>& ids,
-             std::vector<N>& data) const;
+             std::vector<ValueType>& data) const;
     bool Get(const std::set<Id>& ids,
-             std::vector<N>& data) const;
+             std::vector<ValueType>& data) const;
 
-    bool Get(const Id& id, N& entry) const;
+    bool Get(const Id& id, ValueType& entry) const;
 
     void FlushCache();
     void DumpStatistics() const;
@@ -124,7 +128,7 @@ namespace osmscout {
 
   template <class N>
   bool DataFile<N>::Get(const std::vector<FileOffset>& offsets,
-                        std::vector<N>& data) const
+                        std::vector<ValueType>& data) const
   {
     assert(isOpen);
 
@@ -148,7 +152,8 @@ namespace osmscout {
         cacheRef=cache.SetEntry(cacheEntry);
 
         scanner.SetPos(*offset);
-        cacheRef->value.Read(scanner);
+        cacheRef->value=new N();
+        cacheRef->value->Read(scanner);
 
         if (scanner.HasError()) {
           std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
@@ -166,7 +171,7 @@ namespace osmscout {
 
   template <class N>
   bool DataFile<N>::Get(const std::list<FileOffset>& offsets,
-                        std::vector<N>& data) const
+                        std::vector<ValueType>& data) const
   {
     assert(isOpen);
 
@@ -190,7 +195,8 @@ namespace osmscout {
         cacheRef=cache.SetEntry(cacheEntry);
 
         scanner.SetPos(*offset);
-        cacheRef->value.Read(scanner);
+        cacheRef->value=new N();
+        cacheRef->value->Read(scanner);
 
         if (scanner.HasError()) {
           std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
@@ -208,7 +214,7 @@ namespace osmscout {
 
   template <class N>
   bool DataFile<N>::Get(const std::set<FileOffset>& offsets,
-                        std::vector<N>& data) const
+                        std::vector<ValueType>& data) const
   {
     assert(isOpen);
 
@@ -232,7 +238,8 @@ namespace osmscout {
         cacheRef=cache.SetEntry(cacheEntry);
 
         scanner.SetPos(*offset);
-        cacheRef->value.Read(scanner);
+        cacheRef->value=new N();
+        cacheRef->value->Read(scanner);
 
         if (scanner.HasError()) {
           std::cerr << "Error while reading data from offset " << *offset << " of file " << datafilename << "!" << std::endl;
@@ -250,7 +257,7 @@ namespace osmscout {
 
   template <class N>
   bool DataFile<N>::Get(const std::vector<Id>& ids,
-                        std::vector<N>& data) const
+                        std::vector<ValueType>& data) const
   {
     assert(isOpen);
 
@@ -266,7 +273,7 @@ namespace osmscout {
 
   template <class N>
   bool DataFile<N>::Get(const std::set<Id>& ids,
-                        std::vector<N>& data) const
+                        std::vector<ValueType>& data) const
   {
     assert(isOpen);
 
@@ -290,12 +297,12 @@ namespace osmscout {
   }
 
   template <class N>
-  bool DataFile<N>::Get(const Id& id, N& entry) const
+  bool DataFile<N>::Get(const Id& id, ValueType& entry) const
   {
     assert(isOpen);
 
-    std::vector<Id> ids;
-    std::vector<N>  data;
+    std::vector<Id>        ids;
+    std::vector<ValueType> data;
 
     ids.push_back(id);
 

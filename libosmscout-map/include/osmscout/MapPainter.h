@@ -99,14 +99,14 @@ namespace osmscout {
 
   struct OSMSCOUT_MAP_API MapData
   {
-    std::vector<Node>     nodes;
-    std::vector<Way>      ways;
-    std::vector<Way>      areas;
-    std::vector<Relation> relationWays;
-    std::vector<Relation> relationAreas;
-    std::list<Way>        poiWays;
-    std::list<Node>       poiNodes;
-    std::list<GroundTile> groundTiles;
+    std::vector<NodeRef>     nodes;
+    std::vector<WayRef>      ways;
+    std::vector<WayRef>      areas;
+    std::vector<RelationRef> relationWays;
+    std::vector<RelationRef> relationAreas;
+    std::list<WayRef>        poiWays;
+    std::list<NodeRef>       poiNodes;
+    std::list<GroundTile>    groundTiles;
   };
 
   class OSMSCOUT_MAP_API MapPainter

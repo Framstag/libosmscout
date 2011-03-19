@@ -291,7 +291,7 @@ bool DatabaseTask::GetBoundingBox(double& minLat,double& minLon,
 }
 
 bool DatabaseTask::GetWay(osmscout::Id id,
-                          osmscout::Way& way) const
+                          osmscout::WayRef& way) const
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
@@ -392,7 +392,7 @@ void DatabaseTask::AddRoute(const osmscout::Way& way)
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
-  data.poiWays.push_back(way);
+  data.poiWays.push_back(osmscout::WayRef(way));
 
   SignalRedraw();
 }

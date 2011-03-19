@@ -24,10 +24,11 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
+#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
-  class RawRelation
+  class RawRelation : public Referencable
   {
   public:
     enum MemberType {
@@ -74,6 +75,8 @@ namespace osmscout {
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;
   };
+
+  typedef Ref<RawRelation> RawRelationRef;
 }
 
 #endif

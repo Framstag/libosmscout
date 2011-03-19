@@ -184,19 +184,19 @@ namespace osmscout {
                               size_t maxNodes) const;*/
 
     bool GetNodes(const std::vector<FileOffset>& offsets,
-                  std::vector<Node>& nodes) const;
+                  std::vector<NodeRef>& nodes) const;
 
     bool GetWays(const std::vector<FileOffset>& offsets,
-                 std::vector<Way>& ways) const;
+                 std::vector<WayRef>& ways) const;
 
     bool GetWays(const std::list<FileOffset>& offsets,
-                 std::vector<Way>& ways) const;
+                 std::vector<WayRef>& ways) const;
 
     bool GetRelations(const std::vector<FileOffset>& offsets,
-                      std::vector<Relation>& relations) const;
+                      std::vector<RelationRef>& relations) const;
 
     bool GetRelations(const std::list<FileOffset>& offsets,
-                      std::vector<Relation>& relations) const;
+                      std::vector<RelationRef>& relations) const;
 
     /*
     bool GetNodes(const StyleConfig& styleConfig,
@@ -236,32 +236,32 @@ namespace osmscout {
                     double lonMax, double latMax,
                     double magnification,
                     const AreaSearchParameter& parameter,
-                    std::vector<Node>& nodes,
-                    std::vector<Way>& ways,
-                    std::vector<Way>& areas,
-                    std::vector<Relation>& relationWays,
-                    std::vector<Relation>& realtionAreas) const;
+                    std::vector<NodeRef>& nodes,
+                    std::vector<WayRef>& ways,
+                    std::vector<WayRef>& areas,
+                    std::vector<RelationRef>& relationWays,
+                    std::vector<RelationRef>& realtionAreas) const;
 
     bool GetGroundTiles(double lonMin, double latMin,
                         double lonMax, double latMax,
                         std::list<GroundTile>& tiles) const;
 
     bool GetNode(const Id& id,
-                 Node& node) const;
+                 NodeRef& node) const;
     bool GetNodes(const std::vector<Id>& ids,
-                  std::vector<Node>& nodes) const;
+                  std::vector<NodeRef>& nodes) const;
 
     bool GetWay(const Id& id,
-                Way& way) const;
+                WayRef& way) const;
     bool GetWays(const std::vector<Id>& ids,
-                 std::vector<Way>& ways) const;
+                 std::vector<WayRef>& ways) const;
     bool GetWays(const std::set<Id>& ids,
-                 std::vector<Way>& ways) const;
+                 std::vector<WayRef>& ways) const;
 
     bool GetRelation(const Id& id,
-                     Relation& relation) const;
+                     RelationRef& relation) const;
     bool GetRelations(const std::vector<Id>& ids,
-                      std::vector<Relation>& relations) const;
+                      std::vector<RelationRef>& relations) const;
 
     bool GetMatchingAdminRegions(const std::string& name,
                                  std::list<AdminRegion>& regions,
