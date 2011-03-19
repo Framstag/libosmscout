@@ -178,7 +178,7 @@ OSS
     FILL #b5d0d0
     LABEL WITH MINMAG proximity
 
-  WAY "route_ferry" PRIO 11 MINMAG county
+  WAY "route_ferry" PRIO 11 MINMAG proximity
     LINE #0000ff WITH OUTLINECOLOR #ffffff80 DASH 1,1 MINPIXEL 2 WIDTH 2 FIXEDWIDTH OUTLINE 1.5
     LABEL WITH STYLE contour MINMAG detail
 
