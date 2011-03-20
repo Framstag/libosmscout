@@ -108,7 +108,7 @@ namespace osmscout {
                           const MapParameter& parameter,
                           const LabelStyle& style,
                           const std::string& text,
-                          const std::vector<Point>& nodes);
+                          const std::vector<TransPoint>& nodes);
 
     void DrawIcon(const IconStyle* style,
                           double x, double y);
@@ -126,21 +126,21 @@ namespace osmscout {
                   const std::vector<double>& dash,
                   CapStyle startCap,
                   CapStyle endCap,
-                  const std::vector<Point>& nodes);
+                  const std::vector<TransPoint>& nodes);
 
     void DrawArea(const Projection& projection,
                   const MapParameter& parameter,
                   TypeId type,
                   const FillStyle& fillStyle,
                   const LineStyle* lineStyle,
-                  const std::vector<Point>& nodes);
+                  const std::vector<TransPoint>& nodes);
 
     void DrawArea(const Projection& projection,
                   const MapParameter& parameter,
                   TypeId type,
                   const PatternStyle& patternStyle,
                   const LineStyle* lineStyle,
-                  const std::vector<Point>& nodes);
+                  const std::vector<TransPoint>& nodes);
 
     void DrawArea(const FillStyle& style,
                   const MapParameter& parameter,

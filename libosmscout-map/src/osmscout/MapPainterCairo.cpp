@@ -585,7 +585,7 @@ namespace osmscout {
                                          const MapParameter& parameter,
                                          const LabelStyle& style,
                                          const std::string& text,
-                                         const std::vector<Point>& nodes)
+                                         const std::vector<TransPoint>& nodes)
   {
     cairo_scaled_font_t *font;
 
@@ -599,26 +599,24 @@ namespace osmscout {
     double xo=0;
     double yo=0;
 
-    TransformWay(projection,parameter,nodes);
-
     cairo_new_path(draw);
-    if (nodes[0].lon<nodes[nodes.size()-1].lon) {
+    if (nodes[0].x<nodes[nodes.size()-1].x) {
       bool start=true;
 
       for (size_t j=0; j<nodes.size(); j++) {
-        if (drawNode[j]) {
+        if (nodes[j].draw) {
           if (start) {
-            cairo_move_to(draw,nodeX[j],nodeY[j]);
+            cairo_move_to(draw,nodes[j].x,nodes[j].y);
             start=false;
           }
           else {
-            cairo_line_to(draw,nodeX[j],nodeY[j]);
-            length+=sqrt(pow(nodeX[j]-xo,2)+
-                         pow(nodeY[j]-yo,2));
+            cairo_line_to(draw,nodes[j].x,nodes[j].y);
+            length+=sqrt(pow(nodes[j].x-xo,2)+
+                         pow(nodes[j].y-yo,2));
           }
 
-          xo=nodeX[j];
-          yo=nodeY[j];
+          xo=nodes[j].x;
+          yo=nodes[j].y;
         }
       }
     }
@@ -626,23 +624,23 @@ namespace osmscout {
       bool start=true;
 
       for (size_t j=0; j<nodes.size(); j++) {
-        if (drawNode[nodes.size()-j-1]) {
+        if (nodes[nodes.size()-j-1].draw) {
           if (start) {
             cairo_move_to(draw,
-                          nodeX[nodes.size()-j-1],
-                          nodeY[nodes.size()-j-1]);
+                          nodes[nodes.size()-j-1].x,
+                          nodes[nodes.size()-j-1].y);
             start=false;
           }
           else {
             cairo_line_to(draw,
-                          nodeX[nodes.size()-j-1],
-                          nodeY[nodes.size()-j-1]);
-            length+=sqrt(pow(nodeX[nodes.size()-j-1]-xo,2)+
-                         pow(nodeY[nodes.size()-j-1]-yo,2));
+                          nodes[nodes.size()-j-1].x,
+                          nodes[nodes.size()-j-1].y);
+            length+=sqrt(pow(nodes[nodes.size()-j-1].x-xo,2)+
+                         pow(nodes[nodes.size()-j-1].x-yo,2));
           }
 
-          xo=nodeX[nodes.size()-j-1];
-          yo=nodeY[nodes.size()-j-1];
+          xo=nodes[nodes.size()-j-1].x;
+          yo=nodes[nodes.size()-j-1].y;
         }
       }
     }
@@ -747,7 +745,7 @@ namespace osmscout {
                                  const std::vector<double>& dash,
                                  CapStyle startCap,
                                  CapStyle endCap,
-                                 const std::vector<Point>& nodes)
+                                 const std::vector<TransPoint>& nodes)
   {
     double dashArray[10];
 
@@ -776,22 +774,20 @@ namespace osmscout {
       cairo_set_dash(draw,dashArray,dash.size(),0);
     }
 
-    TransformWay(projection,parameter,nodes);
-
     size_t firstNode=0;
     size_t lastNode=0;
     bool   start=true;
     for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
+      if (nodes[i].draw) {
         if (start) {
           cairo_new_path(draw);
-          cairo_move_to(draw,nodeX[i],nodeY[i]);
+          cairo_move_to(draw,nodes[i].x,nodes[i].y);
           start=false;
           firstNode=i;
           lastNode=i;
         }
         else {
-          cairo_line_to(draw,nodeX[i],nodeY[i]);
+          cairo_line_to(draw,nodes[i].x,nodes[i].y);
           lastNode=i;
         }
 
@@ -813,8 +809,8 @@ namespace osmscout {
       cairo_set_dash(draw,NULL,0,0);
       cairo_set_line_width(draw,width);
 
-      cairo_move_to(draw,nodeX[firstNode],nodeY[firstNode]);
-      cairo_line_to(draw,nodeX[firstNode],nodeY[firstNode]);
+      cairo_move_to(draw,nodes[firstNode].x,nodes[firstNode].y);
+      cairo_line_to(draw,nodes[firstNode].x,nodes[firstNode].y);
       cairo_stroke(draw);
     }
 
@@ -826,8 +822,8 @@ namespace osmscout {
       cairo_set_dash(draw,NULL,0,0);
       cairo_set_line_width(draw,width);
 
-      cairo_move_to(draw,nodeX[lastNode],nodeY[lastNode]);
-      cairo_line_to(draw,nodeX[lastNode],nodeY[lastNode]);
+      cairo_move_to(draw,nodes[lastNode].x,nodes[lastNode].y);
+      cairo_line_to(draw,nodes[lastNode].x,nodes[lastNode].y);
       cairo_stroke(draw);
     }
   }
@@ -837,7 +833,7 @@ namespace osmscout {
                                  TypeId type,
                                  const FillStyle& fillStyle,
                                  const LineStyle* lineStyle,
-                                 const std::vector<Point>& nodes)
+                                 const std::vector<TransPoint>& nodes)
   {
     cairo_set_source_rgba(draw,
                           fillStyle.GetFillR(),
@@ -846,18 +842,16 @@ namespace osmscout {
                           1);
     cairo_set_line_width(draw,1);
 
-    TransformArea(projection,parameter,nodes);
-
     bool start=true;
     for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
+      if (nodes[i].draw) {
         if (start) {
           cairo_new_path(draw);
-          cairo_move_to(draw,nodeX[i],nodeY[i]);
+          cairo_move_to(draw,nodes[i].x,nodes[i].y);
           start=false;
         }
         else {
-          cairo_line_to(draw,nodeX[i],nodeY[i]);
+          cairo_line_to(draw,nodes[i].x,nodes[i].y);
         }
         //nodesDrawnCount++;
       }
@@ -887,7 +881,7 @@ namespace osmscout {
                                  TypeId type,
                                  const PatternStyle& patternStyle,
                                  const LineStyle* lineStyle,
-                                 const std::vector<Point>& nodes)
+                                 const std::vector<TransPoint>& nodes)
   {
     assert(patternStyle.GetId()>0);
     assert(patternStyle.GetId()!=std::numeric_limits<size_t>::max());
@@ -896,18 +890,16 @@ namespace osmscout {
 
     cairo_set_source(draw,patterns[patternStyle.GetId()-1]);
 
-    TransformArea(projection,parameter,nodes);
-
     bool start=true;
     for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
+      if (nodes[i].draw) {
         if (start) {
           cairo_new_path(draw);
-          cairo_move_to(draw,nodeX[i],nodeY[i]);
+          cairo_move_to(draw,nodes[i].x,nodes[i].y);
           start=false;
         }
         else {
-          cairo_line_to(draw,nodeX[i],nodeY[i]);
+          cairo_line_to(draw,nodes[i].x,nodes[i].y);
         }
         //nodesDrawnCount++;
       }

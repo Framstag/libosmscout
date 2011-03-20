@@ -253,7 +253,7 @@ namespace osmscout {
                                       const MapParameter& parameter,
                                       const LabelStyle& style,
                                       const std::string& text,
-                                      const std::vector<Point>& nodes)
+                                      const std::vector<TransPoint>& nodes)
   {
     double fontSize=style.GetSize();
     double r=style.GetTextR();
@@ -273,19 +273,17 @@ namespace osmscout {
 
     QPainterPath path;
 
-    TransformWay(projection,parameter,nodes);
-
-    if (nodes[0].lon<nodes[nodes.size()-1].lon) {
+    if (nodes[0].x<nodes[nodes.size()-1].x) {
       bool start=true;
 
       for (size_t j=0; j<nodes.size(); j++) {
-        if (drawNode[j]) {
+        if (nodes[j].draw) {
           if (start) {
-            path.moveTo(nodeX[j],nodeY[j]);
+            path.moveTo(nodes[j].x,nodes[j].y);
             start=false;
           }
           else {
-            path.lineTo(nodeX[j],nodeY[j]);
+            path.lineTo(nodes[j].x,nodes[j].y);
           }
         }
       }
@@ -294,15 +292,15 @@ namespace osmscout {
       bool start=true;
 
       for (size_t j=0; j<nodes.size(); j++) {
-        if (drawNode[nodes.size()-j-1]) {
+        if (nodes[nodes.size()-j-1].draw) {
           if (start) {
-            path.moveTo(nodeX[nodes.size()-j-1],
-                        nodeY[nodes.size()-j-1]);
+            path.moveTo(nodes[nodes.size()-j-1].x,
+                        nodes[nodes.size()-j-1].y);
             start=false;
           }
           else {
-            path.lineTo(nodeX[nodes.size()-j-1],
-                        nodeY[nodes.size()-j-1]);
+            path.lineTo(nodes[nodes.size()-j-1].x,
+                        nodes[nodes.size()-j-1].y);
           }
         }
       }
@@ -414,7 +412,7 @@ namespace osmscout {
                               const std::vector<double>& dash,
                               CapStyle startCap,
                               CapStyle endCap,
-                              const std::vector<Point>& nodes)
+                              const std::vector<TransPoint>& nodes)
   {
     QPen pen;
 
@@ -444,8 +442,6 @@ namespace osmscout {
       pen.setDashPattern(dashes);
     }
 
-    TransformWay(projection,parameter,nodes);
-
     size_t firstNode=0;
     size_t lastNode=0;
 
@@ -470,15 +466,15 @@ namespace osmscout {
 
     bool start=true;
     for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
+      if (nodes[i].draw) {
         if (start) {
-          path.moveTo(nodeX[i],nodeY[i]);
+          path.moveTo(nodes[i].x,nodes[i].y);
           start=false;
           firstNode=i;
           lastNode=i;
         }
         else {
-          path.lineTo(nodeX[i],nodeY[i]);
+          path.lineTo(nodes[i].x,nodes[i].y);
           lastNode=i;
         }
       }
@@ -501,8 +497,8 @@ namespace osmscout {
         endCap!=capRound) {
       painter->setBrush(QBrush(QColor::fromRgbF(r,g,b,a)));
 
-      painter->drawEllipse(QPointF(nodeX[firstNode],
-                                   nodeY[firstNode]),
+      painter->drawEllipse(QPointF(nodes[firstNode].x,
+                                   nodes[firstNode].y),
                                    width/2,width/2);
     }
 
@@ -511,8 +507,8 @@ namespace osmscout {
       startCap!=capRound) {
       painter->setBrush(QBrush(QColor::fromRgbF(r,g,b,a)));
 
-      painter->drawEllipse(QPointF(nodeX[lastNode],
-                                   nodeY[lastNode]),
+      painter->drawEllipse(QPointF(nodes[lastNode].x,
+                                   nodes[lastNode].y),
                                    width/2,width/2);
     }
   }
@@ -522,15 +518,13 @@ namespace osmscout {
                               TypeId type,
                               const FillStyle& fillStyle,
                               const LineStyle* lineStyle,
-                              const std::vector<Point>& nodes)
+                              const std::vector<TransPoint>& nodes)
   {
-    TransformArea(projection,parameter,nodes);
-
     QPolygonF polygon;
 
     for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
-        polygon << QPointF(nodeX[i],nodeY[i]);
+      if (nodes[i].draw) {
+        polygon << QPointF(nodes[i].x,nodes[i].y);
       }
     }
 
@@ -552,15 +546,13 @@ namespace osmscout {
                               TypeId type,
                               const PatternStyle& patternStyle,
                               const LineStyle* lineStyle,
-                              const std::vector<Point>& nodes)
+                              const std::vector<TransPoint>& nodes)
   {
-    TransformArea(projection,parameter,nodes);
-
     QPolygonF polygon;
 
     for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
-        polygon << QPointF(nodeX[i],nodeY[i]);
+      if (nodes[i].draw) {
+        polygon << QPointF(nodes[i].x,nodes[i].y);
       }
     }
 

@@ -332,7 +332,7 @@ namespace osmscout {
                                       const MapParameter& parameter,
                                       const LabelStyle& style,
                                       const std::string& text,
-                                      const std::vector<Point>& nodes)
+                                      const std::vector<TransPoint>& nodes)
   {
     double       fontSize=style.GetSize();
     double       r=style.GetTextR();
@@ -340,8 +340,6 @@ namespace osmscout {
     double       b=style.GetTextB();
     double       a=style.GetTextA();
     std::wstring wideText(UTF8StringToWString(text));
-
-    TransformWay(projection,parameter,nodes);
 
     SetOutlineFont(parameter,
                    fontSize);
@@ -357,27 +355,27 @@ namespace osmscout {
     double xo=0;
     double yo=0;
 
-    if (nodes[0].lon<nodes[nodes.size()-1].lon) {
+    if (nodes[0].x<nodes[nodes.size()-1].x) {
       bool start=true;
 
       for (size_t j=0; j<nodes.size(); j++) {
-        if (drawNode[j]) {
+        if (nodes[j].draw) {
           if (start) {
-            path.move_to(nodeX[j],
-                           nodeY[j]);
-            xs=nodeX[j];
-            ys=nodeY[j];
+            path.move_to(nodes[j].x,
+                         nodes[j].y);
+            xs=nodes[j].x;
+            ys=nodes[j].y;
             start=false;
           }
           else {
-            path.line_to(nodeX[j],
-                           nodeY[j]);
-            length+=sqrt(pow(nodeX[j]-xo,2)+
-                         pow(nodeY[j]-yo,2));
+            path.line_to(nodes[j].x,
+                         nodes[j].y);
+            length+=sqrt(pow(nodes[j].x-xo,2)+
+                         pow(nodes[j].y-yo,2));
           }
 
-          xo=nodeX[j];
-          yo=nodeY[j];
+          xo=nodes[j].x;
+          yo=nodes[j].y;
         }
       }
     }
@@ -385,23 +383,23 @@ namespace osmscout {
       bool start=true;
 
       for (size_t j=0; j<nodes.size(); j++) {
-        if (drawNode[nodes.size()-j-1]) {
+        if (nodes[nodes.size()-j-1].draw) {
           if (start) {
-            path.move_to(nodeX[nodes.size()-j-1],
-                           nodeY[nodes.size()-j-1]);
-            xs=nodeX[j];
-            ys=nodeY[j];
+            path.move_to(nodes[nodes.size()-j-1].x,
+                         nodes[nodes.size()-j-1].y);
+            xs=nodes[j].x;
+            ys=nodes[j].y;
             start=false;
           }
           else {
-            path.line_to(nodeX[nodes.size()-j-1],
-                           nodeY[nodes.size()-j-1]);
-            length+=sqrt(pow(nodeX[nodes.size()-j-1]-xo,2)+
-                         pow(nodeY[nodes.size()-j-1]-yo,2));
+            path.line_to(nodes[nodes.size()-j-1].x,
+                         nodes[nodes.size()-j-1].y);
+            length+=sqrt(pow(nodes[nodes.size()-j-1].x-xo,2)+
+                         pow(nodes[nodes.size()-j-1].y-yo,2));
           }
 
-          xo=nodeX[nodes.size()-j-1];
-          yo=nodeY[nodes.size()-j-1];
+          xo=nodes[nodes.size()-j-1].x;
+          yo=nodes[nodes.size()-j-1].y;
         }
       }
     }
@@ -485,21 +483,19 @@ namespace osmscout {
                                const std::vector<double>& dash,
                                CapStyle startCap,
                                CapStyle endCap,
-                               const std::vector<Point>& nodes)
+                               const std::vector<TransPoint>& nodes)
   {
-    TransformWay(projection,parameter,nodes);
-
     agg::path_storage path;
 
     bool start=true;
     for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
+      if (nodes[i].draw) {
         if (start) {
-          path.move_to(nodeX[i],nodeY[i]);
+          path.move_to(nodes[i].x,nodes[i].y);
           start=false;
         }
         else {
-          path.line_to(nodeX[i],nodeY[i]);
+          path.line_to(nodes[i].x,nodes[i].y);
         }
         //nodesDrawnCount++;
       }
@@ -551,21 +547,19 @@ namespace osmscout {
                               TypeId type,
                               const FillStyle& fillStyle,
                               const LineStyle* lineStyle,
-                              const std::vector<Point>& nodes)
+                              const std::vector<TransPoint>& nodes)
   {
-    TransformArea(projection,parameter,nodes);
-
     agg::path_storage path;
 
     bool start=true;
     for (size_t i=0; i<nodes.size(); i++) {
-      if (drawNode[i]) {
+      if (nodes[i].draw) {
         if (start) {
-          path.move_to(nodeX[i],nodeY[i]);
+          path.move_to(nodes[i].x,nodes[i].y);
           start=false;
         }
         else {
-          path.line_to(nodeX[i],nodeY[i]);
+          path.line_to(nodes[i].x,nodes[i].y);
         }
         //nodesDrawnCount++;
       }
@@ -604,10 +598,8 @@ namespace osmscout {
                               TypeId type,
                               const PatternStyle& patternStyle,
                               const LineStyle* lineStyle,
-                              const std::vector<Point>& nodes)
+                              const std::vector<TransPoint>& nodes)
   {
-    TransformArea(projection,parameter,nodes);
-
     // TODO
   }
 

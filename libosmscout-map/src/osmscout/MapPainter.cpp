@@ -82,10 +82,6 @@ namespace osmscout {
 
   MapPainter::MapPainter()
   {
-    drawNode.resize(100000); // TODO: Calculate matching size
-    nodeX.resize(100000);
-    nodeY.resize(100000);
-
     tunnelDash.push_back(3);
     tunnelDash.push_back(3);
   }
@@ -93,31 +89,6 @@ namespace osmscout {
   MapPainter::~MapPainter()
   {
     // no code
-  }
-
-  bool MapPainter::IsVisible(const Projection& projection,
-                             const std::vector<Point>& nodes) const
-  {
-    if (nodes.size()==0) {
-      return false;
-    }
-
-    // Bounding box
-    double lonMin=nodes[0].lon;
-    double lonMax=nodes[0].lon;
-    double latMin=nodes[0].lat;
-    double latMax=nodes[0].lat;
-
-    for (size_t i=1; i<nodes.size(); i++) {
-      lonMin=std::min(lonMin,nodes[i].lon);
-      lonMax=std::max(lonMax,nodes[i].lon);
-      latMin=std::min(latMin,nodes[i].lat);
-      latMax=std::max(latMax,nodes[i].lat);
-    }
-
-    // If bounding box is neither left or right nor above or below
-    // it must somehow cover the map area.
-    return projection.GeoIsIn(lonMin,latMin,lonMax,latMax);
   }
 
   bool MapPainter::IsVisible(const Projection& projection,
@@ -172,72 +143,80 @@ namespace osmscout {
              yMax<0);
   }
 
+  void MapPainter::Transform(const Projection& projection,
+                             const MapParameter& parameter,
+                             double lon,
+                             double lat,
+                             TransPoint& point)
+  {
+    point.draw=true;
+    projection.GeoToPixel(lon,lat,
+                          point.x,point.y);
+  }
+
   void MapPainter::TransformArea(const Projection& projection,
                                  const MapParameter& parameter,
-                                 const std::vector<Point>& nodes)
+                                 const std::vector<Point>& nodes,
+                                 std::vector<TransPoint>& points)
   {
-    if (!parameter.GetOptimizeAreaNodes()) {
-      for (size_t i=0; i<nodes.size(); i++) {
-        drawNode[i]=true;
-        projection.GeoToPixel(nodes[i].lon,nodes[i].lat,
-                              nodeX[i],nodeY[i]);
-      }
-    }
-    else {
-      drawNode[0]=true;
-      drawNode[nodes.size()-1]=true;
+    points.resize(nodes.size());
+
+    if (parameter.GetOptimizeAreaNodes()) {
+      points[0].draw=true;
+      points[nodes.size()-1].draw=true;
 
       // Drop every point that is on direct line between two points A and B
       for (size_t i=1; i+1<nodes.size(); i++) {
-        drawNode[i]=std::abs((nodes[i].lon-nodes[i-1].lon)/
-                             (nodes[i].lat-nodes[i-1].lat)-
-                             (nodes[i+1].lon-nodes[i].lon)/
-                             (nodes[i+1].lat-nodes[i].lat))>=relevantSlopeDeriviation;
+        points[i].draw=std::abs((nodes[i].lon-nodes[i-1].lon)/
+                                (nodes[i].lat-nodes[i-1].lat)-
+                                (nodes[i+1].lon-nodes[i].lon)/
+                                (nodes[i+1].lat-nodes[i].lat))>=relevantSlopeDeriviation;
       }
 
       // Calculate screen position
       for (size_t i=0; i<nodes.size(); i++) {
-        if (drawNode[i]) {
+        if (points[i].draw) {
           projection.GeoToPixel(nodes[i].lon,nodes[i].lat,
-                                nodeX[i],nodeY[i]);
+                                points[i].x,points[i].y);
         }
       }
 
       // Drop all points that do not differ in position from the previous node
       for (size_t i=1; i<nodes.size()-1; i++) {
-        if (drawNode[i]) {
+        if (points[i].draw) {
           size_t j=i+1;
-          while (!drawNode[j]) {
+          while (!points[j].draw) {
             j++;
           }
 
-          if (std::fabs(nodeX[j]-nodeX[i])<=relevantPosDeriviation &&
-              std::fabs(nodeY[j]-nodeY[i])<=relevantPosDeriviation) {
-            drawNode[i]=false;
+          if (std::fabs(points[j].x-points[i].x)<=relevantPosDeriviation &&
+              std::fabs(points[j].y-points[i].y)<=relevantPosDeriviation) {
+            points[i].draw=false;
           }
         }
+      }
+    }
+    else {
+      for (size_t i=0; i<nodes.size(); i++) {
+        points[i].draw=true;
+        projection.GeoToPixel(nodes[i].lon,nodes[i].lat,
+                              points[i].x,points[i].y);
       }
     }
   }
 
   void MapPainter::TransformWay(const Projection& projection,
                                 const MapParameter& parameter,
-                                const std::vector<Point>& nodes)
+                                const std::vector<Point>& nodes,
+                                std::vector<TransPoint>& points)
   {
-    if (!parameter.GetOptimizeWayNodes()) {
-      for (size_t i=0; i<nodes.size(); i++) {
-        drawNode[i]=true;
-        projection.GeoToPixel(nodes[i].lon,
-                              nodes[i].lat,
-                              nodeX[i],
-                              nodeY[i]);
-      }
-    }
-    else {
+    points.resize(nodes.size());
+
+    if (parameter.GetOptimizeWayNodes()) {
       size_t a;
 
       for (size_t i=0; i<nodes.size(); i++) {
-        drawNode[i]=true;
+        points[i].draw=true;
       }
 
       if (nodes.size()>=3) {
@@ -252,7 +231,7 @@ namespace osmscout {
 
         if (a>1) {
           for (size_t i=0; i<a-1; i++) {
-            drawNode[i]=false;
+            points[i].draw=false;
           }
         }
       }
@@ -269,55 +248,55 @@ namespace osmscout {
 
         if (a<nodes.size()-2) {
           for (size_t i=a+2; i<nodes.size(); i++) {
-            drawNode[i]=false;
+            points[i].draw=false;
           }
         }
       }
 
       // Drop every point that is on direct line between two points A and B
       for (size_t i=0; i+2<nodes.size(); i++) {
-        if (drawNode[i]) {
+        if (points[i].draw) {
           size_t j=i+1;
-          while (j<nodes.size() && !drawNode[j]) {
+          while (j<nodes.size() && !points[j].draw) {
             j++;
           }
 
           size_t k=j+1;
-          while (k<nodes.size() && !drawNode[k]) {
+          while (k<nodes.size() && !points[k].draw) {
             k++;
           }
 
           if (j<nodes.size() && k<nodes.size()) {
-            drawNode[j]=std::abs((nodes[j].lon-nodes[i].lon)/
-                                 (nodes[j].lat-nodes[i].lat)-
-                                 (nodes[k].lon-nodes[j].lon)/
-                                 (nodes[k].lat-nodes[j].lat))>=relevantSlopeDeriviation;
+            points[j].draw=std::abs((nodes[j].lon-nodes[i].lon)/
+                                    (nodes[j].lat-nodes[i].lat)-
+                                    (nodes[k].lon-nodes[j].lon)/
+                                    (nodes[k].lat-nodes[j].lat))>=relevantSlopeDeriviation;
           }
         }
       }
 
       // Calculate screen position
       for (size_t i=0; i<nodes.size(); i++) {
-        if (drawNode[i]) {
+        if (points[i].draw) {
           projection.GeoToPixel(nodes[i].lon,nodes[i].lat,
-                                nodeX[i],nodeY[i]);
+                                points[i].x,points[i].y);
         }
       }
 
       // Drop all points that do not differ in position from the previous node
       if (nodes.size()>2) {
         for (size_t i=1; i<nodes.size()-1; i++) {
-          if (drawNode[i]) {
+          if (points[i].draw) {
             size_t j=i+1;
 
             while (j+1<nodes.size() &&
-                   !drawNode[j]) {
+                   !points[j].draw) {
               j++;
             }
 
-            if (std::fabs(nodeX[j]-nodeX[i])<=relevantPosDeriviation &&
-                std::fabs(nodeY[j]-nodeY[i])<=relevantPosDeriviation) {
-              drawNode[i]=false;
+            if (std::fabs(points[j].x-points[i].x)<=relevantPosDeriviation &&
+                std::fabs(points[j].y-points[i].y)<=relevantPosDeriviation) {
+              points[i].y=false;
             }
           }
         }
@@ -345,6 +324,15 @@ namespace osmscout {
       if (outNode[way->nodes.size()-2]) {
         drawNode[way->nodes.size()-1]=false;
       }*/
+    }
+    else {
+      for (size_t i=0; i<nodes.size(); i++) {
+        points[i].draw=true;
+        projection.GeoToPixel(nodes[i].lon,
+                              nodes[i].lat,
+                              points[i].x,
+                              points[i].y);
+      }
     }
   }
 
@@ -659,10 +647,13 @@ namespace osmscout {
         continue;
       }
 
-      double x,y;
+      TransPoint point;
 
-      projection.GeoToPixel(node->GetLon(),node->GetLat(),
-                            x,y);
+      Transform(projection,
+                parameter,
+                node->GetLon(),
+                node->GetLat(),
+                point);
 
       if (hasLabel) {
         if (hasSymbol) {
@@ -670,30 +661,37 @@ namespace osmscout {
                     parameter,
                     *labelStyle,
                     label,
-                    x,y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
+                    point.x,
+                    point.y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
         }
         else if (hasIcon) {
           DrawLabel(projection,
                     parameter,
                     *labelStyle,
                     label,
-                    x,y+14+5); // TODO: Better layout to real size of icon
+                    point.x,
+                    point.y+14+5); // TODO: Better layout to real size of icon
         }
         else {
           DrawLabel(projection,
                     parameter,
                     *labelStyle,
                     label,
-                    x,y);
+                    point.x,
+                    point.y);
         }
       }
 
       if (hasIcon) {
-        DrawIcon(iconStyle,x,y);
+        DrawIcon(iconStyle,
+                 point.x,
+                 point.y);
       }
 
       if (hasSymbol) {
-        DrawSymbol(symbolStyle,x,y);
+        DrawSymbol(symbolStyle,
+                   point.x,
+                   point.y);
       }
     }
   }
@@ -729,13 +727,18 @@ namespace osmscout {
                                   *patternStyle);
           }
 
+          TransformArea(projection,
+                        parameter,
+                        area->nodes,
+                        points);
+
           if (hasPattern) {
             DrawArea(projection,
                      parameter,
                      area->GetType(),
                      *patternStyle,
                      lineStyle,
-                     area->nodes);
+                     points);
           }
           else if (hasFill) {
             DrawArea(projection,
@@ -743,7 +746,7 @@ namespace osmscout {
                      area->GetType(),
                      *fillStyle,
                      lineStyle,
-                     area->nodes);
+                     points);
           }
         }
       }
@@ -776,21 +779,31 @@ namespace osmscout {
               }
 
               if (hasPattern) {
+                TransformArea(projection,
+                              parameter,
+                              relation->roles[m].nodes,
+                              points);
+
                 DrawArea(projection,
                          parameter,
                          relation->roles[m].GetType(),
                          *patternStyle,
                          lineStyle,
-                         relation->roles[m].nodes);
+                         points);
                 drawn=true;
               }
               else if (hasFill) {
+                TransformArea(projection,
+                              parameter,
+                              relation->roles[m].nodes,
+                              points);
+
                 DrawArea(projection,
                          parameter,
                          relation->roles[m].GetType(),
                          *fillStyle,
                          lineStyle,
-                         relation->roles[m].nodes);
+                         points);
                 drawn=true;
               }
 
@@ -1020,6 +1033,8 @@ namespace osmscout {
           projection.GetMagnification()>=magCity)) {
       // Should draw outline, but resolution is too low
       // Draw line with alternate color
+      TransformWay(projection,parameter,nodes,points);
+
       DrawPath(projection,
                parameter,
                style.GetAlternateR(),
@@ -1030,11 +1045,13 @@ namespace osmscout {
                style.GetDash(),
                capRound,
                capRound,
-               nodes);
+               points);
     }
     else if (outline) {
       // Draw outline
       // Draw line with normal color but reduced with
+      TransformWay(projection,parameter,nodes,points);
+
       DrawPath(projection,
                parameter,
                style.GetLineR(),
@@ -1045,11 +1062,14 @@ namespace osmscout {
                style.GetDash(),
                capRound,
                capRound,
-               nodes);
+               points);
     }
     else {
       // Draw without outline
       // Draw line with normal color and normal width
+
+      TransformWay(projection,parameter,nodes,points);
+
       DrawPath(projection,
                parameter,
                style.GetLineR(),
@@ -1060,7 +1080,7 @@ namespace osmscout {
                style.GetDash(),
                capRound,
                capRound,
-               nodes);
+               points);
     }
   }
 
@@ -1108,6 +1128,9 @@ namespace osmscout {
 
     if (drawBridge) {
       // black outline for bridges
+
+      TransformWay(projection,parameter,nodes,points);
+
       DrawPath(projection,
                parameter,
                0.0,
@@ -1118,11 +1141,14 @@ namespace osmscout {
                emptyDash,
                attributes.StartIsJoint() ? capButt : capRound,
                attributes.EndIsJoint() ? capButt : capRound,
-               nodes);
+               points);
     }
     else if (drawTunnel) {
       if (projection.GetMagnification()>=10000) {
         // light grey dashes
+
+        TransformWay(projection,parameter,nodes,points);
+
         DrawPath(projection,
                  parameter,
                  0.75,
@@ -1133,10 +1159,13 @@ namespace osmscout {
                  tunnelDash,
                  attributes.StartIsJoint() ? capButt : capRound,
                  attributes.EndIsJoint() ? capButt : capRound,
-                 nodes);
+                 points);
       }
       else {
         // dark grey dashes
+
+        TransformWay(projection,parameter,nodes,points);
+
         DrawPath(projection,
                  parameter,
                  0.5,
@@ -1147,11 +1176,14 @@ namespace osmscout {
                  tunnelDash,
                  attributes.StartIsJoint() ? capButt : capRound,
                  attributes.EndIsJoint() ? capButt : capRound,
-                 nodes);
+                 points);
       }
     }
     else {
       // normal path, notmal outline color
+
+      TransformWay(projection,parameter,nodes,points);
+
       DrawPath(projection,
                parameter,
                style.GetOutlineR(),
@@ -1162,7 +1194,7 @@ namespace osmscout {
                emptyDash,
                attributes.StartIsJoint() ? capButt : capRound,
                attributes.EndIsJoint() ? capButt : capRound,
-               nodes);
+               points);
     }
   }
 
@@ -1311,11 +1343,13 @@ namespace osmscout {
             projection.GetMagnification()<=style->GetMaxMag()) {
 
           if (style->GetStyle()==LabelStyle::contour) {
+            TransformWay(projection,parameter,way->nodes,points);
+
             DrawContourLabel(projection,
                              parameter,
                              *style,
                              way->GetName(),
-                             way->nodes);
+                             points);
           }
           else {
             DrawTiledLabel(projection,
@@ -1336,11 +1370,13 @@ namespace osmscout {
             projection.GetMagnification()<=style->GetMaxMag()) {
 
           if (style->GetStyle()==LabelStyle::contour) {
+            TransformWay(projection,parameter,way->nodes,points);
+
             DrawContourLabel(projection,
                              parameter,
                              *style,
                              way->GetRefName(),
-                             way->nodes);
+                             points);
           }
           else {
             DrawTiledLabel(projection,
@@ -1371,11 +1407,13 @@ namespace osmscout {
               if (IsVisible(projection,
                             relation->roles[m].nodes,
                             style->GetSize())) {
+                TransformWay(projection,parameter,relation->roles[m].nodes,points);
+
                 DrawContourLabel(projection,
                                  parameter,
                                  *style,
                                  relation->roles[m].GetName(),
-                                 relation->roles[m].nodes);
+                                 points);
               }
             }
             else {
@@ -1400,11 +1438,13 @@ namespace osmscout {
               if (IsVisible(projection,
                             relation->roles[m].nodes,
                             style->GetSize())) {
+                TransformWay(projection,parameter,relation->roles[m].nodes,points);
+
                 DrawContourLabel(projection,
                                  parameter,
                                  *style,
                                  relation->roles[m].GetRefName(),
-                                 relation->roles[m].nodes);
+                                 points);
               }
             }
             else {
