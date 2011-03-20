@@ -739,6 +739,8 @@ namespace osmscout {
                      *patternStyle,
                      lineStyle,
                      points);
+
+            areasDrawn++;
           }
           else if (hasFill) {
             DrawArea(projection,
@@ -747,6 +749,8 @@ namespace osmscout {
                      *fillStyle,
                      lineStyle,
                      points);
+
+            areasDrawn++;
           }
         }
       }
@@ -806,11 +810,11 @@ namespace osmscout {
                          points);
                 drawn=true;
               }
-
-              if (!drawn) {
-                //std::cout << " Something is wrong with area relation " << relation->id << " " << relation->GetType() << std::endl;
-              }
             }
+          }
+
+          if (drawn) {
+            relAreasDrawn++;
           }
         }
       }
@@ -896,6 +900,8 @@ namespace osmscout {
                     label,
                     x,y);
         }
+
+        areasLabelDrawn++;
       }
 
       if (hasIcon) {
@@ -983,6 +989,8 @@ namespace osmscout {
                         label,
                         x,y);
             }
+
+            relAreasLabelDrawn++;
           }
 
           if (hasIcon) {
@@ -1084,7 +1092,7 @@ namespace osmscout {
     }
   }
 
-  void MapPainter::DrawWayOutline(const Projection& projection,
+  bool MapPainter::DrawWayOutline(const Projection& projection,
                                   const MapParameter& parameter,
                                   const LineStyle& style,
                                   const SegmentAttributes& attributes,
@@ -1123,7 +1131,7 @@ namespace osmscout {
     if (!(drawBridge ||
           drawTunnel ||
           outline)) {
-      return;
+      return false;
     }
 
     if (drawBridge) {
@@ -1180,7 +1188,7 @@ namespace osmscout {
       }
     }
     else {
-      // normal path, notmal outline color
+      // normal path, normal outline color
 
       TransformWay(projection,parameter,nodes,points);
 
@@ -1196,6 +1204,8 @@ namespace osmscout {
                attributes.EndIsJoint() ? capButt : capRound,
                points);
     }
+
+    return true;
   }
 
 
@@ -1224,11 +1234,13 @@ namespace osmscout {
             continue;
           }
 
-          DrawWayOutline(projection,
-                         parameter,
-                         *style,
-                         way->GetAttributes(),
-                         way->nodes);
+          if (DrawWayOutline(projection,
+                             parameter,
+                             *style,
+                             way->GetAttributes(),
+                             way->nodes)) {
+            waysOutlineDrawn++;
+          }
         }
       }
 
@@ -1237,6 +1249,7 @@ namespace osmscout {
              r!=data.relationWays.end();
              ++r) {
           const RelationRef& relation=*r;
+          bool               drawn=false;
 
           for (size_t m=0; m<relation->roles.size(); m++) {
             TypeId type=relation->roles[m].GetType()==typeIgnore ? relation->GetType() : relation->roles[m].GetType();
@@ -1254,12 +1267,18 @@ namespace osmscout {
             if (IsVisible(projection,
                           relation->roles[m].nodes,
                           style->GetWidth())) {
-              DrawWayOutline(projection,
-                             parameter,
-                             *style,
-                             relation->roles[m].GetAttributes(),
-                             relation->roles[m].nodes);
+              if (DrawWayOutline(projection,
+                                 parameter,
+                                 *style,
+                                 relation->roles[m].GetAttributes(),
+                                 relation->roles[m].nodes)) {
+                drawn=true;
+              }
             }
+          }
+
+          if (drawn) {
+            relWaysOutlineDrawn++;
           }
         }
       }
@@ -1285,6 +1304,8 @@ namespace osmscout {
                   *style,
                   way->GetAttributes(),
                   way->nodes);
+
+          waysDrawn++;
         }
       }
 
@@ -1293,8 +1314,8 @@ namespace osmscout {
              r!=data.relationWays.end();
              ++r) {
           const RelationRef& relation=*r;
+          bool               drawn=false;
 
-          //std::cout << "Draw way relation " << relation->id << std::endl;
           for (size_t m=0; m<relation->roles.size(); m++) {
             TypeId type=relation->roles[m].GetType()==typeIgnore ? relation->GetType() : relation->roles[m].GetType();
 
@@ -1316,7 +1337,13 @@ namespace osmscout {
                       *style,
                       relation->roles[m].GetAttributes(),
                       relation->roles[m].nodes);
+
+              drawn=true;
             }
+          }
+
+          if (drawn) {
+            relWaysDrawn++;
           }
         }
       }
@@ -1359,6 +1386,8 @@ namespace osmscout {
                            way->nodes,
                            tileBlacklist);
           }
+
+          waysLabelDrawn++;
         }
       }
 
@@ -1386,6 +1415,8 @@ namespace osmscout {
                            way->nodes,
                            tileBlacklist);
           }
+
+          waysLabelDrawn++;
         }
       }
     }
@@ -1424,6 +1455,8 @@ namespace osmscout {
                              relation->roles[m].nodes,
                              tileBlacklist);
             }
+
+            relWaysLabelDrawn++;
           }
         }
 
@@ -1455,6 +1488,8 @@ namespace osmscout {
                              relation->roles[m].nodes,
                              tileBlacklist);
             }
+
+            relWaysLabelDrawn++;
           }
         }
       }
@@ -1595,6 +1630,24 @@ namespace osmscout {
                         const MapParameter& parameter,
                         const MapData& data)
   {
+    waysCount=data.ways.size();
+    waysOutlineDrawn=0;
+    waysDrawn=0;
+    waysLabelDrawn=0;
+
+    relWaysCount=data.relationWays.size();
+    relWaysOutlineDrawn=0;
+    relWaysDrawn=0;
+    relWaysLabelDrawn=0;
+
+    areasCount=data.areas.size();
+    areasDrawn=0;
+    areasLabelDrawn=0;
+
+    relAreasCount=data.relationAreas.size();
+    relAreasDrawn=0;
+    relAreasLabelDrawn=0;
+
     /*
     nodesDrawnCount=0;
     areasDrawnCount=0;
@@ -1744,10 +1797,15 @@ namespace osmscout {
     }
     std::cout << std::endl;*/
 
-    std::cout << "Areas: " << areasTimer <<"/" << areaLabelsTimer;
-    std::cout << " Paths: " << pathsTimer << "/" << pathLabelsTimer;
-    std::cout << " Nodes: " << nodesTimer;
-    std::cout << " POIs: " << poisTimer << "/" << routesTimer << std::endl;
+    std::cout << "Paths: " << pathsTimer << "/" << pathLabelsTimer << " ";
+    std::cout << "Areas: " << areasTimer << "/" << areaLabelsTimer << " ";
+    std::cout << "Nodes: " << nodesTimer << " ";
+    std::cout << "POIs: " << poisTimer << "/" << routesTimer << std::endl;
+
+    std::cout << "Path ways: " << waysCount << "/" << waysDrawn << "/" << waysOutlineDrawn << "/" << waysLabelDrawn << " (pcs)" << std::endl;
+    std::cout << "Path rels: " << relWaysCount << "/" << relWaysDrawn << "/" << relWaysOutlineDrawn << "/" << relWaysLabelDrawn << " (pcs)" << std::endl;
+    std::cout << "Area ways: " << areasCount << "/" << areasDrawn << "/" << areasLabelDrawn << " (pcs)" << std::endl;
+    std::cout << "Area rels: " << relAreasCount << "/" << relAreasDrawn << "/" << relAreasLabelDrawn << " (pcs)" << std::endl;
   }
 }
 

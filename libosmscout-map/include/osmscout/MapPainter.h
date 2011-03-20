@@ -134,7 +134,6 @@ namespace osmscout {
     std::vector<TransPoint> points;   //! Static scratch buffer for coordinate transformation results
     //@}
 
-
     /**
        Style specific precalculations
      */
@@ -152,6 +151,29 @@ namespace osmscout {
     //@{
     std::vector<double>    emptyDash;         //! Empty dash array
     std::vector<double>    tunnelDash;        //! Dash array for drawing tunnel border
+    //@}
+
+    /**
+      Statistics counter
+     */
+    //@{
+    size_t waysCount;
+    size_t waysDrawn;
+    size_t waysOutlineDrawn;
+    size_t waysLabelDrawn;
+
+    size_t relWaysCount;
+    size_t relWaysDrawn;
+    size_t relWaysOutlineDrawn;
+    size_t relWaysLabelDrawn;
+
+    size_t areasCount;
+    size_t areasDrawn;
+    size_t areasLabelDrawn;
+
+    size_t relAreasCount;
+    size_t relAreasDrawn;
+    size_t relAreasLabelDrawn;
     //@}
 
   private:
@@ -196,7 +218,7 @@ namespace osmscout {
       style modification attributes and the given path. Also draw sensfull
       line end given that the path has joints with other pathes or not.
      */
-    void DrawWayOutline(const Projection& projection,
+    bool DrawWayOutline(const Projection& projection,
                         const MapParameter& parameter,
                         const LineStyle& style,
                         const SegmentAttributes& attributes,
