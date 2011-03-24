@@ -24,7 +24,11 @@
 #include <cstdio>
 
 // We should try to get rid of this!
-#include <arpa/inet.h>
+#if defined(__WIN32__) || defined(WIN32)
+  #include <winsock2.h>
+#else
+  #include <arpa/inet.h>
+#endif  
 
 #if defined(HAVE_LIB_ZLIB)
   #include <zlib.h>
