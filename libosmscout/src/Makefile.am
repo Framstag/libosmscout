@@ -48,7 +48,6 @@ libosmscout_la_SOURCES= osmscout/util/Cache.cpp \
                         osmscout/NumericIndex.cpp \
                         osmscout/Import.cpp \
                         osmscout/Preprocess.cpp \
-                        osmscout/PreprocessOSM.cpp \
                         osmscout/GenAreaIndex.cpp \
                         osmscout/GenAreaNodeIndex.cpp \
                         osmscout/GenCityStreetIndex.cpp \
@@ -69,6 +68,10 @@ libosmscout_la_SOURCES= osmscout/util/Cache.cpp \
                         osmscout/Route.cpp \
                         osmscout/RoutingProfile.cpp \
                         osmscout/Database.cpp
+
+if HAVE_LIB_XML
+libosmscout_la_SOURCES += osmscout/PreprocessOSM.cpp
+endif
 
 if HAVE_LIB_PROTOBUF
 if HAVE_PROG_PROTOC
