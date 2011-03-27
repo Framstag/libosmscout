@@ -555,7 +555,14 @@ namespace osmscout {
     size_t              selectedRelationCount=0;
     uint32_t            writtenRelationCount=0;
     std::vector<size_t> wayTypeCount;
+    std::vector<size_t> wayNodeTypeCount;
     std::vector<size_t> areaTypeCount;
+    std::vector<size_t> areaNodeTypeCount;
+
+    wayTypeCount.resize(typeConfig.GetMaxTypeId(),0);
+    wayNodeTypeCount.resize(typeConfig.GetMaxTypeId(),0);
+    areaTypeCount.resize(typeConfig.GetMaxTypeId(),0);
+    areaNodeTypeCount.resize(typeConfig.GetMaxTypeId(),0);
 
     wayTypeCount.resize(typeConfig.GetMaxTypeId(),0);
     areaTypeCount.resize(typeConfig.GetMaxTypeId(),0);
@@ -784,9 +791,18 @@ namespace osmscout {
       if (rel.GetType()!=typeIgnore) {
         if (rel.IsArea()) {
           areaTypeCount[rel.GetType()]++;
+          for (size_t i=0; i<rel.roles.size(); i++) {
+            if (rel.roles[i].role=="0") {
+              areaNodeTypeCount[rel.GetType()]+=rel.roles[i].nodes.size();
+            }
+          }
         }
         else {
           wayTypeCount[rel.GetType()]++;
+
+          for (size_t i=0; i<rel.roles.size(); i++) {
+            wayNodeTypeCount[rel.GetType()]+=rel.roles[i].nodes.size();
+          }
         }
 
         rel.Write(writer);
@@ -825,7 +841,8 @@ namespace osmscout {
 
     for (size_t i=0; i<typeConfig.GetMaxTypeId(); i++) {
       std::string buffer=typeConfig.GetTypeInfo(i).GetName()+": "+
-                         NumberToString(wayTypeCount[i])+" "+NumberToString(areaTypeCount[i]);
+                         NumberToString(wayTypeCount[i])+" "+NumberToString(wayNodeTypeCount[i])+" "+
+                         NumberToString(areaTypeCount[i])+" "+NumberToString(areaNodeTypeCount[i]);
 
       progress.Debug(buffer);
     }
