@@ -21,8 +21,6 @@
 
 #include <string.h>
 
-#include <libxml/parser.h>
-
 #include <cassert>
 #include <iostream>
 #include <sstream>
