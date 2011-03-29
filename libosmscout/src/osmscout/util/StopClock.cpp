@@ -31,8 +31,7 @@
 
 namespace osmscout {
 
-#if defined(__WIN32__) || defined(WIN32)
-#else
+#if defined(HAVE_SYS_TIME_H)
   #ifndef timersub
       # define timersub(a, b, result) \
             do { \

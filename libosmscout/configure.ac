@@ -55,14 +55,18 @@ AC_MSG_CHECKING([for WIN32])
     AC_LANG_PROGRAM([[#include <windows.h>]],
                     [[GetModuleHandleA(0);]])],
     [AC_MSG_RESULT(yes);
-     LDFLAGS="$LDFLAGS -no-undefined"],
+     LDFLAGS="$LDFLAGS -lwsock32 -no-undefined"],
     [AC_MSG_RESULT(no)])
 
 dnl Check for libxml2
 PKG_CHECK_MODULES(XML2,
                   [libxml-2.0 >= 2.6.0],
                   [AC_SUBST(XML2_CFLAGS)
-                   AC_SUBST(XML2_LIBS)])
+                   AC_SUBST(XML2_LIBS)
+                   LIB_XML_FOUND=true],
+                   [LIB_XML_FOUND=false])
+
+AM_CONDITIONAL(HAVE_LIB_XML,[test "$LIB_XML_FOUND" = true])
 
 PKG_CHECK_MODULES(PROTOBUF,
                   [protobuf],
@@ -70,7 +74,7 @@ PKG_CHECK_MODULES(PROTOBUF,
                    AC_SUBST(PROTOBUF_LIBS)
                    AC_DEFINE(HAVE_LIB_PROTOBUF,1,[libprotobuf detected])
                    LIB_PROTOBUF_FOUND=true],
-                   [])
+                   [LIB_PROTOBUF_FOUND=false])
 
 AM_CONDITIONAL(HAVE_LIB_PROTOBUF,[test "$LIB_PROTOBUF_FOUND" = true])
 
@@ -80,7 +84,7 @@ PKG_CHECK_MODULES(ZLIB,
                    AC_SUBST(ZLIB_LIBS)
                    AC_DEFINE(HAVE_LIB_ZLIB,1,[zlib detected])
                    LIB_ZLIB_FOUND=true],
-                   [])
+                   [HAVE_ZLIB_FOUND=false])
 AM_CONDITIONAL(HAVE_LIB_ZLIB,[test "$LIB_ZLIB_FOUND" = true])
 
 dnl Checking for protoc

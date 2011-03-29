@@ -59,6 +59,16 @@ namespace osmscout {
     TypeId                                      restrictionPosId=typeConfig.GetRelationTypeId("restriction_only_straight_on");
     TypeId                                      restrictionNegId=typeConfig.GetRelationTypeId("restriction_no_straight_on");
     std::map<Id,std::vector<Way::Restriction> > restrictions;
+    std::vector<size_t>                         wayTypeCount;
+    std::vector<size_t>                         wayNodeTypeCount;
+    std::vector<size_t>                         areaTypeCount;
+    std::vector<size_t>                         areaNodeTypeCount;
+
+    wayTypeCount.resize(typeConfig.GetMaxTypeId(),0);
+    wayNodeTypeCount.resize(typeConfig.GetMaxTypeId(),0);
+    areaTypeCount.resize(typeConfig.GetMaxTypeId(),0);
+    areaNodeTypeCount.resize(typeConfig.GetMaxTypeId(),0);
+
     /*
     DataFile<RawNode>                           nodeDataFile("rawnodes.dat",
                                                              "rawnode.idx",
@@ -238,6 +248,15 @@ namespace osmscout {
 
         wayDistribution[index]++;
         wayCount++;
+
+        if (way.IsArea()) {
+          areaTypeCount[way.GetType()]++;
+          areaNodeTypeCount[way.GetType()]+=way.GetNodes().size();
+        }
+        else {
+          wayTypeCount[way.GetType()]++;
+          wayNodeTypeCount[way.GetType()]+=way.GetNodes().size();
+        }
       }
     }
 
@@ -520,6 +539,16 @@ namespace osmscout {
     restrictions.clear();
 
     bc.Stop();
+
+    progress.Info("Dump statistics");
+
+    for (size_t i=0; i<typeConfig.GetMaxTypeId(); i++) {
+      std::string buffer=typeConfig.GetTypeInfo(i).GetName()+": "+
+                         NumberToString(wayTypeCount[i])+" "+NumberToString(wayNodeTypeCount[i])+" "+
+                         NumberToString(areaTypeCount[i])+" "+NumberToString(areaNodeTypeCount[i]);
+
+      progress.Debug(buffer);
+    }
 
     //std::cout << ac << " <=> " << bc << std::endl;
 
