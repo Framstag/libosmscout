@@ -317,6 +317,7 @@ namespace osmscout {
     TagId                                           tagTunnel;
     TagId                                           tagType;
     TagId                                           tagWidth;
+    TagId                                           tagArea;
 
   public:
     TypeConfig();

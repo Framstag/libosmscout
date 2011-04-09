@@ -122,48 +122,75 @@ namespace osmscout {
                              std::vector<Id>& nodes,
                              const std::map<TagId,std::string>& tagMap)
   {
-    TypeId areaType=typeIgnore;
-    TypeId wayType=typeIgnore;
-    bool   isArea=false;
+    TypeId                                      areaType=typeIgnore;
+    TypeId                                      wayType=typeIgnore;
+    int                                         isArea=0; // 0==unknown, 1==true, -1==false
+    std::map<TagId,std::string>::const_iterator areaTag;
+    RawWay                                      way;
+
+    way.SetId(id);
+
+    areaTag=tagMap.find(config.tagArea);
+
+    if (areaTag==tagMap.end()) {
+      isArea=0;
+    }
+    else if (areaTag->second=="yes" ||
+             areaTag->second=="true" ||
+             areaTag->second=="1") {
+      isArea=1;
+    }
+    else {
+      isArea=-1;
+    }
 
     config.GetWayAreaTypeId(tagMap,wayType,areaType);
     config.ResolveTags(tagMap,tags);
 
-    if (areaType!=typeIgnore &&
-        nodes.size()>1 &&
-        nodes[0]==nodes[nodes.size()-1]) {
-      isArea=true;
+    if (isArea==1 &&
+        areaType==typeIgnore) {
+      isArea=0;
     }
-    else if (areaType!=typeIgnore &&
-                     nodes.size()>1 &&
-                     wayType==typeIgnore) {
-      nodes.push_back(nodes[0]);
-      isArea=true;
-    }
-    else if (wayType!=typeIgnore) {
-      // no code
-    }
-    else if (areaType==typeIgnore &&
+    else if (isArea==-1 &&
              wayType==typeIgnore) {
+      isArea=0;
+    }
+
+    if (isArea==0) {
+      if (areaType!=typeIgnore &&
+          nodes.size()>1 &&
+          nodes[0]==nodes[nodes.size()-1]) {
+        isArea=1;
+      }
+      else if (wayType!=typeIgnore) {
+        isArea=-1;
+      }
+      else if (areaType!=typeIgnore &&
+               nodes.size()>1 &&
+               wayType==typeIgnore) {
+
+        nodes.push_back(nodes[0]);
+        isArea=1;
+      }
+    }
+
+    if (isArea==1) {
+      way.SetType(areaType,true);
+      areaCount++;
+    }
+    else if (isArea==-1) {
+      way.SetType(wayType,false);
+      wayCount++;
+    }
+    else {
+      way.SetType(typeIgnore,false);
+      wayCount++;
       // Unidentified way
       /*
       std::cout << "--- " << id << std::endl;
       for (size_t tag=0; tag<tags.size(); tag++) {
         std::cout << tags[tag].key << "/" << tags[tag].value << std::endl;
       }*/
-    }
-
-    RawWay way;
-
-    way.SetId(id);
-
-    if (isArea) {
-      way.SetType(areaType,true);
-      areaCount++;
-    }
-    else {
-      way.SetType(wayType,false);
-      wayCount++;
     }
 
     way.SetNodes(nodes);

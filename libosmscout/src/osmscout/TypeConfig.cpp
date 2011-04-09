@@ -244,6 +244,7 @@ namespace osmscout {
     RegisterTagForExternalUse("tunnel");
     RegisterTagForExternalUse("type");
     RegisterTagForExternalUse("width");
+    RegisterTagForExternalUse("area");
 
     TypeInfo ignore;
     TypeInfo route;
@@ -272,6 +273,7 @@ namespace osmscout {
     tagTunnel=GetTagId("tunnel");
     tagType=GetTagId("type");
     tagWidth=GetTagId("width");
+    tagArea=GetTagId("area");
 
     assert(tagAdminLevel!=tagIgnore);
     assert(tagBoundary!=tagIgnore);
@@ -286,6 +288,7 @@ namespace osmscout {
     assert(tagTunnel!=tagIgnore);
     assert(tagType!=tagIgnore);
     assert(tagWidth!=tagIgnore);
+    assert(tagArea!=tagIgnore);
   }
 
   TypeConfig::~TypeConfig()
@@ -497,11 +500,13 @@ namespace osmscout {
       if ((types[i].CanBeWay() || types[i].CanBeArea()) &&
           types[i].GetCondition()!=NULL &&
           types[i].GetCondition()->Evaluate(tagMap)) {
-        if (types[i].CanBeWay()) {
+        if (wayType==typeIgnore &&
+            types[i].CanBeWay()) {
           wayType=types[i].GetId();
         }
 
-        if (types[i].CanBeArea()) {
+        if (areaType==typeIgnore &&
+            types[i].CanBeArea()) {
           areaType=types[i].GetId();
         }
 
