@@ -14,7 +14,7 @@ TYPES
   TYPE "highway_road" WHERE "highway"=="road" CAN BE WAY OPTIONS ROUTE INDEX
   TYPE "highway_residential" WHERE "highway"=="residential" CAN BE WAY OPTIONS ROUTE INDEX
   TYPE "highway_living_street" WHERE "highway"=="living_street" CAN BE WAY OPTIONS ROUTE INDEX
-  TYPE "highway_service" WHERE "highway"=="service" CAN BE WAY OPTIONS ROUTE INDEX
+  TYPE "highway_service" WHERE "highway"=="service" CAN BE WAY AREA OPTIONS ROUTE INDEX
   TYPE "highway_track" WHERE "highway"=="track" CAN BE WAY OPTIONS ROUTE INDEX
   TYPE "highway_pedestrian" WHERE "highway"=="pedestrian" CAN BE WAY AREA OPTIONS ROUTE INDEX
   TYPE "highway_services" WHERE "highway"=="services" CAN BE NODE AREA OPTIONS ROUTE INDEX
