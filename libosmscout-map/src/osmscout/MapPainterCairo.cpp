@@ -636,7 +636,7 @@ namespace osmscout {
                           nodes[nodes.size()-j-1].x,
                           nodes[nodes.size()-j-1].y);
             length+=sqrt(pow(nodes[nodes.size()-j-1].x-xo,2)+
-                         pow(nodes[nodes.size()-j-1].x-yo,2));
+                         pow(nodes[nodes.size()-j-1].y-yo,2));
           }
 
           xo=nodes[nodes.size()-j-1].x;

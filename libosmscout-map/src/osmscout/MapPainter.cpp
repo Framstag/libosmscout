@@ -296,7 +296,7 @@ namespace osmscout {
 
             if (std::fabs(points[j].x-points[i].x)<=relevantPosDeriviation &&
                 std::fabs(points[j].y-points[i].y)<=relevantPosDeriviation) {
-              points[i].y=false;
+              points[i].draw=false;
             }
           }
         }
