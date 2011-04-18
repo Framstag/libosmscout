@@ -363,6 +363,17 @@ Token* Scanner::CreateToken() {
 
 void Scanner::AppendVal(Token *t) {
   int reqMem = (tlen + 1) * sizeof(char);
+
+#ifdef ARM
+  // In ARM architectures, make sure that required memory is 4-byte multiple
+  // in order to avoid later datatype misalignment exceptions
+
+  int memOffset=reqMem%4;
+
+  if (memOffset)
+    reqMem+=(4-memOffset);
+#endif
+
   if (((char*) heapTop + reqMem) >= (char*) heapEnd) {
     if (reqMem > HEAP_BLOCK_SIZE) {
       printf("--- Too long token value\n");
