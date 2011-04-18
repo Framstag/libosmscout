@@ -174,7 +174,7 @@ namespace osmscout {
 
   /**
    * This functions does a scan conversion of a line with the given start and end points.
-   * This problem is equals to the following problem:
+   * This problem is equal to the following problem:
    * Assuming an index that works by referencing lines by linking them to all cells in a cell
    * grid that contain or are crossed by the line. Which cells does the line cross?
    *
