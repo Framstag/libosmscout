@@ -77,6 +77,7 @@ private:
   double                startLon,startLat;
   int                   startX,startY;
   bool                  requestNewMap;
+  Lum::OS::ColorRef     backgroundColor;
 
 public:
   MapControl()
@@ -84,7 +85,8 @@ public:
     lon(7.13601),
     lat(50.68924),
     magnification(/*2*2*2**/2*1024),
-    requestNewMap(true)
+    requestNewMap(true),
+    backgroundColor(241.0/255,238.0/255,233.0/255,1.0)
   {
     SetCanFocus(true);
     RequestFocus();
@@ -124,7 +126,7 @@ public:
 
     /* --- */
 
-    draw->PushForeground(Lum::OS::Display::blackColor);
+    draw->PushForeground(backgroundColor);
     draw->FillRectangle(this->x,this->y,this->width,this->height);
     draw->PopForeground();
 
