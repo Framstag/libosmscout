@@ -33,8 +33,8 @@ namespace osmscout {
 
     virtual double GetLon() const = 0;
     virtual double GetLat() const = 0;
-    virtual double GetWidth() const = 0;
-    virtual double GetHeight() const = 0;
+    virtual size_t GetWidth() const = 0;
+    virtual size_t GetHeight() const = 0;
     virtual double GetLonMin() const = 0;
     virtual double GetLatMin() const = 0;
     virtual double GetLonMax() const = 0;
@@ -54,13 +54,13 @@ namespace osmscout {
 
     virtual bool GeoToPixel(double lon, double lat,
                             double& x, double& y) const = 0;
-                    
+
     virtual bool GetDimensions(double& lonMin, double& latMin,
                                double& lonMax, double& latMax) const = 0;
-                               
-    virtual double GetPixelSize() const = 0;                   
+
+    virtual double GetPixelSize() const = 0;
   };
-  
+
   class OSMSCOUT_MAP_API MercatorProjection : public Projection
   {
     bool                valid;         //! projects is valid
@@ -90,18 +90,18 @@ namespace osmscout {
     {
       return lon;
     }
-    
+
     inline double GetLat() const
     {
       return lat;
     }
 
-    inline double GetWidth() const
+    inline size_t GetWidth() const
     {
       return width;
     }
-    
-    inline double GetHeight() const
+
+    inline size_t GetHeight() const
     {
       return height;
     }
@@ -110,17 +110,17 @@ namespace osmscout {
     {
       return lonMin;
     }
-    
+
     inline double GetLatMin() const
     {
       return latMin;
     }
-    
+
     inline double GetLonMax() const
     {
       return lonMax;
     }
-    
+
     inline double GetLatMax() const
     {
       return latMax;
@@ -144,12 +144,12 @@ namespace osmscout {
 
     bool GeoToPixel(double lon, double lat,
                     double& x, double& y) const;
-                    
+
     bool GetDimensions(double& lonMin, double& latMin,
                        double& lonMax, double& latMax) const;
-                       
-    double GetPixelSize() const;                   
-  };  
+
+    double GetPixelSize() const;
+  };
 }
 
 #endif
