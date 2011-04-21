@@ -50,11 +50,21 @@ namespace osmscout {
                     const MapParameter& parameter,
                     PatternStyle& style);
 
+    void GetTextDimension(const MapParameter& parameter,
+                          double fontSize,
+                          const std::string& text,
+                          double& xOff,
+                          double& yOff,
+                          double& width,
+                          double& height);
+
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
-                   const LabelStyle& style,
-                   const std::string& text,
-                   double x, double y);
+                   const Label& label);
+
+    void DrawPlateLabel(const Projection& projection,
+                        const MapParameter& parameter,
+                        const Label& label);
 
     void DrawContourLabel(const Projection& projection,
                           const MapParameter& parameter,

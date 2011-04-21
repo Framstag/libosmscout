@@ -136,117 +136,100 @@ namespace osmscout {
     return false;
   }
 
+  void MapPainterQt::GetTextDimension(const MapParameter& parameter,
+                                      double fontSize,
+                                      const std::string& text,
+                                      double& xOff,
+                                      double& yOff,
+                                      double& width,
+                                      double& height)
+  {
+    QFont        font(GetFont(parameter,fontSize));
+    QFontMetrics metrics=QFontMetrics(font);
+    QString      string=QString::fromUtf8(text.c_str());
+    QRect        extents=metrics.boundingRect(string);
+
+    xOff=extents.x();
+    yOff=extents.y();
+    width=extents.width();
+    height=extents.height();
+  }
+
   void MapPainterQt::DrawLabel(const Projection& projection,
                                const MapParameter& parameter,
-                               const LabelStyle& style,
-                               const std::string& text,
-                               double x, double y)
+                               const Label& label)
   {
-    if (style.GetStyle()==LabelStyle::normal) {
-      double fontSize=style.GetSize();
-      double r=style.GetTextR();
-      double g=style.GetTextG();
-      double b=style.GetTextB();
-      double a=style.GetTextA();
+    double r=label.style->GetTextR();
+    double g=label.style->GetTextG();
+    double b=label.style->GetTextB();
 
-      if (projection.GetMagnification()>style.GetScaleAndFadeMag()) {
-        double factor=Log2(projection.GetMagnification())-Log2(style.GetScaleAndFadeMag());
-        fontSize=fontSize*pow(2,factor);
-        a=a/factor;
-      }
+    QFont        font(GetFont(parameter,label.fontSize));
+    QString      string=QString::fromUtf8(label.text.c_str());
+    QFontMetrics metrics=QFontMetrics(font);
 
-      QFont        font(GetFont(parameter,fontSize));
-      QFontMetrics metrics=QFontMetrics(font);
-      QString      string=QString::fromUtf8(text.c_str());
-      QRect        extents=metrics.boundingRect(string);
-
-      painter->setPen(QColor::fromRgbF(r,g,b,a));
+    if (label.style->GetStyle()==LabelStyle::normal) {
+      painter->setPen(QColor::fromRgbF(r,g,b,label.alpha));
       painter->setBrush(Qt::NoBrush);
       painter->setFont(font);
-      painter->drawText(QPointF(x-extents.width()/2,
-                                y+metrics.ascent()-extents.height()/2),
+      painter->drawText(QPointF(label.x,
+                                label.y+metrics.ascent()),
                         string);
     }
-    else if (style.GetStyle()==LabelStyle::plate) {
-      static const double outerWidth = 4;
-      static const double innerWidth = 2;
-
-      double       fontSize=style.GetSize();
-      QFont        font(GetFont(parameter,fontSize));
-      QFontMetrics metrics=QFontMetrics(font);
-      QString      string=QString::fromUtf8(text.c_str());
-      QRect        extents=metrics.boundingRect(string);
-
-      if (x-extents.width()/2-outerWidth>=projection.GetWidth() ||
-          x+extents.width()/2-outerWidth<0 ||
-          y-extents.height()/2+outerWidth>=projection.GetHeight() ||
-          y+extents.width()/2+outerWidth<0) {
-        return;
-      }
-
-      painter->fillRect(QRectF(x-extents.width()/2-outerWidth,
-                               y-metrics.height()/2-outerWidth,
-                               extents.width()+2*outerWidth,
-                               metrics.height()+2*outerWidth),
-                              QColor::fromRgbF(style.GetBgR(),
-                                               style.GetBgG(),
-                                               style.GetBgB(),
-                                               style.GetBgA()));
-
-      painter->setPen(QColor::fromRgbF(style.GetBorderR(),
-                                       style.GetBorderG(),
-                                       style.GetBorderB(),
-                                       style.GetBorderA()));
-
-      painter->drawRect(QRect(x-extents.width()/2-innerWidth,
-                              y-metrics.height()/2-innerWidth,
-                              extents.width()+2*innerWidth,
-                              metrics.height()+2*innerWidth));
-
-      painter->setPen(QColor::fromRgbF(style.GetTextR(),
-                                       style.GetTextG(),
-                                       style.GetTextB(),
-                                       style.GetTextA()));
-
-      painter->drawText(QPointF(x-extents.width()/2-metrics.leftBearing(string[0]),
-                                y-metrics.height()/2+metrics.ascent()),
-                                string);
-    }
-    else if (style.GetStyle()==LabelStyle::emphasize) {
-      double fontSize=style.GetSize();
-      double r=style.GetTextR();
-      double g=style.GetTextG();
-      double b=style.GetTextB();
-      double a=style.GetTextA();
-
-      if (projection.GetMagnification()>style.GetScaleAndFadeMag()) {
-        double factor=Log2(projection.GetMagnification())-Log2(style.GetScaleAndFadeMag());
-
-        fontSize=fontSize*pow(2,factor);
-        if (factor>=1) {
-          a=a/factor;
-        }
-      }
-
-      QFont        font(GetFont(parameter,fontSize));
-      QFontMetrics metrics=QFontMetrics(font);
-      QString      string=QString::fromUtf8(text.c_str());
-      QRect        extents=metrics.boundingRect(string);
+    else if (label.style->GetStyle()==LabelStyle::emphasize) {
       QPainterPath path;
       QPen         pen;
 
-      pen.setColor(QColor::fromRgbF(1.0,1.0,1.0,a));
+      pen.setColor(QColor::fromRgbF(1.0,1.0,1.0,label.alpha));
       pen.setWidthF(2.0);
       painter->setPen(pen);
 
-      path.addText(QPointF(x-extents.width()/2,
-                           y+metrics.ascent()-extents.height()/2),
-                   font,
+      path.addText(QPointF(label.x,
+                           label.y+metrics.ascent()),
+                           font,
                    string);
 
       painter->drawPath(path);
-      painter->fillPath(path,QBrush(QColor::fromRgbF(r,g,b,a)));
+      painter->fillPath(path,QBrush(QColor::fromRgbF(r,g,b,label.alpha)));
     }
+  }
+
+  void MapPainterQt::DrawPlateLabel(const Projection& projection,
+                                    const MapParameter& parameter,
+                                    const Label& label)
+  {
+    QFont        font(GetFont(parameter,label.fontSize));
+    QFontMetrics metrics=QFontMetrics(font);
+    QString      string=QString::fromUtf8(label.text.c_str());
+
+    painter->fillRect(QRectF(label.bx,
+                             label.by,
+                             label.bwidth,
+                             label.bheight),
+                      QBrush(QColor::fromRgbF(label.style->GetBgR(),
+                                              label.style->GetBgG(),
+                                              label.style->GetBgB(),
+                                              1)));
+
+    painter->setPen(QColor::fromRgbF(label.style->GetBorderR(),
+                                     label.style->GetBorderG(),
+                                     label.style->GetBorderB(),
+                                     label.style->GetBorderA()));
+    painter->setBrush(Qt::NoBrush);
+
+    painter->drawRect(QRectF(label.bx+2,
+                             label.by+2,
+                             label.bwidth-4,
+                             label.bheight-4));
+
+    painter->setPen(QColor::fromRgbF(label.style->GetTextR(),
+                                     label.style->GetTextG(),
+                                     label.style->GetTextB(),
+                                     label.style->GetTextA()));
+    painter->setBrush(Qt::NoBrush);
+    painter->setFont(font);
+    painter->drawText(QPointF(label.x,
+                              label.y+metrics.ascent()),
+                              string);
   }
 
   void MapPainterQt::DrawContourLabel(const Projection& projection,

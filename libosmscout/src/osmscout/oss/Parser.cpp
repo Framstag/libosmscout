@@ -327,6 +327,21 @@ void Parser::LABELDEF(LabelStyle& style) {
 				SCALEMAG(scaleMag);
 				style.SetScaleAndFadeMag(scaleMag); 
 			}
+			if (la->kind == 10) {
+				size_t priority; 
+				Get();
+				INTEGER(priority);
+				if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
+				 style.SetPriority((uint8_t)priority);
+				}
+				else {
+				  std::string e="Priority must be in the interval [0,"+
+				                NumberToString(std::numeric_limits<uint8_t>::max())+"[";
+				
+				                        SemErr(e.c_str());
+				                      }
+				                     
+			}
 		}
 }
 
@@ -378,6 +393,21 @@ void Parser::REFDEF(LabelStyle& style) {
 				Mag scaleMag=style.GetScaleAndFadeMag(); 
 				SCALEMAG(scaleMag);
 				style.SetScaleAndFadeMag(scaleMag); 
+			}
+			if (la->kind == 10) {
+				size_t priority; 
+				Get();
+				INTEGER(priority);
+				if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
+				 style.SetPriority((uint8_t)priority);
+				}
+				else {
+				  std::string e="Priority must be in the interval [0,"+
+				                NumberToString(std::numeric_limits<uint8_t>::max())+"[";
+				
+				                        SemErr(e.c_str());
+				                      }
+				                    
 			}
 		}
 }

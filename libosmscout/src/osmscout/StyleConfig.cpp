@@ -187,6 +187,7 @@ namespace osmscout {
 
   LabelStyle::LabelStyle()
    : style(none),
+     priority(0),
      minMag(magWorld),
      scaleAndFadeMag((Mag)1000000),
      maxMag((Mag)1000000),
@@ -210,6 +211,13 @@ namespace osmscout {
   LabelStyle& LabelStyle::SetStyle(Style style)
   {
     this->style=style;
+
+    return *this;
+  }
+
+  LabelStyle& LabelStyle::SetPriority(uint8_t priority)
+  {
+    this->priority=priority;
 
     return *this;
   }

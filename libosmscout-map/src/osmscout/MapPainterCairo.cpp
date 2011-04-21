@@ -382,7 +382,6 @@ namespace osmscout {
   }
 
   cairo_scaled_font_t* MapPainterCairo::GetScaledFont(const MapParameter& parameter,
-                                                      cairo_t* draw,
                                                       size_t fontSize)
   {
     std::map<size_t,cairo_scaled_font_t*>::const_iterator f;
@@ -393,192 +392,157 @@ namespace osmscout {
       return f->second;
     }
 
+    cairo_font_face_t    *fontFace;
     cairo_matrix_t       scaleMatrix;
     cairo_matrix_t       transformMatrix;
     cairo_font_options_t *options;
     cairo_scaled_font_t  *scaledFont;
 
+    fontFace=cairo_toy_font_face_create(parameter.GetFontName().c_str(),
+                                        CAIRO_FONT_SLANT_NORMAL,
+                                        CAIRO_FONT_WEIGHT_NORMAL);
+
     cairo_matrix_init_scale(&scaleMatrix,
                             parameter.GetFontSize()*fontSize,
                             parameter.GetFontSize()*fontSize);
-    cairo_get_matrix(draw,&transformMatrix);
+
+    cairo_matrix_init_identity(&transformMatrix);
+
     options=cairo_font_options_create();
     cairo_font_options_set_hint_style (options,CAIRO_HINT_STYLE_NONE);
     cairo_font_options_set_hint_metrics (options,CAIRO_HINT_METRICS_OFF);
 
-    cairo_select_font_face(draw,
-                           parameter.GetFontName().c_str(),
-                           CAIRO_FONT_SLANT_NORMAL,
-                           CAIRO_FONT_WEIGHT_NORMAL);
-
-    scaledFont=cairo_scaled_font_create(cairo_get_font_face(draw),
+    scaledFont=cairo_scaled_font_create(fontFace,
                                         &scaleMatrix,
                                         &transformMatrix,
                                         options);
 
     cairo_font_options_destroy(options);
+    cairo_font_face_destroy(fontFace);
 
     return font.insert(std::pair<size_t,cairo_scaled_font_t*>(fontSize,scaledFont)).first->second;
   }
 
+  void MapPainterCairo::GetTextDimension(const MapParameter& parameter,
+                                         double fontSize,
+                                         const std::string& text,
+                                         double& xOff,
+                                         double& yOff,
+                                         double& width,
+                                         double& height)
+  {
+    cairo_scaled_font_t *font;
+    cairo_text_extents_t textExtents;
+    cairo_font_extents_t fontExtents;
+
+    font=GetScaledFont(parameter,
+                       fontSize);
+
+    cairo_scaled_font_extents(font,&fontExtents);
+
+    cairo_scaled_font_text_extents(font,
+                                   text.c_str(),
+                                   &textExtents);
+
+    xOff=textExtents.x_bearing;
+    yOff=textExtents.y_bearing;
+    width=textExtents.width;
+    height=fontExtents.height;
+  }
+
   void MapPainterCairo::DrawLabel(const Projection& projection,
                                   const MapParameter& parameter,
-                                  const LabelStyle& style,
-                                  const std::string& text,
-                                  double x, double y)
+                                  const Label& label)
   {
-    // TODO: If the point is offscreen move it into the screen...
+    double               r=label.style->GetTextR();
+    double               g=label.style->GetTextG();
+    double               b=label.style->GetTextB();
+    cairo_scaled_font_t  *font;
+    cairo_font_extents_t fontExtents;
 
-    if (style.GetStyle()==LabelStyle::normal) {
-      cairo_scaled_font_t *font;
+    font=GetScaledFont(parameter,
+                       label.fontSize);
 
-      cairo_text_extents_t textExtents;
+    cairo_set_scaled_font(draw,font);
 
-      double fontSize=style.GetSize();
-      double r=style.GetTextR();
-      double g=style.GetTextG();
-      double b=style.GetTextB();
-      double a=style.GetTextA();
+    cairo_scaled_font_extents(font,&fontExtents);
 
-      if (projection.GetMagnification()>style.GetScaleAndFadeMag()) {
-        double factor=log2(projection.GetMagnification())-log2(style.GetScaleAndFadeMag());
-        fontSize=fontSize*pow(2,factor);
-        a=a/factor;
-      }
+    cairo_set_source_rgba(draw,r,g,b,label.alpha);
 
-      font=GetScaledFont(parameter,
-                         draw,
-                         fontSize);
+    cairo_move_to(draw,
+                  label.x,
+                  label.y+fontExtents.ascent);
 
-      cairo_set_scaled_font(draw,font);
+    if (label.style->GetStyle()==LabelStyle::normal) {
 
-      cairo_scaled_font_text_extents(font,text.c_str(),&textExtents);
-
-      cairo_set_source_rgba(draw,r,g,b,a);
-
-      if (x-textExtents.width/2+textExtents.x_bearing>=projection.GetWidth() ||
-          x+textExtents.width/2+textExtents.x_bearing<0 ||
-          y-textExtents.height/2+textExtents.x_bearing>=projection.GetHeight() ||
-          y+textExtents.width/2+textExtents.x_bearing<0) {
-        return;
-      }
-
-      cairo_move_to(draw,x-textExtents.width/2+textExtents.x_bearing,
-                    y-textExtents.height/2-textExtents.y_bearing);
-      cairo_show_text(draw,text.c_str());
+      cairo_show_text(draw,label.text.c_str());
       cairo_stroke(draw);
     }
-    else if (style.GetStyle()==LabelStyle::plate) {
-      static const double outerWidth = 4;
-      static const double innerWidth = 2;
+    else {
+      cairo_text_path(draw,label.text.c_str());
 
-      cairo_scaled_font_t *font;
-
-      font=GetScaledFont(parameter,
-                         draw,
-                         style.GetSize());
-
-      cairo_set_scaled_font(draw,font);
-
-      cairo_font_extents_t fontExtents;
-      cairo_text_extents_t textExtents;
-
-      cairo_scaled_font_extents(font,&fontExtents);
-      cairo_scaled_font_text_extents(font,text.c_str(),&textExtents);
-
-      if (x-textExtents.width/2+textExtents.x_bearing-outerWidth>=projection.GetWidth() ||
-          x+textExtents.width/2+textExtents.x_bearing-outerWidth<0 ||
-          y-textExtents.height/2+textExtents.x_bearing+outerWidth>=projection.GetHeight() ||
-          y+textExtents.width/2+textExtents.x_bearing+outerWidth<0) {
-        return;
-      }
-
-      cairo_set_line_width(draw,1);
-
-      cairo_set_source_rgba(draw,
-                            style.GetBgR(),
-                            style.GetBgG(),
-                            style.GetBgB(),
-                            style.GetBgA());
-
-      cairo_rectangle(draw,
-                      x-textExtents.width/2+textExtents.x_bearing-outerWidth,
-                      y-fontExtents.height/2-outerWidth,
-                      textExtents.width+2*outerWidth,
-                      fontExtents.height+2*outerWidth);
-      cairo_fill(draw);
-
-      cairo_set_source_rgba(draw,
-                            style.GetBorderR(),
-                            style.GetBorderG(),
-                            style.GetBorderB(),
-                            style.GetBorderA());
-
-      cairo_rectangle(draw,
-                      x-textExtents.width/2+textExtents.x_bearing-innerWidth,
-                      y-fontExtents.height/2-innerWidth,
-                      textExtents.width+2*innerWidth,
-                      fontExtents.height+2*innerWidth);
-      cairo_stroke(draw);
-
-      cairo_set_source_rgba(draw,
-                            style.GetTextR(),
-                            style.GetTextG(),
-                            style.GetTextB(),
-                            style.GetTextA());
-
-      cairo_move_to(draw,
-                    x-textExtents.width/2+textExtents.x_bearing,
-                    y-fontExtents.height/2+fontExtents.ascent);
-      cairo_show_text(draw,text.c_str());
-      cairo_stroke(draw);
-    }
-    else if (style.GetStyle()==LabelStyle::emphasize) {
-      cairo_text_extents_t textExtents;
-
-      cairo_save(draw);
-
-      double fontSize=style.GetSize();
-      double r=style.GetTextR();
-      double g=style.GetTextG();
-      double b=style.GetTextB();
-      double a=style.GetTextA();
-
-      if (projection.GetMagnification()>style.GetScaleAndFadeMag()) {
-        double factor=log2(projection.GetMagnification())-log2(style.GetScaleAndFadeMag());
-        fontSize=fontSize*pow(2,factor);
-        a=a/factor;
-      }
-
-      cairo_scaled_font_t *font;
-
-      font=GetScaledFont(parameter,
-                         draw,
-                         fontSize);
-
-      cairo_set_scaled_font(draw,font);
-
-      cairo_scaled_font_text_extents(font,text.c_str(),&textExtents);
-
-      if (x-textExtents.width/2+textExtents.x_bearing>=projection.GetWidth() ||
-          x+textExtents.width/2+textExtents.x_bearing<0 ||
-          y-textExtents.height/2+textExtents.x_bearing>=projection.GetHeight() ||
-          y+textExtents.width/2+textExtents.x_bearing<0) {
-        return;
-      }
-
-      cairo_move_to(draw,x-textExtents.width/2+textExtents.x_bearing,
-                    y-textExtents.height/2-textExtents.y_bearing);
-
-      cairo_text_path(draw,text.c_str());
-      cairo_set_source_rgba(draw,1,1,1,a);
+      cairo_set_source_rgba(draw,1,1,1,label.alpha);
       cairo_set_line_width(draw,2.0);
       cairo_stroke_preserve(draw);
-      cairo_set_source_rgba(draw,r,g,b,a);
-      cairo_fill(draw);
 
-      cairo_restore(draw);
+      cairo_set_source_rgba(draw,r,g,b,label.alpha);
+      cairo_fill(draw);
     }
+  }
+
+  void MapPainterCairo::DrawPlateLabel(const Projection& projection,
+                                       const MapParameter& parameter,
+                                       const Label& label)
+  {
+    cairo_scaled_font_t  *font;
+    cairo_font_extents_t fontExtents;
+
+    font=GetScaledFont(parameter,
+                       label.fontSize);
+
+    cairo_set_scaled_font(draw,font);
+
+    cairo_scaled_font_extents(font,&fontExtents);
+
+    cairo_set_dash(draw,NULL,0,0);
+    cairo_set_line_width(draw,1);
+    cairo_set_source_rgba(draw,
+                          label.style->GetBgR(),
+                          label.style->GetBgG(),
+                          label.style->GetBgB(),
+                          label.style->GetBgA());
+
+    cairo_rectangle(draw,
+                    label.bx,
+                    label.by,
+                    label.bwidth,
+                    label.bheight);
+    cairo_fill(draw);
+
+    cairo_set_source_rgba(draw,
+                          label.style->GetBorderR(),
+                          label.style->GetBorderG(),
+                          label.style->GetBorderB(),
+                          label.style->GetBorderA());
+
+    cairo_rectangle(draw,
+                    label.bx+2,
+                    label.by+2,
+                    label.bwidth-4,
+                    label.bheight-4);
+    cairo_stroke(draw);
+
+    cairo_set_source_rgba(draw,
+                          label.style->GetTextR(),
+                          label.style->GetTextG(),
+                          label.style->GetTextB(),
+                          label.style->GetTextA());
+
+    cairo_move_to(draw,
+                  label.x,
+                  label.y+fontExtents.ascent);
+    cairo_show_text(draw,label.text.c_str());
+    cairo_stroke(draw);
   }
 
   void MapPainterCairo::DrawContourLabel(const Projection& projection,
@@ -587,11 +551,10 @@ namespace osmscout {
                                          const std::string& text,
                                          const std::vector<TransPoint>& nodes)
   {
-    cairo_scaled_font_t *font;
+    assert(style.GetStyle()==LabelStyle::contour);
 
-    font=GetScaledFont(parameter,
-                       draw,
-                       style.GetSize());
+    cairo_scaled_font_t *font=GetScaledFont(parameter,
+                                            style.GetSize());
 
     cairo_set_scaled_font(draw,font);
 
@@ -600,17 +563,20 @@ namespace osmscout {
     double yo=0;
 
     cairo_new_path(draw);
+
     if (nodes[0].x<nodes[nodes.size()-1].x) {
       bool start=true;
 
       for (size_t j=0; j<nodes.size(); j++) {
         if (nodes[j].draw) {
           if (start) {
-            cairo_move_to(draw,nodes[j].x,nodes[j].y);
+            cairo_move_to(draw,nodes[j].x,
+                          nodes[j].y);
             start=false;
           }
           else {
-            cairo_line_to(draw,nodes[j].x,nodes[j].y);
+            cairo_line_to(draw,nodes[j].x,
+                          nodes[j].y);
             length+=sqrt(pow(nodes[j].x-xo,2)+
                          pow(nodes[j].y-yo,2));
           }
@@ -624,30 +590,34 @@ namespace osmscout {
       bool start=true;
 
       for (size_t j=0; j<nodes.size(); j++) {
-        if (nodes[nodes.size()-j-1].draw) {
+        size_t idx=nodes.size()-j-1;
+
+        if (nodes[idx].draw) {
           if (start) {
             cairo_move_to(draw,
-                          nodes[nodes.size()-j-1].x,
-                          nodes[nodes.size()-j-1].y);
+                          nodes[idx].x,
+                          nodes[idx].y);
             start=false;
           }
           else {
             cairo_line_to(draw,
-                          nodes[nodes.size()-j-1].x,
-                          nodes[nodes.size()-j-1].y);
-            length+=sqrt(pow(nodes[nodes.size()-j-1].x-xo,2)+
-                         pow(nodes[nodes.size()-j-1].x-yo,2));
+                          nodes[idx].x,
+                          nodes[idx].y);
+            length+=sqrt(pow(nodes[idx].x-xo,2)+
+                         pow(nodes[idx].y-yo,2));
           }
 
-          xo=nodes[nodes.size()-j-1].x;
-          yo=nodes[nodes.size()-j-1].y;
+          xo=nodes[idx].x;
+          yo=nodes[idx].y;
         }
       }
     }
 
     cairo_text_extents_t textExtents;
 
-    cairo_scaled_font_text_extents(font,text.c_str(),&textExtents);
+    cairo_scaled_font_text_extents(font,
+                                   text.c_str(),
+                                   &textExtents);
 
     if (length<textExtents.width) {
       // Text is longer than path to draw on
@@ -656,7 +626,8 @@ namespace osmscout {
 
     cairo_font_extents_t fontExtents;
 
-    cairo_scaled_font_extents(font,&fontExtents);
+    cairo_scaled_font_extents(font,
+                              &fontExtents);
 
     cairo_set_source_rgba(draw,
                           style.GetTextR(),

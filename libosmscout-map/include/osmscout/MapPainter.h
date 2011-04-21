@@ -26,6 +26,8 @@
 
 #include <osmscout/Private/MapImportExport.h>
 
+#include <osmscout/util/Geometry.h>
+
 #include <osmscout/GroundTile.h>
 #include <osmscout/Node.h>
 #include <osmscout/Projection.h>
@@ -126,6 +128,25 @@ namespace osmscout {
       double y;
     };
 
+    struct OSMSCOUT_API Label
+    {
+      bool              draw;
+      bool              overlay;
+      bool              mark;
+      double            x;
+      double            y;
+      double            width;
+      double            height;
+      double            bx;
+      double            by;
+      double            bwidth;
+      double            bheight;
+      double            alpha;
+      double            fontSize;
+      const LabelStyle* style;
+      std::string       text;
+    };
+
   protected:
     /**
        Scratch variables for path optimization algortihm
@@ -138,19 +159,33 @@ namespace osmscout {
        Style specific precalculations
      */
     //@{
-    std::vector<double> borderWidth;  //! border with for this way (area) border style
-    bool                areaLayers[11];
-    bool                wayLayers[11];
-    bool                relationAreaLayers[11];
-    bool                relationWayLayers[11];
+    std::vector<double>     borderWidth;  //! border with for this way (area) border style
+    bool                    areaLayers[11];
+    bool                    wayLayers[11];
+    bool                    relationAreaLayers[11];
+    bool                    relationWayLayers[11];
     //@}
 
     /**
-      Preset dashes
+      Presets and similar
      */
     //@{
-    std::vector<double>    emptyDash;         //! Empty dash array
-    std::vector<double>    tunnelDash;        //! Dash array for drawing tunnel border
+    std::vector<double>     emptyDash;         //! Empty dash array
+    std::vector<double>     tunnelDash;        //! Dash array for drawing tunnel border
+    FillStyle               areaMarkStyle;     //! Marker fill style for internal debugging
+    //@}
+
+    /**
+      Temporary data structures for intelligent label positioning
+      */
+    //@{
+    int                     xCellCount;
+    int                     yCellCount;
+    size_t                  cellWidth;
+    size_t                  cellHeight;
+    std::vector<std::list<size_t> > labelRefs;
+    std::vector<Label>      labels;
+    std::vector<ScanCell>   wayScanlines;
     //@}
 
     /**
@@ -177,6 +212,11 @@ namespace osmscout {
     //@}
 
   private:
+    void ScanConvertLine(const std::vector<TransPoint>& points,
+                         double cellWidth,
+                         double cellHeight,
+                         std::vector<ScanCell>& cells);
+
     /**
       Private draw algorithm implementation routines.
      */
@@ -186,17 +226,24 @@ namespace osmscout {
                          const MapParameter& parameter,
                          const MapData& data);
 
-    void DrawTiledLabel(const Projection& projection,
-                        const MapParameter& parameter,
-                        const LabelStyle& style,
-                        const std::string& label,
-                        const std::vector<Point>& nodes,
-                        std::set<size_t>& tileBlacklist);
-
     void PrecalculateStyleData(const StyleConfig& styleConfig,
                                const Projection& projection,
                                const MapParameter& parameter,
                                const MapData& data);
+
+    void RegisterPointWayLabel(const Projection& projection,
+                               const MapParameter& parameter,
+                               const LabelStyle& style,
+                               const std::string& text,
+                               const std::vector<TransPoint>& points);
+
+    bool RegisterPointLabel(const Projection& projection,
+                            const MapParameter& parameter,
+                            const LabelStyle& style,
+                            const std::string& text,
+                            double x,
+                            double y);
+
 
     void DrawNodes(const StyleConfig& styleConfig,
                    const Projection& projection,
@@ -211,7 +258,7 @@ namespace osmscout {
                  const MapParameter& parameter,
                  const LineStyle& style,
                  const SegmentAttributes& attributes,
-                 const std::vector<Point>& nodes);
+                 const std::vector<TransPoint>& point);
 
     /**
       Draw the outline of the way using LineStyle for the given type, the given
@@ -252,10 +299,10 @@ namespace osmscout {
                       const Projection& projection,
                       const MapParameter& parameter,
                       const MapData& data);
-    void DrawPOINodeLabels(const StyleConfig& styleConfig,
-                           const Projection& projection,
-                           const MapParameter& parameter,
-                           const MapData& data);
+
+    void DrawLabels(const StyleConfig& styleConfig,
+                    const Projection& projection,
+                    const MapParameter& parameter);
     //@}
 
   protected:
@@ -284,8 +331,14 @@ namespace osmscout {
     bool GetBoundingBox(const std::vector<Point>& nodes,
                         double& xmin, double& ymin,
                         double& xmax, double& ymax);
+    bool GetBoundingBox(const std::vector<TransPoint>& points,
+                        double& xmin, double& ymin,
+                        double& xmax, double& ymax);
     bool GetCenterPixel(const Projection& projection,
                         const std::vector<Point>& nodes,
+                        double& cx,
+                        double& cy);
+    bool GetCenterPixel(const std::vector<TransPoint>& points,
                         double& cx,
                         double& cy);
     //@}
@@ -315,14 +368,35 @@ namespace osmscout {
                             PatternStyle& style) = 0;
 
     /**
+      Return the bounding box of the given text.
+
+      The backend may decide to relayout the given text, however it must assure
+      that later calls to corresponding DrawXXX methods will honour the initial
+      bounding box.
+      */
+    virtual void GetTextDimension(const MapParameter& parameter,
+                                  double fontSize,
+                                  const std::string& text,
+                                  double& xOff,
+                                  double& yOff,
+                                  double& width,
+                                  double& height) = 0;
+
+    /**
       Draw the given text at the given pixel coordinate in a style defined
       by the given LabelStyle.
      */
     virtual void DrawLabel(const Projection& projection,
                            const MapParameter& parameter,
-                           const LabelStyle& style,
-                           const std::string& text,
-                           double x, double y) = 0;
+                           const Label& label) = 0;
+
+    /**
+      Draw the given text at the given pixel coordinate in a style defined
+      by the given LabelStyle. Draw a plate style icon around the text.
+     */
+    virtual void DrawPlateLabel(const Projection& projection,
+                                const MapParameter& parameter,
+                                const Label& label) = 0;
 
     /**
       Draw the given text as a contour of the given path in a style defined

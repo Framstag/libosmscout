@@ -87,11 +87,38 @@ namespace osmscout {
                                        double& width,
                                        double& height)
   {
+
     width=0;
     height=fontEngine->height();
 
     for (size_t i=0; i<text.length(); i++) {
       const agg::glyph_cache* glyph=fontCacheManager->glyph(text[i]);
+
+      if (glyph!=NULL) {
+        width+=glyph->advance_x;
+      }
+    }
+  }
+
+  void MapPainterAgg::GetTextDimension(const MapParameter& parameter,
+                                       double fontSize,
+                                       const std::string& text,
+                                       double& xOff,
+                                       double& yOff,
+                                       double& width,
+                                       double& height)
+  {
+    std::wstring wideText(UTF8StringToWString(text));
+
+    xOff=0;
+    yOff=0;
+    width=0;
+    height=fontEngine->height();
+
+    SetFont(parameter,fontSize);
+
+    for (size_t i=0; i<wideText.length(); i++) {
+      const agg::glyph_cache* glyph=fontCacheManager->glyph(wideText[i]);
 
       if (glyph!=NULL) {
         width+=glyph->advance_x;
@@ -244,88 +271,47 @@ namespace osmscout {
 
   void MapPainterAgg::DrawLabel(const Projection& projection,
                                const MapParameter& parameter,
-                               const LabelStyle& style,
-                               const std::string& text,
-                               double x, double y)
+                               const Label& label)
   {
-    if (style.GetStyle()==LabelStyle::normal) {
-      double       fontSize=style.GetSize();
-      double       r=style.GetTextR();
-      double       g=style.GetTextG();
-      double       b=style.GetTextB();
-      double       a=style.GetTextA();
-      std::wstring wideText(UTF8StringToWString(text));
+    double       r=label.style->GetTextR();
+    double       g=label.style->GetTextG();
+    double       b=label.style->GetTextB();
+    std::wstring wideText(UTF8StringToWString(label.text));
 
-      if (projection.GetMagnification()>style.GetScaleAndFadeMag()) {
-        double factor=Log2(projection.GetMagnification())-Log2(style.GetScaleAndFadeMag());
-        fontSize=fontSize*pow(2,factor);
-        a=a/factor;
-      }
+    if (label.style->GetStyle()==LabelStyle::normal) {
 
       SetFont(parameter,
-              fontSize);
-
-      double width;
-      double height;
-
-      GetTextDimension(wideText,width,height);
-
-      x=x-width/2;
-      y=y+-height/2+fontEngine->ascender();
+              label.fontSize);
 
       //renderer_bin->color(agg::rgba(r,g,b,a));
-      renderer_aa->color(agg::rgba(r,g,b,a));
+      renderer_aa->color(agg::rgba(r,g,b,label.alpha));
 
-      DrawText(x,y,wideText);
+      DrawText(label.x,label.y+fontEngine->ascender(),wideText);
     }
-    else if (style.GetStyle()==LabelStyle::plate) {
-      static const double outerWidth = 4;
-      static const double innerWidth = 2;
-
-      // TODO
-    }
-    else if (style.GetStyle()==LabelStyle::emphasize) {
-      double       fontSize=style.GetSize();
-      double       r=style.GetTextR();
-      double       g=style.GetTextG();
-      double       b=style.GetTextB();
-      double       a=style.GetTextA();
-      std::wstring wideText(UTF8StringToWString(text));
-
-      if (projection.GetMagnification()>style.GetScaleAndFadeMag()) {
-        double factor=Log2(projection.GetMagnification())-Log2(style.GetScaleAndFadeMag());
-
-        fontSize=fontSize*pow(2,factor);
-        if (factor>=1) {
-          a=a/factor;
-        }
-      }
-
+    else if (label.style->GetStyle()==LabelStyle::emphasize) {
       SetOutlineFont(parameter,
-                     fontSize);
-
-      double width;
-      double height;
-
-      GetTextDimension(wideText,width,height);
-
-      x=x-width/2;
-      y=y+-height/2+fontEngine->ascender();
+                     label.fontSize);
 
       //renderer_bin->color(agg::rgba(r,g,b,a));
-      renderer_aa->color(agg::rgba(1,1,1,a));
+      renderer_aa->color(agg::rgba(1,1,1,label.alpha));
 
-      DrawOutlineText(x,y,wideText,2);
+      DrawOutlineText(label.x,label.y+fontEngine->ascender(),wideText,2);
 
       SetFont(parameter,
-              fontSize);
+              label.fontSize);
 
       //renderer_bin->color(agg::rgba(r,g,b,a));
-      renderer_aa->color(agg::rgba(r,g,b,a));
+      renderer_aa->color(agg::rgba(r,g,b,label.alpha));
 
-      DrawText(x,y,wideText);
-
+      DrawText(label.x,label.y+fontEngine->ascender(),wideText);
     }
+  }
+
+  void MapPainterAgg::DrawPlateLabel(const Projection& projection,
+                                     const MapParameter& parameter,
+                                     const Label& label)
+  {
+    // TODO
   }
 
   void MapPainterAgg::DrawContourLabel(const Projection& projection,

@@ -21,6 +21,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <limits>
 
 #include <osmscout/util/StopClock.h>
 
@@ -84,11 +85,31 @@ namespace osmscout {
   {
     tunnelDash.push_back(3);
     tunnelDash.push_back(3);
+
+    areaMarkStyle.SetStyle(FillStyle::plain);
+    areaMarkStyle.SetColor(1,0,0,0.5);
   }
 
   MapPainter::~MapPainter()
   {
     // no code
+  }
+
+  void MapPainter::ScanConvertLine(const std::vector<TransPoint>& points,
+                                   double cellWidth,
+                                   double cellHeight,
+                                   std::vector<ScanCell>& cells)
+  {
+    assert(points.size()>=2);
+
+    for (size_t i=0; i<points.size()-1; i++) {
+      int x1=int(points[i].x/cellWidth);
+      int x2=int(points[i+1].x/cellWidth);
+      int y1=int(points[i].y/cellHeight);
+      int y2=int(points[i+1].y/cellHeight);
+
+      osmscout::ScanConvertLine(x1,y1,x2,y2,cells);
+    }
   }
 
   bool MapPainter::IsVisible(const Projection& projection,
@@ -359,6 +380,29 @@ namespace osmscout {
     return true;
   }
 
+  bool MapPainter::GetBoundingBox(const std::vector<TransPoint>& points,
+                                  double& xmin, double& ymin,
+                                  double& xmax, double& ymax)
+  {
+    if (points.size()==0) {
+      return false;
+    }
+
+    xmin=points[0].x;
+    xmax=points[0].x;
+    ymin=points[0].y;
+    ymax=points[0].y;
+
+    for (size_t j=1; j<points.size(); j++) {
+      xmin=std::min(xmin,points[j].x);
+      xmax=std::max(xmax,points[j].x);
+      ymin=std::min(ymin,points[j].y);
+      ymax=std::max(ymax,points[j].y);
+    }
+
+    return true;
+  }
+
   bool MapPainter::GetCenterPixel(const Projection& projection,
                                   const std::vector<Point>& nodes,
                                   double& cx,
@@ -375,6 +419,25 @@ namespace osmscout {
 
     projection.GeoToPixel(xmin,ymin,xmin,ymin);
     projection.GeoToPixel(xmax,ymax,xmax,ymax);
+
+    cx=xmin+(xmax-xmin)/2;
+    cy=ymin+(ymax-ymin)/2;
+
+    return true;
+  }
+
+  bool MapPainter::GetCenterPixel(const std::vector<TransPoint>& points,
+                                  double& cx,
+                                  double& cy)
+  {
+    double xmin;
+    double xmax;
+    double ymin;
+    double ymax;
+
+    if (!GetBoundingBox(points,xmin,ymin,xmax,ymax)) {
+      return false;
+    }
 
     cx=xmin+(xmax-xmin)/2;
     cy=ymin+(ymax-ymin)/2;
@@ -456,47 +519,296 @@ namespace osmscout {
     }
   }
 
-  void MapPainter::DrawTiledLabel(const Projection& projection,
-                                  const MapParameter& parameter,
-                                  const LabelStyle& style,
-                                  const std::string& label,
-                                  const std::vector<Point>& nodes,
-                                  std::set<size_t>& tileBlacklist)
+  void MapPainter::RegisterPointWayLabel(const Projection& projection,
+                                         const MapParameter& parameter,
+                                         const LabelStyle& style,
+                                         const std::string& text,
+                                         const std::vector<TransPoint>& points)
   {
-    double x,y;
-    double xmin;
-    double xmax;
-    double ymin;
-    double ymax;
-
-    if (!GetBoundingBox(nodes,xmin,ymin,xmax,ymax)) {
+    if (style.GetStyle()!=LabelStyle::plate) {
       return;
     }
 
-    projection.GeoToPixel(xmin,ymin,xmin,ymin);
-    projection.GeoToPixel(xmax,ymax,xmax,ymax);
+    wayScanlines.clear();
+    ScanConvertLine(points,1,1,wayScanlines);
 
-    x=xmin+(xmax-xmin)/2;
-    y=ymin+(ymax-ymin)/2;
+    for (size_t i=0; i<wayScanlines.size(); i++) {
+      if (RegisterPointLabel(projection,
+                             parameter,
+                             style,
+                             text,
+                             wayScanlines[i].x+0.5,
+                             wayScanlines[i].y+0.5)) {
+        i+=parameter.GetFontSize()*6;
+      }
+      else {
+        i+=2;
+      }
+    }
+  }
 
-    size_t tx,ty;
+  bool MapPainter::RegisterPointLabel(const Projection& projection,
+                                      const MapParameter& parameter,
+                                      const LabelStyle& style,
+                                      const std::string& text,
+                                      double x,
+                                      double y)
+  {
+    assert(style.IsPointStyle());
 
-    tx=(x-xmin)*20/(xmax-xmin);
-    ty=(y-ymin)*20/(ymax-ymin);
+    double fontSize=style.GetSize();
+    double a=style.GetTextA();
+    double plateSpace=parameter.GetFontSize()*6;
+    double normalSpace=parameter.GetFontSize();
 
-    size_t tile=20*ty+tx;
-
-    if (tileBlacklist.find(tile)!=tileBlacklist.end()) {
-      return;
+    // Calculate effective font size and alpha value
+    if (projection.GetMagnification()>style.GetScaleAndFadeMag()) {
+      double factor=log2(projection.GetMagnification())-log2(style.GetScaleAndFadeMag());
+      fontSize=fontSize*pow(2,factor);
+      a=a/factor;
     }
 
-    DrawLabel(projection,
-              parameter,
-              style,
-              label,
-              x,y);
+    if (a>=0.8) {
+      for (size_t i=0; i<labels.size(); i++) {
+        labels[i].mark=false;
+      }
+    }
 
-    tileBlacklist.insert(tile);
+    if (a>=0.8) {
+      for (std::vector<Label>::iterator label=labels.begin();
+           label!=labels.end();
+           ++label) {
+        if (label->overlay || !label->draw || label->mark) {
+          continue;
+        }
+
+        if (style.GetStyle()==LabelStyle::plate &&
+            label->style->GetStyle()==LabelStyle::plate) {
+          if (!(x-plateSpace>label->bx+label->bwidth ||
+                x+plateSpace<label->bx ||
+                y-plateSpace>label->by+label->bheight ||
+                y+plateSpace<label->by)) {
+            if (label->style->GetPriority()<=style.GetPriority()) {
+              return false;
+            }
+
+            label->mark=true;
+          }
+        }
+        else {
+          if (!(x-normalSpace>label->bx+label->bwidth ||
+                x+normalSpace<label->bx ||
+                y-normalSpace>label->by+label->bheight ||
+                y+normalSpace<label->by)) {
+            if (label->style->GetPriority()<=style.GetPriority()) {
+              return false;
+            }
+
+            label->mark=true;
+          }
+        }
+      }
+
+      /*
+      int xcMin,xcMax,ycMin,ycMax;
+
+      if (style.GetStyle()==LabelStyle::plate) {
+        xcMin=std::max(0,(int)floor((x-plateSpace)/cellWidth));
+        xcMax=std::min(xCellCount-1,(int)floor((x+plateSpace)/cellWidth));
+        ycMin=std::max(0,(int)floor((y-plateSpace)/cellHeight));
+        ycMax=std::min(yCellCount-1,(int)floor((y+plateSpace)/cellHeight));
+      }
+      else {
+        xcMin=std::max(0,(int)floor((x-normalSpace)/cellWidth));
+        xcMax=std::min(xCellCount-1,(int)floor((x+normalSpace)/cellWidth));
+        ycMin=std::max(0,(int)floor((y-normalSpace)/cellHeight));
+        ycMax=std::min(yCellCount-1,(int)floor((y+normalSpace)/cellHeight));
+      }
+
+
+      // Check if we are visible
+      for (int yc=ycMin; yc<=ycMax; yc++) {
+        for (int xc=xcMin; xc<=xcMax; xc++) {
+          int c=yc*yCellCount+xc;
+
+          if (labelRefs[c].size()>0) {
+            for (std::list<size_t>::const_iterator idx=labelRefs[c].begin();
+                 idx!=labelRefs[c].end();
+                 idx++) {
+              if (labels[*idx].overlay || !labels[*idx].draw || labels[*idx].mark) {
+                continue;
+              }
+
+              if (style.GetStyle()==LabelStyle::plate &&
+                  labels[*idx].style->GetStyle()==LabelStyle::plate) {
+                if (!(x-plateSpace>labels[*idx].bx+labels[*idx].bwidth ||
+                      x+plateSpace<labels[*idx].bx ||
+                      y-plateSpace>labels[*idx].by+labels[*idx].bheight ||
+                      y+plateSpace<labels[*idx].by)) {
+                  if (labels[*idx].style->GetPriority()<=style.GetPriority()) {
+                    return;
+                  }
+
+                  labels[*idx].mark=true;
+                }
+              }
+              else {
+                if (!(x-normalSpace>labels[*idx].bx+labels[*idx].bwidth ||
+                      x+normalSpace<labels[*idx].bx ||
+                      y-normalSpace>labels[*idx].by+labels[*idx].bheight ||
+                      y+normalSpace<labels[*idx].by)) {
+                  if (labels[*idx].style->GetPriority()<=style.GetPriority()) {
+                    return;
+                  }
+
+                  labels[*idx].mark=true;
+                }
+              }
+            }
+          }
+        }
+      }*/
+    }
+
+    // Bounding box
+
+    double xOff,yOff,width,height;
+
+    GetTextDimension(parameter,
+                     fontSize,
+                     text,
+                     xOff,yOff,width,height);
+
+    // Top left border
+    x=x-width/2;
+    y=y-height/2;
+
+    double bx,by,bwidth,bheight;
+
+    if (style.GetStyle()!=LabelStyle::plate) {
+      bx=x;
+      by=y;
+      bwidth=width;
+      bheight=height;
+    }
+    else {
+      bx=x-4;
+      by=y-4;
+      bwidth=width+8;
+      bheight=height+8;
+    }
+
+    // is visible?
+    if (bx>=projection.GetWidth() ||
+        bx+bwidth<0 ||
+        by>=projection.GetHeight() ||
+        by+bheight<0) {
+      return false;
+    }
+
+    if (a>=0.8) {
+      int xcMin,xcMax,ycMin,ycMax;
+
+      if (style.GetStyle()==LabelStyle::plate) {
+        xcMin=std::max(0,(int)floor((bx-plateSpace)/cellWidth));
+        xcMax=std::min(xCellCount-1,(int)floor((bx+bwidth+plateSpace)/cellWidth));
+        ycMin=std::max(0,(int)floor((by-plateSpace)/cellHeight));
+        ycMax=std::min(yCellCount-1,(int)floor((by+bheight+plateSpace)/cellHeight));
+      }
+      else {
+        xcMin=std::max(0,(int)floor((bx-normalSpace)/cellWidth));
+        xcMax=std::min(xCellCount-1,(int)floor((bx+bwidth+normalSpace)/cellWidth));
+        ycMin=std::max(0,(int)floor((by-normalSpace)/cellHeight));
+        ycMax=std::min(yCellCount-1,(int)floor((by+bheight+normalSpace)/cellHeight));
+      }
+
+      // Check if we are visible
+      for (int yc=ycMin; yc<=ycMax; yc++) {
+        for (int xc=xcMin; xc<=xcMax; xc++) {
+          int c=yc*yCellCount+xc;
+
+          if (labelRefs[c].size()>0) {
+            for (std::list<size_t>::const_iterator idx=labelRefs[c].begin();
+                 idx!=labelRefs[c].end();
+                 idx++) {
+              if (labels[*idx].overlay || !labels[*idx].draw || labels[*idx].mark) {
+                continue;
+              }
+
+              if (style.GetStyle()==LabelStyle::plate &&
+                  labels[*idx].style->GetStyle()==LabelStyle::plate) {
+                if (!(bx-plateSpace>labels[*idx].bx+labels[*idx].bwidth ||
+                      bx+bwidth+plateSpace<labels[*idx].bx ||
+                      by-plateSpace>labels[*idx].by+labels[*idx].bheight ||
+                      by+bheight+plateSpace<labels[*idx].by)) {
+                  if (labels[*idx].style->GetPriority()<=style.GetPriority()) {
+                    return false;
+                  }
+
+                  labels[*idx].mark=true;
+                }
+              }
+              else {
+                if (!(bx-normalSpace>labels[*idx].bx+labels[*idx].bwidth ||
+                      bx+bwidth+normalSpace<labels[*idx].bx ||
+                      by-normalSpace>labels[*idx].by+labels[*idx].bheight ||
+                      by+bheight+normalSpace<labels[*idx].by)) {
+                  if (labels[*idx].style->GetPriority()<=style.GetPriority()) {
+                    return false;
+                  }
+
+                  labels[*idx].mark=true;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Set everything else to draw=false
+      for (int yc=ycMin; yc<=ycMax; yc++) {
+        for (int xc=xcMin; xc<=xcMax; xc++) {
+          int c=yc*yCellCount+xc;
+
+          if (labelRefs[c].size()>0) {
+            for (std::list<size_t>::const_iterator idx=labelRefs[c].begin();
+                 idx!=labelRefs[c].end();
+                 idx++) {
+              if (labels[*idx].overlay) {
+                continue;
+              }
+
+              if (labels[*idx].mark) {
+                labels[*idx].draw=false;
+              }
+            }
+          }
+
+          labelRefs[c].push_front(labels.size());
+        }
+      }
+    }
+
+    Label label;
+
+    label.draw=true;
+    label.overlay=(a<0.8);
+    label.x=x;
+    label.y=y;
+    label.width=width;
+    label.height=height;
+    label.bx=bx;
+    label.by=by;
+    label.bwidth=bwidth;
+    label.bheight=bheight;
+    label.alpha=a;
+    label.fontSize=fontSize;
+    label.style=&style;
+    label.text=text;
+
+    labels.push_back(label);
+
+    return true;
   }
 
   void MapPainter::PrecalculateStyleData(const StyleConfig& styleConfig,
@@ -657,28 +969,28 @@ namespace osmscout {
 
       if (hasLabel) {
         if (hasSymbol) {
-          DrawLabel(projection,
-                    parameter,
-                    *labelStyle,
-                    label,
-                    point.x,
-                    point.y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
+          RegisterPointLabel(projection,
+                             parameter,
+                             *labelStyle,
+                             label,
+                             point.x,
+                             point.y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
         }
         else if (hasIcon) {
-          DrawLabel(projection,
-                    parameter,
-                    *labelStyle,
-                    label,
-                    point.x,
-                    point.y+14+5); // TODO: Better layout to real size of icon
+          RegisterPointLabel(projection,
+                             parameter,
+                             *labelStyle,
+                             label,
+                             point.x,
+                             point.y+14+5); // TODO: Better layout to real size of icon
         }
         else {
-          DrawLabel(projection,
-                    parameter,
-                    *labelStyle,
-                    label,
-                    point.x,
-                    point.y);
+          RegisterPointLabel(projection,
+                             parameter,
+                             *labelStyle,
+                             label,
+                             point.x,
+                             point.y);
         }
       }
 
@@ -836,6 +1148,7 @@ namespace osmscout {
       const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetAreaSymbolStyle(area->GetType());
 
       bool hasLabel=labelStyle!=NULL &&
+                    labelStyle->GetStyle()!=LabelStyle::none &&
                     projection.GetMagnification()>=labelStyle->GetMinMag() &&
                     projection.GetMagnification()<=labelStyle->GetMaxMag();
 
@@ -880,25 +1193,25 @@ namespace osmscout {
 
       if (hasLabel) {
         if (hasSymbol) {
-          DrawLabel(projection,
-                    parameter,
-                    *labelStyle,
-                    label,
-                    x,y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
+          RegisterPointLabel(projection,
+                             parameter,
+                             *labelStyle,
+                             label,
+                             x,y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
         }
         else if (hasIcon) {
-          DrawLabel(projection,
-                    parameter,
-                    *labelStyle,
-                    label,
-                    x,y+14+5); // TODO: Better layout to real size of icon
+          RegisterPointLabel(projection,
+                             parameter,
+                             *labelStyle,
+                             label,
+                             x,y+14+5); // TODO: Better layout to real size of icon
         }
         else {
-          DrawLabel(projection,
-                    parameter,
-                    *labelStyle,
-                    label,
-                    x,y);
+          RegisterPointLabel(projection,
+                             parameter,
+                             *labelStyle,
+                             label,
+                             x,y);
         }
 
         areasLabelDrawn++;
@@ -969,25 +1282,25 @@ namespace osmscout {
 
           if (hasLabel) {
             if (hasSymbol) {
-              DrawLabel(projection,
-                        parameter,
-                        *labelStyle,
-                        label,
-                        x,y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
+              RegisterPointLabel(projection,
+                                 parameter,
+                                 *labelStyle,
+                                 label,
+                                 x,y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
             }
             else if (hasIcon) {
-              DrawLabel(projection,
-                        parameter,
-                        *labelStyle,
-                        label,
-                        x,y+14+5); // TODO: Better layout to real size of icon
+              RegisterPointLabel(projection,
+                                 parameter,
+                                 *labelStyle,
+                                 label,
+                                 x,y+14+5); // TODO: Better layout to real size of icon
             }
             else {
-              DrawLabel(projection,
-                        parameter,
-                        *labelStyle,
-                        label,
-                        x,y);
+              RegisterPointLabel(projection,
+                                 parameter,
+                                 *labelStyle,
+                                 label,
+                                 x,y);
             }
 
             relAreasLabelDrawn++;
@@ -1009,9 +1322,11 @@ namespace osmscout {
                            const MapParameter& parameter,
                            const LineStyle& style,
                            const SegmentAttributes& attributes,
-                           const std::vector<Point>& nodes)
+                           const std::vector<TransPoint>& points)
   {
     double lineWidth=attributes.GetWidth();
+    bool   drawBridge=attributes.IsBridge();
+    bool   drawTunnel=attributes.IsTunnel();
 
     if (style.GetFixedWidth()) {
       lineWidth=style.GetWidth();
@@ -1033,6 +1348,20 @@ namespace osmscout {
     bool outline=style.GetOutline()>0 &&
                  lineWidth-2*style.GetOutline()>=parameter.GetOutlineMinWidth();
 
+    if (outline) {
+      lineWidth-=2*style.GetOutline();
+    }
+
+    if (drawBridge &&
+        projection.GetMagnification()<magCity) {
+      drawBridge=false;
+    }
+
+    if (drawTunnel &&
+        projection.GetMagnification()<magCity) {
+      drawTunnel=false;
+    }
+
     if (style.GetOutline()>0 &&
         !outline &&
         !(attributes.IsBridge() &&
@@ -1041,7 +1370,6 @@ namespace osmscout {
           projection.GetMagnification()>=magCity)) {
       // Should draw outline, but resolution is too low
       // Draw line with alternate color
-      TransformWay(projection,parameter,nodes,points);
 
       DrawPath(projection,
                parameter,
@@ -1055,28 +1383,8 @@ namespace osmscout {
                capRound,
                points);
     }
-    else if (outline) {
-      // Draw outline
-      // Draw line with normal color but reduced with
-      TransformWay(projection,parameter,nodes,points);
-
-      DrawPath(projection,
-               parameter,
-               style.GetLineR(),
-               style.GetLineG(),
-               style.GetLineB(),
-               style.GetLineA(),
-               lineWidth-2*style.GetOutline(),
-               style.GetDash(),
-               capRound,
-               capRound,
-               points);
-    }
     else {
-      // Draw without outline
-      // Draw line with normal color and normal width
-
-      TransformWay(projection,parameter,nodes,points);
+      // Draw line with normal color and (optionally) reduced with
 
       DrawPath(projection,
                parameter,
@@ -1135,21 +1443,34 @@ namespace osmscout {
     }
 
     if (drawBridge) {
-      // black outline for bridges
-
       TransformWay(projection,parameter,nodes,points);
 
+      // black outline for bridges
       DrawPath(projection,
                parameter,
                0.0,
                0.0,
                0.0,
                1.0,
-               lineWidth,
+               lineWidth+1,
                emptyDash,
-               attributes.StartIsJoint() ? capButt : capRound,
-               attributes.EndIsJoint() ? capButt : capRound,
+               capButt,
+               capButt,
                points);
+
+      if (outline) {
+        DrawPath(projection,
+                 parameter,
+                 style.GetOutlineR(),
+                 style.GetOutlineG(),
+                 style.GetOutlineB(),
+                 1.0,
+                 lineWidth,
+                 emptyDash,
+                 attributes.StartIsJoint() ? capButt : capRound,
+                 attributes.EndIsJoint() ? capButt : capRound,
+                 points);
+      }
     }
     else if (drawTunnel) {
       if (projection.GetMagnification()>=10000) {
@@ -1293,17 +1614,54 @@ namespace osmscout {
             continue;
           }
 
-          const LineStyle *style=styleConfig.GetWayLineStyle(way->GetType());
+          const LineStyle *lineStyle=styleConfig.GetWayLineStyle(way->GetType());
 
-          if (style==NULL) {
+          if (lineStyle==NULL) {
             continue;
           }
 
+          TransformWay(projection,parameter,way->nodes,points);
+
           DrawWay(projection,
                   parameter,
-                  *style,
+                  *lineStyle,
                   way->GetAttributes(),
-                  way->nodes);
+                  points);
+
+          if (!way->GetName().empty()) {
+            const LabelStyle *style=styleConfig.GetWayNameLabelStyle(way->GetType());
+
+            if (style!=NULL &&
+                style->IsPointStyle() &&
+                projection.GetMagnification()>=style->GetMinMag() &&
+                projection.GetMagnification()<=style->GetMaxMag()) {
+              RegisterPointWayLabel(projection,
+                                    parameter,
+                                    *style,
+                                    way->GetName(),
+                                    points);
+
+              waysLabelDrawn++;
+            }
+          }
+
+          if (!way->GetRefName().empty()) {
+            const LabelStyle *style=styleConfig.GetWayRefLabelStyle(way->GetType());
+
+            if (style!=NULL &&
+                style->IsPointStyle() &&
+                projection.GetMagnification()>=style->GetMinMag() &&
+                projection.GetMagnification()<=style->GetMaxMag()) {
+
+              RegisterPointWayLabel(projection,
+                                    parameter,
+                                    *style,
+                                    way->GetRefName(),
+                                    points);
+
+              waysLabelDrawn++;
+            }
+          }
 
           waysDrawn++;
         }
@@ -1332,11 +1690,48 @@ namespace osmscout {
             if (IsVisible(projection,
                           relation->roles[m].nodes,
                           style->GetWidth())) {
+              TransformWay(projection,parameter,relation->roles[m].nodes,points);
+
               DrawWay(projection,
                       parameter,
                       *style,
                       relation->roles[m].GetAttributes(),
-                      relation->roles[m].nodes);
+                      points);
+
+              if (!relation->roles[m].GetName().empty()) {
+                const LabelStyle *style=styleConfig.GetWayNameLabelStyle(relation->roles[m].GetType());
+
+                if (style!=NULL &&
+                    style->IsPointStyle() &&
+                    projection.GetMagnification()>=style->GetMinMag() &&
+                    projection.GetMagnification()<=style->GetMaxMag()) {
+                  RegisterPointWayLabel(projection,
+                                        parameter,
+                                        *style,
+                                        relation->roles[m].GetName(),
+                                        points);
+
+                  relWaysLabelDrawn++;
+                }
+              }
+
+              if (!relation->roles[m].GetRefName().empty()) {
+                const LabelStyle *style=styleConfig.GetWayRefLabelStyle(relation->roles[m].GetType());
+
+                if (style!=NULL &&
+                    style->IsPointStyle() &&
+                    projection.GetMagnification()>=style->GetMinMag() &&
+                    projection.GetMagnification()<=style->GetMaxMag()) {
+
+                  RegisterPointWayLabel(projection,
+                                        parameter,
+                                        *style,
+                                        relation->roles[m].GetRefName(),
+                                        points);
+
+                  relWaysLabelDrawn++;
+                }
+              }
 
               drawn=true;
             }
@@ -1366,26 +1761,17 @@ namespace osmscout {
         const LabelStyle *style=styleConfig.GetWayNameLabelStyle(way->GetType());
 
         if (style!=NULL &&
+            style->IsContourStyle() &&
             projection.GetMagnification()>=style->GetMinMag() &&
             projection.GetMagnification()<=style->GetMaxMag()) {
 
-          if (style->GetStyle()==LabelStyle::contour) {
-            TransformWay(projection,parameter,way->nodes,points);
+          TransformWay(projection,parameter,way->nodes,points);
 
-            DrawContourLabel(projection,
-                             parameter,
-                             *style,
-                             way->GetName(),
-                             points);
-          }
-          else {
-            DrawTiledLabel(projection,
+          DrawContourLabel(projection,
                            parameter,
                            *style,
                            way->GetName(),
-                           way->nodes,
-                           tileBlacklist);
-          }
+                           points);
 
           waysLabelDrawn++;
         }
@@ -1395,26 +1781,17 @@ namespace osmscout {
         const LabelStyle *style=styleConfig.GetWayRefLabelStyle(way->GetType());
 
         if (style!=NULL &&
+            style->IsContourStyle() &&
             projection.GetMagnification()>=style->GetMinMag() &&
             projection.GetMagnification()<=style->GetMaxMag()) {
 
-          if (style->GetStyle()==LabelStyle::contour) {
-            TransformWay(projection,parameter,way->nodes,points);
+          TransformWay(projection,parameter,way->nodes,points);
 
-            DrawContourLabel(projection,
-                             parameter,
-                             *style,
-                             way->GetRefName(),
-                             points);
-          }
-          else {
-            DrawTiledLabel(projection,
+          DrawContourLabel(projection,
                            parameter,
                            *style,
                            way->GetRefName(),
-                           way->nodes,
-                           tileBlacklist);
-          }
+                           points);
 
           waysLabelDrawn++;
         }
@@ -1431,29 +1808,20 @@ namespace osmscout {
           const LabelStyle *style=styleConfig.GetWayNameLabelStyle(relation->roles[m].GetType());
 
           if (style!=NULL &&
+              style->IsContourStyle() &&
               projection.GetMagnification()>=style->GetMinMag() &&
               projection.GetMagnification()<=style->GetMaxMag()) {
 
-            if (style->GetStyle()==LabelStyle::contour) {
-              if (IsVisible(projection,
-                            relation->roles[m].nodes,
-                            style->GetSize())) {
-                TransformWay(projection,parameter,relation->roles[m].nodes,points);
+            if (IsVisible(projection,
+                          relation->roles[m].nodes,
+                          style->GetSize())) {
+              TransformWay(projection,parameter,relation->roles[m].nodes,points);
 
-                DrawContourLabel(projection,
-                                 parameter,
-                                 *style,
-                                 relation->roles[m].GetName(),
-                                 points);
-              }
-            }
-            else {
-              DrawTiledLabel(projection,
-                             parameter,
-                             *style,
-                             relation->roles[m].GetName(),
-                             relation->roles[m].nodes,
-                             tileBlacklist);
+              DrawContourLabel(projection,
+                               parameter,
+                               *style,
+                               relation->roles[m].GetName(),
+                               points);
             }
 
             relWaysLabelDrawn++;
@@ -1464,29 +1832,20 @@ namespace osmscout {
           const LabelStyle *style=styleConfig.GetWayRefLabelStyle(relation->roles[m].GetType());
 
           if (style!=NULL &&
+              style->IsContourStyle() &&
               projection.GetMagnification()>=style->GetMinMag() &&
               projection.GetMagnification()<=style->GetMaxMag()) {
 
-            if (style->GetStyle()==LabelStyle::contour) {
-              if (IsVisible(projection,
-                            relation->roles[m].nodes,
-                            style->GetSize())) {
-                TransformWay(projection,parameter,relation->roles[m].nodes,points);
+            if (IsVisible(projection,
+                          relation->roles[m].nodes,
+                          style->GetSize())) {
+              TransformWay(projection,parameter,relation->roles[m].nodes,points);
 
-                DrawContourLabel(projection,
-                                 parameter,
-                                 *style,
-                                 relation->roles[m].GetRefName(),
-                                 points);
-              }
-            }
-            else {
-              DrawTiledLabel(projection,
-                             parameter,
-                             *style,
-                             relation->roles[m].GetRefName(),
-                             relation->roles[m].nodes,
-                             tileBlacklist);
+              DrawContourLabel(projection,
+                               parameter,
+                               *style,
+                               relation->roles[m].GetRefName(),
+                               points);
             }
 
             relWaysLabelDrawn++;
@@ -1520,11 +1879,13 @@ namespace osmscout {
       if (IsVisible(projection,
                     way->nodes,
                     style->GetWidth())) {
+        TransformWay(projection,parameter,way->nodes,points);
+
         DrawWay(projection,
                 parameter,
                 *style,
                 way->GetAttributes(),
-                way->nodes);
+                points);
       }
 
       //waysDrawnCount++;
@@ -1547,36 +1908,16 @@ namespace osmscout {
         continue;
       }
 
-      const SymbolStyle *style=styleConfig.GetNodeSymbolStyle(node->GetType());
-
-      if (style==NULL ||
-          projection.GetMagnification()<style->GetMinMag()) {
-        continue;
-      }
-
       double x,y;
 
       projection.GeoToPixel(node->GetLon(),node->GetLat(),
                             x,y);
 
-      DrawSymbol(style,x,y);
+      const SymbolStyle *symbolStyle=styleConfig.GetNodeSymbolStyle(node->GetType());
 
-      //nodesDrawnCount++;
-    }
-  }
-
-  void MapPainter::DrawPOINodeLabels(const StyleConfig& styleConfig,
-                                     const Projection& projection,
-                                     const MapParameter& parameter,
-                                     const MapData& data)
-  {
-    for (std::list<NodeRef>::const_iterator n=data.poiNodes.begin();
-         n!=data.poiNodes.end();
-         ++n) {
-      const NodeRef& node=*n;
-
-      if (!projection.GeoIsIn(node->GetLon(),node->GetLat())) {
-        continue;
+      if (symbolStyle!=NULL &&
+          projection.GetMagnification()>=symbolStyle->GetMinMag()) {
+        DrawSymbol(symbolStyle,x,y);
       }
 
       for (size_t i=0; i<node->GetTagCount(); i++) {
@@ -1595,11 +1936,11 @@ namespace osmscout {
           projection.GeoToPixel(node->GetLon(),node->GetLat(),
                                 x,y);
 
-          DrawLabel(projection,
-                    parameter,
-                    *style,
-                    node->GetTagValue(i),
-                    x,y);
+          RegisterPointLabel(projection,
+                             parameter,
+                             *style,
+                             node->GetTagValue(i),
+                             x,y);
         }
         else if (node->GetTagKey(i)==styleConfig.GetTypeConfig()->tagRef)  {
           const LabelStyle *style=styleConfig.GetNodeRefLabelStyle(node->GetType());
@@ -1615,12 +1956,67 @@ namespace osmscout {
           projection.GeoToPixel(node->GetLon(),node->GetLat(),
                                 x,y);
 
-          DrawLabel(projection,
-                    parameter,
-                    *style,
-                    node->GetTagValue(i),
-                    x,y);
+          RegisterPointLabel(projection,
+                             parameter,
+                             *style,
+                             node->GetTagValue(i),
+                             x,y);
         }
+      }
+
+      //nodesDrawnCount++;
+    }
+  }
+
+  void MapPainter::DrawLabels(const StyleConfig& styleConfig,
+                              const Projection& projection,
+                              const MapParameter& parameter)
+  {
+    std::cout << "Label List Size: " << labels.size() << std::endl;
+
+    //
+    // Draw normal
+    //
+
+    for (size_t i=0; i<labels.size(); i++) {
+      if (!labels[i].draw ||
+          labels[i].overlay) {
+        continue;
+      }
+
+      if (labels[i].style->GetStyle()==LabelStyle::normal ||
+          labels[i].style->GetStyle()==LabelStyle::emphasize) {
+        DrawLabel(projection,
+                  parameter,
+                  labels[i]);
+      }
+      else if (labels[i].style->GetStyle()==LabelStyle::plate) {
+        DrawPlateLabel(projection,
+                       parameter,
+                       labels[i]);
+      }
+    }
+
+    //
+    // Draw overlays
+    //
+
+    for (size_t i=0; i<labels.size(); i++) {
+      if (!labels[i].draw ||
+          !labels[i].overlay) {
+        continue;
+      }
+
+      if (labels[i].style->GetStyle()==LabelStyle::normal ||
+          labels[i].style->GetStyle()==LabelStyle::emphasize) {
+        DrawLabel(projection,
+                  parameter,
+                  labels[i]);
+      }
+      else if (labels[i].style->GetStyle()==LabelStyle::plate) {
+        DrawPlateLabel(projection,
+                       parameter,
+                       labels[i]);
       }
     }
   }
@@ -1648,10 +2044,14 @@ namespace osmscout {
     relAreasDrawn=0;
     relAreasLabelDrawn=0;
 
-    /*
-    nodesDrawnCount=0;
-    areasDrawnCount=0;
-    waysDrawnCount=0;*/
+    cellWidth=parameter.GetFontSize()*4;
+    cellHeight=parameter.GetFontSize()*4;
+    xCellCount=(int)ceil(projection.GetWidth()/cellWidth);
+    yCellCount=(int)ceil(projection.GetHeight()/cellHeight);
+
+    labels.clear();
+    labelRefs.clear();
+    labelRefs.resize(xCellCount*yCellCount);
 
     std::cout << "Draw ";
     std::cout << projection.GetLat() <<", ";
@@ -1770,37 +2170,21 @@ namespace osmscout {
                  parameter,
                  data);
 
-    //
-    // POI Node labels
-    //
-
-    DrawPOINodeLabels(styleConfig,
-                      projection,
-                      parameter,
-                      data);
-
     poisTimer.Stop();
-/*
-    std::cout << "Nodes: " << nodesDrawnCount << "/" << data.nodes.size()+data.poiNodes.size() << " ";
-    if (data.nodes.size()+data.poiNodes.size()>0) {
-      std::cout << "(" << nodesDrawnCount*100/(data.nodes.size()+data.poiNodes.size()) << "%) ";
-    }
 
-    std::cout << " ways: " << waysDrawnCount << "/" << data.ways.size()+data.poiWays.size() << " ";
-    if (data.ways.size()+data.poiWays.size()>0) {
-      std::cout << "(" << waysDrawnCount*100/(data.ways.size()+data.poiWays.size()) << "%) ";
-    }
+    StopClock labelsTimer;
 
-    std::cout << " areas: " << areasDrawnCount << "/" << data.areas.size() << " ";
-    if (data.areas.size()>0) {
-      std::cout << "(" << areasDrawnCount*100/data.areas.size() << "%) ";
-    }
-    std::cout << std::endl;*/
+    DrawLabels(styleConfig,
+               projection,
+               parameter);
+
+    labelsTimer.Stop();
 
     std::cout << "Paths: " << pathsTimer << "/" << pathLabelsTimer << " ";
     std::cout << "Areas: " << areasTimer << "/" << areaLabelsTimer << " ";
     std::cout << "Nodes: " << nodesTimer << " ";
-    std::cout << "POIs: " << poisTimer << "/" << routesTimer << std::endl;
+    std::cout << "POIs: " << poisTimer << "/" << routesTimer << " ";
+    std::cout << "Labels: " << labelsTimer << std::endl;
 
     std::cout << "Path ways: " << waysCount << "/" << waysDrawn << "/" << waysOutlineDrawn << "/" << waysLabelDrawn << " (pcs)" << std::endl;
     std::cout << "Path rels: " << relWaysCount << "/" << relWaysDrawn << "/" << relWaysOutlineDrawn << "/" << relWaysLabelDrawn << " (pcs)" << std::endl;

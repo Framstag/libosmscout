@@ -272,28 +272,30 @@ namespace osmscout {
     };
 
   private:
-    Style style;
-    Mag   minMag;
-    Mag   scaleAndFadeMag;
-    Mag   maxMag;
-    double size;
-    double textR;
-    double textG;
-    double textB;
-    double textA;
-    double bgR;
-    double bgG;
-    double bgB;
-    double bgA;
-    double borderR;
-    double borderG;
-    double borderB;
-    double borderA;
+    Style   style;
+    uint8_t priority;
+    Mag     minMag;
+    Mag     scaleAndFadeMag;
+    Mag     maxMag;
+    double  size;
+    double  textR;
+    double  textG;
+    double  textB;
+    double  textA;
+    double  bgR;
+    double  bgG;
+    double  bgB;
+    double  bgA;
+    double  borderR;
+    double  borderG;
+    double  borderB;
+    double  borderA;
 
   public:
     LabelStyle();
 
     LabelStyle& SetStyle(Style style);
+    LabelStyle& SetPriority(uint8_t priority);
     LabelStyle& SetMinMag(Mag mag);
     LabelStyle& SetScaleAndFadeMag(Mag mag);
     LabelStyle& SetMaxMag(Mag mag);
@@ -312,17 +314,32 @@ namespace osmscout {
       return style;
     }
 
-    inline const Mag& GetMinMag() const
+    inline bool IsPointStyle() const
+    {
+      return style==normal || style==plate || style==emphasize;
+    }
+
+    inline bool IsContourStyle() const
+    {
+      return style==contour;
+    }
+
+    inline uint8_t GetPriority() const
+    {
+      return priority;
+    }
+
+    inline Mag GetMinMag() const
     {
       return minMag;
     }
 
-    inline const Mag& GetScaleAndFadeMag() const
+    inline Mag GetScaleAndFadeMag() const
     {
       return scaleAndFadeMag;
     }
 
-    inline const Mag& GetMaxMag() const
+    inline Mag GetMaxMag() const
     {
       return maxMag;
     }

@@ -1,8 +1,11 @@
 #include <iostream>
+#include <limits>
 #include <sstream>
 
 #include <osmscout/TypeConfig.h>
 #include <osmscout/Util.h>
+
+#include <osmscout/util/String.h>
 
 COMPILER OSS
 
@@ -377,6 +380,23 @@ PRODUCTIONS
                     SCALEMAG<scaleMag>
                     (. style.SetScaleAndFadeMag(scaleMag); .)
                   ]
+
+                  [
+                    (. size_t priority; .)
+                    "PRIO"
+                    INTEGER<priority>
+                    (.
+                      if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
+                        style.SetPriority((uint8_t)priority);
+                      }
+                      else {
+                        std::string e="Priority must be in the interval [0,"+
+                                      NumberToString(std::numeric_limits<uint8_t>::max())+"[";
+
+                        SemErr(e.c_str());
+                      }
+                     .)
+                  ]
                 ].
 
   REFDEF<LabelStyle& style>
@@ -429,6 +449,23 @@ PRODUCTIONS
                   [ (. Mag scaleMag=style.GetScaleAndFadeMag(); .)
                     SCALEMAG<scaleMag>
                     (. style.SetScaleAndFadeMag(scaleMag); .)
+                  ]
+
+                  [
+                    (. size_t priority; .)
+                    "PRIO"
+                    INTEGER<priority>
+                    (.
+                      if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
+                        style.SetPriority((uint8_t)priority);
+                      }
+                      else {
+                        std::string e="Priority must be in the interval [0,"+
+                                      NumberToString(std::numeric_limits<uint8_t>::max())+"[";
+
+                        SemErr(e.c_str());
+                      }
+                    .)
                   ]
                 ].
 

@@ -22,10 +22,13 @@
 #define OSMSCOUT_OSS_PARSER_H
 
 #include <iostream>
+#include <limits>
 #include <sstream>
 
 #include <osmscout/TypeConfig.h>
 #include <osmscout/Util.h>
+
+#include <osmscout/util/String.h>
 
 
 #include <osmscout/oss/Scanner.h>
