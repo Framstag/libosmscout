@@ -100,7 +100,9 @@ namespace osmscout {
                                    double cellHeight,
                                    std::vector<ScanCell>& cells)
   {
-    assert(points.size()>=2);
+    if (points.size()<2) {
+      return;
+    }
 
     for (size_t i=0; i<points.size()-1; i++) {
       int x1=int(points[i].x/cellWidth);
