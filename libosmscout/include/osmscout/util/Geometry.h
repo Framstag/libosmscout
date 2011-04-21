@@ -20,8 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <stdint.h>
-
 #include <cassert>
 #include <ctime>
 #include <limits>
@@ -32,6 +30,8 @@
 #include <vector>
 
 #include <osmscout/private/CoreImportExport.h>
+
+#include <osmscout/system/Types.h>
 
 #include <osmscout/Point.h>
 

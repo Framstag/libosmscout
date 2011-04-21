@@ -24,9 +24,9 @@
 #include <string>
 #include <vector>
 
-#include <stdint.h>
-
 #include <osmscout/GroundTile.h>
+
+#include <osmscout/system/Types.h>
 
 namespace osmscout {
 

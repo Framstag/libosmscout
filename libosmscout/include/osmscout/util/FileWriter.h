@@ -23,8 +23,6 @@
 #include <cstdio>
 #include <string>
 
-#include <stdint.h>
-
 #include <osmscout/Types.h>
 
 namespace osmscout {

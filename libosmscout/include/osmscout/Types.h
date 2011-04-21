@@ -20,10 +20,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-// will be <cstdint> in c++0x
-#include <stdint.h>
-
 #include <osmscout/private/CoreImportExport.h>
+
+#include <osmscout/system/Types.h>
 
 namespace osmscout {
 

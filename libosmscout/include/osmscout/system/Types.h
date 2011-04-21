@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_TAG_H
-#define OSMSCOUT_TAG_H
+#ifndef OSMSCOUT_SYSTEM_TYPES_H
+#define OSMSCOUT_SYSTEM_TYPES_H
 
 /*
   This source is part of the libosmscout library
@@ -20,33 +20,22 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <string>
+#include <osmscout/CoreFeatures.h>
 
-#include <osmscout/private/CoreImportExport.h>
+#if defined(OSMSCOUT_HAVE_STDINT_H)
+  // will be <cstdint> in c++0x
+  #include <stdint.h>
+#elif defined(__WIN32__) || defined(WIN32)
+  #include <stdio.h>
 
-#include <osmscout/system/Types.h>
+  typedef          __int8 int8_t;
+  typedef unsigned __int8 uint8_t;
 
-namespace osmscout {
+  typedef          __int16 int16_t;
+  typedef unsigned __int16 uint16_t;
 
-  typedef uint16_t TagId;
-
-  struct OSMSCOUT_API Tag
-  {
-    TagId       key;
-    std::string value;
-
-    inline Tag()
-    {
-      // no code
-    }
-
-    inline Tag(TagId key, const std::string& value)
-     : key(key),
-       value(value)
-    {
-      // no code
-    }
-  };
-}
+  typedef          __int32 int32_t;
+  typedef unsigned __int32 uint32_t;
+#endif  
 
 #endif

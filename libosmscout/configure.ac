@@ -20,8 +20,8 @@ AC_ARG_WITH(protoc,
             [protoc=$with_protoc])
 
 AC_SUBST(protoc)
-AC_TYPE_SIZE_T
 
+AC_TYPE_SIZE_T
 AC_CHECK_SIZEOF([wchar_t])
 
 AC_CHECK_HEADERS([sys/time.h])
@@ -30,11 +30,15 @@ AC_CHECK_FUNCS([mmap])
 
 AC_SEARCH_LIBS([sqrt],[m])
 
-if test "$GXX" = yes; then
+if test "x$GXX" = xyes; then
   CPPFLAGS="$CPPFLAGS -Wall -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
 fi
 
 dnl Selfmade tests
+
+if test "x$ac_cv_header_stdint_h" = xyes; then
+  AC_DEFINE([OSMSCOUT_HAVE_STDINT_H],[1],[system header stdint.h is available])
+fi
 
 if test "$build_os" != "mingw32"; then
   AC_MSG_CHECKING([for gcc symbol visibility support])
@@ -45,7 +49,7 @@ if test "$build_os" != "mingw32"; then
                  [LIB_CXXFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden"
                   AC_SUBST(LIB_CXXFLAGS)
                   AC_MSG_RESULT(yes)
-                  AC_DEFINE(OSMSCOUT_EXPORT_SYMBOLS,1,[libosmscout uses special gcc compiler features to export symbols])],
+                  AC_DEFINE([OSMSCOUT_EXPORT_SYMBOLS],[1],[libosmscout uses special gcc compiler features to export symbols])],
                  [AC_MSG_RESULT(no)])
   CXXFLAGS="$OLDCXXFLAGS"
 fi
