@@ -831,7 +831,6 @@ bool Parser::StartOf(int s)
 Parser::~Parser()
 {
   delete errors;
-  delete dummyToken;
 }
 
 Errors::Errors()

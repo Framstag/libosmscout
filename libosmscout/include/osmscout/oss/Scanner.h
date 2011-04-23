@@ -31,6 +31,8 @@
 #include <string>
 #include <map>
 
+#include <osmscout/util/Reference.h>
+
 #define COCO_WCHAR_MAX 255
 #define MIN_BUFFER_LENGTH 1024
 #define MAX_BUFFER_LENGTH (64*MIN_BUFFER_LENGTH)
@@ -45,15 +47,19 @@ extern char* coco_string_create(const char* value);
 extern char* coco_string_create(const char* value, int startIndex, int length);
 extern void  coco_string_delete(char* &data);
 
-class Token
+class Token;
+
+typedef osmscout::Ref<Token> TokenRef;
+
+class Token : public osmscout::Referencable
 {
 public:
-  int kind;     // token kind
-  int pos;      // token position in the source text (starting at 0)
-  int col;      // token column (starting at 1)
-  int line;     // token line (starting at 1)
-  char* val; // token value
-  Token *next;  // ML 2005-03-11 Peek tokens are kept in linked list
+  int      kind; // token kind
+  int      pos;  // token position in the source text (starting at 0)
+  int      col;  // token column (starting at 1)
+  int      line; // token line (starting at 1)
+  char*    val;  // token value
+  TokenRef next; // ML 2005-03-11 Peek tokens are kept in linked list
 
   Token();
   ~Token();
@@ -155,11 +161,6 @@ public:
 class Scanner
 {
 private:
-  void *firstHeap;
-  void *heap;
-  void *heapTop;
-  void **heapEnd;
-
   unsigned char EOL;
   int eofSym;
   int noSym;
@@ -168,22 +169,21 @@ private:
   StartStates start;
   KeywordMap keywords;
 
-  Token *t;         // current token
-  char *tval;    // text of current token
-  int tvalLength;   // length of text of current token
-  int tlen;         // length of current token
+  TokenRef t;      // current token
+  char *tval;      // text of current token
+  int tvalLength;  // length of text of current token
+  int tlen;        // length of current token
 
-  Token *tokens;    // list of tokens already peeked (first token is a dummy)
-  Token *pt;        // current peek token
+  TokenRef tokens; // list of tokens already peeked (first token is a dummy)
+  TokenRef pt;     // current peek token
 
-  int ch;           // current input character
+  int ch;          // current input character
 
-  int pos;          // byte position of current character
-  int line;         // line number of current character
-  int col;          // column number of current character
-  int oldEols;      // EOLs that appeared in a comment;
+  int pos;         // byte position of current character
+  int line;        // line number of current character
+  int col;         // column number of current character
+  int oldEols;     // EOLs that appeared in a comment;
 
-  void CreateHeapBlock();
   Token* CreateToken();
   void AppendVal(Token *t);
 

@@ -67,7 +67,7 @@ class Parser
 {
 private:
 -->constantsheader
-  Token *dummyToken;
+  TokenRef dummyToken;
   int errDist;
   int minErrDist;
 
@@ -80,8 +80,8 @@ private:
 
   Scanner *scanner;
 
-  Token *t;  // last recognized token
-  Token *la; // lookahead token
+  TokenRef t;  // last recognized token
+  TokenRef la; // lookahead token
 
   StyleConfig& config;
 
@@ -253,7 +253,6 @@ bool Parser::StartOf(int s)
 Parser::~Parser()
 {
   delete errors;
-  delete dummyToken;
 }
 
 Errors::Errors()

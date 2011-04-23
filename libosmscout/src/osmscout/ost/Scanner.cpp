@@ -56,20 +56,20 @@ void coco_string_delete(char* &data) {
 }
 
 Token::Token()
+: kind(0),
+  pos(0),
+  col(0),
+  line(0),
+  val(NULL),
+  next(NULL)
 {
-  kind = 0;
-  pos  = 0;
-  col  = 0;
-  line = 0;
-  val  = NULL;
-  next = NULL;
+ // no code
 }
 
 Token::~Token()
 {
-  coco_string_delete(val);
+  delete [] val;
 }
-
 
 Buffer::Buffer(const unsigned char* buf, int len)
 {
@@ -91,20 +91,6 @@ int Buffer::Peek()
   SetPos(curPos);
   return ch;
 }
-
-/*
-char* Buffer::GetString(int beg, int end)
-{
-  int len = 0;
-  char *buf = new char[end - beg];
-  int oldPos = GetPos();
-  SetPos(beg);
-  while (GetPos() < end) buf[len++] = (char) Read();
-  SetPos(oldPos);
-  char *res = coco_string_create(buf, 0, len);
-  coco_string_delete(buf);
-  return res;
-}*/
 
 int Buffer::GetPos()
 {
@@ -135,13 +121,6 @@ Scanner::Scanner(const unsigned char* buf, int len) {
 }
 
 Scanner::~Scanner() {
-  char* cur = (char*) firstHeap;
-
-  while(cur != NULL) {
-    cur = *(char**) (cur + HEAP_BLOCK_SIZE);
-    free(firstHeap);
-    firstHeap = cur;
-  }
   delete [] tval;
   delete buffer;
 }
@@ -186,17 +165,6 @@ void Scanner::Init() {
 
   tvalLength = 128;
   tval = new char[tvalLength]; // text of current token
-
-  // HEAP_BLOCK_SIZE byte heap + pointer to next heap block
-  heap = malloc(HEAP_BLOCK_SIZE + sizeof(void*));
-  firstHeap = heap;
-  heapEnd = (void**) (((char*) heap) + HEAP_BLOCK_SIZE);
-  *heapEnd = 0;
-  heapTop = heap;
-  if (sizeof(Token) > HEAP_BLOCK_SIZE) {
-    printf("--- Too small HEAP_BLOCK_SIZE\n");
-    exit(1);
-  }
 
   pos = -1; line = 1; col = 0;
   oldEols = 0;
@@ -298,59 +266,17 @@ bool Scanner::Comment1() {
 }
 
 
-void Scanner::CreateHeapBlock() {
-  void* newHeap;
-  char* cur = (char*) firstHeap;
-
-  while(((char*) tokens < cur) || ((char*) tokens > (cur + HEAP_BLOCK_SIZE))) {
-    cur = *((char**) (cur + HEAP_BLOCK_SIZE));
-    free(firstHeap);
-    firstHeap = cur;
-  }
-
-  // HEAP_BLOCK_SIZE byte heap + pointer to next heap block
-  newHeap = malloc(HEAP_BLOCK_SIZE + sizeof(void*));
-  *heapEnd = newHeap;
-  heapEnd = (void**) (((char*) newHeap) + HEAP_BLOCK_SIZE);
-  *heapEnd = 0;
-  heap = newHeap;
-  heapTop = heap;
-}
-
 Token* Scanner::CreateToken() {
   Token *t;
-  if (((char*) heapTop + (int) sizeof(Token)) >= (char*) heapEnd) {
-    CreateHeapBlock();
-  }
-  t = (Token*) heapTop;
-  heapTop = (void*) ((char*) heapTop + sizeof(Token));
-  t->val = NULL;
-  t->next = NULL;
+
+  t = new Token();
+
   return t;
 }
 
 void Scanner::AppendVal(Token *t) {
-  int reqMem = (tlen + 1) * sizeof(char);
-
-#ifdef ARM
-  // In ARM architectures, make sure that required memory is 4-byte multiple
-  // in order to avoid later datatype misalignment exceptions
-
-  int memOffset=reqMem%4;
-
-  if (memOffset)
-    reqMem+=(4-memOffset);
-#endif
-
-  if (((char*) heapTop + reqMem) >= (char*) heapEnd) {
-    if (reqMem > HEAP_BLOCK_SIZE) {
-      printf("--- Too long token value\n");
-      exit(1);
-    }
-    CreateHeapBlock();
-  }
-  t->val = (char*) heapTop;
-  heapTop = (void*) ((char*) heapTop + reqMem);
+  delete [] t->val;
+  t->val = new char[tlen+1];
 
   strncpy(t->val, tval, tlen);
   t->val[tlen] = '\0';

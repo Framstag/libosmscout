@@ -86,7 +86,7 @@ private:
 	};
 	int maxT;
 
-  Token *dummyToken;
+  TokenRef dummyToken;
   int errDist;
   int minErrDist;
 
@@ -99,8 +99,8 @@ private:
 
   Scanner *scanner;
 
-  Token *t;  // last recognized token
-  Token *la; // lookahead token
+  TokenRef t;  // last recognized token
+  TokenRef la; // lookahead token
 
   StyleConfig& config;
 
