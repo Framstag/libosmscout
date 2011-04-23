@@ -266,7 +266,7 @@ namespace osmscout {
       The reference count of the old value will be decremented and freed,
       if the count reached 0.
     */
-    void operator=(T* pointer)
+    Ref<T>& operator=(T* pointer)
     {
       if (ptr!=pointer) {
 
@@ -281,6 +281,8 @@ namespace osmscout {
 
         ptr=pointer;
       }
+
+      return *this;
     }
 
     /**
@@ -291,7 +293,7 @@ namespace osmscout {
       will be incremented. The reference count of the old value will be
       decremented and freed, if the count reached 0.
     */
-    void operator=(const Ref<T>& other)
+    Ref<T>& operator=(const Ref<T>& other)
     {
       if (&other!=this && this->ptr!=other.ptr) {
         if (ptr!=NULL &&
@@ -305,10 +307,12 @@ namespace osmscout {
           ptr->AddReference();
         }
       }
+
+      return *this;
     }
 
     template<typename T1>
-    void operator=(const Ref<T1>& other)
+    Ref<T>& operator=(const Ref<T1>& other)
     {
       if (&other!=this && this->ptr!=other.Get()) {
         if (ptr!=NULL &&
@@ -322,6 +326,8 @@ namespace osmscout {
           ptr->AddReference();
         }
       }
+
+      return *this;
     }
 
     bool Valid() const
