@@ -19,7 +19,8 @@
 
 #include <osmscout/util/NumberSet.h>
 
-#include <stdint.h>
+#include <osmscout/system/Types.h>
+
 #include <stdio.h>
 
 namespace osmscout {

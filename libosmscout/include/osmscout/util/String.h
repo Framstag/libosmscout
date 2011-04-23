@@ -67,7 +67,7 @@ namespace osmscout {
     res.reserve(20);
 
     while (value!=0) {
-      res.insert(0,1,'0'+value%10);
+      res.insert(0,1,(char)('0'+value%10));
       value=value/10;
     }
 

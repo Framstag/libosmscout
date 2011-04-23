@@ -559,13 +559,10 @@ namespace osmscout {
     std::vector<size_t> areaTypeCount;
     std::vector<size_t> areaNodeTypeCount;
 
-    wayTypeCount.resize(typeConfig.GetMaxTypeId(),0);
-    wayNodeTypeCount.resize(typeConfig.GetMaxTypeId(),0);
-    areaTypeCount.resize(typeConfig.GetMaxTypeId(),0);
-    areaNodeTypeCount.resize(typeConfig.GetMaxTypeId(),0);
-
-    wayTypeCount.resize(typeConfig.GetMaxTypeId(),0);
-    areaTypeCount.resize(typeConfig.GetMaxTypeId(),0);
+    wayTypeCount.resize(typeConfig.GetMaxTypeId()+1,0);
+    wayNodeTypeCount.resize(typeConfig.GetMaxTypeId()+1,0);
+    areaTypeCount.resize(typeConfig.GetMaxTypeId()+1,0);
+    areaNodeTypeCount.resize(typeConfig.GetMaxTypeId()+1,0);
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawrels.dat"))) {
