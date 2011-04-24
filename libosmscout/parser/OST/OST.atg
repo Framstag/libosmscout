@@ -62,21 +62,6 @@ PRODUCTIONS
                   config.AddTypeInfo(typeInfo);
                 .)
                 .
-/*
-  CONDITION<Condition*& condition>
-              = (.
-                  std::string nameValue;
-                  std::string valueValue;
-                .)
-                string (. nameValue=Destring(t->val); .)
-                "=="
-                string (. valueValue=Destring(t->val); .)
-                (.
-                  TagId tagId=config.RegisterTagForInternalUse(nameValue);
-
-                  condition=new TagEquals(tagId,valueValue);
-                .)
-                .*/
 
   CONDITION<Condition*& condition>
               = (.
