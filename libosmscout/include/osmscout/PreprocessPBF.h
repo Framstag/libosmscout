@@ -20,11 +20,57 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <map>
+#include <string>
+#include <vector>
+
+#include <osmscout/pbf/fileformat.pb.h>
+#include <osmscout/pbf/osmformat.pb.h>
+
+#include <osmscout/RawNode.h>
+#include <osmscout/RawRelation.h>
+#include <osmscout/RawWay.h>
+
 #include <osmscout/Import.h>
+#include <osmscout/Types.h>
 
 namespace osmscout {
   class PreprocessPBF : public ImportModule
   {
+  private:
+    RawNode                     rawNode;
+    RawWay                      rawWay;
+    RawRelation                 rawRel;
+    std::vector<Tag>            tags;
+    std::map<TagId,std::string> tagMap;
+    std::vector<Id>             nodes;
+
+    uint32_t                    nodeCount;
+    uint32_t                    wayCount;
+    uint32_t                    areaCount;
+    uint32_t                    relationCount;
+
+  private:
+    void ReadNodes(const TypeConfig& typeConfig,
+                   const PBF::PrimitiveBlock& block,
+                   const PBF::PrimitiveGroup &group,
+                   FileWriter& nodeWriter);
+
+    void ReadDenseNodes(const TypeConfig& typeConfig,
+                        const PBF::PrimitiveBlock& block,
+                        const PBF::PrimitiveGroup &group,
+                        FileWriter& nodeWriter);
+
+    void ReadWays(const TypeConfig& typeConfig,
+                   const PBF::PrimitiveBlock& block,
+                   const PBF::PrimitiveGroup &group,
+                   FileWriter& wayWriter);
+
+    void ReadRelations(const TypeConfig& typeConfig,
+                       const PBF::PrimitiveBlock& block,
+                       const PBF::PrimitiveGroup &group,
+                       FileWriter& relationWriter);
+
   public:
     std::string GetDescription() const;
     bool Import(const ImportParameter& parameter,

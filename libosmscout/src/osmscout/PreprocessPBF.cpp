@@ -34,13 +34,6 @@
   #include <zlib.h>
 #endif
 
-#include <osmscout/pbf/fileformat.pb.h>
-#include <osmscout/pbf/osmformat.pb.h>
-
-#include <osmscout/RawNode.h>
-#include <osmscout/RawRelation.h>
-#include <osmscout/RawWay.h>
-
 #include <osmscout/Util.h>
 
 #include <osmscout/util/String.h>
@@ -281,6 +274,261 @@ namespace osmscout {
     return "PreprocessPBF";
   }
 
+  void PreprocessPBF::ReadNodes(const TypeConfig& typeConfig,
+                                const PBF::PrimitiveBlock& block,
+                                const PBF::PrimitiveGroup& group,
+                                FileWriter& nodeWriter)
+  {
+    for (int n=0; n<group.nodes_size(); n++) {
+      TypeId          type=typeIgnore;
+      const PBF::Node &inputNode=group.nodes(n);
+
+      rawNode.SetId(inputNode.id());
+      rawNode.SetCoordinates((inputNode.lon()*block.granularity()+block.lon_offset())/NANO,
+                             (inputNode.lat()*block.granularity()+block.lat_offset())/NANO);
+
+      tags.clear();
+      tagMap.clear();
+
+      for (int t=0; t<inputNode.keys_size(); t++) {
+        TagId id=typeConfig.GetTagId(block.stringtable().s(inputNode.keys(t)).c_str());
+
+        if (id!=tagIgnore) {
+          tagMap[id]=block.stringtable().s(inputNode.vals(t));
+        }
+      }
+
+      typeConfig.GetNodeTypeId(tagMap,type);
+      typeConfig.ResolveTags(tagMap,tags);
+
+      rawNode.SetType(type);
+      rawNode.SetTags(tags);
+
+      rawNode.Write(nodeWriter);
+      nodeCount++;
+    }
+  }
+
+  void PreprocessPBF::ReadDenseNodes(const TypeConfig& typeConfig,
+                                     const PBF::PrimitiveBlock& block,
+                                     const PBF::PrimitiveGroup& group,
+                                     FileWriter& nodeWriter)
+  {
+    const PBF::DenseNodes &dense=group.dense();
+    unsigned long dId=0;
+    double        dLat=0;
+    double        dLon=0;
+    int           t=0;
+
+    for (int d=0; d<dense.id_size();d++) {
+      TypeId type=typeIgnore;
+
+      dId+=dense.id(d);
+      dLat+=dense.lat(d);
+      dLon+=dense.lon(d);
+
+      rawNode.SetId(dId);
+      rawNode.SetCoordinates((dLon*block.granularity()+block.lon_offset())/NANO,
+                             (dLat*block.granularity()+block.lat_offset())/NANO);
+
+      tags.clear();
+      tagMap.clear();
+
+      while (true) {
+        if (t>=dense.keys_vals_size()) {
+          break;
+        }
+
+        if (dense.keys_vals(t)==0) {
+          t++;
+          break;
+        }
+
+        TagId id=typeConfig.GetTagId(block.stringtable().s(dense.keys_vals(t)).c_str());
+
+        if (id!=tagIgnore) {
+          tagMap[id]=block.stringtable().s(dense.keys_vals(t+1));
+        }
+
+        t+=2;
+      }
+
+      typeConfig.GetNodeTypeId(tagMap,type);
+      typeConfig.ResolveTags(tagMap,tags);
+
+      rawNode.SetType(type);
+      rawNode.SetTags(tags);
+
+      rawNode.Write(nodeWriter);
+      nodeCount++;
+    }
+  }
+
+  void PreprocessPBF::ReadWays(const TypeConfig& typeConfig,
+                               const PBF::PrimitiveBlock& block,
+                               const PBF::PrimitiveGroup& group,
+                               FileWriter& wayWriter)
+  {
+    for (int w=0; w<group.ways_size(); w++) {
+      const PBF::Way &inputWay=group.ways(w);
+
+      nodes.clear();
+      tags.clear();
+      tagMap.clear();
+
+      rawWay.SetId(inputWay.id());
+
+      for (int t=0; t<inputWay.keys_size(); t++) {
+        TagId id=typeConfig.GetTagId(block.stringtable().s(inputWay.keys(t)).c_str());
+
+        if (id!=tagIgnore) {
+          tagMap[id]=block.stringtable().s(inputWay.vals(t));
+        }
+      }
+
+      long ref=0;
+      for (int r=0; r<inputWay.refs_size();r++) {
+        ref+=inputWay.refs(r);
+
+        nodes.push_back(ref);
+      }
+
+      TypeId                                      areaType=typeIgnore;
+      TypeId                                      wayType=typeIgnore;
+      int                                         isArea=0; // 0==unknown, 1==true, -1==false
+      std::map<TagId,std::string>::const_iterator areaTag;
+
+      areaTag=tagMap.find(typeConfig.tagArea);
+
+      if (areaTag==tagMap.end()) {
+        isArea=0;
+      }
+      else if (areaTag->second=="yes" ||
+               areaTag->second=="true" ||
+               areaTag->second=="1") {
+        isArea=1;
+      }
+      else {
+        isArea=-1;
+      }
+
+      typeConfig.GetWayAreaTypeId(tagMap,wayType,areaType);
+      typeConfig.ResolveTags(tagMap,tags);
+
+      if (isArea==1 &&
+          areaType==typeIgnore) {
+        isArea=0;
+      }
+      else if (isArea==-1 &&
+               wayType==typeIgnore) {
+        isArea=0;
+      }
+
+      if (isArea==0) {
+        if (areaType!=typeIgnore &&
+            nodes.size()>1 &&
+            nodes[0]==nodes[nodes.size()-1]) {
+          isArea=1;
+        }
+        else if (wayType!=typeIgnore) {
+          isArea=-1;
+        }
+        else if (areaType!=typeIgnore &&
+                 nodes.size()>1 &&
+                 wayType==typeIgnore) {
+
+          nodes.push_back(nodes[0]);
+          isArea=1;
+        }
+      }
+
+      if (isArea==1) {
+        rawWay.SetType(areaType,true);
+        areaCount++;
+      }
+      else if (isArea==-1) {
+        rawWay.SetType(wayType,false);
+        wayCount++;
+      }
+      else {
+        rawWay.SetType(typeIgnore,false);
+        wayCount++;
+        // Unidentified way
+        /*
+        std::cout << "--- " << id << std::endl;
+        for (size_t tag=0; tag<tags.size(); tag++) {
+          std::cout << tags[tag].key << "/" << tags[tag].value << std::endl;
+        }*/
+      }
+
+      rawWay.SetTags(tags);
+      rawWay.SetNodes(nodes);
+
+      rawWay.Write(wayWriter);
+    }
+  }
+
+  void PreprocessPBF::ReadRelations(const TypeConfig& typeConfig,
+                                    const PBF::PrimitiveBlock& block,
+                                    const PBF::PrimitiveGroup& group,
+                                    FileWriter& relationWriter)
+  {
+    for (int r=0; r<group.relations_size(); r++) {
+      const PBF::Relation &inputRelation=group.relations(r);
+
+      rawRel.tags.clear();
+      rawRel.members.clear();
+
+      rawRel.SetId(inputRelation.id());
+      rawRel.SetType(typeIgnore);
+
+      tagMap.clear();
+
+      for (int t=0; t<inputRelation.keys_size(); t++) {
+        TagId id=typeConfig.GetTagId(block.stringtable().s(inputRelation.keys(t)).c_str());
+
+        if (id!=tagIgnore) {
+          tagMap[id]=block.stringtable().s(inputRelation.vals(t));
+        }
+      }
+
+      long ref=0;
+      for (int r=0; r<inputRelation.types_size();r++) {
+        RawRelation::Member member;
+
+        switch (inputRelation.types(r)) {
+        case PBF::Relation::NODE:
+          member.type=RawRelation::memberNode;
+          break;
+        case PBF::Relation::WAY:
+          member.type=RawRelation::memberWay;
+          break;
+        case PBF::Relation::RELATION:
+          member.type=RawRelation::memberRelation;
+          break;
+        }
+
+        ref+=inputRelation.memids(r);
+
+        member.id=ref;
+        member.role=block.stringtable().s(inputRelation.roles_sid(r));
+
+        rawRel.members.push_back(member);
+      }
+
+      TypeId type;
+
+      typeConfig.GetRelationTypeId(tagMap,type);
+      typeConfig.ResolveTags(tagMap,rawRel.tags);
+
+      rawRel.SetType(type);
+
+      rawRel.Write(relationWriter);
+
+      relationCount++;
+    }
+  }
+
   bool PreprocessPBF::Import(const ImportParameter& parameter,
                              Progress& progress,
                              const TypeConfig& typeConfig)
@@ -289,10 +537,10 @@ namespace osmscout {
     FileWriter wayWriter;
     FileWriter relationWriter;
 
-    uint32_t   nodeCount=0;
-    uint32_t   wayCount=0;
-    uint32_t   areaCount=0;
-    uint32_t   relationCount=0;
+    nodeCount=0;
+    wayCount=0;
+    areaCount=0;
+    relationCount=0;
 
     progress.SetAction(std::string("Parsing PBF file '")+parameter.GetMapfile()+"'");
 
@@ -352,13 +600,6 @@ namespace osmscout {
       }
     }
 
-    RawNode                     rawNode;
-    RawWay                      rawWay;
-    RawRelation                 rawRel;
-    std::vector<Tag>            tags;
-    std::map<TagId,std::string> tagMap;
-    std::vector<Id>             nodes;
-
     tags.reserve(20);
     nodes.reserve(20000);
 
@@ -395,240 +636,16 @@ namespace osmscout {
         const PBF::PrimitiveGroup &group=block.primitivegroup(currentGroup);
 
         if (group.nodes_size()>0) {
-          for (int n=0; n<group.nodes_size(); n++) {
-            TypeId          type=typeIgnore;
-            const PBF::Node &inputNode=group.nodes(n);
-
-            rawNode.SetId(inputNode.id());
-            rawNode.SetCoordinates((inputNode.lon()*block.granularity()+block.lon_offset())/NANO,
-                                   (inputNode.lat()*block.granularity()+block.lat_offset())/NANO);
-
-            tags.clear();
-            tagMap.clear();
-
-            for (int t=0; t<inputNode.keys_size(); t++) {
-              TagId id=typeConfig.GetTagId(block.stringtable().s(inputNode.keys(t)).c_str());
-
-              if (id!=tagIgnore) {
-                tagMap[id]=block.stringtable().s(inputNode.vals(t));
-              }
-            }
-
-            typeConfig.GetNodeTypeId(tagMap,type);
-            typeConfig.ResolveTags(tagMap,tags);
-
-            rawNode.SetType(type);
-            rawNode.SetTags(tags);
-
-            rawNode.Write(nodeWriter);
-            nodeCount++;
-
-          }
+          ReadNodes(typeConfig,block,group,nodeWriter);
         }
         else if (group.ways_size()>0) {
-          for (int w=0; w<group.ways_size(); w++) {
-            const PBF::Way &inputWay=group.ways(w);
-
-            nodes.clear();
-            tags.clear();
-            tagMap.clear();
-
-            rawWay.SetId(inputWay.id());
-
-            for (int t=0; t<inputWay.keys_size(); t++) {
-              TagId id=typeConfig.GetTagId(block.stringtable().s(inputWay.keys(t)).c_str());
-
-              if (id!=tagIgnore) {
-                tagMap[id]=block.stringtable().s(inputWay.vals(t));
-              }
-            }
-
-            long ref=0;
-            for (int r=0; r<inputWay.refs_size();r++) {
-              ref+=inputWay.refs(r);
-
-              nodes.push_back(ref);
-            }
-
-            TypeId                                      areaType=typeIgnore;
-            TypeId                                      wayType=typeIgnore;
-            int                                         isArea=0; // 0==unknown, 1==true, -1==false
-            std::map<TagId,std::string>::const_iterator areaTag;
-
-            areaTag=tagMap.find(typeConfig.tagArea);
-
-            if (areaTag==tagMap.end()) {
-              isArea=0;
-            }
-            else if (areaTag->second=="yes" ||
-                     areaTag->second=="true" ||
-                     areaTag->second=="1") {
-              isArea=1;
-            }
-            else {
-              isArea=-1;
-            }
-
-            typeConfig.GetWayAreaTypeId(tagMap,wayType,areaType);
-            typeConfig.ResolveTags(tagMap,tags);
-
-            if (isArea==1 &&
-                areaType==typeIgnore) {
-              isArea=0;
-            }
-            else if (isArea==-1 &&
-                     wayType==typeIgnore) {
-              isArea=0;
-            }
-
-            if (isArea==0) {
-              if (areaType!=typeIgnore &&
-                  nodes.size()>1 &&
-                  nodes[0]==nodes[nodes.size()-1]) {
-                isArea=1;
-              }
-              else if (wayType!=typeIgnore) {
-                isArea=-1;
-              }
-              else if (areaType!=typeIgnore &&
-                       nodes.size()>1 &&
-                       wayType==typeIgnore) {
-
-                nodes.push_back(nodes[0]);
-                isArea=1;
-              }
-            }
-
-            if (isArea==1) {
-              rawWay.SetType(areaType,true);
-              areaCount++;
-            }
-            else if (isArea==-1) {
-              rawWay.SetType(wayType,false);
-              wayCount++;
-            }
-            else {
-              rawWay.SetType(typeIgnore,false);
-              wayCount++;
-              // Unidentified way
-              /*
-              std::cout << "--- " << id << std::endl;
-              for (size_t tag=0; tag<tags.size(); tag++) {
-                std::cout << tags[tag].key << "/" << tags[tag].value << std::endl;
-              }*/
-            }
-
-            rawWay.SetTags(tags);
-            rawWay.SetNodes(nodes);
-
-            rawWay.Write(wayWriter);
-          }
+          ReadWays(typeConfig,block,group,wayWriter);
         }
         else if (group.relations_size()>0) {
-          for (int r=0; r<group.relations_size(); r++) {
-            const PBF::Relation &inputRelation=group.relations(r);
-
-            rawRel.tags.clear();
-            rawRel.members.clear();
-
-            rawRel.SetId(inputRelation.id());
-            rawRel.SetType(typeIgnore);
-
-            tagMap.clear();
-
-            for (int t=0; t<inputRelation.keys_size(); t++) {
-              TagId id=typeConfig.GetTagId(block.stringtable().s(inputRelation.keys(t)).c_str());
-
-              if (id!=tagIgnore) {
-                tagMap[id]=block.stringtable().s(inputRelation.vals(t));
-              }
-            }
-
-            long ref=0;
-            for (int r=0; r<inputRelation.types_size();r++) {
-              RawRelation::Member member;
-
-              switch (inputRelation.types(r)) {
-              case PBF::Relation::NODE:
-                member.type=RawRelation::memberNode;
-                break;
-              case PBF::Relation::WAY:
-                member.type=RawRelation::memberWay;
-                break;
-              case PBF::Relation::RELATION:
-                member.type=RawRelation::memberRelation;
-                break;
-              }
-
-              ref+=inputRelation.memids(r);
-
-              member.id=ref;
-              member.role=block.stringtable().s(inputRelation.roles_sid(r));
-
-              rawRel.members.push_back(member);
-            }
-
-            TypeId type;
-
-            typeConfig.GetRelationTypeId(tagMap,type);
-            typeConfig.ResolveTags(tagMap,rawRel.tags);
-
-            rawRel.SetType(type);
-
-            rawRel.Write(relationWriter);
-
-            relationCount++;
-          }
+          ReadRelations(typeConfig,block,group,relationWriter);
         }
         else if (group.has_dense()) {
-          const PBF::DenseNodes &dense=group.dense();
-          unsigned long dId=0;
-          double        dLat=0;
-          double        dLon=0;
-          int           t=0;
-
-          for (int d=0; d<dense.id_size();d++) {
-            TypeId type=typeIgnore;
-
-            dId+=dense.id(d);
-            dLat+=dense.lat(d);
-            dLon+=dense.lon(d);
-
-            rawNode.SetId(dId);
-            rawNode.SetCoordinates((dLon*block.granularity()+block.lon_offset())/NANO,
-                                   (dLat*block.granularity()+block.lat_offset())/NANO);
-
-            tags.clear();
-            tagMap.clear();
-
-            while (true) {
-              if (t>=dense.keys_vals_size()) {
-                break;
-              }
-
-              if (dense.keys_vals(t)==0) {
-                t++;
-                break;
-              }
-
-              TagId id=typeConfig.GetTagId(block.stringtable().s(dense.keys_vals(t)).c_str());
-
-              if (id!=tagIgnore) {
-                tagMap[id]=block.stringtable().s(dense.keys_vals(t+1));
-              }
-
-              t+=2;
-            }
-
-            typeConfig.GetNodeTypeId(tagMap,type);
-            typeConfig.ResolveTags(tagMap,tags);
-
-            rawNode.SetType(type);
-            rawNode.SetTags(tags);
-
-            rawNode.Write(nodeWriter);
-            nodeCount++;
-          }
+          ReadDenseNodes(typeConfig,block,group,nodeWriter);
         }
       }
     }
