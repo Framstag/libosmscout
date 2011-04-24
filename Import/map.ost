@@ -34,17 +34,17 @@ TYPES
   TYPE "route_road" WHERE "route"=="road" CAN BE RELATION
   TYPE "waterway_stream" WHERE "waterway"=="stream" CAN BE WAY RELATION OPTIONS ROUTE
   TYPE "waterway_river" WHERE "waterway"=="river" CAN BE WAY RELATION OPTIONS ROUTE
-  TYPE "waterway_riverbank" WHERE "waterway"=="riverbank" CAN BE AREA RELATION OPTIONS ROUTE
+  TYPE "waterway_riverbank" WHERE "waterway"=="riverbank" CAN BE AREA OPTIONS ROUTE
   TYPE "waterway_canal" WHERE "waterway"=="canal" CAN BE WAY RELATION OPTIONS ROUTE
   TYPE "waterway_ditch" WHERE "waterway"=="ditch" CAN BE WAY RELATION OPTIONS ROUTE
   TYPE "waterway_drain" WHERE "waterway"=="drain" CAN BE WAY RELATION OPTIONS ROUTE
-  TYPE "waterway_dock" WHERE "waterway"=="dock" CAN BE NODE AREA RELATION OPTIONS ROUTE
+  TYPE "waterway_dock" WHERE "waterway"=="dock" CAN BE NODE AREA OPTIONS ROUTE
   TYPE "waterway_lock_gate" WHERE "waterway"=="lock_gate" CAN BE NODE
   TYPE "waterway_turning_point" WHERE "waterway"=="turning_point" CAN BE NODE
   TYPE "waterway_boat_yard" WHERE "waterway"=="boat_yard" CAN BE NODE
   TYPE "waterway_weir" WHERE "waterway"=="weir" CAN BE NODE WAY RELATION
   TYPE "waterway_rapits" WHERE "waterway"=="rapits" CAN BE NODE WAY RELATION
-  TYPE "waterway_dam" WHERE "waterway"=="dam" CAN BE WAY AREA RELATION
+  TYPE "waterway_dam" WHERE "waterway"=="dam" CAN BE WAY AREA
   TYPE "railway_rail" WHERE "railway"=="rail" CAN BE WAY RELATION OPTIONS ROUTE
   TYPE "railway_tram" WHERE "railway"=="tram" CAN BE WAY OPTIONS ROUTE
   TYPE "railway_light_rail" WHERE "railway"=="light_rail" CAN BE WAY OPTIONS ROUTE
@@ -201,57 +201,57 @@ TYPES
   TYPE "tourism_theme_park" WHERE "tourism"=="theme_park" CAN BE NODE AREA
   TYPE "tourism_viewpoint" WHERE "tourism"=="viewpoint" CAN BE NODE
   TYPE "tourism_zoo" WHERE "tourism"=="zoo" CAN BE NODE AREA
-  TYPE "landuse_allotments" WHERE "landuse"=="allotments" CAN BE NODE AREA RELATION
-  TYPE "landuse_basin" WHERE "landuse"=="basin" CAN BE NODE AREA RELATION
-  TYPE "landuse_brownfield" WHERE "landuse"=="brownfield" CAN BE NODE AREA RELATION
-  TYPE "landuse_cemetery" WHERE "landuse"=="cemetery" CAN BE AREA RELATION
-  TYPE "landuse_commercial" WHERE "landuse"=="commercial" CAN BE NODE AREA RELATION
-  TYPE "landuse_construction" WHERE "landuse"=="construction" CAN BE NODE AREA RELATION
-  TYPE "landuse_farm" WHERE "landuse"=="farm" CAN BE AREA RELATION
-  TYPE "landuse_farmland" WHERE "landuse"=="farmland" CAN BE AREA RELATION
-  TYPE "landuse_farmyard" WHERE "landuse"=="farmyard" CAN BE AREA RELATION
-  TYPE "landuse_forest" WHERE "landuse"=="forest" CAN BE NODE AREA RELATION
-  TYPE "landuse_garages" WHERE "landuse"=="garages" CAN BE AREA RELATION
-  TYPE "landuse_grass" WHERE "landuse"=="grass" CAN BE NODE AREA RELATION
-  TYPE "landuse_greenfield" WHERE "landuse"=="greenfield" CAN BE NODE AREA RELATION
-  TYPE "landuse_greenhouse_horticulture" WHERE "landuse"=="greenhouse_horticulture" CAN BE AREA RELATION
-  TYPE "landuse_industrial" WHERE "landuse"=="industrial" CAN BE NODE AREA RELATION
-  TYPE "landuse_landfill" WHERE "landuse"=="landfill" CAN BE NODE AREA RELATION
-  TYPE "landuse_meadow" WHERE "landuse"=="meadow" CAN BE NODE AREA RELATION
-  TYPE "landuse_military" WHERE "landuse"=="military" CAN BE NODE AREA RELATION
-  TYPE "landuse_orchard" WHERE "landuse"=="orchard" CAN BE NODE AREA RELATION
-  TYPE "landuse_quarry" WHERE "landuse"=="quarry" CAN BE NODE AREA RELATION
-  TYPE "landuse_railway" WHERE "landuse"=="railway" CAN BE AREA RELATION OPTIONS ROUTE
-  TYPE "landuse_recreation_ground" WHERE "landuse"=="recreation_ground" CAN BE NODE AREA RELATION
-  TYPE "landuse_reservoir" WHERE "landuse"=="reservoir" CAN BE NODE AREA RELATION
-  TYPE "landuse_residential" WHERE "landuse"=="residential" CAN BE NODE AREA RELATION
-  TYPE "landuse_retail" WHERE "landuse"=="retail" CAN BE NODE AREA RELATION
-  TYPE "landuse_salt_pond" WHERE "landuse"=="salt_pond" CAN BE AREA RELATION
-  TYPE "landuse_village_green" WHERE "landuse"=="village_green" CAN BE NODE AREA RELATION
-  TYPE "landuse_vineyard" WHERE "landuse"=="vineyard" CAN BE NODE AREA RELATION
-  TYPE "landuse_wood" WHERE "landuse"=="wood" CAN BE NODE AREA RELATION
-  TYPE "natural_bay" WHERE "natural"=="bay" CAN BE NODE AREA RELATION
-  TYPE "natural_beach" WHERE "natural"=="beach" CAN BE NODE AREA RELATION
-  TYPE "natural_cave_entrance" WHERE "natural"=="cave_entrance" CAN BE NODE AREA RELATION
-  TYPE "natural_cliff" WHERE "natural"=="cliff" CAN BE NODE WAY AREA RELATION
+  TYPE "landuse_allotments" WHERE "landuse"=="allotments" CAN BE NODE AREA
+  TYPE "landuse_basin" WHERE "landuse"=="basin" CAN BE NODE AREA
+  TYPE "landuse_brownfield" WHERE "landuse"=="brownfield" CAN BE NODE AREA
+  TYPE "landuse_cemetery" WHERE "landuse"=="cemetery" CAN BE AREA
+  TYPE "landuse_commercial" WHERE "landuse"=="commercial" CAN BE NODE AREA
+  TYPE "landuse_construction" WHERE "landuse"=="construction" CAN BE NODE AREA
+  TYPE "landuse_farm" WHERE "landuse"=="farm" CAN BE AREA
+  TYPE "landuse_farmland" WHERE "landuse"=="farmland" CAN BE AREA
+  TYPE "landuse_farmyard" WHERE "landuse"=="farmyard" CAN BE AREA
+  TYPE "landuse_forest" WHERE "landuse"=="forest" CAN BE NODE AREA
+  TYPE "landuse_garages" WHERE "landuse"=="garages" CAN BE AREA
+  TYPE "landuse_grass" WHERE "landuse"=="grass" CAN BE NODE AREA
+  TYPE "landuse_greenfield" WHERE "landuse"=="greenfield" CAN BE NODE AREA
+  TYPE "landuse_greenhouse_horticulture" WHERE "landuse"=="greenhouse_horticulture" CAN BE AREA
+  TYPE "landuse_industrial" WHERE "landuse"=="industrial" CAN BE NODE AREA
+  TYPE "landuse_landfill" WHERE "landuse"=="landfill" CAN BE NODE AREA
+  TYPE "landuse_meadow" WHERE "landuse"=="meadow" CAN BE NODE AREA
+  TYPE "landuse_military" WHERE "landuse"=="military" CAN BE NODE AREA
+  TYPE "landuse_orchard" WHERE "landuse"=="orchard" CAN BE NODE AREA
+  TYPE "landuse_quarry" WHERE "landuse"=="quarry" CAN BE NODE AREA
+  TYPE "landuse_railway" WHERE "landuse"=="railway" CAN BE AREA OPTIONS ROUTE
+  TYPE "landuse_recreation_ground" WHERE "landuse"=="recreation_ground" CAN BE NODE AREA
+  TYPE "landuse_reservoir" WHERE "landuse"=="reservoir" CAN BE NODE AREA
+  TYPE "landuse_residential" WHERE "landuse"=="residential" CAN BE NODE AREA
+  TYPE "landuse_retail" WHERE "landuse"=="retail" CAN BE NODE AREA
+  TYPE "landuse_salt_pond" WHERE "landuse"=="salt_pond" CAN BE AREA
+  TYPE "landuse_village_green" WHERE "landuse"=="village_green" CAN BE NODE AREA
+  TYPE "landuse_vineyard" WHERE "landuse"=="vineyard" CAN BE NODE AREA
+  TYPE "landuse_wood" WHERE "landuse"=="wood" CAN BE NODE AREA
+  TYPE "natural_bay" WHERE "natural"=="bay" CAN BE NODE AREA
+  TYPE "natural_beach" WHERE "natural"=="beach" CAN BE NODE AREA
+  TYPE "natural_cave_entrance" WHERE "natural"=="cave_entrance" CAN BE NODE AREA
+  TYPE "natural_cliff" WHERE "natural"=="cliff" CAN BE NODE WAY AREA
   TYPE "natural_coastline" WHERE "natural"=="coastline" CAN BE WAY RELATION
-  TYPE "natural_fell" WHERE "natural"=="fell" CAN BE NODE AREA RELATION
-  TYPE "natural_glacier" WHERE "natural"=="glacier" CAN BE NODE AREA RELATION
-  TYPE "natural_heath" WHERE "natural"=="heath" CAN BE NODE AREA RELATION
-  TYPE "natural_land" WHERE "natural"=="land" CAN BE NODE AREA RELATION
-  TYPE "natural_marsh" WHERE "natural"=="marsh" CAN BE NODE AREA RELATION
-  TYPE "natural_mud" WHERE "natural"=="mud" CAN BE NODE AREA RELATION
+  TYPE "natural_fell" WHERE "natural"=="fell" CAN BE NODE AREA
+  TYPE "natural_glacier" WHERE "natural"=="glacier" CAN BE NODE AREA
+  TYPE "natural_heath" WHERE "natural"=="heath" CAN BE NODE AREA
+  TYPE "natural_land" WHERE "natural"=="land" CAN BE NODE AREA
+  TYPE "natural_marsh" WHERE "natural"=="marsh" CAN BE NODE AREA
+  TYPE "natural_mud" WHERE "natural"=="mud" CAN BE NODE AREA
   TYPE "natural_peak" WHERE "natural"=="peak" CAN BE NODE
-  TYPE "natural_sand" WHERE "natural"=="sand" CAN BE NODE AREA RELATION
-  TYPE "natural_scree" WHERE "natural"=="scree" CAN BE NODE AREA RELATION
-  TYPE "natural_scrub" WHERE "natural"=="scrub" CAN BE NODE AREA RELATION
+  TYPE "natural_sand" WHERE "natural"=="sand" CAN BE NODE AREA
+  TYPE "natural_scree" WHERE "natural"=="scree" CAN BE NODE AREA
+  TYPE "natural_scrub" WHERE "natural"=="scrub" CAN BE NODE AREA
   TYPE "natural_spring" WHERE "natural"=="spring" CAN BE NODE
   TYPE "natural_tree" WHERE "natural"=="tree" CAN BE NODE
   TYPE "natural_volcano" WHERE "natural"=="volcano" CAN BE NODE
-  TYPE "natural_water" WHERE "natural"=="water" CAN BE NODE AREA RELATION
-  TYPE "natural_wetland" WHERE "natural"=="wetland" CAN BE NODE AREA RELATION
-  TYPE "natural_wood" WHERE "natural"=="wood" CAN BE NODE AREA RELATION
-  TYPE "boundary_administrative" WHERE "boundary"=="administrative" CAN BE WAY RELATION
+  TYPE "natural_water" WHERE "natural"=="water" CAN BE NODE AREA
+  TYPE "natural_wetland" WHERE "natural"=="wetland" CAN BE NODE AREA
+  TYPE "natural_wood" WHERE "natural"=="wood" CAN BE NODE AREA
+  TYPE "boundary_administrative" WHERE "boundary"=="administrative" CAN BE WAY AREA // clearify
   TYPE "boundary_civil" WHERE "boundary"=="civil" CAN BE AREA
   TYPE "boundary_political" WHERE "boundary"=="political" CAN BE AREA
   TYPE "place_continent" WHERE "place"=="continent" CAN BE NODE AREA

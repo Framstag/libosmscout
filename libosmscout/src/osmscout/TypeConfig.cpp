@@ -529,15 +529,33 @@ namespace osmscout {
       return false;
     }
 
-    for (size_t i=0; i<types.size(); i++) {
-      if (types[i].GetCondition()==NULL ||
-          !types[i].CanBeRelation()) {
-        continue;
-      }
+    std::map<TagId,std::string>::const_iterator relationType=tagMap.find(tagType);
 
-      if (types[i].GetCondition()->Evaluate(tagMap)) {
-        typeId=types[i].GetId();
-        return true;
+    if (relationType!=tagMap.end() &&
+        relationType->second=="multipolygon") {
+      for (size_t i=0; i<types.size(); i++) {
+        if (types[i].GetCondition()==NULL ||
+            !types[i].CanBeArea()) {
+          continue;
+        }
+
+        if (types[i].GetCondition()->Evaluate(tagMap)) {
+          typeId=types[i].GetId();
+          return true;
+        }
+      }
+    }
+    else {
+      for (size_t i=0; i<types.size(); i++) {
+        if (types[i].GetCondition()==NULL ||
+            !types[i].CanBeRelation()) {
+          continue;
+        }
+
+        if (types[i].GetCondition()->Evaluate(tagMap)) {
+          typeId=types[i].GetId();
+          return true;
+        }
       }
     }
 
