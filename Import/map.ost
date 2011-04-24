@@ -251,7 +251,7 @@ TYPES
   TYPE "natural_water" WHERE "natural"=="water" CAN BE NODE AREA
   TYPE "natural_wetland" WHERE "natural"=="wetland" CAN BE NODE AREA
   TYPE "natural_wood" WHERE "natural"=="wood" CAN BE NODE AREA
-  TYPE "boundary_administrative" WHERE "boundary"=="administrative" CAN BE WAY AREA // clearify
+  TYPE "boundary_administrative" WHERE "boundary"=="administrative" CAN BE WAY AREA RELATION // we have multipolygon and boundary as relation type
   TYPE "boundary_civil" WHERE "boundary"=="civil" CAN BE AREA
   TYPE "boundary_political" WHERE "boundary"=="political" CAN BE AREA
   TYPE "place_continent" WHERE "place"=="continent" CAN BE NODE AREA
