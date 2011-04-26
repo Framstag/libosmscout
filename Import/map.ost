@@ -1,363 +1,359 @@
 OST
 
 TYPES
-  TYPE "highway_motorway" WHERE "highway"=="motorway" CAN BE WAY RELATION OPTIONS ROUTE INDEX
-  TYPE "highway_motorway_link" WHERE "highway"=="motorway_link" CAN BE WAY RELATION OPTIONS ROUTE INDEX
-  TYPE "highway_trunk" WHERE "highway"=="trunk" CAN BE WAY RELATION OPTIONS ROUTE INDEX
-  TYPE "highway_trunk_link" WHERE "highway"=="trunk_link" CAN BE WAY RELATION OPTIONS ROUTE INDEX
-  TYPE "highway_primary" WHERE "highway"=="primary" CAN BE WAY RELATION OPTIONS ROUTE INDEX
-  TYPE "highway_primary_link" WHERE "highway"=="primary_link" CAN BE WAY RELATION OPTIONS ROUTE INDEX
-  TYPE "highway_secondary" WHERE "highway"=="secondary" CAN BE WAY OPTIONS ROUTE INDEX
-  TYPE "highway_secondary_link" WHERE "highway"=="secondary_link" CAN BE WAY OPTIONS ROUTE INDEX
-  TYPE "highway_tertiary" WHERE "highway"=="tertiary" CAN BE WAY OPTIONS ROUTE INDEX
-  TYPE "highway_unclassified" WHERE "highway"=="unclassified" CAN BE WAY OPTIONS ROUTE INDEX
-  TYPE "highway_road" WHERE "highway"=="road" CAN BE WAY OPTIONS ROUTE INDEX
-  TYPE "highway_residential" WHERE "highway"=="residential" CAN BE WAY OPTIONS ROUTE INDEX
-  TYPE "highway_living_street" WHERE "highway"=="living_street" CAN BE WAY OPTIONS ROUTE INDEX
-  TYPE "highway_service" WHERE "highway"=="service" CAN BE WAY AREA OPTIONS ROUTE INDEX
-  TYPE "highway_track" WHERE "highway"=="track" CAN BE WAY OPTIONS ROUTE INDEX
-  TYPE "highway_pedestrian" WHERE "highway"=="pedestrian" CAN BE WAY AREA OPTIONS ROUTE INDEX
-  TYPE "highway_services" WHERE "highway"=="services" CAN BE NODE AREA OPTIONS ROUTE INDEX
-  TYPE "highway_bus_guideway" WHERE "highway"=="bus_guideway" CAN BE WAY OPTIONS ROUTE
-  TYPE "highway_path" WHERE "highway"=="path" CAN BE WAY OPTIONS ROUTE
-  TYPE "highway_cycleway" WHERE "highway"=="cycleway" CAN BE WAY OPTIONS ROUTE
-  TYPE "highway_footway" WHERE "highway"=="footway" CAN BE WAY OPTIONS ROUTE
-  TYPE "highway_bridleway" WHERE "highway"=="bridleway" CAN BE WAY OPTIONS ROUTE
-  TYPE "highway_byway" WHERE "highway"=="byway" CAN BE WAY OPTIONS ROUTE
-  TYPE "highway_steps" WHERE "highway"=="steps" CAN BE WAY OPTIONS ROUTE
-  TYPE "highway_mini_roundabout" WHERE "highway"=="mini_roundabout" CAN BE NODE
-  TYPE "highway_bus_stop" WHERE "highway"=="bus_stop" CAN BE NODE
-  TYPE "highway_turning_cycle" WHERE "highway"=="turning_cycle" CAN BE NODE
-  TYPE "highway_construction" WHERE "highway"=="construction" CAN BE WAY
-  TYPE "highway_roundabout" WHERE "highway"=="roundabout" CAN BE WAY AREA OPTIONS ROUTE
-  TYPE "highway_motorway_junction" WHERE "highway"=="motorway_junction" CAN BE NODE OPTIONS ROUTE
-  TYPE "route_road" WHERE "route"=="road" CAN BE RELATION
-  TYPE "waterway_stream" WHERE "waterway"=="stream" CAN BE WAY RELATION OPTIONS ROUTE
-  TYPE "waterway_river" WHERE "waterway"=="river" CAN BE WAY RELATION OPTIONS ROUTE
-  TYPE "waterway_riverbank" WHERE "waterway"=="riverbank" CAN BE AREA OPTIONS ROUTE
-  TYPE "waterway_canal" WHERE "waterway"=="canal" CAN BE WAY RELATION OPTIONS ROUTE
-  TYPE "waterway_ditch" WHERE "waterway"=="ditch" CAN BE WAY RELATION OPTIONS ROUTE
-  TYPE "waterway_drain" WHERE "waterway"=="drain" CAN BE WAY RELATION OPTIONS ROUTE
-  TYPE "waterway_dock" WHERE "waterway"=="dock" CAN BE NODE AREA OPTIONS ROUTE
-  TYPE "waterway_lock_gate" WHERE "waterway"=="lock_gate" CAN BE NODE
-  TYPE "waterway_turning_point" WHERE "waterway"=="turning_point" CAN BE NODE
-  TYPE "waterway_boat_yard" WHERE "waterway"=="boat_yard" CAN BE NODE
-  TYPE "waterway_weir" WHERE "waterway"=="weir" CAN BE NODE WAY RELATION
-  TYPE "waterway_rapits" WHERE "waterway"=="rapits" CAN BE NODE WAY RELATION
-  TYPE "waterway_dam" WHERE "waterway"=="dam" CAN BE WAY AREA
-  TYPE "railway_rail" WHERE "railway"=="rail" CAN BE WAY RELATION OPTIONS ROUTE
-  TYPE "railway_tram" WHERE "railway"=="tram" CAN BE WAY OPTIONS ROUTE
-  TYPE "railway_light_rail" WHERE "railway"=="light_rail" CAN BE WAY OPTIONS ROUTE
-  TYPE "railway_subway" WHERE "railway"=="subway" CAN BE WAY OPTIONS ROUTE
-  TYPE "railway_preserved" WHERE "railway"=="preserved" CAN BE WAY OPTIONS ROUTE
-  TYPE "railway_disused" WHERE "railway"=="disused" CAN BE WAY
-  TYPE "railway_abandoned" WHERE "railway"=="abandoned" CAN BE WAY
-  TYPE "railway_narrow_gauge" WHERE "railway"=="narrow_gauge" CAN BE WAY
-  TYPE "railway_monorail" WHERE "railway"=="monorail" CAN BE WAY
-  TYPE "railway_station" WHERE "railway"=="station" CAN BE NODE AREA
-  TYPE "railway_halt" WHERE "railway"=="halt" CAN BE NODE
-  TYPE "railway_tram_stop" WHERE "railway"=="tram_stop" CAN BE NODE
-  TYPE "railway_crossing" WHERE "railway"=="crossing" CAN BE NODE
-  TYPE "railway_level_crossing" WHERE "railway"=="level_crossing" CAN BE NODE
-  TYPE "railway_subway_entrance" WHERE "railway"=="subway_entrance" CAN BE NODE
-  TYPE "railway_turntable" WHERE "railway"=="turntable" CAN BE NODE AREA
-  TYPE "railway_platform" WHERE "railway"=="platform" CAN BE WAY AREA
-  TYPE "route_ferry" WHERE "route"=="ferry" CAN BE WAY
-  TYPE "aeroway_aerodrome" WHERE "aeroway"=="aerodrome" CAN BE NODE AREA
-  TYPE "aeroway_terminal" WHERE "aeroway"=="terminal" CAN BE NODE AREA
-  TYPE "aeroway_helipad" WHERE "aeroway"=="helipad" CAN BE NODE AREA
-  TYPE "aeroway_runway" WHERE "aeroway"=="runway" CAN BE WAY
-  TYPE "aeroway_taxiway" WHERE "aeroway"=="taxiway" CAN BE WAY
-  TYPE "aeroway_apron" WHERE "aeroway"=="apron" CAN BE AREA
-  TYPE "aeroway_gate" WHERE "aeroway"=="gate" CAN BE NODE
-  TYPE "leisure_sports_centre" WHERE "leisure"=="sports_centre" CAN BE NODE AREA
-  TYPE "leisure_golf_course" WHERE "leisure"=="golf_course" CAN BE NODE AREA
-  TYPE "leisure_stadium" WHERE "leisure"=="stadium" CAN BE NODE AREA
-  TYPE "leisure_track" WHERE "leisure"=="track" CAN BE NODE WAY AREA
-  TYPE "leisure_pitch" WHERE "leisure"=="pitch" CAN BE NODE AREA
-  TYPE "leisure_water_park" WHERE "leisure"=="water_park" CAN BE NODE AREA
-  TYPE "leisure_marina" WHERE "leisure"=="marina" CAN BE NODE AREA
-  TYPE "leisure_slipway" WHERE "leisure"=="slipway" CAN BE NODE
-  TYPE "leisure_fishing" WHERE "leisure"=="fishing" CAN BE NODE AREA
-  TYPE "leisure_nature_reserve" WHERE "leisure"=="nature_reserve" CAN BE NODE AREA
-  TYPE "leisure_park" WHERE "leisure"=="park" CAN BE NODE AREA
-  TYPE "leisure_playground" WHERE "leisure"=="playground" CAN BE NODE AREA
-  TYPE "leisure_garden" WHERE "leisure"=="garden" CAN BE NODE AREA
-  TYPE "leisure_common" WHERE "leisure"=="common" CAN BE NODE AREA
-  TYPE "leisure_ice_rink" WHERE "leisure"=="ice_rink" CAN BE NODE AREA
-  TYPE "amenity_arts_centre" WHERE "amenity"=="arts_centre" CAN BE NODE AREA
-  TYPE "amenity_atm" WHERE "amenity"=="atm" CAN BE NODE
-  TYPE "amenity_baby_hatch" WHERE "amenity"=="baby_hatch" CAN BE NODE AREA
-  TYPE "amenity_bank" WHERE "amenity"=="bank" CAN BE NODE AREA
-  TYPE "amenity_bbq" WHERE "amenity"=="bbq" CAN BE NODE
-  TYPE "amenity_bench" WHERE "amenity"=="bench" CAN BE NODE
-  TYPE "amenity_biergarten" WHERE "amenity"=="biergarten" CAN BE NODE AREA
-  TYPE "amenity_bicycle_parking" WHERE "amenity"=="bicycle_parking" CAN BE NODE AREA
-  TYPE "amenity_bicycle_rental" WHERE "amenity"=="bicycle_rental" CAN BE NODE AREA
-  TYPE "amenity_buerau_de_change" WHERE "amenity"=="buerau_de_change" CAN BE NODE
-  TYPE "amenity_bus_station" WHERE "amenity"=="bus_station" CAN BE NODE AREA
-  TYPE "amenity_brothel" WHERE "amenity"=="brothel" CAN BE NODE AREA
-  TYPE "amenity_cafe" WHERE "amenity"=="cafe" CAN BE NODE AREA
-  TYPE "amenity_car_rental" WHERE "amenity"=="car_rental" CAN BE NODE AREA
-  TYPE "amenity_car_sharing" WHERE "amenity"=="car_sharing" CAN BE NODE AREA
-  TYPE "amenity_car_wash" WHERE "amenity"=="car_wash" CAN BE NODE AREA
-  TYPE "amenity_cinema" WHERE "amenity"=="cinema" CAN BE NODE AREA
-  TYPE "amenity_college" WHERE "amenity"=="college" CAN BE NODE AREA
-  TYPE "amenity_courthouse" WHERE "amenity"=="courthouse" CAN BE NODE AREA
-  TYPE "amenity_crematorium" WHERE "amenity"=="crematorium" CAN BE NODE AREA
-  TYPE "amenity_dentist" WHERE "amenity"=="dentist" CAN BE NODE AREA
-  TYPE "amenity_doctors" WHERE "amenity"=="doctors" CAN BE NODE AREA
-  TYPE "amenity_drinking_water" WHERE "amenity"=="drinking_water" CAN BE NODE
-  TYPE "amenity_embassy" WHERE "amenity"=="embassy" CAN BE NODE AREA
-  TYPE "amenity_emergency_phone" WHERE "amenity"=="emergency_phone" CAN BE NODE
-  TYPE "amenity_fast_food" WHERE "amenity"=="fast_food" CAN BE NODE AREA
-  TYPE "amenity_ferry_terminal" WHERE "amenity"=="ferry_terminal" CAN BE NODE AREA
-  TYPE "amenity_fire_station" WHERE "amenity"=="fire_station" CAN BE NODE AREA
-  TYPE "amenity_food_court" WHERE "amenity"=="food_court" CAN BE NODE AREA
-  TYPE "amenity_fountain" WHERE "amenity"=="fountain" CAN BE NODE AREA
-  TYPE "amenity_fuel" WHERE "amenity"=="fuel" CAN BE NODE AREA
-  TYPE "amenity_grave_yard" WHERE "amenity"=="grave_yard" CAN BE NODE AREA
-  TYPE "amenity_grid_bin" WHERE "amenity"=="grid_bin" CAN BE NODE
-  TYPE "amenity_hospital" WHERE "amenity"=="hospital" CAN BE NODE AREA
-  TYPE "amenity_hunting_stand" WHERE "amenity"=="hunting_stand" CAN BE NODE AREA
-  TYPE "amenity_kindergarten" WHERE "amenity"=="kindergarten" CAN BE NODE AREA
-  TYPE "amenity_library" WHERE "amenity"=="library" CAN BE NODE AREA
-  TYPE "amenity_marketplace" WHERE "amenity"=="marketplace" CAN BE WAY AREA
-  TYPE "amenity_nightclub" WHERE "amenity"=="nightclub" CAN BE NODE AREA
-  TYPE "amenity_parking" WHERE "amenity"=="parking" CAN BE NODE AREA
-  TYPE "amenity_pharmacy" WHERE "amenity"=="pharmacy" CAN BE NODE AREA
-  TYPE "amenity_place_of_worship" WHERE "amenity"=="place_of_worship" CAN BE NODE AREA
-  TYPE "amenity_police" WHERE "amenity"=="police" CAN BE NODE AREA
-  TYPE "amenity_post_box" WHERE "amenity"=="post_box" CAN BE NODE
-  TYPE "amenity_post_office" WHERE "amenity"=="post_office" CAN BE NODE AREA
-  TYPE "amenity_prison" WHERE "amenity"=="prison" CAN BE NODE AREA
-  TYPE "amenity_pub" WHERE "amenity"=="pub" CAN BE NODE AREA
-  TYPE "amenity_public_building" WHERE "amenity"=="public_building" CAN BE NODE AREA
-  TYPE "amenity_recycling" WHERE "amenity"=="recycling" CAN BE NODE AREA
-  TYPE "amenity_restaurant" WHERE "amenity"=="restaurant" CAN BE NODE AREA
-  TYPE "amenity_school" WHERE "amenity"=="school" CAN BE NODE AREA
-  TYPE "amenity_shelter" WHERE "amenity"=="shelter" CAN BE NODE AREA
-  TYPE "amenity_signpost" WHERE "amenity"=="signpost" CAN BE NODE
-  TYPE "amenity_studio" WHERE "amenity"=="studio" CAN BE NODE AREA
-  TYPE "amenity_taxi" WHERE "amenity"=="taxi" CAN BE NODE AREA
-  TYPE "amenity_telefon" WHERE "amenity"=="telefon" CAN BE NODE
-  TYPE "amenity_theatre" WHERE "amenity"=="theatre" CAN BE NODE AREA
-  TYPE "amenity_toilets" WHERE "amenity"=="toilets" CAN BE NODE
-  TYPE "amenity_townhall" WHERE "amenity"=="townhall" CAN BE NODE AREA
-  TYPE "amenity_university" WHERE "amenity"=="university" CAN BE NODE AREA
-  TYPE "amenity_vending_machine" WHERE "amenity"=="vending_machine" CAN BE NODE
-  TYPE "amenity_veterinary" WHERE "amenity"=="veterinary" CAN BE NODE AREA
-  TYPE "amenity_waste_basket" WHERE "amenity"=="waste_basket" CAN BE NODE
-  TYPE "amenity_waste_disposal" WHERE "amenity"=="waste_disposal" CAN BE NODE
-  TYPE "shop_alcohol" WHERE "shop"=="alcohol" CAN BE NODE AREA
-  TYPE "shop_bakery" WHERE "shop"=="bakery" CAN BE NODE AREA
-  TYPE "shop_beverages" WHERE "shop"=="beverages" CAN BE NODE AREA
-  TYPE "shop_bicycle" WHERE "shop"=="bicycle" CAN BE NODE AREA
-  TYPE "shop_books" WHERE "shop"=="books" CAN BE NODE AREA
-  TYPE "shop_butcher" WHERE "shop"=="butcher" CAN BE NODE AREA
-  TYPE "shop_car" WHERE "shop"=="car" CAN BE NODE AREA
-  TYPE "shop_car_repair" WHERE "shop"=="car_repair" CAN BE NODE AREA
-  TYPE "shop_chemist" WHERE "shop"=="chemist" CAN BE NODE AREA
-  TYPE "shop_clothes" WHERE "shop"=="clothes" CAN BE NODE AREA
-  TYPE "shop_computer" WHERE "shop"=="computer" CAN BE NODE AREA
-  TYPE "shop_convenience" WHERE "shop"=="convenience" CAN BE NODE AREA
-  TYPE "shop_department_store" WHERE "shop"=="department_store" CAN BE NODE AREA
-  TYPE "shop_dry_cleaning" WHERE "shop"=="dry_cleaning" CAN BE NODE AREA
-  TYPE "shop_doityourself" WHERE "shop"=="doityourself" CAN BE NODE AREA
-  TYPE "shop_electronics" WHERE "shop"=="electronics" CAN BE NODE AREA
-  TYPE "shop_florist" WHERE "shop"=="florist" CAN BE NODE AREA
-  TYPE "shop_furniture" WHERE "shop"=="furniture" CAN BE NODE AREA
-  TYPE "shop_garden_centre" WHERE "shop"=="garden_centre" CAN BE NODE AREA
-  TYPE "shop_hairdresser" WHERE "shop"=="hairdresser" CAN BE NODE AREA
-  TYPE "shop_hardware" WHERE "shop"=="hardware" CAN BE NODE AREA
-  TYPE "shop_hifi" WHERE "shop"=="hifi" CAN BE NODE AREA
-  TYPE "shop_kiosk" WHERE "shop"=="kiosk" CAN BE NODE AREA
-  TYPE "shop_laundry" WHERE "shop"=="laundry" CAN BE NODE AREA
-  TYPE "shop_mall" WHERE "shop"=="mall" CAN BE NODE AREA
-  TYPE "shop_motorcycle" WHERE "shop"=="motorcycle" CAN BE NODE AREA
-  TYPE "shop_optician" WHERE "shop"=="optician" CAN BE NODE AREA
-  TYPE "shop_organic" WHERE "shop"=="organic" CAN BE NODE AREA
-  TYPE "shop_outdoor" WHERE "shop"=="outdoor" CAN BE NODE AREA
-  TYPE "shop_sports" WHERE "shop"=="sports" CAN BE NODE AREA
-  TYPE "shop_stationery" WHERE "shop"=="stationery" CAN BE NODE AREA
-  TYPE "shop_supermarket" WHERE "shop"=="supermarket" CAN BE NODE AREA
-  TYPE "shop_shoes" WHERE "shop"=="shoes" CAN BE NODE AREA
-  TYPE "shop_toys" WHERE "shop"=="toys" CAN BE NODE AREA
-  TYPE "shop_video" WHERE "shop"=="video" CAN BE NODE AREA
-  TYPE "tourism_alpine_hut" WHERE "tourism"=="alpine_hut" CAN BE NODE AREA
-  TYPE "tourism_aquarium" WHERE "tourism"=="aquarium" CAN BE NODE AREA
-  TYPE "tourism_attraction" WHERE "tourism"=="attraction" CAN BE NODE AREA
-  TYPE "tourism_artwork" WHERE "tourism"=="artwork" CAN BE NODE WAY AREA
-  TYPE "tourism_camp_site" WHERE "tourism"=="camp_site" CAN BE NODE AREA
-  TYPE "tourism_caravan_site" WHERE "tourism"=="caravan_site" CAN BE NODE AREA
-  TYPE "tourism_chalet" WHERE "tourism"=="chalet" CAN BE NODE AREA
-  TYPE "tourism_guest_house" WHERE "tourism"=="guest_house" CAN BE NODE AREA
-  TYPE "tourism_hostel" WHERE "tourism"=="hostel" CAN BE NODE AREA
-  TYPE "tourism_hotel" WHERE "tourism"=="hotel" CAN BE NODE AREA
-  TYPE "tourism_information" WHERE "tourism"=="information" CAN BE NODE AREA
-  TYPE "tourism_motel" WHERE "tourism"=="motel" CAN BE NODE AREA
-  TYPE "tourism_museum" WHERE "tourism"=="museum" CAN BE NODE AREA
-  TYPE "tourism_picnic_site" WHERE "tourism"=="picnic_site" CAN BE NODE AREA
-  TYPE "tourism_theme_park" WHERE "tourism"=="theme_park" CAN BE NODE AREA
-  TYPE "tourism_viewpoint" WHERE "tourism"=="viewpoint" CAN BE NODE
-  TYPE "tourism_zoo" WHERE "tourism"=="zoo" CAN BE NODE AREA
-  TYPE "landuse_allotments" WHERE "landuse"=="allotments" CAN BE NODE AREA
-  TYPE "landuse_basin" WHERE "landuse"=="basin" CAN BE NODE AREA
-  TYPE "landuse_brownfield" WHERE "landuse"=="brownfield" CAN BE NODE AREA
-  TYPE "landuse_cemetery" WHERE "landuse"=="cemetery" CAN BE AREA
-  TYPE "landuse_commercial" WHERE "landuse"=="commercial" CAN BE NODE AREA
-  TYPE "landuse_construction" WHERE "landuse"=="construction" CAN BE NODE AREA
-  TYPE "landuse_farm" WHERE "landuse"=="farm" CAN BE AREA
-  TYPE "landuse_farmland" WHERE "landuse"=="farmland" CAN BE AREA
-  TYPE "landuse_farmyard" WHERE "landuse"=="farmyard" CAN BE AREA
-  TYPE "landuse_forest" WHERE "landuse"=="forest" CAN BE NODE AREA
-  TYPE "landuse_garages" WHERE "landuse"=="garages" CAN BE AREA
-  TYPE "landuse_grass" WHERE "landuse"=="grass" CAN BE NODE AREA
-  TYPE "landuse_greenfield" WHERE "landuse"=="greenfield" CAN BE NODE AREA
-  TYPE "landuse_greenhouse_horticulture" WHERE "landuse"=="greenhouse_horticulture" CAN BE AREA
-  TYPE "landuse_industrial" WHERE "landuse"=="industrial" CAN BE NODE AREA
-  TYPE "landuse_landfill" WHERE "landuse"=="landfill" CAN BE NODE AREA
-  TYPE "landuse_meadow" WHERE "landuse"=="meadow" CAN BE NODE AREA
-  TYPE "landuse_military" WHERE "landuse"=="military" CAN BE NODE AREA
-  TYPE "landuse_orchard" WHERE "landuse"=="orchard" CAN BE NODE AREA
-  TYPE "landuse_quarry" WHERE "landuse"=="quarry" CAN BE NODE AREA
-  TYPE "landuse_railway" WHERE "landuse"=="railway" CAN BE AREA OPTIONS ROUTE
-  TYPE "landuse_recreation_ground" WHERE "landuse"=="recreation_ground" CAN BE NODE AREA
-  TYPE "landuse_reservoir" WHERE "landuse"=="reservoir" CAN BE NODE AREA
-  TYPE "landuse_residential" WHERE "landuse"=="residential" CAN BE NODE AREA
-  TYPE "landuse_retail" WHERE "landuse"=="retail" CAN BE NODE AREA
-  TYPE "landuse_salt_pond" WHERE "landuse"=="salt_pond" CAN BE AREA
-  TYPE "landuse_village_green" WHERE "landuse"=="village_green" CAN BE NODE AREA
-  TYPE "landuse_vineyard" WHERE "landuse"=="vineyard" CAN BE NODE AREA
-  TYPE "landuse_wood" WHERE "landuse"=="wood" CAN BE NODE AREA
-  TYPE "natural_bay" WHERE "natural"=="bay" CAN BE NODE AREA
-  TYPE "natural_beach" WHERE "natural"=="beach" CAN BE NODE AREA
-  TYPE "natural_cave_entrance" WHERE "natural"=="cave_entrance" CAN BE NODE AREA
-  TYPE "natural_cliff" WHERE "natural"=="cliff" CAN BE NODE WAY AREA
-  TYPE "natural_coastline" WHERE "natural"=="coastline" CAN BE WAY RELATION
-  TYPE "natural_fell" WHERE "natural"=="fell" CAN BE NODE AREA
-  TYPE "natural_glacier" WHERE "natural"=="glacier" CAN BE NODE AREA
-  TYPE "natural_heath" WHERE "natural"=="heath" CAN BE NODE AREA
-  TYPE "natural_land" WHERE "natural"=="land" CAN BE NODE AREA
-  TYPE "natural_marsh" WHERE "natural"=="marsh" CAN BE NODE AREA
-  TYPE "natural_mud" WHERE "natural"=="mud" CAN BE NODE AREA
-  TYPE "natural_peak" WHERE "natural"=="peak" CAN BE NODE
-  TYPE "natural_sand" WHERE "natural"=="sand" CAN BE NODE AREA
-  TYPE "natural_scree" WHERE "natural"=="scree" CAN BE NODE AREA
-  TYPE "natural_scrub" WHERE "natural"=="scrub" CAN BE NODE AREA
-  TYPE "natural_spring" WHERE "natural"=="spring" CAN BE NODE
-  TYPE "natural_tree" WHERE "natural"=="tree" CAN BE NODE
-  TYPE "natural_volcano" WHERE "natural"=="volcano" CAN BE NODE
-  TYPE "natural_water" WHERE "natural"=="water" CAN BE NODE AREA
-  TYPE "natural_wetland" WHERE "natural"=="wetland" CAN BE NODE AREA
-  TYPE "natural_wood" WHERE "natural"=="wood" CAN BE NODE AREA
-  TYPE "boundary_administrative" WHERE "boundary"=="administrative" CAN BE WAY AREA RELATION // we have multipolygon and boundary as relation type
-  TYPE "boundary_civil" WHERE "boundary"=="civil" CAN BE AREA
-  TYPE "boundary_political" WHERE "boundary"=="political" CAN BE AREA
-  TYPE "place_continent" WHERE "place"=="continent" CAN BE NODE AREA
-  TYPE "place_country" WHERE "place"=="country" CAN BE NODE
-  TYPE "place_state" WHERE "place"=="state" CAN BE NODE AREA
-  TYPE "place_region" WHERE "place"=="region" CAN BE NODE AREA
-  TYPE "place_county" WHERE "place"=="county" CAN BE NODE AREA
-  TYPE "place_city" WHERE "place"=="city" CAN BE NODE AREA
-  TYPE "place_town" WHERE "place"=="town" CAN BE NODE AREA
-  TYPE "place_village" WHERE "place"=="village" CAN BE NODE AREA
-  TYPE "place_hamlet" WHERE "place"=="hamlet" CAN BE NODE AREA
-  TYPE "place_suburb" WHERE "place"=="suburb" CAN BE NODE AREA
-  TYPE "place_locality" WHERE "place"=="locality" CAN BE NODE AREA
-  TYPE "place_island" WHERE "place"=="island" CAN BE NODE AREA
-  TYPE "historic_castle" WHERE "historic"=="castle" CAN BE NODE AREA
-  TYPE "historic_manor" WHERE "historic"=="manor" CAN BE NODE AREA
-  TYPE "historic_monument" WHERE "historic"=="monument" CAN BE NODE AREA
-  TYPE "historic_memorial" WHERE "historic"=="memorial" CAN BE NODE AREA
-  TYPE "historic_archaeological_site" WHERE "historic"=="archaeological_site" CAN BE NODE WAY AREA
-  TYPE "historic_ruins" WHERE "historic"=="ruins" CAN BE NODE AREA
-  TYPE "historic_battlefield" WHERE "historic"=="battlefield" CAN BE NODE AREA
-  TYPE "historic_wreck" WHERE "historic"=="wreck" CAN BE NODE AREA
-  TYPE "military_airfield" WHERE "military"=="airfield" CAN BE NODE AREA
-  TYPE "military_bunker" WHERE "military"=="bunker" CAN BE NODE AREA
-  TYPE "military_barracks" WHERE "military"=="barracks" CAN BE NODE AREA
-  TYPE "military_danger_area" WHERE "military"=="danger_area" CAN BE NODE AREA
-  TYPE "military_range" WHERE "military"=="range" CAN BE NODE AREA
-  TYPE "military_naval_base" WHERE "military"=="naval_base" CAN BE NODE AREA
-  TYPE "sport_9pin" WHERE "sport"=="9pin" CAN BE NODE AREA
-  TYPE "sport_10pin" WHERE "sport"=="10pin" CAN BE NODE AREA
-  TYPE "sport_archery" WHERE "sport"=="archery" CAN BE NODE AREA
-  TYPE "sport_athletics" WHERE "sport"=="athletics" CAN BE NODE AREA
-  TYPE "sport_australian_football" WHERE "sport"=="australian_football" CAN BE NODE AREA
-  TYPE "sport_baseball" WHERE "sport"=="baseball" CAN BE NODE AREA
-  TYPE "sport_basketball" WHERE "sport"=="basketball" CAN BE NODE AREA
-  TYPE "sport_beachvolleyball" WHERE "sport"=="beachvolleyball" CAN BE NODE AREA
-  TYPE "sport_boules" WHERE "sport"=="boules" CAN BE NODE AREA
-  TYPE "sport_bowls" WHERE "sport"=="bowls" CAN BE NODE AREA
-  TYPE "sport_canoe" WHERE "sport"=="canoe" CAN BE NODE AREA
-  TYPE "sport_chess" WHERE "sport"=="chess" CAN BE NODE AREA
-  TYPE "sport_climbing" WHERE "sport"=="climbing" CAN BE NODE AREA
-  TYPE "sport_cricket" WHERE "sport"=="cricket" CAN BE NODE AREA
-  TYPE "sport_cricket_nets" WHERE "sport"=="cricket_nets" CAN BE NODE AREA
-  TYPE "sport_croquet" WHERE "sport"=="croquet" CAN BE NODE AREA
-  TYPE "sport_cycling" WHERE "sport"=="cycling" CAN BE NODE AREA
-  TYPE "sport_diving" WHERE "sport"=="diving" CAN BE NODE AREA
-  TYPE "sport_dog_racing" WHERE "sport"=="dog_racing" CAN BE NODE AREA
-  TYPE "sport_equestrian" WHERE "sport"=="equestrian" CAN BE NODE AREA
-  TYPE "sport_football" WHERE "sport"=="football" CAN BE NODE AREA
-  TYPE "sport_golf" WHERE "sport"=="golf" CAN BE NODE AREA
-  TYPE "sport_gymnastics" WHERE "sport"=="gymnastics" CAN BE NODE AREA
-  TYPE "sport_hockey" WHERE "sport"=="hockey" CAN BE NODE AREA
-  TYPE "sport_horse_racing" WHERE "sport"=="horse_racing" CAN BE NODE AREA
-  TYPE "sport_motor" WHERE "sport"=="motor" CAN BE NODE AREA
-  TYPE "sport_multi" WHERE "sport"=="multi" CAN BE NODE AREA
-  TYPE "sport_orienteering" WHERE "sport"=="orienteering" CAN BE NODE AREA
-  TYPE "sport_paddle_tennis" WHERE "sport"=="paddle_tennis" CAN BE NODE AREA
-  TYPE "sport_pelota" WHERE "sport"=="pelota" CAN BE NODE AREA
-  TYPE "sport_raquet" WHERE "sport"=="raquet" CAN BE NODE AREA
-  TYPE "sport_rowing" WHERE "sport"=="rowing" CAN BE NODE AREA
-  TYPE "sport_rugby" WHERE "sport"=="rugby" CAN BE NODE AREA
-  TYPE "sport_shooting" WHERE "sport"=="shooting" CAN BE NODE AREA
-  TYPE "sport_skating" WHERE "sport"=="skating" CAN BE NODE AREA
-  TYPE "sport_skateboard" WHERE "sport"=="skateboard" CAN BE NODE AREA
-  TYPE "sport_skiing" WHERE "sport"=="skiing" CAN BE NODE AREA
-  TYPE "sport_soccer" WHERE "sport"=="soccer" CAN BE NODE AREA
-  TYPE "sport_swimming" WHERE "sport"=="swimming" CAN BE NODE AREA
-  TYPE "sport_table_tenis" WHERE "sport"=="table_tenis" CAN BE NODE AREA
-  TYPE "sport_team_handball" WHERE "sport"=="team_handball" CAN BE NODE AREA
-  TYPE "sport_tennis" WHERE "sport"=="tennis" CAN BE NODE AREA
-  TYPE "sport_volleyball" WHERE "sport"=="volleyball" CAN BE NODE AREA
-  TYPE "power_tower" WHERE "power"=="tower" CAN BE NODE
-  TYPE "power_pole" WHERE "power"=="pole" CAN BE NODE
-  TYPE "power_line" WHERE "power"=="line" CAN BE WAY
-  TYPE "power_minor_line" WHERE "power"=="minor_line" CAN BE WAY
-  TYPE "power_station" WHERE "power"=="station" CAN BE NODE AREA
-  TYPE "power_sub_station" WHERE "power"=="sub_station" CAN BE NODE AREA
-  TYPE "power_generator" WHERE "power"=="generator" CAN BE NODE AREA
-  TYPE "building"
-        WHERE EXISTS "building" AND
-              !("building" IN ["no","false","0"])
-        CAN BE AREA
+  TYPE "highway_motorway" = WAY ("highway"=="motorway") OPTIONS ROUTE INDEX
+  TYPE "highway_motorway_link" = WAY ("highway"=="motorway_link") OPTIONS ROUTE INDEX
+  TYPE "highway_trunk" = WAY ("highway"=="trunk") OPTIONS ROUTE INDEX
+  TYPE "highway_trunk_link" = WAY ("highway"=="trunk_link") OPTIONS ROUTE INDEX
+  TYPE "highway_primary" = WAY ("highway"=="primary") OPTIONS ROUTE INDEX
+  TYPE "highway_primary_link" = WAY ("highway"=="primary_link") OPTIONS ROUTE INDEX
+  TYPE "highway_secondary" = WAY ("highway"=="secondary") OPTIONS ROUTE INDEX
+  TYPE "highway_secondary_link" = WAY ("highway"=="secondary_link") OPTIONS ROUTE INDEX
+  TYPE "highway_tertiary" = WAY ("highway"=="tertiary") OPTIONS ROUTE INDEX
+  TYPE "highway_unclassified" = WAY ("highway"=="unclassified") OPTIONS ROUTE INDEX
+  TYPE "highway_road" = WAY ("highway"=="road") OPTIONS ROUTE INDEX
+  TYPE "highway_residential" = WAY ("highway"=="residential") OPTIONS ROUTE INDEX
+  TYPE "highway_living_street" = WAY ("highway"=="living_street") OPTIONS ROUTE INDEX
+  TYPE "highway_service" = WAY AREA ("highway"=="service") OPTIONS ROUTE INDEX
+  TYPE "highway_track" = WAY ("highway"=="track") OPTIONS ROUTE INDEX
+  TYPE "highway_pedestrian" = WAY AREA ("highway"=="pedestrian") OPTIONS ROUTE INDEX
+  TYPE "highway_services" = NODE AREA ("highway"=="services") OPTIONS ROUTE INDEX
+  TYPE "highway_bus_guideway" = WAY ("highway"=="bus_guideway") OPTIONS ROUTE
+  TYPE "highway_path" = WAY ("highway"=="path") OPTIONS ROUTE
+  TYPE "highway_cycleway" = WAY ("highway"=="cycleway") OPTIONS ROUTE
+  TYPE "highway_footway" = WAY ("highway"=="footway") OPTIONS ROUTE
+  TYPE "highway_bridleway" = WAY ("highway"=="bridleway") OPTIONS ROUTE
+  TYPE "highway_byway" = WAY ("highway"=="byway") OPTIONS ROUTE
+  TYPE "highway_steps" = WAY ("highway"=="steps") OPTIONS ROUTE
+  TYPE "highway_mini_roundabout" = NODE ("highway"=="mini_roundabout")
+  TYPE "highway_bus_stop" = NODE ("highway"=="bus_stop")
+  TYPE "highway_turning_cycle" = NODE ("highway"=="turning_cycle")
+  TYPE "highway_construction" = WAY ("highway"=="construction")
+  TYPE "highway_roundabout" = WAY AREA ("highway"=="roundabout") OPTIONS ROUTE
+  TYPE "highway_motorway_junction" = NODE ("highway"=="motorway_junction") OPTIONS ROUTE
+  TYPE "waterway_stream" = WAY ("waterway"=="stream") OR RELATION ("type"=="waterway" AND "waterway"=="stream") OPTIONS ROUTE CONSUME_CHILDREN
+  TYPE "waterway_river" = WAY ("waterway"=="river") OR RELATION ("type"=="waterway" AND "waterway"=="river") OPTIONS ROUTE CONSUME_CHILDREN
+  TYPE "waterway_riverbank" = AREA ("waterway"=="riverbank") OPTIONS ROUTE
+  TYPE "waterway_canal" = WAY ("waterway"=="canal") OR RELATION ("type"=="waterway" AND "waterway"=="canal") OPTIONS ROUTE CONSUME_CHILDREN
+  TYPE "waterway_ditch" = WAY ("waterway"=="ditch") OR RELATION ("type"=="waterway" AND "waterway"=="ditch") OPTIONS ROUTE CONSUME_CHILDREN
+  TYPE "waterway_drain" = WAY ("waterway"=="drain") OR RELATION ("type"=="waterway" AND "waterway"=="drain") OPTIONS ROUTE CONSUME_CHILDREN
+  TYPE "waterway_dock" = NODE AREA ("waterway"=="dock") OPTIONS ROUTE
+  TYPE "waterway_lock_gate" = NODE ("waterway"=="lock_gate")
+  TYPE "waterway_turning_point" = NODE ("waterway"=="turning_point")
+  TYPE "waterway_boat_yard" = NODE ("waterway"=="boat_yard")
+  TYPE "waterway_weir" = NODE WAY ("waterway"=="weir") OR RELATION ("type"=="waterway" AND "waterway"=="weir") OPTIONS CONSUME_CHILDREN
+  TYPE "waterway_rapits" = NODE WAY ("waterway"=="rapits") OR RELATION ("type"=="waterway" AND "waterway"=="rapits") OPTIONS CONSUME_CHILDREN
+  TYPE "waterway_dam" = WAY AREA ("waterway"=="dam")
+  TYPE "railway_rail" = WAY ("railway"=="rail") OPTIONS ROUTE
+  TYPE "railway_tram" = WAY ("railway"=="tram") OPTIONS ROUTE
+  TYPE "railway_light_rail" = WAY ("railway"=="light_rail") OPTIONS ROUTE
+  TYPE "railway_subway" = WAY ("railway"=="subway") OPTIONS ROUTE
+  TYPE "railway_preserved" = WAY ("railway"=="preserved") OPTIONS ROUTE
+  TYPE "railway_disused" = WAY ("railway"=="disused")
+  TYPE "railway_abandoned" = WAY ("railway"=="abandoned")
+  TYPE "railway_narrow_gauge" = WAY ("railway"=="narrow_gauge")
+  TYPE "railway_monorail" = WAY ("railway"=="monorail")
+  TYPE "railway_station" = NODE AREA ("railway"=="station")
+  TYPE "railway_halt" = NODE ("railway"=="halt")
+  TYPE "railway_tram_stop" = NODE ("railway"=="tram_stop")
+  TYPE "railway_crossing" = NODE ("railway"=="crossing")
+  TYPE "railway_level_crossing" = NODE ("railway"=="level_crossing")
+  TYPE "railway_subway_entrance" = NODE ("railway"=="subway_entrance")
+  TYPE "railway_turntable" = NODE AREA ("railway"=="turntable")
+  TYPE "railway_platform" = WAY AREA ("railway"=="platform")
+  TYPE "route_ferry" = WAY ("route"=="ferry")
+  TYPE "aeroway_aerodrome" = NODE AREA ("aeroway"=="aerodrome")
+  TYPE "aeroway_terminal" = NODE AREA ("aeroway"=="terminal")
+  TYPE "aeroway_helipad" = NODE AREA ("aeroway"=="helipad")
+  TYPE "aeroway_runway" = WAY ("aeroway"=="runway")
+  TYPE "aeroway_taxiway" = WAY ("aeroway"=="taxiway")
+  TYPE "aeroway_apron" = AREA ("aeroway"=="apron")
+  TYPE "aeroway_gate" = NODE ("aeroway"=="gate")
+  TYPE "leisure_sports_centre" = NODE AREA ("leisure"=="sports_centre")
+  TYPE "leisure_golf_course" = NODE AREA ("leisure"=="golf_course")
+  TYPE "leisure_stadium" = NODE AREA ("leisure"=="stadium")
+  TYPE "leisure_track" = NODE WAY AREA ("leisure"=="track")
+  TYPE "leisure_pitch" = NODE AREA ("leisure"=="pitch")
+  TYPE "leisure_water_park" = NODE AREA ("leisure"=="water_park")
+  TYPE "leisure_marina" = NODE AREA ("leisure"=="marina")
+  TYPE "leisure_slipway" = NODE ("leisure"=="slipway")
+  TYPE "leisure_fishing" = NODE AREA ("leisure"=="fishing")
+  TYPE "leisure_nature_reserve" = NODE AREA ("leisure"=="nature_reserve")
+  TYPE "leisure_park" = NODE AREA ("leisure"=="park")
+  TYPE "leisure_playground" = NODE AREA ("leisure"=="playground")
+  TYPE "leisure_garden" = NODE AREA ("leisure"=="garden")
+  TYPE "leisure_common" = NODE AREA ("leisure"=="common")
+  TYPE "leisure_ice_rink" = NODE AREA ("leisure"=="ice_rink")
+  TYPE "amenity_arts_centre" = NODE AREA ("amenity"=="arts_centre")
+  TYPE "amenity_atm" = NODE ("amenity"=="atm")
+  TYPE "amenity_baby_hatch" = NODE AREA ("amenity"=="baby_hatch")
+  TYPE "amenity_bank" = NODE AREA ("amenity"=="bank")
+  TYPE "amenity_bbq" = NODE ("amenity"=="bbq")
+  TYPE "amenity_bench" = NODE ("amenity"=="bench")
+  TYPE "amenity_biergarten" = NODE AREA ("amenity"=="biergarten")
+  TYPE "amenity_bicycle_parking" = NODE AREA ("amenity"=="bicycle_parking")
+  TYPE "amenity_bicycle_rental" = NODE AREA ("amenity"=="bicycle_rental")
+  TYPE "amenity_buerau_de_change" = NODE ("amenity"=="buerau_de_change")
+  TYPE "amenity_bus_station" = NODE AREA ("amenity"=="bus_station")
+  TYPE "amenity_brothel" = NODE AREA ("amenity"=="brothel")
+  TYPE "amenity_cafe" = NODE AREA ("amenity"=="cafe")
+  TYPE "amenity_car_rental" = NODE AREA ("amenity"=="car_rental")
+  TYPE "amenity_car_sharing" = NODE AREA ("amenity"=="car_sharing")
+  TYPE "amenity_car_wash" = NODE AREA ("amenity"=="car_wash")
+  TYPE "amenity_cinema" = NODE AREA ("amenity"=="cinema")
+  TYPE "amenity_college" = NODE AREA ("amenity"=="college")
+  TYPE "amenity_courthouse" = NODE AREA ("amenity"=="courthouse")
+  TYPE "amenity_crematorium" = NODE AREA ("amenity"=="crematorium")
+  TYPE "amenity_dentist" = NODE AREA ("amenity"=="dentist")
+  TYPE "amenity_doctors" = NODE AREA ("amenity"=="doctors")
+  TYPE "amenity_drinking_water" = NODE ("amenity"=="drinking_water")
+  TYPE "amenity_embassy" = NODE AREA ("amenity"=="embassy")
+  TYPE "amenity_emergency_phone" = NODE ("amenity"=="emergency_phone")
+  TYPE "amenity_fast_food" = NODE AREA ("amenity"=="fast_food")
+  TYPE "amenity_ferry_terminal" = NODE AREA ("amenity"=="ferry_terminal")
+  TYPE "amenity_fire_station" = NODE AREA ("amenity"=="fire_station")
+  TYPE "amenity_food_court" = NODE AREA ("amenity"=="food_court")
+  TYPE "amenity_fountain" = NODE AREA ("amenity"=="fountain")
+  TYPE "amenity_fuel" = NODE AREA ("amenity"=="fuel")
+  TYPE "amenity_grave_yard" = NODE AREA ("amenity"=="grave_yard")
+  TYPE "amenity_grid_bin" = NODE ("amenity"=="grid_bin")
+  TYPE "amenity_hospital" = NODE AREA ("amenity"=="hospital")
+  TYPE "amenity_hunting_stand" = NODE AREA ("amenity"=="hunting_stand")
+  TYPE "amenity_kindergarten" = NODE AREA ("amenity"=="kindergarten")
+  TYPE "amenity_library" = NODE AREA ("amenity"=="library")
+  TYPE "amenity_marketplace" = WAY AREA ("amenity"=="marketplace")
+  TYPE "amenity_nightclub" = NODE AREA ("amenity"=="nightclub")
+  TYPE "amenity_parking" = NODE AREA ("amenity"=="parking")
+  TYPE "amenity_pharmacy" = NODE AREA ("amenity"=="pharmacy")
+  TYPE "amenity_place_of_worship" = NODE AREA ("amenity"=="place_of_worship")
+  TYPE "amenity_police" = NODE AREA ("amenity"=="police")
+  TYPE "amenity_post_box" = NODE ("amenity"=="post_box")
+  TYPE "amenity_post_office" = NODE AREA ("amenity"=="post_office")
+  TYPE "amenity_prison" = NODE AREA ("amenity"=="prison")
+  TYPE "amenity_pub" = NODE AREA ("amenity"=="pub")
+  TYPE "amenity_public_building" = NODE AREA ("amenity"=="public_building")
+  TYPE "amenity_recycling" = NODE AREA ("amenity"=="recycling")
+  TYPE "amenity_restaurant" = NODE AREA ("amenity"=="restaurant")
+  TYPE "amenity_school" = NODE AREA ("amenity"=="school")
+  TYPE "amenity_shelter" = NODE AREA ("amenity"=="shelter")
+  TYPE "amenity_signpost" = NODE ("amenity"=="signpost")
+  TYPE "amenity_studio" = NODE AREA ("amenity"=="studio")
+  TYPE "amenity_taxi" = NODE AREA ("amenity"=="taxi")
+  TYPE "amenity_telefon" = NODE ("amenity"=="telefon")
+  TYPE "amenity_theatre" = NODE AREA ("amenity"=="theatre")
+  TYPE "amenity_toilets" = NODE ("amenity"=="toilets")
+  TYPE "amenity_townhall" = NODE AREA ("amenity"=="townhall")
+  TYPE "amenity_university" = NODE AREA ("amenity"=="university")
+  TYPE "amenity_vending_machine" = NODE ("amenity"=="vending_machine")
+  TYPE "amenity_veterinary" = NODE AREA ("amenity"=="veterinary")
+  TYPE "amenity_waste_basket" = NODE ("amenity"=="waste_basket")
+  TYPE "amenity_waste_disposal" = NODE ("amenity"=="waste_disposal")
+  TYPE "shop_alcohol" = NODE AREA ("shop"=="alcohol")
+  TYPE "shop_bakery" = NODE AREA ("shop"=="bakery")
+  TYPE "shop_beverages" = NODE AREA ("shop"=="beverages")
+  TYPE "shop_bicycle" = NODE AREA ("shop"=="bicycle")
+  TYPE "shop_books" = NODE AREA ("shop"=="books")
+  TYPE "shop_butcher" = NODE AREA ("shop"=="butcher")
+  TYPE "shop_car" = NODE AREA ("shop"=="car")
+  TYPE "shop_car_repair" = NODE AREA ("shop"=="car_repair")
+  TYPE "shop_chemist" = NODE AREA ("shop"=="chemist")
+  TYPE "shop_clothes" = NODE AREA ("shop"=="clothes")
+  TYPE "shop_computer" = NODE AREA ("shop"=="computer")
+  TYPE "shop_convenience" = NODE AREA ("shop"=="convenience")
+  TYPE "shop_department_store" = NODE AREA ("shop"=="department_store")
+  TYPE "shop_dry_cleaning" = NODE AREA ("shop"=="dry_cleaning")
+  TYPE "shop_doityourself" = NODE AREA ("shop"=="doityourself")
+  TYPE "shop_electronics" = NODE AREA ("shop"=="electronics")
+  TYPE "shop_florist" = NODE AREA ("shop"=="florist")
+  TYPE "shop_furniture" = NODE AREA ("shop"=="furniture")
+  TYPE "shop_garden_centre" = NODE AREA ("shop"=="garden_centre")
+  TYPE "shop_hairdresser" = NODE AREA ("shop"=="hairdresser")
+  TYPE "shop_hardware" = NODE AREA ("shop"=="hardware")
+  TYPE "shop_hifi" = NODE AREA ("shop"=="hifi")
+  TYPE "shop_kiosk" = NODE AREA ("shop"=="kiosk")
+  TYPE "shop_laundry" = NODE AREA ("shop"=="laundry")
+  TYPE "shop_mall" = NODE AREA ("shop"=="mall")
+  TYPE "shop_motorcycle" = NODE AREA ("shop"=="motorcycle")
+  TYPE "shop_optician" = NODE AREA ("shop"=="optician")
+  TYPE "shop_organic" = NODE AREA ("shop"=="organic")
+  TYPE "shop_outdoor" = NODE AREA ("shop"=="outdoor")
+  TYPE "shop_sports" = NODE AREA ("shop"=="sports")
+  TYPE "shop_stationery" = NODE AREA ("shop"=="stationery")
+  TYPE "shop_supermarket" = NODE AREA ("shop"=="supermarket")
+  TYPE "shop_shoes" = NODE AREA ("shop"=="shoes")
+  TYPE "shop_toys" = NODE AREA ("shop"=="toys")
+  TYPE "shop_video" = NODE AREA ("shop"=="video")
+  TYPE "tourism_alpine_hut" = NODE AREA ("tourism"=="alpine_hut")
+  TYPE "tourism_aquarium" = NODE AREA ("tourism"=="aquarium")
+  TYPE "tourism_attraction" = NODE AREA ("tourism"=="attraction")
+  TYPE "tourism_artwork" = NODE WAY AREA ("tourism"=="artwork")
+  TYPE "tourism_camp_site" = NODE AREA ("tourism"=="camp_site")
+  TYPE "tourism_caravan_site" = NODE AREA ("tourism"=="caravan_site")
+  TYPE "tourism_chalet" = NODE AREA ("tourism"=="chalet")
+  TYPE "tourism_guest_house" = NODE AREA ("tourism"=="guest_house")
+  TYPE "tourism_hostel" = NODE AREA ("tourism"=="hostel")
+  TYPE "tourism_hotel" = NODE AREA ("tourism"=="hotel")
+  TYPE "tourism_information" = NODE AREA ("tourism"=="information")
+  TYPE "tourism_motel" = NODE AREA ("tourism"=="motel")
+  TYPE "tourism_museum" = NODE AREA ("tourism"=="museum")
+  TYPE "tourism_picnic_site" = NODE AREA ("tourism"=="picnic_site")
+  TYPE "tourism_theme_park" = NODE AREA ("tourism"=="theme_park")
+  TYPE "tourism_viewpoint" = NODE ("tourism"=="viewpoint")
+  TYPE "tourism_zoo" = NODE AREA ("tourism"=="zoo")
+  TYPE "landuse_allotments" = NODE AREA ("landuse"=="allotments")
+  TYPE "landuse_basin" = NODE AREA ("landuse"=="basin")
+  TYPE "landuse_brownfield" = NODE AREA ("landuse"=="brownfield")
+  TYPE "landuse_cemetery" = AREA ("landuse"=="cemetery")
+  TYPE "landuse_commercial" = NODE AREA ("landuse"=="commercial")
+  TYPE "landuse_construction" = NODE AREA ("landuse"=="construction")
+  TYPE "landuse_farm" = AREA ("landuse"=="farm")
+  TYPE "landuse_farmland" = AREA ("landuse"=="farmland")
+  TYPE "landuse_farmyard" = AREA ("landuse"=="farmyard")
+  TYPE "landuse_forest" = NODE AREA ("landuse"=="forest")
+  TYPE "landuse_garages" = AREA ("landuse"=="garages")
+  TYPE "landuse_grass" = NODE AREA ("landuse"=="grass")
+  TYPE "landuse_greenfield" = NODE AREA ("landuse"=="greenfield")
+  TYPE "landuse_greenhouse_horticulture" = AREA ("landuse"=="greenhouse_horticulture")
+  TYPE "landuse_industrial" = NODE AREA ("landuse"=="industrial")
+  TYPE "landuse_landfill" = NODE AREA ("landuse"=="landfill")
+  TYPE "landuse_meadow" = NODE AREA ("landuse"=="meadow")
+  TYPE "landuse_military" = NODE AREA ("landuse"=="military")
+  TYPE "landuse_orchard" = NODE AREA ("landuse"=="orchard")
+  TYPE "landuse_quarry" = NODE AREA ("landuse"=="quarry")
+  TYPE "landuse_railway" = AREA ("landuse"=="railway") OPTIONS ROUTE
+  TYPE "landuse_recreation_ground" = NODE AREA ("landuse"=="recreation_ground")
+  TYPE "landuse_reservoir" = NODE AREA ("landuse"=="reservoir")
+  TYPE "landuse_residential" = NODE AREA ("landuse"=="residential")
+  TYPE "landuse_retail" = NODE AREA ("landuse"=="retail")
+  TYPE "landuse_salt_pond" = AREA ("landuse"=="salt_pond")
+  TYPE "landuse_village_green" = NODE AREA ("landuse"=="village_green")
+  TYPE "landuse_vineyard" = NODE AREA ("landuse"=="vineyard")
+  TYPE "landuse_wood" = NODE AREA ("landuse"=="wood")
+  TYPE "natural_bay" = NODE AREA ("natural"=="bay")
+  TYPE "natural_beach" = NODE AREA ("natural"=="beach")
+  TYPE "natural_cave_entrance" = NODE AREA ("natural"=="cave_entrance")
+  TYPE "natural_cliff" = NODE WAY AREA ("natural"=="cliff")
+  TYPE "natural_coastline" = WAY RELATION ("natural"=="coastline")
+  TYPE "natural_fell" = NODE AREA ("natural"=="fell")
+  TYPE "natural_glacier" = NODE AREA ("natural"=="glacier")
+  TYPE "natural_heath" = NODE AREA ("natural"=="heath")
+  TYPE "natural_land" = NODE AREA ("natural"=="land")
+  TYPE "natural_marsh" = NODE AREA ("natural"=="marsh")
+  TYPE "natural_mud" = NODE AREA ("natural"=="mud")
+  TYPE "natural_peak" = NODE ("natural"=="peak")
+  TYPE "natural_sand" = NODE AREA ("natural"=="sand")
+  TYPE "natural_scree" = NODE AREA ("natural"=="scree")
+  TYPE "natural_scrub" = NODE AREA ("natural"=="scrub")
+  TYPE "natural_spring" = NODE ("natural"=="spring")
+  TYPE "natural_tree" = NODE ("natural"=="tree")
+  TYPE "natural_volcano" = NODE ("natural"=="volcano")
+  TYPE "natural_water" = NODE AREA ("natural"=="water")
+  TYPE "natural_wetland" = NODE AREA ("natural"=="wetland")
+  TYPE "natural_wood" = NODE AREA ("natural"=="wood")
+  TYPE "boundary_administrative" = WAY AREA ("boundary"=="administrative") OR RELATION ("type"=="boundary" AND "boundary"=="administrative") // we have multipolygon and boundary as relation type
+  TYPE "boundary_civil" = AREA ("boundary"=="civil")
+  TYPE "boundary_political" = AREA ("boundary"=="political")
+  TYPE "place_continent" = NODE AREA ("place"=="continent")
+  TYPE "place_country" = NODE ("place"=="country")
+  TYPE "place_state" = NODE AREA ("place"=="state")
+  TYPE "place_region" = NODE AREA ("place"=="region")
+  TYPE "place_county" = NODE AREA ("place"=="county")
+  TYPE "place_city" = NODE AREA ("place"=="city")
+  TYPE "place_town" = NODE AREA ("place"=="town")
+  TYPE "place_village" = NODE AREA ("place"=="village")
+  TYPE "place_hamlet" = NODE AREA ("place"=="hamlet")
+  TYPE "place_suburb" = NODE AREA ("place"=="suburb")
+  TYPE "place_locality" = NODE AREA ("place"=="locality")
+  TYPE "place_island" = NODE AREA ("place"=="island")
+  TYPE "historic_castle" = NODE AREA ("historic"=="castle")
+  TYPE "historic_manor" = NODE AREA ("historic"=="manor")
+  TYPE "historic_monument" = NODE AREA ("historic"=="monument")
+  TYPE "historic_memorial" = NODE AREA ("historic"=="memorial")
+  TYPE "historic_archaeological_site" = NODE WAY AREA ("historic"=="archaeological_site")
+  TYPE "historic_ruins" = NODE AREA ("historic"=="ruins")
+  TYPE "historic_battlefield" = NODE AREA ("historic"=="battlefield")
+  TYPE "historic_wreck" = NODE AREA ("historic"=="wreck")
+  TYPE "military_airfield" = NODE AREA ("military"=="airfield")
+  TYPE "military_bunker" = NODE AREA ("military"=="bunker")
+  TYPE "military_barracks" = NODE AREA ("military"=="barracks")
+  TYPE "military_danger_area" = NODE AREA ("military"=="danger_area")
+  TYPE "military_range" = NODE AREA ("military"=="range")
+  TYPE "military_naval_base" = NODE AREA ("military"=="naval_base")
+  TYPE "sport_9pin" = NODE AREA ("sport"=="9pin")
+  TYPE "sport_10pin" = NODE AREA ("sport"=="10pin")
+  TYPE "sport_archery" = NODE AREA ("sport"=="archery")
+  TYPE "sport_athletics" = NODE AREA ("sport"=="athletics")
+  TYPE "sport_australian_football" = NODE AREA ("sport"=="australian_football")
+  TYPE "sport_baseball" = NODE AREA ("sport"=="baseball")
+  TYPE "sport_basketball" = NODE AREA ("sport"=="basketball")
+  TYPE "sport_beachvolleyball" = NODE AREA ("sport"=="beachvolleyball")
+  TYPE "sport_boules" = NODE AREA ("sport"=="boules")
+  TYPE "sport_bowls" = NODE AREA ("sport"=="bowls")
+  TYPE "sport_canoe" = NODE AREA ("sport"=="canoe")
+  TYPE "sport_chess" = NODE AREA ("sport"=="chess")
+  TYPE "sport_climbing" = NODE AREA ("sport"=="climbing")
+  TYPE "sport_cricket" = NODE AREA ("sport"=="cricket")
+  TYPE "sport_cricket_nets" = NODE AREA ("sport"=="cricket_nets")
+  TYPE "sport_croquet" = NODE AREA ("sport"=="croquet")
+  TYPE "sport_cycling" = NODE AREA ("sport"=="cycling")
+  TYPE "sport_diving" = NODE AREA ("sport"=="diving")
+  TYPE "sport_dog_racing" = NODE AREA ("sport"=="dog_racing")
+  TYPE "sport_equestrian" = NODE AREA ("sport"=="equestrian")
+  TYPE "sport_football" = NODE AREA ("sport"=="football")
+  TYPE "sport_golf" = NODE AREA ("sport"=="golf")
+  TYPE "sport_gymnastics" = NODE AREA ("sport"=="gymnastics")
+  TYPE "sport_hockey" = NODE AREA ("sport"=="hockey")
+  TYPE "sport_horse_racing" = NODE AREA ("sport"=="horse_racing")
+  TYPE "sport_motor" = NODE AREA ("sport"=="motor")
+  TYPE "sport_multi" = NODE AREA ("sport"=="multi")
+  TYPE "sport_orienteering" = NODE AREA ("sport"=="orienteering")
+  TYPE "sport_paddle_tennis" = NODE AREA ("sport"=="paddle_tennis")
+  TYPE "sport_pelota" = NODE AREA ("sport"=="pelota")
+  TYPE "sport_raquet" = NODE AREA ("sport"=="raquet")
+  TYPE "sport_rowing" = NODE AREA ("sport"=="rowing")
+  TYPE "sport_rugby" = NODE AREA ("sport"=="rugby")
+  TYPE "sport_shooting" = NODE AREA ("sport"=="shooting")
+  TYPE "sport_skating" = NODE AREA ("sport"=="skating")
+  TYPE "sport_skateboard" = NODE AREA ("sport"=="skateboard")
+  TYPE "sport_skiing" = NODE AREA ("sport"=="skiing")
+  TYPE "sport_soccer" = NODE AREA ("sport"=="soccer")
+  TYPE "sport_swimming" = NODE AREA ("sport"=="swimming")
+  TYPE "sport_table_tenis" = NODE AREA ("sport"=="table_tenis")
+  TYPE "sport_team_handball" = NODE AREA ("sport"=="team_handball")
+  TYPE "sport_tennis" = NODE AREA ("sport"=="tennis")
+  TYPE "sport_volleyball" = NODE AREA ("sport"=="volleyball")
+  TYPE "power_tower" = NODE ("power"=="tower")
+  TYPE "power_pole" = NODE ("power"=="pole")
+  TYPE "power_line" = WAY ("power"=="line")
+  TYPE "power_minor_line" = WAY ("power"=="minor_line")
+  TYPE "power_station" = NODE AREA ("power"=="station")
+  TYPE "power_sub_station" = NODE AREA ("power"=="sub_station")
+  TYPE "power_generator" = NODE AREA ("power"=="generator")
+  TYPE "building" = AREA (EXISTS "building" AND !("building" IN ["no","false","0"]))
         /*
-  TYPE "barrier_hedge" WHERE "barrier"=="hedge" CAN BE WAY AREA
-  TYPE "barrier_fence" WHERE "barrier"=="fence" CAN BE WAY AREA
-  TYPE "barrier_wall" WHERE "barrier"=="wall" CAN BE WAY AREA
-  TYPE "barrier_ditch" WHERE "barrier"=="ditch" CAN BE WAY AREA
-  TYPE "barrier_retaining_wall" WHERE "barrier"=="retaining_wall" CAN BE WAY AREA
-  TYPE "barrier_city_wall" WHERE "barrier"=="city_wall" CAN BE WAY AREA
-  TYPE "barrier_bollard" WHERE "barrier"=="bollard" CAN BE NODE WAY
-  TYPE "barrier_cycle_barrier" WHERE "barrier"=="cycle_barrier" CAN BE NODE
-  TYPE "barrier_block" WHERE "barrier"=="block" CAN BE NODE
-  TYPE "barrier_cattle_grid" WHERE "barrier"=="cattle_grid" CAN BE NODE
-  TYPE "barrier_toll_booth" WHERE "barrier"=="toll_booth" CAN BE NODE
-  TYPE "barrier_entrance" WHERE "barrier"=="entrance" CAN BE NODE
-  TYPE "barrier_gate" WHERE "barrier"=="gate" CAN BE NODE WAY
-  TYPE "barrier_lift_gate" WHERE "barrier"=="lift_gate" CAN BE NODE
-  TYPE "barrier_stile" WHERE "barrier"=="stile" CAN BE NODE
-  TYPE "barrier_sally_port" WHERE "barrier"=="sally_port" CAN BE NODE
-  TYPE "barrier_kent_carriage_gate" WHERE "barrier"=="kent_carriage_gate" CAN BE NODE*/
-  TYPE "restriction_no_right_turn" WHERE "restriction"=="no_right_turn" CAN BE RELATION
-  TYPE "restriction_no_left_turn" WHERE "restriction"=="no_left_turn" CAN BE RELATION
-  TYPE "restriction_no_u_turn" WHERE "restriction"=="no_u_turn" CAN BE RELATION
-  TYPE "restriction_no_straight_on" WHERE "restriction"=="no_straight_on" CAN BE RELATION
-  TYPE "restriction_only_right_turn" WHERE "restriction"=="only_right_turn" CAN BE RELATION
-  TYPE "restriction_only_right_turn" WHERE "restriction"=="only_right_turn" CAN BE RELATION
-  TYPE "restriction_only_left_turn" WHERE "restriction"=="only_left_turn" CAN BE RELATION
-  TYPE "restriction_only_straight_on" WHERE "restriction"=="only_straight_on" CAN BE RELATION
+  TYPE "barrier_hedge" = WAY AREA ("barrier"=="hedge")
+  TYPE "barrier_fence" = WAY AREA ("barrier"=="fence")
+  TYPE "barrier_wall" = WAY AREA ("barrier"=="wall")
+  TYPE "barrier_ditch" = WAY AREA ("barrier"=="ditch")
+  TYPE "barrier_retaining_wall" = WAY AREA ("barrier"=="retaining_wall")
+  TYPE "barrier_city_wall" = WAY AREA ("barrier"=="city_wall")
+  TYPE "barrier_bollard" = NODE WAY ("barrier"=="bollard")
+  TYPE "barrier_cycle_barrier" = NODE ("barrier"=="cycle_barrier")
+  TYPE "barrier_block" = NODE ("barrier"=="block")
+  TYPE "barrier_cattle_grid" = NODE ("barrier"=="cattle_grid")
+  TYPE "barrier_toll_booth" = NODE ("barrier"=="toll_booth")
+  TYPE "barrier_entrance" = NODE ("barrier"=="entrance")
+  TYPE "barrier_gate" = NODE WAY ("barrier"=="gate")
+  TYPE "barrier_lift_gate" = NODE ("barrier"=="lift_gate")
+  TYPE "barrier_stile" = NODE ("barrier"=="stile")
+  TYPE "barrier_sally_port" = NODE ("barrier"=="sally_port")
+  TYPE "barrier_kent_carriage_gate" = NODE ("barrier"=="kent_carriage_gate")*/
+  TYPE "restriction_no_right_turn" = RELATION ("type"=="restriction" AND "restriction"=="no_right_turn")
+  TYPE "restriction_no_left_turn" = RELATION ("type"=="restriction" AND "restriction"=="no_left_turn")
+  TYPE "restriction_no_u_turn" = RELATION ("type"=="restriction" AND "restriction"=="no_u_turn")
+  TYPE "restriction_no_straight_on" = RELATION ("type"=="restriction" AND "restriction"=="no_straight_on")
+  TYPE "restriction_only_right_turn" = RELATION ("type"=="restriction" AND "restriction"=="only_right_turn")
+  TYPE "restriction_only_right_turn" = RELATION ("type"=="restriction" AND "restriction"=="only_right_turn")
+  TYPE "restriction_only_left_turn" = RELATION ("type"=="restriction" AND "restriction"=="only_left_turn")
+  TYPE "restriction_only_straight_on" = RELATION ("type"=="restriction" AND "restriction"=="only_straight_on")
 END

@@ -663,11 +663,10 @@ namespace osmscout {
         continue;
       }
 
-      // Resolve type of multipolygon/boundary relations if the relation does
+      // Resolve type of multipolygon relations if the relation does
       // not have a type
       if (rel.GetType()==typeIgnore &&
-          (rel.GetRelType()=="multipolygon" ||
-           rel.GetRelType()=="boundary")) {
+          rel.GetRelType()=="multipolygon") {
         bool   correct=true;
         TypeId typeId=typeIgnore;
 
@@ -677,14 +676,14 @@ namespace osmscout {
                 rel.roles[m].GetType()!=typeIgnore) {
               typeId=rel.roles[m].GetType();
               if (progress.OutputDebug()) {
-                progress.Debug("Autodetecting type of relation "+NumberToString(rel.GetId())+" as "+NumberToString(rel.GetType()));
+                progress.Debug("Autodetecting type of relation "+NumberToString(rel.GetId())+" as "+NumberToString(typeId));
               }
             }
             else if (typeId!=typeIgnore &&
                      rel.roles[m].GetType()!=typeIgnore &&
                      typeId!=rel.roles[m].GetType()) {
               if (progress.OutputDebug()) {
-                progress.Debug("Multipolygon/boundary relation "+NumberToString(rel.GetId())+" has conflicting types for outer boundary ("+
+                progress.Debug("Multipolygon relation "+NumberToString(rel.GetId())+" has conflicting types for outer boundary ("+
                                NumberToString(rawRel.members[m].id)+","+NumberToString(rel.GetType())+","+NumberToString(rel.roles[m].GetType())+")");
               }
               correct=false;
@@ -723,20 +722,20 @@ namespace osmscout {
       // from the areaWayIndex to assure that a way will not be returned twice,
       // once as part of the relation and once as way itself
       //
-      // For multipolygon and boundary relations we restrict blacklisting to the
+      // For multipolygon relations we restrict blacklisting to the
       // outer boundaries
-      if (rel.GetRelType()=="multipolygon" ||
-          rel.GetRelType()=="boundary") {
+      if (rel.GetRelType()=="multipolygon") {
         for (size_t m=0; m<rel.roles.size(); m++) {
           if (rel.roles[m].role=="outer" ||
               rel.roles[m].role=="") {
-            if (rel.GetType()==rel.roles[m].GetType()) {
+            if (rel.roles[m].GetType()==rel.GetType()) {
               wayAreaIndexBlacklist.insert(rawRel.members[m].id);
             }
           }
         }
       }
-      else {
+      else if (rel.GetType()!=typeIgnore &&
+               typeConfig.GetTypeInfo(rel.GetType()).GetConsumeChildren()) {
         for (size_t m=0; m<rel.roles.size(); m++) {
           if (rel.GetType()==rel.roles[m].GetType()) {
             wayAreaIndexBlacklist.insert(rawRel.members[m].id);
@@ -747,8 +746,7 @@ namespace osmscout {
       // Reconstruct multiploygon relation by applying the multipolygon resolving
       // algorithm as destribed at
       // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
-      if (rel.GetRelType()=="multipolygon" ||
-          rel.GetRelType()=="boundary") {
+      if (rel.GetRelType()=="multipolygon") {
         if (!ResolveMultipolygon(rel,progress)) {
           progress.Error("Cannot resolve multipolygon relation "+
                          NumberToString(rawRel.GetId())+" "+name);
@@ -759,9 +757,8 @@ namespace osmscout {
       rel.SetId(rawRel.GetId());
       rel.tags=rawRel.tags;
 
-      if (rel.GetRelType()=="multipolygon" &&
-          rel.GetType()!=typeIgnore &&
-          typeConfig.GetTypeInfo(rel.GetType()).CanBeArea()) {
+      // Multipolygons are always areas
+      if (rel.GetRelType()=="multipolygon") {
         rel.flags|=Relation::isArea;
       }
 
@@ -782,7 +779,7 @@ namespace osmscout {
       }
 
       if (progress.OutputDebug()) {
-        progress.Debug("Storing relation "+rel.GetRelType()+" "+NumberToString(rel.GetType())+" "+name);
+        progress.Debug("Storing relation "+NumberToString(rel.GetId())+" "+rel.GetRelType()+" "+NumberToString(rel.GetType())+" "+name);
       }
 
       if (rel.GetType()!=typeIgnore) {

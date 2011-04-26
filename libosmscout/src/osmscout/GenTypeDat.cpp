@@ -69,9 +69,9 @@ namespace osmscout {
       writer.Write(type->CanBeWay());
       writer.Write(type->CanBeArea());
       writer.Write(type->CanBeRelation());
-      writer.Write(type->CanBeOverview());
       writer.Write(type->CanBeRoute());
       writer.Write(type->CanBeIndexed());
+      writer.Write(type->GetConsumeChildren());
     }
 
     return !writer.HasError() && writer.Close();

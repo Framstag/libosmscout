@@ -52,7 +52,7 @@ namespace osmscout {
 
     unsigned char* content=new unsigned char[fileSize];
 
-    if (fread(content,1,fileSize,file)!=fileSize) {
+    if (fread(content,1,fileSize,file)!=(size_t)fileSize) {
       std::cerr << "Cannot load file '" << typeFile << "'" << std::endl;
       delete [] content;
       fclose(file);
@@ -125,9 +125,9 @@ namespace osmscout {
       bool        canBeWay;
       bool        canBeArea;
       bool        canBeRelation;
-      bool        canBeOverview;
       bool        canBeRoute;
       bool        canBeIndexed;
+      bool        consumeChildren;
 
       if (!(scanner.ReadNumber(id) &&
             scanner.Read(name) &&
@@ -135,9 +135,9 @@ namespace osmscout {
             scanner.Read(canBeWay) &&
             scanner.Read(canBeArea) &&
             scanner.Read(canBeRelation) &&
-            scanner.Read(canBeOverview) &&
             scanner.Read(canBeRoute) &&
-            scanner.Read(canBeIndexed))) {
+            scanner.Read(canBeIndexed) &&
+            scanner.Read(consumeChildren))) {
 
         std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
         return false;
@@ -147,15 +147,15 @@ namespace osmscout {
 
       typeInfo.SetId(id);
 
-      typeInfo.SetType(name,NULL);
+      typeInfo.SetType(name);
 
       typeInfo.CanBeNode(canBeNode);
       typeInfo.CanBeWay(canBeWay);
       typeInfo.CanBeArea(canBeArea);
       typeInfo.CanBeRelation(canBeRelation);
-      typeInfo.CanBeOverview(canBeOverview);
       typeInfo.CanBeRoute(canBeRoute);
       typeInfo.CanBeIndexed(canBeIndexed);
+      typeInfo.SetConsumeChildren(consumeChildren);
 
       config.AddTypeInfo(typeInfo);
     }

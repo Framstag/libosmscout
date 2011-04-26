@@ -185,14 +185,13 @@ namespace osmscout {
 
   TypeInfo::TypeInfo()
    : id(0),
-     condition(NULL),
      canBeNode(false),
      canBeWay(false),
      canBeArea(false),
      canBeRelation(false),
-     canBeOverview(false),
      canBeRoute(false),
-     canBeIndexed(false)
+     canBeIndexed(false),
+     consumeChildren(false)
   {
     // no code
   }
@@ -209,13 +208,38 @@ namespace osmscout {
     return *this;
   }
 
-  TypeInfo& TypeInfo::SetType(const std::string& name,
-                              Condition* condition)
+  TypeInfo& TypeInfo::SetType(const std::string& name)
   {
     this->name=name;
 
-    delete this->condition;
-    this->condition=condition;
+    return *this;
+  }
+
+  TypeInfo& TypeInfo::AddCondition(unsigned char types,
+                                   Condition* condition)
+  {
+    TypeCondition typeCondition;
+
+    if (types & typeNode) {
+      canBeNode=true;
+    }
+
+    if (types & typeWay) {
+      canBeWay=true;
+    }
+
+    if (types & typeArea) {
+      canBeArea=true;
+    }
+
+    if (types & typeRelation) {
+      canBeRelation=true;
+    }
+
+    typeCondition.types=types;
+    typeCondition.condition=condition;
+
+    conditions.push_back(typeCondition);
 
     return *this;
   }
@@ -251,11 +275,11 @@ namespace osmscout {
 
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for typeIgnore
-    ignore.SetType("",NULL);
+    ignore.SetType("");
 
     AddTypeInfo(ignore);
 
-    route.SetType("_route",NULL)
+    route.SetType("_route")
          .CanBeWay(true);
 
     AddTypeInfo(route);
@@ -471,14 +495,22 @@ namespace osmscout {
     }
 
     for (size_t i=0; i<types.size(); i++) {
-      if (types[i].GetCondition()==NULL ||
+      if (!types[i].HasConditions() ||
           !types[i].CanBeNode()) {
         continue;
       }
 
-      if (types[i].GetCondition()->Evaluate(tagMap)) {
-        typeId=types[i].GetId();
-        return true;
+      for (std::list<TypeInfo::TypeCondition>::const_iterator cond=types[i].GetConditions().begin();
+           cond!=types[i].GetConditions().end();
+           ++cond) {
+        if (!(cond->types & TypeInfo::typeNode)) {
+          continue;
+        }
+
+        if (cond->condition->Evaluate(tagMap)) {
+          typeId=types[i].GetId();
+          return true;
+        }
       }
     }
 
@@ -497,22 +529,34 @@ namespace osmscout {
     }
 
     for (size_t i=0; i<types.size(); i++) {
-      if ((types[i].CanBeWay() || types[i].CanBeArea()) &&
-          types[i].GetCondition()!=NULL &&
-          types[i].GetCondition()->Evaluate(tagMap)) {
-        if (wayType==typeIgnore &&
-            types[i].CanBeWay()) {
-          wayType=types[i].GetId();
+      if (!((types[i].CanBeWay() ||
+             types[i].CanBeArea()) &&
+             types[i].HasConditions())) {
+        continue;
+      }
+
+      for (std::list<TypeInfo::TypeCondition>::const_iterator cond=types[i].GetConditions().begin();
+           cond!=types[i].GetConditions().end();
+           ++cond) {
+        if (!((cond->types & TypeInfo::typeWay) || (cond->types & TypeInfo::typeArea))) {
+          continue;
         }
 
-        if (areaType==typeIgnore &&
-            types[i].CanBeArea()) {
-          areaType=types[i].GetId();
-        }
+        if (cond->condition->Evaluate(tagMap)) {
+          if (wayType==typeIgnore &&
+              (cond->types & TypeInfo::typeWay)) {
+            wayType=types[i].GetId();
+          }
 
-        if (wayType!=typeIgnore &&
-            areaType!=typeIgnore) {
-          return true;
+          if (areaType==typeIgnore &&
+              (cond->types & TypeInfo::typeArea)) {
+            areaType=types[i].GetId();
+          }
+
+          if (wayType!=typeIgnore &&
+              areaType!=typeIgnore) {
+            return true;
+          }
         }
       }
     }
@@ -534,27 +578,43 @@ namespace osmscout {
     if (relationType!=tagMap.end() &&
         relationType->second=="multipolygon") {
       for (size_t i=0; i<types.size(); i++) {
-        if (types[i].GetCondition()==NULL ||
+        if (!types[i].HasConditions() ||
             !types[i].CanBeArea()) {
           continue;
         }
 
-        if (types[i].GetCondition()->Evaluate(tagMap)) {
-          typeId=types[i].GetId();
-          return true;
+        for (std::list<TypeInfo::TypeCondition>::const_iterator cond=types[i].GetConditions().begin();
+             cond!=types[i].GetConditions().end();
+             ++cond) {
+          if (!(cond->types & TypeInfo::typeArea)) {
+            continue;
+          }
+
+          if (cond->condition->Evaluate(tagMap)) {
+            typeId=types[i].GetId();
+            return true;
+          }
         }
       }
     }
     else {
       for (size_t i=0; i<types.size(); i++) {
-        if (types[i].GetCondition()==NULL ||
+        if (!types[i].HasConditions() ||
             !types[i].CanBeRelation()) {
           continue;
         }
 
-        if (types[i].GetCondition()->Evaluate(tagMap)) {
-          typeId=types[i].GetId();
-          return true;
+        for (std::list<TypeInfo::TypeCondition>::const_iterator cond=types[i].GetConditions().begin();
+             cond!=types[i].GetConditions().end();
+             ++cond) {
+          if (!(cond->types & TypeInfo::typeRelation)) {
+            continue;
+          }
+
+          if (cond->condition->Evaluate(tagMap)) {
+            typeId=types[i].GetId();
+            return true;
+          }
         }
       }
     }

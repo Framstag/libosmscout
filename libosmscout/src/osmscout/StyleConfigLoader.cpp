@@ -53,7 +53,7 @@ namespace osmscout {
 
     unsigned char* content=new unsigned char[fileSize];
 
-    if (fread(content,1,fileSize,file)!=fileSize) {
+    if (fread(content,1,fileSize,file)!=(size_t)fileSize) {
       std::cerr << "Cannot load file '" << styleFile << "'" << std::endl;
       delete [] content;
       fclose(file);

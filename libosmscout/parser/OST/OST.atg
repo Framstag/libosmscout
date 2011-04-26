@@ -40,24 +40,28 @@ PRODUCTIONS
   OST         = SYNC "OST" [TYPES] "END".
   TYPES       = SYNC "TYPES" TYPE {TYPE}.
   TYPE        = (.
-                  std::string idValue;
-                  std::string typeValue;
-                  Condition   *condition=NULL;
-                  TypeInfo    typeInfo;
+                  Condition     *condition=NULL;
+                  TypeInfo      typeInfo;
+                  unsigned char types;
                 .)
                 SYNC "TYPE"
-                string
-                (.
-                  typeValue=Destring(t->val);
-                .)
-                "WHERE"
-                CONDITION<condition>
-                (.
-                  typeInfo.SetType(typeValue,condition);
-                .)
+                string                         (. typeInfo.SetType(Destring(t->val)); .)
 
-                TYPEKINDS<typeInfo>
-                [TYPEOPTIONS<typeInfo>]
+                "="
+                TYPEKINDS<types>
+                "(" CONDITION<condition> ")"   (. typeInfo.AddCondition(types,condition); .)
+
+                {
+                  "OR"
+                  TYPEKINDS<types>
+                  "(" CONDITION<condition> ")" (. typeInfo.AddCondition(types,condition); .)
+                }
+
+                [
+                  "OPTIONS"
+                  TYPEOPTIONS<typeInfo>
+                ]
+
                 (.
                   config.AddTypeInfo(typeInfo);
                 .)
@@ -199,20 +203,39 @@ PRODUCTIONS
                  .)
                  .
 
-  TYPEKINDS<TypeInfo& typeInfo>
-              = "CAN" "BE" TYPEKIND<typeInfo> {TYPEKIND<typeInfo>}.
-  TYPEKIND<TypeInfo& typeInfo>
-              =  "NODE"      (. typeInfo.CanBeNode(true); .)
-               | "WAY"       (. typeInfo.CanBeWay(true); .)
-               | "AREA"      (. typeInfo.CanBeArea(true); .)
-               | "RELATION"  (. typeInfo.CanBeRelation(true); .)
+  TYPEKINDS<unsigned char& types>
+              = (.
+                  types=0;
+                .)
+
+                TYPEKIND<types>
+
+                {
+                  [
+                    ","
+                  ]
+                  TYPEKIND<types>
+                }
+                .
+
+  TYPEKIND<unsigned char& types>
+              =  "NODE"      (. types|=TypeInfo::typeNode; .)
+               | "WAY"       (. types|=TypeInfo::typeWay; .)
+               | "AREA"      (. types|=TypeInfo::typeArea; .)
+               | "RELATION"  (. types|=TypeInfo::typeRelation; .)
                .
 
   TYPEOPTIONS<TypeInfo& typeInfo>
-              = "OPTIONS" TYPEOPTION<typeInfo> { TYPEOPTION<typeInfo>}.
+              = TYPEOPTION<typeInfo>
+                {
+                  TYPEOPTION<typeInfo>
+                }
+              .
+
   TYPEOPTION<TypeInfo& typeInfo>
-              =  "ROUTE" (. typeInfo.CanBeRoute(true); .)
-               | "INDEX" (. typeInfo.CanBeIndexed(true); .)
+              =  "ROUTE"            (. typeInfo.CanBeRoute(true); .)
+               | "INDEX"            (. typeInfo.CanBeIndexed(true); .)
+               | "CONSUME_CHILDREN" (. typeInfo.SetConsumeChildren(true); .)
                .
 
 END OST.

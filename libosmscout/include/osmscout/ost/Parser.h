@@ -125,8 +125,8 @@ std::string Destring(const char* str)
 	void OST();
 	void TYPES();
 	void TYPE();
+	void TYPEKINDS(unsigned char& types);
 	void CONDITION(Condition*& condition);
-	void TYPEKINDS(TypeInfo& typeInfo);
 	void TYPEOPTIONS(TypeInfo& typeInfo);
 	void ANDCOND(Condition*& condition);
 	void BOOLCOND(Condition*& condition);
@@ -135,7 +135,7 @@ std::string Destring(const char* str)
 	void EQUALSCOND(const std::string& tagName,Condition*& condition);
 	void NOTEQUALSCOND(const std::string& tagName,Condition*& condition);
 	void ISINCOND(const std::string& tagName,Condition*& condition);
-	void TYPEKIND(TypeInfo& typeInfo);
+	void TYPEKIND(unsigned char& types);
 	void TYPEOPTION(TypeInfo& typeInfo);
 
   void Parse();

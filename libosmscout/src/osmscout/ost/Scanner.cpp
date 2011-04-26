@@ -128,39 +128,37 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 30;
-	noSym = 30;
+	maxT = 29;
+	noSym = 29;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
 	for (i = 48; i <= 57; ++i) start.set(i, 2);
 	start.set(34, 3);
+	start.set(61, 14);
 	start.set(40, 7);
 	start.set(41, 8);
 	start.set(33, 15);
-	start.set(61, 9);
-	start.set(91, 12);
-	start.set(44, 13);
-	start.set(93, 14);
+	start.set(91, 11);
+	start.set(44, 12);
+	start.set(93, 13);
 		start.set(Buffer::EoF, -1);
 	keywords.set("OST", 4);
 	keywords.set("END", 5);
 	keywords.set("TYPES", 6);
 	keywords.set("TYPE", 7);
-	keywords.set("WHERE", 8);
-	keywords.set("OR", 9);
-	keywords.set("AND", 10);
-	keywords.set("IN", 16);
-	keywords.set("EXISTS", 20);
-	keywords.set("CAN", 21);
-	keywords.set("BE", 22);
-	keywords.set("NODE", 23);
-	keywords.set("WAY", 24);
-	keywords.set("AREA", 25);
-	keywords.set("RELATION", 26);
-	keywords.set("OPTIONS", 27);
-	keywords.set("ROUTE", 28);
-	keywords.set("INDEX", 29);
+	keywords.set("OR", 11);
+	keywords.set("OPTIONS", 12);
+	keywords.set("AND", 13);
+	keywords.set("IN", 17);
+	keywords.set("EXISTS", 21);
+	keywords.set("NODE", 22);
+	keywords.set("WAY", 23);
+	keywords.set("AREA", 24);
+	keywords.set("RELATION", 25);
+	keywords.set("ROUTE", 26);
+	keywords.set("INDEX", 27);
+	keywords.set("CONSUME_CHILDREN", 28);
 
 
   tvalLength = 128;
@@ -325,27 +323,27 @@ Token* Scanner::NextToken() {
 			else if (ch == 92) {AddCh(); goto case_5;}
 			else {t->kind = 3; break;}
 		case 7:
-			{t->kind = 11; break;}
+			{t->kind = 9; break;}
 		case 8:
-			{t->kind = 12; break;}
+			{t->kind = 10; break;}
 		case 9:
-			if (ch == '=') {AddCh(); goto case_10;}
-			else {t->kind = noSym; break;}
+			case_9:
+			{t->kind = 15; break;}
 		case 10:
 			case_10:
-			{t->kind = 14; break;}
+			{t->kind = 16; break;}
 		case 11:
-			case_11:
-			{t->kind = 15; break;}
-		case 12:
-			{t->kind = 17; break;}
-		case 13:
 			{t->kind = 18; break;}
-		case 14:
+		case 12:
 			{t->kind = 19; break;}
+		case 13:
+			{t->kind = 20; break;}
+		case 14:
+			if (ch == '=') {AddCh(); goto case_9;}
+			else {t->kind = 8; break;}
 		case 15:
-			if (ch == '=') {AddCh(); goto case_11;}
-			else {t->kind = 13; break;}
+			if (ch == '=') {AddCh(); goto case_10;}
+			else {t->kind = 14; break;}
 
   }
   AppendVal(t);

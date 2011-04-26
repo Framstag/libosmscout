@@ -167,19 +167,32 @@ namespace osmscout {
 
   class OSMSCOUT_API TypeInfo
   {
+  public:
+    const static unsigned char typeNode     = 1 << 0;
+    const static unsigned char typeWay      = 1 << 1;
+    const static unsigned char typeArea     = 1 << 2;
+    const static unsigned char typeRelation = 1 << 3;
+
+  public:
+    struct TypeCondition
+    {
+      unsigned char types;
+      ConditionRef  condition;
+    };
+
   private:
     TypeId       id;
     std::string  name;
 
-    ConditionRef condition;
+    std::list<TypeCondition> conditions;
 
     bool         canBeNode;
     bool         canBeWay;
     bool         canBeArea;
     bool         canBeRelation;
-    bool         canBeOverview;
     bool         canBeRoute;
     bool         canBeIndexed;
+    bool         consumeChildren;
 
   public:
     TypeInfo();
@@ -187,8 +200,10 @@ namespace osmscout {
 
     TypeInfo& SetId(TypeId id);
 
-    TypeInfo& SetType(const std::string& name,
-                      Condition* condition);
+    TypeInfo& SetType(const std::string& name);
+
+    TypeInfo& AddCondition(unsigned char types,
+                           Condition* condition);
 
     inline TypeId GetId() const
     {
@@ -200,9 +215,14 @@ namespace osmscout {
       return name;
     }
 
-    inline Condition* GetCondition() const
+    inline bool HasConditions() const
     {
-      return condition;
+      return conditions.size()>0;
+    }
+
+    inline const std::list<TypeCondition>& GetConditions() const
+    {
+      return conditions;
     }
 
     inline TypeInfo& CanBeNode(bool canBeNode)
@@ -253,18 +273,6 @@ namespace osmscout {
       return canBeRelation;
     }
 
-    inline TypeInfo& CanBeOverview(bool canBeOverview)
-    {
-      this->canBeOverview=canBeOverview;
-
-      return *this;
-    }
-
-    inline bool CanBeOverview() const
-    {
-      return canBeOverview;
-    }
-
     inline TypeInfo& CanBeRoute(bool canBeRoute)
     {
       this->canBeRoute=canBeRoute;
@@ -287,6 +295,18 @@ namespace osmscout {
     inline bool CanBeIndexed() const
     {
       return canBeIndexed;
+    }
+
+    inline TypeInfo& SetConsumeChildren(bool consumeChildren)
+    {
+      this->consumeChildren=consumeChildren;
+
+      return *this;
+    }
+
+    inline bool GetConsumeChildren() const
+    {
+      return consumeChildren;
     }
   };
 
