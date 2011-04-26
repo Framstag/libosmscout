@@ -239,7 +239,8 @@ namespace osmscout {
         return false;
       }
 
-      if (way.GetType()!=typeIgnore) {
+      if (way.GetType()!=typeIgnore &&
+          !typeConfig.GetTypeInfo(way.GetType()).GetIgnore()) {
         size_t index=way.GetId()/distributionGranuality;
 
         if (index>=wayDistribution.size()) {
@@ -330,6 +331,7 @@ namespace osmscout {
         }
 
         if (way.GetType()!=typeIgnore &&
+            !typeConfig.GetTypeInfo(way.GetType()).GetIgnore() &&
             way.GetId()>=start &&
             way.GetId()<end) {
           ways[way.GetId()]=way;
@@ -424,7 +426,8 @@ namespace osmscout {
           return false;
         }
 
-        if (way.GetType()!=typeIgnore) {
+        if (way.GetType()!=typeIgnore &&
+            !typeConfig.GetTypeInfo(way.GetType()).GetIgnore()) {
           for (size_t j=0; j<way.GetNodeCount(); j++) {
             std::map<Id,uint8_t>::iterator nodeUse=nodeUses.find(way.GetNodeId(j));
 

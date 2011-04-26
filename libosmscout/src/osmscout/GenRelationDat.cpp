@@ -604,6 +604,11 @@ namespace osmscout {
         continue;
       }
 
+      if (rawRel.GetType()!=typeIgnore &&
+          typeConfig.GetTypeInfo(rawRel.GetType()).GetIgnore()) {
+        continue;
+      }
+
       Relation              rel;
       std::string           name;
       std::set<std::string> roles;
@@ -718,6 +723,14 @@ namespace osmscout {
         }
       }
 
+      if (rel.GetType()==typeIgnore) {
+        continue;
+      }
+
+      if (typeConfig.GetTypeInfo(rel.GetType()).GetIgnore()) {
+        continue;
+      }
+
       // Blacklist all relation members that have the same type as relation itself
       // from the areaWayIndex to assure that a way will not be returned twice,
       // once as part of the relation and once as way itself
@@ -734,8 +747,7 @@ namespace osmscout {
           }
         }
       }
-      else if (rel.GetType()!=typeIgnore &&
-               typeConfig.GetTypeInfo(rel.GetType()).GetConsumeChildren()) {
+      else if (typeConfig.GetTypeInfo(rel.GetType()).GetConsumeChildren()) {
         for (size_t m=0; m<rel.roles.size(); m++) {
           if (rel.GetType()==rel.roles[m].GetType()) {
             wayAreaIndexBlacklist.insert(rawRel.members[m].id);
@@ -782,26 +794,24 @@ namespace osmscout {
         progress.Debug("Storing relation "+NumberToString(rel.GetId())+" "+rel.GetRelType()+" "+NumberToString(rel.GetType())+" "+name);
       }
 
-      if (rel.GetType()!=typeIgnore) {
-        if (rel.IsArea()) {
-          areaTypeCount[rel.GetType()]++;
-          for (size_t i=0; i<rel.roles.size(); i++) {
-            if (rel.roles[i].role=="0") {
-              areaNodeTypeCount[rel.GetType()]+=rel.roles[i].nodes.size();
-            }
+      if (rel.IsArea()) {
+        areaTypeCount[rel.GetType()]++;
+        for (size_t i=0; i<rel.roles.size(); i++) {
+          if (rel.roles[i].role=="0") {
+            areaNodeTypeCount[rel.GetType()]+=rel.roles[i].nodes.size();
           }
         }
-        else {
-          wayTypeCount[rel.GetType()]++;
-
-          for (size_t i=0; i<rel.roles.size(); i++) {
-            wayNodeTypeCount[rel.GetType()]+=rel.roles[i].nodes.size();
-          }
-        }
-
-        rel.Write(writer);
-        writtenRelationCount++;
       }
+      else {
+        wayTypeCount[rel.GetType()]++;
+
+        for (size_t i=0; i<rel.roles.size(); i++) {
+          wayNodeTypeCount[rel.GetType()]+=rel.roles[i].nodes.size();
+        }
+      }
+
+      rel.Write(writer);
+      writtenRelationCount++;
     }
 
     progress.Info(NumberToString(rawRelationCount)+" relations read"+

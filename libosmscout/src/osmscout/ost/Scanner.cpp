@@ -128,8 +128,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 29;
-	noSym = 29;
+	maxT = 30;
+	noSym = 30;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
@@ -159,6 +159,7 @@ void Scanner::Init() {
 	keywords.set("ROUTE", 26);
 	keywords.set("INDEX", 27);
 	keywords.set("CONSUME_CHILDREN", 28);
+	keywords.set("IGNORE", 29);
 
 
   tvalLength = 128;

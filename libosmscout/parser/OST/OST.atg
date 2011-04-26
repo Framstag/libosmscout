@@ -236,6 +236,7 @@ PRODUCTIONS
               =  "ROUTE"            (. typeInfo.CanBeRoute(true); .)
                | "INDEX"            (. typeInfo.CanBeIndexed(true); .)
                | "CONSUME_CHILDREN" (. typeInfo.SetConsumeChildren(true); .)
+               | "IGNORE"           (. typeInfo.SetIgnore(true); .)
                .
 
 END OST.

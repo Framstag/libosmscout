@@ -191,7 +191,8 @@ namespace osmscout {
      canBeRelation(false),
      canBeRoute(false),
      canBeIndexed(false),
-     consumeChildren(false)
+     consumeChildren(false),
+     ignore(false)
   {
     // no code
   }

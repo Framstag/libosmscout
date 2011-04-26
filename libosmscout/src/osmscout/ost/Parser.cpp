@@ -109,7 +109,7 @@ bool Parser::WeakSeparator(int n, int syFol, int repFol)
 }
 
 void Parser::OST() {
-		while (!(la->kind == 0 || la->kind == 4)) {SynErr(30); Get();}
+		while (!(la->kind == 0 || la->kind == 4)) {SynErr(31); Get();}
 		Expect(4);
 		if (la->kind == 6) {
 			TYPES();
@@ -118,7 +118,7 @@ void Parser::OST() {
 }
 
 void Parser::TYPES() {
-		while (!(la->kind == 0 || la->kind == 6)) {SynErr(31); Get();}
+		while (!(la->kind == 0 || la->kind == 6)) {SynErr(32); Get();}
 		Expect(6);
 		TYPE();
 		while (la->kind == 7) {
@@ -131,7 +131,7 @@ void Parser::TYPE() {
 		TypeInfo      typeInfo;
 		unsigned char types;
 		
-		while (!(la->kind == 0 || la->kind == 7)) {SynErr(32); Get();}
+		while (!(la->kind == 0 || la->kind == 7)) {SynErr(33); Get();}
 		Expect(7);
 		Expect(3);
 		typeInfo.SetType(Destring(t->val)); 
@@ -199,7 +199,7 @@ void Parser::CONDITION(Condition*& condition) {
 
 void Parser::TYPEOPTIONS(TypeInfo& typeInfo) {
 		TYPEOPTION(typeInfo);
-		while (la->kind == 26 || la->kind == 27 || la->kind == 28) {
+		while (StartOf(2)) {
 			TYPEOPTION(typeInfo);
 		}
 }
@@ -245,7 +245,7 @@ void Parser::BOOLCOND(Condition*& condition) {
 			Get();
 			BOOLCOND(condition);
 			condition=new NotCondition(condition); 
-		} else SynErr(33);
+		} else SynErr(34);
 }
 
 void Parser::BINARYCOND(Condition*& condition) {
@@ -259,7 +259,7 @@ void Parser::BINARYCOND(Condition*& condition) {
 			NOTEQUALSCOND(nameValue,condition);
 		} else if (la->kind == 17) {
 			ISINCOND(nameValue,condition);
-		} else SynErr(34);
+		} else SynErr(35);
 }
 
 void Parser::EXISTSCOND(Condition*& condition) {
@@ -338,7 +338,7 @@ void Parser::TYPEKIND(unsigned char& types) {
 		} else if (la->kind == 25) {
 			Get();
 			types|=TypeInfo::typeRelation; 
-		} else SynErr(35);
+		} else SynErr(36);
 }
 
 void Parser::TYPEOPTION(TypeInfo& typeInfo) {
@@ -351,7 +351,10 @@ void Parser::TYPEOPTION(TypeInfo& typeInfo) {
 		} else if (la->kind == 28) {
 			Get();
 			typeInfo.SetConsumeChildren(true); 
-		} else SynErr(36);
+		} else if (la->kind == 29) {
+			Get();
+			typeInfo.SetIgnore(true); 
+		} else SynErr(37);
 }
 
 
@@ -371,7 +374,7 @@ Parser::Parser(Scanner *scanner,
                TypeConfig& config)
  : config(config)
 {
-	maxT = 29;
+	maxT = 30;
 
   dummyToken = NULL;
   t = la = NULL;
@@ -386,9 +389,10 @@ bool Parser::StartOf(int s)
   const bool T = true;
   const bool x = false;
 
-	static bool set[2][31] = {
-		{T,x,x,x, T,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,T,T, T,T,x,x, x,x,x}
+	static bool set[3][32] = {
+		{T,x,x,x, T,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,T,T, T,T,x,x, x,x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,x,x}
 	};
 
 
@@ -440,14 +444,15 @@ void Errors::SynErr(int line, int col, int n)
 			case 26: s = coco_string_create("\"ROUTE\" expected"); break;
 			case 27: s = coco_string_create("\"INDEX\" expected"); break;
 			case 28: s = coco_string_create("\"CONSUME_CHILDREN\" expected"); break;
-			case 29: s = coco_string_create("??? expected"); break;
-			case 30: s = coco_string_create("this symbol not expected in OST"); break;
-			case 31: s = coco_string_create("this symbol not expected in TYPES"); break;
-			case 32: s = coco_string_create("this symbol not expected in TYPE"); break;
-			case 33: s = coco_string_create("invalid BOOLCOND"); break;
-			case 34: s = coco_string_create("invalid BINARYCOND"); break;
-			case 35: s = coco_string_create("invalid TYPEKIND"); break;
-			case 36: s = coco_string_create("invalid TYPEOPTION"); break;
+			case 29: s = coco_string_create("\"IGNORE\" expected"); break;
+			case 30: s = coco_string_create("??? expected"); break;
+			case 31: s = coco_string_create("this symbol not expected in OST"); break;
+			case 32: s = coco_string_create("this symbol not expected in TYPES"); break;
+			case 33: s = coco_string_create("this symbol not expected in TYPE"); break;
+			case 34: s = coco_string_create("invalid BOOLCOND"); break;
+			case 35: s = coco_string_create("invalid BINARYCOND"); break;
+			case 36: s = coco_string_create("invalid TYPEKIND"); break;
+			case 37: s = coco_string_create("invalid TYPEOPTION"); break;
 
     default:
     {

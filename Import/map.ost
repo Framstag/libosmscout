@@ -330,7 +330,8 @@ TYPES
   TYPE "power_sub_station" = NODE AREA ("power"=="sub_station")
   TYPE "power_generator" = NODE AREA ("power"=="generator")
   TYPE "building" = AREA (EXISTS "building" AND !("building" IN ["no","false","0"]))
-        /*
+
+  // Currently not supported by stylesheet
   TYPE "barrier_hedge" = WAY AREA ("barrier"=="hedge")
   TYPE "barrier_fence" = WAY AREA ("barrier"=="fence")
   TYPE "barrier_wall" = WAY AREA ("barrier"=="wall")
@@ -347,7 +348,20 @@ TYPES
   TYPE "barrier_lift_gate" = NODE ("barrier"=="lift_gate")
   TYPE "barrier_stile" = NODE ("barrier"=="stile")
   TYPE "barrier_sally_port" = NODE ("barrier"=="sally_port")
-  TYPE "barrier_kent_carriage_gate" = NODE ("barrier"=="kent_carriage_gate")*/
+  TYPE "barrier_kent_carriage_gate" = NODE ("barrier"=="kent_carriage_gate")
+
+  // Types we currently ignore
+
+  TYPE "associated_street_any" = RELATION ("type"=="associatedStreet") OPTIONS IGNORE
+  TYPE "enforcement_any" = RELATION ("type"=="enforcement") OPTIONS IGNORE
+  TYPE "network_any" = RELATION ("type"=="network") OPTIONS IGNORE
+  TYPE "boundary_postal_code" = AREA ("boundary"=="postal_code") OPTIONS IGNORE
+  TYPE "related_building_any" = RELATION ("type"=="relatedBuilding") OPTIONS IGNORE
+  TYPE "route_any" = RELATION ("type"=="route") OPTIONS IGNORE
+  TYPE "site_any" = RELATION ("type"=="site") OPTIONS IGNORE
+  TYPE "tmc_any" = AREA (EXISTS "TMC:cid_58:tabcd_1:Class") OR RELATION ("type"=="tmc") OPTIONS IGNORE
+
+  // Evaluated for routing
   TYPE "restriction_no_right_turn" = RELATION ("type"=="restriction" AND "restriction"=="no_right_turn")
   TYPE "restriction_no_left_turn" = RELATION ("type"=="restriction" AND "restriction"=="no_left_turn")
   TYPE "restriction_no_u_turn" = RELATION ("type"=="restriction" AND "restriction"=="no_u_turn")

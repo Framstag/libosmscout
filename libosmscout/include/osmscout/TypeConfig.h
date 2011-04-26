@@ -193,6 +193,7 @@ namespace osmscout {
     bool         canBeRoute;
     bool         canBeIndexed;
     bool         consumeChildren;
+    bool         ignore;
 
   public:
     TypeInfo();
@@ -307,6 +308,18 @@ namespace osmscout {
     inline bool GetConsumeChildren() const
     {
       return consumeChildren;
+    }
+
+    inline TypeInfo& SetIgnore(bool ignore)
+    {
+      this->ignore=ignore;
+
+      return *this;
+    }
+
+    inline bool GetIgnore() const
+    {
+      return ignore;
     }
   };
 
