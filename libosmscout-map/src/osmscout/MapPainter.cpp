@@ -83,8 +83,8 @@ namespace osmscout {
 
   MapPainter::MapPainter()
   {
-    tunnelDash.push_back(3);
-    tunnelDash.push_back(3);
+    tunnelDash.push_back(0.4);
+    tunnelDash.push_back(0.4);
 
     areaMarkStyle.SetStyle(FillStyle::plain);
     areaMarkStyle.SetColor(1,0,0,0.5);
@@ -1364,42 +1364,44 @@ namespace osmscout {
       drawTunnel=false;
     }
 
-    if (style.GetOutline()>0 &&
-        !outline &&
-        !(attributes.IsBridge() &&
-          projection.GetMagnification()>=magCity) &&
-        !(attributes.IsTunnel() &&
-          projection.GetMagnification()>=magCity)) {
-      // Should draw outline, but resolution is too low
-      // Draw line with alternate color
+    // Drawing tunnel style for dashed lines is currently not supported
+    if (drawTunnel &&
+        style.HasDashValues()) {
+      drawTunnel=false;
+    }
 
-      DrawPath(projection,
-               parameter,
-               style.GetAlternateR(),
-               style.GetAlternateG(),
-               style.GetAlternateB(),
-               style.GetAlternateA(),
-               lineWidth,
-               style.GetDash(),
-               capRound,
-               capRound,
-               points);
+    double r,g,b,a;
+
+    if (outline) {
+      // Draw line with normal color
+      r=style.GetLineR();
+      g=style.GetLineG();
+      b=style.GetLineB();
+      a=style.GetLineA();
     }
     else {
-      // Draw line with normal color and (optionally) reduced with
-
-      DrawPath(projection,
-               parameter,
-               style.GetLineR(),
-               style.GetLineG(),
-               style.GetLineB(),
-               style.GetLineA(),
-               lineWidth,
-               style.GetDash(),
-               capRound,
-               capRound,
-               points);
+      // Should draw outline, but resolution is too low
+      // Draw line with alternate color
+      r=style.GetAlternateR();
+      g=style.GetAlternateG();
+      b=style.GetAlternateB();
+      a=style.GetAlternateA();
     }
+
+    if (drawTunnel) {
+      r=r+(1-r)*50/100;
+      g=g+(1-g)*50/100;
+      b=b+(1-b)*50/100;
+    }
+
+    DrawPath(projection,
+             parameter,
+             r,g,b,a,
+             lineWidth,
+             style.GetDash(),
+             capRound,
+             capRound,
+             points);
   }
 
   bool MapPainter::DrawWayOutline(const Projection& projection,
@@ -1435,6 +1437,12 @@ namespace osmscout {
 
     if (drawTunnel &&
         projection.GetMagnification()<magCity) {
+      drawTunnel=false;
+    }
+
+    // Drawing tunnel style for dashed lines is currently not supported
+    if (drawTunnel &&
+        style.HasDashValues()) {
       drawTunnel=false;
     }
 
@@ -1490,16 +1498,32 @@ namespace osmscout {
       }
     }
     else if (drawTunnel) {
-      if (projection.GetMagnification()>=10000) {
-        // light grey dashes
+      tunnelDash[0]=4.0/lineWidth;
+      tunnelDash[1]=2.0/lineWidth;
 
-        TransformWay(projection,parameter,nodes,points);
+      TransformWay(projection,parameter,nodes,points);
+
+      if (outline) {
+        DrawPath(projection,
+                 parameter,
+                 style.GetOutlineR(),
+                 style.GetOutlineG(),
+                 style.GetOutlineB(),
+                 style.GetOutlineA(),
+                 lineWidth,
+                 tunnelDash,
+                 attributes.StartIsJoint() ? capButt : capRound,
+                 attributes.EndIsJoint() ? capButt : capRound,
+                 points);
+      }
+      else if (projection.GetMagnification()>=10000) {
+        // light grey dashes
 
         DrawPath(projection,
                  parameter,
-                 0.75,
-                 0.75,
-                 0.75,
+                 0.5,
+                 0.5,
+                 0.5,
                  1.0,
                  lineWidth,
                  tunnelDash,
@@ -1509,8 +1533,6 @@ namespace osmscout {
       }
       else {
         // dark grey dashes
-
-        TransformWay(projection,parameter,nodes,points);
 
         DrawPath(projection,
                  parameter,
