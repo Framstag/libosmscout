@@ -1473,6 +1473,21 @@ namespace osmscout {
                  attributes.EndIsJoint() ? capButt : capRound,
                  points);
       }
+      else if (style.HasDashValues() ||
+               style.GetLineA()<1.0 ||
+               style.GetAlternateA()<1.0) {
+        DrawPath(projection,
+                 parameter,
+                 1.0,
+                 1.0,
+                 1.0,
+                 1.0,
+                 lineWidth,
+                 emptyDash,
+                 attributes.StartIsJoint() ? capButt : capRound,
+                 attributes.EndIsJoint() ? capButt : capRound,
+                 points);
+      }
     }
     else if (drawTunnel) {
       if (projection.GetMagnification()>=10000) {
