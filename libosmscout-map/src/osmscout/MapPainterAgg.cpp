@@ -336,8 +336,6 @@ namespace osmscout {
     agg::path_storage path;
 
     double length=0;
-    double xs=0;
-    double ys=0;
     double xo=0;
     double yo=0;
 
@@ -349,8 +347,6 @@ namespace osmscout {
           if (start) {
             path.move_to(nodes[j].x,
                          nodes[j].y);
-            xs=nodes[j].x;
-            ys=nodes[j].y;
             start=false;
           }
           else {
@@ -373,8 +369,6 @@ namespace osmscout {
           if (start) {
             path.move_to(nodes[nodes.size()-j-1].x,
                          nodes[nodes.size()-j-1].y);
-            xs=nodes[j].x;
-            ys=nodes[j].y;
             start=false;
           }
           else {

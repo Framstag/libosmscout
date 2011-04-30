@@ -34,8 +34,6 @@ namespace osmscout {
                                   std::vector<Tag>& tags,
                                   bool& reverseNodes)
   {
-    bool isOneway=false;
-
     name.clear();
     ref.clear();
     flags=0;
@@ -93,7 +91,6 @@ namespace osmscout {
       }
       else if (!IsArea() && tag->key==typeConfig.tagOneway) {
         if (tag->value=="-1") {
-          isOneway=true;
           reverseNodes=true;
           flags|=SegmentAttributes::isOneway;
         }

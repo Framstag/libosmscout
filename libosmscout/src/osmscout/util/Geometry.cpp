@@ -107,7 +107,6 @@ namespace osmscout {
     double sigma=0.0;
     double deltasigma=0.0;
     double lambda0;
-    bool converged=false;
 
     for (int i=0; i < 10; i++)
     {
@@ -157,7 +156,6 @@ namespace osmscout {
                                       cossigma * (-1 + 2 * cos2sigmam2)));
 
       if ((i > 1) && (std::abs((lambda - lambda0) / lambda) < 0.0000000000001)) {
-        converged=true;
         break;
       }
     }

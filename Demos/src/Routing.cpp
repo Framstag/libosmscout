@@ -84,8 +84,6 @@ int main(int argc, char* argv[])
 
   database.TransformRouteDataToRouteDescription(data,description);
 
-  double lastDistance = 0;
-
   for (std::list<osmscout::RouteDescription::RouteStep>::const_iterator step=description.Steps().begin();
        step!=description.Steps().end();
        ++step) {
@@ -182,8 +180,6 @@ int main(int argc, char* argv[])
     std::cout << "</td></tr>";
 #endif
     std::cout << std::endl;
-
-    lastDistance=step->GetAt();
   }
 
 
