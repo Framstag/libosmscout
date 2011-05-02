@@ -20,12 +20,52 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <map>
+#include <set>
+
 #include <osmscout/Import.h>
+
+#include <osmscout/util/FileWriter.h>
+#include <osmscout/util/Geometry.h>
 
 namespace osmscout {
 
   class AreaIndexGenerator : public ImportModule
   {
+  private:
+    struct AreaLeaf
+    {
+      FileOffset                              offset;
+      std::map<TypeId,std::list<FileOffset> > ways;
+      std::map<TypeId,std::list<FileOffset> > relWays;
+      std::list<FileOffset>                   areas;
+      std::list<FileOffset>                   relAreas;
+      FileOffset                              children[4];
+
+      AreaLeaf()
+      {
+        offset=0;
+        children[0]=0;
+        children[1]=0;
+        children[2]=0;
+        children[3]=0;
+      }
+    };
+
+  private:
+    bool LoadWayBlacklist(const ImportParameter& parameter,
+                          Progress& progress,
+                          std::set<Id>& wayBlacklist);
+
+    void SetOffsetOfChildren(const std::map<Coord,AreaLeaf>& leafs,
+                             std::map<Coord,AreaLeaf>& newAreaLeafs);
+
+    bool WriteIndexLevel(const ImportParameter& parameter,
+                         FileWriter& writer,
+                         int level,
+                         std::map<Coord,AreaLeaf>& leafs);
+
+
   public:
     std::string GetDescription() const;
     bool Import(const ImportParameter& parameter,

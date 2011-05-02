@@ -29,34 +29,162 @@
 #include <osmscout/Util.h>
 
 #include <osmscout/util/FileScanner.h>
-#include <osmscout/util/FileWriter.h>
-#include <osmscout/util/Geometry.h>
 #include <osmscout/util/String.h>
 
 namespace osmscout {
 
-  struct AreaLeaf
-  {
-    FileOffset                              offset;
-    std::map<TypeId,std::list<FileOffset> > ways;
-    std::map<TypeId,std::list<FileOffset> > relWays;
-    std::list<FileOffset>                   areas;
-    std::list<FileOffset>                   relAreas;
-    FileOffset                              children[4];
-
-    AreaLeaf()
-    {
-      offset=0;
-      children[0]=0;
-      children[1]=0;
-      children[2]=0;
-      children[3]=0;
-    }
-  };
-
   std::string AreaIndexGenerator::GetDescription() const
   {
     return "Generate 'area.idx'";
+  }
+
+  bool AreaIndexGenerator::LoadWayBlacklist(const ImportParameter& parameter,
+                                            Progress& progress,
+                                            std::set<Id>& wayBlacklist)
+  {
+    FileScanner scanner;
+
+    progress.SetAction("Loading way blacklist");
+
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "wayblack.dat"))) {
+      progress.Error("Cannot open 'wayblack.dat'");
+      return false;
+    }
+
+    while (!scanner.IsEOF()) {
+      Id id;
+
+      scanner.Read(id);
+
+      if (!scanner.HasError()) {
+        wayBlacklist.insert(id);
+      }
+    }
+
+    return scanner.Close();
+  }
+
+  void AreaIndexGenerator::SetOffsetOfChildren(const std::map<Coord,AreaLeaf>& leafs,
+                                               std::map<Coord,AreaLeaf>& newAreaLeafs)
+  {
+    // For every cell that had entries in one of its children we create
+    // an index entry.
+    for (std::map<Coord,AreaLeaf>::const_iterator leaf=leafs.begin();
+         leaf!=leafs.end();
+         ++leaf) {
+      // Coordinates of the children in "children dimension" calculated from the tile id
+      size_t xc=leaf->first.x;
+      size_t yc=leaf->first.y;
+
+      size_t index;
+
+      //
+      // child index is build as following (y-axis is from bottom to top!):
+      //   01
+      //   23
+
+      if (yc%2!=0) {
+        if (xc%2==0) {
+          index=0;
+        }
+        else {
+          index=1;
+        }
+      }
+      else {
+        if (xc%2==0) {
+          index=2;
+        }
+        else {
+          index=3;
+        }
+      }
+
+      assert(leaf->second.offset!=0);
+
+      newAreaLeafs[Coord(xc/2,yc/2)].children[index]=leaf->second.offset;
+    }
+  }
+
+  bool AreaIndexGenerator::WriteIndexLevel(const ImportParameter& parameter,
+                                           FileWriter& writer,
+                                           int level,
+                                           std::map<Coord,AreaLeaf>& leafs)
+  {
+    for (std::map<Coord,AreaLeaf>::iterator leaf=leafs.begin();
+         leaf!=leafs.end();
+         ++leaf) {
+      writer.GetPos(leaf->second.offset);
+
+      assert(leaf->second.ways.size()>0 ||
+             leaf->second.relWays.size()>0 ||
+             leaf->second.areas.size()>0 ||
+             leaf->second.relAreas.size()>0 ||
+             leaf->second.children[0]!=0 ||
+             leaf->second.children[1]!=0 ||
+             leaf->second.children[2]!=0 ||
+             leaf->second.children[3]!=0);
+
+      if (level<(int)parameter.GetAreaAreaIndexMaxMag()) {
+        // TODO: Is writer.Write better?
+        for (size_t c=0; c<4; c++) {
+          writer.WriteNumber(leaf->second.children[c]);
+        }
+      }
+
+      // Ways
+      writer.WriteNumber((uint32_t)leaf->second.ways.size());
+      for (std::map<TypeId, std::list<FileOffset> >::const_iterator entry=leaf->second.ways.begin();
+           entry!=leaf->second.ways.end();
+           ++entry) {
+        writer.WriteNumber(entry->first);
+        writer.WriteNumber((uint32_t)entry->second.size());
+
+        for (std::list<FileOffset>::const_iterator o=entry->second.begin();
+             o!=entry->second.end();
+             o++) {
+          // TODO: Is writer.Write better?
+          writer.Write(*o);
+        }
+      }
+
+      // Relation ways
+      writer.WriteNumber((uint32_t)leaf->second.relWays.size());
+      for (std::map<TypeId, std::list<FileOffset> >::const_iterator entry=leaf->second.relWays.begin();
+           entry!=leaf->second.relWays.end();
+           ++entry) {
+        writer.WriteNumber(entry->first);
+        writer.WriteNumber((uint32_t)entry->second.size());
+
+        for (std::list<FileOffset>::const_iterator o=entry->second.begin();
+             o!=entry->second.end();
+             o++) {
+          // TODO: Is writer.Write better?
+          writer.Write(*o);
+        }
+      }
+
+      // Areas
+      writer.WriteNumber((uint32_t)leaf->second.areas.size());
+      for (std::list<FileOffset>::const_iterator o=leaf->second.areas.begin();
+           o!=leaf->second.areas.end();
+           o++) {
+        // TODO: Is writer.Write better?
+        writer.Write(*o);
+      }
+
+      // Relation areas
+      writer.WriteNumber((uint32_t)leaf->second.relAreas.size());
+      for (std::list<FileOffset>::const_iterator o=leaf->second.relAreas.begin();
+           o!=leaf->second.relAreas.end();
+           o++) {
+        // TODO: Is writer.Write better?
+        writer.Write(*o);
+      }
+    }
+
+    return !writer.HasError();
   }
 
   bool AreaIndexGenerator::Import(const ImportParameter& parameter,
@@ -89,25 +217,9 @@ namespace osmscout {
     // Loading way blacklist
     //
 
-    progress.SetAction("Loading way blacklist");
-
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "wayblack.dat"))) {
-      progress.Error("Cannot open 'wayblack.dat'");
-      return false;
-    }
-
-    while (!scanner.IsEOF()) {
-      Id id;
-
-      scanner.Read(id);
-
-      if (!scanner.HasError()) {
-        wayBlacklist.insert(id);
-      }
-    }
-
-    if (!scanner.Close()) {
+    if (!LoadWayBlacklist(parameter,
+                          progress,
+                          wayBlacklist)) {
       return false;
     }
 
@@ -151,43 +263,7 @@ namespace osmscout {
 
       newAreaLeafs.clear();
 
-      // For every cell that had entries in one of its children we create
-      // an index entry.
-      for (std::map<Coord,AreaLeaf>::iterator leaf=leafs.begin();
-           leaf!=leafs.end();
-           ++leaf) {
-        // Coordinates of the children in "children dimension" calculated from the tile id
-        size_t xc=leaf->first.x;
-        size_t yc=leaf->first.y;
-
-        size_t index;
-
-        //
-        // child index is build as following (y-axis is from bottom to top!):
-        //   01
-        //   23
-
-        if (yc%2!=0) {
-          if (xc%2==0) {
-            index=0;
-          }
-          else {
-            index=1;
-          }
-        }
-        else {
-          if (xc%2==0) {
-            index=2;
-          }
-          else {
-            index=3;
-          }
-        }
-
-        assert(leaf->second.offset!=0);
-
-        newAreaLeafs[Coord(xc/2,yc/2)].children[index]=leaf->second.offset;
-      }
+      SetOffsetOfChildren(leafs,newAreaLeafs);
 
       leafs=newAreaLeafs;
 
@@ -556,76 +632,11 @@ namespace osmscout {
         }
       }
 
-      for (std::map<Coord,AreaLeaf>::iterator leaf=leafs.begin();
-           leaf!=leafs.end();
-           ++leaf) {
-        writer.GetPos(leaf->second.offset);
-
-        assert(leaf->second.ways.size()>0 ||
-               leaf->second.relWays.size()>0 ||
-               leaf->second.areas.size()>0 ||
-               leaf->second.relAreas.size()>0 ||
-               leaf->second.children[0]!=0 ||
-               leaf->second.children[1]!=0 ||
-               leaf->second.children[2]!=0 ||
-               leaf->second.children[3]!=0);
-
-        if (l<(int)parameter.GetAreaAreaIndexMaxMag()) {
-          // TODO: Is writer.Write better?
-          for (size_t c=0; c<4; c++) {
-            writer.WriteNumber(leaf->second.children[c]);
-          }
-        }
-
-        // Ways
-        writer.WriteNumber((uint32_t)leaf->second.ways.size());
-        for (std::map<TypeId, std::list<FileOffset> >::const_iterator entry=leaf->second.ways.begin();
-             entry!=leaf->second.ways.end();
-             ++entry) {
-          writer.WriteNumber(entry->first);
-          writer.WriteNumber((uint32_t)entry->second.size());
-
-          for (std::list<FileOffset>::const_iterator o=entry->second.begin();
-               o!=entry->second.end();
-               o++) {
-            // TODO: Is writer.Write better?
-            writer.Write(*o);
-          }
-        }
-
-        // Relation ways
-        writer.WriteNumber((uint32_t)leaf->second.relWays.size());
-        for (std::map<TypeId, std::list<FileOffset> >::const_iterator entry=leaf->second.relWays.begin();
-             entry!=leaf->second.relWays.end();
-             ++entry) {
-          writer.WriteNumber(entry->first);
-          writer.WriteNumber((uint32_t)entry->second.size());
-
-          for (std::list<FileOffset>::const_iterator o=entry->second.begin();
-               o!=entry->second.end();
-               o++) {
-            // TODO: Is writer.Write better?
-            writer.Write(*o);
-          }
-        }
-
-        // Areas
-        writer.WriteNumber((uint32_t)leaf->second.areas.size());
-        for (std::list<FileOffset>::const_iterator o=leaf->second.areas.begin();
-             o!=leaf->second.areas.end();
-             o++) {
-          // TODO: Is writer.Write better?
-          writer.Write(*o);
-        }
-
-        // Relation areas
-        writer.WriteNumber((uint32_t)leaf->second.relAreas.size());
-        for (std::list<FileOffset>::const_iterator o=leaf->second.relAreas.begin();
-             o!=leaf->second.relAreas.end();
-             o++) {
-          // TODO: Is writer.Write better?
-          writer.Write(*o);
-        }
+      if (!WriteIndexLevel(parameter,
+                           writer,
+                           l,
+                           leafs)) {
+        return false;
       }
 
       l--;

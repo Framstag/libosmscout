@@ -390,7 +390,6 @@ namespace osmscout {
     TypeId GetRelationTypeId(const std::string& name) const;
 
     void GetRoutables(std::set<TypeId>& types) const;
-
     void GetIndexables(std::set<TypeId>& types) const;
   };
 }
