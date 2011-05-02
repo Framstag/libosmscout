@@ -230,6 +230,11 @@ namespace osmscout {
     return filename;
   }
 
+  bool FileScanner::GotoBegin()
+  {
+    return SetPos(0);
+  }
+
   bool FileScanner::SetPos(FileOffset pos)
   {
     if (file==NULL || hasError) {

@@ -76,6 +76,7 @@ namespace osmscout {
 
     std::string GetFilename() const;
 
+    bool GotoBegin();
     bool SetPos(FileOffset pos);
     bool GetPos(FileOffset &pos) const;
 
