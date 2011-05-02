@@ -191,7 +191,8 @@ namespace osmscout {
                                   Progress& progress,
                                   const TypeConfig& typeConfig)
   {
-    FileScanner               scanner;
+    FileScanner               wayScanner;
+    FileScanner               relScanner;
     std::set<Id>              wayBlacklist;   // Ids of ways that should not be in index
     size_t                    ways=0;         // Number of ways found
     size_t                    waysConsumed=0; // Number of ways consumed
@@ -239,6 +240,18 @@ namespace osmscout {
       return false;
     }
 
+    if (!wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                         "ways.dat"))) {
+      progress.Error("Cannot open 'ways.dat'");
+      return false;
+    }
+
+    if (!relScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                         "relations.dat"))) {
+      progress.Error("Cannot open 'relations.dat'");
+      return false;
+    }
+
     writer.WriteNumber((uint32_t)parameter.GetAreaAreaIndexMaxMag()); // MaxMag
 
     if (!writer.GetPos(topLevelOffsetOffset)) {
@@ -275,13 +288,11 @@ namespace osmscout {
 
         progress.Info(std::string("Scanning ways.dat for ways of index level ")+NumberToString(l)+"...");
 
-        if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                          "ways.dat"))) {
-          progress.Error("Cannot open 'ways.dat'");
-          return false;
+        if (!wayScanner.GotoBegin()) {
+          progress.Error("Cannot go to begin of way file");
         }
 
-        if (!scanner.Read(wayCount)) {
+        if (!wayScanner.Read(wayCount)) {
           progress.Error("Error while reading number of data entries in file");
           return false;
         }
@@ -293,13 +304,14 @@ namespace osmscout {
           FileOffset offset;
           Way        way;
 
-          scanner.GetPos(offset);
-          if (!way.Read(scanner)) {
+          wayScanner.GetPos(offset);
+
+          if (!way.Read(wayScanner)) {
             progress.Error(std::string("Error while reading data entry ")+
                            NumberToString(w)+" of "+
                            NumberToString(wayCount)+
                            " in file '"+
-                           scanner.GetFilename()+"'");
+                           wayScanner.GetFilename()+"'");
             return false;
           }
 
@@ -434,8 +446,6 @@ namespace osmscout {
             }
           }
         }
-
-        scanner.Close();
       }
 
       // Relations
@@ -446,13 +456,11 @@ namespace osmscout {
 
         progress.Info(std::string("Scanning relations.dat for relations of index level ")+NumberToString(l)+"...");
 
-        if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                          "relations.dat"))) {
-          progress.Error("Cannot open 'relations.dat'");
-          return false;
+        if (!relScanner.GotoBegin()) {
+          progress.Error("Cannot go to begin of relation file");
         }
 
-        if (!scanner.Read(relCount)) {
+        if (!relScanner.Read(relCount)) {
           progress.Error("Error while reading number of data entries in file");
           return false;
         }
@@ -464,14 +472,14 @@ namespace osmscout {
           FileOffset offset;
           Relation   relation;
 
-          scanner.GetPos(offset);
+          relScanner.GetPos(offset);
 
-          if (!relation.Read(scanner)) {
+          if (!relation.Read(relScanner)) {
             progress.Error(std::string("Error while reading data entry ")+
                            NumberToString(r)+" of "+
                            NumberToString(relCount)+
                            " in file '"+
-                           scanner.GetFilename()+"'");
+                           relScanner.GetFilename()+"'");
             return false;
           }
 
@@ -613,8 +621,6 @@ namespace osmscout {
             }
           }
         }
-
-        scanner.Close();
       }
 
       progress.Debug(std::string("Writing ")+NumberToString(leafs.size())+" entries ("+
