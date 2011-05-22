@@ -40,6 +40,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/Preprocess.h \
                         osmscout/GenAreaIndex.h \
                         osmscout/GenAreaNodeIndex.h \
+                        osmscout/GenAreaWayIndex.h \
                         osmscout/GenCityStreetIndex.h \
                         osmscout/GenNumericIndex.h \
                         osmscout/GenNodeDat.h \
@@ -54,6 +55,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/WayDataFile.h \
                         osmscout/AreaIndex.h \
                         osmscout/AreaNodeIndex.h \
+                        osmscout/AreaWayIndex.h \
                         osmscout/CityStreetIndex.h \
                         osmscout/NodeIndex.h \
                         osmscout/NodeUseIndex.h \

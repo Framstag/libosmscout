@@ -44,6 +44,7 @@
 
 #include <osmscout/GenAreaIndex.h>
 #include <osmscout/GenAreaNodeIndex.h>
+#include <osmscout/GenAreaWayIndex.h>
 #include <osmscout/GenNodeUseIndex.h>
 #include <osmscout/GenCityStreetIndex.h>
 #include <osmscout/GenWaterIndex.h>
@@ -67,8 +68,8 @@ namespace osmscout {
      waysLoadSize(1000000),
      wayDataCacheSize(100),
      wayIndexCacheSize(5000),
-     areaAreaIndexMaxMag(18),
-     areaAreaRelIndexMaxMag(18),
+     areaAreaIndexMaxMag(17),
+     areaAreaRelIndexMaxMag(17),
      areaWayIndexMaxMag(18),
      areaWayRelIndexMaxMag(18),
      waterIndexMaxMag(14)
@@ -335,12 +336,14 @@ namespace osmscout {
     /* 11 */
     modules.push_back(new AreaIndexGenerator());
     /* 12 */
-    modules.push_back(new AreaNodeIndexGenerator());
+    modules.push_back(new AreaWayIndexGenerator());
     /* 13 */
-    modules.push_back(new CityStreetIndexGenerator());
+    modules.push_back(new AreaNodeIndexGenerator());
     /* 14 */
-    modules.push_back(new NodeUseIndexGenerator());
+    modules.push_back(new CityStreetIndexGenerator());
     /* 15 */
+    modules.push_back(new NodeUseIndexGenerator());
+    /* 16 */
     modules.push_back(new WaterIndexGenerator());
 
     bool result=ExecuteModules(modules,parameter,progress,typeConfig);

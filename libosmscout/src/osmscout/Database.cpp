@@ -142,7 +142,7 @@ namespace osmscout {
   : maxWayLevel(4),
     maxAreaLevel(4),
     maxNodes(2000),
-    maxWays(3000),
+    maxWays(25000),
     maxAreas(std::numeric_limits<unsigned long>::max())
   {
     // no code
@@ -202,6 +202,7 @@ namespace osmscout {
    : isOpen(false),
      areaIndex(parameter.GetAreaIndexCacheSize()),
      areaNodeIndex(parameter.GetAreaNodeIndexCacheSize()),
+     areaWayIndex(),
      nodeDataFile("nodes.dat",
                   "node.idx",
                   parameter.GetNodeCacheSize(),
@@ -321,6 +322,15 @@ namespace osmscout {
     }
     std::cout << "Loading area node index done." << std::endl;
 
+    std::cout << "Loading area way index..." << std::endl;
+    if (!areaWayIndex.Load(path)) {
+      std::cerr << "Cannot load area way index!" << std::endl;
+      delete typeConfig;
+      typeConfig=NULL;
+      return false;
+    }
+    std::cout << "Loading area way index done." << std::endl;
+
     std::cout << "Loading city street index..." << std::endl;
     if (!cityStreetIndex.Load(path, hashFunction)) {
       std::cerr << "Cannot load city street index!" << std::endl;
@@ -428,7 +438,7 @@ namespace osmscout {
 
     maxPrioTimer.Stop();*/
 
-    StopClock nodesTimer;
+    StopClock nodeIndexTimer;
 
     styleConfig.GetNodeTypesWithMag(magnification,
                                     nodeTypes);
@@ -442,6 +452,54 @@ namespace osmscout {
       return false;
     }
 
+    nodeIndexTimer.Stop();
+
+    StopClock wayIndexTimer;
+
+    styleConfig.GetWayTypesByPrioWithMag(magnification,
+                                         wayTypes);
+
+    if (!areaWayIndex.GetOffsets(styleConfig,
+                                 lonMin,
+                                 latMin,
+                                 lonMax,
+                                 latMax,
+                                 wayTypes,
+                                 parameter.GetMaximumWays(),
+                                 wayWayOffsets,
+                                 relationWayOffsets)) {
+      std::cout << "Error getting ways and relations from area way index!" << std::endl;
+    }
+
+    wayIndexTimer.Stop();
+
+    StopClock areaIndexTimer;
+
+    /*
+    std::cout << "Ways for magnification: " << magLevel << std::endl;
+    for (size_t i=0; i<wayTypes.size(); i++) {
+      std::cout << "Drawing way of type: " << typeConfig->GetTypes()[wayTypes[i]].GetName() << " " << typeConfig->GetTypes()[wayTypes[i]].GetId() << std::endl;
+    }*/
+
+    wayTypes.clear();
+
+    if (!areaIndex.GetOffsets(styleConfig,
+                              lonMin,
+                              latMin,
+                              lonMax,
+                              latMax,
+                              ((size_t)ceil(magLevel))+
+                              parameter.GetMaximumAreaLevel(),
+                              parameter.GetMaximumAreas(),
+                              wayAreaOffsets,
+                              relationAreaOffsets)) {
+      std::cout << "Error getting ways and relations from area index!" << std::endl;
+    }
+
+    areaIndexTimer.Stop();
+
+    StopClock nodesTimer;
+
     if (!GetNodes(nodeOffsets,
                   nodes)) {
       std::cout << "Error reading nodes in area!" << std::endl;
@@ -450,38 +508,6 @@ namespace osmscout {
 
     nodesTimer.Stop();
 
-    StopClock indexTimer;
-
-    styleConfig.GetWayTypesByPrioWithMag(magnification,
-                                         wayTypes);
-
-    /*
-    std::cout << "Ways for magnification: " << magLevel << std::endl;
-    for (size_t i=0; i<wayTypes.size(); i++) {
-      std::cout << "Drawing way of type: " << typeConfig->GetTypes()[wayTypes[i]].GetName() << " " << typeConfig->GetTypes()[wayTypes[i]].GetId() << std::endl;
-    }*/
-
-    if (!areaIndex.GetOffsets(styleConfig,
-                              lonMin,
-                              latMin,
-                              lonMax,
-                              latMax,
-                              ((size_t)ceil(magLevel))+
-                              parameter.GetMaximumWayLevel(),
-                              ((size_t)ceil(magLevel))+
-                              parameter.GetMaximumAreaLevel(),
-                              parameter.GetMaximumAreas(),
-                              wayTypes,
-                              parameter.GetMaximumWays(),
-                              wayWayOffsets,
-                              relationWayOffsets,
-                              wayAreaOffsets,
-                              relationAreaOffsets)) {
-      std::cout << "Error getting ways and relations from area index!" << std::endl;
-    }
-
-    indexTimer.Stop();
-
     StopClock waysTimer;
 
     if (!GetWays(wayWayOffsets,
@@ -489,18 +515,12 @@ namespace osmscout {
       std::cout << "Error reading ways in area!" << std::endl;
       return false;
     }
+    /*
+    for (size_t i=0; i<ways.size(); i++) {
+      std::cout << ways[i]->GetId() << " " << ways[i]->GetName() << " " << ways[i]->GetRefName() << std::endl;
+    }*/
 
     waysTimer.Stop();
-
-    StopClock relationWaysTimer;
-
-    if (!GetRelations(relationWayOffsets,
-                      relationWays)) {
-      std::cout << "Error reading relation ways in area!" << std::endl;
-      return false;
-    }
-
-    relationWaysTimer.Stop();
 
     StopClock areasTimer;
 
@@ -512,6 +532,16 @@ namespace osmscout {
 
     areasTimer.Stop();
 
+    StopClock relationWaysTimer;
+
+    if (!GetRelations(relationWayOffsets,
+                      relationWays)) {
+      std::cout << "Error reading relation ways in area!" << std::endl;
+      return false;
+    }
+
+    relationWaysTimer.Stop();
+
     StopClock relationAreasTimer;
 
     if (!GetRelations(relationAreaOffsets,
@@ -522,13 +552,14 @@ namespace osmscout {
 
     relationAreasTimer.Stop();
 
-    //std::cout << "Max Prio: " << maxPrioTimer << " ";
-    std::cout << "nodes: " << nodesTimer << " ";
-    std::cout << "index: " << indexTimer << " ";
-    std::cout << "ways: " << waysTimer << " ";
-    std::cout << "areas: " << areasTimer << " ";
-    std::cout << "rel. ways: " << relationWaysTimer << " ";
-    std::cout << "rel. areas: " << relationAreasTimer;
+    std::cout << "I/O: ";
+    std::cout << "n " << nodeIndexTimer << " ";
+    std::cout << "w " << wayIndexTimer << " ";
+    std::cout << "a " << areaIndexTimer;
+    std::cout << " - ";
+    std::cout << "n " << nodesTimer << " ";
+    std::cout << "w " << waysTimer << "/" << relationWaysTimer << " ";
+    std::cout << "a " << areasTimer << "/" << relationAreasTimer;
     std::cout << std::endl;
 
     return true;
@@ -1638,6 +1669,7 @@ namespace osmscout {
 
     areaIndex.DumpStatistics();
     areaNodeIndex.DumpStatistics();
+    areaWayIndex.DumpStatistics();
     cityStreetIndex.DumpStatistics();
     waterIndex.DumpStatistics();
   }

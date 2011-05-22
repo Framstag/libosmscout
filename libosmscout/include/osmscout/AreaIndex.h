@@ -22,9 +22,6 @@
 
 #include <map>
 #include <vector>
-#include <cassert>
-#include <cmath>
-#include <iostream>
 
 #include <osmscout/StyleConfig.h>
 
@@ -57,11 +54,9 @@ namespace osmscout {
       */
     struct IndexEntry
     {
-      FileOffset                                children[4]; //! File index of each of the four children, or 0 if there is no child
-      std::map<TypeId,std::vector<FileOffset> > ways;
-      std::map<TypeId,std::vector<FileOffset> > relWays;
-      std::vector<FileOffset>                   areas;
-      std::vector<FileOffset>                   relAreas;
+      FileOffset              children[4]; //! File index of each of the four children, or 0 if there is no child
+      std::vector<FileOffset> areas;
+      std::vector<FileOffset> relAreas;
     };
 
     typedef Cache<FileOffset,IndexEntry> IndexCache;
@@ -73,24 +68,6 @@ namespace osmscout {
         unsigned long memory=0;
 
         memory+=sizeof(value);
-
-        // Ways
-        memory+=value.ways.size()*(sizeof(TypeId)+sizeof(std::vector<FileOffset>));
-
-        for (std::map<TypeId,std::vector<FileOffset> >::const_iterator iter2=value.ways.begin();
-             iter2!=value.ways.end();
-             ++iter2) {
-          memory+=iter2->second.size()*sizeof(FileOffset);
-        }
-
-        // RelWays
-        memory+=value.relWays.size()*(sizeof(TypeId)+sizeof(std::vector<FileOffset>));
-
-        for (std::map<TypeId,std::vector<FileOffset> >::const_iterator iter2=value.relWays.begin();
-             iter2!=value.relWays.end();
-             ++iter2) {
-          memory+=iter2->second.size()*sizeof(FileOffset);
-        }
 
         // Areas
         memory+=value.areas.size()*sizeof(FileOffset);
@@ -129,13 +106,8 @@ namespace osmscout {
                     double minlat,
                     double maxlon,
                     double maxlat,
-                    size_t maxWayLevel,
                     size_t maxAreaLevel,
                     size_t maxAreaCount,
-                    const std::vector<TypeId>& wayTypes,
-                    size_t maxWayCount,
-                    std::vector<FileOffset>& wayWayOffsets,
-                    std::vector<FileOffset>& relationWayOffsets,
                     std::vector<FileOffset>& wayAreaOffsets,
                     std::vector<FileOffset>& relationAreaOffsets) const;
 

@@ -41,7 +41,7 @@ OSS
     LINE #fefeb3 WITH ALTCOLOR #fefe73 MINPIXEL 1 WIDTH 10 OUTLINE 1
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "highway_unclassified" PRIO 6 MINMAG proximity
+  WAY "highway_unclassified" PRIO 7 MINMAG proximity
     LINE #ffffff WITH ALTCOLOR #888888 MINPIXEL 0.5 WIDTH 8 OUTLINE 1
     LABEL WITH STYLE contour MINMAG close
 
@@ -49,7 +49,7 @@ OSS
     LINE #ffffff WITH ALTCOLOR #888888 MINPIXEL 0.5 WIDTH 8 OUTLINE 1
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "highway_residential" PRIO 8 MINMAG city
+  WAY "highway_residential" PRIO 7 MINMAG city
     LINE #ffffff WITH ALTCOLOR #888888 MINPIXEL 0.5 WIDTH 8 OUTLINE 1
     LABEL WITH STYLE contour MINMAG close
 

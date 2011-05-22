@@ -117,9 +117,7 @@ namespace osmscout {
          ++leaf) {
       writer.GetPos(leaf->second.offset);
 
-      assert(leaf->second.ways.size()>0 ||
-             leaf->second.relWays.size()>0 ||
-             leaf->second.areas.size()>0 ||
+      assert(leaf->second.areas.size()>0 ||
              leaf->second.relAreas.size()>0 ||
              leaf->second.children[0]!=0 ||
              leaf->second.children[1]!=0 ||
@@ -130,38 +128,6 @@ namespace osmscout {
         // TODO: Is writer.Write better?
         for (size_t c=0; c<4; c++) {
           writer.WriteNumber(leaf->second.children[c]);
-        }
-      }
-
-      // Ways
-      writer.WriteNumber((uint32_t)leaf->second.ways.size());
-      for (std::map<TypeId, std::list<FileOffset> >::const_iterator entry=leaf->second.ways.begin();
-           entry!=leaf->second.ways.end();
-           ++entry) {
-        writer.WriteNumber(entry->first);
-        writer.WriteNumber((uint32_t)entry->second.size());
-
-        for (std::list<FileOffset>::const_iterator o=entry->second.begin();
-             o!=entry->second.end();
-             o++) {
-          // TODO: Is writer.Write better?
-          writer.Write(*o);
-        }
-      }
-
-      // Relation ways
-      writer.WriteNumber((uint32_t)leaf->second.relWays.size());
-      for (std::map<TypeId, std::list<FileOffset> >::const_iterator entry=leaf->second.relWays.begin();
-           entry!=leaf->second.relWays.end();
-           ++entry) {
-        writer.WriteNumber(entry->first);
-        writer.WriteNumber((uint32_t)entry->second.size());
-
-        for (std::list<FileOffset>::const_iterator o=entry->second.begin();
-             o!=entry->second.end();
-             o++) {
-          // TODO: Is writer.Write better?
-          writer.Write(*o);
         }
       }
 
@@ -267,9 +233,7 @@ namespace osmscout {
     int l=parameter.GetAreaAreaIndexMaxMag();
 
     while (l>=0) {
-      size_t wayLevelEntries=0;
       size_t areaLevelEntries=0;
-      size_t relWayLevelEntries=0;
       size_t relAreaLevelEntries=0;
 
       progress.Info(std::string("Storing level ")+NumberToString(l)+"...");
@@ -323,21 +287,12 @@ namespace osmscout {
           ways++;
 
           if (way.IsArea()) { // Areas
-            //
-            // Bounding box calculation
-            //
+            double minLon;
+            double maxLon;
+            double minLat;
+            double maxLat;
 
-            double minLon=way.nodes[0].lon;
-            double maxLon=way.nodes[0].lon;
-            double minLat=way.nodes[0].lat;
-            double maxLat=way.nodes[0].lat;
-
-            for (size_t i=1; i<way.nodes.size(); i++) {
-              minLon=std::min(minLon,way.nodes[i].lon);
-              maxLon=std::max(maxLon,way.nodes[i].lon);
-              minLat=std::min(minLat,way.nodes[i].lat);
-              maxLat=std::max(maxLat,way.nodes[i].lat);
-            }
+            way.GetBoundingBox(minLon,maxLon,minLat,maxLat);
 
             //
             // Renormated coordinate space (everything is >=0)
@@ -377,70 +332,6 @@ namespace osmscout {
               // Add this area to the tile where the center of the area lies in.
               leafs[Coord((minxc+maxxc)/2,(minyc+maxyc)/2)].areas.push_back(offset);
               areaLevelEntries++;
-
-              waysConsumed++;
-            }
-          }
-          else { // Ways
-            //
-            // Bounding box calculation
-            //
-
-            double length=0.0;
-            double minLon=way.nodes[0].lon;
-            double maxLon=way.nodes[0].lon;
-            double minLat=way.nodes[0].lat;
-            double maxLat=way.nodes[0].lat;
-
-            for (size_t i=1; i<way.nodes.size(); i++) {
-              length+=sqrt(pow(way.nodes[i].lon-way.nodes[i-1].lon,2)+
-                           pow(way.nodes[i].lat-way.nodes[i-1].lat,2));
-              minLon=std::min(minLon,way.nodes[i].lon);
-              maxLon=std::max(maxLon,way.nodes[i].lon);
-              minLat=std::min(minLat,way.nodes[i].lat);
-              maxLat=std::max(maxLat,way.nodes[i].lat);
-            }
-
-            //
-            // Renormated coordinate space (everything is >=0)
-            //
-
-            minLon+=180;
-            maxLon+=180;
-            minLat+=90;
-            maxLat+=90;
-
-            //
-            // Calculate highest level where the way (length) completely
-            // fits in the cell size. Assign the way to the tile with contains
-            // it geometric middle
-            //
-
-            int level=parameter.GetAreaWayIndexMaxMag();
-
-            // Way length must be smaller than cell
-            while (level>=l) {
-              if (length<=cellWidth[level] &&
-                  length<=cellHeight[level]) {
-                break;
-              }
-
-              level--;
-            }
-
-            if (level==l) {
-              //
-              // Calculate minum and maximum tile ids that are covered
-              // by the way
-              //
-              size_t minyc=(size_t)floor(minLat/cellHeight[level]);
-              size_t maxyc=(size_t)floor(maxLat/cellHeight[level]);
-              size_t minxc=(size_t)floor(minLon/cellWidth[level]);
-              size_t maxxc=(size_t)floor(maxLon/cellWidth[level]);
-
-              // Add this way to the tile where the center of the way lies in.
-              leafs[Coord((minxc+maxxc)/2,(minyc+maxyc)/2)].ways[way.GetType()].push_back(offset);
-              wayLevelEntries++;
 
               waysConsumed++;
             }
@@ -549,83 +440,10 @@ namespace osmscout {
               relsConsumed++;
             }
           }
-          else {
-            //
-            // Bounding box calculation
-            //
-
-            double minLon=relation.roles[0].nodes[0].lon;
-            double maxLon=relation.roles[0].nodes[0].lon;
-            double minLat=relation.roles[0].nodes[0].lat;
-            double maxLat=relation.roles[0].nodes[0].lat;
-
-            for (std::vector<Relation::Role>::const_iterator role=relation.roles.begin();
-                 role!=relation.roles.end();
-                 ++role) {
-              for (size_t i=0; i<role->nodes.size(); i++) {
-                minLon=std::min(minLon,role->nodes[i].lon);
-                maxLon=std::max(maxLon,role->nodes[i].lon);
-                minLat=std::min(minLat,role->nodes[i].lat);
-                maxLat=std::max(maxLat,role->nodes[i].lat);
-              }
-            }
-
-            //
-            // Renormated coordinate space (everything is >=0)
-            //
-
-            minLon+=180;
-            maxLon+=180;
-            minLat+=90;
-            maxLat+=90;
-
-            // For relation we just take the diagonal of the bounding box,
-            // since we cannot be sure that we just can sum up the length of all
-            // role paths
-            double length=sqrt(pow(maxLon-minLon,2)+
-                               pow(maxLat-minLat,2));
-
-            //
-            // Calculate highest level where the way (length) completely
-            // fits in the cell size. Assign the way to the tile with contains
-            // it geometric middle
-            //
-
-            int level=parameter.GetAreaWayIndexMaxMag();
-
-            // Way length must be smaller than cell
-            while (level>=l) {
-              if (length<=cellWidth[level] &&
-                  length<=cellHeight[level]) {
-                break;
-              }
-
-              level--;
-            }
-
-            if (level==l) {
-              //
-              // Calculate minum and maximum tile ids that are covered
-              // by the way
-              //
-              size_t minxc=(size_t)floor(minLon/cellWidth[level]);
-              size_t maxxc=(size_t)floor(maxLon/cellWidth[level]);
-              size_t minyc=(size_t)floor(minLat/cellHeight[level]);
-              size_t maxyc=(size_t)floor(maxLat/cellHeight[level]);
-
-              // Add this way to the tile where the center of the way lies in.
-              leafs[Coord((minxc+maxxc)/2,(minyc+maxyc)/2)].relWays[relation.GetType()].push_back(offset);
-              relWayLevelEntries++;
-
-              relsConsumed++;
-            }
-          }
         }
       }
 
       progress.Debug(std::string("Writing ")+NumberToString(leafs.size())+" entries ("+
-                     NumberToString(wayLevelEntries)+"/"+
-                     NumberToString(relWayLevelEntries)+"/"+
                      NumberToString(areaLevelEntries)+"/"+
                      NumberToString(relAreaLevelEntries)+") "+
                      "to index of level "+NumberToString(l)+"...");

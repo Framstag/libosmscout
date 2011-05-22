@@ -35,12 +35,10 @@ namespace osmscout {
   private:
     struct AreaLeaf
     {
-      FileOffset                              offset;
-      std::map<TypeId,std::list<FileOffset> > ways;
-      std::map<TypeId,std::list<FileOffset> > relWays;
-      std::list<FileOffset>                   areas;
-      std::list<FileOffset>                   relAreas;
-      FileOffset                              children[4];
+      FileOffset            offset;
+      std::list<FileOffset> areas;
+      std::list<FileOffset> relAreas;
+      FileOffset            children[4];
 
       AreaLeaf()
       {

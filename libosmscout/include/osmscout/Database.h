@@ -39,6 +39,7 @@
 // In area index
 #include <osmscout/AreaIndex.h>
 #include <osmscout/AreaNodeIndex.h>
+#include <osmscout/AreaWayIndex.h>
 
 // Location index
 #include <osmscout/CityStreetIndex.h>
@@ -156,8 +157,8 @@ namespace osmscout {
     double                maxLat;        //! bounding box of data
 
     AreaIndex             areaIndex;
-
     AreaNodeIndex         areaNodeIndex;
+    AreaWayIndex          areaWayIndex;
 
     CityStreetIndex       cityStreetIndex;
 

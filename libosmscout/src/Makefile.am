@@ -50,6 +50,7 @@ libosmscout_la_SOURCES= osmscout/util/Cache.cpp \
                         osmscout/Preprocess.cpp \
                         osmscout/GenAreaIndex.cpp \
                         osmscout/GenAreaNodeIndex.cpp \
+                        osmscout/GenAreaWayIndex.cpp \
                         osmscout/GenCityStreetIndex.cpp \
                         osmscout/GenNumericIndex.cpp \
                         osmscout/GenNodeDat.cpp \
@@ -60,6 +61,7 @@ libosmscout_la_SOURCES= osmscout/util/Cache.cpp \
                         osmscout/GenWayDat.cpp \
                         osmscout/AreaIndex.cpp \
                         osmscout/AreaNodeIndex.cpp \
+                        osmscout/AreaWayIndex.cpp \
                         osmscout/CityStreetIndex.cpp \
                         osmscout/NodeIndex.cpp \
                         osmscout/NodeUseIndex.cpp \

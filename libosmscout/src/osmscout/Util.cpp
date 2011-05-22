@@ -116,6 +116,7 @@ namespace osmscout {
     number=0;
     bytes=1;
 
+    // TODO: Assure that we do not read past the end of the buffer
     while (true) {
       uint32_t add=((*buffer) & 0x7f) << mult;
 

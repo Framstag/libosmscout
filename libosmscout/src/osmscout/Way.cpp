@@ -96,6 +96,26 @@ namespace osmscout {
     }
   }
 
+  void Way::GetBoundingBox(double& minLon,
+                           double& maxLon,
+                           double& minLat,
+                           double& maxLat) const
+  {
+    assert(nodes.size()>0);
+
+    minLon=nodes[0].lon;
+    maxLon=nodes[0].lon;
+    minLat=nodes[0].lat;
+    maxLat=nodes[0].lat;
+
+    for (size_t i=1; i<nodes.size(); i++) {
+      minLon=std::min(minLon,nodes[i].lon);
+      maxLon=std::max(maxLon,nodes[i].lon);
+      minLat=std::min(minLat,nodes[i].lat);
+      maxLat=std::max(maxLat,nodes[i].lat);
+    }
+  }
+
   bool Way::Read(FileScanner& scanner)
   {
     uint32_t nodeCount;

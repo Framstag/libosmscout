@@ -65,6 +65,31 @@ namespace osmscout {
     return true;
   }
 
+  void Relation::GetBoundingBox(double& minLon,
+                                double& maxLon,
+                                double& minLat,
+                                double& maxLat) const
+  {
+    assert(roles.size()>0);
+    assert(roles[0].nodes.size()>0);
+
+    minLon=roles[0].nodes[0].lon;
+    maxLon=roles[0].nodes[0].lon;
+    minLat=roles[0].nodes[0].lat;
+    maxLat=roles[0].nodes[0].lat;
+
+    for (std::vector<Relation::Role>::const_iterator role=roles.begin();
+         role!=roles.end();
+         ++role) {
+      for (size_t i=0; i<role->nodes.size(); i++) {
+        minLon=std::min(minLon,role->nodes[i].lon);
+        maxLon=std::max(maxLon,role->nodes[i].lon);
+        minLat=std::min(minLat,role->nodes[i].lat);
+        maxLat=std::max(maxLat,role->nodes[i].lat);
+      }
+    }
+  }
+
   void Relation::SetId(Id id)
   {
     this->id=id;

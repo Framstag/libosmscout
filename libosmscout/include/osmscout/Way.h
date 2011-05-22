@@ -145,7 +145,12 @@ namespace osmscout {
       return attributes.tags[idx].value;
     }
 
-    bool GetCenter(double& lat, double& lon) const;
+    bool GetCenter(double& lat,
+                   double& lon) const;
+    void GetBoundingBox(double& minLon,
+                        double& maxLon,
+                        double& minLat,
+                        double& maxLat) const;
 
     void SetId(Id id);
     void SetType(TypeId type);
