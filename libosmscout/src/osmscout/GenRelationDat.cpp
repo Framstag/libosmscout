@@ -670,60 +670,63 @@ namespace osmscout {
 
       // Resolve type of multipolygon relations if the relation does
       // not have a type
-      if (rel.GetType()==typeIgnore &&
-          rel.GetRelType()=="multipolygon") {
-        bool   correct=true;
-        TypeId typeId=typeIgnore;
+      if (rel.GetType()==typeIgnore) {
+        if (rel.GetRelType()=="multipolygon") {
+          bool   correct=true;
+          TypeId typeId=typeIgnore;
 
-        for (size_t m=0; m<rel.roles.size(); m++) {
-          if (rel.roles[m].role=="outer") {
-            if (typeId==typeIgnore &&
-                rel.roles[m].GetType()!=typeIgnore) {
-              typeId=rel.roles[m].GetType();
-              if (progress.OutputDebug()) {
-                progress.Debug("Autodetecting type of relation "+NumberToString(rel.GetId())+" as "+NumberToString(typeId));
+          for (size_t m=0; m<rel.roles.size(); m++) {
+            if (rel.roles[m].role=="outer" &&
+                rel.roles[m].GetType()!=typeIgnore &&
+                typeConfig.GetTypeInfo(rel.roles[m].GetType()).CanBeArea()) {
+              if (typeId==typeIgnore) {
+                typeId=rel.roles[m].GetType();
+                if (progress.OutputDebug()) {
+                  progress.Debug("Autodetecting type of multipolygon relation "+NumberToString(rel.GetId())+" as "+NumberToString(typeId));
+                }
+              }
+              else if (typeId!=typeIgnore &&
+                       typeId!=rel.roles[m].GetType()) {
+                if (progress.OutputDebug()) {
+                  progress.Warning("Multipolygon relation "+NumberToString(rel.GetId())+" has conflicting types for outer boundary ("+
+                                   NumberToString(rawRel.members[m].id)+","+NumberToString(rel.GetType())+","+NumberToString(rel.roles[m].GetType())+")");
+                }
+                correct=false;
               }
             }
-            else if (typeId!=typeIgnore &&
-                     rel.roles[m].GetType()!=typeIgnore &&
-                     typeId!=rel.roles[m].GetType()) {
-              if (progress.OutputDebug()) {
-                progress.Debug("Multipolygon relation "+NumberToString(rel.GetId())+" has conflicting types for outer boundary ("+
-                               NumberToString(rawRel.members[m].id)+","+NumberToString(rel.GetType())+","+NumberToString(rel.roles[m].GetType())+")");
-              }
+          }
+
+          if (correct) {
+            rel.SetType(typeId);
+          }
+        }
+        /*
+        else {
+          bool correct=true;
+
+          TypeId type=rel.roles[0].GetType();
+
+          for (size_t m=1; m<rel.roles.size(); m++) {
+            if (rel.roles[m].GetType()!=type) {
               correct=false;
+              break;
             }
           }
-        }
 
-        if (correct) {
-          rel.SetType(typeId);
-        }
-      }
-      else {
-        bool correct=true;
-
-        TypeId type=rel.roles[0].GetType();
-
-        for (size_t m=1; m<rel.roles.size(); m++) {
-          if (rel.roles[m].GetType()!=type) {
-            correct=false;
-            break;
+          if (correct &&
+              type!=rel.GetType() &&
+              type!=typeIgnore) {
+            if (progress.OutputDebug()) {
+              progress.Debug("Autocorrecting type of relation "+NumberToString(rel.GetId())+
+                             " from "+NumberToString(rel.GetType())+" to "+NumberToString(type));
+            }
+            rel.SetType(type);
           }
-        }
-
-        if (correct &&
-            type!=rel.GetType() &&
-            type!=typeIgnore) {
-          if (progress.OutputDebug()) {
-            progress.Debug("Autocorrecting type of relation "+NumberToString(rel.GetId())+
-                           " from "+NumberToString(rel.GetType())+" to "+NumberToString(type));
-          }
-          rel.SetType(type);
-        }
+        }*/
       }
 
       if (rel.GetType()==typeIgnore) {
+        //std::cout << "Cannot identify type of relation " << rel.GetId() << std::endl;
         continue;
       }
 
