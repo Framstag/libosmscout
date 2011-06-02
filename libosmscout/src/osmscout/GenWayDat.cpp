@@ -239,25 +239,30 @@ namespace osmscout {
         return false;
       }
 
-      if (way.GetType()!=typeIgnore &&
-          !typeConfig.GetTypeInfo(way.GetType()).GetIgnore()) {
-        size_t index=way.GetId()/distributionGranuality;
+      if (way.GetType()==typeIgnore) {
+        continue;
+      }
 
-        if (index>=wayDistribution.size()) {
-          wayDistribution.resize(index+1,0);
-        }
+      if (typeConfig.GetTypeInfo(way.GetType()).GetIgnore()) {
+        continue;
+      }
 
-        wayDistribution[index]++;
-        wayCount++;
+      size_t index=way.GetId()/distributionGranuality;
 
-        if (way.IsArea()) {
-          areaTypeCount[way.GetType()]++;
-          areaNodeTypeCount[way.GetType()]+=way.GetNodes().size();
-        }
-        else {
-          wayTypeCount[way.GetType()]++;
-          wayNodeTypeCount[way.GetType()]+=way.GetNodes().size();
-        }
+      if (index>=wayDistribution.size()) {
+        wayDistribution.resize(index+1,0);
+      }
+
+      wayDistribution[index]++;
+      wayCount++;
+
+      if (way.IsArea()) {
+        areaTypeCount[way.GetType()]++;
+        areaNodeTypeCount[way.GetType()]+=way.GetNodes().size();
+      }
+      else {
+        wayTypeCount[way.GetType()]++;
+        wayNodeTypeCount[way.GetType()]+=way.GetNodes().size();
       }
     }
 
