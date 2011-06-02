@@ -52,6 +52,8 @@ namespace osmscout {
     size_t      wayIndexCacheSize;     //! Size of the way index cache
     size_t      areaAreaIndexMaxMag;   //! Maximum depth of the index generated
     size_t      areaAreaRelIndexMaxMag;//! Maximum depth of the index generated
+    size_t      areaWayIndexCellSizeAverage; //! Average entries per index cell
+    size_t      areaWayIndexCellSizeMax;   //! Maximum number of entries  per index cell
     size_t      waterIndexMaxMag;      //! Maximum depth of the index generated
 
   public:
@@ -74,6 +76,8 @@ namespace osmscout {
     size_t GetWayIndexCacheSize() const;
     size_t GetAreaAreaIndexMaxMag() const;
     size_t GetAreaAreaRelIndexMaxMag() const;
+    size_t GetAreaWayIndexCellSizeAverage() const;
+    size_t GetAreaWayIndexCellSizeMax() const;
     size_t GetWaterIndexMaxMag() const;
 
     void SetMapfile(const std::string& mapfile);
