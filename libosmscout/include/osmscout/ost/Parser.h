@@ -1,4 +1,3 @@
-
 /*
   This source is part of the libosmscout library
   Copyright (C) 2011  Tim Teulings
@@ -17,6 +16,7 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
+
 
 #ifndef OSMSCOUT_OST_PARSER_H
 #define OSMSCOUT_OST_PARSER_H
@@ -67,7 +67,6 @@ public:
   void Warning(int line, int col, const char *s);
   void Warning(const char *s);
   void Exception(const char *s);
-
 };
 
 class Parser
@@ -77,7 +76,7 @@ private:
 		_EOF=0,
 		_ident=1,
 		_number=2,
-		_string=3,
+		_string=3
 	};
 	int maxT;
 
@@ -139,7 +138,6 @@ std::string Destring(const char* str)
 	void TYPEOPTION(TypeInfo& typeInfo);
 
   void Parse();
-
 };
 
 } // namespace

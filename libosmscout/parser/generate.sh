@@ -1,7 +1,9 @@
 #!/bin/sh
 
+COCO=/tmp/coco/Coco
+
 # OST (aka OSMScout types)
-cococpp OST/OST.atg -namespace osmscout:ost -frames OST -o OST 
+$COCO OST/OST.atg -namespace osmscout:ost -frames OST -o OST 
 
 sed -i s/\(L\"/\(\"/g OST/Scanner.cpp
 sed -i s/L\'/\'/g OST/Scanner.cpp
@@ -16,7 +18,7 @@ cp OST/Parser.h ../include/osmscout/ost/
 cp OST/Parser.cpp ../src/osmscout/ost
 
 # OSS (aka OSMScout style)
-cococpp OSS/OSS.atg -namespace osmscout:oss -frames OSS -o OSS
+$COCO OSS/OSS.atg -namespace osmscout:oss -frames OSS -o OSS
 
 sed -i s/\(L\"/\(\"/g OSS/Scanner.cpp
 sed -i s/L\'/\'/g OSS/Scanner.cpp

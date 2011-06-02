@@ -1,3 +1,21 @@
+/*
+  This source is part of the libosmscout library
+  Copyright (C) 2011  Tim Teulings
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+*/
 
 /*
   This source is part of the libosmscout library
@@ -219,7 +237,7 @@ void Scanner::AddCh() {
 
 
 bool Scanner::Comment0() {
-	int level = 1, pos0 = pos, line0 = line, col0 = col;
+	int level = 1, pos0 = pos, line0 = line, col0 = col, charPos0 = charPos;
 	NextCh();
 	if (ch == '/') {
 		NextCh();
@@ -232,13 +250,13 @@ bool Scanner::Comment0() {
 			else NextCh();
 		}
 	} else {
-		buffer->SetPos(pos0); NextCh(); line = line0; col = col0;
+		buffer->SetPos(pos0); NextCh(); line = line0; col = col0; charPos = charPos0;
 	}
 	return false;
 }
 
 bool Scanner::Comment1() {
-	int level = 1, pos0 = pos, line0 = line, col0 = col;
+	int level = 1, pos0 = pos, line0 = line, col0 = col, charPos0 = charPos;
 	NextCh();
 	if (ch == '*') {
 		NextCh();
@@ -259,7 +277,7 @@ bool Scanner::Comment1() {
 			else NextCh();
 		}
 	} else {
-		buffer->SetPos(pos0); NextCh(); line = line0; col = col0;
+		buffer->SetPos(pos0); NextCh(); line = line0; col = col0; charPos = charPos0;
 	}
 	return false;
 }
@@ -286,20 +304,33 @@ Token* Scanner::NextToken() {
 			(ch >= 9 && ch <= 10) || ch == 13
   ) NextCh();
 	if ((ch == '/' && Comment0()) || (ch == '/' && Comment1())) return NextToken();
+  int recKind = noSym;
+  int recEnd = pos;
+
   t = CreateToken();
-  t->pos = pos; t->col = col; t->line = line;
+  t->pos = pos; t->col = col; t->line = line; t->charPos = charPos;
   int state = start.state(ch);
   tlen = 0; AddCh();
 
   switch (state) {
-    case -1: { t->kind = eofSym; break; } // NextCh already done
-    case 0: { t->kind = noSym; break; }   // NextCh already done
+  case -1: { t->kind = eofSym; break; } // NextCh already done
+  case 0: {
+    case_0:
+    if (recKind != noSym) {
+      tlen = recEnd - t->pos;
+      SetScannerBehindT();
+    }
+
+    t->kind = recKind; break;
+  } // NextCh already done
 		case 1:
 			case_1:
+			recEnd = pos; recKind = 1;
 			if ((ch >= 'A' && ch <= 'Z') || ch == '_' || (ch >= 'a' && ch <= 'z')) {AddCh(); goto case_1;}
 			else {t->kind = 1; char *literal = coco_string_create(tval, 0, tlen); t->kind = keywords.get(literal, t->kind); coco_string_delete(literal); break;}
 		case 2:
 			case_2:
+			recEnd = pos; recKind = 2;
 			if ((ch >= '0' && ch <= '9')) {AddCh(); goto case_2;}
 			else {t->kind = 2; break;}
 		case 3:
@@ -307,7 +338,7 @@ Token* Scanner::NextToken() {
 			if (ch <= '!' || (ch >= '#' && ch <= '[') || (ch >= ']' && ch <= 65535)) {AddCh(); goto case_3;}
 			else if (ch == '"') {AddCh(); goto case_4;}
 			else if (ch == 92) {AddCh(); goto case_5;}
-			else {t->kind = noSym; break;}
+			else {goto case_0;}
 		case 4:
 			case_4:
 			{t->kind = 3; break;}
@@ -316,9 +347,10 @@ Token* Scanner::NextToken() {
 			if (ch <= '!' || (ch >= '#' && ch <= '[') || (ch >= ']' && ch <= 65535)) {AddCh(); goto case_3;}
 			else if (ch == 92) {AddCh(); goto case_5;}
 			else if (ch == '"') {AddCh(); goto case_6;}
-			else {t->kind = noSym; break;}
+			else {goto case_0;}
 		case 6:
 			case_6:
+			recEnd = pos; recKind = 3;
 			if (ch <= '!' || (ch >= '#' && ch <= '[') || (ch >= ']' && ch <= 65535)) {AddCh(); goto case_3;}
 			else if (ch == '"') {AddCh(); goto case_4;}
 			else if (ch == 92) {AddCh(); goto case_5;}
@@ -340,9 +372,11 @@ Token* Scanner::NextToken() {
 		case 13:
 			{t->kind = 20; break;}
 		case 14:
+			recEnd = pos; recKind = 8;
 			if (ch == '=') {AddCh(); goto case_9;}
 			else {t->kind = 8; break;}
 		case 15:
+			recEnd = pos; recKind = 14;
 			if (ch == '=') {AddCh(); goto case_10;}
 			else {t->kind = 14; break;}
 
@@ -361,6 +395,15 @@ Token* Scanner::Scan() {
     return tokens;
   }
 }
+
+void Scanner::SetScannerBehindT()
+{
+  buffer->SetPos(t->pos);
+  NextCh();
+  line = t->line; col = t->col; charPos = t->charPos;
+  for (int i = 0; i < tlen; i++) NextCh();
+}
+
 
 // peek for the next token, ignore pragmas
 Token* Scanner::Peek() {

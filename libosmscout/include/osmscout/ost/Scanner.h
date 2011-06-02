@@ -1,7 +1,3 @@
-
-#ifndef OSMSCOUT_OST_SCANNER_H
-#define OSMSCOUT_OST_SCANNER_H
-
 /*
   This source is part of the libosmscout library
   Copyright (C) 2011  Tim Teulings
@@ -21,6 +17,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#ifndef OSMSCOUT_OST_SCANNER_H
+#define OSMSCOUT_OST_SCANNER_H
+
 #include <limits.h>
 
 #include <cstdio>
@@ -33,14 +32,11 @@
 
 #include <osmscout/util/Reference.h>
 
-#define COCO_WCHAR_MAX 255
-#define MIN_BUFFER_LENGTH 1024
-#define MAX_BUFFER_LENGTH (64*MIN_BUFFER_LENGTH)
-#define HEAP_BLOCK_SIZE (64*1024)
-
 namespace osmscout {
 namespace ost {
 
+
+#define COCO_WCHAR_MAX 65535
 
 // string handling, wide character
 extern char* coco_string_create(const char* value);
@@ -54,12 +50,13 @@ typedef osmscout::Ref<Token> TokenRef;
 class Token : public osmscout::Referencable
 {
 public:
-  int      kind; // token kind
-  int      pos;  // token position in the source text (starting at 0)
-  int      col;  // token column (starting at 1)
-  int      line; // token line (starting at 1)
-  char*    val;  // token value
-  TokenRef next; // ML 2005-03-11 Peek tokens are kept in linked list
+  int      kind;    // token kind
+  int      pos;     // token position in the source text (starting at 0)
+  int      charPos; // token position in characters in the source text (starting at 0)
+  int      col;     // token column (starting at 1)
+  int      line;    // token line (starting at 1)
+  char*    val;     // token value
+  TokenRef next;    // ML 2005-03-11 Peek tokens are kept in linked list
 
   Token();
   ~Token();
@@ -180,6 +177,7 @@ private:
   int ch;          // current input character
 
   int pos;         // byte position of current character
+  int charPos;     // position by unicode characters starting with 0
   int line;        // line number of current character
   int col;         // column number of current character
   int oldEols;     // EOLs that appeared in a comment;
@@ -201,6 +199,7 @@ public:
   Scanner(const unsigned char* buf, int len);
   ~Scanner();
   Token* Scan();
+  void SetScannerBehindT();
   Token* Peek();
   void ResetPeek();
 

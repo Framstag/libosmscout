@@ -1,4 +1,3 @@
-
 /*
   This source is part of the libosmscout library
   Copyright (C) 2011  Tim Teulings
@@ -17,6 +16,7 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
+
 
 #ifndef OSMSCOUT_OSS_PARSER_H
 #define OSMSCOUT_OSS_PARSER_H
@@ -82,7 +82,7 @@ private:
 		_number=2,
 		_double=3,
 		_color=4,
-		_string=5,
+		_string=5
 	};
 	int maxT;
 
