@@ -176,7 +176,9 @@ namespace osmscout {
 
           double average=entryCount*1.0/cellFillCount[i].size();
 
-          if (cellFillCount[i].size()>0 && (max>1024 || average>64)) {
+          if (cellFillCount[i].size()>0 &&
+              (max>parameter.GetAreaWayIndexCellSizeMax() ||
+               average>parameter.GetAreaWayIndexCellSizeAverage())) {
             currentWayTypes.erase(i);
           }
         }
@@ -311,7 +313,9 @@ namespace osmscout {
 
           double average=entryCount*1.0/cellFillCount[i].size();
 
-          if (cellFillCount[i].size()>0 && (max>1024 || average>64)) {
+          if (cellFillCount[i].size()>0 &&
+              (max>parameter.GetAreaWayIndexCellSizeMax() ||
+               average>parameter.GetAreaWayIndexCellSizeAverage())) {
             currentRelTypes.erase(i);
           }
         }
