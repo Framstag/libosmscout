@@ -70,8 +70,6 @@ namespace osmscout {
      wayIndexCacheSize(5000),
      areaAreaIndexMaxMag(17),
      areaAreaRelIndexMaxMag(17),
-     areaWayIndexMaxMag(18),
-     areaWayRelIndexMaxMag(18),
      waterIndexMaxMag(14)
   {
     // no code
@@ -150,16 +148,6 @@ namespace osmscout {
   size_t ImportParameter::GetAreaAreaRelIndexMaxMag() const
   {
     return areaAreaRelIndexMaxMag;
-  }
-
-  size_t ImportParameter::GetAreaWayIndexMaxMag() const
-  {
-    return areaWayIndexMaxMag;
-  }
-
-  size_t ImportParameter::GetAreaWayRelIndexMaxMag() const
-  {
-    return areaWayRelIndexMaxMag;
   }
 
   size_t ImportParameter::GetWaterIndexMaxMag() const

@@ -412,7 +412,7 @@ namespace osmscout {
             // hold the geometric center of the tile.
             //
 
-            int level=parameter.GetAreaWayIndexMaxMag();
+            int level=parameter.GetAreaAreaIndexMaxMag();
 
             while (level>=l) {
               if (maxLon-minLon<=cellWidth[level] &&
