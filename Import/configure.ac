@@ -10,8 +10,9 @@ AC_CONFIG_SRCDIR(src/Import.cpp)
 AC_CONFIG_HEADERS(src/config.h)
 AM_INIT_AUTOMAKE([nostdinc subdir-objects dist-bzip2 no-dist-gzip])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+AC_LANG(C++)
 AC_PROG_CXX
-AC_PROG_LIBTOOL
+LT_INIT
 AC_PROG_INSTALL
 
 if test "$GXX" = yes; then
