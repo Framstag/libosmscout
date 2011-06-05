@@ -506,6 +506,24 @@ namespace osmscout {
     return *this;
   }
 
+  StyleConfig& StyleConfig::SetAreaMag(TypeId type, Mag mag)
+  {
+    if (type>=areaMag.size()) {
+      areaMag.resize(type+1);
+      areaFillStyles.resize(type+1,NULL);
+      areaBuildingFillStyles.resize(type+1,NULL);
+      areaPatternStyles.resize(type+1,NULL);
+      areaSymbolStyles.resize(type+1,NULL);
+      areaLabelStyles.resize(type+1,NULL);
+      areaBorderStyles.resize(type+1,NULL);
+      areaIconStyles.resize(type+1,NULL);
+    }
+
+    areaMag[type]=mag;
+
+    return *this;
+  }
+
   StyleConfig& StyleConfig::SetNodeSymbolStyle(TypeId type,
                                                const SymbolStyle& style)
   {
@@ -625,6 +643,7 @@ namespace osmscout {
                                              const FillStyle& style)
   {
     if (type>=areaFillStyles.size()) {
+      areaMag.resize(type+1,magWorld);
       areaFillStyles.resize(type+1,NULL);
       areaBuildingFillStyles.resize(type+1,NULL);
       areaPatternStyles.resize(type+1,NULL);
@@ -644,6 +663,7 @@ namespace osmscout {
                                                      const FillStyle& style)
   {
     if (type>=areaFillStyles.size()) {
+      areaMag.resize(type+1,magWorld);
       areaFillStyles.resize(type+1,NULL);
       areaBuildingFillStyles.resize(type+1,NULL);
       areaPatternStyles.resize(type+1,NULL);
@@ -663,6 +683,7 @@ namespace osmscout {
                                                 const PatternStyle& style)
   {
     if (type>=areaFillStyles.size()) {
+      areaMag.resize(type+1,magWorld);
       areaFillStyles.resize(type+1,NULL);
       areaBuildingFillStyles.resize(type+1,NULL);
       areaPatternStyles.resize(type+1,NULL);
@@ -682,6 +703,7 @@ namespace osmscout {
                                               const LabelStyle& style)
   {
     if (type>=areaFillStyles.size()) {
+      areaMag.resize(type+1,magWorld);
       areaFillStyles.resize(type+1,NULL);
       areaBuildingFillStyles.resize(type+1,NULL);
       areaPatternStyles.resize(type+1,NULL);
@@ -701,6 +723,7 @@ namespace osmscout {
                                                const SymbolStyle& style)
   {
     if (type>=areaFillStyles.size()) {
+      areaMag.resize(type+1,magWorld);
       areaFillStyles.resize(type+1,NULL);
       areaBuildingFillStyles.resize(type+1,NULL);
       areaPatternStyles.resize(type+1,NULL);
@@ -720,6 +743,7 @@ namespace osmscout {
                                                const LineStyle& style)
   {
     if (type>=areaFillStyles.size()) {
+      areaMag.resize(type+1,magWorld);
       areaFillStyles.resize(type+1,NULL);
       areaBuildingFillStyles.resize(type+1,NULL);
       areaPatternStyles.resize(type+1,NULL);
@@ -739,6 +763,7 @@ namespace osmscout {
                                              const IconStyle& style)
   {
     if (type>=areaFillStyles.size()) {
+      areaMag.resize(type+1,magWorld);
       areaFillStyles.resize(type+1,NULL);
       areaBuildingFillStyles.resize(type+1,NULL);
       areaPatternStyles.resize(type+1,NULL);
@@ -776,6 +801,18 @@ namespace osmscout {
     for (size_t i=0; i<wayTypesByPrio.size(); i++) {
       if (mag>=wayMag[wayTypesByPrio[i]]) {
         types.push_back(wayTypesByPrio[i]);
+      }
+    }
+  }
+
+  void StyleConfig::GetAreaTypesWithMag(double mag,
+                                        TypeSet& types) const
+  {
+    types.Reset(areaMag.size());
+
+    for (size_t i=0; i<areaMag.size(); i++) {
+      if (mag>=areaMag[i]) {
+        types.SetType(i);
       }
     }
   }

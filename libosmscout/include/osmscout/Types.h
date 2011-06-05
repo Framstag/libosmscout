@@ -22,6 +22,8 @@
 
 #include <osmscout/private/CoreImportExport.h>
 
+#include <vector>
+
 #include <osmscout/system/Types.h>
 
 namespace osmscout {
@@ -51,6 +53,34 @@ namespace osmscout {
    magClose     =   2*2*2*2*1024, // 14
    magVeryClose = 2*2*2*2*2*1024  // 15
   };
+
+  class TypeSet
+  {
+  private:
+    std::vector<bool> types;
+
+  public:
+    TypeSet()
+    {
+      // no code
+    }
+
+    void Reset(size_t numberOfTypes)
+    {
+      types.resize(numberOfTypes,false);
+    }
+
+    void SetType(TypeId type)
+    {
+      types[type]=true;
+    }
+
+    bool IsTypeSet(TypeId type) const
+    {
+      return type<types.size() && types[type];
+    }
+  };
+
 
   /**
     Coordinates will be stored as unsigned long values in file.

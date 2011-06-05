@@ -22,6 +22,8 @@
 
 #include <osmscout/CoreFeatures.h>
 
+#include <stddef.h>
+
 #if defined(OSMSCOUT_HAVE_STDINT_H)
   // will be <cstdint> in c++0x
   #include <stdint.h>
@@ -36,6 +38,6 @@
 
   typedef          __int32 int32_t;
   typedef unsigned __int32 uint32_t;
-#endif  
+#endif
 
 #endif

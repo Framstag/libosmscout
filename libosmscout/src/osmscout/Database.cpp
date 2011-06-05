@@ -139,18 +139,12 @@ namespace osmscout {
   }
 
   AreaSearchParameter::AreaSearchParameter()
-  : maxWayLevel(4),
-    maxAreaLevel(4),
+  : maxAreaLevel(4),
     maxNodes(2000),
     maxWays(25000),
     maxAreas(std::numeric_limits<unsigned long>::max())
   {
     // no code
-  }
-
-  void AreaSearchParameter::SetMaximumWayLevel(unsigned long maxWayLevel)
-  {
-    this->maxWayLevel=maxWayLevel;
   }
 
   void AreaSearchParameter::SetMaximumAreaLevel(unsigned long maxAreaLevel)
@@ -171,11 +165,6 @@ namespace osmscout {
   void AreaSearchParameter::SetMaximumAreas(unsigned long maxAreas)
   {
     this->maxAreas=maxAreas;
-  }
-
-  unsigned long AreaSearchParameter::GetMaximumWayLevel() const
-  {
-    return maxWayLevel;
   }
 
   unsigned long AreaSearchParameter::GetMaximumAreaLevel() const
@@ -411,6 +400,7 @@ namespace osmscout {
     }
 
     std::vector<TypeId>     wayTypes;
+    TypeSet                 areaTypes;
     std::vector<TypeId>     nodeTypes;
     std::vector<FileOffset> nodeOffsets;
     std::vector<FileOffset> wayWayOffsets;
@@ -483,6 +473,9 @@ namespace osmscout {
 
     wayTypes.clear();
 
+    styleConfig.GetAreaTypesWithMag(magnification,
+                                    areaTypes);
+
     if (!areaIndex.GetOffsets(styleConfig,
                               lonMin,
                               latMin,
@@ -490,6 +483,7 @@ namespace osmscout {
                               latMax,
                               ((size_t)ceil(magLevel))+
                               parameter.GetMaximumAreaLevel(),
+                              areaTypes,
                               parameter.GetMaximumAreas(),
                               wayAreaOffsets,
                               relationAreaOffsets)) {

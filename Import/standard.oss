@@ -939,7 +939,7 @@ OSS
     FILL #bca9a9 WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA "building"
+  AREA "building" MINMAG close
     FILL #bca9a9 WITH LAYER 2
     BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose

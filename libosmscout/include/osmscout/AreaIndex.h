@@ -50,30 +50,39 @@ namespace osmscout {
   {
   private:
     /**
-      Datastructure for every index entry of our index.
+      An individual index entry in a index cell
       */
     struct IndexEntry
     {
-      FileOffset              children[4]; //! File index of each of the four children, or 0 if there is no child
-      std::vector<FileOffset> areas;
-      std::vector<FileOffset> relAreas;
+      TypeId     type;
+      FileOffset offset;
     };
 
-    typedef Cache<FileOffset,IndexEntry> IndexCache;
+    /**
+      Datastructure for every index cell of our index.
+      */
+    struct IndexCell
+    {
+      FileOffset              children[4]; //! File index of each of the four children, or 0 if there is no child
+      std::vector<IndexEntry> areas;
+      std::vector<IndexEntry> relAreas;
+    };
+
+    typedef Cache<FileOffset,IndexCell> IndexCache;
 
     struct IndexCacheValueSizer : public IndexCache::ValueSizer
     {
-      unsigned long GetSize(const IndexEntry& value) const
+      unsigned long GetSize(const IndexCell& value) const
       {
         unsigned long memory=0;
 
         memory+=sizeof(value);
 
         // Areas
-        memory+=value.areas.size()*sizeof(FileOffset);
+        memory+=value.areas.size()*sizeof(IndexEntry);
 
         // RelAreas
-        memory+=value.relAreas.size()*sizeof(FileOffset);
+        memory+=value.relAreas.size()*sizeof(IndexEntry);
 
         return memory;
       }
@@ -92,7 +101,7 @@ namespace osmscout {
     mutable IndexCache              indexCache;     //! Cached map of all index entries by file offset
 
   private:
-    bool GetIndexEntry(uint32_t level,
+    bool GetIndexCell(uint32_t level,
                        FileOffset offset,
                        IndexCache::CacheRef& cacheRef) const;
 
@@ -107,6 +116,7 @@ namespace osmscout {
                     double maxlon,
                     double maxlat,
                     size_t maxAreaLevel,
+                    const TypeSet& types,
                     size_t maxAreaCount,
                     std::vector<FileOffset>& wayAreaOffsets,
                     std::vector<FileOffset>& relationAreaOffsets) const;

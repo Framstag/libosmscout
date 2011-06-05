@@ -232,11 +232,16 @@ void Parser::AREASTYLE() {
 		TypeId      type=typeIgnore;
 		std::string name;
 		std::string value;
+		Mag         mag=magWorld;
 		
 		while (!(la->kind == 0 || la->kind == 12)) {SynErr(66); Get();}
 		Expect(12);
 		Expect(5);
 		name=Destring(t->val); 
+		if (la->kind == 11) {
+			Get();
+			MAG(mag);
+		}
 		type=config.GetTypeConfig()->GetAreaTypeId(name);
 		
 		                  if (type==typeIgnore) {
@@ -244,7 +249,9 @@ void Parser::AREASTYLE() {
 		
 		                    SemErr(e.c_str());
 		                  }
-		
+		                  else if (mag!=magWorld) {
+		                    config.SetAreaMag(type,mag);
+		                  }
 		                
 		while (StartOf(2)) {
 			switch (la->kind) {

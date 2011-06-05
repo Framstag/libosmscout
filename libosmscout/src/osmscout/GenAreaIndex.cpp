@@ -125,28 +125,37 @@ namespace osmscout {
              leaf->second.children[3]!=0);
 
       if (level<(int)parameter.GetAreaAreaIndexMaxMag()) {
-        // TODO: Is writer.Write better?
         for (size_t c=0; c<4; c++) {
           writer.WriteNumber(leaf->second.children[c]);
         }
       }
 
+      FileOffset lastOffset;
+
       // Areas
       writer.WriteNumber((uint32_t)leaf->second.areas.size());
-      for (std::list<FileOffset>::const_iterator o=leaf->second.areas.begin();
-           o!=leaf->second.areas.end();
-           o++) {
-        // TODO: Is writer.Write better?
-        writer.Write(*o);
+
+      lastOffset=0;
+      for (std::list<Entry>::const_iterator entry=leaf->second.areas.begin();
+           entry!=leaf->second.areas.end();
+           entry++) {
+        writer.WriteNumber(entry->type);
+        writer.WriteNumber(entry->offset-lastOffset);
+
+        lastOffset=entry->offset;
       }
 
       // Relation areas
       writer.WriteNumber((uint32_t)leaf->second.relAreas.size());
-      for (std::list<FileOffset>::const_iterator o=leaf->second.relAreas.begin();
-           o!=leaf->second.relAreas.end();
-           o++) {
-        // TODO: Is writer.Write better?
-        writer.Write(*o);
+
+      lastOffset=0;
+      for (std::list<Entry>::const_iterator entry=leaf->second.relAreas.begin();
+           entry!=leaf->second.relAreas.end();
+           entry++) {
+        writer.WriteNumber(entry->type);
+        writer.WriteNumber(entry->offset-lastOffset);
+
+        lastOffset=entry->offset;
       }
     }
 
@@ -279,6 +288,10 @@ namespace osmscout {
             return false;
           }
 
+          if (!way.IsArea()) {
+            continue;
+          }
+
           // We do not index a way that is in the blacklist
           if (wayBlacklist.find(way.GetId())!=wayBlacklist.end()) {
             continue;
@@ -286,55 +299,58 @@ namespace osmscout {
 
           ways++;
 
-          if (way.IsArea()) { // Areas
-            double minLon;
-            double maxLon;
-            double minLat;
-            double maxLat;
+          double minLon;
+          double maxLon;
+          double minLat;
+          double maxLat;
 
-            way.GetBoundingBox(minLon,maxLon,minLat,maxLat);
+          way.GetBoundingBox(minLon,maxLon,minLat,maxLat);
 
-            //
-            // Renormated coordinate space (everything is >=0)
-            //
+          //
+          // Renormated coordinate space (everything is >=0)
+          //
 
-            minLon+=180;
-            maxLon+=180;
-            minLat+=90;
-            maxLat+=90;
+          minLon+=180;
+          maxLon+=180;
+          minLat+=90;
+          maxLat+=90;
 
-            //
-            // Calculate highest level where the bounding box completely
-            // fits in the cell size and assign area to the tiles that
-            // hold the geometric center of the tile.
-            //
+          //
+          // Calculate highest level where the bounding box completely
+          // fits in the cell size and assign area to the tiles that
+          // hold the geometric center of the tile.
+          //
 
-            int level=parameter.GetAreaAreaIndexMaxMag();
-            while (level>=0) {
-              if (maxLon-minLon<=cellWidth[level] &&
-                  maxLat-minLat<=cellHeight[level]) {
-                break;
-              }
-
-              level--;
+          int level=parameter.GetAreaAreaIndexMaxMag();
+          while (level>=0) {
+            if (maxLon-minLon<=cellWidth[level] &&
+                maxLat-minLat<=cellHeight[level]) {
+              break;
             }
 
-            if (level==l) {
-              //
-              // Calculate minimum and maximum tile ids that are covered
-              // by the area
-              //
-              size_t minyc=(size_t)floor(minLat/cellHeight[level]);
-              size_t maxyc=(size_t)floor(maxLat/cellHeight[level]);
-              size_t minxc=(size_t)floor(minLon/cellWidth[level]);
-              size_t maxxc=(size_t)floor(maxLon/cellWidth[level]);
+            level--;
+          }
 
-              // Add this area to the tile where the center of the area lies in.
-              leafs[Coord((minxc+maxxc)/2,(minyc+maxyc)/2)].areas.push_back(offset);
-              areaLevelEntries++;
+          if (level==l) {
+            //
+            // Calculate minimum and maximum tile ids that are covered
+            // by the area
+            //
+            size_t minyc=(size_t)floor(minLat/cellHeight[level]);
+            size_t maxyc=(size_t)floor(maxLat/cellHeight[level]);
+            size_t minxc=(size_t)floor(minLon/cellWidth[level]);
+            size_t maxxc=(size_t)floor(maxLon/cellWidth[level]);
 
-              waysConsumed++;
-            }
+            Entry entry;
+
+            entry.type=way.GetType();
+            entry.offset=offset;
+
+            // Add this area to the tile where the center of the area lies in.
+            leafs[Coord((minxc+maxxc)/2,(minyc+maxyc)/2)].areas.push_back(entry);
+            areaLevelEntries++;
+
+            waysConsumed++;
           }
         }
       }
@@ -374,71 +390,78 @@ namespace osmscout {
             return false;
           }
 
+          if (!relation.IsArea()) {
+            continue;
+          }
+
           rels++;
 
-          if (relation.IsArea()) {
-            //
-            // Bounding box calculation
-            //
+          //
+          // Bounding box calculation
+          //
 
-            double minLon=relation.roles[0].nodes[0].lon;
-            double maxLon=relation.roles[0].nodes[0].lon;
-            double minLat=relation.roles[0].nodes[0].lat;
-            double maxLat=relation.roles[0].nodes[0].lat;
+          double minLon=relation.roles[0].nodes[0].lon;
+          double maxLon=relation.roles[0].nodes[0].lon;
+          double minLat=relation.roles[0].nodes[0].lat;
+          double maxLat=relation.roles[0].nodes[0].lat;
 
-            for (std::vector<Relation::Role>::const_iterator role=relation.roles.begin();
-                 role!=relation.roles.end();
-                 ++role) {
-              for (size_t i=0; i<role->nodes.size(); i++) {
-                minLon=std::min(minLon,role->nodes[i].lon);
-                maxLon=std::max(maxLon,role->nodes[i].lon);
-                minLat=std::min(minLat,role->nodes[i].lat);
-                maxLat=std::max(maxLat,role->nodes[i].lat);
-              }
+          for (std::vector<Relation::Role>::const_iterator role=relation.roles.begin();
+               role!=relation.roles.end();
+               ++role) {
+            for (size_t i=0; i<role->nodes.size(); i++) {
+              minLon=std::min(minLon,role->nodes[i].lon);
+              maxLon=std::max(maxLon,role->nodes[i].lon);
+              minLat=std::min(minLat,role->nodes[i].lat);
+              maxLat=std::max(maxLat,role->nodes[i].lat);
+            }
+          }
+
+          //
+          // Renormated coordinate space (everything is >=0)
+          //
+
+          minLon+=180;
+          maxLon+=180;
+          minLat+=90;
+          maxLat+=90;
+
+          //
+          // Calculate highest level where the bounding box completely
+          // fits in the cell size and assign area to the tiles that
+          // hold the geometric center of the tile.
+          //
+
+          int level=parameter.GetAreaAreaIndexMaxMag();
+
+          while (level>=l) {
+            if (maxLon-minLon<=cellWidth[level] &&
+                maxLat-minLat<=cellHeight[level]) {
+              break;
             }
 
+            level--;
+          }
+
+          if (level==l) {
             //
-            // Renormated coordinate space (everything is >=0)
+            // Calculate minimum and maximum tile ids that are covered
+            // by the area
             //
+            size_t minyc=(size_t)floor(minLat/cellHeight[level]);
+            size_t maxyc=(size_t)floor(maxLat/cellHeight[level]);
+            size_t minxc=(size_t)floor(minLon/cellWidth[level]);
+            size_t maxxc=(size_t)floor(maxLon/cellWidth[level]);
 
-            minLon+=180;
-            maxLon+=180;
-            minLat+=90;
-            maxLat+=90;
+            Entry entry;
 
-            //
-            // Calculate highest level where the bounding box completely
-            // fits in the cell size and assign area to the tiles that
-            // hold the geometric center of the tile.
-            //
+            entry.type=relation.GetType();
+            entry.offset=offset;
 
-            int level=parameter.GetAreaAreaIndexMaxMag();
+            // Add this area to the tile where the center of the area lies in.
+            leafs[Coord((minxc+maxxc)/2,(minyc+maxyc)/2)].relAreas.push_back(entry);
+            relAreaLevelEntries++;
 
-            while (level>=l) {
-              if (maxLon-minLon<=cellWidth[level] &&
-                  maxLat-minLat<=cellHeight[level]) {
-                break;
-              }
-
-              level--;
-            }
-
-            if (level==l) {
-              //
-              // Calculate minimum and maximum tile ids that are covered
-              // by the area
-              //
-              size_t minyc=(size_t)floor(minLat/cellHeight[level]);
-              size_t maxyc=(size_t)floor(maxLat/cellHeight[level]);
-              size_t minxc=(size_t)floor(minLon/cellWidth[level]);
-              size_t maxxc=(size_t)floor(maxLon/cellWidth[level]);
-
-              // Add this area to the tile where the center of the area lies in.
-              leafs[Coord((minxc+maxxc)/2,(minyc+maxyc)/2)].relAreas.push_back(offset);
-              relAreaLevelEntries++;
-
-              relsConsumed++;
-            }
+            relsConsumed++;
           }
         }
       }

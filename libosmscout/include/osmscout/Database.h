@@ -113,7 +113,6 @@ namespace osmscout {
   class OSMSCOUT_API AreaSearchParameter
   {
   private:
-    unsigned long maxWayLevel;
     unsigned long maxAreaLevel;
     unsigned long maxNodes;
     unsigned long maxWays;
@@ -122,14 +121,12 @@ namespace osmscout {
   public:
     AreaSearchParameter();
 
-    void SetMaximumWayLevel(unsigned long maxWayLevel);
     void SetMaximumAreaLevel(unsigned long maxAreaLevel);
 
     void SetMaximumNodes(unsigned long maxNodes);
     void SetMaximumWays(unsigned long maxWays);
     void SetMaximumAreas(unsigned long maxAreas);
 
-    unsigned long GetMaximumWayLevel() const;
     unsigned long GetMaximumAreaLevel() const;
 
     unsigned long GetMaximumNodes() const;

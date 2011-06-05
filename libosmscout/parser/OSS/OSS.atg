@@ -152,9 +152,13 @@ PRODUCTIONS
                   TypeId      type=typeIgnore;
                   std::string name;
                   std::string value;
+                  Mag         mag=magWorld;
                 .)
                 SYNC "AREA"
                 string (. name=Destring(t->val); .)
+                [
+                  "MINMAG" MAG<mag>
+                ]
                 (.
                   type=config.GetTypeConfig()->GetAreaTypeId(name);
 
@@ -163,7 +167,9 @@ PRODUCTIONS
 
                     SemErr(e.c_str());
                   }
-
+                  else if (mag!=magWorld) {
+                    config.SetAreaMag(type,mag);
+                  }
                 .)
                 {
                   (.

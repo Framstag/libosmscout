@@ -23,6 +23,7 @@
 #include <set>
 #include <vector>
 
+#include <osmscout/Types.h>
 #include <osmscout/TypeConfig.h>
 
 namespace osmscout {
@@ -554,6 +555,7 @@ namespace osmscout {
 
     std::vector<size_t>        wayPrio;
     std::vector<Mag>           wayMag;
+    std::vector<Mag>           areaMag;
     std::vector<size_t>        priorities;
     std::vector<TypeId>        wayTypesByPrio;
 
@@ -567,6 +569,7 @@ namespace osmscout {
 
     StyleConfig& SetWayPrio(TypeId type, size_t prio);
     StyleConfig& SetWayMag(TypeId type, Mag mag);
+    StyleConfig& SetAreaMag(TypeId type, Mag mag);
 
     StyleConfig& SetNodeSymbolStyle(TypeId type, const SymbolStyle& style);
     StyleConfig& SetNodeRefLabelStyle(TypeId type, const LabelStyle& style);
@@ -587,10 +590,14 @@ namespace osmscout {
 
     size_t GetStyleCount() const;
 
-    void GetWayTypesByPrioWithMag(double mag,
-                                  std::vector<TypeId>& types) const;
     void GetNodeTypesWithMag(double mag,
                              std::vector<TypeId>& types) const;
+    void GetWayTypesByPrioWithMag(double mag,
+                                  std::vector<TypeId>& types) const;
+    void GetAreaTypesWithMag(double mag,
+                             TypeSet& types) const;
+
+
     void GetPriorities(std::vector<size_t>& priorities) const;
 
     bool IsWayVisible(TypeId type, size_t prio) const

@@ -33,12 +33,18 @@ namespace osmscout {
   class AreaIndexGenerator : public ImportModule
   {
   private:
+    struct Entry
+    {
+      TypeId     type;
+      FileOffset offset;
+    };
+
     struct AreaLeaf
     {
-      FileOffset            offset;
-      std::list<FileOffset> areas;
-      std::list<FileOffset> relAreas;
-      FileOffset            children[4];
+      FileOffset       offset;
+      std::list<Entry> areas;
+      std::list<Entry> relAreas;
+      FileOffset       children[4];
 
       AreaLeaf()
       {

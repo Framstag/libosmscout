@@ -31,9 +31,9 @@ namespace osmscout {
     // no code
   }
 
-  bool AreaIndex::GetIndexEntry(uint32_t level,
-                                FileOffset offset,
-                                IndexCache::CacheRef& cacheRef) const
+  bool AreaIndex::GetIndexCell(uint32_t level,
+                               FileOffset offset,
+                               IndexCache::CacheRef& cacheRef) const
   {
     if (!indexCache.GetEntry(offset,cacheRef)) {
       IndexCache::CacheEntry cacheEntry(offset);
@@ -78,11 +78,22 @@ namespace osmscout {
 
       cacheRef->value.areas.resize(offsetCount);
 
+      FileOffset lastOffset;
+
+      lastOffset=0;
       for (size_t c=0; c<offsetCount; c++) {
-        if (!scanner.Read(cacheRef->value.areas[c])) {
+        if (!scanner.ReadNumber(cacheRef->value.areas[c].type)) {
           std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
           return false;
         }
+        if (!scanner.ReadNumber(cacheRef->value.areas[c].offset)) {
+          std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
+          return false;
+        }
+
+        cacheRef->value.areas[c].offset+=lastOffset;
+
+        lastOffset=cacheRef->value.areas[c].offset;
       }
 
       // Relation areas
@@ -94,11 +105,20 @@ namespace osmscout {
 
       cacheRef->value.relAreas.resize(offsetCount);
 
+      lastOffset=0;
       for (size_t c=0; c<offsetCount; c++) {
-        if (!scanner.Read(cacheRef->value.relAreas[c])) {
+        if (!scanner.ReadNumber(cacheRef->value.relAreas[c].type)) {
           std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
           return false;
         }
+        if (!scanner.ReadNumber(cacheRef->value.relAreas[c].offset)) {
+          std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
+          return false;
+        }
+
+        cacheRef->value.relAreas[c].offset+=lastOffset;
+
+        lastOffset=cacheRef->value.relAreas[c].offset;
       }
     }
 
@@ -147,6 +167,7 @@ namespace osmscout {
                              double maxlon,
                              double maxlat,
                              size_t maxAreaLevel,
+                             const TypeSet& types,
                              size_t maxAreaCount,
                              std::vector<FileOffset>& wayAreaOffsets,
                              std::vector<FileOffset>& relationAreaOffsets) const
@@ -196,7 +217,9 @@ namespace osmscout {
     stopArea=false;
     for (size_t level=0;
          !stopArea &&
-         level<=this->maxLevel && co.size()>0 && level<=maxAreaLevel;
+         level<=this->maxLevel &&
+         co.size()>0 &&
+         level<=maxAreaLevel;
          level++) {
       ntx.clear();
       nty.clear();
@@ -207,9 +230,9 @@ namespace osmscout {
         size_t cy;
         double x;
         double y;
-        IndexCache::CacheRef entry;
+        IndexCache::CacheRef cell;
 
-        if (!GetIndexEntry(level,co[i],entry)) {
+        if (!GetIndexCell(level,co[i],cell)) {
           std::cerr << "Cannot find offset " << co[i] << " in level " << level << ", => aborting!" << std::endl;
           return false;
         }
@@ -218,28 +241,32 @@ namespace osmscout {
         // add it to the result
 
         if (wayAreaOffsets.size()+relationAreaOffsets.size()+
-                 entry->value.areas.size()+
-                 entry->value.relAreas.size()>=maxAreaCount) {
+                 cell->value.areas.size()+
+                 cell->value.relAreas.size()>=maxAreaCount) {
           stopArea=true;
+          continue;
         }
-        else {
-          for (std::vector<FileOffset>::const_iterator o=entry->value.areas.begin();
-               o!=entry->value.areas.end();
-               ++o) {
-            wayAreaOffsets.push_back(*o);
-          }
 
-          for (std::vector<FileOffset>::const_iterator o=entry->value.relAreas.begin();
-               o!=entry->value.relAreas.end();
-               ++o) {
-            relationAreaOffsets.push_back(*o);
+        for (std::vector<IndexEntry>::const_iterator entry=cell->value.areas.begin();
+             entry!=cell->value.areas.end();
+             ++entry) {
+          if (types.IsTypeSet(entry->type)) {
+            wayAreaOffsets.push_back(entry->offset);
+          }
+        }
+
+        for (std::vector<IndexEntry>::const_iterator entry=cell->value.relAreas.begin();
+             entry!=cell->value.relAreas.end();
+             ++entry) {
+          if (types.IsTypeSet(entry->type)) {
+            relationAreaOffsets.push_back(entry->offset);
           }
         }
 
         cx=ctx[i]*2;
         cy=cty[i]*2;
 
-        if (entry->value.children[0]!=0) {
+        if (cell->value.children[0]!=0) {
           // top left
 
           x=cx*cellWidth[level+1];
@@ -251,11 +278,11 @@ namespace osmscout {
                 y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
             ntx.push_back(cx);
             nty.push_back(cy+1);
-            no.push_back(entry->value.children[0]);
+            no.push_back(cell->value.children[0]);
           }
         }
 
-        if (entry->value.children[1]!=0) {
+        if (cell->value.children[1]!=0) {
           // top right
           x=(cx+1)*cellWidth[level+1];
           y=(cy+1)*cellHeight[level+1];
@@ -266,11 +293,11 @@ namespace osmscout {
                 y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
             ntx.push_back(cx+1);
             nty.push_back(cy+1);
-            no.push_back(entry->value.children[1]);
+            no.push_back(cell->value.children[1]);
           }
         }
 
-        if (entry->value.children[2]!=0) {
+        if (cell->value.children[2]!=0) {
           // bottom left
           x=cx*cellWidth[level+1];
           y=cy*cellHeight[level+1];
@@ -281,11 +308,11 @@ namespace osmscout {
                 y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
             ntx.push_back(cx);
             nty.push_back(cy);
-            no.push_back(entry->value.children[2]);
+            no.push_back(cell->value.children[2]);
           }
         }
 
-        if (entry->value.children[3]!=0) {
+        if (cell->value.children[3]!=0) {
           // bottom right
           x=(cx+1)*cellWidth[level+1];
           y=cy*cellHeight[level+1];
@@ -296,7 +323,7 @@ namespace osmscout {
                 y+cellHeight[level+1]<minlat-cellHeight[level+1]/2)) {
             ntx.push_back(cx+1);
             nty.push_back(cy);
-            no.push_back(entry->value.children[3]);
+            no.push_back(cell->value.children[3]);
           }
         }
       }
