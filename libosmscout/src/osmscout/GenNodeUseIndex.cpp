@@ -204,6 +204,8 @@ namespace osmscout {
       index=newIndex;
     }
 
+    nodeDistribution.clear();
+
     std::vector<uint32_t>   resultDistribution; // Number of entries in interval
     std::vector<FileOffset> resultOffset;       // Offset for each interval
     std::vector<uint32_t>   resultOffsetCount;  // Number of entries for each interval
