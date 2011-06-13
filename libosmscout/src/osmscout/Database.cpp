@@ -46,7 +46,7 @@ namespace osmscout {
   };
 
   DatabaseParameter::DatabaseParameter()
-  : areaIndexCacheSize(1000),
+  : areaAreaIndexCacheSize(1000),
     areaNodeIndexCacheSize(1000),
     nodeIndexCacheSize(1000),
     nodeCacheSize(1000),
@@ -58,9 +58,9 @@ namespace osmscout {
     // no code
   }
 
-  void DatabaseParameter::SetAreaIndexCacheSize(unsigned long areaIndexCacheSize)
+  void DatabaseParameter::SetAreaAreaIndexCacheSize(unsigned long areaAreaIndexCacheSize)
   {
-    this->areaIndexCacheSize=areaIndexCacheSize;
+    this->areaAreaIndexCacheSize=areaAreaIndexCacheSize;
   }
 
   void DatabaseParameter::SetAreaNodeIndexCacheSize(unsigned long areaNodeIndexCacheSize)
@@ -98,9 +98,9 @@ namespace osmscout {
     this->relationCacheSize=relationCacheSize;
   }
 
-  unsigned long DatabaseParameter::GetAreaIndexCacheSize() const
+  unsigned long DatabaseParameter::GetAreaAreaIndexCacheSize() const
   {
-    return areaIndexCacheSize;
+    return areaAreaIndexCacheSize;
   }
 
   unsigned long DatabaseParameter::GetAreaNodeIndexCacheSize() const
@@ -189,7 +189,7 @@ namespace osmscout {
 
   Database::Database(const DatabaseParameter& parameter)
    : isOpen(false),
-     areaIndex(parameter.GetAreaIndexCacheSize()),
+     areaAreaIndex(parameter.GetAreaAreaIndexCacheSize()),
      areaNodeIndex(parameter.GetAreaNodeIndexCacheSize()),
      areaWayIndex(),
      nodeDataFile("nodes.dat",
@@ -293,9 +293,9 @@ namespace osmscout {
     }
     std::cout << "Opening 'relations.dat' done." << std::endl;
 
-    std::cout << "Loading area index..." << std::endl;
-    if (!areaIndex.Load(path)) {
-      std::cerr << "Cannot load area index!" << std::endl;
+    std::cout << "Loading area area index..." << std::endl;
+    if (!areaAreaIndex.Load(path)) {
+      std::cerr << "Cannot load area area index!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
@@ -463,7 +463,7 @@ namespace osmscout {
 
     wayIndexTimer.Stop();
 
-    StopClock areaIndexTimer;
+    StopClock areaAreaIndexTimer;
 
     /*
     std::cout << "Ways for magnification: " << magLevel << std::endl;
@@ -476,21 +476,21 @@ namespace osmscout {
     styleConfig.GetAreaTypesWithMag(magnification,
                                     areaTypes);
 
-    if (!areaIndex.GetOffsets(styleConfig,
-                              lonMin,
-                              latMin,
-                              lonMax,
-                              latMax,
-                              ((size_t)ceil(magLevel))+
-                              parameter.GetMaximumAreaLevel(),
-                              areaTypes,
-                              parameter.GetMaximumAreas(),
-                              wayAreaOffsets,
-                              relationAreaOffsets)) {
+    if (!areaAreaIndex.GetOffsets(styleConfig,
+                                  lonMin,
+                                  latMin,
+                                  lonMax,
+                                  latMax,
+                                  ((size_t)ceil(magLevel))+
+                                  parameter.GetMaximumAreaLevel(),
+                                  areaTypes,
+                                  parameter.GetMaximumAreas(),
+                                  wayAreaOffsets,
+                                  relationAreaOffsets)) {
       std::cout << "Error getting ways and relations from area index!" << std::endl;
     }
 
-    areaIndexTimer.Stop();
+    areaAreaIndexTimer.Stop();
 
     StopClock nodesTimer;
 
@@ -549,7 +549,7 @@ namespace osmscout {
     std::cout << "I/O: ";
     std::cout << "n " << nodeIndexTimer << " ";
     std::cout << "w " << wayIndexTimer << " ";
-    std::cout << "a " << areaIndexTimer;
+    std::cout << "a " << areaAreaIndexTimer;
     std::cout << " - ";
     std::cout << "n " << nodesTimer << " ";
     std::cout << "w " << waysTimer << "/" << relationWaysTimer << " ";
@@ -1661,7 +1661,7 @@ namespace osmscout {
     wayDataFile.DumpStatistics();
     relationDataFile.DumpStatistics();
 
-    areaIndex.DumpStatistics();
+    areaAreaIndex.DumpStatistics();
     areaNodeIndex.DumpStatistics();
     areaWayIndex.DumpStatistics();
     cityStreetIndex.DumpStatistics();

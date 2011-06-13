@@ -37,7 +37,7 @@
 #include <osmscout/WayIndex.h>
 
 // In area index
-#include <osmscout/AreaIndex.h>
+#include <osmscout/AreaAreaIndex.h>
 #include <osmscout/AreaNodeIndex.h>
 #include <osmscout/AreaWayIndex.h>
 
@@ -66,7 +66,7 @@ namespace osmscout {
   class OSMSCOUT_API DatabaseParameter
   {
   private:
-    unsigned long areaIndexCacheSize;
+    unsigned long areaAreaIndexCacheSize;
     unsigned long areaNodeIndexCacheSize;
 
     unsigned long nodeIndexCacheSize;
@@ -81,7 +81,7 @@ namespace osmscout {
   public:
     DatabaseParameter();
 
-    void SetAreaIndexCacheSize(unsigned long areaIndexCacheSize);
+    void SetAreaAreaIndexCacheSize(unsigned long areaAreaIndexCacheSize);
     void SetAreaNodeIndexCacheSize(unsigned long areaNodeIndexCacheSize);
 
     void SetNodeIndexCacheSize(unsigned long nodeIndexCacheSize);
@@ -93,7 +93,7 @@ namespace osmscout {
     void SetRelationIndexCacheSize(unsigned long relationIndexCacheSize);
     void SetRelationCacheSize(unsigned long relationCacheSize);
 
-    unsigned long GetAreaIndexCacheSize() const;
+    unsigned long GetAreaAreaIndexCacheSize() const;
     unsigned long GetAreaNodeIndexCacheSize() const;
 
     unsigned long GetNodeIndexCacheSize() const;
@@ -153,7 +153,7 @@ namespace osmscout {
     double                maxLon;        //! bounding box of data
     double                maxLat;        //! bounding box of data
 
-    AreaIndex             areaIndex;
+    AreaAreaIndex         areaAreaIndex;
     AreaNodeIndex         areaNodeIndex;
     AreaWayIndex          areaWayIndex;
 

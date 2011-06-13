@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_GENAREAINDEX_H
-#define OSMSCOUT_GENAREAINDEX_H
+#ifndef OSMSCOUT_GENAREAAREAINDEX_H
+#define OSMSCOUT_GENAREAAREAINDEX_H
 
 /*
   This source is part of the libosmscout library
@@ -30,7 +30,7 @@
 
 namespace osmscout {
 
-  class AreaIndexGenerator : public ImportModule
+  class AreaAreaIndexGenerator : public ImportModule
   {
   private:
     struct Entry

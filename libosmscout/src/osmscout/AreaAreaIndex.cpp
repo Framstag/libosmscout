@@ -17,23 +17,23 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/AreaIndex.h>
+#include <osmscout/AreaAreaIndex.h>
 
 #include <cmath>
 #include <iostream>
 
 namespace osmscout {
 
-  AreaIndex::AreaIndex(size_t cacheSize)
-  : filepart("area.idx"),
+  AreaAreaIndex::AreaAreaIndex(size_t cacheSize)
+  : filepart("areaarea.idx"),
     indexCache(cacheSize)
   {
     // no code
   }
 
-  bool AreaIndex::GetIndexCell(uint32_t level,
-                               FileOffset offset,
-                               IndexCache::CacheRef& cacheRef) const
+  bool AreaAreaIndex::GetIndexCell(uint32_t level,
+                                   FileOffset offset,
+                                   IndexCache::CacheRef& cacheRef) const
   {
     if (!indexCache.GetEntry(offset,cacheRef)) {
       IndexCache::CacheEntry cacheEntry(offset);
@@ -125,7 +125,7 @@ namespace osmscout {
     return true;
   }
 
-  bool AreaIndex::Load(const std::string& path)
+  bool AreaAreaIndex::Load(const std::string& path)
   {
     datafilename=path+"/"+filepart;
 
@@ -161,16 +161,16 @@ namespace osmscout {
     return !scanner.HasError() && scanner.Close();
   }
 
-  bool AreaIndex::GetOffsets(const StyleConfig& styleConfig,
-                             double minlon,
-                             double minlat,
-                             double maxlon,
-                             double maxlat,
-                             size_t maxAreaLevel,
-                             const TypeSet& types,
-                             size_t maxAreaCount,
-                             std::vector<FileOffset>& wayAreaOffsets,
-                             std::vector<FileOffset>& relationAreaOffsets) const
+  bool AreaAreaIndex::GetOffsets(const StyleConfig& styleConfig,
+                                 double minlon,
+                                 double minlat,
+                                 double maxlon,
+                                 double maxlat,
+                                 size_t maxAreaLevel,
+                                 const TypeSet& types,
+                                 size_t maxAreaCount,
+                                 std::vector<FileOffset>& wayAreaOffsets,
+                                 std::vector<FileOffset>& relationAreaOffsets) const
   {
     std::vector<size_t>     ctx;  // tile x coordinates in this level
     std::vector<size_t>     cty;  // tile y coordinates in this level
@@ -338,7 +338,7 @@ namespace osmscout {
     return true;
   }
 
-  void AreaIndex::DumpStatistics()
+  void AreaAreaIndex::DumpStatistics()
   {
     indexCache.DumpStatistics(filepart.c_str(),IndexCacheValueSizer());
   }

@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_AREAINDEX_H
-#define OSMSCOUT_AREAINDEX_H
+#ifndef OSMSCOUT_AREAAREAINDEX_H
+#define OSMSCOUT_AREAAREAINDEX_H
 
 /*
   This source is part of the libosmscout library
@@ -33,7 +33,7 @@
 namespace osmscout {
 
   /**
-    AreaIndex allows you to find areas, ways, area relations and way releations in
+    AreaAreaIndex allows you to find areas and area relations in
     a given area.
 
     For area structure result can be limited by the maximum level (which in turn
@@ -46,7 +46,7 @@ namespace osmscout {
     Internally the index is implemented as quadtree. As a result each index entry
     has 4 children (besides entries in the lowest level).
     */
-  class AreaIndex
+  class AreaAreaIndex
   {
   private:
     /**
@@ -106,7 +106,7 @@ namespace osmscout {
                        IndexCache::CacheRef& cacheRef) const;
 
   public:
-    AreaIndex(size_t cacheSize);
+    AreaAreaIndex(size_t cacheSize);
 
     bool Load(const std::string& path);
 

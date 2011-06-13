@@ -42,7 +42,7 @@
 
 #include <osmscout/GenNumericIndex.h>
 
-#include <osmscout/GenAreaIndex.h>
+#include <osmscout/GenAreaAreaIndex.h>
 #include <osmscout/GenAreaNodeIndex.h>
 #include <osmscout/GenAreaWayIndex.h>
 #include <osmscout/GenNodeUseIndex.h>
@@ -334,7 +334,7 @@ namespace osmscout {
                                                         AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                         "way.idx")));
     /* 11 */
-    modules.push_back(new AreaIndexGenerator());
+    modules.push_back(new AreaAreaIndexGenerator());
     /* 12 */
     modules.push_back(new AreaWayIndexGenerator());
     /* 13 */

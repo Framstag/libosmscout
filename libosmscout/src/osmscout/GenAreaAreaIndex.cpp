@@ -17,7 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/GenAreaIndex.h>
+#include <osmscout/GenAreaAreaIndex.h>
 
 #include <cassert>
 #include <cmath>
@@ -33,14 +33,14 @@
 
 namespace osmscout {
 
-  std::string AreaIndexGenerator::GetDescription() const
+  std::string AreaAreaIndexGenerator::GetDescription() const
   {
-    return "Generate 'area.idx'";
+    return "Generate 'areaarea.idx'";
   }
 
-  bool AreaIndexGenerator::LoadWayBlacklist(const ImportParameter& parameter,
-                                            Progress& progress,
-                                            std::set<Id>& wayBlacklist)
+  bool AreaAreaIndexGenerator::LoadWayBlacklist(const ImportParameter& parameter,
+                                                Progress& progress,
+                                                std::set<Id>& wayBlacklist)
   {
     FileScanner scanner;
 
@@ -65,8 +65,8 @@ namespace osmscout {
     return scanner.Close();
   }
 
-  void AreaIndexGenerator::SetOffsetOfChildren(const std::map<Coord,AreaLeaf>& leafs,
-                                               std::map<Coord,AreaLeaf>& newAreaLeafs)
+  void AreaAreaIndexGenerator::SetOffsetOfChildren(const std::map<Coord,AreaLeaf>& leafs,
+                                                   std::map<Coord,AreaLeaf>& newAreaLeafs)
   {
     // For every cell that had entries in one of its children we create
     // an index entry.
@@ -107,10 +107,10 @@ namespace osmscout {
     }
   }
 
-  bool AreaIndexGenerator::WriteIndexLevel(const ImportParameter& parameter,
-                                           FileWriter& writer,
-                                           int level,
-                                           std::map<Coord,AreaLeaf>& leafs)
+  bool AreaAreaIndexGenerator::WriteIndexLevel(const ImportParameter& parameter,
+                                               FileWriter& writer,
+                                               int level,
+                                               std::map<Coord,AreaLeaf>& leafs)
   {
     for (std::map<Coord,AreaLeaf>::iterator leaf=leafs.begin();
          leaf!=leafs.end();
@@ -162,9 +162,9 @@ namespace osmscout {
     return !writer.HasError();
   }
 
-  bool AreaIndexGenerator::Import(const ImportParameter& parameter,
-                                  Progress& progress,
-                                  const TypeConfig& typeConfig)
+  bool AreaAreaIndexGenerator::Import(const ImportParameter& parameter,
+                                      Progress& progress,
+                                      const TypeConfig& typeConfig)
   {
     FileScanner               wayScanner;
     FileScanner               relScanner;
@@ -203,15 +203,15 @@ namespace osmscout {
     // Writing index file
     //
 
-    progress.SetAction("Generating 'area.idx'");
+    progress.SetAction("Generating 'areaarea.idx'");
 
     FileWriter writer;
     FileOffset topLevelOffset=0;
     FileOffset topLevelOffsetOffset; // Offset of the toplevel entry
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "area.idx"))) {
-      progress.Error("Cannot create 'area.idx'");
+                                     "areaarea.idx"))) {
+      progress.Error("Cannot create 'areaarea.idx'");
       return false;
     }
 
