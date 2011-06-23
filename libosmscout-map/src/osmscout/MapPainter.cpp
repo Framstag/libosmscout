@@ -1594,6 +1594,12 @@ namespace osmscout {
             continue;
           }
 
+          if (!IsVisible(projection,
+                        way->nodes,
+                        style->GetWidth())) {
+            continue;
+          }
+
           if (DrawWayOutline(projection,
                              parameter,
                              *style,
@@ -1624,16 +1630,17 @@ namespace osmscout {
               continue;
             }
 
-            if (IsVisible(projection,
+            if (!IsVisible(projection,
                           relation->roles[m].nodes,
                           style->GetWidth())) {
-              if (DrawWayOutline(projection,
-                                 parameter,
-                                 *style,
-                                 relation->roles[m].GetAttributes(),
-                                 relation->roles[m].nodes)) {
-                drawn=true;
-              }
+              continue;
+            }
+            if (DrawWayOutline(projection,
+                               parameter,
+                               *style,
+                               relation->roles[m].GetAttributes(),
+                               relation->roles[m].nodes)) {
+              drawn=true;
             }
           }
 
@@ -1656,6 +1663,12 @@ namespace osmscout {
           const LineStyle *lineStyle=styleConfig.GetWayLineStyle(way->GetType());
 
           if (lineStyle==NULL) {
+            continue;
+          }
+
+          if (!IsVisible(projection,
+                         way->nodes,
+                         lineStyle->GetWidth())) {
             continue;
           }
 
@@ -1726,54 +1739,56 @@ namespace osmscout {
               continue;
             }
 
-            if (IsVisible(projection,
+            if (!IsVisible(projection,
                           relation->roles[m].nodes,
                           style->GetWidth())) {
-              TransformWay(projection,parameter,relation->roles[m].nodes,points);
+              continue;
+            }
 
-              DrawWay(projection,
-                      parameter,
-                      *style,
-                      relation->roles[m].GetAttributes(),
-                      points);
+            TransformWay(projection,parameter,relation->roles[m].nodes,points);
 
-              if (!relation->roles[m].GetName().empty()) {
-                const LabelStyle *style=styleConfig.GetWayNameLabelStyle(relation->roles[m].GetType());
+            DrawWay(projection,
+                    parameter,
+                    *style,
+                    relation->roles[m].GetAttributes(),
+                    points);
 
-                if (style!=NULL &&
-                    style->IsPointStyle() &&
-                    projection.GetMagnification()>=style->GetMinMag() &&
-                    projection.GetMagnification()<=style->GetMaxMag()) {
-                  RegisterPointWayLabel(projection,
-                                        parameter,
-                                        *style,
-                                        relation->roles[m].GetName(),
-                                        points);
+            if (!relation->roles[m].GetName().empty()) {
+              const LabelStyle *style=styleConfig.GetWayNameLabelStyle(relation->roles[m].GetType());
 
-                  relWaysLabelDrawn++;
-                }
+              if (style!=NULL &&
+                  style->IsPointStyle() &&
+                  projection.GetMagnification()>=style->GetMinMag() &&
+                  projection.GetMagnification()<=style->GetMaxMag()) {
+                RegisterPointWayLabel(projection,
+                                      parameter,
+                                      *style,
+                                      relation->roles[m].GetName(),
+                                      points);
+
+                relWaysLabelDrawn++;
               }
+            }
 
-              if (!relation->roles[m].GetRefName().empty()) {
+            if (!relation->roles[m].GetRefName().empty()) {
                 const LabelStyle *style=styleConfig.GetWayRefLabelStyle(relation->roles[m].GetType());
 
-                if (style!=NULL &&
-                    style->IsPointStyle() &&
-                    projection.GetMagnification()>=style->GetMinMag() &&
-                    projection.GetMagnification()<=style->GetMaxMag()) {
+              if (style!=NULL &&
+                  style->IsPointStyle() &&
+                  projection.GetMagnification()>=style->GetMinMag() &&
+                  projection.GetMagnification()<=style->GetMaxMag()) {
 
-                  RegisterPointWayLabel(projection,
-                                        parameter,
-                                        *style,
-                                        relation->roles[m].GetRefName(),
-                                        points);
+                RegisterPointWayLabel(projection,
+                                      parameter,
+                                      *style,
+                                      relation->roles[m].GetRefName(),
+                                      points);
 
-                  relWaysLabelDrawn++;
-                }
+                relWaysLabelDrawn++;
               }
-
-              drawn=true;
             }
+
+            drawn=true;
           }
 
           if (drawn) {
@@ -1804,6 +1819,12 @@ namespace osmscout {
             projection.GetMagnification()>=style->GetMinMag() &&
             projection.GetMagnification()<=style->GetMaxMag()) {
 
+          if (!IsVisible(projection,
+                         way->nodes,
+                         style->GetSize())) {
+            continue;
+          }
+
           TransformWay(projection,parameter,way->nodes,points);
 
           DrawContourLabel(projection,
@@ -1823,6 +1844,12 @@ namespace osmscout {
             style->IsContourStyle() &&
             projection.GetMagnification()>=style->GetMinMag() &&
             projection.GetMagnification()<=style->GetMaxMag()) {
+
+          if (!IsVisible(projection,
+                         way->nodes,
+                         style->GetSize())) {
+            continue;
+          }
 
           TransformWay(projection,parameter,way->nodes,points);
 
@@ -1851,17 +1878,19 @@ namespace osmscout {
               projection.GetMagnification()>=style->GetMinMag() &&
               projection.GetMagnification()<=style->GetMaxMag()) {
 
-            if (IsVisible(projection,
-                          relation->roles[m].nodes,
-                          style->GetSize())) {
-              TransformWay(projection,parameter,relation->roles[m].nodes,points);
-
-              DrawContourLabel(projection,
-                               parameter,
-                               *style,
-                               relation->roles[m].GetName(),
-                               points);
+            if (!IsVisible(projection,
+                           relation->roles[m].nodes,
+                           style->GetSize())) {
+              continue;
             }
+
+            TransformWay(projection,parameter,relation->roles[m].nodes,points);
+
+            DrawContourLabel(projection,
+                             parameter,
+                             *style,
+                             relation->roles[m].GetName(),
+                             points);
 
             relWaysLabelDrawn++;
           }
@@ -1875,17 +1904,19 @@ namespace osmscout {
               projection.GetMagnification()>=style->GetMinMag() &&
               projection.GetMagnification()<=style->GetMaxMag()) {
 
-            if (IsVisible(projection,
-                          relation->roles[m].nodes,
-                          style->GetSize())) {
-              TransformWay(projection,parameter,relation->roles[m].nodes,points);
-
-              DrawContourLabel(projection,
-                               parameter,
-                               *style,
-                               relation->roles[m].GetRefName(),
-                               points);
+            if (!IsVisible(projection,
+                           relation->roles[m].nodes,
+                           style->GetSize())) {
+              continue;
             }
+
+            TransformWay(projection,parameter,relation->roles[m].nodes,points);
+
+            DrawContourLabel(projection,
+                             parameter,
+                             *style,
+                             relation->roles[m].GetRefName(),
+                             points);
 
             relWaysLabelDrawn++;
           }
