@@ -76,7 +76,12 @@ namespace osmscout {
       ScanConvertLine(coastline->coast,-180.0,cellWidth,-90.0,cellHeight,cells);
 
       for (size_t i=0; i<cells.size(); i++) {
-        area.SetState(cells[i].x-cellXStart,cells[i].y-cellYStart,coast);
+        if (cells[i].x>=cellXStart &&
+            cells[i].x<=cellXEnd &&
+            cells[i].y>=cellYStart &&
+            cells[i].y<=cellYEnd) {
+          area.SetState(cells[i].x-cellXStart,cells[i].y-cellYStart,coast);
+        }
       }
     }
   }
@@ -120,22 +125,32 @@ namespace osmscout {
       if (line->b.lat>line->a.lat) {
         // up
         for (size_t i=0; i<cells.size(); i++) {
-          int cx=cells[i].x-cellXStart;
-          int cy=cells[i].y-cellYStart;
+          if (cells[i].x>=cellXStart &&
+              cells[i].x<=cellXEnd &&
+              cells[i].y>=cellYStart &&
+              cells[i].y<=cellYEnd) {
+            int cx=cells[i].x-cellXStart;
+            int cy=cells[i].y-cellYStart;
 
-          if (cx-1>=0 && area.GetState(cx-1,cy)==unknown) {
-            area.SetState(cx-1,cy,land);
+            if (cx-1>=0 && area.GetState(cx-1,cy)==unknown) {
+              area.SetState(cx-1,cy,land);
+            }
           }
         }
       }
       else if (line->b.lat<line->a.lat) {
         // down
         for (size_t i=0; i<cells.size(); i++) {
-          int cx=cells[i].x-cellXStart;
-          int cy=cells[i].y-cellYStart;
+          if (cells[i].x>=cellXStart &&
+              cells[i].x<=cellXEnd &&
+              cells[i].y>=cellYStart &&
+              cells[i].y<=cellYEnd) {
+            int cx=cells[i].x-cellXStart;
+            int cy=cells[i].y-cellYStart;
 
-          if (cx-1>=0 && area.GetState(cx-1,cy)==unknown) {
-            area.SetState(cx-1,cy,water);
+            if (cx-1>=0 && area.GetState(cx-1,cy)==unknown) {
+              area.SetState(cx-1,cy,water);
+            }
           }
         }
       }
@@ -163,22 +178,32 @@ namespace osmscout {
       if (line->b.lat>line->a.lat) {
         // up
         for (size_t i=0; i<cells.size(); i++) {
-          int cx=cells[i].x-cellXStart;
-          int cy=cells[i].y-cellYStart;
+          if (cells[i].x>=cellXStart &&
+              cells[i].x<=cellXEnd &&
+              cells[i].y>=cellYStart &&
+              cells[i].y<=cellYEnd) {
+            int cx=cells[i].x-cellXStart;
+            int cy=cells[i].y-cellYStart;
 
-          if (cx+1<cellXCount && area.GetState(cx+1,cy)==unknown) {
-            area.SetState(cx+1,cy,water);
+            if (cx+1<cellXCount && area.GetState(cx+1,cy)==unknown) {
+              area.SetState(cx+1,cy,water);
+            }
           }
         }
       }
       else if (line->b.lat<line->a.lat) {
         // down
         for (size_t i=0; i<cells.size(); i++) {
-          int cx=cells[i].x-cellXStart;
-          int cy=cells[i].y-cellYStart;
+          if (cells[i].x>=cellXStart &&
+              cells[i].x<=cellXEnd &&
+              cells[i].y>=cellYStart &&
+              cells[i].y<=cellYEnd) {
+            int cx=cells[i].x-cellXStart;
+            int cy=cells[i].y-cellYStart;
 
-          if (cx+1<cellXCount && area.GetState(cx+1,cy)==unknown) {
-            area.SetState(cx+1,cy,land);
+            if (cx+1<cellXCount && area.GetState(cx+1,cy)==unknown) {
+              area.SetState(cx+1,cy,land);
+            }
           }
         }
       }
@@ -224,22 +249,32 @@ namespace osmscout {
       if (line->b.lon>line->a.lon) {
         // right
         for (size_t i=0; i<cells.size(); i++) {
-          int cx=cells[i].x-cellXStart;
-          int cy=cells[i].y-cellYStart;
+          if (cells[i].x>=cellXStart &&
+              cells[i].x<=cellXEnd &&
+              cells[i].y>=cellYStart &&
+              cells[i].y<=cellYEnd) {
+            int cx=cells[i].x-cellXStart;
+            int cy=cells[i].y-cellYStart;
 
-          if (cy-1>=0 && area.GetState(cx,cy-1)==unknown) {
-            area.SetState(cx,cy-1,water);
+            if (cy-1>=0 && area.GetState(cx,cy-1)==unknown) {
+              area.SetState(cx,cy-1,water);
+            }
           }
         }
       }
       else if (line->b.lon<line->a.lon) {
         // left
         for (size_t i=0; i<cells.size(); i++) {
-          int cx=cells[i].x-cellXStart;
-          int cy=cells[i].y-cellYStart;
+          if (cells[i].x>=cellXStart &&
+              cells[i].x<=cellXEnd &&
+              cells[i].y>=cellYStart &&
+              cells[i].y<=cellYEnd) {
+            int cx=cells[i].x-cellXStart;
+            int cy=cells[i].y-cellYStart;
 
-          if (cy-1>=0 && area.GetState(cx,cy-1)==unknown) {
-            area.SetState(cx,cy-1,land);
+            if (cy-1>=0 && area.GetState(cx,cy-1)==unknown) {
+              area.SetState(cx,cy-1,land);
+            }
           }
         }
       }
@@ -267,22 +302,32 @@ namespace osmscout {
       if (line->b.lon>line->a.lon) {
         // right
         for (size_t i=0; i<cells.size(); i++) {
-          int cx=cells[i].x-cellXStart;
-          int cy=cells[i].y-cellYStart;
+          if (cells[i].x>=cellXStart &&
+              cells[i].x<=cellXEnd &&
+              cells[i].y>=cellYStart &&
+              cells[i].y<=cellYEnd) {
+            int cx=cells[i].x-cellXStart;
+            int cy=cells[i].y-cellYStart;
 
-          if (cy+1<cellYCount && area.GetState(cx,cy+1)==unknown) {
+            if (cy+1<cellYCount && area.GetState(cx,cy+1)==unknown) {
             area.SetState(cx,cy+1,land);
+            }
           }
         }
       }
       else if (line->b.lon<line->a.lon) {
         // left
         for (size_t i=0; i<cells.size(); i++) {
-          int cx=cells[i].x-cellXStart;
-          int cy=cells[i].y-cellYStart;
+          if (cells[i].x>=cellXStart &&
+              cells[i].x<=cellXEnd &&
+              cells[i].y>=cellYStart &&
+              cells[i].y<=cellYEnd) {
+            int cx=cells[i].x-cellXStart;
+            int cy=cells[i].y-cellYStart;
 
-          if (cy+1<cellYCount && area.GetState(cx,cy+1)==unknown) {
-            area.SetState(cx,cy+1,water);
+            if (cy+1<cellYCount && area.GetState(cx,cy+1)==unknown) {
+              area.SetState(cx,cy+1,water);
+            }
           }
         }
       }
