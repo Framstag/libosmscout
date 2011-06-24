@@ -836,7 +836,7 @@ namespace osmscout {
       // algorithm as destribed at
       // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
       if (rel.GetRelType()=="multipolygon") {
-        if (rel.roles.size()>2000 || !ResolveMultipolygon(rel,progress)) {
+        if (!ResolveMultipolygon(rel,progress)) {
           progress.Error("Cannot resolve multipolygon relation "+
                          NumberToString(rawRel.GetId())+" "+name);
           continue;
