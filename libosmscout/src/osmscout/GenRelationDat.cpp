@@ -35,6 +35,74 @@
 
 namespace osmscout {
 
+  class GroupingState
+  {
+  private:
+    size_t rings;
+    bool   *used;
+    bool   *includes;
+    bool   *hasIncludes;
+
+  public:
+    GroupingState(size_t rings)
+    {
+      this->rings=rings;
+
+      used=new bool[rings];
+      for (size_t i=0; i<rings; i++) {
+        used[i]=false;
+      }
+
+      includes=new bool[rings*rings];
+      for (size_t i=0; i<rings*rings; i++) {
+        includes[i]=false;
+      }
+
+      hasIncludes=new bool[rings];
+      for (size_t i=0; i<rings; i++) {
+        hasIncludes[i]=false;
+      }
+    }
+
+    ~GroupingState()
+    {
+      delete [] used;
+      delete [] includes;
+    }
+
+    size_t GetRingCount() const
+    {
+      return rings;
+    }
+
+    void SetUsed(size_t used)
+    {
+      this->used[used]=true;
+    }
+
+    inline bool IsUsed(size_t used) const
+    {
+      return this->used[used];
+    }
+
+    void SetIncluded(size_t includer, size_t included)
+    {
+      hasIncludes[includer]=true;
+      includes[included*rings+includer]=true;
+    }
+
+    inline bool HasIncludes(size_t includer) const
+    {
+      return hasIncludes[includer];
+    }
+
+    inline bool Includes(size_t included, size_t includer) const
+    {
+      return includes[included*rings+includer];
+    }
+  };
+
+
   bool ResolveMember(const TypeConfig& typeConfig,
                      Id id,
                      const std::string& name,
@@ -125,7 +193,10 @@ namespace osmscout {
   /**
     Returns true, if area a is in area b
     */
-  inline bool IsAreaInArea(const std::vector<bool>& includes, size_t count, size_t a, size_t b)
+  inline bool IsAreaInArea(const std::vector<bool>& includes,
+                           size_t count,
+                           size_t a,
+                           size_t b)
   {
     return includes[a*count+b];
   }
@@ -137,38 +208,31 @@ namespace osmscout {
     element").
     */
   std::list<Relation::Role>::const_iterator FindTopLevel(const std::list<Relation::Role>& rings,
-                                                         const std::vector<bool>& includes,
-                                                         const std::vector<bool>& used,
+                                                         const GroupingState& state,
                                                          size_t& topIndex)
   {
     size_t i=0;
-    std::list<Relation::Role>::const_iterator r=rings.begin();
-    while (r!=rings.end()) {
-      bool found=false;
-
-      if (!used[i]) {
+    for (std::list<Relation::Role>::const_iterator r=rings.begin();
+         r!=rings.end();
+         r++) {
+      if (!state.IsUsed(i)) {
         bool included=false;
 
-        for (size_t x=0; x<rings.size();x++) {
-          if (x!=i && !used[x]) {
-            included=IsAreaInArea(includes,rings.size(),i,x);
-
-            if (included) {
-              break;
-            }
+        for (size_t x=0; x<state.GetRingCount(); x++) {
+          if (!state.IsUsed(x) &&
+              state.Includes(i,x)) {
+            included=true;
+            break;
           }
         }
 
-        found=!included;
-
-        if (found) {
+        if (!included) {
           topIndex=i;
           return r;
         }
       }
 
       ++i;
-      ++r;
     }
 
     return rings.end();
@@ -182,19 +246,19 @@ namespace osmscout {
     */
   std::list<Relation::Role>::const_iterator FindSub(const std::list<Relation::Role>& rings,
                                                     size_t topIndex,
-                                                    const std::vector<bool>& includes,
-                                                    const std::vector<bool>& used,
+                                                    const GroupingState& state,
                                                     size_t& subIndex)
   {
     size_t i=0;
-    std::list<Relation::Role>::const_iterator r=rings.begin();
-    while (r!=rings.end()) {
-      if (!used[i] && IsAreaInArea(includes,rings.size(),i,topIndex)) {
+    for (std::list<Relation::Role>::const_iterator r=rings.begin();
+         r!=rings.end(); r++) {
+      if (!state.IsUsed(i) &&
+          state.Includes(i,topIndex)) {
         bool included=false;
 
-        for (size_t x=0; x<rings.size();x++) {
-          if (x!=i && !used[x]) {
-            included=IsAreaInArea(includes,rings.size(),i,x);
+        for (size_t x=0; x<state.GetRingCount(); x++) {
+          if (x!=i && !state.IsUsed(x)) {
+            included=state.Includes(i,x);
 
             if (included) {
               break;
@@ -209,7 +273,6 @@ namespace osmscout {
       }
 
       ++i;
-      ++r;
     }
 
     return rings.end();
@@ -221,47 +284,37 @@ namespace osmscout {
     */
   void ConsumeSubs(const std::list<Relation::Role>& rings,
                    std::list<Relation::Role>& groups,
-                   const std::vector<bool> includes,
-                   std::vector<bool>& used,
-                   size_t topIndex, size_t id)
+                   GroupingState& state,
+                   size_t topIndex,
+                   size_t id)
   {
     std::list<Relation::Role>::const_iterator sub;
     size_t                                    subIndex;
 
-    sub=FindSub(rings,topIndex,includes,used,subIndex);
+    sub=FindSub(rings,topIndex,state,subIndex);
     while (sub!=rings.end()) {
-      used[subIndex]=true;
+      state.SetUsed(subIndex);
       groups.push_back(*sub);
       groups.back().role=NumberToString(id);
 
-      ConsumeSubs(rings,groups,includes,used,subIndex,id+1);
+      ConsumeSubs(rings,groups,state,subIndex,id+1);
 
-      sub=FindSub(rings,topIndex,includes,used,subIndex);
+      sub=FindSub(rings,topIndex,state,subIndex);
     }
   }
 
-  /**
-    Try to resolve a multipolygon relation.
-
-    See http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
-    */
-  bool ResolveMultipolygon(Relation& relation,
-                           Progress& progress)
+  bool AssignRings(Relation& relation,
+                   std::list<Relation::Role>& rings,
+                   Progress& progress)
   {
-    size_t                    counter=0;
     std::list<Relation::Role> roles;
-    std::list<Relation::Role> rings;
-    std::list<Relation::Role> groups;
     std::list<Point>          points;
+    size_t                    counter=0;
 
     // Make a local copy of the relation roles
     for (size_t i=0; i<relation.roles.size(); i++) {
       roles.push_back(relation.roles[i]);
     }
-
-    //
-    // Ring assignment
-    //
 
     // Try to consume all roles
     while (roles.size()>0) {
@@ -331,7 +384,7 @@ namespace osmscout {
         return false;
       }
 
-      // Add the found points the our new (internal) list of merges roles
+      // Add the found points the our new (internal) list of merged roles
       Relation::Role role;
 
       role.attributes.type=type;
@@ -349,29 +402,48 @@ namespace osmscout {
       counter++;
     }
 
+    return true;
+  }
+
+  /**
+    Try to resolve a multipolygon relation.
+
+    See http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
+    */
+  bool ResolveMultipolygon(Relation& relation,
+                           Progress& progress)
+  {
+    std::list<Relation::Role> rings;
+    std::list<Relation::Role> groups;
+
+    //
+    // Ring assignment
+    //
+
+    if (!AssignRings(relation,
+                     rings,
+                     progress)) {
+      return false;
+    }
+
     //
     // Ring grouping
     //
 
-    std::vector<bool> includes;
-    std::vector<bool> used;
-
-    includes.resize(rings.size()*rings.size(),false);
-    used.resize(rings.size(),false);
+    GroupingState state(rings.size());
 
     size_t i=0;
     for (std::list<Relation::Role>::const_iterator r1=rings.begin();
          r1!=rings.end();
          ++r1) {
       size_t j=0;
+
       for (std::list<Relation::Role>::const_iterator r2=rings.begin();
            r2!=rings.end();
            ++r2) {
-        if (i==j) {
-          includes[j*rings.size()+i]=false;
-        }
-        else {
-          includes[j*rings.size()+i]=IsAreaInArea(r2->nodes,r1->nodes);
+        if (i!=j &&
+            IsAreaInArea(r2->nodes,r1->nodes)) {
+          state.SetIncluded(i,j);
         }
 
         j++;
@@ -381,12 +453,12 @@ namespace osmscout {
     }
 
     size_t id=0;
-    while (groups.size()<rings.size()) {
+    while (groups.size()<state.GetRingCount()) {
       std::list<Relation::Role>::const_iterator top;
       size_t                                    topIndex;
 
       // Find a ring that is not yet used and that is not contained by another unused ring
-      top=FindTopLevel(rings,includes,used,topIndex);
+      top=FindTopLevel(rings,state,topIndex);
 
       if (top==rings.end()) {
         progress.Warning("Multipolygon relation "+NumberToString(relation.GetId())+
@@ -394,11 +466,13 @@ namespace osmscout {
         return false;
       }
 
-      used[topIndex]=true;
+      state.SetUsed(topIndex);
       groups.push_back(*top);
       groups.back().role=NumberToString(id);
 
-      ConsumeSubs(rings,groups,includes,used,topIndex,id+1);
+      if (state.HasIncludes(topIndex)) {
+        ConsumeSubs(rings,groups,state,topIndex,id+1);
+      }
     }
 
     //
@@ -762,7 +836,7 @@ namespace osmscout {
       // algorithm as destribed at
       // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
       if (rel.GetRelType()=="multipolygon") {
-        if (!ResolveMultipolygon(rel,progress)) {
+        if (rel.roles.size()>2000 || !ResolveMultipolygon(rel,progress)) {
           progress.Error("Cannot resolve multipolygon relation "+
                          NumberToString(rawRel.GetId())+" "+name);
           continue;
