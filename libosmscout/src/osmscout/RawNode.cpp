@@ -68,8 +68,8 @@ namespace osmscout {
     }
 
     type=(TypeId)tmpType;
-    lat=latValue/conversionFactor-180.0;
-    lon=lonValue/conversionFactor-90.0;
+    lat=latValue/conversionFactor-90.0;
+    lon=lonValue/conversionFactor-180.0;
 
     if (!scanner.ReadNumber(tagCount)) {
       return false;
@@ -91,8 +91,8 @@ namespace osmscout {
 
   bool RawNode::Write(FileWriter& writer) const
   {
-    uint32_t latValue=(uint32_t)floor((lat+180.0)*conversionFactor+0.5);
-    uint32_t lonValue=(uint32_t)floor((lon+90.0)*conversionFactor+0.5);
+    uint32_t latValue=(uint32_t)floor((lat+90.0)*conversionFactor+0.5);
+    uint32_t lonValue=(uint32_t)floor((lon+180.0)*conversionFactor+0.5);
 
     writer.Write(id);
 
