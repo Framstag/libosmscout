@@ -24,7 +24,8 @@ bin_PROGRAMS += DrawMapQt \
 endif
 
 if HAVE_LIB_AGG
-bin_PROGRAMS += DrawMapAgg
+bin_PROGRAMS += DrawMapAgg \
+                Tiler
 endif
 
 AddressLookup_SOURCES = AddressLookup.cpp
@@ -40,5 +41,7 @@ ResourceConsumption_SOURCES = ResourceConsumption.cpp
 ResourceConsumptionQt_SOURCES = ResourceConsumptionQt.cpp
 
 Routing_SOURCES = Routing.cpp
+
+Tiler_SOURCES = Tiler.cpp
 
 
