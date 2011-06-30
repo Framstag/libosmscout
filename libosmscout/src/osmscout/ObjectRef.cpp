@@ -21,5 +21,19 @@
 
 namespace osmscout {
 
+  const char* ObjectRef::GetTypeName() const
+  {
+    switch (type) {
+    case refNode:
+      return "Node";
+    case refWay:
+      return "Way";
+    case refRelation:
+      return "Relation";
+    default:
+      return "none";
+    }
+  }
+
 }
 

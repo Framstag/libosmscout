@@ -78,6 +78,8 @@ namespace osmscout {
     {
       return type==reference.type && id==reference.id;
     }
+
+    const char* GetTypeName() const;
   };
 }
 
