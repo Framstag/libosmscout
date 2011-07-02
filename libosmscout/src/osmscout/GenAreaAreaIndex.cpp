@@ -30,7 +30,7 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/String.h>
-
+#include <iostream>
 namespace osmscout {
 
   std::string AreaAreaIndexGenerator::GetDescription() const
@@ -400,6 +400,9 @@ namespace osmscout {
           // Bounding box calculation
           //
 
+          assert(relation.roles.size()>0);
+          assert(relation.roles[0].nodes.size()>0);
+
           double minLon=relation.roles[0].nodes[0].lon;
           double maxLon=relation.roles[0].nodes[0].lon;
           double minLat=relation.roles[0].nodes[0].lat;
@@ -491,6 +494,8 @@ namespace osmscout {
 
     writer.SetPos(topLevelOffsetOffset);
     writer.Write(topLevelOffset);
+
+    std::cout << "Nearly finished!"<< std::endl;
 
     return !writer.HasError() && writer.Close();
   }

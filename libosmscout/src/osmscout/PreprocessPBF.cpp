@@ -386,8 +386,8 @@ namespace osmscout {
         }
       }
 
-      long ref=0;
-      for (int r=0; r<inputWay.refs_size();r++) {
+      unsigned long ref=0;
+      for (int r=0; r<inputWay.refs_size(); r++) {
         ref+=inputWay.refs(r);
 
         nodes.push_back(ref);
@@ -426,8 +426,8 @@ namespace osmscout {
 
       if (isArea==0) {
         if (areaType!=typeIgnore &&
-            nodes.size()>1 &&
-            nodes[0]==nodes[nodes.size()-1]) {
+            nodes.size()>2 &&
+            nodes.front()==nodes.back()) {
           isArea=1;
         }
         else if (wayType!=typeIgnore) {
@@ -436,14 +436,18 @@ namespace osmscout {
         else if (areaType!=typeIgnore &&
                  nodes.size()>1 &&
                  wayType==typeIgnore) {
-
-          nodes.push_back(nodes[0]);
           isArea=1;
         }
       }
 
       if (isArea==1) {
         rawWay.SetType(areaType,true);
+
+        if (nodes.size()>2 &&
+            nodes.front()==nodes.back()) {
+          nodes.pop_back();
+        }
+
         areaCount++;
       }
       else if (isArea==-1) {
@@ -451,8 +455,21 @@ namespace osmscout {
         wayCount++;
       }
       else {
-        rawWay.SetType(typeIgnore,false);
-        wayCount++;
+        if (nodes.size()>2 &&
+            nodes.front()==nodes.back()) {
+          rawWay.SetType(typeIgnore,
+                         true);
+
+          nodes.pop_back();
+
+          areaCount++;
+        }
+        else {
+          rawWay.SetType(typeIgnore,
+                         false);
+
+          wayCount++;
+        }
         // Unidentified way
         /*
         std::cout << "--- " << id << std::endl;
@@ -492,7 +509,7 @@ namespace osmscout {
         }
       }
 
-      long ref=0;
+      unsigned long ref=0;
       for (int r=0; r<inputRelation.types_size();r++) {
         RawRelation::Member member;
 

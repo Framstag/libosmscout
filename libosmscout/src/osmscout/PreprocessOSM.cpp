@@ -158,8 +158,8 @@ namespace osmscout {
 
     if (isArea==0) {
       if (areaType!=typeIgnore &&
-          nodes.size()>1 &&
-          nodes[0]==nodes[nodes.size()-1]) {
+          nodes.size()>2 &&
+          nodes.front()==nodes.back()) {
         isArea=1;
       }
       else if (wayType!=typeIgnore) {
@@ -168,14 +168,18 @@ namespace osmscout {
       else if (areaType!=typeIgnore &&
                nodes.size()>1 &&
                wayType==typeIgnore) {
-
-        nodes.push_back(nodes[0]);
         isArea=1;
       }
     }
 
     if (isArea==1) {
       way.SetType(areaType,true);
+
+      if (nodes.size()>2 &&
+          nodes.front()==nodes.back()) {
+        nodes.pop_back();
+      }
+
       areaCount++;
     }
     else if (isArea==-1) {
@@ -183,8 +187,20 @@ namespace osmscout {
       wayCount++;
     }
     else {
-      way.SetType(typeIgnore,false);
-      wayCount++;
+      if (nodes.size()>1 &&
+          nodes.front()==nodes.back()) {
+        way.SetType(typeIgnore,
+                    true);
+
+        nodes.pop_back();
+
+        areaCount++;
+      }
+      else {
+        way.SetType(typeIgnore,
+                    false);
+        wayCount++;
+      }
       // Unidentified way
       /*
       std::cout << "--- " << id << std::endl;

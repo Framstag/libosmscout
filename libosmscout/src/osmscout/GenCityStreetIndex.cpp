@@ -59,7 +59,10 @@ namespace osmscout {
   };
 
   /**
-    An area
+    An area. An area is a administrative region, a city, a country, ...
+    An area can have child areas (suburbs, ...).
+    An area has a name and also a number of locations, which are possibly
+    within the area but area currently also represented by this area.
     */
   struct Area
   {
@@ -155,7 +158,7 @@ namespace osmscout {
           continue;
         }
 
-        //std::cout << "Found node of type city: " << node.id << " " << name << std::endl;
+        //std::cout << "Found node of type city: " << node.GetId() << " " << name << " " << node.GetLat() <<"," <<  node.GetLon() << std::endl;
         cityNodes.push_back(node);
       }
     }
@@ -217,7 +220,7 @@ namespace osmscout {
           continue;
         }
 
-        //std::cout << "Found area of type city: " << way.id << " " << name << std::endl;
+        //std::cout << "Found area of type city: " << way.GetId() << " " << name << std::endl;
 
         cityAreas.push_back(way);
       }
@@ -346,7 +349,7 @@ namespace osmscout {
       for (size_t i=0; i<indent; i++) {
         std::cout << " ";
       }
-      std::cout << a->name << " " << parent.offset << " " << a->offset << " " << a->areas.size() << " " << a->nodes.size() << " " << a->ways.size() << " " << a->locations.size() << std::endl;
+      std::cout << a->name << " " << a->reference.GetTypeName() << " " << a->reference.GetId() << " " << a->areas.size() << " " << a->nodes.size() << " " << a->ways.size() << " " << a->locations.size() << std::endl;
 
       for (std::list<Loc>::const_iterator l=a->locations.begin();
            l!=a->locations.end();
@@ -354,7 +357,7 @@ namespace osmscout {
         for (size_t i=0; i<indent; i++) {
           std::cout << " ";
         }
-        std::cout << " =" << l->name << std::endl;
+        std::cout << " =" << l->name << " " << l->reference.GetTypeName() << " " << l->reference.GetId() << std::endl;
       }
 
       DumpArea(*a,indent+2);
@@ -776,6 +779,7 @@ namespace osmscout {
               area.CalculateMinMax();
 
               AddArea(rootArea,area);
+              // TODO: Should we break after the first outer ring detected?
             }
           }
         }
@@ -889,8 +893,8 @@ namespace osmscout {
       Point node;
 
       node.id=city->GetId();
-      node.lon=city->GetLon();
       node.lat=city->GetLat();
+      node.lon=city->GetLon();
 
       AddLocationToArea(rootArea,location,node);
     }

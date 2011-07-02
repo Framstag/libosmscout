@@ -319,9 +319,9 @@ OSS
   AREA "natural_water"
     FILL #b5d0d0 WITH LAYER 1
     LABEL WITH MINMAG close
-/*
+
   WAY "natural_coastline" PRIO 1 MINMAG world
-    LINE #000000 WITH MINPIXEL 3 WIDTH 1*/
+    LINE #000000 WITH MINPIXEL 1 WIDTH 1
 
   AREA "natural_beach"
     FILL #eecc55

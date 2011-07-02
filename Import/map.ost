@@ -21,7 +21,7 @@ TYPES
   TYPE "highway_bus_guideway" = WAY ("highway"=="bus_guideway") OPTIONS ROUTE
   TYPE "highway_path" = WAY ("highway"=="path") OPTIONS ROUTE
   TYPE "highway_cycleway" = WAY ("highway"=="cycleway") OPTIONS ROUTE
-  TYPE "highway_footway" = WAY ("highway"=="footway") OPTIONS ROUTE
+  TYPE "highway_footway" = WAY AREA ("highway"=="footway") OPTIONS ROUTE
   TYPE "highway_bridleway" = WAY ("highway"=="bridleway") OPTIONS ROUTE
   TYPE "highway_byway" = WAY ("highway"=="byway") OPTIONS ROUTE
   TYPE "highway_steps" = WAY ("highway"=="steps") OPTIONS ROUTE
@@ -357,6 +357,7 @@ TYPES
   TYPE "bridge_any" = RELATION ("type"=="bridge") OPTIONS IGNORE
   TYPE "dual_carriageway_any" = RELATION ("type"=="dual_carriageway") OPTIONS IGNORE
 
+  TYPE "wayparts_any" = RELATION ("type"=="wayparts") OPTIONS IGNORE
   TYPE "associated_street_any" = RELATION ("type"=="associatedStreet") OPTIONS IGNORE
   TYPE "enforcement_any" = RELATION ("type"=="enforcement") OPTIONS IGNORE
   TYPE "roadAccess_any" = RELATION ("type"=="roadAccess") OPTIONS IGNORE
@@ -365,24 +366,24 @@ TYPES
   TYPE "composite_Attribute_any" = RELATION ("type"=="composite_Attribute") OPTIONS IGNORE
   TYPE "segmented_tag_any" = RELATION ("type"=="segmented_tag") OPTIONS IGNORE
 
-
   TYPE "building_any" = RELATION ("type"=="building") OPTIONS IGNORE
   TYPE "related_building_any" = RELATION ("type"=="relatedBuilding") OPTIONS IGNORE
   TYPE "site_any" = RELATION ("type"=="site") OPTIONS IGNORE
   TYPE "station_any" = RELATION ("type"=="station") OPTIONS IGNORE
   TYPE "railway_halt_any" = RELATION ("type"=="railway_halt") OPTIONS IGNORE
 
-
   TYPE "line_any" = RELATION ("type"=="line") OPTIONS IGNORE
   TYPE "public_transport_any" = RELATION ("type"=="public_transport") OPTIONS IGNORE
   TYPE "collection_any" = RELATION ("type"=="collection") OPTIONS IGNORE
   TYPE "network_any" = RELATION ("type"=="network") OPTIONS IGNORE
   TYPE "route_any" = RELATION ("type"=="route") OPTIONS IGNORE
+  TYPE "routemaster_any" = RELATION ("type"=="route_master") OPTIONS IGNORE
   TYPE "superroute_any" = RELATION ("type"=="superroute") OPTIONS IGNORE
 
   TYPE "border" = AREA ("type"=="border") OPTIONS IGNORE
   TYPE "boundary_postal_code" = AREA ("boundary"=="postal_code") OPTIONS IGNORE
   TYPE "postal_code" = AREA ("type"=="postal_code") OPTIONS IGNORE
+  TYPE "organization" = AREA ("type"=="organization") OPTIONS IGNORE
 
   TYPE "place_any" = RELATION ("type"=="place") OPTIONS IGNORE
   TYPE "amt_any" = RELATION ("type"=="amt") OPTIONS IGNORE

@@ -313,63 +313,90 @@ namespace osmscout {
 
     // Make a local copy of the relation roles
     for (size_t i=0; i<relation.roles.size(); i++) {
-      roles.push_back(relation.roles[i]);
+      // We have some marker nodes like "admin_centre", which we want to skip
+      if (relation.roles[i].nodes.size()>1) {
+        roles.push_back(relation.roles[i]);
+      }
     }
 
     // Try to consume all roles
     while (roles.size()>0) {
       TypeId type=typeIgnore;
+      size_t rolesSelected=1;
+      bool finished=false;
+
+      Relation::Role leadingRole=roles.front();
+      roles.erase(roles.begin());
 
       // Take the first unused roles and copy all its points
-      for (size_t i=0; i<roles.front().nodes.size(); i++) {
-        points.push_back(roles.front().nodes[i]);
+      for (size_t i=0; i<leadingRole.nodes.size(); i++) {
+        points.push_back(leadingRole.nodes[i]);
       }
 
-      if (roles.begin()->GetType()!=typeIgnore) {
-        type=roles.begin()->GetType();
+      if (type==typeIgnore &&
+          leadingRole.GetType()!=typeIgnore) {
+        type=leadingRole.GetType();
       }
-      roles.erase(roles.begin());
+
+      // TODO: All roles that make up a ring should have the same type
+
+      if (leadingRole.IsArea()) {
+        finished=true;
+      }
 
       // Now consume more roles that have the same start or end
       // until all joined points build a closed shape ("current way")
       while (roles.size()>0 &&
-             points.front().id!=points.back().id) {
+             !finished) {
         bool found=false;
 
         // Find a role that continues the current way
         for (std::list<Relation::Role>::iterator role=roles.begin();
              role!=roles.end();
              ++role) {
-          if (points.back().id==role->nodes.front().id) {
+          if (points.back().GetId()==role->nodes.front().GetId()) {
             for (size_t i=1; i<role->nodes.size(); i++) {
               points.push_back(role->nodes[i]);
             }
 
-            if (roles.begin()->GetType()!=typeIgnore) {
-              type=roles.begin()->GetType();
+            if (type==typeIgnore &&
+                role->GetType()!=typeIgnore) {
+              type=role->GetType();
             }
+
             roles.erase(role);
 
+            rolesSelected++;
             found=true;
+
             break;
           }
-          else if (points.back().id==role->nodes.back().id) {
+          else if (points.back().GetId()==role->nodes.back().GetId()) {
             for (size_t i=1; i<role->nodes.size(); i++) {
               points.push_back(role->nodes[role->nodes.size()-i-1]);
             }
 
-            if (roles.begin()->GetType()!=typeIgnore) {
-              type=roles.begin()->GetType();
+            if (type==typeIgnore &&
+                role->GetType()!=typeIgnore) {
+              type=role->GetType();
             }
+
             roles.erase(role);
+
+            rolesSelected++;
             found=true;
             break;
           }
         }
 
-        // if we havn't found another way and we have not closed
-        // the current way we have to give up
-        if (!found) {
+        if (found) {
+          if (points.front().GetId()==points.back().GetId()) {
+            finished=true;
+          }
+        }
+        else {
+          // if we havn't found another way and we have not closed
+          // the current way we have to give up
           progress.Error("Multipolygon relation "+NumberToString(relation.GetId())+
                          ": Cannot find matching node for node id "+
                          NumberToString(points.back().id));
@@ -378,7 +405,7 @@ namespace osmscout {
       }
 
       // All roles have been consumed and we still have not closed the current way
-      if (points.front().id!=points.back().id) {
+      if (!finished) {
         progress.Error("Multipolygon relation "+NumberToString(relation.GetId())+
                        ": No ways left to close current ring");
         return false;
@@ -473,6 +500,12 @@ namespace osmscout {
       if (state.HasIncludes(topIndex)) {
         ConsumeSubs(rings,groups,state,topIndex,id+1);
       }
+    }
+
+    if (groups.size()==0) {
+      progress.Warning("Multipolygon relation "+NumberToString(relation.GetId())+
+                       ": No groups");
+      return false;
     }
 
     //
