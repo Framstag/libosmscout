@@ -27,9 +27,9 @@
 
 /*
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
-  level directory):
+  level directory), drawing the "Ruhrgebiet":
 
-  src/Tiler ../TravelJinni/ ../TravelJinni/standard.oss 51 7 51.5 7.5 11
+  src/Tiler ../TravelJinni/ ../TravelJinni/standard.oss 51.2 6.5 51.7 8 10 13
 */
 
 static unsigned long tileWidth=256;
@@ -88,13 +88,15 @@ int main(int argc, char* argv[])
   std::string   style;
   double        latTop,latBottom,lonLeft,lonRight;
   unsigned long xTileStart,xTileEnd,xTileCount,yTileStart,yTileEnd,yTileCount;
-  unsigned long zoom;
+  unsigned long startZoom;
+  unsigned long endZoom;
 
-  if (argc!=8) {
+  if (argc!=9) {
     std::cerr << "DrawMap ";
     std::cerr << "<map directory> <style-file> ";
     std::cerr << "<lat_top> <lon_left> <lat_bottom> <lon_right> ";
-    std::cerr << "<zoom>" << std::endl;
+    std::cerr << "<start_zoom>" << std::endl;
+    std::cerr << "<end_zoom>" << std::endl;
     return 1;
   }
 
@@ -121,8 +123,13 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  if (sscanf(argv[7],"%lu",&zoom)!=1) {
-    std::cerr << "zoom is not numeric!" << std::endl;
+  if (sscanf(argv[7],"%lu",&startZoom)!=1) {
+    std::cerr << "start zoom is not numeric!" << std::endl;
+    return 1;
+  }
+
+  if (sscanf(argv[8],"%lu",&endZoom)!=1) {
+    std::cerr << "end zoom is not numeric!" << std::endl;
     return 1;
   }
 
@@ -141,94 +148,110 @@ int main(int argc, char* argv[])
     std::cerr << "Cannot open style" << std::endl;
   }
 
+  osmscout::MercatorProjection  projection;
+  osmscout::MapParameter        drawParameter;
+  osmscout::AreaSearchParameter searchParameter;
+  osmscout::MapData             data;
 
-  xTileStart=long2tilex(std::min(lonLeft,lonRight),zoom);
-  xTileEnd=long2tilex(std::max(lonLeft,lonRight),zoom);
-  xTileCount=xTileEnd-xTileStart+1;
-
-  yTileStart=lat2tiley(std::max(latTop,latBottom),zoom);
-  yTileEnd=lat2tiley(std::min(latTop,latBottom),zoom);
-  yTileCount=yTileEnd-yTileStart+1;
-
-  std::cout << "Drawing " << (xTileCount)*(yTileCount) << " tiles [" << xTileStart << "," << yTileStart << " - " <<  xTileEnd << "," << yTileEnd << "]" << std::endl;
-
-  unsigned long bitmapSize=tileWidth*tileHeight*3*xTileCount*yTileCount;
-  unsigned char *buffer=new unsigned char[bitmapSize];
-
-  memset(buffer,0,bitmapSize);
-
-  agg::rendering_buffer rbuf(buffer,
-                             tileWidth*xTileCount,
-                             tileHeight*yTileCount,
-                             tileWidth*xTileCount*3);
+  searchParameter.SetMaximumAreaLevel(3);
+  searchParameter.SetMaximumNodes(100);
+  searchParameter.SetMaximumWays(3000);
+  searchParameter.SetMaximumAreas(500);
 
 
-  for (size_t y=yTileStart; y<=yTileEnd; y++) {
-    for (size_t x=xTileStart; x<=xTileEnd; x++) {
-      osmscout::MercatorProjection  projection;
-      osmscout::MapParameter        drawParameter;
-      osmscout::AreaSearchParameter searchParameter;
-      osmscout::MapData             data;
-      osmscout::MapPainterAgg       painter;
-      double                        lat,lon;
-      agg::pixfmt_rgb24             pf(rbuf);
+  for (size_t zoom=std::min(startZoom,endZoom);
+       zoom<=std::max(startZoom,endZoom);
+       zoom++) {
+    std::cout << "Drawing zoom: " << zoom << std::endl;
 
-      drawParameter.SetFontName("/usr/share/fonts/truetype/msttcorefonts/Verdana.ttf");
+    xTileStart=long2tilex(std::min(lonLeft,lonRight),zoom);
+    xTileEnd=long2tilex(std::max(lonLeft,lonRight),zoom);
+    xTileCount=xTileEnd-xTileStart+1;
 
-      lat=(tiley2lat(y,zoom)+tiley2lat(y+1,zoom))/2;
-      lon=(tilex2long(x,zoom)+tilex2long(x+1,zoom))/2;
+    yTileStart=lat2tiley(std::max(latTop,latBottom),zoom);
+    yTileEnd=lat2tiley(std::min(latTop,latBottom),zoom);
+    yTileCount=yTileEnd-yTileStart+1;
 
-      std::cout << "---" << std::endl;
-      std::cout << "Drawing tile at " << lat << "," << lon << "/";
-      std::cout << x << "," << y << "/";
-      std::cout << x-xTileStart << "," << y-yTileStart << std::endl;
+    std::cout << "Drawing " << (xTileCount)*(yTileCount) << " tiles [" << xTileStart << "," << yTileStart << " - " <<  xTileEnd << "," << yTileEnd << "]" << std::endl;
 
-      projection.Set(lon,lat,
-                     pow(2.0,zoom),
-                     tileWidth,
-                     tileHeight);
+    unsigned long bitmapSize=tileWidth*tileHeight*3*xTileCount*yTileCount;
+    unsigned char *buffer=new unsigned char[bitmapSize];
+
+    memset(buffer,0,bitmapSize);
+
+    agg::rendering_buffer rbuf(buffer,
+                               tileWidth*xTileCount,
+                               tileHeight*yTileCount,
+                               tileWidth*xTileCount*3);
 
 
-      database.GetObjects(styleConfig,
-                          projection.GetLonMin(),
-                          projection.GetLatMin(),
-                          projection.GetLonMax(),
-                          projection.GetLatMax(),
-                          projection.GetMagnification(),
-                          searchParameter,
-                          data.nodes,
-                          data.ways,
-                          data.areas,
-                          data.relationWays,
-                          data.relationAreas);
+    for (size_t y=yTileStart; y<=yTileEnd; y++) {
+      for (size_t x=xTileStart; x<=xTileEnd; x++) {
+        osmscout::MapPainterAgg       painter;
+        double                        lat,lon;
+        agg::pixfmt_rgb24             pf(rbuf);
 
-      size_t bufferOffset=xTileCount*tileWidth*3*(y-yTileStart)*tileHeight+
-                          (x-xTileStart)*tileWidth*3;
+        drawParameter.SetFontName("/usr/share/fonts/truetype/msttcorefonts/Verdana.ttf");
 
-      std::cout << "Offset: " << bufferOffset << std::endl;
+        lat=(tiley2lat(y,zoom)+tiley2lat(y+1,zoom))/2;
+        lon=(tilex2long(x,zoom)+tilex2long(x+1,zoom))/2;
 
-      rbuf.attach(buffer+bufferOffset,
-                  tileWidth,tileHeight,
-                  tileWidth*xTileCount*3);
+        std::cout << "---" << std::endl;
+        std::cout << "Drawing tile at " << lat << "," << lon << "/";
+        std::cout << x << "," << y << "/";
+        std::cout << x-xTileStart << "," << y-yTileStart << std::endl;
 
-      if (painter.DrawMap(styleConfig,
-                          projection,
-                          drawParameter,
-                          data,
-                          &pf)) {
-        std::string output=osmscout::NumberToString(zoom)+"_"+osmscout::NumberToString(x)+"_"+osmscout::NumberToString(y)+".ppm";
+        projection.Set(lon,lat,
+                       pow(2.0,zoom),
+                       tileWidth,
+                       tileHeight);
 
-        write_ppm(rbuf,output.c_str());
+
+        database.GetObjects(styleConfig,
+                            projection.GetLonMin(),
+                            projection.GetLatMin(),
+                            projection.GetLonMax(),
+                            projection.GetLatMax(),
+                            projection.GetMagnification(),
+                            searchParameter,
+                            data.nodes,
+                            data.ways,
+                            data.areas,
+                            data.relationWays,
+                            data.relationAreas);
+
+        size_t bufferOffset=xTileCount*tileWidth*3*(y-yTileStart)*tileHeight+
+                            (x-xTileStart)*tileWidth*3;
+
+        std::cout << "Offset: " << bufferOffset << std::endl;
+
+        rbuf.attach(buffer+bufferOffset,
+                    tileWidth,tileHeight,
+                    tileWidth*xTileCount*3);
+
+        if (painter.DrawMap(styleConfig,
+                            projection,
+                            drawParameter,
+                            data,
+                            &pf)) {
+          std::string output=osmscout::NumberToString(zoom)+"_"+osmscout::NumberToString(x)+"_"+osmscout::NumberToString(y)+".ppm";
+
+          write_ppm(rbuf,output.c_str());
+        }
       }
     }
+
+    rbuf.attach(buffer,
+                tileWidth*xTileCount,
+                tileHeight*yTileCount,
+                tileWidth*xTileCount*3);
+
+    std::string output=osmscout::NumberToString(zoom)+"_full_map.ppm";
+
+    write_ppm(rbuf,output.c_str());
   }
 
-  rbuf.attach(buffer,
-              tileWidth*xTileCount,
-              tileHeight*yTileCount,
-              tileWidth*xTileCount*3);
-
-  write_ppm(rbuf,"full_map.ppm");
+  database.Close();
 
   return 0;
 }
