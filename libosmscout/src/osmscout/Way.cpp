@@ -132,21 +132,25 @@ namespace osmscout {
       return false;
     }
 
+    Id       minId;
     uint32_t minLat;
     uint32_t minLon;
 
+    scanner.Read(minId),
     scanner.Read(minLat);
     scanner.Read(minLon);
 
     nodes.resize(nodeCount);
     for (size_t i=0; i<nodeCount; i++) {
+      Id       id;
       uint32_t latValue;
       uint32_t lonValue;
 
-      scanner.Read(nodes[i].id);
+      scanner.ReadNumber(id);
       scanner.ReadNumber(latValue);
       scanner.ReadNumber(lonValue);
 
+      nodes[i].id=minId+id;
       nodes[i].lat=(minLat+latValue)/conversionFactor-90.0;
       nodes[i].lon=(minLon+lonValue)/conversionFactor-180.0;
     }
@@ -177,7 +181,7 @@ namespace osmscout {
         restrictions[i].members.resize(memberCount);
 
         for (size_t j=0; j<memberCount; j++) {
-          scanner.Read(restrictions[i].members[j]);
+          scanner.ReadNumber(restrictions[i].members[j]);
         }
       }
     }
@@ -195,14 +199,17 @@ namespace osmscout {
 
     writer.WriteNumber((uint32_t)nodes.size());
 
+    Id       minId=std::numeric_limits<uint32_t>::max();
     uint32_t minLat=std::numeric_limits<uint32_t>::max();
     uint32_t minLon=std::numeric_limits<uint32_t>::max();
 
     for (size_t i=0; i<nodes.size(); i++) {
+      minId=std::min(minId,nodes[i].id);
       minLat=std::min(minLat,(uint32_t)floor((nodes[i].lat+90.0)*conversionFactor+0.5));
       minLon=std::min(minLon,(uint32_t)floor((nodes[i].lon+180.0)*conversionFactor+0.5));
     }
 
+    writer.Write(minId);
     writer.Write(minLat);
     writer.Write(minLon);
 
@@ -210,7 +217,7 @@ namespace osmscout {
       uint32_t latValue=(uint32_t)floor((nodes[i].lat+90.0)*conversionFactor+0.5);
       uint32_t lonValue=(uint32_t)floor((nodes[i].lon+180.0)*conversionFactor+0.5);
 
-      writer.Write(nodes[i].id);
+      writer.WriteNumber(nodes[i].id-minId);
       writer.WriteNumber(latValue-minLat);
       writer.WriteNumber(lonValue-minLon);
     }
@@ -224,7 +231,7 @@ namespace osmscout {
         writer.WriteNumber((uint32_t)restrictions[i].members.size());
 
         for (size_t j=0; j<restrictions[i].members.size(); j++) {
-          writer.Write(restrictions[i].members[j]);
+          writer.WriteNumber(restrictions[i].members[j]);
         }
       }
     }
