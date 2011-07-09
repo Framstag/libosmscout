@@ -47,6 +47,7 @@ namespace osmscout {
     double                 outlineMinWidth;   //! Minimum width of an outline to be drawn
     bool                   optimizeWayNodes;  //! Try to reduce the number of nodes for a way
     bool                   optimizeAreaNodes; //! Try to reduce the number of nodes for an area
+    bool                   drawFadings;       //! Draw label fadings (default: true)
 
   public:
     MapParameter();
@@ -62,6 +63,8 @@ namespace osmscout {
 
     void SetOptimizeWayNodes(bool optimize);
     void SetOptimizeAreaNodes(bool optimize);
+
+    void SetDrawFadings(bool drawFadings);
 
     inline std::string GetFontName() const
     {
@@ -96,6 +99,11 @@ namespace osmscout {
     inline bool GetOptimizeAreaNodes() const
     {
       return optimizeAreaNodes;
+    }
+
+    inline bool GetDrawFadings() const
+    {
+      return drawFadings;
     }
   };
 

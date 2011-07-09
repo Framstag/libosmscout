@@ -36,7 +36,8 @@ namespace osmscout {
     fontSize(9.0),
     outlineMinWidth(1.0),
     optimizeWayNodes(false),
-    optimizeAreaNodes(false)
+    optimizeAreaNodes(false),
+    drawFadings(true)
   {
     // no code
   }
@@ -79,6 +80,11 @@ namespace osmscout {
   void MapParameter::SetOptimizeAreaNodes(bool optimize)
   {
     optimizeAreaNodes=optimize;
+  }
+
+  void MapParameter::SetDrawFadings(bool drawFadings)
+  {
+    this->drawFadings=drawFadings;
   }
 
   MapPainter::MapPainter()
@@ -565,9 +571,11 @@ namespace osmscout {
 
     // Calculate effective font size and alpha value
     if (projection.GetMagnification()>style.GetScaleAndFadeMag()) {
-      double factor=log2(projection.GetMagnification())-log2(style.GetScaleAndFadeMag());
-      fontSize=fontSize*pow(2,factor);
-      a=a/factor;
+      if (parameter.GetDrawFadings()) {
+        double factor=log2(projection.GetMagnification())-log2(style.GetScaleAndFadeMag());
+        fontSize=fontSize*pow(2,factor);
+        a=a/factor;
+      }
     }
 
     if (a>=0.8) {
