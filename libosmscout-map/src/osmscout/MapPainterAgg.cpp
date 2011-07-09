@@ -593,9 +593,9 @@ namespace osmscout {
     agg::path_storage path;
 
     path.move_to(x,y);
-    path.line_to(x+width-1,y);
-    path.line_to(x+width-1,y+height-1);
-    path.line_to(x, y+height-1);
+    path.line_to(x+width,y);
+    path.line_to(x+width,y+height);
+    path.line_to(x, y+height);
     path.close_polygon();
 
     renderer_aa->color(agg::rgba(style.GetFillR(),
