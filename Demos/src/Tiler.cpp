@@ -153,6 +153,8 @@ int main(int argc, char* argv[])
   osmscout::AreaSearchParameter searchParameter;
   osmscout::MapData             data;
 
+  drawParameter.SetDrawFadings(false);
+
   searchParameter.SetMaximumAreaLevel(3);
   searchParameter.SetMaximumNodes(100);
   searchParameter.SetMaximumWays(3000);
