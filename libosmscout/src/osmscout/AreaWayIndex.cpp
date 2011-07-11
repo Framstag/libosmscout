@@ -218,7 +218,7 @@ namespace osmscout {
         }
 
         if (currentSize+newOffsets.size()+dataCount>maxWayCount) {
-          std::cout << currentSize<< "+" << newOffsets.size() << "+" << dataCount << ">" << maxWayCount << std::endl;
+          //std::cout << currentSize<< "+" << newOffsets.size() << "+" << dataCount << ">" << maxWayCount << std::endl;
           sizeExceeded=true;
           return true;
         }
@@ -301,7 +301,7 @@ namespace osmscout {
       }
     }
 
-    std::cout << "Found " << wayWayOffsets.size() << "+" << relationWayOffsets.size()<< " offsets in 'areaway.idx'" << std::endl;
+    //std::cout << "Found " << wayWayOffsets.size() << "+" << relationWayOffsets.size()<< " offsets in 'areaway.idx'" << std::endl;
 
     return true;
   }

@@ -78,6 +78,8 @@ namespace osmscout {
     unsigned long relationIndexCacheSize;
     unsigned long relationCacheSize;
 
+    bool          debugPerformance;
+
   public:
     DatabaseParameter();
 
@@ -93,6 +95,8 @@ namespace osmscout {
     void SetRelationIndexCacheSize(unsigned long relationIndexCacheSize);
     void SetRelationCacheSize(unsigned long relationCacheSize);
 
+    void SetDebugPerformance(bool debug);
+
     unsigned long GetAreaAreaIndexCacheSize() const;
     unsigned long GetAreaNodeIndexCacheSize() const;
 
@@ -104,6 +108,8 @@ namespace osmscout {
 
     unsigned long GetRelationIndexCacheSize() const;
     unsigned long GetRelationCacheSize() const;
+
+    bool IsDebugPerformance() const;
   };
 
   /**
@@ -145,8 +151,9 @@ namespace osmscout {
 
     typedef Cache<size_t,std::vector<NodeUse> > NodeUseCache;
 
-  private:                               //! true, if opened
-    bool                  isOpen;
+  private:
+    bool                  isOpen;        //! true, if opened
+    bool                  debugPerformance;
 
     double                minLon;        //! bounding box of data
     double                minLat;        //! bounding box of data

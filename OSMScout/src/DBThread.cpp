@@ -161,6 +161,7 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
 
     drawParameter.SetIconPaths(paths);
     drawParameter.SetPatternPaths(paths);
+    drawParameter.SetDebugPerformance(true);
 
     std::cout << std::endl;
 

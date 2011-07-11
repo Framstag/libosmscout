@@ -37,7 +37,8 @@ namespace osmscout {
     outlineMinWidth(1.0),
     optimizeWayNodes(false),
     optimizeAreaNodes(false),
-    drawFadings(true)
+    drawFadings(true),
+    debugPerformance(false)
   {
     // no code
   }
@@ -85,6 +86,11 @@ namespace osmscout {
   void MapParameter::SetDrawFadings(bool drawFadings)
   {
     this->drawFadings=drawFadings;
+  }
+
+  void MapParameter::SetDebugPerformance(bool debug)
+  {
+    debugPerformance=debug;
   }
 
   MapPainter::MapPainter()
@@ -2050,8 +2056,6 @@ namespace osmscout {
                               const Projection& projection,
                               const MapParameter& parameter)
   {
-    std::cout << "Label List Size: " << labels.size() << std::endl;
-
     //
     // Draw normal
     //
@@ -2131,11 +2135,13 @@ namespace osmscout {
     labelRefs.clear();
     labelRefs.resize(xCellCount*yCellCount);
 
-    std::cout << "Draw ";
-    std::cout << projection.GetLat() <<", ";
-    std::cout << projection.GetLon() << " with mag. ";
-    std::cout << projection.GetMagnification() << "x" << "/" << log(projection.GetMagnification())/log(2);
-    std::cout << " area " << projection.GetWidth() << "x" << projection.GetHeight() << std::endl;
+    if (parameter.IsDebugPerformance()) {
+      std::cout << "Draw ";
+      std::cout << projection.GetLat() <<", ";
+      std::cout << projection.GetLon() << " with mag. ";
+      std::cout << projection.GetMagnification() << "x" << "/" << log(projection.GetMagnification())/log(2);
+      std::cout << " area " << projection.GetWidth() << "x" << projection.GetHeight() << std::endl;
+    }
 
     //
     // Setup and Precalculation
@@ -2258,16 +2264,18 @@ namespace osmscout {
 
     labelsTimer.Stop();
 
-    std::cout << "Paths: " << pathsTimer << "/" << pathLabelsTimer << " ";
-    std::cout << "Areas: " << areasTimer << "/" << areaLabelsTimer << " ";
-    std::cout << "Nodes: " << nodesTimer << " ";
-    std::cout << "POIs: " << poisTimer << "/" << routesTimer << " ";
-    std::cout << "Labels: " << labelsTimer << std::endl;
+    if (parameter.IsDebugPerformance()) {
+      std::cout << "Paths: " << pathsTimer << "/" << pathLabelsTimer << " ";
+      std::cout << "Areas: " << areasTimer << "/" << areaLabelsTimer << " ";
+      std::cout << "Nodes: " << nodesTimer << " ";
+      std::cout << "POIs: " << poisTimer << "/" << routesTimer << " ";
+      std::cout << "Labels: " << labelsTimer << std::endl;
 
-    std::cout << "Path ways: " << waysCount << "/" << waysDrawn << "/" << waysOutlineDrawn << "/" << waysLabelDrawn << " (pcs)" << std::endl;
-    std::cout << "Path rels: " << relWaysCount << "/" << relWaysDrawn << "/" << relWaysOutlineDrawn << "/" << relWaysLabelDrawn << " (pcs)" << std::endl;
-    std::cout << "Area ways: " << areasCount << "/" << areasDrawn << "/" << areasLabelDrawn << " (pcs)" << std::endl;
-    std::cout << "Area rels: " << relAreasCount << "/" << relAreasDrawn << "/" << relAreasLabelDrawn << " (pcs)" << std::endl;
+      std::cout << "Path ways: " << waysCount << "/" << waysDrawn << "/" << waysOutlineDrawn << "/" << waysLabelDrawn << " (pcs)" << std::endl;
+      std::cout << "Path rels: " << relWaysCount << "/" << relWaysDrawn << "/" << relWaysOutlineDrawn << "/" << relWaysLabelDrawn << " (pcs)" << std::endl;
+      std::cout << "Area ways: " << areasCount << "/" << areasDrawn << "/" << areasLabelDrawn << " (pcs)" << std::endl;
+      std::cout << "Area rels: " << relAreasCount << "/" << relAreasDrawn << "/" << relAreasLabelDrawn << " (pcs)" << std::endl;
+    }
   }
 }
 

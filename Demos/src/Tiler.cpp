@@ -158,12 +158,13 @@ int main(int argc, char* argv[])
   searchParameter.SetMaximumAreaLevel(3);
   searchParameter.SetMaximumNodes(100);
   searchParameter.SetMaximumWays(3000);
-  searchParameter.SetMaximumAreas(500);
+  searchParameter.SetMaximumAreas(1000);
 
 
   for (size_t zoom=std::min(startZoom,endZoom);
        zoom<=std::max(startZoom,endZoom);
        zoom++) {
+    std::cout << "---" << std::endl;
     std::cout << "Drawing zoom: " << zoom << std::endl;
 
     xTileStart=long2tilex(std::min(lonLeft,lonRight),zoom);
@@ -198,7 +199,6 @@ int main(int argc, char* argv[])
         lat=(tiley2lat(y,zoom)+tiley2lat(y+1,zoom))/2;
         lon=(tilex2long(x,zoom)+tilex2long(x+1,zoom))/2;
 
-        std::cout << "---" << std::endl;
         std::cout << "Drawing tile at " << lat << "," << lon << "/";
         std::cout << x << "," << y << "/";
         std::cout << x-xTileStart << "," << y-yTileStart << std::endl;
@@ -224,8 +224,6 @@ int main(int argc, char* argv[])
 
         size_t bufferOffset=xTileCount*tileWidth*3*(y-yTileStart)*tileHeight+
                             (x-xTileStart)*tileWidth*3;
-
-        std::cout << "Offset: " << bufferOffset << std::endl;
 
         rbuf.attach(buffer+bufferOffset,
                     tileWidth,tileHeight,

@@ -53,7 +53,8 @@ namespace osmscout {
     wayIndexCacheSize(1000),
     wayCacheSize(1000),
     relationIndexCacheSize(1000),
-    relationCacheSize(1000)
+    relationCacheSize(1000),
+    debugPerformance(false)
   {
     // no code
   }
@@ -98,6 +99,11 @@ namespace osmscout {
     this->relationCacheSize=relationCacheSize;
   }
 
+  void DatabaseParameter::SetDebugPerformance(bool debug)
+  {
+    debugPerformance=debug;
+  }
+
   unsigned long DatabaseParameter::GetAreaAreaIndexCacheSize() const
   {
     return areaAreaIndexCacheSize;
@@ -136,6 +142,11 @@ namespace osmscout {
   unsigned long DatabaseParameter::GetRelationCacheSize() const
   {
     return relationCacheSize;
+  }
+
+  bool DatabaseParameter::IsDebugPerformance() const
+  {
+    return debugPerformance;
   }
 
   AreaSearchParameter::AreaSearchParameter()
@@ -189,6 +200,7 @@ namespace osmscout {
 
   Database::Database(const DatabaseParameter& parameter)
    : isOpen(false),
+     debugPerformance(parameter.IsDebugPerformance()),
      areaAreaIndex(parameter.GetAreaAreaIndexCacheSize()),
      areaNodeIndex(parameter.GetAreaNodeIndexCacheSize()),
      areaWayIndex(),
@@ -546,15 +558,17 @@ namespace osmscout {
 
     relationAreasTimer.Stop();
 
-    std::cout << "I/O: ";
-    std::cout << "n " << nodeIndexTimer << " ";
-    std::cout << "w " << wayIndexTimer << " ";
-    std::cout << "a " << areaAreaIndexTimer;
-    std::cout << " - ";
-    std::cout << "n " << nodesTimer << " ";
-    std::cout << "w " << waysTimer << "/" << relationWaysTimer << " ";
-    std::cout << "a " << areasTimer << "/" << relationAreasTimer;
-    std::cout << std::endl;
+    if (debugPerformance) {
+      std::cout << "I/O: ";
+      std::cout << "n " << nodeIndexTimer << " ";
+      std::cout << "w " << wayIndexTimer << " ";
+      std::cout << "a " << areaAreaIndexTimer;
+      std::cout << " - ";
+      std::cout << "n " << nodesTimer << " ";
+      std::cout << "w " << waysTimer << "/" << relationWaysTimer << " ";
+      std::cout << "a " << areasTimer << "/" << relationAreasTimer;
+      std::cout << std::endl;
+    }
 
     return true;
   }
@@ -576,7 +590,7 @@ namespace osmscout {
 
     timer.Stop();
 
-    std::cout << "Found " << tiles.size() << " ground tiles " << timer << std::endl;
+    //std::cout << "Found " << tiles.size() << " ground tiles " << timer << std::endl;
 
     return true;
   }

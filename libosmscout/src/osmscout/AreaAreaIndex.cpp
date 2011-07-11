@@ -144,7 +144,7 @@ namespace osmscout {
       return false;
     }
 
-    std::cout << "Max level is: " << maxLevel << std::endl;
+    //std::cout << "Max level is: " << maxLevel << std::endl;
 
     // Calculate the size of a cell in each index level
     cellWidth.resize(maxLevel+1);
@@ -333,7 +333,7 @@ namespace osmscout {
       co=no;
     }
 
-    std::cout << "Found " << wayAreaOffsets.size() << "/" << relationAreaOffsets.size() << " offsets in '" << filepart << "'" << std::endl;
+    //std::cout << "Found " << wayAreaOffsets.size() << "/" << relationAreaOffsets.size() << " offsets in '" << filepart << "'" << std::endl;
 
     return true;
   }

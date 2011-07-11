@@ -41,7 +41,7 @@ OSS
     LINE #fefeb3 WITH ALTCOLOR #fefe73 MINPIXEL 1 WIDTH 10 OUTLINE 1
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "highway_unclassified" PRIO 7 MINMAG proximity
+  WAY "highway_unclassified" PRIO 7 MINMAG city
     LINE #ffffff WITH ALTCOLOR #888888 MINPIXEL 0.5 WIDTH 8 OUTLINE 1
     LABEL WITH STYLE contour MINMAG close
 
@@ -61,11 +61,11 @@ OSS
     LINE #ffffff WITH ALTCOLOR #888888 MINPIXEL 0.5 WIDTH 8 OUTLINE 1
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "highway_track" PRIO 11 MINMAG detail
+  WAY "highway_track" PRIO 11 MINMAG close
     LINE #90570c WITH OUTLINECOLOR #ffffff80 DASH 3,1 MINPIXEL 1.5 FIXEDWIDTH OUTLINE 1.5
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "highway_pedestrian" PRIO 11 MINMAG detail
+  WAY "highway_pedestrian" PRIO 11 MINMAG close
     LINE #ebeaea WITH MINPIXEL 0.5 WIDTH 8 OUTLINE 1
     LABEL WITH STYLE contour MINMAG close
 
@@ -85,31 +85,31 @@ OSS
     LINE #90570c WITH MINPIXEL 0.5 WIDTH 2
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "highway_path" PRIO 11 MINMAG detail
+  WAY "highway_path" PRIO 11 MINMAG close
     LINE #555555 WITH OUTLINECOLOR #ffffff80 DASH 8,2 MINPIXEL 1 FIXEDWIDTH OUTLINE 1
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "highway_cycleway" PRIO 11 MINMAG detail
+  WAY "highway_cycleway" PRIO 11 MINMAG close
     LINE #4645fa WITH OUTLINECOLOR #ffffff80 DASH 1,1 MINPIXEL 2 FIXEDWIDTH OUTLINE 1.5
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "highway_footway" PRIO 11 MINMAG detail
+  WAY "highway_footway" PRIO 11 MINMAG close
     LINE #fe9897 WITH OUTLINECOLOR #ffffff80 DASH 1,1 MINPIXEL 2 FIXEDWIDTH OUTLINE 1.5
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "highway_bridleway" PRIO 11 MINMAG detail
+  WAY "highway_bridleway" PRIO 11 MINMAG close
     LINE #90570c WITH MINPIXEL 0.5 WIDTH 2
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "highway_byway" PRIO 11 MINMAG detail
+  WAY "highway_byway" PRIO 11 MINMAG close
     LINE #90570c WITH MINPIXEL 0.5 WIDTH 2
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "highway_steps" PRIO 11 MINMAG detail
+  WAY "highway_steps" PRIO 11 MINMAG close
     LINE #fe9897 WITH DASH 0.25,0.25 MINPIXEL 5
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "highway_construction" PRIO 11 MINMAG proximity
+  WAY "highway_construction" PRIO 11 MINMAG close
     LINE #99cccc WITH MINPIXEL 0.5 WIDTH 2
     LABEL WITH STYLE contour MINMAG close
 
@@ -284,7 +284,7 @@ OSS
     LABEL WITH MINMAG detail
 
   NODE "natural_peak"
-    SYMBOL triangle #9c5e29 8 WITH MINMAG city
+    SYMBOL triangle #9c5e29 8 WITH MINMAG cityOver
     LABEL WITH STYLE emphasize COLOR #9c5329 MINMAG detail
 
   AREA "natural_glacier"
@@ -345,11 +345,11 @@ OSS
     FILL #d5ddbd
     LABEL WITH MINMAG detail
 
-  WAY "aeroway_runway" PRIO 20 MINMAG city
+  WAY "aeroway_runway" PRIO 20 MINMAG detail
     LINE #bbbbcc WITH MINPIXEL 2 WIDTH 20
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "aeroway_taxiway" PRIO 20 MINMAG city
+  WAY "aeroway_taxiway" PRIO 20 MINMAG detail
     LINE #bbbbcc WITH MINPIXEL 2 WIDTH 15
     LABEL WITH STYLE contour MINMAG close
 
@@ -370,7 +370,7 @@ OSS
     FILL #bde3cb WITH LAYER 2
     LABEL WITH MINMAG close
 
-  WAY "leisure_track" PRIO 11 MINMAG city
+  WAY "leisure_track" PRIO 11 MINMAG close
     LINE #bde3cb WITH MINPIXEL 1 WIDTH 3
     LABEL WITH STYLE contour MINMAG city
 

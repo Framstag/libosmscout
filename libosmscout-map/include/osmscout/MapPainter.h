@@ -44,10 +44,15 @@ namespace osmscout {
     double                 fontSize;          //! Pixel size of base font (aka font size 100%)
     std::list<std::string> iconPaths;         //! List of paths to search for images for icons
     std::list<std::string> patternPaths;      //! List of paths to search for images for patterns
+
     double                 outlineMinWidth;   //! Minimum width of an outline to be drawn
+
     bool                   optimizeWayNodes;  //! Try to reduce the number of nodes for a way
     bool                   optimizeAreaNodes; //! Try to reduce the number of nodes for an area
+
     bool                   drawFadings;       //! Draw label fadings (default: true)
+
+    bool                   debugPerformance;  //! Print out some performance information
 
   public:
     MapParameter();
@@ -65,6 +70,8 @@ namespace osmscout {
     void SetOptimizeAreaNodes(bool optimize);
 
     void SetDrawFadings(bool drawFadings);
+
+    void SetDebugPerformance(bool debug);
 
     inline std::string GetFontName() const
     {
@@ -104,6 +111,11 @@ namespace osmscout {
     inline bool GetDrawFadings() const
     {
       return drawFadings;
+    }
+
+    inline bool IsDebugPerformance() const
+    {
+      return debugPerformance;
     }
   };
 

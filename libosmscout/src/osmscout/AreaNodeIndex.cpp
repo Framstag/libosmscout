@@ -60,7 +60,7 @@ namespace osmscout {
     scanner.ReadNumber(maxType);
     scanner.ReadNumber(maxLevel);
 
-    std::cout << types << " area node index entries..." << std::endl;
+    //std::cout << types << " area node index entries..." << std::endl;
 
     // Calculate the size of a cell in each index level
     cellWidth.resize(maxLevel+1);
@@ -204,10 +204,11 @@ namespace osmscout {
 
           if (nodeOffsets.size()+
               newNodeOffsets.size()+entry->value.offsets.size()>maxNodeCount) {
+            /*
             std::cout << "Maximum node limit hit: " << nodeOffsets.size();
             std::cout << "+" << newNodeOffsets.size();
             std::cout << "+" << entry->value.offsets.size();
-            std::cout << ">" << maxNodeCount << " for type " << types[*type] << std::endl;
+            std::cout << ">" << maxNodeCount << " for type " << types[*type] << std::endl;*/
             stop=true;
             break;
           }
