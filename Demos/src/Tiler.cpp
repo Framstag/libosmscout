@@ -261,6 +261,8 @@ int main(int argc, char* argv[])
 
     write_ppm(rbuf,output.c_str());
 
+    delete[] buffer;
+
     std::cout << "=> Time: ";
     std::cout << "total: " << totalTime << " msec ";
     std::cout << "min: " << minTime << " msec ";
