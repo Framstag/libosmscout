@@ -73,6 +73,22 @@ namespace osmscout {
 #endif
   }
 
+  double StopClock::GetMilliseconds() const
+  {
+#if defined(HAVE_SYS_TIME_H)
+    timeval diff;
+    size_t  result;
+
+    timersub(&pimpl->stop,&pimpl->start,&diff);
+
+    result =diff.tv_sec*1000.0+diff.tv_usec/1000;
+
+    return result;
+#else
+    return 0.0;
+#endif
+  }
+
   std::ostream& operator<<(std::ostream& stream, const StopClock& clock)
   {
 #if defined(HAVE_SYS_TIME_H)
