@@ -19,11 +19,14 @@
 
 #include <iostream>
 #include <iomanip>
+#include <limits>
 
 #include <osmscout/Database.h>
 #include <osmscout/MapPainterAgg.h>
 #include <osmscout/StyleConfigLoader.h>
 #include <osmscout/Util.h>
+
+#include <osmscout/util/StopClock.h>
 
 /*
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
@@ -153,6 +156,7 @@ int main(int argc, char* argv[])
   osmscout::AreaSearchParameter searchParameter;
   osmscout::MapData             data;
 
+  drawParameter.SetFontName("/usr/share/fonts/truetype/msttcorefonts/Verdana.ttf");
   drawParameter.SetDrawFadings(false);
 
   searchParameter.SetMaximumAreaLevel(3);
@@ -160,13 +164,9 @@ int main(int argc, char* argv[])
   searchParameter.SetMaximumWays(3000);
   searchParameter.SetMaximumAreas(1000);
 
-
   for (size_t zoom=std::min(startZoom,endZoom);
        zoom<=std::max(startZoom,endZoom);
        zoom++) {
-    std::cout << "---" << std::endl;
-    std::cout << "Drawing zoom: " << zoom << std::endl;
-
     xTileStart=long2tilex(std::min(lonLeft,lonRight),zoom);
     xTileEnd=long2tilex(std::max(lonLeft,lonRight),zoom);
     xTileCount=xTileEnd-xTileStart+1;
@@ -175,10 +175,11 @@ int main(int argc, char* argv[])
     yTileEnd=lat2tiley(std::min(latTop,latBottom),zoom);
     yTileCount=yTileEnd-yTileStart+1;
 
-    std::cout << "Drawing " << (xTileCount)*(yTileCount) << " tiles [" << xTileStart << "," << yTileStart << " - " <<  xTileEnd << "," << yTileEnd << "]" << std::endl;
+    std::cout << "Drawing zoom " << zoom << ", " << (xTileCount)*(yTileCount) << " tiles [" << xTileStart << "," << yTileStart << " - " <<  xTileEnd << "," << yTileEnd << "]" << std::endl;
 
-    unsigned long bitmapSize=tileWidth*tileHeight*3*xTileCount*yTileCount;
-    unsigned char *buffer=new unsigned char[bitmapSize];
+    unsigned long           bitmapSize=tileWidth*tileHeight*3*xTileCount*yTileCount;
+    unsigned char           *buffer=new unsigned char[bitmapSize];
+    osmscout::MapPainterAgg painter;
 
     memset(buffer,0,bitmapSize);
 
@@ -187,21 +188,23 @@ int main(int argc, char* argv[])
                                tileHeight*yTileCount,
                                tileWidth*xTileCount*3);
 
+    double minTime=std::numeric_limits<double>::max();
+    double maxTime=0.0;
+    double totalTime=0.0;
 
     for (size_t y=yTileStart; y<=yTileEnd; y++) {
       for (size_t x=xTileStart; x<=xTileEnd; x++) {
-        osmscout::MapPainterAgg       painter;
-        double                        lat,lon;
-        agg::pixfmt_rgb24             pf(rbuf);
+        double              lat,lon;
+        agg::pixfmt_rgb24   pf(rbuf);
+        osmscout::StopClock timer;
 
-        drawParameter.SetFontName("/usr/share/fonts/truetype/msttcorefonts/Verdana.ttf");
 
         lat=(tiley2lat(y,zoom)+tiley2lat(y+1,zoom))/2;
         lon=(tilex2long(x,zoom)+tilex2long(x+1,zoom))/2;
 
-        std::cout << "Drawing tile at " << lat << "," << lon << "/";
-        std::cout << x << "," << y << "/";
-        std::cout << x-xTileStart << "," << y-yTileStart << std::endl;
+        //std::cout << "Drawing tile at " << lat << "," << lon << "/";
+        //std::cout << x << "," << y << "/";
+        //std::cout << x-xTileStart << "," << y-yTileStart << std::endl;
 
         projection.Set(lon,lat,
                        pow(2.0,zoom),
@@ -229,15 +232,23 @@ int main(int argc, char* argv[])
                     tileWidth,tileHeight,
                     tileWidth*xTileCount*3);
 
-        if (painter.DrawMap(styleConfig,
-                            projection,
-                            drawParameter,
-                            data,
-                            &pf)) {
-          std::string output=osmscout::NumberToString(zoom)+"_"+osmscout::NumberToString(x)+"_"+osmscout::NumberToString(y)+".ppm";
+        painter.DrawMap(styleConfig,
+                        projection,
+                        drawParameter,
+                        data,
+                        &pf);
 
-          write_ppm(rbuf,output.c_str());
-        }
+        timer.Stop();
+
+        double time=timer.GetMilliseconds();
+
+        minTime=std::min(minTime,time);
+        maxTime=std::max(maxTime,time);
+        totalTime+=time;
+
+        std::string output=osmscout::NumberToString(zoom)+"_"+osmscout::NumberToString(x)+"_"+osmscout::NumberToString(y)+".ppm";
+
+        write_ppm(rbuf,output.c_str());
       }
     }
 
@@ -249,6 +260,12 @@ int main(int argc, char* argv[])
     std::string output=osmscout::NumberToString(zoom)+"_full_map.ppm";
 
     write_ppm(rbuf,output.c_str());
+
+    std::cout << "=> Time: ";
+    std::cout << "total: " << totalTime << " msec ";
+    std::cout << "min: " << minTime << " msec ";
+    std::cout << "avg: " << totalTime/(xTileCount*yTileCount) << " msec ";
+    std::cout << "max: " << maxTime << " msec" << std::endl;
   }
 
   database.Close();
