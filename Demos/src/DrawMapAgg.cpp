@@ -125,6 +125,7 @@ int main(int argc, char* argv[])
   osmscout::MapPainterAgg       painter;
 
   drawParameter.SetFontName("/usr/share/fonts/truetype/msttcorefonts/Verdana.ttf");
+  drawParameter.SetFontSize(8);
 
   projection.Set(lon,
                  lat,

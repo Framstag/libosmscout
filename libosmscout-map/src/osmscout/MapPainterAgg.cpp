@@ -59,8 +59,8 @@ namespace osmscout {
     }
 
     //fontEngine->resolution(72);
-    fontEngine->width(size*8);  // We need to clearify this value, likely DPI depend?
-    fontEngine->height(size*8); // We need to clearify this value, likely DPI depend?
+    fontEngine->width(size*parameter.GetFontSize());
+    fontEngine->height(size*parameter.GetFontSize());
     fontEngine->hinting(true);
     fontEngine->flip_y(true);
   }
@@ -77,8 +77,8 @@ namespace osmscout {
     }
 
     //fontEngine->resolution(72);
-    fontEngine->width(size*8);  // We need to clearify this value, likely DPI depend?
-    fontEngine->height(size*8); // We need to clearify this value, likely DPI depend?
+    fontEngine->width(size*parameter.GetFontSize());
+    fontEngine->height(size*parameter.GetFontSize());
     fontEngine->hinting(true);
     fontEngine->flip_y(true);
   }
