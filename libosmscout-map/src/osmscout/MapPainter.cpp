@@ -27,7 +27,6 @@
 
 namespace osmscout {
 
-  static const double gradtorad=2*M_PI/360;
   static double relevantPosDeriviation=2.0;
   static double relevantSlopeDeriviation=0.1;
 
