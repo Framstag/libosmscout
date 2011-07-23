@@ -56,6 +56,9 @@ namespace osmscout {
     cairo_path_data_t *data, last_move_to, current_point;
     parametrization_t *parametrization;
 
+    current_point.point.x=0;
+    current_point.point.y=0;
+
     parametrization = (parametrization_t*)malloc (path->num_data * sizeof (parametrization[0]));
 
     for (i=0; i < path->num_data; i += path->data[i].header.length) {
@@ -151,6 +154,9 @@ namespace osmscout {
     cairo_path_data_t *data, last_move_to, current_point;
     cairo_path_t *path = param->path;
     parametrization_t *parametrization = param->parametrization;
+
+    current_point.point.x=0;
+    current_point.point.y=0;
 
     for (i=0; i + path->data[i].header.length < path->num_data &&
          (the_x > parametrization[i] ||
