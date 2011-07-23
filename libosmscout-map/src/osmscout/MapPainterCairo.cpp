@@ -34,8 +34,6 @@
 
 namespace osmscout {
 
-  static const double gradtorad=2*M_PI/360;
-
   /* Returns Euclidean distance between two points */
   static double two_points_distance(cairo_path_data_t *a, cairo_path_data_t *b)
   {
