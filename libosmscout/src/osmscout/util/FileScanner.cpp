@@ -672,6 +672,8 @@ namespace osmscout {
         idx++;
       };
     }
+
+    return true;
   }
 
   bool FileScanner::ReadNumber(uint16_t& number)
