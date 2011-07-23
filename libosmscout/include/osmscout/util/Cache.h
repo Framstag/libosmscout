@@ -78,6 +78,11 @@ namespace osmscout {
       */
     struct ValueSizer
     {
+      virtual ~ValueSizer()
+      {
+
+      }
+
       virtual unsigned long GetSize(const V& value) const = 0;
     };
 
