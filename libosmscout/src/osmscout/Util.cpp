@@ -76,7 +76,7 @@ namespace osmscout {
         byte=number & 0xff;
         rest=number >> 8;
 
-        if ((rest!=0 || byte & 0x80)!=0) {
+        if (rest!=0 || (byte & 0x80)!=0) {
           // If we have something to encode or the high bit is set
           // we need an additional byte and can only decode 7 bit
           byte=byte & 0x7f; // Mask out the lower 7 bytes
@@ -130,6 +130,8 @@ namespace osmscout {
       buffer++;
       mult+=7;
     }
+
+    return true;
   }
 
   bool GetFileSize(const std::string& filename, long& size)
