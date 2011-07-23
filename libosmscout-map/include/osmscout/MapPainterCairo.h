@@ -114,7 +114,7 @@ namespace osmscout {
 
   public:
     MapPainterCairo();
-    ~MapPainterCairo();
+    virtual ~MapPainterCairo();
 
 
     bool DrawMap(const StyleConfig& styleConfig,

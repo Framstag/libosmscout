@@ -118,7 +118,7 @@ namespace osmscout {
 
   public:
     MapPainterQt();
-    ~MapPainterQt();
+    virtual ~MapPainterQt();
 
 
     bool DrawMap(const StyleConfig& styleConfig,

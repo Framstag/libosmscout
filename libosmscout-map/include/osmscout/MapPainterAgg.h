@@ -161,7 +161,7 @@ namespace osmscout {
 
   public:
     MapPainterAgg();
-    ~MapPainterAgg();
+    virtual ~MapPainterAgg();
 
 
     bool DrawMap(const StyleConfig& styleConfig,
