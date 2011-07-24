@@ -1,0 +1,105 @@
+This text describes the options to tune rendering:
+
+Overall
+-------
+
+libosmscout uses memory mapped files using mmap under Unix
+and under Windows. Note that depending on the OS for mmap
+to work main memory of the size of the individual files
+may be required. If memory mapped files cannot be activated
+the library falls back to normal file access automatically.
+
+There is currently no way to selectivly enable/disable
+this feature for only a subset of files.
+
+DatabaseParameter-Options
+-------------------------
+
+AreaAreaIndexCacheSize, WayIndexCacheSize, AreaNodeIndexCacheSize,
+NodeIndexCacheSize, RelationIndexCacheSize:
+  Caches for the various indexes. If do not give this caches enough memory
+  pages of indexes must be loaded from disk. If you have memory, give
+  this caches enough memory so that they can completely (or at least
+  most of it) load the indexes into memory.
+
+WayCacheSize, NodeCacheSize, RelationCacheSize:
+  Caches for the data itself. If after giving the index caches
+  enough memory you have still memory left, try to give it to this
+  caches. Note that cache hits are far less likely than for the index
+  caches and caches missing are more expensive than cache hits. So
+  depending on the speed of you storage medium loading data from disk
+  might be faster in average than loading them with a cache enabled
+  (this in fact true on my desktop and laptop system). 
+
+AreaSearchParameter-Options:
+----------------------------
+
+MaxAreaLevel:
+  The area index is implemented as quad-tree. Index is build upon
+  containment in tiles where tile count for each level is dubbled
+  in every dimension (1, 4, 16...tiles). An area is index by a certain
+  tile of it is smaller than the tile area and is bigger than the tile
+  area in the net index level and the area is (partially) covered by the
+  tile. That means that the index sorts areas by size and position.
+  The Database evaluates all tiles covering the area from the top level
+  upto the current zoom level plus further MaxAreaLevel levels.
+  The bigger MaxAreaLevel is the more details you will thus see. On
+  the other side the more index pages have to be loaded and evaluated,
+  the longer the lookup takes. Note also that the index by default is
+  generated up to (zoom) level 18. The final zoom level contains
+  all data, not index higher in the index. So if on zoom level 18
+  and MaxAreaLevel=0 everything will be shown.
+  
+MaxNodes, MaxWays, MaxAreas:
+  Absolute limit for the number of elements to be loaded. The style
+  sheet evaluates in a list of types ordered by priority. The index
+  (node, way, area) will be sequentially visited for every type
+  until the maximum number of objects is reached (if the limit
+  is crossed during evaluation of a type,the data for this type is
+  dropped).
+
+MapParameter-Options
+--------------------
+
+OptimizeWayNodes, OptimizeAreaNodes:
+  If set the drawing engine tries to reduce the number of nodes for
+  ways and/or areas. These additional step costs CPU time, but reduces
+  the number of point and lines the rendering backend needs to draw.
+  Use these options if you have CPU left and drawing is slow.
+
+Style-Sheet-Strategies
+----------------------
+
+The style sheet together with the database options can be used to
+follow one of two strategies:
+
+Zoom-driven:
+  The style sheet defines with objects will be shown at a given zoom
+  level. This allows to set the MaxXXX AreaSearchParameter options
+  to MAX, since the number of objects selected is only limited
+  by the style sheet.
+  This means that the number of objects per tile differ and thus
+  database lookup and rendering speed may differ, too. On the other hand
+  different tiles will show the same detail level.
+
+Priority-driven:
+  The detail level of a tile is defined by the number of objects drawn
+  which is pinned by the MaxXXX AreaSearch parameter. The detail level
+  is defined by the priorities in the style sheet but does not pin
+  certain details to certain zoom levels (building would be shown with 
+  zoom level 1 if you allow to draw a huge number of objects).
+  This means database lookup and rendering should take nearly the same
+  amount of time, but detail level of tiles may differ,especially
+  two neighboring tiles may show artifacts.
+
+The current style sheet does mix the two approaches. It was started to be
+priority driven at start but made using of soft pinning because visual
+differences between tiles were too extreme and finding the right
+object limit was hard. It defines soft limits for increasing detailed
+objects but pinning could be stronger.
+
+Note that currently the behaviour of the engine is undefined if several
+types have the same priority (however the style sheets defines the same
+priority for multiple types). It is planed to bundle types of same priority
+so that either all or none of them are shown. This is however not implemented
+yet.
