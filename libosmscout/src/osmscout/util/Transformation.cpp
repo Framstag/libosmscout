@@ -70,6 +70,96 @@ namespace osmscout {
     delete points;
   }
 
+  void TransPolygon::InitializeDraw()
+  {
+    for (size_t i=0; i<length; i++) {
+      points[i].draw=true;
+    }
+  }
+
+  void TransPolygon::TransformGeoToPixel(const Projection& projection,
+                                         const std::vector<Point>& nodes)
+  {
+    for (size_t i=0; i<length; i++) {
+      if (points[i].draw) {
+        projection.GeoToPixel(nodes[i].lon,nodes[i].lat,
+                              points[i].x,points[i].y);
+      }
+    }
+  }
+
+  void TransPolygon::DropSimilarPoints()
+  {
+    for (size_t i=0; i<length; i++) {
+      if (points[i].draw) {
+        size_t j=i+1;
+        while (j<length-1) {
+          if (points[j].draw)
+          {
+            if (std::fabs(points[j].x-points[i].x)<=relevantPosDeriviation &&
+                std::fabs(points[j].y-points[i].y)<=relevantPosDeriviation) {
+              points[j].draw=false;
+            }
+            else {
+              break;
+            }
+          }
+
+          j++;
+        }
+      }
+    }
+  }
+
+  void TransPolygon::DropRedundantPoints()
+  {
+    // Drop every point that is (more or less) on direct line between two points A and B
+    size_t prev=0;
+    while (prev<length) {
+
+      while (prev<length && !points[prev].draw) {
+        prev++;
+      }
+
+      if (prev>=length) {
+        break;
+      }
+
+      size_t cur=prev+1;
+
+      while (cur<length && !points[cur].draw) {
+        cur++;
+      }
+
+      if (cur>=length) {
+        break;
+      }
+
+      size_t next=cur+1;
+
+      while (next<length && !points[next].draw) {
+        next++;
+      }
+
+      if (next>=length) {
+        break;
+      }
+
+      double distance=distancePointToLineSegment(points[cur],
+                                                 points[prev],
+                                                 points[next]);
+
+      if (distance<=relevantPosDeriviation) {
+        points[cur].draw=false;
+
+        prev=next;
+      }
+      else {
+        prev++;
+      }
+    }
+  }
+
   void TransPolygon::TransformArea(const Projection& projection,
                                    bool optimize,
                                    const std::vector<Point>& nodes)
@@ -80,93 +170,24 @@ namespace osmscout {
       return;
     }
 
-    if (pointsSize<nodes.size())
+    length=nodes.size();
+
+    if (pointsSize<length)
     {
       delete [] points;
-      points=new TransPoint[nodes.size()];
+      points=new TransPoint[length];
       pointsSize=nodes.size();
     }
 
     if (optimize) {
-      // Calculate screen position
-      for (size_t i=0; i<nodes.size(); i++) {
-        points[i].draw=true;
-      }
+      InitializeDraw();
 
-      // Calculate screen position
-      for (size_t i=0; i<nodes.size(); i++) {
-        if (points[i].draw) {
-          projection.GeoToPixel(nodes[i].lon,nodes[i].lat,
-                                points[i].x,points[i].y);
-        }
-      }
+      TransformGeoToPixel(projection,
+                          nodes);
 
-      // Drop all points that do not differ in position from the previous node
-      for (size_t i=0; i<nodes.size(); i++) {
-        if (points[i].draw) {
-          size_t j=i+1;
-          while (j<nodes.size()-1) {
-            if (points[j].draw)
-            {
-              if (std::fabs(points[j].x-points[i].x)<=relevantPosDeriviation &&
-                  std::fabs(points[j].y-points[i].y)<=relevantPosDeriviation) {
-                points[j].draw=false;
-              }
-              else {
-                break;
-              }
-            }
+      DropSimilarPoints();
 
-            j++;
-          }
-        }
-      }
-
-      // Drop every point that is (more or less) on direct line between two points A and B
-      size_t prev=0;
-      while (prev<nodes.size()) {
-
-        while (prev<nodes.size() && !points[prev].draw) {
-          prev++;
-        }
-
-        if (prev>=nodes.size()) {
-          break;
-        }
-
-        size_t cur=prev+1;
-
-        while (cur<nodes.size() && !points[cur].draw) {
-          cur++;
-        }
-
-        if (cur>=nodes.size()) {
-          break;
-        }
-
-        size_t next=cur+1;
-
-        while (next<nodes.size() && !points[next].draw) {
-          next++;
-        }
-
-        if (next>=nodes.size()) {
-          break;
-        }
-
-        double distance=distancePointToLineSegment(points[cur],
-                                                   points[prev],
-                                                   points[next]);
-
-        if (distance<=relevantPosDeriviation) {
-          points[cur].draw=false;
-
-          prev=next;
-        }
-        else {
-          prev++;
-        }
-      }
+      DropRedundantPoints();
 
       length=0;
       start=nodes.size();
@@ -208,92 +229,24 @@ namespace osmscout {
       return;
     }
 
-    if (pointsSize<nodes.size())
+    length=nodes.size();
+
+    if (pointsSize<length)
     {
       delete [] points;
-      points=new TransPoint[nodes.size()];
-      pointsSize=nodes.size();
+      points=new TransPoint[length];
+      pointsSize=length;
     }
 
     if (optimize) {
-      for (size_t i=0; i<nodes.size(); i++) {
-        points[i].draw=true;
-      }
+      InitializeDraw();
 
-      // Calculate screen position
-      for (size_t i=0; i<nodes.size(); i++) {
-        if (points[i].draw) {
-          projection.GeoToPixel(nodes[i].lon,nodes[i].lat,
-                                points[i].x,points[i].y);
-        }
-      }
+      TransformGeoToPixel(projection,
+                          nodes);
 
-      // Drop all points that do not differ in position from the previous node
-      for (size_t i=0; i<nodes.size(); i++) {
-        if (points[i].draw) {
-          size_t j=i+1;
-          while (j<nodes.size()-1) {
-            if (points[j].draw)
-            {
-              if (std::fabs(points[j].x-points[i].x)<=relevantPosDeriviation &&
-                  std::fabs(points[j].y-points[i].y)<=relevantPosDeriviation) {
-                points[j].draw=false;
-              }
-              else {
-                break;
-              }
-            }
+      DropSimilarPoints();
 
-            j++;
-          }
-        }
-      }
-
-      // Drop every point that is (more or less) on direct line between two points A and B
-      size_t prev=0;
-      while (prev<nodes.size()) {
-
-        while (prev<nodes.size() && !points[prev].draw) {
-          prev++;
-        }
-
-        if (prev>=nodes.size()) {
-          break;
-        }
-
-        size_t cur=prev+1;
-
-        while (cur<nodes.size() && !points[cur].draw) {
-          cur++;
-        }
-
-        if (cur>=nodes.size()) {
-          break;
-        }
-
-        size_t next=cur+1;
-
-        while (next<nodes.size() && !points[next].draw) {
-          next++;
-        }
-
-        if (next>=nodes.size()) {
-          break;
-        }
-
-        double distance=distancePointToLineSegment(points[cur],
-                                                   points[prev],
-                                                   points[next]);
-
-        if (distance<=relevantPosDeriviation) {
-          points[cur].draw=false;
-
-          prev=next;
-        }
-        else {
-          prev++;
-        }
-      }
+      DropRedundantPoints();
 
       length=0;
       start=nodes.size();

@@ -47,6 +47,14 @@ namespace osmscout {
   public:
     TransPoint* points;
 
+  private:
+    void InitializeDraw();
+    void TransformGeoToPixel(const Projection& projection,
+                             const std::vector<Point>& nodes);
+    void DropSimilarPoints();
+    void DropRedundantPoints();
+
+  public:
     TransPolygon();
     virtual ~TransPolygon();
 
