@@ -20,6 +20,7 @@
 #include <osmscout/RawWay.h>
 
 #include <cmath>
+#include <limits>
 
 namespace osmscout {
 
@@ -84,9 +85,22 @@ namespace osmscout {
     }
 
     nodes.resize(nodeCount);
-    for (size_t i=0; i<nodeCount; i++) {
-      if (!scanner.Read(nodes[i])) {
+
+    if (nodeCount>0) {
+      Id minId;
+
+      if (!scanner.Read(minId)) {
         return false;
+      }
+
+      for (size_t i=0; i<nodeCount; i++) {
+        Id id;
+
+        if (!scanner.ReadNumber(id)) {
+          return false;
+        }
+
+        nodes[i]=id+minId;
       }
     }
 
@@ -106,8 +120,18 @@ namespace osmscout {
     }
 
     writer.WriteNumber((uint32_t)nodes.size());
-    for (size_t i=0; i<nodes.size(); i++) {
-      writer.Write(nodes[i]);
+
+    if (nodes.size()>0) {
+      Id minId=std::numeric_limits<uint32_t>::max();
+
+      for (size_t i=0; i<nodes.size(); i++) {
+        minId=std::min(minId,nodes[i]);
+      }
+
+      writer.Write(minId);
+      for (size_t i=0; i<nodes.size(); i++) {
+        writer.WriteNumber(nodes[i]-minId);
+      }
     }
 
     return !writer.HasError();
