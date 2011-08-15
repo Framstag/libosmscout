@@ -19,6 +19,8 @@
 
 #include <osmscout/RawRelation.h>
 
+#include <limits>
+
 namespace osmscout {
 
   void RawRelation::SetId(Id id)
@@ -58,13 +60,26 @@ namespace osmscout {
     }
 
     members.resize(memberCount);
-    for (size_t i=0; i<memberCount; i++) {
-      uint32_t memberType;
 
-      scanner.ReadNumber(memberType);
-      members[i].type=(MemberType)memberType;
-      scanner.Read(members[i].id);
-      scanner.Read(members[i].role);
+    if (memberCount>0) {
+      Id minId;
+
+      if (!scanner.Read(minId)) {
+        return false;
+      }
+
+      for (size_t i=0; i<memberCount; i++) {
+        uint32_t memberType;
+        Id       id;
+
+        scanner.ReadNumber(memberType);
+        members[i].type=(MemberType)memberType;
+
+        scanner.ReadNumber(id);
+        members[i].id=minId+id;
+
+        scanner.Read(members[i].role);
+      }
     }
 
     return !scanner.HasError();
@@ -82,10 +97,21 @@ namespace osmscout {
     }
 
     writer.WriteNumber((uint32_t)members.size());
-    for (size_t i=0; i<members.size(); i++) {
-      writer.WriteNumber(members[i].type);
-      writer.Write(members[i].id);
-      writer.Write(members[i].role);
+
+    if (members.size()>0) {
+      Id minId=std::numeric_limits<Id>::max();
+
+      for (size_t i=0; i<members.size(); i++) {
+        minId=std::min(minId,members[i].id);
+      }
+
+      writer.Write(minId);
+
+      for (size_t i=0; i<members.size(); i++) {
+        writer.WriteNumber(members[i].type);
+        writer.WriteNumber(members[i].id-minId);
+        writer.Write(members[i].role);
+      }
     }
 
     return !writer.HasError();

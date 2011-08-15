@@ -100,7 +100,7 @@ namespace osmscout {
           return false;
         }
 
-        nodes[i]=id+minId;
+        nodes[i]=minId+id;
       }
     }
 
@@ -122,7 +122,7 @@ namespace osmscout {
     writer.WriteNumber((uint32_t)nodes.size());
 
     if (nodes.size()>0) {
-      Id minId=std::numeric_limits<uint32_t>::max();
+      Id minId=std::numeric_limits<Id>::max();
 
       for (size_t i=0; i<nodes.size(); i++) {
         minId=std::min(minId,nodes[i]);

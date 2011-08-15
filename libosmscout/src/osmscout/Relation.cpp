@@ -144,24 +144,31 @@ namespace osmscout {
       scanner.Read(roles[i].role);
 
       scanner.ReadNumber(nodesCount);
-      roles[i].nodes.resize(nodesCount);
 
-      uint32_t minLat;
-      uint32_t minLon;
+      if (nodesCount>0) {
+        roles[i].nodes.resize(nodesCount);
 
-      scanner.Read(minLat);
-      scanner.Read(minLon);
+        Id       minId;
+        uint32_t minLat;
+        uint32_t minLon;
 
-      for (size_t j=0; j<nodesCount; j++) {
-        uint32_t latValue;
-        uint32_t lonValue;
+        scanner.Read(minId);
+        scanner.Read(minLat);
+        scanner.Read(minLon);
 
-        scanner.Read(roles[i].nodes[j].id);
-        scanner.ReadNumber(latValue);
-        scanner.ReadNumber(lonValue);
+        for (size_t j=0; j<nodesCount; j++) {
+          Id       id;
+          uint32_t latValue;
+          uint32_t lonValue;
 
-        roles[i].nodes[j].lat=(minLat+latValue)/conversionFactor-90.0;
-        roles[i].nodes[j].lon=(minLon+lonValue)/conversionFactor-180.0;
+          scanner.ReadNumber(id);
+          scanner.ReadNumber(latValue);
+          scanner.ReadNumber(lonValue);
+
+          roles[i].nodes[j].id=minId+id;
+          roles[i].nodes[j].lat=(minLat+latValue)/conversionFactor-90.0;
+          roles[i].nodes[j].lon=(minLon+lonValue)/conversionFactor-180.0;
+        }
       }
     }
 
@@ -193,24 +200,29 @@ namespace osmscout {
 
       writer.WriteNumber((uint32_t)roles[i].nodes.size());
 
-      uint32_t minLat=std::numeric_limits<uint32_t>::max();
-      uint32_t minLon=std::numeric_limits<uint32_t>::max();
+      if (roles[i].nodes.size()>0) {
+        Id       minId=std::numeric_limits<Id>::max();
+        uint32_t minLat=std::numeric_limits<uint32_t>::max();
+        uint32_t minLon=std::numeric_limits<uint32_t>::max();
 
-      for (size_t j=0; j<roles[i].nodes.size(); j++) {
-        minLat=std::min(minLat,(uint32_t)floor((roles[i].nodes[j].lat+90.0)*conversionFactor+0.5));
-        minLon=std::min(minLon,(uint32_t)floor((roles[i].nodes[j].lon+180.0)*conversionFactor+0.5));
-      }
+        for (size_t j=0; j<roles[i].nodes.size(); j++) {
+          minId=std::min(minId,roles[i].nodes[j].GetId());
+          minLat=std::min(minLat,(uint32_t)floor((roles[i].nodes[j].lat+90.0)*conversionFactor+0.5));
+          minLon=std::min(minLon,(uint32_t)floor((roles[i].nodes[j].lon+180.0)*conversionFactor+0.5));
+        }
 
-      writer.Write(minLat);
-      writer.Write(minLon);
+        writer.Write(minId);
+        writer.Write(minLat);
+        writer.Write(minLon);
 
-      for (size_t j=0; j<roles[i].nodes.size(); j++) {
-        uint32_t latValue=(uint32_t)floor((roles[i].nodes[j].lat+90.0)*conversionFactor+0.5);
-        uint32_t lonValue=(uint32_t)floor((roles[i].nodes[j].lon+180.0)*conversionFactor+0.5);
+        for (size_t j=0; j<roles[i].nodes.size(); j++) {
+          uint32_t latValue=(uint32_t)floor((roles[i].nodes[j].lat+90.0)*conversionFactor+0.5);
+          uint32_t lonValue=(uint32_t)floor((roles[i].nodes[j].lon+180.0)*conversionFactor+0.5);
 
-        writer.Write(roles[i].nodes[j].id);
-        writer.WriteNumber(latValue-minLat);
-        writer.WriteNumber(lonValue-minLon);
+          writer.WriteNumber(roles[i].nodes[j].id-minId);
+          writer.WriteNumber(latValue-minLat);
+          writer.WriteNumber(lonValue-minLon);
+        }
       }
     }
 
