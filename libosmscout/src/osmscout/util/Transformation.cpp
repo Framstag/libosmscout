@@ -88,9 +88,6 @@ namespace osmscout {
     }
 
     if (optimize) {
-      points[0].draw=true;
-      points[nodes.size()-1].draw=true;
-
       // Calculate screen position
       for (size_t i=0; i<nodes.size(); i++) {
         points[i].draw=true;
@@ -101,32 +98,6 @@ namespace osmscout {
         if (points[i].draw) {
           projection.GeoToPixel(nodes[i].lon,nodes[i].lat,
                                 points[i].x,points[i].y);
-        }
-      }
-
-      // Drop every point that is (more or less) on direct line between two points A and B
-      if (nodes.size()>=3) {
-        size_t prev=0;
-        size_t cur=1;
-        size_t next=2;
-
-        while (next<nodes.size()) {
-          double distance=distancePointToLineSegment(points[cur],
-                                                     points[prev],
-                                                     points[next]);
-
-          if (distance<=relevantPosDeriviation) {
-            points[cur].draw=false;
-
-            prev=next;
-            cur=prev+1;
-            next=cur+1;
-          }
-          else {
-            prev++;
-            cur++;
-            next++;
-          }
         }
       }
 
@@ -148,6 +119,52 @@ namespace osmscout {
 
             j++;
           }
+        }
+      }
+
+      // Drop every point that is (more or less) on direct line between two points A and B
+      size_t prev=0;
+      while (prev<nodes.size()) {
+
+        while (prev<nodes.size() && !points[prev].draw) {
+          prev++;
+        }
+
+        if (prev>=nodes.size()) {
+          break;
+        }
+
+        size_t cur=prev+1;
+
+        while (cur<nodes.size() && !points[cur].draw) {
+          cur++;
+        }
+
+        if (cur>=nodes.size()) {
+          break;
+        }
+
+        size_t next=cur+1;
+
+        while (next<nodes.size() && !points[next].draw) {
+          next++;
+        }
+
+        if (next>=nodes.size()) {
+          break;
+        }
+
+        double distance=distancePointToLineSegment(points[cur],
+                                                   points[prev],
+                                                   points[next]);
+
+        if (distance<=relevantPosDeriviation) {
+          points[cur].draw=false;
+
+          prev=next;
+        }
+        else {
+          prev++;
         }
       }
 
@@ -199,9 +216,6 @@ namespace osmscout {
     }
 
     if (optimize) {
-      points[0].draw=true;
-      points[nodes.size()-1].draw=true;
-
       for (size_t i=0; i<nodes.size(); i++) {
         points[i].draw=true;
       }
@@ -211,32 +225,6 @@ namespace osmscout {
         if (points[i].draw) {
           projection.GeoToPixel(nodes[i].lon,nodes[i].lat,
                                 points[i].x,points[i].y);
-        }
-      }
-
-      // Drop every point that is (more or less) on direct line between two points A and B
-      if (nodes.size()>=3) {
-        size_t prev=0;
-        size_t cur=1;
-        size_t next=2;
-
-        while (next<nodes.size()) {
-          double distance=distancePointToLineSegment(points[cur],
-                                                     points[prev],
-                                                     points[next]);
-
-          if (distance<=relevantPosDeriviation) {
-            points[cur].draw=false;
-
-            prev=next;
-            cur=prev+1;
-            next=cur+1;
-          }
-          else {
-            prev++;
-            cur++;
-            next++;
-          }
         }
       }
 
@@ -258,6 +246,52 @@ namespace osmscout {
 
             j++;
           }
+        }
+      }
+
+      // Drop every point that is (more or less) on direct line between two points A and B
+      size_t prev=0;
+      while (prev<nodes.size()) {
+
+        while (prev<nodes.size() && !points[prev].draw) {
+          prev++;
+        }
+
+        if (prev>=nodes.size()) {
+          break;
+        }
+
+        size_t cur=prev+1;
+
+        while (cur<nodes.size() && !points[cur].draw) {
+          cur++;
+        }
+
+        if (cur>=nodes.size()) {
+          break;
+        }
+
+        size_t next=cur+1;
+
+        while (next<nodes.size() && !points[next].draw) {
+          next++;
+        }
+
+        if (next>=nodes.size()) {
+          break;
+        }
+
+        double distance=distancePointToLineSegment(points[cur],
+                                                   points[prev],
+                                                   points[next]);
+
+        if (distance<=relevantPosDeriviation) {
+          points[cur].draw=false;
+
+          prev=next;
+        }
+        else {
+          prev++;
         }
       }
 
