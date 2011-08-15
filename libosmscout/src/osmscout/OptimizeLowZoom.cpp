@@ -66,7 +66,6 @@ namespace osmscout
 
       magnification=pow(2,optimizationMaxMag);
 
-      std::cout << "LowZoom: " << typeCount << " " << magnification << std::endl;
       for (size_t i=1; i<=typeCount; i++) {
         TypeId   typeId;
         DataInfo info;
@@ -74,8 +73,6 @@ namespace osmscout
         scanner.Read(typeId);
         scanner.Read(info.dataCount);
         scanner.Read(info.dataOffset);
-
-        std::cout << "LowZoom: " <<typeId << " " << info.dataCount << " " << info.dataOffset << std::endl;
 
         dataInfos[typeId]=info;
       }
