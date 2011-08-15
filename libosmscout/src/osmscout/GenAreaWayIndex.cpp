@@ -282,7 +282,7 @@ namespace osmscout {
           rel.GetBoundingBox(minLon,maxLon,minLat,maxLat);
 
           //
-          // Calculate minumum and maximum tile ids that are covered
+          // Calculate minimum and maximum tile ids that are covered
           // by the way
           // Renormated coordinate space (everything is >=0)
           //

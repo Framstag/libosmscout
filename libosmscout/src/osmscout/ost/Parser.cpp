@@ -125,7 +125,7 @@ bool Parser::WeakSeparator(int n, int syFol, int repFol)
 }
 
 void Parser::OST() {
-		while (!(la->kind == 0 || la->kind == 4)) {SynErr(31); Get();}
+		while (!(la->kind == 0 || la->kind == 4)) {SynErr(32); Get();}
 		Expect(4);
 		if (la->kind == 6) {
 			TYPES();
@@ -134,7 +134,7 @@ void Parser::OST() {
 }
 
 void Parser::TYPES() {
-		while (!(la->kind == 0 || la->kind == 6)) {SynErr(32); Get();}
+		while (!(la->kind == 0 || la->kind == 6)) {SynErr(33); Get();}
 		Expect(6);
 		TYPE();
 		while (la->kind == 7) {
@@ -147,7 +147,7 @@ void Parser::TYPE() {
 		TypeInfo      typeInfo;
 		unsigned char types;
 		
-		while (!(la->kind == 0 || la->kind == 7)) {SynErr(33); Get();}
+		while (!(la->kind == 0 || la->kind == 7)) {SynErr(34); Get();}
 		Expect(7);
 		Expect(3);
 		typeInfo.SetType(Destring(t->val)); 
@@ -200,17 +200,17 @@ void Parser::CONDITION(Condition*& condition) {
 		 condition=conditions.front();
 		}
 		else {
-		  OrCondition *orCondition=new OrCondition();
+		 OrCondition *orCondition=new OrCondition();
 		
-		                    for (std::list<Condition*>::const_iterator c=conditions.begin();
-		                         c!=conditions.end();
-		                         ++c) {
-		                      orCondition->AddCondition(*c);
-		                    }
+		 for (std::list<Condition*>::const_iterator c=conditions.begin();
+		      c!=conditions.end();
+		      ++c) {
+		   orCondition->AddCondition(*c);
+		 }
 		
-		                    condition=orCondition;
-		                  }
-		                
+		 condition=orCondition;
+		}
+		
 }
 
 void Parser::TYPEOPTIONS(TypeInfo& typeInfo) {
@@ -235,17 +235,17 @@ void Parser::ANDCOND(Condition*& condition) {
 		 condition=conditions.front();
 		}
 		else {
-		  AndCondition *andCondition=new AndCondition();
+		 AndCondition *andCondition=new AndCondition();
 		
-		                    for (std::list<Condition*>::const_iterator c=conditions.begin();
-		                         c!=conditions.end();
-		                         ++c) {
-		                      andCondition->AddCondition(*c);
-		                    }
+		 for (std::list<Condition*>::const_iterator c=conditions.begin();
+		      c!=conditions.end();
+		      ++c) {
+		   andCondition->AddCondition(*c);
+		 }
 		
-		                    condition=andCondition;
-		                  }
-		                
+		 condition=andCondition;
+		}
+		
 }
 
 void Parser::BOOLCOND(Condition*& condition) {
@@ -261,7 +261,7 @@ void Parser::BOOLCOND(Condition*& condition) {
 			Get();
 			BOOLCOND(condition);
 			condition=new NotCondition(condition); 
-		} else SynErr(34);
+		} else SynErr(35);
 }
 
 void Parser::BINARYCOND(Condition*& condition) {
@@ -275,7 +275,7 @@ void Parser::BINARYCOND(Condition*& condition) {
 			NOTEQUALSCOND(nameValue,condition);
 		} else if (la->kind == 17) {
 			ISINCOND(nameValue,condition);
-		} else SynErr(35);
+		} else SynErr(36);
 }
 
 void Parser::EXISTSCOND(Condition*& condition) {
@@ -293,8 +293,8 @@ void Parser::EQUALSCOND(const std::string& tagName,Condition*& condition) {
 		valueValue=Destring(t->val); 
 		TagId tagId=config.RegisterTagForInternalUse(tagName);
 		
-		                  condition=new EqualsCondition(tagId,valueValue);
-		                
+		condition=new EqualsCondition(tagId,valueValue);
+		
 }
 
 void Parser::NOTEQUALSCOND(const std::string& tagName,Condition*& condition) {
@@ -305,8 +305,8 @@ void Parser::NOTEQUALSCOND(const std::string& tagName,Condition*& condition) {
 		valueValue=Destring(t->val); 
 		TagId tagId=config.RegisterTagForInternalUse(tagName);
 		
-		                  condition=new NotEqualsCondition(tagId,valueValue);
-		                
+		condition=new NotEqualsCondition(tagId,valueValue);
+		
 }
 
 void Parser::ISINCOND(const std::string& tagName,Condition*& condition) {
@@ -324,21 +324,21 @@ void Parser::ISINCOND(const std::string& tagName,Condition*& condition) {
 		Expect(20);
 		TagId tagId=config.RegisterTagForInternalUse(tagName);
 		
-		                  if (values.size()==1) {
-		                    condition=new EqualsCondition(tagId,values.front());
-		                  }
-		                  else {
-		                    IsInCondition *isInCondition=new IsInCondition(tagId);
+		if (values.size()==1) {
+		 condition=new EqualsCondition(tagId,values.front());
+		}
+		else {
+		 IsInCondition *isInCondition=new IsInCondition(tagId);
 		
-		                    for (std::list<std::string>::const_iterator s=values.begin();
-		                         s!=values.end();
-		                         ++s) {
-		                      isInCondition->AddTagValue(*s);
-		                    }
+		 for (std::list<std::string>::const_iterator s=values.begin();
+		      s!=values.end();
+		      ++s) {
+		   isInCondition->AddTagValue(*s);
+		 }
 		
-		                    condition=isInCondition;
-		                  }
-		                
+		 condition=isInCondition;
+		}
+		
 }
 
 void Parser::TYPEKIND(unsigned char& types) {
@@ -354,7 +354,7 @@ void Parser::TYPEKIND(unsigned char& types) {
 		} else if (la->kind == 25) {
 			Get();
 			types|=TypeInfo::typeRelation; 
-		} else SynErr(36);
+		} else SynErr(37);
 }
 
 void Parser::TYPEOPTION(TypeInfo& typeInfo) {
@@ -369,8 +369,11 @@ void Parser::TYPEOPTION(TypeInfo& typeInfo) {
 			typeInfo.SetConsumeChildren(true); 
 		} else if (la->kind == 29) {
 			Get();
+			typeInfo.SetOptimizeLowZoom(true); 
+		} else if (la->kind == 30) {
+			Get();
 			typeInfo.SetIgnore(true); 
-		} else SynErr(37);
+		} else SynErr(38);
 }
 
 
@@ -389,7 +392,7 @@ Parser::Parser(Scanner *scanner,
                TypeConfig& config)
  : config(config)
 {
-	maxT = 30;
+	maxT = 31;
 
   dummyToken = NULL;
   t = la = NULL;
@@ -404,10 +407,10 @@ bool Parser::StartOf(int s)
   const bool T = true;
   const bool x = false;
 
-	static bool set[3][32] = {
-		{T,x,x,x, T,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,T,T, T,T,x,x, x,x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,x,x}
+	static bool set[3][33] = {
+		{T,x,x,x, T,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,T,T, T,T,x,x, x,x,x,x, x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,T,x, x}
 	};
 
 
@@ -459,15 +462,16 @@ void Errors::SynErr(int line, int col, int n)
 			case 26: s = coco_string_create("\"ROUTE\" expected"); break;
 			case 27: s = coco_string_create("\"INDEX\" expected"); break;
 			case 28: s = coco_string_create("\"CONSUME_CHILDREN\" expected"); break;
-			case 29: s = coco_string_create("\"IGNORE\" expected"); break;
-			case 30: s = coco_string_create("??? expected"); break;
-			case 31: s = coco_string_create("this symbol not expected in OST"); break;
-			case 32: s = coco_string_create("this symbol not expected in TYPES"); break;
-			case 33: s = coco_string_create("this symbol not expected in TYPE"); break;
-			case 34: s = coco_string_create("invalid BOOLCOND"); break;
-			case 35: s = coco_string_create("invalid BINARYCOND"); break;
-			case 36: s = coco_string_create("invalid TYPEKIND"); break;
-			case 37: s = coco_string_create("invalid TYPEOPTION"); break;
+			case 29: s = coco_string_create("\"OPTIMIZE_LOW_ZOOM\" expected"); break;
+			case 30: s = coco_string_create("\"IGNORE\" expected"); break;
+			case 31: s = coco_string_create("??? expected"); break;
+			case 32: s = coco_string_create("this symbol not expected in OST"); break;
+			case 33: s = coco_string_create("this symbol not expected in TYPES"); break;
+			case 34: s = coco_string_create("this symbol not expected in TYPE"); break;
+			case 35: s = coco_string_create("invalid BOOLCOND"); break;
+			case 36: s = coco_string_create("invalid BINARYCOND"); break;
+			case 37: s = coco_string_create("invalid TYPEKIND"); break;
+			case 38: s = coco_string_create("invalid TYPEOPTION"); break;
 
     default:
     {

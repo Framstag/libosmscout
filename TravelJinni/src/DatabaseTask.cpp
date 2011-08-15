@@ -123,6 +123,9 @@ void DatabaseTask::Run()
 
         drawParameter.SetIconPaths(paths);
         drawParameter.SetPatternPaths(paths);
+
+        drawParameter.SetOptimizeWayNodes(true);
+        drawParameter.SetOptimizeAreaNodes(true);
         drawParameter.SetDebugPerformance(true);
 
         std::cout << std::endl;

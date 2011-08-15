@@ -1,5 +1,5 @@
 /*
-  This source is part of the libosmscout-map library
+  This source is part of the libosmscout library
   Copyright (C) 2010  Tim Teulings
 
   This library is free software; you can redistribute it and/or
@@ -17,12 +17,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/Projection.h>
+#include <osmscout/util/Projection.h>
 
 #include <cassert>
 #include <cmath>
-
-//#include <iostream>
 
 namespace osmscout {
 

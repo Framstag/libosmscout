@@ -236,7 +236,7 @@ namespace osmscout {
                                       const MapParameter& parameter,
                                       const LabelStyle& style,
                                       const std::string& text,
-                                      const std::vector<TransPoint>& nodes)
+                                      const TransPolygon& path)
   {
     double fontSize=style.GetSize();
     double r=style.GetTextR();
@@ -254,19 +254,19 @@ namespace osmscout {
     painter->setPen(pen);
     painter->setFont(font);
 
-    QPainterPath path;
+    QPainterPath p;
 
-    if (nodes[0].x<nodes[nodes.size()-1].x) {
+    if (path.points[path.GetStart()].x<path.points[path.GetEnd()].x) {
       bool start=true;
 
-      for (size_t j=0; j<nodes.size(); j++) {
-        if (nodes[j].draw) {
+      for (size_t j=path.GetStart(); j<=path.GetEnd(); j++) {
+        if (path.points[j].draw) {
           if (start) {
-            path.moveTo(nodes[j].x,nodes[j].y);
+            p.moveTo(path.points[j].x,path.points[j].y);
             start=false;
           }
           else {
-            path.lineTo(nodes[j].x,nodes[j].y);
+            p.lineTo(path.points[j].x,path.points[j].y);
           }
         }
       }
@@ -274,33 +274,35 @@ namespace osmscout {
     else {
       bool start=true;
 
-      for (size_t j=0; j<nodes.size(); j++) {
-        if (nodes[nodes.size()-j-1].draw) {
+      for (size_t j=0; j<=path.GetEnd()-path.GetStart(); j++) {
+        size_t idx=path.GetEnd()-j;
+
+        if (path.points[idx].draw) {
           if (start) {
-            path.moveTo(nodes[nodes.size()-j-1].x,
-                        nodes[nodes.size()-j-1].y);
+            p.moveTo(path.points[idx].x,
+                     path.points[idx].y);
             start=false;
           }
           else {
-            path.lineTo(nodes[nodes.size()-j-1].x,
-                        nodes[nodes.size()-j-1].y);
+            p.lineTo(path.points[idx].x,
+                     path.points[idx].y);
           }
         }
       }
     }
 
-    if (path.length()<stringLength) {
+    if (p.length()<stringLength) {
       // Text is longer than path to draw on
       return;
     }
 
-    qreal offset=(path.length()-stringLength)/2;
+    qreal offset=(p.length()-stringLength)/2;
 
     QTransform tran;
 
     for (int i=0; i<string.size(); i++) {
-      QPointF point=path.pointAtPercent(path.percentAtLength(offset));
-      qreal angle=path.angleAtPercent(path.percentAtLength(offset));
+      QPointF point=p.pointAtPercent(p.percentAtLength(offset));
+      qreal angle=p.angleAtPercent(p.percentAtLength(offset));
 
       // rotation matrix components
 
@@ -395,7 +397,7 @@ namespace osmscout {
                               const std::vector<double>& dash,
                               CapStyle startCap,
                               CapStyle endCap,
-                              const std::vector<TransPoint>& nodes)
+                              const TransPolygon& path)
   {
     QPen pen;
 
@@ -425,9 +427,6 @@ namespace osmscout {
       pen.setDashPattern(dashes);
     }
 
-    size_t firstNode=0;
-    size_t lastNode=0;
-
 /*
     painter->setPen(pen);
     size_t last=0;
@@ -445,25 +444,22 @@ namespace osmscout {
       }
     }*/
 
-    QPainterPath path;
+    QPainterPath p;
 
     bool start=true;
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (nodes[i].draw) {
+    for (size_t i=path.GetStart(); i<=path.GetEnd(); i++) {
+      if (path.points[i].draw) {
         if (start) {
-          path.moveTo(nodes[i].x,nodes[i].y);
+          p.moveTo(path.points[i].x,path.points[i].y);
           start=false;
-          firstNode=i;
-          lastNode=i;
         }
         else {
-          path.lineTo(nodes[i].x,nodes[i].y);
-          lastNode=i;
+          p.lineTo(path.points[i].x,path.points[i].y);
         }
       }
     }
 
-    painter->strokePath(path,pen);
+    painter->strokePath(p,pen);
 /*
     QPolygonF polygon;
     for (size_t i=0; i<nodes.size(); i++) {
@@ -480,8 +476,8 @@ namespace osmscout {
         endCap!=capRound) {
       painter->setBrush(QBrush(QColor::fromRgbF(r,g,b,a)));
 
-      painter->drawEllipse(QPointF(nodes[firstNode].x,
-                                   nodes[firstNode].y),
+      painter->drawEllipse(QPointF(path.points[path.GetStart()].x,
+                                   path.points[path.GetStart()].y),
                                    width/2,width/2);
     }
 
@@ -490,8 +486,8 @@ namespace osmscout {
       startCap!=capRound) {
       painter->setBrush(QBrush(QColor::fromRgbF(r,g,b,a)));
 
-      painter->drawEllipse(QPointF(nodes[lastNode].x,
-                                   nodes[lastNode].y),
+      painter->drawEllipse(QPointF(path.points[path.GetEnd()].x,
+                                   path.points[path.GetEnd()].y),
                                    width/2,width/2);
     }
   }
@@ -501,13 +497,13 @@ namespace osmscout {
                               TypeId type,
                               const FillStyle& fillStyle,
                               const LineStyle* lineStyle,
-                              const std::vector<TransPoint>& nodes)
+                              const TransPolygon& area)
   {
     QPolygonF polygon;
 
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (nodes[i].draw) {
-        polygon << QPointF(nodes[i].x,nodes[i].y);
+    for (size_t i=area.GetStart(); i<=area.GetEnd(); i++) {
+      if (area.points[i].draw) {
+        polygon << QPointF(area.points[i].x,area.points[i].y);
       }
     }
 
@@ -529,13 +525,13 @@ namespace osmscout {
                               TypeId type,
                               const PatternStyle& patternStyle,
                               const LineStyle* lineStyle,
-                              const std::vector<TransPoint>& nodes)
+                              const TransPolygon& area)
   {
     QPolygonF polygon;
 
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (nodes[i].draw) {
-        polygon << QPointF(nodes[i].x,nodes[i].y);
+    for (size_t i=area.GetStart(); i<=area.GetEnd(); i++) {
+      if (area.points[i].draw) {
+        polygon << QPointF(area.points[i].x,area.points[i].y);
       }
     }
 

@@ -1,13 +1,13 @@
 OST
 
 TYPES
-  TYPE "highway_motorway" = WAY ("highway"=="motorway") OPTIONS ROUTE INDEX
+  TYPE "highway_motorway" = WAY ("highway"=="motorway") OPTIONS ROUTE INDEX OPTIMIZE_LOW_ZOOM
   TYPE "highway_motorway_link" = WAY ("highway"=="motorway_link") OPTIONS ROUTE INDEX
-  TYPE "highway_trunk" = WAY ("highway"=="trunk") OPTIONS ROUTE INDEX
+  TYPE "highway_trunk" = WAY ("highway"=="trunk") OPTIONS ROUTE INDEX OPTIMIZE_LOW_ZOOM
   TYPE "highway_trunk_link" = WAY ("highway"=="trunk_link") OPTIONS ROUTE INDEX
-  TYPE "highway_primary" = WAY ("highway"=="primary") OPTIONS ROUTE INDEX
+  TYPE "highway_primary" = WAY ("highway"=="primary") OPTIONS ROUTE INDEX OPTIMIZE_LOW_ZOOM
   TYPE "highway_primary_link" = WAY ("highway"=="primary_link") OPTIONS ROUTE INDEX
-  TYPE "highway_secondary" = WAY ("highway"=="secondary") OPTIONS ROUTE INDEX
+  TYPE "highway_secondary" = WAY ("highway"=="secondary") OPTIONS ROUTE INDEX OPTIMIZE_LOW_ZOOM
   TYPE "highway_secondary_link" = WAY ("highway"=="secondary_link") OPTIONS ROUTE INDEX
   TYPE "highway_tertiary" = WAY ("highway"=="tertiary") OPTIONS ROUTE INDEX
   TYPE "highway_unclassified" = WAY ("highway"=="unclassified") OPTIONS ROUTE INDEX

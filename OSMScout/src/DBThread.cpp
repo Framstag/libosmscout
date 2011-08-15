@@ -19,6 +19,7 @@
 
 #include "DBThread.h"
 
+#include <cmath>
 #include <iostream>
 
 #include <QMutexLocker>
@@ -162,6 +163,8 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
     drawParameter.SetIconPaths(paths);
     drawParameter.SetPatternPaths(paths);
     drawParameter.SetDebugPerformance(true);
+    drawParameter.SetOptimizeWayNodes(true);
+    drawParameter.SetOptimizeAreaNodes(true);
 
     std::cout << std::endl;
 

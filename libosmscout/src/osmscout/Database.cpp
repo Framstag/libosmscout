@@ -152,7 +152,7 @@ namespace osmscout {
   AreaSearchParameter::AreaSearchParameter()
   : maxAreaLevel(4),
     maxNodes(2000),
-    maxWays(25000),
+    maxWays(10000),
     maxAreas(std::numeric_limits<unsigned long>::max())
   {
     // no code
@@ -305,6 +305,15 @@ namespace osmscout {
     }
     std::cout << "Opening 'relations.dat' done." << std::endl;
 
+    std::cout << "Loading low zoom optimizations..." << std::endl;
+    if (!optimizeLowZoom.Open(path)) {
+      std::cerr << "Cannot load low zoom optimizations!" << std::endl;
+      delete typeConfig;
+      typeConfig=NULL;
+      return false;
+    }
+    std::cout << "Loading water index done." << std::endl;
+
     std::cout << "Loading area area index..." << std::endl;
     if (!areaAreaIndex.Load(path)) {
       std::cerr << "Cannot load area area index!" << std::endl;
@@ -427,19 +436,6 @@ namespace osmscout {
     relationWays.clear();
     relationAreas.clear();
 
-
-    /*
-    size_t maxPriority;
-
-    StopClock maxPrioTimer;
-
-    maxPriority=GetMaximumPriority(styleConfig,
-                                   lonMin,latMin,lonMax,latMax,
-                                   magnification,
-                                   parameter.GetMaximumNodes());
-
-    maxPrioTimer.Stop();*/
-
     StopClock nodeIndexTimer;
 
     styleConfig.GetNodeTypesWithMag(magnification,
@@ -460,6 +456,17 @@ namespace osmscout {
 
     styleConfig.GetWayTypesByPrioWithMag(magnification,
                                          wayTypes);
+
+    if (optimizeLowZoom.HasOptimizations(magnification)) {
+      optimizeLowZoom.GetWays(styleConfig,
+                              lonMin,
+                              latMin,
+                              lonMax,
+                              latMax,
+                              parameter.GetMaximumWays(),
+                              wayTypes,
+                              ways);
+    }
 
     if (!areaWayIndex.GetOffsets(styleConfig,
                                  lonMin,
@@ -521,6 +528,7 @@ namespace osmscout {
       std::cout << "Error reading ways in area!" << std::endl;
       return false;
     }
+
     /*
     for (size_t i=0; i<ways.size(); i++) {
       std::cout << ways[i]->GetId() << " " << ways[i]->GetName() << " " << ways[i]->GetRefName() << std::endl;

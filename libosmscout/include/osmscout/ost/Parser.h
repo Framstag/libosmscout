@@ -18,8 +18,8 @@
 */
 
 
-#ifndef OSMSCOUT_OST_PARSER_H
-#define OSMSCOUT_OST_PARSER_H
+#if !defined(osmscout_ost_PARSER_H)
+#define osmscout_ost_PARSER_H
 
 #include <cassert>
 #include <iostream>

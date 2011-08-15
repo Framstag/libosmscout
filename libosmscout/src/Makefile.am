@@ -17,9 +17,11 @@ libosmscout_la_SOURCES= osmscout/util/Cache.cpp \
                         osmscout/util/FileWriter.cpp \
                         osmscout/util/Geometry.cpp \
                         osmscout/util/NumberSet.cpp \
+                        osmscout/util/Projection.cpp \
                         osmscout/util/Reference.cpp \
                         osmscout/util/StopClock.cpp \
                         osmscout/util/String.cpp \
+                        osmscout/util/Transformation.cpp \
                         osmscout/Types.cpp \
                         osmscout/Util.cpp \
                         osmscout/Progress.cpp \
@@ -55,6 +57,7 @@ libosmscout_la_SOURCES= osmscout/util/Cache.cpp \
                         osmscout/GenNumericIndex.cpp \
                         osmscout/GenNodeDat.cpp \
                         osmscout/GenNodeUseIndex.cpp \
+                        osmscout/GenOptimizeLowZoom.cpp \
                         osmscout/GenRelationDat.cpp \
                         osmscout/GenTypeDat.cpp \
                         osmscout/GenWaterIndex.cpp \
@@ -65,6 +68,7 @@ libosmscout_la_SOURCES= osmscout/util/Cache.cpp \
                         osmscout/CityStreetIndex.cpp \
                         osmscout/NodeIndex.cpp \
                         osmscout/NodeUseIndex.cpp \
+                        osmscout/OptimizeLowZoom.cpp \
                         osmscout/WaterIndex.cpp \
                         osmscout/WayIndex.cpp \
                         osmscout/Route.cpp \

@@ -157,13 +157,13 @@ void Parser::NODESTYLE() {
 		name=Destring(t->val); 
 		type=config.GetTypeConfig()->GetNodeTypeId(name);
 		
-		                  if (type==typeIgnore) {
-		                    std::string e="Unknown type '"+name+"'";
+		if (type==typeIgnore) {
+		 std::string e="Unknown type '"+name+"'";
 		
-		                    SemErr(e.c_str());
-		                  }
+		 SemErr(e.c_str());
+		}
 		
-		                
+		
 		while (StartOf(1)) {
 			if (la->kind == 23) {
 				LabelStyle labelStyle; 
@@ -201,16 +201,16 @@ void Parser::WAYSTYLE() {
 		MAG(mag);
 		type=config.GetTypeConfig()->GetWayTypeId(name);
 		
-		                  if (type==typeIgnore) {
-		                    std::string e="Unknown type '"+name+"'";
+		if (type==typeIgnore) {
+		 std::string e="Unknown type '"+name+"'";
 		
-		                    SemErr(e.c_str());
-		                  }
-		                  else {
-		                    config.SetWayPrio(type,prio);
-		                    config.SetWayMag(type,mag);
-		                  }
-		                
+		 SemErr(e.c_str());
+		}
+		else {
+		 config.SetWayPrio(type,prio);
+		 config.SetWayMag(type,mag);
+		}
+		
 		while (la->kind == 13 || la->kind == 23 || la->kind == 27) {
 			if (la->kind == 13) {
 				LineStyle lineStyle; 
@@ -244,15 +244,15 @@ void Parser::AREASTYLE() {
 		}
 		type=config.GetTypeConfig()->GetAreaTypeId(name);
 		
-		                  if (type==typeIgnore) {
-		                    std::string e="Unknown type '"+name+"'";
+		if (type==typeIgnore) {
+		 std::string e="Unknown type '"+name+"'";
 		
-		                    SemErr(e.c_str());
-		                  }
-		                  else if (mag!=magWorld) {
-		                    config.SetAreaMag(type,mag);
-		                  }
-		                
+		 SemErr(e.c_str());
+		}
+		else if (mag!=magWorld) {
+		 config.SetAreaMag(type,mag);
+		}
+		
 		while (StartOf(2)) {
 			switch (la->kind) {
 			case 20: {
@@ -264,7 +264,7 @@ void Parser::AREASTYLE() {
 				 config.SetAreaBuildingFillStyle(type,fillStyle);
 				}
 				else {
-				  config.SetAreaFillStyle(type,fillStyle);
+				 config.SetAreaFillStyle(type,fillStyle);
 				}
 				
 				break;
@@ -360,12 +360,12 @@ void Parser::LABELDEF(LabelStyle& style) {
 				 style.SetPriority((uint8_t)priority);
 				}
 				else {
-				  std::string e="Priority must be in the interval [0,"+
-				                NumberToString(std::numeric_limits<uint8_t>::max())+"[";
+				 std::string e="Priority must be in the interval [0,"+
+				               NumberToString(std::numeric_limits<uint8_t>::max())+"[";
 				
-				                        SemErr(e.c_str());
-				                      }
-				                     
+				 SemErr(e.c_str());
+				}
+				
 			}
 		}
 }
@@ -427,12 +427,12 @@ void Parser::REFDEF(LabelStyle& style) {
 				 style.SetPriority((uint8_t)priority);
 				}
 				else {
-				  std::string e="Priority must be in the interval [0,"+
-				                NumberToString(std::numeric_limits<uint8_t>::max())+"[";
+				 std::string e="Priority must be in the interval [0,"+
+				               NumberToString(std::numeric_limits<uint8_t>::max())+"[";
 				
-				                        SemErr(e.c_str());
-				                      }
-				                    
+				 SemErr(e.c_str());
+				}
+				
 			}
 		}
 }
@@ -482,9 +482,9 @@ void Parser::INTEGER(size_t& value) {
 		if (!StringToNumber(t->val,value)) {
 		 std::string e="Cannot parse number '"+std::string(t->val)+"'";
 		
-		                      SemErr(e.c_str());
-		                    }
-		                  
+		 SemErr(e.c_str());
+		}
+		
 }
 
 void Parser::MAG(Mag& mag) {
@@ -696,10 +696,10 @@ void Parser::COLOR(double& r, double& g, double& b, double& a) {
 		 ToRGBA(t->val,r,g,b,a);
 		}
 		else {
-		  r=1.0;
-		  g=0.0;
-		  b=0.0;
-		  a=1.0;
+		 r=1.0;
+		 g=0.0;
+		 b=0.0;
+		 a=1.0;
 		}
 		
 }
@@ -710,17 +710,17 @@ void Parser::DOUBLE(double& value) {
 			if (!StringToDouble(t->val,value)) {
 			 std::string e="Cannot parse double '"+std::string(t->val)+"'";
 			
-			                      SemErr(e.c_str());
-			                    }
-			                  
+			 SemErr(e.c_str());
+			}
+			
 		} else if (la->kind == 3) {
 			Get();
 			if (!StringToDouble(t->val,value)) {
 			 std::string e="Cannot parse double '"+std::string(t->val)+"'";
 			
-			                      SemErr(e.c_str());
-			                    }
-			                  
+			 SemErr(e.c_str());
+			}
+			
 		} else SynErr(84);
 }
 
@@ -745,9 +745,9 @@ void Parser::LAYER(int& layer) {
 		if (!StringToNumber(t->val,layer)) {
 		 std::string e="Cannot parse number '"+std::string(t->val)+"'";
 		
-		                      SemErr(e.c_str());
-		                    }
-		                  
+		 SemErr(e.c_str());
+		}
+		
 }
 
 void Parser::FILTER(std::string& filter) {

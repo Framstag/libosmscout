@@ -18,8 +18,8 @@
 */
 
 
-#ifndef OSMSCOUT_OSS_PARSER_H
-#define OSMSCOUT_OSS_PARSER_H
+#if !defined(osmscout_oss_PARSER_H)
+#define osmscout_oss_PARSER_H
 
 #include <iostream>
 #include <limits>

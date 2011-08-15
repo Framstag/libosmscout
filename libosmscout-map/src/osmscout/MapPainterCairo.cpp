@@ -553,7 +553,7 @@ namespace osmscout {
                                          const MapParameter& parameter,
                                          const LabelStyle& style,
                                          const std::string& text,
-                                         const std::vector<TransPoint>& nodes)
+                                         const TransPolygon& contour)
   {
     assert(style.GetStyle()==LabelStyle::contour);
 
@@ -568,51 +568,53 @@ namespace osmscout {
 
     cairo_new_path(draw);
 
-    if (nodes[0].x<nodes[nodes.size()-1].x) {
+    if (contour.points[contour.GetStart()].x<=contour.points[contour.GetEnd()].x) {
       bool start=true;
 
-      for (size_t j=0; j<nodes.size(); j++) {
-        if (nodes[j].draw) {
+      for (size_t j=contour.GetStart(); j<=contour.GetEnd(); j++) {
+        if (contour.points[j].draw) {
           if (start) {
-            cairo_move_to(draw,nodes[j].x,
-                          nodes[j].y);
+            cairo_move_to(draw,
+                          contour.points[j].x,
+                          contour.points[j].y);
             start=false;
           }
           else {
-            cairo_line_to(draw,nodes[j].x,
-                          nodes[j].y);
-            length+=sqrt(pow(nodes[j].x-xo,2)+
-                         pow(nodes[j].y-yo,2));
+            cairo_line_to(draw,
+                          contour.points[j].x,
+                          contour.points[j].y);
+            length+=sqrt(pow(contour.points[j].x-xo,2)+
+                         pow(contour.points[j].y-yo,2));
           }
 
-          xo=nodes[j].x;
-          yo=nodes[j].y;
+          xo=contour.points[j].x;
+          yo=contour.points[j].y;
         }
       }
     }
     else {
       bool start=true;
 
-      for (size_t j=0; j<nodes.size(); j++) {
-        size_t idx=nodes.size()-j-1;
+      for (size_t j=0; j<=contour.GetEnd()-contour.GetStart(); j++) {
+        size_t idx=contour.GetEnd()-j;
 
-        if (nodes[idx].draw) {
+        if (contour.points[idx].draw) {
           if (start) {
             cairo_move_to(draw,
-                          nodes[idx].x,
-                          nodes[idx].y);
+                          contour.points[idx].x,
+                          contour.points[idx].y);
             start=false;
           }
           else {
             cairo_line_to(draw,
-                          nodes[idx].x,
-                          nodes[idx].y);
-            length+=sqrt(pow(nodes[idx].x-xo,2)+
-                         pow(nodes[idx].y-yo,2));
+                          contour.points[idx].x,
+                          contour.points[idx].y);
+            length+=sqrt(pow(contour.points[idx].x-xo,2)+
+                         pow(contour.points[idx].y-yo,2));
           }
 
-          xo=nodes[idx].x;
-          yo=nodes[idx].y;
+          xo=contour.points[idx].x;
+          yo=contour.points[idx].y;
         }
       }
     }
@@ -720,7 +722,7 @@ namespace osmscout {
                                  const std::vector<double>& dash,
                                  CapStyle startCap,
                                  CapStyle endCap,
-                                 const std::vector<TransPoint>& nodes)
+                                 const TransPolygon& path)
   {
     double dashArray[10];
 
@@ -749,21 +751,20 @@ namespace osmscout {
       cairo_set_dash(draw,dashArray,dash.size(),0);
     }
 
-    size_t firstNode=0;
-    size_t lastNode=0;
     bool   start=true;
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (nodes[i].draw) {
+    for (size_t i=path.GetStart(); i<=path.GetEnd(); i++) {
+      if (path.points[i].draw) {
         if (start) {
           cairo_new_path(draw);
-          cairo_move_to(draw,nodes[i].x,nodes[i].y);
+          cairo_move_to(draw,
+                        path.points[i].x,
+                        path.points[i].y);
           start=false;
-          firstNode=i;
-          lastNode=i;
         }
         else {
-          cairo_line_to(draw,nodes[i].x,nodes[i].y);
-          lastNode=i;
+          cairo_line_to(draw,
+                        path.points[i].x,
+                        path.points[i].y);
         }
 
         //nodesDrawnCount++;
@@ -784,8 +785,8 @@ namespace osmscout {
       cairo_set_dash(draw,NULL,0,0);
       cairo_set_line_width(draw,width);
 
-      cairo_move_to(draw,nodes[firstNode].x,nodes[firstNode].y);
-      cairo_line_to(draw,nodes[firstNode].x,nodes[firstNode].y);
+      cairo_move_to(draw,path.points[path.GetStart()].x,path.points[path.GetStart()].y);
+      cairo_line_to(draw,path.points[path.GetStart()].x,path.points[path.GetStart()].y);
       cairo_stroke(draw);
     }
 
@@ -797,8 +798,8 @@ namespace osmscout {
       cairo_set_dash(draw,NULL,0,0);
       cairo_set_line_width(draw,width);
 
-      cairo_move_to(draw,nodes[lastNode].x,nodes[lastNode].y);
-      cairo_line_to(draw,nodes[lastNode].x,nodes[lastNode].y);
+      cairo_move_to(draw,path.points[path.GetEnd()].x,path.points[path.GetEnd()].y);
+      cairo_line_to(draw,path.points[path.GetEnd()].x,path.points[path.GetEnd()].y);
       cairo_stroke(draw);
     }
   }
@@ -808,7 +809,7 @@ namespace osmscout {
                                  TypeId type,
                                  const FillStyle& fillStyle,
                                  const LineStyle* lineStyle,
-                                 const std::vector<TransPoint>& nodes)
+                                 const TransPolygon& area)
   {
     cairo_set_source_rgba(draw,
                           fillStyle.GetFillR(),
@@ -818,15 +819,15 @@ namespace osmscout {
     cairo_set_line_width(draw,1);
 
     bool start=true;
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (nodes[i].draw) {
+    for (size_t i=area.GetStart(); i<=area.GetEnd(); i++) {
+      if (area.points[i].draw) {
         if (start) {
           cairo_new_path(draw);
-          cairo_move_to(draw,nodes[i].x,nodes[i].y);
+          cairo_move_to(draw,area.points[i].x,area.points[i].y);
           start=false;
         }
         else {
-          cairo_line_to(draw,nodes[i].x,nodes[i].y);
+          cairo_line_to(draw,area.points[i].x,area.points[i].y);
         }
         //nodesDrawnCount++;
       }
@@ -847,7 +848,7 @@ namespace osmscout {
                lineStyle->GetDash(),
                capRound,
                capRound,
-               nodes);
+               area);
     }
   }
 
@@ -856,7 +857,7 @@ namespace osmscout {
                                  TypeId type,
                                  const PatternStyle& patternStyle,
                                  const LineStyle* lineStyle,
-                                 const std::vector<TransPoint>& nodes)
+                                 const TransPolygon& area)
   {
     assert(patternStyle.GetId()>0);
     assert(patternStyle.GetId()!=std::numeric_limits<size_t>::max());
@@ -866,15 +867,15 @@ namespace osmscout {
     cairo_set_source(draw,patterns[patternStyle.GetId()-1]);
 
     bool start=true;
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (nodes[i].draw) {
+    for (size_t i=area.GetStart(); i<=area.GetEnd(); i++) {
+      if (area.points[i].draw) {
         if (start) {
           cairo_new_path(draw);
-          cairo_move_to(draw,nodes[i].x,nodes[i].y);
+          cairo_move_to(draw,area.points[i].x,area.points[i].y);
           start=false;
         }
         else {
-          cairo_line_to(draw,nodes[i].x,nodes[i].y);
+          cairo_line_to(draw,area.points[i].x,area.points[i].y);
         }
         //nodesDrawnCount++;
       }
@@ -895,7 +896,7 @@ namespace osmscout {
                lineStyle->GetDash(),
                capRound,
                capRound,
-               nodes);
+               area);
     }
   }
 

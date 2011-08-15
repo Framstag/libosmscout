@@ -1,6 +1,6 @@
 #!/bin/sh
 
-COCO=/tmp/coco/Coco
+COCO=cococpp
 
 # OST (aka OSMScout types)
 $COCO OST/OST.atg -namespace osmscout:ost -frames OST -o OST 

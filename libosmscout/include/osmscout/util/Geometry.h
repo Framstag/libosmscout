@@ -34,9 +34,9 @@
 #include <osmscout/system/Types.h>
 
 #include <osmscout/Point.h>
+#include <osmscout/util/Projection.h>
 
 namespace osmscout {
-
   /**
     Returns true, if point in area.
 

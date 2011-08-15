@@ -15,7 +15,6 @@ libosmscoutmap_la_LDFLAGS  = $(LIBOSMSCOUT_LIBS) \
                              $(LIBPNG_LIBS)
 
 libosmscoutmap_la_SOURCES = osmscout/LoaderPNG.cpp \
-                            osmscout/Projection.cpp \
                             osmscout/MapPainter.cpp
 
 if HAVE_LIB_CAIRO

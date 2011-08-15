@@ -25,8 +25,8 @@
 #include <osmscout/StyleConfigLoader.h>
 
 #include <osmscout/MapPainter.h>
-#include <osmscout/Projection.h>
 
+#include <osmscout/util/Projection.h>
 #include <osmscout/util/StopClock.h>
 
 /*

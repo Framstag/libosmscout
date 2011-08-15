@@ -32,6 +32,8 @@
 #include <osmscout/RelationDataFile.h>
 #include <osmscout/WayDataFile.h>
 
+#include <osmscout/OptimizeLowZoom.h>
+
 // Fileoffset by Id index
 #include <osmscout/NodeIndex.h>
 #include <osmscout/WayIndex.h>
@@ -152,13 +154,13 @@ namespace osmscout {
     typedef Cache<size_t,std::vector<NodeUse> > NodeUseCache;
 
   private:
-    bool                  isOpen;        //! true, if opened
+    bool                  isOpen;          //! true, if opened
     bool                  debugPerformance;
 
-    double                minLon;        //! bounding box of data
-    double                minLat;        //! bounding box of data
-    double                maxLon;        //! bounding box of data
-    double                maxLat;        //! bounding box of data
+    double                minLon;          //! bounding box of data
+    double                minLat;          //! bounding box of data
+    double                maxLon;          //! bounding box of data
+    double                maxLat;          //! bounding box of data
 
     AreaAreaIndex         areaAreaIndex;
     AreaNodeIndex         areaNodeIndex;
@@ -168,15 +170,17 @@ namespace osmscout {
 
     WaterIndex            waterIndex;
 
-    std::string           path;          //! Path to the directory containing all files
+    std::string           path;             //! Path to the directory containing all files
 
-    NodeDataFile          nodeDataFile;  //! Cached access to the 'nodes.dat' file
-    RelationDataFile      relationDataFile;//! Cached access to the 'relations.dat' file
-    WayDataFile           wayDataFile;   //! Cached access to the 'ways.dat' file
+    NodeDataFile          nodeDataFile;     //! Cached access to the 'nodes.dat' file
+    RelationDataFile      relationDataFile; //! Cached access to the 'relations.dat' file
+    WayDataFile           wayDataFile;      //! Cached access to the 'ways.dat' file
 
-    mutable FileScanner   nodeUseScanner;//! File stream to the nodeuse.idx file
+    OptimizeLowZoom       optimizeLowZoom;  //! Optimized data for low zoom situations
 
-    TypeConfig            *typeConfig;   //! Type config for the currently opened map
+    mutable FileScanner   nodeUseScanner;   //! File stream to the nodeuse.idx file
+
+    TypeConfig            *typeConfig;      //! Type config for the currently opened map
 
     std::string           (*hashFunction) (std::string);
 

@@ -1,6 +1,7 @@
 -->begin
-#ifndef OSMSCOUT_OSS_SCANNER_H
-#define OSMSCOUT_OSS_SCANNER_H
+
+#if !defined(-->prefixSCANNER_H)
+#define -->prefixSCANNER_H
 
 #include <limits.h>
 

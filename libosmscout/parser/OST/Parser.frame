@@ -4,8 +4,8 @@
 
 -->begin
 
-#ifndef OSMSCOUT_OST_PARSER_H
-#define OSMSCOUT_OST_PARSER_H
+#if !defined(-->prefixPARSER_H)
+#define -->prefixPARSER_H
 
 -->headerdef
 

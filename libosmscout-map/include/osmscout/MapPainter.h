@@ -30,10 +30,12 @@
 
 #include <osmscout/GroundTile.h>
 #include <osmscout/Node.h>
-#include <osmscout/Projection.h>
 #include <osmscout/Relation.h>
 #include <osmscout/StyleConfig.h>
 #include <osmscout/Way.h>
+
+#include <osmscout/util/Projection.h>
+#include <osmscout/util/Transformation.h>
 
 namespace osmscout {
 
@@ -141,13 +143,6 @@ namespace osmscout {
     };
 
   protected:
-    struct OSMSCOUT_API TransPoint
-    {
-      bool   draw;
-      double x;
-      double y;
-    };
-
     struct OSMSCOUT_API Label
     {
       bool              draw;
@@ -169,10 +164,10 @@ namespace osmscout {
 
   protected:
     /**
-       Scratch variables for path optimization algortihm
+       Scratch variables for path optimization algorithm
      */
     //@{
-    std::vector<TransPoint> points;   //! Static scratch buffer for coordinate transformation results
+    TransPolygon            polygon;  //! Static (avoid reallocation) transformed polygon
     //@}
 
     /**
@@ -232,7 +227,7 @@ namespace osmscout {
     //@}
 
   private:
-    void ScanConvertLine(const std::vector<TransPoint>& points,
+    void ScanConvertLine(const TransPolygon& polygon,
                          double cellWidth,
                          double cellHeight,
                          std::vector<ScanCell>& cells);
@@ -255,7 +250,7 @@ namespace osmscout {
                                const MapParameter& parameter,
                                const LabelStyle& style,
                                const std::string& text,
-                               const std::vector<TransPoint>& points);
+                               const TransPolygon& polygon);
 
     bool RegisterPointLabel(const Projection& projection,
                             const MapParameter& parameter,
@@ -278,7 +273,7 @@ namespace osmscout {
                  const MapParameter& parameter,
                  const LineStyle& style,
                  const SegmentAttributes& attributes,
-                 const std::vector<TransPoint>& point);
+                 const TransPolygon& polygon);
 
     /**
       Draw the outline of the way using LineStyle for the given type, the given
@@ -338,27 +333,14 @@ namespace osmscout {
                    const MapParameter& parameter,
                    double lon,
                    double lat,
-                   TransPoint& point);
-    void TransformArea(const Projection& projection,
-                       const MapParameter& parameter,
-                       const std::vector<Point>& nodes,
-                       std::vector<TransPoint>& points);
-    void TransformWay(const Projection& projection,
-                      const MapParameter& parameter,
-                      const std::vector<Point>& nodes,
-                      std::vector<TransPoint>& points);
+                   double& x,
+                   double& y);
 
     bool GetBoundingBox(const std::vector<Point>& nodes,
                         double& xmin, double& ymin,
                         double& xmax, double& ymax);
-    bool GetBoundingBox(const std::vector<TransPoint>& points,
-                        double& xmin, double& ymin,
-                        double& xmax, double& ymax);
     bool GetCenterPixel(const Projection& projection,
                         const std::vector<Point>& nodes,
-                        double& cx,
-                        double& cy);
-    bool GetCenterPixel(const std::vector<TransPoint>& points,
                         double& cx,
                         double& cy);
     //@}
@@ -426,7 +408,7 @@ namespace osmscout {
                                   const MapParameter& parameter,
                                   const LabelStyle& style,
                                   const std::string& text,
-                                  const std::vector<TransPoint>& nodes) = 0;
+                                  const TransPolygon& polygon) = 0;
 
     /**
       Draw the Icon as defined by the IconStyle at the givcen pixel coordinate.
@@ -454,7 +436,7 @@ namespace osmscout {
                           const std::vector<double>& dash,
                           CapStyle startCap,
                           CapStyle endCap,
-                          const std::vector<TransPoint>& nodes) = 0;
+                          const TransPolygon& polygon) = 0;
 
     /**
       Draw the given area using the given FillStyle and (optionally) the given LineStyle
@@ -465,7 +447,7 @@ namespace osmscout {
                           TypeId type,
                           const FillStyle& fillStyle,
                           const LineStyle* lineStyle,
-                          const std::vector<TransPoint>& nodes) = 0;
+                          const TransPolygon& polygon) = 0;
 
     /**
       Draw the given area using the given PatternStyle and (optionally) the given LineStyle
@@ -476,7 +458,7 @@ namespace osmscout {
                           TypeId type,
                           const PatternStyle& patternStyle,
                           const LineStyle* lineStyle,
-                          const std::vector<TransPoint>& nodes) = 0;
+                          const TransPolygon& polygon) = 0;
 
     /**
       Draw the given area in using the given fill. This is currently done to

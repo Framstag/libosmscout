@@ -20,7 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <qt4/QtGui/QPainter>
+#include <QPainter>
 
 #include <osmscout/Private/MapImportExport.h>
 
@@ -70,7 +70,7 @@ namespace osmscout {
                           const MapParameter& parameter,
                           const LabelStyle& style,
                           const std::string& text,
-                          const std::vector<TransPoint>& nodes);
+                          const TransPolygon& nodes);
 
     void DrawIcon(const IconStyle* style,
                           double x, double y);
@@ -88,21 +88,21 @@ namespace osmscout {
                   const std::vector<double>& dash,
                   CapStyle startCap,
                   CapStyle endCap,
-                  const std::vector<TransPoint>& nodes);
+                  const TransPolygon& nodes);
 
     void DrawArea(const Projection& projection,
                   const MapParameter& parameter,
                   TypeId type,
                   const FillStyle& fillStyle,
                   const LineStyle* lineStyle,
-                  const std::vector<TransPoint>& nodes);
+                  const TransPolygon& nodes);
 
     void DrawArea(const Projection& projection,
                   const MapParameter& parameter,
                   TypeId type,
                   const PatternStyle& patternStyle,
                   const LineStyle* lineStyle,
-                  const std::vector<TransPoint>& nodes);
+                  const TransPolygon& nodes);
 
     void DrawArea(const FillStyle& style,
                   const MapParameter& parameter,

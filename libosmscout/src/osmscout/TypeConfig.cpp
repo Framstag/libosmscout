@@ -192,6 +192,7 @@ namespace osmscout {
      canBeRoute(false),
      canBeIndexed(false),
      consumeChildren(false),
+     optimizeLowZoom(false),
      ignore(false)
   {
     // no code

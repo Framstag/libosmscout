@@ -17,8 +17,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#ifndef OSMSCOUT_OSS_SCANNER_H
-#define OSMSCOUT_OSS_SCANNER_H
+
+#if !defined(osmscout_oss_SCANNER_H)
+#define osmscout_oss_SCANNER_H
 
 #include <limits.h>
 

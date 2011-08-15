@@ -3,8 +3,9 @@
 */
 
 -->begin
-#ifndef OSMSCOUT_OST_SCANNER_H
-#define OSMSCOUT_OST_SCANNER_H
+
+#if !defined(-->prefixSCANNER_H)
+#define -->prefixSCANNER_H
 
 #include <limits.h>
 

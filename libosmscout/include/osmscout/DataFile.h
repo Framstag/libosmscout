@@ -66,6 +66,8 @@ namespace osmscout {
              unsigned long dataCacheSize,
              unsigned long indexCacheSize);
 
+    virtual ~DataFile();
+
     bool Open(const std::string& path);
     bool Close();
 
@@ -98,6 +100,14 @@ namespace osmscout {
     index(indexfile,indexCacheSize)
   {
     // no code
+  }
+
+  template <class N>
+  DataFile<N>::~DataFile()
+  {
+    if (isOpen) {
+      Close();
+    }
   }
 
   template <class N>

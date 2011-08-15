@@ -81,7 +81,7 @@ namespace osmscout {
     destroyed if all locations delete the object and where copying the object is expensive.
 
     LazyRef allocates a new object instance the first time the reference is dereferenced and
-    the object instanc eof type T accessed.
+    the object instance of type T is accessed.
 
     Note that type T must inherit from class Referencable!
   */
@@ -110,6 +110,15 @@ namespace osmscout {
       if (ptr!=NULL) {
         ptr->AddReference();
       }
+    }
+
+    /**
+      Creates an reference holding an instance of T.
+    */
+    LazyRef(const T& reference)
+      : ptr(new T(reference))
+    {
+      ptr->AddReference();
     }
 
     /**
@@ -171,6 +180,19 @@ namespace osmscout {
       }
 
       return ptr;
+    }
+
+    /**
+      Dereference operator.
+
+      Returns a reference to the underlying object. Makes the reference behave
+      like a pointer.
+    */
+    T& operator*() const
+    {
+      assert(ptr!=NULL);
+
+      return *ptr;
     }
   };
 

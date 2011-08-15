@@ -48,13 +48,14 @@
 #include <osmscout/GenNodeUseIndex.h>
 #include <osmscout/GenCityStreetIndex.h>
 #include <osmscout/GenWaterIndex.h>
+#include <osmscout/GenOptimizeLowZoom.h>
 
 #include <osmscout/util/StopClock.h>
 
 namespace osmscout {
 
   static const size_t defaultStartStep=1;
-  static const size_t defaultEndStep=16;
+  static const size_t defaultEndStep=17;
 
   ImportParameter::ImportParameter()
    : typefile("map.ost"),
@@ -72,7 +73,8 @@ namespace osmscout {
      areaAreaRelIndexMaxMag(17),
      areaWayIndexCellSizeAverage(64),
      areaWayIndexCellSizeMax(1024),
-     waterIndexMaxMag(14)
+     waterIndexMaxMag(14),
+     optimizationMaxMag(8)
   {
     // no code
   }
@@ -167,6 +169,11 @@ namespace osmscout {
     return waterIndexMaxMag;
   }
 
+  size_t ImportParameter::GetOptimizationMaxMag() const
+  {
+    return optimizationMaxMag;
+  }
+
   void ImportParameter::SetMapfile(const std::string& mapfile)
   {
     this->mapfile=mapfile;
@@ -234,10 +241,15 @@ namespace osmscout {
     this->wayIndexCacheSize=wayIndexCacheSize;
   }
 
-  bool ExecuteModules(std::list<ImportModule*>& modules,
-                      const ImportParameter& parameter,
-                      Progress& progress,
-                      const TypeConfig& typeConfig)
+  ImportModule::~ImportModule()
+  {
+    // no code
+  }
+
+  static bool ExecuteModules(std::list<ImportModule*>& modules,
+                            const ImportParameter& parameter,
+                            Progress& progress,
+                            const TypeConfig& typeConfig)
   {
     StopClock overAllTimer;
     size_t    currentStep=1;
@@ -345,6 +357,8 @@ namespace osmscout {
     modules.push_back(new NodeUseIndexGenerator());
     /* 16 */
     modules.push_back(new WaterIndexGenerator());
+    /* 17 */
+    modules.push_back(new OptimizeLowZoomGenerator());
 
     bool result=ExecuteModules(modules,parameter,progress,typeConfig);
 

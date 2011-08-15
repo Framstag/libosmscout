@@ -1,7 +1,7 @@
 -->begin
 
-#ifndef OSMSCOUT_OSS_PARSER_H
-#define OSMSCOUT_OSS_PARSER_H
+#if !defined(-->prefixPARSER_H)
+#define -->prefixPARSER_H
 
 -->headerdef
 

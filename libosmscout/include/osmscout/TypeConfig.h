@@ -193,6 +193,7 @@ namespace osmscout {
     bool         canBeRoute;
     bool         canBeIndexed;
     bool         consumeChildren;
+    bool         optimizeLowZoom;
     bool         ignore;
 
   public:
@@ -308,6 +309,18 @@ namespace osmscout {
     inline bool GetConsumeChildren() const
     {
       return consumeChildren;
+    }
+
+    inline TypeInfo& SetOptimizeLowZoom(bool optimize)
+    {
+      this->optimizeLowZoom=optimize;
+
+      return *this;
+    }
+
+    inline bool GetOptimizeLowZoom() const
+    {
+      return optimizeLowZoom;
     }
 
     inline TypeInfo& SetIgnore(bool ignore)

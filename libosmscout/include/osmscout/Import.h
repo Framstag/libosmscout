@@ -55,6 +55,7 @@ namespace osmscout {
     size_t      areaWayIndexCellSizeAverage; //! Average entries per index cell
     size_t      areaWayIndexCellSizeMax;   //! Maximum number of entries  per index cell
     size_t      waterIndexMaxMag;      //! Maximum depth of the index generated
+    size_t      optimizationMaxMag;    //! Maximum magnification for optimization
 
   public:
     ImportParameter();
@@ -79,6 +80,7 @@ namespace osmscout {
     size_t GetAreaWayIndexCellSizeAverage() const;
     size_t GetAreaWayIndexCellSizeMax() const;
     size_t GetWaterIndexMaxMag() const;
+    size_t GetOptimizationMaxMag() const;
 
     void SetMapfile(const std::string& mapfile);
     void SetTypefile(const std::string& typefile);
@@ -107,6 +109,7 @@ namespace osmscout {
   class OSMSCOUT_API ImportModule
   {
   public:
+    virtual ~ImportModule();
     virtual std::string GetDescription() const = 0;
     virtual bool Import(const ImportParameter& parameter,
                         Progress& progress,

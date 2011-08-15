@@ -233,10 +233,11 @@ PRODUCTIONS
               .
 
   TYPEOPTION<TypeInfo& typeInfo>
-              =  "ROUTE"            (. typeInfo.CanBeRoute(true); .)
-               | "INDEX"            (. typeInfo.CanBeIndexed(true); .)
-               | "CONSUME_CHILDREN" (. typeInfo.SetConsumeChildren(true); .)
-               | "IGNORE"           (. typeInfo.SetIgnore(true); .)
+              =  "ROUTE"             (. typeInfo.CanBeRoute(true); .)
+               | "INDEX"             (. typeInfo.CanBeIndexed(true); .)
+               | "CONSUME_CHILDREN"  (. typeInfo.SetConsumeChildren(true); .)
+               | "OPTIMIZE_LOW_ZOOM" (. typeInfo.SetOptimizeLowZoom(true); .)
+               | "IGNORE"            (. typeInfo.SetIgnore(true); .)
                .
 
 END OST.

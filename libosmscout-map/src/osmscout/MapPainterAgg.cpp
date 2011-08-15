@@ -318,7 +318,7 @@ namespace osmscout {
                                       const MapParameter& parameter,
                                       const LabelStyle& style,
                                       const std::string& text,
-                                      const std::vector<TransPoint>& nodes)
+                                      const TransPolygon& contour)
   {
     double       fontSize=style.GetSize();
     double       r=style.GetTextR();
@@ -339,47 +339,49 @@ namespace osmscout {
     double xo=0;
     double yo=0;
 
-    if (nodes[0].x<nodes[nodes.size()-1].x) {
+    if (contour.points[contour.GetStart()].x<contour.points[contour.GetEnd()].x) {
       bool start=true;
 
-      for (size_t j=0; j<nodes.size(); j++) {
-        if (nodes[j].draw) {
+      for (size_t j=contour.GetStart(); j<=contour.GetEnd(); j++) {
+        if (contour.points[j].draw) {
           if (start) {
-            path.move_to(nodes[j].x,
-                         nodes[j].y);
+            path.move_to(contour.points[j].x,
+                contour.points[j].y);
             start=false;
           }
           else {
-            path.line_to(nodes[j].x,
-                         nodes[j].y);
-            length+=sqrt(pow(nodes[j].x-xo,2)+
-                         pow(nodes[j].y-yo,2));
+            path.line_to(contour.points[j].x,
+                         contour.points[j].y);
+            length+=sqrt(pow(contour.points[j].x-xo,2)+
+                         pow(contour.points[j].y-yo,2));
           }
 
-          xo=nodes[j].x;
-          yo=nodes[j].y;
+          xo=contour.points[j].x;
+          yo=contour.points[j].y;
         }
       }
     }
     else {
       bool start=true;
 
-      for (size_t j=0; j<nodes.size(); j++) {
-        if (nodes[nodes.size()-j-1].draw) {
+      for (size_t j=0; j<=contour.GetEnd()-contour.GetStart(); j++) {
+        size_t idx=contour.GetEnd()-j;
+
+        if (contour.points[idx].draw) {
           if (start) {
-            path.move_to(nodes[nodes.size()-j-1].x,
-                         nodes[nodes.size()-j-1].y);
+            path.move_to(contour.points[idx].x,
+                contour.points[idx].y);
             start=false;
           }
           else {
-            path.line_to(nodes[nodes.size()-j-1].x,
-                         nodes[nodes.size()-j-1].y);
-            length+=sqrt(pow(nodes[nodes.size()-j-1].x-xo,2)+
-                         pow(nodes[nodes.size()-j-1].y-yo,2));
+            path.line_to(contour.points[idx].x,
+                         contour.points[idx].y);
+            length+=sqrt(pow(contour.points[idx].x-xo,2)+
+                         pow(contour.points[idx].y-yo,2));
           }
 
-          xo=nodes[nodes.size()-j-1].x;
-          yo=nodes[nodes.size()-j-1].y;
+          xo=contour.points[idx].x;
+          yo=contour.points[idx].y;
         }
       }
     }
@@ -463,19 +465,19 @@ namespace osmscout {
                                const std::vector<double>& dash,
                                CapStyle startCap,
                                CapStyle endCap,
-                               const std::vector<TransPoint>& nodes)
+                               const TransPolygon& path)
   {
-    agg::path_storage path;
+    agg::path_storage p;
 
     bool start=true;
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (nodes[i].draw) {
+    for (size_t i=polygon.GetStart(); i<=polygon.GetEnd(); i++) {
+      if (polygon.points[i].draw) {
         if (start) {
-          path.move_to(nodes[i].x,nodes[i].y);
+          p.move_to(polygon.points[i].x,polygon.points[i].y);
           start=false;
         }
         else {
-          path.line_to(nodes[i].x,nodes[i].y);
+          p.line_to(polygon.points[i].x,polygon.points[i].y);
         }
         //nodesDrawnCount++;
       }
@@ -486,7 +488,7 @@ namespace osmscout {
     renderer_aa->color(agg::rgba(r,g,b,a));
 
     if (dash.size()==0) {
-      agg::conv_stroke<agg::path_storage> stroke(path);
+      agg::conv_stroke<agg::path_storage> stroke(p);
 
       stroke.width(width);
 
@@ -503,7 +505,7 @@ namespace osmscout {
       agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
     }
     else {
-      agg::conv_dash<agg::path_storage>                    dasher(path);
+      agg::conv_dash<agg::path_storage>                    dasher(p);
       agg::conv_stroke<agg::conv_dash<agg::path_storage> > stroke(dasher);
 
       stroke.width(width);
@@ -527,19 +529,19 @@ namespace osmscout {
                               TypeId type,
                               const FillStyle& fillStyle,
                               const LineStyle* lineStyle,
-                              const std::vector<TransPoint>& nodes)
+                              const TransPolygon& area)
   {
     agg::path_storage path;
 
     bool start=true;
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (nodes[i].draw) {
+    for (size_t i=polygon.GetStart(); i<=polygon.GetEnd(); i++) {
+      if (polygon.points[i].draw) {
         if (start) {
-          path.move_to(nodes[i].x,nodes[i].y);
+          path.move_to(polygon.points[i].x,polygon.points[i].y);
           start=false;
         }
         else {
-          path.line_to(nodes[i].x,nodes[i].y);
+          path.line_to(polygon.points[i].x,polygon.points[i].y);
         }
         //nodesDrawnCount++;
       }
@@ -569,7 +571,7 @@ namespace osmscout {
                lineStyle->GetDash(),
                capRound,
                capRound,
-               nodes);
+               area);
     }
   }
 
@@ -578,7 +580,7 @@ namespace osmscout {
                               TypeId type,
                               const PatternStyle& patternStyle,
                               const LineStyle* lineStyle,
-                              const std::vector<TransPoint>& nodes)
+                              const TransPolygon& area)
   {
     // TODO
   }

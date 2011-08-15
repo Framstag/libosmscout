@@ -136,11 +136,6 @@ namespace osmscout {
     It is free to copy and use.
   */
 
-  static const int halfShift=10; /* used for shifting by 10 bits */
-
-  static const unsigned long halfBase=0x0010000UL;
-  static const unsigned long halfMask=0x3FFUL;
-
   #define UNI_SUR_HIGH_START  0xD800
   #define UNI_SUR_HIGH_END    0xDBFF
   #define UNI_SUR_LOW_START   0xDC00
@@ -226,6 +221,9 @@ namespace osmscout {
     }
 
 #elif SIZEOF_WCHAR_T==2
+    static const int halfShift=10; /* used for shifting by 10 bits */
+    static const unsigned long halfBase=0x0010000UL;
+    static const unsigned long halfMask=0x3FFUL;
 
     size_t idx=0;
 

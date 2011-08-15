@@ -27,9 +27,6 @@
 
 namespace osmscout {
 
-  static double relevantPosDeriviation=2.0;
-  static double relevantSlopeDeriviation=0.1;
-
   MapParameter::MapParameter()
   : fontName("sans-serif"),
     fontSize(9.0),
@@ -106,22 +103,34 @@ namespace osmscout {
     // no code
   }
 
-  void MapPainter::ScanConvertLine(const std::vector<TransPoint>& points,
+  void MapPainter::ScanConvertLine(const TransPolygon& polygon,
                                    double cellWidth,
                                    double cellHeight,
                                    std::vector<ScanCell>& cells)
   {
-    if (points.size()<2) {
+    if (polygon.GetLength()<2) {
       return;
     }
 
-    for (size_t i=0; i<points.size()-1; i++) {
-      int x1=int(points[i].x/cellWidth);
-      int x2=int(points[i+1].x/cellWidth);
-      int y1=int(points[i].y/cellHeight);
-      int y2=int(points[i+1].y/cellHeight);
+    for (size_t i=polygon.GetStart(); i<=polygon.GetEnd(); i++) {
+      if (polygon.points[i].draw)
+      {
+        size_t j=i+1;
 
-      osmscout::ScanConvertLine(x1,y1,x2,y2,cells);
+        while (j<=polygon.GetEnd() && !polygon.points[j].draw)
+        {
+          j++;
+        }
+
+        if (j<=polygon.GetEnd()) {
+          int x1=int(polygon.points[i].x/cellWidth);
+          int x2=int(polygon.points[j].x/cellWidth);
+          int y1=int(polygon.points[i].y/cellHeight);
+          int y2=int(polygon.points[j].y/cellHeight);
+
+          osmscout::ScanConvertLine(x1,y1,x2,y2,cells);
+        }
+      }
     }
   }
 
@@ -181,193 +190,11 @@ namespace osmscout {
                              const MapParameter& parameter,
                              double lon,
                              double lat,
-                             TransPoint& point)
+                             double& x,
+                             double& y)
   {
-    point.draw=true;
     projection.GeoToPixel(lon,lat,
-                          point.x,point.y);
-  }
-
-  void MapPainter::TransformArea(const Projection& projection,
-                                 const MapParameter& parameter,
-                                 const std::vector<Point>& nodes,
-                                 std::vector<TransPoint>& points)
-  {
-    points.resize(nodes.size());
-
-    if (parameter.GetOptimizeAreaNodes()) {
-      points[0].draw=true;
-      points[nodes.size()-1].draw=true;
-
-      // Drop every point that is on direct line between two points A and B
-      for (size_t i=1; i+1<nodes.size(); i++) {
-        points[i].draw=std::abs((nodes[i].lon-nodes[i-1].lon)/
-                                (nodes[i].lat-nodes[i-1].lat)-
-                                (nodes[i+1].lon-nodes[i].lon)/
-                                (nodes[i+1].lat-nodes[i].lat))>=relevantSlopeDeriviation;
-      }
-
-      // Calculate screen position
-      for (size_t i=0; i<nodes.size(); i++) {
-        if (points[i].draw) {
-          projection.GeoToPixel(nodes[i].lon,nodes[i].lat,
-                                points[i].x,points[i].y);
-        }
-      }
-
-      // Drop all points that do not differ in position from the previous node
-      for (size_t i=1; i<nodes.size()-1; i++) {
-        if (points[i].draw) {
-          size_t j=i+1;
-          while (!points[j].draw) {
-            j++;
-          }
-
-          if (std::fabs(points[j].x-points[i].x)<=relevantPosDeriviation &&
-              std::fabs(points[j].y-points[i].y)<=relevantPosDeriviation) {
-            points[i].draw=false;
-          }
-        }
-      }
-    }
-    else {
-      for (size_t i=0; i<nodes.size(); i++) {
-        points[i].draw=true;
-        projection.GeoToPixel(nodes[i].lon,nodes[i].lat,
-                              points[i].x,points[i].y);
-      }
-    }
-  }
-
-  void MapPainter::TransformWay(const Projection& projection,
-                                const MapParameter& parameter,
-                                const std::vector<Point>& nodes,
-                                std::vector<TransPoint>& points)
-  {
-    points.resize(nodes.size());
-
-    if (parameter.GetOptimizeWayNodes()) {
-      size_t a;
-
-      for (size_t i=0; i<nodes.size(); i++) {
-        points[i].draw=true;
-      }
-
-      if (nodes.size()>=3) {
-        a=0;
-        while (a+1<nodes.size()) {
-          if (projection.GeoIsIn(nodes[a].lon,nodes[a].lat)) {
-            break;
-          }
-
-          a++;
-        }
-
-        if (a>1) {
-          for (size_t i=0; i<a-1; i++) {
-            points[i].draw=false;
-          }
-        }
-      }
-
-      if (nodes.size()>=3) {
-        a=nodes.size()-1;
-        while (a>0) {
-          if (projection.GeoIsIn(nodes[a].lon,nodes[a].lat)) {
-            break;
-          }
-
-          a--;
-        }
-
-        if (a<nodes.size()-2) {
-          for (size_t i=a+2; i<nodes.size(); i++) {
-            points[i].draw=false;
-          }
-        }
-      }
-
-      // Drop every point that is on direct line between two points A and B
-      for (size_t i=0; i+2<nodes.size(); i++) {
-        if (points[i].draw) {
-          size_t j=i+1;
-          while (j<nodes.size() && !points[j].draw) {
-            j++;
-          }
-
-          size_t k=j+1;
-          while (k<nodes.size() && !points[k].draw) {
-            k++;
-          }
-
-          if (j<nodes.size() && k<nodes.size()) {
-            points[j].draw=std::abs((nodes[j].lon-nodes[i].lon)/
-                                    (nodes[j].lat-nodes[i].lat)-
-                                    (nodes[k].lon-nodes[j].lon)/
-                                    (nodes[k].lat-nodes[j].lat))>=relevantSlopeDeriviation;
-          }
-        }
-      }
-
-      // Calculate screen position
-      for (size_t i=0; i<nodes.size(); i++) {
-        if (points[i].draw) {
-          projection.GeoToPixel(nodes[i].lon,nodes[i].lat,
-                                points[i].x,points[i].y);
-        }
-      }
-
-      // Drop all points that do not differ in position from the previous node
-      if (nodes.size()>2) {
-        for (size_t i=1; i<nodes.size()-1; i++) {
-          if (points[i].draw) {
-            size_t j=i+1;
-
-            while (j+1<nodes.size() &&
-                   !points[j].draw) {
-              j++;
-            }
-
-            if (std::fabs(points[j].x-points[i].x)<=relevantPosDeriviation &&
-                std::fabs(points[j].y-points[i].y)<=relevantPosDeriviation) {
-              points[i].draw=false;
-            }
-          }
-        }
-      }
-
-      /*
-      // Check which nodes or not visible in the given way
-      for (size_t i=0; i<way->nodes.size(); i++) {
-        if (way->nodes[i].lon<lonMin || way->nodes[i].lon>lonMax ||
-            way->nodes[i].lat<latMin || way->nodes[i].lat>latMax){
-          outNode[i]=true;
-        }
-      }
-
-      if (outNode[1]) {
-        drawNode[0]=false;
-      }
-
-      for (size_t i=1; i<way->nodes.size()-1; i++) {
-        if (outNode[i-1] && outNode[i+1]) {
-          drawNode[i]=false;
-        }
-      }
-
-      if (outNode[way->nodes.size()-2]) {
-        drawNode[way->nodes.size()-1]=false;
-      }*/
-    }
-    else {
-      for (size_t i=0; i<nodes.size(); i++) {
-        points[i].draw=true;
-        projection.GeoToPixel(nodes[i].lon,
-                              nodes[i].lat,
-                              points[i].x,
-                              points[i].y);
-      }
-    }
+                          x,y);
   }
 
   bool MapPainter::GetBoundingBox(const std::vector<Point>& nodes,
@@ -393,29 +220,6 @@ namespace osmscout {
     return true;
   }
 
-  bool MapPainter::GetBoundingBox(const std::vector<TransPoint>& points,
-                                  double& xmin, double& ymin,
-                                  double& xmax, double& ymax)
-  {
-    if (points.size()==0) {
-      return false;
-    }
-
-    xmin=points[0].x;
-    xmax=points[0].x;
-    ymin=points[0].y;
-    ymax=points[0].y;
-
-    for (size_t j=1; j<points.size(); j++) {
-      xmin=std::min(xmin,points[j].x);
-      xmax=std::max(xmax,points[j].x);
-      ymin=std::min(ymin,points[j].y);
-      ymax=std::max(ymax,points[j].y);
-    }
-
-    return true;
-  }
-
   bool MapPainter::GetCenterPixel(const Projection& projection,
                                   const std::vector<Point>& nodes,
                                   double& cx,
@@ -432,25 +236,6 @@ namespace osmscout {
 
     projection.GeoToPixel(xmin,ymin,xmin,ymin);
     projection.GeoToPixel(xmax,ymax,xmax,ymax);
-
-    cx=xmin+(xmax-xmin)/2;
-    cy=ymin+(ymax-ymin)/2;
-
-    return true;
-  }
-
-  bool MapPainter::GetCenterPixel(const std::vector<TransPoint>& points,
-                                  double& cx,
-                                  double& cy)
-  {
-    double xmin;
-    double xmax;
-    double ymin;
-    double ymax;
-
-    if (!GetBoundingBox(points,xmin,ymin,xmax,ymax)) {
-      return false;
-    }
 
     cx=xmin+(xmax-xmin)/2;
     cy=ymin+(ymax-ymin)/2;
@@ -536,14 +321,14 @@ namespace osmscout {
                                          const MapParameter& parameter,
                                          const LabelStyle& style,
                                          const std::string& text,
-                                         const std::vector<TransPoint>& points)
+                                         const TransPolygon& polygon)
   {
     if (style.GetStyle()!=LabelStyle::plate) {
       return;
     }
 
     wayScanlines.clear();
-    ScanConvertLine(points,1,1,wayScanlines);
+    ScanConvertLine(polygon,1,1,wayScanlines);
 
     for (size_t i=0; i<wayScanlines.size(); i++) {
       if (RegisterPointLabel(projection,
@@ -974,13 +759,13 @@ namespace osmscout {
         continue;
       }
 
-      TransPoint point;
+      double x,y;
 
       Transform(projection,
                 parameter,
                 node->GetLon(),
                 node->GetLat(),
-                point);
+                x,y);
 
       if (hasLabel) {
         if (hasSymbol) {
@@ -988,37 +773,30 @@ namespace osmscout {
                              parameter,
                              *labelStyle,
                              label,
-                             point.x,
-                             point.y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
+                             x,y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
         }
         else if (hasIcon) {
           RegisterPointLabel(projection,
                              parameter,
                              *labelStyle,
                              label,
-                             point.x,
-                             point.y+14+5); // TODO: Better layout to real size of icon
+                             x,y+14+5); // TODO: Better layout to real size of icon
         }
         else {
           RegisterPointLabel(projection,
                              parameter,
                              *labelStyle,
                              label,
-                             point.x,
-                             point.y);
+                             x,y);
         }
       }
 
       if (hasIcon) {
-        DrawIcon(iconStyle,
-                 point.x,
-                 point.y);
+        DrawIcon(iconStyle,x,y);
       }
 
       if (hasSymbol) {
-        DrawSymbol(symbolStyle,
-                   point.x,
-                   point.y);
+        DrawSymbol(symbolStyle,x,y);
       }
     }
   }
@@ -1054,10 +832,9 @@ namespace osmscout {
                                   *patternStyle);
           }
 
-          TransformArea(projection,
-                        parameter,
-                        area->nodes,
-                        points);
+          polygon.TransformArea(projection,
+                                parameter.GetOptimizeAreaNodes(),
+                                area->nodes);
 
           if (hasPattern) {
             DrawArea(projection,
@@ -1065,7 +842,7 @@ namespace osmscout {
                      area->GetType(),
                      *patternStyle,
                      lineStyle,
-                     points);
+                     polygon);
 
             areasDrawn++;
           }
@@ -1075,7 +852,7 @@ namespace osmscout {
                      area->GetType(),
                      *fillStyle,
                      lineStyle,
-                     points);
+                     polygon);
 
             areasDrawn++;
           }
@@ -1110,31 +887,29 @@ namespace osmscout {
               }
 
               if (hasPattern) {
-                TransformArea(projection,
-                              parameter,
-                              relation->roles[m].nodes,
-                              points);
+                polygon.TransformArea(projection,
+                                      parameter.GetOptimizeAreaNodes(),
+                                      relation->roles[m].nodes);
 
                 DrawArea(projection,
                          parameter,
                          relation->roles[m].GetType(),
                          *patternStyle,
                          lineStyle,
-                         points);
+                         polygon);
                 drawn=true;
               }
               else if (hasFill) {
-                TransformArea(projection,
-                              parameter,
-                              relation->roles[m].nodes,
-                              points);
+                polygon.TransformArea(projection,
+                                      parameter.GetOptimizeAreaNodes(),
+                                      relation->roles[m].nodes);
 
                 DrawArea(projection,
                          parameter,
                          relation->roles[m].GetType(),
                          *fillStyle,
                          lineStyle,
-                         points);
+                         polygon);
                 drawn=true;
               }
             }
@@ -1337,7 +1112,7 @@ namespace osmscout {
                            const MapParameter& parameter,
                            const LineStyle& style,
                            const SegmentAttributes& attributes,
-                           const std::vector<TransPoint>& points)
+                           const TransPolygon& polygon)
   {
     double lineWidth=attributes.GetWidth();
     bool   drawBridge=attributes.IsBridge();
@@ -1414,7 +1189,7 @@ namespace osmscout {
              style.GetDash(),
              capRound,
              capRound,
-             points);
+             polygon);
   }
 
   bool MapPainter::DrawWayOutline(const Projection& projection,
@@ -1466,7 +1241,7 @@ namespace osmscout {
     }
 
     if (drawBridge) {
-      TransformWay(projection,parameter,nodes,points);
+      polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),nodes);
 
       // black outline for bridges
       DrawPath(projection,
@@ -1479,7 +1254,7 @@ namespace osmscout {
                emptyDash,
                capButt,
                capButt,
-               points);
+               polygon);
 
       if (outline) {
         DrawPath(projection,
@@ -1492,7 +1267,7 @@ namespace osmscout {
                  emptyDash,
                  attributes.StartIsJoint() ? capButt : capRound,
                  attributes.EndIsJoint() ? capButt : capRound,
-                 points);
+                 polygon);
       }
       else if (style.HasDashValues() ||
                style.GetLineA()<1.0 ||
@@ -1507,14 +1282,14 @@ namespace osmscout {
                  emptyDash,
                  attributes.StartIsJoint() ? capButt : capRound,
                  attributes.EndIsJoint() ? capButt : capRound,
-                 points);
+                 polygon);
       }
     }
     else if (drawTunnel) {
       tunnelDash[0]=4.0/lineWidth;
       tunnelDash[1]=2.0/lineWidth;
 
-      TransformWay(projection,parameter,nodes,points);
+      polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),nodes);
 
       if (outline) {
         DrawPath(projection,
@@ -1527,7 +1302,7 @@ namespace osmscout {
                  tunnelDash,
                  attributes.StartIsJoint() ? capButt : capRound,
                  attributes.EndIsJoint() ? capButt : capRound,
-                 points);
+                 polygon);
       }
       else if (projection.GetMagnification()>=10000) {
         // light grey dashes
@@ -1542,7 +1317,7 @@ namespace osmscout {
                  tunnelDash,
                  attributes.StartIsJoint() ? capButt : capRound,
                  attributes.EndIsJoint() ? capButt : capRound,
-                 points);
+                 polygon);
       }
       else {
         // dark grey dashes
@@ -1557,13 +1332,13 @@ namespace osmscout {
                  tunnelDash,
                  attributes.StartIsJoint() ? capButt : capRound,
                  attributes.EndIsJoint() ? capButt : capRound,
-                 points);
+                 polygon);
       }
     }
     else {
       // normal path, normal outline color
 
-      TransformWay(projection,parameter,nodes,points);
+      polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),nodes);
 
       DrawPath(projection,
                parameter,
@@ -1575,7 +1350,7 @@ namespace osmscout {
                emptyDash,
                attributes.StartIsJoint() ? capButt : capRound,
                attributes.EndIsJoint() ? capButt : capRound,
-               points);
+               polygon);
     }
 
     return true;
@@ -1685,13 +1460,13 @@ namespace osmscout {
             continue;
           }
 
-          TransformWay(projection,parameter,way->nodes,points);
+          polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),way->nodes);
 
           DrawWay(projection,
                   parameter,
                   *lineStyle,
                   way->GetAttributes(),
-                  points);
+                  polygon);
 
           if (!way->GetName().empty()) {
             const LabelStyle *style=styleConfig.GetWayNameLabelStyle(way->GetType());
@@ -1704,7 +1479,7 @@ namespace osmscout {
                                     parameter,
                                     *style,
                                     way->GetName(),
-                                    points);
+                                    polygon);
 
               waysLabelDrawn++;
             }
@@ -1722,7 +1497,7 @@ namespace osmscout {
                                     parameter,
                                     *style,
                                     way->GetRefName(),
-                                    points);
+                                    polygon);
 
               waysLabelDrawn++;
             }
@@ -1758,13 +1533,13 @@ namespace osmscout {
               continue;
             }
 
-            TransformWay(projection,parameter,relation->roles[m].nodes,points);
+            polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),relation->roles[m].nodes);
 
             DrawWay(projection,
                     parameter,
                     *style,
                     relation->roles[m].GetAttributes(),
-                    points);
+                    polygon);
 
             if (!relation->roles[m].GetName().empty()) {
               const LabelStyle *style=styleConfig.GetWayNameLabelStyle(relation->roles[m].GetType());
@@ -1777,7 +1552,7 @@ namespace osmscout {
                                       parameter,
                                       *style,
                                       relation->roles[m].GetName(),
-                                      points);
+                                      polygon);
 
                 relWaysLabelDrawn++;
               }
@@ -1795,7 +1570,7 @@ namespace osmscout {
                                       parameter,
                                       *style,
                                       relation->roles[m].GetRefName(),
-                                      points);
+                                      polygon);
 
                 relWaysLabelDrawn++;
               }
@@ -1838,13 +1613,13 @@ namespace osmscout {
             continue;
           }
 
-          TransformWay(projection,parameter,way->nodes,points);
+          polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),way->nodes);
 
           DrawContourLabel(projection,
                            parameter,
                            *style,
                            way->GetName(),
-                           points);
+                           polygon);
 
           waysLabelDrawn++;
         }
@@ -1864,13 +1639,13 @@ namespace osmscout {
             continue;
           }
 
-          TransformWay(projection,parameter,way->nodes,points);
+          polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),way->nodes);
 
           DrawContourLabel(projection,
                            parameter,
                            *style,
                            way->GetRefName(),
-                           points);
+                           polygon);
 
           waysLabelDrawn++;
         }
@@ -1897,13 +1672,13 @@ namespace osmscout {
               continue;
             }
 
-            TransformWay(projection,parameter,relation->roles[m].nodes,points);
+            polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),relation->roles[m].nodes);
 
             DrawContourLabel(projection,
                              parameter,
                              *style,
                              relation->roles[m].GetName(),
-                             points);
+                             polygon);
 
             relWaysLabelDrawn++;
           }
@@ -1923,13 +1698,13 @@ namespace osmscout {
               continue;
             }
 
-            TransformWay(projection,parameter,relation->roles[m].nodes,points);
+            polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),relation->roles[m].nodes);
 
             DrawContourLabel(projection,
                              parameter,
                              *style,
                              relation->roles[m].GetRefName(),
-                             points);
+                             polygon);
 
             relWaysLabelDrawn++;
           }
@@ -1962,13 +1737,13 @@ namespace osmscout {
       if (IsVisible(projection,
                     way->nodes,
                     style->GetWidth())) {
-        TransformWay(projection,parameter,way->nodes,points);
+        polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),way->nodes);
 
         DrawWay(projection,
                 parameter,
                 *style,
                 way->GetAttributes(),
-                points);
+                polygon);
       }
 
       //waysDrawnCount++;

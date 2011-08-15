@@ -51,7 +51,7 @@
 #include <Lum/String.h>
 #include <Lum/Table.h>
 
-#include <osmscout/Projection.h>
+#include <osmscout/util/Projection.h>
 
 #include "config.h"
 

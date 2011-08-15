@@ -1,8 +1,8 @@
-#ifndef OSMSCOUT_MAP_PROJECTION_H
-#define OSMSCOUT_MAP_PROJECTION_H
+#ifndef OSMSCOUT_UTIL_PROJECTION_H
+#define OSMSCOUT_UTIL_PROJECTION_H
 
 /*
-  This source is part of the libosmscout-map library
+  This source is part of the libosmscout library
   Copyright (C) 2010  Tim Teulings
 
   This library is free software; you can redistribute it and/or
@@ -22,11 +22,11 @@
 
 #include <cstdlib>
 
-#include <osmscout/Private/MapImportExport.h>
+#include <osmscout/private/CoreImportExport.h>
 
 namespace osmscout {
 
-  class OSMSCOUT_MAP_API Projection
+  class OSMSCOUT_API Projection
   {
   public:
     virtual ~Projection();
@@ -61,7 +61,7 @@ namespace osmscout {
     virtual double GetPixelSize() const = 0;
   };
 
-  class OSMSCOUT_MAP_API MercatorProjection : public Projection
+  class OSMSCOUT_API MercatorProjection : public Projection
   {
     bool                valid;         //! projects is valid
     double              lon;           //! Longitude coordinate of the center of the image

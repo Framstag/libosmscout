@@ -2,7 +2,6 @@ nobase_include_HEADERS= osmscout/Private/Config.h \
                         osmscout/Private/MapImportExport.h \
                         osmscout/MapFeatures.h \
                         osmscout/LoaderPNG.h \
-                        osmscout/Projection.h \
                         osmscout/MapPainter.h
 
 if HAVE_LIB_CAIRO

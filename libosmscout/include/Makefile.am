@@ -6,9 +6,11 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/util/FileWriter.h \
                         osmscout/util/Geometry.h \
                         osmscout/util/NumberSet.h \
+                        osmscout/util/Projection.h \
                         osmscout/util/Reference.h \
                         osmscout/util/StopClock.h \
                         osmscout/util/String.h \
+                        osmscout/util/Transformation.h \
                         osmscout/CoreFeatures.h \
                         osmscout/Types.h \
                         osmscout/Util.h \
@@ -45,6 +47,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/GenNumericIndex.h \
                         osmscout/GenNodeDat.h \
                         osmscout/GenNodeUseIndex.h \
+                        osmscout/GenOptimizeLowZoom.h \
                         osmscout/GenRelationDat.h \
                         osmscout/GenTypeDat.h \
                         osmscout/GenWaterIndex.h \
@@ -59,6 +62,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/CityStreetIndex.h \
                         osmscout/NodeIndex.h \
                         osmscout/NodeUseIndex.h \
+                        osmscout/OptimizeLowZoom.h \
                         osmscout/WaterIndex.h \
                         osmscout/WayIndex.h \
                         osmscout/Route.h \
@@ -66,7 +70,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/Database.h
 
 if HAVE_LIB_XML
-nobase_include_HEADERS + = osmscout/PreprocessOSM.h
+nobase_include_HEADERS += osmscout/PreprocessOSM.h
 endif
 
 if HAVE_LIB_PROTOBUF
