@@ -942,7 +942,7 @@ OSS
   AREA "building" MINMAG close
     FILL #bca9a9 WITH LAYER 2
     BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
+    LABEL WITH STYLE normal COLOR #524a4a SIZE 0.8 MINMAG veryClose
 
   NODE "place_continent"
     LABEL WITH STYLE emphasize MINMAG world MAXMAG city PRIO 1

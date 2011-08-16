@@ -44,8 +44,13 @@ namespace osmscout {
 
   private:
     cairo_scaled_font_t* GetScaledFont(const MapParameter& parameter,
-                                       size_t fontSize);
+                                       double fontSize);
 
+    void SetLineAttributes(double r, double g, double b, double a,
+                           double width,
+                           const std::vector<double>& dash);
+
+  protected:
     bool HasIcon(const StyleConfig& styleConfig,
                  const MapParameter& parameter,
                  IconStyle& style);

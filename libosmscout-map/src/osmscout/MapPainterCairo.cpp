@@ -35,7 +35,7 @@
 namespace osmscout {
 
   /* Returns Euclidean distance between two points */
-  static double two_points_distance(cairo_path_data_t *a, cairo_path_data_t *b)
+  static double CalculatePointDistance(cairo_path_data_t *a, cairo_path_data_t *b)
   {
     double dx=b->point.x-a->point.x;
     double dy=b->point.y-a->point.y;
@@ -43,43 +43,38 @@ namespace osmscout {
     return sqrt(pow(dx,2)+pow(dy,2));
   }
 
-  typedef double parametrization_t;
-
-  /* Compute parametrization info. That is, for each part of the
-    * cairo path, tags it with its length.
-  */
-  static parametrization_t* parametrize_path(cairo_path_t *path)
+  /**
+   * Calculate an array of double for the path, that contains the length of each path segment
+   */
+  static double* CalculatePathSegmentLengths(cairo_path_t *path)
   {
-    int i;
-    cairo_path_data_t *data, last_move_to, current_point;
-    parametrization_t *parametrization;
+    cairo_path_data_t *startPoint=NULL;
+    cairo_path_data_t *currentPoint=NULL;
+    double            *parametrization;
 
-    current_point.point.x=0;
-    current_point.point.y=0;
+    parametrization=new double[path->num_data];
 
-    parametrization = (parametrization_t*)malloc (path->num_data * sizeof (parametrization[0]));
+    for (int i=0; i < path->num_data; i += path->data[i].header.length) {
+      cairo_path_data_t *data=&path->data[i];
 
-    for (i=0; i < path->num_data; i += path->data[i].header.length) {
-      data = &path->data[i];
       parametrization[i] = 0.0;
+
       switch (data->header.type) {
       case CAIRO_PATH_MOVE_TO:
-        last_move_to = data[1];
-        current_point = data[1];
+        startPoint = &data[1];
+        currentPoint = &data[1];
         break;
       case CAIRO_PATH_CLOSE_PATH:
-        /* Make it look like it's a line_to to last_move_to */
-        data = (&last_move_to) - 1;
-        parametrization[i] = two_points_distance (&current_point, &data[1]);
-        current_point = data[1];
+        // From current point back to the start */
+        parametrization[i] = CalculatePointDistance(currentPoint,startPoint);
+        currentPoint = startPoint;
         break;
       case CAIRO_PATH_LINE_TO:
-        parametrization[i] = two_points_distance (&current_point, &data[1]);
-        current_point = data[1];
+        parametrization[i] = CalculatePointDistance(currentPoint, &data[1]);
+        currentPoint = &data[1];
         break;
       case CAIRO_PATH_CURVE_TO:
         assert(false);
-        // not with cairo_path_copy_flat!
         break;
       default:
         assert(false);
@@ -91,27 +86,27 @@ namespace osmscout {
   }
 
 
-  typedef void (*transform_point_func_t)(void *closure, double *x, double *y);
+  typedef void (*transform_point_func_t)(void *transformData, double& x, double& y);
 
   /* Project a path using a function. Each point of the path (including
     * Bezier control points) is passed to the function for transformation.
   */
-  static void transform_path(cairo_path_t *path, transform_point_func_t f, void *closure)
+  static void TransformPath(cairo_path_t *path, transform_point_func_t f, void *transformData)
   {
-    int i;
-    cairo_path_data_t *data;
+    for (int i=0; i<path->num_data; i+=path->data[i].header.length) {
+      cairo_path_data_t *data=&path->data[i];
 
-    for (i=0; i < path->num_data; i += path->data[i].header.length) {
-      data = &path->data[i];
       switch (data->header.type) {
       case CAIRO_PATH_CURVE_TO:
-        f (closure, &data[3].point.x, &data[3].point.y);
-        f (closure, &data[2].point.x, &data[2].point.y);
-        f (closure, &data[1].point.x, &data[1].point.y);
+        f(transformData, data[1].point.x, data[1].point.y);
+        f(transformData, data[2].point.x, data[2].point.y);
+        f(transformData, data[3].point.x, data[3].point.y);
         break;
       case CAIRO_PATH_MOVE_TO:
+        f(transformData, data[1].point.x, data[1].point.y);
+        break;
       case CAIRO_PATH_LINE_TO:
-        f (closure, &data[1].point.x, &data[1].point.y);
+        f(transformData, data[1].point.x, data[1].point.y);
         break;
       case CAIRO_PATH_CLOSE_PATH:
         break;
@@ -124,11 +119,11 @@ namespace osmscout {
 
 
   /* Simple struct to hold a path and its parametrization */
-  typedef struct
+  struct parametrized_path_t
   {
     cairo_path_t *path;
-    parametrization_t *parametrization;
-  } parametrized_path_t;
+    double       *parametrization;
+  };
 
 
   /* Project a point X,Y onto a parameterized path. The final point is
@@ -136,13 +131,10 @@ namespace osmscout {
     * units, then stop there and walk another Y units perpendicular to the
     * path at that point. In more detail:
     *
-    * There's three pieces of math involved:
+    * There's two pieces of math involved:
     *
     * - The parametric form of the Line equation
     * http://en.wikipedia.org/wiki/Line
-    *
-    * - The parametric form of the Cubic BÃ©zier curve equation
-    * http://en.wikipedia.org/wiki/B%C3%A9zier_curve
     *
     * - The Gradient (aka multi-dimensional derivative) of the above
     * http://en.wikipedia.org/wiki/Gradient
@@ -152,34 +144,38 @@ namespace osmscout {
     * the question of "where will I be if then I stop, rotate left for 90
     * degrees and walk straight for a distance of Y".
   */
-  static void point_on_path(parametrized_path_t *param, double *x, double *y)
+  static void PathPointTransformer(parametrized_path_t *param, double& x, double& y)
   {
-    int i;
-    double ratio, the_y = *y, the_x = *x, dx, dy;
-    cairo_path_data_t *data, last_move_to, current_point;
-    cairo_path_t *path = param->path;
-    parametrization_t *parametrization = param->parametrization;
+    cairo_path_t      *path = param->path;
+    double            *parametrization = param->parametrization;
 
-    current_point.point.x=0;
-    current_point.point.y=0;
+    int               i;
+    double            the_y=y;
+    double            the_x=x;
+    cairo_path_data_t *data;
+    cairo_path_data_t *startPoint=NULL;
+    cairo_path_data_t *currentPoint=NULL;
 
-    for (i=0; i + path->data[i].header.length < path->num_data &&
+    // Find the segment on the line that is "x" away from the start
+    for (i=0;
+         i+path->data[i].header.length < path->num_data &&
          (the_x > parametrization[i] ||
           path->data[i].header.type == CAIRO_PATH_MOVE_TO);
-          i += path->data[i].header.length) {
-      the_x -= parametrization[i];
+         i+=path->data[i].header.length) {
       data = &path->data[i];
+
+      the_x -= parametrization[i];
+
       switch (data->header.type) {
       case CAIRO_PATH_MOVE_TO:
-        current_point = data[1];
-        last_move_to = data[1];
+        currentPoint = &data[1];
+        startPoint = &data[1];
         break;
       case CAIRO_PATH_LINE_TO:
-        current_point = data[1];
+        currentPoint = &data[1];
         break;
       case CAIRO_PATH_CURVE_TO:
         assert(false);
-        // not with cairo_path_copy_flat!
         break;
       case CAIRO_PATH_CLOSE_PATH:
         break;
@@ -188,6 +184,7 @@ namespace osmscout {
         break;
       }
     }
+
     data = &path->data[i];
 
     switch (data->header.type) {
@@ -195,44 +192,43 @@ namespace osmscout {
     case CAIRO_PATH_MOVE_TO:
       break;
     case CAIRO_PATH_CLOSE_PATH:
-      /* Make it look like it's a line_to to last_move_to */
-      data = (&last_move_to) - 1;
       {
-        ratio = the_x / parametrization[i];
-        /* Line polynomial */
-        *x = current_point.point.x * (1 - ratio) + data[1].point.x * ratio;
-        *y = current_point.point.y * (1 - ratio) + data[1].point.y * ratio;
+        // Relative offset in the current segment ([0..1])
+        double ratio = the_x / parametrization[i];
+        // Line polynomial
+        x = currentPoint->point.x * (1 - ratio) + startPoint->point.x * ratio;
+        y = currentPoint->point.y * (1 - ratio) + startPoint->point.y * ratio;
 
-        /* Line gradient */
-        dx = -(current_point.point.x - data[1].point.x);
-        dy = -(current_point.point.y - data[1].point.y);
+        // Line gradient
+        double dx = -(currentPoint->point.x - startPoint->point.x);
+        double dy = -(currentPoint->point.y - startPoint->point.y);
 
-        /*optimization for: ratio = the_y / sqrt (dx * dx + dy * dy);*/
+        // optimization for: ratio = the_y / sqrt (dx * dx + dy * dy)
         ratio = the_y / parametrization[i];
-        *x += -dy * ratio;
-        *y += dx * ratio;
+        x += -dy * ratio;
+        y += dx * ratio;
       }
       break;
     case CAIRO_PATH_LINE_TO:
       {
-        ratio = the_x / parametrization[i];
-        /* Line polynomial */
-        *x = current_point.point.x * (1 - ratio) + data[1].point.x * ratio;
-        *y = current_point.point.y * (1 - ratio) + data[1].point.y * ratio;
+        // Relative offset in the current segment ([0..1])
+        double ratio = the_x / parametrization[i];
+        // Line polynomial
+        x = currentPoint->point.x * (1 - ratio) + data[1].point.x * ratio;
+        y = currentPoint->point.y * (1 - ratio) + data[1].point.y * ratio;
 
-        /* Line gradient */
-        dx = -(current_point.point.x - data[1].point.x);
-        dy = -(current_point.point.y - data[1].point.y);
+        // Line gradient
+        double dx = -(currentPoint->point.x - data[1].point.x);
+        double dy = -(currentPoint->point.y - data[1].point.y);
 
-        /*optimization for: ratio = the_y / sqrt (dx * dx + dy * dy);*/
+        // optimization for: ratio = the_y / sqrt (dx * dx + dy * dy)
         ratio = the_y / parametrization[i];
-        *x += -dy * ratio;
-        *y += dx * ratio;
+        x += -dy * ratio;
+        y += dx * ratio;
       }
       break;
     case CAIRO_PATH_CURVE_TO:
-        assert(false);
-        // not with cairo_path_copy_flat!
+      assert(false);
       break;
     default:
       assert(false);
@@ -241,35 +237,33 @@ namespace osmscout {
   }
 
   /* Projects the current path of cr onto the provided path. */
-  static void map_path_onto(cairo_t *cr, cairo_path_t *path)
+  static void MapCurrentPathOnContour(cairo_t *cr, cairo_path_t *path)
   {
-    cairo_path_t        *current_path;
+    cairo_path_t        *textPath;
     parametrized_path_t param;
 
     param.path=path;
-    param.parametrization=parametrize_path(path);
+    param.parametrization=CalculatePathSegmentLengths(path);
 
-    current_path=cairo_copy_path(cr);
-    cairo_new_path(cr);
+    textPath=cairo_copy_path(cr);
 
-    transform_path(current_path,
-                   (transform_point_func_t) point_on_path,
+
+    TransformPath(textPath,
+                   (transform_point_func_t) PathPointTransformer,
                    &param);
 
-    cairo_append_path(cr,current_path);
+    cairo_new_path(cr);
+    cairo_append_path(cr,textPath);
 
-    cairo_path_destroy(current_path);
-    free(param.parametrization);
+    cairo_path_destroy(textPath);
+
+    delete [] param.parametrization;
   }
 
-
-  typedef void (*draw_path_func_t) (cairo_t *cr);
 
   static void DrawContourLabelCairo(cairo_t *cr, double x, double y, const char *text)
   {
     cairo_path_t *path;
-
-    cairo_save(cr);
 
     /* Decrease tolerance a bit, since it's going to be magnified */
     //cairo_set_tolerance (cr, 0.01);
@@ -282,18 +276,22 @@ namespace osmscout {
       * tolerance for that reason. Increase tolerance to see that
       * artifact.
     */
+
+    // Make a copy of the path of the line we should draw along
     path=cairo_copy_path_flat(cr);
 
+    // Create a new path for the text we should draw along the curve
     cairo_new_path(cr);
-
     cairo_move_to(cr,x,y);
     cairo_text_path(cr,text);
-    map_path_onto(cr,path);
+
+    // Now transform the text path so that it maps to the contour of the line
+    MapCurrentPathOnContour(cr,path);
+
+    // Draw the text path
     cairo_fill(cr);
 
     cairo_path_destroy(path);
-
-    cairo_restore(cr);
   }
 
   MapPainterCairo::MapPainterCairo()
@@ -325,6 +323,71 @@ namespace osmscout {
       if (entry->second!=NULL) {
         cairo_scaled_font_destroy(entry->second);
       }
+    }
+  }
+
+  cairo_scaled_font_t* MapPainterCairo::GetScaledFont(const MapParameter& parameter,
+                                                      double fontSize)
+  {
+    std::map<size_t,cairo_scaled_font_t*>::const_iterator f;
+
+    f=font.find(fontSize);
+
+    if (f!=font.end()) {
+      return f->second;
+    }
+
+    cairo_font_face_t    *fontFace;
+    cairo_matrix_t       scaleMatrix;
+    cairo_matrix_t       transformMatrix;
+    cairo_font_options_t *options;
+    cairo_scaled_font_t  *scaledFont;
+
+    fontFace=cairo_toy_font_face_create(parameter.GetFontName().c_str(),
+                                        CAIRO_FONT_SLANT_NORMAL,
+                                        CAIRO_FONT_WEIGHT_NORMAL);
+
+    cairo_matrix_init_scale(&scaleMatrix,
+                            parameter.GetFontSize()*fontSize,
+                            parameter.GetFontSize()*fontSize);
+
+    cairo_matrix_init_identity(&transformMatrix);
+
+    options=cairo_font_options_create();
+    cairo_font_options_set_hint_style (options,CAIRO_HINT_STYLE_NONE);
+    cairo_font_options_set_hint_metrics (options,CAIRO_HINT_METRICS_OFF);
+
+    scaledFont=cairo_scaled_font_create(fontFace,
+                                        &scaleMatrix,
+                                        &transformMatrix,
+                                        options);
+
+    cairo_font_options_destroy(options);
+    cairo_font_face_destroy(fontFace);
+
+    return font.insert(std::pair<size_t,cairo_scaled_font_t*>(fontSize,scaledFont)).first->second;
+  }
+
+  void MapPainterCairo::SetLineAttributes(double r, double g, double b, double a,
+                                          double width,
+                                          const std::vector<double>& dash)
+  {
+    double dashArray[10];
+
+    assert(dash.size()<=10);
+
+    cairo_set_source_rgba(draw,r,g,b,a);
+
+    cairo_set_line_width(draw,width);
+
+    if (dash.empty()) {
+      cairo_set_dash(draw,NULL,0,0);
+    }
+    else {
+      for (size_t i=0; i<dash.size(); i++) {
+        dashArray[i]=dash[i]*width;
+      }
+      cairo_set_dash(draw,dashArray,dash.size(),0);
     }
   }
 
@@ -404,48 +467,6 @@ namespace osmscout {
     style.SetId(std::numeric_limits<size_t>::max());
 
     return false;
-  }
-
-  cairo_scaled_font_t* MapPainterCairo::GetScaledFont(const MapParameter& parameter,
-                                                      size_t fontSize)
-  {
-    std::map<size_t,cairo_scaled_font_t*>::const_iterator f;
-
-    f=font.find(fontSize);
-
-    if (f!=font.end()) {
-      return f->second;
-    }
-
-    cairo_font_face_t    *fontFace;
-    cairo_matrix_t       scaleMatrix;
-    cairo_matrix_t       transformMatrix;
-    cairo_font_options_t *options;
-    cairo_scaled_font_t  *scaledFont;
-
-    fontFace=cairo_toy_font_face_create(parameter.GetFontName().c_str(),
-                                        CAIRO_FONT_SLANT_NORMAL,
-                                        CAIRO_FONT_WEIGHT_NORMAL);
-
-    cairo_matrix_init_scale(&scaleMatrix,
-                            parameter.GetFontSize()*fontSize,
-                            parameter.GetFontSize()*fontSize);
-
-    cairo_matrix_init_identity(&transformMatrix);
-
-    options=cairo_font_options_create();
-    cairo_font_options_set_hint_style (options,CAIRO_HINT_STYLE_NONE);
-    cairo_font_options_set_hint_metrics (options,CAIRO_HINT_METRICS_OFF);
-
-    scaledFont=cairo_scaled_font_create(fontFace,
-                                        &scaleMatrix,
-                                        &transformMatrix,
-                                        options);
-
-    cairo_font_options_destroy(options);
-    cairo_font_face_destroy(fontFace);
-
-    return font.insert(std::pair<size_t,cairo_scaled_font_t*>(fontSize,scaledFont)).first->second;
   }
 
   void MapPainterCairo::GetTextDimension(const MapParameter& parameter,
@@ -590,15 +611,12 @@ namespace osmscout {
     cairo_new_path(draw);
 
     if (contour.points[contour.GetStart()].x<=contour.points[contour.GetEnd()].x) {
-      bool start=true;
-
       for (size_t j=contour.GetStart(); j<=contour.GetEnd(); j++) {
         if (contour.points[j].draw) {
-          if (start) {
+          if (j==contour.GetStart()) {
             cairo_move_to(draw,
                           contour.points[j].x,
                           contour.points[j].y);
-            start=false;
           }
           else {
             cairo_line_to(draw,
@@ -614,17 +632,14 @@ namespace osmscout {
       }
     }
     else {
-      bool start=true;
-
       for (size_t j=0; j<=contour.GetEnd()-contour.GetStart(); j++) {
         size_t idx=contour.GetEnd()-j;
 
         if (contour.points[idx].draw) {
-          if (start) {
+          if (j==contour.GetStart()) {
             cairo_move_to(draw,
                           contour.points[idx].x,
                           contour.points[idx].y);
-            start=false;
           }
           else {
             cairo_line_to(draw,
@@ -745,13 +760,7 @@ namespace osmscout {
                                  CapStyle endCap,
                                  const TransPolygon& path)
   {
-    double dashArray[10];
-
-    assert(dash.size()<=10);
-
-    cairo_set_source_rgba(draw,r,g,b,a);
-
-    cairo_set_line_width(draw,width);
+    SetLineAttributes(r,g,b,a,width,dash);
 
     if (startCap==capRound &&
         endCap==capRound &&
@@ -762,39 +771,21 @@ namespace osmscout {
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
     }
 
-    if (dash.empty()) {
-      cairo_set_dash(draw,NULL,0,0);
-    }
-    else {
-      for (size_t i=0; i<dash.size(); i++) {
-        dashArray[i]=dash[i]*width;
-      }
-      cairo_set_dash(draw,dashArray,dash.size(),0);
-    }
-
-    bool   start=true;
     for (size_t i=path.GetStart(); i<=path.GetEnd(); i++) {
       if (path.points[i].draw) {
-        if (start) {
+        if (i==path.GetStart()) {
           cairo_new_path(draw);
           cairo_move_to(draw,
                         path.points[i].x,
                         path.points[i].y);
-          start=false;
         }
         else {
           cairo_line_to(draw,
                         path.points[i].x,
                         path.points[i].y);
         }
-
-        //nodesDrawnCount++;
-      }
-      else {
-        //nodesOutCount++;
       }
     }
-    //nodesAllCount+=way->nodes.size();
 
     cairo_stroke(draw);
 
@@ -839,37 +830,33 @@ namespace osmscout {
                           1);
     cairo_set_line_width(draw,1);
 
-    bool start=true;
     for (size_t i=area.GetStart(); i<=area.GetEnd(); i++) {
       if (area.points[i].draw) {
-        if (start) {
+        if (i==area.GetStart()) {
           cairo_new_path(draw);
           cairo_move_to(draw,area.points[i].x,area.points[i].y);
-          start=false;
         }
         else {
           cairo_line_to(draw,area.points[i].x,area.points[i].y);
         }
-        //nodesDrawnCount++;
       }
-
-      //nodesAllCount++;
     }
 
-    cairo_fill(draw);
+    cairo_line_to(draw,area.points[area.GetStart()].x,area.points[area.GetStart()].y);
+
+    cairo_fill_preserve(draw);
 
     if (lineStyle!=NULL) {
-      DrawPath(projection,
-               parameter,
-               lineStyle->GetLineR(),
-               lineStyle->GetLineG(),
-               lineStyle->GetLineB(),
-               lineStyle->GetLineA(),
-               borderWidth[(size_t)type],
-               lineStyle->GetDash(),
-               capRound,
-               capRound,
-               area);
+      SetLineAttributes(lineStyle->GetLineR(),
+                        lineStyle->GetLineG(),
+                        lineStyle->GetLineB(),
+                        lineStyle->GetLineA(),
+                        borderWidth[(size_t)type],
+                        lineStyle->GetDash());
+
+      cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
+
+      cairo_stroke(draw);
     }
   }
 
@@ -887,37 +874,33 @@ namespace osmscout {
 
     cairo_set_source(draw,patterns[patternStyle.GetId()-1]);
 
-    bool start=true;
     for (size_t i=area.GetStart(); i<=area.GetEnd(); i++) {
       if (area.points[i].draw) {
-        if (start) {
+        if (i==area.GetStart()) {
           cairo_new_path(draw);
           cairo_move_to(draw,area.points[i].x,area.points[i].y);
-          start=false;
         }
         else {
           cairo_line_to(draw,area.points[i].x,area.points[i].y);
         }
-        //nodesDrawnCount++;
       }
-
-      //nodesAllCount++;
     }
 
-    cairo_fill(draw);
+    cairo_line_to(draw,area.points[area.GetStart()].x,area.points[area.GetStart()].y);
+
+    cairo_fill_preserve(draw);
 
     if (lineStyle!=NULL) {
-      DrawPath(projection,
-               parameter,
-               lineStyle->GetLineR(),
-               lineStyle->GetLineG(),
-               lineStyle->GetLineB(),
-               lineStyle->GetLineA(),
-               borderWidth[(size_t)type],
-               lineStyle->GetDash(),
-               capRound,
-               capRound,
-               area);
+      SetLineAttributes(lineStyle->GetLineR(),
+                        lineStyle->GetLineG(),
+                        lineStyle->GetLineB(),
+                        lineStyle->GetLineA(),
+                        borderWidth[(size_t)type],
+                        lineStyle->GetDash());
+
+      cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
+
+      cairo_stroke(draw);
     }
   }
 
