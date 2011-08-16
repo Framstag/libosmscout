@@ -90,6 +90,11 @@ namespace osmscout {
       return attributes.GetRefName();
     }
 
+    inline std::string GetHouseNr() const
+    {
+      return attributes.GetHouseNr();
+    }
+
     inline int8_t GetLayer() const
     {
       return attributes.GetLayer();

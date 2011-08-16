@@ -61,6 +61,13 @@ namespace osmscout {
         }
         tag=tags.erase(tag);
       }
+      else if (tag->key==typeConfig.tagHouseNr) {
+        houseNr=tag->value;
+        if (!houseNr.empty()) {
+          flags|=SegmentAttributes::hasHouseNr;
+        }
+        tag=tags.erase(tag);
+      }
       else if (tag->key==typeConfig.tagLayer) {
         if (!StringToNumber(tag->value.c_str(),layer)) {
           progress.Warning(std::string("Layer tag value '")+tag->value+"' for "+NumberToString(id)+" is not numeric!");
@@ -182,6 +189,10 @@ namespace osmscout {
       scanner.Read(ref);
     }
 
+    if (flags & hasHouseNr) {
+      scanner.Read(houseNr);
+    }
+
     if (flags & hasLayer) {
       scanner.Read(layer);
     }
@@ -225,6 +236,10 @@ namespace osmscout {
 
     if (flags & hasRef) {
       writer.Write(ref);
+    }
+
+    if (flags & hasHouseNr) {
+      writer.Write(houseNr);
     }
 
     if (flags & hasLayer) {

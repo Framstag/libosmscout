@@ -744,6 +744,9 @@ namespace osmscout {
           else if (node->GetTagKey(i)==styleConfig.GetTypeConfig()->tagRef)  {
             label=node->GetTagValue(i);
           }
+          else if (node->GetTagKey(i)==styleConfig.GetTypeConfig()->tagHouseNr)  {
+            label=node->GetTagValue(i);
+          }
         }
 
         hasLabel=!label.empty();
@@ -966,6 +969,9 @@ namespace osmscout {
         }
         else if (!area->GetName().empty()) {
           label=area->GetName();
+        }
+        else if (!area->GetHouseNr().empty()) {
+          label=area->GetHouseNr();
         }
 
         hasLabel=!label.empty();

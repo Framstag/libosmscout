@@ -364,6 +364,7 @@ namespace osmscout {
     TagId                                           tagType;
     TagId                                           tagWidth;
     TagId                                           tagArea;
+    TagId                                           tagHouseNr;
 
   public:
     TypeConfig();

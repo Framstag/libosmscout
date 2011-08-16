@@ -39,6 +39,7 @@ namespace osmscout {
     const static uint16_t isArea          = 1 <<  3; //! We are an area (or a way if not set)
 
     // Area flags
+    const static uint16_t hasHouseNr      = 1 << 14; //! We have a house number
     const static uint16_t isBuilding      = 1 << 15; //! We are a building
 
     // Way flags
@@ -52,13 +53,14 @@ namespace osmscout {
     const static uint16_t isOneway        = 1 << 15; //! We are a oneway (in way direction)
 
   public:
-    TypeId                    type;  //! type of the way/relation
+    TypeId                    type;    //! type of the way/relation
     uint16_t                  flags;
-    std::string               name;  //! name
-    std::string               ref;   //! reference name (normally drawn in a plate)
-    int8_t                    layer; //! layer to draw on
-    uint8_t                   width; //! width of way
-    std::vector<Tag>          tags;  //! list of preparsed tags
+    std::string               name;    //! name
+    std::string               ref;     //! reference name (normally drawn in a plate)
+    std::string               houseNr; //! house number
+    int8_t                    layer;   //! layer to draw on
+    uint8_t                   width;   //! width of way
+    std::vector<Tag>          tags;    //! list of preparsed tags
 
   public:
     inline SegmentAttributes()
@@ -93,6 +95,11 @@ namespace osmscout {
     inline std::string GetRefName() const
     {
       return ref;
+    }
+
+    inline std::string GetHouseNr() const
+    {
+      return houseNr;
     }
 
     inline int8_t GetLayer() const
