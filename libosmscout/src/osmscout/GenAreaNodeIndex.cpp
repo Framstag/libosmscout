@@ -212,7 +212,7 @@ namespace osmscout {
       if (node.GetType()>=leafs.size()) {
         leafs.resize(node.GetType()+1);
       }
-      if (leafs[node.GetType()].size()==0){
+      if (leafs[node.GetType()].empty()) {
         leafs[node.GetType()].resize(1);
       }
 
@@ -230,7 +230,7 @@ namespace osmscout {
 
     drawTypeCount=0;
     for (size_t i=0; i<leafs.size(); i++) {
-      if (leafs[i].size()>0) {
+      if (!leafs[i].empty()) {
         drawTypeCount++;
         leafCount+=leafs[i].size();
       }
@@ -266,7 +266,7 @@ namespace osmscout {
 
     // Index lookup table
     for (TypeId i=0; i<leafs.size(); i++) {
-      if (leafs[i].size()>0) {
+      if (!leafs[i].empty()) {
         writer.Write(i); // Type
         writer.Write(0); // Offset of top index entry
       }
@@ -274,7 +274,7 @@ namespace osmscout {
 
     // Index pages
     for (TypeId i=0; i<leafs.size(); i++) {
-      if (leafs[i].size()>0) {
+      if (!leafs[i].empty()) {
         for (std::vector<NodeLeaf>::reverse_iterator leaf=leafs[i].rbegin();
              leaf!=leafs[i].rend();
              ++leaf) {
@@ -329,7 +329,7 @@ namespace osmscout {
     }
 
     for (TypeId i=0; i<leafs.size(); i++) {
-      if (leafs[i].size()>0) {
+      if (!leafs[i].empty()) {
         //std::cout << i << " " << leafs[i][0].offset << " " << leafs[i][leafs[i][0].children[0]].offset << " " << leafs[i][leafs[i][0].children[1]].offset << " " << leafs[i][leafs[i][0].children[2]].offset << " " << leafs[i][leafs[i][0].children[3]].offset << std::endl;
         writer.Write(i);
         writer.Write(leafs[i][0].offset);

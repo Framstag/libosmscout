@@ -26,7 +26,7 @@ namespace osmscout {
 
   bool Relation::GetCenter(double& lat, double& lon) const
   {
-    if (roles.size()==0) {
+    if (roles.empty()) {
       return false;
     }
 
@@ -70,8 +70,8 @@ namespace osmscout {
                                 double& minLat,
                                 double& maxLat) const
   {
-    assert(roles.size()>0);
-    assert(roles[0].nodes.size()>0);
+    assert(!roles.empty());
+    assert(!roles[0].nodes.empty());
 
     minLon=roles[0].nodes[0].lon;
     maxLon=roles[0].nodes[0].lon;
@@ -200,7 +200,7 @@ namespace osmscout {
 
       writer.WriteNumber((uint32_t)roles[i].nodes.size());
 
-      if (roles[i].nodes.size()>0) {
+      if (!roles[i].nodes.empty()) {
         Id       minId=std::numeric_limits<Id>::max();
         uint32_t minLat=std::numeric_limits<uint32_t>::max();
         uint32_t minLon=std::numeric_limits<uint32_t>::max();

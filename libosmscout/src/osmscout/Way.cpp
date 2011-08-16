@@ -27,7 +27,7 @@ namespace osmscout {
 
   bool Way::GetCenter(double& lat, double& lon) const
   {
-    if (nodes.size()==0) {
+    if (nodes.empty()) {
       return false;
     }
 
@@ -101,7 +101,7 @@ namespace osmscout {
                            double& minLat,
                            double& maxLat) const
   {
-    assert(nodes.size()>0);
+    assert(!nodes.empty());
 
     minLon=nodes[0].lon;
     maxLon=nodes[0].lon;
@@ -201,7 +201,7 @@ namespace osmscout {
 
     writer.WriteNumber((uint32_t)nodes.size());
 
-    if (nodes.size()>0) {
+    if (!nodes.empty()) {
       Id       minId=std::numeric_limits<Id>::max();
       uint32_t minLat=std::numeric_limits<uint32_t>::max();
       uint32_t minLon=std::numeric_limits<uint32_t>::max();

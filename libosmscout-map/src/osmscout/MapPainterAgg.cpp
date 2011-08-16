@@ -487,7 +487,7 @@ namespace osmscout {
 
     renderer_aa->color(agg::rgba(r,g,b,a));
 
-    if (dash.size()==0) {
+    if (dash.empty()) {
       agg::conv_stroke<agg::path_storage> stroke(p);
 
       stroke.width(width);

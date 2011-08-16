@@ -37,12 +37,10 @@ namespace osmscout {
   /* Returns Euclidean distance between two points */
   static double two_points_distance(cairo_path_data_t *a, cairo_path_data_t *b)
   {
-    double dx, dy;
+    double dx=b->point.x-a->point.x;
+    double dy=b->point.y-a->point.y;
 
-    dx = b->point.x - a->point.x;
-    dy = b->point.y - a->point.y;
-
-    return sqrt (dx * dx + dy * dy);
+    return sqrt(pow(dx,2)+pow(dy,2));
   }
 
   typedef double parametrization_t;
@@ -72,7 +70,9 @@ namespace osmscout {
       case CAIRO_PATH_CLOSE_PATH:
         /* Make it look like it's a line_to to last_move_to */
         data = (&last_move_to) - 1;
-        /* fall through */
+        parametrization[i] = two_points_distance (&current_point, &data[1]);
+        current_point = data[1];
+        break;
       case CAIRO_PATH_LINE_TO:
         parametrization[i] = two_points_distance (&current_point, &data[1]);
         current_point = data[1];
@@ -83,6 +83,7 @@ namespace osmscout {
         break;
       default:
         assert(false);
+        break;
       }
     }
 
@@ -106,6 +107,8 @@ namespace osmscout {
       case CAIRO_PATH_CURVE_TO:
         f (closure, &data[3].point.x, &data[3].point.y);
         f (closure, &data[2].point.x, &data[2].point.y);
+        f (closure, &data[1].point.x, &data[1].point.y);
+        break;
       case CAIRO_PATH_MOVE_TO:
       case CAIRO_PATH_LINE_TO:
         f (closure, &data[1].point.x, &data[1].point.y);
@@ -114,13 +117,15 @@ namespace osmscout {
         break;
       default:
         assert(false);
+        break;
       }
     }
   }
 
 
   /* Simple struct to hold a path and its parametrization */
-  typedef struct {
+  typedef struct
+  {
     cairo_path_t *path;
     parametrization_t *parametrization;
   } parametrized_path_t;
@@ -180,6 +185,7 @@ namespace osmscout {
         break;
       default:
         assert(false);
+        break;
       }
     }
     data = &path->data[i];
@@ -191,7 +197,22 @@ namespace osmscout {
     case CAIRO_PATH_CLOSE_PATH:
       /* Make it look like it's a line_to to last_move_to */
       data = (&last_move_to) - 1;
-      /* fall through */
+      {
+        ratio = the_x / parametrization[i];
+        /* Line polynomial */
+        *x = current_point.point.x * (1 - ratio) + data[1].point.x * ratio;
+        *y = current_point.point.y * (1 - ratio) + data[1].point.y * ratio;
+
+        /* Line gradient */
+        dx = -(current_point.point.x - data[1].point.x);
+        dy = -(current_point.point.y - data[1].point.y);
+
+        /*optimization for: ratio = the_y / sqrt (dx * dx + dy * dy);*/
+        ratio = the_y / parametrization[i];
+        *x += -dy * ratio;
+        *y += dx * ratio;
+      }
+      break;
     case CAIRO_PATH_LINE_TO:
       {
         ratio = the_x / parametrization[i];
@@ -215,6 +236,7 @@ namespace osmscout {
       break;
     default:
       assert(false);
+      break;
     }
   }
 
@@ -243,7 +265,7 @@ namespace osmscout {
 
   typedef void (*draw_path_func_t) (cairo_t *cr);
 
-  static void draw_twisted(cairo_t *cr, double x, double y, const char *text)
+  static void DrawContourLabelCairo(cairo_t *cr, double x, double y, const char *text)
   {
     cairo_path_t *path;
 
@@ -261,7 +283,6 @@ namespace osmscout {
       * artifact.
     */
     path=cairo_copy_path_flat(cr);
-    //path=cairo_copy_path(cr);
 
     cairo_new_path(cr);
 
@@ -641,10 +662,10 @@ namespace osmscout {
                           style.GetTextB(),
                           style.GetTextA());
 
-    draw_twisted(draw,
-                 (length-textExtents.width)/2+textExtents.x_bearing,
-                 fontExtents.ascent+textExtents.y_bearing,
-                 text.c_str());
+    DrawContourLabelCairo(draw,
+                          (length-textExtents.width)/2+textExtents.x_bearing,
+                          fontExtents.ascent+textExtents.y_bearing,
+                          text.c_str());
   }
 
   void MapPainterCairo::DrawSymbol(const SymbolStyle* style,
@@ -734,14 +755,14 @@ namespace osmscout {
 
     if (startCap==capRound &&
         endCap==capRound &&
-        dash.size()==0) {
+        dash.empty()) {
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
     }
     else {
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
     }
 
-    if (dash.size()==0) {
+    if (dash.empty()) {
       cairo_set_dash(draw,NULL,0,0);
     }
     else {
@@ -777,7 +798,7 @@ namespace osmscout {
 
     cairo_stroke(draw);
 
-    if (dash.size()==0 &&
+    if (dash.empty() &&
       startCap==capRound &&
       endCap!=capRound) {
       cairo_new_path(draw);
@@ -790,7 +811,7 @@ namespace osmscout {
       cairo_stroke(draw);
     }
 
-    if (dash.size()==0 &&
+    if (dash.empty() &&
       endCap==capRound &&
       startCap!=capRound) {
       cairo_new_path(draw);

@@ -97,7 +97,7 @@ namespace osmscout {
     }
 
     level=0;
-    while (remainingWayTypes.size()>0)  {
+    while (!remainingWayTypes.empty()) {
       uint32_t         wayCount=0;
       std::set<TypeId> currentWayTypes(remainingWayTypes);
       double           cellWidth=360.0/pow(2.0,(int)level);
@@ -176,7 +176,7 @@ namespace osmscout {
 
           double average=entryCount*1.0/cellFillCount[i].size();
 
-          if (cellFillCount[i].size()>0 &&
+          if (!cellFillCount[i].empty() &&
               (max>parameter.GetAreaWayIndexCellSizeMax() ||
                average>parameter.GetAreaWayIndexCellSizeAverage())) {
             currentWayTypes.erase(i);
@@ -193,7 +193,7 @@ namespace osmscout {
         wayTypeData[*cwt].indexCells=cellFillCount[*cwt].size();
         wayTypeData[*cwt].indexEntries=0;
 
-        if (cellFillCount[*cwt].size()>0) {
+        if (!cellFillCount[*cwt].empty()) {
           wayTypeData[*cwt].cellXStart=cellFillCount[*cwt].begin()->first.x;
           wayTypeData[*cwt].cellYStart=cellFillCount[*cwt].begin()->first.y;
 
@@ -234,7 +234,7 @@ namespace osmscout {
     }
 
     level=0;
-    while (remainingRelTypes.size()>0)  {
+    while (!remainingRelTypes.empty())  {
       uint32_t         relCount=0;
       std::set<TypeId> currentRelTypes(remainingRelTypes);
       double           cellWidth=360.0/pow(2.0,(int)level);
@@ -313,7 +313,7 @@ namespace osmscout {
 
           double average=entryCount*1.0/cellFillCount[i].size();
 
-          if (cellFillCount[i].size()>0 &&
+          if (!cellFillCount[i].empty() &&
               (max>parameter.GetAreaWayIndexCellSizeMax() ||
                average>parameter.GetAreaWayIndexCellSizeAverage())) {
             currentRelTypes.erase(i);
@@ -330,7 +330,7 @@ namespace osmscout {
         relTypeData[*crt].indexCells=cellFillCount[*crt].size();
         relTypeData[*crt].indexEntries=0;
 
-        if (cellFillCount[*crt].size()>0) {
+        if (!cellFillCount[*crt].empty()) {
           relTypeData[*crt].cellXStart=cellFillCount[*crt].begin()->first.x;
           relTypeData[*crt].cellYStart=cellFillCount[*crt].begin()->first.y;
 
@@ -444,7 +444,7 @@ namespace osmscout {
         }
       }
 
-      if (indexTypes.size()==0) {
+      if (indexTypes.empty()) {
         continue;
       }
 
@@ -605,7 +605,7 @@ namespace osmscout {
         }
       }
 
-      if (indexTypes.size()==0) {
+      if (indexTypes.empty()) {
         continue;
       }
 

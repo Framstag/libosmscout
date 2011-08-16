@@ -615,7 +615,7 @@ namespace osmscout {
     ids.push_back(id);
 
     if (GetNodes(ids,nodes)) {
-      if (nodes.size()>0) {
+      if (!nodes.empty()) {
         node=*nodes.begin();
         return true;
       }
@@ -696,7 +696,7 @@ namespace osmscout {
     ids.push_back(id);
 
     if (GetWays(ids,ways)) {
-      if (ways.size()>0) {
+      if (!ways.empty()) {
         way=*ways.begin();
         return true;
       }
@@ -797,7 +797,7 @@ namespace osmscout {
 
     nodeUseIndex.GetNodeIndexEntries(ids,indexEntries);
 
-    if (indexEntries.size()==0) {
+    if (indexEntries.empty()) {
       std::cout << "GetJoints(): Ids not found in index" << std::endl;
       return false;
     }
@@ -904,7 +904,7 @@ namespace osmscout {
       }
     }
 
-    if (remaining.size()>0) {
+    if (!remaining.empty()) {
       std::vector<FileOffset> offsets;
       static FileScanner      wayScanner;
       std::string             file=path+"/"+"ways.dat";
@@ -1017,7 +1017,7 @@ namespace osmscout {
 
   bool CanBeTurnedInto(const Way& way, Id via, Id to)
   {
-    if (way.restrictions.size()==0) {
+    if (way.restrictions.empty()) {
       return true;
     }
 
@@ -1540,7 +1540,7 @@ namespace osmscout {
         std::cout << "=========== Routing end ==============" << std::endl;
         return true;
       }
-    } while (openList.size()>0);
+    } while (!openList.empty());
 
     std::cout << "No route found!" << std::endl;
     std::cout << "=========== Routing end ==============" << std::endl;
@@ -1563,7 +1563,7 @@ namespace osmscout {
 
     description.Clear();
 
-    if (data.Entries().size()==0) {
+    if (data.Entries().empty()) {
       return true;
     }
 
@@ -1654,7 +1654,7 @@ namespace osmscout {
     way.SetType(routeType);
     way.nodes.reserve(data.Entries().size());
 
-    if (data.Entries().size()==0) {
+    if (data.Entries().empty()) {
       return true;
     }
 

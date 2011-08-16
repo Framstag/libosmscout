@@ -358,7 +358,7 @@ namespace osmscout {
       return false;
     }
 
-    if (regions.size()==0) {
+    if (regions.empty()) {
       return true;
     }
 

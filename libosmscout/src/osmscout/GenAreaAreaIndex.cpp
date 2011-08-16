@@ -117,8 +117,8 @@ namespace osmscout {
          ++leaf) {
       writer.GetPos(leaf->second.offset);
 
-      assert(leaf->second.areas.size()>0 ||
-             leaf->second.relAreas.size()>0 ||
+      assert(!leaf->second.areas.empty() ||
+             !leaf->second.relAreas.empty() ||
              leaf->second.children[0]!=0 ||
              leaf->second.children[1]!=0 ||
              leaf->second.children[2]!=0 ||
@@ -400,8 +400,8 @@ namespace osmscout {
           // Bounding box calculation
           //
 
-          assert(relation.roles.size()>0);
-          assert(relation.roles[0].nodes.size()>0);
+          assert(!relation.roles.empty());
+          assert(!relation.roles[0].nodes.empty());
 
           double minLon=relation.roles[0].nodes[0].lon;
           double maxLon=relation.roles[0].nodes[0].lon;

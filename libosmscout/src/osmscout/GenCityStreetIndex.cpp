@@ -84,7 +84,7 @@ namespace osmscout {
 
     void CalculateMinMax()
     {
-      if (area.size()>0) {
+      if (!area.empty()) {
         minlon=area[0].lon;
         maxlon=area[0].lon;
 

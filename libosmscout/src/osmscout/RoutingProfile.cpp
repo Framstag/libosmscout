@@ -37,7 +37,7 @@ namespace osmscout {
 
   void RoutingProfile::SetTypeCostFactor(TypeId type, double costFactor)
   {
-    if (costFactors.size()==0) {
+    if (costFactors.empty()) {
       minCostFactor=costFactor;
     }
     else {

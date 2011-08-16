@@ -161,7 +161,7 @@ namespace osmscout {
     // tags
 
     this->tags=tags;
-    if (this->tags.size()>0) {
+    if (!this->tags.empty()) {
       flags|=SegmentAttributes::hasTags;
     }
 

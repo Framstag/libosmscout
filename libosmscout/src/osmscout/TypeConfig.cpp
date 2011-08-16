@@ -494,7 +494,7 @@ namespace osmscout {
   {
     typeId=typeIgnore;
 
-    if (tagMap.size()==0) {
+    if (tagMap.empty()) {
       return false;
     }
 
@@ -528,7 +528,7 @@ namespace osmscout {
     wayType=typeIgnore;
     areaType=typeIgnore;
 
-    if (tagMap.size()==0) {
+    if (tagMap.empty()) {
       return false;
     }
 
@@ -573,7 +573,7 @@ namespace osmscout {
   {
     typeId=typeIgnore;
 
-    if (tagMap.size()==0) {
+    if (tagMap.empty()) {
       return false;
     }
 

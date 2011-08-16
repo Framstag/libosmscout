@@ -320,7 +320,7 @@ namespace osmscout {
     }
 
     // Try to consume all roles
-    while (roles.size()>0) {
+    while (!roles.empty()) {
       TypeId type=typeIgnore;
       size_t rolesSelected=1;
       bool finished=false;
@@ -346,7 +346,7 @@ namespace osmscout {
 
       // Now consume more roles that have the same start or end
       // until all joined points build a closed shape ("current way")
-      while (roles.size()>0 &&
+      while (!roles.empty() &&
              !finished) {
         bool found=false;
 
@@ -502,7 +502,7 @@ namespace osmscout {
       }
     }
 
-    if (groups.size()==0) {
+    if (groups.empty()) {
       progress.Warning("Multipolygon relation "+NumberToString(relation.GetId())+
                        ": No groups");
       return false;
@@ -704,7 +704,7 @@ namespace osmscout {
         return false;
       }
 
-      if (rawRel.members.size()==0) {
+      if (rawRel.members.empty()) {
         progress.Warning("Relation "+
                          NumberToString(rawRel.GetId())+
                          " does not have any members!");
@@ -884,7 +884,7 @@ namespace osmscout {
         rel.flags|=Relation::isArea;
       }
 
-      if (rel.tags.size()>0) {
+      if (!rel.tags.empty()) {
         rel.flags|=Relation::hasTags;
       }
 

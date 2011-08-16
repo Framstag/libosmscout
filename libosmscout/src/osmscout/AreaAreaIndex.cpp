@@ -218,7 +218,7 @@ namespace osmscout {
     for (size_t level=0;
          !stopArea &&
          level<=this->maxLevel &&
-         co.size()>0 &&
+         !co.empty() &&
          level<=maxAreaLevel;
          level++) {
       ntx.clear();

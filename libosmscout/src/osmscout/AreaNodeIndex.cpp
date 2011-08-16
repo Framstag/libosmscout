@@ -179,7 +179,7 @@ namespace osmscout {
 
       for (size_t level=0;
            !stop &&
-           co.size()>0;
+           !co.empty();
            level++) {
         // Clear the list of new index tiles
         ntx.clear();

@@ -407,14 +407,14 @@ namespace osmscout {
 
     if (startCap==capRound &&
         endCap==capRound &&
-        dash.size()==0) {
+        dash.empty()) {
       pen.setCapStyle(Qt::RoundCap);
     }
     else {
       pen.setCapStyle(Qt::FlatCap);
     }
 
-    if (dash.size()==0) {
+    if (dash.empty()) {
       pen.setStyle(Qt::SolidLine);
     }
     else {
@@ -471,7 +471,7 @@ namespace osmscout {
     painter->setPen(pen);
     painter->drawPolyline(polygon);*/
 
-    if (dash.size()==0 &&
+    if (dash.empty() &&
         startCap==capRound &&
         endCap!=capRound) {
       painter->setBrush(QBrush(QColor::fromRgbF(r,g,b,a)));
@@ -481,7 +481,7 @@ namespace osmscout {
                                    width/2,width/2);
     }
 
-    if (dash.size()==0 &&
+    if (dash.empty() &&
       endCap==capRound &&
       startCap!=capRound) {
       painter->setBrush(QBrush(QColor::fromRgbF(r,g,b,a)));
@@ -573,7 +573,7 @@ namespace osmscout {
                                   style.GetLineA()));
     pen.setWidthF(lineWidth);
 
-    if (style.GetDash().size()==0) {
+    if (style.GetDash().empty()) {
       pen.setStyle(Qt::SolidLine);
       pen.setCapStyle(Qt::RoundCap);
     }

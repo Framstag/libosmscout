@@ -223,7 +223,7 @@ namespace osmscout {
                                   bool optimize,
                                   const std::vector<Point>& nodes)
   {
-    if (nodes.size()==0)
+    if (nodes.empty())
     {
       length=0;
       return;

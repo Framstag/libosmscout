@@ -193,7 +193,7 @@ namespace osmscout {
         cellDataOffsets.push_back(cellDataOffset);
       }
 
-      if (cellDataOffsets.size()==0) {
+      if (cellDataOffsets.empty()) {
         continue;
       }
 

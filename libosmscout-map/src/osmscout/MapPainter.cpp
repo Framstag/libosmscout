@@ -138,7 +138,7 @@ namespace osmscout {
                              const std::vector<Point>& nodes,
                              double pixelOffset) const
   {
-    if (nodes.size()==0) {
+    if (nodes.empty()) {
       return false;
     }
 
@@ -201,7 +201,7 @@ namespace osmscout {
                                   double& xmin, double& ymin,
                                   double& xmax, double& ymax)
   {
-    if (nodes.size()==0) {
+    if (nodes.empty()) {
       return false;
     }
 
@@ -527,7 +527,7 @@ namespace osmscout {
         for (int xc=xcMin; xc<=xcMax; xc++) {
           int c=yc*yCellCount+xc;
 
-          if (labelRefs[c].size()>0) {
+          if (!labelRefs[c].empty()) {
             for (std::list<size_t>::const_iterator idx=labelRefs[c].begin();
                  idx!=labelRefs[c].end();
                  idx++) {
@@ -570,7 +570,7 @@ namespace osmscout {
         for (int xc=xcMin; xc<=xcMax; xc++) {
           int c=yc*yCellCount+xc;
 
-          if (labelRefs[c].size()>0) {
+          if (!labelRefs[c].empty()) {
             for (std::list<size_t>::const_iterator idx=labelRefs[c].begin();
                  idx!=labelRefs[c].end();
                  idx++) {
