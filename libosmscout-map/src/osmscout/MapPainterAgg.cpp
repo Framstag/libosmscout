@@ -340,14 +340,11 @@ namespace osmscout {
     double yo=0;
 
     if (contour.points[contour.GetStart()].x<contour.points[contour.GetEnd()].x) {
-      bool start=true;
-
       for (size_t j=contour.GetStart(); j<=contour.GetEnd(); j++) {
         if (contour.points[j].draw) {
-          if (start) {
+          if (j==contour.GetStart()) {
             path.move_to(contour.points[j].x,
                 contour.points[j].y);
-            start=false;
           }
           else {
             path.line_to(contour.points[j].x,
@@ -362,16 +359,13 @@ namespace osmscout {
       }
     }
     else {
-      bool start=true;
-
       for (size_t j=0; j<=contour.GetEnd()-contour.GetStart(); j++) {
         size_t idx=contour.GetEnd()-j;
 
         if (contour.points[idx].draw) {
-          if (start) {
+          if (j==contour.GetStart()) {
             path.move_to(contour.points[idx].x,
                 contour.points[idx].y);
-            start=false;
           }
           else {
             path.line_to(contour.points[idx].x,
@@ -469,20 +463,15 @@ namespace osmscout {
   {
     agg::path_storage p;
 
-    bool start=true;
     for (size_t i=polygon.GetStart(); i<=polygon.GetEnd(); i++) {
       if (polygon.points[i].draw) {
-        if (start) {
+        if (i==polygon.GetStart()) {
           p.move_to(polygon.points[i].x,polygon.points[i].y);
-          start=false;
         }
         else {
           p.line_to(polygon.points[i].x,polygon.points[i].y);
         }
-        //nodesDrawnCount++;
       }
-
-      //nodesAllCount++;
     }
 
     renderer_aa->color(agg::rgba(r,g,b,a));
@@ -533,20 +522,15 @@ namespace osmscout {
   {
     agg::path_storage path;
 
-    bool start=true;
     for (size_t i=polygon.GetStart(); i<=polygon.GetEnd(); i++) {
       if (polygon.points[i].draw) {
-        if (start) {
+        if (i==polygon.GetStart()) {
           path.move_to(polygon.points[i].x,polygon.points[i].y);
-          start=false;
         }
         else {
           path.line_to(polygon.points[i].x,polygon.points[i].y);
         }
-        //nodesDrawnCount++;
       }
-
-      //nodesAllCount++;
     }
 
     path.close_polygon();

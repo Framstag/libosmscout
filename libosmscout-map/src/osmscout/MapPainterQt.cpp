@@ -257,13 +257,10 @@ namespace osmscout {
     QPainterPath p;
 
     if (path.points[path.GetStart()].x<path.points[path.GetEnd()].x) {
-      bool start=true;
-
       for (size_t j=path.GetStart(); j<=path.GetEnd(); j++) {
         if (path.points[j].draw) {
-          if (start) {
+          if (j==path.GetStart()) {
             p.moveTo(path.points[j].x,path.points[j].y);
-            start=false;
           }
           else {
             p.lineTo(path.points[j].x,path.points[j].y);
@@ -272,16 +269,13 @@ namespace osmscout {
       }
     }
     else {
-      bool start=true;
-
       for (size_t j=0; j<=path.GetEnd()-path.GetStart(); j++) {
         size_t idx=path.GetEnd()-j;
 
         if (path.points[idx].draw) {
-          if (start) {
+          if (j==path.GetStart()) {
             p.moveTo(path.points[idx].x,
                      path.points[idx].y);
-            start=false;
           }
           else {
             p.lineTo(path.points[idx].x,
@@ -446,12 +440,10 @@ namespace osmscout {
 
     QPainterPath p;
 
-    bool start=true;
     for (size_t i=path.GetStart(); i<=path.GetEnd(); i++) {
       if (path.points[i].draw) {
-        if (start) {
+        if (i==path.GetStart()) {
           p.moveTo(path.points[i].x,path.points[i].y);
-          start=false;
         }
         else {
           p.lineTo(path.points[i].x,path.points[i].y);
