@@ -517,7 +517,6 @@ namespace osmscout {
                               const MapParameter& parameter,
                               TypeId type,
                               const FillStyle& fillStyle,
-                              const LineStyle* lineStyle,
                               const TransPolygon& area)
   {
     agg::path_storage path;
@@ -538,21 +537,23 @@ namespace osmscout {
     renderer_aa->color(agg::rgba(fillStyle.GetFillR(),
                                  fillStyle.GetFillG(),
                                  fillStyle.GetFillB(),
-                                 1));
+                                 fillStyle.GetFillA()));
 
     rasterizer->add_path(path);
 
     agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
 
-    if (lineStyle!=NULL) {
+    double borderWidth=GetProjectedWidth(projection, fillStyle.GetBorderMinPixel(), fillStyle.GetBorderWidth());
+
+    if (borderWidth>0.0) {
       DrawPath(projection,
                parameter,
-               lineStyle->GetLineR(),
-               lineStyle->GetLineG(),
-               lineStyle->GetLineB(),
-               lineStyle->GetLineA(),
-               borderWidth[(size_t)type],
-               lineStyle->GetDash(),
+               fillStyle.GetBorderR(),
+               fillStyle.GetBorderG(),
+               fillStyle.GetBorderB(),
+               fillStyle.GetBorderA(),
+               borderWidth,
+               fillStyle.GetBorderDash(),
                capRound,
                capRound,
                area);
@@ -563,7 +564,6 @@ namespace osmscout {
                               const MapParameter& parameter,
                               TypeId type,
                               const PatternStyle& patternStyle,
-                              const LineStyle* lineStyle,
                               const TransPolygon& area)
   {
     // TODO

@@ -820,7 +820,6 @@ namespace osmscout {
                                  const MapParameter& parameter,
                                  TypeId type,
                                  const FillStyle& fillStyle,
-                                 const LineStyle* lineStyle,
                                  const TransPolygon& area)
   {
     cairo_set_source_rgba(draw,
@@ -846,13 +845,15 @@ namespace osmscout {
 
     cairo_fill_preserve(draw);
 
-    if (lineStyle!=NULL) {
-      SetLineAttributes(lineStyle->GetLineR(),
-                        lineStyle->GetLineG(),
-                        lineStyle->GetLineB(),
-                        lineStyle->GetLineA(),
-                        borderWidth[(size_t)type],
-                        lineStyle->GetDash());
+    double borderWidth=GetProjectedWidth(projection, fillStyle.GetBorderMinPixel(), fillStyle.GetBorderWidth());
+
+    if (borderWidth>0.0) {
+      SetLineAttributes(fillStyle.GetBorderR(),
+                        fillStyle.GetBorderG(),
+                        fillStyle.GetBorderB(),
+                        fillStyle.GetBorderA(),
+                        borderWidth,
+                        fillStyle.GetBorderDash());
 
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
 
@@ -864,7 +865,6 @@ namespace osmscout {
                                  const MapParameter& parameter,
                                  TypeId type,
                                  const PatternStyle& patternStyle,
-                                 const LineStyle* lineStyle,
                                  const TransPolygon& area)
   {
     assert(patternStyle.GetId()>0);
@@ -890,13 +890,15 @@ namespace osmscout {
 
     cairo_fill_preserve(draw);
 
-    if (lineStyle!=NULL) {
-      SetLineAttributes(lineStyle->GetLineR(),
-                        lineStyle->GetLineG(),
-                        lineStyle->GetLineB(),
-                        lineStyle->GetLineA(),
-                        borderWidth[(size_t)type],
-                        lineStyle->GetDash());
+    double borderWidth=GetProjectedWidth(projection, patternStyle.GetBorderMinPixel(), patternStyle.GetBorderWidth());
+
+    if (borderWidth>0.0) {
+      SetLineAttributes(patternStyle.GetBorderR(),
+                        patternStyle.GetBorderG(),
+                        patternStyle.GetBorderB(),
+                        patternStyle.GetBorderA(),
+                        borderWidth,
+                        patternStyle.GetBorderDash());
 
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
 

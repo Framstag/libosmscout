@@ -121,7 +121,12 @@ namespace osmscout {
      fillR(1),
      fillG(0),
      fillB(0),
-     fillA(1)
+     fillA(1),
+     borderR(1),
+     borderG(0),
+     borderB(0),
+     borderMinPixel(0.0),
+     borderWidth(0.0)
   {
     // no code
   }
@@ -140,7 +145,7 @@ namespace osmscout {
     return *this;
   }
 
-  FillStyle& FillStyle::SetColor(double r, double g, double b, double a)
+  FillStyle& FillStyle::SetFillColor(double r, double g, double b, double a)
   {
     fillR=r;
     fillG=g;
@@ -150,9 +155,45 @@ namespace osmscout {
     return *this;
   }
 
+  FillStyle& FillStyle::SetBorderColor(double r, double g, double b, double a)
+  {
+    borderR=r;
+    borderG=g;
+    borderB=b;
+    borderA=a;
+
+    return *this;
+  }
+
+  FillStyle& FillStyle::SetBorderMinPixel(double value)
+  {
+    borderMinPixel=value;
+
+    return *this;
+  }
+
+  FillStyle& FillStyle::SetBorderWidth(double value)
+  {
+    borderWidth=value;
+
+    return *this;
+  }
+
+  FillStyle& FillStyle::AddBorderDashValue(double dashValue)
+  {
+    borderDash.push_back(dashValue);
+
+    return *this;
+  }
+
   PatternStyle::PatternStyle()
    : layer(0),
-     id(0)
+     id(0),
+     borderR(1),
+     borderG(0),
+     borderB(0),
+     borderMinPixel(0.0),
+     borderWidth(0.0)
   {
     // no code
   }
@@ -181,6 +222,37 @@ namespace osmscout {
   PatternStyle& PatternStyle::SetMinMag(Mag mag)
   {
     this->minMag=mag;
+
+    return *this;
+  }
+
+  PatternStyle& PatternStyle::SetBorderColor(double r, double g, double b, double a)
+  {
+    borderR=r;
+    borderG=g;
+    borderB=b;
+    borderA=a;
+
+    return *this;
+  }
+
+  PatternStyle& PatternStyle::SetBorderMinPixel(double value)
+  {
+    borderMinPixel=value;
+
+    return *this;
+  }
+
+  PatternStyle& PatternStyle::SetBorderWidth(double value)
+  {
+    borderWidth=value;
+
+    return *this;
+  }
+
+  PatternStyle& PatternStyle::AddBorderDashValue(double dashValue)
+  {
+    borderDash.push_back(dashValue);
 
     return *this;
   }
@@ -407,10 +479,6 @@ namespace osmscout {
       delete areaLabelStyles[i];
     }
 
-    for (size_t i=0; i<areaBorderStyles.size(); i++) {
-      delete areaBorderStyles[i];
-    }
-
     for (size_t i=0; i<areaIconStyles.size(); i++) {
       delete areaIconStyles[i];
     }
@@ -515,7 +583,6 @@ namespace osmscout {
       areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
-      areaBorderStyles.resize(type+1,NULL);
       areaIconStyles.resize(type+1,NULL);
     }
 
@@ -649,7 +716,6 @@ namespace osmscout {
       areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
-      areaBorderStyles.resize(type+1,NULL);
       areaIconStyles.resize(type+1,NULL);
     }
 
@@ -669,7 +735,6 @@ namespace osmscout {
       areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
-      areaBorderStyles.resize(type+1,NULL);
       areaIconStyles.resize(type+1,NULL);
     }
 
@@ -689,7 +754,6 @@ namespace osmscout {
       areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
-      areaBorderStyles.resize(type+1,NULL);
       areaIconStyles.resize(type+1,NULL);
     }
 
@@ -709,7 +773,6 @@ namespace osmscout {
       areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
-      areaBorderStyles.resize(type+1,NULL);
       areaIconStyles.resize(type+1,NULL);
     }
 
@@ -729,32 +792,11 @@ namespace osmscout {
       areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
-      areaBorderStyles.resize(type+1,NULL);
       areaIconStyles.resize(type+1,NULL);
     }
 
     delete areaSymbolStyles[type];
     areaSymbolStyles[type]=new SymbolStyle(style);
-
-    return *this;
-  }
-
-  StyleConfig& StyleConfig::SetAreaBorderStyle(TypeId type,
-                                               const LineStyle& style)
-  {
-    if (type>=areaFillStyles.size()) {
-      areaMag.resize(type+1,magWorld);
-      areaFillStyles.resize(type+1,NULL);
-      areaBuildingFillStyles.resize(type+1,NULL);
-      areaPatternStyles.resize(type+1,NULL);
-      areaSymbolStyles.resize(type+1,NULL);
-      areaLabelStyles.resize(type+1,NULL);
-      areaBorderStyles.resize(type+1,NULL);
-      areaIconStyles.resize(type+1,NULL);
-    }
-
-    delete areaBorderStyles[type];
-    areaBorderStyles[type]=new LineStyle(style);
 
     return *this;
   }
@@ -769,7 +811,6 @@ namespace osmscout {
       areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
-      areaBorderStyles.resize(type+1,NULL);
       areaIconStyles.resize(type+1,NULL);
     }
 

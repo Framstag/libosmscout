@@ -197,13 +197,15 @@ namespace osmscout {
                                  const MapParameter& parameter,
                                  TypeId type,
                                  const FillStyle& fillStyle,
-                                 const LineStyle* lineStyle,
                                  const TransPolygon& area)
   {
-    stream << "    <polygon fill=\"" << GetColorValue(fillStyle.GetFillR(),fillStyle.GetFillG(),fillStyle.GetFillB()) << "\"" << std::endl;
+    stream << "    <polygon fill=\"" << GetColorValue(fillStyle.GetFillR(),fillStyle.GetFillG(),fillStyle.GetFillB(),fillStyle.GetFillA()) << "\"" << std::endl;
 
-    if (lineStyle!=NULL) {
-      stream << "             stroke=\"" << GetColorValue(lineStyle->GetLineR(),lineStyle->GetLineG(),lineStyle->GetLineB()) << "\"" << std::endl;
+    double borderWidth=GetProjectedWidth(projection, fillStyle.GetBorderMinPixel(), fillStyle.GetBorderWidth());
+
+    if (borderWidth>0.0) {
+      stream << "             stroke=\"" << GetColorValue(fillStyle.GetBorderR(),fillStyle.GetBorderG(),fillStyle.GetBorderB()) << "\" ";
+      stream << "stroke-width=\"" << borderWidth << "\"" << std::endl;
     }
 
     stream << "             points=\"";
@@ -224,7 +226,6 @@ namespace osmscout {
                                  const MapParameter& parameter,
                                  TypeId type,
                                  const PatternStyle& patternStyle,
-                                 const LineStyle* lineStyle,
                                  const TransPolygon& area)
   {
   }

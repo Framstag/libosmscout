@@ -188,9 +188,6 @@ PRODUCTIONS
                 | (. PatternStyle patternStyle; .)
                   PATTERNDEF<patternStyle>
                   (. config.SetAreaPatternStyle(type,patternStyle); .)
-                | (. LineStyle lineStyle; .)
-                  BORDERDEF<lineStyle>
-                  (. config.SetAreaBorderStyle(type,lineStyle); .)
                 | (. LabelStyle labelStyle; .)
                   LABELDEF<labelStyle>
                   (. config.SetAreaLabelStyle(type,labelStyle); .)
@@ -270,7 +267,7 @@ PRODUCTIONS
                 .)
                 SYNC "FILL"
                 COLOR<r,g,b,a>
-                (. style.SetColor(r,g,b,a); .)
+                (. style.SetFillColor(r,g,b,a); .)
 
                 [SYNC "WITH"
                   [
@@ -282,10 +279,41 @@ PRODUCTIONS
                   [
                     FILTER<filter>
                   ]
+                ]
+                
+                [
+                  SYNC "BORDER"
+                  COLOR<r,g,b,a> (. style.SetBorderColor(r,g,b,a); .)
+
+                  [SYNC "WITH"
+                    [
+                      (. double dash; .)
+                      "DASH"
+                      DOUBLE<dash>   (. style.AddBorderDashValue(dash); .)
+                      {
+                        ","
+                        DOUBLE<dash> (. style.AddBorderDashValue(dash); .)
+                      }
+                    ]
+
+                    [
+                      (. double minPixel=style.GetBorderMinPixel(); .)
+                      MINPIXEL<minPixel>
+                      (. style.SetBorderMinPixel(minPixel); .)
+                    ]
+
+                    [
+                      (. double width=style.GetBorderWidth(); .)
+                      WIDTH<width>
+                      (. style.SetBorderWidth(width); .)
+                    ]
+                  ]
                 ].
 
   PATTERNDEF<PatternStyle& style>
-              =
+              = (.
+                  double r,g,b,a;
+                .)
                 SYNC "PATTERN"
                 string (. style.SetPattern(Destring(t->val)); .)
 
@@ -301,36 +329,34 @@ PRODUCTIONS
                     LAYER<layer>
                     (. style.SetLayer(layer); .)
                   ]
-                ].
+                ]
+                
+                [
+                  SYNC "BORDER"
+                  COLOR<r,g,b,a> (. style.SetBorderColor(r,g,b,a); .)
 
-  BORDERDEF<LineStyle& style>
-              = (.
-                  double r,g,b,a;
-                .)
-                SYNC "BORDER"
-                COLOR<r,g,b,a> (. style.SetLineColor(r,g,b,a); .)
+                  [SYNC "WITH"
+                    [
+                      (. double dash; .)
+                      "DASH"
+                      DOUBLE<dash>   (. style.AddBorderDashValue(dash); .)
+                      {
+                        ","
+                        DOUBLE<dash> (. style.AddBorderDashValue(dash); .)
+                      }
+                    ]
 
-                [SYNC "WITH"
-                  [
-                    (. double dash; .)
-                    "DASH"
-                    DOUBLE<dash>   (. style.AddDashValue(dash); .)
-                    {
-                      ","
-                      DOUBLE<dash> (. style.AddDashValue(dash); .)
-                    }
-                  ]
+                    [
+                      (. double minPixel=style.GetBorderMinPixel(); .)
+                      MINPIXEL<minPixel>
+                      (. style.SetBorderMinPixel(minPixel); .)
+                    ]
 
-                  [
-                    (. double minPixel=style.GetMinPixel(); .)
-                    MINPIXEL<minPixel>
-                    (. style.SetMinPixel(minPixel); .)
-                  ]
-
-                  [
-                    (. double width=style.GetWidth(); .)
-                    WIDTH<width>
-                    (. style.SetWidth(width); .)
+                    [
+                      (. double width=style.GetBorderWidth(); .)
+                      WIDTH<width>
+                      (. style.SetBorderWidth(width); .)
+                    ]
                   ]
                 ].
 

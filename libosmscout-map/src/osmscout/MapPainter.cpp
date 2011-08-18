@@ -95,7 +95,7 @@ namespace osmscout {
     tunnelDash.push_back(0.4);
 
     areaMarkStyle.SetStyle(FillStyle::plain);
-    areaMarkStyle.SetColor(1,0,0,0.5);
+    areaMarkStyle.SetFillColor(1,0,0,0.5);
   }
 
   MapPainter::~MapPainter()
@@ -199,7 +199,7 @@ namespace osmscout {
 
   bool MapPainter::GetBoundingBox(const std::vector<Point>& nodes,
                                   double& xmin, double& ymin,
-                                  double& xmax, double& ymax)
+                                  double& xmax, double& ymax) const
   {
     if (nodes.empty()) {
       return false;
@@ -223,7 +223,7 @@ namespace osmscout {
   bool MapPainter::GetCenterPixel(const Projection& projection,
                                   const std::vector<Point>& nodes,
                                   double& cx,
-                                  double& cy)
+                                  double& cy) const
   {
     double xmin;
     double xmax;
@@ -243,6 +243,24 @@ namespace osmscout {
     return true;
   }
 
+  double MapPainter::GetProjectedWidth(const Projection& projection,
+                                       double minPixel,
+                                       double width) const
+  {
+    if (width==0.0) {
+      return 0.0;
+    }
+
+    width=width/projection.GetPixelSize();
+
+    if (width<minPixel) {
+      return minPixel;
+    }
+    else {
+      return width;
+    }
+  }
+
   void MapPainter::DrawGroundTiles(const StyleConfig& styleConfig,
                                    const Projection& projection,
                                    const MapParameter& parameter,
@@ -254,10 +272,10 @@ namespace osmscout {
     FillStyle unknownFill;
     LabelStyle labelStyle;
 
-    landFill.SetColor(241.0/255,238.0/255,233.0/255,1.0);
-    seeFill.SetColor(181.0/255,208.0/255,208.0/255,1.0);
-    coastFill.SetColor(255.0/255,192.0/255,203.0/255,1.0);
-    unknownFill.SetColor(255.0/255,255.0/255,173.0/255,1.0);
+    landFill.SetFillColor(241.0/255,238.0/255,233.0/255,1.0);
+    seeFill.SetFillColor(181.0/255,208.0/255,208.0/255,1.0);
+    coastFill.SetFillColor(255.0/255,192.0/255,203.0/255,1.0);
+    unknownFill.SetFillColor(255.0/255,255.0/255,173.0/255,1.0);
 
     labelStyle.SetStyle(LabelStyle::normal);
     labelStyle.SetMinMag(magCity);
@@ -617,22 +635,6 @@ namespace osmscout {
                                          const MapData& data)
   {
     //
-    // Calculate border width for each way line style
-    //
-
-    borderWidth.resize(styleConfig.GetStyleCount(),0);
-    for (size_t i=0; i<styleConfig.GetStyleCount(); i++) {
-      const LineStyle *borderStyle=styleConfig.GetAreaBorderStyle(i);
-
-      if (borderStyle!=NULL) {
-        borderWidth[i]=borderStyle->GetWidth()/projection.GetPixelSize();
-        if (borderWidth[i]<borderStyle->GetMinPixel()) {
-          borderWidth[i]=borderStyle->GetMinPixel();
-        }
-      }
-    }
-
-    //
     // Calculate available layers for ways and way relations
     //
 
@@ -821,7 +823,6 @@ namespace osmscout {
           PatternStyle    *patternStyle=styleConfig.GetAreaPatternStyle(area->GetType());
           const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(area->GetType(),
                                                                   area->GetAttributes().IsBuilding());
-          const LineStyle *lineStyle=styleConfig.GetAreaBorderStyle(area->GetType());
 
           bool            hasPattern=patternStyle!=NULL &&
                                      patternStyle->GetLayer()==layer &&
@@ -844,7 +845,6 @@ namespace osmscout {
                      parameter,
                      area->GetType(),
                      *patternStyle,
-                     lineStyle,
                      polygon);
 
             areasDrawn++;
@@ -854,7 +854,6 @@ namespace osmscout {
                      parameter,
                      area->GetType(),
                      *fillStyle,
-                     lineStyle,
                      polygon);
 
             areasDrawn++;
@@ -875,7 +874,6 @@ namespace osmscout {
               PatternStyle    *patternStyle=styleConfig.GetAreaPatternStyle(relation->roles[m].GetType());
               const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(relation->roles[m].GetType(),
                                                                       relation->roles[m].GetAttributes().IsBuilding());
-              const LineStyle *lineStyle=styleConfig.GetAreaBorderStyle(relation->roles[m].GetType());
 
               bool            hasPattern=patternStyle!=NULL &&
                                          patternStyle->GetLayer()==layer &&
@@ -898,7 +896,6 @@ namespace osmscout {
                          parameter,
                          relation->roles[m].GetType(),
                          *patternStyle,
-                         lineStyle,
                          polygon);
                 drawn=true;
               }
@@ -911,7 +908,6 @@ namespace osmscout {
                          parameter,
                          relation->roles[m].GetType(),
                          *fillStyle,
-                         lineStyle,
                          polygon);
                 drawn=true;
               }

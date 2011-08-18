@@ -174,7 +174,6 @@ namespace osmscout {
        Style specific precalculations
      */
     //@{
-    std::vector<double>     borderWidth;  //! border with for this way (area) border style
     bool                    areaLayers[11];
     bool                    wayLayers[11];
     bool                    relationAreaLayers[11];
@@ -338,11 +337,15 @@ namespace osmscout {
 
     bool GetBoundingBox(const std::vector<Point>& nodes,
                         double& xmin, double& ymin,
-                        double& xmax, double& ymax);
+                        double& xmax, double& ymax) const;
     bool GetCenterPixel(const Projection& projection,
                         const std::vector<Point>& nodes,
                         double& cx,
-                        double& cy);
+                        double& cy) const;
+
+    double GetProjectedWidth(const Projection& projection,
+                             double minPixel,
+                             double width) const;
     //@}
 
     /**
@@ -439,25 +442,23 @@ namespace osmscout {
                           const TransPolygon& polygon) = 0;
 
     /**
-      Draw the given area using the given FillStyle and (optionally) the given LineStyle
+      Draw the given area using the given FillStyle
       for the area outline.
      */
     virtual void DrawArea(const Projection& projection,
                           const MapParameter& parameter,
                           TypeId type,
                           const FillStyle& fillStyle,
-                          const LineStyle* lineStyle,
                           const TransPolygon& polygon) = 0;
 
     /**
-      Draw the given area using the given PatternStyle and (optionally) the given LineStyle
+      Draw the given area using the given PatternStyle
       for the area outline.
      */
     virtual void DrawArea(const Projection& projection,
                           const MapParameter& parameter,
                           TypeId type,
                           const PatternStyle& patternStyle,
-                          const LineStyle* lineStyle,
                           const TransPolygon& polygon) = 0;
 
     /**

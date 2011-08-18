@@ -178,7 +178,6 @@ void ToRGBA(const char* str, double& r, double& g, double& b, double& a)
 	void LINEDEF(LineStyle& style);
 	void FILLDEF(FillStyle& style, std::string& filter);
 	void PATTERNDEF(PatternStyle& style);
-	void BORDERDEF(LineStyle& style);
 	void COLOR(double& r, double& g, double& b, double& a);
 	void DOUBLE(double& value);
 	void MINPIXEL(double& value);

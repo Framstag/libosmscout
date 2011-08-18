@@ -142,14 +142,12 @@ namespace osmscout {
                   const MapParameter& parameter,
                   TypeId type,
                   const FillStyle& fillStyle,
-                  const LineStyle* lineStyle,
                   const TransPolygon& area);
 
     void DrawArea(const Projection& projection,
                   const MapParameter& parameter,
                   TypeId type,
                   const PatternStyle& patternStyle,
-                  const LineStyle* lineStyle,
                   const TransPolygon& area);
 
     void DrawArea(const FillStyle& style,

@@ -171,8 +171,8 @@ void Scanner::Init() {
 	keywords.set("DASH", 17);
 	keywords.set("FIXEDWIDTH", 19);
 	keywords.set("FILL", 20);
-	keywords.set("PATTERN", 21);
-	keywords.set("BORDER", 22);
+	keywords.set("BORDER", 21);
+	keywords.set("PATTERN", 22);
 	keywords.set("LABEL", 23);
 	keywords.set("COLOR", 24);
 	keywords.set("BGCOLOR", 25);

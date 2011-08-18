@@ -70,9 +70,8 @@ OSS
     LABEL WITH STYLE contour MINMAG close
 
   AREA "highway_pedestrian"
-    FILL #ededed
+    FILL #ededed BORDER #c5c5c5 WITH MINPIXEL 1 WIDTH 1
     LABEL WITH MINMAG close
-    BORDER #c5c5c5 WITH MINPIXEL 1 WIDTH 1
 
   NODE "highway_services"
     LABEL WITH STYLE normal MINMAG close
@@ -229,8 +228,8 @@ OSS
 
   AREA "landuse_retail"
     FILL #bca9a9 WITH LAYER 2 FILTER "building"
-    FILL #feeaea
-    BORDER #c5a0a0 WITH MINPIXEL 1 WIDTH 1
+    FILL #feeaea BORDER #c5a0a0 WITH MINPIXEL 1 WIDTH 1
+    
     LABEL WITH MINMAG city
 
   AREA "landuse_commercial"
@@ -238,8 +237,7 @@ OSS
     LABEL WITH MINMAG city
 
   AREA "landuse_industrial"
-    FILL #dfd1d6
-    BORDER #c5a0a0 WITH MINPIXEL 1 WIDTH 1
+    FILL #dfd1d6 BORDER #c5a0a0 WITH MINPIXEL 1 WIDTH 1
     LABEL WITH STYLE emphasize MINMAG close
 
   AREA "landuse_brownfield"
@@ -337,8 +335,7 @@ OSS
 
   AREA "aeroway_terminal"
     FILL #cc99ff WITH LAYER 2 FILTER "building"
-    FILL #d5ddbd
-    BORDER #b265ff WITH MINPIXEL 1 WIDTH 1
+    FILL #d5ddbd BORDER #b265ff WITH MINPIXEL 1 WIDTH 1
     LABEL WITH MINMAG detail
 
   AREA "aeroway_helipad"
@@ -379,9 +376,8 @@ OSS
     LABEL WITH MINMAG close
 
   AREA "leisure_pitch"
-    FILL #90d3b9 WITH LAYER 3
+    FILL #90d3b9 WITH LAYER 3 BORDER #b0b0b0 WITH MINPIXEL 1 WIDTH 1
     LABEL WITH MINMAG close
-    BORDER #b0b0b0 WITH MINPIXEL 1 WIDTH 1
 
   AREA "leisure_water_park"
     FILL #b5d6f1
@@ -641,9 +637,9 @@ OSS
 
   AREA "amenity_school"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
+    FILL #f0f0d8 WITH LAYER -1 BORDER #c5a0a0 WITH MINPIXEL 1 WIDTH 1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-    BORDER #c5a0a0 WITH MINPIXEL 1 WIDTH 1
+    
 
   AREA "amenity_shelter"
     FILL #cb4040 WITH LAYER 2 FILTER "building"
@@ -940,8 +936,7 @@ OSS
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "building" MINMAG close
-    FILL #bca9a9 WITH LAYER 2
-    BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #bca9a9 WITH LAYER 2 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
     LABEL WITH STYLE normal COLOR #524a4a SIZE 0.8 MINMAG veryClose
 
   NODE "place_continent"

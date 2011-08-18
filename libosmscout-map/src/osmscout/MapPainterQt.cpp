@@ -488,7 +488,6 @@ namespace osmscout {
                               const MapParameter& parameter,
                               TypeId type,
                               const FillStyle& fillStyle,
-                              const LineStyle* lineStyle,
                               const TransPolygon& area)
   {
     QPolygonF polygon;
@@ -499,9 +498,33 @@ namespace osmscout {
       }
     }
 
-    if (lineStyle!=NULL) {
-      SetPen(*lineStyle,
-             borderWidth[(size_t)type]);
+    double borderWidth=GetProjectedWidth(projection, fillStyle.GetBorderMinPixel(), fillStyle.GetBorderWidth());
+
+    if (borderWidth>0.0) {
+      QPen pen;
+
+      pen.setColor(QColor::fromRgbF(fillStyle.GetBorderR(),
+                                    fillStyle.GetBorderG(),
+                                    fillStyle.GetBorderB(),
+                                    fillStyle.GetBorderA()));
+      pen.setWidthF(borderWidth);
+
+      if (fillStyle.GetBorderDash().empty()) {
+        pen.setStyle(Qt::SolidLine);
+        pen.setCapStyle(Qt::RoundCap);
+      }
+      else {
+        QVector<qreal> dashes;
+
+        for (size_t i=0; i<fillStyle.GetBorderDash().size(); i++) {
+          dashes << fillStyle.GetBorderDash()[i];
+        }
+
+        pen.setDashPattern(dashes);
+        pen.setCapStyle(Qt::FlatCap);
+      }
+
+      painter->setPen(pen);
     }
     else {
       painter->setPen(Qt::NoPen);
@@ -516,7 +539,6 @@ namespace osmscout {
                               const MapParameter& parameter,
                               TypeId type,
                               const PatternStyle& patternStyle,
-                              const LineStyle* lineStyle,
                               const TransPolygon& area)
   {
     QPolygonF polygon;
@@ -527,9 +549,33 @@ namespace osmscout {
       }
     }
 
-    if (lineStyle!=NULL) {
-      SetPen(*lineStyle,
-             borderWidth[(size_t)type]);
+    double borderWidth=GetProjectedWidth(projection, patternStyle.GetBorderMinPixel(), patternStyle.GetBorderWidth());
+
+    if (borderWidth>0.0) {
+      QPen pen;
+
+      pen.setColor(QColor::fromRgbF(patternStyle.GetBorderR(),
+                                    patternStyle.GetBorderG(),
+                                    patternStyle.GetBorderB(),
+                                    patternStyle.GetBorderA()));
+      pen.setWidthF(borderWidth);
+
+      if (patternStyle.GetBorderDash().empty()) {
+        pen.setStyle(Qt::SolidLine);
+        pen.setCapStyle(Qt::RoundCap);
+      }
+      else {
+        QVector<qreal> dashes;
+
+        for (size_t i=0; i<patternStyle.GetBorderDash().size(); i++) {
+          dashes << patternStyle.GetBorderDash()[i];
+        }
+
+        pen.setDashPattern(dashes);
+        pen.setCapStyle(Qt::FlatCap);
+      }
+
+      painter->setPen(pen);
     }
     else {
       painter->setPen(Qt::NoPen);
@@ -593,7 +639,7 @@ namespace osmscout {
     painter->setBrush(QBrush(QColor::fromRgbF(fillStyle.GetFillR(),
                                               fillStyle.GetFillG(),
                                               fillStyle.GetFillB(),
-                                              1)));
+                                              fillStyle.GetFillA())));
   }
 
   bool MapPainterQt::DrawMap(const StyleConfig& styleConfig,

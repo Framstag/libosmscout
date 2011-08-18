@@ -172,19 +172,30 @@ namespace osmscout {
     };
 
   private:
-    Style       style;
-    int         layer;
-    double      fillR;
-    double      fillG;
-    double      fillB;
-    double      fillA;
+    Style               style;
+    int                 layer;
+    double              fillR;
+    double              fillG;
+    double              fillB;
+    double              fillA;
+    double              borderR;
+    double              borderG;
+    double              borderB;
+    double              borderA;
+    double              borderMinPixel;
+    double              borderWidth;
+    std::vector<double> borderDash;
 
   public:
     FillStyle();
 
     FillStyle& SetStyle(Style style);
     FillStyle& SetLayer(int layer);
-    FillStyle& SetColor(double r, double g, double b, double a);
+    FillStyle& SetFillColor(double r, double g, double b, double a);
+    FillStyle& SetBorderColor(double r, double g, double b, double a);
+    FillStyle& SetBorderMinPixel(double value);
+    FillStyle& SetBorderWidth(double value);
+    FillStyle& AddBorderDashValue(double dashValue);
 
     inline bool IsVisible() const
     {
@@ -215,6 +226,50 @@ namespace osmscout {
     {
       return fillB;
     }
+
+    inline double GetFillA() const
+    {
+      return fillA;
+    }
+
+    inline double GetBorderR() const
+    {
+      return borderR;
+    }
+
+    inline double GetBorderG() const
+    {
+      return borderG;
+    }
+
+    inline double GetBorderB() const
+    {
+      return borderB;
+    }
+
+    inline double GetBorderA() const
+    {
+      return borderA;
+    }
+    inline double GetBorderMinPixel() const
+    {
+      return borderMinPixel;
+    }
+
+    inline double GetBorderWidth() const
+    {
+      return borderWidth;
+    }
+
+    inline bool HasBorderDashValues() const
+    {
+      return borderDash.size()>0;
+    }
+
+    inline const std::vector<double>& GetBorderDash() const
+    {
+      return borderDash;
+    }
   };
 
   /**
@@ -223,10 +278,17 @@ namespace osmscout {
   class OSMSCOUT_API PatternStyle
   {
   private:
-    int         layer;
-    size_t      id;
-    std::string pattern;
-    Mag         minMag;
+    int                 layer;
+    size_t              id;
+    std::string         pattern;
+    Mag                 minMag;
+    double              borderR;
+    double              borderG;
+    double              borderB;
+    double              borderA;
+    double              borderMinPixel;
+    double              borderWidth;
+    std::vector<double> borderDash;
 
   public:
     PatternStyle();
@@ -235,6 +297,10 @@ namespace osmscout {
     PatternStyle& SetId(size_t id);
     PatternStyle& SetPattern(const std::string& pattern);
     PatternStyle& SetMinMag(Mag mag);
+    PatternStyle& SetBorderColor(double r, double g, double b, double a);
+    PatternStyle& SetBorderMinPixel(double value);
+    PatternStyle& SetBorderWidth(double value);
+    PatternStyle& AddBorderDashValue(double dashValue);
 
     inline int GetLayer() const
     {
@@ -254,6 +320,45 @@ namespace osmscout {
     inline const Mag& GetMinMag() const
     {
       return minMag;
+    }
+
+    inline double GetBorderR() const
+    {
+      return borderR;
+    }
+
+    inline double GetBorderG() const
+    {
+      return borderG;
+    }
+
+    inline double GetBorderB() const
+    {
+      return borderB;
+    }
+
+    inline double GetBorderA() const
+    {
+      return borderA;
+    }
+    inline double GetBorderMinPixel() const
+    {
+      return borderMinPixel;
+    }
+
+    inline double GetBorderWidth() const
+    {
+      return borderWidth;
+    }
+
+    inline bool HasBorderDashValues() const
+    {
+      return borderDash.size()>0;
+    }
+
+    inline const std::vector<double>& GetBorderDash() const
+    {
+      return borderDash;
     }
   };
 
@@ -550,7 +655,6 @@ namespace osmscout {
     std::vector<PatternStyle*> areaPatternStyles;
     std::vector<SymbolStyle*>  areaSymbolStyles;
     std::vector<LabelStyle*>   areaLabelStyles;
-    std::vector<LineStyle*>    areaBorderStyles;
     std::vector<IconStyle*>    areaIconStyles;
 
     std::vector<size_t>        wayPrio;
@@ -585,7 +689,6 @@ namespace osmscout {
     StyleConfig& SetAreaPatternStyle(TypeId type, const PatternStyle& style);
     StyleConfig& SetAreaLabelStyle(TypeId type, const LabelStyle& style);
     StyleConfig& SetAreaSymbolStyle(TypeId type, const SymbolStyle& style);
-    StyleConfig& SetAreaBorderStyle(TypeId type, const LineStyle& style);
     StyleConfig& SetAreaIconStyle(TypeId type, const IconStyle& style);
 
     size_t GetStyleCount() const;
@@ -748,16 +851,6 @@ namespace osmscout {
     {
       if (type<areaSymbolStyles.size()) {
         return areaSymbolStyles[type];
-      }
-      else {
-        return NULL;
-      }
-    }
-
-    const LineStyle* GetAreaBorderStyle(TypeId type) const
-    {
-      if (type<areaBorderStyles.size()) {
-        return areaBorderStyles[type];
       }
       else {
         return NULL;
