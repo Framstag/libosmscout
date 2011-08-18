@@ -12,7 +12,8 @@ LDADD=$(LIBOSMSCOUT_LIBS) \
 
 bin_PROGRAMS = AddressLookup \
                ResourceConsumption \
-               Routing
+               Routing \
+               DrawMapSVG
 
 if HAVE_LIB_CAIRO
 bin_PROGRAMS += DrawMapCairo
@@ -30,11 +31,13 @@ endif
 
 AddressLookup_SOURCES = AddressLookup.cpp
 
+DrawMapAgg_SOURCES = DrawMapAgg.cpp
+
 DrawMapCairo_SOURCES = DrawMapCairo.cpp
 
 DrawMapQt_SOURCES = DrawMapQt.cpp
 
-DrawMapAgg_SOURCES = DrawMapAgg.cpp
+DrawMapSVG_SOURCES = DrawMapSVG.cpp
 
 ResourceConsumption_SOURCES = ResourceConsumption.cpp
 
