@@ -329,6 +329,8 @@ TYPES
   TYPE "power_station" = NODE AREA ("power"=="station")
   TYPE "power_sub_station" = NODE AREA ("power"=="sub_station")
   TYPE "power_generator" = NODE AREA ("power"=="generator")
+  
+  TYPE "building_garage" = AREA ("building"=="garage")
   TYPE "building" = AREA (EXISTS "building" AND !("building" IN ["no","false","0"]))
 
   // Currently not supported by stylesheet

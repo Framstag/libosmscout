@@ -227,7 +227,6 @@ OSS
     LABEL WITH MINMAG city
 
   AREA "landuse_retail"
-    FILL #bca9a9 WITH LAYER 2 FILTER "building"
     FILL #feeaea BORDER #c5a0a0 WITH MINPIXEL 1 WIDTH 1
     
     LABEL WITH MINMAG city
@@ -237,7 +236,7 @@ OSS
     LABEL WITH MINMAG city
 
   AREA "landuse_industrial"
-    FILL #dfd1d6 BORDER #c5a0a0 WITH MINPIXEL 1 WIDTH 1
+    FILL #dfd1d6
     LABEL WITH STYLE emphasize MINMAG close
 
   AREA "landuse_brownfield"
@@ -334,19 +333,18 @@ OSS
     LABEL WITH MINMAG detail
 
   AREA "aeroway_terminal"
-    FILL #cc99ff WITH LAYER 2 FILTER "building"
-    FILL #d5ddbd BORDER #b265ff WITH MINPIXEL 1 WIDTH 1
+    FILL #cc99ff WITH LAYER 2
     LABEL WITH MINMAG detail
 
   AREA "aeroway_helipad"
     FILL #d5ddbd
     LABEL WITH MINMAG detail
 
-  WAY "aeroway_runway" PRIO 20 MINMAG detail
+  WAY "aeroway_runway" PRIO 20 MINMAG suburb
     LINE #bbbbcc WITH MINPIXEL 2 WIDTH 20
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "aeroway_taxiway" PRIO 20 MINMAG detail
+  WAY "aeroway_taxiway" PRIO 20 MINMAG suburb
     LINE #bbbbcc WITH MINPIXEL 2 WIDTH 15
     LABEL WITH STYLE contour MINMAG close
 
@@ -934,6 +932,9 @@ OSS
   AREA "power_generator"
     FILL #bca9a9 WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
+
+  AREA "building_garage" MINMAG close
+    FILL #bca9a9 WITH LAYER 2
 
   AREA "building" MINMAG close
     FILL #bca9a9 WITH LAYER 2 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
