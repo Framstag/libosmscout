@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <iostream>
 
 #include <osmscout/RawNode.h>
 #include <osmscout/RawRelation.h>
@@ -32,7 +33,6 @@
 
 #include <osmscout/Util.h>
 #include <osmscout/util/Geometry.h>
-
 namespace osmscout {
 
   class GroupingState
@@ -415,6 +415,7 @@ namespace osmscout {
       Relation::Role role;
 
       role.attributes.type=type;
+      role.attributes.flags|=SegmentAttributes::isArea;
 
       role.nodes.reserve(points.size());
 
@@ -422,6 +423,12 @@ namespace osmscout {
            point!=points.end();
            ++point) {
         role.nodes.push_back(*point);
+      }
+
+      // During concatination we might define,a close ring, where start==end, but everywhere else
+      // in the code we store areas without repeating the start
+      if (role.nodes.back().GetId()==role.nodes.front().GetId()) {
+        role.nodes.pop_back();
       }
 
       rings.push_back(role);
@@ -438,6 +445,8 @@ namespace osmscout {
     See http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
     */
   bool ResolveMultipolygon(Relation& relation,
+                           const std::string& name,
+                           const std::string& refName,
                            Progress& progress)
   {
     std::list<Relation::Role> rings;
@@ -479,6 +488,10 @@ namespace osmscout {
       i++;
     }
 
+    //
+    // Multipolygon creation
+    //
+
     size_t id=0;
     while (groups.size()<state.GetRingCount()) {
       std::list<Relation::Role>::const_iterator top;
@@ -497,6 +510,24 @@ namespace osmscout {
       groups.push_back(*top);
       groups.back().role=NumberToString(id);
 
+      // The outer ring(s) inherit attribute values from the relation
+      if (id==0) {
+        if (groups.back().attributes.GetType()==typeIgnore) {
+          // Outer ring always has the type of the relation
+          groups.back().attributes.type=relation.GetType();
+        }
+
+        if (!name.empty() && groups.back().attributes.GetName().empty()) {
+          groups.back().attributes.name=name;
+          groups.back().attributes.flags|=SegmentAttributes::hasName;
+        }
+
+        if (!refName.empty() && groups.back().attributes.GetRefName().empty()) {
+          groups.back().attributes.ref=refName;
+          groups.back().attributes.flags|=SegmentAttributes::hasRef;
+        }
+      }
+
       if (state.HasIncludes(topIndex)) {
         ConsumeSubs(rings,groups,state,topIndex,id+1);
       }
@@ -507,10 +538,6 @@ namespace osmscout {
                        ": No groups");
       return false;
     }
-
-    //
-    // Multipolygon creation
-    //
 
     //
     // Copy back data
@@ -718,6 +745,7 @@ namespace osmscout {
 
       Relation              rel;
       std::string           name;
+      std::string           refName;
       std::set<std::string> roles;
       bool                  error=false;
       int8_t                layer=0;
@@ -736,6 +764,10 @@ namespace osmscout {
         }
         else if (tag->key==typeConfig.tagName) {
           name=tag->value;
+          tag++;
+        }
+        else if (tag->key==typeConfig.tagRef) {
+          refName=tag->value;
           tag++;
         }
         else if (tag->key==typeConfig.tagLayer) {
@@ -869,7 +901,7 @@ namespace osmscout {
       // algorithm as destribed at
       // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
       if (rel.GetRelType()=="multipolygon") {
-        if (!ResolveMultipolygon(rel,progress)) {
+        if (!ResolveMultipolygon(rel,name,refName,progress)) {
           progress.Error("Cannot resolve multipolygon relation "+
                          NumberToString(rawRel.GetId())+" "+name);
           continue;
@@ -894,10 +926,12 @@ namespace osmscout {
         }
       }
 
-      if (!CompactRelation(rel,name,progress)) {
-        progress.Error("Relation "+NumberToString(rel.GetId())+
-                       " cannot be compacted");
-        continue;
+      if (rel.GetRelType()!="multipolygon") {
+        if (!CompactRelation(rel,name,progress)) {
+          progress.Error("Relation "+NumberToString(rel.GetId())+
+                         " cannot be compacted");
+          continue;
+        }
       }
 
       if (progress.OutputDebug()) {

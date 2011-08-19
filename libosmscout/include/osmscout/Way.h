@@ -105,11 +105,6 @@ namespace osmscout {
       return attributes.GetWidth();
     }
 
-    inline bool IsBuilding() const
-    {
-      return attributes.IsBuilding();
-    }
-
     inline bool IsBridge() const
     {
       return attributes.IsBridge();

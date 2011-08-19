@@ -146,8 +146,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 61;
-	noSym = 61;
+	maxT = 60;
+	noSym = 60;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
@@ -190,27 +190,26 @@ void Scanner::Init() {
 	keywords.set("triangle", 37);
 	keywords.set("circle", 38);
 	keywords.set("LAYER", 39);
-	keywords.set("FILTER", 40);
-	keywords.set("MAXMAG", 41);
-	keywords.set("FADE", 42);
-	keywords.set("AT", 43);
-	keywords.set("world", 44);
-	keywords.set("continent", 45);
-	keywords.set("state", 46);
-	keywords.set("stateOver", 47);
-	keywords.set("county", 48);
-	keywords.set("region", 49);
-	keywords.set("proximity", 50);
-	keywords.set("cityOver", 51);
-	keywords.set("city", 52);
-	keywords.set("suburb", 53);
-	keywords.set("detail", 54);
-	keywords.set("close", 55);
-	keywords.set("veryClose", 56);
-	keywords.set("SIZE", 57);
-	keywords.set("MINPIXEL", 58);
-	keywords.set("WIDTH", 59);
-	keywords.set("OUTLINE", 60);
+	keywords.set("MAXMAG", 40);
+	keywords.set("FADE", 41);
+	keywords.set("AT", 42);
+	keywords.set("world", 43);
+	keywords.set("continent", 44);
+	keywords.set("state", 45);
+	keywords.set("stateOver", 46);
+	keywords.set("county", 47);
+	keywords.set("region", 48);
+	keywords.set("proximity", 49);
+	keywords.set("cityOver", 50);
+	keywords.set("city", 51);
+	keywords.set("suburb", 52);
+	keywords.set("detail", 53);
+	keywords.set("close", 54);
+	keywords.set("veryClose", 55);
+	keywords.set("SIZE", 56);
+	keywords.set("MINPIXEL", 57);
+	keywords.set("WIDTH", 58);
+	keywords.set("OUTLINE", 59);
 
 
   tvalLength = 128;

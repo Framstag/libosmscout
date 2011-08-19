@@ -256,7 +256,6 @@ namespace osmscout {
 
     RegisterTagForExternalUse("admin_level");
     RegisterTagForExternalUse("boundary");
-    RegisterTagForExternalUse("building");
     RegisterTagForExternalUse("bridge");
     RegisterTagForExternalUse("highway");
     RegisterTagForExternalUse("layer");
@@ -289,7 +288,6 @@ namespace osmscout {
 
     tagAdminLevel=GetTagId("admin_level");
     tagBoundary=GetTagId("boundary");
-    tagBuilding=GetTagId("building");
     tagBridge=GetTagId("bridge");
     tagLayer=GetTagId("layer");
     tagName=GetTagId("name");
@@ -305,7 +303,6 @@ namespace osmscout {
 
     assert(tagAdminLevel!=tagIgnore);
     assert(tagBoundary!=tagIgnore);
-    assert(tagBuilding!=tagIgnore);
     assert(tagBridge!=tagIgnore);
     assert(tagLayer!=tagIgnore);
     assert(tagName!=tagIgnore);
@@ -317,6 +314,7 @@ namespace osmscout {
     assert(tagType!=tagIgnore);
     assert(tagWidth!=tagIgnore);
     assert(tagArea!=tagIgnore);
+    assert(tagHouseNr!=tagIgnore);
   }
 
   TypeConfig::~TypeConfig()

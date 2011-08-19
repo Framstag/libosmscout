@@ -80,11 +80,6 @@ namespace osmscout {
         return attributes.GetLayer();
       }
 
-      inline bool IsBuilding() const
-      {
-        return attributes.IsBuilding();
-      }
-
       inline bool IsBridge() const
       {
         return attributes.IsBridge();

@@ -651,7 +651,6 @@ namespace osmscout {
     // Area
 
     std::vector<FillStyle*>    areaFillStyles;
-    std::vector<FillStyle*>    areaBuildingFillStyles;
     std::vector<PatternStyle*> areaPatternStyles;
     std::vector<SymbolStyle*>  areaSymbolStyles;
     std::vector<LabelStyle*>   areaLabelStyles;
@@ -685,7 +684,6 @@ namespace osmscout {
     StyleConfig& SetWayNameLabelStyle(TypeId type, const LabelStyle& style);
 
     StyleConfig& SetAreaFillStyle(TypeId type, const FillStyle& style);
-    StyleConfig& SetAreaBuildingFillStyle(TypeId type, const FillStyle& style);
     StyleConfig& SetAreaPatternStyle(TypeId type, const PatternStyle& style);
     StyleConfig& SetAreaLabelStyle(TypeId type, const LabelStyle& style);
     StyleConfig& SetAreaSymbolStyle(TypeId type, const SymbolStyle& style);
@@ -812,15 +810,10 @@ namespace osmscout {
       }
     }
 
-    const FillStyle* GetAreaFillStyle(TypeId type, bool building) const
+    const FillStyle* GetAreaFillStyle(TypeId type) const
     {
       if (type<areaFillStyles.size()) {
-        if (building && areaBuildingFillStyles[type]!=NULL) {
-          return areaBuildingFillStyles[type];
-        }
-        else {
-          return areaFillStyles[type];
-        }
+        return areaFillStyles[type];
       }
       else {
         return NULL;

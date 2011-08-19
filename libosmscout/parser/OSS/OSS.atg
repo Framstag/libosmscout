@@ -174,16 +174,10 @@ PRODUCTIONS
                 {
                   (.
                     FillStyle   fillStyle;
-                    std::string filter;
                   .)
-                  FILLDEF<fillStyle,filter>
+                  FILLDEF<fillStyle>
                   (.
-                    if (filter=="building") {
-                      config.SetAreaBuildingFillStyle(type,fillStyle);
-                    }
-                    else {
-                      config.SetAreaFillStyle(type,fillStyle);
-                    }
+                    config.SetAreaFillStyle(type,fillStyle);
                   .)
                 | (. PatternStyle patternStyle; .)
                   PATTERNDEF<patternStyle>
@@ -261,7 +255,7 @@ PRODUCTIONS
                   ]
                 ].
 
-  FILLDEF<FillStyle& style, std::string& filter>
+  FILLDEF<FillStyle& style>
               = (.
                   double r,g,b,a;
                 .)
@@ -274,10 +268,6 @@ PRODUCTIONS
                     (. int layer=style.GetLayer(); .)
                     LAYER<layer>
                     (. style.SetLayer(layer); .)
-                  ]
-
-                  [
-                    FILTER<filter>
                   ]
                 ]
                 
@@ -362,6 +352,8 @@ PRODUCTIONS
 
   LABELDEF<LabelStyle& style>
               = SYNC "LABEL"
+
+                (. style.SetStyle(LabelStyle::normal); .)
 
                 [SYNC "WITH"
                   [
@@ -575,9 +567,6 @@ PRODUCTIONS
                     }
                   .)
                  .
-
-  FILTER<std::string& filter>
-              = "FILTER" string (. filter=Destring(t->val); .).
 
   MINMAG<Mag& mag>
               = "MINMAG" MAG<mag>.

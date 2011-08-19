@@ -39,8 +39,7 @@ namespace osmscout {
     const static uint16_t isArea          = 1 <<  3; //! We are an area (or a way if not set)
 
     // Area flags
-    const static uint16_t hasHouseNr      = 1 << 14; //! We have a house number
-    const static uint16_t isBuilding      = 1 << 15; //! We are a building
+    const static uint16_t hasHouseNr      = 1 << 15; //! We have a house number
 
     // Way flags
     const static uint16_t hasRestrictions = 1 <<  8; //! We have restrictions
@@ -110,11 +109,6 @@ namespace osmscout {
     inline uint8_t GetWidth() const
     {
       return width;
-    }
-
-    inline bool IsBuilding() const
-    {
-      return (flags & isBuilding)!=0;
     }
 
     inline bool IsBridge() const

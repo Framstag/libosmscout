@@ -89,13 +89,6 @@ namespace osmscout {
         }
         tag=tags.erase(tag);
       }
-      else if (IsArea() && tag->key==typeConfig.tagBuilding) {
-        if (!(tag->value=="no" || tag->value=="false" || tag->value=="0")) {
-          flags|=SegmentAttributes::isBuilding;
-        }
-
-        tag=tags.erase(tag);
-      }
       else if (!IsArea() && tag->key==typeConfig.tagOneway) {
         if (tag->value=="-1") {
           reverseNodes=true;

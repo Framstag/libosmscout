@@ -176,7 +176,7 @@ void ToRGBA(const char* str, double& r, double& g, double& b, double& a)
 	void INTEGER(size_t& value);
 	void MAG(Mag& mag);
 	void LINEDEF(LineStyle& style);
-	void FILLDEF(FillStyle& style, std::string& filter);
+	void FILLDEF(FillStyle& style);
 	void PATTERNDEF(PatternStyle& style);
 	void COLOR(double& r, double& g, double& b, double& a);
 	void DOUBLE(double& value);
@@ -184,7 +184,6 @@ void ToRGBA(const char* str, double& r, double& g, double& b, double& a)
 	void WIDTH(double& value);
 	void OUTLINE(double& value);
 	void LAYER(int& layer);
-	void FILTER(std::string& filter);
 	void MINMAG(Mag& mag);
 	void LABELSTYLE(LabelStyle::Style& style);
 	void SIZE(double& value);

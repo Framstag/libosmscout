@@ -352,7 +352,6 @@ namespace osmscout {
   public:
     TagId                                           tagAdminLevel;
     TagId                                           tagBoundary;
-    TagId                                           tagBuilding;
     TagId                                           tagBridge;
     TagId                                           tagLayer;
     TagId                                           tagName;

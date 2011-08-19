@@ -682,8 +682,7 @@ namespace osmscout {
          ++a) {
       const WayRef& area=*a;
 
-      const FillStyle *style=styleConfig.GetAreaFillStyle(area->GetType(),
-                                                          area->IsBuilding());
+      const FillStyle *style=styleConfig.GetAreaFillStyle(area->GetType());
 
       if (style!=NULL &&
           style->GetLayer()>=-5 &&
@@ -697,8 +696,7 @@ namespace osmscout {
          ++r) {
       const RelationRef& relation=*r;
 
-      const FillStyle *style=styleConfig.GetAreaFillStyle(relation->GetType(),
-                                                          false/*relation->flags & Way::isBuilding*/);
+      const FillStyle *style=styleConfig.GetAreaFillStyle(relation->GetType());
 
       if (style!=NULL &&
           style->GetLayer()>=-5 &&
@@ -821,8 +819,7 @@ namespace osmscout {
           const WayRef& area=*a;
 
           PatternStyle    *patternStyle=styleConfig.GetAreaPatternStyle(area->GetType());
-          const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(area->GetType(),
-                                                                  area->GetAttributes().IsBuilding());
+          const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(area->GetType());
 
           bool            hasPattern=patternStyle!=NULL &&
                                      patternStyle->GetLayer()==layer &&
@@ -836,11 +833,12 @@ namespace osmscout {
                                   *patternStyle);
           }
 
-          polygon.TransformArea(projection,
-                                parameter.GetOptimizeAreaNodes(),
-                                area->nodes);
 
           if (hasPattern) {
+            polygon.TransformArea(projection,
+                                  parameter.GetOptimizeAreaNodes(),
+                                  area->nodes);
+
             DrawArea(projection,
                      parameter,
                      area->GetType(),
@@ -850,6 +848,10 @@ namespace osmscout {
             areasDrawn++;
           }
           else if (hasFill) {
+            polygon.TransformArea(projection,
+                                  parameter.GetOptimizeAreaNodes(),
+                                  area->nodes);
+
             DrawArea(projection,
                      parameter,
                      area->GetType(),
@@ -872,8 +874,7 @@ namespace osmscout {
           for (size_t m=0; m<relation->roles.size(); m++) {
             if (relation->roles[m].role=="0") {
               PatternStyle    *patternStyle=styleConfig.GetAreaPatternStyle(relation->roles[m].GetType());
-              const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(relation->roles[m].GetType(),
-                                                                      relation->roles[m].GetAttributes().IsBuilding());
+              const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(relation->roles[m].GetType());
 
               bool            hasPattern=patternStyle!=NULL &&
                                          patternStyle->GetLayer()==layer &&

@@ -61,6 +61,10 @@ OSS
     LINE #ffffff WITH ALTCOLOR #888888 MINPIXEL 0.5 WIDTH 8 OUTLINE 1
     LABEL WITH STYLE contour MINMAG close
 
+  AREA "highway_service"
+    FILL #ffffff BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    LABEL WITH STYLE contour MINMAG close
+
   WAY "highway_track" PRIO 11 MINMAG close
     LINE #90570c WITH OUTLINECOLOR #ffffff80 DASH 3,1 MINPIXEL 1.5 FIXEDWIDTH OUTLINE 1.5
     LABEL WITH STYLE contour MINMAG close
@@ -352,8 +356,11 @@ OSS
     FILL #e8d1fe
     LABEL WITH MINMAG detail
 
+  AREA "leisure_sports_centre_building"
+    FILL #bca9a9 WITH LAYER 2
+    LABEL WITH MINMAG close
+
   AREA "leisure_sports_centre"
-    FILL #bca9a9 WITH LAYER 2 FILTER "building"
     FILL #bde3cb
     LABEL WITH MINMAG close
 
@@ -413,132 +420,17 @@ OSS
     FILL #b5d6f1
     LABEL WITH MINMAG close
 
-  AREA "amenity_arts_centre"
-    FILL #cb4040
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_baby_hatch"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_bank"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_biergarten"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_bicycle_parking"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_bicycle_rental"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_bus_station"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_brothel"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_cafe"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_car_rental"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_car_sharing"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_cinema"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_college"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_courthouse"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_crematorium"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_dentist"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_doctors"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_embassy"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_fast_food"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_ferry_terminal"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_fire_station"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_food_court"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_fountain"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_fuel"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
   AREA "amenity_grave_yard"
     FILL #bde3cb WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
+  AREA "amenity_hospital_building"
+    FILL #b89c9c WITH LAYER 2 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    LABEL WITH STYLE emphasize COLOR #da0092 SIZE 1.1 MINMAG veryClose
+    ICON hospital WITH MINMAG close
+
   AREA "amenity_hospital"
-    FILL #bca9a9 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
+    FILL #f0f0d8 WITH LAYER -1 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
     LABEL WITH STYLE emphasize COLOR #da0092 SIZE 1.1 MINMAG veryClose
     ICON hospital WITH MINMAG close
 
@@ -547,28 +439,13 @@ OSS
     LABEL WITH STYLE emphasize COLOR #da0092 SIZE 1.1 MINMAG veryClose
     ICON hospital WITH MINMAG close
 
-  AREA "amenity_hunting_stand"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_kindergarten"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_library"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_nightclub"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
+  AREA "amenity_parking_building"
+    FILL #c4c393 WITH LAYER 2 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    ICON parking WITH MINMAG close
+    LABEL WITH STYLE emphasize COLOR #4bb2da SIZE 1.1 MINMAG veryClose
 
   AREA "amenity_parking"
-    FILL #f6eeb6
+    FILL #f6eeb6 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
     ICON parking WITH MINMAG close
     LABEL WITH STYLE emphasize COLOR #4bb2da SIZE 1.1 MINMAG veryClose
 
@@ -577,28 +454,15 @@ OSS
     ICON parking WITH MINMAG close
     LABEL WITH STYLE emphasize COLOR #4bb2da SIZE 1.1 MINMAG veryClose
 
-  AREA "amenity_pharmacy"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    ICON pharmacy WITH MINMAG veryClose
-    LABEL WITH STYLE emphasize COLOR #da0092 SIZE 1.1 MINMAG veryClose
-
   NODE "amenity_pharmacy"
     ICON pharmacy WITH MINMAG veryClose
     LABEL WITH STYLE emphasize COLOR #da0092 SIZE 1.1 MINMAG veryClose
 
-  AREA "amenity_place_of_worship"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_police"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
+  AREA "amenity_post_office_building"
+    FILL #ffcc00 WITH LAYER 2 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "amenity_post_office"
-    FILL #ffcc00 WITH LAYER 2 FILTER "building"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
@@ -608,68 +472,15 @@ OSS
   NODE "amenity_post_box"
     SYMBOL circle #ffcc00 4 WITH MINMAG veryClose
 
-  AREA "amenity_prison"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_pub"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_public_building"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_recycling"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_restaurant"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_school"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1 BORDER #c5a0a0 WITH MINPIXEL 1 WIDTH 1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-    
-
-  AREA "amenity_shelter"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_studio"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
   AREA "amenity_taxi"
     FILL #d2d2d2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA "amenity_theatre"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
+  AREA "amenity_building"
+    FILL #b89c9c WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA "amenity_townhall"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_university"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
-    FILL #f0f0d8 WITH LAYER -1
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_veterinary"
-    FILL #cb4040 WITH LAYER 2 FILTER "building"
+  AREA "amenity"
     FILL #f0f0d8 WITH LAYER -1
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
@@ -757,144 +568,8 @@ OSS
     FILL #9f5eb4 WITH LAYER 2
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA "shop_alcohol"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_bakery"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_beverages"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_bicycle"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_books"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_butcher"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_car"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_car_repair"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_chemist"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_clothes"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_computer"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_convenience"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_department_store"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_dry_cleaning"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_doityourself"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_electronics"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_florist"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_furniture"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_garden_centre"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_hairdresser"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_hardware"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_hifi"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_kiosk"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_laundry"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_mall"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_motorcycle"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_optician"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_organic"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_outdoor"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_sports"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_stationery"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_supermarket"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_shoes"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_toys"
-    FILL #cb8440 WITH LAYER 2
-    LABEL WITH MINMAG veryClose
-
-  AREA "shop_video"
-    FILL #cb8440 WITH LAYER 2
+  AREA "shop"
+    FILL #bca284 WITH LAYER 2 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
     LABEL WITH MINMAG veryClose
 
   AREA "military_airfield"
@@ -934,10 +609,10 @@ OSS
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "building_garage" MINMAG close
-    FILL #bca9a9 WITH LAYER 2
+    FILL #bcbcbc WITH LAYER 2
 
   AREA "building" MINMAG close
-    FILL #bca9a9 WITH LAYER 2 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #bcbcbc WITH LAYER 2 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
     LABEL WITH STYLE normal COLOR #524a4a SIZE 0.8 MINMAG veryClose
 
   NODE "place_continent"

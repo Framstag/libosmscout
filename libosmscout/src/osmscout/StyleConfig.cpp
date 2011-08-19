@@ -463,10 +463,6 @@ namespace osmscout {
       delete areaFillStyles[i];
     }
 
-    for (size_t i=0; i<areaBuildingFillStyles.size(); i++) {
-      delete areaBuildingFillStyles[i];
-    }
-
     for (size_t i=0; i<areaPatternStyles.size(); i++) {
       delete areaPatternStyles[i];
     }
@@ -579,7 +575,6 @@ namespace osmscout {
     if (type>=areaMag.size()) {
       areaMag.resize(type+1);
       areaFillStyles.resize(type+1,NULL);
-      areaBuildingFillStyles.resize(type+1,NULL);
       areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
@@ -712,7 +707,6 @@ namespace osmscout {
     if (type>=areaFillStyles.size()) {
       areaMag.resize(type+1,magWorld);
       areaFillStyles.resize(type+1,NULL);
-      areaBuildingFillStyles.resize(type+1,NULL);
       areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
@@ -725,32 +719,12 @@ namespace osmscout {
     return *this;
   }
 
-  StyleConfig& StyleConfig::SetAreaBuildingFillStyle(TypeId type,
-                                                     const FillStyle& style)
-  {
-    if (type>=areaFillStyles.size()) {
-      areaMag.resize(type+1,magWorld);
-      areaFillStyles.resize(type+1,NULL);
-      areaBuildingFillStyles.resize(type+1,NULL);
-      areaPatternStyles.resize(type+1,NULL);
-      areaSymbolStyles.resize(type+1,NULL);
-      areaLabelStyles.resize(type+1,NULL);
-      areaIconStyles.resize(type+1,NULL);
-    }
-
-    delete areaBuildingFillStyles[type];
-    areaBuildingFillStyles[type]=new FillStyle(style);
-
-    return *this;
-  }
-
   StyleConfig& StyleConfig::SetAreaPatternStyle(TypeId type,
                                                 const PatternStyle& style)
   {
     if (type>=areaFillStyles.size()) {
       areaMag.resize(type+1,magWorld);
       areaFillStyles.resize(type+1,NULL);
-      areaBuildingFillStyles.resize(type+1,NULL);
       areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
@@ -769,7 +743,6 @@ namespace osmscout {
     if (type>=areaFillStyles.size()) {
       areaMag.resize(type+1,magWorld);
       areaFillStyles.resize(type+1,NULL);
-      areaBuildingFillStyles.resize(type+1,NULL);
       areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
@@ -788,7 +761,6 @@ namespace osmscout {
     if (type>=areaFillStyles.size()) {
       areaMag.resize(type+1,magWorld);
       areaFillStyles.resize(type+1,NULL);
-      areaBuildingFillStyles.resize(type+1,NULL);
       areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
@@ -807,7 +779,6 @@ namespace osmscout {
     if (type>=areaFillStyles.size()) {
       areaMag.resize(type+1,magWorld);
       areaFillStyles.resize(type+1,NULL);
-      areaBuildingFillStyles.resize(type+1,NULL);
       areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
@@ -827,7 +798,6 @@ namespace osmscout {
     result=std::max(result,nodeSymbolStyles.size());
     result=std::max(result,wayLineStyles.size());
     result=std::max(result,areaFillStyles.size());
-    result=std::max(result,areaBuildingFillStyles.size());
     result=std::max(result,areaPatternStyles.size());
 
     return result;

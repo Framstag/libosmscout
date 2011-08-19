@@ -31,6 +31,7 @@ TYPES
   TYPE "highway_construction" = WAY ("highway"=="construction")
   TYPE "highway_roundabout" = WAY AREA ("highway"=="roundabout") OPTIONS ROUTE
   TYPE "highway_motorway_junction" = NODE ("highway"=="motorway_junction") OPTIONS ROUTE
+  
   TYPE "waterway_stream" = WAY ("waterway"=="stream") OR RELATION ("type"=="waterway" AND "waterway"=="stream") OPTIONS ROUTE CONSUME_CHILDREN
   TYPE "waterway_river" = WAY ("waterway"=="river") OR RELATION ("type"=="waterway" AND "waterway"=="river") OPTIONS ROUTE CONSUME_CHILDREN
   TYPE "waterway_riverbank" = AREA ("waterway"=="riverbank") OPTIONS ROUTE
@@ -44,6 +45,7 @@ TYPES
   TYPE "waterway_weir" = NODE WAY ("waterway"=="weir") OR RELATION ("type"=="waterway" AND "waterway"=="weir") OPTIONS CONSUME_CHILDREN
   TYPE "waterway_rapits" = NODE WAY ("waterway"=="rapits") OR RELATION ("type"=="waterway" AND "waterway"=="rapits") OPTIONS CONSUME_CHILDREN
   TYPE "waterway_dam" = WAY AREA ("waterway"=="dam")
+  
   TYPE "railway_rail" = WAY ("railway"=="rail") OPTIONS ROUTE
   TYPE "railway_tram" = WAY ("railway"=="tram") OPTIONS ROUTE
   TYPE "railway_light_rail" = WAY ("railway"=="light_rail") OPTIONS ROUTE
@@ -61,7 +63,9 @@ TYPES
   TYPE "railway_subway_entrance" = NODE ("railway"=="subway_entrance")
   TYPE "railway_turntable" = NODE AREA ("railway"=="turntable")
   TYPE "railway_platform" = WAY AREA ("railway"=="platform")
+  
   TYPE "route_ferry" = WAY ("route"=="ferry")
+  
   TYPE "aeroway_aerodrome" = NODE AREA ("aeroway"=="aerodrome")
   TYPE "aeroway_terminal" = NODE AREA ("aeroway"=="terminal")
   TYPE "aeroway_helipad" = NODE AREA ("aeroway"=="helipad")
@@ -69,6 +73,8 @@ TYPES
   TYPE "aeroway_taxiway" = WAY ("aeroway"=="taxiway")
   TYPE "aeroway_apron" = AREA ("aeroway"=="apron")
   TYPE "aeroway_gate" = NODE ("aeroway"=="gate")
+  
+  TYPE "leisure_sports_centre_building" = NODE AREA ("leisure"=="sports_centre" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE "leisure_sports_centre" = NODE AREA ("leisure"=="sports_centre")
   TYPE "leisure_golf_course" = NODE AREA ("leisure"=="golf_course")
   TYPE "leisure_stadium" = NODE AREA ("leisure"=="stadium")
@@ -84,105 +90,28 @@ TYPES
   TYPE "leisure_garden" = NODE AREA ("leisure"=="garden")
   TYPE "leisure_common" = NODE AREA ("leisure"=="common")
   TYPE "leisure_ice_rink" = NODE AREA ("leisure"=="ice_rink")
-  TYPE "amenity_arts_centre" = NODE AREA ("amenity"=="arts_centre")
-  TYPE "amenity_atm" = NODE ("amenity"=="atm")
-  TYPE "amenity_baby_hatch" = NODE AREA ("amenity"=="baby_hatch")
-  TYPE "amenity_bank" = NODE AREA ("amenity"=="bank")
-  TYPE "amenity_bbq" = NODE ("amenity"=="bbq")
-  TYPE "amenity_bench" = NODE ("amenity"=="bench")
-  TYPE "amenity_biergarten" = NODE AREA ("amenity"=="biergarten")
-  TYPE "amenity_bicycle_parking" = NODE AREA ("amenity"=="bicycle_parking")
-  TYPE "amenity_bicycle_rental" = NODE AREA ("amenity"=="bicycle_rental")
-  TYPE "amenity_buerau_de_change" = NODE ("amenity"=="buerau_de_change")
-  TYPE "amenity_bus_station" = NODE AREA ("amenity"=="bus_station")
-  TYPE "amenity_brothel" = NODE AREA ("amenity"=="brothel")
-  TYPE "amenity_cafe" = NODE AREA ("amenity"=="cafe")
-  TYPE "amenity_car_rental" = NODE AREA ("amenity"=="car_rental")
-  TYPE "amenity_car_sharing" = NODE AREA ("amenity"=="car_sharing")
-  TYPE "amenity_car_wash" = NODE AREA ("amenity"=="car_wash")
-  TYPE "amenity_cinema" = NODE AREA ("amenity"=="cinema")
-  TYPE "amenity_college" = NODE AREA ("amenity"=="college")
-  TYPE "amenity_courthouse" = NODE AREA ("amenity"=="courthouse")
-  TYPE "amenity_crematorium" = NODE AREA ("amenity"=="crematorium")
-  TYPE "amenity_dentist" = NODE AREA ("amenity"=="dentist")
-  TYPE "amenity_doctors" = NODE AREA ("amenity"=="doctors")
-  TYPE "amenity_drinking_water" = NODE ("amenity"=="drinking_water")
-  TYPE "amenity_embassy" = NODE AREA ("amenity"=="embassy")
-  TYPE "amenity_emergency_phone" = NODE ("amenity"=="emergency_phone")
-  TYPE "amenity_fast_food" = NODE AREA ("amenity"=="fast_food")
-  TYPE "amenity_ferry_terminal" = NODE AREA ("amenity"=="ferry_terminal")
-  TYPE "amenity_fire_station" = NODE AREA ("amenity"=="fire_station")
-  TYPE "amenity_food_court" = NODE AREA ("amenity"=="food_court")
-  TYPE "amenity_fountain" = NODE AREA ("amenity"=="fountain")
-  TYPE "amenity_fuel" = NODE AREA ("amenity"=="fuel")
-  TYPE "amenity_grave_yard" = NODE AREA ("amenity"=="grave_yard")
-  TYPE "amenity_grid_bin" = NODE ("amenity"=="grid_bin")
+
+  // These are currently special-cased in the style file  
+  TYPE "amenity_hospital_building" = NODE AREA ("amenity"=="hospital" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE "amenity_hospital" = NODE AREA ("amenity"=="hospital")
-  TYPE "amenity_hunting_stand" = NODE AREA ("amenity"=="hunting_stand")
-  TYPE "amenity_kindergarten" = NODE AREA ("amenity"=="kindergarten")
-  TYPE "amenity_library" = NODE AREA ("amenity"=="library")
-  TYPE "amenity_marketplace" = WAY AREA ("amenity"=="marketplace")
-  TYPE "amenity_nightclub" = NODE AREA ("amenity"=="nightclub")
+  
+  TYPE "amenity_parking_building" = NODE AREA ("amenity"=="parking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE "amenity_parking" = NODE AREA ("amenity"=="parking")
+  
+  TYPE "amenity_grave_yard" = NODE AREA ("amenity"=="grave_yard")
   TYPE "amenity_pharmacy" = NODE AREA ("amenity"=="pharmacy")
-  TYPE "amenity_place_of_worship" = NODE AREA ("amenity"=="place_of_worship")
-  TYPE "amenity_police" = NODE AREA ("amenity"=="police")
-  TYPE "amenity_post_box" = NODE ("amenity"=="post_box")
+  TYPE "amenity_post_office_building" = NODE AREA ("amenity"=="post_office" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE "amenity_post_office" = NODE AREA ("amenity"=="post_office")
-  TYPE "amenity_prison" = NODE AREA ("amenity"=="prison")
-  TYPE "amenity_pub" = NODE AREA ("amenity"=="pub")
-  TYPE "amenity_public_building" = NODE AREA ("amenity"=="public_building")
-  TYPE "amenity_recycling" = NODE AREA ("amenity"=="recycling")
-  TYPE "amenity_restaurant" = NODE AREA ("amenity"=="restaurant")
-  TYPE "amenity_school" = NODE AREA ("amenity"=="school")
-  TYPE "amenity_shelter" = NODE AREA ("amenity"=="shelter")
-  TYPE "amenity_signpost" = NODE ("amenity"=="signpost")
-  TYPE "amenity_studio" = NODE AREA ("amenity"=="studio")
+  TYPE "amenity_post_box" = NODE ("amenity"=="post_box")
   TYPE "amenity_taxi" = NODE AREA ("amenity"=="taxi")
-  TYPE "amenity_telefon" = NODE ("amenity"=="telefon")
-  TYPE "amenity_theatre" = NODE AREA ("amenity"=="theatre")
-  TYPE "amenity_toilets" = NODE ("amenity"=="toilets")
-  TYPE "amenity_townhall" = NODE AREA ("amenity"=="townhall")
-  TYPE "amenity_university" = NODE AREA ("amenity"=="university")
-  TYPE "amenity_vending_machine" = NODE ("amenity"=="vending_machine")
-  TYPE "amenity_veterinary" = NODE AREA ("amenity"=="veterinary")
-  TYPE "amenity_waste_basket" = NODE ("amenity"=="waste_basket")
-  TYPE "amenity_waste_disposal" = NODE ("amenity"=="waste_disposal")
-  TYPE "shop_alcohol" = NODE AREA ("shop"=="alcohol")
-  TYPE "shop_bakery" = NODE AREA ("shop"=="bakery")
-  TYPE "shop_beverages" = NODE AREA ("shop"=="beverages")
-  TYPE "shop_bicycle" = NODE AREA ("shop"=="bicycle")
-  TYPE "shop_books" = NODE AREA ("shop"=="books")
-  TYPE "shop_butcher" = NODE AREA ("shop"=="butcher")
-  TYPE "shop_car" = NODE AREA ("shop"=="car")
-  TYPE "shop_car_repair" = NODE AREA ("shop"=="car_repair")
-  TYPE "shop_chemist" = NODE AREA ("shop"=="chemist")
-  TYPE "shop_clothes" = NODE AREA ("shop"=="clothes")
-  TYPE "shop_computer" = NODE AREA ("shop"=="computer")
-  TYPE "shop_convenience" = NODE AREA ("shop"=="convenience")
-  TYPE "shop_department_store" = NODE AREA ("shop"=="department_store")
-  TYPE "shop_dry_cleaning" = NODE AREA ("shop"=="dry_cleaning")
-  TYPE "shop_doityourself" = NODE AREA ("shop"=="doityourself")
-  TYPE "shop_electronics" = NODE AREA ("shop"=="electronics")
-  TYPE "shop_florist" = NODE AREA ("shop"=="florist")
-  TYPE "shop_furniture" = NODE AREA ("shop"=="furniture")
-  TYPE "shop_garden_centre" = NODE AREA ("shop"=="garden_centre")
-  TYPE "shop_hairdresser" = NODE AREA ("shop"=="hairdresser")
-  TYPE "shop_hardware" = NODE AREA ("shop"=="hardware")
-  TYPE "shop_hifi" = NODE AREA ("shop"=="hifi")
-  TYPE "shop_kiosk" = NODE AREA ("shop"=="kiosk")
-  TYPE "shop_laundry" = NODE AREA ("shop"=="laundry")
-  TYPE "shop_mall" = NODE AREA ("shop"=="mall")
-  TYPE "shop_motorcycle" = NODE AREA ("shop"=="motorcycle")
-  TYPE "shop_optician" = NODE AREA ("shop"=="optician")
-  TYPE "shop_organic" = NODE AREA ("shop"=="organic")
-  TYPE "shop_outdoor" = NODE AREA ("shop"=="outdoor")
-  TYPE "shop_sports" = NODE AREA ("shop"=="sports")
-  TYPE "shop_stationery" = NODE AREA ("shop"=="stationery")
-  TYPE "shop_supermarket" = NODE AREA ("shop"=="supermarket")
-  TYPE "shop_shoes" = NODE AREA ("shop"=="shoes")
-  TYPE "shop_toys" = NODE AREA ("shop"=="toys")
-  TYPE "shop_video" = NODE AREA ("shop"=="video")
+
+  // Everything else is just an 'amenity' for now
+  TYPE "amenity_building" = NODE AREA (EXISTS "amenity" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+  TYPE "amenity" = NODE AREA (EXISTS "amenity")
+  
+  // Currently all shops are the same...
+  TYPE "shop" = NODE AREA(EXISTS "shop")
+  
   TYPE "tourism_alpine_hut" = NODE AREA ("tourism"=="alpine_hut")
   TYPE "tourism_aquarium" = NODE AREA ("tourism"=="aquarium")
   TYPE "tourism_attraction" = NODE AREA ("tourism"=="attraction")
@@ -200,6 +129,7 @@ TYPES
   TYPE "tourism_theme_park" = NODE AREA ("tourism"=="theme_park")
   TYPE "tourism_viewpoint" = NODE ("tourism"=="viewpoint")
   TYPE "tourism_zoo" = NODE AREA ("tourism"=="zoo")
+  
   TYPE "landuse_allotments" = NODE AREA ("landuse"=="allotments")
   TYPE "landuse_basin" = NODE AREA ("landuse"=="basin")
   TYPE "landuse_brownfield" = NODE AREA ("landuse"=="brownfield")
@@ -250,9 +180,11 @@ TYPES
   TYPE "natural_water" = NODE AREA ("natural"=="water")
   TYPE "natural_wetland" = NODE AREA ("natural"=="wetland")
   TYPE "natural_wood" = NODE AREA ("natural"=="wood")
+  
   TYPE "boundary_administrative" = WAY AREA ("boundary"=="administrative") OR RELATION ("type"=="boundary" AND "boundary"=="administrative") // we have multipolygon and boundary as relation type
   TYPE "boundary_civil" = AREA ("boundary"=="civil")
   TYPE "boundary_political" = AREA ("boundary"=="political")
+  
   TYPE "place_continent" = NODE AREA ("place"=="continent")
   TYPE "place_country" = NODE ("place"=="country")
   TYPE "place_state" = NODE AREA ("place"=="state")
@@ -265,6 +197,7 @@ TYPES
   TYPE "place_suburb" = NODE AREA ("place"=="suburb")
   TYPE "place_locality" = NODE AREA ("place"=="locality")
   TYPE "place_island" = NODE AREA ("place"=="island")
+  
   TYPE "historic_castle" = NODE AREA ("historic"=="castle")
   TYPE "historic_manor" = NODE AREA ("historic"=="manor")
   TYPE "historic_monument" = NODE AREA ("historic"=="monument")
@@ -273,12 +206,14 @@ TYPES
   TYPE "historic_ruins" = NODE AREA ("historic"=="ruins")
   TYPE "historic_battlefield" = NODE AREA ("historic"=="battlefield")
   TYPE "historic_wreck" = NODE AREA ("historic"=="wreck")
+  
   TYPE "military_airfield" = NODE AREA ("military"=="airfield")
   TYPE "military_bunker" = NODE AREA ("military"=="bunker")
   TYPE "military_barracks" = NODE AREA ("military"=="barracks")
   TYPE "military_danger_area" = NODE AREA ("military"=="danger_area")
   TYPE "military_range" = NODE AREA ("military"=="range")
   TYPE "military_naval_base" = NODE AREA ("military"=="naval_base")
+  
   TYPE "sport_9pin" = NODE AREA ("sport"=="9pin")
   TYPE "sport_10pin" = NODE AREA ("sport"=="10pin")
   TYPE "sport_archery" = NODE AREA ("sport"=="archery")
@@ -322,6 +257,7 @@ TYPES
   TYPE "sport_team_handball" = NODE AREA ("sport"=="team_handball")
   TYPE "sport_tennis" = NODE AREA ("sport"=="tennis")
   TYPE "sport_volleyball" = NODE AREA ("sport"=="volleyball")
+  
   TYPE "power_tower" = NODE ("power"=="tower")
   TYPE "power_pole" = NODE ("power"=="pole")
   TYPE "power_line" = WAY ("power"=="line")
