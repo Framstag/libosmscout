@@ -478,6 +478,10 @@ namespace osmscout {
           return false;
         }
 
+        if (way.IsArea()) {
+          continue;
+        }
+
         if (indexTypes.find(way.GetType())!=indexTypes.end()) {
           double minLon;
           double maxLon;
@@ -638,6 +642,10 @@ namespace osmscout {
                          " in file '"+
                          relScanner.GetFilename()+"'");
           return false;
+        }
+
+        if (rel.IsArea()) {
+          continue;
         }
 
         if (indexTypes.find(rel.GetType())!=indexTypes.end()) {
