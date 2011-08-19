@@ -495,8 +495,6 @@ namespace osmscout {
     writer.SetPos(topLevelOffsetOffset);
     writer.Write(topLevelOffset);
 
-    std::cout << "Nearly finished!"<< std::endl;
-
     return !writer.HasError() && writer.Close();
   }
 }
