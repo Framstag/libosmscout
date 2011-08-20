@@ -62,7 +62,6 @@ TYPES
   TYPE "railway_level_crossing" = NODE ("railway"=="level_crossing")
   TYPE "railway_subway_entrance" = NODE ("railway"=="subway_entrance")
   TYPE "railway_turntable" = NODE AREA ("railway"=="turntable")
-  TYPE "railway_platform" = WAY AREA ("railway"=="platform")
   
   TYPE "route_ferry" = WAY ("route"=="ferry")
   
@@ -73,6 +72,8 @@ TYPES
   TYPE "aeroway_taxiway" = WAY ("aeroway"=="taxiway")
   TYPE "aeroway_apron" = AREA ("aeroway"=="apron")
   TYPE "aeroway_gate" = NODE ("aeroway"=="gate")
+
+  TYPE "public_transport_platform" = WAY AREA ("public_transport"=="platform" OR "railway"=="platform")
   
   TYPE "leisure_sports_centre_building" = NODE AREA ("leisure"=="sports_centre" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE "leisure_sports_centre" = NODE AREA ("leisure"=="sports_centre")
