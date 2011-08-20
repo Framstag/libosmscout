@@ -1185,6 +1185,17 @@ namespace osmscout {
       b=b+(1-b)*50/100;
     }
 
+    if (!style.GetDash().empty() && style.GetGapA()>0.0) {
+      DrawPath(projection,
+               parameter,
+               style.GetGapR(),style.GetGapG(),style.GetGapB(),style.GetGapA(),
+               lineWidth,
+               emptyDash,
+               capRound,
+               capRound,
+               polygon);
+    }
+
     DrawPath(projection,
              parameter,
              r,g,b,a,

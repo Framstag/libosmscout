@@ -36,6 +36,10 @@ namespace osmscout {
      outlineG(0.75),
      outlineB(0.75),
      outlineA(1),
+     gapR(1),
+     gapG(0),
+     gapB(0),
+     gapA(0),
      minPixel(2),
      width(0),
      fixedWidth(false),
@@ -75,6 +79,16 @@ namespace osmscout {
     outlineG=g;
     outlineB=b;
     outlineA=a;
+
+    return *this;
+  }
+
+  LineStyle& LineStyle::SetGapColor(double r, double g, double b, double a)
+  {
+    gapR=r;
+    gapG=g;
+    gapB=b;
+    gapA=a;
 
     return *this;
   }

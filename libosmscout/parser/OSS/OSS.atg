@@ -229,6 +229,13 @@ PRODUCTIONS
                       ","
                       DOUBLE<dash> (. style.AddDashValue(dash); .)
                     }
+                    
+                    [
+                    (. double cr,cg,cb,ca; .)
+                      "GAPCOLOR"
+                      COLOR<cr,cg,cb,ca>
+                      (. style.SetGapColor(cr,cg,cb,ca); .)
+                    ]
                   ]
 
                   [

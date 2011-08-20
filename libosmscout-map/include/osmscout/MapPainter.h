@@ -431,10 +431,7 @@ namespace osmscout {
      */
     virtual void DrawPath(const Projection& projection,
                           const MapParameter& parameter,
-                          double r,
-                          double g,
-                          double b,
-                          double a,
+                          double r, double g, double b, double a,
                           double width,
                           const std::vector<double>& dash,
                           CapStyle startCap,
