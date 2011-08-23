@@ -15,8 +15,11 @@ libosmscoutmap_la_LDFLAGS  = $(LIBOSMSCOUT_LIBS) \
                              $(LIBPNG_LIBS)
 
 libosmscoutmap_la_SOURCES = osmscout/LoaderPNG.cpp \
-                            osmscout/MapPainter.cpp \
-                            osmscout/MapPainterSVG.cpp
+                            osmscout/MapPainter.cpp
+
+if HAVE_LIB_AGG
+libosmscoutmap_la_SOURCES += osmscout/MapPainterAgg.cpp
+endif
 
 if HAVE_LIB_CAIRO
 libosmscoutmap_la_SOURCES += osmscout/MapPainterCairo.cpp
@@ -26,6 +29,7 @@ if HAVE_LIB_QTGUI
 libosmscoutmap_la_SOURCES += osmscout/MapPainterQt.cpp
 endif
 
-if HAVE_LIB_AGG
-libosmscoutmap_la_SOURCES += osmscout/MapPainterAgg.cpp
+if HAVE_DRIVER_SVG
+libosmscoutmap_la_SOURCES += osmscout/MapPainterSVG.cpp
 endif
+

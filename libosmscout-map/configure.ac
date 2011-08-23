@@ -13,6 +13,15 @@ AC_LANG(C++)
 LT_INIT([win32-dll])
 AC_PROG_INSTALL
 
+AC_ARG_ENABLE(libagg-driver,
+              [  --disable-libagg-driver do not include libagg driver])
+AC_ARG_ENABLE(cairo-driver,
+              [  --disable-cairo-driver  do not include cairo driver])
+AC_ARG_ENABLE(qt-driver,
+              [  --disable-qt-driver     do not include Qt driver])
+AC_ARG_ENABLE(svg-driver,
+              [  --disable-svg-driver    do not include SVG driver])
+              
 AC_TYPE_SIZE_T
 
 AC_CHECK_FUNCS([mmap])
@@ -49,45 +58,56 @@ dnl Check for libosmscout
 PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout],
                   [AC_SUBST(LIBOSMSCOUT_CFLAGS)
                    AC_SUBST(LIBOSMSCOUT_LIBS)])
-
-PKG_CHECK_MODULES(LIBCAIRO, cairo,
-                  HASCAIRO=true
-                  [AC_SUBST(LIBCAIRO_CFLAGS)
-                   AC_SUBST(LIBCAIRO_LIBS)
-                   AC_DEFINE(HAVE_LIB_CAIRO,1,[libcairo found])],
-                   [HASCAIRO=false])
-
+                   
+if test "$enable_cairo_driver" != "no"; then
+	PKG_CHECK_MODULES(LIBCAIRO, cairo,
+	                  HASCAIRO=true
+	                  [AC_SUBST(LIBCAIRO_CFLAGS)
+	                   AC_SUBST(LIBCAIRO_LIBS)
+	                   AC_DEFINE(HAVE_LIB_CAIRO,1,[libcairo found])],
+	                   [HASCAIRO=false])
+fi
 AM_CONDITIONAL(HAVE_LIB_CAIRO,[test "$HASCAIRO" = "true"])
 
-PKG_CHECK_MODULES(LIBQTGUI, QtGui > 4.6.0,
-                  HASQTGUI=true
-                  [AC_SUBST(LIBQTGUI_CFLAGS)
-                   AC_SUBST(LIBQTGUI_LIBS)
-                   AC_DEFINE(HAVE_LIB_QTGUI,1,[libQtGui found])],
-                   [HASQTGUI=false])
-
+if test "$enable_qt_driver" != "no"; then
+	PKG_CHECK_MODULES(LIBQTGUI, QtGui > 4.6.0,
+	                  HASQTGUI=true
+	                  [AC_SUBST(LIBQTGUI_CFLAGS)
+	                   AC_SUBST(LIBQTGUI_LIBS)
+	                   AC_DEFINE(HAVE_LIB_QTGUI,1,[libQtGui found])],
+	                   [HASQTGUI=false])
+fi
 AM_CONDITIONAL(HAVE_LIB_QTGUI,[test "$HASQTGUI" = "true"])
 
-PKG_CHECK_MODULES(LIBFREETYPE, freetype2,
-                  HASLIBFREETYPE=true
-                  [AC_SUBST(LIBFREETYPE_CFLAGS)
-                   AC_SUBST(LIBFREETYPE_LIBS)
-                   AC_DEFINE(HAVE_LIB_FREETYPE,1,[libfreetype found])],
-                   [HASQTGUI=false])
-
+if test "$enable_libagg_driver" != "no"; then
+	PKG_CHECK_MODULES(LIBFREETYPE, freetype2,
+	                  HASLIBFREETYPE=true
+	                  [AC_SUBST(LIBFREETYPE_CFLAGS)
+	                   AC_SUBST(LIBFREETYPE_LIBS)
+	                   AC_DEFINE(HAVE_LIB_FREETYPE,1,[libfreetype found])],
+	                   [HASQTGUI=false])
+	
+fi
 AM_CONDITIONAL(HAVE_LIB_FREETYPE,[test "$HASLIBFREETYPE" = "true"])
-
-PKG_CHECK_MODULES(LIBAGG, libagg,
-                  HASAGG=true
-                  [AC_SUBST(LIBAGG_CFLAGS)
-                   if test "$HASLIBFREETYPE" = "true"; then
-                     LIBAGG_LIBS="-laggfontfreetype_pic $LIBAGG_LIBS"
-                   fi
-                   AC_SUBST(LIBAGG_LIBS)
-                   AC_DEFINE(HAVE_LIB_AGG,1,[libagg found])],
-                   [HASAGG=false])
-
+	
+if test "$enable_libagg_driver" != "no"; then
+	PKG_CHECK_MODULES(LIBAGG, libagg,
+	                  HASAGG=true
+	                  [AC_SUBST(LIBAGG_CFLAGS)
+	                   if test "$HASLIBFREETYPE" = "true"; then
+	                     LIBAGG_LIBS="-laggfontfreetype_pic $LIBAGG_LIBS"
+	                   fi
+	                   AC_SUBST(LIBAGG_LIBS)
+	                   AC_DEFINE(HAVE_LIB_AGG,1,[libagg found])],
+	                   [HASAGG=false])
+fi
 AM_CONDITIONAL(HAVE_LIB_AGG,[test "$HASAGG" = "true"])
+
+if test "$enable_svg_driver" != "no"; then
+  HASSVG="true"
+fi
+AM_CONDITIONAL(HAVE_DRIVER_SVG,[test "$HASSVG" = "true"])
+
 
 PKG_CHECK_MODULES(LIBPNG,libpng)
 AC_SUBST(LIBPNG_CFLAGS)
