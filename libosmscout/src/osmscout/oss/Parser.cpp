@@ -260,10 +260,6 @@ void Parser::AREASTYLE() {
 				FILLDEF(fillStyle);
 				config.SetAreaFillStyle(type,fillStyle);
 				
-			} else if (la->kind == 23) {
-				PatternStyle patternStyle; 
-				PATTERNDEF(patternStyle);
-				config.SetAreaPatternStyle(type,patternStyle); 
 			} else if (la->kind == 24) {
 				LabelStyle labelStyle; 
 				LABELDEF(labelStyle);
@@ -616,64 +612,25 @@ void Parser::FILLDEF(FillStyle& style) {
 		if (la->kind == 22) {
 			while (!(la->kind == 0 || la->kind == 22)) {SynErr(80); Get();}
 			Get();
-			COLOR(r,g,b,a);
-			style.SetBorderColor(r,g,b,a); 
+			Expect(5);
+			style.SetPattern(Destring(t->val)); 
 			if (la->kind == 14) {
 				while (!(la->kind == 0 || la->kind == 14)) {SynErr(81); Get();}
 				Get();
-				if (la->kind == 17) {
-					double dash; 
-					Get();
-					DOUBLE(dash);
-					style.AddBorderDashValue(dash); 
-					while (la->kind == 18) {
-						Get();
-						DOUBLE(dash);
-						style.AddBorderDashValue(dash); 
-					}
-				}
-				if (la->kind == 58) {
-					double minPixel=style.GetBorderMinPixel(); 
-					MINPIXEL(minPixel);
-					style.SetBorderMinPixel(minPixel); 
-				}
-				if (la->kind == 59) {
-					double width=style.GetBorderWidth(); 
-					WIDTH(width);
-					style.SetBorderWidth(width); 
+				if (la->kind == 11) {
+					Mag minMag=style.GetPatternMinMag(); 
+					MINMAG(minMag);
+					style.SetPatternMinMag(minMag); 
 				}
 			}
 		}
-}
-
-void Parser::PATTERNDEF(PatternStyle& style) {
-		double r,g,b,a;
-		
-		while (!(la->kind == 0 || la->kind == 23)) {SynErr(82); Get();}
-		Expect(23);
-		Expect(5);
-		style.SetPattern(Destring(t->val)); 
-		if (la->kind == 14) {
-			while (!(la->kind == 0 || la->kind == 14)) {SynErr(83); Get();}
-			Get();
-			if (la->kind == 11) {
-				Mag minMag=style.GetMinMag(); 
-				MINMAG(minMag);
-				style.SetMinMag(minMag); 
-			}
-			if (la->kind == 40) {
-				int layer=style.GetLayer(); 
-				LAYER(layer);
-				style.SetLayer(layer); 
-			}
-		}
-		if (la->kind == 22) {
-			while (!(la->kind == 0 || la->kind == 22)) {SynErr(84); Get();}
+		if (la->kind == 23) {
+			while (!(la->kind == 0 || la->kind == 23)) {SynErr(82); Get();}
 			Get();
 			COLOR(r,g,b,a);
 			style.SetBorderColor(r,g,b,a); 
 			if (la->kind == 14) {
-				while (!(la->kind == 0 || la->kind == 14)) {SynErr(85); Get();}
+				while (!(la->kind == 0 || la->kind == 14)) {SynErr(83); Get();}
 				Get();
 				if (la->kind == 17) {
 					double dash; 
@@ -732,7 +689,7 @@ void Parser::DOUBLE(double& value) {
 			 SemErr(e.c_str());
 			}
 			
-		} else SynErr(86);
+		} else SynErr(84);
 }
 
 void Parser::MINPIXEL(double& value) {
@@ -780,7 +737,7 @@ void Parser::LABELSTYLE(LabelStyle::Style& style) {
 		} else if (la->kind == 35) {
 			Get();
 			style=LabelStyle::emphasize; 
-		} else SynErr(87);
+		} else SynErr(85);
 }
 
 void Parser::SIZE(double& value) {
@@ -812,7 +769,7 @@ void Parser::SYMBOLSTYLE(SymbolStyle::Style& style) {
 		} else if (la->kind == 39) {
 			Get();
 			style=SymbolStyle::circle; 
-		} else SynErr(88);
+		} else SynErr(86);
 }
 
 
@@ -849,7 +806,7 @@ bool Parser::StartOf(int s)
 	static bool set[3][63] = {
 		{T,x,x,x, x,x,T,x, T,T,x,x, T,T,T,x, x,x,x,x, x,T,T,T, T,x,x,x, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,T, T,x,x,x, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x}
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, T,x,x,x, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x}
 	};
 
 
@@ -894,8 +851,8 @@ void Errors::SynErr(int line, int col, int n)
 			case 19: s = coco_string_create("\"GAPCOLOR\" expected"); break;
 			case 20: s = coco_string_create("\"FIXEDWIDTH\" expected"); break;
 			case 21: s = coco_string_create("\"FILL\" expected"); break;
-			case 22: s = coco_string_create("\"BORDER\" expected"); break;
-			case 23: s = coco_string_create("\"PATTERN\" expected"); break;
+			case 22: s = coco_string_create("\"PATTERN\" expected"); break;
+			case 23: s = coco_string_create("\"BORDER\" expected"); break;
 			case 24: s = coco_string_create("\"LABEL\" expected"); break;
 			case 25: s = coco_string_create("\"COLOR\" expected"); break;
 			case 26: s = coco_string_create("\"BGCOLOR\" expected"); break;
@@ -954,13 +911,11 @@ void Errors::SynErr(int line, int col, int n)
 			case 79: s = coco_string_create("this symbol not expected in FILLDEF"); break;
 			case 80: s = coco_string_create("this symbol not expected in FILLDEF"); break;
 			case 81: s = coco_string_create("this symbol not expected in FILLDEF"); break;
-			case 82: s = coco_string_create("this symbol not expected in PATTERNDEF"); break;
-			case 83: s = coco_string_create("this symbol not expected in PATTERNDEF"); break;
-			case 84: s = coco_string_create("this symbol not expected in PATTERNDEF"); break;
-			case 85: s = coco_string_create("this symbol not expected in PATTERNDEF"); break;
-			case 86: s = coco_string_create("invalid DOUBLE"); break;
-			case 87: s = coco_string_create("invalid LABELSTYLE"); break;
-			case 88: s = coco_string_create("invalid SYMBOLSTYLE"); break;
+			case 82: s = coco_string_create("this symbol not expected in FILLDEF"); break;
+			case 83: s = coco_string_create("this symbol not expected in FILLDEF"); break;
+			case 84: s = coco_string_create("invalid DOUBLE"); break;
+			case 85: s = coco_string_create("invalid LABELSTYLE"); break;
+			case 86: s = coco_string_create("invalid SYMBOLSTYLE"); break;
 
     default:
     {

@@ -41,14 +41,20 @@ namespace osmscout {
     QFont GetFont(const MapParameter& parameter,
                   double fontSize);
 
+    void SetPen(const LineStyle& style,
+                double lineWidth);
+
+    void SetBrush();
+    void SetBrush(const MapParameter& parameter,
+                  const FillStyle& fillStyle);
+
   protected:
     bool HasIcon(const StyleConfig& styleConfig,
                  const MapParameter& parameter,
                  IconStyle& style);
 
-    bool HasPattern(const StyleConfig& styleConfig,
-                    const MapParameter& parameter,
-                    PatternStyle& style);
+    bool HasPattern(const MapParameter& parameter,
+                    const FillStyle& style);
 
     void GetTextDimension(const MapParameter& parameter,
                           double fontSize,
@@ -73,10 +79,10 @@ namespace osmscout {
                           const TransPolygon& nodes);
 
     void DrawIcon(const IconStyle* style,
-                          double x, double y);
+                  double x, double y);
 
     void DrawSymbol(const SymbolStyle* style,
-                            double x, double y);
+                    double x, double y);
 
     void DrawPath(const Projection& projection,
                   const MapParameter& parameter,
@@ -96,23 +102,12 @@ namespace osmscout {
                   const FillStyle& fillStyle,
                   const TransPolygon& nodes);
 
-    void DrawArea(const Projection& projection,
-                  const MapParameter& parameter,
-                  TypeId type,
-                  const PatternStyle& patternStyle,
-                  const TransPolygon& nodes);
-
     void DrawArea(const FillStyle& style,
                   const MapParameter& parameter,
                   double x,
                   double y,
                   double width,
                   double height);
-
-    void SetPen(const LineStyle& style,
-                double lineWidth);
-    void SetBrush();
-    void SetBrush(const FillStyle& fillStyle);
 
   public:
     MapPainterQt();

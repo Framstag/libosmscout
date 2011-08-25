@@ -249,26 +249,6 @@ namespace osmscout {
     return false;
   }
 
-  bool MapPainterAgg::HasPattern(const StyleConfig& styleConfig,
-                                 const MapParameter& parameter,
-                                 PatternStyle& style)
-  {
-    if (style.GetId()==std::numeric_limits<size_t>::max()) {
-      return false;
-    }
-
-    if (style.GetId()!=0) {
-      return true;
-    }
-
-    std::string filename=std::string("../libosmscout/data/icons/14x14/standard/")+
-                         style.GetPatternName()+".png";
-
-    // TODO
-
-    return false;
-  }
-
   void MapPainterAgg::DrawLabel(const Projection& projection,
                                const MapParameter& parameter,
                                const Label& label)
@@ -558,15 +538,6 @@ namespace osmscout {
                capRound,
                area);
     }
-  }
-
-  void MapPainterAgg::DrawArea(const Projection& projection,
-                              const MapParameter& parameter,
-                              TypeId type,
-                              const PatternStyle& patternStyle,
-                              const TransPolygon& area)
-  {
-    // TODO
   }
 
   void MapPainterAgg::DrawArea(const FillStyle& style,

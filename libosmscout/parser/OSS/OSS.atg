@@ -179,9 +179,6 @@ PRODUCTIONS
                   (.
                     config.SetAreaFillStyle(type,fillStyle);
                   .)
-                | (. PatternStyle patternStyle; .)
-                  PATTERNDEF<patternStyle>
-                  (. config.SetAreaPatternStyle(type,patternStyle); .)
                 | (. LabelStyle labelStyle; .)
                   LABELDEF<labelStyle>
                   (. config.SetAreaLabelStyle(type,labelStyle); .)
@@ -277,56 +274,19 @@ PRODUCTIONS
                     (. style.SetLayer(layer); .)
                   ]
                 ]
-                
+
                 [
-                  SYNC "BORDER"
-                  COLOR<r,g,b,a> (. style.SetBorderColor(r,g,b,a); .)
+                  SYNC "PATTERN"
+                  string (. style.SetPattern(Destring(t->val)); .)
 
                   [SYNC "WITH"
                     [
-                      (. double dash; .)
-                      "DASH"
-                      DOUBLE<dash>   (. style.AddBorderDashValue(dash); .)
-                      {
-                        ","
-                        DOUBLE<dash> (. style.AddBorderDashValue(dash); .)
-                      }
-                    ]
-
-                    [
-                      (. double minPixel=style.GetBorderMinPixel(); .)
-                      MINPIXEL<minPixel>
-                      (. style.SetBorderMinPixel(minPixel); .)
-                    ]
-
-                    [
-                      (. double width=style.GetBorderWidth(); .)
-                      WIDTH<width>
-                      (. style.SetBorderWidth(width); .)
+                      (. Mag minMag=style.GetPatternMinMag(); .)
+                      MINMAG<minMag>
+                      (. style.SetPatternMinMag(minMag); .)
                     ]
                   ]
-                ].
-
-  PATTERNDEF<PatternStyle& style>
-              = (.
-                  double r,g,b,a;
-                .)
-                SYNC "PATTERN"
-                string (. style.SetPattern(Destring(t->val)); .)
-
-                [SYNC "WITH"
-                  [
-                    (. Mag minMag=style.GetMinMag(); .)
-                    MINMAG<minMag>
-                    (. style.SetMinMag(minMag); .)
-                  ]
-
-                  [
-                    (. int layer=style.GetLayer(); .)
-                    LAYER<layer>
-                    (. style.SetLayer(layer); .)
-                  ]
-                ]
+                ]  
                 
                 [
                   SYNC "BORDER"

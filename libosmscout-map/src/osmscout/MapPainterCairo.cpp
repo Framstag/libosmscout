@@ -425,15 +425,18 @@ namespace osmscout {
     return false;
   }
 
-  bool MapPainterCairo::HasPattern(const StyleConfig& styleConfig,
-                                   const MapParameter& parameter,
-                                   PatternStyle& style)
+  bool MapPainterCairo::HasPattern(const MapParameter& parameter,
+                                   const FillStyle& style)
   {
-    if (style.GetId()==std::numeric_limits<size_t>::max()) {
+    assert(style.HasPattern()) ;
+
+    // Was not able to load pattern
+    if (style.GetPatternId()==std::numeric_limits<size_t>::max()) {
       return false;
     }
 
-    if (style.GetId()!=0) {
+    // Pattern already loaded
+    if (style.GetPatternId()!=0) {
       return true;
     }
 
@@ -446,7 +449,7 @@ namespace osmscout {
 
       if (image!=NULL) {
         images.resize(images.size()+1,image);
-        style.SetId(images.size());
+        style.SetPatternId(images.size());
         patterns.resize(images.size(),NULL);
 
         patterns[patterns.size()-1]=cairo_pattern_create_for_surface(images[images.size()-1]);
@@ -457,14 +460,14 @@ namespace osmscout {
         cairo_matrix_init_scale(&matrix,1,1);
         cairo_pattern_set_matrix(patterns[patterns.size()-1],&matrix);
 
-        std::cout << "Loaded image " << filename << " => id " << style.GetId() << std::endl;
+        std::cout << "Loaded image " << filename << " => id " << style.GetPatternId() << std::endl;
 
         return true;
       }
     }
 
     std::cerr << "ERROR while loading icon file '" << style.GetPatternName() << "'" << std::endl;
-    style.SetId(std::numeric_limits<size_t>::max());
+    style.SetPatternId(std::numeric_limits<size_t>::max());
 
     return false;
   }
@@ -819,12 +822,22 @@ namespace osmscout {
                                  const FillStyle& fillStyle,
                                  const TransPolygon& area)
   {
-    cairo_set_source_rgba(draw,
-                          fillStyle.GetFillR(),
-                          fillStyle.GetFillG(),
-                          fillStyle.GetFillB(),
-                          1);
-    cairo_set_line_width(draw,1);
+    if (fillStyle.HasPattern() &&
+        projection.GetMagnification()>=fillStyle.GetPatternMinMag() &&
+        HasPattern(parameter,fillStyle)) {
+      assert(fillStyle.GetPatternId()<=images.size());
+      assert(images[fillStyle.GetPatternId()-1]!=NULL);
+
+      cairo_set_source(draw,patterns[fillStyle.GetPatternId()-1]);
+    }
+    else {
+      cairo_set_source_rgba(draw,
+                            fillStyle.GetFillR(),
+                            fillStyle.GetFillG(),
+                            fillStyle.GetFillB(),
+                            fillStyle.GetFillA());
+      cairo_set_line_width(draw,1);
+    }
 
     for (size_t i=area.GetStart(); i<=area.GetEnd(); i++) {
       if (area.points[i].draw) {
@@ -851,51 +864,6 @@ namespace osmscout {
                         fillStyle.GetBorderA(),
                         borderWidth,
                         fillStyle.GetBorderDash());
-
-      cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
-
-      cairo_stroke(draw);
-    }
-  }
-
-  void MapPainterCairo::DrawArea(const Projection& projection,
-                                 const MapParameter& parameter,
-                                 TypeId type,
-                                 const PatternStyle& patternStyle,
-                                 const TransPolygon& area)
-  {
-    assert(patternStyle.GetId()>0);
-    assert(patternStyle.GetId()!=std::numeric_limits<size_t>::max());
-    assert(patternStyle.GetId()<=images.size());
-    assert(images[patternStyle.GetId()-1]!=NULL);
-
-    cairo_set_source(draw,patterns[patternStyle.GetId()-1]);
-
-    for (size_t i=area.GetStart(); i<=area.GetEnd(); i++) {
-      if (area.points[i].draw) {
-        if (i==area.GetStart()) {
-          cairo_new_path(draw);
-          cairo_move_to(draw,area.points[i].x,area.points[i].y);
-        }
-        else {
-          cairo_line_to(draw,area.points[i].x,area.points[i].y);
-        }
-      }
-    }
-
-    cairo_line_to(draw,area.points[area.GetStart()].x,area.points[area.GetStart()].y);
-
-    cairo_fill_preserve(draw);
-
-    double borderWidth=GetProjectedWidth(projection, patternStyle.GetBorderMinPixel(), patternStyle.GetBorderWidth());
-
-    if (borderWidth>0.0) {
-      SetLineAttributes(patternStyle.GetBorderR(),
-                        patternStyle.GetBorderG(),
-                        patternStyle.GetBorderB(),
-                        patternStyle.GetBorderA(),
-                        borderWidth,
-                        patternStyle.GetBorderDash());
 
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
 

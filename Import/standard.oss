@@ -222,8 +222,7 @@ OSS
     LABEL WITH MINMAG detail
 
   AREA "landuse_forest"
-    PATTERN "forest" WITH MINMAG cityOver LAYER 1
-    FILL #8dc56c WITH LAYER 1
+    FILL #8dc56c WITH LAYER 1 PATTERN "forest" WITH MINMAG cityOver
     LABEL WITH STYLE emphasize MINMAG city
 
   AREA "landuse_allotments"
@@ -276,8 +275,7 @@ OSS
     LABEL WITH MINMAG city
 
   AREA "landuse_cemetery"
-    PATTERN "cemetery" WITH MINMAG detail
-    FILL #a9caae
+    FILL #a9caae PATTERN "cemetery" WITH MINMAG detail
     LABEL WITH MINMAG close
 
   AREA "landuse_meadow"
@@ -301,8 +299,7 @@ OSS
     LABEL WITH MINMAG detail
 
   AREA "natural_scrub"
-    PATTERN "scrub" WITH MINMAG cityOver
-    FILL #b5e2b5
+    FILL #b5e2b5 PATTERN "scrub" WITH MINMAG cityOver
     LABEL WITH MINMAG city
 
   AREA "natural_fell"

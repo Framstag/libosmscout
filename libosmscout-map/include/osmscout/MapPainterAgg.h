@@ -94,10 +94,6 @@ namespace osmscout {
                  const MapParameter& parameter,
                  IconStyle& style);
 
-    bool HasPattern(const StyleConfig& styleConfig,
-                    const MapParameter& parameter,
-                    PatternStyle& style);
-
     void GetTextDimension(const MapParameter& parameter,
                           double fontSize,
                           const std::string& text,
@@ -142,12 +138,6 @@ namespace osmscout {
                   const MapParameter& parameter,
                   TypeId type,
                   const FillStyle& fillStyle,
-                  const TransPolygon& area);
-
-    void DrawArea(const Projection& projection,
-                  const MapParameter& parameter,
-                  TypeId type,
-                  const PatternStyle& patternStyle,
                   const TransPolygon& area);
 
     void DrawArea(const FillStyle& style,

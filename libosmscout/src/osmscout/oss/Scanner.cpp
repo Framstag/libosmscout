@@ -172,8 +172,8 @@ void Scanner::Init() {
 	keywords.set("GAPCOLOR", 19);
 	keywords.set("FIXEDWIDTH", 20);
 	keywords.set("FILL", 21);
-	keywords.set("BORDER", 22);
-	keywords.set("PATTERN", 23);
+	keywords.set("PATTERN", 22);
+	keywords.set("BORDER", 23);
 	keywords.set("LABEL", 24);
 	keywords.set("COLOR", 25);
 	keywords.set("BGCOLOR", 26);

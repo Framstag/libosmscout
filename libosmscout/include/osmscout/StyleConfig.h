@@ -202,6 +202,9 @@ namespace osmscout {
     double              fillG;
     double              fillB;
     double              fillA;
+    std::string         pattern;
+    mutable size_t      patternId;
+    Mag                 patternMinMag;
     double              borderR;
     double              borderG;
     double              borderB;
@@ -216,6 +219,9 @@ namespace osmscout {
     FillStyle& SetStyle(Style style);
     FillStyle& SetLayer(int layer);
     FillStyle& SetFillColor(double r, double g, double b, double a);
+    void SetPatternId(size_t id) const;
+    FillStyle& SetPattern(const std::string& pattern);
+    FillStyle& SetPatternMinMag(Mag mag);
     FillStyle& SetBorderColor(double r, double g, double b, double a);
     FillStyle& SetBorderMinPixel(double value);
     FillStyle& SetBorderWidth(double value);
@@ -256,84 +262,14 @@ namespace osmscout {
       return fillA;
     }
 
-    inline double GetBorderR() const
+    inline bool HasPattern() const
     {
-      return borderR;
+      return !pattern.empty();
     }
 
-    inline double GetBorderG() const
+    inline size_t GetPatternId() const
     {
-      return borderG;
-    }
-
-    inline double GetBorderB() const
-    {
-      return borderB;
-    }
-
-    inline double GetBorderA() const
-    {
-      return borderA;
-    }
-    inline double GetBorderMinPixel() const
-    {
-      return borderMinPixel;
-    }
-
-    inline double GetBorderWidth() const
-    {
-      return borderWidth;
-    }
-
-    inline bool HasBorderDashValues() const
-    {
-      return borderDash.size()>0;
-    }
-
-    inline const std::vector<double>& GetBorderDash() const
-    {
-      return borderDash;
-    }
-  };
-
-  /**
-   * Areas can have a pattern style, filling the area with an repeated image pattern
-   */
-  class OSMSCOUT_API PatternStyle
-  {
-  private:
-    int                 layer;
-    size_t              id;
-    std::string         pattern;
-    Mag                 minMag;
-    double              borderR;
-    double              borderG;
-    double              borderB;
-    double              borderA;
-    double              borderMinPixel;
-    double              borderWidth;
-    std::vector<double> borderDash;
-
-  public:
-    PatternStyle();
-
-    PatternStyle& SetLayer(int layer);
-    PatternStyle& SetId(size_t id);
-    PatternStyle& SetPattern(const std::string& pattern);
-    PatternStyle& SetMinMag(Mag mag);
-    PatternStyle& SetBorderColor(double r, double g, double b, double a);
-    PatternStyle& SetBorderMinPixel(double value);
-    PatternStyle& SetBorderWidth(double value);
-    PatternStyle& AddBorderDashValue(double dashValue);
-
-    inline int GetLayer() const
-    {
-      return layer;
-    }
-
-    inline size_t GetId() const
-    {
-      return id;
+      return patternId;
     }
 
     inline std::string GetPatternName() const
@@ -341,9 +277,9 @@ namespace osmscout {
       return pattern;
     }
 
-    inline const Mag& GetMinMag() const
+    inline const Mag& GetPatternMinMag() const
     {
-      return minMag;
+      return patternMinMag;
     }
 
     inline double GetBorderR() const
@@ -675,7 +611,6 @@ namespace osmscout {
     // Area
 
     std::vector<FillStyle*>    areaFillStyles;
-    std::vector<PatternStyle*> areaPatternStyles;
     std::vector<SymbolStyle*>  areaSymbolStyles;
     std::vector<LabelStyle*>   areaLabelStyles;
     std::vector<IconStyle*>    areaIconStyles;
@@ -707,7 +642,6 @@ namespace osmscout {
     StyleConfig& SetWayNameLabelStyle(TypeId type, const LabelStyle& style);
 
     StyleConfig& SetAreaFillStyle(TypeId type, const FillStyle& style);
-    StyleConfig& SetAreaPatternStyle(TypeId type, const PatternStyle& style);
     StyleConfig& SetAreaLabelStyle(TypeId type, const LabelStyle& style);
     StyleConfig& SetAreaSymbolStyle(TypeId type, const SymbolStyle& style);
     StyleConfig& SetAreaIconStyle(TypeId type, const IconStyle& style);
@@ -794,16 +728,6 @@ namespace osmscout {
     {
       if (type<areaFillStyles.size()) {
         return areaFillStyles[type];
-      }
-      else {
-        return NULL;
-      }
-    }
-
-    PatternStyle* GetAreaPatternStyle(TypeId type) const
-    {
-      if (type<areaPatternStyles.size()) {
-        return areaPatternStyles[type];
       }
       else {
         return NULL;

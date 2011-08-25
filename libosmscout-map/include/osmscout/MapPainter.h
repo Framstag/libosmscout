@@ -364,15 +364,6 @@ namespace osmscout {
                          IconStyle& style)= 0;
 
     /**
-      Return true, if the pattern in the PatternStyle is available and can be drawn.
-      If this method returns false, possibly a fallback (e.g. using a also defined FillStyle)
-      will be chosen.
-     */
-    virtual bool HasPattern(const StyleConfig& styleConfig,
-                            const MapParameter& parameter,
-                            PatternStyle& style) = 0;
-
-    /**
       Return the bounding box of the given text.
 
       The backend may decide to relayout the given text, however it must assure
@@ -446,16 +437,6 @@ namespace osmscout {
                           const MapParameter& parameter,
                           TypeId type,
                           const FillStyle& fillStyle,
-                          const TransPolygon& polygon) = 0;
-
-    /**
-      Draw the given area using the given PatternStyle
-      for the area outline.
-     */
-    virtual void DrawArea(const Projection& projection,
-                          const MapParameter& parameter,
-                          TypeId type,
-                          const PatternStyle& patternStyle,
                           const TransPolygon& polygon) = 0;
 
     /**

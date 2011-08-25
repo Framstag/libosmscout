@@ -98,15 +98,18 @@ namespace osmscout {
     return false;
   }
 
-  bool MapPainterQt::HasPattern(const StyleConfig& styleConfig,
-                                const MapParameter& parameter,
-                                PatternStyle& style)
+  bool MapPainterQt::HasPattern(const MapParameter& parameter,
+                                const FillStyle& style)
   {
-    if (style.GetId()==std::numeric_limits<size_t>::max()) {
+    assert(style.HasPattern());
+
+    // Was not able to load pattern
+    if (style.GetPatternId()==std::numeric_limits<size_t>::max()) {
       return false;
     }
 
-    if (style.GetId()!=0) {
+    // Pattern already loaded
+    if (style.GetPatternId()!=0) {
       return true;
     }
 
@@ -119,19 +122,19 @@ namespace osmscout {
 
       if (image.load(filename.c_str())) {
         images.resize(images.size()+1,image);
-        style.SetId(images.size());
+        style.SetPatternId(images.size());
         patterns.resize(images.size());
 
         patterns[patterns.size()-1].setTextureImage(image);
 
-        std::cout << "Loaded image " << filename << " => id " << style.GetId() << std::endl;
+        std::cout << "Loaded image " << filename << " => id " << style.GetPatternId() << std::endl;
 
         return true;
       }
     }
 
     std::cerr << "ERROR while loading icon file '" << style.GetPatternName() << "'" << std::endl;
-    style.SetId(std::numeric_limits<size_t>::max());
+    style.SetPatternId(std::numeric_limits<size_t>::max());
 
     return false;
   }
@@ -530,58 +533,8 @@ namespace osmscout {
       painter->setPen(Qt::NoPen);
     }
 
-    SetBrush(fillStyle);
-
-    painter->drawPolygon(polygon);
-  }
-
-  void MapPainterQt::DrawArea(const Projection& projection,
-                              const MapParameter& parameter,
-                              TypeId type,
-                              const PatternStyle& patternStyle,
-                              const TransPolygon& area)
-  {
-    QPolygonF polygon;
-
-    for (size_t i=area.GetStart(); i<=area.GetEnd(); i++) {
-      if (area.points[i].draw) {
-        polygon << QPointF(area.points[i].x,area.points[i].y);
-      }
-    }
-
-    double borderWidth=GetProjectedWidth(projection, patternStyle.GetBorderMinPixel(), patternStyle.GetBorderWidth());
-
-    if (borderWidth>0.0) {
-      QPen pen;
-
-      pen.setColor(QColor::fromRgbF(patternStyle.GetBorderR(),
-                                    patternStyle.GetBorderG(),
-                                    patternStyle.GetBorderB(),
-                                    patternStyle.GetBorderA()));
-      pen.setWidthF(borderWidth);
-
-      if (patternStyle.GetBorderDash().empty()) {
-        pen.setStyle(Qt::SolidLine);
-        pen.setCapStyle(Qt::RoundCap);
-      }
-      else {
-        QVector<qreal> dashes;
-
-        for (size_t i=0; i<patternStyle.GetBorderDash().size(); i++) {
-          dashes << patternStyle.GetBorderDash()[i];
-        }
-
-        pen.setDashPattern(dashes);
-        pen.setCapStyle(Qt::FlatCap);
-      }
-
-      painter->setPen(pen);
-    }
-    else {
-      painter->setPen(Qt::NoPen);
-    }
-
-    painter->setBrush(patterns[patternStyle.GetId()-1]);
+    SetBrush(parameter,
+             fillStyle);
 
     painter->drawPolygon(polygon);
   }
@@ -634,12 +587,18 @@ namespace osmscout {
     painter->setBrush(Qt::NoBrush);
   }
 
-  void MapPainterQt::SetBrush(const FillStyle& fillStyle)
+  void MapPainterQt::SetBrush(const MapParameter& parameter,
+                              const FillStyle& fillStyle)
   {
-    painter->setBrush(QBrush(QColor::fromRgbF(fillStyle.GetFillR(),
-                                              fillStyle.GetFillG(),
-                                              fillStyle.GetFillB(),
-                                              fillStyle.GetFillA())));
+    if (fillStyle.HasPattern() && HasPattern(parameter,fillStyle)) {
+      painter->setBrush(patterns[fillStyle.GetPatternId()-1]);
+    }
+    else {
+      painter->setBrush(QBrush(QColor::fromRgbF(fillStyle.GetFillR(),
+                                                fillStyle.GetFillG(),
+                                                fillStyle.GetFillB(),
+                                                fillStyle.GetFillA())));
+    }
   }
 
   bool MapPainterQt::DrawMap(const StyleConfig& styleConfig,

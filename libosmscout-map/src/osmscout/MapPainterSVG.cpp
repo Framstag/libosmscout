@@ -172,13 +172,6 @@ namespace osmscout {
     return false;
   }
 
-  bool MapPainterSVG::HasPattern(const StyleConfig& styleConfig,
-                                   const MapParameter& parameter,
-                                   PatternStyle& style)
-  {
-    return false;
-  }
-
   void MapPainterSVG::GetTextDimension(const MapParameter& parameter,
                                          double fontSize,
                                          const std::string& text,
@@ -267,14 +260,6 @@ namespace osmscout {
     }
 
     stream << "\" />" << std::endl;
-  }
-
-  void MapPainterSVG::DrawArea(const Projection& projection,
-                                 const MapParameter& parameter,
-                                 TypeId type,
-                                 const PatternStyle& patternStyle,
-                                 const TransPolygon& area)
-  {
   }
 
   void MapPainterSVG::DrawArea(const FillStyle& style,

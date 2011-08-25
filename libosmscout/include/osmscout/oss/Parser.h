@@ -177,7 +177,6 @@ void ToRGBA(const char* str, double& r, double& g, double& b, double& a)
 	void MAG(Mag& mag);
 	void LINEDEF(LineStyle& style);
 	void FILLDEF(FillStyle& style);
-	void PATTERNDEF(PatternStyle& style);
 	void COLOR(double& r, double& g, double& b, double& a);
 	void DOUBLE(double& value);
 	void MINPIXEL(double& value);

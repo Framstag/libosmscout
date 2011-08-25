@@ -814,48 +814,23 @@ namespace osmscout {
              ++a) {
           const WayRef& area=*a;
 
-          PatternStyle    *patternStyle=styleConfig.GetAreaPatternStyle(area->GetType());
           const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(area->GetType());
 
-          bool            hasPattern=patternStyle!=NULL &&
-                                     patternStyle->GetLayer()==layer &&
-                                     projection.GetMagnification()>=patternStyle->GetMinMag();
-          bool            hasFill=fillStyle!=NULL &&
-                                  fillStyle->GetLayer()==layer;
-
-          if (hasPattern) {
-            hasPattern=HasPattern(styleConfig,
-                                  parameter,
-                                  *patternStyle);
+          if (fillStyle==NULL || fillStyle->GetLayer()!=layer) {
+            continue;
           }
 
+          polygon.TransformArea(projection,
+                                parameter.GetOptimizeAreaNodes(),
+                                area->nodes);
 
-          if (hasPattern) {
-            polygon.TransformArea(projection,
-                                  parameter.GetOptimizeAreaNodes(),
-                                  area->nodes);
+          DrawArea(projection,
+                   parameter,
+                   area->GetType(),
+                   *fillStyle,
+                   polygon);
 
-            DrawArea(projection,
-                     parameter,
-                     area->GetType(),
-                     *patternStyle,
-                     polygon);
-
-            areasDrawn++;
-          }
-          else if (hasFill) {
-            polygon.TransformArea(projection,
-                                  parameter.GetOptimizeAreaNodes(),
-                                  area->nodes);
-
-            DrawArea(projection,
-                     parameter,
-                     area->GetType(),
-                     *fillStyle,
-                     polygon);
-
-            areasDrawn++;
-          }
+          areasDrawn++;
         }
       }
 
@@ -869,45 +844,22 @@ namespace osmscout {
 
           for (size_t m=0; m<relation->roles.size(); m++) {
             if (relation->roles[m].role=="0") {
-              PatternStyle    *patternStyle=styleConfig.GetAreaPatternStyle(relation->roles[m].GetType());
               const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(relation->roles[m].GetType());
 
-              bool            hasPattern=patternStyle!=NULL &&
-                                         patternStyle->GetLayer()==layer &&
-                                         projection.GetMagnification()>=patternStyle->GetMinMag();
-              bool            hasFill=fillStyle!=NULL &&
-                                      fillStyle->GetLayer()==layer;
-
-              if (hasPattern) {
-                hasPattern=HasPattern(styleConfig,
-                                      parameter,
-                                      *patternStyle);
+              if (fillStyle==NULL || fillStyle->GetLayer()!=layer) {
+                continue;
               }
 
-              if (hasPattern) {
-                polygon.TransformArea(projection,
-                                      parameter.GetOptimizeAreaNodes(),
-                                      relation->roles[m].nodes);
+              polygon.TransformArea(projection,
+                                    parameter.GetOptimizeAreaNodes(),
+                                    relation->roles[m].nodes);
 
-                DrawArea(projection,
-                         parameter,
-                         relation->roles[m].GetType(),
-                         *patternStyle,
-                         polygon);
-                drawn=true;
-              }
-              else if (hasFill) {
-                polygon.TransformArea(projection,
-                                      parameter.GetOptimizeAreaNodes(),
-                                      relation->roles[m].nodes);
-
-                DrawArea(projection,
-                         parameter,
-                         relation->roles[m].GetType(),
-                         *fillStyle,
-                         polygon);
-                drawn=true;
-              }
+              DrawArea(projection,
+                       parameter,
+                       relation->roles[m].GetType(),
+                       *fillStyle,
+                       polygon);
+              drawn=true;
             }
           }
 

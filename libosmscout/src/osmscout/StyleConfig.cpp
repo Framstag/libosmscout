@@ -137,6 +137,8 @@ namespace osmscout {
      fillG(0),
      fillB(0),
      fillA(1),
+     patternId(0),
+     patternMinMag(magWorld),
      borderR(1),
      borderG(0),
      borderB(0),
@@ -170,6 +172,25 @@ namespace osmscout {
     return *this;
   }
 
+  void FillStyle::SetPatternId(size_t id) const
+  {
+    patternId=id;
+  }
+
+  FillStyle& FillStyle::SetPattern(const std::string& pattern)
+  {
+    this->pattern=pattern;
+
+    return *this;
+  }
+
+  FillStyle& FillStyle::SetPatternMinMag(Mag mag)
+  {
+    patternMinMag=mag;
+
+    return *this;
+  }
+
   FillStyle& FillStyle::SetBorderColor(double r, double g, double b, double a)
   {
     borderR=r;
@@ -195,77 +216,6 @@ namespace osmscout {
   }
 
   FillStyle& FillStyle::AddBorderDashValue(double dashValue)
-  {
-    borderDash.push_back(dashValue);
-
-    return *this;
-  }
-
-  PatternStyle::PatternStyle()
-   : layer(0),
-     id(0),
-     borderR(1),
-     borderG(0),
-     borderB(0),
-     borderMinPixel(0.0),
-     borderWidth(0.0)
-  {
-    // no code
-  }
-
-  PatternStyle& PatternStyle::SetLayer(int layer)
-  {
-    this->layer=layer;
-
-    return *this;
-  }
-
-  PatternStyle& PatternStyle::SetId(size_t id)
-  {
-    this->id=id;
-
-    return *this;
-  }
-
-  PatternStyle& PatternStyle::SetPattern(const std::string& pattern)
-  {
-    this->pattern=pattern;
-
-    return *this;
-  }
-
-  PatternStyle& PatternStyle::SetMinMag(Mag mag)
-  {
-    this->minMag=mag;
-
-    return *this;
-  }
-
-  PatternStyle& PatternStyle::SetBorderColor(double r, double g, double b, double a)
-  {
-    borderR=r;
-    borderG=g;
-    borderB=b;
-    borderA=a;
-
-    return *this;
-  }
-
-  PatternStyle& PatternStyle::SetBorderMinPixel(double value)
-  {
-    borderMinPixel=value;
-
-    return *this;
-  }
-
-  PatternStyle& PatternStyle::SetBorderWidth(double value)
-  {
-    borderWidth=value;
-
-    return *this;
-  }
-
-  PatternStyle& PatternStyle::AddBorderDashValue(double dashValue)
   {
     borderDash.push_back(dashValue);
 
@@ -478,10 +428,6 @@ namespace osmscout {
       delete areaFillStyles[i];
     }
 
-    for (size_t i=0; i<areaPatternStyles.size(); i++) {
-      delete areaPatternStyles[i];
-    }
-
     for (size_t i=0; i<areaSymbolStyles.size(); i++) {
       delete areaSymbolStyles[i];
     }
@@ -590,7 +536,6 @@ namespace osmscout {
     if (type>=areaMag.size()) {
       areaMag.resize(type+1);
       areaFillStyles.resize(type+1,NULL);
-      areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
       areaIconStyles.resize(type+1,NULL);
@@ -722,7 +667,6 @@ namespace osmscout {
     if (type>=areaFillStyles.size()) {
       areaMag.resize(type+1,magWorld);
       areaFillStyles.resize(type+1,NULL);
-      areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
       areaIconStyles.resize(type+1,NULL);
@@ -734,31 +678,12 @@ namespace osmscout {
     return *this;
   }
 
-  StyleConfig& StyleConfig::SetAreaPatternStyle(TypeId type,
-                                                const PatternStyle& style)
-  {
-    if (type>=areaFillStyles.size()) {
-      areaMag.resize(type+1,magWorld);
-      areaFillStyles.resize(type+1,NULL);
-      areaPatternStyles.resize(type+1,NULL);
-      areaSymbolStyles.resize(type+1,NULL);
-      areaLabelStyles.resize(type+1,NULL);
-      areaIconStyles.resize(type+1,NULL);
-    }
-
-    delete areaPatternStyles[type];
-    areaPatternStyles[type]=new PatternStyle(style);
-
-    return *this;
-  }
-
   StyleConfig& StyleConfig::SetAreaLabelStyle(TypeId type,
                                               const LabelStyle& style)
   {
     if (type>=areaFillStyles.size()) {
       areaMag.resize(type+1,magWorld);
       areaFillStyles.resize(type+1,NULL);
-      areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
       areaIconStyles.resize(type+1,NULL);
@@ -776,7 +701,6 @@ namespace osmscout {
     if (type>=areaFillStyles.size()) {
       areaMag.resize(type+1,magWorld);
       areaFillStyles.resize(type+1,NULL);
-      areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
       areaIconStyles.resize(type+1,NULL);
@@ -794,7 +718,6 @@ namespace osmscout {
     if (type>=areaFillStyles.size()) {
       areaMag.resize(type+1,magWorld);
       areaFillStyles.resize(type+1,NULL);
-      areaPatternStyles.resize(type+1,NULL);
       areaSymbolStyles.resize(type+1,NULL);
       areaLabelStyles.resize(type+1,NULL);
       areaIconStyles.resize(type+1,NULL);
