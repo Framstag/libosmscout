@@ -28,7 +28,8 @@
 namespace osmscout {
 
   MapParameter::MapParameter()
-  : fontName("sans-serif"),
+  : dpi(96.0),
+    fontName("sans-serif"),
     fontSize(9.0),
     outlineMinWidth(1.0),
     optimizeWayNodes(false),

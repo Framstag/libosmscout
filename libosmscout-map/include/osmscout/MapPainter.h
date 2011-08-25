@@ -42,8 +42,11 @@ namespace osmscout {
   class OSMSCOUT_MAP_API MapParameter
   {
   private:
+    double                 dpi;               //! DPI of the display, default is 92
+
     std::string            fontName;          //! Name of the font to use
     double                 fontSize;          //! Pixel size of base font (aka font size 100%)
+
     std::list<std::string> iconPaths;         //! List of paths to search for images for icons
     std::list<std::string> patternPaths;      //! List of paths to search for images for patterns
 
@@ -60,6 +63,8 @@ namespace osmscout {
     MapParameter();
     virtual ~MapParameter();
 
+    void SetDPI(double dpi);
+
     void SetFontName(const std::string& fontName);
     void SetFontSize(double fontSize);
 
@@ -74,6 +79,11 @@ namespace osmscout {
     void SetDrawFadings(bool drawFadings);
 
     void SetDebugPerformance(bool debug);
+
+    inline double GetDPI() const
+    {
+      return dpi;
+    }
 
     inline std::string GetFontName() const
     {
