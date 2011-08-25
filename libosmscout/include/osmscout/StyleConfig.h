@@ -20,7 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <set>
 #include <vector>
 
 #include <osmscout/Types.h>
@@ -684,7 +683,6 @@ namespace osmscout {
     std::vector<size_t>        wayPrio;
     std::vector<Mag>           wayMag;
     std::vector<Mag>           areaMag;
-    std::vector<size_t>        priorities;
     std::vector<TypeId>        wayTypesByPrio;
 
   public:
@@ -714,8 +712,6 @@ namespace osmscout {
     StyleConfig& SetAreaSymbolStyle(TypeId type, const SymbolStyle& style);
     StyleConfig& SetAreaIconStyle(TypeId type, const IconStyle& style);
 
-    size_t GetStyleCount() const;
-
     void GetNodeTypesWithMag(double mag,
                              std::vector<TypeId>& types) const;
     void GetWayTypesByPrioWithMag(double mag,
@@ -723,47 +719,6 @@ namespace osmscout {
     void GetAreaTypesWithMag(double mag,
                              TypeSet& types) const;
 
-
-    void GetPriorities(std::vector<size_t>& priorities) const;
-
-    bool IsWayVisible(TypeId type, size_t prio) const
-    {
-      if (type<wayLineStyles.size() && type<wayPrio.size()) {
-        return wayLineStyles[type]!=NULL && wayPrio[type]<=prio;
-      }
-      else {
-        return false;
-      }
-    }
-
-    bool IsAreaVisible(TypeId type, size_t prio) const
-    {
-      if (type<areaFillStyles.size()) {
-        return areaFillStyles[type]!=NULL;
-      }
-      else if (type<areaPatternStyles.size()) {
-        return areaPatternStyles[type]!=NULL;
-      }
-      else {
-        return false;
-      }
-    }
-
-    bool IsNodeVisible(TypeId type, double mag) const
-    {
-      if (type<nodeSymbolStyles.size() &&
-          nodeSymbolStyles[type]!=NULL &&
-          nodeSymbolStyles[type]->GetMinMag()<=mag) {
-        return true;
-      }
-      else if (type<nodeLabelStyles.size() &&
-               nodeLabelStyles[type]!=NULL &&
-               nodeLabelStyles[type]->GetMinMag()<=mag) {
-        return true;
-      }
-
-      return false;
-    }
 
     inline const SymbolStyle* GetNodeSymbolStyle(TypeId type) const
     {

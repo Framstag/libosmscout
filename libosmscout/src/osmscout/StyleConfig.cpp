@@ -20,7 +20,8 @@
 #include <osmscout/StyleConfig.h>
 
 #include <limits>
-#include <iostream>
+#include <set>
+
 namespace osmscout {
 
   LineStyle::LineStyle()
@@ -496,7 +497,8 @@ namespace osmscout {
 
   void StyleConfig::Postprocess()
   {
-    std::set<size_t > prios;
+    std::set<size_t >   prios;
+    std::vector<size_t> sortedPrios;
 
     for (size_t i=0; i<wayLineStyles.size() && i<wayPrio.size(); i++) {
       if (wayLineStyles[i]!=NULL) {
@@ -504,19 +506,18 @@ namespace osmscout {
       }
     }
 
-    priorities.clear();
-    priorities.reserve(prios.size());
+    sortedPrios.reserve(prios.size());
     for (std::set<size_t>::const_iterator prio=prios.begin();
          prio!=prios.end();
          ++prio) {
-      priorities.push_back(*prio);
+      sortedPrios.push_back(*prio);
     }
 
     wayTypesByPrio.clear();
-    wayTypesByPrio.reserve(priorities.size());
-    for (size_t p=0; p<priorities.size(); p++) {
+    wayTypesByPrio.reserve(sortedPrios.size());
+    for (size_t p=0; p<sortedPrios.size(); p++) {
       for (size_t i=0; i<wayLineStyles.size() && i<wayPrio.size(); i++) {
-        if (wayLineStyles[i]!=NULL && wayPrio[i]==priorities[p]) {
+        if (wayLineStyles[i]!=NULL && wayPrio[i]==sortedPrios[p]) {
           wayTypesByPrio.push_back(i);
         }
       }
@@ -805,18 +806,6 @@ namespace osmscout {
     return *this;
   }
 
-  size_t StyleConfig::GetStyleCount() const
-  {
-    size_t result=0;
-
-    result=std::max(result,nodeSymbolStyles.size());
-    result=std::max(result,wayLineStyles.size());
-    result=std::max(result,areaFillStyles.size());
-    result=std::max(result,areaPatternStyles.size());
-
-    return result;
-  }
-
   void StyleConfig::GetWayTypesByPrioWithMag(double mag,
                                              std::vector<TypeId>& types) const
   {
@@ -866,17 +855,6 @@ namespace osmscout {
         types.push_back(i);
       }
     }
-  }
-
-  /**
-    Returns a sorted array (high priority with low numerical value to low priority with
-    high numerical value) of used priorities.
-
-    Example: [1,2,3,4,5,6,7,8,9,10,11,20]
-    */
-  void StyleConfig::GetPriorities(std::vector<size_t>& priorities) const
-  {
-    priorities=this->priorities;
   }
 }
 
