@@ -14,8 +14,11 @@ libosmscoutmap_la_LDFLAGS  = $(LIBOSMSCOUT_LIBS) \
                              $(LIBAGG_LIBS) \
                              $(LIBPNG_LIBS)
 
-libosmscoutmap_la_SOURCES = osmscout/LoaderPNG.cpp \
-                            osmscout/MapPainter.cpp
+libosmscoutmap_la_SOURCES = osmscout/MapPainter.cpp
+
+if HAVE_LIB_PNG
+libosmscoutmap_la_SOURCES += osmscout/LoaderPNG.cpp
+endif
 
 if HAVE_LIB_AGG
 libosmscoutmap_la_SOURCES += osmscout/MapPainterAgg.cpp

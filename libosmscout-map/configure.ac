@@ -69,6 +69,16 @@ if test "$enable_cairo_driver" != "no"; then
 fi
 AM_CONDITIONAL(HAVE_LIB_CAIRO,[test "$HASCAIRO" = "true"])
 
+if test "$enable_cairo_driver" != "no"; then
+	PKG_CHECK_MODULES(LIBPNG,libpng,
+	                  HASPNG=true
+	                  [AC_SUBST(LIBPNG_CFLAGS)
+                       AC_SUBST(LIBPNG_LIBS)
+                       AC_DEFINE(HAVE_LIB_PNG,1,[libpng found])],
+                       [HASPNG=false])
+fi
+AM_CONDITIONAL(HAVE_LIB_PNG,[test "$HASPNG" = "true"])
+
 if test "$enable_qt_driver" != "no"; then
 	PKG_CHECK_MODULES(LIBQTGUI, QtGui > 4.6.0,
 	                  HASQTGUI=true
@@ -108,10 +118,6 @@ if test "$enable_svg_driver" != "no"; then
 fi
 AM_CONDITIONAL(HAVE_DRIVER_SVG,[test "$HASSVG" = "true"])
 
-
-PKG_CHECK_MODULES(LIBPNG,libpng)
-AC_SUBST(LIBPNG_CFLAGS)
-AC_SUBST(LIBPNG_LIBS)
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
