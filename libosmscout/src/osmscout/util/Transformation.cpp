@@ -67,7 +67,7 @@ namespace osmscout {
 
   TransPolygon::~TransPolygon()
   {
-    delete points;
+    delete [] points;
   }
 
   void TransPolygon::InitializeDraw()
