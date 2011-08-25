@@ -247,10 +247,6 @@ namespace osmscout {
                                        double minPixel,
                                        double width) const
   {
-    if (width==0.0) {
-      return 0.0;
-    }
-
     width=width/projection.GetPixelSize();
 
     if (width<minPixel) {
@@ -1117,25 +1113,19 @@ namespace osmscout {
                            const SegmentAttributes& attributes,
                            const TransPolygon& polygon)
   {
-    double lineWidth=attributes.GetWidth();
+    double lineWidth;
     bool   drawBridge=attributes.IsBridge();
     bool   drawTunnel=attributes.IsTunnel();
 
     if (style.GetFixedWidth()) {
-      lineWidth=style.GetWidth();
-
-      lineWidth=std::max(style.GetMinPixel(),
-                         lineWidth/projection.GetPixelSize());
+      lineWidth=GetProjectedWidth(projection,
+                                  style.GetMinPixel(),
+                                  style.GetWidth());
     }
     else {
-      lineWidth=attributes.GetWidth();
-
-      if (lineWidth==0) {
-        lineWidth=style.GetWidth();
-      }
-
-      lineWidth=std::max(style.GetMinPixel(),
-                         lineWidth/projection.GetPixelSize());
+      lineWidth=GetProjectedWidth(projection,
+                                  style.GetMinPixel(),
+                                  attributes.GetWidth()>0 ? attributes.GetWidth() : style.GetWidth());
     }
 
     bool outline=style.GetOutline()>0 &&
@@ -1212,21 +1202,19 @@ namespace osmscout {
                                   const SegmentAttributes& attributes,
                                   const std::vector<Point>& nodes)
   {
-    double lineWidth=attributes.GetWidth();
+    double lineWidth;
     bool   drawBridge=attributes.IsBridge();
     bool   drawTunnel=attributes.IsTunnel();
 
-    if (lineWidth==0) {
-      lineWidth=style.GetWidth();
-    }
-
     if (style.GetFixedWidth()) {
-      lineWidth=std::max(style.GetMinPixel(),
-                         lineWidth);
+      lineWidth=GetProjectedWidth(projection,
+                                  style.GetMinPixel(),
+                                  style.GetWidth());
     }
     else {
-      lineWidth=std::max(style.GetMinPixel(),
-                         lineWidth/projection.GetPixelSize());
+      lineWidth=GetProjectedWidth(projection,
+                                  style.GetMinPixel(),
+                                  attributes.GetWidth()>0 ? attributes.GetWidth() : style.GetWidth());
     }
 
     bool outline=style.GetOutline()>0 &&
