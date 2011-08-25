@@ -34,7 +34,8 @@ namespace osmscout {
   static const char* valueChar="0123456789abcdef";
 
   MapPainterSVG::MapPainterSVG()
-  : stream(NULL)
+  : stream(NULL),
+    typeConfig(NULL)
   {
     // no code
   }
@@ -67,8 +68,12 @@ namespace osmscout {
     result.reserve(9);
 
     result.append("#");
-    result.append(1,valueChar[(uint)(a*255)/16]);
-    result.append(1,valueChar[(uint)(a*255)%16]);
+
+    if (a!=1.0) {
+      result.append(1,valueChar[(uint)(a*255)/16]);
+      result.append(1,valueChar[(uint)(a*255)%16]);
+    }
+
     result.append(1,valueChar[(uint)(r*255)/16]);
     result.append(1,valueChar[(uint)(r*255)%16]);
     result.append(1,valueChar[(uint)(g*255)/16]);
@@ -92,6 +97,56 @@ namespace osmscout {
     stream << "  height=\"" << height << "\"" << std::endl;
     stream << "  id=\"map\"" << std::endl;
     stream << "  version=\"1.1\">" << std::endl;
+    stream << std::endl;
+  }
+
+  void MapPainterSVG::DumpStyles(const StyleConfig& styleConfig,
+                                 const Projection& projection)
+  {
+    stream << "  <defs>" << std::endl;
+    stream << "    <style type=\"text/css\">" << std::endl;
+    stream << "       <![CDATA[" << std::endl;
+
+
+    for (std::vector<TypeInfo>::const_iterator typeInfo=styleConfig.GetTypeConfig()->GetTypes().begin();
+        typeInfo!=styleConfig.GetTypeConfig()->GetTypes().end();
+        typeInfo++) {
+      const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(typeInfo->GetId());
+
+      if (fillStyle!=NULL) {
+        stream << "        ." << typeInfo->GetName() << "_area {";
+
+        stream << "fill:" << GetColorValue(fillStyle->GetFillR(),fillStyle->GetFillG(),fillStyle->GetFillB(),fillStyle->GetFillA());
+
+        double borderWidth=GetProjectedWidth(projection, fillStyle->GetBorderMinPixel(), fillStyle->GetBorderWidth());
+
+        if (borderWidth>0.0) {
+          stream << ";stroke:" << GetColorValue(fillStyle->GetBorderR(),fillStyle->GetBorderG(),fillStyle->GetBorderB());
+          stream << ";stroke-width:" << borderWidth;
+        }
+
+        stream << "}" << std::endl;
+      }
+    }
+
+    stream << std::endl;
+
+    for (std::vector<TypeInfo>::const_iterator typeInfo=styleConfig.GetTypeConfig()->GetTypes().begin();
+        typeInfo!=styleConfig.GetTypeConfig()->GetTypes().end();
+        typeInfo++) {
+      const LineStyle *lineStyle=styleConfig.GetWayLineStyle(typeInfo->GetId());
+
+      if (lineStyle!=NULL) {
+        /*
+        stream << "        ." << typeInfo->GetName() << "_way {";
+        // TODO
+        stream << "}" << std::endl;*/
+      }
+    }
+
+    stream << "       ]]>" << std::endl;
+    stream << "    </style>" << std::endl;
+    stream << "  </defs>" << std::endl;
     stream << std::endl;
   }
 
@@ -199,15 +254,7 @@ namespace osmscout {
                                  const FillStyle& fillStyle,
                                  const TransPolygon& area)
   {
-    stream << "    <polygon fill=\"" << GetColorValue(fillStyle.GetFillR(),fillStyle.GetFillG(),fillStyle.GetFillB(),fillStyle.GetFillA()) << "\"" << std::endl;
-
-    double borderWidth=GetProjectedWidth(projection, fillStyle.GetBorderMinPixel(), fillStyle.GetBorderWidth());
-
-    if (borderWidth>0.0) {
-      stream << "             stroke=\"" << GetColorValue(fillStyle.GetBorderR(),fillStyle.GetBorderG(),fillStyle.GetBorderB()) << "\" ";
-      stream << "stroke-width=\"" << borderWidth << "\"" << std::endl;
-    }
-
+    stream << "    <polygon class=\"" << typeConfig->GetTypeInfo(type).GetName() << "_area\"" << std::endl;
     stream << "             points=\"";
 
     for (size_t i=area.GetStart(); i<=area.GetEnd(); i++) {
@@ -242,14 +289,18 @@ namespace osmscout {
   }
 
   bool MapPainterSVG::DrawMap(const StyleConfig& styleConfig,
-                                const Projection& projection,
-                                const MapParameter& parameter,
-                                const MapData& data,
-                                std::ostream& stream)
+                              const Projection& projection,
+                              const MapParameter& parameter,
+                              const MapData& data,
+                              std::ostream& stream)
   {
     this->stream.rdbuf(stream.rdbuf());
+    typeConfig=styleConfig.GetTypeConfig();
 
     WriteHeader(projection.GetWidth(),projection.GetHeight());
+
+    DumpStyles(styleConfig,
+               projection);
 
     StartMainGroup();
     Draw(styleConfig,

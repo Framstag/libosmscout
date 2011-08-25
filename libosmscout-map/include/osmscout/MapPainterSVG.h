@@ -32,13 +32,16 @@ namespace osmscout {
   class OSMSCOUT_MAP_API MapPainterSVG : public MapPainter
   {
   private:
-     std::ostream stream;
+     std::ostream     stream;
+     const TypeConfig *typeConfig;
 
   private:
     std::string GetColorValue(double r, double g, double b);
     std::string GetColorValue(double r, double g, double b, double a);
 
     void WriteHeader(size_t width,size_t height);
+    void DumpStyles(const StyleConfig& styleConfig,
+                    const Projection& projection);
     void WriteFooter();
 
     void StartMainGroup();
@@ -50,8 +53,8 @@ namespace osmscout {
                  IconStyle& style);
 
     bool HasPattern(const StyleConfig& styleConfig,
-                   const MapParameter& parameter,
-                   PatternStyle& style);
+                    const MapParameter& parameter,
+                    PatternStyle& style);
 
     void GetTextDimension(const MapParameter& parameter,
                           double fontSize,
