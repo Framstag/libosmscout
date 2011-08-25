@@ -46,15 +46,12 @@ bool LoadConfig()
     return false;
   }
 
-  std::cout << "TravelJinni top node found: " << top->GetChildren().size() << std::endl;
-
   for (Lum::Config::Node::NodeList::const_iterator iter=top->GetChildren().begin();
        iter!=top->GetChildren().end();
        ++iter) {
     Lum::Config::Node *node=*iter;
 
     if (node->GetName()==L"map") {
-      std::cout << "Map" << std::endl;
       Map map;
 
       if (node->GetAttribute(L"dir",map.dir)) {
@@ -70,7 +67,6 @@ bool LoadConfig()
       }
     }
     else if (node->GetName()==L"style") {
-      std::cout << "Style" << std::endl;
       Style style;
 
       if (node->GetAttribute(L"file",style.file)) {
@@ -89,8 +85,6 @@ bool LoadConfig()
       std::cout << "Unnown element'" << Lum::Base::WStringToString(node->GetName()) << "'" << std::endl;
     }
   }
-
-  std::cout << "Maps/style: " << maps.size() << " " << styles.size() << std::endl;
 
   if (currentMap.empty() && maps.size()>0) {
     currentMap=maps.front().dir;
