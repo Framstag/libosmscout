@@ -21,7 +21,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <iostream>
 
 #include <osmscout/RawNode.h>
 #include <osmscout/RawRelation.h>
@@ -33,6 +32,7 @@
 
 #include <osmscout/Util.h>
 #include <osmscout/util/Geometry.h>
+
 namespace osmscout {
 
   class GroupingState
@@ -492,7 +492,6 @@ namespace osmscout {
     // Multipolygon creation
     //
 
-    size_t id=0;
     while (groups.size()<state.GetRingCount()) {
       std::list<Relation::Role>::const_iterator top;
       size_t                                    topIndex;
@@ -508,26 +507,27 @@ namespace osmscout {
 
       state.SetUsed(topIndex);
       groups.push_back(*top);
-      groups.back().role=NumberToString(id);
+      groups.back().role="0";
 
+      //
       // The outer ring(s) inherit attribute values from the relation
-      if (id==0) {
-        // Outer ring always has the type of the relation
-        groups.back().attributes.type=relation.GetType();
+      //
 
-        if (!name.empty() && groups.back().attributes.GetName().empty()) {
-          groups.back().attributes.name=name;
-          groups.back().attributes.flags|=SegmentAttributes::hasName;
-        }
+      // Outer ring always has the type of the relation
+      groups.back().attributes.type=relation.GetType();
 
-        if (!refName.empty() && groups.back().attributes.GetRefName().empty()) {
-          groups.back().attributes.ref=refName;
-          groups.back().attributes.flags|=SegmentAttributes::hasRef;
-        }
+      if (!name.empty() && groups.back().attributes.GetName().empty()) {
+        groups.back().attributes.name=name;
+        groups.back().attributes.flags|=SegmentAttributes::hasName;
+      }
+
+      if (!refName.empty() && groups.back().attributes.GetRefName().empty()) {
+        groups.back().attributes.ref=refName;
+        groups.back().attributes.flags|=SegmentAttributes::hasRef;
       }
 
       if (state.HasIncludes(topIndex)) {
-        ConsumeSubs(rings,groups,state,topIndex,id+1);
+        ConsumeSubs(rings,groups,state,topIndex,1);
       }
     }
 
