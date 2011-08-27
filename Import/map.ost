@@ -139,6 +139,7 @@ TYPES
   TYPE "landuse_construction" = NODE AREA ("landuse"=="construction")
   TYPE "landuse_farm" = AREA ("landuse"=="farm")
   TYPE "landuse_farmland" = AREA ("landuse"=="farmland")
+  TYPE "landuse_farmyard_building" = AREA ("landuse"=="farmyard"AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE "landuse_farmyard" = AREA ("landuse"=="farmyard")
   TYPE "landuse_forest" = NODE AREA ("landuse"=="forest")
   TYPE "landuse_garages" = AREA ("landuse"=="garages")

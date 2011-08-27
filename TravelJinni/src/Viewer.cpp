@@ -95,7 +95,7 @@ public:
 
   }
 
-  ~MapControl()
+  virtual ~MapControl()
   {
     // no code
   }
