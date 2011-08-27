@@ -100,11 +100,6 @@ namespace osmscout {
     this->type=type;
   }
 
-  void Relation::SetRelType(const std::string& relType)
-  {
-    this->relType=relType;
-  }
-
   bool Relation::Read(FileScanner& scanner)
   {
     uint32_t tagCount;
@@ -112,7 +107,6 @@ namespace osmscout {
 
     scanner.Read(id);
     scanner.ReadNumber(type);
-    scanner.Read(relType);
     scanner.Read(flags);
 
     if (flags & hasTags) {
@@ -179,7 +173,6 @@ namespace osmscout {
   {
     writer.Write(id);
     writer.WriteNumber(type);
-    writer.Write(relType);
     writer.Write(flags);
 
     if (flags & hasTags) {

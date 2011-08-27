@@ -1361,7 +1361,7 @@ namespace osmscout {
           bool               drawn=false;
 
           for (size_t m=0; m<relation->roles.size(); m++) {
-            TypeId type=relation->roles[m].GetType()==typeIgnore ? relation->GetType() : relation->roles[m].GetType();
+            TypeId type=relation->roles[m].GetType();
 
             if (relation->roles[m].GetLayer()!=layer) {
               continue;
@@ -1470,7 +1470,7 @@ namespace osmscout {
           bool               drawn=false;
 
           for (size_t m=0; m<relation->roles.size(); m++) {
-            TypeId type=relation->roles[m].GetType()==typeIgnore ? relation->GetType() : relation->roles[m].GetType();
+            TypeId type=relation->roles[m].GetType();
 
             if (relation->roles[m].GetLayer()!=layer) {
               continue;

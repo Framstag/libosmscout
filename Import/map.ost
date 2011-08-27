@@ -32,18 +32,17 @@ TYPES
   TYPE "highway_roundabout" = WAY AREA ("highway"=="roundabout") OPTIONS ROUTE
   TYPE "highway_motorway_junction" = NODE ("highway"=="motorway_junction") OPTIONS ROUTE
   
-  TYPE "waterway_stream" = WAY ("waterway"=="stream") OR RELATION ("type"=="waterway" AND "waterway"=="stream") OPTIONS ROUTE CONSUME_CHILDREN
-  TYPE "waterway_river" = WAY ("waterway"=="river") OR RELATION ("type"=="waterway" AND "waterway"=="river") OPTIONS ROUTE CONSUME_CHILDREN
+  TYPE "waterway_stream" = WAY ("waterway"=="stream") OPTIONS ROUTE
+  TYPE "waterway_river" = WAY ("waterway"=="river") OPTIONS ROUTE
   TYPE "waterway_riverbank" = AREA ("waterway"=="riverbank") OPTIONS ROUTE
-  TYPE "waterway_canal" = WAY ("waterway"=="canal") OR RELATION ("type"=="waterway" AND "waterway"=="canal") OPTIONS ROUTE CONSUME_CHILDREN
-  TYPE "waterway_ditch" = WAY ("waterway"=="ditch") OR RELATION ("type"=="waterway" AND "waterway"=="ditch") OPTIONS ROUTE CONSUME_CHILDREN
-  TYPE "waterway_drain" = WAY ("waterway"=="drain") OR RELATION ("type"=="waterway" AND "waterway"=="drain") OPTIONS ROUTE CONSUME_CHILDREN
+  TYPE "waterway_canal" = WAY ("waterway"=="canal") OPTIONS ROUTE
+  TYPE "waterway_ditch" = WAY ("waterway"=="ditch") OPTIONS ROUTE
+  TYPE "waterway_drain" = WAY ("waterway"=="drain") OPTIONS ROUTE
   TYPE "waterway_dock" = NODE AREA ("waterway"=="dock") OPTIONS ROUTE
   TYPE "waterway_lock_gate" = NODE ("waterway"=="lock_gate")
   TYPE "waterway_turning_point" = NODE ("waterway"=="turning_point")
-  TYPE "waterway_boat_yard" = NODE ("waterway"=="boat_yard")
-  TYPE "waterway_weir" = NODE WAY ("waterway"=="weir") OR RELATION ("type"=="waterway" AND "waterway"=="weir") OPTIONS CONSUME_CHILDREN
-  TYPE "waterway_rapits" = NODE WAY ("waterway"=="rapits") OR RELATION ("type"=="waterway" AND "waterway"=="rapits") OPTIONS CONSUME_CHILDREN
+  TYPE "waterway_boatyard" = NODE AREA ("waterway"=="boatyard")
+  TYPE "waterway_weir" = NODE WAY ("waterway"=="weir")
   TYPE "waterway_dam" = WAY AREA ("waterway"=="dam")
   
   TYPE "railway_rail" = WAY ("railway"=="rail") OPTIONS ROUTE
@@ -296,6 +295,7 @@ TYPES
   TYPE "tunnel_any" = RELATION ("type"=="tunnel") OPTIONS IGNORE
   TYPE "bridge_any" = RELATION ("type"=="bridge") OPTIONS IGNORE
   TYPE "dual_carriageway_any" = RELATION ("type"=="dual_carriageway") OPTIONS IGNORE
+  TYPE "waterway_any" = RELATION ("type"=="waterway") OPTIONS IGNORE
 
   TYPE "wayparts_any" = RELATION ("type"=="wayparts") OPTIONS IGNORE
   TYPE "associated_street_any" = RELATION ("type"=="associatedStreet") OPTIONS IGNORE

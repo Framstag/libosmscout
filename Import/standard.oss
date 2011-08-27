@@ -291,7 +291,7 @@ OSS
     LABEL WITH MINMAG close
 
   AREA "landuse_village_green"
-    FILL #cfeca8
+    FILL #cfeca8 WITH LAYER 1
     LABEL WITH MINMAG detail
 
   AREA "landuse_recreation_ground"
@@ -366,7 +366,7 @@ OSS
     LABEL WITH STYLE contour MINMAG close
 
   AREA "aeroway_apron"
-    FILL #e8d1fe
+    FILL #e8d1fe WITH LAYER 1
     LABEL WITH MINMAG detail
 
   AREA "leisure_sports_centre_building"

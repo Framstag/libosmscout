@@ -512,10 +512,8 @@ namespace osmscout {
 
       // The outer ring(s) inherit attribute values from the relation
       if (id==0) {
-        if (groups.back().attributes.GetType()==typeIgnore) {
-          // Outer ring always has the type of the relation
-          groups.back().attributes.type=relation.GetType();
-        }
+        // Outer ring always has the type of the relation
+        groups.back().attributes.type=relation.GetType();
 
         if (!name.empty() && groups.back().attributes.GetName().empty()) {
           groups.back().attributes.name=name;
@@ -754,12 +752,15 @@ namespace osmscout {
 
       rel.SetId(rawRel.GetId());
       rel.SetType(rawRel.GetType());
-      rel.flags=0;
+      rel.tags=rawRel.tags;
 
       std::vector<Tag>::iterator tag=rawRel.tags.begin();
       while (tag!=rawRel.tags.end()) {
         if (tag->key==typeConfig.tagType) {
-          rel.SetRelType(tag->value);
+          if (tag->value=="multipolygon") {
+            rel.flags|=Relation::isArea;
+          }
+
           tag=rawRel.tags.erase(tag);
         }
         else if (tag->key==typeConfig.tagName) {
@@ -781,6 +782,10 @@ namespace osmscout {
         }
       }
 
+      if (!rel.tags.empty()) {
+        rel.flags|=Relation::hasTags;
+      }
+
       for (size_t i=0; i<rawRel.members.size(); i++) {
         roles.insert(rawRel.members[i].role);
       }
@@ -794,7 +799,8 @@ namespace osmscout {
         if (!ResolveMember(typeConfig,
                            rawRel.GetId(),
                            name,
-                           rawRel.members[m],nodeDataFile,
+                           rawRel.members[m],
+                           nodeDataFile,
                            wayDataFile,
                            rel.roles[m],
                            progress)) {
@@ -810,7 +816,7 @@ namespace osmscout {
       // Resolve type of multipolygon relations if the relation does
       // not have a type
       if (rel.GetType()==typeIgnore) {
-        if (rel.GetRelType()=="multipolygon") {
+        if (rel.IsArea()) {
           bool   correct=true;
           TypeId typeId=typeIgnore;
 
@@ -839,29 +845,6 @@ namespace osmscout {
             rel.SetType(typeId);
           }
         }
-        /*
-        else {
-          bool correct=true;
-
-          TypeId type=rel.roles[0].GetType();
-
-          for (size_t m=1; m<rel.roles.size(); m++) {
-            if (rel.roles[m].GetType()!=type) {
-              correct=false;
-              break;
-            }
-          }
-
-          if (correct &&
-              type!=rel.GetType() &&
-              type!=typeIgnore) {
-            if (progress.OutputDebug()) {
-              progress.Debug("Autocorrecting type of relation "+NumberToString(rel.GetId())+
-                             " from "+NumberToString(rel.GetType())+" to "+NumberToString(type));
-            }
-            rel.SetType(type);
-          }
-        }*/
       }
 
       if (rel.GetType()==typeIgnore) {
@@ -879,7 +862,7 @@ namespace osmscout {
       //
       // For multipolygon relations we restrict blacklisting to the
       // outer boundaries
-      if (rel.GetRelType()=="multipolygon") {
+      if (rel.IsArea()) {
         for (size_t m=0; m<rel.roles.size(); m++) {
           if (rel.roles[m].role=="outer" ||
               rel.roles[m].role=="") {
@@ -897,27 +880,14 @@ namespace osmscout {
         }
       }
 
-      // Reconstruct multiploygon relation by applying the multipolygon resolving
-      // algorithm as destribed at
-      // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
-      if (rel.GetRelType()=="multipolygon") {
-        if (!ResolveMultipolygon(rel,name,refName,progress)) {
-          progress.Error("Cannot resolve multipolygon relation "+
-                         NumberToString(rawRel.GetId())+" "+name);
-          continue;
+      // For non-areas:
+      // If a relation member does not have a type, it has the type of the relation
+      if (!rel.IsArea()) {
+        for (size_t m=0; m<rel.roles.size(); m++) {
+          if (rel.roles[m].GetType()==typeIgnore) {
+            rel.roles[m].attributes.type=rel.GetType();
+          }
         }
-      }
-
-      rel.SetId(rawRel.GetId());
-      rel.tags=rawRel.tags;
-
-      // Multipolygons are always areas
-      if (rel.GetRelType()=="multipolygon") {
-        rel.flags|=Relation::isArea;
-      }
-
-      if (!rel.tags.empty()) {
-        rel.flags|=Relation::hasTags;
       }
 
       for (size_t m=0; m<rel.roles.size(); m++) {
@@ -926,7 +896,17 @@ namespace osmscout {
         }
       }
 
-      if (rel.GetRelType()!="multipolygon") {
+      // Reconstruct multiploygon relation by applying the multipolygon resolving
+      // algorithm as destribed at
+      // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
+      if (rel.IsArea()) {
+        if (!ResolveMultipolygon(rel,name,refName,progress)) {
+          progress.Error("Cannot resolve multipolygon relation "+
+                         NumberToString(rawRel.GetId())+" "+name);
+          continue;
+        }
+      }
+      else {
         if (!CompactRelation(rel,name,progress)) {
           progress.Error("Relation "+NumberToString(rel.GetId())+
                          " cannot be compacted");
@@ -935,7 +915,7 @@ namespace osmscout {
       }
 
       if (progress.OutputDebug()) {
-        progress.Debug("Storing relation "+NumberToString(rel.GetId())+" "+rel.GetRelType()+" "+NumberToString(rel.GetType())+" "+name);
+        progress.Debug("Storing relation "+NumberToString(rel.GetId())+" "+NumberToString(rel.GetType())+" "+name);
       }
 
       if (rel.IsArea()) {

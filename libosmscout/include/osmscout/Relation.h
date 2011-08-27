@@ -103,7 +103,6 @@ namespace osmscout {
   private:
     Id                id;
     TypeId            type;
-    std::string       relType;
 
   public:
     uint16_t          flags;
@@ -127,11 +126,6 @@ namespace osmscout {
       return type;
     }
 
-    inline std::string GetRelType() const
-    {
-      return relType;
-    }
-
     inline bool IsArea() const
     {
       return flags & isArea;
@@ -146,7 +140,6 @@ namespace osmscout {
 
     void SetId(Id id);
     void SetType(TypeId type);
-    void SetRelType(const std::string& relType);
 
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;

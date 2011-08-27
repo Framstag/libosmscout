@@ -716,7 +716,7 @@ namespace osmscout {
               boundaryRelations.push_back(relation);
             }
             else {
-              progress.Info("Could not parse admin_level of relation "+relation.GetRelType()+" "+
+              progress.Info("Could not parse admin_level of relation "+
                             NumberToString(relation.GetType())+" "+NumberToString(relation.GetId()));
             }
 
@@ -725,7 +725,7 @@ namespace osmscout {
         }
 
         if (level==0) {
-          progress.Info("No tag 'admin_level' for relation "+relation.GetRelType()+" "+
+          progress.Info("No tag 'admin_level' for relation "+
                         NumberToString(relation.GetType())+" "+NumberToString(relation.GetId()));
         }
       }
