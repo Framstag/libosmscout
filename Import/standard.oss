@@ -361,6 +361,10 @@ OSS
     LINE #bbbbcc WITH MINPIXEL 2 WIDTH 20
     LABEL WITH STYLE contour MINMAG close
 
+  AREA "aeroway_runway"
+    FILL #bbbbcc
+    LABEL WITH MINMAG close
+
   WAY "aeroway_taxiway" PRIO 20 MINMAG suburb
     LINE #bbbbcc WITH MINPIXEL 2 WIDTH 15
     LABEL WITH STYLE contour MINMAG close

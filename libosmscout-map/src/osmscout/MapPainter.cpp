@@ -235,11 +235,9 @@ namespace osmscout {
       return false;
     }
 
-    projection.GeoToPixel(xmin,ymin,xmin,ymin);
-    projection.GeoToPixel(xmax,ymax,xmax,ymax);
-
-    cx=xmin+(xmax-xmin)/2;
-    cy=ymin+(ymax-ymin)/2;
+    projection.GeoToPixel(xmin+(xmax-xmin)/2,
+                          ymin+(ymax-ymin)/2,
+                          cx,cy);
 
     return true;
   }
@@ -980,6 +978,7 @@ namespace osmscout {
           const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetAreaSymbolStyle(relation->roles[m].GetType());
 
           bool hasLabel=labelStyle!=NULL &&
+                        labelStyle->GetStyle()!=LabelStyle::none &&
                         projection.GetMagnification()>=labelStyle->GetMinMag() &&
                         projection.GetMagnification()<=labelStyle->GetMaxMag();
 

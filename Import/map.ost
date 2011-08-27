@@ -67,7 +67,7 @@ TYPES
   TYPE "aeroway_aerodrome" = NODE AREA ("aeroway"=="aerodrome")
   TYPE "aeroway_terminal" = NODE AREA ("aeroway"=="terminal")
   TYPE "aeroway_helipad" = NODE AREA ("aeroway"=="helipad")
-  TYPE "aeroway_runway" = WAY ("aeroway"=="runway")
+  TYPE "aeroway_runway" = WAY AREA ("aeroway"=="runway") // Officially not AREA!
   TYPE "aeroway_taxiway" = WAY ("aeroway"=="taxiway")
   TYPE "aeroway_apron" = AREA ("aeroway"=="apron")
   TYPE "aeroway_gate" = NODE ("aeroway"=="gate")
