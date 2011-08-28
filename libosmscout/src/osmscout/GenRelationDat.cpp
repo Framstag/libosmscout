@@ -516,16 +516,6 @@ namespace osmscout {
       // Outer ring always has the type of the relation
       groups.back().attributes.type=relation.GetType();
 
-      if (!name.empty() && groups.back().attributes.GetName().empty()) {
-        groups.back().attributes.name=name;
-        groups.back().attributes.flags|=SegmentAttributes::hasName;
-      }
-
-      if (!refName.empty() && groups.back().attributes.GetRefName().empty()) {
-        groups.back().attributes.ref=refName;
-        groups.back().attributes.flags|=SegmentAttributes::hasRef;
-      }
-
       if (state.HasIncludes(topIndex)) {
         ConsumeSubs(rings,groups,state,topIndex,1);
       }
@@ -782,10 +772,6 @@ namespace osmscout {
         }
       }
 
-      if (!rel.tags.empty()) {
-        rel.flags|=Relation::hasTags;
-      }
-
       for (size_t i=0; i<rawRel.members.size(); i++) {
         roles.insert(rawRel.members[i].role);
       }
@@ -880,22 +866,6 @@ namespace osmscout {
         }
       }
 
-      // For non-areas:
-      // If a relation member does not have a type, it has the type of the relation
-      if (!rel.IsArea()) {
-        for (size_t m=0; m<rel.roles.size(); m++) {
-          if (rel.roles[m].GetType()==typeIgnore) {
-            rel.roles[m].attributes.type=rel.GetType();
-          }
-        }
-      }
-
-      for (size_t m=0; m<rel.roles.size(); m++) {
-        if (rel.roles[m].attributes.layer!=0) {
-          rel.roles[m].attributes.flags|=SegmentAttributes::hasLayer;
-        }
-      }
-
       // Reconstruct multiploygon relation by applying the multipolygon resolving
       // algorithm as destribed at
       // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
@@ -911,6 +881,47 @@ namespace osmscout {
           progress.Error("Relation "+NumberToString(rel.GetId())+
                          " cannot be compacted");
           continue;
+        }
+      }
+
+      //
+
+      // Postprocessing of relation
+
+      if (rel.IsArea()) {
+        for (size_t m=0; m<rel.roles.size(); m++) {
+
+          // Outer boundary inherits attributes from relation
+          if (rel.roles[m].role=="0") {
+            if (rel.roles[m].GetType()==typeIgnore) {
+              rel.roles[m].attributes.type=rel.GetType();
+            }
+
+            if (!name.empty() && rel.roles[m].attributes.GetName().empty()) {
+              rel.roles[m].attributes.name=name;
+            }
+
+            if (!refName.empty() && rel.roles[m].GetRefName().empty()) {
+              rel.roles[m].attributes.ref=refName;
+            }
+          }
+        }
+
+      }
+      else {
+        for (size_t m=0; m<rel.roles.size(); m++) {
+          if (rel.roles[m].GetType()==typeIgnore) {
+            // If a relation member does not have a type, it has the type of the relation
+            rel.roles[m].attributes.type=rel.GetType();
+          }
+
+          if (!name.empty() && rel.roles[m].attributes.GetName().empty()) {
+            rel.roles[m].attributes.name=name;
+          }
+
+          if (!refName.empty() && rel.roles[m].GetRefName().empty()) {
+            rel.roles[m].attributes.ref=refName;
+          }
         }
       }
 

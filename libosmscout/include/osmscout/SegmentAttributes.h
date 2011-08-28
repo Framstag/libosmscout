@@ -31,35 +31,39 @@ namespace osmscout {
 
   class SegmentAttributes
   {
+  private:
+    // Attribute availability flags (for optimized attribute storage)
+    const static uint16_t hasTags         = 1 << 11; //! We have additional tags stored on disk
+    const static uint16_t hasName         = 1 << 12; //! We have a name
+    const static uint16_t hasRef          = 1 << 13; //! We have reference name
+    const static uint16_t hasWidth        = 1 << 14; //! We have width
+    const static uint16_t hasLayer        = 1 << 15; //! We have optional layer information
+
   public:
-    // Common flags
-    const static uint16_t hasTags         = 1 <<  0; //! We have additional tags stored on disk
-    const static uint16_t hasName         = 1 <<  1; //! We have a name
-    const static uint16_t hasRef          = 1 <<  2; //! We have reference name
-    const static uint16_t isArea          = 1 <<  3; //! We are an area (or a way if not set)
+    // Common flags (Area & Way)
+    const static uint16_t isArea          = 1 <<  0; //! We are an area (or a way if not set)
 
     // Area flags
-    const static uint16_t hasHouseNr      = 1 << 15; //! We have a house number
+    const static uint16_t hasHouseNr      = 1 <<  1; //! We have a house number
 
     // Way flags
-    const static uint16_t hasRestrictions = 1 <<  8; //! We have restrictions
-    const static uint16_t hasWidth        = 1 <<  9; //! We have width
-    const static uint16_t hasLayer        = 1 << 10; //! We have optional layer information
-    const static uint16_t isBridge        = 1 << 11; //! We are a bridge
-    const static uint16_t isTunnel        = 1 << 12; //! We are a tunnel
-    const static uint16_t startIsJoint    = 1 << 13; //! Start node is a joint node
-    const static uint16_t endIsJoint      = 1 << 14; //! End node is a joint node
-    const static uint16_t isOneway        = 1 << 15; //! We are a oneway (in way direction)
+    const static uint16_t hasRestrictions = 1 <<  1; //! We have restrictions
+    const static uint16_t isBridge        = 1 <<  2; //! We are a bridge
+    const static uint16_t isTunnel        = 1 <<  3; //! We are a tunnel
+    const static uint16_t startIsJoint    = 1 <<  4; //! Start node is a joint node
+    const static uint16_t endIsJoint      = 1 <<  5; //! End node is a joint node
+    const static uint16_t isOneway        = 1 <<  6; //! We are a oneway (in way direction)
+
 
   public:
-    TypeId                    type;    //! type of the way/relation
-    uint16_t                  flags;
-    std::string               name;    //! name
-    std::string               ref;     //! reference name (normally drawn in a plate)
-    std::string               houseNr; //! house number
-    int8_t                    layer;   //! layer to draw on
-    uint8_t                   width;   //! width of way
-    std::vector<Tag>          tags;    //! list of preparsed tags
+    TypeId           type;    //! type of the way/relation
+    mutable uint16_t flags;
+    std::string      name;    //! name
+    std::string      ref;     //! reference name (normally drawn in a plate)
+    std::string      houseNr; //! house number
+    int8_t           layer;   //! layer to draw on
+    uint8_t          width;   //! width of way
+    std::vector<Tag> tags;    //! list of preparsed tags
 
   public:
     inline SegmentAttributes()

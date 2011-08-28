@@ -49,31 +49,19 @@ namespace osmscout {
     while (tag!=tags.end()) {
       if (tag->key==typeConfig.tagName) {
         name=tag->value;
-        if (!name.empty()) {
-          flags|=SegmentAttributes::hasName;
-        }
         tag=tags.erase(tag);
       }
       else if (tag->key==typeConfig.tagRef) {
         ref=tag->value;
-        if (!ref.empty()) {
-          flags|=SegmentAttributes::hasRef;
-        }
         tag=tags.erase(tag);
       }
       else if (tag->key==typeConfig.tagHouseNr) {
         houseNr=tag->value;
-        if (!houseNr.empty()) {
-          flags|=SegmentAttributes::hasHouseNr;
-        }
         tag=tags.erase(tag);
       }
       else if (tag->key==typeConfig.tagLayer) {
         if (!StringToNumber(tag->value.c_str(),layer)) {
           progress.Warning(std::string("Layer tag value '")+tag->value+"' for "+NumberToString(id)+" is not numeric!");
-        }
-        else if (layer!=0) {
-          flags|=SegmentAttributes::hasLayer;
         }
         tag=tags.erase(tag);
       }
@@ -142,7 +130,6 @@ namespace osmscout {
         }
         else {
           width=(uint8_t)floor(w+0.5);
-          flags|=SegmentAttributes::hasWidth;
         }
         tag=tags.erase(tag);
       }
@@ -151,19 +138,14 @@ namespace osmscout {
       }
     }
 
-    // tags
-
     this->tags=tags;
-    if (!this->tags.empty()) {
-      flags|=SegmentAttributes::hasTags;
-    }
 
     return true;
   }
 
   bool SegmentAttributes::Read(FileScanner& scanner)
   {
-    uint32_t flags;
+    uint16_t flags;
 
     scanner.ReadNumber(type);
     scanner.Read(flags);
@@ -221,7 +203,50 @@ namespace osmscout {
   bool SegmentAttributes::Write(FileWriter& writer) const
   {
     writer.WriteNumber(type);
-    writer.Write((uint32_t)flags);
+
+    if (!name.empty()) {
+      flags|=hasName;
+    }
+    else {
+      flags&=~hasName;
+    }
+
+    if (!ref.empty()) {
+      flags|=hasRef;
+    }
+    else {
+      flags&=~hasRef;
+    }
+
+    if (!houseNr.empty()) {
+      flags|=hasHouseNr;
+    }
+    else {
+      flags&=~hasHouseNr;
+    }
+
+    if (layer!=0) {
+      flags|=hasLayer;
+    }
+    else {
+      flags&=~hasLayer;
+    }
+
+    if (width!=0) {
+      flags|=hasWidth;
+    }
+    else {
+      flags&=~hasWidth;
+    }
+
+    if (!tags.empty()) {
+      flags|=hasTags;
+    }
+    else {
+      flags&=~hasTags;
+    }
+
+    writer.Write(flags);
 
     if (flags & hasName) {
       writer.Write(name);
