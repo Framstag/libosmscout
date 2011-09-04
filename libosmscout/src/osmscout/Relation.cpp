@@ -97,29 +97,17 @@ namespace osmscout {
 
   void Relation::SetType(TypeId type)
   {
-    this->type=type;
+    attributes.type=type;
   }
 
   bool Relation::Read(FileScanner& scanner)
   {
-    uint32_t tagCount;
     uint32_t roleCount;
 
     scanner.Read(id);
-    scanner.ReadNumber(type);
-    scanner.Read(flags);
 
-    if (flags & hasTags) {
-      scanner.ReadNumber(tagCount);
-      if (scanner.HasError()) {
-        return false;
-      }
-
-      tags.resize(tagCount);
-      for (size_t i=0; i<tagCount; i++) {
-        scanner.ReadNumber(tags[i].key);
-        scanner.Read(tags[i].value);
-      }
+    if (!attributes.Read(scanner)) {
+      return false;
     }
 
     scanner.ReadNumber(roleCount);
@@ -172,15 +160,9 @@ namespace osmscout {
   bool Relation::Write(FileWriter& writer) const
   {
     writer.Write(id);
-    writer.WriteNumber(type);
-    writer.Write(flags);
 
-    if (flags & hasTags) {
-      writer.WriteNumber((uint32_t)tags.size());
-      for (size_t i=0; i<tags.size(); i++) {
-        writer.WriteNumber(tags[i].key);
-        writer.Write(tags[i].value);
-      }
+    if (!attributes.Write(writer)) {
+      return false;
     }
 
     writer.WriteNumber((uint32_t)roles.size());

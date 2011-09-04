@@ -145,6 +145,11 @@ namespace osmscout {
       return (flags & hasRestrictions)!=0;
     }
 
+    inline const std::vector<Tag>& GetTags() const
+    {
+      return tags;
+    }
+
     bool SetTags(Progress& progress,
                  const TypeConfig& typeConfig,
                  Id id,

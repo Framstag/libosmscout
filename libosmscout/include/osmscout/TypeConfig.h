@@ -194,6 +194,7 @@ namespace osmscout {
     bool         canBeIndexed;
     bool         consumeChildren;
     bool         optimizeLowZoom;
+    bool         multipolygon;
     bool         ignore;
 
   public:
@@ -321,6 +322,18 @@ namespace osmscout {
     inline bool GetOptimizeLowZoom() const
     {
       return optimizeLowZoom;
+    }
+
+    inline TypeInfo& SetMultipolygon(bool multipolygon)
+    {
+      this->multipolygon=multipolygon;
+
+      return *this;
+    }
+
+    inline bool GetMultipolygon() const
+    {
+      return multipolygon;
     }
 
     inline TypeInfo& SetIgnore(bool ignore)

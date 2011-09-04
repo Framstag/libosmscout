@@ -238,6 +238,7 @@ PRODUCTIONS
                | "CONSUME_CHILDREN"  (. typeInfo.SetConsumeChildren(true); .)
                | "OPTIMIZE_LOW_ZOOM" (. typeInfo.SetOptimizeLowZoom(true); .)
                | "IGNORE"            (. typeInfo.SetIgnore(true); .)
+               | "MULTIPOLYGON"      (. typeInfo.SetMultipolygon(true); .)
                .
 
 END OST.

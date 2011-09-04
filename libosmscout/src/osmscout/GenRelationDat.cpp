@@ -732,44 +732,44 @@ namespace osmscout {
       }
 
       Relation              rel;
-      std::string           name;
-      std::string           refName;
       std::set<std::string> roles;
       bool                  error=false;
+      bool                  isArea=false;
+      bool                  reverseNodes;
       int8_t                layer=0;
 
       selectedRelationCount++;
 
       rel.SetId(rawRel.GetId());
       rel.SetType(rawRel.GetType());
-      rel.tags=rawRel.tags;
 
-      std::vector<Tag>::iterator tag=rawRel.tags.begin();
-      while (tag!=rawRel.tags.end()) {
-        if (tag->key==typeConfig.tagType) {
-          if (tag->value=="multipolygon") {
-            rel.flags|=Relation::isArea;
-          }
+      // Check, if the type should be handled as multipolygon
+      isArea=typeConfig.GetTypeInfo(rel.GetType()).GetMultipolygon();
 
-          tag=rawRel.tags.erase(tag);
-        }
-        else if (tag->key==typeConfig.tagName) {
-          name=tag->value;
-          tag++;
-        }
-        else if (tag->key==typeConfig.tagRef) {
-          refName=tag->value;
-          tag++;
-        }
-        else if (tag->key==typeConfig.tagLayer) {
-          if (!StringToNumber(tag->value,layer)) {
-            progress.Warning(std::string("Layer tag value '")+tag->value+"' for relation "+NumberToString(rawRel.GetId())+" is not numeric!");
+      // Is it possibly explicitely marked  multipolygon
+      if (!isArea) {
+        std::vector<Tag>::iterator tag=rawRel.tags.begin();
+        while (tag!=rawRel.tags.end()) {
+          if (tag->key==typeConfig.tagType) {
+            if (tag->value=="multipolygon") {
+              isArea=true;
+            }
+
+            tag=rawRel.tags.erase(tag);
           }
-          tag=rawRel.tags.erase(tag);
+          else {
+            tag++;
+          }
         }
-        else {
-          tag++;
-        }
+      }
+
+      if (!rel.attributes.SetTags(progress,
+                                  typeConfig,
+                                  rel.GetId(),
+                                  isArea,
+                                  rawRel.tags,
+                                  reverseNodes)) {
+        continue;
       }
 
       for (size_t i=0; i<rawRel.members.size(); i++) {
@@ -784,7 +784,7 @@ namespace osmscout {
 
         if (!ResolveMember(typeConfig,
                            rawRel.GetId(),
-                           name,
+                           rel.GetName(),
                            rawRel.members[m],
                            nodeDataFile,
                            wayDataFile,
@@ -870,14 +870,14 @@ namespace osmscout {
       // algorithm as destribed at
       // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
       if (rel.IsArea()) {
-        if (!ResolveMultipolygon(rel,name,refName,progress)) {
+        if (!ResolveMultipolygon(rel,rel.GetName(),rel.GetRefName(),progress)) {
           progress.Error("Cannot resolve multipolygon relation "+
-                         NumberToString(rawRel.GetId())+" "+name);
+                         NumberToString(rawRel.GetId())+" "+rel.GetName());
           continue;
         }
       }
       else {
-        if (!CompactRelation(rel,name,progress)) {
+        if (!CompactRelation(rel,rel.GetName(),progress)) {
           progress.Error("Relation "+NumberToString(rel.GetId())+
                          " cannot be compacted");
           continue;
@@ -897,12 +897,12 @@ namespace osmscout {
               rel.roles[m].attributes.type=rel.GetType();
             }
 
-            if (!name.empty() && rel.roles[m].attributes.GetName().empty()) {
-              rel.roles[m].attributes.name=name;
+            if (!rel.GetName().empty() && rel.roles[m].attributes.GetName().empty()) {
+              rel.roles[m].attributes.name=rel.GetName();
             }
 
-            if (!refName.empty() && rel.roles[m].GetRefName().empty()) {
-              rel.roles[m].attributes.ref=refName;
+            if (!rel.GetRefName().empty() && rel.roles[m].GetRefName().empty()) {
+              rel.roles[m].attributes.ref=rel.GetRefName();
             }
           }
         }
@@ -915,18 +915,18 @@ namespace osmscout {
             rel.roles[m].attributes.type=rel.GetType();
           }
 
-          if (!name.empty() && rel.roles[m].attributes.GetName().empty()) {
-            rel.roles[m].attributes.name=name;
+          if (!rel.GetName().empty() && rel.roles[m].attributes.GetName().empty()) {
+            rel.roles[m].attributes.name=rel.GetName();
           }
 
-          if (!refName.empty() && rel.roles[m].GetRefName().empty()) {
-            rel.roles[m].attributes.ref=refName;
+          if (!rel.GetRefName().empty() && rel.roles[m].GetRefName().empty()) {
+            rel.roles[m].attributes.ref=rel.GetRefName();
           }
         }
       }
 
       if (progress.OutputDebug()) {
-        progress.Debug("Storing relation "+NumberToString(rel.GetId())+" "+NumberToString(rel.GetType())+" "+name);
+        progress.Debug("Storing relation "+NumberToString(rel.GetId())+" "+NumberToString(rel.GetType())+" "+rel.GetName());
       }
 
       if (rel.IsArea()) {

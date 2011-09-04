@@ -710,9 +710,9 @@ namespace osmscout {
       if (relation.GetType()==boundaryId) {
         size_t level=0;
 
-        for (size_t i=0; i<relation.tags.size(); i++) {
-          if (relation.tags[i].key==typeConfig.tagAdminLevel) {
-            if (StringToNumber(relation.tags[i].value,level)) {
+        for (size_t i=0; i<relation.GetTags().size(); i++) {
+          if (relation.GetTags()[i].key==typeConfig.tagAdminLevel) {
+            if (StringToNumber(relation.GetTags()[i].value,level)) {
               boundaryRelations.push_back(relation);
             }
             else {
@@ -750,36 +750,35 @@ namespace osmscout {
            rel!=boundaryRelations.end();
            ++rel) {
         size_t      level=0;
-        std::string name;
+        std::string name=rel->GetName();
 
         count++;
 
         progress.SetProgress((l-1)*boundaryRelations.size()+count,10*boundaryRelations.size());
 
-        for (size_t i=0; i<rel->tags.size() && !(l!=0 && !name.empty()); i++) {
-          if (rel->tags[i].key==typeConfig.tagAdminLevel &&
-              StringToNumber(rel->tags[i].value,level)) {
+        if (!name.empty()) {
+          for (size_t i=0; i<rel->GetTags().size() && level==0; i++) {
+            if (rel->GetTags()[i].key==typeConfig.tagAdminLevel) {
+              StringToNumber(rel->GetTags()[i].value,level);
+            }
           }
-          else if (rel->tags[i].key==typeConfig.tagName) {
-            name=rel->tags[i].value;
-          }
-        }
 
-        if (level==l && !name.empty()) {
-          std::vector<Point> ns;
+          if (level==l) {
+            std::vector<Point> ns;
 
-          for (size_t i=0; i<rel->roles.size(); i++) {
-            if (rel->roles[i].role=="0") {
-              Area area;
+            for (size_t i=0; i<rel->roles.size(); i++) {
+              if (rel->roles[i].role=="0") {
+                Area area;
 
-              area.reference.Set(rel->GetId(),refRelation);
-              area.name=name;
-              area.area=rel->roles[i].nodes;
+                area.reference.Set(rel->GetId(),refRelation);
+                area.name=name;
+                area.area=rel->roles[i].nodes;
 
-              area.CalculateMinMax();
+                area.CalculateMinMax();
 
-              AddArea(rootArea,area);
-              // TODO: Should we break after the first outer ring detected?
+                AddArea(rootArea,area);
+                // TODO: Should we break after the first outer ring detected?
+              }
             }
           }
         }
@@ -791,31 +790,30 @@ namespace osmscout {
            ++a) {
 
         size_t      level=0;
-        std::string name;
+        std::string name=a->GetName();
 
         count++;
 
         progress.SetProgress((l-1)*boundaryAreas.size()+count,10*boundaryAreas.size());
 
-        for (size_t i=0; i<a->GetTagCount() && !(l!=0 && !name.empty()); i++) {
-          if (a->GetTagKey(i)==typeConfig.tagAdminLevel &&
-              StringToNumber(a->GetTagValue(i),level)) {
+        if (!name.empty()) {
+          for (size_t i=0; i<a->GetTagCount() && level==0; i++) {
+            if (a->GetTagKey(i)==typeConfig.tagAdminLevel) {
+              StringToNumber(a->GetTagValue(i),level);
+            }
           }
-          else if (a->GetTagKey(i)==typeConfig.tagName) {
-            name=a->GetTagValue(i);
+
+          if (level==l) {
+            Area area;
+
+            area.reference.Set(a->GetId(),refWay);
+            area.name=name;
+            area.area=a->nodes;
+
+            area.CalculateMinMax();
+
+            AddArea(rootArea,area);
           }
-        }
-
-        if (level==l && !name.empty()) {
-          Area area;
-
-          area.reference.Set(a->GetId(),refWay);
-          area.name=name;
-          area.area=a->nodes;
-
-          area.CalculateMinMax();
-
-          AddArea(rootArea,area);
         }
       }
     }

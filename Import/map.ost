@@ -181,8 +181,10 @@ TYPES
   TYPE "natural_water" = NODE AREA ("natural"=="water")
   TYPE "natural_wetland" = NODE AREA ("natural"=="wetland")
   TYPE "natural_wood" = NODE AREA ("natural"=="wood")
-  
-  TYPE "boundary_administrative" = WAY AREA ("boundary"=="administrative") OR RELATION ("type"=="boundary" AND "boundary"=="administrative") // we have multipolygon and boundary as relation type
+
+  // we have multipolygon and boundary as relation type  
+  TYPE "boundary_administrative" = WAY AREA ("boundary"=="administrative") OR
+                                   RELATION ("type"=="boundary" AND "boundary"=="administrative") OPTIONS MULTIPOLYGON 
   TYPE "boundary_civil" = AREA ("boundary"=="civil")
   TYPE "boundary_political" = AREA ("boundary"=="political")
   

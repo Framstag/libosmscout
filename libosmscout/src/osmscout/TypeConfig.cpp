@@ -193,6 +193,7 @@ namespace osmscout {
      canBeIndexed(false),
      consumeChildren(false),
      optimizeLowZoom(false),
+     multipolygon(false),
      ignore(false)
   {
     // no code

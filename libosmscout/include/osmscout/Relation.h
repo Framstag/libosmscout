@@ -96,22 +96,15 @@ namespace osmscout {
       }
     };
 
-  public:
-    const static uint16_t isArea   = 1 << 0; //! We are an area
-    const static uint16_t hasTags  = 1 << 1; //! We have additional tags stored on disk
-
   private:
-    Id                id;
-    TypeId            type;
+    Id                 id;
 
   public:
-    uint16_t          flags;
-    std::vector<Tag>  tags;
-    std::vector<Role> roles;
+    SegmentAttributes  attributes;
+    std::vector<Role>  roles;
 
   public:
     inline Relation()
-    : type(typeIgnore)
     {
       // no code
     }
@@ -121,14 +114,59 @@ namespace osmscout {
       return id;
     }
 
+    inline const SegmentAttributes& GetAttributes() const
+    {
+      return attributes;
+    }
+
     inline TypeId GetType() const
     {
-      return type;
+      return attributes.GetType();
+    }
+
+    inline uint16_t GetFlags() const
+    {
+      return attributes.GetFlags();
     }
 
     inline bool IsArea() const
     {
-      return flags & isArea;
+      return attributes.IsArea();
+    }
+
+    inline std::string GetName() const
+    {
+      return attributes.GetName();
+    }
+
+    inline std::string GetRefName() const
+    {
+      return attributes.GetRefName();
+    }
+
+    inline int8_t GetLayer() const
+    {
+      return attributes.GetLayer();
+    }
+
+    inline bool IsBridge() const
+    {
+      return attributes.IsBridge();
+    }
+
+    inline bool IsTunnel() const
+    {
+      return attributes.IsTunnel();
+    }
+
+    inline bool IsOneway() const
+    {
+      return attributes.IsOneway();
+    }
+
+    inline const std::vector<Tag>& GetTags() const
+    {
+      return attributes.GetTags();
     }
 
     bool GetCenter(double& lat,
