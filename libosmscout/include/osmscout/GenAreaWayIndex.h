@@ -29,7 +29,7 @@ namespace osmscout {
   private:
     struct TypeData
     {
-      size_t     indexLevel;
+      uint32_t   indexLevel;
       size_t     indexCells;
       size_t     indexEntries;
 

@@ -148,11 +148,11 @@ namespace osmscout {
       return true;
     }
 
-    size_t minxc=(size_t)floor((minlon+180.0)/typeData[type].cellWidth);
-    size_t maxxc=(size_t)floor((maxlon+180.0)/typeData[type].cellWidth);
+    uint32_t minxc=(uint32_t)floor((minlon+180.0)/typeData[type].cellWidth);
+    uint32_t maxxc=(uint32_t)floor((maxlon+180.0)/typeData[type].cellWidth);
 
-    size_t minyc=(size_t)floor((minlat+90.0)/typeData[type].cellHeight);
-    size_t maxyc=(size_t)floor((maxlat+90.0)/typeData[type].cellHeight);
+    uint32_t minyc=(uint32_t)floor((minlat+90.0)/typeData[type].cellHeight);
+    uint32_t maxyc=(uint32_t)floor((maxlat+90.0)/typeData[type].cellHeight);
 
     minxc=std::max(minxc,typeData[type].cellXStart);
     maxxc=std::min(maxxc,typeData[type].cellXEnd);
@@ -208,7 +208,7 @@ namespace osmscout {
 
       // For each data cell in row found
       for (size_t i=0; i<cellDataOffsets.size(); i++) {
-        size_t     dataCount;
+        uint32_t   dataCount;
         FileOffset lastOffset=0;
 
 

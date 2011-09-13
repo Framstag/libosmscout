@@ -182,10 +182,10 @@ namespace osmscout {
 
   struct OSMSCOUT_API Coord
   {
-    size_t x;
-    size_t y;
+    uint32_t x;
+    uint32_t y;
 
-    Coord(size_t x, size_t y)
+    Coord(uint32_t x, uint32_t y)
      :x(x),y(y)
     {
       // no code

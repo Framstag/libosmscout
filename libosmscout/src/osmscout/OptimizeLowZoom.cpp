@@ -54,7 +54,7 @@ namespace osmscout
     datafilename=AppendFileToDir(path,datafile);
 
     if (scanner.Open(datafilename)) {
-      size_t   optimizationMaxMag;
+      uint32_t optimizationMaxMag;
       uint32_t typeCount;
 
       scanner.ReadNumber(optimizationMaxMag);

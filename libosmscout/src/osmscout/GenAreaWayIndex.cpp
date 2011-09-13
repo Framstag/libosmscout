@@ -399,7 +399,7 @@ namespace osmscout {
            relTypeData[i].indexEntries>0)) {
         FileOffset bitmapOffset=0;
 
-        writer.WriteNumber(i);
+        writer.WriteNumber((uint32_t)i);
 
         writer.GetPos(wayTypeData[i].indexOffset);
 
@@ -431,7 +431,7 @@ namespace osmscout {
 
     for (size_t l=0; l<=maxLevel; l++) {
       std::set<TypeId> indexTypes;
-      size_t           wayCount;
+      uint32_t         wayCount;
       double           cellWidth=360.0/pow(2.0,(int)l);
       double           cellHeight=180.0/pow(2.0,(int)l);
 
@@ -581,7 +581,7 @@ namespace osmscout {
             return false;
           }
 
-          writer.WriteNumber(cell->second.size());
+          writer.WriteNumber((uint32_t)cell->second.size());
 
           for (std::list<FileOffset>::const_iterator offset=cell->second.begin();
                offset!=cell->second.end();
@@ -596,7 +596,7 @@ namespace osmscout {
 
     for (size_t l=0; l<=maxLevel; l++) {
       std::set<TypeId> indexTypes;
-      size_t           relCount;
+      uint32_t         relCount;
       double           cellWidth=360.0/pow(2.0,(int)l);
       double           cellHeight=180.0/pow(2.0,(int)l);
 
@@ -747,7 +747,7 @@ namespace osmscout {
             return false;
           }
 
-          writer.WriteNumber(cell->second.size());
+          writer.WriteNumber((uint32_t)cell->second.size());
 
           for (std::list<FileOffset>::const_iterator offset=cell->second.begin();
                offset!=cell->second.end();
