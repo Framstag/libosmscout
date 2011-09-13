@@ -581,7 +581,7 @@ namespace osmscout {
       // Set everything else to draw=false
       for (int yc=ycMin; yc<=ycMax; yc++) {
         for (int xc=xcMin; xc<=xcMax; xc++) {
-          int c=yc*yCellCount+xc;
+          int c=yc*xCellCount+xc;
 
           if (!labelRefs[c].empty()) {
             for (std::list<size_t>::const_iterator idx=labelRefs[c].begin();
@@ -799,6 +799,28 @@ namespace osmscout {
     }
   }
 
+  void MapPainter::DrawArea(const StyleConfig& styleConfig,
+                            const Projection& projection,
+                            const MapParameter& parameter,
+                            const SegmentAttributes& attributes,
+                            const FillStyle& fillStyle,
+                            const std::vector<Point>& nodes)
+  {
+    if (!IsVisible(projection, nodes, fillStyle.GetBorderWidth())) {
+      return;
+    }
+
+    polygon.TransformArea(projection,
+                          parameter.GetOptimizeAreaNodes(),
+                          nodes);
+
+    DrawArea(projection,
+             parameter,
+             attributes.GetType(),
+             fillStyle,
+             polygon);
+  }
+
   void MapPainter::DrawAreas(const StyleConfig& styleConfig,
                              const Projection& projection,
                              const MapParameter& parameter,
@@ -819,15 +841,12 @@ namespace osmscout {
             continue;
           }
 
-          polygon.TransformArea(projection,
-                                parameter.GetOptimizeAreaNodes(),
-                                area->nodes);
-
-          DrawArea(projection,
+          DrawArea(styleConfig,
+                   projection,
                    parameter,
-                   area->GetType(),
+                   area->GetAttributes(),
                    *fillStyle,
-                   polygon);
+                   area->nodes);
 
           areasDrawn++;
         }
@@ -849,15 +868,13 @@ namespace osmscout {
                 continue;
               }
 
-              polygon.TransformArea(projection,
-                                    parameter.GetOptimizeAreaNodes(),
-                                    relation->roles[m].nodes);
-
-              DrawArea(projection,
+              DrawArea(styleConfig,
+                       projection,
                        parameter,
-                       relation->roles[m].GetType(),
+                       relation->roles[m].GetAttributes(),
                        *fillStyle,
-                       polygon);
+                       relation->roles[m].nodes);
+
               drawn=true;
             }
           }
@@ -1059,118 +1076,41 @@ namespace osmscout {
     }
   }
 
-  void MapPainter::DrawWay(const Projection& projection,
-                           const MapParameter& parameter,
-                           const LineStyle& style,
-                           const SegmentAttributes& attributes,
-                           const TransPolygon& polygon)
-  {
-    double lineWidth;
-    bool   drawBridge=attributes.IsBridge();
-    bool   drawTunnel=attributes.IsTunnel();
-
-    if (style.GetFixedWidth()) {
-      lineWidth=GetProjectedWidth(projection,
-                                  style.GetMinPixel(),
-                                  style.GetWidth());
-    }
-    else {
-      lineWidth=GetProjectedWidth(projection,
-                                  style.GetMinPixel(),
-                                  attributes.GetWidth()>0 ? attributes.GetWidth() : style.GetWidth());
-    }
-
-    bool outline=style.GetOutline()>0 &&
-                 lineWidth-2*style.GetOutline()>=parameter.GetOutlineMinWidth();
-
-    if (outline) {
-      lineWidth-=2*style.GetOutline();
-    }
-
-    if (drawBridge &&
-        projection.GetMagnification()<magCity) {
-      drawBridge=false;
-    }
-
-    if (drawTunnel &&
-        projection.GetMagnification()<magCity) {
-      drawTunnel=false;
-    }
-
-    // Drawing tunnel style for dashed lines is currently not supported
-    if (drawTunnel &&
-        style.HasDashValues()) {
-      drawTunnel=false;
-    }
-
-    double r,g,b,a;
-
-    if (outline) {
-      // Draw line with normal color
-      r=style.GetLineR();
-      g=style.GetLineG();
-      b=style.GetLineB();
-      a=style.GetLineA();
-    }
-    else {
-      // Should draw outline, but resolution is too low
-      // Draw line with alternate color
-      r=style.GetAlternateR();
-      g=style.GetAlternateG();
-      b=style.GetAlternateB();
-      a=style.GetAlternateA();
-    }
-
-    if (drawTunnel) {
-      r=r+(1-r)*50/100;
-      g=g+(1-g)*50/100;
-      b=b+(1-b)*50/100;
-    }
-
-    if (!style.GetDash().empty() && style.GetGapA()>0.0) {
-      DrawPath(projection,
-               parameter,
-               style.GetGapR(),style.GetGapG(),style.GetGapB(),style.GetGapA(),
-               lineWidth,
-               emptyDash,
-               capRound,
-               capRound,
-               polygon);
-    }
-
-    DrawPath(projection,
-             parameter,
-             r,g,b,a,
-             lineWidth,
-             style.GetDash(),
-             capRound,
-             capRound,
-             polygon);
-  }
-
-  bool MapPainter::DrawWayOutline(const Projection& projection,
+  void MapPainter::DrawWayOutline(const StyleConfig& styleConfig,
+                                  const Projection& projection,
                                   const MapParameter& parameter,
-                                  const LineStyle& style,
                                   const SegmentAttributes& attributes,
                                   const std::vector<Point>& nodes)
   {
+    const LineStyle *style=styleConfig.GetWayLineStyle(attributes.GetType());
+
+    if (style==NULL) {
+      return;
+    }
+
+    if (!IsVisible(projection,
+                  nodes,
+                  style->GetWidth())) {
+      return;
+    }
+
     double lineWidth;
     bool   drawBridge=attributes.IsBridge();
     bool   drawTunnel=attributes.IsTunnel();
 
-    if (style.GetFixedWidth()) {
+    if (style->GetFixedWidth()) {
       lineWidth=GetProjectedWidth(projection,
-                                  style.GetMinPixel(),
-                                  style.GetWidth());
+                                  style->GetMinPixel(),
+                                  style->GetWidth());
     }
     else {
       lineWidth=GetProjectedWidth(projection,
-                                  style.GetMinPixel(),
-                                  attributes.GetWidth()>0 ? attributes.GetWidth() : style.GetWidth());
+                                  style->GetMinPixel(),
+                                  attributes.GetWidth()>0 ? attributes.GetWidth() : style->GetWidth());
     }
 
-    bool outline=style.GetOutline()>0 &&
-                 lineWidth-2*style.GetOutline()>=parameter.GetOutlineMinWidth();
+    bool outline=style->GetOutline()>0 &&
+                 lineWidth-2*style->GetOutline()>=parameter.GetOutlineMinWidth();
 
     if (drawBridge &&
         projection.GetMagnification()<magCity) {
@@ -1184,15 +1124,17 @@ namespace osmscout {
 
     // Drawing tunnel style for dashed lines is currently not supported
     if (drawTunnel &&
-        style.HasDashValues()) {
+        style->HasDashValues()) {
       drawTunnel=false;
     }
 
     if (!(drawBridge ||
           drawTunnel ||
           outline)) {
-      return false;
+      return;
     }
+
+    waysOutlineDrawn++;
 
     if (drawBridge) {
       polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),nodes);
@@ -1213,9 +1155,9 @@ namespace osmscout {
       if (outline) {
         DrawPath(projection,
                  parameter,
-                 style.GetOutlineR(),
-                 style.GetOutlineG(),
-                 style.GetOutlineB(),
+                 style->GetOutlineR(),
+                 style->GetOutlineG(),
+                 style->GetOutlineB(),
                  1.0,
                  lineWidth,
                  emptyDash,
@@ -1223,9 +1165,9 @@ namespace osmscout {
                  attributes.EndIsJoint() ? capButt : capRound,
                  polygon);
       }
-      else if (style.HasDashValues() ||
-               style.GetLineA()<1.0 ||
-               style.GetAlternateA()<1.0) {
+      else if (style->HasDashValues() ||
+               style->GetLineA()<1.0 ||
+               style->GetAlternateA()<1.0) {
         DrawPath(projection,
                  parameter,
                  1.0,
@@ -1248,10 +1190,10 @@ namespace osmscout {
       if (outline) {
         DrawPath(projection,
                  parameter,
-                 style.GetOutlineR(),
-                 style.GetOutlineG(),
-                 style.GetOutlineB(),
-                 style.GetOutlineA(),
+                 style->GetOutlineR(),
+                 style->GetOutlineG(),
+                 style->GetOutlineB(),
+                 style->GetOutlineA(),
                  lineWidth,
                  tunnelDash,
                  attributes.StartIsJoint() ? capButt : capRound,
@@ -1296,20 +1238,160 @@ namespace osmscout {
 
       DrawPath(projection,
                parameter,
-               style.GetOutlineR(),
-               style.GetOutlineG(),
-               style.GetOutlineB(),
-               style.GetOutlineA(),
+               style->GetOutlineR(),
+               style->GetOutlineG(),
+               style->GetOutlineB(),
+               style->GetOutlineA(),
                lineWidth,
                emptyDash,
                attributes.StartIsJoint() ? capButt : capRound,
                attributes.EndIsJoint() ? capButt : capRound,
                polygon);
     }
-
-    return true;
   }
 
+  void MapPainter::DrawWay(const StyleConfig& styleConfig,
+                           const Projection& projection,
+                           const MapParameter& parameter,
+                           const SegmentAttributes& attributes,
+                           const std::vector<Point>& nodes)
+  {
+    waysSegments++;
+
+    const LineStyle *style=styleConfig.GetWayLineStyle(attributes.GetType());
+
+    if (style==NULL) {
+      return;
+    }
+
+    if (!IsVisible(projection,
+                  nodes,
+                  style->GetWidth())) {
+      return;
+    }
+
+    waysDrawn++;
+
+    polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),nodes);
+
+    double lineWidth;
+    bool   drawBridge=attributes.IsBridge();
+    bool   drawTunnel=attributes.IsTunnel();
+
+    if (style->GetFixedWidth()) {
+      lineWidth=GetProjectedWidth(projection,
+                                  style->GetMinPixel(),
+                                  style->GetWidth());
+    }
+    else {
+      lineWidth=GetProjectedWidth(projection,
+                                  style->GetMinPixel(),
+                                  attributes.GetWidth()>0 ? attributes.GetWidth() : style->GetWidth());
+    }
+
+    bool outline=style->GetOutline()>0 &&
+                 lineWidth-2*style->GetOutline()>=parameter.GetOutlineMinWidth();
+
+    if (outline) {
+      lineWidth-=2*style->GetOutline();
+    }
+
+    if (drawBridge &&
+        projection.GetMagnification()<magCity) {
+      drawBridge=false;
+    }
+
+    if (drawTunnel &&
+        projection.GetMagnification()<magCity) {
+      drawTunnel=false;
+    }
+
+    // Drawing tunnel style for dashed lines is currently not supported
+    if (drawTunnel &&
+        style->HasDashValues()) {
+      drawTunnel=false;
+    }
+
+    double r,g,b,a;
+
+    if (outline) {
+      // Draw line with normal color
+      r=style->GetLineR();
+      g=style->GetLineG();
+      b=style->GetLineB();
+      a=style->GetLineA();
+    }
+    else {
+      // Should draw outline, but resolution is too low
+      // Draw line with alternate color
+      r=style->GetAlternateR();
+      g=style->GetAlternateG();
+      b=style->GetAlternateB();
+      a=style->GetAlternateA();
+    }
+
+    if (drawTunnel) {
+      r=r+(1-r)*50/100;
+      g=g+(1-g)*50/100;
+      b=b+(1-b)*50/100;
+    }
+
+    if (!style->GetDash().empty() && style->GetGapA()>0.0) {
+      DrawPath(projection,
+               parameter,
+               style->GetGapR(),style->GetGapG(),style->GetGapB(),style->GetGapA(),
+               lineWidth,
+               emptyDash,
+               capRound,
+               capRound,
+               polygon);
+    }
+
+    DrawPath(projection,
+             parameter,
+             r,g,b,a,
+             lineWidth,
+             style->GetDash(),
+             capRound,
+             capRound,
+             polygon);
+
+    if (!attributes.GetName().empty()) {
+      const LabelStyle *style=styleConfig.GetWayNameLabelStyle(attributes.GetType());
+
+      if (style!=NULL &&
+          style->IsPointStyle() &&
+          projection.GetMagnification()>=style->GetMinMag() &&
+          projection.GetMagnification()<=style->GetMaxMag()) {
+        RegisterPointWayLabel(projection,
+                              parameter,
+                              *style,
+                              attributes.GetName(),
+                              polygon);
+
+        waysLabelDrawn++;
+      }
+    }
+
+    if (!attributes.GetRefName().empty()) {
+      const LabelStyle *style=styleConfig.GetWayRefLabelStyle(attributes.GetType());
+
+      if (style!=NULL &&
+          style->IsPointStyle() &&
+          projection.GetMagnification()>=style->GetMinMag() &&
+          projection.GetMagnification()<=style->GetMaxMag()) {
+
+        RegisterPointWayLabel(projection,
+                              parameter,
+                              *style,
+                              attributes.GetRefName(),
+                              polygon);
+
+        waysLabelDrawn++;
+      }
+    }
+
+  }
 
   void MapPainter::DrawWays(const StyleConfig& styleConfig,
                             const Projection& projection,
@@ -1330,25 +1412,11 @@ namespace osmscout {
             continue;
           }
 
-          const LineStyle *style=styleConfig.GetWayLineStyle(way->GetType());
-
-          if (style==NULL) {
-            continue;
-          }
-
-          if (!IsVisible(projection,
-                        way->nodes,
-                        style->GetWidth())) {
-            continue;
-          }
-
-          if (DrawWayOutline(projection,
-                             parameter,
-                             *style,
-                             way->GetAttributes(),
-                             way->nodes)) {
-            waysOutlineDrawn++;
-          }
+          DrawWayOutline(styleConfig,
+                         projection,
+                         parameter,
+                         way->GetAttributes(),
+                         way->nodes);
         }
       }
 
@@ -1357,37 +1425,17 @@ namespace osmscout {
              r!=data.relationWays.end();
              ++r) {
           const RelationRef& relation=*r;
-          bool               drawn=false;
 
           for (size_t m=0; m<relation->roles.size(); m++) {
-            TypeId type=relation->roles[m].GetType();
-
             if (relation->roles[m].GetLayer()!=layer) {
               continue;
             }
 
-            const LineStyle *style=styleConfig.GetWayLineStyle(type);
-
-            if (style==NULL) {
-              continue;
-            }
-
-            if (!IsVisible(projection,
-                          relation->roles[m].nodes,
-                          style->GetWidth())) {
-              continue;
-            }
-            if (DrawWayOutline(projection,
-                               parameter,
-                               *style,
-                               relation->roles[m].GetAttributes(),
-                               relation->roles[m].nodes)) {
-              drawn=true;
-            }
-          }
-
-          if (drawn) {
-            relWaysOutlineDrawn++;
+            DrawWayOutline(styleConfig,
+                           projection,
+                           parameter,
+                           relation->roles[m].GetAttributes(),
+                           relation->roles[m].nodes);
           }
         }
       }
@@ -1402,62 +1450,11 @@ namespace osmscout {
             continue;
           }
 
-          const LineStyle *lineStyle=styleConfig.GetWayLineStyle(way->GetType());
-
-          if (lineStyle==NULL) {
-            continue;
-          }
-
-          if (!IsVisible(projection,
-                         way->nodes,
-                         lineStyle->GetWidth())) {
-            continue;
-          }
-
-          polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),way->nodes);
-
-          DrawWay(projection,
+          DrawWay(styleConfig,
+                  projection,
                   parameter,
-                  *lineStyle,
                   way->GetAttributes(),
-                  polygon);
-
-          if (!way->GetName().empty()) {
-            const LabelStyle *style=styleConfig.GetWayNameLabelStyle(way->GetType());
-
-            if (style!=NULL &&
-                style->IsPointStyle() &&
-                projection.GetMagnification()>=style->GetMinMag() &&
-                projection.GetMagnification()<=style->GetMaxMag()) {
-              RegisterPointWayLabel(projection,
-                                    parameter,
-                                    *style,
-                                    way->GetName(),
-                                    polygon);
-
-              waysLabelDrawn++;
-            }
-          }
-
-          if (!way->GetRefName().empty()) {
-            const LabelStyle *style=styleConfig.GetWayRefLabelStyle(way->GetType());
-
-            if (style!=NULL &&
-                style->IsPointStyle() &&
-                projection.GetMagnification()>=style->GetMinMag() &&
-                projection.GetMagnification()<=style->GetMaxMag()) {
-
-              RegisterPointWayLabel(projection,
-                                    parameter,
-                                    *style,
-                                    way->GetRefName(),
-                                    polygon);
-
-              waysLabelDrawn++;
-            }
-          }
-
-          waysDrawn++;
+                  way->nodes);
         }
       }
 
@@ -1466,75 +1463,17 @@ namespace osmscout {
              r!=data.relationWays.end();
              ++r) {
           const RelationRef& relation=*r;
-          bool               drawn=false;
 
           for (size_t m=0; m<relation->roles.size(); m++) {
-            TypeId type=relation->roles[m].GetType();
-
             if (relation->roles[m].GetLayer()!=layer) {
               continue;
             }
 
-            const LineStyle *style=styleConfig.GetWayLineStyle(type);
-
-            if (style==NULL) {
-              continue;
-            }
-
-            if (!IsVisible(projection,
-                          relation->roles[m].nodes,
-                          style->GetWidth())) {
-              continue;
-            }
-
-            polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),relation->roles[m].nodes);
-
-            DrawWay(projection,
+            DrawWay(styleConfig,
+                    projection,
                     parameter,
-                    *style,
                     relation->roles[m].GetAttributes(),
-                    polygon);
-
-            if (!relation->roles[m].GetName().empty()) {
-              const LabelStyle *style=styleConfig.GetWayNameLabelStyle(relation->roles[m].GetType());
-
-              if (style!=NULL &&
-                  style->IsPointStyle() &&
-                  projection.GetMagnification()>=style->GetMinMag() &&
-                  projection.GetMagnification()<=style->GetMaxMag()) {
-                RegisterPointWayLabel(projection,
-                                      parameter,
-                                      *style,
-                                      relation->roles[m].GetName(),
-                                      polygon);
-
-                relWaysLabelDrawn++;
-              }
-            }
-
-            if (!relation->roles[m].GetRefName().empty()) {
-                const LabelStyle *style=styleConfig.GetWayRefLabelStyle(relation->roles[m].GetType());
-
-              if (style!=NULL &&
-                  style->IsPointStyle() &&
-                  projection.GetMagnification()>=style->GetMinMag() &&
-                  projection.GetMagnification()<=style->GetMaxMag()) {
-
-                RegisterPointWayLabel(projection,
-                                      parameter,
-                                      *style,
-                                      relation->roles[m].GetRefName(),
-                                      polygon);
-
-                relWaysLabelDrawn++;
-              }
-            }
-
-            drawn=true;
-          }
-
-          if (drawn) {
-            relWaysDrawn++;
+                    relation->roles[m].nodes);
           }
         }
       }
@@ -1633,8 +1572,6 @@ namespace osmscout {
                              *style,
                              relation->roles[m].GetName(),
                              polygon);
-
-            relWaysLabelDrawn++;
           }
         }
 
@@ -1659,8 +1596,6 @@ namespace osmscout {
                              *style,
                              relation->roles[m].GetRefName(),
                              polygon);
-
-            relWaysLabelDrawn++;
           }
         }
       }
@@ -1682,25 +1617,11 @@ namespace osmscout {
         continue;
       }
 
-      const LineStyle *style=styleConfig.GetWayLineStyle(way->GetType());
-
-      if (style==NULL) {
-        continue;
-      }
-
-      if (IsVisible(projection,
-                    way->nodes,
-                    style->GetWidth())) {
-        polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),way->nodes);
-
-        DrawWay(projection,
-                parameter,
-                *style,
-                way->GetAttributes(),
-                polygon);
-      }
-
-      //waysDrawnCount++;
+      DrawWay(styleConfig,
+              projection,
+              parameter,
+              way->GetAttributes(),
+              way->nodes);
 
       //nodesAllCount+=way->nodes.size();
     }
@@ -1836,21 +1757,16 @@ namespace osmscout {
                         const MapParameter& parameter,
                         const MapData& data)
   {
-    waysCount=data.ways.size();
+    waysSegments=0;
     waysOutlineDrawn=0;
     waysDrawn=0;
     waysLabelDrawn=0;
 
     relWaysCount=data.relationWays.size();
-    relWaysOutlineDrawn=0;
-    relWaysDrawn=0;
-    relWaysLabelDrawn=0;
 
-    areasCount=data.areas.size();
     areasDrawn=0;
     areasLabelDrawn=0;
 
-    relAreasCount=data.relationAreas.size();
     relAreasDrawn=0;
     relAreasLabelDrawn=0;
 
@@ -1999,10 +1915,9 @@ namespace osmscout {
       std::cout << "POIs: " << poisTimer << "/" << routesTimer << " ";
       std::cout << "Labels: " << labelsTimer << std::endl;
 
-      std::cout << "Path ways: " << waysCount << "/" << waysDrawn << "/" << waysOutlineDrawn << "/" << waysLabelDrawn << " (pcs)" << std::endl;
-      std::cout << "Path rels: " << relWaysCount << "/" << relWaysDrawn << "/" << relWaysOutlineDrawn << "/" << relWaysLabelDrawn << " (pcs)" << std::endl;
-      std::cout << "Area ways: " << areasCount << "/" << areasDrawn << "/" << areasLabelDrawn << " (pcs)" << std::endl;
-      std::cout << "Area rels: " << relAreasCount << "/" << relAreasDrawn << "/" << relAreasLabelDrawn << " (pcs)" << std::endl;
+      std::cout << "Path ways: " << data.ways.size() << "+" << data.relationWays.size() << "/" << waysSegments << "/" << waysDrawn << "/" << waysOutlineDrawn << "/" << waysLabelDrawn << " (pcs)" << std::endl;
+      std::cout << "Area ways: " << data.areas.size() << "/" << areasDrawn << "/" << areasLabelDrawn << " (pcs)" << std::endl;
+      std::cout << "Area rels: " << data.relationAreas.size() << "/" << relAreasDrawn << "/" << relAreasLabelDrawn << " (pcs)" << std::endl;
     }
   }
 }

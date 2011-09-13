@@ -216,21 +216,16 @@ namespace osmscout {
       Statistics counter
      */
     //@{
-    size_t waysCount;
+    size_t waysSegments;
     size_t waysDrawn;
     size_t waysOutlineDrawn;
     size_t waysLabelDrawn;
 
     size_t relWaysCount;
-    size_t relWaysDrawn;
-    size_t relWaysOutlineDrawn;
-    size_t relWaysLabelDrawn;
 
-    size_t areasCount;
     size_t areasDrawn;
     size_t areasLabelDrawn;
 
-    size_t relAreasCount;
     size_t relAreasDrawn;
     size_t relAreasLabelDrawn;
     //@}
@@ -275,25 +270,22 @@ namespace osmscout {
                    const MapData& data);
 
     /**
-      Draw the way using LineStyle for the given type, the given style modification
-      attributes and the given path.
-     */
-    void DrawWay(const Projection& projection,
-                 const MapParameter& parameter,
-                 const LineStyle& style,
-                 const SegmentAttributes& attributes,
-                 const TransPolygon& polygon);
-
-    /**
       Draw the outline of the way using LineStyle for the given type, the given
       style modification attributes and the given path. Also draw sensfull
       line end given that the path has joints with other pathes or not.
      */
-    bool DrawWayOutline(const Projection& projection,
+    void DrawWayOutline(const StyleConfig& styleConfig,
+                        const Projection& projection,
                         const MapParameter& parameter,
-                        const LineStyle& style,
                         const SegmentAttributes& attributes,
                         const std::vector<Point>& nodes);
+
+
+    void DrawWay(const StyleConfig& styleConfig,
+                 const Projection& projection,
+                 const MapParameter& parameter,
+                 const SegmentAttributes& attributes,
+                 const std::vector<Point>& nodes);
 
     void DrawWays(const StyleConfig& styleConfig,
                   const Projection& projection,
@@ -304,6 +296,13 @@ namespace osmscout {
                        const Projection& projection,
                        const MapParameter& parameter,
                        const MapData& data);
+
+    void DrawArea(const StyleConfig& styleConfig,
+                  const Projection& projection,
+                  const MapParameter& parameter,
+                  const SegmentAttributes& attributes,
+                  const FillStyle& fillStyle,
+                  const std::vector<Point>& nodes);
 
     void DrawAreas(const StyleConfig& styleConfig,
                    const Projection& projection,
