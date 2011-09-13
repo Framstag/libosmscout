@@ -400,12 +400,12 @@ namespace osmscout {
     /**
       Type conversion operator.
 
-      Returns the underlying pointer. Allows reference to be
-      passed as a parameter where the base pointer type is required.
+      Returns the underlying object as reference. Allows reference to be
+      passed as a parameter where the object type is required.
     */
     operator T&() const
     {
-      return ptr;
+      return *ptr;
     }
 
   private:
