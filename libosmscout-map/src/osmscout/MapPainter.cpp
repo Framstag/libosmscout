@@ -375,7 +375,7 @@ namespace osmscout {
     // Calculate effective font size and alpha value
     if (projection.GetMagnification()>style.GetScaleAndFadeMag()) {
       if (parameter.GetDrawFadings()) {
-        double factor=log2(projection.GetMagnification())-log2(style.GetScaleAndFadeMag());
+        double factor=Log2(projection.GetMagnification())-Log2(style.GetScaleAndFadeMag());
         fontSize=fontSize*pow(2,factor);
         a=a/factor;
       }

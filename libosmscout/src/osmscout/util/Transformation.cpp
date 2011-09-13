@@ -20,7 +20,8 @@
 #include <osmscout/util/Transformation.h>
 
 #include <cmath>
-#include <iostream>
+#include <limits>
+
 namespace osmscout {
   static double relevantPosDeriviation=1.0;   // Pixel
 
@@ -30,7 +31,7 @@ namespace osmscout {
     double ydelta=b.y-a.y;
 
     if (xdelta==0 && ydelta==0) {
-      return INFINITY;
+      return std::numeric_limits<double>::infinity();
     }
 
     double u=((p.x-a.x)*xdelta+(p.y-a.y)*ydelta)/(pow(xdelta,2)+pow(ydelta,2));

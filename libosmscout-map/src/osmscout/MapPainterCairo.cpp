@@ -19,8 +19,6 @@
 
 #include <osmscout/MapPainterCairo.h>
 
-#include <sys/time.h>
-
 #include <cassert>
 #include <cmath>
 #include <iostream>

@@ -22,7 +22,6 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include <unistd.h>
 #include <png.h>
 
 namespace osmscout {
