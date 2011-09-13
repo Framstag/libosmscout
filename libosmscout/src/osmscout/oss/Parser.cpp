@@ -36,10 +36,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <osmscout/oss/Parser.h>
+
 #include <cassert>
+#include <sstream>
 
 #include <osmscout/oss/Scanner.h>
-#include <osmscout/oss/Parser.h>
 
 #include <osmscout/util/String.h>
 
@@ -919,9 +921,11 @@ void Errors::SynErr(int line, int col, int n)
 
     default:
     {
-      char format[20];
-      snprintf(format, 20, "error %d", n);
-      s = coco_string_create(format);
+      std::stringstream buffer;
+      
+      buffer << "error " << n;
+      
+      s = coco_string_create(buffer.str().c_str());
     }
     break;
   }
