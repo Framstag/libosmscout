@@ -304,11 +304,13 @@ namespace osmscout {
 
     bytesToWrite=blockSize-(currentPos%blockSize);
 
-    char buffer[blockSize];
+    char *buffer=new char[blockSize];
 
     memset(buffer,0,bytesToWrite);
 
     hasError=fwrite(buffer,sizeof(char),bytesToWrite,file)!=bytesToWrite;
+
+    delete buffer;
 
     return !hasError;
   }
