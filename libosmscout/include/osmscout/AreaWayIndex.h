@@ -41,7 +41,7 @@ namespace osmscout {
   private:
     struct TypeData
     {
-      size_t     indexLevel;
+      uint32_t   indexLevel;
 
       FileOffset indexOffset;
 

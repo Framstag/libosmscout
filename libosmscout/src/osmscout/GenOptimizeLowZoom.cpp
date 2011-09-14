@@ -71,7 +71,7 @@ namespace osmscout
     }
 
     typeCount=types.size();
-    writer.WriteNumber(parameter.GetOptimizationMaxMag());
+    writer.WriteNumber((uint32_t)parameter.GetOptimizationMaxMag());
     writer.Write(typeCount);
 
     for (std::set<TypeId>::const_iterator type=types.begin();
@@ -314,7 +314,7 @@ namespace osmscout
 
       writer.SetPos(dataOffsetOffset->second);
 
-      writer.Write(newWays.size());
+      writer.Write((uint32_t)newWays.size());
       writer.Write(dataOffset);
 
       writer.SetPos(dataOffset);
