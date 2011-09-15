@@ -65,7 +65,7 @@ namespace osmscout
         return false;
       }
 
-      magnification=pow(2,optimizationMaxMag);
+      magnification=pow(2.0,(int)optimizationMaxMag);
 
       for (size_t i=1; i<=typeCount; i++) {
         TypeId   typeId;

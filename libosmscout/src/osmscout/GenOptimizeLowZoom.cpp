@@ -53,7 +53,7 @@ namespace osmscout
     std::map<TypeId,FileOffset> dataOffsets;
     double                      magnification;
 
-    magnification=pow(2,parameter.GetOptimizationMaxMag());
+    magnification=pow(2.0,(int)parameter.GetOptimizationMaxMag());
 
     progress.SetAction("Getting type to optimize");
 

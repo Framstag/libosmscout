@@ -1773,8 +1773,8 @@ namespace osmscout {
 
     cellWidth=parameter.GetFontSize()*4;
     cellHeight=parameter.GetFontSize()*4;
-    xCellCount=(int)ceil(projection.GetWidth()/cellWidth);
-    yCellCount=(int)ceil(projection.GetHeight()/cellHeight);
+    xCellCount=(int)ceil((double)projection.GetWidth()/cellWidth);
+    yCellCount=(int)ceil((double)projection.GetHeight()/cellHeight);
 
     labels.clear();
     labelRefs.clear();
@@ -1784,7 +1784,7 @@ namespace osmscout {
       std::cout << "Draw ";
       std::cout << projection.GetLat() <<", ";
       std::cout << projection.GetLon() << " with mag. ";
-      std::cout << projection.GetMagnification() << "x" << "/" << log(projection.GetMagnification())/log(2);
+      std::cout << projection.GetMagnification() << "x" << "/" << log(projection.GetMagnification())/log(2.0);
       std::cout << " area " << projection.GetWidth() << "x" << projection.GetHeight() << std::endl;
     }
 
