@@ -52,12 +52,12 @@ namespace osmscout {
     result.reserve(7);
 
     result.append("#");
-    result.append(1,valueChar[(uint)(r*255)/16]);
-    result.append(1,valueChar[(uint)(r*255)%16]);
-    result.append(1,valueChar[(uint)(g*255)/16]);
-    result.append(1,valueChar[(uint)(g*255)%16]);
-    result.append(1,valueChar[(uint)(b*255)/16]);
-    result.append(1,valueChar[(uint)(b*255)%16]);
+    result.append(1,valueChar[(unsigned int)(r*255)/16]);
+    result.append(1,valueChar[(unsigned int)(r*255)%16]);
+    result.append(1,valueChar[(unsigned int)(g*255)/16]);
+    result.append(1,valueChar[(unsigned int)(g*255)%16]);
+    result.append(1,valueChar[(unsigned int)(b*255)/16]);
+    result.append(1,valueChar[(unsigned int)(b*255)%16]);
 
     return result;
   }
@@ -71,16 +71,16 @@ namespace osmscout {
     result.append("#");
 
     if (a!=1.0) {
-      result.append(1,valueChar[(uint)(a*255)/16]);
-      result.append(1,valueChar[(uint)(a*255)%16]);
+      result.append(1,valueChar[(unsigned int)(a*255)/16]);
+      result.append(1,valueChar[(unsigned int)(a*255)%16]);
     }
 
-    result.append(1,valueChar[(uint)(r*255)/16]);
-    result.append(1,valueChar[(uint)(r*255)%16]);
-    result.append(1,valueChar[(uint)(g*255)/16]);
-    result.append(1,valueChar[(uint)(g*255)%16]);
-    result.append(1,valueChar[(uint)(b*255)/16]);
-    result.append(1,valueChar[(uint)(b*255)%16]);
+    result.append(1,valueChar[(unsigned int)(r*255)/16]);
+    result.append(1,valueChar[(unsigned int)(r*255)%16]);
+    result.append(1,valueChar[(unsigned int)(g*255)/16]);
+    result.append(1,valueChar[(unsigned int)(g*255)%16]);
+    result.append(1,valueChar[(unsigned int)(b*255)/16]);
+    result.append(1,valueChar[(unsigned int)(b*255)%16]);
 
     return result;
   }
