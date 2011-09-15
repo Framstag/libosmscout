@@ -25,7 +25,7 @@
 
 // We should try to get rid of this!
 #if defined(__WIN32__) || defined(WIN32)
-  #include <winsock2.h>
+  #include <winsock.h>
 #else
   #include <arpa/inet.h>
 #endif
