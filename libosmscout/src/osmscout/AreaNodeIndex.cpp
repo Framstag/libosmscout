@@ -20,10 +20,11 @@
 #include <osmscout/AreaNodeIndex.h>
 
 #include <cerrno>
-#include <cmath>
 #include <cstring>
 #include <iostream>
 #include <map>
+
+#include <osmscout/private/Math.h>
 
 namespace osmscout {
 

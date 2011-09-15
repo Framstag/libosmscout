@@ -19,10 +19,11 @@
 
 #include <osmscout/WaterIndex.h>
 
-#include <cmath>
 #include <iostream>
 
 #include <osmscout/util/FileScanner.h>
+
+#include <osmscout/private/Math.h>
 
 namespace osmscout {
 

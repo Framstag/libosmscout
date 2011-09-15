@@ -20,7 +20,6 @@
 #include <osmscout/Database.h>
 
 #include <cassert>
-#include <cmath>
 #include <iostream>
 
 #include <osmscout/RoutingProfile.h>
@@ -28,6 +27,8 @@
 
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/StopClock.h>
+
+#include <osmscout/private/Math.h>
 
 namespace osmscout {
 
@@ -428,7 +429,7 @@ namespace osmscout {
     std::vector<FileOffset> relationWayOffsets;
     std::vector<FileOffset> wayAreaOffsets;
     std::vector<FileOffset> relationAreaOffsets;
-    double                  magLevel=osmscout::Log2(magnification);
+    double                  magLevel=log2(magnification);
 
     nodes.clear();
     ways.clear();

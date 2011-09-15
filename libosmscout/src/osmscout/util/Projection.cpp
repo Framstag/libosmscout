@@ -20,7 +20,8 @@
 #include <osmscout/util/Projection.h>
 
 #include <cassert>
-#include <cmath>
+
+#include <osmscout/private/Math.h>
 
 namespace osmscout {
 

@@ -20,8 +20,9 @@
 #include <osmscout/Way.h>
 
 #include <cassert>
-#include <cmath>
 #include <limits>
+
+#include <osmscout/private/Math.h>
 
 namespace osmscout {
 

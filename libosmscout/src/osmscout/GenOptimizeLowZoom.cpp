@@ -20,7 +20,6 @@
 #include <osmscout/GenOptimizeLowZoom.h>
 
 #include <cassert>
-#include <cmath>
 
 #include <osmscout/Way.h>
 
@@ -30,6 +29,8 @@
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/String.h>
 #include <osmscout/util/Transformation.h>
+
+#include <osmscout/private/Math.h>
 
 #include <iostream>
 

@@ -21,19 +21,9 @@
 
 #include <cstdlib>
 
-#if defined(__WIN32__) || defined(WIN32)
-  #define _USE_MATH_DEFINES
-  #include <math.h>
-#endif
-
-#include <cmath>
+#include <osmscout/private/Math.h>
 
 namespace osmscout {
-
-  double Log2(double x)
-  {
-    return log(x)/log(2.0l);
-  }
 
   size_t Pow(size_t a, size_t b)
   {

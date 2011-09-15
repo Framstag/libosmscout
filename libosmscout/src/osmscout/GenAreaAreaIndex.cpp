@@ -20,7 +20,6 @@
 #include <osmscout/GenAreaAreaIndex.h>
 
 #include <cassert>
-#include <cmath>
 #include <vector>
 
 #include <osmscout/Relation.h>
@@ -30,7 +29,9 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/String.h>
-#include <iostream>
+
+#include <osmscout/private/Math.h>
+
 namespace osmscout {
 
   std::string AreaAreaIndexGenerator::GetDescription() const

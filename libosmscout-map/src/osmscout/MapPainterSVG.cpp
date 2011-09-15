@@ -20,7 +20,6 @@
 #include <osmscout/MapPainterSVG.h>
 
 #include <cassert>
-#include <cmath>
 #include <iostream>
 #include <iomanip>
 #include <limits>
@@ -28,6 +27,8 @@
 #include <cstdlib>
 
 #include <osmscout/Util.h>
+
+#include <osmscout/private/Math.h>
 
 namespace osmscout {
 

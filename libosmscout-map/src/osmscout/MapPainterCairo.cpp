@@ -20,7 +20,6 @@
 #include <osmscout/MapPainterCairo.h>
 
 #include <cassert>
-#include <cmath>
 #include <iostream>
 #include <iomanip>
 #include <limits>
@@ -29,6 +28,8 @@
 
 #include <osmscout/LoaderPNG.h>
 #include <osmscout/Util.h>
+
+#include <osmscout/private/Math.h>
 
 namespace osmscout {
 

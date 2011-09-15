@@ -203,7 +203,6 @@ namespace osmscout {
     }
   };
 
-  extern OSMSCOUT_API double Log2(double x);
   extern OSMSCOUT_API size_t Pow(size_t a, size_t b);
   extern OSMSCOUT_API double GetSphericalDistance(double aLon, double aLat,
                                                   double bLon, double bLat);

@@ -20,10 +20,11 @@
 #include <osmscout/SegmentAttributes.h>
 
 #include <cassert>
-#include <cmath>
 #include <limits>
 
 #include <osmscout/util/String.h>
+
+#include <osmscout/private/Math.h>
 
 namespace osmscout {
 

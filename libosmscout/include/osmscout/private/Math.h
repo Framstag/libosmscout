@@ -1,6 +1,9 @@
+#ifndef OSMSCOUT_UTIL_MATH_H
+#define OSMSCOUT_UTIL_MATH_H
+
 /*
   This source is part of the libosmscout library
-  Copyright (C) 2009  Tim Teulings
+  Copyright (C) 2011  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,41 +20,27 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/Tiles.h>
 
-#include <osmscout/private/Math.h>
+#if defined(__WIN32__) || defined(WIN32)
+  #define _USE_MATH_DEFINES
+#endif
 
-namespace osmscout {
+#include <cmath>
 
-  static double tileDiv = 20;
+#include <osmscout/private/Config.h>
 
-  double GetTileWidth()
+#if !HAVE_DECL_LOG2
+  inline double log2(double x)
   {
-    return 1/tileDiv;
+    return log(x)/log(2.0l);
   }
+#endif
 
-  double GetTileHeight()
-  {
-    return 1/tileDiv;
-  }
+#if !HAVE_DECL_ATANH
+  inline double atanh(double x)
+    {
+      return log((1.0+x)/(1.0-x))/2.0;
+    }
+#endif
 
-  size_t GetTileX(double lon)
-  {
-    return (size_t)ceil((lon+180)*tileDiv);
-  }
-
-  size_t GetTileY(double lat)
-  {
-    return (size_t)ceil((lat+90)*tileDiv);
-  }
-
-  TileId GetTileId(size_t x, size_t y)
-  {
-    return (size_t)y*360*tileDiv+x;
-  }
-
-  TileId GetTileId(double lon, double lat)
-  {
-    return GetTileId(GetTileX(lon),GetTileY(lat));
-  }
-}
+#endif

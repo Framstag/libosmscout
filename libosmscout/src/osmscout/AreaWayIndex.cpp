@@ -19,8 +19,9 @@
 
 #include <osmscout/AreaWayIndex.h>
 
-#include <cmath>
 #include <iostream>
+
+#include <osmscout/private/Math.h>
 
 namespace osmscout {
 

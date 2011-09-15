@@ -19,7 +19,6 @@
 
 #include <osmscout/GenAreaNodeIndex.h>
 
-#include <cmath>
 #include <map>
 #include <set>
 
@@ -31,6 +30,8 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/String.h>
+
+#include <osmscout/private/Math.h>
 
 namespace osmscout {
 

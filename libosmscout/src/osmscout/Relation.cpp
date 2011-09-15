@@ -19,8 +19,9 @@
 
 #include <osmscout/Relation.h>
 
-#include <cmath>
 #include <limits>
+
+#include <osmscout/private/Math.h>
 
 namespace osmscout {
 

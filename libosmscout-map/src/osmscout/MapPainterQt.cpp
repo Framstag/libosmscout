@@ -20,11 +20,12 @@
 #include <osmscout/MapPainterQt.h>
 
 #include <cassert>
-#include <cmath>
 #include <iostream>
 #include <limits>
 
 #include <osmscout/util/Geometry.h>
+
+#include <osmscout/private/Math.h>
 
 namespace osmscout {
 

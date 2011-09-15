@@ -19,11 +19,12 @@
 
 #include <osmscout/MapPainter.h>
 
-#include <cmath>
 #include <iostream>
 #include <limits>
 
 #include <osmscout/util/StopClock.h>
+
+#include <osmscout/private/Math.h>
 
 namespace osmscout {
 
@@ -375,7 +376,7 @@ namespace osmscout {
     // Calculate effective font size and alpha value
     if (projection.GetMagnification()>style.GetScaleAndFadeMag()) {
       if (parameter.GetDrawFadings()) {
-        double factor=Log2(projection.GetMagnification())-Log2(style.GetScaleAndFadeMag());
+        double factor=log2(projection.GetMagnification())-log2(style.GetScaleAndFadeMag());
         fontSize=fontSize*pow(2,factor);
         a=a/factor;
       }

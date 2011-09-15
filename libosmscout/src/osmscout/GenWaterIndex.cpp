@@ -20,7 +20,6 @@
 #include <osmscout/GenWaterIndex.h>
 
 #include <cassert>
-#include <cmath>
 #include <vector>
 
 #include <osmscout/Relation.h>
@@ -32,6 +31,8 @@
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/String.h>
+
+#include <osmscout/private/Math.h>
 
 #include <iostream>
 

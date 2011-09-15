@@ -26,9 +26,10 @@ AC_CHECK_SIZEOF([wchar_t])
 
 AC_CHECK_HEADERS([sys/time.h])
 
-AC_CHECK_FUNCS([mmap])
-
 AC_SEARCH_LIBS([sqrt],[m])
+
+AC_CHECK_DECLS([log2(double), atanh(double)],[],[],[#include <cmath>])
+AC_CHECK_FUNCS([mmap])
 
 if test "x$GXX" = xyes; then
   CPPFLAGS="$CPPFLAGS -Wall -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"

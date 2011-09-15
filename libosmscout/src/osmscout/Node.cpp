@@ -19,7 +19,7 @@
 
 #include <osmscout/Node.h>
 
-#include <cmath>
+#include <osmscout/private/Math.h>
 
 namespace osmscout {
 
