@@ -443,7 +443,7 @@ namespace osmscout {
       // Check if we are visible
       for (int yc=ycMin; yc<=ycMax; yc++) {
         for (int xc=xcMin; xc<=xcMax; xc++) {
-          int c=yc*yCellCount+xc;
+          int c=yc*xCellCount+xc;
 
           if (labelRefs[c].size()>0) {
             for (std::list<size_t>::const_iterator idx=labelRefs[c].begin();
@@ -539,7 +539,7 @@ namespace osmscout {
       // Check if we are visible
       for (int yc=ycMin; yc<=ycMax; yc++) {
         for (int xc=xcMin; xc<=xcMax; xc++) {
-          int c=yc*yCellCount+xc;
+          int c=yc*xCellCount+xc;
 
           if (!labelRefs[c].empty()) {
             for (std::list<size_t>::const_iterator idx=labelRefs[c].begin();
