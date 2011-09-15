@@ -24,6 +24,7 @@ AC_ARG_ENABLE(svg-driver,
               
 AC_TYPE_SIZE_T
 
+AC_CHECK_DECLS([log2(double), atanh(double)],[],[],[#include <cmath>])
 AC_CHECK_FUNCS([mmap])
 
 AC_SEARCH_LIBS([sqrt],[m])
