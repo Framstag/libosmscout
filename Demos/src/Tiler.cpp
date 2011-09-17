@@ -160,9 +160,9 @@ int main(int argc, char* argv[])
   drawParameter.SetDrawFadings(false);
 
   searchParameter.SetMaximumAreaLevel(3);
-  searchParameter.SetMaximumNodes(100);
-  searchParameter.SetMaximumWays(3000);
-  searchParameter.SetMaximumAreas(1000);
+  searchParameter.SetMaximumNodes(std::numeric_limits<unsigned long>::max());
+  searchParameter.SetMaximumWays(std::numeric_limits<unsigned long>::max());
+  searchParameter.SetMaximumAreas(std::numeric_limits<unsigned long>::max());
 
   for (size_t zoom=std::min(startZoom,endZoom);
        zoom<=std::max(startZoom,endZoom);
