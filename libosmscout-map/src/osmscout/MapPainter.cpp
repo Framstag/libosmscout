@@ -176,11 +176,11 @@ namespace osmscout {
       return false;
     }
 
-    xMin+=pixelOffset;
-    yMin+=pixelOffset;
+    xMin-=pixelOffset;
+    yMin-=pixelOffset;
 
-    xMax-=pixelOffset;
-    yMax-=pixelOffset;
+    xMax+=pixelOffset;
+    yMax+=pixelOffset;
 
     return !(xMin>=projection.GetWidth() ||
              yMin>=projection.GetHeight() ||
@@ -807,7 +807,7 @@ namespace osmscout {
                             const FillStyle& fillStyle,
                             const std::vector<Point>& nodes)
   {
-    if (!IsVisible(projection, nodes, fillStyle.GetBorderWidth())) {
+    if (!IsVisible(projection, nodes, fillStyle.GetBorderWidth()/2)) {
       return;
     }
 
@@ -1089,15 +1089,7 @@ namespace osmscout {
       return;
     }
 
-    if (!IsVisible(projection,
-                  nodes,
-                  style->GetWidth())) {
-      return;
-    }
-
     double lineWidth;
-    bool   drawBridge=attributes.IsBridge();
-    bool   drawTunnel=attributes.IsTunnel();
 
     if (style->GetFixedWidth()) {
       lineWidth=GetProjectedWidth(projection,
@@ -1110,6 +1102,14 @@ namespace osmscout {
                                   attributes.GetWidth()>0 ? attributes.GetWidth() : style->GetWidth());
     }
 
+    if (!IsVisible(projection,
+                  nodes,
+                  lineWidth/2)) {
+      return;
+    }
+
+    bool drawBridge=attributes.IsBridge();
+    bool drawTunnel=attributes.IsTunnel();
     bool outline=style->GetOutline()>0 &&
                  lineWidth-2*style->GetOutline()>=parameter.GetOutlineMinWidth();
 
@@ -1265,19 +1265,7 @@ namespace osmscout {
       return;
     }
 
-    if (!IsVisible(projection,
-                  nodes,
-                  style->GetWidth())) {
-      return;
-    }
-
-    waysDrawn++;
-
-    polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),nodes);
-
     double lineWidth;
-    bool   drawBridge=attributes.IsBridge();
-    bool   drawTunnel=attributes.IsTunnel();
 
     if (style->GetFixedWidth()) {
       lineWidth=GetProjectedWidth(projection,
@@ -1290,6 +1278,18 @@ namespace osmscout {
                                   attributes.GetWidth()>0 ? attributes.GetWidth() : style->GetWidth());
     }
 
+    if (!IsVisible(projection,
+                  nodes,
+                  lineWidth/2)) {
+      return;
+    }
+
+    waysDrawn++;
+
+    polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),nodes);
+
+    bool drawBridge=attributes.IsBridge();
+    bool drawTunnel=attributes.IsTunnel();
     bool outline=style->GetOutline()>0 &&
                  lineWidth-2*style->GetOutline()>=parameter.GetOutlineMinWidth();
 
