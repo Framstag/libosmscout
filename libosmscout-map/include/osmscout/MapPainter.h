@@ -172,6 +172,7 @@ namespace osmscout {
       const LineStyle         *lineStyle;
       const LabelStyle        *nameLabelStyle;
       const LabelStyle        *refLabelStyle;
+      size_t                  prio;
       size_t                  transStart;
       size_t                  transEnd;
       double                  lineWidth;
@@ -181,7 +182,13 @@ namespace osmscout {
 
       inline bool operator<(const WayData& other)
       {
-        return attributes->GetLayer()<other.attributes->GetLayer();
+        if (attributes->GetLayer()==other.attributes->GetLayer())
+        {
+          return prio>other.prio;
+        }
+        else {
+          return attributes->GetLayer()<other.attributes->GetLayer();
+        }
       }
     };
 

@@ -1500,6 +1500,8 @@ namespace osmscout {
       data.refLabelStyle=NULL;
     }
 
+    data.prio=styleConfig.GetWayPrio(attributes.GetType());
+
     data.transStart=start;
     data.transEnd=end;
     data.lineWidth=lineWidth;

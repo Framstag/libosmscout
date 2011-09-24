@@ -654,6 +654,11 @@ namespace osmscout {
                              TypeSet& types) const;
 
 
+    inline size_t GetWayPrio(TypeId type) const
+    {
+      return wayPrio[type];
+    }
+
     inline const SymbolStyle* GetNodeSymbolStyle(TypeId type) const
     {
       if (type<nodeSymbolStyles.size()) {
