@@ -19,10 +19,12 @@
 
 #include <osmscout/util/Transformation.h>
 
+#include <cstring>
 #include <limits>
 
 #include <osmscout/private/Math.h>
 
+#include <iostream>
 namespace osmscout {
   static double relevantPosDeriviation=1.0;   // Pixel
 
@@ -322,5 +324,133 @@ namespace osmscout {
     cy=ymin+(ymax-ymin)/2;
 
     return true;
+  }
+
+  TransBuffer::TransBuffer()
+  : bufferSize(131072),
+    usedPoints(0),
+    buffer(NULL)
+  {
+    buffer = new Pixel[bufferSize];
+  }
+
+  TransBuffer::~TransBuffer()
+  {
+    delete [] buffer;
+  }
+
+  void TransBuffer::Reset()
+  {
+    usedPoints=0;
+  }
+
+  void TransBuffer::AssureRoomForPoints(size_t count)
+  {
+    if (usedPoints+count>bufferSize)
+    {
+      bufferSize=bufferSize*2;
+
+      Pixel* newBuffer=new Pixel[bufferSize];
+
+      memcpy(newBuffer,buffer, sizeof(Pixel)*usedPoints);
+
+      std::cout << "*** Buffer reallocation: " << bufferSize << std::endl;
+
+      delete [] buffer;
+
+      buffer=newBuffer;
+    }
+  }
+
+  bool TransBuffer::TransformArea(const Projection& projection,
+                     bool optimize,
+                     const std::vector<Point>& nodes,
+                     size_t& start, size_t &end)
+  {
+    transPolygon.TransformArea(projection, optimize,nodes);
+
+    if (transPolygon.IsEmpty())
+    {
+      return false;
+    }
+
+    AssureRoomForPoints(transPolygon.GetLength());
+
+    start=usedPoints;
+    for (size_t i=transPolygon.GetStart(); i<=transPolygon.GetEnd(); i++)
+    {
+      if (transPolygon.points[i].draw)
+      {
+        buffer[usedPoints].x=transPolygon.points[i].x;
+        buffer[usedPoints].y=transPolygon.points[i].y;
+        usedPoints++;
+      }
+    }
+
+    end=usedPoints-1;
+
+    return true;
+  }
+
+  bool TransBuffer::TransformWay(const Projection& projection,
+                    bool optimize,
+                    const std::vector<Point>& nodes,
+                    size_t& start, size_t &end)
+  {
+    transPolygon.TransformWay(projection, optimize,nodes);
+
+    if (transPolygon.IsEmpty())
+    {
+      return false;
+    }
+
+    AssureRoomForPoints(transPolygon.GetLength());
+
+    start=usedPoints;
+    for (size_t i=transPolygon.GetStart(); i<=transPolygon.GetEnd(); i++)
+    {
+      if (transPolygon.points[i].draw)
+      {
+        buffer[usedPoints].x=transPolygon.points[i].x;
+        buffer[usedPoints].y=transPolygon.points[i].y;
+        usedPoints++;
+      }
+    }
+
+    end=usedPoints-1;
+
+    return true;
+  }
+
+  void TransBuffer::GetBoundingBox(size_t start, size_t end,
+                                   double& xmin, double& ymin,
+                                   double& xmax, double& ymax) const
+  {
+    xmin=buffer[start].x;
+    xmax=buffer[start].x;
+    ymin=buffer[start].y;
+    ymax=buffer[start].y;
+
+    for (size_t j=start+1; j<=end; j++) {
+      xmin=std::min(xmin,buffer[j].x);
+      xmax=std::max(xmax,buffer[j].x);
+      ymin=std::min(ymin,buffer[j].y);
+      ymax=std::max(ymax,buffer[j].y);
+    }
+  }
+
+  void TransBuffer::GetCenterPixel(size_t start, size_t end,
+                                   double& cx,
+                                   double& cy) const
+  {
+    double xmin;
+    double xmax;
+    double ymin;
+    double ymax;
+
+    GetBoundingBox(start,end,xmin,ymin,xmax,ymax);
+
+    cx=xmin+(xmax-xmin)/2;
+    cy=ymin+(ymax-ymin)/2;
   }
 }

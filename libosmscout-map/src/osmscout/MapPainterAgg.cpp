@@ -296,10 +296,10 @@ namespace osmscout {
   }
 
   void MapPainterAgg::DrawContourLabel(const Projection& projection,
-                                      const MapParameter& parameter,
-                                      const LabelStyle& style,
-                                      const std::string& text,
-                                      const TransPolygon& contour)
+                                       const MapParameter& parameter,
+                                       const LabelStyle& style,
+                                       const std::string& text,
+                                       size_t transStart, size_t transEnd)
   {
     double       fontSize=style.GetSize();
     double       r=style.GetTextR();
@@ -320,44 +320,40 @@ namespace osmscout {
     double xo=0;
     double yo=0;
 
-    if (contour.points[contour.GetStart()].x<contour.points[contour.GetEnd()].x) {
-      for (size_t j=contour.GetStart(); j<=contour.GetEnd(); j++) {
-        if (contour.points[j].draw) {
-          if (j==contour.GetStart()) {
-            path.move_to(contour.points[j].x,
-                contour.points[j].y);
-          }
-          else {
-            path.line_to(contour.points[j].x,
-                         contour.points[j].y);
-            length+=sqrt(pow(contour.points[j].x-xo,2)+
-                         pow(contour.points[j].y-yo,2));
-          }
-
-          xo=contour.points[j].x;
-          yo=contour.points[j].y;
+    if (transBuffer.buffer[transStart].x<transBuffer.buffer[transEnd].x) {
+      for (size_t j=transStart; j<=transEnd; j++) {
+        if (j==transStart) {
+          path.move_to(transBuffer.buffer[j].x,
+                       transBuffer.buffer[j].y);
         }
+        else {
+          path.line_to(transBuffer.buffer[j].x,
+                       transBuffer.buffer[j].y);
+          length+=sqrt(pow(transBuffer.buffer[j].x-xo,2)+
+                       pow(transBuffer.buffer[j].y-yo,2));
+        }
+
+        xo=transBuffer.buffer[j].x;
+        yo=transBuffer.buffer[j].y;
       }
     }
     else {
-      for (size_t j=0; j<=contour.GetEnd()-contour.GetStart(); j++) {
-        size_t idx=contour.GetEnd()-j;
+      for (size_t j=0; j<=transEnd-transStart; j++) {
+        size_t idx=transEnd-j;
 
-        if (contour.points[idx].draw) {
-          if (j==contour.GetStart()) {
-            path.move_to(contour.points[idx].x,
-                contour.points[idx].y);
-          }
-          else {
-            path.line_to(contour.points[idx].x,
-                         contour.points[idx].y);
-            length+=sqrt(pow(contour.points[idx].x-xo,2)+
-                         pow(contour.points[idx].y-yo,2));
-          }
-
-          xo=contour.points[idx].x;
-          yo=contour.points[idx].y;
+        if (j==0) {
+          path.move_to(transBuffer.buffer[idx].x,
+                       transBuffer.buffer[idx].y);
         }
+        else {
+          path.line_to(transBuffer.buffer[idx].x,
+                       transBuffer.buffer[idx].y);
+          length+=sqrt(pow(transBuffer.buffer[idx].x-xo,2)+
+                       pow(transBuffer.buffer[idx].y-yo,2));
+        }
+
+        xo=transBuffer.buffer[idx].x;
+        yo=transBuffer.buffer[idx].y;
       }
     }
 
@@ -440,18 +436,16 @@ namespace osmscout {
                                const std::vector<double>& dash,
                                CapStyle startCap,
                                CapStyle endCap,
-                               const TransPolygon& path)
+                               size_t transStart, size_t transEnd)
   {
     agg::path_storage p;
 
-    for (size_t i=polygon.GetStart(); i<=polygon.GetEnd(); i++) {
-      if (polygon.points[i].draw) {
-        if (i==polygon.GetStart()) {
-          p.move_to(polygon.points[i].x,polygon.points[i].y);
-        }
-        else {
-          p.line_to(polygon.points[i].x,polygon.points[i].y);
-        }
+    for (size_t i=transStart; i<=transEnd; i++) {
+      if (i==transStart) {
+        p.move_to(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+      }
+      else {
+        p.line_to(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
       }
     }
 
@@ -495,49 +489,46 @@ namespace osmscout {
   }
 
   void MapPainterAgg::DrawArea(const Projection& projection,
-                              const MapParameter& parameter,
-                              TypeId type,
-                              const FillStyle& fillStyle,
-                              const TransPolygon& area)
+                               const MapParameter& parameter,
+                               const MapPainter::AreaData& area)
   {
     agg::path_storage path;
 
-    for (size_t i=polygon.GetStart(); i<=polygon.GetEnd(); i++) {
-      if (polygon.points[i].draw) {
-        if (i==polygon.GetStart()) {
-          path.move_to(polygon.points[i].x,polygon.points[i].y);
-        }
-        else {
-          path.line_to(polygon.points[i].x,polygon.points[i].y);
-        }
+    for (size_t i=area.transStart; i<=area.transEnd; i++) {
+      if (i==area.transStart) {
+        path.move_to(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+      }
+      else {
+        path.line_to(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
       }
     }
+    path.line_to(transBuffer.buffer[area.transStart].x,transBuffer.buffer[area.transEnd].y);
 
-    path.close_polygon();
-
-    renderer_aa->color(agg::rgba(fillStyle.GetFillR(),
-                                 fillStyle.GetFillG(),
-                                 fillStyle.GetFillB(),
-                                 fillStyle.GetFillA()));
+    renderer_aa->color(agg::rgba(area.fillStyle->GetFillR(),
+                                 area.fillStyle->GetFillG(),
+                                 area.fillStyle->GetFillB(),
+                                 area.fillStyle->GetFillA()));
 
     rasterizer->add_path(path);
 
     agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
 
-    double borderWidth=GetProjectedWidth(projection, fillStyle.GetBorderMinPixel(), fillStyle.GetBorderWidth());
+    double borderWidth=GetProjectedWidth(projection,
+                                         area.fillStyle->GetBorderMinPixel(),
+                                         area.fillStyle->GetBorderWidth());
 
     if (borderWidth>0.0) {
       DrawPath(projection,
                parameter,
-               fillStyle.GetBorderR(),
-               fillStyle.GetBorderG(),
-               fillStyle.GetBorderB(),
-               fillStyle.GetBorderA(),
+               area.fillStyle->GetBorderR(),
+               area.fillStyle->GetBorderG(),
+               area.fillStyle->GetBorderB(),
+               area.fillStyle->GetBorderA(),
                borderWidth,
-               fillStyle.GetBorderDash(),
+               area.fillStyle->GetBorderDash(),
                capRound,
                capRound,
-               area);
+               area.transStart,area.transEnd);
     }
   }
 

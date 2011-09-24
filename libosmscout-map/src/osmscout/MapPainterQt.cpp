@@ -240,7 +240,7 @@ namespace osmscout {
                                       const MapParameter& parameter,
                                       const LabelStyle& style,
                                       const std::string& text,
-                                      const TransPolygon& path)
+                                      size_t transStart, size_t transEnd)
   {
     double fontSize=style.GetSize();
     double r=style.GetTextR();
@@ -260,31 +260,27 @@ namespace osmscout {
 
     QPainterPath p;
 
-    if (path.points[path.GetStart()].x<path.points[path.GetEnd()].x) {
-      for (size_t j=path.GetStart(); j<=path.GetEnd(); j++) {
-        if (path.points[j].draw) {
-          if (j==path.GetStart()) {
-            p.moveTo(path.points[j].x,path.points[j].y);
-          }
-          else {
-            p.lineTo(path.points[j].x,path.points[j].y);
-          }
+    if (transBuffer.buffer[transStart].x<transBuffer.buffer[transEnd].x) {
+      for (size_t j=transStart; j<=transEnd; j++) {
+        if (j==transStart) {
+          p.moveTo(transBuffer.buffer[j].x,transBuffer.buffer[j].y);
+        }
+        else {
+          p.lineTo(transBuffer.buffer[j].x,transBuffer.buffer[j].y);
         }
       }
     }
     else {
-      for (size_t j=0; j<=path.GetEnd()-path.GetStart(); j++) {
-        size_t idx=path.GetEnd()-j;
+      for (size_t j=0; j<=transEnd-transStart; j++) {
+        size_t idx=transEnd-j;
 
-        if (path.points[idx].draw) {
-          if (j==path.GetStart()) {
-            p.moveTo(path.points[idx].x,
-                     path.points[idx].y);
-          }
-          else {
-            p.lineTo(path.points[idx].x,
-                     path.points[idx].y);
-          }
+        if (j==0) {
+          p.moveTo(transBuffer.buffer[idx].x,
+                   transBuffer.buffer[idx].y);
+        }
+        else {
+          p.lineTo(transBuffer.buffer[idx].x,
+                   transBuffer.buffer[idx].y);
         }
       }
     }
@@ -395,7 +391,7 @@ namespace osmscout {
                               const std::vector<double>& dash,
                               CapStyle startCap,
                               CapStyle endCap,
-                              const TransPolygon& path)
+                              size_t transStart, size_t transEnd)
   {
     QPen pen;
 
@@ -444,14 +440,12 @@ namespace osmscout {
 
     QPainterPath p;
 
-    for (size_t i=path.GetStart(); i<=path.GetEnd(); i++) {
-      if (path.points[i].draw) {
-        if (i==path.GetStart()) {
-          p.moveTo(path.points[i].x,path.points[i].y);
-        }
-        else {
-          p.lineTo(path.points[i].x,path.points[i].y);
-        }
+    for (size_t i=transStart; i<=transEnd; i++) {
+      if (i==transStart) {
+        p.moveTo(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+      }
+      else {
+        p.lineTo(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
       }
     }
 
@@ -472,8 +466,8 @@ namespace osmscout {
         endCap!=capRound) {
       painter->setBrush(QBrush(QColor::fromRgbF(r,g,b,a)));
 
-      painter->drawEllipse(QPointF(path.points[path.GetStart()].x,
-                                   path.points[path.GetStart()].y),
+      painter->drawEllipse(QPointF(transBuffer.buffer[transStart].x,
+                                   transBuffer.buffer[transStart].y),
                                    width/2,width/2);
     }
 
@@ -482,46 +476,42 @@ namespace osmscout {
       startCap!=capRound) {
       painter->setBrush(QBrush(QColor::fromRgbF(r,g,b,a)));
 
-      painter->drawEllipse(QPointF(path.points[path.GetEnd()].x,
-                                   path.points[path.GetEnd()].y),
+      painter->drawEllipse(QPointF(transBuffer.buffer[transEnd].x,
+                                   transBuffer.buffer[transEnd].y),
                                    width/2,width/2);
     }
   }
 
   void MapPainterQt::DrawArea(const Projection& projection,
                               const MapParameter& parameter,
-                              TypeId type,
-                              const FillStyle& fillStyle,
-                              const TransPolygon& area)
+                              const MapPainter::AreaData& area)
   {
     QPolygonF polygon;
 
-    for (size_t i=area.GetStart(); i<=area.GetEnd(); i++) {
-      if (area.points[i].draw) {
-        polygon << QPointF(area.points[i].x,area.points[i].y);
-      }
+    for (size_t i=area.transStart; i<=area.transEnd; i++) {
+      polygon << QPointF(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
     }
 
-    double borderWidth=GetProjectedWidth(projection, fillStyle.GetBorderMinPixel(), fillStyle.GetBorderWidth());
+    double borderWidth=GetProjectedWidth(projection, area.fillStyle->GetBorderMinPixel(), area.fillStyle->GetBorderWidth());
 
     if (borderWidth>0.0) {
       QPen pen;
 
-      pen.setColor(QColor::fromRgbF(fillStyle.GetBorderR(),
-                                    fillStyle.GetBorderG(),
-                                    fillStyle.GetBorderB(),
-                                    fillStyle.GetBorderA()));
+      pen.setColor(QColor::fromRgbF(area.fillStyle->GetBorderR(),
+                                    area.fillStyle->GetBorderG(),
+                                    area.fillStyle->GetBorderB(),
+                                    area.fillStyle->GetBorderA()));
       pen.setWidthF(borderWidth);
 
-      if (fillStyle.GetBorderDash().empty()) {
+      if (area.fillStyle->GetBorderDash().empty()) {
         pen.setStyle(Qt::SolidLine);
         pen.setCapStyle(Qt::RoundCap);
       }
       else {
         QVector<qreal> dashes;
 
-        for (size_t i=0; i<fillStyle.GetBorderDash().size(); i++) {
-          dashes << fillStyle.GetBorderDash()[i];
+        for (size_t i=0; i<area.fillStyle->GetBorderDash().size(); i++) {
+          dashes << area.fillStyle->GetBorderDash()[i];
         }
 
         pen.setDashPattern(dashes);
@@ -535,7 +525,7 @@ namespace osmscout {
     }
 
     SetBrush(parameter,
-             fillStyle);
+             *area.fillStyle);
 
     painter->drawPolygon(polygon);
   }

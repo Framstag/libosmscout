@@ -36,6 +36,12 @@ namespace osmscout {
     double y;
   };
 
+  struct OSMSCOUT_API Pixel
+  {
+    double x;
+    double y;
+  };
+
   class OSMSCOUT_API TransPolygon
   {
   private:
@@ -77,6 +83,7 @@ namespace osmscout {
     {
       return end;
     }
+
     void TransformArea(const Projection& projection,
                        bool optimize,
                        const std::vector<Point>& nodes);
@@ -88,6 +95,42 @@ namespace osmscout {
                         double& xmax, double& ymax) const;
 
     bool GetCenterPixel(double& cx,
+                        double& cy) const;
+  };
+
+  class OSMSCOUT_API TransBuffer
+  {
+  private:
+    TransPolygon transPolygon;
+    size_t       bufferSize;
+    size_t       usedPoints;
+
+  public:
+    Pixel*       buffer;
+
+  private:
+    void AssureRoomForPoints(size_t count);
+
+  public:
+    TransBuffer();
+    virtual ~TransBuffer();
+
+    void Reset();
+
+    bool TransformArea(const Projection& projection,
+                       bool optimize,
+                       const std::vector<Point>& nodes,
+                       size_t& start, size_t &end);
+    bool TransformWay(const Projection& projection,
+                      bool optimize,
+                      const std::vector<Point>& nodes,
+                      size_t& start, size_t &end);
+    void GetBoundingBox(size_t start, size_t end,
+                        double& xmin, double& ymin,
+                        double& xmax, double& ymax) const;
+
+    void GetCenterPixel(size_t start, size_t end,
+                        double& cx,
                         double& cy) const;
   };
 }

@@ -196,10 +196,10 @@ namespace osmscout {
   }
 
   void MapPainterSVG::DrawContourLabel(const Projection& projection,
-                                         const MapParameter& parameter,
-                                         const LabelStyle& style,
-                                         const std::string& text,
-                                         const TransPolygon& contour)
+                                       const MapParameter& parameter,
+                                       const LabelStyle& style,
+                                       const std::string& text,
+                                       size_t transStart, size_t transEnd)
   {
   }
 
@@ -225,17 +225,17 @@ namespace osmscout {
                                  const std::vector<double>& dash,
                                  CapStyle startCap,
                                  CapStyle endCap,
-                                 const TransPolygon& path)
+                                 size_t transStart, size_t transEnd)
   {
     stream << "    <polyline fill=\"none\" stroke=\"" << GetColorValue(r,g,b,a) << "\" stroke-width=\"" << width << "\"" << std::endl;
     stream << "              points=\"";
 
-    for (size_t i=path.GetStart(); i<=path.GetEnd(); i++) {
-      if (i!=path.GetStart()) {
+    for (size_t i=transStart; i<=transEnd; i++) {
+      if (i!=transStart) {
         stream << " ";
       }
 
-      stream << path.points[i].x << "," << path.points[i].y;
+      stream << transBuffer.buffer[i].x << "," << transBuffer.buffer[i].y;
 
     }
 
@@ -243,20 +243,18 @@ namespace osmscout {
   }
 
   void MapPainterSVG::DrawArea(const Projection& projection,
-                                 const MapParameter& parameter,
-                                 TypeId type,
-                                 const FillStyle& fillStyle,
-                                 const TransPolygon& area)
+                               const MapParameter& parameter,
+                               const MapPainter::AreaData& area)
   {
-    stream << "    <polygon class=\"" << typeConfig->GetTypeInfo(type).GetName() << "_area\"" << std::endl;
+    stream << "    <polygon class=\"" << typeConfig->GetTypeInfo(area.attributes->GetType()).GetName() << "_area\"" << std::endl;
     stream << "             points=\"";
 
-    for (size_t i=area.GetStart(); i<=area.GetEnd(); i++) {
-      if (i!=area.GetStart()) {
+    for (size_t i=area.transStart; i<=area.transEnd; i++) {
+      if (i!=area.transStart) {
         stream << " ";
       }
 
-      stream << area.points[i].x << "," << area.points[i].y;
+      stream << transBuffer.buffer[i].x << "," << transBuffer.buffer[i].y;
 
     }
 

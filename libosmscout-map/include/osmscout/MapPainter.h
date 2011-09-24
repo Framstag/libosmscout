@@ -153,6 +153,38 @@ namespace osmscout {
     };
 
   protected:
+    struct OSMSCOUT_API AreaData
+    {
+      const SegmentAttributes *attributes;
+      const FillStyle         *fillStyle;
+      size_t                  transStart;
+      size_t                  transEnd;
+
+      inline bool operator<(const AreaData& other)
+      {
+        return fillStyle->GetLayer()<other.fillStyle->GetLayer();
+      }
+    };
+
+    struct OSMSCOUT_API WayData
+    {
+      const SegmentAttributes *attributes;
+      const LineStyle         *lineStyle;
+      const LabelStyle        *nameLabelStyle;
+      const LabelStyle        *refLabelStyle;
+      size_t                  transStart;
+      size_t                  transEnd;
+      double                  lineWidth;
+      bool                    drawBridge;
+      bool                    drawTunnel;
+      bool                    outline;
+
+      inline bool operator<(const WayData& other)
+      {
+        return attributes->GetLayer()<other.attributes->GetLayer();
+      }
+    };
+
     struct OSMSCOUT_API Label
     {
       bool              draw;
@@ -177,17 +209,7 @@ namespace osmscout {
        Scratch variables for path optimization algorithm
      */
     //@{
-    TransPolygon            polygon;  //! Static (avoid reallocation) transformed polygon
-    //@}
-
-    /**
-       Style specific precalculations
-     */
-    //@{
-    bool                    areaLayers[11];
-    bool                    wayLayers[11];
-    bool                    relationAreaLayers[11];
-    bool                    relationWayLayers[11];
+    TransBuffer             transBuffer; //! Static (avoid reallocation) buffer of transformed coordinates
     //@}
 
     /**
@@ -199,6 +221,9 @@ namespace osmscout {
     FillStyle               areaMarkStyle;     //! Marker fill style for internal debugging
     //@}
 
+    std::list<AreaData>     areaData;
+    std::list<WayData>      wayData;
+
     /**
       Temporary data structures for intelligent label positioning
       */
@@ -207,6 +232,7 @@ namespace osmscout {
     int                     yCellCount;
     size_t                  cellWidth;
     size_t                  cellHeight;
+
     std::vector<std::list<size_t> > labelRefs;
     std::vector<Label>      labels;
     std::vector<ScanCell>   wayScanlines;
@@ -221,17 +247,13 @@ namespace osmscout {
     size_t waysOutlineDrawn;
     size_t waysLabelDrawn;
 
-    size_t relWaysCount;
-
+    size_t areasSegments;
     size_t areasDrawn;
     size_t areasLabelDrawn;
-
-    size_t relAreasDrawn;
-    size_t relAreasLabelDrawn;
     //@}
 
   private:
-    void ScanConvertLine(const TransPolygon& polygon,
+    void ScanConvertLine(size_t transStart, size_t transEnd,
                          double cellWidth,
                          double cellHeight,
                          std::vector<ScanCell>& cells);
@@ -240,21 +262,38 @@ namespace osmscout {
       Private draw algorithm implementation routines.
      */
     //@{
+    void PrepareAreaSegment(const StyleConfig& styleConfig,
+                            const Projection& projection,
+                            const MapParameter& parameter,
+                            const SegmentAttributes& attributes,
+                            const std::vector<Point>& nodes);
+
+    void PrepareAreas(const StyleConfig& styleConfig,
+                      const Projection& projection,
+                      const MapParameter& parameter,
+                      const MapData& data);
+
+    void PrepareWaySegment(const StyleConfig& styleConfig,
+                           const Projection& projection,
+                           const MapParameter& parameter,
+                           const SegmentAttributes& attributes,
+                           const std::vector<Point>& nodes);
+
+    void PrepareWays(const StyleConfig& styleConfig,
+                     const Projection& projection,
+                     const MapParameter& parameter,
+                     const MapData& data);
+
     void DrawGroundTiles(const StyleConfig& styleConfig,
                          const Projection& projection,
                          const MapParameter& parameter,
                          const MapData& data);
 
-    void PrecalculateStyleData(const StyleConfig& styleConfig,
-                               const Projection& projection,
-                               const MapParameter& parameter,
-                               const MapData& data);
-
     void RegisterPointWayLabel(const Projection& projection,
                                const MapParameter& parameter,
                                const LabelStyle& style,
                                const std::string& text,
-                               const TransPolygon& polygon);
+                               size_t transStart, size_t transEnd);
 
     bool RegisterPointLabel(const Projection& projection,
                             const MapParameter& parameter,
@@ -277,15 +316,12 @@ namespace osmscout {
     void DrawWayOutline(const StyleConfig& styleConfig,
                         const Projection& projection,
                         const MapParameter& parameter,
-                        const SegmentAttributes& attributes,
-                        const std::vector<Point>& nodes);
-
+                        const WayData& data);
 
     void DrawWay(const StyleConfig& styleConfig,
                  const Projection& projection,
                  const MapParameter& parameter,
-                 const SegmentAttributes& attributes,
-                 const std::vector<Point>& nodes);
+                 const WayData& data);
 
     void DrawWays(const StyleConfig& styleConfig,
                   const Projection& projection,
@@ -297,13 +333,6 @@ namespace osmscout {
                        const MapParameter& parameter,
                        const MapData& data);
 
-    void DrawArea(const StyleConfig& styleConfig,
-                  const Projection& projection,
-                  const MapParameter& parameter,
-                  const SegmentAttributes& attributes,
-                  const FillStyle& fillStyle,
-                  const std::vector<Point>& nodes);
-
     void DrawAreas(const StyleConfig& styleConfig,
                    const Projection& projection,
                    const MapParameter& parameter,
@@ -314,10 +343,6 @@ namespace osmscout {
                         const MapParameter& parameter,
                         const MapData& data);
 
-    void DrawPOIWays(const StyleConfig& styleConfig,
-                     const Projection& projection,
-                     const MapParameter& parameter,
-                     const MapData& data);
     void DrawPOINodes(const StyleConfig& styleConfig,
                       const Projection& projection,
                       const MapParameter& parameter,
@@ -411,7 +436,7 @@ namespace osmscout {
                                   const MapParameter& parameter,
                                   const LabelStyle& style,
                                   const std::string& text,
-                                  const TransPolygon& polygon) = 0;
+                                  size_t transStart, size_t transEnd) = 0;
 
     /**
       Draw the Icon as defined by the IconStyle at the givcen pixel coordinate.
@@ -436,7 +461,7 @@ namespace osmscout {
                           const std::vector<double>& dash,
                           CapStyle startCap,
                           CapStyle endCap,
-                          const TransPolygon& polygon) = 0;
+                          size_t transStart, size_t transEnd) = 0;
 
     /**
       Draw the given area using the given FillStyle
@@ -444,9 +469,7 @@ namespace osmscout {
      */
     virtual void DrawArea(const Projection& projection,
                           const MapParameter& parameter,
-                          TypeId type,
-                          const FillStyle& fillStyle,
-                          const TransPolygon& polygon) = 0;
+                          const AreaData& area) = 0;
 
     /**
       Draw the given area in using the given fill. This is currently done to

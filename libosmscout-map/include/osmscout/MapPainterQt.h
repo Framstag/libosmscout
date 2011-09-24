@@ -76,7 +76,7 @@ namespace osmscout {
                           const MapParameter& parameter,
                           const LabelStyle& style,
                           const std::string& text,
-                          const TransPolygon& nodes);
+                          size_t transStart, size_t transEnd);
 
     void DrawIcon(const IconStyle* style,
                   double x, double y);
@@ -86,21 +86,16 @@ namespace osmscout {
 
     void DrawPath(const Projection& projection,
                   const MapParameter& parameter,
-                  double r,
-                  double g,
-                  double b,
-                  double a,
+                  double r, double g, double b, double a,
                   double width,
                   const std::vector<double>& dash,
                   CapStyle startCap,
                   CapStyle endCap,
-                  const TransPolygon& nodes);
+                  size_t transStart, size_t transEnd);
 
     void DrawArea(const Projection& projection,
                   const MapParameter& parameter,
-                  TypeId type,
-                  const FillStyle& fillStyle,
-                  const TransPolygon& nodes);
+                  const AreaData& area);
 
     void DrawArea(const FillStyle& style,
                   const MapParameter& parameter,

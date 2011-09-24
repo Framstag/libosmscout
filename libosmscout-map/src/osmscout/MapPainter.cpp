@@ -105,34 +105,24 @@ namespace osmscout {
     // no code
   }
 
-  void MapPainter::ScanConvertLine(const TransPolygon& polygon,
+  void MapPainter::ScanConvertLine(size_t transStart, size_t transEnd,
                                    double cellWidth,
                                    double cellHeight,
                                    std::vector<ScanCell>& cells)
   {
-    if (polygon.GetLength()<2) {
+    if (transStart==transEnd) {
       return;
     }
 
-    for (size_t i=polygon.GetStart(); i<=polygon.GetEnd(); i++) {
-      if (polygon.points[i].draw)
-      {
-        size_t j=i+1;
+    for (size_t i=transStart; i<transEnd; i++) {
+      size_t j=i+1;
 
-        while (j<=polygon.GetEnd() && !polygon.points[j].draw)
-        {
-          j++;
-        }
+      int x1=int(transBuffer.buffer[i].x/cellWidth);
+      int x2=int(transBuffer.buffer[j].x/cellWidth);
+      int y1=int(transBuffer.buffer[i].y/cellHeight);
+      int y2=int(transBuffer.buffer[j].y/cellHeight);
 
-        if (j<=polygon.GetEnd()) {
-          int x1=int(polygon.points[i].x/cellWidth);
-          int x2=int(polygon.points[j].x/cellWidth);
-          int y1=int(polygon.points[i].y/cellHeight);
-          int y2=int(polygon.points[j].y/cellHeight);
-
-          osmscout::ScanConvertLine(x1,y1,x2,y2,cells);
-        }
-      }
+      osmscout::ScanConvertLine(x1,y1,x2,y2,cells);
     }
   }
 
@@ -335,14 +325,14 @@ namespace osmscout {
                                          const MapParameter& parameter,
                                          const LabelStyle& style,
                                          const std::string& text,
-                                         const TransPolygon& polygon)
+                                         size_t transStart, size_t transEnd)
   {
     if (style.GetStyle()!=LabelStyle::plate) {
       return;
     }
 
     wayScanlines.clear();
-    ScanConvertLine(polygon,1,1,wayScanlines);
+    ScanConvertLine(transStart,transEnd,1,1,wayScanlines);
 
     for (size_t i=0; i<wayScanlines.size(); i++) {
       if (RegisterPointLabel(projection,
@@ -625,83 +615,6 @@ namespace osmscout {
     return true;
   }
 
-  void MapPainter::PrecalculateStyleData(const StyleConfig& styleConfig,
-                                         const Projection& projection,
-                                         const MapParameter& parameter,
-                                         const MapData& data)
-  {
-    //
-    // Calculate available layers for ways and way relations
-    //
-
-    for (size_t i=0; i<11; i++) {
-      wayLayers[i]=false;
-    }
-
-    for (std::vector<WayRef>::const_iterator w=data.ways.begin();
-         w!=data.ways.end();
-         ++w) {
-      const WayRef& way=*w;
-
-      if (way->GetLayer()>=-5 && way->GetLayer()<=5) {
-        wayLayers[way->GetLayer()+5]=true;
-      }
-    }
-
-    for (size_t i=0; i<11; i++) {
-      relationWayLayers[i]=false;
-    }
-
-    for (std::vector<RelationRef>::const_iterator r=data.relationWays.begin();
-         r!=data.relationWays.end();
-         ++r) {
-      const RelationRef& relation=*r;
-
-      for (size_t m=0; m<relation->roles.size(); m++) {
-        if (relation->roles[m].GetLayer()>=-5 && relation->roles[m].GetLayer()<=5) {
-          relationWayLayers[relation->roles[m].GetLayer()+5]=true;
-        }
-      }
-    }
-
-    //
-    // Calculate available layers for areas and area relations
-    //
-
-    for (size_t i=0; i<11; i++) {
-      areaLayers[i]=false;
-      relationAreaLayers[i]=false;
-    }
-
-    for (std::vector<WayRef>::const_iterator a=data.areas.begin();
-         a!=data.areas.end();
-         ++a) {
-      const WayRef& area=*a;
-
-      const FillStyle *style=styleConfig.GetAreaFillStyle(area->GetType());
-
-      if (style!=NULL &&
-          style->GetLayer()>=-5 &&
-          style->GetLayer()<=5) {
-        areaLayers[style->GetLayer()+5]=true;
-      }
-    }
-
-    for (std::vector<RelationRef>::const_iterator r=data.relationAreas.begin();
-         r!=data.relationAreas.end();
-         ++r) {
-      const RelationRef& relation=*r;
-
-      const FillStyle *style=styleConfig.GetAreaFillStyle(relation->GetType());
-
-      if (style!=NULL &&
-          style->GetLayer()>=-5 &&
-          style->GetLayer()<=5) {
-        relationAreaLayers[style->GetLayer()+5]=true;
-      }
-    }
-  }
-
   void MapPainter::DrawNodes(const StyleConfig& styleConfig,
                              const Projection& projection,
                              const MapParameter& parameter,
@@ -800,91 +713,20 @@ namespace osmscout {
     }
   }
 
-  void MapPainter::DrawArea(const StyleConfig& styleConfig,
-                            const Projection& projection,
-                            const MapParameter& parameter,
-                            const SegmentAttributes& attributes,
-                            const FillStyle& fillStyle,
-                            const std::vector<Point>& nodes)
-  {
-    if (!IsVisible(projection, nodes, fillStyle.GetBorderWidth()/2)) {
-      return;
-    }
-
-    polygon.TransformArea(projection,
-                          parameter.GetOptimizeAreaNodes(),
-                          nodes);
-
-    DrawArea(projection,
-             parameter,
-             attributes.GetType(),
-             fillStyle,
-             polygon);
-  }
-
   void MapPainter::DrawAreas(const StyleConfig& styleConfig,
                              const Projection& projection,
                              const MapParameter& parameter,
                              const MapData& data)
   {
-    for (size_t l=0; l<11; l++) {
-      int layer=l-5;
+    for (std::list<AreaData>::const_iterator area=areaData.begin();
+        area!=areaData.end();
+        area++)
+    {
+      DrawArea(projection,
+               parameter,
+               *area);
 
-      if (areaLayers[l]) {
-        for (std::vector<WayRef>::const_iterator a=data.areas.begin();
-             a!=data.areas.end();
-             ++a) {
-          const WayRef& area=*a;
-
-          const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(area->GetType());
-
-          if (fillStyle==NULL || fillStyle->GetLayer()!=layer) {
-            continue;
-          }
-
-          DrawArea(styleConfig,
-                   projection,
-                   parameter,
-                   area->GetAttributes(),
-                   *fillStyle,
-                   area->nodes);
-
-          areasDrawn++;
-        }
-      }
-
-      if (relationAreaLayers[l]) {
-        for (std::vector<RelationRef>::const_iterator r=data.relationAreas.begin();
-             r!=data.relationAreas.end();
-             ++r) {
-          const RelationRef& relation=*r;
-
-          bool drawn=false;
-
-          for (size_t m=0; m<relation->roles.size(); m++) {
-            if (relation->roles[m].role=="0") {
-              const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(relation->roles[m].GetType());
-
-              if (fillStyle==NULL || fillStyle->GetLayer()!=layer) {
-                continue;
-              }
-
-              DrawArea(styleConfig,
-                       projection,
-                       parameter,
-                       relation->roles[m].GetAttributes(),
-                       *fillStyle,
-                       relation->roles[m].nodes);
-
-              drawn=true;
-            }
-          }
-
-          if (drawn) {
-            relAreasDrawn++;
-          }
-        }
-      }
+      areasDrawn++;
     }
   }
 
@@ -1062,7 +904,7 @@ namespace osmscout {
                                  x,y);
             }
 
-            relAreasLabelDrawn++;
+            areasLabelDrawn++;
           }
 
           if (hasIcon) {
@@ -1080,66 +922,9 @@ namespace osmscout {
   void MapPainter::DrawWayOutline(const StyleConfig& styleConfig,
                                   const Projection& projection,
                                   const MapParameter& parameter,
-                                  const SegmentAttributes& attributes,
-                                  const std::vector<Point>& nodes)
+                                  const WayData& data)
   {
-    const LineStyle *style=styleConfig.GetWayLineStyle(attributes.GetType());
-
-    if (style==NULL) {
-      return;
-    }
-
-    double lineWidth;
-
-    if (style->GetFixedWidth()) {
-      lineWidth=GetProjectedWidth(projection,
-                                  style->GetMinPixel(),
-                                  style->GetWidth());
-    }
-    else {
-      lineWidth=GetProjectedWidth(projection,
-                                  style->GetMinPixel(),
-                                  attributes.GetWidth()>0 ? attributes.GetWidth() : style->GetWidth());
-    }
-
-    if (!IsVisible(projection,
-                  nodes,
-                  lineWidth/2)) {
-      return;
-    }
-
-    bool drawBridge=attributes.IsBridge();
-    bool drawTunnel=attributes.IsTunnel();
-    bool outline=style->GetOutline()>0 &&
-                 lineWidth-2*style->GetOutline()>=parameter.GetOutlineMinWidth();
-
-    if (drawBridge &&
-        projection.GetMagnification()<magCity) {
-      drawBridge=false;
-    }
-
-    if (drawTunnel &&
-        projection.GetMagnification()<magCity) {
-      drawTunnel=false;
-    }
-
-    // Drawing tunnel style for dashed lines is currently not supported
-    if (drawTunnel &&
-        style->HasDashValues()) {
-      drawTunnel=false;
-    }
-
-    if (!(drawBridge ||
-          drawTunnel ||
-          outline)) {
-      return;
-    }
-
-    waysOutlineDrawn++;
-
-    if (drawBridge) {
-      polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),nodes);
-
+    if (data.drawBridge) {
       // black outline for bridges
       DrawPath(projection,
                parameter,
@@ -1147,60 +932,58 @@ namespace osmscout {
                0.0,
                0.0,
                1.0,
-               lineWidth+1,
+               data.lineWidth+1,
                emptyDash,
                capButt,
                capButt,
-               polygon);
+               data.transStart,data.transEnd);
 
-      if (outline) {
+      if (data.outline) {
         DrawPath(projection,
                  parameter,
-                 style->GetOutlineR(),
-                 style->GetOutlineG(),
-                 style->GetOutlineB(),
+                 data.lineStyle->GetOutlineR(),
+                 data.lineStyle->GetOutlineG(),
+                 data.lineStyle->GetOutlineB(),
                  1.0,
-                 lineWidth,
+                 data.lineWidth,
                  emptyDash,
-                 attributes.StartIsJoint() ? capButt : capRound,
-                 attributes.EndIsJoint() ? capButt : capRound,
-                 polygon);
+                 data.attributes->StartIsJoint() ? capButt : capRound,
+                 data.attributes->EndIsJoint() ? capButt : capRound,
+                 data.transStart,data.transEnd);
       }
-      else if (style->HasDashValues() ||
-               style->GetLineA()<1.0 ||
-               style->GetAlternateA()<1.0) {
+      else if (data.lineStyle->HasDashValues() ||
+          data.lineStyle->GetLineA()<1.0 ||
+          data.lineStyle->GetAlternateA()<1.0) {
         DrawPath(projection,
                  parameter,
                  1.0,
                  1.0,
                  1.0,
                  1.0,
-                 lineWidth,
+                 data.lineWidth,
                  emptyDash,
-                 attributes.StartIsJoint() ? capButt : capRound,
-                 attributes.EndIsJoint() ? capButt : capRound,
-                 polygon);
+                 data.attributes->StartIsJoint() ? capButt : capRound,
+                 data.attributes->EndIsJoint() ? capButt : capRound,
+                 data.transStart,data.transEnd);
       }
     }
-    else if (drawTunnel) {
-      tunnelDash[0]=4.0/lineWidth;
-      tunnelDash[1]=2.0/lineWidth;
+    else if (data.drawTunnel) {
+      tunnelDash[0]=4.0/data.lineWidth;
+      tunnelDash[1]=2.0/data.lineWidth;
 
-      polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),nodes);
-
-      if (outline) {
+      if (data.outline) {
         DrawPath(projection,
                  parameter,
-                 style->GetOutlineR(),
-                 style->GetOutlineG(),
-                 style->GetOutlineB(),
-                 style->GetOutlineA(),
-                 lineWidth,
+                 data.lineStyle->GetOutlineR(),
+                 data.lineStyle->GetOutlineG(),
+                 data.lineStyle->GetOutlineB(),
+                 data.lineStyle->GetOutlineA(),
+                 data.lineWidth,
                  tunnelDash,
-                 attributes.StartIsJoint() ? capButt : capRound,
-                 attributes.EndIsJoint() ? capButt : capRound,
-                 polygon);
-      }
+                 data.attributes->StartIsJoint() ? capButt : capRound,
+                 data.attributes->EndIsJoint() ? capButt : capRound,
+                 data.transStart,data.transEnd);
+     }
       else if (projection.GetMagnification()>=10000) {
         // light grey dashes
 
@@ -1210,11 +993,11 @@ namespace osmscout {
                  0.5,
                  0.5,
                  1.0,
-                 lineWidth,
+                 data.lineWidth,
                  tunnelDash,
-                 attributes.StartIsJoint() ? capButt : capRound,
-                 attributes.EndIsJoint() ? capButt : capRound,
-                 polygon);
+                 data.attributes->StartIsJoint() ? capButt : capRound,
+                 data.attributes->EndIsJoint() ? capButt : capRound,
+                 data.transStart,data.transEnd);
       }
       else {
         // dark grey dashes
@@ -1225,173 +1008,88 @@ namespace osmscout {
                  0.5,
                  0.5,
                  1.0,
-                 lineWidth,
+                 data.lineWidth,
                  tunnelDash,
-                 attributes.StartIsJoint() ? capButt : capRound,
-                 attributes.EndIsJoint() ? capButt : capRound,
-                 polygon);
+                 data.attributes->StartIsJoint() ? capButt : capRound,
+                 data.attributes->EndIsJoint() ? capButt : capRound,
+                     data.transStart,data.transEnd);
       }
     }
     else {
       // normal path, normal outline color
 
-      polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),nodes);
-
       DrawPath(projection,
                parameter,
-               style->GetOutlineR(),
-               style->GetOutlineG(),
-               style->GetOutlineB(),
-               style->GetOutlineA(),
-               lineWidth,
+               data.lineStyle->GetOutlineR(),
+               data.lineStyle->GetOutlineG(),
+               data.lineStyle->GetOutlineB(),
+               data.lineStyle->GetOutlineA(),
+               data.lineWidth,
                emptyDash,
-               attributes.StartIsJoint() ? capButt : capRound,
-               attributes.EndIsJoint() ? capButt : capRound,
-               polygon);
+               data.attributes->StartIsJoint() ? capButt : capRound,
+               data.attributes->EndIsJoint() ? capButt : capRound,
+               data.transStart,data.transEnd);
     }
+
+    waysOutlineDrawn++;
   }
 
   void MapPainter::DrawWay(const StyleConfig& styleConfig,
                            const Projection& projection,
                            const MapParameter& parameter,
-                           const SegmentAttributes& attributes,
-                           const std::vector<Point>& nodes)
+                           const WayData& data)
   {
-    waysSegments++;
+    double lineWidth=data.lineWidth;
 
-    const LineStyle *style=styleConfig.GetWayLineStyle(attributes.GetType());
-
-    if (style==NULL) {
-      return;
-    }
-
-    double lineWidth;
-
-    if (style->GetFixedWidth()) {
-      lineWidth=GetProjectedWidth(projection,
-                                  style->GetMinPixel(),
-                                  style->GetWidth());
-    }
-    else {
-      lineWidth=GetProjectedWidth(projection,
-                                  style->GetMinPixel(),
-                                  attributes.GetWidth()>0 ? attributes.GetWidth() : style->GetWidth());
-    }
-
-    if (!IsVisible(projection,
-                  nodes,
-                  lineWidth/2)) {
-      return;
-    }
-
-    waysDrawn++;
-
-    polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),nodes);
-
-    bool drawBridge=attributes.IsBridge();
-    bool drawTunnel=attributes.IsTunnel();
-    bool outline=style->GetOutline()>0 &&
-                 lineWidth-2*style->GetOutline()>=parameter.GetOutlineMinWidth();
-
-    if (outline) {
-      lineWidth-=2*style->GetOutline();
-    }
-
-    if (drawBridge &&
-        projection.GetMagnification()<magCity) {
-      drawBridge=false;
-    }
-
-    if (drawTunnel &&
-        projection.GetMagnification()<magCity) {
-      drawTunnel=false;
-    }
-
-    // Drawing tunnel style for dashed lines is currently not supported
-    if (drawTunnel &&
-        style->HasDashValues()) {
-      drawTunnel=false;
+    if (data.outline) {
+      lineWidth-=2*data.lineStyle->GetOutline();
     }
 
     double r,g,b,a;
 
-    if (outline) {
+    if (data.outline) {
       // Draw line with normal color
-      r=style->GetLineR();
-      g=style->GetLineG();
-      b=style->GetLineB();
-      a=style->GetLineA();
+      r=data.lineStyle->GetLineR();
+      g=data.lineStyle->GetLineG();
+      b=data.lineStyle->GetLineB();
+      a=data.lineStyle->GetLineA();
     }
     else {
       // Should draw outline, but resolution is too low
       // Draw line with alternate color
-      r=style->GetAlternateR();
-      g=style->GetAlternateG();
-      b=style->GetAlternateB();
-      a=style->GetAlternateA();
+      r=data.lineStyle->GetAlternateR();
+      g=data.lineStyle->GetAlternateG();
+      b=data.lineStyle->GetAlternateB();
+      a=data.lineStyle->GetAlternateA();
     }
 
-    if (drawTunnel) {
+    if (data.drawTunnel) {
       r=r+(1-r)*50/100;
       g=g+(1-g)*50/100;
       b=b+(1-b)*50/100;
     }
 
-    if (!style->GetDash().empty() && style->GetGapA()>0.0) {
+    if (!data.lineStyle->GetDash().empty() && data.lineStyle->GetGapA()>0.0) {
       DrawPath(projection,
                parameter,
-               style->GetGapR(),style->GetGapG(),style->GetGapB(),style->GetGapA(),
+               data.lineStyle->GetGapR(),data.lineStyle->GetGapG(),data.lineStyle->GetGapB(),data.lineStyle->GetGapA(),
                lineWidth,
                emptyDash,
                capRound,
                capRound,
-               polygon);
+               data.transStart,data.transEnd);
     }
 
     DrawPath(projection,
              parameter,
              r,g,b,a,
              lineWidth,
-             style->GetDash(),
+             data.lineStyle->GetDash(),
              capRound,
              capRound,
-             polygon);
+             data.transStart,data.transEnd);
 
-    if (!attributes.GetName().empty()) {
-      const LabelStyle *style=styleConfig.GetWayNameLabelStyle(attributes.GetType());
-
-      if (style!=NULL &&
-          style->IsPointStyle() &&
-          projection.GetMagnification()>=style->GetMinMag() &&
-          projection.GetMagnification()<=style->GetMaxMag()) {
-        RegisterPointWayLabel(projection,
-                              parameter,
-                              *style,
-                              attributes.GetName(),
-                              polygon);
-
-        waysLabelDrawn++;
-      }
-    }
-
-    if (!attributes.GetRefName().empty()) {
-      const LabelStyle *style=styleConfig.GetWayRefLabelStyle(attributes.GetType());
-
-      if (style!=NULL &&
-          style->IsPointStyle() &&
-          projection.GetMagnification()>=style->GetMinMag() &&
-          projection.GetMagnification()<=style->GetMaxMag()) {
-
-        RegisterPointWayLabel(projection,
-                              parameter,
-                              *style,
-                              attributes.GetRefName(),
-                              polygon);
-
-        waysLabelDrawn++;
-      }
-    }
-
+    waysDrawn++;
   }
 
   void MapPainter::DrawWays(const StyleConfig& styleConfig,
@@ -1399,232 +1097,90 @@ namespace osmscout {
                             const MapParameter& parameter,
                             const MapData& data)
   {
-    for (size_t l=0; l<11; l++) {
-      int8_t layer=l-5;
-      // Potential path outline
+    std::list<WayData>::const_iterator start;
 
-      if (wayLayers[l]) {
-        for (std::vector<WayRef>::const_iterator w=data.ways.begin();
-             w!=data. ways.end();
-             ++w) {
-          const WayRef& way=*w;
+    start=wayData.begin();
+    while (start!=wayData.end()) {
 
-          if (way->GetLayer()!=layer) {
-            continue;
-          }
+      std::list<WayData>::const_iterator way;
 
+      way=start;
+      while (way!=wayData.end() && way->attributes->GetLayer()==start->attributes->GetLayer()) {
+        if (way->drawBridge ||
+            way->drawTunnel ||
+            way->outline) {
           DrawWayOutline(styleConfig,
                          projection,
                          parameter,
-                         way->GetAttributes(),
-                         way->nodes);
+                         *way);
         }
+
+        way++;
       }
 
-      if (relationWayLayers[l]) {
-        for (std::vector<RelationRef>::const_iterator r=data.relationWays.begin();
-             r!=data.relationWays.end();
-             ++r) {
-          const RelationRef& relation=*r;
+      way=start;
+      while (way!=wayData.end() && way->attributes->GetLayer()==start->attributes->GetLayer()) {
+        DrawWay(styleConfig,
+                projection,
+                parameter,
+                *way);
 
-          for (size_t m=0; m<relation->roles.size(); m++) {
-            if (relation->roles[m].GetLayer()!=layer) {
-              continue;
-            }
-
-            DrawWayOutline(styleConfig,
-                           projection,
-                           parameter,
-                           relation->roles[m].GetAttributes(),
-                           relation->roles[m].nodes);
-          }
-        }
+        way++;
       }
 
-      if (wayLayers[l]) {
-        for (std::vector<WayRef>::const_iterator w=data.ways.begin();
-             w!=data.ways.end();
-             ++w) {
-          const WayRef& way=*w;
-
-          if (way->GetLayer()!=layer) {
-            continue;
-          }
-
-          DrawWay(styleConfig,
-                  projection,
-                  parameter,
-                  way->GetAttributes(),
-                  way->nodes);
-        }
-      }
-
-      if (relationWayLayers[l]) {
-        for (std::vector<RelationRef>::const_iterator r=data.relationWays.begin();
-             r!=data.relationWays.end();
-             ++r) {
-          const RelationRef& relation=*r;
-
-          for (size_t m=0; m<relation->roles.size(); m++) {
-            if (relation->roles[m].GetLayer()!=layer) {
-              continue;
-            }
-
-            DrawWay(styleConfig,
-                    projection,
-                    parameter,
-                    relation->roles[m].GetAttributes(),
-                    relation->roles[m].nodes);
-          }
-        }
-      }
+      start=way;
     }
   }
+
 
   void MapPainter::DrawWayLabels(const StyleConfig& styleConfig,
                                  const Projection& projection,
                                  const MapParameter& parameter,
                                  const MapData& data)
   {
-    std::set<size_t> tileBlacklist;
-
-    for (std::vector<WayRef>::const_iterator w=data.ways.begin();
-         w!=data.ways.end();
-         ++w) {
-      const WayRef& way=*w;
-
-      if (!way->GetName().empty()) {
-        const LabelStyle *style=styleConfig.GetWayNameLabelStyle(way->GetType());
-
-        if (style!=NULL &&
-            style->IsContourStyle() &&
-            projection.GetMagnification()>=style->GetMinMag() &&
-            projection.GetMagnification()<=style->GetMaxMag()) {
-
-          if (!IsVisible(projection,
-                         way->nodes,
-                         style->GetSize())) {
-            continue;
-          }
-
-          polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),way->nodes);
-
+    for (std::list<WayData>::const_iterator way=wayData.begin();
+        way!=wayData.end();
+        way++)
+    {
+      if (way->nameLabelStyle!=NULL) {
+        if (way->nameLabelStyle->IsContourStyle()) {
           DrawContourLabel(projection,
                            parameter,
-                           *style,
-                           way->GetName(),
-                           polygon);
+                           *way->nameLabelStyle,
+                           way->attributes->GetName(),
+                           way->transStart, way->transEnd);
 
-          waysLabelDrawn++;
         }
+        else {
+          RegisterPointWayLabel(projection,
+                                parameter,
+                                *way->nameLabelStyle,
+                                way->attributes->GetName(),
+                                way->transStart,way->transEnd);
+        }
+
+        waysLabelDrawn++;
       }
 
-      if (!way->GetRefName().empty()) {
-        const LabelStyle *style=styleConfig.GetWayRefLabelStyle(way->GetType());
-
-        if (style!=NULL &&
-            style->IsContourStyle() &&
-            projection.GetMagnification()>=style->GetMinMag() &&
-            projection.GetMagnification()<=style->GetMaxMag()) {
-
-          if (!IsVisible(projection,
-                         way->nodes,
-                         style->GetSize())) {
-            continue;
-          }
-
-          polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),way->nodes);
-
+      if (way->refLabelStyle!=NULL) {
+        if (way->refLabelStyle->IsContourStyle()) {
           DrawContourLabel(projection,
                            parameter,
-                           *style,
-                           way->GetRefName(),
-                           polygon);
+                           *way->refLabelStyle,
+                           way->attributes->GetRefName(),
+                           way->transStart, way->transEnd);
 
-          waysLabelDrawn++;
         }
-      }
-    }
-
-    for (std::vector<RelationRef>::const_iterator r=data.relationWays.begin();
-         r!=data.relationWays.end();
-         ++r) {
-      const RelationRef& relation=*r;
-
-      for (size_t m=0; m<relation->roles.size(); m++) {
-        if (!relation->roles[m].GetName().empty()) {
-          const LabelStyle *style=styleConfig.GetWayNameLabelStyle(relation->roles[m].GetType());
-
-          if (style!=NULL &&
-              style->IsContourStyle() &&
-              projection.GetMagnification()>=style->GetMinMag() &&
-              projection.GetMagnification()<=style->GetMaxMag()) {
-
-            if (!IsVisible(projection,
-                           relation->roles[m].nodes,
-                           style->GetSize())) {
-              continue;
-            }
-
-            polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),relation->roles[m].nodes);
-
-            DrawContourLabel(projection,
-                             parameter,
-                             *style,
-                             relation->roles[m].GetName(),
-                             polygon);
-          }
+        else {
+          RegisterPointWayLabel(projection,
+                                parameter,
+                                *way->refLabelStyle,
+                                way->attributes->GetRefName(),
+                                way->transStart,way->transEnd);
         }
 
-        if (!relation->roles[m].GetRefName().empty()) {
-          const LabelStyle *style=styleConfig.GetWayRefLabelStyle(relation->roles[m].GetType());
-
-          if (style!=NULL &&
-              style->IsContourStyle() &&
-              projection.GetMagnification()>=style->GetMinMag() &&
-              projection.GetMagnification()<=style->GetMaxMag()) {
-
-            if (!IsVisible(projection,
-                           relation->roles[m].nodes,
-                           style->GetSize())) {
-              continue;
-            }
-
-            polygon.TransformWay(projection,parameter.GetOptimizeWayNodes(),relation->roles[m].nodes);
-
-            DrawContourLabel(projection,
-                             parameter,
-                             *style,
-                             relation->roles[m].GetRefName(),
-                             polygon);
-          }
-        }
+        waysLabelDrawn++;
       }
-    }
-  }
-
-  void MapPainter::DrawPOIWays(const StyleConfig& styleConfig,
-                               const Projection& projection,
-                               const MapParameter& parameter,
-                               const MapData& data)
-  {
-    for (std::list<WayRef>::const_iterator w=data.poiWays.begin();
-         w!=data.poiWays.end();
-         ++w) {
-      const WayRef& way=*w;
-
-      if (way->IsArea()) {
-        std::cerr << "POI way is area, skipping..." << std::endl;
-        continue;
-      }
-
-      DrawWay(styleConfig,
-              projection,
-              parameter,
-              way->GetAttributes(),
-              way->nodes);
-
-      //nodesAllCount+=way->nodes.size();
     }
   }
 
@@ -1753,6 +1309,279 @@ namespace osmscout {
     }
   }
 
+  void MapPainter::PrepareAreaSegment(const StyleConfig& styleConfig,
+                                      const Projection& projection,
+                                      const MapParameter& parameter,
+                                      const SegmentAttributes& attributes,
+                                      const std::vector<Point>& nodes)
+  {
+    const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(attributes.GetType());
+
+    if (fillStyle==NULL)
+    {
+      return;
+    }
+
+    if (!IsVisible(projection, nodes, fillStyle->GetBorderWidth()/2)) {
+      return;
+    }
+
+    size_t start,end;
+
+    if (!transBuffer.TransformArea(projection,
+                                   parameter.GetOptimizeAreaNodes(),
+                                   nodes,
+                                   start,end)) {
+      return;
+    }
+
+    AreaData data;
+
+    data.attributes=&attributes;
+    data.fillStyle=fillStyle;
+    data.transStart=start;
+    data.transEnd=end;
+
+    areaData.push_back(data);
+
+    areasSegments++;
+  }
+
+  void MapPainter::PrepareAreas(const StyleConfig& styleConfig,
+                                const Projection& projection,
+                                const MapParameter& parameter,
+                                const MapData& data)
+  {
+    areaData.clear();
+
+    for (std::vector<WayRef>::const_iterator a=data.areas.begin();
+         a!=data.areas.end();
+         ++a) {
+      const WayRef& area=*a;
+
+      PrepareAreaSegment(styleConfig,
+                         projection,
+                         parameter,
+                         area->GetAttributes(),
+                         area->nodes);
+    }
+
+    for (std::vector<RelationRef>::const_iterator r=data.relationAreas.begin();
+         r!=data.relationAreas.end();
+         ++r) {
+      const RelationRef& relation=*r;
+
+      for (std::vector<Relation::Role>::const_iterator r=relation->roles.begin();
+          r!=relation->roles.end();
+          r++) {
+        if (r->role=="0") {
+          const Relation::Role& role=*r;
+
+          PrepareAreaSegment(styleConfig,
+                             projection,
+                             parameter,
+                             role.GetAttributes(),
+                             role.nodes);
+        }
+      }
+    }
+
+    for (std::list<WayRef>::const_iterator p=data.poiWays.begin();
+         p!=data.poiWays.end();
+         ++p) {
+      if ((*p)->IsArea()) {
+        const WayRef& area=*p;
+
+        PrepareAreaSegment(styleConfig,
+                           projection,
+                           parameter,
+                           area->GetAttributes(),
+                           area->nodes);
+      }
+    }
+
+    areaData.sort();
+  }
+
+  void MapPainter::PrepareWaySegment(const StyleConfig& styleConfig,
+                                     const Projection& projection,
+                                     const MapParameter& parameter,
+                                     const SegmentAttributes& attributes,
+                                     const std::vector<Point>& nodes)
+  {
+    const LineStyle *lineStyle=styleConfig.GetWayLineStyle(attributes.GetType());
+
+    if (lineStyle==NULL) {
+      return;
+    }
+
+    double lineWidth;
+
+    if (lineStyle->GetFixedWidth()) {
+      lineWidth=GetProjectedWidth(projection,
+                                  lineStyle->GetMinPixel(),
+                                  lineStyle->GetWidth());
+    }
+    else {
+      lineWidth=GetProjectedWidth(projection,
+                                  lineStyle->GetMinPixel(),
+                                  attributes.GetWidth()>0 ? attributes.GetWidth() : lineStyle->GetWidth());
+    }
+
+    if (!IsVisible(projection,
+                  nodes,
+                  lineWidth/2)) {
+      return;
+    }
+
+    size_t start,end;
+
+    if (!transBuffer.TransformArea(projection,
+                                   parameter.GetOptimizeAreaNodes(),
+                                   nodes,
+                                   start,end)) {
+      return;
+    }
+
+    WayData data;
+
+    data.attributes=&attributes;
+    data.lineStyle=lineStyle;
+
+    if (!attributes.GetName().empty()) {
+      const LabelStyle *style=styleConfig.GetWayNameLabelStyle(attributes.GetType());
+
+      if (style!=NULL) {
+        if (style->IsContourStyle()) {
+          if (projection.GetMagnification()>=style->GetMinMag() &&
+              projection.GetMagnification()<=style->GetMaxMag() &&
+              IsVisible(projection,
+                       nodes,
+                       style->GetSize())) {
+            data.nameLabelStyle=style;
+          }
+        }
+        else if (projection.GetMagnification()>=style->GetMinMag() &&
+                 projection.GetMagnification()<=style->GetMaxMag()) {
+          data.nameLabelStyle=style;
+        }
+        else {
+          data.nameLabelStyle=NULL;
+        }
+      }
+    }
+    else {
+      data.nameLabelStyle=NULL;
+    }
+
+    if (!attributes.GetRefName().empty()) {
+      const LabelStyle *style=styleConfig.GetWayRefLabelStyle(attributes.GetType());
+
+      if (style!=NULL) {
+        if (style->IsContourStyle()) {
+          if (projection.GetMagnification()>=style->GetMinMag() &&
+              projection.GetMagnification()<=style->GetMaxMag() &&
+              IsVisible(projection,
+                       nodes,
+                       style->GetSize())) {
+            data.refLabelStyle=style;
+          }
+        }
+        else if (projection.GetMagnification()>=style->GetMinMag() &&
+                 projection.GetMagnification()<=style->GetMaxMag()) {
+          data.refLabelStyle=style;
+        }
+        else {
+          data.refLabelStyle=NULL;
+        }
+      }
+    }
+    else {
+      data.refLabelStyle=NULL;
+    }
+
+    data.transStart=start;
+    data.transEnd=end;
+    data.lineWidth=lineWidth;
+    data.drawBridge=attributes.IsBridge();
+    data.drawTunnel=attributes.IsTunnel();
+    data.outline=lineStyle->GetOutline()>0 &&
+                 lineWidth-2*lineStyle->GetOutline()>=parameter.GetOutlineMinWidth();
+
+    if (data.drawBridge &&
+        projection.GetMagnification()<magCity) {
+      data.drawBridge=false;
+    }
+
+    if (data.drawTunnel &&
+        projection.GetMagnification()<magCity) {
+      data.drawTunnel=false;
+    }
+
+    // Drawing tunnel style for dashed lines is currently not supported
+    if (data.drawTunnel &&
+        lineStyle->HasDashValues()) {
+      data.drawTunnel=false;
+    }
+
+    waysSegments++;
+    wayData.push_back(data);
+  }
+
+  void MapPainter::PrepareWays(const StyleConfig& styleConfig,
+                               const Projection& projection,
+                               const MapParameter& parameter,
+                               const MapData& data)
+  {
+    wayData.clear();
+
+    for (std::vector<WayRef>::const_iterator w=data.ways.begin();
+         w!=data.ways.end();
+         ++w) {
+      const WayRef& way=*w;
+
+      PrepareWaySegment(styleConfig,
+                        projection,
+                        parameter,
+                        way->GetAttributes(),
+                        way->nodes);
+    }
+
+    for (std::vector<RelationRef>::const_iterator r=data.relationWays.begin();
+         r!=data.relationWays.end();
+         ++r) {
+      const RelationRef& relation=*r;
+
+      for (std::vector<Relation::Role>::const_iterator r=relation->roles.begin();
+          r!=relation->roles.end();
+          r++) {
+        const Relation::Role& role=*r;
+
+        PrepareWaySegment(styleConfig,
+                          projection,
+                          parameter,
+                          role.GetAttributes(),
+                          role.nodes);
+      }
+    }
+
+    for (std::list<WayRef>::const_iterator p=data.poiWays.begin();
+         p!=data.poiWays.end();
+         ++p) {
+      if (!(*p)->IsArea()) {
+        const WayRef& way=*p;
+
+        PrepareWaySegment(styleConfig,
+                          projection,
+                          parameter,
+                          way->GetAttributes(),
+                          way->nodes);
+      }
+    }
+
+    wayData.sort();
+  }
+
   void MapPainter::Draw(const StyleConfig& styleConfig,
                         const Projection& projection,
                         const MapParameter& parameter,
@@ -1763,13 +1592,9 @@ namespace osmscout {
     waysDrawn=0;
     waysLabelDrawn=0;
 
-    relWaysCount=data.relationWays.size();
-
+    areasSegments=0;
     areasDrawn=0;
     areasLabelDrawn=0;
-
-    relAreasDrawn=0;
-    relAreasLabelDrawn=0;
 
     cellWidth=parameter.GetFontSize()*4;
     cellHeight=parameter.GetFontSize()*4;
@@ -1779,6 +1604,8 @@ namespace osmscout {
     labels.clear();
     labelRefs.clear();
     labelRefs.resize(xCellCount*yCellCount);
+
+    transBuffer.Reset();
 
     if (parameter.IsDebugPerformance()) {
       std::cout << "Draw ";
@@ -1792,10 +1619,23 @@ namespace osmscout {
     // Setup and Precalculation
     //
 
-    PrecalculateStyleData(styleConfig,
-                          projection,
-                          parameter,
-                          data);
+    StopClock prepareAreasTimer;
+
+    PrepareAreas(styleConfig,
+                 projection,
+                 parameter,
+                 data);
+
+    prepareAreasTimer.Stop();
+
+    StopClock prepareWaysTimer;
+
+    PrepareWays(styleConfig,
+                projection,
+                parameter,
+                data);
+
+    prepareWaysTimer.Stop();
 
     //
     // Clear area with background color
@@ -1875,20 +1715,6 @@ namespace osmscout {
     areaLabelsTimer.Stop();
 
     //
-    // POI ways (aka routes)
-    //
-
-
-    StopClock routesTimer;
-
-    DrawPOIWays(styleConfig,
-                projection,
-                parameter,
-                data);
-
-    routesTimer.Stop();
-
-    //
     // POI Nodes
     //
 
@@ -1910,16 +1736,18 @@ namespace osmscout {
     labelsTimer.Stop();
 
     if (parameter.IsDebugPerformance()) {
-      std::cout << "Paths: " << pathsTimer << "/" << pathLabelsTimer << " ";
-      std::cout << "Areas: " << areasTimer << "/" << areaLabelsTimer << " ";
-      std::cout << "Nodes: " << nodesTimer << " ";
-      std::cout << "POIs: " << poisTimer << "/" << routesTimer << " ";
-      std::cout << "Labels: " << labelsTimer << std::endl;
 
-      std::cout << "Path ways: " << data.ways.size() << "+" << data.relationWays.size() << "/" << waysSegments << "/" << waysDrawn << "/" << waysOutlineDrawn << "/" << waysLabelDrawn << " (pcs)" << std::endl;
-      std::cout << "Area ways: " << data.areas.size() << "/" << areasDrawn << "/" << areasLabelDrawn << " (pcs)" << std::endl;
-      std::cout << "Area rels: " << data.relationAreas.size() << "/" << relAreasDrawn << "/" << relAreasLabelDrawn << " (pcs)" << std::endl;
+      std::cout << "Paths: ";
+      std::cout << data.ways.size() << "+" << data.relationWays.size() << "/" << waysSegments << "/" << waysDrawn << "/" << waysOutlineDrawn << "/" << waysLabelDrawn << " (pcs) ";
+      std::cout << prepareWaysTimer << "/" << pathsTimer << "/" << pathLabelsTimer << " (sec)" << std::endl;
+
+      std::cout << "Areas: ";
+      std::cout << data.areas.size() << "+" << data.relationAreas.size() << "/" << areasSegments << "/" << areasDrawn << "/" << areasLabelDrawn << " (pcs) ";
+      std::cout << prepareAreasTimer << "/" << areasTimer << "/" << areaLabelsTimer << " (sec)" << std::endl;
+
+      std::cout << "Nodes: " << nodesTimer << " ";
+      std::cout << "POIs: " << poisTimer << " ";
+      std::cout << "Labels: " << labelsTimer << std::endl;
     }
   }
 }
-

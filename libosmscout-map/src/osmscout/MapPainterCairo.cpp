@@ -597,7 +597,7 @@ namespace osmscout {
                                          const MapParameter& parameter,
                                          const LabelStyle& style,
                                          const std::string& text,
-                                         const TransPolygon& contour)
+                                         size_t transStart, size_t transEnd)
   {
     assert(style.GetStyle()==LabelStyle::contour);
 
@@ -612,48 +612,44 @@ namespace osmscout {
 
     cairo_new_path(draw);
 
-    if (contour.points[contour.GetStart()].x<=contour.points[contour.GetEnd()].x) {
-      for (size_t j=contour.GetStart(); j<=contour.GetEnd(); j++) {
-        if (contour.points[j].draw) {
-          if (j==contour.GetStart()) {
-            cairo_move_to(draw,
-                          contour.points[j].x,
-                          contour.points[j].y);
-          }
-          else {
-            cairo_line_to(draw,
-                          contour.points[j].x,
-                          contour.points[j].y);
-            length+=sqrt(pow(contour.points[j].x-xo,2)+
-                         pow(contour.points[j].y-yo,2));
-          }
-
-          xo=contour.points[j].x;
-          yo=contour.points[j].y;
+    if (transBuffer.buffer[transStart].x<=transBuffer.buffer[transEnd].x) {
+      for (size_t j=transStart; j<=transEnd; j++) {
+        if (j==transStart) {
+          cairo_move_to(draw,
+                        transBuffer.buffer[j].x,
+                        transBuffer.buffer[j].y);
         }
+        else {
+          cairo_line_to(draw,
+                        transBuffer.buffer[j].x,
+                        transBuffer.buffer[j].y);
+          length+=sqrt(pow(transBuffer.buffer[j].x-xo,2)+
+                       pow(transBuffer.buffer[j].y-yo,2));
+        }
+
+        xo=transBuffer.buffer[j].x;
+        yo=transBuffer.buffer[j].y;
       }
     }
     else {
-      for (size_t j=0; j<=contour.GetEnd()-contour.GetStart(); j++) {
-        size_t idx=contour.GetEnd()-j;
+      for (size_t j=0; j<=transEnd-transStart; j++) {
+        size_t idx=transEnd-j;
 
-        if (contour.points[idx].draw) {
-          if (j==contour.GetStart()) {
-            cairo_move_to(draw,
-                          contour.points[idx].x,
-                          contour.points[idx].y);
-          }
-          else {
-            cairo_line_to(draw,
-                          contour.points[idx].x,
-                          contour.points[idx].y);
-            length+=sqrt(pow(contour.points[idx].x-xo,2)+
-                         pow(contour.points[idx].y-yo,2));
-          }
-
-          xo=contour.points[idx].x;
-          yo=contour.points[idx].y;
+        if (j==0) {
+          cairo_move_to(draw,
+                        transBuffer.buffer[idx].x,
+                        transBuffer.buffer[idx].y);
         }
+        else {
+          cairo_line_to(draw,
+                        transBuffer.buffer[idx].x,
+                        transBuffer.buffer[idx].y);
+          length+=sqrt(pow(transBuffer.buffer[idx].x-xo,2)+
+                       pow(transBuffer.buffer[idx].y-yo,2));
+        }
+
+        xo=transBuffer.buffer[idx].x;
+        yo=transBuffer.buffer[idx].y;
       }
     }
 
@@ -757,7 +753,7 @@ namespace osmscout {
                                  const std::vector<double>& dash,
                                  CapStyle startCap,
                                  CapStyle endCap,
-                                 const TransPolygon& path)
+                                 size_t transStart, size_t transEnd)
   {
     SetLineAttributes(r,g,b,a,width,dash);
 
@@ -770,19 +766,17 @@ namespace osmscout {
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
     }
 
-    for (size_t i=path.GetStart(); i<=path.GetEnd(); i++) {
-      if (path.points[i].draw) {
-        if (i==path.GetStart()) {
-          cairo_new_path(draw);
-          cairo_move_to(draw,
-                        path.points[i].x,
-                        path.points[i].y);
-        }
-        else {
-          cairo_line_to(draw,
-                        path.points[i].x,
-                        path.points[i].y);
-        }
+    for (size_t i=transStart; i<=transEnd; i++) {
+      if (i==transStart) {
+        cairo_new_path(draw);
+        cairo_move_to(draw,
+                      transBuffer.buffer[i].x,
+                      transBuffer.buffer[i].y);
+      }
+      else {
+        cairo_line_to(draw,
+                      transBuffer.buffer[i].x,
+                      transBuffer.buffer[i].y);
       }
     }
 
@@ -796,8 +790,8 @@ namespace osmscout {
       cairo_set_dash(draw,NULL,0,0);
       cairo_set_line_width(draw,width);
 
-      cairo_move_to(draw,path.points[path.GetStart()].x,path.points[path.GetStart()].y);
-      cairo_line_to(draw,path.points[path.GetStart()].x,path.points[path.GetStart()].y);
+      cairo_move_to(draw,transBuffer.buffer[transStart].x,transBuffer.buffer[transStart].y);
+      cairo_line_to(draw,transBuffer.buffer[transStart].x,transBuffer.buffer[transStart].y);
       cairo_stroke(draw);
     }
 
@@ -809,60 +803,58 @@ namespace osmscout {
       cairo_set_dash(draw,NULL,0,0);
       cairo_set_line_width(draw,width);
 
-      cairo_move_to(draw,path.points[path.GetEnd()].x,path.points[path.GetEnd()].y);
-      cairo_line_to(draw,path.points[path.GetEnd()].x,path.points[path.GetEnd()].y);
+      cairo_move_to(draw,transBuffer.buffer[transEnd].x,transBuffer.buffer[transEnd].y);
+      cairo_line_to(draw,transBuffer.buffer[transEnd].x,transBuffer.buffer[transEnd].y);
       cairo_stroke(draw);
     }
   }
 
   void MapPainterCairo::DrawArea(const Projection& projection,
                                  const MapParameter& parameter,
-                                 TypeId type,
-                                 const FillStyle& fillStyle,
-                                 const TransPolygon& area)
+                                 const MapPainter::AreaData& area)
   {
-    if (fillStyle.HasPattern() &&
-        projection.GetMagnification()>=fillStyle.GetPatternMinMag() &&
-        HasPattern(parameter,fillStyle)) {
-      assert(fillStyle.GetPatternId()<=images.size());
-      assert(images[fillStyle.GetPatternId()-1]!=NULL);
+    if (area.fillStyle->HasPattern() &&
+        projection.GetMagnification()>=area.fillStyle->GetPatternMinMag() &&
+        HasPattern(parameter,*area.fillStyle)) {
+      assert(area.fillStyle->GetPatternId()<=images.size());
+      assert(images[area.fillStyle->GetPatternId()-1]!=NULL);
 
-      cairo_set_source(draw,patterns[fillStyle.GetPatternId()-1]);
+      cairo_set_source(draw,patterns[area.fillStyle->GetPatternId()-1]);
     }
     else {
       cairo_set_source_rgba(draw,
-                            fillStyle.GetFillR(),
-                            fillStyle.GetFillG(),
-                            fillStyle.GetFillB(),
-                            fillStyle.GetFillA());
+                            area.fillStyle->GetFillR(),
+                            area.fillStyle->GetFillG(),
+                            area.fillStyle->GetFillB(),
+                            area.fillStyle->GetFillA());
       cairo_set_line_width(draw,1);
     }
 
-    for (size_t i=area.GetStart(); i<=area.GetEnd(); i++) {
-      if (area.points[i].draw) {
-        if (i==area.GetStart()) {
-          cairo_new_path(draw);
-          cairo_move_to(draw,area.points[i].x,area.points[i].y);
-        }
-        else {
-          cairo_line_to(draw,area.points[i].x,area.points[i].y);
-        }
+    for (size_t i=area.transStart; i<=area.transEnd; i++) {
+      if (i==area.transStart) {
+        cairo_new_path(draw);
+        cairo_move_to(draw,transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+      }
+      else {
+        cairo_line_to(draw,transBuffer.buffer[i].x,transBuffer.buffer[i].y);
       }
     }
 
-    cairo_line_to(draw,area.points[area.GetStart()].x,area.points[area.GetStart()].y);
+    cairo_line_to(draw,transBuffer.buffer[area.transStart].x,transBuffer.buffer[area.transStart].y);
 
     cairo_fill_preserve(draw);
 
-    double borderWidth=GetProjectedWidth(projection, fillStyle.GetBorderMinPixel(), fillStyle.GetBorderWidth());
+    double borderWidth=GetProjectedWidth(projection,
+                                         area.fillStyle->GetBorderMinPixel(),
+                                         area.fillStyle->GetBorderWidth());
 
     if (borderWidth>0.0) {
-      SetLineAttributes(fillStyle.GetBorderR(),
-                        fillStyle.GetBorderG(),
-                        fillStyle.GetBorderB(),
-                        fillStyle.GetBorderA(),
+      SetLineAttributes(area.fillStyle->GetBorderR(),
+                        area.fillStyle->GetBorderG(),
+                        area.fillStyle->GetBorderB(),
+                        area.fillStyle->GetBorderA(),
                         borderWidth,
-                        fillStyle.GetBorderDash());
+                        area.fillStyle->GetBorderDash());
 
       cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
 
