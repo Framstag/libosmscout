@@ -442,8 +442,7 @@ namespace osmscout {
     styleConfig.GetNodeTypesWithMag(magnification,
                                     nodeTypes);
 
-    if (!areaNodeIndex.GetOffsets(styleConfig,
-                                  lonMin,latMin,lonMax,latMax,
+    if (!areaNodeIndex.GetOffsets(lonMin,latMin,lonMax,latMax,
                                   nodeTypes,
                                   parameter.GetMaximumNodes(),
                                   nodeOffsets)) {
@@ -469,8 +468,7 @@ namespace osmscout {
                               ways);
     }
 
-    if (!areaWayIndex.GetOffsets(styleConfig,
-                                 lonMin,
+    if (!areaWayIndex.GetOffsets(lonMin,
                                  latMin,
                                  lonMax,
                                  latMax,
@@ -496,8 +494,7 @@ namespace osmscout {
     styleConfig.GetAreaTypesWithMag(magnification,
                                     areaTypes);
 
-    if (!areaAreaIndex.GetOffsets(styleConfig,
-                                  lonMin,
+    if (!areaAreaIndex.GetOffsets(lonMin,
                                   latMin,
                                   lonMax,
                                   latMax,
@@ -534,6 +531,155 @@ namespace osmscout {
     for (size_t i=0; i<ways.size(); i++) {
       std::cout << ways[i]->GetId() << " " << ways[i]->GetName() << " " << ways[i]->GetRefName() << std::endl;
     }*/
+
+    waysTimer.Stop();
+
+    StopClock areasTimer;
+
+    if (!GetWays(wayAreaOffsets,
+                 areas)) {
+      std::cout << "Error reading areas in area!" << std::endl;
+      return false;
+    }
+
+    areasTimer.Stop();
+
+    StopClock relationWaysTimer;
+
+    if (!GetRelations(relationWayOffsets,
+                      relationWays)) {
+      std::cout << "Error reading relation ways in area!" << std::endl;
+      return false;
+    }
+
+    relationWaysTimer.Stop();
+
+    StopClock relationAreasTimer;
+
+    if (!GetRelations(relationAreaOffsets,
+                      relationAreas)) {
+      std::cerr << "Error reading relation areas in area!" << std::endl;
+      return false;
+    }
+
+    relationAreasTimer.Stop();
+
+    if (debugPerformance) {
+      std::cout << "I/O: ";
+      std::cout << "n " << nodeIndexTimer << " ";
+      std::cout << "w " << wayIndexTimer << " ";
+      std::cout << "a " << areaAreaIndexTimer;
+      std::cout << " - ";
+      std::cout << "n " << nodesTimer << " ";
+      std::cout << "w " << waysTimer << "/" << relationWaysTimer << " ";
+      std::cout << "a " << areasTimer << "/" << relationAreasTimer;
+      std::cout << std::endl;
+    }
+
+    return true;
+  }
+
+  bool Database::GetObjects(double lonMin, double latMin,
+                            double lonMax, double latMax,
+                            std::vector<TypeId> types,
+                            std::vector<NodeRef>& nodes,
+                            std::vector<WayRef>& ways,
+                            std::vector<WayRef>& areas,
+                            std::vector<RelationRef>& relationWays,
+                            std::vector<RelationRef>& relationAreas) const
+  {
+    if (!IsOpen()) {
+      return false;
+    }
+
+    TypeSet                 areaTypes;
+    std::vector<FileOffset> nodeOffsets;
+    std::vector<FileOffset> wayWayOffsets;
+    std::vector<FileOffset> relationWayOffsets;
+    std::vector<FileOffset> wayAreaOffsets;
+    std::vector<FileOffset> relationAreaOffsets;
+
+    nodes.clear();
+    ways.clear();
+    areas.clear();
+    relationWays.clear();
+    relationAreas.clear();
+
+    StopClock nodeIndexTimer;
+
+    if (!areaNodeIndex.GetOffsets(lonMin,latMin,lonMax,latMax,
+                                  types,
+                                  std::numeric_limits<size_t>::max(),
+                                  nodeOffsets)) {
+      std::cout << "Error getting nodes from area node index!" << std::endl;
+      return false;
+    }
+
+    nodeIndexTimer.Stop();
+
+    StopClock wayIndexTimer;
+
+    if (!areaWayIndex.GetOffsets(lonMin,
+                                 latMin,
+                                 lonMax,
+                                 latMax,
+                                 types,
+                                 std::numeric_limits<size_t>::max(),
+                                 wayWayOffsets,
+                                 relationWayOffsets)) {
+      std::cout << "Error getting ways and relations from area way index!" << std::endl;
+    }
+
+    wayIndexTimer.Stop();
+
+    StopClock areaAreaIndexTimer;
+
+    TypeId maxId=0;
+    for (std::vector<TypeId>::const_iterator type=types.begin();
+        type!=types.end();
+        type++) {
+      maxId=std::max(maxId,*type);
+    }
+
+    areaTypes.Reset(maxId);
+
+    for (std::vector<TypeId>::const_iterator type=types.begin();
+        type!=types.end();
+        type++) {
+      areaTypes.SetType(*type);
+    }
+
+    if (!areaAreaIndex.GetOffsets(lonMin,
+                                  latMin,
+                                  lonMax,
+                                  latMax,
+                                  std::numeric_limits<size_t>::max(),
+                                  areaTypes,
+                                  std::numeric_limits<size_t>::max(),
+                                  wayAreaOffsets,
+                                  relationAreaOffsets)) {
+      std::cout << "Error getting ways and relations from area index!" << std::endl;
+    }
+
+    areaAreaIndexTimer.Stop();
+
+    StopClock nodesTimer;
+
+    if (!GetNodes(nodeOffsets,
+                  nodes)) {
+      std::cout << "Error reading nodes in area!" << std::endl;
+      return false;
+    }
+
+    nodesTimer.Stop();
+
+    StopClock waysTimer;
+
+    if (!GetWays(wayWayOffsets,
+                 ways)) {
+      std::cout << "Error reading ways in area!" << std::endl;
+      return false;
+    }
 
     waysTimer.Stop();
 

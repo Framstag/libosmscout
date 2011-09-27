@@ -247,8 +247,7 @@ namespace osmscout {
     return true;
   }
 
-  bool AreaWayIndex::GetOffsets(const StyleConfig& styleConfig,
-                                double minlon,
+  bool AreaWayIndex::GetOffsets(double minlon,
                                 double minlat,
                                 double maxlon,
                                 double maxlat,

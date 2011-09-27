@@ -131,8 +131,7 @@ namespace osmscout {
   }
 
 
-  bool AreaNodeIndex::GetOffsets(const StyleConfig& styleConfig,
-                                 double minlon,
+  bool AreaNodeIndex::GetOffsets(double minlon,
                                  double minlat,
                                  double maxlon,
                                  double maxlat,

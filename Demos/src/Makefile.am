@@ -13,7 +13,8 @@ LDADD=$(LIBOSMSCOUT_LIBS) \
 bin_PROGRAMS = AddressLookup \
                ResourceConsumption \
                Routing \
-               DrawMapSVG
+               DrawMapSVG \
+               LookupPOI
 
 if HAVE_LIB_CAIRO
 bin_PROGRAMS += DrawMapCairo
@@ -38,6 +39,8 @@ DrawMapCairo_SOURCES = DrawMapCairo.cpp
 DrawMapQt_SOURCES = DrawMapQt.cpp
 
 DrawMapSVG_SOURCES = DrawMapSVG.cpp
+
+LookupPOI_SOURCES = LookupPOI.cpp
 
 ResourceConsumption_SOURCES = ResourceConsumption.cpp
 

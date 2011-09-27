@@ -162,8 +162,7 @@ namespace osmscout {
     return !scanner.HasError() && scanner.Close();
   }
 
-  bool AreaAreaIndex::GetOffsets(const StyleConfig& styleConfig,
-                                 double minlon,
+  bool AreaAreaIndex::GetOffsets(double minlon,
                                  double minlat,
                                  double maxlon,
                                  double maxlat,

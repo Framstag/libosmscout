@@ -76,8 +76,7 @@ namespace osmscout {
 
     bool LoadAreaNodeIndex(const std::string& path);
 
-    bool GetOffsets(const StyleConfig& styleConfig,
-                    double minlon,
+    bool GetOffsets(double minlon,
                     double minlat,
                     double maxlon,
                     double maxlat,

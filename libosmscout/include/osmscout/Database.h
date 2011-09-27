@@ -249,7 +249,16 @@ namespace osmscout {
                     std::vector<WayRef>& ways,
                     std::vector<WayRef>& areas,
                     std::vector<RelationRef>& relationWays,
-                    std::vector<RelationRef>& realtionAreas) const;
+                    std::vector<RelationRef>& relationAreas) const;
+
+    bool GetObjects(double lonMin, double latMin,
+                    double lonMax, double latMax,
+                    std::vector<TypeId> types,
+                    std::vector<NodeRef>& nodes,
+                    std::vector<WayRef>& ways,
+                    std::vector<WayRef>& areas,
+                    std::vector<RelationRef>& relationWays,
+                    std::vector<RelationRef>& relationAreas) const;
 
     bool GetGroundTiles(double lonMin, double latMin,
                         double lonMax, double latMax,
