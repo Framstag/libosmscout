@@ -1,0 +1,21 @@
+OSS
+  WAY "highway_motorway" PRIO 1 MINMAG continent
+    LINE #809bc0 WITH OUTLINECOLOR #777777 MINPIXEL 2.5 WIDTH 20 OUTLINE 1
+    REF WITH STYLE plate COLOR #ffffff BGCOLOR #809bc0 BORDERCOLOR #ffffff MINMAG state PRIO 1 
+   
+  AREA "highway_services"
+    FILL #cb9999
+    LABEL WITH MINMAG close
+   
+  NODE "place_city"
+    LABEL WITH SIZE 1.3 MINMAG stateOver PRIO 2
+    SYMBOL circle #ff0000aa 4 WITH MINMAG world
+
+  NODE "place_town"
+    LABEL WITH SIZE 1.2 MINMAG county PRIO 3
+    SYMBOL circle #ff000055 4 WITH MINMAG county
+    
+  NODE "highway_services"
+    LABEL WITH STYLE normal MINMAG stateOver PRIO 4
+    SYMBOL circle #00ff0055 4 WITH MINMAG world
+END
