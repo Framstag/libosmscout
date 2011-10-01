@@ -126,8 +126,6 @@ namespace osmscout
           continue;
         }
 
-        std::cout << "Loading optimized data for type " << *type << std::endl;
-
         for (size_t i=1; i<=dataInfo->second.dataCount; i++) {
           WayRef way = new Way();
 

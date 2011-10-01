@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_PRIVATE_IMPORT_EXPORT_H
-#define OSMSCOUT_PRIVATE_IMPORT_EXPORT_H
+#ifndef OSMSCOUT_IMPORT_PRIVATE_IMPORT_EXPORT_H
+#define OSMSCOUT_IMPORT_PRIVATE_IMPORT_EXPORT_H
 
 /*
   This source is part of the libosmscout library
@@ -20,54 +20,54 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/CoreFeatures.h>
+#include <osmscout/ImportFeatures.h>
 
 // Shared library support
 #if defined(__WIN32__) || defined(WIN32)
-  #if defined(OSMSCOUTDLL) 
+  #if defined(OSMSCOUTIMPORTDLL) 
     #if defined(DLL_EXPORT) || defined(_WINDLL)
-      #define OSMSCOUT_EXPTEMPL
-      #define OSMSCOUT_API __declspec(dllexport)
+      #define OSMSCOUT_IMPORT_EXPTEMPL
+      #define OSMSCOUT_IMPORT_API __declspec(dllexport)
     #else
-      #define OSMSCOUT_API
+      #define OSMSCOUT_IMPORT_API
     #endif
   #else
-    #define OSMSCOUT_API __declspec(dllimport)
-    #define OSMSCOUT_EXPTEMPL extern
+    #define OSMSCOUT_IMPORT_API __declspec(dllimport)
+    #define OSMSCOUT_IMPORT_EXPTEMPL extern
   #endif
 
-  #define OSMSCOUT_DLLLOCAL
+  #define OSMSCOUT_IMPORT_DLLLOCAL
 #else
-  #define OSMSCOUT_IMPORT
-  #define OSMSCOUT_EXPTEMPL
+  #define OSMSCOUT_IMPORT_IMPORT
+  #define OSMSCOUT_IMPORT_EXPTEMPL
   
-  #if defined(OSMSCOUT_EXPORT_SYMBOLS)
-    #define OSMSCOUT_EXPORT __attribute__ ((visibility("default")))
-    #define OSMSCOUT_DLLLOCAL __attribute__ ((visibility("hidden")))
+  #if defined(OSMSCOUT_IMPORT_EXPORT_SYMBOLS)
+    #define OSMSCOUT_IMPORT_EXPORT __attribute__ ((visibility("default")))
+    #define OSMSCOUT_IMPORT_DLLLOCAL __attribute__ ((visibility("hidden")))
   #else
-    #define OSMSCOUT_EXPORT
-    #define OSMSCOUT_DLLLOCAL
+    #define OSMSCOUT_IMPORT_EXPORT
+    #define OSMSCOUT_IMPORT_DLLLOCAL
   #endif
 
-  #if defined(OSMSCOUTDLL)
-    #define OSMSCOUT_API OSMSCOUT_EXPORT
+  #if defined(OSMSCOUTIMPORTDLL)
+    #define OSMSCOUT_IMPORT_API OSMSCOUT_IMPORT_EXPORT
   #else
-    #define OSMSCOUT_API OSMSCOUT_IMPORT
+    #define OSMSCOUT_IMPORT_API OSMSCOUT_IMPORT_IMPORT
   #endif
 
 #endif
 
 // Throwable classes must always be visible on GCC in all binaries
 #if defined(__WIN32__) || defined(WIN32)
-  #define OSMSCOUT_EXCEPTIONAPI(api) api
-#elif defined(OSMSCOUT_EXPORT_SYMBOLS)
-  #define OSMSCOUT_EXCEPTIONAPI(api) OSMSCOUT__EXPORT
+  #define OSMSCOUT_IMPORT_EXCEPTIONAPI(api) api
+#elif defined(OSMSCOUT_IMPORT_EXPORT_SYMBOLS)
+  #define OSMSCOUT_IMPORT_EXCEPTIONAPI(api) OSMSCOUT_IMPORT_EXPORT
 #else
-  #define OSMSCOUT_EXCEPTIONAPI(api)
+  #define OSMSCOUT_IMPORT_EXCEPTIONAPI(api)
 #endif
 
 #if defined(_MSC_VER)
-  #define OSMSCOUT_INSTANTIATE_TEMPLATES
+  #define OSMSCOUT_IMPORT_INSTANTIATE_TEMPLATES
 #endif  
 #endif
 

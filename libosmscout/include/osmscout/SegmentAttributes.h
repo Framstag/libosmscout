@@ -20,6 +20,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <osmscout/private/CoreImportExport.h>
+
 #include <osmscout/Progress.h>
 #include <osmscout/Tag.h>
 #include <osmscout/TypeConfig.h>
@@ -29,7 +31,7 @@
 
 namespace osmscout {
 
-  class SegmentAttributes
+  class OSMSCOUT_API SegmentAttributes
   {
   private:
     // Attribute availability flags (for optimized attribute storage)

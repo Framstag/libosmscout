@@ -25,9 +25,6 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/ost/Parser.h \
                         osmscout/TypeConfigLoader.h \
                         osmscout/Tiles.h \
-                        osmscout/RawNode.h \
-                        osmscout/RawRelation.h \
-                        osmscout/RawWay.h \
                         osmscout/AdminRegion.h \
                         osmscout/GroundTile.h \
                         osmscout/Node.h \
@@ -39,20 +36,6 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/Way.h \
                         osmscout/ObjectRef.h \
                         osmscout/NumericIndex.h \
-                        osmscout/Import.h \
-                        osmscout/Preprocess.h \
-                        osmscout/GenAreaAreaIndex.h \
-                        osmscout/GenAreaNodeIndex.h \
-                        osmscout/GenAreaWayIndex.h \
-                        osmscout/GenCityStreetIndex.h \
-                        osmscout/GenNumericIndex.h \
-                        osmscout/GenNodeDat.h \
-                        osmscout/GenNodeUseIndex.h \
-                        osmscout/GenOptimizeLowZoom.h \
-                        osmscout/GenRelationDat.h \
-                        osmscout/GenTypeDat.h \
-                        osmscout/GenWaterIndex.h \
-                        osmscout/GenWayDat.h \
                         osmscout/DataFile.h \
                         osmscout/NodeDataFile.h \
                         osmscout/RelationDataFile.h \
@@ -69,13 +52,3 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/Route.h \
                         osmscout/RoutingProfile.h \
                         osmscout/Database.h
-
-if HAVE_LIB_XML
-nobase_include_HEADERS += osmscout/PreprocessOSM.h
-endif
-
-if HAVE_LIB_PROTOBUF
-nobase_include_HEADERS += osmscout/pbf/fileformat.pb.h \
-                          osmscout/pbf/osmformat.pb.h \
-                          osmscout/PreprocessPBF.h
-endif

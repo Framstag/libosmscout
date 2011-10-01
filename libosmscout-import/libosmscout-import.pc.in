@@ -4,8 +4,8 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: libosmscout                       # human-readable name
+Name: libosmscout-import                # human-readable name
 Description: osm navigation library     # human-readable description
 Version: @VERSION@
-Libs: -L${libdir} -losmscout
+Libs: @XML2_LIBS@ -L${libdir} -losmscoutimport
 Cflags: -I${includedir}

@@ -1,16 +1,7 @@
-SUBDIRS = protobuf
-
 AM_CPPFLAGS = $(LIB_CXXFLAGS) -DOSMSCOUTDLL \
-              -I$(top_srcdir)/include \
-              -I$(top_srcdir)/include/osmscout/pbf \
-              $(XML2_CFLAGS) \
-              $(PROTOBUF_CFLAGS) \
-              $(ZLIB_CFLAGS)
+              -I$(top_srcdir)/include 
 
 lib_LTLIBRARIES = libosmscout.la
-libosmscout_la_LDFLAGS  = $(XML2_LIBS) \
-                          $(PROTOBUF_LIBS) \
-                          $(ZLIB_LIBS)
 
 libosmscout_la_SOURCES= osmscout/util/Cache.cpp \
                         osmscout/util/FileScanner.cpp \
@@ -34,9 +25,6 @@ libosmscout_la_SOURCES= osmscout/util/Cache.cpp \
                         osmscout/ost/Parser.cpp \
                         osmscout/TypeConfigLoader.cpp \
                         osmscout/Tiles.cpp \
-                        osmscout/RawNode.cpp \
-                        osmscout/RawRelation.cpp \
-                        osmscout/RawWay.cpp \
                         osmscout/AdminRegion.cpp \
                         osmscout/GroundTile.cpp \
                         osmscout/Location.cpp \
@@ -48,20 +36,6 @@ libosmscout_la_SOURCES= osmscout/util/Cache.cpp \
                         osmscout/Way.cpp \
                         osmscout/ObjectRef.cpp \
                         osmscout/NumericIndex.cpp \
-                        osmscout/Import.cpp \
-                        osmscout/Preprocess.cpp \
-                        osmscout/GenAreaAreaIndex.cpp \
-                        osmscout/GenAreaNodeIndex.cpp \
-                        osmscout/GenAreaWayIndex.cpp \
-                        osmscout/GenCityStreetIndex.cpp \
-                        osmscout/GenNumericIndex.cpp \
-                        osmscout/GenNodeDat.cpp \
-                        osmscout/GenNodeUseIndex.cpp \
-                        osmscout/GenOptimizeLowZoom.cpp \
-                        osmscout/GenRelationDat.cpp \
-                        osmscout/GenTypeDat.cpp \
-                        osmscout/GenWaterIndex.cpp \
-                        osmscout/GenWayDat.cpp \
                         osmscout/AreaAreaIndex.cpp \
                         osmscout/AreaNodeIndex.cpp \
                         osmscout/AreaWayIndex.cpp \
@@ -74,16 +48,3 @@ libosmscout_la_SOURCES= osmscout/util/Cache.cpp \
                         osmscout/Route.cpp \
                         osmscout/RoutingProfile.cpp \
                         osmscout/Database.cpp
-
-if HAVE_LIB_XML
-libosmscout_la_SOURCES += osmscout/PreprocessOSM.cpp
-endif
-
-if HAVE_LIB_PROTOBUF
-if HAVE_PROG_PROTOC
-libosmscout_la_SOURCES += osmscout/pbf/fileformat.pb.cc \
-                          osmscout/pbf/osmformat.pb.cc \
-                          osmscout/PreprocessPBF.cpp
-endif
-endif
-

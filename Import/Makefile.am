@@ -1,2 +1,2 @@
 SUBDIRS = src
-EXTRA_DIST = autogen.sh style.xml types.xml
+EXTRA_DIST = autogen.sh standard.oss map.ost

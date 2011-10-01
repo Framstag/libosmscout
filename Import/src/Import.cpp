@@ -22,11 +22,12 @@
 #include <cstdio>
 #include <iostream>
 
-#include <osmscout/Import.h>
 
 #include <osmscout/Util.h>
 
 #include <osmscout/util/String.h>
+
+#include <osmscout/import/Import.h>
 
 void DumpHelp(osmscout::ImportParameter& parameter)
 {
@@ -287,4 +288,6 @@ int main(int argc, char* argv[])
   else {
     std::cerr << "Import failed!" << std::endl;
   }
+
+  return 0;
 }
