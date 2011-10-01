@@ -1448,6 +1448,9 @@ namespace osmscout {
     data.attributes=&attributes;
     data.lineStyle=lineStyle;
 
+    data.nameLabelStyle=NULL;
+    data.refLabelStyle=NULL;
+
     if (!attributes.GetName().empty()) {
       const LabelStyle *style=styleConfig.GetWayNameLabelStyle(attributes.GetType());
 
@@ -1465,13 +1468,7 @@ namespace osmscout {
                  projection.GetMagnification()<=style->GetMaxMag()) {
           data.nameLabelStyle=style;
         }
-        else {
-          data.nameLabelStyle=NULL;
-        }
       }
-    }
-    else {
-      data.nameLabelStyle=NULL;
     }
 
     if (!attributes.GetRefName().empty()) {
@@ -1491,13 +1488,7 @@ namespace osmscout {
                  projection.GetMagnification()<=style->GetMaxMag()) {
           data.refLabelStyle=style;
         }
-        else {
-          data.refLabelStyle=NULL;
-        }
       }
-    }
-    else {
-      data.refLabelStyle=NULL;
     }
 
     data.prio=styleConfig.GetWayPrio(attributes.GetType());
