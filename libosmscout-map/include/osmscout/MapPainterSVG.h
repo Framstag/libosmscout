@@ -89,6 +89,24 @@ namespace osmscout {
                   CapStyle endCap,
                   size_t transStart, size_t transEnd);
 
+    void DrawPath(const Projection& projection,
+                  const MapParameter& parameter,
+                  const std::string& styleName,
+                  double width,
+                  CapStyle startCap,
+                  CapStyle endCap,
+                  size_t transStart, size_t transEnd);
+
+    void DrawWayOutline(const StyleConfig& styleConfig,
+                        const Projection& projection,
+                        const MapParameter& parameter,
+                        const WayData& data);
+
+    void DrawWay(const StyleConfig& styleConfig,
+                 const Projection& projection,
+                 const MapParameter& parameter,
+                 const WayData& data);
+
     void DrawArea(const Projection& projection,
                   const MapParameter& parameter,
                   const AreaData& area);

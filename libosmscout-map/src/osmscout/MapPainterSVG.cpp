@@ -119,12 +119,25 @@ namespace osmscout {
 
         stream << "fill:" << GetColorValue(fillStyle->GetFillR(),fillStyle->GetFillG(),fillStyle->GetFillB(),fillStyle->GetFillA());
 
-        double borderWidth=GetProjectedWidth(projection, fillStyle->GetBorderMinPixel(), fillStyle->GetBorderWidth());
+        double borderWidth=GetProjectedWidth(projection, 0, fillStyle->GetBorderWidth());
 
         if (borderWidth>0.0) {
-          stream << ";stroke:" << GetColorValue(fillStyle->GetBorderR(),fillStyle->GetBorderG(),fillStyle->GetBorderB());
+          stream << ";stroke:" << GetColorValue(fillStyle->GetBorderR(),fillStyle->GetBorderG(),fillStyle->GetBorderB(),fillStyle->GetBorderA());
           stream << ";stroke-width:" << borderWidth;
+
+          if (fillStyle->HasBorderDashValues()) {
+            stream << ";stroke-dasharray:";
+
+            for (size_t i=0; i<fillStyle->GetBorderDash().size(); i++) {
+              if (i>0) {
+                stream << ",";
+              }
+
+              stream << fillStyle->GetBorderDash()[i]*borderWidth;
+            }
+          }
         }
+
 
         stream << "}" << std::endl;
       }
@@ -135,13 +148,70 @@ namespace osmscout {
     for (std::vector<TypeInfo>::const_iterator typeInfo=styleConfig.GetTypeConfig()->GetTypes().begin();
         typeInfo!=styleConfig.GetTypeConfig()->GetTypes().end();
         typeInfo++) {
+      // We skip internal types
+      if (!typeInfo->GetName().empty() && typeInfo->GetName()[0]=='_') {
+        continue;
+      }
+
       const LineStyle *lineStyle=styleConfig.GetWayLineStyle(typeInfo->GetId());
 
       if (lineStyle!=NULL) {
-        /*
-        stream << "        ." << typeInfo->GetName() << "_way {";
-        // TODO
-        stream << "}" << std::endl;*/
+        double lineWidth;
+
+        if (lineStyle->GetFixedWidth()) {
+          lineWidth=GetProjectedWidth(projection,
+                                      lineStyle->GetMinPixel(),
+                                      lineStyle->GetWidth());
+        }
+        else {
+          lineWidth=GetProjectedWidth(projection,
+                                      lineStyle->GetMinPixel(),
+                                      lineStyle->GetWidth());
+        }
+
+        bool outline=lineStyle->GetOutline()>0 &&
+                     lineWidth-2*lineStyle->GetOutline()>=0;
+
+        if (outline) {
+          stream << "        ." << typeInfo->GetName() << "_way_outline {";
+          stream << "fill:none;";
+          stream << "stroke:" << GetColorValue(lineStyle->GetOutlineR(),
+                                               lineStyle->GetOutlineG(),
+                                               lineStyle->GetOutlineB(),
+                                               lineStyle->GetOutlineA());
+          stream << "}" << std::endl;
+
+          stream << "        ." << typeInfo->GetName() << "_way {";
+          stream << "fill:none;";
+          stream << "stroke:" << GetColorValue(lineStyle->GetLineR(),
+                                               lineStyle->GetLineG(),
+                                               lineStyle->GetLineB(),
+                                               lineStyle->GetLineA());
+        }
+        else {
+          stream << "        ." << typeInfo->GetName() << "_way {";
+          stream << "fill:none;";
+          stream << "stroke:" << GetColorValue(lineStyle->GetAlternateR(),
+                                               lineStyle->GetAlternateG(),
+                                               lineStyle->GetAlternateB(),
+                                               lineStyle->GetAlternateA());
+        }
+
+
+        if (lineStyle->HasDashValues()) {
+          stream << ";stroke-dasharray:";
+
+          for (size_t i=0; i<lineStyle->GetDash().size(); i++) {
+
+            if (i>0) {
+              stream << " ";
+            }
+
+            stream << lineStyle->GetDash()[i]*lineWidth;
+          }
+        }
+
+        stream << "}" << std::endl;
       }
     }
 
@@ -216,16 +286,16 @@ namespace osmscout {
   }
 
   void MapPainterSVG::DrawPath(const Projection& projection,
-                                 const MapParameter& parameter,
-                                 double r,
-                                 double g,
-                                 double b,
-                                 double a,
-                                 double width,
-                                 const std::vector<double>& dash,
-                                 CapStyle startCap,
-                                 CapStyle endCap,
-                                 size_t transStart, size_t transEnd)
+                               const MapParameter& parameter,
+                               double r,
+                               double g,
+                               double b,
+                               double a,
+                               double width,
+                               const std::vector<double>& dash,
+                               CapStyle startCap,
+                               CapStyle endCap,
+                               size_t transStart, size_t transEnd)
   {
     stream << "    <polyline fill=\"none\" stroke=\"" << GetColorValue(r,g,b,a) << "\" stroke-width=\"" << width << "\"" << std::endl;
     stream << "              points=\"";
@@ -240,6 +310,209 @@ namespace osmscout {
     }
 
     stream << "\" />" << std::endl;
+  }
+
+  void MapPainterSVG::DrawPath(const Projection& projection,
+                               const MapParameter& parameter,
+                               const std::string& styleName,
+                               double width,
+                               CapStyle startCap,
+                               CapStyle endCap,
+                               size_t transStart, size_t transEnd)
+  {
+    stream << "    <polyline class=\"" << styleName  << "\" stroke-width=\"" << width << "\"" << std::endl;
+    stream << "              points=\"";
+
+    for (size_t i=transStart; i<=transEnd; i++) {
+      if (i!=transStart) {
+        stream << " ";
+      }
+
+      stream << transBuffer.buffer[i].x << "," << transBuffer.buffer[i].y;
+
+    }
+
+    stream << "\" />" << std::endl;
+  }
+
+  void MapPainterSVG::DrawWayOutline(const StyleConfig& styleConfig,
+                                     const Projection& projection,
+                                     const MapParameter& parameter,
+                                     const WayData& data)
+  {
+    if (data.drawBridge) {
+      // black outline for bridges
+      DrawPath(projection,
+               parameter,
+               0.0,
+               0.0,
+               0.0,
+               1.0,
+               data.lineWidth+1,
+               emptyDash,
+               capButt,
+               capButt,
+               data.transStart,data.transEnd);
+
+      if (data.outline) {
+        DrawPath(projection,
+                 parameter,
+                 data.lineStyle->GetOutlineR(),
+                 data.lineStyle->GetOutlineG(),
+                 data.lineStyle->GetOutlineB(),
+                 1.0,
+                 data.lineWidth,
+                 emptyDash,
+                 data.attributes->StartIsJoint() ? capButt : capRound,
+                 data.attributes->EndIsJoint() ? capButt : capRound,
+                 data.transStart,data.transEnd);
+      }
+      else if (data.lineStyle->HasDashValues() ||
+               data.lineStyle->GetLineA()<1.0 ||
+               data.lineStyle->GetAlternateA()<1.0) {
+        DrawPath(projection,
+                 parameter,
+                 1.0,
+                 1.0,
+                 1.0,
+                 1.0,
+                 data.lineWidth,
+                 emptyDash,
+                 data.attributes->StartIsJoint() ? capButt : capRound,
+                 data.attributes->EndIsJoint() ? capButt : capRound,
+                 data.transStart,data.transEnd);
+      }
+    }
+    else if (data.drawTunnel) {
+      tunnelDash[0]=4.0/data.lineWidth;
+      tunnelDash[1]=2.0/data.lineWidth;
+
+      if (data.outline) {
+        DrawPath(projection,
+                 parameter,
+                 data.lineStyle->GetOutlineR(),
+                 data.lineStyle->GetOutlineG(),
+                 data.lineStyle->GetOutlineB(),
+                 data.lineStyle->GetOutlineA(),
+                 data.lineWidth,
+                 tunnelDash,
+                 data.attributes->StartIsJoint() ? capButt : capRound,
+                 data.attributes->EndIsJoint() ? capButt : capRound,
+                 data.transStart,data.transEnd);
+     }
+      else if (projection.GetMagnification()>=10000) {
+        // light grey dashes
+
+        DrawPath(projection,
+                 parameter,
+                 0.5,
+                 0.5,
+                 0.5,
+                 1.0,
+                 data.lineWidth,
+                 tunnelDash,
+                 data.attributes->StartIsJoint() ? capButt : capRound,
+                 data.attributes->EndIsJoint() ? capButt : capRound,
+                 data.transStart,data.transEnd);
+      }
+      else {
+        // dark grey dashes
+
+        DrawPath(projection,
+                 parameter,
+                 0.5,
+                 0.5,
+                 0.5,
+                 1.0,
+                 data.lineWidth,
+                 tunnelDash,
+                 data.attributes->StartIsJoint() ? capButt : capRound,
+                 data.attributes->EndIsJoint() ? capButt : capRound,
+                     data.transStart,data.transEnd);
+      }
+    }
+    else {
+      // normal path, normal outline color
+
+      DrawPath(projection,
+               parameter,
+               typeConfig->GetTypeInfo(data.attributes->GetType()).GetName()+"_way_outline",
+               data.lineWidth,
+               data.attributes->StartIsJoint() ? capButt : capRound,
+               data.attributes->EndIsJoint() ? capButt : capRound,
+               data.transStart,data.transEnd);
+    }
+
+    waysOutlineDrawn++;
+  }
+
+  void MapPainterSVG::DrawWay(const StyleConfig& styleConfig,
+                              const Projection& projection,
+                              const MapParameter& parameter,
+                              const WayData& data)
+  {
+    double lineWidth=data.lineWidth;
+
+    if (data.outline) {
+      lineWidth-=2*data.lineStyle->GetOutline();
+    }
+
+
+    if (data.drawTunnel) {
+      double r,g,b,a;
+
+      // Draw line with normal color
+      r=data.lineStyle->GetLineR();
+      g=data.lineStyle->GetLineG();
+      b=data.lineStyle->GetLineB();
+      a=data.lineStyle->GetLineA();
+
+      r=r+(1-r)*50/100;
+      g=g+(1-g)*50/100;
+      b=b+(1-b)*50/100;
+
+      if (!data.lineStyle->GetDash().empty() && data.lineStyle->GetGapA()>0.0) {
+        DrawPath(projection,
+                 parameter,
+                 data.lineStyle->GetGapR(),data.lineStyle->GetGapG(),data.lineStyle->GetGapB(),data.lineStyle->GetGapA(),
+                 lineWidth,
+                 emptyDash,
+                 capRound,
+                 capRound,
+                 data.transStart,data.transEnd);
+      }
+
+      DrawPath(projection,
+               parameter,
+               r,g,b,a,
+               lineWidth,
+               data.lineStyle->GetDash(),
+               capRound,
+               capRound,
+               data.transStart,data.transEnd);
+    }
+    else {
+      if (!data.lineStyle->GetDash().empty() && data.lineStyle->GetGapA()>0.0) {
+        DrawPath(projection,
+                 parameter,
+                 data.lineStyle->GetGapR(),data.lineStyle->GetGapG(),data.lineStyle->GetGapB(),data.lineStyle->GetGapA(),
+                 lineWidth,
+                 emptyDash,
+                 capRound,
+                 capRound,
+                 data.transStart,data.transEnd);
+      }
+
+      DrawPath(projection,
+               parameter,
+               typeConfig->GetTypeInfo(data.attributes->GetType()).GetName()+"_way",
+               lineWidth,
+               capRound,
+               capRound,
+               data.transStart,data.transEnd);
+    }
+
+    waysDrawn++;
   }
 
   void MapPainterSVG::DrawArea(const Projection& projection,

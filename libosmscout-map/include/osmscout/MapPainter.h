@@ -310,40 +310,11 @@ namespace osmscout {
                             double y);
 
 
-    void DrawNodes(const StyleConfig& styleConfig,
-                   const Projection& projection,
-                   const MapParameter& parameter,
-                   const MapData& data);
-
-    /**
-      Draw the outline of the way using LineStyle for the given type, the given
-      style modification attributes and the given path. Also draw sensfull
-      line end given that the path has joints with other pathes or not.
-     */
-    void DrawWayOutline(const StyleConfig& styleConfig,
-                        const Projection& projection,
-                        const MapParameter& parameter,
-                        const WayData& data);
-
-    void DrawWay(const StyleConfig& styleConfig,
-                 const Projection& projection,
-                 const MapParameter& parameter,
-                 const WayData& data);
-
-    void DrawWays(const StyleConfig& styleConfig,
-                  const Projection& projection,
-                  const MapParameter& parameter,
-                  const MapData& data);
 
     void DrawWayLabels(const StyleConfig& styleConfig,
                        const Projection& projection,
                        const MapParameter& parameter,
                        const MapData& data);
-
-    void DrawAreas(const StyleConfig& styleConfig,
-                   const Projection& projection,
-                   const MapParameter& parameter,
-                   const MapData& data);
 
     void DrawAreaLabels(const StyleConfig& styleConfig,
                         const Projection& projection,
@@ -493,10 +464,46 @@ namespace osmscout {
 
     //@}
 
+    /**
+      Med level drawing routines that are already implemented by the base class, but which can be overwritten
+      by the driver if necessary.
+     */
+    //@{
+    virtual void DrawNodes(const StyleConfig& styleConfig,
+                           const Projection& projection,
+                           const MapParameter& parameter,
+                           const MapData& data);
+
+    /**
+      Draw the outline of the way using LineStyle for the given type, the given
+      style modification attributes and the given path. Also draw sensfull
+      line end given that the path has joints with other pathes or not.
+     */
+    virtual void DrawWayOutline(const StyleConfig& styleConfig,
+                                const Projection& projection,
+                                const MapParameter& parameter,
+                                const WayData& data);
+
+    virtual void DrawWay(const StyleConfig& styleConfig,
+                         const Projection& projection,
+                         const MapParameter& parameter,
+                         const WayData& data);
+
+    virtual void DrawWays(const StyleConfig& styleConfig,
+                          const Projection& projection,
+                          const MapParameter& parameter,
+                          const MapData& data);
+
+    virtual void DrawAreas(const StyleConfig& styleConfig,
+                           const Projection& projection,
+                           const MapParameter& parameter,
+                           const MapData& data);
+
     void Draw(const StyleConfig& styleConfig,
               const Projection& projection,
               const MapParameter& parameter,
               const MapData& data);
+    //@}
 
   public:
     MapPainter();

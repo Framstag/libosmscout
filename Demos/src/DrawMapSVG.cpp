@@ -31,6 +31,7 @@
   level directory):
 
   src/DrawMapSVG ../TravelJinni/ ../TravelJinni/standard.oss 640 480 7.13 50.69 10000 test.svg
+  src/DrawMapSVG ../TravelJinni/ ../TravelJinni/standard.oss 640 480 7.25 51.45 100 test.svg
 */
 
 int main(int argc, char* argv[])
@@ -109,6 +110,10 @@ int main(int argc, char* argv[])
                  width,
                  height);
 
+  searchParameter.SetMaximumNodes(std::numeric_limits<size_t>::max());
+  searchParameter.SetMaximumWays(std::numeric_limits<size_t>::max());
+  searchParameter.SetMaximumAreas(std::numeric_limits<size_t>::max());
+  searchParameter.SetMaximumAreaLevel(6);
 
   database.GetObjects(styleConfig,
                       projection.GetLonMin(),
