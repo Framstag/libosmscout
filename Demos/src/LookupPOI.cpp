@@ -149,31 +149,41 @@ int main(int argc, char* argv[])
       }
     }
 
-    std::cout << "Node " << (*node)->GetId() << " " << name << std::endl;
+    std::cout << "Node " << (*node)->GetId();
+    std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*node)->GetType()).GetName();
+    std::cout << " " << name << std::endl;
   }
 
   for (std::vector<osmscout::WayRef>::const_iterator way=ways.begin();
       way!=ways.end();
       way++) {
-    std::cout << "Way " << (*way)->GetId() << " " << (*way)->GetName() << std::endl;
+    std::cout << "Way " << (*way)->GetId();
+    std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*way)->GetType()).GetName();
+    std::cout << " " << (*way)->GetName() << std::endl;
   }
 
   for (std::vector<osmscout::RelationRef>::const_iterator way=relationWays.begin();
       way!=relationWays.end();
       way++) {
-    std::cout << "Way " << (*way)->GetId() << " " << (*way)->GetName() << std::endl;
+    std::cout << "Way " << (*way)->GetId();
+    std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*way)->GetType()).GetName();
+    std::cout << " " << (*way)->GetName() << std::endl;
   }
 
   for (std::vector<osmscout::WayRef>::const_iterator area=areas.begin();
       area!=areas.end();
       area++) {
-    std::cout << "Area " << (*area)->GetId() << " " << (*area)->GetName() << std::endl;
+    std::cout << "Area " << (*area)->GetId();
+    std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*area)->GetType()).GetName();
+    std::cout << " " << (*area)->GetName() << std::endl;
   }
 
   for (std::vector<osmscout::RelationRef>::const_iterator area=relationAreas.begin();
       area!=relationAreas.end();
       area++) {
-    std::cout << "Area " << (*area)->GetId() << " " << (*area)->GetName() << std::endl;
+    std::cout << "Area " << (*area)->GetId();
+    std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*area)->GetType()).GetName();
+    std::cout << " " << (*area)->GetName() << std::endl;
   }
 
   return 0;
