@@ -237,7 +237,7 @@ namespace osmscout {
           return false;
         }
 
-        // TODO: First collect all areas for a level, then - afte rthe level is scanned -
+        // TODO: First collect all areas for a level, then - after the level is scanned -
         // add it to the result
 
         if (wayAreaOffsets.size()+relationAreaOffsets.size()+
