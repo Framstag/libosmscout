@@ -27,6 +27,7 @@
   level directory):
 
   src/LookupPOI ../TravelJinni/ 51.2 6.5 51.7 8 amenity_hospital amenity_hospital_building
+  src/LookupPOI ../TravelJinni/ 43.65 -79.39 43.66 -79.37 shop
 */
 
 int main(int argc, char* argv[])
@@ -67,7 +68,6 @@ int main(int argc, char* argv[])
     typeNames.push_back(std::string(argv[i]));
   }
 
-
   osmscout::DatabaseParameter databaseParameter;
   osmscout::Database          database(databaseParameter);
 
@@ -76,6 +76,11 @@ int main(int argc, char* argv[])
 
     return 1;
   }
+
+  std::cout << "- Search area: ";
+  std::cout << "[" << std::min(latTop,latBottom) << "," << std::min(lonLeft,lonRight) << "]";
+  std::cout << "x";
+  std::cout << "[" <<std::max(latTop,latBottom) << "," << std::max(lonLeft,lonRight) << "]" << std::endl;
 
   types.reserve(typeNames.size()*3); // Avoid dynamic resize
 
@@ -97,18 +102,31 @@ int main(int argc, char* argv[])
       continue;
     }
 
+    std::cout << "- Searching for '" << *name << "' as";
+
     if (nodeType!=osmscout::typeIgnore) {
+      std::cout << " node (" << nodeType << ")";
+
       types.push_back(nodeType);
     }
 
-    if (wayType!=osmscout::typeIgnore && wayType!=nodeType) {
-      types.push_back(wayType);
+    if (wayType!=osmscout::typeIgnore) {
+      std::cout << " way (" << wayType << ")";
+
+      if (wayType!=nodeType) {
+        types.push_back(wayType);
+      }
     }
 
-    if (areaType!=osmscout::typeIgnore && areaType!=nodeType && areaType!=wayType) {
-      types.push_back(areaType);
+    if (areaType!=osmscout::typeIgnore) {
+      std::cout << " area (" << areaType << ")";
+
+      if (areaType!=nodeType && areaType!=wayType) {
+        types.push_back(areaType);
+      }
     }
 
+    std::cout << std::endl;
   }
 
   std::vector<osmscout::NodeRef> nodes;
@@ -149,7 +167,7 @@ int main(int argc, char* argv[])
       }
     }
 
-    std::cout << "Node " << (*node)->GetId();
+    std::cout << "+ Node " << (*node)->GetId();
     std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*node)->GetType()).GetName();
     std::cout << " " << name << std::endl;
   }
@@ -157,7 +175,7 @@ int main(int argc, char* argv[])
   for (std::vector<osmscout::WayRef>::const_iterator way=ways.begin();
       way!=ways.end();
       way++) {
-    std::cout << "Way " << (*way)->GetId();
+    std::cout << "+ Way " << (*way)->GetId();
     std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*way)->GetType()).GetName();
     std::cout << " " << (*way)->GetName() << std::endl;
   }
@@ -165,7 +183,7 @@ int main(int argc, char* argv[])
   for (std::vector<osmscout::RelationRef>::const_iterator way=relationWays.begin();
       way!=relationWays.end();
       way++) {
-    std::cout << "Way " << (*way)->GetId();
+    std::cout << "+ Way " << (*way)->GetId();
     std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*way)->GetType()).GetName();
     std::cout << " " << (*way)->GetName() << std::endl;
   }
@@ -173,7 +191,7 @@ int main(int argc, char* argv[])
   for (std::vector<osmscout::WayRef>::const_iterator area=areas.begin();
       area!=areas.end();
       area++) {
-    std::cout << "Area " << (*area)->GetId();
+    std::cout << "+ Area " << (*area)->GetId();
     std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*area)->GetType()).GetName();
     std::cout << " " << (*area)->GetName() << std::endl;
   }
@@ -181,7 +199,7 @@ int main(int argc, char* argv[])
   for (std::vector<osmscout::RelationRef>::const_iterator area=relationAreas.begin();
       area!=relationAreas.end();
       area++) {
-    std::cout << "Area " << (*area)->GetId();
+    std::cout << "+ Area " << (*area)->GetId();
     std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*area)->GetType()).GetName();
     std::cout << " " << (*area)->GetName() << std::endl;
   }
