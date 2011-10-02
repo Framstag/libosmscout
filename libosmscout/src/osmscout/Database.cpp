@@ -634,14 +634,7 @@ namespace osmscout {
 
     StopClock areaAreaIndexTimer;
 
-    TypeId maxId=0;
-    for (std::vector<TypeId>::const_iterator type=types.begin();
-        type!=types.end();
-        type++) {
-      maxId=std::max(maxId,*type);
-    }
-
-    areaTypes.Reset(maxId);
+    areaTypes.Reset(typeConfig->GetMaxTypeId()+1);
 
     for (std::vector<TypeId>::const_iterator type=types.begin();
         type!=types.end();
