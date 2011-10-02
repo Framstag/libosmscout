@@ -110,7 +110,7 @@ TYPES
   TYPE "amenity" = NODE AREA (EXISTS "amenity")
   
   // Currently all shops are the same...
-  TYPE "shop" = NODE AREA(EXISTS "shop")
+  TYPE "shop" = NODE AREA (EXISTS "shop")
   
   TYPE "tourism_alpine_hut" = NODE AREA ("tourism"=="alpine_hut")
   TYPE "tourism_aquarium" = NODE AREA ("tourism"=="aquarium")
