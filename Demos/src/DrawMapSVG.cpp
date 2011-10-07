@@ -30,42 +30,45 @@
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
   level directory):
 
-  src/DrawMapSVG ../TravelJinni/ ../TravelJinni/standard.oss 640 480 7.13 50.69 10000 test.svg
-  src/DrawMapSVG ../TravelJinni/ ../TravelJinni/standard.oss 640 480 7.25 51.45 100 test.svg
+  src/DrawMapSVG ../TravelJinni/ ../TravelJinni/standard.oss 51.2 6.5 51.7 8 1000 1000 test.svg
 */
 
 int main(int argc, char* argv[])
 {
   std::string   map;
   std::string   style;
+  double        latTop,latBottom,lonLeft,lonRight;
+  double        zoom;
+  size_t        width;
   std::string   output;
-  size_t        width,height;
-  double        lon,lat,zoom;
 
-  if (argc!=9) {
-    std::cerr << "DrawMap <map directory> <style-file> <width> <height> <lon> <lat> <zoom> <output>" << std::endl;
+  if (argc!=10) {
+    std::cerr << "DrawMap <map directory> <style-file> ";
+    std::cerr << "<lat_top> <lon_left> <lat_bottom> <lon_right> ";
+    std::cerr << "<zoom> <width> ";
+    std::cerr << "<output>" << std::endl;
     return 1;
   }
 
   map=argv[1];
   style=argv[2];
 
-  if (!osmscout::StringToNumber(argv[3],width)) {
-    std::cerr << "width is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (!osmscout::StringToNumber(argv[4],height)) {
-    std::cerr << "height is not numeric!" << std::endl;
-    return 1;
-  }
-
-  if (sscanf(argv[5],"%lf",&lon)!=1) {
+  if (sscanf(argv[3],"%lf",&latTop)!=1) {
     std::cerr << "lon is not numeric!" << std::endl;
     return 1;
   }
 
-  if (sscanf(argv[6],"%lf",&lat)!=1) {
+  if (sscanf(argv[4],"%lf",&lonLeft)!=1) {
+    std::cerr << "lat is not numeric!" << std::endl;
+    return 1;
+  }
+
+  if (sscanf(argv[5],"%lf",&latBottom)!=1) {
+    std::cerr << "lon is not numeric!" << std::endl;
+    return 1;
+  }
+
+  if (sscanf(argv[6],"%lf",&lonRight)!=1) {
     std::cerr << "lat is not numeric!" << std::endl;
     return 1;
   }
@@ -75,7 +78,12 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  output=argv[8];
+  if (!osmscout::StringToNumber(argv[8],width)) {
+    std::cerr << "width is not numeric!" << std::endl;
+    return 1;
+  }
+
+  output=argv[9];
 
   osmscout::DatabaseParameter databaseParameter;
   osmscout::Database          database(databaseParameter);
@@ -104,11 +112,12 @@ int main(int argc, char* argv[])
   osmscout::MapData             data;
   osmscout::MapPainterSVG       painter;
 
-  projection.Set(lon,
-                 lat,
+  projection.Set(std::min(lonLeft,lonRight),
+                 std::min(latTop,latBottom),
+                 std::max(lonLeft,lonRight),
+                 std::max(latTop,latBottom),
                  zoom,
-                 width,
-                 height);
+                 width);
 
   searchParameter.SetMaximumNodes(std::numeric_limits<size_t>::max());
   searchParameter.SetMaximumWays(std::numeric_limits<size_t>::max());

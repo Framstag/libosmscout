@@ -22,7 +22,7 @@
 #include <cassert>
 
 #include <osmscout/private/Math.h>
-
+#include <iostream>
 namespace osmscout {
 
   static const double gradtorad=2*M_PI/360;
@@ -47,9 +47,8 @@ namespace osmscout {
                                double magnification,
                                size_t width, size_t height)
   {
-    valid=true;
-  
-    if (this->lon==lon &&
+    if (valid &&
+        this->lon==lon &&
         this->lat==lat &&
         this->magnification==magnification &&
         this->width==width &&
@@ -57,11 +56,7 @@ namespace osmscout {
       return true;
     }
 
-    double boxWidth,boxHeight;
-
-    //
-    // calculation of bounds and scaling factors
-    //
+    valid=true;
 
     // Make a copy of the context information
     this->lon=lon;
@@ -70,41 +65,102 @@ namespace osmscout {
     this->height=height;
     this->magnification=magnification;
 
+    //
+    // Calculation of bounds and scaling factors
+    //
+    // We have three projections:
+    // * Mercator projection of longitudes to X-coordinates
+    // * Mercator projections of latitudes to Y-coordinates
+    // * Projection of X and Y coordinates as result of mercator projection to on screen cooridnates
+    //
 
-    boxWidth=360/magnification;
-    boxHeight=boxWidth*height/width;
+    double boxWidth=360/magnification; // Part of the full earth circle that has to be shown, in degree
 
+    // longitude does scale linear, so left and right longitude borders is easy to calculate
     lonMin=lon-boxWidth/2;
     lonMax=lon+boxWidth/2;
 
-    latMin=atan(sinh(atanh(sin(lat*gradtorad))-boxHeight/2*gradtorad))/gradtorad;
-    latMax=atan(sinh(atanh(sin(lat*gradtorad))+boxHeight/2*gradtorad))/gradtorad;
-
-    //std::cout << "Dimension: " << lonMin << " " << latMin << " " << lonMax << " " << latMax << std::endl;
-
-    hmin=lonMin*gradtorad;
-    hmax=lonMax*gradtorad;
-    vmin=atanh(sin(latMin*gradtorad));
-    vmax=atanh(sin(latMax*gradtorad));
-
-    hscale=(width-1)/(hmax-hmin);
-    vscale=(height-1)/(vmax-vmin);
+    scale=(width-1)/(gradtorad*(lonMax-lonMin));
 
     // Width of an pixel in meter
     double d=(lonMax-lonMin)*gradtorad;
 
     pixelSize=d*180*60/M_PI*1852.216/width;
 
+    // Absolute Y mercator coordinate for latitude
+    double y=atanh(sin(lat*gradtorad));
+
+    latMin=atan(sinh(y-(height/2)/scale))/gradtorad;
+    latMax=atan(sinh(y+(height/2)/scale))/gradtorad;
+
+    lonOffset=lonMin*scale*gradtorad;
+    latOffset=scale*atanh(sin(latMin*gradtorad));
+
     /*
     std::cout << "Box (grad) h: " << lonMin << "-" << lonMax << " v: " << latMin <<"-" << latMax << std::endl;
-    std::cout << "Box (merc) h: " << hmin << "-" << hmax << " v: " << vmin <<"-" << vmax << std::endl;
-    std::cout << "hscale: " << hscale << " vscale: " << vscale << std::endl;
+    std::cout << "Center (grad):" << this->lat << "x" << this->lon << std::endl;
+    std::cout << "Magnification: " << magnification << std::endl;
+    std::cout << "Scale: " << scale << std::endl;
+    std::cout << "Screen dimension: " << width << "x" << height << std::endl;
     std::cout << "d: " << d << " " << d*180*60/M_PI << std::endl;
     std::cout << "The complete screen are " << d*180*60/M_PI*1852.216 << " meters" << std::endl;
     std::cout << "1 pixel are " << pixelSize << " meters" << std::endl;
-    std::cout << "20 meters are " << 20/(d*180*60/M_PI*1852.216/width) << " pixels" << std::endl;
-    */
+    std::cout << "20 meters are " << 20/(d*180*60/M_PI*1852.216/width) << " pixels" << std::endl;*/
     
+    return true;
+  }
+
+  bool MercatorProjection::Set(double lonMin, double latMin,
+                               double lonMax, double latMax,
+                               double magnification,
+                               size_t width)
+  {
+    if (valid &&
+        this->lonMin==lonMin &&
+        this->lonMax==lonMax &&
+        this->latMin==latMin &&
+        this->latMax==latMax &&
+        this->magnification==magnification &&
+        this->width==width) {
+      return true;
+    }
+
+    valid=true;
+
+    this->lonMin=lonMin;
+    this->lonMax=lonMax;
+    this->latMin=latMin;
+    this->latMax=latMax;
+    this->magnification=magnification;
+    this->width=width;
+
+    // Make a copy of the context information
+    this->lon=(lonMin+lonMax)/2;
+    this->lat=atan(sinh((atanh(sin(latMax*gradtorad))+atanh(sin(latMin*gradtorad)))/2))/gradtorad;
+
+    scale=(width-1)/(gradtorad*(lonMax-lonMin));
+
+    // Width of an pixel in meter
+    double d=(lonMax-lonMin)*gradtorad;
+
+    pixelSize=d*180*60/M_PI*1852.216/width;
+
+    this->height=(atanh(sin(latMax*gradtorad))-atanh(sin(latMin*gradtorad)))*scale;
+
+    lonOffset=lonMin*scale*gradtorad;
+    latOffset=scale*atanh(sin(latMin*gradtorad));
+
+    /*
+    std::cout << "Box (grad) h: " << lonMin << "-" << lonMax << " v: " << latMin <<"-" << latMax << std::endl;
+    std::cout << "Center (grad):" << this->lat << "x" << this->lon << std::endl;
+    std::cout << "Magnification: " << magnification << std::endl;
+    std::cout << "Scale: " << scale << std::endl;
+    std::cout << "Screen dimension: " << width << "x" << height << std::endl;
+    std::cout << "d: " << d << " " << d*180*60/M_PI << std::endl;
+    std::cout << "The complete screen are " << d*180*60/M_PI*1852.216 << " meters" << std::endl;
+    std::cout << "1 pixel are " << pixelSize << " meters" << std::endl;
+    std::cout << "20 meters are " << 20/(d*180*60/M_PI*1852.216/width) << " pixels" << std::endl;*/
+
     return true;
   }
   
@@ -131,8 +187,8 @@ namespace osmscout {
   {
     assert(valid);
   
-    lon=lonMin+(lonMax-lonMin)*x/width;
-    lat=latMin+(latMax-latMin)*y/height;
+    lon=(x+lonOffset)/(scale*gradtorad);
+    lat=atan(sinh((y-height+latOffset)/scale))/gradtorad;
 
     return true;
   }
@@ -142,8 +198,8 @@ namespace osmscout {
   {
     assert(valid);
     
-    x=(lon*gradtorad-hmin)*hscale;
-    y=height-(atanh(sin(lat*gradtorad))-vmin)*vscale;
+    x=lon*scale*gradtorad-lonOffset;
+    y=height-(scale*atanh(sin(lat*gradtorad))-latOffset);
 
     return true;
   }
@@ -167,6 +223,4 @@ namespace osmscout {
     
     return pixelSize;
   }
-  
 }
-

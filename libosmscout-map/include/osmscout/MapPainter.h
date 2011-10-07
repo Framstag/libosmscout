@@ -153,19 +153,6 @@ namespace osmscout {
     };
 
   protected:
-    struct OSMSCOUT_API AreaData
-    {
-      const SegmentAttributes *attributes;
-      const FillStyle         *fillStyle;
-      size_t                  transStart;
-      size_t                  transEnd;
-
-      inline bool operator<(const AreaData& other)
-      {
-        return fillStyle->GetLayer()<other.fillStyle->GetLayer();
-      }
-    };
-
     struct OSMSCOUT_API WayData
     {
       const SegmentAttributes *attributes;
@@ -176,6 +163,7 @@ namespace osmscout {
       size_t                  transStart;
       size_t                  transEnd;
       double                  lineWidth;
+      double                  outlineWidth;
       bool                    drawBridge;
       bool                    drawTunnel;
       bool                    outline;
@@ -189,6 +177,19 @@ namespace osmscout {
         else {
           return attributes->GetLayer()<other.attributes->GetLayer();
         }
+      }
+    };
+
+    struct OSMSCOUT_API AreaData
+    {
+      const SegmentAttributes *attributes;
+      const FillStyle         *fillStyle;
+      size_t                  transStart;
+      size_t                  transEnd;
+
+      inline bool operator<(const AreaData& other)
+      {
+        return fillStyle->GetLayer()<other.fillStyle->GetLayer();
       }
     };
 

@@ -169,8 +169,8 @@ namespace osmscout {
                                       lineStyle->GetWidth());
         }
 
-        bool outline=lineStyle->GetOutline()>0 &&
-                     lineWidth-2*lineStyle->GetOutline()>=0;
+        bool outline=lineStyle->GetOutline()>0.0 &&
+                     lineWidth>2*lineStyle->GetOutline();
 
         if (outline) {
           stream << "        ." << typeInfo->GetName() << "_way_outline {";
@@ -348,7 +348,7 @@ namespace osmscout {
                0.0,
                0.0,
                1.0,
-               data.lineWidth+1,
+               data.outlineWidth+1,
                emptyDash,
                capButt,
                capButt,
@@ -361,7 +361,7 @@ namespace osmscout {
                  data.lineStyle->GetOutlineG(),
                  data.lineStyle->GetOutlineB(),
                  1.0,
-                 data.lineWidth,
+                 data.outlineWidth,
                  emptyDash,
                  data.attributes->StartIsJoint() ? capButt : capRound,
                  data.attributes->EndIsJoint() ? capButt : capRound,
@@ -376,7 +376,7 @@ namespace osmscout {
                  1.0,
                  1.0,
                  1.0,
-                 data.lineWidth,
+                 data.outlineWidth,
                  emptyDash,
                  data.attributes->StartIsJoint() ? capButt : capRound,
                  data.attributes->EndIsJoint() ? capButt : capRound,
@@ -394,7 +394,7 @@ namespace osmscout {
                  data.lineStyle->GetOutlineG(),
                  data.lineStyle->GetOutlineB(),
                  data.lineStyle->GetOutlineA(),
-                 data.lineWidth,
+                 data.outlineWidth,
                  tunnelDash,
                  data.attributes->StartIsJoint() ? capButt : capRound,
                  data.attributes->EndIsJoint() ? capButt : capRound,
@@ -409,7 +409,7 @@ namespace osmscout {
                  0.5,
                  0.5,
                  1.0,
-                 data.lineWidth,
+                 data.outlineWidth,
                  tunnelDash,
                  data.attributes->StartIsJoint() ? capButt : capRound,
                  data.attributes->EndIsJoint() ? capButt : capRound,
@@ -424,7 +424,7 @@ namespace osmscout {
                  0.5,
                  0.5,
                  1.0,
-                 data.lineWidth,
+                 data.outlineWidth,
                  tunnelDash,
                  data.attributes->StartIsJoint() ? capButt : capRound,
                  data.attributes->EndIsJoint() ? capButt : capRound,
@@ -437,7 +437,7 @@ namespace osmscout {
       DrawPath(projection,
                parameter,
                typeConfig->GetTypeInfo(data.attributes->GetType()).GetName()+"_way_outline",
-               data.lineWidth,
+               data.outlineWidth,
                data.attributes->StartIsJoint() ? capButt : capRound,
                data.attributes->EndIsJoint() ? capButt : capRound,
                data.transStart,data.transEnd);
@@ -451,13 +451,6 @@ namespace osmscout {
                               const MapParameter& parameter,
                               const WayData& data)
   {
-    double lineWidth=data.lineWidth;
-
-    if (data.outline) {
-      lineWidth-=2*data.lineStyle->GetOutline();
-    }
-
-
     if (data.drawTunnel) {
       double r,g,b,a;
 
@@ -475,7 +468,7 @@ namespace osmscout {
         DrawPath(projection,
                  parameter,
                  data.lineStyle->GetGapR(),data.lineStyle->GetGapG(),data.lineStyle->GetGapB(),data.lineStyle->GetGapA(),
-                 lineWidth,
+                 data.lineWidth,
                  emptyDash,
                  capRound,
                  capRound,
@@ -485,7 +478,7 @@ namespace osmscout {
       DrawPath(projection,
                parameter,
                r,g,b,a,
-               lineWidth,
+               data.lineWidth,
                data.lineStyle->GetDash(),
                capRound,
                capRound,
@@ -496,7 +489,7 @@ namespace osmscout {
         DrawPath(projection,
                  parameter,
                  data.lineStyle->GetGapR(),data.lineStyle->GetGapG(),data.lineStyle->GetGapB(),data.lineStyle->GetGapA(),
-                 lineWidth,
+                 data.lineWidth,
                  emptyDash,
                  capRound,
                  capRound,
@@ -506,7 +499,7 @@ namespace osmscout {
       DrawPath(projection,
                parameter,
                typeConfig->GetTypeInfo(data.attributes->GetType()).GetName()+"_way",
-               lineWidth,
+               data.lineWidth,
                capRound,
                capRound,
                data.transStart,data.transEnd);

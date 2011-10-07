@@ -932,7 +932,7 @@ namespace osmscout {
                0.0,
                0.0,
                1.0,
-               data.lineWidth+1,
+               data.outlineWidth+1,
                emptyDash,
                capButt,
                capButt,
@@ -945,7 +945,7 @@ namespace osmscout {
                  data.lineStyle->GetOutlineG(),
                  data.lineStyle->GetOutlineB(),
                  1.0,
-                 data.lineWidth,
+                 data.outlineWidth,
                  emptyDash,
                  data.attributes->StartIsJoint() ? capButt : capRound,
                  data.attributes->EndIsJoint() ? capButt : capRound,
@@ -960,7 +960,7 @@ namespace osmscout {
                  1.0,
                  1.0,
                  1.0,
-                 data.lineWidth,
+                 data.outlineWidth,
                  emptyDash,
                  data.attributes->StartIsJoint() ? capButt : capRound,
                  data.attributes->EndIsJoint() ? capButt : capRound,
@@ -978,12 +978,12 @@ namespace osmscout {
                  data.lineStyle->GetOutlineG(),
                  data.lineStyle->GetOutlineB(),
                  data.lineStyle->GetOutlineA(),
-                 data.lineWidth,
+                 data.outlineWidth,
                  tunnelDash,
                  data.attributes->StartIsJoint() ? capButt : capRound,
                  data.attributes->EndIsJoint() ? capButt : capRound,
                  data.transStart,data.transEnd);
-     }
+      }
       else if (projection.GetMagnification()>=10000) {
         // light grey dashes
 
@@ -993,7 +993,7 @@ namespace osmscout {
                  0.5,
                  0.5,
                  1.0,
-                 data.lineWidth,
+                 data.outlineWidth,
                  tunnelDash,
                  data.attributes->StartIsJoint() ? capButt : capRound,
                  data.attributes->EndIsJoint() ? capButt : capRound,
@@ -1008,7 +1008,7 @@ namespace osmscout {
                  0.5,
                  0.5,
                  1.0,
-                 data.lineWidth,
+                 data.outlineWidth,
                  tunnelDash,
                  data.attributes->StartIsJoint() ? capButt : capRound,
                  data.attributes->EndIsJoint() ? capButt : capRound,
@@ -1024,7 +1024,7 @@ namespace osmscout {
                data.lineStyle->GetOutlineG(),
                data.lineStyle->GetOutlineB(),
                data.lineStyle->GetOutlineA(),
-               data.lineWidth,
+               data.outlineWidth,
                emptyDash,
                data.attributes->StartIsJoint() ? capButt : capRound,
                data.attributes->EndIsJoint() ? capButt : capRound,
@@ -1039,12 +1039,6 @@ namespace osmscout {
                            const MapParameter& parameter,
                            const WayData& data)
   {
-    double lineWidth=data.lineWidth;
-
-    if (data.outline) {
-      lineWidth-=2*data.lineStyle->GetOutline();
-    }
-
     double r,g,b,a;
 
     if (data.outline) {
@@ -1069,11 +1063,15 @@ namespace osmscout {
       b=b+(1-b)*50/100;
     }
 
-    if (!data.lineStyle->GetDash().empty() && data.lineStyle->GetGapA()>0.0) {
+    if (!data.lineStyle->GetDash().empty() &&
+        data.lineStyle->GetGapA()>0.0) {
       DrawPath(projection,
                parameter,
-               data.lineStyle->GetGapR(),data.lineStyle->GetGapG(),data.lineStyle->GetGapB(),data.lineStyle->GetGapA(),
-               lineWidth,
+               data.lineStyle->GetGapR(),
+               data.lineStyle->GetGapG(),
+               data.lineStyle->GetGapB(),
+               data.lineStyle->GetGapA(),
+               data.lineWidth,
                emptyDash,
                capRound,
                capRound,
@@ -1083,7 +1081,7 @@ namespace osmscout {
     DrawPath(projection,
              parameter,
              r,g,b,a,
-             lineWidth,
+             data.lineWidth,
              data.lineStyle->GetDash(),
              capRound,
              capRound,
@@ -1428,10 +1426,29 @@ namespace osmscout {
                                   attributes.GetWidth()>0 ? attributes.GetWidth() : lineStyle->GetWidth());
     }
 
-    if (!IsVisible(projection,
-                  nodes,
-                  lineWidth/2)) {
-      return;
+    WayData data;
+
+    data.lineWidth=lineWidth;
+    data.outline=lineStyle->GetOutline()>0.0 &&
+                 lineWidth>2*lineStyle->GetOutline();
+
+    if (data.outline) {
+      data.outlineWidth=lineWidth+2*lineStyle->GetOutline();
+
+      if (!IsVisible(projection,
+                     nodes,
+                     data.outlineWidth/2)) {
+        return;
+      }
+    }
+    else {
+      data.outlineWidth=data.lineWidth;
+
+      if (!IsVisible(projection,
+                    nodes,
+                    lineWidth/2)) {
+        return;
+      }
     }
 
     size_t start,end;
@@ -1442,8 +1459,6 @@ namespace osmscout {
                                    start,end)) {
       return;
     }
-
-    WayData data;
 
     data.attributes=&attributes;
     data.lineStyle=lineStyle;
@@ -1495,11 +1510,8 @@ namespace osmscout {
 
     data.transStart=start;
     data.transEnd=end;
-    data.lineWidth=lineWidth;
     data.drawBridge=attributes.IsBridge();
     data.drawTunnel=attributes.IsTunnel();
-    data.outline=lineStyle->GetOutline()>0 &&
-                 lineWidth-2*lineStyle->GetOutline()>=parameter.GetOutlineMinWidth();
 
     if (data.drawBridge &&
         projection.GetMagnification()<magCity) {

@@ -71,15 +71,12 @@ namespace osmscout {
     double              lonMax;        //! Longitude of the lower right corner of the image
     double              latMax;        //! Latitude of the lower right corner of the image
     double              magnification; //! Current maginification
-    size_t              width;         //! Width fo image
+    size_t              width;         //! Width of image
     size_t              height;        //! Height of image
-    double              hmin;
-    double              hmax;
-    double              vmin;
-    double              vmax;
 
-    double              hscale;
-    double              vscale;
+    double              lonOffset;
+    double              latOffset;
+    double              scale;
 
     double              pixelSize;     //! Size of a pixel in meter
 
@@ -134,6 +131,11 @@ namespace osmscout {
     bool Set(double lon, double lat,
              double magnification,
              size_t width, size_t height);
+
+    bool Set(double lonMin, double latMin,
+             double lonMax, double latMax,
+             double magnification,
+             size_t width);
 
     bool GeoIsIn(double lon, double lat) const;
     bool GeoIsIn(double lonMin, double latMin,
