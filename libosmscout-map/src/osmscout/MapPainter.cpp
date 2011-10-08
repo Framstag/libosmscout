@@ -33,8 +33,8 @@ namespace osmscout {
     fontName("sans-serif"),
     fontSize(9.0),
     outlineMinWidth(1.0),
-    drawBridgeMagnification(magDetail),
-    drawTunnelMagnification(magDetail),
+    drawBridgeMagnification(magVeryClose),
+    drawTunnelMagnification(magVeryClose),
     optimizeWayNodes(false),
     optimizeAreaNodes(false),
     drawFadings(true),
@@ -936,50 +936,7 @@ namespace osmscout {
                                   const MapParameter& parameter,
                                   const WayData& data)
   {
-    if (data.drawBridge) {
-      // black outline for bridges
-      DrawPath(projection,
-               parameter,
-               0.0,
-               0.0,
-               0.0,
-               1.0,
-               data.outlineWidth+1,
-               emptyDash,
-               capButt,
-               capButt,
-               data.transStart,data.transEnd);
-
-      if (data.outline) {
-        DrawPath(projection,
-                 parameter,
-                 data.lineStyle->GetOutlineR(),
-                 data.lineStyle->GetOutlineG(),
-                 data.lineStyle->GetOutlineB(),
-                 1.0,
-                 data.outlineWidth,
-                 emptyDash,
-                 data.attributes->StartIsJoint() ? capButt : capRound,
-                 data.attributes->EndIsJoint() ? capButt : capRound,
-                 data.transStart,data.transEnd);
-      }
-      else if (data.lineStyle->HasDashValues() ||
-          data.lineStyle->GetLineA()<1.0 ||
-          data.lineStyle->GetAlternateA()<1.0) {
-        DrawPath(projection,
-                 parameter,
-                 1.0,
-                 1.0,
-                 1.0,
-                 1.0,
-                 data.outlineWidth,
-                 emptyDash,
-                 data.attributes->StartIsJoint() ? capButt : capRound,
-                 data.attributes->EndIsJoint() ? capButt : capRound,
-                 data.transStart,data.transEnd);
-      }
-    }
-    else if (data.drawTunnel) {
+    if (data.drawTunnel) {
       tunnelDash[0]=4.0/data.lineWidth;
       tunnelDash[1]=2.0/data.lineWidth;
 
@@ -1098,6 +1055,32 @@ namespace osmscout {
              capRound,
              capRound,
              data.transStart,data.transEnd);
+
+    if (data.drawBridge) {
+      DrawPath(projection,
+               parameter,
+               0.0,
+               0.0,
+               0.0,
+               1.0,
+               1,
+               emptyDash,
+               capButt,
+               capButt,
+               data.par1Start,data.par1End);
+
+      DrawPath(projection,
+               parameter,
+               0.0,
+               0.0,
+               0.0,
+               1.0,
+               1,
+               emptyDash,
+               capButt,
+               capButt,
+               data.par2Start,data.par2End);
+    }
 
     waysDrawn++;
   }
@@ -1539,6 +1522,17 @@ namespace osmscout {
     if (data.drawTunnel &&
         lineStyle->HasDashValues()) {
       data.drawTunnel=false;
+    }
+
+    if (data.drawBridge) {
+      bool par1=transBuffer.GenerateParallelWay(data.transStart,data.transEnd,
+                                                data.outlineWidth/2+0.5,
+                                                data.par1Start, data.par1End);
+      bool par2=transBuffer.GenerateParallelWay(data.transStart,data.transEnd,
+                                                -(data.outlineWidth/2+0.5),
+                                                data.par2Start, data.par2End);
+
+      data.drawBridge=par1 && par2;
     }
 
     waysSegments++;

@@ -422,6 +422,95 @@ namespace osmscout {
     return true;
   }
 
+  static void normalize(double x, double y, double& nx,double& ny)
+  {
+    double length=sqrt(x*x+y*y);
+
+    nx=x/length;
+    ny=y/length;
+  }
+
+  static double det(double x1, double y1, double x2,double y2)
+  {
+    return x1*y2-y1*x2;
+  }
+
+  bool TransBuffer::GenerateParallelWay(size_t orgStart, size_t orgEnd,
+                                        double offset,
+                                        size_t& start, size_t& end)
+  {
+    if (orgStart+1>orgEnd) {
+      return false;
+    }
+
+    AssureRoomForPoints(orgEnd-orgStart+1);
+
+    double oax, oay;
+    double obx, oby;
+
+    normalize(buffer[orgStart].y-buffer[orgStart+1].y,
+              buffer[orgStart+1].x-buffer[orgStart].x,
+              oax, oay);
+
+    oax=offset*oax;
+    oay=offset*oay;
+
+    buffer[usedPoints].x=buffer[orgStart].x+oax;
+    buffer[usedPoints].y=buffer[orgStart].y+oay;
+
+    start=usedPoints;
+
+    usedPoints++;
+
+    for (size_t i=orgStart+1; i<orgEnd; i++) {
+      normalize(buffer[i-1].y-buffer[i].y,
+                buffer[i].x-buffer[i-1].x,
+                oax, oay);
+
+      oax=offset*oax;
+      oay=offset*oay;
+
+      normalize(buffer[i].y-buffer[i+1].y,
+                buffer[i+1].x-buffer[i].x,
+                obx, oby);
+
+      obx=offset*obx;
+      oby=offset*oby;
+
+
+      double det1=det(obx-oax, oby-oay, buffer[i+1].x-buffer[i].x, buffer[i+1].y-buffer[i].y);
+      double det2=det(buffer[i].x-buffer[i-1].x, buffer[i].y-buffer[i-1].y,
+                      buffer[i+1].x-buffer[i].x, buffer[i+1].y-buffer[i].y);
+
+      if (det2>0.0001) {
+        buffer[usedPoints].x=buffer[i].x+oax+det1/det2*(buffer[i].x-buffer[i-1].x);
+        buffer[usedPoints].y=buffer[i].y+oay+det1/det2*(buffer[i].y-buffer[i-1].y);
+      }
+      else {
+        buffer[usedPoints].x=buffer[i].x+oax;
+        buffer[usedPoints].y=buffer[i].y+oay;
+      }
+
+      usedPoints++;
+    }
+
+    normalize(buffer[orgEnd-1].y-buffer[orgEnd].y,
+              buffer[orgEnd].x-buffer[orgEnd-1].x,
+              oax, oay);
+
+    oax=offset*oax;
+    oay=offset*oay;
+
+    buffer[usedPoints].x=buffer[orgEnd].x+oax;
+    buffer[usedPoints].y=buffer[orgEnd].y+oay;
+
+    end=usedPoints;
+
+    usedPoints++;
+
+    return true;
+  }
+
   void TransBuffer::GetBoundingBox(size_t start, size_t end,
                                    double& xmin, double& ymin,
                                    double& xmax, double& ymax) const

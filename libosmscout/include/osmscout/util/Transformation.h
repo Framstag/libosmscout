@@ -125,6 +125,11 @@ namespace osmscout {
                       bool optimize,
                       const std::vector<Point>& nodes,
                       size_t& start, size_t &end);
+
+    bool GenerateParallelWay(size_t orgStart, size_t orgEnd,
+                             double offset,
+                             size_t& start, size_t& end);
+
     void GetBoundingBox(size_t start, size_t end,
                         double& xmin, double& ymin,
                         double& xmax, double& ymax) const;

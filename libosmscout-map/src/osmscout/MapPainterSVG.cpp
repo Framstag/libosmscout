@@ -215,6 +215,16 @@ namespace osmscout {
       }
     }
 
+    stream << std::endl;
+
+    stream << "        .bridge_marker {";
+    stream << "fill:none;";
+    stream << "stroke:" << GetColorValue(0,
+                                         0,
+                                         0,
+                                         1);
+    stream << "}" << std::endl;
+
     stream << "       ]]>" << std::endl;
     stream << "    </style>" << std::endl;
     stream << "  </defs>" << std::endl;
@@ -340,50 +350,7 @@ namespace osmscout {
                                      const MapParameter& parameter,
                                      const WayData& data)
   {
-    if (data.drawBridge) {
-      // black outline for bridges
-      DrawPath(projection,
-               parameter,
-               0.0,
-               0.0,
-               0.0,
-               1.0,
-               data.outlineWidth+1,
-               emptyDash,
-               capButt,
-               capButt,
-               data.transStart,data.transEnd);
-
-      if (data.outline) {
-        DrawPath(projection,
-                 parameter,
-                 data.lineStyle->GetOutlineR(),
-                 data.lineStyle->GetOutlineG(),
-                 data.lineStyle->GetOutlineB(),
-                 1.0,
-                 data.outlineWidth,
-                 emptyDash,
-                 data.attributes->StartIsJoint() ? capButt : capRound,
-                 data.attributes->EndIsJoint() ? capButt : capRound,
-                 data.transStart,data.transEnd);
-      }
-      else if (data.lineStyle->HasDashValues() ||
-               data.lineStyle->GetLineA()<1.0 ||
-               data.lineStyle->GetAlternateA()<1.0) {
-        DrawPath(projection,
-                 parameter,
-                 1.0,
-                 1.0,
-                 1.0,
-                 1.0,
-                 data.outlineWidth,
-                 emptyDash,
-                 data.attributes->StartIsJoint() ? capButt : capRound,
-                 data.attributes->EndIsJoint() ? capButt : capRound,
-                 data.transStart,data.transEnd);
-      }
-    }
-    else if (data.drawTunnel) {
+    if (data.drawTunnel) {
       tunnelDash[0]=4.0/data.lineWidth;
       tunnelDash[1]=2.0/data.lineWidth;
 
@@ -503,6 +470,24 @@ namespace osmscout {
                capRound,
                capRound,
                data.transStart,data.transEnd);
+
+      if (data.drawBridge) {
+        DrawPath(projection,
+                 parameter,
+                 "bridge_marker",
+                 1,
+                 capButt,
+                 capButt,
+                 data.par1Start,data.par1End);
+
+        DrawPath(projection,
+                 parameter,
+                 "bridge_marker",
+                 1,
+                 capButt,
+                 capButt,
+                 data.par2Start,data.par2End);
+      }
     }
 
     waysDrawn++;

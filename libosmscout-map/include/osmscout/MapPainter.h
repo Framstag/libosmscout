@@ -172,18 +172,22 @@ namespace osmscout {
   protected:
     struct OSMSCOUT_API WayData
     {
-      const SegmentAttributes *attributes;
-      const LineStyle         *lineStyle;
-      const LabelStyle        *nameLabelStyle;
-      const LabelStyle        *refLabelStyle;
-      size_t                  prio;
-      size_t                  transStart;
-      size_t                  transEnd;
-      double                  lineWidth;
-      double                  outlineWidth;
-      bool                    drawBridge;
-      bool                    drawTunnel;
-      bool                    outline;
+      const SegmentAttributes *attributes;     //! Attributes of line segment
+      const LineStyle         *lineStyle;      //! Line style
+      const LabelStyle        *nameLabelStyle; //! LabelStyle for name
+      const LabelStyle        *refLabelStyle;  //! LabelStyle for ref
+      size_t                  prio;            //! Priority of way (from style sheet)
+      size_t                  transStart;      //! Start of coordinates in transformation buffer
+      size_t                  transEnd;        //! End of coordinates in transformation buffer
+      size_t                  par1Start;       //! Coordinates of upper line (bridge marker)
+      size_t                  par1End;         //! Coordinates of upper line (bridge marker)
+      size_t                  par2Start;       //! Coordinates of lower line (bridge marker)
+      size_t                  par2End;         //! Coordinates of lower line (bridge marker)
+      double                  lineWidth;       //! Line width
+      double                  outlineWidth;    //! Line width including outline
+      bool                    drawBridge;      //! Draw bridge marker
+      bool                    drawTunnel;      //! Draw as tunnel
+      bool                    outline;         //! Draw outline
 
       inline bool operator<(const WayData& other)
       {
@@ -199,10 +203,10 @@ namespace osmscout {
 
     struct OSMSCOUT_API AreaData
     {
-      const SegmentAttributes *attributes;
-      const FillStyle         *fillStyle;
-      size_t                  transStart;
-      size_t                  transEnd;
+      const SegmentAttributes *attributes;     //! Area attributes
+      const FillStyle         *fillStyle;      //! Fill style
+      size_t                  transStart;      //! Start of coordinates in transformation buffer
+      size_t                  transEnd;        //! End of coordinates in transformation buffer
 
       inline bool operator<(const AreaData& other)
       {
