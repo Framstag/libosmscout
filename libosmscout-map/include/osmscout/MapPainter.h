@@ -52,10 +52,14 @@ namespace osmscout {
 
     double                 outlineMinWidth;   //! Minimum width of an outline to be drawn
 
+    double                 drawBridgeMagnification; //! Starting with this magnification, we draw bridges
+    double                 drawTunnelMagnification; //! Starting with this magnification, we draw tunnels
+
     bool                   optimizeWayNodes;  //! Try to reduce the number of nodes for a way
     bool                   optimizeAreaNodes; //! Try to reduce the number of nodes for an area
 
     bool                   drawFadings;       //! Draw label fadings (default: true)
+
 
     bool                   debugPerformance;  //! Print out some performance information
 
@@ -72,6 +76,9 @@ namespace osmscout {
     void SetPatternPaths(const std::list<std::string>& paths);
 
     void SetOutlineMinWidth(double outlineMinWidth);
+
+    void SetDrawBridgeMagnification(double magnification);
+    void SetDrawTunnelMagnification(double magnification);
 
     void SetOptimizeWayNodes(bool optimize);
     void SetOptimizeAreaNodes(bool optimize);
@@ -108,6 +115,16 @@ namespace osmscout {
     inline double GetOutlineMinWidth() const
     {
       return outlineMinWidth;
+    }
+
+    inline double GetDrawBridgeMagnification() const
+    {
+      return drawBridgeMagnification;
+    }
+
+    inline double GetDrawTunnelMagnification() const
+    {
+      return drawTunnelMagnification;
     }
 
     inline bool GetOptimizeWayNodes() const

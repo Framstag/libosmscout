@@ -33,6 +33,8 @@ namespace osmscout {
     fontName("sans-serif"),
     fontSize(9.0),
     outlineMinWidth(1.0),
+    drawBridgeMagnification(magDetail),
+    drawTunnelMagnification(magDetail),
     optimizeWayNodes(false),
     optimizeAreaNodes(false),
     drawFadings(true),
@@ -69,6 +71,16 @@ namespace osmscout {
   void MapParameter::SetOutlineMinWidth(double outlineMinWidth)
   {
     this->outlineMinWidth=outlineMinWidth;
+  }
+
+  void MapParameter::SetDrawBridgeMagnification(double magnification)
+  {
+    this->drawBridgeMagnification=magnification;
+  }
+
+  void MapParameter::SetDrawTunnelMagnification(double magnification)
+  {
+    this->drawTunnelMagnification=magnification;
   }
 
   void MapParameter::SetOptimizeWayNodes(bool optimize)
@@ -1514,12 +1526,12 @@ namespace osmscout {
     data.drawTunnel=attributes.IsTunnel();
 
     if (data.drawBridge &&
-        projection.GetMagnification()<magCity) {
+        projection.GetMagnification()<parameter.GetDrawBridgeMagnification()) {
       data.drawBridge=false;
     }
 
     if (data.drawTunnel &&
-        projection.GetMagnification()<magCity) {
+        projection.GetMagnification()<parameter.GetDrawTunnelMagnification()) {
       data.drawTunnel=false;
     }
 
