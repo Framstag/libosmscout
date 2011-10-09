@@ -844,7 +844,7 @@ namespace osmscout {
       const RelationRef& relation=*r;
 
       for (size_t m=0; m<relation->roles.size(); m++) {
-        if (relation->roles[m].role=="0") {
+        if (relation->roles[m].ring==0) {
           const LabelStyle  *labelStyle=styleConfig.GetAreaLabelStyle(relation->roles[m].GetType());
           IconStyle         *iconStyle=styleConfig.GetAreaIconStyle(relation->roles[m].GetType());
           const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetAreaSymbolStyle(relation->roles[m].GetType());
@@ -1367,7 +1367,7 @@ namespace osmscout {
       for (std::vector<Relation::Role>::const_iterator r=relation->roles.begin();
           r!=relation->roles.end();
           r++) {
-        if (r->role=="0") {
+        if (r->ring==0) {
           const Relation::Role& role=*r;
 
           PrepareAreaSegment(styleConfig,

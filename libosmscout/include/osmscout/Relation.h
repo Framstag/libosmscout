@@ -42,6 +42,7 @@ namespace osmscout {
     public:
       SegmentAttributes  attributes;
       std::string        role;
+      uint8_t            ring;
       std::vector<Point> nodes;
 
     public:

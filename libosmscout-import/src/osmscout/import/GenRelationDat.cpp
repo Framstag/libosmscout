@@ -295,7 +295,7 @@ namespace osmscout {
     while (sub!=rings.end()) {
       state.SetUsed(subIndex);
       groups.push_back(*sub);
-      groups.back().role=NumberToString(id);
+      groups.back().ring=id;
 
       ConsumeSubs(rings,groups,state,subIndex,id+1);
 
@@ -507,7 +507,7 @@ namespace osmscout {
 
       state.SetUsed(topIndex);
       groups.push_back(*top);
-      groups.back().role="0";
+      groups.back().ring=0;
 
       //
       // The outer ring(s) inherit attribute values from the relation
@@ -780,6 +780,7 @@ namespace osmscout {
 
       for (size_t m=0; m<rawRel.members.size(); m++) {
         rel.roles[m].role=rawRel.members[m].role;
+        rel.roles[m].ring=0;
         rel.roles[m].attributes.layer=layer;
 
         if (!ResolveMember(typeConfig,
@@ -892,7 +893,7 @@ namespace osmscout {
         for (size_t m=0; m<rel.roles.size(); m++) {
 
           // Outer boundary inherits attributes from relation
-          if (rel.roles[m].role=="0") {
+          if (rel.roles[m].ring==0) {
             if (rel.roles[m].GetType()==typeIgnore) {
               rel.roles[m].attributes.type=rel.GetType();
             }
@@ -932,7 +933,7 @@ namespace osmscout {
       if (rel.IsArea()) {
         areaTypeCount[rel.GetType()]++;
         for (size_t i=0; i<rel.roles.size(); i++) {
-          if (rel.roles[i].role=="0") {
+          if (rel.roles[i].ring==0) {
             areaNodeTypeCount[rel.GetType()]+=rel.roles[i].nodes.size();
           }
         }

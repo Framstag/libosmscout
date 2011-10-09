@@ -39,7 +39,7 @@ namespace osmscout {
     double dx=b->point.x-a->point.x;
     double dy=b->point.y-a->point.y;
 
-    return sqrt(pow(dx,2)+pow(dy,2));
+    return sqrt(dx*dx+dy*dy);
   }
 
   /**

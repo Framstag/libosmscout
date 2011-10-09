@@ -768,7 +768,7 @@ namespace osmscout {
             std::vector<Point> ns;
 
             for (size_t i=0; i<rel->roles.size(); i++) {
-              if (rel->roles[i].role=="0") {
+              if (rel->roles[i].ring==0) {
                 Area area;
 
                 area.reference.Set(rel->GetId(),refRelation);

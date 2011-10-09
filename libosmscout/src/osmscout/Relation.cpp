@@ -125,9 +125,9 @@ namespace osmscout {
       }
 
       scanner.Read(roles[i].role);
+      scanner.Read(roles[i].ring);
 
       scanner.ReadNumber(nodesCount);
-
       if (nodesCount>0) {
         roles[i].nodes.resize(nodesCount);
 
@@ -173,6 +173,7 @@ namespace osmscout {
       }
 
       writer.Write(roles[i].role);
+      writer.Write(roles[i].ring);
 
       writer.WriteNumber((uint32_t)roles[i].nodes.size());
 
