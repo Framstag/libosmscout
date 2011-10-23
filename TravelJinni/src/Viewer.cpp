@@ -493,7 +493,7 @@ public:
             databaseTask->SetStyle(styleConfig);
           }
           else {
-            std::cerr << "Cannot load style configuration!" << std::endl;
+            std::cerr << "Cannot load style configuration '" << Lum::Base::WStringToString(currentStyle) << "'" << std::endl;
           }
         }
         else {
