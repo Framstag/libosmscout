@@ -185,6 +185,7 @@ namespace osmscout {
 
       pen.setColor(QColor::fromRgbF(1.0,1.0,1.0,label.alpha));
       pen.setWidthF(2.0);
+
       painter->setPen(pen);
 
       path.addText(QPointF(label.x,
@@ -486,10 +487,29 @@ namespace osmscout {
                               const MapParameter& parameter,
                               const MapPainter::AreaData& area)
   {
-    QPolygonF polygon;
+    QPainterPath path;
 
-    for (size_t i=area.transStart; i<=area.transEnd; i++) {
-      polygon << QPointF(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+    path.moveTo(transBuffer.buffer[area.transStart].x,transBuffer.buffer[area.transStart].y);
+    for (size_t i=area.transStart+1; i<=area.transEnd; i++) {
+      path.lineTo(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+    }
+    path.closeSubpath();
+
+    if (!area.clippings.empty()) {
+      for (std::list<PolyData>::const_iterator c=area.clippings.begin();
+          c!=area.clippings.end();
+          c++) {
+        const PolyData& data=*c;
+        QPainterPath    subpath;
+
+        subpath.moveTo(transBuffer.buffer[data.transStart].x,transBuffer.buffer[data.transStart].y);
+        for (size_t i=data.transStart+1; i<=data.transEnd; i++) {
+          subpath.lineTo(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+        }
+        path.closeSubpath();
+
+        path=path.subtracted(subpath);
+      }
     }
 
     double borderWidth=GetProjectedWidth(projection, area.fillStyle->GetBorderMinPixel(), area.fillStyle->GetBorderWidth());
@@ -527,7 +547,7 @@ namespace osmscout {
     SetBrush(parameter,
              *area.fillStyle);
 
-    painter->drawPolygon(polygon);
+    painter->drawPath(path);
   }
 
   void MapPainterQt::DrawArea(const FillStyle& style,

@@ -30,6 +30,7 @@
 
 #include <osmscout/GroundTile.h>
 #include <osmscout/Node.h>
+#include <osmscout/ObjectRef.h>
 #include <osmscout/Relation.h>
 #include <osmscout/StyleConfig.h>
 #include <osmscout/Way.h>
@@ -169,7 +170,7 @@ namespace osmscout {
       capRound
     };
 
-  protected:
+  public:
     struct OSMSCOUT_API WayData
     {
       const SegmentAttributes *attributes;     //! Attributes of line segment
@@ -201,17 +202,21 @@ namespace osmscout {
       }
     };
 
-    struct OSMSCOUT_API AreaData
+    struct OSMSCOUT_API PolyData
     {
-      const SegmentAttributes *attributes;     //! Area attributes
-      const FillStyle         *fillStyle;      //! Fill style
       size_t                  transStart;      //! Start of coordinates in transformation buffer
       size_t                  transEnd;        //! End of coordinates in transformation buffer
+    };
 
-      inline bool operator<(const AreaData& other)
-      {
-        return fillStyle->GetLayer()<other.fillStyle->GetLayer();
-      }
+    struct OSMSCOUT_API AreaData
+    {
+      ObjectRef               ref;
+      const SegmentAttributes *attributes;     //! Area attributes
+      const FillStyle         *fillStyle;      //! Fill style
+      double                  minLon;
+      size_t                  transStart;      //! Start of coordinates in transformation buffer
+      size_t                  transEnd;        //! End of coordinates in transformation buffer
+      std::list<PolyData>     clippings;       // Clipping polygons to be used during drawing of this area
     };
 
     struct OSMSCOUT_API Label
@@ -291,9 +296,10 @@ namespace osmscout {
       Private draw algorithm implementation routines.
      */
     //@{
-    void PrepareAreaSegment(const StyleConfig& styleConfig,
+    bool PrepareAreaSegment(const StyleConfig& styleConfig,
                             const Projection& projection,
                             const MapParameter& parameter,
+                            const ObjectRef& ref,
                             const SegmentAttributes& attributes,
                             const std::vector<Point>& nodes);
 

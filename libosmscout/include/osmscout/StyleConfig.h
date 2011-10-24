@@ -197,7 +197,6 @@ namespace osmscout {
 
   private:
     Style               style;
-    int                 layer;
     double              fillR;
     double              fillG;
     double              fillB;
@@ -217,7 +216,6 @@ namespace osmscout {
     FillStyle();
 
     FillStyle& SetStyle(Style style);
-    FillStyle& SetLayer(int layer);
     FillStyle& SetFillColor(double r, double g, double b, double a);
     void SetPatternId(size_t id) const;
     FillStyle& SetPattern(const std::string& pattern);
@@ -235,11 +233,6 @@ namespace osmscout {
     inline const Style& GetStyle() const
     {
       return style;
-    }
-
-    inline int GetLayer() const
-    {
-      return layer;
     }
 
     inline double GetFillR() const

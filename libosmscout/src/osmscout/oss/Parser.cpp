@@ -131,7 +131,7 @@ bool Parser::WeakSeparator(int n, int syFol, int repFol)
 }
 
 void Parser::OSS() {
-		while (!(la->kind == 0 || la->kind == 6)) {SynErr(62); Get();}
+		while (!(la->kind == 0 || la->kind == 6)) {SynErr(61); Get();}
 		Expect(6);
 		while (la->kind == 8 || la->kind == 9 || la->kind == 12) {
 			STYLE();
@@ -146,14 +146,14 @@ void Parser::STYLE() {
 			WAYSTYLE();
 		} else if (la->kind == 12) {
 			AREASTYLE();
-		} else SynErr(63);
+		} else SynErr(62);
 }
 
 void Parser::NODESTYLE() {
 		TypeId      type=typeIgnore;
 		std::string name;
 		
-		while (!(la->kind == 0 || la->kind == 8)) {SynErr(64); Get();}
+		while (!(la->kind == 0 || la->kind == 8)) {SynErr(63); Get();}
 		Expect(8);
 		Expect(5);
 		name=Destring(t->val); 
@@ -193,7 +193,7 @@ void Parser::WAYSTYLE() {
 		size_t      prio;
 		Mag         mag;
 		
-		while (!(la->kind == 0 || la->kind == 9)) {SynErr(65); Get();}
+		while (!(la->kind == 0 || la->kind == 9)) {SynErr(64); Get();}
 		Expect(9);
 		Expect(5);
 		name=Destring(t->val); 
@@ -236,7 +236,7 @@ void Parser::AREASTYLE() {
 		std::string value;
 		Mag         mag=magWorld;
 		
-		while (!(la->kind == 0 || la->kind == 12)) {SynErr(66); Get();}
+		while (!(la->kind == 0 || la->kind == 12)) {SynErr(65); Get();}
 		Expect(12);
 		Expect(5);
 		name=Destring(t->val); 
@@ -279,11 +279,11 @@ void Parser::AREASTYLE() {
 }
 
 void Parser::LABELDEF(LabelStyle& style) {
-		while (!(la->kind == 0 || la->kind == 24)) {SynErr(67); Get();}
+		while (!(la->kind == 0 || la->kind == 24)) {SynErr(66); Get();}
 		Expect(24);
 		style.SetStyle(LabelStyle::normal); 
 		if (la->kind == 14) {
-			while (!(la->kind == 0 || la->kind == 14)) {SynErr(68); Get();}
+			while (!(la->kind == 0 || la->kind == 14)) {SynErr(67); Get();}
 			Get();
 			if (la->kind == 31) {
 				LabelStyle::Style s; 
@@ -308,7 +308,7 @@ void Parser::LABELDEF(LabelStyle& style) {
 				COLOR(cr,cg,cb,ca);
 				style.SetBorderColor(cr,cg,cb,ca); 
 			}
-			if (la->kind == 57) {
+			if (la->kind == 56) {
 				double size=style.GetSize(); 
 				SIZE(size);
 				style.SetSize(size); 
@@ -318,12 +318,12 @@ void Parser::LABELDEF(LabelStyle& style) {
 				MINMAG(minMag);
 				style.SetMinMag(minMag); 
 			}
-			if (la->kind == 41) {
+			if (la->kind == 40) {
 				Mag maxMag=style.GetMaxMag(); 
 				MAXMAG(maxMag);
 				style.SetMaxMag(maxMag); 
 			}
-			if (la->kind == 42) {
+			if (la->kind == 41) {
 				Mag scaleMag=style.GetScaleAndFadeMag(); 
 				SCALEMAG(scaleMag);
 				style.SetScaleAndFadeMag(scaleMag); 
@@ -347,10 +347,10 @@ void Parser::LABELDEF(LabelStyle& style) {
 }
 
 void Parser::REFDEF(LabelStyle& style) {
-		while (!(la->kind == 0 || la->kind == 28)) {SynErr(69); Get();}
+		while (!(la->kind == 0 || la->kind == 28)) {SynErr(68); Get();}
 		Expect(28);
 		if (la->kind == 14) {
-			while (!(la->kind == 0 || la->kind == 14)) {SynErr(70); Get();}
+			while (!(la->kind == 0 || la->kind == 14)) {SynErr(69); Get();}
 			Get();
 			if (la->kind == 31) {
 				LabelStyle::Style s; 
@@ -375,7 +375,7 @@ void Parser::REFDEF(LabelStyle& style) {
 				COLOR(cr,cg,cb,ca);
 				style.SetBorderColor(cr,cg,cb,ca); 
 			}
-			if (la->kind == 57) {
+			if (la->kind == 56) {
 				double size=style.GetSize(); 
 				SIZE(size);
 				style.SetSize(size); 
@@ -385,12 +385,12 @@ void Parser::REFDEF(LabelStyle& style) {
 				MINMAG(minMag);
 				style.SetMinMag(minMag); 
 			}
-			if (la->kind == 41) {
+			if (la->kind == 40) {
 				Mag maxMag=style.GetMaxMag(); 
 				MAXMAG(maxMag);
 				style.SetMaxMag(maxMag); 
 			}
-			if (la->kind == 42) {
+			if (la->kind == 41) {
 				Mag scaleMag=style.GetScaleAndFadeMag(); 
 				SCALEMAG(scaleMag);
 				style.SetScaleAndFadeMag(scaleMag); 
@@ -418,7 +418,7 @@ void Parser::SYMBOLDEF(SymbolStyle& style) {
 		double             r,g,b,a;
 		double             size=style.GetSize();
 		
-		while (!(la->kind == 0 || la->kind == 29)) {SynErr(71); Get();}
+		while (!(la->kind == 0 || la->kind == 29)) {SynErr(70); Get();}
 		Expect(29);
 		SYMBOLSTYLE(s);
 		style.SetStyle(s); 
@@ -427,7 +427,7 @@ void Parser::SYMBOLDEF(SymbolStyle& style) {
 		DOUBLE(size);
 		style.SetSize(size); 
 		if (la->kind == 14) {
-			while (!(la->kind == 0 || la->kind == 14)) {SynErr(72); Get();}
+			while (!(la->kind == 0 || la->kind == 14)) {SynErr(71); Get();}
 			Get();
 			if (la->kind == 11) {
 				Mag minMag=style.GetMinMag(); 
@@ -438,12 +438,12 @@ void Parser::SYMBOLDEF(SymbolStyle& style) {
 }
 
 void Parser::ICONDEF(IconStyle& style) {
-		while (!(la->kind == 0 || la->kind == 30)) {SynErr(73); Get();}
+		while (!(la->kind == 0 || la->kind == 30)) {SynErr(72); Get();}
 		Expect(30);
 		Expect(1);
 		style.SetIconName(t->val); 
 		if (la->kind == 14) {
-			while (!(la->kind == 0 || la->kind == 14)) {SynErr(74); Get();}
+			while (!(la->kind == 0 || la->kind == 14)) {SynErr(73); Get();}
 			Get();
 			if (la->kind == 11) {
 				Mag minMag=style.GetMinMag(); 
@@ -465,84 +465,84 @@ void Parser::INTEGER(size_t& value) {
 
 void Parser::MAG(Mag& mag) {
 		switch (la->kind) {
-		case 44: {
+		case 43: {
 			Get();
 			mag=magWorld; 
 			break;
 		}
-		case 45: {
+		case 44: {
 			Get();
 			mag=magContinent; 
 			break;
 		}
-		case 46: {
+		case 45: {
 			Get();
 			mag=magState; 
 			break;
 		}
-		case 47: {
+		case 46: {
 			Get();
 			mag=magStateOver; 
 			break;
 		}
-		case 48: {
+		case 47: {
 			Get();
 			mag=magCounty; 
 			break;
 		}
-		case 49: {
+		case 48: {
 			Get();
 			mag=magRegion; 
 			break;
 		}
-		case 50: {
+		case 49: {
 			Get();
 			mag=magProximity; 
 			break;
 		}
-		case 51: {
+		case 50: {
 			Get();
 			mag=magCityOver; 
 			break;
 		}
-		case 52: {
+		case 51: {
 			Get();
 			mag=magCity; 
 			break;
 		}
-		case 53: {
+		case 52: {
 			Get();
 			mag=magSuburb; 
 			break;
 		}
-		case 54: {
+		case 53: {
 			Get();
 			mag=magDetail; 
 			break;
 		}
-		case 55: {
+		case 54: {
 			Get();
 			mag=magClose; 
 			break;
 		}
-		case 56: {
+		case 55: {
 			Get();
 			mag=magVeryClose; 
 			break;
 		}
-		default: SynErr(75); break;
+		default: SynErr(74); break;
 		}
 }
 
 void Parser::LINEDEF(LineStyle& style) {
 		double r,g,b,a;
 		
-		while (!(la->kind == 0 || la->kind == 13)) {SynErr(76); Get();}
+		while (!(la->kind == 0 || la->kind == 13)) {SynErr(75); Get();}
 		Expect(13);
 		COLOR(r,g,b,a);
 		style.SetLineColor(r,g,b,a); 
 		if (la->kind == 14) {
-			while (!(la->kind == 0 || la->kind == 14)) {SynErr(77); Get();}
+			while (!(la->kind == 0 || la->kind == 14)) {SynErr(76); Get();}
 			Get();
 			if (la->kind == 15) {
 				double cr,cg,cb,ca; 
@@ -573,12 +573,12 @@ void Parser::LINEDEF(LineStyle& style) {
 					style.SetGapColor(cr,cg,cb,ca); 
 				}
 			}
-			if (la->kind == 58) {
+			if (la->kind == 57) {
 				double minPixel=style.GetMinPixel(); 
 				MINPIXEL(minPixel);
 				style.SetMinPixel(minPixel); 
 			}
-			if (la->kind == 59) {
+			if (la->kind == 58) {
 				double width=style.GetWidth(); 
 				WIDTH(width);
 				style.SetWidth(width); 
@@ -587,7 +587,7 @@ void Parser::LINEDEF(LineStyle& style) {
 				Get();
 				style.SetFixedWidth(true); 
 			}
-			if (la->kind == 60) {
+			if (la->kind == 59) {
 				double outline=style.GetOutline(); 
 				OUTLINE(outline);
 				style.SetOutline(outline); 
@@ -598,26 +598,17 @@ void Parser::LINEDEF(LineStyle& style) {
 void Parser::FILLDEF(FillStyle& style) {
 		double r,g,b,a;
 		
-		while (!(la->kind == 0 || la->kind == 21)) {SynErr(78); Get();}
+		while (!(la->kind == 0 || la->kind == 21)) {SynErr(77); Get();}
 		Expect(21);
 		COLOR(r,g,b,a);
 		style.SetFillColor(r,g,b,a); 
-		if (la->kind == 14) {
-			while (!(la->kind == 0 || la->kind == 14)) {SynErr(79); Get();}
-			Get();
-			if (la->kind == 40) {
-				int layer=style.GetLayer(); 
-				LAYER(layer);
-				style.SetLayer(layer); 
-			}
-		}
 		if (la->kind == 22) {
-			while (!(la->kind == 0 || la->kind == 22)) {SynErr(80); Get();}
+			while (!(la->kind == 0 || la->kind == 22)) {SynErr(78); Get();}
 			Get();
 			Expect(5);
 			style.SetPattern(Destring(t->val)); 
 			if (la->kind == 14) {
-				while (!(la->kind == 0 || la->kind == 14)) {SynErr(81); Get();}
+				while (!(la->kind == 0 || la->kind == 14)) {SynErr(79); Get();}
 				Get();
 				if (la->kind == 11) {
 					Mag minMag=style.GetPatternMinMag(); 
@@ -627,12 +618,12 @@ void Parser::FILLDEF(FillStyle& style) {
 			}
 		}
 		if (la->kind == 23) {
-			while (!(la->kind == 0 || la->kind == 23)) {SynErr(82); Get();}
+			while (!(la->kind == 0 || la->kind == 23)) {SynErr(80); Get();}
 			Get();
 			COLOR(r,g,b,a);
 			style.SetBorderColor(r,g,b,a); 
 			if (la->kind == 14) {
-				while (!(la->kind == 0 || la->kind == 14)) {SynErr(83); Get();}
+				while (!(la->kind == 0 || la->kind == 14)) {SynErr(81); Get();}
 				Get();
 				if (la->kind == 17) {
 					double dash; 
@@ -645,12 +636,12 @@ void Parser::FILLDEF(FillStyle& style) {
 						style.AddBorderDashValue(dash); 
 					}
 				}
-				if (la->kind == 58) {
+				if (la->kind == 57) {
 					double minPixel=style.GetBorderMinPixel(); 
 					MINPIXEL(minPixel);
 					style.SetBorderMinPixel(minPixel); 
 				}
-				if (la->kind == 59) {
+				if (la->kind == 58) {
 					double width=style.GetBorderWidth(); 
 					WIDTH(width);
 					style.SetBorderWidth(width); 
@@ -691,33 +682,22 @@ void Parser::DOUBLE(double& value) {
 			 SemErr(e.c_str());
 			}
 			
-		} else SynErr(84);
+		} else SynErr(82);
 }
 
 void Parser::MINPIXEL(double& value) {
-		Expect(58);
+		Expect(57);
 		DOUBLE(value);
 }
 
 void Parser::WIDTH(double& value) {
-		Expect(59);
+		Expect(58);
 		DOUBLE(value);
 }
 
 void Parser::OUTLINE(double& value) {
-		Expect(60);
+		Expect(59);
 		DOUBLE(value);
-}
-
-void Parser::LAYER(int& layer) {
-		Expect(40);
-		Expect(2);
-		if (!StringToNumber(t->val,layer)) {
-		 std::string e="Cannot parse number '"+std::string(t->val)+"'";
-		
-		 SemErr(e.c_str());
-		}
-		
 }
 
 void Parser::MINMAG(Mag& mag) {
@@ -739,22 +719,22 @@ void Parser::LABELSTYLE(LabelStyle::Style& style) {
 		} else if (la->kind == 35) {
 			Get();
 			style=LabelStyle::emphasize; 
-		} else SynErr(85);
+		} else SynErr(83);
 }
 
 void Parser::SIZE(double& value) {
-		Expect(57);
+		Expect(56);
 		DOUBLE(value);
 }
 
 void Parser::MAXMAG(Mag& mag) {
-		Expect(41);
+		Expect(40);
 		MAG(mag);
 }
 
 void Parser::SCALEMAG(Mag& mag) {
+		Expect(41);
 		Expect(42);
-		Expect(43);
 		MAG(mag);
 }
 
@@ -771,7 +751,7 @@ void Parser::SYMBOLSTYLE(SymbolStyle::Style& style) {
 		} else if (la->kind == 39) {
 			Get();
 			style=SymbolStyle::circle; 
-		} else SynErr(86);
+		} else SynErr(84);
 }
 
 
@@ -790,7 +770,7 @@ Parser::Parser(Scanner *scanner,
                StyleConfig& config)
  : config(config)
 {
-	maxT = 61;
+	maxT = 60;
 
   dummyToken = NULL;
   t = la = NULL;
@@ -805,10 +785,10 @@ bool Parser::StartOf(int s)
   const bool T = true;
   const bool x = false;
 
-	static bool set[3][63] = {
-		{T,x,x,x, x,x,T,x, T,T,x,x, T,T,T,x, x,x,x,x, x,T,T,T, T,x,x,x, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, T,x,x,x, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x}
+	static bool set[3][62] = {
+		{T,x,x,x, x,x,T,x, T,T,x,x, T,T,T,x, x,x,x,x, x,T,T,T, T,x,x,x, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, T,x,x,x, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
 	};
 
 
@@ -871,53 +851,51 @@ void Errors::SynErr(int line, int col, int n)
 			case 37: s = coco_string_create("\"box\" expected"); break;
 			case 38: s = coco_string_create("\"triangle\" expected"); break;
 			case 39: s = coco_string_create("\"circle\" expected"); break;
-			case 40: s = coco_string_create("\"LAYER\" expected"); break;
-			case 41: s = coco_string_create("\"MAXMAG\" expected"); break;
-			case 42: s = coco_string_create("\"FADE\" expected"); break;
-			case 43: s = coco_string_create("\"AT\" expected"); break;
-			case 44: s = coco_string_create("\"world\" expected"); break;
-			case 45: s = coco_string_create("\"continent\" expected"); break;
-			case 46: s = coco_string_create("\"state\" expected"); break;
-			case 47: s = coco_string_create("\"stateOver\" expected"); break;
-			case 48: s = coco_string_create("\"county\" expected"); break;
-			case 49: s = coco_string_create("\"region\" expected"); break;
-			case 50: s = coco_string_create("\"proximity\" expected"); break;
-			case 51: s = coco_string_create("\"cityOver\" expected"); break;
-			case 52: s = coco_string_create("\"city\" expected"); break;
-			case 53: s = coco_string_create("\"suburb\" expected"); break;
-			case 54: s = coco_string_create("\"detail\" expected"); break;
-			case 55: s = coco_string_create("\"close\" expected"); break;
-			case 56: s = coco_string_create("\"veryClose\" expected"); break;
-			case 57: s = coco_string_create("\"SIZE\" expected"); break;
-			case 58: s = coco_string_create("\"MINPIXEL\" expected"); break;
-			case 59: s = coco_string_create("\"WIDTH\" expected"); break;
-			case 60: s = coco_string_create("\"OUTLINE\" expected"); break;
-			case 61: s = coco_string_create("??? expected"); break;
-			case 62: s = coco_string_create("this symbol not expected in OSS"); break;
-			case 63: s = coco_string_create("invalid STYLE"); break;
-			case 64: s = coco_string_create("this symbol not expected in NODESTYLE"); break;
-			case 65: s = coco_string_create("this symbol not expected in WAYSTYLE"); break;
-			case 66: s = coco_string_create("this symbol not expected in AREASTYLE"); break;
+			case 40: s = coco_string_create("\"MAXMAG\" expected"); break;
+			case 41: s = coco_string_create("\"FADE\" expected"); break;
+			case 42: s = coco_string_create("\"AT\" expected"); break;
+			case 43: s = coco_string_create("\"world\" expected"); break;
+			case 44: s = coco_string_create("\"continent\" expected"); break;
+			case 45: s = coco_string_create("\"state\" expected"); break;
+			case 46: s = coco_string_create("\"stateOver\" expected"); break;
+			case 47: s = coco_string_create("\"county\" expected"); break;
+			case 48: s = coco_string_create("\"region\" expected"); break;
+			case 49: s = coco_string_create("\"proximity\" expected"); break;
+			case 50: s = coco_string_create("\"cityOver\" expected"); break;
+			case 51: s = coco_string_create("\"city\" expected"); break;
+			case 52: s = coco_string_create("\"suburb\" expected"); break;
+			case 53: s = coco_string_create("\"detail\" expected"); break;
+			case 54: s = coco_string_create("\"close\" expected"); break;
+			case 55: s = coco_string_create("\"veryClose\" expected"); break;
+			case 56: s = coco_string_create("\"SIZE\" expected"); break;
+			case 57: s = coco_string_create("\"MINPIXEL\" expected"); break;
+			case 58: s = coco_string_create("\"WIDTH\" expected"); break;
+			case 59: s = coco_string_create("\"OUTLINE\" expected"); break;
+			case 60: s = coco_string_create("??? expected"); break;
+			case 61: s = coco_string_create("this symbol not expected in OSS"); break;
+			case 62: s = coco_string_create("invalid STYLE"); break;
+			case 63: s = coco_string_create("this symbol not expected in NODESTYLE"); break;
+			case 64: s = coco_string_create("this symbol not expected in WAYSTYLE"); break;
+			case 65: s = coco_string_create("this symbol not expected in AREASTYLE"); break;
+			case 66: s = coco_string_create("this symbol not expected in LABELDEF"); break;
 			case 67: s = coco_string_create("this symbol not expected in LABELDEF"); break;
-			case 68: s = coco_string_create("this symbol not expected in LABELDEF"); break;
+			case 68: s = coco_string_create("this symbol not expected in REFDEF"); break;
 			case 69: s = coco_string_create("this symbol not expected in REFDEF"); break;
-			case 70: s = coco_string_create("this symbol not expected in REFDEF"); break;
+			case 70: s = coco_string_create("this symbol not expected in SYMBOLDEF"); break;
 			case 71: s = coco_string_create("this symbol not expected in SYMBOLDEF"); break;
-			case 72: s = coco_string_create("this symbol not expected in SYMBOLDEF"); break;
+			case 72: s = coco_string_create("this symbol not expected in ICONDEF"); break;
 			case 73: s = coco_string_create("this symbol not expected in ICONDEF"); break;
-			case 74: s = coco_string_create("this symbol not expected in ICONDEF"); break;
-			case 75: s = coco_string_create("invalid MAG"); break;
+			case 74: s = coco_string_create("invalid MAG"); break;
+			case 75: s = coco_string_create("this symbol not expected in LINEDEF"); break;
 			case 76: s = coco_string_create("this symbol not expected in LINEDEF"); break;
-			case 77: s = coco_string_create("this symbol not expected in LINEDEF"); break;
+			case 77: s = coco_string_create("this symbol not expected in FILLDEF"); break;
 			case 78: s = coco_string_create("this symbol not expected in FILLDEF"); break;
 			case 79: s = coco_string_create("this symbol not expected in FILLDEF"); break;
 			case 80: s = coco_string_create("this symbol not expected in FILLDEF"); break;
 			case 81: s = coco_string_create("this symbol not expected in FILLDEF"); break;
-			case 82: s = coco_string_create("this symbol not expected in FILLDEF"); break;
-			case 83: s = coco_string_create("this symbol not expected in FILLDEF"); break;
-			case 84: s = coco_string_create("invalid DOUBLE"); break;
-			case 85: s = coco_string_create("invalid LABELSTYLE"); break;
-			case 86: s = coco_string_create("invalid SYMBOLSTYLE"); break;
+			case 82: s = coco_string_create("invalid DOUBLE"); break;
+			case 83: s = coco_string_create("invalid LABELSTYLE"); break;
+			case 84: s = coco_string_create("invalid SYMBOLSTYLE"); break;
 
     default:
     {

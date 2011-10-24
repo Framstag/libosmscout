@@ -30,6 +30,7 @@
   level directory):
 
   src/DrawMapAgg ../TravelJinni/ ../TravelJinni/standard.oss 640 480 7.13 50.69 10000 test.ppm
+  src/DrawMapAgg ../TravelJinni/ ../TravelJinni/standard.oss 640 480 7.45274 51.49256 50000 test.ppm
 */
 
 bool write_ppm(const unsigned char* buf,

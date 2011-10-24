@@ -32,6 +32,7 @@
 
   src/DrawMapSVG ../TravelJinni/ ../TravelJinni/standard.oss 51.2 6.5 51.7 8 1000 1000 test.svg
   src/DrawMapSVG ../TravelJinni/ ../TravelJinni/standard.oss 51.565 7.45 51.58 7.47 40000 1000 test.svg
+  src/DrawMapSVG ../TravelJinni/ ../TravelJinni/standard.oss 51.48 7.45 51.50 7.47 40000 1000 test.svg
 */
 
 int main(int argc, char* argv[])

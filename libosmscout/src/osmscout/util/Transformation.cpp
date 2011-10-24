@@ -362,17 +362,14 @@ namespace osmscout {
     }
   }
 
-  bool TransBuffer::TransformArea(const Projection& projection,
-                     bool optimize,
-                     const std::vector<Point>& nodes,
-                     size_t& start, size_t &end)
+  void TransBuffer::TransformArea(const Projection& projection,
+                                  bool optimize,
+                                  const std::vector<Point>& nodes,
+                                  size_t& start, size_t &end)
   {
     transPolygon.TransformArea(projection, optimize,nodes);
 
-    if (transPolygon.IsEmpty())
-    {
-      return false;
-    }
+    assert(!transPolygon.IsEmpty());
 
     AssureRoomForPoints(transPolygon.GetLength());
 
@@ -388,8 +385,6 @@ namespace osmscout {
     }
 
     end=usedPoints-1;
-
-    return true;
   }
 
   bool TransBuffer::TransformWay(const Projection& projection,

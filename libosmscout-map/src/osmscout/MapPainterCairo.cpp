@@ -813,6 +813,8 @@ namespace osmscout {
                                  const MapParameter& parameter,
                                  const MapPainter::AreaData& area)
   {
+    cairo_save(draw);
+
     if (area.fillStyle->HasPattern() &&
         projection.GetMagnification()>=area.fillStyle->GetPatternMinMag() &&
         HasPattern(parameter,*area.fillStyle)) {
@@ -830,17 +832,34 @@ namespace osmscout {
       cairo_set_line_width(draw,1);
     }
 
-    for (size_t i=area.transStart; i<=area.transEnd; i++) {
-      if (i==area.transStart) {
-        cairo_new_path(draw);
-        cairo_move_to(draw,transBuffer.buffer[i].x,transBuffer.buffer[i].y);
-      }
-      else {
-        cairo_line_to(draw,transBuffer.buffer[i].x,transBuffer.buffer[i].y);
-      }
+    if (!area.clippings.empty()) {
+      cairo_set_fill_rule (draw,CAIRO_FILL_RULE_EVEN_ODD);
     }
 
-    cairo_line_to(draw,transBuffer.buffer[area.transStart].x,transBuffer.buffer[area.transStart].y);
+    cairo_new_path(draw);
+    cairo_move_to(draw,transBuffer.buffer[area.transStart].x,transBuffer.buffer[area.transStart].y);
+    for (size_t i=area.transStart+1; i<=area.transEnd; i++) {
+      cairo_line_to(draw,transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+    }
+    cairo_close_path(draw);
+
+    if (!area.clippings.empty()) {
+      // Clip areas within the area by using CAIRO_FILL_RULE_EVEN_ODD
+      for (std::list<PolyData>::const_iterator c=area.clippings.begin();
+          c!=area.clippings.end();
+          c++) {
+        const PolyData& data=*c;
+
+        cairo_new_sub_path(draw);
+        cairo_move_to(draw,transBuffer.buffer[data.transStart].x,transBuffer.buffer[data.transStart].y);
+        for (size_t i=data.transStart+1; i<=data.transEnd; i++) {
+          cairo_line_to(draw,transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+        }
+        cairo_close_path(draw);
+
+        cairo_fill(draw);
+      }
+    }
 
     cairo_fill_preserve(draw);
 
@@ -860,6 +879,8 @@ namespace osmscout {
 
       cairo_stroke(draw);
     }
+
+    cairo_restore(draw);
   }
 
   void MapPainterCairo::DrawArea(const FillStyle& style,

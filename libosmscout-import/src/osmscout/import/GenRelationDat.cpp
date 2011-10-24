@@ -851,12 +851,13 @@ namespace osmscout {
       // outer boundaries
       if (rel.IsArea()) {
         for (size_t m=0; m<rel.roles.size(); m++) {
+          /*
           if (rel.roles[m].role=="outer" ||
               rel.roles[m].role=="") {
-            if (rel.roles[m].GetType()==rel.GetType()) {
+            if (rel.roles[m].GetType()==rel.GetType()) {*/
               wayAreaIndexBlacklist.insert(rawRel.members[m].id);
-            }
-          }
+          /*  }
+          }*/
         }
       }
       else if (typeConfig.GetTypeInfo(rel.GetType()).GetConsumeChildren()) {

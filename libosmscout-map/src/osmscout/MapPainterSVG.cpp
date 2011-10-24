@@ -118,6 +118,7 @@ namespace osmscout {
         stream << "        ." << typeInfo->GetName() << "_area {";
 
         stream << "fill:" << GetColorValue(fillStyle->GetFillR(),fillStyle->GetFillG(),fillStyle->GetFillB(),fillStyle->GetFillA());
+        stream << ";fillRule:nonzero";
 
         double borderWidth=GetProjectedWidth(projection, 0, fillStyle->GetBorderWidth());
 
@@ -169,34 +170,20 @@ namespace osmscout {
                                       lineStyle->GetWidth());
         }
 
-        bool outline=lineStyle->GetOutline()>0.0 &&
-                     lineWidth>2*lineStyle->GetOutline();
+        stream << "        ." << typeInfo->GetName() << "_way_outline {";
+        stream << "fill:none;";
+        stream << "stroke:" << GetColorValue(lineStyle->GetOutlineR(),
+                                             lineStyle->GetOutlineG(),
+                                             lineStyle->GetOutlineB(),
+                                             lineStyle->GetOutlineA());
+        stream << "}" << std::endl;
 
-        if (outline) {
-          stream << "        ." << typeInfo->GetName() << "_way_outline {";
-          stream << "fill:none;";
-          stream << "stroke:" << GetColorValue(lineStyle->GetOutlineR(),
-                                               lineStyle->GetOutlineG(),
-                                               lineStyle->GetOutlineB(),
-                                               lineStyle->GetOutlineA());
-          stream << "}" << std::endl;
-
-          stream << "        ." << typeInfo->GetName() << "_way {";
-          stream << "fill:none;";
-          stream << "stroke:" << GetColorValue(lineStyle->GetLineR(),
-                                               lineStyle->GetLineG(),
-                                               lineStyle->GetLineB(),
-                                               lineStyle->GetLineA());
-        }
-        else {
-          stream << "        ." << typeInfo->GetName() << "_way {";
-          stream << "fill:none;";
-          stream << "stroke:" << GetColorValue(lineStyle->GetAlternateR(),
-                                               lineStyle->GetAlternateG(),
-                                               lineStyle->GetAlternateB(),
-                                               lineStyle->GetAlternateA());
-        }
-
+        stream << "        ." << typeInfo->GetName() << "_way {";
+        stream << "fill:none;";
+        stream << "stroke:" << GetColorValue(lineStyle->GetLineR(),
+                                             lineStyle->GetLineG(),
+                                             lineStyle->GetLineB(),
+                                             lineStyle->GetLineA());
 
         if (lineStyle->HasDashValues()) {
           stream << ";stroke-dasharray:";
@@ -497,16 +484,30 @@ namespace osmscout {
                                const MapParameter& parameter,
                                const MapPainter::AreaData& area)
   {
-    stream << "    <polygon class=\"" << typeConfig->GetTypeInfo(area.attributes->GetType()).GetName() << "_area\"" << std::endl;
-    stream << "             points=\"";
+    stream << "    <path class=\"" << typeConfig->GetTypeInfo(area.attributes->GetType()).GetName() << "_area\"" << std::endl;
 
-    for (size_t i=area.transStart; i<=area.transEnd; i++) {
-      if (i!=area.transStart) {
-        stream << " ";
+    if (!area.clippings.empty()) {
+      stream << "          fillRule=\"evenodd\"";
+    }
+
+    stream << "          d=\"";
+
+    stream << "M " << transBuffer.buffer[area.transStart].x << " " << transBuffer.buffer[area.transStart].y;
+    for (size_t i=area.transStart+1; i<=area.transEnd; i++) {
+      stream << " L " << transBuffer.buffer[i].x << " " << transBuffer.buffer[i].y;
+    }
+    stream << " Z";
+
+    for (std::list<PolyData>::const_iterator c=area.clippings.begin();
+        c!=area.clippings.end();
+        c++) {
+      const PolyData    &data=*c;
+
+      stream << "M " << transBuffer.buffer[data.transStart].x << " " << transBuffer.buffer[data.transStart].y;
+      for (size_t i=data.transStart+1; i<=data.transEnd; i++) {
+        stream << " L " << transBuffer.buffer[i].x << " " << transBuffer.buffer[i].y;
       }
-
-      stream << transBuffer.buffer[i].x << "," << transBuffer.buffer[i].y;
-
+      stream << " Z";
     }
 
     stream << "\" />" << std::endl;

@@ -117,7 +117,7 @@ namespace osmscout {
 
     void Reset();
 
-    bool TransformArea(const Projection& projection,
+    void TransformArea(const Projection& projection,
                        bool optimize,
                        const std::vector<Point>& nodes,
                        size_t& start, size_t &end);

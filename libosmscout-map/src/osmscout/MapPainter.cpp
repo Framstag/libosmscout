@@ -28,6 +28,11 @@
 
 namespace osmscout {
 
+  static inline bool AreaSortByLon(const MapPainter::AreaData& a, const MapPainter::AreaData& b)
+  {
+    return a.minLon<b.minLon;
+  }
+
   MapParameter::MapParameter()
   : dpi(96.0),
     fontName("sans-serif"),
@@ -1302,9 +1307,10 @@ namespace osmscout {
     }
   }
 
-  void MapPainter::PrepareAreaSegment(const StyleConfig& styleConfig,
+  bool MapPainter::PrepareAreaSegment(const StyleConfig& styleConfig,
                                       const Projection& projection,
                                       const MapParameter& parameter,
+                                      const ObjectRef& ref,
                                       const SegmentAttributes& attributes,
                                       const std::vector<Point>& nodes)
   {
@@ -1312,32 +1318,39 @@ namespace osmscout {
 
     if (fillStyle==NULL)
     {
-      return;
+      return false;
     }
 
     if (!IsVisible(projection, nodes, fillStyle->GetBorderWidth()/2)) {
-      return;
+      return false;
     }
 
     size_t start,end;
 
-    if (!transBuffer.TransformArea(projection,
-                                   parameter.GetOptimizeAreaNodes(),
-                                   nodes,
-                                   start,end)) {
-      return;
-    }
+    transBuffer.TransformArea(projection,
+                              parameter.GetOptimizeAreaNodes(),
+                              nodes,
+                              start,end);
 
     AreaData data;
 
+    data.ref=ref;
     data.attributes=&attributes;
     data.fillStyle=fillStyle;
     data.transStart=start;
     data.transEnd=end;
 
+    data.minLon=nodes[0].lon;
+
+    for (size_t i=1; i<nodes.size(); i++) {
+      data.minLon=std::min(data.minLon,nodes[i].lon);
+    }
+
     areaData.push_back(data);
 
     areasSegments++;
+
+    return true;
   }
 
   void MapPainter::PrepareAreas(const StyleConfig& styleConfig,
@@ -1347,6 +1360,7 @@ namespace osmscout {
   {
     areaData.clear();
 
+    // Simple areas
     for (std::vector<WayRef>::const_iterator a=data.areas.begin();
          a!=data.areas.end();
          ++a) {
@@ -1355,30 +1369,12 @@ namespace osmscout {
       PrepareAreaSegment(styleConfig,
                          projection,
                          parameter,
+                         ObjectRef(area->GetId(),refWay),
                          area->GetAttributes(),
                          area->nodes);
     }
 
-    for (std::vector<RelationRef>::const_iterator r=data.relationAreas.begin();
-         r!=data.relationAreas.end();
-         ++r) {
-      const RelationRef& relation=*r;
-
-      for (std::vector<Relation::Role>::const_iterator r=relation->roles.begin();
-          r!=relation->roles.end();
-          r++) {
-        if (r->ring==0) {
-          const Relation::Role& role=*r;
-
-          PrepareAreaSegment(styleConfig,
-                             projection,
-                             parameter,
-                             role.GetAttributes(),
-                             role.nodes);
-        }
-      }
-    }
-
+    // external Ways that are of type 'area'
     for (std::list<WayRef>::const_iterator p=data.poiWays.begin();
          p!=data.poiWays.end();
          ++p) {
@@ -1388,12 +1384,91 @@ namespace osmscout {
         PrepareAreaSegment(styleConfig,
                            projection,
                            parameter,
+                           ObjectRef(area->GetId(),refWay),
                            area->GetAttributes(),
                            area->nodes);
       }
     }
 
-    areaData.sort();
+    //Relations
+    for (std::vector<RelationRef>::const_iterator a=data.relationAreas.begin();
+         a!=data.relationAreas.end();
+         ++a) {
+      const RelationRef& relation=*a;
+
+      std::vector<PolyData> data(relation->roles.size());
+
+      for (size_t i=0; i<relation->roles.size(); i++) {
+        transBuffer.TransformArea(projection,
+                                  parameter.GetOptimizeAreaNodes(),
+                                  relation->roles[i].nodes,
+                                  data[i].transStart,data[i].transEnd);
+      }
+
+      size_t ring=0;
+      bool foundRing=true;
+
+      while (foundRing) {
+        std::list<size_t>   roles;
+        std::list<PolyData> clippings;
+
+        for (size_t i=0; i<relation->roles.size(); i++) {
+          const Relation::Role& role=relation->roles[i];
+
+          if (role.ring==ring && role.GetType()!=typeIgnore)
+          {
+            roles.push_back(i);
+          }
+          else if (role.ring==ring+1 && role.GetType()==typeIgnore) {
+            clippings.push_back(data[i]);
+          }
+        }
+
+        for (std::list<size_t>::const_iterator r=roles.begin();
+            r!=roles.end();
+            r++) {
+          const Relation::Role& role=relation->roles[*r];
+
+          const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(role.attributes.GetType());
+
+          if (fillStyle==NULL)
+          {
+            continue;
+          }
+
+          if (!IsVisible(projection, role.nodes, fillStyle->GetBorderWidth()/2)) {
+            continue;
+          }
+
+          AreaData a;
+
+          a.ref=ObjectRef(relation->GetId(),refRelation);
+          a.attributes=&role.attributes;
+          a.fillStyle=fillStyle;
+          a.transStart=data[*r].transStart;
+          a.transEnd=data[*r].transEnd;
+
+          a.minLon=role.nodes[0].lon;
+
+          for (size_t i=1; i<role.nodes.size(); i++) {
+            a.minLon=std::min(a.minLon,role.nodes[i].lon);
+          }
+
+          a.clippings=clippings;
+
+          areaData.push_back(a);
+
+          areasSegments++;
+        }
+
+
+        foundRing=!roles.empty();
+
+        ring++;
+      }
+    }
+
+    areaData.sort(AreaSortByLon);
   }
 
   void MapPainter::PrepareWaySegment(const StyleConfig& styleConfig,
@@ -1448,12 +1523,10 @@ namespace osmscout {
 
     size_t start,end;
 
-    if (!transBuffer.TransformArea(projection,
-                                   parameter.GetOptimizeAreaNodes(),
-                                   nodes,
-                                   start,end)) {
-      return;
-    }
+    transBuffer.TransformArea(projection,
+                              parameter.GetOptimizeAreaNodes(),
+                              nodes,
+                              start,end);
 
     data.attributes=&attributes;
     data.lineStyle=lineStyle;

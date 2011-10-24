@@ -62,7 +62,7 @@ OSS
     LABEL WITH STYLE contour MINMAG close
 
   AREA "highway_service"
-    FILL #ffffff WITH LAYER 1 BORDER #cccccc WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #ffffff BORDER #cccccc WITH MINPIXEL 0.5 WIDTH 0.5
     LABEL WITH MINMAG close
 
   WAY "highway_track" PRIO 11 MINMAG close
@@ -74,7 +74,7 @@ OSS
     LABEL WITH STYLE contour MINMAG close
 
   AREA "highway_pedestrian"
-    FILL #ededed WITH LAYER 1 BORDER #c5c5c5 WITH MINPIXEL 0.5
+    FILL #ededed BORDER #c5c5c5 WITH MINPIXEL 0.5
     LABEL WITH MINMAG close
 
   NODE "highway_services"
@@ -194,11 +194,11 @@ OSS
     LABEL WITH STYLE contour MINMAG veryClose
 
   AREA "public_transport_platform" MINMAG close
-    FILL #9b9b9c WITH LAYER 2 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #9b9b9c BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
     LABEL WITH STYLE normal COLOR #524a4a SIZE 0.8 MINMAG veryClose
 
   AREA "landuse_farm"
-    FILL #ead8bd WITH LAYER 2
+    FILL #ead8bd
     LABEL WITH MINMAG city
 
   AREA "landuse_farmland"
@@ -206,11 +206,11 @@ OSS
     LABEL WITH MINMAG city
 
   AREA "landuse_farmyard_building"
-    FILL #bcbcbc WITH LAYER 2 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #bcbcbc BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
     LABEL WITH MINMAG city
 
   AREA "landuse_farmyard"
-    FILL #dcbe92 WITH LAYER 1
+    FILL #dcbe92
     LABEL WITH MINMAG city
 
   AREA "landuse_quarry"
@@ -222,15 +222,15 @@ OSS
     LABEL WITH MINMAG city
 
   AREA "landuse_basin"
-    FILL #b3d1d4 WITH LAYER 1
+    FILL #b3d1d4 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
     LABEL WITH MINMAG detail
 
   AREA "landuse_reservoir"
-    FILL #b4d5f0 WITH LAYER 1
+    FILL #b4d5f0
     LABEL WITH MINMAG detail
 
   AREA "landuse_forest"
-    FILL #8dc56c WITH LAYER 1 PATTERN "forest" WITH MINMAG cityOver
+    FILL #8dc56c PATTERN "forest" WITH MINMAG cityOver
     LABEL WITH STYLE emphasize MINMAG city
 
   AREA "landuse_allotments"
@@ -267,11 +267,11 @@ OSS
     LABEL WITH MINMAG city
 
   AREA "landuse_greenfield"
-    FILL #dcdcc8 WITH LAYER 1
+    FILL #dcdcc8
     LABEL WITH MINMAG city
 
   AREA "landuse_railway"
-    FILL #dcdcc8 WITH LAYER 1
+    FILL #dcdcc8
     LABEL WITH MINMAG city
 
   AREA "landuse_construction"
@@ -279,19 +279,23 @@ OSS
     LABEL WITH MINMAG detail
 
   AREA "landuse_military"
-    FILL #fe9898 WITH LAYER 1
+    FILL #fe9898
     LABEL WITH MINMAG city
+
+  AREA "landuse_orchard"
+    FILL #cfeca8
+    LABEL WITH MINMAG detail
 
   AREA "landuse_cemetery"
     FILL #a9caae PATTERN "cemetery" WITH MINMAG detail
     LABEL WITH MINMAG close
 
   AREA "landuse_meadow"
-    FILL #cfeca8 WITH LAYER 1
+    FILL #cfeca8
     LABEL WITH MINMAG close
 
   AREA "landuse_village_green"
-    FILL #cfeca8 WITH LAYER 1
+    FILL #cfeca8
     LABEL WITH MINMAG detail
 
   AREA "landuse_recreation_ground"
@@ -319,7 +323,7 @@ OSS
     LABEL WITH MINMAG city
 
   AREA "natural_wood"
-    FILL #aed1a0 WITH LAYER 1
+    FILL #aed1a0
     LABEL WITH MINMAG proximity
 
   AREA "natural_marsh"
@@ -331,7 +335,7 @@ OSS
     LABEL WITH MINMAG city
 
   AREA "natural_water"
-    FILL #b5d0d0 WITH LAYER 1
+    FILL #b5d0d0
     LABEL WITH MINMAG close
 
   WAY "natural_coastline" PRIO 1 MINMAG world
@@ -350,7 +354,7 @@ OSS
     LABEL WITH MINMAG detail
 
   AREA "aeroway_terminal"
-    FILL #cc99ff WITH LAYER 2
+    FILL #cc99ff
     LABEL WITH MINMAG detail
 
   AREA "aeroway_helipad"
@@ -370,11 +374,11 @@ OSS
     LABEL WITH STYLE contour MINMAG close
 
   AREA "aeroway_apron"
-    FILL #e8d1fe WITH LAYER 1
+    FILL #e8d1fe
     LABEL WITH MINMAG detail
 
   AREA "leisure_sports_centre_building"
-    FILL #bca9a9 WITH LAYER 2
+    FILL #bca9a9
     LABEL WITH MINMAG close
 
   AREA "leisure_sports_centre"
@@ -386,7 +390,7 @@ OSS
     LABEL WITH MINMAG close
 
   AREA "leisure_stadium"
-    FILL #bde3cb WITH LAYER 2
+    FILL #33cb98
     LABEL WITH MINMAG close
 
   WAY "leisure_track" PRIO 11 MINMAG close
@@ -394,15 +398,15 @@ OSS
     LABEL WITH STYLE contour MINMAG city
 
   AREA "leisure_track"
-    FILL #bde3cb
+    FILL #7fdac2
     LABEL WITH MINMAG close
 
   AREA "leisure_pitch"
-    FILL #90d3b9 WITH LAYER 3 BORDER #b0b0b0 WITH MINPIXEL 1 WIDTH 1
+    FILL #90d3b9 BORDER #b0b0b0 WITH MINPIXEL 1 WIDTH 1
     LABEL WITH MINMAG close
 
   AREA "leisure_water_park"
-    FILL #b5d6f1
+	FILL #f1eee8 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
     LABEL WITH MINMAG close
 
   AREA "leisure_marina"
@@ -438,16 +442,16 @@ OSS
     LABEL WITH MINMAG close
 
   AREA "amenity_grave_yard"
-    FILL #bde3cb WITH LAYER -1
+    FILL #bde3cb
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "amenity_hospital_building"
-    FILL #b89c9c WITH LAYER 2 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #b89c9c BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
     LABEL WITH STYLE emphasize COLOR #da0092 SIZE 1.1 MINMAG veryClose
     ICON hospital WITH MINMAG close
 
   AREA "amenity_hospital"
-    FILL #f0f0d8 WITH LAYER -1 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #f0f0d8 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
     LABEL WITH STYLE emphasize COLOR #da0092 SIZE 1.1 MINMAG veryClose
     ICON hospital WITH MINMAG close
 
@@ -457,12 +461,12 @@ OSS
     ICON hospital WITH MINMAG close
 
   AREA "amenity_parking_building"
-    FILL #c4c393 WITH LAYER 2 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #c4c393 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
     ICON parking WITH MINMAG close
     LABEL WITH STYLE emphasize COLOR #4bb2da SIZE 1.1 MINMAG veryClose
 
   AREA "amenity_parking"
-    FILL #f6eeb6 WITH LAYER 1 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #f6eeb6 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
     ICON parking WITH MINMAG close
     LABEL WITH STYLE emphasize COLOR #4bb2da SIZE 1.1 MINMAG veryClose
 
@@ -476,11 +480,11 @@ OSS
     LABEL WITH STYLE emphasize COLOR #da0092 SIZE 1.1 MINMAG veryClose
 
   AREA "amenity_post_office_building"
-    FILL #ffcc00 WITH LAYER 2 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #ffcc00 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "amenity_post_office"
-    FILL #f0f0d8 WITH LAYER -1
+    FILL #f0f0d8
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   NODE "amenity_post_office"
@@ -494,93 +498,93 @@ OSS
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "amenity_building"
-    FILL #b89c9c WITH LAYER 2
+    FILL #b89c9c
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   NODE "amenity"
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "amenity"
-    FILL #f0f0d8 WITH LAYER -1
+    FILL #f0f0d8
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "tourism_alpine_hut"
-    FILL #7172db WITH LAYER 2
+    FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "tourism_attraction"
-    FILL #7172db WITH LAYER 2
+    FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   NODE "tourism_attraction"
     LABEL WITH STYLE emphasize COLOR #8888fd MINMAG detail
 
   AREA "tourism_artwork"
-    FILL #7172db WITH LAYER 2
+    FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "tourism_camp_site"
-    FILL #7172db WITH LAYER 2
+    FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "tourism_caravan_site"
-    FILL #7172db WITH LAYER 2
+    FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "tourism_chalet"
-    FILL #7172db WITH LAYER 2
+    FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "tourism_guest_house"
-    FILL #7172db WITH LAYER 2
+    FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "tourism_hotel"
-    FILL #7172db WITH LAYER 2
+    FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "tourism_information"
-    FILL #7172db WITH LAYER 2
+    FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "tourism_motel"
-    FILL #7172db WITH LAYER 2
+    FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "tourism_museum"
-    FILL #7172db WITH LAYER 2
+    FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "tourism_picnic_site"
-    FILL #7172db WITH LAYER 2
+    FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "tourism_theme_park"
-    FILL #7172db WITH LAYER 2
+    FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "tourism_zoo"
-    FILL #7172db WITH LAYER 2
+    FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "historic_castle"
-    FILL #9f5eb4 WITH LAYER 2
+    FILL #9f5eb4
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "historic_monument"
-    FILL #9f5eb4 WITH LAYER 2
+    FILL #9f5eb4
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "historic_memorial"
-    FILL #9f5eb4 WITH LAYER 2
+    FILL #9f5eb4
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "historic_archaeological_site"
-    FILL #9f5eb4 WITH LAYER 2
+    FILL #9f5eb4
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "historic_ruins"
-    FILL #9f5eb4 WITH LAYER 2
+    FILL #9f5eb4
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "historic_battlefield"
@@ -588,14 +592,14 @@ OSS
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "historic_wreck"
-    FILL #9f5eb4 WITH LAYER 2
+    FILL #9f5eb4
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   NODE "shop"
     LABEL WITH MINMAG veryClose
 
   AREA "shop"
-    FILL #bca284 WITH LAYER 2 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #bca284 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
     LABEL WITH MINMAG veryClose
 
   AREA "military_airfield"
@@ -603,11 +607,11 @@ OSS
     LABEL WITH MINMAG city
 
   AREA "military_bunker"
-    FILL #f59897 WITH LAYER 2
+    FILL #f59897
     LABEL WITH MINMAG city
 
   AREA "military_barracks"
-    FILL #f59897 WITH LAYER 2
+    FILL #f59897
     LABEL WITH MINMAG city
 
   AREA "military_danger_area"
@@ -623,22 +627,22 @@ OSS
     LABEL WITH MINMAG city
 
   AREA "power_station"
-    FILL #bca9a9 WITH LAYER 2
+    FILL #bca9a9
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "power_sub_station"
-    FILL #bca9a9 WITH LAYER 2
+    FILL #bca9a9
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "power_generator"
-    FILL #bca9a9 WITH LAYER 2
+    FILL #bca9a9
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "building_garage" MINMAG close
-    FILL #bcbcbc WITH LAYER 2
+    FILL #bcbcbc
 
   AREA "building" MINMAG close
-    FILL #bcbcbc WITH LAYER 2 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #bcbcbc BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
     LABEL WITH STYLE normal COLOR #524a4a SIZE 0.8 MINMAG veryClose
 
   WAY "barrier_fence" PRIO 20 MINMAG veryClose

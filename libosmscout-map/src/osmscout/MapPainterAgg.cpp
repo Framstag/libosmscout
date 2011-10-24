@@ -494,22 +494,43 @@ namespace osmscout {
   {
     agg::path_storage path;
 
-    for (size_t i=area.transStart; i<=area.transEnd; i++) {
-      if (i==area.transStart) {
-        path.move_to(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
-      }
-      else {
-        path.line_to(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
-      }
-    }
-    path.line_to(transBuffer.buffer[area.transStart].x,transBuffer.buffer[area.transEnd].y);
-
     renderer_aa->color(agg::rgba(area.fillStyle->GetFillR(),
                                  area.fillStyle->GetFillG(),
                                  area.fillStyle->GetFillB(),
                                  area.fillStyle->GetFillA()));
 
+
+    if (!area.clippings.empty()) {
+      rasterizer->filling_rule(agg::fill_even_odd);
+    }
+    else {
+      rasterizer->filling_rule(agg::fill_non_zero);
+    }
+
+    path.move_to(transBuffer.buffer[area.transStart].x,transBuffer.buffer[area.transStart].y);
+    for (size_t i=area.transStart+1; i<=area.transEnd; i++) {
+      path.line_to(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+    }
+    path.close_polygon();
+
     rasterizer->add_path(path);
+
+    if (!area.clippings.empty()) {
+      for (std::list<PolyData>::const_iterator c=area.clippings.begin();
+          c!=area.clippings.end();
+          c++) {
+        const PolyData    &data=*c;
+        agg::path_storage clipPath;
+
+         clipPath.move_to(transBuffer.buffer[data.transStart].x,transBuffer.buffer[data.transStart].y);
+        for (size_t i=data.transStart+1; i<=data.transEnd; i++) {
+          clipPath.line_to(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+        }
+        clipPath.close_polygon();
+
+        rasterizer->add_path(clipPath);
+      }
+    }
 
     agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
 
@@ -517,18 +538,40 @@ namespace osmscout {
                                          area.fillStyle->GetBorderMinPixel(),
                                          area.fillStyle->GetBorderWidth());
 
+
     if (borderWidth>0.0) {
-      DrawPath(projection,
-               parameter,
-               area.fillStyle->GetBorderR(),
-               area.fillStyle->GetBorderG(),
-               area.fillStyle->GetBorderB(),
-               area.fillStyle->GetBorderA(),
-               borderWidth,
-               area.fillStyle->GetBorderDash(),
-               capRound,
-               capRound,
-               area.transStart,area.transEnd);
+      renderer_aa->color(agg::rgba(area.fillStyle->GetBorderR(),
+                                   area.fillStyle->GetBorderG(),
+                                   area.fillStyle->GetBorderB(),
+                                   area.fillStyle->GetBorderA()));
+
+      if (area.fillStyle->GetBorderDash().empty()) {
+        agg::conv_stroke<agg::path_storage> stroke(path);
+
+        stroke.width(borderWidth);
+        stroke.line_cap(agg::round_cap);
+
+        rasterizer->add_path(stroke);
+
+        agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
+      }
+      else {
+        agg::conv_dash<agg::path_storage>                    dasher(path);
+        agg::conv_stroke<agg::conv_dash<agg::path_storage> > stroke(dasher);
+
+        stroke.width(borderWidth);
+
+        stroke.line_cap(agg::butt_cap);
+
+        for (size_t i=0; i<area.fillStyle->GetBorderDash().size(); i+=2) {
+          dasher.add_dash(area.fillStyle->GetBorderDash()[i]*borderWidth,
+                          area.fillStyle->GetBorderDash()[i+1]*borderWidth);
+        }
+
+        rasterizer->add_path(stroke);
+
+        agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
+      }
     }
   }
 
@@ -552,6 +595,7 @@ namespace osmscout {
                                  style.GetFillB(),
                                  1));
 
+    rasterizer->filling_rule(agg::fill_non_zero);
     rasterizer->add_path(path);
     agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
   }

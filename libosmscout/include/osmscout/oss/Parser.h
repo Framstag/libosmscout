@@ -182,7 +182,6 @@ void ToRGBA(const char* str, double& r, double& g, double& b, double& a)
 	void MINPIXEL(double& value);
 	void WIDTH(double& value);
 	void OUTLINE(double& value);
-	void LAYER(int& layer);
 	void MINMAG(Mag& mag);
 	void LABELSTYLE(LabelStyle::Style& style);
 	void SIZE(double& value);

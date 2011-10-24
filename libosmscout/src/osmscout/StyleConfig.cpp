@@ -132,7 +132,6 @@ namespace osmscout {
 
   FillStyle::FillStyle()
    : style(none),
-     layer(0),
      fillR(1),
      fillG(0),
      fillB(0),
@@ -151,13 +150,6 @@ namespace osmscout {
   FillStyle& FillStyle::SetStyle(Style style)
   {
     this->style=style;
-
-    return *this;
-  }
-
-  FillStyle& FillStyle::SetLayer(int layer)
-  {
-    this->layer=layer;
 
     return *this;
   }
@@ -748,7 +740,11 @@ namespace osmscout {
     types.Reset(areaMag.size());
 
     for (size_t i=0; i<areaMag.size(); i++) {
-      if (mag>=areaMag[i]) {
+      if (mag>=areaMag[i] && (
+          areaFillStyles[i]!=NULL ||
+          areaIconStyles[i]!=NULL ||
+          areaSymbolStyles[i]!=NULL ||
+          areaLabelStyles[i]!=NULL)) {
         types.SetType(i);
       }
     }

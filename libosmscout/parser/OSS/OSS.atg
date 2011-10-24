@@ -267,14 +267,6 @@ PRODUCTIONS
                 COLOR<r,g,b,a>
                 (. style.SetFillColor(r,g,b,a); .)
 
-                [SYNC "WITH"
-                  [
-                    (. int layer=style.GetLayer(); .)
-                    LAYER<layer>
-                    (. style.SetLayer(layer); .)
-                  ]
-                ]
-
                 [
                   SYNC "PATTERN"
                   string (. style.SetPattern(Destring(t->val)); .)
@@ -523,17 +515,6 @@ PRODUCTIONS
                     a=1.0;
                   }
                 .).
-
-  LAYER<int& layer>
-              = "LAYER" number
-                  (.
-                    if (!StringToNumber(t->val,layer)) {
-                      std::string e="Cannot parse number '"+std::string(t->val)+"'";
-
-                      SemErr(e.c_str());
-                    }
-                  .)
-                 .
 
   MINMAG<Mag& mag>
               = "MINMAG" MAG<mag>.
