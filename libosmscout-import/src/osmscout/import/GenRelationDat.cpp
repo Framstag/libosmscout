@@ -321,21 +321,20 @@ namespace osmscout {
 
     // Try to consume all roles
     while (!roles.empty()) {
-      TypeId type=typeIgnore;
-      size_t rolesSelected=1;
-      bool finished=false;
-
+      size_t         rolesSelected=1;
+      bool           finished=false;
       Relation::Role leadingRole=roles.front();
+      Relation::Role role;
+
       roles.erase(roles.begin());
+
+      role.attributes=leadingRole.attributes;
+      role.attributes.flags|=SegmentAttributes::isArea;
+      role.ring=0;
 
       // Take the first unused roles and copy all its points
       for (size_t i=0; i<leadingRole.nodes.size(); i++) {
         points.push_back(leadingRole.nodes[i]);
-      }
-
-      if (type==typeIgnore &&
-          leadingRole.GetType()!=typeIgnore) {
-        type=leadingRole.GetType();
       }
 
       // TODO: All roles that make up a ring should have the same type
@@ -351,37 +350,53 @@ namespace osmscout {
         bool found=false;
 
         // Find a role that continues the current way
-        for (std::list<Relation::Role>::iterator role=roles.begin();
-             role!=roles.end();
-             ++role) {
-          if (points.back().GetId()==role->nodes.front().GetId()) {
-            for (size_t i=1; i<role->nodes.size(); i++) {
-              points.push_back(role->nodes[i]);
+        for (std::list<Relation::Role>::iterator r=roles.begin();
+             r!=roles.end();
+             ++r) {
+          if (points.back().GetId()==r->nodes.front().GetId()) {
+            for (size_t i=1; i<r->nodes.size(); i++) {
+              points.push_back(r->nodes[i]);
             }
 
-            if (type==typeIgnore &&
-                role->GetType()!=typeIgnore) {
-              type=role->GetType();
+            if (role.attributes.type==typeIgnore &&
+                r->GetType()!=typeIgnore) {
+              role.attributes.type=r->GetType();
             }
 
-            roles.erase(role);
+            if (role.GetName().empty() && !r->GetName().empty()) {
+              role.attributes.name=r->GetName();
+            }
+
+            if (role.GetRefName().empty() && !r->GetRefName().empty()) {
+              role.attributes.ref=r->GetRefName();
+            }
+
+            roles.erase(r);
 
             rolesSelected++;
             found=true;
 
             break;
           }
-          else if (points.back().GetId()==role->nodes.back().GetId()) {
-            for (size_t i=1; i<role->nodes.size(); i++) {
-              points.push_back(role->nodes[role->nodes.size()-i-1]);
+          else if (points.back().GetId()==r->nodes.back().GetId()) {
+            for (size_t i=1; i<r->nodes.size(); i++) {
+              points.push_back(r->nodes[r->nodes.size()-i-1]);
             }
 
-            if (type==typeIgnore &&
-                role->GetType()!=typeIgnore) {
-              type=role->GetType();
+            if (role.attributes.type==typeIgnore &&
+                r->GetType()!=typeIgnore) {
+              role.attributes.type=r->GetType();
             }
 
-            roles.erase(role);
+            if (role.GetName().empty() && !r->GetName().empty()) {
+              role.attributes.name=r->GetName();
+            }
+
+            if (role.GetRefName().empty() && !r->GetRefName().empty()) {
+              role.attributes.ref=r->GetRefName();
+            }
+
+            roles.erase(r);
 
             rolesSelected++;
             found=true;
@@ -411,12 +426,6 @@ namespace osmscout {
         return false;
       }
 
-      // Add the found points the our new (internal) list of merged roles
-      Relation::Role role;
-
-      role.attributes.type=type;
-      role.attributes.flags|=SegmentAttributes::isArea;
-
       role.nodes.reserve(points.size());
 
       for (std::list<Point>::const_iterator point=points.begin();
@@ -425,8 +434,8 @@ namespace osmscout {
         role.nodes.push_back(*point);
       }
 
-      // During concatination we might define,a close ring, where start==end, but everywhere else
-      // in the code we store areas without repeating the start
+      // During concatination we might define a closed ring with start==end, but everywhere else
+      // in the code we store areas without repeating the start, so we remove the final node again
       if (role.nodes.back().GetId()==role.nodes.front().GetId()) {
         role.nodes.pop_back();
       }
@@ -507,7 +516,6 @@ namespace osmscout {
 
       state.SetUsed(topIndex);
       groups.push_back(*top);
-      groups.back().ring=0;
 
       //
       // The outer ring(s) inherit attribute values from the relation
@@ -515,6 +523,7 @@ namespace osmscout {
 
       // Outer ring always has the type of the relation
       groups.back().attributes.type=relation.GetType();
+      groups.back().ring=0;
 
       if (state.HasIncludes(topIndex)) {
         ConsumeSubs(rings,groups,state,topIndex,1);
@@ -736,7 +745,6 @@ namespace osmscout {
       bool                  error=false;
       bool                  isArea=false;
       bool                  reverseNodes;
-      int8_t                layer=0;
 
       selectedRelationCount++;
 
@@ -781,7 +789,6 @@ namespace osmscout {
       for (size_t m=0; m<rawRel.members.size(); m++) {
         rel.roles[m].role=rawRel.members[m].role;
         rel.roles[m].ring=0;
-        rel.roles[m].attributes.layer=layer;
 
         if (!ResolveMember(typeConfig,
                            rawRel.GetId(),
@@ -851,13 +858,7 @@ namespace osmscout {
       // outer boundaries
       if (rel.IsArea()) {
         for (size_t m=0; m<rel.roles.size(); m++) {
-          /*
-          if (rel.roles[m].role=="outer" ||
-              rel.roles[m].role=="") {
-            if (rel.roles[m].GetType()==rel.GetType()) {*/
-              wayAreaIndexBlacklist.insert(rawRel.members[m].id);
-          /*  }
-          }*/
+          wayAreaIndexBlacklist.insert(rawRel.members[m].id);
         }
       }
       else if (typeConfig.GetTypeInfo(rel.GetType()).GetConsumeChildren()) {
@@ -886,8 +887,6 @@ namespace osmscout {
         }
       }
 
-      //
-
       // Postprocessing of relation
 
       if (rel.IsArea()) {
@@ -902,9 +901,15 @@ namespace osmscout {
             if (!rel.GetName().empty() && rel.roles[m].attributes.GetName().empty()) {
               rel.roles[m].attributes.name=rel.GetName();
             }
+            else if (rel.GetName().empty() && !rel.roles[m].attributes.GetName().empty()) {
+              rel.GetName()=rel.roles[m].attributes.name;
+            }
 
             if (!rel.GetRefName().empty() && rel.roles[m].GetRefName().empty()) {
               rel.roles[m].attributes.ref=rel.GetRefName();
+            }
+            else if (rel.GetRefName().empty() && !rel.roles[m].GetRefName().empty()) {
+              rel.GetRefName()=rel.roles[m].attributes.ref;
             }
           }
         }
@@ -920,9 +925,15 @@ namespace osmscout {
           if (!rel.GetName().empty() && rel.roles[m].attributes.GetName().empty()) {
             rel.roles[m].attributes.name=rel.GetName();
           }
+          else if (rel.GetName().empty() && !rel.roles[m].attributes.GetName().empty()) {
+            rel.GetName()=rel.roles[m].attributes.name;
+          }
 
           if (!rel.GetRefName().empty() && rel.roles[m].GetRefName().empty()) {
             rel.roles[m].attributes.ref=rel.GetRefName();
+          }
+          else if (rel.GetRefName().empty() && !rel.roles[m].GetRefName().empty()) {
+            rel.GetRefName()=rel.roles[m].attributes.ref;
           }
         }
       }

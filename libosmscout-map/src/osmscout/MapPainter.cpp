@@ -849,88 +849,86 @@ namespace osmscout {
       const RelationRef& relation=*r;
 
       for (size_t m=0; m<relation->roles.size(); m++) {
-        if (relation->roles[m].ring==0) {
-          const LabelStyle  *labelStyle=styleConfig.GetAreaLabelStyle(relation->roles[m].GetType());
-          IconStyle         *iconStyle=styleConfig.GetAreaIconStyle(relation->roles[m].GetType());
-          const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetAreaSymbolStyle(relation->roles[m].GetType());
+        const LabelStyle  *labelStyle=styleConfig.GetAreaLabelStyle(relation->roles[m].GetType());
+        IconStyle         *iconStyle=styleConfig.GetAreaIconStyle(relation->roles[m].GetType());
+        const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetAreaSymbolStyle(relation->roles[m].GetType());
 
-          bool hasLabel=labelStyle!=NULL &&
-                        labelStyle->GetStyle()!=LabelStyle::none &&
-                        projection.GetMagnification()>=labelStyle->GetMinMag() &&
-                        projection.GetMagnification()<=labelStyle->GetMaxMag();
+        bool hasLabel=labelStyle!=NULL &&
+                      labelStyle->GetStyle()!=LabelStyle::none &&
+                      projection.GetMagnification()>=labelStyle->GetMinMag() &&
+                      projection.GetMagnification()<=labelStyle->GetMaxMag();
 
-          bool hasSymbol=symbolStyle!=NULL &&
-                         projection.GetMagnification()>=symbolStyle->GetMinMag();
+        bool hasSymbol=symbolStyle!=NULL &&
+                       projection.GetMagnification()>=symbolStyle->GetMinMag();
 
-          bool hasIcon=iconStyle!=NULL &&
-                       projection.GetMagnification()>=iconStyle->GetMinMag();
+        bool hasIcon=iconStyle!=NULL &&
+                     projection.GetMagnification()>=iconStyle->GetMinMag();
 
-          std::string label;
+        std::string label;
 
-          if (hasIcon) {
-            hasIcon=HasIcon(styleConfig,
-                            parameter,
-                            *iconStyle);
+        if (hasIcon) {
+          hasIcon=HasIcon(styleConfig,
+                          parameter,
+                          *iconStyle);
+        }
+
+        if (!hasSymbol && !hasLabel && !hasIcon) {
+          continue;
+        }
+
+        if (hasLabel) {
+          if (!relation->roles[m].GetRefName().empty()) {
+            label=relation->roles[m].GetRefName();
+          }
+          else if (!relation->roles[m].GetName().empty()) {
+            label=relation->roles[m].GetName();
           }
 
-          if (!hasSymbol && !hasLabel && !hasIcon) {
-            continue;
-          }
+          hasLabel=!label.empty();
+        }
 
-          if (hasLabel) {
-            if (!relation->roles[m].GetRefName().empty()) {
-              label=relation->roles[m].GetRefName();
-            }
-            else if (!relation->roles[m].GetName().empty()) {
-              label=relation->roles[m].GetName();
-            }
+        if (!hasSymbol && !hasLabel && !hasIcon) {
+          continue;
+        }
 
-            hasLabel=!label.empty();
-          }
+        double x,y;
 
-          if (!hasSymbol && !hasLabel && !hasIcon) {
-            continue;
-          }
+        if (!GetCenterPixel(projection,relation->roles[m].nodes,x,y)) {
+          continue;
+        }
 
-          double x,y;
-
-          if (!GetCenterPixel(projection,relation->roles[m].nodes,x,y)) {
-            continue;
-          }
-
-          if (hasLabel) {
-            if (hasSymbol) {
-              RegisterPointLabel(projection,
-                                 parameter,
-                                 *labelStyle,
-                                 label,
-                                 x,y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
-            }
-            else if (hasIcon) {
-              RegisterPointLabel(projection,
-                                 parameter,
-                                 *labelStyle,
-                                 label,
-                                 x,y+14+5); // TODO: Better layout to real size of icon
-            }
-            else {
-              RegisterPointLabel(projection,
-                                 parameter,
-                                 *labelStyle,
-                                 label,
-                                 x,y);
-            }
-
-            areasLabelDrawn++;
-          }
-
-          if (hasIcon) {
-            DrawIcon(iconStyle,x,y);
-          }
-
+        if (hasLabel) {
           if (hasSymbol) {
-            DrawSymbol(symbolStyle,x,y);
+            RegisterPointLabel(projection,
+                               parameter,
+                               *labelStyle,
+                               label,
+                               x,y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
           }
+          else if (hasIcon) {
+            RegisterPointLabel(projection,
+                               parameter,
+                               *labelStyle,
+                               label,
+                               x,y+14+5); // TODO: Better layout to real size of icon
+          }
+          else {
+            RegisterPointLabel(projection,
+                               parameter,
+                               *labelStyle,
+                               label,
+                               x,y);
+          }
+
+          areasLabelDrawn++;
+        }
+
+        if (hasIcon) {
+          DrawIcon(iconStyle,x,y);
+        }
+
+        if (hasSymbol) {
+          DrawSymbol(symbolStyle,x,y);
         }
       }
     }
