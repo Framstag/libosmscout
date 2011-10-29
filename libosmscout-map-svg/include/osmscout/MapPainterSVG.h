@@ -23,13 +23,13 @@
 #include <ostream>
 #include <set>
 
-#include <osmscout/Private/MapImportExport.h>
+#include <osmscout/private/MapSVGImportExport.h>
 
 #include <osmscout/MapPainter.h>
 
 namespace osmscout {
 
-  class OSMSCOUT_MAP_API MapPainterSVG : public MapPainter
+  class OSMSCOUT_MAP_SVG_API MapPainterSVG : public MapPainter
   {
   private:
      std::ostream     stream;

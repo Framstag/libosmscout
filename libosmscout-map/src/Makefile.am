@@ -31,8 +31,3 @@ endif
 if HAVE_LIB_QTGUI
 libosmscoutmap_la_SOURCES += osmscout/MapPainterQt.cpp
 endif
-
-if HAVE_DRIVER_SVG
-libosmscoutmap_la_SOURCES += osmscout/MapPainterSVG.cpp
-endif
-

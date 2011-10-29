@@ -15,8 +15,3 @@ endif
 if HAVE_LIB_QTGUI
 nobase_include_HEADERS += osmscout/MapPainterQt.h
 endif
-
-if HAVE_DRIVER_SVG
-nobase_include_HEADERS += osmscout/MapPainterSVG.h
-endif
-

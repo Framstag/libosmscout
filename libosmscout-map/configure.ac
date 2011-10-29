@@ -19,8 +19,6 @@ AC_ARG_ENABLE(cairo-driver,
               [  --disable-cairo-driver  do not include cairo driver])
 AC_ARG_ENABLE(qt-driver,
               [  --disable-qt-driver     do not include Qt driver])
-AC_ARG_ENABLE(svg-driver,
-              [  --disable-svg-driver    do not include SVG driver])
               
 AC_TYPE_SIZE_T
 
@@ -112,12 +110,6 @@ if test "$enable_libagg_driver" != "no"; then
 	                   [HASAGG=false])
 fi
 AM_CONDITIONAL(HAVE_LIB_AGG,[test "$HASAGG" = "true"])
-
-if test "$enable_svg_driver" != "no"; then
-  HASSVG="true"
-fi
-AM_CONDITIONAL(HAVE_DRIVER_SVG,[test "$HASSVG" = "true"])
-
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 

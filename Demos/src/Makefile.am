@@ -1,11 +1,13 @@
 AM_CXXFLAGS=$(LIBOSMSCOUT_CFLAGS) \
             $(LIBOSMSCOUTMAP_CFLAGS) \
+            $(LIBOSMSCOUTMAPSVG_CFLAGS) \
             $(LIBCAIRO_CFLAGS) \
             $(LIBQTGUI_CFLAGS) \
             $(LIBAGG_CFLAGS)
 
 LDADD=$(LIBOSMSCOUT_LIBS) \
       $(LIBOSMSCOUTMAP_LIBS) \
+      $(LIBOSMSCOUTMAPSVG_LIBS) \
       $(LIBCAIRO_LIBS) \
       $(LIBQTGUI_LIBS) \
       $(LIBAGG_LIBS)
@@ -13,8 +15,11 @@ LDADD=$(LIBOSMSCOUT_LIBS) \
 bin_PROGRAMS = AddressLookup \
                ResourceConsumption \
                Routing \
-               DrawMapSVG \
                LookupPOI
+
+if HAVE_LIB_OSMSCOUTMAPSVG
+bin_PROGRAMS += DrawMapSVG
+endif
 
 if HAVE_LIB_CAIRO
 bin_PROGRAMS += DrawMapCairo

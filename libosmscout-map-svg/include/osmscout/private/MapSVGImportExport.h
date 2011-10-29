@@ -1,9 +1,9 @@
-#ifndef OSMSCOUT_MAP_PRIVATE_IMPORT_EXPORT_H
-#define OSMSCOUT_MAP_PRIVATE_IMPORT_EXPORT_H
+#ifndef OSMSCOUT_MAP_SVG_PRIVATE_IMPORT_EXPORT_H
+#define OSMSCOUT_MAP_SVG_PRIVATE_IMPORT_EXPORT_H
 
 /*
-  This source is part of the libosmscout-map library
-  Copyright (C) 2010  Tim Teulings
+  This source is part of the libosmscout-map-svg library
+  Copyright (C) 2011  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,54 +20,54 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/MapFeatures.h>
+#include <osmscout/MapSVGFeatures.h>
 
 // Shared library support
 #if defined(__WIN32__) || defined(WIN32)
-  #if defined(OSMSCOUTMAPDLL) 
+  #if defined(OSMSCOUTMAPSVGDLL) 
     #if defined(DLL_EXPORT) || defined(_WINDLL)
-      #define OSMSCOUT_MAP_EXPTEMPL
-      #define OSMSCOUT_MAP_API __declspec(dllexport)
+      #define OSMSCOUT_MAP_SVG_EXPTEMPL
+      #define OSMSCOUT_MAP_SVG_API __declspec(dllexport)
     #else
-      #define OSMSCOUT_MAP_API
+      #define OSMSCOUT_MAP_SVG_API
     #endif
   #else
-    #define OSMSCOUT_MAP_API __declspec(dllimport)
-    #define OSMSCOUT_MAP_EXPTEMPL extern
+    #define OSMSCOUT_MAP_SVG_API __declspec(dllimport)
+    #define OSMSCOUT_MAP_SVG_EXPTEMPL extern
   #endif
 
-  #define OSMSCOUT_MAP_DLLLOCAL
+  #define OSMSCOUT_MAP_SVG_DLLLOCAL
 #else
-  #define OSMSCOUT_MAP_IMPORT
-  #define OSMSCOUT_MAP_EXPTEMPL
+  #define OSMSCOUT_MAP_SVG_IMPORT
+  #define OSMSCOUT_MAP_SVG_EXPTEMPL
   
-  #if defined(OSMSCOUT_MAP_EXPORT_SYMBOLS)
-    #define OSMSCOUT_MAP_EXPORT __attribute__ ((visibility("default")))
-    #define OSMSCOUT_MAP_DLLLOCAL __attribute__ ((visibility("hidden")))
+  #if defined(OSMSCOUT_MAP_SVG_EXPORT_SYMBOLS)
+    #define OSMSCOUT_MAP_SVG_EXPORT __attribute__ ((visibility("default")))
+    #define OSMSCOUT_MAP_SVG_DLLLOCAL __attribute__ ((visibility("hidden")))
   #else
-    #define OSMSCOUT_MAP_EXPORT
-    #define OSMSCOUT_MAP_DLLLOCAL
+    #define OSMSCOUT_MAP_SVG_EXPORT
+    #define OSMSCOUT_MAP_SVG_DLLLOCAL
   #endif
 
-  #if defined(OSMSCOUTMAPDLL)
-    #define OSMSCOUT_MAP_API OSMSCOUT_MAP_EXPORT
+  #if defined(OSMSCOUTMAPSVGDLL)
+    #define OSMSCOUT_MAP_SVG_API OSMSCOUT_MAP_SVG_EXPORT
   #else
-    #define OSMSCOUT_MAP_API OSMSCOUT_MAP_IMPORT
+    #define OSMSCOUT_MAP_SVG_API OSMSCOUT_MAP_SVG_IMPORT
   #endif
 
 #endif
 
 // Throwable classes must always be visible on GCC in all binaries
 #if defined(__WIN32__) || defined(WIN32)
-  #define OSMSCOUT_MAP_EXCEPTIONAPI(api) api
-#elif defined(OSMSCOUT_MAP_EXPORT_SYMBOLS)
-  #define OSMSCOUT_MAP_EXCEPTIONAPI(api) OSMSCOUT_MAP_EXPORT
+  #define OSMSCOUT_MAP_SVG_EXCEPTIONAPI(api) api
+#elif defined(OSMSCOUT_MAP_SVG_EXPORT_SYMBOLS)
+  #define OSMSCOUT_MAP_SVG_EXCEPTIONAPI(api) OSMSCOUT_MAP_EXPORT
 #else
-  #define OSMSCOUT_MAP_EXCEPTIONAPI(api)
+  #define OSMSCOUT_MAP_SVG_EXCEPTIONAPI(api)
 #endif
 
 #if defined(_MSC_VER)
-  #define OSMSCOUT_MAP_INSTANTIATE_TEMPLATES
+  #define OSMSCOUT_MAP_SVG_INSTANTIATE_TEMPLATES
 #endif  
 #endif
 
