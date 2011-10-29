@@ -1,0 +1,14 @@
+# This is a comment
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: libosmscout-map-svg               # human-readable name
+Description: osm navigation library     # human-readable description
+Version: @VERSION@
+Libs: -L${libdir} \
+      @LIBOSMSCOUTMAP@ \
+      -losmscoutmap-svg
+Cflags: -I${includedir} \
+        @LIBOSMSCOUTMAP@ \
