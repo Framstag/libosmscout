@@ -3,6 +3,7 @@ programs = libosmscout \
            libosmscout-map \
            libosmscout-map-svg \
            libosmscout-map-qt \
+           libosmscout-map-agg \
            Import \
            Demos \
            TravelJinni \
