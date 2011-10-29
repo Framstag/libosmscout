@@ -3,6 +3,6 @@ Description: osm navigation library     # human-readable description
 Version: @VERSION@
 Libs: -L@abs_builddir@/src/.libs \
       @LIBOSMSCOUTMAP_LIBS@ \
-      -losmscoutmap
+      -losmscoutmapsvg
 Cflags: -I@abs_builddir@/include \
         @LIBOSMSCOUTMAP_CFLAGS@

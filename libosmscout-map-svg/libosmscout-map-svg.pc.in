@@ -9,6 +9,6 @@ Description: osm navigation library     # human-readable description
 Version: @VERSION@
 Libs: -L${libdir} \
       @LIBOSMSCOUTMAPi_LIBS@ \
-      -losmscoutmap-svg
+      -losmscoutmapsvg
 Cflags: -I${includedir} \
         @LIBOSMSCOUTMAP_CFLAGS@ \

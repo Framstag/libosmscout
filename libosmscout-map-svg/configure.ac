@@ -33,7 +33,7 @@ AC_TRY_COMPILE([],
                [LIB_CXXFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden"
                 AC_SUBST(LIB_CXXFLAGS)
                 AC_MSG_RESULT(yes)
-                AC_DEFINE(OSMSCOUT_MAP_EXPORT_SYMBOLS,1,[libosmscout uses special gcc compiler features to export symbols])],
+                AC_DEFINE(OSMSCOUT_MAP_SVG_EXPORT_SYMBOLS,1,[libosmscout uses special gcc compiler features to export symbols])],
                [AC_MSG_RESULT(no)])
 CXXFLAGS="$OLDCXXFLAGS"
 
