@@ -28,7 +28,7 @@
   #include <cairo/cairo.h>
 #endif
 
-#include <osmscout/Private/MapImportExport.h>
+#include <osmscout/private/MapImportExport.h>
 
 #include <osmscout/MapPainter.h>
 

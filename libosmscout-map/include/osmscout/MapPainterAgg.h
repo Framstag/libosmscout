@@ -35,7 +35,7 @@
 // TODO: This one is likely not available under Windows!
 #include <agg2/agg_font_freetype.h>
 
-#include <osmscout/Private/MapImportExport.h>
+#include <osmscout/private/MapImportExport.h>
 
 #include <osmscout/MapPainter.h>
 

@@ -24,7 +24,7 @@
 #include <set>
 #include <string>
 
-#include <osmscout/Private/MapImportExport.h>
+#include <osmscout/private/MapImportExport.h>
 
 #include <osmscout/util/Geometry.h>
 
