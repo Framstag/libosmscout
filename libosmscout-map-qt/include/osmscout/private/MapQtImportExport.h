@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_MAP_SVG_PRIVATE_IMPORT_EXPORT_H
-#define OSMSCOUT_MAP_SVG_PRIVATE_IMPORT_EXPORT_H
+#ifndef OSMSCOUT_MAP_QT_PRIVATE_IMPORT_EXPORT_H
+#define OSMSCOUT_MAP_QT_PRIVATE_IMPORT_EXPORT_H
 
 /*
   This source is part of the libosmscout-map-svg library
@@ -20,54 +20,54 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/MapSVGFeatures.h>
+#include <osmscout/MapQtFeatures.h>
 
 // Shared library support
 #if defined(__WIN32__) || defined(WIN32)
-  #if defined(OSMSCOUTMAPSVGDLL) 
+  #if defined(OSMSCOUTMAPQTDLL)
     #if defined(DLL_EXPORT) || defined(_WINDLL)
-      #define OSMSCOUT_MAP_SVG_EXPTEMPL
-      #define OSMSCOUT_MAP_SVG_API __declspec(dllexport)
+      #define OSMSCOUT_MAP_QT_EXPTEMPL
+      #define OSMSCOUT_MAP_QT_API __declspec(dllexport)
     #else
-      #define OSMSCOUT_MAP_SVG_API
+      #define OSMSCOUT_MAP_QT_API
     #endif
   #else
-    #define OSMSCOUT_MAP_SVG_API __declspec(dllimport)
-    #define OSMSCOUT_MAP_SVG_EXPTEMPL extern
+    #define OSMSCOUT_MAP_QT_API __declspec(dllimport)
+    #define OSMSCOUT_MAP_QT_EXPTEMPL extern
   #endif
 
-  #define OSMSCOUT_MAP_SVG_DLLLOCAL
+  #define OSMSCOUT_MAP_QT_DLLLOCAL
 #else
-  #define OSMSCOUT_MAP_SVG_IMPORT
-  #define OSMSCOUT_MAP_SVG_EXPTEMPL
+  #define OSMSCOUT_MAP_QT_IMPORT
+  #define OSMSCOUT_MAP_QT_EXPTEMPL
   
-  #if defined(OSMSCOUT_MAP_SVG_EXPORT_SYMBOLS)
-    #define OSMSCOUT_MAP_SVG_EXPORT __attribute__ ((visibility("default")))
-    #define OSMSCOUT_MAP_SVG_DLLLOCAL __attribute__ ((visibility("hidden")))
+  #if defined(OSMSCOUT_MAP_QT_EXPORT_SYMBOLS)
+    #define OSMSCOUT_MAP_QT_EXPORT __attribute__ ((visibility("default")))
+    #define OSMSCOUT_MAP_QT_DLLLOCAL __attribute__ ((visibility("hidden")))
   #else
-    #define OSMSCOUT_MAP_SVG_EXPORT
-    #define OSMSCOUT_MAP_SVG_DLLLOCAL
+    #define OSMSCOUT_MAP_QT_EXPORT
+    #define OSMSCOUT_MAP_QT_DLLLOCAL
   #endif
 
-  #if defined(OSMSCOUTMAPSVGDLL)
-    #define OSMSCOUT_MAP_SVG_API OSMSCOUT_MAP_SVG_EXPORT
+  #if defined(OSMSCOUTMAPQTDLL)
+    #define OSMSCOUT_MAP_QT_API OSMSCOUT_MAP_QT_EXPORT
   #else
-    #define OSMSCOUT_MAP_SVG_API OSMSCOUT_MAP_SVG_IMPORT
+    #define OSMSCOUT_MAP_QT_API OSMSCOUT_MAP_QT_IMPORT
   #endif
 
 #endif
 
 // Throwable classes must always be visible on GCC in all binaries
 #if defined(__WIN32__) || defined(WIN32)
-  #define OSMSCOUT_MAP_SVG_EXCEPTIONAPI(api) api
-#elif defined(OSMSCOUT_MAP_SVG_EXPORT_SYMBOLS)
-  #define OSMSCOUT_MAP_SVG_EXCEPTIONAPI(api) OSMSCOUT_MAP_SVG_EXPORT
+  #define OSMSCOUT_MAP_QT_EXCEPTIONAPI(api) api
+#elif defined(OSMSCOUT_MAP_QT_EXPORT_SYMBOLS)
+  #define OSMSCOUT_MAP_QT_EXCEPTIONAPI(api) OSMSCOUT_MAP_QT_EXPORT
 #else
-  #define OSMSCOUT_MAP_SVG_EXCEPTIONAPI(api)
+  #define OSMSCOUT_MAP_QT_EXCEPTIONAPI(api)
 #endif
 
 #if defined(_MSC_VER)
-  #define OSMSCOUT_MAP_SVG_INSTANTIATE_TEMPLATES
+  #define OSMSCOUT_MAP_QT_INSTANTIATE_TEMPLATES
 #endif  
 #endif
 

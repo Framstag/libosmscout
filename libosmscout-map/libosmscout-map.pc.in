@@ -11,10 +11,8 @@ Libs: -L${libdir} \
       @LIBCAIRO_LIBS@ \
       @LIBFREETYPE_LIBS@ \
       @LIBAGG_LIBS@ \
-      @LIBQTGUI_LIBS@ \
       -losmscoutmap
 Cflags: -I${includedir} \
         @LIBCAIRO_CFLAGS@ \
         @LIBFREETYPE_CFLAGS@ \
-        @LIBAGG_CFLAGS@ \
-        @LIBQTGUI_CFLAGS@
+        @LIBAGG_CFLAGS@

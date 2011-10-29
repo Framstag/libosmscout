@@ -12,6 +12,3 @@ if HAVE_LIB_CAIRO
 nobase_include_HEADERS += osmscout/MapPainterCairo.h
 endif
 
-if HAVE_LIB_QTGUI
-nobase_include_HEADERS += osmscout/MapPainterQt.h
-endif

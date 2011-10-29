@@ -77,16 +77,6 @@ if test "$enable_cairo_driver" != "no"; then
 fi
 AM_CONDITIONAL(HAVE_LIB_PNG,[test "$HASPNG" = "true"])
 
-if test "$enable_qt_driver" != "no"; then
-	PKG_CHECK_MODULES(LIBQTGUI, QtGui > 4.6.0,
-	                  HASQTGUI=true
-	                  [AC_SUBST(LIBQTGUI_CFLAGS)
-	                   AC_SUBST(LIBQTGUI_LIBS)
-	                   AC_DEFINE(HAVE_LIB_QTGUI,1,[libQtGui found])],
-	                   [HASQTGUI=false])
-fi
-AM_CONDITIONAL(HAVE_LIB_QTGUI,[test "$HASQTGUI" = "true"])
-
 if test "$enable_libagg_driver" != "no"; then
 	PKG_CHECK_MODULES(LIBFREETYPE, freetype2,
 	                  HASLIBFREETYPE=true

@@ -35,6 +35,15 @@ PKG_CHECK_MODULES(LIBOSMSCOUTMAPSVG,[libosmscout-map-svg],
 
 AM_CONDITIONAL(HAVE_LIB_OSMSCOUTMAPSVG,[test "$HASLIBOSMSCOUTMAPSVG" = "true"])
 
+PKG_CHECK_MODULES(LIBOSMSCOUTMAPQT,[libosmscout-map-qt],
+                  [HASLIBOSMSCOUTMAPQT=true
+                   AC_SUBST(LIBOSMSCOUTMAPQT_CFLAGS)
+                   AC_SUBST(LIBOSMSCOUTMAPQT_LIBS)
+                   AC_DEFINE(HAV_LIB_OSMSCOUTMAPQT,1,[libosmscout-map-qt found])],
+                  [HASLIBOSMSCOUTMAPQT=false])
+
+AM_CONDITIONAL(HAVE_LIB_OSMSCOUTMAPQT,[test "$HASLIBOSMSCOUTMAPQT" = "true"])
+
 PKG_CHECK_MODULES(LIBCAIRO, cairo,
                   HASCAIRO=true
                   [AC_SUBST(LIBCAIRO_CFLAGS)
@@ -43,15 +52,6 @@ PKG_CHECK_MODULES(LIBCAIRO, cairo,
                    [HASCAIRO=false])
 
 AM_CONDITIONAL(HAVE_LIB_CAIRO,[test "$HASCAIRO" = "true"])
-
-PKG_CHECK_MODULES(LIBQTGUI, QtGui > 4.6.0,
-                  HASQTGUI=true
-                  [AC_SUBST(LIBQTGUI_CFLAGS)
-                   AC_SUBST(LIBQTGUI_LIBS)
-                   AC_DEFINE(HAVE_LIB_QTGUI,1,[libQtGui found])],
-                   [HASQTGUI=false])
-
-AM_CONDITIONAL(HAVE_LIB_QTGUI,[test "$HASQTGUI" = "true"])
 
 PKG_CHECK_MODULES(LIBAGG, libagg,
                   HASAGG=true

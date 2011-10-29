@@ -5,10 +5,8 @@ Libs: -L@abs_builddir@/src/.libs \
       @LIBCAIRO_LIBS@ \
       @LIBFREETYPE_LIBS@ \
       @LIBAGG_LIBS@ \
-      @LIBQTGUI_LIBS@ \
       -losmscoutmap
 Cflags: -I@abs_builddir@/include \
         @LIBCAIRO_CFLAGS@ \
         @LIBFREETYPE_CFLAGS@ \
-        @LIBAGG_CFLAGS@ \
-        @LIBQTGUI_CFLAGS@
+        @LIBAGG_CFLAGS@

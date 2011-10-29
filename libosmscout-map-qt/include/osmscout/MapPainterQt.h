@@ -22,13 +22,13 @@
 
 #include <QPainter>
 
-#include <osmscout/private/MapImportExport.h>
+#include <osmscout/private/MapQtImportExport.h>
 
 #include <osmscout/MapPainter.h>
 
 namespace osmscout {
 
-  class OSMSCOUT_MAP_API MapPainterQt : public MapPainter
+  class OSMSCOUT_MAP_QT_API MapPainterQt : public MapPainter
   {
     QPainter               *painter;
 

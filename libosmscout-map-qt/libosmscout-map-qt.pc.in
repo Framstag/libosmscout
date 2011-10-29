@@ -4,11 +4,13 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: libosmscout-map-svg               # human-readable name
+Name: libosmscout-map-qt                # human-readable name
 Description: osm navigation library     # human-readable description
 Version: @VERSION@
 Libs: -L${libdir} \
       @LIBOSMSCOUTMAP_LIBS@ \
-      -losmscoutmapsvg
+      @LIBQTGUI_LIBS@ \
+      -losmscoutmapqt
 Cflags: -I${includedir} \
         @LIBOSMSCOUTMAP_CFLAGS@ \
+        @LIBQTGUI_CFLAGS@

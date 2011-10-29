@@ -1,15 +1,15 @@
 AM_CXXFLAGS=$(LIBOSMSCOUT_CFLAGS) \
             $(LIBOSMSCOUTMAP_CFLAGS) \
             $(LIBOSMSCOUTMAPSVG_CFLAGS) \
+            $(LIBOSMSCOUTMAPQT_CFLAGS) \
             $(LIBCAIRO_CFLAGS) \
-            $(LIBQTGUI_CFLAGS) \
             $(LIBAGG_CFLAGS)
 
 LDADD=$(LIBOSMSCOUT_LIBS) \
       $(LIBOSMSCOUTMAP_LIBS) \
       $(LIBOSMSCOUTMAPSVG_LIBS) \
+      $(LIBOSMSCOUTMAPQT_LIBS) \
       $(LIBCAIRO_LIBS) \
-      $(LIBQTGUI_LIBS) \
       $(LIBAGG_LIBS)
 
 bin_PROGRAMS = AddressLookup \
@@ -25,7 +25,7 @@ if HAVE_LIB_CAIRO
 bin_PROGRAMS += DrawMapCairo
 endif
 
-if HAVE_LIB_QTGUI
+if HAVE_LIB_OSMSCOUTMAPQT
 bin_PROGRAMS += DrawMapQt \
                 ResourceConsumptionQt
 endif
