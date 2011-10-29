@@ -2,15 +2,15 @@ AM_CXXFLAGS=$(LIBOSMSCOUT_CFLAGS) \
             $(LIBOSMSCOUTMAP_CFLAGS) \
             $(LIBOSMSCOUTMAPSVG_CFLAGS) \
             $(LIBOSMSCOUTMAPQT_CFLAGS) \
-            $(LIBCAIRO_CFLAGS) \
-            $(LIBAGG_CFLAGS)
+            $(LIBOSMSCOUTMAPAGG_CFLAGS) \
+            $(LIBCAIRO_CFLAGS)
 
 LDADD=$(LIBOSMSCOUT_LIBS) \
       $(LIBOSMSCOUTMAP_LIBS) \
       $(LIBOSMSCOUTMAPSVG_LIBS) \
       $(LIBOSMSCOUTMAPQT_LIBS) \
-      $(LIBCAIRO_LIBS) \
-      $(LIBAGG_LIBS)
+      $(LIBOSMSCOUTMAPAGG_LIBS) \
+      $(LIBCAIRO_LIBS)
 
 bin_PROGRAMS = AddressLookup \
                ResourceConsumption \
@@ -30,7 +30,7 @@ bin_PROGRAMS += DrawMapQt \
                 ResourceConsumptionQt
 endif
 
-if HAVE_LIB_AGG
+if HAVE_LIB_OSMSCOUTMAPAGG
 bin_PROGRAMS += DrawMapAgg \
                 Tiler
 endif

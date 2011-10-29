@@ -44,6 +44,15 @@ PKG_CHECK_MODULES(LIBOSMSCOUTMAPQT,[libosmscout-map-qt],
 
 AM_CONDITIONAL(HAVE_LIB_OSMSCOUTMAPQT,[test "$HASLIBOSMSCOUTMAPQT" = "true"])
 
+PKG_CHECK_MODULES(LIBOSMSCOUTMAPAGG,[libosmscout-map-agg],
+                  [HASLIBOSMSCOUTMAPAGG=true
+                   AC_SUBST(LIBOSMSCOUTMAPAGG_CFLAGS)
+                   AC_SUBST(LIBOSMSCOUTMAPAGG_LIBS)
+                   AC_DEFINE(HAV_LIB_OSMSCOUTMAPAGG,1,[libosmscout-map-agg found])],
+                  [HASLIBOSMSCOUTMAPAGG=false])
+
+AM_CONDITIONAL(HAVE_LIB_OSMSCOUTMAPAGG,[test "$HASLIBOSMSCOUTMAPAGG" = "true"])
+
 PKG_CHECK_MODULES(LIBCAIRO, cairo,
                   HASCAIRO=true
                   [AC_SUBST(LIBCAIRO_CFLAGS)
@@ -52,15 +61,6 @@ PKG_CHECK_MODULES(LIBCAIRO, cairo,
                    [HASCAIRO=false])
 
 AM_CONDITIONAL(HAVE_LIB_CAIRO,[test "$HASCAIRO" = "true"])
-
-PKG_CHECK_MODULES(LIBAGG, libagg,
-                  HASAGG=true
-                  [AC_SUBST(LIBAGG_CFLAGS)
-                   AC_SUBST(LIBAGG_LIBS)
-                   AC_DEFINE(HAVE_LIB_AGG,1,[libagg found])],
-                   [HASAGG=false])
-
-AM_CONDITIONAL(HAVE_LIB_AGG,[test "$HASAGG" = "true"])
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT

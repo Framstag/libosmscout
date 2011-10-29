@@ -1,11 +1,11 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.56)
-AC_INIT([libosmscout-map-qt],[0.1],[tim@teulings.org],[libosmscout-map-qt])
+AC_INIT([libosmscout-map-agg],[0.1],[tim@teulings.org],[libosmscout-map-agg])
 
-AC_CONFIG_SRCDIR(src/osmscout/MapPainterQt.cpp)
+AC_CONFIG_SRCDIR(src/osmscout/MapPainterAgg.cpp)
 AC_CONFIG_MACRO_DIR([m4])
 
-AC_CONFIG_HEADERS([include/osmscout/private/Config.h include/osmscout/MapQtFeatures.h])
+AC_CONFIG_HEADERS([include/osmscout/private/Config.h include/osmscout/MapAggFeatures.h])
 AM_INIT_AUTOMAKE([no-define nostdinc subdir-objects dist-bzip2])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 AC_PROG_CXX
@@ -33,7 +33,7 @@ AC_TRY_COMPILE([],
                [LIB_CXXFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden"
                 AC_SUBST(LIB_CXXFLAGS)
                 AC_MSG_RESULT(yes)
-                AC_DEFINE(OSMSCOUT_MAP_QT_EXPORT_SYMBOLS,1,[libosmscout uses special gcc compiler features to export symbols])],
+                AC_DEFINE(OSMSCOUT_MAP_AGG_EXPORT_SYMBOLS,1,[libosmscout uses special gcc compiler features to export symbols])],
                [AC_MSG_RESULT(no)])
 CXXFLAGS="$OLDCXXFLAGS"
 
@@ -55,11 +55,23 @@ PKG_CHECK_MODULES(LIBOSMSCOUTMAP,[libosmscout-map],
                   [AC_SUBST(LIBOSMSCOUTMAP_CFLAGS)
                    AC_SUBST(LIBOSMSCOUTMAP_LIBS)])
 
-PKG_CHECK_MODULES(LIBQTGUI, [QtGui > 4.6.0],
-                  [AC_SUBST(LIBQTGUI_CFLAGS)
-                   AC_SUBST(LIBQTGUI_LIBS)])
+PKG_CHECK_MODULES(LIBFREETYPE, [freetype2],
+                  HASLIBFREETYPE=true
+                  [AC_SUBST(LIBFREETYPE_CFLAGS)
+                   AC_SUBST(LIBFREETYPE_LIBS)
+                   AC_DEFINE(HAVE_LIB_FREETYPE,1,[libfreetype found])],
+                   [HASFREETYPE=false])
+
+AM_CONDITIONAL(HAVE_LIB_FREETYPE,[test "$HASLIBFREETYPE" = "true"])
+	
+PKG_CHECK_MODULES(LIBAGG, [libagg],
+                  [if test "$HASLIBFREETYPE" = "true"; then
+                     LIBAGG_LIBS="-laggfontfreetype_pic $LIBAGG_LIBS"
+                   fi
+                   AC_SUBST(LIBAGG_CFLAGS)
+                   AC_SUBST(LIBAGG_LIBS)])
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
-AC_CONFIG_FILES([Makefile src/Makefile include/Makefile libosmscout-map-qt.pc libosmscout-map-qt-uninstalled.pc])
+AC_CONFIG_FILES([Makefile src/Makefile include/Makefile libosmscout-map-agg.pc libosmscout-map-agg-uninstalled.pc])
 AC_OUTPUT

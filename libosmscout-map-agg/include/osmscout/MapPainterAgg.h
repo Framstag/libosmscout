@@ -35,13 +35,13 @@
 // TODO: This one is likely not available under Windows!
 #include <agg2/agg_font_freetype.h>
 
-#include <osmscout/private/MapImportExport.h>
+#include <osmscout/private/MapAggImportExport.h>
 
 #include <osmscout/MapPainter.h>
 
 namespace osmscout {
 
-  class OSMSCOUT_MAP_API MapPainterAgg : public MapPainter
+  class OSMSCOUT_MAP_AGG_API MapPainterAgg : public MapPainter
   {
   public:
     typedef agg::pixfmt_rgb24                                  AggPixelFormat;

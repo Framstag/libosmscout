@@ -9,10 +9,6 @@ Description: osm navigation library     # human-readable description
 Version: @VERSION@
 Libs: -L${libdir} \
       @LIBCAIRO_LIBS@ \
-      @LIBFREETYPE_LIBS@ \
-      @LIBAGG_LIBS@ \
       -losmscoutmap
 Cflags: -I${includedir} \
-        @LIBCAIRO_CFLAGS@ \
-        @LIBFREETYPE_CFLAGS@ \
-        @LIBAGG_CFLAGS@
+        @LIBCAIRO_CFLAGS@
