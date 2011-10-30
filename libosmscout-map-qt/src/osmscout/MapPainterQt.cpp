@@ -544,7 +544,8 @@ namespace osmscout {
       painter->setPen(Qt::NoPen);
     }
 
-    SetBrush(parameter,
+    SetBrush(projection,
+             parameter,
              *area.fillStyle);
 
     painter->drawPath(path);
@@ -598,10 +599,14 @@ namespace osmscout {
     painter->setBrush(Qt::NoBrush);
   }
 
-  void MapPainterQt::SetBrush(const MapParameter& parameter,
+  void MapPainterQt::SetBrush(const Projection& projection,
+                              const MapParameter& parameter,
                               const FillStyle& fillStyle)
   {
-    if (fillStyle.HasPattern() && HasPattern(parameter,fillStyle)) {
+
+    if (fillStyle.HasPattern() &&
+        projection.GetMagnification()>=fillStyle.GetPatternMinMag() &&
+        HasPattern(parameter,fillStyle)) {
       painter->setBrush(patterns[fillStyle.GetPatternId()-1]);
     }
     else {

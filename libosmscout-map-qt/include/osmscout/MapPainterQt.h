@@ -45,7 +45,8 @@ namespace osmscout {
                 double lineWidth);
 
     void SetBrush();
-    void SetBrush(const MapParameter& parameter,
+    void SetBrush(const Projection& projection,
+                  const MapParameter& parameter,
                   const FillStyle& fillStyle);
 
   protected:
