@@ -8,11 +8,13 @@ Name: libosmscout-map-agg               # human-readable name
 Description: osm navigation library     # human-readable description
 Version: @VERSION@
 Libs: -L${libdir} \
+      @LIBOSMSCOUT_LIBS@ \
       @LIBOSMSCOUTMAP_LIBS@ \
       @LIBFREETYPE_LIBS@ \
       @LIBAGG_LIBS@ \
       -losmscoutmapagg
 Cflags: -I${includedir} \
+        @LIBOSMSCOUT_CFLAGS@ \
         @LIBOSMSCOUTMAP_CFLAGS@ \
         @LIBFREETYPE_CFLAGS@ \
         @LIBAGG_CFLAGS@

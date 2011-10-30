@@ -2,6 +2,8 @@ programs = libosmscout \
            libosmscout-import \
            libosmscout-map \
            libosmscout-map-svg \
+           libosmscout-map-cairo \
+           libosmscout-map-agg \
            libosmscout-map-qt \
            Import \
            Demos \

@@ -28,11 +28,11 @@
   #include <cairo/cairo.h>
 #endif
 
-#include <osmscout/private/MapImportExport.h>
+#include <osmscout/private/MapCairoImportExport.h>
 
 namespace osmscout {
 
-  OSMSCOUT_MAP_API cairo_surface_t* LoadPNG(const std::string& filename);
+  OSMSCOUT_MAP_CAIRO_API cairo_surface_t* LoadPNG(const std::string& filename);
 }
 
 #endif

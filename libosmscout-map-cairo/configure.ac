@@ -1,18 +1,18 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.56)
-AC_INIT([libosmscout-map],[0.1],[tim@teulings.org],[libosmscout-map])
+AC_INIT([libosmscout-map-cairo],[0.1],[tim@teulings.org],[libosmscout-map-cairo])
 
-AC_CONFIG_SRCDIR(src/osmscout/MapPainter.cpp)
+AC_CONFIG_SRCDIR(src/osmscout/MapPainterCairo.cpp)
 AC_CONFIG_MACRO_DIR([m4])
 
-AC_CONFIG_HEADERS([include/osmscout/private/Config.h include/osmscout/MapFeatures.h])
+AC_CONFIG_HEADERS([include/osmscout/private/Config.h include/osmscout/MapCairoFeatures.h])
 AM_INIT_AUTOMAKE([no-define nostdinc subdir-objects dist-bzip2])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 AC_PROG_CXX
 AC_LANG(C++)
 LT_INIT([win32-dll])
 AC_PROG_INSTALL
-              
+
 AC_TYPE_SIZE_T
 
 AC_SEARCH_LIBS([sqrt],[m])
@@ -33,7 +33,7 @@ AC_TRY_COMPILE([],
                [LIB_CXXFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden"
                 AC_SUBST(LIB_CXXFLAGS)
                 AC_MSG_RESULT(yes)
-                AC_DEFINE(OSMSCOUT_MAP_EXPORT_SYMBOLS,1,[libosmscout uses special gcc compiler features to export symbols])],
+                AC_DEFINE(OSMSCOUT_MAP_CAIRO_EXPORT_SYMBOLS,1,[libosmscout uses special gcc compiler features to export symbols])],
                [AC_MSG_RESULT(no)])
 CXXFLAGS="$OLDCXXFLAGS"
 
@@ -49,10 +49,29 @@ dnl Check for libosmscout
 PKG_CHECK_MODULES(LIBOSMSCOUT,[libosmscout],
                   [AC_SUBST(LIBOSMSCOUT_CFLAGS)
                    AC_SUBST(LIBOSMSCOUT_LIBS)])
+
+dnl Check for libosmscout-map
+PKG_CHECK_MODULES(LIBOSMSCOUTMAP,[libosmscout-map],
+                  [AC_SUBST(LIBOSMSCOUTMAP_CFLAGS)
+                   AC_SUBST(LIBOSMSCOUTMAP_LIBS)])
+
+PKG_CHECK_MODULES(LIBCAIRO, cairo,
+                  [AC_SUBST(LIBCAIRO_CFLAGS)
+                   AC_SUBST(LIBCAIRO_LIBS)
+                   AC_DEFINE(HAVE_LIB_CAIRO,1,[libcairo found])])
+
+PKG_CHECK_MODULES(LIBPNG,libpng,
+                  HASPNG=true
+                  [AC_SUBST(LIBPNG_CFLAGS)
+                   AC_SUBST(LIBPNG_LIBS)
+                   AC_DEFINE(HAVE_LIB_PNG,1,[libpng found])],
+                   [HASPNG=false])
                    
+AM_CONDITIONAL(HAVE_LIB_PNG,[test "$HASPNG" = "true"])
+
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
-AC_CONFIG_FILES([Makefile src/Makefile include/Makefile libosmscout-map.pc libosmscout-map-uninstalled.pc])
+AC_CONFIG_FILES([Makefile src/Makefile include/Makefile libosmscout-map-cairo.pc libosmscout-map-cairo-uninstalled.pc])
 AC_OUTPUT
 

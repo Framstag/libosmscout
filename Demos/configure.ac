@@ -35,6 +35,15 @@ PKG_CHECK_MODULES(LIBOSMSCOUTMAPSVG,[libosmscout-map-svg],
 
 AM_CONDITIONAL(HAVE_LIB_OSMSCOUTMAPSVG,[test "$HASLIBOSMSCOUTMAPSVG" = "true"])
 
+PKG_CHECK_MODULES(LIBOSMSCOUTMAPCAIRO,[libosmscout-map-cairo],
+                  [HASLIBOSMSCOUTMAPCAIRO=true
+                   AC_SUBST(LIBOSMSCOUTMAPCAIRO_CFLAGS)
+                   AC_SUBST(LIBOSMSCOUTMAPCAIRO_LIBS)
+                   AC_DEFINE(HAV_LIB_OSMSCOUTMAPCAIRO,1,[libosmscout-map-cairo found])],
+                  [HASLIBOSMSCOUTMAPCAIRO=false])
+
+AM_CONDITIONAL(HAVE_LIB_OSMSCOUTMAPCAIRO,[test "$HASLIBOSMSCOUTMAPCAIRO" = "true"])
+
 PKG_CHECK_MODULES(LIBOSMSCOUTMAPQT,[libosmscout-map-qt],
                   [HASLIBOSMSCOUTMAPQT=true
                    AC_SUBST(LIBOSMSCOUTMAPQT_CFLAGS)
@@ -52,15 +61,6 @@ PKG_CHECK_MODULES(LIBOSMSCOUTMAPAGG,[libosmscout-map-agg],
                   [HASLIBOSMSCOUTMAPAGG=false])
 
 AM_CONDITIONAL(HAVE_LIB_OSMSCOUTMAPAGG,[test "$HASLIBOSMSCOUTMAPAGG" = "true"])
-
-PKG_CHECK_MODULES(LIBCAIRO, cairo,
-                  HASCAIRO=true
-                  [AC_SUBST(LIBCAIRO_CFLAGS)
-                   AC_SUBST(LIBCAIRO_LIBS)
-                   AC_DEFINE(HAVE_LIB_CAIRO,1,[libcairo found])],
-                   [HASCAIRO=false])
-
-AM_CONDITIONAL(HAVE_LIB_CAIRO,[test "$HASCAIRO" = "true"])
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT

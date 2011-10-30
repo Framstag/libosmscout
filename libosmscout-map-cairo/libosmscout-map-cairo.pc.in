@@ -4,15 +4,17 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: libosmscout-map-qt                # human-readable name
+Name: libosmscout-map-cairo             # human-readable name
 Description: osm navigation library     # human-readable description
 Version: @VERSION@
 Libs: -L${libdir} \
       @LIBOSMSCOUT_LIBS@ \
       @LIBOSMSCOUTMAP_LIBS@ \
-      @LIBQTGUI_LIBS@ \
-      -losmscoutmapqt
+      @LIBPNG_LIBS@ \
+      @LIBCAIRO_LIBS@ \
+      -losmscoutmapcairo
 Cflags: -I${includedir} \
         @LIBOSMSCOUT_CFLAGS@ \
         @LIBOSMSCOUTMAP_CFLAGS@ \
-        @LIBQTGUI_CFLAGS@
+        @LIBPNG_CFLAGS@ \
+        @LIBCAIRO_CFLAGS@

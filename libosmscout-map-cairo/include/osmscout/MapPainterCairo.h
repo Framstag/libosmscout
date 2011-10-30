@@ -28,13 +28,13 @@
   #include <cairo/cairo.h>
 #endif
 
-#include <osmscout/private/MapImportExport.h>
+#include <osmscout/private/MapCairoImportExport.h>
 
 #include <osmscout/MapPainter.h>
 
 namespace osmscout {
 
-  class OSMSCOUT_MAP_API MapPainterCairo : public MapPainter
+  class OSMSCOUT_MAP_CAIRO_API MapPainterCairo : public MapPainter
   {
   private:
     cairo_t                               *draw;     //! The cairo cairo_t for the mask

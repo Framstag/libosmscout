@@ -7,5 +7,10 @@ includedir=@includedir@
 Name: libosmscout-import                # human-readable name
 Description: osm navigation library     # human-readable description
 Version: @VERSION@
-Libs: @XML2_LIBS@ -L${libdir} -losmscoutimport
-Cflags: -I${includedir}
+Libs: -L${libdir}  \
+      @XML2_LIBS@ \
+      @LIBOSMSCOUT_LIBS@ \
+      -losmscoutimport
+Cflags: -I${includedir} \
+      @XML2_CFLAGS@ \
+      @LIBOSMSCOUT_CFLAGS@
