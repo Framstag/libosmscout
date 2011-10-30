@@ -5,6 +5,7 @@ programs = libosmscout \
            libosmscout-map-cairo \
            libosmscout-map-agg \
            libosmscout-map-qt \
+           libosmscout-map-agg \
            Import \
            Demos \
            TravelJinni \
