@@ -386,6 +386,10 @@ namespace osmscout {
         double factor=log2(projection.GetMagnification())-log2(style.GetScaleAndFadeMag());
         fontSize=fontSize*pow(2,factor);
         a=a/factor;
+
+        if (a>1.0) {
+          a=1.0;
+        }
       }
     }
 
