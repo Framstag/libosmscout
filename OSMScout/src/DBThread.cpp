@@ -160,6 +160,7 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
 
     paths.push_back("../libosmscout/data/icons/14x14/standard/");
 
+    //drawParameter.SetDPI(QApplication::desktop()->physicalDpiX());
     drawParameter.SetIconPaths(paths);
     drawParameter.SetPatternPaths(paths);
     drawParameter.SetDebugPerformance(true);

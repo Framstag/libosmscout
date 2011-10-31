@@ -176,6 +176,7 @@ namespace osmscout {
   public:
     struct OSMSCOUT_API WayData
     {
+      ObjectRef               ref;
       const SegmentAttributes *attributes;     //! Attributes of line segment
       const LineStyle         *lineStyle;      //! Line style
       const LabelStyle        *nameLabelStyle; //! LabelStyle for name
@@ -314,6 +315,7 @@ namespace osmscout {
     void PrepareWaySegment(const StyleConfig& styleConfig,
                            const Projection& projection,
                            const MapParameter& parameter,
+                           const ObjectRef& ref,
                            const SegmentAttributes& attributes,
                            const std::vector<Point>& nodes);
 

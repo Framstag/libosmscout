@@ -97,7 +97,7 @@ namespace osmscout {
       }
     }
 
-    level=0;
+    level=parameter.GetAreaWayMinMag();
     while (!remainingWayTypes.empty()) {
       uint32_t         wayCount=0;
       std::set<TypeId> currentWayTypes(remainingWayTypes);

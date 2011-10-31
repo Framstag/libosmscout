@@ -1488,6 +1488,7 @@ namespace osmscout {
   void MapPainter::PrepareWaySegment(const StyleConfig& styleConfig,
                                      const Projection& projection,
                                      const MapParameter& parameter,
+                                     const ObjectRef& ref,
                                      const SegmentAttributes& attributes,
                                      const std::vector<Point>& nodes)
   {
@@ -1510,6 +1511,7 @@ namespace osmscout {
 
     WayData data;
 
+    data.ref=ref;
     data.lineWidth=lineWidth;
 
     if (lineStyle->GetOutline()>0.0) {
@@ -1658,6 +1660,7 @@ namespace osmscout {
       PrepareWaySegment(styleConfig,
                         projection,
                         parameter,
+                        ObjectRef(way->GetId(),refWay),
                         way->GetAttributes(),
                         way->nodes);
     }
@@ -1675,6 +1678,7 @@ namespace osmscout {
         PrepareWaySegment(styleConfig,
                           projection,
                           parameter,
+                          ObjectRef(relation->GetId(),refRelation),
                           role.GetAttributes(),
                           role.nodes);
       }
@@ -1689,6 +1693,7 @@ namespace osmscout {
         PrepareWaySegment(styleConfig,
                           projection,
                           parameter,
+                          ObjectRef(way->GetId(),refWay),
                           way->GetAttributes(),
                           way->nodes);
       }
@@ -1723,11 +1728,13 @@ namespace osmscout {
     transBuffer.Reset();
 
     if (parameter.IsDebugPerformance()) {
-      std::cout << "Draw ";
-      std::cout << projection.GetLat() <<", ";
-      std::cout << projection.GetLon() << " with mag. ";
+      std::cout << "Draw [";
+      std::cout << projection.GetLatMin() <<",";
+      std::cout << projection.GetLonMin() << " - ";
+      std::cout << projection.GetLatMax() << ",";
+      std::cout << projection.GetLonMax() << "]  with mag. ";
       std::cout << projection.GetMagnification() << "x" << "/" << log(projection.GetMagnification())/log(2.0);
-      std::cout << " area " << projection.GetWidth() << "x" << projection.GetHeight() << std::endl;
+      std::cout << " area " << projection.GetWidth() << "x" << projection.GetHeight() << " " << parameter.GetDPI()<< " DPI" << std::endl;
     }
 
     //

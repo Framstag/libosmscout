@@ -71,8 +71,9 @@ namespace osmscout {
      wayIndexCacheSize(5000),
      areaAreaIndexMaxMag(17),
      areaAreaRelIndexMaxMag(17),
+     areaWayMinMag(14),
      areaWayIndexCellSizeAverage(64),
-     areaWayIndexCellSizeMax(1024),
+     areaWayIndexCellSizeMax(256),
      waterIndexMaxMag(14),
      optimizationMaxMag(8)
   {
@@ -152,6 +153,11 @@ namespace osmscout {
   size_t ImportParameter::GetAreaAreaRelIndexMaxMag() const
   {
     return areaAreaRelIndexMaxMag;
+  }
+
+  size_t ImportParameter::GetAreaWayMinMag() const
+  {
+    return areaWayMinMag;
   }
 
   size_t ImportParameter::GetAreaWayIndexCellSizeAverage() const
