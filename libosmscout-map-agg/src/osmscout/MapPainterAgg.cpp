@@ -60,8 +60,8 @@ namespace osmscout {
     }
 
     //fontEngine->resolution(72);
-    fontEngine->width(size*parameter.GetFontSize());
-    fontEngine->height(size*parameter.GetFontSize());
+    fontEngine->width(size*ConvertWidthToPixel(parameter,parameter.GetFontSize()));
+    fontEngine->height(size*ConvertWidthToPixel(parameter,parameter.GetFontSize()));
     fontEngine->hinting(true);
     fontEngine->flip_y(true);
   }
@@ -78,8 +78,8 @@ namespace osmscout {
     }
 
     //fontEngine->resolution(72);
-    fontEngine->width(size*parameter.GetFontSize());
-    fontEngine->height(size*parameter.GetFontSize());
+    fontEngine->width(size*ConvertWidthToPixel(parameter,parameter.GetFontSize()));
+    fontEngine->height(size*ConvertWidthToPixel(parameter,parameter.GetFontSize()));
     fontEngine->hinting(true);
     fontEngine->flip_y(true);
   }

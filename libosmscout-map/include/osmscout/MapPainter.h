@@ -40,13 +40,16 @@
 
 namespace osmscout {
 
+  /**
+   * Collection of Parameter that parametrize and influence drawing of the map.
+   */
   class OSMSCOUT_MAP_API MapParameter
   {
   private:
     double                 dpi;               //! DPI of the display, default is 92
 
     std::string            fontName;          //! Name of the font to use
-    double                 fontSize;          //! Pixel size of base font (aka font size 100%)
+    double                 fontSize;          //! Metric size of base font (aka font size 100%) in millimeter
 
     std::list<std::string> iconPaths;         //! List of paths to search for images for icons
     std::list<std::string> patternPaths;      //! List of paths to search for images for patterns

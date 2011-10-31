@@ -36,7 +36,7 @@ namespace osmscout {
   MapParameter::MapParameter()
   : dpi(96.0),
     fontName("sans-serif"),
-    fontSize(9.0),
+    fontSize(3.0),
     lineMinWidthPixel(0.2),
     drawBridgeMagnification(magVeryClose),
     drawTunnelMagnification(magVeryClose),
@@ -370,7 +370,7 @@ namespace osmscout {
                              text,
                              wayScanlines[i].x+0.5,
                              wayScanlines[i].y+0.5)) {
-        i+=parameter.GetFontSize()*6;
+        i+=ConvertWidthToPixel(parameter,parameter.GetFontSize())*10;
       }
       else {
         i+=2;

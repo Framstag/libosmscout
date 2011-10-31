@@ -347,8 +347,8 @@ namespace osmscout {
                                         CAIRO_FONT_WEIGHT_NORMAL);
 
     cairo_matrix_init_scale(&scaleMatrix,
-                            parameter.GetFontSize()*fontSize,
-                            parameter.GetFontSize()*fontSize);
+                            fontSize*ConvertWidthToPixel(parameter,parameter.GetFontSize()),
+                            fontSize*ConvertWidthToPixel(parameter,parameter.GetFontSize()));
 
     cairo_matrix_init_identity(&transformMatrix);
 

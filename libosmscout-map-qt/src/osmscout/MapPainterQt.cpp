@@ -57,7 +57,7 @@ namespace osmscout {
 
     QFont font(parameter.GetFontName().c_str(),QFont::Normal,false);
 
-    font.setPixelSize(parameter.GetFontSize()*fontSize);
+    font.setPixelSize(fontSize*ConvertWidthToPixel(parameter,parameter.GetFontSize()));
     font.setStyleStrategy(QFont::PreferAntialias);
     font.setStyleStrategy(QFont::PreferMatch);
 
