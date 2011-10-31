@@ -68,7 +68,7 @@ Lum::Object* LocationSearchDialog::GetContent()
   table->SetFlex(true,true);
   table->SetMinWidth(Lum::Base::Size::stdCharWidth,60);
   table->SetHeight(Lum::Base::Size::stdCharHeight,10);
-  table->SetShowHeader(true);
+  table->SetShowHeader(false);
   table->GetTableView()->SetAutoFitColumns(true);
   table->GetTableView()->SetAutoVSize(true);
   table->SetModel(locationsModel);
