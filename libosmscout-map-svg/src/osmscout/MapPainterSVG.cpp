@@ -161,14 +161,12 @@ namespace osmscout {
       if (lineStyle!=NULL) {
         double lineWidth;
 
-        if (lineStyle->GetFixedWidth()) {
-          lineWidth=GetProjectedWidth(projection,
-                                      lineStyle->GetMinPixel(),
-                                      lineStyle->GetWidth());
+        if (lineStyle->GetWidth()==0) {
+          lineWidth=ConvertWidthToPixel(parameter,lineStyle->GetMinWidth());
         }
         else {
           lineWidth=GetProjectedWidth(projection,
-                                      lineStyle->GetMinPixel(),
+                                      ConvertWidthToPixel(parameter,lineStyle->GetMinWidth()),
                                       lineStyle->GetWidth());
         }
 
