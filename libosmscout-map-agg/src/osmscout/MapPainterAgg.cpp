@@ -534,12 +534,11 @@ namespace osmscout {
 
     agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
 
-    double borderWidth=GetProjectedWidth(projection,
-                                         area.fillStyle->GetBorderMinPixel(),
-                                         area.fillStyle->GetBorderWidth());
+    double borderWidth=ConvertWidthToPixel(parameter,
+                                           area.fillStyle->GetBorderWidth());
 
 
-    if (borderWidth>0.0) {
+    if (borderWidth>=parameter.GetLineMinWidthPixel()) {
       renderer_aa->color(agg::rgba(area.fillStyle->GetBorderR(),
                                    area.fillStyle->GetBorderG(),
                                    area.fillStyle->GetBorderB(),

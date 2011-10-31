@@ -1,80 +1,80 @@
 OSS
   WAY "highway_motorway" PRIO 1 MINMAG continent
-    LINE #809bc0 WITH OUTLINECOLOR #777777 MINPIXEL 2 WIDTH 20 OUTLINE 1
+    LINE #809bc0 WITH OUTLINECOLOR #777777 MINWIDTH 0.45mm WIDTH 20m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG detail
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #809bc0 BORDERCOLOR #ffffff MINMAG state PRIO 20
 
   WAY "highway_motorway_link" PRIO 5 MINMAG proximity
-    LINE #809bc0 WITH OUTLINECOLOR #777777 MINPIXEL 2 WIDTH 20 OUTLINE 1
+    LINE #809bc0 WITH OUTLINECOLOR #777777 MINWIDTH 0.45mm WIDTH 20m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG detail
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #809bc0 BORDERCOLOR #ffffff MINMAG state PRIO 20
 
   WAY "highway_trunk" PRIO 2 MINMAG state
-    LINE #a8daa8 WITH OUTLINECOLOR #777777 MINPIXEL 2 WIDTH 18 OUTLINE 1
+    LINE #a8daa8 WITH OUTLINECOLOR #777777 MINWIDTH 0.45mm WIDTH 18m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG detail
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #7ec87e BORDERCOLOR #ffffff MINMAG proximity PRIO 20
 
   WAY "highway_trunk_link" PRIO 5 MINMAG proximity
-    LINE #a8daa8 WITH OUTLINECOLOR #777777 MINPIXEL 2 WIDTH 18 OUTLINE 1
+    LINE #a8daa8 WITH OUTLINECOLOR #777777 MINWIDTH 0.45mm WIDTH 18m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG detail
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #7ec87e BORDERCOLOR #ffffff MINMAG proximity PRIO 20
 
   WAY "highway_primary" PRIO 3 MINMAG stateOver
-    LINE #ec989a WITH OUTLINECOLOR #a56769 MINPIXEL 1.5 WIDTH 14 OUTLINE 1
+    LINE #ec989a WITH OUTLINECOLOR #a56769 MINWIDTH 0.4mm WIDTH 14m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG detail
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #e46d71 BORDERCOLOR #ffffff MINMAG cityOver PRIO 20
 
   WAY "highway_primary_link" PRIO 5 MINMAG proximity
-    LINE #ec989a WITH MINPIXEL 1.5 WIDTH 14 OUTLINE 1
+    LINE #ec989a WITH MINWIDTH 0.4mm WIDTH 14m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG detail
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #e46d71 BORDERCOLOR #ffffff MINMAG cityOver PRIO 20
 
   WAY "highway_secondary" PRIO 4 MINMAG proximity
-    LINE #fdd6a4 WITH ALTCOLOR #fdd654 MINPIXEL 1 WIDTH 12 OUTLINE 1
+    LINE #fdd6a4 WITH ALTCOLOR #fdd654 MINWIDTH 0.25mm WIDTH 12m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG detail
 
   WAY "highway_secondary_link" PRIO 5 MINMAG proximity
-    LINE #fdd6a4 WITH ALTCOLOR #fdd654 MINPIXEL 1 WIDTH 12 OUTLINE 1
+    LINE #fdd6a4 WITH ALTCOLOR #fdd654 MINWIDTH 0.25mm WIDTH 12m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG detail
 
   WAY "highway_tertiary" PRIO 5 MINMAG proximity
-    LINE #fefeb3 WITH ALTCOLOR #fefe73 MINPIXEL 1 WIDTH 10 OUTLINE 1
+    LINE #fefeb3 WITH ALTCOLOR #fefe73 MINWIDTH 0.25mm WIDTH 10m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG close
 
   WAY "highway_unclassified" PRIO 7 MINMAG city
-    LINE #ffffff WITH ALTCOLOR #888888 MINPIXEL 0.5 WIDTH 8 OUTLINE 1
+    LINE #ffffff WITH ALTCOLOR #888888 MINWIDTH 0.1mm WIDTH 8m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG close
 
   WAY "highway_road" PRIO 7 MINMAG proximity
-    LINE #ffffff WITH ALTCOLOR #888888 MINPIXEL 0.5 WIDTH 8 OUTLINE 1
+    LINE #ffffff WITH ALTCOLOR #888888 MINWIDTH 0.1mm WIDTH 8m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG close
 
   WAY "highway_residential" PRIO 7 MINMAG city
-    LINE #ffffff WITH ALTCOLOR #888888 MINPIXEL 0.5 WIDTH 8 OUTLINE 1
+    LINE #ffffff WITH ALTCOLOR #888888 MINWIDTH 0.1mm WIDTH 8m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG close
 
   WAY "highway_living_street" PRIO 9 MINMAG detail
-    LINE #bababa WITH MINPIXEL 1 WIDTH 8 OUTLINE 1
+    LINE #bababa WITH MINWIDTH 0.25mm WIDTH 8m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG close
 
   WAY "highway_service" PRIO 10 MINMAG close
-    LINE #ffffff WITH ALTCOLOR #888888 MINPIXEL 0.5 WIDTH 8 OUTLINE 1
+    LINE #ffffff WITH ALTCOLOR #888888 MINWIDTH 0.1mm WIDTH 8m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG close
 
   AREA "highway_service"
-    FILL #ffffff BORDER #cccccc WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #ffffff BORDER #cccccc WIDTH 0.1mm
     LABEL WITH MINMAG close
 
   WAY "highway_track" PRIO 11 MINMAG close
-    LINE #90570c WITH OUTLINECOLOR #ffffff80 DASH 3,1 MINPIXEL 1.5 FIXEDWIDTH OUTLINE 1.5
+    LINE #90570c WITH OUTLINECOLOR #ffffff50 DASH 3,1 MINWIDTH 0.4mm OUTLINE 0.4mm
     LABEL WITH STYLE contour MINMAG close
 
   WAY "highway_pedestrian" PRIO 11 MINMAG close
-    LINE #ebeaea WITH MINPIXEL 0.5 WIDTH 8 OUTLINE 1
+    LINE #ebeaea WITH MINWIDTH 0.1mm WIDTH 8m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG close
 
   AREA "highway_pedestrian"
-    FILL #ededed BORDER #c5c5c5 WITH MINPIXEL 0.5
+    FILL #ededed BORDER #c5c5c5 WIDTH 0.1mm
     LABEL WITH MINMAG close
 
   NODE "highway_services"
@@ -85,39 +85,39 @@ OSS
     LABEL WITH MINMAG close
 
   WAY "highway_bus_guideway" PRIO 11 MINMAG detail
-    LINE #90570c WITH MINPIXEL 0.5 WIDTH 2
+    LINE #90570c WITH MINWIDTH 0.1mm WIDTH 2m
     LABEL WITH STYLE contour MINMAG close
 
   WAY "highway_path" PRIO 11 MINMAG close
-    LINE #555555 WITH OUTLINECOLOR #ffffff80 DASH 8,2 MINPIXEL 1 FIXEDWIDTH OUTLINE 1
+	LINE #555555 WITH OUTLINECOLOR #ffffff50 DASH 8,2 MINWIDTH 0.25mm OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG close
 
   WAY "highway_cycleway" PRIO 11 MINMAG close
-    LINE #4645fa WITH OUTLINECOLOR #ffffff80 DASH 1,1 MINPIXEL 2 FIXEDWIDTH OUTLINE 1.5
+    LINE #4645fa WITH OUTLINECOLOR #ffffff50 DASH 1,1 MINWIDTH 0.4mm OUTLINE 0.4mm
     LABEL WITH STYLE contour MINMAG close
 
   AREA "highway_footway"
-    FILL #ededed BORDER #c5c5c5 WITH MINPIXEL 0.5
+    FILL #ededed BORDER #c5c5c5 WIDTH 0.1mm
     LABEL WITH MINMAG close
 
   WAY "highway_footway" PRIO 11 MINMAG close
-    LINE #fe9897 WITH OUTLINECOLOR #ffffff80 DASH 1,1 MINPIXEL 2 FIXEDWIDTH OUTLINE 1.5
+    LINE #f64762 WITH OUTLINECOLOR #ffffff50 DASH 1,1 MINWIDTH 0.4mm OUTLINE 0.4mm
     LABEL WITH STYLE contour MINMAG close
 
   WAY "highway_bridleway" PRIO 11 MINMAG close
-    LINE #90570c WITH MINPIXEL 0.5 WIDTH 2
+    LINE #90570c WITH MINWIDTH 0.1mm WIDTH 2m
     LABEL WITH STYLE contour MINMAG close
 
   WAY "highway_byway" PRIO 11 MINMAG close
-    LINE #90570c WITH MINPIXEL 0.5 WIDTH 2
+    LINE #90570c WITH MINWIDTH 0.1mm WIDTH 2m
     LABEL WITH STYLE contour MINMAG close
 
   WAY "highway_steps" PRIO 11 MINMAG close
-    LINE #fe9897 WITH DASH 0.25,0.25 MINPIXEL 5
+    LINE #fe9897 WITH DASH 0.25,0.25 MINWIDTH 1.25mm
     LABEL WITH STYLE contour MINMAG close
 
   WAY "highway_construction" PRIO 11 MINMAG close
-    LINE #99cccc WITH MINPIXEL 0.5 WIDTH 2
+    LINE #99cccc WITH MINWIDTH 0.1mm WIDTH 2m
     LABEL WITH STYLE contour MINMAG close
 
   NODE "highway_bus_stop"
@@ -129,19 +129,19 @@ OSS
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #e46d71 BORDERCOLOR #ffffff MINMAG detail PRIO 20
 
   WAY "railway_rail" PRIO 8 MINMAG cityOver
-    LINE #939393 WITH ALTCOLOR #777777 OUTLINECOLOR #b3b3b3 DASH 3,3 GAPCOLOR #ffffff MINPIXEL 1 WIDTH 5 OUTLINE 1
+    LINE #939393 WITH ALTCOLOR #777777 OUTLINECOLOR #b3b3b3 DASH 3,3 GAPCOLOR #ffffff MINWIDTH 0.25mm WIDTH 5m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG close
 
   WAY "railway_tram" PRIO 20 MINMAG city
-    LINE #444444 WITH MINPIXEL 1 WIDTH 5
+    LINE #444444 WITH MINWIDTH 0.25mm WIDTH 5m
     LABEL WITH STYLE contour MINMAG close
 
   WAY "railway_light_rail" PRIO 20 MINMAG city
-    LINE #b3b3b3 WITH MINPIXEL 1 WIDTH 5
+    LINE #b3b3b3 WITH MINWIDTH 0.25mm WIDTH 5m
     LABEL WITH STYLE contour MINMAG close
 
   WAY "railway_subway" PRIO 20 MINMAG city
-    LINE #b3b3b3 WITH OUTLINECOLOR #ffffff80 MINPIXEL 1 WIDTH 5 OUTLINE 1
+    LINE #b3b3b3 WITH OUTLINECOLOR #ffffff50 MINWIDTH 0.25mm WIDTH 5m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG close
 
   NODE "railway_station"
@@ -162,19 +162,19 @@ OSS
     SYMBOL box #7885b0 8 WITH MINMAG close
 
   WAY "waterway_stream" PRIO 20 MINMAG cityOver
-    LINE #b5d0d0 WITH MINPIXEL 1 WIDTH 2
+    LINE #b5d0d0 WITH MINWIDTH 0.25mm WIDTH 2m
     LABEL WITH STYLE contour MINMAG close
 
   WAY "waterway_river" PRIO 1 MINMAG proximity
-    LINE #b5d0d0 WITH MINPIXEL 0.5 WIDTH 15
+    LINE #b5d0d0 WITH MINWIDTH 0.1mm WIDTH 15m
     LABEL WITH STYLE contour MINMAG city
 
   WAY "waterway_canal" PRIO 1 MINMAG proximity
-    LINE #b5d0d0 WITH MINPIXEL 0.5 WIDTH 15
+    LINE #b5d0d0 WITH MINWIDTH 0.1mm WIDTH 15m
     LABEL WITH STYLE contour MINMAG city
 
   WAY "waterway_drain" PRIO 1 MINMAG cityOver
-    LINE #b5d0d0 WITH MINPIXEL 0.5 WIDTH 3
+    LINE #b5d0d0 WITH MINWIDTH 0.1mm WIDTH 3m
     LABEL WITH STYLE contour MINMAG city
 
   AREA "waterway_dock"
@@ -186,15 +186,15 @@ OSS
     LABEL WITH MINMAG proximity
 
   WAY "route_ferry" PRIO 11 MINMAG cityOver
-    LINE #0000ff WITH OUTLINECOLOR #ffffff80 DASH 1,1 MINPIXEL 2 WIDTH 2 FIXEDWIDTH OUTLINE 1.5
+    LINE #0000ff WITH OUTLINECOLOR #ffffff50 DASH 1,1 MINWIDTH 0.5mm WIDTH 2m OUTLINE 0.4mm
     LABEL WITH STYLE contour MINMAG detail
 
   WAY "public_transport_platform" PRIO 11 MINMAG close
-    LINE #9b9b9c WITH OUTLINECOLOR #887b7b MINPIXEL 3 WIDTH 2 OUTLINE 0.5
+    LINE #9b9b9c WITH OUTLINECOLOR #887b7b MINWIDTH 0.75mm WIDTH 2m OUTLINE 0.1mm
     LABEL WITH STYLE contour MINMAG veryClose
 
   AREA "public_transport_platform" MINMAG close
-    FILL #9b9b9c BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #9b9b9c BORDER #887b7b WIDTH 0.1mm
     LABEL WITH STYLE normal COLOR #524a4a SIZE 0.8 MINMAG veryClose
 
   AREA "landuse_farm"
@@ -206,7 +206,7 @@ OSS
     LABEL WITH MINMAG city
 
   AREA "landuse_farmyard_building"
-    FILL #bcbcbc BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #bcbcbc BORDER #887b7b WIDTH 0.1mm
     LABEL WITH MINMAG city
 
   AREA "landuse_farmyard"
@@ -222,7 +222,7 @@ OSS
     LABEL WITH MINMAG city
 
   AREA "landuse_basin"
-    FILL #b3d1d4 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #b3d1d4 BORDER #887b7b WIDTH 0.1mm
     LABEL WITH MINMAG detail
 
   AREA "landuse_reservoir"
@@ -246,7 +246,7 @@ OSS
     LABEL WITH MINMAG city
 
   AREA "landuse_retail"
-    FILL #feeaea BORDER #c5a0a0 WITH MINPIXEL 1 WIDTH 1
+    FILL #feeaea BORDER #c5a0a0 WIDTH 0.1mm
     
     LABEL WITH MINMAG city
 
@@ -339,7 +339,7 @@ OSS
     LABEL WITH MINMAG close
 
   WAY "natural_coastline" PRIO 1 MINMAG world
-    LINE #000000 WITH MINPIXEL 1 WIDTH 1
+    LINE #000000 WITH MINWIDTH 0.25mm WIDTH 1m
 
   AREA "natural_beach"
     FILL #eecc55
@@ -362,7 +362,7 @@ OSS
     LABEL WITH MINMAG detail
 
   WAY "aeroway_runway" PRIO 20 MINMAG suburb
-    LINE #bbbbcc WITH MINPIXEL 2 WIDTH 20
+    LINE #bbbbcc WITH MINWIDTH 0.5mm WIDTH 20m
     LABEL WITH STYLE contour MINMAG close
 
   AREA "aeroway_runway"
@@ -370,7 +370,7 @@ OSS
     LABEL WITH MINMAG close
 
   WAY "aeroway_taxiway" PRIO 20 MINMAG suburb
-    LINE #bbbbcc WITH MINPIXEL 2 WIDTH 15
+    LINE #bbbbcc WITH MINWIDTH 0.5mm WIDTH 15m
     LABEL WITH STYLE contour MINMAG close
 
   AREA "aeroway_apron"
@@ -394,7 +394,7 @@ OSS
     LABEL WITH MINMAG close
 
   WAY "leisure_track" PRIO 11 MINMAG close
-    LINE #bde3cb WITH MINPIXEL 1 WIDTH 3
+    LINE #bde3cb WITH MINWIDTH 0.25mm WIDTH 3m
     LABEL WITH STYLE contour MINMAG city
 
   AREA "leisure_track"
@@ -402,11 +402,11 @@ OSS
     LABEL WITH MINMAG close
 
   AREA "leisure_pitch"
-    FILL #90d3b9 BORDER #b0b0b0 WITH MINPIXEL 1 WIDTH 1
+    FILL #90d3b9 BORDER #b0b0b0 WIDTH 0.1mm
     LABEL WITH MINMAG close
 
   AREA "leisure_water_park"
-	FILL #f1eee8 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+	FILL #f1eee8 BORDER #887b7b WIDTH 0.1mm
     LABEL WITH MINMAG close
 
   AREA "leisure_marina"
@@ -446,12 +446,12 @@ OSS
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "amenity_hospital_building"
-    FILL #b89c9c BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #b89c9c BORDER #887b7b WIDTH 0.1mm
     LABEL WITH STYLE emphasize COLOR #da0092 SIZE 1.1 MINMAG veryClose
     ICON hospital WITH MINMAG close
 
   AREA "amenity_hospital"
-    FILL #f0f0d8 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #f0f0d8 BORDER #887b7b WIDTH 0.1mm
     LABEL WITH STYLE emphasize COLOR #da0092 SIZE 1.1 MINMAG veryClose
     ICON hospital WITH MINMAG close
 
@@ -461,12 +461,12 @@ OSS
     ICON hospital WITH MINMAG close
 
   AREA "amenity_parking_building"
-    FILL #c4c393 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #c4c393 BORDER #887b7b WIDTH 0.1mm
     ICON parking WITH MINMAG close
     LABEL WITH STYLE emphasize COLOR #4bb2da SIZE 1.1 MINMAG veryClose
 
   AREA "amenity_parking"
-    FILL #f6eeb6 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #f6eeb6 BORDER #887b7b WIDTH 0.1mm
     ICON parking WITH MINMAG close
     LABEL WITH STYLE emphasize COLOR #4bb2da SIZE 1.1 MINMAG veryClose
 
@@ -480,7 +480,7 @@ OSS
     LABEL WITH STYLE emphasize COLOR #da0092 SIZE 1.1 MINMAG veryClose
 
   AREA "amenity_post_office_building"
-    FILL #ffcc00 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #ffcc00 BORDER #887b7b WIDTH 0.1mm
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "amenity_post_office"
@@ -599,7 +599,7 @@ OSS
     LABEL WITH MINMAG veryClose
 
   AREA "shop"
-    FILL #bca284 BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #bca284 BORDER #887b7b WIDTH 0.1mm
     LABEL WITH MINMAG veryClose
 
   AREA "military_airfield"
@@ -642,11 +642,11 @@ OSS
     FILL #bcbcbc
 
   AREA "building" MINMAG close
-    FILL #bcbcbc BORDER #887b7b WITH MINPIXEL 0.5 WIDTH 0.5
+    FILL #bcbcbc BORDER #887b7b WIDTH 0.1mm
     LABEL WITH STYLE normal COLOR #524a4a SIZE 0.8 MINMAG veryClose
 
   WAY "barrier_fence" PRIO 20 MINMAG veryClose
-    LINE #aaaaaa WITH MINPIXEL 0.5 WIDTH 0.5
+    LINE #aaaaaa WITH MINWIDTH 0.1mm WIDTH 0.5m
    
   NODE "place_continent"
     LABEL WITH STYLE emphasize MINMAG world MAXMAG city PRIO 1
@@ -691,5 +691,5 @@ OSS
     ICON target*/
 
   WAY "_route" PRIO 1 MINMAG world
-    LINE #ff000088 WITH MINPIXEL 2 WIDTH 20
+    LINE #ff000088 WITH MINWIDTH 0.5mm WIDTH 20m
 END

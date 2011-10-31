@@ -51,7 +51,7 @@ namespace osmscout {
     std::list<std::string> iconPaths;         //! List of paths to search for images for icons
     std::list<std::string> patternPaths;      //! List of paths to search for images for patterns
 
-    double                 outlineMinWidth;   //! Minimum width of an outline to be drawn
+    double                 lineMinWidthPixel; //! Minimum width of an line to be drawn
 
     double                 drawBridgeMagnification; //! Starting with this magnification, we draw bridges
     double                 drawTunnelMagnification; //! Starting with this magnification, we draw tunnels
@@ -76,7 +76,7 @@ namespace osmscout {
     void SetIconPaths(const std::list<std::string>& paths);
     void SetPatternPaths(const std::list<std::string>& paths);
 
-    void SetOutlineMinWidth(double outlineMinWidth);
+    void SetLineMinWidthPixel(double lineMinWidthPixel);
 
     void SetDrawBridgeMagnification(double magnification);
     void SetDrawTunnelMagnification(double magnification);
@@ -113,9 +113,9 @@ namespace osmscout {
       return patternPaths;
     }
 
-    inline double GetOutlineMinWidth() const
+    inline double GetLineMinWidthPixel() const
     {
-      return outlineMinWidth;
+      return lineMinWidthPixel;
     }
 
     inline double GetDrawBridgeMagnification() const
@@ -386,6 +386,10 @@ namespace osmscout {
     double GetProjectedWidth(const Projection& projection,
                              double minPixel,
                              double width) const;
+
+    double ConvertWidthToPixel(const MapParameter& parameter,
+                               double width) const;
+
     //@}
 
     /**

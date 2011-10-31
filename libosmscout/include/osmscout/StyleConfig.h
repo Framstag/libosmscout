@@ -49,7 +49,7 @@ namespace osmscout {
     double              gapG;
     double              gapB;
     double              gapA;
-    double              minPixel;
+    double              minWidth;
     double              width;
     double              fixedWidth;
     double              outline;
@@ -62,7 +62,7 @@ namespace osmscout {
     LineStyle& SetAlternateColor(double r, double g, double b, double a);
     LineStyle& SetOutlineColor(double r, double g, double b, double a);
     LineStyle& SetGapColor(double r, double g, double b, double a);
-    LineStyle& SetMinPixel(double value);
+    LineStyle& SetMinWidth(double value);
     LineStyle& SetWidth(double value);
     LineStyle& SetFixedWidth(bool fixedWidth);
     LineStyle& SetOutline(double value);
@@ -153,9 +153,9 @@ namespace osmscout {
       return gapA;
     }
 
-    inline double GetMinPixel() const
+    inline double GetMinWidth() const
     {
-      return minPixel;
+      return minWidth;
     }
 
     inline double GetWidth() const
@@ -208,7 +208,6 @@ namespace osmscout {
     double              borderG;
     double              borderB;
     double              borderA;
-    double              borderMinPixel;
     double              borderWidth;
     std::vector<double> borderDash;
 
@@ -221,7 +220,6 @@ namespace osmscout {
     FillStyle& SetPattern(const std::string& pattern);
     FillStyle& SetPatternMinMag(Mag mag);
     FillStyle& SetBorderColor(double r, double g, double b, double a);
-    FillStyle& SetBorderMinPixel(double value);
     FillStyle& SetBorderWidth(double value);
     FillStyle& AddBorderDashValue(double dashValue);
 
@@ -293,10 +291,6 @@ namespace osmscout {
     inline double GetBorderA() const
     {
       return borderA;
-    }
-    inline double GetBorderMinPixel() const
-    {
-      return borderMinPixel;
     }
 
     inline double GetBorderWidth() const

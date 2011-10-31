@@ -41,7 +41,7 @@ namespace osmscout {
      gapG(0),
      gapB(0),
      gapA(0),
-     minPixel(2),
+     minWidth(1),
      width(0),
      fixedWidth(false),
      outline(0)
@@ -94,9 +94,9 @@ namespace osmscout {
     return *this;
   }
 
-  LineStyle& LineStyle::SetMinPixel(double value)
+  LineStyle& LineStyle::SetMinWidth(double value)
   {
-    minPixel=value;
+    minWidth=value;
 
     return *this;
   }
@@ -141,7 +141,6 @@ namespace osmscout {
      borderR(1),
      borderG(0),
      borderB(0),
-     borderMinPixel(0.0),
      borderWidth(0.0)
   {
     // no code
@@ -189,13 +188,6 @@ namespace osmscout {
     borderG=g;
     borderB=b;
     borderA=a;
-
-    return *this;
-  }
-
-  FillStyle& FillStyle::SetBorderMinPixel(double value)
-  {
-    borderMinPixel=value;
 
     return *this;
   }

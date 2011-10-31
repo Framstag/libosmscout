@@ -1,6 +1,6 @@
 OSS
   AREA "boundary_administrative"
-    FILL #cccccc BORDER #000000 WITH MINPIXEL 2
+    FILL #cccccc BORDER #000000 WIDTH 0.5mm
     LABEL WITH STYLE emphasize SIZE 1.5 MINMAG world PRIO 1
    
   NODE "place_city"

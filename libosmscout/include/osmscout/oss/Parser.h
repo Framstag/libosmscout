@@ -179,9 +179,8 @@ void ToRGBA(const char* str, double& r, double& g, double& b, double& a)
 	void FILLDEF(FillStyle& style);
 	void COLOR(double& r, double& g, double& b, double& a);
 	void DOUBLE(double& value);
-	void MINPIXEL(double& value);
-	void WIDTH(double& value);
-	void OUTLINE(double& value);
+	void DISPLAYSIZE(double& value);
+	void MAPSIZE(double& value);
 	void MINMAG(Mag& mag);
 	void LABELSTYLE(LabelStyle::Style& style);
 	void SIZE(double& value);

@@ -863,11 +863,10 @@ namespace osmscout {
 
     cairo_fill_preserve(draw);
 
-    double borderWidth=GetProjectedWidth(projection,
-                                         area.fillStyle->GetBorderMinPixel(),
-                                         area.fillStyle->GetBorderWidth());
+    double borderWidth=ConvertWidthToPixel(parameter,
+                                           area.fillStyle->GetBorderWidth());
 
-    if (borderWidth>0.0) {
+    if (borderWidth>=parameter.GetLineMinWidthPixel()) {
       SetLineAttributes(area.fillStyle->GetBorderR(),
                         area.fillStyle->GetBorderG(),
                         area.fillStyle->GetBorderB(),

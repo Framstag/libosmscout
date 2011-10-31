@@ -512,9 +512,10 @@ namespace osmscout {
       }
     }
 
-    double borderWidth=GetProjectedWidth(projection, area.fillStyle->GetBorderMinPixel(), area.fillStyle->GetBorderWidth());
+    double borderWidth=ConvertWidthToPixel(parameter,
+                                           area.fillStyle->GetBorderWidth());
 
-    if (borderWidth>0.0) {
+    if (borderWidth>=parameter.GetLineMinWidthPixel()) {
       QPen pen;
 
       pen.setColor(QColor::fromRgbF(area.fillStyle->GetBorderR(),

@@ -37,7 +37,7 @@ namespace osmscout {
   : dpi(96.0),
     fontName("sans-serif"),
     fontSize(9.0),
-    outlineMinWidth(1.0),
+    lineMinWidthPixel(0.2),
     drawBridgeMagnification(magVeryClose),
     drawTunnelMagnification(magVeryClose),
     optimizeWayNodes(false),
@@ -51,6 +51,11 @@ namespace osmscout {
   MapParameter::~MapParameter()
   {
     // no code
+  }
+
+  void MapParameter::SetDPI(double dpi)
+  {
+    this->dpi=dpi;
   }
 
   void MapParameter::SetFontName(const std::string& fontName)
@@ -73,9 +78,9 @@ namespace osmscout {
     this->patternPaths=paths;
   }
 
-  void MapParameter::SetOutlineMinWidth(double outlineMinWidth)
+  void MapParameter::SetLineMinWidthPixel(double lineMinWidthPixel)
   {
-    this->outlineMinWidth=outlineMinWidth;
+    this->lineMinWidthPixel=lineMinWidthPixel;
   }
 
   void MapParameter::SetDrawBridgeMagnification(double magnification)
@@ -263,6 +268,13 @@ namespace osmscout {
       return width;
     }
   }
+
+  double MapPainter::ConvertWidthToPixel(const MapParameter& parameter,
+                                         double width) const
+  {
+    return width*parameter.GetDPI()/25.4;
+  }
+
 
   void MapPainter::DrawGroundTiles(const StyleConfig& styleConfig,
                                    const Projection& projection,
@@ -1487,25 +1499,42 @@ namespace osmscout {
 
     double lineWidth;
 
-    if (lineStyle->GetFixedWidth()) {
-      lineWidth=GetProjectedWidth(projection,
-                                  lineStyle->GetMinPixel(),
-                                  lineStyle->GetWidth());
+    if (lineStyle->GetWidth()==0) {
+      lineWidth=ConvertWidthToPixel(parameter,lineStyle->GetMinWidth());
     }
     else {
       lineWidth=GetProjectedWidth(projection,
-                                  lineStyle->GetMinPixel(),
+                                  ConvertWidthToPixel(parameter,lineStyle->GetMinWidth()),
                                   attributes.GetWidth()>0 ? attributes.GetWidth() : lineStyle->GetWidth());
     }
 
     WayData data;
 
     data.lineWidth=lineWidth;
-    data.outline=lineStyle->GetOutline()>0.0 &&
-                 lineWidth>2*lineStyle->GetOutline();
+
+    if (lineStyle->GetOutline()>0.0) {
+      double convertedOutlineWidth=ConvertWidthToPixel(parameter,2*lineStyle->GetOutline());
+
+      if (lineStyle->GetOutlineA()==1.0) {
+        data.outline=lineWidth>convertedOutlineWidth;
+      }
+      else {
+        data.outline=true;
+      }
+
+      if (data.outline) {
+        data.outlineWidth=lineWidth+convertedOutlineWidth;
+      }
+      else {
+        data.outlineWidth=lineWidth;
+      }
+    }
+    else {
+      data.outline=false;
+      data.outlineWidth=data.lineWidth;
+    }
 
     if (data.outline) {
-      data.outlineWidth=lineWidth+2*lineStyle->GetOutline();
 
       if (!IsVisible(projection,
                      nodes,

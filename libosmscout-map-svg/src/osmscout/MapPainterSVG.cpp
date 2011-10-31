@@ -102,6 +102,7 @@ namespace osmscout {
   }
 
   void MapPainterSVG::DumpStyles(const StyleConfig& styleConfig,
+                                 const MapParameter& parameter,
                                  const Projection& projection)
   {
     stream << "  <defs>" << std::endl;
@@ -120,7 +121,8 @@ namespace osmscout {
         stream << "fill:" << GetColorValue(fillStyle->GetFillR(),fillStyle->GetFillG(),fillStyle->GetFillB(),fillStyle->GetFillA());
         stream << ";fillRule:nonzero";
 
-        double borderWidth=GetProjectedWidth(projection, 0, fillStyle->GetBorderWidth());
+        double borderWidth=ConvertWidthToPixel(parameter,
+                                               fillStyle->GetBorderWidth());
 
         if (borderWidth>0.0) {
           stream << ";stroke:" << GetColorValue(fillStyle->GetBorderR(),fillStyle->GetBorderG(),fillStyle->GetBorderB(),fillStyle->GetBorderA());
@@ -536,6 +538,7 @@ namespace osmscout {
     WriteHeader(projection.GetWidth(),projection.GetHeight());
 
     DumpStyles(styleConfig,
+               parameter,
                projection);
 
     StartMainGroup();

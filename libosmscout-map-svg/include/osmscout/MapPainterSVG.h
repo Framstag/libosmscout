@@ -41,6 +41,7 @@ namespace osmscout {
 
     void WriteHeader(size_t width,size_t height);
     void DumpStyles(const StyleConfig& styleConfig,
+                    const MapParameter& parameter,
                     const Projection& projection);
     void WriteFooter();
 

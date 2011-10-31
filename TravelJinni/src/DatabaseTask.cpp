@@ -128,6 +128,8 @@ void DatabaseTask::Run()
         drawParameter.SetOptimizeAreaNodes(true);
         drawParameter.SetDebugPerformance(true);
 
+        drawParameter.SetDPI(Lum::OS::display->GetDPI());
+
         std::cout << std::endl;
 
         osmscout::StopClock overallTimer;

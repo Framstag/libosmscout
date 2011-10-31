@@ -236,25 +236,20 @@ PRODUCTIONS
                   ]
 
                   [
-                    (. double minPixel=style.GetMinPixel(); .)
-                    MINPIXEL<minPixel>
-                    (. style.SetMinPixel(minPixel); .)
+                    (. double minWidth=style.GetMinWidth(); .)
+                    "MINWIDTH" DISPLAYSIZE<minWidth>
+                    (. style.SetMinWidth(minWidth); .)
                   ]
 
                   [
                     (. double width=style.GetWidth(); .)
-                    WIDTH<width>
+                    "WIDTH" MAPSIZE<width>
                     (. style.SetWidth(width); .)
                   ]
 
                   [
-                    "FIXEDWIDTH"
-                    (. style.SetFixedWidth(true); .)
-                  ]
-
-                  [
                     (. double outline=style.GetOutline(); .)
-                    OUTLINE<outline>
+                    "OUTLINE" DISPLAYSIZE<outline>
                     (. style.SetOutline(outline); .)
                   ]
                 ].
@@ -284,6 +279,12 @@ PRODUCTIONS
                   SYNC "BORDER"
                   COLOR<r,g,b,a> (. style.SetBorderColor(r,g,b,a); .)
 
+	              [
+	                (. double width=style.GetBorderWidth(); .)
+	                "WIDTH" DISPLAYSIZE<width>
+	                (. style.SetBorderWidth(width); .)
+	              ]
+
                   [SYNC "WITH"
                     [
                       (. double dash; .)
@@ -293,18 +294,6 @@ PRODUCTIONS
                         ","
                         DOUBLE<dash> (. style.AddBorderDashValue(dash); .)
                       }
-                    ]
-
-                    [
-                      (. double minPixel=style.GetBorderMinPixel(); .)
-                      MINPIXEL<minPixel>
-                      (. style.SetBorderMinPixel(minPixel); .)
-                    ]
-
-                    [
-                      (. double width=style.GetBorderWidth(); .)
-                      WIDTH<width>
-                      (. style.SetBorderWidth(width); .)
                     ]
                   ]
                 ].
@@ -541,18 +530,16 @@ PRODUCTIONS
                | "veryClose" (. mag=magVeryClose; .)
                .
 
+  /** Size in units of screen (currently millimeter) */ 
+  DISPLAYSIZE <double& value>
+              = DOUBLE<value> "mm".
+              
+  /** Size in units of map (currently meter) */ 
+  MAPSIZE <double& value>
+              = DOUBLE<value> "m".
 
   SIZE<double& value>
               = "SIZE" DOUBLE<value>.
-
-  MINPIXEL<double& value>
-              = "MINPIXEL" DOUBLE<value>.
-
-  WIDTH<double& value>
-              = "WIDTH" DOUBLE<value>.
-
-  OUTLINE<double& value>
-              = "OUTLINE" DOUBLE<value>.
 
   DOUBLE<double& value>
               = (  number
