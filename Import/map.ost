@@ -74,7 +74,7 @@ TYPES
 
   TYPE "public_transport_platform" = WAY AREA ("public_transport"=="platform" OR "railway"=="platform")
   
-  TYPE "leisure_sports_centre_building" = NODE AREA ("leisure"=="sports_centre" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+  TYPE "leisure_building" = NODE AREA (EXISTS "leisure" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE "leisure_sports_centre" = NODE AREA ("leisure"=="sports_centre")
   TYPE "leisure_golf_course" = NODE AREA ("leisure"=="golf_course")
   TYPE "leisure_stadium" = NODE AREA ("leisure"=="stadium")
@@ -217,6 +217,7 @@ TYPES
   TYPE "military_range" = NODE AREA ("military"=="range")
   TYPE "military_naval_base" = NODE AREA ("military"=="naval_base")
   
+  TYPE "sport_building" = NODE AREA (EXISTS "sport" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE "sport_9pin" = NODE AREA ("sport"=="9pin")
   TYPE "sport_10pin" = NODE AREA ("sport"=="10pin")
   TYPE "sport_archery" = NODE AREA ("sport"=="archery")

@@ -377,8 +377,8 @@ OSS
     FILL #e8d1fe
     LABEL WITH MINMAG detail
 
-  AREA "leisure_sports_centre_building"
-    FILL #bca9a9
+  AREA "leisure_building"
+    FILL #b89c9c BORDER #887b7b WIDTH 0.1mm
     LABEL WITH MINMAG close
 
   AREA "leisure_sports_centre"
@@ -502,6 +502,7 @@ OSS
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   NODE "amenity"
+    SYMBOL circle #b89c9c 4 WITH MINMAG veryClose
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
   AREA "amenity"
@@ -625,6 +626,10 @@ OSS
   AREA "military_naval_base"
     FILL #f59897
     LABEL WITH MINMAG city
+
+  AREA "sport_building"
+    FILL #b89c9c BORDER #887b7b WIDTH 0.1mm
+    LABEL WITH MINMAG close
 
   AREA "power_station"
     FILL #bca9a9
