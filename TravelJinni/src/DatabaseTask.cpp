@@ -432,7 +432,8 @@ bool DatabaseTask::DrawResult(Lum::OS::Window* window,
                               int x, int y,
                               size_t width, size_t height,
                               double lon, double lat,
-                              double magnification)
+                              double magnification,
+                              osmscout::Projection& projection)
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
@@ -441,8 +442,6 @@ bool DatabaseTask::DrawResult(Lum::OS::Window* window,
     return false;
   }
 
-  osmscout::MercatorProjection projection;
-
   projection.Set(finishedLon,finishedLat,
                  finishedMagnification,
                  finishedWidth,finishedHeight);
@@ -450,32 +449,6 @@ bool DatabaseTask::DrawResult(Lum::OS::Window* window,
   double lonMin,lonMax,latMin,latMax;
 
   projection.GetDimensions(lonMin,latMin,lonMax,latMax);
-
-  double d=(lonMax-lonMin)*2*M_PI/360;
-  double scaleSize;
-  size_t minScaleWidth=width/20;
-  size_t maxScaleWidth=width/10;
-  double scaleValue=d*180*60/M_PI*1852.216/(width/minScaleWidth);
-
-  //std::cout << "1/10 screen (" << width/10 << " pixels) are: " << scaleValue << " meters" << std::endl;
-
-  scaleValue=pow(10,floor(log10(scaleValue))+1);
-  scaleSize=scaleValue/(d*180*60/M_PI*1852.216/width);
-
-  if (scaleSize>minScaleWidth && scaleSize/2>minScaleWidth && scaleSize/2<=maxScaleWidth) {
-    scaleValue=scaleValue/2;
-    scaleSize=scaleSize/2;
-  }
-  else if (scaleSize>minScaleWidth && scaleSize/5>minScaleWidth && scaleSize/5<=maxScaleWidth) {
-    scaleValue=scaleValue/5;
-    scaleSize=scaleSize/5;
-  }
-  else if (scaleSize>minScaleWidth && scaleSize/10>minScaleWidth && scaleSize/10<=maxScaleWidth) {
-    scaleValue=scaleValue/10;
-    scaleSize=scaleSize/10;
-  }
-
-  //std::cout << "VisualScale: value: " << scaleValue << " pixel: " << scaleSize << std::endl;
 
   double dx=0;
   double dy=0;
@@ -494,28 +467,6 @@ bool DatabaseTask::DrawResult(Lum::OS::Window* window,
     cairo_set_source_surface(cairo,finishedSurface,x-dx,y+dy);
     cairo_rectangle(cairo,x,y,finishedWidth,finishedHeight);
     cairo_fill(cairo);
-
-    // Scale
-
-    cairo_save(cairo);
-
-    cairo_set_source_rgb(cairo,0,0,0);
-    cairo_set_line_width(cairo,2);
-    cairo_move_to(cairo,x+width/20,y+height*19/20);
-    cairo_line_to(cairo,x+width/20+scaleSize-1,y+height*19/20);
-    cairo_stroke(cairo);
-    cairo_move_to(cairo,x+width/20,y+height*19/20);
-    cairo_line_to(cairo,x+width/20,y+height*19/20-height/40);
-    cairo_stroke(cairo);
-    cairo_move_to(cairo,x+width/20+scaleSize-1,y+height*19/20);
-    cairo_line_to(cairo,x+width/20+scaleSize-1,y+height*19/20-height/40);
-    cairo_stroke(cairo);
-
-    cairo_move_to(cairo,x+width/20+scaleSize-1+10,y+height*19/20);
-    cairo_show_text(cairo,Lum::Base::NumberToString((size_t)scaleValue).c_str());
-    cairo_stroke(cairo);
-
-    cairo_restore(cairo);
   }
 #endif
 

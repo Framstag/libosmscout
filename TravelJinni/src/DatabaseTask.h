@@ -125,7 +125,8 @@ public:
                   int x, int y,
                   size_t width, size_t height,
                   double lon, double lat,
-                  double magnification);
+                  double magnification,
+                  osmscout::Projection& projection);
 };
 
 #endif

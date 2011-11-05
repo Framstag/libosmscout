@@ -130,12 +130,72 @@ public:
     draw->FillRectangle(this->x,this->y,this->width,this->height);
     draw->PopForeground();
 
-    if (!databaseTask->DrawResult(GetWindow(),
-                                  draw,
-                                  this->x,this->y,
-                                  this->width,this->height,
-                                  lon,lat,
-                                  magnification) && requestNewMap) {
+    osmscout::MercatorProjection projection;
+
+    bool drawResultFinal=databaseTask->DrawResult(GetWindow(),
+                                                  draw,
+                                                  this->x,this->y,
+                                                  this->width,this->height,
+                                                  lon,lat,
+                                                  magnification,
+                                                  projection);
+
+    double lonMin,lonMax,latMin,latMax;
+
+    projection.GetDimensions(lonMin,latMin,lonMax,latMax);
+
+    double d=(lonMax-lonMin)*2*M_PI/360;
+    double scaleSize;
+    size_t minScaleWidth=width/20;
+    size_t maxScaleWidth=width/10;
+    double scaleValue=d*180*60/M_PI*1852.216/(width/minScaleWidth);
+
+    //std::cout << "1/10 screen (" << width/10 << " pixels) are: " << scaleValue << " meters" << std::endl;
+
+    scaleValue=pow(10,floor(log10(scaleValue))+1);
+    scaleSize=scaleValue/(d*180*60/M_PI*1852.216/width);
+
+    if (scaleSize>minScaleWidth && scaleSize/2>minScaleWidth && scaleSize/2<=maxScaleWidth) {
+      scaleValue=scaleValue/2;
+      scaleSize=scaleSize/2;
+    }
+    else if (scaleSize>minScaleWidth && scaleSize/5>minScaleWidth && scaleSize/5<=maxScaleWidth) {
+      scaleValue=scaleValue/5;
+      scaleSize=scaleSize/5;
+    }
+    else if (scaleSize>minScaleWidth && scaleSize/10>minScaleWidth && scaleSize/10<=maxScaleWidth) {
+      scaleValue=scaleValue/10;
+      scaleSize=scaleSize/10;
+    }
+
+    //std::cout << "VisualScale: value: " << scaleValue << " pixel: " << scaleSize << std::endl;
+
+    std::wstring unit=L"m";
+
+    if (scaleValue>=1000) {
+      scaleValue=scaleValue/1000;
+      unit=L"km";
+    }
+
+    draw->PushForeground(Lum::OS::Display::blackColor);
+
+    draw->PushPen(2,Lum::OS::DrawInfo::penNormal);
+
+    draw->DrawLine(this->x+width/20,this->y+height*19/20,
+                   this->x+width/20+scaleSize-1,this->y+height*19/20);
+    draw->DrawLine(this->x+width/20,this->y+height*19/20,
+                   this->x+width/20,this->y+height*19/20-height/40);
+    draw->DrawLine(this->x+width/20+scaleSize-1,this->y+height*19/20,
+                   this->x+width/20+scaleSize-1,this->y+height*19/20-height/40);
+
+    draw->PushFont(Lum::OS::display->GetFont());
+    draw->DrawString(this->x+width/20+scaleSize-1+10,this->y+height*19/20,
+                     Lum::Base::NumberToWString((size_t)scaleValue)+unit);
+    draw->PopFont();
+
+    draw->PopForeground();
+
+    if (!drawResultFinal && requestNewMap) {
       RequestNewMap();
     }
   }
