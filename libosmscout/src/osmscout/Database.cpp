@@ -19,6 +19,7 @@
 
 #include <osmscout/Database.h>
 
+#include <algorithm>
 #include <cassert>
 #include <iostream>
 
@@ -510,6 +511,12 @@ namespace osmscout {
     areaAreaIndexTimer.Stop();
 
     StopClock nodesTimer;
+
+    std::sort(nodeOffsets.begin(),nodeOffsets.end());
+    std::sort(wayWayOffsets.begin(),wayWayOffsets.end());
+    std::sort(wayAreaOffsets.begin(),wayAreaOffsets.end());
+    std::sort(relationWayOffsets.begin(),relationWayOffsets.end());
+    std::sort(relationAreaOffsets.begin(),relationAreaOffsets.end());
 
     if (!GetNodes(nodeOffsets,
                   nodes)) {
