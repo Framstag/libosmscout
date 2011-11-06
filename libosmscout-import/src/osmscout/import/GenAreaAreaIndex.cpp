@@ -308,15 +308,6 @@ namespace osmscout {
           way.GetBoundingBox(minLon,maxLon,minLat,maxLat);
 
           //
-          // Renormated coordinate space (everything is >=0)
-          //
-
-          minLon+=180;
-          maxLon+=180;
-          minLat+=90;
-          maxLat+=90;
-
-          //
           // Calculate highest level where the bounding box completely
           // fits in the cell size and assign area to the tiles that
           // hold the geometric center of the tile.
@@ -333,6 +324,15 @@ namespace osmscout {
           }
 
           if (level==l) {
+            //
+            // Renormated coordinate space (everything is >=0)
+            //
+
+            minLon+=180;
+            maxLon+=180;
+            minLat+=90;
+            maxLat+=90;
+
             //
             // Calculate minimum and maximum tile ids that are covered
             // by the area
@@ -401,33 +401,12 @@ namespace osmscout {
           // Bounding box calculation
           //
 
-          assert(!relation.roles.empty());
-          assert(!relation.roles[0].nodes.empty());
+          double minLon;
+          double maxLon;
+          double minLat;
+          double maxLat;
 
-          double minLon=relation.roles[0].nodes[0].lon;
-          double maxLon=relation.roles[0].nodes[0].lon;
-          double minLat=relation.roles[0].nodes[0].lat;
-          double maxLat=relation.roles[0].nodes[0].lat;
-
-          for (std::vector<Relation::Role>::const_iterator role=relation.roles.begin();
-               role!=relation.roles.end();
-               ++role) {
-            for (size_t i=0; i<role->nodes.size(); i++) {
-              minLon=std::min(minLon,role->nodes[i].lon);
-              maxLon=std::max(maxLon,role->nodes[i].lon);
-              minLat=std::min(minLat,role->nodes[i].lat);
-              maxLat=std::max(maxLat,role->nodes[i].lat);
-            }
-          }
-
-          //
-          // Renormated coordinate space (everything is >=0)
-          //
-
-          minLon+=180;
-          maxLon+=180;
-          minLat+=90;
-          maxLat+=90;
+          relation.GetBoundingBox(minLon,maxLon,minLat,maxLat);
 
           //
           // Calculate highest level where the bounding box completely
@@ -447,6 +426,15 @@ namespace osmscout {
           }
 
           if (level==l) {
+            //
+            // Renormated coordinate space (everything is >=0)
+            //
+
+            minLon+=180;
+            maxLon+=180;
+            minLat+=90;
+            maxLat+=90;
+
             //
             // Calculate minimum and maximum tile ids that are covered
             // by the area
@@ -470,7 +458,7 @@ namespace osmscout {
         }
       }
 
-      progress.Debug(std::string("Writing ")+NumberToString(leafs.size())+" entries ("+
+      progress.Debug(std::string("Writing ")+NumberToString(leafs.size())+" leafs ("+
                      NumberToString(areaLevelEntries)+"/"+
                      NumberToString(relAreaLevelEntries)+") "+
                      "to index of level "+NumberToString(l)+"...");
