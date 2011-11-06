@@ -49,6 +49,8 @@ namespace osmscout {
   {
     std::map<size_t,QFont>::const_iterator f;
 
+    fontSize=fontSize*ConvertWidthToPixel(parameter,parameter.GetFontSize());
+
     f=fonts.find(fontSize);
 
     if (f!=fonts.end()) {
@@ -57,7 +59,7 @@ namespace osmscout {
 
     QFont font(parameter.GetFontName().c_str(),QFont::Normal,false);
 
-    font.setPixelSize(fontSize*ConvertWidthToPixel(parameter,parameter.GetFontSize()));
+    font.setPixelSize(fontSize);
     font.setStyleStrategy(QFont::PreferAntialias);
     font.setStyleStrategy(QFont::PreferMatch);
 

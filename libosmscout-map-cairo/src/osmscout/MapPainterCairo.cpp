@@ -330,6 +330,8 @@ namespace osmscout {
   {
     std::map<size_t,cairo_scaled_font_t*>::const_iterator f;
 
+    fontSize=fontSize*ConvertWidthToPixel(parameter,parameter.GetFontSize());
+
     f=font.find(fontSize);
 
     if (f!=font.end()) {
@@ -346,10 +348,7 @@ namespace osmscout {
                                         CAIRO_FONT_SLANT_NORMAL,
                                         CAIRO_FONT_WEIGHT_NORMAL);
 
-    cairo_matrix_init_scale(&scaleMatrix,
-                            fontSize*ConvertWidthToPixel(parameter,parameter.GetFontSize()),
-                            fontSize*ConvertWidthToPixel(parameter,parameter.GetFontSize()));
-
+    cairo_matrix_init_scale(&scaleMatrix,fontSize,fontSize);
     cairo_matrix_init_identity(&transformMatrix);
 
     options=cairo_font_options_create();
