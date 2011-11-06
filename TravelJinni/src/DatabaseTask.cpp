@@ -52,6 +52,8 @@
 #endif
 #include <Lum/Base/Path.h>
 
+#include "Configuration.h"
+
 DatabaseTask::DatabaseTask(osmscout::Database* database,
                            Lum::Model::Action* jobFinishedAction)
  : database(database),
@@ -121,6 +123,10 @@ void DatabaseTask::Run()
 
         paths.push_back("../libosmscout/data/icons/14x14/standard/");
 
+        searchParameter.SetMaximumNodes(maxNodes->Get());
+        searchParameter.SetMaximumWays(maxWays->Get());
+        searchParameter.SetMaximumAreas(maxAreas->Get());
+
         drawParameter.SetIconPaths(paths);
         drawParameter.SetPatternPaths(paths);
 
@@ -128,7 +134,12 @@ void DatabaseTask::Run()
         drawParameter.SetOptimizeAreaNodes(true);
         drawParameter.SetDebugPerformance(true);
 
-        drawParameter.SetDPI(Lum::OS::display->GetDPI());
+        if (!dpi->IsNull()) {
+          drawParameter.SetDPI(dpi->GetDouble());
+        }
+        else {
+          drawParameter.SetDPI(Lum::OS::display->GetDPI());
+        }
 
         std::cout << std::endl;
 
@@ -139,7 +150,27 @@ void DatabaseTask::Run()
                        currentMagnification,
                        currentWidth,
                        currentHeight);
+/*
+        double width=10*drawParameter.GetDPI()/25.4;
+        std::cout << "10mm => " << width << std::endl;
+        double areaMinDegree=width/currentWidth*(projection.GetLonMax()-projection.GetLonMin());
 
+        size_t level=0;
+        double levelDegree=360.0;
+
+        std::cout << "Minimum area degree: " << areaMinDegree << std::endl;
+        while (areaMinDegree<levelDegree) {
+          levelDegree=levelDegree/2;
+          level++;
+        }
+
+        level=level-1;
+
+
+        //searchParameter.SetMaximumAreaLevel(level-log2(currentMagnification));
+
+        std::cout << "Resulting max area level: " << level-log2(currentMagnification) << " <=> " << searchParameter.GetMaximumAreaLevel() << std::endl;
+*/
         osmscout::StopClock dataRetrievalTimer;
 
         database->GetObjects(*styleConfig,
@@ -154,6 +185,7 @@ void DatabaseTask::Run()
                              data.areas,
                              data.relationWays,
                              data.relationAreas);
+
         /*
         database->GetGroundTiles(projection.GetLonMin(),
                                  projection.GetLatMin(),

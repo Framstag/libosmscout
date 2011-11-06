@@ -23,6 +23,8 @@
 #include <list>
 #include <string>
 
+#include <Lum/Model/Number.h>
+
 struct Map
 {
   std::wstring dir;
@@ -32,6 +34,11 @@ struct Style
 {
   std::wstring file;
 };
+
+extern Lum::Model::ULongRef dpi;
+extern Lum::Model::ULongRef maxNodes;
+extern Lum::Model::ULongRef maxWays;
+extern Lum::Model::ULongRef maxAreas;
 
 extern std::list<Map> maps;
 extern std::list<Style> styles;

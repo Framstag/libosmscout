@@ -26,17 +26,35 @@
 
 #include <Lum/Config/Config.h>
 
-std::list<Map>   maps;
-std::list<Style> styles;
+#include <Lum/OS/Display.h>
 
-std::wstring     currentMap;
-std::wstring     currentStyle;
+#include <osmscout/Database.h>
+
+std::list<Map>       maps;
+std::list<Style>     styles;
+
+Lum::Model::ULongRef dpi(new Lum::Model::ULong());
+Lum::Model::ULongRef maxNodes(new Lum::Model::ULong());
+Lum::Model::ULongRef maxWays(new Lum::Model::ULong());
+Lum::Model::ULongRef maxAreas(new Lum::Model::ULong());
+
+std::wstring         currentMap;
+std::wstring         currentStyle;
 
 bool LoadConfig()
 {
   Lum::Config::Node      *top;
   Lum::Config::ErrorList errors;
   Lum::Base::Path        path(Lum::Base::Path::GetApplicationConfigPath());
+
+  osmscout::AreaSearchParameter searchParameter;
+
+  dpi->SetRange(72ul,400ul);
+  dpi->Set((unsigned long)Lum::OS::display->GetDPI());
+
+  maxNodes->Set(searchParameter.GetMaximumNodes());
+  maxWays->Set(searchParameter.GetMaximumWays());
+  maxAreas->Set(searchParameter.GetMaximumAreas());
 
   top=Lum::Config::LoadConfigFromXMLFile(path.GetPath(),errors);
 
@@ -51,7 +69,26 @@ bool LoadConfig()
        ++iter) {
     Lum::Config::Node *node=*iter;
 
-    if (node->GetName()==L"map") {
+    if (node->GetName()==L"settings") {
+      unsigned long value;
+
+      if (node->GetAttribute(L"dpi", value)) {
+        dpi->Set(value);
+      }
+
+      if (node->GetAttribute(L"maxNodes", value)) {
+        maxNodes->Set(value);
+      }
+
+      if (node->GetAttribute(L"maxWays", value)) {
+        maxWays->Set(value);
+      }
+
+      if (node->GetAttribute(L"maxAreas", value)) {
+        maxAreas->Set(value);
+      }
+    }
+    else if (node->GetName()==L"map") {
       Map map;
 
       if (node->GetAttribute(L"dir",map.dir)) {
@@ -103,11 +140,18 @@ bool SaveConfig()
 {
   Lum::Config::Node *top;
   Lum::Base::Path   path(Lum::Base::Path::GetApplicationConfigPath());
-  std::wstring      config;
   bool              res;
 
-  top=new Lum::Config::Node();
-  top->SetName(L"TravelJinni");
+  top=new Lum::Config::Node(L"TravelJinni");
+
+  Lum::Config::Node *settings=new Lum::Config::Node(L"settings");
+
+  settings->SetAttribute(L"dpi",dpi->Get());
+  settings->SetAttribute(L"maxNodes",maxNodes->Get());
+  settings->SetAttribute(L"maxWays",maxWays->Get());
+  settings->SetAttribute(L"maxAreas",maxAreas->Get());
+
+  top->Add(settings);
 
   for (std::list<Map>::const_iterator map=maps.begin();
        map!=maps.end();

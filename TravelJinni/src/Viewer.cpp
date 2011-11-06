@@ -28,9 +28,11 @@
 
 #include <Lum/Def/AppInfo.h>
 #include <Lum/Def/Menu.h>
+#include <Lum/Def/Props.h>
 
 #include <Lum/Dlg/About.h>
 #include <Lum/Dlg/Msg.h>
+#include <Lum/Dlg/Properties.h>
 
 #include <Lum/Manager/FileSystem.h>
 
@@ -475,6 +477,7 @@ class MainDialog : public Lum::Dialog
 private:
   Lum::Model::ActionRef       locationSearchAction;
   Lum::Model::ActionRef       routeAction;
+  Lum::Model::ActionRef       settingsAction;
   Lum::Model::ActionRef       debugFlushCacheAction;
   Lum::Model::ActionRef       debugStatisticsAction;
   Lum::Model::ActionRef       aboutAction;
@@ -484,6 +487,7 @@ public:
   MainDialog()
    : locationSearchAction(new Lum::Model::Action()),
      routeAction(new Lum::Model::Action()),
+     settingsAction(new Lum::Model::Action()),
      debugFlushCacheAction(new Lum::Model::Action()),
      debugStatisticsAction(new Lum::Model::Action()),
      aboutAction(new Lum::Model::Action()),
@@ -493,6 +497,7 @@ public:
     Observe(GetClosedAction());
     Observe(locationSearchAction);
     Observe(routeAction);
+    Observe(settingsAction);
     Observe(debugFlushCacheAction);
     Observe(debugStatisticsAction);
     Observe(aboutAction);
@@ -519,6 +524,9 @@ public:
         ->Action(Lum::Def::Action(Lum::Def::Desc(L"_Route")
                                   .SetShortcut(Lum::OS::qualifierControl,L"r"),
                                   routeAction))
+      ->End()
+      ->GroupEdit()
+        ->ActionSettings(settingsAction)
       ->End()
       ->Group(L"Debug")
         ->Action(Lum::Def::Action(Lum::Def::Desc(L"_Flush Cache"),
@@ -608,6 +616,50 @@ public:
       }
 
       delete dialog;
+    }
+    else if (model==settingsAction && settingsAction->IsFinished()) {
+      Lum::Def::PropGroup           *props=new Lum::Def::PropGroup();
+      std::wstring                  label;
+      osmscout::AreaSearchParameter searchParameter;
+
+      label=L"DPI";
+      label+=L" ("+Lum::Base::NumberToWString(dpi->GetMinAsUnsignedLong())+L"-"+Lum::Base::NumberToWString(dpi->GetMaxAsUnsignedLong())+L")";
+      props->Number(Lum::Def::Number(Lum::Def::Desc(label),dpi));
+
+      label=L"Maximum nodes";
+
+      if (searchParameter.GetMaximumNodes()==std::numeric_limits<unsigned long>::max()) {
+        label+=L" (unlimited)";
+      }
+      else {
+        label+=L" ("+Lum::Base::NumberToWString(searchParameter.GetMaximumNodes())+L")";
+      }
+      props->Number(Lum::Def::Number(Lum::Def::Desc(label),maxNodes));
+
+      label=L"Maximum ways";
+      if (searchParameter.GetMaximumWays()==std::numeric_limits<unsigned long>::max()) {
+        label+=L" (unlimited)";
+      }
+      else {
+        label+=L" ("+Lum::Base::NumberToWString(searchParameter.GetMaximumWays())+L")";
+      }
+      props->Number(Lum::Def::Number(Lum::Def::Desc(label),maxWays));
+
+      label=L"Maximum areas";
+      if (searchParameter.GetMaximumAreas()==std::numeric_limits<unsigned long>::max()) {
+        label+=L" (unlimited)";
+      }
+      else {
+        label+=L" ("+Lum::Base::NumberToWString(searchParameter.GetMaximumAreas())+L")";
+      }
+      props->Number(Lum::Def::Number(Lum::Def::Desc(label),maxAreas));
+
+      Lum::Dlg::Properties::Show(this,props);
+
+      map->RequestNewMap();
+
+      delete props;
+
     }
     else if (model==debugFlushCacheAction && debugFlushCacheAction->IsFinished()) {
       database->FlushCache();
