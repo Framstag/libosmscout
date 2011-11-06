@@ -36,7 +36,7 @@ namespace osmscout {
   MapParameter::MapParameter()
   : dpi(96.0),
     fontName("sans-serif"),
-    fontSize(3.0),
+    fontSize(2.0),
     lineMinWidthPixel(0.2),
     drawBridgeMagnification(magVeryClose),
     drawTunnelMagnification(magVeryClose),

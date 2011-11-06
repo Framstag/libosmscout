@@ -4,7 +4,7 @@ OSS
     LABEL WITH STYLE contour MINMAG detail
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #809bc0 BORDERCOLOR #ffffff MINMAG state PRIO 20
 
-  WAY "highway_motorway_link" PRIO 5 MINMAG proximity
+  WAY "highway_motorway_link" PRIO 5 MINMAG cityOver
     LINE #809bc0 WITH OUTLINECOLOR #777777 MINWIDTH 0.45mm WIDTH 20m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG detail
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #809bc0 BORDERCOLOR #ffffff MINMAG state PRIO 20
@@ -14,7 +14,7 @@ OSS
     LABEL WITH STYLE contour MINMAG detail
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #7ec87e BORDERCOLOR #ffffff MINMAG proximity PRIO 20
 
-  WAY "highway_trunk_link" PRIO 5 MINMAG proximity
+  WAY "highway_trunk_link" PRIO 5 MINMAG cityOver
     LINE #a8daa8 WITH OUTLINECOLOR #777777 MINWIDTH 0.45mm WIDTH 18m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG detail
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #7ec87e BORDERCOLOR #ffffff MINMAG proximity PRIO 20
@@ -24,7 +24,7 @@ OSS
     LABEL WITH STYLE contour MINMAG detail
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #e46d71 BORDERCOLOR #ffffff MINMAG cityOver PRIO 20
 
-  WAY "highway_primary_link" PRIO 5 MINMAG proximity
+  WAY "highway_primary_link" PRIO 5 MINMAG city
     LINE #ec989a WITH MINWIDTH 0.4mm WIDTH 14m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG detail
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #e46d71 BORDERCOLOR #ffffff MINMAG cityOver PRIO 20
@@ -33,11 +33,11 @@ OSS
     LINE #fdd6a4 WITH ALTCOLOR #fdd654 MINWIDTH 0.25mm WIDTH 12m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY "highway_secondary_link" PRIO 5 MINMAG proximity
+  WAY "highway_secondary_link" PRIO 5 MINMAG city
     LINE #fdd6a4 WITH ALTCOLOR #fdd654 MINWIDTH 0.25mm WIDTH 12m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG detail
 
-  WAY "highway_tertiary" PRIO 5 MINMAG proximity
+  WAY "highway_tertiary" PRIO 5 MINMAG cityOver
     LINE #fefeb3 WITH ALTCOLOR #fefe73 MINWIDTH 0.25mm WIDTH 10m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG close
 
@@ -45,7 +45,7 @@ OSS
     LINE #ffffff WITH ALTCOLOR #888888 MINWIDTH 0.1mm WIDTH 8m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "highway_road" PRIO 7 MINMAG proximity
+  WAY "highway_road" PRIO 7 MINMAG cityOver
     LINE #ffffff WITH ALTCOLOR #888888 MINWIDTH 0.1mm WIDTH 8m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG close
 
@@ -303,7 +303,7 @@ OSS
     LABEL WITH MINMAG detail
 
   NODE "natural_peak"
-    SYMBOL triangle #9c5e29 8 WITH MINMAG cityOver
+    SYMBOL triangle #9c5e29 8 WITH MINMAG city
     LABEL WITH STYLE emphasize COLOR #9c5329 MINMAG detail
 
   AREA "natural_glacier"
@@ -648,7 +648,7 @@ OSS
 
   AREA "building" MINMAG close
     FILL #bcbcbc BORDER #887b7b WIDTH 0.1mm
-    LABEL WITH STYLE normal COLOR #524a4a SIZE 0.8 MINMAG veryClose
+    LABEL WITH STYLE normal COLOR #524a4a SIZE 0.8 MINMAG block
 
   WAY "barrier_fence" PRIO 20 MINMAG veryClose
     LINE #aaaaaa WITH MINWIDTH 0.1mm WIDTH 0.5m

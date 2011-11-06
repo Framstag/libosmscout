@@ -39,19 +39,20 @@ namespace osmscout {
     a value change from x to x+1 means a zoom by the factor of two.
     */
   enum Mag {
-   magWorld     =              1, //  0
-   magContinent =             16, //  4
-   magState     =             32, //  5
-   magStateOver =             64, //  6
-   magCounty    =            128, //  7
-   magRegion    =            256, //  8
-   magProximity =            512, //  9
-   magCityOver  =           1024, // 10
-   magCity      =         2*1024, // 11
-   magSuburb    =       2*2*1014, // 12
-   magDetail    =     2*2*2*1024, // 13
-   magClose     =   2*2*2*2*1024, // 14
-   magVeryClose = 2*2*2*2*2*1024  // 15
+   magWorld     =                1, //  0
+   magContinent =               16, //  4
+   magState     =               32, //  5
+   magStateOver =               64, //  6
+   magCounty    =              128, //  7
+   magRegion    =              256, //  8
+   magProximity =              512, //  9
+   magCityOver  =             1024, // 10
+   magCity      =           2*1024, // 11
+   magSuburb    =         2*2*1014, // 12
+   magDetail    =       2*2*2*1024, // 13
+   magClose     =     2*2*2*2*1024, // 14
+   magVeryClose =   2*2*2*2*2*1024, // 15
+   magBlock     = 2*2*2*2*2*2*1024  // 16
   };
 
   class TypeSet

@@ -146,8 +146,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 61;
-	noSym = 61;
+	maxT = 62;
+	noSym = 62;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
@@ -208,9 +208,10 @@ void Scanner::Init() {
 	keywords.set("detail", 55);
 	keywords.set("close", 56);
 	keywords.set("veryClose", 57);
-	keywords.set("mm", 58);
-	keywords.set("m", 59);
-	keywords.set("SIZE", 60);
+	keywords.set("block", 58);
+	keywords.set("mm", 59);
+	keywords.set("m", 60);
+	keywords.set("SIZE", 61);
 
 
   tvalLength = 128;

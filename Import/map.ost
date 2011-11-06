@@ -9,7 +9,7 @@ TYPES
   TYPE "highway_primary_link" = WAY ("highway"=="primary_link") OPTIONS ROUTE INDEX
   TYPE "highway_secondary" = WAY ("highway"=="secondary") OPTIONS ROUTE INDEX OPTIMIZE_LOW_ZOOM
   TYPE "highway_secondary_link" = WAY ("highway"=="secondary_link") OPTIONS ROUTE INDEX
-  TYPE "highway_tertiary" = WAY ("highway"=="tertiary") OPTIONS ROUTE INDEX
+  TYPE "highway_tertiary" = WAY ("highway"=="tertiary") OPTIONS ROUTE INDEX  
   TYPE "highway_unclassified" = WAY ("highway"=="unclassified") OPTIONS ROUTE INDEX
   TYPE "highway_road" = WAY ("highway"=="road") OPTIONS ROUTE INDEX
   TYPE "highway_residential" = WAY ("highway"=="residential") OPTIONS ROUTE INDEX

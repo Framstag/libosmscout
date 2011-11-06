@@ -528,6 +528,7 @@ PRODUCTIONS
                | "detail"    (. mag=magDetail; .)
                | "close"     (. mag=magClose; .)
                | "veryClose" (. mag=magVeryClose; .)
+               | "block"     (. mag=magBlock; .)
                .
 
   /** Size in units of screen (currently millimeter) */ 
