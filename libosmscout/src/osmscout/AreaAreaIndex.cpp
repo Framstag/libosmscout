@@ -145,8 +145,6 @@ namespace osmscout {
       return false;
     }
 
-    //std::cout << "Max level is: " << maxLevel << std::endl;
-
     // Calculate the size of a cell in each index level
     cellWidth.resize(maxLevel+1);
     cellHeight.resize(maxLevel+1);
@@ -172,15 +170,18 @@ namespace osmscout {
                                  std::vector<FileOffset>& wayAreaOffsets,
                                  std::vector<FileOffset>& relationAreaOffsets) const
   {
-    std::vector<size_t>     ctx;  // tile x coordinates in this level
-    std::vector<size_t>     cty;  // tile y coordinates in this level
-    std::vector<FileOffset> co;   // offsets in this level
+    std::vector<size_t>     ctx;               // tile x coordinates in this level
+    std::vector<size_t>     cty;               // tile y coordinates in this level
+    std::vector<FileOffset> co;                // index cell offsets in this level
 
-    std::vector<size_t>     ntx;  // tile x coordinates in next level
-    std::vector<size_t>     nty;  // tile y coordinates in next level
-    std::vector<FileOffset> no;   // offsets in next level
+    std::vector<size_t>     ntx;               // tile x coordinates in next level
+    std::vector<size_t>     nty;               // tile y coordinates in next level
+    std::vector<FileOffset> no;                // index cell offsets in next level
 
-    bool                    stopArea; // to break out of iteration
+    std::vector<FileOffset> newWayAreaOffsets; // offsets collected in the current level
+    std::vector<FileOffset> newRelAreaOffsets; // offsets collected in the current level
+
+    bool                    stopArea;          // to break out of iteration
 
     minlon+=180;
     maxlon+=180;
@@ -196,6 +197,9 @@ namespace osmscout {
     wayAreaOffsets.reserve(std::min(100000u,(uint32_t)maxAreaCount));
     relationAreaOffsets.reserve(std::min(100000u,(uint32_t)maxAreaCount));
 
+    newWayAreaOffsets.reserve(std::min(100000u,(uint32_t)maxAreaCount));
+    newRelAreaOffsets.reserve(std::min(100000u,(uint32_t)maxAreaCount));
+
     //
     // Areas
     //
@@ -210,7 +214,7 @@ namespace osmscout {
 
     // For all levels:
     // * Take the tiles and offsets of the last level
-    // * Calculate the new tiles and offsets that still interfer with given area
+    // * Calculate the new tiles and offsets that still interfere with given area
     // * Add the new offsets to the list of offsets and finish if we have
     //   reached maxLevel or maxAreaCount.
     // * copy no, ntx, nty to ctx, cty, co and go to next iteration
@@ -225,6 +229,9 @@ namespace osmscout {
       nty.clear();
       no.clear();
 
+      newWayAreaOffsets.clear();
+      newRelAreaOffsets.clear();
+
       for (size_t i=0; !stopArea && i<co.size(); i++) {
         size_t cx;
         size_t cy;
@@ -237,12 +244,12 @@ namespace osmscout {
           return false;
         }
 
-        // TODO: First collect all areas for a level, then - after the level is scanned -
-        // add it to the result
-
-        if (wayAreaOffsets.size()+relationAreaOffsets.size()+
-                 cell->value.areas.size()+
-                 cell->value.relAreas.size()>=maxAreaCount) {
+        if (wayAreaOffsets.size()+
+            relationAreaOffsets.size()+
+            newWayAreaOffsets.size()+
+            newRelAreaOffsets.size()+
+            cell->value.areas.size()+
+            cell->value.relAreas.size()>=maxAreaCount) {
           stopArea=true;
           continue;
         }
@@ -251,7 +258,7 @@ namespace osmscout {
              entry!=cell->value.areas.end();
              ++entry) {
           if (types.IsTypeSet(entry->type)) {
-            wayAreaOffsets.push_back(entry->offset);
+            newWayAreaOffsets.push_back(entry->offset);
           }
         }
 
@@ -259,7 +266,7 @@ namespace osmscout {
              entry!=cell->value.relAreas.end();
              ++entry) {
           if (types.IsTypeSet(entry->type)) {
-            relationAreaOffsets.push_back(entry->offset);
+            newRelAreaOffsets.push_back(entry->offset);
           }
         }
 
@@ -328,12 +335,15 @@ namespace osmscout {
         }
       }
 
+      if (!stopArea) {
+        wayAreaOffsets.insert(wayAreaOffsets.end(), newWayAreaOffsets.begin(), newWayAreaOffsets.end());
+        relationAreaOffsets.insert(relationAreaOffsets.end(), newRelAreaOffsets.begin(), newRelAreaOffsets.end());
+      }
+
       ctx=ntx;
       cty=nty;
       co=no;
     }
-
-    //std::cout << "Found " << wayAreaOffsets.size() << "/" << relationAreaOffsets.size() << " offsets in '" << filepart << "'" << std::endl;
 
     return true;
   }

@@ -36,8 +36,8 @@ namespace osmscout {
     AreaAreaIndex allows you to find areas and area relations in
     a given area.
 
-    For area structure result can be limited by the maximum level (which in turn
-    defines the mimimum size of the resulting areas since and area in a given
+    For areas result can be limited by the maximum level (which in turn
+    defines the mimimum size of the resulting areas since an area in a given
     level must fit into the cell size (but can cross cell borders)) and the
     maximum number of areas found.
 
