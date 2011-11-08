@@ -197,6 +197,8 @@ void DatabaseTask::Run()
 
         osmscout::StopClock drawTimer;
 
+        cairo_set_tolerance(currentCairo,0.7);
+
         painter.DrawMap(*styleConfig,
                         projection,
                         drawParameter,

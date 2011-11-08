@@ -53,7 +53,7 @@ namespace osmscout {
     nodeIndexCacheSize(1000),
     nodeCacheSize(1000),
     wayIndexCacheSize(1000),
-    wayCacheSize(1000),
+    wayCacheSize(8000),
     relationIndexCacheSize(1000),
     relationCacheSize(1000),
     debugPerformance(false)
