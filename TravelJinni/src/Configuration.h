@@ -23,6 +23,7 @@
 #include <list>
 #include <string>
 
+#include <Lum/Model/Boolean.h>
 #include <Lum/Model/Number.h>
 
 struct Map
@@ -35,10 +36,12 @@ struct Style
   std::wstring file;
 };
 
-extern Lum::Model::ULongRef dpi;
-extern Lum::Model::ULongRef maxNodes;
-extern Lum::Model::ULongRef maxWays;
-extern Lum::Model::ULongRef maxAreas;
+extern Lum::Model::ULongRef   dpi;
+extern Lum::Model::ULongRef   maxNodes;
+extern Lum::Model::ULongRef   maxWays;
+extern Lum::Model::ULongRef   maxAreas;
+extern Lum::Model::BooleanRef optimizeWays;
+extern Lum::Model::BooleanRef optimizeAreas;
 
 extern std::list<Map> maps;
 extern std::list<Style> styles;

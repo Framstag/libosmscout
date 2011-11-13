@@ -654,6 +654,9 @@ public:
       }
       props->Number(Lum::Def::Number(Lum::Def::Desc(label),maxAreas));
 
+      props->Boolean(Lum::Def::Boolean(Lum::Def::Desc(L"Optimize ways"),optimizeWays));
+      props->Boolean(Lum::Def::Boolean(Lum::Def::Desc(L"Optimize areas"),optimizeAreas));
+
       Lum::Dlg::Properties::Show(this,props);
 
       map->RequestNewMap();

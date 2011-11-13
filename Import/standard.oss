@@ -9,7 +9,7 @@ OSS
     LABEL WITH STYLE contour MINMAG detail
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #809bc0 BORDERCOLOR #ffffff MINMAG state PRIO 20
 
-  WAY "highway_trunk" PRIO 2 MINMAG state
+  WAY "highway_trunk" PRIO 2 MINMAG county
     LINE #a8daa8 WITH OUTLINECOLOR #777777 MINWIDTH 0.45mm WIDTH 18m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG detail
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #7ec87e BORDERCOLOR #ffffff MINMAG proximity PRIO 20
@@ -19,7 +19,7 @@ OSS
     LABEL WITH STYLE contour MINMAG detail
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #7ec87e BORDERCOLOR #ffffff MINMAG proximity PRIO 20
 
-  WAY "highway_primary" PRIO 3 MINMAG stateOver
+  WAY "highway_primary" PRIO 3 MINMAG county
     LINE #ec989a WITH OUTLINECOLOR #a56769 MINWIDTH 0.4mm WIDTH 14m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG detail
     REF WITH STYLE plate COLOR #ffffff BGCOLOR #e46d71 BORDERCOLOR #ffffff MINMAG cityOver PRIO 20
@@ -61,11 +61,11 @@ OSS
     LINE #ffffff WITH ALTCOLOR #888888 MINWIDTH 0.1mm WIDTH 8m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG veryClose
 
-  AREA "highway_service"
+  AREA "highway_service" MINMAG close
     FILL #ffffff BORDER #cccccc WIDTH 0.1mm
     LABEL WITH MINMAG veryClose
 
-  WAY "highway_track" PRIO 11 MINMAG close
+  WAY "highway_track" PRIO 11 MINMAG veryClose
     LINE #90570c WITH OUTLINECOLOR #ffffff50 DASH 3,1 MINWIDTH 0.4mm OUTLINE 0.4mm
     LABEL WITH STYLE contour MINMAG veryClose
 
@@ -73,7 +73,7 @@ OSS
     LINE #ebeaea WITH MINWIDTH 0.1mm WIDTH 8m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG block
 
-  AREA "highway_pedestrian"
+  AREA "highway_pedestrian" MINMAG close
     FILL #ededed BORDER #c5c5c5 WIDTH 0.1mm
     LABEL WITH MINMAG block
 
@@ -88,31 +88,31 @@ OSS
     LINE #90570c WITH MINWIDTH 0.1mm WIDTH 2m
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "highway_path" PRIO 11 MINMAG close
+  WAY "highway_path" PRIO 11 MINMAG veryClose
 	LINE #555555 WITH OUTLINECOLOR #ffffff50 DASH 8,2 MINWIDTH 0.25mm OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "highway_cycleway" PRIO 11 MINMAG close
+  WAY "highway_cycleway" PRIO 11 MINMAG veryClose
     LINE #4645fa WITH OUTLINECOLOR #ffffff50 DASH 1,1 MINWIDTH 0.4mm OUTLINE 0.4mm
     LABEL WITH STYLE contour MINMAG close
 
-  AREA "highway_footway"
+  AREA "highway_footway" MINMAG close
     FILL #ededed BORDER #c5c5c5 WIDTH 0.1mm
     LABEL WITH MINMAG block
 
-  WAY "highway_footway" PRIO 11 MINMAG close
+  WAY "highway_footway" PRIO 11 MINMAG veryClose
     LINE #f64762 WITH OUTLINECOLOR #ffffff50 DASH 1,1 MINWIDTH 0.4mm OUTLINE 0.4mm
     LABEL WITH STYLE contour MINMAG block
 
-  WAY "highway_bridleway" PRIO 11 MINMAG close
+  WAY "highway_bridleway" PRIO 11 MINMAG veryClose
     LINE #90570c WITH MINWIDTH 0.1mm WIDTH 2m
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "highway_byway" PRIO 11 MINMAG close
+  WAY "highway_byway" PRIO 11 MINMAG block
     LINE #90570c WITH MINWIDTH 0.1mm WIDTH 2m
     LABEL WITH STYLE contour MINMAG close
 
-  WAY "highway_steps" PRIO 11 MINMAG close
+  WAY "highway_steps" PRIO 11 MINMAG block
     LINE #fe9897 WITH DASH 0.25,0.25 MINWIDTH 1.25mm
     LABEL WITH STYLE contour MINMAG close
 
@@ -163,15 +163,15 @@ OSS
 
   WAY "waterway_stream" PRIO 20 MINMAG cityOver
     LINE #b5d0d0 WITH MINWIDTH 0.25mm WIDTH 2m
-    LABEL WITH STYLE contour MINMAG close
+    LABEL WITH STYLE contour MINMAG block
 
   WAY "waterway_river" PRIO 1 MINMAG proximity
     LINE #b5d0d0 WITH MINWIDTH 0.1mm WIDTH 15m
-    LABEL WITH STYLE contour MINMAG city
+    LABEL WITH STYLE contour MINMAG block
 
   WAY "waterway_canal" PRIO 1 MINMAG proximity
     LINE #b5d0d0 WITH MINWIDTH 0.1mm WIDTH 15m
-    LABEL WITH STYLE contour MINMAG city
+    LABEL WITH STYLE contour MINMAG block
 
   WAY "waterway_drain" PRIO 1 MINMAG cityOver
     LINE #b5d0d0 WITH MINWIDTH 0.1mm WIDTH 3m
@@ -183,7 +183,7 @@ OSS
 
   AREA "waterway_riverbank"
     FILL #b5d0d0
-    LABEL WITH MINMAG proximity
+    LABEL WITH MINMAG block
 
   WAY "route_ferry" PRIO 11 MINMAG cityOver
     LINE #0000ff WITH OUTLINECOLOR #ffffff50 DASH 1,1 MINWIDTH 0.5mm WIDTH 2m OUTLINE 0.4mm
@@ -229,9 +229,9 @@ OSS
     FILL #b4d5f0
     LABEL WITH MINMAG close
 
-  AREA "landuse_forest"
+  AREA "landuse_forest" MINMAG county
     FILL #8dc56c PATTERN "forest" WITH MINMAG cityOver
-    LABEL WITH STYLE emphasize MINMAG city
+    LABEL WITH STYLE emphasize MINMAG detail
 
   AREA "landuse_allotments" MINMAG city
     FILL #c8b084
@@ -261,7 +261,7 @@ OSS
     FILL #ebd7fe
     LABEL WITH MINMAG close
 
-  AREA "landuse_grass" MINMAG city
+  AREA "landuse_grass" MINMAG close
     FILL #cfeca8
     LABEL WITH MINMAG close
 
@@ -309,29 +309,29 @@ OSS
     FILL #ddecec
     LABEL WITH MINMAG detail
 
-  AREA "natural_scrub"
+  AREA "natural_scrub" MINMAG close
     FILL #b5e2b5 PATTERN "scrub" WITH MINMAG cityOver
-    LABEL WITH MINMAG close
+    LABEL WITH MINMAG suburb
 
   AREA "natural_fell"
     FILL #f9f9f9
-    LABEL WITH MINMAG close
+    LABEL WITH MINMAG detail
 
   AREA "natural_heath"
     FILL #ffffc0
-    LABEL WITH MINMAG close
+    LABEL WITH MINMAG detail
 
-  AREA "natural_wood"
+  AREA "natural_wood" MINMAG county
     FILL #aed1a0
-    LABEL WITH MINMAG proximity
+    LABEL WITH MINMAG detail
 
   AREA "natural_marsh"
     FILL #f7f9f5
-    LABEL WITH MINMAG city
+    LABEL WITH MINMAG detail
 
   AREA "natural_wetland"
     FILL #f7f9f5
-    LABEL WITH MINMAG city
+    LABEL WITH MINMAG detail
 
   AREA "natural_water"
     FILL #b5d0d0
@@ -346,7 +346,7 @@ OSS
 
   AREA "natural_land"
     FILL #ffffff
-    LABEL WITH MINMAG region
+    LABEL WITH MINMAG detail
 
   AREA "aeroway_aerodrome"
     FILL #d5ddbd
@@ -402,7 +402,7 @@ OSS
 
   AREA "leisure_pitch"
     FILL #90d3b9 BORDER #b0b0b0 WIDTH 0.1mm
-    LABEL WITH MINMAG close
+    LABEL WITH MINMAG veryClose
 
   AREA "leisure_water_park"
 	FILL #f1eee8 BORDER #887b7b WIDTH 0.1mm
@@ -424,11 +424,11 @@ OSS
     FILL #c6f0cf
     LABEL WITH MINMAG close
 
-  AREA "leisure_playground"
+  AREA "leisure_playground" MINMAG close
     FILL #ccffff
     LABEL WITH MINMAG close
 
-  AREA "leisure_garden"
+  AREA "leisure_garden" MINMAG close
     FILL #ceeca8
     LABEL WITH MINMAG close
 
@@ -642,7 +642,7 @@ OSS
     FILL #bca9a9
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG  block
 
-  AREA "building_garage" MINMAG close
+  AREA "building_garage" MINMAG veryClose
     FILL #bcbcbc
 
   AREA "building" MINMAG close

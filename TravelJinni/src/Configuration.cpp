@@ -29,14 +29,17 @@
 #include <Lum/OS/Display.h>
 
 #include <osmscout/Database.h>
+#include <osmscout/MapPainter.h>
 
 std::list<Map>       maps;
 std::list<Style>     styles;
 
-Lum::Model::ULongRef dpi(new Lum::Model::ULong());
-Lum::Model::ULongRef maxNodes(new Lum::Model::ULong());
-Lum::Model::ULongRef maxWays(new Lum::Model::ULong());
-Lum::Model::ULongRef maxAreas(new Lum::Model::ULong());
+Lum::Model::ULongRef   dpi(new Lum::Model::ULong());
+Lum::Model::ULongRef   maxNodes(new Lum::Model::ULong());
+Lum::Model::ULongRef   maxWays(new Lum::Model::ULong());
+Lum::Model::ULongRef   maxAreas(new Lum::Model::ULong());
+Lum::Model::BooleanRef optimizeWays(new Lum::Model::Boolean());
+Lum::Model::BooleanRef optimizeAreas(new Lum::Model::Boolean());
 
 std::wstring         currentMap;
 std::wstring         currentStyle;
@@ -48,6 +51,7 @@ bool LoadConfig()
   Lum::Base::Path        path(Lum::Base::Path::GetApplicationConfigPath());
 
   osmscout::AreaSearchParameter searchParameter;
+  osmscout::MapParameter        mapParameter;
 
   dpi->SetRange(72ul,400ul);
   dpi->Set((unsigned long)Lum::OS::display->GetDPI());
@@ -55,6 +59,8 @@ bool LoadConfig()
   maxNodes->Set(searchParameter.GetMaximumNodes());
   maxWays->Set(searchParameter.GetMaximumWays());
   maxAreas->Set(searchParameter.GetMaximumAreas());
+  optimizeWays->Set(mapParameter.GetOptimizeWayNodes());
+  optimizeAreas->Set(mapParameter.GetOptimizeAreaNodes());
 
   top=Lum::Config::LoadConfigFromXMLFile(path.GetPath(),errors);
 
@@ -70,22 +76,31 @@ bool LoadConfig()
     Lum::Config::Node *node=*iter;
 
     if (node->GetName()==L"settings") {
-      unsigned long value;
+      unsigned long ulongValue;
+      bool          boolValue;
 
-      if (node->GetAttribute(L"dpi", value)) {
-        dpi->Set(value);
+      if (node->GetAttribute(L"dpi", ulongValue)) {
+        dpi->Set(ulongValue);
       }
 
-      if (node->GetAttribute(L"maxNodes", value)) {
-        maxNodes->Set(value);
+      if (node->GetAttribute(L"maxNodes", ulongValue)) {
+        maxNodes->Set(ulongValue);
       }
 
-      if (node->GetAttribute(L"maxWays", value)) {
-        maxWays->Set(value);
+      if (node->GetAttribute(L"maxWays", ulongValue)) {
+        maxWays->Set(ulongValue);
       }
 
-      if (node->GetAttribute(L"maxAreas", value)) {
-        maxAreas->Set(value);
+      if (node->GetAttribute(L"maxAreas", ulongValue)) {
+        maxAreas->Set(ulongValue);
+      }
+
+      if (node->GetAttribute(L"optimizeWays", boolValue)) {
+        optimizeWays->Set(boolValue);
+      }
+
+      if (node->GetAttribute(L"optimizeAreas", boolValue)) {
+        optimizeAreas->Set(boolValue);
       }
     }
     else if (node->GetName()==L"map") {
@@ -150,6 +165,8 @@ bool SaveConfig()
   settings->SetAttribute(L"maxNodes",maxNodes->Get());
   settings->SetAttribute(L"maxWays",maxWays->Get());
   settings->SetAttribute(L"maxAreas",maxAreas->Get());
+  settings->SetAttribute(L"optimizeWays",optimizeWays->Get());
+  settings->SetAttribute(L"optimizeAreas",optimizeAreas->Get());
 
   top->Add(settings);
 

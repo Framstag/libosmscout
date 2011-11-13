@@ -130,8 +130,8 @@ void DatabaseTask::Run()
         drawParameter.SetIconPaths(paths);
         drawParameter.SetPatternPaths(paths);
 
-        drawParameter.SetOptimizeWayNodes(true);
-        drawParameter.SetOptimizeAreaNodes(true);
+        drawParameter.SetOptimizeWayNodes(optimizeWays->Get());
+        drawParameter.SetOptimizeAreaNodes(optimizeAreas->Get());
         drawParameter.SetDebugPerformance(true);
 
         if (!dpi->IsNull()) {
