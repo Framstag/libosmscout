@@ -86,7 +86,7 @@ public:
   : initial(true),
     lon(7.13601),
     lat(50.68924),
-    magnification(/*2*2*2**/2*1024),
+    magnification(2*1024),
     requestNewMap(true),
     backgroundColor(241.0/255,238.0/255,233.0/255,1.0)
   {
@@ -299,6 +299,7 @@ public:
     if (event.type==Lum::OS::MouseEvent::down &&
         PointIsIn(event) &&
         event.button==Lum::OS::MouseEvent::button1) {
+      requestNewMap=false;
       startLon=lon;
       startLat=lat;
       startX=event.x;
@@ -308,6 +309,7 @@ public:
     else if (event.IsGrabEnd() &&
              event.button==Lum::OS::MouseEvent::button1) {
       HandleMouseMove(event);
+      requestNewMap=true;
       Redraw();
     }
     else if (event.type==Lum::OS::MouseEvent::move &&
@@ -315,9 +317,7 @@ public:
              event.button==Lum::OS::MouseEvent::none &&
              event.qualifier==Lum::OS::qualifierButton1) {
       HandleMouseMove(event);
-      requestNewMap=false;
       Redraw();
-      requestNewMap=true;
       return true;
     }
     else if (event.type==Lum::OS::MouseEvent::down &&
@@ -548,7 +548,6 @@ public:
   void Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& msg)
   {
     if (model==GetOpenedAction() && GetOpenedAction()->IsFinished()) {
-      std::cout << "GetOpenedAction!" << std::endl;
       if (!LoadConfig()) {
         Lum::Dlg::Msg::ShowOk(this,
                               L"Cannot load configuration!",
