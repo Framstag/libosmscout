@@ -31,6 +31,7 @@
 
 #include <osmscout/import/RawNode.h>
 #include <osmscout/import/RawWay.h>
+#include <osmscout/import/RawRelation.h>
 
 #include <osmscout/import/GenTypeDat.h>
 
@@ -55,7 +56,7 @@
 namespace osmscout {
 
   static const size_t defaultStartStep=1;
-  static const size_t defaultEndStep=17;
+  static const size_t defaultEndStep=18;
 
   ImportParameter::ImportParameter()
    : typefile("map.ost"),
@@ -328,22 +329,29 @@ namespace osmscout {
                                                            AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                            "rawway.idx")));
     /* 5 */
-    modules.push_back(new RelationDataGenerator());
+    modules.push_back(new NumericIndexGenerator<Id,RawRelation>("Generating 'rawrel.idx'",
+                                                                AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                                "rawrels.dat"),
+                                                                AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                                "rawrel.idx")));
+
     /* 6 */
+    modules.push_back(new RelationDataGenerator());
+    /* 7 */
     modules.push_back(new NumericIndexGenerator<Id,Relation>("Generating 'relation.idx'",
                                                              AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                              "relations.dat"),
                                                              AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                              "relation.idx")));
-    /* 7 */
-    modules.push_back(new NodeDataGenerator());
     /* 8 */
+    modules.push_back(new NodeDataGenerator());
+    /* 9 */
     modules.push_back(new NumericIndexGenerator<Id,Node>("Generating 'node.idx'",
                                                          AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                          "nodes.dat"),
                                                          AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                          "node.idx")));
-    /* 9 */
+    /* 10 */
     modules.push_back(new WayDataGenerator());
     /* 10 */
     modules.push_back(new NumericIndexGenerator<Id,Way>("Generating 'way.idx'",
@@ -351,19 +359,19 @@ namespace osmscout {
                                                                         "ways.dat"),
                                                         AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                         "way.idx")));
-    /* 11 */
-    modules.push_back(new AreaAreaIndexGenerator());
     /* 12 */
-    modules.push_back(new AreaWayIndexGenerator());
+    modules.push_back(new AreaAreaIndexGenerator());
     /* 13 */
-    modules.push_back(new AreaNodeIndexGenerator());
+    modules.push_back(new AreaWayIndexGenerator());
     /* 14 */
-    modules.push_back(new CityStreetIndexGenerator());
+    modules.push_back(new AreaNodeIndexGenerator());
     /* 15 */
-    modules.push_back(new NodeUseIndexGenerator());
+    modules.push_back(new CityStreetIndexGenerator());
     /* 16 */
-    modules.push_back(new WaterIndexGenerator());
+    modules.push_back(new NodeUseIndexGenerator());
     /* 17 */
+    modules.push_back(new WaterIndexGenerator());
+    /* 18 */
     modules.push_back(new OptimizeLowZoomGenerator());
 
     bool result=ExecuteModules(modules,parameter,progress,typeConfig);

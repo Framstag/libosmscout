@@ -109,16 +109,11 @@ namespace osmscout {
                      const RawRelation::Member& member,
                      DataFile<RawNode>& nodeDataFile,
                      DataFile<RawWay>& wayDataFile,
-                     Relation::Role& role,
+                     DataFile<RawRelation>& relationDataFile,
+                     const std::string& roleName,
+                     std::vector<Relation::Role>& roles,
                      Progress& progress)
   {
-    // We currently do not support referencing relations
-    if (member.type==RawRelation::memberRelation) {
-      progress.Warning("Relation "+NumberToString(id)+" "+name+
-                       " references a relation => ignoring");
-      return false;
-    }
-
     if (member.type==RawRelation::memberNode) {
       RawNodeRef node;
 
@@ -130,7 +125,11 @@ namespace osmscout {
         return false;
       }
 
-      Point point;
+      Relation::Role role;
+      Point          point;
+
+      role.role=roleName;
+      role.ring=0;
 
       point.id=node->GetId();
       point.lat=node->GetLat();
@@ -139,6 +138,8 @@ namespace osmscout {
       role.nodes.push_back(point);
 
       role.attributes.type=node->GetType();
+
+      roles.push_back(role);
     }
     else if (member.type==RawRelation::memberWay) {
       RawWayRef way;
@@ -161,8 +162,11 @@ namespace osmscout {
         return false;
       }
 
-      bool reverseNodes=false;
+      bool           reverseNodes=false;
+      Relation::Role role;
 
+      role.role=roleName;
+      role.ring=0;
       role.attributes.type=way->GetType();
 
       std::vector<Tag> tags(way->GetTags());
@@ -185,9 +189,43 @@ namespace osmscout {
 
         role.nodes.push_back(point);
       }
+
+      roles.push_back(role);
+
+      return true;
+    }
+    else if (member.type==RawRelation::memberRelation) {
+      RawRelationRef relation;
+
+      if (!relationDataFile.Get(member.id,relation)) {
+        progress.Error("Cannot resolve relation member of type relation with id "+
+                       NumberToString(member.id)+
+                       " for relation "+
+                       NumberToString(id)+" "+name);
+        return false;
+      }
+
+      for (size_t m=0; m<relation->members.size(); m++) {
+        if (!ResolveMember(typeConfig,
+                           id,
+                           name,
+                           relation->members[m],
+                           nodeDataFile,
+                           wayDataFile,
+                           relationDataFile,
+                           roleName,
+                           roles,
+                           progress)) {
+          break;
+        }
+
+
+      }
+
+      return true;
     }
 
-    return true;
+    return false;
   }
 
   /**
@@ -655,14 +693,19 @@ namespace osmscout {
   {
     std::set<Id> wayAreaIndexBlacklist;
 
-    DataFile<RawNode> nodeDataFile("rawnodes.dat",
-                                   "rawnode.idx",
-                                   parameter.GetNodeDataCacheSize(),
-                                   parameter.GetNodeIndexCacheSize());
-    DataFile<RawWay>  wayDataFile("rawways.dat",
-                                  "rawway.idx",
-                                   parameter.GetWayDataCacheSize(),
-                                   parameter.GetWayIndexCacheSize());
+    DataFile<RawNode>     nodeDataFile("rawnodes.dat",
+                                       "rawnode.idx",
+                                       parameter.GetNodeDataCacheSize(),
+                                       parameter.GetNodeIndexCacheSize());
+    DataFile<RawWay>      wayDataFile("rawways.dat",
+                                      "rawway.idx",
+                                      parameter.GetWayDataCacheSize(),
+                                      parameter.GetWayIndexCacheSize());
+
+    DataFile<RawRelation> relDataFile("rawrels.dat",
+                                      "rawrel.idx",
+                                      parameter.GetWayDataCacheSize(),
+                                      parameter.GetWayIndexCacheSize());
 
     if (!nodeDataFile.Open(parameter.GetDestinationDirectory())) {
       std::cerr << "Cannot open raw nodes data files!" << std::endl;
@@ -671,6 +714,11 @@ namespace osmscout {
 
     if (!wayDataFile.Open(parameter.GetDestinationDirectory())) {
       std::cerr << "Cannot open raw way data files!" << std::endl;
+      return false;
+    }
+
+    if (!relDataFile.Open(parameter.GetDestinationDirectory())) {
+      std::cerr << "Cannot open raw relation data files!" << std::endl;
       return false;
     }
 
@@ -784,19 +832,18 @@ namespace osmscout {
         roles.insert(rawRel.members[i].role);
       }
 
-      rel.roles.resize(rawRel.members.size());
+      rel.roles.reserve(rawRel.members.size());
 
       for (size_t m=0; m<rawRel.members.size(); m++) {
-        rel.roles[m].role=rawRel.members[m].role;
-        rel.roles[m].ring=0;
-
         if (!ResolveMember(typeConfig,
                            rawRel.GetId(),
                            rel.GetName(),
                            rawRel.members[m],
                            nodeDataFile,
                            wayDataFile,
-                           rel.roles[m],
+                           relDataFile,
+                           rawRel.members[m].role,
+                           rel.roles,
                            progress)) {
           error=true;
           break;

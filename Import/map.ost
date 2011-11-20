@@ -317,16 +317,17 @@ TYPES
 
   TYPE "line_any" = RELATION ("type"=="line") OPTIONS IGNORE
   TYPE "public_transport_any" = RELATION ("type"=="public_transport") OPTIONS IGNORE
+  TYPE "public_transport_stop_area_group" = RELATION ("public_transport"=="stop_area_group") OPTIONS IGNORE
   TYPE "collection_any" = RELATION ("type"=="collection") OPTIONS IGNORE
   TYPE "network_any" = RELATION ("type"=="network") OPTIONS IGNORE
   TYPE "route_any" = RELATION ("type"=="route") OPTIONS IGNORE
   TYPE "routemaster_any" = RELATION ("type"=="route_master") OPTIONS IGNORE
   TYPE "superroute_any" = RELATION ("type"=="superroute") OPTIONS IGNORE
 
-  TYPE "border" = AREA ("type"=="border") OPTIONS IGNORE
-  TYPE "boundary_postal_code" = AREA ("boundary"=="postal_code") OPTIONS IGNORE
-  TYPE "postal_code" = AREA ("type"=="postal_code") OPTIONS IGNORE
-  TYPE "organization" = AREA ("type"=="organization") OPTIONS IGNORE
+  TYPE "border" = AREA RELATION ("type"=="border") OPTIONS IGNORE
+  TYPE "boundary_postal_code" = AREA RELATION ("boundary"=="postal_code") OPTIONS IGNORE
+  TYPE "postal_code" = AREA RELATION ("type"=="postal_code") OPTIONS IGNORE
+  TYPE "organization" = AREA RELATION ("type"=="organization") OPTIONS IGNORE
 
   TYPE "place_any" = RELATION ("type"=="place") OPTIONS IGNORE
   TYPE "amt_any" = RELATION ("type"=="amt") OPTIONS IGNORE
@@ -339,6 +340,8 @@ TYPES
   TYPE "state_any" = RELATION ("type"=="state") OPTIONS IGNORE
   TYPE "tmc_any" = AREA (EXISTS "TMC:cid_58:tabcd_1:Class") OR RELATION ("type"=="tmc" OR "type"=="TMC") OPTIONS IGNORE
   TYPE "lez_any" = RELATION ("type"=="LEZ") OPTIONS IGNORE
+  TYPE "group_any" = RELATION ("type"=="group") OPTIONS IGNORE
+  TYPE "set_any" = RELATION ("type"=="set") OPTIONS IGNORE
 
   // Evaluated for routing
   TYPE "restriction_no_right_turn" = RELATION ("type"=="restriction" AND "restriction"=="no_right_turn") OPTIONS IGNORE
