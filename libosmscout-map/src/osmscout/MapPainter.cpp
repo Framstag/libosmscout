@@ -405,6 +405,10 @@ namespace osmscout {
       }
     }
 
+    // If the resulting alpha value is >0.8,we do not want labels to overlap
+    // but be drawn with a little space around them (plateSpace for the space
+    // between plates, else normalSpace)
+
     if (a>=0.8) {
       for (size_t i=0; i<labels.size(); i++) {
         labels[i].mark=false;
@@ -415,9 +419,16 @@ namespace osmscout {
       for (std::vector<Label>::iterator label=labels.begin();
            label!=labels.end();
            ++label) {
+        // Ignore all labels that are not drawn
         if (label->overlay || !label->draw || label->mark) {
           continue;
         }
+
+        // Check for labels that intersect (including space). If our priority is lower,
+        // we stop processing, else we mark the other label
+        // In the first step we do not check the bounding box of the new label
+        // but only for intersection with the center point - this is because we are called very often
+        // and bounding box calculation is expensive.
 
         if (style.GetStyle()==LabelStyle::plate &&
             label->style->GetStyle()==LabelStyle::plate) {
@@ -507,7 +518,7 @@ namespace osmscout {
       }*/
     }
 
-    // Bounding box
+    // We passed the first intersection test, we now calculate bounding box
 
     double xOff,yOff,width,height;
 
@@ -542,6 +553,11 @@ namespace osmscout {
         by+bheight<0) {
       return false;
     }
+
+    // again for labels with alpha >=0.8 we check for intersection with an existing label
+    // but now with the complete bounding box
+    // We now do not want to check against all labels, so we do only check against labels
+    // which are in the same quandrants as we are
 
     if (a>=0.8) {
       int xcMin,xcMax,ycMin,ycMax;
@@ -602,7 +618,8 @@ namespace osmscout {
         }
       }
 
-      // Set everything else to draw=false
+      // Set everything else to draw=false, if we marked it before as "intersecting but of lower
+      // priority". We also add our own (future) index to all the cells we interect with
       for (int yc=ycMin; yc<=ycMax; yc++) {
         for (int xc=xcMin; xc<=xcMax; xc++) {
           int c=yc*xCellCount+xc;
@@ -625,6 +642,8 @@ namespace osmscout {
         }
       }
     }
+
+    // We passed the test, lest put ourself into the "draw label" job list
 
     Label label;
 
