@@ -263,7 +263,7 @@ public:
                           tlon,tlat);
 
     lon=startLon-(tlon-olon);
-    lat=startLat+(tlat-olat);
+    lat=startLat-(tlat-olat);
   }
 
   void ZoomIn(double zoomFactor)

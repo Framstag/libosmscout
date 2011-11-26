@@ -188,7 +188,7 @@ namespace osmscout {
     assert(valid);
   
     lon=(x+lonOffset)/(scale*gradtorad);
-    lat=atan(sinh((y-height+latOffset)/scale))/gradtorad;
+    lat=atan(sinh((height-y+latOffset)/scale))/gradtorad;
 
     return true;
   }

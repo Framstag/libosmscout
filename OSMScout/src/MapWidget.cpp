@@ -183,7 +183,7 @@ void MapWidget::HandleMouseMove(QMouseEvent* event)
                         tlon,tlat);
 
   lon=startLon-(tlon-olon);
-  lat=startLat+(tlat-olat);
+  lat=startLat-(tlat-olat);
 }
 
 void MapWidget::mousePressEvent(QMouseEvent* event)
