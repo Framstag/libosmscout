@@ -128,7 +128,7 @@ bool Parser::WeakSeparator(int n, int syFol, int repFol)
 }
 
 void Parser::OST() {
-		while (!(la->kind == 0 || la->kind == 4)) {SynErr(33); Get();}
+		while (!(la->kind == 0 || la->kind == 4)) {SynErr(34); Get();}
 		Expect(4);
 		if (la->kind == 6) {
 			TYPES();
@@ -137,7 +137,7 @@ void Parser::OST() {
 }
 
 void Parser::TYPES() {
-		while (!(la->kind == 0 || la->kind == 6)) {SynErr(34); Get();}
+		while (!(la->kind == 0 || la->kind == 6)) {SynErr(35); Get();}
 		Expect(6);
 		TYPE();
 		while (la->kind == 7) {
@@ -150,7 +150,7 @@ void Parser::TYPE() {
 		TypeInfo      typeInfo;
 		unsigned char types;
 		
-		while (!(la->kind == 0 || la->kind == 7)) {SynErr(35); Get();}
+		while (!(la->kind == 0 || la->kind == 7)) {SynErr(36); Get();}
 		Expect(7);
 		Expect(3);
 		typeInfo.SetType(Destring(t->val)); 
@@ -264,7 +264,7 @@ void Parser::BOOLCOND(Condition*& condition) {
 			Get();
 			BOOLCOND(condition);
 			condition=new NotCondition(condition); 
-		} else SynErr(36);
+		} else SynErr(37);
 }
 
 void Parser::BINARYCOND(Condition*& condition) {
@@ -278,7 +278,7 @@ void Parser::BINARYCOND(Condition*& condition) {
 			NOTEQUALSCOND(nameValue,condition);
 		} else if (la->kind == 17) {
 			ISINCOND(nameValue,condition);
-		} else SynErr(37);
+		} else SynErr(38);
 }
 
 void Parser::EXISTSCOND(Condition*& condition) {
@@ -357,7 +357,7 @@ void Parser::TYPEKIND(unsigned char& types) {
 		} else if (la->kind == 25) {
 			Get();
 			types|=TypeInfo::typeRelation; 
-		} else SynErr(38);
+		} else SynErr(39);
 }
 
 void Parser::TYPEOPTION(TypeInfo& typeInfo) {
@@ -392,7 +392,12 @@ void Parser::TYPEOPTION(TypeInfo& typeInfo) {
 			typeInfo.SetMultipolygon(true); 
 			break;
 		}
-		default: SynErr(39); break;
+		case 32: {
+			Get();
+			typeInfo.SetPinWay(true); 
+			break;
+		}
+		default: SynErr(40); break;
 		}
 }
 
@@ -412,7 +417,7 @@ Parser::Parser(Scanner *scanner,
                TypeConfig& config)
  : config(config)
 {
-	maxT = 32;
+	maxT = 33;
 
   dummyToken = NULL;
   t = la = NULL;
@@ -427,10 +432,10 @@ bool Parser::StartOf(int s)
   const bool T = true;
   const bool x = false;
 
-	static bool set[3][34] = {
-		{T,x,x,x, T,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,T,T, T,T,x,x, x,x,x,x, x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,T,T, x,x}
+	static bool set[3][35] = {
+		{T,x,x,x, T,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,T,T, T,T,x,x, x,x,x,x, x,x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,T,T, T,x,x}
 	};
 
 
@@ -485,14 +490,15 @@ void Errors::SynErr(int line, int col, int n)
 			case 29: s = coco_string_create("\"OPTIMIZE_LOW_ZOOM\" expected"); break;
 			case 30: s = coco_string_create("\"IGNORE\" expected"); break;
 			case 31: s = coco_string_create("\"MULTIPOLYGON\" expected"); break;
-			case 32: s = coco_string_create("??? expected"); break;
-			case 33: s = coco_string_create("this symbol not expected in OST"); break;
-			case 34: s = coco_string_create("this symbol not expected in TYPES"); break;
-			case 35: s = coco_string_create("this symbol not expected in TYPE"); break;
-			case 36: s = coco_string_create("invalid BOOLCOND"); break;
-			case 37: s = coco_string_create("invalid BINARYCOND"); break;
-			case 38: s = coco_string_create("invalid TYPEKIND"); break;
-			case 39: s = coco_string_create("invalid TYPEOPTION"); break;
+			case 32: s = coco_string_create("\"PIN_WAY\" expected"); break;
+			case 33: s = coco_string_create("??? expected"); break;
+			case 34: s = coco_string_create("this symbol not expected in OST"); break;
+			case 35: s = coco_string_create("this symbol not expected in TYPES"); break;
+			case 36: s = coco_string_create("this symbol not expected in TYPE"); break;
+			case 37: s = coco_string_create("invalid BOOLCOND"); break;
+			case 38: s = coco_string_create("invalid BINARYCOND"); break;
+			case 39: s = coco_string_create("invalid TYPEKIND"); break;
+			case 40: s = coco_string_create("invalid TYPEOPTION"); break;
 
     default:
     {

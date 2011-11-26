@@ -135,13 +135,13 @@ namespace osmscout {
     if (areaTag==tagMap.end()) {
       isArea=0;
     }
-    else if (areaTag->second=="yes" ||
-             areaTag->second=="true" ||
-             areaTag->second=="1") {
-      isArea=1;
+    else if (areaTag->second=="no" ||
+             areaTag->second=="false" ||
+             areaTag->second=="0") {
+      isArea=-1;
     }
     else {
-      isArea=-1;
+      isArea=1;
     }
 
     config.GetWayAreaTypeId(tagMap,wayType,areaType);
@@ -157,18 +157,24 @@ namespace osmscout {
     }
 
     if (isArea==0) {
-      if (areaType!=typeIgnore &&
-          nodes.size()>2 &&
-          nodes.front()==nodes.back()) {
-        isArea=1;
-      }
-      else if (wayType!=typeIgnore) {
+      if (wayType!=typeIgnore && areaType==typeIgnore) {
         isArea=-1;
       }
-      else if (areaType!=typeIgnore &&
-               nodes.size()>1 &&
-               wayType==typeIgnore) {
+      else if (wayType==typeIgnore && areaType!=typeIgnore) {
         isArea=1;
+      }
+      else if (areaType!=typeIgnore &&
+          nodes.size()>2 &&
+          nodes.front()==nodes.back()) {
+        if (config.GetTypeInfo(wayType).GetIPinWay()) {
+          isArea=-1;
+        }
+        else {
+          isArea=1;
+        }
+      }
+      else {
+        isArea=-1;
       }
     }
 

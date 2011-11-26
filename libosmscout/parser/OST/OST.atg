@@ -239,6 +239,7 @@ PRODUCTIONS
                | "OPTIMIZE_LOW_ZOOM" (. typeInfo.SetOptimizeLowZoom(true); .)
                | "IGNORE"            (. typeInfo.SetIgnore(true); .)
                | "MULTIPOLYGON"      (. typeInfo.SetMultipolygon(true); .)
+               | "PIN_WAY"           (. typeInfo.SetPinWay(true); .)
                .
 
 END OST.

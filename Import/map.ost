@@ -14,14 +14,14 @@ TYPES
   TYPE "highway_road" = WAY ("highway"=="road") OPTIONS ROUTE INDEX
   TYPE "highway_residential" = WAY ("highway"=="residential") OPTIONS ROUTE INDEX
   TYPE "highway_living_street" = WAY ("highway"=="living_street") OPTIONS ROUTE INDEX
-  TYPE "highway_service" = WAY AREA ("highway"=="service") OPTIONS ROUTE INDEX
+  TYPE "highway_service" = WAY AREA ("highway"=="service") OPTIONS ROUTE INDEX PIN_WAY
   TYPE "highway_track" = WAY ("highway"=="track") OPTIONS ROUTE INDEX
-  TYPE "highway_pedestrian" = WAY AREA ("highway"=="pedestrian") OPTIONS ROUTE INDEX
+  TYPE "highway_pedestrian" = WAY AREA ("highway"=="pedestrian") OPTIONS ROUTE INDEX PIN_WAY
   TYPE "highway_services" = NODE AREA ("highway"=="services") OPTIONS ROUTE INDEX
   TYPE "highway_bus_guideway" = WAY ("highway"=="bus_guideway") OPTIONS ROUTE
   TYPE "highway_path" = WAY ("highway"=="path") OPTIONS ROUTE
   TYPE "highway_cycleway" = WAY ("highway"=="cycleway") OPTIONS ROUTE
-  TYPE "highway_footway" = WAY AREA ("highway"=="footway") OPTIONS ROUTE
+  TYPE "highway_footway" = WAY AREA ("highway"=="footway") OPTIONS ROUTE PIN_WAY
   TYPE "highway_bridleway" = WAY ("highway"=="bridleway") OPTIONS ROUTE
   TYPE "highway_byway" = WAY ("highway"=="byway") OPTIONS ROUTE
   TYPE "highway_steps" = WAY ("highway"=="steps") OPTIONS ROUTE
@@ -29,7 +29,7 @@ TYPES
   TYPE "highway_bus_stop" = NODE ("highway"=="bus_stop")
   TYPE "highway_turning_cycle" = NODE ("highway"=="turning_cycle")
   TYPE "highway_construction" = WAY ("highway"=="construction")
-  TYPE "highway_roundabout" = WAY AREA ("highway"=="roundabout") OPTIONS ROUTE
+  TYPE "highway_roundabout" = WAY AREA ("highway"=="roundabout") OPTIONS ROUTE PIN_WAY
   TYPE "highway_motorway_junction" = NODE ("highway"=="motorway_junction") OPTIONS ROUTE
   
   TYPE "waterway_stream" = WAY ("waterway"=="stream") OPTIONS ROUTE
@@ -78,7 +78,7 @@ TYPES
   TYPE "leisure_sports_centre" = NODE AREA ("leisure"=="sports_centre")
   TYPE "leisure_golf_course" = NODE AREA ("leisure"=="golf_course")
   TYPE "leisure_stadium" = NODE AREA ("leisure"=="stadium")
-  TYPE "leisure_track" = NODE WAY AREA ("leisure"=="track")
+  TYPE "leisure_track" = NODE WAY AREA ("leisure"=="track") OPTIONS PIN_WAY
   TYPE "leisure_pitch" = NODE AREA ("leisure"=="pitch")
   TYPE "leisure_water_park" = NODE AREA ("leisure"=="water_park")
   TYPE "leisure_marina" = NODE AREA ("leisure"=="marina")

@@ -195,6 +195,7 @@ namespace osmscout {
     bool         consumeChildren;
     bool         optimizeLowZoom;
     bool         multipolygon;
+    bool         pinWay;
     bool         ignore;
 
   public:
@@ -334,6 +335,18 @@ namespace osmscout {
     inline bool GetMultipolygon() const
     {
       return multipolygon;
+    }
+
+    inline TypeInfo& SetPinWay(bool pinWay)
+    {
+      this->pinWay=pinWay;
+
+      return *this;
+    }
+
+    inline bool GetIPinWay() const
+    {
+      return pinWay;
     }
 
     inline TypeInfo& SetIgnore(bool ignore)

@@ -146,8 +146,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 32;
-	noSym = 32;
+	maxT = 33;
+	noSym = 33;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
@@ -180,6 +180,7 @@ void Scanner::Init() {
 	keywords.set("OPTIMIZE_LOW_ZOOM", 29);
 	keywords.set("IGNORE", 30);
 	keywords.set("MULTIPOLYGON", 31);
+	keywords.set("PIN_WAY", 32);
 
 
   tvalLength = 128;

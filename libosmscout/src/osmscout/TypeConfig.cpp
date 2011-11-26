@@ -194,6 +194,7 @@ namespace osmscout {
      consumeChildren(false),
      optimizeLowZoom(false),
      multipolygon(false),
+     pinWay(false),
      ignore(false)
   {
     // no code
@@ -556,7 +557,7 @@ namespace osmscout {
             areaType=types[i].GetId();
           }
 
-          if (wayType!=typeIgnore &&
+          if (wayType!=typeIgnore ||
               areaType!=typeIgnore) {
             return true;
           }
@@ -564,7 +565,7 @@ namespace osmscout {
       }
     }
 
-    return wayType!=typeIgnore || areaType!=typeIgnore;
+    return false;
   }
 
   bool TypeConfig::GetRelationTypeId(const std::map<TagId,std::string>& tagMap,
