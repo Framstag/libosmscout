@@ -1575,10 +1575,10 @@ namespace osmscout {
 
     size_t start,end;
 
-    transBuffer.TransformArea(projection,
-                              parameter.GetOptimizeAreaNodes(),
-                              nodes,
-                              start,end);
+    transBuffer.TransformWay(projection,
+                             parameter.GetOptimizeAreaNodes(),
+                             nodes,
+                             start,end);
 
     data.attributes=&attributes;
     data.lineStyle=lineStyle;
