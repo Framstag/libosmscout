@@ -81,7 +81,7 @@ namespace osmscout {
 #endif
   }
 
-  bool FileScanner::Open(const std::string& filename, bool readOnly)
+  bool FileScanner::Open(const std::string& filename, bool readOnly, bool useMmap)
   {
     if (file!=NULL) {
       std::cerr << "File already opened, cannot open it again!" << std::endl;
@@ -127,7 +127,7 @@ namespace osmscout {
     }
 
 #if defined(HAVE_MMAP)
-    if (file!=NULL && readOnly && this->size>0) {
+    if (file!=NULL && readOnly && useMmap && this->size>0) {
       FreeBuffer();
 
       buffer=(char*)mmap(NULL,size,PROT_READ,MAP_SHARED,fileno(file),0);

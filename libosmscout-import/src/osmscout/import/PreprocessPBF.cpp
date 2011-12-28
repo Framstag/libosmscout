@@ -441,6 +441,13 @@ namespace osmscout {
             isArea=1;
           }
         }
+        else if (wayType==typeIgnore &&
+                 areaType==typeIgnore &&
+                 nodes.size()>2 &&
+                 nodes.front()==nodes.back()) {
+          isArea=1;
+        }
+
         else {
           isArea=-1;
         }

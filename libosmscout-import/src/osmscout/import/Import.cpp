@@ -26,6 +26,7 @@
 #include <osmscout/TypeConfigLoader.h>
 
 #include <osmscout/Node.h>
+#include <osmscout/Point.h>
 #include <osmscout/Relation.h>
 #include <osmscout/Way.h>
 
@@ -63,13 +64,18 @@ namespace osmscout {
      startStep(defaultStartStep),
      endStep(defaultEndStep),
      numericIndexPageSize(4096),
+     rawNodeIndexMemoryMaped(true),
+     rawNodeDataMemoryMaped(false),
+     rawWayIndexMemoryMaped(true),
+     rawWayDataMemoryMaped(true),
+     rawWayBlockSize(500000),
      nodesLoadSize(10000000),
      nodeIndexIntervalSize(50),
-     nodeDataCacheSize(100),
-     nodeIndexCacheSize(30000),
+     nodeDataCacheSize(10000),
+     nodeIndexCacheSize(50000),
      waysLoadSize(1000000),
-     wayDataCacheSize(100),
-     wayIndexCacheSize(5000),
+     wayDataCacheSize(5000),
+     wayIndexCacheSize(10000),
      areaAreaIndexMaxMag(17),
      areaAreaRelIndexMaxMag(17),
      areaWayMinMag(14),
@@ -111,6 +117,31 @@ namespace osmscout {
     return numericIndexPageSize;
   }
 
+  bool ImportParameter::GetRawNodeIndexMemoryMaped() const
+  {
+    return rawNodeIndexMemoryMaped;
+  }
+
+  bool ImportParameter::GetRawNodeDataMemoryMaped() const
+  {
+    return rawNodeDataMemoryMaped;
+  }
+
+  bool ImportParameter::GetRawWayIndexMemoryMaped() const
+  {
+    return rawWayIndexMemoryMaped;
+  }
+
+  bool ImportParameter::GetRawWayDataMemoryMaped() const
+  {
+    return rawWayDataMemoryMaped;
+  }
+
+  size_t ImportParameter::GetRawWayBlockSize() const
+  {
+    return rawWayBlockSize;
+  }
+
   size_t ImportParameter::GetNodesLoadSize() const
   {
     return nodesLoadSize;
@@ -129,11 +160,6 @@ namespace osmscout {
   size_t ImportParameter::GetNodeIndexCacheSize() const
   {
     return nodeIndexCacheSize;
-  }
-
-  size_t ImportParameter::GetWaysLoadSize() const
-  {
-    return waysLoadSize;
   }
 
   size_t ImportParameter::GetWayDataCacheSize() const
@@ -211,6 +237,31 @@ namespace osmscout {
   void ImportParameter::SetNumericIndexPageSize(size_t numericIndexPageSize)
   {
     this->numericIndexPageSize=numericIndexPageSize;
+  }
+
+  void ImportParameter::SetRawNodeIndexMemoryMaped(bool memoryMaped)
+  {
+    this->rawNodeIndexMemoryMaped=memoryMaped;
+  }
+
+  void ImportParameter::SetRawNodeDataMemoryMaped(bool memoryMaped)
+  {
+    this->rawNodeDataMemoryMaped=memoryMaped;
+  }
+
+  void ImportParameter::SetRawWayIndexMemoryMaped(bool memoryMaped)
+  {
+    this->rawWayIndexMemoryMaped=memoryMaped;
+  }
+
+  void ImportParameter::SetRawWayDataMemoryMaped(bool memoryMaped)
+  {
+    this->rawWayDataMemoryMaped=memoryMaped;
+  }
+
+  void ImportParameter::SetRawWayBlockSize(size_t blockSize)
+  {
+    this->rawWayBlockSize=blockSize;
   }
 
   void ImportParameter::SetNodesLoadSize(size_t nodesLoadSize)
@@ -353,7 +404,7 @@ namespace osmscout {
                                                                          "node.idx")));
     /* 10 */
     modules.push_back(new WayDataGenerator());
-    /* 10 */
+    /* 11 */
     modules.push_back(new NumericIndexGenerator<Id,Way>("Generating 'way.idx'",
                                                         AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                         "ways.dat"),

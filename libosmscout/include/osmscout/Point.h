@@ -20,11 +20,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/TypeConfig.h>
+#include <osmscout/Types.h>
 
 namespace osmscout {
 
-  class Point
+  class OSMSCOUT_API Point
   {
   public:
     Id     id;
@@ -35,6 +35,17 @@ namespace osmscout {
     inline Point()
     {
       // no code
+    }
+
+    inline void SetId(Id id)
+    {
+      this->id=id;
+    }
+
+    inline void SetCoordinates(double lat, double lon)
+    {
+      this->lat=lat;
+      this->lon=lon;
     }
 
     inline Id GetId() const

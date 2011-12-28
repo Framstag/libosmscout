@@ -281,7 +281,7 @@ namespace osmscout {
     std::cout << "Data bounding box: [" << minLat << "," << minLon << "] - [" << maxLat << "," << maxLon << "]" << std::endl;
 
     std::cout << "Opening 'nodes.dat'..." << std::endl;
-    if (!nodeDataFile.Open(path)) {
+    if (!nodeDataFile.Open(path,true,true)) {
       std::cerr << "Cannot open 'nodes.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
@@ -290,7 +290,7 @@ namespace osmscout {
     std::cout << "Opening 'nodes.dat' done." << std::endl;
 
     std::cout << "Opening 'ways.dat'..." << std::endl;
-    if (!wayDataFile.Open(path)) {
+    if (!wayDataFile.Open(path,true,true)) {
       std::cerr << "Cannot open 'ways.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
@@ -299,7 +299,7 @@ namespace osmscout {
     std::cout << "Opening 'ways.dat' done." << std::endl;
 
     std::cout << "Opening 'relations.dat'..." << std::endl;
-    if (!relationDataFile.Open(path)) {
+    if (!relationDataFile.Open(path,true,true)) {
       std::cerr << "Cannot open 'relations.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
@@ -1249,7 +1249,7 @@ namespace osmscout {
     std::cout << "Loading node use index done." << std::endl;
 
     std::cout << "Loading way index..." << std::endl;
-    if (!wayIndex.Load(path)) {
+    if (!wayIndex.Open(path, true)) {
       std::cerr << "Cannot load way index..." << std::endl;
     }
     std::cout << "Loading way index done." << std::endl;

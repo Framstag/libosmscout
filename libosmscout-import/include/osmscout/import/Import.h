@@ -39,26 +39,31 @@ namespace osmscout {
   class OSMSCOUT_IMPORT_API ImportParameter
   {
   private:
-    std::string mapfile;               //! Name of the file containing the map (either *.osm or *.osm.pbf)
-    std::string typefile;              //! Name and path ff type definition file (map.ost.xml)
-    std::string destinationDirectory;  //! Name of the destination directory
-    size_t      startStep;             //! Starting step for import
-    size_t      endStep;               //! End step for mport
-    size_t      numericIndexPageSize;  //! Size of an numeric index page in bytes
-    size_t      nodesLoadSize;         //! Maximum number of nodes loaded into memory in one go
-    size_t      nodeIndexIntervalSize; //! The size of the index interval of the noduse index
-    size_t      nodeDataCacheSize;     //! Size of the node data cache
-    size_t      nodeIndexCacheSize;    //! Size of the node index cache
-    size_t      waysLoadSize;          //! Maximum number of ways loaded into memory in one go
-    size_t      wayDataCacheSize;      //! Size of the way data cache
-    size_t      wayIndexCacheSize;     //! Size of the way index cache
-    size_t      areaAreaIndexMaxMag;   //! Maximum depth of the index generated
-    size_t      areaAreaRelIndexMaxMag;//! Maximum depth of the index generated
-    size_t      areaWayMinMag;         //! Minimum magnification of index for individual type
+    std::string mapfile;                 //! Name of the file containing the map (either *.osm or *.osm.pbf)
+    std::string typefile;                //! Name and path ff type definition file (map.ost.xml)
+    std::string destinationDirectory;    //! Name of the destination directory
+    size_t      startStep;               //! Starting step for import
+    size_t      endStep;                 //! End step for import
+    size_t      numericIndexPageSize;    //! Size of an numeric index page in bytes
+    bool        rawNodeIndexMemoryMaped; //! Use memory mapping for raw node index file access
+    bool        rawNodeDataMemoryMaped;  //! Use memory mapping for raw node data file access
+    bool        rawWayIndexMemoryMaped;  //! Use memory mapping for raw way index file access
+    bool        rawWayDataMemoryMaped;   //! Use memory mapping for raw way data file access
+    size_t      rawWayBlockSize;         //! Number of ways loaded during import until nodes get resolved
+    size_t      nodesLoadSize;           //! Maximum number of nodes loaded into memory in one go
+    size_t      nodeIndexIntervalSize;   //! The size of the index interval of the noduse index
+    size_t      nodeDataCacheSize;       //! Size of the node data cache
+    size_t      nodeIndexCacheSize;      //! Size of the node index cache
+    size_t      waysLoadSize;            //! Maximum number of ways loaded into memory in one go
+    size_t      wayDataCacheSize;        //! Size of the way data cache
+    size_t      wayIndexCacheSize;       //! Size of the way index cache
+    size_t      areaAreaIndexMaxMag;     //! Maximum depth of the index generated
+    size_t      areaAreaRelIndexMaxMag;  //! Maximum depth of the index generated
+    size_t      areaWayMinMag;           //! Minimum magnification of index for individual type
     size_t      areaWayIndexCellSizeAverage; //! Average entries per index cell
-    size_t      areaWayIndexCellSizeMax;   //! Maximum number of entries  per index cell
-    size_t      waterIndexMaxMag;      //! Maximum depth of the index generated
-    size_t      optimizationMaxMag;    //! Maximum magnification for optimization
+    size_t      areaWayIndexCellSizeMax; //! Maximum number of entries  per index cell
+    size_t      waterIndexMaxMag;        //! Maximum depth of the index generated
+    size_t      optimizationMaxMag;      //! Maximum magnification for optimization
 
   public:
     ImportParameter();
@@ -71,11 +76,18 @@ namespace osmscout {
     size_t GetEndStep() const;
 
     size_t GetNumericIndexPageSize() const;
+
+    bool GetRawNodeIndexMemoryMaped() const;
+    bool GetRawNodeDataMemoryMaped() const;
+
+    bool GetRawWayIndexMemoryMaped() const;
+    bool GetRawWayDataMemoryMaped() const;
+    size_t GetRawWayBlockSize() const;
+
     size_t GetNodesLoadSize() const;
     size_t GetNodeIndexIntervalSize() const;
     size_t GetNodeDataCacheSize() const;
     size_t GetNodeIndexCacheSize() const;
-    size_t GetWaysLoadSize() const;
     size_t GetWayDataCacheSize() const;
     size_t GetWayIndexCacheSize() const;
     size_t GetAreaAreaIndexMaxMag() const;
@@ -94,6 +106,14 @@ namespace osmscout {
     void SetSteps(size_t startStep, size_t endStep);
 
     void SetNumericIndexPageSize(size_t numericIndexPageSize);
+
+    void SetRawNodeIndexMemoryMaped(bool memoryMaped);
+    void SetRawNodeDataMemoryMaped(bool memoryMaped);
+
+    void SetRawWayIndexMemoryMaped(bool memoryMaped);
+    void SetRawWayDataMemoryMaped(bool memoryMaped);
+    void SetRawWayBlockSize(size_t blockSize);
+
     void SetNodesLoadSize(size_t nodesLoadSize);
     void SetNodeIndexIntervalSize(size_t nodeIndexIntervalSize);
     void SetNodeDataCacheSize(size_t nodeDataCacheSize);

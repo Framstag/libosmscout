@@ -96,7 +96,8 @@ namespace osmscout {
                  unsigned long cacheSize);
     virtual ~NumericIndex();
 
-    bool Load(const std::string& path);
+    bool Open(const std::string& path, bool memoryMaped);
+    bool Close();
 
     bool GetOffsets(const std::vector<N>& ids, std::vector<FileOffset>& offsets) const;
 
@@ -118,6 +119,8 @@ namespace osmscout {
   template <class N, class T>
   NumericIndex<N,T>::~NumericIndex()
   {
+    Close();
+
     delete [] buffer;
   }
 
@@ -210,7 +213,7 @@ namespace osmscout {
   }
 
   template <class N, class T>
-  bool NumericIndex<N,T>::Load(const std::string& path)
+  bool NumericIndex<N,T>::Open(const std::string& path, bool memoryMaped)
   {
     uint32_t    entries;
     FileOffset  lastLevelPageStart;
@@ -218,7 +221,7 @@ namespace osmscout {
 
     filename=AppendFileToDir(path,filepart);
 
-    if (!scanner.Open(filename)) {
+    if (!scanner.Open(filename,true, memoryMaped)) {
       std::cerr << "Cannot open index file '" << filename << "'" << std::endl;
       return false;
     }
@@ -267,7 +270,17 @@ namespace osmscout {
       leafs.push_back(PageCache(resultingCacheSize));
     }
 
-    return !scanner.HasError() && scanner.Close();
+    return !scanner.HasError();
+  }
+
+  template <class N, class T>
+  bool NumericIndex<N,T>::Close()
+  {
+    if (scanner.IsOpen()) {
+      return scanner.Close();
+    }
+
+    return true;
   }
 
   template <class N, class T>

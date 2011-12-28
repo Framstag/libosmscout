@@ -67,7 +67,8 @@ namespace osmscout {
     FileWriter  writer;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "rawnodes.dat"))) {
+                                      "rawnodes.dat"),
+                                      parameter.GetRawNodeDataMemoryMaped())) {
       progress.Error("Cannot open 'rawnodes.dat'");
       return false;
     }

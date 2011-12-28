@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 
   osmscout::NumericIndex<osmscout::Id,osmscout::Way> wayIndex("way.idx",1000);
 
-  if (!wayIndex.Load(".")) {
+  if (!wayIndex.Open(".",true)) {
     std::cerr << "Cannot open way index file!" << std::endl;
     return 1;
   }

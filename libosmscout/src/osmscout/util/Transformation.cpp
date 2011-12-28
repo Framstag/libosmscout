@@ -19,12 +19,14 @@
 
 #include <osmscout/util/Transformation.h>
 
+#include <cassert>
 #include <cstring>
 #include <limits>
 
 #include <osmscout/private/Math.h>
 
 #include <iostream>
+
 namespace osmscout {
   static double relevantPosDeriviation=1.0;   // Pixel
 

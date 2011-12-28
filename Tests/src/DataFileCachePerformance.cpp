@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
   for (size_t i=1; i<=7; i++) {
     osmscout::WayDataFile wayDataFile("ways.dat","way.idx",dataCacheSize,indexCacheSize);
 
-    if (!wayDataFile.Open(".")) {
+    if (!wayDataFile.Open(".",true,true)) {
       std::cerr << "Cannot open way data file!" << std::endl;
       return 1;
     }

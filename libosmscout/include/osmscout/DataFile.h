@@ -68,7 +68,7 @@ namespace osmscout {
 
     virtual ~DataFile();
 
-    bool Open(const std::string& path);
+    bool Open(const std::string& path, bool memoryMapedIndex, bool memoryMapedData);
     bool Close();
 
     bool Get(const std::vector<FileOffset>& offsets,
@@ -111,11 +111,11 @@ namespace osmscout {
   }
 
   template <class N>
-  bool DataFile<N>::Open(const std::string& path)
+  bool DataFile<N>::Open(const std::string& path, bool memoryMapedIndex, bool memoryMapedData)
   {
     datafilename=AppendFileToDir(path,datafile);
 
-    isOpen=scanner.Open(datafilename) && index.Load(path);
+    isOpen=index.Open(path,memoryMapedIndex) && scanner.Open(datafilename,true,memoryMapedData);
 
     return isOpen;
   }
@@ -129,6 +129,10 @@ namespace osmscout {
       if (!scanner.Close()) {
         success=false;
       }
+    }
+
+    if (!index.Close()) {
+      success=false;
     }
 
     isOpen=false;

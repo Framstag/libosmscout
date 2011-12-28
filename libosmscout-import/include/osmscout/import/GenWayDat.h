@@ -20,12 +20,41 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <osmscout/Way.h>
+#include <osmscout/NumericIndex.h>
+
 #include <osmscout/import/Import.h>
+#include <osmscout/import/RawWay.h>
 
 namespace osmscout {
 
   class WayDataGenerator : public ImportModule
   {
+  private:
+    bool ReadRestrictionRelations(const ImportParameter& parameter,
+                                  Progress& progress,
+                                  const TypeConfig& typeConfig,
+                                  std::map<Id,std::vector<Way::Restriction> >& restrictions);
+
+    bool ReadWayEndpoints(const ImportParameter& parameter,
+                          Progress& progress,
+                          const TypeConfig& typeConfig,
+                          std::map<Id,std::list<Id> >& endPointWayMap);
+
+    bool ReadAreasIncludingEndpoints(const ImportParameter& parameter,
+                                     Progress& progress,
+                                     const TypeConfig& typeConfig,
+                                     const std::map<Id,std::list<Id> >& endPointWayMap,
+                                     std::set<Id>& endPointAreaSet);
+    bool JoinWay(Progress& progress,
+                 const TypeConfig& typeConfig,
+                 FileScanner& scanner,
+                 RawWay& rawWay,
+                 std::map<Id,std::list<Id> >& endPointWayMap,
+                 NumericIndex<Id,RawWay>& rawWayIndex,
+                 std::set<Id>& wayBlacklist,
+                 size_t& mergeCount);
+
   public:
     std::string GetDescription() const;
     bool Import(const ImportParameter& parameter,

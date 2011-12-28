@@ -15,3 +15,8 @@ Rules of thumb:
 * If the import runs into swap, try to reduce memory consumption by reducing cache sizes and
   increasing iterations. This will make the importer run slower than on systems with more memory
   but still makes it way faster than if running into swap.
+* On big imports on a 32 bit system, using memory mapped file access for all intermediate data
+  files might might result in out of memory because memory mapping big files and doing 
+  many allocation pushes the process over the 4GB addressable memory limit. In this case
+  switch of memory mapping for data and index files (raw node before raw way, data before index
+  files) to stay below 4GB. 

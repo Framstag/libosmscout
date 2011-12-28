@@ -781,30 +781,30 @@ namespace osmscout {
 
     cairo_stroke(draw);
 
-    if (dash.empty() &&
-      startCap==capRound &&
-      endCap!=capRound) {
-      cairo_new_path(draw);
-      cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
-      cairo_set_dash(draw,NULL,0,0);
-      cairo_set_line_width(draw,width);
+    if ((startCap==capRound || endCap==capRound) &&
+        cairo_get_line_cap(draw)!=CAIRO_LINE_CAP_ROUND)
+    {
+      if (startCap==capRound) {
+        cairo_new_path(draw);
+        cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
+        cairo_set_dash(draw,NULL,0,0);
+        cairo_set_line_width(draw,width);
 
-      cairo_move_to(draw,transBuffer.buffer[transStart].x,transBuffer.buffer[transStart].y);
-      cairo_line_to(draw,transBuffer.buffer[transStart].x,transBuffer.buffer[transStart].y);
-      cairo_stroke(draw);
-    }
+        cairo_move_to(draw,transBuffer.buffer[transStart].x,transBuffer.buffer[transStart].y);
+        cairo_line_to(draw,transBuffer.buffer[transStart].x,transBuffer.buffer[transStart].y);
+        cairo_stroke(draw);
+      }
 
-    if (dash.empty() &&
-      endCap==capRound &&
-      startCap!=capRound) {
-      cairo_new_path(draw);
-      cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
-      cairo_set_dash(draw,NULL,0,0);
-      cairo_set_line_width(draw,width);
+      if (endCap==capRound) {
+        cairo_new_path(draw);
+        cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
+        cairo_set_dash(draw,NULL,0,0);
+        cairo_set_line_width(draw,width);
 
-      cairo_move_to(draw,transBuffer.buffer[transEnd].x,transBuffer.buffer[transEnd].y);
-      cairo_line_to(draw,transBuffer.buffer[transEnd].x,transBuffer.buffer[transEnd].y);
-      cairo_stroke(draw);
+        cairo_move_to(draw,transBuffer.buffer[transEnd].x,transBuffer.buffer[transEnd].y);
+        cairo_line_to(draw,transBuffer.buffer[transEnd].x,transBuffer.buffer[transEnd].y);
+        cairo_stroke(draw);
+      }
     }
   }
 
@@ -828,7 +828,7 @@ namespace osmscout {
                             area.fillStyle->GetFillG(),
                             area.fillStyle->GetFillB(),
                             area.fillStyle->GetFillA());
-      cairo_set_line_width(draw,1);
+      cairo_set_line_width(draw,0.0);
     }
 
     if (!area.clippings.empty()) {
@@ -850,13 +850,14 @@ namespace osmscout {
         const PolyData& data=*c;
 
         cairo_new_sub_path(draw);
+        cairo_set_line_width(draw,0.0);
         cairo_move_to(draw,transBuffer.buffer[data.transStart].x,transBuffer.buffer[data.transStart].y);
         for (size_t i=data.transStart+1; i<=data.transEnd; i++) {
           cairo_line_to(draw,transBuffer.buffer[i].x,transBuffer.buffer[i].y);
         }
         cairo_close_path(draw);
 
-        cairo_fill(draw);
+        //cairo_fill(draw);
       }
     }
 

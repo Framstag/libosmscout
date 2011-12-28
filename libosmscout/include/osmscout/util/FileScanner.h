@@ -67,7 +67,7 @@ namespace osmscout {
     FileScanner();
     virtual ~FileScanner();
 
-    bool Open(const std::string& filename, bool readOnly=true);
+    bool Open(const std::string& filename, bool readOnly=true, bool useMmap=true);
     bool Close();
 
     bool IsOpen() const;

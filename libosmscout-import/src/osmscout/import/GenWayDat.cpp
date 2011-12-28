@@ -22,7 +22,7 @@
 #include <algorithm>
 #include <cassert>
 
-#include <osmscout/Way.h>
+#include <osmscout/DataFile.h>
 
 #include <osmscout/Util.h>
 
@@ -35,55 +35,29 @@
 
 namespace osmscout {
 
-  static size_t distributionGranuality =  100000;
-
   std::string WayDataGenerator::GetDescription() const
   {
     return "Generate 'ways.dat'";
   }
 
-  bool WayDataGenerator::Import(const ImportParameter& parameter,
-                                Progress& progress,
-                                const TypeConfig& typeConfig)
+  bool WayDataGenerator::ReadRestrictionRelations(const ImportParameter& parameter,
+                                                  Progress& progress,
+                                                  const TypeConfig& typeConfig,
+                                                  std::map<Id,std::vector<Way::Restriction> >& restrictions)
   {
-    //
-    // Analysing distribution of nodes in the given interval size
-    //
+    FileScanner scanner;
+    uint32_t    rawRelCount=0;
 
-    progress.SetAction("Generate ways.dat");
-
-    FileScanner                                 scanner;
-    FileWriter                                  writer;
-    uint32_t                                    rawNodeCount=0;
-    uint32_t                                    rawRelCount=0;
-    uint32_t                                    rawWayCount=0;
-    TypeId                                      restrictionPosId=typeConfig.GetRelationTypeId("restriction_only_straight_on");
-    TypeId                                      restrictionNegId=typeConfig.GetRelationTypeId("restriction_no_straight_on");
-    std::map<Id,std::vector<Way::Restriction> > restrictions;
-    std::vector<size_t>                         wayTypeCount;
-    std::vector<size_t>                         wayNodeTypeCount;
-    std::vector<size_t>                         areaTypeCount;
-    std::vector<size_t>                         areaNodeTypeCount;
-
-    wayTypeCount.resize(typeConfig.GetMaxTypeId()+1,0);
-    wayNodeTypeCount.resize(typeConfig.GetMaxTypeId()+1,0);
-    areaTypeCount.resize(typeConfig.GetMaxTypeId()+1,0);
-    areaNodeTypeCount.resize(typeConfig.GetMaxTypeId()+1,0);
-
-    /*
-    DataFile<RawNode>                           nodeDataFile("rawnodes.dat",
-                                                             "rawnode.idx",
-                                                             10,
-                                                             100000);*/
+    // List of restrictions for a way
+    TypeId      restrictionPosId=typeConfig.GetRelationTypeId("restriction_only_straight_on");
+    TypeId      restrictionNegId=typeConfig.GetRelationTypeId("restriction_no_straight_on");
 
     assert(restrictionPosId!=typeIgnore);
     assert(restrictionNegId!=typeIgnore);
 
-    progress.SetAction("Scanning for restriction relations");
-
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawrels.dat"))) {
-      progress.Error("Canot open 'rawrels.dat'");
+      progress.Error("Cannot open 'rawrels.dat'");
       return false;
     }
 
@@ -153,17 +127,21 @@ namespace osmscout {
 
     progress.Info(std::string("Found ")+NumberToString(restrictions.size())+" restrictions");
 
-/*
-    if (!nodeDataFile.Open(".")) {
-      std::cerr << "Cannot open raw nodes data file!" << std::endl;
-      return false;
-    }
+    return true;
+  }
 
-    StopClock ac;
+  bool WayDataGenerator::ReadWayEndpoints(const ImportParameter& parameter,
+                                          Progress& progress,
+                                          const TypeConfig& typeConfig,
+                                          std::map<Id,std::list<Id> >& endPointWayMap)
+  {
+    FileScanner scanner;
+    uint32_t    rawWayCount=0;
 
-    progress.Info("Resolving ways using rawnodes.idx");
-
-    if (!scanner.Open("rawways.dat")) {
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "rawways.dat"),
+                                      true,
+                                      parameter.GetRawWayDataMemoryMaped())) {
       progress.Error("Canot open 'rawways.dat'");
       return false;
     }
@@ -176,9 +154,9 @@ namespace osmscout {
     for (uint32_t w=1; w<=rawWayCount; w++) {
       progress.SetProgress(w,rawWayCount);
 
-      RawWay way;
+      RawWay rawWay;
 
-      if (!way.Read(scanner)) {
+      if (!rawWay.Read(scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(w)+" of "+
                        NumberToString(rawWayCount)+
@@ -187,12 +165,85 @@ namespace osmscout {
         return false;
       }
 
-      if (way.type!=typeIgnore) {
-        std::vector<RawNode> nodes;
+      if (rawWay.GetType()==typeIgnore) {
+        continue;
+      }
 
-        if (!nodeDataFile.Get(way.nodes,nodes)) {
-          std::cerr << "Cannot read nodes for way " << way.id << "!" << std::endl;
-          return false;
+      if (typeConfig.GetTypeInfo(rawWay.GetType()).GetIgnore()) {
+        continue;
+      }
+
+      if (rawWay.IsArea()) {
+        continue;
+      }
+
+      endPointWayMap[rawWay.GetNodeId(0)].push_back(rawWay.GetId());
+      endPointWayMap[rawWay.GetNodeId(rawWay.GetNodeCount()-1)].push_back(rawWay.GetId());
+    }
+
+    if (!scanner.Close()) {
+      progress.Error("Cannot close file 'rawways.dat'");
+      return false;
+    }
+
+    return true;
+  }
+
+  bool WayDataGenerator::ReadAreasIncludingEndpoints(const ImportParameter& parameter,
+                                                     Progress& progress,
+                                                     const TypeConfig& typeConfig,
+                                                     const std::map<Id,std::list<Id> >& endPointWayMap,
+                                                     std::set<Id>& endPointAreaSet)
+  {
+    FileScanner scanner;
+    uint32_t    rawWayCount=0;
+
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "rawways.dat"),
+                                      true,
+                                      parameter.GetRawWayDataMemoryMaped())) {
+      progress.Error("Canot open 'rawways.dat'");
+      return false;
+    }
+
+    if (!scanner.Read(rawWayCount)) {
+      progress.Error("Error while reading number of data entries in file");
+      return false;
+    }
+
+    for (uint32_t w=1; w<=rawWayCount; w++) {
+      progress.SetProgress(w,rawWayCount);
+
+      RawWay rawWay;
+
+      if (!rawWay.Read(scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(w)+" of "+
+                       NumberToString(rawWayCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+        return false;
+      }
+
+      if (rawWay.GetType()==typeIgnore) {
+        continue;
+      }
+
+      if (typeConfig.GetTypeInfo(rawWay.GetType()).GetIgnore()) {
+        continue;
+      }
+
+      if (!rawWay.IsArea()) {
+        continue;
+      }
+
+      for (size_t i=0; i<rawWay.GetNodeCount(); i++) {
+        std::map<Id,std::list<Id> >::const_iterator nodeUse;
+
+        nodeUse=endPointWayMap.find(rawWay.GetNodeId(i));
+
+        if (nodeUse!=endPointWayMap.end()) {
+          endPointAreaSet.insert(rawWay.GetNodeId(i));
         }
       }
     }
@@ -202,303 +253,435 @@ namespace osmscout {
       return false;
     }
 
-    ac.Stop();
+    return true;
+  }
 
-    //std::cout << ac <<  std::endl;*/
+  bool WayDataGenerator::JoinWay(Progress& progress,
+                                 const TypeConfig& typeConfig,
+                                 FileScanner& scanner,
+                                 RawWay& rawWay,
+                                 std::map<Id,std::list<Id> >& endPointWayMap,
+                                 NumericIndex<Id,RawWay>& rawWayIndex,
+                                 std::set<Id> & wayBlacklist,
+                                 size_t& mergeCount)
+  {
+    bool merged=true;
 
-    StopClock bc;
+    while (merged) {
+      std::map<Id,std::list<Id> >::const_iterator endPoints;
+      std::vector<Id>                             candidates;
 
-    std::vector<size_t> wayDistribution;
-    size_t              wayCount=0;
-    size_t              sum=0;
-    uint32_t            writtenWayCount=0;
+      endPoints=endPointWayMap.find(rawWay.GetNodes()[0]);
 
-    progress.SetAction("Analysing distribution");
+      if (endPoints!=endPointWayMap.end()) {
+        for (std::list<Id>::const_iterator id=endPoints->second.begin();
+            id!=endPoints->second.end();
+            id++) {
+          if (*id>rawWay.GetId()) {
+            candidates.push_back(*id);
+          }
+        }
+      }
+
+      endPoints=endPointWayMap.find(rawWay.GetNodes()[rawWay.GetNodeCount()-1]);
+
+      if (endPoints!=endPointWayMap.end()) {
+        for (std::list<Id>::const_iterator id=endPoints->second.begin();
+            id!=endPoints->second.end();
+            id++) {
+          if (*id>rawWay.GetId()) {
+            candidates.push_back(*id);
+          }
+        }
+      }
+
+      if (!candidates.empty()) {
+        std::vector<FileOffset> offsets;
+
+        if (!rawWayIndex.GetOffsets(candidates,offsets)) {
+          return false;
+        }
+
+        std::vector<RawWay> ways;
+        FileOffset          oldPos;
+
+        ways.resize(offsets.size());
+
+        if (!scanner.GetPos(oldPos)){
+          return false;
+        }
+
+        for (size_t i=0; i<offsets.size(); i++) {
+          if (!scanner.SetPos(offsets[i])) {
+            return false;
+          }
+
+          if (!ways[i].Read(scanner)) {
+            return false;
+          }
+        }
+
+        if (!scanner.SetPos(oldPos)) {
+          return false;
+        }
+
+        int reverseOrigNodes=-1;
+
+        for (size_t t=0; t<rawWay.GetTags().size(); t++) {
+          if (rawWay.GetTags()[t].key==typeConfig.tagOneway &&
+              rawWay.GetTags()[t].value=="-1") {
+            reverseOrigNodes=t;
+            break;
+          }
+        }
+
+        for (size_t w=0; w<ways.size(); w++) {
+          if (rawWay.GetType()!=ways[w].GetType()) {
+            continue;
+          }
+
+          if (rawWay.GetTags().size()!=ways[w].GetTags().size()) {
+            continue;
+          }
+
+          for (size_t t=0; t<ways[w].GetTags().size(); t++) {
+            if (rawWay.GetTags()[t].key!=ways[w].GetTags()[t].key) {
+              continue;
+            }
+
+            if (rawWay.GetTags()[t].value!=ways[w].GetTags()[t].value) {
+              continue;
+            }
+          }
+/*
+          progress.Info("Joining way with id "+
+                         NumberToString(rawWay.GetId()) +
+                         " with way with id "+
+                         NumberToString(ways[w].GetId()));*/
+
+          std::vector<Id> nodes(rawWay.GetNodes());
+
+          if (reverseOrigNodes!=-1) {
+            std::vector<Tag> tags(rawWay.GetTags());
+            std::vector<Tag>::iterator t=tags.begin();
+
+            t+=reverseOrigNodes;
+
+            tags.erase(t);
+
+            rawWay.SetTags(tags);
+
+            reverseOrigNodes=-1;
+
+            std::reverse(nodes.begin(),nodes.end());
+          }
+
+          int reverseMatchNodes=-1;
+
+          for (size_t t=0; t<ways[w].GetTags().size(); t++) {
+            if (ways[w].GetTags()[t].key==typeConfig.tagOneway &&
+                ways[w].GetTags()[t].value=="-1") {
+              reverseMatchNodes=t;
+              break;
+            }
+          }
+
+          if (reverseMatchNodes!=-1) {
+            std::vector<Id> nodes(ways[w].GetNodes());
+            std::vector<Tag> tags(ways[w].GetTags());
+            std::vector<Tag>::iterator t=tags.begin();
+
+            t+=reverseMatchNodes;
+
+            tags.erase(t);
+
+            ways[w].SetTags(tags);
+
+            std::reverse(nodes.begin(),nodes.end());
+            ways[w].SetNodes(nodes);
+          }
+
+          wayBlacklist.insert(ways[w].GetId());
+
+          if (nodes.front()==ways[w].GetNodes().front()) {
+            nodes.reserve(nodes.size()+
+                          ways[w].GetNodeCount()-1);
+
+            for (size_t i=1; i<ways[w].GetNodeCount(); i++) {
+              nodes.insert(nodes.begin(),ways[w].GetNodeId(i));
+            }
+          }
+          else if (nodes.front()==ways[w].GetNodes().back()) {
+            nodes.reserve(nodes.size()+
+                          ways[w].GetNodeCount()-1);
+
+            for (size_t i=0; i<ways[w].GetNodeCount()-1; i++) {
+              nodes.insert(nodes.begin(),ways[w].GetNodeId(ways[w].GetNodeCount()-1-i));
+            }
+          }
+          else if (nodes.back()==ways[w].GetNodes().front()) {
+            nodes.reserve(nodes.size()+
+                          ways[w].GetNodeCount()-1);
+
+            for (size_t i=1; i<ways[w].GetNodeCount(); i++) {
+              nodes.push_back(ways[w].GetNodeId(i));
+            }
+          }
+          else if (nodes.back()==ways[w].GetNodes().back()) {
+            nodes.reserve(nodes.size()+
+                          ways[w].GetNodeCount()-1);
+
+            for (size_t i=0; i<ways[w].GetNodeCount()-1; i++) {
+              nodes.push_back(ways[w].GetNodeId(ways[w].GetNodeCount()-1-i));
+            }
+          }
+
+          rawWay.SetNodes(nodes);
+
+          mergeCount++;
+
+          /*for (size_t n=0; n<rawWay.GetNodeCount(); n++) {
+            std::cout << rawWay.GetNodeId(n) << " ";
+          }
+          std::cout << std::endl;*/
+
+          merged=true;
+
+          break;
+        }
+      }
+
+      merged=false;
+    }
+
+    return true;
+  }
+
+  bool WayDataGenerator::Import(const ImportParameter& parameter,
+                                Progress& progress,
+                                const TypeConfig& typeConfig)
+  {
+    progress.SetAction("Generate ways.dat");
+
+    FileScanner                                 scanner;
+    FileWriter                                  writer;
+    uint32_t                                    rawWayCount=0;
+
+    // List of restrictions for a way
+    std::map<Id,std::vector<Way::Restriction> > restrictions;
+
+    uint32_t                                    writtenWayCount=0;
+
+    std::map<Id,std::list<Id> >                 endPointWayMap;
+    std::set<Id>                                endPointAreaSet;
+
+    std::set<Id>                                wayBlacklist;
+
+    //
+    // handling of restriction relations
+    //
+
+    progress.SetAction("Scanning for restriction relations");
+
+    if (!ReadRestrictionRelations(parameter,
+                                  progress,
+                                  typeConfig,
+                                  restrictions)) {
+      return false;
+    }
+
+    //
+    // Building a map of way endpoint ids and list of ways having this point as endpoint
+    //
+
+    progress.SetAction("Collecting way endpoints");
+
+    if (!ReadWayEndpoints(parameter,
+                          progress,
+                          typeConfig,
+                          endPointWayMap)) {
+      return false;
+    }
+
+    //
+    // Now enriching this map with areas that include this endpoints as node
+    //
+
+    progress.SetAction("Enriching way endpoints");
+
+    if (!ReadAreasIncludingEndpoints(parameter,
+                                     progress,
+                                     typeConfig,
+                                     endPointWayMap,
+                                     endPointAreaSet)) {
+      return false;
+    }
+
+    progress.Info(NumberToString(endPointWayMap.size())+ " endpoints collected");
+
+    DataFile<RawNode>       nodeDataFile("rawnodes.dat",
+                                         "rawnode.idx",
+                                         parameter.GetNodeDataCacheSize(),
+                                         parameter.GetNodeIndexCacheSize());
+    NumericIndex<Id,RawWay> rawWayIndex("rawway.idx",parameter.GetWayIndexCacheSize());
+
+    if (!nodeDataFile.Open(parameter.GetDestinationDirectory(),
+                           parameter.GetRawNodeIndexMemoryMaped(),
+                           parameter.GetRawNodeDataMemoryMaped())) {
+      std::cerr << "Cannot open raw node data file!" << std::endl;
+      return false;
+    }
+
+    if (!rawWayIndex.Open(parameter.GetDestinationDirectory(),
+                           parameter.GetRawWayIndexMemoryMaped())) {
+      std::cerr << "Cannot open raw way index file!" << std::endl;
+      return false;
+    }
+
+    //
+    // Writing ways
+    //
+
+    progress.SetAction("Writing ways");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "rawways.dat"))) {
-      progress.Error("Canot open 'rawways.dat'");
+                                      "rawways.dat"),
+                                      true,
+                                      parameter.GetRawWayDataMemoryMaped())) {
+      progress.Error("Cannot open 'rawways.dat'");
       return false;
     }
 
     if (!scanner.Read(rawWayCount)) {
       progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t w=1; w<=rawWayCount; w++) {
-      progress.SetProgress(w,rawWayCount);
-
-      RawWay way;
-
-      if (!way.Read(scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(w)+" of "+
-                       NumberToString(rawWayCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-        return false;
-      }
-
-      if (way.GetType()==typeIgnore) {
-        continue;
-      }
-
-      if (typeConfig.GetTypeInfo(way.GetType()).GetIgnore()) {
-        continue;
-      }
-
-      size_t index=way.GetId()/distributionGranuality;
-
-      if (index>=wayDistribution.size()) {
-        wayDistribution.resize(index+1,0);
-      }
-
-      wayDistribution[index]++;
-      wayCount++;
-
-      if (way.IsArea()) {
-        areaTypeCount[way.GetType()]++;
-        areaNodeTypeCount[way.GetType()]+=way.GetNodes().size();
-      }
-      else {
-        wayTypeCount[way.GetType()]++;
-        wayNodeTypeCount[way.GetType()]+=way.GetNodes().size();
-      }
-    }
-
-    if (!scanner.Close()) {
-      progress.Error("Cannot close file 'rawways.dat'");
-      return false;
-    }
-
-    progress.Info(std::string("Ways: ")+NumberToString(wayCount));
-    for (size_t i=0; i<wayDistribution.size(); i++) {
-      sum+=wayDistribution[i];
-      //std::cout << "Nodes " << i*distributionGranuality << "-" << (i+1)*distributionGranuality << ": "  << nodeDistribution[i] << std::endl;
-    }
-
-    if (sum!=wayCount) {
-      progress.Error(std::string("Number of ways over all does not match sum over distribution (")+NumberToString(wayCount)+"!="+NumberToString(sum )+")!");
       return false;
     }
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      "ways.dat"))) {
-      progress.Error("Canot create 'ways.dat'");
+      progress.Error("Cannot create 'ways.dat'");
       return false;
     }
 
     writer.Write(writtenWayCount);
 
-    size_t index=0;
-    while (index<wayDistribution.size()) {
-      size_t bucketSize=0;
-      size_t newIndex=index;
+    uint32_t            currentWay=1;
+    size_t              mergeCount=0;
+    std::vector<RawWay> block(parameter.GetRawWayBlockSize());
 
-      while (newIndex<wayDistribution.size() &&
-             bucketSize+wayDistribution[newIndex]<parameter.GetWaysLoadSize()) {
-        bucketSize+=wayDistribution[newIndex];
-        newIndex++;
-      }
+    while (currentWay<rawWayCount) {
+      size_t blockCount=0;
 
-      size_t start=index*distributionGranuality;
-      size_t end=newIndex*distributionGranuality;
+      while (blockCount<block.size() && currentWay<rawWayCount) {
+        progress.SetProgress(currentWay,rawWayCount);
 
-      progress.Info(std::string("Loading way id ")+NumberToString(start)+">=id<"+NumberToString(end)+" (interval "+NumberToString(index+1)+" of "+NumberToString(wayDistribution.size())+")");
-
-      std::map<Id,RawWay>  ways;
-      std::set<Id>         nodeIds;
-      std::map<Id,uint8_t> nodeUses;
-
-      if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        "rawways.dat"))) {
-        progress.Error("Canot open 'rawways.dat'");
-        return false;
-      }
-
-      if (!scanner.Read(rawWayCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
-
-      for (uint32_t w=1; w<=rawWayCount; w++) {
-        progress.SetProgress(w,rawWayCount);
-
-        RawWay way;
-
-        if (!way.Read(scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(w)+" of "+
-                       NumberToString(rawWayCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-          return false;
-        }
-
-        if (way.GetType()!=typeIgnore &&
-            !typeConfig.GetTypeInfo(way.GetType()).GetIgnore() &&
-            way.GetId()>=start &&
-            way.GetId()<end) {
-          ways[way.GetId()]=way;
-
-          for (size_t j=0; j<way.GetNodeCount(); j++) {
-            nodeIds.insert(way.GetNodeId(j));
-            nodeUses[way.GetNodeId(j)]=0;
-          }
-        }
-
-        if (way.GetId()>end) {
-          // ways are stored in increasing id order, so we can stop after we have reached
-          // the last id for this interval.
-          break;
-        }
-      }
-
-      if (!scanner.Close()) {
-        progress.Error("Cannot close file 'rawways.dat'");
-        return false;
-      }
-
-      if (bucketSize!=ways.size()) {
-        progress.Info(std::string("Number of loaded ways does not match expected number of ways (")+NumberToString(ways.size())+"!="+NumberToString(bucketSize)+")!");
-      }
-
-      progress.Info(std::string("Ways loaded: ")+NumberToString(ways.size()));
-
-      progress.Info("Scanning for matching nodes");
-
-      std::map<Id,RawNode> nodes;
-
-      if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        "rawnodes.dat"))) {
-        progress.Error("Canot open 'rawnodes.dat'");
-        return false;
-      }
-
-      if (!scanner.Read(rawNodeCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
-
-      for (uint32_t n=1; n<=rawNodeCount; n++) {
-        progress.SetProgress(n,rawNodeCount);
-
-        RawNode node;
-
-        if (!node.Read(scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(n)+" of "+
-                       NumberToString(rawNodeCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-          return false;
-        }
-
-        if (nodeIds.find(node.GetId())!=nodeIds.end()) {
-          nodes[node.GetId()]=node;
-        }
-      }
-
-      if (!scanner.Close()) {
-        progress.Error("Cannot close file 'rawnodes.dat'");
-        return false;
-      }
-
-      progress.Info("Scanning way node usage");
-
-      if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        "rawways.dat"))) {
-        progress.Error("Canot open 'rawways.dat'");
-        return false;
-      }
-
-      if (!scanner.Read(rawWayCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
-
-      for (uint32_t w=1; w<=rawWayCount; w++) {
-        progress.SetProgress(w,rawWayCount);
-
-        RawWay way;
-
-        if (!way.Read(scanner)) {
+        if (!block[blockCount].Read(scanner)) {
           progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(w)+" of "+
+                         NumberToString(currentWay)+" of "+
                          NumberToString(rawWayCount)+
                          " in file '"+
                          scanner.GetFilename()+"'");
           return false;
         }
 
-        if (way.GetType()!=typeIgnore &&
-            !typeConfig.GetTypeInfo(way.GetType()).GetIgnore()) {
-          for (size_t j=0; j<way.GetNodeCount(); j++) {
-            std::map<Id,uint8_t>::iterator nodeUse=nodeUses.find(way.GetNodeId(j));
+        currentWay++;
 
-            if (nodeUse!=nodeUses.end()) {
-              nodeUse->second++;
-            }
-          }
+        if (wayBlacklist.find(block[blockCount].GetId())!=wayBlacklist.end()) {
+          continue;
+        }
+
+        if (block[blockCount].GetType()==typeIgnore) {
+          continue;
+        }
+
+        if (typeConfig.GetTypeInfo(block[blockCount].GetType()).GetIgnore()) {
+          continue;
+        }
+
+        if (block[blockCount].GetNodeCount()<2) {
+          progress.Error(std::string("Way ")+
+                         NumberToString(block[blockCount].GetId())+" has only "+
+                         NumberToString(block[blockCount].GetNodeCount())+
+                         " node(s) but requires at least 2 nodes");
+          continue;
+        }
+
+
+        blockCount++;
+      }
+
+      std::set<Id> nodeIds;
+
+      for (size_t w=0; w<blockCount; w++) {
+        // Join with potential joined ways
+        if (!JoinWay(progress,
+                     typeConfig,
+                     scanner,
+                     block[w],
+                     endPointWayMap,
+                     rawWayIndex,
+                     wayBlacklist,
+                     mergeCount)) {
+          return false;
         }
       }
 
-      if (!scanner.Close()) {
-        progress.Error("Cannot close file 'rawways.dat'");
-        return false;
+      for (size_t w=0; w<blockCount; w++) {
+        for (size_t n=0; n<block[w].GetNodeCount(); n++) {
+          nodeIds.insert(block[w].GetNodeId(n));
+        }
       }
 
-      progress.Info("Writing ways");
+      std::vector<RawNodeRef> nodes;
 
-      for (std::map<Id,RawWay>::iterator w=ways.begin();
-           w!=ways.end();
-           ++w) {
-        RawWay           rawWay=w->second;
-        std::vector<Tag> tags(rawWay.GetTags());
+      if (!nodeDataFile.Get(nodeIds,nodes)) {
+        std::cerr << "Cannot read nodes!" << std::endl;
+        continue;
+      }
+
+      std::map<Id, RawNodeRef> nodesMap;
+
+      for (size_t n=0; n<nodes.size(); n++) {
+        nodesMap[nodes[n]->GetId()]=nodes[n];
+      }
+
+      for (size_t w=0; w<blockCount; w++) {
+        std::vector<Tag> tags(block[w].GetTags());
         Way              way;
         bool             reverseNodes=false;
-        bool             error=false;
 
-        way.SetId(rawWay.GetId());
-        way.SetType(rawWay.GetType());
+        way.SetId(block[w].GetId());
+        way.SetType(block[w].GetType());
+
 
         if (!way.SetTags(progress,
                          typeConfig,
-                         rawWay.IsArea(),
+                         block[w].IsArea(),
                          tags,
                          reverseNodes)) {
           continue;
         }
 
-        // Nodes
+        way.nodes.resize(block[w].GetNodeCount());
 
-        if (rawWay.GetNodeCount()<2) {
-          progress.Error(std::string("Way ")+
-                         NumberToString(rawWay.GetId())+" has only "+
-                         NumberToString(rawWay.GetNodeCount())+
-                         " node(s) but requires at least 2 nodes");
-          continue;
-        }
+        bool success=true;
+        for (size_t n=0; n<block[w].GetNodeCount(); n++) {
+          std::map<Id,RawNodeRef>::const_iterator node=nodesMap.find(block[w].GetNodeId(n));
 
-        way.nodes.resize(rawWay.GetNodeCount());
-        for (size_t i=0; i<rawWay.GetNodeCount() && !error; i++) {
-          std::map<Id,RawNode>::iterator node=nodes.find(rawWay.GetNodeId(i));
-
-          if (node==nodes.end()) {
-            progress.Error(std::string("Cannot find node ")+
-                           NumberToString(rawWay.GetNodeId(i))+" for way "+
-                           NumberToString(rawWay.GetId()));
-            error=true;
-            continue;
+          if (node==nodesMap.end()) {
+            progress.Error("Cannot resolve node with id "+
+                           NumberToString(block[w].GetNodeId(n))+
+                           " for Way "+
+                           NumberToString(way.GetId()));
+            success=false;
+            break;
           }
 
-          way.nodes[i].id=rawWay.GetNodeId(i);
-          way.nodes[i].lat=node->second.GetLat();
-          way.nodes[i].lon=node->second.GetLon();
+          way.nodes[n].SetId(node->second->GetId());
+          way.nodes[n].SetCoordinates(node->second->GetLat(),node->second->GetLon());
         }
 
-        if (error) {
+        if (!success) {
           continue;
         }
 
@@ -509,15 +692,32 @@ namespace osmscout {
         // startIsJoint/endIsJoint
 
         if (!way.IsArea()) {
-          std::map<Id,uint8_t>::const_iterator nodeUse;
+          std::map<Id,std::list<Id> >::const_iterator wayJoint;
+          std::set<Id>::const_iterator                areaJoint;
 
-          nodeUse=nodeUses.find(way.nodes[0].id);
+          wayJoint=endPointWayMap.find(way.nodes[0].id);
 
-          way.SetStartIsJoint(nodeUse!=nodeUses.end() && nodeUse->second>=2);
+          if (wayJoint!=endPointWayMap.end() && wayJoint->second.size()<2) {
+            wayJoint=endPointWayMap.end();
+          }
 
-          nodeUse=nodeUses.find(way.nodes[way.nodes.size()-1].id);
+          if (wayJoint==endPointWayMap.end()) {
+            areaJoint=endPointAreaSet.find(way.nodes[0].id);
+          }
 
-          way.SetEndIsJoint(nodeUse!=nodeUses.end() && nodeUse->second>=2);
+          way.SetStartIsJoint((wayJoint!=endPointWayMap.end() || areaJoint!=endPointAreaSet.end()));
+
+          wayJoint=endPointWayMap.find(way.nodes[way.nodes.size()-1].id);
+
+          if (wayJoint!=endPointWayMap.end() && wayJoint->second.size()<2) {
+            wayJoint=endPointWayMap.end();
+          }
+
+          if (wayJoint==endPointWayMap.end()) {
+            areaJoint=endPointAreaSet.find(way.nodes[way.nodes.size()-1].id);
+          }
+
+          way.SetEndIsJoint(wayJoint!=endPointWayMap.end() || areaJoint!=endPointAreaSet.end());
         }
 
         // Restrictions
@@ -531,35 +731,39 @@ namespace osmscout {
         way.Write(writer);
         writtenWayCount++;
       }
-
-      index=newIndex;
     }
 
+    if (!scanner.Close()) {
+      progress.Error("Cannot close file 'rawways.dat'");
+      return false;
+    }
 
     writer.SetPos(0);
     writer.Write(writtenWayCount);
+
 
     if (!writer.Close()) {
       return false;
     }
 
-    // Cleaning up...
-
-    restrictions.clear();
-
-    bc.Stop();
-
-    progress.Info("Dump statistics");
-
-    for (size_t i=0; i<typeConfig.GetMaxTypeId(); i++) {
-      std::string buffer=typeConfig.GetTypeInfo(i).GetName()+": "+
-                         NumberToString(wayTypeCount[i])+" "+NumberToString(wayNodeTypeCount[i])+" "+
-                         NumberToString(areaTypeCount[i])+" "+NumberToString(areaNodeTypeCount[i]);
-
-      progress.Debug(buffer);
+    if (!rawWayIndex.Close()) {
+      return false;
     }
 
-    //std::cout << ac << " <=> " << bc << std::endl;
+    if (!nodeDataFile.Close()) {
+      return false;
+    }
+
+    progress.Info(NumberToString(rawWayCount) + " raw way(s) read, "+
+                  NumberToString(writtenWayCount) + " way(s) written, "+
+                  NumberToString(mergeCount) + " merges");
+
+    // Cleaning up...
+
+    endPointWayMap.clear();
+    endPointAreaSet.clear();
+    restrictions.clear();
+    wayBlacklist.clear();
 
     return true;
   }

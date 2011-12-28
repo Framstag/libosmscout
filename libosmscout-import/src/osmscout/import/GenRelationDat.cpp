@@ -125,16 +125,15 @@ namespace osmscout {
         return false;
       }
 
-      Relation::Role role;
       Point          point;
+      Relation::Role role;
+
+      point.SetId(node->GetId());
+      point.SetCoordinates(node->GetLat(),
+                           node->GetLon());
 
       role.role=roleName;
       role.ring=0;
-
-      point.id=node->GetId();
-      point.lat=node->GetLat();
-      point.lon=node->GetLon();
-
       role.nodes.push_back(point);
 
       role.attributes.type=node->GetType();
@@ -152,9 +151,9 @@ namespace osmscout {
         return false;
       }
 
-      std::vector<RawNodeRef> ns;
+      std::vector<RawNodeRef> nodes;
 
-      if (!nodeDataFile.Get(way->GetNodes(),ns)) {
+      if (!nodeDataFile.Get(way->GetNodes(),nodes)) {
         progress.Error("Cannot resolve nodes of relation member of type way with id "+
                        NumberToString(member.id)+
                        " for relation "+
@@ -180,12 +179,13 @@ namespace osmscout {
         return false;
       }
 
-      for (size_t i=0; i<ns.size(); i++) {
+      role.nodes.reserve(nodes.size());
+      for (size_t i=0; i<nodes.size(); i++) {
         Point point;
 
-        point.id=ns[i]->GetId();
-        point.lat=ns[i]->GetLat();
-        point.lon=ns[i]->GetLon();
+        point.SetId(nodes[i]->GetId());
+        point.SetCoordinates(nodes[i]->GetLat(),
+                             nodes[i]->GetLon());
 
         role.nodes.push_back(point);
       }
@@ -351,6 +351,14 @@ namespace osmscout {
 
     // Make a local copy of the relation roles
     for (size_t i=0; i<relation.roles.size(); i++) {
+      // We can have ways that are of type way and still build a closed shape.
+      // We are sure that they build an area and fix the data here
+      if (relation.roles[i].nodes.size()>2 &&
+          relation.roles[i].nodes.front().GetId()==relation.roles[i].nodes.back().GetId()) {
+        relation.roles[i].attributes.flags|=SegmentAttributes::isArea;
+        relation.roles[i].nodes.pop_back();
+      }
+
       // We have some marker nodes like "admin_centre", which we want to skip
       if (relation.roles[i].nodes.size()>1) {
         roles.push_back(relation.roles[i]);
@@ -707,17 +715,21 @@ namespace osmscout {
                                       parameter.GetWayDataCacheSize(),
                                       parameter.GetWayIndexCacheSize());
 
-    if (!nodeDataFile.Open(parameter.GetDestinationDirectory())) {
+    if (!nodeDataFile.Open(parameter.GetDestinationDirectory(),
+                           parameter.GetRawNodeIndexMemoryMaped(),
+                           parameter.GetRawNodeDataMemoryMaped())) {
       std::cerr << "Cannot open raw nodes data files!" << std::endl;
       return false;
     }
 
-    if (!wayDataFile.Open(parameter.GetDestinationDirectory())) {
+    if (!wayDataFile.Open(parameter.GetDestinationDirectory(),
+                          parameter.GetRawWayIndexMemoryMaped(),
+                          parameter.GetRawWayDataMemoryMaped())) {
       std::cerr << "Cannot open raw way data files!" << std::endl;
       return false;
     }
 
-    if (!relDataFile.Open(parameter.GetDestinationDirectory())) {
+    if (!relDataFile.Open(parameter.GetDestinationDirectory(),true,true)) {
       std::cerr << "Cannot open raw relation data files!" << std::endl;
       return false;
     }
@@ -789,7 +801,7 @@ namespace osmscout {
       }
 
       Relation              rel;
-      std::set<std::string> roles;
+      //std::set<std::string> roles;
       bool                  error=false;
       bool                  isArea=false;
       bool                  reverseNodes;
@@ -802,7 +814,7 @@ namespace osmscout {
       // Check, if the type should be handled as multipolygon
       isArea=typeConfig.GetTypeInfo(rel.GetType()).GetMultipolygon();
 
-      // Is it possibly explicitely marked  multipolygon
+      // Is it possibly explicitely marked  multipolygon?
       if (!isArea) {
         std::vector<Tag>::iterator tag=rawRel.tags.begin();
         while (tag!=rawRel.tags.end()) {
@@ -828,9 +840,10 @@ namespace osmscout {
         continue;
       }
 
+      /*
       for (size_t i=0; i<rawRel.members.size(); i++) {
         roles.insert(rawRel.members[i].role);
-      }
+      }*/
 
       rel.roles.reserve(rawRel.members.size());
 
@@ -849,6 +862,7 @@ namespace osmscout {
           break;
         }
       }
+
 
       if (error) {
         continue;
@@ -1016,7 +1030,10 @@ namespace osmscout {
     writer.SetPos(0);
     writer.Write(writtenRelationCount);
 
-    if (!(scanner.Close() && writer.Close() && wayDataFile.Close() && nodeDataFile.Close())) {
+    if (!(scanner.Close() &&
+          writer.Close() &&
+          wayDataFile.Close() &&
+          nodeDataFile.Close())) {
       return false;
     }
 
@@ -1024,7 +1041,7 @@ namespace osmscout {
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      "wayblack.dat"))) {
-      progress.Error("Canot create 'wayblack.dat'");
+      progress.Error("Cannot create 'wayblack.dat'");
       return false;
     }
 
