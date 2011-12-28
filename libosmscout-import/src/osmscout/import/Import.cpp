@@ -67,7 +67,7 @@ namespace osmscout {
      rawNodeIndexMemoryMaped(true),
      rawNodeDataMemoryMaped(false),
      rawWayIndexMemoryMaped(true),
-     rawWayDataMemoryMaped(true),
+     rawWayDataMemoryMaped(false),
      rawWayBlockSize(500000),
      nodesLoadSize(10000000),
      nodeIndexIntervalSize(50),
