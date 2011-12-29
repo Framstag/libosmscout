@@ -1,5 +1,6 @@
 nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/private/ImportImportExport.h \
+                        osmscout/private/Math.h \
                         osmscout/ImportFeatures.h \
                         osmscout/import/RawNode.h \
                         osmscout/import/RawRelation.h \
