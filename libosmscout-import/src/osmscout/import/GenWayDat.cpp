@@ -372,7 +372,7 @@ namespace osmscout {
       std::set<Id> candidates;
 
       for (size_t b=0; b<blockCount; b++) {
-        if (hasBeenMerged[b]) {
+        if (hasBeenMerged[b] && !rawWays[b].IsArea()) {
           RawWay& rawWay=rawWays[b];
 
           GetWayMergeCandidates(rawWay,
