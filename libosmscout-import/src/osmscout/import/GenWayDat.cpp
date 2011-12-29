@@ -256,202 +256,292 @@ namespace osmscout {
     return true;
   }
 
-  bool WayDataGenerator::JoinWay(Progress& progress,
-                                 const TypeConfig& typeConfig,
-                                 FileScanner& scanner,
-                                 RawWay& rawWay,
-                                 std::map<Id,std::list<Id> >& endPointWayMap,
-                                 NumericIndex<Id,RawWay>& rawWayIndex,
-                                 std::set<Id> & wayBlacklist,
-                                 size_t& mergeCount)
+  void WayDataGenerator::GetWayMergeCandidates(const RawWay& way,
+                                               const std::map<Id,std::list<Id> >& endPointWayMap,
+                                               const std::set<Id>& wayBlacklist,
+                                               std::set<Id>& candidates)
   {
-    bool merged=true;
+    std::map<Id,std::list<Id> >::const_iterator endPoints;
 
-    while (merged) {
-      std::map<Id,std::list<Id> >::const_iterator endPoints;
-      std::vector<Id>                             candidates;
+    endPoints=endPointWayMap.find(way.GetNodes()[0]);
 
-      endPoints=endPointWayMap.find(rawWay.GetNodes()[0]);
+    if (endPoints!=endPointWayMap.end()) {
+      for (std::list<Id>::const_iterator id=endPoints->second.begin();
+          id!=endPoints->second.end();
+          id++) {
+        if (*id>way.GetId() && wayBlacklist.find(*id)==wayBlacklist.end()) {
+          candidates.insert(*id);
+        }
+      }
+    }
 
-      if (endPoints!=endPointWayMap.end()) {
-        for (std::list<Id>::const_iterator id=endPoints->second.begin();
-            id!=endPoints->second.end();
-            id++) {
-          if (*id>rawWay.GetId()) {
-            candidates.push_back(*id);
-          }
+    endPoints=endPointWayMap.find(way.GetNodes()[way.GetNodeCount()-1]);
+
+    if (endPoints!=endPointWayMap.end()) {
+      for (std::list<Id>::const_iterator id=endPoints->second.begin();
+          id!=endPoints->second.end();
+          id++) {
+        if (*id>way.GetId() && wayBlacklist.find(*id)==wayBlacklist.end()) {
+          candidates.insert(*id);
+        }
+      }
+    }
+  }
+
+  bool WayDataGenerator::LoadWays(FileScanner& scanner,
+                                  NumericIndex<Id,RawWay>& rawWayIndex,
+                                  const std::set<Id>& ids,
+                                  std::map<Id,RawWayRef>& ways)
+  {
+    std::vector<FileOffset> offsets;
+
+    if (!rawWayIndex.GetOffsets(ids,offsets)) {
+      return false;
+    }
+
+    FileOffset oldPos;
+
+    if (!scanner.GetPos(oldPos)){
+      return false;
+    }
+
+    for (size_t i=0; i<offsets.size(); i++) {
+      if (!scanner.SetPos(offsets[i])) {
+        return false;
+      }
+
+      RawWayRef way=new RawWay();
+
+      if (!way->Read(scanner)) {
+        return false;
+      }
+
+      ways[way->GetId()]=way;
+    }
+
+    if (!scanner.SetPos(oldPos)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  bool WayDataGenerator::CompareWays(const RawWay& a,
+                                     const RawWay& b) const
+  {
+    if (a.GetType()!=b.GetType()) {
+      return false;
+    }
+
+    if (a.GetTags().size()!=b.GetTags().size()) {
+      return false;
+    }
+
+    for (size_t t=0; t<b.GetTags().size(); t++) {
+      if (a.GetTags()[t].key!=b.GetTags()[t].key) {
+        return false;
+      }
+
+      if (a.GetTags()[t].value!=b.GetTags()[t].value) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool WayDataGenerator::JoinWays(Progress& progress,
+                                  const TypeConfig& typeConfig,
+                                  FileScanner& scanner,
+                                  std::vector<RawWay>& rawWays,
+                                  size_t blockCount,
+                                  std::map<Id,std::list<Id> >& endPointWayMap,
+                                  NumericIndex<Id,RawWay>& rawWayIndex,
+                                  std::set<Id> & wayBlacklist,
+                                  size_t& mergeCount)
+  {
+    std::vector<bool> hasBeenMerged(blockCount, true);
+    bool              somethingHasMerged=true;
+
+    while (somethingHasMerged) {
+      somethingHasMerged=false;
+
+      // Collect all candidate ids for all ways, the still has potential merges
+      // to be verified
+
+      std::set<Id> candidates;
+
+      for (size_t b=0; b<blockCount; b++) {
+        if (hasBeenMerged[b]) {
+          RawWay& rawWay=rawWays[b];
+
+          GetWayMergeCandidates(rawWay,
+                                endPointWayMap,
+                                wayBlacklist,
+                                candidates);
         }
       }
 
-      endPoints=endPointWayMap.find(rawWay.GetNodes()[rawWay.GetNodeCount()-1]);
 
-      if (endPoints!=endPointWayMap.end()) {
-        for (std::list<Id>::const_iterator id=endPoints->second.begin();
-            id!=endPoints->second.end();
-            id++) {
-          if (*id>rawWay.GetId()) {
-            candidates.push_back(*id);
-          }
-        }
+      if (candidates.empty()) {
+        continue;
       }
 
-      if (!candidates.empty()) {
-        std::vector<FileOffset> offsets;
+      // Now load all candidate ways by id as calculated above
 
-        if (!rawWayIndex.GetOffsets(candidates,offsets)) {
-          return false;
-        }
+      std::map<Id,RawWayRef> ways;
 
-        std::vector<RawWay> ways;
-        FileOffset          oldPos;
+      progress.Info("Loading candidates");
+      if (!LoadWays(scanner,
+                    rawWayIndex,
+                    candidates,
+                    ways)) {
+        return false;
+      }
 
-        ways.resize(offsets.size());
+      progress.Info("Merging ways");
+      for (size_t b=0; b<blockCount; b++) {
+        if (hasBeenMerged[b]) {
+          RawWay& rawWay=rawWays[b];
+          int     reverseOrigNodes=-1;
 
-        if (!scanner.GetPos(oldPos)){
-          return false;
-        }
+          hasBeenMerged[b]=false;
 
-        for (size_t i=0; i<offsets.size(); i++) {
-          if (!scanner.SetPos(offsets[i])) {
-            return false;
-          }
-
-          if (!ways[i].Read(scanner)) {
-            return false;
-          }
-        }
-
-        if (!scanner.SetPos(oldPos)) {
-          return false;
-        }
-
-        int reverseOrigNodes=-1;
-
-        for (size_t t=0; t<rawWay.GetTags().size(); t++) {
-          if (rawWay.GetTags()[t].key==typeConfig.tagOneway &&
-              rawWay.GetTags()[t].value=="-1") {
-            reverseOrigNodes=t;
-            break;
-          }
-        }
-
-        for (size_t w=0; w<ways.size(); w++) {
-          if (rawWay.GetType()!=ways[w].GetType()) {
+          // The way has already been merged (within this block)
+          if (wayBlacklist.find(rawWay.GetId())!=wayBlacklist.end()) {
             continue;
           }
 
-          if (rawWay.GetTags().size()!=ways[w].GetTags().size()) {
-            continue;
-          }
-
-          for (size_t t=0; t<ways[w].GetTags().size(); t++) {
-            if (rawWay.GetTags()[t].key!=ways[w].GetTags()[t].key) {
-              continue;
-            }
-
-            if (rawWay.GetTags()[t].value!=ways[w].GetTags()[t].value) {
-              continue;
-            }
-          }
-/*
-          progress.Info("Joining way with id "+
-                         NumberToString(rawWay.GetId()) +
-                         " with way with id "+
-                         NumberToString(ways[w].GetId()));*/
-
-          std::vector<Id> nodes(rawWay.GetNodes());
-
-          if (reverseOrigNodes!=-1) {
-            std::vector<Tag> tags(rawWay.GetTags());
-            std::vector<Tag>::iterator t=tags.begin();
-
-            t+=reverseOrigNodes;
-
-            tags.erase(t);
-
-            rawWay.SetTags(tags);
-
-            reverseOrigNodes=-1;
-
-            std::reverse(nodes.begin(),nodes.end());
-          }
-
-          int reverseMatchNodes=-1;
-
-          for (size_t t=0; t<ways[w].GetTags().size(); t++) {
-            if (ways[w].GetTags()[t].key==typeConfig.tagOneway &&
-                ways[w].GetTags()[t].value=="-1") {
-              reverseMatchNodes=t;
+          // Check, if we have to reverse the nodes
+          for (size_t t=0; t<rawWay.GetTags().size(); t++) {
+            if (rawWay.GetTags()[t].key==typeConfig.tagOneway &&
+                rawWay.GetTags()[t].value=="-1") {
+              reverseOrigNodes=t;
               break;
             }
           }
 
-          if (reverseMatchNodes!=-1) {
-            std::vector<Id> nodes(ways[w].GetNodes());
-            std::vector<Tag> tags(ways[w].GetTags());
-            std::vector<Tag>::iterator t=tags.begin();
+          std::set<Id> candidates;
 
-            t+=reverseMatchNodes;
+          GetWayMergeCandidates(rawWay,
+                                endPointWayMap,
+                                wayBlacklist,
+                                candidates);
 
-            tags.erase(t);
+          for (std::set<Id>::const_iterator id=candidates.begin();
+              id!=candidates.end();
+              ++id) {
+            RawWayRef candidate=ways.find(*id)->second;
 
-            ways[w].SetTags(tags);
-
-            std::reverse(nodes.begin(),nodes.end());
-            ways[w].SetNodes(nodes);
-          }
-
-          wayBlacklist.insert(ways[w].GetId());
-
-          if (nodes.front()==ways[w].GetNodes().front()) {
-            nodes.reserve(nodes.size()+
-                          ways[w].GetNodeCount()-1);
-
-            for (size_t i=1; i<ways[w].GetNodeCount(); i++) {
-              nodes.insert(nodes.begin(),ways[w].GetNodeId(i));
+            // We do not merge against ways, that are already on the blacklist
+            // because of previous merges
+            if(wayBlacklist.find(*id)!=wayBlacklist.end()) {
+              continue;
             }
-          }
-          else if (nodes.front()==ways[w].GetNodes().back()) {
-            nodes.reserve(nodes.size()+
-                          ways[w].GetNodeCount()-1);
 
-            for (size_t i=0; i<ways[w].GetNodeCount()-1; i++) {
-              nodes.insert(nodes.begin(),ways[w].GetNodeId(ways[w].GetNodeCount()-1-i));
+            if (!CompareWays(rawWay,*candidate)) {
+              continue;
             }
-          }
-          else if (nodes.back()==ways[w].GetNodes().front()) {
-            nodes.reserve(nodes.size()+
-                          ways[w].GetNodeCount()-1);
 
-            for (size_t i=1; i<ways[w].GetNodeCount(); i++) {
-              nodes.push_back(ways[w].GetNodeId(i));
+            hasBeenMerged[b]=true;
+            somethingHasMerged=true;
+
+            /*
+            progress.Info("Joining way with id "+
+                           NumberToString(rawWay.GetId()) +
+                           " with way with id "+
+                           NumberToString(candidate->GetId()));*/
+
+            std::vector<Id> nodes(rawWay.GetNodes());
+
+            if (reverseOrigNodes!=-1) {
+              std::vector<Tag> tags(rawWay.GetTags());
+              std::vector<Tag>::iterator t=tags.begin();
+
+              t+=reverseOrigNodes;
+
+              tags.erase(t);
+
+              rawWay.SetTags(tags);
+
+              reverseOrigNodes=-1;
+
+              std::reverse(nodes.begin(),nodes.end());
             }
-          }
-          else if (nodes.back()==ways[w].GetNodes().back()) {
-            nodes.reserve(nodes.size()+
-                          ways[w].GetNodeCount()-1);
 
-            for (size_t i=0; i<ways[w].GetNodeCount()-1; i++) {
-              nodes.push_back(ways[w].GetNodeId(ways[w].GetNodeCount()-1-i));
+            int reverseMatchNodes=-1;
+
+            for (size_t t=0; t<candidate->GetTags().size(); t++) {
+              if (candidate->GetTags()[t].key==typeConfig.tagOneway &&
+                  candidate->GetTags()[t].value=="-1") {
+                reverseMatchNodes=t;
+                break;
+              }
             }
+
+            if (reverseMatchNodes!=-1) {
+              std::vector<Id> nodes(candidate->GetNodes());
+              std::vector<Tag> tags(candidate->GetTags());
+              std::vector<Tag>::iterator t=tags.begin();
+
+              t+=reverseMatchNodes;
+
+              tags.erase(t);
+
+              candidate->SetTags(tags);
+
+              std::reverse(nodes.begin(),nodes.end());
+              candidate->SetNodes(nodes);
+            }
+
+            wayBlacklist.insert(candidate->GetId());
+
+            if (nodes.front()==candidate->GetNodes().front()) {
+              nodes.reserve(nodes.size()+
+                  candidate->GetNodeCount()-1);
+
+              for (size_t i=1; i<candidate->GetNodeCount(); i++) {
+                nodes.insert(nodes.begin(),candidate->GetNodeId(i));
+              }
+            }
+            else if (nodes.front()==candidate->GetNodes().back()) {
+              nodes.reserve(nodes.size()+
+                  candidate->GetNodeCount()-1);
+
+              for (size_t i=0; i<candidate->GetNodeCount()-1; i++) {
+                nodes.insert(nodes.begin(),candidate->GetNodeId(candidate->GetNodeCount()-1-i));
+              }
+            }
+            else if (nodes.back()==candidate->GetNodes().front()) {
+              nodes.reserve(nodes.size()+
+                  candidate->GetNodeCount()-1);
+
+              for (size_t i=1; i<candidate->GetNodeCount(); i++) {
+                nodes.push_back(candidate->GetNodeId(i));
+              }
+            }
+            else if (nodes.back()==candidate->GetNodes().back()) {
+              nodes.reserve(nodes.size()+
+                  candidate->GetNodeCount()-1);
+
+              for (size_t i=0; i<candidate->GetNodeCount()-1; i++) {
+                nodes.push_back(candidate->GetNodeId(candidate->GetNodeCount()-1-i));
+              }
+            }
+
+            rawWay.SetNodes(nodes);
+
+            mergeCount++;
+
+            /*for (size_t n=0; n<rawWay.GetNodeCount(); n++) {
+              std::cout << rawWay.GetNodeId(n) << " ";
+            }
+            std::cout << std::endl;*/
+
+            break;
           }
-
-          rawWay.SetNodes(nodes);
-
-          mergeCount++;
-
-          /*for (size_t n=0; n<rawWay.GetNodeCount(); n++) {
-            std::cout << rawWay.GetNodeId(n) << " ";
-          }
-          std::cout << std::endl;*/
-
-          merged=true;
-
-          break;
         }
       }
-
-      merged=false;
     }
 
     return true;
@@ -586,7 +676,11 @@ namespace osmscout {
 
         currentWay++;
 
-        if (wayBlacklist.find(block[blockCount].GetId())!=wayBlacklist.end()) {
+        std::set<Id>::iterator blacklistEntry=wayBlacklist.find(block[blockCount].GetId());
+
+        if (blacklistEntry!=wayBlacklist.end()) {
+          wayBlacklist.erase(blacklistEntry);
+
           continue;
         }
 
@@ -612,18 +706,17 @@ namespace osmscout {
 
       std::set<Id> nodeIds;
 
-      for (size_t w=0; w<blockCount; w++) {
-        // Join with potential joined ways
-        if (!JoinWay(progress,
-                     typeConfig,
-                     scanner,
-                     block[w],
-                     endPointWayMap,
-                     rawWayIndex,
-                     wayBlacklist,
-                     mergeCount)) {
-          return false;
-        }
+      // Join with potential joined ways
+      if (!JoinWays(progress,
+                   typeConfig,
+                   scanner,
+                   block,
+                   blockCount,
+                   endPointWayMap,
+                   rawWayIndex,
+                   wayBlacklist,
+                   mergeCount)) {
+        return false;
       }
 
       for (size_t w=0; w<blockCount; w++) {

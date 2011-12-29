@@ -46,14 +46,29 @@ namespace osmscout {
                                      const TypeConfig& typeConfig,
                                      const std::map<Id,std::list<Id> >& endPointWayMap,
                                      std::set<Id>& endPointAreaSet);
-    bool JoinWay(Progress& progress,
-                 const TypeConfig& typeConfig,
-                 FileScanner& scanner,
-                 RawWay& rawWay,
-                 std::map<Id,std::list<Id> >& endPointWayMap,
-                 NumericIndex<Id,RawWay>& rawWayIndex,
-                 std::set<Id>& wayBlacklist,
-                 size_t& mergeCount);
+
+    void GetWayMergeCandidates(const RawWay& way,
+                               const std::map<Id,std::list<Id> >& endPointWayMap,
+                               const std::set<Id>& wayBlacklist,
+                               std::set<Id>& candidates);
+
+    bool LoadWays(FileScanner& scanner,
+                  NumericIndex<Id,RawWay>& rawWayIndex,
+                  const std::set<Id>& ids,
+                  std::map<Id,RawWayRef>& ways);
+
+    bool CompareWays(const RawWay& a,
+                     const RawWay& b) const;
+
+    bool JoinWays(Progress& progress,
+                  const TypeConfig& typeConfig,
+                  FileScanner& scanner,
+                  std::vector<RawWay>& rawWays,
+                  size_t blockCount,
+                  std::map<Id,std::list<Id> >& endPointWayMap,
+                  NumericIndex<Id,RawWay>& rawWayIndex,
+                  std::set<Id>& wayBlacklist,
+                  size_t& mergeCount);
 
   public:
     std::string GetDescription() const;

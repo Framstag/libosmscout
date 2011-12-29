@@ -99,6 +99,7 @@ namespace osmscout {
     bool Open(const std::string& path, bool memoryMaped);
     bool Close();
 
+    bool GetOffsets(const std::set<N>& ids, std::vector<FileOffset>& offsets) const;
     bool GetOffsets(const std::vector<N>& ids, std::vector<FileOffset>& offsets) const;
 
     void DumpStatistics() const;
@@ -278,6 +279,59 @@ namespace osmscout {
   {
     if (scanner.IsOpen()) {
       return scanner.Close();
+    }
+
+    return true;
+  }
+
+  template <class N, class T>
+  bool NumericIndex<N,T>::GetOffsets(const std::set<N>& ids,
+                                     std::vector<FileOffset>& offsets) const
+  {
+    offsets.reserve(ids.size());
+    offsets.clear();
+
+    for (typename std::set<N>::const_iterator id=ids.begin();
+         id!=ids.end();
+         ++id) {
+      size_t r=GetPageIndex(root,*id);
+
+      if (!root->IndexIsValid(r)) {
+        //std::cerr << "Id " << *id << " not found in root index!" << std::endl;
+        continue;
+      }
+
+      Id         startId=root->entries[r].startId;
+      FileOffset offset=root->entries[r].fileOffset;
+      bool       error=false;
+
+      for (size_t level=0; level<=levels-2 && !error; level++) {
+        typename PageCache::CacheRef cacheRef;
+
+        if (!leafs[level].GetEntry(startId,cacheRef)) {
+          typename PageCache::CacheEntry cacheEntry(startId);
+
+          cacheRef=leafs[level].SetEntry(cacheEntry);
+
+          ReadPage(offset,cacheRef->value);
+        }
+
+        size_t i=GetPageIndex(cacheRef->value,*id);
+
+        if (!cacheRef->value->IndexIsValid(i)) {
+          //std::cerr << "Id " << *id << " not found in index level " << level+2 << "!" << std::endl;
+          error=true;
+          continue;
+        }
+
+        startId=cacheRef->value->entries[i].startId;
+        offset=cacheRef->value->entries[i].fileOffset;
+      }
+
+      if (!error &&
+          startId==*id) {
+        offsets.push_back(offset);
+      }
     }
 
     return true;
