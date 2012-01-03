@@ -646,7 +646,7 @@ namespace osmscout {
         else if (role->nodes.front().id==cand->nodes.back().id) {
           role->nodes.reserve(role->nodes.size()+
                               cand->nodes.size()-1);
-          for (size_t i=0; i<cand->nodes.size()-1; i++) {
+          for (size_t i=1; i<cand->nodes.size(); i++) {
             role->nodes.insert(role->nodes.begin(),cand->nodes[cand->nodes.size()-1-i]);
           }
           merged=true;
@@ -664,7 +664,7 @@ namespace osmscout {
         else if (role->nodes.back().id==cand->nodes.back().id) {
           role->nodes.reserve(role->nodes.size()+
                               cand->nodes.size()-1);
-          for (size_t i=0; i<cand->nodes.size()-1; i++) {
+          for (size_t i=1; i<cand->nodes.size(); i++) {
             role->nodes.push_back(cand->nodes[cand->nodes.size()-1-i]);
           }
           merged=true;

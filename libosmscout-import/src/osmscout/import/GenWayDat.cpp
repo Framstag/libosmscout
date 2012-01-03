@@ -508,7 +508,7 @@ namespace osmscout {
               nodes.reserve(nodes.size()+
                   candidate->GetNodeCount()-1);
 
-              for (size_t i=0; i<candidate->GetNodeCount()-1; i++) {
+              for (size_t i=1; i<candidate->GetNodeCount(); i++) {
                 nodes.insert(nodes.begin(),candidate->GetNodeId(candidate->GetNodeCount()-1-i));
               }
             }
@@ -524,7 +524,7 @@ namespace osmscout {
               nodes.reserve(nodes.size()+
                   candidate->GetNodeCount()-1);
 
-              for (size_t i=0; i<candidate->GetNodeCount()-1; i++) {
+              for (size_t i=1; i<candidate->GetNodeCount(); i++) {
                 nodes.push_back(candidate->GetNodeId(candidate->GetNodeCount()-1-i));
               }
             }
