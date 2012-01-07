@@ -120,7 +120,6 @@ namespace osmscout {
       return false;
     }
 
-
     writer.WriteNumber(pageSize);       // Size of one index page in bytes
     writer.WriteNumber(dataCount);      // Number of entries in data file
 
@@ -264,22 +263,22 @@ namespace osmscout {
     // If we have data to index, we should have at least one root level index page
     if (dataCount>0) {
       assert(pageStarts.size()==1);
+
+      FileOffset indexPageCountsPos;
+
+      writer.GetPos(indexPageCountsPos);
+
+      writer.SetPos(levelsOffset);
+      writer.Write((uint32_t)indexPageCounts.size());
+
+      writer.SetPos(lastLevelPageStartOffset);
+      writer.Write(pageStarts[0]);
+
+      writer.SetPos(indexPageCountsOffset);
+      writer.Write(indexPageCountsPos);
+
+      writer.SetPos(indexPageCountsPos);
     }
-
-    FileOffset indexPageCountsPos;
-
-    writer.GetPos(indexPageCountsPos);
-
-    writer.SetPos(levelsOffset);
-    writer.Write((uint32_t)indexPageCounts.size());
-
-    writer.SetPos(lastLevelPageStartOffset);
-    writer.Write(pageStarts[0]);
-
-    writer.SetPos(indexPageCountsOffset);
-    writer.Write(indexPageCountsPos);
-
-    writer.SetPos(indexPageCountsPos);
 
     progress.Info(std::string("Index for ")+NumberToString(dataCount)+" data elements will be stored in "+NumberToString(indexPageCounts.size())+ " levels");
     for (size_t i=0; i<indexPageCounts.size(); i++) {
