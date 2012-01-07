@@ -73,6 +73,7 @@ PKG_CHECK_MODULES(XML2,
                   [libxml-2.0 >= 2.6.0],
                   [AC_SUBST(XML2_CFLAGS)
                    AC_SUBST(XML2_LIBS)
+                   AC_DEFINE(HAVE_LIB_XML,1,[libxml detected])
                    LIB_XML_FOUND=true],
                    [LIB_XML_FOUND=false])
 
