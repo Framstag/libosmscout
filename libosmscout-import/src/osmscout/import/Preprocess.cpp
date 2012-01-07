@@ -21,7 +21,9 @@
 
 #include <osmscout/private/Config.h>
 
-#include <osmscout/import/PreprocessOSM.h>
+#if defined(HAVE_LIB_XML)
+  #include <osmscout/import/PreprocessOSM.h>
+#endif
 
 #if defined(HAVE_LIB_PROTOBUF)
   #include <osmscout/import/PreprocessPBF.h>
