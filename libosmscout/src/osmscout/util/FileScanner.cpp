@@ -208,7 +208,7 @@ namespace osmscout {
   bool FileScanner::IsEOF() const
   {
     if (file==NULL || hasError) {
-      return false;
+      return true;
     }
 
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
