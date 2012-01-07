@@ -435,7 +435,7 @@ namespace osmscout {
          ++way) {
       Id lastId=0;
 
-      writer.Write(way->first);               // Way name
+      writer.Write(way->first);                         // Way name
       writer.WriteNumber((uint32_t)way->second.size()); // Number of ids
 
       for (std::list<Id>::const_iterator id=way->second.begin();
