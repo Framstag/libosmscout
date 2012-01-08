@@ -39,9 +39,11 @@ namespace osmscout {
   {
     if (costFactors.empty()) {
       minCostFactor=costFactor;
+      maxCostFactor=costFactor;
     }
     else {
       minCostFactor=std::min(minCostFactor,costFactor);
+      maxCostFactor=std::max(maxCostFactor,costFactor);
     }
 
     if (type>=costFactors.size()) {

@@ -66,6 +66,7 @@ static Lum::Def::AppInfo info;
 
 static osmscout::StyleConfig *styleConfig;
 static osmscout::Database    *database=NULL;
+static osmscout::Router      *router=NULL;
 static Lum::Model::ActionRef jobFinishedAction;
 static DatabaseTask          *databaseTask=NULL;
 
@@ -688,8 +689,11 @@ public:
 #endif
 
     osmscout::DatabaseParameter databaseParameter;
+    osmscout::RouterParameter   routerParameter;
 
     database=new osmscout::Database(databaseParameter);
+    router=new osmscout::Router(routerParameter);
+
     jobFinishedAction=new Lum::Model::Action();
 
     info.SetProgram(Lum::Base::StringToWString(PACKAGE_NAME));
@@ -705,6 +709,7 @@ public:
     }
 
     databaseTask=new DatabaseTask(database,
+                                  router,
                                   jobFinishedAction);
 
     databaseTask->Start();
@@ -724,9 +729,16 @@ public:
 
     Lum::GUIApplication<MainDialog>::Cleanup();
 
+    if (router->IsOpen()) {
+      router->Close();
+    }
+    delete router;
+    router=NULL;
+
     if (database->IsOpen()) {
       database->Close();
     }
+
     delete database;
     database=NULL;
   }

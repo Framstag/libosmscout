@@ -20,7 +20,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include <osmscout/Database.h>
+#include <osmscout/Router.h>
 
 /*
   Example for the nordrhein-westfalen.osm:
@@ -62,10 +62,10 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  osmscout::DatabaseParameter databaseParameter;
-  osmscout::Database          database(databaseParameter);
+  osmscout::RouterParameter routerParameter;
+  osmscout::Router          router(routerParameter);
 
-  if (!database.Open(map.c_str())) {
+  if (!router.Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
 
     return 1;
@@ -74,15 +74,15 @@ int main(int argc, char* argv[])
   osmscout::RouteData        data;
   osmscout::RouteDescription description;
 
-  if (!database.CalculateRoute(startWayId,startNodeId,
-                               targetWayId,targetNodeId,
-                               data)) {
+  if (!router.CalculateRoute(startWayId,startNodeId,
+                             targetWayId,targetNodeId,
+                             data)) {
     std::cerr << "There was an error while calculating the route!" << std::endl;
-    database.Close();
+    router.Close();
     return 1;
   }
 
-  database.TransformRouteDataToRouteDescription(data,description);
+  router.TransformRouteDataToRouteDescription(data,description);
 
   for (std::list<osmscout::RouteDescription::RouteStep>::const_iterator step=description.Steps().begin();
        step!=description.Steps().end();
@@ -183,7 +183,7 @@ int main(int argc, char* argv[])
   }
 
 
-  database.Close();
+  router.Close();
 
   return 0;
 }

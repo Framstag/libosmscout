@@ -178,20 +178,11 @@ namespace osmscout {
 
     OptimizeLowZoom       optimizeLowZoom;  //! Optimized data for low zoom situations
 
-    mutable FileScanner   nodeUseScanner;   //! File stream to the nodeuse.idx file
-
     TypeConfig            *typeConfig;      //! Type config for the currently opened map
 
     std::string           (*hashFunction) (std::string);
 
   private:
-    /*
-    size_t GetMaximumPriority(const StyleConfig& styleConfig,
-                              double minlon, double minlat,
-                              double maxlon, double maxlat,
-                              double magnification,
-                              size_t maxNodes) const;*/
-
     bool GetNodes(const std::vector<FileOffset>& offsets,
                   std::vector<NodeRef>& nodes) const;
 
@@ -206,23 +197,6 @@ namespace osmscout {
 
     bool GetRelations(const std::list<FileOffset>& offsets,
                       std::vector<RelationRef>& relations) const;
-
-    /*
-    bool GetNodes(const StyleConfig& styleConfig,
-                  double lonMin, double latMin,
-                  double lonMax, double latMax,
-                  double magnification,
-                  size_t maxPriority,
-                  std::vector<Node>& nodes) const;*/
-
-    bool GetJoints(NodeUseIndex& nodeUseIndex,
-                   NodeUseCache& nodeUseCache,
-                   Id id,
-                   std::set<Id>& wayIds) const;
-    bool GetJoints(NodeUseIndex& nodeUseIndex,
-                   NodeUseCache& nodeUseCache,
-                   const std::set<Id>& ids,
-                   std::set<Id>& wayIds) const;
 
   public:
     Database(const DatabaseParameter& parameter);
@@ -293,15 +267,6 @@ namespace osmscout {
                               size_t limit,
                               bool& limitReached,
                               bool startWith) const;
-
-    bool CalculateRoute(Id startWayId, Id startNodeId,
-                        Id targetWayId, Id targetNodeId,
-                        RouteData& route);
-
-    bool TransformRouteDataToRouteDescription(const RouteData& data,
-                                              RouteDescription& description);
-    bool TransformRouteDataToWay(const RouteData& data,
-                                 Way& way);
 
     void DumpStatistics();
   };

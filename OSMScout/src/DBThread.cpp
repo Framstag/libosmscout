@@ -32,6 +32,7 @@ DBThread dbThread;
 
 DBThread::DBThread()
  : database(databaseParameter),
+   router(routerParameter),
    styleConfig(NULL),
    currentPixmap(NULL)
 #if defined(HAVE_LIB_QTOPENGL)
@@ -64,7 +65,7 @@ void DBThread::FreeMaps()
 
 void DBThread::run()
 {
-  if (database.Open("../TravelJinni")) {
+  if (database.Open("../TravelJinni") && router.Open("../TravelJinni")) {
     if (database.GetTypeConfig()!=NULL) {
       styleConfig=new osmscout::StyleConfig(database.GetTypeConfig());
 
@@ -102,6 +103,10 @@ void DBThread::run()
   exec();
 
   FreeMaps();
+
+  if (router.IsOpen()) {
+    router.Close();
+  }
 
   if (database.IsOpen()) {
     database.Close();
@@ -488,11 +493,11 @@ bool DBThread::CalculateRoute(osmscout::Id startWayId,
 {
   QMutexLocker locker(&mutex);
 
-  return database.CalculateRoute(startWayId,
-                                 startNodeId,
-                                 targetWayId,
-                                 targetNodeId,
-                                 route);
+  return router.CalculateRoute(startWayId,
+                               startNodeId,
+                               targetWayId,
+                               targetNodeId,
+                               route);
 }
 
 bool DBThread::TransformRouteDataToRouteDescription(const osmscout::RouteData& data,
@@ -500,7 +505,7 @@ bool DBThread::TransformRouteDataToRouteDescription(const osmscout::RouteData& d
 {
   QMutexLocker locker(&mutex);
 
-  return database.TransformRouteDataToRouteDescription(data,description);
+  return router.TransformRouteDataToRouteDescription(data,description);
 }
 
 bool DBThread::TransformRouteDataToWay(const osmscout::RouteData& data,
@@ -508,7 +513,7 @@ bool DBThread::TransformRouteDataToWay(const osmscout::RouteData& data,
 {
   QMutexLocker locker(&mutex);
 
-  return database.TransformRouteDataToWay(data,way);
+  return router.TransformRouteDataToWay(data,way);
 }
 
 

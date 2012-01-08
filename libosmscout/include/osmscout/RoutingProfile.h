@@ -32,6 +32,7 @@ namespace osmscout {
   private:
     std::vector<double> costFactors;
     double              minCostFactor;
+    double              maxCostFactor;
     double              turnCostFactor;
 
   public:
@@ -59,6 +60,11 @@ namespace osmscout {
     inline double GetMinCostFactor() const
     {
       return minCostFactor;
+    }
+
+    inline double GetMaxCostFactor() const
+    {
+      return maxCostFactor;
     }
 
     inline double GetTurnCostFactor() const

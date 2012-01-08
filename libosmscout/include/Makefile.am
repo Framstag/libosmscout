@@ -51,4 +51,5 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/WayIndex.h \
                         osmscout/Route.h \
                         osmscout/RoutingProfile.h \
-                        osmscout/Database.h
+                        osmscout/Database.h \
+                        osmscout/Router.h

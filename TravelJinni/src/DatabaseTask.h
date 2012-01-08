@@ -31,6 +31,7 @@
 #include <Lum/OS/Thread.h>
 
 #include <osmscout/Database.h>
+#include <osmscout/Router.h>
 #include <osmscout/StyleConfig.h>
 #include <osmscout/TypeConfig.h>
 
@@ -49,6 +50,7 @@ class DatabaseTask : public Lum::OS::Thread
 {
 private:
   osmscout::Database        *database;
+  osmscout::Router          *router;
   osmscout::StyleConfig     *styleConfig;
   osmscout::MapData         data;
   Lum::OS::Condition        condition;
@@ -76,6 +78,7 @@ private:
 
 public:
   DatabaseTask(osmscout::Database* database,
+               osmscout::Router* router,
                Lum::Model::Action* jobFinishedAction);
 
   void Run();

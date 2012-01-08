@@ -55,8 +55,10 @@
 #include "Configuration.h"
 
 DatabaseTask::DatabaseTask(osmscout::Database* database,
+                           osmscout::Router* router,
                            Lum::Model::Action* jobFinishedAction)
  : database(database),
+   router(router),
    styleConfig(NULL),
    finish(false),
    newJob(NULL),
@@ -257,20 +259,22 @@ bool DatabaseTask::Open(const std::wstring& path)
 
   p.SetNativeDir(path);
 
-  return database->Open(Lum::Base::WStringToString(p.GetPath()).c_str());
+  return database->Open(Lum::Base::WStringToString(p.GetPath()).c_str()) &&
+         router->Open(Lum::Base::WStringToString(p.GetPath()).c_str());
 }
 
 bool DatabaseTask::IsOpen() const
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
-  return database->IsOpen();
+  return database->IsOpen() && router->IsOpen();
 }
 
 void DatabaseTask::Close()
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
+  router->Close(),
   database->Close();
 }
 
@@ -384,15 +388,15 @@ bool DatabaseTask::CalculateRoute(osmscout::Id startWayId, osmscout::Id startNod
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
-  if (!database->IsOpen()) {
+  if (!router->IsOpen()) {
     return false;
   }
 
-  return database->CalculateRoute(startWayId,
-                                  startNodeId,
-                                  targetWayId,
-                                  targetNodeId,
-                                  route);
+  return router->CalculateRoute(startWayId,
+                                startNodeId,
+                                targetWayId,
+                                targetNodeId,
+                                route);
 }
 
 bool DatabaseTask::TransformRouteDataToRouteDescription(const osmscout::RouteData& data,
@@ -400,11 +404,11 @@ bool DatabaseTask::TransformRouteDataToRouteDescription(const osmscout::RouteDat
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
-  if (!database->IsOpen()) {
+  if (!router->IsOpen()) {
     return false;
   }
 
-  return database->TransformRouteDataToRouteDescription(data,description);
+  return router->TransformRouteDataToRouteDescription(data,description);
 }
 
 bool DatabaseTask::TransformRouteDataToWay(const osmscout::RouteData& data,
@@ -412,11 +416,11 @@ bool DatabaseTask::TransformRouteDataToWay(const osmscout::RouteData& data,
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
-  if (!database->IsOpen()) {
+  if (!router->IsOpen()) {
     return false;
   }
 
-  return database->TransformRouteDataToWay(data,way);
+  return router->TransformRouteDataToWay(data,way);
 }
 
 void DatabaseTask::ClearRoute()

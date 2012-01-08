@@ -71,6 +71,11 @@ namespace osmscout {
     bool Open(const std::string& path, bool memoryMapedIndex, bool memoryMapedData);
     bool Close();
 
+    bool GetOffsets(const std::set<Id>& ids,
+                    std::vector<FileOffset>& offsets) const;
+    bool GetOffsets(const std::vector<Id>& ids,
+                    std::vector<FileOffset>& offsets) const;
+
     bool Get(const std::vector<FileOffset>& offsets,
              std::vector<ValueType>& data) const;
     bool Get(const std::list<FileOffset>& offsets,
@@ -138,6 +143,20 @@ namespace osmscout {
     isOpen=false;
 
     return success;
+  }
+
+  template <class N>
+  bool DataFile<N>::GetOffsets(const std::set<Id>& ids,
+                               std::vector<FileOffset>& offsets) const
+  {
+    return index.GetOffsets(ids,offsets);
+  }
+
+  template <class N>
+  bool DataFile<N>::GetOffsets(const std::vector<Id>& ids,
+                               std::vector<FileOffset>& offsets) const
+  {
+    return index.GetOffsets(ids,offsets);
   }
 
   template <class N>

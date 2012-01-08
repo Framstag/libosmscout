@@ -32,6 +32,8 @@
 #endif
 
 #include <osmscout/Database.h>
+#include <osmscout/Router.h>
+
 #include <osmscout/MapPainterQt.h>
 
 struct RenderMapRequest
@@ -68,28 +70,30 @@ public slots:
   void TriggerMapRendering(const RenderMapRequest& request);
 
 private:
-  mutable QMutex            mutex;
+  mutable QMutex              mutex;
   osmscout::DatabaseParameter databaseParameter;
-  osmscout::Database        database;
-  osmscout::StyleConfig     *styleConfig;
-  osmscout::MapData         data;
-  osmscout::MapPainterQt    painter;
+  osmscout::Database          database;
+  osmscout::RouterParameter   routerParameter;
+  osmscout::Router            router;
+  osmscout::StyleConfig       *styleConfig;
+  osmscout::MapData           data;
+  osmscout::MapPainterQt      painter;
 
-  bool                      finish;
+  bool                        finish;
 
-  QPixmap                   *currentPixmap;
+  QPixmap                     *currentPixmap;
 #if defined(HAVE_LIB_QTOPENGL)
-  QGLPixelBuffer            *currentGLPixmap;
+  QGLPixelBuffer              *currentGLPixmap;
 #endif
-  double                    currentLon,currentLat;
-  double                    currentMagnification;
+  double                      currentLon,currentLat;
+  double                      currentMagnification;
 
-  QPixmap                   *finishedPixmap;
+  QPixmap                     *finishedPixmap;
 #if defined(HAVE_LIB_QTOPENGL)
-  QGLPixelBuffer            *finishedGLPixmap;
+  QGLPixelBuffer              *finishedGLPixmap;
 #endif
-  double                    finishedLon,finishedLat;
-  double                    finishedMagnification;
+  double                      finishedLon,finishedLat;
+  double                      finishedMagnification;
 
 private:
   void FreeMaps();

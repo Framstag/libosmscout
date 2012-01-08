@@ -47,4 +47,5 @@ libosmscout_la_SOURCES= osmscout/util/Cache.cpp \
                         osmscout/WayIndex.cpp \
                         osmscout/Route.cpp \
                         osmscout/RoutingProfile.cpp \
-                        osmscout/Database.cpp
+                        osmscout/Database.cpp \
+                        osmscout/Router.cpp
