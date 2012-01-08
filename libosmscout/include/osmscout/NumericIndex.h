@@ -305,7 +305,7 @@ namespace osmscout {
       FileOffset offset=root->entries[r].fileOffset;
       bool       error=false;
 
-      for (size_t level=0; level<=levels-2 && !error; level++) {
+      for (size_t level=0; level+2<=levels && !error; level++) {
         typename PageCache::CacheRef cacheRef;
 
         if (!leafs[level].GetEntry(startId,cacheRef)) {
