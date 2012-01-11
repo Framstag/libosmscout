@@ -40,20 +40,22 @@ namespace osmscout {
                           Progress& progress,
                           const TypeConfig& typeConfig)
   {
-#if defined(HAVE_LIB_XML)
     if (parameter.GetMapfile().length()>=4 &&
         parameter.GetMapfile().substr(parameter.GetMapfile().length()-4)==".osm")  {
       PreprocessOSM preprocess;
 
+#if defined(HAVE_LIB_XML)
       return preprocess.Import(parameter,progress,typeConfig);
-    }
+#else
+      progress.Error("Support for the OSM file format is not enabled!");
 #endif
+    }
 
-#if defined(HAVE_LIB_PROTOBUF)
     if (parameter.GetMapfile().length()>=4 &&
              parameter.GetMapfile().substr(parameter.GetMapfile().length()-4)==".pbf") {
       PreprocessPBF preprocess;
 
+#if defined(HAVE_LIB_PROTOBUF)
       return preprocess.Import(parameter,progress,typeConfig);
 #else
       progress.Error("Support for the PBF file format is not enabled!");
