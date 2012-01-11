@@ -352,6 +352,9 @@ namespace osmscout {
   }
 
 
+  /**
+   * A node in the routing graph, normally a node as part of a way
+   */
   struct RNode
   {
     Id        id;
@@ -472,7 +475,9 @@ namespace osmscout {
     double                startLon=0.0L,startLat=0.0L;
     WayPtr                targetWay;
     double                targetLon=0.0L,targetLat=0.0L;
+    // Sorted list (smallest cost first) of ways to check (we are using a std::set)
     OpenList              openList;
+    // Map routing nodes by id
     std::map<Id,RNodeRef> openMap;
     std::map<Id,RNode>    closeMap;
     std::set<Id>          loaded;
@@ -593,6 +598,9 @@ namespace osmscout {
 
     std::cout << "OK" << std::endl;
 
+    // Start node, we do not have any cost up to now
+    // The estimated costs for the rest of the way are cost of the the spherical distance (shortest
+    // way) using the fasted way type available.
     RNode node=RNode(startNodeId,
                      startLon,
                      startLat,
@@ -610,13 +618,15 @@ namespace osmscout {
     openList.insert(node);
     openMap[openList.begin()->id]=openList.begin();
 
-    currentWay=startWay;
-
+    // array of follower nodes in the routing graph
     std::vector<RNode> follower;
 
     follower.reserve(1000);
 
+    // As long as the way doe snot change we can cache the list of followers for the current way
     bool cachedFollower=false;
+
+    currentWay=NULL;
 
     do {
       //
@@ -638,13 +648,13 @@ namespace osmscout {
       openMap.erase(current.id);
 
       //
-      // Place all followers on list
+      // Load current way, if not already loaded/cached
       //
 
       follower.clear();
 
-      // Get joint nodes in same way/area
-      if (currentWay->GetId()!=current.ref.id) {
+      // Get joint nodes in same way/area, if the current way changes
+      if (currentWay==NULL || currentWay->GetId()!=current.ref.id) {
         if (!GetWay(waysCache,
                     current.ref.id,
                     currentWay)) {
@@ -654,10 +664,19 @@ namespace osmscout {
         cachedFollower=false;
       }
 
+      // Current way is a way we cannot use for routing, continue with next entry in open list
       if (!profile.CanUse(currentWay->GetType())) {
         continue;
       }
 
+      //
+      // Calculate follower of current node
+      //
+
+      // Get potential follower in the current way
+
+      // If the current way is an area, then all nodes in the area are potential followers if not already
+      // visited
       if (currentWay->IsArea()) {
         for (size_t i=0; i<currentWay->nodes.size(); ++i) {
           if (currentWay->nodes[i].id!=current.id) {
@@ -676,6 +695,8 @@ namespace osmscout {
           }
         }
       }
+      // For ways the node before and after the current node aree potential followers, if not already
+      // visited. For Oneways only the next node in the way is candidate.
       else {
         for (size_t i=0; i<currentWay->nodes.size(); ++i) {
           if (currentWay->nodes[i].id==current.id) {
@@ -735,13 +756,14 @@ namespace osmscout {
         cachedFollower=true;
       }
 
-      // Get joint nodes in joint way/area
+      // Get joint nodes in joint way/area, for ways we need to be able to turn into the new way
 
       for (std::vector<WayPtr>::const_iterator iter=followWays.begin();
            iter!=followWays.end();
            ++iter) {
         const Way* way=*iter;
 
+        // joint way/area is of non-routable type
         if (!profile.CanUse(way->GetType())) {
           continue;
         }
@@ -798,9 +820,13 @@ namespace osmscout {
         }
       }
 
+      //
+      // Calculate costs of follower and put them into the open list
+      //
       for (std::vector<RNode>::iterator iter=follower.begin();
            iter!=follower.end();
            ++iter) {
+        // Calculate cost of moving from the current node to the new node using the current way type
         double currentCost=current.currentCost+
                            profile.GetCostFactor(currentWay->GetType())*
                            GetSphericalDistance(current.lon,
@@ -814,15 +840,20 @@ namespace osmscout {
 
         std::map<Id,RNodeRef>::iterator openEntry=openMap.find(iter->id);
 
+        // Check, if we already have a cheaper path to the new node.If yes, do not put the new path
+        // into the open list
         if (openEntry!=openMap.end() &&
             openEntry->second->currentCost<=currentCost) {
           continue;
         }
 
+        // Estimate costs for the rest of the distance to the target
         double estimateCost=profile.GetMinCostFactor()*
                             GetSphericalDistance(iter->lon,iter->lat,targetLon,targetLat);
         double overallCost=currentCost+estimateCost;
 
+        // If we already have the node in the open list, put the new path is cheaper,
+        // update the existing entry
         if (openEntry!=openMap.end()) {
           iter->prev=current.id;
           iter->currentCost=currentCost;
