@@ -52,7 +52,8 @@ namespace osmscout {
                                const std::set<Id>& wayBlacklist,
                                std::set<Id>& candidates);
 
-    bool LoadWays(FileScanner& scanner,
+    bool LoadWays(Progress& progress,
+                  FileScanner& scanner,
                   NumericIndex<Id,RawWay>& rawWayIndex,
                   const std::set<Id>& ids,
                   std::map<Id,RawWayRef>& ways);

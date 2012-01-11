@@ -288,7 +288,8 @@ namespace osmscout {
     }
   }
 
-  bool WayDataGenerator::LoadWays(FileScanner& scanner,
+  bool WayDataGenerator::LoadWays(Progress& progress,
+                                  FileScanner& scanner,
                                   NumericIndex<Id,RawWay>& rawWayIndex,
                                   const std::set<Id>& ids,
                                   std::map<Id,RawWayRef>& ways)
@@ -302,17 +303,24 @@ namespace osmscout {
     FileOffset oldPos;
 
     if (!scanner.GetPos(oldPos)){
+      progress.Error("Error while getting current file position");
       return false;
     }
 
-    for (size_t i=0; i<offsets.size(); i++) {
-      if (!scanner.SetPos(offsets[i])) {
+    for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
+         offset!=offsets.end();
+         offset++) {
+      if (!scanner.SetPos(*offset)) {
+        progress.Error("Error while moving to way at offset " + NumberToString(*offset));
         return false;
       }
 
       RawWayRef way=new RawWay();
 
-      if (!way->Read(scanner)) {
+      way->Read(scanner);
+
+      if (scanner.HasError()) {
+        progress.Error("Error while loading way at offset " + NumberToString(*offset));
         return false;
       }
 
@@ -320,6 +328,7 @@ namespace osmscout {
     }
 
     if (!scanner.SetPos(oldPos)) {
+      progress.Error("Error while resetting current file position");
       return false;
     }
 
@@ -366,10 +375,10 @@ namespace osmscout {
     while (somethingHasMerged) {
       somethingHasMerged=false;
 
-      // Collect all candidate ids for all ways, the still has potential merges
+      // Collect all candidate ids for all ways, that still have potential merges
       // to be verified
 
-      std::set<Id> candidates;
+      std::set<Id> allCandidates;
 
       for (size_t b=0; b<blockCount; b++) {
         if (hasBeenMerged[b] && !rawWays[b].IsArea()) {
@@ -378,12 +387,12 @@ namespace osmscout {
           GetWayMergeCandidates(rawWay,
                                 endPointWayMap,
                                 wayBlacklist,
-                                candidates);
+                                allCandidates);
         }
       }
 
 
-      if (candidates.empty()) {
+      if (allCandidates.empty()) {
         continue;
       }
 
@@ -391,17 +400,20 @@ namespace osmscout {
 
       std::map<Id,RawWayRef> ways;
 
-      progress.Info("Loading candidates");
-      if (!LoadWays(scanner,
+      progress.Info("Loading " + NumberToString(allCandidates.size())+ " candidate(s)");
+      if (!LoadWays(progress,
+                    scanner,
                     rawWayIndex,
-                    candidates,
+                    allCandidates,
                     ways)) {
         return false;
       }
 
+      allCandidates.clear();
+
       progress.Info("Merging ways");
       for (size_t b=0; b<blockCount; b++) {
-        if (hasBeenMerged[b]) {
+        if (hasBeenMerged[b] && !rawWays[b].IsArea()) {
           RawWay& rawWay=rawWays[b];
           int     reverseOrigNodes=-1;
 
@@ -431,7 +443,18 @@ namespace osmscout {
           for (std::set<Id>::const_iterator id=candidates.begin();
               id!=candidates.end();
               ++id) {
-            RawWayRef candidate=ways.find(*id)->second;
+            std::map<Id,RawWayRef>::const_iterator wayEntry;
+
+            wayEntry=ways.find(*id);
+
+            if (wayEntry==ways.end()) {
+              progress.Error("Error while loading merge candidate "+
+                             NumberToString(*id) +
+                             " (Internal error?)");
+              continue;
+            }
+
+            RawWayRef candidate=wayEntry->second;
 
             // We do not merge against ways, that are already on the blacklist
             // because of previous merges
@@ -662,6 +685,7 @@ namespace osmscout {
     while (currentWay<rawWayCount) {
       size_t blockCount=0;
 
+      progress.SetAction("Loading up to " + NumberToString(block.size()) + " ways");
       while (blockCount<block.size() && currentWay<rawWayCount) {
         progress.SetProgress(currentWay,rawWayCount);
 
@@ -706,6 +730,7 @@ namespace osmscout {
 
       std::set<Id> nodeIds;
 
+      progress.SetAction("Merging ways");
       // Join with potential joined ways
       if (!JoinWays(progress,
                    typeConfig,
