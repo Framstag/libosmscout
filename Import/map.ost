@@ -324,6 +324,7 @@ TYPES
   TYPE "routemaster_any" = RELATION ("type"=="route_master") OPTIONS IGNORE
   TYPE "superroute_any" = RELATION ("type"=="superroute") OPTIONS IGNORE
 
+  TYPE "address" = RELATION ("type"=="address") OPTIONS IGNORE
   TYPE "border" = AREA RELATION ("type"=="border") OPTIONS IGNORE
   TYPE "boundary_postal_code" = AREA RELATION ("boundary"=="postal_code") OPTIONS IGNORE
   TYPE "postal_code" = AREA RELATION ("type"=="postal_code") OPTIONS IGNORE
