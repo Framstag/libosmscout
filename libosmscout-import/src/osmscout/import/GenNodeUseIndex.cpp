@@ -272,7 +272,7 @@ namespace osmscout {
       for (std::map<Id, std::set<Id> >::const_iterator id=wayWayMap.lower_bound(i*intervalSize);
            id!=wayWayMap.end() && id->first<(i+1)*intervalSize;
            ++id) {
-        writer.Write(id->first);          // The id of the way/area
+        writer.Write(id->first);                          // The id of the way/area
         writer.WriteNumber((uint32_t)id->second.size());  // The number of references
 
         for (std::set<Id>::const_iterator ref=id->second.begin();

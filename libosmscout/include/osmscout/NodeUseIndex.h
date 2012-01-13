@@ -27,12 +27,17 @@
 
 namespace osmscout {
 
+  /**
+   * Index entry.
+   *
+   * Contains "count" entries. Each entry consists of an way id, a count and "count" ids that are joins
+   * for the given way id.
+   */
   struct NodeUseIndexEntry
   {
-    uint32_t   interval;
-    FileOffset offset;
-    uint32_t   size;
-    uint32_t   count;
+    uint32_t   interval; // Unique identifier
+    FileOffset offset;   // File offset of this entry
+    uint32_t   count;    // Number of entries stored at file offset
   };
 
   class NodeUseIndex
@@ -40,8 +45,8 @@ namespace osmscout {
   private:
     struct IndexEntry
     {
-      FileOffset offset;
-      uint32_t   count;
+      FileOffset offset; // File offset of this entry
+      uint32_t   count;  // Number of way ids stored at file offset
     };
 
   private:
