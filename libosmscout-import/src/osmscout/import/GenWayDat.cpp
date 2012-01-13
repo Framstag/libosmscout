@@ -728,7 +728,9 @@ namespace osmscout {
         blockCount++;
       }
 
-      std::set<Id> nodeIds;
+      std::set<Id>            nodeIds;
+      std::vector<RawNodeRef> nodes;
+      std::map<Id,RawNodeRef> nodesMap;
 
       progress.SetAction("Merging ways");
       // Join with potential joined ways
@@ -744,24 +746,26 @@ namespace osmscout {
         return false;
       }
 
+      progress.SetAction("Writing ways");
+
       for (size_t w=0; w<blockCount; w++) {
         for (size_t n=0; n<block[w].GetNodeCount(); n++) {
           nodeIds.insert(block[w].GetNodeId(n));
         }
       }
 
-      std::vector<RawNodeRef> nodes;
-
       if (!nodeDataFile.Get(nodeIds,nodes)) {
         std::cerr << "Cannot read nodes!" << std::endl;
         continue;
       }
 
-      std::map<Id, RawNodeRef> nodesMap;
-
-      for (size_t n=0; n<nodes.size(); n++) {
-        nodesMap[nodes[n]->GetId()]=nodes[n];
+      for (std::vector<RawNodeRef>::const_iterator node=nodes.begin();
+          node!=nodes.end();
+          node++) {
+        nodesMap[(*node)->GetId()]=*node;
       }
+
+      nodes.clear();
 
       for (size_t w=0; w<blockCount; w++) {
         std::vector<Tag> tags(block[w].GetTags());
