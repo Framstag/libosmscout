@@ -95,13 +95,6 @@ namespace osmscout {
 
         entry++;
 
-        if (entry!=nodeUseIndex.end()) {
-          tmp.size=entry->second.offset-tmp.offset;
-        }
-        else {
-          tmp.size=datSize-tmp.offset;
-        }
-
         entries.push_back(tmp);
       }
     }
