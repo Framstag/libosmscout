@@ -484,6 +484,12 @@ namespace osmscout {
     std::vector<size_t>   costs;
     RoutingProfile        profile;
 
+    size_t                nodesVisitedCount=0;
+    size_t                waysVisitedCount=0;
+    size_t                waysDroppedCount=0;
+    size_t                turnsUsedCount=0;
+    size_t                turnsDroppedCount=0;
+
     std::cout << startWayId << "[" << startNodeId << "] => " << targetWayId << "[" << targetNodeId << "]" << std::endl;
 
     std::cout << "=========== Routing start =============" << std::endl;
@@ -598,6 +604,18 @@ namespace osmscout {
 
     std::cout << "OK" << std::endl;
 
+    // Start way is a way we cannot use for routing
+    if (!profile.CanUse(startWay->GetType())) {
+      std::cout << "Start way of type " << typeConfig->GetTypeInfo(startWay->GetType()).GetName() <<  " is not in the routing profile and thus cannot be routing start!" << std::endl;
+      return false;
+    }
+
+    // Target way is a way we cannot use for routing
+    if (!profile.CanUse(targetWay->GetType())) {
+      std::cout << "Start way of type " << typeConfig->GetTypeInfo(targetWay->GetType()).GetName() <<  " is not in the routing profile and thus cannot be routing start!" << std::endl;
+      return false;
+    }
+
     // Start node, we do not have any cost up to now
     // The estimated costs for the rest of the way are cost of the the spherical distance (shortest
     // way) using the fasted way type available.
@@ -623,7 +641,7 @@ namespace osmscout {
 
     follower.reserve(1000);
 
-    // As long as the way doe snot change we can cache the list of followers for the current way
+    // As long as the way does not change we can cache the list of followers for the current way
     bool cachedFollower=false;
 
     currentWay=NULL;
@@ -634,6 +652,8 @@ namespace osmscout {
       //
 
       RNode current=*openList.begin();
+
+      nodesVisitedCount++;
 /*
       std::cout << "S:   " << openList.size() << std::endl;
       std::cout << "ID:  " << current.id << std::endl;
@@ -661,12 +681,8 @@ namespace osmscout {
           return false;
         }
 
+        waysVisitedCount++;
         cachedFollower=false;
-      }
-
-      // Current way is a way we cannot use for routing, continue with next entry in open list
-      if (!profile.CanUse(currentWay->GetType())) {
-        continue;
       }
 
       //
@@ -765,6 +781,8 @@ namespace osmscout {
 
         // joint way/area is of non-routable type
         if (!profile.CanUse(way->GetType())) {
+          //std::cout << typeConfig->GetTypeInfo(way->GetType()).GetName() << std::endl;
+          waysDroppedCount++;
           continue;
         }
 
@@ -787,31 +805,36 @@ namespace osmscout {
         }
         else {
           for (size_t i=0; i<way->nodes.size(); ++i) {
-            if (way->nodes[i].id==current.id  &&
-                CanBeTurnedInto(*currentWay,way->nodes[i].id,way->GetId())) {
+            if (way->nodes[i].id==current.id) {
+              if (CanBeTurnedInto(*currentWay,way->nodes[i].id,way->GetId())) {
+                turnsUsedCount++;
 
-              if (i>0 && !way->IsOneway()) {
-                std::map<Id,RNode>::iterator closeEntry=closeMap.find(way->nodes[i-1].id);
+                if (i>0 && !way->IsOneway()) {
+                  std::map<Id,RNode>::iterator closeEntry=closeMap.find(way->nodes[i-1].id);
 
-                if (closeEntry==closeMap.end()) {
-                  follower.push_back(RNode(way->nodes[i-1].id,
-                                           way->nodes[i-1].lon,
-                                           way->nodes[i-1].lat,
-                                           ObjectRef(way->GetId(),refWay),
-                                           current.id));
+                  if (closeEntry==closeMap.end()) {
+                    follower.push_back(RNode(way->nodes[i-1].id,
+                                             way->nodes[i-1].lon,
+                                             way->nodes[i-1].lat,
+                                             ObjectRef(way->GetId(),refWay),
+                                             current.id));
+                  }
+                }
+
+                if (i<way->nodes.size()-1) {
+                  std::map<Id,RNode>::iterator closeEntry=closeMap.find(way->nodes[i+1].id);
+
+                  if (closeEntry==closeMap.end()) {
+                    follower.push_back(RNode(way->nodes[i+1].id,
+                                             way->nodes[i+1].lon,
+                                             way->nodes[i+1].lat,
+                                             ObjectRef(way->GetId(),refWay),
+                                             current.id));
+                  }
                 }
               }
-
-              if (i<way->nodes.size()-1) {
-                std::map<Id,RNode>::iterator closeEntry=closeMap.find(way->nodes[i+1].id);
-
-                if (closeEntry==closeMap.end()) {
-                  follower.push_back(RNode(way->nodes[i+1].id,
-                                           way->nodes[i+1].lon,
-                                           way->nodes[i+1].lat,
-                                           ObjectRef(way->GetId(),refWay),
-                                           current.id));
-                }
+              else {
+                turnsDroppedCount++;
               }
 
               break;
@@ -930,7 +953,12 @@ namespace osmscout {
 
         clock.Stop();
 
-        std::cout << "Time: " << clock << std::endl;
+        std::cout << "Time:                " << clock << std::endl;
+        std::cout << "Route nodes visited: " << nodesVisitedCount << std::endl;
+        std::cout << "Ways visited:        " << waysVisitedCount << std::endl;
+        std::cout << "Ways dropped:        " << waysDroppedCount << std::endl;
+        std::cout << "Turns evaluated:     " << turnsUsedCount << std::endl;
+        std::cout << "Turns dropped:       " << turnsDroppedCount << std::endl;
 
         std::cout << "=========== Routing end ==============" << std::endl;
         return true;
@@ -1004,7 +1032,7 @@ namespace osmscout {
         }
       }
 
-      // We skip steps where street doe not have any names
+      // We skip steps where street does not have any names
       if (newWay->GetName().empty() &&
           newWay->GetRefName().empty()) {
         continue;
