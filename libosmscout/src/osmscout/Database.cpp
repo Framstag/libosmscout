@@ -141,7 +141,8 @@ namespace osmscout {
   : maxAreaLevel(4),
     maxNodes(2000),
     maxWays(10000),
-    maxAreas(std::numeric_limits<unsigned long>::max())
+    maxAreas(std::numeric_limits<unsigned long>::max()),
+    useLowZoomOptimization(true)
   {
     // no code
   }
@@ -166,6 +167,16 @@ namespace osmscout {
     this->maxAreas=maxAreas;
   }
 
+  void AreaSearchParameter::SetUseLowZoomOptimization(bool useLowZoomOptimization)
+  {
+    this->useLowZoomOptimization=useLowZoomOptimization;
+  }
+
+  void AreaSearchParameter::SetBreaker(const BreakerRef& breaker)
+  {
+    this->breaker=breaker;
+  }
+
   unsigned long AreaSearchParameter::GetMaximumAreaLevel() const
   {
     return maxAreaLevel;
@@ -184,6 +195,21 @@ namespace osmscout {
   unsigned long AreaSearchParameter::GetMaximumAreas() const
   {
     return maxAreas;
+  }
+
+  bool AreaSearchParameter::GetUseLowZoomOptimization() const
+  {
+    return useLowZoomOptimization;
+  }
+
+  bool AreaSearchParameter::IsAborted() const
+  {
+    if (breaker.Valid()) {
+      return breaker->IsAborted();
+    }
+    else {
+      return false;
+    }
   }
 
   Database::Database(const DatabaseParameter& parameter)
@@ -408,6 +434,10 @@ namespace osmscout {
       return false;
     }
 
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
     std::vector<TypeId>     wayTypes;
     TypeSet                 areaTypes;
     std::vector<TypeId>     nodeTypes;
@@ -424,6 +454,10 @@ namespace osmscout {
     relationWays.clear();
     relationAreas.clear();
 
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
     StopClock nodeIndexTimer;
 
     styleConfig.GetNodeTypesWithMag(magnification,
@@ -439,12 +473,17 @@ namespace osmscout {
 
     nodeIndexTimer.Stop();
 
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
     StopClock wayIndexTimer;
 
     styleConfig.GetWayTypesByPrioWithMag(magnification,
                                          wayTypes);
 
-    if (optimizeLowZoom.HasOptimizations(magnification)) {
+    if (parameter.GetUseLowZoomOptimization() &&
+        optimizeLowZoom.HasOptimizations(magnification)) {
       optimizeLowZoom.GetWays(styleConfig,
                               lonMin,
                               latMin,
@@ -453,6 +492,10 @@ namespace osmscout {
                               parameter.GetMaximumWays(),
                               wayTypes,
                               ways);
+    }
+
+    if (parameter.IsAborted()) {
+      return false;
     }
 
     if (!areaWayIndex.GetOffsets(lonMin,
@@ -464,6 +507,11 @@ namespace osmscout {
                                  wayWayOffsets,
                                  relationWayOffsets)) {
       std::cout << "Error getting ways and relations from area way index!" << std::endl;
+      return false;
+    }
+
+    if (parameter.IsAborted()) {
+      return false;
     }
 
     wayIndexTimer.Stop();
@@ -492,9 +540,14 @@ namespace osmscout {
                                   wayAreaOffsets,
                                   relationAreaOffsets)) {
       std::cout << "Error getting ways and relations from area index!" << std::endl;
+      return false;
     }
 
     areaAreaIndexTimer.Stop();
+
+    if (parameter.IsAborted()) {
+      return false;
+    }
 
     StopClock nodesTimer;
 
@@ -512,6 +565,10 @@ namespace osmscout {
 
     nodesTimer.Stop();
 
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
     StopClock waysTimer;
 
     if (!GetWays(wayWayOffsets,
@@ -527,6 +584,10 @@ namespace osmscout {
 
     waysTimer.Stop();
 
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
     StopClock areasTimer;
 
     if (!GetWays(wayAreaOffsets,
@@ -537,6 +598,10 @@ namespace osmscout {
 
     areasTimer.Stop();
 
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
     StopClock relationWaysTimer;
 
     if (!GetRelations(relationWayOffsets,
@@ -546,6 +611,10 @@ namespace osmscout {
     }
 
     relationWaysTimer.Stop();
+
+    if (parameter.IsAborted()) {
+      return false;
+    }
 
     StopClock relationAreasTimer;
 

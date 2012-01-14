@@ -3,7 +3,8 @@ AM_CPPFLAGS = $(LIB_CXXFLAGS) -DOSMSCOUTDLL \
 
 lib_LTLIBRARIES = libosmscout.la
 
-libosmscout_la_SOURCES= osmscout/util/Cache.cpp \
+libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
+                        osmscout/util/Cache.cpp \
                         osmscout/util/FileScanner.cpp \
                         osmscout/util/FileWriter.cpp \
                         osmscout/util/Geometry.cpp \

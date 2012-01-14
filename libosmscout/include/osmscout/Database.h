@@ -54,6 +54,7 @@
 
 #include <osmscout/Route.h>
 
+#include <osmscout/util/Breaker.h>
 #include <osmscout/util/Cache.h>
 
 namespace osmscout {
@@ -125,6 +126,8 @@ namespace osmscout {
     unsigned long maxNodes;
     unsigned long maxWays;
     unsigned long maxAreas;
+    bool          useLowZoomOptimization;
+    BreakerRef    breaker;
 
   public:
     AreaSearchParameter();
@@ -135,11 +138,19 @@ namespace osmscout {
     void SetMaximumWays(unsigned long maxWays);
     void SetMaximumAreas(unsigned long maxAreas);
 
+    void SetUseLowZoomOptimization(bool useLowZoomOptimization);
+
+    void SetBreaker(const BreakerRef& breaker);
+
     unsigned long GetMaximumAreaLevel() const;
 
     unsigned long GetMaximumNodes() const;
     unsigned long GetMaximumWays() const;
     unsigned long GetMaximumAreas() const;
+
+    bool GetUseLowZoomOptimization() const;
+
+    bool IsAborted() const;
   };
 
   class OSMSCOUT_API Database

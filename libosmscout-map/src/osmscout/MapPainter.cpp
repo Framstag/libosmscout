@@ -1721,7 +1721,7 @@ namespace osmscout {
     wayData.sort();
   }
 
-  void MapPainter::Draw(const StyleConfig& styleConfig,
+  bool MapPainter::Draw(const StyleConfig& styleConfig,
                         const Projection& projection,
                         const MapParameter& parameter,
                         const MapData& data)
@@ -1746,6 +1746,10 @@ namespace osmscout {
 
     transBuffer.Reset();
 
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
     if (parameter.IsDebugPerformance()) {
       std::cout << "Draw [";
       std::cout << projection.GetLatMin() <<",";
@@ -1769,6 +1773,10 @@ namespace osmscout {
 
     prepareAreasTimer.Stop();
 
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
     StopClock prepareWaysTimer;
 
     PrepareWays(styleConfig,
@@ -1778,6 +1786,10 @@ namespace osmscout {
 
     prepareWaysTimer.Stop();
 
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
     //
     // Clear area with background color
     //
@@ -1786,6 +1798,10 @@ namespace osmscout {
                     projection,
                     parameter,
                     data);
+
+    if (parameter.IsAborted()) {
+      return false;
+    }
 
     //
     // Draw areas
@@ -1800,6 +1816,10 @@ namespace osmscout {
 
     areasTimer.Stop();
 
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
     //
     // Drawing ways
     //
@@ -1812,6 +1832,10 @@ namespace osmscout {
              data);
 
     pathsTimer.Stop();
+
+    if (parameter.IsAborted()) {
+      return false;
+    }
 
     //
     // Path labels
@@ -1829,6 +1853,10 @@ namespace osmscout {
 
     pathLabelsTimer.Stop();
 
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
     //
     // Nodes symbols & Node labels
     //
@@ -1841,6 +1869,10 @@ namespace osmscout {
               data);
 
     nodesTimer.Stop();
+
+    if (parameter.IsAborted()) {
+      return false;
+    }
 
     //
     // Area labels
@@ -1855,6 +1887,10 @@ namespace osmscout {
 
     areaLabelsTimer.Stop();
 
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
     //
     // POI Nodes
     //
@@ -1867,6 +1903,10 @@ namespace osmscout {
                  data);
 
     poisTimer.Stop();
+
+    if (parameter.IsAborted()) {
+      return false;
+    }
 
     StopClock labelsTimer;
 
@@ -1890,5 +1930,7 @@ namespace osmscout {
       std::cout << "POIs: " << poisTimer << " ";
       std::cout << "Labels: " << labelsTimer << std::endl;
     }
+
+    return true;
   }
 }

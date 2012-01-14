@@ -35,6 +35,7 @@
 #include <osmscout/StyleConfig.h>
 #include <osmscout/Way.h>
 
+#include <osmscout/util/Breaker.h>
 #include <osmscout/util/Projection.h>
 #include <osmscout/util/Transformation.h>
 
@@ -67,6 +68,8 @@ namespace osmscout {
 
     bool                   debugPerformance;  //! Print out some performance information
 
+    BreakerRef             breaker;
+
   public:
     MapParameter();
     virtual ~MapParameter();
@@ -90,6 +93,8 @@ namespace osmscout {
     void SetDrawFadings(bool drawFadings);
 
     void SetDebugPerformance(bool debug);
+
+    void SetBreaker(const BreakerRef& breaker);
 
     inline double GetDPI() const
     {
@@ -149,6 +154,16 @@ namespace osmscout {
     inline bool IsDebugPerformance() const
     {
       return debugPerformance;
+    }
+
+    bool IsAborted() const
+    {
+      if (breaker.Valid()) {
+        return breaker->IsAborted();
+      }
+      else {
+        return false;
+      }
     }
   };
 
@@ -536,7 +551,7 @@ namespace osmscout {
                            const MapParameter& parameter,
                            const MapData& data);
 
-    void Draw(const StyleConfig& styleConfig,
+    bool Draw(const StyleConfig& styleConfig,
               const Projection& projection,
               const MapParameter& parameter,
               const MapData& data);

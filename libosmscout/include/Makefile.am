@@ -2,6 +2,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/private/CoreImportExport.h \
                         osmscout/private/Math.h \
                         osmscout/system/Types.h \
+                        osmscout/util/Breaker.h \
                         osmscout/util/Cache.h \
                         osmscout/util/FileScanner.h \
                         osmscout/util/FileWriter.h \
