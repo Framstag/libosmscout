@@ -80,7 +80,7 @@ OSS
   NODE "highway_services"
     LABEL WITH STYLE normal MINMAG close
 
-  AREA "highway_services"
+  AREA "highway_services" MINMAG county
     FILL #cb9999
     LABEL WITH MINMAG block
 
@@ -148,7 +148,7 @@ OSS
     LABEL WITH STYLE emphasize COLOR #8888fd MINMAG close
     SYMBOL box #7885b0 8 WITH MINMAG close
 
-  AREA "railway_station"
+  AREA "railway_station" MINMAG city
     FILL #cb4040
     LABEL WITH STYLE emphasize COLOR #8888fd MINMAG close
     SYMBOL box #7885b0 8 WITH MINMAG close
@@ -177,11 +177,11 @@ OSS
     LINE #b5d0d0 WITH MINWIDTH 0.1mm WIDTH 3m
     LABEL WITH STYLE contour MINMAG block
 
-  AREA "waterway_dock"
+  AREA "waterway_dock" MINMAG proximity
     FILL #b5d0d0
     LABEL WITH MINMAG proximity
 
-  AREA "waterway_riverbank"
+  AREA "waterway_riverbank" MINMAG proximity
     FILL #b5d0d0
     LABEL WITH MINMAG block
 
@@ -213,7 +213,7 @@ OSS
     FILL #dcbe92
     LABEL WITH MINMAG close
 
-  AREA "landuse_quarry"
+  AREA "landuse_quarry" MINMAG county
     FILL #b3b3b3
     LABEL WITH MINMAG close
 
@@ -221,11 +221,11 @@ OSS
     FILL #b6b591
     LABEL WITH MINMAG close
 
-  AREA "landuse_basin"
+  AREA "landuse_basin" MINMAG county
     FILL #b3d1d4 BORDER #887b7b WIDTH 0.1mm
     LABEL WITH MINMAG close
 
-  AREA "landuse_reservoir"
+  AREA "landuse_reservoir" MINMAG county
     FILL #b4d5f0
     LABEL WITH MINMAG close
 
@@ -241,7 +241,7 @@ OSS
     FILL #b3e2a8
     LABEL WITH MINMAG close
 
-  AREA "landuse_residential"
+  AREA "landuse_residential" MINMAG county
     FILL #dcdcdc
     LABEL WITH MINMAG detail
 
@@ -277,11 +277,11 @@ OSS
     FILL #9d9d6c
     LABEL WITH MINMAG veryClose
 
-  AREA "landuse_military" MINMAG city
+  AREA "landuse_military" MINMAG proximity
     FILL #fe9898
     LABEL WITH MINMAG detail
 
-  AREA "landuse_orchard"
+  AREA "landuse_orchard" MINMAG county
     FILL #cfeca8
     LABEL WITH MINMAG close
 
@@ -289,15 +289,15 @@ OSS
     FILL #a9caae PATTERN "cemetery" WITH MINMAG detail
     LABEL WITH MINMAG close
 
-  AREA "landuse_meadow"
+  AREA "landuse_meadow" MINMAG county
     FILL #cfeca8
     LABEL WITH MINMAG close
 
-  AREA "landuse_village_green"
+  AREA "landuse_village_green" MINMAG county
     FILL #cfeca8
     LABEL WITH MINMAG close
 
-  AREA "landuse_recreation_ground"
+  AREA "landuse_recreation_ground" MINMAG county
     FILL #bce2ca
     LABEL WITH MINMAG close
 
@@ -305,7 +305,7 @@ OSS
     SYMBOL triangle #9c5e29 8 WITH MINMAG city
     LABEL WITH STYLE emphasize COLOR #9c5329 MINMAG detail
 
-  AREA "natural_glacier"
+  AREA "natural_glacier" MINMAG county
     FILL #ddecec
     LABEL WITH MINMAG detail
 
@@ -313,11 +313,11 @@ OSS
     FILL #b5e2b5 PATTERN "scrub" WITH MINMAG cityOver
     LABEL WITH MINMAG suburb
 
-  AREA "natural_fell"
+  AREA "natural_fell" MINMAG county
     FILL #f9f9f9
     LABEL WITH MINMAG detail
 
-  AREA "natural_heath"
+  AREA "natural_heath" MINMAG county
     FILL #ffffc0
     LABEL WITH MINMAG detail
 
@@ -325,11 +325,11 @@ OSS
     FILL #aed1a0
     LABEL WITH MINMAG detail
 
-  AREA "natural_marsh"
+  AREA "natural_marsh" MINMAG county
     FILL #f7f9f5
     LABEL WITH MINMAG detail
 
-  AREA "natural_wetland"
+  AREA "natural_wetland" MINMAG county
     FILL #f7f9f5
     LABEL WITH MINMAG detail
 
@@ -340,23 +340,23 @@ OSS
   WAY "natural_coastline" PRIO 1 MINMAG world
     LINE #000000 WITH MINWIDTH 0.25mm WIDTH 1m
 
-  AREA "natural_beach"
+  AREA "natural_beach" MINMAG county
     FILL #eecc55
     LABEL WITH MINMAG block
 
-  AREA "natural_land"
+  AREA "natural_land" MINMAG county
     FILL #ffffff
     LABEL WITH MINMAG detail
 
-  AREA "aeroway_aerodrome"
+  AREA "aeroway_aerodrome" MINMAG cityOver
     FILL #d5ddbd
     LABEL WITH MINMAG detail
 
-  AREA "aeroway_terminal"
+  AREA "aeroway_terminal" MINMAG cityOver
     FILL #cc99ff
     LABEL WITH MINMAG detail
 
-  AREA "aeroway_helipad"
+  AREA "aeroway_helipad" MINMAG cityOver
     FILL #d5ddbd
     LABEL WITH MINMAG detail
 
@@ -364,7 +364,7 @@ OSS
     LINE #bbbbcc WITH MINWIDTH 0.5mm WIDTH 20m
     LABEL WITH STYLE contour MINMAG close
 
-  AREA "aeroway_runway"
+  AREA "aeroway_runway" MINMAG cityOver
     FILL #bbbbcc
     LABEL WITH MINMAG close
 
@@ -372,7 +372,7 @@ OSS
     LINE #bbbbcc WITH MINWIDTH 0.5mm WIDTH 15m
     LABEL WITH STYLE contour MINMAG close
 
-  AREA "aeroway_apron"
+  AREA "aeroway_apron" MINMAG cityOver
     FILL #e8d1fe
     LABEL WITH MINMAG detail
 
@@ -384,7 +384,7 @@ OSS
     FILL #bde3cb
     LABEL WITH MINMAG close
 
-  AREA "leisure_golf_course"
+  AREA "leisure_golf_course" MINMAG county
     FILL #c7f1a3
     LABEL WITH MINMAG close
 
@@ -396,23 +396,23 @@ OSS
     LINE #bde3cb WITH MINWIDTH 0.25mm WIDTH 3m
     LABEL WITH STYLE contour MINMAG city
 
-  AREA "leisure_track"
+  AREA "leisure_track" MINMAG county
     FILL #7fdac2
     LABEL WITH MINMAG close
 
-  AREA "leisure_pitch"
+  AREA "leisure_pitch" MINMAG county
     FILL #90d3b9 BORDER #b0b0b0 WIDTH 0.1mm
     LABEL WITH MINMAG veryClose
 
-  AREA "leisure_water_park"
+  AREA "leisure_water_park" MINMAG county
 	FILL #f1eee8 BORDER #887b7b WIDTH 0.1mm
     LABEL WITH MINMAG close
 
-  AREA "leisure_marina"
+  AREA "leisure_marina" MINMAG county
     FILL #b5d6f1
     LABEL WITH MINMAG close
 
-  AREA "leisure_fishing"
+  AREA "leisure_fishing" MINMAG county
     FILL #b5d6f1
     LABEL WITH MINMAG close
 
@@ -436,7 +436,7 @@ OSS
     FILL #bde3cb
     LABEL WITH MINMAG close
 
-  AREA "leisure_ice_rink"
+  AREA "leisure_ice_rink" MINMAG county
     FILL #b5d6f1
     LABEL WITH MINMAG close
 
@@ -508,90 +508,90 @@ OSS
     FILL #f0f0d8
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
 
-  AREA "tourism_alpine_hut"
+  AREA "tourism_alpine_hut" MINMAG proximity
     FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
 
-  AREA "tourism_attraction"
+  AREA "tourism_attraction" MINMAG proximity
     FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
 
   NODE "tourism_attraction"
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
 
-  AREA "tourism_artwork"
+  AREA "tourism_artwork" MINMAG proximity
     FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
 
-  AREA "tourism_camp_site"
+  AREA "tourism_camp_site" MINMAG suburb
     FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
 
-  AREA "tourism_caravan_site"
+  AREA "tourism_caravan_site" MINMAG suburb
     FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
 
-  AREA "tourism_chalet"
+  AREA "tourism_chalet" MINMAG suburb
     FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
 
-  AREA "tourism_guest_house"
+  AREA "tourism_guest_house" MINMAG suburb
     FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
 
-  AREA "tourism_hotel"
+  AREA "tourism_hotel" MINMAG suburb
     FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
 
-  AREA "tourism_information"
+  AREA "tourism_information" MINMAG suburb
     FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
 
-  AREA "tourism_motel"
+  AREA "tourism_motel" MINMAG suburb
     FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
 
-  AREA "tourism_museum"
-    FILL #7172db
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "tourism_picnic_site"
-    FILL #7172db
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  AREA "tourism_theme_park"
+  AREA "tourism_museum" MINMAG proximity
     FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA "tourism_zoo"
+  AREA "tourism_picnic_site" MINMAG suburb
+    FILL #7172db
+    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
+
+  AREA "tourism_theme_park" MINMAG proximity
     FILL #7172db
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA "historic_castle"
+  AREA "tourism_zoo" MINMAG proximity
+    FILL #7172db
+    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
+
+  AREA "historic_castle" MINMAG suburb
     FILL #9f5eb4
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA "historic_monument"
+  AREA "historic_monument" MINMAG suburb
     FILL #9f5eb4
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA "historic_memorial"
+  AREA "historic_memorial" MINMAG suburb
     FILL #9f5eb4
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
 
-  AREA "historic_archaeological_site"
+  AREA "historic_archaeological_site" MINMAG suburb
     FILL #9f5eb4
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
 
-  AREA "historic_ruins"
+  AREA "historic_ruins" MINMAG suburb
     FILL #9f5eb4
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
 
-  AREA "historic_battlefield"
+  AREA "historic_battlefield" MINMAG suburb
     FILL #9f5eb4
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
 
-  AREA "historic_wreck"
+  AREA "historic_wreck" MINMAG suburb
     FILL #9f5eb4
     LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
 
@@ -602,27 +602,27 @@ OSS
     FILL #bca284 BORDER #887b7b WIDTH 0.1mm
     LABEL WITH MINMAG block
 
-  AREA "military_airfield"
+  AREA "military_airfield" MINMAG proximity
     FILL #f59897
     LABEL WITH MINMAG city
 
-  AREA "military_bunker"
+  AREA "military_bunker" MINMAG proximity
     FILL #f59897
     LABEL WITH MINMAG city
 
-  AREA "military_barracks"
+  AREA "military_barracks" MINMAG proximity
     FILL #f59897
     LABEL WITH MINMAG city
 
-  AREA "military_danger_area"
+  AREA "military_danger_area" MINMAG proximity
     FILL #f59897
     LABEL WITH MINMAG city
 
-  AREA "military_range"
+  AREA "military_range" MINMAG proximity
     FILL #f59897
     LABEL WITH MINMAG city
 
-  AREA "military_naval_base"
+  AREA "military_naval_base" MINMAG proximity
     FILL #f59897
     LABEL WITH MINMAG city
 
