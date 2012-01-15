@@ -250,8 +250,8 @@ namespace osmscout {
     writer.GetPos(indexOffset);
 
     for (size_t i=0; i<intervalCount; i++) {
-      uint32_t/*FileOffset*/ offset=0;      // place holder
-      uint32_t offsetCount=0; // place holder
+      uint32_t/*FileOffset*/ offset=0; // place holder
+      uint32_t offsetCount=0;          // place holder
 
       writer.Write((uint32_t)i); // The interval
       writer.Write(offset);      // The offset to the interval

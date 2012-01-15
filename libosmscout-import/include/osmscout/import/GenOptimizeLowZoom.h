@@ -22,10 +22,40 @@
 
 #include <osmscout/import/Import.h>
 
+#include <osmscout/Way.h>
+
+#include <osmscout/util/FileScanner.h>
+#include <osmscout/util/FileWriter.h>
+
 namespace osmscout {
 
   class OptimizeLowZoomGenerator : public ImportModule
   {
+  private:
+    void GetTypesToOptimize(const TypeConfig& typeConfig,
+                            std::set<TypeId>& types);
+
+    void WriteHeader(FileWriter& writer,
+                     const std::set<TypeId>& types,
+                     size_t optimizeMaxMap,
+                     std::map<TypeId,FileOffset>& typeOffsetMap);
+
+    bool GetWaysToOptimize(Progress& progress,
+                           FileScanner& scanner,
+                           TypeId type,
+                           std::list<WayRef>& ways);
+
+    void MergeWays(const std::list<WayRef>& ways,
+                   std::list<WayRef>& newWays);
+
+    bool OptimizeWriteWays(Progress& progress,
+                           FileWriter& writer,
+                           FileOffset typeFileOffset,
+                           const std::list<WayRef>& newWays,
+                           size_t width,
+                           size_t height,
+                           double magnification);
+
   public:
     std::string GetDescription() const;
     bool Import(const ImportParameter& parameter,
