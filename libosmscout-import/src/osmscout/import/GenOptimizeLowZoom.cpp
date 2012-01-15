@@ -112,7 +112,9 @@ namespace osmscout
         return false;
       }
 
-      if (way->GetType()==type && way->nodes.size()>=2) {
+      if (!way->IsArea() &&
+          way->GetType()==type &&
+          way->nodes.size()>=2) {
         ways.push_back(way);
         nodes+=way->nodes.size();
       }
@@ -295,7 +297,8 @@ namespace osmscout
                                                    size_t height,
                                                    double magnification)
   {
-    size_t            newNodesCount=0;
+    size_t            wayCount=0;
+    size_t            nodeCount=0;
     MercatorProjection projection;
     FileOffset        dataOffset;
 
@@ -315,8 +318,20 @@ namespace osmscout
         way++) {
       TransPolygon       polygon;
       std::vector<Point> newNodes;
+      double             xmin;
+      double             xmax;
+      double             ymin;
+      double             ymax;
 
       polygon.TransformWay(projection,true,(*way)->nodes);
+
+      polygon.GetBoundingBox(xmin,ymin,xmax,ymax);
+
+      //std::cout << xmax-xmin<< " " << ymax-ymin << std::endl;
+
+      if (xmax-xmin<=1.0 && ymax-ymin<=1.0) {
+        continue;
+      }
 
       newNodes.reserve(polygon.GetLength());
 
@@ -332,10 +347,11 @@ namespace osmscout
         return false;
       }
 
-      newNodesCount+=(*way)->nodes.size();
+      wayCount++;
+      nodeCount+=(*way)->nodes.size();
     }
 
-    progress.Info(NumberToString(newNodesCount)+ " nodes");
+    progress.Info(NumberToString(wayCount)+ " ways,"+NumberToString(nodeCount)+ " nodes");
 
     return true;
   }
@@ -417,7 +433,7 @@ namespace osmscout
       // Transform/Optimize the way and store it
       //
 
-      progress.Info(NumberToString(newWays.size())+ " ways");
+      // TODO: Wee need to make import parameters for the width and the height
 
       if (!OptimizeWriteWays(progress,
                              writer,
