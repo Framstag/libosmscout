@@ -19,7 +19,7 @@
 
 #include <osmscout/import/GenNodeUseIndex.h>
 
-#include <map>
+#include <algorithm>
 
 #include <osmscout/Way.h>
 
@@ -41,23 +41,16 @@ namespace osmscout {
 
   }
 
-  bool NodeUseIndexGenerator::Import(const ImportParameter& parameter,
-                                     Progress& progress,
-                                     const TypeConfig& typeConfig)
+  bool NodeUseIndexGenerator::GetNodeDistribution(const ImportParameter& parameter,
+                                                  Progress& progress,
+                                                  std::vector<uint32_t>& nodeDistribution)
   {
-    progress.SetAction("Analysing distribution");
-
-    std::set<TypeId>      types;
-    uint32_t              nodeCount=0;
-    std::vector<uint32_t> nodeDistribution;
-    FileScanner           scanner;
-    uint32_t              intervalSize=parameter.GetNodeIndexIntervalSize();
-
-    typeConfig.GetRoutables(types);
+    FileScanner scanner;
+    uint32_t    nodeCount=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawnodes.dat"))) {
-      progress.Error("Canot open 'rawnodes.dat'");
+      progress.Error("Cannot open 'rawnodes.dat'");
       return false;
     }
 
@@ -89,14 +82,149 @@ namespace osmscout {
       nodeDistribution[index]++;
     }
 
-    scanner.Close();
+    return scanner.Close();
+  }
+
+  bool NodeUseIndexGenerator::GetNodeWayMap(const ImportParameter& parameter,
+                                            Progress& progress,
+                                            const std::set<TypeId>& types,
+                                            size_t start,
+                                            size_t end,
+                                            std::map<Id,std::list<IndexEntry> >& nodeWayMap)
+  {
+    FileScanner scanner;
+    uint32_t    wayCount;
+
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "ways.dat"))) {
+      progress.Error("Error while opening ways.dat!");
+      return false;
+    }
+
+    if (!scanner.Read(wayCount)) {
+      progress.Error("Error while reading number of data entries in file");
+      return false;
+    }
+
+    for (uint32_t w=1; w<=wayCount; w++) {
+      progress.SetProgress(w,wayCount);
+
+      Way way;
+
+      if (!way.Read(scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(w)+" of "+
+                       NumberToString(wayCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+        return false;
+      }
+
+      if (types.find(way.GetType())!=types.end()) {
+        for (size_t i=0; i<way.nodes.size(); i++) {
+          if (way.nodes[i].id>=start && way.nodes[i].id<end) {
+            IndexEntry indexEntry;
+
+            indexEntry.wayId=way.GetId();
+            indexEntry.type=way.GetType();
+
+            nodeWayMap[way.nodes[i].id].push_back(indexEntry);
+          }
+        }
+      }
+    }
+
+    return scanner.Close();
+  }
+
+  bool NodeUseIndexGenerator::ResolveReferences(const ImportParameter& parameter,
+                                                Progress& progress,
+                                                const std::set<TypeId>& types,
+                                                size_t start,
+                                                size_t end,
+                                                const std::map<Id,std::list<IndexEntry> >& nodeWayMap,
+                                                std::map<Id,std::list<IndexEntry> >& wayWayMap)
+  {
+    FileScanner scanner;
+    uint32_t    wayCount;
+
+    progress.Info(std::string("Resolving area/way references ")+NumberToString(start)+">=id<"+NumberToString(end));
+
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "ways.dat"))) {
+      progress.Error("Error while opening ways.dat!");
+      return false;
+    }
+
+    if (!scanner.Read(wayCount)) {
+      progress.Error("Error while reading number of data entries in file");
+      return false;
+    }
+
+    for (uint32_t w=1; w<=wayCount; w++) {
+      progress.SetProgress(w,wayCount);
+
+      Way way;
+
+      if (!way.Read(scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(w)+" of "+
+                       NumberToString(wayCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+        return false;
+      }
+
+      if (types.find(way.GetType())!=types.end()) {
+        for (size_t i=0; i<way.nodes.size(); i++) {
+          if (way.nodes[i].id>=start && way.nodes[i].id<end) {
+            std::map<Id, std::list<IndexEntry> >::const_iterator ways;
+
+            ways=nodeWayMap.find(way.nodes[i].id);
+
+            if (ways!=nodeWayMap.end()) {
+              for (std::list<IndexEntry>::const_iterator w=ways->second.begin();
+                   w!=ways->second.end();
+                   ++w) {
+                if (w->wayId!=way.GetId()) {
+                  // TODO: Optimize performance
+                  wayWayMap[way.GetId()].push_back(*w);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return scanner.Close();
+  }
+
+  bool NodeUseIndexGenerator::Import(const ImportParameter& parameter,
+                                     Progress& progress,
+                                     const TypeConfig& typeConfig)
+  {
+    progress.SetAction("Analysing distribution");
+
+    std::set<TypeId>      types;
+    std::vector<uint32_t> nodeDistribution;
+    FileScanner           scanner;
+    uint32_t              intervalSize=parameter.GetNodeIndexIntervalSize();
+
+    typeConfig.GetRoutables(types);
+
+    if (!GetNodeDistribution(parameter,
+                             progress,
+                             nodeDistribution)) {
+      return false;
+    }
 
     //std::cout << "Nodes: " << nodeCount << std::endl;
 
     progress.SetAction("Scanning node usage");
 
-    std::map<Id,std::set<Id> > wayWayMap;
-    size_t                     index=0;
+    std::map<Id,std::list<IndexEntry> > wayWayMap;
+    size_t                              index=0;
 
     while (index<nodeDistribution.size()) {
       size_t bucketSize=0;
@@ -108,99 +236,30 @@ namespace osmscout {
         newIndex++;
       }
 
-      size_t                      start=index*distributionGranuality;
-      size_t                      end=newIndex*distributionGranuality;
-      uint32_t                    wayCount;
-      std::map<Id,std::list<Id> > nodeWayMap;
+      size_t                              start=index*distributionGranuality;
+      size_t                              end=newIndex*distributionGranuality;
+      std::map<Id,std::list<IndexEntry> > nodeWayMap;
 
       progress.Info(std::string("Scanning for node ids ")+NumberToString(start)+">=id<"+NumberToString(end)+" (interval "+NumberToString(index+1)+" of "+NumberToString(nodeDistribution.size())+")");
 
-      if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        "ways.dat"))) {
-        progress.Error("Error while opening ways.dat!");
+      if (!GetNodeWayMap(parameter,
+                         progress,
+                         types,
+                         start,
+                         end,
+                         nodeWayMap)) {
         return false;
       }
 
-      if (!scanner.Read(wayCount)) {
-        progress.Error("Error while reading number of data entries in file");
+      if (!ResolveReferences(parameter,
+                             progress,
+                             types,
+                             start,
+                             end,
+                             nodeWayMap,
+                             wayWayMap)) {
         return false;
       }
-
-      for (uint32_t w=1; w<=wayCount; w++) {
-        progress.SetProgress(w,wayCount);
-
-        Way way;
-
-        if (!way.Read(scanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(w)+" of "+
-                         NumberToString(wayCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
-
-        if (types.find(way.GetType())!=types.end()) {
-          for (size_t i=0; i<way.nodes.size(); i++) {
-            if (way.nodes[i].id>=start && way.nodes[i].id<end) {
-              nodeWayMap[way.nodes[i].id].push_back(way.GetId());
-              }
-          }
-        }
-      }
-
-      scanner.Close();
-
-      progress.Info(std::string("Resolving area/way references ")+NumberToString(start)+">=id<"+NumberToString(end));
-
-      if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        "ways.dat"))) {
-        progress.Error("Error while opening ways.dat!");
-        return false;
-      }
-
-      if (!scanner.Read(wayCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
-
-      for (uint32_t w=1; w<=wayCount; w++) {
-        progress.SetProgress(w,wayCount);
-
-        Way way;
-
-        if (!way.Read(scanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(w)+" of "+
-                         NumberToString(wayCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
-
-        if (types.find(way.GetType())!=types.end()) {
-          for (size_t i=0; i<way.nodes.size(); i++) {
-            if (way.nodes[i].id>=start && way.nodes[i].id<end) {
-              std::map<Id, std::list<Id> >::const_iterator ways;
-
-              ways=nodeWayMap.find(way.nodes[i].id);
-
-              if (ways!=nodeWayMap.end()) {
-                for (std::list<Id>::const_iterator w=ways->second.begin();
-                     w!=ways->second.end();
-                     ++w) {
-                  if (*w!=way.GetId()) {
-                    // TODO: Optimize performance
-                    wayWayMap[way.GetId()].insert(*w);
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-
-      scanner.Close();
 
       index=newIndex;
     }
@@ -213,7 +272,7 @@ namespace osmscout {
     FileOffset              indexOffset;        // Start of the offset table in file
     FileWriter              writer;
 
-    for (std::map<Id, std::set<Id> >::const_iterator res=wayWayMap.begin();
+    for (std::map<Id, std::list<IndexEntry> >::const_iterator res=wayWayMap.begin();
          res!=wayWayMap.end();
          ++res) {
       size_t index=res->first/intervalSize;
@@ -247,6 +306,8 @@ namespace osmscout {
     writer.WriteNumber(intervalSize);  // The size of the interval
     writer.WriteNumber(intervalCount); // The number of intervals
 
+    progress.Debug("Storing "+NumberToString(intervalCount)+" intervals of size "+NumberToString(intervalSize));
+
     writer.GetPos(indexOffset);
 
     for (size_t i=0; i<intervalCount; i++) {
@@ -269,16 +330,21 @@ namespace osmscout {
       writer.GetPos(offset);
       resultOffset[i]=offset;
 
-      for (std::map<Id, std::set<Id> >::const_iterator id=wayWayMap.lower_bound(i*intervalSize);
+      for (std::map<Id, std::list<IndexEntry> >::iterator id=wayWayMap.lower_bound(i*intervalSize);
            id!=wayWayMap.end() && id->first<(i+1)*intervalSize;
            ++id) {
+
+        id->second.sort();
+        id->second.unique();
+
         writer.Write(id->first);                          // The id of the way/area
         writer.WriteNumber((uint32_t)id->second.size());  // The number of references
 
-        for (std::set<Id>::const_iterator ref=id->second.begin();
+        for (std::list<IndexEntry>::const_iterator ref=id->second.begin();
              ref!=id->second.end();
              ++ref) {
-          writer.Write(*ref); // The id of the references
+          writer.WriteNumber(ref->type); // The type of the references
+          writer.Write(ref->wayId); // The id of the references
         }
 
         entryCount++;

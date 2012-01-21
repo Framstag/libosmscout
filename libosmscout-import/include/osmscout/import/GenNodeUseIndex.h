@@ -22,10 +22,57 @@
 
 #include <osmscout/import/Import.h>
 
+#include <list>
+#include <map>
+
 namespace osmscout {
 
   class NodeUseIndexGenerator : public ImportModule
   {
+  private:
+    struct IndexEntry
+    {
+      TypeId type;
+      Id     wayId;
+
+      inline bool operator<(const IndexEntry& other) const
+      {
+        if (wayId<other.wayId) {
+          return true;
+        }
+
+        if (type<other.type) {
+          return true;
+        }
+
+        return true;
+      }
+
+      inline bool operator==(const IndexEntry& other) const
+      {
+        return type==other.type && wayId==other.wayId;
+      }
+    };
+
+  private:
+    bool GetNodeDistribution(const ImportParameter& parameter,
+                             Progress& progress,
+                             std::vector<uint32_t>& nodeDistribution);
+    bool GetNodeWayMap(const ImportParameter& parameter,
+                       Progress& progress,
+                       const std::set<TypeId>& types,
+                       size_t start,
+                       size_t end,
+                       std::map<Id,std::list<IndexEntry> >& nodeWayMap);
+
+    bool ResolveReferences(const ImportParameter& parameter,
+                           Progress& progress,
+                           const std::set<TypeId>& types,
+                           size_t start,
+                           size_t end,
+                           const std::map<Id,std::list<IndexEntry> >& nodeWayMap,
+                           std::map<Id,std::list<IndexEntry> >& wayWayMap);
+
   public:
     std::string GetDescription() const;
     bool Import(const ImportParameter& parameter,

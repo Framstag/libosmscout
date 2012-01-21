@@ -36,7 +36,7 @@ namespace osmscout {
   struct NodeUseIndexEntry
   {
     uint32_t   interval; // Unique identifier
-    FileOffset offset;   // File offset of this entry
+    FileOffset offset;   // File offset of the data of this entry
     uint32_t   count;    // Number of entries stored at file offset
   };
 

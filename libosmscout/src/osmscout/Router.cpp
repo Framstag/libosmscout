@@ -34,20 +34,6 @@
 
 namespace osmscout {
 
-  struct NodeUseCacheValueSizer : public Router::NodeUseCache::ValueSizer
-  {
-    unsigned long GetSize(const std::vector<Router::NodeUse>& value) const
-    {
-      unsigned long memory=0;
-
-      for (size_t i=0; i<value.size(); i++) {
-        memory+=sizeof(Router::NodeUse);
-      }
-
-      return memory;
-    }
-  };
-
   RouterParameter::RouterParameter()
   : wayIndexCacheSize(10000),
     wayCacheSize(0),
@@ -187,7 +173,7 @@ namespace osmscout {
   }
 
   bool Router::GetJoints(const std::set<Id>& ids,
-                         std::set<Id>& wayIds) const
+                         std::list<Follower>& followers) const
   {
     if (!IsOpen()) {
       return false;
@@ -196,7 +182,7 @@ namespace osmscout {
     std::list<NodeUseIndexEntry> indexEntries;
     std::string                  file=path+"/"+"nodeuse.idx";
 
-    wayIds.clear();
+    followers.clear();
 
     nodeUseIndex.GetNodeIndexEntries(ids,indexEntries);
 
@@ -244,7 +230,8 @@ namespace osmscout {
           cacheRef->value[i].references.resize(count);
 
           for (size_t j=0; j<count; j++) {
-            nodeUseScanner.Read(cacheRef->value[i].references[j]);
+            nodeUseScanner.ReadNumber(cacheRef->value[i].references[j].type);
+            nodeUseScanner.Read(cacheRef->value[i].references[j].wayId);
           }
         }
       }
@@ -253,8 +240,10 @@ namespace osmscout {
            w!=cacheRef->value.end();
            ++w) {
         if (ids.find(w->id)!=ids.end()) {
-          for (size_t i=0; i<w->references.size(); i++) {
-            wayIds.insert(w->references[i]);
+          for (std::vector<Follower>::const_iterator follower=w->references.begin();
+              follower!=w->references.end();
+              follower++) {
+            followers.push_back(*follower);
           }
         }
       }
@@ -264,7 +253,7 @@ namespace osmscout {
   }
 
   bool Router::GetJoints(Id id,
-                         std::set<Id>& wayIds) const
+                         std::list<Follower>& followers) const
   {
     if (!IsOpen()) {
       return false;
@@ -274,7 +263,7 @@ namespace osmscout {
 
     ids.insert(id);
 
-    return GetJoints(ids,wayIds);
+    return GetJoints(ids,followers);
   }
 
   bool Router::GetWays(std::map<Id,WayRef>& cache,
@@ -443,11 +432,6 @@ namespace osmscout {
     return true;
   }
 
-  struct Follower
-  {
-    std::set<Id>  ways;
-  };
-
   typedef std::set<RNode,RNodeCostCompare> OpenList;
   typedef OpenList::iterator               RNodeRef;
 
@@ -463,7 +447,7 @@ namespace osmscout {
                               RouteData& route)
   {
     std::map<Id,WayRef>   waysCache;
-    std::map<Id,Follower> candidatesCache;
+    std::map<Id,std::list<Follower> > candidatesCache;
     std::vector<WayRef>   followWays;
     WayRef                startWay;
     WayRef                currentWay;
@@ -480,7 +464,7 @@ namespace osmscout {
 
     size_t                nodesVisitedCount=0;
     size_t                waysVisitedCount=0;
-    size_t                waysDroppedCount=0;
+    size_t                cachedFollowerUsedCount=0;
     size_t                turnsUsedCount=0;
     size_t                turnsDroppedCount=0;
 
@@ -506,8 +490,6 @@ namespace osmscout {
       return false;
     }
 
-    std::cout << "Searching for node " << startNodeId << " in way " << startWayId << "..." << std::endl;
-
     size_t index=0;
     while (index<startWay->nodes.size()) {
       if (startWay->nodes[index].id==startNodeId) {
@@ -519,11 +501,10 @@ namespace osmscout {
       index++;
     }
 
-    assert(index<startWay->nodes.size());
-
-    std::cout << "OK" << std::endl;
-
-    std::cout << "Searching for node " << targetNodeId << " in way " << targetWayId << "..." << std::endl;
+    if (index>=startWay->nodes.size()) {
+      std::cerr << "Given start node is not part of start way" << std::endl;
+      return false;
+    }
 
     index=0;
     while (index<targetWay->nodes.size()) {
@@ -536,9 +517,10 @@ namespace osmscout {
       index++;
     }
 
-    assert(index<targetWay->nodes.size());
-
-    std::cout << "OK" << std::endl;
+    if (index>=targetWay->nodes.size()) {
+      std::cerr << "Given target node is not part of target way" << std::endl;
+      return false;
+    }
 
     // Start way is a way we cannot use for routing
     if (!profile.CanUse(startWay->GetType())) {
@@ -604,12 +586,10 @@ namespace osmscout {
       openMap.erase(current.id);
 
       //
-      // Load current way, if not already loaded/cached
+      // Load current way
       //
 
-      follower.clear();
-
-      // Get joint nodes in same way/area, if the current way changes
+      // Get new way data, if the current way changes
       if (!currentWay.Valid() || currentWay->GetId()!=current.ref.id) {
         if (!GetWay(waysCache,
                     current.ref.id,
@@ -624,6 +604,8 @@ namespace osmscout {
       //
       // Calculate follower of current node
       //
+
+      follower.clear();
 
       // Get potential follower in the current way
 
@@ -647,30 +629,32 @@ namespace osmscout {
           }
         }
       }
-      // For ways the node before and after the current node aree potential followers, if not already
+      // For ways the node before and after the current node are potential followers, if not already
       // visited. For Oneways only the next node in the way is candidate.
       else {
         for (size_t i=0; i<currentWay->nodes.size(); ++i) {
           if (currentWay->nodes[i].id==current.id) {
             if (i>0 && !currentWay->IsOneway()) {
-              std::map<Id,RNode>::iterator closeEntry=closeMap.find(currentWay->nodes[i-1].id);
+              Point                        &prevNode=currentWay->nodes[i-1];
+              std::map<Id,RNode>::iterator closeEntry=closeMap.find(prevNode.id);
 
               if (closeEntry==closeMap.end()) {
-                follower.push_back(RNode(currentWay->nodes[i-1].id,
-                                         currentWay->nodes[i-1].lon,
-                                         currentWay->nodes[i-1].lat,
+                follower.push_back(RNode(prevNode.id,
+                                         prevNode.lon,
+                                         prevNode.lat,
                                          ObjectRef(currentWay->GetId(),refWay),
                                          current.id));
               }
             }
 
             if (i<currentWay->nodes.size()-1) {
-              std::map<Id,RNode>::iterator closeEntry=closeMap.find(currentWay->nodes[i+1].id);
+              Point                        &nextNode=currentWay->nodes[i+1];
+              std::map<Id,RNode>::iterator closeEntry=closeMap.find(nextNode.id);
 
               if (closeEntry==closeMap.end()) {
-                follower.push_back(RNode(currentWay->nodes[i+1].id,
-                                         currentWay->nodes[i+1].lon,
-                                         currentWay->nodes[i+1].lat,
+                follower.push_back(RNode(nextNode.id,
+                                         nextNode.lon,
+                                         nextNode.lat,
                                          ObjectRef(currentWay->GetId(),refWay),
                                          current.id));
               }
@@ -684,28 +668,41 @@ namespace osmscout {
       // Get joint ways and areas
 
       if (!cachedFollower) {
-        std::map<Id,Follower>::const_iterator cacheEntry=candidatesCache.find(current.ref.id);
+        std::map<Id,std::list<Follower> >::const_iterator cacheEntry=candidatesCache.find(current.ref.id);
 
         if (cacheEntry==candidatesCache.end()) {
-          std::pair<std::map<Id,Follower >::iterator,bool> result;
+          std::pair<std::map<Id,std::list<Follower> >::iterator,bool> result;
 
-          result=candidatesCache.insert(std::pair<Id,Follower>(current.ref.id,Follower()));
+          result=candidatesCache.insert(std::pair<Id,std::list<Follower> >(current.ref.id,std::list<Follower>()));
 
           if (!GetJoints(current.ref.id,
-                         result.first->second.ways)) {
+                         result.first->second)) {
             return false;
           }
 
           cacheEntry=result.first;
         }
 
+        std::set<Id> followWayIds;
+
+        for (std::list<Follower>::const_iterator follower=cacheEntry->second.begin();
+            follower!=cacheEntry->second.end();
+            follower++) {
+          if (profile.CanUse(follower->type)) {
+            followWayIds.insert(follower->wayId);
+          }
+        }
+
         if (!GetWays(waysCache,
-                     cacheEntry->second.ways,
+                     followWayIds,
                      followWays)) {
           return false;
         }
 
         cachedFollower=true;
+      }
+      else {
+        cachedFollowerUsedCount++;
       }
 
       // Get joint nodes in joint way/area, for ways we need to be able to turn into the new way
@@ -715,25 +712,19 @@ namespace osmscout {
            ++iter) {
         const WayRef way=*iter;
 
-        // joint way/area is of non-routable type
-        if (!profile.CanUse(way->GetType())) {
-          //std::cout << typeConfig->GetTypeInfo(way->GetType()).GetName() << std::endl;
-          waysDroppedCount++;
-          continue;
-        }
-
         if (way->IsArea()) {
           for (size_t i=0; i<way->nodes.size(); i++) {
             if (way->nodes[i].id!=current.id) {
-              std::map<Id,RNode>::iterator closeEntry=closeMap.find(way->nodes[i].id);
+              Point                        &node=way->nodes[i];
+              std::map<Id,RNode>::iterator closeEntry=closeMap.find(node.id);
 
               if (closeEntry!=closeMap.end()) {
                 continue;
               }
 
-              follower.push_back(RNode(way->nodes[i].id,
-                                       way->nodes[i].lon,
-                                       way->nodes[i].lat,
+              follower.push_back(RNode(node.id,
+                                       node.lon,
+                                       node.lat,
                                        ObjectRef(way->GetId(),refWay),
                                        current.id));
             }
@@ -746,24 +737,26 @@ namespace osmscout {
                 turnsUsedCount++;
 
                 if (i>0 && !way->IsOneway()) {
-                  std::map<Id,RNode>::iterator closeEntry=closeMap.find(way->nodes[i-1].id);
+                  Point                        &prevNode=way->nodes[i-1];
+                  std::map<Id,RNode>::iterator closeEntry=closeMap.find(prevNode.id);
 
                   if (closeEntry==closeMap.end()) {
-                    follower.push_back(RNode(way->nodes[i-1].id,
-                                             way->nodes[i-1].lon,
-                                             way->nodes[i-1].lat,
+                    follower.push_back(RNode(prevNode.id,
+                                             prevNode.lon,
+                                             prevNode.lat,
                                              ObjectRef(way->GetId(),refWay),
                                              current.id));
                   }
                 }
 
                 if (i<way->nodes.size()-1) {
-                  std::map<Id,RNode>::iterator closeEntry=closeMap.find(way->nodes[i+1].id);
+                  Point                        &nextNode=way->nodes[i+1];
+                  std::map<Id,RNode>::iterator closeEntry=closeMap.find(nextNode.id);
 
                   if (closeEntry==closeMap.end()) {
-                    follower.push_back(RNode(way->nodes[i+1].id,
-                                             way->nodes[i+1].lon,
-                                             way->nodes[i+1].lat,
+                    follower.push_back(RNode(nextNode.id,
+                                             nextNode.lon,
+                                             nextNode.lat,
                                              ObjectRef(way->GetId(),refWay),
                                              current.id));
                   }
@@ -892,8 +885,8 @@ namespace osmscout {
         std::cout << "Time:                " << clock << std::endl;
         std::cout << "Route nodes visited: " << nodesVisitedCount << std::endl;
         std::cout << "Ways visited:        " << waysVisitedCount << std::endl;
-        std::cout << "Ways dropped:        " << waysDroppedCount << std::endl;
         std::cout << "Ways cached:         " << waysCache.size() << std::endl;
+        std::cout << "Followers cached:    " << cachedFollowerUsedCount << std::endl;
         std::cout << "Turns evaluated:     " << turnsUsedCount << std::endl;
         std::cout << "Turns dropped:       " << turnsDroppedCount << std::endl;
 
@@ -909,7 +902,7 @@ namespace osmscout {
   }
 
   bool Router::TransformRouteDataToRouteDescription(const RouteData& data,
-                                                      RouteDescription& description)
+                                                    RouteDescription& description)
   {
     if (!IsOpen()) {
       return false;

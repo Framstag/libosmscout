@@ -73,14 +73,34 @@ namespace osmscout {
 
   class OSMSCOUT_API Router
   {
-  public: // Fix this
+  private:
+    struct Follower
+    {
+      TypeId type;
+      Id     wayId;
+    };
+
     struct NodeUse
     {
-      Id              id;
-      std::vector<Id> references;
+      Id                    id;
+      std::vector<Follower> references;
     };
 
     typedef Cache<size_t,std::vector<NodeUse> > NodeUseCache;
+
+    struct NodeUseCacheValueSizer : public NodeUseCache::ValueSizer
+    {
+      unsigned long GetSize(const std::vector<Router::NodeUse>& value) const
+      {
+        unsigned long memory=0;
+
+        for (size_t i=0; i<value.size(); i++) {
+          memory+=sizeof(Router::NodeUse);
+        }
+
+        return memory;
+      }
+    };
 
   private:
     bool                  isOpen;          //! true, if opened
@@ -110,9 +130,9 @@ namespace osmscout {
                 WayRef& way) const;
 
     bool GetJoints(Id id,
-                   std::set<Id>& wayIds) const;
+                   std::list<Follower>& followers) const;
     bool GetJoints(const std::set<Id>& ids,
-                   std::set<Id>& wayIds) const;
+                   std::list<Follower>& followers) const;
 
   public:
     Router(const RouterParameter& parameter);

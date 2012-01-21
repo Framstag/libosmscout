@@ -62,7 +62,7 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " -d                                   show debug output" << std::endl;
   std::cout << " -s <start step>                      set starting step" << std::endl;
   std::cout << " -s <end step>                        set final step" << std::endl;
-  std::cout << " --typefile <path>                    path and name of the map.ost.xml file (default: " << parameter.GetTypefile() << ")" << std::endl;
+  std::cout << " --typefile <path>                    path and name of the map.ost file (default: " << parameter.GetTypefile() << ")" << std::endl;
   std::cout << " --destinationDirectory <path>        destination for generated map files (default: " << parameter.GetDestinationDirectory() << ")" << std::endl;
   std::cout << " --numericIndexPageSize <number>      size of an numeric index page in bytes (default: " << parameter.GetNumericIndexPageSize() << ")" << std::endl;
   std::cout << " --rawNodeIndexMemoryMaped true|false memory map raw node index file access (default: " << BoolToString(parameter.GetRawNodeIndexMemoryMaped()) << ")" << std::endl;

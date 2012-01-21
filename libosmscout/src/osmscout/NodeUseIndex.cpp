@@ -55,7 +55,7 @@ namespace osmscout {
       uint32_t   interval;
 
       scanner.Read(interval);     // The interval
-      scanner.Read(entry.offset); // The offset into the way.dat file
+      scanner.Read(entry.offset); // The offset into the nodeuse.idx file
       scanner.Read(entry.count);  // The number of entries in the interval
 
       nodeUseIndex[interval]=entry;
