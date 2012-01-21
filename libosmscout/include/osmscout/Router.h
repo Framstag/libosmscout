@@ -34,7 +34,9 @@
 // Reverse index
 #include <osmscout/NodeUseIndex.h>
 
+// Routing
 #include <osmscout/Route.h>
+#include <osmscout/RoutingProfile.h>
 
 #include <osmscout/util/Cache.h>
 
@@ -79,7 +81,6 @@ namespace osmscout {
     };
 
     typedef Cache<size_t,std::vector<NodeUse> > NodeUseCache;
-    typedef const Way*                          WayPtr;
 
   private:
     bool                  isOpen;          //! true, if opened
@@ -97,13 +98,13 @@ namespace osmscout {
     TypeConfig            *typeConfig;      //! Type config for the currently opened map
 
   private:
-    bool GetWays(std::map<Id,Way>& cache,
+    bool GetWays(std::map<Id,WayRef>& cache,
                  const std::set<Id>& ids,
-                 std::vector<WayPtr>& refs);
+                 std::vector<WayRef>& refs);
 
-    bool GetWay(std::map<Id,Way>& cache,
+    bool GetWay(std::map<Id,WayRef>& cache,
                 Id id,
-                WayPtr& ref);
+                WayRef& ref);
 
     bool GetWay(const Id& id,
                 WayRef& way) const;
@@ -123,7 +124,10 @@ namespace osmscout {
 
     void FlushCache();
 
-    bool CalculateRoute(Id startWayId, Id startNodeId,
+    TypeConfig* GetTypeConfig() const;
+
+    bool CalculateRoute(const RoutingProfile& profile,
+                        Id startWayId, Id startNodeId,
                         Id targetWayId, Id targetNodeId,
                         RouteData& route);
 

@@ -71,10 +71,73 @@ int main(int argc, char* argv[])
     return 1;
   }
 
+  osmscout::TypeId           type;
+  osmscout::TypeConfig       *typeConfig=router.GetTypeConfig();
+
+  osmscout::RoutingProfile   routingProfile;
   osmscout::RouteData        data;
   osmscout::RouteDescription description;
 
-  if (!router.CalculateRoute(startWayId,startNodeId,
+  routingProfile.SetTurnCostFactor(1/60/2); // 30 seconds
+
+  type=typeConfig->GetWayTypeId("highway_motorway");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/110.0);
+
+  type=typeConfig->GetWayTypeId("highway_motorway_link");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/60.0);
+
+  type=typeConfig->GetWayTypeId("highway_trunk");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/70.0);
+
+  type=typeConfig->GetWayTypeId("highway_trunk_link");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/70.0);
+
+  type=typeConfig->GetWayTypeId("highway_primary");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/70.0);
+
+  type=typeConfig->GetWayTypeId("highway_primary_link");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/60.0);
+
+  type=typeConfig->GetWayTypeId("highway_secondary");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/60.0);
+
+  type=typeConfig->GetWayTypeId("highway_secondary_link");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/50.0);
+
+  type=typeConfig->GetWayTypeId("highway_tertiary");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/55.0);
+
+  type=typeConfig->GetWayTypeId("highway_unclassified");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/50.0);
+
+  type=typeConfig->GetWayTypeId("highway_road");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/50.0);
+
+  type=typeConfig->GetWayTypeId("highway_residential");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/40.0);
+
+  type=typeConfig->GetWayTypeId("highway_living_street");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/10.0);
+
+  type=typeConfig->GetWayTypeId("highway_service");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/30.0);
+
+  if (!router.CalculateRoute(routingProfile,
+                             startWayId,startNodeId,
                              targetWayId,targetNodeId,
                              data)) {
     std::cerr << "There was an error while calculating the route!" << std::endl;

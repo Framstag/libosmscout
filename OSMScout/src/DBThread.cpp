@@ -32,8 +32,8 @@ DBThread dbThread;
 
 DBThread::DBThread()
  : database(databaseParameter),
-   router(routerParameter),
    styleConfig(NULL),
+   router(routerParameter),
    currentPixmap(NULL)
 #if defined(HAVE_LIB_QTOPENGL)
    ,currentGLPixmap(NULL)
@@ -78,6 +78,67 @@ void DBThread::run()
     else {
       styleConfig=NULL;
     }
+
+    osmscout::TypeId     type;
+    osmscout::TypeConfig *typeConfig=router.GetTypeConfig();
+
+    routingProfile.SetTurnCostFactor(1/60/2); // 30 seconds
+
+    type=typeConfig->GetWayTypeId("highway_motorway");
+    assert(type!=osmscout::typeIgnore);
+    routingProfile.SetTypeCostFactor(type,1/110.0);
+
+    type=typeConfig->GetWayTypeId("highway_motorway_link");
+    assert(type!=osmscout::typeIgnore);
+    routingProfile.SetTypeCostFactor(type,1/60.0);
+
+    type=typeConfig->GetWayTypeId("highway_trunk");
+    assert(type!=osmscout::typeIgnore);
+    routingProfile.SetTypeCostFactor(type,1/70.0);
+
+    type=typeConfig->GetWayTypeId("highway_trunk_link");
+    assert(type!=osmscout::typeIgnore);
+    routingProfile.SetTypeCostFactor(type,1/70.0);
+
+    type=typeConfig->GetWayTypeId("highway_primary");
+    assert(type!=osmscout::typeIgnore);
+    routingProfile.SetTypeCostFactor(type,1/70.0);
+
+    type=typeConfig->GetWayTypeId("highway_primary_link");
+    assert(type!=osmscout::typeIgnore);
+    routingProfile.SetTypeCostFactor(type,1/60.0);
+
+    type=typeConfig->GetWayTypeId("highway_secondary");
+    assert(type!=osmscout::typeIgnore);
+    routingProfile.SetTypeCostFactor(type,1/60.0);
+
+    type=typeConfig->GetWayTypeId("highway_secondary_link");
+    assert(type!=osmscout::typeIgnore);
+    routingProfile.SetTypeCostFactor(type,1/50.0);
+
+    type=typeConfig->GetWayTypeId("highway_tertiary");
+    assert(type!=osmscout::typeIgnore);
+    routingProfile.SetTypeCostFactor(type,1/55.0);
+
+    type=typeConfig->GetWayTypeId("highway_unclassified");
+    assert(type!=osmscout::typeIgnore);
+    routingProfile.SetTypeCostFactor(type,1/50.0);
+
+    type=typeConfig->GetWayTypeId("highway_road");
+    assert(type!=osmscout::typeIgnore);
+    routingProfile.SetTypeCostFactor(type,1/50.0);
+
+    type=typeConfig->GetWayTypeId("highway_residential");
+    assert(type!=osmscout::typeIgnore);
+    routingProfile.SetTypeCostFactor(type,1/40.0);
+
+    type=typeConfig->GetWayTypeId("highway_living_street");
+    assert(type!=osmscout::typeIgnore);
+    routingProfile.SetTypeCostFactor(type,1/10.0);
+
+    type=typeConfig->GetWayTypeId("highway_service");
+    assert(type!=osmscout::typeIgnore);
+    routingProfile.SetTypeCostFactor(type,1/30.0);
   }
   else {
     std::cerr << "Cannot open database!" << std::endl;
@@ -493,7 +554,8 @@ bool DBThread::CalculateRoute(osmscout::Id startWayId,
 {
   QMutexLocker locker(&mutex);
 
-  return router.CalculateRoute(startWayId,
+  return router.CalculateRoute(routingProfile,
+                               startWayId,
                                startNodeId,
                                targetWayId,
                                targetNodeId,

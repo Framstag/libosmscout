@@ -29,7 +29,8 @@
 
 namespace osmscout {
 
-  bool NodeUseIndex::LoadNodeUseIndex(const std::string& path)
+  bool NodeUseIndex::LoadNodeUseIndex(const std::string& path,
+                                      bool useMmap)
   {
     std::string file=path+"/"+"nodeuse.idx";
     FileScanner scanner;
@@ -38,7 +39,7 @@ namespace osmscout {
       return false;
     }
 
-    if (!scanner.Open(file)) {
+    if (!scanner.Open(file,true,useMmap)) {
       return false;
     }
 

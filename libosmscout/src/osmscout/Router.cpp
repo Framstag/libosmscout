@@ -120,7 +120,7 @@ namespace osmscout {
     }
 
     std::cout << "Loading node use index..." << std::endl;
-    if (!nodeUseIndex.LoadNodeUseIndex(path)) {
+    if (!nodeUseIndex.LoadNodeUseIndex(path,true)) {
       std::cerr << "Cannot load node use index!" << std::endl;
       return false;
     }
@@ -148,6 +148,8 @@ namespace osmscout {
 
   void Router::Close()
   {
+    nodeUseScanner.Close();
+
     wayDataFile.Close();
 
     isOpen=false;
@@ -156,6 +158,11 @@ namespace osmscout {
   void Router::FlushCache()
   {
     wayDataFile.FlushCache();
+  }
+
+  TypeConfig* Router::GetTypeConfig() const
+  {
+    return typeConfig;
   }
 
   bool Router::GetWay(const Id& id, WayRef& way) const
@@ -199,7 +206,7 @@ namespace osmscout {
     }
 
     if (!nodeUseScanner.IsOpen()) {
-      if (!nodeUseScanner.Open(file)) {
+      if (!nodeUseScanner.Open(file,false)) {
         std::cerr << "Cannot open nodeuse.idx file!" << std::endl;
         return false;
       }
@@ -270,12 +277,10 @@ namespace osmscout {
     return GetJoints(ids,wayIds);
   }
 
-  bool Router::GetWays(std::map<Id,Way>& cache,
+  bool Router::GetWays(std::map<Id,WayRef>& cache,
                        const std::set<Id>& ids,
-                       std::vector<WayPtr>& refs)
+                       std::vector<WayRef>& refs)
   {
-    bool result=true;
-
     refs.clear();
     refs.reserve(ids.size());
 
@@ -284,10 +289,10 @@ namespace osmscout {
     for (std::set<Id>::const_iterator id=ids.begin();
          id!=ids.end();
          ++id) {
-      std::map<Id,Way>::const_iterator ref=cache.find(*id);
+      std::map<Id,WayRef>::const_iterator ref=cache.find(*id);
 
       if (ref!=cache.end()) {
-        refs.push_back(&ref->second);
+        refs.push_back(ref->second);
       }
       else {
         remaining.push_back(*id);
@@ -296,49 +301,39 @@ namespace osmscout {
 
     if (!remaining.empty()) {
       std::vector<FileOffset> offsets;
-      static FileScanner      wayScanner;
+      std::vector<WayRef>     data;
       std::string             file=path+"/"+"ways.dat";
-
-      if (!wayScanner.IsOpen()) {
-        if (!wayScanner.Open(file)){
-          std::cerr << "Error while opening ways.dat for routing file!" << std::endl;
-
-          return false;
-        }
-      }
 
       if (!wayDataFile.GetOffsets(remaining,offsets)) {
         return false;
       }
 
-      for (std::vector<FileOffset>::const_iterator entry=offsets.begin();
-           entry!=offsets.end();
-           ++entry) {
-        wayScanner.SetPos(*entry);
-
-        Way way;
-
-        way.Read(wayScanner);
-
-        std::pair<std::map<Id,Way>::iterator,bool> result=cache.insert(std::pair<Id,Way>(way.GetId(),way));
-
-        refs.push_back(&result.first->second);
+      if (!wayDataFile.Get(offsets,data)) {
+        return false;
       }
 
-      result=!wayScanner.HasError()/* && wayScanner.Close()*/;
+      for (std::vector<WayRef>::const_iterator entry=data.begin();
+           entry!=data.end();
+           ++entry) {
+        WayRef way=*entry;
+
+        std::pair<std::map<Id,WayRef>::iterator,bool> result=cache.insert(std::pair<Id,WayRef>(way->GetId(),way));
+
+        refs.push_back(result.first->second);
+      }
     }
 
     assert(ids.size()==refs.size());
 
-    return result;
+    return true;
   }
 
-  bool Router::GetWay(std::map<Id,Way>& cache,
+  bool Router::GetWay(std::map<Id,WayRef>& cache,
                       Id id,
-                      WayPtr& ref)
+                      WayRef& ref)
   {
     std::set<Id>        ids;
-    std::vector<WayPtr> refs;
+    std::vector<WayRef> refs;
 
     ids.insert(id);
 
@@ -462,18 +457,18 @@ namespace osmscout {
     Id nodeId;
   };
 
-  bool Router::CalculateRoute(Id startWayId, Id startNodeId,
+  bool Router::CalculateRoute(const RoutingProfile& profile,
+                              Id startWayId, Id startNodeId,
                               Id targetWayId, Id targetNodeId,
                               RouteData& route)
   {
-    TypeId                type;
-    std::map<Id,Way>      waysCache;
+    std::map<Id,WayRef>   waysCache;
     std::map<Id,Follower> candidatesCache;
-    std::vector<WayPtr>   followWays;
-    WayPtr                startWay;
-    WayPtr                currentWay;
+    std::vector<WayRef>   followWays;
+    WayRef                startWay;
+    WayRef                currentWay;
     double                startLon=0.0L,startLat=0.0L;
-    WayPtr                targetWay;
+    WayRef                targetWay;
     double                targetLon=0.0L,targetLat=0.0L;
     // Sorted list (smallest cost first) of ways to check (we are using a std::set)
     OpenList              openList;
@@ -482,7 +477,6 @@ namespace osmscout {
     std::map<Id,RNode>    closeMap;
     std::set<Id>          loaded;
     std::vector<size_t>   costs;
-    RoutingProfile        profile;
 
     size_t                nodesVisitedCount=0;
     size_t                waysVisitedCount=0;
@@ -497,64 +491,6 @@ namespace osmscout {
     StopClock clock;
 
     route.Clear();
-
-    profile.SetTurnCostFactor(1/60/2); // 30 seconds
-
-    type=typeConfig->GetWayTypeId("highway_motorway");
-    assert(type!=typeIgnore);
-    profile.SetTypeCostFactor(type,1/110.0);
-
-    type=typeConfig->GetWayTypeId("highway_motorway_link");
-    assert(type!=typeIgnore);
-    profile.SetTypeCostFactor(type,1/60.0);
-
-    type=typeConfig->GetWayTypeId("highway_trunk");
-    assert(type!=typeIgnore);
-    profile.SetTypeCostFactor(type,1/70.0);
-
-    type=typeConfig->GetWayTypeId("highway_trunk_link");
-    assert(type!=typeIgnore);
-    profile.SetTypeCostFactor(type,1/70.0);
-
-    type=typeConfig->GetWayTypeId("highway_primary");
-    assert(type!=typeIgnore);
-    profile.SetTypeCostFactor(type,1/70.0);
-
-    type=typeConfig->GetWayTypeId("highway_primary_link");
-    assert(type!=typeIgnore);
-    profile.SetTypeCostFactor(type,1/60.0);
-
-    type=typeConfig->GetWayTypeId("highway_secondary");
-    assert(type!=typeIgnore);
-    profile.SetTypeCostFactor(type,1/60.0);
-
-    type=typeConfig->GetWayTypeId("highway_secondary_link");
-    assert(type!=typeIgnore);
-    profile.SetTypeCostFactor(type,1/50.0);
-
-    type=typeConfig->GetWayTypeId("highway_tertiary");
-    assert(type!=typeIgnore);
-    profile.SetTypeCostFactor(type,1/55.0);
-
-    type=typeConfig->GetWayTypeId("highway_unclassified");
-    assert(type!=typeIgnore);
-    profile.SetTypeCostFactor(type,1/50.0);
-
-    type=typeConfig->GetWayTypeId("highway_road");
-    assert(type!=typeIgnore);
-    profile.SetTypeCostFactor(type,1/50.0);
-
-    type=typeConfig->GetWayTypeId("highway_residential");
-    assert(type!=typeIgnore);
-    profile.SetTypeCostFactor(type,1/40.0);
-
-    type=typeConfig->GetWayTypeId("highway_living_street");
-    assert(type!=typeIgnore);
-    profile.SetTypeCostFactor(type,1/10.0);
-
-    type=typeConfig->GetWayTypeId("highway_service");
-    assert(type!=typeIgnore);
-    profile.SetTypeCostFactor(type,1/30.0);
 
     if (!GetWay(waysCache,
                 startWayId,
@@ -674,7 +610,7 @@ namespace osmscout {
       follower.clear();
 
       // Get joint nodes in same way/area, if the current way changes
-      if (currentWay==NULL || currentWay->GetId()!=current.ref.id) {
+      if (!currentWay.Valid() || currentWay->GetId()!=current.ref.id) {
         if (!GetWay(waysCache,
                     current.ref.id,
                     currentWay)) {
@@ -774,10 +710,10 @@ namespace osmscout {
 
       // Get joint nodes in joint way/area, for ways we need to be able to turn into the new way
 
-      for (std::vector<WayPtr>::const_iterator iter=followWays.begin();
+      for (std::vector<WayRef>::const_iterator iter=followWays.begin();
            iter!=followWays.end();
            ++iter) {
-        const Way* way=*iter;
+        const WayRef way=*iter;
 
         // joint way/area is of non-routable type
         if (!profile.CanUse(way->GetType())) {
@@ -957,6 +893,7 @@ namespace osmscout {
         std::cout << "Route nodes visited: " << nodesVisitedCount << std::endl;
         std::cout << "Ways visited:        " << waysVisitedCount << std::endl;
         std::cout << "Ways dropped:        " << waysDroppedCount << std::endl;
+        std::cout << "Ways cached:         " << waysCache.size() << std::endl;
         std::cout << "Turns evaluated:     " << turnsUsedCount << std::endl;
         std::cout << "Turns dropped:       " << turnsDroppedCount << std::endl;
 

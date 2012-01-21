@@ -140,7 +140,7 @@ namespace osmscout {
       }
     }
 #elif  defined(__WIN32__) || defined(WIN32)
-    if (file!=NULL && readOnly && this->size>0) {
+    if (file!=NULL && readOnly && useMmap && this->size>0) {
       FreeBuffer();
 
       mmfHandle=CreateFileMapping((HANDLE)_get_osfhandle(_fileno(file)),

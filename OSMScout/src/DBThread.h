@@ -73,11 +73,12 @@ private:
   mutable QMutex              mutex;
   osmscout::DatabaseParameter databaseParameter;
   osmscout::Database          database;
-  osmscout::RouterParameter   routerParameter;
-  osmscout::Router            router;
   osmscout::StyleConfig       *styleConfig;
   osmscout::MapData           data;
   osmscout::MapPainterQt      painter;
+  osmscout::RouterParameter   routerParameter;
+  osmscout::Router            router;
+  osmscout::RoutingProfile    routingProfile;
 
   bool                        finish;
 

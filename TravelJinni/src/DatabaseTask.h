@@ -50,9 +50,10 @@ class DatabaseTask : public Lum::OS::Thread
 {
 private:
   osmscout::Database        *database;
-  osmscout::Router          *router;
   osmscout::StyleConfig     *styleConfig;
   osmscout::MapData         data;
+  osmscout::Router          *router;
+  osmscout::RoutingProfile  routingProfile;
   Lum::OS::Condition        condition;
   osmscout::MapPainterCairo painter;
 

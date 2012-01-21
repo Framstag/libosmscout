@@ -55,7 +55,8 @@ namespace osmscout {
     long                        datSize;      //! The size of the nodeuse.dat file
 
   public:
-    bool LoadNodeUseIndex(const std::string& path);
+    bool LoadNodeUseIndex(const std::string& path,
+                          bool useMmap);
 
     size_t GetIntervalSize() const;
     void GetNodeIndexEntries(const std::set<Id>& ids,

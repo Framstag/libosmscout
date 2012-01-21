@@ -58,8 +58,8 @@ DatabaseTask::DatabaseTask(osmscout::Database* database,
                            osmscout::Router* router,
                            Lum::Model::Action* jobFinishedAction)
  : database(database),
-   router(router),
    styleConfig(NULL),
+   router(router),
    finish(false),
    newJob(NULL),
    currentJob(NULL),
@@ -255,12 +255,82 @@ bool DatabaseTask::Open(const std::wstring& path)
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
-  Lum::Base::Path p;
+  Lum::Base::Path  p;
 
   p.SetNativeDir(path);
 
-  return database->Open(Lum::Base::WStringToString(p.GetPath()).c_str()) &&
-         router->Open(Lum::Base::WStringToString(p.GetPath()).c_str());
+  if (!database->Open(Lum::Base::WStringToString(p.GetPath()).c_str())) {
+    return false;
+  }
+
+
+  if (!router->Open(Lum::Base::WStringToString(p.GetPath()).c_str())) {
+    return false;
+  }
+
+
+  osmscout::TypeId     type;
+  osmscout::TypeConfig *typeConfig=router->GetTypeConfig();
+
+  routingProfile.SetTurnCostFactor(1/60/2); // 30 seconds
+
+  type=typeConfig->GetWayTypeId("highway_motorway");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/110.0);
+
+  type=typeConfig->GetWayTypeId("highway_motorway_link");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/60.0);
+
+  type=typeConfig->GetWayTypeId("highway_trunk");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/70.0);
+
+  type=typeConfig->GetWayTypeId("highway_trunk_link");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/70.0);
+
+  type=typeConfig->GetWayTypeId("highway_primary");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/70.0);
+
+  type=typeConfig->GetWayTypeId("highway_primary_link");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/60.0);
+
+  type=typeConfig->GetWayTypeId("highway_secondary");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/60.0);
+
+  type=typeConfig->GetWayTypeId("highway_secondary_link");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/50.0);
+
+  type=typeConfig->GetWayTypeId("highway_tertiary");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/55.0);
+
+  type=typeConfig->GetWayTypeId("highway_unclassified");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/50.0);
+
+  type=typeConfig->GetWayTypeId("highway_road");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/50.0);
+
+  type=typeConfig->GetWayTypeId("highway_residential");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/40.0);
+
+  type=typeConfig->GetWayTypeId("highway_living_street");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/10.0);
+
+  type=typeConfig->GetWayTypeId("highway_service");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.SetTypeCostFactor(type,1/30.0);
+
+  return true;
 }
 
 bool DatabaseTask::IsOpen() const
@@ -392,7 +462,8 @@ bool DatabaseTask::CalculateRoute(osmscout::Id startWayId, osmscout::Id startNod
     return false;
   }
 
-  return router->CalculateRoute(startWayId,
+  return router->CalculateRoute(routingProfile,
+                                startWayId,
                                 startNodeId,
                                 targetWayId,
                                 targetNodeId,

@@ -27,7 +27,7 @@
 
 namespace osmscout {
 
-  class RoutingProfile
+  class OSMSCOUT_API RoutingProfile
   {
   private:
     std::vector<double> costFactors;
