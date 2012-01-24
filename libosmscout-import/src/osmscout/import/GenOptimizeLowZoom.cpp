@@ -85,8 +85,8 @@ namespace osmscout
                                                    TypeId type,
                                                    std::list<WayRef>& ways)
   {
-    size_t nodes=0;
-    size_t wayCount=0;
+    size_t   nodes=0;
+    uint32_t wayCount=0;
 
     if (!scanner.GotoBegin()) {
       progress.Error("Error while positioning at start of file");
