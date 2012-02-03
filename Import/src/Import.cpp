@@ -58,22 +58,33 @@ static const char* BoolToString(bool value)
 void DumpHelp(osmscout::ImportParameter& parameter)
 {
   std::cout << "Import -h -d -s <start step> -e <end step> [openstreetmapdata.osm|openstreetmapdata.osm.pbf]" << std::endl;
-  std::cout << " -h                                   show this help" << std::endl;
+  std::cout << " -h|--help                            show this help" << std::endl;
   std::cout << " -d                                   show debug output" << std::endl;
   std::cout << " -s <start step>                      set starting step" << std::endl;
   std::cout << " -s <end step>                        set final step" << std::endl;
   std::cout << " --typefile <path>                    path and name of the map.ost file (default: " << parameter.GetTypefile() << ")" << std::endl;
   std::cout << " --destinationDirectory <path>        destination for generated map files (default: " << parameter.GetDestinationDirectory() << ")" << std::endl;
+
   std::cout << " --numericIndexPageSize <number>      size of an numeric index page in bytes (default: " << parameter.GetNumericIndexPageSize() << ")" << std::endl;
+
   std::cout << " --rawNodeIndexMemoryMaped true|false memory map raw node index file access (default: " << BoolToString(parameter.GetRawNodeIndexMemoryMaped()) << ")" << std::endl;
   std::cout << " --rawNodeDataMemoryMaped true|false  memory map raw node data file access (default: " << BoolToString(parameter.GetRawNodeDataMemoryMaped()) << ")" << std::endl;
+  std::cout << " --rawNodeDataCacheSize <number>      raw node data cache size (default: " << parameter.GetRawNodeDataCacheSize() << ")" << std::endl;
+  std::cout << " --rawNodeIndexCacheSize <number>     raw node index cache size (default: " << parameter.GetRawNodeIndexCacheSize() << ")" << std::endl;
+
   std::cout << " --rawWayIndexMemoryMaped true|false  memory map raw way index file access (default: " << BoolToString(parameter.GetRawWayIndexMemoryMaped()) << ")" << std::endl;
   std::cout << " --rawWayDataMemoryMaped true|false   memory map raw way data file access (default: " << BoolToString(parameter.GetRawWayDataMemoryMaped()) << ")" << std::endl;
-  std::cout << " --nodesLoadSize <number>             number of nodes to load in one step (default: " << parameter.GetNodesLoadSize() << ")" << std::endl;
-  std::cout << " --nodeDataCacheSize <number>         node data cache size (default: " << parameter.GetNodeDataCacheSize() << ")" << std::endl;
-  std::cout << " --nodeIndexCacheSize <number>        node index cache size (default: " << parameter.GetNodeIndexCacheSize() << ")" << std::endl;
+  std::cout << " --rawWayDataCacheSize <number>       raw way data cache size (default: " << parameter.GetRawWayDataCacheSize() << ")" << std::endl;
+  std::cout << " --rawWayIndexCacheSize <number>      raw way index cache size (default: " << parameter.GetRawWayIndexCacheSize() << ")" << std::endl;
+  std::cout << " --rawWayBlockSize <number>           number of raw ways resolved in block (default: " << BoolToString(parameter.GetRawWayBlockSize()) << ")" << std::endl;
+
+
+  std::cout << " --wayIndexMemoryMaped true|false     memory map way index file access (default: " << BoolToString(parameter.GetWayIndexMemoryMaped()) << ")" << std::endl;
+  std::cout << " --wayDataMemoryMaped true|false      memory map way data file access (default: " << BoolToString(parameter.GetWayDataMemoryMaped()) << ")" << std::endl;
   std::cout << " --wayDataCacheSize <number>          way data cache size (default: " << parameter.GetWayDataCacheSize() << ")" << std::endl;
   std::cout << " --wayIndexCacheSize <number>         way index cache size (default: " << parameter.GetWayIndexCacheSize() << ")" << std::endl;
+
+  std::cout << " --routeNodeBlockSize <number>        number of route nodes resolved in block (default: " << BoolToString(parameter.GetRouteNodeBlockSize()) << ")" << std::endl;
 }
 
 int main(int argc, char* argv[])
@@ -93,16 +104,22 @@ int main(int argc, char* argv[])
 
   bool                      rawNodeIndexMemoryMaped=parameter.GetRawNodeIndexMemoryMaped();
   bool                      rawNodeDataMemoryMaped=parameter.GetRawNodeDataMemoryMaped();
+  size_t                    rawNodeDataCacheSize=parameter.GetRawNodeDataCacheSize();
+  size_t                    rawNodeIndexCacheSize=parameter.GetRawNodeIndexCacheSize();
 
   bool                      rawWayIndexMemoryMaped=parameter.GetRawWayIndexMemoryMaped();
   bool                      rawWayDataMemoryMaped=parameter.GetRawWayDataMemoryMaped();
+  size_t                    rawWayDataCacheSize=parameter.GetRawWayDataCacheSize();
+  size_t                    rawWayIndexCacheSize=parameter.GetRawWayIndexCacheSize();
   size_t                    rawWayBlockSize=parameter.GetRawWayBlockSize();
 
-  size_t                    nodesLoadSize=parameter.GetNodesLoadSize();
-  size_t                    nodeDataCacheSize=parameter.GetNodeDataCacheSize();
-  size_t                    nodeIndexCacheSize=parameter.GetNodeIndexCacheSize();
+
+  bool                      wayIndexMemoryMaped=parameter.GetWayIndexMemoryMaped();
+  bool                      wayDataMemoryMaped=parameter.GetWayDataMemoryMaped();
   size_t                    wayDataCacheSize=parameter.GetWayDataCacheSize();
   size_t                    wayIndexCacheSize=parameter.GetWayIndexCacheSize();
+
+  size_t                    routeNodeBlockSize=parameter.GetRouteNodeBlockSize();
 
   // Simple way to analyse command line parameters, but enough for now...
   int i=1;
@@ -139,6 +156,10 @@ int main(int argc, char* argv[])
       progress.SetOutputDebug(true);
     }
     else if (strcmp(argv[i],"-h")==0) {
+      DumpHelp(parameter);
+      return 0;
+    }
+    else if (strcmp(argv[i],"--help")==0) {
       DumpHelp(parameter);
       return 0;
     }
@@ -206,6 +227,34 @@ int main(int argc, char* argv[])
         parameterError=true;
       }
     }
+    else if (strcmp(argv[i],"--rawNodeDataCacheSize")==0) {
+      i++;
+
+      if (i<argc) {
+        if (!osmscout::StringToNumber(argv[i],rawNodeDataCacheSize)) {
+          std::cerr << "Cannot parse rawNodeDataCacheSize '" << argv[i] << "'" << std::endl;
+          parameterError=true;
+        }
+      }
+      else {
+        std::cerr << "Missing parameter after --rawNodeDataCacheSize option" << std::endl;
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--rawNodeIndexCacheSize")==0) {
+      i++;
+
+      if (i<argc) {
+        if (!osmscout::StringToNumber(argv[i],rawNodeIndexCacheSize)) {
+          std::cerr << "Cannot parse rawNodeIndexCacheSize '" << argv[i] << "'" << std::endl;
+          parameterError=true;
+        }
+      }
+      else {
+        std::cerr << "Missing parameter after --rawNodeIndexCacheSize option" << std::endl;
+        parameterError=true;
+      }
+    }
     else if (strcmp(argv[i],"--rawWayIndexMemoryMaped")==0) {
       i++;
 
@@ -234,6 +283,34 @@ int main(int argc, char* argv[])
         parameterError=true;
       }
     }
+    else if (strcmp(argv[i],"--rawWayDataCacheSize")==0) {
+      i++;
+
+      if (i<argc) {
+        if (!osmscout::StringToNumber(argv[i],rawWayDataCacheSize)) {
+          std::cerr << "Cannot parse rawWayDataCacheSize '" << argv[i] << "'" << std::endl;
+          parameterError=true;
+        }
+      }
+      else {
+        std::cerr << "Missing parameter after --rawWayDataCacheSize option" << std::endl;
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--rawWayIndexCacheSize")==0) {
+      i++;
+
+      if (i<argc) {
+        if (!osmscout::StringToNumber(argv[i],rawWayIndexCacheSize)) {
+          std::cerr << "Cannot parse rawWayIndexCacheSize '" << argv[i] << "'" << std::endl;
+          parameterError=true;
+        }
+      }
+      else {
+        std::cerr << "Missing parameter after --rawWayIndexCacheSize option" << std::endl;
+        parameterError=true;
+      }
+    }
     else if (strcmp(argv[i],"--rawWayBlockSize")==0) {
       i++;
 
@@ -248,45 +325,31 @@ int main(int argc, char* argv[])
         parameterError=true;
       }
     }
-    else if (strcmp(argv[i],"--nodesLoadSize")==0) {
+    else if (strcmp(argv[i],"--wayIndexMemoryMaped")==0) {
       i++;
 
       if (i<argc) {
-        if (!osmscout::StringToNumber(argv[i],nodesLoadSize)) {
-          std::cerr << "Cannot parse nodesLoadSize '" << argv[i] << "'" << std::endl;
+        if (!StringToBool(argv[i],wayIndexMemoryMaped)) {
+          std::cerr << "Cannot parse wayIndexMemoryMaped '" << argv[i] << "'" << std::endl;
           parameterError=true;
         }
       }
       else {
-        std::cerr << "Missing parameter after --nodesLoadSize option" << std::endl;
+        std::cerr << "Missing parameter after --wayIndexMemoryMaped option" << std::endl;
         parameterError=true;
       }
     }
-    else if (strcmp(argv[i],"--nodeDataCacheSize")==0) {
+    else if (strcmp(argv[i],"--wayDataMemoryMaped")==0) {
       i++;
 
       if (i<argc) {
-        if (!osmscout::StringToNumber(argv[i],nodeDataCacheSize)) {
-          std::cerr << "Cannot parse nodeDataCacheSize '" << argv[i] << "'" << std::endl;
+        if (!StringToBool(argv[i],wayDataMemoryMaped)) {
+          std::cerr << "Cannot parse wayDataMemoryMaped '" << argv[i] << "'" << std::endl;
           parameterError=true;
         }
       }
       else {
-        std::cerr << "Missing parameter after --nodeDataCacheSize option" << std::endl;
-        parameterError=true;
-      }
-    }
-    else if (strcmp(argv[i],"--nodeIndexCacheSize")==0) {
-      i++;
-
-      if (i<argc) {
-        if (!osmscout::StringToNumber(argv[i],nodeIndexCacheSize)) {
-          std::cerr << "Cannot parse nodeIndexCacheSize '" << argv[i] << "'" << std::endl;
-          parameterError=true;
-        }
-      }
-      else {
-        std::cerr << "Missing parameter after --nodeIndexCacheSize option" << std::endl;
+        std::cerr << "Missing parameter after --wayDataMemoryMaped option" << std::endl;
         parameterError=true;
       }
     }
@@ -315,6 +378,20 @@ int main(int argc, char* argv[])
       }
       else {
         std::cerr << "Missing parameter after --wayIndexCacheSize option" << std::endl;
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--routeNodeBlockSize")==0) {
+      i++;
+
+      if (i<argc) {
+        if (!osmscout::StringToNumber(argv[i],routeNodeBlockSize)) {
+          std::cerr << "Cannot parse routeNodeBlockSize '" << argv[i] << "'" << std::endl;
+          parameterError=true;
+        }
+      }
+      else {
+        std::cerr << "Missing parameter after --routeNodeBlockSize option" << std::endl;
         parameterError=true;
       }
     }
@@ -348,17 +425,22 @@ int main(int argc, char* argv[])
 
   parameter.SetRawNodeIndexMemoryMaped(rawNodeIndexMemoryMaped);
   parameter.SetRawNodeDataMemoryMaped(rawNodeDataMemoryMaped);
+  parameter.SetRawNodeDataCacheSize(rawNodeDataCacheSize);
+  parameter.SetRawNodeIndexCacheSize(rawNodeIndexCacheSize);
 
   parameter.SetRawWayIndexMemoryMaped(rawWayIndexMemoryMaped);
   parameter.SetRawWayDataMemoryMaped(rawWayDataMemoryMaped);
+  parameter.SetRawWayDataCacheSize(rawWayDataCacheSize);
+  parameter.SetRawWayIndexCacheSize(rawWayIndexCacheSize);
   parameter.SetRawWayBlockSize(rawWayBlockSize);
 
-  parameter.SetNodesLoadSize(nodesLoadSize);
-  parameter.SetNodeDataCacheSize(nodeDataCacheSize);
-  parameter.SetNodeIndexCacheSize(nodeIndexCacheSize);
 
+  parameter.SetWayIndexMemoryMaped(wayIndexMemoryMaped);
+  parameter.SetWayDataMemoryMaped(wayDataMemoryMaped);
   parameter.SetWayDataCacheSize(wayDataCacheSize);
   parameter.SetWayIndexCacheSize(wayIndexCacheSize);
+
+  parameter.SetRouteNodeBlockSize(routeNodeBlockSize);
 
   progress.SetStep("Dump parameter");
   progress.Info(std::string("Mapfile: ")+parameter.GetMapfile());
@@ -370,26 +452,39 @@ int main(int argc, char* argv[])
                 osmscout::NumberToString(parameter.GetEndStep()));
   progress.Info(std::string("NumericIndexPageSize: ")+
                 osmscout::NumberToString(parameter.GetNumericIndexPageSize()));
+
   progress.Info(std::string("RawNodeIndexMemoryMaped: ")+
                 (parameter.GetRawNodeIndexMemoryMaped() ? "true" : "false"));
   progress.Info(std::string("RawNodeDataMemoryMaped: ")+
                 (parameter.GetRawNodeDataMemoryMaped() ? "true" : "false"));
+  progress.Info(std::string("RawNodeDataCacheSize: ")+
+                osmscout::NumberToString(parameter.GetRawNodeDataCacheSize()));
+  progress.Info(std::string("RawNodeIndexCacheSize: ")+
+                osmscout::NumberToString(parameter.GetRawNodeIndexCacheSize()));
+
   progress.Info(std::string("RawWayIndexMemoryMaped: ")+
                 (parameter.GetRawWayIndexMemoryMaped() ? "true" : "false"));
   progress.Info(std::string("RawWayDataMemoryMaped: ")+
                 (parameter.GetRawWayDataMemoryMaped() ? "true" : "false"));
+  progress.Info(std::string("RawWayDataCacheSize: ")+
+                osmscout::NumberToString(parameter.GetRawWayDataCacheSize()));
+  progress.Info(std::string("RawWayIndexCacheSize: ")+
+                osmscout::NumberToString(parameter.GetRawWayIndexCacheSize()));
   progress.Info(std::string("RawWayBlockSize: ")+
                 osmscout::NumberToString(parameter.GetRawWayBlockSize()));
-  progress.Info(std::string("NodesLoadSize: ")+
-                osmscout::NumberToString(parameter.GetNodesLoadSize()));
-  progress.Info(std::string("NodeDataCacheSize: ")+
-                osmscout::NumberToString(parameter.GetNodeDataCacheSize()));
-  progress.Info(std::string("NodeIndexCacheSize: ")+
-                osmscout::NumberToString(parameter.GetNodeIndexCacheSize()));
+
+
+  progress.Info(std::string("WayIndexMemoryMaped: ")+
+                (parameter.GetWayIndexMemoryMaped() ? "true" : "false"));
+  progress.Info(std::string("WayDataMemoryMaped: ")+
+                (parameter.GetWayDataMemoryMaped() ? "true" : "false"));
   progress.Info(std::string("WayDataCacheSize: ")+
                 osmscout::NumberToString(parameter.GetWayDataCacheSize()));
   progress.Info(std::string("WayIndexCacheSize: ")+
                 osmscout::NumberToString(parameter.GetWayIndexCacheSize()));
+
+  progress.Info(std::string("RouteNodeBlockSize: ")+
+                osmscout::NumberToString(parameter.GetRouteNodeBlockSize()));
 
   if (osmscout::Import(parameter,progress)) {
     std::cout << "Import OK!" << std::endl;

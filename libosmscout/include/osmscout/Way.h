@@ -40,7 +40,7 @@ namespace osmscout {
       rstrForbitTurn = 1  //! 0th member will be to, rest via ids
     };
 
-    struct Restriction
+    struct OSMSCOUT_API Restriction
     {
       RestrictionType type;
       std::vector<Id> members;

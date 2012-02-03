@@ -44,26 +44,37 @@ namespace osmscout {
     std::string destinationDirectory;    //! Name of the destination directory
     size_t      startStep;               //! Starting step for import
     size_t      endStep;                 //! End step for import
+
     size_t      numericIndexPageSize;    //! Size of an numeric index page in bytes
+
     bool        rawNodeIndexMemoryMaped; //! Use memory mapping for raw node index file access
     bool        rawNodeDataMemoryMaped;  //! Use memory mapping for raw node data file access
+    size_t      rawNodeDataCacheSize;    //! Size of the raw node data cache
+    size_t      rawNodeIndexCacheSize;   //! Size of the raw node index cache
+
     bool        rawWayIndexMemoryMaped;  //! Use memory mapping for raw way index file access
     bool        rawWayDataMemoryMaped;   //! Use memory mapping for raw way data file access
+    size_t      rawWayDataCacheSize;     //! Size of the raw way data cache
+    size_t      rawWayIndexCacheSize;    //! Size of the raw way index cache
     size_t      rawWayBlockSize;         //! Number of ways loaded during import until nodes get resolved
-    size_t      nodesLoadSize;           //! Maximum number of nodes loaded into memory in one go
-    size_t      nodeIndexIntervalSize;   //! The size of the index interval of the noduse index
-    size_t      nodeDataCacheSize;       //! Size of the node data cache
-    size_t      nodeIndexCacheSize;      //! Size of the node index cache
-    size_t      waysLoadSize;            //! Maximum number of ways loaded into memory in one go
+
+    bool        wayIndexMemoryMaped;     //! Use memory mapping for way index file access
+    bool        wayDataMemoryMaped;      //! Use memory mapping for way data file access
     size_t      wayDataCacheSize;        //! Size of the way data cache
     size_t      wayIndexCacheSize;       //! Size of the way index cache
+    size_t      waysLoadSize;            //! Maximum number of ways loaded into memory in one go
+
     size_t      areaAreaIndexMaxMag;     //! Maximum depth of the index generated
-    size_t      areaAreaRelIndexMaxMag;  //! Maximum depth of the index generated
+
     size_t      areaWayMinMag;           //! Minimum magnification of index for individual type
     size_t      areaWayIndexCellSizeAverage; //! Average entries per index cell
     size_t      areaWayIndexCellSizeMax; //! Maximum number of entries  per index cell
+
     size_t      waterIndexMaxMag;        //! Maximum depth of the index generated
+
     size_t      optimizationMaxMag;      //! Maximum magnification for optimization
+
+    size_t      routeNodeBlockSize;      //! Number of route nodes loaded during import until ways get resolved
 
   public:
     ImportParameter();
@@ -79,24 +90,31 @@ namespace osmscout {
 
     bool GetRawNodeIndexMemoryMaped() const;
     bool GetRawNodeDataMemoryMaped() const;
+    size_t GetRawNodeDataCacheSize() const;
+    size_t GetRawNodeIndexCacheSize() const;
 
     bool GetRawWayIndexMemoryMaped() const;
     bool GetRawWayDataMemoryMaped() const;
+    size_t GetRawWayDataCacheSize() const;
+    size_t GetRawWayIndexCacheSize() const;
     size_t GetRawWayBlockSize() const;
 
-    size_t GetNodesLoadSize() const;
-    size_t GetNodeIndexIntervalSize() const;
-    size_t GetNodeDataCacheSize() const;
-    size_t GetNodeIndexCacheSize() const;
+
+    bool GetWayIndexMemoryMaped() const;
+    bool GetWayDataMemoryMaped() const;
     size_t GetWayDataCacheSize() const;
     size_t GetWayIndexCacheSize() const;
+
     size_t GetAreaAreaIndexMaxMag() const;
-    size_t GetAreaAreaRelIndexMaxMag() const;
     size_t GetAreaWayMinMag() const;
     size_t GetAreaWayIndexCellSizeAverage() const;
     size_t GetAreaWayIndexCellSizeMax() const;
+
     size_t GetWaterIndexMaxMag() const;
+
     size_t GetOptimizationMaxMag() const;
+
+    size_t GetRouteNodeBlockSize() const;
 
     void SetMapfile(const std::string& mapfile);
     void SetTypefile(const std::string& typefile);
@@ -109,18 +127,24 @@ namespace osmscout {
 
     void SetRawNodeIndexMemoryMaped(bool memoryMaped);
     void SetRawNodeDataMemoryMaped(bool memoryMaped);
+    void SetRawNodeDataCacheSize(size_t nodeDataCacheSize);
+    void SetRawNodeIndexCacheSize(size_t nodeIndexCacheSize);
 
     void SetRawWayIndexMemoryMaped(bool memoryMaped);
     void SetRawWayDataMemoryMaped(bool memoryMaped);
+    void SetRawWayDataCacheSize(size_t wayDataCacheSize);
+    void SetRawWayIndexCacheSize(size_t wayIndexCacheSize);
     void SetRawWayBlockSize(size_t blockSize);
 
-    void SetNodesLoadSize(size_t nodesLoadSize);
-    void SetNodeIndexIntervalSize(size_t nodeIndexIntervalSize);
-    void SetNodeDataCacheSize(size_t nodeDataCacheSize);
-    void SetNodeIndexCacheSize(size_t nodeIndexCacheSize);
-    void SetWaysLoadSize(size_t waysLoadSize);
+
+    void SetWayIndexMemoryMaped(bool memoryMaped);
+    void SetWayDataMemoryMaped(bool memoryMaped);
     void SetWayDataCacheSize(size_t wayDataCacheSize);
     void SetWayIndexCacheSize(size_t wayIndexCacheSize);
+    void SetWaysLoadSize(size_t waysLoadSize);
+
+    void SetRouteNodeBlockSize(size_t blockSize);
+
   };
 
   /**

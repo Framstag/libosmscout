@@ -25,6 +25,8 @@
 
 #include <osmscout/TypeConfig.h>
 
+#include <osmscout/RouteNode.h>
+
 // Datafiles
 #include <osmscout/WayDataFile.h>
 
@@ -41,6 +43,8 @@
 #include <osmscout/util/Cache.h>
 
 namespace osmscout {
+
+  typedef DataFile<RouteNode> RouteNodeDataFile;
 
   /**
     Database instance initialisation parameter to influence the behaviour of the database
@@ -80,59 +84,21 @@ namespace osmscout {
       Id     wayId;
     };
 
-    struct NodeUse
-    {
-      Id                    id;
-      std::vector<Follower> references;
-    };
-
-    typedef Cache<size_t,std::vector<NodeUse> > NodeUseCache;
-
-    struct NodeUseCacheValueSizer : public NodeUseCache::ValueSizer
-    {
-      unsigned long GetSize(const std::vector<Router::NodeUse>& value) const
-      {
-        unsigned long memory=0;
-
-        for (size_t i=0; i<value.size(); i++) {
-          memory+=sizeof(Router::NodeUse);
-        }
-
-        return memory;
-      }
-    };
-
   private:
-    bool                  isOpen;          //! true, if opened
+    bool                  isOpen;            //! true, if opened
     bool                  debugPerformance;
 
-    std::string           path;             //! Path to the directory containing all files
+    std::string           path;              //! Path to the directory containing all files
 
-    mutable NodeUseCache  nodeUseCache;     //! Cache for node use data, seems like the cache is more expensive than direct loading!?
-    NodeUseIndex          nodeUseIndex;
+    WayDataFile           wayDataFile;       //! Cached access to the 'ways.dat' file
+    RouteNodeDataFile     routeNodeDataFile; //! Cached access to the 'route.dat' file
 
-    WayDataFile           wayDataFile;      //! Cached access to the 'ways.dat' file
-
-    mutable FileScanner   nodeUseScanner;   //! File stream to the nodeuse.idx file
-
-    TypeConfig            *typeConfig;      //! Type config for the currently opened map
+    TypeConfig            *typeConfig;       //! Type config for the currently opened map
 
   private:
-    bool GetWays(std::map<Id,WayRef>& cache,
-                 const std::set<Id>& ids,
-                 std::vector<WayRef>& refs);
-
-    bool GetWay(std::map<Id,WayRef>& cache,
-                Id id,
-                WayRef& ref);
-
-    bool GetWay(const Id& id,
-                WayRef& way) const;
-
-    bool GetJoints(Id id,
-                   std::list<Follower>& followers) const;
-    bool GetJoints(const std::set<Id>& ids,
-                   std::list<Follower>& followers) const;
+    void GetClosestRouteNode(const WayRef& way,
+                             Id nodeId,
+                             RouteNodeRef& routeNode);
 
   public:
     Router(const RouterParameter& parameter);

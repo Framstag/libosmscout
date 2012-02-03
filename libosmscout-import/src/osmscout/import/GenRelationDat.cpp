@@ -703,17 +703,17 @@ namespace osmscout {
 
     DataFile<RawNode>     nodeDataFile("rawnodes.dat",
                                        "rawnode.idx",
-                                       parameter.GetNodeDataCacheSize(),
-                                       parameter.GetNodeIndexCacheSize());
+                                       parameter.GetRawNodeDataCacheSize(),
+                                       parameter.GetRawNodeIndexCacheSize());
     DataFile<RawWay>      wayDataFile("rawways.dat",
                                       "rawway.idx",
-                                      parameter.GetWayDataCacheSize(),
-                                      parameter.GetWayIndexCacheSize());
+                                      parameter.GetRawWayDataCacheSize(),
+                                      parameter.GetRawWayIndexCacheSize());
 
     DataFile<RawRelation> relDataFile("rawrels.dat",
                                       "rawrel.idx",
-                                      parameter.GetWayDataCacheSize(),
-                                      parameter.GetWayIndexCacheSize());
+                                      parameter.GetRawWayDataCacheSize(),
+                                      parameter.GetRawWayIndexCacheSize());
 
     if (!nodeDataFile.Open(parameter.GetDestinationDirectory(),
                            parameter.GetRawNodeIndexMemoryMaped(),

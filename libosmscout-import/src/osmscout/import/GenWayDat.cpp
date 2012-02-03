@@ -142,7 +142,7 @@ namespace osmscout {
                                       "rawways.dat"),
                                       true,
                                       parameter.GetRawWayDataMemoryMaped())) {
-      progress.Error("Canot open 'rawways.dat'");
+      progress.Error("Cannot open 'rawways.dat'");
       return false;
     }
 
@@ -202,7 +202,7 @@ namespace osmscout {
                                       "rawways.dat"),
                                       true,
                                       parameter.GetRawWayDataMemoryMaped())) {
-      progress.Error("Canot open 'rawways.dat'");
+      progress.Error("Cannot open 'rawways.dat'");
       return false;
     }
 
@@ -634,9 +634,9 @@ namespace osmscout {
 
     DataFile<RawNode>       nodeDataFile("rawnodes.dat",
                                          "rawnode.idx",
-                                         parameter.GetNodeDataCacheSize(),
-                                         parameter.GetNodeIndexCacheSize());
-    NumericIndex<Id,RawWay> rawWayIndex("rawway.idx",parameter.GetWayIndexCacheSize());
+                                         parameter.GetRawNodeDataCacheSize(),
+                                         parameter.GetRawNodeIndexCacheSize());
+    NumericIndex<Id,RawWay> rawWayIndex("rawway.idx",parameter.GetRawWayIndexCacheSize());
 
     if (!nodeDataFile.Open(parameter.GetDestinationDirectory(),
                            parameter.GetRawNodeIndexMemoryMaped(),

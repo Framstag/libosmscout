@@ -28,6 +28,7 @@
 #include <osmscout/Node.h>
 #include <osmscout/Point.h>
 #include <osmscout/Relation.h>
+#include <osmscout/RouteNode.h>
 #include <osmscout/Way.h>
 
 #include <osmscout/import/RawNode.h>
@@ -47,17 +48,20 @@
 #include <osmscout/import/GenAreaAreaIndex.h>
 #include <osmscout/import/GenAreaNodeIndex.h>
 #include <osmscout/import/GenAreaWayIndex.h>
-#include <osmscout/import/GenNodeUseIndex.h>
+
 #include <osmscout/import/GenCityStreetIndex.h>
 #include <osmscout/import/GenWaterIndex.h>
 #include <osmscout/import/GenOptimizeLowZoom.h>
+
+// Routing
+#include <osmscout/import/GenRouteDat.h>
 
 #include <osmscout/util/StopClock.h>
 
 namespace osmscout {
 
   static const size_t defaultStartStep=1;
-  static const size_t defaultEndStep=18;
+  static const size_t defaultEndStep=19;
 
   ImportParameter::ImportParameter()
    : typefile("map.ost"),
@@ -66,23 +70,25 @@ namespace osmscout {
      numericIndexPageSize(4096),
      rawNodeIndexMemoryMaped(true),
      rawNodeDataMemoryMaped(false),
+     rawNodeDataCacheSize(10000),
+     rawNodeIndexCacheSize(50000),
      rawWayIndexMemoryMaped(true),
      rawWayDataMemoryMaped(false),
+     rawWayDataCacheSize(5000),
+     rawWayIndexCacheSize(10000),
      rawWayBlockSize(500000),
-     nodesLoadSize(10000000),
-     nodeIndexIntervalSize(64),
-     nodeDataCacheSize(10000),
-     nodeIndexCacheSize(50000),
-     waysLoadSize(1000000),
-     wayDataCacheSize(5000),
+     wayIndexMemoryMaped(true),
+     wayDataMemoryMaped(false),
+     wayDataCacheSize(0),
      wayIndexCacheSize(10000),
+     waysLoadSize(1000000),
      areaAreaIndexMaxMag(17),
-     areaAreaRelIndexMaxMag(17),
      areaWayMinMag(14),
      areaWayIndexCellSizeAverage(64),
      areaWayIndexCellSizeMax(256),
      waterIndexMaxMag(14),
-     optimizationMaxMag(8)
+     optimizationMaxMag(8),
+     routeNodeBlockSize(1500000)
   {
     // no code
   }
@@ -132,6 +138,16 @@ namespace osmscout {
     return rawWayIndexMemoryMaped;
   }
 
+  size_t ImportParameter::GetRawWayDataCacheSize() const
+  {
+    return rawWayDataCacheSize;
+  }
+
+  size_t ImportParameter::GetRawWayIndexCacheSize() const
+  {
+    return rawWayIndexCacheSize;
+  }
+
   bool ImportParameter::GetRawWayDataMemoryMaped() const
   {
     return rawWayDataMemoryMaped;
@@ -142,24 +158,19 @@ namespace osmscout {
     return rawWayBlockSize;
   }
 
-  size_t ImportParameter::GetNodesLoadSize() const
+  size_t ImportParameter::GetRawNodeDataCacheSize() const
   {
-    return nodesLoadSize;
+    return rawNodeDataCacheSize;
   }
 
-  size_t ImportParameter::GetNodeIndexIntervalSize() const
+  size_t ImportParameter::GetRawNodeIndexCacheSize() const
   {
-    return nodeIndexIntervalSize;
+    return rawNodeIndexCacheSize;
   }
 
-  size_t ImportParameter::GetNodeDataCacheSize() const
+  bool ImportParameter::GetWayIndexMemoryMaped() const
   {
-    return nodeDataCacheSize;
-  }
-
-  size_t ImportParameter::GetNodeIndexCacheSize() const
-  {
-    return nodeIndexCacheSize;
+    return wayIndexMemoryMaped;
   }
 
   size_t ImportParameter::GetWayDataCacheSize() const
@@ -172,14 +183,14 @@ namespace osmscout {
     return wayIndexCacheSize;
   }
 
+  bool ImportParameter::GetWayDataMemoryMaped() const
+  {
+    return wayDataMemoryMaped;
+  }
+
   size_t ImportParameter::GetAreaAreaIndexMaxMag() const
   {
     return areaAreaIndexMaxMag;
-  }
-
-  size_t ImportParameter::GetAreaAreaRelIndexMaxMag() const
-  {
-    return areaAreaRelIndexMaxMag;
   }
 
   size_t ImportParameter::GetAreaWayMinMag() const
@@ -205,6 +216,11 @@ namespace osmscout {
   size_t ImportParameter::GetOptimizationMaxMag() const
   {
     return optimizationMaxMag;
+  }
+
+  size_t ImportParameter::GetRouteNodeBlockSize() const
+  {
+    return routeNodeBlockSize;
   }
 
   void ImportParameter::SetMapfile(const std::string& mapfile)
@@ -259,34 +275,39 @@ namespace osmscout {
     this->rawWayDataMemoryMaped=memoryMaped;
   }
 
+  void ImportParameter::SetRawWayDataCacheSize(size_t wayDataCacheSize)
+  {
+    this->rawWayDataCacheSize=wayDataCacheSize;
+  }
+
+  void ImportParameter::SetRawWayIndexCacheSize(size_t wayIndexCacheSize)
+  {
+    this->rawWayIndexCacheSize=wayIndexCacheSize;
+  }
+
   void ImportParameter::SetRawWayBlockSize(size_t blockSize)
   {
     this->rawWayBlockSize=blockSize;
   }
 
-  void ImportParameter::SetNodesLoadSize(size_t nodesLoadSize)
+  void ImportParameter::SetRawNodeDataCacheSize(size_t nodeDataCacheSize)
   {
-    this->nodesLoadSize=nodesLoadSize;
+    this->rawNodeDataCacheSize=nodeDataCacheSize;
   }
 
-  void ImportParameter::SetNodeIndexIntervalSize(size_t nodeIndexIntervalSize)
+  void ImportParameter::SetRawNodeIndexCacheSize(size_t nodeIndexCacheSize)
   {
-    this->nodeIndexIntervalSize=nodeIndexIntervalSize;
+    this->rawNodeIndexCacheSize=nodeIndexCacheSize;
   }
 
-  void ImportParameter::SetNodeDataCacheSize(size_t nodeDataCacheSize)
+  void ImportParameter::SetWayIndexMemoryMaped(bool memoryMaped)
   {
-    this->nodeDataCacheSize=nodeDataCacheSize;
+    this->wayIndexMemoryMaped=memoryMaped;
   }
 
-  void ImportParameter::SetNodeIndexCacheSize(size_t nodeIndexCacheSize)
+  void ImportParameter::SetWayDataMemoryMaped(bool memoryMaped)
   {
-    this->nodeIndexCacheSize=nodeIndexCacheSize;
-  }
-
-  void ImportParameter::SetWaysLoadSize(size_t waysLoadSize)
-  {
-    this->waysLoadSize=waysLoadSize;
+    this->wayDataMemoryMaped=memoryMaped;
   }
 
   void ImportParameter::SetWayDataCacheSize(size_t wayDataCacheSize)
@@ -297,6 +318,16 @@ namespace osmscout {
   void ImportParameter::SetWayIndexCacheSize(size_t wayIndexCacheSize)
   {
     this->wayIndexCacheSize=wayIndexCacheSize;
+  }
+
+  void ImportParameter::SetWaysLoadSize(size_t waysLoadSize)
+  {
+    this->waysLoadSize=waysLoadSize;
+  }
+
+  void ImportParameter::SetRouteNodeBlockSize(size_t blockSize)
+  {
+    this->routeNodeBlockSize=blockSize;
   }
 
   ImportModule::~ImportModule()
@@ -419,11 +450,17 @@ namespace osmscout {
     /* 15 */
     modules.push_back(new CityStreetIndexGenerator());
     /* 16 */
-    modules.push_back(new NodeUseIndexGenerator());
-    /* 17 */
     modules.push_back(new WaterIndexGenerator());
-    /* 18 */
+    /* 17 */
     modules.push_back(new OptimizeLowZoomGenerator());
+    /* 18 */
+    modules.push_back(new RouteDataGenerator());
+    /* 19 */
+    modules.push_back(new NumericIndexGenerator<Id,RouteNode>("Generating 'route.idx'",
+                                                              AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                              "route.dat"),
+                                                              AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                              "route.idx")));
 
     bool result=ExecuteModules(modules,parameter,progress,typeConfig);
 

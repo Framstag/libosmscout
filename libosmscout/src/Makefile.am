@@ -30,6 +30,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/GroundTile.cpp \
                         osmscout/Location.cpp \
                         osmscout/Node.cpp \
+                        osmscout/RouteNode.cpp \
                         osmscout/Point.cpp \
                         osmscout/Relation.cpp \
                         osmscout/SegmentAttributes.cpp \
