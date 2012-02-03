@@ -319,9 +319,8 @@ namespace osmscout {
     std::map<Id,RNodeRef> openMap;
     std::map<Id,RNode>    closeMap;
 
-    size_t                nodesVisitedCount=0;
-    size_t                turnsUsedCount=0;
-    size_t                turnsDroppedCount=0;
+    size_t                nodesLoadedCount=0;
+    size_t                nodesIgnoredCount=0;
 
     std::cout << startWayId << "[" << startNodeId << "] => " << targetWayId << "[" << targetNodeId << "]" << std::endl;
 
@@ -420,13 +419,13 @@ namespace osmscout {
 
       if (!routeNodeDataFile.Get(current.nodeId,currentRouteNode) || !currentRouteNode.Valid()) {
         std::cerr << "Cannot load route node with id " << current.nodeId << std::endl;
-        turnsDroppedCount++;
+        nodesIgnoredCount++;
         return false;
       }
 
       //std::cout << "Visiting route node " << currentRouteNode->id << " " << currentRouteNode->lat << "," << currentRouteNode->lon << std::endl;
 
-      nodesVisitedCount++;
+      nodesLoadedCount++;
 /*
       std::cout << "S:   " << openList.size() << std::endl;
       std::cout << "ID:  " << current.id << std::endl;
@@ -445,7 +444,7 @@ namespace osmscout {
       for (size_t i=0; i<currentRouteNode->paths.size(); i++) {
         if (!profile.CanUse(currentRouteNode->paths[i].type)) {
           //std::cout << "skipping route node " << currentRouteNode->paths[i].id << " (wrong type)" << std::endl;
-          turnsDroppedCount++;
+          nodesIgnoredCount++;
           continue;
         }
 
@@ -461,7 +460,7 @@ namespace osmscout {
           }
 
           if (!canTurnedInto) {
-            turnsDroppedCount++;
+            nodesIgnoredCount++;
             continue;
           }
         }
@@ -488,8 +487,6 @@ namespace osmscout {
           //std::cout << "skipping route node " << currentRouteNode->paths[i].id << " (cheaper route exists " << currentCost << "<=>" << openEntry->second->currentCost << ")" << std::endl;
           continue;
         }
-
-        turnsUsedCount++;
 
         // Estimate costs for the rest of the distance to the target
         double estimateCost=profile.GetMinCostFactor()*
@@ -579,10 +576,9 @@ namespace osmscout {
 
         clock.Stop();
 
-        std::cout << "Time:                " << clock << std::endl;
-        std::cout << "Route nodes visited: " << nodesVisitedCount << std::endl;
-        std::cout << "Turns evaluated:     " << turnsUsedCount << std::endl;
-        std::cout << "Turns dropped:       " << turnsDroppedCount << std::endl;
+        std::cout << "Time:                  " << clock << std::endl;
+        std::cout << "Route nodes loaded:    " << nodesLoadedCount << std::endl;
+        std::cout << "Route nodes ignored:   " << nodesIgnoredCount << std::endl;
 
         std::cout << "=========== Routing end ==============" << std::endl;
         return true;
