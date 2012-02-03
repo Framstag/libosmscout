@@ -21,17 +21,17 @@ $(OSMScout_OBJECTS) : moc_DBThread.cpp \
                       moc_MainWindow.cpp
 
 OSMScout_CXXFLAGS=-I. \
-                  $(LIBQTGUI_CFLAGS) \
-                  $(LIBOSMSCOUT_CFLAGS) \
+                  $(LIBOSMSCOUTMAPQT_CFLAGS) \
                   $(LIBOSMSCOUTMAP_CFLAGS) \
-                  $(LIBOSMSCOUTMAPQT_CFLAGS)
+                  $(LIBOSMSCOUT_CFLAGS) \
+                  $(LIBQTGUI_CFLAGS)
 
 
 OSMScout_LDADD= \
-               $(LIBQTGUI_LIBS) \
-               $(LIBOSMSCOUT_LIBS) \
+               $(LIBOSMSCOUTMAPQT_LIBS) \
                $(LIBOSMSCOUTMAP_LIBS) \
-               $(LIBOSMSCOUTMAPQT_LIBS)
+               $(LIBOSMSCOUT_LIBS) \
+               $(LIBQTGUI_LIBS)
 
 if HAVE_LIB_QTOPENGL
 OSMScout_CXXFLAGS += $(LIBQTOPENGL_CFLAGS)

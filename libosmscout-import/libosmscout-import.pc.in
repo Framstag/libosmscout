@@ -8,9 +8,13 @@ Name: libosmscout-import                # human-readable name
 Description: osm navigation library     # human-readable description
 Version: @VERSION@
 Libs: -L${libdir}  \
-      @XML2_LIBS@ \
+      -losmscoutimport \
       @LIBOSMSCOUT_LIBS@ \
-      -losmscoutimport
+      @PROTOBUF_LIBS@ \
+      @ZLIB_LIBS@ \
+      @XML2_LIBS@
 Cflags: -I${includedir} \
-      @XML2_CFLAGS@ \
-      @LIBOSMSCOUT_CFLAGS@
+        @LIBOSMSCOUT_CFLAGS@ \
+        @PROTOBUF_CFLAGS@ \
+        @ZLIB_CFLAGS@ \
+        @XML2_CFLAGS@

@@ -2,10 +2,12 @@ Name: libosmscout-map-qt                # human-readable name
 Description: osm navigation library     # human-readable description
 Version: @VERSION@
 Libs: -L@abs_builddir@/src/.libs \
+      -losmscoutmapqt \
       @LIBOSMSCOUTMAP_LIBS@ \
-      @LIBQTGUI_LIBS@ \
-      -losmscoutmapqt
+      @LIBOSMSCOUT_LIBS@ \
+      @LIBQTGUI_LIBS@
 Cflags: -I@abs_builddir@/include \
         @LIBOSMSCOUTMAP_CFLAGS@ \
+        @LIBOSMSCOUT_CFLAGS@ \
         @LIBQTGUI_CFLAGS@
         

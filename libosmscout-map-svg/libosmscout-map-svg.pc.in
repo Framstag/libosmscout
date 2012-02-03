@@ -8,9 +8,9 @@ Name: libosmscout-map-svg               # human-readable name
 Description: osm navigation library     # human-readable description
 Version: @VERSION@
 Libs: -L${libdir} \
-      @LIBOSMSCOUT_LIBS@ \
+      -losmscoutmapsvg \
       @LIBOSMSCOUTMAP_LIBS@ \
-      -losmscoutmapsvg
+      @LIBOSMSCOUT_LIBS@
 Cflags: -I${includedir} \
-        @LIBOSMSCOUT_CFLAGS@ \
         @LIBOSMSCOUTMAP_CFLAGS@ \
+        @LIBOSMSCOUT_CFLAGS@

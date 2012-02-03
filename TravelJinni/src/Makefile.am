@@ -13,12 +13,12 @@ TravelJinni_SOURCES = DatabaseTask.h \
 TravelJinni_CXXFLAGS=-I. \
                       -DAPP_DATADIR=\"$(pkgdatadir)\" \
                       $(LIBILLUMINATION_CFLAGS) \
-                      $(LIBOSMSCOUT_CFLAGS) \
+                      $(LIBOSMSCOUTMAPCAIRO_CFLAGS) \
                       $(LIBOSMSCOUTMAP_CFLAGS) \
-                      $(LIBOSMSCOUTMAPCAIRO_CFLAGS)
+                      $(LIBOSMSCOUT_CFLAGS)
 
 TravelJinni_LDADD=$(LIBILLUMINATION_LIBS) \
-                  $(LIBOSMSCOUT_LIBS) \
+                  $(LIBOSMSCOUTMAPCAIRO_LIBS) \
                   $(LIBOSMSCOUTMAP_LIBS) \
-                  $(LIBOSMSCOUTMAPCAIRO_LIBS)
+                  $(LIBOSMSCOUT_LIBS)
 
