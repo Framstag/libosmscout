@@ -40,7 +40,6 @@ namespace osmscout {
     {
       RestrictionType type;
       Id              from;
-      Id              via;
       Id              to;
     };
 

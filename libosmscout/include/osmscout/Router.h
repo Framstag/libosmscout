@@ -98,7 +98,8 @@ namespace osmscout {
   private:
     void GetClosestRouteNode(const WayRef& way,
                              Id nodeId,
-                             RouteNodeRef& routeNode);
+                             RouteNodeRef& routeNode,
+                             size_t& pos);
 
   public:
     Router(const RouterParameter& parameter);

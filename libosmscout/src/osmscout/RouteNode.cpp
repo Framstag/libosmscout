@@ -56,7 +56,7 @@ namespace osmscout {
       scanner.ReadNumber(latValue);
       scanner.ReadNumber(lonValue);
 
-      paths[i].distance=distanceValue/(1000.0*10.0);
+      paths[i].distance=distanceValue/(1000.0*100.0);
       paths[i].lat=(latValue+minLat)/conversionFactor-90.0;
       paths[i].lon=(lonValue+minLon)/conversionFactor-180.0;
     }
@@ -90,7 +90,7 @@ namespace osmscout {
     for (size_t i=0; i<paths.size(); i++) {
       uint32_t latValue=(uint32_t)floor((paths[i].lat+90.0)*conversionFactor+0.5);
       uint32_t lonValue=(uint32_t)floor((paths[i].lon+180.0)*conversionFactor+0.5);
-      uint32_t distanceValue=(uint32_t)floor(paths[i].distance*(1000.0*10.0)+0.5);
+      uint32_t distanceValue=(uint32_t)floor(paths[i].distance*(1000.0*100.0)+0.5);
 
       writer.Write(paths[i].id);
       writer.WriteNumber(paths[i].type);

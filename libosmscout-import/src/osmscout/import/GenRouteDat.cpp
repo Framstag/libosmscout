@@ -53,18 +53,6 @@ namespace osmscout {
     std::set<TypeId> posRestrictions;
     std::set<TypeId> negRestrictions;
 
-    /*
-    TYPE "restriction_no_right_turn" = RELATION ("type"=="restriction" AND "restriction"=="no_right_turn") OPTIONS IGNORE
-    TYPE "restriction_no_left_turn" = RELATION ("type"=="restriction" AND "restriction"=="no_left_turn") OPTIONS IGNORE
-    TYPE "restriction_no_u_turn" = RELATION ("type"=="restriction" AND "restriction"=="no_u_turn") OPTIONS IGNORE
-    TYPE "restriction_no_straight_on" = RELATION ("type"=="restriction" AND "restriction"=="no_straight_on") OPTIONS IGNORE
-    TYPE "restriction_only_right_turn" = RELATION ("type"=="restriction" AND "restriction"=="only_right_turn") OPTIONS IGNORE
-    TYPE "restriction_only_right_turn" = RELATION ("type"=="restriction" AND "restriction"=="only_right_turn") OPTIONS IGNORE
-    TYPE "restriction_only_left_turn" = RELATION ("type"=="restriction" AND "restriction"=="only_left_turn") OPTIONS IGNORE
-    TYPE "restriction_only_straight_on" = RELATION ("type"=="restriction" AND "restriction"=="only_straight_on") OPTIONS IGNORE
-    */
-
-
     if (typeConfig.GetRelationTypeId("restriction_only_right_turn")!=typeIgnore) {
       posRestrictions.insert(typeConfig.GetRelationTypeId("restriction_only_right_turn"));
     }
@@ -120,9 +108,7 @@ namespace osmscout {
 
       if (posRestrictions.find(relation.GetType())!=posRestrictions.end() ||
           negRestrictions.find(relation.GetType())!=negRestrictions.end()) {
-        Id          from=0;
-        Id          via;
-        Id          to=0;
+        Id          via=0;
         Restriction restriction;
 
         if (posRestrictions.find(relation.GetType())!=posRestrictions.end()) {
@@ -138,19 +124,19 @@ namespace osmscout {
         for (size_t i=0; i<relation.members.size(); i++) {
           if (relation.members[i].type==RawRelation::memberWay &&
               relation.members[i].role=="from") {
-            from=relation.members[i].id;
-          }
-          else if (relation.members[i].type==RawRelation::memberWay &&
-                   relation.members[i].role=="to") {
-            to=relation.members[i].id;
+            restriction.from=relation.members[i].id;
           }
           else if (relation.members[i].type==RawRelation::memberNode &&
                    relation.members[i].role=="via") {
             via=relation.members[i].id;
           }
+          else if (relation.members[i].type==RawRelation::memberWay &&
+                   relation.members[i].role=="to") {
+            restriction.to=relation.members[i].id;
+          }
         }
 
-        if (from!=0 && via!=0 && to!=0) {
+        if (restriction.from!=0 && via!=0 && restriction.to!=0) {
           restrictions[via].push_back(restriction);
         }
       }
@@ -179,27 +165,27 @@ namespace osmscout {
     for (std::vector<Restriction>::const_iterator iter=restrictions.begin();
          iter!=restrictions.end();
          ++iter) {
-      if (iter->type==allow) {
-        if (iter->from==from &&
-            iter->to==to) {
-          return true;
-        }
+      if (iter->from==from) {
+        if (iter->type==allow) {
+          if (iter->to==to) {
+            return true;
+          }
 
-        // If there are allow restrictions,everything is forbitten
-        defaultReturn=false;
-      }
-      else if (iter->type==forbit) {
-        if (iter->from==from &&
-            iter->to==to) {
-          return false;
+          // If there are allow restrictions,everything else is forbidden
+          defaultReturn=false;
         }
+        else if (iter->type==forbit) {
+          if (iter->to==to) {
+            return false;
+          }
 
-        // If there are forbit restrictions, everything else is allowed
-        defaultReturn=true;
+          // If there are forbid restrictions, everything else is allowed
+          defaultReturn=true;
+        }
       }
     }
 
-    // Now lets hope, nobody is mixing allow and forbit!
+    // Now lets hope nobody is mixing allow and forbid!
     return defaultReturn;
   }
 
@@ -406,6 +392,7 @@ namespace osmscout {
     // List of restrictions for a way
     std::map<Id,std::vector<Restriction> > restrictions;
 
+    uint32_t                               handledRouteNodeCount=0;
     uint32_t                               writtenRouteNodeCount=0;
     uint32_t                               writtenRoutePathCount=0;
 
@@ -553,8 +540,8 @@ namespace osmscout {
 
         routeNode.id=node->first;
 
-        writtenRouteNodeCount++;
-        progress.SetProgress(writtenRouteNodeCount,nodeWayMap.size());
+        handledRouteNodeCount++;
+        progress.SetProgress(handledRouteNodeCount,nodeWayMap.size());
 
         for (std::list<Id>::const_iterator wayId=node->second.begin();
             wayId!=node->second.end();
@@ -562,54 +549,97 @@ namespace osmscout {
           const WayRef& way=waysMap[*wayId];
 
           if (way->IsArea()) {
-            // Area handling is not correct, because it is possible that the shortest way by node count
-            // is not the shortest way by distance.
-            // In fact we should only add a route path to the next route node clockwise and anti-clockwise
-            // with wrap-around at way->nodes.size().
+            int    currentNode=0;
+            double distance;
 
-            size_t currentNode=0;
-
-            while (currentNode<way->nodes.size() &&
+            while (currentNode<(int)way->nodes.size() &&
                   way->nodes[currentNode].GetId()!=node->first) {
               currentNode++;
             }
 
-            assert(currentNode<way->nodes.size());
+            assert(currentNode<(int)way->nodes.size());
 
-            for (size_t i=0;i<way->nodes.size(); i++) {
-              if (way->nodes[i].GetId()!=node->first &&
-                  nodeWayMap.find(way->nodes[i].GetId())!=nodeWayMap.end()
-                  ) {
-                RouteNode::RoutePath path;
+            int nextNode=currentNode+1;
 
-                path.type=way->GetType();
-                path.wayId=way->GetId();
-                path.id=way->nodes[i].GetId();
-                path.lat=way->nodes[i].GetLat();
-                path.lon=way->nodes[i].GetLon();
+            if (nextNode>=(int)way->nodes.size()) {
+              nextNode=0;
+            }
 
-                path.distance=0.0;
+            distance=GetSphericalDistance(way->nodes[currentNode].GetLon(),
+                                          way->nodes[currentNode].GetLat(),
+                                          way->nodes[nextNode].GetLon(),
+                                          way->nodes[nextNode].GetLat());
 
-                if (currentNode<i)
-                {
-                  for (size_t d=currentNode;d<i; d++) {
-                    path.distance+=GetSphericalDistance(way->nodes[d].GetLon(),
-                                                        way->nodes[d].GetLat(),
-                                                        way->nodes[d+1].GetLon(),
-                                                        way->nodes[d+1].GetLat());
-                  }
-                }
-                else {
-                  for (size_t d=i;d<currentNode; d++) {
-                    path.distance+=GetSphericalDistance(way->nodes[d].GetLon(),
-                                                        way->nodes[d].GetLat(),
-                                                        way->nodes[d+1].GetLon(),
-                                                        way->nodes[d+1].GetLat());
-                  }
-                }
+            while (nextNode!=currentNode &&
+                nodeWayMap.find(way->nodes[nextNode].GetId())==nodeWayMap.end()) {
+              int lastNode=nextNode;
+              nextNode++;
 
-                routeNode.paths.push_back(path);
+              if (nextNode>=(int)way->nodes.size()) {
+                nextNode=0;
               }
+
+              if (nextNode!=currentNode) {
+                distance+=GetSphericalDistance(way->nodes[lastNode].GetLon(),
+                                               way->nodes[lastNode].GetLat(),
+                                               way->nodes[nextNode].GetLon(),
+                                               way->nodes[nextNode].GetLat());
+              }
+            }
+
+            if (nextNode!=currentNode) {
+              RouteNode::RoutePath path;
+
+              path.type=way->GetType();
+              path.wayId=way->GetId();
+              path.id=way->nodes[nextNode].GetId();
+              path.lat=way->nodes[nextNode].GetLat();
+              path.lon=way->nodes[nextNode].GetLon();
+              path.distance=distance;
+
+              routeNode.paths.push_back(path);
+            }
+
+            int prevNode=currentNode-1;
+
+            if (prevNode<0) {
+              prevNode=(int)(way->nodes.size()-1);
+            }
+
+            distance=GetSphericalDistance(way->nodes[currentNode].GetLon(),
+                                          way->nodes[currentNode].GetLat(),
+                                          way->nodes[prevNode].GetLon(),
+                                          way->nodes[prevNode].GetLat());
+
+            while (prevNode!=currentNode &&
+                nodeWayMap.find(way->nodes[prevNode].GetId())==nodeWayMap.end()) {
+              int lastNode=prevNode;
+              prevNode--;
+
+              if (prevNode<0) {
+                prevNode=(int)(way->nodes.size()-1);
+              }
+
+              if (prevNode!=currentNode) {
+                distance+=GetSphericalDistance(way->nodes[lastNode].GetLon(),
+                                               way->nodes[lastNode].GetLat(),
+                                               way->nodes[prevNode].GetLon(),
+                                               way->nodes[prevNode].GetLat());
+              }
+            }
+
+            if (prevNode!=currentNode &&
+                prevNode!=nextNode) {
+              RouteNode::RoutePath path;
+
+              path.type=way->GetType();
+              path.wayId=way->GetId();
+              path.id=way->nodes[prevNode].GetId();
+              path.lat=way->nodes[prevNode].GetLat();
+              path.lon=way->nodes[prevNode].GetLon();
+              path.distance=distance;
+
+              routeNode.paths.push_back(path);
             }
           }
           else {
@@ -717,6 +747,7 @@ namespace osmscout {
           return false;
         }
 
+        writtenRouteNodeCount++;
         writtenRoutePathCount+=routeNode.paths.size();
 
         node++;

@@ -23,8 +23,13 @@
 #include <osmscout/Router.h>
 
 /*
-  Example for the nordrhein-westfalen.osm:
+  Examples for the nordrhein-westfalen.osm:
+
+  Long:
   time src/Routing ../TravelJinni/ 14332719 138190834 10414977 283372120
+
+  Short:
+  time src/Routing ../TravelJinni/ 33879912 388178746 24922615 270813911
 */
 
 int main(int argc, char* argv[])

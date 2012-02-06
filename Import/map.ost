@@ -350,7 +350,7 @@ TYPES
   TYPE "restriction_no_left_turn" = RELATION ("type"=="restriction" AND "restriction"=="no_left_turn") OPTIONS IGNORE
   TYPE "restriction_no_u_turn" = RELATION ("type"=="restriction" AND "restriction"=="no_u_turn") OPTIONS IGNORE
   TYPE "restriction_no_straight_on" = RELATION ("type"=="restriction" AND "restriction"=="no_straight_on") OPTIONS IGNORE
-  TYPE "restriction_only_right_turn" = RELATION ("type"=="restriction" AND "restriction"=="only_right_turn") OPTIONS IGNORE
+  
   TYPE "restriction_only_right_turn" = RELATION ("type"=="restriction" AND "restriction"=="only_right_turn") OPTIONS IGNORE
   TYPE "restriction_only_left_turn" = RELATION ("type"=="restriction" AND "restriction"=="only_left_turn") OPTIONS IGNORE
   TYPE "restriction_only_straight_on" = RELATION ("type"=="restriction" AND "restriction"=="only_straight_on") OPTIONS IGNORE
