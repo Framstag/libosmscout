@@ -73,8 +73,8 @@ namespace osmscout {
   bool RouteNode::Write(FileWriter& writer) const
   {
     writer.Write(id);
-    writer.WriteNumber(paths.size());
-    writer.WriteNumber(excludes.size());
+    writer.WriteNumber((uint32_t)paths.size());
+    writer.WriteNumber((uint32_t)excludes.size());
 
     uint32_t minLat=std::numeric_limits<uint32_t>::max();
     uint32_t minLon=std::numeric_limits<uint32_t>::max();
