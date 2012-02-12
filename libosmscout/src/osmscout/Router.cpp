@@ -329,8 +329,6 @@ namespace osmscout {
 
     std::cout << startWayId << "[" << startNodeId << "] => " << targetWayId << "[" << targetNodeId << "]" << std::endl;
 
-    std::cout << "=========== Routing start =============" << std::endl;
-
     StopClock clock;
 
     route.Clear();
@@ -414,13 +412,15 @@ namespace osmscout {
 
     currentWay=NULL;
 
+    RNode        current;
+    RouteNodeRef currentRouteNode;
+
     do {
       //
       // Take entry from open list with lowest cost
       //
 
-      RNode        current=*openList.begin();
-      RouteNodeRef currentRouteNode;
+      current=*openList.begin();
 
       if (!routeNodeDataFile.Get(current.nodeId,currentRouteNode) || !currentRouteNode.Valid()) {
         std::cerr << "Cannot load route node with id " << current.nodeId << std::endl;
@@ -541,87 +541,82 @@ namespace osmscout {
       //
 
       closeMap[current.nodeId]=current;
+    } while (!openList.empty() && current.nodeId!=targetRouteNode->id);
 
-      //
-      // Check if finished
-      //
+    clock.Stop();
+    std::cout << "Time:                " << clock << std::endl;
+    std::cout << "Route nodes loaded:  " << nodesLoadedCount << std::endl;
+    std::cout << "Route nodes ignored: " << nodesIgnoredCount << std::endl;
 
-      if (current.nodeId==targetRouteNode->id) {
-        std::list<RouteStep> steps;
-        double               distance=0.0;
-        double               cost=0.0;
+    if (current.nodeId!=targetRouteNode->id) {
+      std::cout << "No route found!" << std::endl;
+      return false;
+    }
 
-        while (current.prev!=0) {
-          RouteStep step;
+    if (current.nodeId==targetRouteNode->id) {
+      std::list<RouteStep> steps;
+      double               distance=0.0;
+      double               cost=0.0;
 
-          step.wayId=current.wayId;
-          step.nodeId=current.nodeId;
+      while (current.prev!=0) {
+        RouteStep step;
 
-          steps.push_back(step);
+        step.wayId=current.wayId;
+        step.nodeId=current.nodeId;
 
-          std::map<Id,RNode>::const_iterator prev=closeMap.find(current.prev);
+        steps.push_back(step);
 
-          assert(prev!=closeMap.end());
+        std::map<Id,RNode>::const_iterator prev=closeMap.find(current.prev);
 
-          RouteNodeRef prevRouteNode;
+        assert(prev!=closeMap.end());
 
-          routeNodeDataFile.Get(current.prev,prevRouteNode);
+        RouteNodeRef prevRouteNode;
 
-          for (size_t i=0; i<prevRouteNode->paths.size(); i++) {
-            if (prevRouteNode->paths[i].id==currentRouteNode->id) {
-              distance+=prevRouteNode->paths[i].distance;
-              cost+=profile.GetCostFactor(prevRouteNode->paths[i].type)*prevRouteNode->paths[i].distance;
-              break;
-            }
+        routeNodeDataFile.Get(current.prev,prevRouteNode);
+
+        for (size_t i=0; i<prevRouteNode->paths.size(); i++) {
+          if (prevRouteNode->paths[i].id==currentRouteNode->id) {
+            distance+=prevRouteNode->paths[i].distance;
+            cost+=profile.GetCostFactor(prevRouteNode->paths[i].type)*prevRouteNode->paths[i].distance;
+            break;
           }
-
-          current=prev->second;
-          currentRouteNode=prevRouteNode;
         }
 
-        std::cout << "COST:     " << cost << std::endl;
-        std::cout << "DISTANCE: " << distance << std::endl;
-
-        route.AddEntry(startWayId,startNodeId);
-        for (std::list<RouteStep>::reverse_iterator step=steps.rbegin();
-             step!=steps.rend();
-             ++step) {
-          route.AddEntry(step->wayId,step->nodeId);
-
-          /*
-          std::cout << "node " << step->nodeId << "( way " << step->wayId << ")";
-
-          Way way;
-
-          GetWay(step->wayId,way);
-
-          for (size_t i=0; i<way.tags.size(); i++) {
-            if (way.tags[i].key==tagName) {
-              std::cout << " " << way.tags[i].value;
-            }
-            else if (way.tags[i].key==tagRef) {
-              std::cout << " " << way.tags[i].value;
-            }
-          }
-
-          std::cout << std::endl;*/
-        }
-
-        clock.Stop();
-
-        std::cout << "Time:                  " << clock << std::endl;
-        std::cout << "Route nodes loaded:    " << nodesLoadedCount << std::endl;
-        std::cout << "Route nodes ignored:   " << nodesIgnoredCount << std::endl;
-
-        std::cout << "=========== Routing end ==============" << std::endl;
-        return true;
+        current=prev->second;
+        currentRouteNode=prevRouteNode;
       }
-    } while (!openList.empty());
 
-    std::cout << "No route found!" << std::endl;
-    std::cout << "=========== Routing end ==============" << std::endl;
+      std::cout << "Cost:                " << cost << std::endl;
+      std::cout << "Distance:            " << distance << std::endl;
 
-    return false;
+      route.AddEntry(startWayId,startNodeId);
+      for (std::list<RouteStep>::reverse_iterator step=steps.rbegin();
+           step!=steps.rend();
+           ++step) {
+        route.AddEntry(step->wayId,step->nodeId);
+
+#if 0
+        std::cout << "node " << step->nodeId << "( way " << step->wayId << ")";
+
+        Way way;
+
+        GetWay(step->wayId,way);
+
+        for (size_t i=0; i<way.tags.size(); i++) {
+          if (way.tags[i].key==tagName) {
+            std::cout << " " << way.tags[i].value;
+          }
+          else if (way.tags[i].key==tagRef) {
+            std::cout << " " << way.tags[i].value;
+          }
+        }
+
+        std::cout << std::endl;
+#endif
+      }
+    }
+
+    return true;
   }
 
   bool Router::TransformRouteDataToRouteDescription(const RouteData& data,

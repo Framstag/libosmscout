@@ -152,21 +152,22 @@ int main(int argc, char* argv[])
 
   router.TransformRouteDataToRouteDescription(data,description);
 
+  std::cout << "-----" << std::endl;
   for (std::list<osmscout::RouteDescription::RouteStep>::const_iterator step=description.Steps().begin();
        step!=description.Steps().end();
        ++step) {
 #if defined(HTML)
     std::cout << "<tr><td>";
 #endif
-    std::cout << std::fixed << std::setprecision(1);
+    std::cout << std::setfill(' ') << std::setw(5) << std::fixed << std::setprecision(1);
     std::cout << step->GetAt() << "km ";
 
     if (step->GetAfter()!=0.0) {
-      std::cout << std::fixed << std::setprecision(1);
+      std::cout << std::setfill(' ') << std::setw(4) << std::fixed << std::setprecision(1);
       std::cout << step->GetAfter() << "km ";
     }
     else {
-      std::cout << "      ";
+      std::cout << "       ";
     }
 
 #if defined(HTML)
@@ -249,7 +250,7 @@ int main(int argc, char* argv[])
 #endif
     std::cout << std::endl;
   }
-
+  std::cout << "-----" << std::endl;
 
   router.Close();
 
