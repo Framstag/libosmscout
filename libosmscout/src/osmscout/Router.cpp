@@ -365,6 +365,7 @@ namespace osmscout {
 
     if (!startRouteNode.Valid()) {
       std::cerr << "No route node found for start way" << std::endl;
+      return false;
     }
 
     index=0;
@@ -387,6 +388,7 @@ namespace osmscout {
 
     if (!targetRouteNode.Valid()) {
       std::cerr << "No route node found for target way" << std::endl;
+      return false;
     }
 
     // Start node, we do not have any cost up to now
@@ -544,6 +546,7 @@ namespace osmscout {
     } while (!openList.empty() && current.nodeId!=targetRouteNode->id);
 
     clock.Stop();
+
     std::cout << "Time:                " << clock << std::endl;
     std::cout << "Route nodes loaded:  " << nodesLoadedCount << std::endl;
     std::cout << "Route nodes ignored: " << nodesIgnoredCount << std::endl;
