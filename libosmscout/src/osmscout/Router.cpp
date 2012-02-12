@@ -556,68 +556,79 @@ namespace osmscout {
       return false;
     }
 
-    if (current.nodeId==targetRouteNode->id) {
-      std::list<RouteStep> steps;
-      double               distance=0.0;
-      double               cost=0.0;
+    std::list<RNode> nodes;
 
-      while (current.prev!=0) {
-        RouteStep step;
+    while (current.prev!=0) {
+      RouteNodeRef prevRouteNode;
 
-        step.wayId=current.wayId;
-        step.nodeId=current.nodeId;
+      std::map<Id,RNode>::const_iterator prev=closeMap.find(current.prev);
 
-        steps.push_back(step);
+      nodes.push_back(current);
 
-        std::map<Id,RNode>::const_iterator prev=closeMap.find(current.prev);
+      current=prev->second;
+    }
+    nodes.push_back(current);
 
-        assert(prev!=closeMap.end());
+    std::reverse(nodes.begin(),nodes.end());
 
-        RouteNodeRef prevRouteNode;
+    double distance=0.0;
+    double cost=0.0;
 
-        routeNodeDataFile.Get(current.prev,prevRouteNode);
+    for (std::list<RNode>::const_iterator node=nodes.begin();
+        node!=nodes.end();
+        node++) {
+      route.AddEntry(node->wayId,node->nodeId);
 
-        for (size_t i=0; i<prevRouteNode->paths.size(); i++) {
-          if (prevRouteNode->paths[i].id==currentRouteNode->id) {
-            distance+=prevRouteNode->paths[i].distance;
-            cost+=profile.GetCostFactor(prevRouteNode->paths[i].type)*prevRouteNode->paths[i].distance;
+      std::list<RNode>::const_iterator next=node;
+
+      next++;
+
+      if (next!=nodes.end()) {
+        RouteNodeRef currentRouteNode;
+
+        routeNodeDataFile.Get(node->nodeId,currentRouteNode);
+
+        for (size_t i=0; i<currentRouteNode->paths.size(); i++) {
+          if (currentRouteNode->paths[i].id==next->nodeId) {
+            distance+=currentRouteNode->paths[i].distance;
+            cost+=profile.GetCostFactor(currentRouteNode->paths[i].type)*currentRouteNode->paths[i].distance;
             break;
           }
         }
 
-        current=prev->second;
-        currentRouteNode=prevRouteNode;
-      }
+        WayRef nextWay;
 
-      std::cout << "Cost:                " << cost << std::endl;
-      std::cout << "Distance:            " << distance << std::endl;
+        wayDataFile.Get(next->wayId,nextWay);
 
-      route.AddEntry(startWayId,startNodeId);
-      for (std::list<RouteStep>::reverse_iterator step=steps.rbegin();
-           step!=steps.rend();
-           ++step) {
-        route.AddEntry(step->wayId,step->nodeId);
-
-#if 0
-        std::cout << "node " << step->nodeId << "( way " << step->wayId << ")";
-
-        Way way;
-
-        GetWay(step->wayId,way);
-
-        for (size_t i=0; i<way.tags.size(); i++) {
-          if (way.tags[i].key==tagName) {
-            std::cout << " " << way.tags[i].value;
-          }
-          else if (way.tags[i].key==tagRef) {
-            std::cout << " " << way.tags[i].value;
-          }
+        size_t start=0;
+        while (start<nextWay->nodes.size() &&
+            nextWay->nodes[start].GetId()!=node->nodeId) {
+          start++;
         }
 
-        std::cout << std::endl;
-#endif
+        size_t end=0;
+        while (end<nextWay->nodes.size() &&
+            nextWay->nodes[end].GetId()!=next->nodeId) {
+          end++;
+        }
+
+        if (start<nextWay->nodes.size() && end<nextWay->nodes.size()) {
+          if (start<end) {
+            for (size_t i=start+1; i<end; i++) {
+              route.AddEntry(nextWay->GetId(),nextWay->nodes[i].GetId());
+            }
+          }
+          else {
+            for (int i=start-1; i>(int)end; i--) {
+              route.AddEntry(nextWay->GetId(),nextWay->nodes[i].GetId());
+            }
+          }
+        }
       }
     }
+
+    std::cout << "Cost:                " << cost << std::endl;
+    std::cout << "Distance:            " << distance << std::endl;
 
     return true;
   }
