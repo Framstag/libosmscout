@@ -84,6 +84,70 @@ namespace osmscout {
       Id     wayId;
     };
 
+    /**
+     * A node in the routing graph, normally a node as part of a way
+     */
+    struct RNode
+    {
+      Id        nodeId;
+      Id        wayId;
+      double    currentCost;
+      double    estimateCost;
+      double    overallCost;
+      Id        prev;
+
+      RNode()
+       : nodeId(0),
+         wayId(0)
+      {
+      }
+
+      RNode(Id nodeId,
+            Id wayId,
+            Id prev)
+       : nodeId(nodeId),
+         wayId(wayId),
+         currentCost(0),
+         estimateCost(0),
+         overallCost(0),
+         prev(prev)
+      {
+        // no code
+      }
+
+      inline bool operator==(const RNode& other)
+      {
+        return nodeId==other.nodeId;
+      }
+
+      inline bool operator<(const RNode& other) const
+      {
+        return nodeId<other.nodeId;
+      }
+    };
+
+    struct RNodeCostCompare
+    {
+      inline bool operator()(const RNode& a, const RNode& b) const
+      {
+        if (a.overallCost==b.overallCost) {
+         return a.nodeId<b.nodeId;
+        }
+        else {
+          return a.overallCost<b.overallCost;
+        }
+      }
+    };
+
+    typedef std::set<RNode,RNodeCostCompare> OpenList;
+    typedef OpenList::iterator               RNodeRef;
+
+    struct RouteStep
+    {
+      Id wayId;
+      Id nodeId;
+    };
+
   private:
     bool                  isOpen;            //! true, if opened
     bool                  debugPerformance;
@@ -100,6 +164,12 @@ namespace osmscout {
                              Id nodeId,
                              RouteNodeRef& routeNode,
                              size_t& pos);
+    void ResolveRNodesToList(const RNode& end,
+                             const std::map<Id,RNode>& closeMap,
+                             std::list<RNode>& nodes);
+    void ResolveRNodesToRouteData(const std::list<RNode>& nodes,
+                                  RouteData& route);
+
 
   public:
     Router(const RouterParameter& parameter);
