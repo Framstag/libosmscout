@@ -81,14 +81,12 @@ namespace osmscout {
     {
     private:
       double      at;
-      double      after;
       Action      action;
       std::string name;
       std::string refName;
 
     public:
       RouteStep(double At,
-                double after,
                 Action action,
                 const std::string& name,
                 const std::string& refName);
@@ -96,11 +94,6 @@ namespace osmscout {
       inline double GetAt() const
       {
         return at;
-      }
-
-      inline double GetAfter() const
-      {
-        return after;
       }
 
       inline Action GetAction() const
@@ -128,7 +121,6 @@ namespace osmscout {
     void Clear();
 
     void AddStep(double at,
-                 double after,
                  Action action,
                  const std::string& name,
                  const std::string& refName);

@@ -52,7 +52,14 @@ std::wstring RouteDialog::RouteModelPainter::GetCellData() const
     return DistanceToWString(step.GetAt());
   }
   else if (GetColumn()==2) {
-    return DistanceToWString(step.GetAfter());
+    if (GetRow()>1) {
+      const osmscout::RouteDescription::RouteStep prevStep=dynamic_cast<const RouteModel*>(GetModel())->GetEntry(GetRow()-1);
+
+      if (step.GetAt()-prevStep.GetAt()>0.0) {
+        return DistanceToWString(step.GetAt()-prevStep.GetAt());
+      }
+    }
+    return L"";
   }
   else if (GetColumn()==3) {
     std::wstring action;
@@ -366,114 +373,6 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
                                                        result.routeDescription);
 
     routeModel->Notify();
-
-    for (std::list<osmscout::RouteDescription::RouteStep>::const_iterator step=result.routeDescription.Steps().begin();
-         step!=result.routeDescription.Steps().end();
-         ++step) {
-#if defined(HTML)
-      std::cout << "<tr><td>";
-#endif
-      std::cout.setf(std::ios::right);
-      std::cout.fill(' ');
-      std::cout.width(5);
-      std::cout.setf(std::ios::fixed);
-      std::cout.precision(1);
-      std::cout << step->GetAt() << "km ";
-
-      if (step->GetAfter()!=0.0) {
-        std::cout.setf(std::ios::right);
-        std::cout.fill(' ');
-        std::cout.width(5);
-        std::cout.setf(std::ios::fixed);
-        std::cout.precision(1);
-        std::cout << step->GetAfter() << "km ";
-      }
-      else {
-        std::cout << "        ";
-      }
-
-#if defined(HTML)
-      std::cout <<"</td>";
-#endif
-
-#if defined(HTML)
-      std::cout << "<td>";
-#endif
-      switch (step->GetAction()) {
-      case osmscout::RouteDescription::start:
-        std::cout << "Start at ";
-        if (!step->GetName().empty()) {
-          std::cout << step->GetName();
-
-          if (!step->GetRefName().empty()) {
-            std::cout << " (" << step->GetRefName() << ")";
-          }
-        }
-        else {
-          std::cout << step->GetRefName();
-        }
-        break;
-      case osmscout::RouteDescription::drive:
-        std::cout << "drive along ";
-        if (!step->GetName().empty()) {
-          std::cout << step->GetName();
-
-          if (!step->GetRefName().empty()) {
-            std::cout << " (" << step->GetRefName() << ")";
-          }
-        }
-        else {
-          std::cout << step->GetRefName();
-        }
-        break;
-      case osmscout::RouteDescription::switchRoad:
-        std::cout << "turn into ";
-        if (!step->GetName().empty()) {
-          std::cout << step->GetName();
-
-          if (!step->GetRefName().empty()) {
-            std::cout << " (" << step->GetRefName() << ")";
-          }
-        }
-        else {
-          std::cout << step->GetRefName();
-        }
-        break;
-      case osmscout::RouteDescription::reachTarget:
-        std::cout << "Arriving at ";
-        if (!step->GetName().empty()) {
-          std::cout << step->GetName();
-
-          if (!step->GetRefName().empty()) {
-            std::cout << " (" << step->GetRefName() << ")";
-          }
-        }
-        else {
-          std::cout << step->GetRefName();
-        }
-        break;
-      case osmscout::RouteDescription::pass:
-        std::cout << "passing along ";
-        if (!step->GetName().empty()) {
-          std::cout << step->GetName();
-
-          if (!step->GetRefName().empty()) {
-            std::cout << " (" << step->GetRefName() << ")";
-          }
-        }
-        else {
-          std::cout << step->GetRefName();
-        }
-        break;
-      }
-
-#if defined(HTML)
-      std::cout << "</td></tr>";
-#endif
-      std::cout << std::endl;
-    }
-
-    std::cout << std::setprecision(6); // back to default
 
     databaseTask->TransformRouteDataToWay(result.routeData,way);
     databaseTask->ClearRoute();

@@ -44,12 +44,10 @@ namespace osmscout {
   }
 
   RouteDescription::RouteStep::RouteStep(double at,
-                                         double after,
                                          Action action,
                                          const std::string& name,
                                          const std::string& refName)
   : at(at),
-    after(after),
     action(action),
     name(name),
     refName(refName)
@@ -68,12 +66,11 @@ namespace osmscout {
   }
 
   void RouteDescription::AddStep(double at,
-                                 double after,
                                  Action action,
                                  const std::string& name,
                                  const std::string& refName)
   {
-    steps.push_back(RouteStep(at,after,action,name,refName));
+    steps.push_back(RouteStep(at,action,name,refName));
   }
 }
 

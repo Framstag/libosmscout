@@ -82,16 +82,26 @@ QVariant RouteModel::data(const QModelIndex &index, int role) const
   }
 
   if (role==Qt::DisplayRole) {
+    std::list<osmscout::RouteDescription::RouteStep>::const_iterator prevStep=route.routeDescription.Steps().end();
     std::list<osmscout::RouteDescription::RouteStep>::const_iterator step=route.routeDescription.Steps().begin();
 
     // Not fast, but hopefully fast enough for small lists
+    if (index.row()>0) {
+      prevStep=route.routeDescription.Steps().begin();
+      std::advance(prevStep,index.row()-1);
+    }
+
     std::advance(step,index.row());
 
     if (index.column()==0) {
       return DistanceToString(step->GetAt()).c_str();
     }
     else if (index.column()==1) {
-      return DistanceToString(step->GetAfter()).c_str();
+      if (prevStep!=route.routeDescription.Steps().end() &&
+          step->GetAt()-prevStep->GetAt()>0.0) {
+        return DistanceToString(step->GetAt()-prevStep->GetAt()).c_str();
+      }
+      return "";
     }
     else if (index.column()==2) {
       QString action;
@@ -371,114 +381,6 @@ void RoutingDialog::Route()
   dbThread.TransformRouteDataToRouteDescription(routeData,route.routeDescription);
 
   routeModel->refresh();
-
-  for (std::list<osmscout::RouteDescription::RouteStep>::const_iterator step=route.routeDescription.Steps().begin();
-       step!=route.routeDescription.Steps().end();
-       ++step) {
-#if defined(HTML)
-    std::cout << "<tr><td>";
-#endif
-    std::cout.setf(std::ios::right);
-    std::cout.fill(' ');
-    std::cout.width(5);
-    std::cout.setf(std::ios::fixed);
-    std::cout.precision(1);
-    std::cout << step->GetAt() << "km ";
-
-    if (step->GetAfter()!=0.0) {
-      std::cout.setf(std::ios::right);
-      std::cout.fill(' ');
-      std::cout.width(5);
-      std::cout.setf(std::ios::fixed);
-      std::cout.precision(1);
-      std::cout << step->GetAfter() << "km ";
-    }
-    else {
-      std::cout << "        ";
-    }
-
-#if defined(HTML)
-    std::cout <<"</td>";
-#endif
-
-#if defined(HTML)
-    std::cout << "<td>";
-#endif
-    switch (step->GetAction()) {
-    case osmscout::RouteDescription::start:
-      std::cout << "Start at ";
-      if (!step->GetName().empty()) {
-        std::cout << step->GetName();
-
-        if (!step->GetRefName().empty()) {
-          std::cout << " (" << step->GetRefName() << ")";
-        }
-      }
-      else {
-        std::cout << step->GetRefName();
-      }
-      break;
-    case osmscout::RouteDescription::drive:
-      std::cout << "drive along ";
-      if (!step->GetName().empty()) {
-        std::cout << step->GetName();
-
-        if (!step->GetRefName().empty()) {
-          std::cout << " (" << step->GetRefName() << ")";
-        }
-      }
-      else {
-        std::cout << step->GetRefName();
-      }
-      break;
-    case osmscout::RouteDescription::switchRoad:
-      std::cout << "turn into ";
-      if (!step->GetName().empty()) {
-        std::cout << step->GetName();
-
-        if (!step->GetRefName().empty()) {
-          std::cout << " (" << step->GetRefName() << ")";
-        }
-      }
-      else {
-        std::cout << step->GetRefName();
-      }
-      break;
-    case osmscout::RouteDescription::reachTarget:
-      std::cout << "Arriving at ";
-      if (!step->GetName().empty()) {
-        std::cout << step->GetName();
-
-        if (!step->GetRefName().empty()) {
-          std::cout << " (" << step->GetRefName() << ")";
-        }
-      }
-      else {
-        std::cout << step->GetRefName();
-      }
-      break;
-    case osmscout::RouteDescription::pass:
-      std::cout << "passing along ";
-      if (!step->GetName().empty()) {
-        std::cout << step->GetName();
-
-        if (!step->GetRefName().empty()) {
-          std::cout << " (" << step->GetRefName() << ")";
-        }
-      }
-      else {
-        std::cout << step->GetRefName();
-      }
-      break;
-    }
-
-#if defined(HTML)
-    std::cout << "</td></tr>";
-#endif
-    std::cout << std::endl;
-  }
-
-  std::cout << std::setprecision(6); // back to default
 
   dbThread.TransformRouteDataToWay(routeData,routeWay);
 
