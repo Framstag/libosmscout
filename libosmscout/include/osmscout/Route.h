@@ -26,17 +26,116 @@
 
 namespace osmscout {
 
-  class OSMSCOUT_API RouteData
+  /**
+   * Description of a route, enhanced with information that are required to
+   * give a human textual (or narrative) drive instructions;
+   *
+   * A route consists of nodes. A Node can be the crossing point of a number of
+   * ways and is a route decision point (where the driver possibly has the change ways)
+   * that requires some potential action by the driver.
+   *
+   * For each node you can pass a number of descriptions. For the way from the current node
+   * to the next node also a number of descriptions can get retrieved.
+   *
+   * Descriptions are typed and must derive from class Description..
+   */
+  class OSMSCOUT_API RouteDescription
   {
   public:
-    class RouteEntry
+    /** Constant for a description of the start node (StartDescription) */
+    static const char* const NODE_START_DESC;
+    /** Constant for a description of the target node (TargetDescription) */
+    static const char* const NODE_TARGET_DESC;
+    /** Constant for a description of name of the way (NameDescription) */
+    static const char* const WAY_NAME_DESC;
+    /** Constant for a description of a change of way name (NameChangedDescription) */
+    static const char* const WAY_NAME_CHANGED_DESC;
+
+  public:
+    /*
+     * Base class of all descriptions.
+     */
+    class OSMSCOUT_API Description : public Referencable
+    {
+    public:
+      virtual~Description();
+    };
+
+    typedef Ref<Description> DescriptionRef;
+
+    /**
+     * Start of the route
+     */
+    class OSMSCOUT_API StartDescription : public Description
     {
     private:
-      Id wayId;
-      Id nodeId;
+      std::string description;
 
     public:
-      RouteEntry(Id wayId, Id routeId);
+      StartDescription(const std::string& description);
+
+      std::string GetDescription() const;
+    };
+
+    typedef Ref<StartDescription> StartDescriptionRef;
+
+    /**
+     * Start of the route
+     */
+    class OSMSCOUT_API TargetDescription : public Description
+    {
+    private:
+      std::string description;
+
+    public:
+      TargetDescription(const std::string& description);
+
+      std::string GetDescription() const;
+    };
+
+    typedef Ref<TargetDescription> TargetDescriptionRef;
+
+    /**
+     * Something has a name. A name consists of a name and a optional alphanumeric
+     * reference (LIke B1 or A40).
+     */
+    class OSMSCOUT_API NameDescription : public Description
+    {
+    private:
+      std::string name;
+      std::string ref;
+
+    public:
+      NameDescription(const std::string& name,
+                      const std::string& ref);
+
+      std::string GetName() const;
+      std::string GetRef() const;
+    };
+
+    /**
+     * Something has a name. A name consists of a name and a optional alphanumeric
+     * reference (Like B1 or A40).
+     */
+    class OSMSCOUT_API NameChangedDescription : public Description
+    {
+    public:
+      NameChangedDescription();
+    };
+
+    typedef Ref<NameDescription> NameDescriptionRef;
+
+    class Node
+    {
+    private:
+      Id                                   wayId;
+      Id                                   nodeId;
+      bool                                 isCrossing;
+      double                               distance;
+      std::map<std::string,DescriptionRef> descriptions;
+
+    public:
+      Node(Id wayId, Id nodeId, bool isCrossing);
 
       inline Id GetWayId() const
       {
@@ -47,87 +146,44 @@ namespace osmscout {
       {
         return nodeId;
       }
+
+      /**
+       * Is a crossing of (routable) ways.
+       */
+      inline bool IsCrossing() const
+      {
+        return isCrossing;
+      }
+
+      /**
+       * Distance from the start of the route in km.
+       */
+      inline double GetDistance() const
+      {
+        return distance;
+      }
+
+      bool HasDescription(const char* name) const;
+      DescriptionRef GetDescription(const char* name) const;
+
+      void SetDistance(double distance);
+
+      void AddDescription(const char* name, Description* description);
     };
 
   private:
-    std::list<RouteEntry> entries;
-
-  public:
-    RouteData();
-
-    void Clear();
-
-    void AddEntry(Id wayId, Id nodeId);
-
-    inline const std::list<RouteEntry>& Entries() const
-    {
-      return entries;
-    }
-  };
-
-  class OSMSCOUT_API RouteDescription
-  {
-  public:
-    enum Action
-    {
-      start,
-      drive,
-      switchRoad, // TODO: make it more precise
-      pass,       // TODO: make it more precise
-      reachTarget
-    };
-
-    class RouteStep
-    {
-    private:
-      double      at;
-      Action      action;
-      std::string name;
-      std::string refName;
-
-    public:
-      RouteStep(double At,
-                Action action,
-                const std::string& name,
-                const std::string& refName);
-
-      inline double GetAt() const
-      {
-        return at;
-      }
-
-      inline Action GetAction() const
-      {
-        return action;
-      }
-
-      inline std::string GetName() const
-      {
-        return name;
-      }
-
-      inline std::string GetRefName() const
-      {
-        return refName;
-      }
-    };
-
-  private:
-    std::list<RouteStep> steps;
+    std::list<Node> nodes;
 
   public:
     RouteDescription();
 
     void Clear();
 
-    void AddStep(double at,
-                 Action action,
-                 const std::string& name,
-                 const std::string& refName);
+    void AddNode(Id wayId, Id nodeId, bool isCrossing);
 
-    inline std::list<RouteStep>& Steps()
+    inline std::list<Node>& Nodes()
     {
-      return steps;
+      return nodes;
     }
   };
 }

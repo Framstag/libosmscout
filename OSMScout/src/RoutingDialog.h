@@ -27,6 +27,7 @@
 #include <QTableView>
 
 #include <osmscout/Location.h>
+#include <osmscout/Route.h>
 
 class RouteModel : public QAbstractTableModel
 {
@@ -41,6 +42,13 @@ public:
   QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
   void refresh();
+};
+
+struct RouteStep
+{
+  double  distance;
+  double  distanceDelta;
+  QString description;
 };
 
 class RoutingDialog : public QDialog
@@ -60,6 +68,13 @@ private:
   QTableView  *routeView;
   RouteModel  *routeModel;
   QPushButton *routeButton;
+
+private:
+  void PrepareRouteStep(const std::list<osmscout::RouteDescription::Node>::const_iterator& prevNode,
+                        const std::list<osmscout::RouteDescription::Node>::const_iterator& node,
+                        size_t lineCount,
+                        RouteStep& step);
+  bool HasRelevantDescriptions(const osmscout::RouteDescription::Node& node);
 
 public:
   RoutingDialog(QWidget* parentWindow);

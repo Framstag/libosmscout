@@ -36,6 +36,243 @@
 #include <limits>
 namespace osmscout {
 
+  RoutePostprocessor::Postprocessor::~Postprocessor()
+  {
+    // no code
+  }
+
+  RoutePostprocessor::StartPostprocessor::StartPostprocessor(const std::string& startDescription)
+  : startDescription(startDescription)
+  {
+    // no code
+  }
+
+  bool RoutePostprocessor::StartPostprocessor::Process(RouteDescription& description,
+                                                       Database& database)
+  {
+    description.Nodes().front().AddDescription(RouteDescription::NODE_START_DESC,
+                                               new RouteDescription::StartDescription(startDescription));
+
+    return true;
+  }
+
+  RoutePostprocessor::TargetPostprocessor::TargetPostprocessor(const std::string& targetDescription)
+  : targetDescription(targetDescription)
+  {
+    // no code
+  }
+
+  bool RoutePostprocessor::TargetPostprocessor::Process(RouteDescription& description,
+                                                        Database& database)
+  {
+    description.Nodes().back().AddDescription(RouteDescription::NODE_TARGET_DESC,
+                                              new RouteDescription::TargetDescription(targetDescription));
+
+    return true;
+  }
+
+  bool RoutePostprocessor::DistancePostprocessor::Process(RouteDescription& description,
+                                                         Database& database)
+  {
+    WayRef                                      way,newWay;
+    Id                                          node=0,newNode=0;
+    std::list<RouteDescription::Node>::iterator iter;
+    double                                      distance=0.0;
+
+    iter=description.Nodes().begin();
+
+    if (!database.GetWay(iter->GetWayId(),way)) {
+      return false;
+    }
+
+    // Find the starting node
+    for (size_t i=0; i<way->nodes.size(); i++) {
+      if (way->nodes[i].id==iter->GetNodeId()) {
+        node=i;
+        break;
+      }
+    }
+
+    iter++;
+
+    // For every step in the route...
+    for ( /* no code */ ;iter!=description.Nodes().end(); ++iter, way=newWay, node=newNode) {
+      // Find the corresponding way (which may be the old way?)
+      if (iter->GetWayId()!=way->GetId()) {
+        if (!database.GetWay(iter->GetWayId(),newWay)) {
+          return false;
+        }
+      }
+      else {
+        newWay=way;
+      }
+
+      // Find the current node in the new way and calculate the distance
+      // between the old point and the new point
+      for (size_t i=0; i<newWay->nodes.size(); i++) {
+        if (newWay->nodes[i].id==iter->GetNodeId()) {
+          distance+=GetEllipsoidalDistance(way->nodes[node].lon,way->nodes[node].lat,
+                                           newWay->nodes[i].lon,newWay->nodes[i].lat);
+          newNode=i;
+
+          iter->SetDistance(distance);
+        }
+      }
+    }
+
+    return true;
+  }
+
+  bool RoutePostprocessor::WayNamePostprocessor::Process(RouteDescription& description,
+                                                         Database& database)
+  {
+    RouteDescription::NameDescriptionRef lastDescription;
+    WayRef                               nextWay;
+
+    for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
+        node!=description.Nodes().end();
+        ++node) {
+      WayRef                                      lastWay=nextWay;
+      std::list<RouteDescription::Node>::iterator nextNode=node;
+
+      nextNode++;
+
+      if (nextNode==description.Nodes().end()) {
+        continue;
+      }
+
+      RouteDescription::NameDescriptionRef nextDescription;
+
+      if (lastWay.Invalid() || nextNode->GetWayId()!=node->GetWayId()) {
+        if (!database.GetWay(nextNode->GetWayId(),nextWay)) {
+          std::cerr << "Cannot retrieve way " << nextNode->GetWayId() << std::endl;
+          return false;
+        }
+
+        nextDescription=new RouteDescription::NameDescription(nextWay->GetName(),
+                                                              nextWay->GetRefName());
+        lastDescription=nextDescription;
+      }
+      else {
+        nextWay=lastWay;
+        nextDescription=lastDescription;
+      }
+
+      node->AddDescription(RouteDescription::WAY_NAME_DESC,
+                           lastDescription);
+    }
+
+    return true;
+  }
+
+  bool RoutePostprocessor::WayNameChangedPostprocessor::Process(RouteDescription& description,
+                                                                Database& database)
+  {
+    WayRef lastInterestingWay;
+    WayRef nextWay;
+
+    for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
+        node!=description.Nodes().end();
+        ++node) {
+      WayRef                                      lastWay=nextWay;
+      std::list<RouteDescription::Node>::iterator nextNode=node;
+
+      nextNode++;
+
+      if (nextNode==description.Nodes().end()) {
+        continue;
+      }
+
+      if (lastWay.Invalid() || nextNode->GetWayId()!=node->GetWayId()) {
+        if (!database.GetWay(nextNode->GetWayId(),nextWay)) {
+          std::cerr << "Cannot retrieve way " << nextNode->GetWayId() << std::endl;
+          return false;
+        }
+      }
+      else {
+        nextWay=lastWay;
+      }
+
+      if (lastInterestingWay.Valid()) {
+        // We didn't change street name, so we do not create a new entry...
+        if (lastInterestingWay->GetName()==nextWay->GetName() &&
+            lastInterestingWay->GetRefName()==nextWay->GetRefName()) {
+          continue;
+        }
+
+        // We skip steps where street does not have any names and silently
+        // assume they still have the old name (currently this happens for
+        // motorway links, that no have a name.
+        if (nextWay->GetName().empty() &&
+            nextWay->GetRefName().empty()) {
+          continue;
+        }
+
+        // If the ref name is still the same but the way name changes and the new way is a bridge
+        // we assume that the name changed just because of the bridge and do not see this as
+        // relevant name change.
+        // TODO: Check if this is because of some import error
+        if (lastInterestingWay->GetName().empty() &&
+            !nextWay->GetName().empty() &&
+            lastInterestingWay->GetRefName()==nextWay->GetRefName() &&
+            nextWay->IsBridge()) {
+          continue;
+        }
+      }
+
+      node->AddDescription(RouteDescription::WAY_NAME_CHANGED_DESC,
+                           new RouteDescription::NameChangedDescription());
+      lastInterestingWay=nextWay;
+    }
+
+    return true;
+  }
+
+  bool RoutePostprocessor::PostprocessRouteDescription(RouteDescription& description,
+                                                       Database& database,
+                                                       std::list<PostprocessorRef> processors)
+  {
+    for (std::list<PostprocessorRef>::iterator p=processors.begin();
+        p!=processors.end();
+        ++p) {
+      PostprocessorRef processor=*p;
+
+      if (!processor->Process(description,
+                              database)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  RouteData::RouteEntry::RouteEntry(Id wayId,
+                                    Id nodeId,
+                                    bool isCrossing)
+   : wayId(wayId),
+     nodeId(nodeId),
+     isCrossing(isCrossing)
+  {
+    // no code
+  }
+
+  RouteData::RouteData()
+  {
+    // no code
+  }
+
+  void RouteData::Clear()
+  {
+    entries.clear();
+  }
+
+  void RouteData::AddEntry(Id wayId,
+                           Id nodeId,
+                           bool isCrossing)
+  {
+    entries.push_back(RouteEntry(wayId,nodeId,isCrossing));
+  }
+
   RouterParameter::RouterParameter()
   : wayIndexCacheSize(10000),
     wayCacheSize(0),
@@ -261,7 +498,7 @@ namespace osmscout {
     for (std::list<RNode>::const_iterator node=nodes.begin();
         node!=nodes.end();
         node++) {
-      route.AddEntry(node->wayId,node->nodeId);
+      route.AddEntry(node->wayId,node->nodeId,true);
 
       std::list<RNode>::const_iterator next=node;
 
@@ -287,12 +524,12 @@ namespace osmscout {
         if (start<nextWay->nodes.size() && end<nextWay->nodes.size()) {
           if (start<end) {
             for (size_t i=start+1; i<end; i++) {
-              route.AddEntry(nextWay->GetId(),nextWay->nodes[i].GetId());
+              route.AddEntry(nextWay->GetId(),nextWay->nodes[i].GetId(),false);
             }
           }
           else {
             for (int i=start-1; i>(int)end; i--) {
-              route.AddEntry(nextWay->GetId(),nextWay->nodes[i].GetId());
+              route.AddEntry(nextWay->GetId(),nextWay->nodes[i].GetId(),false);
             }
           }
         }
@@ -542,7 +779,7 @@ namespace osmscout {
       //
 
       closeMap[current.nodeId]=current;
-    } while (!openList.empty() && current.nodeId!=targetRouteNode->id);
+    } while (!openList.empty() && current.nodeId!=targetNodeId && current.wayId!=targetWayId);
 
     clock.Stop();
 
@@ -567,96 +804,8 @@ namespace osmscout {
     return true;
   }
 
-  bool Router::TransformRouteDataToRouteDescription(const RouteData& data,
-                                                    RouteDescription& description)
-  {
-    if (!IsOpen()) {
-      return false;
-    }
-
-    WayRef                                           way,newWay;
-    Id                                               node=0,newNode=0;
-    std::list<RouteData::RouteEntry>::const_iterator iter;
-    double                                           distance=0.0;
-
-    description.Clear();
-
-    if (data.Entries().empty()) {
-      return true;
-    }
-
-    iter=data.Entries().begin();
-
-    if (!wayDataFile.Get(iter->GetWayId(),way)) {
-      return false;
-    }
-
-    // Find the starting node
-    for (size_t i=0; i<way->nodes.size(); i++) {
-      if (way->nodes[i].id==iter->GetNodeId()) {
-        node=i;
-        break;
-      }
-    }
-
-    // Lets start at the starting node (suprise, suprise ;-))
-    description.AddStep(0.0,RouteDescription::start,way->GetName(),way->GetRefName());
-    description.AddStep(0.0,RouteDescription::drive,way->GetName(),way->GetRefName());
-
-    iter++;
-
-    // For every step in the route...
-    for ( /* no code */ ;iter!=data.Entries().end(); ++iter, way=newWay, node=newNode) {
-      // Find the corresponding way (which may be the old way?)
-      if (iter->GetWayId()!=way->GetId()) {
-        if (!wayDataFile.Get(iter->GetWayId(),newWay)) {
-          return false;
-        }
-      }
-      else {
-        newWay=way;
-      }
-
-      // Find the current node in the new way and calculate the distance
-      // between the old point and the new point
-      for (size_t i=0; i<newWay->nodes.size(); i++) {
-        if (newWay->nodes[i].id==iter->GetNodeId()) {
-          distance+=GetEllipsoidalDistance(way->nodes[node].lon,way->nodes[node].lat,
-                                           newWay->nodes[i].lon,newWay->nodes[i].lat);
-          newNode=i;
-        }
-      }
-
-      // We skip steps where street does not have any names
-      if (newWay->GetName().empty() &&
-          newWay->GetRefName().empty()) {
-        continue;
-      }
-
-      // We didn't change street name, so we do not create a new entry...
-      if (!way->GetName().empty() &&
-          way->GetName()==newWay->GetName()) {
-        continue;
-      }
-
-      // We didn't change ref name, so we do not create a new entry...
-      if (!way->GetRefName().empty()
-          && way->GetRefName()==newWay->GetRefName()) {
-        continue;
-      }
-
-      description.AddStep(distance,RouteDescription::switchRoad,newWay->GetName(),newWay->GetRefName());
-      description.AddStep(distance,RouteDescription::drive,newWay->GetName(),newWay->GetRefName());
-    }
-
-    // We reached the destination!
-    description.AddStep(distance,RouteDescription::reachTarget,newWay->GetName(),newWay->GetRefName());
-
-    return true;
-  }
-
   bool Router::TransformRouteDataToWay(const RouteData& data,
-                                         Way& way)
+                                       Way& way)
   {
     TypeId routeType;
     Way    tmp;
@@ -694,9 +843,41 @@ namespace osmscout {
 
     return true;
   }
+
+  bool Router::TransformRouteDataToRouteDescription(const RouteData& data,
+                                                    RouteDescription& description)
+  {
+    TypeId routeType;
+    Way    tmp;
+
+    routeType=typeConfig->GetWayTypeId("_route");
+
+    assert(routeType!=typeIgnore);
+
+    if (data.Entries().empty()) {
+      return true;
+    }
+
+    for (std::list<RouteData::RouteEntry>::const_iterator iter=data.Entries().begin();
+         iter!=data.Entries().end();
+         ++iter) {
+      description.AddNode(iter->GetWayId(),iter->GetNodeId(),iter->IsCrossing());
+    }
+
+    return true;
+  }
+
+  bool PostprocessRouteDescription(RouteDescription& description,
+                                   const std::string& startDescription,
+                                   const std::string& targetDescription)
+  {
+    return true;
+  }
+
   void Router::DumpStatistics()
   {
     wayDataFile.DumpStatistics();
+    routeNodeDataFile.DumpStatistics();
   }
 }
 

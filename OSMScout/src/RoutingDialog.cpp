@@ -51,6 +51,7 @@ struct RouteSelection
   osmscout::Id               endNode;
   osmscout::RouteData        routeData;
   osmscout::RouteDescription routeDescription;
+  std::list<RouteStep>       routeSteps;
 };
 
 RouteSelection route;
@@ -63,7 +64,7 @@ RouteModel::RouteModel(QObject *parent)
 
 int RouteModel::rowCount(const QModelIndex &parent) const
 {
-  return route.routeDescription.Steps().size();
+  return route.routeSteps.size();
 }
 
 int RouteModel::columnCount(const QModelIndex &parent) const
@@ -77,64 +78,29 @@ QVariant RouteModel::data(const QModelIndex &index, int role) const
     return QVariant();
   }
 
-  if (index.row()<0 || index.row()>=(int)route.routeDescription.Steps().size()) {
+  if (index.row()<0 || index.row()>=(int)route.routeDescription.Nodes().size()) {
     return QVariant();
   }
 
   if (role==Qt::DisplayRole) {
-    std::list<osmscout::RouteDescription::RouteStep>::const_iterator prevStep=route.routeDescription.Steps().end();
-    std::list<osmscout::RouteDescription::RouteStep>::const_iterator step=route.routeDescription.Steps().begin();
-
-    // Not fast, but hopefully fast enough for small lists
-    if (index.row()>0) {
-      prevStep=route.routeDescription.Steps().begin();
-      std::advance(prevStep,index.row()-1);
-    }
+    std::list<RouteStep>::const_iterator step=route.routeSteps.begin();
 
     std::advance(step,index.row());
 
     if (index.column()==0) {
-      return DistanceToString(step->GetAt()).c_str();
+      if (isnan(step->distance)) {
+        return "";
+      }
+      return DistanceToString(step->distance).c_str();
     }
     else if (index.column()==1) {
-      if (prevStep!=route.routeDescription.Steps().end() &&
-          step->GetAt()-prevStep->GetAt()>0.0) {
-        return DistanceToString(step->GetAt()-prevStep->GetAt()).c_str();
+      if (isnan(step->distanceDelta)) {
+        return "";
       }
-      return "";
+      return DistanceToString(step->distanceDelta).c_str();
     }
     else if (index.column()==2) {
-      QString action;
-      switch (step->GetAction()) {
-      case osmscout::RouteDescription::start:
-        action="Start at ";
-        break;
-      case osmscout::RouteDescription::drive:
-        action="Drive along ";
-        break;
-      case osmscout::RouteDescription::switchRoad:
-        action="Turn into ";
-        break;
-      case osmscout::RouteDescription::reachTarget:
-        action="Arriving at ";
-        break;
-      case osmscout::RouteDescription::pass:
-        action="Passing along ";
-        break;
-      }
-
-      if (!step->GetName().empty()) {
-        action+=QString::fromUtf8(step->GetName().c_str());
-
-        if (!step->GetRefName().empty()) {
-          action+=" ("+QString::fromUtf8(step->GetRefName().c_str())+")";
-        }
-      }
-      else {
-        action+=QString::fromUtf8(step->GetRefName().c_str());
-      }
-
-      return action;
+      return step->description;
     }
   }
   else if (role==Qt::TextAlignmentRole) {
@@ -352,6 +318,34 @@ void RoutingDialog::SelectTo()
   }
 }
 
+bool RoutingDialog::HasRelevantDescriptions(const osmscout::RouteDescription::Node& node)
+{
+  return node.HasDescription(osmscout::RouteDescription::NODE_START_DESC) ||
+         node.HasDescription(osmscout::RouteDescription::NODE_TARGET_DESC) ||
+         node.HasDescription(osmscout::RouteDescription::WAY_NAME_CHANGED_DESC);
+}
+
+void RoutingDialog::PrepareRouteStep(const std::list<osmscout::RouteDescription::Node>::const_iterator& prevNode,
+                                     const std::list<osmscout::RouteDescription::Node>::const_iterator& node,
+                                     size_t lineCount,
+                                     RouteStep& step)
+{
+  if (lineCount==0) {
+    step.distance=node->GetDistance();
+
+    if (prevNode!=route.routeDescription.Nodes().end() && node->GetDistance()-prevNode->GetDistance()!=0.0) {
+      step.distanceDelta=node->GetDistance()-prevNode->GetDistance();
+    }
+    else {
+      step.distanceDelta=NAN;
+    }
+  }
+  else {
+    step.distance=NAN;
+    step.distanceDelta=NAN;
+  }
+}
+
 void RoutingDialog::Route()
 {
   std::cout << "Route" << std::endl;
@@ -378,9 +372,84 @@ void RoutingDialog::Route()
     return;
   }
 
-  dbThread.TransformRouteDataToRouteDescription(routeData,route.routeDescription);
+  dbThread.TransformRouteDataToRouteDescription(routeData,
+                                                route.routeDescription,
+                                                route.start.toUtf8().constData(),
+                                                route.end.toUtf8().constData());
 
   routeModel->refresh();
+
+  std::list<osmscout::RouteDescription::Node>::const_iterator prevNode=route.routeDescription.Nodes().end();
+  for (std::list<osmscout::RouteDescription::Node>::const_iterator node=route.routeDescription.Nodes().begin();
+       node!=route.routeDescription.Nodes().end();
+       ++node) {
+
+    if (!HasRelevantDescriptions(*node)) {
+      continue;
+    }
+
+    size_t lineCount=0;
+
+    if (node->HasDescription(osmscout::RouteDescription::NODE_START_DESC)) {
+      osmscout::RouteDescription::DescriptionRef   description=node->GetDescription(osmscout::RouteDescription::NODE_START_DESC);
+      osmscout::RouteDescription::StartDescription *startDescription=dynamic_cast<osmscout::RouteDescription::StartDescription*>(description.Get());
+      RouteStep                                    step;
+
+      PrepareRouteStep(prevNode,node,lineCount,step);
+
+      step.description="Start at \"" +QString::fromUtf8(startDescription->GetDescription().c_str()) + "\"";
+
+      route.routeSteps.push_back(step);
+
+      lineCount++;
+    }
+    if (node->HasDescription(osmscout::RouteDescription::NODE_TARGET_DESC)) {
+      osmscout::RouteDescription::DescriptionRef    description=node->GetDescription(osmscout::RouteDescription::NODE_TARGET_DESC);
+      osmscout::RouteDescription::TargetDescription *targetDescription=dynamic_cast<osmscout::RouteDescription::TargetDescription*>(description.Get());
+      RouteStep                                     step;
+
+      PrepareRouteStep(prevNode,node,lineCount,step);
+      step.description="Target reached \"" + QString::fromUtf8(targetDescription->GetDescription().c_str()) + "\"";
+
+      route.routeSteps.push_back(step);
+
+      lineCount++;
+    }
+    if (node->HasDescription(osmscout::RouteDescription::WAY_NAME_CHANGED_DESC)) {
+      osmscout::RouteDescription::DescriptionRef  description=node->GetDescription(osmscout::RouteDescription::WAY_NAME_DESC);
+      osmscout::RouteDescription::NameDescription *nameDescription=dynamic_cast<osmscout::RouteDescription::NameDescription*>(description.Get());
+      RouteStep                                   step;
+
+      PrepareRouteStep(prevNode,node,lineCount,step);
+
+      step.description="Way ";
+
+
+      if (!nameDescription->GetName().empty()) {
+        step.description+=QString::fromUtf8(nameDescription->GetName().c_str());
+      }
+
+      if (!nameDescription->GetName().empty() &&
+          !nameDescription->GetRef().empty()) {
+        step.description+=" (";
+      }
+
+      if (!nameDescription->GetRef().empty()) {
+        step.description+=QString::fromUtf8(nameDescription->GetRef().c_str());
+      }
+
+      if (!nameDescription->GetName().empty() &&
+          !nameDescription->GetRef().empty()) {
+        step.description+=")";
+      }
+
+      route.routeSteps.push_back(step);
+
+      lineCount++;
+    }
+
+    prevNode=node;
+  }
 
   dbThread.TransformRouteDataToWay(routeData,routeWay);
 

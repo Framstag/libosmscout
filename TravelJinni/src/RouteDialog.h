@@ -31,14 +31,20 @@
 
 #include "DatabaseTask.h"
 
+struct RouteStep
+{
+  double       distance;
+  double       distanceDelta;
+  std::wstring description;
+};
+
 /**
  */
 class RouteDialog : public Lum::Dlg::ActionDialog
 {
 private:
-  typedef Lum::Model::StdRefTable<osmscout::RouteDescription::RouteStep,
-          std::list<osmscout::RouteDescription::RouteStep> >             RouteModel;
-  typedef Lum::Base::Reference<RouteModel>                               RouteModelRef;
+  typedef Lum::Model::StdRefTable<RouteStep,std::list<RouteStep> > RouteModel;
+  typedef Lum::Base::Reference<RouteModel>                         RouteModelRef;
 
   class RouteModelPainter : public Lum::StringCellPainter
   {
@@ -56,6 +62,13 @@ private:
   bool                  hasEnd;
   Lum::Model::ActionRef endAction;
   RouteModelRef         routeModel;
+
+private:
+  void PrepareRouteStep(const std::list<osmscout::RouteDescription::Node>::const_iterator& prevNode,
+                        const std::list<osmscout::RouteDescription::Node>::const_iterator& node,
+                        size_t lineCount,
+                        RouteStep& step);
+  bool HasRelevantDescriptions(const osmscout::RouteDescription::Node& node);
 
 public:
   RouteDialog(DatabaseTask* databaseTask);

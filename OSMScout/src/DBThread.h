@@ -70,31 +70,32 @@ public slots:
   void TriggerMapRendering(const RenderMapRequest& request);
 
 private:
-  mutable QMutex              mutex;
-  osmscout::DatabaseParameter databaseParameter;
-  osmscout::Database          database;
-  osmscout::StyleConfig       *styleConfig;
-  osmscout::MapData           data;
-  osmscout::MapPainterQt      painter;
-  osmscout::RouterParameter   routerParameter;
-  osmscout::Router            router;
-  osmscout::RoutingProfile    routingProfile;
+  mutable QMutex               mutex;
+  osmscout::DatabaseParameter  databaseParameter;
+  osmscout::Database           database;
+  osmscout::StyleConfig        *styleConfig;
+  osmscout::MapData            data;
+  osmscout::MapPainterQt       painter;
+  osmscout::RouterParameter    routerParameter;
+  osmscout::Router             router;
+  osmscout::RoutingProfile     routingProfile;
+  osmscout::RoutePostprocessor routePostprocessor;
 
-  bool                        finish;
+  bool                         finish;
 
-  QPixmap                     *currentPixmap;
+  QPixmap                      *currentPixmap;
 #if defined(HAVE_LIB_QTOPENGL)
-  QGLPixelBuffer              *currentGLPixmap;
+  QGLPixelBuffer               *currentGLPixmap;
 #endif
-  double                      currentLon,currentLat;
-  double                      currentMagnification;
+  double                       currentLon,currentLat;
+  double                       currentMagnification;
 
-  QPixmap                     *finishedPixmap;
+  QPixmap                      *finishedPixmap;
 #if defined(HAVE_LIB_QTOPENGL)
-  QGLPixelBuffer              *finishedGLPixmap;
+  QGLPixelBuffer               *finishedGLPixmap;
 #endif
-  double                      finishedLon,finishedLat;
-  double                      finishedMagnification;
+  double                       finishedLon,finishedLat;
+  double                       finishedMagnification;
 
 private:
   void FreeMaps();
@@ -130,7 +131,9 @@ public:
                       osmscout::RouteData& route);
 
   bool TransformRouteDataToRouteDescription(const osmscout::RouteData& data,
-                                            osmscout::RouteDescription& description);
+                                            osmscout::RouteDescription& description,
+                                            const std::string& start,
+                                            const std::string& target);
   bool TransformRouteDataToWay(const osmscout::RouteData& data,
                                osmscout::Way& way);
 

@@ -72,7 +72,7 @@ DatabaseTask::DatabaseTask(osmscout::Database* database,
    finishedSurface(NULL),
    finishedCairo(NULL)
 {
-    // no code
+  // no code
 }
 
 void DatabaseTask::Run()
@@ -471,7 +471,9 @@ bool DatabaseTask::CalculateRoute(osmscout::Id startWayId, osmscout::Id startNod
 }
 
 bool DatabaseTask::TransformRouteDataToRouteDescription(const osmscout::RouteData& data,
-                                                        osmscout::RouteDescription& description)
+                                                        osmscout::RouteDescription& description,
+                                                        const std::string& start,
+                                                        const std::string& target)
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
@@ -479,7 +481,27 @@ bool DatabaseTask::TransformRouteDataToRouteDescription(const osmscout::RouteDat
     return false;
   }
 
-  return router->TransformRouteDataToRouteDescription(data,description);
+  if (!router->TransformRouteDataToRouteDescription(data,description)) {
+    return false;
+  }
+
+  if (!database->IsOpen()) {
+    return false;
+  }
+
+  std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors;
+
+  postprocessors.push_back(new osmscout::RoutePostprocessor::DistancePostprocessor());
+  postprocessors.push_back(new osmscout::RoutePostprocessor::StartPostprocessor(start));
+  postprocessors.push_back(new osmscout::RoutePostprocessor::WayNamePostprocessor());
+  postprocessors.push_back(new osmscout::RoutePostprocessor::WayNameChangedPostprocessor());
+  postprocessors.push_back(new osmscout::RoutePostprocessor::TargetPostprocessor(target));
+
+  if (!postprocessor.PostprocessRouteDescription(description,*database,postprocessors)) {
+    return false;
+  }
+
+  return true;
 }
 
 bool DatabaseTask::TransformRouteDataToWay(const osmscout::RouteData& data,

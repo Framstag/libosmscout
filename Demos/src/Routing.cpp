@@ -19,7 +19,9 @@
 
 #include <iostream>
 #include <iomanip>
+#include <list>
 
+#include <osmscout/Database.h>
 #include <osmscout/Router.h>
 
 /*
@@ -31,6 +33,13 @@
   Short:
   time src/Routing ../TravelJinni/ 33879912 388178746 24922615 270813911
 */
+
+static bool HasRelevantDescriptions(const osmscout::RouteDescription::Node& node)
+{
+  return node.HasDescription(osmscout::RouteDescription::NODE_START_DESC) ||
+         node.HasDescription(osmscout::RouteDescription::NODE_TARGET_DESC) ||
+         node.HasDescription(osmscout::RouteDescription::WAY_NAME_CHANGED_DESC);
+}
 
 int main(int argc, char* argv[])
 {
@@ -71,7 +80,7 @@ int main(int argc, char* argv[])
   osmscout::Router          router(routerParameter);
 
   if (!router.Open(map.c_str())) {
-    std::cerr << "Cannot open database" << std::endl;
+    std::cerr << "Cannot open routing database" << std::endl;
 
     return 1;
   }
@@ -152,20 +161,48 @@ int main(int argc, char* argv[])
 
   router.TransformRouteDataToRouteDescription(data,description);
 
+  std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors;
+
+  postprocessors.push_back(new osmscout::RoutePostprocessor::DistancePostprocessor());
+  postprocessors.push_back(new osmscout::RoutePostprocessor::StartPostprocessor("Start"));
+  postprocessors.push_back(new osmscout::RoutePostprocessor::WayNamePostprocessor());
+  postprocessors.push_back(new osmscout::RoutePostprocessor::WayNameChangedPostprocessor());
+  postprocessors.push_back(new osmscout::RoutePostprocessor::TargetPostprocessor("Target"));
+
+  osmscout::DatabaseParameter  databaseParameter;
+  osmscout::Database           database(databaseParameter);
+  osmscout::RoutePostprocessor postprocessor;
+
+  if (!database.Open(map.c_str())) {
+    std::cerr << "Cannot open database" << std::endl;
+
+    return 1;
+  }
+
+  if (!postprocessor.PostprocessRouteDescription(description,
+                                                 database,
+                                                 postprocessors)) {
+    std::cerr << "Error during route postprocessing" << std::endl;
+  }
+
   std::cout << "-----" << std::endl;
-  std::list<osmscout::RouteDescription::RouteStep>::const_iterator prevStep=description.Steps().end();
-  for (std::list<osmscout::RouteDescription::RouteStep>::const_iterator step=description.Steps().begin();
-       step!=description.Steps().end();
-       ++step) {
+  std::list<osmscout::RouteDescription::Node>::const_iterator prevNode=description.Nodes().end();
+  for (std::list<osmscout::RouteDescription::Node>::const_iterator node=description.Nodes().begin();
+       node!=description.Nodes().end();
+       ++node) {
+    if (!HasRelevantDescriptions(*node)) {
+      continue;
+    }
+
 #if defined(HTML)
     std::cout << "<tr><td>";
 #endif
     std::cout << std::setfill(' ') << std::setw(5) << std::fixed << std::setprecision(1);
-    std::cout << step->GetAt() << "km ";
+    std::cout << node->GetDistance() << "km ";
 
-    if (prevStep!=description.Steps().end() && step->GetAt()-prevStep->GetAt()!=0.0) {
+    if (prevNode!=description.Nodes().end() && node->GetDistance()-prevNode->GetDistance()!=0.0) {
       std::cout << std::setfill(' ') << std::setw(4) << std::fixed << std::setprecision(1);
-      std::cout << step->GetAt()-prevStep->GetAt() << "km ";
+      std::cout << node->GetDistance()-prevNode->GetDistance() << "km ";
     }
     else {
       std::cout << "       ";
@@ -178,80 +215,70 @@ int main(int argc, char* argv[])
 #if defined(HTML)
     std::cout << "<td>";
 #endif
-    switch (step->GetAction()) {
-    case osmscout::RouteDescription::start:
-      std::cout << "Start at ";
-      if (!step->GetName().empty()) {
-        std::cout << step->GetName();
 
-        if (!step->GetRefName().empty()) {
-          std::cout << " (" << step->GetRefName() << ")";
-        }
-      }
-      else {
-        std::cout << step->GetRefName();
-      }
-      break;
-    case osmscout::RouteDescription::drive:
-      std::cout << "drive along ";
-      if (!step->GetName().empty()) {
-        std::cout << step->GetName();
+    size_t lineCount=0;
 
-        if (!step->GetRefName().empty()) {
-          std::cout << " (" << step->GetRefName() << ")";
-        }
-      }
-      else {
-        std::cout << step->GetRefName();
-      }
-      break;
-    case osmscout::RouteDescription::switchRoad:
-      std::cout << "turn into ";
-      if (!step->GetName().empty()) {
-        std::cout << step->GetName();
+    if (node->HasDescription(osmscout::RouteDescription::NODE_START_DESC)) {
+      osmscout::RouteDescription::DescriptionRef   description=node->GetDescription(osmscout::RouteDescription::NODE_START_DESC);
+      osmscout::RouteDescription::StartDescription *startDescription=dynamic_cast<osmscout::RouteDescription::StartDescription*>(description.Get());
 
-        if (!step->GetRefName().empty()) {
-          std::cout << " (" << step->GetRefName() << ")";
-        }
+      if (lineCount>0) {
+        std::cout << "               ";
       }
-      else {
-        std::cout << step->GetRefName();
-      }
-      break;
-    case osmscout::RouteDescription::reachTarget:
-      std::cout << "Arriving at ";
-      if (!step->GetName().empty()) {
-        std::cout << step->GetName();
 
-        if (!step->GetRefName().empty()) {
-          std::cout << " (" << step->GetRefName() << ")";
-        }
-      }
-      else {
-        std::cout << step->GetRefName();
-      }
-      break;
-    case osmscout::RouteDescription::pass:
-      std::cout << "passing along ";
-      if (!step->GetName().empty()) {
-        std::cout << step->GetName();
+      std::cout << "Start at \"" << startDescription->GetDescription() << "\"" << std::endl;
+      lineCount++;
+    }
 
-        if (!step->GetRefName().empty()) {
-          std::cout << " (" << step->GetRefName() << ")";
-        }
+    if (node->HasDescription(osmscout::RouteDescription::NODE_TARGET_DESC)) {
+      osmscout::RouteDescription::DescriptionRef    description=node->GetDescription(osmscout::RouteDescription::NODE_TARGET_DESC);
+      osmscout::RouteDescription::TargetDescription *targetDescription=dynamic_cast<osmscout::RouteDescription::TargetDescription*>(description.Get());
+
+      if (lineCount>0) {
+        std::cout << "               ";
       }
-      else {
-        std::cout << step->GetRefName();
+
+      std::cout << "Target reached \"" << targetDescription->GetDescription() << "\"" << std::endl;
+      lineCount++;
+    }
+
+    if (node->HasDescription(osmscout::RouteDescription::WAY_NAME_CHANGED_DESC)) {
+      osmscout::RouteDescription::DescriptionRef  description=node->GetDescription(osmscout::RouteDescription::WAY_NAME_DESC);
+      osmscout::RouteDescription::NameDescription *nameDescription=dynamic_cast<osmscout::RouteDescription::NameDescription*>(description.Get());
+
+      if (lineCount>0) {
+        std::cout << "               ";
       }
-      break;
+
+      std::cout << "Way ";
+      if (!nameDescription->GetName().empty()) {
+        std::cout << nameDescription->GetName();
+      }
+
+      if (!nameDescription->GetName().empty() &&
+          !nameDescription->GetRef().empty()) {
+        std::cout << " (";
+      }
+
+      if (!nameDescription->GetRef().empty()) {
+        std::cout << nameDescription->GetRef();
+      }
+
+      if (!nameDescription->GetName().empty() &&
+          !nameDescription->GetRef().empty()) {
+        std::cout << ")";
+      }
+
+      std::cout << std::endl;
+
+      lineCount++;
     }
 
 #if defined(HTML)
     std::cout << "</td></tr>";
 #endif
-    std::cout << std::endl;
 
-    prevStep=step;
+    prevNode=node;
   }
   std::cout << "-----" << std::endl;
 

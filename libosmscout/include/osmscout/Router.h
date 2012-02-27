@@ -36,6 +36,9 @@
 // Reverse index
 #include <osmscout/NodeUseIndex.h>
 
+// Database
+#include <osmscout/Database.h>
+
 // Routing
 #include <osmscout/Route.h>
 #include <osmscout/RoutingProfile.h>
@@ -43,6 +46,135 @@
 #include <osmscout/util/Cache.h>
 
 namespace osmscout {
+
+  class OSMSCOUT_API RoutePostprocessor
+  {
+  public:
+    OSMSCOUT_API class Postprocessor : public Referencable
+    {
+    public:
+      virtual ~Postprocessor();
+
+      virtual bool Process(RouteDescription& description,
+                           Database& database) = 0;
+    };
+
+    typedef Ref<Postprocessor> PostprocessorRef;
+
+    /**
+     * Places the given description at the start node
+     */
+    OSMSCOUT_API class StartPostprocessor : public Postprocessor
+    {
+    private:
+      std::string startDescription;
+
+    public:
+      StartPostprocessor(const std::string& startDescription);
+
+      bool Process(RouteDescription& description,
+                   Database& database);
+    };
+
+    /**
+     * Places the given description at the target node
+     */
+    OSMSCOUT_API class TargetPostprocessor : public Postprocessor
+    {
+    private:
+      std::string targetDescription;
+
+    public:
+      TargetPostprocessor(const std::string& targetDescription);
+
+      bool Process(RouteDescription& description,
+                   Database& database);
+    };
+
+    /**
+     * Places a name description as way description
+     */
+    OSMSCOUT_API class DistancePostprocessor : public Postprocessor
+    {
+    public:
+      bool Process(RouteDescription& description,
+                   Database& database);
+    };
+
+    /**
+     * Places a name description as way description
+     */
+    OSMSCOUT_API class WayNamePostprocessor : public Postprocessor
+    {
+    public:
+      bool Process(RouteDescription& description,
+                   Database& database);
+    };
+
+    /**
+     * Places a name change description if the name changes
+     */
+    OSMSCOUT_API class WayNameChangedPostprocessor : public Postprocessor
+    {
+    public:
+      bool Process(RouteDescription& description,
+                   Database& database);
+    };
+
+  public:
+    bool PostprocessRouteDescription(RouteDescription& description,
+                                     Database& database,
+                                     std::list<PostprocessorRef> processors);
+  };
+
+  class OSMSCOUT_API RouteData
+  {
+  public:
+    class RouteEntry
+    {
+    private:
+      Id   wayId;
+      Id   nodeId;
+      bool isCrossing;
+
+    public:
+      RouteEntry(Id wayId,
+                 Id routeId,
+                 bool isCrossing);
+
+      inline Id GetWayId() const
+      {
+        return wayId;
+      }
+
+      inline Id GetNodeId() const
+      {
+        return nodeId;
+      }
+
+      inline bool IsCrossing() const
+      {
+        return isCrossing;
+      }
+    };
+
+  private:
+    std::list<RouteEntry> entries;
+
+  public:
+    RouteData();
+
+    void Clear();
+
+    void AddEntry(Id wayId,
+                  Id nodeId,
+                  bool isCrossing);
+
+    inline const std::list<RouteEntry>& Entries() const
+    {
+      return entries;
+    }
+  };
 
   typedef DataFile<RouteNode> RouteNodeDataFile;
 
@@ -188,10 +320,11 @@ namespace osmscout {
                         Id targetWayId, Id targetNodeId,
                         RouteData& route);
 
-    bool TransformRouteDataToRouteDescription(const RouteData& data,
-                                              RouteDescription& description);
     bool TransformRouteDataToWay(const RouteData& data,
                                  Way& way);
+
+    bool TransformRouteDataToRouteDescription(const RouteData& data,
+                                              RouteDescription& description);
 
     void DumpStatistics();
   };

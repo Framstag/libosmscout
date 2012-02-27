@@ -54,6 +54,7 @@ private:
   osmscout::MapData         data;
   osmscout::Router          *router;
   osmscout::RoutingProfile  routingProfile;
+  osmscout::RoutePostprocessor postprocessor;
   Lum::OS::Condition        condition;
   osmscout::MapPainterCairo painter;
 
@@ -116,7 +117,10 @@ public:
                       osmscout::Id targetWayId, osmscout::Id targetNodeId,
                       osmscout::RouteData& route);
   bool TransformRouteDataToRouteDescription(const osmscout::RouteData& data,
-                                            osmscout::RouteDescription& description);
+                                            osmscout::RouteDescription& description,
+                                            const std::string& start,
+                                            const std::string& target);
+  bool PostprocessRouteDescription(osmscout::RouteDescription& description);
   bool TransformRouteDataToWay(const osmscout::RouteData& data,
                                osmscout::Way& way);
   void ClearRoute();

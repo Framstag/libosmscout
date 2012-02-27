@@ -21,38 +21,102 @@
 
 namespace osmscout {
 
-  RouteData::RouteEntry::RouteEntry(Id wayId, Id nodeId)
-   : wayId(wayId),
-     nodeId(nodeId)
+  /** Constant for a description of the start node (StartDescription) */
+  const char* const RouteDescription::NODE_START_DESC       = "NodeStart";
+  /** Constant for a description of the target node (TargetDescription) */
+  const char* const RouteDescription::NODE_TARGET_DESC      = "NodeTarget";
+  /** Constant for a description of name of the way (NameDescription) */
+  const char* const RouteDescription::WAY_NAME_DESC         = "WayName";
+  /** Constant for a description of a change of way name (NameChangedDescription) */
+  const char* const RouteDescription::WAY_NAME_CHANGED_DESC = "WayChangedName";
+
+  RouteDescription::Description::~Description()
   {
     // no code
   }
 
-  RouteData::RouteData()
+  RouteDescription::StartDescription::StartDescription(const std::string& description)
+  : description(description)
   {
     // no code
   }
 
-  void RouteData::Clear()
+  std::string RouteDescription::StartDescription::GetDescription() const
   {
-    entries.clear();
+    return description;
   }
 
-  void RouteData::AddEntry(Id wayId, Id nodeId)
-  {
-    entries.push_back(RouteEntry(wayId,nodeId));
-  }
-
-  RouteDescription::RouteStep::RouteStep(double at,
-                                         Action action,
-                                         const std::string& name,
-                                         const std::string& refName)
-  : at(at),
-    action(action),
-    name(name),
-    refName(refName)
+  RouteDescription::TargetDescription::TargetDescription(const std::string& description)
+  : description(description)
   {
     // no code
+  }
+
+  std::string RouteDescription::TargetDescription::GetDescription() const
+  {
+    return description;
+  }
+
+
+  RouteDescription::NameDescription::NameDescription(const std::string& name,
+                                                     const std::string& ref)
+  : name(name),
+    ref(ref)
+  {
+    // no code
+  }
+
+  std::string RouteDescription::NameDescription::GetName() const
+  {
+    return name;
+  }
+
+  std::string RouteDescription::NameDescription::GetRef() const
+  {
+    return ref;
+  }
+
+  RouteDescription::NameChangedDescription::NameChangedDescription()
+  {
+    // no code
+  }
+
+  RouteDescription::Node::Node(Id wayId, Id nodeId, bool isCrossing)
+  : wayId(wayId),
+    nodeId(nodeId),
+    isCrossing(isCrossing),
+    distance(0.0)
+  {
+    // no code
+  }
+
+  bool RouteDescription::Node::HasDescription(const char* name) const
+  {
+    std::map<std::string,DescriptionRef>::const_iterator entry;
+
+    entry=descriptions.find(name);
+
+    return entry!=descriptions.end() && entry->second.Valid();
+  }
+
+  RouteDescription::DescriptionRef RouteDescription::Node::GetDescription(const char* name) const
+  {
+    std::map<std::string,DescriptionRef>::const_iterator entry;
+
+    entry=descriptions.find(name);
+
+    return entry->second;
+  }
+
+  void RouteDescription::Node::SetDistance(double distance)
+  {
+    this->distance=distance;
+  }
+
+  void RouteDescription::Node::AddDescription(const char* name,
+                                              Description* description)
+  {
+    descriptions[name]=description;
   }
 
   RouteDescription::RouteDescription()
@@ -62,15 +126,12 @@ namespace osmscout {
 
   void RouteDescription::Clear()
   {
-    steps.clear();
+    nodes.clear();
   }
 
-  void RouteDescription::AddStep(double at,
-                                 Action action,
-                                 const std::string& name,
-                                 const std::string& refName)
+  void RouteDescription::AddNode(Id wayId, Id nodeId, bool isCrossing)
   {
-    steps.push_back(RouteStep(at,action,name,refName));
+    nodes.push_back(Node(wayId,nodeId,isCrossing));
   }
 }
 

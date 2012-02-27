@@ -19,6 +19,7 @@
 
 #include "RouteDialog.h"
 
+#include <cmath>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -46,92 +47,26 @@ static std::wstring DistanceToWString(double distance)
 
 std::wstring RouteDialog::RouteModelPainter::GetCellData() const
 {
-  const osmscout::RouteDescription::RouteStep step=dynamic_cast<const RouteModel*>(GetModel())->GetEntry(GetRow());
+  const RouteStep step=dynamic_cast<const RouteModel*>(GetModel())->GetEntry(GetRow());
 
   if (GetColumn()==1) {
-    return DistanceToWString(step.GetAt());
+    if (isnan(step.distance)) {
+      return L"";
+    }
+    else {
+      return DistanceToWString(step.distance);
+    }
   }
   else if (GetColumn()==2) {
-    if (GetRow()>1) {
-      const osmscout::RouteDescription::RouteStep prevStep=dynamic_cast<const RouteModel*>(GetModel())->GetEntry(GetRow()-1);
-
-      if (step.GetAt()-prevStep.GetAt()>0.0) {
-        return DistanceToWString(step.GetAt()-prevStep.GetAt());
-      }
+    if (isnan(step.distanceDelta)) {
+      return L"";
     }
-    return L"";
+    else {
+      return DistanceToWString(step.distanceDelta);
+    }
   }
   else if (GetColumn()==3) {
-    std::wstring action;
-
-    switch (step.GetAction()) {
-    case osmscout::RouteDescription::start:
-      action=L"Start at ";
-      if (!step.GetName().empty()) {
-        action.append(Lum::Base::UTF8ToWString(step.GetName()));
-
-        if (!step.GetRefName().empty()) {
-          action.append(std::wstring(L" (")+Lum::Base::UTF8ToWString(step.GetRefName())+L")");
-        }
-      }
-      else {
-        action.append(Lum::Base::UTF8ToWString(step.GetRefName()));
-      }
-      break;
-    case osmscout::RouteDescription::drive:
-      action=L"drive along ";
-      if (!step.GetName().empty()) {
-        action.append(Lum::Base::UTF8ToWString(step.GetName()));
-
-        if (!step.GetRefName().empty()) {
-          action.append(std::wstring(L" (")+Lum::Base::UTF8ToWString(step.GetRefName())+L")");
-        }
-      }
-      else {
-        action.append(Lum::Base::UTF8ToWString(step.GetRefName()));
-      }
-      break;
-    case osmscout::RouteDescription::switchRoad:
-      action=L"turn into ";
-      if (!step.GetName().empty()) {
-        action.append(Lum::Base::UTF8ToWString(step.GetName()));
-
-        if (!step.GetRefName().empty()) {
-          action.append(std::wstring(L" (")+Lum::Base::UTF8ToWString(step.GetRefName())+L")");
-        }
-      }
-      else {
-        action.append(Lum::Base::UTF8ToWString(step.GetRefName()));
-      }
-      break;
-    case osmscout::RouteDescription::reachTarget:
-      action=L"Arriving at ";
-      if (!step.GetName().empty()) {
-        action.append(Lum::Base::UTF8ToWString(step.GetName()));
-
-        if (!step.GetRefName().empty()) {
-          action.append(std::wstring(L" (")+Lum::Base::UTF8ToWString(step.GetRefName())+L")");
-        }
-      }
-      else {
-        action.append(Lum::Base::UTF8ToWString(step.GetRefName()));
-      }
-      break;
-    case osmscout::RouteDescription::pass:
-      action=L"passing along ";
-      if (!step.GetName().empty()) {
-        action.append(Lum::Base::UTF8ToWString(step.GetName()));
-
-        if (!step.GetRefName().empty()) {
-          action.append(std::wstring(L" (")+Lum::Base::UTF8ToWString(step.GetRefName())+L")");
-        }
-      }
-      else {
-        action.append(Lum::Base::UTF8ToWString(step.GetRefName()));
-      }
-      break;
-    }
-    return action;
+    return step.description;
   }
 
   return L"???";
@@ -147,6 +82,7 @@ struct RouteSelection
   osmscout::Id               endNode;
   osmscout::RouteData        routeData;
   osmscout::RouteDescription routeDescription;
+  std::list<RouteStep>       routeSteps;
 };
 
 RouteSelection result;
@@ -160,7 +96,7 @@ RouteDialog::RouteDialog(DatabaseTask* databaseTask)
    end(new Lum::Model::String()),
    hasEnd(false),
    endAction(new Lum::Model::Action()),
-   routeModel(new RouteModel(result.routeDescription.Steps()))
+   routeModel(new RouteModel(result.routeSteps))
 {
   Observe(routeAction);
   Observe(GetClosedAction());
@@ -216,6 +152,11 @@ Lum::Object* RouteDialog::GetContent()
   headerModel->AddColumn(L"After",Lum::Base::Size::stdCharWidth,8);
   headerModel->AddColumn(L"Instruction",Lum::Base::Size::stdCharWidth,20,true);
 
+  RouteModelPainter *routeModelPainter=new RouteModelPainter();
+  routeModelPainter->SetAlignment(1, RouteModelPainter::right);
+  routeModelPainter->SetAlignment(2, RouteModelPainter::right);
+  routeModelPainter->SetAlignment(3, RouteModelPainter::left);
+
   table=new Lum::Table();
   table->SetFlex(true,true);
   table->SetMinWidth(Lum::Base::Size::stdCharWidth,60);
@@ -224,7 +165,7 @@ Lum::Object* RouteDialog::GetContent()
   table->GetTableView()->SetAutoFitColumns(true);
   table->GetTableView()->SetAutoVSize(true);
   table->SetModel(routeModel);
-  table->SetPainter(new RouteModelPainter());
+  table->SetPainter(routeModelPainter);
   table->SetHeaderModel(headerModel);
   panel->Add(table);
 
@@ -241,6 +182,34 @@ void RouteDialog::GetActions(std::vector<Lum::Dlg::ActionInfo>& actions)
                                     true));
 
   Lum::Dlg::ActionDialog::CreateActionInfosClose(actions,GetClosedAction());
+}
+
+bool RouteDialog::HasRelevantDescriptions(const osmscout::RouteDescription::Node& node)
+{
+  return node.HasDescription(osmscout::RouteDescription::NODE_START_DESC) ||
+         node.HasDescription(osmscout::RouteDescription::NODE_TARGET_DESC) ||
+         node.HasDescription(osmscout::RouteDescription::WAY_NAME_CHANGED_DESC);
+}
+
+void RouteDialog::PrepareRouteStep(const std::list<osmscout::RouteDescription::Node>::const_iterator& prevNode,
+                                   const std::list<osmscout::RouteDescription::Node>::const_iterator& node,
+                                   size_t lineCount,
+                                   RouteStep& step)
+{
+  if (lineCount==0) {
+    step.distance=node->GetDistance();
+
+    if (prevNode!=result.routeDescription.Nodes().end() && node->GetDistance()-prevNode->GetDistance()!=0.0) {
+      step.distanceDelta=node->GetDistance()-prevNode->GetDistance();
+    }
+    else {
+      step.distanceDelta=NAN;
+    }
+  }
+  else {
+    step.distance=NAN;
+    step.distanceDelta=NAN;
+  }
 }
 
 void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& msg)
@@ -370,7 +339,81 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
     //databaseTask->DumpStatistics();
 
     databaseTask->TransformRouteDataToRouteDescription(result.routeData,
-                                                       result.routeDescription);
+                                                       result.routeDescription,
+                                                       Lum::Base::WStringToUTF8(result.start),
+                                                       Lum::Base::WStringToUTF8(result.end));
+
+    std::list<osmscout::RouteDescription::Node>::const_iterator prevNode=result.routeDescription.Nodes().end();
+    for (std::list<osmscout::RouteDescription::Node>::const_iterator node=result.routeDescription.Nodes().begin();
+         node!=result.routeDescription.Nodes().end();
+         ++node) {
+
+      if (!HasRelevantDescriptions(*node)) {
+        continue;
+      }
+
+      size_t lineCount=0;
+
+      if (node->HasDescription(osmscout::RouteDescription::NODE_START_DESC)) {
+        osmscout::RouteDescription::DescriptionRef   description=node->GetDescription(osmscout::RouteDescription::NODE_START_DESC);
+        osmscout::RouteDescription::StartDescription *startDescription=dynamic_cast<osmscout::RouteDescription::StartDescription*>(description.Get());
+        RouteStep                                    step;
+
+        PrepareRouteStep(prevNode,node,lineCount,step);
+
+        step.description=L"Start at \"" +Lum::Base::UTF8ToWString(startDescription->GetDescription()) + L"\"";
+
+        result.routeSteps.push_back(step);
+
+        lineCount++;
+      }
+      if (node->HasDescription(osmscout::RouteDescription::NODE_TARGET_DESC)) {
+        osmscout::RouteDescription::DescriptionRef    description=node->GetDescription(osmscout::RouteDescription::NODE_TARGET_DESC);
+        osmscout::RouteDescription::TargetDescription *targetDescription=dynamic_cast<osmscout::RouteDescription::TargetDescription*>(description.Get());
+        RouteStep                                     step;
+
+        PrepareRouteStep(prevNode,node,lineCount,step);
+        step.description=L"Target reached \"" + Lum::Base::UTF8ToWString(targetDescription->GetDescription()) + L"\"";
+
+        result.routeSteps.push_back(step);
+
+        lineCount++;
+      }
+      if (node->HasDescription(osmscout::RouteDescription::WAY_NAME_CHANGED_DESC)) {
+        osmscout::RouteDescription::DescriptionRef  description=node->GetDescription(osmscout::RouteDescription::WAY_NAME_DESC);
+        osmscout::RouteDescription::NameDescription *nameDescription=dynamic_cast<osmscout::RouteDescription::NameDescription*>(description.Get());
+        RouteStep                                   step;
+
+        PrepareRouteStep(prevNode,node,lineCount,step);
+
+        step.description=L"Way ";
+
+
+        if (!nameDescription->GetName().empty()) {
+          step.description+=Lum::Base::UTF8ToWString(nameDescription->GetName());
+        }
+
+        if (!nameDescription->GetName().empty() &&
+            !nameDescription->GetRef().empty()) {
+          step.description+=L" (";
+        }
+
+        if (!nameDescription->GetRef().empty()) {
+          step.description+=Lum::Base::UTF8ToWString(nameDescription->GetRef());
+        }
+
+        if (!nameDescription->GetName().empty() &&
+            !nameDescription->GetRef().empty()) {
+          step.description+=L")";
+        }
+
+        result.routeSteps.push_back(step);
+
+        lineCount++;
+      }
+
+      prevNode=node;
+    }
 
     routeModel->Notify();
 

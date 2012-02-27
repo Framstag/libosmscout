@@ -563,11 +563,29 @@ bool DBThread::CalculateRoute(osmscout::Id startWayId,
 }
 
 bool DBThread::TransformRouteDataToRouteDescription(const osmscout::RouteData& data,
-                                                    osmscout::RouteDescription& description)
+                                                    osmscout::RouteDescription& description,
+                                                    const std::string& start,
+                                                    const std::string& target)
 {
   QMutexLocker locker(&mutex);
 
-  return router.TransformRouteDataToRouteDescription(data,description);
+  if (!router.TransformRouteDataToRouteDescription(data,description)) {
+    return false;
+  }
+
+  std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors;
+
+  postprocessors.push_back(new osmscout::RoutePostprocessor::DistancePostprocessor());
+  postprocessors.push_back(new osmscout::RoutePostprocessor::StartPostprocessor(start));
+  postprocessors.push_back(new osmscout::RoutePostprocessor::WayNamePostprocessor());
+  postprocessors.push_back(new osmscout::RoutePostprocessor::WayNameChangedPostprocessor());
+  postprocessors.push_back(new osmscout::RoutePostprocessor::TargetPostprocessor(target));
+
+  if (!routePostprocessor.PostprocessRouteDescription(description,database,postprocessors)) {
+    return false;
+  }
+
+  return true;
 }
 
 bool DBThread::TransformRouteDataToWay(const osmscout::RouteData& data,
