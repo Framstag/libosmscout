@@ -55,7 +55,8 @@ namespace osmscout {
     public:
       virtual ~Postprocessor();
 
-      virtual bool Process(RouteDescription& description,
+      virtual bool Process(const RoutingProfile& profile,
+                           RouteDescription& description,
                            Database& database) = 0;
     };
 
@@ -72,7 +73,8 @@ namespace osmscout {
     public:
       StartPostprocessor(const std::string& startDescription);
 
-      bool Process(RouteDescription& description,
+      bool Process(const RoutingProfile& profile,
+                   RouteDescription& description,
                    Database& database);
     };
 
@@ -87,17 +89,30 @@ namespace osmscout {
     public:
       TargetPostprocessor(const std::string& targetDescription);
 
-      bool Process(RouteDescription& description,
+      bool Process(const RoutingProfile& profile,
+                   RouteDescription& description,
                    Database& database);
     };
 
     /**
-     * Places a name description as way description
+     * Calculates the overall running distance for each node
      */
     OSMSCOUT_API class DistancePostprocessor : public Postprocessor
     {
     public:
-      bool Process(RouteDescription& description,
+      bool Process(const RoutingProfile& profile,
+                   RouteDescription& description,
+                   Database& database);
+    };
+
+    /**
+     * Calculates the overall running time for each node
+     */
+    OSMSCOUT_API class TimePostprocessor : public Postprocessor
+    {
+    public:
+      bool Process(const RoutingProfile& profile,
+                   RouteDescription& description,
                    Database& database);
     };
 
@@ -107,7 +122,8 @@ namespace osmscout {
     OSMSCOUT_API class WayNamePostprocessor : public Postprocessor
     {
     public:
-      bool Process(RouteDescription& description,
+      bool Process(const RoutingProfile& profile,
+                   RouteDescription& description,
                    Database& database);
     };
 
@@ -117,12 +133,14 @@ namespace osmscout {
     OSMSCOUT_API class WayNameChangedPostprocessor : public Postprocessor
     {
     public:
-      bool Process(RouteDescription& description,
+      bool Process(const RoutingProfile& profile,
+                   RouteDescription& description,
                    Database& database);
     };
 
   public:
     bool PostprocessRouteDescription(RouteDescription& description,
+                                     const RoutingProfile& profile,
                                      Database& database,
                                      std::list<PostprocessorRef> processors);
   };

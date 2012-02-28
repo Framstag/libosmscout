@@ -27,10 +27,11 @@
 #include "DBThread.h"
 #include "SearchLocationDialog.h"
 
+#include <cmath>
 #include <iostream>
 #include <iomanip>
 
-static std::string DistanceToString(double distance)
+static QString DistanceToString(double distance)
 {
   std::ostringstream stream;
 
@@ -38,7 +39,22 @@ static std::string DistanceToString(double distance)
   stream.precision(1);
   stream << distance << "km";
 
-  return stream.str();
+  return stream.str().c_str();
+}
+
+static QString TimeToString(double time)
+{
+  std::ostringstream stream;
+
+  stream << std::setfill(' ') << std::setw(2) << (int)std::floor(time) << ":";
+
+  time-=std::floor(time);
+
+  stream << std::setfill('0') << std::setw(2) << (int)floor(60*time+0.5);
+
+  stream << "h";
+
+  return stream.str().c_str();
 }
 
 struct RouteSelection
@@ -69,7 +85,7 @@ int RouteModel::rowCount(const QModelIndex &parent) const
 
 int RouteModel::columnCount(const QModelIndex &parent) const
 {
-  return 3;
+  return 5;
 }
 
 QVariant RouteModel::data(const QModelIndex &index, int role) const
@@ -88,18 +104,18 @@ QVariant RouteModel::data(const QModelIndex &index, int role) const
     std::advance(step,index.row());
 
     if (index.column()==0) {
-      if (isnan(step->distance)) {
-        return "";
-      }
-      return DistanceToString(step->distance).c_str();
+      return step->distance;
     }
     else if (index.column()==1) {
-      if (isnan(step->distanceDelta)) {
-        return "";
-      }
-      return DistanceToString(step->distanceDelta).c_str();
+      return step->distanceDelta;
     }
-    else if (index.column()==2) {
+    if (index.column()==2) {
+      return step->time;
+    }
+    else if (index.column()==3) {
+      return step->timeDelta;
+    }
+    else if (index.column()==4) {
       return step->description;
     }
   }
@@ -124,6 +140,10 @@ QVariant RouteModel::headerData(int section, Qt::Orientation orientation, int ro
     case 1:
       return "After";
     case 2:
+      return "Time";
+    case 3:
+      return "After";
+    case 4:
       return "Instruction";
     default:
       return QVariant();
@@ -191,6 +211,8 @@ RoutingDialog::RoutingDialog(QWidget* parentWindow)
   routeView->verticalHeader()->hide();
   routeView->setColumnWidth(0,QApplication::fontMetrics().width("mlxi")/4*12);
   routeView->setColumnWidth(1,QApplication::fontMetrics().width("mlxi")/4*12);
+  routeView->setColumnWidth(2,QApplication::fontMetrics().width("mlxi")/4*10);
+  routeView->setColumnWidth(3,QApplication::fontMetrics().width("mlxi")/4*10);
 
   mainLayout->addWidget(routeView);
 
@@ -331,18 +353,16 @@ void RoutingDialog::PrepareRouteStep(const std::list<osmscout::RouteDescription:
                                      RouteStep& step)
 {
   if (lineCount==0) {
-    step.distance=node->GetDistance();
+    step.distance=DistanceToString(node->GetDistance());
+    step.time=TimeToString(node->GetTime());
 
     if (prevNode!=route.routeDescription.Nodes().end() && node->GetDistance()-prevNode->GetDistance()!=0.0) {
-      step.distanceDelta=node->GetDistance()-prevNode->GetDistance();
+      step.distanceDelta=DistanceToString(node->GetDistance()-prevNode->GetDistance());
     }
-    else {
-      step.distanceDelta=NAN;
+
+    if (prevNode!=route.routeDescription.Nodes().end() && node->GetTime()-prevNode->GetTime()!=0.0) {
+      step.timeDelta=TimeToString(node->GetTime()-prevNode->GetTime());
     }
-  }
-  else {
-    step.distance=NAN;
-    step.distanceDelta=NAN;
   }
 }
 

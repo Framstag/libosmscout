@@ -78,7 +78,7 @@ private:
   osmscout::MapPainterQt       painter;
   osmscout::RouterParameter    routerParameter;
   osmscout::Router             router;
-  osmscout::RoutingProfile     routingProfile;
+  osmscout::FastestPathRoutingProfile routingProfile;
   osmscout::RoutePostprocessor routePostprocessor;
 
   bool                         finish;

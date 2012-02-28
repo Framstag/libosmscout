@@ -23,34 +23,34 @@
 
 namespace osmscout {
 
-  RoutingProfile::RoutingProfile()
-   : minCostFactor(0),
-     turnCostFactor(0)
+  RoutingProfile::~RoutingProfile()
   {
     // no code
   }
 
-  void RoutingProfile::SetTurnCostFactor(double costFactor)
+  AbstractRoutingProfile::AbstractRoutingProfile()
+   : minSpeed(0),
+     maxSpeed(0)
   {
-    turnCostFactor=costFactor;
+    // no code
   }
 
-  void RoutingProfile::SetTypeCostFactor(TypeId type, double costFactor)
+  void AbstractRoutingProfile::AddType(TypeId type, double speed)
   {
-    if (costFactors.empty()) {
-      minCostFactor=costFactor;
-      maxCostFactor=costFactor;
+    if (speeds.empty()) {
+      minSpeed=speed;
+      maxSpeed=speed;
     }
     else {
-      minCostFactor=std::min(minCostFactor,costFactor);
-      maxCostFactor=std::max(maxCostFactor,costFactor);
+      minSpeed=std::min(minSpeed,speed);
+      maxSpeed=std::max(maxSpeed,speed);
     }
 
-    if (type>=costFactors.size()) {
-      costFactors.resize(type+1,0.0);
+    if (type>=speeds.size()) {
+      speeds.resize(type+1,0.0);
     }
 
-    costFactors[type]=costFactor;
+    speeds[type]=speed;
   }
 }
 

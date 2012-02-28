@@ -22,54 +22,93 @@
 
 #include <vector>
 
-#include <osmscout/StyleConfig.h>
-#include <osmscout/TypeConfig.h>
+#include <osmscout/RouteNode.h>
+#include <osmscout/Types.h>
 
 namespace osmscout {
 
   class OSMSCOUT_API RoutingProfile
   {
-  private:
-    std::vector<double> costFactors;
-    double              minCostFactor;
-    double              maxCostFactor;
-    double              turnCostFactor;
+  public:
+    virtual ~RoutingProfile();
+
+    virtual bool CanUse(const RouteNode& currentNode, size_t pathIndex) const = 0;
+    virtual double GetCosts(const RouteNode& currentNode, size_t pathIndex) const = 0;
+    virtual double GetCosts(TypeId type, double distance) const = 0;
+    virtual double GetCosts(double distance) const = 0;
+    virtual double GetTime(TypeId type, double distance) const = 0;
+  };
+
+  class OSMSCOUT_API AbstractRoutingProfile : public RoutingProfile
+  {
+  protected:
+    std::vector<double> speeds;
+    double              minSpeed;
+    double              maxSpeed;
 
   public:
-    RoutingProfile();
+    AbstractRoutingProfile();
 
-    void SetTurnCostFactor(double costFactor);
+    void AddType(TypeId type, double speed);
 
-    void SetTypeCostFactor(TypeId type, double costFactor);
-
-    inline double GetCostFactor(TypeId type) const
+    inline bool CanUse(const RouteNode& currentNode, size_t pathIndex) const
     {
-      if (type>=costFactors.size()) {
-        return 0;
-      }
-      else {
-        return costFactors[type];
-      }
+      TypeId type=currentNode.paths[pathIndex].type;
+
+      return type<speeds.size() && speeds[type]>0.0;
     }
 
-    inline bool CanUse(TypeId type) const
+    inline double GetTime(TypeId type, double distance) const
     {
-      return type<costFactors.size() && costFactors[type]!=0.0;
+      return distance/speeds[type];
+    }
+  };
+
+  class OSMSCOUT_API ShortestPathRoutingProfile : public AbstractRoutingProfile
+  {
+  public:
+    inline double GetCosts(const RouteNode& currentNode, size_t pathIndex) const
+    {
+      return currentNode.paths[pathIndex].distance;
     }
 
-    inline double GetMinCostFactor() const
+    double GetCosts(TypeId type, double distance) const
     {
-      return minCostFactor;
+      return distance;
     }
 
-    inline double GetMaxCostFactor() const
+    inline double GetCosts(double distance) const
     {
-      return maxCostFactor;
+      return distance;
+    }
+  };
+
+  class OSMSCOUT_API FastestPathRoutingProfile : public AbstractRoutingProfile
+  {
+  public:
+    inline double GetCosts(const RouteNode& currentNode, size_t pathIndex) const
+    {
+      TypeId type=currentNode.paths[pathIndex].type;
+      double distance=currentNode.paths[pathIndex].distance;
+
+      double costs=distance/speeds[type];
+
+      return costs;
     }
 
-    inline double GetTurnCostFactor() const
+    double GetCosts(TypeId type, double distance) const
     {
-      return turnCostFactor;
+      double costs=distance/speeds[type];
+
+      return costs;
+    }
+
+    inline double GetCosts(double distance) const
+    {
+
+      double costs=distance/maxSpeed;
+
+      return costs;
     }
   };
 }

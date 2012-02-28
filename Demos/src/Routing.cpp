@@ -17,9 +17,11 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <cmath>
 #include <iostream>
 #include <iomanip>
 #include <list>
+#include <sstream>
 
 #include <osmscout/Database.h>
 #include <osmscout/Router.h>
@@ -39,6 +41,19 @@ static bool HasRelevantDescriptions(const osmscout::RouteDescription::Node& node
   return node.HasDescription(osmscout::RouteDescription::NODE_START_DESC) ||
          node.HasDescription(osmscout::RouteDescription::NODE_TARGET_DESC) ||
          node.HasDescription(osmscout::RouteDescription::WAY_NAME_CHANGED_DESC);
+}
+
+static std::string TimeToString(double time)
+{
+  std::ostringstream stream;
+
+  stream << std::setfill(' ') << std::setw(2) << (int)std::floor(time) << ":";
+
+  time-=std::floor(time);
+
+  stream << std::setfill('0') << std::setw(2) << (int)floor(60*time+0.5);
+
+  return stream.str();
 }
 
 int main(int argc, char* argv[])
@@ -85,70 +100,69 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  osmscout::TypeId           type;
-  osmscout::TypeConfig       *typeConfig=router.GetTypeConfig();
+  osmscout::TypeId                    type;
+  osmscout::TypeConfig                *typeConfig=router.GetTypeConfig();
 
-  osmscout::RoutingProfile   routingProfile;
-  osmscout::RouteData        data;
-  osmscout::RouteDescription description;
-
-  routingProfile.SetTurnCostFactor(1/60/2); // 30 seconds
+  //osmscout::ShortestPathRoutingProfile routingProfile;
+  osmscout::FastestPathRoutingProfile routingProfile;
+  osmscout::RouteData                 data;
+  osmscout::RouteDescription          description;
 
   type=typeConfig->GetWayTypeId("highway_motorway");
   assert(type!=osmscout::typeIgnore);
-  routingProfile.SetTypeCostFactor(type,1/110.0);
+  routingProfile.AddType(type,110.0);
 
   type=typeConfig->GetWayTypeId("highway_motorway_link");
   assert(type!=osmscout::typeIgnore);
-  routingProfile.SetTypeCostFactor(type,1/60.0);
+  routingProfile.AddType(type,60.0);
 
   type=typeConfig->GetWayTypeId("highway_trunk");
   assert(type!=osmscout::typeIgnore);
-  routingProfile.SetTypeCostFactor(type,1/70.0);
+  routingProfile.AddType(type,70.0);
 
   type=typeConfig->GetWayTypeId("highway_trunk_link");
   assert(type!=osmscout::typeIgnore);
-  routingProfile.SetTypeCostFactor(type,1/70.0);
+  routingProfile.AddType(type,70.0);
 
   type=typeConfig->GetWayTypeId("highway_primary");
   assert(type!=osmscout::typeIgnore);
-  routingProfile.SetTypeCostFactor(type,1/70.0);
+  routingProfile.AddType(type,70.0);
 
   type=typeConfig->GetWayTypeId("highway_primary_link");
   assert(type!=osmscout::typeIgnore);
-  routingProfile.SetTypeCostFactor(type,1/60.0);
+  routingProfile.AddType(type,60.0);
 
   type=typeConfig->GetWayTypeId("highway_secondary");
   assert(type!=osmscout::typeIgnore);
-  routingProfile.SetTypeCostFactor(type,1/60.0);
+  routingProfile.AddType(type,60.0);
 
   type=typeConfig->GetWayTypeId("highway_secondary_link");
   assert(type!=osmscout::typeIgnore);
-  routingProfile.SetTypeCostFactor(type,1/50.0);
+  routingProfile.AddType(type,50.0);
 
   type=typeConfig->GetWayTypeId("highway_tertiary");
   assert(type!=osmscout::typeIgnore);
-  routingProfile.SetTypeCostFactor(type,1/55.0);
+  routingProfile.AddType(type,55.0);
 
   type=typeConfig->GetWayTypeId("highway_unclassified");
   assert(type!=osmscout::typeIgnore);
-  routingProfile.SetTypeCostFactor(type,1/50.0);
+  routingProfile.AddType(type,50.0);
 
   type=typeConfig->GetWayTypeId("highway_road");
   assert(type!=osmscout::typeIgnore);
-  routingProfile.SetTypeCostFactor(type,1/50.0);
+  routingProfile.AddType(type,50.0);
 
   type=typeConfig->GetWayTypeId("highway_residential");
   assert(type!=osmscout::typeIgnore);
-  routingProfile.SetTypeCostFactor(type,1/40.0);
+  routingProfile.AddType(type,40.0);
 
   type=typeConfig->GetWayTypeId("highway_living_street");
   assert(type!=osmscout::typeIgnore);
-  routingProfile.SetTypeCostFactor(type,1/10.0);
+  routingProfile.AddType(type,10.0);
 
   type=typeConfig->GetWayTypeId("highway_service");
   assert(type!=osmscout::typeIgnore);
-  routingProfile.SetTypeCostFactor(type,1/30.0);
+  routingProfile.AddType(type,30.0);
 
   if (!router.CalculateRoute(routingProfile,
                              startWayId,startNodeId,
@@ -164,6 +178,7 @@ int main(int argc, char* argv[])
   std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors;
 
   postprocessors.push_back(new osmscout::RoutePostprocessor::DistancePostprocessor());
+  postprocessors.push_back(new osmscout::RoutePostprocessor::TimePostprocessor());
   postprocessors.push_back(new osmscout::RoutePostprocessor::StartPostprocessor("Start"));
   postprocessors.push_back(new osmscout::RoutePostprocessor::WayNamePostprocessor());
   postprocessors.push_back(new osmscout::RoutePostprocessor::WayNameChangedPostprocessor());
@@ -180,12 +195,15 @@ int main(int argc, char* argv[])
   }
 
   if (!postprocessor.PostprocessRouteDescription(description,
+                                                 routingProfile,
                                                  database,
                                                  postprocessors)) {
     std::cerr << "Error during route postprocessing" << std::endl;
   }
 
-  std::cout << "-----" << std::endl;
+  std::cout << "----------------------------------------------------" << std::endl;
+  std::cout << "     At| After|  Time| After|" << std::endl;
+  std::cout << "----------------------------------------------------" << std::endl;
   std::list<osmscout::RouteDescription::Node>::const_iterator prevNode=description.Nodes().end();
   for (std::list<osmscout::RouteDescription::Node>::const_iterator node=description.Nodes().begin();
        node!=description.Nodes().end();
@@ -200,6 +218,10 @@ int main(int argc, char* argv[])
     std::cout << std::setfill(' ') << std::setw(5) << std::fixed << std::setprecision(1);
     std::cout << node->GetDistance() << "km ";
 
+#if defined(HTML)
+    std::cout <<"</td><td>";
+#endif
+
     if (prevNode!=description.Nodes().end() && node->GetDistance()-prevNode->GetDistance()!=0.0) {
       std::cout << std::setfill(' ') << std::setw(4) << std::fixed << std::setprecision(1);
       std::cout << node->GetDistance()-prevNode->GetDistance() << "km ";
@@ -209,11 +231,24 @@ int main(int argc, char* argv[])
     }
 
 #if defined(HTML)
-    std::cout <<"</td>";
+    std::cout << "<tr><td>";
 #endif
+    std::cout << TimeToString(node->GetTime()) << "h ";
 
 #if defined(HTML)
-    std::cout << "<td>";
+    std::cout <<"</td><td>";
+#endif
+
+    if (prevNode!=description.Nodes().end() && node->GetTime()-prevNode->GetTime()!=0.0) {
+      std::cout << TimeToString(node->GetTime()-prevNode->GetTime()) << "h ";
+    }
+    else {
+      std::cout << "       ";
+    }
+
+
+#if defined(HTML)
+    std::cout <<"</td><td>";
 #endif
 
     size_t lineCount=0;
@@ -223,7 +258,7 @@ int main(int argc, char* argv[])
       osmscout::RouteDescription::StartDescription *startDescription=dynamic_cast<osmscout::RouteDescription::StartDescription*>(description.Get());
 
       if (lineCount>0) {
-        std::cout << "               ";
+        std::cout << "                      ";
       }
 
       std::cout << "Start at \"" << startDescription->GetDescription() << "\"" << std::endl;
@@ -235,7 +270,7 @@ int main(int argc, char* argv[])
       osmscout::RouteDescription::TargetDescription *targetDescription=dynamic_cast<osmscout::RouteDescription::TargetDescription*>(description.Get());
 
       if (lineCount>0) {
-        std::cout << "               ";
+        std::cout << "                      ";
       }
 
       std::cout << "Target reached \"" << targetDescription->GetDescription() << "\"" << std::endl;
@@ -247,7 +282,7 @@ int main(int argc, char* argv[])
       osmscout::RouteDescription::NameDescription *nameDescription=dynamic_cast<osmscout::RouteDescription::NameDescription*>(description.Get());
 
       if (lineCount>0) {
-        std::cout << "               ";
+        std::cout << "                             ";
       }
 
       std::cout << "Way ";

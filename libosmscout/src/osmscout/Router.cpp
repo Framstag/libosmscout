@@ -47,7 +47,8 @@ namespace osmscout {
     // no code
   }
 
-  bool RoutePostprocessor::StartPostprocessor::Process(RouteDescription& description,
+  bool RoutePostprocessor::StartPostprocessor::Process(const RoutingProfile& profile,
+                                                       RouteDescription& description,
                                                        Database& database)
   {
     description.Nodes().front().AddDescription(RouteDescription::NODE_START_DESC,
@@ -62,7 +63,8 @@ namespace osmscout {
     // no code
   }
 
-  bool RoutePostprocessor::TargetPostprocessor::Process(RouteDescription& description,
+  bool RoutePostprocessor::TargetPostprocessor::Process(const RoutingProfile& profile,
+                                                        RouteDescription& description,
                                                         Database& database)
   {
     description.Nodes().back().AddDescription(RouteDescription::NODE_TARGET_DESC,
@@ -71,59 +73,81 @@ namespace osmscout {
     return true;
   }
 
-  bool RoutePostprocessor::DistancePostprocessor::Process(RouteDescription& description,
-                                                         Database& database)
+  bool RoutePostprocessor::DistancePostprocessor::Process(const RoutingProfile& profile,
+                                                          RouteDescription& description,
+                                                          Database& database)
   {
-    WayRef                                      way,newWay;
-    Id                                          node=0,newNode=0;
-    std::list<RouteDescription::Node>::iterator iter;
+    WayRef                                      prevWay,nextWay;
+    Id                                          prevNode,nextNode;
     double                                      distance=0.0;
 
-    iter=description.Nodes().begin();
-
-    if (!database.GetWay(iter->GetWayId(),way)) {
-      return false;
-    }
-
-    // Find the starting node
-    for (size_t i=0; i<way->nodes.size(); i++) {
-      if (way->nodes[i].id==iter->GetNodeId()) {
-        node=i;
-        break;
-      }
-    }
-
-    iter++;
-
-    // For every step in the route...
-    for ( /* no code */ ;iter!=description.Nodes().end(); ++iter, way=newWay, node=newNode) {
-      // Find the corresponding way (which may be the old way?)
-      if (iter->GetWayId()!=way->GetId()) {
-        if (!database.GetWay(iter->GetWayId(),newWay)) {
+    for (std::list<RouteDescription::Node>::iterator iter=description.Nodes().begin();
+         iter!=description.Nodes().end();
+         ++iter) {
+      if (prevWay.Invalid() || prevWay->GetId()!=iter->GetWayId()) {
+        if (!database.GetWay(iter->GetWayId(),nextWay)) {
           return false;
         }
       }
-      else {
-        newWay=way;
-      }
 
-      // Find the current node in the new way and calculate the distance
-      // between the old point and the new point
-      for (size_t i=0; i<newWay->nodes.size(); i++) {
-        if (newWay->nodes[i].id==iter->GetNodeId()) {
-          distance+=GetEllipsoidalDistance(way->nodes[node].lon,way->nodes[node].lat,
-                                           newWay->nodes[i].lon,newWay->nodes[i].lat);
-          newNode=i;
-
-          iter->SetDistance(distance);
+      for (size_t i=0; i<nextWay->nodes.size(); i++) {
+        if (nextWay->nodes[i].id==iter->GetNodeId()) {
+          nextNode=i;
+          break;
         }
       }
+
+      if (prevWay.Valid()) {
+        distance+=GetEllipsoidalDistance(prevWay->nodes[prevNode].lon,
+                                         prevWay->nodes[prevNode].lat,
+                                         nextWay->nodes[nextNode].lon,
+                                         nextWay->nodes[nextNode].lat);
+
+        iter->SetDistance(distance);
+      }
+      else {
+        iter->SetDistance(0.0);
+      }
+
+      prevWay=nextWay;
+      prevNode=nextNode;
     }
 
     return true;
   }
 
-  bool RoutePostprocessor::WayNamePostprocessor::Process(RouteDescription& description,
+  bool RoutePostprocessor::TimePostprocessor::Process(const RoutingProfile& profile,
+                                                      RouteDescription& description,
+                                                      Database& database)
+  {
+    double time=0.0;
+
+    std::list<RouteDescription::Node>::iterator prev=description.Nodes().end();
+    for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
+        node!=description.Nodes().end();
+        ++node) {
+      WayRef way;
+
+      if (way.Invalid() || node->GetWayId()!=way->GetId()) {
+        if (!database.GetWay(node->GetWayId(),way)) {
+          return false;
+        }
+      }
+
+      if (prev!=description.Nodes().end()) {
+        time+=profile.GetTime(way->GetType(),node->GetDistance()-prev->GetDistance());
+      }
+
+      node->SetTime(time);
+
+      prev=node;
+    }
+
+    return true;
+  }
+
+  bool RoutePostprocessor::WayNamePostprocessor::Process(const RoutingProfile& profile,
+                                                         RouteDescription& description,
                                                          Database& database)
   {
     RouteDescription::NameDescriptionRef lastDescription;
@@ -165,7 +189,8 @@ namespace osmscout {
     return true;
   }
 
-  bool RoutePostprocessor::WayNameChangedPostprocessor::Process(RouteDescription& description,
+  bool RoutePostprocessor::WayNameChangedPostprocessor::Process(const RoutingProfile& profile,
+                                                                RouteDescription& description,
                                                                 Database& database)
   {
     WayRef lastInterestingWay;
@@ -229,6 +254,7 @@ namespace osmscout {
   }
 
   bool RoutePostprocessor::PostprocessRouteDescription(RouteDescription& description,
+                                                       const RoutingProfile& profile,
                                                        Database& database,
                                                        std::list<PostprocessorRef> processors)
   {
@@ -237,7 +263,8 @@ namespace osmscout {
         ++p) {
       PostprocessorRef processor=*p;
 
-      if (!processor->Process(description,
+      if (!processor->Process(profile,
+                              description,
                               database)) {
         return false;
       }
@@ -505,31 +532,31 @@ namespace osmscout {
       next++;
 
       if (next!=nodes.end()) {
-        WayRef nextWay;
+        WayRef way;
 
-        wayDataFile.Get(next->wayId,nextWay);
+        wayDataFile.Get(node->wayId,way);
 
         size_t start=0;
-        while (start<nextWay->nodes.size() &&
-            nextWay->nodes[start].GetId()!=node->nodeId) {
+        while (start<way->nodes.size() &&
+            way->nodes[start].GetId()!=node->nodeId) {
           start++;
         }
 
         size_t end=0;
-        while (end<nextWay->nodes.size() &&
-            nextWay->nodes[end].GetId()!=next->nodeId) {
+        while (end<way->nodes.size() &&
+            way->nodes[end].GetId()!=next->nodeId) {
           end++;
         }
 
-        if (start<nextWay->nodes.size() && end<nextWay->nodes.size()) {
+        if (start<way->nodes.size() && end<way->nodes.size()) {
           if (start<end) {
             for (size_t i=start+1; i<end; i++) {
-              route.AddEntry(nextWay->GetId(),nextWay->nodes[i].GetId(),false);
+              route.AddEntry(way->GetId(),way->nodes[i].GetId(),false);
             }
           }
           else {
             for (int i=start-1; i>(int)end; i--) {
-              route.AddEntry(nextWay->GetId(),nextWay->nodes[i].GetId(),false);
+              route.AddEntry(way->GetId(),way->nodes[i].GetId(),false);
             }
           }
         }
@@ -634,15 +661,16 @@ namespace osmscout {
                      startWay->GetId(),
                      0);
 
-    node.currentCost=GetSphericalDistance(startLon,
-                                          startLat,
-                                          startWay->nodes[startNodePos].GetLon(),
-                                          startWay->nodes[startNodePos].GetLat());
-    node.estimateCost=profile.GetMinCostFactor()*
-                      GetSphericalDistance(startLon,
-                                           startLat,
-                                           targetLon,
-                                           targetLat);
+    node.currentCost=profile.GetCosts(startWay->GetType(),
+                                      GetSphericalDistance(startLon,
+                                                           startLat,
+                                                           startWay->nodes[startNodePos].GetLon(),
+                                                           startWay->nodes[startNodePos].GetLat()));
+    node.estimateCost=profile.GetCosts(GetSphericalDistance(startLon,
+                                                            startLat,
+                                                            targetLon,
+                                                            targetLat));
+
     node.overallCost=node.currentCost+node.estimateCost;
 
     openList.insert(node);
@@ -685,7 +713,7 @@ namespace osmscout {
       // Get potential follower in the current way
 
       for (size_t i=0; i<currentRouteNode->paths.size(); i++) {
-        if (!profile.CanUse(currentRouteNode->paths[i].type)) {
+        if (!profile.CanUse(*currentRouteNode,i)) {
           //std::cout << "skipping route from " << currentRouteNode->id << " to " << currentRouteNode->paths[i].id << " (wrong type " << currentRouteNode->paths[i].type  << ")" << std::endl;
           nodesIgnoredCount++;
           continue;
@@ -726,14 +754,13 @@ namespace osmscout {
         }
 
         double currentCost=current.currentCost+
-                           profile.GetCostFactor(currentRouteNode->paths[i].type)*
-                           currentRouteNode->paths[i].distance;
+                           profile.GetCosts(*currentRouteNode,i);
 
         // TODO: Turn costs
 
         std::map<Id,RNodeRef>::iterator openEntry=openMap.find(currentRouteNode->paths[i].id);
 
-        // Check, if we already have a cheaper path to the new node.If yes, do not put the new path
+        // Check, if we already have a cheaper path to the new node. If yes, do not put the new path
         // into the open list
         if (openEntry!=openMap.end() &&
             openEntry->second->currentCost<=currentCost) {
@@ -742,9 +769,10 @@ namespace osmscout {
         }
 
         // Estimate costs for the rest of the distance to the target
-        double estimateCost=profile.GetMinCostFactor()*
-                            GetSphericalDistance(currentRouteNode->paths[i].lon,currentRouteNode->paths[i].lat,
-                                                 targetLon,targetLat);
+        double estimateCost=profile.GetCosts(GetSphericalDistance(currentRouteNode->paths[i].lon,
+                                                                  currentRouteNode->paths[i].lat,
+                                                                  targetLon,
+                                                                  targetLat));
         double overallCost=currentCost+estimateCost;
 
         RNode node(currentRouteNode->paths[i].id,

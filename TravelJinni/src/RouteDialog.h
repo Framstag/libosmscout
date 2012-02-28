@@ -33,8 +33,10 @@
 
 struct RouteStep
 {
-  double       distance;
-  double       distanceDelta;
+  std::wstring distance;
+  std::wstring distanceDelta;
+  std::wstring time;
+  std::wstring timeDelta;
   std::wstring description;
 };
 

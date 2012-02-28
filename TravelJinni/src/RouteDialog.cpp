@@ -45,27 +45,38 @@ static std::wstring DistanceToWString(double distance)
   return Lum::Base::StringToWString(stream.str());
 }
 
+static std::wstring TimeToWString(double time)
+{
+  std::ostringstream stream;
+
+  stream << std::setfill(' ') << std::setw(2) << (int)std::floor(time) << ":";
+
+  time-=std::floor(time);
+
+  stream << std::setfill('0') << std::setw(2) << (int)floor(60*time+0.5);
+
+  stream << "h";
+
+  return Lum::Base::StringToWString(stream.str());
+}
+
 std::wstring RouteDialog::RouteModelPainter::GetCellData() const
 {
   const RouteStep step=dynamic_cast<const RouteModel*>(GetModel())->GetEntry(GetRow());
 
   if (GetColumn()==1) {
-    if (isnan(step.distance)) {
-      return L"";
-    }
-    else {
-      return DistanceToWString(step.distance);
-    }
+    return step.distance;
   }
   else if (GetColumn()==2) {
-    if (isnan(step.distanceDelta)) {
-      return L"";
-    }
-    else {
-      return DistanceToWString(step.distanceDelta);
-    }
+    return step.distanceDelta;
   }
   else if (GetColumn()==3) {
+    return step.time;
+  }
+  else if (GetColumn()==4) {
+    return step.timeDelta;
+  }
+  else if (GetColumn()==5) {
     return step.description;
   }
 
@@ -148,8 +159,10 @@ Lum::Object* RouteDialog::GetContent()
   panel->AddSpace();
 
   headerModel=new Lum::Model::HeaderImpl();
-  headerModel->AddColumn(L"At",Lum::Base::Size::stdCharWidth,8);
-  headerModel->AddColumn(L"After",Lum::Base::Size::stdCharWidth,8);
+  headerModel->AddColumn(L"At",Lum::Base::Size::stdCharWidth,7);
+  headerModel->AddColumn(L"After",Lum::Base::Size::stdCharWidth,7);
+  headerModel->AddColumn(L"Time",Lum::Base::Size::stdCharWidth,6);
+  headerModel->AddColumn(L"After",Lum::Base::Size::stdCharWidth,6);
   headerModel->AddColumn(L"Instruction",Lum::Base::Size::stdCharWidth,20,true);
 
   RouteModelPainter *routeModelPainter=new RouteModelPainter();
@@ -197,18 +210,15 @@ void RouteDialog::PrepareRouteStep(const std::list<osmscout::RouteDescription::N
                                    RouteStep& step)
 {
   if (lineCount==0) {
-    step.distance=node->GetDistance();
+    step.distance=DistanceToWString(node->GetDistance());
+    step.time=TimeToWString(node->GetTime());
 
     if (prevNode!=result.routeDescription.Nodes().end() && node->GetDistance()-prevNode->GetDistance()!=0.0) {
-      step.distanceDelta=node->GetDistance()-prevNode->GetDistance();
+      step.distanceDelta=DistanceToWString(node->GetDistance()-prevNode->GetDistance());
     }
-    else {
-      step.distanceDelta=NAN;
+    if (prevNode!=result.routeDescription.Nodes().end() && node->GetTime()-prevNode->GetTime()!=0.0) {
+      step.timeDelta=TimeToWString(node->GetTime()-prevNode->GetTime());
     }
-  }
-  else {
-    step.distance=NAN;
-    step.distanceDelta=NAN;
   }
 }
 

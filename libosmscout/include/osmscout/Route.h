@@ -128,10 +128,12 @@ namespace osmscout {
     class Node
     {
     private:
+      // Location
       Id                                   wayId;
       Id                                   nodeId;
       bool                                 isCrossing;
       double                               distance;
+      double                               time;
       std::map<std::string,DescriptionRef> descriptions;
 
     public:
@@ -163,10 +165,19 @@ namespace osmscout {
         return distance;
       }
 
+      /**
+       * Time from the start of the route in h.
+       */
+      inline double GetTime() const
+      {
+        return time;
+      }
+
       bool HasDescription(const char* name) const;
       DescriptionRef GetDescription(const char* name) const;
 
       void SetDistance(double distance);
+      void SetTime(double time);
 
       void AddDescription(const char* name, Description* description);
     };

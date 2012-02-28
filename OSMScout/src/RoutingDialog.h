@@ -46,8 +46,10 @@ public:
 
 struct RouteStep
 {
-  double  distance;
-  double  distanceDelta;
+  QString distance;
+  QString distanceDelta;
+  QString time;
+  QString timeDelta;
   QString description;
 };
 

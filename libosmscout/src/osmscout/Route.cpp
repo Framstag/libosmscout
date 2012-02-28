@@ -85,7 +85,8 @@ namespace osmscout {
   : wayId(wayId),
     nodeId(nodeId),
     isCrossing(isCrossing),
-    distance(0.0)
+    distance(0.0),
+    time(0.0)
   {
     // no code
   }
@@ -111,6 +112,11 @@ namespace osmscout {
   void RouteDescription::Node::SetDistance(double distance)
   {
     this->distance=distance;
+  }
+
+  void RouteDescription::Node::SetTime(double time)
+  {
+    this->time=time;
   }
 
   void RouteDescription::Node::AddDescription(const char* name,
