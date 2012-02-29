@@ -81,9 +81,13 @@ namespace osmscout {
     // no code
   }
 
-  RouteDescription::Node::Node(Id wayId, Id nodeId, bool isCrossing)
-  : wayId(wayId),
-    nodeId(nodeId),
+  RouteDescription::Node::Node(Id currentNodeId,
+                               Id pathWayId,
+                               Id targetNodeId,
+                               bool isCrossing)
+  : currentNodeId(currentNodeId),
+    pathWayId(pathWayId),
+    targetNodeId(targetNodeId),
     isCrossing(isCrossing),
     distance(0.0),
     time(0.0)
@@ -135,9 +139,15 @@ namespace osmscout {
     nodes.clear();
   }
 
-  void RouteDescription::AddNode(Id wayId, Id nodeId, bool isCrossing)
+  void RouteDescription::AddNode(Id currentNodeId,
+                                 Id pathWayId,
+                                 Id targetNodeId,
+                                 bool isCrossing)
   {
-    nodes.push_back(Node(wayId,nodeId,isCrossing));
+    nodes.push_back(Node(currentNodeId,
+                         pathWayId,
+                         targetNodeId,
+                         isCrossing));
   }
 }
 

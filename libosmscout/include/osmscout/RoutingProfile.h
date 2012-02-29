@@ -27,6 +27,11 @@
 
 namespace osmscout {
 
+  /**
+   * Abstract interface for a routing profile. A routing profile decides about the costs
+   * of taking a certain way. It thus may hold information about how fast ways can be used,
+   * maximum speed of the traveling device etc...
+   */
   class OSMSCOUT_API RoutingProfile
   {
   public:
@@ -39,6 +44,9 @@ namespace osmscout {
     virtual double GetTime(TypeId type, double distance) const = 0;
   };
 
+  /**
+   * Common base class for our concrete profile instantiations.
+   */
   class OSMSCOUT_API AbstractRoutingProfile : public RoutingProfile
   {
   protected:
@@ -64,6 +72,9 @@ namespace osmscout {
     }
   };
 
+  /**
+   * Profile that defines costs in a way that the shortest way is chosen (cost==distance).
+   */
   class OSMSCOUT_API ShortestPathRoutingProfile : public AbstractRoutingProfile
   {
   public:
@@ -72,7 +83,7 @@ namespace osmscout {
       return currentNode.paths[pathIndex].distance;
     }
 
-    double GetCosts(TypeId type, double distance) const
+    inline double GetCosts(TypeId type, double distance) const
     {
       return distance;
     }
@@ -83,32 +94,26 @@ namespace osmscout {
     }
   };
 
+  /**
+   * Profile that defines costs base of the time the traveling device needs
+   * for a certain way resulting in the fastest path chosen (cost=distance/speedForWayType).
+   */
   class OSMSCOUT_API FastestPathRoutingProfile : public AbstractRoutingProfile
   {
   public:
     inline double GetCosts(const RouteNode& currentNode, size_t pathIndex) const
     {
-      TypeId type=currentNode.paths[pathIndex].type;
-      double distance=currentNode.paths[pathIndex].distance;
-
-      double costs=distance/speeds[type];
-
-      return costs;
+      return currentNode.paths[pathIndex].distance/speeds[currentNode.paths[pathIndex].type];
     }
 
-    double GetCosts(TypeId type, double distance) const
+    inline double GetCosts(TypeId type, double distance) const
     {
-      double costs=distance/speeds[type];
-
-      return costs;
+      return distance/speeds[type];
     }
 
     inline double GetCosts(double distance) const
     {
-
-      double costs=distance/maxSpeed;
-
-      return costs;
+      return distance/maxSpeed;
     }
   };
 }

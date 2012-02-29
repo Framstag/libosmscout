@@ -89,6 +89,15 @@ namespace osmscout {
 
         tag=tags.erase(tag);
       }
+      else if (!IsArea() && tag->key==typeConfig.tagJunction) {
+        if (tag->value=="roundabout") {
+          flags|=SegmentAttributes::isOneway;
+          // If it is a roundabout is cannot be a area
+          flags&=~SegmentAttributes::isArea;
+        }
+
+        tag=tags.erase(tag);
+      }
       else if (!IsArea() && tag->key==typeConfig.tagWidth) {
         double w;
         size_t pos=0;
@@ -132,6 +141,7 @@ namespace osmscout {
         else {
           width=(uint8_t)floor(w+0.5);
         }
+
         tag=tags.erase(tag);
       }
       else {

@@ -489,8 +489,7 @@ bool DatabaseTask::TransformRouteDataToRouteDescription(const osmscout::RouteDat
 
   std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors;
 
-  postprocessors.push_back(new osmscout::RoutePostprocessor::DistancePostprocessor());
-  postprocessors.push_back(new osmscout::RoutePostprocessor::TimePostprocessor());
+  postprocessors.push_back(new osmscout::RoutePostprocessor::DistanceAndTimePostprocessor());
   postprocessors.push_back(new osmscout::RoutePostprocessor::StartPostprocessor(start));
   postprocessors.push_back(new osmscout::RoutePostprocessor::WayNamePostprocessor());
   postprocessors.push_back(new osmscout::RoutePostprocessor::WayNameChangedPostprocessor());

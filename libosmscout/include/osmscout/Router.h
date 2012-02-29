@@ -95,20 +95,9 @@ namespace osmscout {
     };
 
     /**
-     * Calculates the overall running distance for each node
+     * Calculates the overall running distance and time for each node
      */
-    OSMSCOUT_API class DistancePostprocessor : public Postprocessor
-    {
-    public:
-      bool Process(const RoutingProfile& profile,
-                   RouteDescription& description,
-                   Database& database);
-    };
-
-    /**
-     * Calculates the overall running time for each node
-     */
-    OSMSCOUT_API class TimePostprocessor : public Postprocessor
+    OSMSCOUT_API class DistanceAndTimePostprocessor : public Postprocessor
     {
     public:
       bool Process(const RoutingProfile& profile,
@@ -151,23 +140,30 @@ namespace osmscout {
     class RouteEntry
     {
     private:
-      Id   wayId;
-      Id   nodeId;
+      Id   currentNodeId;
+      Id   pathWayId;
+      Id   targetNodeId;
       bool isCrossing;
 
     public:
-      RouteEntry(Id wayId,
-                 Id routeId,
+      RouteEntry(Id currentNodeId,
+                 Id pathWayId,
+                 Id targetNodeId,
                  bool isCrossing);
 
-      inline Id GetWayId() const
+      inline Id GetCurrentNodeId() const
       {
-        return wayId;
+        return currentNodeId;
       }
 
-      inline Id GetNodeId() const
+      inline Id GetPathWayId() const
       {
-        return nodeId;
+        return pathWayId;
+      }
+
+      inline Id GetTargetNodeId() const
+      {
+        return targetNodeId;
       }
 
       inline bool IsCrossing() const
@@ -184,8 +180,9 @@ namespace osmscout {
 
     void Clear();
 
-    void AddEntry(Id wayId,
-                  Id nodeId,
+    void AddEntry(Id currentNodeId,
+                  Id pathWayId,
+                  Id targetNodeId,
                   bool isCrossing);
 
     inline const std::list<RouteEntry>& Entries() const

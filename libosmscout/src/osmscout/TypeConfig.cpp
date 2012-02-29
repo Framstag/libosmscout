@@ -273,6 +273,7 @@ namespace osmscout {
     RegisterTagForExternalUse("width");
     RegisterTagForExternalUse("area");
     RegisterTagForExternalUse("addr:housenumber");
+    RegisterTagForExternalUse("junction");
 
     TypeInfo ignore;
     TypeInfo route;
@@ -302,6 +303,7 @@ namespace osmscout {
     tagWidth=GetTagId("width");
     tagArea=GetTagId("area");
     tagHouseNr=GetTagId("addr:housenumber");
+    tagJunction=GetTagId("junction");
 
     assert(tagAdminLevel!=tagIgnore);
     assert(tagBoundary!=tagIgnore);
@@ -317,6 +319,7 @@ namespace osmscout {
     assert(tagWidth!=tagIgnore);
     assert(tagArea!=tagIgnore);
     assert(tagHouseNr!=tagIgnore);
+    assert(tagJunction!=tagIgnore);
   }
 
   TypeConfig::~TypeConfig()

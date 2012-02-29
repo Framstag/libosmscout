@@ -177,8 +177,7 @@ int main(int argc, char* argv[])
 
   std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors;
 
-  postprocessors.push_back(new osmscout::RoutePostprocessor::DistancePostprocessor());
-  postprocessors.push_back(new osmscout::RoutePostprocessor::TimePostprocessor());
+  postprocessors.push_back(new osmscout::RoutePostprocessor::DistanceAndTimePostprocessor());
   postprocessors.push_back(new osmscout::RoutePostprocessor::StartPostprocessor("Start"));
   postprocessors.push_back(new osmscout::RoutePostprocessor::WayNamePostprocessor());
   postprocessors.push_back(new osmscout::RoutePostprocessor::WayNameChangedPostprocessor());
@@ -277,7 +276,7 @@ int main(int argc, char* argv[])
       lineCount++;
     }
 
-    if (node->HasDescription(osmscout::RouteDescription::WAY_NAME_CHANGED_DESC)) {
+    if (node->HasDescription(osmscout::RouteDescription::WAY_NAME_DESC)) {
       osmscout::RouteDescription::DescriptionRef  description=node->GetDescription(osmscout::RouteDescription::WAY_NAME_DESC);
       osmscout::RouteDescription::NameDescription *nameDescription=dynamic_cast<osmscout::RouteDescription::NameDescription*>(description.Get());
 
@@ -309,13 +308,16 @@ int main(int argc, char* argv[])
       lineCount++;
     }
 
+    if (lineCount==0) {
+      std::cout << std::endl;
+    }
+
 #if defined(HTML)
     std::cout << "</td></tr>";
 #endif
 
     prevNode=node;
   }
-  std::cout << "-----" << std::endl;
 
   router.Close();
 

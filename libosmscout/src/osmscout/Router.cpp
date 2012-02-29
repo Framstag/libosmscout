@@ -73,74 +73,55 @@ namespace osmscout {
     return true;
   }
 
-  bool RoutePostprocessor::DistancePostprocessor::Process(const RoutingProfile& profile,
-                                                          RouteDescription& description,
-                                                          Database& database)
+  bool RoutePostprocessor::DistanceAndTimePostprocessor::Process(const RoutingProfile& profile,
+                                                                 RouteDescription& description,
+                                                                 Database& database)
   {
-    WayRef                                      prevWay,nextWay;
-    Id                                          prevNode,nextNode;
-    double                                      distance=0.0;
+    WayRef prevWay,nextWay;
+    Id     prevNode,nextNode;
+    double distance=0.0;
+    double time=0.0;
 
     for (std::list<RouteDescription::Node>::iterator iter=description.Nodes().begin();
          iter!=description.Nodes().end();
          ++iter) {
-      if (prevWay.Invalid() || prevWay->GetId()!=iter->GetWayId()) {
-        if (!database.GetWay(iter->GetWayId(),nextWay)) {
-          return false;
+      // The last node does not have a pathWayId set, since we are not going anywhere!
+      if (iter->GetPathWayId()!=0) {
+        // Only load the next way, if it is different from the old one
+        if (prevWay.Invalid() || prevWay->GetId()!=iter->GetPathWayId()) {
+          if (!database.GetWay(iter->GetPathWayId(),nextWay)) {
+            std::cout << "Error while loading way " << iter->GetPathWayId() << std::endl;
+            return false;
+          }
+        }
+        else {
+          nextWay=prevWay;
+        }
+
+        for (size_t i=0; i<nextWay->nodes.size(); i++) {
+          if (nextWay->nodes[i].id==iter->GetTargetNodeId()) {
+            nextNode=i;
+            break;
+          }
+        }
+
+        if (prevWay.Valid()) {
+          double deltaDistance=GetEllipsoidalDistance(prevWay->nodes[prevNode].lon,
+                                                      prevWay->nodes[prevNode].lat,
+                                                      nextWay->nodes[nextNode].lon,
+                                                      nextWay->nodes[nextNode].lat);
+          double deltaTime=profile.GetTime(nextWay->GetType(),deltaDistance);
+
+          distance+=deltaDistance;
+          time+=deltaTime;
         }
       }
 
-      for (size_t i=0; i<nextWay->nodes.size(); i++) {
-        if (nextWay->nodes[i].id==iter->GetNodeId()) {
-          nextNode=i;
-          break;
-        }
-      }
-
-      if (prevWay.Valid()) {
-        distance+=GetEllipsoidalDistance(prevWay->nodes[prevNode].lon,
-                                         prevWay->nodes[prevNode].lat,
-                                         nextWay->nodes[nextNode].lon,
-                                         nextWay->nodes[nextNode].lat);
-
-        iter->SetDistance(distance);
-      }
-      else {
-        iter->SetDistance(0.0);
-      }
+      iter->SetDistance(distance);
+      iter->SetTime(time);
 
       prevWay=nextWay;
       prevNode=nextNode;
-    }
-
-    return true;
-  }
-
-  bool RoutePostprocessor::TimePostprocessor::Process(const RoutingProfile& profile,
-                                                      RouteDescription& description,
-                                                      Database& database)
-  {
-    double time=0.0;
-
-    std::list<RouteDescription::Node>::iterator prev=description.Nodes().end();
-    for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
-        node!=description.Nodes().end();
-        ++node) {
-      WayRef way;
-
-      if (way.Invalid() || node->GetWayId()!=way->GetId()) {
-        if (!database.GetWay(node->GetWayId(),way)) {
-          return false;
-        }
-      }
-
-      if (prev!=description.Nodes().end()) {
-        time+=profile.GetTime(way->GetType(),node->GetDistance()-prev->GetDistance());
-      }
-
-      node->SetTime(time);
-
-      prev=node;
     }
 
     return true;
@@ -151,25 +132,23 @@ namespace osmscout {
                                                          Database& database)
   {
     RouteDescription::NameDescriptionRef lastDescription;
+    WayRef                               lastWay;
     WayRef                               nextWay;
 
     for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
         node!=description.Nodes().end();
         ++node) {
-      WayRef                                      lastWay=nextWay;
-      std::list<RouteDescription::Node>::iterator nextNode=node;
-
-      nextNode++;
-
-      if (nextNode==description.Nodes().end()) {
-        continue;
+      // The last node does not have a pathWayId set, since we are not going anywhere from the target node!
+      if (node->GetPathWayId()==0) {
+        break;
       }
 
       RouteDescription::NameDescriptionRef nextDescription;
 
-      if (lastWay.Invalid() || nextNode->GetWayId()!=node->GetWayId()) {
-        if (!database.GetWay(nextNode->GetWayId(),nextWay)) {
-          std::cerr << "Cannot retrieve way " << nextNode->GetWayId() << std::endl;
+      // Only load the next way, if it is different from the old one
+      if (lastWay.Invalid() || lastWay->GetId()!=node->GetPathWayId()) {
+        if (!database.GetWay(node->GetPathWayId(),nextWay)) {
+          std::cerr << "Cannot retrieve way " << node->GetPathWayId() << std::endl;
           return false;
         }
 
@@ -183,7 +162,7 @@ namespace osmscout {
       }
 
       node->AddDescription(RouteDescription::WAY_NAME_DESC,
-                           lastDescription);
+                           nextDescription);
     }
 
     return true;
@@ -194,23 +173,20 @@ namespace osmscout {
                                                                 Database& database)
   {
     WayRef lastInterestingWay;
+    WayRef lastWay;
     WayRef nextWay;
 
     for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
         node!=description.Nodes().end();
         ++node) {
-      WayRef                                      lastWay=nextWay;
-      std::list<RouteDescription::Node>::iterator nextNode=node;
-
-      nextNode++;
-
-      if (nextNode==description.Nodes().end()) {
-        continue;
+      // The last node does not have a pathWayId set, since we are not going anywhere from the target node!
+      if (node->GetPathWayId()==0) {
+        break;
       }
 
-      if (lastWay.Invalid() || nextNode->GetWayId()!=node->GetWayId()) {
-        if (!database.GetWay(nextNode->GetWayId(),nextWay)) {
-          std::cerr << "Cannot retrieve way " << nextNode->GetWayId() << std::endl;
+      if (lastWay.Invalid() || lastWay->GetId()!=node->GetPathWayId()) {
+        if (!database.GetWay(node->GetPathWayId(),nextWay)) {
+          std::cerr << "Cannot retrieve way " << node->GetPathWayId() << std::endl;
           return false;
         }
       }
@@ -258,6 +234,7 @@ namespace osmscout {
                                                        Database& database,
                                                        std::list<PostprocessorRef> processors)
   {
+    size_t pos=1;
     for (std::list<PostprocessorRef>::iterator p=processors.begin();
         p!=processors.end();
         ++p) {
@@ -266,18 +243,23 @@ namespace osmscout {
       if (!processor->Process(profile,
                               description,
                               database)) {
+        std::cerr << "Error during execution of postprocessor " << pos << std::endl;
         return false;
       }
+
+      pos++;
     }
 
     return true;
   }
 
-  RouteData::RouteEntry::RouteEntry(Id wayId,
-                                    Id nodeId,
+  RouteData::RouteEntry::RouteEntry(Id currentNodeId,
+                                    Id pathWayId,
+                                    Id targetNodeId,
                                     bool isCrossing)
-   : wayId(wayId),
-     nodeId(nodeId),
+   : currentNodeId(currentNodeId),
+     pathWayId(pathWayId),
+     targetNodeId(targetNodeId),
      isCrossing(isCrossing)
   {
     // no code
@@ -293,11 +275,15 @@ namespace osmscout {
     entries.clear();
   }
 
-  void RouteData::AddEntry(Id wayId,
-                           Id nodeId,
+  void RouteData::AddEntry(Id currentNodeId,
+                           Id pathWayId,
+                           Id targetNodeId,
                            bool isCrossing)
   {
-    entries.push_back(RouteEntry(wayId,nodeId,isCrossing));
+    entries.push_back(RouteEntry(currentNodeId,
+                                 pathWayId,
+                                 targetNodeId,
+                                 isCrossing));
   }
 
   RouterParameter::RouterParameter()
@@ -525,8 +511,6 @@ namespace osmscout {
     for (std::list<RNode>::const_iterator node=nodes.begin();
         node!=nodes.end();
         node++) {
-      route.AddEntry(node->wayId,node->nodeId,true);
-
       std::list<RNode>::const_iterator next=node;
 
       next++;
@@ -534,7 +518,7 @@ namespace osmscout {
       if (next!=nodes.end()) {
         WayRef way;
 
-        wayDataFile.Get(node->wayId,way);
+        wayDataFile.Get(next->wayId,way);
 
         size_t start=0;
         while (start<way->nodes.size() &&
@@ -548,18 +532,51 @@ namespace osmscout {
           end++;
         }
 
-        if (start<way->nodes.size() && end<way->nodes.size()) {
+        if (start<way->nodes.size() &&
+            end<way->nodes.size()) {
           if (start<end) {
-            for (size_t i=start+1; i<end; i++) {
-              route.AddEntry(way->GetId(),way->nodes[i].GetId(),false);
+            route.AddEntry(node->nodeId,
+                           way->GetId(),
+                           way->nodes[start+1].GetId(),
+                           true);
+
+            for (size_t i=start+1; i<end-1; i++) {
+              route.AddEntry(way->nodes[i].GetId(),
+                             way->GetId(),
+                             way->nodes[i+1].GetId(),
+                             false);
             }
+
+            route.AddEntry(way->nodes[end-1].GetId(),
+                           way->GetId(),
+                           next->nodeId,
+                           true);
           }
           else {
-            for (int i=start-1; i>(int)end; i--) {
-              route.AddEntry(way->GetId(),way->nodes[i].GetId(),false);
+            route.AddEntry(node->nodeId,
+                           way->GetId(),
+                           way->nodes[start-1].GetId(),
+                           true);
+
+            for (int i=start-1; i>(int)end+1; i--) {
+              route.AddEntry(way->nodes[i].GetId(),
+                             way->GetId(),
+                             way->nodes[i-1].GetId(),
+                             false);
             }
+
+            route.AddEntry(way->nodes[end+1].GetId(),
+                           way->GetId(),
+                           next->nodeId,
+                           true);
           }
         }
+      }
+      else {
+        route.AddEntry(node->nodeId,
+                       0,
+                       0,
+                       true);
       }
     }
   }
@@ -857,12 +874,12 @@ namespace osmscout {
          ++iter) {
       WayRef w;
 
-      if (!wayDataFile.Get(iter->GetWayId(),w)) {
+      if (!wayDataFile.Get(iter->GetPathWayId(),w)) {
         return false;
       }
 
       for (size_t i=0; i<w->nodes.size(); i++) {
-        if (w->nodes[i].id==iter->GetNodeId()) {
+        if (w->nodes[i].id==iter->GetTargetNodeId()) {
           way.nodes.push_back(w->nodes[i]);
           break;
         }
@@ -889,7 +906,10 @@ namespace osmscout {
     for (std::list<RouteData::RouteEntry>::const_iterator iter=data.Entries().begin();
          iter!=data.Entries().end();
          ++iter) {
-      description.AddNode(iter->GetWayId(),iter->GetNodeId(),iter->IsCrossing());
+      description.AddNode(iter->GetCurrentNodeId(),
+                          iter->GetPathWayId(),
+                          iter->GetTargetNodeId(),
+                          iter->IsCrossing());
     }
 
     return true;

@@ -811,10 +811,12 @@ namespace osmscout {
       rel.SetId(rawRel.GetId());
       rel.SetType(rawRel.GetType());
 
+      //std::cout << "Relation " << rel.GetId() << std::endl;
+
       // Check, if the type should be handled as multipolygon
       isArea=typeConfig.GetTypeInfo(rel.GetType()).GetMultipolygon();
 
-      // Is it possibly explicitely marked  multipolygon?
+      // Is it possibly a explicitly marked multipolygon?
       if (!isArea) {
         std::vector<Tag>::iterator tag=rawRel.tags.begin();
         while (tag!=rawRel.tags.end()) {
@@ -862,7 +864,6 @@ namespace osmscout {
           break;
         }
       }
-
 
       if (error) {
         continue;

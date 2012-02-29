@@ -128,25 +128,33 @@ namespace osmscout {
     class Node
     {
     private:
-      // Location
-      Id                                   wayId;
-      Id                                   nodeId;
+      Id                                   currentNodeId;
+      Id                                   pathWayId;
+      Id                                   targetNodeId;
       bool                                 isCrossing;
       double                               distance;
       double                               time;
       std::map<std::string,DescriptionRef> descriptions;
 
     public:
-      Node(Id wayId, Id nodeId, bool isCrossing);
+      Node(Id currentNodeId,
+           Id pathWayId,
+           Id targetNodeId,
+           bool isCrossing);
 
-      inline Id GetWayId() const
+      inline Id GetCurrentNodeId() const
       {
-        return wayId;
+        return currentNodeId;
       }
 
-      inline Id GetNodeId() const
+      inline Id GetPathWayId() const
       {
-        return nodeId;
+        return pathWayId;
+      }
+
+      inline Id GetTargetNodeId() const
+      {
+        return targetNodeId;
       }
 
       /**
@@ -190,7 +198,10 @@ namespace osmscout {
 
     void Clear();
 
-    void AddNode(Id wayId, Id nodeId, bool isCrossing);
+    void AddNode(Id currentNodeId,
+                 Id pathWayId,
+                 Id targetNodeId,
+                 bool isCrossing);
 
     inline std::list<Node>& Nodes()
     {

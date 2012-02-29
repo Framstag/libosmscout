@@ -324,6 +324,8 @@ TYPES
   TYPE "route_any" = RELATION ("type"=="route") OPTIONS IGNORE
   TYPE "routemaster_any" = RELATION ("type"=="route_master") OPTIONS IGNORE
   TYPE "superroute_any" = RELATION ("type"=="superroute") OPTIONS IGNORE
+  TYPE "netzwolf_route_any" = RELATION ("type"=="netzwolf-route") OPTIONS IGNORE
+  TYPE "netzwolf_routemaster_any" = RELATION ("type"=="netzwolf:route_master") OPTIONS IGNORE
 
   TYPE "address" = RELATION ("type"=="address") OPTIONS IGNORE
   TYPE "border" = AREA RELATION ("type"=="border") OPTIONS IGNORE
@@ -344,6 +346,7 @@ TYPES
   TYPE "lez_any" = RELATION ("type"=="LEZ") OPTIONS IGNORE
   TYPE "group_any" = RELATION ("type"=="group") OPTIONS IGNORE
   TYPE "set_any" = RELATION ("type"=="set") OPTIONS IGNORE
+  TYPE "compound_any" = RELATION ("type"=="compound") OPTIONS IGNORE
 
   // Evaluated for routing
   TYPE "restriction_no_right_turn" = RELATION ("type"=="restriction" AND "restriction"=="no_right_turn") OPTIONS IGNORE
