@@ -824,7 +824,7 @@ namespace osmscout {
       //
 
       closeMap[current.nodeId]=current;
-    } while (!openList.empty() && current.nodeId!=targetNodeId && current.wayId!=targetWayId);
+    } while (!openList.empty() && current.nodeId!=targetRouteNode->id);
 
     clock.Stop();
 
