@@ -923,6 +923,41 @@ namespace osmscout {
     return true;
   }
 
+  bool Router::TransformRouteDataToPoints(const RouteData& data,
+                                          std::list<Point>& points)
+  {
+    points.clear();
+
+    if (data.Entries().empty()) {
+      return true;
+    }
+
+    for (std::list<RouteData::RouteEntry>::const_iterator iter=data.Entries().begin();
+         iter!=data.Entries().end();
+         ++iter) {
+      WayRef w;
+
+      if (!wayDataFile.Get(iter->GetPathWayId(),w)) {
+        return false;
+      }
+
+      for (size_t i=0; i<w->nodes.size(); i++) {
+        if (w->nodes[i].id==iter->GetTargetNodeId()) {
+          Point point;
+
+          point.SetId(w->nodes[i].GetId());
+          point.SetCoordinates(w->nodes[i].GetLat(),
+                               w->nodes[i].GetLon());
+
+          points.push_back(point);
+          break;
+        }
+      }
+    }
+
+    return true;
+  }
+
   bool Router::TransformRouteDataToRouteDescription(const RouteData& data,
                                                     RouteDescription& description)
   {
