@@ -548,6 +548,11 @@ namespace osmscout {
             wayId++) {
           const WayRef& way=waysMap[*wayId];
 
+          if (way->GetId()==24922623) {
+            std::cout << way->GetId() << " " << way->IsArea() << " " << way->IsOneway() << " " << way->nodes.front().GetId() << " " << way->nodes.back().GetId() << std::endl;
+          }
+
+          // Area routing
           if (way->IsArea()) {
             int    currentNode=0;
             double distance;
@@ -642,6 +647,104 @@ namespace osmscout {
               routeNode.paths.push_back(path);
             }
           }
+          // Circular way routing (similar to current area routing, but respecting isOneway())
+          else if (way->nodes.front().GetId()==way->nodes.back().GetId()) {
+            int    currentNode=0;
+            double distance;
+
+            while (currentNode<(int)way->nodes.size() &&
+                  way->nodes[currentNode].GetId()!=node->first) {
+              currentNode++;
+            }
+
+            assert(currentNode<(int)way->nodes.size());
+
+            int nextNode=currentNode+1;
+
+            if (nextNode>=(int)way->nodes.size()) {
+              nextNode=0;
+            }
+
+            distance=GetSphericalDistance(way->nodes[currentNode].GetLon(),
+                                          way->nodes[currentNode].GetLat(),
+                                          way->nodes[nextNode].GetLon(),
+                                          way->nodes[nextNode].GetLat());
+
+            while (nextNode!=currentNode &&
+                nodeWayMap.find(way->nodes[nextNode].GetId())==nodeWayMap.end()) {
+              int lastNode=nextNode;
+              nextNode++;
+
+              if (nextNode>=(int)way->nodes.size()) {
+                nextNode=0;
+              }
+
+              if (nextNode!=currentNode) {
+                distance+=GetSphericalDistance(way->nodes[lastNode].GetLon(),
+                                               way->nodes[lastNode].GetLat(),
+                                               way->nodes[nextNode].GetLon(),
+                                               way->nodes[nextNode].GetLat());
+              }
+            }
+
+            if (nextNode!=currentNode) {
+              RouteNode::RoutePath path;
+
+              path.type=way->GetType();
+              path.wayId=way->GetId();
+              path.id=way->nodes[nextNode].GetId();
+              path.lat=way->nodes[nextNode].GetLat();
+              path.lon=way->nodes[nextNode].GetLon();
+              path.distance=distance;
+
+              routeNode.paths.push_back(path);
+            }
+
+            if (!way->IsOneway()) {
+              int prevNode=currentNode-1;
+
+              if (prevNode<0) {
+                prevNode=(int)(way->nodes.size()-1);
+              }
+
+              distance=GetSphericalDistance(way->nodes[currentNode].GetLon(),
+                                            way->nodes[currentNode].GetLat(),
+                                            way->nodes[prevNode].GetLon(),
+                                            way->nodes[prevNode].GetLat());
+
+              while (prevNode!=currentNode &&
+                  nodeWayMap.find(way->nodes[prevNode].GetId())==nodeWayMap.end()) {
+                int lastNode=prevNode;
+                prevNode--;
+
+                if (prevNode<0) {
+                  prevNode=(int)(way->nodes.size()-1);
+                }
+
+                if (prevNode!=currentNode) {
+                  distance+=GetSphericalDistance(way->nodes[lastNode].GetLon(),
+                                                 way->nodes[lastNode].GetLat(),
+                                                 way->nodes[prevNode].GetLon(),
+                                                 way->nodes[prevNode].GetLat());
+                }
+              }
+
+              if (prevNode!=currentNode &&
+                  prevNode!=nextNode) {
+                RouteNode::RoutePath path;
+
+                path.type=way->GetType();
+                path.wayId=way->GetId();
+                path.id=way->nodes[prevNode].GetId();
+                path.lat=way->nodes[prevNode].GetLat();
+                path.lon=way->nodes[prevNode].GetLon();
+                path.distance=distance;
+
+                routeNode.paths.push_back(path);
+              }
+            }
+          }
+          // Normal way routing
           else {
             for (size_t i=0;i<way->nodes.size(); i++) {
               if (way->nodes[i].GetId()==node->first) {

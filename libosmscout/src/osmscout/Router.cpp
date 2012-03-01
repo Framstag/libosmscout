@@ -511,14 +511,14 @@ namespace osmscout {
     for (std::list<RNode>::const_iterator node=nodes.begin();
         node!=nodes.end();
         node++) {
-      std::list<RNode>::const_iterator next=node;
+      std::list<RNode>::const_iterator nextNode=node;
 
-      next++;
+      nextNode++;
 
-      if (next!=nodes.end()) {
+      if (nextNode!=nodes.end()) {
         WayRef way;
 
-        wayDataFile.Get(next->wayId,way);
+        wayDataFile.Get(nextNode->wayId,way);
 
         size_t start=0;
         while (start<way->nodes.size() &&
@@ -528,7 +528,7 @@ namespace osmscout {
 
         size_t end=0;
         while (end<way->nodes.size() &&
-            way->nodes[end].GetId()!=next->nodeId) {
+            way->nodes[end].GetId()!=nextNode->nodeId) {
           end++;
         }
 
@@ -549,8 +549,42 @@ namespace osmscout {
 
             route.AddEntry(way->nodes[end-1].GetId(),
                            way->GetId(),
-                           next->nodeId,
+                           nextNode->nodeId,
                            true);
+          }
+          else if (way->IsOneway()) {
+            size_t pos=start;
+
+            route.AddEntry(node->nodeId,
+                           way->GetId(),
+                           way->nodes[pos].GetId(),
+                           true);
+
+            while (way->nodes[pos].GetId()!=way->nodes[end].GetId()) {
+              size_t next=pos++;
+
+              if (next>=way->nodes.size()) {
+                next=0;
+              }
+
+              if (way->nodes[next].GetId()==way->nodes[end].GetId()) {
+                route.AddEntry(way->nodes[pos].GetId(),
+                               way->GetId(),
+                               nextNode->nodeId,
+                               true);
+              }
+              else {
+                route.AddEntry(way->nodes[pos].GetId(),
+                               way->GetId(),
+                               way->nodes[next].GetId(),
+                               false);
+              }
+
+              pos++;
+              if (pos>=way->nodes.size()) {
+                pos=0;
+              }
+            }
           }
           else {
             route.AddEntry(node->nodeId,
@@ -567,7 +601,7 @@ namespace osmscout {
 
             route.AddEntry(way->nodes[end+1].GetId(),
                            way->GetId(),
-                           next->nodeId,
+                           nextNode->nodeId,
                            true);
           }
         }
