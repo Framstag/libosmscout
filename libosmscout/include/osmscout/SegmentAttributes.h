@@ -35,6 +35,7 @@ namespace osmscout {
   {
   private:
     // Attribute availability flags (for optimized attribute storage)
+    const static uint16_t hasMaxSpeed     = 1 << 10; //! We have maximum speed information stored on disk
     const static uint16_t hasTags         = 1 << 11; //! We have additional tags stored on disk
     const static uint16_t hasName         = 1 << 12; //! We have a name
     const static uint16_t hasRef          = 1 << 13; //! We have reference name
@@ -56,23 +57,24 @@ namespace osmscout {
     const static uint16_t endIsJoint      = 1 <<  5; //! End node is a joint node
     const static uint16_t isOneway        = 1 <<  6; //! We are a oneway (in way direction)
 
-
   public:
-    TypeId           type;    //! type of the way/relation
+    TypeId           type;     //! type of the way/relation
     mutable uint16_t flags;
-    std::string      name;    //! name
-    std::string      ref;     //! reference name (normally drawn in a plate)
-    std::string      houseNr; //! house number
-    int8_t           layer;   //! layer to draw on
-    uint8_t          width;   //! width of way
-    std::vector<Tag> tags;    //! list of preparsed tags
+    std::string      name;     //! name
+    std::string      ref;      //! reference name (normally drawn in a plate)
+    std::string      houseNr;  //! house number
+    int8_t           layer;    //! layer to draw on
+    uint8_t          width;    //! width of way
+    uint8_t          maxSpeed; //! speed from 1..255km/h (0 means, not set)
+    std::vector<Tag> tags;     //! list of preparsed tags
 
   public:
     inline SegmentAttributes()
     : type(typeIgnore),
       flags(0),
       layer(0),
-      width(0)
+      width(0),
+      maxSpeed(0)
     {
       // no code
     }
@@ -115,6 +117,11 @@ namespace osmscout {
     inline uint8_t GetWidth() const
     {
       return width;
+    }
+
+    inline uint8_t GetMaxSpeed() const
+    {
+      return maxSpeed;
     }
 
     inline bool IsBridge() const

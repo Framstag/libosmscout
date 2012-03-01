@@ -61,9 +61,63 @@ namespace osmscout {
         tag=tags.erase(tag);
       }
       else if (tag->key==typeConfig.tagLayer) {
-        if (!StringToNumber(tag->value.c_str(),layer)) {
+        if (!StringToNumber(tag->value,layer)) {
           progress.Warning(std::string("Layer tag value '")+tag->value+"' for "+NumberToString(id)+" is not numeric!");
         }
+        tag=tags.erase(tag);
+      }
+      else if (tag->key==typeConfig.tagMaxSpeed) {
+        std::string valueString=tag->value;
+        size_t      value;
+        bool        isMph=false;
+
+        if (valueString=="signals") {
+          tag=tags.erase(tag);
+          continue;
+        }
+
+        if (valueString=="none") {
+          tag=tags.erase(tag);
+          continue;
+        }
+
+        // "walk" should not be used, but we provide an estimation anyway,
+        // since it is likely still better than the default
+        if (valueString=="walk") {
+          maxSpeed=10;
+
+          tag=tags.erase(tag);
+          continue;
+        }
+
+        size_t pos;
+
+        pos=valueString.rfind("mph");
+        if (pos!=std::string::npos) {
+          valueString.erase(pos);
+          isMph=true;
+        }
+
+        while (valueString.length()>0 && valueString[valueString.length()-1]==' ') {
+          valueString.erase(valueString.length()-1);
+        }
+
+        if (StringToNumber(valueString,value)) {
+          if (isMph) {
+            maxSpeed=(uint8_t)(value*1.609+0.5);
+          }
+
+          if (value>std::numeric_limits<uint8_t>::max()) {
+            maxSpeed=std::numeric_limits<uint8_t>::max();
+          }
+          else {
+            maxSpeed=(uint8_t)value;
+          }
+        }
+        else {
+          progress.Warning(std::string("Max speed tag value '")+tag->value+"' for "+NumberToString(id)+" is not numeric!");
+        }
+
         tag=tags.erase(tag);
       }
       else if (!IsArea() && tag->key==typeConfig.tagBridge) {
@@ -193,6 +247,13 @@ namespace osmscout {
       width=0;
     }
 
+    if (flags & hasMaxSpeed) {
+      scanner.Read(maxSpeed);
+    }
+    else {
+      maxSpeed=0;
+    }
+
     if (flags & hasTags) {
       uint32_t tagCount;
 
@@ -250,6 +311,13 @@ namespace osmscout {
       flags&=~hasWidth;
     }
 
+    if (maxSpeed!=0) {
+      flags|=hasMaxSpeed;
+    }
+    else {
+      flags&=~hasMaxSpeed;
+    }
+
     if (!tags.empty()) {
       flags|=hasTags;
     }
@@ -277,6 +345,10 @@ namespace osmscout {
 
     if (flags & hasWidth) {
       writer.Write(width);
+    }
+
+    if (flags & hasMaxSpeed) {
+      writer.Write(maxSpeed);
     }
 
     if (flags & hasTags) {

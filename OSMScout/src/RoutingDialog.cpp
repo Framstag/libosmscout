@@ -471,10 +471,13 @@ void RoutingDialog::Route()
     prevNode=node;
   }
 
-  dbThread.TransformRouteDataToWay(routeData,routeWay);
-
-  dbThread.ClearRoute();
-  dbThread.AddRoute(routeWay);
+  if (dbThread.TransformRouteDataToWay(routeData,routeWay)) {
+    dbThread.ClearRoute();
+    dbThread.AddRoute(routeWay);
+  }
+  else {
+    std::cerr << "Error while transforming route" << std::endl;
+  }
 }
 
 #include "moc_RoutingDialog.cpp"

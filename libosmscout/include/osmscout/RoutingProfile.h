@@ -37,11 +37,15 @@ namespace osmscout {
   public:
     virtual ~RoutingProfile();
 
-    virtual bool CanUse(const RouteNode& currentNode, size_t pathIndex) const = 0;
-    virtual double GetCosts(const RouteNode& currentNode, size_t pathIndex) const = 0;
-    virtual double GetCosts(TypeId type, double distance) const = 0;
+    virtual bool CanUse(const RouteNode& currentNode,
+                        size_t pathIndex) const = 0;
+    virtual double GetCosts(const RouteNode& currentNode,
+                            size_t pathIndex) const = 0;
+    virtual double GetCosts(const Way& way,
+                            double distance) const = 0;
     virtual double GetCosts(double distance) const = 0;
-    virtual double GetTime(TypeId type, double distance) const = 0;
+    virtual double GetTime(const Way& way,
+                           double distance) const = 0;
   };
 
   /**
@@ -59,16 +63,23 @@ namespace osmscout {
 
     void AddType(TypeId type, double speed);
 
-    inline bool CanUse(const RouteNode& currentNode, size_t pathIndex) const
+    inline bool CanUse(const RouteNode& currentNode,
+                       size_t pathIndex) const
     {
       TypeId type=currentNode.paths[pathIndex].type;
 
       return type<speeds.size() && speeds[type]>0.0;
     }
 
-    inline double GetTime(TypeId type, double distance) const
+    inline double GetTime(const Way& way,
+                          double distance) const
     {
-      return distance/speeds[type];
+      if (way.GetMaxSpeed()>0) {
+        return distance/way.GetMaxSpeed();
+      }
+      else {
+        return distance/speeds[way.GetType()];
+      }
     }
   };
 
@@ -78,12 +89,14 @@ namespace osmscout {
   class OSMSCOUT_API ShortestPathRoutingProfile : public AbstractRoutingProfile
   {
   public:
-    inline double GetCosts(const RouteNode& currentNode, size_t pathIndex) const
+    inline double GetCosts(const RouteNode& currentNode,
+                           size_t pathIndex) const
     {
       return currentNode.paths[pathIndex].distance;
     }
 
-    inline double GetCosts(TypeId type, double distance) const
+    inline double GetCosts(const Way& way,
+                           double distance) const
     {
       return distance;
     }
@@ -101,14 +114,26 @@ namespace osmscout {
   class OSMSCOUT_API FastestPathRoutingProfile : public AbstractRoutingProfile
   {
   public:
-    inline double GetCosts(const RouteNode& currentNode, size_t pathIndex) const
+    inline double GetCosts(const RouteNode& currentNode,
+                           size_t pathIndex) const
     {
-      return currentNode.paths[pathIndex].distance/speeds[currentNode.paths[pathIndex].type];
+      if (currentNode.paths[pathIndex].maxSpeed>0) {
+        return currentNode.paths[pathIndex].distance/currentNode.paths[pathIndex].maxSpeed;
+      }
+      else {
+        return currentNode.paths[pathIndex].distance/speeds[currentNode.paths[pathIndex].type];
+      }
     }
 
-    inline double GetCosts(TypeId type, double distance) const
+    inline double GetCosts(const Way& way,
+                           double distance) const
     {
-      return distance/speeds[type];
+      if (way.GetMaxSpeed()>0) {
+        return distance/way.GetMaxSpeed();
+      }
+      else {
+        return distance/speeds[way.GetType()];
+      }
     }
 
     inline double GetCosts(double distance) const

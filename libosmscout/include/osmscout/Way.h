@@ -105,6 +105,11 @@ namespace osmscout {
       return attributes.GetWidth();
     }
 
+    inline uint8_t GetMaxSpeed() const
+    {
+      return attributes.GetMaxSpeed();
+    }
+
     inline bool IsBridge() const
     {
       return attributes.IsBridge();

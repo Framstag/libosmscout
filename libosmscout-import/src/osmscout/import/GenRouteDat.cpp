@@ -548,10 +548,6 @@ namespace osmscout {
             wayId++) {
           const WayRef& way=waysMap[*wayId];
 
-          if (way->GetId()==24922623) {
-            std::cout << way->GetId() << " " << way->IsArea() << " " << way->IsOneway() << " " << way->nodes.front().GetId() << " " << way->nodes.back().GetId() << std::endl;
-          }
-
           // Area routing
           if (way->IsArea()) {
             int    currentNode=0;
@@ -595,9 +591,10 @@ namespace osmscout {
             if (nextNode!=currentNode) {
               RouteNode::RoutePath path;
 
-              path.type=way->GetType();
               path.wayId=way->GetId();
               path.id=way->nodes[nextNode].GetId();
+              path.type=way->GetType();
+              path.maxSpeed=way->GetMaxSpeed();
               path.lat=way->nodes[nextNode].GetLat();
               path.lon=way->nodes[nextNode].GetLon();
               path.distance=distance;
@@ -637,9 +634,10 @@ namespace osmscout {
                 prevNode!=nextNode) {
               RouteNode::RoutePath path;
 
-              path.type=way->GetType();
-              path.wayId=way->GetId();
               path.id=way->nodes[prevNode].GetId();
+              path.wayId=way->GetId();
+              path.type=way->GetType();
+              path.maxSpeed=way->GetMaxSpeed();
               path.lat=way->nodes[prevNode].GetLat();
               path.lon=way->nodes[prevNode].GetLon();
               path.distance=distance;
@@ -690,9 +688,10 @@ namespace osmscout {
             if (nextNode!=currentNode) {
               RouteNode::RoutePath path;
 
-              path.type=way->GetType();
-              path.wayId=way->GetId();
               path.id=way->nodes[nextNode].GetId();
+              path.wayId=way->GetId();
+              path.type=way->GetType();
+              path.maxSpeed=way->GetMaxSpeed();
               path.lat=way->nodes[nextNode].GetLat();
               path.lon=way->nodes[nextNode].GetLon();
               path.distance=distance;
@@ -733,9 +732,10 @@ namespace osmscout {
                   prevNode!=nextNode) {
                 RouteNode::RoutePath path;
 
-                path.type=way->GetType();
-                path.wayId=way->GetId();
                 path.id=way->nodes[prevNode].GetId();
+                path.wayId=way->GetId();
+                path.type=way->GetType();
+                path.maxSpeed=way->GetMaxSpeed();
                 path.lat=way->nodes[prevNode].GetLat();
                 path.lon=way->nodes[prevNode].GetLon();
                 path.distance=distance;
@@ -762,9 +762,10 @@ namespace osmscout {
                   if (j>=0) {
                     RouteNode::RoutePath path;
 
-                    path.type=way->GetType();
-                    path.wayId=way->GetId();
                     path.id=way->nodes[j].GetId();
+                    path.wayId=way->GetId();
+                    path.type=way->GetType();
+                    path.maxSpeed=way->GetMaxSpeed();
                     path.lat=way->nodes[j].GetLat();
                     path.lon=way->nodes[j].GetLon();
 
@@ -794,9 +795,10 @@ namespace osmscout {
                   if (j<way->nodes.size()) {
                     RouteNode::RoutePath path;
 
-                    path.type=way->GetType();
-                    path.wayId=way->GetId();
                     path.id=way->nodes[j].GetId();
+                    path.wayId=way->GetId();
+                    path.type=way->GetType();
+                    path.maxSpeed=way->GetMaxSpeed();
                     path.lat=way->nodes[j].GetLat();
                     path.lon=way->nodes[j].GetLon();
 

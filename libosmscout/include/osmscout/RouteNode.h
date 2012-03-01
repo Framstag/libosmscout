@@ -41,12 +41,13 @@ namespace osmscout {
 
     struct OSMSCOUT_API RoutePath
     {
-      Id               id;
-      TypeId           type;
-      Id               wayId;
-      double           distance;
-      double           lat;
-      double           lon;
+      Id      id;
+      Id      wayId;
+      TypeId  type;
+      uint8_t maxSpeed;
+      double  distance;
+      double  lat;
+      double  lon;
     };
 
   public:

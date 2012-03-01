@@ -427,9 +427,13 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
 
     routeModel->Notify();
 
-    databaseTask->TransformRouteDataToWay(result.routeData,way);
-    databaseTask->ClearRoute();
-    databaseTask->AddRoute(way);
+    if (databaseTask->TransformRouteDataToWay(result.routeData,way)) {
+      databaseTask->ClearRoute();
+      databaseTask->AddRoute(way);
+    }
+    else {
+      std::cerr << "Error while transforming route" << std::endl;
+    }
   }
   else {
     Dialog::Resync(model,msg);
