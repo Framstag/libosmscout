@@ -344,7 +344,7 @@ namespace osmscout {
       return *this;
     }
 
-    inline bool GetIPinWay() const
+    inline bool GetPinWay() const
     {
       return pinWay;
     }

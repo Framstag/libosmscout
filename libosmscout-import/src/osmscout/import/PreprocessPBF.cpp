@@ -434,7 +434,7 @@ namespace osmscout {
         else if (areaType!=typeIgnore &&
             nodes.size()>2 &&
             nodes.front()==nodes.back()) {
-          if (typeConfig.GetTypeInfo(wayType).GetIPinWay()) {
+          if (typeConfig.GetTypeInfo(wayType).GetPinWay()) {
             isArea=-1;
           }
           else {
