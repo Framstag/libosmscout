@@ -553,38 +553,46 @@ namespace osmscout {
                            true);
           }
           else if (way->IsOneway()) {
-            size_t pos=start;
+            size_t pos=start+1;
+            size_t next;
+
+            if (pos>=way->nodes.size()) {
+              pos=0;
+            }
+
+            next=pos+1;
+            if (next>=way->nodes.size()) {
+              next=0;
+            }
+
+            std::cout << node->nodeId << "[" << node->wayId << "]" << " => " << nextNode->nodeId << "[" << nextNode->wayId << "]" << std::endl;
 
             route.AddEntry(node->nodeId,
                            way->GetId(),
                            way->nodes[pos].GetId(),
                            true);
 
-            while (way->nodes[pos].GetId()!=way->nodes[end].GetId()) {
-              size_t next=pos++;
-
-              if (next>=way->nodes.size()) {
-                next=0;
-              }
-
-              if (way->nodes[next].GetId()==way->nodes[end].GetId()) {
-                route.AddEntry(way->nodes[pos].GetId(),
-                               way->GetId(),
-                               nextNode->nodeId,
-                               true);
-              }
-              else {
-                route.AddEntry(way->nodes[pos].GetId(),
-                               way->GetId(),
-                               way->nodes[next].GetId(),
-                               false);
-              }
+            while (way->nodes[next].GetId()!=way->nodes[end].GetId()) {
+              route.AddEntry(way->nodes[pos].GetId(),
+                             way->GetId(),
+                             way->nodes[next].GetId(),
+                             false);
 
               pos++;
               if (pos>=way->nodes.size()) {
                 pos=0;
               }
+
+              next=pos+1;
+              if (next>=way->nodes.size()) {
+                next=0;
+              }
             }
+
+            route.AddEntry(way->nodes[pos].GetId(),
+                           way->GetId(),
+                           nextNode->nodeId,
+                           true);
           }
           else {
             route.AddEntry(node->nodeId,
