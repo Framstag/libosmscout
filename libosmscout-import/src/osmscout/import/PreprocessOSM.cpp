@@ -55,6 +55,13 @@ namespace osmscout {
     uint32_t areaCount;
     uint32_t relationCount;
 
+    uint32_t lastNodeId;
+    uint32_t lastWayId;
+    uint32_t lastRelationId;
+    bool     nodeSortingError;
+    bool     waySortingError;
+    bool     relationSortingError;
+
   public:
     Preprocessor(const ImportParameter& parameter,
                  const TypeConfig& config);
@@ -79,7 +86,13 @@ namespace osmscout {
      nodeCount(0),
      wayCount(0),
      areaCount(0),
-     relationCount(0)
+     relationCount(0),
+     lastNodeId(0),
+     lastWayId(0),
+     lastRelationId(0),
+     nodeSortingError(false),
+     waySortingError(false),
+     relationSortingError(false)
   {
     nodeWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                     "rawnodes.dat"));
@@ -106,6 +119,10 @@ namespace osmscout {
     RawNode node;
     TypeId  type=typeIgnore;
 
+    if (id<lastNodeId) {
+      nodeSortingError=true;
+    }
+
     config.GetNodeTypeId(tagMap,type);
     config.ResolveTags(tagMap,tags);
 
@@ -115,7 +132,9 @@ namespace osmscout {
     node.SetTags(tags);
 
     node.Write(nodeWriter);
+
     nodeCount++;
+    lastNodeId=id;
   }
 
   void Preprocessor::Process(const Id& id,
@@ -127,6 +146,10 @@ namespace osmscout {
     int                                         isArea=0; // 0==unknown, 1==true, -1==false
     std::map<TagId,std::string>::const_iterator areaTag;
     RawWay                                      way;
+
+    if (id<lastWayId) {
+      waySortingError=true;
+    }
 
     way.SetId(id);
 
@@ -207,18 +230,14 @@ namespace osmscout {
                     false);
         wayCount++;
       }
-      // Unidentified way
-      /*
-      std::cout << "--- " << id << std::endl;
-      for (size_t tag=0; tag<tags.size(); tag++) {
-        std::cout << tags[tag].key << "/" << tags[tag].value << std::endl;
-      }*/
     }
 
     way.SetNodes(nodes);
     way.SetTags(tags);
 
     way.Write(wayWriter);
+
+    lastWayId=id;
   }
 
   void Preprocessor::Process(const Id& id,
@@ -227,6 +246,10 @@ namespace osmscout {
   {
     RawRelation relation;
     TypeId      type;
+
+    if (id<lastRelationId) {
+      relationSortingError=true;
+    }
 
     relation.SetId(id);
     relation.members=members;
@@ -237,7 +260,9 @@ namespace osmscout {
     relation.SetType(type);
 
     relation.Write(relationWriter);
+
     relationCount++;
+    lastRelationId=id;
   }
 
   void Preprocessor::Cleanup()
@@ -432,17 +457,17 @@ namespace osmscout {
           }
         }
 
-	if (typeValue==NULL) {
+        if (typeValue==NULL) {
           std::cerr << "Member of relation " << id << " does not have a type" << std::endl;
           return;
         }
 
-	if (refValue==NULL) {
+        if (refValue==NULL) {
           std::cerr << "Member of relation " << id << " does not have a valid reference" << std::endl;
           return;
         }
 
-	if (roleValue==NULL) {
+        if (roleValue==NULL) {
           std::cerr << "Member of relation " << id << " does not have a valid role" << std::endl;
           return;
         }
@@ -550,6 +575,22 @@ namespace osmscout {
                   NumberToString(pp.areaCount)+" "+
                   NumberToString(pp.wayCount+pp.areaCount));
     progress.Info(std::string("Relations:      ")+NumberToString(pp.relationCount));
+
+    if (pp.nodeSortingError) {
+      progress.Error("Nodes are not sorting by increasing id");
+    }
+
+    if (pp.waySortingError) {
+      progress.Error("Ways are not sorting by increasing id");
+    }
+
+    if (pp.relationSortingError) {
+      progress.Error("Relations are not sorting by increasing id");
+    }
+
+    if (pp.nodeSortingError || pp.waySortingError || pp.relationSortingError) {
+      return false;
+    }
 
     return true;
   }

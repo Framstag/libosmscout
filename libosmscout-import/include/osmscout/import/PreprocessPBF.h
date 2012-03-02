@@ -52,6 +52,14 @@ namespace osmscout {
     uint32_t                    areaCount;
     uint32_t                    relationCount;
 
+    uint32_t                    lastNodeId;
+    uint32_t                    lastWayId;
+    uint32_t                    lastRelationId;
+    bool                        nodeSortingError;
+    bool                        waySortingError;
+    bool                        relationSortingError;
+
+
   private:
     void ReadNodes(const TypeConfig& typeConfig,
                    const PBF::PrimitiveBlock& block,

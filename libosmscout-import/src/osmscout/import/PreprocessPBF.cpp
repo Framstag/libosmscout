@@ -283,6 +283,10 @@ namespace osmscout {
       TypeId          type=typeIgnore;
       const PBF::Node &inputNode=group.nodes(n);
 
+      if (inputNode.id()<lastNodeId) {
+        nodeSortingError=true;
+      }
+
       rawNode.SetId(inputNode.id());
       rawNode.SetCoordinates((inputNode.lon()*block.granularity()+block.lon_offset())/NANO,
                              (inputNode.lat()*block.granularity()+block.lat_offset())/NANO);
@@ -305,7 +309,9 @@ namespace osmscout {
       rawNode.SetTags(tags);
 
       rawNode.Write(nodeWriter);
+
       nodeCount++;
+      lastNodeId=inputNode.id();
     }
   }
 
@@ -326,6 +332,10 @@ namespace osmscout {
       dId+=dense.id(d);
       dLat+=dense.lat(d);
       dLon+=dense.lon(d);
+
+      if (dId<lastNodeId) {
+        nodeSortingError=true;
+      }
 
       rawNode.SetId(dId);
       rawNode.SetCoordinates((dLon*block.granularity()+block.lon_offset())/NANO,
@@ -360,7 +370,9 @@ namespace osmscout {
       rawNode.SetTags(tags);
 
       rawNode.Write(nodeWriter);
+
       nodeCount++;
+      lastNodeId=dId;
     }
   }
 
@@ -375,6 +387,10 @@ namespace osmscout {
       nodes.clear();
       tags.clear();
       tagMap.clear();
+
+      if (inputWay.id()<lastWayId) {
+        waySortingError=true;
+      }
 
       rawWay.SetId(inputWay.id());
 
@@ -495,6 +511,8 @@ namespace osmscout {
       rawWay.SetNodes(nodes);
 
       rawWay.Write(wayWriter);
+
+      lastWayId=inputWay.id();
     }
   }
 
@@ -508,6 +526,10 @@ namespace osmscout {
 
       rawRel.tags.clear();
       rawRel.members.clear();
+
+      if (inputRelation.id()<lastRelationId) {
+        relationSortingError=true;
+      }
 
       rawRel.SetId(inputRelation.id());
       rawRel.SetType(typeIgnore);
@@ -556,6 +578,7 @@ namespace osmscout {
       rawRel.Write(relationWriter);
 
       relationCount++;
+      lastRelationId=inputRelation.id();
     }
   }
 
@@ -571,6 +594,14 @@ namespace osmscout {
     wayCount=0;
     areaCount=0;
     relationCount=0;
+
+    lastNodeId=0;
+    lastWayId=0;
+    lastRelationId=0;
+
+    nodeSortingError=false;
+    waySortingError=false;
+    relationSortingError=false;
 
     progress.SetAction(std::string("Parsing PBF file '")+parameter.GetMapfile()+"'");
 
@@ -698,6 +729,22 @@ namespace osmscout {
                   NumberToString(areaCount)+" "+
                   NumberToString(wayCount+areaCount));
     progress.Info(std::string("Relations:      ")+NumberToString(relationCount));
+
+    if (nodeSortingError) {
+      progress.Error("Nodes are not sorting by increasing id");
+    }
+
+    if (waySortingError) {
+      progress.Error("Ways are not sorting by increasing id");
+    }
+
+    if (relationSortingError) {
+      progress.Error("Relations are not sorting by increasing id");
+    }
+
+    if (nodeSortingError || waySortingError || relationSortingError) {
+      return false;
+    }
 
     return true;
   }
