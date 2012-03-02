@@ -548,6 +548,13 @@ namespace osmscout {
             wayId++) {
           const WayRef& way=waysMap[*wayId];
 
+          if (!way.Valid()) {
+            progress.Error("Error while loading way "+
+                           NumberToString(*wayId) +
+                           " (Internal error?)");
+            continue;
+          }
+
           // Area routing
           if (way->IsArea()) {
             int    currentNode=0;
@@ -746,7 +753,7 @@ namespace osmscout {
           }
           // Normal way routing
           else {
-            for (size_t i=0;i<way->nodes.size(); i++) {
+            for (size_t i=0; i<way->nodes.size(); i++) {
               if (way->nodes[i].GetId()==node->first) {
                 if (i>0 && !way->IsOneway()) {
                   int j=i-1;
