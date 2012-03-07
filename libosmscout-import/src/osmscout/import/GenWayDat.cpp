@@ -415,6 +415,7 @@ namespace osmscout {
       for (size_t b=0; b<blockCount; b++) {
         if (hasBeenMerged[b] && !rawWays[b].IsArea()) {
           RawWay& rawWay=rawWays[b];
+          bool    isOneway=false;
           int     reverseOrigNodes=-1;
 
           hasBeenMerged[b]=false;
@@ -426,9 +427,14 @@ namespace osmscout {
 
           // Check, if we have to reverse the nodes
           for (size_t t=0; t<rawWay.GetTags().size(); t++) {
-            if (rawWay.GetTags()[t].key==typeConfig.tagOneway &&
-                rawWay.GetTags()[t].value=="-1") {
-              reverseOrigNodes=t;
+            if (rawWay.GetTags()[t].key==typeConfig.tagOneway) {
+              std::string value=rawWay.GetTags()[t].value;
+              isOneway=value!="no" && value!="false" && value!="0";
+
+              if (isOneway &&
+                  value=="-1") {
+                reverseOrigNodes=t;
+              }
               break;
             }
           }
@@ -519,7 +525,8 @@ namespace osmscout {
 
             wayBlacklist.insert(candidate->GetId());
 
-            if (nodes.front()==candidate->GetNodes().front()) {
+            if (!isOneway &&
+                nodes.front()==candidate->GetNodes().front()) {
               nodes.reserve(nodes.size()+
                   candidate->GetNodeCount()-1);
 
@@ -543,7 +550,8 @@ namespace osmscout {
                 nodes.push_back(candidate->GetNodeId(i));
               }
             }
-            else if (nodes.back()==candidate->GetNodes().back()) {
+            else if (!isOneway &&
+                nodes.back()==candidate->GetNodes().back()) {
               nodes.reserve(nodes.size()+
                   candidate->GetNodeCount()-1);
 
