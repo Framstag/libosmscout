@@ -42,8 +42,10 @@ namespace osmscout {
     width=0;
     reverseNodes=false;
 
+    flags|=hasAccess;
+
     if (isArea) {
-      flags|=SegmentAttributes::isArea;
+      flags|=isArea;
     }
 
     std::vector<Tag>::iterator tag=tags.begin();
@@ -122,32 +124,42 @@ namespace osmscout {
       }
       else if (!IsArea() && tag->key==typeConfig.tagBridge) {
         if (!(tag->value=="no" || tag->value=="false" || tag->value=="0")) {
-          flags|=SegmentAttributes::isBridge;
+          flags|=isBridge;
         }
         tag=tags.erase(tag);
       }
       else if (!IsArea() && tag->key==typeConfig.tagTunnel) {
         if (!(tag->value=="no" || tag->value=="false" || tag->value=="0")) {
-          flags|=SegmentAttributes::isTunnel;
+          flags|=isTunnel;
         }
         tag=tags.erase(tag);
       }
       else if (!IsArea() && tag->key==typeConfig.tagOneway) {
         if (tag->value=="-1") {
           reverseNodes=true;
-          flags|=SegmentAttributes::isOneway;
+          flags|=isOneway;
         }
         else if (!(tag->value=="no" || tag->value=="false" || tag->value=="0")) {
-          flags|=SegmentAttributes::isOneway;
+          flags|=isOneway;
+        }
+
+        tag=tags.erase(tag);
+      }
+      else if (tag->key==typeConfig.tagAccess) {
+        if (tag->value=="no" ||
+            tag->value=="private" ||
+            tag->value=="destination" ||
+            tag->value=="delivery") {
+          flags&=~hasAccess;
         }
 
         tag=tags.erase(tag);
       }
       else if (!IsArea() && tag->key==typeConfig.tagJunction) {
         if (tag->value=="roundabout") {
-          flags|=SegmentAttributes::isOneway;
+          flags|=isOneway;
           // If it is a roundabout is cannot be a area
-          flags&=~SegmentAttributes::isArea;
+          flags&=~isArea;
         }
 
         tag=tags.erase(tag);

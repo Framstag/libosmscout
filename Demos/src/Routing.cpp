@@ -32,6 +32,9 @@
   Long:
   time src/Routing ../TravelJinni/ 14332719 138190834 10414977 283372120
 
+  Medium:
+  time src/Routing ../TravelJinni/ 33879912 388178746 38363871 453298626
+
   Short:
   time src/Routing ../TravelJinni/ 33879912 388178746 24922615 270813911
 */
@@ -107,6 +110,8 @@ int main(int argc, char* argv[])
   osmscout::FastestPathRoutingProfile routingProfile;
   osmscout::RouteData                 data;
   osmscout::RouteDescription          description;
+
+  routingProfile.SetVehicleMaxSpeed(160.0);
 
   type=typeConfig->GetWayTypeId("highway_motorway");
   assert(type!=osmscout::typeIgnore);

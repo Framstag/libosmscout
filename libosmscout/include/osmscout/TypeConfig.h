@@ -392,6 +392,7 @@ namespace osmscout {
     TagId                                           tagHouseNr;
     TagId                                           tagJunction;
     TagId                                           tagMaxSpeed;
+    TagId                                           tagAccess;
 
   public:
     TypeConfig();

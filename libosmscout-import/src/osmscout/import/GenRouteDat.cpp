@@ -38,6 +38,18 @@
 
 namespace osmscout {
 
+  static uint8_t CopyFlags(const Way& way)
+  {
+    uint8_t flags=0;
+
+    if (way.HasAccess()) {
+      flags|=RouteNode::hasAccess;
+    }
+
+    return flags;
+  }
+
+
   std::string RouteDataGenerator::GetDescription() const
   {
     return "Generate 'route.dat'";
@@ -602,6 +614,7 @@ namespace osmscout {
               path.id=way->nodes[nextNode].GetId();
               path.type=way->GetType();
               path.maxSpeed=way->GetMaxSpeed();
+              path.flags=CopyFlags(*way);
               path.lat=way->nodes[nextNode].GetLat();
               path.lon=way->nodes[nextNode].GetLon();
               path.distance=distance;
@@ -645,6 +658,7 @@ namespace osmscout {
               path.wayId=way->GetId();
               path.type=way->GetType();
               path.maxSpeed=way->GetMaxSpeed();
+              path.flags=CopyFlags(*way);
               path.lat=way->nodes[prevNode].GetLat();
               path.lon=way->nodes[prevNode].GetLon();
               path.distance=distance;
@@ -699,6 +713,7 @@ namespace osmscout {
               path.wayId=way->GetId();
               path.type=way->GetType();
               path.maxSpeed=way->GetMaxSpeed();
+              path.flags=CopyFlags(*way);
               path.lat=way->nodes[nextNode].GetLat();
               path.lon=way->nodes[nextNode].GetLon();
               path.distance=distance;
@@ -743,6 +758,7 @@ namespace osmscout {
                 path.wayId=way->GetId();
                 path.type=way->GetType();
                 path.maxSpeed=way->GetMaxSpeed();
+                path.flags=CopyFlags(*way);
                 path.lat=way->nodes[prevNode].GetLat();
                 path.lon=way->nodes[prevNode].GetLon();
                 path.distance=distance;
@@ -773,6 +789,7 @@ namespace osmscout {
                     path.wayId=way->GetId();
                     path.type=way->GetType();
                     path.maxSpeed=way->GetMaxSpeed();
+                    path.flags=CopyFlags(*way);
                     path.lat=way->nodes[j].GetLat();
                     path.lon=way->nodes[j].GetLon();
 
@@ -806,6 +823,7 @@ namespace osmscout {
                     path.wayId=way->GetId();
                     path.type=way->GetType();
                     path.maxSpeed=way->GetMaxSpeed();
+                    path.flags=CopyFlags(*way);
                     path.lat=way->nodes[j].GetLat();
                     path.lon=way->nodes[j].GetLon();
 

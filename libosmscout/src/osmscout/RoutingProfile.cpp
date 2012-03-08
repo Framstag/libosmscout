@@ -20,6 +20,7 @@
 #include <osmscout/RoutingProfile.h>
 
 #include <cassert>
+#include <limits>
 
 namespace osmscout {
 
@@ -30,9 +31,15 @@ namespace osmscout {
 
   AbstractRoutingProfile::AbstractRoutingProfile()
    : minSpeed(0),
-     maxSpeed(0)
+     maxSpeed(0),
+     vehicleMaxSpeed(std::numeric_limits<double>::max())
   {
     // no code
+  }
+
+  void AbstractRoutingProfile::SetVehicleMaxSpeed(double maxSpeed)
+  {
+    vehicleMaxSpeed=maxSpeed;
   }
 
   void AbstractRoutingProfile::AddType(TypeId type, double speed)

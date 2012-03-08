@@ -33,6 +33,8 @@ namespace osmscout {
   class OSMSCOUT_API RouteNode : public Referencable
   {
   public:
+    const static uint8_t hasAccess = 1 <<  0; //! We do have access rights to this way/area
+
     struct OSMSCOUT_API RouteExclude
     {
       Id       sourceWay;
@@ -45,9 +47,15 @@ namespace osmscout {
       Id      wayId;
       TypeId  type;
       uint8_t maxSpeed;
+      uint8_t flags;
       double  distance;
       double  lat;
       double  lon;
+
+      inline bool HasAccess() const
+      {
+        return (flags & hasAccess) != 0;
+      }
     };
 
   public:

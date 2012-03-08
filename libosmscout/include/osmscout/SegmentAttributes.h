@@ -45,17 +45,18 @@ namespace osmscout {
   public:
     // Common flags (Area & Way)
     const static uint16_t isArea          = 1 <<  0; //! We are an area (or a way if not set)
+    const static uint16_t hasAccess       = 1 <<  1; //! We do have access rights to this way/area
 
     // Area flags
-    const static uint16_t hasHouseNr      = 1 <<  1; //! We have a house number
+    const static uint16_t hasHouseNr      = 1 <<  2; //! We have a house number
 
     // Way flags
-    const static uint16_t hasRestrictions = 1 <<  1; //! We have restrictions
-    const static uint16_t isBridge        = 1 <<  2; //! We are a bridge
-    const static uint16_t isTunnel        = 1 <<  3; //! We are a tunnel
-    const static uint16_t startIsJoint    = 1 <<  4; //! Start node is a joint node
-    const static uint16_t endIsJoint      = 1 <<  5; //! End node is a joint node
-    const static uint16_t isOneway        = 1 <<  6; //! We are a oneway (in way direction)
+    const static uint16_t hasRestrictions = 1 <<  2; //! We have restrictions
+    const static uint16_t isBridge        = 1 <<  3; //! We are a bridge
+    const static uint16_t isTunnel        = 1 <<  4; //! We are a tunnel
+    const static uint16_t startIsJoint    = 1 <<  5; //! Start node is a joint node
+    const static uint16_t endIsJoint      = 1 <<  6; //! End node is a joint node
+    const static uint16_t isOneway        = 1 <<  7; //! We are a oneway (in way direction)
 
   public:
     TypeId           type;     //! type of the way/relation
@@ -137,6 +138,11 @@ namespace osmscout {
     inline bool IsOneway() const
     {
       return (flags & isOneway)!=0;
+    }
+
+    inline bool HasAccess() const
+    {
+      return (flags & hasAccess)!=0;
     }
 
     inline bool StartIsJoint() const

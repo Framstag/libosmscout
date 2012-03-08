@@ -125,6 +125,11 @@ namespace osmscout {
       return attributes.IsOneway();
     }
 
+    inline bool HasAccess() const
+    {
+      return attributes.HasAccess();
+    }
+
     inline bool StartIsJoint() const
     {
       return attributes.StartIsJoint();

@@ -57,9 +57,12 @@ namespace osmscout {
     std::vector<double> speeds;
     double              minSpeed;
     double              maxSpeed;
+    double              vehicleMaxSpeed;
 
   public:
     AbstractRoutingProfile();
+
+    void SetVehicleMaxSpeed(double maxSpeed);
 
     void AddType(TypeId type, double speed);
 
@@ -74,12 +77,18 @@ namespace osmscout {
     inline double GetTime(const Way& way,
                           double distance) const
     {
+      double speed;
+
       if (way.GetMaxSpeed()>0) {
-        return distance/way.GetMaxSpeed();
+        speed=way.GetMaxSpeed();
       }
       else {
-        return distance/speeds[way.GetType()];
+        speed=speeds[way.GetType()];
       }
+
+      speed=std::min(vehicleMaxSpeed,speed);
+
+      return distance/speed;
     }
   };
 
@@ -117,28 +126,44 @@ namespace osmscout {
     inline double GetCosts(const RouteNode& currentNode,
                            size_t pathIndex) const
     {
+      double speed;
+
       if (currentNode.paths[pathIndex].maxSpeed>0) {
-        return currentNode.paths[pathIndex].distance/currentNode.paths[pathIndex].maxSpeed;
+        speed=currentNode.paths[pathIndex].maxSpeed;
       }
       else {
-        return currentNode.paths[pathIndex].distance/speeds[currentNode.paths[pathIndex].type];
+        speed=speeds[currentNode.paths[pathIndex].type];
       }
+
+      speed=std::min(vehicleMaxSpeed,speed);
+
+      return currentNode.paths[pathIndex].distance/speed;
     }
 
     inline double GetCosts(const Way& way,
                            double distance) const
     {
+      double speed;
+
       if (way.GetMaxSpeed()>0) {
-        return distance/way.GetMaxSpeed();
+        speed=way.GetMaxSpeed();
       }
       else {
-        return distance/speeds[way.GetType()];
+        speed=speeds[way.GetType()];
       }
+
+      speed=std::min(vehicleMaxSpeed,speed);
+
+      return distance/speed;
     }
 
     inline double GetCosts(double distance) const
     {
-      return distance/maxSpeed;
+      double speed=maxSpeed;
+
+      speed=std::min(vehicleMaxSpeed,speed);
+
+      return distance/speed;
     }
   };
 }

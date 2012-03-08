@@ -236,28 +236,47 @@ namespace osmscout {
      */
     struct RNode
     {
-      Id        nodeId;
-      Id        wayId;
-      double    currentCost;
-      double    estimateCost;
-      double    overallCost;
-      Id        prev;
+      Id     nodeId;
+      Id     wayId;
+
+      double currentCost;
+      double estimateCost;
+      double overallCost;
+
+      Id     prev;
+
+      bool   access;
 
       RNode()
-       : nodeId(0),
-         wayId(0)
+      : nodeId(0),
+        wayId(0)
       {
+        // no code
+      }
+
+      RNode(Id nodeId,
+            Id wayId)
+      : nodeId(nodeId),
+        wayId(wayId),
+        currentCost(0),
+        estimateCost(0),
+        overallCost(0),
+        prev(0),
+        access(true)
+      {
+        // no code
       }
 
       RNode(Id nodeId,
             Id wayId,
             Id prev)
-       : nodeId(nodeId),
-         wayId(wayId),
-         currentCost(0),
-         estimateCost(0),
-         overallCost(0),
-         prev(prev)
+      : nodeId(nodeId),
+        wayId(wayId),
+        currentCost(0),
+        estimateCost(0),
+        overallCost(0),
+        prev(prev),
+        access(true)
       {
         // no code
       }
