@@ -308,12 +308,6 @@ namespace osmscout {
     typedef std::set<RNode,RNodeCostCompare> OpenList;
     typedef OpenList::iterator               RNodeRef;
 
-    struct RouteStep
-    {
-      Id wayId;
-      Id nodeId;
-    };
-
   private:
     bool                  isOpen;            //! true, if opened
     bool                  debugPerformance;
