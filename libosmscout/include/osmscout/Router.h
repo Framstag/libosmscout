@@ -225,12 +225,6 @@ namespace osmscout {
   class OSMSCOUT_API Router
   {
   private:
-    struct Follower
-    {
-      TypeId type;
-      Id     wayId;
-    };
-
     /**
      * A node in the routing graph, normally a node as part of a way
      */
