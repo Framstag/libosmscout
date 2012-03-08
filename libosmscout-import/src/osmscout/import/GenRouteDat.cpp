@@ -608,7 +608,7 @@ namespace osmscout {
             }
 
             if (nextNode!=currentNode) {
-              RouteNode::RoutePath path;
+              RouteNode::Path path;
 
               path.wayId=way->GetId();
               path.id=way->nodes[nextNode].GetId();
@@ -652,7 +652,7 @@ namespace osmscout {
 
             if (prevNode!=currentNode &&
                 prevNode!=nextNode) {
-              RouteNode::RoutePath path;
+              RouteNode::Path path;
 
               path.id=way->nodes[prevNode].GetId();
               path.wayId=way->GetId();
@@ -707,7 +707,7 @@ namespace osmscout {
             }
 
             if (nextNode!=currentNode) {
-              RouteNode::RoutePath path;
+              RouteNode::Path path;
 
               path.id=way->nodes[nextNode].GetId();
               path.wayId=way->GetId();
@@ -752,7 +752,7 @@ namespace osmscout {
 
               if (prevNode!=currentNode &&
                   prevNode!=nextNode) {
-                RouteNode::RoutePath path;
+                RouteNode::Path path;
 
                 path.id=way->nodes[prevNode].GetId();
                 path.wayId=way->GetId();
@@ -783,7 +783,7 @@ namespace osmscout {
                   }
 
                   if (j>=0) {
-                    RouteNode::RoutePath path;
+                    RouteNode::Path path;
 
                     path.id=way->nodes[j].GetId();
                     path.wayId=way->GetId();
@@ -817,7 +817,7 @@ namespace osmscout {
                   }
 
                   if (j<way->nodes.size()) {
-                    RouteNode::RoutePath path;
+                    RouteNode::Path path;
 
                     path.id=way->nodes[j].GetId();
                     path.wayId=way->GetId();
@@ -854,7 +854,7 @@ namespace osmscout {
                 destWayId++) {
               if (*sourceWayId!=*destWayId) {
                 if (!CanTurn(turnConstraints->second,*sourceWayId,*destWayId)) {
-                  RouteNode::RouteExclude exclude;
+                  RouteNode::Exclude exclude;
 
                   exclude.sourceWay=*sourceWayId;
                   exclude.targetPath=0;

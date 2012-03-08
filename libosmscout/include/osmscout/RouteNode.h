@@ -30,27 +30,38 @@
 
 namespace osmscout {
 
+  /**
+   * A route node is the representation of a node in the routing graph.
+   */
   class OSMSCOUT_API RouteNode : public Referencable
   {
   public:
     const static uint8_t hasAccess = 1 <<  0; //! We do have access rights to this way/area
 
-    struct OSMSCOUT_API RouteExclude
+    /**
+     * Exclude regarding use of paths. You cannot use the path with the index "targetPath" if you come
+     * from the way with the id "sourceWay".
+     */
+    struct OSMSCOUT_API Exclude
     {
-      Id       sourceWay;
-      uint32_t targetPath;
+      Id       sourceWay;  //! The source way
+      uint32_t targetPath; //! The index of the target path
     };
 
-    struct OSMSCOUT_API RoutePath
+    /**
+     * A single path that starts at the given route node. A path contains a number of information
+     * that are relevant for the router.
+     */
+    struct OSMSCOUT_API Path
     {
-      Id      id;
-      Id      wayId;
-      TypeId  type;
-      uint8_t maxSpeed;
-      uint8_t flags;
-      double  distance;
-      double  lat;
-      double  lon;
+      Id      id;       //! Id of the target routing node if you take this route path
+      Id      wayId;    //! The id of the way to use from this route node to the target route node
+      TypeId  type;     //! The type of the way
+      uint8_t maxSpeed; //! Maximum speed allowed on the way
+      uint8_t flags;    //! Certain flags
+      double  distance; //! Distance from the current route node to the target route node
+      double  lat;      //! Latitude of the target node
+      double  lon;      //! Longitude of the target node
 
       inline bool HasAccess() const
       {
@@ -59,9 +70,9 @@ namespace osmscout {
     };
 
   public:
-    Id                        id;
-    std::vector<RoutePath>    paths;
-    std::vector<RouteExclude> excludes;
+    Id                   id;       //! Id of the route node, equal the id of the underlying node
+    std::vector<Path>    paths;    //! List of paths that can in principle be used from this node
+    std::vector<Exclude> excludes; //! List of potential excludes regarding use of paths
 
     inline Id GetId() const
     {
