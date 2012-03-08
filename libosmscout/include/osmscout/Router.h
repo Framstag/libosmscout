@@ -143,13 +143,11 @@ namespace osmscout {
       Id   currentNodeId;
       Id   pathWayId;
       Id   targetNodeId;
-      bool isCrossing;
 
     public:
       RouteEntry(Id currentNodeId,
                  Id pathWayId,
-                 Id targetNodeId,
-                 bool isCrossing);
+                 Id targetNodeId);
 
       inline Id GetCurrentNodeId() const
       {
@@ -165,11 +163,6 @@ namespace osmscout {
       {
         return targetNodeId;
       }
-
-      inline bool IsCrossing() const
-      {
-        return isCrossing;
-      }
     };
 
   private:
@@ -182,8 +175,7 @@ namespace osmscout {
 
     void AddEntry(Id currentNodeId,
                   Id pathWayId,
-                  Id targetNodeId,
-                  bool isCrossing);
+                  Id targetNodeId);
 
     inline const std::list<RouteEntry>& Entries() const
     {

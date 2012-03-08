@@ -131,7 +131,6 @@ namespace osmscout {
       Id                                   currentNodeId;
       Id                                   pathWayId;
       Id                                   targetNodeId;
-      bool                                 isCrossing;
       double                               distance;
       double                               time;
       std::map<std::string,DescriptionRef> descriptions;
@@ -139,8 +138,7 @@ namespace osmscout {
     public:
       Node(Id currentNodeId,
            Id pathWayId,
-           Id targetNodeId,
-           bool isCrossing);
+           Id targetNodeId);
 
       inline Id GetCurrentNodeId() const
       {
@@ -155,14 +153,6 @@ namespace osmscout {
       inline Id GetTargetNodeId() const
       {
         return targetNodeId;
-      }
-
-      /**
-       * Is a crossing of (routable) ways.
-       */
-      inline bool IsCrossing() const
-      {
-        return isCrossing;
       }
 
       /**
@@ -200,8 +190,7 @@ namespace osmscout {
 
     void AddNode(Id currentNodeId,
                  Id pathWayId,
-                 Id targetNodeId,
-                 bool isCrossing);
+                 Id targetNodeId);
 
     inline std::list<Node>& Nodes()
     {

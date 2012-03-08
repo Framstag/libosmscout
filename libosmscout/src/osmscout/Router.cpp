@@ -259,12 +259,10 @@ namespace osmscout {
 
   RouteData::RouteEntry::RouteEntry(Id currentNodeId,
                                     Id pathWayId,
-                                    Id targetNodeId,
-                                    bool isCrossing)
+                                    Id targetNodeId)
    : currentNodeId(currentNodeId),
      pathWayId(pathWayId),
-     targetNodeId(targetNodeId),
-     isCrossing(isCrossing)
+     targetNodeId(targetNodeId)
   {
     // no code
   }
@@ -281,13 +279,11 @@ namespace osmscout {
 
   void RouteData::AddEntry(Id currentNodeId,
                            Id pathWayId,
-                           Id targetNodeId,
-                           bool isCrossing)
+                           Id targetNodeId)
   {
     entries.push_back(RouteEntry(currentNodeId,
                                  pathWayId,
-                                 targetNodeId,
-                                 isCrossing));
+                                 targetNodeId));
   }
 
   RouterParameter::RouterParameter()
@@ -541,20 +537,17 @@ namespace osmscout {
           if (start<end) {
             route.AddEntry(node->nodeId,
                            way->GetId(),
-                           way->nodes[start+1].GetId(),
-                           true);
+                           way->nodes[start+1].GetId());
 
             for (size_t i=start+1; i<end-1; i++) {
               route.AddEntry(way->nodes[i].GetId(),
                              way->GetId(),
-                             way->nodes[i+1].GetId(),
-                             false);
+                             way->nodes[i+1].GetId());
             }
 
             route.AddEntry(way->nodes[end-1].GetId(),
                            way->GetId(),
-                           nextNode->nodeId,
-                           true);
+                           nextNode->nodeId);
           }
           else if (way->IsOneway()) {
             size_t pos=start+1;
@@ -571,14 +564,12 @@ namespace osmscout {
 
             route.AddEntry(node->nodeId,
                            way->GetId(),
-                           way->nodes[pos].GetId(),
-                           true);
+                           way->nodes[pos].GetId());
 
             while (way->nodes[next].GetId()!=way->nodes[end].GetId()) {
               route.AddEntry(way->nodes[pos].GetId(),
                              way->GetId(),
-                             way->nodes[next].GetId(),
-                             false);
+                             way->nodes[next].GetId());
 
               pos++;
               if (pos>=way->nodes.size()) {
@@ -593,34 +584,29 @@ namespace osmscout {
 
             route.AddEntry(way->nodes[pos].GetId(),
                            way->GetId(),
-                           nextNode->nodeId,
-                           true);
+                           nextNode->nodeId);
           }
           else {
             route.AddEntry(node->nodeId,
                            way->GetId(),
-                           way->nodes[start-1].GetId(),
-                           true);
+                           way->nodes[start-1].GetId());
 
             for (int i=start-1; i>(int)end+1; i--) {
               route.AddEntry(way->nodes[i].GetId(),
                              way->GetId(),
-                             way->nodes[i-1].GetId(),
-                             false);
+                             way->nodes[i-1].GetId());
             }
 
             route.AddEntry(way->nodes[end+1].GetId(),
                            way->GetId(),
-                           nextNode->nodeId,
-                           true);
+                           nextNode->nodeId);
           }
         }
       }
       else {
         route.AddEntry(node->nodeId,
                        0,
-                       0,
-                       true);
+                       0);
       }
     }
   }
@@ -1007,8 +993,7 @@ namespace osmscout {
          ++iter) {
       description.AddNode(iter->GetCurrentNodeId(),
                           iter->GetPathWayId(),
-                          iter->GetTargetNodeId(),
-                          iter->IsCrossing());
+                          iter->GetTargetNodeId());
     }
 
     return true;
