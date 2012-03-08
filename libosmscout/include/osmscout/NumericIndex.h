@@ -100,8 +100,9 @@ namespace osmscout {
     bool Close();
 
     bool GetOffset(const N& id, FileOffset& offset) const;
-    bool GetOffsets(const std::set<N>& ids, std::vector<FileOffset>& offsets) const;
     bool GetOffsets(const std::vector<N>& ids, std::vector<FileOffset>& offsets) const;
+    bool GetOffsets(const std::list<N>& ids, std::vector<FileOffset>& offsets) const;
+    bool GetOffsets(const std::set<N>& ids, std::vector<FileOffset>& offsets) const;
 
     void DumpStatistics() const;
   };
@@ -330,13 +331,13 @@ namespace osmscout {
   }
 
   template <class N, class T>
-  bool NumericIndex<N,T>::GetOffsets(const std::set<N>& ids,
+  bool NumericIndex<N,T>::GetOffsets(const std::vector<N>& ids,
                                      std::vector<FileOffset>& offsets) const
   {
     offsets.reserve(ids.size());
     offsets.clear();
 
-    for (typename std::set<N>::const_iterator id=ids.begin();
+    for (typename std::vector<N>::const_iterator id=ids.begin();
          id!=ids.end();
          ++id) {
       FileOffset offset;
@@ -351,13 +352,34 @@ namespace osmscout {
   }
 
   template <class N, class T>
-  bool NumericIndex<N,T>::GetOffsets(const std::vector<N>& ids,
+  bool NumericIndex<N,T>::GetOffsets(const std::list<N>& ids,
                                      std::vector<FileOffset>& offsets) const
   {
     offsets.reserve(ids.size());
     offsets.clear();
 
-    for (typename std::vector<N>::const_iterator id=ids.begin();
+    for (typename std::list<N>::const_iterator id=ids.begin();
+         id!=ids.end();
+         ++id) {
+      FileOffset offset;
+
+      if (GetOffset(*id,
+                    offset)) {
+        offsets.push_back(offset);
+      }
+    }
+
+    return true;
+  }
+
+  template <class N, class T>
+  bool NumericIndex<N,T>::GetOffsets(const std::set<N>& ids,
+                                     std::vector<FileOffset>& offsets) const
+  {
+    offsets.reserve(ids.size());
+    offsets.clear();
+
+    for (typename std::set<N>::const_iterator id=ids.begin();
          id!=ids.end();
          ++id) {
       FileOffset offset;

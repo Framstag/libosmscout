@@ -85,6 +85,8 @@ namespace osmscout {
 
     bool Get(const std::vector<Id>& ids,
              std::vector<ValueType>& data) const;
+    bool Get(const std::list<Id>& ids,
+             std::vector<ValueType>& data) const;
     bool Get(const std::set<Id>& ids,
              std::vector<ValueType>& data) const;
 
@@ -290,6 +292,22 @@ namespace osmscout {
 
   template <class N>
   bool DataFile<N>::Get(const std::vector<Id>& ids,
+                        std::vector<ValueType>& data) const
+  {
+    assert(isOpen);
+
+    std::vector<FileOffset> offsets;
+
+    if (!index.GetOffsets(ids,offsets)) {
+      std::cerr << "Ids not found in index" << std::endl;
+      return false;
+    }
+
+    return Get(offsets,data);
+  }
+
+  template <class N>
+  bool DataFile<N>::Get(const std::list<Id>& ids,
                         std::vector<ValueType>& data) const
   {
     assert(isOpen);
