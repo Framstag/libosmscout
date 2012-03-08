@@ -845,7 +845,7 @@ namespace osmscout {
         double overallCost=currentCost+estimateCost;
 
         RNode node(currentRouteNode->paths[i].id,
-                   currentRouteNode->paths[i].wayId,
+                   currentRouteNode->ways[currentRouteNode->paths[i].wayIndex],
                    currentRouteNode->id);
 
         node.currentCost=currentCost;

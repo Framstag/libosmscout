@@ -27,12 +27,15 @@ namespace osmscout {
 
   bool RouteNode::Read(FileScanner& scanner)
   {
+    uint32_t wayCount;
     uint32_t pathCount;
     uint32_t excludesCount;
     uint32_t minLat;
     uint32_t minLon;
 
     scanner.Read(id);
+
+    scanner.ReadNumber(wayCount);
     scanner.ReadNumber(pathCount);
     scanner.ReadNumber(excludesCount);
 
@@ -43,6 +46,16 @@ namespace osmscout {
       return false;
     }
 
+    Id lastId=0;
+    ways.resize(wayCount);
+    for (size_t i=0; i<wayCount; i++) {
+      scanner.ReadNumber(ways[i]);
+
+      ways[i]+=lastId;
+
+      lastId=ways[i];
+    }
+
     paths.resize(pathCount);
     for (size_t i=0; i<pathCount; i++) {
       uint32_t latValue;
@@ -50,7 +63,7 @@ namespace osmscout {
       uint32_t distanceValue;
 
       scanner.Read(paths[i].id);
-      scanner.Read(paths[i].wayId);
+      scanner.ReadNumber(paths[i].wayIndex);
       scanner.ReadNumber(paths[i].type);
       scanner.Read(paths[i].maxSpeed);
       scanner.Read(paths[i].flags);
@@ -75,6 +88,8 @@ namespace osmscout {
   bool RouteNode::Write(FileWriter& writer) const
   {
     writer.Write(id);
+
+    writer.WriteNumber((uint32_t)ways.size());
     writer.WriteNumber((uint32_t)paths.size());
     writer.WriteNumber((uint32_t)excludes.size());
 
@@ -89,13 +104,20 @@ namespace osmscout {
     writer.Write(minLat);
     writer.Write(minLon);
 
+    Id lastId=0;
+    for (size_t i=0; i<ways.size(); i++) {
+      writer.WriteNumber(ways[i]-lastId);
+
+      lastId=ways[i];
+    }
+
     for (size_t i=0; i<paths.size(); i++) {
       uint32_t latValue=(uint32_t)floor((paths[i].lat+90.0)*conversionFactor+0.5);
       uint32_t lonValue=(uint32_t)floor((paths[i].lon+180.0)*conversionFactor+0.5);
       uint32_t distanceValue=(uint32_t)floor(paths[i].distance*(1000.0*100.0)+0.5);
 
       writer.Write(paths[i].id);
-      writer.Write(paths[i].wayId);
+      writer.WriteNumber(paths[i].wayIndex);
       writer.WriteNumber(paths[i].type);
       writer.Write(paths[i].maxSpeed);
       writer.Write(paths[i].flags);
@@ -111,6 +133,4 @@ namespace osmscout {
 
     return !writer.HasError();
   }
-
 }
-

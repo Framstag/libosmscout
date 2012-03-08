@@ -555,6 +555,10 @@ namespace osmscout {
         handledRouteNodeCount++;
         progress.SetProgress(handledRouteNodeCount,nodeWayMap.size());
 
+        // We sort ways by increasing id, for more efficient storage
+        // in route node
+        node->second.sort();
+
         for (std::list<Id>::const_iterator wayId=node->second.begin();
             wayId!=node->second.end();
             wayId++) {
@@ -566,6 +570,8 @@ namespace osmscout {
                            " (Internal error?)");
             continue;
           }
+
+          routeNode.ways.push_back(*wayId);
 
           // Area routing
           if (way->IsArea()) {
@@ -610,8 +616,8 @@ namespace osmscout {
             if (nextNode!=currentNode) {
               RouteNode::Path path;
 
-              path.wayId=way->GetId();
               path.id=way->nodes[nextNode].GetId();
+              path.wayIndex=routeNode.ways.size()-1;
               path.type=way->GetType();
               path.maxSpeed=way->GetMaxSpeed();
               path.flags=CopyFlags(*way);
@@ -655,7 +661,7 @@ namespace osmscout {
               RouteNode::Path path;
 
               path.id=way->nodes[prevNode].GetId();
-              path.wayId=way->GetId();
+              path.wayIndex=routeNode.ways.size()-1;
               path.type=way->GetType();
               path.maxSpeed=way->GetMaxSpeed();
               path.flags=CopyFlags(*way);
@@ -710,7 +716,7 @@ namespace osmscout {
               RouteNode::Path path;
 
               path.id=way->nodes[nextNode].GetId();
-              path.wayId=way->GetId();
+              path.wayIndex=routeNode.ways.size()-1;
               path.type=way->GetType();
               path.maxSpeed=way->GetMaxSpeed();
               path.flags=CopyFlags(*way);
@@ -755,7 +761,7 @@ namespace osmscout {
                 RouteNode::Path path;
 
                 path.id=way->nodes[prevNode].GetId();
-                path.wayId=way->GetId();
+                path.wayIndex=routeNode.ways.size()-1;
                 path.type=way->GetType();
                 path.maxSpeed=way->GetMaxSpeed();
                 path.flags=CopyFlags(*way);
@@ -786,7 +792,7 @@ namespace osmscout {
                     RouteNode::Path path;
 
                     path.id=way->nodes[j].GetId();
-                    path.wayId=way->GetId();
+                    path.wayIndex=routeNode.ways.size()-1;
                     path.type=way->GetType();
                     path.maxSpeed=way->GetMaxSpeed();
                     path.flags=CopyFlags(*way);
@@ -820,7 +826,7 @@ namespace osmscout {
                     RouteNode::Path path;
 
                     path.id=way->nodes[j].GetId();
-                    path.wayId=way->GetId();
+                    path.wayIndex=routeNode.ways.size()-1;
                     path.type=way->GetType();
                     path.maxSpeed=way->GetMaxSpeed();
                     path.flags=CopyFlags(*way);
@@ -860,7 +866,7 @@ namespace osmscout {
                   exclude.targetPath=0;
 
                   while (exclude.targetPath<routeNode.paths.size() &&
-                      routeNode.paths[exclude.targetPath].wayId!=*destWayId) {
+                      routeNode.ways[routeNode.paths[exclude.targetPath].wayIndex]!=*destWayId) {
                     exclude.targetPath++;
                   }
 
