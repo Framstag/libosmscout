@@ -27,6 +27,7 @@
 #include <osmscout/Router.h>
 
 //#define ROUTE_DEBUG
+//#define POINTS_DEBUG
 //#define NODE_DEBUG
 //#define CROSSING_DEBUG
 
@@ -91,12 +92,6 @@ static bool IsRelevantCrossing(const osmscout::RouteDescription::CrossingWaysDes
     if (!originDescription->GetName().empty() &&
         targetDescription->GetName().empty() &&
         originDescription->GetRef()==targetDescription->GetRef()) {
-      return false;
-    }
-
-    // Target way does not have a name at all :-/
-    if (targetDescription->GetName().empty() &&
-        targetDescription->GetRef().empty()) {
       return false;
     }
   }
@@ -172,6 +167,11 @@ static bool HasRelevantDescriptions(const osmscout::RouteDescription::Node& node
 static std::string NameDescriptionToString(osmscout::RouteDescription::NameDescription* nameDescription)
 {
   std::ostringstream stream;
+
+  if (nameDescription->GetName().empty() &&
+      nameDescription->GetRef().empty()) {
+    return "unnamed road";
+  }
 
   if (!nameDescription->GetName().empty()) {
     stream << nameDescription->GetName();
@@ -374,6 +374,20 @@ int main(int argc, char* argv[])
     return 1;
   }
 
+#if defined(POINTS_DEBUG)
+  std::list<osmscout::Point> points;
+
+  if (!router.TransformRouteDataToPoints(data,points)) {
+    std::cerr << "Error during route conversion" << std::endl;
+  }
+
+  for (std::list<osmscout::Point>::const_iterator point=points.begin();
+      point!=points.end();
+      ++point) {
+    std::cout << "Point " << point->GetId() << " " << point->GetLat() << "," << point->GetLon() << std::endl;
+  }
+#endif
+
   if (!postprocessor.PostprocessRouteDescription(description,
                                                  routingProfile,
                                                  database,
@@ -474,11 +488,11 @@ int main(int argc, char* argv[])
       std::cout << "Crossing";
 
       if (originDescription.Valid()) {
-        std::cout << " from " << NameDescriptionToString(originDescription);
+        std::cout << " from '" << NameDescriptionToString(originDescription);
       }
 
       if (targetDescription.Valid()) {
-        std::cout << " to " << NameDescriptionToString(targetDescription);
+        std::cout << "' to '" << NameDescriptionToString(targetDescription);
       }
 
       std::cout << " with";
@@ -486,7 +500,7 @@ int main(int argc, char* argv[])
       for (std::list<osmscout::RouteDescription::NameDescriptionRef>::const_iterator name=crossingWaysDescription->GetDescriptions().begin();
           name!=crossingWaysDescription->GetDescriptions().end();
           ++name) {
-        std::cout << " " << NameDescriptionToString(*name);
+        std::cout << " '" << NameDescriptionToString(*name) << "'";
       }
 
       std::cout << std::endl;

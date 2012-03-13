@@ -1130,6 +1130,16 @@ namespace osmscout {
           return false;
         }
 
+        // Initial starting point
+        if (iter==data.Entries().begin()) {
+          for (size_t i=0; i<w->nodes.size(); i++) {
+            if (w->nodes[i].id==iter->GetCurrentNodeId()) {
+              way.nodes.push_back(w->nodes[i]);
+              break;
+            }
+          }
+        }
+
         for (size_t i=0; i<w->nodes.size(); i++) {
           if (w->nodes[i].id==iter->GetTargetNodeId()) {
             way.nodes.push_back(w->nodes[i]);
@@ -1145,6 +1155,8 @@ namespace osmscout {
   bool Router::TransformRouteDataToPoints(const RouteData& data,
                                           std::list<Point>& points)
   {
+    WayRef w;
+
     points.clear();
 
     if (data.Entries().empty()) {
@@ -1155,12 +1167,31 @@ namespace osmscout {
          iter!=data.Entries().end();
          ++iter) {
       if (iter->GetPathWayId()!=0) {
-        WayRef w;
 
-        if (!wayDataFile.Get(iter->GetPathWayId(),w)) {
-          return false;
+        if (w.Invalid() ||
+            w->GetId()!=iter->GetPathWayId()) {
+          if (!wayDataFile.Get(iter->GetPathWayId(),w)) {
+            return false;
+          }
         }
 
+        // Initial starting point
+        if (iter==data.Entries().begin()) {
+          for (size_t i=0; i<w->nodes.size(); i++) {
+            if (w->nodes[i].id==iter->GetCurrentNodeId()) {
+              Point point;
+
+              point.SetId(w->nodes[i].GetId());
+              point.SetCoordinates(w->nodes[i].GetLat(),
+                                   w->nodes[i].GetLon());
+
+              points.push_back(point);
+              break;
+            }
+          }
+        }
+
+        // target node of current path
         for (size_t i=0; i<w->nodes.size(); i++) {
           if (w->nodes[i].id==iter->GetTargetNodeId()) {
             Point point;
