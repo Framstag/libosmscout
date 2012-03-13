@@ -53,6 +53,10 @@ namespace osmscout {
 
       ways[i]+=lastId;
 
+      if (i>0) {
+        assert(ways[i]>=ways[i-1]);
+      }
+
       lastId=ways[i];
     }
 
@@ -106,6 +110,8 @@ namespace osmscout {
 
     Id lastId=0;
     for (size_t i=0; i<ways.size(); i++) {
+      assert(ways[i]>=lastId);
+
       writer.WriteNumber(ways[i]-lastId);
 
       lastId=ways[i];

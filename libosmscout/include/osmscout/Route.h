@@ -50,6 +50,8 @@ namespace osmscout {
     static const char* const WAY_NAME_DESC;
     /** Constant for a description of a change of way name (NameChangedDescription) */
     static const char* const WAY_NAME_CHANGED_DESC;
+    /** Constant for a description of list of way name crossing a node (CrossingWaysDescription) */
+    static const char* const CROSSING_WAYS_DESC;
 
   public:
     /*
@@ -113,22 +115,73 @@ namespace osmscout {
       std::string GetRef() const;
     };
 
+    typedef Ref<NameDescription> NameDescriptionRef;
+
     /**
      * Something has a name. A name consists of a name and a optional alphanumeric
      * reference (Like B1 or A40).
      */
     class OSMSCOUT_API NameChangedDescription : public Description
     {
+      NameDescriptionRef originDescription;
+      NameDescriptionRef targetDescription;
+
     public:
-      NameChangedDescription();
+      NameChangedDescription(NameDescription* originDescription,
+                             NameDescription* targetDescription);
+
+      inline const NameDescriptionRef& GetOriginDesccription() const
+      {
+        return originDescription;
+      }
+
+      inline const NameDescriptionRef& GetTargetDesccription() const
+      {
+        return targetDescription;
+      }
     };
 
-    typedef Ref<NameDescription> NameDescriptionRef;
+    typedef Ref<NameChangedDescription> NameChangedDescriptionRef;
+
+    /**
+     * List the names of allways, that are crossing the current node.
+     */
+    class OSMSCOUT_API CrossingWaysDescription : public Description
+    {
+    private:
+      NameDescriptionRef            originDescription;
+      NameDescriptionRef            targetDescription;
+      std::list<NameDescriptionRef> descriptions;
+
+    public:
+      CrossingWaysDescription(NameDescription* originDescription,
+                              NameDescription* targetDescription);
+
+      void AddDescription(NameDescription* description);
+
+      inline const NameDescriptionRef& GetOriginDesccription() const
+      {
+        return originDescription;
+      }
+
+      inline const NameDescriptionRef& GetTargetDesccription() const
+      {
+        return targetDescription;
+      }
+
+      inline const std::list<NameDescriptionRef>& GetDescriptions() const
+      {
+        return descriptions;
+      }
+    };
+
+    typedef Ref<CrossingWaysDescription> CrossingWaysDescriptionRef;
 
     class Node
     {
     private:
       Id                                   currentNodeId;
+      std::vector<Id>                      ways;
       Id                                   pathWayId;
       Id                                   targetNodeId;
       double                               distance;
@@ -137,12 +190,18 @@ namespace osmscout {
 
     public:
       Node(Id currentNodeId,
+           const std::vector<Id>& ways,
            Id pathWayId,
            Id targetNodeId);
 
       inline Id GetCurrentNodeId() const
       {
         return currentNodeId;
+      }
+
+      inline const std::vector<Id>& GetWays() const
+      {
+        return ways;
       }
 
       inline Id GetPathWayId() const
@@ -189,6 +248,7 @@ namespace osmscout {
     void Clear();
 
     void AddNode(Id currentNodeId,
+                 const std::vector<Id>& ways,
                  Id pathWayId,
                  Id targetNodeId);
 

@@ -117,6 +117,17 @@ namespace osmscout {
     };
 
     /**
+     * Places a crossing ways description as a description of the name of all ways crossing the given node
+     */
+    OSMSCOUT_API class CrossingWaysPostprocessor : public Postprocessor
+    {
+    public:
+      bool Process(const RoutingProfile& profile,
+                   RouteDescription& description,
+                   Database& database);
+    };
+
+    /**
      * Places a name change description if the name changes
      */
     OSMSCOUT_API class WayNameChangedPostprocessor : public Postprocessor
@@ -140,12 +151,18 @@ namespace osmscout {
     class RouteEntry
     {
     private:
-      Id   currentNodeId;
-      Id   pathWayId;
-      Id   targetNodeId;
+      Id              currentNodeId;
+      std::vector<Id> ways;
+      Id              pathWayId;
+      Id              targetNodeId;
 
     public:
       RouteEntry(Id currentNodeId,
+                 Id pathWayId,
+                 Id targetNodeId);
+
+      RouteEntry(Id currentNodeId,
+                 const std::vector<Id>& ways,
                  Id pathWayId,
                  Id targetNodeId);
 
@@ -163,6 +180,11 @@ namespace osmscout {
       {
         return targetNodeId;
       }
+
+      inline const std::vector<Id>& GetWays() const
+      {
+        return ways;
+      }
     };
 
   private:
@@ -174,6 +196,11 @@ namespace osmscout {
     void Clear();
 
     void AddEntry(Id currentNodeId,
+                  Id pathWayId,
+                  Id targetNodeId);
+
+    void AddEntry(Id currentNodeId,
+                  const std::vector<Id>& ways,
                   Id pathWayId,
                   Id targetNodeId);
 
@@ -310,10 +337,10 @@ namespace osmscout {
                              Id nodeId,
                              RouteNodeRef& routeNode,
                              size_t& pos);
-    void ResolveRNodesToList(const RNode& end,
+    bool ResolveRNodesToList(const RNode& end,
                              const std::map<Id,RNode>& closeMap,
                              std::list<RNode>& nodes);
-    void ResolveRNodesToRouteData(const std::list<RNode>& nodes,
+    bool ResolveRNodesToRouteData(const std::list<RNode>& nodes,
                                   RouteData& route);
 
 

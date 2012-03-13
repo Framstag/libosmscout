@@ -29,6 +29,8 @@ namespace osmscout {
   const char* const RouteDescription::WAY_NAME_DESC         = "WayName";
   /** Constant for a description of a change of way name (NameChangedDescription) */
   const char* const RouteDescription::WAY_NAME_CHANGED_DESC = "WayChangedName";
+  /** Constant for a description of list of way name crossing a node (CrossingWaysDescription) */
+  const char* const RouteDescription::CROSSING_WAYS_DESC    = "CrossingWays";
 
   RouteDescription::Description::~Description()
   {
@@ -76,15 +78,33 @@ namespace osmscout {
     return ref;
   }
 
-  RouteDescription::NameChangedDescription::NameChangedDescription()
+  RouteDescription::NameChangedDescription::NameChangedDescription(NameDescription* originDescription,
+                                                                   NameDescription* targetDescription)
+  : originDescription(originDescription),
+    targetDescription(targetDescription)
   {
     // no code
   }
 
+  RouteDescription::CrossingWaysDescription::CrossingWaysDescription(NameDescription* originDescription,
+                                                                     NameDescription* targetDescription)
+  : originDescription(originDescription),
+    targetDescription(targetDescription)
+  {
+    // no code
+  }
+
+  void RouteDescription::CrossingWaysDescription::AddDescription(NameDescription* description)
+  {
+    descriptions.push_back(description);
+  }
+
   RouteDescription::Node::Node(Id currentNodeId,
+                               const std::vector<Id>& ways,
                                Id pathWayId,
                                Id targetNodeId)
   : currentNodeId(currentNodeId),
+    ways(ways),
     pathWayId(pathWayId),
     targetNodeId(targetNodeId),
     distance(0.0),
@@ -108,7 +128,12 @@ namespace osmscout {
 
     entry=descriptions.find(name);
 
-    return entry->second;
+    if (entry!=descriptions.end()) {
+      return entry->second;
+    }
+    else {
+      return NULL;
+    }
   }
 
   void RouteDescription::Node::SetDistance(double distance)
@@ -138,10 +163,12 @@ namespace osmscout {
   }
 
   void RouteDescription::AddNode(Id currentNodeId,
+                                 const std::vector<Id>& ways,
                                  Id pathWayId,
                                  Id targetNodeId)
   {
     nodes.push_back(Node(currentNodeId,
+                         ways,
                          pathWayId,
                          targetNodeId));
   }

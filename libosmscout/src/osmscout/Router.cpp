@@ -188,6 +188,9 @@ namespace osmscout {
         break;
       }
 
+      RouteDescription::NameDescriptionRef originDescription;
+      RouteDescription::NameDescriptionRef targetDescription;
+
       if (lastWay.Invalid() || lastWay->GetId()!=node->GetPathWayId()) {
         if (!database.GetWay(node->GetPathWayId(),nextWay)) {
           std::cerr << "Cannot retrieve way " << node->GetPathWayId() << std::endl;
@@ -199,7 +202,7 @@ namespace osmscout {
       }
 
       if (lastInterestingWay.Valid()) {
-        // We didn't change street name, so we do not create a new entry...
+        // We didn't change street name and ref, so we do not create a new entry...
         if (lastInterestingWay->GetName()==nextWay->GetName() &&
             lastInterestingWay->GetRefName()==nextWay->GetRefName()) {
           continue;
@@ -207,7 +210,7 @@ namespace osmscout {
 
         // We skip steps where street does not have any names and silently
         // assume they still have the old name (currently this happens for
-        // motorway links, that no have a name.
+        // motorway links that no have a name.
         if (nextWay->GetName().empty() &&
             nextWay->GetRefName().empty()) {
           continue;
@@ -223,11 +226,142 @@ namespace osmscout {
             nextWay->IsBridge()) {
           continue;
         }
+
+        originDescription=new RouteDescription::NameDescription(lastInterestingWay->GetName(),
+                                                                lastInterestingWay->GetRefName());
       }
 
+      targetDescription=new RouteDescription::NameDescription(nextWay->GetName(),
+                                                              nextWay->GetRefName());
+
+
       node->AddDescription(RouteDescription::WAY_NAME_CHANGED_DESC,
-                           new RouteDescription::NameChangedDescription());
+                           new RouteDescription::NameChangedDescription(originDescription,
+                                                                        targetDescription));
       lastInterestingWay=nextWay;
+    }
+
+    return true;
+  }
+
+  bool RoutePostprocessor::CrossingWaysPostprocessor::Process(const RoutingProfile& profile,
+                                                              RouteDescription& description,
+                                                              Database& database)
+  {
+    std::set<Id>                                wayIds;
+    std::vector<WayRef>                         ways;
+    std::map<Id,WayRef>                         wayMap;
+    std::list<RouteDescription::Node>::iterator lastNode;
+
+    lastNode=description.Nodes().end();
+    for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
+        node!=description.Nodes().end();
+        ++node) {
+      // The origin way
+      if (lastNode!=description.Nodes().end()) {
+        wayIds.insert(lastNode->GetPathWayId());
+      }
+
+      // The target way
+      if (node->GetPathWayId()!=0) {
+        wayIds.insert(node->GetPathWayId());
+      }
+
+      for (std::vector<Id>::const_iterator id=node->GetWays().begin();
+          id!=node->GetWays().end();
+          ++id) {
+        wayIds.insert(*id);
+      }
+
+      lastNode=node;
+    }
+
+    if (!database.GetWays(wayIds,ways)) {
+      std::cerr << "Cannot retrieve crossing ways" << std::endl;
+      return false;
+    }
+
+    for (std::vector<WayRef>::const_iterator w=ways.begin();
+        w!=ways.end();
+        ++w) {
+      WayRef way=*w;
+
+      wayMap[way->GetId()]=way;
+    }
+
+    lastNode=description.Nodes().end();
+    for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
+        node!=description.Nodes().end();
+        ++node) {
+      if (!node->GetWays().empty()) {
+        WayRef                            originWay;
+        WayRef                            targetWay;
+        RouteDescription::NameDescription *originDescription=NULL;
+        RouteDescription::NameDescription *targetDescription=NULL;
+
+        if (lastNode!=description.Nodes().end()) {
+          std::map<Id,WayRef>::const_iterator way=wayMap.find(lastNode->GetPathWayId());
+
+          if (way!=wayMap.end()) {
+            originWay=way->second;
+            originDescription=new RouteDescription::NameDescription(way->second->GetName(),
+                                                                    way->second->GetRefName());
+          }
+        }
+
+        if (node->GetPathWayId()!=0) {
+          std::map<Id,WayRef>::const_iterator way=wayMap.find(node->GetPathWayId());
+
+          if (way!=wayMap.end()) {
+            targetWay=way->second;
+            targetDescription=new RouteDescription::NameDescription(way->second->GetName(),
+                                                                    way->second->GetRefName());
+          }
+        }
+
+        RouteDescription::CrossingWaysDescriptionRef crossingDescription=new RouteDescription::CrossingWaysDescription(originDescription,
+                                                                                                                       targetDescription);
+
+        for (std::vector<Id>::const_iterator id=node->GetWays().begin();
+            id!=node->GetWays().end();
+            ++id) {
+          std::map<Id,WayRef>::const_iterator way=wayMap.find(*id);
+
+          if (way!=wayMap.end()) {
+            // Way is origin way and starts or end here so it is not an additional crossing way
+            if (originWay.Valid() &&
+                way->second->GetId()==originWay->GetId() &&
+                (way->second->nodes.front().GetId()==node->GetCurrentNodeId() ||
+                 way->second->nodes.back().GetId()==node->GetCurrentNodeId())) {
+              continue;
+            }
+
+            // Way is target way and starts or end here so it is not an additional crossing way
+            if (targetWay.Valid() &&
+                way->second->GetId()==targetWay->GetId() &&
+                (way->second->nodes.front().GetId()==node->GetCurrentNodeId() ||
+                 way->second->nodes.back().GetId()==node->GetCurrentNodeId())) {
+              continue;
+            }
+
+            // ways is origin way and way is target way so it is not an additional crossing way
+            if (originWay.Valid() &&
+                targetWay.Valid() &&
+                way->second->GetId()==originWay->GetId() &&
+                way->second->GetId()==targetWay->GetId()) {
+              continue;
+            }
+
+            crossingDescription->AddDescription(new RouteDescription::NameDescription(way->second->GetName(),
+                                                                                      way->second->GetRefName()));
+          }
+        }
+
+        node->AddDescription(RouteDescription::CROSSING_WAYS_DESC,
+                             crossingDescription);
+      }
+
+      lastNode=node;
     }
 
     return true;
@@ -267,6 +401,18 @@ namespace osmscout {
     // no code
   }
 
+  RouteData::RouteEntry::RouteEntry(Id currentNodeId,
+                                    const std::vector<Id>& ways,
+                                    Id pathWayId,
+                                    Id targetNodeId)
+   : currentNodeId(currentNodeId),
+     ways(ways),
+     pathWayId(pathWayId),
+     targetNodeId(targetNodeId)
+  {
+    // no code
+  }
+
   RouteData::RouteData()
   {
     // no code
@@ -282,6 +428,17 @@ namespace osmscout {
                            Id targetNodeId)
   {
     entries.push_back(RouteEntry(currentNodeId,
+                                 pathWayId,
+                                 targetNodeId));
+  }
+
+  void RouteData::AddEntry(Id currentNodeId,
+                           const std::vector<Id>& ways,
+                           Id pathWayId,
+                           Id targetNodeId)
+  {
+    entries.push_back(RouteEntry(currentNodeId,
+                                 ways,
                                  pathWayId,
                                  targetNodeId));
   }
@@ -487,128 +644,171 @@ namespace osmscout {
     }
   }
 
-  void Router::ResolveRNodesToList(const RNode& end,
+  bool Router::ResolveRNodesToList(const RNode& end,
                                    const std::map<Id,RNode>& closeMap,
                                    std::list<RNode>& nodes)
   {
-    RNode current=end;
+    std::map<Id,RNode>::const_iterator current=closeMap.find(end.nodeId);
+    RouteNodeRef                       routeNode;
 
-    while (current.prev!=0) {
-      std::map<Id,RNode>::const_iterator prev=closeMap.find(current.prev);
+    while (current->second.prev!=0) {
+      std::map<Id,RNode>::const_iterator prev=closeMap.find(current->second.prev);
 
-      nodes.push_back(current);
+      nodes.push_back(current->second);
 
-      current=prev->second;
+      current=prev;
     }
-    nodes.push_back(current);
+
+    nodes.push_back(current->second);
 
     std::reverse(nodes.begin(),nodes.end());
+
+    return true;
   }
 
-  void Router::ResolveRNodesToRouteData(const std::list<RNode>& nodes,
+  bool Router::ResolveRNodesToRouteData(const std::list<RNode>& nodes,
                                         RouteData& route)
   {
-    for (std::list<RNode>::const_iterator node=nodes.begin();
-        node!=nodes.end();
-        node++) {
-      std::list<RNode>::const_iterator nextNode=node;
+    for (std::list<RNode>::const_iterator n=nodes.begin();
+        n!=nodes.end();
+        n++) {
+      std::list<RNode>::const_iterator nn=n;
 
-      nextNode++;
+      nn++;
 
-      if (nextNode!=nodes.end()) {
-        WayRef way;
-
-        wayDataFile.Get(nextNode->wayId,way);
-
-        size_t start=0;
-        while (start<way->nodes.size() &&
-            way->nodes[start].GetId()!=node->nodeId) {
-          start++;
-        }
-
-        size_t end=0;
-        while (end<way->nodes.size() &&
-            way->nodes[end].GetId()!=nextNode->nodeId) {
-          end++;
-        }
-
-        if (start<way->nodes.size() &&
-            end<way->nodes.size()) {
-          if (start<end) {
-            route.AddEntry(node->nodeId,
-                           way->GetId(),
-                           way->nodes[start+1].GetId());
-
-            for (size_t i=start+1; i<end-1; i++) {
-              route.AddEntry(way->nodes[i].GetId(),
-                             way->GetId(),
-                             way->nodes[i+1].GetId());
-            }
-
-            route.AddEntry(way->nodes[end-1].GetId(),
-                           way->GetId(),
-                           nextNode->nodeId);
-          }
-          else if (way->IsOneway()) {
-            size_t pos=start+1;
-            size_t next;
-
-            if (pos>=way->nodes.size()) {
-              pos=0;
-            }
-
-            next=pos+1;
-            if (next>=way->nodes.size()) {
-              next=0;
-            }
-
-            route.AddEntry(node->nodeId,
-                           way->GetId(),
-                           way->nodes[pos].GetId());
-
-            while (way->nodes[next].GetId()!=way->nodes[end].GetId()) {
-              route.AddEntry(way->nodes[pos].GetId(),
-                             way->GetId(),
-                             way->nodes[next].GetId());
-
-              pos++;
-              if (pos>=way->nodes.size()) {
-                pos=0;
-              }
-
-              next=pos+1;
-              if (next>=way->nodes.size()) {
-                next=0;
-              }
-            }
-
-            route.AddEntry(way->nodes[pos].GetId(),
-                           way->GetId(),
-                           nextNode->nodeId);
-          }
-          else {
-            route.AddEntry(node->nodeId,
-                           way->GetId(),
-                           way->nodes[start-1].GetId());
-
-            for (int i=start-1; i>(int)end+1; i--) {
-              route.AddEntry(way->nodes[i].GetId(),
-                             way->GetId(),
-                             way->nodes[i-1].GetId());
-            }
-
-            route.AddEntry(way->nodes[end+1].GetId(),
-                           way->GetId(),
-                           nextNode->nodeId);
-          }
-        }
-      }
-      else {
-        route.AddEntry(node->nodeId,
+      // We do not have any follower node, push the final entry (leading nowhere)
+      // to the route
+      if (nn==nodes.end()) {
+        route.AddEntry(n->nodeId,
                        0,
                        0);
+        continue;
+      }
+
+      RouteNodeRef node;
+      RouteNodeRef nextNode;
+      WayRef       way;
+      size_t       pathIndex=0;
+
+      // TODO: Optimize node=nextNode of the last step!
+      if (!routeNodeDataFile.Get(n->nodeId,node)) {
+        return false;
+      }
+
+      if (!routeNodeDataFile.Get(nn->nodeId,nextNode)) {
+        return false;
+      }
+
+      // Find the path with need to go to reach the next route node
+      for (size_t i=0; i<node->paths.size(); i++) {
+        if (node->ways[node->paths[i].wayIndex]==n->wayId) {
+          pathIndex=i;
+          break;
+        }
+      }
+
+      // Load the way to get all nodes between current route node and the next route node
+      if (!wayDataFile.Get(node->ways[node->paths[pathIndex].wayIndex],way)) {
+        std::cerr << "Cannot load way " << node->ways[node->paths[pathIndex].wayIndex] << std::endl;
+        return false;
+      }
+
+      size_t start=0;
+      while (start<way->nodes.size() &&
+          way->nodes[start].GetId()!=node->id) {
+        start++;
+      }
+
+      size_t end=0;
+      while (end<way->nodes.size() &&
+          way->nodes[end].GetId()!=nextNode->id) {
+        end++;
+      }
+
+      if (start>=way->nodes.size() ||
+          end>=way->nodes.size()) {
+        continue;
+      }
+
+      if (std::max(start,end)-std::min(start,end)==1) {
+        route.AddEntry(way->nodes[start].GetId(),
+                       node->ways,
+                       way->GetId(),
+                       nextNode->id);
+      }
+      else if (start<end) {
+        route.AddEntry(way->nodes[start].GetId(),
+                       node->ways,
+                       way->GetId(),
+                       way->nodes[start+1].GetId());
+
+        for (size_t i=start+1; i<end-1; i++) {
+          route.AddEntry(way->nodes[i].GetId(),
+                         way->GetId(),
+                         way->nodes[i+1].GetId());
+        }
+
+        route.AddEntry(way->nodes[end-1].GetId(),
+                       way->GetId(),
+                       nextNode->id);
+      }
+      else if (way->IsOneway()) {
+        size_t pos=start+1;
+        size_t next;
+
+        if (pos>=way->nodes.size()) {
+          pos=0;
+        }
+
+        next=pos+1;
+        if (next>=way->nodes.size()) {
+          next=0;
+        }
+
+        route.AddEntry(node->id,
+                       node->ways,
+                       way->GetId(),
+                       way->nodes[pos].GetId());
+
+        while (way->nodes[next].GetId()!=way->nodes[end].GetId()) {
+          route.AddEntry(way->nodes[pos].GetId(),
+                         way->GetId(),
+                         way->nodes[next].GetId());
+
+          pos++;
+          if (pos>=way->nodes.size()) {
+            pos=0;
+          }
+
+          next=pos+1;
+          if (next>=way->nodes.size()) {
+            next=0;
+          }
+        }
+
+        route.AddEntry(way->nodes[pos].GetId(),
+                       way->GetId(),
+                       nextNode->id);
+      }
+      else {
+        route.AddEntry(way->nodes[start].GetId(),
+                       node->ways,
+                       way->GetId(),
+                       way->nodes[start-1].GetId());
+
+        for (int i=start-1; i>(int)end+1; i--) {
+          route.AddEntry(way->nodes[i].GetId(),
+                         way->GetId(),
+                         way->nodes[i-1].GetId());
+        }
+
+        route.AddEntry(way->nodes[end+1].GetId(),
+                       way->GetId(),
+                       nextNode->id);
       }
     }
+
+    return true;
   }
 
   bool Router::CalculateRoute(const RoutingProfile& profile,
@@ -734,13 +934,12 @@ namespace osmscout {
 
       current=*openList.begin();
 
-      if (!routeNodeDataFile.Get(current.nodeId,currentRouteNode) || !currentRouteNode.Valid()) {
+      if (!routeNodeDataFile.Get(current.nodeId,currentRouteNode) ||
+          !currentRouteNode.Valid()) {
         std::cerr << "Cannot load route node with id " << current.nodeId << std::endl;
         nodesIgnoredCount++;
         return false;
       }
-
-      //std::cout << "Visiting route node " << currentRouteNode->id  << std::endl;
 
       nodesLoadedCount++;
 
@@ -779,12 +978,12 @@ namespace osmscout {
               WayRef targetWay;
 
               wayDataFile.Get(current.wayId,sourceWay);
-              wayDataFile.Get(currentRouteNode->paths[i].wayId,targetWay);
+              wayDataFile.Get(currentRouteNode->ways[currentRouteNode->paths[i].wayIndex],targetWay);
 
               std::cout << "  Node " <<  currentRouteNode->id << ": ";
               std::cout << "Cannot turn from " << current.wayId << " " << sourceWay->GetName() << " (" << sourceWay->GetRefName()  << ")";
               std::cout << " into ";
-              std::cout << currentRouteNode->paths[i].wayId << " " << targetWay->GetName() << " (" << targetWay->GetRefName()  << ")" << std::endl;
+              std::cout << currentRouteNode->ways[currentRouteNode->paths[i].wayIndex] << " " << targetWay->GetName() << " (" << targetWay->GetRefName()  << ")" << std::endl;
 #endif
               canTurnedInto=false;
               break;
@@ -843,7 +1042,7 @@ namespace osmscout {
         // update the existing entry
         if (openEntry!=openMap.end()) {
 #if defined(DEBUG_ROUTING)
-          std::cout << "  Updating route node " << node.nodeId << " via way " << node.wayId << std::endl;
+          std::cout << "  Updating route " << node.nodeId << " via way " << node.wayId << " " << currentCost << " " << estimateCost << " " << overallCost << std::endl;
 #endif
 
           openList.erase(openEntry->second);
@@ -854,7 +1053,7 @@ namespace osmscout {
         }
         else {
 #if defined(DEBUG_ROUTING)
-          std::cout << "  Inserting route node " << node.nodeId <<  " via way " << node.wayId << std::endl;
+          std::cout << "  Inserting route " << node.nodeId <<  " via way " << node.wayId  << " " << currentCost << " " << estimateCost << " " << overallCost << std::endl;
 #endif
 
           std::pair<RNodeRef,bool> result=openList.insert(node);
@@ -885,12 +1084,18 @@ namespace osmscout {
 
     std::list<RNode> nodes;
 
-    ResolveRNodesToList(current,
-                        closeMap,
-                        nodes);
+    if (!ResolveRNodesToList(current,
+                             closeMap,
+                             nodes)) {
+      std::cerr << "Cannot resolve route nodes from routed path" << std::endl;
+      return false;
+    }
 
-    ResolveRNodesToRouteData(nodes,
-                             route);
+    if (!ResolveRNodesToRouteData(nodes,
+                                  route)) {
+      std::cerr << "Cannot convert routing result to route data" << std::endl;
+      return false;
+    }
 
     return true;
   }
@@ -992,6 +1197,7 @@ namespace osmscout {
          iter!=data.Entries().end();
          ++iter) {
       description.AddNode(iter->GetCurrentNodeId(),
+                          iter->GetWays(),
                           iter->GetPathWayId(),
                           iter->GetTargetNodeId());
     }
