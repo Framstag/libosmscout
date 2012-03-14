@@ -341,7 +341,16 @@ namespace osmscout {
                              const std::map<Id,RNode>& closeMap,
                              std::list<RNode>& nodes);
     bool ResolveRNodesToRouteData(const std::list<RNode>& nodes,
+                                  Id startWayId,
+                                  Id startNodeId,
+                                  Id targetWayId,
+                                  Id targetNodeId,
                                   RouteData& route);
+    bool AddNodes(RouteData& route,
+                  const std::vector<Id>& startCrossingWaysIds,
+                  Id startNodeId,
+                  Id wayId,
+                  Id targetNodeId);
 
 
   public:

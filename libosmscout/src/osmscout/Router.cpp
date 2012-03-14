@@ -666,96 +666,83 @@ namespace osmscout {
     return true;
   }
 
-  bool Router::ResolveRNodesToRouteData(const std::list<RNode>& nodes,
-                                        RouteData& route)
+  bool Router::AddNodes(RouteData& route,
+                        const std::vector<Id>& startCrossingWaysIds,
+                        Id startNodeId,
+                        Id wayId,
+                        Id targetNodeId)
   {
-    for (std::list<RNode>::const_iterator n=nodes.begin();
-        n!=nodes.end();
-        n++) {
-      std::list<RNode>::const_iterator nn=n;
+    WayRef way;
 
-      nn++;
+    // Load the way to get all nodes between current route node and the next route node
+    if (!wayDataFile.Get(wayId,way)) {
+      std::cerr << "Cannot load way " << wayId << std::endl;
+      return false;
+    }
 
-      // We do not have any follower node, push the final entry (leading nowhere)
-      // to the route
-      if (nn==nodes.end()) {
-        route.AddEntry(n->nodeId,
-                       0,
-                       0);
-        continue;
-      }
+    size_t start=0;
+    while (start<way->nodes.size() &&
+        way->nodes[start].GetId()!=startNodeId) {
+      start++;
+    }
 
-      RouteNodeRef node;
-      RouteNodeRef nextNode;
-      WayRef       way;
-      size_t       pathIndex=0;
+    size_t end=0;
+    while (end<way->nodes.size() &&
+        way->nodes[end].GetId()!=targetNodeId) {
+      end++;
+    }
 
-      // TODO: Optimize node=nextNode of the last step!
-      if (!routeNodeDataFile.Get(n->nodeId,node)) {
-        return false;
-      }
+    if (start>=way->nodes.size() ||
+        end>=way->nodes.size()) {
+      return false;
+    }
 
-      if (!routeNodeDataFile.Get(nn->nodeId,nextNode)) {
-        return false;
-      }
+    if (std::max(start,end)-std::min(start,end)==1) {
+      route.AddEntry(way->nodes[start].GetId(),
+                     startCrossingWaysIds,
+                     way->GetId(),
+                     targetNodeId);
+    }
+    else if (start<end) {
+      route.AddEntry(way->nodes[start].GetId(),
+                     startCrossingWaysIds,
+                     way->GetId(),
+                     way->nodes[start+1].GetId());
 
-      // Find the path with need to go to reach the next route node
-      for (size_t i=0; i<node->paths.size(); i++) {
-        if (node->ways[node->paths[i].wayIndex]==n->wayId) {
-          pathIndex=i;
-          break;
-        }
-      }
-
-      // Load the way to get all nodes between current route node and the next route node
-      if (!wayDataFile.Get(node->ways[node->paths[pathIndex].wayIndex],way)) {
-        std::cerr << "Cannot load way " << node->ways[node->paths[pathIndex].wayIndex] << std::endl;
-        return false;
-      }
-
-      size_t start=0;
-      while (start<way->nodes.size() &&
-          way->nodes[start].GetId()!=node->id) {
-        start++;
-      }
-
-      size_t end=0;
-      while (end<way->nodes.size() &&
-          way->nodes[end].GetId()!=nextNode->id) {
-        end++;
-      }
-
-      if (start>=way->nodes.size() ||
-          end>=way->nodes.size()) {
-        continue;
-      }
-
-      if (std::max(start,end)-std::min(start,end)==1) {
-        route.AddEntry(way->nodes[start].GetId(),
-                       node->ways,
+      for (size_t i=start+1; i<end-1; i++) {
+        route.AddEntry(way->nodes[i].GetId(),
                        way->GetId(),
-                       nextNode->id);
+                       way->nodes[i+1].GetId());
       }
-      else if (start<end) {
-        route.AddEntry(way->nodes[start].GetId(),
-                       node->ways,
-                       way->GetId(),
-                       way->nodes[start+1].GetId());
 
-        for (size_t i=start+1; i<end-1; i++) {
-          route.AddEntry(way->nodes[i].GetId(),
-                         way->GetId(),
-                         way->nodes[i+1].GetId());
-        }
+      route.AddEntry(way->nodes[end-1].GetId(),
+                     way->GetId(),
+                     targetNodeId);
+    }
+    else if (way->IsOneway()) {
+      size_t pos=start+1;
+      size_t next;
 
-        route.AddEntry(way->nodes[end-1].GetId(),
-                       way->GetId(),
-                       nextNode->id);
+      if (pos>=way->nodes.size()) {
+        pos=0;
       }
-      else if (way->IsOneway()) {
-        size_t pos=start+1;
-        size_t next;
 
+      next=pos+1;
+      if (next>=way->nodes.size()) {
+        next=0;
+      }
+
+      route.AddEntry(startNodeId,
+                     startCrossingWaysIds,
+                     way->GetId(),
+                     way->nodes[pos].GetId());
+
+      while (way->nodes[next].GetId()!=way->nodes[end].GetId()) {
+        route.AddEntry(way->nodes[pos].GetId(),
+                       way->GetId(),
+                       way->nodes[next].GetId());
+
+        pos++;
         if (pos>=way->nodes.size()) {
           pos=0;
         }
@@ -764,48 +751,122 @@ namespace osmscout {
         if (next>=way->nodes.size()) {
           next=0;
         }
+      }
 
-        route.AddEntry(node->id,
-                       node->ways,
+      route.AddEntry(way->nodes[pos].GetId(),
+                     way->GetId(),
+                     targetNodeId);
+    }
+    else {
+      route.AddEntry(way->nodes[start].GetId(),
+                     startCrossingWaysIds,
+                     way->GetId(),
+                     way->nodes[start-1].GetId());
+
+      for (int i=start-1; i>(int)end+1; i--) {
+        route.AddEntry(way->nodes[i].GetId(),
                        way->GetId(),
-                       way->nodes[pos].GetId());
+                       way->nodes[i-1].GetId());
+      }
 
-        while (way->nodes[next].GetId()!=way->nodes[end].GetId()) {
-          route.AddEntry(way->nodes[pos].GetId(),
-                         way->GetId(),
-                         way->nodes[next].GetId());
+      route.AddEntry(way->nodes[end+1].GetId(),
+                     way->GetId(),
+                     targetNodeId);
+    }
 
-          pos++;
-          if (pos>=way->nodes.size()) {
-            pos=0;
-          }
+    return true;
+  }
 
-          next=pos+1;
-          if (next>=way->nodes.size()) {
-            next=0;
-          }
+  bool Router::ResolveRNodesToRouteData(const std::list<RNode>& nodes,
+                                        Id startWayId,
+                                        Id startNodeId,
+                                        Id targetWayId,
+                                        Id targetNodeId,
+                                        RouteData& route)
+  {
+    if (nodes.empty()) {
+      AddNodes(route,
+               std::vector<Id>(),
+               startNodeId,
+               startWayId,
+               targetNodeId);
+
+      route.AddEntry(targetNodeId,
+                     0,
+                     0);
+      return true;
+    }
+
+    if (startNodeId!=nodes.front().nodeId) {
+      // Start node to initial route node
+      AddNodes(route,
+               std::vector<Id>(),
+               startNodeId,
+               startWayId,
+               nodes.front().nodeId);
+    }
+
+    for (std::list<RNode>::const_iterator n=nodes.begin();
+        n!=nodes.end();
+        n++) {
+      std::list<RNode>::const_iterator nn=n;
+
+      nn++;
+
+      RouteNodeRef node;
+
+      // TODO: Optimize node=nextNode of the last step!
+      if (!routeNodeDataFile.Get(n->nodeId,node)) {
+        std::cerr << "Cannot load route node with id " << n->nodeId << std::endl;
+        return false;
+      }
+
+
+      // We do not have any follower node, push the final entry (leading nowhere)
+      // to the route
+      if (nn==nodes.end()) {
+        if (n->nodeId!=targetNodeId) {
+          AddNodes(route,
+                   node->ways,
+                   n->nodeId,
+                   targetWayId,
+                   targetNodeId);
+
+          route.AddEntry(targetNodeId,
+                         0,
+                         0);
+        }
+        else {
+          route.AddEntry(n->nodeId,
+                         0,
+                         0);
         }
 
-        route.AddEntry(way->nodes[pos].GetId(),
-                       way->GetId(),
-                       nextNode->id);
+        break;
       }
-      else {
-        route.AddEntry(way->nodes[start].GetId(),
-                       node->ways,
-                       way->GetId(),
-                       way->nodes[start-1].GetId());
 
-        for (int i=start-1; i>(int)end+1; i--) {
-          route.AddEntry(way->nodes[i].GetId(),
-                         way->GetId(),
-                         way->nodes[i-1].GetId());
+      RouteNodeRef nextNode;
+      WayRef       way;
+      size_t       pathIndex=0;
+
+      if (!routeNodeDataFile.Get(nn->nodeId,nextNode)) {
+        std::cerr << "Cannot load route node with id " << nn->nodeId << std::endl;
+        return false;
+      }
+
+      // Find the path with need to go to reach the next route node
+      for (size_t i=0; i<node->paths.size(); i++) {
+        if (node->ways[node->paths[i].wayIndex]==nn->wayId) {
+          pathIndex=i;
+          break;
         }
-
-        route.AddEntry(way->nodes[end+1].GetId(),
-                       way->GetId(),
-                       nextNode->id);
       }
+
+      AddNodes(route,
+               node->ways,
+               node->id,
+               node->ways[node->paths[pathIndex].wayIndex],
+               nextNode->id);
     }
 
     return true;
@@ -1092,6 +1153,8 @@ namespace osmscout {
     }
 
     if (!ResolveRNodesToRouteData(nodes,
+                                  startWayId,startNodeId,
+                                  targetWayId,targetNodeId,
                                   route)) {
       std::cerr << "Cannot convert routing result to route data" << std::endl;
       return false;
@@ -1171,6 +1234,7 @@ namespace osmscout {
         if (w.Invalid() ||
             w->GetId()!=iter->GetPathWayId()) {
           if (!wayDataFile.Get(iter->GetPathWayId(),w)) {
+            std::cerr << "Cannot load way with id " << iter->GetPathWayId() << std::endl;
             return false;
           }
         }

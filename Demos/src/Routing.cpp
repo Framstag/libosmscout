@@ -38,10 +38,10 @@
   time src/Routing ../TravelJinni/ 14332719 138190834 10414977 283372120
 
   Medium:
-  time src/Routing ../TravelJinni/ 33879912 388178746 38363871 453298626
+  time src/Routing ../TravelJinni/ 33879936 388178882 38363871 453298626
 
   Short:
-  time src/Routing ../TravelJinni/ 33879912 388178746 24922615 270813911
+  time src/Routing ../TravelJinni/ 33879936 388178882 24922615 270813923
 */
 
 static std::string TimeToString(double time)
@@ -381,6 +381,7 @@ int main(int argc, char* argv[])
     std::cerr << "Error during route conversion" << std::endl;
   }
 
+  std::cout << points.size() << " point(s)" << std::endl;
   for (std::list<osmscout::Point>::const_iterator point=points.begin();
       point!=points.end();
       ++point) {
@@ -488,11 +489,11 @@ int main(int argc, char* argv[])
       std::cout << "Crossing";
 
       if (originDescription.Valid()) {
-        std::cout << " from '" << NameDescriptionToString(originDescription);
+        std::cout << " from '" << NameDescriptionToString(originDescription) << "'";
       }
 
       if (targetDescription.Valid()) {
-        std::cout << "' to '" << NameDescriptionToString(targetDescription);
+        std::cout << " to '" << NameDescriptionToString(targetDescription) << "'";
       }
 
       std::cout << " with";
@@ -510,13 +511,13 @@ int main(int argc, char* argv[])
     if (startDescription.Valid()) {
       NextLine(lineCount);
 
-      std::cout << "Start at \"" << startDescription->GetDescription() << "\"" << std::endl;
+      std::cout << "Start at '" << startDescription->GetDescription() << "'" << std::endl;
     }
 
     if (targetDescription.Valid()) {
       NextLine(lineCount);
 
-      std::cout << "Target reached \"" << targetDescription->GetDescription() << "\"" << std::endl;
+      std::cout << "Target reached '" << targetDescription->GetDescription() << "'" << std::endl;
     }
 
     if (crossingWaysDescription.Valid() &&
@@ -562,7 +563,7 @@ int main(int argc, char* argv[])
           if (name!=names.begin()) {
             std::cout << ", ";
           }
-          std::cout << *name;
+          std::cout << "'" << *name << "'";
         }
 
         std::cout << std::endl;
@@ -570,17 +571,17 @@ int main(int argc, char* argv[])
 
       NextLine(lineCount);
 
-      std::cout << "Turn into way ";
+      std::cout << "Turn into way '";
       std::cout << NameDescriptionToString(targetDescription);
-      std::cout << std::endl;
+      std::cout << "'" << std::endl;
     }
     else if (nameChangedDescription.Valid() &&
              IsRelevantNameChange(nameChangedDescription)) {
       NextLine(lineCount);
 
-      std::cout << "Way changes name to ";
+      std::cout << "Way changes name to '";
       std::cout << NameDescriptionToString(nameChangedDescription->GetTargetDesccription());
-      std::cout << std::endl;
+      std::cout << "'" << std::endl;
     }
 
     if (lineCount==0) {
