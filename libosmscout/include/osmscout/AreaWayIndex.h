@@ -66,23 +66,23 @@ namespace osmscout {
 
   private:
     std::string           filepart;       //! name of the data file
-    std::string           datafilename;   //! Fullpath and name of the data file
+    std::string           datafilename;   //! Full path and name of the data file
     mutable FileScanner   scanner;        //! Scanner instance for reading this file
 
     std::vector<TypeData> wayTypeData;
     std::vector<TypeData> relTypeData;
 
   private:
-  bool GetOffsets(TypeId type,
-                  const std::vector<TypeData>& typeData,
-                  double minlon,
-                  double minlat,
-                  double maxlon,
-                  double maxlat,
-                  size_t maxWayCount,
-                  std::vector<FileOffset>& offsets,
-                  size_t currentSize,
-                  bool& sizeExceeded) const;
+    bool GetOffsets(TypeId type,
+                    const std::vector<TypeData>& typeData,
+                    double minlon,
+                    double minlat,
+                    double maxlon,
+                    double maxlat,
+                    size_t maxWayCount,
+                    std::vector<FileOffset>& offsets,
+                    size_t currentSize,
+                    bool& sizeExceeded) const;
 
   public:
     AreaWayIndex();

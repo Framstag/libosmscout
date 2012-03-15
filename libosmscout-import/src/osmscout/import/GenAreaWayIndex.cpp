@@ -88,7 +88,7 @@ namespace osmscout {
     // Scanning distribution
     //
 
-    progress.SetAction("Scannning level distribution of way types");
+    progress.SetAction("Scanning level distribution of way types");
 
     for (size_t i=0; i<typeConfig.GetTypes().size(); i++) {
       if (typeConfig.GetTypeInfo(i).CanBeWay() &&
@@ -146,7 +146,7 @@ namespace osmscout {
           way.GetBoundingBox(minLon,maxLon,minLat,maxLat);
 
           //
-          // Calculate minumum and maximum tile ids that are covered
+          // Calculate minimum and maximum tile ids that are covered
           // by the way
           // Renormated coordinate space (everything is >=0)
           //
@@ -225,7 +225,7 @@ namespace osmscout {
       level++;
     }
 
-    progress.SetAction("Scannning level distribution of relation types");
+    progress.SetAction("Scanning level distribution of relation types");
 
     for (size_t i=0; i<typeConfig.GetTypes().size(); i++) {
       if (typeConfig.GetTypeInfo(i).CanBeRelation() &&
@@ -492,7 +492,7 @@ namespace osmscout {
           way.GetBoundingBox(minLon,maxLon,minLat,maxLat);
 
           //
-          // Calculate minum and maximum tile ids that are covered
+          // Calculate minimum and maximum tile ids that are covered
           // by the way
           // Renormated coordinate space (everything is >=0)
           //

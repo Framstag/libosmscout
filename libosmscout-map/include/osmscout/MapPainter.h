@@ -64,6 +64,7 @@ namespace osmscout {
     bool                   optimizeAreaNodes; //! Try to reduce the number of nodes for an area
 
     bool                   drawFadings;       //! Draw label fadings (default: true)
+    bool                   drawWaysWithFixedWidth; //! Draw ways using the size of the style sheet, if if the way has a width explicitely given
 
 
     bool                   debugPerformance;  //! Print out some performance information
@@ -91,6 +92,7 @@ namespace osmscout {
     void SetOptimizeAreaNodes(bool optimize);
 
     void SetDrawFadings(bool drawFadings);
+    void SetDrawWaysWithFixedWidth(bool drawWaysWithFixedWidth);
 
     void SetDebugPerformance(bool debug);
 
@@ -149,6 +151,11 @@ namespace osmscout {
     inline bool GetDrawFadings() const
     {
       return drawFadings;
+    }
+
+    inline bool GetDrawWaysWithFixedWidth() const
+    {
+      return drawWaysWithFixedWidth;
     }
 
     inline bool IsDebugPerformance() const
@@ -303,6 +310,10 @@ namespace osmscout {
     size_t areasSegments;
     size_t areasDrawn;
     size_t areasLabelDrawn;
+
+    size_t nodesDrawn;
+
+    size_t labelsDrawn;
     //@}
 
   private:
@@ -525,6 +536,16 @@ namespace osmscout {
                            const Projection& projection,
                            const MapParameter& parameter,
                            const MapData& data);
+
+    /**
+      Med level drawing routines that are already implemented by the base class, but which can be overwritten
+      by the driver if necessary.
+     */
+    //@{
+    virtual void DrawNode(const StyleConfig& styleConfig,
+                          const Projection& projection,
+                          const MapParameter& parameter,
+                          const NodeRef& node);
 
     /**
       Draw the outline of the way using LineStyle for the given type, the given

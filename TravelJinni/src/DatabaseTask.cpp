@@ -134,6 +134,9 @@ void DatabaseTask::Run()
 
         drawParameter.SetOptimizeWayNodes(optimizeWays->Get());
         drawParameter.SetOptimizeAreaNodes(optimizeAreas->Get());
+
+        drawParameter.SetDrawWaysWithFixedWidth(false);
+
         drawParameter.SetDebugPerformance(true);
 
         if (!dpi->IsNull()) {

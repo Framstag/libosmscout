@@ -43,6 +43,7 @@ namespace osmscout {
     optimizeWayNodes(false),
     optimizeAreaNodes(false),
     drawFadings(true),
+    drawWaysWithFixedWidth(false),
     debugPerformance(false)
   {
     // no code
@@ -106,6 +107,11 @@ namespace osmscout {
   void MapParameter::SetDrawFadings(bool drawFadings)
   {
     this->drawFadings=drawFadings;
+  }
+
+  void MapParameter::SetDrawWaysWithFixedWidth(bool drawWaysWithFixedWidth)
+  {
+    this->drawWaysWithFixedWidth=drawWaysWithFixedWidth;
   }
 
   void MapParameter::SetDebugPerformance(bool debug)
@@ -677,91 +683,10 @@ namespace osmscout {
          ++n) {
       const NodeRef& node=*n;
 
-      const LabelStyle  *labelStyle=styleConfig.GetNodeLabelStyle(node->GetType());
-      IconStyle         *iconStyle=styleConfig.GetNodeIconStyle(node->GetType());
-      const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetNodeSymbolStyle(node->GetType());
-
-      bool hasLabel=labelStyle!=NULL &&
-                    projection.GetMagnification()>=labelStyle->GetMinMag() &&
-                    projection.GetMagnification()<=labelStyle->GetMaxMag();
-
-      bool hasSymbol=symbolStyle!=NULL &&
-                     projection.GetMagnification()>=symbolStyle->GetMinMag();
-
-      bool hasIcon=iconStyle!=NULL &&
-                   projection.GetMagnification()>=iconStyle->GetMinMag();
-
-      std::string label;
-
-      //nodesDrawnCount++;
-
-      if (hasLabel) {
-        for (size_t i=0; i<node->GetTagCount(); i++) {
-          // TODO: We should make sure we prefer one over the other
-          if (node->GetTagKey(i)==styleConfig.GetTypeConfig()->tagName) {
-            label=node->GetTagValue(i);
-            break;
-          }
-          else if (node->GetTagKey(i)==styleConfig.GetTypeConfig()->tagRef)  {
-            label=node->GetTagValue(i);
-          }
-          else if (node->GetTagKey(i)==styleConfig.GetTypeConfig()->tagHouseNr)  {
-            label=node->GetTagValue(i);
-          }
-        }
-
-        hasLabel=!label.empty();
-      }
-
-      if (hasIcon) {
-        hasIcon=HasIcon(styleConfig,
-                        parameter,
-                        *iconStyle);
-      }
-
-      if (!hasSymbol && !hasLabel && !hasIcon) {
-        continue;
-      }
-
-      double x,y;
-
-      Transform(projection,
-                parameter,
-                node->GetLon(),
-                node->GetLat(),
-                x,y);
-
-      if (hasLabel) {
-        if (hasSymbol) {
-          RegisterPointLabel(projection,
-                             parameter,
-                             *labelStyle,
-                             label,
-                             x,y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
-        }
-        else if (hasIcon) {
-          RegisterPointLabel(projection,
-                             parameter,
-                             *labelStyle,
-                             label,
-                             x,y+14+5); // TODO: Better layout to real size of icon
-        }
-        else {
-          RegisterPointLabel(projection,
-                             parameter,
-                             *labelStyle,
-                             label,
-                             x,y);
-        }
-      }
-
-      if (hasIcon) {
-        DrawIcon(iconStyle,x,y);
-      }
-
-      if (hasSymbol) {
-        DrawSymbol(symbolStyle,x,y);
-      }
+      DrawNode(styleConfig,
+               projection,
+               parameter,
+               node);
     }
   }
 
@@ -967,6 +892,100 @@ namespace osmscout {
         }
       }
     }
+  }
+
+  void MapPainter::DrawNode(const StyleConfig& styleConfig,
+                            const Projection& projection,
+                            const MapParameter& parameter,
+                            const NodeRef& node)
+  {
+    const LabelStyle  *labelStyle=styleConfig.GetNodeLabelStyle(node->GetType());
+    IconStyle         *iconStyle=styleConfig.GetNodeIconStyle(node->GetType());
+    const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetNodeSymbolStyle(node->GetType());
+
+    bool hasLabel=labelStyle!=NULL &&
+                  projection.GetMagnification()>=labelStyle->GetMinMag() &&
+                  projection.GetMagnification()<=labelStyle->GetMaxMag();
+
+    bool hasSymbol=symbolStyle!=NULL &&
+                   projection.GetMagnification()>=symbolStyle->GetMinMag();
+
+    bool hasIcon=iconStyle!=NULL &&
+                 projection.GetMagnification()>=iconStyle->GetMinMag();
+
+    std::string label;
+
+    //nodesDrawnCount++;
+
+    if (hasLabel) {
+      for (size_t i=0; i<node->GetTagCount(); i++) {
+        // TODO: We should make sure we prefer one over the other
+        if (node->GetTagKey(i)==styleConfig.GetTypeConfig()->tagName) {
+          label=node->GetTagValue(i);
+          break;
+        }
+        else if (node->GetTagKey(i)==styleConfig.GetTypeConfig()->tagRef)  {
+          label=node->GetTagValue(i);
+        }
+        else if (node->GetTagKey(i)==styleConfig.GetTypeConfig()->tagHouseNr)  {
+          label=node->GetTagValue(i);
+        }
+      }
+
+      hasLabel=!label.empty();
+    }
+
+    if (hasIcon) {
+      hasIcon=HasIcon(styleConfig,
+                      parameter,
+                      *iconStyle);
+    }
+
+    if (!hasSymbol && !hasLabel && !hasIcon) {
+      return;
+    }
+
+    double x,y;
+
+    Transform(projection,
+              parameter,
+              node->GetLon(),
+              node->GetLat(),
+              x,y);
+
+    if (hasLabel) {
+      if (hasSymbol) {
+        RegisterPointLabel(projection,
+                           parameter,
+                           *labelStyle,
+                           label,
+                           x,y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
+      }
+      else if (hasIcon) {
+        RegisterPointLabel(projection,
+                           parameter,
+                           *labelStyle,
+                           label,
+                           x,y+14+5); // TODO: Better layout to real size of icon
+      }
+      else {
+        RegisterPointLabel(projection,
+                           parameter,
+                           *labelStyle,
+                           label,
+                           x,y);
+      }
+    }
+
+    if (hasIcon) {
+      DrawIcon(iconStyle,x,y);
+    }
+
+    if (hasSymbol) {
+      DrawSymbol(symbolStyle,x,y);
+    }
+
+    nodesDrawn++;
   }
 
   void MapPainter::DrawWayOutline(const StyleConfig& styleConfig,
@@ -1225,67 +1244,10 @@ namespace osmscout {
          ++n) {
       const NodeRef& node=*n;
 
-      if (!projection.GeoIsIn(node->GetLon(),node->GetLat())) {
-        continue;
-      }
-
-      double x,y;
-
-      projection.GeoToPixel(node->GetLon(),node->GetLat(),
-                            x,y);
-
-      const SymbolStyle *symbolStyle=styleConfig.GetNodeSymbolStyle(node->GetType());
-
-      if (symbolStyle!=NULL &&
-          projection.GetMagnification()>=symbolStyle->GetMinMag()) {
-        DrawSymbol(symbolStyle,x,y);
-      }
-
-      for (size_t i=0; i<node->GetTagCount(); i++) {
-        // TODO: We should make sure we prefer one over the other
-        if (node->GetTagKey(i)==styleConfig.GetTypeConfig()->tagName) {
-          const LabelStyle *style=styleConfig.GetNodeLabelStyle(node->GetType());
-
-          if (style==NULL ||
-              projection.GetMagnification()<style->GetMinMag() ||
-              projection.GetMagnification()>style->GetMaxMag()) {
-            continue;
-          }
-
-          double x,y;
-
-          projection.GeoToPixel(node->GetLon(),node->GetLat(),
-                                x,y);
-
-          RegisterPointLabel(projection,
-                             parameter,
-                             *style,
-                             node->GetTagValue(i),
-                             x,y);
-        }
-        else if (node->GetTagKey(i)==styleConfig.GetTypeConfig()->tagRef)  {
-          const LabelStyle *style=styleConfig.GetNodeRefLabelStyle(node->GetType());
-
-          if (style==NULL ||
-              projection.GetMagnification()<style->GetMinMag() ||
-              projection.GetMagnification()>style->GetMaxMag()) {
-            continue;
-          }
-
-          double x,y;
-
-          projection.GeoToPixel(node->GetLon(),node->GetLat(),
-                                x,y);
-
-          RegisterPointLabel(projection,
-                             parameter,
-                             *style,
-                             node->GetTagValue(i),
-                             x,y);
-        }
-      }
-
-      //nodesDrawnCount++;
+      DrawNode(styleConfig,
+               projection,
+               parameter,
+               node);
     }
   }
 
@@ -1308,11 +1270,13 @@ namespace osmscout {
         DrawLabel(projection,
                   parameter,
                   labels[i]);
+        labelsDrawn++;
       }
       else if (labels[i].style->GetStyle()==LabelStyle::plate) {
         DrawPlateLabel(projection,
                        parameter,
                        labels[i]);
+        labelsDrawn++;
       }
     }
 
@@ -1331,11 +1295,13 @@ namespace osmscout {
         DrawLabel(projection,
                   parameter,
                   labels[i]);
+        labelsDrawn++;
       }
       else if (labels[i].style->GetStyle()==LabelStyle::plate) {
         DrawPlateLabel(projection,
                        parameter,
                        labels[i]);
+        labelsDrawn++;
       }
     }
   }
@@ -1522,10 +1488,16 @@ namespace osmscout {
     if (lineStyle->GetWidth()==0) {
       lineWidth=ConvertWidthToPixel(parameter,lineStyle->GetMinWidth());
     }
+    else if (parameter.GetDrawWaysWithFixedWidth() ||
+        attributes.GetWidth()==0) {
+      lineWidth=GetProjectedWidth(projection,
+                                  ConvertWidthToPixel(parameter,lineStyle->GetMinWidth()),
+                                  lineStyle->GetWidth());
+    }
     else {
       lineWidth=GetProjectedWidth(projection,
                                   ConvertWidthToPixel(parameter,lineStyle->GetMinWidth()),
-                                  attributes.GetWidth()>0 ? attributes.GetWidth() : lineStyle->GetWidth());
+                                  attributes.GetWidth());
     }
 
     WayData data;
@@ -1735,6 +1707,10 @@ namespace osmscout {
     areasDrawn=0;
     areasLabelDrawn=0;
 
+    nodesDrawn=0;
+
+    labelsDrawn=0;
+
     cellWidth=parameter.GetFontSize()*4;
     cellHeight=parameter.GetFontSize()*4;
     xCellCount=(int)ceil((double)projection.GetWidth()/cellWidth);
@@ -1926,9 +1902,12 @@ namespace osmscout {
       std::cout << data.areas.size() << "+" << data.relationAreas.size() << "/" << areasSegments << "/" << areasDrawn << "/" << areasLabelDrawn << " (pcs) ";
       std::cout << prepareAreasTimer << "/" << areasTimer << "/" << areaLabelsTimer << " (sec)" << std::endl;
 
-      std::cout << "Nodes: " << nodesTimer << " ";
-      std::cout << "POIs: " << poisTimer << " ";
-      std::cout << "Labels: " << labelsTimer << std::endl;
+      std::cout << "Nodes: ";
+      std::cout << data.nodes.size() <<"+" << data.poiNodes.size() << "/" << nodesDrawn << " (pcs) ";
+      std::cout << nodesTimer << "/" << poisTimer << " (sec)" << std::endl;
+
+      std::cout << "Labels: " << labels.size() << "/" << labelsDrawn << " (pcs) ";
+      std::cout << labelsTimer << " (sec)" << std::endl;
     }
 
     return true;
