@@ -148,16 +148,30 @@ namespace osmscout {
      */
     class OSMSCOUT_API CrossingWaysDescription : public Description
     {
+    public:
+      enum Type {
+        normal,
+        roundaboutEnter,
+        roundaboutLeave
+      };
+
     private:
+      Type                          type;
       NameDescriptionRef            originDescription;
       NameDescriptionRef            targetDescription;
       std::list<NameDescriptionRef> descriptions;
 
     public:
-      CrossingWaysDescription(NameDescription* originDescription,
+      CrossingWaysDescription(Type type,
+                              NameDescription* originDescription,
                               NameDescription* targetDescription);
 
       void AddDescription(NameDescription* description);
+
+      inline Type GetType() const
+      {
+        return type;
+      }
 
       inline const NameDescriptionRef& GetOriginDesccription() const
       {

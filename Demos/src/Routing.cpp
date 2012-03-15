@@ -62,6 +62,10 @@ static bool IsRelevantCrossing(const osmscout::RouteDescription::CrossingWaysDes
   osmscout::RouteDescription::NameDescriptionRef originDescription=crossing->GetOriginDesccription();
   osmscout::RouteDescription::NameDescriptionRef targetDescription=crossing->GetTargetDesccription();
 
+  if (crossing->GetType()!=osmscout::RouteDescription::CrossingWaysDescription::normal) {
+    return true;
+  }
+
   if (originDescription.Valid() &&
       targetDescription.Valid()) {
     // Is not really a turn, because there are no other crossing ways
@@ -367,6 +371,7 @@ int main(int argc, char* argv[])
   osmscout::DatabaseParameter  databaseParameter;
   osmscout::Database           database(databaseParameter);
   osmscout::RoutePostprocessor postprocessor;
+  size_t                       roundaboutCrossingCounter=0;
 
   if (!database.Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
@@ -521,6 +526,11 @@ int main(int argc, char* argv[])
     }
 
     if (crossingWaysDescription.Valid() &&
+        roundaboutCrossingCounter>0) {
+      roundaboutCrossingCounter++;
+    }
+
+    if (crossingWaysDescription.Valid() &&
         IsRelevantCrossing(crossingWaysDescription)) {
       std::set<std::string>                          names;
       osmscout::RouteDescription::NameDescriptionRef originDescription=crossingWaysDescription->GetOriginDesccription();
@@ -571,9 +581,25 @@ int main(int argc, char* argv[])
 
       NextLine(lineCount);
 
-      std::cout << "Turn into way '";
-      std::cout << NameDescriptionToString(targetDescription);
-      std::cout << "'" << std::endl;
+      if (crossingWaysDescription->GetType()==osmscout::RouteDescription::CrossingWaysDescription::roundaboutEnter) {
+        std::cout << "Enter roundabout" << std::endl;
+        roundaboutCrossingCounter=1;
+      }
+      else if (crossingWaysDescription->GetType()==osmscout::RouteDescription::CrossingWaysDescription::roundaboutLeave) {
+        std::cout << "Leave roundabout into way '";
+        std::cout << NameDescriptionToString(targetDescription);
+        std::cout << "'";
+
+        std::cout << " (" << roundaboutCrossingCounter-1 << ". crossing)";
+
+        std::cout << std::endl;
+        roundaboutCrossingCounter=0;
+      }
+      else {
+        std::cout << "Turn into way '";
+        std::cout << NameDescriptionToString(targetDescription);
+        std::cout << "'" << std::endl;
+      }
     }
     else if (nameChangedDescription.Valid() &&
              IsRelevantNameChange(nameChangedDescription)) {

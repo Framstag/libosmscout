@@ -125,6 +125,11 @@ namespace osmscout {
       return attributes.IsOneway();
     }
 
+    inline bool IsRoundabout() const
+    {
+      return attributes.IsRoundabout();
+    }
+
     inline bool HasAccess() const
     {
       return attributes.HasAccess();

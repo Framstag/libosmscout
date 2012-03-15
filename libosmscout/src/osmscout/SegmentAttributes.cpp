@@ -158,6 +158,7 @@ namespace osmscout {
       else if (!IsArea() && tag->key==typeConfig.tagJunction) {
         if (tag->value=="roundabout") {
           flags|=isOneway;
+          flags|=isRoundabout;
           // If it is a roundabout is cannot be a area
           flags&=~isArea;
         }

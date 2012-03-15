@@ -294,10 +294,11 @@ namespace osmscout {
         node!=description.Nodes().end();
         ++node) {
       if (!node->GetWays().empty()) {
-        WayRef                            originWay;
-        WayRef                            targetWay;
-        RouteDescription::NameDescription *originDescription=NULL;
-        RouteDescription::NameDescription *targetDescription=NULL;
+        RouteDescription::CrossingWaysDescription::Type type=RouteDescription::CrossingWaysDescription::normal;
+        WayRef                                          originWay;
+        WayRef                                          targetWay;
+        RouteDescription::NameDescription               *originDescription=NULL;
+        RouteDescription::NameDescription               *targetDescription=NULL;
 
         if (lastNode!=description.Nodes().end()) {
           std::map<Id,WayRef>::const_iterator way=wayMap.find(lastNode->GetPathWayId());
@@ -319,7 +320,20 @@ namespace osmscout {
           }
         }
 
-        RouteDescription::CrossingWaysDescriptionRef crossingDescription=new RouteDescription::CrossingWaysDescription(originDescription,
+        if (originWay.Valid() &&
+            targetWay.Valid()) {
+          if (originWay->IsRoundabout() &&
+              !targetWay->IsRoundabout()) {
+            type=RouteDescription::CrossingWaysDescription::roundaboutLeave;
+          }
+          else if (!originWay->IsRoundabout() &&
+              targetWay->IsRoundabout()) {
+            type=RouteDescription::CrossingWaysDescription::roundaboutEnter;
+          }
+        }
+
+        RouteDescription::CrossingWaysDescriptionRef crossingDescription=new RouteDescription::CrossingWaysDescription(type,
+                                                                                                                       originDescription,
                                                                                                                        targetDescription);
 
         for (std::vector<Id>::const_iterator id=node->GetWays().begin();

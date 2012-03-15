@@ -57,6 +57,7 @@ namespace osmscout {
     const static uint16_t startIsJoint    = 1 <<  5; //! Start node is a joint node
     const static uint16_t endIsJoint      = 1 <<  6; //! End node is a joint node
     const static uint16_t isOneway        = 1 <<  7; //! We are a oneway (in way direction)
+    const static uint16_t isRoundabout    = 1 <<  8; //! We are a roundabout
 
   public:
     TypeId           type;     //! type of the way/relation
@@ -138,6 +139,11 @@ namespace osmscout {
     inline bool IsOneway() const
     {
       return (flags & isOneway)!=0;
+    }
+
+    inline bool IsRoundabout() const
+    {
+      return (flags & isRoundabout)!=0;
     }
 
     inline bool HasAccess() const

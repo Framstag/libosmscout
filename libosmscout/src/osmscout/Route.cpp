@@ -86,9 +86,11 @@ namespace osmscout {
     // no code
   }
 
-  RouteDescription::CrossingWaysDescription::CrossingWaysDescription(NameDescription* originDescription,
+  RouteDescription::CrossingWaysDescription::CrossingWaysDescription(Type type,
+                                                                     NameDescription* originDescription,
                                                                      NameDescription* targetDescription)
-  : originDescription(originDescription),
+  : type(type),
+    originDescription(originDescription),
     targetDescription(targetDescription)
   {
     // no code
