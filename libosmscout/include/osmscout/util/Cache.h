@@ -34,7 +34,7 @@ namespace osmscout {
     parameter class V holds the data class that is to be cached.
 
     * The cache is not threadsafe.
-    * It uses a std::map for data lookup
+    * It uses a std::vector<std::list>> as a hash table for data lookup
     * It uses an std::list for implementing FIFO characteristics.
    */
   template <class K, class V>

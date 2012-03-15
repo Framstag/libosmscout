@@ -31,7 +31,7 @@
 namespace osmscout {
 
   /**
-    AreaWayIndex allows you to find ways and way releations in
+    AreaWayIndex allows you to find ways and way relations in
     a given area.
 
     Ways can be limited by type and result count.
