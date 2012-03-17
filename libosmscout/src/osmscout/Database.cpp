@@ -216,7 +216,7 @@ namespace osmscout {
    : isOpen(false),
      debugPerformance(parameter.IsDebugPerformance()),
      areaAreaIndex(parameter.GetAreaAreaIndexCacheSize()),
-     areaNodeIndex(parameter.GetAreaNodeIndexCacheSize()),
+     areaNodeIndex(/*parameter.GetAreaNodeIndexCacheSize()*/),
      areaWayIndex(),
      nodeDataFile("nodes.dat",
                   "node.idx",
@@ -338,7 +338,7 @@ namespace osmscout {
     std::cout << "Loading area index done." << std::endl;
 
     std::cout << "Loading area node index..." << std::endl;
-    if (!areaNodeIndex.LoadAreaNodeIndex(path)) {
+    if (!areaNodeIndex.Load(path)) {
       std::cerr << "Cannot load area node index!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
@@ -492,6 +492,10 @@ namespace osmscout {
                               parameter.GetMaximumWays(),
                               wayTypes,
                               ways);
+
+      for (size_t i=0; i<wayTypes.size(); i++) {
+        std::cout << "Warning: Loading type " << typeConfig->GetTypeInfo(wayTypes[i]).GetName() << " via normal index" << std::endl;
+      }
     }
 
     if (parameter.IsAborted()) {

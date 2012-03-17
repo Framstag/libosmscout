@@ -3,7 +3,7 @@
 
 /*
   This source is part of the libosmscout library
-  Copyright (C) 2009  Tim Teulings
+  Copyright (C) 2011  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -26,6 +26,31 @@ namespace osmscout {
 
   class AreaNodeIndexGenerator : public ImportModule
   {
+  private:
+    struct TypeData
+    {
+      uint32_t   indexLevel;   //! magnification level of index
+      size_t     indexCells;   //! Number of filled cells in index
+      size_t     indexEntries; //! Number of entries over all cells
+
+      uint32_t   cellXStart;
+      uint32_t   cellXEnd;
+      uint32_t   cellYStart;
+      uint32_t   cellYEnd;
+      uint32_t   cellXCount;
+      uint32_t   cellYCount;
+
+      FileOffset indexOffset; //! Position in file where the offset of the bitmap is written
+
+      TypeData();
+
+      inline bool HasEntries()
+      {
+        return indexCells>0 &&
+               indexEntries>0;
+      }
+    };
+
   public:
     std::string GetDescription() const;
     bool Import(const ImportParameter& parameter,

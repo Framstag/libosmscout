@@ -74,7 +74,7 @@ namespace osmscout {
 
   private:
     bool GetOffsets(TypeId type,
-                    const std::vector<TypeData>& typeData,
+                    const TypeData& typeData,
                     double minlon,
                     double minlat,
                     double maxlon,

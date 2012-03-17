@@ -124,7 +124,7 @@ namespace osmscout {
   }
 
   bool AreaWayIndex::GetOffsets(TypeId type,
-                                const std::vector<TypeData>& typeData,
+                                const TypeData& typeData,
                                 double minlon,
                                 double minlat,
                                 double maxlon,
@@ -136,30 +136,30 @@ namespace osmscout {
   {
     std::set<FileOffset> newOffsets;
 
-    if (typeData[type].indexOffset==0) {
+    if (typeData.indexOffset==0) {
       // No data for this type available
       return true;
     }
 
-    if (maxlon<typeData[type].minLon ||
-        minlon>=typeData[type].maxLon ||
-        maxlat<typeData[type].minLat ||
-        minlat>=typeData[type].maxLat) {
+    if (maxlon<typeData.minLon ||
+        minlon>=typeData.maxLon ||
+        maxlat<typeData.minLat ||
+        minlat>=typeData.maxLat) {
       // No data available in given bounding box
       return true;
     }
 
-    uint32_t minxc=(uint32_t)floor((minlon+180.0)/typeData[type].cellWidth);
-    uint32_t maxxc=(uint32_t)floor((maxlon+180.0)/typeData[type].cellWidth);
+    uint32_t minxc=(uint32_t)floor((minlon+180.0)/typeData.cellWidth);
+    uint32_t maxxc=(uint32_t)floor((maxlon+180.0)/typeData.cellWidth);
 
-    uint32_t minyc=(uint32_t)floor((minlat+90.0)/typeData[type].cellHeight);
-    uint32_t maxyc=(uint32_t)floor((maxlat+90.0)/typeData[type].cellHeight);
+    uint32_t minyc=(uint32_t)floor((minlat+90.0)/typeData.cellHeight);
+    uint32_t maxyc=(uint32_t)floor((maxlat+90.0)/typeData.cellHeight);
 
-    minxc=std::max(minxc,typeData[type].cellXStart);
-    maxxc=std::min(maxxc,typeData[type].cellXEnd);
+    minxc=std::max(minxc,typeData.cellXStart);
+    maxxc=std::min(maxxc,typeData.cellXEnd);
 
-    minyc=std::max(minyc,typeData[type].cellYStart);
-    maxyc=std::min(maxyc,typeData[type].cellYEnd);
+    minyc=std::max(minyc,typeData.cellYStart);
+    maxyc=std::min(maxyc,typeData.cellYEnd);
 
     std::vector<FileOffset> cellDataOffsets;
 
@@ -167,9 +167,9 @@ namespace osmscout {
 
     // For each row
     for (size_t y=minyc; y<=maxyc; y++) {
-      FileOffset cellIndexOffset=typeData[type].indexOffset+
-                                 ((y-typeData[type].cellYStart)*typeData[type].cellXCount+
-                                  minxc-typeData[type].cellXStart)*sizeof(FileOffset);
+      FileOffset cellIndexOffset=typeData.indexOffset+
+                                 ((y-typeData.cellYStart)*typeData.cellXCount+
+                                  minxc-typeData.cellXStart)*sizeof(FileOffset);
 
       cellDataOffsets.clear();
 
@@ -267,7 +267,7 @@ namespace osmscout {
 
     for (size_t i=0; i<wayTypes.size(); i++) {
       if (!GetOffsets(wayTypes[i],
-                      wayTypeData,
+                      wayTypeData[wayTypes[i]],
                       minlon,
                       minlat,
                       maxlon,
@@ -284,7 +284,7 @@ namespace osmscout {
       }
 
       if (!GetOffsets(wayTypes[i],
-                      relTypeData,
+                      relTypeData[wayTypes[i]],
                       minlon,
                       minlat,
                       maxlon,

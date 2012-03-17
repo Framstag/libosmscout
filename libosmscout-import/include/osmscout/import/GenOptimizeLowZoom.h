@@ -32,11 +32,37 @@ namespace osmscout {
   class OptimizeLowZoomGenerator : public ImportModule
   {
   private:
+    struct TypeData
+    {
+      uint32_t   indexLevel;   //! magnification level of index
+      size_t     indexCells;   //! Number of filled cells in index
+      size_t     indexEntries; //! Number of entries over all cells
+
+      uint32_t   cellXStart;
+      uint32_t   cellXEnd;
+      uint32_t   cellYStart;
+      uint32_t   cellYEnd;
+      uint32_t   cellXCount;
+      uint32_t   cellYCount;
+
+      FileOffset bitmapOffset; //! Position in file where the offset of the bitmap is written
+
+      TypeData();
+
+      inline bool HasEntries()
+      {
+        return indexCells>0 &&
+               indexEntries>0;
+      }
+    };
+
+  private:
     void GetTypesToOptimize(const TypeConfig& typeConfig,
                             std::set<TypeId>& types);
 
     void WriteHeader(FileWriter& writer,
                      const std::set<TypeId>& types,
+                     const std::vector<TypeData>& typesData,
                      size_t optimizeMaxMap,
                      std::map<TypeId,FileOffset>& typeOffsetMap);
 
@@ -48,13 +74,25 @@ namespace osmscout {
     void MergeWays(const std::list<WayRef>& ways,
                    std::list<WayRef>& newWays);
 
-    bool OptimizeWriteWays(Progress& progress,
-                           FileWriter& writer,
-                           FileOffset typeFileOffset,
-                           const std::list<WayRef>& newWays,
-                           size_t width,
-                           size_t height,
-                           double magnification);
+    void GetIndexLevel(const ImportParameter& parameter,
+                       Progress& progress,
+                       const std::list<WayRef>& newWays,
+                       TypeData& typeData);
+
+    bool WriteOptimizedWays(Progress& progress,
+                            FileWriter& writer,
+                            const std::list<WayRef>& ways,
+                            std::map<Id,FileOffset>& offsets,
+                            size_t width,
+                            size_t height,
+                            double magnification);
+
+    bool WriteBitmap(Progress& progress,
+                     FileWriter& writer,
+                     const TypeInfo& type,
+                     const std::list<WayRef>& ways,
+                     std::map<Id,FileOffset>& offsets,
+                     TypeData& data);
 
   public:
     std::string GetDescription() const;

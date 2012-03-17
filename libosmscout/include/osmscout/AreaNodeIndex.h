@@ -3,7 +3,7 @@
 
 /*
   This source is part of the libosmscout library
-  Copyright (C) 2009  Tim Teulings
+  Copyright (C) 2011  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,67 +20,78 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <set>
+#include <vector>
 
 #include <osmscout/StyleConfig.h>
 
-#include <osmscout/util/Cache.h>
+#include <osmscout/Util.h>
+
 #include <osmscout/util/FileScanner.h>
 
 namespace osmscout {
 
+  /**
+    AreaWayIndex allows you to find ways and way relations in
+    a given area.
+
+    Ways can be limited by type and result count.
+    */
   class AreaNodeIndex
   {
   private:
-    struct Leaf
+    struct TypeData
     {
-      FileOffset              children[4];
-      std::vector<FileOffset> offsets;
+      uint32_t   indexLevel;
 
+      FileOffset indexOffset;
 
-      Leaf();
-    };
+      uint32_t   cellXStart;
+      uint32_t   cellXEnd;
+      uint32_t   cellYStart;
+      uint32_t   cellYEnd;
+      uint32_t   cellXCount;
+      uint32_t   cellYCount;
 
-    typedef Cache<FileOffset,Leaf> LeafCache;
+      double     cellWidth;
+      double     cellHeight;
 
-    struct LeafCacheValueSizer : public LeafCache::ValueSizer
-    {
-      unsigned long GetSize(const Leaf& value) const
-      {
-        unsigned long memory=0;
+      double     minLon;
+      double     maxLon;
+      double     minLat;
+      double     maxLat;
 
-        memory+=sizeof(value);
-
-        memory+=value.offsets.size()*sizeof(FileOffset);
-
-        return memory;
-      }
+      TypeData();
     };
 
   private:
-    std::string             filepart;
-    std::string             datafilename;
-    mutable FileScanner     scanner;
+    std::string           filepart;       //! name of the data file
+    std::string           datafilename;   //! Full path and name of the data file
+    mutable FileScanner   scanner;        //! Scanner instance for reading this file
 
-    std::vector<double>     cellWidth;
-    std::vector<double>     cellHeight;
-    mutable LeafCache       leafCache;
-    std::vector<FileOffset> topLevelOffsets;
+    std::vector<TypeData> nodeTypeData;
 
   private:
-    bool GetIndexEntry(FileOffset offset,
-                       LeafCache::CacheRef& cacheRef) const;
+    bool GetOffsets(TypeId type,
+                    const TypeData& typeData,
+                    double minlon,
+                    double minlat,
+                    double maxlon,
+                    double maxlat,
+                    size_t maxNodeCount,
+                    std::vector<FileOffset>& offsets,
+                    size_t currentSize,
+                    bool& sizeExceeded) const;
 
   public:
-    AreaNodeIndex(size_t cacheSize);
+    AreaNodeIndex();
 
-    bool LoadAreaNodeIndex(const std::string& path);
+    bool Load(const std::string& path);
 
     bool GetOffsets(double minlon,
                     double minlat,
                     double maxlon,
                     double maxlat,
-                    const std::vector<TypeId>& types,
+                    const std::vector<TypeId>& nodeTypes,
                     size_t maxNodeCount,
                     std::vector<FileOffset>& nodeOffsets) const;
 

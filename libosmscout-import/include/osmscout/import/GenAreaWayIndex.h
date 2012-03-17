@@ -29,9 +29,9 @@ namespace osmscout {
   private:
     struct TypeData
     {
-      uint32_t   indexLevel;
-      size_t     indexCells;
-      size_t     indexEntries;
+      uint32_t   indexLevel;   //! magnification level of index
+      size_t     indexCells;   //! Number of filled cells in index
+      size_t     indexEntries; //! Number of entries over all cells
 
       uint32_t   cellXStart;
       uint32_t   cellXEnd;
@@ -40,9 +40,15 @@ namespace osmscout {
       uint32_t   cellXCount;
       uint32_t   cellYCount;
 
-      FileOffset indexOffset;
+      FileOffset indexOffset; //! Position in file where the offset of the bitmap is written
 
       TypeData();
+
+      inline bool HasEntries()
+      {
+        return indexCells>0 &&
+               indexEntries>0;
+      }
     };
 
   public:

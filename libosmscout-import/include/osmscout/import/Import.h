@@ -39,42 +39,49 @@ namespace osmscout {
   class OSMSCOUT_IMPORT_API ImportParameter
   {
   private:
-    std::string mapfile;                 //! Name of the file containing the map (either *.osm or *.osm.pbf)
-    std::string typefile;                //! Name and path ff type definition file (map.ost.xml)
-    std::string destinationDirectory;    //! Name of the destination directory
-    size_t      startStep;               //! Starting step for import
-    size_t      endStep;                 //! End step for import
+    std::string mapfile;                  //! Name of the file containing the map (either *.osm or *.osm.pbf)
+    std::string typefile;                 //! Name and path ff type definition file (map.ost.xml)
+    std::string destinationDirectory;     //! Name of the destination directory
+    size_t      startStep;                //! Starting step for import
+    size_t      endStep;                  //! End step for import
 
-    size_t      numericIndexPageSize;    //! Size of an numeric index page in bytes
+    size_t      numericIndexPageSize;     //! Size of an numeric index page in bytes
 
-    bool        rawNodeIndexMemoryMaped; //! Use memory mapping for raw node index file access
-    bool        rawNodeDataMemoryMaped;  //! Use memory mapping for raw node data file access
-    size_t      rawNodeDataCacheSize;    //! Size of the raw node data cache
-    size_t      rawNodeIndexCacheSize;   //! Size of the raw node index cache
+    bool        rawNodeIndexMemoryMaped;  //! Use memory mapping for raw node index file access
+    bool        rawNodeDataMemoryMaped;   //! Use memory mapping for raw node data file access
+    size_t      rawNodeDataCacheSize;     //! Size of the raw node data cache
+    size_t      rawNodeIndexCacheSize;    //! Size of the raw node index cache
 
-    bool        rawWayIndexMemoryMaped;  //! Use memory mapping for raw way index file access
-    bool        rawWayDataMemoryMaped;   //! Use memory mapping for raw way data file access
-    size_t      rawWayDataCacheSize;     //! Size of the raw way data cache
-    size_t      rawWayIndexCacheSize;    //! Size of the raw way index cache
-    size_t      rawWayBlockSize;         //! Number of ways loaded during import until nodes get resolved
+    bool        rawWayIndexMemoryMaped;   //! Use memory mapping for raw way index file access
+    bool        rawWayDataMemoryMaped;    //! Use memory mapping for raw way data file access
+    size_t      rawWayDataCacheSize;      //! Size of the raw way data cache
+    size_t      rawWayIndexCacheSize;     //! Size of the raw way index cache
+    size_t      rawWayBlockSize;          //! Number of ways loaded during import until nodes get resolved
 
-    bool        wayIndexMemoryMaped;     //! Use memory mapping for way index file access
-    bool        wayDataMemoryMaped;      //! Use memory mapping for way data file access
-    size_t      wayDataCacheSize;        //! Size of the way data cache
-    size_t      wayIndexCacheSize;       //! Size of the way index cache
-    size_t      waysLoadSize;            //! Maximum number of ways loaded into memory in one go
+    bool        wayIndexMemoryMaped;      //! Use memory mapping for way index file access
+    bool        wayDataMemoryMaped;       //! Use memory mapping for way data file access
+    size_t      wayDataCacheSize;         //! Size of the way data cache
+    size_t      wayIndexCacheSize;        //! Size of the way index cache
+    size_t      waysLoadSize;             //! Maximum number of ways loaded into memory in one go
 
-    size_t      areaAreaIndexMaxMag;     //! Maximum depth of the index generated
+    size_t      areaAreaIndexMaxMag;      //! Maximum depth of the index generated
 
-    size_t      areaWayMinMag;           //! Minimum magnification of index for individual type
+    size_t      areaWayMinMag;            //! Minimum magnification of index for individual type
     size_t      areaWayIndexCellSizeAverage; //! Average entries per index cell
-    size_t      areaWayIndexCellSizeMax; //! Maximum number of entries  per index cell
+    size_t      areaWayIndexCellSizeMax;  //! Maximum number of entries  per index cell
 
-    size_t      waterIndexMaxMag;        //! Maximum depth of the index generated
+    size_t      areaNodeMinMag;           //! Minimum magnification of index for individual type
+    size_t      areaNodeIndexCellSizeAverage; //! Average entries per index cell
+    size_t      areaNodeIndexCellSizeMax; //! Maximum number of entries  per index cell
 
-    size_t      optimizationMaxMag;      //! Maximum magnification for optimization
+    size_t      waterIndexMaxMag;         //! Maximum depth of the index generated
 
-    size_t      routeNodeBlockSize;      //! Number of route nodes loaded during import until ways get resolved
+    size_t      optimizationMaxMag;       //! Maximum magnification for optimization
+    size_t      optimizationMinMag;       //! Minimum magnification of index for individual type
+    size_t      optimizationCellSizeAverage; //! Average entries per index cell
+    size_t      optimizationCellSizeMax;  //! Maximum number of entries  per index cell
+
+    size_t      routeNodeBlockSize;       //! Number of route nodes loaded during import until ways get resolved
 
   public:
     ImportParameter();
@@ -105,14 +112,22 @@ namespace osmscout {
     size_t GetWayDataCacheSize() const;
     size_t GetWayIndexCacheSize() const;
 
-    size_t GetAreaAreaIndexMaxMag() const;
+    size_t GetAreaNodeMinMag() const;
+    size_t GetAreaNodeIndexCellSizeAverage() const;
+    size_t GetAreaNodeIndexCellSizeMax() const;
+
     size_t GetAreaWayMinMag() const;
     size_t GetAreaWayIndexCellSizeAverage() const;
     size_t GetAreaWayIndexCellSizeMax() const;
 
+    size_t GetAreaAreaIndexMaxMag() const;
+
     size_t GetWaterIndexMaxMag() const;
 
     size_t GetOptimizationMaxMag() const;
+    size_t GetOptimizationMinMag() const;
+    size_t GetOptimizationCellSizeAverage() const;
+    size_t GetOptimizationCellSizeMax() const;
 
     size_t GetRouteNodeBlockSize() const;
 

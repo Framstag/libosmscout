@@ -2,16 +2,16 @@ OST
 
 TYPES
   TYPE "highway_motorway" = WAY ("highway"=="motorway") OPTIONS ROUTE INDEX OPTIMIZE_LOW_ZOOM
-  TYPE "highway_motorway_link" = WAY ("highway"=="motorway_link") OPTIONS ROUTE INDEX
+  TYPE "highway_motorway_link" = WAY ("highway"=="motorway_link") OPTIONS ROUTE INDEX OPTIMIZE_LOW_ZOOM
   TYPE "highway_trunk" = WAY ("highway"=="trunk") OPTIONS ROUTE INDEX OPTIMIZE_LOW_ZOOM
-  TYPE "highway_trunk_link" = WAY ("highway"=="trunk_link") OPTIONS ROUTE INDEX
+  TYPE "highway_trunk_link" = WAY ("highway"=="trunk_link") OPTIONS ROUTE INDEX OPTIMIZE_LOW_ZOOM
   TYPE "highway_primary" = WAY ("highway"=="primary") OPTIONS ROUTE INDEX OPTIMIZE_LOW_ZOOM
   TYPE "highway_primary_link" = WAY ("highway"=="primary_link") OPTIONS ROUTE INDEX
   TYPE "highway_secondary" = WAY ("highway"=="secondary") OPTIONS ROUTE INDEX OPTIMIZE_LOW_ZOOM
   TYPE "highway_secondary_link" = WAY ("highway"=="secondary_link") OPTIONS ROUTE INDEX
-  TYPE "highway_tertiary" = WAY ("highway"=="tertiary") OPTIONS ROUTE INDEX  
+  TYPE "highway_tertiary" = WAY ("highway"=="tertiary") OPTIONS ROUTE INDEX OPTIMIZE_LOW_ZOOM
   TYPE "highway_unclassified" = WAY ("highway"=="unclassified") OPTIONS ROUTE INDEX
-  TYPE "highway_road" = WAY ("highway"=="road") OPTIONS ROUTE INDEX
+  TYPE "highway_road" = WAY ("highway"=="road") OPTIONS ROUTE INDEX OPTIMIZE_LOW_ZOOM
   TYPE "highway_residential" = WAY ("highway"=="residential") OPTIONS ROUTE INDEX
   TYPE "highway_living_street" = WAY ("highway"=="living_street") OPTIONS ROUTE INDEX
   TYPE "highway_service" = WAY AREA ("highway"=="service") OPTIONS ROUTE INDEX PIN_WAY
@@ -32,24 +32,24 @@ TYPES
   TYPE "highway_roundabout" = WAY AREA ("highway"=="roundabout") OPTIONS ROUTE PIN_WAY
   TYPE "highway_motorway_junction" = NODE ("highway"=="motorway_junction") OPTIONS ROUTE
   
-  TYPE "waterway_stream" = WAY ("waterway"=="stream") OPTIONS ROUTE
-  TYPE "waterway_river" = WAY ("waterway"=="river") OPTIONS ROUTE
-  TYPE "waterway_riverbank" = AREA ("waterway"=="riverbank") OPTIONS ROUTE
-  TYPE "waterway_canal" = WAY ("waterway"=="canal") OPTIONS ROUTE
-  TYPE "waterway_ditch" = WAY ("waterway"=="ditch") OPTIONS ROUTE
-  TYPE "waterway_drain" = WAY ("waterway"=="drain") OPTIONS ROUTE
-  TYPE "waterway_dock" = NODE AREA ("waterway"=="dock") OPTIONS ROUTE
+  TYPE "waterway_stream" = WAY ("waterway"=="stream") OPTIONS OPTIMIZE_LOW_ZOOM
+  TYPE "waterway_river" = WAY ("waterway"=="river") OPTIONS OPTIMIZE_LOW_ZOOM
+  TYPE "waterway_riverbank" = AREA ("waterway"=="riverbank")
+  TYPE "waterway_canal" = WAY ("waterway"=="canal") OPTIONS OPTIMIZE_LOW_ZOOM
+  TYPE "waterway_ditch" = WAY ("waterway"=="ditch") OPTIONS OPTIMIZE_LOW_ZOOM
+  TYPE "waterway_drain" = WAY ("waterway"=="drain") OPTIONS OPTIMIZE_LOW_ZOOM
+  TYPE "waterway_dock" = NODE AREA ("waterway"=="dock")
   TYPE "waterway_lock_gate" = NODE ("waterway"=="lock_gate")
   TYPE "waterway_turning_point" = NODE ("waterway"=="turning_point")
   TYPE "waterway_boatyard" = NODE AREA ("waterway"=="boatyard")
   TYPE "waterway_weir" = NODE WAY ("waterway"=="weir")
   TYPE "waterway_dam" = WAY AREA ("waterway"=="dam")
   
-  TYPE "railway_rail" = WAY ("railway"=="rail") OPTIONS ROUTE
-  TYPE "railway_tram" = WAY ("railway"=="tram") OPTIONS ROUTE
-  TYPE "railway_light_rail" = WAY ("railway"=="light_rail") OPTIONS ROUTE
-  TYPE "railway_subway" = WAY ("railway"=="subway") OPTIONS ROUTE
-  TYPE "railway_preserved" = WAY ("railway"=="preserved") OPTIONS ROUTE
+  TYPE "railway_rail" = WAY ("railway"=="rail") OPTIONS OPTIMIZE_LOW_ZOOM
+  TYPE "railway_tram" = WAY ("railway"=="tram")
+  TYPE "railway_light_rail" = WAY ("railway"=="light_rail")
+  TYPE "railway_subway" = WAY ("railway"=="subway")
+  TYPE "railway_preserved" = WAY ("railway"=="preserved")
   TYPE "railway_disused" = WAY ("railway"=="disused")
   TYPE "railway_abandoned" = WAY ("railway"=="abandoned")
   TYPE "railway_narrow_gauge" = WAY ("railway"=="narrow_gauge")
@@ -62,7 +62,7 @@ TYPES
   TYPE "railway_subway_entrance" = NODE ("railway"=="subway_entrance")
   TYPE "railway_turntable" = NODE AREA ("railway"=="turntable")
   
-  TYPE "route_ferry" = WAY ("route"=="ferry")
+  TYPE "route_ferry" = WAY ("route"=="ferry") OPTIONS OPTIMIZE_LOW_ZOOM
   
   TYPE "aeroway_aerodrome" = NODE AREA ("aeroway"=="aerodrome")
   TYPE "aeroway_terminal" = NODE AREA ("aeroway"=="terminal")
@@ -95,7 +95,7 @@ TYPES
   TYPE "landuse_military" = NODE AREA ("landuse"=="military")
   TYPE "landuse_orchard" = NODE AREA ("landuse"=="orchard")
   TYPE "landuse_quarry" = NODE AREA ("landuse"=="quarry")
-  TYPE "landuse_railway" = AREA ("landuse"=="railway") OPTIONS ROUTE
+  TYPE "landuse_railway" = AREA ("landuse"=="railway")
   TYPE "landuse_recreation_ground" = NODE AREA ("landuse"=="recreation_ground")
   TYPE "landuse_reservoir" = NODE AREA ("landuse"=="reservoir")
   TYPE "landuse_residential" = NODE AREA ("landuse"=="residential")
@@ -109,7 +109,7 @@ TYPES
   TYPE "natural_beach" = NODE AREA ("natural"=="beach")
   TYPE "natural_cave_entrance" = NODE AREA ("natural"=="cave_entrance")
   TYPE "natural_cliff" = NODE WAY AREA ("natural"=="cliff")
-  TYPE "natural_coastline" = WAY RELATION ("natural"=="coastline")
+  TYPE "natural_coastline" = WAY RELATION ("natural"=="coastline") OPTIONS OPTIMIZE_LOW_ZOOM
   TYPE "natural_fell" = NODE AREA ("natural"=="fell")
   TYPE "natural_glacier" = NODE AREA ("natural"=="glacier")
   TYPE "natural_heath" = NODE AREA ("natural"=="heath")

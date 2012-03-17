@@ -33,10 +33,25 @@ namespace osmscout {
   class OptimizeLowZoom
   {
   private:
-    struct DataInfo
+    struct TypeData
     {
-      FileOffset dataOffset;
-      uint32_t   dataCount;
+      uint32_t   indexLevel;   //! magnification level of index
+      FileOffset bitmapOffset; //! Position in file where the offset of the bitmap is written
+
+      uint32_t   cellXStart;
+      uint32_t   cellXEnd;
+      uint32_t   cellYStart;
+      uint32_t   cellYEnd;
+      uint32_t   cellXCount;
+      uint32_t   cellYCount;
+
+      double     cellWidth;
+      double     cellHeight;
+
+      double     minLon;
+      double     maxLon;
+      double     minLat;
+      double     maxLat;
     };
 
   private:
@@ -45,7 +60,7 @@ namespace osmscout {
     mutable FileScanner       scanner;       //! File stream to the data file
 
     double                    magnification; //! Vergrößerung, bis zur der Optimization unterstützt wird
-    std::map<TypeId,DataInfo> dataInfos;     //! Some info about the data of a type
+    std::map<TypeId,TypeData> typesData;     //! Index information for all types
 
   public:
     OptimizeLowZoom();
@@ -55,6 +70,14 @@ namespace osmscout {
     bool Close();
 
     bool HasOptimizations(double magnification) const;
+
+    bool GetOffsets(TypeId type,
+                    const TypeData& typeData,
+                    double minlon,
+                    double minlat,
+                    double maxlon,
+                    double maxlat,
+                    std::vector<FileOffset>& offsets) const;
 
     bool GetWays(const StyleConfig& styleConfig,
                  double lonMin, double latMin,

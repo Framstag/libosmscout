@@ -48,6 +48,7 @@ namespace osmscout {
     cellYCount(0),
     indexOffset(0)
   {
+    // no code
   }
 
   std::string AreaWayIndexGenerator::GetDescription() const
@@ -137,6 +138,7 @@ namespace osmscout {
           continue;
         }
 
+        // Count number of entries per current type and coordinate
         if (currentWayTypes.find(way.GetType())!=currentWayTypes.end()) {
           double minLon;
           double maxLon;
@@ -163,6 +165,7 @@ namespace osmscout {
         }
       }
 
+      // Check if cell fill for current type is in defined limits
       for (size_t i=0; i<typeConfig.GetTypes().size(); i++) {
         if (currentWayTypes.find(i)!=currentWayTypes.end()) {
           size_t entryCount=0;
@@ -274,6 +277,7 @@ namespace osmscout {
           continue;
         }
 
+        // Count number of entries per current type and coordinate
         if (currentRelTypes.find(rel.GetType())!=currentRelTypes.end()) {
           double minLon;
           double maxLon;
@@ -300,6 +304,7 @@ namespace osmscout {
         }
       }
 
+      // Check if cell fill for current type is in defined limits
       for (size_t i=0; i<typeConfig.GetTypes().size(); i++) {
         if (currentRelTypes.find(i)!=currentRelTypes.end()) {
           size_t entryCount=0;
@@ -379,11 +384,9 @@ namespace osmscout {
     for (size_t i=0; i<typeConfig.GetTypes().size(); i++)
     {
       if ((typeConfig.GetTypeInfo(i).CanBeWay() &&
-           wayTypeData[i].indexCells>0 &&
-           wayTypeData[i].indexEntries>0) ||
+           wayTypeData[i].HasEntries()) ||
           (typeConfig.GetTypeInfo(i).CanBeRelation() &&
-           relTypeData[i].indexCells>0 &&
-           relTypeData[i].indexEntries>0)) {
+           relTypeData[i].HasEntries())) {
         indexEntries++;
       }
     }
@@ -393,21 +396,18 @@ namespace osmscout {
     for (size_t i=0; i<typeConfig.GetTypes().size(); i++)
     {
       if ((typeConfig.GetTypeInfo(i).CanBeWay() &&
-           wayTypeData[i].indexCells>0 &&
-           wayTypeData[i].indexEntries>0) ||
+           wayTypeData[i].HasEntries()) ||
           (typeConfig.GetTypeInfo(i).CanBeRelation() &&
-           relTypeData[i].indexCells>0 &&
-           relTypeData[i].indexEntries>0)) {
+           relTypeData[i].HasEntries())) {
         FileOffset bitmapOffset=0;
 
-        writer.WriteNumber((uint32_t)i);
+        writer.WriteNumber(typeConfig.GetTypeInfo(i).GetId());
 
         writer.GetPos(wayTypeData[i].indexOffset);
 
         writer.Write(bitmapOffset);
 
-        if (wayTypeData[i].indexCells>0 &&
-            wayTypeData[i].indexEntries>0) {
+        if (wayTypeData[i].HasEntries()) {
           writer.WriteNumber(wayTypeData[i].indexLevel);
           writer.WriteNumber(wayTypeData[i].cellXStart);
           writer.WriteNumber(wayTypeData[i].cellXEnd);
@@ -419,8 +419,7 @@ namespace osmscout {
 
         writer.Write(bitmapOffset);
 
-        if (relTypeData[i].indexCells>0 &&
-            relTypeData[i].indexEntries>0) {
+        if (relTypeData[i].HasEntries()) {
           writer.WriteNumber(relTypeData[i].indexLevel);
           writer.WriteNumber(relTypeData[i].cellXStart);
           writer.WriteNumber(relTypeData[i].cellXEnd);
@@ -438,8 +437,7 @@ namespace osmscout {
 
       for (size_t i=0; i<typeConfig.GetTypes().size(); i++) {
         if (typeConfig.GetTypeInfo(i).CanBeWay() &&
-            wayTypeData[i].indexCells>0 &&
-            wayTypeData[i].indexEntries>0 &&
+            wayTypeData[i].HasEntries() &&
             wayTypeData[i].indexLevel==l) {
           indexTypes.insert(i);
         }
@@ -519,11 +517,12 @@ namespace osmscout {
           indexEntries+=cell->second.size();
         }
 
-        progress.Info("Writing way bitmap for type "+
-                      typeConfig.GetTypeInfo(*type).GetName()+" ("+NumberToString(*type)+") "+
-                      NumberToString(typeCellOffsets[*type].size())+" "+
-                      NumberToString(indexEntries)+" "+
-                      NumberToString(wayTypeData[*type].cellXCount*wayTypeData[*type].cellYCount));
+        progress.Info("Writing bitmap for "+
+                      typeConfig.GetTypeInfo(*type).GetName()+" ("+NumberToString(*type)+"), "+
+                      NumberToString(typeCellOffsets[*type].size())+" cells, "+
+                      NumberToString(indexEntries)+" entries, "+
+                      NumberToString(wayTypeData[*type].cellXCount*wayTypeData[*type].cellYCount)+
+                      " map size");
 
         FileOffset bitmapOffset;
 
@@ -603,8 +602,7 @@ namespace osmscout {
 
       for (size_t i=0; i<typeConfig.GetTypes().size(); i++) {
         if (typeConfig.GetTypeInfo(i).CanBeRelation() &&
-            relTypeData[i].indexCells>0 &&
-            relTypeData[i].indexEntries>0 &&
+            relTypeData[i].HasEntries() &&
             relTypeData[i].indexLevel==l) {
           indexTypes.insert(i);
         }
@@ -685,11 +683,12 @@ namespace osmscout {
           indexEntries+=cell->second.size();
         }
 
-        progress.Info("Writing relation bitmap for type "+
-                      typeConfig.GetTypeInfo(*type).GetName()+" ("+NumberToString(*type)+") "+
-                      NumberToString(typeCellOffsets[*type].size())+" "+
-                      NumberToString(indexEntries)+" "+
-                      NumberToString(relTypeData[*type].cellXCount*relTypeData[*type].cellYCount));
+        progress.Info("Writing bitmap for "+
+                      typeConfig.GetTypeInfo(*type).GetName()+" ("+NumberToString(*type)+"), "+
+                      NumberToString(typeCellOffsets[*type].size())+" cells, "+
+                      NumberToString(indexEntries)+" entries, "+
+                      NumberToString(relTypeData[*type].cellXCount*relTypeData[*type].cellYCount)+
+                      " map size");
 
         FileOffset bitmapOffset;
 

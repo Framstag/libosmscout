@@ -691,7 +691,7 @@ public:
     osmscout::DatabaseParameter databaseParameter;
     osmscout::RouterParameter   routerParameter;
 
-    //databaseParameter.SetDebugPerformance(true);
+    databaseParameter.SetDebugPerformance(true);
 
     database=new osmscout::Database(databaseParameter);
     router=new osmscout::Router(routerParameter);

@@ -84,10 +84,16 @@ namespace osmscout {
      waysLoadSize(1000000),
      areaAreaIndexMaxMag(17),
      areaWayMinMag(14),
-     areaWayIndexCellSizeAverage(64),
+     areaWayIndexCellSizeAverage(16),
      areaWayIndexCellSizeMax(256),
+     areaNodeMinMag(8),
+     areaNodeIndexCellSizeAverage(16),
+     areaNodeIndexCellSizeMax(256),
      waterIndexMaxMag(14),
-     optimizationMaxMag(8),
+     optimizationMaxMag(10),
+     optimizationMinMag(6),
+     optimizationCellSizeAverage(16),
+     optimizationCellSizeMax(256),
      routeNodeBlockSize(1500000)
   {
     // no code
@@ -188,9 +194,19 @@ namespace osmscout {
     return wayDataMemoryMaped;
   }
 
-  size_t ImportParameter::GetAreaAreaIndexMaxMag() const
+  size_t ImportParameter::GetAreaNodeMinMag() const
   {
-    return areaAreaIndexMaxMag;
+    return areaNodeMinMag;
+  }
+
+  size_t ImportParameter::GetAreaNodeIndexCellSizeAverage() const
+  {
+    return areaNodeIndexCellSizeAverage;
+  }
+
+  size_t ImportParameter::GetAreaNodeIndexCellSizeMax() const
+  {
+    return areaNodeIndexCellSizeMax;
   }
 
   size_t ImportParameter::GetAreaWayMinMag() const
@@ -208,6 +224,11 @@ namespace osmscout {
     return areaWayIndexCellSizeMax;
   }
 
+  size_t ImportParameter::GetAreaAreaIndexMaxMag() const
+  {
+    return areaAreaIndexMaxMag;
+  }
+
   size_t ImportParameter::GetWaterIndexMaxMag() const
   {
     return waterIndexMaxMag;
@@ -216,6 +237,21 @@ namespace osmscout {
   size_t ImportParameter::GetOptimizationMaxMag() const
   {
     return optimizationMaxMag;
+  }
+
+  size_t ImportParameter::GetOptimizationMinMag() const
+  {
+    return optimizationMinMag;
+  }
+
+  size_t ImportParameter::GetOptimizationCellSizeAverage() const
+  {
+    return optimizationCellSizeAverage;
+  }
+
+  size_t ImportParameter::GetOptimizationCellSizeMax() const
+  {
+    return optimizationCellSizeMax;
   }
 
   size_t ImportParameter::GetRouteNodeBlockSize() const
