@@ -44,6 +44,7 @@
 #include <osmscout/RoutingProfile.h>
 
 #include <osmscout/util/Cache.h>
+#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
@@ -247,7 +248,7 @@ namespace osmscout {
     /**
      * A node in the routing graph, normally a node as part of a way
      */
-    struct RNode
+    struct RNode : public Referencable
     {
       Id     nodeId;
       Id     wayId;
@@ -305,21 +306,23 @@ namespace osmscout {
       }
     };
 
+    typedef Ref<RNode> RNodeRef;
+
     struct RNodeCostCompare
     {
-      inline bool operator()(const RNode& a, const RNode& b) const
+      inline bool operator()(const RNodeRef& a, const RNodeRef& b) const
       {
-        if (a.overallCost==b.overallCost) {
-         return a.nodeId<b.nodeId;
+        if (a->overallCost==b->overallCost) {
+         return a->nodeId<b->nodeId;
         }
         else {
-          return a.overallCost<b.overallCost;
+          return a->overallCost<b->overallCost;
         }
       }
     };
 
-    typedef std::set<RNode,RNodeCostCompare> OpenList;
-    typedef OpenList::iterator               RNodeRef;
+    typedef std::set<RNodeRef,RNodeCostCompare>           OpenList;
+    typedef std::set<RNodeRef,RNodeCostCompare>::iterator OpenListRef;
 
   private:
     bool                  isOpen;            //! true, if opened
@@ -337,10 +340,10 @@ namespace osmscout {
                              Id nodeId,
                              RouteNodeRef& routeNode,
                              size_t& pos);
-    bool ResolveRNodesToList(const RNode& end,
-                             const std::map<Id,RNode>& closeMap,
-                             std::list<RNode>& nodes);
-    bool ResolveRNodesToRouteData(const std::list<RNode>& nodes,
+    bool ResolveRNodesToList(const RNodeRef& end,
+                             const std::map<Id,RNodeRef>& closeMap,
+                             std::list<RNodeRef>& nodes);
+    bool ResolveRNodesToRouteData(const std::list<RNodeRef>& nodes,
                                   Id startWayId,
                                   Id startNodeId,
                                   Id targetWayId,
