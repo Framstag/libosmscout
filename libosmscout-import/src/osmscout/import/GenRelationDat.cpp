@@ -699,7 +699,7 @@ namespace osmscout {
                                      Progress& progress,
                                      const TypeConfig& typeConfig)
   {
-    std::set<Id> wayAreaIndexBlacklist;
+    std::set<Id>          wayAreaIndexBlacklist;
 
     DataFile<RawNode>     nodeDataFile("rawnodes.dat",
                                        "rawnode.idx",
@@ -740,7 +740,7 @@ namespace osmscout {
 
     progress.SetAction("Generate relations.dat");
 
-    FileScanner scanner;
+    FileScanner         scanner;
     FileWriter          writer;
     uint32_t            rawRelationCount=0;
     size_t              selectedRelationCount=0;
@@ -801,7 +801,6 @@ namespace osmscout {
       }
 
       Relation              rel;
-      //std::set<std::string> roles;
       bool                  error=false;
       bool                  isArea=false;
       bool                  reverseNodes;

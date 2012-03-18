@@ -1,5 +1,10 @@
 /* libosmscout uses special gcc compiler features to export symbols */
 #undef OSMSCOUT_EXPORT_SYMBOLS
 
-/* system header stdint.h is available */
+/* system header <stdint.h> is available */
 #undef OSMSCOUT_HAVE_STDINT_H
+
+/* system header <unordered_map> is available */
+#undef OSMSCOUT_HAVE_UNORDERED_MAP
+
+

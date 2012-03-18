@@ -133,7 +133,7 @@ namespace osmscout {
   bool WayDataGenerator::ReadWayEndpoints(const ImportParameter& parameter,
                                           Progress& progress,
                                           const TypeConfig& typeConfig,
-                                          std::map<Id,std::list<Id> >& endPointWayMap)
+                                          EndPointWayMap& endPointWayMap)
   {
     FileScanner scanner;
     uint32_t    rawWayCount=0;
@@ -192,7 +192,7 @@ namespace osmscout {
   bool WayDataGenerator::ReadAreasIncludingEndpoints(const ImportParameter& parameter,
                                                      Progress& progress,
                                                      const TypeConfig& typeConfig,
-                                                     const std::map<Id,std::list<Id> >& endPointWayMap,
+                                                     const EndPointWayMap& endPointWayMap,
                                                      std::set<Id>& endPointAreaSet)
   {
     FileScanner scanner;
@@ -238,7 +238,7 @@ namespace osmscout {
       }
 
       for (size_t i=0; i<rawWay.GetNodeCount(); i++) {
-        std::map<Id,std::list<Id> >::const_iterator nodeUse;
+        EndPointWayMap::const_iterator nodeUse;
 
         nodeUse=endPointWayMap.find(rawWay.GetNodeId(i));
 
@@ -257,11 +257,11 @@ namespace osmscout {
   }
 
   void WayDataGenerator::GetWayMergeCandidates(const RawWay& way,
-                                               const std::map<Id,std::list<Id> >& endPointWayMap,
+                                               const EndPointWayMap& endPointWayMap,
                                                const std::set<Id>& wayBlacklist,
                                                std::set<Id>& candidates)
   {
-    std::map<Id,std::list<Id> >::const_iterator endPoints;
+    EndPointWayMap::const_iterator endPoints;
 
     endPoints=endPointWayMap.find(way.GetNodes()[0]);
 
@@ -364,7 +364,7 @@ namespace osmscout {
                                   FileScanner& scanner,
                                   std::vector<RawWay>& rawWays,
                                   size_t blockCount,
-                                  std::map<Id,std::list<Id> >& endPointWayMap,
+                                  EndPointWayMap& endPointWayMap,
                                   NumericIndex<Id,RawWay>& rawWayIndex,
                                   std::set<Id> & wayBlacklist,
                                   size_t& mergeCount)
@@ -593,7 +593,7 @@ namespace osmscout {
 
     uint32_t                                    writtenWayCount=0;
 
-    std::map<Id,std::list<Id> >                 endPointWayMap;
+    EndPointWayMap                              endPointWayMap;
     std::set<Id>                                endPointAreaSet;
 
     std::set<Id>                                wayBlacklist;
@@ -822,12 +822,13 @@ namespace osmscout {
         // startIsJoint/endIsJoint
 
         if (!way.IsArea()) {
-          std::map<Id,std::list<Id> >::const_iterator wayJoint;
-          std::set<Id>::const_iterator                areaJoint;
+          EndPointWayMap::const_iterator wayJoint;
+          std::set<Id>::const_iterator   areaJoint;
 
           wayJoint=endPointWayMap.find(way.nodes[0].id);
 
-          if (wayJoint!=endPointWayMap.end() && wayJoint->second.size()<2) {
+          if (wayJoint!=endPointWayMap.end() &&
+              wayJoint->second.size()<2) {
             wayJoint=endPointWayMap.end();
           }
 
@@ -835,7 +836,7 @@ namespace osmscout {
             areaJoint=endPointAreaSet.find(way.nodes[0].id);
           }
 
-          way.SetStartIsJoint((wayJoint!=endPointWayMap.end() || areaJoint!=endPointAreaSet.end()));
+          way.SetStartIsJoint(wayJoint!=endPointWayMap.end() || areaJoint!=endPointAreaSet.end());
 
           wayJoint=endPointWayMap.find(way.nodes[way.nodes.size()-1].id);
 

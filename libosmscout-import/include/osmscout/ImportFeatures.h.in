@@ -2,4 +2,4 @@
 #undef OSMSCOUT_IMPORT_EXPORT_SYMBOLS
 
 /* system header stdint.h is available */
-#undef OSMSCOUT_HAVE_STDINT_H
+#undef OSMSCOUT_IMPORT_HAVE_UNORDERED_MAP

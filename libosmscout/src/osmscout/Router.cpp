@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <cassert>
 #include <iostream>
+#include <map>
 
 #include <osmscout/ObjectRef.h>
 #include <osmscout/RoutingProfile.h>
@@ -659,14 +660,14 @@ namespace osmscout {
   }
 
   bool Router::ResolveRNodesToList(const RNodeRef& end,
-                                   const std::map<Id,RNodeRef>& closeMap,
+                                   const CloseMap& closeMap,
                                    std::list<RNodeRef>& nodes)
   {
-    std::map<Id,RNodeRef>::const_iterator current=closeMap.find(end->nodeId);
-    RouteNodeRef                          routeNode;
+    CloseMap::const_iterator current=closeMap.find(end->nodeId);
+    RouteNodeRef                     routeNode;
 
     while (current->second->prev!=0) {
-      std::map<Id,RNodeRef>::const_iterator prev=closeMap.find(current->second->prev);
+      CloseMap::const_iterator prev=closeMap.find(current->second->prev);
 
       nodes.push_back(current->second);
 
@@ -891,26 +892,26 @@ namespace osmscout {
                               Id targetWayId, Id targetNodeId,
                               RouteData& route)
   {
-    WayRef                startWay;
-    double                startLon=0.0L,startLat=0.0L;
-    RouteNodeRef          startRouteNode;
-    size_t                startNodePos;
+    WayRef                   startWay;
+    double                   startLon=0.0L,startLat=0.0L;
+    RouteNodeRef             startRouteNode;
+    size_t                   startNodePos;
 
-    WayRef                targetWay;
-    double                targetLon=0.0L,targetLat=0.0L;
-    RouteNodeRef          targetRouteNode;
-    size_t                targetNodePos;
+    WayRef                   targetWay;
+    double                   targetLon=0.0L,targetLat=0.0L;
+    RouteNodeRef             targetRouteNode;
+    size_t                   targetNodePos;
 
-    WayRef                currentWay;
+    WayRef                   currentWay;
 
     // Sorted list (smallest cost first) of ways to check (we are using a std::set)
-    OpenList              openList;
+    OpenList                 openList;
     // Map routing nodes by id
-    std::map<Id,OpenListRef> openMap;
-    std::map<Id,RNodeRef> closeMap;
+    OpenMap                  openMap;
+    CloseMap                 closeMap;
 
-    size_t                nodesLoadedCount=0;
-    size_t                nodesIgnoredCount=0;
+    size_t                   nodesLoadedCount=0;
+    size_t                   nodesIgnoredCount=0;
 
     std::cout << startWayId << "[" << startNodeId << "] => " << targetWayId << "[" << targetNodeId << "]" << std::endl;
 
@@ -1071,7 +1072,7 @@ namespace osmscout {
           }
         }
 
-        std::map<Id,RNodeRef>::iterator closeEntry=closeMap.find(currentRouteNode->paths[i].id);
+        CloseMap::iterator closeEntry=closeMap.find(currentRouteNode->paths[i].id);
 
         if (closeEntry!=closeMap.end()) {
 #if defined(DEBUG_ROUTING)
@@ -1085,7 +1086,7 @@ namespace osmscout {
 
         // TODO: Turn costs
 
-        std::map<Id,OpenListRef>::iterator openEntry=openMap.find(currentRouteNode->paths[i].id);
+        OpenMap::iterator openEntry=openMap.find(currentRouteNode->paths[i].id);
 
         // Check, if we already have a cheaper path to the new node. If yes, do not put the new path
         // into the open list

@@ -20,6 +20,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <osmscout/ImportFeatures.h>
+
+#if defined(OSMSCOUT_IMPORT_HAVE_UNORDERED_MAP)
+  #include <unordered_map>
+#endif
+
+#include <map>
+
 #include <osmscout/import/Import.h>
 
 #include <osmscout/Way.h>
@@ -32,6 +40,13 @@ namespace osmscout {
   class OptimizeLowZoomGenerator : public ImportModule
   {
   private:
+#if defined(OSMSCOUT_IMPORT_HAVE_UNORDERED_MAP)
+    typedef std::unordered_map<Id,FileOffset> IdFileOffsetMap;
+#else
+    typedef std::map<Id,FileOffset> IdFileOffsetMap;
+#endif
+
+
     struct TypeData
     {
       uint32_t   indexLevel;   //! magnification level of index
@@ -82,7 +97,7 @@ namespace osmscout {
     bool WriteOptimizedWays(Progress& progress,
                             FileWriter& writer,
                             const std::list<WayRef>& ways,
-                            std::map<Id,FileOffset>& offsets,
+                            IdFileOffsetMap& offsets,
                             size_t width,
                             size_t height,
                             double magnification);
@@ -91,7 +106,7 @@ namespace osmscout {
                      FileWriter& writer,
                      const TypeInfo& type,
                      const std::list<WayRef>& ways,
-                     std::map<Id,FileOffset>& offsets,
+                     const IdFileOffsetMap& offsets,
                      TypeData& data);
 
   public:

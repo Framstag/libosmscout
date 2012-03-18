@@ -20,7 +20,13 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <set>
+#include <osmscout/MapCairoFeatures.h>
+
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_UNORDERED_MAP)
+  #include <unordered_map>
+#else
+  #include <map>
+#endif
 
 #if defined(__WIN32__) || defined(WIN32) || defined(__APPLE__)
   #include <cairo.h>
@@ -37,10 +43,16 @@ namespace osmscout {
   class OSMSCOUT_MAP_CAIRO_API MapPainterCairo : public MapPainter
   {
   private:
-    cairo_t                               *draw;     //! The cairo cairo_t for the mask
-    std::vector<cairo_surface_t*>         images;    //! vector of cairo surfaces for icons
-    std::vector<cairo_pattern_t*>         patterns;  //! cairo pattern structure for patterns
-    std::map<size_t,cairo_scaled_font_t*> font;      //! Cached scaled font
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_UNORDERED_MAP)
+    typedef std::unordered_map<size_t,cairo_scaled_font_t*> FontMap;
+#else
+    typedef std::map<size_t,cairo_scaled_font_t*>           FontMap;
+#endif
+
+    cairo_t                       *draw;     //! The cairo cairo_t for the mask
+    std::vector<cairo_surface_t*> images;    //! vector of cairo surfaces for icons
+    std::vector<cairo_pattern_t*> patterns;  //! cairo pattern structure for patterns
+    FontMap                       font;      //! Cached scaled font
 
   private:
     cairo_scaled_font_t* GetScaledFont(const MapParameter& parameter,

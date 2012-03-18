@@ -316,7 +316,7 @@ namespace osmscout {
       }
     }
 
-    for (std::map<size_t,cairo_scaled_font_t*>::const_iterator entry=font.begin();
+    for (FontMap::const_iterator entry=font.begin();
          entry!=font.end();
          ++entry) {
       if (entry->second!=NULL) {
@@ -328,7 +328,7 @@ namespace osmscout {
   cairo_scaled_font_t* MapPainterCairo::GetScaledFont(const MapParameter& parameter,
                                                       double fontSize)
   {
-    std::map<size_t,cairo_scaled_font_t*>::const_iterator f;
+    FontMap::const_iterator f;
 
     fontSize=fontSize*ConvertWidthToPixel(parameter,parameter.GetFontSize());
 

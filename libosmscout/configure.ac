@@ -8,16 +8,19 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([include/osmscout/private/Config.h include/osmscout/CoreFeatures.h])
 AM_INIT_AUTOMAKE([no-define nostdinc subdir-objects dist-bzip2])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+
 AC_PROG_CXX
 AC_LANG(C++)
 LT_INIT([win32-dll])
-
 AC_PROG_INSTALL
+
+AX_CHECK_COMPILE_FLAG([-std=c++0x],
+                      [CPPFLAGS="$CPPFLAGS -std=c++0x"])
 
 AC_TYPE_SIZE_T
 AC_CHECK_SIZEOF([wchar_t])
 
-AC_CHECK_HEADERS([sys/time.h])
+AC_CHECK_HEADERS([sys/time.h unordered_map])
 
 AC_SEARCH_LIBS([sqrt],[m])
 
@@ -31,7 +34,11 @@ fi
 dnl Selfmade tests
 
 if test "x$ac_cv_header_stdint_h" = xyes; then
-  AC_DEFINE([OSMSCOUT_HAVE_STDINT_H],[1],[system header stdint.h is available])
+  AC_DEFINE([OSMSCOUT_HAVE_STDINT_H],[1],[system header <stdint.h> is available])
+fi
+
+if test "x$ac_cv_header_unordered_map" = xyes; then
+  AC_DEFINE([OSMSCOUT_HAVE_UNORDERED_MAP],[1],[system header <unordered_map> is available])
 fi
 
 if test "$build_os" != "mingw32"; then

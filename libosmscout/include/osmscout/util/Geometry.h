@@ -20,13 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <cassert>
-#include <ctime>
-#include <limits>
-#include <list>
-#include <set>
-#include <sstream>
-#include <string>
 #include <vector>
 
 #include <osmscout/private/CoreImportExport.h>
@@ -34,7 +27,6 @@
 #include <osmscout/system/Types.h>
 
 #include <osmscout/Point.h>
-#include <osmscout/util/Projection.h>
 
 namespace osmscout {
   /**

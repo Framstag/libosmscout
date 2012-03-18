@@ -20,6 +20,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <osmscout/ImportFeatures.h>
+
+#if defined(OSMSCOUT_IMPORT_HAVE_UNORDERED_MAP)
+  #include <unordered_map>
+#endif
+
+#include <map>
+
 #include <osmscout/Way.h>
 #include <osmscout/NumericIndex.h>
 
@@ -31,6 +39,12 @@ namespace osmscout {
   class WayDataGenerator : public ImportModule
   {
   private:
+#if defined(OSMSCOUT_IMPORT_HAVE_UNORDERED_MAP)
+    typedef std::unordered_map<Id,std::list<Id> > EndPointWayMap;
+#else
+    typedef std::map<Id,std::list<Id> >           EndPointWayMap;
+#endif
+
     bool ReadRestrictionRelations(const ImportParameter& parameter,
                                   Progress& progress,
                                   const TypeConfig& typeConfig,
@@ -39,16 +53,16 @@ namespace osmscout {
     bool ReadWayEndpoints(const ImportParameter& parameter,
                           Progress& progress,
                           const TypeConfig& typeConfig,
-                          std::map<Id,std::list<Id> >& endPointWayMap);
+                          EndPointWayMap& endPointWayMap);
 
     bool ReadAreasIncludingEndpoints(const ImportParameter& parameter,
                                      Progress& progress,
                                      const TypeConfig& typeConfig,
-                                     const std::map<Id,std::list<Id> >& endPointWayMap,
+                                     const EndPointWayMap& endPointWayMap,
                                      std::set<Id>& endPointAreaSet);
 
     void GetWayMergeCandidates(const RawWay& way,
-                               const std::map<Id,std::list<Id> >& endPointWayMap,
+                               const EndPointWayMap& endPointWayMap,
                                const std::set<Id>& wayBlacklist,
                                std::set<Id>& candidates);
 
@@ -66,7 +80,7 @@ namespace osmscout {
                   FileScanner& scanner,
                   std::vector<RawWay>& rawWays,
                   size_t blockCount,
-                  std::map<Id,std::list<Id> >& endPointWayMap,
+                  EndPointWayMap& endPointWayMap,
                   NumericIndex<Id,RawWay>& rawWayIndex,
                   std::set<Id>& wayBlacklist,
                   size_t& mergeCount);

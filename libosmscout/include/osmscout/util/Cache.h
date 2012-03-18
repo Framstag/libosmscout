@@ -20,8 +20,15 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <osmscout/CoreFeatures.h>
+
 #include <cassert>
 #include <iostream>
+
+#if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
+  #include <unordered_map>
+#endif
+
 #include <list>
 #include <vector>
 
@@ -88,8 +95,12 @@ namespace osmscout {
 
     typedef std::list<CacheEntry>                   OrderList;
     typedef typename OrderList::iterator            CacheRef;
+#if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
+    typedef std::unordered_map<K,typename OrderList::iterator> Map;
+#else
     typedef std::list<typename OrderList::iterator> CacheRefList;
     typedef std::vector<CacheRefList>               Map;
+#endif
 
   private:
     unsigned long size;
@@ -110,7 +121,14 @@ namespace osmscout {
         // Get oldest entry
         typename std::list<CacheEntry>::reverse_iterator lastEntry=order.rbegin();
 
-        unsigned long index=lastEntry->key%map.size();
+#if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
+        typename Map::iterator iter=map.find(lastEntry->key);
+
+        assert(iter!=map.end());
+
+        map.erase(iter);
+#else
+        unsigned long index=lastEntry->key % map.size();
 
         typename CacheRefList::iterator iter=map[index].begin();
         while (iter!=map[index].end() &&
@@ -122,7 +140,7 @@ namespace osmscout {
 
         // Remove it from map
         map[index].erase(iter);
-
+#endif
         // Remove it from order list
         order.pop_back();
         size--;
@@ -137,17 +155,16 @@ namespace osmscout {
      : size(0),
        maxSize(maxSize)
     {
-      /*
-      if (maxSize==0) {
-        maxSize=1;
-      }*/
-
+#if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
+      map.reserve(maxSize);
+#else
       if(maxSize>=10) {
         map.resize(maxSize/5);
       }
       else {
         map.resize(maxSize);
       }
+#endif
     }
 
     /**
@@ -167,6 +184,21 @@ namespace osmscout {
         return false;
       }
 
+#if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
+      typename Map::iterator iter=map.find(key);
+
+      if (iter!=map.end()) {
+        // Move key/value to the start of the order list
+        order.splice(order.begin(),order,iter->second);
+
+        // Update the map with the new iterator into the order list
+        iter->second=order.begin();
+
+        reference=order.begin();
+
+        return true;
+      }
+#else
       unsigned long index(key%map.size());
       CacheRefList  *refList=&map[index];
 
@@ -186,7 +218,7 @@ namespace osmscout {
           return true;
         }
       }
-
+#endif
       return false;
     }
 
@@ -199,7 +231,7 @@ namespace osmscout {
       */
     typename Cache::CacheRef SetEntry(const CacheEntry& entry)
     {
-      if (map.size()==0) {
+      if (maxSize==0) {
         order.clear();
 
         order.push_front(entry);
@@ -207,6 +239,28 @@ namespace osmscout {
         return order.begin();
       }
 
+#if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
+      typename Map::iterator iter=map.find(entry.key);
+
+      if (iter!=map.end()) {
+        // Move key/value to the start of the order list
+        order.splice(order.begin(),order,iter->second);
+
+        // Update the map with the new iterator into the order list
+        iter->second=order.begin();
+
+        order.front().value=entry.value;
+      }
+      else {
+        // Place key/value to the start of the order list
+        order.push_front(entry);
+        size++;
+        // Update the map with the new iterator into the order list
+        map[entry.key]=order.begin();
+
+        StripCache();
+      }
+#else
       unsigned long                   index=entry.key%map.size();
       CacheRefList                    *refList=&map[index];
       typename CacheRefList::iterator iter=refList->begin();
@@ -236,7 +290,7 @@ namespace osmscout {
 
         StripCache();
       }
-
+#endif
       return order.begin();
     }
 
@@ -246,14 +300,13 @@ namespace osmscout {
       */
     void SetMaxSize(unsigned long maxSize)
     {
-      /*
-      if (maxSize==0) {
-        maxSize=1;
-      }*/
-
       this->maxSize=maxSize;
 
       StripCache();
+
+#if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
+      map.reserve(maxSize);
+#endif
     }
 
     /**
@@ -265,12 +318,14 @@ namespace osmscout {
       map.clear();
       size=0;
 
+#if !defined(OSMSCOUT_HAVE_UNORDERED_MAP)
       if(maxSize>=10) {
         map.resize(maxSize/5);
       }
       else {
         map.resize(maxSize);
       }
+#endif
     }
 
     /**
@@ -285,6 +340,19 @@ namespace osmscout {
     {
       unsigned long memory=0;
 
+#if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
+      // Size of map
+      memory+=map.size()*sizeof(CacheRef);
+
+      // Size of list
+      memory+=size*sizeof(CacheEntry);
+
+      for (typename std::list<CacheEntry>::const_iterator entry=order.begin();
+           entry!=order.end();
+           ++entry) {
+        memory+=sizer.GetSize(entry->value);
+      }
+#else
       memory+=map.size()*sizeof(CacheRefList);
       memory+=size*sizeof(CacheEntry);
 
@@ -297,6 +365,7 @@ namespace osmscout {
            ++entry) {
         memory+=sizer.GetSize(entry->value);
       }
+#endif
 
       return memory;
     }

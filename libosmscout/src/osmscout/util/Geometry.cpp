@@ -21,6 +21,7 @@
 
 #include <osmscout/util/Geometry.h>
 
+#include <cassert>
 #include <cstdlib>
 
 namespace osmscout {

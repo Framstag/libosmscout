@@ -387,7 +387,7 @@ namespace osmscout
   bool OptimizeLowZoomGenerator::WriteOptimizedWays(Progress& progress,
                                                    FileWriter& writer,
                                                    const std::list<WayRef>& ways,
-                                                   std::map<Id,FileOffset>& offsets,
+                                                   IdFileOffsetMap& offsets,
                                                    size_t width,
                                                    size_t height,
                                                    double magnification)
@@ -450,7 +450,7 @@ namespace osmscout
                                              FileWriter& writer,
                                              const TypeInfo& type,
                                              const std::list<WayRef>& ways,
-                                             std::map<Id,FileOffset>& offsets,
+                                             const IdFileOffsetMap& offsets,
                                              TypeData& data)
   {
     // We do not write a bitmap, if there is not data to map
@@ -465,12 +465,12 @@ namespace osmscout
     for (std::list<WayRef>::const_iterator w=ways.begin();
         w!=ways.end();
         w++) {
-      WayRef                                  way(*w);
-      double                                  minLon;
-      double                                  maxLon;
-      double                                  minLat;
-      double                                  maxLat;
-      std::map<Id,FileOffset>::const_iterator offset=offsets.find(way->GetId());
+      WayRef                          way(*w);
+      double                          minLon;
+      double                          maxLon;
+      double                          minLat;
+      double                          maxLat;
+      IdFileOffsetMap::const_iterator offset=offsets.find(way->GetId());
 
       if (offset==offsets.end()) {
         continue;
@@ -609,9 +609,9 @@ namespace osmscout
     for (std::set<TypeId>::const_iterator type=types.begin();
          type!=types.end();
          type++) {
-      std::list<WayRef>       ways;
-      std::list<WayRef>       newWays;
-      std::map<Id,FileOffset> offsets;
+      std::list<WayRef> ways;
+      std::list<WayRef> newWays;
+      IdFileOffsetMap   offsets;
 
       //
       // Load type data

@@ -4,5 +4,8 @@
 /* Illumination uses special gcc compiler features to explicitely export symbols */
 #undef OSMSCOUT_MAP_CAIRO_EXPORT_SYMBOLS
 
+/* system header <unordered_map> is available */
+#undef OSMSCOUT_MAP_CAIRO_HAVE_UNORDERED_MAP
+
 #endif
 

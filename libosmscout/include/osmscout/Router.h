@@ -23,6 +23,12 @@
 #include <list>
 #include <set>
 
+#include <osmscout/CoreFeatures.h>
+
+#if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
+  #include <unordered_map>
+#endif
+
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/RouteNode.h>
@@ -324,6 +330,14 @@ namespace osmscout {
     typedef std::set<RNodeRef,RNodeCostCompare>           OpenList;
     typedef std::set<RNodeRef,RNodeCostCompare>::iterator OpenListRef;
 
+#if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
+  typedef std::unordered_map<Id,Router::OpenListRef>      OpenMap;
+  typedef std::unordered_map<Id,Router::RNodeRef>         CloseMap;
+#else
+  typedef std::map<Id,Router::OpenListRef>                OpenMap;
+  typedef std::map<Id,Router::RNodeRef>                   CloseMap;
+#endif
+
   private:
     bool                  isOpen;            //! true, if opened
     bool                  debugPerformance;
@@ -341,7 +355,7 @@ namespace osmscout {
                              RouteNodeRef& routeNode,
                              size_t& pos);
     bool ResolveRNodesToList(const RNodeRef& end,
-                             const std::map<Id,RNodeRef>& closeMap,
+                             const CloseMap& closeMap,
                              std::list<RNodeRef>& nodes);
     bool ResolveRNodesToRouteData(const std::list<RNodeRef>& nodes,
                                   Id startWayId,
