@@ -22,10 +22,6 @@
 
 #include <osmscout/ImportFeatures.h>
 
-#if defined(OSMSCOUT_IMPORT_HAVE_UNORDERED_MAP)
-  #include <unordered_map>
-#endif
-
 #include <map>
 
 #include <osmscout/import/Import.h>
@@ -34,18 +30,14 @@
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
+#include <osmscout/util/HashMap.h>
 
 namespace osmscout {
 
   class OptimizeLowZoomGenerator : public ImportModule
   {
   private:
-#if defined(OSMSCOUT_IMPORT_HAVE_UNORDERED_MAP)
-    typedef std::unordered_map<Id,FileOffset> IdFileOffsetMap;
-#else
-    typedef std::map<Id,FileOffset> IdFileOffsetMap;
-#endif
-
+    typedef OSMSCOUT_HASHMAP<Id,FileOffset> IdFileOffsetMap;
 
     struct TypeData
     {

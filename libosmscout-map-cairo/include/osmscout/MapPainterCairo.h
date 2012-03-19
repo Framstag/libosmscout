@@ -22,12 +22,6 @@
 
 #include <osmscout/MapCairoFeatures.h>
 
-#if defined(OSMSCOUT_MAP_CAIRO_HAVE_UNORDERED_MAP)
-  #include <unordered_map>
-#else
-  #include <map>
-#endif
-
 #if defined(__WIN32__) || defined(WIN32) || defined(__APPLE__)
   #include <cairo.h>
 #else
@@ -36,6 +30,8 @@
 
 #include <osmscout/private/MapCairoImportExport.h>
 
+#include <osmscout/util/HashMap.h>
+
 #include <osmscout/MapPainter.h>
 
 namespace osmscout {
@@ -43,11 +39,7 @@ namespace osmscout {
   class OSMSCOUT_MAP_CAIRO_API MapPainterCairo : public MapPainter
   {
   private:
-#if defined(OSMSCOUT_MAP_CAIRO_HAVE_UNORDERED_MAP)
-    typedef std::unordered_map<size_t,cairo_scaled_font_t*> FontMap;
-#else
-    typedef std::map<size_t,cairo_scaled_font_t*>           FontMap;
-#endif
+    typedef OSMSCOUT_HASHMAP<size_t,cairo_scaled_font_t*> FontMap;
 
     cairo_t                       *draw;     //! The cairo cairo_t for the mask
     std::vector<cairo_surface_t*> images;    //! vector of cairo surfaces for icons

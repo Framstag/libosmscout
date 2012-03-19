@@ -22,28 +22,23 @@
 
 #include <osmscout/ImportFeatures.h>
 
-#if defined(OSMSCOUT_IMPORT_HAVE_UNORDERED_MAP)
-  #include <unordered_map>
-#endif
-
 #include <map>
 
 #include <osmscout/Way.h>
 #include <osmscout/NumericIndex.h>
 
+#include <osmscout/util/HashMap.h>
+
 #include <osmscout/import/Import.h>
 #include <osmscout/import/RawWay.h>
+
 
 namespace osmscout {
 
   class WayDataGenerator : public ImportModule
   {
   private:
-#if defined(OSMSCOUT_IMPORT_HAVE_UNORDERED_MAP)
-    typedef std::unordered_map<Id,std::list<Id> > EndPointWayMap;
-#else
-    typedef std::map<Id,std::list<Id> >           EndPointWayMap;
-#endif
+    typedef OSMSCOUT_HASHMAP<Id,std::list<Id> > EndPointWayMap;
 
     bool ReadRestrictionRelations(const ImportParameter& parameter,
                                   Progress& progress,

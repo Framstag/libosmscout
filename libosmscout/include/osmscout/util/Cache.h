@@ -25,12 +25,11 @@
 #include <cassert>
 #include <iostream>
 
-#if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
-  #include <unordered_map>
-#endif
 
 #include <list>
 #include <vector>
+
+#include <osmscout/util/HashMap.h>
 
 namespace osmscout {
 
@@ -96,7 +95,7 @@ namespace osmscout {
     typedef std::list<CacheEntry>                   OrderList;
     typedef typename OrderList::iterator            CacheRef;
 #if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
-    typedef std::unordered_map<K,typename OrderList::iterator> Map;
+    typedef OSMSCOUT_HASHMAP<K,typename OrderList::iterator> Map;
 #else
     typedef std::list<typename OrderList::iterator> CacheRefList;
     typedef std::vector<CacheRefList>               Map;

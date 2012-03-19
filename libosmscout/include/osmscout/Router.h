@@ -25,10 +25,6 @@
 
 #include <osmscout/CoreFeatures.h>
 
-#if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
-  #include <unordered_map>
-#endif
-
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/RouteNode.h>
@@ -50,6 +46,7 @@
 #include <osmscout/RoutingProfile.h>
 
 #include <osmscout/util/Cache.h>
+#include <osmscout/util/HashMap.h>
 #include <osmscout/util/Reference.h>
 
 namespace osmscout {
@@ -330,13 +327,8 @@ namespace osmscout {
     typedef std::set<RNodeRef,RNodeCostCompare>           OpenList;
     typedef std::set<RNodeRef,RNodeCostCompare>::iterator OpenListRef;
 
-#if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
-  typedef std::unordered_map<Id,Router::OpenListRef>      OpenMap;
-  typedef std::unordered_map<Id,Router::RNodeRef>         CloseMap;
-#else
-  typedef std::map<Id,Router::OpenListRef>                OpenMap;
-  typedef std::map<Id,Router::RNodeRef>                   CloseMap;
-#endif
+    typedef OSMSCOUT_HASHMAP<Id,Router::OpenListRef>      OpenMap;
+    typedef OSMSCOUT_HASHMAP<Id,Router::RNodeRef>         CloseMap;
 
   private:
     bool                  isOpen;            //! true, if opened
