@@ -163,16 +163,16 @@ namespace osmscout {
     }
 
     // Bounding box
-    double lonMin=nodes[0].lon;
-    double lonMax=nodes[0].lon;
-    double latMin=nodes[0].lat;
-    double latMax=nodes[0].lat;
+    double lonMin=nodes[0].GetLon();
+    double lonMax=nodes[0].GetLon();
+    double latMin=nodes[0].GetLat();
+    double latMax=nodes[0].GetLat();
 
     for (size_t i=1; i<nodes.size(); i++) {
-      lonMin=std::min(lonMin,nodes[i].lon);
-      lonMax=std::max(lonMax,nodes[i].lon);
-      latMin=std::min(latMin,nodes[i].lat);
-      latMax=std::max(latMax,nodes[i].lat);
+      lonMin=std::min(lonMin,nodes[i].GetLon());
+      lonMax=std::max(lonMax,nodes[i].GetLon());
+      latMin=std::min(latMin,nodes[i].GetLat());
+      latMax=std::max(latMax,nodes[i].GetLat());
     }
 
     double xMin;
@@ -225,16 +225,16 @@ namespace osmscout {
       return false;
     }
 
-    xmin=nodes[0].lon;
-    xmax=nodes[0].lon;
-    ymin=nodes[0].lat;
-    ymax=nodes[0].lat;
+    xmin=nodes[0].GetLon();
+    xmax=nodes[0].GetLon();
+    ymin=nodes[0].GetLat();
+    ymax=nodes[0].GetLat();
 
     for (size_t j=1; j<nodes.size(); j++) {
-      xmin=std::min(xmin,nodes[j].lon);
-      xmax=std::max(xmax,nodes[j].lon);
-      ymin=std::min(ymin,nodes[j].lat);
-      ymax=std::max(ymax,nodes[j].lat);
+      xmin=std::min(xmin,nodes[j].GetLon());
+      xmax=std::max(xmax,nodes[j].GetLon());
+      ymin=std::min(ymin,nodes[j].GetLat());
+      ymax=std::max(ymax,nodes[j].GetLat());
     }
 
     return true;
@@ -1339,10 +1339,10 @@ namespace osmscout {
     data.transStart=start;
     data.transEnd=end;
 
-    data.minLon=nodes[0].lon;
+    data.minLon=nodes[0].GetLon();
 
     for (size_t i=1; i<nodes.size(); i++) {
-      data.minLon=std::min(data.minLon,nodes[i].lon);
+      data.minLon=std::min(data.minLon,nodes[i].GetLon());
     }
 
     areaData.push_back(data);
@@ -1447,10 +1447,10 @@ namespace osmscout {
           a.transStart=data[*r].transStart;
           a.transEnd=data[*r].transEnd;
 
-          a.minLon=role.nodes[0].lon;
+          a.minLon=role.nodes[0].GetLon();
 
           for (size_t i=1; i<role.nodes.size(); i++) {
-            a.minLon=std::min(a.minLon,role.nodes[i].lon);
+            a.minLon=std::min(a.minLon,role.nodes[i].GetLon());
           }
 
           a.clippings=clippings;

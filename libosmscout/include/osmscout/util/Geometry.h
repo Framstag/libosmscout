@@ -120,13 +120,13 @@ namespace osmscout {
     bool c=false;
 
     for (i=0, j=nodes.size()-1; i<(int)nodes.size(); j=i++) {
-      if (point.id==nodes[i].GetId()) {
+      if (point.GetId()==nodes[i].GetId()) {
         return 0;
       }
 
-      if ((nodes[i].lat>point.lat)!=(nodes[j].lat>point.lat) &&
-          (point.lon<(nodes[j].lon-nodes[i].lon)*(point.lat-nodes[i].lat) /
-           (nodes[j].lat-nodes[i].lat)+nodes[i].lon))  {
+      if ((nodes[i].GetLat()>point.GetLat())!=(nodes[j].GetLat()>point.GetLat()) &&
+          (point.GetLon()<(nodes[j].GetLon()-nodes[i].GetLon())*(point.GetLat()-nodes[i].GetLat()) /
+           (nodes[j].GetLat()-nodes[i].GetLat())+nodes[i].GetLon()))  {
         c=!c;
       }
     }

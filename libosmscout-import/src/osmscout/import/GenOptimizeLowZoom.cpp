@@ -505,10 +505,9 @@ namespace osmscout
 
     progress.Info("Writing bitmap for "+
                   type.GetName()+" ("+NumberToString(type.GetId())+"), "+
+                  "level "+NumberToString(data.indexLevel)+","+
                   NumberToString(cellOffsets.size())+" cells, "+
-                  NumberToString(indexEntries)+" entries, "+
-                  NumberToString(data.cellXCount*data.cellYCount)+
-                  " map size");
+                  NumberToString(indexEntries)+" entries");
 
     if (!writer.GetPos(data.bitmapOffset)) {
       progress.Error("Cannot get type index start position in file");

@@ -249,16 +249,22 @@ namespace osmscout {
         continue;
       }
 
+      std::set<Id> nodeIds;
+
       for (std::vector<Point>::const_iterator node=way.nodes.begin();
           node!=way.nodes.end();
           node++) {
-        std::map<Id,size_t>::iterator entry=nodeWayCountMap.find(node->GetId());
+        if (nodeIds.find(node->GetId())==nodeIds.end()) {
+          std::map<Id,size_t>::iterator entry=nodeWayCountMap.find(node->GetId());
 
-        if (entry!=nodeWayCountMap.end()) {
-          entry->second++;
-        }
-        else {
-         nodeWayCountMap[node->GetId()]=1;
+          if (entry!=nodeWayCountMap.end()) {
+            entry->second++;
+          }
+          else {
+            nodeWayCountMap[node->GetId()]=1;
+          }
+
+          nodeIds.insert(node->GetId());
         }
       }
     }
@@ -331,7 +337,9 @@ namespace osmscout {
       for (std::vector<Point>::const_iterator node=way.nodes.begin();
           node!=way.nodes.end();
           node++) {
-        if (junctions.find(node->GetId())!=junctions.end()) {
+        if ((node==way.nodes.begin() ||
+            node->GetId()!=way.nodes.front().GetId()) &&
+            junctions.find(node->GetId())!=junctions.end()) {
           endPointWayMap[node->GetId()].push_back(way.GetId());
         }
       }

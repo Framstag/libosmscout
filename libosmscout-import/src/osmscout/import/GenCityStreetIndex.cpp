@@ -86,18 +86,18 @@ namespace osmscout {
     void CalculateMinMax()
     {
       if (!area.empty()) {
-        minlon=area[0].lon;
-        maxlon=area[0].lon;
+        minlon=area[0].GetLon();
+        maxlon=area[0].GetLon();
 
-        minlat=area[0].lat;
-        maxlat=area[0].lat;
+        minlat=area[0].GetLat();
+        maxlat=area[0].GetLat();
 
         for (size_t n=1; n<area.size(); n++) {
-          minlon=std::min(minlon,area[n].lon);
-          maxlon=std::max(maxlon,area[n].lon);
+          minlon=std::min(minlon,area[n].GetLon());
+          maxlon=std::max(maxlon,area[n].GetLon());
 
-          minlat=std::min(minlat,area[n].lat);
-          maxlat=std::max(maxlat,area[n].lat);
+          minlat=std::min(minlat,area[n].GetLat());
+          maxlat=std::max(maxlat,area[n].GetLat());
         }
       }
     }
@@ -891,9 +891,9 @@ namespace osmscout {
 
       Point node;
 
-      node.id=city->GetId();
-      node.lat=city->GetLat();
-      node.lon=city->GetLon();
+      node.SetId(city->GetId());
+      node.SetCoordinates(city->GetLat(),
+                          city->GetLon());
 
       AddLocationToArea(rootArea,location,node);
     }
@@ -958,18 +958,18 @@ namespace osmscout {
         std::string name=way.GetName();
 
         if (!name.empty()) {
-          double minlon=way.nodes[0].lon;
-          double maxlon=way.nodes[0].lon;
+          double minlon=way.nodes[0].GetLon();
+          double maxlon=way.nodes[0].GetLon();
 
-          double minlat=way.nodes[0].lat;
-          double maxlat=way.nodes[0].lat;
+          double minlat=way.nodes[0].GetLat();
+          double maxlat=way.nodes[0].GetLat();
 
           for (size_t n=1; n<way.nodes.size(); n++) {
-            minlon=std::min(minlon,way.nodes[n].lon);
-            maxlon=std::max(maxlon,way.nodes[n].lon);
+            minlon=std::min(minlon,way.nodes[n].GetLon());
+            maxlon=std::max(maxlon,way.nodes[n].GetLon());
 
-            minlat=std::min(minlat,way.nodes[n].lat);
-            maxlat=std::max(maxlat,way.nodes[n].lat);
+            minlat=std::min(minlat,way.nodes[n].GetLat());
+            maxlat=std::max(maxlat,way.nodes[n].GetLat());
           }
 
           AddObjectToArea(rootArea,way,minlon,minlat,maxlon,maxlat);

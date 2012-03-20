@@ -88,8 +88,10 @@ namespace osmscout {
   {
     for (size_t i=0; i<length; i++) {
       if (points[i].draw) {
-        projection.GeoToPixel(nodes[i].lon,nodes[i].lat,
-                              points[i].x,points[i].y);
+        projection.GeoToPixel(nodes[i].GetLon(),
+                              nodes[i].GetLat(),
+                              points[i].x,
+                              points[i].y);
       }
     }
   }
@@ -219,8 +221,10 @@ namespace osmscout {
 
       for (size_t i=0; i<nodes.size(); i++) {
         points[i].draw=true;
-        projection.GeoToPixel(nodes[i].lon,nodes[i].lat,
-                              points[i].x,points[i].y);
+        projection.GeoToPixel(nodes[i].GetLon(),
+                              nodes[i].GetLat(),
+                              points[i].x,
+                              points[i].y);
       }
     }
   }
@@ -277,8 +281,8 @@ namespace osmscout {
 
       for (size_t i=0; i<nodes.size(); i++) {
         points[i].draw=true;
-        projection.GeoToPixel(nodes[i].lon,
-                              nodes[i].lat,
+        projection.GeoToPixel(nodes[i].GetLon(),
+                              nodes[i].GetLat(),
                               points[i].x,
                               points[i].y);
       }

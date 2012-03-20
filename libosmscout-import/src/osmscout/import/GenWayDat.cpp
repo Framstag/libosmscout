@@ -177,8 +177,8 @@ namespace osmscout {
         continue;
       }
 
-      endPointWayMap[rawWay.GetNodeId(0)].push_back(rawWay.GetId());
-      endPointWayMap[rawWay.GetNodeId(rawWay.GetNodeCount()-1)].push_back(rawWay.GetId());
+      endPointWayMap[rawWay.GetNodes().front()].push_back(rawWay.GetId());
+      endPointWayMap[rawWay.GetNodes().back()].push_back(rawWay.GetId());
     }
 
     if (!scanner.Close()) {
@@ -263,25 +263,27 @@ namespace osmscout {
   {
     EndPointWayMap::const_iterator endPoints;
 
-    endPoints=endPointWayMap.find(way.GetNodes()[0]);
+    endPoints=endPointWayMap.find(way.GetNodes().front());
 
     if (endPoints!=endPointWayMap.end()) {
       for (std::list<Id>::const_iterator id=endPoints->second.begin();
           id!=endPoints->second.end();
           id++) {
-        if (*id>way.GetId() && wayBlacklist.find(*id)==wayBlacklist.end()) {
+        if (*id>way.GetId() &&
+            wayBlacklist.find(*id)==wayBlacklist.end()) {
           candidates.insert(*id);
         }
       }
     }
 
-    endPoints=endPointWayMap.find(way.GetNodes()[way.GetNodeCount()-1]);
+    endPoints=endPointWayMap.find(way.GetNodes().back());
 
     if (endPoints!=endPointWayMap.end()) {
       for (std::list<Id>::const_iterator id=endPoints->second.begin();
           id!=endPoints->second.end();
           id++) {
-        if (*id>way.GetId() && wayBlacklist.find(*id)==wayBlacklist.end()) {
+        if (*id>way.GetId() &&
+            wayBlacklist.find(*id)==wayBlacklist.end()) {
           candidates.insert(*id);
         }
       }
@@ -381,7 +383,8 @@ namespace osmscout {
       std::set<Id> allCandidates;
 
       for (size_t b=0; b<blockCount; b++) {
-        if (hasBeenMerged[b] && !rawWays[b].IsArea()) {
+        if (hasBeenMerged[b] &&
+            !rawWays[b].IsArea()) {
           RawWay& rawWay=rawWays[b];
 
           GetWayMergeCandidates(rawWay,
@@ -475,12 +478,6 @@ namespace osmscout {
             hasBeenMerged[b]=true;
             somethingHasMerged=true;
 
-            /*
-            progress.Info("Joining way with id "+
-                           NumberToString(rawWay.GetId()) +
-                           " with way with id "+
-                           NumberToString(candidate->GetId()));*/
-
             std::vector<Id> nodes(rawWay.GetNodes());
 
             if (reverseOrigNodes!=-1) {
@@ -558,6 +555,9 @@ namespace osmscout {
               for (size_t i=1; i<candidate->GetNodeCount(); i++) {
                 nodes.push_back(candidate->GetNodeId(candidate->GetNodeCount()-1-i));
               }
+            }
+            else {
+              assert(true);
             }
 
             rawWay.SetNodes(nodes);
@@ -776,6 +776,11 @@ namespace osmscout {
       nodes.clear();
 
       for (size_t w=0; w<blockCount; w++) {
+        // Way has been joined, no need to write it
+        if (wayBlacklist.find(block[w].GetId())!=wayBlacklist.end()) {
+          continue;
+        }
+
         std::vector<Tag> tags(block[w].GetTags());
         Way              way;
         bool             reverseNodes=false;
@@ -825,7 +830,7 @@ namespace osmscout {
           EndPointWayMap::const_iterator wayJoint;
           std::set<Id>::const_iterator   areaJoint;
 
-          wayJoint=endPointWayMap.find(way.nodes[0].id);
+          wayJoint=endPointWayMap.find(way.nodes.front().GetId());
 
           if (wayJoint!=endPointWayMap.end() &&
               wayJoint->second.size()<2) {
@@ -833,19 +838,19 @@ namespace osmscout {
           }
 
           if (wayJoint==endPointWayMap.end()) {
-            areaJoint=endPointAreaSet.find(way.nodes[0].id);
+            areaJoint=endPointAreaSet.find(way.nodes.front().GetId());
           }
 
           way.SetStartIsJoint(wayJoint!=endPointWayMap.end() || areaJoint!=endPointAreaSet.end());
 
-          wayJoint=endPointWayMap.find(way.nodes[way.nodes.size()-1].id);
+          wayJoint=endPointWayMap.find(way.nodes.back().GetId());
 
           if (wayJoint!=endPointWayMap.end() && wayJoint->second.size()<2) {
             wayJoint=endPointWayMap.end();
           }
 
           if (wayJoint==endPointWayMap.end()) {
-            areaJoint=endPointAreaSet.find(way.nodes[way.nodes.size()-1].id);
+            areaJoint=endPointAreaSet.find(way.nodes.back().GetId());
           }
 
           way.SetEndIsJoint(wayJoint!=endPointWayMap.end() || areaJoint!=endPointAreaSet.end());

@@ -103,17 +103,17 @@ namespace osmscout {
         }
 
         for (size_t i=0; i<nextWay->nodes.size(); i++) {
-          if (nextWay->nodes[i].id==iter->GetTargetNodeId()) {
+          if (nextWay->nodes[i].GetId()==iter->GetTargetNodeId()) {
             nextNode=i;
             break;
           }
         }
 
         if (prevWay.Valid()) {
-          double deltaDistance=GetEllipsoidalDistance(prevWay->nodes[prevNode].lon,
-                                                      prevWay->nodes[prevNode].lat,
-                                                      nextWay->nodes[nextNode].lon,
-                                                      nextWay->nodes[nextNode].lat);
+          double deltaDistance=GetEllipsoidalDistance(prevWay->nodes[prevNode].GetLon(),
+                                                      prevWay->nodes[prevNode].GetLat(),
+                                                      nextWay->nodes[nextNode].GetLon(),
+                                                      nextWay->nodes[nextNode].GetLat());
           double deltaTime=profile.GetTime(nextWay,
                                            deltaDistance);
 
@@ -627,7 +627,7 @@ namespace osmscout {
 
     size_t index=0;
     while (index<way->nodes.size()) {
-      if (way->nodes[index].id==nodeId) {
+      if (way->nodes[index].GetId()==nodeId) {
         break;
       }
 
@@ -933,9 +933,9 @@ namespace osmscout {
 
     size_t index=0;
     while (index<startWay->nodes.size()) {
-      if (startWay->nodes[index].id==startNodeId) {
-        startLon=startWay->nodes[index].lon;
-        startLat=startWay->nodes[index].lat;
+      if (startWay->nodes[index].GetId()==startNodeId) {
+        startLon=startWay->nodes[index].GetLon();
+        startLat=startWay->nodes[index].GetLat();
         break;
       }
 
@@ -956,9 +956,9 @@ namespace osmscout {
 
     index=0;
     while (index<targetWay->nodes.size()) {
-      if (targetWay->nodes[index].id==targetNodeId) {
-        targetLon=targetWay->nodes[index].lon;
-        targetLat=targetWay->nodes[index].lat;
+      if (targetWay->nodes[index].GetId()==targetNodeId) {
+        targetLon=targetWay->nodes[index].GetLon();
+        targetLat=targetWay->nodes[index].GetLat();
         break;
       }
 
@@ -1218,7 +1218,7 @@ namespace osmscout {
         // Initial starting point
         if (iter==data.Entries().begin()) {
           for (size_t i=0; i<w->nodes.size(); i++) {
-            if (w->nodes[i].id==iter->GetCurrentNodeId()) {
+            if (w->nodes[i].GetId()==iter->GetCurrentNodeId()) {
               way.nodes.push_back(w->nodes[i]);
               break;
             }
@@ -1226,7 +1226,7 @@ namespace osmscout {
         }
 
         for (size_t i=0; i<w->nodes.size(); i++) {
-          if (w->nodes[i].id==iter->GetTargetNodeId()) {
+          if (w->nodes[i].GetId()==iter->GetTargetNodeId()) {
             way.nodes.push_back(w->nodes[i]);
             break;
           }
@@ -1264,7 +1264,7 @@ namespace osmscout {
         // Initial starting point
         if (iter==data.Entries().begin()) {
           for (size_t i=0; i<w->nodes.size(); i++) {
-            if (w->nodes[i].id==iter->GetCurrentNodeId()) {
+            if (w->nodes[i].GetId()==iter->GetCurrentNodeId()) {
               Point point;
 
               point.SetId(w->nodes[i].GetId());
@@ -1279,7 +1279,7 @@ namespace osmscout {
 
         // target node of current path
         for (size_t i=0; i<w->nodes.size(); i++) {
-          if (w->nodes[i].id==iter->GetTargetNodeId()) {
+          if (w->nodes[i].GetId()==iter->GetTargetNodeId()) {
             Point point;
 
             point.SetId(w->nodes[i].GetId());

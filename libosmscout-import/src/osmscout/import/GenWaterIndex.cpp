@@ -106,8 +106,8 @@ namespace osmscout {
     for (std::list<Line>::iterator line=lines.begin();
         line!=lines.end();
         ++line) {
-      line->sortCriteria1=std::min(line->a.lon,line->b.lon);
-      line->sortCriteria2=std::abs((line->b.lat-line->a.lat)/(line->b.lon-line->a.lon));
+      line->sortCriteria1=std::min(line->a.GetLon(),line->b.GetLon());
+      line->sortCriteria2=std::abs((line->b.GetLat()-line->a.GetLat())/(line->b.GetLon()-line->a.GetLon()));
     }
 
     lines.sort(SmallerLineSort());
@@ -117,13 +117,13 @@ namespace osmscout {
         ++line) {
       std::vector<ScanCell> cells;
 
-      ScanConvertLine((int)((line->a.lon+180.0)/cellWidth),
-                      (int)((line->a.lat+90.0)/cellHeight),
-                      (int)((line->b.lon+180.0)/cellWidth),
-                      (int)((line->b.lat+90.0)/cellHeight),
+      ScanConvertLine((int)((line->a.GetLon()+180.0)/cellWidth),
+                      (int)((line->a.GetLat()+90.0)/cellHeight),
+                      (int)((line->b.GetLon()+180.0)/cellWidth),
+                      (int)((line->b.GetLat()+90.0)/cellHeight),
                       cells);
 
-      if (line->b.lat>line->a.lat) {
+      if (line->b.GetLat()>line->a.GetLat()) {
         // up
         for (size_t i=0; i<cells.size(); i++) {
           if (cells[i].x>=cellXStart &&
@@ -139,7 +139,7 @@ namespace osmscout {
           }
         }
       }
-      else if (line->b.lat<line->a.lat) {
+      else if (line->b.GetLat()<line->a.GetLat()) {
         // down
         for (size_t i=0; i<cells.size(); i++) {
           if (cells[i].x>=cellXStart &&
@@ -160,8 +160,8 @@ namespace osmscout {
     for (std::list<Line>::iterator line=lines.begin();
         line!=lines.end();
         ++line) {
-      line->sortCriteria1=std::max(line->a.lon,line->b.lon);
-      line->sortCriteria2=std::abs((line->b.lat-line->a.lat)/(line->b.lon-line->a.lon));
+      line->sortCriteria1=std::max(line->a.GetLon(),line->b.GetLon());
+      line->sortCriteria2=std::abs((line->b.GetLat()-line->a.GetLat())/(line->b.GetLon()-line->a.GetLon()));
     }
 
     lines.sort(BiggerLineSort());
@@ -171,12 +171,12 @@ namespace osmscout {
         ++line) {
       std::vector<ScanCell> cells;
 
-      ScanConvertLine((int)((line->a.lon+180.0)/cellWidth),
-                      (int)((line->a.lat+90.0)/cellHeight),
-                      (int)((line->b.lon+180.0)/cellWidth),
-                      (int)((line->b.lat+90.0)/cellHeight),
+      ScanConvertLine((int)((line->a.GetLon()+180.0)/cellWidth),
+                      (int)((line->a.GetLat()+90.0)/cellHeight),
+                      (int)((line->b.GetLon()+180.0)/cellWidth),
+                      (int)((line->b.GetLat()+90.0)/cellHeight),
                       cells);
-      if (line->b.lat>line->a.lat) {
+      if (line->b.GetLat()>line->a.GetLat()) {
         // up
         for (size_t i=0; i<cells.size(); i++) {
           if (cells[i].x>=cellXStart &&
@@ -192,7 +192,7 @@ namespace osmscout {
           }
         }
       }
-      else if (line->b.lat<line->a.lat) {
+      else if (line->b.GetLat()<line->a.GetLat()) {
         // down
         for (size_t i=0; i<cells.size(); i++) {
           if (cells[i].x>=cellXStart &&
@@ -230,8 +230,8 @@ namespace osmscout {
     for (std::list<Line>::iterator line=lines.begin();
         line!=lines.end();
         ++line) {
-      line->sortCriteria1=std::min(line->a.lat,line->b.lat);
-      line->sortCriteria2=std::abs((line->b.lon-line->a.lon)/(line->b.lat-line->a.lat));
+      line->sortCriteria1=std::min(line->a.GetLat(),line->b.GetLat());
+      line->sortCriteria2=std::abs((line->b.GetLon()-line->a.GetLon())/(line->b.GetLat()-line->a.GetLat()));
     }
 
     lines.sort(SmallerLineSort());
@@ -241,13 +241,13 @@ namespace osmscout {
         ++line) {
       std::vector<ScanCell> cells;
 
-      ScanConvertLine((int)((line->a.lon+180.0)/cellWidth),
-                      (int)((line->a.lat+90.0)/cellHeight),
-                      (int)((line->b.lon+180.0)/cellWidth),
-                      (int)((line->b.lat+90.0)/cellHeight),
+      ScanConvertLine((int)((line->a.GetLon()+180.0)/cellWidth),
+                      (int)((line->a.GetLat()+90.0)/cellHeight),
+                      (int)((line->b.GetLon()+180.0)/cellWidth),
+                      (int)((line->b.GetLat()+90.0)/cellHeight),
                       cells);
 
-      if (line->b.lon>line->a.lon) {
+      if (line->b.GetLon()>line->a.GetLon()) {
         // right
         for (size_t i=0; i<cells.size(); i++) {
           if (cells[i].x>=cellXStart &&
@@ -263,7 +263,7 @@ namespace osmscout {
           }
         }
       }
-      else if (line->b.lon<line->a.lon) {
+      else if (line->b.GetLon()<line->a.GetLon()) {
         // left
         for (size_t i=0; i<cells.size(); i++) {
           if (cells[i].x>=cellXStart &&
@@ -284,8 +284,8 @@ namespace osmscout {
     for (std::list<Line>::iterator line=lines.begin();
         line!=lines.end();
         ++line) {
-      line->sortCriteria1=std::max(line->a.lat,line->b.lat);
-      line->sortCriteria2=std::abs((line->b.lon-line->a.lon)/(line->b.lat-line->a.lat));
+      line->sortCriteria1=std::max(line->a.GetLat(),line->b.GetLat());
+      line->sortCriteria2=std::abs((line->b.GetLon()-line->a.GetLon())/(line->b.GetLat()-line->a.GetLat()));
     }
 
     lines.sort(BiggerLineSort());
@@ -295,12 +295,12 @@ namespace osmscout {
         ++line) {
       std::vector<ScanCell> cells;
 
-      ScanConvertLine((int)((line->a.lon+180.0)/cellWidth),
-                      (int)((line->a.lat+90.0)/cellHeight),
-                      (int)((line->b.lon+180.0)/cellWidth),
-                      (int)((line->b.lat+90.0)/cellHeight),
+      ScanConvertLine((int)((line->a.GetLon()+180.0)/cellWidth),
+                      (int)((line->a.GetLat()+90.0)/cellHeight),
+                      (int)((line->b.GetLon()+180.0)/cellWidth),
+                      (int)((line->b.GetLat()+90.0)/cellHeight),
                       cells);
-      if (line->b.lon>line->a.lon) {
+      if (line->b.GetLon()>line->a.GetLon()) {
         // right
         for (size_t i=0; i<cells.size(); i++) {
           if (cells[i].x>=cellXStart &&
@@ -316,7 +316,7 @@ namespace osmscout {
           }
         }
       }
-      else if (line->b.lon<line->a.lon) {
+      else if (line->b.GetLon()<line->a.GetLon()) {
         // left
         for (size_t i=0; i<cells.size(); i++) {
           if (cells[i].x>=cellXStart &&

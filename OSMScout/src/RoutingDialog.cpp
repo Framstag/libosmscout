@@ -270,7 +270,7 @@ void RoutingDialog::SelectFrom()
     route.startWay=location.references.front().GetId();
 
     if (dbThread.GetWay(route.startWay,way)) {
-      route.startNode=way->nodes[0].id;
+      route.startNode=way->nodes[0].GetId();
 
       if (location.path.empty()) {
         route.start=QString::fromUtf8(location.name.c_str());
@@ -314,7 +314,7 @@ void RoutingDialog::SelectTo()
     route.endWay=location.references.front().GetId();
 
     if (dbThread.GetWay(route.endWay,way)) {
-      route.endNode=way->nodes[0].id;
+      route.endNode=way->nodes[0].GetId();
 
       if (location.path.empty()) {
         route.end=QString::fromUtf8(location.name.c_str());
@@ -385,8 +385,8 @@ void RoutingDialog::Route()
     return;
   }
 
-  if (!dbThread.CalculateRoute(startWay->GetId(),startWay->nodes.front().id,
-                               endWay->GetId(),endWay->nodes.back().id,
+  if (!dbThread.CalculateRoute(startWay->GetId(),startWay->nodes.front().GetId(),
+                               endWay->GetId(),endWay->nodes.back().GetId(),
                                routeData)) {
     std::cerr << "There was an error while routing!" << std::endl;
     return;

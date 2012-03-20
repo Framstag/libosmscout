@@ -460,7 +460,7 @@ namespace osmscout {
           // the current way we have to give up
           progress.Error("Multipolygon relation "+NumberToString(relation.GetId())+
                          ": Cannot find matching node for node id "+
-                         NumberToString(points.back().id));
+                         NumberToString(points.back().GetId()));
           return false;
         }
       }
@@ -634,7 +634,7 @@ namespace osmscout {
           continue;
         }
 
-        if (role->nodes.front().id==cand->nodes.front().id) {
+        if (role->nodes.front().GetId()==cand->nodes.front().GetId()) {
           role->nodes.reserve(role->nodes.size()+
                               cand->nodes.size()-1);
           for (size_t i=1; i<cand->nodes.size(); i++) {
@@ -643,7 +643,7 @@ namespace osmscout {
           merged=true;
           relation.roles.erase(cand);
         }
-        else if (role->nodes.front().id==cand->nodes.back().id) {
+        else if (role->nodes.front().GetId()==cand->nodes.back().GetId()) {
           role->nodes.reserve(role->nodes.size()+
                               cand->nodes.size()-1);
           for (size_t i=1; i<cand->nodes.size(); i++) {
@@ -652,7 +652,7 @@ namespace osmscout {
           merged=true;
           relation.roles.erase(cand);
         }
-        else if (role->nodes.back().id==cand->nodes.front().id) {
+        else if (role->nodes.back().GetId()==cand->nodes.front().GetId()) {
           role->nodes.reserve(role->nodes.size()+
                               cand->nodes.size()-1);
           for (size_t i=1; i<cand->nodes.size(); i++) {
@@ -661,7 +661,7 @@ namespace osmscout {
           merged=true;
           relation.roles.erase(cand);
         }
-        else if (role->nodes.back().id==cand->nodes.back().id) {
+        else if (role->nodes.back().GetId()==cand->nodes.back().GetId()) {
           role->nodes.reserve(role->nodes.size()+
                               cand->nodes.size()-1);
           for (size_t i=1; i<cand->nodes.size(); i++) {

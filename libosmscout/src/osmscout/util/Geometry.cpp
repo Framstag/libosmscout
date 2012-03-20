@@ -227,10 +227,10 @@ namespace osmscout {
     assert(points.size()>=2);
 
     for (size_t i=0; i<points.size()-1; i++) {
-      int x1=int((points[i].lon-xTrans)/cellWidth);
-      int x2=int((points[i+1].lon-xTrans)/cellWidth);
-      int y1=int((points[i].lat-yTrans)/cellHeight);
-      int y2=int((points[i+1].lat-yTrans)/cellHeight);
+      int x1=int((points[i].GetLon()-xTrans)/cellWidth);
+      int x2=int((points[i+1].GetLon()-xTrans)/cellWidth);
+      int y1=int((points[i].GetLat()-yTrans)/cellHeight);
+      int y2=int((points[i+1].GetLat()-yTrans)/cellHeight);
 
       ScanConvertLine(x1,y1,x2,y2,cells);
     }

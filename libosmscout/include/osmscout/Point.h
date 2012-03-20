@@ -26,7 +26,7 @@ namespace osmscout {
 
   class OSMSCOUT_API Point
   {
-  public:
+  private:
     Id     id;
     double lon;
     double lat;

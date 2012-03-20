@@ -41,18 +41,18 @@ namespace osmscout {
     for (size_t i=0; i<roles.size(); i++) {
       for (size_t j=0; j<roles[i].nodes.size(); j++) {
         if (start) {
-          minLat=roles[i].nodes[j].lat;
-          minLon=roles[i].nodes[j].lon;
-          maxLat=roles[i].nodes[j].lat;
-          maxLon=roles[i].nodes[j].lon;
+          minLat=roles[i].nodes[j].GetLat();
+          minLon=roles[i].nodes[j].GetLon();
+          maxLat=roles[i].nodes[j].GetLat();
+          maxLon=roles[i].nodes[j].GetLon();
 
           start=false;
         }
 
-        minLat=std::min(minLat,roles[i].nodes[j].lat);
-        minLon=std::min(minLon,roles[i].nodes[j].lon);
-        maxLat=std::max(maxLat,roles[i].nodes[j].lat);
-        maxLon=std::max(maxLon,roles[i].nodes[j].lon);
+        minLat=std::min(minLat,roles[i].nodes[j].GetLat());
+        minLon=std::min(minLon,roles[i].nodes[j].GetLon());
+        maxLat=std::max(maxLat,roles[i].nodes[j].GetLat());
+        maxLon=std::max(maxLon,roles[i].nodes[j].GetLon());
       }
     }
 
@@ -74,19 +74,19 @@ namespace osmscout {
     assert(!roles.empty());
     assert(!roles[0].nodes.empty());
 
-    minLon=roles[0].nodes[0].lon;
-    maxLon=roles[0].nodes[0].lon;
-    minLat=roles[0].nodes[0].lat;
-    maxLat=roles[0].nodes[0].lat;
+    minLon=roles[0].nodes[0].GetLon();
+    maxLon=roles[0].nodes[0].GetLon();
+    minLat=roles[0].nodes[0].GetLat();
+    maxLat=roles[0].nodes[0].GetLat();
 
     for (std::vector<Relation::Role>::const_iterator role=roles.begin();
          role!=roles.end();
          ++role) {
       for (size_t i=0; i<role->nodes.size(); i++) {
-        minLon=std::min(minLon,role->nodes[i].lon);
-        maxLon=std::max(maxLon,role->nodes[i].lon);
-        minLat=std::min(minLat,role->nodes[i].lat);
-        maxLat=std::max(maxLat,role->nodes[i].lat);
+        minLon=std::min(minLon,role->nodes[i].GetLon());
+        maxLon=std::max(maxLon,role->nodes[i].GetLon());
+        minLat=std::min(minLat,role->nodes[i].GetLat());
+        maxLat=std::max(maxLat,role->nodes[i].GetLat());
       }
     }
   }
@@ -148,9 +148,9 @@ namespace osmscout {
           scanner.ReadNumber(latValue);
           scanner.ReadNumber(lonValue);
 
-          roles[i].nodes[j].id=minId+id;
-          roles[i].nodes[j].lat=(minLat+latValue)/conversionFactor-90.0;
-          roles[i].nodes[j].lon=(minLon+lonValue)/conversionFactor-180.0;
+          roles[i].nodes[j].SetId(minId+id);
+          roles[i].nodes[j].SetCoordinates((minLat+latValue)/conversionFactor-90.0,
+                                           (minLon+lonValue)/conversionFactor-180.0);
         }
       }
     }
@@ -184,8 +184,8 @@ namespace osmscout {
 
         for (size_t j=0; j<roles[i].nodes.size(); j++) {
           minId=std::min(minId,roles[i].nodes[j].GetId());
-          minLat=std::min(minLat,(uint32_t)floor((roles[i].nodes[j].lat+90.0)*conversionFactor+0.5));
-          minLon=std::min(minLon,(uint32_t)floor((roles[i].nodes[j].lon+180.0)*conversionFactor+0.5));
+          minLat=std::min(minLat,(uint32_t)floor((roles[i].nodes[j].GetLat()+90.0)*conversionFactor+0.5));
+          minLon=std::min(minLon,(uint32_t)floor((roles[i].nodes[j].GetLon()+180.0)*conversionFactor+0.5));
         }
 
         writer.Write(minId);
@@ -193,10 +193,10 @@ namespace osmscout {
         writer.Write(minLon);
 
         for (size_t j=0; j<roles[i].nodes.size(); j++) {
-          uint32_t latValue=(uint32_t)floor((roles[i].nodes[j].lat+90.0)*conversionFactor+0.5);
-          uint32_t lonValue=(uint32_t)floor((roles[i].nodes[j].lon+180.0)*conversionFactor+0.5);
+          uint32_t latValue=(uint32_t)floor((roles[i].nodes[j].GetLat()+90.0)*conversionFactor+0.5);
+          uint32_t lonValue=(uint32_t)floor((roles[i].nodes[j].GetLon()+180.0)*conversionFactor+0.5);
 
-          writer.WriteNumber(roles[i].nodes[j].id-minId);
+          writer.WriteNumber(roles[i].nodes[j].GetId()-minId);
           writer.WriteNumber(latValue-minLat);
           writer.WriteNumber(lonValue-minLon);
         }
