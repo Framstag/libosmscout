@@ -119,7 +119,7 @@ void DumpWay(const osmscout::TypeConfig* typeConfig,
     }
 
     if (way->GetMaxSpeed()!=0) {
-      std::cout << "  maxSpeed: " << way->GetMaxSpeed() << std::endl;
+      std::cout << "  maxSpeed: " << (size_t)way->GetMaxSpeed() << std::endl;
     }
 
     if (way->StartIsJoint()) {

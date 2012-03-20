@@ -106,14 +106,20 @@ namespace osmscout {
 
         if (StringToNumber(valueString,value)) {
           if (isMph) {
-            maxSpeed=(uint8_t)(value*1.609+0.5);
-          }
-
-          if (value>std::numeric_limits<uint8_t>::max()) {
-            maxSpeed=std::numeric_limits<uint8_t>::max();
+            if (value>std::numeric_limits<uint8_t>::max()/1.609+0.5) {
+              maxSpeed=std::numeric_limits<uint8_t>::max();
+            }
+            else {
+              maxSpeed=(uint8_t)(value*1.609+0.5);
+            }
           }
           else {
-            maxSpeed=(uint8_t)value;
+            if (value>std::numeric_limits<uint8_t>::max()) {
+              maxSpeed=std::numeric_limits<uint8_t>::max();
+            }
+            else {
+              maxSpeed=value;
+            }
           }
         }
         else {
