@@ -505,7 +505,7 @@ namespace osmscout
 
     progress.Info("Writing bitmap for "+
                   type.GetName()+" ("+NumberToString(type.GetId())+"), "+
-                  "level "+NumberToString(data.indexLevel)+","+
+                  "level "+NumberToString(data.indexLevel)+", "+
                   NumberToString(cellOffsets.size())+" cells, "+
                   NumberToString(indexEntries)+" entries");
 

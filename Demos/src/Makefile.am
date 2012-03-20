@@ -6,6 +6,7 @@ AM_CXXFLAGS=$(LIBOSMSCOUTMAPSVG_CFLAGS) \
             $(LIBOSMSCOUT_CFLAGS)
 
 bin_PROGRAMS = AddressLookup \
+               DumpData \
                ResourceConsumption \
                Routing \
                LookupPOI
@@ -50,6 +51,9 @@ DrawMapSVG_SOURCES = DrawMapSVG.cpp
 DrawMapSVG_LDADD = $(LIBOSMSCOUTMAPSVG_LIBS) \
                    $(LIBOSMSCOUTMAP_LIBS) \
                    $(LIBOSMSCOUT_LIBS)
+
+DumpData_SOURCES = DumpData.cpp
+DumpData_LDADD = $(LIBOSMSCOUT_LIBS)
 
 LookupPOI_SOURCES = LookupPOI.cpp
 LookupPOI_LDADD = $(LIBOSMSCOUT_LIBS)

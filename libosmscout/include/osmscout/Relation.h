@@ -165,9 +165,24 @@ namespace osmscout {
       return attributes.IsOneway();
     }
 
-    inline const std::vector<Tag>& GetTags() const
+    inline bool HasTags() const
     {
-      return attributes.GetTags();
+      return !attributes.tags.empty();
+    }
+
+    inline size_t GetTagCount() const
+    {
+      return attributes.tags.size();
+    }
+
+    inline TagId GetTagKey(size_t idx) const
+    {
+      return attributes.tags[idx].key;
+    }
+
+    inline const std::string& GetTagValue(size_t idx) const
+    {
+      return attributes.tags[idx].value;
     }
 
     bool GetCenter(double& lat,

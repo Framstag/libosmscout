@@ -145,6 +145,11 @@ namespace osmscout {
       return attributes.EndIsJoint();
     }
 
+    inline bool HasTags() const
+    {
+      return !attributes.tags.empty();
+    }
+
     inline size_t GetTagCount() const
     {
       return attributes.tags.size();

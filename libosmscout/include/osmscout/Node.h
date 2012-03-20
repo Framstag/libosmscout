@@ -67,6 +67,11 @@ namespace osmscout {
       return lat;
     }
 
+    inline bool HasTags() const
+    {
+      return !tags.empty();
+    }
+
     inline size_t GetTagCount() const
     {
       return tags.size();
