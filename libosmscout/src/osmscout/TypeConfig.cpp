@@ -259,15 +259,12 @@ namespace osmscout {
     RegisterTagForExternalUse("admin_level");
     RegisterTagForExternalUse("boundary");
     RegisterTagForExternalUse("bridge");
-    RegisterTagForExternalUse("highway");
     RegisterTagForExternalUse("layer");
     RegisterTagForExternalUse("name");
-    RegisterTagForExternalUse("natural");
     RegisterTagForExternalUse("oneway");
     RegisterTagForExternalUse("place");
     RegisterTagForExternalUse("place_name");
     RegisterTagForExternalUse("ref");
-    RegisterTagForExternalUse("restriction");
     RegisterTagForExternalUse("tunnel");
     RegisterTagForExternalUse("type");
     RegisterTagForExternalUse("width");

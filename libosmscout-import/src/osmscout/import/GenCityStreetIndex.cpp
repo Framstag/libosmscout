@@ -711,9 +711,9 @@ namespace osmscout {
       if (relation.GetType()==boundaryId) {
         size_t level=0;
 
-        for (size_t i=0; i<relation.GetTags().size(); i++) {
-          if (relation.GetTags()[i].key==typeConfig.tagAdminLevel) {
-            if (StringToNumber(relation.GetTags()[i].value,level)) {
+        for (size_t i=0; i<relation.GetTagCount(); i++) {
+          if (relation.GetTagKey(i)==typeConfig.tagAdminLevel) {
+            if (StringToNumber(relation.GetTagValue(i),level)) {
               boundaryRelations.push_back(relation);
             }
             else {
@@ -758,9 +758,9 @@ namespace osmscout {
         progress.SetProgress((l-1)*boundaryRelations.size()+count,10*boundaryRelations.size());
 
         if (!name.empty()) {
-          for (size_t i=0; i<rel->GetTags().size() && level==0; i++) {
-            if (rel->GetTags()[i].key==typeConfig.tagAdminLevel) {
-              StringToNumber(rel->GetTags()[i].value,level);
+          for (size_t i=0; i<rel->GetTagCount() && level==0; i++) {
+            if (rel->GetTagKey(i)==typeConfig.tagAdminLevel) {
+              StringToNumber(rel->GetTagValue(i),level);
             }
           }
 
