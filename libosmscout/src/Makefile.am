@@ -10,6 +10,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/util/Geometry.cpp \
                         osmscout/util/HashMap.cpp \
                         osmscout/util/NumberSet.cpp \
+                        osmscout/util/Progress.cpp \
                         osmscout/util/Projection.cpp \
                         osmscout/util/Reference.cpp \
                         osmscout/util/StopClock.cpp \
@@ -17,7 +18,6 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/util/Transformation.cpp \
                         osmscout/Types.cpp \
                         osmscout/Util.cpp \
-                        osmscout/Progress.cpp \
                         osmscout/StyleConfig.cpp \
                         osmscout/StyleConfigLoader.cpp \
                         osmscout/TypeConfig.cpp \
@@ -26,7 +26,6 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/ost/Scanner.cpp \
                         osmscout/ost/Parser.cpp \
                         osmscout/TypeConfigLoader.cpp \
-                        osmscout/Tiles.cpp \
                         osmscout/AdminRegion.cpp \
                         osmscout/GroundTile.cpp \
                         osmscout/Location.cpp \
@@ -44,7 +43,6 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/AreaWayIndex.cpp \
                         osmscout/CityStreetIndex.cpp \
                         osmscout/NodeIndex.cpp \
-                        osmscout/NodeUseIndex.cpp \
                         osmscout/OptimizeLowZoom.cpp \
                         osmscout/WaterIndex.cpp \
                         osmscout/WayIndex.cpp \

@@ -24,8 +24,9 @@
 
 #include <osmscout/private/ImportImportExport.h>
 
-#include <osmscout/Progress.h>
 #include <osmscout/TypeConfig.h>
+
+#include <osmscout/util/Progress.h>
 
 namespace osmscout {
 

@@ -46,9 +46,6 @@
 // Location index
 #include <osmscout/CityStreetIndex.h>
 
-// Reverse index
-#include <osmscout/NodeUseIndex.h>
-
 // Water index
 #include <osmscout/WaterIndex.h>
 

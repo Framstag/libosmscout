@@ -35,9 +35,6 @@
 // Fileoffset by Id index
 #include <osmscout/WayIndex.h>
 
-// Reverse index
-#include <osmscout/NodeUseIndex.h>
-
 // Database
 #include <osmscout/Database.h>
 

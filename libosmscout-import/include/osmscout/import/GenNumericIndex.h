@@ -22,13 +22,13 @@
 
 #include <vector>
 
-#include <osmscout/Progress.h>
 
 #include <osmscout/Util.h>
 
 #include <osmscout/util/Cache.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
+#include <osmscout/util/Progress.h>
 #include <osmscout/util/String.h>
 
 #include <osmscout/import/Import.h>

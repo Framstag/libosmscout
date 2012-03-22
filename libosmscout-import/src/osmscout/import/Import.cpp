@@ -21,8 +21,6 @@
 
 #include <iostream>
 
-#include <osmscout/Progress.h>
-
 #include <osmscout/TypeConfigLoader.h>
 
 #include <osmscout/Node.h>
@@ -56,6 +54,7 @@
 // Routing
 #include <osmscout/import/GenRouteDat.h>
 
+#include <osmscout/util/Progress.h>
 #include <osmscout/util/StopClock.h>
 
 namespace osmscout {

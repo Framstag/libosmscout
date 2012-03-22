@@ -22,12 +22,12 @@
 
 #include <osmscout/private/CoreImportExport.h>
 
-#include <osmscout/Progress.h>
 #include <osmscout/Tag.h>
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
+#include <osmscout/util/Progress.h>
 
 namespace osmscout {
 

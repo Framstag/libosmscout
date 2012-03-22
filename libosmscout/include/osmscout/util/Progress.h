@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_PROGRESS_H
-#define OSMSCOUT_PROGRESS_H
+#ifndef OSMSCOUT_UTIL_PROGRESS_H
+#define OSMSCOUT_UTIL_PROGRESS_H
 
 /*
   This source is part of the libosmscout library

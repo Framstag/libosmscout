@@ -22,7 +22,6 @@
 #include <iostream>
 #include <map>
 
-#include <osmscout/Tiles.h>
 #include <osmscout/Node.h>
 
 #include <osmscout/Util.h>

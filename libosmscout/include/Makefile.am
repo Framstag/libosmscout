@@ -9,6 +9,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/util/Geometry.h \
                         osmscout/util/HashMap.h \
                         osmscout/util/NumberSet.h \
+                        osmscout/util/Progress.h \
                         osmscout/util/Projection.h \
                         osmscout/util/Reference.h \
                         osmscout/util/StopClock.h \
@@ -17,7 +18,6 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/CoreFeatures.h \
                         osmscout/Types.h \
                         osmscout/Util.h \
-                        osmscout/Progress.h \
                         osmscout/StyleConfig.h \
                         osmscout/StyleConfigLoader.h \
                         osmscout/TypeConfig.h \
@@ -26,7 +26,6 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/ost/Scanner.h \
                         osmscout/ost/Parser.h \
                         osmscout/TypeConfigLoader.h \
-                        osmscout/Tiles.h \
                         osmscout/AdminRegion.h \
                         osmscout/GroundTile.h \
                         osmscout/Node.h \
@@ -48,7 +47,6 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/AreaWayIndex.h \
                         osmscout/CityStreetIndex.h \
                         osmscout/NodeIndex.h \
-                        osmscout/NodeUseIndex.h \
                         osmscout/OptimizeLowZoom.h \
                         osmscout/WaterIndex.h \
                         osmscout/WayIndex.h \
