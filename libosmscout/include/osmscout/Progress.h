@@ -51,6 +51,10 @@ namespace osmscout {
     virtual void Error(const std::string& text);
   };
 
+  class OSMSCOUT_API SilentProgress : public Progress
+  {
+  };
+
   class OSMSCOUT_API ConsoleProgress : public Progress
   {
   private:
