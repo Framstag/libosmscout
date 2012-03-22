@@ -579,48 +579,6 @@ namespace osmscout {
     return typeConfig;
   }
 
-  bool CanBeTurnedInto(const Way& way, Id via, Id to)
-  {
-    if (way.restrictions.empty()) {
-      return true;
-    }
-
-    for (std::vector<Way::Restriction>::const_iterator iter=way.restrictions.begin();
-         iter!=way.restrictions.end();
-         ++iter) {
-      if (iter->type==Way::rstrAllowTurn) {
-        // If our "to" is restriction "to" and our via is in the list of restriction "vias"
-        // we can turn, else not.
-        // If our !"to" is not the "to" of our restriction we also cannot turn.
-        if (iter->members[0]==to) {
-          for (size_t i=1; i<iter->members.size(); i++) {
-            if (iter->members[i]==via) {
-              return true;
-            }
-          }
-
-          return false;
-        }
-        else {
-          return false;
-        }
-      }
-      else if (iter->type==Way::rstrForbitTurn) {
-        // If our "to" is the restriction "to" and our "via" is in the list of the restriction "vias"
-        // we cannot turn.
-        if (iter->members[0]==to) {
-          for (size_t i=1; i<iter->members.size(); i++) {
-            if (iter->members[i]==via) {
-              return false;
-            }
-          }
-        }
-      }
-    }
-
-    return true;
-  }
-
   void Router::GetClosestRouteNode(const WayRef& way, Id nodeId, RouteNodeRef& routeNode, size_t& pos)
   {
     routeNode=NULL;
