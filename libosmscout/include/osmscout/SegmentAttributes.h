@@ -180,6 +180,9 @@ namespace osmscout {
 
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;
+
+    bool operator==(const SegmentAttributes& other) const;
+    bool operator!=(const SegmentAttributes& other) const;
   };
 }
 

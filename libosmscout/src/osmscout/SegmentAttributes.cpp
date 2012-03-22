@@ -37,9 +37,15 @@ namespace osmscout {
   {
     name.clear();
     ref.clear();
+    houseNr.clear();
+
     flags=0;
     layer=0;
     width=0;
+    maxSpeed=0;
+
+    this->tags.clear();
+
     reverseNodes=false;
 
     flags|=hasAccess;
@@ -381,4 +387,52 @@ namespace osmscout {
 
     return !writer.HasError();
   }
+
+  bool SegmentAttributes::operator==(const SegmentAttributes& other) const
+  {
+    if (type!=other.type) {
+      return false;
+    }
+
+    if ((flags & (isBridge | isTunnel | isOneway | isRoundabout))!=
+        (other.flags & (isBridge | isTunnel | isOneway | isRoundabout))) {
+      return false;
+    }
+
+    if (name!=other.name ||
+        ref!=other.ref ||
+        houseNr!=other.houseNr ||
+        layer!=other.layer ||
+        width!=other.width ||
+        maxSpeed!=other.maxSpeed) {
+      return false;
+    }
+
+    if (tags.empty() && other.tags.empty()) {
+      return true;
+    }
+
+    if (tags.size()!=other.tags.size()) {
+      return false;
+    }
+
+    for (size_t t=0; t<tags.size(); t++) {
+      if (tags[t].key!=other.tags[t].key) {
+        return false;
+      }
+
+      if (tags[t].value!=other.tags[t].value) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool SegmentAttributes::operator!=(const SegmentAttributes& other) const
+  {
+    return !this->operator==(other);
+  }
+
 }
+
