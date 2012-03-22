@@ -1025,7 +1025,7 @@ namespace osmscout {
       // Get potential follower in the current way
 
 #if defined(DEBUG_ROUTING)
-      std::cout << "Analysing follower of node " << currentRouteNode->GetId() << " " << current.currentCost << " " << current.estimateCost << " " << current.overallCost << std::endl;
+      std::cout << "Analysing follower of node " << currentRouteNode->GetId() << " " << current->currentCost << " " << current->estimateCost << " " << current->overallCost << std::endl;
 #endif
       for (size_t i=0; i<currentRouteNode->paths.size(); i++) {
         if (!profile.CanUse(*currentRouteNode,i)) {
@@ -1053,11 +1053,11 @@ namespace osmscout {
               WayRef sourceWay;
               WayRef targetWay;
 
-              wayDataFile.Get(current.wayId,sourceWay);
+              wayDataFile.Get(current->wayId,sourceWay);
               wayDataFile.Get(currentRouteNode->ways[currentRouteNode->paths[i].wayIndex],targetWay);
 
               std::cout << "  Node " <<  currentRouteNode->id << ": ";
-              std::cout << "Cannot turn from " << current.wayId << " " << sourceWay->GetName() << " (" << sourceWay->GetRefName()  << ")";
+              std::cout << "Cannot turn from " << current->wayId << " " << sourceWay->GetName() << " (" << sourceWay->GetRefName()  << ")";
               std::cout << " into ";
               std::cout << currentRouteNode->ways[currentRouteNode->paths[i].wayIndex] << " " << targetWay->GetName() << " (" << targetWay->GetRefName()  << ")" << std::endl;
 #endif
@@ -1093,7 +1093,7 @@ namespace osmscout {
         if (openEntry!=openMap.end() &&
             (*openEntry->second)->currentCost<=currentCost) {
 #if defined(DEBUG_ROUTING)
-          std::cout << "  Skipping route node " << currentRouteNode->paths[i].id << " (cheaper route exists " << currentCost << "<=>" << openEntry->second->currentCost << ")" << std::endl;
+          std::cout << "  Skipping route node " << currentRouteNode->paths[i].id << " (cheaper route exists " << currentCost << "<=>" << (*openEntry->second)->currentCost << ")" << std::endl;
 #endif
           continue;
         }
@@ -1108,9 +1108,6 @@ namespace osmscout {
         // If we already have the node in the open list, but the new path is cheaper,
         // update the existing entry
         if (openEntry!=openMap.end()) {
-#if defined(DEBUG_ROUTING)
-          std::cout << "  Updating route " << node.nodeId << " via way " << node.wayId << " " << currentCost << " " << estimateCost << " " << overallCost << std::endl;
-#endif
           RNodeRef node=*openEntry->second;
 
           node->prev=currentRouteNode->id;
@@ -1121,15 +1118,16 @@ namespace osmscout {
           node->overallCost=overallCost;
           node->access=currentRouteNode->paths[i].HasAccess();
 
+#if defined(DEBUG_ROUTING)
+          std::cout << "  Updating route " << node->nodeId << " via way " << node->wayId << " " << currentCost << " " << estimateCost << " " << overallCost << std::endl;
+#endif
+
           openList.erase(openEntry->second);
 
           std::pair<OpenListRef,bool> result=openList.insert(node);
           openEntry->second=result.first;
         }
         else {
-#if defined(DEBUG_ROUTING)
-          std::cout << "  Inserting route " << node.nodeId <<  " via way " << node.wayId  << " " << currentCost << " " << estimateCost << " " << overallCost << std::endl;
-#endif
           RNodeRef node=new RNode(currentRouteNode->paths[i].id,
                                   currentRouteNode->ways[currentRouteNode->paths[i].wayIndex],
                                   currentRouteNode->id);
@@ -1138,6 +1136,10 @@ namespace osmscout {
           node->estimateCost=estimateCost;
           node->overallCost=overallCost;
           node->access=currentRouteNode->paths[i].HasAccess();
+
+#if defined(DEBUG_ROUTING)
+          std::cout << "  Inserting route " << node->nodeId <<  " via way " << node->wayId  << " " << currentCost << " " << estimateCost << " " << overallCost << std::endl;
+#endif
 
           std::pair<OpenListRef,bool> result=openList.insert(node);
           openMap[node->nodeId]=result.first;
@@ -1155,7 +1157,7 @@ namespace osmscout {
 
     std::cout << "Time:                " << clock << std::endl;
 #if defined(DEBUG_ROUTING)
-    std::cout << "Cost:                " << current.currentCost << " " << current.estimateCost << " " << current.overallCost << std::endl;
+    std::cout << "Cost:                " << current->currentCost << " " << current->estimateCost << " " << current->overallCost << std::endl;
 #endif
     std::cout << "Route nodes loaded:  " << nodesLoadedCount << std::endl;
     std::cout << "Route nodes ignored: " << nodesIgnoredCount << std::endl;
