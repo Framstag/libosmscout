@@ -217,7 +217,13 @@ namespace osmscout {
 
       inline bool operator<(const WayData& other)
       {
-        if (attributes->GetLayer()==other.attributes->GetLayer())
+        if (lineStyle->GetLineA()!=1 && other.lineStyle->GetLineA()==1) {
+          return false;
+        }
+        else if (lineStyle->GetLineA()==1 && other.lineStyle->GetLineA()!=1) {
+          return true;
+        }
+        else if (attributes->GetLayer()==other.attributes->GetLayer())
         {
           return prio>other.prio;
         }
