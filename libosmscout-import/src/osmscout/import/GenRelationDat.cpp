@@ -841,11 +841,6 @@ namespace osmscout {
         continue;
       }
 
-      /*
-      for (size_t i=0; i<rawRel.members.size(); i++) {
-        roles.insert(rawRel.members[i].role);
-      }*/
-
       rel.roles.reserve(rawRel.members.size());
 
       for (size_t m=0; m<rawRel.members.size(); m++) {
