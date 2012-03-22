@@ -26,6 +26,7 @@ libosmscoutimport_la_SOURCES = osmscout/import/RawNode.cpp \
                                osmscout/import/GenOptimizeLowZoom.cpp \
                                osmscout/import/GenRelationDat.cpp \
                                osmscout/import/GenRouteDat.cpp \
+                               osmscout/import/GenTurnRestrictionDat.cpp \
                                osmscout/import/GenTypeDat.cpp \
                                osmscout/import/GenWaterIndex.cpp \
                                osmscout/import/GenWayDat.cpp \

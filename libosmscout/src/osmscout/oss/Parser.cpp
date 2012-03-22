@@ -131,20 +131,20 @@ bool Parser::WeakSeparator(int n, int syFol, int repFol)
 }
 
 void Parser::OSS() {
-		while (!(la->kind == 0 || la->kind == 6)) {SynErr(63); Get();}
-		Expect(6);
-		while (la->kind == 8 || la->kind == 9 || la->kind == 12) {
+		while (!(la->kind == _EOF || la->kind == 6 /* "OSS" */)) {SynErr(63); Get();}
+		Expect(6 /* "OSS" */);
+		while (la->kind == 8 /* "NODE" */ || la->kind == 9 /* "WAY" */ || la->kind == 12 /* "AREA" */) {
 			STYLE();
 		}
-		Expect(7);
+		Expect(7 /* "END" */);
 }
 
 void Parser::STYLE() {
-		if (la->kind == 8) {
+		if (la->kind == 8 /* "NODE" */) {
 			NODESTYLE();
-		} else if (la->kind == 9) {
+		} else if (la->kind == 9 /* "WAY" */) {
 			WAYSTYLE();
-		} else if (la->kind == 12) {
+		} else if (la->kind == 12 /* "AREA" */) {
 			AREASTYLE();
 		} else SynErr(64);
 }
@@ -153,9 +153,9 @@ void Parser::NODESTYLE() {
 		TypeId      type=typeIgnore;
 		std::string name;
 		
-		while (!(la->kind == 0 || la->kind == 8)) {SynErr(65); Get();}
-		Expect(8);
-		Expect(5);
+		while (!(la->kind == _EOF || la->kind == 8 /* "NODE" */)) {SynErr(65); Get();}
+		Expect(8 /* "NODE" */);
+		Expect(_string);
 		name=Destring(t->val); 
 		type=config.GetTypeConfig()->GetNodeTypeId(name);
 		
@@ -167,15 +167,15 @@ void Parser::NODESTYLE() {
 		
 		
 		while (StartOf(1)) {
-			if (la->kind == 26) {
+			if (la->kind == 26 /* "LABE" */) {
 				LabelStyle labelStyle; 
 				LABELDEF(labelStyle);
 				config.SetNodeLabelStyle(type,labelStyle); 
-			} else if (la->kind == 30) {
+			} else if (la->kind == 30 /* "REF" */) {
 				LabelStyle refStyle; 
 				REFDEF(refStyle);
 				config.SetNodeRefLabelStyle(type,refStyle); 
-			} else if (la->kind == 31) {
+			} else if (la->kind == 31 /* "SYMBO" */) {
 				SymbolStyle symbolStyle; 
 				SYMBOLDEF(symbolStyle);
 				config.SetNodeSymbolStyle(type,symbolStyle); 
@@ -193,13 +193,13 @@ void Parser::WAYSTYLE() {
 		size_t      prio;
 		Mag         mag;
 		
-		while (!(la->kind == 0 || la->kind == 9)) {SynErr(66); Get();}
-		Expect(9);
-		Expect(5);
+		while (!(la->kind == _EOF || la->kind == 9 /* "WAY" */)) {SynErr(66); Get();}
+		Expect(9 /* "WAY" */);
+		Expect(_string);
 		name=Destring(t->val); 
-		Expect(10);
+		Expect(10 /* "PRIO" */);
 		INTEGER(prio);
-		Expect(11);
+		Expect(11 /* "MINMAG" */);
 		MAG(mag);
 		type=config.GetTypeConfig()->GetWayTypeId(name);
 		
@@ -213,12 +213,12 @@ void Parser::WAYSTYLE() {
 		 config.SetWayMag(type,mag);
 		}
 		
-		while (la->kind == 13 || la->kind == 26 || la->kind == 30) {
-			if (la->kind == 13) {
+		while (la->kind == 13 /* "LINE" */ || la->kind == 26 /* "LABE" */ || la->kind == 30 /* "REF" */) {
+			if (la->kind == 13 /* "LINE" */) {
 				LineStyle lineStyle; 
 				LINEDEF(lineStyle);
 				config.SetWayLineStyle(type,lineStyle); 
-			} else if (la->kind == 26) {
+			} else if (la->kind == 26 /* "LABE" */) {
 				LabelStyle labelStyle; 
 				LABELDEF(labelStyle);
 				config.SetWayNameLabelStyle(type,labelStyle); 
@@ -236,11 +236,11 @@ void Parser::AREASTYLE() {
 		std::string value;
 		Mag         mag=magWorld;
 		
-		while (!(la->kind == 0 || la->kind == 12)) {SynErr(67); Get();}
-		Expect(12);
-		Expect(5);
+		while (!(la->kind == _EOF || la->kind == 12 /* "AREA" */)) {SynErr(67); Get();}
+		Expect(12 /* "AREA" */);
+		Expect(_string);
 		name=Destring(t->val); 
-		if (la->kind == 11) {
+		if (la->kind == 11 /* "MINMAG" */) {
 			Get();
 			MAG(mag);
 		}
@@ -256,17 +256,17 @@ void Parser::AREASTYLE() {
 		}
 		
 		while (StartOf(2)) {
-			if (la->kind == 23) {
+			if (la->kind == 23 /* "FIL" */) {
 				FillStyle   fillStyle;
 				
 				FILLDEF(fillStyle);
 				config.SetAreaFillStyle(type,fillStyle);
 				
-			} else if (la->kind == 26) {
+			} else if (la->kind == 26 /* "LABE" */) {
 				LabelStyle labelStyle; 
 				LABELDEF(labelStyle);
 				config.SetAreaLabelStyle(type,labelStyle); 
-			} else if (la->kind == 31) {
+			} else if (la->kind == 31 /* "SYMBO" */) {
 				SymbolStyle symbolStyle; 
 				SYMBOLDEF(symbolStyle);
 				config.SetAreaSymbolStyle(type,symbolStyle); 
@@ -279,56 +279,56 @@ void Parser::AREASTYLE() {
 }
 
 void Parser::LABELDEF(LabelStyle& style) {
-		while (!(la->kind == 0 || la->kind == 26)) {SynErr(68); Get();}
-		Expect(26);
+		while (!(la->kind == _EOF || la->kind == 26 /* "LABE" */)) {SynErr(68); Get();}
+		Expect(26 /* "LABE" */);
 		style.SetStyle(LabelStyle::normal); 
-		if (la->kind == 14) {
-			while (!(la->kind == 0 || la->kind == 14)) {SynErr(69); Get();}
+		if (la->kind == 14 /* "WITH" */) {
+			while (!(la->kind == _EOF || la->kind == 14 /* "WITH" */)) {SynErr(69); Get();}
 			Get();
-			if (la->kind == 33) {
+			if (la->kind == 33 /* "STYLE" */) {
 				LabelStyle::Style s; 
 				LABELSTYLE(s);
 				style.SetStyle(s); 
 			}
-			if (la->kind == 27) {
+			if (la->kind == 27 /* "COLOR" */) {
 				double cr,cg,cb,ca; 
 				Get();
 				COLOR(cr,cg,cb,ca);
 				style.SetTextColor(cr,cg,cb,ca); 
 			}
-			if (la->kind == 28) {
+			if (la->kind == 28 /* "BGCOLOR" */) {
 				double cr,cg,cb,ca; 
 				Get();
 				COLOR(cr,cg,cb,ca);
 				style.SetBgColor(cr,cg,cb,ca); 
 			}
-			if (la->kind == 29) {
+			if (la->kind == 29 /* "BORDERCOLOR" */) {
 				double cr,cg,cb,ca; 
 				Get();
 				COLOR(cr,cg,cb,ca);
 				style.SetBorderColor(cr,cg,cb,ca); 
 			}
-			if (la->kind == 61) {
+			if (la->kind == 61 /* "SIZE" */) {
 				double size=style.GetSize(); 
 				SIZE(size);
 				style.SetSize(size); 
 			}
-			if (la->kind == 11) {
+			if (la->kind == 11 /* "MINMAG" */) {
 				Mag minMag=style.GetMinMag(); 
 				MINMAG(minMag);
 				style.SetMinMag(minMag); 
 			}
-			if (la->kind == 42) {
+			if (la->kind == 42 /* "MAXMAG" */) {
 				Mag maxMag=style.GetMaxMag(); 
 				MAXMAG(maxMag);
 				style.SetMaxMag(maxMag); 
 			}
-			if (la->kind == 43) {
+			if (la->kind == 43 /* "FADE" */) {
 				Mag scaleMag=style.GetScaleAndFadeMag(); 
 				SCALEMAG(scaleMag);
 				style.SetScaleAndFadeMag(scaleMag); 
 			}
-			if (la->kind == 10) {
+			if (la->kind == 10 /* "PRIO" */) {
 				size_t priority; 
 				Get();
 				INTEGER(priority);
@@ -347,55 +347,55 @@ void Parser::LABELDEF(LabelStyle& style) {
 }
 
 void Parser::REFDEF(LabelStyle& style) {
-		while (!(la->kind == 0 || la->kind == 30)) {SynErr(70); Get();}
-		Expect(30);
-		if (la->kind == 14) {
-			while (!(la->kind == 0 || la->kind == 14)) {SynErr(71); Get();}
+		while (!(la->kind == _EOF || la->kind == 30 /* "REF" */)) {SynErr(70); Get();}
+		Expect(30 /* "REF" */);
+		if (la->kind == 14 /* "WITH" */) {
+			while (!(la->kind == _EOF || la->kind == 14 /* "WITH" */)) {SynErr(71); Get();}
 			Get();
-			if (la->kind == 33) {
+			if (la->kind == 33 /* "STYLE" */) {
 				LabelStyle::Style s; 
 				LABELSTYLE(s);
 				style.SetStyle(s); 
 			}
-			if (la->kind == 27) {
+			if (la->kind == 27 /* "COLOR" */) {
 				double cr,cg,cb,ca; 
 				Get();
 				COLOR(cr,cg,cb,ca);
 				style.SetTextColor(cr,cg,cb,ca); 
 			}
-			if (la->kind == 28) {
+			if (la->kind == 28 /* "BGCOLOR" */) {
 				double cr,cg,cb,ca; 
 				Get();
 				COLOR(cr,cg,cb,ca);
 				style.SetBgColor(cr,cg,cb,ca); 
 			}
-			if (la->kind == 29) {
+			if (la->kind == 29 /* "BORDERCOLOR" */) {
 				double cr,cg,cb,ca; 
 				Get();
 				COLOR(cr,cg,cb,ca);
 				style.SetBorderColor(cr,cg,cb,ca); 
 			}
-			if (la->kind == 61) {
+			if (la->kind == 61 /* "SIZE" */) {
 				double size=style.GetSize(); 
 				SIZE(size);
 				style.SetSize(size); 
 			}
-			if (la->kind == 11) {
+			if (la->kind == 11 /* "MINMAG" */) {
 				Mag minMag=style.GetMinMag(); 
 				MINMAG(minMag);
 				style.SetMinMag(minMag); 
 			}
-			if (la->kind == 42) {
+			if (la->kind == 42 /* "MAXMAG" */) {
 				Mag maxMag=style.GetMaxMag(); 
 				MAXMAG(maxMag);
 				style.SetMaxMag(maxMag); 
 			}
-			if (la->kind == 43) {
+			if (la->kind == 43 /* "FADE" */) {
 				Mag scaleMag=style.GetScaleAndFadeMag(); 
 				SCALEMAG(scaleMag);
 				style.SetScaleAndFadeMag(scaleMag); 
 			}
-			if (la->kind == 10) {
+			if (la->kind == 10 /* "PRIO" */) {
 				size_t priority; 
 				Get();
 				INTEGER(priority);
@@ -418,18 +418,18 @@ void Parser::SYMBOLDEF(SymbolStyle& style) {
 		double             r,g,b,a;
 		double             size=style.GetSize();
 		
-		while (!(la->kind == 0 || la->kind == 31)) {SynErr(72); Get();}
-		Expect(31);
+		while (!(la->kind == _EOF || la->kind == 31 /* "SYMBO" */)) {SynErr(72); Get();}
+		Expect(31 /* "SYMBO" */);
 		SYMBOLSTYLE(s);
 		style.SetStyle(s); 
 		COLOR(r,g,b,a);
 		style.SetFillColor(r,g,b,a); 
 		DOUBLE(size);
 		style.SetSize(size); 
-		if (la->kind == 14) {
-			while (!(la->kind == 0 || la->kind == 14)) {SynErr(73); Get();}
+		if (la->kind == 14 /* "WITH" */) {
+			while (!(la->kind == _EOF || la->kind == 14 /* "WITH" */)) {SynErr(73); Get();}
 			Get();
-			if (la->kind == 11) {
+			if (la->kind == 11 /* "MINMAG" */) {
 				Mag minMag=style.GetMinMag(); 
 				MINMAG(minMag);
 				style.SetMinMag(minMag); 
@@ -438,14 +438,14 @@ void Parser::SYMBOLDEF(SymbolStyle& style) {
 }
 
 void Parser::ICONDEF(IconStyle& style) {
-		while (!(la->kind == 0 || la->kind == 32)) {SynErr(74); Get();}
-		Expect(32);
-		Expect(1);
+		while (!(la->kind == _EOF || la->kind == 32 /* "ICON" */)) {SynErr(74); Get();}
+		Expect(32 /* "ICON" */);
+		Expect(_ident);
 		style.SetIconName(t->val); 
-		if (la->kind == 14) {
-			while (!(la->kind == 0 || la->kind == 14)) {SynErr(75); Get();}
+		if (la->kind == 14 /* "WITH" */) {
+			while (!(la->kind == _EOF || la->kind == 14 /* "WITH" */)) {SynErr(75); Get();}
 			Get();
-			if (la->kind == 11) {
+			if (la->kind == 11 /* "MINMAG" */) {
 				Mag minMag=style.GetMinMag(); 
 				MINMAG(minMag);
 				style.SetMinMag(minMag); 
@@ -454,7 +454,7 @@ void Parser::ICONDEF(IconStyle& style) {
 }
 
 void Parser::INTEGER(size_t& value) {
-		Expect(2);
+		Expect(_number);
 		if (!StringToNumber(t->val,value)) {
 		 std::string e="Cannot parse number '"+std::string(t->val)+"'";
 		
@@ -465,72 +465,72 @@ void Parser::INTEGER(size_t& value) {
 
 void Parser::MAG(Mag& mag) {
 		switch (la->kind) {
-		case 45: {
+		case 45 /* "world" */: {
 			Get();
 			mag=magWorld; 
 			break;
 		}
-		case 46: {
+		case 46 /* "continent" */: {
 			Get();
 			mag=magContinent; 
 			break;
 		}
-		case 47: {
+		case 47 /* "state" */: {
 			Get();
 			mag=magState; 
 			break;
 		}
-		case 48: {
+		case 48 /* "stateOver" */: {
 			Get();
 			mag=magStateOver; 
 			break;
 		}
-		case 49: {
+		case 49 /* "county" */: {
 			Get();
 			mag=magCounty; 
 			break;
 		}
-		case 50: {
+		case 50 /* "region" */: {
 			Get();
 			mag=magRegion; 
 			break;
 		}
-		case 51: {
+		case 51 /* "proximity" */: {
 			Get();
 			mag=magProximity; 
 			break;
 		}
-		case 52: {
+		case 52 /* "cityOver" */: {
 			Get();
 			mag=magCityOver; 
 			break;
 		}
-		case 53: {
+		case 53 /* "city" */: {
 			Get();
 			mag=magCity; 
 			break;
 		}
-		case 54: {
+		case 54 /* "suburb" */: {
 			Get();
 			mag=magSuburb; 
 			break;
 		}
-		case 55: {
+		case 55 /* "detail" */: {
 			Get();
 			mag=magDetail; 
 			break;
 		}
-		case 56: {
+		case 56 /* "close" */: {
 			Get();
 			mag=magClose; 
 			break;
 		}
-		case 57: {
+		case 57 /* "veryClose" */: {
 			Get();
 			mag=magVeryClose; 
 			break;
 		}
-		case 58: {
+		case 58 /* "block" */: {
 			Get();
 			mag=magBlock; 
 			break;
@@ -542,55 +542,55 @@ void Parser::MAG(Mag& mag) {
 void Parser::LINEDEF(LineStyle& style) {
 		double r,g,b,a;
 		
-		while (!(la->kind == 0 || la->kind == 13)) {SynErr(77); Get();}
-		Expect(13);
+		while (!(la->kind == _EOF || la->kind == 13 /* "LINE" */)) {SynErr(77); Get();}
+		Expect(13 /* "LINE" */);
 		COLOR(r,g,b,a);
 		style.SetLineColor(r,g,b,a); 
-		if (la->kind == 14) {
-			while (!(la->kind == 0 || la->kind == 14)) {SynErr(78); Get();}
+		if (la->kind == 14 /* "WITH" */) {
+			while (!(la->kind == _EOF || la->kind == 14 /* "WITH" */)) {SynErr(78); Get();}
 			Get();
-			if (la->kind == 15) {
+			if (la->kind == 15 /* "ALTCOLOR" */) {
 				double cr,cg,cb,ca; 
 				Get();
 				COLOR(cr,cg,cb,ca);
 				style.SetAlternateColor(cr,cg,cb,ca); 
 			}
-			if (la->kind == 16) {
+			if (la->kind == 16 /* "OUTLINECOLOR" */) {
 				double cr,cg,cb,ca; 
 				Get();
 				COLOR(cr,cg,cb,ca);
 				style.SetOutlineColor(cr,cg,cb,ca); 
 			}
-			if (la->kind == 17) {
+			if (la->kind == 17 /* "DASH" */) {
 				double dash; 
 				Get();
 				DOUBLE(dash);
 				style.AddDashValue(dash); 
-				while (la->kind == 18) {
+				while (la->kind == 18 /* "," */) {
 					Get();
 					DOUBLE(dash);
 					style.AddDashValue(dash); 
 				}
-				if (la->kind == 19) {
+				if (la->kind == 19 /* "GAPCOLOR" */) {
 					double cr,cg,cb,ca; 
 					Get();
 					COLOR(cr,cg,cb,ca);
 					style.SetGapColor(cr,cg,cb,ca); 
 				}
 			}
-			if (la->kind == 20) {
+			if (la->kind == 20 /* "MINWIDTH" */) {
 				double minWidth=style.GetMinWidth(); 
 				Get();
 				DISPLAYSIZE(minWidth);
 				style.SetMinWidth(minWidth); 
 			}
-			if (la->kind == 21) {
+			if (la->kind == 21 /* "WIDTH" */) {
 				double width=style.GetWidth(); 
 				Get();
 				MAPSIZE(width);
 				style.SetWidth(width); 
 			}
-			if (la->kind == 22) {
+			if (la->kind == 22 /* "OUTLINE" */) {
 				double outline=style.GetOutline(); 
 				Get();
 				DISPLAYSIZE(outline);
@@ -602,45 +602,45 @@ void Parser::LINEDEF(LineStyle& style) {
 void Parser::FILLDEF(FillStyle& style) {
 		double r,g,b,a;
 		
-		while (!(la->kind == 0 || la->kind == 23)) {SynErr(79); Get();}
-		Expect(23);
+		while (!(la->kind == _EOF || la->kind == 23 /* "FIL" */)) {SynErr(79); Get();}
+		Expect(23 /* "FIL" */);
 		COLOR(r,g,b,a);
 		style.SetFillColor(r,g,b,a); 
-		if (la->kind == 24) {
-			while (!(la->kind == 0 || la->kind == 24)) {SynErr(80); Get();}
+		if (la->kind == 24 /* "PATTERN" */) {
+			while (!(la->kind == _EOF || la->kind == 24 /* "PATTERN" */)) {SynErr(80); Get();}
 			Get();
-			Expect(5);
+			Expect(_string);
 			style.SetPattern(Destring(t->val)); 
-			if (la->kind == 14) {
-				while (!(la->kind == 0 || la->kind == 14)) {SynErr(81); Get();}
+			if (la->kind == 14 /* "WITH" */) {
+				while (!(la->kind == _EOF || la->kind == 14 /* "WITH" */)) {SynErr(81); Get();}
 				Get();
-				if (la->kind == 11) {
+				if (la->kind == 11 /* "MINMAG" */) {
 					Mag minMag=style.GetPatternMinMag(); 
 					MINMAG(minMag);
 					style.SetPatternMinMag(minMag); 
 				}
 			}
 		}
-		if (la->kind == 25) {
-			while (!(la->kind == 0 || la->kind == 25)) {SynErr(82); Get();}
+		if (la->kind == 25 /* "BORDER" */) {
+			while (!(la->kind == _EOF || la->kind == 25 /* "BORDER" */)) {SynErr(82); Get();}
 			Get();
 			COLOR(r,g,b,a);
 			style.SetBorderColor(r,g,b,a); 
-			if (la->kind == 21) {
+			if (la->kind == 21 /* "WIDTH" */) {
 				double width=style.GetBorderWidth(); 
 				Get();
 				DISPLAYSIZE(width);
 				style.SetBorderWidth(width); 
 			}
-			if (la->kind == 14) {
-				while (!(la->kind == 0 || la->kind == 14)) {SynErr(83); Get();}
+			if (la->kind == 14 /* "WITH" */) {
+				while (!(la->kind == _EOF || la->kind == 14 /* "WITH" */)) {SynErr(83); Get();}
 				Get();
-				if (la->kind == 17) {
+				if (la->kind == 17 /* "DASH" */) {
 					double dash; 
 					Get();
 					DOUBLE(dash);
 					style.AddBorderDashValue(dash); 
-					while (la->kind == 18) {
+					while (la->kind == 18 /* "," */) {
 						Get();
 						DOUBLE(dash);
 						style.AddBorderDashValue(dash); 
@@ -651,7 +651,7 @@ void Parser::FILLDEF(FillStyle& style) {
 }
 
 void Parser::COLOR(double& r, double& g, double& b, double& a) {
-		Expect(4);
+		Expect(_color);
 		if (strlen(t->val)==7 ||
 		   strlen(t->val)==9) {
 		 ToRGBA(t->val,r,g,b,a);
@@ -666,7 +666,7 @@ void Parser::COLOR(double& r, double& g, double& b, double& a) {
 }
 
 void Parser::DOUBLE(double& value) {
-		if (la->kind == 2) {
+		if (la->kind == _number) {
 			Get();
 			if (!StringToDouble(t->val,value)) {
 			 std::string e="Cannot parse double '"+std::string(t->val)+"'";
@@ -674,7 +674,7 @@ void Parser::DOUBLE(double& value) {
 			 SemErr(e.c_str());
 			}
 			
-		} else if (la->kind == 3) {
+		} else if (la->kind == _double) {
 			Get();
 			if (!StringToDouble(t->val,value)) {
 			 std::string e="Cannot parse double '"+std::string(t->val)+"'";
@@ -687,63 +687,63 @@ void Parser::DOUBLE(double& value) {
 
 void Parser::DISPLAYSIZE(double& value) {
 		DOUBLE(value);
-		Expect(59);
+		Expect(59 /* "mm" */);
 }
 
 void Parser::MAPSIZE(double& value) {
 		DOUBLE(value);
-		Expect(60);
+		Expect(60 /* "m" */);
 }
 
 void Parser::MINMAG(Mag& mag) {
-		Expect(11);
+		Expect(11 /* "MINMAG" */);
 		MAG(mag);
 }
 
 void Parser::LABELSTYLE(LabelStyle::Style& style) {
-		Expect(33);
-		if (la->kind == 34) {
+		Expect(33 /* "STYLE" */);
+		if (la->kind == 34 /* "normal" */) {
 			Get();
 			style=LabelStyle::normal; 
-		} else if (la->kind == 35) {
+		} else if (la->kind == 35 /* "contour" */) {
 			Get();
 			style=LabelStyle::contour; 
-		} else if (la->kind == 36) {
+		} else if (la->kind == 36 /* "plate" */) {
 			Get();
 			style=LabelStyle::plate; 
-		} else if (la->kind == 37) {
+		} else if (la->kind == 37 /* "emphasize" */) {
 			Get();
 			style=LabelStyle::emphasize; 
 		} else SynErr(85);
 }
 
 void Parser::SIZE(double& value) {
-		Expect(61);
+		Expect(61 /* "SIZE" */);
 		DOUBLE(value);
 }
 
 void Parser::MAXMAG(Mag& mag) {
-		Expect(42);
+		Expect(42 /* "MAXMAG" */);
 		MAG(mag);
 }
 
 void Parser::SCALEMAG(Mag& mag) {
-		Expect(43);
-		Expect(44);
+		Expect(43 /* "FADE" */);
+		Expect(44 /* "AT" */);
 		MAG(mag);
 }
 
 void Parser::SYMBOLSTYLE(SymbolStyle::Style& style) {
-		if (la->kind == 38) {
+		if (la->kind == 38 /* "none" */) {
 			Get();
 			style=SymbolStyle::none; 
-		} else if (la->kind == 39) {
+		} else if (la->kind == 39 /* "box" */) {
 			Get();
 			style=SymbolStyle::box; 
-		} else if (la->kind == 40) {
+		} else if (la->kind == 40 /* "triangle" */) {
 			Get();
 			style=SymbolStyle::triangle; 
-		} else if (la->kind == 41) {
+		} else if (la->kind == 41 /* "circle" */) {
 			Get();
 			style=SymbolStyle::circle; 
 		} else SynErr(86);

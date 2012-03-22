@@ -74,15 +74,6 @@ namespace osmscout {
                               reverseNodes);
   }
 
-  void Way::SetRestrictions(const std::vector<Way::Restriction>& restrictions)
-  {
-    this->restrictions=restrictions;
-
-    if (!restrictions.empty()) {
-      attributes.flags|=SegmentAttributes::hasRestrictions;
-    }
-  }
-
   void Way::SetStartIsJoint(bool isJoint)
   {
     if (isJoint) {
@@ -158,37 +149,6 @@ namespace osmscout {
       }
     }
 
-    if (attributes.HasRestrictions()) {
-      uint32_t restrictionCount;
-
-      scanner.ReadNumber(restrictionCount);
-      if (scanner.HasError()) {
-        return false;
-      }
-
-      restrictions.resize(restrictionCount);
-
-      for (size_t i=0; i<restrictionCount; i++) {
-        uint32_t type;
-        uint32_t memberCount;
-
-        scanner.ReadNumber(type);
-        scanner.ReadNumber(memberCount);
-
-        if (scanner.HasError()) {
-          return false;
-        }
-
-
-        restrictions[i].type=(Way::RestrictionType)type;
-        restrictions[i].members.resize(memberCount);
-
-        for (size_t j=0; j<memberCount; j++) {
-          scanner.ReadNumber(restrictions[i].members[j]);
-        }
-      }
-    }
-
     return !scanner.HasError();
   }
 
@@ -224,20 +184,6 @@ namespace osmscout {
         writer.WriteNumber(nodes[i].GetId()-minId);
         writer.WriteNumber(latValue-minLat);
         writer.WriteNumber(lonValue-minLon);
-      }
-    }
-
-    if (attributes.HasRestrictions()) {
-      writer.WriteNumber((uint32_t)restrictions.size());
-
-      for (size_t i=0; i<restrictions.size(); i++) {
-        writer.WriteNumber(restrictions[i].type);
-
-        writer.WriteNumber((uint32_t)restrictions[i].members.size());
-
-        for (size_t j=0; j<restrictions[i].members.size(); j++) {
-          writer.WriteNumber(restrictions[i].members[j]);
-        }
       }
     }
 

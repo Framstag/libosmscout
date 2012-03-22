@@ -408,6 +408,21 @@ namespace osmscout {
       return *ptr;
     }
 
+    bool operator==(const Ref<T>& other) const
+    {
+      return ptr==other.ptr;
+    }
+
+    bool operator!=(const Ref<T>& other) const
+    {
+      return ptr!=other.ptr;
+    }
+
+    bool operator<(const Ref<T>& other) const
+    {
+      return ptr<other.ptr;
+    }
+
   private:
     T* ptr;
   };

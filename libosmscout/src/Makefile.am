@@ -35,6 +35,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/Relation.cpp \
                         osmscout/SegmentAttributes.cpp \
                         osmscout/Tag.cpp \
+                        osmscout/TurnRestriction.cpp \
                         osmscout/Way.cpp \
                         osmscout/ObjectRef.cpp \
                         osmscout/NumericIndex.cpp \

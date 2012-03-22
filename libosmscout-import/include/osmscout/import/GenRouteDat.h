@@ -21,6 +21,7 @@
 */
 
 #include <osmscout/NumericIndex.h>
+#include <osmscout/TurnRestriction.h>
 #include <osmscout/Way.h>
 
 #include <osmscout/import/Import.h>
@@ -30,26 +31,11 @@ namespace osmscout {
   class RouteDataGenerator : public ImportModule
   {
   private:
-    enum RestrictionType
-    {
-      allow,
-      forbit
-    };
+    bool ReadTurnRestrictions(const ImportParameter& parameter,
+                              Progress& progress,
+                              std::map<Id,std::vector<TurnRestrictionRef> >& restrictions);
 
-    struct Restriction
-    {
-      RestrictionType type;
-      Id              from;
-      Id              to;
-    };
-
-  private:
-    bool ReadRestrictionRelations(const ImportParameter& parameter,
-                                  Progress& progress,
-                                  const TypeConfig& typeConfig,
-                                  std::map<Id,std::vector<Restriction> >& restrictions);
-
-    bool CanTurn(const std::vector<Restriction>& restrictions,
+    bool CanTurn(const std::vector<TurnRestrictionRef>& restrictions,
                  Id from,
                  Id to) const;
 

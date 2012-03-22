@@ -365,34 +365,38 @@ namespace osmscout {
   class OSMSCOUT_API TypeConfig
   {
   private:
-    std::vector<TagInfo>                            tags;
-    std::vector<TypeInfo>                           types;
+    std::vector<TagInfo>           tags;
+    std::vector<TypeInfo>          types;
 
-    TagId                                           nextTagId;
-    TypeId                                          nextTypeId;
+    TagId                          nextTagId;
+    TypeId                         nextTypeId;
 
-    std::map<std::string,TagId>                     stringToTagMap;
-    std::map<std::string,TypeInfo>                  nameToTypeMap;
-    std::map<TypeId,TypeInfo>                       idToTypeMap;
+    std::map<std::string,TagId>    stringToTagMap;
+    std::map<std::string,TypeInfo> nameToTypeMap;
+    std::map<TypeId,TypeInfo>      idToTypeMap;
 
   public:
-    TagId                                           tagAdminLevel;
-    TagId                                           tagBoundary;
-    TagId                                           tagBridge;
-    TagId                                           tagLayer;
-    TagId                                           tagName;
-    TagId                                           tagOneway;
-    TagId                                           tagPlace;
-    TagId                                           tagPlaceName;
-    TagId                                           tagRef;
-    TagId                                           tagTunnel;
-    TagId                                           tagType;
-    TagId                                           tagWidth;
-    TagId                                           tagArea;
-    TagId                                           tagHouseNr;
-    TagId                                           tagJunction;
-    TagId                                           tagMaxSpeed;
-    TagId                                           tagAccess;
+    // Internal use (only available during preprocessing)
+
+    // External use (also available in "normal" types, if not explicitly deleted)
+    TagId                          tagAdminLevel;
+    TagId                          tagBoundary;
+    TagId                          tagBridge;
+    TagId                          tagLayer;
+    TagId                          tagName;
+    TagId                          tagOneway;
+    TagId                          tagPlace;
+    TagId                          tagPlaceName;
+    TagId                          tagRef;
+    TagId                          tagTunnel;
+    TagId                          tagType;
+    TagId                          tagWidth;
+    TagId                          tagArea;
+    TagId                          tagHouseNr;
+    TagId                          tagJunction;
+    TagId                          tagMaxSpeed;
+    TagId                          tagAccess;
+    TagId                          tagRestriction;
 
   public:
     TypeConfig();

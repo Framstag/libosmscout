@@ -447,7 +447,7 @@ Token* Scanner::NextToken() {
 
 // get the next token (possibly a token already seen during peeking)
 Token* Scanner::Scan() {
-  if (tokens->next == NULL) {
+  if (tokens->next.Invalid()) {
     return pt = tokens = NextToken();
   } else {
     pt = tokens = tokens->next;
@@ -466,7 +466,7 @@ void Scanner::SetScannerBehindT()
 // peek for the next token, ignore pragmas
 Token* Scanner::Peek() {
   do {
-    if (pt->next == NULL) {
+    if (pt->next.Invalid()) {
       pt->next = NextToken();
     }
     pt = pt->next;

@@ -273,6 +273,7 @@ namespace osmscout {
     RegisterTagForExternalUse("junction");
     RegisterTagForExternalUse("maxspeed");
     RegisterTagForExternalUse("access");
+    RegisterTagForExternalUse("restriction");
 
     TypeInfo ignore;
     TypeInfo route;
@@ -305,6 +306,7 @@ namespace osmscout {
     tagJunction=GetTagId("junction");
     tagMaxSpeed=GetTagId("maxspeed");
     tagAccess=GetTagId("access");
+    tagRestriction=GetTagId("restriction");
 
     assert(tagAdminLevel!=tagIgnore);
     assert(tagBoundary!=tagIgnore);
@@ -323,6 +325,7 @@ namespace osmscout {
     assert(tagJunction!=tagIgnore);
     assert(tagMaxSpeed!=tagIgnore);
     assert(tagAccess!=tagIgnore);
+    assert(tagRestriction!=tagIgnore);
   }
 
   TypeConfig::~TypeConfig()

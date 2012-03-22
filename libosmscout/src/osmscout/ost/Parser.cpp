@@ -128,19 +128,19 @@ bool Parser::WeakSeparator(int n, int syFol, int repFol)
 }
 
 void Parser::OST() {
-		while (!(la->kind == 0 || la->kind == 4)) {SynErr(34); Get();}
-		Expect(4);
-		if (la->kind == 6) {
+		while (!(la->kind == _EOF || la->kind == 4 /* "OST" */)) {SynErr(34); Get();}
+		Expect(4 /* "OST" */);
+		if (la->kind == 6 /* "TYPES" */) {
 			TYPES();
 		}
-		Expect(5);
+		Expect(5 /* "END" */);
 }
 
 void Parser::TYPES() {
-		while (!(la->kind == 0 || la->kind == 6)) {SynErr(35); Get();}
-		Expect(6);
+		while (!(la->kind == _EOF || la->kind == 6 /* "TYPES" */)) {SynErr(35); Get();}
+		Expect(6 /* "TYPES" */);
 		TYPE();
-		while (la->kind == 7) {
+		while (la->kind == 7 /* "TYPE" */) {
 			TYPE();
 		}
 }
@@ -150,25 +150,25 @@ void Parser::TYPE() {
 		TypeInfo      typeInfo;
 		unsigned char types;
 		
-		while (!(la->kind == 0 || la->kind == 7)) {SynErr(36); Get();}
-		Expect(7);
-		Expect(3);
+		while (!(la->kind == _EOF || la->kind == 7 /* "TYPE" */)) {SynErr(36); Get();}
+		Expect(7 /* "TYPE" */);
+		Expect(_string);
 		typeInfo.SetType(Destring(t->val)); 
-		Expect(8);
+		Expect(8 /* "=" */);
 		TYPEKINDS(types);
-		Expect(9);
+		Expect(9 /* "(" */);
 		CONDITION(condition);
-		Expect(10);
+		Expect(10 /* ")" */);
 		typeInfo.AddCondition(types,condition); 
-		while (la->kind == 11) {
+		while (la->kind == 11 /* "OR" */) {
 			Get();
 			TYPEKINDS(types);
-			Expect(9);
+			Expect(9 /* "(" */);
 			CONDITION(condition);
-			Expect(10);
+			Expect(10 /* ")" */);
 			typeInfo.AddCondition(types,condition); 
 		}
-		if (la->kind == 12) {
+		if (la->kind == 12 /* "OPTIONS" */) {
 			Get();
 			TYPEOPTIONS(typeInfo);
 		}
@@ -181,7 +181,7 @@ void Parser::TYPEKINDS(unsigned char& types) {
 		
 		TYPEKIND(types);
 		while (StartOf(1)) {
-			if (la->kind == 19) {
+			if (la->kind == 19 /* "," */) {
 				Get();
 			}
 			TYPEKIND(types);
@@ -194,7 +194,7 @@ void Parser::CONDITION(Condition*& condition) {
 		
 		ANDCOND(subCond);
 		conditions.push_back(subCond); 
-		while (la->kind == 11) {
+		while (la->kind == 11 /* "OR" */) {
 			Get();
 			ANDCOND(subCond);
 			conditions.push_back(subCond); 
@@ -229,7 +229,7 @@ void Parser::ANDCOND(Condition*& condition) {
 		
 		BOOLCOND(subCond);
 		conditions.push_back(subCond); 
-		while (la->kind == 13) {
+		while (la->kind == 13 /* "AND" */) {
 			Get();
 			BOOLCOND(subCond);
 			conditions.push_back(subCond); 
@@ -252,15 +252,15 @@ void Parser::ANDCOND(Condition*& condition) {
 }
 
 void Parser::BOOLCOND(Condition*& condition) {
-		if (la->kind == 3) {
+		if (la->kind == _string) {
 			BINARYCOND(condition);
-		} else if (la->kind == 21) {
+		} else if (la->kind == 21 /* "EXISTS" */) {
 			EXISTSCOND(condition);
-		} else if (la->kind == 9) {
+		} else if (la->kind == 9 /* "(" */) {
 			Get();
 			CONDITION(condition);
-			Expect(10);
-		} else if (la->kind == 14) {
+			Expect(10 /* ")" */);
+		} else if (la->kind == 14 /* "!" */) {
 			Get();
 			BOOLCOND(condition);
 			condition=new NotCondition(condition); 
@@ -270,20 +270,20 @@ void Parser::BOOLCOND(Condition*& condition) {
 void Parser::BINARYCOND(Condition*& condition) {
 		std::string nameValue;
 		
-		Expect(3);
+		Expect(_string);
 		nameValue=Destring(t->val); 
-		if (la->kind == 15) {
+		if (la->kind == 15 /* "==" */) {
 			EQUALSCOND(nameValue,condition);
-		} else if (la->kind == 16) {
+		} else if (la->kind == 16 /* "!=" */) {
 			NOTEQUALSCOND(nameValue,condition);
-		} else if (la->kind == 17) {
+		} else if (la->kind == 17 /* "IN" */) {
 			ISINCOND(nameValue,condition);
 		} else SynErr(38);
 }
 
 void Parser::EXISTSCOND(Condition*& condition) {
-		Expect(21);
-		Expect(3);
+		Expect(21 /* "EXISTS" */);
+		Expect(_string);
 		condition=new ExistsCondition(config.RegisterTagForInternalUse(Destring(t->val)));
 		
 }
@@ -291,8 +291,8 @@ void Parser::EXISTSCOND(Condition*& condition) {
 void Parser::EQUALSCOND(const std::string& tagName,Condition*& condition) {
 		std::string valueValue;
 		
-		Expect(15);
-		Expect(3);
+		Expect(15 /* "==" */);
+		Expect(_string);
 		valueValue=Destring(t->val); 
 		TagId tagId=config.RegisterTagForInternalUse(tagName);
 		
@@ -303,8 +303,8 @@ void Parser::EQUALSCOND(const std::string& tagName,Condition*& condition) {
 void Parser::NOTEQUALSCOND(const std::string& tagName,Condition*& condition) {
 		std::string valueValue;
 		
-		Expect(16);
-		Expect(3);
+		Expect(16 /* "!=" */);
+		Expect(_string);
 		valueValue=Destring(t->val); 
 		TagId tagId=config.RegisterTagForInternalUse(tagName);
 		
@@ -315,16 +315,16 @@ void Parser::NOTEQUALSCOND(const std::string& tagName,Condition*& condition) {
 void Parser::ISINCOND(const std::string& tagName,Condition*& condition) {
 		std::list<std::string> values;
 		
-		Expect(17);
-		Expect(18);
-		Expect(3);
+		Expect(17 /* "IN" */);
+		Expect(18 /* "[" */);
+		Expect(_string);
 		values.push_back(Destring(t->val)); 
-		while (la->kind == 19) {
+		while (la->kind == 19 /* "," */) {
 			Get();
-			Expect(3);
+			Expect(_string);
 			values.push_back(Destring(t->val)); 
 		}
-		Expect(20);
+		Expect(20 /* "]" */);
 		TagId tagId=config.RegisterTagForInternalUse(tagName);
 		
 		if (values.size()==1) {
@@ -345,16 +345,16 @@ void Parser::ISINCOND(const std::string& tagName,Condition*& condition) {
 }
 
 void Parser::TYPEKIND(unsigned char& types) {
-		if (la->kind == 22) {
+		if (la->kind == 22 /* "NODE" */) {
 			Get();
 			types|=TypeInfo::typeNode; 
-		} else if (la->kind == 23) {
+		} else if (la->kind == 23 /* "WAY" */) {
 			Get();
 			types|=TypeInfo::typeWay; 
-		} else if (la->kind == 24) {
+		} else if (la->kind == 24 /* "AREA" */) {
 			Get();
 			types|=TypeInfo::typeArea; 
-		} else if (la->kind == 25) {
+		} else if (la->kind == 25 /* "RELATION" */) {
 			Get();
 			types|=TypeInfo::typeRelation; 
 		} else SynErr(39);
@@ -362,37 +362,37 @@ void Parser::TYPEKIND(unsigned char& types) {
 
 void Parser::TYPEOPTION(TypeInfo& typeInfo) {
 		switch (la->kind) {
-		case 26: {
+		case 26 /* "ROUTE" */: {
 			Get();
 			typeInfo.CanBeRoute(true); 
 			break;
 		}
-		case 27: {
+		case 27 /* "INDEX" */: {
 			Get();
 			typeInfo.CanBeIndexed(true); 
 			break;
 		}
-		case 28: {
+		case 28 /* "CONSUME_CHILDREN" */: {
 			Get();
 			typeInfo.SetConsumeChildren(true); 
 			break;
 		}
-		case 29: {
+		case 29 /* "OPTIMIZE_LOW_ZOOM" */: {
 			Get();
 			typeInfo.SetOptimizeLowZoom(true); 
 			break;
 		}
-		case 30: {
+		case 30 /* "IGNORE" */: {
 			Get();
 			typeInfo.SetIgnore(true); 
 			break;
 		}
-		case 31: {
+		case 31 /* "MULTIPOLYGON" */: {
 			Get();
 			typeInfo.SetMultipolygon(true); 
 			break;
 		}
-		case 32: {
+		case 32 /* "PIN_WAY" */: {
 			Get();
 			typeInfo.SetPinWay(true); 
 			break;

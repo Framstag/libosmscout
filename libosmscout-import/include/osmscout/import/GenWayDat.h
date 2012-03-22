@@ -26,12 +26,12 @@
 
 #include <osmscout/Way.h>
 #include <osmscout/NumericIndex.h>
+#include <osmscout/TurnRestriction.h>
 
 #include <osmscout/util/HashMap.h>
 
 #include <osmscout/import/Import.h>
 #include <osmscout/import/RawWay.h>
-
 
 namespace osmscout {
 
@@ -40,10 +40,13 @@ namespace osmscout {
   private:
     typedef OSMSCOUT_HASHMAP<Id,std::list<Id> > EndPointWayMap;
 
-    bool ReadRestrictionRelations(const ImportParameter& parameter,
-                                  Progress& progress,
-                                  const TypeConfig& typeConfig,
-                                  std::map<Id,std::vector<Way::Restriction> >& restrictions);
+    bool ReadTurnRestrictions(const ImportParameter& parameter,
+                              Progress& progress,
+                              std::multimap<Id,TurnRestrictionRef>& restrictions);
+
+    bool WriteTurnRestrictions(const ImportParameter& parameter,
+                               Progress& progress,
+                               std::multimap<Id,TurnRestrictionRef>& restrictions);
 
     bool ReadWayEndpoints(const ImportParameter& parameter,
                           Progress& progress,
@@ -70,6 +73,10 @@ namespace osmscout {
     bool CompareWays(const RawWay& a,
                      const RawWay& b) const;
 
+    void UpdateRestrictions(std::multimap<Id,TurnRestrictionRef>& restrictions,
+                            Id oldId,
+                            Id newId);
+
     bool JoinWays(Progress& progress,
                   const TypeConfig& typeConfig,
                   FileScanner& scanner,
@@ -78,6 +85,7 @@ namespace osmscout {
                   EndPointWayMap& endPointWayMap,
                   NumericIndex<Id,RawWay>& rawWayIndex,
                   std::set<Id>& wayBlacklist,
+                  std::multimap<Id,TurnRestrictionRef>& restrictions,
                   size_t& mergeCount);
 
   public:

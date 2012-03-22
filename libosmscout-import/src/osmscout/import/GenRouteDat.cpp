@@ -55,116 +55,52 @@ namespace osmscout {
     return "Generate 'route.dat'";
   }
 
-  bool RouteDataGenerator::ReadRestrictionRelations(const ImportParameter& parameter,
+  bool RouteDataGenerator::ReadTurnRestrictions(const ImportParameter& parameter,
                                                     Progress& progress,
-                                                    const TypeConfig& typeConfig,
-                                                    std::map<Id,std::vector<Restriction> >& restrictions)
+                                                    std::map<Id,std::vector<TurnRestrictionRef> >& restrictions)
   {
-    FileScanner      scanner;
-    uint32_t         rawRelCount=0;
-    std::set<TypeId> posRestrictions;
-    std::set<TypeId> negRestrictions;
-
-    if (typeConfig.GetRelationTypeId("restriction_only_right_turn")!=typeIgnore) {
-      posRestrictions.insert(typeConfig.GetRelationTypeId("restriction_only_right_turn"));
-    }
-
-    if (typeConfig.GetRelationTypeId("restriction_only_left_turn")!=typeIgnore) {
-      posRestrictions.insert(typeConfig.GetRelationTypeId("restriction_only_left_turn"));
-    }
-
-    if (typeConfig.GetRelationTypeId("restriction_only_straight_on")!=typeIgnore) {
-      posRestrictions.insert(typeConfig.GetRelationTypeId("restriction_only_straight_on"));
-    }
-
-    if (typeConfig.GetRelationTypeId("restriction_no_right_turn")!=typeIgnore) {
-      negRestrictions.insert(typeConfig.GetRelationTypeId("restriction_no_right_turn"));
-    }
-
-    if (typeConfig.GetRelationTypeId("restriction_no_left_turn")!=typeIgnore) {
-      negRestrictions.insert(typeConfig.GetRelationTypeId("restriction_no_left_turn"));
-    }
-
-    if (typeConfig.GetRelationTypeId("restriction_no_u_turn")!=typeIgnore) {
-      negRestrictions.insert(typeConfig.GetRelationTypeId("restriction_no_u_turn"));
-    }
-
-    if (typeConfig.GetRelationTypeId("restriction_no_straight_on")!=typeIgnore) {
-      negRestrictions.insert(typeConfig.GetRelationTypeId("restriction_no_straight_on"));
-    }
+    FileScanner scanner;
+    uint32_t    restrictionCount=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "rawrels.dat"))) {
-      progress.Error("Cannot open 'rawrels.dat'");
+                                      "restrictions.dat"))) {
+      progress.Error("Cannot open 'restrictions.dat'");
       return false;
     }
 
-    if (!scanner.Read(rawRelCount)) {
+    if (!scanner.Read(restrictionCount)) {
       progress.Error("Error while reading number of data entries in file");
       return false;
     }
 
-    for (uint32_t r=1; r<=rawRelCount; r++) {
-      progress.SetProgress(r,rawRelCount);
+    for (uint32_t r=1; r<=restrictionCount; r++) {
+      progress.SetProgress(r,restrictionCount);
 
-      RawRelation relation;
+      TurnRestrictionRef restriction=new TurnRestriction();
 
-      if (!relation.Read(scanner)) {
+      if (!restriction->Read(scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(r)+" of "+
-                       NumberToString(rawRelCount)+
+                       NumberToString(restrictionCount)+
                        " in file '"+
                        scanner.GetFilename()+"'");
         return false;
       }
 
-      if (posRestrictions.find(relation.GetType())!=posRestrictions.end() ||
-          negRestrictions.find(relation.GetType())!=negRestrictions.end()) {
-        Id          via=0;
-        Restriction restriction;
-
-        if (posRestrictions.find(relation.GetType())!=posRestrictions.end()) {
-          restriction.type=allow;
-        }
-        else if (negRestrictions.find(relation.GetType())!=negRestrictions.end()) {
-          restriction.type=forbit;
-        }
-        else {
-          continue;
-        }
-
-        for (size_t i=0; i<relation.members.size(); i++) {
-          if (relation.members[i].type==RawRelation::memberWay &&
-              relation.members[i].role=="from") {
-            restriction.from=relation.members[i].id;
-          }
-          else if (relation.members[i].type==RawRelation::memberNode &&
-                   relation.members[i].role=="via") {
-            via=relation.members[i].id;
-          }
-          else if (relation.members[i].type==RawRelation::memberWay &&
-                   relation.members[i].role=="to") {
-            restriction.to=relation.members[i].id;
-          }
-        }
-
-        if (restriction.from!=0 && via!=0 && restriction.to!=0) {
-          restrictions[via].push_back(restriction);
-        }
-      }
+      restrictions[restriction->GetVia()].push_back(restriction);
     }
 
     if (!scanner.Close()) {
-      progress.Error("Cannot close file 'rawrels.dat'");
+      progress.Error("Cannot close file 'restrictions.dat'");
       return false;
     }
 
-    progress.Info(std::string("Found ")+NumberToString(restrictions.size())+" restrictions");
+    progress.Info(std::string("Read ")+NumberToString(restrictionCount)+" turn restrictions");
 
     return true;
   }
 
-  bool RouteDataGenerator::CanTurn(const std::vector<Restriction>& restrictions,
+  bool RouteDataGenerator::CanTurn(const std::vector<TurnRestrictionRef>& restrictions,
                                    Id from,
                                    Id to) const
   {
@@ -174,20 +110,22 @@ namespace osmscout {
       return true;
     }
 
-    for (std::vector<Restriction>::const_iterator iter=restrictions.begin();
+    for (std::vector<TurnRestrictionRef>::const_iterator iter=restrictions.begin();
          iter!=restrictions.end();
          ++iter) {
-      if (iter->from==from) {
-        if (iter->type==allow) {
-          if (iter->to==to) {
+      TurnRestrictionRef restriction=*iter;
+
+      if (restriction->GetFrom()==from) {
+        if (restriction->GetType()==TurnRestriction::Allow) {
+          if (restriction->GetTo()==to) {
             return true;
           }
 
           // If there are allow restrictions,everything else is forbidden
           defaultReturn=false;
         }
-        else if (iter->type==forbit) {
-          if (iter->to==to) {
+        else if (restriction->GetType()==TurnRestriction::Forbit) {
+          if (restriction->GetTo()==to) {
             return false;
           }
 
@@ -410,7 +348,7 @@ namespace osmscout {
     FileWriter                             writer;
 
     // List of restrictions for a way
-    std::map<Id,std::vector<Restriction> > restrictions;
+    std::map<Id,std::vector<TurnRestrictionRef> > restrictions;
 
     uint32_t                               handledRouteNodeCount=0;
     uint32_t                               writtenRouteNodeCount=0;
@@ -425,10 +363,9 @@ namespace osmscout {
 
     progress.SetAction("Scanning for restriction relations");
 
-    if (!ReadRestrictionRelations(parameter,
-                                  progress,
-                                  typeConfig,
-                                  restrictions)) {
+    if (!ReadTurnRestrictions(parameter,
+                              progress,
+                              restrictions)) {
       return false;
     }
 
@@ -857,7 +794,7 @@ namespace osmscout {
           }
         }
 
-        std::map<Id,std::vector<Restriction> >::const_iterator turnConstraints=restrictions.find(routeNode.GetId());
+        std::map<Id,std::vector<TurnRestrictionRef> >::const_iterator turnConstraints=restrictions.find(routeNode.GetId());
 
         if (turnConstraints!=restrictions.end()) {
           for (std::list<Id>::const_iterator sourceWayId=node->second.begin();

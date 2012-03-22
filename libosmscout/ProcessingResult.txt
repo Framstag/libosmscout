@@ -23,9 +23,12 @@ rawway.idx (import only):
 rawrels.dat (import only):
  * Raw dump of all relations in import data
 
-nodeuse.idx (import only):
-* index of nodes that areapart of a way/area. Influences
-  drawing of way ends.
+rawrestrictions.dat (import only):
+ * List of restrictions as parsed from rawrels.dat
+
+restrictions.dat (import only):
+ * List of restrictions modified by the Way data generator
+   because of way merges.
 
 wayblack.dat (import only):
  * List of way ids that are already part of a outer member
@@ -60,17 +63,21 @@ relations.dat (export):
 relation.idx (export):
  * Index by numeric id over all relations in 'relations.dat'.
 
-area.idx (export):
- * Area index returning all ways/areas in a given bounding box
-   that are of a given list of types and (for areas) have at least
+areaarea.idx (export):
+ * Area index returning all areas in a given bounding box
+   that are of a given list of types and have at least
    a given size.
+
+areaway.idx (export):
+ * Area index returning all ways in a given bounding box
+   that are of a given list of types.
 
 areanode.idx (export):
  * Area index returning all nodes in a given bounding box
    that are of a given list of types and.
 
 region.dat (export):
- * Holds the tree of areas that build up the hierachical
+* Holds the tree of areas that build up the hierachical
    administrative regions.
 
 nameregion.idx (export):
@@ -79,7 +86,20 @@ nameregion.idx (export):
    (e.g. streets).
 
 water.idx (export, unfinished):
-  * Index that for a given region returns tiles that are either
-    of ground type 'water' or of ground type 'land' or ground type
-    'both'. This will in future allow to correctly use the correct
-    background color.
+ * Index that for a given region returns tiles that are either
+   of ground type 'water' or of ground type 'land' or ground type
+   'both'. This will in future allow to correctly use the correct
+   background color.
+
+optimized.dat (export)
+ * Combined index and data file for returning (in the map.ost
+   marked) ways in low zoom. Ways are merged and nodes are reduced
+   to minimize the amount of data to load and render.
+
+
+route.dat (export)
+ * Contains the route graph.
+
+route.idx (export)
+ * Contains the index over the route graph to load individual
+   routing nodes by id.

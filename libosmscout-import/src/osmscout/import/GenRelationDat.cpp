@@ -906,17 +906,19 @@ namespace osmscout {
         continue;
       }
 
-      // Blacklist all relation members that have the same type as relation itself
-      // from the areaWayIndex to assure that a way will not be returned twice,
-      // once as part of the relation and once as way itself
-      //
-      // For multipolygon relations we restrict blacklisting to the
-      // outer boundaries
+      if (!rel.IsArea()) {
+        continue;
+      }
+
+      // Blacklist all ways that build the multipolygon relation
       if (rel.IsArea()) {
         for (size_t m=0; m<rel.roles.size(); m++) {
           wayAreaIndexBlacklist.insert(rawRel.members[m].id);
         }
       }
+      // Blacklist all relation members that have the same type as relation itself
+      // from the areaWayIndex to assure that a way will not be returned twice,
+      // once as part of the relation and once as way itself
       else if (typeConfig.GetTypeInfo(rel.GetType()).GetConsumeChildren()) {
         for (size_t m=0; m<rel.roles.size(); m++) {
           if (rel.GetType()==rel.roles[m].GetType()) {

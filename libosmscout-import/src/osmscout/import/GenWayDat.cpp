@@ -40,92 +40,88 @@ namespace osmscout {
     return "Generate 'ways.dat'";
   }
 
-  bool WayDataGenerator::ReadRestrictionRelations(const ImportParameter& parameter,
-                                                  Progress& progress,
-                                                  const TypeConfig& typeConfig,
-                                                  std::map<Id,std::vector<Way::Restriction> >& restrictions)
+  bool WayDataGenerator::ReadTurnRestrictions(const ImportParameter& parameter,
+                                              Progress& progress,
+                                              std::multimap<Id,TurnRestrictionRef>& restrictions)
   {
     FileScanner scanner;
-    uint32_t    rawRelCount=0;
-
-    // List of restrictions for a way
-    TypeId      restrictionPosId=typeConfig.GetRelationTypeId("restriction_only_straight_on");
-    TypeId      restrictionNegId=typeConfig.GetRelationTypeId("restriction_no_straight_on");
-
-    assert(restrictionPosId!=typeIgnore);
-    assert(restrictionNegId!=typeIgnore);
+    uint32_t    restrictionCount=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "rawrels.dat"))) {
-      progress.Error("Cannot open 'rawrels.dat'");
+                                      "rawrestrictions.dat"))) {
+      progress.Error("Cannot open 'rawrestrictions.dat'");
       return false;
     }
 
-    if (!scanner.Read(rawRelCount)) {
+    if (!scanner.Read(restrictionCount)) {
       progress.Error("Error while reading number of data entries in file");
       return false;
     }
 
-    for (uint32_t r=1; r<=rawRelCount; r++) {
-      progress.SetProgress(r,rawRelCount);
+    for (uint32_t r=1; r<=restrictionCount; r++) {
+      progress.SetProgress(r,restrictionCount);
 
-      RawRelation relation;
+      TurnRestrictionRef restriction=new TurnRestriction();
 
-      if (!relation.Read(scanner)) {
+      if (!restriction->Read(scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(r)+" of "+
-                       NumberToString(rawRelCount)+
+                       NumberToString(restrictionCount)+
                        " in file '"+
                        scanner.GetFilename()+"'");
         return false;
       }
 
-      if (relation.GetType()==restrictionPosId ||
-          relation.GetType()==restrictionNegId) {
-        Id               from=0;
-        Way::Restriction restriction;
-
-        restriction.members.resize(1,0);
-
-        if (relation.GetType()==restrictionPosId) {
-          restriction.type=Way::rstrAllowTurn;
-        }
-        else if (relation.GetType()==restrictionNegId) {
-          restriction.type=Way::rstrForbitTurn;
-        }
-        else {
-          continue;
-        }
-
-        for (size_t i=0; i<relation.members.size(); i++) {
-          if (relation.members[i].type==RawRelation::memberWay &&
-              relation.members[i].role=="from") {
-            from=relation.members[i].id;
-          }
-          else if (relation.members[i].type==RawRelation::memberWay &&
-                   relation.members[i].role=="to") {
-            restriction.members[0]=relation.members[i].id;
-          }
-          else if (relation.members[i].type==RawRelation::memberNode &&
-                   relation.members[i].role=="via") {
-            restriction.members.push_back(relation.members[i].id);
-          }
-        }
-
-        if (from!=0 &&
-            restriction.members[1]!=0 &&
-            restriction.members.size()>1) {
-          restrictions[from].push_back(restriction);
-        }
-      }
+      restrictions.insert(std::make_pair(restriction->GetFrom(),restriction));
+      restrictions.insert(std::make_pair(restriction->GetTo(),restriction));
     }
 
     if (!scanner.Close()) {
-      progress.Error("Cannot close file 'rawrels.dat'");
+      progress.Error("Cannot close file 'rawrestrictions.dat'");
       return false;
     }
 
-    progress.Info(std::string("Found ")+NumberToString(restrictions.size())+" restrictions");
+    progress.Info(std::string("Read ")+NumberToString(restrictionCount)+" turn restrictions");
+
+    return true;
+  }
+
+  bool WayDataGenerator::WriteTurnRestrictions(const ImportParameter& parameter,
+                                               Progress& progress,
+                                               std::multimap<Id,TurnRestrictionRef>& restrictions)
+  {
+    std::set<TurnRestrictionRef> restrictionsSet;
+
+    for (std::multimap<Id,TurnRestrictionRef>::const_iterator restriction=restrictions.begin();
+        restriction!=restrictions.end();
+        ++restriction) {
+      restrictionsSet.insert(restriction->second);
+    }
+
+    FileWriter writer;
+
+    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     "restrictions.dat"))) {
+      progress.Error("Cannot create 'restrictions.dat'");
+      return false;
+    }
+
+    writer.Write(restrictionsSet.size());
+
+    for (std::set<TurnRestrictionRef>::const_iterator r=restrictionsSet.begin();
+        r!=restrictionsSet.end();
+        ++r) {
+      TurnRestrictionRef restriction=*r;
+
+      restriction->Write(writer);
+    }
+
+    if (!writer.Close()) {
+      progress.Error("Cannot close file 'restrictions.dat'");
+      return false;
+    }
+
+    progress.Info(std::string("Wrote back ")+NumberToString(restrictionsSet.size())+" restrictions");
 
     return true;
   }
@@ -361,6 +357,38 @@ namespace osmscout {
     return true;
   }
 
+  void WayDataGenerator::UpdateRestrictions(std::multimap<Id,TurnRestrictionRef>& restrictions,
+                                            Id oldId,
+                                            Id newId)
+  {
+    std::list<TurnRestrictionRef> oldRestrictions;
+
+    std::pair<std::multimap<Id,TurnRestrictionRef>::iterator,
+              std::multimap<Id,TurnRestrictionRef>::iterator> hits=restrictions.equal_range(oldId);
+    for (std::multimap<Id,TurnRestrictionRef>::iterator hit=hits.first;
+        hit!=hits.second;
+        ++hit) {
+      oldRestrictions.push_back(hit->second);
+    }
+
+    restrictions.erase(hits.first,hits.second);
+
+    for (std::list<TurnRestrictionRef>::iterator r=oldRestrictions.begin();
+        r!=oldRestrictions.end();
+        ++r) {
+      TurnRestrictionRef restriction(*r);
+
+      if (restriction->GetFrom()==oldId) {
+        restriction->SetFrom(newId);
+        restrictions.insert(std::make_pair(restriction->GetFrom(),restriction));
+      }
+      else if (restriction->GetTo()==oldId) {
+        restriction->SetTo(newId);
+        restrictions.insert(std::make_pair(restriction->GetTo(),restriction));
+      }
+    }
+  }
+
   bool WayDataGenerator::JoinWays(Progress& progress,
                                   const TypeConfig& typeConfig,
                                   FileScanner& scanner,
@@ -369,6 +397,7 @@ namespace osmscout {
                                   EndPointWayMap& endPointWayMap,
                                   NumericIndex<Id,RawWay>& rawWayIndex,
                                   std::set<Id> & wayBlacklist,
+                                  std::multimap<Id,TurnRestrictionRef>& restrictions,
                                   size_t& mergeCount)
   {
     std::vector<bool> hasBeenMerged(blockCount, true);
@@ -415,7 +444,7 @@ namespace osmscout {
 
       allCandidates.clear();
 
-      progress.Info("Merging ways");
+      progress.Info("Merging");
       for (size_t b=0; b<blockCount; b++) {
         if (hasBeenMerged[b] &&
             !rawWays[b].IsArea()) {
@@ -497,10 +526,6 @@ namespace osmscout {
               continue;
             }
 
-            if (rawWay.GetId()==56433551 || candidate->GetId()==56433551) {
-              std::cout << "Merging " << rawWay.GetId() << " with " << candidate->GetId() << std::endl;
-            }
-
             hasBeenMerged[b]=true;
             somethingHasMerged=true;
 
@@ -553,18 +578,15 @@ namespace osmscout {
               assert(true);
             }
 
+            UpdateRestrictions(restrictions,
+                               candidate->GetId(),
+                               rawWay.GetId());
+
             wayBlacklist.insert(candidate->GetId());
 
             rawWay.SetNodes(origNodes);
 
             mergeCount++;
-
-            if (rawWay.GetId()==56433551 || candidate->GetId()==56433551) {
-              for (size_t n=0; n<rawWay.GetNodeCount(); n++) {
-                std::cout << rawWay.GetNodeId(n) << " ";
-              }
-              std::cout << std::endl;
-            }
 
             break;
           }
@@ -581,30 +603,29 @@ namespace osmscout {
   {
     progress.SetAction("Generate ways.dat");
 
-    FileScanner                                 scanner;
-    FileWriter                                  writer;
-    uint32_t                                    rawWayCount=0;
+    FileScanner                          scanner;
+    FileWriter                           writer;
+    uint32_t                             rawWayCount=0;
 
     // List of restrictions for a way
-    std::map<Id,std::vector<Way::Restriction> > restrictions;
+    std::multimap<Id,TurnRestrictionRef> restrictions;
 
-    uint32_t                                    writtenWayCount=0;
+    uint32_t                             writtenWayCount=0;
 
-    EndPointWayMap                              endPointWayMap;
-    std::set<Id>                                endPointAreaSet;
+    EndPointWayMap                       endPointWayMap;
+    std::set<Id>                         endPointAreaSet;
 
-    std::set<Id>                                wayBlacklist;
+    std::set<Id>                         wayBlacklist;
 
     //
     // handling of restriction relations
     //
 
-    progress.SetAction("Scanning for restriction relations");
+    progress.SetAction("Reading turn restrictions");
 
-    if (!ReadRestrictionRelations(parameter,
-                                  progress,
-                                  typeConfig,
-                                  restrictions)) {
+    if (!ReadTurnRestrictions(parameter,
+                              progress,
+                              restrictions)) {
       return false;
     }
 
@@ -655,12 +676,6 @@ namespace osmscout {
       std::cerr << "Cannot open raw way index file!" << std::endl;
       return false;
     }
-
-    //
-    // Writing ways
-    //
-
-    progress.SetAction("Writing ways");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawways.dat"),
@@ -747,6 +762,7 @@ namespace osmscout {
                     endPointWayMap,
                     rawWayIndex,
                     wayBlacklist,
+                    restrictions,
                     mergeCount)) {
         return false;
       }
@@ -853,14 +869,6 @@ namespace osmscout {
           way.SetEndIsJoint(wayJoint!=endPointWayMap.end() || areaJoint!=endPointAreaSet.end());
         }
 
-        // Restrictions
-
-        std::map<Id,std::vector<Way::Restriction> >::iterator iter=restrictions.find(way.GetId());
-
-        if (iter!=restrictions.end()) {
-          way.SetRestrictions(iter->second);
-        }
-
         way.Write(writer);
         writtenWayCount++;
       }
@@ -879,6 +887,12 @@ namespace osmscout {
       return false;
     }
 
+    progress.SetAction("Storing back updated turn restrictions");
+
+    WriteTurnRestrictions(parameter,
+                          progress,
+                          restrictions);
+
     if (!rawWayIndex.Close()) {
       return false;
     }
@@ -895,7 +909,6 @@ namespace osmscout {
 
     endPointWayMap.clear();
     endPointAreaSet.clear();
-    restrictions.clear();
     wayBlacklist.clear();
 
     return true;

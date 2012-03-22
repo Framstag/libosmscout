@@ -33,26 +33,12 @@ namespace osmscout {
 
   class OSMSCOUT_API Way : public Referencable
   {
-  public:
-    enum RestrictionType
-    {
-      rstrAllowTurn  = 0, //! 0th member will be to, rest via ids
-      rstrForbitTurn = 1  //! 0th member will be to, rest via ids
-    };
-
-    struct OSMSCOUT_API Restriction
-    {
-      RestrictionType type;
-      std::vector<Id> members;
-    };
-
   private:
-    Id                        id;
-    SegmentAttributes         attributes;
+    Id                 id;
+    SegmentAttributes  attributes;
 
   public:
-    std::vector<Point>        nodes;
-    std::vector<Restriction>  restrictions;
+    std::vector<Point> nodes;
 
   public:
     inline Way()
@@ -180,8 +166,6 @@ namespace osmscout {
                  bool isArea,
                  std::vector<Tag>& tags,
                  bool& reverseNodes);
-
-    void SetRestrictions(const std::vector<Way::Restriction>& restrictions);
 
     void SetStartIsJoint(bool isJoint);
     void SetEndIsJoint(bool isJoint);
