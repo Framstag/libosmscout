@@ -80,7 +80,7 @@ namespace osmscout {
     bool JoinWays(Progress& progress,
                   const TypeConfig& typeConfig,
                   FileScanner& scanner,
-                  std::vector<RawWay>& rawWays,
+                  std::vector<RawWayRef>& rawWays,
                   size_t blockCount,
                   EndPointWayMap& endPointWayMap,
                   NumericIndex<Id,RawWay>& rawWayIndex,

@@ -392,7 +392,7 @@ namespace osmscout {
   bool WayDataGenerator::JoinWays(Progress& progress,
                                   const TypeConfig& typeConfig,
                                   FileScanner& scanner,
-                                  std::vector<RawWay>& rawWays,
+                                  std::vector<RawWayRef>& rawWays,
                                   size_t blockCount,
                                   EndPointWayMap& endPointWayMap,
                                   NumericIndex<Id,RawWay>& rawWayIndex,
@@ -400,9 +400,10 @@ namespace osmscout {
                                   std::multimap<Id,TurnRestrictionRef>& restrictions,
                                   size_t& mergeCount)
   {
-    std::vector<bool> hasBeenMerged(blockCount, true);
-    bool              somethingHasMerged=true;
-    SilentProgress    silentProgress;
+    std::vector<bool>      hasBeenMerged(blockCount, true);
+    std::map<Id,RawWayRef> mergedWays;
+    bool                   somethingHasMerged=true;
+    SilentProgress         silentProgress;
 
     while (somethingHasMerged) {
       somethingHasMerged=false;
@@ -414,16 +415,13 @@ namespace osmscout {
 
       for (size_t b=0; b<blockCount; b++) {
         if (hasBeenMerged[b] &&
-            !rawWays[b].IsArea()) {
-          RawWay& rawWay=rawWays[b];
-
-          GetWayMergeCandidates(rawWay,
+            !rawWays[b]->IsArea()) {
+          GetWayMergeCandidates(rawWays[b],
                                 endPointWayMap,
                                 wayBlacklist,
                                 allCandidates);
         }
       }
-
 
       if (allCandidates.empty()) {
         continue;
@@ -447,25 +445,25 @@ namespace osmscout {
       progress.Info("Merging");
       for (size_t b=0; b<blockCount; b++) {
         if (hasBeenMerged[b] &&
-            !rawWays[b].IsArea()) {
-          RawWay& rawWay=rawWays[b];
+            !rawWays[b]->IsArea()) {
+          RawWayRef rawWay=rawWays[b];
 
           hasBeenMerged[b]=false;
 
           // The way has already been merged (within this block)
-          if (wayBlacklist.find(rawWay.GetId())!=wayBlacklist.end()) {
+          if (wayBlacklist.find(rawWay->GetId())!=wayBlacklist.end()) {
             continue;
           }
 
           SegmentAttributes origAttributes;
-          std::vector<Tag>  origTags(rawWay.GetTags());
+          std::vector<Tag>  origTags(rawWay->GetTags());
           bool              origReverseNodes;
 
-          origAttributes.type=rawWay.GetType();
+          origAttributes.type=rawWay->GetType();
           if (!origAttributes.SetTags(silentProgress,
                                       typeConfig,
-                                      rawWay.GetId(),
-                                      rawWay.IsArea(),
+                                      rawWay->GetId(),
+                                      rawWay->IsArea(),
                                       origTags,
                                       origReverseNodes)) {
             continue;
@@ -504,6 +502,14 @@ namespace osmscout {
               continue;
             }
 
+            // Assure that we do not work on an old version from disk,
+            // but take the local version if we already had done merges on them
+            std::map<Id,RawWayRef>::const_iterator allreadyMergedCandidate=mergedWays.find(candidate->GetId());
+
+            if (allreadyMergedCandidate!=mergedWays.end()) {
+              candidate=allreadyMergedCandidate->second;
+            }
+
             SegmentAttributes matchAttributes;
             std::vector<Tag>  matchTags(candidate->GetTags());
             bool              matchReverseNodes;
@@ -529,7 +535,7 @@ namespace osmscout {
             hasBeenMerged[b]=true;
             somethingHasMerged=true;
 
-            std::vector<Id> origNodes(rawWay.GetNodes());
+            std::vector<Id> origNodes(rawWay->GetNodes());
 
             if (origReverseNodes) {
               std::reverse(origNodes.begin(),origNodes.end());
@@ -580,11 +586,13 @@ namespace osmscout {
 
             UpdateRestrictions(restrictions,
                                candidate->GetId(),
-                               rawWay.GetId());
+                               rawWay->GetId());
 
             wayBlacklist.insert(candidate->GetId());
 
-            rawWay.SetNodes(origNodes);
+            rawWay->SetNodes(origNodes);
+
+            mergedWays[rawWay->GetId()]=rawWay;
 
             mergeCount++;
 
@@ -698,9 +706,9 @@ namespace osmscout {
 
     writer.Write(writtenWayCount);
 
-    uint32_t            currentWay=1;
-    size_t              mergeCount=0;
-    std::vector<RawWay> block(parameter.GetRawWayBlockSize());
+    uint32_t               currentWay=1;
+    size_t                 mergeCount=0;
+    std::vector<RawWayRef> block(parameter.GetRawWayBlockSize());
 
     while (currentWay<rawWayCount) {
       size_t blockCount=0;
@@ -709,7 +717,11 @@ namespace osmscout {
       while (blockCount<block.size() && currentWay<rawWayCount) {
         progress.SetProgress(currentWay,rawWayCount);
 
-        if (!block[blockCount].Read(scanner)) {
+        if (block[blockCount].Invalid()) {
+          block[blockCount]=new RawWay();
+        }
+
+        if (!block[blockCount]->Read(scanner)) {
           progress.Error(std::string("Error while reading data entry ")+
                          NumberToString(currentWay)+" of "+
                          NumberToString(rawWayCount)+
@@ -720,7 +732,7 @@ namespace osmscout {
 
         currentWay++;
 
-        std::set<Id>::iterator blacklistEntry=wayBlacklist.find(block[blockCount].GetId());
+        std::set<Id>::iterator blacklistEntry=wayBlacklist.find(block[blockCount]->GetId());
 
         if (blacklistEntry!=wayBlacklist.end()) {
           wayBlacklist.erase(blacklistEntry);
@@ -728,18 +740,18 @@ namespace osmscout {
           continue;
         }
 
-        if (block[blockCount].GetType()==typeIgnore) {
+        if (block[blockCount]->GetType()==typeIgnore) {
           continue;
         }
 
-        if (typeConfig.GetTypeInfo(block[blockCount].GetType()).GetIgnore()) {
+        if (typeConfig.GetTypeInfo(block[blockCount]->GetType()).GetIgnore()) {
           continue;
         }
 
-        if (block[blockCount].GetNodeCount()<2) {
+        if (block[blockCount]->GetNodeCount()<2) {
           progress.Error(std::string("Way ")+
-                         NumberToString(block[blockCount].GetId())+" has only "+
-                         NumberToString(block[blockCount].GetNodeCount())+
+                         NumberToString(block[blockCount]->GetId())+" has only "+
+                         NumberToString(block[blockCount]->GetNodeCount())+
                          " node(s) but requires at least 2 nodes");
           continue;
         }
@@ -770,8 +782,8 @@ namespace osmscout {
       progress.SetAction("Writing ways");
 
       for (size_t w=0; w<blockCount; w++) {
-        for (size_t n=0; n<block[w].GetNodeCount(); n++) {
-          nodeIds.insert(block[w].GetNodeId(n));
+        for (size_t n=0; n<block[w]->GetNodeCount(); n++) {
+          nodeIds.insert(block[w]->GetNodeId(n));
         }
       }
 
@@ -790,35 +802,35 @@ namespace osmscout {
 
       for (size_t w=0; w<blockCount; w++) {
         // Way has been joined, no need to write it
-        if (wayBlacklist.find(block[w].GetId())!=wayBlacklist.end()) {
+        if (wayBlacklist.find(block[w]->GetId())!=wayBlacklist.end()) {
           continue;
         }
 
-        std::vector<Tag> tags(block[w].GetTags());
+        std::vector<Tag> tags(block[w]->GetTags());
         Way              way;
         bool             reverseNodes=false;
 
-        way.SetId(block[w].GetId());
-        way.SetType(block[w].GetType());
+        way.SetId(block[w]->GetId());
+        way.SetType(block[w]->GetType());
 
 
         if (!way.SetTags(progress,
                          typeConfig,
-                         block[w].IsArea(),
+                         block[w]->IsArea(),
                          tags,
                          reverseNodes)) {
           continue;
         }
 
-        way.nodes.resize(block[w].GetNodeCount());
+        way.nodes.resize(block[w]->GetNodeCount());
 
         bool success=true;
-        for (size_t n=0; n<block[w].GetNodeCount(); n++) {
-          std::map<Id,RawNodeRef>::const_iterator node=nodesMap.find(block[w].GetNodeId(n));
+        for (size_t n=0; n<block[w]->GetNodeCount(); n++) {
+          std::map<Id,RawNodeRef>::const_iterator node=nodesMap.find(block[w]->GetNodeId(n));
 
           if (node==nodesMap.end()) {
             progress.Error("Cannot resolve node with id "+
-                           NumberToString(block[w].GetNodeId(n))+
+                           NumberToString(block[w]->GetNodeId(n))+
                            " for Way "+
                            NumberToString(way.GetId()));
             success=false;
