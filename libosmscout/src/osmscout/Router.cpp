@@ -81,8 +81,10 @@ namespace osmscout {
                                                                  RouteDescription& description,
                                                                  Database& database)
   {
-    WayRef prevWay,nextWay;
-    Id     prevNode,nextNode;
+    WayRef prevWay;
+    WayRef  nextWay;
+    Id     prevNode=0;
+    Id     nextNode=0;
     double distance=0.0;
     double time=0.0;
 
