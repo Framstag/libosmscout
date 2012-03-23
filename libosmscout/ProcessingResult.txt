@@ -23,10 +23,10 @@ rawway.idx (import only):
 rawrels.dat (import only):
  * Raw dump of all relations in import data
 
-rawrestrictions.dat (import only):
+rawturnrestr.dat (import only):
  * List of restrictions as parsed from rawrels.dat
 
-restrictions.dat (import only):
+turnrestr.dat (import only):
  * List of restrictions modified by the Way data generator
    because of way merges.
 

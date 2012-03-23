@@ -33,7 +33,7 @@ namespace osmscout {
 
   std::string TurnRestrictionDataGenerator::GetDescription() const
   {
-    return "Generate 'rawrestrictions.dat'";
+    return "Generate 'rawturnrestr.dat'";
   }
 
   bool TurnRestrictionDataGenerator::Import(const ImportParameter& parameter,
@@ -43,7 +43,7 @@ namespace osmscout {
     uint32_t rawRelsCount=0;
     uint32_t restrictionsWrittenCount=0;
 
-    progress.SetAction("Generating rawrestrictions.dat");
+    progress.SetAction("Generating rawturnrestr.dat");
 
     FileScanner scanner;
     FileWriter  writer;
@@ -61,8 +61,8 @@ namespace osmscout {
     }
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "rawrestrictions.dat"))) {
-      progress.Error("Cannot create 'rawrestrictions.dat'");
+                                     "rawturnrestr.dat"))) {
+      progress.Error("Cannot create 'rawturnrestr.dat'");
       return false;
     }
 

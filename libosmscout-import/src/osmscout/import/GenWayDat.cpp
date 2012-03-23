@@ -48,8 +48,8 @@ namespace osmscout {
     uint32_t    restrictionCount=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "rawrestrictions.dat"))) {
-      progress.Error("Cannot open 'rawrestrictions.dat'");
+                                      "rawturnrestr.dat"))) {
+      progress.Error("Cannot open 'rawturnrestr.dat'");
       return false;
     }
 
@@ -77,7 +77,7 @@ namespace osmscout {
     }
 
     if (!scanner.Close()) {
-      progress.Error("Cannot close file 'rawrestrictions.dat'");
+      progress.Error("Cannot close file 'rawturnrestr.dat'");
       return false;
     }
 
@@ -101,8 +101,8 @@ namespace osmscout {
     FileWriter writer;
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "restrictions.dat"))) {
-      progress.Error("Cannot create 'restrictions.dat'");
+                                     "turnrestr.dat"))) {
+      progress.Error("Cannot create 'turnrestr.dat'");
       return false;
     }
 
@@ -117,7 +117,7 @@ namespace osmscout {
     }
 
     if (!writer.Close()) {
-      progress.Error("Cannot close file 'restrictions.dat'");
+      progress.Error("Cannot close file 'turnrestr.dat'");
       return false;
     }
 

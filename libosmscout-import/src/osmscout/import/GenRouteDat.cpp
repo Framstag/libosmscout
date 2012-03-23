@@ -63,8 +63,8 @@ namespace osmscout {
     uint32_t    restrictionCount=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "restrictions.dat"))) {
-      progress.Error("Cannot open 'restrictions.dat'");
+                                      "turnrestr.dat"))) {
+      progress.Error("Cannot open 'turnrestr.dat'");
       return false;
     }
 
@@ -91,7 +91,7 @@ namespace osmscout {
     }
 
     if (!scanner.Close()) {
-      progress.Error("Cannot close file 'restrictions.dat'");
+      progress.Error("Cannot close file 'turnrestr.dat'");
       return false;
     }
 
