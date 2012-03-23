@@ -6,6 +6,7 @@ AC_INIT([TravelJinni],
         [TravelJinni])
 
 AC_CONFIG_SRCDIR(src/Viewer.cpp)
+AC_CONFIG_MACRO_DIR([m4])
 
 AC_CONFIG_HEADERS(src/config.h)
 AM_INIT_AUTOMAKE([nostdinc subdir-objects dist-bzip2 no-dist-gzip])

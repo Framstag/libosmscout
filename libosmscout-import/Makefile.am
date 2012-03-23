@@ -1,6 +1,7 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = src include 
+SUBDIRS = src include
+ 
 EXTRA_DIST = ./config.rpath autogen.sh
 
 pkgconfigdir = $(libdir)/pkgconfig
