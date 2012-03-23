@@ -106,7 +106,7 @@ namespace osmscout {
       return false;
     }
 
-    writer.Write(restrictionsSet.size());
+    writer.Write((uint32_t)restrictionsSet.size());
 
     for (std::set<TurnRestrictionRef>::const_iterator r=restrictionsSet.begin();
         r!=restrictionsSet.end();
