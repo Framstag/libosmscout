@@ -251,13 +251,16 @@ namespace osmscout {
     delete buffer;
     buffer=new char[pageSize];
 
-    std::cout << entries << " entries to index, " << levels << " levels, pageSize " << pageSize << ", cache size " << cacheSize << std::endl;
+    //std::cout << entries << " entries to index, " << levels << " levels, pageSize " << pageSize << ", cache size " << cacheSize << std::endl;
 
     ReadPage(lastLevelPageStart,root);
 
     unsigned long currentCacheSize=cacheSize;
+    unsigned long requiredCacheSize=0;
     for (size_t i=1; i<pageCounts.size(); i++) {
       unsigned long resultingCacheSize;
+
+      requiredCacheSize+=pageCounts[i];
 
       if (pageCounts[i]>currentCacheSize) {
         resultingCacheSize=currentCacheSize;
@@ -268,7 +271,11 @@ namespace osmscout {
         currentCacheSize-=pageCounts[i];
       }
 
-      std::cout << "Setting cache size for level " << i+1 << " with " << pageCounts[i] << " entries to " << resultingCacheSize << std::endl;
+      if (requiredCacheSize>cacheSize) {
+        std::cerr << "Warning: Index " << filepart << " has cache size " << cacheSize<< ", but requires cache size " << requiredCacheSize << " to load index completely into cache!" << std::endl;
+      }
+
+      //std::cout << "Setting cache size for level " << i+1 << " with " << pageCounts[i] << " entries to " << resultingCacheSize << std::endl;
 
       leafs.push_back(PageCache(resultingCacheSize));
     }

@@ -292,86 +292,68 @@ namespace osmscout {
 
     std::cout << "Data bounding box: [" << minLat << "," << minLon << "] - [" << maxLat << "," << maxLon << "]" << std::endl;
 
-    std::cout << "Opening 'nodes.dat'..." << std::endl;
     if (!nodeDataFile.Open(path,true,true)) {
       std::cerr << "Cannot open 'nodes.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
     }
-    std::cout << "Opening 'nodes.dat' done." << std::endl;
 
-    std::cout << "Opening 'ways.dat'..." << std::endl;
     if (!wayDataFile.Open(path,true,true)) {
       std::cerr << "Cannot open 'ways.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
     }
-    std::cout << "Opening 'ways.dat' done." << std::endl;
 
-    std::cout << "Opening 'relations.dat'..." << std::endl;
     if (!relationDataFile.Open(path,true,true)) {
       std::cerr << "Cannot open 'relations.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
     }
-    std::cout << "Opening 'relations.dat' done." << std::endl;
 
-    std::cout << "Loading low zoom optimizations..." << std::endl;
     if (!optimizeLowZoom.Open(path)) {
       std::cerr << "Cannot load low zoom optimizations!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
     }
-    std::cout << "Loading water index done." << std::endl;
 
-    std::cout << "Loading area area index..." << std::endl;
     if (!areaAreaIndex.Load(path)) {
       std::cerr << "Cannot load area area index!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
     }
-    std::cout << "Loading area index done." << std::endl;
 
-    std::cout << "Loading area node index..." << std::endl;
     if (!areaNodeIndex.Load(path)) {
       std::cerr << "Cannot load area node index!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
     }
-    std::cout << "Loading area node index done." << std::endl;
 
-    std::cout << "Loading area way index..." << std::endl;
     if (!areaWayIndex.Load(path)) {
       std::cerr << "Cannot load area way index!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
     }
-    std::cout << "Loading area way index done." << std::endl;
 
-    std::cout << "Loading city street index..." << std::endl;
     if (!cityStreetIndex.Load(path, hashFunction)) {
       std::cerr << "Cannot load city street index!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
     }
-    std::cout << "Loading city street index done." << std::endl;
 
-    std::cout << "Loading water index..." << std::endl;
     if (!waterIndex.Load(path)) {
       std::cerr << "Cannot load water index!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
     }
-    std::cout << "Loading water index done." << std::endl;
 
     isOpen=true;
 
@@ -522,12 +504,6 @@ namespace osmscout {
 
     StopClock areaAreaIndexTimer;
 
-    /*
-    std::cout << "Ways for magnification: " << magLevel << std::endl;
-    for (size_t i=0; i<wayTypes.size(); i++) {
-      std::cout << "Drawing way of type: " << typeConfig->GetTypes()[wayTypes[i]].GetName() << " " << typeConfig->GetTypes()[wayTypes[i]].GetId() << std::endl;
-    }*/
-
     wayTypes.clear();
 
     styleConfig.GetAreaTypesWithMag(magnification,
@@ -580,11 +556,6 @@ namespace osmscout {
       std::cout << "Error reading ways in area!" << std::endl;
       return false;
     }
-
-    /*
-    for (size_t i=0; i<ways.size(); i++) {
-      std::cout << ways[i]->GetId() << " " << ways[i]->GetName() << " " << ways[i]->GetRefName() << std::endl;
-    }*/
 
     waysTimer.Stop();
 
@@ -804,8 +775,6 @@ namespace osmscout {
 
     timer.Stop();
 
-    //std::cout << "Found " << tiles.size() << " ground tiles " << timer << std::endl;
-
     return true;
   }
 
@@ -1000,4 +969,3 @@ namespace osmscout {
     waterIndex.DumpStatistics();
   }
 }
-
