@@ -65,20 +65,20 @@ namespace osmscout {
     png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,NULL,NULL,NULL);
     if (!png_ptr) {
       fclose(file);
-      return false;   /* out of memory */
+      return NULL;   /* out of memory */
     }
 
     info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr) {
       png_destroy_read_struct(&png_ptr,NULL,NULL);
       fclose(file);
-      return false;   /* out of memory */
+      return NULL;   /* out of memory */
     }
 
     if (setjmp(png_jmpbuf(png_ptr))) {
       png_destroy_read_struct(&png_ptr,&info_ptr,NULL);
       fclose(file);
-      return false;
+      return NULL;
     }
 
     png_init_io(png_ptr,file);
@@ -90,7 +90,7 @@ namespace osmscout {
     if (setjmp(png_jmpbuf(png_ptr))) {
       png_destroy_read_struct(&png_ptr,&info_ptr,NULL);
       fclose(file);
-      return false;
+      return NULL;
     }
 
     /* We always want RGB or RGBA */
@@ -138,14 +138,14 @@ namespace osmscout {
     if ((image_data=(unsigned char *)malloc(rowbytes*height)) == NULL) {
       png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
       fclose(file);
-      return false;
+      return NULL;
     }
 
     if ((row_pointers=(png_bytepp)malloc(height*sizeof(png_bytep))) == NULL) {
       png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
       free(image_data);
       fclose(file);
-      return false;
+      return NULL;
     }
 
     for (size_t i=0;  i<height; ++i) {

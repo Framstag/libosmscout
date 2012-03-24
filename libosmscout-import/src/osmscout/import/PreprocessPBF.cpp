@@ -127,7 +127,7 @@ namespace osmscout {
 
       z_stream compressedStream;
 
-      compressedStream.next_in=(unsigned char*)blob.zlib_data().data();
+      compressedStream.next_in=(const unsigned char*)blob.zlib_data().data();
       compressedStream.avail_in=blob.zlib_data().size();
       compressedStream.next_out=(Bytef*)buffer;
       compressedStream.avail_out=length;
@@ -219,7 +219,7 @@ namespace osmscout {
 
       z_stream compressedStream;
 
-      compressedStream.next_in=(unsigned char*)blob.zlib_data().data();
+      compressedStream.next_in=(const unsigned char*)blob.zlib_data().data();
       compressedStream.avail_in=blob.zlib_data().size();
       compressedStream.next_out=(Bytef*)buffer;
       compressedStream.avail_out=length;

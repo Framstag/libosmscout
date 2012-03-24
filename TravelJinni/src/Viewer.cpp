@@ -95,7 +95,6 @@ public:
     RequestFocus();
 
     Observe(jobFinishedAction);
-
   }
 
   virtual ~MapControl()
@@ -494,6 +493,8 @@ public:
      aboutAction(new Lum::Model::Action()),
      map(NULL)
   {
+    GetWindow()->SetScreenOrientationHint(Lum::OS::Window::screenOrientationBothSupported);
+
     Observe(GetOpenedAction());
     Observe(GetClosedAction());
     Observe(locationSearchAction);
