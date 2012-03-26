@@ -111,16 +111,18 @@ void DumpWay(const osmscout::TypeConfig* typeConfig,
     }
 
     if (way->GetWidth()!=0) {
-      std::cout << "  width: " << way->GetWidth() << std::endl;
+      std::cout << "  width: " << (size_t)way->GetWidth() << std::endl;
     }
 
     if (way->GetLayer()!=0) {
-      std::cout << "  layer: " << way->GetLayer() << std::endl;
+      std::cout << "  layer: " << (size_t)way->GetLayer() << std::endl;
     }
 
     if (way->GetMaxSpeed()!=0) {
       std::cout << "  maxSpeed: " << (size_t)way->GetMaxSpeed() << std::endl;
     }
+
+    std::cout << "  grade: " << (size_t)way->GetGrade() << std::endl;
 
     if (way->StartIsJoint()) {
       std::cout << "  startIsJoint: true" << std::endl;
@@ -147,7 +149,7 @@ void DumpWay(const osmscout::TypeConfig* typeConfig,
     std::cout << std::endl;
 
     for (size_t n=0; n<way->nodes.size(); n++) {
-      std::cout << "  node[" << n << "] { id: " << way->nodes[n].GetId() << " lat: " << way->nodes[n].GetLat() << " lon: "<< way->nodes[n].GetLon() << "}" << std::endl;
+      std::cout << "  node[" << n << "] { id: " << way->nodes[n].GetId() << " lat: " << way->nodes[n].GetLat() << " lon: "<< way->nodes[n].GetLon() << " }" << std::endl;
     }
   }
 
