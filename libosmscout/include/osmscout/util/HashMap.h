@@ -31,8 +31,10 @@
 
 #if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
   #define OSMSCOUT_HASHMAP std::unordered_map
+  #define OSMSCOUT_HASHMAP_HAS_RESERVE 1
 #else
   #define OSMSCOUT_HASHMAP std::map
+  #undef OSMSCOUT_HASHMAP_HAS_RESERVE
 #endif
 
 #endif
