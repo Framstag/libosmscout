@@ -35,6 +35,8 @@ namespace osmscout {
                                   std::vector<Tag>& tags,
                                   bool& reverseNodes)
   {
+    bool hasGrade=false;
+
     name.clear();
     ref.clear();
     houseNr.clear();
@@ -43,6 +45,7 @@ namespace osmscout {
     layer=0;
     width=0;
     maxSpeed=0;
+    grade=1;
 
     this->tags.clear();
 
@@ -130,6 +133,83 @@ namespace osmscout {
         }
         else {
           progress.Warning(std::string("Max speed tag value '")+tag->value+"' for "+NumberToString(id)+" is not numeric!");
+        }
+
+        tag=tags.erase(tag);
+      }
+      else if (!IsArea() && tag->key==typeConfig.tagSurface) {
+        if (!hasGrade) {
+          if (tag->value=="paved" ||
+              tag->value=="asphalt" ||
+              tag->value=="cobblestone" ||
+              tag->value=="cobblestone:flattened" ||
+              tag->value=="concrete" ||
+              tag->value=="concrete:lanes" ||
+              tag->value=="concrete:plates" ||
+              tag->value=="paving_stones" ||
+              tag->value=="paving_stones:20" ||
+              tag->value=="paving_stones:30" ||
+              tag->value=="sett" ||
+              tag->value=="tarred" ||
+              tag->value=="tartan") {
+            grade=1;
+          }
+          else if (tag->value=="ash" ||
+                   tag->value=="clay" ||
+                   tag->value=="compacted" ||
+                   tag->value=="compacted_gravel" ||
+                   tag->value=="fine_gravel" ||
+                   tag->value=="gravel" ||
+                   tag->value=="gravel;grass" ||
+                   tag->value=="grass_paver" ||
+                   tag->value=="metal" ||
+                   tag->value=="pebblestone" ||
+                   tag->value=="stone" ||
+                   tag->value=="wood") {
+            grade=2;
+          }
+          else if (tag->value=="unpaved" ||
+                   tag->value=="dirt" ||
+                   tag->value=="earth" ||
+                   tag->value=="grass" ||
+                   tag->value=="grass;earth" ||
+                   tag->value=="ground" ||
+                   tag->value=="mud" ||
+                   tag->value=="sand" ||
+                   tag->value=="soil") {
+            grade=3;
+          }
+          else if (tag->value=="artificial_turf" ||
+                   tag->value=="bark_mulch") {
+            grade=4;
+          }
+          else {
+            progress.Warning(std::string("Unknown surface type '")+tag->value+"' for "+NumberToString(id)+"!");
+          }
+        }
+
+        tag=tags.erase(tag);
+      }
+      else if (!IsArea() && tag->key==typeConfig.tagTracktype) {
+        if (tag->value=="grade1") {
+          grade=1;
+          hasGrade=true;
+        }
+        else if (tag->value=="grade2") {
+          grade=2;
+          hasGrade=true;
+        }
+        else if (tag->value=="grade3") {
+          grade=3;
+          hasGrade=true;
+        }
+        else if (tag->value=="grade4") {
+          grade=4;
+          hasGrade=true;
+        }
+        else if (tag->value=="grade5") {
+          grade=5;
+          hasGrade=true;
         }
 
         tag=tags.erase(tag);
@@ -279,6 +359,13 @@ namespace osmscout {
       maxSpeed=0;
     }
 
+    if (flags & hasGrade) {
+      scanner.Read(grade);
+    }
+    else {
+      grade=1;
+    }
+
     if (flags & hasTags) {
       uint32_t tagCount;
 
@@ -343,6 +430,13 @@ namespace osmscout {
       flags&=~hasMaxSpeed;
     }
 
+    if (grade!=1) {
+      flags|=hasGrade;
+    }
+    else {
+      flags&=~hasGrade;
+    }
+
     if (!tags.empty()) {
       flags|=hasTags;
     }
@@ -376,6 +470,10 @@ namespace osmscout {
       writer.Write(maxSpeed);
     }
 
+    if (flags & hasGrade) {
+      writer.Write(grade);
+    }
+
     if (flags & hasTags) {
       writer.WriteNumber((uint32_t)tags.size());
 
@@ -404,7 +502,8 @@ namespace osmscout {
         houseNr!=other.houseNr ||
         layer!=other.layer ||
         width!=other.width ||
-        maxSpeed!=other.maxSpeed) {
+        maxSpeed!=other.maxSpeed ||
+        grade!=other.grade) {
       return false;
     }
 

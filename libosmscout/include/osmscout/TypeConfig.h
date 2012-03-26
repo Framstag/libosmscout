@@ -397,6 +397,8 @@ namespace osmscout {
     TagId                          tagMaxSpeed;
     TagId                          tagAccess;
     TagId                          tagRestriction;
+    TagId                          tagSurface;
+    TagId                          tagTracktype;
 
   public:
     TypeConfig();

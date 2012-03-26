@@ -565,6 +565,7 @@ namespace osmscout {
               path.wayIndex=routeNode.ways.size()-1;
               path.type=way->GetType();
               path.maxSpeed=way->GetMaxSpeed();
+              path.grade=way->GetGrade();
               path.flags=CopyFlags(*way);
               path.lat=way->nodes[nextNode].GetLat();
               path.lon=way->nodes[nextNode].GetLon();
@@ -609,6 +610,7 @@ namespace osmscout {
               path.wayIndex=routeNode.ways.size()-1;
               path.type=way->GetType();
               path.maxSpeed=way->GetMaxSpeed();
+              path.grade=way->GetGrade();
               path.flags=CopyFlags(*way);
               path.lat=way->nodes[prevNode].GetLat();
               path.lon=way->nodes[prevNode].GetLon();
@@ -664,6 +666,7 @@ namespace osmscout {
               path.wayIndex=routeNode.ways.size()-1;
               path.type=way->GetType();
               path.maxSpeed=way->GetMaxSpeed();
+              path.grade=way->GetGrade();
               path.flags=CopyFlags(*way);
               path.lat=way->nodes[nextNode].GetLat();
               path.lon=way->nodes[nextNode].GetLon();
@@ -709,6 +712,7 @@ namespace osmscout {
                 path.wayIndex=routeNode.ways.size()-1;
                 path.type=way->GetType();
                 path.maxSpeed=way->GetMaxSpeed();
+                path.grade=way->GetGrade();
                 path.flags=CopyFlags(*way);
                 path.lat=way->nodes[prevNode].GetLat();
                 path.lon=way->nodes[prevNode].GetLon();
@@ -740,6 +744,7 @@ namespace osmscout {
                     path.wayIndex=routeNode.ways.size()-1;
                     path.type=way->GetType();
                     path.maxSpeed=way->GetMaxSpeed();
+                    path.grade=way->GetGrade();
                     path.flags=CopyFlags(*way);
                     path.lat=way->nodes[j].GetLat();
                     path.lon=way->nodes[j].GetLon();
@@ -774,6 +779,7 @@ namespace osmscout {
                     path.wayIndex=routeNode.ways.size()-1;
                     path.type=way->GetType();
                     path.maxSpeed=way->GetMaxSpeed();
+                    path.grade=way->GetGrade();
                     path.flags=CopyFlags(*way);
                     path.lat=way->nodes[j].GetLat();
                     path.lon=way->nodes[j].GetLon();

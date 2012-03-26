@@ -35,6 +35,7 @@ namespace osmscout {
   {
   private:
     // Attribute availability flags (for optimized attribute storage)
+    const static uint16_t hasGrade        = 1 <<  9; //! We have grade information stored on disk
     const static uint16_t hasMaxSpeed     = 1 << 10; //! We have maximum speed information stored on disk
     const static uint16_t hasTags         = 1 << 11; //! We have additional tags stored on disk
     const static uint16_t hasName         = 1 << 12; //! We have a name
@@ -67,6 +68,7 @@ namespace osmscout {
     int8_t           layer;    //! layer to draw on
     uint8_t          width;    //! width of way
     uint8_t          maxSpeed; //! speed from 1..255km/h (0 means, not set)
+    uint8_t          grade;    //! Quality of road/track 1 (good)...5 (bad)
     std::vector<Tag> tags;     //! list of preparsed tags
 
   public:
@@ -75,7 +77,8 @@ namespace osmscout {
       flags(0),
       layer(0),
       width(0),
-      maxSpeed(0)
+      maxSpeed(0),
+      grade(1)
     {
       // no code
     }
@@ -123,6 +126,11 @@ namespace osmscout {
     inline uint8_t GetMaxSpeed() const
     {
       return maxSpeed;
+    }
+
+    inline uint8_t GetGrade() const
+    {
+      return grade;
     }
 
     inline bool IsBridge() const
