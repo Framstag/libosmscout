@@ -625,6 +625,10 @@ namespace osmscout {
 
     std::set<Id>                         wayBlacklist;
 
+#if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
+    endPointWayMap.reserve(200000);
+#endif
+
     //
     // handling of restriction relations
     //
@@ -854,31 +858,53 @@ namespace osmscout {
         if (!way.IsArea()) {
           EndPointWayMap::const_iterator wayJoint;
           std::set<Id>::const_iterator   areaJoint;
+          std::list<Id>::iterator        jointWayId;
+          size_t                         startNodeJointCount=0;
+          size_t                         endNodeJointCount=0;
 
           wayJoint=endPointWayMap.find(way.nodes.front().GetId());
 
-          if (wayJoint!=endPointWayMap.end() &&
-              wayJoint->second.size()<2) {
-            wayJoint=endPointWayMap.end();
+          if (wayJoint!=endPointWayMap.end()) {
+            for (std::list<Id>::const_iterator jointWayId=wayJoint->second.begin();
+                jointWayId!=wayJoint->second.end();
+                ++jointWayId) {
+              if (wayBlacklist.find(*jointWayId)==wayBlacklist.end()) {
+                startNodeJointCount++;
+              }
+            }
           }
 
-          if (wayJoint==endPointWayMap.end()) {
+          if (startNodeJointCount==1) {
+            startNodeJointCount=0;
+          }
+
+          if (startNodeJointCount==0) {
             areaJoint=endPointAreaSet.find(way.nodes.front().GetId());
           }
 
-          way.SetStartIsJoint(wayJoint!=endPointWayMap.end() || areaJoint!=endPointAreaSet.end());
+          way.SetStartIsJoint(startNodeJointCount>0 || areaJoint!=endPointAreaSet.end());
 
           wayJoint=endPointWayMap.find(way.nodes.back().GetId());
 
-          if (wayJoint!=endPointWayMap.end() && wayJoint->second.size()<2) {
-            wayJoint=endPointWayMap.end();
+          if (wayJoint!=endPointWayMap.end()) {
+            for (std::list<Id>::const_iterator jointWayId=wayJoint->second.begin();
+                jointWayId!=wayJoint->second.end();
+                ++jointWayId) {
+              if (wayBlacklist.find(*jointWayId)==wayBlacklist.end()) {
+                endNodeJointCount++;
+              }
+            }
           }
 
-          if (wayJoint==endPointWayMap.end()) {
+          if (endNodeJointCount==1) {
+            endNodeJointCount=0;
+          }
+
+          if (endNodeJointCount==0) {
             areaJoint=endPointAreaSet.find(way.nodes.back().GetId());
           }
 
-          way.SetEndIsJoint(wayJoint!=endPointWayMap.end() || areaJoint!=endPointAreaSet.end());
+          way.SetEndIsJoint(endNodeJointCount>0 || areaJoint!=endPointAreaSet.end());
         }
 
         way.Write(writer);
