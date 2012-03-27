@@ -408,58 +408,6 @@ namespace osmscout {
     return true;
   }
 
-  RouteData::RouteEntry::RouteEntry(Id currentNodeId,
-                                    Id pathWayId,
-                                    Id targetNodeId)
-   : currentNodeId(currentNodeId),
-     pathWayId(pathWayId),
-     targetNodeId(targetNodeId)
-  {
-    // no code
-  }
-
-  RouteData::RouteEntry::RouteEntry(Id currentNodeId,
-                                    const std::vector<Id>& ways,
-                                    Id pathWayId,
-                                    Id targetNodeId)
-   : currentNodeId(currentNodeId),
-     ways(ways),
-     pathWayId(pathWayId),
-     targetNodeId(targetNodeId)
-  {
-    // no code
-  }
-
-  RouteData::RouteData()
-  {
-    // no code
-  }
-
-  void RouteData::Clear()
-  {
-    entries.clear();
-  }
-
-  void RouteData::AddEntry(Id currentNodeId,
-                           Id pathWayId,
-                           Id targetNodeId)
-  {
-    entries.push_back(RouteEntry(currentNodeId,
-                                 pathWayId,
-                                 targetNodeId));
-  }
-
-  void RouteData::AddEntry(Id currentNodeId,
-                           const std::vector<Id>& ways,
-                           Id pathWayId,
-                           Id targetNodeId)
-  {
-    entries.push_back(RouteEntry(currentNodeId,
-                                 ways,
-                                 pathWayId,
-                                 targetNodeId));
-  }
-
   RouterParameter::RouterParameter()
   : wayIndexCacheSize(10000),
     wayCacheSize(0),

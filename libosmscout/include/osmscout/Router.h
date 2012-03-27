@@ -40,6 +40,7 @@
 
 // Routing
 #include <osmscout/Route.h>
+#include <osmscout/RouteData.h>
 #include <osmscout/RoutingProfile.h>
 
 #include <osmscout/util/Cache.h>
@@ -144,71 +145,6 @@ namespace osmscout {
                                      const RoutingProfile& profile,
                                      Database& database,
                                      std::list<PostprocessorRef> processors);
-  };
-
-  class OSMSCOUT_API RouteData
-  {
-  public:
-    class RouteEntry
-    {
-    private:
-      Id              currentNodeId;
-      std::vector<Id> ways;
-      Id              pathWayId;
-      Id              targetNodeId;
-
-    public:
-      RouteEntry(Id currentNodeId,
-                 Id pathWayId,
-                 Id targetNodeId);
-
-      RouteEntry(Id currentNodeId,
-                 const std::vector<Id>& ways,
-                 Id pathWayId,
-                 Id targetNodeId);
-
-      inline Id GetCurrentNodeId() const
-      {
-        return currentNodeId;
-      }
-
-      inline Id GetPathWayId() const
-      {
-        return pathWayId;
-      }
-
-      inline Id GetTargetNodeId() const
-      {
-        return targetNodeId;
-      }
-
-      inline const std::vector<Id>& GetWays() const
-      {
-        return ways;
-      }
-    };
-
-  private:
-    std::list<RouteEntry> entries;
-
-  public:
-    RouteData();
-
-    void Clear();
-
-    void AddEntry(Id currentNodeId,
-                  Id pathWayId,
-                  Id targetNodeId);
-
-    void AddEntry(Id currentNodeId,
-                  const std::vector<Id>& ways,
-                  Id pathWayId,
-                  Id targetNodeId);
-
-    inline const std::list<RouteEntry>& Entries() const
-    {
-      return entries;
-    }
   };
 
   typedef DataFile<RouteNode> RouteNodeDataFile;

@@ -31,7 +31,6 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/GroundTile.cpp \
                         osmscout/Location.cpp \
                         osmscout/Node.cpp \
-                        osmscout/RouteNode.cpp \
                         osmscout/Point.cpp \
                         osmscout/Relation.cpp \
                         osmscout/SegmentAttributes.cpp \
@@ -49,6 +48,8 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/WaterIndex.cpp \
                         osmscout/WayIndex.cpp \
                         osmscout/Route.cpp \
+                        osmscout/RouteData.cpp \
+                        osmscout/RouteNode.cpp \
                         osmscout/RoutingProfile.cpp \
                         osmscout/Database.cpp \
                         osmscout/Router.cpp

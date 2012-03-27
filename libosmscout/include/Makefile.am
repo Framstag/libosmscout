@@ -30,7 +30,6 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/AdminRegion.h \
                         osmscout/GroundTile.h \
                         osmscout/Node.h \
-                        osmscout/RouteNode.h \
                         osmscout/Point.h \
                         osmscout/Location.h \
                         osmscout/Relation.h \
@@ -53,6 +52,8 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/WaterIndex.h \
                         osmscout/WayIndex.h \
                         osmscout/Route.h \
+                        osmscout/RouteData.h \
+                        osmscout/RouteNode.h \
                         osmscout/RoutingProfile.h \
                         osmscout/Database.h \
                         osmscout/Router.h
