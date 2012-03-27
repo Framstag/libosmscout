@@ -8,6 +8,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/util/FileWriter.h \
                         osmscout/util/Geometry.h \
                         osmscout/util/HashMap.h \
+                        osmscout/util/HashSet.h \
                         osmscout/util/NumberSet.h \
                         osmscout/util/Progress.h \
                         osmscout/util/Projection.h \

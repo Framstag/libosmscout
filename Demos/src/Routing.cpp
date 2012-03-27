@@ -29,19 +29,19 @@
 //#define ROUTE_DEBUG
 //#define POINTS_DEBUG
 //#define NODE_DEBUG
-//#define CROSSING_DEBUG
+#define CROSSING_DEBUG
 
 /*
   Examples for the nordrhein-westfalen.osm:
 
   Long:
-  time src/Routing ../TravelJinni/ 14332719 138190834 10414977 283372120
+  src/Routing ../TravelJinni/ 14332719 138190834 10414977 283372120
 
   Medium:
-  time src/Routing ../TravelJinni/ 33879936 388178882 38363871 453298626
+  src/Routing ../TravelJinni/ 33879936 388178882 38363871 453298626
 
   Short:
-  time src/Routing ../TravelJinni/ 33879936 388178882 24922615 270813923
+  src/Routing ../TravelJinni/ 33879936 388178882 24922615 270813923
 */
 
 static std::string TimeToString(double time)

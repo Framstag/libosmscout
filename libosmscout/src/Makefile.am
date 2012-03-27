@@ -9,6 +9,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/util/FileWriter.cpp \
                         osmscout/util/Geometry.cpp \
                         osmscout/util/HashMap.cpp \
+                        osmscout/util/HashSet.cpp \
                         osmscout/util/NumberSet.cpp \
                         osmscout/util/Progress.cpp \
                         osmscout/util/Projection.cpp \
