@@ -29,7 +29,7 @@
 //#define ROUTE_DEBUG
 //#define POINTS_DEBUG
 //#define NODE_DEBUG
-#define CROSSING_DEBUG
+//#define CROSSING_DEBUG
 
 /*
   Examples for the nordrhein-westfalen.osm:
@@ -42,6 +42,9 @@
 
   Short:
   src/Routing ../TravelJinni/ 33879936 388178882 24922615 270813923
+
+  Roundabout
+  src/Routing ../TravelJinni/ 24998462 271758830 42123520 523731341
 */
 
 static std::string TimeToString(double time)
@@ -408,6 +411,37 @@ int main(int argc, char* argv[])
   for (std::list<osmscout::RouteDescription::Node>::const_iterator node=description.Nodes().begin();
        node!=description.Nodes().end();
        ++node) {
+    osmscout::RouteDescription::DescriptionRef             desc;
+    osmscout::RouteDescription::StartDescriptionRef        startDescription;
+    osmscout::RouteDescription::TargetDescriptionRef       targetDescription;
+    osmscout::RouteDescription::NameChangedDescriptionRef  nameChangedDescription;
+    osmscout::RouteDescription::CrossingWaysDescriptionRef crossingWaysDescription;
+
+    desc=node->GetDescription(osmscout::RouteDescription::NODE_START_DESC);
+    if (desc.Valid()) {
+      startDescription=dynamic_cast<osmscout::RouteDescription::StartDescription*>(desc.Get());
+    }
+
+    desc=node->GetDescription(osmscout::RouteDescription::NODE_TARGET_DESC);
+    if (desc.Valid()) {
+      targetDescription=dynamic_cast<osmscout::RouteDescription::TargetDescription*>(desc.Get());
+    }
+
+    desc=node->GetDescription(osmscout::RouteDescription::WAY_NAME_CHANGED_DESC);
+    if (desc.Valid()) {
+      nameChangedDescription=dynamic_cast<osmscout::RouteDescription::NameChangedDescription*>(desc.Get());
+    }
+
+    desc=node->GetDescription(osmscout::RouteDescription::CROSSING_WAYS_DESC);
+    if (desc.Valid()) {
+      crossingWaysDescription=dynamic_cast<osmscout::RouteDescription::CrossingWaysDescription*>(desc.Get());
+    }
+
+    if (crossingWaysDescription.Valid() &&
+        roundaboutCrossingCounter>0) {
+      roundaboutCrossingCounter++;
+    }
+
     if (!HasRelevantDescriptions(*node)) {
       continue;
     }
@@ -453,32 +487,6 @@ int main(int argc, char* argv[])
 
     size_t lineCount=0;
 
-    osmscout::RouteDescription::DescriptionRef             description;
-    osmscout::RouteDescription::StartDescriptionRef        startDescription;
-    osmscout::RouteDescription::TargetDescriptionRef       targetDescription;
-    osmscout::RouteDescription::NameChangedDescriptionRef  nameChangedDescription;
-    osmscout::RouteDescription::CrossingWaysDescriptionRef crossingWaysDescription;
-
-    description=node->GetDescription(osmscout::RouteDescription::NODE_START_DESC);
-    if (description.Valid()) {
-      startDescription=dynamic_cast<osmscout::RouteDescription::StartDescription*>(description.Get());
-    }
-
-    description=node->GetDescription(osmscout::RouteDescription::NODE_TARGET_DESC);
-    if (description.Valid()) {
-      targetDescription=dynamic_cast<osmscout::RouteDescription::TargetDescription*>(description.Get());
-    }
-
-    description=node->GetDescription(osmscout::RouteDescription::WAY_NAME_CHANGED_DESC);
-    if (description.Valid()) {
-      nameChangedDescription=dynamic_cast<osmscout::RouteDescription::NameChangedDescription*>(description.Get());
-    }
-
-    description=node->GetDescription(osmscout::RouteDescription::CROSSING_WAYS_DESC);
-    if (description.Valid()) {
-      crossingWaysDescription=dynamic_cast<osmscout::RouteDescription::CrossingWaysDescription*>(description.Get());
-    }
-
 #if defined(ROUTE_DEBUG) || defined(NODE_DEBUG)
     NextLine(lineCount);
 
@@ -523,11 +531,6 @@ int main(int argc, char* argv[])
       NextLine(lineCount);
 
       std::cout << "Target reached '" << targetDescription->GetDescription() << "'" << std::endl;
-    }
-
-    if (crossingWaysDescription.Valid() &&
-        roundaboutCrossingCounter>0) {
-      roundaboutCrossingCounter++;
     }
 
     if (crossingWaysDescription.Valid() &&
