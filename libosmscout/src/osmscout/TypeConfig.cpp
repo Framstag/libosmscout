@@ -351,7 +351,7 @@ namespace osmscout {
 
   TagId TypeConfig::RegisterTagForInternalUse(const std::string& tagName)
   {
-    std::map<std::string,TagId>::const_iterator mapping=stringToTagMap.find(tagName);
+    OSMSCOUT_HASHMAP<std::string,TagId>::const_iterator mapping=stringToTagMap.find(tagName);
 
     if (mapping!=stringToTagMap.end()) {
       return mapping->second;
@@ -376,7 +376,7 @@ namespace osmscout {
 
   TagId TypeConfig::RegisterTagForExternalUse(const std::string& tagName)
   {
-    std::map<std::string,TagId>::const_iterator mapping=stringToTagMap.find(tagName);
+    OSMSCOUT_HASHMAP<std::string,TagId>::const_iterator mapping=stringToTagMap.find(tagName);
 
     if (mapping!=stringToTagMap.end()) {
       // TODO: Set to externalUse!
@@ -459,7 +459,7 @@ namespace osmscout {
 
   TagId TypeConfig::GetTagId(const char* name) const
   {
-    std::map<std::string,TagId>::const_iterator iter=stringToTagMap.find(name);
+    OSMSCOUT_HASHMAP<std::string,TagId>::const_iterator iter=stringToTagMap.find(name);
 
     if (iter!=stringToTagMap.end()) {
       return iter->second;
@@ -643,7 +643,7 @@ namespace osmscout {
 
   TypeId TypeConfig::GetNodeTypeId(const std::string& name) const
   {
-    std::map<std::string,TypeInfo>::const_iterator iter=nameToTypeMap.find(name);
+    OSMSCOUT_HASHMAP<std::string,TypeInfo>::const_iterator iter=nameToTypeMap.find(name);
 
     if (iter!=nameToTypeMap.end() &&
         iter->second.CanBeNode()) {
@@ -655,7 +655,7 @@ namespace osmscout {
 
   TypeId TypeConfig::GetWayTypeId(const std::string& name) const
   {
-    std::map<std::string,TypeInfo>::const_iterator iter=nameToTypeMap.find(name);
+    OSMSCOUT_HASHMAP<std::string,TypeInfo>::const_iterator iter=nameToTypeMap.find(name);
 
     if (iter!=nameToTypeMap.end() &&
         iter->second.CanBeWay()) {
@@ -667,7 +667,7 @@ namespace osmscout {
 
   TypeId TypeConfig::GetAreaTypeId(const std::string& name) const
   {
-    std::map<std::string,TypeInfo>::const_iterator iter=nameToTypeMap.find(name);
+    OSMSCOUT_HASHMAP<std::string,TypeInfo>::const_iterator iter=nameToTypeMap.find(name);
 
     if (iter!=nameToTypeMap.end() &&
         iter->second.CanBeArea()) {
@@ -679,7 +679,7 @@ namespace osmscout {
 
   TypeId TypeConfig::GetRelationTypeId(const std::string& name) const
   {
-    std::map<std::string,TypeInfo>::const_iterator iter=nameToTypeMap.find(name);
+    OSMSCOUT_HASHMAP<std::string,TypeInfo>::const_iterator iter=nameToTypeMap.find(name);
 
     if (iter!=nameToTypeMap.end() &&
         iter->second.CanBeRelation()) {

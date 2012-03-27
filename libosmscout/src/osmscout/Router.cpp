@@ -900,8 +900,8 @@ namespace osmscout {
     route.Clear();
 
 #if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
-    openMap.reserve(200000);
-    closeMap.reserve(200000);
+    openMap.reserve(10000);
+    closeMap.reserve(250000);
 #endif
 
     if (!wayDataFile.Get(startWayId,

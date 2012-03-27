@@ -29,6 +29,7 @@
 #include <osmscout/Tag.h>
 #include <osmscout/Types.h>
 
+#include <osmscout/util/HashMap.h>
 #include <osmscout/util/Reference.h>
 
 namespace osmscout {
@@ -365,40 +366,40 @@ namespace osmscout {
   class OSMSCOUT_API TypeConfig
   {
   private:
-    std::vector<TagInfo>           tags;
-    std::vector<TypeInfo>          types;
+    std::vector<TagInfo>                   tags;
+    std::vector<TypeInfo>                  types;
 
-    TagId                          nextTagId;
-    TypeId                         nextTypeId;
+    TagId                                  nextTagId;
+    TypeId                                 nextTypeId;
 
-    std::map<std::string,TagId>    stringToTagMap;
-    std::map<std::string,TypeInfo> nameToTypeMap;
-    std::map<TypeId,TypeInfo>      idToTypeMap;
+    OSMSCOUT_HASHMAP<std::string,TagId>    stringToTagMap;
+    OSMSCOUT_HASHMAP<std::string,TypeInfo> nameToTypeMap;
+    OSMSCOUT_HASHMAP<TypeId,TypeInfo>      idToTypeMap;
 
   public:
     // Internal use (only available during preprocessing)
 
     // External use (also available in "normal" types, if not explicitly deleted)
-    TagId                          tagAdminLevel;
-    TagId                          tagBoundary;
-    TagId                          tagBridge;
-    TagId                          tagLayer;
-    TagId                          tagName;
-    TagId                          tagOneway;
-    TagId                          tagPlace;
-    TagId                          tagPlaceName;
-    TagId                          tagRef;
-    TagId                          tagTunnel;
-    TagId                          tagType;
-    TagId                          tagWidth;
-    TagId                          tagArea;
-    TagId                          tagHouseNr;
-    TagId                          tagJunction;
-    TagId                          tagMaxSpeed;
-    TagId                          tagAccess;
-    TagId                          tagRestriction;
-    TagId                          tagSurface;
-    TagId                          tagTracktype;
+    TagId                                  tagAdminLevel;
+    TagId                                  tagBoundary;
+    TagId                                  tagBridge;
+    TagId                                  tagLayer;
+    TagId                                  tagName;
+    TagId                                  tagOneway;
+    TagId                                  tagPlace;
+    TagId                                  tagPlaceName;
+    TagId                                  tagRef;
+    TagId                                  tagTunnel;
+    TagId                                  tagType;
+    TagId                                  tagWidth;
+    TagId                                  tagArea;
+    TagId                                  tagHouseNr;
+    TagId                                  tagJunction;
+    TagId                                  tagMaxSpeed;
+    TagId                                  tagAccess;
+    TagId                                  tagRestriction;
+    TagId                                  tagSurface;
+    TagId                                  tagTracktype;
 
   public:
     TypeConfig();
