@@ -26,6 +26,8 @@
 #include <sstream>
 #include <string>
 
+#include <osmscout/CoreFeatures.h>
+
 #include <osmscout/private/CoreImportExport.h>
 
 namespace osmscout {
@@ -167,7 +169,9 @@ namespace osmscout {
   extern OSMSCOUT_API std::string StringListToString(const std::list<std::string>& list,
                                                      const std::string& separator="/");
 
+#if defined(OSMSCOUT_HAVE_STD__WSTRING)
   extern OSMSCOUT_API std::wstring UTF8StringToWString(const std::string& text);
+#endif
 }
 
 #endif

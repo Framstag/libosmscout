@@ -128,6 +128,8 @@ namespace osmscout {
     return result;
   }
 
+#if defined(OSMSCOUT_HAVE_STD__WSTRING)
+
   /**
     The following string conversion code is a modified version of code copied
     from the source of the ConvertUTF tool, as can be found for example at
@@ -286,4 +288,5 @@ namespace osmscout {
 
     return result;
   }
+#endif
 }
