@@ -577,7 +577,36 @@ namespace osmscout {
     return typeConfig;
   }
 
-  void Router::GetClosestRouteNode(const WayRef& way, Id nodeId, RouteNodeRef& routeNode, size_t& pos)
+  void Router::GetClosestForwardRouteNode(const WayRef& way,
+                                          Id nodeId,
+                                          RouteNodeRef& routeNode,
+                                          size_t& pos)
+  {
+    routeNode=NULL;
+
+    size_t index=0;
+    while (index<way->nodes.size()) {
+      if (way->nodes[index].GetId()==nodeId) {
+        break;
+      }
+
+      index++;
+    }
+
+    for (size_t i=index; i<way->nodes.size(); i++) {
+      routeNodeDataFile.Get(way->nodes[i].GetId(),routeNode);
+
+      if (routeNode.Valid()) {
+        pos=i;
+        return;
+      }
+    }
+  }
+
+  void Router::GetClosestBackwardRouteNode(const WayRef& way,
+                                           Id nodeId,
+                                           RouteNodeRef& routeNode,
+                                           size_t& pos)
   {
     routeNode=NULL;
 
@@ -592,15 +621,6 @@ namespace osmscout {
 
     if (index>=way->nodes.size()) {
       return;
-    }
-
-    for (size_t i=index; i<way->nodes.size(); i++) {
-      routeNodeDataFile.Get(way->nodes[i].GetId(),routeNode);
-
-      if (routeNode.Valid()) {
-        pos=i;
-        return;
-      }
     }
 
     if (!way->IsOneway()) {
@@ -850,13 +870,19 @@ namespace osmscout {
   {
     WayRef                   startWay;
     double                   startLon=0.0L,startLat=0.0L;
-    RouteNodeRef             startRouteNode;
-    size_t                   startNodePos;
+
+    RouteNodeRef             startForwardRouteNode;
+    size_t                   startForwardNodePos;
+    RouteNodeRef             startBackwardRouteNode;
+    size_t                   startBackwardNodePos;
 
     WayRef                   targetWay;
     double                   targetLon=0.0L,targetLat=0.0L;
-    RouteNodeRef             targetRouteNode;
-    size_t                   targetNodePos;
+
+    RouteNodeRef             targetForwardRouteNode;
+    size_t                   targetForwardNodePos;
+    RouteNodeRef             targetBackwardRouteNode;
+    size_t                   targetBackwardNodePos;
 
     WayRef                   currentWay;
 
@@ -868,8 +894,6 @@ namespace osmscout {
 
     size_t                   nodesLoadedCount=0;
     size_t                   nodesIgnoredCount=0;
-
-    std::cout << startWayId << "[" << startNodeId << "] => " << targetWayId << "[" << targetNodeId << "]" << std::endl;
 
     StopClock clock;
 
@@ -903,9 +927,13 @@ namespace osmscout {
       return false;
     }
 
-    GetClosestRouteNode(startWay,startNodeId,startRouteNode,startNodePos);
+    GetClosestForwardRouteNode(startWay,startNodeId,
+                               startForwardRouteNode,startForwardNodePos);
+    GetClosestBackwardRouteNode(startWay,startNodeId,
+                                startBackwardRouteNode,startBackwardNodePos);
 
-    if (!startRouteNode.Valid()) {
+    if (startForwardRouteNode.Invalid() &&
+        startBackwardRouteNode.Invalid()) {
       std::cerr << "No route node found for start way" << std::endl;
       return false;
     }
@@ -926,33 +954,56 @@ namespace osmscout {
       return false;
     }
 
-    GetClosestRouteNode(targetWay,targetNodeId,targetRouteNode,targetNodePos);
+    GetClosestForwardRouteNode(targetWay,targetNodeId,
+                               targetForwardRouteNode,targetForwardNodePos);
+    GetClosestBackwardRouteNode(targetWay,targetNodeId,
+                                targetBackwardRouteNode,targetBackwardNodePos);
 
-    if (!targetRouteNode.Valid()) {
+    if (targetForwardRouteNode.Invalid() &&
+        targetBackwardRouteNode.Invalid()) {
       std::cerr << "No route node found for target way" << std::endl;
       return false;
     }
 
-    // Start node, we do not have any cost up to now
-    // The estimated costs for the rest of the way are cost of the the spherical distance (shortest
-    // way) using the fasted way type available.
-    RNodeRef node=new RNode(startRouteNode->id,
-                            startWay->GetId());
+    if (startForwardRouteNode.Valid()) {
+      RNodeRef node=new RNode(startForwardRouteNode->id,
+                              startWay->GetId());
 
-    node->currentCost=profile.GetCosts(startWay,
-                                       GetSphericalDistance(startLon,
-                                                            startLat,
-                                                            startWay->nodes[startNodePos].GetLon(),
-                                                            startWay->nodes[startNodePos].GetLat()));
-    node->estimateCost=profile.GetCosts(GetSphericalDistance(startLon,
-                                                             startLat,
-                                                             targetLon,
-                                                             targetLat));
+      node->currentCost=profile.GetCosts(startWay,
+                                         GetSphericalDistance(startLon,
+                                                              startLat,
+                                                              startWay->nodes[startForwardNodePos].GetLon(),
+                                                              startWay->nodes[startForwardNodePos].GetLat()));
+      node->estimateCost=profile.GetCosts(GetSphericalDistance(startLon,
+                                                               startLat,
+                                                               targetLon,
+                                                               targetLat));
 
-    node->overallCost=node->currentCost+node->estimateCost;
+      node->overallCost=node->currentCost+node->estimateCost;
 
-    openList.insert(node);
-    openMap[node->nodeId]=openList.begin();
+      openList.insert(node);
+      openMap[node->nodeId]=openList.begin();
+    }
+
+    if (startBackwardRouteNode.Valid()) {
+      RNodeRef node=new RNode(startBackwardRouteNode->id,
+                              startWay->GetId());
+
+      node->currentCost=profile.GetCosts(startWay,
+                                         GetSphericalDistance(startLon,
+                                                              startLat,
+                                                              startWay->nodes[startBackwardNodePos].GetLon(),
+                                                              startWay->nodes[startBackwardNodePos].GetLat()));
+      node->estimateCost=profile.GetCosts(GetSphericalDistance(startLon,
+                                                               startLat,
+                                                               targetLon,
+                                                               targetLat));
+
+      node->overallCost=node->currentCost+node->estimateCost;
+
+      openList.insert(node);
+      openMap[node->nodeId]=openList.begin();
+    }
 
     currentWay=NULL;
 
@@ -1107,10 +1158,14 @@ namespace osmscout {
       //
 
       closeMap[current->nodeId]=current;
-    } while (!openList.empty() && current->nodeId!=targetRouteNode->id);
+    } while (!openList.empty() &&
+             (targetForwardRouteNode.Invalid() || current->nodeId!=targetForwardRouteNode->id) &&
+             (targetBackwardRouteNode.Invalid() || current->nodeId!=targetBackwardRouteNode->id));
 
     clock.Stop();
 
+    std::cout << "From:                " << startWayId << "[" << startNodeId << "]" << std::endl;
+    std::cout << "To:                  " << targetWayId << "[" << targetNodeId << "]" << std::endl;
     std::cout << "Time:                " << clock << std::endl;
 #if defined(DEBUG_ROUTING)
     std::cout << "Cost:                " << current->currentCost << " " << current->estimateCost << " " << current->overallCost << std::endl;
@@ -1118,7 +1173,8 @@ namespace osmscout {
     std::cout << "Route nodes loaded:  " << nodesLoadedCount << std::endl;
     std::cout << "Route nodes ignored: " << nodesIgnoredCount << std::endl;
 
-    if (current->nodeId!=targetRouteNode->id) {
+    if (!((targetForwardRouteNode.Invalid() || current->nodeId==targetForwardRouteNode->id) ||
+          (targetBackwardRouteNode.Invalid() || current->nodeId==targetBackwardRouteNode->id))) {
       std::cout << "No route found!" << std::endl;
       return false;
     }
@@ -1136,7 +1192,7 @@ namespace osmscout {
                                   startWayId,startNodeId,
                                   targetWayId,targetNodeId,
                                   route)) {
-      std::cerr << "Cannot convert routing result to route data" << std::endl;
+      //std::cerr << "Cannot convert routing result to route data" << std::endl;
       return false;
     }
 

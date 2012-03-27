@@ -290,8 +290,6 @@ namespace osmscout {
     maxLon=maxLonDat/conversionFactor-180.0;
     maxLat=maxLatDat/conversionFactor-90.0;
 
-    std::cout << "Data bounding box: [" << minLat << "," << minLon << "] - [" << maxLat << "," << maxLon << "]" << std::endl;
-
     if (!nodeDataFile.Open(path,true,true)) {
       std::cerr << "Cannot open 'nodes.dat'!" << std::endl;
       delete typeConfig;

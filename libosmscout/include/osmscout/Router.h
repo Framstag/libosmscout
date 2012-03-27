@@ -339,10 +339,14 @@ namespace osmscout {
     TypeConfig            *typeConfig;       //! Type config for the currently opened map
 
   private:
-    void GetClosestRouteNode(const WayRef& way,
-                             Id nodeId,
-                             RouteNodeRef& routeNode,
-                             size_t& pos);
+    void GetClosestForwardRouteNode(const WayRef& way,
+                                    Id nodeId,
+                                    RouteNodeRef& routeNode,
+                                    size_t& pos);
+    void GetClosestBackwardRouteNode(const WayRef& way,
+                                     Id nodeId,
+                                     RouteNodeRef& routeNode,
+                                     size_t& pos);
     bool ResolveRNodesToList(const RNodeRef& end,
                              const CloseMap& closeMap,
                              std::list<RNodeRef>& nodes);

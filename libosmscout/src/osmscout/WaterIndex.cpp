@@ -76,11 +76,6 @@ namespace osmscout {
       cellHeight=cellHeight/2;
     }
 
-    std::cout << "Cell dimension: " << cellWidth << "x" << cellHeight << std::endl;
-    std::cout << "Cell rectangle: [" << cellXStart << "," << cellYStart << "]x[" << cellXEnd << "," << cellYEnd << "]";
-    std::cout <<  " => " << cellXCount << "x" << cellYCount << std::endl;
-    std::cout << "Array size: " << cellXCount*cellYCount/4/1024 << "kb" << std::endl;
-
     // In the beginning everything is undecided
     area.resize(cellXCount*cellYCount/4,0x00);
 
@@ -108,8 +103,6 @@ namespace osmscout {
     cy1=(uint32_t)floor((minlat+90.0)/cellHeight);
     cy2=(uint32_t)floor((maxlat+90.0)/cellHeight);
 
-    std::cout << "Cell rectangle: [" << cx1 << "," << cy1 << "]x[" << cx2 << "," << cy2 << "]" << std::endl;
-
     for (size_t y=cy1; y<=cy2; y++) {
       for (size_t x=cx1; x<=cx2; x++) {
         GroundTile tile;
@@ -129,8 +122,6 @@ namespace osmscout {
         tiles.push_back(tile);
       }
     }
-
-    std::cout << "Returning " << tiles.size() << " ground tile(s)" << std::endl;
 
     return true;
   }
