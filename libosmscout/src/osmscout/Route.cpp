@@ -117,7 +117,7 @@ namespace osmscout {
 
   bool RouteDescription::Node::HasDescription(const char* name) const
   {
-    std::map<std::string,DescriptionRef>::const_iterator entry;
+    OSMSCOUT_HASHMAP<std::string,DescriptionRef>::const_iterator entry;
 
     entry=descriptions.find(name);
 
@@ -126,7 +126,7 @@ namespace osmscout {
 
   RouteDescription::DescriptionRef RouteDescription::Node::GetDescription(const char* name) const
   {
-    std::map<std::string,DescriptionRef>::const_iterator entry;
+    OSMSCOUT_HASHMAP<std::string,DescriptionRef>::const_iterator entry;
 
     entry=descriptions.find(name);
 

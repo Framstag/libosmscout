@@ -24,6 +24,8 @@
 
 #include <osmscout/TypeConfig.h>
 
+#include <osmscout/util/HashMap.h>
+
 namespace osmscout {
 
   /**
@@ -194,13 +196,13 @@ namespace osmscout {
     class Node
     {
     private:
-      Id                                   currentNodeId;
-      std::vector<Id>                      ways;
-      Id                                   pathWayId;
-      Id                                   targetNodeId;
-      double                               distance;
-      double                               time;
-      std::map<std::string,DescriptionRef> descriptions;
+      Id                                           currentNodeId;
+      std::vector<Id>                              ways;
+      Id                                           pathWayId;
+      Id                                           targetNodeId;
+      double                                       distance;
+      double                                       time;
+      OSMSCOUT_HASHMAP<std::string,DescriptionRef> descriptions;
 
     public:
       Node(Id currentNodeId,
