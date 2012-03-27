@@ -46,6 +46,10 @@ if test "x$ac_cv_header_unordered_map" = xyes; then
   AC_DEFINE([OSMSCOUT_HAVE_UNORDERED_MAP],[1],[system header <unordered_map> is available])
 fi
 
+if test "x$ac_cv_header_unordered_set" = xyes; then
+  AC_DEFINE([OSMSCOUT_HAVE_UNORDERED_SET],[1],[system header <unordered_set> is available])
+fi
+
 if test "$build_os" != "mingw32"; then
   AC_MSG_CHECKING([for gcc symbol visibility support])
   OLDCXXFLAGS="$CXXFLAGS"
