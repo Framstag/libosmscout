@@ -899,6 +899,11 @@ namespace osmscout {
 
     route.Clear();
 
+#if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
+    openMap.reserve(200000);
+    closeMap.reserve(200000);
+#endif
+
     if (!wayDataFile.Get(startWayId,
                          startWay)) {
       std::cerr << "Cannot get start way!" << std::endl;
