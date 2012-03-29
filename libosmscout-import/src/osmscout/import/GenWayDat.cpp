@@ -557,6 +557,8 @@ namespace osmscout {
               for (size_t i=1; i<candidate->GetNodeCount(); i++) {
                 origNodes.insert(origNodes.begin(),candidate->GetNodeId(i));
               }
+
+              endPointWayMap[origNodes.front()].push_back(rawWay->GetId());
             }
             else if (origNodes.front()==candidate->GetNodes().back()) {
               origNodes.reserve(origNodes.size()+candidate->GetNodeCount()-1);
@@ -564,6 +566,8 @@ namespace osmscout {
               for (size_t i=1; i<candidate->GetNodeCount(); i++) {
                 origNodes.insert(origNodes.begin(),candidate->GetNodeId(candidate->GetNodeCount()-1-i));
               }
+
+              endPointWayMap[origNodes.front()].push_back(rawWay->GetId());
             }
             else if (origNodes.back()==candidate->GetNodes().front()) {
               origNodes.reserve(origNodes.size()+candidate->GetNodeCount()-1);
@@ -571,6 +575,8 @@ namespace osmscout {
               for (size_t i=1; i<candidate->GetNodeCount(); i++) {
                 origNodes.push_back(candidate->GetNodeId(i));
               }
+
+              endPointWayMap[origNodes.back()].push_back(rawWay->GetId());
             }
             else if (!origAttributes.IsOneway() &&
                      origNodes.back()==candidate->GetNodes().back()) {
@@ -579,6 +585,8 @@ namespace osmscout {
               for (size_t i=1; i<candidate->GetNodeCount(); i++) {
                 origNodes.push_back(candidate->GetNodeId(candidate->GetNodeCount()-1-i));
               }
+
+              endPointWayMap[origNodes.back()].push_back(rawWay->GetId());
             }
             else {
               assert(true);
