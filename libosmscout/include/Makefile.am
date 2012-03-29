@@ -30,6 +30,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/AdminRegion.h \
                         osmscout/GroundTile.h \
                         osmscout/Node.h \
+                        osmscout/Path.h \
                         osmscout/Point.h \
                         osmscout/Location.h \
                         osmscout/Relation.h \

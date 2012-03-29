@@ -33,10 +33,12 @@ namespace osmscout {
 
   RouteData::RouteEntry::RouteEntry(Id currentNodeId,
                                     const std::vector<Id>& ways,
+                                    const std::vector<Path>& paths,
                                     Id pathWayId,
                                     Id targetNodeId)
    : currentNodeId(currentNodeId),
      ways(ways),
+     paths(paths),
      pathWayId(pathWayId),
      targetNodeId(targetNodeId)
   {
@@ -64,11 +66,13 @@ namespace osmscout {
 
   void RouteData::AddEntry(Id currentNodeId,
                            const std::vector<Id>& ways,
+                           const std::vector<Path>& paths,
                            Id pathWayId,
                            Id targetNodeId)
   {
     entries.push_back(RouteEntry(currentNodeId,
                                  ways,
+                                 paths,
                                  pathWayId,
                                  targetNodeId));
   }

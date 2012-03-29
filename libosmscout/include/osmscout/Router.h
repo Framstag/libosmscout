@@ -294,6 +294,7 @@ namespace osmscout {
                                   RouteData& route);
     bool AddNodes(RouteData& route,
                   const std::vector<Id>& startCrossingWaysIds,
+                  const std::vector<Path>& startPaths,
                   Id startNodeId,
                   Id wayId,
                   Id targetNodeId);

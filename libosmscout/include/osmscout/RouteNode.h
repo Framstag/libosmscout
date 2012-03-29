@@ -22,11 +22,13 @@
 
 #include <vector>
 
-#include <osmscout/TypeConfig.h>
+#include <osmscout/Path.h>
+#include <osmscout/Types.h>
 #include <osmscout/Way.h>
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
+#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
@@ -80,6 +82,8 @@ namespace osmscout {
     {
       return id;
     }
+
+    std::vector<osmscout::Path> GetPaths() const;
 
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;

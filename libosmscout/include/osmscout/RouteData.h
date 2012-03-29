@@ -23,6 +23,7 @@
 #include <list>
 #include <vector>
 
+#include <osmscout/Path.h>
 #include <osmscout/Types.h>
 
 namespace osmscout {
@@ -33,10 +34,11 @@ namespace osmscout {
     class RouteEntry
     {
     private:
-      Id              currentNodeId;
-      std::vector<Id> ways;
-      Id              pathWayId;
-      Id              targetNodeId;
+      Id                currentNodeId;
+      std::vector<Id>   ways;
+      std::vector<Path> paths;
+      Id                pathWayId;
+      Id                targetNodeId;
 
     public:
       RouteEntry(Id currentNodeId,
@@ -45,6 +47,7 @@ namespace osmscout {
 
       RouteEntry(Id currentNodeId,
                  const std::vector<Id>& ways,
+                 const std::vector<Path>& paths,
                  Id pathWayId,
                  Id targetNodeId);
 
@@ -67,6 +70,11 @@ namespace osmscout {
       {
         return ways;
       }
+
+      inline const std::vector<Path>& GetPaths() const
+      {
+        return paths;
+      }
     };
 
   private:
@@ -83,6 +91,7 @@ namespace osmscout {
 
     void AddEntry(Id currentNodeId,
                   const std::vector<Id>& ways,
+                  const std::vector<Path>& paths,
                   Id pathWayId,
                   Id targetNodeId);
 

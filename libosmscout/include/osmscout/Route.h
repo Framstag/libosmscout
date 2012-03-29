@@ -21,10 +21,12 @@
 */
 
 #include <list>
+#include <string>
 
-#include <osmscout/TypeConfig.h>
+#include <osmscout/Path.h>
 
 #include <osmscout/util/HashMap.h>
+#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
@@ -62,7 +64,9 @@ namespace osmscout {
     class OSMSCOUT_API Description : public Referencable
     {
     public:
-      virtual~Description();
+      virtual ~Description();
+
+      virtual std::string GetDebugString() const = 0;
     };
 
     typedef Ref<Description> DescriptionRef;
@@ -77,6 +81,8 @@ namespace osmscout {
 
     public:
       StartDescription(const std::string& description);
+
+      std::string GetDebugString() const;
 
       std::string GetDescription() const;
     };
@@ -93,6 +99,8 @@ namespace osmscout {
 
     public:
       TargetDescription(const std::string& description);
+
+      std::string GetDebugString() const;
 
       std::string GetDescription() const;
     };
@@ -113,8 +121,12 @@ namespace osmscout {
       NameDescription(const std::string& name,
                       const std::string& ref);
 
+      std::string GetDebugString() const;
+
       std::string GetName() const;
       std::string GetRef() const;
+
+      std::string GetDescription() const;
     };
 
     typedef Ref<NameDescription> NameDescriptionRef;
@@ -131,6 +143,8 @@ namespace osmscout {
     public:
       NameChangedDescription(NameDescription* originDescription,
                              NameDescription* targetDescription);
+
+      std::string GetDebugString() const;
 
       inline const NameDescriptionRef& GetOriginDesccription() const
       {
@@ -159,20 +173,34 @@ namespace osmscout {
 
     private:
       Type                          type;
+      size_t                        exitCount;
       NameDescriptionRef            originDescription;
       NameDescriptionRef            targetDescription;
       std::list<NameDescriptionRef> descriptions;
 
     public:
       CrossingWaysDescription(Type type,
+                              size_t exitCount,
                               NameDescription* originDescription,
                               NameDescription* targetDescription);
 
       void AddDescription(NameDescription* description);
 
+      std::string GetDebugString() const;
+
       inline Type GetType() const
       {
         return type;
+      }
+
+      inline size_t GetExitCount() const
+      {
+        return exitCount;
+      }
+
+      inline bool HasMultipleExits() const
+      {
+        return exitCount>1;
       }
 
       inline const NameDescriptionRef& GetOriginDesccription() const
@@ -198,6 +226,7 @@ namespace osmscout {
     private:
       Id                                           currentNodeId;
       std::vector<Id>                              ways;
+      std::vector<Path>                            paths;
       Id                                           pathWayId;
       Id                                           targetNodeId;
       double                                       distance;
@@ -207,6 +236,7 @@ namespace osmscout {
     public:
       Node(Id currentNodeId,
            const std::vector<Id>& ways,
+           const std::vector<Path>& paths,
            Id pathWayId,
            Id targetNodeId);
 
@@ -218,6 +248,11 @@ namespace osmscout {
       inline const std::vector<Id>& GetWays() const
       {
         return ways;
+      }
+
+      inline const std::vector<Path>& GetPaths() const
+      {
+        return paths;
       }
 
       inline Id GetPathWayId() const
@@ -260,11 +295,13 @@ namespace osmscout {
 
   public:
     RouteDescription();
+    virtual ~RouteDescription();
 
     void Clear();
 
     void AddNode(Id currentNodeId,
                  const std::vector<Id>& ways,
+                 const std::vector<Path>& paths,
                  Id pathWayId,
                  Id targetNodeId);
 

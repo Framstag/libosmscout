@@ -336,6 +336,7 @@ namespace osmscout {
         }
 
         RouteDescription::CrossingWaysDescriptionRef crossingDescription=new RouteDescription::CrossingWaysDescription(type,
+                                                                                                                       node->GetPaths().size(),
                                                                                                                        originDescription,
                                                                                                                        targetDescription);
 
@@ -607,6 +608,7 @@ namespace osmscout {
 
   bool Router::AddNodes(RouteData& route,
                         const std::vector<Id>& startCrossingWaysIds,
+                        const std::vector<Path>& startPaths,
                         Id startNodeId,
                         Id wayId,
                         Id targetNodeId)
@@ -639,12 +641,14 @@ namespace osmscout {
     if (std::max(start,end)-std::min(start,end)==1) {
       route.AddEntry(way->nodes[start].GetId(),
                      startCrossingWaysIds,
+                     startPaths,
                      way->GetId(),
                      targetNodeId);
     }
     else if (start<end) {
       route.AddEntry(way->nodes[start].GetId(),
                      startCrossingWaysIds,
+                     startPaths,
                      way->GetId(),
                      way->nodes[start+1].GetId());
 
@@ -673,6 +677,7 @@ namespace osmscout {
 
       route.AddEntry(startNodeId,
                      startCrossingWaysIds,
+                     startPaths,
                      way->GetId(),
                      way->nodes[pos].GetId());
 
@@ -699,6 +704,7 @@ namespace osmscout {
     else {
       route.AddEntry(way->nodes[start].GetId(),
                      startCrossingWaysIds,
+                     startPaths,
                      way->GetId(),
                      way->nodes[start-1].GetId());
 
@@ -726,6 +732,7 @@ namespace osmscout {
     if (nodes.empty()) {
       AddNodes(route,
                std::vector<Id>(),
+               std::vector<Path>(),
                startNodeId,
                startWayId,
                targetNodeId);
@@ -740,6 +747,7 @@ namespace osmscout {
       // Start node to initial route node
       AddNodes(route,
                std::vector<Id>(),
+               std::vector<Path>(),
                startNodeId,
                startWayId,
                nodes.front()->nodeId);
@@ -767,6 +775,7 @@ namespace osmscout {
         if ((*n)->nodeId!=targetNodeId) {
           AddNodes(route,
                    node->ways,
+                   node->GetPaths(),
                    (*n)->nodeId,
                    targetWayId,
                    targetNodeId);
@@ -803,6 +812,7 @@ namespace osmscout {
 
       AddNodes(route,
                node->ways,
+               node->GetPaths(),
                node->id,
                node->ways[node->paths[pathIndex].wayIndex],
                nextNode->id);
@@ -1282,6 +1292,7 @@ namespace osmscout {
          ++iter) {
       description.AddNode(iter->GetCurrentNodeId(),
                           iter->GetWays(),
+                          iter->GetPaths(),
                           iter->GetPathWayId(),
                           iter->GetTargetNodeId());
     }

@@ -19,6 +19,10 @@
 
 #include <osmscout/Route.h>
 
+#include <sstream>
+
+#include <osmscout/util/String.h>
+
 namespace osmscout {
 
   /** Constant for a description of the start node (StartDescription) */
@@ -43,6 +47,11 @@ namespace osmscout {
     // no code
   }
 
+  std::string RouteDescription::StartDescription::GetDebugString() const
+  {
+    return "Start: "+description;
+  }
+
   std::string RouteDescription::StartDescription::GetDescription() const
   {
     return description;
@@ -52,6 +61,11 @@ namespace osmscout {
   : description(description)
   {
     // no code
+  }
+
+  std::string RouteDescription::TargetDescription::GetDebugString() const
+  {
+    return "Target: "+description;
   }
 
   std::string RouteDescription::TargetDescription::GetDescription() const
@@ -68,6 +82,11 @@ namespace osmscout {
     // no code
   }
 
+  std::string RouteDescription::NameDescription::GetDebugString() const
+  {
+    return "Name: "+GetDescription();
+  }
+
   std::string RouteDescription::NameDescription::GetName() const
   {
     return name;
@@ -78,6 +97,36 @@ namespace osmscout {
     return ref;
   }
 
+  std::string RouteDescription::NameDescription::GetDescription() const
+  {
+    std::ostringstream stream;
+
+    if (name.empty() &&
+        ref.empty()) {
+      return "unnamed road";
+    }
+
+    if (!name.empty()) {
+      stream << name;
+    }
+
+    if (!name.empty() &&
+        !ref.empty()) {
+      stream << " (";
+    }
+
+    if (!ref.empty()) {
+      stream << ref;
+    }
+
+    if (!name.empty() &&
+        !ref.empty()) {
+      stream << ")";
+    }
+
+    return stream.str();
+  }
+
   RouteDescription::NameChangedDescription::NameChangedDescription(NameDescription* originDescription,
                                                                    NameDescription* targetDescription)
   : originDescription(originDescription),
@@ -86,10 +135,29 @@ namespace osmscout {
     // no code
   }
 
+  std::string RouteDescription::NameChangedDescription::GetDebugString() const
+  {
+    std::string result="Name Change: ";
+
+    if (originDescription.Valid()) {
+      result+=originDescription->GetDescription();
+    }
+
+    result+=" => ";
+
+    if (targetDescription.Valid()) {
+      result+=targetDescription->GetDescription();
+    }
+
+    return result;
+  }
+
   RouteDescription::CrossingWaysDescription::CrossingWaysDescription(Type type,
+                                                                     size_t exitCount,
                                                                      NameDescription* originDescription,
                                                                      NameDescription* targetDescription)
   : type(type),
+    exitCount(exitCount),
     originDescription(originDescription),
     targetDescription(targetDescription)
   {
@@ -101,12 +169,54 @@ namespace osmscout {
     descriptions.push_back(description);
   }
 
+  std::string RouteDescription::CrossingWaysDescription::GetDebugString() const
+  {
+    std::string result;
+
+    if (originDescription.Valid()) {
+      result+="From "+originDescription->GetDescription();
+    }
+
+    if (targetDescription.Valid()) {
+      if (!result.empty()) {
+        result+=" ";
+      }
+
+      result+="to "+targetDescription->GetDescription();
+    }
+
+    if (!descriptions.empty()) {
+      if (!result.empty()) {
+        result+=" ";
+      }
+
+      result+="with";
+
+      for (std::list<NameDescriptionRef>::const_iterator desc=descriptions.begin();
+          desc!=descriptions.end();
+          ++desc) {
+        result+=" "+(*desc)->GetDescription();
+      }
+    }
+
+    if (!descriptions.empty()) {
+      if (!result.empty()) {
+        result+=" ";
+      }
+      result+=NumberToString(exitCount)+ " exits";
+    }
+
+    return "Crossing: "+result;
+  }
+
   RouteDescription::Node::Node(Id currentNodeId,
                                const std::vector<Id>& ways,
+                               const std::vector<Path>& paths,
                                Id pathWayId,
                                Id targetNodeId)
   : currentNodeId(currentNodeId),
     ways(ways),
+    paths(paths),
     pathWayId(pathWayId),
     targetNodeId(targetNodeId),
     distance(0.0),
@@ -159,6 +269,11 @@ namespace osmscout {
     // no code
   }
 
+  RouteDescription::~RouteDescription()
+  {
+    // no code
+  }
+
   void RouteDescription::Clear()
   {
     nodes.clear();
@@ -166,11 +281,13 @@ namespace osmscout {
 
   void RouteDescription::AddNode(Id currentNodeId,
                                  const std::vector<Id>& ways,
+                                 const std::vector<Path>& paths,
                                  Id pathWayId,
                                  Id targetNodeId)
   {
     nodes.push_back(Node(currentNodeId,
                          ways,
+                         paths,
                          pathWayId,
                          targetNodeId));
   }
