@@ -162,6 +162,9 @@ namespace osmscout {
                         double& maxLon,
                         double& minLat,
                         double& maxLat) const;
+    bool GetCoordinates(Id nodeId,
+                        double& lat,
+                        double& lon) const;
 
     void SetId(Id id);
     void SetType(TypeId type);

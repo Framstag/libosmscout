@@ -108,6 +108,22 @@ namespace osmscout {
     }
   }
 
+  bool Way::GetCoordinates(Id nodeId,
+                           double& lat,
+                           double& lon) const
+  {
+    for (size_t i=0; i<nodes.size(); i++) {
+      if (nodes[i].GetId()==nodeId) {
+        lat=nodes[i].GetLat();
+        lon=nodes[i].GetLon();
+
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   bool Way::Read(FileScanner& scanner)
   {
     uint32_t nodeCount;
