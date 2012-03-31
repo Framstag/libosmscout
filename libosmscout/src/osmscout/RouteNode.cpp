@@ -84,6 +84,7 @@ namespace osmscout {
       scanner.ReadNumber(paths[i].type);
       scanner.Read(paths[i].maxSpeed);
       scanner.Read(paths[i].grade);
+      scanner.Read(paths[i].bearing);
       scanner.Read(paths[i].flags);
       scanner.ReadNumber(distanceValue);
       scanner.ReadNumber(latValue);
@@ -141,6 +142,7 @@ namespace osmscout {
       writer.WriteNumber(paths[i].type);
       writer.Write(paths[i].maxSpeed);
       writer.Write(paths[i].grade);
+      writer.Write(paths[i].bearing);
       writer.Write(paths[i].flags);
       writer.WriteNumber(distanceValue);
       writer.WriteNumber(latValue-minLat);

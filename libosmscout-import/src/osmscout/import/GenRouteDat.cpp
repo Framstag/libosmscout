@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 
 #include <osmscout/DataFile.h>
 
@@ -338,6 +339,42 @@ namespace osmscout {
     return true;
   }
 
+  uint8_t RouteDataGenerator::CalculateEncodedBearing(const WayRef& way,
+                                                      size_t currentNode,
+                                                      size_t nextNode,
+                                                      bool clockwise) const
+  {
+    size_t currentNodeFollower;
+    size_t nextNodePrecursor;
+
+    if (clockwise) {
+      currentNodeFollower=currentNode==way->nodes.size()-1 ? 0 : currentNode+1;
+      nextNodePrecursor=nextNode>0 ? nextNode-1 :way->nodes.size()-1;
+    }
+    else {
+      currentNodeFollower=currentNode>0 ? currentNode-1 :way->nodes.size()-1;
+      nextNodePrecursor=nextNode==way->nodes.size()-1 ? 0 : nextNode+1;
+    }
+
+    double initialBearing=GetSphericalBearingInitial(way->nodes[currentNode].GetLon(),
+                                                     way->nodes[currentNode].GetLat(),
+                                                     way->nodes[currentNodeFollower].GetLon(),
+                                                     way->nodes[currentNodeFollower].GetLat());
+    double finalBearing=GetSphericalBearingInitial(way->nodes[nextNodePrecursor].GetLon(),
+                                                   way->nodes[nextNodePrecursor].GetLat(),
+                                                   way->nodes[nextNode].GetLon(),
+                                                   way->nodes[nextNode].GetLat());
+
+    // Transform in 0..360 Degree
+
+    initialBearing=fmod(initialBearing*180.0/M_PI+360.0,360.0);
+    finalBearing=fmod(initialBearing*180.0/M_PI+360.0,360.0);
+
+    uint8_t bearing=initialBearing/10+100+finalBearing/10;
+
+    return bearing;
+  }
+
   bool RouteDataGenerator::Import(const ImportParameter& parameter,
                                   Progress& progress,
                                   const TypeConfig& typeConfig)
@@ -566,6 +603,7 @@ namespace osmscout {
               path.type=way->GetType();
               path.maxSpeed=way->GetMaxSpeed();
               path.grade=way->GetGrade();
+              path.bearing=CalculateEncodedBearing(way,currentNode,nextNode,true);
               path.flags=CopyFlags(*way);
               path.lat=way->nodes[nextNode].GetLat();
               path.lon=way->nodes[nextNode].GetLon();
@@ -611,6 +649,7 @@ namespace osmscout {
               path.type=way->GetType();
               path.maxSpeed=way->GetMaxSpeed();
               path.grade=way->GetGrade();
+              path.bearing=CalculateEncodedBearing(way,currentNode,prevNode,false);
               path.flags=CopyFlags(*way);
               path.lat=way->nodes[prevNode].GetLat();
               path.lon=way->nodes[prevNode].GetLon();
@@ -667,6 +706,7 @@ namespace osmscout {
               path.type=way->GetType();
               path.maxSpeed=way->GetMaxSpeed();
               path.grade=way->GetGrade();
+              path.bearing=CalculateEncodedBearing(way,currentNode,nextNode,true);
               path.flags=CopyFlags(*way);
               path.lat=way->nodes[nextNode].GetLat();
               path.lon=way->nodes[nextNode].GetLon();
@@ -713,6 +753,7 @@ namespace osmscout {
                 path.type=way->GetType();
                 path.maxSpeed=way->GetMaxSpeed();
                 path.grade=way->GetGrade();
+                path.bearing=CalculateEncodedBearing(way,prevNode,nextNode,false);
                 path.flags=CopyFlags(*way);
                 path.lat=way->nodes[prevNode].GetLat();
                 path.lon=way->nodes[prevNode].GetLon();
@@ -745,6 +786,7 @@ namespace osmscout {
                     path.type=way->GetType();
                     path.maxSpeed=way->GetMaxSpeed();
                     path.grade=way->GetGrade();
+                    path.bearing=CalculateEncodedBearing(way,i,j,false);
                     path.flags=CopyFlags(*way);
                     path.lat=way->nodes[j].GetLat();
                     path.lon=way->nodes[j].GetLon();
@@ -780,6 +822,7 @@ namespace osmscout {
                     path.type=way->GetType();
                     path.maxSpeed=way->GetMaxSpeed();
                     path.grade=way->GetGrade();
+                    path.bearing=CalculateEncodedBearing(way,i,j,true);
                     path.flags=CopyFlags(*way);
                     path.lat=way->nodes[j].GetLat();
                     path.lon=way->nodes[j].GetLon();

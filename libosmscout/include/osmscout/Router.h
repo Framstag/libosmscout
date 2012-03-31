@@ -140,6 +140,24 @@ namespace osmscout {
                    Database& database);
     };
 
+    /**
+     * Places a turn description for every node
+     */
+    OSMSCOUT_API class TurnPostprocessor : public Postprocessor
+    {
+    private:
+      static const double curveMinInitialAngle;
+      static const double curveMaxInitialAngle;
+      static const double curveMaxNodeDistance;
+      static const double curveMaxDistance;
+      static const double curveMinAngle;
+
+    public:
+      bool Process(const RoutingProfile& profile,
+                   RouteDescription& description,
+                   Database& database);
+    };
+
   public:
     bool PostprocessRouteDescription(RouteDescription& description,
                                      const RoutingProfile& profile,

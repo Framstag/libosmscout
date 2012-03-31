@@ -56,6 +56,11 @@ namespace osmscout {
                   const std::set<Id>& ids,
                   std::list<WayRef>& ways);
 
+    uint8_t CalculateEncodedBearing(const WayRef& way,
+                                    size_t currentNode,
+                                    size_t nextNode,
+                                    bool clockwise) const;
+
   public:
     std::string GetDescription() const;
     bool Import(const ImportParameter& parameter,

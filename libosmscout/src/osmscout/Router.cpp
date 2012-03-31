@@ -105,7 +105,7 @@ namespace osmscout {
         }
 
         for (size_t i=0; i<nextWay->nodes.size(); i++) {
-          if (nextWay->nodes[i].GetId()==iter->GetTargetNodeId()) {
+          if (nextWay->nodes[i].GetId()==iter->GetCurrentNodeId()) {
             nextNode=i;
             break;
           }
@@ -380,6 +380,157 @@ namespace osmscout {
       }
 
       lastNode=node;
+    }
+
+    return true;
+  }
+
+  const double RoutePostprocessor::TurnPostprocessor::curveMinInitialAngle=5.0;
+  const double RoutePostprocessor::TurnPostprocessor::curveMaxInitialAngle=10.0;
+  const double RoutePostprocessor::TurnPostprocessor::curveMaxNodeDistance=0.020;
+  const double RoutePostprocessor::TurnPostprocessor::curveMaxDistance=0.300;
+  const double RoutePostprocessor::TurnPostprocessor::curveMinAngle=5.0;
+
+  bool RoutePostprocessor::TurnPostprocessor::Process(const RoutingProfile& profile,
+                                                      RouteDescription& description,
+                                                      Database& database)
+  {
+    std::set<Id>        wayIds;
+    std::vector<WayRef> ways;
+    std::map<Id,WayRef> wayMap;
+
+    for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
+        node!=description.Nodes().end();
+        ++node) {
+      if (node->GetPathWayId()!=0) {
+        wayIds.insert(node->GetPathWayId());
+      }
+    }
+
+    if (!database.GetWays(wayIds,ways)) {
+      std::cerr << "Cannot retrieve crossing ways" << std::endl;
+      return false;
+    }
+
+    for (std::vector<WayRef>::const_iterator w=ways.begin();
+        w!=ways.end();
+        ++w) {
+      WayRef way=*w;
+
+      wayMap[way->GetId()]=way;
+    }
+
+
+    for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
+        node!=description.Nodes().end();
+        ++node) {
+      std::list<RouteDescription::Node>::iterator prevNode=node;
+      std::list<RouteDescription::Node>::iterator nextNode=node;
+
+      prevNode--;
+      nextNode++;
+
+      if (prevNode!=description.Nodes().end() &&
+          nextNode!=description.Nodes().end() &&
+          nextNode->GetPathWayId()!=0) {
+        WayRef prevWay=wayMap[prevNode->GetPathWayId()];
+        double prevLat=0.0;
+        double prevLon=0.0;
+
+        WayRef way=wayMap[node->GetPathWayId()];
+        double lat=0.0;
+        double lon=0.0;
+
+        WayRef nextWay=wayMap[nextNode->GetPathWayId()];
+        double nextLat=0.0;
+        double nextLon=0.0;
+
+        prevWay->GetCoordinates(prevNode->GetCurrentNodeId(),prevLat,prevLon);
+        way->GetCoordinates(node->GetCurrentNodeId(),lat,lon);
+        nextWay->GetCoordinates(nextNode->GetCurrentNodeId(),nextLat,nextLon);
+
+        double inBearing=GetSphericalBearingFinal(prevLon,prevLat,lon,lat)*180/M_PI;
+        double outBearing=GetSphericalBearingInitial(lon,lat,nextLon,nextLat)*180/M_PI;
+
+        double turnAngle=outBearing-inBearing;
+
+        if (turnAngle>180) {
+          turnAngle=-(360-turnAngle);
+        }
+
+        double curveAngle=turnAngle;
+
+        if (abs(turnAngle)>=curveMinInitialAngle && abs(turnAngle)<=curveMaxInitialAngle) {
+          std::list<RouteDescription::Node>::iterator curveB=nextNode;
+          double                                      currentBearing=outBearing;
+          double                                      forwardDistance=nextNode->GetDistance()-node->GetDistance();
+          std::list<RouteDescription::Node>::iterator lookup=nextNode;
+
+          lookup++;
+          while (true) {
+            // Next node does not exists or does not have a path?
+            if (lookup==description.Nodes().end() ||
+                lookup->GetPathWayId()==0) {
+              break;
+            }
+
+            // Next node is to far away from last node?
+            if (lookup->GetDistance()-curveB->GetDistance()>curveMaxNodeDistance) {
+              break;
+            }
+
+            // Next node is to far away from turn origin?
+            if (forwardDistance+lookup->GetDistance()-curveB->GetDistance()>curveMaxDistance) {
+              break;
+            }
+
+            forwardDistance+=lookup->GetDistance()-curveB->GetDistance();
+
+            WayRef wayB=wayMap[curveB->GetPathWayId()];
+            WayRef wayLookup=wayMap[lookup->GetPathWayId()];
+            double curveBLat;
+            double curveBLon;
+            double lookupLat;
+            double lookupLon;
+
+            wayB->GetCoordinates(curveB->GetCurrentNodeId(),curveBLat,curveBLon);
+            wayLookup->GetCoordinates(lookup->GetCurrentNodeId(),lookupLat,lookupLon);
+
+            double lookupBearing=GetSphericalBearingInitial(curveBLon,curveBLat,lookupLon,lookupLat)*180/M_PI;
+
+
+            double lookupAngle=lookupBearing-currentBearing;
+
+            // The next node does not have enough direction change to be still part of a turn?
+            if (abs(lookupAngle)<curveMinAngle) {
+              break;
+            }
+
+            if (lookupAngle>180) {
+              lookupAngle=-(360-lookupAngle);
+            }
+
+            // The turn direction changes?
+            if ((turnAngle>0 && lookupAngle<=0) ||
+                (turnAngle<0 && lookupAngle>=0)) {
+              break;
+            }
+
+            currentBearing=lookupBearing;
+            curveAngle=currentBearing-inBearing;
+
+            if (curveAngle>180) {
+              curveAngle=-(360-curveAngle);
+            }
+
+            curveB++;
+            lookup++;
+          }
+        }
+
+        node->AddDescription(RouteDescription::TURN_DESC,
+                             new RouteDescription::TurnDescription(turnAngle,curveAngle));
+      }
     }
 
     return true;
@@ -1068,11 +1219,12 @@ namespace osmscout {
           continue;
         }
 
+        double distanceToTarget=GetSphericalDistance(currentRouteNode->paths[i].lon,
+                                                     currentRouteNode->paths[i].lat,
+                                                     targetLon,
+                                                     targetLat);
         // Estimate costs for the rest of the distance to the target
-        double estimateCost=profile.GetCosts(GetSphericalDistance(currentRouteNode->paths[i].lon,
-                                                                  currentRouteNode->paths[i].lat,
-                                                                  targetLon,
-                                                                  targetLat));
+        double estimateCost=profile.GetCosts(distanceToTarget);
         double overallCost=currentCost+estimateCost;
 
         // If we already have the node in the open list, but the new path is cheaper,

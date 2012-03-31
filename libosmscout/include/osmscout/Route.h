@@ -56,6 +56,8 @@ namespace osmscout {
     static const char* const WAY_NAME_CHANGED_DESC;
     /** Constant for a description of list of way name crossing a node (CrossingWaysDescription) */
     static const char* const CROSSING_WAYS_DESC;
+    /** Constant for a description of a turn (TurnDescription) */
+    static const char* const TURN_DESC;
 
   public:
     /*
@@ -220,6 +222,68 @@ namespace osmscout {
     };
 
     typedef Ref<CrossingWaysDescription> CrossingWaysDescriptionRef;
+
+    /**
+     * Describes the turn and the curve while getting from the previous node to the next node via the current node.
+     *
+     * The turn is the angle between the incoming way (previous node and current node)
+     * and the outgoing way (current node and next node) at the given node.
+     *
+     * The curve is a heuristic measurement that not only take the next node of the target way into
+     * account (which could only the start of a slight curve) but tries to determine the last node
+     * of the curve and this gives a better description of the curve the vehicle needs to take.
+     */
+    class OSMSCOUT_API TurnDescription : public Description
+    {
+    public:
+      enum Move {
+        sharpLeft,
+        left,
+        slightlyLeft,
+        straightOn,
+        slightlyRight,
+        right,
+        sharpRight
+      };
+
+    private:
+      double turnAngle;
+      double curveAngle;
+      Move   turn;
+      Move   curve;
+
+    private:
+      Move ConvertAngleToMove(double angle) const;
+      std::string ConvertMoveToString(Move move) const;
+
+    public:
+      TurnDescription(double turnAngle,
+                      double curveAngle);
+
+      std::string GetDebugString() const;
+
+      inline double GetTurnAngle() const
+      {
+        return turnAngle;
+      }
+
+      inline double GetCurveAngle() const
+      {
+        return curveAngle;
+      }
+
+      inline Move GetTurn() const
+      {
+        return turn;
+      }
+
+      inline Move GetCurve() const
+      {
+        return curve;
+      }
+    };
+
+    typedef Ref<TurnDescription> TurnDescriptionRef;
 
     class Node
     {

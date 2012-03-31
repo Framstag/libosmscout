@@ -19,6 +19,7 @@
 
 #include <osmscout/Route.h>
 
+#include <cmath>
 #include <sstream>
 
 #include <osmscout/util/String.h>
@@ -35,6 +36,8 @@ namespace osmscout {
   const char* const RouteDescription::WAY_NAME_CHANGED_DESC = "WayChangedName";
   /** Constant for a description of list of way name crossing a node (CrossingWaysDescription) */
   const char* const RouteDescription::CROSSING_WAYS_DESC    = "CrossingWays";
+  /** Constant for a description of a turn (TurnDescription) */
+  const char* const RouteDescription::TURN_DESC             = "Turn";
 
   RouteDescription::Description::~Description()
   {
@@ -207,6 +210,63 @@ namespace osmscout {
     }
 
     return "Crossing: "+result;
+  }
+
+  RouteDescription::TurnDescription::Move RouteDescription::TurnDescription::ConvertAngleToMove(double angle) const
+  {
+    if (fabs(angle)<=10.0) {
+      return straightOn;
+    }
+    else if (fabs(angle)<=45.0) {
+      return angle<0 ? slightlyLeft : slightlyRight;
+    }
+    else if (fabs(angle)<=120.0) {
+      return angle<0 ? left : right;
+    }
+    else {
+      return angle<0 ? sharpLeft : sharpRight;
+    }
+  }
+
+  std::string RouteDescription::TurnDescription::ConvertMoveToString(Move move) const
+  {
+    switch (move) {
+    case osmscout::RouteDescription::TurnDescription::sharpLeft:
+      return "Turn sharp left";
+    case osmscout::RouteDescription::TurnDescription::left:
+      return "Turn left";
+    case osmscout::RouteDescription::TurnDescription::slightlyLeft:
+      return "Turn slightly left";
+    case osmscout::RouteDescription::TurnDescription::straightOn:
+      return "Straight on";
+    case osmscout::RouteDescription::TurnDescription::slightlyRight:
+      return "Turn slightly right";
+    case osmscout::RouteDescription::TurnDescription::right:
+      return "Turn right";
+    case osmscout::RouteDescription::TurnDescription::sharpRight:
+      return "Turn sharp right";
+    }
+
+    assert(false);
+  }
+
+  RouteDescription::TurnDescription::TurnDescription(double turnAngle,
+                                                     double curveAngle)
+  : turnAngle(turnAngle),
+    curveAngle(curveAngle)
+  {
+    turn=ConvertAngleToMove(turnAngle);
+    curve=ConvertAngleToMove(curveAngle);
+  }
+
+  std::string RouteDescription::TurnDescription::GetDebugString() const
+  {
+    std::ostringstream stream;
+
+    stream << "Turn: " << ConvertMoveToString(turn) << ", " << turnAngle << " degrees ";
+    stream << "Curve: " << ConvertMoveToString(curve) << ", " << curveAngle << " degrees";
+
+    return stream.str();
   }
 
   RouteDescription::Node::Node(Id currentNodeId,

@@ -25,7 +25,7 @@
 #include <osmscout/Database.h>
 #include <osmscout/Router.h>
 
-#define ROUTE_DEBUG
+//#define ROUTE_DEBUG
 //#define POINTS_DEBUG
 //#define NODE_DEBUG
 
@@ -334,10 +334,11 @@ int main(int argc, char* argv[])
 
   postprocessors.push_back(new osmscout::RoutePostprocessor::DistanceAndTimePostprocessor());
   postprocessors.push_back(new osmscout::RoutePostprocessor::StartPostprocessor("Start"));
+  postprocessors.push_back(new osmscout::RoutePostprocessor::TargetPostprocessor("Target"));
   postprocessors.push_back(new osmscout::RoutePostprocessor::WayNamePostprocessor());
   postprocessors.push_back(new osmscout::RoutePostprocessor::WayNameChangedPostprocessor());
   postprocessors.push_back(new osmscout::RoutePostprocessor::CrossingWaysPostprocessor());
-  postprocessors.push_back(new osmscout::RoutePostprocessor::TargetPostprocessor("Target"));
+  postprocessors.push_back(new osmscout::RoutePostprocessor::TurnPostprocessor());
 
   osmscout::DatabaseParameter  databaseParameter;
   osmscout::Database           database(databaseParameter);
@@ -385,6 +386,7 @@ int main(int argc, char* argv[])
     osmscout::RouteDescription::NameDescriptionRef         nameDescription;
     osmscout::RouteDescription::NameChangedDescriptionRef  nameChangedDescription;
     osmscout::RouteDescription::CrossingWaysDescriptionRef crossingWaysDescription;
+    osmscout::RouteDescription::TurnDescriptionRef         turnDescription;
 
     desc=node->GetDescription(osmscout::RouteDescription::NODE_START_DESC);
     if (desc.Valid()) {
@@ -409,6 +411,11 @@ int main(int argc, char* argv[])
     desc=node->GetDescription(osmscout::RouteDescription::CROSSING_WAYS_DESC);
     if (desc.Valid()) {
       crossingWaysDescription=dynamic_cast<osmscout::RouteDescription::CrossingWaysDescription*>(desc.Get());
+    }
+
+    desc=node->GetDescription(osmscout::RouteDescription::TURN_DESC);
+    if (desc.Valid()) {
+      turnDescription=dynamic_cast<osmscout::RouteDescription::TurnDescription*>(desc.Get());
     }
 
     if (crossingWaysDescription.Valid() &&
@@ -465,7 +472,7 @@ int main(int argc, char* argv[])
 #if defined(ROUTE_DEBUG) || defined(NODE_DEBUG)
     NextLine(lineCount);
 
-    std::cout << "# " << node->GetCurrentNodeId() << " => " << node->GetPathWayId() << "[" << node->GetTargetNodeId() << "]" << std::endl;
+    std::cout << "# " << node->GetTime() << "h " << std::setw(0) << std::setprecision(3) << node->GetDistance() << "km " << node->GetCurrentNodeId() << " => " << node->GetPathWayId() << "[" << node->GetTargetNodeId() << "]" << std::endl;
 #endif
 
 #if defined(ROUTE_DEBUG)
@@ -492,6 +499,11 @@ int main(int argc, char* argv[])
     if (crossingWaysDescription.Valid()) {
       NextLine(lineCount);
       std::cout << "# " << crossingWaysDescription->GetDebugString() << std::endl;
+    }
+
+    if (turnDescription.Valid()) {
+      NextLine(lineCount);
+      std::cout << "# " << turnDescription->GetDebugString() << std::endl;
     }
 #endif
 
@@ -573,7 +585,35 @@ int main(int argc, char* argv[])
         roundaboutCrossingCounter=0;
       }
       else {
-        std::cout << "Turn into way '";
+        std::string turnCommand="turn";
+
+        if (turnDescription.Valid()) {
+          switch (turnDescription->GetCurve()) {
+          case osmscout::RouteDescription::TurnDescription::sharpLeft:
+            turnCommand="Turn sharp left";
+            break;
+          case osmscout::RouteDescription::TurnDescription::left:
+            turnCommand="Turn left";
+            break;
+          case osmscout::RouteDescription::TurnDescription::slightlyLeft:
+            turnCommand="Turn slightly left";
+            break;
+          case osmscout::RouteDescription::TurnDescription::straightOn:
+            turnCommand="Straight on";
+            break;
+          case osmscout::RouteDescription::TurnDescription::slightlyRight:
+            turnCommand="Turn slightly right";
+            break;
+          case osmscout::RouteDescription::TurnDescription::right:
+            turnCommand="Turn right";
+            break;
+          case osmscout::RouteDescription::TurnDescription::sharpRight:
+            turnCommand="Turn sharp right";
+            break;
+          }
+        }
+
+        std::cout << turnCommand << " into way '";
         std::cout << targetDescription->GetDescription();
         std::cout << "'" << std::endl;
       }

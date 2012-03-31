@@ -61,6 +61,7 @@ namespace osmscout {
       TypeId   type;     //! The type of the way
       uint8_t  maxSpeed; //! Maximum speed allowed on the way
       uint8_t  grade;    //! Quality of road/track 1 (good)...5 (bad)
+      uint8_t  bearing;  //! Encoded initial and final bearing of this path
       uint8_t  flags;    //! Certain flags
       double   distance; //! Distance from the current route node to the target route node
       double   lat;      //! Latitude of the target node
