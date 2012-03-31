@@ -154,6 +154,58 @@ namespace osmscout {
     return b * A * (sigma - deltasigma)/1000; // We want the distance in Km
   }
 
+  /**
+   * Taken the path from A to B over a sphere return the bearing (0..2PI) at the starting point A.
+   */
+  double GetSphericalBearingInitial(double aLon, double aLat,
+                                    double bLon, double bLat)
+  {
+    aLon=aLon*M_PI/180;
+    aLat=aLat*M_PI/180;
+
+    bLon=bLon*M_PI/180;
+    bLat=bLat*M_PI/180;
+
+    double dLon=bLon-aLon;
+    double y=sin(dLon)*cos(bLat);
+    double x=cos(aLat)*sin(bLat)-sin(aLat)*cos(bLat)*cos(dLon);
+
+    double bearing=atan2(y,x);
+    //double bearing=fmod(atan2(y,x)+2*M_PI,2*M_PI);
+
+    return bearing;
+  }
+
+  /**
+   * Taken the path from A to B over a sphere return the bearing (0..2PI) at the destination point B.
+   */
+  double GetSphericalBearingFinal(double aLon, double aLat,
+                                  double bLon, double bLat)
+  {
+    aLon=aLon*M_PI/180;
+    aLat=aLat*M_PI/180;
+
+    bLon=bLon*M_PI/180;
+    bLat=bLat*M_PI/180;
+
+    double dLon=aLon-bLon;
+    double y=sin(dLon)*cos(aLat);
+    double x=cos(bLat)*sin(aLat)-sin(bLat)*cos(aLat)*cos(dLon);
+
+    double bearing=atan2(y,x);
+
+    if (bearing>=0) {
+      bearing-=M_PI;
+    }
+    else {
+      bearing+=M_PI;
+    }
+
+    //double bearing=fmod(atan2(y,x)+3*M_PI,2*M_PI);
+
+    return bearing;
+  }
+
   ScanCell::ScanCell(int x, int y)
   : x(x),
     y(y)

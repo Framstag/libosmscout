@@ -201,6 +201,12 @@ namespace osmscout {
   extern OSMSCOUT_API double GetEllipsoidalDistance(double aLon, double aLat,
                                                    double bLon, double bLat);
 
+  extern OSMSCOUT_API double GetSphericalBearingInitial(double aLon, double aLat,
+                                                        double bLon, double bLat);
+
+  extern OSMSCOUT_API double GetSphericalBearingFinal(double aLon, double aLat,
+                                                      double bLon, double bLat);
+
   struct OSMSCOUT_API ScanCell
   {
     int x;
