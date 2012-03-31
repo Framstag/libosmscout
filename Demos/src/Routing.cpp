@@ -25,9 +25,9 @@
 #include <osmscout/Database.h>
 #include <osmscout/Router.h>
 
-//#define ROUTE_DEBUG
 //#define POINTS_DEBUG
-//#define NODE_DEBUG
+#define ROUTE_DEBUG
+#define NODE_DEBUG
 
 /*
   Examples for the nordrhein-westfalen.osm:
@@ -58,50 +58,36 @@ static std::string TimeToString(double time)
   return stream.str();
 }
 
-static bool IsRelevantCrossing(const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossing)
+static bool IsRelevantCrossing(const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossing,
+                               const osmscout::RouteDescription::TurnDescriptionRef& turn)
 {
   osmscout::RouteDescription::NameDescriptionRef originDescription=crossing->GetOriginDesccription();
   osmscout::RouteDescription::NameDescriptionRef targetDescription=crossing->GetTargetDesccription();
 
+  // Roundabout enter/leave is always interesting
   if (crossing->GetType()!=osmscout::RouteDescription::CrossingWaysDescription::normal) {
     return true;
   }
 
-  if (originDescription.Valid() &&
-      targetDescription.Valid()) {
-    // Is not really a turn, because there are no other crossing ways
-    if (crossing->GetDescriptions().empty()) {
+  // If we have to turn, this is important!
+  if (crossing->HasMultipleExits()) {
+    // If it is only a slight turn and the name stays, we do not mention it
+    // TODO: More precisely we should always skip a crossing with multiple exists,
+    // if the turn we make is the (obviously) smalest possible for all paths we could go from here.
+    if (originDescription.Valid() &&
+        targetDescription.Valid() &&
+        originDescription->GetName()==targetDescription->GetName() &&
+        originDescription->GetRef()==targetDescription->GetRef() &&
+        (turn->GetCurve()==osmscout::RouteDescription::TurnDescription::slightlyLeft ||
+         turn->GetCurve()==osmscout::RouteDescription::TurnDescription::slightlyRight)) {
       return false;
     }
-
-    // It is a crossing with additional ways, but we stay on the same way
-    if (originDescription->GetName()==targetDescription->GetName() &&
-        originDescription->GetRef()==targetDescription->GetRef()) {
-      return false;
-    }
-
-    // Origin and target way just change refs
-    if (!originDescription->GetName().empty() &&
-        originDescription->GetName()==targetDescription->GetName()) {
-      return false;
-    }
-
-    // The name changes from empty to non-empty, but the ref stays the same
-    if (originDescription->GetName().empty() &&
-        !targetDescription->GetName().empty() &&
-        originDescription->GetRef()==targetDescription->GetRef()) {
-      return false;
-    }
-
-    // The name changes from non-empty to empty, but the ref stays the same
-    if (!originDescription->GetName().empty() &&
-        targetDescription->GetName().empty() &&
-        originDescription->GetRef()==targetDescription->GetRef()) {
-      return false;
+    else if (turn->GetCurve()!=osmscout::RouteDescription::TurnDescription::straightOn) {
+      return true;
     }
   }
 
-  return true;
+  return false;
 }
 
 static bool IsRelevantNameChange(const osmscout::RouteDescription::NameChangedDescriptionRef& change)
@@ -147,11 +133,16 @@ static bool HasRelevantDescriptions(const osmscout::RouteDescription::Node& node
     return true;
   }
 
-  if (node.HasDescription(osmscout::RouteDescription::CROSSING_WAYS_DESC)) {
-    osmscout::RouteDescription::DescriptionRef             description=node.GetDescription(osmscout::RouteDescription::CROSSING_WAYS_DESC);
-    osmscout::RouteDescription::CrossingWaysDescriptionRef crossingWaysDescription=dynamic_cast<osmscout::RouteDescription::CrossingWaysDescription*>(description.Get());
+  osmscout::RouteDescription::DescriptionRef description;
 
-    if (IsRelevantCrossing(crossingWaysDescription)) {
+  if (node.HasDescription(osmscout::RouteDescription::CROSSING_WAYS_DESC) &&
+      node.HasDescription(osmscout::RouteDescription::TURN_DESC)) {
+    description=node.GetDescription(osmscout::RouteDescription::CROSSING_WAYS_DESC);
+    osmscout::RouteDescription::CrossingWaysDescriptionRef crossingWaysDescription=dynamic_cast<osmscout::RouteDescription::CrossingWaysDescription*>(description.Get());
+    description=node.GetDescription(osmscout::RouteDescription::TURN_DESC);
+    osmscout::RouteDescription::TurnDescriptionRef turnDescription=dynamic_cast<osmscout::RouteDescription::TurnDescription*>(description.Get());
+
+    if (IsRelevantCrossing(crossingWaysDescription,turnDescription)) {
       return true;
     }
   }
@@ -167,37 +158,6 @@ static bool HasRelevantDescriptions(const osmscout::RouteDescription::Node& node
 
   return false;
 #endif
-}
-
-bool IsJustWayChange(osmscout::RouteDescription::CrossingWaysDescription* crossingDescription)
-{
-  if (crossingDescription==NULL) {
-    return true;
-  }
-
-  if (crossingDescription->GetDescriptions().size()==0) {
-    return true;
-  }
-
-  osmscout::RouteDescription::NameDescriptionRef originDescription=crossingDescription->GetOriginDesccription();
-  osmscout::RouteDescription::NameDescriptionRef targetDescription=crossingDescription->GetTargetDesccription();
-
-  if (originDescription.Valid() &&
-      targetDescription.Valid()) {
-    // Origin and target way just change refs
-    if (!originDescription->GetName().empty() &&
-        originDescription->GetName()==targetDescription->GetName()) {
-      return true;
-    }
-
-    // Origin and target way just change names
-    if (!originDescription->GetRef().empty() &&
-        originDescription->GetRef()==targetDescription->GetRef()) {
-      return true;
-    }
-  }
-
-  return false;
 }
 
 static void NextLine(size_t& lineCount)
@@ -473,9 +433,7 @@ int main(int argc, char* argv[])
     NextLine(lineCount);
 
     std::cout << "# " << node->GetTime() << "h " << std::setw(0) << std::setprecision(3) << node->GetDistance() << "km " << node->GetCurrentNodeId() << " => " << node->GetPathWayId() << "[" << node->GetTargetNodeId() << "]" << std::endl;
-#endif
 
-#if defined(ROUTE_DEBUG)
     if (startDescription.Valid()) {
       NextLine(lineCount);
       std::cout << "# " << startDescription->GetDebugString() << std::endl;
@@ -520,7 +478,8 @@ int main(int argc, char* argv[])
     }
 
     if (crossingWaysDescription.Valid() &&
-        IsRelevantCrossing(crossingWaysDescription)) {
+        turnDescription.Valid() &&
+        IsRelevantCrossing(crossingWaysDescription,turnDescription)) {
       std::set<std::string>                          names;
       osmscout::RouteDescription::NameDescriptionRef originDescription=crossingWaysDescription->GetOriginDesccription();
       osmscout::RouteDescription::NameDescriptionRef targetDescription=crossingWaysDescription->GetTargetDesccription();
