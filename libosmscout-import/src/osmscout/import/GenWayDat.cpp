@@ -532,9 +532,6 @@ namespace osmscout {
               continue;
             }
 
-            hasBeenMerged[b]=true;
-            somethingHasMerged=true;
-
             std::vector<Id> origNodes(rawWay->GetNodes());
 
             if (origReverseNodes) {
@@ -589,8 +586,11 @@ namespace osmscout {
               endPointWayMap[origNodes.back()].push_back(rawWay->GetId());
             }
             else {
-              assert(true);
+              continue;
             }
+
+            hasBeenMerged[b]=true;
+            somethingHasMerged=true;
 
             UpdateRestrictions(restrictions,
                                candidate->GetId(),
