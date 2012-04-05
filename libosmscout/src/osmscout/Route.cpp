@@ -37,7 +37,19 @@ namespace osmscout {
   /** Constant for a description of list of way name crossing a node (CrossingWaysDescription) */
   const char* const RouteDescription::CROSSING_WAYS_DESC    = "CrossingWays";
   /** Constant for a description of a turn (TurnDescription) */
+  const char* const RouteDescription::DIRECTION_DESC        = "Direction";
+  /** Constant for doing description of an explicit turn (TurnDescription) */
   const char* const RouteDescription::TURN_DESC             = "Turn";
+  /** Constant for a description of entering a roundabout (RoundaboutEnterDescription) */
+  const char* const RouteDescription::ROUNDABOUT_ENTER_DESC = "RountaboutEnter";
+  /** Constant for a description of entering a roundabout (RoundaboutLeaveDescription) */
+  const char* const RouteDescription::ROUNDABOUT_LEAVE_DESC = "RountaboutLeave";
+  /** Constant for a description of entering a motorway (MotorwayEnterDescription) */
+  const char* const RouteDescription::MOTORWAY_ENTER_DESC   = "MotorwayEnter";
+  /** Constant for a description of changing a motorway (MotorwayChangeDescription) */
+  const char* const RouteDescription::MOTORWAY_CHANGE_DESC  = "MotorwayChange";
+  /** Constant for a description of leaving a motorway (MotorwayLeaveDescription) */
+  const char* const RouteDescription::MOTORWAY_LEAVE_DESC   = "MotorwayLeave";
 
   RouteDescription::Description::~Description()
   {
@@ -52,7 +64,7 @@ namespace osmscout {
 
   std::string RouteDescription::StartDescription::GetDebugString() const
   {
-    return "Start: "+description;
+    return "Start: '"+description+"'";
   }
 
   std::string RouteDescription::StartDescription::GetDescription() const
@@ -68,7 +80,7 @@ namespace osmscout {
 
   std::string RouteDescription::TargetDescription::GetDebugString() const
   {
-    return "Target: "+description;
+    return "Target: '"+description+"'";
   }
 
   std::string RouteDescription::TargetDescription::GetDescription() const
@@ -87,7 +99,12 @@ namespace osmscout {
 
   std::string RouteDescription::NameDescription::GetDebugString() const
   {
-    return "Name: "+GetDescription();
+    return "Name: '"+GetDescription()+"'";
+  }
+
+  bool RouteDescription::NameDescription::HasName() const
+  {
+    return !name.empty() || !ref.empty();
   }
 
   std::string RouteDescription::NameDescription::GetName() const
@@ -143,24 +160,22 @@ namespace osmscout {
     std::string result="Name Change: ";
 
     if (originDescription.Valid()) {
-      result+=originDescription->GetDescription();
+      result+="'"+originDescription->GetDescription()+"'";
     }
 
     result+=" => ";
 
     if (targetDescription.Valid()) {
-      result+=targetDescription->GetDescription();
+      result+="'"+targetDescription->GetDescription()+"'";
     }
 
     return result;
   }
 
-  RouteDescription::CrossingWaysDescription::CrossingWaysDescription(Type type,
-                                                                     size_t exitCount,
+  RouteDescription::CrossingWaysDescription::CrossingWaysDescription(size_t exitCount,
                                                                      NameDescription* originDescription,
                                                                      NameDescription* targetDescription)
-  : type(type),
-    exitCount(exitCount),
+  : exitCount(exitCount),
     originDescription(originDescription),
     targetDescription(targetDescription)
   {
@@ -176,8 +191,14 @@ namespace osmscout {
   {
     std::string result;
 
+    result+="Crossing";
+
     if (originDescription.Valid()) {
-      result+="From "+originDescription->GetDescription();
+      if (!result.empty()) {
+        result+=" ";
+      }
+
+      result+="from '"+originDescription->GetDescription()+"'";
     }
 
     if (targetDescription.Valid()) {
@@ -185,7 +206,7 @@ namespace osmscout {
         result+=" ";
       }
 
-      result+="to "+targetDescription->GetDescription();
+      result+="to '"+targetDescription->GetDescription()+"'";
     }
 
     if (!descriptions.empty()) {
@@ -198,7 +219,7 @@ namespace osmscout {
       for (std::list<NameDescriptionRef>::const_iterator desc=descriptions.begin();
           desc!=descriptions.end();
           ++desc) {
-        result+=" "+(*desc)->GetDescription();
+        result+=" '"+(*desc)->GetDescription()+"'";
       }
     }
 
@@ -212,7 +233,7 @@ namespace osmscout {
     return "Crossing: "+result;
   }
 
-  RouteDescription::TurnDescription::Move RouteDescription::TurnDescription::ConvertAngleToMove(double angle) const
+  RouteDescription::DirectionDescription::Move RouteDescription::DirectionDescription::ConvertAngleToMove(double angle) const
   {
     if (fabs(angle)<=10.0) {
       return straightOn;
@@ -228,30 +249,32 @@ namespace osmscout {
     }
   }
 
-  std::string RouteDescription::TurnDescription::ConvertMoveToString(Move move) const
+  std::string RouteDescription::DirectionDescription::ConvertMoveToString(Move move) const
   {
     switch (move) {
-    case osmscout::RouteDescription::TurnDescription::sharpLeft:
+    case osmscout::RouteDescription::DirectionDescription::sharpLeft:
       return "Turn sharp left";
-    case osmscout::RouteDescription::TurnDescription::left:
+    case osmscout::RouteDescription::DirectionDescription::left:
       return "Turn left";
-    case osmscout::RouteDescription::TurnDescription::slightlyLeft:
+    case osmscout::RouteDescription::DirectionDescription::slightlyLeft:
       return "Turn slightly left";
-    case osmscout::RouteDescription::TurnDescription::straightOn:
+    case osmscout::RouteDescription::DirectionDescription::straightOn:
       return "Straight on";
-    case osmscout::RouteDescription::TurnDescription::slightlyRight:
+    case osmscout::RouteDescription::DirectionDescription::slightlyRight:
       return "Turn slightly right";
-    case osmscout::RouteDescription::TurnDescription::right:
+    case osmscout::RouteDescription::DirectionDescription::right:
       return "Turn right";
-    case osmscout::RouteDescription::TurnDescription::sharpRight:
+    case osmscout::RouteDescription::DirectionDescription::sharpRight:
       return "Turn sharp right";
     }
 
     assert(false);
+
+    return "???";
   }
 
-  RouteDescription::TurnDescription::TurnDescription(double turnAngle,
-                                                     double curveAngle)
+  RouteDescription::DirectionDescription::DirectionDescription(double turnAngle,
+                                                               double curveAngle)
   : turnAngle(turnAngle),
     curveAngle(curveAngle)
   {
@@ -259,14 +282,88 @@ namespace osmscout {
     curve=ConvertAngleToMove(curveAngle);
   }
 
-  std::string RouteDescription::TurnDescription::GetDebugString() const
+  std::string RouteDescription::DirectionDescription::GetDebugString() const
   {
     std::ostringstream stream;
 
+    stream << "Direction: ";
     stream << "Turn: " << ConvertMoveToString(turn) << ", " << turnAngle << " degrees ";
     stream << "Curve: " << ConvertMoveToString(curve) << ", " << curveAngle << " degrees";
 
     return stream.str();
+  }
+
+  RouteDescription::TurnDescription::TurnDescription()
+  {
+    // no code
+  }
+
+  std::string RouteDescription::TurnDescription::GetDebugString() const
+  {
+    return "Turn";
+  }
+
+  RouteDescription::RoundaboutEnterDescription::RoundaboutEnterDescription()
+  {
+    // no code
+  }
+
+  std::string RouteDescription::RoundaboutEnterDescription::GetDebugString() const
+  {
+    return "Enter roundabout";
+  }
+
+  RouteDescription::RoundaboutLeaveDescription::RoundaboutLeaveDescription(size_t exitCount)
+  : exitCount(exitCount)
+  {
+    // no code
+  }
+
+  std::string RouteDescription::RoundaboutLeaveDescription::GetDebugString() const
+  {
+    return "Leave roundabout";
+  }
+
+  RouteDescription::MotorwayEnterDescription::MotorwayEnterDescription(NameDescription* targetDescription)
+  : toDescription(targetDescription)
+  {
+    // no code
+  }
+
+  std::string RouteDescription::MotorwayEnterDescription::GetDebugString() const
+  {
+    std::string result="Enter motorway";
+
+    if (toDescription.Valid() &&
+        toDescription->HasName()) {
+      result+=" '"+toDescription->GetDescription()+"'";
+    }
+
+    return result;
+  }
+
+  RouteDescription::MotorwayChangeDescription::MotorwayChangeDescription(NameDescription* fromDescription,
+                                                                         NameDescription* toDescription)
+  : fromDescription(fromDescription),
+    toDescription(toDescription)
+  {
+    // no code
+  }
+
+  std::string RouteDescription::MotorwayChangeDescription::GetDebugString() const
+  {
+    return "Change motorway";
+  }
+
+  RouteDescription::MotorwayLeaveDescription::MotorwayLeaveDescription(NameDescription* fromDescription)
+  : fromDescription(fromDescription)
+  {
+    // no code
+  }
+
+  std::string RouteDescription::MotorwayLeaveDescription::GetDebugString() const
+  {
+    return "Leave motorway";
   }
 
   RouteDescription::Node::Node(Id currentNodeId,
@@ -289,18 +386,18 @@ namespace osmscout {
   {
     OSMSCOUT_HASHMAP<std::string,DescriptionRef>::const_iterator entry;
 
-    entry=descriptions.find(name);
+    entry=descriptionMap.find(name);
 
-    return entry!=descriptions.end() && entry->second.Valid();
+    return entry!=descriptionMap.end() && entry->second.Valid();
   }
 
-  RouteDescription::DescriptionRef RouteDescription::Node::GetDescription(const char* name) const
+  RouteDescription::Description* RouteDescription::Node::GetDescription(const char* name) const
   {
     OSMSCOUT_HASHMAP<std::string,DescriptionRef>::const_iterator entry;
 
-    entry=descriptions.find(name);
+    entry=descriptionMap.find(name);
 
-    if (entry!=descriptions.end()) {
+    if (entry!=descriptionMap.end()) {
       return entry->second;
     }
     else {
@@ -321,7 +418,8 @@ namespace osmscout {
   void RouteDescription::Node::AddDescription(const char* name,
                                               Description* description)
   {
-    descriptions[name]=description;
+    descriptions.push_back(description);
+    descriptionMap[name]=description;
   }
 
   RouteDescription::RouteDescription()

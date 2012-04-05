@@ -285,11 +285,11 @@ bool DatabaseTask::Open(const std::wstring& path)
 
   type=typeConfig->GetWayTypeId("highway_trunk");
   assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,70.0);
+  routingProfile.AddType(type,100.0);
 
   type=typeConfig->GetWayTypeId("highway_trunk_link");
   assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,70.0);
+  routingProfile.AddType(type,60.0);
 
   type=typeConfig->GetWayTypeId("highway_primary");
   assert(type!=osmscout::typeIgnore);

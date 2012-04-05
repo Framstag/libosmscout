@@ -56,8 +56,20 @@ namespace osmscout {
     static const char* const WAY_NAME_CHANGED_DESC;
     /** Constant for a description of list of way name crossing a node (CrossingWaysDescription) */
     static const char* const CROSSING_WAYS_DESC;
-    /** Constant for a description of a turn (TurnDescription) */
+    /** Constant for a description of drive direction (DirectionDescription) */
+    static const char* const DIRECTION_DESC;
+    /** Constant for a description of an explicit turn (TurnDescription) */
     static const char* const TURN_DESC;
+    /** Constant for a description of entering a roundabout  (RoundaboutEnterDescription) */
+    static const char* const ROUNDABOUT_ENTER_DESC;
+    /** Constant for a description of leaving a roundabout (RoundaboutLeaveDescription) */
+    static const char* const ROUNDABOUT_LEAVE_DESC;
+    /** Constant for a description of entering a motorway (MotorwayEnterDescription) */
+    static const char* const MOTORWAY_ENTER_DESC;
+    /** Constant for a description of changing a motorway (MotorwayChangeDescription) */
+    static const char* const MOTORWAY_CHANGE_DESC;
+    /** Constant for a description of leaving a motorway (MotorwayLeaveDescription) */
+    static const char* const MOTORWAY_LEAVE_DESC;
 
   public:
     /*
@@ -125,6 +137,8 @@ namespace osmscout {
 
       std::string GetDebugString() const;
 
+      bool HasName() const;
+
       std::string GetName() const;
       std::string GetRef() const;
 
@@ -166,34 +180,20 @@ namespace osmscout {
      */
     class OSMSCOUT_API CrossingWaysDescription : public Description
     {
-    public:
-      enum Type {
-        normal,
-        roundaboutEnter,
-        roundaboutLeave
-      };
-
     private:
-      Type                          type;
       size_t                        exitCount;
       NameDescriptionRef            originDescription;
       NameDescriptionRef            targetDescription;
       std::list<NameDescriptionRef> descriptions;
 
     public:
-      CrossingWaysDescription(Type type,
-                              size_t exitCount,
+      CrossingWaysDescription(size_t exitCount,
                               NameDescription* originDescription,
                               NameDescription* targetDescription);
 
       void AddDescription(NameDescription* description);
 
       std::string GetDebugString() const;
-
-      inline Type GetType() const
-      {
-        return type;
-      }
 
       inline size_t GetExitCount() const
       {
@@ -233,7 +233,7 @@ namespace osmscout {
      * account (which could only the start of a slight curve) but tries to determine the last node
      * of the curve and this gives a better description of the curve the vehicle needs to take.
      */
-    class OSMSCOUT_API TurnDescription : public Description
+    class OSMSCOUT_API DirectionDescription : public Description
     {
     public:
       enum Move {
@@ -257,7 +257,7 @@ namespace osmscout {
       std::string ConvertMoveToString(Move move) const;
 
     public:
-      TurnDescription(double turnAngle,
+      DirectionDescription(double turnAngle,
                       double curveAngle);
 
       std::string GetDebugString() const;
@@ -283,7 +283,124 @@ namespace osmscout {
       }
     };
 
+    typedef Ref<DirectionDescription> DirectionDescriptionRef;
+
+    /**
+     * Signals an explicit turn
+     */
+    class OSMSCOUT_API TurnDescription : public Description
+    {
+    public:
+      TurnDescription();
+
+      std::string GetDebugString() const;
+    };
+
     typedef Ref<TurnDescription> TurnDescriptionRef;
+
+    /**
+     * Signals entering a roundabout
+     */
+    class OSMSCOUT_API RoundaboutEnterDescription : public Description
+    {
+    public:
+      RoundaboutEnterDescription();
+
+      std::string GetDebugString() const;
+    };
+
+    typedef Ref<RoundaboutEnterDescription> RoundaboutEnterDescriptionRef;
+
+    /**
+     * Signals leaving a roundabout
+     */
+    class OSMSCOUT_API RoundaboutLeaveDescription : public Description
+    {
+    private:
+      size_t exitCount;
+
+    public:
+      RoundaboutLeaveDescription(size_t exitCount);
+
+      std::string GetDebugString() const;
+
+      inline size_t GetExitCount() const
+      {
+        return exitCount;
+      }
+    };
+
+    typedef Ref<RoundaboutLeaveDescription> RoundaboutLeaveDescriptionRef;
+
+    /**
+     * Signals entering a motorway
+     */
+    class OSMSCOUT_API MotorwayEnterDescription : public Description
+    {
+    private:
+      NameDescriptionRef toDescription;
+
+    public:
+      MotorwayEnterDescription(NameDescription* toDescription);
+
+      std::string GetDebugString() const;
+
+      inline const NameDescriptionRef& GetToDescription() const
+      {
+        return toDescription;
+      }
+    };
+
+    typedef Ref<MotorwayEnterDescription> MotorwayEnterDescriptionRef;
+
+    /**
+     * Signals changing a motorway
+     */
+    class OSMSCOUT_API MotorwayChangeDescription : public Description
+    {
+    private:
+      NameDescriptionRef fromDescription;
+      NameDescriptionRef toDescription;
+
+    public:
+      MotorwayChangeDescription(NameDescription* fromDescription,
+                                NameDescription* toDescription);
+
+      std::string GetDebugString() const;
+
+      inline const NameDescriptionRef& GetFromDescription() const
+      {
+        return fromDescription;
+      }
+
+      inline const NameDescriptionRef& GetToDescription() const
+      {
+        return toDescription;
+      }
+    };
+
+    typedef Ref<MotorwayChangeDescription> MotorwayChangeDescriptionRef;
+
+    /**
+     * Signals leaving a motorway
+     */
+    class OSMSCOUT_API MotorwayLeaveDescription : public Description
+    {
+    private:
+      NameDescriptionRef fromDescription;
+
+    public:
+      MotorwayLeaveDescription(NameDescription* fromDescription);
+
+      std::string GetDebugString() const;
+
+      inline const NameDescriptionRef& GetFromDescription() const
+      {
+        return fromDescription;
+      }
+    };
+
+    typedef Ref<MotorwayLeaveDescription> MotorwayLeaveDescriptionRef;
 
     class Node
     {
@@ -295,7 +412,8 @@ namespace osmscout {
       Id                                           targetNodeId;
       double                                       distance;
       double                                       time;
-      OSMSCOUT_HASHMAP<std::string,DescriptionRef> descriptions;
+      OSMSCOUT_HASHMAP<std::string,DescriptionRef> descriptionMap;
+      std::list<DescriptionRef>                    descriptions;
 
     public:
       Node(Id currentNodeId,
@@ -317,6 +435,16 @@ namespace osmscout {
       inline const std::vector<Path>& GetPaths() const
       {
         return paths;
+      }
+
+      inline const std::list<DescriptionRef>& GetDescriptions() const
+      {
+        return descriptions;
+      }
+
+      inline bool HasPathWay() const
+      {
+        return pathWayId!=0;
       }
 
       inline Id GetPathWayId() const
@@ -346,7 +474,7 @@ namespace osmscout {
       }
 
       bool HasDescription(const char* name) const;
-      DescriptionRef GetDescription(const char* name) const;
+      Description* GetDescription(const char* name) const;
 
       void SetDistance(double distance);
       void SetTime(double time);
