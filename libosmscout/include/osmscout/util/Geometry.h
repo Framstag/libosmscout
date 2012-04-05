@@ -207,6 +207,8 @@ namespace osmscout {
   extern OSMSCOUT_API double GetSphericalBearingFinal(double aLon, double aLat,
                                                       double bLon, double bLat);
 
+  extern OSMSCOUT_API double NormalizeRelativeAngel(double angle);
+
   struct OSMSCOUT_API ScanCell
   {
     int x;

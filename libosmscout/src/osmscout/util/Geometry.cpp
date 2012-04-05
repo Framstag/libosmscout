@@ -206,6 +206,18 @@ namespace osmscout {
     return bearing;
   }
 
+  double NormalizeRelativeAngel(double angle)
+  {
+    if (angle>180.0) {
+      return angle-360.0;
+    }
+    else if (angle<-180.0) {
+      return angle+360.0;
+    }
+
+    return angle;
+  }
+
   ScanCell::ScanCell(int x, int y)
   : x(x),
     y(y)
