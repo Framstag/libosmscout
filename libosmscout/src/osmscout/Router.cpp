@@ -1532,8 +1532,8 @@ namespace osmscout {
 
       node->overallCost=node->currentCost+node->estimateCost;
 
-      openList.insert(node);
-      openMap[node->nodeId]=openList.begin();
+      std::pair<OpenListRef,bool> result=openList.insert(node);
+      openMap[node->nodeId]=result.first;
     }
 
     if (startBackwardRouteNode.Valid()) {
@@ -1552,8 +1552,8 @@ namespace osmscout {
 
       node->overallCost=node->currentCost+node->estimateCost;
 
-      openList.insert(node);
-      openMap[node->nodeId]=openList.begin();
+      std::pair<OpenListRef,bool> result=openList.insert(node);
+      openMap[node->nodeId]=result.first;
     }
 
     currentWay=NULL;
@@ -1568,17 +1568,16 @@ namespace osmscout {
 
       current=*openList.begin();
 
+      openMap.erase(current->nodeId);
+      openList.erase(openList.begin());
+
       if (!routeNodeDataFile.Get(current->nodeId,currentRouteNode) ||
           !currentRouteNode.Valid()) {
         std::cerr << "Cannot load route node with id " << current->nodeId << std::endl;
-        nodesIgnoredCount++;
         return false;
       }
 
       nodesLoadedCount++;
-
-      openList.erase(openList.begin());
-      openMap.erase(current->nodeId);
 
       // Get potential follower in the current way
 
@@ -1630,7 +1629,7 @@ namespace osmscout {
           }
         }
 
-        CloseMap::iterator closeEntry=closeMap.find(currentRouteNode->paths[i].id);
+        CloseMap::const_iterator closeEntry=closeMap.find(currentRouteNode->paths[i].id);
 
         if (closeEntry!=closeMap.end()) {
 #if defined(DEBUG_ROUTING)
