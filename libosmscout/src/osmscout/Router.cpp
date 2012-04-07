@@ -1438,6 +1438,8 @@ namespace osmscout {
 
     size_t                   nodesLoadedCount=0;
     size_t                   nodesIgnoredCount=0;
+    size_t                   maxOpenList=0;
+    size_t                   maxCloseMap=0;
 
     StopClock clock;
 
@@ -1708,6 +1710,10 @@ namespace osmscout {
       //
 
       closeMap[current->nodeId]=current;
+
+      maxOpenList=std::max(maxOpenList,openMap.size());
+      maxCloseMap=std::max(maxCloseMap,closeMap.size());
+
     } while (!openList.empty() &&
              (targetForwardRouteNode.Invalid() || current->nodeId!=targetForwardRouteNode->id) &&
              (targetBackwardRouteNode.Invalid() || current->nodeId!=targetBackwardRouteNode->id));
@@ -1722,6 +1728,8 @@ namespace osmscout {
 #endif
     std::cout << "Route nodes loaded:  " << nodesLoadedCount << std::endl;
     std::cout << "Route nodes ignored: " << nodesIgnoredCount << std::endl;
+    std::cout << "Max. OpenList size:  " << maxOpenList << std::endl;
+    std::cout << "Max. CloseMap size:  " << maxCloseMap << std::endl;
 
     if (!((targetForwardRouteNode.Invalid() || current->nodeId==targetForwardRouteNode->id) ||
           (targetBackwardRouteNode.Invalid() || current->nodeId==targetBackwardRouteNode->id))) {
