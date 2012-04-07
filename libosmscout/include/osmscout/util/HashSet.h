@@ -33,8 +33,8 @@
   #define OSMSCOUT_HASHSET std::unordered_set
   #define OSMSCOUT_HASHSET_HAS_RESERVE 1
 #else
-  #define OSMSCOUT_HASHMAP std::map
-  #undef OSMSCOUT_HASHMAP_HAS_RESERVE
+  #define OSMSCOUT_HASHSET std::set
+  #undef OSMSCOUT_HASHSET_HAS_RESERVE
 #endif
 
 #endif
