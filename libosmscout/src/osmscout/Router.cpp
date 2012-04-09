@@ -858,7 +858,7 @@ namespace osmscout {
       // Non-Link, non-motorway to motorway
       if (motorwayLinkTypes.find(originWay->GetType())==motorwayLinkTypes.end() &&
           motorwayTypes.find(originWay->GetType())==motorwayTypes.end() &&
-          motorwayTypes.find(targetWay->GetType())!=motorwayLinkTypes.end()) {
+          motorwayTypes.find(targetWay->GetType())!=motorwayTypes.end()) {
         HandleDirectMotorwayEnter(*node,
                                   targetName);
 
@@ -867,7 +867,7 @@ namespace osmscout {
       }
 
       // Motorway to Non-Link, non-motorway
-      if (motorwayLinkTypes.find(originWay->GetType())!=motorwayLinkTypes.end() &&
+      if (motorwayTypes.find(originWay->GetType())!=motorwayTypes.end() &&
           motorwayLinkTypes.find(targetWay->GetType())==motorwayLinkTypes.end() &&
           motorwayTypes.find(targetWay->GetType())==motorwayTypes.end()) {
         HandleDirectMotorwayLeave(*node,
