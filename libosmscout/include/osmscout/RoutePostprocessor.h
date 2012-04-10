@@ -125,17 +125,6 @@ namespace osmscout {
     };
 
     /**
-     * Places a name change description if the name changes
-     */
-    OSMSCOUT_API class WayNameChangedPostprocessor : public Postprocessor
-    {
-    public:
-      bool Process(const RoutingProfile& profile,
-                   RouteDescription& description,
-                   Database& database);
-    };
-
-    /**
      * Places a turn description for every node
      */
     OSMSCOUT_API class DirectionPostprocessor : public Postprocessor

@@ -164,8 +164,6 @@ namespace osmscout {
     // Store the name of each way
     //
 
-    RouteDescription::NameDescriptionRef lastDescription;
-
     for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
         node!=description.Nodes().end();
         ++node) {
@@ -175,111 +173,27 @@ namespace osmscout {
       }
 
       WayRef                               way=wayMap[node->GetPathWayId()];
-      RouteDescription::NameDescriptionRef description=new RouteDescription::NameDescription(way->GetName(),
-                                                                                             way->GetRefName());
+      RouteDescription::NameDescriptionRef nameDesc=new RouteDescription::NameDescription(way->GetName(),
+                                                                                          way->GetRefName());
+
+      if (way->IsBridge() &&
+          node!=description.Nodes().begin()) {
+        std::list<RouteDescription::Node>::iterator lastNode=node;
+
+        lastNode--;
+
+        RouteDescription::NameDescriptionRef lastDesc=dynamic_cast<RouteDescription::NameDescription*>(lastNode->GetDescription(RouteDescription::WAY_NAME_DESC));
+
+
+        if (lastDesc.Valid() &&
+            lastDesc->GetRef()==nameDesc->GetRef() &&
+            lastDesc->GetName()!=nameDesc->GetName()) {
+          nameDesc=lastDesc;
+        }
+      }
 
       node->AddDescription(RouteDescription::WAY_NAME_DESC,
-                           description);
-    }
-
-    return true;
-  }
-
-  bool RoutePostprocessor::WayNameChangedPostprocessor::Process(const RoutingProfile& profile,
-                                                                RouteDescription& description,
-                                                                Database& database)
-  {
-    //
-    // Load all ways in one go and put them into a map
-    //
-
-    std::set<Id>        wayIds;
-    std::vector<WayRef> ways;
-    std::map<Id,WayRef> wayMap;
-
-    for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
-        node!=description.Nodes().end();
-        ++node) {
-      if (node->HasPathWay()) {
-        wayIds.insert(node->GetPathWayId());
-      }
-
-      for (std::vector<Id>::const_iterator id=node->GetWays().begin();
-          id!=node->GetWays().end();
-          ++id) {
-        wayIds.insert(*id);
-      }
-    }
-
-    if (!database.GetWays(wayIds,ways)) {
-      std::cerr << "Cannot retrieve crossing ways" << std::endl;
-      return false;
-    }
-
-    for (std::vector<WayRef>::const_iterator w=ways.begin();
-        w!=ways.end();
-        ++w) {
-      WayRef way=*w;
-
-      wayMap[way->GetId()]=way;
-    }
-
-    //
-    // Collect (relevant) way name changes
-    //
-
-    WayRef lastInterestingWay;
-
-    for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
-        node!=description.Nodes().end();
-        ++node) {
-      // The last node does not have a pathWayId set, since we are not going anywhere from the target node!
-      if (!node->HasPathWay()) {
-        break;
-      }
-
-      RouteDescription::NameDescriptionRef originDescription;
-      RouteDescription::NameDescriptionRef targetDescription;
-      WayRef                               way=wayMap[node->GetPathWayId()];
-
-      if (lastInterestingWay.Valid()) {
-        // We didn't change street name and ref, so we do not create a new entry...
-        if (lastInterestingWay->GetName()==way->GetName() &&
-            lastInterestingWay->GetRefName()==way->GetRefName()) {
-          continue;
-        }
-
-        // We skip steps where street does not have any names and silently
-        // assume they still have the old name (currently this happens for
-        // motorway links that no have a name.
-        if (way->GetName().empty() &&
-            way->GetRefName().empty()) {
-          continue;
-        }
-
-        // If the ref name is still the same but the way name changes and the new way is a bridge
-        // we assume that the name changed just because of the bridge and do not see this as
-        // relevant name change.
-        // TODO: Check if this is because of some import error
-        if (lastInterestingWay->GetName().empty() &&
-            !way->GetName().empty() &&
-            lastInterestingWay->GetRefName()==way->GetRefName() &&
-            way->IsBridge()) {
-          continue;
-        }
-
-        originDescription=new RouteDescription::NameDescription(lastInterestingWay->GetName(),
-                                                                lastInterestingWay->GetRefName());
-      }
-
-      targetDescription=new RouteDescription::NameDescription(way->GetName(),
-                                                              way->GetRefName());
-
-
-      node->AddDescription(RouteDescription::WAY_NAME_CHANGED_DESC,
-                           new RouteDescription::NameChangedDescription(originDescription,
-                                                                        targetDescription));
-      lastInterestingWay=way;
+                           nameDesc);
     }
 
     return true;
