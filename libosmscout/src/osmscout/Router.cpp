@@ -340,16 +340,6 @@ namespace osmscout {
     }
   }
 
-  void RoutePostprocessor::CrossingWaysPostprocessor::AddMotorwayType(TypeId type)
-  {
-    motorwayTypes.insert(type);
-  }
-
-  void RoutePostprocessor::CrossingWaysPostprocessor::AddMotorwayLinkType(TypeId type)
-  {
-    motorwayLinkTypes.insert(type);
-  }
-
   bool RoutePostprocessor::CrossingWaysPostprocessor::Process(const RoutingProfile& profile,
                                                               RouteDescription& description,
                                                               Database& database)
@@ -715,14 +705,17 @@ namespace osmscout {
     lastName=dynamic_cast<RouteDescription::NameDescription*>(lastNode->GetDescription(RouteDescription::WAY_NAME_DESC));
     nextName=dynamic_cast<RouteDescription::NameDescription*>(node->GetDescription(RouteDescription::WAY_NAME_DESC));
 
-    RouteDescription::DescriptionRef     desc=node->GetDescription(RouteDescription::DIRECTION_DESC);
-    RouteDescription::DirectionDescriptionRef turnDesc=dynamic_cast<RouteDescription::DirectionDescription*>(desc.Get());
+    RouteDescription::DescriptionRef          desc=node->GetDescription(RouteDescription::DIRECTION_DESC);
+    RouteDescription::DirectionDescriptionRef directionDesc=dynamic_cast<RouteDescription::DirectionDescription*>(desc.Get());
 
-    if (lastName->GetName()==nextName->GetName() &&
+    if (lastName.Valid() &&
+        nextName.Valid() &&
+        directionDesc.Valid() &&
+        lastName->GetName()==nextName->GetName() &&
         lastName->GetRef()==nextName->GetRef()) {
-      if (turnDesc->GetCurve()!=RouteDescription::DirectionDescription::slightlyLeft &&
-          turnDesc->GetCurve()!=RouteDescription::DirectionDescription::straightOn &&
-          turnDesc->GetCurve()!=RouteDescription::DirectionDescription::slightlyRight) {
+      if (directionDesc->GetCurve()!=RouteDescription::DirectionDescription::slightlyLeft &&
+          directionDesc->GetCurve()!=RouteDescription::DirectionDescription::straightOn &&
+          directionDesc->GetCurve()!=RouteDescription::DirectionDescription::slightlyRight) {
 
           node->AddDescription(RouteDescription::TURN_DESC,
                                new RouteDescription::TurnDescription());
@@ -730,7 +723,8 @@ namespace osmscout {
           return true;
       }
     }
-    else if (turnDesc->GetCurve()!=RouteDescription::DirectionDescription::straightOn) {
+    else if (directionDesc.Valid() &&
+        directionDesc->GetCurve()!=RouteDescription::DirectionDescription::straightOn) {
 
       node->AddDescription(RouteDescription::TURN_DESC,
                            new RouteDescription::TurnDescription());

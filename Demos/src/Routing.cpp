@@ -492,15 +492,7 @@ int main(int argc, char* argv[])
   postprocessors.push_back(new osmscout::RoutePostprocessor::StartPostprocessor("Start"));
   postprocessors.push_back(new osmscout::RoutePostprocessor::TargetPostprocessor("Target"));
   postprocessors.push_back(new osmscout::RoutePostprocessor::WayNamePostprocessor());
-
-  osmscout::RoutePostprocessor::CrossingWaysPostprocessor *crossingWaysProcessor=new osmscout::RoutePostprocessor::CrossingWaysPostprocessor();
-
-  crossingWaysProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway"));
-  crossingWaysProcessor->AddMotorwayLinkType(typeConfig->GetWayTypeId("highway_motorway_link"));
-  crossingWaysProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_trunk"));
-  crossingWaysProcessor->AddMotorwayLinkType(typeConfig->GetWayTypeId("highway_trunk_link"));
-  postprocessors.push_back(crossingWaysProcessor);
-
+  postprocessors.push_back(new osmscout::RoutePostprocessor::CrossingWaysPostprocessor());
   postprocessors.push_back(new osmscout::RoutePostprocessor::DirectionPostprocessor());
 
   osmscout::RoutePostprocessor::InstructionPostprocessor *instructionProcessor=new osmscout::RoutePostprocessor::InstructionPostprocessor();

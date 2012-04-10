@@ -125,10 +125,6 @@ namespace osmscout {
     OSMSCOUT_API class CrossingWaysPostprocessor : public Postprocessor
     {
     private:
-      OSMSCOUT_HASHSET<TypeId> motorwayTypes;
-      OSMSCOUT_HASHSET<TypeId> motorwayLinkTypes;
-
-    private:
       void AddCrossingWaysDescriptions(RouteDescription::CrossingWaysDescription* description,
                                        const RouteDescription::Node& node,
                                        const WayRef& originWay,
@@ -139,9 +135,6 @@ namespace osmscout {
       bool Process(const RoutingProfile& profile,
                    RouteDescription& description,
                    Database& database);
-
-      void AddMotorwayType(TypeId type);
-      void AddMotorwayLinkType(TypeId type);
     };
 
     /**
