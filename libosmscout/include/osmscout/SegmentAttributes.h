@@ -35,13 +35,14 @@ namespace osmscout {
   {
   private:
     // Attribute availability flags (for optimized attribute storage)
-    const static uint16_t hasGrade        = 1 <<  9; //! We have grade information stored on disk
-    const static uint16_t hasMaxSpeed     = 1 << 10; //! We have maximum speed information stored on disk
-    const static uint16_t hasTags         = 1 << 11; //! We have additional tags stored on disk
-    const static uint16_t hasName         = 1 << 12; //! We have a name
-    const static uint16_t hasRef          = 1 << 13; //! We have reference name
-    const static uint16_t hasWidth        = 1 << 14; //! We have width
-    const static uint16_t hasLayer        = 1 << 15; //! We have optional layer information
+    const static uint16_t hasName         = 1 <<  8; //! We have a name
+    const static uint16_t hasRef          = 1 <<  9; //! We have reference name
+    const static uint16_t hasHouseNr      = 1 << 10; //! We have a house number
+    const static uint16_t hasLayer        = 1 << 11; //! We have optional layer information
+    const static uint16_t hasWidth        = 1 << 12; //! We have width
+    const static uint16_t hasMaxSpeed     = 1 << 13; //! We have maximum speed information
+    const static uint16_t hasGrade        = 1 << 14; //! We have grade information
+    const static uint16_t hasTags         = 1 << 15; //! We have additional tags
 
   public:
     // Common flags (Area & Way)
@@ -49,7 +50,6 @@ namespace osmscout {
     const static uint16_t hasAccess       = 1 <<  1; //! We do have access rights to this way/area
 
     // Area flags
-    const static uint16_t hasHouseNr      = 1 <<  2; //! We have a house number
 
     // Way flags
     const static uint16_t isBridge        = 1 <<  2; //! We are a bridge
