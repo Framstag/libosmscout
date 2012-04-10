@@ -24,6 +24,7 @@
 
 #include <osmscout/Database.h>
 #include <osmscout/Router.h>
+#include <osmscout/RoutePostprocessor.h>
 
 //#define POINTS_DEBUG
 //#define ROUTE_DEBUG

@@ -51,6 +51,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/Route.cpp \
                         osmscout/RouteData.cpp \
                         osmscout/RouteNode.cpp \
+                        osmscout/RoutePostprocessor.cpp \
                         osmscout/RoutingProfile.cpp \
                         osmscout/Database.cpp \
                         osmscout/Router.cpp

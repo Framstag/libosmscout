@@ -32,6 +32,7 @@
 
 #include <osmscout/Database.h>
 #include <osmscout/Router.h>
+#include <osmscout/RoutePostprocessor.h>
 #include <osmscout/StyleConfig.h>
 #include <osmscout/TypeConfig.h>
 
