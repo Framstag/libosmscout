@@ -123,10 +123,12 @@ std::string Destring(const char* str)
 
 	void OST();
 	void TYPES();
+	void TAGS();
 	void TYPE();
 	void TYPEKINDS(unsigned char& types);
 	void CONDITION(Condition*& condition);
 	void TYPEOPTIONS(TypeInfo& typeInfo);
+	void TAG();
 	void ANDCOND(Condition*& condition);
 	void BOOLCOND(Condition*& condition);
 	void BINARYCOND(Condition*& condition);

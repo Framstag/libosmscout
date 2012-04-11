@@ -146,8 +146,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 33;
-	noSym = 33;
+	maxT = 35;
+	noSym = 35;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
@@ -167,20 +167,22 @@ void Scanner::Init() {
 	keywords.set("TYPE", 7);
 	keywords.set("OR", 11);
 	keywords.set("OPTIONS", 12);
-	keywords.set("AND", 13);
-	keywords.set("IN", 17);
-	keywords.set("EXISTS", 21);
-	keywords.set("NODE", 22);
-	keywords.set("WAY", 23);
-	keywords.set("AREA", 24);
-	keywords.set("RELATION", 25);
-	keywords.set("ROUTE", 26);
-	keywords.set("INDEX", 27);
-	keywords.set("CONSUME_CHILDREN", 28);
-	keywords.set("OPTIMIZE_LOW_ZOOM", 29);
-	keywords.set("IGNORE", 30);
-	keywords.set("MULTIPOLYGON", 31);
-	keywords.set("PIN_WAY", 32);
+	keywords.set("TAGS", 13);
+	keywords.set("TAG", 14);
+	keywords.set("AND", 15);
+	keywords.set("IN", 19);
+	keywords.set("EXISTS", 23);
+	keywords.set("NODE", 24);
+	keywords.set("WAY", 25);
+	keywords.set("AREA", 26);
+	keywords.set("RELATION", 27);
+	keywords.set("ROUTE", 28);
+	keywords.set("INDEX", 29);
+	keywords.set("CONSUME_CHILDREN", 30);
+	keywords.set("OPTIMIZE_LOW_ZOOM", 31);
+	keywords.set("IGNORE", 32);
+	keywords.set("MULTIPOLYGON", 33);
+	keywords.set("PIN_WAY", 34);
 
 
   tvalLength = 128;
@@ -364,24 +366,24 @@ Token* Scanner::NextToken() {
 			{t->kind = 10; break;}
 		case 9:
 			case_9:
-			{t->kind = 15; break;}
+			{t->kind = 17; break;}
 		case 10:
 			case_10:
-			{t->kind = 16; break;}
-		case 11:
 			{t->kind = 18; break;}
-		case 12:
-			{t->kind = 19; break;}
-		case 13:
+		case 11:
 			{t->kind = 20; break;}
+		case 12:
+			{t->kind = 21; break;}
+		case 13:
+			{t->kind = 22; break;}
 		case 14:
 			recEnd = pos; recKind = 8;
 			if (ch == '=') {AddCh(); goto case_9;}
 			else {t->kind = 8; break;}
 		case 15:
-			recEnd = pos; recKind = 14;
+			recEnd = pos; recKind = 16;
 			if (ch == '=') {AddCh(); goto case_10;}
-			else {t->kind = 14; break;}
+			else {t->kind = 16; break;}
 
   }
   AppendVal(t);

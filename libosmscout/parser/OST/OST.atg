@@ -37,7 +37,7 @@ COMMENTS FROM "//" TO eol
 IGNORE '\t' + '\r' + '\n'
 
 PRODUCTIONS
-  OST         = SYNC "OST" [TYPES] "END".
+  OST         = SYNC "OST" [TYPES] [TAGS] "END".
   TYPES       = SYNC "TYPES" TYPE {TYPE}.
   TYPE        = (.
                   Condition     *condition=NULL;
@@ -66,6 +66,22 @@ PRODUCTIONS
                   config.AddTypeInfo(typeInfo);
                 .)
                 .
+  TAGS        = SYNC "TAGS" TAG {TAG}.
+  TAG         = SYNC "TAG"
+                string
+                (.
+                   std::string tagName=Destring(t->val);
+                
+                   if (tagName.empty()) {
+                     std::string e="Empty tags are not allowed";
+
+                     SemErr(e.c_str());
+                   }
+                   else {
+                     config.RegisterTagForExternalUse(tagName);
+                   }
+                .)
+                .              
 
   CONDITION<Condition*& condition>
               = (.
