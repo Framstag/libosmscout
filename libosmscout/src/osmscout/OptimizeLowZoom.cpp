@@ -233,8 +233,7 @@ namespace osmscout
     return true;
   }
 
-  bool OptimizeLowZoom::GetWays(const StyleConfig& styleConfig,
-                                double lonMin, double latMin,
+  bool OptimizeLowZoom::GetWays(double lonMin, double latMin,
                                 double lonMax, double latMax,
                                 size_t maxWayCount,
                                 std::vector<TypeId>& wayTypes,

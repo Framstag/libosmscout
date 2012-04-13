@@ -464,8 +464,7 @@ namespace osmscout {
 
     if (parameter.GetUseLowZoomOptimization() &&
         optimizeLowZoom.HasOptimizations(magnification)) {
-      optimizeLowZoom.GetWays(styleConfig,
-                              lonMin,
+      optimizeLowZoom.GetWays(lonMin,
                               latMin,
                               lonMax,
                               latMax,

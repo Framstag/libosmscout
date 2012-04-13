@@ -79,8 +79,7 @@ namespace osmscout {
                     double maxlat,
                     std::vector<FileOffset>& offsets) const;
 
-    bool GetWays(const StyleConfig& styleConfig,
-                 double lonMin, double latMin,
+    bool GetWays(double lonMin, double latMin,
                  double lonMax, double latMax,
                  size_t maxWayCount,
                  std::vector<TypeId>& wayTypes,
