@@ -36,6 +36,7 @@
 #include <osmscout/import/GenTypeDat.h>
 
 #include <osmscout/import/Preprocess.h>
+#include <osmscout/import/RenumberRawDats.h>
 
 #include <osmscout/import/GenTurnRestrictionDat.h>
 
@@ -62,7 +63,7 @@
 namespace osmscout {
 
   static const size_t defaultStartStep=1;
-  static const size_t defaultEndStep=20;
+  static const size_t defaultEndStep=21;
 
   ImportParameter::ImportParameter()
    : typefile("map.ost"),
@@ -436,65 +437,68 @@ namespace osmscout {
     modules.push_back(new Preprocess());
 
     /* 3 */
+    modules.push_back(new RenumberRawDatsGenerator());
+
+    /* 4 */
     modules.push_back(new NumericIndexGenerator<Id,RawNode>("Generating 'rawnode.idx'",
                                                             AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                             "rawnodes.dat"),
                                                             AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                             "rawnode.idx")));
-    /* 4 */
+    /* 5 */
     modules.push_back(new NumericIndexGenerator<Id,RawWay>("Generating 'rawway.idx'",
                                                            AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                            "rawways.dat"),
                                                            AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                            "rawway.idx")));
-    /* 5 */
+    /* 6 */
     modules.push_back(new NumericIndexGenerator<Id,RawRelation>("Generating 'rawrel.idx'",
                                                                 AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                                 "rawrels.dat"),
                                                                 AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                                 "rawrel.idx")));
-    /* 6 */
-    modules.push_back(new RelationDataGenerator());
     /* 7 */
+    modules.push_back(new RelationDataGenerator());
+    /* 8 */
     modules.push_back(new NumericIndexGenerator<Id,Relation>("Generating 'relation.idx'",
                                                              AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                              "relations.dat"),
                                                              AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                              "relation.idx")));
-    /* 8 */
-    modules.push_back(new NodeDataGenerator());
     /* 9 */
+    modules.push_back(new NodeDataGenerator());
+    /* 10 */
     modules.push_back(new NumericIndexGenerator<Id,Node>("Generating 'node.idx'",
                                                          AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                          "nodes.dat"),
                                                          AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                          "node.idx")));
-    /* 10 */
+    /* 11 */
     modules.push_back(new TurnRestrictionDataGenerator());
 
-    /* 11 */
-    modules.push_back(new WayDataGenerator());
     /* 12 */
+    modules.push_back(new WayDataGenerator());
+    /* 13 */
     modules.push_back(new NumericIndexGenerator<Id,Way>("Generating 'way.idx'",
                                                         AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                         "ways.dat"),
                                                         AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                         "way.idx")));
-    /* 13 */
-    modules.push_back(new AreaAreaIndexGenerator());
     /* 14 */
-    modules.push_back(new AreaWayIndexGenerator());
+    modules.push_back(new AreaAreaIndexGenerator());
     /* 15 */
-    modules.push_back(new AreaNodeIndexGenerator());
+    modules.push_back(new AreaWayIndexGenerator());
     /* 16 */
-    modules.push_back(new CityStreetIndexGenerator());
+    modules.push_back(new AreaNodeIndexGenerator());
     /* 17 */
-    modules.push_back(new WaterIndexGenerator());
+    modules.push_back(new CityStreetIndexGenerator());
     /* 18 */
-    modules.push_back(new OptimizeLowZoomGenerator());
+    modules.push_back(new WaterIndexGenerator());
     /* 19 */
-    modules.push_back(new RouteDataGenerator());
+    modules.push_back(new OptimizeLowZoomGenerator());
     /* 20 */
+    modules.push_back(new RouteDataGenerator());
+    /* 21 */
     modules.push_back(new NumericIndexGenerator<Id,RouteNode>("Generating 'route.idx'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               "route.dat"),
