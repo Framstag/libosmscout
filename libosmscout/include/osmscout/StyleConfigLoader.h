@@ -21,7 +21,6 @@
 */
 
 #include <osmscout/StyleConfig.h>
-#include <osmscout/TypeConfig.h>
 
 namespace osmscout {
 
