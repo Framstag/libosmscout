@@ -22,7 +22,7 @@
 
 #include <vector>
 
-#include <osmscout/StyleConfig.h>
+#include <osmscout/TypeSet.h>
 
 #include <osmscout/Util.h>
 

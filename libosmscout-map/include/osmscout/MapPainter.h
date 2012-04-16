@@ -195,7 +195,7 @@ namespace osmscout {
     };
 
   public:
-    struct OSMSCOUT_API WayData
+    struct OSMSCOUT_MAP_API WayData
     {
       ObjectRef               ref;
       const SegmentAttributes *attributes;     //! Attributes of line segment

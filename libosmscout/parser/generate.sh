@@ -16,18 +16,3 @@ cp OST/Scanner.cpp ../src/osmscout/ost
 
 cp OST/Parser.h ../include/osmscout/ost/
 cp OST/Parser.cpp ../src/osmscout/ost
-
-# OSS (aka OSMScout style)
-$COCO OSS/OSS.atg -namespace osmscout:oss -frames OSS -o OSS
-
-sed -i s/\(L\"/\(\"/g OSS/Scanner.cpp
-sed -i s/L\'/\'/g OSS/Scanner.cpp
-sed -i s/wchar_t/char/g OSS/Scanner.cpp
-
-sed -i s/L\"/\"/g OSS/Parser.cpp
-
-cp OSS/Scanner.h ../include/osmscout/oss/
-cp OSS/Scanner.cpp ../src/osmscout/oss
-
-cp OSS/Parser.h ../include/osmscout/oss/
-cp OSS/Parser.cpp ../src/osmscout/oss

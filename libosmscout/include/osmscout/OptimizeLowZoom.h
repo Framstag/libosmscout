@@ -23,7 +23,8 @@
 #include <set>
 #include <string>
 
-#include <osmscout/StyleConfig.h>
+#include <osmscout/TypeSet.h>
+
 #include <osmscout/Way.h>
 
 #include <osmscout/util/FileScanner.h>

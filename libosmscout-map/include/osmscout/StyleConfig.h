@@ -22,16 +22,19 @@
 
 #include <vector>
 
+#include <osmscout/private/MapImportExport.h>
+
 #include <osmscout/Types.h>
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeSet.h>
+
 
 namespace osmscout {
 
   /**
    * Ways can have a line style
    */
-  class OSMSCOUT_API LineStyle
+  class OSMSCOUT_MAP_API LineStyle
   {
   private:
     double              lineR;
@@ -188,7 +191,7 @@ namespace osmscout {
   /**
    * Areas can have a fill style, filling the area with one color
    */
-  class OSMSCOUT_API FillStyle
+  class OSMSCOUT_MAP_API FillStyle
   {
   public:
     enum Style {
@@ -314,7 +317,7 @@ namespace osmscout {
     Nodes, ways and areas can have a label style for drawing text. Text can be formatted
     in different ways.
    */
-  class OSMSCOUT_API LabelStyle
+  class OSMSCOUT_MAP_API LabelStyle
   {
   public:
     enum Style {
@@ -469,7 +472,7 @@ namespace osmscout {
     iconic image, most of the time simple geometric forms lice circles, crosses and
     similar.
    */
-  class OSMSCOUT_API SymbolStyle
+  class OSMSCOUT_MAP_API SymbolStyle
   {
   public:
     enum Style {
@@ -540,7 +543,7 @@ namespace osmscout {
   /**
     IconStyle is for define drawing of external images as icons for nodes and areas
     */
-  class OSMSCOUT_API IconStyle
+  class OSMSCOUT_MAP_API IconStyle
   {
   private:
     size_t      id;       //! Internal id for fast lookup. 0 == no id defined (yet), max(size_t) == error
@@ -578,7 +581,7 @@ namespace osmscout {
   /**
    * A complete style definition
    */
-  class OSMSCOUT_API StyleConfig
+  class OSMSCOUT_MAP_API StyleConfig
   {
   private:
     TypeConfig                *typeConfig;

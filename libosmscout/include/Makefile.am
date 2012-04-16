@@ -19,12 +19,8 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/CoreFeatures.h \
                         osmscout/Types.h \
                         osmscout/Util.h \
-                        osmscout/StyleConfig.h \
-                        osmscout/StyleConfigLoader.h \
                         osmscout/TypeConfig.h \
                         osmscout/TypeSet.h \
-                        osmscout/oss/Scanner.h \
-                        osmscout/oss/Parser.h \
                         osmscout/ost/Scanner.h \
                         osmscout/ost/Parser.h \
                         osmscout/TypeConfigLoader.h \
