@@ -28,8 +28,8 @@ namespace osmscout {
   {
   private:
     Id     id;
-    double lon;
     double lat;
+    double lon;
 
   public:
     inline Point()
@@ -37,13 +37,21 @@ namespace osmscout {
       // no code
     }
 
-    inline void SetId(Id id)
+    inline Point(Id id,
+                 double lat,
+                 double lon)
+    : id(id),
+      lat(lat),
+      lon(lon)
     {
-      this->id=id;
+      // no code
     }
 
-    inline void SetCoordinates(double lat, double lon)
+    inline void Set(Id id,
+                    double lat,
+                    double lon)
     {
+      this->id=id;
       this->lat=lat;
       this->lon=lon;
     }
@@ -53,14 +61,14 @@ namespace osmscout {
       return id;
     }
 
-    inline double GetLon() const
-    {
-      return lon;
-    }
-
     inline double GetLat() const
     {
       return lat;
+    }
+
+    inline double GetLon() const
+    {
+      return lon;
     }
   };
 }

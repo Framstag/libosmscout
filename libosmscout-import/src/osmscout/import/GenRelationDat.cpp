@@ -125,16 +125,13 @@ namespace osmscout {
         return false;
       }
 
-      Point          point;
       Relation::Role role;
-
-      point.SetId(node->GetId());
-      point.SetCoordinates(node->GetLat(),
-                           node->GetLon());
 
       role.role=roleName;
       role.ring=0;
-      role.nodes.push_back(point);
+      role.nodes.push_back(Point(node->GetId(),
+                           node->GetLat(),
+                           node->GetLon()));
 
       role.attributes.type=node->GetType();
 
@@ -183,9 +180,9 @@ namespace osmscout {
       for (size_t i=0; i<nodes.size(); i++) {
         Point point;
 
-        point.SetId(nodes[i]->GetId());
-        point.SetCoordinates(nodes[i]->GetLat(),
-                             nodes[i]->GetLon());
+        point.Set(nodes[i]->GetId(),
+                  nodes[i]->GetLat(),
+                  nodes[i]->GetLon());
 
         role.nodes.push_back(point);
       }

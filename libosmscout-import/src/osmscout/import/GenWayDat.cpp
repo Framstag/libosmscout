@@ -849,8 +849,9 @@ namespace osmscout {
             break;
           }
 
-          way.nodes[n].SetId(node->second->GetId());
-          way.nodes[n].SetCoordinates(node->second->GetLat(),node->second->GetLon());
+          way.nodes[n].Set(node->second->GetId(),
+                           node->second->GetLat(),
+                           node->second->GetLon());
         }
 
         if (!success) {

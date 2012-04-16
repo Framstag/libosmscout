@@ -159,9 +159,9 @@ namespace osmscout {
         scanner.ReadNumber(latValue);
         scanner.ReadNumber(lonValue);
 
-        nodes[i].SetId(minId+id);
-        nodes[i].SetCoordinates((minLat+latValue)/conversionFactor-90.0,
-                                (minLon+lonValue)/conversionFactor-180.0);
+        nodes[i].Set(minId+id,
+                     (minLat+latValue)/conversionFactor-90.0,
+                     (minLon+lonValue)/conversionFactor-180.0);
       }
     }
 

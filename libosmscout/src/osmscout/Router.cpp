@@ -874,13 +874,9 @@ namespace osmscout {
         if (iter==data.Entries().begin()) {
           for (size_t i=0; i<w->nodes.size(); i++) {
             if (w->nodes[i].GetId()==iter->GetCurrentNodeId()) {
-              Point point;
-
-              point.SetId(w->nodes[i].GetId());
-              point.SetCoordinates(w->nodes[i].GetLat(),
-                                   w->nodes[i].GetLon());
-
-              points.push_back(point);
+              points.push_back(Point(w->nodes[i].GetId(),
+                                     w->nodes[i].GetLat(),
+                                     w->nodes[i].GetLon()));
               break;
             }
           }
@@ -891,9 +887,9 @@ namespace osmscout {
           if (w->nodes[i].GetId()==iter->GetTargetNodeId()) {
             Point point;
 
-            point.SetId(w->nodes[i].GetId());
-            point.SetCoordinates(w->nodes[i].GetLat(),
-                                 w->nodes[i].GetLon());
+            point.Set(w->nodes[i].GetId(),
+                      w->nodes[i].GetLat(),
+                      w->nodes[i].GetLon());
 
             points.push_back(point);
             break;

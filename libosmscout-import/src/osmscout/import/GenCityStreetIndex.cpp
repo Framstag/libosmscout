@@ -889,11 +889,9 @@ namespace osmscout {
       location.reference.Set(city->GetId(),refNode);
       location.name=name;
 
-      Point node;
-
-      node.SetId(city->GetId());
-      node.SetCoordinates(city->GetLat(),
-                          city->GetLon());
+      Point node(city->GetId(),
+                 city->GetLat(),
+                 city->GetLon());
 
       AddLocationToArea(rootArea,location,node);
     }
