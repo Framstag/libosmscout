@@ -23,8 +23,7 @@
 
 #include <osmscout/Way.h>
 
-#include <osmscout/Util.h>
-
+#include <osmscout/util/File.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Projection.h>
 #include <osmscout/util/String.h>

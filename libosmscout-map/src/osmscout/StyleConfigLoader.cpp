@@ -25,7 +25,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <osmscout/Util.h>
+#include <osmscout/util/File.h>
 
 #include <osmscout/oss/Parser.h>
 #include <osmscout/oss/Scanner.h>

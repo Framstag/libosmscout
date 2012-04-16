@@ -22,7 +22,7 @@
 #include <cassert>
 #include <iostream>
 
-#include <osmscout/Util.h>
+#include <osmscout/util/File.h>
 #include <osmscout/util/StopClock.h>
 
 namespace osmscout {

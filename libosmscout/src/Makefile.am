@@ -5,6 +5,7 @@ lib_LTLIBRARIES = libosmscout.la
 
 libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/util/Cache.cpp \
+                        osmscout/util/File.cpp \
                         osmscout/util/FileScanner.cpp \
                         osmscout/util/FileWriter.cpp \
                         osmscout/util/Geometry.cpp \

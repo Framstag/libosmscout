@@ -27,6 +27,7 @@
 #include <osmscout/Util.h>
 
 #include <osmscout/util/Cache.h>
+#include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/Reference.h>
 #include <osmscout/util/String.h>

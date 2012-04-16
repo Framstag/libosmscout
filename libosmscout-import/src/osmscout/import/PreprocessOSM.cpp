@@ -29,8 +29,7 @@
 
 #include <libxml/parser.h>
 
-#include <osmscout/Util.h>
-
+#include <osmscout/util/File.h>
 #include <osmscout/util/String.h>
 
 #include <osmscout/import/RawNode.h>

@@ -25,8 +25,7 @@
 #include <osmscout/Relation.h>
 #include <osmscout/Way.h>
 
-#include <osmscout/Util.h>
-
+#include <osmscout/util/File.h>
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/Geometry.h>

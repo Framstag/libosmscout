@@ -34,8 +34,7 @@
   #include <zlib.h>
 #endif
 
-#include <osmscout/Util.h>
-
+#include <osmscout/util/File.h>
 #include <osmscout/util/String.h>
 
 #define MAX_BLOCK_HEADER_SIZE (64*1024)

@@ -201,13 +201,12 @@ namespace osmscout {
                                         Progress& progress,
                                         const TypeConfig& typeConfig)
   {
-    return true;
+    //return true;
 
-    /*
     if (!RenumberRawNodes(parameter,
                           progress)) {
       return false;
-    }*/
+    }
 
     return true;
   }

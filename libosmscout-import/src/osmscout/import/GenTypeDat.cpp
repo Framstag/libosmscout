@@ -19,8 +19,7 @@
 
 #include <osmscout/import/GenTypeDat.h>
 
-#include <osmscout/Util.h>
-
+#include <osmscout/util/File.h>
 #include <osmscout/util/FileWriter.h>
 
 namespace osmscout {

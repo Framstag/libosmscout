@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_UTIL_H
-#define OSMSCOUT_UTIL_H
+#ifndef OSMSCOUT_UTIL_FILE_H
+#define OSMSCOUT_UTIL_FILE_H
 
 /*
   This source is part of the libosmscout library
@@ -20,48 +20,23 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <set>
 #include <string>
 
 #include <osmscout/private/CoreImportExport.h>
 
-#include <osmscout/system/Types.h>
-
 namespace osmscout {
 
-  extern OSMSCOUT_API void GetKeysForName(const std::string& name, std::set<uint32_t>& keys);
+  /**
+   * Return the size of the file in the parameter size. Returns true, if the file size
+   * could be calculated, else false.
+   */
+  extern OSMSCOUT_API bool GetFileSize(const std::string& filename, long& size);
 
-  extern OSMSCOUT_API bool EncodeNumber(unsigned long number,
-                                        size_t bufferLength,
-                                        char* buffer,
-                                        size_t& bytes);
-
-
-  template<typename N>
-  bool DecodeNumber(const char* buffer, N& number, size_t& bytes)
-  {
-    N mult=0;
-
-    number=0;
-    bytes=1;
-
-    // TODO: Assure that we do not read past the end of the buffer
-    while (true) {
-      N add=((*buffer) & 0x7f) << mult;
-
-      number=number | add;
-
-      if (((*buffer) & 0x80)==0) {
-        return true;
-      }
-
-      bytes++;
-      buffer++;
-      mult+=7;
-    }
-
-    return true;
-  }
+  /**
+   * Append the filename 'name' to the directory name 'name' correctly adding directory
+   * delimiter if necessary.
+   */
+  extern OSMSCOUT_API std::string AppendFileToDir(const std::string& dir, const std::string& file);
 }
 
 #endif
