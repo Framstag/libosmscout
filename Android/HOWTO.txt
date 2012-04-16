@@ -1,0 +1,63 @@
+# 
+# This How-To describes the needed software, environment settings and build
+# procedure to get the libosmscout library built for Android. 
+# 
+# Please report any bug, feedback or comments to the libosmscout development 
+# mailing list:
+#
+#     https://lists.sourceforge.net/lists/listinfo/libosmscout-development
+#
+# WARNING!! Please read the "Current Android OsmScoutLib limitations" chapter
+# at the end of this document before developing apps using the library.
+#
+ 
+
+1. Build environment and used software
+
+  - Linux (not tested yet on other platforms).
+  - Android SDK r17 (developer.android.com/sdk/index.html).
+  - Android NDK r17 (developer.android.com/sdk/ndk/index.html).
+  - Eclipse IDE 3.7.0 (www.eclipse.org/downloads).
+  - Eclipse ADT Plugin v17.0.0 (developer.android.com/sdk/eclipse-adt.html).
+
+
+2. Environment variables 
+
+In order to run the build scripts, set the ANDROID_NDK_PATH environment variable
+to the Android NDK installation directory. Add also this directory to the
+executable search PATH environmental variable.
+
+
+3. Build the OsmScout JNI shared library
+
+Go to the “libosmscout/Android/OsmScoutLib/jni” directory and run the “build.sh”
+script. This script will copy the configuration headers files (Config.h,
+CoreFeatures.h and MapFeatures.h), build the libosmscout-arm static library and
+libosmscout-jni shared library. At the end of the build process, the 
+“libosmscout/Android/OsmScoutLib/libs/armeabi” directory shall contain both the
+"libgnustl_shared.so" and "libosmscout-jni.so" shared libraries.
+
+
+4. Importing the OsmScoutLib project into Eclipse workspace
+
+On Eclipse IDE, import the OsmScoutLib project into your workspace via the
+"File>>Import" menu, import source "General>>Existing Projects into Workspace",
+select "libosmscout/Android" as root directory and choose the "OsmScoutLib" 
+project to import. You can also import the "OsmScoutViewer" demo project.
+
+
+5. Setting up the User's Project properties
+
+Open the "Project Properties" window of your Android App project, select the
+"Android" tab and add the "OsmScoutLib" to the list of library projects.
+
+
+6. Current Android OsmScoutLib limitations
+
+The most relevant limitation of the actual implementation of the OsmScout lib
+under Android is that the number of objects of each kind is limited to one,
+this is, even if you create more that one OsmScout library object of a kind
+(Database, MapData, StyleConfig, etc.), they will all be refering to the same
+single object. This limitation will be overcomed in the near future.
+
+
