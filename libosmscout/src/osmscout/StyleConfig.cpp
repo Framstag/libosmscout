@@ -475,10 +475,10 @@ namespace osmscout {
       }
     }
 
-    nodeTypeSets.resize(maxLevel+1);
+    nodeTypeSets.reserve(maxLevel);
 
-    for (size_t type=0; type<nodeTypeSets.size(); type++) {
-      nodeTypeSets[type].Reset(typeConfig->GetMaxTypeId()+1);
+    for (size_t type=0; type<maxLevel; type++) {
+      nodeTypeSets.push_back(TypeSet(*typeConfig));
     }
 
     for (size_t level=0;
@@ -529,9 +529,7 @@ namespace osmscout {
       for (std::set<size_t>::const_iterator prio=prios.begin();
           prio!=prios.end();
           ++prio) {
-        TypeSet typeSet;
-
-        typeSet.Reset(typeConfig->GetMaxTypeId()+1);
+        TypeSet typeSet(*typeConfig);
 
         for (size_t i=0; i<wayLineStyles.size(); i++) {
           if (wayPrio[i]==*prio &&
@@ -553,10 +551,10 @@ namespace osmscout {
       maxLevel=std::max(maxLevel,MagToLevel(areaMag[i]));
     }
 
-    areaTypeSets.resize(maxLevel+1);
+    areaTypeSets.reserve(maxLevel);
 
-    for (size_t i=0; i<areaTypeSets.size(); i++) {
-      areaTypeSets[i].Reset(typeConfig->GetMaxTypeId()+1);
+    for (size_t i=0; i<maxLevel; i++) {
+      areaTypeSets.push_back(TypeSet(*typeConfig));
     }
 
     for (size_t level=0;

@@ -25,6 +25,7 @@
 
 // Type and style sheet configuration
 #include <osmscout/TypeConfig.h>
+#include <osmscout/TypeSet.h>
 
 // Datafiles
 #include <osmscout/NodeDataFile.h>

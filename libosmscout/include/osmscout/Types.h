@@ -55,53 +55,6 @@ namespace osmscout {
    magBlock     = 2*2*2*2*2*2*1024  // 16
   };
 
-  class TypeSet
-  {
-  private:
-    std::vector<bool> types;
-
-  public:
-    TypeSet()
-    {
-      // no code
-    }
-
-    TypeSet(const TypeSet& other)
-    {
-      this->types=other.types;
-    }
-
-    void Reset(size_t numberOfTypes)
-    {
-      types.resize(numberOfTypes,false);
-    }
-
-    void SetType(TypeId type)
-    {
-      types[type]=true;
-    }
-
-    void UnsetType(TypeId type)
-    {
-      types[type]=false;
-    }
-
-    bool IsTypeSet(TypeId type) const
-    {
-      return type<types.size() && types[type];
-    }
-
-    TypeSet& operator=(const TypeSet& other)
-    {
-      if (&other!=this) {
-        this->types=other.types;
-      }
-
-      return *this;
-    }
-  };
-
-
   /**
     Coordinates will be stored as unsigned long values in file.
     For the conversion the float value is shifted to positive

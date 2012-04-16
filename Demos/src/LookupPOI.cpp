@@ -35,7 +35,6 @@ int main(int argc, char* argv[])
   std::string            map;
   double                 latTop,latBottom,lonLeft,lonRight;
   std::list<std::string> typeNames;
-  osmscout::TypeSet      types;
 
   if (argc<6) {
     std::cerr << "LookupPOI <map directory> <lat_top> <lon_left> <lat_bottom> <lon_right> {type}" << std::endl;
@@ -82,7 +81,7 @@ int main(int argc, char* argv[])
   std::cout << "x";
   std::cout << "[" <<std::max(latTop,latBottom) << "," << std::max(lonLeft,lonRight) << "]" << std::endl;
 
-  types.Reset(database.GetTypeConfig()->GetMaxTypeId()+1);
+  osmscout::TypeSet types(*database.GetTypeConfig());
 
   for (std::list<std::string>::const_iterator name=typeNames.begin();
       name!=typeNames.end();

@@ -24,6 +24,7 @@
 
 #include <osmscout/Types.h>
 #include <osmscout/TypeConfig.h>
+#include <osmscout/TypeSet.h>
 
 namespace osmscout {
 

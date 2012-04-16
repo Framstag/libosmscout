@@ -22,6 +22,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/StyleConfig.cpp \
                         osmscout/StyleConfigLoader.cpp \
                         osmscout/TypeConfig.cpp \
+                        osmscout/TypeSet.cpp \
                         osmscout/oss/Scanner.cpp \
                         osmscout/oss/Parser.cpp \
                         osmscout/ost/Scanner.cpp \
