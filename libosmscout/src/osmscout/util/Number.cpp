@@ -17,10 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/Util.h>
-
-#include <cstdio>
-#include <cstdlib>
+#include <osmscout/util/Number.h>
 
 namespace osmscout {
 

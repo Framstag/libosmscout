@@ -24,7 +24,6 @@
 #include <osmscout/Database.h>
 #include <osmscout/MapPainterAgg.h>
 #include <osmscout/StyleConfigLoader.h>
-#include <osmscout/Util.h>
 
 #include <osmscout/util/StopClock.h>
 

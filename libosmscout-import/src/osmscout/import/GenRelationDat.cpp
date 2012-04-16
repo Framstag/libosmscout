@@ -26,7 +26,6 @@
 
 #include <osmscout/Relation.h>
 
-#include <osmscout/Util.h>
 #include <osmscout/util/Geometry.h>
 
 #include <osmscout/import/RawNode.h>

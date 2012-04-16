@@ -11,6 +11,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/util/Geometry.cpp \
                         osmscout/util/HashMap.cpp \
                         osmscout/util/HashSet.cpp \
+                        osmscout/util/Number.cpp \
                         osmscout/util/NumberSet.cpp \
                         osmscout/util/Progress.cpp \
                         osmscout/util/Projection.cpp \
@@ -19,7 +20,6 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/util/String.cpp \
                         osmscout/util/Transformation.cpp \
                         osmscout/Types.cpp \
-                        osmscout/Util.cpp \
                         osmscout/TypeConfig.cpp \
                         osmscout/TypeSet.cpp \
                         osmscout/ost/Scanner.cpp \

@@ -21,8 +21,6 @@
 
 #include <osmscout/DataFile.h>
 
-#include <osmscout/Util.h>
-
 #include <osmscout/util/StopClock.h>
 
 #include <osmscout/import/RawNode.h>

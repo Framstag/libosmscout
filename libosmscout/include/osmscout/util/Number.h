@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_UTIL_H
-#define OSMSCOUT_UTIL_H
+#ifndef OSMSCOUT_NUMBER_H
+#define OSMSCOUT_NUMBER_H
 
 /*
   This source is part of the libosmscout library
@@ -20,12 +20,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <set>
-#include <string>
-
 #include <osmscout/private/CoreImportExport.h>
 
-#include <osmscout/system/Types.h>
+#include <stddef.h>
 
 namespace osmscout {
 

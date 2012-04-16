@@ -25,8 +25,6 @@
 
 #include <osmscout/NumericIndex.h>
 
-#include <osmscout/Util.h>
-
 #include <osmscout/util/Cache.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/Reference.h>

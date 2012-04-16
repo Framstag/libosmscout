@@ -24,8 +24,6 @@
 
 #include <osmscout/TypeSet.h>
 
-#include <osmscout/Util.h>
-
 #include <osmscout/util/Cache.h>
 #include <osmscout/util/FileScanner.h>
 

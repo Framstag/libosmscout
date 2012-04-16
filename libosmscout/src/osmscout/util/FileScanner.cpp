@@ -36,7 +36,7 @@
   #include<io.h>
 #endif
 
-#include <osmscout/Util.h>
+#include <osmscout/util/Number.h>
 
 namespace osmscout {
 

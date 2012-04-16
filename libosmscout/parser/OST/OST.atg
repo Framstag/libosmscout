@@ -2,7 +2,6 @@
 #include <iostream>
 
 #include <osmscout/TypeConfig.h>
-#include <osmscout/Util.h>
 
 COMPILER OST
 

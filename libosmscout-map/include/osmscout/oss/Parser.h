@@ -26,7 +26,6 @@
 #include <sstream>
 
 #include <osmscout/TypeConfig.h>
-#include <osmscout/Util.h>
 
 #include <osmscout/util/String.h>
 

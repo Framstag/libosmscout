@@ -22,9 +22,6 @@
 #include <cstdio>
 #include <iostream>
 
-
-#include <osmscout/Util.h>
-
 #include <osmscout/util/String.h>
 
 #include <osmscout/import/Import.h>

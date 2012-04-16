@@ -29,7 +29,6 @@
 #include <cstdlib>
 
 #include <osmscout/LoaderPNG.h>
-#include <osmscout/Util.h>
 
 namespace osmscout {
 

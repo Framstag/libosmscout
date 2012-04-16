@@ -24,7 +24,6 @@
 #include <osmscout/Database.h>
 #include <osmscout/MapPainterSVG.h>
 #include <osmscout/StyleConfigLoader.h>
-#include <osmscout/Util.h>
 
 /*
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top

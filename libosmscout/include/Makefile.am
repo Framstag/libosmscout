@@ -10,6 +10,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/util/Geometry.h \
                         osmscout/util/HashMap.h \
                         osmscout/util/HashSet.h \
+                        osmscout/util/Number.h \
                         osmscout/util/NumberSet.h \
                         osmscout/util/Progress.h \
                         osmscout/util/Projection.h \
@@ -19,7 +20,6 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/util/Transformation.h \
                         osmscout/CoreFeatures.h \
                         osmscout/Types.h \
-                        osmscout/Util.h \
                         osmscout/TypeConfig.h \
                         osmscout/TypeSet.h \
                         osmscout/ost/Scanner.h \

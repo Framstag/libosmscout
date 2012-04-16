@@ -25,10 +25,9 @@
 #include <osmscout/ost/Parser.h>
 #include <osmscout/ost/Scanner.h>
 
-#include <osmscout/Util.h>
-
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
+#include <osmscout/util/Number.h>
 
 #include <iostream>
 namespace osmscout {
