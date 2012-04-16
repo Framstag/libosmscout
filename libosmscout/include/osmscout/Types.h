@@ -22,6 +22,8 @@
 
 #include <osmscout/private/CoreImportExport.h>
 
+#include <osmscout/CoreFeatures.h>
+
 #include <vector>
 
 #include <osmscout/system/Types.h>
@@ -29,10 +31,14 @@
 namespace osmscout {
 
   typedef int32_t  FileOffset;
+
+#if defined(OSMSCOUT_HAVE_UINT64_T)
+  typedef uint64_t Id;
+#else
   typedef uint32_t Id;
-  typedef uint32_t Page;
+#endif
+
   typedef uint16_t TypeId;
-  typedef uint16_t NodeCount;
 
   /**
     Named values for magnification values in the range 0..15.

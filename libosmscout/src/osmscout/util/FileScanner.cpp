@@ -525,6 +525,50 @@ namespace osmscout {
     return true;
   }
 
+#if defined(OSMSCOUT_HAVE_UINT64_T)
+  bool FileScanner::Read(uint64_t& number)
+  {
+    if (file==NULL || hasError) {
+      return false;
+    }
+
+    number=0;
+
+#if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
+    if (buffer!=NULL) {
+      if (offset+(FileOffset)sizeof(uint64_t)-1>=size) {
+        std::cerr << "Cannot read uint64_t beyond file end!" << std::endl;
+        hasError=true;
+        return false;
+      }
+
+      for (size_t i=0; i<sizeof(uint64_t); i++) {
+      number=number | (((unsigned char)buffer[offset+i]) << (i*8));
+      }
+
+      offset+=sizeof(uint64_t);
+
+      return true;
+    }
+#endif
+
+    unsigned char buffer[sizeof(uint64_t)];
+
+    hasError=fread(&buffer,sizeof(unsigned char),sizeof(uint64_t),file)!=sizeof(uint64_t);
+
+    if (hasError) {
+      std::cerr << "Cannot read uint64_t beyond file end!" << std::endl;
+      return false;
+    }
+
+    for (size_t i=0; i<sizeof(uint64_t); i++) {
+      number=number | (buffer[i] << (i*8));
+    }
+
+    return true;
+  }
+#endif
+
   bool FileScanner::Read(int8_t& number)
   {
     if (file==NULL || hasError) {
@@ -608,6 +652,75 @@ namespace osmscout {
 
     return true;
   }
+
+#if defined(OSMSCOUT_HAVE_UINT64_T)
+  bool FileScanner::ReadNumber(uint64_t& number)
+  {
+    if (file==NULL || hasError) {
+      return false;
+    }
+
+    number=0;
+
+#if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
+    if (buffer!=NULL) {
+      if (offset>=(FileOffset)size) {
+        std::cerr << "Cannot read uint64_t beyond file end!" << std::endl;
+        hasError=true;
+        return false;
+      }
+
+      size_t bytes;
+
+      if (DecodeNumber(&buffer[offset],number,bytes)) {
+        offset+=bytes;
+
+        return true;
+      }
+      else {
+        hasError=true;
+
+        return false;
+      }
+    }
+#endif
+
+    char buffer;
+
+    if (fread(&buffer,sizeof(char),1,file)!=1) {
+      std::cerr << "Cannot read uint64_t beyond file end!" << std::endl;
+      hasError=true;
+      return false;
+    }
+
+    if (buffer==0) {
+      return true;
+    }
+    else {
+      size_t idx=0;
+
+      while (true) {
+        uint64_t add=(buffer & 0x7f);
+
+        number=number | (add << (idx*7));
+
+        if ((buffer & 0x80)==0) {
+          return true;
+        }
+
+        if (fread(&buffer,sizeof(char),1,file)!=1) {
+          std::cerr << "Cannot read uint64_t beyond file end!" << std::endl;
+          hasError=true;
+          return false;
+        }
+
+        idx++;
+      };
+    }
+
+    return true;
+  }
+#endif
 
   bool FileScanner::ReadNumber(uint32_t& number)
   {

@@ -23,6 +23,8 @@
 #include <cstdio>
 #include <string>
 
+#include <osmscout/CoreFeatures.h>
+
 #include <osmscout/Types.h>
 
 #if defined(__WIN32__) || defined(WIN32)
@@ -83,16 +85,26 @@ namespace osmscout {
     bool Read(char* buffer, size_t bytes);
 
     bool Read(std::string& value);
+
     bool Read(bool& boolean);
+
     bool Read(uint8_t& number);
     bool Read(uint16_t& number);
     bool Read(uint32_t& number);
+#if defined(OSMSCOUT_HAVE_UINT64_T)
+    bool Read(uint64_t& number);
+#endif
+
     bool Read(int8_t& number);
     bool Read(int32_t& number);
 
     bool ReadNumber(uint8_t& number);
     bool ReadNumber(uint16_t& number);
     bool ReadNumber(uint32_t& number);
+#if defined(OSMSCOUT_HAVE_UINT64_T)
+    bool ReadNumber(uint64_t& number);
+#endif
+
     bool ReadNumber(int32_t& number);
   };
 }

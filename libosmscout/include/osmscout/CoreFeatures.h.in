@@ -13,4 +13,6 @@
 /* std::wstring is available */
 #undef OSMSCOUT_HAVE_STD__WSTRING
 
+/* uint64_t is available */
+#undef OSMSCOUT_HAVE_UINT64_T
 

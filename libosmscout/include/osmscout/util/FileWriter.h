@@ -23,6 +23,8 @@
 #include <cstdio>
 #include <string>
 
+#include <osmscout/CoreFeatures.h>
+
 #include <osmscout/Types.h>
 
 namespace osmscout {
@@ -49,15 +51,25 @@ namespace osmscout {
     bool Write(const char* buffer, size_t bytes);
 
     bool Write(const std::string& value);
+
     bool Write(bool boolean);
+
     bool Write(uint8_t number);
     bool Write(uint16_t number);
     bool Write(uint32_t number);
+#if defined(OSMSCOUT_HAVE_UINT64_T)
+    bool Write(uint64_t number);
+#endif
+
     bool Write(int8_t number);
     bool Write(int32_t number);
 
-    bool WriteNumber(uint32_t number);
     bool WriteNumber(uint16_t number);
+    bool WriteNumber(uint32_t number);
+#if defined(OSMSCOUT_HAVE_UINT64_T)
+    bool WriteNumber(uint64_t number);
+#endif
+
     bool WriteNumber(int32_t number);
 
     bool FlushCurrentBlockWithZeros(size_t blockSize);

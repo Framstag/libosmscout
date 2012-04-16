@@ -36,9 +36,32 @@ namespace osmscout {
                                         char* buffer,
                                         size_t& bytes);
 
-  extern OSMSCOUT_API bool DecodeNumber(const char* buffer,
-                                        uint32_t& number,
-                                        size_t& bytes);
+
+  template<typename N>
+  bool DecodeNumber(const char* buffer, N& number, size_t& bytes)
+  {
+    N mult=0;
+
+    number=0;
+    bytes=1;
+
+    // TODO: Assure that we do not read past the end of the buffer
+    while (true) {
+      N add=((*buffer) & 0x7f) << mult;
+
+      number=number | add;
+
+      if (((*buffer) & 0x80)==0) {
+        return true;
+      }
+
+      bytes++;
+      buffer++;
+      mult+=7;
+    }
+
+    return true;
+  }
 
   extern OSMSCOUT_API bool GetFileSize(const std::string& filename, long& size);
 

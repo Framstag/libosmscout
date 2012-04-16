@@ -23,10 +23,8 @@
 #include <cassert>
 #include <iostream>
 
-#include <osmscout/RoutingProfile.h>
 #include <osmscout/TypeConfigLoader.h>
 
-#include <osmscout/util/Geometry.h>
 #include <osmscout/util/StopClock.h>
 
 #include <osmscout/private/Math.h>
@@ -440,10 +438,6 @@ namespace osmscout {
 
     StopClock nodeIndexTimer;
 
-    /*
-    styleConfig.GetNodeTypesWithMaxMag(magnification,
-                                       nodeTypes);*/
-
     if (!areaNodeIndex.GetOffsets(lonMin,latMin,lonMax,latMax,
                                   nodeTypes,
                                   parameter.GetMaximumNodes(),
@@ -459,10 +453,6 @@ namespace osmscout {
     }
 
     StopClock wayIndexTimer;
-
-    /*
-    styleConfig.GetWayTypesByPrioWithMaxMag(magnification,
-                                            wayTypes);*/
 
     if (parameter.GetUseLowZoomOptimization() &&
         optimizeLowZoom.HasOptimizations(magnification)) {
@@ -503,10 +493,6 @@ namespace osmscout {
     wayIndexTimer.Stop();
 
     StopClock areaAreaIndexTimer;
-
-    /*
-    styleConfig.GetAreaTypesWithMaxMag(magnification,
-                                       areaTypes);*/
 
     if (!areaAreaIndex.GetOffsets(lonMin,
                                   latMin,
