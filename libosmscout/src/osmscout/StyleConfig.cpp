@@ -425,59 +425,156 @@ namespace osmscout {
     }
   }
 
+  void StyleConfig::ReserveSpaceForNodeType(TypeId type)
+  {
+    if (type>=nodeLabelStyles.size()) {
+      nodeSymbolStyles.resize(type+1,NULL);
+      nodeRefLabelStyles.resize(type+1,NULL);
+      nodeLabelStyles.resize(type+1,NULL);
+      nodeIconStyles.resize(type+1,NULL);
+    }
+  }
+
+  void StyleConfig::ReserveSpaceForWayType(TypeId type)
+  {
+    if (type>=wayLineStyles.size()) {
+      wayPrio.resize(type+1,std::numeric_limits<size_t>::max());
+      wayMag.resize(type+1,magVeryClose);
+      wayLineStyles.resize(type+1);
+      wayRefLabelStyles.resize(type+1);
+      wayNameLabelStyles.resize(type+1);
+    }
+  }
+
+  void StyleConfig::ReserveSpaceForAreaType(TypeId type)
+  {
+    if (type>=areaFillStyles.size()) {
+      areaMag.resize(type+1,magWorld);
+      areaFillStyles.resize(type+1,NULL);
+      areaSymbolStyles.resize(type+1,NULL);
+      areaLabelStyles.resize(type+1,NULL);
+      areaIconStyles.resize(type+1,NULL);
+    }
+  }
+
+  void StyleConfig::PostprocessNodes()
+  {
+    size_t maxLevel=0;
+    for (size_t type=0; type<nodeLabelStyles.size(); type++) {
+      if (nodeLabelStyles[type]!=NULL) {
+        maxLevel=std::max(maxLevel,MagToLevel(nodeLabelStyles[type]->GetMinMag()));
+      }
+      else if (nodeRefLabelStyles[type]!=NULL) {
+        maxLevel=std::max(maxLevel,MagToLevel(nodeRefLabelStyles[type]->GetMinMag()));
+      }
+      else if (nodeSymbolStyles[type]!=NULL) {
+        maxLevel=std::max(maxLevel,MagToLevel(nodeSymbolStyles[type]->GetMinMag()));
+      }
+      else if (nodeIconStyles[type]!=NULL) {
+        maxLevel=std::max(maxLevel,MagToLevel(nodeIconStyles[type]->GetMinMag()));
+      }
+    }
+
+    nodeTypeSets.resize(maxLevel+1);
+
+    for (size_t type=0; type<nodeTypeSets.size(); type++) {
+      nodeTypeSets[type].Reset(typeConfig->GetMaxTypeId()+1);
+    }
+
+    for (size_t level=0;
+        level<nodeTypeSets.size();
+        ++level) {
+      for (size_t type=0; type<nodeLabelStyles.size(); type++) {
+        if (nodeLabelStyles[type]!=NULL &&
+            MagToLevel(nodeLabelStyles[type]->GetMinMag())<=level) {
+          nodeTypeSets[level].SetType(type);
+        }
+
+        if (nodeRefLabelStyles[type]!=NULL &&
+            MagToLevel(nodeRefLabelStyles[type]->GetMinMag())<=level) {
+          nodeTypeSets[level].SetType(type);
+        }
+
+        if (nodeSymbolStyles[type]!=NULL &&
+            MagToLevel(nodeSymbolStyles[type]->GetMinMag())<=level) {
+          nodeTypeSets[level].SetType(type);
+        }
+
+        if (nodeIconStyles[type]!=NULL &&
+            MagToLevel(nodeIconStyles[type]->GetMinMag())<=level) {
+          nodeTypeSets[level].SetType(type);
+        }
+      }
+    }
+  }
+
+  void StyleConfig::PostprocessWays()
+  {
+    size_t maxLevel=0;
+    for (size_t i=0; i<wayLineStyles.size(); i++) {
+      maxLevel=std::max(maxLevel,MagToLevel(wayMag[i]));
+    }
+
+    wayTypeSets.resize(maxLevel+1);
+
+    std::set<size_t> prios;
+
+    for (size_t i=0; i<wayLineStyles.size(); i++) {
+      prios.insert(wayPrio[i]);
+    }
+
+    for (size_t level=0;
+        level<wayTypeSets.size();
+        ++level) {
+      for (std::set<size_t>::const_iterator prio=prios.begin();
+          prio!=prios.end();
+          ++prio) {
+        TypeSet typeSet;
+
+        typeSet.Reset(typeConfig->GetMaxTypeId()+1);
+
+        for (size_t i=0; i<wayLineStyles.size(); i++) {
+          if (wayPrio[i]==*prio &&
+              MagToLevel(wayMag[i])<=level) {
+            typeSet.SetType(i);
+          }
+        }
+
+        // TODO: Is type set not empty?
+        wayTypeSets[level].push_back(typeSet);
+      }
+    }
+  }
+
+  void StyleConfig::PostprocessAreas()
+  {
+    size_t maxLevel=0;
+    for (size_t i=0; i<areaFillStyles.size(); i++) {
+      maxLevel=std::max(maxLevel,MagToLevel(areaMag[i]));
+    }
+
+    areaTypeSets.resize(maxLevel+1);
+
+    for (size_t i=0; i<areaTypeSets.size(); i++) {
+      areaTypeSets[i].Reset(typeConfig->GetMaxTypeId()+1);
+    }
+
+    for (size_t level=0;
+        level<areaTypeSets.size();
+        ++level) {
+      for (size_t i=0; i<areaFillStyles.size(); i++) {
+        if (MagToLevel(areaMag[i])<=level) {
+          areaTypeSets[level].SetType(i);
+        }
+      }
+    }
+  }
+
   void StyleConfig::Postprocess()
   {
-    std::set<size_t >   prios;
-    std::vector<size_t> sortedPrios;
-
-    for (size_t i=0; i<wayLineStyles.size() && i<wayPrio.size(); i++) {
-      if (wayLineStyles[i]!=NULL) {
-        prios.insert(wayPrio[i]);
-      }
-    }
-
-    sortedPrios.reserve(prios.size());
-    for (std::set<size_t>::const_iterator prio=prios.begin();
-         prio!=prios.end();
-         ++prio) {
-      sortedPrios.push_back(*prio);
-    }
-
-    wayTypesByPrio.clear();
-    wayTypesByPrio.reserve(sortedPrios.size());
-    for (size_t p=0; p<sortedPrios.size(); p++) {
-      for (size_t i=0; i<wayLineStyles.size() && i<wayPrio.size(); i++) {
-        if (wayLineStyles[i]!=NULL && wayPrio[i]==sortedPrios[p]) {
-          wayTypesByPrio.push_back(i);
-        }
-      }
-    }
-
-    std::set<Mag> magnifications;
-    for (size_t i=0; i<nodeSymbolStyles.size(); i++) {
-      if (nodeLabelStyles[i]!=NULL) {
-        magnifications.insert(nodeLabelStyles[i]->GetMinMag());
-      }
-
-      if (nodeSymbolStyles[i]!=NULL) {
-        magnifications.insert(nodeSymbolStyles[i]->GetMinMag());
-      }
-    }
-
-    std::map<Mag,std::set<TypeId> > nodeTypesByMag;
-
-    for (std::set<Mag>::const_iterator mag=magnifications.begin();
-         mag!=magnifications.end();
-         ++mag) {
-      for (size_t i=0; i<nodeSymbolStyles.size() || i<nodeLabelStyles.size(); i++) {
-        if (nodeLabelStyles[i]!=NULL && *mag>=nodeLabelStyles[i]->GetMinMag()) {
-          nodeTypesByMag[*mag].insert(i);
-        }
-        if (nodeSymbolStyles[i]!=NULL && *mag>=nodeSymbolStyles[i]->GetMinMag()) {
-          nodeTypesByMag[*mag].insert(i);
-        }
-      }
-    }
+    PostprocessNodes();
+    PostprocessWays();
+    PostprocessAreas();
   }
 
   TypeConfig* StyleConfig::GetTypeConfig() const
@@ -485,60 +582,10 @@ namespace osmscout {
     return typeConfig;
   }
 
-  StyleConfig& StyleConfig::SetWayPrio(TypeId type, size_t prio)
-  {
-    if (type>=wayPrio.size()) {
-      wayPrio.resize(type+1);
-      wayMag.resize(type+1,magVeryClose);
-      wayLineStyles.resize(type+1);
-      wayRefLabelStyles.resize(type+1);
-      wayNameLabelStyles.resize(type+1);
-    }
-
-    wayPrio[type]=prio;
-
-    return *this;
-  }
-
-  StyleConfig& StyleConfig::SetWayMag(TypeId type, Mag mag)
-  {
-    if (type>=wayMag.size()) {
-      wayPrio.resize(type+1,std::numeric_limits<size_t>::max());
-      wayMag.resize(type+1);
-      wayLineStyles.resize(type+1);
-      wayRefLabelStyles.resize(type+1);
-      wayNameLabelStyles.resize(type+1);
-    }
-
-    wayMag[type]=mag;
-
-    return *this;
-  }
-
-  StyleConfig& StyleConfig::SetAreaMag(TypeId type, Mag mag)
-  {
-    if (type>=areaMag.size()) {
-      areaMag.resize(type+1);
-      areaFillStyles.resize(type+1,NULL);
-      areaSymbolStyles.resize(type+1,NULL);
-      areaLabelStyles.resize(type+1,NULL);
-      areaIconStyles.resize(type+1,NULL);
-    }
-
-    areaMag[type]=mag;
-
-    return *this;
-  }
-
   StyleConfig& StyleConfig::SetNodeSymbolStyle(TypeId type,
                                                const SymbolStyle& style)
   {
-    if (type>=nodeSymbolStyles.size()) {
-      nodeSymbolStyles.resize(type+1,NULL);
-      nodeRefLabelStyles.resize(type+1,NULL);
-      nodeLabelStyles.resize(type+1,NULL);
-      nodeIconStyles.resize(type+1,NULL);
-    }
+    ReserveSpaceForNodeType(type);
 
     delete nodeSymbolStyles[type];
     nodeSymbolStyles[type]=new SymbolStyle(style);
@@ -549,12 +596,7 @@ namespace osmscout {
   StyleConfig& StyleConfig::SetNodeLabelStyle(TypeId type,
                                               const LabelStyle& style)
   {
-    if (type>=nodeSymbolStyles.size()) {
-      nodeSymbolStyles.resize(type+1,NULL);
-      nodeRefLabelStyles.resize(type+1,NULL);
-      nodeLabelStyles.resize(type+1,NULL);
-      nodeIconStyles.resize(type+1,NULL);
-    }
+    ReserveSpaceForNodeType(type);
 
     delete nodeLabelStyles[type];
     nodeLabelStyles[type]=new LabelStyle(style);
@@ -565,12 +607,7 @@ namespace osmscout {
   StyleConfig& StyleConfig::SetNodeRefLabelStyle(TypeId type,
                                                  const LabelStyle& style)
   {
-    if (type>=nodeSymbolStyles.size()) {
-      nodeSymbolStyles.resize(type+1,NULL);
-      nodeRefLabelStyles.resize(type+1,NULL);
-      nodeLabelStyles.resize(type+1,NULL);
-      nodeIconStyles.resize(type+1,NULL);
-    }
+    ReserveSpaceForNodeType(type);
 
     delete nodeRefLabelStyles[type];
     nodeRefLabelStyles[type]=new LabelStyle(style);
@@ -581,12 +618,7 @@ namespace osmscout {
   StyleConfig& StyleConfig::SetNodeIconStyle(TypeId type,
                                              const IconStyle& style)
   {
-    if (type>=nodeSymbolStyles.size()) {
-      nodeSymbolStyles.resize(type+1,NULL);
-      nodeRefLabelStyles.resize(type+1,NULL);
-      nodeLabelStyles.resize(type+1,NULL);
-      nodeIconStyles.resize(type+1,NULL);
-    }
+    ReserveSpaceForNodeType(type);
 
     delete nodeIconStyles[type];
     nodeIconStyles[type]=new IconStyle(style);
@@ -594,16 +626,28 @@ namespace osmscout {
     return *this;
   }
 
+  StyleConfig& StyleConfig::SetWayPrio(TypeId type, size_t prio)
+  {
+    ReserveSpaceForWayType(type);
+
+    wayPrio[type]=prio;
+
+    return *this;
+  }
+
+  StyleConfig& StyleConfig::SetWayMag(TypeId type, Mag mag)
+  {
+    ReserveSpaceForWayType(type);
+
+    wayMag[type]=mag;
+
+    return *this;
+  }
+
   StyleConfig& StyleConfig::SetWayLineStyle(TypeId type,
                                             const LineStyle& style)
   {
-    if (type>=wayPrio.size()) {
-      wayPrio.resize(type+1,std::numeric_limits<size_t>::max());
-      wayMag.resize(type+1,magVeryClose);
-      wayLineStyles.resize(type+1,NULL);
-      wayRefLabelStyles.resize(type+1,NULL);
-      wayNameLabelStyles.resize(type+1,NULL);
-    }
+    ReserveSpaceForWayType(type);
 
     delete wayLineStyles[type];
     wayLineStyles[type]=new LineStyle(style);
@@ -614,13 +658,7 @@ namespace osmscout {
   StyleConfig& StyleConfig::SetWayRefLabelStyle(TypeId type,
                                                 const LabelStyle& style)
   {
-    if (type>=wayPrio.size()) {
-      wayPrio.resize(type+1,std::numeric_limits<size_t>::max());
-      wayMag.resize(type+1,magVeryClose);
-      wayLineStyles.resize(type+1,NULL);
-      wayRefLabelStyles.resize(type+1,NULL);
-      wayNameLabelStyles.resize(type+1,NULL);
-    }
+    ReserveSpaceForWayType(type);
 
     delete wayRefLabelStyles[type];
     wayRefLabelStyles[type]=new LabelStyle(style);
@@ -631,13 +669,7 @@ namespace osmscout {
   StyleConfig& StyleConfig::SetWayNameLabelStyle(TypeId type,
                                                  const LabelStyle& style)
   {
-    if (type>=wayPrio.size()) {
-      wayPrio.resize(type+1,std::numeric_limits<size_t>::max());
-      wayMag.resize(type+1,magVeryClose);
-      wayLineStyles.resize(type+1,NULL);
-      wayRefLabelStyles.resize(type+1,NULL);
-      wayNameLabelStyles.resize(type+1,NULL);
-    }
+    ReserveSpaceForWayType(type);
 
     delete wayNameLabelStyles[type];
     wayNameLabelStyles[type]=new LabelStyle(style);
@@ -645,16 +677,19 @@ namespace osmscout {
     return *this;
   }
 
+  StyleConfig& StyleConfig::SetAreaMag(TypeId type, Mag mag)
+  {
+    ReserveSpaceForAreaType(type);
+
+    areaMag[type]=mag;
+
+    return *this;
+  }
+
   StyleConfig& StyleConfig::SetAreaFillStyle(TypeId type,
                                              const FillStyle& style)
   {
-    if (type>=areaFillStyles.size()) {
-      areaMag.resize(type+1,magWorld);
-      areaFillStyles.resize(type+1,NULL);
-      areaSymbolStyles.resize(type+1,NULL);
-      areaLabelStyles.resize(type+1,NULL);
-      areaIconStyles.resize(type+1,NULL);
-    }
+    ReserveSpaceForAreaType(type);
 
     delete areaFillStyles[type];
     areaFillStyles[type]=new FillStyle(style);
@@ -665,13 +700,7 @@ namespace osmscout {
   StyleConfig& StyleConfig::SetAreaLabelStyle(TypeId type,
                                               const LabelStyle& style)
   {
-    if (type>=areaFillStyles.size()) {
-      areaMag.resize(type+1,magWorld);
-      areaFillStyles.resize(type+1,NULL);
-      areaSymbolStyles.resize(type+1,NULL);
-      areaLabelStyles.resize(type+1,NULL);
-      areaIconStyles.resize(type+1,NULL);
-    }
+    ReserveSpaceForAreaType(type);
 
     delete areaLabelStyles[type];
     areaLabelStyles[type]=new LabelStyle(style);
@@ -682,13 +711,7 @@ namespace osmscout {
   StyleConfig& StyleConfig::SetAreaSymbolStyle(TypeId type,
                                                const SymbolStyle& style)
   {
-    if (type>=areaFillStyles.size()) {
-      areaMag.resize(type+1,magWorld);
-      areaFillStyles.resize(type+1,NULL);
-      areaSymbolStyles.resize(type+1,NULL);
-      areaLabelStyles.resize(type+1,NULL);
-      areaIconStyles.resize(type+1,NULL);
-    }
+    ReserveSpaceForAreaType(type);
 
     delete areaSymbolStyles[type];
     areaSymbolStyles[type]=new SymbolStyle(style);
@@ -699,13 +722,7 @@ namespace osmscout {
   StyleConfig& StyleConfig::SetAreaIconStyle(TypeId type,
                                              const IconStyle& style)
   {
-    if (type>=areaFillStyles.size()) {
-      areaMag.resize(type+1,magWorld);
-      areaFillStyles.resize(type+1,NULL);
-      areaSymbolStyles.resize(type+1,NULL);
-      areaLabelStyles.resize(type+1,NULL);
-      areaIconStyles.resize(type+1,NULL);
-    }
+    ReserveSpaceForAreaType(type);
 
     delete areaIconStyles[type];
     areaIconStyles[type]=new IconStyle(style);
@@ -713,59 +730,22 @@ namespace osmscout {
     return *this;
   }
 
-  void StyleConfig::GetWayTypesByPrioWithMag(double mag,
-                                             std::vector<TypeId>& types) const
+  void StyleConfig::GetNodeTypesWithMaxMag(double maxMag,
+                                           TypeSet& types) const
   {
-    types.clear();
-    types.reserve(wayTypesByPrio.size());
-
-    for (size_t i=0; i<wayTypesByPrio.size(); i++) {
-      if (mag>=wayMag[wayTypesByPrio[i]]) {
-        types.push_back(wayTypesByPrio[i]);
-      }
-    }
+    types=nodeTypeSets[std::min(MagToLevel(maxMag),nodeTypeSets.size()-1)];
   }
 
-  void StyleConfig::GetAreaTypesWithMag(double mag,
-                                        TypeSet& types) const
+  void StyleConfig::GetWayTypesByPrioWithMaxMag(double maxMag,
+                                             std::vector<TypeSet>& types) const
   {
-    types.Reset(areaMag.size());
-
-    for (size_t i=0; i<areaMag.size(); i++) {
-      if (mag>=areaMag[i] && (
-          areaFillStyles[i]!=NULL ||
-          areaIconStyles[i]!=NULL ||
-          areaSymbolStyles[i]!=NULL ||
-          areaLabelStyles[i]!=NULL)) {
-        types.SetType(i);
-      }
-    }
+    types=wayTypeSets[std::min(MagToLevel(maxMag),wayTypeSets.size()-1)];
   }
 
-  void StyleConfig::GetNodeTypesWithMag(double mag,
-                                        std::vector<TypeId>& types) const
+  void StyleConfig::GetAreaTypesWithMaxMag(double maxMag,
+                                           TypeSet& types) const
   {
-    types.clear();
-    types.reserve(nodeSymbolStyles.size());
-
-    for (size_t i=0; i<nodeSymbolStyles.size(); i++) {
-      if (nodeLabelStyles[i]!=NULL &&
-          mag>=nodeLabelStyles[i]->GetMinMag()) {
-        types.push_back(i);
-      }
-      else if (nodeRefLabelStyles[i]!=NULL &&
-          mag>=nodeRefLabelStyles[i]->GetMinMag()) {
-        types.push_back(i);
-      }
-      else if (nodeSymbolStyles[i]!=NULL &&
-               mag>=nodeSymbolStyles[i]->GetMinMag()) {
-        types.push_back(i);
-      }
-      else if (nodeIconStyles[i]!=NULL &&
-               mag>=nodeIconStyles[i]->GetMinMag()) {
-        types.push_back(i);
-      }
-    }
+    types=areaTypeSets[std::min(MagToLevel(maxMag),areaTypeSets.size()-1)];
   }
 }
 

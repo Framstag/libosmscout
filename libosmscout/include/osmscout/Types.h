@@ -66,6 +66,11 @@ namespace osmscout {
       // no code
     }
 
+    TypeSet(const TypeSet& other)
+    {
+      this->types=other.types;
+    }
+
     void Reset(size_t numberOfTypes)
     {
       types.resize(numberOfTypes,false);
@@ -76,9 +81,23 @@ namespace osmscout {
       types[type]=true;
     }
 
+    void UnsetType(TypeId type)
+    {
+      types[type]=false;
+    }
+
     bool IsTypeSet(TypeId type) const
     {
       return type<types.size() && types[type];
+    }
+
+    TypeSet& operator=(const TypeSet& other)
+    {
+      if (&other!=this) {
+        this->types=other.types;
+      }
+
+      return *this;
     }
   };
 
@@ -90,6 +109,7 @@ namespace osmscout {
     to get long values without significant values after colon.
     */
   extern OSMSCOUT_API const double conversionFactor;
+  extern OSMSCOUT_API size_t MagToLevel(double mag);
 }
 
 #endif

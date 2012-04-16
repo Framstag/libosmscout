@@ -399,7 +399,9 @@ namespace osmscout {
     return true;
   }
 
-  bool Database::GetObjects(const StyleConfig& styleConfig,
+  bool Database::GetObjects(const TypeSet &nodeTypes,
+                            const std::vector<TypeSet>& wayTypes,
+                            const TypeSet& areaTypes,
                             double lonMin, double latMin,
                             double lonMax, double latMax,
                             double magnification,
@@ -418,9 +420,7 @@ namespace osmscout {
       return false;
     }
 
-    std::vector<TypeId>     wayTypes;
-    TypeSet                 areaTypes;
-    std::vector<TypeId>     nodeTypes;
+    std::vector<TypeSet>    internalWayTypes(wayTypes);
     std::vector<FileOffset> nodeOffsets;
     std::vector<FileOffset> wayWayOffsets;
     std::vector<FileOffset> relationWayOffsets;
@@ -440,8 +440,9 @@ namespace osmscout {
 
     StopClock nodeIndexTimer;
 
-    styleConfig.GetNodeTypesWithMag(magnification,
-                                    nodeTypes);
+    /*
+    styleConfig.GetNodeTypesWithMaxMag(magnification,
+                                       nodeTypes);*/
 
     if (!areaNodeIndex.GetOffsets(lonMin,latMin,lonMax,latMax,
                                   nodeTypes,
@@ -459,8 +460,9 @@ namespace osmscout {
 
     StopClock wayIndexTimer;
 
-    styleConfig.GetWayTypesByPrioWithMag(magnification,
-                                         wayTypes);
+    /*
+    styleConfig.GetWayTypesByPrioWithMaxMag(magnification,
+                                            wayTypes);*/
 
     if (parameter.GetUseLowZoomOptimization() &&
         optimizeLowZoom.HasOptimizations(magnification)) {
@@ -469,12 +471,13 @@ namespace osmscout {
                               lonMax,
                               latMax,
                               parameter.GetMaximumWays(),
-                              wayTypes,
+                              internalWayTypes,
                               ways);
 
+      /* TODO:
       for (size_t i=0; i<wayTypes.size(); i++) {
         std::cout << "Warning: Loading type " << typeConfig->GetTypeInfo(wayTypes[i]).GetName() << " via normal index" << std::endl;
-      }
+      }*/
     }
 
     if (parameter.IsAborted()) {
@@ -485,7 +488,7 @@ namespace osmscout {
                                  latMin,
                                  lonMax,
                                  latMax,
-                                 wayTypes,
+                                 internalWayTypes,
                                  parameter.GetMaximumWays(),
                                  wayWayOffsets,
                                  relationWayOffsets)) {
@@ -501,10 +504,9 @@ namespace osmscout {
 
     StopClock areaAreaIndexTimer;
 
-    wayTypes.clear();
-
-    styleConfig.GetAreaTypesWithMag(magnification,
-                                    areaTypes);
+    /*
+    styleConfig.GetAreaTypesWithMaxMag(magnification,
+                                       areaTypes);*/
 
     if (!areaAreaIndex.GetOffsets(lonMin,
                                   latMin,
@@ -615,7 +617,7 @@ namespace osmscout {
 
   bool Database::GetObjects(double lonMin, double latMin,
                             double lonMax, double latMax,
-                            std::vector<TypeId> types,
+                            const TypeSet& types,
                             std::vector<NodeRef>& nodes,
                             std::vector<WayRef>& ways,
                             std::vector<WayRef>& areas,
@@ -626,7 +628,7 @@ namespace osmscout {
       return false;
     }
 
-    TypeSet                 areaTypes;
+    std::vector<TypeSet>    wayTypes;
     std::vector<FileOffset> nodeOffsets;
     std::vector<FileOffset> wayWayOffsets;
     std::vector<FileOffset> relationWayOffsets;
@@ -638,6 +640,8 @@ namespace osmscout {
     areas.clear();
     relationWays.clear();
     relationAreas.clear();
+
+    wayTypes.push_back(types);;
 
     StopClock nodeIndexTimer;
 
@@ -657,7 +661,7 @@ namespace osmscout {
                                  latMin,
                                  lonMax,
                                  latMax,
-                                 types,
+                                 wayTypes,
                                  std::numeric_limits<size_t>::max(),
                                  wayWayOffsets,
                                  relationWayOffsets)) {
@@ -668,20 +672,12 @@ namespace osmscout {
 
     StopClock areaAreaIndexTimer;
 
-    areaTypes.Reset(typeConfig->GetMaxTypeId()+1);
-
-    for (std::vector<TypeId>::const_iterator type=types.begin();
-        type!=types.end();
-        type++) {
-      areaTypes.SetType(*type);
-    }
-
     if (!areaAreaIndex.GetOffsets(lonMin,
                                   latMin,
                                   lonMax,
                                   latMax,
                                   std::numeric_limits<size_t>::max(),
-                                  areaTypes,
+                                  types,
                                   std::numeric_limits<size_t>::max(),
                                   wayAreaOffsets,
                                   relationAreaOffsets)) {

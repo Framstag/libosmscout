@@ -118,8 +118,7 @@ namespace osmscout
     return magnification<=this->magnification;
   }
 
-  bool OptimizeLowZoom::GetOffsets(TypeId type,
-                                   const TypeData& typeData,
+  bool OptimizeLowZoom::GetOffsets(const TypeData& typeData,
                                    double minlon,
                                    double minlat,
                                    double maxlon,
@@ -236,11 +235,10 @@ namespace osmscout
   bool OptimizeLowZoom::GetWays(double lonMin, double latMin,
                                 double lonMax, double latMax,
                                 size_t maxWayCount,
-                                std::vector<TypeId>& wayTypes,
+                                std::vector<TypeSet>& wayTypes,
                                 std::vector<WayRef>& ways) const
   {
-    std::vector<TypeId>::iterator type=wayTypes.begin();
-    std::vector<FileOffset>       offsets;
+    std::vector<FileOffset> offsets;
 
     if (!scanner.IsOpen()) {
       if (!scanner.Open(datafilename)) {
@@ -251,44 +249,43 @@ namespace osmscout
 
     offsets.reserve(20000);
 
-    while (type!=wayTypes.end()) {
-      std::map<TypeId, TypeData>::const_iterator data=typesData.find(*type);
-
-      if (data!=typesData.end()) {
-        if (!GetOffsets(*type,
-                        data->second,
-                        lonMin,
-                        latMin,
-                        lonMax,
-                        latMax,
-                        offsets)) {
-          return false;
-        }
-
-        for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
-            offset!=offsets.end();
-            ++offset) {
-          if (!scanner.SetPos(*offset)) {
-            std::cerr << "Error while positioning in file " << datafilename  << std::endl;
-            type++;
-            continue;
+    for (size_t i=0; i<wayTypes.size(); i++) {
+      for (std::map<TypeId,TypeData>::const_iterator type=typesData.begin();
+          type!=typesData.end();
+          ++type) {
+        if (wayTypes[i].IsTypeSet(type->first)) {
+          if (!GetOffsets(type->second,
+                          lonMin,
+                          latMin,
+                          lonMax,
+                          latMax,
+                          offsets)) {
+            return false;
           }
 
-          WayRef way=new Way();
+          for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
+              offset!=offsets.end();
+              ++offset) {
+            if (!scanner.SetPos(*offset)) {
+              std::cerr << "Error while positioning in file " << datafilename  << std::endl;
+              type++;
+              continue;
+            }
 
-          if (!way->Read(scanner)) {
-            std::cerr << "Error while reading data entry of type " << *type << " from file " << datafilename  << std::endl;
-            continue;
+            WayRef way=new Way();
+
+            if (!way->Read(scanner)) {
+              std::cerr << "Error while reading data entry of type " << type->first << " from file " << datafilename  << std::endl;
+              continue;
+            }
+
+            ways.push_back(way);
           }
 
-          ways.push_back(way);
-        }
+          offsets.clear();
 
-        offsets.clear();
-        type=wayTypes.erase(type);
-      }
-      else {
-        type++;
+          wayTypes[i].UnsetType(type->first);
+        }
       }
     }
 

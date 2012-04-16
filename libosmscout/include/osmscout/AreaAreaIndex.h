@@ -37,7 +37,7 @@ namespace osmscout {
     a given area.
 
     For areas result can be limited by the maximum level (which in turn
-    defines the mimimum size of the resulting areas since an area in a given
+    defines the minimum size of the resulting areas since an area in a given
     level must fit into the cell size (but can cross cell borders)) and the
     maximum number of areas found.
 

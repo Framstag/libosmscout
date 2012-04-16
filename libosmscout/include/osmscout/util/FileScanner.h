@@ -23,7 +23,7 @@
 #include <cstdio>
 #include <string>
 
-#include <osmscout/TypeConfig.h>
+#include <osmscout/Types.h>
 
 #if defined(__WIN32__) || defined(WIN32)
   #include <windows.h>

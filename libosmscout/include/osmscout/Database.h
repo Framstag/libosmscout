@@ -24,7 +24,6 @@
 #include <set>
 
 // Type and style sheet configuration
-#include <osmscout/StyleConfig.h>
 #include <osmscout/TypeConfig.h>
 
 // Datafiles
@@ -52,7 +51,6 @@
 #include <osmscout/Route.h>
 
 #include <osmscout/util/Breaker.h>
-#include <osmscout/util/Cache.h>
 
 namespace osmscout {
 
@@ -152,15 +150,6 @@ namespace osmscout {
 
   class OSMSCOUT_API Database
   {
-  public: // Fix this
-    struct NodeUse
-    {
-      Id              id;
-      std::vector<Id> references;
-    };
-
-    typedef Cache<size_t,std::vector<NodeUse> > NodeUseCache;
-
   private:
     bool                  isOpen;          //! true, if opened
     bool                  debugPerformance;
@@ -222,7 +211,9 @@ namespace osmscout {
     bool GetBoundingBox(double& minLat,double& minLon,
                         double& maxLat,double& maxLon) const;
 
-    bool GetObjects(const StyleConfig& styleConfig,
+    bool GetObjects(const TypeSet &nodeTypes,
+                    const std::vector<TypeSet>& wayTypes,
+                    const TypeSet& areaTypes,
                     double lonMin, double latMin,
                     double lonMax, double latMax,
                     double magnification,
@@ -235,7 +226,7 @@ namespace osmscout {
 
     bool GetObjects(double lonMin, double latMin,
                     double lonMax, double latMax,
-                    std::vector<TypeId> types,
+                    const TypeSet& types,
                     std::vector<NodeRef>& nodes,
                     std::vector<WayRef>& ways,
                     std::vector<WayRef>& areas,

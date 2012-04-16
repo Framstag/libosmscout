@@ -95,16 +95,15 @@ namespace osmscout {
     return !scanner.HasError() && scanner.Close();
   }
 
-  bool AreaNodeIndex::GetOffsets(TypeId type,
-                                const TypeData& typeData,
-                                double minlon,
-                                double minlat,
-                                double maxlon,
-                                double maxlat,
-                                size_t maxNodeCount,
-                                std::vector<FileOffset>& offsets,
-                                size_t currentSize,
-                                bool& sizeExceeded) const
+  bool AreaNodeIndex::GetOffsets(const TypeData& typeData,
+                                 double minlon,
+                                 double minlat,
+                                 double maxlon,
+                                 double maxlat,
+                                 size_t maxNodeCount,
+                                 std::vector<FileOffset>& offsets,
+                                 size_t currentSize,
+                                 bool& sizeExceeded) const
   {
     std::set<FileOffset> newOffsets;
 
@@ -223,7 +222,7 @@ namespace osmscout {
                                  double minlat,
                                  double maxlon,
                                  double maxlat,
-                                 const std::vector<TypeId>& nodeTypes,
+                                 const TypeSet& nodeTypes,
                                  size_t maxNodeCount,
                                  std::vector<FileOffset>& nodeOffsets) const
   {
@@ -236,22 +235,23 @@ namespace osmscout {
 
     bool sizeExceeded=false;
 
-    for (size_t i=0; i<nodeTypes.size(); i++) {
-      if (!GetOffsets(nodeTypes[i],
-                      nodeTypeData[nodeTypes[i]],
-                      minlon,
-                      minlat,
-                      maxlon,
-                      maxlat,
-                      maxNodeCount,
-                      nodeOffsets,
-                      nodeOffsets.size(),
-                      sizeExceeded)) {
-        return false;
-      }
+    for (size_t i=0; i<nodeTypeData.size(); i++) {
+      if (nodeTypes.IsTypeSet(i)) {
+        if (!GetOffsets(nodeTypeData[i],
+                        minlon,
+                        minlat,
+                        maxlon,
+                        maxlat,
+                        maxNodeCount,
+                        nodeOffsets,
+                        nodeOffsets.size(),
+                        sizeExceeded)) {
+          return false;
+        }
 
-      if (sizeExceeded) {
-        break;
+        if (sizeExceeded) {
+          break;
+        }
       }
     }
 

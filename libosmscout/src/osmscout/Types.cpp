@@ -19,6 +19,13 @@
 
 #include <osmscout/Types.h>
 
+#include <osmscout/private/Math.h>
+
 namespace osmscout {
   const double conversionFactor=10000000.0;
+
+  size_t MagToLevel(double mag)
+  {
+    return (size_t)log2(mag);
+  }
 }

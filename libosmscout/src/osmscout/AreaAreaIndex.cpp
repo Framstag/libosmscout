@@ -336,8 +336,8 @@ namespace osmscout {
       }
 
       if (!stopArea) {
-        wayAreaOffsets.insert(wayAreaOffsets.end(), newWayAreaOffsets.begin(), newWayAreaOffsets.end());
-        relationAreaOffsets.insert(relationAreaOffsets.end(), newRelAreaOffsets.begin(), newRelAreaOffsets.end());
+        wayAreaOffsets.insert(wayAreaOffsets.end(),newWayAreaOffsets.begin(),newWayAreaOffsets.end());
+        relationAreaOffsets.insert(relationAreaOffsets.end(),newRelAreaOffsets.begin(),newRelAreaOffsets.end());
       }
 
       ctx=ntx;

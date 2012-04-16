@@ -114,7 +114,22 @@ int main(int argc, char* argv[])
                      height);
 
 
-      database.GetObjects(styleConfig,
+      osmscout::TypeSet              nodeTypes;
+      std::vector<osmscout::TypeSet> wayTypes;
+      osmscout::TypeSet              areaTypes;
+
+      styleConfig.GetNodeTypesWithMaxMag(projection.GetMagnification(),
+                                         nodeTypes);
+
+      styleConfig.GetWayTypesByPrioWithMaxMag(projection.GetMagnification(),
+                                              wayTypes);
+
+      styleConfig.GetAreaTypesWithMaxMag(projection.GetMagnification(),
+                                         areaTypes);
+
+      database.GetObjects(nodeTypes,
+                          wayTypes,
+                          areaTypes,
                           projection.GetLonMin(),
                           projection.GetLatMin(),
                           projection.GetLonMax(),

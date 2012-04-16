@@ -71,8 +71,7 @@ namespace osmscout {
     std::vector<TypeData> nodeTypeData;
 
   private:
-    bool GetOffsets(TypeId type,
-                    const TypeData& typeData,
+    bool GetOffsets(const TypeData& typeData,
                     double minlon,
                     double minlat,
                     double maxlon,
@@ -91,7 +90,7 @@ namespace osmscout {
                     double minlat,
                     double maxlon,
                     double maxlat,
-                    const std::vector<TypeId>& nodeTypes,
+                    const TypeSet& nodeTypes,
                     size_t maxNodeCount,
                     std::vector<FileOffset>& nodeOffsets) const;
 

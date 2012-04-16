@@ -121,12 +121,22 @@ int main(int argc, char* argv[])
                  zoom,
                  width);
 
-  searchParameter.SetMaximumNodes(std::numeric_limits<size_t>::max());
-  searchParameter.SetMaximumWays(std::numeric_limits<size_t>::max());
-  searchParameter.SetMaximumAreas(std::numeric_limits<size_t>::max());
-  searchParameter.SetMaximumAreaLevel(6);
+  osmscout::TypeSet              nodeTypes;
+  std::vector<osmscout::TypeSet> wayTypes;
+  osmscout::TypeSet              areaTypes;
 
-  database.GetObjects(styleConfig,
+  styleConfig.GetNodeTypesWithMaxMag(projection.GetMagnification(),
+                                     nodeTypes);
+
+  styleConfig.GetWayTypesByPrioWithMaxMag(projection.GetMagnification(),
+                                          wayTypes);
+
+  styleConfig.GetAreaTypesWithMaxMag(projection.GetMagnification(),
+                                     areaTypes);
+
+  database.GetObjects(nodeTypes,
+                      wayTypes,
+                      areaTypes,
                       projection.GetLonMin(),
                       projection.GetLatMin(),
                       projection.GetLonMax(),
@@ -138,6 +148,11 @@ int main(int argc, char* argv[])
                       data.areas,
                       data.relationWays,
                       data.relationAreas);
+
+  searchParameter.SetMaximumNodes(std::numeric_limits<size_t>::max());
+  searchParameter.SetMaximumWays(std::numeric_limits<size_t>::max());
+  searchParameter.SetMaximumAreas(std::numeric_limits<size_t>::max());
+  searchParameter.SetMaximumAreaLevel(6);
 
   painter.DrawMap(styleConfig,
                       projection,

@@ -123,19 +123,16 @@ namespace osmscout {
     return !scanner.HasError() && scanner.Close();
   }
 
-  bool AreaWayIndex::GetOffsets(TypeId type,
-                                const TypeData& typeData,
+  bool AreaWayIndex::GetOffsets(const TypeData& typeData,
                                 double minlon,
                                 double minlat,
                                 double maxlon,
                                 double maxlat,
                                 size_t maxWayCount,
-                                std::vector<FileOffset>& offsets,
+                                OSMSCOUT_HASHSET<FileOffset>& offsets,
                                 size_t currentSize,
                                 bool& sizeExceeded) const
   {
-    std::set<FileOffset> newOffsets;
-
     if (typeData.indexOffset==0) {
       // No data for this type available
       return true;
@@ -218,7 +215,7 @@ namespace osmscout {
           return false;
         }
 
-        if (currentSize+newOffsets.size()+dataCount>maxWayCount) {
+        if (currentSize+offsets.size()+dataCount>maxWayCount) {
           //std::cout << currentSize<< "+" << newOffsets.size() << "+" << dataCount << ">" << maxWayCount << std::endl;
           sizeExceeded=true;
           return true;
@@ -231,17 +228,11 @@ namespace osmscout {
 
           objectOffset+=lastOffset;
 
-          newOffsets.insert(objectOffset);
+          offsets.insert(objectOffset);
 
           lastOffset=objectOffset;
         }
       }
-    }
-
-    for (std::set<FileOffset>::const_iterator offset=newOffsets.begin();
-         offset!=newOffsets.end();
-         ++offset) {
-      offsets.push_back(*offset);
     }
 
     return true;
@@ -251,7 +242,7 @@ namespace osmscout {
                                 double minlat,
                                 double maxlon,
                                 double maxlat,
-                                const std::vector<TypeId>& wayTypes,
+                                const std::vector<TypeSet>& wayTypes,
                                 size_t maxWayCount,
                                 std::vector<FileOffset>& wayWayOffsets,
                                 std::vector<FileOffset>& relationWayOffsets) const
@@ -263,42 +254,65 @@ namespace osmscout {
       }
     }
 
-    bool sizeExceeded=false;
+    bool                         sizeExceeded=false;
+    OSMSCOUT_HASHSET<FileOffset> newWayWayOffsets;
+    OSMSCOUT_HASHSET<FileOffset> newRelationWayOffsets;
+
+    wayWayOffsets.reserve(std::min(100000u,(uint32_t)maxWayCount));
+    relationWayOffsets.reserve(std::min(100000u,(uint32_t)maxWayCount));
+
+#if defined(OSMSCOUT_HASHSET_HAS_RESERVE)
+    newWayWayOffsets.reserve(std::min(100000u,(uint32_t)maxWayCount));
+    newRelationWayOffsets.reserve(std::min(100000u,(uint32_t)maxWayCount));
+#endif
 
     for (size_t i=0; i<wayTypes.size(); i++) {
-      if (!GetOffsets(wayTypes[i],
-                      wayTypeData[wayTypes[i]],
-                      minlon,
-                      minlat,
-                      maxlon,
-                      maxlat,
-                      maxWayCount,
-                      wayWayOffsets,
-                      wayWayOffsets.size()+relationWayOffsets.size(),
-                      sizeExceeded)) {
-        return false;
+      newWayWayOffsets.clear();
+      newRelationWayOffsets.clear();
+
+      for (size_t type=0;
+          type<wayTypeData.size();
+          ++type) {
+        if (wayTypes[i].IsTypeSet(type)) {
+          if (!GetOffsets(wayTypeData[type],
+                          minlon,
+                          minlat,
+                          maxlon,
+                          maxlat,
+                          maxWayCount,
+                          newWayWayOffsets,
+                          wayWayOffsets.size()+
+                          relationWayOffsets.size(),
+                          sizeExceeded)) {
+            return false;
+          }
+
+          if (sizeExceeded) {
+            return true;
+          }
+
+          if (!GetOffsets(relTypeData[type],
+                          minlon,
+                          minlat,
+                          maxlon,
+                          maxlat,
+                          maxWayCount,
+                          newRelationWayOffsets,
+                          wayWayOffsets.size()+relationWayOffsets.size(),
+                          sizeExceeded)) {
+            return false;
+          }
+
+          if (sizeExceeded) {
+            return true;
+          }
+        }
       }
 
-      if (sizeExceeded) {
-        break;
-      }
+      // Copy data from temporary set to final vector
 
-      if (!GetOffsets(wayTypes[i],
-                      relTypeData[wayTypes[i]],
-                      minlon,
-                      minlat,
-                      maxlon,
-                      maxlat,
-                      maxWayCount,
-                      relationWayOffsets,
-                      wayWayOffsets.size()+relationWayOffsets.size(),
-                      sizeExceeded)) {
-        return false;
-      }
-
-      if (sizeExceeded) {
-        break;
-      }
+      wayWayOffsets.insert(wayWayOffsets.end(),newWayWayOffsets.begin(),newWayWayOffsets.end());
+      relationWayOffsets.insert(relationWayOffsets.end(),newRelationWayOffsets.begin(),newRelationWayOffsets.end());
     }
 
     //std::cout << "Found " << wayWayOffsets.size() << "+" << relationWayOffsets.size()<< " offsets in 'areaway.idx'" << std::endl;

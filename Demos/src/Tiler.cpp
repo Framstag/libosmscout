@@ -192,6 +192,19 @@ int main(int argc, char* argv[])
     double maxTime=0.0;
     double totalTime=0.0;
 
+    osmscout::TypeSet              nodeTypes;
+    std::vector<osmscout::TypeSet> wayTypes;
+    osmscout::TypeSet              areaTypes;
+
+    styleConfig.GetNodeTypesWithMaxMag(projection.GetMagnification(),
+                                       nodeTypes);
+
+    styleConfig.GetWayTypesByPrioWithMaxMag(projection.GetMagnification(),
+                                            wayTypes);
+
+    styleConfig.GetAreaTypesWithMaxMag(projection.GetMagnification(),
+                                       areaTypes);
+
     for (size_t y=yTileStart; y<=yTileEnd; y++) {
       for (size_t x=xTileStart; x<=xTileEnd; x++) {
         double              lat,lon;
@@ -212,7 +225,9 @@ int main(int argc, char* argv[])
                        tileHeight);
 
 
-        database.GetObjects(styleConfig,
+        database.GetObjects(nodeTypes,
+                            wayTypes,
+                            areaTypes,
                             projection.GetLonMin(),
                             projection.GetLatMin(),
                             projection.GetLonMax(),

@@ -176,9 +176,25 @@ void DatabaseTask::Run()
 
         std::cout << "Resulting max area level: " << level-log2(currentMagnification) << " <=> " << searchParameter.GetMaximumAreaLevel() << std::endl;
 */
+
+        osmscout::TypeSet              nodeTypes;
+        std::vector<osmscout::TypeSet> wayTypes;
+        osmscout::TypeSet              areaTypes;
+
+        styleConfig->GetNodeTypesWithMaxMag(projection.GetMagnification(),
+                                            nodeTypes);
+
+        styleConfig->GetWayTypesByPrioWithMaxMag(projection.GetMagnification(),
+                                                 wayTypes);
+
+        styleConfig->GetAreaTypesWithMaxMag(projection.GetMagnification(),
+                                            areaTypes);
+
         osmscout::StopClock dataRetrievalTimer;
 
-        database->GetObjects(*styleConfig,
+        database->GetObjects(nodeTypes,
+                             wayTypes,
+                             areaTypes,
                              projection.GetLonMin(),
                              projection.GetLatMin(),
                              projection.GetLonMax(),

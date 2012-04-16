@@ -589,11 +589,18 @@ namespace osmscout {
     std::vector<LabelStyle*>   nodeLabelStyles;
     std::vector<IconStyle*>    nodeIconStyles;
 
+    std::vector<TypeSet>       nodeTypeSets;
+
     // Way
 
     std::vector<LineStyle*>    wayLineStyles;
     std::vector<LabelStyle*>   wayRefLabelStyles;
     std::vector<LabelStyle*>   wayNameLabelStyles;
+
+    std::vector<size_t>        wayPrio;
+    std::vector<Mag>           wayMag;
+
+    std::vector<std::vector<TypeSet> > wayTypeSets;
 
     // Area
 
@@ -602,10 +609,18 @@ namespace osmscout {
     std::vector<LabelStyle*>   areaLabelStyles;
     std::vector<IconStyle*>    areaIconStyles;
 
-    std::vector<size_t>        wayPrio;
-    std::vector<Mag>           wayMag;
     std::vector<Mag>           areaMag;
-    std::vector<TypeId>        wayTypesByPrio;
+    std::vector<TypeSet>       areaTypeSets;
+
+
+  private:
+    void ReserveSpaceForNodeType(TypeId type);
+    void ReserveSpaceForWayType(TypeId type);
+    void ReserveSpaceForAreaType(TypeId type);
+
+    void PostprocessNodes();
+    void PostprocessWays();
+    void PostprocessAreas();
 
   public:
     StyleConfig(TypeConfig* typeConfig);
@@ -615,30 +630,30 @@ namespace osmscout {
 
     TypeConfig* GetTypeConfig() const;
 
-    StyleConfig& SetWayPrio(TypeId type, size_t prio);
-    StyleConfig& SetWayMag(TypeId type, Mag mag);
-    StyleConfig& SetAreaMag(TypeId type, Mag mag);
 
     StyleConfig& SetNodeSymbolStyle(TypeId type, const SymbolStyle& style);
     StyleConfig& SetNodeRefLabelStyle(TypeId type, const LabelStyle& style);
     StyleConfig& SetNodeLabelStyle(TypeId type, const LabelStyle& style);
     StyleConfig& SetNodeIconStyle(TypeId type, const IconStyle& style);
 
+    StyleConfig& SetWayPrio(TypeId type, size_t prio);
+    StyleConfig& SetWayMag(TypeId type, Mag mag);
     StyleConfig& SetWayLineStyle(TypeId type, const LineStyle& style);
     StyleConfig& SetWayRefLabelStyle(TypeId type, const LabelStyle& style);
     StyleConfig& SetWayNameLabelStyle(TypeId type, const LabelStyle& style);
 
+    StyleConfig& SetAreaMag(TypeId type, Mag mag);
     StyleConfig& SetAreaFillStyle(TypeId type, const FillStyle& style);
     StyleConfig& SetAreaLabelStyle(TypeId type, const LabelStyle& style);
     StyleConfig& SetAreaSymbolStyle(TypeId type, const SymbolStyle& style);
     StyleConfig& SetAreaIconStyle(TypeId type, const IconStyle& style);
 
-    void GetNodeTypesWithMag(double mag,
-                             std::vector<TypeId>& types) const;
-    void GetWayTypesByPrioWithMag(double mag,
-                                  std::vector<TypeId>& types) const;
-    void GetAreaTypesWithMag(double mag,
-                             TypeSet& types) const;
+    void GetNodeTypesWithMaxMag(double maxMag,
+                                TypeSet& types) const;
+    void GetWayTypesByPrioWithMaxMag(double mag,
+                                     std::vector<TypeSet>& types) const;
+    void GetAreaTypesWithMaxMag(double maxMag,
+                                TypeSet& types) const;
 
 
     inline size_t GetWayPrio(TypeId type) const

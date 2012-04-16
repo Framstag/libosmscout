@@ -71,8 +71,7 @@ namespace osmscout {
 
     bool HasOptimizations(double magnification) const;
 
-    bool GetOffsets(TypeId type,
-                    const TypeData& typeData,
+    bool GetOffsets(const TypeData& typeData,
                     double minlon,
                     double minlat,
                     double maxlon,
@@ -82,7 +81,7 @@ namespace osmscout {
     bool GetWays(double lonMin, double latMin,
                  double lonMax, double latMax,
                  size_t maxWayCount,
-                 std::vector<TypeId>& wayTypes,
+                 std::vector<TypeSet>& wayTypes,
                  std::vector<WayRef>& ways) const;
   };
 }

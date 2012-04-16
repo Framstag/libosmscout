@@ -27,15 +27,15 @@
   level directory):
 
   src/LookupPOI ../TravelJinni/ 51.2 6.5 51.7 8 amenity_hospital amenity_hospital_building
-  src/LookupPOI ../TravelJinni/ 43.65 -79.39 43.66 -79.37 shop
+  src/LookupPOI ../TravelJinni/ 51.2 6.5 51.7 8 shop
 */
 
 int main(int argc, char* argv[])
 {
-  std::string                   map;
-  double                        latTop,latBottom,lonLeft,lonRight;
-  std::list<std::string>        typeNames;
-  std::vector<osmscout::TypeId> types;
+  std::string            map;
+  double                 latTop,latBottom,lonLeft,lonRight;
+  std::list<std::string> typeNames;
+  osmscout::TypeSet      types;
 
   if (argc<6) {
     std::cerr << "LookupPOI <map directory> <lat_top> <lon_left> <lat_bottom> <lon_right> {type}" << std::endl;
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
   std::cout << "x";
   std::cout << "[" <<std::max(latTop,latBottom) << "," << std::max(lonLeft,lonRight) << "]" << std::endl;
 
-  types.reserve(typeNames.size()*3); // Avoid dynamic resize
+  types.Reset(database.GetTypeConfig()->GetMaxTypeId()+1);
 
   for (std::list<std::string>::const_iterator name=typeNames.begin();
       name!=typeNames.end();
@@ -107,31 +107,27 @@ int main(int argc, char* argv[])
     if (nodeType!=osmscout::typeIgnore) {
       std::cout << " node (" << nodeType << ")";
 
-      types.push_back(nodeType);
+      types.SetType(nodeType);
     }
 
     if (wayType!=osmscout::typeIgnore) {
       std::cout << " way (" << wayType << ")";
 
-      if (wayType!=nodeType) {
-        types.push_back(wayType);
-      }
+      types.SetType(wayType);
     }
 
     if (areaType!=osmscout::typeIgnore) {
       std::cout << " area (" << areaType << ")";
 
-      if (areaType!=nodeType && areaType!=wayType) {
-        types.push_back(areaType);
-      }
+      types.SetType(areaType);
     }
 
     std::cout << std::endl;
   }
 
-  std::vector<osmscout::NodeRef> nodes;
-  std::vector<osmscout::WayRef> ways;
-  std::vector<osmscout::WayRef> areas;
+  std::vector<osmscout::NodeRef>     nodes;
+  std::vector<osmscout::WayRef>      ways;
+  std::vector<osmscout::WayRef>      areas;
   std::vector<osmscout::RelationRef> relationWays;
   std::vector<osmscout::RelationRef> relationAreas;
 

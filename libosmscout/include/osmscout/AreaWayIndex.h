@@ -27,6 +27,7 @@
 #include <osmscout/Util.h>
 
 #include <osmscout/util/FileScanner.h>
+#include <osmscout/util/HashSet.h>
 
 namespace osmscout {
 
@@ -73,14 +74,13 @@ namespace osmscout {
     std::vector<TypeData> relTypeData;
 
   private:
-    bool GetOffsets(TypeId type,
-                    const TypeData& typeData,
+    bool GetOffsets(const TypeData& typeData,
                     double minlon,
                     double minlat,
                     double maxlon,
                     double maxlat,
                     size_t maxWayCount,
-                    std::vector<FileOffset>& offsets,
+                    OSMSCOUT_HASHSET<FileOffset>& offsets,
                     size_t currentSize,
                     bool& sizeExceeded) const;
 
@@ -93,7 +93,7 @@ namespace osmscout {
                     double minlat,
                     double maxlon,
                     double maxlat,
-                    const std::vector<TypeId>& wayTypes,
+                    const std::vector<TypeSet>& wayTypes,
                     size_t maxWayCount,
                     std::vector<FileOffset>& wayWayOffsets,
                     std::vector<FileOffset>& relationWayOffsets) const;
