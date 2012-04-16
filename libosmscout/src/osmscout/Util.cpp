@@ -24,34 +24,6 @@
 
 namespace osmscout {
 
-  void GetKeysForName(const std::string& name, std::set<uint32_t>& keys)
-  {
-    for (size_t s=0; s==0 || s+4<=name.length(); s++) {
-      uint32_t value=0;
-
-      if (name.length()>s) {
-        value=name[s];
-      }
-      value=value << 8;
-
-      if (name.length()>s+1) {
-        value+=name[s+1];
-      }
-      value=value << 8;
-
-      if (name.length()>s+2) {
-        value+=name[s+2];
-      }
-      value=value << 8;
-
-      if (name.length()>s+3) {
-        value+=name[s+3];
-      }
-
-      keys.insert(value);
-    }
-  }
-
   bool EncodeNumber(unsigned long number,
                     size_t bufferLength,
                     char* buffer,

@@ -29,8 +29,6 @@
 
 namespace osmscout {
 
-  extern OSMSCOUT_API void GetKeysForName(const std::string& name, std::set<uint32_t>& keys);
-
   extern OSMSCOUT_API bool EncodeNumber(unsigned long number,
                                         size_t bufferLength,
                                         char* buffer,
