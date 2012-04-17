@@ -159,13 +159,13 @@ namespace osmscout {
       }
 
       if (currentPageSize>0) {
-        char   b1[5];
-        char   b2[5];
-        size_t b1size;
-        size_t b2size;
+        char         b1[10];
+        char         b2[10];
+        unsigned int b1size;
+        unsigned int b2size;
 
-        EncodeNumber(data.GetId()-lastId,5,b1,b1size);
-        EncodeNumber(readPos-lastPos,5,b2,b2size);
+        b1size=EncodeNumber(data.GetId()-lastId,b1);
+        b2size=EncodeNumber(readPos-lastPos,b2);
 
         if (currentPageSize+b1size+b2size>pageSize) {
           // Next entry does not fit, fill rest of index page with zeros
@@ -217,13 +217,13 @@ namespace osmscout {
       for (size_t i=0; i<si.size(); i++) {
 
         if (currentPageSize>0) {
-          char   b1[5];
-          char   b2[5];
-          size_t b1size;
-          size_t b2size;
+          char         b1[10];
+          char         b2[10];
+          unsigned int b1size;
+          unsigned int b2size;
 
-          EncodeNumber((si[i]-si[i-1]),5,b1,b1size);
-          EncodeNumber(po[i]-po[i-1],5,b2,b2size);
+          b1size=EncodeNumber((si[i]-si[i-1]),b1);
+          b2size=EncodeNumber(po[i]-po[i-1],b2);
 
           if (currentPageSize+b1size+b2size>pageSize) {
             // Fill rest of first index page with zeros

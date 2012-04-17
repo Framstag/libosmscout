@@ -670,18 +670,11 @@ namespace osmscout {
         return false;
       }
 
-      size_t bytes;
+      unsigned int bytes=DecodeNumber(&buffer[offset],number);
 
-      if (DecodeNumber(&buffer[offset],number,bytes)) {
-        offset+=bytes;
+      offset+=bytes;
 
-        return true;
-      }
-      else {
-        hasError=true;
-
-        return false;
-      }
+      return true;
     }
 #endif
 
@@ -693,29 +686,22 @@ namespace osmscout {
       return false;
     }
 
-    if (buffer==0) {
-      return true;
-    }
-    else {
-      size_t idx=0;
+    unsigned int shift=0;
 
-      while (true) {
-        uint64_t add=(buffer & 0x7f);
+    while (true) {
+      number=number+((buffer & 0x7f) << shift);
 
-        number=number | (add << (idx*7));
+      if ((buffer & 0x80)==0) {
+        return true;
+      }
 
-        if ((buffer & 0x80)==0) {
-          return true;
-        }
+      if (fread(&buffer,sizeof(char),1,file)!=1) {
+        std::cerr << "Cannot read uint64_t beyond file end!" << std::endl;
+        hasError=true;
+        return false;
+      }
 
-        if (fread(&buffer,sizeof(char),1,file)!=1) {
-          std::cerr << "Cannot read uint64_t beyond file end!" << std::endl;
-          hasError=true;
-          return false;
-        }
-
-        idx++;
-      };
+      shift+=7;
     }
 
     return true;
@@ -738,18 +724,11 @@ namespace osmscout {
         return false;
       }
 
-      size_t bytes;
+      unsigned int bytes=DecodeNumber(&buffer[offset],number);
 
-      if (DecodeNumber(&buffer[offset],number,bytes)) {
-        offset+=bytes;
+      offset+=bytes;
 
-        return true;
-      }
-      else {
-        hasError=true;
-
-        return false;
-      }
+      return true;
     }
 #endif
 
@@ -761,29 +740,22 @@ namespace osmscout {
       return false;
     }
 
-    if (buffer==0) {
-      return true;
-    }
-    else {
-      size_t idx=0;
+    unsigned int shift=0;
 
-      while (true) {
-        uint32_t add=(buffer & 0x7f);
+    while (true) {
+      number=number+((buffer & 0x7f) << shift);
 
-        number=number | (add << (idx*7));
+      if ((buffer & 0x80)==0) {
+        return true;
+      }
 
-        if ((buffer & 0x80)==0) {
-          return true;
-        }
+      if (fread(&buffer,sizeof(char),1,file)!=1) {
+        std::cerr << "Cannot read uint64_t beyond file end!" << std::endl;
+        hasError=true;
+        return false;
+      }
 
-        if (fread(&buffer,sizeof(char),1,file)!=1) {
-          std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
-          hasError=true;
-          return false;
-        }
-
-        idx++;
-      };
+      shift+=7;
     }
 
     return true;
@@ -791,36 +763,106 @@ namespace osmscout {
 
   bool FileScanner::ReadNumber(uint16_t& number)
   {
-    uint32_t value;
-
-    if (!ReadNumber(value)) {
+    if (file==NULL || hasError) {
       return false;
     }
 
-    if (value>(uint32_t)std::numeric_limits<uint16_t>::max()) {
+    number=0;
+
+#if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
+    if (buffer!=NULL) {
+      if (offset>=(FileOffset)size) {
+        std::cerr << "Cannot read uint16_t beyond file end!" << std::endl;
+        hasError=true;
+        return false;
+      }
+
+      unsigned int bytes=DecodeNumber(&buffer[offset],number);
+
+      offset+=bytes;
+
+      return true;
+    }
+#endif
+
+    char buffer;
+
+    if (fread(&buffer,sizeof(char),1,file)!=1) {
+      std::cerr << "Cannot read uint16_t beyond file end!" << std::endl;
       hasError=true;
       return false;
     }
 
-    number=(uint16_t)value;
+    unsigned int shift=0;
+
+    while (true) {
+      number=number+((buffer & 0x7f) << shift);
+
+      if ((buffer & 0x80)==0) {
+        return true;
+      }
+
+      if (fread(&buffer,sizeof(char),1,file)!=1) {
+        std::cerr << "Cannot read uint16_t beyond file end!" << std::endl;
+        hasError=true;
+        return false;
+      }
+
+      shift+=7;
+    }
 
     return true;
   }
 
   bool FileScanner::ReadNumber(uint8_t& number)
   {
-    uint32_t value;
-
-    if (!ReadNumber(value)) {
+    if (file==NULL || hasError) {
       return false;
     }
 
-    if (value>(uint32_t)std::numeric_limits<uint8_t>::max()) {
+    number=0;
+
+#if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
+    if (buffer!=NULL) {
+      if (offset>=(FileOffset)size) {
+        std::cerr << "Cannot read uint8_t beyond file end!" << std::endl;
+        hasError=true;
+        return false;
+      }
+
+      unsigned int bytes=DecodeNumber(&buffer[offset],number);
+
+      offset+=bytes;
+
+      return true;
+    }
+#endif
+
+    char buffer;
+
+    if (fread(&buffer,sizeof(char),1,file)!=1) {
+      std::cerr << "Cannot read uint8_t beyond file end!" << std::endl;
       hasError=true;
       return false;
     }
 
-    number=(uint8_t)value;
+    unsigned int shift=0;
+
+    while (true) {
+      number=number+((buffer & 0x7f) << shift);
+
+      if ((buffer & 0x80)==0) {
+        return true;
+      }
+
+      if (fread(&buffer,sizeof(char),1,file)!=1) {
+        std::cerr << "Cannot read uint8_t beyond file end!" << std::endl;
+        hasError=true;
+        return false;
+      }
+
+      shift+=7;
+    }
 
     return true;
   }
@@ -830,18 +872,53 @@ namespace osmscout {
     */
   bool FileScanner::ReadNumber(int32_t& number)
   {
-    uint32_t value;
-
-    if (!ReadNumber(value)) {
+    if (file==NULL || hasError) {
       return false;
     }
 
-    if ((int32_t)value>(int32_t)std::numeric_limits<int32_t>::max()) {
+    number=0;
+
+#if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
+    if (buffer!=NULL) {
+      if (offset>=(FileOffset)size) {
+        std::cerr << "Cannot read int32_t beyond file end!" << std::endl;
+        hasError=true;
+        return false;
+      }
+
+      unsigned int bytes=DecodeNumber(&buffer[offset],number);
+
+      offset+=bytes;
+
+      return true;
+    }
+#endif
+
+    char buffer;
+
+    if (fread(&buffer,sizeof(char),1,file)!=1) {
+      std::cerr << "Cannot read int32_t beyond file end!" << std::endl;
       hasError=true;
       return false;
     }
 
-    number=(int32_t)value;
+    unsigned int shift=0;
+
+    while (true) {
+      number=number+((buffer & 0x7f) << shift);
+
+      if ((buffer & 0x80)==0) {
+        return true;
+      }
+
+      if (fread(&buffer,sizeof(char),1,file)!=1) {
+        std::cerr << "Cannot read int64_t beyond file end!" << std::endl;
+        hasError=true;
+        return false;
+      }
+
+      shift+=7;
+    }
 
     return true;
   }

@@ -183,22 +183,20 @@ namespace osmscout {
 
     while (currentPos<pageSize &&
            buffer[currentPos]!=0) {
-      uint32_t   data;
-      size_t     bytes;
-      Id         si;
-      FileOffset po;
-      Entry      entry;
+      uint32_t     data;
+      unsigned int bytes;
+      Id           si;
+      FileOffset   po;
+      Entry        entry;
 
-      DecodeNumber(&buffer[currentPos],
-                   data,
-                   bytes);
+      bytes=DecodeNumber(&buffer[currentPos],
+                         data);
 
       si=(Id)data;
       currentPos+=bytes;
 
-      DecodeNumber(&buffer[currentPos],
-                   data,
-                   bytes);
+      bytes=DecodeNumber(&buffer[currentPos],
+                         data);
 
       po=(FileOffset)data;
       currentPos+=bytes;

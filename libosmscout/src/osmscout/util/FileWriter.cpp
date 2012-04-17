@@ -237,23 +237,20 @@ namespace osmscout {
   /**
     Write a numeric value to the file using some internal encoding
     to reduce storage size. Note that this works only if the average number
-    is small. Don't use this method for storing ids, latitude or longitude.
+    is small.
     */
   bool FileWriter::WriteNumber(uint64_t number)
   {
-    char   buffer[9];
-    size_t bytes;
+    char         buffer[10];
+    unsigned int bytes;
 
     if (file==NULL || hasError) {
       return false;
     }
 
-    if (!EncodeNumber(number,sizeof(buffer),buffer,bytes)) {
-      hasError=true;
-      return false;
-    }
+    bytes=EncodeNumber(number,buffer);
 
-    hasError=fwrite(buffer,sizeof(char),bytes,file)!=bytes;
+    hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
 
     return !hasError;
   }
@@ -262,23 +259,20 @@ namespace osmscout {
   /**
     Write a numeric value to the file using some internal encoding
     to reduce storage size. Note that this works only if the average number
-    is small. Don't use this method for storing ids, latitude or longitude.
+    is small.
     */
   bool FileWriter::WriteNumber(uint32_t number)
   {
-    char   buffer[5];
-    size_t bytes;
+    char         buffer[10];
+    unsigned int bytes;
 
     if (file==NULL || hasError) {
       return false;
     }
 
-    if (!EncodeNumber(number,sizeof(buffer),buffer,bytes)) {
-      hasError=true;
-      return false;
-    }
+    bytes=EncodeNumber(number,buffer);
 
-    hasError=fwrite(buffer,sizeof(char),bytes,file)!=bytes;
+    hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
 
     return !hasError;
   }
@@ -286,23 +280,20 @@ namespace osmscout {
   /**
     Write a numeric value to the file using some internal encoding
     to reduce storage size. Note that this works only if the average number
-    is small. Don't use this method for storing ids, latitude or longitude.
+    is small.
     */
   bool FileWriter::WriteNumber(uint16_t number)
   {
-    char   buffer[5];
-    size_t bytes;
+    char         buffer[10];
+    unsigned int bytes;
 
     if (file==NULL || hasError) {
       return false;
     }
 
-    if (!EncodeNumber(number,5,buffer,bytes)) {
-      hasError=true;
-      return false;
-    }
+    bytes=EncodeNumber(number,buffer);
 
-    hasError=fwrite(buffer,sizeof(char),bytes,file)!=bytes;
+    hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
 
     return !hasError;
   }
@@ -310,23 +301,20 @@ namespace osmscout {
   /**
     Write a numeric value to the file using some internal encoding
     to reduce storage size. Note that this works only if the average number
-    is small. Don't use this method for storing ids, latitude or longitude.
+    is small.
     */
   bool FileWriter::WriteNumber(int32_t number)
   {
-    char   buffer[5];
-    size_t bytes;
+    char         buffer[10];
+    unsigned int bytes;
 
     if (file==NULL || hasError) {
       return false;
     }
 
-    if (!EncodeNumber(number,5,buffer,bytes)) {
-      hasError=true;
-      return false;
-    }
+    bytes=EncodeNumber(number,buffer);
 
-    hasError=fwrite(buffer,sizeof(char),bytes,file)!=bytes;
+    hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
 
     return !hasError;
   }

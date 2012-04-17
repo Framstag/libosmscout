@@ -24,38 +24,67 @@
 
 #include <stddef.h>
 
+#include <cassert>
+
 namespace osmscout {
 
-  extern OSMSCOUT_API bool EncodeNumber(unsigned long number,
-                                        size_t bufferLength,
-                                        char* buffer,
-                                        size_t& bytes);
-
-
+  /**
+   * Encode a number into the given buffer using some variable length encoding.
+   *
+   * The current implementation requires the buffer to have at least space
+   * for sizeof(N)*8/7 bytes:
+   *
+   * This are 5 bytes for a 32bit value and 10 bytes for a64bit value.
+   *
+   * The methods returns the number of bytes written.
+   */
   template<typename N>
-  bool DecodeNumber(const char* buffer, N& number, size_t& bytes)
+  unsigned int OSMSCOUT_API EncodeNumber(N number,
+                                         char* buffer)
   {
-    N mult=0;
+    unsigned int bytes=0;
+
+    while (number>0x7f) {
+      buffer[bytes]=((number & 0x7f) | 0x80);
+      number=number >> 7;
+      bytes++;
+    }
+
+    buffer[bytes]=number;
+    bytes++;
+
+    return bytes;
+  }
+
+
+  /**
+   * Decode a variable length encoded number from the buffer back to
+   * the variable.
+   *
+   * The methods returns the number of bytes read.
+   */
+  template<typename N>
+  unsigned int OSMSCOUT_API DecodeNumber(const char* buffer,
+                                         N& number)
+  {
+    unsigned int shift=0;
+    unsigned int bytes=1;
 
     number=0;
-    bytes=1;
 
-    // TODO: Assure that we do not read past the end of the buffer
     while (true) {
-      N add=((*buffer) & 0x7f) << mult;
-
-      number=number | add;
+      number=number+(((*buffer) & 0x7f) << shift);
 
       if (((*buffer) & 0x80)==0) {
-        return true;
+        return bytes;
       }
 
       bytes++;
       buffer++;
-      mult+=7;
+      shift+=7;
     }
 
-    return true;
+    return bytes;
   }
 }
 
