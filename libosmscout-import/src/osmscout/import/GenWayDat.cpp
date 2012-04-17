@@ -38,6 +38,35 @@ namespace osmscout {
     return "Generate 'ways.dat'";
   }
 
+  bool WayDataGenerator::ReadWayBlacklist(const ImportParameter& parameter,
+                                          Progress& progress,
+                                          std::set<Id>& wayBlacklist)
+  {
+    FileScanner scanner;
+
+    progress.SetAction("Loading way blacklist");
+
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "wayblack.dat"))) {
+      progress.Error("Cannot open 'wayblack.dat'");
+      return false;
+    }
+
+    while (!scanner.IsEOF()) {
+      Id id;
+
+      scanner.ReadNumber(id);
+
+      if (scanner.HasError()) {
+        return false;
+      }
+
+      wayBlacklist.insert(id);
+    }
+
+    return scanner.Close();
+  }
+
   bool WayDataGenerator::ReadTurnRestrictions(const ImportParameter& parameter,
                                               Progress& progress,
                                               std::multimap<Id,TurnRestrictionRef>& restrictions)
@@ -634,6 +663,18 @@ namespace osmscout {
 #if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
     endPointWayMap.reserve(200000);
 #endif
+
+    //
+    // load blacklist of wayId as a result from multipolygon relation parsing
+    //
+
+    progress.SetAction("Reading way blacklist");
+
+    if (!ReadWayBlacklist(parameter,
+                          progress,
+                          wayBlacklist)) {
+      return false;
+    }
 
     //
     // handling of restriction relations

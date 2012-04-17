@@ -28,9 +28,9 @@ namespace osmscout {
     scanner.ReadNumber(typeValue);
     this->type=(Type)typeValue;
 
-    scanner.Read(from);
-    scanner.Read(via);
-    scanner.Read(to);
+    scanner.ReadNumber(from);
+    scanner.ReadNumber(via);
+    scanner.ReadNumber(to);
 
     return !scanner.HasError();
   }
@@ -39,9 +39,9 @@ namespace osmscout {
   {
     writer.WriteNumber((uint32_t)type);
 
-    writer.Write(from);
-    writer.Write(via);
-    writer.Write(to);
+    writer.WriteNumber(from);
+    writer.WriteNumber(via);
+    writer.WriteNumber(to);
 
     return !writer.HasError();
   }

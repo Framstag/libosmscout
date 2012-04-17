@@ -46,7 +46,7 @@ namespace osmscout {
     uint32_t minLat;
     uint32_t minLon;
 
-    scanner.Read(id);
+    scanner.ReadNumber(id);
 
     scanner.ReadNumber(wayCount);
     scanner.ReadNumber(pathCount);
@@ -106,7 +106,7 @@ namespace osmscout {
 
   bool RouteNode::Write(FileWriter& writer) const
   {
-    writer.Write(id);
+    writer.WriteNumber(id);
 
     writer.WriteNumber((uint32_t)ways.size());
     writer.WriteNumber((uint32_t)paths.size());

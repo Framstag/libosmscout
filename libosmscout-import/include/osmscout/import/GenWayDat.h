@@ -40,6 +40,10 @@ namespace osmscout {
   private:
     typedef OSMSCOUT_HASHMAP<Id,std::list<Id> > EndPointWayMap;
 
+    bool ReadWayBlacklist(const ImportParameter& parameter,
+                          Progress& progress,
+                          std::set<Id>& wayBlacklist);
+
     bool ReadTurnRestrictions(const ImportParameter& parameter,
                               Progress& progress,
                               std::multimap<Id,TurnRestrictionRef>& restrictions);

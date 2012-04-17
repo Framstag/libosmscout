@@ -38,7 +38,7 @@ namespace osmscout {
     uint32_t tagCount;
     uint32_t memberCount;
 
-    scanner.Read(id);
+    scanner.ReadNumber(id);
     scanner.ReadNumber(type);
 
     scanner.ReadNumber(tagCount);
@@ -87,7 +87,7 @@ namespace osmscout {
 
   bool RawRelation::Write(FileWriter& writer) const
   {
-    writer.Write(id);
+    writer.WriteNumber(id);
     writer.WriteNumber(type);
 
     writer.WriteNumber((uint32_t)tags.size());

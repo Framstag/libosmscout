@@ -51,7 +51,7 @@ namespace osmscout {
     uint32_t latValue;
     uint32_t lonValue;
 
-    scanner.Read(id);
+    scanner.ReadNumber(id);
     scanner.ReadNumber(tmpType);
     scanner.Read(latValue);
     scanner.Read(lonValue);
@@ -80,7 +80,7 @@ namespace osmscout {
     uint32_t latValue=(uint32_t)floor((lat+90.0)*conversionFactor+0.5);
     uint32_t lonValue=(uint32_t)floor((lon+180.0)*conversionFactor+0.5);
 
-    writer.Write(id);
+    writer.WriteNumber(id);
     writer.WriteNumber(type);
     writer.Write(latValue);
     writer.Write(lonValue);

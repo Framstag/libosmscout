@@ -105,7 +105,7 @@ namespace osmscout {
   {
     uint32_t roleCount;
 
-    scanner.Read(id);
+    scanner.ReadNumber(id);
 
     if (!attributes.Read(scanner)) {
       return false;
@@ -160,7 +160,7 @@ namespace osmscout {
 
   bool Relation::Write(FileWriter& writer) const
   {
-    writer.Write(id);
+    writer.WriteNumber(id);
 
     if (!attributes.Write(writer)) {
       return false;

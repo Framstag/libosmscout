@@ -48,7 +48,7 @@ namespace osmscout {
 
   bool RawWay::Read(FileScanner& scanner)
   {
-    if (!scanner.Read(id)) {
+    if (!scanner.ReadNumber(id)) {
       return false;
     }
 
@@ -110,7 +110,7 @@ namespace osmscout {
 
   bool RawWay::Write(FileWriter& writer) const
   {
-    writer.Write(id);
+    writer.WriteNumber(id);
     writer.WriteNumber(type);
     writer.Write(isArea);
 

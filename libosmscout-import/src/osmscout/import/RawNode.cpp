@@ -46,7 +46,7 @@ namespace osmscout {
 
   bool RawNode::Read(FileScanner& scanner)
   {
-    if (!scanner.Read(id)) {
+    if (!scanner.ReadNumber(id)) {
       return false;
     }
 
@@ -94,7 +94,7 @@ namespace osmscout {
     uint32_t latValue=(uint32_t)floor((lat+90.0)*conversionFactor+0.5);
     uint32_t lonValue=(uint32_t)floor((lon+180.0)*conversionFactor+0.5);
 
-    writer.Write(id);
+    writer.WriteNumber(id);
 
     writer.WriteNumber(type);
     writer.Write(latValue);

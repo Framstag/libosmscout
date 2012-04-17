@@ -23,7 +23,6 @@
 #include <map>
 #include <set>
 
-
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Geometry.h>
 
@@ -58,10 +57,6 @@ namespace osmscout {
     };
 
   private:
-    bool LoadWayBlacklist(const ImportParameter& parameter,
-                          Progress& progress,
-                          std::set<Id>& wayBlacklist);
-
     void SetOffsetOfChildren(const std::map<Coord,AreaLeaf>& leafs,
                              std::map<Coord,AreaLeaf>& newAreaLeafs);
 

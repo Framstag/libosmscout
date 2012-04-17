@@ -1041,7 +1041,7 @@ namespace osmscout {
     for (std::set<Id>::const_iterator id=wayAreaIndexBlacklist.begin();
          id!=wayAreaIndexBlacklist.end();
          ++id) {
-      writer.Write(*id);
+      writer.WriteNumber(*id);
     }
 
     progress.Info(NumberToString(wayAreaIndexBlacklist.size())+" ways written to blacklist");

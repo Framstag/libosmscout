@@ -38,33 +38,6 @@ namespace osmscout {
     return "Generate 'areaarea.idx'";
   }
 
-  bool AreaAreaIndexGenerator::LoadWayBlacklist(const ImportParameter& parameter,
-                                                Progress& progress,
-                                                std::set<Id>& wayBlacklist)
-  {
-    FileScanner scanner;
-
-    progress.SetAction("Loading way blacklist");
-
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "wayblack.dat"))) {
-      progress.Error("Cannot open 'wayblack.dat'");
-      return false;
-    }
-
-    while (!scanner.IsEOF()) {
-      Id id;
-
-      scanner.Read(id);
-
-      if (!scanner.HasError()) {
-        wayBlacklist.insert(id);
-      }
-    }
-
-    return scanner.Close();
-  }
-
   void AreaAreaIndexGenerator::SetOffsetOfChildren(const std::map<Coord,AreaLeaf>& leafs,
                                                    std::map<Coord,AreaLeaf>& newAreaLeafs)
   {
@@ -168,7 +141,6 @@ namespace osmscout {
   {
     FileScanner               wayScanner;
     FileScanner               relScanner;
-    std::set<Id>              wayBlacklist;   // Ids of ways that should not be in index
     size_t                    ways=0;         // Number of ways found
     size_t                    waysConsumed=0; // Number of ways consumed
     size_t                    rels=0;         // Number of relations found
@@ -187,16 +159,6 @@ namespace osmscout {
 
     for (size_t i=0; i<cellHeight.size(); i++) {
       cellHeight[i]=180.0/pow(2.0,(int)i);
-    }
-
-    //
-    // Loading way blacklist
-    //
-
-    if (!LoadWayBlacklist(parameter,
-                          progress,
-                          wayBlacklist)) {
-      return false;
     }
 
     //
@@ -289,11 +251,6 @@ namespace osmscout {
           }
 
           if (!way.IsArea()) {
-            continue;
-          }
-
-          // We do not index a way that is in the blacklist
-          if (wayBlacklist.find(way.GetId())!=wayBlacklist.end()) {
             continue;
           }
 
