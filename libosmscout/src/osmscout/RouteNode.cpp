@@ -79,7 +79,7 @@ namespace osmscout {
       uint32_t lonValue;
       uint32_t distanceValue;
 
-      scanner.Read(paths[i].id);
+      scanner.ReadNumber(paths[i].id);
       scanner.ReadNumber(paths[i].wayIndex);
       scanner.ReadNumber(paths[i].type);
       scanner.Read(paths[i].maxSpeed);
@@ -97,7 +97,7 @@ namespace osmscout {
 
     excludes.resize(excludesCount);
     for (size_t i=0; i<excludesCount; i++) {
-      scanner.Read(excludes[i].sourceWay);
+      scanner.ReadNumber(excludes[i].sourceWay);
       scanner.ReadNumber(excludes[i].targetPath);
     }
 
@@ -137,7 +137,7 @@ namespace osmscout {
       uint32_t lonValue=(uint32_t)floor((paths[i].lon+180.0)*conversionFactor+0.5);
       uint32_t distanceValue=(uint32_t)floor(paths[i].distance*(1000.0*100.0)+0.5);
 
-      writer.Write(paths[i].id);
+      writer.WriteNumber(paths[i].id);
       writer.WriteNumber(paths[i].wayIndex);
       writer.WriteNumber(paths[i].type);
       writer.Write(paths[i].maxSpeed);
@@ -150,7 +150,7 @@ namespace osmscout {
     }
 
     for (size_t i=0; i<excludes.size(); i++) {
-      writer.Write(excludes[i].sourceWay);
+      writer.WriteNumber(excludes[i].sourceWay);
       writer.WriteNumber(excludes[i].targetPath);
     }
 

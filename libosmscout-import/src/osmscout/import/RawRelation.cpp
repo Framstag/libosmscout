@@ -64,7 +64,7 @@ namespace osmscout {
     if (memberCount>0) {
       Id minId;
 
-      if (!scanner.Read(minId)) {
+      if (!scanner.ReadNumber(minId)) {
         return false;
       }
 
@@ -105,7 +105,7 @@ namespace osmscout {
         minId=std::min(minId,members[i].id);
       }
 
-      writer.Write(minId);
+      writer.WriteNumber(minId);
 
       for (size_t i=0; i<members.size(); i++) {
         writer.WriteNumber(members[i].type);

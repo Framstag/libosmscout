@@ -145,7 +145,7 @@ namespace osmscout {
       uint32_t minLat;
       uint32_t minLon;
 
-      scanner.Read(minId),
+      scanner.ReadNumber(minId),
       scanner.Read(minLat);
       scanner.Read(minLon);
 
@@ -189,7 +189,7 @@ namespace osmscout {
         minLon=std::min(minLon,(uint32_t)floor((nodes[i].GetLon()+180.0)*conversionFactor+0.5));
       }
 
-      writer.Write(minId);
+      writer.WriteNumber(minId);
       writer.Write(minLat);
       writer.Write(minLon);
 
