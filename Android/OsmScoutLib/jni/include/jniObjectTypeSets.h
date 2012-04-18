@@ -1,3 +1,6 @@
+#ifndef __OBJECT_TYPE_SETS_H__
+#define __OBJECT_TYPE_SETS_H__
+
 /*
   This source is part of the libosmscout library
   Copyright (C) 2010  Tim Teulings
@@ -17,38 +20,19 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-package osm.scout;
+#include <osmscout/TypeSet.h>
 
-public class StyleConfig {
-	
-	public StyleConfig() {
-		
-		jniConstructor();
-	}
-	
-	protected void finalize() throws Throwable {		
-		try {			
-			jniDestructor();
-		}
-		finally {			
-			super.finalize();
-		}
-	}
-	
-	public boolean loadStyleConfig(String fileName) {
-		return jniLoadStyleConfig(fileName);
-	}
-	
-	public ObjectTypeSets getObjectTypesWithMaxMag(double magnification) {
-		return jniGetObjectTypesWithMaxMag(magnification);
-	}
-	
-	// Native methods
-	
-	private native void jniConstructor();
-	private native void jniDestructor();
-	
-	private native boolean jniLoadStyleConfig(String fileName);
-	private native ObjectTypeSets jniGetObjectTypesWithMaxMag(double magnification);
-	
+namespace osmscout {
+
+  typedef struct _ObjectTypeSets {
+
+    osmscout::TypeSet              nodeTypes;
+    std::vector<osmscout::TypeSet> wayTypes;
+    osmscout::TypeSet              areaTypes;
+
+  } ObjectTypeSets;
+
 }
+
+#endif	// __OBJECT_TYPE_SETS_H__
+

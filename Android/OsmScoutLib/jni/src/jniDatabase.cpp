@@ -26,6 +26,8 @@
 #include <osmscout/Node.h>
 #include <osmscout/MapPainter.h>
 
+#include "../include/jniObjectTypeSets.h"
+
 #define DEBUG_TAG "OsmScoutJni:Database"
 
 #ifdef __cplusplus
@@ -37,6 +39,7 @@ osmscout::Database                    *gDatabase;
 extern osmscout::StyleConfig          *gStyleConfig;
 extern osmscout::MapData              *gMapData;
 extern osmscout::MercatorProjection   *gMercatorProjection;
+extern osmscout::ObjectTypeSets       *gObjectTypeSets;
 
 void Java_osm_scout_Database_jniConstructor(JNIEnv *env, jobject object)
 {
@@ -185,7 +188,9 @@ jobject Java_osm_scout_Database_jniGetObjects(JNIEnv *env, jobject object)
 
   osmscout::AreaSearchParameter searchParameter;
 
-  gDatabase->GetObjects(*gStyleConfig,
+  gDatabase->GetObjects(gObjectTypeSets->nodeTypes,
+                        gObjectTypeSets->wayTypes,
+                        gObjectTypeSets->areaTypes,
                         gMercatorProjection->GetLonMin(),
                         gMercatorProjection->GetLatMin(),
                         gMercatorProjection->GetLonMax(),

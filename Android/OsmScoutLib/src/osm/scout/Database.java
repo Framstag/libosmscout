@@ -49,7 +49,7 @@ public class Database {
 		return jniGetBoundingBox();
 	}
 	
-	public MapData getObjects(Projection projection) {
+	public MapData getObjects(ObjectTypeSets typeSets, Projection projection) {
 		return jniGetObjects();
 	}
 	

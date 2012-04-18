@@ -25,11 +25,14 @@
 #include <osmscout/StyleConfig.h>
 #include <osmscout/StyleConfigLoader.h>
 
+#include "../include/jniObjectTypeSets.h"
+
 #define DEBUG_TAG "OsmScoutJni:StyleConfig"
 
-extern osmscout::Database   *gDatabase;
+extern osmscout::Database       *gDatabase;
+extern osmscout::ObjectTypeSets *gObjectTypeSets;
 
-osmscout::StyleConfig       *gStyleConfig;
+osmscout::StyleConfig           *gStyleConfig;
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,7 +51,8 @@ void Java_osm_scout_StyleConfig_jniDestructor(JNIEnv *env, jobject object)
   delete gStyleConfig;
 }
 
-jboolean Java_osm_scout_StyleConfig_jniLoadStyleConfig(JNIEnv *env, jobject object, jstring fileName)
+jboolean Java_osm_scout_StyleConfig_jniLoadStyleConfig(
+                        JNIEnv *env, jobject object, jstring fileName)
 {
   jboolean isCopy;
 
@@ -59,6 +63,22 @@ jboolean Java_osm_scout_StyleConfig_jniLoadStyleConfig(JNIEnv *env, jobject obje
   env->ReleaseStringUTFChars(fileName, szFileName);
 
   return result;
+}
+
+jboolean Java_osm_scout_StyleConfig_jniGetObjectTypesWithMaxMag(
+                        JNIEnv *env, jobject object, jdouble magnification)
+{
+  gStyleConfig->GetNodeTypesWithMaxMag(magnification,
+                                       gObjectTypeSets->nodeTypes);
+
+  gStyleConfig->GetWayTypesByPrioWithMaxMag(magnification,
+                                            gObjectTypeSets->wayTypes);
+
+  gStyleConfig->GetAreaTypesWithMaxMag(magnification,
+                                       gObjectTypeSets->areaTypes);
+
+  // TODO: return a valid ObjectTypeSets object
+  return NULL;  
 }
 
 #ifdef __cplusplus

@@ -36,6 +36,7 @@ import osm.scout.OsmScoutMapEventListener;
 import osm.scout.MercatorProjection;
 import osm.scout.OsmScoutMapView;
 import osm.scout.StyleConfig;
+import osm.scout.ObjectTypeSets;
 
 public class OsmScoutViewerActivity extends Activity implements OsmScoutMapEventListener {
 		
@@ -174,12 +175,16 @@ public class OsmScoutViewerActivity extends Activity implements OsmScoutMapEvent
     
     /** Updates map data (objects) and redraws map */ 
     private void updateMap() {
+    	
+    	// Get object type sets for current magnification
+    	ObjectTypeSets typeSets=mStyleConfig.getObjectTypesWithMaxMag(
+    			mProjection.getMagnification());
     
-    	// Get database objects for current projection
-    	MapData mMapData=mDatabase.getObjects(mProjection);
+    	// Get database objects for given object type sets and current projection
+    	MapData mapData=mDatabase.getObjects(typeSets, mProjection);
     
     	// Redraws map
-    	mOsmScoutMapView.drawMap(mStyleConfig, mProjection, mMapData);
+    	mOsmScoutMapView.drawMap(mStyleConfig, mProjection, mapData);
     }
 
 	public void onMapSizeChanged(int width, int height) {

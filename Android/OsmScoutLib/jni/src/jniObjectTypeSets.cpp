@@ -21,34 +21,22 @@
 #include <string.h>
 #include <android/log.h>
 
-#include <osmscout/Database.h>
-#include <osmscout/util/Projection.h>
-#include <osmscout/StyleConfig.h>
-
-#include "../include/jniMapPainterCanvas.h"
 #include "../include/jniObjectTypeSets.h"
 
-extern osmscout::Database            *gDatabase;
-extern osmscout::MapData             *gMapData;
-extern osmscout::MapPainterCanvas    *gMapPainter;
-extern osmscout::MercatorProjection  *gMercatorProjection;
-extern osmscout::ObjectTypeSets      *gObjectTypeSets;
-extern osmscout::StyleConfig         *gStyleConfig;
+#define DEBUG_TAG "OsmScoutJni:ObjectTypeSets"
+
+osmscout::ObjectTypeSets *gObjectTypeSets;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
+void Java_osm_scout_ObjectTypeSets_jniConstructor(JNIEnv *env, jobject object)
 {
-  gDatabase=NULL;
-  gMapData=new osmscout::MapData;
-  gMapPainter=NULL;
-  gMercatorProjection=NULL;
-  gObjectTypeSets=new osmscout::ObjectTypeSets;
-  gStyleConfig=NULL;
-	
-  return JNI_VERSION_1_6;
+}
+
+void Java_osm_scout_ObjectTypeSet_jniDestructor(JNIEnv *env, jobject object)
+{
 }
 
 #ifdef __cplusplus
