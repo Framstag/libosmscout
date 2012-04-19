@@ -33,6 +33,17 @@ namespace osmscout {
   extern OSMSCOUT_API bool GetFileSize(const std::string& filename, long& size);
 
   /**
+   * Deletes the given file
+   */
+  extern OSMSCOUT_API bool RemoveFile(const std::string& filename);
+
+  /**
+   * Rename a file
+   */
+  extern OSMSCOUT_API bool RenameFile(const std::string& oldFilename,
+                                      const std::string& newFilename);
+
+  /**
    * Append the filename 'name' to the directory name 'name' correctly adding directory
    * delimiter if necessary.
    */

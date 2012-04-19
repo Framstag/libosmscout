@@ -53,6 +53,21 @@ namespace osmscout {
     return true;
   }
 
+  bool RemoveFile(const std::string& filename)
+  {
+    return remove(filename.c_str())==0;
+  }
+
+  /**
+   * Rename a file
+   */
+  bool RenameFile(const std::string& oldFilename,
+                  const std::string& newFilename)
+  {
+    return rename(oldFilename.c_str(),
+                  newFilename.c_str())==0;
+  }
+
   std::string AppendFileToDir(const std::string& dir, const std::string& file)
   {
 #if defined(__WIN32__) || defined(WIN32)
