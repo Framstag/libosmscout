@@ -39,8 +39,8 @@ namespace osmscout {
    * The methods returns the number of bytes written.
    */
   template<typename N>
-  unsigned int OSMSCOUT_API EncodeNumber(N number,
-                                         char* buffer)
+  unsigned int EncodeNumber(N number,
+                            char* buffer)
   {
     unsigned int bytes=0;
 
@@ -64,8 +64,8 @@ namespace osmscout {
    * The methods returns the number of bytes read.
    */
   template<typename N>
-  unsigned int OSMSCOUT_API DecodeNumber(const char* buffer,
-                                         N& number)
+  unsigned int DecodeNumber(const char* buffer,
+                            N& number)
   {
     unsigned int shift=0;
     unsigned int bytes=1;

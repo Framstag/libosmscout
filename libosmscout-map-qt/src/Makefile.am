@@ -5,7 +5,8 @@ AM_CPPFLAGS = $(LIB_CXXFLAGS) \
               $(LIBQTGUI_CFLAGS)
 
 lib_LTLIBRARIES = libosmscoutmapqt.la
-libosmscoutmapqt_la_LDFLAGS  = $(LIBOSMSCOUTMAP_LIBS) \
+libosmscoutmapqt_la_LDFLAGS  = -no-undefined \
+                               $(LIBOSMSCOUTMAP_LIBS) \
                                $(LIBOSMSCOUT_LIBS) \
                                $(LIBQTGUI_LIBS)
 

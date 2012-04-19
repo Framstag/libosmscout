@@ -3,6 +3,8 @@ AM_CPPFLAGS = $(LIB_CXXFLAGS) \
 
 lib_LTLIBRARIES = libosmscout.la
 
+libosmscout_la_LDFLAGS = -no-undefined
+
 libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/util/Cache.cpp \
                         osmscout/util/File.cpp \

@@ -18,8 +18,18 @@ AX_CHECK_COMPILE_FLAG([-std=c++0x],
                       [CPPFLAGS="$CPPFLAGS -std=c++0x"])
 
 AC_TYPE_SIZE_T
+
 AC_CHECK_TYPES([std::wstring],,,[#include <string>])
+
+AC_CHECK_TYPES([int8_t],,,[#include <stdint.h>])
+AC_CHECK_TYPES([uint8_t],,,[#include <stdint.h>])
+AC_CHECK_TYPES([int16_t],,,[#include <stdint.h>])
+AC_CHECK_TYPES([uint16_t],,,[#include <stdint.h>])
+AC_CHECK_TYPES([int32_t],,,[#include <stdint.h>])
+AC_CHECK_TYPES([uint32_t],,,[#include <stdint.h>])
+AC_CHECK_TYPES([int64_t],,,[#include <stdint.h>])
 AC_CHECK_TYPES([uint64_t],,,[#include <stdint.h>])
+
 AC_CHECK_SIZEOF([wchar_t])
 
 AC_CHECK_HEADERS([sys/time.h unordered_map unordered_set])
@@ -41,6 +51,34 @@ fi
 
 if test "x$ac_cv_type_std__wstring" = xyes; then
   AC_DEFINE([OSMSCOUT_HAVE_STD__WSTRING],[1],[std::wstring is available])
+fi
+
+if test "x$ac_cv_type_int8_t" = xyes; then
+  AC_DEFINE([OSMSCOUT_HAVE_INT8_T],[1],[int8_t is available])
+fi
+
+if test "x$ac_cv_type_uint8_t" = xyes; then
+  AC_DEFINE([OSMSCOUT_HAVE_UINT8_T],[1],[uint8_t is available])
+fi
+
+if test "x$ac_cv_type_int16_t" = xyes; then
+  AC_DEFINE([OSMSCOUT_HAVE_INT16_T],[1],[int16_t is available])
+fi
+
+if test "x$ac_cv_type_uint16_t" = xyes; then
+  AC_DEFINE([OSMSCOUT_HAVE_UINT16_T],[1],[uint16_t is available])
+fi
+
+if test "x$ac_cv_type_int32_t" = xyes; then
+  AC_DEFINE([OSMSCOUT_HAVE_INT32_T],[1],[int32_t is available])
+fi
+
+if test "x$ac_cv_type_uint32_t" = xyes; then
+  AC_DEFINE([OSMSCOUT_HAVE_UINT32_T],[1],[uint32_t is available])
+fi
+
+if test "x$ac_cv_type_int64_t" = xyes; then
+  AC_DEFINE([OSMSCOUT_HAVE_INT64_T],[1],[int64_t is available])
 fi
 
 if test "x$ac_cv_type_uint64_t" = xyes; then

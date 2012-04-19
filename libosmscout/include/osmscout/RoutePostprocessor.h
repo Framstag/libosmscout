@@ -40,7 +40,7 @@ namespace osmscout {
   class OSMSCOUT_API RoutePostprocessor
   {
   public:
-    OSMSCOUT_API class Postprocessor : public Referencable
+    class OSMSCOUT_API Postprocessor : public Referencable
     {
     public:
       virtual ~Postprocessor();
@@ -55,7 +55,7 @@ namespace osmscout {
     /**
      * Places the given description at the start node
      */
-    OSMSCOUT_API class StartPostprocessor : public Postprocessor
+    class OSMSCOUT_API StartPostprocessor : public Postprocessor
     {
     private:
       std::string startDescription;
@@ -71,7 +71,7 @@ namespace osmscout {
     /**
      * Places the given description at the target node
      */
-    OSMSCOUT_API class TargetPostprocessor : public Postprocessor
+    class OSMSCOUT_API TargetPostprocessor : public Postprocessor
     {
     private:
       std::string targetDescription;
@@ -87,7 +87,7 @@ namespace osmscout {
     /**
      * Calculates the overall running distance and time for each node
      */
-    OSMSCOUT_API class DistanceAndTimePostprocessor : public Postprocessor
+    class OSMSCOUT_API DistanceAndTimePostprocessor : public Postprocessor
     {
     public:
       bool Process(const RoutingProfile& profile,
@@ -98,7 +98,7 @@ namespace osmscout {
     /**
      * Places a name description as way description
      */
-    OSMSCOUT_API class WayNamePostprocessor : public Postprocessor
+    class OSMSCOUT_API WayNamePostprocessor : public Postprocessor
     {
     public:
       bool Process(const RoutingProfile& profile,
@@ -109,7 +109,7 @@ namespace osmscout {
     /**
      * Places a crossing ways description as a description of the name of all ways crossing the given node
      */
-    OSMSCOUT_API class CrossingWaysPostprocessor : public Postprocessor
+    class OSMSCOUT_API CrossingWaysPostprocessor : public Postprocessor
     {
     private:
       void AddCrossingWaysDescriptions(RouteDescription::CrossingWaysDescription* description,
@@ -127,7 +127,7 @@ namespace osmscout {
     /**
      * Places a turn description for every node
      */
-    OSMSCOUT_API class DirectionPostprocessor : public Postprocessor
+    class OSMSCOUT_API DirectionPostprocessor : public Postprocessor
     {
     private:
       static const double curveMinInitialAngle;
@@ -145,7 +145,7 @@ namespace osmscout {
     /**
      * Generates drive instructions
      */
-    OSMSCOUT_API class InstructionPostprocessor : public Postprocessor
+    class OSMSCOUT_API InstructionPostprocessor : public Postprocessor
     {
     private:
       enum State {

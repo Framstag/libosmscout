@@ -21,7 +21,8 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cmath>
+
+#include <osmscout/private/Math.h>
 
 #include <osmscout/DataFile.h>
 

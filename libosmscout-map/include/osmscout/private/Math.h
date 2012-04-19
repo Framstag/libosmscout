@@ -29,6 +29,10 @@
 
 #include <osmscout/private/Config.h>
 
+#if !defined(M_PI)
+  #define M_PI 3.14159265358979323846
+#endif
+
 #if !defined(HAVE_DECL_LOG2)
   inline double log2(double x)
   {

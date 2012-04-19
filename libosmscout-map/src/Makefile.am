@@ -3,7 +3,7 @@ AM_CPPFLAGS = $(LIB_CXXFLAGS) \
               $(LIBOSMSCOUT_CFLAGS)
 
 lib_LTLIBRARIES = libosmscoutmap.la
-libosmscoutmap_la_LDFLAGS  = $(LIBOSMSCOUT_LIBS)
+libosmscoutmap_la_LDFLAGS  = -no-undefined $(LIBOSMSCOUT_LIBS)
 
 libosmscoutmap_la_SOURCES = osmscout/oss/Scanner.cpp \
                             osmscout/oss/Parser.cpp \

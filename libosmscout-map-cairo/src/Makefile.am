@@ -6,7 +6,8 @@ AM_CPPFLAGS = $(LIB_CXXFLAGS) \
               $(LIBPNG_CFLAGS)
 
 lib_LTLIBRARIES = libosmscoutmapcairo.la
-libosmscoutmapcairo_la_LDFLAGS  = $(LIBOSMSCOUTMAP_LIBS) \
+libosmscoutmapcairo_la_LDFLAGS  = -no-undefined \
+                                  $(LIBOSMSCOUTMAP_LIBS) \
                                   $(LIBOSMSCOUT_LIBS) \
                                   $(LIBCAIRO_LIBS) \
                                   $(LIBPNG_LIBS)

@@ -9,7 +9,8 @@ AM_CPPFLAGS = $(LIB_CXXFLAGS) -DOSMSCOUTIMPORTDLL \
               $(ZLIB_CFLAGS)
 
 lib_LTLIBRARIES = libosmscoutimport.la
-libosmscoutimport_la_LDFLAGS  = $(LIBOSMSCOUT_LIBS) \
+libosmscoutimport_la_LDFLAGS  = -no-undefined \
+                                $(LIBOSMSCOUT_LIBS) \
                                 $(XML2_LIBS) \
                                 $(PROTOBUF_LIBS) \
                                 $(ZLIB_LIBS)
@@ -45,4 +46,3 @@ libosmscoutimport_la_SOURCES += osmscout/import/pbf/fileformat.pb.cc \
                                 osmscout/import/PreprocessPBF.cpp
 endif
 endif
-

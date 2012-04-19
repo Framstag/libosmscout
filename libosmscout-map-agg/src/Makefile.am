@@ -6,7 +6,8 @@ AM_CPPFLAGS = $(LIB_CXXFLAGS) \
               $(LIBFREETYPE_CFLAGS)
 
 lib_LTLIBRARIES = libosmscoutmapagg.la
-libosmscoutmapagg_la_LDFLAGS  = $(LIBOSMSCOUTMAP_LIBS) \
+libosmscoutmapagg_la_LDFLAGS  = -no-undefined \
+                                $(LIBOSMSCOUTMAP_LIBS) \
                                 $(LIBOSMSCOUT_LIBS) \
                                 $(LIBAGG_LIBS) \
                                 $(LIBFREETYPE_LIBS)

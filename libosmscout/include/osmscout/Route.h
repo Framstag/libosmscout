@@ -402,7 +402,7 @@ namespace osmscout {
 
     typedef Ref<MotorwayLeaveDescription> MotorwayLeaveDescriptionRef;
 
-    class Node
+    class OSMSCOUT_API Node
     {
     private:
       Id                                           currentNodeId;

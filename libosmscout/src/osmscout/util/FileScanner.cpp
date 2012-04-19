@@ -22,6 +22,7 @@
 #include <cassert>
 #include <cerrno>
 #include <cstring>
+#include <cstdio>
 #include <iostream>
 #include <limits>
 
@@ -34,6 +35,10 @@
 
 #if defined(__WIN32__) || defined(WIN32)
   #include<io.h>
+
+  #if !defined(_fileno)
+    #define _fileno(__F) ((__F)->_file)
+  #endif
 #endif
 
 #include <osmscout/util/Number.h>
