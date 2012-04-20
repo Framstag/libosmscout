@@ -114,7 +114,7 @@ namespace osmscout {
       return false;
     }
 
-    if (!routeNodeDataFile.Open(path,true,false)) {
+    if (!routeNodeDataFile.Open(path,true,true)) {
       std::cerr << "Cannot open 'route.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
