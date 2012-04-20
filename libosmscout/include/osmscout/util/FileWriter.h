@@ -31,8 +31,9 @@ namespace osmscout {
   class OSMSCOUT_API FileWriter
   {
   private:
-    FILE *file;
-    bool hasError;
+    std::string filename;
+    FILE        *file;
+    bool        hasError;
 
   public:
     FileWriter();
@@ -40,9 +41,17 @@ namespace osmscout {
 
     bool Open(const std::string& filename);
     bool Close();
-    bool IsOpen() const;
+    inline bool IsOpen() const
+    {
+      return file!=NULL;
+    }
 
-    bool HasError() const;
+    inline bool HasError() const
+    {
+      return file==NULL || hasError;
+    }
+
+    std::string GetFilename() const;
 
     bool GetPos(FileOffset &pos);
     bool SetPos(FileOffset pos);

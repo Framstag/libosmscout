@@ -50,12 +50,11 @@ namespace osmscout {
 
     hasError=file==NULL;
 
-    return !hasError;
-  }
+    if (!hasError) {
+      this->filename=filename;
+    }
 
-  bool FileWriter::IsOpen() const
-  {
-    return file!=NULL;
+    return !hasError;
   }
 
   bool FileWriter::Close()
@@ -73,14 +72,14 @@ namespace osmscout {
     return !hasError;
   }
 
-  bool FileWriter::HasError() const
+  std::string FileWriter::GetFilename() const
   {
-    return file==NULL || hasError;
+    return filename;
   }
 
   bool FileWriter::GetPos(FileOffset& pos)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -93,7 +92,7 @@ namespace osmscout {
 
   bool FileWriter::SetPos(FileOffset pos)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -120,7 +119,7 @@ namespace osmscout {
 
   bool FileWriter::Write(bool boolean)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -133,7 +132,7 @@ namespace osmscout {
 
   bool FileWriter::Write(int8_t number)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -151,7 +150,7 @@ namespace osmscout {
 
   bool FileWriter::Write(uint8_t number)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -162,7 +161,7 @@ namespace osmscout {
 
   bool FileWriter::Write(uint16_t number)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -180,7 +179,7 @@ namespace osmscout {
 
   bool FileWriter::Write(uint32_t number)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -199,7 +198,7 @@ namespace osmscout {
 #if defined(OSMSCOUT_HAVE_UINT64_T)
   bool FileWriter::Write(uint64_t number)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -218,7 +217,7 @@ namespace osmscout {
 
   bool FileWriter::Write(int32_t number)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -242,12 +241,12 @@ namespace osmscout {
     */
   bool FileWriter::WriteNumber(uint64_t number)
   {
-    char         buffer[10];
-    unsigned int bytes;
-
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
+
+    char         buffer[10];
+    unsigned int bytes;
 
     bytes=EncodeNumber(number,buffer);
 
@@ -264,12 +263,12 @@ namespace osmscout {
     */
   bool FileWriter::WriteNumber(uint32_t number)
   {
-    char         buffer[10];
-    unsigned int bytes;
-
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
+
+    char         buffer[10];
+    unsigned int bytes;
 
     bytes=EncodeNumber(number,buffer);
 
@@ -285,12 +284,12 @@ namespace osmscout {
     */
   bool FileWriter::WriteNumber(uint16_t number)
   {
-    char         buffer[10];
-    unsigned int bytes;
-
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
+
+    char         buffer[10];
+    unsigned int bytes;
 
     bytes=EncodeNumber(number,buffer);
 
@@ -306,12 +305,12 @@ namespace osmscout {
     */
   bool FileWriter::WriteNumber(int32_t number)
   {
-    char         buffer[10];
-    unsigned int bytes;
-
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
+
+    char         buffer[10];
+    unsigned int bytes;
 
     bytes=EncodeNumber(number,buffer);
 
@@ -322,12 +321,12 @@ namespace osmscout {
 
   bool FileWriter::FlushCurrentBlockWithZeros(size_t blockSize)
   {
-    FileOffset currentPos;
-    size_t     bytesToWrite;
-
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
+
+    FileOffset currentPos;
+    size_t     bytesToWrite;
 
     if (!GetPos(currentPos)) {
       return false;
