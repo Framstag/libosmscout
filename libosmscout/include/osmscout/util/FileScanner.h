@@ -72,9 +72,17 @@ namespace osmscout {
     bool Open(const std::string& filename, bool readOnly=true, bool useMmap=true);
     bool Close();
 
-    bool IsOpen() const;
+    inline bool IsOpen() const
+    {
+      return file!=NULL;
+    }
+
     bool IsEOF() const;
-    bool HasError() const;
+
+    inline  bool HasError() const
+    {
+      return file==NULL || hasError;
+    }
 
     std::string GetFilename() const;
 

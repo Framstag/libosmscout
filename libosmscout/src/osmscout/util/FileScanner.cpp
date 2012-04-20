@@ -205,14 +205,9 @@ namespace osmscout {
     return result;
   }
 
-  bool FileScanner::IsOpen() const
-  {
-    return file!=NULL;
-  }
-
   bool FileScanner::IsEOF() const
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return true;
     }
 
@@ -223,11 +218,6 @@ namespace osmscout {
 #endif
 
     return feof(file);
-  }
-
-  bool FileScanner::HasError() const
-  {
-    return file==NULL || hasError;
   }
 
   std::string FileScanner::GetFilename() const
@@ -242,7 +232,7 @@ namespace osmscout {
 
   bool FileScanner::SetPos(FileOffset pos)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -261,12 +251,16 @@ namespace osmscout {
     clearerr(file);
     hasError=fseek(file,pos,SEEK_SET)!=0;
 
+    if (hasError) {
+      std::cerr << "Cannot set file pos:" << strerror(errno) << std::endl;
+    }
+
     return !hasError;
   }
 
   bool FileScanner::GetPos(FileOffset& pos) const
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -318,7 +312,7 @@ namespace osmscout {
 
   bool FileScanner::Read(std::string& value)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -378,7 +372,7 @@ namespace osmscout {
 
   bool FileScanner::Read(bool& boolean)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -414,7 +408,7 @@ namespace osmscout {
 
   bool FileScanner::Read(uint8_t& number)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -448,7 +442,7 @@ namespace osmscout {
 
   bool FileScanner::Read(uint16_t& number)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -490,7 +484,7 @@ namespace osmscout {
 
   bool FileScanner::Read(uint32_t& number)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -533,7 +527,7 @@ namespace osmscout {
 #if defined(OSMSCOUT_HAVE_UINT64_T)
   bool FileScanner::Read(uint64_t& number)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -576,7 +570,7 @@ namespace osmscout {
 
   bool FileScanner::Read(int8_t& number)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -618,7 +612,7 @@ namespace osmscout {
 
   bool FileScanner::Read(int32_t& number)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -661,7 +655,7 @@ namespace osmscout {
 #if defined(OSMSCOUT_HAVE_UINT64_T)
   bool FileScanner::ReadNumber(uint64_t& number)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -715,7 +709,7 @@ namespace osmscout {
 
   bool FileScanner::ReadNumber(uint32_t& number)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -768,7 +762,7 @@ namespace osmscout {
 
   bool FileScanner::ReadNumber(uint16_t& number)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -821,7 +815,7 @@ namespace osmscout {
 
   bool FileScanner::ReadNumber(uint8_t& number)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
@@ -877,7 +871,7 @@ namespace osmscout {
     */
   bool FileScanner::ReadNumber(int32_t& number)
   {
-    if (file==NULL || hasError) {
+    if (HasError()) {
       return false;
     }
 
