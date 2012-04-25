@@ -42,7 +42,13 @@ namespace osmscout {
     this->cellXCount=cellXCount;
     this->cellYCount=cellYCount;
 
-    area.resize(cellXCount*cellYCount/4,0x00);
+    uint32_t size=cellXCount*cellYCount/4;
+
+    if (cellXCount*cellYCount%4>0) {
+      size++;
+    }
+
+    area.resize(size,0x00);
   }
 
   WaterIndexGenerator::State WaterIndexGenerator::Area::GetState(uint32_t x, uint32_t y) const
