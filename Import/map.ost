@@ -109,6 +109,8 @@ TYPES
   TYPE "natural_beach" = NODE AREA ("natural"=="beach")
   TYPE "natural_cave_entrance" = NODE AREA ("natural"=="cave_entrance")
   TYPE "natural_cliff" = NODE WAY AREA ("natural"=="cliff")
+  
+  // Do not delete the following type, they are required by the GenWaterIndex import step
   TYPE "natural_coastline" = WAY RELATION ("natural"=="coastline") OPTIONS OPTIMIZE_LOW_ZOOM
   TYPE "natural_fell" = NODE AREA ("natural"=="fell")
   TYPE "natural_glacier" = NODE AREA ("natural"=="glacier")
@@ -183,9 +185,10 @@ TYPES
   TYPE "tourism_viewpoint" = NODE ("tourism"=="viewpoint")
   TYPE "tourism_zoo" = NODE AREA ("tourism"=="zoo")
   
-  // we have multipolygon and boundary as relation type  
+  // Do not delete the following type, they are required by the GenCityStreet import step
   TYPE "boundary_administrative" = WAY AREA ("boundary"=="administrative") OR
-                                   RELATION ("type"=="boundary" AND "boundary"=="administrative") OPTIONS MULTIPOLYGON 
+                                   RELATION ("type"=="boundary" AND "boundary"=="administrative") OPTIONS MULTIPOLYGON
+                                    
   TYPE "boundary_civil" = AREA ("boundary"=="civil")
   TYPE "boundary_political" = AREA ("boundary"=="political")
   
@@ -194,11 +197,14 @@ TYPES
   TYPE "place_state" = NODE AREA ("place"=="state")
   TYPE "place_region" = NODE AREA ("place"=="region")
   TYPE "place_county" = NODE AREA ("place"=="county")
+  
+  // Do not delete the following types, they are required by the GenCityStreet import step
   TYPE "place_city" = NODE AREA ("place"=="city")
   TYPE "place_town" = NODE AREA ("place"=="town")
   TYPE "place_village" = NODE AREA ("place"=="village")
   TYPE "place_hamlet" = NODE AREA ("place"=="hamlet")
   TYPE "place_suburb" = NODE AREA ("place"=="suburb")
+  
   TYPE "place_locality" = NODE AREA ("place"=="locality")
   TYPE "place_island" = NODE AREA ("place"=="island")
   
