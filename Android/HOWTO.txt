@@ -14,11 +14,11 @@
 
 1. Build environment and used software
 
-  - Linux (not tested yet on other platforms).
-  - Android SDK r17 (developer.android.com/sdk/index.html).
-  - Android NDK r17 (developer.android.com/sdk/ndk/index.html).
+  - Linux or Windows (not tested yet on other platforms).
+  - Android SDK r18 (developer.android.com/sdk/index.html).
+  - Android NDK r7c (developer.android.com/sdk/ndk/index.html).
   - Eclipse IDE 3.7.0 (www.eclipse.org/downloads).
-  - Eclipse ADT Plugin v17.0.0 (developer.android.com/sdk/eclipse-adt.html).
+  - Eclipse ADT Plugin v18.0.0 (developer.android.com/sdk/eclipse-adt.html).
 
 
 2. Environment variables 
@@ -30,10 +30,11 @@ executable search PATH environmental variable.
 
 3. Build the OsmScout JNI shared library
 
-Go to the “libosmscout/Android/OsmScoutLib/jni” directory and run the “build.sh”
-script. This script will copy the configuration headers files (Config.h,
-CoreFeatures.h and MapFeatures.h), build the libosmscout-arm static library and
-libosmscout-jni shared library. At the end of the build process, the 
+Go to the “libosmscout/Android/OsmScoutLib/jni” directory and run the build
+script ("build.sh" on linux, "build.bat" on Windows). This script will copy
+the configuration headers files (Config.h, CoreFeatures.h and MapFeatures.h),
+build the libosmscout-arm static library and libosmscout-jni shared library.
+At the end of the build process, the 
 “libosmscout/Android/OsmScoutLib/libs/armeabi” directory shall contain both the
 "libgnustl_shared.so" and "libosmscout-jni.so" shared libraries.
 
