@@ -40,7 +40,7 @@ namespace osmscout {
 
   bool WayDataGenerator::ReadWayBlacklist(const ImportParameter& parameter,
                                           Progress& progress,
-                                          std::set<Id>& wayBlacklist)
+                                          BlacklistSet& wayBlacklist)
   {
     FileScanner scanner;
 
@@ -216,7 +216,7 @@ namespace osmscout {
                                                      Progress& progress,
                                                      const TypeConfig& typeConfig,
                                                      const EndPointWayMap& endPointWayMap,
-                                                     std::set<Id>& endPointAreaSet)
+                                                     EndPointAreaSet& endPointAreaSet)
   {
     FileScanner scanner;
     uint32_t    rawWayCount=0;
@@ -281,7 +281,7 @@ namespace osmscout {
 
   void WayDataGenerator::GetWayMergeCandidates(const RawWay& way,
                                                const EndPointWayMap& endPointWayMap,
-                                               const std::set<Id>& wayBlacklist,
+                                               const BlacklistSet& wayBlacklist,
                                                std::set<Id>& candidates)
   {
     EndPointWayMap::const_iterator endPoints;
@@ -315,7 +315,7 @@ namespace osmscout {
 
   bool WayDataGenerator::LoadWays(Progress& progress,
                                   FileScanner& scanner,
-                                  NumericIndex<Id,RawWay>& rawWayIndex,
+                                  NumericIndex<Id>& rawWayIndex,
                                   const std::set<Id>& ids,
                                   std::map<Id,RawWayRef>& ways)
   {
@@ -388,6 +388,8 @@ namespace osmscout {
                                             Id oldId,
                                             Id newId)
   {
+    return;
+
     std::list<TurnRestrictionRef> oldRestrictions;
 
     std::pair<std::multimap<Id,TurnRestrictionRef>::iterator,
@@ -422,8 +424,8 @@ namespace osmscout {
                                   std::vector<RawWayRef>& rawWays,
                                   size_t blockCount,
                                   EndPointWayMap& endPointWayMap,
-                                  NumericIndex<Id,RawWay>& rawWayIndex,
-                                  std::set<Id> & wayBlacklist,
+                                  NumericIndex<Id>& rawWayIndex,
+                                  BlacklistSet& wayBlacklist,
                                   std::multimap<Id,TurnRestrictionRef>& restrictions,
                                   size_t& mergeCount)
   {
@@ -656,9 +658,9 @@ namespace osmscout {
     uint32_t                             writtenWayCount=0;
 
     EndPointWayMap                       endPointWayMap;
-    std::set<Id>                         endPointAreaSet;
+    EndPointAreaSet                      endPointAreaSet;
 
-    std::set<Id>                         wayBlacklist;
+    BlacklistSet                         wayBlacklist;
 
 #if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
     endPointWayMap.reserve(200000);
@@ -717,11 +719,11 @@ namespace osmscout {
 
     progress.Info(NumberToString(endPointWayMap.size())+ " endpoints collected");
 
-    DataFile<RawNode>       nodeDataFile("rawnodes.dat",
-                                         "rawnode.idx",
-                                         parameter.GetRawNodeDataCacheSize(),
-                                         parameter.GetRawNodeIndexCacheSize());
-    NumericIndex<Id,RawWay> rawWayIndex("rawway.idx",parameter.GetRawWayIndexCacheSize());
+    DataFile<RawNode> nodeDataFile("rawnodes.dat",
+                                   "rawnode.idx",
+                                   parameter.GetRawNodeDataCacheSize(),
+                                   parameter.GetRawNodeIndexCacheSize());
+    NumericIndex<Id>  rawWayIndex("rawway.idx",parameter.GetRawWayIndexCacheSize());
 
     if (!nodeDataFile.Open(parameter.GetDestinationDirectory(),
                            parameter.GetRawNodeIndexMemoryMaped(),
@@ -783,11 +785,7 @@ namespace osmscout {
 
         currentWay++;
 
-        std::set<Id>::iterator blacklistEntry=wayBlacklist.find(block[blockCount]->GetId());
-
-        if (blacklistEntry!=wayBlacklist.end()) {
-          wayBlacklist.erase(blacklistEntry);
-
+        if (wayBlacklist.find(block[blockCount]->GetId())!=wayBlacklist.end()) {
           continue;
         }
 
@@ -849,11 +847,16 @@ namespace osmscout {
         nodesMap[(*node)->GetId()]=*node;
       }
 
+      nodeIds.clear();
       nodes.clear();
 
       for (size_t w=0; w<blockCount; w++) {
         // Way has been joined, no need to write it
-        if (wayBlacklist.find(block[w]->GetId())!=wayBlacklist.end()) {
+        BlacklistSet::iterator blacklistEntry=wayBlacklist.find(block[w]->GetId());
+
+        if (blacklistEntry!=wayBlacklist.end()) {
+          wayBlacklist.erase(blacklistEntry);
+
           continue;
         }
 
@@ -904,11 +907,11 @@ namespace osmscout {
         // startIsJoint/endIsJoint
 
         if (!way.IsArea()) {
-          EndPointWayMap::const_iterator wayJoint;
-          std::set<Id>::const_iterator   areaJoint;
-          std::list<Id>::iterator        jointWayId;
-          size_t                         startNodeJointCount=0;
-          size_t                         endNodeJointCount=0;
+          EndPointWayMap::const_iterator  wayJoint;
+          EndPointAreaSet::const_iterator areaJoint;
+          std::list<Id>::iterator         jointWayId;
+          size_t                          startNodeJointCount=0;
+          size_t                          endNodeJointCount=0;
 
           wayJoint=endPointWayMap.find(way.nodes.front().GetId());
 

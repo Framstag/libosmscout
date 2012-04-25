@@ -38,7 +38,7 @@ namespace osmscout {
     typedef Ref<N> ValueType;
 
   private:
-    typedef NumericIndex<Id,ValueType> DataIndex;
+    typedef NumericIndex<Id>            DataIndex;
 
     typedef Cache<FileOffset,ValueType> DataCache;
 

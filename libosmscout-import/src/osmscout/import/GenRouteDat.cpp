@@ -293,7 +293,7 @@ namespace osmscout {
 
   bool RouteDataGenerator::LoadWays(Progress& progress,
                                     FileScanner& scanner,
-                                    NumericIndex<Id,Way>& wayIndex,
+                                    NumericIndex<Id>& wayIndex,
                                     const std::set<Id>& ids,
                                     std::list<WayRef>& ways)
   {
@@ -438,7 +438,7 @@ namespace osmscout {
 
     progress.Info(NumberToString(nodeWayMap.size())+ " route nodes collected");
 
-    NumericIndex<Id,Way> wayIndex("way.idx",parameter.GetWayIndexCacheSize());
+    NumericIndex<Id> wayIndex("way.idx",parameter.GetWayIndexCacheSize());
 
     if (!wayIndex.Open(parameter.GetDestinationDirectory(),
                            parameter.GetWayIndexMemoryMaped())) {

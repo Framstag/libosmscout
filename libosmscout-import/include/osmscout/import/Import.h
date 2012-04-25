@@ -46,6 +46,10 @@ namespace osmscout {
     size_t      startStep;                //! Starting step for import
     size_t      endStep;                  //! End step for import
 
+    bool        renumberIds;              //! Renumber all Ids
+    size_t      renumberBlockSize;        //! Number of entries loaded in one renumber iterations
+    size_t      renumberMag;              //! Zoom level for individual renumber sorting cells
+
     size_t      numericIndexPageSize;     //! Size of an numeric index page in bytes
 
     bool        rawNodeIndexMemoryMaped;  //! Use memory mapping for raw node index file access
@@ -94,6 +98,10 @@ namespace osmscout {
     size_t GetStartStep() const;
     size_t GetEndStep() const;
 
+    bool GetRenumberIds() const;
+    size_t GetRenumberBlockSize() const;
+    size_t GetRenumberMag() const;
+
     size_t GetNumericIndexPageSize() const;
 
     bool GetRawNodeIndexMemoryMaped() const;
@@ -138,6 +146,10 @@ namespace osmscout {
 
     void SetStartStep(size_t startStep);
     void SetSteps(size_t startStep, size_t endStep);
+
+    void SetRenumberIds(bool renumberIds);
+    void SetRenumberBlockSize(size_t renumberBlockSize);
+    void SetRenumberMag(size_t renumberMag);
 
     void SetNumericIndexPageSize(size_t numericIndexPageSize);
 

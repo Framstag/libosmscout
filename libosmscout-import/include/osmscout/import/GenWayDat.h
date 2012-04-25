@@ -29,6 +29,7 @@
 #include <osmscout/TurnRestriction.h>
 
 #include <osmscout/util/HashMap.h>
+#include <osmscout/util/HashSet.h>
 
 #include <osmscout/import/Import.h>
 #include <osmscout/import/RawWay.h>
@@ -39,10 +40,12 @@ namespace osmscout {
   {
   private:
     typedef OSMSCOUT_HASHMAP<Id,std::list<Id> > EndPointWayMap;
+    typedef OSMSCOUT_HASHSET<Id>                EndPointAreaSet;
+    typedef OSMSCOUT_HASHSET<Id>                BlacklistSet;
 
     bool ReadWayBlacklist(const ImportParameter& parameter,
                           Progress& progress,
-                          std::set<Id>& wayBlacklist);
+                          BlacklistSet& wayBlacklist);
 
     bool ReadTurnRestrictions(const ImportParameter& parameter,
                               Progress& progress,
@@ -61,16 +64,16 @@ namespace osmscout {
                                      Progress& progress,
                                      const TypeConfig& typeConfig,
                                      const EndPointWayMap& endPointWayMap,
-                                     std::set<Id>& endPointAreaSet);
+                                     EndPointAreaSet& endPointAreaSet);
 
     void GetWayMergeCandidates(const RawWay& way,
                                const EndPointWayMap& endPointWayMap,
-                               const std::set<Id>& wayBlacklist,
+                               const BlacklistSet& wayBlacklist,
                                std::set<Id>& candidates);
 
     bool LoadWays(Progress& progress,
                   FileScanner& scanner,
-                  NumericIndex<Id,RawWay>& rawWayIndex,
+                  NumericIndex<Id>& rawWayIndex,
                   const std::set<Id>& ids,
                   std::map<Id,RawWayRef>& ways);
 
@@ -87,8 +90,8 @@ namespace osmscout {
                   std::vector<RawWayRef>& rawWays,
                   size_t blockCount,
                   EndPointWayMap& endPointWayMap,
-                  NumericIndex<Id,RawWay>& rawWayIndex,
-                  std::set<Id>& wayBlacklist,
+                  NumericIndex<Id>& rawWayIndex,
+                  BlacklistSet& wayBlacklist,
                   std::multimap<Id,TurnRestrictionRef>& restrictions,
                   size_t& mergeCount);
 

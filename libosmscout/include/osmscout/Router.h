@@ -32,9 +32,6 @@
 // Datafiles
 #include <osmscout/WayDataFile.h>
 
-// Fileoffset by Id index
-#include <osmscout/WayIndex.h>
-
 // Routing
 #include <osmscout/Route.h>
 #include <osmscout/RouteData.h>

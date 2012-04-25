@@ -34,10 +34,6 @@
 
 #include <osmscout/OptimizeLowZoom.h>
 
-// Fileoffset by Id index
-#include <osmscout/NodeIndex.h>
-#include <osmscout/WayIndex.h>
-
 // In area index
 #include <osmscout/AreaAreaIndex.h>
 #include <osmscout/AreaNodeIndex.h>

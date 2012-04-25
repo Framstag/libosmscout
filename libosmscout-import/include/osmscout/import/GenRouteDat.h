@@ -52,7 +52,7 @@ namespace osmscout {
 
     bool LoadWays(Progress& progress,
                   FileScanner& scanner,
-                  NumericIndex<Id,Way>& wayIndex,
+                  NumericIndex<Id>& wayIndex,
                   const std::set<Id>& ids,
                   std::list<WayRef>& ways);
 

@@ -36,6 +36,19 @@ namespace osmscout {
   private:
     bool RenumberRawNodes(const ImportParameter& parameter,
                           Progress& progress);
+    bool RenumberWayNodes(const ImportParameter& parameter,
+                          Progress& progress,
+                          const std::map<Id,Id>& renumberedNodes);
+    bool RenumberRelationNodes(const ImportParameter& parameter,
+                               Progress& progress,
+                               const std::map<Id,Id>& renumberedNodes);
+
+    bool RenumberRawWays(const ImportParameter& parameter,
+                         Progress& progress);
+
+    bool RenumberRelationWays(const ImportParameter& parameter,
+                              Progress& progress,
+                              const std::map<Id,Id>& renumberedWays);
 
   public:
     std::string GetDescription() const;

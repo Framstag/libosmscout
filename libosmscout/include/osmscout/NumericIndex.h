@@ -37,7 +37,7 @@ namespace osmscout {
     Numeric index handles an index over instance of class <T> where the index criteria
     is of type <N>, where <N> has a numeric nature (usually Id).
     */
-  template <class N, class T>
+  template <class N>
   class NumericIndex
   {
   private:
@@ -107,9 +107,9 @@ namespace osmscout {
     void DumpStatistics() const;
   };
 
-  template <class N, class T>
-  NumericIndex<N,T>::NumericIndex(const std::string& filename,
-                                  unsigned long cacheSize)
+  template <class N>
+  NumericIndex<N>::NumericIndex(const std::string& filename,
+                                unsigned long cacheSize)
    : filepart(filename),
      cacheSize(cacheSize),
      pageSize(0),
@@ -119,8 +119,8 @@ namespace osmscout {
     // no code
   }
 
-  template <class N, class T>
-  NumericIndex<N,T>::~NumericIndex()
+  template <class N>
+  NumericIndex<N>::~NumericIndex()
   {
     Close();
 
@@ -130,8 +130,8 @@ namespace osmscout {
   /**
     Binary search for index page for given id
     */
-  template <class N, class T>
-  inline size_t NumericIndex<N,T>::GetPageIndex(const PageRef& page, Id id) const
+  template <class N>
+  inline size_t NumericIndex<N>::GetPageIndex(const PageRef& page, Id id) const
   {
     int size=page->entries.size();
 
@@ -158,8 +158,8 @@ namespace osmscout {
     return size;
   }
 
-  template <class N, class T>
-  inline bool NumericIndex<N,T>::ReadPage(FileOffset offset, PageRef& page) const
+  template <class N>
+  inline bool NumericIndex<N>::ReadPage(FileOffset offset, PageRef& page) const
   {
     page->entries.clear();
     page->entries.reserve(pageSize);
@@ -213,8 +213,8 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
-  template <class N, class T>
-  bool NumericIndex<N,T>::Open(const std::string& path, bool memoryMaped)
+  template <class N>
+  bool NumericIndex<N>::Open(const std::string& path, bool memoryMaped)
   {
     uint32_t    entries;
     FileOffset  lastLevelPageStart;
@@ -281,8 +281,8 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
-  template <class N, class T>
-  bool NumericIndex<N,T>::Close()
+  template <class N>
+  bool NumericIndex<N>::Close()
   {
     if (scanner.IsOpen()) {
       return scanner.Close();
@@ -291,9 +291,9 @@ namespace osmscout {
     return true;
   }
 
-  template <class N, class T>
-  bool NumericIndex<N,T>::GetOffset(const N& id,
-                                    FileOffset& offset) const
+  template <class N>
+  bool NumericIndex<N>::GetOffset(const N& id,
+                                  FileOffset& offset) const
   {
     size_t r=GetPageIndex(root,id);
 
@@ -335,12 +335,12 @@ namespace osmscout {
     return startId==id;
   }
 
-  template <class N, class T>
-  bool NumericIndex<N,T>::GetOffsets(const std::vector<N>& ids,
-                                     std::vector<FileOffset>& offsets) const
+  template <class N>
+  bool NumericIndex<N>::GetOffsets(const std::vector<N>& ids,
+                                   std::vector<FileOffset>& offsets) const
   {
-    offsets.reserve(ids.size());
     offsets.clear();
+    offsets.reserve(ids.size());
 
     for (typename std::vector<N>::const_iterator id=ids.begin();
          id!=ids.end();
@@ -356,12 +356,12 @@ namespace osmscout {
     return true;
   }
 
-  template <class N, class T>
-  bool NumericIndex<N,T>::GetOffsets(const std::list<N>& ids,
-                                     std::vector<FileOffset>& offsets) const
+  template <class N>
+  bool NumericIndex<N>::GetOffsets(const std::list<N>& ids,
+                                   std::vector<FileOffset>& offsets) const
   {
-    offsets.reserve(ids.size());
     offsets.clear();
+    offsets.reserve(ids.size());
 
     for (typename std::list<N>::const_iterator id=ids.begin();
          id!=ids.end();
@@ -377,12 +377,12 @@ namespace osmscout {
     return true;
   }
 
-  template <class N, class T>
-  bool NumericIndex<N,T>::GetOffsets(const std::set<N>& ids,
-                                     std::vector<FileOffset>& offsets) const
+  template <class N>
+  bool NumericIndex<N>::GetOffsets(const std::set<N>& ids,
+                                   std::vector<FileOffset>& offsets) const
   {
-    offsets.reserve(ids.size());
     offsets.clear();
+    offsets.reserve(ids.size());
 
     for (typename std::set<N>::const_iterator id=ids.begin();
          id!=ids.end();
@@ -398,8 +398,8 @@ namespace osmscout {
     return true;
   }
 
-  template <class N,class T>
-  void NumericIndex<N,T>::DumpStatistics() const
+  template <class N>
+  void NumericIndex<N>::DumpStatistics() const
   {
     size_t memory=0;
     size_t pages=0;

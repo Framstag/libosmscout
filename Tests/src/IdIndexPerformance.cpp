@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
     queries.push_back(ids[(int)(QUERY_COUNT*rand()/(RAND_MAX+1.0))]);
   }
 
-  osmscout::NumericIndex<osmscout::Id,osmscout::Way> wayIndex("way.idx",1000);
+  osmscout::NumericIndex<osmscout::Id> wayIndex("way.idx",1000);
 
   if (!wayIndex.Open(".",true)) {
     std::cerr << "Cannot open way index file!" << std::endl;

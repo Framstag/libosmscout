@@ -69,11 +69,14 @@ namespace osmscout {
    : typefile("map.ost"),
      startStep(defaultStartStep),
      endStep(defaultEndStep),
+     renumberIds(false),
+     renumberBlockSize(40000000),
+     renumberMag(14),
      numericIndexPageSize(4096),
      rawNodeIndexMemoryMaped(true),
      rawNodeDataMemoryMaped(false),
      rawNodeDataCacheSize(10000),
-     rawNodeIndexCacheSize(50000),
+     rawNodeIndexCacheSize(25000),
      rawWayIndexMemoryMaped(true),
      rawWayDataMemoryMaped(false),
      rawWayDataCacheSize(5000),
@@ -124,6 +127,21 @@ namespace osmscout {
   size_t ImportParameter::GetEndStep() const
   {
     return endStep;
+  }
+
+  bool ImportParameter::GetRenumberIds() const
+  {
+    return renumberIds;
+  }
+
+  size_t ImportParameter::GetRenumberBlockSize() const
+  {
+    return renumberBlockSize;
+  }
+
+  size_t ImportParameter::GetRenumberMag() const
+  {
+    return renumberMag;
   }
 
   size_t ImportParameter::GetNumericIndexPageSize() const
@@ -288,6 +306,21 @@ namespace osmscout {
     this->endStep=endStep;
   }
 
+  void ImportParameter::SetRenumberIds(bool renumberIds)
+  {
+    this->renumberIds=renumberIds;
+  }
+
+  void ImportParameter::SetRenumberBlockSize(size_t renumberBlockSize)
+  {
+    this->renumberBlockSize=renumberBlockSize;
+  }
+
+  void ImportParameter::SetRenumberMag(size_t renumberMag)
+  {
+    this->renumberMag=renumberMag;
+  }
+
   void ImportParameter::SetNumericIndexPageSize(size_t numericIndexPageSize)
   {
     this->numericIndexPageSize=numericIndexPageSize;
@@ -401,7 +434,7 @@ namespace osmscout {
         progress.Info(std::string("=> ")+timer.ResultString()+" second(s)");
 
         if (!success) {
-          progress.Error(std::string("Error while executing step ")+(*module)->GetDescription()+"!");
+          progress.Error(std::string("Error while executing step '")+(*module)->GetDescription()+"'!");
           return false;
         }
       }
