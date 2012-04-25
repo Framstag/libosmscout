@@ -183,6 +183,13 @@ namespace osmscout {
     return *this;
   }
 
+  TagInfo& TagInfo::SetToExternal()
+  {
+    internalOnly=false;
+
+    return *this;
+  }
+
   TypeInfo::TypeInfo()
    : id(0),
      canBeNode(false),
@@ -379,7 +386,8 @@ namespace osmscout {
     OSMSCOUT_HASHMAP<std::string,TagId>::const_iterator mapping=stringToTagMap.find(tagName);
 
     if (mapping!=stringToTagMap.end()) {
-      // TODO: Set to externalUse!
+      tags[mapping->second].SetToExternal();
+
       return mapping->second;
     }
 

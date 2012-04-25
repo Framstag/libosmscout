@@ -150,6 +150,7 @@ namespace osmscout {
             bool internalOnly);
 
     TagInfo& SetId(TagId id);
+    TagInfo& SetToExternal();
 
     inline std::string GetName() const
     {
