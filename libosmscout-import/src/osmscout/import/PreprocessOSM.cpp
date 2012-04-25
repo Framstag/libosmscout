@@ -254,7 +254,7 @@ namespace osmscout {
     relation.members=members;
 
     config.GetRelationTypeId(tagMap,type);
-    config.ResolveTags(tagMap,tags);
+    config.ResolveTags(tagMap,relation.tags);
 
     relation.SetType(type);
 

@@ -806,8 +806,6 @@ namespace osmscout {
       rel.SetId(rawRel.GetId());
       rel.SetType(rawRel.GetType());
 
-      //std::cout << "Relation " << rel.GetId() << std::endl;
-
       // Check, if the type should be handled as multipolygon
       isArea=typeConfig.GetTypeInfo(rel.GetType()).GetMultipolygon();
 
