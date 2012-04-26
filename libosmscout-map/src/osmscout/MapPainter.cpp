@@ -366,17 +366,20 @@ namespace osmscout {
       return;
     }
 
+    double fontSize=style.GetSize();
+
     wayScanlines.clear();
     ScanConvertLine(transStart,transEnd,1,1,wayScanlines);
 
-    for (size_t i=0; i<wayScanlines.size(); i++) {
+    size_t i=0;
+    while (i<wayScanlines.size()) {
       if (RegisterPointLabel(projection,
                              parameter,
                              style,
                              text,
                              wayScanlines[i].x+0.5,
                              wayScanlines[i].y+0.5)) {
-        i+=ConvertWidthToPixel(parameter,parameter.GetFontSize())*10;
+        i+=fontSize*ConvertWidthToPixel(parameter,parameter.GetFontSize())*10;
       }
       else {
         i+=2;
