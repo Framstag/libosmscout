@@ -21,4 +21,33 @@ package osm.scout;
 
 public class MapData {
 
+	private int mJniMapDataIndex;
+	
+	public MapData() {
+		
+		mJniMapDataIndex=jniConstructor();
+	}
+	
+	public MapData(int jniMapDataIndex) {
+		
+		mJniMapDataIndex=jniMapDataIndex;
+	}
+	
+	protected void finalize() throws Throwable {
+		
+		try {			
+			jniDestructor(mJniMapDataIndex);
+		}
+		finally {			
+			super.finalize();
+		}
+	}
+	
+	int getJniObjectIndex() {
+		return mJniMapDataIndex;
+	}
+	
+	// Native methods
+	private native int jniConstructor();
+	private native void jniDestructor(int jniObjectTypeSetsIndex);
 }

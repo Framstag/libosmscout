@@ -76,7 +76,8 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := osmscout-jni
 
-LOCAL_C_INCLUDES := ../../../libosmscout/include \
+LOCAL_C_INCLUDES := ./include \
+                    ../../../libosmscout/include \
                     ../../../libosmscout-map/include \
                     $(ANDROID_NDK_PATH)/sources/cxx-stl/gnu-libstdc++/include \
                     $(ANDROID_NDK_PATH)/sources/cxx-stl/gnu-libstdc++/libs/armeabi/include
@@ -95,7 +96,8 @@ LOCAL_SRC_FILES := src/jniDatabase.cpp \
                    src/jniMercatorProjection.cpp \
                    src/jniObjectTypeSets.cpp \
                    src/jniOnLoad.cpp \
-                   src/jniStyleConfig.cpp
+                   src/jniStyleConfig.cpp \
+                   src/jniTypeConfig.cpp
 
 include $(BUILD_SHARED_LIBRARY)
 

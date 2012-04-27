@@ -27,19 +27,17 @@
 #include <osmscout/Node.h>
 #include <osmscout/MapPainter.h>
 
-#include "../include/jniMapPainterCanvas.h"
+#include <jniMapPainterCanvas.h>
+#include <jniObjectArray.h>
 
 #define DEBUG_TAG "OsmScoutJni:MapPainterCanvas"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+using namespace osmscout;
 
-osmscout::MapPainterCanvas           *gMapPainter;
-
-extern osmscout::StyleConfig         *gStyleConfig;
-extern osmscout::MapData             *gMapData;
-extern osmscout::MercatorProjection  *gMercatorProjection;
+extern JniObjectArray<MapData>              *gMapDataArray;
+extern JniObjectArray<MapPainterCanvas>     *gMapPainterArray;
+extern JniObjectArray<MercatorProjection>   *gProjectionArray;
+extern JniObjectArray<StyleConfig>          *gStyleConfigArray;
 
 namespace osmscout {
 
@@ -245,27 +243,74 @@ namespace osmscout {
   }
 }
 
-void Java_osm_scout_MapPainterCanvas_jniConstructor(JNIEnv *env, jobject object)
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+jint Java_osm_scout_MapPainterCanvas_jniConstructor(JNIEnv *env, jobject object)
 {
-  gMapPainter=new osmscout::MapPainterCanvas();
+  MapPainterCanvas *nativeMapPainter=new MapPainterCanvas();
+
+  return gMapPainterArray->Add(nativeMapPainter);
 }
 
-void Java_osm_scout_MapPainterCanvas_jniDestructor(JNIEnv *env, jobject object)
+void Java_osm_scout_MapPainterCanvas_jniDestructor(JNIEnv *env, jobject object,
+                                                   int mapPainterIndex)
 {
-  delete gMapPainter;
+  MapPainterCanvas *nativeMapPainter=
+                    gMapPainterArray->GetAndRemove(mapPainterIndex);
+
+  if (!nativeMapPainter)
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniDestructor(): NULL object");
+  else
+    delete nativeMapPainter;
 }
 
-jboolean Java_osm_scout_MapPainterCanvas_jniDrawMap(JNIEnv *env, jobject object)
+jboolean Java_osm_scout_MapPainterCanvas_jniDrawMap(JNIEnv *env, jobject object,
+                    int mapPainterIndex, int styleConfigIndex,
+                    int projectionIndex, int mapDataIndex)
 {
-  if (gMapPainter==NULL)
+  MapPainterCanvas *nativeMapPainter=gMapPainterArray->Get(mapPainterIndex);
+
+  if (!nativeMapPainter)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniDrawMap(): NULL MapPainter object");
     return JNI_FALSE;
+  }
+
+  StyleConfig *nativeStyleConfig=gStyleConfigArray->Get(styleConfigIndex);
+
+  if (!nativeStyleConfig)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniDrawMap(): NULL StyleConfig pointer");
+    return JNI_FALSE;
+  }
+
+  MercatorProjection *nativeProjection=gProjectionArray->Get(projectionIndex);
+
+  if (!nativeProjection)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniDrawMap(): NULL Projection pointer");
+    return JNI_FALSE;
+  }
+
+  MapData *nativeMapData=gMapDataArray->Get(mapDataIndex);
+
+  if (!nativeMapData)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniDrawMap(): NULL MapData pointer");
+    return JNI_FALSE;
+  }
 	
   osmscout::MapParameter mapParameter;
   
-  __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "jniDrawMap");
-  
-  return gMapPainter->DrawMap(*gStyleConfig, *gMercatorProjection,
-                              mapParameter, *gMapData, env, object);
+  return nativeMapPainter->DrawMap(*nativeStyleConfig, *nativeProjection,
+                              mapParameter, *nativeMapData, env, object);
 }
 
 #ifdef __cplusplus

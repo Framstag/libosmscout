@@ -24,13 +24,16 @@ import java.util.Vector;
 
 public class Database {
 	
+	private int mJniDatabaseIndex;
+	
 	public Database() {		
-		jniConstructor();
+		mJniDatabaseIndex=jniConstructor();
 	}
 	
-	protected void finalize() throws Throwable {		
+	protected void finalize() throws Throwable {
+		
 		try {			
-			jniDestructor();
+			jniDestructor(mJniDatabaseIndex);
 		}
 		finally {			
 			super.finalize();
@@ -38,23 +41,15 @@ public class Database {
 	}
 	
 	public boolean open(String path) {
-		return jniOpen(path);
+		return jniOpen(mJniDatabaseIndex, path);
 	}
 	
 	public boolean isOpen() {
-		return jniIsOpen();
+		return jniIsOpen(mJniDatabaseIndex);
 	}
 	
 	public GeoBox getBoundingBox() {
-		return jniGetBoundingBox();
-	}
-	
-	public MapData getObjects(ObjectTypeSets typeSets, Projection projection) {
-		return jniGetObjects();
-	}
-	
-	public Node getNode(long id) {
-		return jniGetNode(id);
+		return jniGetBoundingBox(mJniDatabaseIndex);
 	}
 	
 	public boolean getMatchingAdminRegions(String name, Vector<AdminRegion> regions,
@@ -62,7 +57,8 @@ public class Database {
 
 		regions.clear();
 		
-		AdminRegion[] regionArray=jniGetMatchingAdminRegions(name, limit, limitReached, startWith);
+		AdminRegion[] regionArray=jniGetMatchingAdminRegions(mJniDatabaseIndex,
+				name, limit, limitReached, startWith);
 		
 		if (regionArray==null)
 			return false;
@@ -72,19 +68,42 @@ public class Database {
 		return true;
 	}
 	
+	public Node getNode(long id) {
+		return jniGetNode(mJniDatabaseIndex, id);
+	}
+	
+	public MapData getObjects(ObjectTypeSets objectTypeSets, Projection projection) {
+		
+		GeoBox bounds=projection.getBoundaries();
+		
+		return jniGetObjects(mJniDatabaseIndex, objectTypeSets.getJniObjectIndex(),
+	            bounds.getLonMin(), bounds.getLatMin(),
+	            bounds.getLonMax(), bounds.getLatMax(),
+	            projection.getMagnification());
+	}
+	
+	public TypeConfig getTypeConfig() {
+		return jniGetTypeConfig(mJniDatabaseIndex);
+	}
+	
 	// Native methods
 	
-	private native void jniConstructor();
-	private native void jniDestructor();
+	private native int jniConstructor();
+	private native void jniDestructor(int databaseIndex);
 	
-	private native boolean jniOpen(String path);
-	private native boolean jniIsOpen();
-	private native GeoBox jniGetBoundingBox();
+	private native boolean jniOpen(int databaseIndex, String path);
+	private native boolean jniIsOpen(int databaseIndex);
+	private native GeoBox jniGetBoundingBox(int databaseIndex);
 	
-	private native AdminRegion[] jniGetMatchingAdminRegions(String name, int limit,
-			Bool limitReached, boolean startWith);
+	private native AdminRegion[] jniGetMatchingAdminRegions(int databaseIndex,
+			String name, int limit, Bool limitReached, boolean startWith);
 	
-	private native Node jniGetNode(long id);
+	private native Node jniGetNode(int databaseIndex, long id);
 	
-	private native MapData jniGetObjects();
+	private native MapData jniGetObjects(
+			int databaseIndex, int objectTypeSetsIndex,
+            double lonMin, double latMin, double lonMax, double latMax,
+            double magnification);
+	
+	private native TypeConfig jniGetTypeConfig(int databaseIndex);
 }

@@ -26,122 +26,162 @@
 #include <osmscout/Node.h>
 #include <osmscout/MapPainter.h>
 
-#include "../include/jniObjectTypeSets.h"
+#include <jniObjectArray.h>
+#include <jniObjectTypeSets.h>
 
 #define DEBUG_TAG "OsmScoutJni:Database"
+
+using namespace osmscout;
+
+extern JniObjectArray<Database>             *gDatabaseArray;
+extern JniObjectArray<MapData>              *gMapDataArray;
+extern JniObjectArray<ObjectTypeSets>       *gObjectTypeSetsArray;
+extern JniObjectArray<TypeConfig>           *gTypeConfigArray;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-osmscout::Database                    *gDatabase;
-
-extern osmscout::StyleConfig          *gStyleConfig;
-extern osmscout::MapData              *gMapData;
-extern osmscout::MercatorProjection   *gMercatorProjection;
-extern osmscout::ObjectTypeSets       *gObjectTypeSets;
-
-void Java_osm_scout_Database_jniConstructor(JNIEnv *env, jobject object)
+jint Java_osm_scout_Database_jniConstructor(JNIEnv *env, jobject object)
 {
-  osmscout::DatabaseParameter databaseParameter;
+  DatabaseParameter databaseParameter;
 
-  gDatabase=new osmscout::Database(databaseParameter);
+  Database *nativeDatabase=new Database(databaseParameter);
+
+  return gDatabaseArray->Add(nativeDatabase);
 }
 
-void Java_osm_scout_Database_jniDestructor(JNIEnv *env, jobject object)
+void Java_osm_scout_Database_jniDestructor(JNIEnv *env, jobject object,
+                                           int databaseIndex)
 {
-  delete gDatabase;
+  Database *nativeDatabase=gDatabaseArray->GetAndRemove(databaseIndex);
+
+  if (!nativeDatabase)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniDestructor(): NULL Database object");
+  }
+  else
+    delete nativeDatabase;
 }
 
-jboolean Java_osm_scout_Database_jniOpen(JNIEnv *env, jobject object, jstring path)
+jboolean Java_osm_scout_Database_jniOpen(JNIEnv *env, jobject object,
+                                         int databaseIndex,  jstring javaPath)
 {
+  Database *nativeDatabase=gDatabaseArray->Get(databaseIndex);
+
+  if (!nativeDatabase)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniOpen(): NULL Database object");
+    return JNI_FALSE;
+  }
+
   jboolean isCopy;
 
-  const char *szPath=env->GetStringUTFChars(path, &isCopy);
+  const char *nativePath=env->GetStringUTFChars(javaPath, &isCopy);
 
-  __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "jniOpen (%s)", szPath);
+  bool result=nativeDatabase->Open(nativePath);
 
-  if (gDatabase==NULL)
-    return JNI_FALSE;
-
-  bool result;
-
-  if (gDatabase->Open(szPath))
-    result=JNI_TRUE;
-  else
-    result=JNI_FALSE;
-
-  env->ReleaseStringUTFChars(path, szPath);
+  env->ReleaseStringUTFChars(javaPath, nativePath);
 
   return result;
 }
 
-jboolean Java_osm_scout_Database_jniIsOpen(JNIEnv *env, jobject object)
+jboolean Java_osm_scout_Database_jniIsOpen(JNIEnv *env, jobject object,
+                                           int databaseIndex)
 {
-  if (gDatabase==NULL)
-    return JNI_FALSE;
+  Database *nativeDatabase=gDatabaseArray->Get(databaseIndex);
 
-  return gDatabase->IsOpen();
+  if (!nativeDatabase)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniIsOpen(): NULL Database object");
+    return JNI_FALSE;
+  }
+
+  return nativeDatabase->IsOpen();
 }
 
-jobject Java_osm_scout_Database_jniGetBoundingBox(JNIEnv *env, jobject object)
+jobject Java_osm_scout_Database_jniGetBoundingBox(JNIEnv *env, jobject object,
+                                                  int databaseIndex)
 {
-  if (gDatabase==NULL)
+  Database *nativeDatabase=gDatabaseArray->Get(databaseIndex);
+
+  if (!nativeDatabase)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniGetBoundingBox(): NULL Database object");
     return NULL;
+  }
 
   double minLat, maxLat;
   double minLon, maxLon;
     
-  if (!gDatabase->GetBoundingBox(minLat, minLon, maxLat, maxLon))
+  if (!nativeDatabase->GetBoundingBox(minLat, minLon, maxLat, maxLon))
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniGetBoundingBox(): GetBoundingBox() returned FALSE");
     return NULL;
+  }
 
   jclass javaClass = env->FindClass("osm/scout/GeoBox");
   jmethodID methodId = env->GetMethodID(javaClass,"<init>","(DDDD)V");
-  jobject geoBox=env->NewObject(javaClass, methodId, minLon, maxLon, minLat, maxLat);
+  jobject geoBox=env->NewObject(javaClass, methodId,
+                                minLon, maxLon, minLat, maxLat);
 
   return geoBox;
 }
 
-jobjectArray Java_osm_scout_Database_jniGetMatchingAdminRegions(JNIEnv *env, jobject object,
-                      jstring name, int limit, jobject limitReached, jboolean startWith)
+jobjectArray Java_osm_scout_Database_jniGetMatchingAdminRegions(JNIEnv *env,
+                      jobject object, int databaseIndex, jstring javaName,
+                      int limit, jobject javaLimitReached, jboolean startWith)
 {
-  if (gDatabase==NULL)
+  Database *nativeDatabase=gDatabaseArray->Get(databaseIndex);
+
+  if (!nativeDatabase)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniGetMatchingAdminRegions(): NULL Database object");
     return NULL;
+  }
 
   jboolean isCopy;
 
-  const char *szName=env->GetStringUTFChars(name, &isCopy);
+  const char *nativeName=env->GetStringUTFChars(javaName, &isCopy);
 
-  std::list<osmscout::AdminRegion> regionList;
+  std::list<AdminRegion> nativeRegions;
   
   bool nativeLimitReached;
 
-  jobjectArray regions;
+  jobjectArray javaRegions;
 
-  if (gDatabase->GetMatchingAdminRegions(szName,
-                                         regionList,
+  if (nativeDatabase->GetMatchingAdminRegions(nativeName,
+                                         nativeRegions,
                                          limit,
                                          nativeLimitReached,
                                          startWith))
   {
     jclass javaClass=env->FindClass("osm/scout/AdminRegion");
 
-    regions=env->NewObjectArray(regionList.size(), javaClass, NULL);
+    javaRegions=env->NewObjectArray(nativeRegions.size(), javaClass, NULL);
 
-    jmethodID methodId = env->GetMethodID(javaClass, "<init>", "(Ljava/lang/String;IJ)V");
+    jmethodID methodId = env->GetMethodID(javaClass, "<init>",
+                                          "(Ljava/lang/String;IJ)V");
 
     int pos=0;
 
-    for(std::list<osmscout::AdminRegion>::iterator iter=regionList.begin(); 
-                                            iter!=regionList.end(); iter++)
+    for(std::list<osmscout::AdminRegion>::iterator iter=nativeRegions.begin(); 
+                                            iter!=nativeRegions.end(); iter++)
     {
       jint type=iter->reference.type;
       jlong id=iter->reference.id;
 
-      jobject region=env->NewObject(javaClass, methodId,
-                                    env->NewStringUTF(iter->name.c_str()), type, id);
+      jobject javaRegion=env->NewObject(javaClass, methodId,
+                                    env->NewStringUTF(iter->name.c_str()),
+                                    type, id);
 
-      env->SetObjectArrayElement(regions, pos, region);
+      env->SetObjectArrayElement(javaRegions, pos, javaRegion);
 
       pos++;
     }
@@ -149,26 +189,34 @@ jobjectArray Java_osm_scout_Database_jniGetMatchingAdminRegions(JNIEnv *env, job
     // Set the <limitReached> value
     javaClass=env->FindClass("osm/scout/Bool");
     methodId=env->GetMethodID(javaClass, "set", "(Z)V");
-    env->CallVoidMethod(limitReached, methodId, nativeLimitReached);
+    env->CallVoidMethod(javaLimitReached, methodId, nativeLimitReached);
   }
   else
   {
-    regions=NULL;
+    // GetMatchingAdminRegions returned FALSE
+    javaRegions=NULL;
   }
 
-  env->ReleaseStringUTFChars(name, szName);
+  env->ReleaseStringUTFChars(javaName, nativeName);
 
-  return regions;
+  return javaRegions;
 }
 
-jobject Java_osm_scout_Database_jniGetNode(JNIEnv *env, jobject object, long id)
+jobject Java_osm_scout_Database_jniGetNode(JNIEnv *env, jobject object,
+                                           int databaseIndex,  long id)
 {
-  if (gDatabase==NULL)
+  Database *nativeDatabase=gDatabaseArray->Get(databaseIndex);
+
+  if (!nativeDatabase)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniGetNode(): NULL Database object");
     return NULL;
+  }
 
   osmscout::NodeRef nodeRef;
 
-  gDatabase->GetNode(id, nodeRef);
+  nativeDatabase->GetNode(id, nodeRef);
 
   osmscout::Node* nativeNode=nodeRef.Get();
 
@@ -176,37 +224,109 @@ jobject Java_osm_scout_Database_jniGetNode(JNIEnv *env, jobject object, long id)
   
   jmethodID methodId=env->GetMethodID(javaClass,"<init>","(DD)V");
   
-  jobject node=env->NewObject(javaClass, methodId, nativeNode->GetLon(), nativeNode->GetLat());
+  jobject node=env->NewObject(javaClass, methodId,
+                              nativeNode->GetLon(), nativeNode->GetLat());
 
   return node;			
 }
 
-jobject Java_osm_scout_Database_jniGetObjects(JNIEnv *env, jobject object)
+jobject Java_osm_scout_Database_jniGetObjects(JNIEnv *env, jobject object,
+                                int databaseIndex, int objectTypeSetsIndex,
+                                double lonMin, double latMin, double lonMax,
+                                double latMax, double magnification)
 {
-  if (gStyleConfig==NULL)
+  __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniGetObjects(): GetObjects() starts...");
+
+  Database *nativeDatabase=gDatabaseArray->Get(databaseIndex);
+
+  if (!nativeDatabase)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniGetObjects(): NULL Database object");
     return NULL;
+  }
 
-  osmscout::AreaSearchParameter searchParameter;
+  ObjectTypeSets *nativeObjectTypeSets=
+                             gObjectTypeSetsArray->Get(objectTypeSetsIndex);
 
-  gDatabase->GetObjects(gObjectTypeSets->nodeTypes,
-                        gObjectTypeSets->wayTypes,
-                        gObjectTypeSets->areaTypes,
-                        gMercatorProjection->GetLonMin(),
-                        gMercatorProjection->GetLatMin(),
-                        gMercatorProjection->GetLonMax(),
-                        gMercatorProjection->GetLatMax(),
-                        gMercatorProjection->GetMagnification(),
-                        searchParameter,
-                        gMapData->nodes,
-                        gMapData->ways,
-                        gMapData->areas,
-                        gMapData->relationWays,
-                        gMapData->relationAreas);
+  if (!nativeObjectTypeSets)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniGetObjects(): NULL ObjectTypeSets object");
+    return NULL;
+  }
 
-  return NULL;
+  AreaSearchParameter searchParameter;
+
+  MapData *nativeMapData=new MapData();
+
+  jobject javaMapData;
+
+  if (!nativeDatabase->GetObjects(nativeObjectTypeSets->nodeTypes,
+                             nativeObjectTypeSets->wayTypes,
+                             nativeObjectTypeSets->areaTypes,
+                             lonMin, latMin, lonMax, latMax,
+                             magnification,
+                             searchParameter,
+                             nativeMapData->nodes,
+                             nativeMapData->ways,
+                             nativeMapData->areas,
+                             nativeMapData->relationWays,
+                             nativeMapData->relationAreas))
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniGetObjects(): GetObjects() Failed!");
+
+    // GetObjects failed. Return null MapData object
+    javaMapData=NULL;
+
+    delete nativeMapData;
+  }
+  else
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniGetObjects(): GetObjects() Ok!");
+
+    int mapDataIndex=gMapDataArray->Add(nativeMapData);
+
+    jclass javaClass=env->FindClass("osm/scout/MapData");
+  
+    jmethodID methodId=env->GetMethodID(javaClass,"<init>","(I)V");
+  
+    javaMapData=env->NewObject(javaClass, methodId, mapDataIndex);
+  }
+
+  return javaMapData;
+}
+
+jobject Java_osm_scout_Database_jniGetTypeConfig(JNIEnv *env, jobject object,
+                                int databaseIndex)
+{
+  Database *nativeDatabase=gDatabaseArray->Get(databaseIndex);
+
+  if (!nativeDatabase)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniGetTypeConfig(): NULL Database object");
+    return NULL;
+  }
+
+  TypeConfig *nativeTypeConfig=nativeDatabase->GetTypeConfig();
+
+  int typeConfigIndex=gTypeConfigArray->Add(nativeTypeConfig);
+
+  jclass javaClass=env->FindClass("osm/scout/TypeConfig");
+  
+  jmethodID methodId=env->GetMethodID(javaClass,"<init>","(I)V");
+  
+  jobject javaTypeConfig=env->NewObject(javaClass, methodId, typeConfigIndex);
+
+  return javaTypeConfig;
 }
 
 #ifdef __cplusplus
 }
 #endif
+
 

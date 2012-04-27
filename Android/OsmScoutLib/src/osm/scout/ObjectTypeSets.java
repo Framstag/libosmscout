@@ -21,22 +21,34 @@ package osm.scout;
 
 public class ObjectTypeSets {
 	
-	public ObjectTypeSets() {		
-		jniConstructor();
+	private int mJniObjectTypeSetsIndex;
+	
+	public ObjectTypeSets() {
+		
+		mJniObjectTypeSetsIndex=jniConstructor();
 	}
 	
-	protected void finalize() throws Throwable {		
+	public ObjectTypeSets(int jniObjectTypeSetsIndex) {
+		
+		mJniObjectTypeSetsIndex=jniObjectTypeSetsIndex;
+	}
+	
+	protected void finalize() throws Throwable {
+		
 		try {			
-			jniDestructor();
+			jniDestructor(mJniObjectTypeSetsIndex);
 		}
 		finally {			
 			super.finalize();
 		}
 	}
 	
-	// Native methods
+	int getJniObjectIndex() {
+		return mJniObjectTypeSetsIndex;
+	}
 	
-	private native void jniConstructor();
-	private native void jniDestructor();
+	// Native methods
+	private native int jniConstructor();
+	private native void jniDestructor(int jniObjectTypeSetsIndex);
 
 }

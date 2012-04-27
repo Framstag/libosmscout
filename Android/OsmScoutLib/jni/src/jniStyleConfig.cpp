@@ -25,60 +25,108 @@
 #include <osmscout/StyleConfig.h>
 #include <osmscout/StyleConfigLoader.h>
 
-#include "../include/jniObjectTypeSets.h"
+#include <jniObjectTypeSets.h>
+#include <jniObjectArray.h>
 
 #define DEBUG_TAG "OsmScoutJni:StyleConfig"
 
-extern osmscout::Database       *gDatabase;
-extern osmscout::ObjectTypeSets *gObjectTypeSets;
+using namespace osmscout;
 
-osmscout::StyleConfig           *gStyleConfig;
+extern JniObjectArray<ObjectTypeSets>       *gObjectTypeSetsArray;
+extern JniObjectArray<StyleConfig>          *gStyleConfigArray;
+extern JniObjectArray<TypeConfig>           *gTypeConfigArray;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void Java_osm_scout_StyleConfig_jniConstructor(JNIEnv *env, jobject object)
+jint Java_osm_scout_StyleConfig_jniConstructor(JNIEnv *env, jobject object,
+                                               int typeConfigIndex)
 {
-  if (gDatabase==NULL)
-    return;
+  TypeConfig *nativeTypeConfig=gTypeConfigArray->Get(typeConfigIndex);
 
-  gStyleConfig=new osmscout::StyleConfig(gDatabase->GetTypeConfig());
+  if (!nativeTypeConfig)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniConstructor(): NULL TypeConfig object");
+
+    return -1;
+  }
+
+  StyleConfig *nativeStyleConfig=new StyleConfig(nativeTypeConfig);
+
+  return gStyleConfigArray->Add(nativeStyleConfig);
 }
 
-void Java_osm_scout_StyleConfig_jniDestructor(JNIEnv *env, jobject object)
+void Java_osm_scout_StyleConfig_jniDestructor(JNIEnv *env, jobject object,
+                                              int styleConfigIndex)
 {
-  delete gStyleConfig;
+  StyleConfig *nativeStyleConfig=gStyleConfigArray->GetAndRemove(styleConfigIndex);
+
+  if (!nativeStyleConfig)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniDestructor(): NULL object");
+  }
+  else
+    delete nativeStyleConfig;
 }
 
-jboolean Java_osm_scout_StyleConfig_jniLoadStyleConfig(
-                        JNIEnv *env, jobject object, jstring fileName)
+jboolean Java_osm_scout_StyleConfig_jniLoadStyleConfig(JNIEnv *env,
+                    jobject object, int styleConfigIndex, jstring javaFileName)
 {
+  StyleConfig *nativeStyleConfig=gStyleConfigArray->Get(styleConfigIndex);
+
+  if (!nativeStyleConfig)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                                    "jniDestructor(): NULL object");
+    return JNI_FALSE;
+  }
+
   jboolean isCopy;
 
-  const char *szFileName=env->GetStringUTFChars(fileName, &isCopy);
+  const char *nativeFileName=env->GetStringUTFChars(javaFileName, &isCopy);
 
-  jboolean result=osmscout::LoadStyleConfig(szFileName, *gStyleConfig);
+  jboolean result=osmscout::LoadStyleConfig(nativeFileName, *nativeStyleConfig);
 
-  env->ReleaseStringUTFChars(fileName, szFileName);
+  env->ReleaseStringUTFChars(javaFileName, nativeFileName);
 
   return result;
 }
 
-jboolean Java_osm_scout_StyleConfig_jniGetObjectTypesWithMaxMag(
-                        JNIEnv *env, jobject object, jdouble magnification)
+jobject Java_osm_scout_StyleConfig_jniGetObjectTypesWithMaxMag(JNIEnv *env,
+               jobject object, int styleConfigIndex, jdouble magnification)
 {
-  gStyleConfig->GetNodeTypesWithMaxMag(magnification,
-                                       gObjectTypeSets->nodeTypes);
+  StyleConfig *nativeStyleConfig=gStyleConfigArray->Get(styleConfigIndex);
 
-  gStyleConfig->GetWayTypesByPrioWithMaxMag(magnification,
-                                            gObjectTypeSets->wayTypes);
+  if (!nativeStyleConfig)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                     "jniGetObjectTypesWithMaxMag(): NULL StyleConfig object");
+    return NULL;
+  }
 
-  gStyleConfig->GetAreaTypesWithMaxMag(magnification,
-                                       gObjectTypeSets->areaTypes);
+  ObjectTypeSets *nativeObjectTypeSets=new ObjectTypeSets;
 
-  // TODO: return a valid ObjectTypeSets object
-  return NULL;  
+  int objectTypeSetsIndex=gObjectTypeSetsArray->Add(nativeObjectTypeSets);
+
+  nativeStyleConfig->GetNodeTypesWithMaxMag(magnification,
+                                            nativeObjectTypeSets->nodeTypes);
+
+  nativeStyleConfig->GetWayTypesByPrioWithMaxMag(magnification,
+                                            nativeObjectTypeSets->wayTypes);
+
+  nativeStyleConfig->GetAreaTypesWithMaxMag(magnification,
+                                            nativeObjectTypeSets->areaTypes);
+
+  jclass javaClass=env->FindClass("osm/scout/ObjectTypeSets");
+  
+  jmethodID methodId=env->GetMethodID(javaClass,"<init>","(I)V");
+  
+  jobject javaObjectTypeSets=env->NewObject(javaClass, methodId, objectTypeSetsIndex);
+
+  return javaObjectTypeSets;
 }
 
 #ifdef __cplusplus
