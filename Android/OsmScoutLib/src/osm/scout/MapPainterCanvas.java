@@ -26,32 +26,37 @@ import android.graphics.RectF;
 
 public class MapPainterCanvas {
 	
-	Canvas mCanvas=null;
-	Paint mPaint=null;
+	private Canvas mCanvas=null;
+	private Paint mPaint=null;
+	
+	private int mJniMapPainterIndex;
 	
 	public MapPainterCanvas() {
-		jniConstructor();
+		
+		mJniMapPainterIndex=jniConstructor();
 		
 		mPaint=new Paint();
 		
 		mPaint.setAntiAlias(true);
 	}
 	
-	protected void finalize() throws Throwable {		
+	protected void finalize() throws Throwable {
+		
 		try {			
-			jniDestructor();
+			jniDestructor(mJniMapPainterIndex);
 		}
 		finally {			
 			super.finalize();
 		}
 	}
 	
-	public boolean drawMap(StyleConfig styleConfig, Projection projection,
+	public boolean drawMap(StyleConfig styleConfig, MercatorProjection projection,
 			MapData mapData, Canvas canvas) {
 		
 		mCanvas=canvas;
 		
-		return jniDrawMap();
+		return jniDrawMap(mJniMapPainterIndex, styleConfig.getJniObjectIndex(),
+                projection.getJniObjectIndex(), mapData.getJniObjectIndex());
 	}
 	
 	public void drawPath(int color, float width, float[] x, float[] y) {
@@ -107,7 +112,8 @@ public class MapPainterCanvas {
 	
 	// Private native methods
 	
-	private native void jniConstructor();
-	private native void jniDestructor();
-	private native boolean jniDrawMap();
+	private native int jniConstructor();
+	private native void jniDestructor(int mapPainterIndex);
+	private native boolean jniDrawMap(int mapPainterIndex, int styleConfigIndex,
+                           int projectionIndex, int mapDataIndex);
 }

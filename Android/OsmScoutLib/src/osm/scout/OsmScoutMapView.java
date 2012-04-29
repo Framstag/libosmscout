@@ -66,7 +66,7 @@ public class OsmScoutMapView extends View {
     mMapEventListener=listener;
   }
 
-  public void drawMap(StyleConfig styleConfig, Projection projection,
+  public void drawMap(StyleConfig styleConfig, MercatorProjection projection,
 		  				MapData mapData) {
 
     if (mMapBitmap==null)

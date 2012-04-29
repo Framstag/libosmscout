@@ -23,49 +23,94 @@
 
 #include <osmscout/util/Projection.h>
 
+#include <jniObjectArray.h>
+
 #define DEBUG_TAG "OsmScoutJni:MercatorProjection"
 
-osmscout::MercatorProjection  *gMercatorProjection;
+using namespace osmscout;
+
+extern JniObjectArray<MercatorProjection>   *gProjectionArray;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void Java_osm_scout_MercatorProjection_jniConstructor(JNIEnv *env, jobject object)
+jint Java_osm_scout_MercatorProjection_jniConstructor(JNIEnv *env, jobject object)
 {
-  gMercatorProjection=new osmscout::MercatorProjection();
+  MercatorProjection *nativeProjection=new MercatorProjection();
+
+  return gProjectionArray->Add(nativeProjection);
 }
 
-void Java_osm_scout_MarcatorProjection_jniDestructor(JNIEnv *env, jobject object)
+void Java_osm_scout_MarcatorProjection_jniDestructor(JNIEnv *env, jobject object,
+                               int projectionIndex)
 {
-  delete gMercatorProjection;
+  MercatorProjection *nativeProjection=
+                        gProjectionArray->GetAndRemove(projectionIndex);
+
+  if (!nativeProjection)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniDestructor(): NULL Projection object");
+  }
+  else
+    delete nativeProjection;
 }
 
 jboolean Java_osm_scout_MercatorProjection_jniSet(JNIEnv *env, jobject object,
-		jdouble lon, jdouble lat, jdouble magnification, jint width, jint height)
+		int projectionIndex, jdouble lon, jdouble lat,
+                jdouble magnification, jint width, jint height)
 {
-  return gMercatorProjection->Set(lon, lat, magnification, width, height);
+  MercatorProjection *nativeProjection=gProjectionArray->Get(projectionIndex);
+
+  if (!nativeProjection)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniSet(): NULL Projection object");
+    return JNI_FALSE;
+  }
+
+  return nativeProjection->Set(lon, lat, magnification, width, height);
 }
 
-jobject Java_osm_scout_MercatorProjection_jniGetBoundaries(JNIEnv *env, jobject object)
+jobject Java_osm_scout_MercatorProjection_jniGetBoundaries(JNIEnv *env,
+                      jobject object, int projectionIndex)
 {
+  MercatorProjection *nativeProjection=gProjectionArray->Get(projectionIndex);
+
+  if (!nativeProjection)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniGetBoundaries(): NULL Projection object");
+    return NULL;
+  }
+
   jclass javaClass = env->FindClass("osm/scout/GeoBox");
   jmethodID methodId = env->GetMethodID(javaClass,"<init>","(DDDD)V");
   jobject geoBox=env->NewObject(javaClass, methodId,
-                                gMercatorProjection->GetLonMin(),
-                                gMercatorProjection->GetLonMax(),
-                                gMercatorProjection->GetLatMin(),
-                                gMercatorProjection->GetLatMax());
+                                nativeProjection->GetLonMin(),
+                                nativeProjection->GetLonMax(),
+                                nativeProjection->GetLatMin(),
+                                nativeProjection->GetLatMax());
 
   return geoBox;
 }
 
-jobject Java_osm_scout_MercatorProjection_jniPixelToGeo(JNIEnv *env, jobject object,
-                                                     double x, double y)
+jobject Java_osm_scout_MercatorProjection_jniPixelToGeo(JNIEnv *env,
+                    jobject object, int projectionIndex, double x, double y)
 {
+  MercatorProjection *nativeProjection=gProjectionArray->Get(projectionIndex);
+
+  if (!nativeProjection)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniPixelToGeo(): NULL Projection object");
+    return NULL;
+  }
+
   double lon, lat;
   
-  if (!gMercatorProjection->PixelToGeo(x, y, lon, lat))
+  if (!nativeProjection->PixelToGeo(x, y, lon, lat))
     return NULL;
 
   jclass javaClass = env->FindClass("osm/scout/GeoPos");
@@ -75,12 +120,21 @@ jobject Java_osm_scout_MercatorProjection_jniPixelToGeo(JNIEnv *env, jobject obj
   return geoPos;	
 }
 
-jobject Java_osm_scout_MercatorProjection_jniGeoToPixel(JNIEnv *env, jobject object,
-                                                     double lon, double lat)
+jobject Java_osm_scout_MercatorProjection_jniGeoToPixel(JNIEnv *env,
+                  jobject object, int projectionIndex, double lon, double lat)
 {
+  MercatorProjection *nativeProjection=gProjectionArray->Get(projectionIndex);
+
+  if (!nativeProjection)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniGeoToPixel(): NULL Projection object");
+    return NULL;
+  }
+
   double x, y;
   
-  if (!gMercatorProjection->GeoToPixel(lon, lat, x, y))
+  if (!nativeProjection->GeoToPixel(lon, lat, x, y))
     return NULL;
     
   jclass javaClass = env->FindClass("android/graphics/PointF");

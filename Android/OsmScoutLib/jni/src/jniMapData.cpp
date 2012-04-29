@@ -23,20 +23,37 @@
 
 #include <osmscout/MapPainter.h>
 
+#include <jniObjectArray.h>
+
 #define DEBUG_TAG "OsmScoutJni:MapData"
 
-osmscout::MapData *gMapData;
+using namespace osmscout;
+
+extern JniObjectArray<MapData>       *gMapDataArray;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void Java_osm_scout_MapData_constructor(JNIEnv *env, jobject object)
+jint Java_osm_scout_MapData_jniConstructor(JNIEnv *env, jobject object)
 {
+  MapData *nativeMapData=new MapData();
+
+  return gMapDataArray->Add(nativeMapData);
 }
 
-void Java_osm_scout_MapData_destructor(JNIEnv *env, jobject object)
+void Java_osm_scout_MapData_jniDestructor(JNIEnv *env, jobject object,
+                                          int mapDataIndex)
 {
+  MapData *nativeMapData=gMapDataArray->GetAndRemove(mapDataIndex);
+
+  if (!nativeMapData)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniDestructor(): NULL object");
+  }
+  else
+    delete nativeMapData;
 }
 
 #ifdef __cplusplus

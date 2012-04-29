@@ -7,9 +7,6 @@
 #
 #     https://lists.sourceforge.net/lists/listinfo/libosmscout-development
 #
-# WARNING!! Please read the "Current Android OsmScoutLib limitations" chapter
-# at the end of this document before developing apps using the library.
-#
  
 
 1. Build environment and used software
@@ -55,10 +52,8 @@ Open the "Project Properties" window of your Android App project, select the
 
 6. Current Android OsmScoutLib limitations
 
-The most relevant limitation of the actual implementation of the OsmScout lib
-under Android is that the number of objects of each kind is limited to one,
-this is, even if you create more that one OsmScout library object of a kind
-(Database, MapData, StyleConfig, etc.), they will all be refering to the same
-single object. This limitation will be overcomed in the near future.
-
+There're many libosmscout library functionalities not yet available in the
+Android port. Do not hesitate to make any request in the development mailing
+list:
+      https://lists.sourceforge.net/lists/listinfo/libosmscout-development
 

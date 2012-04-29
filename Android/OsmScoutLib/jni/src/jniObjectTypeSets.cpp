@@ -21,22 +21,39 @@
 #include <string.h>
 #include <android/log.h>
 
-#include "../include/jniObjectTypeSets.h"
+#include <jniObjectArray.h>
+#include <jniObjectTypeSets.h>
 
 #define DEBUG_TAG "OsmScoutJni:ObjectTypeSets"
 
-osmscout::ObjectTypeSets *gObjectTypeSets;
+using namespace osmscout;
+
+extern JniObjectArray<ObjectTypeSets>       *gObjectTypeSetsArray;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void Java_osm_scout_ObjectTypeSets_jniConstructor(JNIEnv *env, jobject object)
+jint Java_osm_scout_ObjectTypeSets_jniConstructor(JNIEnv *env, jobject object)
 {
+  ObjectTypeSets *nativeObjectTypeSets=new ObjectTypeSets;
+
+  return gObjectTypeSetsArray->Add(nativeObjectTypeSets);
 }
 
-void Java_osm_scout_ObjectTypeSet_jniDestructor(JNIEnv *env, jobject object)
+void Java_osm_scout_ObjectTypeSets_jniDestructor(JNIEnv *env, jobject object,
+                                              int objectTypeSetsIndex)
 {
+  ObjectTypeSets *nativeObjectTypeSets=
+                     gObjectTypeSetsArray->GetAndRemove(objectTypeSetsIndex);
+
+  if (!nativeObjectTypeSets)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniDestructor(): NULL ObjectTypeSets object");
+  }
+  else
+    delete nativeObjectTypeSets;
 }
 
 #ifdef __cplusplus

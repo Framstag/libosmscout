@@ -23,17 +23,24 @@ import android.graphics.Point;
 
 public class MercatorProjection extends Projection {
 	
-	public MercatorProjection() {		
-		jniConstructor();
+	private int mJniProjectionIndex;
+	
+	public MercatorProjection() {
+		mJniProjectionIndex=jniConstructor();
 	}
 	
-	protected void finalize() throws Throwable {		
+	protected void finalize() throws Throwable {
+		
 		try {			
-			jniDestructor();
+			jniDestructor(mJniProjectionIndex);
 		}
 		finally {			
 			super.finalize();
 		}
+	}
+	
+	public int getJniObjectIndex() {
+		return mJniProjectionIndex;
 	}
 	
 	public boolean set(double lon, double lat, double magnification,
@@ -47,21 +54,22 @@ public class MercatorProjection extends Projection {
 		
 		mBoundaries=null;
 
-		return jniSet(mLon, mLat, mMagnification, mWidth, mHeight);
+		return jniSet(mJniProjectionIndex, mLon, mLat, mMagnification,
+				             mWidth, mHeight);
 	}
 	
 	public GeoPos pixelToGeo(double x, double y) {
-		return jniPixelToGeo(x, y);
+		return jniPixelToGeo(mJniProjectionIndex, x, y);
 	}
 	
 	public Point geoToPixel(double lon, double lat) {
-		return jniGeoToPixel(lon, lat);
+		return jniGeoToPixel(mJniProjectionIndex, lon, lat);
 	}
 	
 	public GeoBox getBoundaries() {
 		
 		if (mBoundaries==null) {			
-			mBoundaries=jniGetBoundaries();			
+			mBoundaries=jniGetBoundaries(mJniProjectionIndex);			
 		}
 		
 		return new GeoBox(mBoundaries);
@@ -69,15 +77,18 @@ public class MercatorProjection extends Projection {
 	
 	// Native methods
 	
-	private native void jniConstructor();
-	private native void jniDestructor();
+	private native int jniConstructor();
+	private native void jniDestructor(int jniProjectionIndex);
 	
-	protected native GeoBox jniGetBoundaries();
+	protected native GeoBox jniGetBoundaries(int jniProjectionIndex);
 	
-	protected native boolean jniSet(double lon, double lat, double magnification,
-                                   int width, int height);
+	protected native boolean jniSet(int jniProjectionIndex,
+			double lon, double lat, double magnification,
+			int width, int height);
 	
-	protected native GeoPos jniPixelToGeo(double x, double y);
+	protected native GeoPos jniPixelToGeo(int jniProjectionIndex,
+			                              double x, double y);
 	
-	protected native Point jniGeoToPixel(double lon, double lat);
+	protected native Point jniGeoToPixel(int jniProjectionIndex,
+			                             double lon, double lat);
 }

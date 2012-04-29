@@ -19,19 +19,19 @@
 
 package osm.scout;
 
-public class StyleConfig {
+public class TypeConfig {
 	
-	private int mJniStyleConfigIndex;
+	private int mJniTypeConfigIndex;
 	
-	public StyleConfig(TypeConfig typeConfig) {
+	public TypeConfig(int jniTypeConfigIndex) {
 		
-		mJniStyleConfigIndex=jniConstructor(typeConfig.getJniObjectIndex());
+		mJniTypeConfigIndex=jniTypeConfigIndex;
 	}
 	
 	protected void finalize() throws Throwable {
 		
 		try {			
-			jniDestructor(mJniStyleConfigIndex);
+			jniDestructor(mJniTypeConfigIndex);
 		}
 		finally {			
 			super.finalize();
@@ -39,24 +39,9 @@ public class StyleConfig {
 	}
 	
 	public int getJniObjectIndex() {
-		return mJniStyleConfigIndex;
-	}
-	
-	public boolean loadStyleConfig(String fileName) {
-		return jniLoadStyleConfig(mJniStyleConfigIndex, fileName);
-	}
-	
-	public ObjectTypeSets getObjectTypesWithMaxMag(double magnification) {
-		return jniGetObjectTypesWithMaxMag(mJniStyleConfigIndex, magnification);
+		return mJniTypeConfigIndex;
 	}
 	
 	// Native methods
-	
-	private native int jniConstructor(int typeConfigIndex);
 	private native void jniDestructor(int objectIndex);
-	
-	private native boolean jniLoadStyleConfig(int objectIndex, String fileName);
-	private native ObjectTypeSets jniGetObjectTypesWithMaxMag(
-			int objectIndex, double magnification);
-	
 }

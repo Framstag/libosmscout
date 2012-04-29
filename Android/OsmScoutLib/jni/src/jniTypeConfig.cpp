@@ -22,34 +22,38 @@
 #include <android/log.h>
 
 #include <osmscout/Database.h>
-#include <osmscout/util/Projection.h>
 #include <osmscout/StyleConfig.h>
+#include <osmscout/StyleConfigLoader.h>
 
-#include <jniMapPainterCanvas.h>
 #include <jniObjectArray.h>
-#include <jniObjectTypeSets.h>
+
+#define DEBUG_TAG "OsmScoutJni:TypeConfig"
 
 using namespace osmscout;
 
-// Global Object Arrays
-JniObjectArray<Database>             *gDatabaseArray;
-JniObjectArray<MapData>              *gMapDataArray;
-JniObjectArray<MapPainterCanvas>     *gMapPainterArray;
-JniObjectArray<MercatorProjection>   *gProjectionArray;
-JniObjectArray<ObjectTypeSets>       *gObjectTypeSetsArray;
-JniObjectArray<StyleConfig>          *gStyleConfigArray;
-JniObjectArray<TypeConfig>           *gTypeConfigArray;
+extern JniObjectArray<TypeConfig>           *gTypeConfigArray;
 
-JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void Java_osm_scout_TypeConfig_jniDestructor(JNIEnv *env, jobject object,
+                                              int typeConfigIndex)
 {
-  gDatabaseArray=new JniObjectArray<Database>();
-  gMapDataArray=new JniObjectArray<MapData>();
-  gMapPainterArray=new JniObjectArray<MapPainterCanvas>();
-  gProjectionArray=new JniObjectArray<MercatorProjection>();
-  gObjectTypeSetsArray=new JniObjectArray<ObjectTypeSets>();
-  gStyleConfigArray=new JniObjectArray<StyleConfig>();
-  gTypeConfigArray=new JniObjectArray<TypeConfig>();
-  
-  return JNI_VERSION_1_6;
+  TypeConfig *nativeTypeConfig=gTypeConfigArray->GetAndRemove(typeConfigIndex);
+
+  if (!nativeTypeConfig)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniDestructor(): NULL TypeConfig object");
+  }
+
+  // Do not delete native TypeConfig. Ii internally belongs to the matching
+  // database
+  //delete nativeTypeConfig;
 }
+
+#ifdef __cplusplus
+}
+#endif
 

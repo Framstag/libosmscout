@@ -88,7 +88,7 @@ public class OsmScoutViewerActivity extends Activity implements OsmScoutMapEvent
         	return;
         }
         
-        mStyleConfig=new StyleConfig();
+        mStyleConfig=new StyleConfig(mDatabase.getTypeConfig());
         
         if (!mStyleConfig.loadStyleConfig(mMapPath+"/standard.oss")) {
         	
