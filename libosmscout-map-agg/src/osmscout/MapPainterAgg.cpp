@@ -252,7 +252,7 @@ namespace osmscout {
 
   void MapPainterAgg::DrawLabel(const Projection& projection,
                                const MapParameter& parameter,
-                               const Label& label)
+                               const LabelData& label)
   {
     double       r=label.style->GetTextR();
     double       g=label.style->GetTextG();
@@ -267,7 +267,9 @@ namespace osmscout {
       //renderer_bin->color(agg::rgba(r,g,b,a));
       renderer_aa->color(agg::rgba(r,g,b,label.alpha));
 
-      DrawText(label.x,label.y+fontEngine->ascender(),wideText);
+      DrawText(label.x,
+               label.y+fontEngine->ascender(),
+               wideText);
     }
     else if (label.style->GetStyle()==LabelStyle::emphasize) {
       SetOutlineFont(parameter,
@@ -276,7 +278,10 @@ namespace osmscout {
       //renderer_bin->color(agg::rgba(r,g,b,a));
       renderer_aa->color(agg::rgba(1,1,1,label.alpha));
 
-      DrawOutlineText(label.x,label.y+fontEngine->ascender(),wideText,2);
+      DrawOutlineText(label.x,
+                      label.y+fontEngine->ascender(),
+                      wideText,
+                      2);
 
       SetFont(parameter,
               label.fontSize);
@@ -284,13 +289,15 @@ namespace osmscout {
       //renderer_bin->color(agg::rgba(r,g,b,a));
       renderer_aa->color(agg::rgba(r,g,b,label.alpha));
 
-      DrawText(label.x,label.y+fontEngine->ascender(),wideText);
+      DrawText(label.x,
+               label.y+fontEngine->ascender(),
+               wideText);
     }
   }
 
   void MapPainterAgg::DrawPlateLabel(const Projection& projection,
                                      const MapParameter& parameter,
-                                     const Label& label)
+                                     const LabelData& label)
   {
     // TODO
   }

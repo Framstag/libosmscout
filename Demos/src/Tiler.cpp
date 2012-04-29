@@ -158,6 +158,7 @@ int main(int argc, char* argv[])
   drawParameter.SetFontName("/usr/share/fonts/truetype/msttcorefonts/Verdana.ttf");
   drawParameter.SetDrawFadings(false);
 
+  searchParameter.SetUseLowZoomOptimization(false);
   searchParameter.SetMaximumAreaLevel(3);
   searchParameter.SetMaximumNodes(std::numeric_limits<unsigned long>::max());
   searchParameter.SetMaximumWays(std::numeric_limits<unsigned long>::max());

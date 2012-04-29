@@ -250,13 +250,13 @@ namespace osmscout {
 
   void MapPainterSVG::DrawLabel(const Projection& projection,
                                   const MapParameter& parameter,
-                                  const Label& label)
+                                  const LabelData& label)
   {
   }
 
   void MapPainterSVG::DrawPlateLabel(const Projection& projection,
                                        const MapParameter& parameter,
-                                       const Label& label)
+                                       const LabelData& label)
   {
   }
 

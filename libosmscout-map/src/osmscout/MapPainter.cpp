@@ -22,6 +22,7 @@
 #include <iostream>
 #include <limits>
 
+#include <osmscout/util/HashSet.h>
 #include <osmscout/util/StopClock.h>
 
 #include <osmscout/private/Math.h>
@@ -44,6 +45,9 @@ namespace osmscout {
     optimizeAreaNodes(false),
     drawFadings(true),
     drawWaysWithFixedWidth(false),
+    labelSpace(3.0),
+    plateLabelSpace(5.0),
+    sameLabelSpace(40.0),
     debugPerformance(false)
   {
     // no code
@@ -112,6 +116,21 @@ namespace osmscout {
   void MapParameter::SetDrawWaysWithFixedWidth(bool drawWaysWithFixedWidth)
   {
     this->drawWaysWithFixedWidth=drawWaysWithFixedWidth;
+  }
+
+  void MapParameter::SetLabelSpace(double labelSpace)
+  {
+    this->labelSpace=labelSpace;
+  }
+
+  void MapParameter::SetPlateLabelSpace(double plateLabelSpace)
+  {
+    this->plateLabelSpace=plateLabelSpace;
+  }
+
+  void MapParameter::SetSameLabelSpace(double sameLabelSpace)
+  {
+    this->sameLabelSpace=sameLabelSpace;
   }
 
   void MapParameter::SetDebugPerformance(bool debug)
@@ -206,6 +225,26 @@ namespace osmscout {
              yMax<0);
   }
 
+  void MapPainter::CalculateEffectiveLabelStyle(const Projection& projection,
+                                                const MapParameter& parameter,
+                                                const LabelStyle& style,
+                                                double& fontSize,
+                                                double& alpha)
+  {
+    // Calculate effective font size and alpha value
+    if (projection.GetMagnification()>style.GetScaleAndFadeMag()) {
+      if (parameter.GetDrawFadings()) {
+        double factor=log2(projection.GetMagnification())-log2(style.GetScaleAndFadeMag());
+        fontSize=fontSize*pow(2,factor);
+        alpha=alpha/factor;
+
+        if (alpha>1.0) {
+          alpha=1.0;
+        }
+      }
+    }
+  }
+
   void MapPainter::Transform(const Projection& projection,
                              const MapParameter& parameter,
                              double lon,
@@ -274,13 +313,6 @@ namespace osmscout {
       return width;
     }
   }
-
-  double MapPainter::ConvertWidthToPixel(const MapParameter& parameter,
-                                         double width) const
-  {
-    return width*parameter.GetDPI()/25.4;
-  }
-
 
   void MapPainter::DrawGroundTiles(const StyleConfig& styleConfig,
                                    const Projection& projection,
@@ -366,24 +398,21 @@ namespace osmscout {
       return;
     }
 
-    double fontSize=style.GetSize();
+    double stepSizeInPixel=ConvertWidthToPixel(parameter,parameter.GetLabelSpace());
 
     wayScanlines.clear();
     ScanConvertLine(transStart,transEnd,1,1,wayScanlines);
 
     size_t i=0;
     while (i<wayScanlines.size()) {
-      if (RegisterPointLabel(projection,
-                             parameter,
-                             style,
-                             text,
-                             wayScanlines[i].x+0.5,
-                             wayScanlines[i].y+0.5)) {
-        i+=fontSize*ConvertWidthToPixel(parameter,parameter.GetFontSize())*10;
-      }
-      else {
-        i+=2;
-      }
+      RegisterPointLabel(projection,
+                         parameter,
+                         style,
+                         text,
+                         wayScanlines[i].x+0.5,
+                         wayScanlines[i].y+0.5);
+
+      i+=stepSizeInPixel;
     }
   }
 
@@ -398,136 +427,92 @@ namespace osmscout {
 
     double fontSize=style.GetSize();
     double a=style.GetTextA();
-    double plateSpace=parameter.GetFontSize()*6;
-    double normalSpace=parameter.GetFontSize();
+    double labelSpace=ConvertWidthToPixel(parameter,parameter.GetLabelSpace());
+    double plateLabelSpace=ConvertWidthToPixel(parameter,parameter.GetPlateLabelSpace());
+    double sameLabelSpace=ConvertWidthToPixel(parameter,parameter.GetSameLabelSpace());
 
-    // Calculate effective font size and alpha value
-    if (projection.GetMagnification()>style.GetScaleAndFadeMag()) {
-      if (parameter.GetDrawFadings()) {
-        double factor=log2(projection.GetMagnification())-log2(style.GetScaleAndFadeMag());
-        fontSize=fontSize*pow(2,factor);
-        a=a/factor;
+    CalculateEffectiveLabelStyle(projection,
+                                 parameter,
+                                 style,
+                                 fontSize,
+                                 a);
 
-        if (a>1.0) {
-          a=1.0;
-        }
-      }
-    }
+    // Something is a overlay, if its alpha is <0.8
+    bool overlay=a<0.8;
 
-    // If the resulting alpha value is >0.8,we do not want labels to overlap
-    // but be drawn with a little space around them (plateSpace for the space
-    // between plates, else normalSpace)
-
-    if (a>=0.8) {
+    // Reset all marks on labels, if something is solid, because we needs marks
+    // for our internal collision handling
+    if (!overlay) {
       for (size_t i=0; i<labels.size(); i++) {
         labels[i].mark=false;
       }
     }
 
-    if (a>=0.8) {
-      for (std::vector<Label>::iterator label=labels.begin();
-           label!=labels.end();
-           ++label) {
-        // Ignore all labels that are not drawn
-        if (label->overlay || !label->draw || label->mark) {
+    if (!overlay) {
+      // First rough minimum bounding box, estimated without calculating text dimensions (since this is expensive).
+      double bx1;
+      double bx2;
+      double by1;
+      double by2;
+
+      if (style.GetStyle()==LabelStyle::plate) {
+        bx1=x-1-4;
+        bx2=x+1+4;
+        by1=y-fontSize/2-1-4;
+        by2=y+fontSize/2+1+4;
+      }
+      else {
+        bx1=x;
+        bx2=x;
+        by1=y-fontSize/2;
+        by2=y+fontSize/2;
+      }
+
+      for (std::vector<LabelData>::iterator l=labels.begin();
+          l!=labels.end();
+          ++l) {
+        LabelData& label=*l;
+
+        if (label.overlay || !label.draw || label.mark) {
           continue;
         }
 
-        // Check for labels that intersect (including space). If our priority is lower,
-        // we stop processing, else we mark the other label
-        // In the first step we do not check the bounding box of the new label
-        // but only for intersection with the center point - this is because we are called very often
-        // and bounding box calculation is expensive.
+        double hx1;
+        double hx2;
+        double hy1;
+        double hy2;
 
         if (style.GetStyle()==LabelStyle::plate &&
-            label->style->GetStyle()==LabelStyle::plate) {
-          if (!(x-plateSpace>label->bx+label->bwidth ||
-                x+plateSpace<label->bx ||
-                y-plateSpace>label->by+label->bheight ||
-                y+plateSpace<label->by)) {
-            if (label->style->GetPriority()<=style.GetPriority()) {
-              return false;
-            }
-
-            label->mark=true;
-          }
+            label.style->GetStyle()==LabelStyle::plate) {
+          hx1=bx1-plateLabelSpace;
+          hx2=bx2+plateLabelSpace;
+          hy1=by1-plateLabelSpace;
+          hy2=by2+plateLabelSpace;
         }
         else {
-          if (!(x-normalSpace>label->bx+label->bwidth ||
-                x+normalSpace<label->bx ||
-                y-normalSpace>label->by+label->bheight ||
-                y+normalSpace<label->by)) {
-            if (label->style->GetPriority()<=style.GetPriority()) {
-              return false;
-            }
+          hx1=bx1-labelSpace;
+          hx2=bx2+labelSpace;
+          hy1=by1-labelSpace;
+          hy2=by2+labelSpace;
+        }
 
-            label->mark=true;
+        // Check for labels that intersect (including space). If our priority is lower,
+        // we stop processing, else we mark the other label (as to be deleted)
+        if (!(hx1>label.bx2 ||
+              hx2<label.bx1 ||
+              hy1>label.by2 ||
+              hy2<label.by1)) {
+          if (label.style->GetPriority()<=style.GetPriority()) {
+            return false;
           }
+
+          label.mark=true;
         }
       }
-
-      /*
-      int xcMin,xcMax,ycMin,ycMax;
-
-      if (style.GetStyle()==LabelStyle::plate) {
-        xcMin=std::max(0,(int)floor((x-plateSpace)/cellWidth));
-        xcMax=std::min(xCellCount-1,(int)floor((x+plateSpace)/cellWidth));
-        ycMin=std::max(0,(int)floor((y-plateSpace)/cellHeight));
-        ycMax=std::min(yCellCount-1,(int)floor((y+plateSpace)/cellHeight));
-      }
-      else {
-        xcMin=std::max(0,(int)floor((x-normalSpace)/cellWidth));
-        xcMax=std::min(xCellCount-1,(int)floor((x+normalSpace)/cellWidth));
-        ycMin=std::max(0,(int)floor((y-normalSpace)/cellHeight));
-        ycMax=std::min(yCellCount-1,(int)floor((y+normalSpace)/cellHeight));
-      }
-
-
-      // Check if we are visible
-      for (int yc=ycMin; yc<=ycMax; yc++) {
-        for (int xc=xcMin; xc<=xcMax; xc++) {
-          int c=yc*xCellCount+xc;
-
-          if (labelRefs[c].size()>0) {
-            for (std::list<size_t>::const_iterator idx=labelRefs[c].begin();
-                 idx!=labelRefs[c].end();
-                 idx++) {
-              if (labels[*idx].overlay || !labels[*idx].draw || labels[*idx].mark) {
-                continue;
-              }
-
-              if (style.GetStyle()==LabelStyle::plate &&
-                  labels[*idx].style->GetStyle()==LabelStyle::plate) {
-                if (!(x-plateSpace>labels[*idx].bx+labels[*idx].bwidth ||
-                      x+plateSpace<labels[*idx].bx ||
-                      y-plateSpace>labels[*idx].by+labels[*idx].bheight ||
-                      y+plateSpace<labels[*idx].by)) {
-                  if (labels[*idx].style->GetPriority()<=style.GetPriority()) {
-                    return;
-                  }
-
-                  labels[*idx].mark=true;
-                }
-              }
-              else {
-                if (!(x-normalSpace>labels[*idx].bx+labels[*idx].bwidth ||
-                      x+normalSpace<labels[*idx].bx ||
-                      y-normalSpace>labels[*idx].by+labels[*idx].bheight ||
-                      y+normalSpace<labels[*idx].by)) {
-                  if (labels[*idx].style->GetPriority()<=style.GetPriority()) {
-                    return;
-                  }
-
-                  labels[*idx].mark=true;
-                }
-              }
-            }
-          }
-        }
-      }*/
     }
 
-    // We passed the first intersection test, we now calculate bounding box
+    // We passed the first intersection test, we now calculate the real bounding box
+    // by measuring text dimensions
 
     double xOff,yOff,width,height;
 
@@ -536,136 +521,141 @@ namespace osmscout {
                      text,
                      xOff,yOff,width,height);
 
-    // Top left border
-    x=x-width/2;
-    y=y-height/2;
+    double bx1;
+    double bx2;
+    double by1;
+    double by2;
 
-    double bx,by,bwidth,bheight;
-
-    if (style.GetStyle()!=LabelStyle::plate) {
-      bx=x;
-      by=y;
-      bwidth=width;
-      bheight=height;
+    if (style.GetStyle()==LabelStyle::plate) {
+      bx1=x-width/2-4;
+      bx2=x+width/2+4;
+      by1=y-height/2-4;
+      by2=y+height/2+4;
     }
     else {
-      bx=x-4;
-      by=y-4;
-      bwidth=width+8;
-      bheight=height+8;
+      bx1=x-width/2;
+      bx2=x+width/2;
+      by1=y-height/2;
+      by2=y+height/2;
     }
 
-    // is visible?
-    if (bx>=projection.GetWidth() ||
-        bx+bwidth<0 ||
-        by>=projection.GetHeight() ||
-        by+bheight<0) {
+    // is box visible?
+    if (bx1>=projection.GetWidth() ||
+        bx2<0 ||
+        by1>=projection.GetHeight() ||
+        by2<0) {
       return false;
     }
 
-    // again for labels with alpha >=0.8 we check for intersection with an existing label
+    // again for non-overlay labels we check for intersection with an existing label
     // but now with the complete bounding box
-    // We now do not want to check against all labels, so we do only check against labels
-    // which are in the same quandrants as we are
 
-    if (a>=0.8) {
-      int xcMin,xcMax,ycMin,ycMax;
+    if (!overlay) {
+      for (std::vector<LabelData>::iterator l=labels.begin();
+          l!=labels.end();
+          ++l) {
+        LabelData& label=*l;
 
-      if (style.GetStyle()==LabelStyle::plate) {
-        xcMin=std::max(0,(int)floor((bx-plateSpace)/cellWidth));
-        xcMax=std::min(xCellCount-1,(int)floor((bx+bwidth+plateSpace)/cellWidth));
-        ycMin=std::max(0,(int)floor((by-plateSpace)/cellHeight));
-        ycMax=std::min(yCellCount-1,(int)floor((by+bheight+plateSpace)/cellHeight));
-      }
-      else {
-        xcMin=std::max(0,(int)floor((bx-normalSpace)/cellWidth));
-        xcMax=std::min(xCellCount-1,(int)floor((bx+bwidth+normalSpace)/cellWidth));
-        ycMin=std::max(0,(int)floor((by-normalSpace)/cellHeight));
-        ycMax=std::min(yCellCount-1,(int)floor((by+bheight+normalSpace)/cellHeight));
-      }
-
-      // Check if we are visible
-      for (int yc=ycMin; yc<=ycMax; yc++) {
-        for (int xc=xcMin; xc<=xcMax; xc++) {
-          int c=yc*xCellCount+xc;
-
-          if (!labelRefs[c].empty()) {
-            for (std::list<size_t>::const_iterator idx=labelRefs[c].begin();
-                 idx!=labelRefs[c].end();
-                 idx++) {
-              if (labels[*idx].overlay || !labels[*idx].draw || labels[*idx].mark) {
-                continue;
-              }
-
-              if (style.GetStyle()==LabelStyle::plate &&
-                  labels[*idx].style->GetStyle()==LabelStyle::plate) {
-                if (!(bx-plateSpace>labels[*idx].bx+labels[*idx].bwidth ||
-                      bx+bwidth+plateSpace<labels[*idx].bx ||
-                      by-plateSpace>labels[*idx].by+labels[*idx].bheight ||
-                      by+bheight+plateSpace<labels[*idx].by)) {
-                  if (labels[*idx].style->GetPriority()<=style.GetPriority()) {
-                    return false;
-                  }
-
-                  labels[*idx].mark=true;
-                }
-              }
-              else {
-                if (!(bx-normalSpace>labels[*idx].bx+labels[*idx].bwidth ||
-                      bx+bwidth+normalSpace<labels[*idx].bx ||
-                      by-normalSpace>labels[*idx].by+labels[*idx].bheight ||
-                      by+bheight+normalSpace<labels[*idx].by)) {
-                  if (labels[*idx].style->GetPriority()<=style.GetPriority()) {
-                    return false;
-                  }
-
-                  labels[*idx].mark=true;
-                }
-              }
-            }
-          }
+        if (label.overlay || !label.draw || label.mark) {
+          continue;
         }
-      }
 
-      // Set everything else to draw=false, if we marked it before as "intersecting but of lower
-      // priority". We also add our own (future) index to all the cells we interect with
-      for (int yc=ycMin; yc<=ycMax; yc++) {
-        for (int xc=xcMin; xc<=xcMax; xc++) {
-          int c=yc*xCellCount+xc;
+        double hx1;
+        double hx2;
+        double hy1;
+        double hy2;
 
-          if (!labelRefs[c].empty()) {
-            for (std::list<size_t>::const_iterator idx=labelRefs[c].begin();
-                 idx!=labelRefs[c].end();
-                 idx++) {
-              if (labels[*idx].overlay) {
-                continue;
-              }
+        if (style.GetStyle()==LabelStyle::plate &&
+            label.style->GetStyle()==LabelStyle::plate) {
+          hx1=bx1-plateLabelSpace;
+          hx2=bx2+plateLabelSpace;
+          hy1=by1-plateLabelSpace;
+          hy2=by2+plateLabelSpace;
+        }
+        else {
+          hx1=bx1-labelSpace;
+          hx2=bx2+labelSpace;
+          hy1=by1-labelSpace;
+          hy2=by2+labelSpace;
+        }
 
-              if (labels[*idx].mark) {
-                labels[*idx].draw=false;
-              }
-            }
+        if (!(hx1>label.bx2 ||
+              hx2<label.bx1 ||
+              hy1>label.by2 ||
+              hy2<label.by1)) {
+          if (label.style->GetPriority()<=style.GetPriority()) {
+            return false;
           }
 
-          labelRefs[c].push_front(labels.size());
+          label.mark=true;
         }
       }
     }
 
-    // We passed the test, lest put ourself into the "draw label" job list
+    // As an optional final processing step, we check if labels
+    // with the same value (text) have at least sameLabelSpace distance.
+    if (!overlay &&
+        sameLabelSpace>plateLabelSpace) {
+      for (std::vector<LabelData>::iterator l=labels.begin();
+          l!=labels.end();
+          ++l) {
+        LabelData& label=*l;
 
-    Label label;
+        if (label.overlay || !label.draw || label.mark) {
+          continue;
+        }
+
+        if (style.GetStyle()==label.style->GetStyle() &&
+            style.GetPriority()==label.style->GetPriority()) {
+          double hx1=bx1-sameLabelSpace;
+          double hx2=bx2+sameLabelSpace;
+          double hy1=by1-sameLabelSpace;
+          double hy2=by2+sameLabelSpace;
+
+          if (!(hx1>label.bx2 ||
+                hx2<label.bx1 ||
+                hy1>label.by2 ||
+                hy2<label.by1)) {
+            if (text==label.text) {
+              // TODO: It may be possible that the labels belong to the same "thing".
+              // perhaps we should not just draw one or the other, but also change
+              // final position of the label (but this would require more complex
+              // collision handling and perhaps processing labels in different order)?
+              return false;
+            }
+          }
+        }
+      }
+    }
+
+    if (!overlay) {
+      // Set everything else to draw=false, if we marked it before as "intersecting but of lower
+      // priority". We also add our own (future) index to all the cells we intersect with
+
+      for (std::vector<LabelData>::iterator l=labels.begin();
+           l!=labels.end();
+           ++l) {
+        LabelData& label=*l;
+
+        if (label.mark) {
+          label.mark=false;
+          label.draw=false;
+        }
+      }
+    }
+
+    // We passed the test, lets put ourself into the "draw label" job list
+
+    LabelData label;
 
     label.draw=true;
-    label.overlay=(a<0.8);
-    label.x=x;
-    label.y=y;
-    label.width=width;
-    label.height=height;
-    label.bx=bx;
-    label.by=by;
-    label.bwidth=bwidth;
-    label.bheight=bheight;
+    label.overlay=overlay;
+    label.x=x-width/2;
+    label.y=y-height/2;
+    label.bx1=bx1;
+    label.by1=by1;
+    label.bx2=bx2;
+    label.by2=by2;
     label.alpha=a;
     label.fontSize=fontSize;
     label.style=&style;
@@ -1714,14 +1704,7 @@ namespace osmscout {
 
     labelsDrawn=0;
 
-    cellWidth=parameter.GetFontSize()*4;
-    cellHeight=parameter.GetFontSize()*4;
-    xCellCount=(int)ceil((double)projection.GetWidth()/cellWidth);
-    yCellCount=(int)ceil((double)projection.GetHeight()/cellHeight);
-
     labels.clear();
-    labelRefs.clear();
-    labelRefs.resize(xCellCount*yCellCount);
 
     transBuffer.Reset();
 

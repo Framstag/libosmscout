@@ -163,7 +163,7 @@ namespace osmscout {
 
   void MapPainterQt::DrawLabel(const Projection& projection,
                                const MapParameter& parameter,
-                               const Label& label)
+                               const LabelData& label)
   {
     double r=label.style->GetTextR();
     double g=label.style->GetTextG();
@@ -202,16 +202,16 @@ namespace osmscout {
 
   void MapPainterQt::DrawPlateLabel(const Projection& projection,
                                     const MapParameter& parameter,
-                                    const Label& label)
+                                    const LabelData& label)
   {
     QFont        font(GetFont(parameter,label.fontSize));
     QFontMetrics metrics=QFontMetrics(font);
     QString      string=QString::fromUtf8(label.text.c_str());
 
-    painter->fillRect(QRectF(label.bx,
-                             label.by,
-                             label.bwidth,
-                             label.bheight),
+    painter->fillRect(QRectF(label.bx1,
+                             label.by1,
+                             label.bx2-label.bx1+1,
+                             label.by2-label.by1+1),
                       QBrush(QColor::fromRgbF(label.style->GetBgR(),
                                               label.style->GetBgG(),
                                               label.style->GetBgB(),
@@ -223,10 +223,10 @@ namespace osmscout {
                                      label.style->GetBorderA()));
     painter->setBrush(Qt::NoBrush);
 
-    painter->drawRect(QRectF(label.bx+2,
-                             label.by+2,
-                             label.bwidth-4,
-                             label.bheight-4));
+    painter->drawRect(QRectF(label.bx1+2,
+                             label.by1+2,
+                             label.bx2-label.bx1+1-4,
+                             label.by2-label.by1+1-4));
 
     painter->setPen(QColor::fromRgbF(label.style->GetTextR(),
                                      label.style->GetTextG(),

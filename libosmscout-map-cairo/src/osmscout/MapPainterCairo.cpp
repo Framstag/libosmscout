@@ -498,7 +498,7 @@ namespace osmscout {
 
   void MapPainterCairo::DrawLabel(const Projection& projection,
                                   const MapParameter& parameter,
-                                  const Label& label)
+                                  const LabelData& label)
   {
     double               r=label.style->GetTextR();
     double               g=label.style->GetTextG();
@@ -538,7 +538,7 @@ namespace osmscout {
 
   void MapPainterCairo::DrawPlateLabel(const Projection& projection,
                                        const MapParameter& parameter,
-                                       const Label& label)
+                                       const LabelData& label)
   {
     cairo_scaled_font_t  *font;
     cairo_font_extents_t fontExtents;
@@ -559,10 +559,10 @@ namespace osmscout {
                           label.style->GetBgA());
 
     cairo_rectangle(draw,
-                    label.bx,
-                    label.by,
-                    label.bwidth,
-                    label.bheight);
+                    label.bx1,
+                    label.by1,
+                    label.bx2-label.bx1+1,
+                    label.by2-label.by1+1);
     cairo_fill(draw);
 
     cairo_set_source_rgba(draw,
@@ -572,10 +572,10 @@ namespace osmscout {
                           label.style->GetBorderA());
 
     cairo_rectangle(draw,
-                    label.bx+2,
-                    label.by+2,
-                    label.bwidth-4,
-                    label.bheight-4);
+                    label.bx1+2,
+                    label.by1+2,
+                    label.bx2-label.bx1+1-4,
+                    label.by2-label.by1+1-4);
     cairo_stroke(draw);
 
     cairo_set_source_rgba(draw,

@@ -7,7 +7,6 @@ OSS
   WAY "highway_motorway_link" PRIO 5 MINMAG cityOver
     LINE #809bc0 WITH OUTLINECOLOR #777777 MINWIDTH 0.45mm WIDTH 20m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG detail
-    REF WITH STYLE plate COLOR #ffffff BGCOLOR #809bc0 BORDERCOLOR #ffffff MINMAG state PRIO 20
 
   WAY "highway_trunk" PRIO 2 MINMAG county
     LINE #a8daa8 WITH OUTLINECOLOR #777777 MINWIDTH 0.45mm WIDTH 18m OUTLINE 0.25mm
@@ -17,7 +16,6 @@ OSS
   WAY "highway_trunk_link" PRIO 5 MINMAG cityOver
     LINE #a8daa8 WITH OUTLINECOLOR #777777 MINWIDTH 0.45mm WIDTH 18m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG detail
-    REF WITH STYLE plate COLOR #ffffff BGCOLOR #7ec87e BORDERCOLOR #ffffff MINMAG proximity PRIO 20
 
   WAY "highway_primary" PRIO 3 MINMAG county
     LINE #ec989a WITH OUTLINECOLOR #a56769 MINWIDTH 0.4mm WIDTH 14m OUTLINE 0.25mm
@@ -27,7 +25,6 @@ OSS
   WAY "highway_primary_link" PRIO 5 MINMAG city
     LINE #ec989a WITH MINWIDTH 0.4mm WIDTH 14m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG detail
-    REF WITH STYLE plate COLOR #ffffff BGCOLOR #e46d71 BORDERCOLOR #ffffff MINMAG cityOver PRIO 20
 
   WAY "highway_secondary" PRIO 4 MINMAG proximity
     LINE #fdd6a4 WITH ALTCOLOR #fdd654 MINWIDTH 0.25mm WIDTH 12m OUTLINE 0.25mm

@@ -67,11 +67,11 @@ namespace osmscout {
 
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
-                   const Label& label);
+                   const LabelData& label);
 
     void DrawPlateLabel(const Projection& projection,
                         const MapParameter& parameter,
-                        const Label& label);
+                        const LabelData& label);
 
     void DrawContourLabel(const Projection& projection,
                           const MapParameter& parameter,

@@ -35,6 +35,7 @@
 #include <osmscout/Way.h>
 
 #include <osmscout/util/Breaker.h>
+#include <osmscout/util/HashSet.h>
 #include <osmscout/util/Projection.h>
 #include <osmscout/util/Transformation.h>
 
@@ -46,29 +47,32 @@ namespace osmscout {
   class OSMSCOUT_MAP_API MapParameter
   {
   private:
-    double                 dpi;               //! DPI of the display, default is 92
+    double                 dpi;                //! DPI of the display, default is 92
 
-    std::string            fontName;          //! Name of the font to use
-    double                 fontSize;          //! Metric size of base font (aka font size 100%) in millimeter
+    std::string            fontName;           //! Name of the font to use
+    double                 fontSize;           //! Metric size of base font (aka font size 100%) in millimeter
 
-    std::list<std::string> iconPaths;         //! List of paths to search for images for icons
-    std::list<std::string> patternPaths;      //! List of paths to search for images for patterns
+    std::list<std::string> iconPaths;          //! List of paths to search for images for icons
+    std::list<std::string> patternPaths;       //! List of paths to search for images for patterns
 
-    double                 lineMinWidthPixel; //! Minimum width of an line to be drawn
+    double                 lineMinWidthPixel;  //! Minimum width of an line to be drawn
 
     double                 drawBridgeMagnification; //! Starting with this magnification, we draw bridges
     double                 drawTunnelMagnification; //! Starting with this magnification, we draw tunnels
 
-    bool                   optimizeWayNodes;  //! Try to reduce the number of nodes for a way
-    bool                   optimizeAreaNodes; //! Try to reduce the number of nodes for an area
+    bool                   optimizeWayNodes;   //! Try to reduce the number of nodes for a way
+    bool                   optimizeAreaNodes;  //! Try to reduce the number of nodes for an area
 
-    bool                   drawFadings;       //! Draw label fadings (default: true)
+    bool                   drawFadings;        //! Draw label fadings (default: true)
     bool                   drawWaysWithFixedWidth; //! Draw ways using the size of the style sheet, if if the way has a width explicitely given
 
+    double                 labelSpace;         //! Space between point labels in mm (default 3).
+    double                 plateLabelSpace;    //! Space between plates in mm (default 5).
+    double                 sameLabelSpace;     //! Space between labels with the same value in mm (default 40)
 
-    bool                   debugPerformance;  //! Print out some performance information
+    bool                   debugPerformance;   //! Print out some performance information
 
-    BreakerRef             breaker;
+    BreakerRef             breaker;            //! Breaker to abort processing on external request
 
   public:
     MapParameter();
@@ -92,6 +96,10 @@ namespace osmscout {
 
     void SetDrawFadings(bool drawFadings);
     void SetDrawWaysWithFixedWidth(bool drawWaysWithFixedWidth);
+
+    void SetLabelSpace(double labelSpace);
+    void SetPlateLabelSpace(double plateLabelSpace);
+    void SetSameLabelSpace(double sameLabelSpace);
 
     void SetDebugPerformance(bool debug);
 
@@ -155,6 +163,21 @@ namespace osmscout {
     inline bool GetDrawWaysWithFixedWidth() const
     {
       return drawWaysWithFixedWidth;
+    }
+
+    inline double GetLabelSpace() const
+    {
+      return labelSpace;
+    }
+
+    inline double GetPlateLabelSpace() const
+    {
+      return plateLabelSpace;
+    }
+
+    inline double GetSameLabelSpace() const
+    {
+      return sameLabelSpace;
     }
 
     inline bool IsDebugPerformance() const
@@ -250,23 +273,21 @@ namespace osmscout {
       std::list<PolyData>     clippings;       // Clipping polygons to be used during drawing of this area
     };
 
-    struct OSMSCOUT_API Label
+    struct OSMSCOUT_API LabelData
     {
-      bool              draw;
-      bool              overlay;
-      bool              mark;
-      double            x;
-      double            y;
-      double            width;
-      double            height;
-      double            bx;
-      double            by;
-      double            bwidth;
-      double            bheight;
-      double            alpha;
-      double            fontSize;
-      const LabelStyle* style;
-      std::string       text;
+      bool              draw;     // Draw this label
+      bool              overlay;  // The Label has a alpha channel and acts as overlay text
+      bool              mark;     // Labels can temporary marked during label coverage conflict resolution
+      double            x;        // Coordinate of the left, top edge of the text
+      double            y;        // Coordinate of the left, top edge of the text
+      double            bx1;      // Dimensions of bounding box
+      double            by1;      // Dimensions of bounding box
+      double            bx2;      // Dimensions of bounding box
+      double            by2;      // Dimensions of bounding box
+      double            alpha;    // Alpha value of the label
+      double            fontSize; // Font size to be used
+      const LabelStyle* style;    // Style for drawing
+      std::string       text;     // The label text
     };
 
   protected:
@@ -274,51 +295,46 @@ namespace osmscout {
        Scratch variables for path optimization algorithm
      */
     //@{
-    TransBuffer             transBuffer; //! Static (avoid reallocation) buffer of transformed coordinates
+    TransBuffer            transBuffer; //! Static (avoid reallocation) buffer of transformed coordinates
     //@}
 
     /**
       Presets and similar
      */
     //@{
-    std::vector<double>     emptyDash;         //! Empty dash array
-    std::vector<double>     tunnelDash;        //! Dash array for drawing tunnel border
-    FillStyle               areaMarkStyle;     //! Marker fill style for internal debugging
+    std::vector<double>    emptyDash;         //! Empty dash array
+    std::vector<double>    tunnelDash;        //! Dash array for drawing tunnel border
+    FillStyle              areaMarkStyle;     //! Marker fill style for internal debugging
     //@}
 
-    std::list<AreaData>     areaData;
-    std::list<WayData>      wayData;
+    std::list<AreaData>    areaData;
+    std::list<WayData>     wayData;
 
     /**
       Temporary data structures for intelligent label positioning
       */
     //@{
-    int                     xCellCount;
-    int                     yCellCount;
-    size_t                  cellWidth;
-    size_t                  cellHeight;
+    std::vector<LabelData> labels;
+    std::vector<ScanCell>  wayScanlines;
 
-    std::vector<std::list<size_t> > labelRefs;
-    std::vector<Label>      labels;
-    std::vector<ScanCell>   wayScanlines;
     //@}
 
     /**
       Statistics counter
      */
     //@{
-    size_t waysSegments;
-    size_t waysDrawn;
-    size_t waysOutlineDrawn;
-    size_t waysLabelDrawn;
+    size_t                 waysSegments;
+    size_t                 waysDrawn;
+    size_t                 waysOutlineDrawn;
+    size_t                 waysLabelDrawn;
 
-    size_t areasSegments;
-    size_t areasDrawn;
-    size_t areasLabelDrawn;
+    size_t                 areasSegments;
+    size_t                 areasDrawn;
+    size_t                 areasLabelDrawn;
 
-    size_t nodesDrawn;
+    size_t                 nodesDrawn;
 
-    size_t labelsDrawn;
+    size_t                 labelsDrawn;
     //@}
 
   private:
@@ -326,6 +342,12 @@ namespace osmscout {
                          double cellWidth,
                          double cellHeight,
                          std::vector<ScanCell>& cells);
+
+    void CalculateEffectiveLabelStyle(const Projection& projection,
+                                      const MapParameter& parameter,
+                                      const LabelStyle& style,
+                                      double& fontSize,
+                                      double& alpha);
 
     /**
       Private draw algorithm implementation routines.
@@ -423,8 +445,11 @@ namespace osmscout {
                              double minPixel,
                              double width) const;
 
-    double ConvertWidthToPixel(const MapParameter& parameter,
-                               double width) const;
+    inline double ConvertWidthToPixel(const MapParameter& parameter,
+                                      double width) const
+    {
+      return width*parameter.GetDPI()/25.4;
+    }
 
     //@}
 
@@ -464,7 +489,7 @@ namespace osmscout {
      */
     virtual void DrawLabel(const Projection& projection,
                            const MapParameter& parameter,
-                           const Label& label) = 0;
+                           const LabelData& label) = 0;
 
     /**
       Draw the given text at the given pixel coordinate in a style defined
@@ -472,7 +497,7 @@ namespace osmscout {
      */
     virtual void DrawPlateLabel(const Projection& projection,
                                 const MapParameter& parameter,
-                                const Label& label) = 0;
+                                const LabelData& label) = 0;
 
     /**
       Draw the given text as a contour of the given path in a style defined
