@@ -50,7 +50,7 @@ namespace osmscout {
     cairo_scaled_font_t* GetScaledFont(const MapParameter& parameter,
                                        double fontSize);
 
-    void SetLineAttributes(double r, double g, double b, double a,
+    void SetLineAttributes(const Color& color,
                            double width,
                            const std::vector<double>& dash);
 
@@ -92,7 +92,7 @@ namespace osmscout {
 
     void DrawPath(const Projection& projection,
                   const MapParameter& parameter,
-                  double r, double g, double b, double a,
+                  const Color& color,
                   double width,
                   const std::vector<double>& dash,
                   CapStyle startCap,

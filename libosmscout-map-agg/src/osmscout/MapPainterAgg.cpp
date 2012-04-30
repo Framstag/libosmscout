@@ -254,9 +254,9 @@ namespace osmscout {
                                const MapParameter& parameter,
                                const LabelData& label)
   {
-    double       r=label.style->GetTextR();
-    double       g=label.style->GetTextG();
-    double       b=label.style->GetTextB();
+    double       r=label.style->GetTextColor().GetR();
+    double       g=label.style->GetTextColor().GetG();
+    double       b=label.style->GetTextColor().GetB();
     std::wstring wideText(UTF8StringToWString(label.text));
 
     if (label.style->GetStyle()==LabelStyle::normal) {
@@ -309,10 +309,10 @@ namespace osmscout {
                                        size_t transStart, size_t transEnd)
   {
     double       fontSize=style.GetSize();
-    double       r=style.GetTextR();
-    double       g=style.GetTextG();
-    double       b=style.GetTextB();
-    double       a=style.GetTextA();
+    double       r=style.GetTextColor().GetR();
+    double       g=style.GetTextColor().GetG();
+    double       b=style.GetTextColor().GetB();
+    double       a=style.GetTextColor().GetA();
     std::wstring wideText(UTF8StringToWString(text));
 
     SetOutlineFont(parameter,
@@ -435,10 +435,7 @@ namespace osmscout {
 
   void MapPainterAgg::DrawPath(const Projection& projection,
                                const MapParameter& parameter,
-                               double r,
-                               double g,
-                               double b,
-                               double a,
+                               const Color& color,
                                double width,
                                const std::vector<double>& dash,
                                CapStyle startCap,
@@ -456,7 +453,10 @@ namespace osmscout {
       }
     }
 
-    renderer_aa->color(agg::rgba(r,g,b,a));
+    renderer_aa->color(agg::rgba(color.GetR(),
+                                 color.GetG(),
+                                 color.GetB(),
+                                 color.GetA()));
 
     if (dash.empty()) {
       agg::conv_stroke<agg::path_storage> stroke(p);
@@ -501,10 +501,10 @@ namespace osmscout {
   {
     agg::path_storage path;
 
-    renderer_aa->color(agg::rgba(area.fillStyle->GetFillR(),
-                                 area.fillStyle->GetFillG(),
-                                 area.fillStyle->GetFillB(),
-                                 area.fillStyle->GetFillA()));
+    renderer_aa->color(agg::rgba(area.fillStyle->GetFillColor().GetR(),
+                                 area.fillStyle->GetFillColor().GetG(),
+                                 area.fillStyle->GetFillColor().GetB(),
+                                 area.fillStyle->GetFillColor().GetA()));
 
 
     if (!area.clippings.empty()) {
@@ -546,10 +546,10 @@ namespace osmscout {
 
 
     if (borderWidth>=parameter.GetLineMinWidthPixel()) {
-      renderer_aa->color(agg::rgba(area.fillStyle->GetBorderR(),
-                                   area.fillStyle->GetBorderG(),
-                                   area.fillStyle->GetBorderB(),
-                                   area.fillStyle->GetBorderA()));
+      renderer_aa->color(agg::rgba(area.fillStyle->GetBorderColor().GetR(),
+                                   area.fillStyle->GetBorderColor().GetG(),
+                                   area.fillStyle->GetBorderColor().GetB(),
+                                   area.fillStyle->GetBorderColor().GetA()));
 
       if (area.fillStyle->GetBorderDash().empty()) {
         agg::conv_stroke<agg::path_storage> stroke(path);
@@ -596,9 +596,9 @@ namespace osmscout {
     path.line_to(x, y+height);
     path.close_polygon();
 
-    renderer_aa->color(agg::rgba(style.GetFillR(),
-                                 style.GetFillG(),
-                                 style.GetFillB(),
+    renderer_aa->color(agg::rgba(style.GetFillColor().GetR(),
+                                 style.GetFillColor().GetG(),
+                                 style.GetFillColor().GetB(),
                                  1));
 
     rasterizer->filling_rule(agg::fill_non_zero);

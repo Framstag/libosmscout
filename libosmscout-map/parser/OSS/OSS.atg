@@ -44,11 +44,12 @@ size_t GetHexDigitValue(char c)
   assert(false);
 }
 
-void ToRGBA(const char* str, double& r, double& g, double& b, double& a)
+void ToRGBA(const char* str, Color& color)
 {
-  r=(16*GetHexDigitValue(str[1])+GetHexDigitValue(str[2]))/255.0;
-  g=(16*GetHexDigitValue(str[3])+GetHexDigitValue(str[4]))/255.0;
-  b=(16*GetHexDigitValue(str[5])+GetHexDigitValue(str[6]))/255.0;
+  double r=(16*GetHexDigitValue(str[1])+GetHexDigitValue(str[2]))/255.0;
+  double g=(16*GetHexDigitValue(str[3])+GetHexDigitValue(str[4]))/255.0;
+  double b=(16*GetHexDigitValue(str[5])+GetHexDigitValue(str[6]))/255.0;
+  double a;
 
   if (strlen(str)==9) {
     a=(16*GetHexDigitValue(str[7])+GetHexDigitValue(str[8]))/255.0;
@@ -56,6 +57,8 @@ void ToRGBA(const char* str, double& r, double& g, double& b, double& a)
   else {
     a=1.0;
   }
+  
+  color=Color(r,g,b,a);
 }
 
 CHARACTERS
@@ -196,25 +199,25 @@ PRODUCTIONS
 
   LINEDEF<LineStyle& style>
               = (.
-                  double r,g,b,a;
+                  Color lineColor;
                 .)
                 SYNC "LINE"
-                COLOR<r,g,b,a>
-                (. style.SetLineColor(r,g,b,a); .)
+                COLOR<lineColor>
+                (. style.SetLineColor(lineColor); .)
 
                 [SYNC "WITH"
                   [
-                    (. double cr,cg,cb,ca; .)
+                    (. Color alternateColor; .)
                     "ALTCOLOR"
-                    COLOR<cr,cg,cb,ca>
-                    (. style.SetAlternateColor(cr,cg,cb,ca); .)
+                    COLOR<alternateColor>
+                    (. style.SetAlternateColor(alternateColor); .)
                   ]
 
                   [
-                    (. double cr,cg,cb,ca; .)
+                    (. Color outlineColor; .)
                     "OUTLINECOLOR"
-                    COLOR<cr,cg,cb,ca>
-                    (. style.SetOutlineColor(cr,cg,cb,ca); .)
+                    COLOR<outlineColor>
+                    (. style.SetOutlineColor(outlineColor); .)
                   ]
 
                   [
@@ -227,10 +230,10 @@ PRODUCTIONS
                     }
                     
                     [
-                    (. double cr,cg,cb,ca; .)
+                    (. Color gapColor; .)
                       "GAPCOLOR"
-                      COLOR<cr,cg,cb,ca>
-                      (. style.SetGapColor(cr,cg,cb,ca); .)
+                      COLOR<gapColor>
+                      (. style.SetGapColor(gapColor); .)
                     ]
                   ]
 
@@ -255,11 +258,11 @@ PRODUCTIONS
 
   FILLDEF<FillStyle& style>
               = (.
-                  double r,g,b,a;
+                  Color fillColor;
                 .)
                 SYNC "FILL"
-                COLOR<r,g,b,a>
-                (. style.SetFillColor(r,g,b,a); .)
+                COLOR<fillColor>
+                (. style.SetFillColor(fillColor); .)
 
                 [
                   SYNC "PATTERN"
@@ -275,8 +278,9 @@ PRODUCTIONS
                 ]  
                 
                 [
+                  (. Color borderColor; .)
                   SYNC "BORDER"
-                  COLOR<r,g,b,a> (. style.SetBorderColor(r,g,b,a); .)
+                  COLOR<borderColor> (. style.SetBorderColor(borderColor); .)
 
 	              [
 	                (. double width=style.GetBorderWidth(); .)
@@ -310,24 +314,24 @@ PRODUCTIONS
                   ]
 
                   [
-                    (. double cr,cg,cb,ca; .)
+                    (. Color textColor; .)
                     "COLOR"
-                    COLOR<cr,cg,cb,ca>
-                    (. style.SetTextColor(cr,cg,cb,ca); .)
+                    COLOR<textColor>
+                    (. style.SetTextColor(textColor); .)
                   ]
 
                   [
-                    (. double cr,cg,cb,ca; .)
+                    (. Color bgColor; .)
                     "BGCOLOR"
-                    COLOR<cr,cg,cb,ca>
-                    (. style.SetBgColor(cr,cg,cb,ca); .)
+                    COLOR<bgColor>
+                    (. style.SetBgColor(bgColor); .)
                   ]
 
                   [
-                    (. double cr,cg,cb,ca; .)
+                    (. Color borderColor; .)
                     "BORDERCOLOR"
-                    COLOR<cr,cg,cb,ca>
-                    (. style.SetBorderColor(cr,cg,cb,ca); .)
+                    COLOR<borderColor>
+                    (. style.SetBorderColor(borderColor); .)
                   ]
 
                   [
@@ -381,24 +385,24 @@ PRODUCTIONS
                   ]
 
                   [
-                    (. double cr,cg,cb,ca; .)
+                    (. Color textColor; .)
                     "COLOR"
-                    COLOR<cr,cg,cb,ca>
-                    (. style.SetTextColor(cr,cg,cb,ca); .)
+                    COLOR<textColor>
+                    (. style.SetTextColor(textColor); .)
                   ]
 
                   [
-                    (. double cr,cg,cb,ca; .)
+                    (. Color bgColor; .)
                     "BGCOLOR"
-                    COLOR<cr,cg,cb,ca>
-                    (. style.SetBgColor(cr,cg,cb,ca); .)
+                    COLOR<bgColor>
+                    (. style.SetBgColor(bgColor); .)
                   ]
 
                   [
-                    (. double cr,cg,cb,ca; .)
+                    (. Color borderColor; .)
                     "BORDERCOLOR"
-                    COLOR<cr,cg,cb,ca>
-                    (. style.SetBorderColor(cr,cg,cb,ca); .)
+                    COLOR<borderColor>
+                    (. style.SetBorderColor(borderColor); .)
                   ]
 
                   [ (. double size=style.GetSize(); .)
@@ -443,13 +447,13 @@ PRODUCTIONS
   SYMBOLDEF<SymbolStyle& style>
               = (.
                   SymbolStyle::Style s;
-                  double             r,g,b,a;
+                  Color              fillColor;
                   double             size=style.GetSize();
                 .)
                 SYNC "SYMBOL"
-                SYMBOLSTYLE<s> (. style.SetStyle(s); .)
-                COLOR<r,g,b,a> (. style.SetFillColor(r,g,b,a); .)
-                DOUBLE<size>   (. style.SetSize(size); .)
+                SYMBOLSTYLE<s>   (. style.SetStyle(s); .)
+                COLOR<fillColor> (. style.SetFillColor(fillColor); .)
+                DOUBLE<size>     (. style.SetSize(size); .)
 
                 [SYNC "WITH"
 
@@ -489,18 +493,15 @@ PRODUCTIONS
                 | "circle"    (. style=SymbolStyle::circle; .)
                 ).
 
-  COLOR<double& r, double& g, double& b, double& a>
+  COLOR<Color& color>
               = color
                 (.
                   if (strlen(t->val)==7 ||
                       strlen(t->val)==9) {
-                    ToRGBA(t->val,r,g,b,a);
+                    ToRGBA(t->val,color);
                   }
                   else {
-                    r=1.0;
-                    g=0.0;
-                    b=0.0;
-                    a=1.0;
+                    color=Color();
                   }
                 .).
 

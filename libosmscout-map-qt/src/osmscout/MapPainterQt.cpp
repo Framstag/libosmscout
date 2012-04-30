@@ -165,9 +165,9 @@ namespace osmscout {
                                const MapParameter& parameter,
                                const LabelData& label)
   {
-    double r=label.style->GetTextR();
-    double g=label.style->GetTextG();
-    double b=label.style->GetTextB();
+    double r=label.style->GetTextColor().GetR();
+    double g=label.style->GetTextColor().GetG();
+    double b=label.style->GetTextColor().GetB();
 
     QFont        font(GetFont(parameter,label.fontSize));
     QString      string=QString::fromUtf8(label.text.c_str());
@@ -212,15 +212,15 @@ namespace osmscout {
                              label.by1,
                              label.bx2-label.bx1+1,
                              label.by2-label.by1+1),
-                      QBrush(QColor::fromRgbF(label.style->GetBgR(),
-                                              label.style->GetBgG(),
-                                              label.style->GetBgB(),
+                      QBrush(QColor::fromRgbF(label.style->GetBgColor().GetR(),
+                                              label.style->GetBgColor().GetG(),
+                                              label.style->GetBgColor().GetB(),
                                               1)));
 
-    painter->setPen(QColor::fromRgbF(label.style->GetBorderR(),
-                                     label.style->GetBorderG(),
-                                     label.style->GetBorderB(),
-                                     label.style->GetBorderA()));
+    painter->setPen(QColor::fromRgbF(label.style->GetBorderColor().GetR(),
+                                     label.style->GetBorderColor().GetG(),
+                                     label.style->GetBorderColor().GetB(),
+                                     label.style->GetBorderColor().GetA()));
     painter->setBrush(Qt::NoBrush);
 
     painter->drawRect(QRectF(label.bx1+2,
@@ -228,10 +228,10 @@ namespace osmscout {
                              label.bx2-label.bx1+1-4,
                              label.by2-label.by1+1-4));
 
-    painter->setPen(QColor::fromRgbF(label.style->GetTextR(),
-                                     label.style->GetTextG(),
-                                     label.style->GetTextB(),
-                                     label.style->GetTextA()));
+    painter->setPen(QColor::fromRgbF(label.style->GetTextColor().GetR(),
+                                     label.style->GetTextColor().GetG(),
+                                     label.style->GetTextColor().GetB(),
+                                     label.style->GetTextColor().GetA()));
     painter->setBrush(Qt::NoBrush);
     painter->setFont(font);
     painter->drawText(QPointF(label.x,
@@ -246,10 +246,10 @@ namespace osmscout {
                                       size_t transStart, size_t transEnd)
   {
     double fontSize=style.GetSize();
-    double r=style.GetTextR();
-    double g=style.GetTextG();
-    double b=style.GetTextB();
-    double a=style.GetTextA();
+    double r=style.GetTextColor().GetR();
+    double g=style.GetTextColor().GetG();
+    double b=style.GetTextColor().GetB();
+    double a=style.GetTextColor().GetA();
 
     QPen          pen;
     QFont         font(GetFont(parameter,fontSize));
@@ -356,29 +356,29 @@ namespace osmscout {
     case SymbolStyle::box:
       path.addRect(x-style->GetSize()/2,y-style->GetSize()/2,
                    style->GetSize(),style->GetSize());
-      painter->fillPath(path,QBrush(QColor::fromRgbF(style->GetFillR(),
-                                                     style->GetFillG(),
-                                                     style->GetFillB(),
-                                                     style->GetFillA())));
+      painter->fillPath(path,QBrush(QColor::fromRgbF(style->GetFillColor().GetR(),
+                                                     style->GetFillColor().GetG(),
+                                                     style->GetFillColor().GetB(),
+                                                     style->GetFillColor().GetA())));
       break;
     case SymbolStyle::circle:
       path.addEllipse(QPointF(x,y),
                       (double)style->GetSize(),
                       (double)style->GetSize());
-      painter->fillPath(path,QBrush(QColor::fromRgbF(style->GetFillR(),
-                                                     style->GetFillG(),
-                                                     style->GetFillB(),
-                                                     style->GetFillA())));
+      painter->fillPath(path,QBrush(QColor::fromRgbF(style->GetFillColor().GetR(),
+                                                     style->GetFillColor().GetG(),
+                                                     style->GetFillColor().GetB(),
+                                                     style->GetFillColor().GetA())));
       break;
     case SymbolStyle::triangle: {
       path.moveTo(x-style->GetSize()/2,y+style->GetSize()/2);
       path.lineTo(x,y-style->GetSize()/2);
       path.lineTo(x+style->GetSize()/2,y+style->GetSize()/2);
       path.lineTo(x-style->GetSize()/2,y+style->GetSize()/2);
-      painter->fillPath(path,QBrush(QColor::fromRgbF(style->GetFillR(),
-                                                     style->GetFillG(),
-                                                     style->GetFillB(),
-                                                     style->GetFillA())));
+      painter->fillPath(path,QBrush(QColor::fromRgbF(style->GetFillColor().GetR(),
+                                                     style->GetFillColor().GetG(),
+                                                     style->GetFillColor().GetB(),
+                                                     style->GetFillColor().GetA())));
     }
       break;
     }
@@ -386,10 +386,7 @@ namespace osmscout {
 
   void MapPainterQt::DrawPath(const Projection& projection,
                               const MapParameter& parameter,
-                              double r,
-                              double g,
-                              double b,
-                              double a,
+                              const Color& color,
                               double width,
                               const std::vector<double>& dash,
                               CapStyle startCap,
@@ -398,7 +395,10 @@ namespace osmscout {
   {
     QPen pen;
 
-    pen.setColor(QColor::fromRgbF(r,g,b,a));
+    pen.setColor(QColor::fromRgbF(color.GetR(),
+                                  color.GetG(),
+                                  color.GetB(),
+                                  color.GetA()));
     pen.setWidthF(width);
     pen.setJoinStyle(Qt::RoundJoin);
 
@@ -467,7 +467,10 @@ namespace osmscout {
     if (dash.empty() &&
         startCap==capRound &&
         endCap!=capRound) {
-      painter->setBrush(QBrush(QColor::fromRgbF(r,g,b,a)));
+      painter->setBrush(QBrush(QColor::fromRgbF(color.GetR(),
+                                                color.GetG(),
+                                                color.GetB(),
+                                                color.GetA())));
 
       painter->drawEllipse(QPointF(transBuffer.buffer[transStart].x,
                                    transBuffer.buffer[transStart].y),
@@ -477,7 +480,10 @@ namespace osmscout {
     if (dash.empty() &&
       endCap==capRound &&
       startCap!=capRound) {
-      painter->setBrush(QBrush(QColor::fromRgbF(r,g,b,a)));
+      painter->setBrush(QBrush(QColor::fromRgbF(color.GetR(),
+                                                color.GetG(),
+                                                color.GetB(),
+                                                color.GetA())));
 
       painter->drawEllipse(QPointF(transBuffer.buffer[transEnd].x,
                                    transBuffer.buffer[transEnd].y),
@@ -520,10 +526,10 @@ namespace osmscout {
     if (borderWidth>=parameter.GetLineMinWidthPixel()) {
       QPen pen;
 
-      pen.setColor(QColor::fromRgbF(area.fillStyle->GetBorderR(),
-                                    area.fillStyle->GetBorderG(),
-                                    area.fillStyle->GetBorderB(),
-                                    area.fillStyle->GetBorderA()));
+      pen.setColor(QColor::fromRgbF(area.fillStyle->GetBorderColor().GetR(),
+                                    area.fillStyle->GetBorderColor().GetG(),
+                                    area.fillStyle->GetBorderColor().GetB(),
+                                    area.fillStyle->GetBorderColor().GetA()));
       pen.setWidthF(borderWidth);
 
       if (area.fillStyle->GetBorderDash().empty()) {
@@ -562,9 +568,9 @@ namespace osmscout {
                               double height)
   {
     painter->fillRect(QRectF(x,y,width,height),
-                      QBrush(QColor::fromRgbF(style.GetFillR(),
-                                              style.GetFillG(),
-                                              style.GetFillB(),
+                      QBrush(QColor::fromRgbF(style.GetFillColor().GetR(),
+                                              style.GetFillColor().GetG(),
+                                              style.GetFillColor().GetB(),
                                               1)));
   }
 
@@ -573,10 +579,10 @@ namespace osmscout {
   {
     QPen pen;
 
-    pen.setColor(QColor::fromRgbF(style.GetLineR(),
-                                  style.GetLineG(),
-                                  style.GetLineB(),
-                                  style.GetLineA()));
+    pen.setColor(QColor::fromRgbF(style.GetLineColor().GetR(),
+                                  style.GetLineColor().GetG(),
+                                  style.GetLineColor().GetB(),
+                                  style.GetLineColor().GetA()));
     pen.setWidthF(lineWidth);
 
     if (style.GetDash().empty()) {
@@ -613,10 +619,10 @@ namespace osmscout {
       painter->setBrush(patterns[fillStyle.GetPatternId()-1]);
     }
     else {
-      painter->setBrush(QBrush(QColor::fromRgbF(fillStyle.GetFillR(),
-                                                fillStyle.GetFillG(),
-                                                fillStyle.GetFillB(),
-                                                fillStyle.GetFillA())));
+      painter->setBrush(QBrush(QColor::fromRgbF(fillStyle.GetFillColor().GetR(),
+                                                fillStyle.GetFillColor().GetG(),
+                                                fillStyle.GetFillColor().GetB(),
+                                                fillStyle.GetFillColor().GetA())));
     }
   }
 

@@ -36,8 +36,7 @@ namespace osmscout {
      const TypeConfig *typeConfig;
 
   private:
-    std::string GetColorValue(double r, double g, double b);
-    std::string GetColorValue(double r, double g, double b, double a);
+    std::string GetColorValue(const Color& color);
 
     void WriteHeader(size_t width,size_t height);
     void DumpStyles(const StyleConfig& styleConfig,
@@ -83,7 +82,7 @@ namespace osmscout {
 
     void DrawPath(const Projection& projection,
                   const MapParameter& parameter,
-                  double r, double g, double b, double a,
+                  const Color& color,
                   double width,
                   const std::vector<double>& dash,
                   CapStyle startCap,

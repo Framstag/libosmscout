@@ -28,31 +28,21 @@
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeSet.h>
 
+#include <osmscout/util/Color.h>
+#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
   /**
    * Ways can have a line style
    */
-  class OSMSCOUT_MAP_API LineStyle
+  class OSMSCOUT_MAP_API LineStyle : public Referencable
   {
   private:
-    double              lineR;
-    double              lineG;
-    double              lineB;
-    double              lineA;
-    double              alternateR;
-    double              alternateG;
-    double              alternateB;
-    double              alternateA;
-    double              outlineR;
-    double              outlineG;
-    double              outlineB;
-    double              outlineA;
-    double              gapR;
-    double              gapG;
-    double              gapB;
-    double              gapA;
+    Color               lineColor;
+    Color               alternateColor;
+    Color               outlineColor;
+    Color               gapColor;
     double              minWidth;
     double              width;
     double              fixedWidth;
@@ -62,10 +52,10 @@ namespace osmscout {
   public:
     LineStyle();
 
-    LineStyle& SetLineColor(double r, double g, double b, double a);
-    LineStyle& SetAlternateColor(double r, double g, double b, double a);
-    LineStyle& SetOutlineColor(double r, double g, double b, double a);
-    LineStyle& SetGapColor(double r, double g, double b, double a);
+    LineStyle& SetLineColor(const Color& color);
+    LineStyle& SetAlternateColor(const Color& color);
+    LineStyle& SetOutlineColor(const Color& color);
+    LineStyle& SetGapColor(const Color& color);
     LineStyle& SetMinWidth(double value);
     LineStyle& SetWidth(double value);
     LineStyle& SetFixedWidth(bool fixedWidth);
@@ -77,84 +67,24 @@ namespace osmscout {
       return width>0.0;
     }
 
-    inline double GetLineR() const
+    inline const Color& GetLineColor() const
     {
-      return lineR;
+      return lineColor;
     }
 
-    inline double GetLineG() const
+    inline const Color& GetAlternateColor() const
     {
-      return lineG;
+      return alternateColor;
     }
 
-    inline double GetLineB() const
+    inline const Color& GetOutlineColor() const
     {
-      return lineB;
+      return outlineColor;
     }
 
-    inline double GetLineA() const
+    inline const Color& GetGapColor() const
     {
-      return lineA;
-    }
-
-    inline double GetAlternateR() const
-    {
-      return alternateR;
-    }
-
-    inline double GetAlternateG() const
-    {
-      return alternateG;
-    }
-
-    inline double GetAlternateB() const
-    {
-      return alternateB;
-    }
-
-    inline double GetAlternateA() const
-    {
-      return alternateA;
-    }
-
-    inline double GetOutlineR() const
-    {
-      return outlineR;
-    }
-
-    inline double GetOutlineG() const
-    {
-      return outlineG;
-    }
-
-    inline double GetOutlineB() const
-    {
-      return outlineB;
-    }
-
-    inline double GetOutlineA() const
-    {
-      return outlineA;
-    }
-
-    inline double GetGapR() const
-    {
-      return gapR;
-    }
-
-    inline double GetGapG() const
-    {
-      return gapG;
-    }
-
-    inline double GetGapB() const
-    {
-      return gapB;
-    }
-
-    inline double GetGapA() const
-    {
-      return gapA;
+      return gapColor;
     }
 
     inline double GetMinWidth() const
@@ -188,10 +118,12 @@ namespace osmscout {
     }
   };
 
+  typedef Ref<LineStyle> LineStyleRef;
+
   /**
    * Areas can have a fill style, filling the area with one color
    */
-  class OSMSCOUT_MAP_API FillStyle
+  class OSMSCOUT_MAP_API FillStyle : public Referencable
   {
   public:
     enum Style {
@@ -201,17 +133,11 @@ namespace osmscout {
 
   private:
     Style               style;
-    double              fillR;
-    double              fillG;
-    double              fillB;
-    double              fillA;
+    Color               fillColor;
     std::string         pattern;
     mutable size_t      patternId;
     Mag                 patternMinMag;
-    double              borderR;
-    double              borderG;
-    double              borderB;
-    double              borderA;
+    Color               borderColor;
     double              borderWidth;
     std::vector<double> borderDash;
 
@@ -219,11 +145,11 @@ namespace osmscout {
     FillStyle();
 
     FillStyle& SetStyle(Style style);
-    FillStyle& SetFillColor(double r, double g, double b, double a);
+    FillStyle& SetFillColor(const Color& color);
     void SetPatternId(size_t id) const;
     FillStyle& SetPattern(const std::string& pattern);
     FillStyle& SetPatternMinMag(Mag mag);
-    FillStyle& SetBorderColor(double r, double g, double b, double a);
+    FillStyle& SetBorderColor(const Color& color);
     FillStyle& SetBorderWidth(double value);
     FillStyle& AddBorderDashValue(double dashValue);
 
@@ -237,24 +163,9 @@ namespace osmscout {
       return style;
     }
 
-    inline double GetFillR() const
+    inline const Color& GetFillColor() const
     {
-      return fillR;
-    }
-
-    inline double GetFillG() const
-    {
-      return fillG;
-    }
-
-    inline double GetFillB() const
-    {
-      return fillB;
-    }
-
-    inline double GetFillA() const
-    {
-      return fillA;
+      return fillColor;
     }
 
     inline bool HasPattern() const
@@ -277,24 +188,9 @@ namespace osmscout {
       return patternMinMag;
     }
 
-    inline double GetBorderR() const
+    inline const Color& GetBorderColor() const
     {
-      return borderR;
-    }
-
-    inline double GetBorderG() const
-    {
-      return borderG;
-    }
-
-    inline double GetBorderB() const
-    {
-      return borderB;
-    }
-
-    inline double GetBorderA() const
-    {
-      return borderA;
+      return borderColor;
     }
 
     inline double GetBorderWidth() const
@@ -313,11 +209,13 @@ namespace osmscout {
     }
   };
 
+  typedef Ref<FillStyle> FillStyleRef;
+
   /**
     Nodes, ways and areas can have a label style for drawing text. Text can be formatted
     in different ways.
    */
-  class OSMSCOUT_MAP_API LabelStyle
+  class OSMSCOUT_MAP_API LabelStyle : public Referencable
   {
   public:
     enum Style {
@@ -335,18 +233,9 @@ namespace osmscout {
     Mag     scaleAndFadeMag;
     Mag     maxMag;
     double  size;
-    double  textR;
-    double  textG;
-    double  textB;
-    double  textA;
-    double  bgR;
-    double  bgG;
-    double  bgB;
-    double  bgA;
-    double  borderR;
-    double  borderG;
-    double  borderB;
-    double  borderA;
+    Color   textColor;
+    Color   bgColor;
+    Color   borderColor;
 
   public:
     LabelStyle();
@@ -357,9 +246,9 @@ namespace osmscout {
     LabelStyle& SetScaleAndFadeMag(Mag mag);
     LabelStyle& SetMaxMag(Mag mag);
     LabelStyle& SetSize(double size);
-    LabelStyle& SetTextColor(double r, double g, double b, double a);
-    LabelStyle& SetBgColor(double r, double g, double b, double a);
-    LabelStyle& SetBorderColor(double r, double g, double b, double a);
+    LabelStyle& SetTextColor(const Color& color);
+    LabelStyle& SetBgColor(const Color& color);
+    LabelStyle& SetBorderColor(const Color& color);
 
     inline bool IsVisible() const
     {
@@ -406,73 +295,30 @@ namespace osmscout {
       return size;
     }
 
-    inline double GetTextR() const
+    inline const Color& GetTextColor() const
     {
-      return textR;
+      return textColor;
     }
 
-    inline double GetTextG() const
+    inline const Color& GetBgColor() const
     {
-      return textG;
+      return bgColor;
     }
 
-    inline double GetTextB() const
+    inline const Color& GetBorderColor() const
     {
-      return textB;
-    }
-
-    inline double GetTextA() const
-    {
-      return textA;
-    }
-
-    inline double GetBgR() const
-    {
-      return bgR;
-    }
-
-    inline double GetBgG() const
-    {
-      return bgG;
-    }
-
-    inline double GetBgB() const
-    {
-      return bgB;
-    }
-
-    inline double GetBgA() const
-    {
-      return bgA;
-    }
-
-    inline double GetBorderR() const
-    {
-      return borderR;
-    }
-
-    inline double GetBorderG() const
-    {
-      return borderG;
-    }
-
-    inline double GetBorderB() const
-    {
-      return borderB;
-    }
-
-    inline double GetBorderA() const
-    {
-      return borderA;
+      return borderColor;
     }
   };
+
+  typedef Ref<LabelStyle> LabelStyleRef;
 
   /**
     Nodes and areas can have a symbol style.A symbol is a internal predefined simple
     iconic image, most of the time simple geometric forms lice circles, crosses and
     similar.
    */
-  class OSMSCOUT_MAP_API SymbolStyle
+  class OSMSCOUT_MAP_API SymbolStyle : public Referencable
   {
   public:
     enum Style {
@@ -486,10 +332,7 @@ namespace osmscout {
     Style  style;
     Mag    minMag;
     double size;
-    double fillR;
-    double fillG;
-    double fillB;
-    double fillA;
+    Color  fillColor;
 
   public:
     SymbolStyle();
@@ -497,7 +340,7 @@ namespace osmscout {
     SymbolStyle& SetStyle(Style style);
     SymbolStyle& SetMinMag(Mag mag);
     SymbolStyle& SetSize(double size);
-    SymbolStyle& SetFillColor(double r, double g, double b, double a);
+    SymbolStyle& SetFillColor(const Color& color);
 
     inline bool IsVisible() const
     {
@@ -519,31 +362,18 @@ namespace osmscout {
       return size;
     }
 
-    inline double GetFillR() const
+    inline const Color& GetFillColor() const
     {
-      return fillR;
-    }
-
-    inline double GetFillG() const
-    {
-      return fillG;
-    }
-
-    inline double GetFillB() const
-    {
-      return fillB;
-    }
-
-    inline double GetFillA() const
-    {
-      return fillA;
+      return fillColor;
     }
   };
+
+  typedef Ref<SymbolStyle> SymbolStyleRef;
 
   /**
     IconStyle is for define drawing of external images as icons for nodes and areas
     */
-  class OSMSCOUT_MAP_API IconStyle
+  class OSMSCOUT_MAP_API IconStyle : public Referencable
   {
   private:
     size_t      id;       //! Internal id for fast lookup. 0 == no id defined (yet), max(size_t) == error
@@ -578,43 +408,45 @@ namespace osmscout {
     }
   };
 
+  typedef Ref<IconStyle> IconStyleRef;
+
   /**
    * A complete style definition
    */
   class OSMSCOUT_MAP_API StyleConfig
   {
   private:
-    TypeConfig                *typeConfig;
+    TypeConfig                   *typeConfig;
 
     // Node
 
-    std::vector<SymbolStyle*>  nodeSymbolStyles;
-    std::vector<LabelStyle*>   nodeRefLabelStyles;
-    std::vector<LabelStyle*>   nodeLabelStyles;
-    std::vector<IconStyle*>    nodeIconStyles;
+    std::vector<SymbolStyleRef>  nodeSymbolStyles;
+    std::vector<LabelStyleRef>   nodeRefLabelStyles;
+    std::vector<LabelStyleRef>   nodeLabelStyles;
+    std::vector<IconStyleRef>    nodeIconStyles;
 
-    std::vector<TypeSet>       nodeTypeSets;
+    std::vector<TypeSet>         nodeTypeSets;
 
     // Way
 
-    std::vector<LineStyle*>    wayLineStyles;
-    std::vector<LabelStyle*>   wayRefLabelStyles;
-    std::vector<LabelStyle*>   wayNameLabelStyles;
+    std::vector<LineStyleRef>    wayLineStyles;
+    std::vector<LabelStyleRef>   wayRefLabelStyles;
+    std::vector<LabelStyleRef>   wayNameLabelStyles;
 
-    std::vector<size_t>        wayPrio;
-    std::vector<Mag>           wayMag;
+    std::vector<size_t>          wayPrio;
+    std::vector<Mag>             wayMag;
 
     std::vector<std::vector<TypeSet> > wayTypeSets;
 
     // Area
 
-    std::vector<FillStyle*>    areaFillStyles;
-    std::vector<SymbolStyle*>  areaSymbolStyles;
-    std::vector<LabelStyle*>   areaLabelStyles;
-    std::vector<IconStyle*>    areaIconStyles;
+    std::vector<FillStyleRef>    areaFillStyles;
+    std::vector<SymbolStyleRef>  areaSymbolStyles;
+    std::vector<LabelStyleRef>   areaLabelStyles;
+    std::vector<IconStyleRef>    areaIconStyles;
 
-    std::vector<Mag>           areaMag;
-    std::vector<TypeSet>       areaTypeSets;
+    std::vector<Mag>             areaMag;
+    std::vector<TypeSet>         areaTypeSets;
 
 
   private:

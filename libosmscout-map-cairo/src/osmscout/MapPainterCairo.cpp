@@ -365,7 +365,7 @@ namespace osmscout {
     return font.insert(std::pair<size_t,cairo_scaled_font_t*>(fontSize,scaledFont)).first->second;
   }
 
-  void MapPainterCairo::SetLineAttributes(double r, double g, double b, double a,
+  void MapPainterCairo::SetLineAttributes(const Color& color,
                                           double width,
                                           const std::vector<double>& dash)
   {
@@ -373,7 +373,11 @@ namespace osmscout {
 
     assert(dash.size()<=10);
 
-    cairo_set_source_rgba(draw,r,g,b,a);
+    cairo_set_source_rgba(draw,
+                          color.GetR(),
+                          color.GetG(),
+                          color.GetB(),
+                          color.GetA());
 
     cairo_set_line_width(draw,width);
 
@@ -500,9 +504,9 @@ namespace osmscout {
                                   const MapParameter& parameter,
                                   const LabelData& label)
   {
-    double               r=label.style->GetTextR();
-    double               g=label.style->GetTextG();
-    double               b=label.style->GetTextB();
+    double               r=label.style->GetTextColor().GetR();
+    double               g=label.style->GetTextColor().GetG();
+    double               b=label.style->GetTextColor().GetB();
     cairo_scaled_font_t  *font;
     cairo_font_extents_t fontExtents;
 
@@ -553,10 +557,10 @@ namespace osmscout {
     cairo_set_dash(draw,NULL,0,0);
     cairo_set_line_width(draw,1);
     cairo_set_source_rgba(draw,
-                          label.style->GetBgR(),
-                          label.style->GetBgG(),
-                          label.style->GetBgB(),
-                          label.style->GetBgA());
+                          label.style->GetBgColor().GetR(),
+                          label.style->GetBgColor().GetG(),
+                          label.style->GetBgColor().GetB(),
+                          label.style->GetBgColor().GetA());
 
     cairo_rectangle(draw,
                     label.bx1,
@@ -566,10 +570,10 @@ namespace osmscout {
     cairo_fill(draw);
 
     cairo_set_source_rgba(draw,
-                          label.style->GetBorderR(),
-                          label.style->GetBorderG(),
-                          label.style->GetBorderB(),
-                          label.style->GetBorderA());
+                          label.style->GetBorderColor().GetR(),
+                          label.style->GetBorderColor().GetG(),
+                          label.style->GetBorderColor().GetB(),
+                          label.style->GetBorderColor().GetA());
 
     cairo_rectangle(draw,
                     label.bx1+2,
@@ -579,10 +583,10 @@ namespace osmscout {
     cairo_stroke(draw);
 
     cairo_set_source_rgba(draw,
-                          label.style->GetTextR(),
-                          label.style->GetTextG(),
-                          label.style->GetTextB(),
-                          label.style->GetTextA());
+                          label.style->GetTextColor().GetR(),
+                          label.style->GetTextColor().GetG(),
+                          label.style->GetTextColor().GetB(),
+                          label.style->GetTextColor().GetA());
 
     cairo_move_to(draw,
                   label.x,
@@ -668,10 +672,10 @@ namespace osmscout {
                               &fontExtents);
 
     cairo_set_source_rgba(draw,
-                          style.GetTextR(),
-                          style.GetTextG(),
-                          style.GetTextB(),
-                          style.GetTextA());
+                          style.GetTextColor().GetR(),
+                          style.GetTextColor().GetG(),
+                          style.GetTextColor().GetB(),
+                          style.GetTextColor().GetA());
 
     DrawContourLabelCairo(draw,
                           (length-textExtents.width)/2+textExtents.x_bearing,
@@ -688,10 +692,10 @@ namespace osmscout {
     case SymbolStyle::box:
       cairo_new_path(draw);
       cairo_set_source_rgba(draw,
-                            style->GetFillR(),
-                            style->GetFillG(),
-                            style->GetFillB(),
-                            style->GetFillA());
+                            style->GetFillColor().GetR(),
+                            style->GetFillColor().GetG(),
+                            style->GetFillColor().GetB(),
+                            style->GetFillColor().GetA());
       cairo_set_line_width(draw,1);
 
       cairo_rectangle(draw,
@@ -702,10 +706,10 @@ namespace osmscout {
     case SymbolStyle::circle:
       cairo_new_path(draw);
       cairo_set_source_rgba(draw,
-                            style->GetFillR(),
-                            style->GetFillG(),
-                            style->GetFillB(),
-                            style->GetFillA());
+                            style->GetFillColor().GetR(),
+                            style->GetFillColor().GetG(),
+                            style->GetFillColor().GetB(),
+                            style->GetFillColor().GetA());
       cairo_set_line_width(draw,1);
 
       cairo_arc(draw,
@@ -717,10 +721,10 @@ namespace osmscout {
     case SymbolStyle::triangle:
       cairo_new_path(draw);
       cairo_set_source_rgba(draw,
-                            style->GetFillR(),
-                            style->GetFillG(),
-                            style->GetFillB(),
-                            style->GetFillA());
+                            style->GetFillColor().GetR(),
+                            style->GetFillColor().GetG(),
+                            style->GetFillColor().GetB(),
+                            style->GetFillColor().GetA());
       cairo_set_line_width(draw,1);
 
       cairo_move_to(draw,x-style->GetSize()/2,y+style->GetSize()/2);
@@ -746,14 +750,14 @@ namespace osmscout {
 
   void MapPainterCairo::DrawPath(const Projection& projection,
                                  const MapParameter& parameter,
-                                 double r, double g, double b, double a,
+                                 const Color& color,
                                  double width,
                                  const std::vector<double>& dash,
                                  CapStyle startCap,
                                  CapStyle endCap,
                                  size_t transStart, size_t transEnd)
   {
-    SetLineAttributes(r,g,b,a,width,dash);
+    SetLineAttributes(color,width,dash);
 
     if (startCap==capRound &&
         endCap==capRound &&
@@ -823,10 +827,10 @@ namespace osmscout {
     }
     else {
       cairo_set_source_rgba(draw,
-                            area.fillStyle->GetFillR(),
-                            area.fillStyle->GetFillG(),
-                            area.fillStyle->GetFillB(),
-                            area.fillStyle->GetFillA());
+                            area.fillStyle->GetFillColor().GetR(),
+                            area.fillStyle->GetFillColor().GetG(),
+                            area.fillStyle->GetFillColor().GetB(),
+                            area.fillStyle->GetFillColor().GetA());
       cairo_set_line_width(draw,0.0);
     }
 
@@ -866,10 +870,7 @@ namespace osmscout {
                                            area.fillStyle->GetBorderWidth());
 
     if (borderWidth>=parameter.GetLineMinWidthPixel()) {
-      SetLineAttributes(area.fillStyle->GetBorderR(),
-                        area.fillStyle->GetBorderG(),
-                        area.fillStyle->GetBorderB(),
-                        area.fillStyle->GetBorderA(),
+      SetLineAttributes(area.fillStyle->GetBorderColor(),
                         borderWidth,
                         area.fillStyle->GetBorderDash());
 
@@ -889,9 +890,9 @@ namespace osmscout {
                                  double height)
   {
     cairo_set_source_rgba(draw,
-                          style.GetFillR(),
-                          style.GetFillG(),
-                          style.GetFillB(),
+                          style.GetFillColor().GetR(),
+                          style.GetFillColor().GetG(),
+                          style.GetFillColor().GetB(),
                           1);
 
     cairo_rectangle(draw,x,y,width,height);

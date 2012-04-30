@@ -142,11 +142,12 @@ size_t GetHexDigitValue(char c)
   assert(false);
 }
 
-void ToRGBA(const char* str, double& r, double& g, double& b, double& a)
+void ToRGBA(const char* str, Color& color)
 {
-  r=(16*GetHexDigitValue(str[1])+GetHexDigitValue(str[2]))/255.0;
-  g=(16*GetHexDigitValue(str[3])+GetHexDigitValue(str[4]))/255.0;
-  b=(16*GetHexDigitValue(str[5])+GetHexDigitValue(str[6]))/255.0;
+  double r=(16*GetHexDigitValue(str[1])+GetHexDigitValue(str[2]))/255.0;
+  double g=(16*GetHexDigitValue(str[3])+GetHexDigitValue(str[4]))/255.0;
+  double b=(16*GetHexDigitValue(str[5])+GetHexDigitValue(str[6]))/255.0;
+  double a;
 
   if (strlen(str)==9) {
     a=(16*GetHexDigitValue(str[7])+GetHexDigitValue(str[8]))/255.0;
@@ -154,6 +155,8 @@ void ToRGBA(const char* str, double& r, double& g, double& b, double& a)
   else {
     a=1.0;
   }
+  
+  color=Color(r,g,b,a);
 }
 
 
@@ -176,7 +179,7 @@ void ToRGBA(const char* str, double& r, double& g, double& b, double& a)
 	void MAG(Mag& mag);
 	void LINEDEF(LineStyle& style);
 	void FILLDEF(FillStyle& style);
-	void COLOR(double& r, double& g, double& b, double& a);
+	void COLOR(Color& color);
 	void DOUBLE(double& value);
 	void DISPLAYSIZE(double& value);
 	void MAPSIZE(double& value);

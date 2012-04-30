@@ -291,22 +291,22 @@ void Parser::LABELDEF(LabelStyle& style) {
 				style.SetStyle(s); 
 			}
 			if (la->kind == 27 /* "COLOR" */) {
-				double cr,cg,cb,ca; 
+				Color textColor; 
 				Get();
-				COLOR(cr,cg,cb,ca);
-				style.SetTextColor(cr,cg,cb,ca); 
+				COLOR(textColor);
+				style.SetTextColor(textColor); 
 			}
 			if (la->kind == 28 /* "BGCOLOR" */) {
-				double cr,cg,cb,ca; 
+				Color bgColor; 
 				Get();
-				COLOR(cr,cg,cb,ca);
-				style.SetBgColor(cr,cg,cb,ca); 
+				COLOR(bgColor);
+				style.SetBgColor(bgColor); 
 			}
 			if (la->kind == 29 /* "BORDERCOLOR" */) {
-				double cr,cg,cb,ca; 
+				Color borderColor; 
 				Get();
-				COLOR(cr,cg,cb,ca);
-				style.SetBorderColor(cr,cg,cb,ca); 
+				COLOR(borderColor);
+				style.SetBorderColor(borderColor); 
 			}
 			if (la->kind == 61 /* "SIZE" */) {
 				double size=style.GetSize(); 
@@ -358,22 +358,22 @@ void Parser::REFDEF(LabelStyle& style) {
 				style.SetStyle(s); 
 			}
 			if (la->kind == 27 /* "COLOR" */) {
-				double cr,cg,cb,ca; 
+				Color textColor; 
 				Get();
-				COLOR(cr,cg,cb,ca);
-				style.SetTextColor(cr,cg,cb,ca); 
+				COLOR(textColor);
+				style.SetTextColor(textColor); 
 			}
 			if (la->kind == 28 /* "BGCOLOR" */) {
-				double cr,cg,cb,ca; 
+				Color bgColor; 
 				Get();
-				COLOR(cr,cg,cb,ca);
-				style.SetBgColor(cr,cg,cb,ca); 
+				COLOR(bgColor);
+				style.SetBgColor(bgColor); 
 			}
 			if (la->kind == 29 /* "BORDERCOLOR" */) {
-				double cr,cg,cb,ca; 
+				Color borderColor; 
 				Get();
-				COLOR(cr,cg,cb,ca);
-				style.SetBorderColor(cr,cg,cb,ca); 
+				COLOR(borderColor);
+				style.SetBorderColor(borderColor); 
 			}
 			if (la->kind == 61 /* "SIZE" */) {
 				double size=style.GetSize(); 
@@ -415,15 +415,15 @@ void Parser::REFDEF(LabelStyle& style) {
 
 void Parser::SYMBOLDEF(SymbolStyle& style) {
 		SymbolStyle::Style s;
-		double             r,g,b,a;
+		Color              fillColor;
 		double             size=style.GetSize();
 		
 		while (!(la->kind == _EOF || la->kind == 31 /* "SYMBO" */)) {SynErr(72); Get();}
 		Expect(31 /* "SYMBO" */);
 		SYMBOLSTYLE(s);
 		style.SetStyle(s); 
-		COLOR(r,g,b,a);
-		style.SetFillColor(r,g,b,a); 
+		COLOR(fillColor);
+		style.SetFillColor(fillColor); 
 		DOUBLE(size);
 		style.SetSize(size); 
 		if (la->kind == 14 /* "WITH" */) {
@@ -540,26 +540,26 @@ void Parser::MAG(Mag& mag) {
 }
 
 void Parser::LINEDEF(LineStyle& style) {
-		double r,g,b,a;
+		Color lineColor;
 		
 		while (!(la->kind == _EOF || la->kind == 13 /* "LINE" */)) {SynErr(77); Get();}
 		Expect(13 /* "LINE" */);
-		COLOR(r,g,b,a);
-		style.SetLineColor(r,g,b,a); 
+		COLOR(lineColor);
+		style.SetLineColor(lineColor); 
 		if (la->kind == 14 /* "WITH" */) {
 			while (!(la->kind == _EOF || la->kind == 14 /* "WITH" */)) {SynErr(78); Get();}
 			Get();
 			if (la->kind == 15 /* "ALTCOLOR" */) {
-				double cr,cg,cb,ca; 
+				Color alternateColor; 
 				Get();
-				COLOR(cr,cg,cb,ca);
-				style.SetAlternateColor(cr,cg,cb,ca); 
+				COLOR(alternateColor);
+				style.SetAlternateColor(alternateColor); 
 			}
 			if (la->kind == 16 /* "OUTLINECOLOR" */) {
-				double cr,cg,cb,ca; 
+				Color outlineColor; 
 				Get();
-				COLOR(cr,cg,cb,ca);
-				style.SetOutlineColor(cr,cg,cb,ca); 
+				COLOR(outlineColor);
+				style.SetOutlineColor(outlineColor); 
 			}
 			if (la->kind == 17 /* "DASH" */) {
 				double dash; 
@@ -572,10 +572,10 @@ void Parser::LINEDEF(LineStyle& style) {
 					style.AddDashValue(dash); 
 				}
 				if (la->kind == 19 /* "GAPCOLOR" */) {
-					double cr,cg,cb,ca; 
+					Color gapColor; 
 					Get();
-					COLOR(cr,cg,cb,ca);
-					style.SetGapColor(cr,cg,cb,ca); 
+					COLOR(gapColor);
+					style.SetGapColor(gapColor); 
 				}
 			}
 			if (la->kind == 20 /* "MINWIDTH" */) {
@@ -600,12 +600,12 @@ void Parser::LINEDEF(LineStyle& style) {
 }
 
 void Parser::FILLDEF(FillStyle& style) {
-		double r,g,b,a;
+		Color fillColor;
 		
 		while (!(la->kind == _EOF || la->kind == 23 /* "FIL" */)) {SynErr(79); Get();}
 		Expect(23 /* "FIL" */);
-		COLOR(r,g,b,a);
-		style.SetFillColor(r,g,b,a); 
+		COLOR(fillColor);
+		style.SetFillColor(fillColor); 
 		if (la->kind == 24 /* "PATTERN" */) {
 			while (!(la->kind == _EOF || la->kind == 24 /* "PATTERN" */)) {SynErr(80); Get();}
 			Get();
@@ -622,10 +622,11 @@ void Parser::FILLDEF(FillStyle& style) {
 			}
 		}
 		if (la->kind == 25 /* "BORDER" */) {
+			Color borderColor; 
 			while (!(la->kind == _EOF || la->kind == 25 /* "BORDER" */)) {SynErr(82); Get();}
 			Get();
-			COLOR(r,g,b,a);
-			style.SetBorderColor(r,g,b,a); 
+			COLOR(borderColor);
+			style.SetBorderColor(borderColor); 
 			if (la->kind == 21 /* "WIDTH" */) {
 				double width=style.GetBorderWidth(); 
 				Get();
@@ -650,17 +651,14 @@ void Parser::FILLDEF(FillStyle& style) {
 		}
 }
 
-void Parser::COLOR(double& r, double& g, double& b, double& a) {
+void Parser::COLOR(Color& color) {
 		Expect(_color);
 		if (strlen(t->val)==7 ||
 		   strlen(t->val)==9) {
-		 ToRGBA(t->val,r,g,b,a);
+		 ToRGBA(t->val,color);
 		}
 		else {
-		 r=1.0;
-		 g=0.0;
-		 b=0.0;
-		 a=1.0;
+		 color=Color();
 		}
 		
 }

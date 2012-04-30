@@ -43,42 +43,30 @@ namespace osmscout {
   {
   }
 
-  std::string MapPainterSVG::GetColorValue(double r, double g, double b)
+  std::string MapPainterSVG::GetColorValue(const Color& color)
   {
     std::string result;
 
-    result.reserve(7);
-
-    result.append("#");
-    result.append(1,valueChar[(unsigned int)(r*255)/16]);
-    result.append(1,valueChar[(unsigned int)(r*255)%16]);
-    result.append(1,valueChar[(unsigned int)(g*255)/16]);
-    result.append(1,valueChar[(unsigned int)(g*255)%16]);
-    result.append(1,valueChar[(unsigned int)(b*255)/16]);
-    result.append(1,valueChar[(unsigned int)(b*255)%16]);
-
-    return result;
-  }
-
-  std::string MapPainterSVG::GetColorValue(double r, double g, double b, double a)
-  {
-    std::string result;
-
-    result.reserve(9);
-
-    result.append("#");
-
-    if (a!=1.0) {
-      result.append(1,valueChar[(unsigned int)(a*255)/16]);
-      result.append(1,valueChar[(unsigned int)(a*255)%16]);
+    if (color.IsSolid()) {
+      result.reserve(7);
+    }
+    else {
+      result.reserve(9);
     }
 
-    result.append(1,valueChar[(unsigned int)(r*255)/16]);
-    result.append(1,valueChar[(unsigned int)(r*255)%16]);
-    result.append(1,valueChar[(unsigned int)(g*255)/16]);
-    result.append(1,valueChar[(unsigned int)(g*255)%16]);
-    result.append(1,valueChar[(unsigned int)(b*255)/16]);
-    result.append(1,valueChar[(unsigned int)(b*255)%16]);
+    result.append("#");
+
+    if (!color.IsSolid()) {
+      result.append(1,valueChar[(unsigned int)(color.GetA()*255)/16]);
+      result.append(1,valueChar[(unsigned int)(color.GetA()*255)%16]);
+    }
+
+    result.append(1,valueChar[(unsigned int)(color.GetR()*255)/16]);
+    result.append(1,valueChar[(unsigned int)(color.GetR()*255)%16]);
+    result.append(1,valueChar[(unsigned int)(color.GetG()*255)/16]);
+    result.append(1,valueChar[(unsigned int)(color.GetG()*255)%16]);
+    result.append(1,valueChar[(unsigned int)(color.GetB()*255)/16]);
+    result.append(1,valueChar[(unsigned int)(color.GetB()*255)%16]);
 
     return result;
   }
@@ -116,14 +104,14 @@ namespace osmscout {
       if (fillStyle!=NULL) {
         stream << "        ." << typeInfo->GetName() << "_area {";
 
-        stream << "fill:" << GetColorValue(fillStyle->GetFillR(),fillStyle->GetFillG(),fillStyle->GetFillB(),fillStyle->GetFillA());
+        stream << "fill:" << GetColorValue(fillStyle->GetFillColor());
         stream << ";fillRule:nonzero";
 
         double borderWidth=ConvertWidthToPixel(parameter,
                                                fillStyle->GetBorderWidth());
 
         if (borderWidth>0.0) {
-          stream << ";stroke:" << GetColorValue(fillStyle->GetBorderR(),fillStyle->GetBorderG(),fillStyle->GetBorderB(),fillStyle->GetBorderA());
+          stream << ";stroke:" << GetColorValue(fillStyle->GetBorderColor());
           stream << ";stroke-width:" << borderWidth;
 
           if (fillStyle->HasBorderDashValues()) {
@@ -170,18 +158,12 @@ namespace osmscout {
 
         stream << "        ." << typeInfo->GetName() << "_way_outline {";
         stream << "fill:none;";
-        stream << "stroke:" << GetColorValue(lineStyle->GetOutlineR(),
-                                             lineStyle->GetOutlineG(),
-                                             lineStyle->GetOutlineB(),
-                                             lineStyle->GetOutlineA());
+        stream << "stroke:" << GetColorValue(lineStyle->GetOutlineColor());
         stream << "}" << std::endl;
 
         stream << "        ." << typeInfo->GetName() << "_way {";
         stream << "fill:none;";
-        stream << "stroke:" << GetColorValue(lineStyle->GetLineR(),
-                                             lineStyle->GetLineG(),
-                                             lineStyle->GetLineB(),
-                                             lineStyle->GetLineA());
+        stream << "stroke:" << GetColorValue(lineStyle->GetLineColor());
 
         if (lineStyle->HasDashValues()) {
           stream << ";stroke-dasharray:";
@@ -204,10 +186,7 @@ namespace osmscout {
 
     stream << "        .bridge_marker {";
     stream << "fill:none;";
-    stream << "stroke:" << GetColorValue(0,
-                                         0,
-                                         0,
-                                         1);
+    stream << "stroke:" << GetColorValue(Color(0,0,0));
     stream << "}" << std::endl;
 
     stream << "       ]]>" << std::endl;
@@ -282,17 +261,14 @@ namespace osmscout {
 
   void MapPainterSVG::DrawPath(const Projection& projection,
                                const MapParameter& parameter,
-                               double r,
-                               double g,
-                               double b,
-                               double a,
+                               const Color& color,
                                double width,
                                const std::vector<double>& dash,
                                CapStyle startCap,
                                CapStyle endCap,
                                size_t transStart, size_t transEnd)
   {
-    stream << "    <polyline fill=\"none\" stroke=\"" << GetColorValue(r,g,b,a) << "\" stroke-width=\"" << width << "\"" << std::endl;
+    stream << "    <polyline fill=\"none\" stroke=\"" << GetColorValue(color) << "\" stroke-width=\"" << width << "\"" << std::endl;
     stream << "              points=\"";
 
     for (size_t i=transStart; i<=transEnd; i++) {
@@ -342,10 +318,7 @@ namespace osmscout {
       if (data.outline) {
         DrawPath(projection,
                  parameter,
-                 data.lineStyle->GetOutlineR(),
-                 data.lineStyle->GetOutlineG(),
-                 data.lineStyle->GetOutlineB(),
-                 data.lineStyle->GetOutlineA(),
+                 data.lineStyle->GetOutlineColor(),
                  data.outlineWidth,
                  tunnelDash,
                  data.attributes->StartIsJoint() ? capButt : capRound,
@@ -357,10 +330,7 @@ namespace osmscout {
 
         DrawPath(projection,
                  parameter,
-                 0.5,
-                 0.5,
-                 0.5,
-                 1.0,
+                 Color(0.5,0.5,0.5),
                  data.outlineWidth,
                  tunnelDash,
                  data.attributes->StartIsJoint() ? capButt : capRound,
@@ -372,10 +342,7 @@ namespace osmscout {
 
         DrawPath(projection,
                  parameter,
-                 0.5,
-                 0.5,
-                 0.5,
-                 1.0,
+                 Color(0.5,0.5,0.5),
                  data.outlineWidth,
                  tunnelDash,
                  data.attributes->StartIsJoint() ? capButt : capRound,
@@ -404,22 +371,16 @@ namespace osmscout {
                               const WayData& data)
   {
     if (data.drawTunnel) {
-      double r,g,b,a;
+      Color color;
 
       // Draw line with normal color
-      r=data.lineStyle->GetLineR();
-      g=data.lineStyle->GetLineG();
-      b=data.lineStyle->GetLineB();
-      a=data.lineStyle->GetLineA();
+      color=data.lineStyle->GetLineColor().Lighten(0.5);
 
-      r=r+(1-r)*50/100;
-      g=g+(1-g)*50/100;
-      b=b+(1-b)*50/100;
-
-      if (!data.lineStyle->GetDash().empty() && data.lineStyle->GetGapA()>0.0) {
+      if (!data.lineStyle->GetDash().empty() &&
+          data.lineStyle->GetGapColor().GetA()>0.0) {
         DrawPath(projection,
                  parameter,
-                 data.lineStyle->GetGapR(),data.lineStyle->GetGapG(),data.lineStyle->GetGapB(),data.lineStyle->GetGapA(),
+                 data.lineStyle->GetGapColor(),
                  data.lineWidth,
                  emptyDash,
                  capRound,
@@ -429,7 +390,7 @@ namespace osmscout {
 
       DrawPath(projection,
                parameter,
-               r,g,b,a,
+               color,
                data.lineWidth,
                data.lineStyle->GetDash(),
                capRound,
@@ -437,10 +398,11 @@ namespace osmscout {
                data.transStart,data.transEnd);
     }
     else {
-      if (!data.lineStyle->GetDash().empty() && data.lineStyle->GetGapA()>0.0) {
+      if (!data.lineStyle->GetDash().empty() &&
+          data.lineStyle->GetGapColor().GetA()>0.0) {
         DrawPath(projection,
                  parameter,
-                 data.lineStyle->GetGapR(),data.lineStyle->GetGapG(),data.lineStyle->GetGapB(),data.lineStyle->GetGapA(),
+                 data.lineStyle->GetGapColor(),
                  data.lineWidth,
                  emptyDash,
                  capRound,
@@ -519,7 +481,7 @@ namespace osmscout {
                                  double height)
   {
     stream << "    <rect x=\"" << x << "\" y=\"" << y << "\" width=\"" << width << "\" height=\"" << height << "\"" << std::endl;
-    stream << "          fill=\"" << GetColorValue(style.GetFillR(),style.GetFillG(),style.GetFillB()) << "\"" << "/>" << std::endl;
+    stream << "          fill=\"" << GetColorValue(style.GetFillColor()) << "\"" << "/>" << std::endl;
   }
 
   bool MapPainterSVG::DrawMap(const StyleConfig& styleConfig,

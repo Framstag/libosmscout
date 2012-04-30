@@ -144,7 +144,7 @@ namespace osmscout {
     tunnelDash.push_back(0.4);
 
     areaMarkStyle.SetStyle(FillStyle::plain);
-    areaMarkStyle.SetFillColor(1,0,0,0.5);
+    areaMarkStyle.SetFillColor(Color(1,0,0,0.5));
   }
 
   MapPainter::~MapPainter()
@@ -325,10 +325,10 @@ namespace osmscout {
     FillStyle unknownFill;
     LabelStyle labelStyle;
 
-    landFill.SetFillColor(241.0/255,238.0/255,233.0/255,1.0);
-    seeFill.SetFillColor(181.0/255,208.0/255,208.0/255,1.0);
-    coastFill.SetFillColor(255.0/255,192.0/255,203.0/255,1.0);
-    unknownFill.SetFillColor(255.0/255,255.0/255,173.0/255,1.0);
+    landFill.SetFillColor(Color(241.0/255,238.0/255,233.0/255,1.0));
+    seeFill.SetFillColor(Color(181.0/255,208.0/255,208.0/255,1.0));
+    coastFill.SetFillColor(Color(255.0/255,192.0/255,203.0/255,1.0));
+    unknownFill.SetFillColor(Color(255.0/255,255.0/255,173.0/255,1.0));
 
     labelStyle.SetStyle(LabelStyle::normal);
     labelStyle.SetMinMag(magCity);
@@ -426,7 +426,7 @@ namespace osmscout {
     assert(style.IsPointStyle());
 
     double fontSize=style.GetSize();
-    double a=style.GetTextA();
+    double a=style.GetTextColor().GetA();
     double labelSpace=ConvertWidthToPixel(parameter,parameter.GetLabelSpace());
     double plateLabelSpace=ConvertWidthToPixel(parameter,parameter.GetPlateLabelSpace());
     double sameLabelSpace=ConvertWidthToPixel(parameter,parameter.GetSameLabelSpace());
@@ -993,10 +993,7 @@ namespace osmscout {
       if (data.outline) {
         DrawPath(projection,
                  parameter,
-                 data.lineStyle->GetOutlineR(),
-                 data.lineStyle->GetOutlineG(),
-                 data.lineStyle->GetOutlineB(),
-                 data.lineStyle->GetOutlineA(),
+                 data.lineStyle->GetOutlineColor(),
                  data.outlineWidth,
                  tunnelDash,
                  data.attributes->StartIsJoint() ? capButt : capRound,
@@ -1008,10 +1005,7 @@ namespace osmscout {
 
         DrawPath(projection,
                  parameter,
-                 0.5,
-                 0.5,
-                 0.5,
-                 1.0,
+                 Color(0.5,0.5,0.5),
                  data.outlineWidth,
                  tunnelDash,
                  data.attributes->StartIsJoint() ? capButt : capRound,
@@ -1023,10 +1017,7 @@ namespace osmscout {
 
         DrawPath(projection,
                  parameter,
-                 0.5,
-                 0.5,
-                 0.5,
-                 1.0,
+                 Color(0.5,0.5,0.5),
                  data.outlineWidth,
                  tunnelDash,
                  data.attributes->StartIsJoint() ? capButt : capRound,
@@ -1039,10 +1030,7 @@ namespace osmscout {
 
       DrawPath(projection,
                parameter,
-               data.lineStyle->GetOutlineR(),
-               data.lineStyle->GetOutlineG(),
-               data.lineStyle->GetOutlineB(),
-               data.lineStyle->GetOutlineA(),
+               data.lineStyle->GetOutlineColor(),
                data.outlineWidth,
                emptyDash,
                data.attributes->StartIsJoint() ? capButt : capRound,
@@ -1058,38 +1046,27 @@ namespace osmscout {
                            const MapParameter& parameter,
                            const WayData& data)
   {
-    double r,g,b,a;
+    Color color;
 
     if (data.outline) {
       // Draw line with normal color
-      r=data.lineStyle->GetLineR();
-      g=data.lineStyle->GetLineG();
-      b=data.lineStyle->GetLineB();
-      a=data.lineStyle->GetLineA();
+      color=data.lineStyle->GetLineColor();
     }
     else {
       // Should draw outline, but resolution is too low
       // Draw line with alternate color
-      r=data.lineStyle->GetAlternateR();
-      g=data.lineStyle->GetAlternateG();
-      b=data.lineStyle->GetAlternateB();
-      a=data.lineStyle->GetAlternateA();
+      color=data.lineStyle->GetAlternateColor();
     }
 
     if (data.drawTunnel) {
-      r=r+(1-r)*50/100;
-      g=g+(1-g)*50/100;
-      b=b+(1-b)*50/100;
+      color=color.Lighten(0.5);
     }
 
     if (!data.lineStyle->GetDash().empty() &&
-        data.lineStyle->GetGapA()>0.0) {
+        data.lineStyle->GetGapColor().GetA()>0.0) {
       DrawPath(projection,
                parameter,
-               data.lineStyle->GetGapR(),
-               data.lineStyle->GetGapG(),
-               data.lineStyle->GetGapB(),
-               data.lineStyle->GetGapA(),
+               data.lineStyle->GetGapColor(),
                data.lineWidth,
                emptyDash,
                capRound,
@@ -1099,7 +1076,7 @@ namespace osmscout {
 
     DrawPath(projection,
              parameter,
-             r,g,b,a,
+             color,
              data.lineWidth,
              data.lineStyle->GetDash(),
              capRound,
@@ -1109,10 +1086,7 @@ namespace osmscout {
     if (data.drawBridge) {
       DrawPath(projection,
                parameter,
-               0.0,
-               0.0,
-               0.0,
-               1.0,
+               Color(0.0,0.0,0.0),
                1,
                emptyDash,
                capButt,
@@ -1121,10 +1095,7 @@ namespace osmscout {
 
       DrawPath(projection,
                parameter,
-               0.0,
-               0.0,
-               0.0,
-               1.0,
+               Color(0.0,0.0,0.0),
                1,
                emptyDash,
                capButt,
@@ -1501,7 +1472,7 @@ namespace osmscout {
     if (lineStyle->GetOutline()>0.0) {
       double convertedOutlineWidth=ConvertWidthToPixel(parameter,2*lineStyle->GetOutline());
 
-      if (lineStyle->GetOutlineA()==1.0) {
+      if (lineStyle->GetOutlineColor().IsSolid()) {
         data.outline=lineWidth>convertedOutlineWidth;
       }
       else {

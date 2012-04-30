@@ -240,10 +240,10 @@ namespace osmscout {
 
       inline bool operator<(const WayData& other)
       {
-        if (lineStyle->GetLineA()!=1 && other.lineStyle->GetLineA()==1) {
+        if (!lineStyle->GetLineColor().IsSolid() && other.lineStyle->GetLineColor().IsSolid()) {
           return false;
         }
-        else if (lineStyle->GetLineA()==1 && other.lineStyle->GetLineA()!=1) {
+        else if (lineStyle->GetLineColor().IsSolid() && !other.lineStyle->GetLineColor().IsSolid()) {
           return true;
         }
         else if (attributes->GetLayer()==other.attributes->GetLayer())
@@ -527,7 +527,7 @@ namespace osmscout {
      */
     virtual void DrawPath(const Projection& projection,
                           const MapParameter& parameter,
-                          double r, double g, double b, double a,
+                          const Color& color,
                           double width,
                           const std::vector<double>& dash,
                           CapStyle startCap,

@@ -25,22 +25,10 @@
 namespace osmscout {
 
   LineStyle::LineStyle()
-   : lineR(1),
-     lineG(1),
-     lineB(1),
-     lineA(1),
-     alternateR(0.5),
-     alternateG(0.5),
-     alternateB(0.5),
-     alternateA(1),
-     outlineR(0.75),
-     outlineG(0.75),
-     outlineB(0.75),
-     outlineA(1),
-     gapR(1),
-     gapG(0),
-     gapB(0),
-     gapA(0),
+   : lineColor(1,1,1),
+     alternateColor(0.5,0.5,0.5),
+     outlineColor(0.75,0.75,0.75),
+     gapColor(1,0,0,0),
      minWidth(1),
      width(0),
      fixedWidth(false),
@@ -49,47 +37,31 @@ namespace osmscout {
     // no code
   }
 
-  LineStyle& LineStyle::SetLineColor(double r, double g, double b, double a)
+  LineStyle& LineStyle::SetLineColor(const Color& color)
   {
-    lineR=r;
-    lineG=g;
-    lineB=b;
-    lineA=a;
-
-    alternateR=r;
-    alternateG=g;
-    alternateB=b;
-    alternateA=a;
+    this->lineColor=color;
+    this->alternateColor=color;
 
     return *this;
   }
 
-  LineStyle& LineStyle::SetAlternateColor(double r, double g, double b, double a)
+  LineStyle& LineStyle::SetAlternateColor(const Color& color)
   {
-    alternateR=r;
-    alternateG=g;
-    alternateB=b;
-    alternateA=a;
+    this->alternateColor=color;
 
     return *this;
   }
 
-  LineStyle& LineStyle::SetOutlineColor(double r, double g, double b, double a)
+  LineStyle& LineStyle::SetOutlineColor(const Color& color)
   {
-    outlineR=r;
-    outlineG=g;
-    outlineB=b;
-    outlineA=a;
+    outlineColor=color;
 
     return *this;
   }
 
-  LineStyle& LineStyle::SetGapColor(double r, double g, double b, double a)
+  LineStyle& LineStyle::SetGapColor(const Color& color)
   {
-    gapR=r;
-    gapG=g;
-    gapB=b;
-    gapA=a;
+    gapColor=color;
 
     return *this;
   }
@@ -132,15 +104,10 @@ namespace osmscout {
 
   FillStyle::FillStyle()
    : style(none),
-     fillR(1),
-     fillG(0),
-     fillB(0),
-     fillA(1),
+     fillColor(1,0,0),
      patternId(0),
      patternMinMag(magWorld),
-     borderR(1),
-     borderG(0),
-     borderB(0),
+     borderColor(1,0,0),
      borderWidth(0.0)
   {
     // no code
@@ -153,12 +120,9 @@ namespace osmscout {
     return *this;
   }
 
-  FillStyle& FillStyle::SetFillColor(double r, double g, double b, double a)
+  FillStyle& FillStyle::SetFillColor(const Color& color)
   {
-    fillR=r;
-    fillG=g;
-    fillB=b;
-    fillA=a;
+    fillColor=color;
 
     return *this;
   }
@@ -182,12 +146,9 @@ namespace osmscout {
     return *this;
   }
 
-  FillStyle& FillStyle::SetBorderColor(double r, double g, double b, double a)
+  FillStyle& FillStyle::SetBorderColor(const Color& color)
   {
-    borderR=r;
-    borderG=g;
-    borderB=b;
-    borderA=a;
+    borderColor=color;
 
     return *this;
   }
@@ -213,18 +174,9 @@ namespace osmscout {
      scaleAndFadeMag((Mag)1000000),
      maxMag((Mag)1000000),
      size(1),
-     textR(0),
-     textG(0),
-     textB(0),
-     textA(1),
-     bgR(1),
-     bgG(1),
-     bgB(1),
-     bgA(1),
-     borderR(0),
-     borderG(0),
-     borderB(0),
-     borderA(1)
+     textColor(0,0,0),
+     bgColor(1,1,1),
+     borderColor(0,0,0)
   {
     // no code
   }
@@ -271,32 +223,23 @@ namespace osmscout {
     return *this;
   }
 
-  LabelStyle& LabelStyle::SetTextColor(double r, double g, double b, double a)
+  LabelStyle& LabelStyle::SetTextColor(const Color& color)
   {
-    this->textR=r;
-    this->textG=g;
-    this->textB=b;
-    this->textA=a;
+    this->textColor=color;
 
     return *this;
   }
 
-  LabelStyle& LabelStyle::SetBgColor(double r, double g, double b, double a)
+  LabelStyle& LabelStyle::SetBgColor(const Color& color)
   {
-    this->bgR=r;
-    this->bgG=g;
-    this->bgB=b;
-    this->bgA=a;
+    this->bgColor=color;
 
     return *this;
   }
 
-  LabelStyle& LabelStyle::SetBorderColor(double r, double g, double b, double a)
+  LabelStyle& LabelStyle::SetBorderColor(const Color& color)
   {
-    this->borderR=r;
-    this->borderG=g;
-    this->borderB=b;
-    this->borderA=a;
+    this->borderColor=color;
 
     return *this;
   }
@@ -305,10 +248,7 @@ namespace osmscout {
    : style(none),
      minMag(magWorld),
      size(8),
-     fillR(1),
-     fillG(0),
-     fillB(0),
-     fillA(1)
+     fillColor(1,0,0)
   {
     // no code
   }
@@ -334,12 +274,9 @@ namespace osmscout {
     return *this;
   }
 
-  SymbolStyle& SymbolStyle::SetFillColor(double r, double g, double b, double a)
+  SymbolStyle& SymbolStyle::SetFillColor(const Color& color)
   {
-    fillR=r;
-    fillG=g;
-    fillB=b;
-    fillA=a;
+    fillColor=color;
 
     return *this;
   }
@@ -380,49 +317,7 @@ namespace osmscout {
 
   StyleConfig::~StyleConfig()
   {
-    for (size_t i=0; i<nodeSymbolStyles.size(); i++) {
-      delete nodeSymbolStyles[i];
-    }
-
-    for (size_t i=0; i<nodeRefLabelStyles.size(); i++) {
-      delete nodeRefLabelStyles[i];
-    }
-
-    for (size_t i=0; i<nodeLabelStyles.size(); i++) {
-      delete nodeLabelStyles[i];
-    }
-
-    for (size_t i=0; i<nodeIconStyles.size(); i++) {
-      delete nodeIconStyles[i];
-    }
-
-    for (size_t i=0; i<wayLineStyles.size(); i++) {
-      delete wayLineStyles[i];
-    }
-
-    for (size_t i=0; i<wayRefLabelStyles.size(); i++) {
-      delete wayRefLabelStyles[i];
-    }
-
-    for (size_t i=0; i<wayNameLabelStyles.size(); i++) {
-      delete wayNameLabelStyles[i];
-    }
-
-    for (size_t i=0; i<areaFillStyles.size(); i++) {
-      delete areaFillStyles[i];
-    }
-
-    for (size_t i=0; i<areaSymbolStyles.size(); i++) {
-      delete areaSymbolStyles[i];
-    }
-
-    for (size_t i=0; i<areaLabelStyles.size(); i++) {
-      delete areaLabelStyles[i];
-    }
-
-    for (size_t i=0; i<areaIconStyles.size(); i++) {
-      delete areaIconStyles[i];
-    }
+    // no code
   }
 
   void StyleConfig::ReserveSpaceForNodeType(TypeId type)
@@ -461,16 +356,16 @@ namespace osmscout {
   {
     size_t maxLevel=0;
     for (size_t type=0; type<nodeLabelStyles.size(); type++) {
-      if (nodeLabelStyles[type]!=NULL) {
+      if (nodeLabelStyles[type].Valid()) {
         maxLevel=std::max(maxLevel,MagToLevel(nodeLabelStyles[type]->GetMinMag()));
       }
-      else if (nodeRefLabelStyles[type]!=NULL) {
+      else if (nodeRefLabelStyles[type].Valid()) {
         maxLevel=std::max(maxLevel,MagToLevel(nodeRefLabelStyles[type]->GetMinMag()));
       }
-      else if (nodeSymbolStyles[type]!=NULL) {
+      else if (nodeSymbolStyles[type].Valid()) {
         maxLevel=std::max(maxLevel,MagToLevel(nodeSymbolStyles[type]->GetMinMag()));
       }
-      else if (nodeIconStyles[type]!=NULL) {
+      else if (nodeIconStyles[type].Valid()) {
         maxLevel=std::max(maxLevel,MagToLevel(nodeIconStyles[type]->GetMinMag()));
       }
     }
@@ -485,22 +380,22 @@ namespace osmscout {
         level<nodeTypeSets.size();
         ++level) {
       for (size_t type=0; type<nodeLabelStyles.size(); type++) {
-        if (nodeLabelStyles[type]!=NULL &&
+        if (nodeLabelStyles[type].Valid() &&
             MagToLevel(nodeLabelStyles[type]->GetMinMag())<=level) {
           nodeTypeSets[level].SetType(type);
         }
 
-        if (nodeRefLabelStyles[type]!=NULL &&
+        if (nodeRefLabelStyles[type].Valid() &&
             MagToLevel(nodeRefLabelStyles[type]->GetMinMag())<=level) {
           nodeTypeSets[level].SetType(type);
         }
 
-        if (nodeSymbolStyles[type]!=NULL &&
+        if (nodeSymbolStyles[type].Valid() &&
             MagToLevel(nodeSymbolStyles[type]->GetMinMag())<=level) {
           nodeTypeSets[level].SetType(type);
         }
 
-        if (nodeIconStyles[type]!=NULL &&
+        if (nodeIconStyles[type].Valid() &&
             MagToLevel(nodeIconStyles[type]->GetMinMag())<=level) {
           nodeTypeSets[level].SetType(type);
         }
