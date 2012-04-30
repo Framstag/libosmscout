@@ -19,7 +19,6 @@
 
 #include <osmscout/StyleConfig.h>
 
-#include <limits>
 #include <set>
 
 namespace osmscout {
@@ -379,7 +378,11 @@ namespace osmscout {
     for (size_t level=0;
         level<nodeTypeSets.size();
         ++level) {
-      for (size_t type=0; type<nodeLabelStyles.size(); type++) {
+      for (TypeId type=0; type<nodeLabelStyles.size(); type++) {
+        if (!typeConfig->GetTypeInfo(type).CanBeNode()) {
+          continue;
+        }
+
         if (nodeLabelStyles[type].Valid() &&
             MagToLevel(nodeLabelStyles[type]->GetMinMag())<=level) {
           nodeTypeSets[level].SetType(type);
@@ -426,10 +429,14 @@ namespace osmscout {
           ++prio) {
         TypeSet typeSet(*typeConfig);
 
-        for (size_t i=0; i<wayLineStyles.size(); i++) {
-          if (wayPrio[i]==*prio &&
-              MagToLevel(wayMag[i])<=level) {
-            typeSet.SetType(i);
+        for (TypeId type=0; type<wayLineStyles.size(); type++) {
+          if (!typeConfig->GetTypeInfo(type).CanBeWay()) {
+            continue;
+          }
+
+          if (wayPrio[type]==*prio &&
+              MagToLevel(wayMag[type])<=level) {
+            typeSet.SetType(type);
           }
         }
 
@@ -455,9 +462,13 @@ namespace osmscout {
     for (size_t level=0;
         level<areaTypeSets.size();
         ++level) {
-      for (size_t i=0; i<areaFillStyles.size(); i++) {
-        if (MagToLevel(areaMag[i])<=level) {
-          areaTypeSets[level].SetType(i);
+      for (TypeId type=0; type<areaFillStyles.size(); type++) {
+        if (!typeConfig->GetTypeInfo(type).CanBeArea()) {
+          continue;
+        }
+
+        if (MagToLevel(areaMag[type])<=level) {
+          areaTypeSets[level].SetType(type);
         }
       }
     }

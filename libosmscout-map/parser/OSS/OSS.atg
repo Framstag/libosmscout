@@ -8,7 +8,7 @@
 
 COMPILER OSS
 
-std::string Destring(const char* str)
+static std::string Destring(const char* str)
 {
   std::string result(str);
 
@@ -21,7 +21,7 @@ std::string Destring(const char* str)
   return result;
 }
 
-bool StringToDouble(const char* string, double& value)
+static bool StringToDouble(const char* string, double& value)
 {
   std::istringstream buffer(string);
 
@@ -32,7 +32,7 @@ bool StringToDouble(const char* string, double& value)
   return !buffer.fail() && !buffer.bad() && buffer.eof();
 }
 
-size_t GetHexDigitValue(char c)
+static size_t GetHexDigitValue(char c)
 {
   if (c>='0' && c<='9') {
     return c-'0';
@@ -44,7 +44,7 @@ size_t GetHexDigitValue(char c)
   assert(false);
 }
 
-void ToRGBA(const char* str, Color& color)
+static void ToRGBA(const char* str, Color& color)
 {
   double r=(16*GetHexDigitValue(str[1])+GetHexDigitValue(str[2]))/255.0;
   double g=(16*GetHexDigitValue(str[3])+GetHexDigitValue(str[4]))/255.0;
@@ -82,7 +82,80 @@ COMMENTS FROM "//" TO eol
 IGNORE ' ' + '\t' + '\r' + '\n'
 
 PRODUCTIONS
-  OSS         = SYNC "OSS" {STYLE} "END".
+  OSS         = SYNC "OSS"
+                [
+                  WAYORDER
+                ]
+                {
+                  STYLE
+                }
+                "END"
+                (.
+              	  for (TypeId type=0; type<=config.GetTypeConfig()->GetMaxTypeId(); type++) {
+              	    if (config.GetTypeConfig()->GetTypeInfo(type).CanBeWay()) {
+	              	  if (config.GetWayPrio(type)==std::numeric_limits<size_t>::max() &&
+	              	      config.GetWayLineStyle(type)!=NULL) {
+	                    std::string e="Way type '"+config.GetTypeConfig()->GetTypeInfo(type).GetName()+"' has style but is not in a group";
+	                    SemWarning(e.c_str());
+	              	  }
+		              else if (config.GetWayPrio(type)!=std::numeric_limits<size_t>::max() &&
+		                       config.GetWayLineStyle(type)==NULL) {
+	                    std::string e="Way type '"+config.GetTypeConfig()->GetTypeInfo(type).GetName()+"' is in group but has no style";
+	                    SemWarning(e.c_str());
+	              	  }
+              	    }
+              	  }
+                .)
+                .
+  
+  WAYORDER    = "ORDER" "WAYS"
+                (. size_t priority=1;.)
+                {
+                  WAYGROUP<priority>
+                  (. priority++;.)
+                }
+                .
+  WAYGROUP<size_t priority>
+              = "GROUP"
+                [
+                  (.
+                     std::string wayTypeName;
+                     TypeId      wayType;
+                  .)
+                  string (. wayTypeName=Destring(t->val); .)
+                  (.
+      	              wayType=config.GetTypeConfig()->GetWayTypeId(wayTypeName);
+
+                      if (wayType==typeIgnore) {
+                        std::string e="Unknown way type '"+wayTypeName+"'";
+                        SemErr(e.c_str());
+                      }
+                      else {
+                        config.SetWayPrio(wayType,priority);
+                      }
+                  .)
+                ]
+                {
+                  (.
+                     std::string wayTypeName;
+                     TypeId      wayType;
+                  .)
+                  ","
+                  string (. wayTypeName=Destring(t->val); .)
+                  (.
+      	              wayType=config.GetTypeConfig()->GetWayTypeId(wayTypeName);
+
+                      if (wayType==typeIgnore) {
+                        std::string e="Unknown way type '"+wayTypeName+"'";
+	                    SemErr(e.c_str());
+                      }
+                      else {
+                        config.SetWayPrio(wayType,priority);
+                      }
+                  .)
+                }
+                .                 
+                 
   STYLE       = NODESTYLE | WAYSTYLE | AREASTYLE.
 
   NODESTYLE   = (.
@@ -118,12 +191,10 @@ PRODUCTIONS
   WAYSTYLE    = (.
                   TypeId      type=typeIgnore;
                   std::string name;
-                  size_t      prio;
                   Mag         mag;
                 .)
                 SYNC "WAY"
                 string (. name=Destring(t->val); .)
-                "PRIO" INTEGER<prio>
                 "MINMAG" MAG<mag>
                 (.
                   type=config.GetTypeConfig()->GetWayTypeId(name);
@@ -134,7 +205,6 @@ PRODUCTIONS
                     SemErr(e.c_str());
                   }
                   else {
-                    config.SetWayPrio(type,prio);
                     config.SetWayMag(type,mag);
                   }
                 .)

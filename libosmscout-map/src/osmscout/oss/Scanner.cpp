@@ -146,8 +146,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 62;
-	noSym = 62;
+	maxT = 65;
+	noSym = 65;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
@@ -159,59 +159,62 @@ void Scanner::Init() {
 		start.set(Buffer::EoF, -1);
 	keywords.set("OSS", 6);
 	keywords.set("END", 7);
-	keywords.set("NODE", 8);
-	keywords.set("WAY", 9);
-	keywords.set("PRIO", 10);
-	keywords.set("MINMAG", 11);
-	keywords.set("AREA", 12);
-	keywords.set("LINE", 13);
-	keywords.set("WITH", 14);
-	keywords.set("ALTCOLOR", 15);
-	keywords.set("OUTLINECOLOR", 16);
-	keywords.set("DASH", 17);
-	keywords.set("GAPCOLOR", 19);
-	keywords.set("MINWIDTH", 20);
-	keywords.set("WIDTH", 21);
-	keywords.set("OUTLINE", 22);
-	keywords.set("FILL", 23);
-	keywords.set("PATTERN", 24);
-	keywords.set("BORDER", 25);
-	keywords.set("LABEL", 26);
-	keywords.set("COLOR", 27);
-	keywords.set("BGCOLOR", 28);
-	keywords.set("BORDERCOLOR", 29);
-	keywords.set("REF", 30);
-	keywords.set("SYMBOL", 31);
-	keywords.set("ICON", 32);
-	keywords.set("STYLE", 33);
-	keywords.set("normal", 34);
-	keywords.set("contour", 35);
-	keywords.set("plate", 36);
-	keywords.set("emphasize", 37);
-	keywords.set("none", 38);
-	keywords.set("box", 39);
-	keywords.set("triangle", 40);
-	keywords.set("circle", 41);
-	keywords.set("MAXMAG", 42);
-	keywords.set("FADE", 43);
-	keywords.set("AT", 44);
-	keywords.set("world", 45);
-	keywords.set("continent", 46);
-	keywords.set("state", 47);
-	keywords.set("stateOver", 48);
-	keywords.set("county", 49);
-	keywords.set("region", 50);
-	keywords.set("proximity", 51);
-	keywords.set("cityOver", 52);
-	keywords.set("city", 53);
-	keywords.set("suburb", 54);
-	keywords.set("detail", 55);
-	keywords.set("close", 56);
-	keywords.set("veryClose", 57);
-	keywords.set("block", 58);
-	keywords.set("mm", 59);
-	keywords.set("m", 60);
-	keywords.set("SIZE", 61);
+	keywords.set("ORDER", 8);
+	keywords.set("WAYS", 9);
+	keywords.set("GROUP", 10);
+	keywords.set("NODE", 12);
+	keywords.set("WAY", 13);
+	keywords.set("MINMAG", 14);
+	keywords.set("AREA", 15);
+	keywords.set("LINE", 16);
+	keywords.set("WITH", 17);
+	keywords.set("ALTCOLOR", 18);
+	keywords.set("OUTLINECOLOR", 19);
+	keywords.set("DASH", 20);
+	keywords.set("GAPCOLOR", 21);
+	keywords.set("MINWIDTH", 22);
+	keywords.set("WIDTH", 23);
+	keywords.set("OUTLINE", 24);
+	keywords.set("FILL", 25);
+	keywords.set("PATTERN", 26);
+	keywords.set("BORDER", 27);
+	keywords.set("LABEL", 28);
+	keywords.set("COLOR", 29);
+	keywords.set("BGCOLOR", 30);
+	keywords.set("BORDERCOLOR", 31);
+	keywords.set("PRIO", 32);
+	keywords.set("REF", 33);
+	keywords.set("SYMBOL", 34);
+	keywords.set("ICON", 35);
+	keywords.set("STYLE", 36);
+	keywords.set("normal", 37);
+	keywords.set("contour", 38);
+	keywords.set("plate", 39);
+	keywords.set("emphasize", 40);
+	keywords.set("none", 41);
+	keywords.set("box", 42);
+	keywords.set("triangle", 43);
+	keywords.set("circle", 44);
+	keywords.set("MAXMAG", 45);
+	keywords.set("FADE", 46);
+	keywords.set("AT", 47);
+	keywords.set("world", 48);
+	keywords.set("continent", 49);
+	keywords.set("state", 50);
+	keywords.set("stateOver", 51);
+	keywords.set("county", 52);
+	keywords.set("region", 53);
+	keywords.set("proximity", 54);
+	keywords.set("cityOver", 55);
+	keywords.set("city", 56);
+	keywords.set("suburb", 57);
+	keywords.set("detail", 58);
+	keywords.set("close", 59);
+	keywords.set("veryClose", 60);
+	keywords.set("block", 61);
+	keywords.set("mm", 62);
+	keywords.set("m", 63);
+	keywords.set("SIZE", 64);
 
 
   tvalLength = 128;
@@ -437,7 +440,7 @@ Token* Scanner::NextToken() {
 			else if (ch == 92) {AddCh(); goto case_17;}
 			else {t->kind = 5; break;}
 		case 19:
-			{t->kind = 18; break;}
+			{t->kind = 11; break;}
 
   }
   AppendVal(t);

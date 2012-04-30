@@ -90,6 +90,7 @@ private:
   int minErrDist;
 
   void SynErr(int n);
+  
   void Get();
   void Expect(int n);
   bool StartOf(int s);
@@ -106,7 +107,7 @@ private:
 public:
   Errors  *errors;
 
-std::string Destring(const char* str)
+static std::string Destring(const char* str)
 {
   std::string result(str);
 
@@ -119,7 +120,7 @@ std::string Destring(const char* str)
   return result;
 }
 
-bool StringToDouble(const char* string, double& value)
+static bool StringToDouble(const char* string, double& value)
 {
   std::istringstream buffer(string);
 
@@ -130,7 +131,7 @@ bool StringToDouble(const char* string, double& value)
   return !buffer.fail() && !buffer.bad() && buffer.eof();
 }
 
-size_t GetHexDigitValue(char c)
+static size_t GetHexDigitValue(char c)
 {
   if (c>='0' && c<='9') {
     return c-'0';
@@ -142,7 +143,7 @@ size_t GetHexDigitValue(char c)
   assert(false);
 }
 
-void ToRGBA(const char* str, Color& color)
+static void ToRGBA(const char* str, Color& color)
 {
   double r=(16*GetHexDigitValue(str[1])+GetHexDigitValue(str[2]))/255.0;
   double g=(16*GetHexDigitValue(str[3])+GetHexDigitValue(str[4]))/255.0;
@@ -164,10 +165,14 @@ void ToRGBA(const char* str, Color& color)
   Parser(Scanner *scanner,
          StyleConfig& config);
   ~Parser();
+  
   void SemErr(const char* msg);
+  void SemWarning(const char* msg);
 
 	void OSS();
+	void WAYORDER();
 	void STYLE();
+	void WAYGROUP(size_t priority);
 	void NODESTYLE();
 	void WAYSTYLE();
 	void AREASTYLE();
@@ -175,7 +180,6 @@ void ToRGBA(const char* str, Color& color)
 	void REFDEF(LabelStyle& style);
 	void SYMBOLDEF(SymbolStyle& style);
 	void ICONDEF(IconStyle& style);
-	void INTEGER(size_t& value);
 	void MAG(Mag& mag);
 	void LINEDEF(LineStyle& style);
 	void FILLDEF(FillStyle& style);
@@ -188,6 +192,7 @@ void ToRGBA(const char* str, Color& color)
 	void SIZE(double& value);
 	void MAXMAG(Mag& mag);
 	void SCALEMAG(Mag& mag);
+	void INTEGER(size_t& value);
 	void SYMBOLSTYLE(SymbolStyle::Style& style);
 
   void Parse();

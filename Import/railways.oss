@@ -1,5 +1,5 @@
 OSS
-  WAY "railway_rail" PRIO 1 MINMAG world
+  WAY "railway_rail" MINMAG world
     LINE #939393 WITH ALTCOLOR #777777 OUTLINECOLOR #b3b3b3 MINWIDTH 0.25mm WIDTH 5m OUTLINE 0.25mm
     LABEL WITH STYLE contour MINMAG close
 

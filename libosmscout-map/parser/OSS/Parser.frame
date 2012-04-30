@@ -54,6 +54,7 @@ private:
   int minErrDist;
 
   void SynErr(int n);
+  
   void Get();
   void Expect(int n);
   bool StartOf(int s);
@@ -75,7 +76,9 @@ public:
   Parser(Scanner *scanner,
          StyleConfig& config);
   ~Parser();
+  
   void SemErr(const char* msg);
+  void SemWarning(const char* msg);
 
 -->productionsheader
   void Parse();
@@ -132,6 +135,11 @@ void Parser::SemErr(const char* msg)
     errors->Error(t->line, t->col, msg);
   }
   errDist = 0;
+}
+
+void Parser::SemWarning(const char* msg)
+{
+  errors->Warning(t->line, t->col, msg);
 }
 
 void Parser::Get()

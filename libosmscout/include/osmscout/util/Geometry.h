@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <algorithm>
 #include <vector>
 
 #include <osmscout/private/CoreImportExport.h>
@@ -29,6 +30,35 @@
 #include <osmscout/Point.h>
 
 namespace osmscout {
+  /**
+   * Returns true, if the lines defined by the given coordinates intersect.
+   */
+  template<typename N>
+  bool LinesIntersect(const N& a1,
+                      const N& a2,
+                      const N& b1,
+                      const N& b2)
+  {
+    double ua_numr=(b2.x-b1.x)*(a1.y-b1.y)-(b2.y-b1.y)*(a1.x-b1.x);
+    double ub_numr=(a2.x-a1.x)*(a1.y-b1.y)-(a2.y-a1.y)*(a1.x-b1.x);
+    double denr=(b2.y-b1.y)*(a2.x-a1.x)-(b2.x-b1.x)*(a2.y-a1.y);
+
+    if(denr==0.0) {
+      // lines are coincident
+      return ua_numr==0.0 &&
+             ub_numr==0.0;
+    }
+
+    double ua=ua_numr/denr;
+    double ub=ub_numr/denr;
+
+    return ua>=0.0 &&
+           ua<=1.0 &&
+           ub>=0.0 &&
+           ub<=1.0;
+  }
+
+
   /**
     Returns true, if point in area.
 
@@ -170,6 +200,184 @@ namespace osmscout {
     }
 
     return false;
+  }
+
+
+  /**
+   * Returns true, if the handed polygons are simple (aka not complex),
+   * that means, we have no intersections.
+   */
+  template<typename N>
+  bool AreaIsSimple(const std::vector<std::pair<N,N> >& edges,
+                    const std::vector<bool>& edgeStartsNewPoly)
+  {
+    size_t edgesIntersect=0;
+
+    for (size_t i=0; i<edges.size(); i++) {
+      edgesIntersect=0;
+
+      for (size_t j=i+1; j<edges.size(); j++) {
+        if (LinesIntersect(edges[i].first,
+                           edges[i].second,
+                           edges[j].first,
+                           edges[j].second)) {
+          edgesIntersect++;
+
+          // we check the first edge of a sole polygon against every
+          // other edge and expect to see 2 intersections for
+          // adjacent edges; polygon is complex if there are more
+          // intersections
+          if (edgeStartsNewPoly[i]) {
+            if (edgesIntersect>2) {
+              return false;
+            }
+          }
+
+          // otherwise we check an edge that isn't the first
+          // edge against every other edge excluding those that
+          // have already been tested (this means one adjacent
+          // edge); polygon is complex if there is more than one
+          // intersection
+          else {
+            if (edgesIntersect>1) {
+              return false;
+            }
+          }
+        }
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   *  Returns true, if the polygon is counter clock wise (CCW)
+   */
+  template<typename N>
+  bool AreaIsCCW(const std::vector<N> &edges)
+  {
+    // based on http://en.wikipedia.org/wiki/Curve_orientation
+    // and http://local.wasp.uwa.edu.au/~pbourke/geometry/clockwise/
+
+    // note: polygon must be simple
+    // note: this assumes 2d cartesian coordinate space is used;
+    // for geographic, expect Vec2.x=lon and Vec2.y=lat!
+
+    int ptIdx=0;
+
+    for (int i=1; i<edges.size(); i++) {
+      // find the point with the smallest y value,
+      if (edges[i].y<edges[ptIdx].y) {
+        ptIdx=i;
+      }
+      // if y values are equal save the point with greatest x
+      else if (edges[i].y==edges[ptIdx].y) {
+        if (edges[i].x<edges[ptIdx].x) {
+          ptIdx=i;
+        }
+      }
+    }
+
+    int prevIdx=(ptIdx==0) ? edges.size()-1 : ptIdx-1;
+    int nextIdx=(ptIdx==edges.size()-1) ? 0 : ptIdx+1;
+
+    double signedArea=(edges[ptIdx].x-edges[prevIdx].x)*
+                      (edges[nextIdx].y-edges[ptIdx].y)-
+                      (edges[ptIdx].y-edges[prevIdx].y)*
+                      (edges[nextIdx].x-edges[ptIdx].x);
+
+    return signedArea>0.0;
+  }
+
+  template<typename N>
+  bool AreaIsValid(std::vector<N>& outerPoints,
+                   std::vector<std::vector<N> >& innerPoints)
+  {
+    if (outerPoints.size()<3) {
+      return false;
+    }
+
+    size_t numEdges=outerPoints.size();
+
+    for (size_t i=0; i<innerPoints.size(); i++) {
+      numEdges+=innerPoints[i].size();
+    }
+
+    std::vector<bool>            edgeStartsNewPoly(numEdges,false);
+    std::vector<std::pair<N,N> > listEdges(numEdges);
+    size_t                       cEdge=0;
+
+    // temporarily wrap around vertices
+    // (first == last) to generate edge lists
+    outerPoints.push_back(outerPoints[0]);
+    for (size_t i=0; i<innerPoints.size(); i++) {
+      innerPoints[i].push_back(innerPoints[i][0]);
+    }
+
+    // outer poly
+    edgeStartsNewPoly[0]=true;
+    for (size_t i=1; i<outerPoints.size(); i++) {
+      std::pair<N, N> outerEdge;
+
+      outerEdge.first=outerPoints[i-1];
+      outerEdge.second=outerPoints[i];
+      listEdges[cEdge]=outerEdge;
+
+      cEdge++;
+    }
+
+    // inner polys
+    for (size_t i=0; i<innerPoints.size(); i++) {
+      edgeStartsNewPoly[cEdge]=true;
+
+      for (size_t j=1; j<innerPoints[i].size(); j++) {
+        std::pair<N, N> innerEdge;
+
+        innerEdge.first=innerPoints[i][j-1];
+        innerEdge.second=innerPoints[i][j];
+        listEdges[cEdge]=innerEdge;
+
+        cEdge++;
+      }
+    }
+
+    // revert vertex list modifications (not
+    // really the 'nicest' way of doing this)
+    outerPoints.pop_back();
+    for (size_t i=0; i<innerPoints.size(); i++) {
+      innerPoints[i].pop_back();
+    }
+
+    if (AreaIsSimple(listEdges,edgeStartsNewPoly))
+        {
+      // expect listOuterPts to be CCW and innerPts
+      // to be CW, if not then reverse point order
+
+      if (!AreaIsCCW(outerPoints)) {
+        std::reverse(outerPoints.begin(),
+                     outerPoints.end());
+      }
+
+      for (int i=0; i<innerPoints.size(); i++) {
+        if (AreaIsCCW(innerPoints[i])) {
+          std::reverse(innerPoints[i].begin(),
+                       innerPoints[i].end());
+        }
+      }
+    }
+    else {
+      return false;
+    }
+
+    return true;
+  }
+
+  template<typename N>
+  bool AreaIsValid(std::vector<N> &outerPoints)
+  {
+    std::vector<std::vector<N> > listListInnerPts; //empty
+
+    return AreaIsValid(outerPoints,listListInnerPts);
   }
 
   struct OSMSCOUT_API Coord

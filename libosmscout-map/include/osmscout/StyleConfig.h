@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <limits>
 #include <vector>
 
 #include <osmscout/private/MapImportExport.h>
@@ -494,7 +495,12 @@ namespace osmscout {
 
     inline size_t GetWayPrio(TypeId type) const
     {
-      return wayPrio[type];
+      if (type<wayPrio.size()) {
+        return wayPrio[type];
+      }
+      else {
+        return std::numeric_limits<size_t>::max();
+      }
     }
 
     inline const SymbolStyle* GetNodeSymbolStyle(TypeId type) const
