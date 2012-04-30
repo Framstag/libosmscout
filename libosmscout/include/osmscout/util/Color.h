@@ -26,6 +26,14 @@ namespace osmscout {
 
   class OSMSCOUT_API Color
   {
+  public:
+    static const Color BLACK;
+    static const Color WHITE;
+
+    static const Color RED;
+    static const Color GREEN;
+    static const Color BLUE;
+
   private:
     double r;
     double g;

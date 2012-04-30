@@ -1086,7 +1086,7 @@ namespace osmscout {
     if (data.drawBridge) {
       DrawPath(projection,
                parameter,
-               Color(0.0,0.0,0.0),
+               Color::BLACK,
                1,
                emptyDash,
                capButt,
@@ -1095,7 +1095,7 @@ namespace osmscout {
 
       DrawPath(projection,
                parameter,
-               Color(0.0,0.0,0.0),
+               Color::BLACK,
                1,
                emptyDash,
                capButt,
