@@ -4,16 +4,17 @@ OSS
     GROUP "highway_trunk" 
     GROUP "highway_primary"
     GROUP "highway_secondary"
-    GROUP "highway_motorway_link", "highway_trunk_link", "highway_primary_link", "highway_secondary_link", "highway_tertiary"
+    GROUP "highway_tertiary"
+    GROUP "highway_motorway_link", "highway_trunk_link", "highway_primary_link", "highway_secondary_link"
     GROUP "highway_unclassified", "highway_road", "highway_residential"
-    GROUP "railway_rail"
-    GROUP "highway_living_street", "highway_service"
-    GROUP "highway_track", "highway_pedestrian", "highway_bus_guideway", "highway_path", "highway_cycleway",
+    GROUP "railway_rail",
+          "aeroway_runway", "aeroway_taxiway"
+    GROUP "highway_living_street", "highway_service", "highway_bus_guideway",
+          "railway_tram", "railway_light_rail", "railway_subway", "public_transport_platform" 
+    GROUP "highway_track", "highway_pedestrian", "highway_path", "highway_cycleway",
           "highway_footway", "highway_bridleway", "highway_byway", "highway_construction",
-          "railway_tram", "railway_light_rail", "railway_subway", "public_transport_platform", 
-          "aeroway_runway", "aeroway_taxiway",
           "leisure_track",
-          "waterway_stream","route_ferry"
+	      "waterway_stream","route_ferry"
     GROUP "highway_steps", "barrier_fence"           
 
   WAY "highway_motorway" MINMAG continent
