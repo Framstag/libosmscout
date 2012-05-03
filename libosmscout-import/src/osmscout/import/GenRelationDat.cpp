@@ -65,16 +65,17 @@ namespace osmscout {
 
     ~GroupingState()
     {
-      delete [] used;
+      delete [] hasIncludes;
       delete [] includes;
+      delete [] used;
     }
 
-    size_t GetRingCount() const
+    inline size_t GetRingCount() const
     {
       return rings;
     }
 
-    void SetUsed(size_t used)
+    inline void SetUsed(size_t used)
     {
       this->used[used]=true;
     }
@@ -84,7 +85,7 @@ namespace osmscout {
       return this->used[used];
     }
 
-    void SetIncluded(size_t includer, size_t included)
+    inline void SetIncluded(size_t includer, size_t included)
     {
       hasIncludes[includer]=true;
       includes[included*rings+includer]=true;
@@ -102,16 +103,16 @@ namespace osmscout {
   };
 
 
-  bool ResolveMember(const TypeConfig& typeConfig,
-                     Id id,
-                     const std::string& name,
-                     const RawRelation::Member& member,
-                     DataFile<RawNode>& nodeDataFile,
-                     DataFile<RawWay>& wayDataFile,
-                     DataFile<RawRelation>& relationDataFile,
-                     const std::string& roleName,
-                     std::vector<Relation::Role>& roles,
-                     Progress& progress)
+  static bool ResolveMember(const TypeConfig& typeConfig,
+                            Id id,
+                            const std::string& name,
+                            const RawRelation::Member& member,
+                            DataFile<RawNode>& nodeDataFile,
+                            DataFile<RawWay>& wayDataFile,
+                            DataFile<RawRelation>& relationDataFile,
+                            const std::string& roleName,
+                            std::vector<Relation::Role>& roles,
+                            Progress& progress)
   {
     if (member.type==RawRelation::memberNode) {
       RawNodeRef node;
@@ -241,9 +242,9 @@ namespace osmscout {
     A top level role is a role that is not included by any other unused role ("top level tree
     element").
     */
-  std::list<Relation::Role>::const_iterator FindTopLevel(const std::list<Relation::Role>& rings,
-                                                         const GroupingState& state,
-                                                         size_t& topIndex)
+  static std::list<Relation::Role>::const_iterator FindTopLevel(const std::list<Relation::Role>& rings,
+                                                                const GroupingState& state,
+                                                                size_t& topIndex)
   {
     size_t i=0;
     for (std::list<Relation::Role>::const_iterator r=rings.begin();
@@ -278,10 +279,10 @@ namespace osmscout {
     A sub role is a role that is included by the given top role but is not included
     by any other role ("direct child tree element").
     */
-  std::list<Relation::Role>::const_iterator FindSub(const std::list<Relation::Role>& rings,
-                                                    size_t topIndex,
-                                                    const GroupingState& state,
-                                                    size_t& subIndex)
+  static std::list<Relation::Role>::const_iterator FindSub(const std::list<Relation::Role>& rings,
+                                                           size_t topIndex,
+                                                           const GroupingState& state,
+                                                           size_t& subIndex)
   {
     size_t i=0;
     for (std::list<Relation::Role>::const_iterator r=rings.begin();
@@ -316,11 +317,11 @@ namespace osmscout {
     Recursivly consume all direct children and all direct children of that children)
     of the given role.
     */
-  void ConsumeSubs(const std::list<Relation::Role>& rings,
-                   std::list<Relation::Role>& groups,
-                   GroupingState& state,
-                   size_t topIndex,
-                   size_t id)
+  static void ConsumeSubs(const std::list<Relation::Role>& rings,
+                          std::list<Relation::Role>& groups,
+                          GroupingState& state,
+                          size_t topIndex,
+                          size_t id)
   {
     std::list<Relation::Role>::const_iterator sub;
     size_t                                    subIndex;
@@ -337,16 +338,19 @@ namespace osmscout {
     }
   }
 
-  bool AssignRings(Relation& relation,
-                   std::list<Relation::Role>& rings,
-                   Progress& progress)
+  static bool AssignRings(Relation& relation,
+                          std::list<Relation::Role>& rings,
+                          Progress& progress)
   {
     std::list<Relation::Role> roles;
-    std::list<Point>          points;
-    size_t                    counter=0;
 
     // Make a local copy of the relation roles
     for (size_t i=0; i<relation.roles.size(); i++) {
+      // We have some marker nodes like "admin_centre", which we want to skip
+      if (relation.roles[i].nodes.size()==1) {
+        continue;
+      }
+
       // We can have ways that are of type way and still build a closed shape.
       // We are sure that they build an area and fix the data here
       if (relation.roles[i].nodes.size()>2 &&
@@ -355,20 +359,18 @@ namespace osmscout {
         relation.roles[i].nodes.pop_back();
       }
 
-      // We have some marker nodes like "admin_centre", which we want to skip
-      if (relation.roles[i].nodes.size()>1) {
-        roles.push_back(relation.roles[i]);
-      }
+      roles.push_back(relation.roles[i]);
     }
 
     // Try to consume all roles
     while (!roles.empty()) {
-      size_t         rolesSelected=1;
-      bool           finished=false;
-      Relation::Role leadingRole=roles.front();
-      Relation::Role role;
+      size_t           rolesSelected=1;
+      bool             finished=false;
+      Relation::Role   leadingRole=roles.front();
+      Relation::Role   role;
+      std::list<Point> points;
 
-      roles.erase(roles.begin());
+      roles.pop_front();
 
       role.attributes=leadingRole.attributes;
       role.attributes.flags|=SegmentAttributes::isArea;
@@ -483,8 +485,6 @@ namespace osmscout {
       }
 
       rings.push_back(role);
-      points.clear();
-      counter++;
     }
 
     return true;
@@ -495,10 +495,8 @@ namespace osmscout {
 
     See http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
     */
-  bool ResolveMultipolygon(Relation& relation,
-                           const std::string& name,
-                           const std::string& refName,
-                           Progress& progress)
+  static bool ResolveMultipolygon(Progress& progress,
+                                  Relation& relation)
   {
     std::list<Relation::Role> rings;
     std::list<Relation::Role> groups;
@@ -582,14 +580,7 @@ namespace osmscout {
     // Copy back data
     //
 
-    relation.roles.clear();
-    relation.roles.reserve(groups.size());
-
-    for (std::list<Relation::Role>::const_iterator group=groups.begin();
-         group!=groups.end();
-         ++group) {
-      relation.roles.push_back(*group);
-    }
+    relation.roles.assign(groups.begin(),groups.end());
 
     return true;
   }
@@ -600,9 +591,9 @@ namespace osmscout {
     thus reducing the number of roles and increasing the number of points per role
     (which gives us the change to optimize better for low magnification).
     */
-  bool CompactRelation(Relation& relation,
-                       const std::string& name,
-                       Progress& progress)
+  static bool CompactRelation(Relation& relation,
+                              const std::string& name,
+                              Progress& progress)
   {
     size_t oldSize=relation.roles.size();
 
@@ -925,7 +916,7 @@ namespace osmscout {
       // algorithm as destribed at
       // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
       if (rel.IsArea()) {
-        if (!ResolveMultipolygon(rel,rel.GetName(),rel.GetRefName(),progress)) {
+        if (!ResolveMultipolygon(progress,rel)) {
           progress.Error("Cannot resolve multipolygon relation "+
                          NumberToString(rawRel.GetId())+" "+rel.GetName());
           continue;
