@@ -47,12 +47,23 @@ struct Job
   }
 };
 
-void DumpNode(const osmscout::TypeConfig* typeConfig,
-              const osmscout::NodeRef node)
+static void DumpIndent(size_t indent)
+{
+  for (size_t i=1; i<=indent; i++) {
+    std::cout << " ";
+  }
+}
+
+static void DumpNode(const osmscout::TypeConfig* typeConfig,
+                     const osmscout::NodeRef node)
 {
   std::cout << "Node {" << std::endl;
   std::cout << "  id: " << node->GetId() << std::endl;
-  std::cout << "  type: " << typeConfig->GetTypeInfo(node->GetType()).GetName() << std::endl;
+
+  if (node->GetType()!=osmscout::typeIgnore) {
+    std::cout << "  type: " << typeConfig->GetTypeInfo(node->GetType()).GetName() << std::endl;
+  }
+
   std::cout << "  lat: " << node->GetLat() << std::endl;
   std::cout << "  lon: " << node->GetLon() << std::endl;
 
@@ -67,8 +78,104 @@ void DumpNode(const osmscout::TypeConfig* typeConfig,
   std::cout << "}" << std::endl;
 }
 
-void DumpWay(const osmscout::TypeConfig* typeConfig,
-             const osmscout::WayRef way)
+static void DumpGeneralSegmentAttributes(const osmscout::SegmentAttributes& attributes,
+                                         const osmscout::TypeConfig* typeConfig,
+                                         size_t indent)
+{
+  if (attributes.GetType()!=osmscout::typeIgnore) {
+    DumpIndent(indent);
+    std::cout << "type: " << typeConfig->GetTypeInfo(attributes.GetType()).GetName() << std::endl;
+  }
+
+  if (!attributes.GetName().empty()) {
+    DumpIndent(indent);
+    std::cout << "name: " << attributes.GetName() << std::endl;
+  }
+
+  if (!attributes.GetRefName().empty()) {
+    DumpIndent(indent);
+    std::cout << "ref: " << attributes.GetRefName() << std::endl;
+  }
+
+  if (!attributes.HasAccess()) {
+    DumpIndent(indent);
+    std::cout << "access: false" << std::endl;
+  }
+}
+
+static void DumpAreaSegmentAttributes(const osmscout::SegmentAttributes& attributes,
+                                      const osmscout::TypeConfig* typeConfig,
+                                      size_t indent)
+{
+  DumpGeneralSegmentAttributes(attributes,
+                               typeConfig,
+                               indent);
+
+  if (!attributes.GetHouseNr().empty()) {
+    DumpIndent(indent);
+    std::cout << "houseNr: " << attributes.GetHouseNr() << std::endl;
+  }
+}
+
+static void DumpWaySegmentAttributes(const osmscout::SegmentAttributes& attributes,
+                                     const osmscout::TypeConfig* typeConfig,
+                                     size_t indent)
+{
+  DumpGeneralSegmentAttributes(attributes,
+                               typeConfig,
+                               indent);
+
+  if (attributes.IsBridge()) {
+    DumpIndent(indent);
+    std::cout << "bridge: true" << std::endl;
+  }
+
+  if (attributes.IsTunnel()) {
+    DumpIndent(indent);
+    std::cout << "tunnel: true" << std::endl;
+  }
+
+  if (attributes.IsOneway()) {
+    DumpIndent(indent);
+    std::cout << "oneway: true" << std::endl;
+  }
+
+  if (attributes.IsRoundabout()) {
+    DumpIndent(indent);
+    std::cout << "roundabout: true" << std::endl;
+  }
+
+  if (attributes.GetWidth()!=0) {
+    DumpIndent(indent);
+    std::cout << "width: " << (size_t)attributes.GetWidth() << std::endl;
+  }
+
+  if (attributes.GetLayer()!=0) {
+    DumpIndent(indent);
+    std::cout << "layer: " << (size_t)attributes.GetLayer() << std::endl;
+  }
+
+  if (attributes.GetMaxSpeed()!=0) {
+    DumpIndent(indent);
+    std::cout << "maxSpeed: " << (size_t)attributes.GetMaxSpeed() << std::endl;
+  }
+
+  DumpIndent(indent);
+  std::cout << "grade: " << (size_t)attributes.GetGrade() << std::endl;
+
+  if (attributes.StartIsJoint()) {
+    DumpIndent(indent);
+    std::cout << "startIsJoint: true" << std::endl;
+  }
+
+  if (attributes.EndIsJoint()) {
+    DumpIndent(indent);
+    std::cout << "endIsJoint: true" << std::endl;
+  }
+}
+
+static void DumpWay(const osmscout::TypeConfig* typeConfig,
+                    const osmscout::WayRef way)
 {
   if (way->IsArea()) {
     std::cout << "Area {" << std::endl;
@@ -78,63 +185,16 @@ void DumpWay(const osmscout::TypeConfig* typeConfig,
   }
 
   std::cout << "  id: " << way->GetId() << std::endl;
-  std::cout << "  type: " << typeConfig->GetTypeInfo(way->GetType()).GetName() << std::endl;
-
-  if (!way->GetName().empty()) {
-    std::cout << "  name: " << way->GetName() << std::endl;
-  }
-
-  if (!way->GetRefName().empty()) {
-    std::cout << "  ref: " << way->GetRefName() << std::endl;
-  }
 
   if (way->IsArea()) {
-    if (!way->GetHouseNr().empty()) {
-      std::cout << "  houseNr: " << way->GetHouseNr() << std::endl;
-    }
+    DumpAreaSegmentAttributes(way->GetAttributes(),
+                              typeConfig,
+                              2);
   }
   else {
-    if (way->IsBridge()) {
-      std::cout << "  bridge: true" << std::endl;
-    }
-
-    if (way->IsTunnel()) {
-      std::cout << "  tunnel: true" << std::endl;
-    }
-
-    if (way->IsOneway()) {
-      std::cout << "  oneway: true" << std::endl;
-    }
-
-    if (way->IsRoundabout()) {
-      std::cout << "  roundabout: true" << std::endl;
-    }
-
-    if (way->GetWidth()!=0) {
-      std::cout << "  width: " << (size_t)way->GetWidth() << std::endl;
-    }
-
-    if (way->GetLayer()!=0) {
-      std::cout << "  layer: " << (size_t)way->GetLayer() << std::endl;
-    }
-
-    if (way->GetMaxSpeed()!=0) {
-      std::cout << "  maxSpeed: " << (size_t)way->GetMaxSpeed() << std::endl;
-    }
-
-    std::cout << "  grade: " << (size_t)way->GetGrade() << std::endl;
-
-    if (way->StartIsJoint()) {
-      std::cout << "  startIsJoint: true" << std::endl;
-    }
-
-    if (way->EndIsJoint()) {
-      std::cout << "  endIsJoint: true" << std::endl;
-    }
-  }
-
-  if (!way->HasAccess()) {
-    std::cout << "  access: false" << std::endl;
+    DumpWaySegmentAttributes(way->GetAttributes(),
+                             typeConfig,
+                             2);
   }
 
   if (way->HasTags()) {
@@ -156,8 +216,8 @@ void DumpWay(const osmscout::TypeConfig* typeConfig,
   std::cout << "}" << std::endl;
 }
 
-void DumpRelation(const osmscout::TypeConfig* typeConfig,
-                  const osmscout::RelationRef relation)
+static void DumpRelation(const osmscout::TypeConfig* typeConfig,
+                         const osmscout::RelationRef relation)
 {
   if (relation->IsArea()) {
     std::cout << "AreaRelation {" << std::endl;
@@ -166,35 +226,43 @@ void DumpRelation(const osmscout::TypeConfig* typeConfig,
     std::cout << "WayRelation {" << std::endl;
   }
   std::cout << "  id: " << relation->GetId() << std::endl;
-  std::cout << "  type: " << typeConfig->GetTypeInfo(relation->GetType()).GetName() << std::endl;
-
-  if (!relation->GetName().empty()) {
-    std::cout << "  name: " << relation->GetName() << std::endl;
-  }
-
-  if (!relation->GetRefName().empty()) {
-    std::cout << "  ref: " << relation->GetRefName() << std::endl;
-  }
 
   if (relation->IsArea()) {
-    // no thing
+    DumpAreaSegmentAttributes(relation->GetAttributes(),
+                              typeConfig,
+                              2);
   }
   else {
-    if (relation->IsBridge()) {
-      std::cout << "  bridge: true" << std::endl;
+    DumpWaySegmentAttributes(relation->GetAttributes(),
+                             typeConfig,
+                             2);
+  }
+
+  for (size_t r=0; r<relation->roles.size(); r++) {
+    std::cout << std::endl;
+    std::cout << "  role[" << r << "] {" << std::endl;
+
+    if (!relation->IsArea() &&
+        !relation->roles[r].role.empty()) {
+      std::cout << "    role: " << relation->roles[r].role << std::endl;
     }
 
-    if (relation->IsTunnel()) {
-      std::cout << "  tunnel: true" << std::endl;
+    if (relation->IsArea()) {
+      std::cout << "    ring: " << (size_t)relation->roles[r].ring << std::endl;
     }
 
-    if (relation->IsOneway()) {
-      std::cout << "  oneway: true" << std::endl;
+    if (relation->IsArea()) {
+      DumpAreaSegmentAttributes(relation->roles[r].GetAttributes(),
+                                typeConfig,
+                                4);
+    }
+    else {
+      DumpWaySegmentAttributes(relation->roles[r].GetAttributes(),
+                               typeConfig,
+                               4);
     }
 
-    if (relation->GetLayer()!=0) {
-      std::cout << "  layer: " << relation->GetLayer() << std::endl;
-    }
+    std::cout << "  }" << std::endl;
   }
 
   if (relation->HasTags()) {
