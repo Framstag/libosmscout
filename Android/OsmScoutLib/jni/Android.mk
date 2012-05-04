@@ -50,6 +50,7 @@ LOCAL_SRC_FILES := ../../../libosmscout/src/osmscout/AreaAreaIndex.cpp \
                    ../../../libosmscout/src/osmscout/Way.cpp \
                    ../../../libosmscout/src/osmscout/ost/Parser.cpp \
                    ../../../libosmscout/src/osmscout/ost/Scanner.cpp \
+                   ../../../libosmscout/src/osmscout/util/Color.cpp \
                    ../../../libosmscout/src/osmscout/util/File.cpp \
                    ../../../libosmscout/src/osmscout/util/FileScanner.cpp \
                    ../../../libosmscout/src/osmscout/util/FileWriter.cpp \

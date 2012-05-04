@@ -20,6 +20,7 @@
 package osm.scout;
 
 import android.graphics.Canvas;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
@@ -59,7 +60,9 @@ public class MapPainterCanvas {
                 projection.getJniObjectIndex(), mapData.getJniObjectIndex());
 	}
 	
-	public void drawPath(int color, float width, float[] x, float[] y) {
+	public void drawPath(int color, float width, float[] dash,
+			boolean roundedStartCap, boolean roundedEndCap,
+			float[] x, float[] y) {
 		
 		Path path=new Path();
 		
@@ -76,10 +79,58 @@ public class MapPainterCanvas {
 		mPaint.setStyle(Paint.Style.STROKE);
 		mPaint.setStrokeWidth(width);
 		
+		if ((dash!=null) && (dash.length>=2)) {
+			
+			DashPathEffect dashPathEffect=new DashPathEffect(dash, 0);		
+			mPaint.setPathEffect(dashPathEffect);
+		}
+		else {
+			
+			mPaint.setPathEffect(null);
+		}
+		
+		if ((roundedStartCap) && (roundedEndCap)) {
+			
+			// Both start and end caps are rounded
+			mPaint.setStrokeCap(Paint.Cap.ROUND);
+		}
+		else {
+			mPaint.setStrokeCap(Paint.Cap.BUTT);
+		}
+		
 		mCanvas.drawPath(path, mPaint);
+		
+		if ((roundedStartCap) && (!roundedEndCap)) {
+			
+			// Only the start cap is rounded
+			Path startPath=new Path();
+			
+			startPath.moveTo(x[0], y[0]);
+			startPath.lineTo(x[0], y[0]);
+			
+			mPaint.setStrokeCap(Paint.Cap.ROUND);
+			
+			mCanvas.drawPath(startPath, mPaint);			
+		}
+		
+		if ((!roundedStartCap) && (roundedEndCap)) {
+			
+			// Only the end cap is rounded
+			Path endPath=new Path();
+			
+			endPath.moveTo(x[numPoints-1], y[numPoints-1]);
+			endPath.lineTo(x[numPoints-1], y[numPoints-1]);
+			
+			mPaint.setStrokeCap(Paint.Cap.ROUND);
+			
+			mCanvas.drawPath(endPath, mPaint);			
+		}
+		
+		mPaint.setPathEffect(null);
 	}
 	
-	public void drawArea(int color, float[] x, float[] y) {
+	public void drawArea(int fillColor, int borderColor, float borderWidth,
+			float[] x, float[] y) {
 		
 		Path areaPath=new Path();
 		
@@ -94,10 +145,21 @@ public class MapPainterCanvas {
 		
 		areaPath.close();
 		
-		mPaint.setColor(color);
+		// Draw area fill
+		mPaint.setColor(fillColor);
 		mPaint.setStyle(Paint.Style.FILL);
-		
+					
 		mCanvas.drawPath(areaPath, mPaint);
+		
+		if (borderWidth>0.0) {
+			
+			// Draw area border
+			mPaint.setColor(borderColor);
+			mPaint.setStyle(Paint.Style.STROKE);
+			mPaint.setStrokeWidth(borderWidth);
+							
+			mCanvas.drawPath(areaPath, mPaint);
+		}
 	}
 	
 	public void drawArea(int color, float x, float y, float width, float height) {

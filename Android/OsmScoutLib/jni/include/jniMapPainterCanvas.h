@@ -33,7 +33,8 @@ namespace osmscout {
     jclass   mJavaClass;
     jobject  mObject;
     
-    int GetColor(double r, double g, double b, double a);
+    int GetColorInt(double r, double g, double b, double a);
+    int GetColorInt(Color color);
   
   protected:
 
@@ -54,11 +55,11 @@ namespace osmscout {
 
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
-                   const Label& label);
+                   const LabelData& label);
 
     void DrawPlateLabel(const Projection& projection,
                         const MapParameter& parameter,
-                        const Label& label);
+                        const LabelData& label);
 
     void DrawContourLabel(const Projection& projection,
                           const MapParameter& parameter,
@@ -74,7 +75,7 @@ namespace osmscout {
 
     void DrawPath(const Projection& projection,
                   const MapParameter& parameter,
-                  double r, double g, double b, double a,
+                  const Color& color,
                   double width,
                   const std::vector<double>& dash,
                   CapStyle startCap,
