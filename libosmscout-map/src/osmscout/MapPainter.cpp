@@ -1372,60 +1372,65 @@ namespace osmscout {
       bool foundRing=true;
 
       while (foundRing) {
-        std::list<size_t>   roles;
-        std::list<PolyData> clippings;
+        foundRing=false;
 
         for (size_t i=0; i<relation->roles.size(); i++) {
           const Relation::Role& role=relation->roles[i];
 
-          if (role.ring==ring && role.GetType()!=typeIgnore)
+          if (role.ring==ring &&
+              role.GetType()!=typeIgnore)
           {
-            roles.push_back(i);
-          }
-          else if (role.ring==ring+1 && role.GetType()==typeIgnore) {
-            clippings.push_back(data[i]);
+            std::list<PolyData> clippings;
+
+            foundRing=true;
+
+            const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(role.attributes.GetType());
+
+            if (fillStyle==NULL)
+            {
+              continue;
+            }
+
+            if (!IsVisible(projection,
+                           role.nodes,
+                           fillStyle->GetBorderWidth()/2)) {
+              continue;
+            }
+
+            AreaData a;
+
+            // Collect possible clippings. We only take into account, inner rings of the next level
+            // that do not have a type and thus act as a clipping region. If a inner ring has a type,
+            // we currently assume that it does not have alpha and paints over its region and clipping is
+            // not required.
+            // Since we know that rings a created deep first, we only take into account direct followers
+            // in the list with ring+1.
+            size_t j=i+1;
+            while (j<relation->roles.size() &&
+                   relation->roles[j].ring==ring+1 &&
+                   relation->roles[j].GetType()==typeIgnore) {
+              a.clippings.push_back(data[j]);
+
+              j++;
+            }
+
+            a.ref=ObjectRef(relation->GetId(),refRelation);
+            a.attributes=&role.attributes;
+            a.fillStyle=fillStyle;
+            a.transStart=data[i].transStart;
+            a.transEnd=data[i].transEnd;
+
+            a.minLon=role.nodes[0].GetLon();
+
+            for (size_t i=1; i<role.nodes.size(); i++) {
+              a.minLon=std::min(a.minLon,role.nodes[i].GetLon());
+            }
+
+            areaData.push_back(a);
+
+            areasSegments++;
           }
         }
-
-        for (std::list<size_t>::const_iterator r=roles.begin();
-            r!=roles.end();
-            r++) {
-          const Relation::Role& role=relation->roles[*r];
-
-          const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(role.attributes.GetType());
-
-          if (fillStyle==NULL)
-          {
-            continue;
-          }
-
-          if (!IsVisible(projection, role.nodes, fillStyle->GetBorderWidth()/2)) {
-            continue;
-          }
-
-          AreaData a;
-
-          a.ref=ObjectRef(relation->GetId(),refRelation);
-          a.attributes=&role.attributes;
-          a.fillStyle=fillStyle;
-          a.transStart=data[*r].transStart;
-          a.transEnd=data[*r].transEnd;
-
-          a.minLon=role.nodes[0].GetLon();
-
-          for (size_t i=1; i<role.nodes.size(); i++) {
-            a.minLon=std::min(a.minLon,role.nodes[i].GetLon());
-          }
-
-          a.clippings=clippings;
-
-          areaData.push_back(a);
-
-          areasSegments++;
-        }
-
-
-        foundRing=!roles.empty();
 
         ring++;
       }
