@@ -155,7 +155,9 @@ namespace osmscout {
        maxSize(maxSize)
     {
 #if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
+  #if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
       map.reserve(maxSize);
+  #endif
 #else
       if(maxSize>=10) {
         map.resize(maxSize/5);
@@ -304,7 +306,9 @@ namespace osmscout {
       StripCache();
 
 #if defined(OSMSCOUT_HAVE_UNORDERED_MAP)
+  #if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
       map.reserve(maxSize);
+  #endif
 #endif
     }
 
