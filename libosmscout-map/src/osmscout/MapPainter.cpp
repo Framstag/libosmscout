@@ -143,8 +143,7 @@ namespace osmscout {
     tunnelDash.push_back(0.4);
     tunnelDash.push_back(0.4);
 
-    areaMarkStyle.SetStyle(FillStyle::plain);
-    areaMarkStyle.SetFillColor(Color(1,0,0,0.5));
+    areaMarkStyle.SetFillColor(Color(1.0,0,0.0,0.5));
   }
 
   MapPainter::~MapPainter()
@@ -331,7 +330,6 @@ namespace osmscout {
     unknownFill.SetFillColor(Color(255.0/255,255.0/255,173.0/255,1.0));
 
     labelStyle.SetStyle(LabelStyle::normal);
-    labelStyle.SetMinMag(magCity);
 
     DrawArea(landFill,
              parameter,
@@ -705,25 +703,23 @@ namespace osmscout {
                                   const MapParameter& parameter,
                                   const MapData& data)
   {
+    size_t level=MagToLevel(projection.GetMagnification());
+
     for (std::vector<WayRef>::const_iterator a=data.areas.begin();
          a!=data.areas.end();
          ++a) {
       const WayRef& area=*a;
 
-      const LabelStyle  *labelStyle=styleConfig.GetAreaLabelStyle(area->GetType());
-      IconStyle         *iconStyle=styleConfig.GetAreaIconStyle(area->GetType());
-      const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetAreaSymbolStyle(area->GetType());
+      const LabelStyle  *labelStyle=styleConfig.GetAreaLabelStyle(area->GetType(),level);
+      IconStyle         *iconStyle=styleConfig.GetAreaIconStyle(area->GetType(),level);
+      const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetAreaSymbolStyle(area->GetType(),level);
 
       bool hasLabel=labelStyle!=NULL &&
-                    labelStyle->GetStyle()!=LabelStyle::none &&
-                    projection.GetMagnification()>=labelStyle->GetMinMag() &&
-                    projection.GetMagnification()<=labelStyle->GetMaxMag();
+                    labelStyle->GetStyle()!=LabelStyle::none;
 
-      bool hasSymbol=symbolStyle!=NULL &&
-                     projection.GetMagnification()>=symbolStyle->GetMinMag();
+      bool hasSymbol=symbolStyle!=NULL;
 
-      bool hasIcon=iconStyle!=NULL &&
-                   projection.GetMagnification()>=iconStyle->GetMinMag();
+      bool hasIcon=iconStyle!=NULL;
 
       std::string label;
 
@@ -802,20 +798,16 @@ namespace osmscout {
       const RelationRef& relation=*r;
 
       for (size_t m=0; m<relation->roles.size(); m++) {
-        const LabelStyle  *labelStyle=styleConfig.GetAreaLabelStyle(relation->roles[m].GetType());
-        IconStyle         *iconStyle=styleConfig.GetAreaIconStyle(relation->roles[m].GetType());
-        const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetAreaSymbolStyle(relation->roles[m].GetType());
+        const LabelStyle  *labelStyle=styleConfig.GetAreaLabelStyle(relation->roles[m].GetType(),level);
+        IconStyle         *iconStyle=styleConfig.GetAreaIconStyle(relation->roles[m].GetType(),level);
+        const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetAreaSymbolStyle(relation->roles[m].GetType(),level);
 
         bool hasLabel=labelStyle!=NULL &&
-                      labelStyle->GetStyle()!=LabelStyle::none &&
-                      projection.GetMagnification()>=labelStyle->GetMinMag() &&
-                      projection.GetMagnification()<=labelStyle->GetMaxMag();
+                      labelStyle->GetStyle()!=LabelStyle::none;
 
-        bool hasSymbol=symbolStyle!=NULL &&
-                       projection.GetMagnification()>=symbolStyle->GetMinMag();
+        bool hasSymbol=symbolStyle!=NULL;
 
-        bool hasIcon=iconStyle!=NULL &&
-                     projection.GetMagnification()>=iconStyle->GetMinMag();
+        bool hasIcon=iconStyle!=NULL;
 
         std::string label;
 
@@ -892,19 +884,13 @@ namespace osmscout {
                             const MapParameter& parameter,
                             const NodeRef& node)
   {
-    const LabelStyle  *labelStyle=styleConfig.GetNodeLabelStyle(node->GetType());
-    IconStyle         *iconStyle=styleConfig.GetNodeIconStyle(node->GetType());
-    const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetNodeSymbolStyle(node->GetType());
-
-    bool hasLabel=labelStyle!=NULL &&
-                  projection.GetMagnification()>=labelStyle->GetMinMag() &&
-                  projection.GetMagnification()<=labelStyle->GetMaxMag();
-
-    bool hasSymbol=symbolStyle!=NULL &&
-                   projection.GetMagnification()>=symbolStyle->GetMinMag();
-
-    bool hasIcon=iconStyle!=NULL &&
-                 projection.GetMagnification()>=iconStyle->GetMinMag();
+    size_t            level=MagToLevel(projection.GetMagnification());
+    const LabelStyle  *labelStyle=styleConfig.GetNodeLabelStyle(node->GetType(),level);
+    IconStyle         *iconStyle=styleConfig.GetNodeIconStyle(node->GetType(),level);
+    const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetNodeSymbolStyle(node->GetType(),level);
+    bool              hasLabel=labelStyle!=NULL;
+    bool              hasSymbol=symbolStyle!=NULL;
+    bool              hasIcon=iconStyle!=NULL;
 
     std::string label;
 
@@ -1062,7 +1048,7 @@ namespace osmscout {
       color=color.Lighten(0.5);
     }
 
-    if (!data.lineStyle->GetDash().empty() &&
+    if (data.lineStyle->HasDashes() &&
         data.lineStyle->GetGapColor().GetA()>0.0) {
       DrawPath(projection,
                parameter,
@@ -1277,7 +1263,9 @@ namespace osmscout {
                                       const SegmentAttributes& attributes,
                                       const std::vector<Point>& nodes)
   {
-    const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(attributes.GetType());
+    size_t level=MagToLevel(projection.GetMagnification());
+
+    const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(attributes.GetType(),level);
 
     if (fillStyle==NULL)
     {
@@ -1321,6 +1309,8 @@ namespace osmscout {
                                 const MapParameter& parameter,
                                 const MapData& data)
   {
+    size_t level=MagToLevel(projection.GetMagnification());
+
     areaData.clear();
 
     // Simple areas
@@ -1384,7 +1374,7 @@ namespace osmscout {
 
             foundRing=true;
 
-            const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(role.attributes.GetType());
+            const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(role.attributes.GetType(),level);
 
             if (fillStyle==NULL)
             {
@@ -1446,7 +1436,9 @@ namespace osmscout {
                                      const SegmentAttributes& attributes,
                                      const std::vector<Point>& nodes)
   {
-    const LineStyle *lineStyle=styleConfig.GetWayLineStyle(attributes.GetType());
+    size_t level=MagToLevel(projection.GetMagnification());
+
+    const LineStyle *lineStyle=styleConfig.GetWayLineStyle(attributes.GetType(),level);
 
     if (lineStyle==NULL) {
       return;
@@ -1455,17 +1447,17 @@ namespace osmscout {
     double lineWidth;
 
     if (lineStyle->GetWidth()==0) {
-      lineWidth=ConvertWidthToPixel(parameter,lineStyle->GetMinWidth());
+      lineWidth=ConvertWidthToPixel(parameter,lineStyle->GetDisplayWidth());
     }
     else if (parameter.GetDrawWaysWithFixedWidth() ||
         attributes.GetWidth()==0) {
       lineWidth=GetProjectedWidth(projection,
-                                  ConvertWidthToPixel(parameter,lineStyle->GetMinWidth()),
+                                  ConvertWidthToPixel(parameter,lineStyle->GetDisplayWidth()),
                                   lineStyle->GetWidth());
     }
     else {
       lineWidth=GetProjectedWidth(projection,
-                                  ConvertWidthToPixel(parameter,lineStyle->GetMinWidth()),
+                                  ConvertWidthToPixel(parameter,lineStyle->GetDisplayWidth()),
                                   attributes.GetWidth());
     }
 
@@ -1528,40 +1520,34 @@ namespace osmscout {
     data.refLabelStyle=NULL;
 
     if (!attributes.GetName().empty()) {
-      const LabelStyle *style=styleConfig.GetWayNameLabelStyle(attributes.GetType());
+      const LabelStyle *style=styleConfig.GetWayNameLabelStyle(attributes.GetType(),level);
 
       if (style!=NULL) {
         if (style->IsContourStyle()) {
-          if (projection.GetMagnification()>=style->GetMinMag() &&
-              projection.GetMagnification()<=style->GetMaxMag() &&
-              IsVisible(projection,
+          if (IsVisible(projection,
                        nodes,
                        style->GetSize())) {
             data.nameLabelStyle=style;
           }
         }
-        else if (projection.GetMagnification()>=style->GetMinMag() &&
-                 projection.GetMagnification()<=style->GetMaxMag()) {
+        else {
           data.nameLabelStyle=style;
         }
       }
     }
 
     if (!attributes.GetRefName().empty()) {
-      const LabelStyle *style=styleConfig.GetWayRefLabelStyle(attributes.GetType());
+      const LabelStyle *style=styleConfig.GetWayRefLabelStyle(attributes.GetType(),level);
 
       if (style!=NULL) {
         if (style->IsContourStyle()) {
-          if (projection.GetMagnification()>=style->GetMinMag() &&
-              projection.GetMagnification()<=style->GetMaxMag() &&
-              IsVisible(projection,
+          if (IsVisible(projection,
                        nodes,
                        style->GetSize())) {
             data.refLabelStyle=style;
           }
         }
-        else if (projection.GetMagnification()>=style->GetMinMag() &&
-                 projection.GetMagnification()<=style->GetMaxMag()) {
+        else {
           data.refLabelStyle=style;
         }
       }
@@ -1586,7 +1572,7 @@ namespace osmscout {
 
     // Drawing tunnel style for dashed lines is currently not supported
     if (data.drawTunnel &&
-        lineStyle->HasDashValues()) {
+        lineStyle->HasDashes()) {
       data.drawTunnel=false;
     }
 

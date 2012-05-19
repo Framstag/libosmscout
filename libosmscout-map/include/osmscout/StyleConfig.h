@@ -44,7 +44,7 @@ namespace osmscout {
     Color               alternateColor;
     Color               outlineColor;
     Color               gapColor;
-    double              minWidth;
+    double              displayWidth;
     double              width;
     double              fixedWidth;
     double              outline;
@@ -57,15 +57,19 @@ namespace osmscout {
     LineStyle& SetAlternateColor(const Color& color);
     LineStyle& SetOutlineColor(const Color& color);
     LineStyle& SetGapColor(const Color& color);
-    LineStyle& SetMinWidth(double value);
+    LineStyle& SetDisplayWidth(double value);
     LineStyle& SetWidth(double value);
     LineStyle& SetFixedWidth(bool fixedWidth);
     LineStyle& SetOutline(double value);
-    LineStyle& AddDashValue(double dashValue);
+    LineStyle& SetDashes(const std::vector<double> dashes);
 
     inline bool IsVisible() const
     {
-      return width>0.0;
+      return (displayWidth>0.0 ||
+              width>0.0 ||
+              fixedWidth>0.0) &&
+             (lineColor.IsVisible() ||
+              outlineColor.IsVisible());
     }
 
     inline const Color& GetLineColor() const
@@ -88,9 +92,9 @@ namespace osmscout {
       return gapColor;
     }
 
-    inline double GetMinWidth() const
+    inline double GetDisplayWidth() const
     {
-      return minWidth;
+      return displayWidth;
     }
 
     inline double GetWidth() const
@@ -108,9 +112,9 @@ namespace osmscout {
       return outline;
     }
 
-    inline bool HasDashValues() const
+    inline bool HasDashes() const
     {
-      return dash.size()>0;
+      return !dash.empty();
     }
 
     inline const std::vector<double>& GetDash() const
@@ -127,13 +131,7 @@ namespace osmscout {
   class OSMSCOUT_MAP_API FillStyle : public Referencable
   {
   public:
-    enum Style {
-      none,
-      plain
-    };
-
   private:
-    Style               style;
     Color               fillColor;
     std::string         pattern;
     mutable size_t      patternId;
@@ -145,23 +143,19 @@ namespace osmscout {
   public:
     FillStyle();
 
-    FillStyle& SetStyle(Style style);
     FillStyle& SetFillColor(const Color& color);
     void SetPatternId(size_t id) const;
     FillStyle& SetPattern(const std::string& pattern);
     FillStyle& SetPatternMinMag(Mag mag);
     FillStyle& SetBorderColor(const Color& color);
     FillStyle& SetBorderWidth(double value);
-    FillStyle& AddBorderDashValue(double dashValue);
+    FillStyle& SetBorderDashes(const std::vector<double> dashes);
 
     inline bool IsVisible() const
     {
-      return style!=none;
-    }
-
-    inline const Style& GetStyle() const
-    {
-      return style;
+      return (fillColor.IsVisible() ||
+              (borderWidth>0 && borderColor.IsVisible()) ||
+              !pattern.empty());
     }
 
     inline const Color& GetFillColor() const
@@ -199,9 +193,9 @@ namespace osmscout {
       return borderWidth;
     }
 
-    inline bool HasBorderDashValues() const
+    inline bool HasBorderDashes() const
     {
-      return borderDash.size()>0;
+      return !borderDash.empty();
     }
 
     inline const std::vector<double>& GetBorderDash() const
@@ -230,9 +224,7 @@ namespace osmscout {
   private:
     Style   style;
     uint8_t priority;
-    Mag     minMag;
     Mag     scaleAndFadeMag;
-    Mag     maxMag;
     double  size;
     Color   textColor;
     Color   bgColor;
@@ -243,9 +235,7 @@ namespace osmscout {
 
     LabelStyle& SetStyle(Style style);
     LabelStyle& SetPriority(uint8_t priority);
-    LabelStyle& SetMinMag(Mag mag);
     LabelStyle& SetScaleAndFadeMag(Mag mag);
-    LabelStyle& SetMaxMag(Mag mag);
     LabelStyle& SetSize(double size);
     LabelStyle& SetTextColor(const Color& color);
     LabelStyle& SetBgColor(const Color& color);
@@ -253,7 +243,8 @@ namespace osmscout {
 
     inline bool IsVisible() const
     {
-      return style!=none;
+      return style!=none &&
+          textColor.IsVisible();
     }
 
     inline const Style& GetStyle() const
@@ -276,19 +267,9 @@ namespace osmscout {
       return priority;
     }
 
-    inline Mag GetMinMag() const
-    {
-      return minMag;
-    }
-
     inline Mag GetScaleAndFadeMag() const
     {
       return scaleAndFadeMag;
-    }
-
-    inline Mag GetMaxMag() const
-    {
-      return maxMag;
     }
 
     inline double GetSize() const
@@ -331,7 +312,6 @@ namespace osmscout {
 
   private:
     Style  style;
-    Mag    minMag;
     double size;
     Color  fillColor;
 
@@ -339,23 +319,18 @@ namespace osmscout {
     SymbolStyle();
 
     SymbolStyle& SetStyle(Style style);
-    SymbolStyle& SetMinMag(Mag mag);
     SymbolStyle& SetSize(double size);
     SymbolStyle& SetFillColor(const Color& color);
 
     inline bool IsVisible() const
     {
-      return style!=none;
+      return style!=none &&
+             fillColor.IsVisible();
     }
 
     inline const Style& GetStyle() const
     {
       return style;
-    }
-
-    inline const Mag& GetMinMag() const
-    {
-      return minMag;
     }
 
     inline double GetSize() const
@@ -379,14 +354,12 @@ namespace osmscout {
   private:
     size_t      id;       //! Internal id for fast lookup. 0 == no id defined (yet), max(size_t) == error
     std::string iconName; //! name of the icon as given in style
-    Mag         minMag;   //! minimum magnification to show icon
 
   public:
     IconStyle();
 
     IconStyle& SetId(size_t id);
     IconStyle& SetIconName(const std::string& iconName);
-    IconStyle& SetMinMag(Mag mag);
 
     inline bool IsVisible() const
     {
@@ -402,14 +375,47 @@ namespace osmscout {
     {
       return iconName;
     }
-
-    inline const Mag& GetMinMag() const
-    {
-      return minMag;
-    }
   };
 
   typedef Ref<IconStyle> IconStyleRef;
+
+  class OSMSCOUT_MAP_API StyleFilter
+  {
+  private:
+    TypeSet types;
+    size_t  minLevel;
+    size_t  maxLevel;
+
+  public:
+    StyleFilter();
+
+    StyleFilter& SetTypes(const TypeSet& types);
+
+    StyleFilter& SetMinLevel(size_t level);
+    StyleFilter& SetMaxLevel(size_t level);
+
+    bool HasTypes() const
+    {
+      return types.HasTypes();
+    }
+
+    bool HasType(TypeId typeId) const
+    {
+      return types.IsTypeSet(typeId);
+    }
+
+    size_t GetMinLevel() const
+    {
+      return minLevel;
+    }
+
+    size_t GetMaxLevel() const
+    {
+      return maxLevel;
+    }
+
+    bool HasMaxLevel() const;
+  };
 
   /**
    * A complete style definition
@@ -417,43 +423,41 @@ namespace osmscout {
   class OSMSCOUT_MAP_API StyleConfig
   {
   private:
-    TypeConfig                   *typeConfig;
+    TypeConfig                                 *typeConfig;
 
     // Node
 
-    std::vector<SymbolStyleRef>  nodeSymbolStyles;
-    std::vector<LabelStyleRef>   nodeRefLabelStyles;
-    std::vector<LabelStyleRef>   nodeLabelStyles;
-    std::vector<IconStyleRef>    nodeIconStyles;
+    std::vector<std::vector<SymbolStyleRef> >  nodeSymbolStyles;
+    std::vector<std::vector<LabelStyleRef> >   nodeRefLabelStyles;
+    std::vector<std::vector<LabelStyleRef> >   nodeLabelStyles;
+    std::vector<std::vector<IconStyleRef> >    nodeIconStyles;
 
-    std::vector<TypeSet>         nodeTypeSets;
+    std::vector<TypeSet>                       nodeTypeSets;
 
     // Way
 
-    std::vector<LineStyleRef>    wayLineStyles;
-    std::vector<LabelStyleRef>   wayRefLabelStyles;
-    std::vector<LabelStyleRef>   wayNameLabelStyles;
+    std::vector<size_t>                        wayPrio;
 
-    std::vector<size_t>          wayPrio;
-    std::vector<Mag>             wayMag;
+    std::vector<std::vector<LineStyleRef> >    wayLineStyles;
+    std::vector<std::vector<LabelStyleRef> >   wayRefLabelStyles;
+    std::vector<std::vector<LabelStyleRef> >   wayNameLabelStyles;
 
-    std::vector<std::vector<TypeSet> > wayTypeSets;
+    std::vector<std::vector<TypeSet> >         wayTypeSets;
 
     // Area
 
-    std::vector<FillStyleRef>    areaFillStyles;
-    std::vector<SymbolStyleRef>  areaSymbolStyles;
-    std::vector<LabelStyleRef>   areaLabelStyles;
-    std::vector<IconStyleRef>    areaIconStyles;
+    std::vector<std::vector<FillStyleRef> >    areaFillStyles;
+    std::vector<std::vector<SymbolStyleRef> >  areaSymbolStyles;
+    std::vector<std::vector<LabelStyleRef> >   areaLabelStyles;
+    std::vector<std::vector<IconStyleRef> >    areaIconStyles;
 
-    std::vector<Mag>             areaMag;
-    std::vector<TypeSet>         areaTypeSets;
+    std::vector<TypeSet>                       areaTypeSets;
 
 
   private:
-    void ReserveSpaceForNodeType(TypeId type);
-    void ReserveSpaceForWayType(TypeId type);
-    void ReserveSpaceForAreaType(TypeId type);
+    void GetAllNodeTypes(std::list<TypeId>& types);
+    void GetAllWayTypes(std::list<TypeId>& types);
+    void GetAllAreaTypes(std::list<TypeId>& types);
 
     void PostprocessNodes();
     void PostprocessWays();
@@ -467,23 +471,21 @@ namespace osmscout {
 
     TypeConfig* GetTypeConfig() const;
 
-
-    StyleConfig& SetNodeSymbolStyle(TypeId type, const SymbolStyle& style);
-    StyleConfig& SetNodeRefLabelStyle(TypeId type, const LabelStyle& style);
-    StyleConfig& SetNodeLabelStyle(TypeId type, const LabelStyle& style);
-    StyleConfig& SetNodeIconStyle(TypeId type, const IconStyle& style);
-
     StyleConfig& SetWayPrio(TypeId type, size_t prio);
-    StyleConfig& SetWayMag(TypeId type, Mag mag);
-    StyleConfig& SetWayLineStyle(TypeId type, const LineStyle& style);
-    StyleConfig& SetWayRefLabelStyle(TypeId type, const LabelStyle& style);
-    StyleConfig& SetWayNameLabelStyle(TypeId type, const LabelStyle& style);
 
-    StyleConfig& SetAreaMag(TypeId type, Mag mag);
-    StyleConfig& SetAreaFillStyle(TypeId type, const FillStyle& style);
-    StyleConfig& SetAreaLabelStyle(TypeId type, const LabelStyle& style);
-    StyleConfig& SetAreaSymbolStyle(TypeId type, const SymbolStyle& style);
-    StyleConfig& SetAreaIconStyle(TypeId type, const IconStyle& style);
+    void GetNodeSymbolStyles(const StyleFilter& filter, std::list<SymbolStyleRef>& styles);
+    void GetNodeRefLabelStyles(const StyleFilter& filter, std::list<LabelStyleRef>& styles);
+    void GetNodeNameLabelStyles(const StyleFilter& filter, std::list<LabelStyleRef>& styles);
+    void GetNodeIconStyles(const StyleFilter& filter, std::list<IconStyleRef>& styles);
+
+    void GetWayLineStyles(const StyleFilter& filter, std::list<LineStyleRef>& styles);
+    void GetWayRefLabelStyles(const StyleFilter& filter, std::list<LabelStyleRef>& styles);
+    void GetWayNameLabelStyles(const StyleFilter& filter, std::list<LabelStyleRef>& styles);
+
+    void GetAreaFillStyles(const StyleFilter& filter, std::list<FillStyleRef>& styles);
+    void GetAreaLabelStyles(const StyleFilter& filter, std::list<LabelStyleRef>& styles);
+    void GetAreaSymbolStyles(const StyleFilter& filter, std::list<SymbolStyleRef>& styles);
+    void GetAreaIconStyles(const StyleFilter& filter, std::list<IconStyleRef>& styles);
 
     void GetNodeTypesWithMaxMag(double maxMag,
                                 TypeSet& types) const;
@@ -503,116 +505,19 @@ namespace osmscout {
       }
     }
 
-    inline const SymbolStyle* GetNodeSymbolStyle(TypeId type) const
-    {
-      if (type<nodeSymbolStyles.size()) {
-        return nodeSymbolStyles[type];
-      }
-      else {
-        return NULL;
-      }
-    }
+    SymbolStyle* GetNodeSymbolStyle(TypeId type, size_t level) const;
+    IconStyle* GetNodeIconStyle(TypeId type, size_t level) const;
+    LabelStyle* GetNodeRefLabelStyle(TypeId type, size_t level) const;
+    LabelStyle* GetNodeLabelStyle(TypeId type, size_t level) const;
 
-    inline IconStyle* GetNodeIconStyle(TypeId type) const
-    {
-      if (type<nodeIconStyles.size()) {
-        return nodeIconStyles[type];
-      }
-      else {
-        return NULL;
-      }
-    }
+    LineStyle* GetWayLineStyle(TypeId type, size_t level) const;
+    LabelStyle* GetWayRefLabelStyle(TypeId type, size_t level) const;
+    LabelStyle* GetWayNameLabelStyle(TypeId type, size_t level) const;
 
-    const LabelStyle* GetNodeRefLabelStyle(TypeId type) const
-    {
-      if (type<nodeRefLabelStyles.size()) {
-        return nodeRefLabelStyles[type];
-      }
-      else {
-        return NULL;
-      }
-    }
-
-    const LabelStyle* GetNodeLabelStyle(TypeId type) const
-    {
-      if (type<nodeLabelStyles.size()) {
-        return nodeLabelStyles[type];
-      }
-      else {
-        return NULL;
-      }
-    }
-
-    const LineStyle* GetWayLineStyle(TypeId type) const
-    {
-      if (type<wayLineStyles.size()) {
-        return wayLineStyles[type];
-      }
-      else {
-        return NULL;
-      }
-    }
-
-    const LabelStyle* GetWayRefLabelStyle(TypeId type) const
-    {
-      if (type<wayRefLabelStyles.size()) {
-        return wayRefLabelStyles[type];
-      }
-      else {
-        return NULL;
-      }
-    }
-
-    const LabelStyle* GetWayNameLabelStyle(TypeId type) const
-    {
-      if (type<wayNameLabelStyles.size()) {
-        return wayNameLabelStyles[type];
-      }
-      else {
-        return NULL;
-      }
-    }
-
-    const FillStyle* GetAreaFillStyle(TypeId type) const
-    {
-      if (type<areaFillStyles.size()) {
-        return areaFillStyles[type];
-      }
-      else {
-        return NULL;
-      }
-    }
-
-    const LabelStyle* GetAreaLabelStyle(TypeId type) const
-    {
-      if (type<areaLabelStyles.size()) {
-        return areaLabelStyles[type];
-      }
-      else {
-        return NULL;
-      }
-    }
-
-    const SymbolStyle* GetAreaSymbolStyle(TypeId type) const
-    {
-      if (type<areaSymbolStyles.size()) {
-        return areaSymbolStyles[type];
-      }
-      else {
-        return NULL;
-      }
-    }
-
-    inline IconStyle* GetAreaIconStyle(TypeId type) const
-    {
-      if (type<areaIconStyles.size()) {
-        return areaIconStyles[type];
-      }
-      else {
-        return NULL;
-      }
-    }
-
+    FillStyle* GetAreaFillStyle(TypeId type, size_t level) const;
+    LabelStyle* GetAreaLabelStyle(TypeId type, size_t level) const;
+    SymbolStyle* GetAreaSymbolStyle(TypeId type, size_t level) const;
+    IconStyle* GetAreaIconStyle(TypeId type, size_t level) const;
   };
 }
 

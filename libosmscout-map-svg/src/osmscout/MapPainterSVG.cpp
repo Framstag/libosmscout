@@ -99,7 +99,7 @@ namespace osmscout {
     for (std::vector<TypeInfo>::const_iterator typeInfo=styleConfig.GetTypeConfig()->GetTypes().begin();
         typeInfo!=styleConfig.GetTypeConfig()->GetTypes().end();
         typeInfo++) {
-      const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(typeInfo->GetId());
+      const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(typeInfo->GetId(),MagToLevel(projection.GetMagnification()));
 
       if (fillStyle!=NULL) {
         stream << "        ." << typeInfo->GetName() << "_area {";
@@ -114,7 +114,7 @@ namespace osmscout {
           stream << ";stroke:" << GetColorValue(fillStyle->GetBorderColor());
           stream << ";stroke-width:" << borderWidth;
 
-          if (fillStyle->HasBorderDashValues()) {
+          if (fillStyle->HasBorderDashes()) {
             stream << ";stroke-dasharray:";
 
             for (size_t i=0; i<fillStyle->GetBorderDash().size(); i++) {
@@ -142,17 +142,17 @@ namespace osmscout {
         continue;
       }
 
-      const LineStyle *lineStyle=styleConfig.GetWayLineStyle(typeInfo->GetId());
+      const LineStyle *lineStyle=styleConfig.GetWayLineStyle(typeInfo->GetId(),MagToLevel(projection.GetMagnification()));
 
       if (lineStyle!=NULL) {
         double lineWidth;
 
         if (lineStyle->GetWidth()==0) {
-          lineWidth=ConvertWidthToPixel(parameter,lineStyle->GetMinWidth());
+          lineWidth=ConvertWidthToPixel(parameter,lineStyle->GetDisplayWidth());
         }
         else {
           lineWidth=GetProjectedWidth(projection,
-                                      ConvertWidthToPixel(parameter,lineStyle->GetMinWidth()),
+                                      ConvertWidthToPixel(parameter,lineStyle->GetDisplayWidth()),
                                       lineStyle->GetWidth());
         }
 
@@ -165,7 +165,7 @@ namespace osmscout {
         stream << "fill:none;";
         stream << "stroke:" << GetColorValue(lineStyle->GetLineColor());
 
-        if (lineStyle->HasDashValues()) {
+        if (lineStyle->HasDashes()) {
           stream << ";stroke-dasharray:";
 
           for (size_t i=0; i<lineStyle->GetDash().size(); i++) {

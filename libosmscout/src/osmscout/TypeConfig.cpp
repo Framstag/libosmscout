@@ -649,6 +649,17 @@ namespace osmscout {
     return false;
   }
 
+  TypeId TypeConfig::GetTypeId(const std::string& name) const
+  {
+    OSMSCOUT_HASHMAP<std::string,TypeInfo>::const_iterator iter=nameToTypeMap.find(name);
+
+    if (iter!=nameToTypeMap.end()) {
+      return iter->second.GetId();
+    }
+
+    return typeIgnore;
+  }
+
   TypeId TypeConfig::GetNodeTypeId(const std::string& name) const
   {
     OSMSCOUT_HASHMAP<std::string,TypeInfo>::const_iterator iter=nameToTypeMap.find(name);

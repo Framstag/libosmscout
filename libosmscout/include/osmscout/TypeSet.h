@@ -41,10 +41,12 @@ namespace osmscout {
   class OSMSCOUT_API TypeSet
   {
   private:
+    size_t            typeCount;
     std::vector<bool> types;
 
   public:
     TypeSet()
+    : typeCount(0)
     {
       // no code
     }
@@ -57,6 +59,7 @@ namespace osmscout {
     TypeSet(const TypeSet& other)
     {
       this->types=other.types;
+      this->typeCount=other.typeCount;
     }
 
     void Clear()
@@ -64,6 +67,13 @@ namespace osmscout {
       for (size_t i=0; i<types.size(); i++) {
         types[i]=false;
       }
+
+      typeCount=0;
+    }
+
+    bool HasTypes() const
+    {
+      return typeCount>0;
     }
 
     void SetType(TypeId type)
@@ -72,13 +82,22 @@ namespace osmscout {
         types.resize(type+1,false);
       }
 
-      types[type]=true;
+      if (!types[type]) {
+        types[type]=true;
+
+        typeCount++;
+      }
     }
 
     void UnsetType(TypeId type)
     {
       if (type<types.size()) {
-        types[type]=false;
+
+        if (types[type]) {
+          types[type]=false;
+
+          typeCount--;
+        }
       }
     }
 
@@ -91,6 +110,7 @@ namespace osmscout {
     {
       if (&other!=this) {
         this->types=other.types;
+        this->typeCount=other.typeCount;
       }
 
       return *this;

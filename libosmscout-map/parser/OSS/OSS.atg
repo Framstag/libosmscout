@@ -1,5 +1,6 @@
 #include <iostream>
 #include <limits>
+#include <list>
 #include <sstream>
 
 #include <osmscout/TypeConfig.h>
@@ -8,7 +9,13 @@
 
 COMPILER OSS
 
-static std::string Destring(const char* str)
+typedef std::list<FillStyleRef>   FillStyleList;
+typedef std::list<IconStyleRef>   IconStyleList;
+typedef std::list<LabelStyleRef>  LabelStyleList;
+typedef std::list<LineStyleRef>   LineStyleList;
+typedef std::list<SymbolStyleRef> SymbolStyleList;
+
+inline std::string Destring(const char* str)
 {
   std::string result(str);
 
@@ -21,7 +28,7 @@ static std::string Destring(const char* str)
   return result;
 }
 
-static bool StringToDouble(const char* string, double& value)
+inline bool StringToDouble(const char* string, double& value)
 {
   std::istringstream buffer(string);
 
@@ -32,7 +39,7 @@ static bool StringToDouble(const char* string, double& value)
   return !buffer.fail() && !buffer.bad() && buffer.eof();
 }
 
-static size_t GetHexDigitValue(char c)
+inline size_t GetHexDigitValue(char c)
 {
   if (c>='0' && c<='9') {
     return c-'0';
@@ -44,7 +51,7 @@ static size_t GetHexDigitValue(char c)
   assert(false);
 }
 
-static void ToRGBA(const char* str, Color& color)
+inline void ToRGBA(const char* str, Color& color)
 {
   double r=(16*GetHexDigitValue(str[1])+GetHexDigitValue(str[2]))/255.0;
   double g=(16*GetHexDigitValue(str[3])+GetHexDigitValue(str[4]))/255.0;
@@ -87,10 +94,12 @@ PRODUCTIONS
                   WAYORDER
                 ]
                 {
-                  STYLE
+                  (. StyleFilter filter; .)
+                  STYLE<filter>
                 }
                 "END"
                 (.
+                /*
               	  for (TypeId type=0; type<=config.GetTypeConfig()->GetMaxTypeId(); type++) {
               	    if (config.GetTypeConfig()->GetTypeInfo(type).CanBeWay()) {
 	              	  if (config.GetWayPrio(type)==std::numeric_limits<size_t>::max() &&
@@ -104,7 +113,7 @@ PRODUCTIONS
 	                    SemWarning(e.c_str());
 	              	  }
               	    }
-              	  }
+              	  }*/
                 .)
                 .
   
@@ -155,400 +164,773 @@ PRODUCTIONS
                   .)
                 }
                 .                 
+
+  STYLE<StyleFilter filter>
+              =   STYLEFILTER<filter>
+                  (
+                    "{"
+                       {
+                         STYLE<filter>
+                       }  
+                    "}"
+                  |
+                    STYLEDEF<filter>
+                    {
+                      STYLEDEF<filter>
+                    }  
+                  )  
+                .
                  
-  STYLE       = NODESTYLE | WAYSTYLE | AREASTYLE.
+  STYLEFILTER<StyleFilter& filter>
+              = "["
+                   [
+                     (.TypeSet types;.)
+                     
+                     "TYPE"
+                     string
+                     (.
+                       std::string name=Destring(t->val);
+                       TypeId      type=config.GetTypeConfig()->GetTypeId(name);
+                  
+                       if (type==typeIgnore) {
+                         std::string e="Unknown type '"+name+"'";
 
-  NODESTYLE   = (.
-                  TypeId      type=typeIgnore;
-                  std::string name;
-                .)
-                SYNC "NODE"
-                string (. name=Destring(t->val); .)
-                (.
-                  type=config.GetTypeConfig()->GetNodeTypeId(name);
+                         SemErr(e.c_str());
+                       }
+                       else if (filter.HasTypes() &&
+                                !filter.HasType(type)) {
+                         std::string e="Type '"+name+"' is not included by parent filter";
 
-                  if (type==typeIgnore) {
-                    std::string e="Unknown type '"+name+"'";
+                         SemErr(e.c_str());
+                       }
+                       else {
+                         types.SetType(type);
+                       }
+                     .)
+                     {
+                       ","
+                       string
+                       (.
+                         std::string name=Destring(t->val);
+                         TypeId      type=config.GetTypeConfig()->GetTypeId(name);
+                  
+                         if (type==typeIgnore) {
+                           std::string e="Unknown type '"+name+"'";
 
-                    SemErr(e.c_str());
-                  }
+                           SemErr(e.c_str());
+                         }
+                         else if (filter.HasTypes() &&
+                                  !filter.HasType(type)) {
+                           std::string e="Type '"+name+"' is not included by parent filter";
 
-                .)
-                {
-                  (. LabelStyle labelStyle; .)
-                  LABELDEF<labelStyle>
-                  (. config.SetNodeLabelStyle(type,labelStyle); .)
-                | (. LabelStyle refStyle; .)
-                  REFDEF<refStyle>
-                  (. config.SetNodeRefLabelStyle(type,refStyle); .)
-                | (. SymbolStyle symbolStyle; .)
-                  SYMBOLDEF<symbolStyle>
-                  (. config.SetNodeSymbolStyle(type,symbolStyle); .)
-                | (. IconStyle iconStyle; .)
-                  ICONDEF<iconStyle>
-                  (. config.SetNodeIconStyle(type,iconStyle); .)
-                }.
-  WAYSTYLE    = (.
-                  TypeId      type=typeIgnore;
-                  std::string name;
-                  Mag         mag;
-                .)
-                SYNC "WAY"
-                string (. name=Destring(t->val); .)
-                "MINMAG" MAG<mag>
-                (.
-                  type=config.GetTypeConfig()->GetWayTypeId(name);
+                           SemErr(e.c_str());
+                         }
+                         else {
+                           types.SetType(type);
+                         }
+                       .)
+                     }
+                     
+                     (. filter.SetTypes(types); .)
+                   ]
+                   [
+                     "MAG"
+                     [
+                       (. Mag mag; .)
+                       MAG<mag>
+                       (.
+                          size_t level=MagToLevel(mag);
+                          
+                          if (level<filter.GetMinLevel()) {
+                           std::string e="The magnification interval start is not within the parent magnification range";
 
-                  if (type==typeIgnore) {
-                    std::string e="Unknown type '"+name+"'";
+                           SemErr(e.c_str());
+                          }
+                          else {
+                            filter.SetMinLevel(level);
+                          }
+                       .)
+                     ]
+                     "-"
+                     [
+                       (. Mag mag; .)
+                       MAG<mag>
+                       (.
+                          size_t level=MagToLevel(mag);
+                          
+                          if (level>filter.GetMaxLevel()) {
+                           std::string e="The magnification interval end is not within the parent magnification range";
 
-                    SemErr(e.c_str());
-                  }
-                  else {
-                    config.SetWayMag(type,mag);
-                  }
-                .)
-                {
-                  (. LineStyle lineStyle; .)
-                  LINEDEF<lineStyle>
-                  (.
-                  config.SetWayLineStyle(type,lineStyle); .)
-                | (. LabelStyle labelStyle; .)
-                  LABELDEF<labelStyle>
-                  (. config.SetWayNameLabelStyle(type,labelStyle); .)
-                | (. LabelStyle refStyle; .)
-                  REFDEF<refStyle>
-                  (. config.SetWayRefLabelStyle(type,refStyle); .)
-                }.
-  AREASTYLE   = (.
-                  TypeId      type=typeIgnore;
-                  std::string name;
-                  std::string value;
-                  Mag         mag=magWorld;
-                .)
-                SYNC "AREA"
-                string (. name=Destring(t->val); .)
+                           SemErr(e.c_str());
+                          }
+                          else {
+                            filter.SetMaxLevel(level);
+                          }
+                       .)
+                     ]
+                   ]
+                "]"
+                .
+                
+  STYLEDEF<StyleFilter filter>
+              =   NODESTYLEDEF<filter>
+                | WAYSTYLEDEF<filter>
+                | AREASTYLEDEF<filter>
+                .
+                
+  NODESTYLEDEF<StyleFilter filter>
+              = SYNC "NODE" "."
+                (
+                  NODELABELSTYLE<filter>
+                | NODEREFSTYLE<filter>
+                | NODESYMBOLSTYLE<filter>
+                | NODEICONSTYLE<filter>
+                )
+                .
+                
+  NODELABELSTYLE<StyleFilter filter>
+              = SYNC "LABEL"
                 [
-                  "MINMAG" MAG<mag>
+                  STYLEFILTER<filter>
                 ]
                 (.
-                  type=config.GetTypeConfig()->GetAreaTypeId(name);
-
-                  if (type==typeIgnore) {
-                    std::string e="Unknown type '"+name+"'";
-
-                    SemErr(e.c_str());
-                  }
-                  else if (mag!=magWorld) {
-                    config.SetAreaMag(type,mag);
-                  }
-                .)
-                {
-                  (.
-                    FillStyle   fillStyle;
-                  .)
-                  FILLDEF<fillStyle>
-                  (.
-                    config.SetAreaFillStyle(type,fillStyle);
-                  .)
-                | (. LabelStyle labelStyle; .)
-                  LABELDEF<labelStyle>
-                  (. config.SetAreaLabelStyle(type,labelStyle); .)
-/*
-                | (. LabelStyle labelStyle; .)
-                  REFDEF<labelStyle>
-                  (. config.SetAreaRefLabelStyle(type,labelStyle); .)
-*/
-                | (. SymbolStyle symbolStyle; .)
-                  SYMBOLDEF<symbolStyle>
-                  (. config.SetAreaSymbolStyle(type,symbolStyle); .)
-                | (. IconStyle iconStyle; .)
-                  ICONDEF<iconStyle>
-                  (. config.SetAreaIconStyle(type,iconStyle); .)
-                }.
-
-  LINEDEF<LineStyle& style>
-              = (.
-                  Color lineColor;
-                .)
-                SYNC "LINE"
-                COLOR<lineColor>
-                (. style.SetLineColor(lineColor); .)
-
-                [SYNC "WITH"
-                  [
-                    (. Color alternateColor; .)
-                    "ALTCOLOR"
-                    COLOR<alternateColor>
-                    (. style.SetAlternateColor(alternateColor); .)
-                  ]
-
-                  [
-                    (. Color outlineColor; .)
-                    "OUTLINECOLOR"
-                    COLOR<outlineColor>
-                    (. style.SetOutlineColor(outlineColor); .)
-                  ]
-
-                  [
-                    (. double dash; .)
-                    "DASH"
-                    DOUBLE<dash>   (. style.AddDashValue(dash); .)
-                    {
-                      ","
-                      DOUBLE<dash> (. style.AddDashValue(dash); .)
-                    }
-                    
-                    [
-                    (. Color gapColor; .)
-                      "GAPCOLOR"
-                      COLOR<gapColor>
-                      (. style.SetGapColor(gapColor); .)
-                    ]
-                  ]
-
-                  [
-                    (. double minWidth=style.GetMinWidth(); .)
-                    "MINWIDTH" DISPLAYSIZE<minWidth>
-                    (. style.SetMinWidth(minWidth); .)
-                  ]
-
-                  [
-                    (. double width=style.GetWidth(); .)
-                    "WIDTH" MAPSIZE<width>
-                    (. style.SetWidth(width); .)
-                  ]
-
-                  [
-                    (. double outline=style.GetOutline(); .)
-                    "OUTLINE" DISPLAYSIZE<outline>
-                    (. style.SetOutline(outline); .)
-                  ]
-                ].
-
-  FILLDEF<FillStyle& style>
-              = (.
-                  Color fillColor;
-                .)
-                SYNC "FILL"
-                COLOR<fillColor>
-                (. style.SetFillColor(fillColor); .)
-
-                [
-                  SYNC "PATTERN"
-                  string (. style.SetPattern(Destring(t->val)); .)
-
-                  [SYNC "WITH"
-                    [
-                      (. Mag minMag=style.GetPatternMinMag(); .)
-                      MINMAG<minMag>
-                      (. style.SetPatternMinMag(minMag); .)
-                    ]
-                  ]
-                ]  
+                  LabelStyleList labelStyles;
                 
-                [
-                  (. Color borderColor; .)
-                  SYNC "BORDER"
-                  COLOR<borderColor> (. style.SetBorderColor(borderColor); .)
-
-	              [
-	                (. double width=style.GetBorderWidth(); .)
-	                "WIDTH" DISPLAYSIZE<width>
-	                (. style.SetBorderWidth(width); .)
-	              ]
-
-                  [SYNC "WITH"
-                    [
-                      (. double dash; .)
-                      "DASH"
-                      DOUBLE<dash>   (. style.AddBorderDashValue(dash); .)
-                      {
-                        ","
-                        DOUBLE<dash> (. style.AddBorderDashValue(dash); .)
-                      }
-                    ]
-                  ]
-                ].
-
-  LABELDEF<LabelStyle& style>
-              = SYNC "LABEL"
-
-                (. style.SetStyle(LabelStyle::normal); .)
-
-                [SYNC "WITH"
-                  [
-                    (. LabelStyle::Style s; .)
-                    LABELSTYLE<s>
-                    (. style.SetStyle(s); .)
-                  ]
-
-                  [
-                    (. Color textColor; .)
-                    "COLOR"
-                    COLOR<textColor>
-                    (. style.SetTextColor(textColor); .)
-                  ]
-
-                  [
-                    (. Color bgColor; .)
-                    "BGCOLOR"
-                    COLOR<bgColor>
-                    (. style.SetBgColor(bgColor); .)
-                  ]
-
-                  [
-                    (. Color borderColor; .)
-                    "BORDERCOLOR"
-                    COLOR<borderColor>
-                    (. style.SetBorderColor(borderColor); .)
-                  ]
-
-                  [
-                    (. double size=style.GetSize(); .)
-                    SIZE<size>
-                    (. style.SetSize(size); .)
-                  ]
-
-                  [
-                    (. Mag minMag=style.GetMinMag(); .)
-                    MINMAG<minMag>
-                    (. style.SetMinMag(minMag); .)
-                  ]
-
-                  [ (. Mag maxMag=style.GetMaxMag(); .)
-                    MAXMAG<maxMag>
-                    (. style.SetMaxMag(maxMag); .)
-                  ]
-
-                  [ (. Mag scaleMag=style.GetScaleAndFadeMag(); .)
-                    SCALEMAG<scaleMag>
-                    (. style.SetScaleAndFadeMag(scaleMag); .)
-                  ]
-
-                  [
-                    (. size_t priority; .)
-                    "PRIO"
-                    INTEGER<priority>
-                    (.
-                      if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
-                        style.SetPriority((uint8_t)priority);
-                      }
-                      else {
-                        std::string e="Priority must be in the interval [0,"+
-                                      NumberToString(std::numeric_limits<uint8_t>::max())+"[";
-
-                        SemErr(e.c_str());
-                      }
-                     .)
-                  ]
-                ].
-
-  REFDEF<LabelStyle& style>
-              = SYNC "REF"
-
-                [SYNC "WITH"
-                  [
-                    (. LabelStyle::Style s; .)
-                    LABELSTYLE<s>
-                    (. style.SetStyle(s); .)
-                  ]
-
-                  [
-                    (. Color textColor; .)
-                    "COLOR"
-                    COLOR<textColor>
-                    (. style.SetTextColor(textColor); .)
-                  ]
-
-                  [
-                    (. Color bgColor; .)
-                    "BGCOLOR"
-                    COLOR<bgColor>
-                    (. style.SetBgColor(bgColor); .)
-                  ]
-
-                  [
-                    (. Color borderColor; .)
-                    "BORDERCOLOR"
-                    COLOR<borderColor>
-                    (. style.SetBorderColor(borderColor); .)
-                  ]
-
-                  [ (. double size=style.GetSize(); .)
-                    SIZE<size>
-                    (. style.SetSize(size); .)
-                  ]
-
-                  [
-                    (. Mag minMag=style.GetMinMag(); .)
-                    MINMAG<minMag>
-                    (. style.SetMinMag(minMag); .)
-                  ]
-
-                  [ (. Mag maxMag=style.GetMaxMag(); .)
-                    MAXMAG<maxMag>
-                    (. style.SetMaxMag(maxMag); .)
-                  ]
-
-                  [ (. Mag scaleMag=style.GetScaleAndFadeMag(); .)
-                    SCALEMAG<scaleMag>
-                    (. style.SetScaleAndFadeMag(scaleMag); .)
-                  ]
-
-                  [
-                    (. size_t priority; .)
-                    "PRIO"
-                    INTEGER<priority>
-                    (.
-                      if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
-                        style.SetPriority((uint8_t)priority);
-                      }
-                      else {
-                        std::string e="Priority must be in the interval [0,"+
-                                      NumberToString(std::numeric_limits<uint8_t>::max())+"[";
-
-                        SemErr(e.c_str());
-                      }
-                    .)
-                  ]
-                ].
-
-  SYMBOLDEF<SymbolStyle& style>
-              = (.
-                  SymbolStyle::Style s;
-                  Color              fillColor;
-                  double             size=style.GetSize();
+                  config.GetNodeNameLabelStyles(filter,labelStyles); 
                 .)
-                SYNC "SYMBOL"
-                SYMBOLSTYLE<s>   (. style.SetStyle(s); .)
-                COLOR<fillColor> (. style.SetFillColor(fillColor); .)
-                DOUBLE<size>     (. style.SetSize(size); .)
+                SYNC "{"
+                {
+                  LABELDEF<labelStyles>
+                }
+                SYNC "}"
+                .  
 
-                [SYNC "WITH"
+  NODEREFSTYLE<StyleFilter filter>
+              = SYNC "REF"  
+                [
+                  STYLEFILTER<filter>
+                ]
+                (.
+                  LabelStyleList labelStyles;
+                    
+                  config.GetNodeRefLabelStyles(filter,labelStyles); 
+                .)
+                SYNC "{"
+                {
+                	REFDEF<labelStyles>
+                }
+                SYNC "}"  
+                .
 
-                  [
-                    (. Mag minMag=style.GetMinMag(); .)
-                    MINMAG<minMag>
-                    (. style.SetMinMag(minMag); .)
-                  ]
-                ].
+  NODESYMBOLSTYLE<StyleFilter filter>
+              = SYNC "SYMBOL"  
+                [
+                  STYLEFILTER<filter>
+                ]
+                (.
+                  SymbolStyleList symbolStyles;
+                    
+                  config.GetNodeSymbolStyles(filter,symbolStyles); 
+                .)
+                SYNC "{"
+                {
+                  SYMBOLDEF<symbolStyles>
+                }
+                SYNC "}"  
+                .
 
-  ICONDEF<IconStyle& style>
+  NODEICONSTYLE<StyleFilter filter>
               = SYNC "ICON"
-                ident (. style.SetIconName(t->val); .)
+                [
+                  STYLEFILTER<filter>
+                ]
+                (.
+                  IconStyleList iconStyles;
+                    
+                  config.GetNodeIconStyles(filter,iconStyles); 
+                .)
+                SYNC "{"
+                {
+                  ICONDEF<iconStyles>
+                }
+                SYNC "}"  
+                .
+               
+  WAYSTYLEDEF<StyleFilter filter>
+              = SYNC "WAY"
+                (
+                  WAYSTYLE<filter>
+                | "."
+                  (
+                     WAYLABELSTYLE<filter>
+                  |  WAYREFSTYLE<filter>
+                  )
+                )
+                .  
+                
+  WAYSTYLE<StyleFilter filter>
+              = [
+                  STYLEFILTER<filter>
+                ]
+                (.
+                  LineStyleList lineStyles;
+                    
+                  config.GetWayLineStyles(filter,lineStyles); 
+                .)
+                SYNC "{"
+                {
+                   LINEDEF<lineStyles>
+                }
+                SYNC "}"   
+                   .
 
-                [SYNC "WITH"
-                  [
-                    (. Mag minMag=style.GetMinMag(); .)
-                    MINMAG<minMag>
-                    (. style.SetMinMag(minMag); .)
-                  ]
-                ].
+  WAYLABELSTYLE<StyleFilter filter>
+              = SYNC "LABEL"
+                [
+                  STYLEFILTER<filter>
+                ]
+                (.
+                  LabelStyleList labelStyles;
+                    
+                  config.GetWayNameLabelStyles(filter,labelStyles); 
+                .)
+                "{"
+                {
+                  LABELDEF<labelStyles>
+                }
+                "}"  
+                .
+
+  WAYREFSTYLE<StyleFilter filter>
+              = SYNC "REF"
+                [
+                  STYLEFILTER<filter>
+                ]
+                (.
+                  LabelStyleList labelStyles;
+                    
+                  config.GetWayRefLabelStyles(filter,labelStyles); 
+                .)
+                SYNC "{"
+                {
+                  LABELDEF<labelStyles>
+                }
+                SYNC "}"  
+                .
+              
+  AREASTYLEDEF<StyleFilter filter>
+              = SYNC "AREA"
+                (
+                  AREASTYLE<filter>
+                | "."
+                  (
+                    AREALABELSTYLE<filter>
+                  | AREASYMBOLSTYLE<filter>
+                  | AREAICONSTYLE<filter>
+                  )
+                )
+                .  
+                
+  AREASTYLE<StyleFilter filter>
+              = [
+                  STYLEFILTER<filter>
+                ]
+                  
+                (.
+                  FillStyleList fillStyles;
+                    
+                  config.GetAreaFillStyles(filter,fillStyles); 
+                .)
+                SYNC "{"  
+                {
+                  FILLDEF<fillStyles>
+                }
+                SYNC "}"  
+                .
+
+  AREALABELSTYLE<StyleFilter filter>
+              = SYNC "LABEL"
+                [
+                  STYLEFILTER<filter>
+                ]
+                (.
+                  LabelStyleList labelStyles;
+                
+                  config.GetAreaLabelStyles(filter,labelStyles); 
+                .)
+                SYNC "{"  
+                {
+                  LABELDEF<labelStyles>
+                }
+                SYNC "}"  
+                .
+
+  AREASYMBOLSTYLE<StyleFilter filter>
+              = SYNC "SYMBOL"
+                [
+                  STYLEFILTER<filter>
+                ]
+                (.
+                  SymbolStyleList symbolStyles;
+                 
+                  config.GetAreaSymbolStyles(filter,symbolStyles); 
+                .)
+                SYNC "{"  
+                {
+                  SYMBOLDEF<symbolStyles>
+                }
+                SYNC "}"  
+                .
+
+  AREAICONSTYLE<StyleFilter filter>
+              = SYNC "ICON"
+                [
+                  STYLEFILTER<filter>
+                ]
+                (.
+                  IconStyleList iconStyles;
+                
+                  config.GetAreaIconStyles(filter,iconStyles); 
+                .)
+                SYNC "{"  
+                {
+                  ICONDEF<iconStyles>
+                }
+                SYNC "}"  
+                .
+
+
+  LINEDEF<LineStyleList& styles>
+              = (
+                  (. Color lineColor; .)
+                  "color" ":" COLOR<lineColor> WEAK ";"
+                  (.
+                     for (LineStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       LineStyleRef style(*s);   
+                          
+                  	   style->SetLineColor(lineColor);
+                  	 }  
+                  .)
+                | (. Color alternateColor; .)
+                  "altColor" ":" COLOR<alternateColor> WEAK ";"               // OBSOLETE!
+                  (.
+                     for (LineStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       LineStyleRef style(*s);
+                          
+                  	   style->SetAlternateColor(alternateColor);
+                  	 }  
+                  .)
+                | (. Color outlineColor;.)
+                  "outlineColor" ":" COLOR<outlineColor> WEAK ";"
+                  (.
+                     for (LineStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       LineStyleRef style(*s);
+                          
+                  	   style->SetOutlineColor(outlineColor);
+                  	 }  
+                  .)
+                | (.
+                    std::vector<double> dashes;
+                    double              dash;
+                   .)
+                  "dash" ":"
+                   DOUBLE<dash>   (. dashes.push_back(dash); .)
+                  {
+                    ","
+                    DOUBLE<dash>  (. dashes.push_back(dash); .)
+                  }
+                  (.
+                     for (LineStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       LineStyleRef style(*s);
+                          
+                       style->SetDashes(dashes);
+                     }
+                  .)
+                  WEAK ";"
+                | (. Color gapColor; .)
+                  "gapColor" ":" COLOR<gapColor> WEAK ";"
+                  (.
+                     for (LineStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       LineStyleRef style(*s);
+                          
+                  	   style->SetGapColor(gapColor);
+                  	 }  
+                  .)
+                | (. double displayWidth; .)
+                  "displayWidth" ":"  DISPLAYSIZE<displayWidth> WEAK ";"
+                  (.
+                     for (LineStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       LineStyleRef style(*s);
+                          
+                  	   style->SetDisplayWidth(displayWidth);
+                  	 }  
+                  .)
+                | (. double width; .)
+                  "width" ":" MAPSIZE<width> WEAK ";"
+                  (.
+                     for (LineStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       LineStyleRef style(*s);
+                          
+                  	   style->SetWidth(width);
+                  	 }  
+                  .)
+                | (. double outline; .)
+                  "outline" ":" DISPLAYSIZE<outline> WEAK ";"
+                  (.
+                     for (LineStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       LineStyleRef style(*s);
+                          
+                  	   style->SetOutline(outline);
+                  	 }  
+                  .)
+                )
+                .
+
+  FILLDEF<FillStyleList& styles>
+              = (
+                  (. Color fillColor; .)
+                  "color" ":" COLOR<fillColor> WEAK ";"
+                  (.
+                     for (FillStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       FillStyleRef style(*s);
+                          
+                  	   style->SetFillColor(fillColor);
+                  	 }  
+                  .)
+                | (. std::string patternName; .)
+                  "pattern" ":" string
+                  (. patternName=Destring(t->val); .)
+                   WEAK ";"
+                  (.
+                     for (FillStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       FillStyleRef style(*s);
+                          
+                  	   style->SetPattern(patternName);
+                  	 }  
+                  .)
+                | (. Mag minMag; .)
+                  "patternMinMag" ":" MAG<minMag> WEAK ";"
+                  (.
+                     for (FillStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       FillStyleRef style(*s);
+                          
+                  	   style->SetPatternMinMag(minMag);
+                  	 }  
+                  .)
+                | (. Color borderColor; .)
+                  "borderColor" ":" COLOR<borderColor> WEAK ";"
+                  (.
+                     for (FillStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       FillStyleRef style(*s);
+                          
+                  	   style->SetBorderColor(borderColor);
+                  	 }  
+                  .)
+                | (. double width; .)
+	              "borderWidth" ":" DISPLAYSIZE<width> WEAK ";"
+                  (.
+                     for (FillStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       FillStyleRef style(*s);
+                          
+                  	   style->SetBorderWidth(width);
+                  	 }  
+                  .)
+                | (.
+                    std::vector<double> dashes;
+                    double              dash;
+                   .)
+                  "borderDash" ":"
+                   DOUBLE<dash>   (. dashes.push_back(dash); .)
+                  {
+                    ","
+                    DOUBLE<dash>  (. dashes.push_back(dash); .)
+                  }
+                  (.
+                     for (FillStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       FillStyleRef style(*s);
+                       
+                       style->SetBorderDashes(dashes);
+                     }  
+                  .)
+                  WEAK ";"
+                )  
+                .
+
+  LABELDEF<LabelStyleList& styles>
+              = (
+                  (. LabelStyle::Style labelStyle; .)
+                  "style" ":" LABELSTYLE<labelStyle> WEAK ";"
+                  (.
+                     for (LabelStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       LabelStyleRef style(*s);   
+                       
+                  	   style->SetStyle(labelStyle);
+                  	 }  
+                  .)
+                | (. Color textColor; .)
+                  "color" ":" COLOR<textColor> WEAK ";"
+                  (.
+                     for (LabelStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       LabelStyleRef style(*s);   
+                       
+                  	   style->SetTextColor(textColor);
+                  	 }  
+                  .)
+                | (. Color bgColor; .)
+                  "backgroundColor" ":" COLOR<bgColor> WEAK ";"
+                  (.
+                     for (LabelStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       LabelStyleRef style(*s);   
+                       
+                  	   style->SetBgColor(bgColor);
+                  	 }  
+                  .)
+                | (. Color borderColor; .)
+	              "borderColor" ":" COLOR<borderColor> WEAK ";"
+                  (.
+                     for (LabelStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       LabelStyleRef style(*s);   
+                       
+                  	   style->SetBorderColor(borderColor);
+                  	 }  
+                  .)
+                | (. double size; .)
+                  "size" ":" DOUBLE<size> WEAK ";"
+                  (.
+                     for (LabelStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       LabelStyleRef style(*s);   
+                       
+                  	   style->SetSize(size);
+                  	 }  
+                  .)
+                | (. Mag scaleMag; .)
+                  "scaleMag" ":" MAG<scaleMag> WEAK ";"
+                  (.
+                     for (LabelStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       LabelStyleRef style(*s);   
+                       
+                  	   style->SetScaleAndFadeMag(scaleMag);
+                  	 }  
+                  .)
+                | (. size_t priority; .)
+                  "priority" ":" INTEGER<priority> WEAK ";"
+	              (.
+	                if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
+                      for (LabelStyleList::iterator s=styles.begin();
+                           s!=styles.end();
+                           ++s) {
+                        LabelStyleRef style(*s);   
+                       
+                  	    style->SetPriority((uint8_t)priority);
+                  	  }  
+	                }
+	                else {
+	                  std::string e="Priority must be in the interval [0,"+
+	                                NumberToString(std::numeric_limits<uint8_t>::max())+"[";
+	                                
+	                  SemErr(e.c_str());
+	                }
+	               .)
+                )
+                .
+
+  REFDEF<LabelStyleList& styles>
+              = (.
+                  for (LabelStyleList::iterator s=styles.begin();
+                       s!=styles.end();
+                       ++s) {
+                    LabelStyleRef style(*s);   
+                       
+                    style->SetStyle(LabelStyle::plate);
+                  }  
+                .)
+                (
+                  (. LabelStyle::Style labelStyle; .)
+                  "style" ":" LABELSTYLE<labelStyle> WEAK ";"
+                  (.
+                     for (LabelStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       LabelStyleRef style(*s);   
+                       
+                  	   style->SetStyle(labelStyle);
+                  	 }  
+                  .)
+                | (. Color textColor; .)
+                  "color" ":" COLOR<textColor> WEAK ";"
+                  (.
+                     for (LabelStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       LabelStyleRef style(*s);   
+                       
+                  	   style->SetTextColor(textColor);
+                  	 }  
+                  .)
+                | (. Color bgColor; .)
+                  "backgroundColor" ":" COLOR<bgColor> WEAK ";"
+                  (.
+                     for (LabelStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       LabelStyleRef style(*s);   
+                       
+                  	   style->SetBgColor(bgColor);
+                  	 }  
+                  .)
+                | (. Color borderColor; .)
+	              "borderColor" ":" COLOR<borderColor> WEAK ";"
+                  (.
+                     for (LabelStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       LabelStyleRef style(*s);   
+                       
+                  	   style->SetBorderColor(borderColor);
+                  	 }  
+                  .)
+                | (. double size; .)
+                  "size" ":" DOUBLE<size> WEAK ";"
+                  (.
+                     for (LabelStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       LabelStyleRef style(*s);   
+                       
+                  	   style->SetSize(size);
+                  	 }  
+                  .)
+                | (. Mag scaleMag; .)
+                  "scaleMag" ":" MAG<scaleMag> WEAK ";"
+                  (.
+                     for (LabelStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       LabelStyleRef style(*s);   
+                       
+                  	   style->SetScaleAndFadeMag(scaleMag);
+                  	 }  
+                  .)
+                | (. size_t priority; .)
+                  "priority" ":" INTEGER<priority> WEAK ";"
+	              (.
+	                if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
+                      for (LabelStyleList::iterator s=styles.begin();
+                           s!=styles.end();
+                           ++s) {
+                        LabelStyleRef style(*s);   
+                       
+                  	    style->SetPriority((uint8_t)priority);
+                  	  }  
+	                }
+	                else {
+	                  std::string e="Priority must be in the interval [0,"+
+	                                NumberToString(std::numeric_limits<uint8_t>::max())+"[";
+	                                
+	                  SemErr(e.c_str());
+	                }
+	               .)
+                )
+                .
+
+  SYMBOLDEF<SymbolStyleList& styles>
+              = (
+                  (. SymbolStyle::Style symbolStyle; .)
+                  "style" ":" SYMBOLSTYLE<symbolStyle> WEAK ";"
+                  (.
+                     for (SymbolStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       SymbolStyleRef style(*s);   
+                       
+                  	   style->SetStyle(symbolStyle);
+                  	 }  
+                  .)
+                | (. Color fillColor; .)
+                  "color" ":" COLOR<fillColor> WEAK ";"
+                  (.
+                     for (SymbolStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       SymbolStyleRef style(*s);   
+                       
+                  	   style->SetFillColor(fillColor);
+                  	 }  
+                  .)
+                | (. double size; .)
+                  "size" ":" DOUBLE<size> WEAK ";"
+                  (.
+                     for (SymbolStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       SymbolStyleRef style(*s);   
+                       
+                  	   style->SetSize(size);
+                  	 }  
+                  .)
+                )  
+                .
+
+  ICONDEF<IconStyleList& styles>
+              = (
+                  (. std::string name; .)
+                  "name" ":" ident
+                  (. name=Destring(t->val); .)
+                  WEAK ";"
+                  (.
+                     for (IconStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       IconStyleRef style(*s);   
+                       
+                  	   style->SetIconName(name);
+                  	 }  
+                  .)
+                )
+                .
 
   LABELSTYLE<LabelStyle::Style& style>
-              = "STYLE"
-                (
+              = (
                   "normal"    (. style=LabelStyle::normal; .)
                 | "contour"   (. style=LabelStyle::contour; .)
                 | "plate"     (. style=LabelStyle::plate; .)
@@ -575,15 +957,6 @@ PRODUCTIONS
                   }
                 .).
 
-  MINMAG<Mag& mag>
-              = "MINMAG" MAG<mag>.
-
-  MAXMAG<Mag& mag>
-              = "MAXMAG" MAG<mag>.
-
-  SCALEMAG<Mag& mag>
-              = "FADE" "AT" MAG<mag>.
-
   MAG<Mag& mag>
               =  "world"     (. mag=magWorld; .)
                | "continent" (. mag=magContinent; .)
@@ -608,9 +981,6 @@ PRODUCTIONS
   /** Size in units of map (currently meter) */ 
   MAPSIZE <double& value>
               = DOUBLE<value> "m".
-
-  SIZE<double& value>
-              = "SIZE" DOUBLE<value>.
 
   DOUBLE<double& value>
               = (  number

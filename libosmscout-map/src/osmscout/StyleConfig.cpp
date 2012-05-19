@@ -21,14 +21,16 @@
 
 #include <set>
 
+#include <iostream>
+
 namespace osmscout {
 
   LineStyle::LineStyle()
-   : lineColor(1,1,1),
-     alternateColor(0.5,0.5,0.5),
-     outlineColor(0.75,0.75,0.75),
-     gapColor(1,0,0,0),
-     minWidth(1),
+   : lineColor(1.0,0.0,0.0,0.0),
+     alternateColor(1,0.0,0.0,0.0),
+     outlineColor(1,0.0,0.0,0.0),
+     gapColor(1,0.0,0.0,0.0),
+     displayWidth(0),
      width(0),
      fixedWidth(false),
      outline(0)
@@ -65,9 +67,9 @@ namespace osmscout {
     return *this;
   }
 
-  LineStyle& LineStyle::SetMinWidth(double value)
+  LineStyle& LineStyle::SetDisplayWidth(double value)
   {
-    minWidth=value;
+    displayWidth=value;
 
     return *this;
   }
@@ -93,30 +95,22 @@ namespace osmscout {
     return *this;
   }
 
-  LineStyle& LineStyle::AddDashValue(double dashValue)
+  LineStyle& LineStyle::SetDashes(const std::vector<double> dashes)
   {
-    dash.push_back(dashValue);
+    dash=dashes;
 
     return *this;
   }
 
 
   FillStyle::FillStyle()
-   : style(none),
-     fillColor(1,0,0),
+   : fillColor(1.0,0.0,0.0,0.0),
      patternId(0),
      patternMinMag(magWorld),
-     borderColor(1,0,0),
+     borderColor(1.0,0.0,0.0,0.0),
      borderWidth(0.0)
   {
     // no code
-  }
-
-  FillStyle& FillStyle::SetStyle(Style style)
-  {
-    this->style=style;
-
-    return *this;
   }
 
   FillStyle& FillStyle::SetFillColor(const Color& color)
@@ -159,9 +153,9 @@ namespace osmscout {
     return *this;
   }
 
-  FillStyle& FillStyle::AddBorderDashValue(double dashValue)
+  FillStyle& FillStyle::SetBorderDashes(const std::vector<double> dashes)
   {
-    borderDash.push_back(dashValue);
+    borderDash=dashes;
 
     return *this;
   }
@@ -169,9 +163,7 @@ namespace osmscout {
   LabelStyle::LabelStyle()
    : style(none),
      priority(0),
-     minMag(magWorld),
      scaleAndFadeMag((Mag)1000000),
-     maxMag((Mag)1000000),
      size(1),
      textColor(0,0,0),
      bgColor(1,1,1),
@@ -194,23 +186,9 @@ namespace osmscout {
     return *this;
   }
 
-  LabelStyle& LabelStyle::SetMinMag(Mag mag)
-  {
-    this->minMag=mag;
-
-    return *this;
-  }
-
   LabelStyle& LabelStyle::SetScaleAndFadeMag(Mag mag)
   {
     this->scaleAndFadeMag=mag;
-
-    return *this;
-  }
-
-  LabelStyle& LabelStyle::SetMaxMag(Mag mag)
-  {
-    this->maxMag=mag;
 
     return *this;
   }
@@ -245,7 +223,6 @@ namespace osmscout {
 
   SymbolStyle::SymbolStyle()
    : style(none),
-     minMag(magWorld),
      size(8),
      fillColor(1,0,0)
   {
@@ -255,13 +232,6 @@ namespace osmscout {
   SymbolStyle& SymbolStyle::SetStyle(Style style)
   {
     this->style=style;
-
-    return *this;
-  }
-
-  SymbolStyle& SymbolStyle::SetMinMag(Mag mag)
-  {
-    this->minMag=mag;
 
     return *this;
   }
@@ -281,8 +251,7 @@ namespace osmscout {
   }
 
   IconStyle::IconStyle()
-   : id(0),
-     minMag(magWorld)
+   : id(0)
   {
     // no code
   }
@@ -301,17 +270,58 @@ namespace osmscout {
     return *this;
   }
 
-  IconStyle& IconStyle::SetMinMag(Mag mag)
+  StyleFilter::StyleFilter()
+  : minLevel(0),
+    maxLevel(std::numeric_limits<size_t>::max())
   {
-    this->minMag=mag;
+    // no code
+  }
+
+  StyleFilter& StyleFilter::SetTypes(const TypeSet& types)
+  {
+    this->types=types;
 
     return *this;
+  }
+
+  StyleFilter& StyleFilter::SetMinLevel(size_t level)
+  {
+    minLevel=level;
+
+    return *this;
+  }
+
+  StyleFilter& StyleFilter::SetMaxLevel(size_t level)
+  {
+    maxLevel=level;
+
+    return *this;
+  }
+
+  bool StyleFilter::HasMaxLevel() const
+  {
+    return maxLevel!=std::numeric_limits<size_t>::max();
   }
 
   StyleConfig::StyleConfig(TypeConfig* typeConfig)
    : typeConfig(typeConfig)
   {
-    // no code
+    nodeSymbolStyles.resize(typeConfig->GetMaxTypeId()+1);
+    nodeRefLabelStyles.resize(typeConfig->GetMaxTypeId()+1);
+    nodeLabelStyles.resize(typeConfig->GetMaxTypeId()+1);
+    nodeIconStyles.resize(typeConfig->GetMaxTypeId()+1);
+
+    wayPrio.resize(typeConfig->GetMaxTypeId()+1,std::numeric_limits<size_t>::max());
+    wayLineStyles.resize(typeConfig->GetMaxTypeId()+1);
+    wayRefLabelStyles.resize(typeConfig->GetMaxTypeId()+1);
+    wayNameLabelStyles.resize(typeConfig->GetMaxTypeId()+1);
+
+    areaFillStyles.resize(typeConfig->GetMaxTypeId()+1);
+    areaSymbolStyles.resize(typeConfig->GetMaxTypeId()+1);
+    areaLabelStyles.resize(typeConfig->GetMaxTypeId()+1);
+    areaIconStyles.resize(typeConfig->GetMaxTypeId()+1);
+
+    std::cout << "Size long: " << sizeof(long) << std::endl;
   }
 
   StyleConfig::~StyleConfig()
@@ -319,54 +329,80 @@ namespace osmscout {
     // no code
   }
 
-  void StyleConfig::ReserveSpaceForNodeType(TypeId type)
+  void StyleConfig::GetAllNodeTypes(std::list<TypeId>& types)
   {
-    if (type>=nodeLabelStyles.size()) {
-      nodeSymbolStyles.resize(type+1,NULL);
-      nodeRefLabelStyles.resize(type+1,NULL);
-      nodeLabelStyles.resize(type+1,NULL);
-      nodeIconStyles.resize(type+1,NULL);
+    for (TypeId t=0; t<=typeConfig->GetMaxTypeId(); t++) {
+      if (typeConfig->GetTypeInfo(t).CanBeNode()) {
+        types.push_back(t);
+      }
     }
   }
 
-  void StyleConfig::ReserveSpaceForWayType(TypeId type)
+  void StyleConfig::GetAllWayTypes(std::list<TypeId>& types)
   {
-    if (type>=wayLineStyles.size()) {
-      wayPrio.resize(type+1,std::numeric_limits<size_t>::max());
-      wayMag.resize(type+1,magVeryClose);
-      wayLineStyles.resize(type+1);
-      wayRefLabelStyles.resize(type+1);
-      wayNameLabelStyles.resize(type+1);
+    for (TypeId t=0; t<=typeConfig->GetMaxTypeId(); t++) {
+      if (typeConfig->GetTypeInfo(t).CanBeWay()) {
+        types.push_back(t);
+      }
     }
   }
 
-  void StyleConfig::ReserveSpaceForAreaType(TypeId type)
+  void StyleConfig::GetAllAreaTypes(std::list<TypeId>& types)
   {
-    if (type>=areaFillStyles.size()) {
-      areaMag.resize(type+1,magWorld);
-      areaFillStyles.resize(type+1,NULL);
-      areaSymbolStyles.resize(type+1,NULL);
-      areaLabelStyles.resize(type+1,NULL);
-      areaIconStyles.resize(type+1,NULL);
+    for (TypeId t=0; t<=typeConfig->GetMaxTypeId(); t++) {
+      if (typeConfig->GetTypeInfo(t).CanBeArea()) {
+        types.push_back(t);
+      }
+    }
+  }
+
+  template<typename S>
+  void CleanupStyles(std::vector<std::vector<Ref<S> > >& styles)
+  {
+    for (TypeId type=0;type<styles.size(); type++) {
+      for (size_t level=0; level<styles[type].size(); level++) {
+        if (styles[type][level].Valid() &&
+            !styles[type][level]->IsVisible()) {
+          styles[type][level]=NULL;
+        }
+      }
+    }
+  }
+
+  template<typename S>
+  bool HasStyle(const std::vector<Ref<S> >& styles, size_t level)
+  {
+    size_t size=styles.size();
+
+    if (size==0) {
+      return false;
+    }
+
+    if (level<size) {
+      return styles[level].Valid();
+    }
+    else {
+      return styles[size-1].Valid();
     }
   }
 
   void StyleConfig::PostprocessNodes()
   {
+    CleanupStyles(nodeLabelStyles);
+    CleanupStyles(nodeRefLabelStyles);
+    CleanupStyles(nodeSymbolStyles);
+    CleanupStyles(nodeIconStyles);
+
     size_t maxLevel=0;
-    for (size_t type=0; type<nodeLabelStyles.size(); type++) {
-      if (nodeLabelStyles[type].Valid()) {
-        maxLevel=std::max(maxLevel,MagToLevel(nodeLabelStyles[type]->GetMinMag()));
+    for (TypeId type=0; type<=typeConfig->GetMaxTypeId(); type++) {
+      if (!typeConfig->GetTypeInfo(type).CanBeNode()) {
+        continue;
       }
-      else if (nodeRefLabelStyles[type].Valid()) {
-        maxLevel=std::max(maxLevel,MagToLevel(nodeRefLabelStyles[type]->GetMinMag()));
-      }
-      else if (nodeSymbolStyles[type].Valid()) {
-        maxLevel=std::max(maxLevel,MagToLevel(nodeSymbolStyles[type]->GetMinMag()));
-      }
-      else if (nodeIconStyles[type].Valid()) {
-        maxLevel=std::max(maxLevel,MagToLevel(nodeIconStyles[type]->GetMinMag()));
-      }
+
+      maxLevel=std::max(maxLevel,nodeLabelStyles[type].size());
+      maxLevel=std::max(maxLevel,nodeRefLabelStyles[type].size());
+      maxLevel=std::max(maxLevel,nodeSymbolStyles[type].size());
+      maxLevel=std::max(maxLevel,nodeIconStyles[type].size());
     }
 
     nodeTypeSets.reserve(maxLevel);
@@ -376,30 +412,23 @@ namespace osmscout {
     }
 
     for (size_t level=0;
-        level<nodeTypeSets.size();
+        level<maxLevel;
         ++level) {
-      for (TypeId type=0; type<nodeLabelStyles.size(); type++) {
+      for (TypeId type=0; type<=typeConfig->GetMaxTypeId(); type++) {
         if (!typeConfig->GetTypeInfo(type).CanBeNode()) {
           continue;
         }
 
-        if (nodeLabelStyles[type].Valid() &&
-            MagToLevel(nodeLabelStyles[type]->GetMinMag())<=level) {
+        if (HasStyle(nodeLabelStyles[type],level)) {
           nodeTypeSets[level].SetType(type);
         }
-
-        if (nodeRefLabelStyles[type].Valid() &&
-            MagToLevel(nodeRefLabelStyles[type]->GetMinMag())<=level) {
+        else if (HasStyle(nodeRefLabelStyles[type],level)) {
           nodeTypeSets[level].SetType(type);
         }
-
-        if (nodeSymbolStyles[type].Valid() &&
-            MagToLevel(nodeSymbolStyles[type]->GetMinMag())<=level) {
+        else if (HasStyle(nodeSymbolStyles[type],level)) {
           nodeTypeSets[level].SetType(type);
         }
-
-        if (nodeIconStyles[type].Valid() &&
-            MagToLevel(nodeIconStyles[type]->GetMinMag())<=level) {
+        else if (HasStyle(nodeIconStyles[type],level)) {
           nodeTypeSets[level].SetType(type);
         }
       }
@@ -408,35 +437,52 @@ namespace osmscout {
 
   void StyleConfig::PostprocessWays()
   {
+    CleanupStyles(wayLineStyles);
+    CleanupStyles(wayNameLabelStyles);
+    CleanupStyles(wayRefLabelStyles);
+
     size_t maxLevel=0;
-    for (size_t i=0; i<wayLineStyles.size(); i++) {
-      maxLevel=std::max(maxLevel,MagToLevel(wayMag[i]));
+    for (TypeId type=0; type<=typeConfig->GetMaxTypeId(); type++) {
+      if (!typeConfig->GetTypeInfo(type).CanBeWay()) {
+        continue;
+      }
+
+      maxLevel=std::max(maxLevel,wayLineStyles[type].size());
+      maxLevel=std::max(maxLevel,wayNameLabelStyles[type].size());
+      maxLevel=std::max(maxLevel,wayRefLabelStyles[type].size());
     }
 
-    wayTypeSets.resize(maxLevel+1);
+    wayTypeSets.resize(maxLevel);
 
     std::set<size_t> prios;
 
-    for (size_t i=0; i<wayLineStyles.size(); i++) {
-      prios.insert(wayPrio[i]);
+    for (TypeId type=0; type<wayPrio.size(); type++) {
+      prios.insert(wayPrio[type]);
     }
 
     for (size_t level=0;
-        level<wayTypeSets.size();
+        level<maxLevel;
         ++level) {
       for (std::set<size_t>::const_iterator prio=prios.begin();
           prio!=prios.end();
           ++prio) {
         TypeSet typeSet(*typeConfig);
 
-        for (TypeId type=0; type<wayLineStyles.size(); type++) {
+        for (TypeId type=0; type<wayPrio.size(); type++) {
           if (!typeConfig->GetTypeInfo(type).CanBeWay()) {
             continue;
           }
 
-          if (wayPrio[type]==*prio &&
-              MagToLevel(wayMag[type])<=level) {
-            typeSet.SetType(type);
+          if (wayPrio[type]==*prio) {
+            if (HasStyle(wayLineStyles[type],level)) {
+              typeSet.SetType(type);
+            }
+            else if (HasStyle(wayRefLabelStyles[type],level)) {
+              typeSet.SetType(type);
+            }
+            else if (HasStyle(wayNameLabelStyles[type],level)) {
+              typeSet.SetType(type);
+            }
           }
         }
 
@@ -448,26 +494,47 @@ namespace osmscout {
 
   void StyleConfig::PostprocessAreas()
   {
+    CleanupStyles(areaFillStyles);
+    CleanupStyles(areaSymbolStyles);
+    CleanupStyles(areaLabelStyles);
+    CleanupStyles(areaIconStyles);
+
     size_t maxLevel=0;
-    for (size_t i=0; i<areaFillStyles.size(); i++) {
-      maxLevel=std::max(maxLevel,MagToLevel(areaMag[i]));
+    for (TypeId type=0; type<=typeConfig->GetMaxTypeId(); type++) {
+      if (!typeConfig->GetTypeInfo(type).CanBeArea()) {
+        continue;
+      }
+
+      maxLevel=std::max(maxLevel,areaFillStyles[type].size());
+      maxLevel=std::max(maxLevel,areaSymbolStyles[type].size());
+      maxLevel=std::max(maxLevel,areaLabelStyles[type].size());
+      maxLevel=std::max(maxLevel,areaIconStyles[type].size());
     }
 
     areaTypeSets.reserve(maxLevel);
 
-    for (size_t i=0; i<maxLevel; i++) {
+    for (size_t type=0; type<maxLevel; type++) {
       areaTypeSets.push_back(TypeSet(*typeConfig));
     }
 
     for (size_t level=0;
-        level<areaTypeSets.size();
+        level<maxLevel;
         ++level) {
       for (TypeId type=0; type<areaFillStyles.size(); type++) {
         if (!typeConfig->GetTypeInfo(type).CanBeArea()) {
           continue;
         }
 
-        if (MagToLevel(areaMag[type])<=level) {
+        if (HasStyle(areaFillStyles[type],level)) {
+          areaTypeSets[level].SetType(type);
+        }
+        else if (HasStyle(areaSymbolStyles[type],level)) {
+          areaTypeSets[level].SetType(type);
+        }
+        else if (HasStyle(areaLabelStyles[type],level)) {
+          areaTypeSets[level].SetType(type);
+        }
+        else if (HasStyle(areaIconStyles[type],level)) {
           areaTypeSets[level].SetType(type);
         }
       }
@@ -486,170 +553,306 @@ namespace osmscout {
     return typeConfig;
   }
 
-  StyleConfig& StyleConfig::SetNodeSymbolStyle(TypeId type,
-                                               const SymbolStyle& style)
-  {
-    ReserveSpaceForNodeType(type);
-
-    delete nodeSymbolStyles[type];
-    nodeSymbolStyles[type]=new SymbolStyle(style);
-
-    return *this;
-  }
-
-  StyleConfig& StyleConfig::SetNodeLabelStyle(TypeId type,
-                                              const LabelStyle& style)
-  {
-    ReserveSpaceForNodeType(type);
-
-    delete nodeLabelStyles[type];
-    nodeLabelStyles[type]=new LabelStyle(style);
-
-    return *this;
-  }
-
-  StyleConfig& StyleConfig::SetNodeRefLabelStyle(TypeId type,
-                                                 const LabelStyle& style)
-  {
-    ReserveSpaceForNodeType(type);
-
-    delete nodeRefLabelStyles[type];
-    nodeRefLabelStyles[type]=new LabelStyle(style);
-
-    return *this;
-  }
-
-  StyleConfig& StyleConfig::SetNodeIconStyle(TypeId type,
-                                             const IconStyle& style)
-  {
-    ReserveSpaceForNodeType(type);
-
-    delete nodeIconStyles[type];
-    nodeIconStyles[type]=new IconStyle(style);
-
-    return *this;
-  }
-
   StyleConfig& StyleConfig::SetWayPrio(TypeId type, size_t prio)
   {
-    ReserveSpaceForWayType(type);
-
     wayPrio[type]=prio;
 
     return *this;
   }
 
-  StyleConfig& StyleConfig::SetWayMag(TypeId type, Mag mag)
+  template<typename S>
+  void GetMatchingStyles(const TypeConfig& typeConfig,
+                         const StyleFilter& filter,
+                         std::vector<std::vector<Ref<S> > >& allStyles,
+                         std::list<Ref<S> >& matchingStyles)
   {
-    ReserveSpaceForWayType(type);
+    // Create style, if not available yet
+    for (TypeId type=0;
+        type<=typeConfig.GetMaxTypeId();
+        type++) {
+      if (!filter.HasType(type)) {
+        continue;
+      }
 
-    wayMag[type]=mag;
+      size_t maxLevel;
 
-    return *this;
+      if (filter.HasMaxLevel()) {
+        maxLevel=filter.GetMaxLevel()+1;
+      }
+      else {
+        maxLevel=filter.GetMinLevel();
+      }
+
+      assert(type<allStyles.size());
+
+      if (allStyles[type].size()<maxLevel+1) {
+        size_t oldSize=allStyles[type].size();
+        Ref<S> originalValue;
+
+        if (oldSize>0) {
+          originalValue=allStyles[type][oldSize-1];
+        }
+        else {
+          originalValue=new S();
+        }
+
+        allStyles[type].resize(maxLevel+1);
+
+        for (size_t i=oldSize; i<allStyles[type].size(); i++) {
+          allStyles[type][i]=new S(*originalValue);
+        }
+
+        if (filter.HasMaxLevel()) {
+          allStyles[type][filter.GetMaxLevel()+1]=new S();
+        }
+      }
+    }
+
+    for (TypeId type=0;
+        type<=typeConfig.GetMaxTypeId();
+        type++) {
+      if (!filter.HasType(type)) {
+        continue;
+      }
+
+      size_t minIndex=filter.GetMinLevel();
+      size_t maxIndex;
+
+      if (filter.HasMaxLevel()) {
+        maxIndex=filter.GetMaxLevel();
+      }
+      else {
+        maxIndex=allStyles[type].size()-1;
+      }
+
+      for (size_t i=minIndex; i<=maxIndex; i++) {
+        assert(type<allStyles.size());
+        assert(i<allStyles[type].size());
+        assert(allStyles[type][i].Valid());
+        matchingStyles.push_back(allStyles[type][i]);
+      }
+    }
   }
 
-  StyleConfig& StyleConfig::SetWayLineStyle(TypeId type,
-                                            const LineStyle& style)
+  void StyleConfig::GetNodeSymbolStyles(const StyleFilter& filter,
+                                        std::list<SymbolStyleRef>& styles)
   {
-    ReserveSpaceForWayType(type);
+    styles.clear();
 
-    delete wayLineStyles[type];
-    wayLineStyles[type]=new LineStyle(style);
-
-    return *this;
+    GetMatchingStyles(*typeConfig,
+                      filter,
+                      nodeSymbolStyles,
+                      styles);
   }
 
-  StyleConfig& StyleConfig::SetWayRefLabelStyle(TypeId type,
-                                                const LabelStyle& style)
+  void StyleConfig::GetNodeRefLabelStyles(const StyleFilter& filter,
+                                          std::list<LabelStyleRef>& styles)
   {
-    ReserveSpaceForWayType(type);
+    styles.clear();
 
-    delete wayRefLabelStyles[type];
-    wayRefLabelStyles[type]=new LabelStyle(style);
-
-    return *this;
+    GetMatchingStyles(*typeConfig,
+                      filter,
+                      nodeRefLabelStyles,
+                      styles);
   }
 
-  StyleConfig& StyleConfig::SetWayNameLabelStyle(TypeId type,
-                                                 const LabelStyle& style)
+  void StyleConfig::GetNodeNameLabelStyles(const StyleFilter& filter,
+                                           std::list<LabelStyleRef>& styles)
   {
-    ReserveSpaceForWayType(type);
+    styles.clear();
 
-    delete wayNameLabelStyles[type];
-    wayNameLabelStyles[type]=new LabelStyle(style);
-
-    return *this;
+    GetMatchingStyles(*typeConfig,
+                      filter,
+                      nodeLabelStyles,
+                      styles);
   }
 
-  StyleConfig& StyleConfig::SetAreaMag(TypeId type, Mag mag)
+  void StyleConfig::GetNodeIconStyles(const StyleFilter& filter,
+                                      std::list<IconStyleRef>& styles)
   {
-    ReserveSpaceForAreaType(type);
+    styles.clear();
 
-    areaMag[type]=mag;
-
-    return *this;
+    GetMatchingStyles(*typeConfig,
+                      filter,
+                      nodeIconStyles,
+                      styles);
   }
 
-  StyleConfig& StyleConfig::SetAreaFillStyle(TypeId type,
-                                             const FillStyle& style)
+  void StyleConfig::GetWayLineStyles(const StyleFilter& filter,
+                                     std::list<LineStyleRef>& styles)
   {
-    ReserveSpaceForAreaType(type);
+    styles.clear();
 
-    delete areaFillStyles[type];
-    areaFillStyles[type]=new FillStyle(style);
-
-    return *this;
+    GetMatchingStyles(*typeConfig,
+                      filter,
+                      wayLineStyles,
+                      styles);
   }
 
-  StyleConfig& StyleConfig::SetAreaLabelStyle(TypeId type,
-                                              const LabelStyle& style)
+  void StyleConfig::GetWayRefLabelStyles(const StyleFilter& filter,
+                                         std::list<LabelStyleRef>& styles)
   {
-    ReserveSpaceForAreaType(type);
+    styles.clear();
 
-    delete areaLabelStyles[type];
-    areaLabelStyles[type]=new LabelStyle(style);
-
-    return *this;
+    GetMatchingStyles(*typeConfig,
+                      filter,
+                      wayRefLabelStyles,
+                      styles);
   }
 
-  StyleConfig& StyleConfig::SetAreaSymbolStyle(TypeId type,
-                                               const SymbolStyle& style)
+  void StyleConfig::GetWayNameLabelStyles(const StyleFilter& filter, std::list<LabelStyleRef>& styles)
   {
-    ReserveSpaceForAreaType(type);
+    styles.clear();
 
-    delete areaSymbolStyles[type];
-    areaSymbolStyles[type]=new SymbolStyle(style);
-
-    return *this;
+    GetMatchingStyles(*typeConfig,
+                      filter,
+                      wayNameLabelStyles,
+                      styles);
   }
 
-  StyleConfig& StyleConfig::SetAreaIconStyle(TypeId type,
-                                             const IconStyle& style)
+  void StyleConfig::GetAreaFillStyles(const StyleFilter& filter, std::list<FillStyleRef>& styles)
   {
-    ReserveSpaceForAreaType(type);
+    styles.clear();
 
-    delete areaIconStyles[type];
-    areaIconStyles[type]=new IconStyle(style);
+    GetMatchingStyles(*typeConfig,
+                      filter,
+                      areaFillStyles,
+                      styles);
+  }
 
-    return *this;
+  void StyleConfig::GetAreaLabelStyles(const StyleFilter& filter, std::list<LabelStyleRef>& styles)
+  {
+    styles.clear();
+
+    GetMatchingStyles(*typeConfig,
+                      filter,
+                      areaLabelStyles,
+                      styles);
+
+  }
+
+  void StyleConfig::GetAreaSymbolStyles(const StyleFilter& filter, std::list<SymbolStyleRef>& styles)
+  {
+    styles.clear();
+
+    GetMatchingStyles(*typeConfig,
+                      filter,
+                      areaSymbolStyles,
+                      styles);
+
+  }
+
+  void StyleConfig::GetAreaIconStyles(const StyleFilter& filter, std::list<IconStyleRef>& styles)
+  {
+    styles.clear();
+
+    GetMatchingStyles(*typeConfig,
+                      filter,
+                      areaIconStyles,
+                      styles);
+
   }
 
   void StyleConfig::GetNodeTypesWithMaxMag(double maxMag,
                                            TypeSet& types) const
   {
-    types=nodeTypeSets[std::min(MagToLevel(maxMag),nodeTypeSets.size()-1)];
+    if (!nodeTypeSets.empty()) {
+      types=nodeTypeSets[std::min(MagToLevel(maxMag),nodeTypeSets.size()-1)];
+    }
   }
 
   void StyleConfig::GetWayTypesByPrioWithMaxMag(double maxMag,
                                              std::vector<TypeSet>& types) const
   {
-    types=wayTypeSets[std::min(MagToLevel(maxMag),wayTypeSets.size()-1)];
+    if (!wayTypeSets.empty()) {
+      types=wayTypeSets[std::min(MagToLevel(maxMag),wayTypeSets.size()-1)];
+    }
   }
 
   void StyleConfig::GetAreaTypesWithMaxMag(double maxMag,
                                            TypeSet& types) const
   {
-    types=areaTypeSets[std::min(MagToLevel(maxMag),areaTypeSets.size()-1)];
+    if (!areaTypeSets.empty()) {
+      types=areaTypeSets[std::min(MagToLevel(maxMag),areaTypeSets.size()-1)];
+    }
+  }
+
+  template<typename S>
+  S* GetStyle(const std::vector<std::vector<Ref<S> > >& styles,
+              TypeId type,
+              size_t level)
+  {
+    if (type>=styles.size()) {
+      return NULL;
+    }
+
+    size_t size=styles[type].size();
+
+    if (level<size) {
+      return styles[type][level];
+    }
+    else if (size>0) {
+      return styles[type][size-1];
+    }
+    else {
+      return NULL;
+    }
+  }
+
+  SymbolStyle* StyleConfig::GetNodeSymbolStyle(TypeId type, size_t level) const
+  {
+    return GetStyle(nodeSymbolStyles,type,level);
+  }
+
+  IconStyle* StyleConfig::GetNodeIconStyle(TypeId type,
+                                           size_t level) const
+  {
+    return GetStyle(nodeIconStyles,type,level);
+  }
+
+  LabelStyle* StyleConfig::GetNodeRefLabelStyle(TypeId type, size_t level) const
+  {
+    return GetStyle(nodeRefLabelStyles,type,level);
+  }
+
+  LabelStyle* StyleConfig::GetNodeLabelStyle(TypeId type, size_t level) const
+  {
+    return GetStyle(nodeLabelStyles,type,level);
+  }
+
+  LineStyle* StyleConfig::GetWayLineStyle(TypeId type, size_t level) const
+  {
+    return GetStyle(wayLineStyles,type,level);
+  }
+
+  LabelStyle* StyleConfig::GetWayRefLabelStyle(TypeId type, size_t level) const
+  {
+    return GetStyle(wayRefLabelStyles,type,level);
+  }
+
+  LabelStyle* StyleConfig::GetWayNameLabelStyle(TypeId type, size_t level) const
+  {
+    return GetStyle(wayNameLabelStyles,type,level);
+  }
+
+  FillStyle* StyleConfig::GetAreaFillStyle(TypeId type, size_t level) const
+  {
+    return GetStyle(areaFillStyles,type,level);
+  }
+
+  LabelStyle* StyleConfig::GetAreaLabelStyle(TypeId type, size_t level) const
+  {
+    return GetStyle(areaLabelStyles,type,level);
+  }
+
+  SymbolStyle* StyleConfig::GetAreaSymbolStyle(TypeId type, size_t level) const
+  {
+    return GetStyle(areaSymbolStyles,type,level);
+  }
+
+  IconStyle* StyleConfig::GetAreaIconStyle(TypeId type, size_t level) const
+  {
+    return GetStyle(areaIconStyles,type,level);
   }
 }
 

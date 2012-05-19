@@ -467,7 +467,7 @@ namespace osmscout {
       }
     }
 
-    std::cerr << "ERROR while loading icon file '" << style.GetPatternName() << "'" << std::endl;
+    std::cerr << "ERROR while loading pattern file '" << style.GetPatternName() << "'" << std::endl;
     style.SetPatternId(std::numeric_limits<size_t>::max());
 
     return false;

@@ -1,714 +1,669 @@
 OSS
-  ORDER WAYS
-    GROUP "highway_motorway", "waterway_river", "waterway_canal", "waterway_drain", "natural_coastline", "_route"
-    GROUP "highway_trunk" 
-    GROUP "highway_primary"
-    GROUP "highway_secondary"
-    GROUP "highway_tertiary"
-    GROUP "highway_motorway_link", "highway_trunk_link", "highway_primary_link", "highway_secondary_link"
-    GROUP "highway_unclassified", "highway_road", "highway_residential"
-    GROUP "railway_rail",
-          "aeroway_runway", "aeroway_taxiway"
-    GROUP "highway_living_street", "highway_service", "highway_bus_guideway",
-          "railway_tram", "railway_light_rail", "railway_subway", "public_transport_platform" 
-    GROUP "highway_track", "highway_pedestrian", "highway_path", "highway_cycleway",
-          "highway_footway", "highway_bridleway", "highway_byway", "highway_construction",
-          "leisure_track",
-	      "waterway_stream","route_ferry"
-    GROUP "highway_steps", "barrier_fence"           
-
-  WAY "highway_motorway" MINMAG continent
-    LINE #809bc0 WITH OUTLINECOLOR #777777 MINWIDTH 0.45mm WIDTH 20m OUTLINE 0.25mm
-    LABEL WITH STYLE contour MINMAG detail
-    REF WITH STYLE plate COLOR #ffffff BGCOLOR #809bc0 BORDERCOLOR #ffffff MINMAG state PRIO 20
-
-  WAY "highway_motorway_link" MINMAG cityOver
-    LINE #809bc0 WITH OUTLINECOLOR #777777 MINWIDTH 0.45mm WIDTH 20m OUTLINE 0.25mm
-    LABEL WITH STYLE contour MINMAG detail
-
-  WAY "highway_trunk" MINMAG county
-    LINE #a8daa8 WITH OUTLINECOLOR #777777 MINWIDTH 0.45mm WIDTH 18m OUTLINE 0.25mm
-    LABEL WITH STYLE contour MINMAG detail
-    REF WITH STYLE plate COLOR #ffffff BGCOLOR #7ec87e BORDERCOLOR #ffffff MINMAG proximity PRIO 20
-
-  WAY "highway_trunk_link" MINMAG cityOver
-    LINE #a8daa8 WITH OUTLINECOLOR #777777 MINWIDTH 0.45mm WIDTH 18m OUTLINE 0.25mm
-    LABEL WITH STYLE contour MINMAG detail
-
-  WAY "highway_primary" MINMAG county
-    LINE #ec989a WITH OUTLINECOLOR #a56769 MINWIDTH 0.4mm WIDTH 14m OUTLINE 0.25mm
-    LABEL WITH STYLE contour MINMAG detail
-    REF WITH STYLE plate COLOR #ffffff BGCOLOR #e46d71 BORDERCOLOR #ffffff MINMAG cityOver PRIO 20
-
-  WAY "highway_primary_link" MINMAG city
-    LINE #ec989a WITH MINWIDTH 0.4mm WIDTH 14m OUTLINE 0.25mm
-    LABEL WITH STYLE contour MINMAG detail
-
-  WAY "highway_secondary" MINMAG proximity
-    LINE #fdd6a4 WITH ALTCOLOR #fdd654 MINWIDTH 0.25mm WIDTH 12m OUTLINE 0.25mm
-    LABEL WITH STYLE contour MINMAG detail
-
-  WAY "highway_secondary_link"MINMAG city
-    LINE #fdd6a4 WITH ALTCOLOR #fdd654 MINWIDTH 0.25mm WIDTH 12m OUTLINE 0.25mm
-    LABEL WITH STYLE contour MINMAG detail
-
-  WAY "highway_tertiary" MINMAG cityOver
-    LINE #fefeb3 WITH ALTCOLOR #fefe73 MINWIDTH 0.25mm WIDTH 10m OUTLINE 0.25mm
-    LABEL WITH STYLE contour MINMAG veryClose
-
-  WAY "highway_unclassified" MINMAG city
-    LINE #ffffff WITH ALTCOLOR #888888 MINWIDTH 0.1mm WIDTH 8m OUTLINE 0.25mm
-    LABEL WITH STYLE contour MINMAG veryClose
-
-  WAY "highway_road" MINMAG cityOver
-    LINE #ffffff WITH ALTCOLOR #888888 MINWIDTH 0.1mm WIDTH 8m OUTLINE 0.25mm
-    LABEL WITH STYLE contour MINMAG veryClose
-
-  WAY "highway_residential" MINMAG city
-    LINE #ffffff WITH ALTCOLOR #888888 MINWIDTH 0.1mm WIDTH 8m OUTLINE 0.25mm
-    LABEL WITH STYLE contour MINMAG veryClose
-
-  WAY "highway_living_street" MINMAG detail
-    LINE #bababa WITH MINWIDTH 0.25mm WIDTH 8m OUTLINE 0.25mm
-    LABEL WITH STYLE contour MINMAG veryClose
-
-  WAY "highway_service" MINMAG close
-    LINE #ffffff WITH ALTCOLOR #888888 MINWIDTH 0.1mm WIDTH 8m OUTLINE 0.25mm
-    LABEL WITH STYLE contour MINMAG veryClose
-
-  AREA "highway_service" MINMAG close
-    FILL #ffffff BORDER #cccccc WIDTH 0.1mm
-    LABEL WITH MINMAG veryClose
-
-  WAY "highway_track" MINMAG veryClose
-    LINE #90570c WITH OUTLINECOLOR #ffffff50 DASH 3,1 MINWIDTH 0.4mm OUTLINE 0.4mm
-    LABEL WITH STYLE contour MINMAG veryClose
-
-  WAY "highway_pedestrian" MINMAG close
-    LINE #ebeaea WITH MINWIDTH 0.1mm WIDTH 8m OUTLINE 0.25mm
-    LABEL WITH STYLE contour MINMAG block
-
-  AREA "highway_pedestrian" MINMAG close
-    FILL #ededed BORDER #c5c5c5 WIDTH 0.1mm
-    LABEL WITH MINMAG block
-
-  NODE "highway_services"
-    LABEL WITH STYLE normal MINMAG close
-
-  AREA "highway_services" MINMAG county
-    FILL #cb9999
-    LABEL WITH MINMAG block
-
-  WAY "highway_bus_guideway" MINMAG detail
-    LINE #90570c WITH MINWIDTH 0.1mm WIDTH 2m
-    LABEL WITH STYLE contour MINMAG close
-
-  WAY "highway_path" MINMAG veryClose
-	LINE #555555 WITH OUTLINECOLOR #ffffff50 DASH 8,2 MINWIDTH 0.25mm OUTLINE 0.25mm
-    LABEL WITH STYLE contour MINMAG close
-
-  WAY "highway_cycleway" MINMAG veryClose
-    LINE #4645fa WITH OUTLINECOLOR #ffffff50 DASH 1,1 MINWIDTH 0.4mm OUTLINE 0.4mm
-    LABEL WITH STYLE contour MINMAG close
-
-  AREA "highway_footway" MINMAG close
-    FILL #ededed BORDER #c5c5c5 WIDTH 0.1mm
-    LABEL WITH MINMAG block
-
-  WAY "highway_footway" MINMAG veryClose
-    LINE #f64762 WITH OUTLINECOLOR #ffffff50 DASH 1,1 MINWIDTH 0.4mm OUTLINE 0.4mm
-    LABEL WITH STYLE contour MINMAG block
-
-  WAY "highway_bridleway" MINMAG veryClose
-    LINE #90570c WITH MINWIDTH 0.1mm WIDTH 2m
-    LABEL WITH STYLE contour MINMAG close
-
-  WAY "highway_byway" MINMAG block
-    LINE #90570c WITH MINWIDTH 0.1mm WIDTH 2m
-    LABEL WITH STYLE contour MINMAG close
-
-  WAY "highway_steps" MINMAG block
-    LINE #fe9897 WITH DASH 0.25,0.25 MINWIDTH 1.25mm
-    LABEL WITH STYLE contour MINMAG close
-
-  WAY "highway_construction" MINMAG close
-    LINE #99cccc WITH MINWIDTH 0.1mm WIDTH 2m
-    LABEL WITH STYLE contour MINMAG close
-
-  NODE "highway_bus_stop"
-    SYMBOL circle #7885b0 4 WITH MINMAG close
-    ICON bus_stop WITH MINMAG block
-
-  NODE "highway_motorway_junction"
-    LABEL WITH STYLE emphasize COLOR #809bc0 MINMAG city
-    REF WITH STYLE plate COLOR #ffffff BGCOLOR #e46d71 BORDERCOLOR #ffffff MINMAG detail PRIO 20
-
-  WAY "railway_rail" MINMAG cityOver
-    LINE #939393 WITH ALTCOLOR #777777 OUTLINECOLOR #b3b3b3 DASH 3,3 GAPCOLOR #ffffff MINWIDTH 0.25mm WIDTH 5m OUTLINE 0.25mm
-    LABEL WITH STYLE contour MINMAG block
-
-  WAY "railway_tram" MINMAG city
-    LINE #444444 WITH MINWIDTH 0.25mm WIDTH 5m
-    LABEL WITH STYLE contour MINMAG block
-
-  WAY "railway_light_rail" MINMAG city
-    LINE #b3b3b3 WITH MINWIDTH 0.25mm WIDTH 5m
-    LABEL WITH STYLE contour MINMAG block
-
-  WAY "railway_subway" MINMAG city
-    LINE #b3b3b3 WITH OUTLINECOLOR #ffffff50 MINWIDTH 0.25mm WIDTH 5m OUTLINE 0.25mm
-    LABEL WITH STYLE contour MINMAG block
-
-  NODE "railway_station"
-    LABEL WITH STYLE emphasize COLOR #8888fd MINMAG close
-    SYMBOL box #7885b0 8 WITH MINMAG close
-
-  AREA "railway_station" MINMAG city
-    FILL #cb4040
-    LABEL WITH STYLE emphasize COLOR #8888fd MINMAG close
-    SYMBOL box #7885b0 8 WITH MINMAG close
-
-  NODE "railway_halt"
-    LABEL WITH STYLE emphasize COLOR #8888fd MINMAG close
-    SYMBOL box #7885b0 8 WITH MINMAG block
-
-  NODE "railway_tram_stop"
-    LABEL WITH STYLE emphasize COLOR #8888fd MINMAG close
-    SYMBOL box #7885b0 8 WITH MINMAG block
-
-  WAY "waterway_stream" MINMAG cityOver
-    LINE #b5d0d0 WITH MINWIDTH 0.25mm WIDTH 2m
-    LABEL WITH STYLE contour MINMAG block
-
-  WAY "waterway_river" MINMAG proximity
-    LINE #b5d0d0 WITH MINWIDTH 0.1mm WIDTH 15m
-    LABEL WITH STYLE contour MINMAG block
-
-  WAY "waterway_canal" MINMAG proximity
-    LINE #b5d0d0 WITH MINWIDTH 0.1mm WIDTH 15m
-    LABEL WITH STYLE contour MINMAG block
-
-  WAY "waterway_drain" MINMAG cityOver
-    LINE #b5d0d0 WITH MINWIDTH 0.1mm WIDTH 3m
-    LABEL WITH STYLE contour MINMAG block
-
-  AREA "waterway_dock" MINMAG proximity
-    FILL #b5d0d0
-    LABEL WITH MINMAG proximity
-
-  AREA "waterway_riverbank" MINMAG proximity
-    FILL #b5d0d0
-    LABEL WITH MINMAG block
-
-  WAY "route_ferry" MINMAG cityOver
-    LINE #0000ff WITH OUTLINECOLOR #ffffff50 DASH 1,1 MINWIDTH 0.5mm WIDTH 2m OUTLINE 0.4mm
-    LABEL WITH STYLE contour MINMAG detail
-
-  WAY "public_transport_platform" MINMAG close
-    LINE #9b9b9c WITH OUTLINECOLOR #887b7b MINWIDTH 0.75mm WIDTH 2m OUTLINE 0.1mm
-    LABEL WITH STYLE contour MINMAG block
-
-  AREA "public_transport_platform" MINMAG close
-    FILL #9b9b9c BORDER #887b7b WIDTH 0.1mm
-    LABEL WITH STYLE normal COLOR #524a4a SIZE 0.8 MINMAG block
-
-  AREA "landuse_farm" MINMAG city
-    FILL #ead8bd
-    LABEL WITH MINMAG close
-
-  AREA "landuse_farmland" MINMAG city
-    FILL #ead8bd
-    LABEL WITH MINMAG close
-
-  AREA "landuse_farmyard_building" MINMAG close
-    FILL #bcbcbc BORDER #887b7b WIDTH 0.1mm
-    LABEL WITH MINMAG close
-
-  AREA "landuse_farmyard" MINMAG city
-    FILL #dcbe92
-    LABEL WITH MINMAG close
-
-  AREA "landuse_quarry" MINMAG county
-    FILL #b3b3b3
-    LABEL WITH MINMAG close
-
-  AREA "landuse_landfill" MINMAG city
-    FILL #b6b591
-    LABEL WITH MINMAG close
-
-  AREA "landuse_basin" MINMAG county
-    FILL #b3d1d4 BORDER #887b7b WIDTH 0.1mm
-    LABEL WITH MINMAG close
-
-  AREA "landuse_reservoir" MINMAG county
-    FILL #b4d5f0
-    LABEL WITH MINMAG close
-
-  AREA "landuse_forest" MINMAG county
-    FILL #8dc56c PATTERN "forest" WITH MINMAG cityOver
-    LABEL WITH STYLE emphasize MINMAG detail
-
-  AREA "landuse_allotments" MINMAG city
-    FILL #c8b084
-    LABEL WITH STYLE emphasize MINMAG close
-
-  AREA "landuse_vineyard" MINMAG city
-    FILL #b3e2a8
-    LABEL WITH MINMAG close
-
-  AREA "landuse_residential" MINMAG county
-    FILL #dcdcdc
-    LABEL WITH MINMAG detail
-
-  AREA "landuse_retail" MINMAG city
-    FILL #feeaea BORDER #c5a0a0 WIDTH 0.1mm
-    LABEL WITH MINMAG detail
-
-  AREA "landuse_commercial" MINMAG city
-    FILL #efc8c8
-    LABEL WITH MINMAG detail
-
-  AREA "landuse_industrial" MINMAG city
-    FILL #dfd1d6
-    LABEL WITH STYLE emphasize MINMAG close
-
-  AREA "landuse_brownfield" MINMAG city
-    FILL #ebd7fe
-    LABEL WITH MINMAG close
-
-  AREA "landuse_grass" MINMAG close
-    FILL #cfeca8
-    LABEL WITH MINMAG close
-
-  AREA "landuse_greenfield" MINMAG city
-    FILL #dcdcc8
-    LABEL WITH MINMAG close
-
-  AREA "landuse_railway" MINMAG city
-    FILL #dcdcc8
-    LABEL WITH MINMAG veryClose
-
-  AREA "landuse_construction" MINMAG city
-    FILL #9d9d6c
-    LABEL WITH MINMAG veryClose
-
-  AREA "landuse_military" MINMAG proximity
-    FILL #fe9898
-    LABEL WITH MINMAG detail
-
-  AREA "landuse_orchard" MINMAG county
-    FILL #cfeca8
-    LABEL WITH MINMAG close
-
-  AREA "landuse_cemetery" MINMAG city
-    FILL #a9caae PATTERN "cemetery" WITH MINMAG detail
-    LABEL WITH MINMAG close
-
-  AREA "landuse_meadow" MINMAG county
-    FILL #cfeca8
-    LABEL WITH MINMAG close
-
-  AREA "landuse_village_green" MINMAG county
-    FILL #cfeca8
-    LABEL WITH MINMAG close
-
-  AREA "landuse_recreation_ground" MINMAG county
-    FILL #bce2ca
-    LABEL WITH MINMAG close
-
-  NODE "natural_peak"
-    SYMBOL triangle #9c5e29 8 WITH MINMAG city
-    LABEL WITH STYLE emphasize COLOR #9c5329 MINMAG detail
-
-  AREA "natural_glacier" MINMAG county
-    FILL #ddecec
-    LABEL WITH MINMAG detail
-
-  AREA "natural_scrub" MINMAG close
-    FILL #b5e2b5 PATTERN "scrub" WITH MINMAG cityOver
-    LABEL WITH MINMAG suburb
-
-  AREA "natural_fell" MINMAG county
-    FILL #f9f9f9
-    LABEL WITH MINMAG detail
-
-  AREA "natural_heath" MINMAG county
-    FILL #ffffc0
-    LABEL WITH MINMAG detail
-
-  AREA "natural_wood" MINMAG county
-    FILL #aed1a0
-    LABEL WITH MINMAG detail
-
-  AREA "natural_marsh" MINMAG county
-    FILL #f7f9f5
-    LABEL WITH MINMAG detail
-
-  AREA "natural_wetland" MINMAG county
-    FILL #f7f9f5
-    LABEL WITH MINMAG detail
-
-  AREA "natural_water"
-    FILL #b5d0d0
-    LABEL WITH MINMAG close
-
-  WAY "natural_coastline" MINMAG world
-    LINE #000000 WITH MINWIDTH 0.25mm WIDTH 1m
-
-  AREA "natural_beach" MINMAG county
-    FILL #eecc55
-    LABEL WITH MINMAG block
-
-  AREA "natural_land" MINMAG county
-    FILL #ffffff
-    LABEL WITH MINMAG detail
-
-  AREA "aeroway_aerodrome" MINMAG cityOver
-    FILL #d5ddbd
-    LABEL WITH MINMAG detail
-
-  AREA "aeroway_terminal" MINMAG cityOver
-    FILL #cc99ff
-    LABEL WITH MINMAG detail
-
-  AREA "aeroway_helipad" MINMAG cityOver
-    FILL #d5ddbd
-    LABEL WITH MINMAG detail
-
-  WAY "aeroway_runway" MINMAG suburb
-    LINE #bbbbcc WITH MINWIDTH 0.5mm WIDTH 20m
-    LABEL WITH STYLE contour MINMAG close
-
-  AREA "aeroway_runway" MINMAG cityOver
-    FILL #bbbbcc
-    LABEL WITH MINMAG close
-
-  WAY "aeroway_taxiway" MINMAG suburb
-    LINE #bbbbcc WITH MINWIDTH 0.5mm WIDTH 15m
-    LABEL WITH STYLE contour MINMAG close
-
-  AREA "aeroway_apron" MINMAG cityOver
-    FILL #e8d1fe
-    LABEL WITH MINMAG detail
-
-  AREA "leisure_building" MINMAG close
-    FILL #b89c9c BORDER #887b7b WIDTH 0.1mm
-    LABEL WITH MINMAG block
-
-  AREA "leisure_sports_centre" MINMAG close
-    FILL #bde3cb
-    LABEL WITH MINMAG close
-
-  AREA "leisure_golf_course" MINMAG county
-    FILL #c7f1a3
-    LABEL WITH MINMAG close
-
-  AREA "leisure_stadium" MINMAG city
-    FILL #33cb98
-    LABEL WITH MINMAG close
-
-  WAY "leisure_track" MINMAG close
-    LINE #bde3cb WITH MINWIDTH 0.25mm WIDTH 3m
-    LABEL WITH STYLE contour MINMAG city
-
-  AREA "leisure_track" MINMAG county
-    FILL #7fdac2
-    LABEL WITH MINMAG close
-
-  AREA "leisure_pitch" MINMAG county
-    FILL #90d3b9 BORDER #b0b0b0 WIDTH 0.1mm
-    LABEL WITH MINMAG veryClose
-
-  AREA "leisure_water_park" MINMAG county
-	FILL #f1eee8 BORDER #887b7b WIDTH 0.1mm
-    LABEL WITH MINMAG close
-
-  AREA "leisure_marina" MINMAG county
-    FILL #b5d6f1
-    LABEL WITH MINMAG close
-
-  AREA "leisure_fishing" MINMAG county
-    FILL #b5d6f1
-    LABEL WITH MINMAG close
-
-  AREA "leisure_nature_reserve"
-    FILL #abde96
-    LABEL WITH MINMAG region
-
-  AREA "leisure_park"
-    FILL #c6f0cf
-    LABEL WITH MINMAG close
-
-  AREA "leisure_playground" MINMAG close
-    FILL #ccffff
-    LABEL WITH MINMAG close
-
-  AREA "leisure_garden" MINMAG close
-    FILL #ceeca8
-    LABEL WITH MINMAG close
-
-  AREA "leisure_common"
-    FILL #bde3cb
-    LABEL WITH MINMAG close
-
-  AREA "leisure_ice_rink" MINMAG county
-    FILL #b5d6f1
-    LABEL WITH MINMAG close
-
-  AREA "amenity_grave_yard" MINMAG city
-    FILL #bde3cb
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "amenity_hospital_building" MINMAG close
-    FILL #b89c9c BORDER #887b7b WIDTH 0.1mm
-    LABEL WITH STYLE emphasize COLOR #da0092 SIZE 1.1 MINMAG veryClose
-    ICON hospital WITH MINMAG close
-
-  AREA "amenity_hospital" MINMAG city
-    FILL #f0f0d8 BORDER #887b7b WIDTH 0.1mm
-    LABEL WITH STYLE emphasize COLOR #da0092 SIZE 1.1 MINMAG veryClose
-    ICON hospital WITH MINMAG close
-
-  NODE "amenity_hospital"
-    SYMBOL circle #da0092 4 WITH MINMAG close
-    LABEL WITH STYLE emphasize COLOR #da0092 SIZE 1.1 MINMAG veryClose
-    ICON hospital WITH MINMAG close
-
-  AREA "amenity_parking_building" MINMAG close
-    FILL #c4c393 BORDER #887b7b WIDTH 0.1mm
-    ICON parking WITH MINMAG close
-    LABEL WITH STYLE emphasize COLOR #4bb2da SIZE 1.1 MINMAG block
-
-  AREA "amenity_parking" MINMAG close
-    FILL #f6eeb6 BORDER #887b7b WIDTH 0.1mm
-    ICON parking WITH MINMAG close
-    LABEL WITH STYLE emphasize COLOR #4bb2da SIZE 1.1 MINMAG block
-
-  NODE "amenity_parking"
-    SYMBOL circle #4bb2da 4 WITH MINMAG close
-    ICON parking WITH MINMAG close
-    LABEL WITH STYLE emphasize COLOR #4bb2da SIZE 1.1 MINMAG block
-
-  NODE "amenity_pharmacy"
-    ICON pharmacy WITH MINMAG veryClose
-    LABEL WITH STYLE emphasize COLOR #da0092 SIZE 1.1 MINMAG block
-
-  AREA "amenity_post_office_building" MINMAG close
-    FILL #ffcc00 BORDER #887b7b WIDTH 0.1mm
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  AREA "amenity_post_office" MINMAG close
-    FILL #f0f0d8
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  NODE "amenity_post_office"
-    SYMBOL box #ffcc00 8 WITH MINMAG veryClose
-
-  NODE "amenity_post_box"
-    SYMBOL circle #ffcc00 4 WITH MINMAG veryClose
-
-  AREA "amenity_taxi" MINMAG close
-    FILL #d2d2d2
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  AREA "amenity_building" MINMAG close
-    FILL #b89c9c
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  NODE "amenity"
-    SYMBOL circle #b89c9c 4 WITH MINMAG veryClose
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  AREA "amenity" MINMAG close
-    FILL #f0f0d8
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  AREA "tourism_alpine_hut" MINMAG proximity
-    FILL #7172db
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  AREA "tourism_attraction" MINMAG proximity
-    FILL #7172db
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  NODE "tourism_attraction"
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  AREA "tourism_artwork" MINMAG proximity
-    FILL #7172db
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  AREA "tourism_camp_site" MINMAG suburb
-    FILL #7172db
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  AREA "tourism_caravan_site" MINMAG suburb
-    FILL #7172db
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  AREA "tourism_chalet" MINMAG suburb
-    FILL #7172db
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  AREA "tourism_guest_house" MINMAG suburb
-    FILL #7172db
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  AREA "tourism_hotel" MINMAG suburb
-    FILL #7172db
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  AREA "tourism_information" MINMAG suburb
-    FILL #7172db
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  AREA "tourism_motel" MINMAG suburb
-    FILL #7172db
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  AREA "tourism_museum" MINMAG proximity
-    FILL #7172db
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "tourism_picnic_site" MINMAG suburb
-    FILL #7172db
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  AREA "tourism_theme_park" MINMAG proximity
-    FILL #7172db
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "tourism_zoo" MINMAG proximity
-    FILL #7172db
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "historic_castle" MINMAG suburb
-    FILL #9f5eb4
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "historic_monument" MINMAG suburb
-    FILL #9f5eb4
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "historic_memorial" MINMAG suburb
-    FILL #9f5eb4
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG veryClose
-
-  AREA "historic_archaeological_site" MINMAG suburb
-    FILL #9f5eb4
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  AREA "historic_ruins" MINMAG suburb
-    FILL #9f5eb4
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  AREA "historic_battlefield" MINMAG suburb
-    FILL #9f5eb4
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  AREA "historic_wreck" MINMAG suburb
-    FILL #9f5eb4
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG block
-
-  NODE "shop"
-    LABEL WITH MINMAG block
-
-  AREA "shop" MINMAG detail
-    FILL #bca284 BORDER #887b7b WIDTH 0.1mm
-    LABEL WITH MINMAG block
-
-  AREA "military_airfield" MINMAG proximity
-    FILL #f59897
-    LABEL WITH MINMAG city
-
-  AREA "military_bunker" MINMAG proximity
-    FILL #f59897
-    LABEL WITH MINMAG city
-
-  AREA "military_barracks" MINMAG proximity
-    FILL #f59897
-    LABEL WITH MINMAG city
-
-  AREA "military_danger_area" MINMAG proximity
-    FILL #f59897
-    LABEL WITH MINMAG city
-
-  AREA "military_range" MINMAG proximity
-    FILL #f59897
-    LABEL WITH MINMAG city
-
-  AREA "military_naval_base" MINMAG proximity
-    FILL #f59897
-    LABEL WITH MINMAG city
-
-  AREA "sport_building" MINMAG city
-    FILL #b89c9c BORDER #887b7b WIDTH 0.1mm
-    LABEL WITH MINMAG block
-
-  AREA "power_station" MINMAG city
-    FILL #bca9a9
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG  block
-
-  AREA "power_sub_station" MINMAG city
-    FILL #bca9a9
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG  block
-
-  AREA "power_generator" MINMAG close
-    FILL #bca9a9
-    LABEL WITH STYLE emphasize COLOR #000000 SIZE 1.1 MINMAG  block
-
-  AREA "building_garage" MINMAG veryClose
-    FILL #bcbcbc
-
-  AREA "building" MINMAG close
-    FILL #bcbcbc BORDER #887b7b WIDTH 0.1mm
-    LABEL WITH STYLE normal COLOR #524a4a SIZE 0.8 MINMAG block
-
-  WAY "barrier_fence" MINMAG veryClose
-    LINE #aaaaaa WITH MINWIDTH 0.1mm WIDTH 0.5m
+ ORDER WAYS
+  GROUP "highway_motorway", "waterway_river", "waterway_canal", "waterway_drain", "natural_coastline", "_route"
+  GROUP "highway_trunk" 
+  GROUP "highway_primary"
+  GROUP "highway_secondary"
+  GROUP "highway_tertiary"
+  GROUP "highway_motorway_link", "highway_trunk_link", "highway_primary_link", "highway_secondary_link"
+  GROUP "highway_unclassified", "highway_road", "highway_residential"
+  GROUP "railway_rail",
+     "aeroway_runway", "aeroway_taxiway"
+  GROUP "highway_living_street", "highway_service", "highway_bus_guideway",
+     "railway_tram", "railway_light_rail", "railway_subway", "public_transport_platform" 
+  GROUP "highway_track", "highway_pedestrian", "highway_path", "highway_cycleway",
+     "highway_footway", "highway_bridleway", "highway_byway", "highway_construction",
+     "leisure_track",
+	   "waterway_stream","route_ferry"
+  GROUP "highway_steps", "barrier_fence"      
+
+ // -------------------------------------------------------
+ //
+ // Synthetic
+ //
+
+ /*
+ NODE "internal_start"
+  ICON { name: start;}
+
+ NODE "internal_target"
+  ICON { name: target;} */
+
+ [MAG world-] {
+   [TYPE "_route"] WAY {color: #ff000088; displayWidth: 1.5mm; }
+ }
+
+ // -------------------------------------------------------
+ //
+ // natural_*
+ //
+
+ [MAG world-] {
+   [TYPE "natural_coastline"] WAY {color: #000000; displayWidth: 0.25mm;}
+ }
+
+ [MAG county-] {
+   [TYPE "natural_glacier"] AREA { color: #ddecec; }
+   [TYPE "natural_fell"] AREA { color: #f9f9f9; }
+   [TYPE "natural_heath"] AREA { color: #ffffc0; }
+   [TYPE "natural_wood"] AREA { color: #aed1a0; }
+   [TYPE "natural_marsh", "natural_wetland"] AREA { color: #f7f9f5; }
+   [TYPE "natural_water"] AREA { color: #b5d0d0; }
+   [TYPE "natural_beach"] AREA { color: #eecc55; }
+   [TYPE "natural_land"] AREA { color: #ffffff; }
+   [TYPE "natural_scrub"] AREA { color: #b5e2b5; pattern: "scrub"; patternMinMag: cityOver; }
+ }
+ 
+ [MAG detail-] {
+   [TYPE "natural_glacier",
+         "natural_fell",
+         "natural_heath",
+         "natural_wood",
+         "natural_scrub",
+         "natural_marsh",
+         "natural_wetland",
+         "natural_water",
+         "natural_beach",
+         "natural_land"]
+     AREA.LABEL { style: normal; }
    
-  NODE "place_continent"
-    LABEL WITH STYLE emphasize MINMAG world MAXMAG city PRIO 1
+   [TYPE "natural_peak"] NODE.LABEL { style: emphasize; color: #9c5329;} 
+ }  
 
-  NODE "place_country"
-    LABEL WITH STYLE emphasize MINMAG stateOver MAXMAG city PRIO 2
+ [MAG city-] {
+   [TYPE "natural_peak"] NODE.SYMBOL { style: triangle; color: #9c5e29; size: 8; }
+ }  
 
-  NODE "place_state"
-    LABEL WITH STYLE emphasize SIZE 1.7 MINMAG state MAXMAG county FADE AT state PRIO 3
+ // -------------------------------------------------------
+ //
+ // waterway_*
+ //
+ 
+ [MAG proximity-] {
+   [TYPE "waterway_river",
+         "waterway_canal"]
+     WAY {color: #b5d0d0; displayWidth: 0.1mm; width: 15m;}
+  
+   [TYPE "waterway_dock",
+         "waterway_riverbank"]
+     AREA { color: #b5d0d0; }
+     AREA.LABEL { style: normal;}
+  }  
 
-  NODE "place_region"
-    LABEL WITH STYLE emphasize MINMAG region MAXMAG city PRIO 4
+ [MAG cityOver-] {
+   [TYPE "waterway_stream"] WAY {color: #b5d0d0; displayWidth: 0.25mm; width: 2m;}
+   [TYPE "waterway_drain"] WAY {color: #b5d0d0; displayWidth: 0.1mm; width: 3m;}
+ }
 
-  NODE "place_county"
-    LABEL WITH STYLE emphasize MINMAG county MAXMAG city PRIO 5
+ [MAG block-] {
+   [TYPE "waterway_stream",
+         "waterway_drain",
+         "waterway_river",
+         "waterway_canal"]
+     WAY.LABEL { style: contour;}
 
-  NODE "place_city"
-    LABEL WITH STYLE emphasize SIZE 1.3 MINMAG stateOver MAXMAG city FADE AT county PRIO 6
+   [TYPE "waterway_riverbank"]
+     AREA.LABEL { style: normal;}
+ }    
 
-  NODE "place_town"
-    LABEL WITH STYLE emphasize SIZE 1.2 MINMAG region MAXMAG city FADE AT region PRIO 7
+ // -------------------------------------------------------
+ //
+ // highway_*, railway_*, route_ferry
+ //
+  
+ [TYPE "highway_motorway",
+       "highway_motorway_link",
+       "highway_trunk",
+       "highway_trunk_link",
+       "highway_primary",
+       "highway_primary_link",
+       "highway_secondary",
+       "highway_secondary_link",
+       "highway_tertiary",
+       "highway_road",
+       "highway_unclassified",
+       "highway_residential",
+       "highway_service",
+       "highway_living_street",
+       "highway_pedestrian"] WAY {outline: 0.25mm;}
+  
+ [MAG continent-] { 
+   [TYPE "highway_motorway"] WAY { color: #809bc0; outlineColor: #777777; displayWidth: 0.45mm; width: 20m;}
+ }   
 
-  NODE "place_village"
-    LABEL WITH STYLE emphasize SIZE 1.2 MINMAG cityOver MAXMAG veryClose FADE AT suburb PRIO 8
+ [MAG county-] { 
+   [TYPE "highway_trunk"] WAY { color: #a8daa8; outlineColor: #777777; displayWidth: 0.45mm; width: 18m;}
+   [TYPE "highway_primary"] WAY { color: #ec989a; outlineColor: #a56769; displayWidth: 0.4mm; width: 14m; }
+   [TYPE "highway_services"] AREA { color: #cb9999; }
+ }
+ 
+ [MAG proximity-] {
+   [TYPE "highway_secondary"] WAY { color: #fdd6a4; outlineColor: #bfbfbf; altColor: #fdd654; displayWidth: 0.25mm; width: 12m; }
+ }
 
-  NODE "place_hamlet"
-    LABEL WITH STYLE emphasize SIZE 1.0 MINMAG city MAXMAG veryClose FADE AT city PRIO 9
+ [MAG cityOver-] {
+   [TYPE "highway_motorway_link"] WAY { color: #809bc0; outlineColor: #777777; displayWidth: 0.45mm; width: 20m; }
+   [TYPE "highway_trunk_link"] WAY { color: #a8daa8; outlineColor: #777777; displayWidth: 0.45mm; width: 18m; }
+   [TYPE "highway_tertiary"] WAY { color: #fefeb3; outlineColor: #bfbfbf; altColor: #fefe73; displayWidth: 0.25mm; width: 10m; }
+   [TYPE "highway_road"] WAY { color: #ffffff; outlineColor: #bfbfbf; altColor: #888888; displayWidth: 0.1mm; width: 8m; }
+   [TYPE "railway_rail"] WAY {color: #939393; altColor: #777777; outlineColor: #b3b3b3; dash: 3,3; gapColor: #ffffff; displayWidth: 0.25mm;width: 5m; outline: 0.25mm;}
+   [TYPE "route_ferry"] WAY {color: #0000ff; outlineColor: #ffffff50; dash: 1,1; displayWidth: 0.5mm; width: 2m; outline: 0.4mm;}
+ }   
 
-  NODE "place_suburb"
-    LABEL WITH STYLE emphasize SIZE 1.3 MINMAG cityOver MAXMAG veryClose FADE AT city PRIO 10
+ [MAG city-] {
+   [TYPE "highway_primary_link"] WAY { color: #ec989a; outlineColor: #777777; displayWidth: 0.4mm; width: 14m; }
+   [TYPE "highway_secondary_link"] WAY { color: #fdd6a4; outlineColor: #777777; altColor: #fdd654; displayWidth: 0.25mm; width: 12m; }
+   [TYPE "highway_unclassified",
+         "highway_residential"] WAY { color: #ffffff; outlineColor: #bfbfbf; altColor: #999999; displayWidth: 0.1mm; width: 8m; }
+         
+   [TYPE "railway_tram"] WAY {color: #444444; displayWidth: 0.25mm; width: 5m;}
+   [TYPE "railway_light_rail"] WAY {color: #b3b3b3; displayWidth: 0.25mm; width: 5m;}
+   [TYPE "railway_subway"] WAY {color: #b3b3b3; outlineColor: #ffffff50; displayWidth: 0.25mm; width: 5m; outline: 0.25mm;}
+   
+   [TYPE "railway_station"] AREA { color: #cb4040; }
+ }
 
-  NODE "place_locality"
-    LABEL WITH STYLE emphasize SIZE 1.1 MINMAG close PRIO 11
+ [MAG detail-] {
+   [TYPE "highway_service"] WAY { color: #ffffff; outlineColor: #bfbfbf; altColor: #999999; displayWidth: 0.1mm; width: 8m; }
+   [TYPE "highway_living_street"] WAY { color: #bababa; outlineColor: #bfbfbf; displayWidth: 0.25mm; width: 8m;}
+   [TYPE "highway_bus_guideway"] WAY {color: #90570c; displayWidth: 0.1mm; width: 2m; }
+ }
+    
+ [MAG close-] {
+   [TYPE "railway_station"] NODE.SYMBOL { style: box; color: #7885b0; size: 8; }
+   [TYPE "highway_bus_stop"] NODE.ICON { name: bus_stop;}
+                             NODE.SYMBOL { style: circle; color: #7885b0; size: 4; }
+ 
+   [TYPE "highway_construction"] WAY {color: #99cccc; displayWidth: 0.1mm; width: 2m;}
+  
+   [TYPE "highway_pedestrian"] WAY {color: #ebeaea; displayWidth: 0.1mm; width: 8m; }
+                               AREA { color: #ededed; borderColor: #c5c5c5; borderWidth: 0.1mm; }
 
-  NODE "place_island"
-    LABEL WITH STYLE emphasize MINMAG region MAXMAG veryClose PRIO 1
-  /*
-  NODE "internal_start"
-    ICON start
+   [TYPE "public_transport_platform"] WAY {color: #9b9b9c; outlineColor: #887b7b; displayWidth: 0.75mm; width: 2m; outline: 0.1mm;}
+                                      AREA { color: #9b9b9c; borderColor: #887b7b; borderWidth: 0.1mm; }
 
-  NODE "internal_target"
-    ICON target*/
+   [TYPE "highway_service"] AREA { color: #ffffff; borderColor: #cccccc; borderWidth: 0.1mm; }
+   [TYPE  "highway_footway"] AREA { color: #ededed; borderColor: #c5c5c5; borderWidth: 0.1mm; }
+ }
 
-  WAY "_route" MINMAG world
-    LINE #ff000088 WITH MINWIDTH 0.5mm WIDTH 20m
+ [MAG veryClose-] {  
+   [TYPE "highway_track"] WAY {color: #90570c; outlineColor: #ffffff50; dash: 3,1; displayWidth: 0.4mm;  outline: 0.4mm;}
+   [TYPE "highway_pedestrian"] WAY {color: #555555; outlineColor: #ffffff50; dash: 8,2; displayWidth: 0.25mm; outline: 0.25mm;}
+   [TYPE "highway_path"] WAY {color: #4645fa; outlineColor: #ffffff50; dash: 1,1; displayWidth: 0.4mm; outline: 0.4mm; }
+   [TYPE "highway_cycleway"] WAY {color: #f64762; outlineColor: #ffffff50; dash: 1,1; displayWidth: 0.4mm; outline: 0.4mm; }
+   [TYPE "highway_bridleway"] WAY {color: #90570c; displayWidth: 0.1mm; width: 2m; }
+  }
+
+ [MAG block-] {
+   [TYPE "railway_halt"] NODE.SYMBOL { style: box; color: #7885b0; size: 8;}
+
+   [TYPE "railway_tram_stop"] NODE.SYMBOL { style: box; color: #7885b0; size: 8;}
+
+   [TYPE "highway_byway"] WAY {color: #90570c; displayWidth: 0.1mm; width: 2m; }
+
+   [TYPE "highway_steps"] WAY {color: #fe9897; dash: 0.25,0.25; displayWidth: 1.25mm;}
+ }
+
+ // WAY.REF
+
+ [MAG state-] {
+   [TYPE "highway_motorway"] WAY.REF { style: plate; color: #ffffff; backgroundColor: #809bc0; borderColor: #ffffff; priority: 20;}
+ }
+
+ [MAG proximity-] {
+   [TYPE "highway_trunk"] WAY.REF { style: plate; color: #ffffff; backgroundColor: #7ec87e; borderColor: #ffffff; priority: 20;}
+ }
+
+ [MAG cityOver-] {
+   [TYPE "highway_primary"] WAY.REF { style: plate; color: #ffffff; backgroundColor: #e46d71; borderColor: #ffffff; priority: 20;}
+ }
+
+ [MAG detail-] {
+   [TYPE "highway_motorway_junction"] WAY.REF { style: plate; color: #ffffff; backgroundColor: #e46d71; borderColor: #ffffff; priority: 20;}
+ }
+
+ // Labels
+
+ [MAG city-] {
+   [TYPE "highway_motorway_junction"] NODE.LABEL { style: emphasize; color: #809bc0;}
+ }
+
+ [MAG detail-] {
+   [TYPE "highway_motorway",
+         "highway_motorway_link",
+         "highway_trunk",
+         "highway_trunk_link",
+         "highway_primary",
+         "highway_primary_link",
+         "highway_secondary",
+         "highway_secondary_link",
+         "route_ferry"] WAY.LABEL{ style: contour;}
+ }
+ 
+ [MAG close-] {
+   [TYPE "railway_station"] NODE.LABEL { style: emphasize; color: #8888fd;}
+   [TYPE "railway_halt"] NODE.LABEL { style: emphasize; color: #8888fd;}
+   [TYPE "railway_tram_stop"] NODE.LABEL { style: emphasize; color: #8888fd;}
+   [TYPE "highway_services"] NODE.LABEL {style: normal; }
+
+   [TYPE "highway_construction"] WAY.LABEL { style: contour;}
+ }
+ 
+ [MAG veryClose-] {
+   [TYPE "highway_tertiary",
+         "highway_unclassified",
+         "highway_road",
+         "highway_residential",
+         "highway_living_street",
+         "highway_service",
+         "highway_track",
+         "leisure_track"] WAY.LABEL { style: contour;}
+
+   [TYPE "highway_service"] AREA.LABEL { style: normal;}
+ }
+
+ [MAG block-] {
+   [TYPE "highway_bus_guideway", 
+         "highway_pedestrian",
+         "highway_path",
+         "highway_cycleway",
+         "highway_footway",
+         "highway_bridleway",
+         "highway_byway",
+         "highway_steps",
+         "railway_rail",
+         "railway_tram",
+         "railway_light_rail",
+         "railway_subway",
+         "public_transport_platform"] WAY.LABEL { style: contour;}
+    
+   [TYPE "highway_pedestrian",
+         "highway_services",
+         "highway_footway",
+         "leisure_building",
+         "sport_building",
+         "shop"] AREA.LABEL { style: normal;}
+
+   [TYPE "public_transport_platform"] AREA.LABEL { style: normal; color: #524a4a; size: 0.8;}
+ }
+    
+ // -------------------------------------------------------
+ //
+ // Landuse
+ //
+
+ [MAG county-] {
+   [TYPE "landuse_quarry"] AREA { color: #b3b3b3; }
+   [TYPE "landuse_forest"] AREA { color: #8dc56c; pattern: "forest"; patternMinMag: cityOver; }
+   [TYPE "landuse_basin"] AREA { color: #b3d1d4; borderColor: #887b7b; borderWidth: 0.1mm; }
+   [TYPE "landuse_reservoir"] AREA { color: #b4d5f0; }
+   [TYPE "landuse_residential"] AREA { color: #dcdcdc; }
+   [TYPE "landuse_recreation_ground"] AREA { color: #bce2ca; }
+
+   [TYPE "landuse_orchard",
+         "landuse_meadow",
+         "landuse_village_green"] AREA { color: #cfeca8; }
+ }
+
+ [MAG proximity-] {    
+   [TYPE "landuse_military"] AREA { color: #fe9898; }
+ }
+ 
+ [MAG city-] {
+   [TYPE "landuse_farm",
+         "landuse_farmland"] AREA { color: #ead8bd; }
+
+   [TYPE "landuse_farmyard"] AREA { color: #dcbe92; }
+   [TYPE "landuse_landfill"] AREA { color: #b6b591; }
+   [TYPE "landuse_allotments"] AREA { color: #c8b084; }
+   [TYPE "landuse_vineyard"] AREA { color: #b3e2a8; }
+   [TYPE "landuse_retail"] AREA { color: #feeaea; borderColor: #c5a0a0; borderWidth: 0.1mm; }
+   [TYPE "landuse_commercial"] AREA { color: #efc8c8; }
+   [TYPE "landuse_industrial"] AREA { color: #dfd1d6; }
+   [TYPE "landuse_brownfield"] AREA { color: #ebd7fe; }
+   [TYPE "landuse_greenfield"] AREA { color: #dcdcc8; }
+   [TYPE "landuse_railway"] AREA { color: #dcdcc8; }
+   [TYPE "landuse_construction"] AREA { color: #9d9d6c; }
+   [TYPE "landuse_cemetery"] AREA { color: #a9caae; pattern: "cemetery"; patternMinMag: detail; }
+ }
+
+ [MAG close-] {
+   [TYPE "landuse_grass"] AREA { color: #cfeca8; }
+
+   [TYPE "landuse_farmyard_building"] AREA { color: #bcbcbc; borderColor: #887b7b; borderWidth: 0.1mm; }
+ }
+
+ // Labels
+ [MAG detail-] {  
+   [TYPE "landuse_residential",
+         "landuse_retail",
+         "landuse_brownfield",
+         "landuse_commercial",
+        "landuse_military"] AREA.LABEL { style: normal; }
+
+   [TYPE "landuse_forest"] AREA.LABEL { style: emphasize;}
+ }
+ 
+ [MAG close-] {   
+   [TYPE "landuse_farm",
+         "landuse_farmland",
+         "landuse_farmyard_building",
+         "landuse_farmyard",
+         "landuse_quarry",
+         "landuse_landfill",
+         "landuse_basin",
+         "landuse_reservoir",
+         "landuse_vineyard",
+         "landuse_grass",
+         "landuse_greenfield",
+         "landuse_orchard",
+         "landuse_cemetery",
+         "landuse_meadow",
+         "landuse_village_green",
+         "landuse_recreation_ground"] AREA.LABEL { style: normal;}
+
+   [TYPE "landuse_industrial",
+         "landuse_allotments"] AREA.LABEL { style: emphasize;}
+ }
+ 
+ [MAG veryClose-] {   
+   [TYPE "landuse_railway",
+         "landuse_construction"] AREA.LABEL { style: normal;}
+ }
+    
+ // -------------------------------------------------------
+ //
+ // Man made:
+ // amenity, tourism, history,Leisure, military, buildings, power, barrier  
+ //
+
+ [MAG county-] {
+   [TYPE "leisure_golf_course"] AREA { color: #c7f1a3; }
+   [TYPE "leisure_track"] AREA { color: #7fdac2; }
+   [TYPE "leisure_pitch"]AREA { color: #90d3b9; borderColor: #b0b0b0; borderWidth: 0.1mm; }
+   [TYPE "leisure_water_park"] AREA { color: #f1eee8; borderColor: #887b7b; borderWidth: 0.1mm; }
+   [TYPE "leisure_nature_reserve"] AREA { color: #abde96; }
+   [TYPE "leisure_park"] AREA { color: #c6f0cf; }
+   [TYPE "leisure_common"] AREA { color: #bde3cb; }
+   
+   [TYPE "leisure_marina",
+         "leisure_fishing",
+         "leisure_ice_rink"] AREA { color: #b5d6f1; }
+ }
+
+ [MAG proximity-] {
+   [TYPE "military_airfield",
+         "military_bunker",
+         "military_barracks",
+         "military_danger_area",
+         "military_range",
+         "military_naval_base"] AREA { color: #f59897; }
+
+   [TYPE "tourism_theme_park",
+         "tourism_zoo",
+         "historic_archaeological_site",
+         "historic_battlefield"] AREA { color: #7172db; }
+ }
+
+ [MAG city-] {
+   [TYPE "leisure_stadium"] AREA { color: #33cb98; }
+   [TYPE "amenity_grave_yard"] AREA { color: #bde3cb; }
+   [TYPE "sport_building"] AREA { color: #b89c9c; borderColor: #887b7b; borderWidth: 0.1mm; }
+
+   [TYPE "power_station",
+         "power_sub_station"] AREA { color: #bca9a9; }
+ }
+
+ [MAG detail-] {
+   [TYPE "shop"] AREA { color: #bca284; borderColor: #887b7b; borderWidth: 0.1mm; }
+ }
+
+ [MAG suburb-] {
+   [TYPE "tourism_alpine_hut",
+         "tourism_attraction",
+         "tourism_artwork",
+         "tourism_camp_site",
+         "tourism_caravan_site",
+         "tourism_chalet",
+         "tourism_guest_house",
+         "tourism_hotel",
+         "tourism_information",
+         "tourism_motel",
+         "tourism_museum",
+         "tourism_picnic_site",
+         "historic_castle",
+         "historic_monument",
+         "historic_memorial",
+         "historic_ruins",
+         "historic_wreck"] AREA { color: #7172db; }
+ }        
+
+ [MAG close-] {
+   [TYPE "amenity_hospital"] NODE.ICON { name: hospital;}
+                             NODE.SYMBOL { style: circle; color: #da0092; size: 4; }
+
+   [TYPE "amenity_parking"] NODE.SYMBOL { style: circle; color: #4bb2da; size: 4; }
+                            NODE.ICON { name: parking;}
+
+   [TYPE "leisure_building"]AREA { color: #b89c9c; borderColor: #887b7b; borderWidth: 0.1mm; }
+   [TYPE "leisure_sports_centre"] AREA { color: #bde3cb; }
+   [TYPE "leisure_playground"] AREA { color: #ccffff; }
+   [TYPE "leisure_garden"] AREA { color: #ceeca8; }
+   [TYPE "building"] AREA { color: #bcbcbc; borderColor: #887b7b; borderWidth: 0.1mm; }
+
+   [TYPE "amenity_hospital_building"] AREA { color: #b89c9c; borderColor: #887b7b; borderWidth: 0.1mm; }
+ } 
+
+ [MAG city-] {
+   [TYPE "amenity_parking_building"] AREA { color: #c4c393; borderColor: #887b7b; borderWidth: 0.1mm; }
+                                     AREA.ICON { name: parking;}
+
+   [TYPE "amenity_parking"] AREA { color: #f6eeb6; borderColor: #887b7b;borderWidth: 0.1mm; }
+                            AREA.ICON { name: parking;}
+
+   [TYPE "amenity_hospital"] AREA { color: #f0f0d8; borderColor: #887b7b; borderWidth: 0.1mm; }
+   [TYPE "amenity_post_office_building"] AREA { color: #ffcc00; borderColor: #887b7b; borderWidth: 0.1mm; }
+   [TYPE "amenity_post_office"] AREA { color: #f0f0d8; }
+   [TYPE "amenity_taxi"] AREA { color: #d2d2d2; }
+   [TYPE "amenity_building"] AREA { color: #b89c9c; }
+   [TYPE "amenity"] AREA { color: #f0f0d8; }
+   [TYPE "power_generator"] AREA { color: #bca9a9; }
+ }
+ 
+ [MAG close-] {
+   [TYPE "amenity_hospital",
+         "amenity_hospital_building"] AREA.ICON { name: hospital;}
+
+   [TYPE "railway_station"] AREA.SYMBOL { style: box; color: #7885b0; size: 8; }
+ }
+
+ [MAG veryClose-] {
+   [TYPE "amenity_pharmacy"] NODE.ICON { name: pharmacy;}
+
+   [TYPE "amenity_post_box"] NODE.SYMBOL { style: box; color: #ffcc00; size: 4; }
+
+   [TYPE "amenity_post_office"] NODE.SYMBOL { style: box; color: #ffcc00; size: 8; }
+
+   [TYPE "amenity"] NODE.SYMBOL { style: box; color: #b89c9c; size: 4; }
+
+   [TYPE "barrier_fence"] WAY {color: #aaaaaa; displayWidth: 0.1mm; width: 0.5m;}
+
+   [TYPE "leisure_track"] WAY {color: #bde3cb; displayWidth: 0.25mm; width: 3m;}
+
+   [TYPE "building_garage"] AREA { color: #bcbcbc; }
+ }
+
+  // Labels
+
+ [MAG region-] {
+   [TYPE "leisure_nature_reserve"] AREA.LABEL { style: normal;}
+ }
+  
+ [MAG close-]{ 
+   [TYPE "leisure_sports_centre",
+         "leisure_golf_course",
+         "leisure_stadium",
+         "leisure_track",
+         "leisure_water_park",
+         "leisure_marina",
+         "leisure_fishing",
+         "leisure_park",
+         "leisure_playground",
+         "leisure_garden",
+         "leisure_common",
+         "leisure_ice_rink",
+         "military_airfield",
+         "military_bunker",
+         "military_barracks",
+         "military_danger_area",
+         "military_range",
+         "military_naval_base"] AREA.LABEL { style: normal;}
+
+   [TYPE "railway_station"] AREA.LABEL { style: emphasize; color: #8888fd;}
+ }  
+
+ [MAG veryClose-] {
+   [TYPE "amenity_hospital"] NODE.LABEL { style: emphasize; color: #da0092; size: 1.1; }
+
+   [TYPE "leisure_pitch"] AREA.LABEL { style: normal;}
+
+   [TYPE "amenity_hospital_building",
+         "amenity_hospital"] AREA.LABEL { style: emphasize; color: #da0092; size: 1.1;}
+
+   [TYPE "amenity_grave_yard"] AREA.LABEL { style: emphasize; color: #000000; size: 1.1;}
+ } 
+
+ [MAG block-] {
+   [TYPE "amenity_pharmacy"] NODE.LABEL { style: emphasize; color: #da0092; size: 1.1;}
+
+   [TYPE "amenity",
+         "tourism_attraction"] NODE.LABEL { style: emphasize;color: #000000; size: 1.1; }
+
+   [TYPE "shop"] NODE.LABEL {style: normal; }
+
+   [TYPE "amenity_parking"] AREA.LABEL { style: emphasize; color: #4bb2da; size: 1.1; }
+
+   [TYPE "leisure_building",
+         "sport_building",
+         "shop"] AREA.LABEL { style: normal;}
+
+   [TYPE "building"] AREA.LABEL { style: normal; color: #524a4a; size: 0.8; }
+  
+   [TYPE "power_station",
+         "power_sub_station",
+         "power_generator",
+         "tourism_theme_park",
+         "tourism_zoo",
+         "historic_archaeological_site",
+         "historic_battlefield",
+         "tourism_alpine_hut",
+         "tourism_attraction",
+         "tourism_artwork",
+         "tourism_camp_site",
+         "tourism_caravan_site",
+         "tourism_chalet",
+         "tourism_guest_house",
+         "tourism_hotel",
+         "tourism_information",
+         "tourism_motel",
+         "tourism_museum",
+         "tourism_picnic_site",
+         "historic_castle",
+         "historic_monument",
+         "historic_memorial",
+         "historic_ruins",
+         "historic_wreck",
+         "amenity_post_office_building",
+         "amenity_post_office",
+         "amenity_taxi",
+         "amenity_building",
+         "amenity"] AREA.LABEL { style: emphasize; color: #000000; size: 1.1; }
+
+   [TYPE "amenity_parking",
+         "amenity_parking_building"] AREA.LABEL { style: emphasize; color: #4bb2da; size: 1.1; }
+ }
+  
+  
+ // -------------------------------------------------------
+ // 
+ // Places
+ //
+ 
+ [MAG world-city] {
+   [TYPE "place_continent"] NODE.LABEL { style: emphasize; priority: 1; }
+ }  
+
+ [MAG stateOver-city] {
+   [TYPE "place_country"] NODE.LABEL { style: emphasize; priority: 2; }
+ }  
+
+ [MAG state-county] {
+   [TYPE "place_state"] NODE.LABEL { style: emphasize; size: 1.7; scaleMag: state; priority: 3; }
+ }  
+
+ [MAG region-city] {
+   [TYPE "place_region"] NODE.LABEL { style: emphasize; priority: 4; }
+ }
+
+ [MAG county-city] {
+   [TYPE "place_county"] NODE.LABEL { style: emphasize; priority: 5;}
+ }  
+
+ [MAG stateOver-city] {
+   [TYPE "place_city"] NODE.LABEL { style: emphasize; size: 1.3; scaleMag: county; priority: 6;}
+ }  
+
+ [MAG region-city] {
+   [TYPE "place_town"] NODE.LABEL { style: emphasize; size: 1.2; scaleMag: region; priority: 7;}
+ }  
+
+ [MAG cityOver-veryClose] {
+   [TYPE "place_village"] NODE.LABEL { style: emphasize; size: 1.2; scaleMag: suburb; priority: 8;}
+ }  
+
+ [MAG city-veryClose] {
+   [TYPE "place_hamlet"] NODE.LABEL { style: emphasize; size: 1.0; scaleMag: city; priority: 9;}
+ }  
+
+ [MAG cityOver-veryClose] {
+   [TYPE"place_suburb"] NODE.LABEL { style: emphasize; size: 1.3; scaleMag: city; priority: 10;}
+ }  
+
+ [MAG close-] {
+   [TYPE "place_locality"] NODE.LABEL { style: emphasize; size: 1.1; priority: 11;}
+ }  
+
+ [MAG region-veryClose] {
+   [TYPE "place_island"] NODE.LABEL { style: emphasize; priority: 1;}
+ }  
+  
+ // -------------------------------------------------------
+ //
+ // Aeroway
+ // 
+
+ [MAG cityOver-] {
+   [TYPE "aeroway_aerodrome",
+         "aeroway_helipad"] AREA { color: #d5ddbd; }
+
+   [TYPE "aeroway_terminal"] AREA { color: #cc99ff; }
+   [TYPE "aeroway_runway"] AREA { color: #bbbbcc; }
+   [TYPE "aeroway_apron"] AREA { color: #e8d1fe; }
+ }
+ 
+ [MAG suburb-] { 
+   [TYPE "aeroway_runway"] WAY {color: #bbbbcc; displayWidth: 0.5mm; width: 20m;}
+   [TYPE "aeroway_taxiway"] WAY {color: #bbbbcc; displayWidth: 0.5mm; width: 15m;}
+ }  
+
+ [MAG close-] {
+   [TYPE "aeroway_taxiway",
+         "aeroway_runway"] WAY.LABEL { style: contour;}
+
+   [TYPE "aeroway_aerodrome",
+         "aeroway_terminal",
+         "aeroway_helipad",
+         "aeroway_runway",
+         "aeroway_apron"] AREA.LABEL{ style: normal;}
+ } 
 END

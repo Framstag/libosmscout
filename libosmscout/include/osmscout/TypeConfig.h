@@ -435,6 +435,7 @@ namespace osmscout {
     bool GetRelationTypeId(const std::map<TagId,std::string>& tagMap,
                            TypeId &typeId) const;
 
+    TypeId GetTypeId(const std::string& name) const;
     TypeId GetNodeTypeId(const std::string& name) const;
     TypeId GetWayTypeId(const std::string& name) const;
     TypeId GetAreaTypeId(const std::string& name) const;

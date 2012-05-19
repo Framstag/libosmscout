@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <limits>
+#include <list>
 #include <sstream>
 
 #include <osmscout/TypeConfig.h>
@@ -107,7 +108,13 @@ private:
 public:
   Errors  *errors;
 
-static std::string Destring(const char* str)
+typedef std::list<FillStyleRef>   FillStyleList;
+typedef std::list<IconStyleRef>   IconStyleList;
+typedef std::list<LabelStyleRef>  LabelStyleList;
+typedef std::list<LineStyleRef>   LineStyleList;
+typedef std::list<SymbolStyleRef> SymbolStyleList;
+
+inline std::string Destring(const char* str)
 {
   std::string result(str);
 
@@ -120,7 +127,7 @@ static std::string Destring(const char* str)
   return result;
 }
 
-static bool StringToDouble(const char* string, double& value)
+inline bool StringToDouble(const char* string, double& value)
 {
   std::istringstream buffer(string);
 
@@ -131,7 +138,7 @@ static bool StringToDouble(const char* string, double& value)
   return !buffer.fail() && !buffer.bad() && buffer.eof();
 }
 
-static size_t GetHexDigitValue(char c)
+inline size_t GetHexDigitValue(char c)
 {
   if (c>='0' && c<='9') {
     return c-'0';
@@ -143,7 +150,7 @@ static size_t GetHexDigitValue(char c)
   assert(false);
 }
 
-static void ToRGBA(const char* str, Color& color)
+inline void ToRGBA(const char* str, Color& color)
 {
   double r=(16*GetHexDigitValue(str[1])+GetHexDigitValue(str[2]))/255.0;
   double g=(16*GetHexDigitValue(str[3])+GetHexDigitValue(str[4]))/255.0;
@@ -171,27 +178,36 @@ static void ToRGBA(const char* str, Color& color)
 
 	void OSS();
 	void WAYORDER();
-	void STYLE();
+	void STYLE(StyleFilter filter);
 	void WAYGROUP(size_t priority);
-	void NODESTYLE();
-	void WAYSTYLE();
-	void AREASTYLE();
-	void LABELDEF(LabelStyle& style);
-	void REFDEF(LabelStyle& style);
-	void SYMBOLDEF(SymbolStyle& style);
-	void ICONDEF(IconStyle& style);
+	void STYLEFILTER(StyleFilter& filter);
+	void STYLEDEF(StyleFilter filter);
 	void MAG(Mag& mag);
-	void LINEDEF(LineStyle& style);
-	void FILLDEF(FillStyle& style);
+	void NODESTYLEDEF(StyleFilter filter);
+	void WAYSTYLEDEF(StyleFilter filter);
+	void AREASTYLEDEF(StyleFilter filter);
+	void NODELABELSTYLE(StyleFilter filter);
+	void NODEREFSTYLE(StyleFilter filter);
+	void NODESYMBOLSTYLE(StyleFilter filter);
+	void NODEICONSTYLE(StyleFilter filter);
+	void LABELDEF(LabelStyleList& styles);
+	void REFDEF(LabelStyleList& styles);
+	void SYMBOLDEF(SymbolStyleList& styles);
+	void ICONDEF(IconStyleList& styles);
+	void WAYSTYLE(StyleFilter filter);
+	void WAYLABELSTYLE(StyleFilter filter);
+	void WAYREFSTYLE(StyleFilter filter);
+	void LINEDEF(LineStyleList& styles);
+	void AREASTYLE(StyleFilter filter);
+	void AREALABELSTYLE(StyleFilter filter);
+	void AREASYMBOLSTYLE(StyleFilter filter);
+	void AREAICONSTYLE(StyleFilter filter);
+	void FILLDEF(FillStyleList& styles);
 	void COLOR(Color& color);
 	void DOUBLE(double& value);
 	void DISPLAYSIZE(double& value);
 	void MAPSIZE(double& value);
-	void MINMAG(Mag& mag);
 	void LABELSTYLE(LabelStyle::Style& style);
-	void SIZE(double& value);
-	void MAXMAG(Mag& mag);
-	void SCALEMAG(Mag& mag);
 	void INTEGER(size_t& value);
 	void SYMBOLSTYLE(SymbolStyle::Style& style);
 

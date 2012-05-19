@@ -20,6 +20,7 @@
 #include "DatabaseTask.h"
 
 #include <cmath>
+#include <exception>
 #include <iostream>
 
 #if defined(__WIN32__) || defined(WIN32) || defined(__APPLE__)
@@ -181,14 +182,19 @@ void DatabaseTask::Run()
         std::vector<osmscout::TypeSet> wayTypes;
         osmscout::TypeSet              areaTypes;
 
-        styleConfig->GetNodeTypesWithMaxMag(projection.GetMagnification(),
-                                            nodeTypes);
+        try {
+          styleConfig->GetNodeTypesWithMaxMag(projection.GetMagnification(),
+                                              nodeTypes);
 
-        styleConfig->GetWayTypesByPrioWithMaxMag(projection.GetMagnification(),
-                                                 wayTypes);
+          styleConfig->GetWayTypesByPrioWithMaxMag(projection.GetMagnification(),
+                                                   wayTypes);
+        }
+        catch (std::exception& e) {
+          std::cerr << "Exception while fetching style data: " << e.what() << std::endl;
+        }
 
-        styleConfig->GetAreaTypesWithMaxMag(projection.GetMagnification(),
-                                            areaTypes);
+          styleConfig->GetAreaTypesWithMaxMag(projection.GetMagnification(),
+                                              areaTypes);
 
         osmscout::StopClock dataRetrievalTimer;
 
@@ -220,16 +226,21 @@ void DatabaseTask::Run()
 
         cairo_set_tolerance(currentCairo,0.7);
 
-        painter.DrawMap(*styleConfig,
-                        projection,
-                        drawParameter,
-                        data,
-                        currentCairo);
+        try {
+          painter.DrawMap(*styleConfig,
+                          projection,
+                          drawParameter,
+                          data,
+                          currentCairo);
 
-        drawTimer.Stop();
-        overallTimer.Stop();
+          drawTimer.Stop();
+          overallTimer.Stop();
 
-        std::cout << "All: " << overallTimer << " Data: " << dataRetrievalTimer << " Draw: " << drawTimer << std::endl;
+          std::cout << "All: " << overallTimer << " Data: " << dataRetrievalTimer << " Draw: " << drawTimer << std::endl;
+        }
+        catch (std::exception& e) {
+          std::cerr << "Exception while rendering: " << e.what() << std::endl;
+        }
       }
       else {
         std::cout << "Cannot draw map: " << database->IsOpen() << " " << (styleConfig!=NULL) << std::endl;

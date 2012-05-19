@@ -118,6 +118,11 @@ namespace osmscout {
       return a==1.0;
     }
 
+    bool IsVisible() const
+    {
+      return a>0.0;
+    }
+
     Color Lighten(double factor) const
     {
       return Color(r+(1-r)*factor,

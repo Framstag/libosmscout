@@ -146,75 +146,81 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 65;
-	noSym = 65;
+	maxT = 72;
+	noSym = 72;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
 	for (i = 48; i <= 57; ++i) start.set(i, 15);
-	start.set(45, 16);
+	start.set(45, 26);
 	start.set(35, 4);
 	start.set(34, 13);
-	start.set(44, 19);
+	start.set(44, 18);
+	start.set(123, 19);
+	start.set(125, 20);
+	start.set(91, 21);
+	start.set(93, 22);
+	start.set(46, 23);
+	start.set(58, 24);
+	start.set(59, 25);
 		start.set(Buffer::EoF, -1);
 	keywords.set("OSS", 6);
 	keywords.set("END", 7);
 	keywords.set("ORDER", 8);
 	keywords.set("WAYS", 9);
 	keywords.set("GROUP", 10);
-	keywords.set("NODE", 12);
-	keywords.set("WAY", 13);
-	keywords.set("MINMAG", 14);
-	keywords.set("AREA", 15);
-	keywords.set("LINE", 16);
-	keywords.set("WITH", 17);
-	keywords.set("ALTCOLOR", 18);
-	keywords.set("OUTLINECOLOR", 19);
-	keywords.set("DASH", 20);
-	keywords.set("GAPCOLOR", 21);
-	keywords.set("MINWIDTH", 22);
-	keywords.set("WIDTH", 23);
-	keywords.set("OUTLINE", 24);
-	keywords.set("FILL", 25);
-	keywords.set("PATTERN", 26);
-	keywords.set("BORDER", 27);
-	keywords.set("LABEL", 28);
-	keywords.set("COLOR", 29);
-	keywords.set("BGCOLOR", 30);
-	keywords.set("BORDERCOLOR", 31);
-	keywords.set("PRIO", 32);
-	keywords.set("REF", 33);
-	keywords.set("SYMBOL", 34);
-	keywords.set("ICON", 35);
-	keywords.set("STYLE", 36);
-	keywords.set("normal", 37);
-	keywords.set("contour", 38);
-	keywords.set("plate", 39);
-	keywords.set("emphasize", 40);
-	keywords.set("none", 41);
-	keywords.set("box", 42);
-	keywords.set("triangle", 43);
-	keywords.set("circle", 44);
-	keywords.set("MAXMAG", 45);
-	keywords.set("FADE", 46);
-	keywords.set("AT", 47);
-	keywords.set("world", 48);
-	keywords.set("continent", 49);
-	keywords.set("state", 50);
-	keywords.set("stateOver", 51);
-	keywords.set("county", 52);
-	keywords.set("region", 53);
-	keywords.set("proximity", 54);
-	keywords.set("cityOver", 55);
-	keywords.set("city", 56);
-	keywords.set("suburb", 57);
-	keywords.set("detail", 58);
-	keywords.set("close", 59);
-	keywords.set("veryClose", 60);
-	keywords.set("block", 61);
-	keywords.set("mm", 62);
-	keywords.set("m", 63);
-	keywords.set("SIZE", 64);
+	keywords.set("TYPE", 15);
+	keywords.set("MAG", 16);
+	keywords.set("NODE", 19);
+	keywords.set("LABEL", 21);
+	keywords.set("REF", 22);
+	keywords.set("SYMBOL", 23);
+	keywords.set("ICON", 24);
+	keywords.set("WAY", 25);
+	keywords.set("AREA", 26);
+	keywords.set("color", 27);
+	keywords.set("altColor", 30);
+	keywords.set("outlineColor", 31);
+	keywords.set("dash", 32);
+	keywords.set("gapColor", 33);
+	keywords.set("displayWidth", 34);
+	keywords.set("width", 35);
+	keywords.set("outline", 36);
+	keywords.set("pattern", 37);
+	keywords.set("patternMinMag", 38);
+	keywords.set("borderColor", 39);
+	keywords.set("borderWidth", 40);
+	keywords.set("borderDash", 41);
+	keywords.set("style", 42);
+	keywords.set("backgroundColor", 43);
+	keywords.set("size", 44);
+	keywords.set("scaleMag", 45);
+	keywords.set("priority", 46);
+	keywords.set("name", 47);
+	keywords.set("normal", 48);
+	keywords.set("contour", 49);
+	keywords.set("plate", 50);
+	keywords.set("emphasize", 51);
+	keywords.set("none", 52);
+	keywords.set("box", 53);
+	keywords.set("triangle", 54);
+	keywords.set("circle", 55);
+	keywords.set("world", 56);
+	keywords.set("continent", 57);
+	keywords.set("state", 58);
+	keywords.set("stateOver", 59);
+	keywords.set("county", 60);
+	keywords.set("region", 61);
+	keywords.set("proximity", 62);
+	keywords.set("cityOver", 63);
+	keywords.set("city", 64);
+	keywords.set("suburb", 65);
+	keywords.set("detail", 66);
+	keywords.set("close", 67);
+	keywords.set("veryClose", 68);
+	keywords.set("block", 69);
+	keywords.set("mm", 70);
+	keywords.set("m", 71);
 
 
   tvalLength = 128;
@@ -412,7 +418,7 @@ Token* Scanner::NextToken() {
 			case_13:
 			if (ch <= '!' || (ch >= '#' && ch <= '[') || (ch >= ']' && ch <= 65535)) {AddCh(); goto case_13;}
 			else if (ch == '"') {AddCh(); goto case_14;}
-			else if (ch == 92) {AddCh(); goto case_17;}
+			else if (ch == 92) {AddCh(); goto case_16;}
 			else {goto case_0;}
 		case 14:
 			case_14:
@@ -424,23 +430,38 @@ Token* Scanner::NextToken() {
 			else if (ch == '.') {AddCh(); goto case_2;}
 			else {t->kind = 2; break;}
 		case 16:
-			if ((ch >= '0' && ch <= '9')) {AddCh(); goto case_15;}
+			case_16:
+			if (ch <= '!' || (ch >= '#' && ch <= '[') || (ch >= ']' && ch <= 65535)) {AddCh(); goto case_13;}
+			else if (ch == 92) {AddCh(); goto case_16;}
+			else if (ch == '"') {AddCh(); goto case_17;}
 			else {goto case_0;}
 		case 17:
 			case_17:
-			if (ch <= '!' || (ch >= '#' && ch <= '[') || (ch >= ']' && ch <= 65535)) {AddCh(); goto case_13;}
-			else if (ch == 92) {AddCh(); goto case_17;}
-			else if (ch == '"') {AddCh(); goto case_18;}
-			else {goto case_0;}
-		case 18:
-			case_18:
 			recEnd = pos; recKind = 5;
 			if (ch <= '!' || (ch >= '#' && ch <= '[') || (ch >= ']' && ch <= 65535)) {AddCh(); goto case_13;}
 			else if (ch == '"') {AddCh(); goto case_14;}
-			else if (ch == 92) {AddCh(); goto case_17;}
+			else if (ch == 92) {AddCh(); goto case_16;}
 			else {t->kind = 5; break;}
-		case 19:
+		case 18:
 			{t->kind = 11; break;}
+		case 19:
+			{t->kind = 12; break;}
+		case 20:
+			{t->kind = 13; break;}
+		case 21:
+			{t->kind = 14; break;}
+		case 22:
+			{t->kind = 18; break;}
+		case 23:
+			{t->kind = 20; break;}
+		case 24:
+			{t->kind = 28; break;}
+		case 25:
+			{t->kind = 29; break;}
+		case 26:
+			recEnd = pos; recKind = 17;
+			if ((ch >= '0' && ch <= '9')) {AddCh(); goto case_15;}
+			else {t->kind = 17; break;}
 
   }
   AppendVal(t);

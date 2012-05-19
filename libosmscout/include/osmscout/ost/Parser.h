@@ -26,6 +26,7 @@
 
 #include <osmscout/TypeConfig.h>
 
+
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/ost/Scanner.h>
