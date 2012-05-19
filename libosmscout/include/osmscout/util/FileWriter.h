@@ -69,6 +69,8 @@ namespace osmscout {
     bool Write(uint64_t number);
 #endif
 
+    bool WriteFileOffset(FileOffset offset);
+
     bool Write(int8_t number);
     bool Write(int32_t number);
 
@@ -77,8 +79,6 @@ namespace osmscout {
 #if defined(OSMSCOUT_HAVE_UINT64_T)
     bool WriteNumber(uint64_t number);
 #endif
-
-    bool WriteNumber(int32_t number);
 
     bool FlushCurrentBlockWithZeros(size_t blockSize);
   };

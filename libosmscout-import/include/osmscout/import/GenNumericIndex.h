@@ -123,13 +123,13 @@ namespace osmscout {
     writer.WriteNumber(dataCount);      // Number of entries in data file
 
     writer.GetPos(levelsOffset);
-    writer.Write((FileOffset)0);        // Number of levels
+    writer.Write((uint32_t)0);        // Number of levels
 
     writer.GetPos(lastLevelPageStartOffset);
-    writer.Write((FileOffset)0);        // Write the starting position of the last page
+    writer.WriteFileOffset((FileOffset)0);        // Write the starting position of the last page
 
     writer.GetPos(indexPageCountsOffset);
-    writer.Write((FileOffset)0);        // Write the starting position of list of sizes of each index level
+    writer.WriteFileOffset((FileOffset)0);        // Write the starting position of list of sizes of each index level
 
     writer.FlushCurrentBlockWithZeros(pageSize);
 
@@ -271,10 +271,10 @@ namespace osmscout {
       writer.Write((uint32_t)indexPageCounts.size());
 
       writer.SetPos(lastLevelPageStartOffset);
-      writer.Write(pageStarts[0]);
+      writer.WriteFileOffset(pageStarts[0]);
 
       writer.SetPos(indexPageCountsOffset);
-      writer.Write(indexPageCountsPos);
+      writer.WriteFileOffset(indexPageCountsPos);
 
       writer.SetPos(indexPageCountsPos);
     }

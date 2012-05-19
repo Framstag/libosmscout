@@ -522,7 +522,7 @@ namespace osmscout {
     std::sort(relationWayOffsets.begin(),relationWayOffsets.end());
     std::sort(relationAreaOffsets.begin(),relationAreaOffsets.end());
 
-    if (!GetNodes(nodeOffsets,
+    if (!GetNodesByOffset(nodeOffsets,
                   nodes)) {
       std::cout << "Error reading nodes in area!" << std::endl;
       return false;
@@ -536,7 +536,7 @@ namespace osmscout {
 
     StopClock waysTimer;
 
-    if (!GetWays(wayWayOffsets,
+    if (!GetWaysByOffset(wayWayOffsets,
                  ways)) {
       std::cout << "Error reading ways in area!" << std::endl;
       return false;
@@ -550,7 +550,7 @@ namespace osmscout {
 
     StopClock areasTimer;
 
-    if (!GetWays(wayAreaOffsets,
+    if (!GetWaysByOffset(wayAreaOffsets,
                  areas)) {
       std::cout << "Error reading areas in area!" << std::endl;
       return false;
@@ -564,7 +564,7 @@ namespace osmscout {
 
     StopClock relationWaysTimer;
 
-    if (!GetRelations(relationWayOffsets,
+    if (!GetRelationsByOffset(relationWayOffsets,
                       relationWays)) {
       std::cout << "Error reading relation ways in area!" << std::endl;
       return false;
@@ -578,7 +578,7 @@ namespace osmscout {
 
     StopClock relationAreasTimer;
 
-    if (!GetRelations(relationAreaOffsets,
+    if (!GetRelationsByOffset(relationAreaOffsets,
                       relationAreas)) {
       std::cerr << "Error reading relation areas in area!" << std::endl;
       return false;
@@ -674,7 +674,7 @@ namespace osmscout {
 
     StopClock nodesTimer;
 
-    if (!GetNodes(nodeOffsets,
+    if (!GetNodesByOffset(nodeOffsets,
                   nodes)) {
       std::cout << "Error reading nodes in area!" << std::endl;
       return false;
@@ -684,7 +684,7 @@ namespace osmscout {
 
     StopClock waysTimer;
 
-    if (!GetWays(wayWayOffsets,
+    if (!GetWaysByOffset(wayWayOffsets,
                  ways)) {
       std::cout << "Error reading ways in area!" << std::endl;
       return false;
@@ -694,7 +694,7 @@ namespace osmscout {
 
     StopClock areasTimer;
 
-    if (!GetWays(wayAreaOffsets,
+    if (!GetWaysByOffset(wayAreaOffsets,
                  areas)) {
       std::cout << "Error reading areas in area!" << std::endl;
       return false;
@@ -704,7 +704,7 @@ namespace osmscout {
 
     StopClock relationWaysTimer;
 
-    if (!GetRelations(relationWayOffsets,
+    if (!GetRelationsByOffset(relationWayOffsets,
                       relationWays)) {
       std::cout << "Error reading relation ways in area!" << std::endl;
       return false;
@@ -714,7 +714,7 @@ namespace osmscout {
 
     StopClock relationAreasTimer;
 
-    if (!GetRelations(relationAreaOffsets,
+    if (!GetRelationsByOffset(relationAreaOffsets,
                       relationAreas)) {
       std::cerr << "Error reading relation areas in area!" << std::endl;
       return false;
@@ -778,14 +778,14 @@ namespace osmscout {
     return false;
   }
 
-  bool Database::GetNodes(const std::vector<FileOffset>& offsets,
+  bool Database::GetNodesByOffset(const std::vector<FileOffset>& offsets,
                           std::vector<NodeRef>& nodes) const
   {
     if (!IsOpen()) {
       return false;
     }
 
-    return nodeDataFile.Get(offsets,nodes);
+    return nodeDataFile.GetByOffset(offsets,nodes);
   }
 
   bool Database::GetNodes(const std::vector<Id>& ids,
@@ -798,44 +798,44 @@ namespace osmscout {
     return nodeDataFile.Get(ids,nodes);
   }
 
-  bool Database::GetWays(const std::vector<FileOffset>& offsets,
+  bool Database::GetWaysByOffset(const std::vector<FileOffset>& offsets,
                          std::vector<WayRef>& ways) const
   {
     if (!IsOpen()) {
       return false;
     }
 
-    return wayDataFile.Get(offsets,ways);
+    return wayDataFile.GetByOffset(offsets,ways);
   }
 
-  bool Database::GetWays(const std::list<FileOffset>& offsets,
+  bool Database::GetWaysByOffset(const std::list<FileOffset>& offsets,
                          std::vector<WayRef>& ways) const
   {
     if (!IsOpen()) {
       return false;
     }
 
-    return wayDataFile.Get(offsets,ways);
+    return wayDataFile.GetByOffset(offsets,ways);
   }
 
-  bool Database::GetRelations(const std::vector<FileOffset>& offsets,
+  bool Database::GetRelationsByOffset(const std::vector<FileOffset>& offsets,
                               std::vector<RelationRef>& relations) const
   {
     if (!IsOpen()) {
       return false;
     }
 
-    return relationDataFile.Get(offsets,relations);
+    return relationDataFile.GetByOffset(offsets,relations);
   }
 
-  bool Database::GetRelations(const std::list<FileOffset>& offsets,
+  bool Database::GetRelationsByOffset(const std::list<FileOffset>& offsets,
                               std::vector<RelationRef>& relations) const
   {
     if (!IsOpen()) {
       return false;
     }
 
-    return relationDataFile.Get(offsets,relations);
+    return relationDataFile.GetByOffset(offsets,relations);
   }
 
   bool Database::GetWay(const Id& id, WayRef& way) const

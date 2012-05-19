@@ -172,7 +172,7 @@ namespace osmscout
       for (size_t x=minxc; x<=maxxc; x++) {
         FileOffset cellDataOffset;
 
-        if (!scanner.Read(cellDataOffset)) {
+        if (!scanner.ReadFileOffset(cellDataOffset)) {
           std::cerr << "Cannot read cell data position" << std::endl;
           return false;
         }

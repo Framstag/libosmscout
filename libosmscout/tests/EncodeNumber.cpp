@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include <osmscout/Util.h>
+#include <osmscout/util/Number.h>
 
 int errors=0;
 
@@ -11,10 +11,7 @@ bool CheckEncode(unsigned long value,
   char         buffer[bufferLength];
   size_t       bytes;
 
-  if (!osmscout::EncodeNumber(value,bufferLength,buffer,bytes)) {
-    std::cerr << "Encoding of '" << value << "' failed!" << std::endl;
-    return false;
-  }
+  bytes=osmscout::EncodeNumber(value,buffer);
 
   if (expectedLength!=bytes) {
     std::cerr << "Encoding of '" << value << "' returned wrong length - Expected " << expectedLength << " actual " << bytes << std::endl;
@@ -37,10 +34,7 @@ bool CheckDecode(const char* buffer, unsigned long expected, size_t bytesExpecte
   uint32_t value;
   size_t   bytes;
 
-  if (!osmscout::DecodeNumber(buffer,value,bytes)) {
-    std::cerr << "Decoding of '" << expected << "' failed!" << std::endl;
-    return false;
-  }
+  bytes=osmscout::DecodeNumber(buffer,value);
 
   if (value!=expected) {
     std::cerr << "Error in decoding: expected " << expected << " actual " << value << std::endl;

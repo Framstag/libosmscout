@@ -510,7 +510,7 @@ namespace osmscout {
       for (std::list<LocRef>::const_iterator o=n->second.begin();
            o!=n->second.end();
            ++o) {
-        if (!writer.WriteNumber(o->reference.type)) {
+        if (!writer.WriteNumber((uint32_t)o->reference.type)) {
           return false;
         }
 

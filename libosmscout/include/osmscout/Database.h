@@ -177,20 +177,20 @@ namespace osmscout {
     std::string           (*hashFunction) (std::string);
 
   private:
-    bool GetNodes(const std::vector<FileOffset>& offsets,
-                  std::vector<NodeRef>& nodes) const;
+    bool GetNodesByOffset(const std::vector<FileOffset>& offsets,
+                          std::vector<NodeRef>& nodes) const;
 
-    bool GetWays(const std::vector<FileOffset>& offsets,
-                 std::vector<WayRef>& ways) const;
+    bool GetWaysByOffset(const std::vector<FileOffset>& offsets,
+                         std::vector<WayRef>& ways) const;
 
-    bool GetWays(const std::list<FileOffset>& offsets,
-                 std::vector<WayRef>& ways) const;
+    bool GetWaysByOffset(const std::list<FileOffset>& offsets,
+                         std::vector<WayRef>& ways) const;
 
-    bool GetRelations(const std::vector<FileOffset>& offsets,
-                      std::vector<RelationRef>& relations) const;
+    bool GetRelationsByOffset(const std::vector<FileOffset>& offsets,
+                              std::vector<RelationRef>& relations) const;
 
-    bool GetRelations(const std::list<FileOffset>& offsets,
-                      std::vector<RelationRef>& relations) const;
+    bool GetRelationsByOffset(const std::list<FileOffset>& offsets,
+                              std::vector<RelationRef>& relations) const;
 
   public:
     Database(const DatabaseParameter& parameter);

@@ -24,18 +24,17 @@
 
 #include <osmscout/CoreFeatures.h>
 
-#include <vector>
-
 #include <osmscout/system/Types.h>
 
 namespace osmscout {
 
-  typedef int32_t  FileOffset;
 
 #if defined(OSMSCOUT_HAVE_UINT64_T)
   typedef uint64_t Id;
+  typedef uint64_t FileOffset;
 #else
   typedef uint32_t Id;
+  typedef uint64_t FileOffset;
 #endif
 
   typedef uint16_t TypeId;

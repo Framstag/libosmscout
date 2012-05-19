@@ -17,6 +17,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <osmscout/private/Config.h>
+
 #include <osmscout/util/FileScanner.h>
 
 #include <cassert>
@@ -25,8 +27,6 @@
 #include <cstdio>
 #include <iostream>
 #include <limits>
-
-#include <osmscout/private/Config.h>
 
 #if defined(HAVE_MMAP)
   #include <unistd.h>
@@ -255,7 +255,12 @@ namespace osmscout {
 #endif
 
     clearerr(file);
+
+#if defined(HAVE_FSEEKO)
+    hasError=fseeko(file,(off_t)pos,SEEK_SET)!=0;
+#else
     hasError=fseek(file,pos,SEEK_SET)!=0;
+#endif
 
     if (hasError) {
       std::cerr << "Cannot set file pos:" << strerror(errno) << std::endl;
@@ -277,9 +282,25 @@ namespace osmscout {
     }
 #endif
 
-    pos=ftell(file);
+#if defined(HAVE_FSEEKO)
+    off_t filepos=ftello(file);
 
-    hasError=pos==-1;
+    if (filepos==-1) {
+      hasError=true;
+    }
+    else {
+      pos=(FileOffset)filepos;
+    }
+#else
+    long filepos=ftell(file);
+
+    if (filepos==-1) {
+      hasError=true;
+    }
+    else {
+      pos=(FileOffset)filepos;
+    }
+#endif
 
     if (hasError) {
       std::cerr << "Cannot read file pos:" << strerror(errno) << std::endl;
@@ -573,6 +594,20 @@ namespace osmscout {
     return true;
   }
 #endif
+
+  bool FileScanner::ReadFileOffset(FileOffset& offset)
+  {
+    if (sizeof(FileOffset)==4) {
+      char buffer[4];
+
+      if (!Read(buffer,4)) {
+        return false;
+      }
+    }
+
+    return Read(offset);
+  }
+
 
   bool FileScanner::Read(int8_t& number)
   {

@@ -32,9 +32,9 @@ namespace osmscout {
   {
   public:
     enum MemberType {
-      memberNode,
-      memberWay,
-      memberRelation
+      memberNode      = 0,
+      memberWay       = 1,
+      memberRelation  = 2
     };
 
     struct Member

@@ -85,7 +85,7 @@ namespace osmscout
       writer.Write(typesData[*type].cellXEnd);
       writer.Write(typesData[*type].cellYStart);
       writer.Write(typesData[*type].cellYEnd);
-      writer.Write(typesData[*type].bitmapOffset);
+      writer.WriteFileOffset(typesData[*type].bitmapOffset);
     }
   }
 
@@ -519,7 +519,7 @@ namespace osmscout
     for (size_t i=0; i<data.cellXCount*data.cellYCount; i++) {
       FileOffset cellOffset=0;
 
-      writer.Write(cellOffset);
+      writer.WriteFileOffset(cellOffset);
     }
 
     // Now write the list of offsets of objects for every cell with content
@@ -542,7 +542,7 @@ namespace osmscout
         return false;
       }
 
-      writer.Write(cellOffset);
+      writer.WriteFileOffset(cellOffset);
 
       if (!writer.SetPos(cellOffset)) {
         progress.Error("Cannot go back to cell start position in file");
@@ -554,7 +554,7 @@ namespace osmscout
       for (std::list<FileOffset>::const_iterator offset=cell->second.begin();
            offset!=cell->second.end();
            ++offset) {
-        writer.WriteNumber(*offset-previousOffset);
+        writer.WriteNumber((FileOffset)(*offset-previousOffset));
 
         previousOffset=*offset;
       }

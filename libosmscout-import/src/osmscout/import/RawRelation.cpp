@@ -108,7 +108,7 @@ namespace osmscout {
       writer.WriteNumber(minId);
 
       for (size_t i=0; i<members.size(); i++) {
-        writer.WriteNumber(members[i].type);
+        writer.WriteNumber((uint32_t)members[i].type);
         writer.WriteNumber(members[i].id-minId);
         writer.Write(members[i].role);
       }

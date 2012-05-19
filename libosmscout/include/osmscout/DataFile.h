@@ -74,12 +74,12 @@ namespace osmscout {
     bool GetOffsets(const std::vector<Id>& ids,
                     std::vector<FileOffset>& offsets) const;
 
-    bool Get(const std::vector<FileOffset>& offsets,
-             std::vector<ValueType>& data) const;
-    bool Get(const std::list<FileOffset>& offsets,
-             std::vector<ValueType>& data) const;
-    bool Get(const std::set<FileOffset>& offsets,
-             std::vector<ValueType>& data) const;
+    bool GetByOffset(const std::vector<FileOffset>& offsets,
+                     std::vector<ValueType>& data) const;
+    bool GetByOffset(const std::list<FileOffset>& offsets,
+                     std::vector<ValueType>& data) const;
+    bool GetByOffset(const std::set<FileOffset>& offsets,
+                     std::vector<ValueType>& data) const;
 
     bool Get(const std::vector<Id>& ids,
              std::vector<ValueType>& data) const;
@@ -160,7 +160,7 @@ namespace osmscout {
   }
 
   template <class N>
-  bool DataFile<N>::Get(const std::vector<FileOffset>& offsets,
+  bool DataFile<N>::GetByOffset(const std::vector<FileOffset>& offsets,
                         std::vector<ValueType>& data) const
   {
     assert(isOpen);
@@ -203,7 +203,7 @@ namespace osmscout {
   }
 
   template <class N>
-  bool DataFile<N>::Get(const std::list<FileOffset>& offsets,
+  bool DataFile<N>::GetByOffset(const std::list<FileOffset>& offsets,
                         std::vector<ValueType>& data) const
   {
     assert(isOpen);
@@ -246,7 +246,7 @@ namespace osmscout {
   }
 
   template <class N>
-  bool DataFile<N>::Get(const std::set<FileOffset>& offsets,
+  bool DataFile<N>::GetByOffset(const std::set<FileOffset>& offsets,
                         std::vector<ValueType>& data) const
   {
     assert(isOpen);
@@ -301,7 +301,7 @@ namespace osmscout {
       return false;
     }
 
-    return Get(offsets,data);
+    return GetByOffset(offsets,data);
   }
 
   template <class N>
@@ -317,7 +317,7 @@ namespace osmscout {
       return false;
     }
 
-    return Get(offsets,data);
+    return GetByOffset(offsets,data);
   }
 
   template <class N>
@@ -342,7 +342,7 @@ namespace osmscout {
       return false;
     }
 
-    return Get(offsets,data);
+    return GetByOffset(offsets,data);
   }
 
   template <class N>

@@ -17,6 +17,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <osmscout/private/Config.h>
+
 #include <osmscout/util/FileWriter.h>
 
 #include <cstring>
@@ -83,9 +85,25 @@ namespace osmscout {
       return false;
     }
 
-    pos=ftell(file);
+#if defined(HAVE_FSEEKO)
+    off_t filepos=ftello(file);
 
-    hasError=pos==-1;
+    if (filepos==-1) {
+      hasError=true;
+    }
+    else {
+      pos=(FileOffset)filepos;
+    }
+#else
+    long filepos=ftell(file);
+
+    if (filepos==-1) {
+      hasError=true;
+    }
+    else {
+      pos=(FileOffset)filepos;
+    }
+#endif
 
     return !hasError;
   }
@@ -96,7 +114,11 @@ namespace osmscout {
       return false;
     }
 
+#if defined(HAVE_FSEEKO)
+    hasError=fseeko(file,(off_t)pos,SEEK_SET)!=0;
+#else
     hasError=fseek(file,pos,SEEK_SET)!=0;
+#endif
 
     return !hasError;
   }
@@ -215,6 +237,25 @@ namespace osmscout {
   }
 #endif
 
+  bool FileWriter::WriteFileOffset(FileOffset offset)
+  {
+    if (sizeof(offset)==4) {
+      char buffer[4];
+
+      buffer[0]=0;
+      buffer[1]=0;
+      buffer[2]=0;
+      buffer[3]=0;
+
+      if (!Write(buffer,4)) {
+        return false;
+      }
+    }
+
+    return Write(offset);
+  }
+
+
   bool FileWriter::Write(int32_t number)
   {
     if (HasError()) {
@@ -283,27 +324,6 @@ namespace osmscout {
     is small.
     */
   bool FileWriter::WriteNumber(uint16_t number)
-  {
-    if (HasError()) {
-      return false;
-    }
-
-    char         buffer[10];
-    unsigned int bytes;
-
-    bytes=EncodeNumber(number,buffer);
-
-    hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
-
-    return !hasError;
-  }
-
-  /**
-    Write a numeric value to the file using some internal encoding
-    to reduce storage size. Note that this works only if the average number
-    is small.
-    */
-  bool FileWriter::WriteNumber(int32_t number)
   {
     if (HasError()) {
       return false;

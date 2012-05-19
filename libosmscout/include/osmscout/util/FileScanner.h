@@ -20,7 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <cstdio>
 #include <string>
 
 #include <osmscout/CoreFeatures.h>
@@ -102,6 +101,8 @@ namespace osmscout {
 #if defined(OSMSCOUT_HAVE_UINT64_T)
     bool Read(uint64_t& number);
 #endif
+
+    bool ReadFileOffset(FileOffset& offset);
 
     bool Read(int8_t& number);
     bool Read(int32_t& number);

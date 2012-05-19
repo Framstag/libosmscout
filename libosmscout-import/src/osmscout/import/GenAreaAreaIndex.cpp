@@ -196,7 +196,7 @@ namespace osmscout {
       return false;
     }
 
-    if (!writer.Write(topLevelOffset)) {
+    if (!writer.WriteFileOffset(topLevelOffset)) {
       progress.Error("Cannot write top level entry offset");
       return false;
     }
@@ -438,7 +438,7 @@ namespace osmscout {
     }
 
     writer.SetPos(topLevelOffsetOffset);
-    writer.Write(topLevelOffset);
+    writer.WriteFileOffset(topLevelOffset);
 
     return !writer.HasError() && writer.Close();
   }

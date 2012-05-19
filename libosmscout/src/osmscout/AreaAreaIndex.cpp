@@ -140,7 +140,7 @@ namespace osmscout {
       return false;
     }
 
-    if (!scanner.Read(topLevelOffset)) {
+    if (!scanner.ReadFileOffset(topLevelOffset)) {
       std::cerr << "Cannot read data" << std::endl;
       return false;
     }

@@ -29,7 +29,7 @@ namespace osmscout {
     refNone     = 0,
     refNode     = 1,
     refWay      = 2,
-    refRelation = 4
+    refRelation = 3
   };
 
   class OSMSCOUT_API ObjectRef

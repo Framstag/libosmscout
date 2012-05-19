@@ -71,7 +71,7 @@ namespace osmscout {
         wayTypeData.resize(type+1);
       }
 
-      scanner.Read(wayTypeData[type].indexOffset);
+      scanner.ReadFileOffset(wayTypeData[type].indexOffset);
 
       if (wayTypeData[type].indexOffset>0) {
         scanner.ReadNumber(wayTypeData[type].indexLevel);
@@ -97,7 +97,7 @@ namespace osmscout {
         relTypeData.resize(type+1);
       }
 
-      scanner.Read(relTypeData[type].indexOffset);
+      scanner.ReadFileOffset(relTypeData[type].indexOffset);
 
       if (relTypeData[type].indexOffset>0) {
         scanner.ReadNumber(relTypeData[type].indexLevel);

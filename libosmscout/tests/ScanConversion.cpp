@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include <osmscout/Util.h>
+#include <osmscout/util/Geometry.h>
 
 int errors=0;
 

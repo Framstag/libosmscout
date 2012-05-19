@@ -227,12 +227,12 @@ namespace osmscout {
       return false;
     }
 
-    scanner.ReadNumber(pageSize);        // Size of one index page
-    scanner.ReadNumber(entries);         // Number of entries in data file
+    scanner.ReadNumber(pageSize);                  // Size of one index page
+    scanner.ReadNumber(entries);                   // Number of entries in data file
 
-    scanner.Read(levels);                // Number of levels
-    scanner.Read(lastLevelPageStart);    // Start of top level index page
-    scanner.Read(indexPageCountsOffset); // Start of list of sizes of index levels
+    scanner.Read(levels);                          // Number of levels
+    scanner.ReadFileOffset(lastLevelPageStart);    // Start of top level index page
+    scanner.ReadFileOffset(indexPageCountsOffset); // Start of list of sizes of index levels
 
     if (scanner.HasError()) {
       std::cerr << "Error while loading header data of index file '" << filename << "'" << std::endl;

@@ -71,7 +71,7 @@ namespace osmscout {
         nodeTypeData.resize(type+1);
       }
 
-      scanner.Read(nodeTypeData[type].indexOffset);
+      scanner.ReadFileOffset(nodeTypeData[type].indexOffset);
 
       scanner.ReadNumber(nodeTypeData[type].indexLevel);
 
@@ -153,7 +153,7 @@ namespace osmscout {
       for (size_t x=minxc; x<=maxxc; x++) {
         FileOffset cellDataOffset;
 
-        if (!scanner.Read(cellDataOffset)) {
+        if (!scanner.ReadFileOffset(cellDataOffset)) {
           std::cerr << "Cannot read cell data position" << std::endl;
           return false;
         }
