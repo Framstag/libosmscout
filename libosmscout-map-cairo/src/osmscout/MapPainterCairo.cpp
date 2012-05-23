@@ -83,70 +83,30 @@ namespace osmscout {
     return parametrization;
   }
 
-
-  typedef void (*transform_point_func_t)(void *transformData, double& x, double& y);
-
-  /* Project a path using a function. Each point of the path (including
-    * Bezier control points) is passed to the function for transformation.
-  */
-  static void TransformPath(cairo_path_t *path, transform_point_func_t f, void *transformData)
+  /**
+   *  Project a point X,Y onto a parameterized path. The final point is
+   * where you get if you walk on the path forward from the beginning for X
+   * units, then stop there and walk another Y units perpendicular to the
+   * path at that point. In more detail:
+   *
+   * There's two pieces of math involved:
+   *
+   * - The parametric form of the Line equation
+   * http://en.wikipedia.org/wiki/Line
+   *
+   * - The Gradient (aka multi-dimensional derivative) of the above
+   * http://en.wikipedia.org/wiki/Gradient
+   *
+   * The parametric forms are used to answer the question of "where will I be
+   * if I walk a distance of X on this path". The Gradient is used to answer
+   * the question of "where will I be if then I stop, rotate left for 90
+   * degrees and walk straight for a distance of Y".
+   */
+  static void PathPointTransformer(double& x,
+                                   double& y,
+                                   cairo_path_t *path,
+                                   double *pathSegmentLengths)
   {
-    for (int i=0; i<path->num_data; i+=path->data[i].header.length) {
-      cairo_path_data_t *data=&path->data[i];
-
-      switch (data->header.type) {
-      case CAIRO_PATH_CURVE_TO:
-        f(transformData, data[1].point.x, data[1].point.y);
-        f(transformData, data[2].point.x, data[2].point.y);
-        f(transformData, data[3].point.x, data[3].point.y);
-        break;
-      case CAIRO_PATH_MOVE_TO:
-        f(transformData, data[1].point.x, data[1].point.y);
-        break;
-      case CAIRO_PATH_LINE_TO:
-        f(transformData, data[1].point.x, data[1].point.y);
-        break;
-      case CAIRO_PATH_CLOSE_PATH:
-        break;
-      default:
-        assert(false);
-        break;
-      }
-    }
-  }
-
-
-  /* Simple struct to hold a path and its parametrization */
-  struct parametrized_path_t
-  {
-    cairo_path_t *path;
-    double       *parametrization;
-  };
-
-
-  /* Project a point X,Y onto a parameterized path. The final point is
-    * where you get if you walk on the path forward from the beginning for X
-    * units, then stop there and walk another Y units perpendicular to the
-    * path at that point. In more detail:
-    *
-    * There's two pieces of math involved:
-    *
-    * - The parametric form of the Line equation
-    * http://en.wikipedia.org/wiki/Line
-    *
-    * - The Gradient (aka multi-dimensional derivative) of the above
-    * http://en.wikipedia.org/wiki/Gradient
-    *
-    * The parametric forms are used to answer the question of "where will I be
-    * if I walk a distance of X on this path". The Gradient is used to answer
-    * the question of "where will I be if then I stop, rotate left for 90
-    * degrees and walk straight for a distance of Y".
-  */
-  static void PathPointTransformer(parametrized_path_t *param, double& x, double& y)
-  {
-    cairo_path_t      *path = param->path;
-    double            *parametrization = param->parametrization;
-
     int               i;
     double            the_y=y;
     double            the_x=x;
@@ -157,12 +117,12 @@ namespace osmscout {
     // Find the segment on the line that is "x" away from the start
     for (i=0;
          i+path->data[i].header.length < path->num_data &&
-         (the_x > parametrization[i] ||
+         (the_x > pathSegmentLengths[i] ||
           path->data[i].header.type == CAIRO_PATH_MOVE_TO);
          i+=path->data[i].header.length) {
       data = &path->data[i];
 
-      the_x -= parametrization[i];
+      the_x -= pathSegmentLengths[i];
 
       switch (data->header.type) {
       case CAIRO_PATH_MOVE_TO:
@@ -192,7 +152,7 @@ namespace osmscout {
     case CAIRO_PATH_CLOSE_PATH:
       {
         // Relative offset in the current segment ([0..1])
-        double ratio = the_x / parametrization[i];
+        double ratio = the_x / pathSegmentLengths[i];
         // Line polynomial
         x = currentPoint->point.x * (1 - ratio) + startPoint->point.x * ratio;
         y = currentPoint->point.y * (1 - ratio) + startPoint->point.y * ratio;
@@ -202,7 +162,7 @@ namespace osmscout {
         double dy = -(currentPoint->point.y - startPoint->point.y);
 
         // optimization for: ratio = the_y / sqrt (dx * dx + dy * dy)
-        ratio = the_y / parametrization[i];
+        ratio = the_y / pathSegmentLengths[i];
         x += -dy * ratio;
         y += dx * ratio;
       }
@@ -210,7 +170,7 @@ namespace osmscout {
     case CAIRO_PATH_LINE_TO:
       {
         // Relative offset in the current segment ([0..1])
-        double ratio = the_x / parametrization[i];
+        double ratio = the_x / pathSegmentLengths[i];
         // Line polynomial
         x = currentPoint->point.x * (1 - ratio) + data[1].point.x * ratio;
         y = currentPoint->point.y * (1 - ratio) + data[1].point.y * ratio;
@@ -220,7 +180,7 @@ namespace osmscout {
         double dy = -(currentPoint->point.y - data[1].point.y);
 
         // optimization for: ratio = the_y / sqrt (dx * dx + dy * dy)
-        ratio = the_y / parametrization[i];
+        ratio = the_y / pathSegmentLengths[i];
         x += -dy * ratio;
         y += dx * ratio;
       }
@@ -234,32 +194,86 @@ namespace osmscout {
     }
   }
 
-  /* Projects the current path of cr onto the provided path. */
-  static void MapCurrentPathOnContour(cairo_t *cr, cairo_path_t *path)
+  /**
+   * Project a path using a function. Each point of the path (including
+   * Bezier control points) is passed to the function for transformation.
+   */
+  static void TransformTextOntoPath(cairo_path_t *textPath,
+                                    cairo_path_t *path,
+                                    double xOffset,
+                                    double yOffset,
+                                    double *pathSegmentLengths)
   {
-    cairo_path_t        *textPath;
-    parametrized_path_t param;
+    for (int i=0; i<textPath->num_data; i+=textPath->data[i].header.length) {
+      cairo_path_data_t *data=&textPath->data[i];
 
-    param.path=path;
-    param.parametrization=CalculatePathSegmentLengths(path);
+      switch (data->header.type) {
+      case CAIRO_PATH_CURVE_TO:
+        data[1].point.x+=xOffset;
+        data[1].point.y+=yOffset;
+        data[2].point.x+=xOffset;
+        data[2].point.y+=yOffset;
+        data[3].point.x+=xOffset;
+        data[3].point.y+=yOffset;
+        PathPointTransformer(data[1].point.x, data[1].point.y,path,pathSegmentLengths);
+        PathPointTransformer(data[2].point.x, data[2].point.y,path,pathSegmentLengths);
+        PathPointTransformer(data[3].point.x, data[3].point.y,path,pathSegmentLengths);
+        break;
+      case CAIRO_PATH_MOVE_TO:
+        data[1].point.x+=xOffset;
+        data[1].point.y+=yOffset;
+        PathPointTransformer(data[1].point.x, data[1].point.y,path,pathSegmentLengths);
+        break;
+      case CAIRO_PATH_LINE_TO:
+        data[1].point.x+=xOffset;
+        data[1].point.y+=yOffset;
+        PathPointTransformer(data[1].point.x, data[1].point.y,path,pathSegmentLengths);
+        break;
+      case CAIRO_PATH_CLOSE_PATH:
+        break;
+      default:
+        assert(false);
+        break;
+      }
+    }
+  }
+
+
+  /* Projects the current text path of cr onto the provided path. */
+  static void MapCurrentTextPathOnPath(cairo_t *cr,
+                                       double xOffset,
+                                       double textWidth,
+                                       double textHeight,
+                                       cairo_path_t *path,
+                                       double pathLength)
+  {
+    cairo_path_t *textPath;
+    double       *segmentLengths=CalculatePathSegmentLengths(path);
 
     textPath=cairo_copy_path(cr);
 
-
-    TransformPath(textPath,
-                   (transform_point_func_t) PathPointTransformer,
-                   &param);
+    // Center text on path
+    TransformTextOntoPath(textPath,
+                          path,
+                          (pathLength-textWidth)/2+xOffset,
+                          textHeight,
+                          segmentLengths);
 
     cairo_new_path(cr);
     cairo_append_path(cr,textPath);
 
     cairo_path_destroy(textPath);
 
-    delete [] param.parametrization;
+    delete [] segmentLengths;
   }
 
 
-  static void DrawContourLabelCairo(cairo_t *cr, double x, double y, const char *text)
+  static void DrawContourLabelCairo(cairo_t *cr,
+                                    double pathLength,
+                                    double xOffset,
+                                    double textWidth,
+                                    double textHeight,
+                                    const char *text)
   {
     cairo_path_t *path;
 
@@ -280,11 +294,16 @@ namespace osmscout {
 
     // Create a new path for the text we should draw along the curve
     cairo_new_path(cr);
-    cairo_move_to(cr,x,y);
+    cairo_move_to(cr,0,0);
     cairo_text_path(cr,text);
 
     // Now transform the text path so that it maps to the contour of the line
-    MapCurrentPathOnContour(cr,path);
+    MapCurrentTextPathOnPath(cr,
+                            xOffset,
+                            textWidth,
+                            textHeight,
+                            path,
+                            pathLength);
 
     // Draw the text path
     cairo_fill(cr);
@@ -608,7 +627,7 @@ namespace osmscout {
 
     cairo_set_scaled_font(draw,font);
 
-    double length=0;
+    double lineLength=0;
     double xo=0;
     double yo=0;
 
@@ -625,7 +644,7 @@ namespace osmscout {
           cairo_line_to(draw,
                         transBuffer.buffer[j].x,
                         transBuffer.buffer[j].y);
-          length+=sqrt(pow(transBuffer.buffer[j].x-xo,2)+
+          lineLength+=sqrt(pow(transBuffer.buffer[j].x-xo,2)+
                        pow(transBuffer.buffer[j].y-yo,2));
         }
 
@@ -646,7 +665,7 @@ namespace osmscout {
           cairo_line_to(draw,
                         transBuffer.buffer[idx].x,
                         transBuffer.buffer[idx].y);
-          length+=sqrt(pow(transBuffer.buffer[idx].x-xo,2)+
+          lineLength+=sqrt(pow(transBuffer.buffer[idx].x-xo,2)+
                        pow(transBuffer.buffer[idx].y-yo,2));
         }
 
@@ -661,7 +680,7 @@ namespace osmscout {
                                    text.c_str(),
                                    &textExtents);
 
-    if (length<textExtents.width) {
+    if (lineLength<textExtents.width) {
       // Text is longer than path to draw on
       return;
     }
@@ -678,7 +697,9 @@ namespace osmscout {
                           style.GetTextColor().GetA());
 
     DrawContourLabelCairo(draw,
-                          (length-textExtents.width)/2+textExtents.x_bearing,
+                          lineLength,
+                          textExtents.x_bearing,
+                          textExtents.width,
                           fontExtents.ascent+textExtents.y_bearing,
                           text.c_str());
   }
