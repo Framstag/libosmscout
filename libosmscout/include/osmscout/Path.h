@@ -27,7 +27,7 @@
 namespace osmscout {
 
   /**
-   * A path is defined by the way tobe used and the node id of a node on this way
+   * A path is defined by the way to be used and the node id of a node on this way
    * which is the target to reach.
    */
   class OSMSCOUT_API Path
