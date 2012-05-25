@@ -110,6 +110,7 @@ namespace osmscout {
                             DataFile<RawNode>& nodeDataFile,
                             DataFile<RawWay>& wayDataFile,
                             DataFile<RawRelation>& relationDataFile,
+                            std::set<Id>& resolvedRelations,
                             const std::string& roleName,
                             std::vector<Relation::Role>& roles,
                             Progress& progress)
@@ -194,6 +195,15 @@ namespace osmscout {
     else if (member.type==RawRelation::memberRelation) {
       RawRelationRef relation;
 
+      if (resolvedRelations.find(member.id)!=resolvedRelations.end()) {
+        progress.Error("Found self referencing relation "+
+                       NumberToString(member.id)+
+                       " during resolving of members of relation "+
+                       NumberToString(id)+" "+name);
+        return false;
+      }
+
+
       if (!relationDataFile.Get(member.id,relation)) {
         progress.Error("Cannot resolve relation member of type relation with id "+
                        NumberToString(member.id)+
@@ -201,6 +211,8 @@ namespace osmscout {
                        NumberToString(id)+" "+name);
         return false;
       }
+
+      resolvedRelations.insert(member.id);
 
       for (size_t m=0; m<relation->members.size(); m++) {
         if (!ResolveMember(typeConfig,
@@ -210,13 +222,12 @@ namespace osmscout {
                            nodeDataFile,
                            wayDataFile,
                            relationDataFile,
+                           resolvedRelations,
                            roleName,
                            roles,
                            progress)) {
           break;
         }
-
-
       }
 
       return true;
@@ -828,6 +839,8 @@ namespace osmscout {
 
       rel.roles.reserve(rawRel.members.size());
 
+      std::set<Id> resolvedRelations;
+
       for (size_t m=0; m<rawRel.members.size(); m++) {
         if (!ResolveMember(typeConfig,
                            rawRel.GetId(),
@@ -836,6 +849,7 @@ namespace osmscout {
                            nodeDataFile,
                            wayDataFile,
                            relDataFile,
+                           resolvedRelations,
                            rawRel.members[m].role,
                            rel.roles,
                            progress)) {
@@ -843,6 +857,8 @@ namespace osmscout {
           break;
         }
       }
+
+      resolvedRelations.clear();
 
       if (error) {
         continue;
