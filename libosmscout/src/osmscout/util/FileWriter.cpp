@@ -364,7 +364,7 @@ namespace osmscout {
 
     hasError=fwrite(buffer,sizeof(char),bytesToWrite,file)!=bytesToWrite;
 
-    delete buffer;
+    delete [] buffer;
 
     return !hasError;
   }
