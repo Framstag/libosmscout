@@ -72,9 +72,9 @@ namespace osmscout {
                         FileWriter& nodeWriter);
 
     void ReadWays(const TypeConfig& typeConfig,
-                   const PBF::PrimitiveBlock& block,
-                   const PBF::PrimitiveGroup &group,
-                   FileWriter& wayWriter);
+                  const PBF::PrimitiveBlock& block,
+                  const PBF::PrimitiveGroup &group,
+                  FileWriter& wayWriter);
 
     void ReadRelations(const TypeConfig& typeConfig,
                        const PBF::PrimitiveBlock& block,
