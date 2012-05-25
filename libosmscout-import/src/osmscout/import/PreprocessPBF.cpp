@@ -699,13 +699,22 @@ namespace osmscout {
           ReadNodes(typeConfig,block,group,nodeWriter);
         }
         else if (group.ways_size()>0) {
-          ReadWays(typeConfig,block,group,wayWriter);
+          ReadWays(typeConfig,
+                   block,
+                   group,
+                   wayWriter);
         }
         else if (group.relations_size()>0) {
-          ReadRelations(typeConfig,block,group,relationWriter);
+          ReadRelations(typeConfig,
+                        block,
+                        group,
+                        relationWriter);
         }
         else if (group.has_dense()) {
-          ReadDenseNodes(typeConfig,block,group,nodeWriter);
+          ReadDenseNodes(typeConfig,
+                         block,
+                         group,
+                         nodeWriter);
         }
       }
     }
