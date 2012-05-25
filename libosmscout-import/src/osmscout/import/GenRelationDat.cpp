@@ -869,7 +869,7 @@ namespace osmscout {
                        typeId!=rel.roles[m].GetType()) {
                 if (progress.OutputDebug()) {
                   progress.Warning("Multipolygon relation "+NumberToString(rel.GetId())+" has conflicting types for outer boundary ("+
-                                   NumberToString(rawRel.members[m].id)+","+NumberToString(rel.GetType())+","+NumberToString(rel.roles[m].GetType())+")");
+                                   typeConfig.GetTypeInfo(typeId).GetName()+ " vs. "+typeConfig.GetTypeInfo(rel.roles[m].GetType()).GetName()+")");
                 }
                 correct=false;
               }
@@ -897,8 +897,10 @@ namespace osmscout {
 
       // Blacklist all ways that build the multipolygon relation
       if (rel.IsArea()) {
-        for (size_t m=0; m<rel.roles.size(); m++) {
-          wayAreaIndexBlacklist.insert(rawRel.members[m].id);
+        for (size_t m=0; m<rawRel.members.size(); m++) {
+          if (rawRel.members[m].type==RawRelation::memberWay) {
+            wayAreaIndexBlacklist.insert(rawRel.members[m].id);
+          }
         }
       }
       // Blacklist all relation members that have the same type as relation itself
