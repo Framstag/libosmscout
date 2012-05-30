@@ -443,13 +443,9 @@ namespace osmscout {
 
     QPainterPath p;
 
-    for (size_t i=transStart; i<=transEnd; i++) {
-      if (i==transStart) {
-        p.moveTo(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
-      }
-      else {
-        p.lineTo(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
-      }
+    p.moveTo(transBuffer.buffer[transStart].x,transBuffer.buffer[transStart].y);
+    for (size_t i=transStart+1; i<=transEnd; i++) {
+      p.lineTo(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
     }
 
     painter->strokePath(p,pen);
