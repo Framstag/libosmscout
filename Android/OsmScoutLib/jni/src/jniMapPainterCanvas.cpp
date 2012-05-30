@@ -77,14 +77,14 @@ namespace osmscout {
                           
   void MapPainterCanvas::DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
-                   const Label& label)
+                   const LabelData& label)
   {
     // TODO
   }
 
   void MapPainterCanvas::DrawPlateLabel(const Projection& projection,
                         const MapParameter& parameter,
-                        const Label& label)
+                        const LabelData& label)
   {
     // TODO
   }
@@ -112,20 +112,49 @@ namespace osmscout {
 
   void MapPainterCanvas::DrawPath(const Projection& projection,
                   const MapParameter& parameter,
-                  double r, double g, double b, double a,
+                  const Color& color,
                   double width,
                   const std::vector<double>& dash,
                   CapStyle startCap,
                   CapStyle endCap,
                   size_t transStart, size_t transEnd)
   {
-    jint color=GetColor(r, g, b, a);
+    jint javaColor=GetColorInt(color);
     
     jmethodID methodId=mJniEnv->GetMethodID(mJavaClass, "drawPath",
-                                            "(IF[F[F)V");
+                                            "(IF[FZZ[F[F)V");
     
     if (!methodId)
       return;
+
+    jfloatArray javaDash=NULL;
+    float *dashArray=NULL;
+
+    if (!dash.empty()) {
+
+      javaDash=mJniEnv->NewFloatArray(dash.size());
+
+      dashArray=new float[dash.size()];
+
+      for(int i=0; i<dash.size(); i++)
+      {
+        dashArray[i]=dash[i]*width;
+      }
+
+      mJniEnv->SetFloatArrayRegion(javaDash, 0, dash.size(), dashArray);
+    }
+
+    jboolean roundedStartCap=JNI_FALSE;
+    jboolean roundedEndCap=JNI_FALSE;
+
+    if (dash.empty()) {
+
+      if (startCap==capRound)
+        roundedStartCap=JNI_TRUE;
+
+      if (endCap==capRound)
+        roundedEndCap=JNI_TRUE;
+    }
     
     int numPoints=transEnd-transStart+1;
     
@@ -144,7 +173,8 @@ namespace osmscout {
     mJniEnv->SetFloatArrayRegion(jArrayX, 0, numPoints, x);
     mJniEnv->SetFloatArrayRegion(jArrayY, 0, numPoints, y);
         
-    mJniEnv->CallVoidMethod(mObject, methodId, (jint)color, (jfloat)width,
+    mJniEnv->CallVoidMethod(mObject, methodId, javaColor, (jfloat)width,
+                            javaDash, roundedStartCap, roundedEndCap,
                             jArrayX, jArrayY);
 
     delete x;
@@ -152,6 +182,12 @@ namespace osmscout {
 
     mJniEnv->DeleteLocalRef(jArrayX);
     mJniEnv->DeleteLocalRef(jArrayY);
+
+    if (javaDash) {
+
+      delete dashArray;
+      mJniEnv->DeleteLocalRef(javaDash);
+    }
   }
 
   void MapPainterCanvas::DrawArea(const Projection& projection,
@@ -163,10 +199,20 @@ namespace osmscout {
      * TODO: Handle clipping regions
      */
      
-    jint color=GetColor(area.fillStyle->GetFillR(), area.fillStyle->GetFillG(),
-                        area.fillStyle->GetFillB(), area.fillStyle->GetFillA());
-    
-    jmethodID methodId=mJniEnv->GetMethodID(mJavaClass,"drawArea","(I[F[F)V");
+    jint fillColor=GetColorInt(area.fillStyle->GetFillColor());
+
+    jint borderColor=GetColorInt(area.fillStyle->GetBorderColor());
+
+    jfloat borderWidth=ConvertWidthToPixel(parameter,
+                                           area.fillStyle->GetBorderWidth());
+
+    if (borderWidth<parameter.GetLineMinWidthPixel())
+    {
+      // Set an invalid border width so no border will be drawn
+      borderWidth=-1.0;
+    }
+
+    jmethodID methodId=mJniEnv->GetMethodID(mJavaClass,"drawArea","(IIF[F[F)V");
     
     if (!methodId)
       return;
@@ -188,8 +234,9 @@ namespace osmscout {
     mJniEnv->SetFloatArrayRegion(jArrayX, 0, numPoints, x);
     mJniEnv->SetFloatArrayRegion(jArrayY, 0, numPoints, y);
     
-    mJniEnv->CallVoidMethod(mObject, methodId, color, jArrayX, jArrayY);
-    
+    mJniEnv->CallVoidMethod(mObject, methodId, fillColor, borderColor,
+                            borderWidth, jArrayX, jArrayY);
+
     delete x;
     delete y;
     
@@ -204,8 +251,7 @@ namespace osmscout {
                   double width,
                   double height)
   {
-    jint color=GetColor(style.GetFillR(), style.GetFillG(),
-                        style.GetFillB(), style.GetFillA());
+    jint color=GetColorInt(style.GetFillColor());
     
     jmethodID methodId=mJniEnv->GetMethodID(mJavaClass,"drawArea","(IFFFF)V");
     
@@ -230,7 +276,7 @@ namespace osmscout {
     return Draw(styleConfig, projection, parameter, data);
   }
   
-  int MapPainterCanvas::GetColor(double r, double g, double  b, double a)
+  int MapPainterCanvas::GetColorInt(double r, double g, double  b, double a)
   {
     int colorA=(int)floor(255*a+0.5);
     int colorR=(int)floor(255*r+0.5);
@@ -241,6 +287,15 @@ namespace osmscout {
 
     return color;
   }
+
+  int MapPainterCanvas::GetColorInt(Color color)
+  {
+    return GetColorInt(color.GetR(),
+                       color.GetG(),
+                       color.GetB(),
+                       color.GetA());
+  }
+
 }
 
 #ifdef __cplusplus
