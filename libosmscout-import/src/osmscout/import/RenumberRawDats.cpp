@@ -43,7 +43,7 @@ namespace osmscout {
     FileWriter  writer;
     uint32_t    nodesCount;
     uint32_t    nodesCopyiedCount=0;
-    double      zoomLevel=pow(2,parameter.GetRenumberMag());
+    double      zoomLevel=pow(2.0,(double)parameter.GetRenumberMag());
     size_t      cellCount=zoomLevel*zoomLevel;
     size_t      minIndex=0;
     size_t      maxIndex=cellCount-1;
