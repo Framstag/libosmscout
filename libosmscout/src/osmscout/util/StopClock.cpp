@@ -29,6 +29,10 @@
   #include <sys/time.h>
 #endif
 
+#if defined (__WIN32__) || defined (WIN32)
+#include <windows.h>
+#endif
+
 namespace osmscout {
 
 #if defined(HAVE_SYS_TIME_H)
@@ -51,6 +55,11 @@ namespace osmscout {
     timeval start;
     timeval stop;
 #endif
+#if defined (__WIN32__) || defined (WIN32)
+	LARGE_INTEGER start;
+	LARGE_INTEGER stop;
+	LARGE_INTEGER freq;
+#endif
   };
 
   StopClock::StopClock()
@@ -58,6 +67,9 @@ namespace osmscout {
   {
 #if defined(HAVE_SYS_TIME_H)
     gettimeofday(&pimpl->start,NULL);
+#elif defined (__WIN32__) || defined (WIN32)
+	QueryPerformanceFrequency(&pimpl->freq);
+	QueryPerformanceCounter(&pimpl->start);
 #endif
   }
 
@@ -70,6 +82,8 @@ namespace osmscout {
   {
 #if defined(HAVE_SYS_TIME_H)
     gettimeofday(&pimpl->stop,NULL);
+#elif defined (__WIN32__) || defined (WIN32)
+	QueryPerformanceCounter(&pimpl->stop);
 #endif
   }
 
@@ -84,6 +98,8 @@ namespace osmscout {
     result =diff.tv_sec*1000.0+diff.tv_usec/1000;
 
     return result;
+#elif defined (__WIN32__) || defined (WIN32)
+	return (pimpl->stop.QuadPart-pimpl->start.QuadPart) / (pimpl->freq.QuadPart/1000.0);
 #else
     return 0.0;
 #endif
@@ -97,6 +113,8 @@ namespace osmscout {
     timersub(&clock.pimpl->stop,&clock.pimpl->start,&diff);
 
     stream << diff.tv_sec << "." << std::setw(3) << std::setfill('0') << diff.tv_usec/1000;
+#elif defined (__WIN32__) || defined (WIN32)
+    stream << std::setprecision (6) << static_cast<double>(clock.pimpl->stop.QuadPart-clock.pimpl->start.QuadPart) / clock.pimpl->freq.QuadPart;
 #else
     stream << "X.XXX";
 #endif
@@ -127,6 +145,10 @@ namespace osmscout {
     result+=millis;
 
     return result;
+#elif defined (__WIN32__) || defined (WIN32)
+	  std::stringstream ss;
+	  ss << std::setprecision (6) << static_cast<double>(pimpl->stop.QuadPart-pimpl->start.QuadPart) / pimpl->freq.QuadPart;
+	  return ss.str();
 #else
     return "X.XXX";
 #endif
