@@ -44,3 +44,9 @@ int main(int argc, char* argv[])
 
   return result;
 }
+
+#if defined(__WIN32__) || defined(WIN32)
+int CALLBACK WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR /*lpCmdLine*/, int /*nCmdShow*/){
+	main(0, NULL);
+}
+#endif
