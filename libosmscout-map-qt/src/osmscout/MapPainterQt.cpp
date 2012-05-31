@@ -504,15 +504,12 @@ namespace osmscout {
           c!=area.clippings.end();
           c++) {
         const PolyData& data=*c;
-        QPainterPath    subpath;
 
-        subpath.moveTo(transBuffer.buffer[data.transStart].x,transBuffer.buffer[data.transStart].y);
+        path.moveTo(transBuffer.buffer[data.transStart].x,transBuffer.buffer[data.transStart].y);
         for (size_t i=data.transStart+1; i<=data.transEnd; i++) {
-          subpath.lineTo(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+          path.lineTo(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
         }
         path.closeSubpath();
-
-        path=path.subtracted(subpath);
       }
     }
 
