@@ -51,25 +51,24 @@ namespace osmscout {
 
   struct StopClock::StopClockPIMPL
   {
-#if defined(HAVE_SYS_TIME_H)
-    timeval start;
-    timeval stop;
-#endif
 #if defined (__WIN32__) || defined (WIN32)
 	LARGE_INTEGER start;
 	LARGE_INTEGER stop;
 	LARGE_INTEGER freq;
+#elif defined(HAVE_SYS_TIME_H)
+    timeval start;
+    timeval stop;
 #endif
   };
 
   StopClock::StopClock()
     : pimpl(new StopClockPIMPL())
   {
-#if defined(HAVE_SYS_TIME_H)
-    gettimeofday(&pimpl->start,NULL);
-#elif defined (__WIN32__) || defined (WIN32)
+#if defined (__WIN32__) || defined (WIN32)
 	QueryPerformanceFrequency(&pimpl->freq);
 	QueryPerformanceCounter(&pimpl->start);
+#elif defined(HAVE_SYS_TIME_H)
+    gettimeofday(&pimpl->start,NULL);
 #endif
   }
 
@@ -80,16 +79,18 @@ namespace osmscout {
 
   void StopClock::Stop()
   {
-#if defined(HAVE_SYS_TIME_H)
-    gettimeofday(&pimpl->stop,NULL);
-#elif defined (__WIN32__) || defined (WIN32)
+#if defined (__WIN32__) || defined (WIN32)
 	QueryPerformanceCounter(&pimpl->stop);
+#elif defined(HAVE_SYS_TIME_H)
+    gettimeofday(&pimpl->stop,NULL);
 #endif
   }
 
   double StopClock::GetMilliseconds() const
   {
-#if defined(HAVE_SYS_TIME_H)
+#if defined (__WIN32__) || defined (WIN32)
+	return (pimpl->stop.QuadPart-pimpl->start.QuadPart) / (pimpl->freq.QuadPart/1000.0);
+#elif defined(HAVE_SYS_TIME_H)
     timeval diff;
     size_t  result;
 
@@ -98,8 +99,6 @@ namespace osmscout {
     result =diff.tv_sec*1000.0+diff.tv_usec/1000;
 
     return result;
-#elif defined (__WIN32__) || defined (WIN32)
-	return (pimpl->stop.QuadPart-pimpl->start.QuadPart) / (pimpl->freq.QuadPart/1000.0);
 #else
     return 0.0;
 #endif
@@ -107,14 +106,14 @@ namespace osmscout {
 
   std::ostream& operator<<(std::ostream& stream, const StopClock& clock)
   {
-#if defined(HAVE_SYS_TIME_H)
+#if defined (__WIN32__) || defined (WIN32)
+    stream << std::setprecision (6) << static_cast<double>(clock.pimpl->stop.QuadPart-clock.pimpl->start.QuadPart) / clock.pimpl->freq.QuadPart;
+#elif defined(HAVE_SYS_TIME_H)
     timeval diff;
 
     timersub(&clock.pimpl->stop,&clock.pimpl->start,&diff);
 
     stream << diff.tv_sec << "." << std::setw(3) << std::setfill('0') << diff.tv_usec/1000;
-#elif defined (__WIN32__) || defined (WIN32)
-    stream << std::setprecision (6) << static_cast<double>(clock.pimpl->stop.QuadPart-clock.pimpl->start.QuadPart) / clock.pimpl->freq.QuadPart;
 #else
     stream << "X.XXX";
 #endif
@@ -124,7 +123,11 @@ namespace osmscout {
 
   std::string StopClock::ResultString() const
   {
-#if defined(HAVE_SYS_TIME_H)
+#if defined (__WIN32__) || defined (WIN32)
+	  std::stringstream ss;
+	  ss << std::setprecision (6) << static_cast<double>(pimpl->stop.QuadPart-pimpl->start.QuadPart) / pimpl->freq.QuadPart;
+	  return ss.str();
+#elif defined(HAVE_SYS_TIME_H)
     timeval     diff;
     std::string result;
     std::string seconds;
@@ -145,10 +148,6 @@ namespace osmscout {
     result+=millis;
 
     return result;
-#elif defined (__WIN32__) || defined (WIN32)
-	  std::stringstream ss;
-	  ss << std::setprecision (6) << static_cast<double>(pimpl->stop.QuadPart-pimpl->start.QuadPart) / pimpl->freq.QuadPart;
-	  return ss.str();
 #else
     return "X.XXX";
 #endif
