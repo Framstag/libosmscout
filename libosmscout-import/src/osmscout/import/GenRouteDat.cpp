@@ -442,7 +442,7 @@ namespace osmscout {
 
     if (!wayIndex.Open(parameter.GetDestinationDirectory(),
                            parameter.GetWayIndexMemoryMaped())) {
-      std::cerr << "Cannot open way index file!" << std::endl;
+      progress.Error("Cannot open 'way.idx'!");
       return false;
     }
 
@@ -594,7 +594,8 @@ namespace osmscout {
               }
             }
 
-            if (nextNode!=currentNode) {
+            if (nextNode!=currentNode &&
+                way->nodes[nextNode].GetId()!=routeNode.id) {
               RouteNode::Path path;
 
               path.id=way->nodes[nextNode].GetId();
@@ -640,7 +641,8 @@ namespace osmscout {
             }
 
             if (prevNode!=currentNode &&
-                prevNode!=nextNode) {
+                prevNode!=nextNode &&
+                way->nodes[prevNode].GetId()!=routeNode.id) {
               RouteNode::Path path;
 
               path.id=way->nodes[prevNode].GetId();
@@ -697,7 +699,8 @@ namespace osmscout {
               }
             }
 
-            if (nextNode!=currentNode) {
+            if (nextNode!=currentNode &&
+                way->nodes[nextNode].GetId()!=routeNode.id) {
               RouteNode::Path path;
 
               path.id=way->nodes[nextNode].GetId();
@@ -744,7 +747,8 @@ namespace osmscout {
               }
 
               if (prevNode!=currentNode &&
-                  prevNode!=nextNode) {
+                  prevNode!=nextNode &&
+                  way->nodes[prevNode].GetId()!=routeNode.id) {
                 RouteNode::Path path;
 
                 path.id=way->nodes[prevNode].GetId();
@@ -765,7 +769,7 @@ namespace osmscout {
           // Normal way routing
           else {
             for (size_t i=0; i<way->nodes.size(); i++) {
-              if (way->nodes[i].GetId()==node->first) {
+              if (way->nodes[i].GetId()==routeNode.id) {
                 if (i>0 && !way->IsOneway()) {
                   int j=i-1;
 
@@ -777,7 +781,8 @@ namespace osmscout {
                     j--;
                   }
 
-                  if (j>=0) {
+                  if (j>=0 &&
+                      way->nodes[j].GetId()!=routeNode.id) {
                     RouteNode::Path path;
 
                     path.id=way->nodes[j].GetId();
@@ -813,7 +818,8 @@ namespace osmscout {
                     j++;
                   }
 
-                  if (j<way->nodes.size()) {
+                  if (j<way->nodes.size() &&
+                      way->nodes[j].GetId()!=routeNode.id) {
                     RouteNode::Path path;
 
                     path.id=way->nodes[j].GetId();
