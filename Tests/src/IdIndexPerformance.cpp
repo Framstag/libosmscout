@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
   std::vector<osmscout::Id> ids;
   std::vector<osmscout::Id> queries;
   std::string               filename="ways.dat";
-  long                      filesize=0;
+  unsigned long             filesize=0;
   size_t                    readerWayCount;
 
   if (!osmscout::GetFileSize(filename,filesize)) {

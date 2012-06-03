@@ -36,9 +36,9 @@ namespace osmscout {
   bool LoadStyleConfig(const char* styleFile,
                        StyleConfig& styleConfig)
   {
-    long  fileSize;
-    FILE* file;
-    bool  success=false;
+    unsigned long fileSize;
+    FILE*         file;
+    bool          success=false;
 
     if (!GetFileSize(styleFile,fileSize)) {
       std::cerr << "Cannot get size of file '" << styleFile << "'" << std::endl;

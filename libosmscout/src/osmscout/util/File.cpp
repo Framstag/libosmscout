@@ -17,6 +17,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <osmscout/private/Config.h>
+
 #include <osmscout/util/File.h>
 
 #include <cstdio>
@@ -24,7 +26,7 @@
 
 namespace osmscout {
 
-  bool GetFileSize(const std::string& filename, long& size)
+  bool GetFileSize(const std::string& filename, unsigned long& size)
   {
     FILE *file;
 
@@ -34,19 +36,40 @@ namespace osmscout {
       return false;
     }
 
+#if defined(HAVE_FSEEKO)
+    if (fseeko(file,0L,SEEK_END)!=0) {
+      fclose(file);
+
+      return false;
+    }
+
+    off_t pos=ftello(file);
+
+    if (pos==-1) {
+      fclose(file);
+
+      return false;
+    }
+
+    size=(unsigned long)pos;
+
+#else
     if (fseek(file,0L,SEEK_END)!=0) {
       fclose(file);
 
       return false;
     }
 
-    size=ftell(file);
+    unsigned long pos=ftell(file);
 
-    if (size==-1) {
+    if (pos==-1) {
       fclose(file);
 
       return false;
     }
+
+    size=(unsigned long)pos;
+#endif
 
     fclose(file);
 

@@ -107,6 +107,31 @@ namespace osmscout {
       return false;
     }
 
+#if defined(HAVE_FSEEKO)
+    off_t size;
+
+    if (fseeko(file,0L,SEEK_END)!=0) {
+      std::cerr << "Cannot seek to end of file!" << std::endl;
+      hasError=true;
+      return false;
+    }
+
+    size=ftello(file);
+
+    if (size==-1) {
+      std::cerr << "Cannot get size of file!" << std::endl;
+      hasError=true;
+      return false;
+    }
+
+    this->size=(FileOffset)size;
+
+    if (fseeko(file,0L,SEEK_SET)!=0) {
+      std::cerr << "Cannot seek to start of file!" << std::endl;
+      hasError=true;
+      return false;
+    }
+#else
     long size;
 
     if (fseek(file,0L,SEEK_END)!=0) {
@@ -123,13 +148,14 @@ namespace osmscout {
       return false;
     }
 
-    this->size=(size_t)size;
+    this->size=(FileOffset)size;
 
     if (fseek(file,0L,SEEK_SET)!=0) {
       std::cerr << "Cannot seek to start of file!" << std::endl;
       hasError=true;
       return false;
     }
+#endif
 
 #if defined(HAVE_MMAP)
     if (file!=NULL && readOnly && useMmap && this->size>0) {

@@ -29,7 +29,7 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/StopClock.h>
 
-//#define DEBUG_ROUTING
+#define DEBUG_ROUTING
 
 namespace osmscout {
 
@@ -715,7 +715,7 @@ namespace osmscout {
           node->access=currentRouteNode->paths[i].HasAccess();
 
 #if defined(DEBUG_ROUTING)
-          std::cout << "  Updating route " << node->nodeId << " via way " << node->wayId << " " << currentCost << " " << estimateCost << " " << overallCost << std::endl;
+          std::cout << "  Updating route " << node->nodeId << " via way " << node->wayId << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->id << std::endl;
 #endif
 
           openList.erase(openEntry->second);
@@ -734,7 +734,7 @@ namespace osmscout {
           node->access=currentRouteNode->paths[i].HasAccess();
 
 #if defined(DEBUG_ROUTING)
-          std::cout << "  Inserting route " << node->nodeId <<  " via way " << node->wayId  << " " << currentCost << " " << estimateCost << " " << overallCost << std::endl;
+          std::cout << "  Inserting route " << node->nodeId <<  " via way " << node->wayId  << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->id << std::endl;
 #endif
 
           std::pair<OpenListRef,bool> result=openList.insert(node);

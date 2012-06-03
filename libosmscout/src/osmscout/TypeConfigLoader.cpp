@@ -34,9 +34,9 @@ namespace osmscout {
   bool LoadTypeConfig(const char* typeFile,
                       TypeConfig& config)
   {
-    long  fileSize;
-    FILE* file;
-    bool  success=false;
+    unsigned long fileSize;
+    FILE*         file;
+    bool          success=false;
 
     if (!GetFileSize(typeFile,fileSize)) {
       std::cerr << "Cannot get size of file '" << typeFile << "'" << std::endl;
