@@ -141,7 +141,7 @@ void Parser::OSS() {
 		if (la->kind == 8 /* "ORDER" */) {
 			WAYORDER();
 		}
-		while (la->kind == 14 /* "[" */) {
+		while (StartOf(1)) {
 			StyleFilter filter; 
 			STYLE(filter);
 		}
@@ -160,18 +160,17 @@ void Parser::WAYORDER() {
 }
 
 void Parser::STYLE(StyleFilter filter) {
-		STYLEFILTER(filter);
+		if (la->kind == 14 /* "[" */) {
+			STYLEFILTER(filter);
+		}
 		if (la->kind == 12 /* "{" */) {
 			Get();
-			while (la->kind == 14 /* "[" */) {
+			while (StartOf(1)) {
 				STYLE(filter);
 			}
 			Expect(13 /* "}" */);
 		} else if (la->kind == 19 /* "NODE" */ || la->kind == 25 /* "WAY" */ || la->kind == 26 /* "AREA" */) {
 			STYLEDEF(filter);
-			while (la->kind == 19 /* "NODE" */ || la->kind == 25 /* "WAY" */ || la->kind == 26 /* "AREA" */) {
-				STYLEDEF(filter);
-			}
 		} else SynErr(74);
 }
 
@@ -264,7 +263,7 @@ void Parser::STYLEFILTER(StyleFilter& filter) {
 		}
 		if (la->kind == 16 /* "MAG" */) {
 			Get();
-			if (StartOf(1)) {
+			if (StartOf(2)) {
 				Mag mag; 
 				MAG(mag);
 				size_t level=MagToLevel(mag);
@@ -280,7 +279,7 @@ void Parser::STYLEFILTER(StyleFilter& filter) {
 				
 			}
 			Expect(17 /* "-" */);
-			if (StartOf(1)) {
+			if (StartOf(2)) {
 				Mag mag; 
 				MAG(mag);
 				size_t level=MagToLevel(mag);
@@ -444,7 +443,7 @@ void Parser::NODELABELSTYLE(StyleFilter filter) {
 		
 		while (!(la->kind == _EOF || la->kind == 12 /* "{" */)) {SynErr(86); Get();}
 		Expect(12 /* "{" */);
-		while (StartOf(2)) {
+		while (StartOf(3)) {
 			LABELDEF(labelStyles);
 		}
 		while (!(la->kind == _EOF || la->kind == 13 /* "}" */)) {SynErr(87); Get();}
@@ -463,7 +462,7 @@ void Parser::NODEREFSTYLE(StyleFilter filter) {
 		
 		while (!(la->kind == _EOF || la->kind == 12 /* "{" */)) {SynErr(89); Get();}
 		Expect(12 /* "{" */);
-		while (StartOf(2)) {
+		while (StartOf(3)) {
 			REFDEF(labelStyles);
 		}
 		while (!(la->kind == _EOF || la->kind == 13 /* "}" */)) {SynErr(90); Get();}
@@ -515,7 +514,7 @@ void Parser::LABELDEF(LabelStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			LABELSTYLE(labelStyle);
-			ExpectWeak(29 /* ";" */, 3);
+			ExpectWeak(29 /* ";" */, 4);
 			for (LabelStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -531,7 +530,7 @@ void Parser::LABELDEF(LabelStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			COLOR(textColor);
-			ExpectWeak(29 /* ";" */, 3);
+			ExpectWeak(29 /* ";" */, 4);
 			for (LabelStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -547,7 +546,7 @@ void Parser::LABELDEF(LabelStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			COLOR(bgColor);
-			ExpectWeak(29 /* ";" */, 3);
+			ExpectWeak(29 /* ";" */, 4);
 			for (LabelStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -563,7 +562,7 @@ void Parser::LABELDEF(LabelStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			COLOR(borderColor);
-			ExpectWeak(29 /* ";" */, 3);
+			ExpectWeak(29 /* ";" */, 4);
 			for (LabelStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -579,7 +578,7 @@ void Parser::LABELDEF(LabelStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			DOUBLE(size);
-			ExpectWeak(29 /* ";" */, 3);
+			ExpectWeak(29 /* ";" */, 4);
 			for (LabelStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -595,7 +594,7 @@ void Parser::LABELDEF(LabelStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			MAG(scaleMag);
-			ExpectWeak(29 /* ";" */, 3);
+			ExpectWeak(29 /* ";" */, 4);
 			for (LabelStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -611,7 +610,7 @@ void Parser::LABELDEF(LabelStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			INTEGER(priority);
-			ExpectWeak(29 /* ";" */, 3);
+			ExpectWeak(29 /* ";" */, 4);
 			if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
 			    for (LabelStyleList::iterator s=styles.begin();
 			         s!=styles.end();
@@ -649,7 +648,7 @@ void Parser::REFDEF(LabelStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			LABELSTYLE(labelStyle);
-			ExpectWeak(29 /* ";" */, 3);
+			ExpectWeak(29 /* ";" */, 4);
 			for (LabelStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -665,7 +664,7 @@ void Parser::REFDEF(LabelStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			COLOR(textColor);
-			ExpectWeak(29 /* ";" */, 3);
+			ExpectWeak(29 /* ";" */, 4);
 			for (LabelStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -681,7 +680,7 @@ void Parser::REFDEF(LabelStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			COLOR(bgColor);
-			ExpectWeak(29 /* ";" */, 3);
+			ExpectWeak(29 /* ";" */, 4);
 			for (LabelStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -697,7 +696,7 @@ void Parser::REFDEF(LabelStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			COLOR(borderColor);
-			ExpectWeak(29 /* ";" */, 3);
+			ExpectWeak(29 /* ";" */, 4);
 			for (LabelStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -713,7 +712,7 @@ void Parser::REFDEF(LabelStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			DOUBLE(size);
-			ExpectWeak(29 /* ";" */, 3);
+			ExpectWeak(29 /* ";" */, 4);
 			for (LabelStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -729,7 +728,7 @@ void Parser::REFDEF(LabelStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			MAG(scaleMag);
-			ExpectWeak(29 /* ";" */, 3);
+			ExpectWeak(29 /* ";" */, 4);
 			for (LabelStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -745,7 +744,7 @@ void Parser::REFDEF(LabelStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			INTEGER(priority);
-			ExpectWeak(29 /* ";" */, 3);
+			ExpectWeak(29 /* ";" */, 4);
 			if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
 			    for (LabelStyleList::iterator s=styles.begin();
 			         s!=styles.end();
@@ -774,7 +773,7 @@ void Parser::SYMBOLDEF(SymbolStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			SYMBOLSTYLE(symbolStyle);
-			ExpectWeak(29 /* ";" */, 4);
+			ExpectWeak(29 /* ";" */, 5);
 			for (SymbolStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -788,7 +787,7 @@ void Parser::SYMBOLDEF(SymbolStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			COLOR(fillColor);
-			ExpectWeak(29 /* ";" */, 4);
+			ExpectWeak(29 /* ";" */, 5);
 			for (SymbolStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -802,7 +801,7 @@ void Parser::SYMBOLDEF(SymbolStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			DOUBLE(size);
-			ExpectWeak(29 /* ";" */, 4);
+			ExpectWeak(29 /* ";" */, 5);
 			for (SymbolStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -820,7 +819,7 @@ void Parser::ICONDEF(IconStyleList& styles) {
 		Expect(28 /* ":" */);
 		Expect(_ident);
 		name=Destring(t->val); 
-		ExpectWeak(29 /* ";" */, 5);
+		ExpectWeak(29 /* ";" */, 6);
 		for (IconStyleList::iterator s=styles.begin();
 		    s!=styles.end();
 		    ++s) {
@@ -841,7 +840,7 @@ void Parser::WAYSTYLE(StyleFilter filter) {
 		
 		while (!(la->kind == _EOF || la->kind == 12 /* "{" */)) {SynErr(100); Get();}
 		Expect(12 /* "{" */);
-		while (StartOf(6)) {
+		while (StartOf(7)) {
 			LINEDEF(lineStyles);
 		}
 		while (!(la->kind == _EOF || la->kind == 13 /* "}" */)) {SynErr(101); Get();}
@@ -859,7 +858,7 @@ void Parser::WAYLABELSTYLE(StyleFilter filter) {
 		config.GetWayNameLabelStyles(filter,labelStyles); 
 		
 		Expect(12 /* "{" */);
-		while (StartOf(2)) {
+		while (StartOf(3)) {
 			LABELDEF(labelStyles);
 		}
 		Expect(13 /* "}" */);
@@ -877,7 +876,7 @@ void Parser::WAYREFSTYLE(StyleFilter filter) {
 		
 		while (!(la->kind == _EOF || la->kind == 12 /* "{" */)) {SynErr(104); Get();}
 		Expect(12 /* "{" */);
-		while (StartOf(2)) {
+		while (StartOf(3)) {
 			LABELDEF(labelStyles);
 		}
 		while (!(la->kind == _EOF || la->kind == 13 /* "}" */)) {SynErr(105); Get();}
@@ -891,7 +890,7 @@ void Parser::LINEDEF(LineStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			COLOR(lineColor);
-			ExpectWeak(29 /* ";" */, 7);
+			ExpectWeak(29 /* ";" */, 8);
 			for (LineStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -907,7 +906,7 @@ void Parser::LINEDEF(LineStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			COLOR(alternateColor);
-			ExpectWeak(29 /* ";" */, 7);
+			ExpectWeak(29 /* ";" */, 8);
 			for (LineStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -923,7 +922,7 @@ void Parser::LINEDEF(LineStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			COLOR(outlineColor);
-			ExpectWeak(29 /* ";" */, 7);
+			ExpectWeak(29 /* ";" */, 8);
 			for (LineStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -955,7 +954,7 @@ void Parser::LINEDEF(LineStyleList& styles) {
 			 style->SetDashes(dashes);
 			}
 			
-			ExpectWeak(29 /* ";" */, 7);
+			ExpectWeak(29 /* ";" */, 8);
 			break;
 		}
 		case 33 /* "gapColor" */: {
@@ -963,7 +962,7 @@ void Parser::LINEDEF(LineStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			COLOR(gapColor);
-			ExpectWeak(29 /* ";" */, 7);
+			ExpectWeak(29 /* ";" */, 8);
 			for (LineStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -979,7 +978,7 @@ void Parser::LINEDEF(LineStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			DISPLAYSIZE(displayWidth);
-			ExpectWeak(29 /* ";" */, 7);
+			ExpectWeak(29 /* ";" */, 8);
 			for (LineStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -995,7 +994,7 @@ void Parser::LINEDEF(LineStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			MAPSIZE(width);
-			ExpectWeak(29 /* ";" */, 7);
+			ExpectWeak(29 /* ";" */, 8);
 			for (LineStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -1011,7 +1010,7 @@ void Parser::LINEDEF(LineStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			DISPLAYSIZE(outline);
-			ExpectWeak(29 /* ";" */, 7);
+			ExpectWeak(29 /* ";" */, 8);
 			for (LineStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -1036,7 +1035,7 @@ void Parser::AREASTYLE(StyleFilter filter) {
 		
 		while (!(la->kind == _EOF || la->kind == 12 /* "{" */)) {SynErr(107); Get();}
 		Expect(12 /* "{" */);
-		while (StartOf(8)) {
+		while (StartOf(9)) {
 			FILLDEF(fillStyles);
 		}
 		while (!(la->kind == _EOF || la->kind == 13 /* "}" */)) {SynErr(108); Get();}
@@ -1055,7 +1054,7 @@ void Parser::AREALABELSTYLE(StyleFilter filter) {
 		
 		while (!(la->kind == _EOF || la->kind == 12 /* "{" */)) {SynErr(110); Get();}
 		Expect(12 /* "{" */);
-		while (StartOf(2)) {
+		while (StartOf(3)) {
 			LABELDEF(labelStyles);
 		}
 		while (!(la->kind == _EOF || la->kind == 13 /* "}" */)) {SynErr(111); Get();}
@@ -1107,7 +1106,7 @@ void Parser::FILLDEF(FillStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			COLOR(fillColor);
-			ExpectWeak(29 /* ";" */, 9);
+			ExpectWeak(29 /* ";" */, 10);
 			for (FillStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -1124,7 +1123,7 @@ void Parser::FILLDEF(FillStyleList& styles) {
 			Expect(28 /* ":" */);
 			Expect(_string);
 			patternName=Destring(t->val); 
-			ExpectWeak(29 /* ";" */, 9);
+			ExpectWeak(29 /* ";" */, 10);
 			for (FillStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -1140,7 +1139,7 @@ void Parser::FILLDEF(FillStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			MAG(minMag);
-			ExpectWeak(29 /* ";" */, 9);
+			ExpectWeak(29 /* ";" */, 10);
 			for (FillStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -1156,7 +1155,7 @@ void Parser::FILLDEF(FillStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			COLOR(borderColor);
-			ExpectWeak(29 /* ";" */, 9);
+			ExpectWeak(29 /* ";" */, 10);
 			for (FillStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -1172,7 +1171,7 @@ void Parser::FILLDEF(FillStyleList& styles) {
 			Get();
 			Expect(28 /* ":" */);
 			DISPLAYSIZE(width);
-			ExpectWeak(29 /* ";" */, 9);
+			ExpectWeak(29 /* ";" */, 10);
 			for (FillStyleList::iterator s=styles.begin();
 			    s!=styles.end();
 			    ++s) {
@@ -1204,7 +1203,7 @@ void Parser::FILLDEF(FillStyleList& styles) {
 			 style->SetBorderDashes(dashes);
 			}  
 			
-			ExpectWeak(29 /* ";" */, 9);
+			ExpectWeak(29 /* ";" */, 10);
 			break;
 		}
 		default: SynErr(118); break;
@@ -1326,8 +1325,9 @@ bool Parser::StartOf(int s)
   const bool T = true;
   const bool x = false;
 
-	static bool set[10][74] = {
+	static bool set[11][74] = {
 		{T,x,x,x, x,x,T,x, x,x,x,x, T,T,x,x, x,x,x,T, x,T,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, x,x,x,x, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,T,T, T,T,T,T, T,T,T,T, T,T,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,T, x,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{T,x,x,x, x,x,T,x, x,x,x,x, T,T,x,x, x,x,x,T, x,T,T,T, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,T, x,x,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},

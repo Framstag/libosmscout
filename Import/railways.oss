@@ -1,26 +1,41 @@
 OSS
-  WAY "railway_rail" MINMAG world
-    LINE #939393 WITH ALTCOLOR #777777 OUTLINECOLOR #b3b3b3 MINWIDTH 0.25mm WIDTH 5m OUTLINE 0.25mm
-    LABEL WITH STYLE contour MINMAG close
+  [TYPE "railway_rail"] {
+    WAY {color: #939393; altColor: #777777; outlineColor: #b3b3b3;displayWidth: 0.25mm; width: 5m; outline: 0.25mm;}
+    
+        
+    [MAG close-] {
+      WAY.LABEL {style: contour;}
+    }
+    
+    [MAG veryClose-] {
+      WAY {color: #939393; altColor: #777777; outlineColor: #b3b3b3; dash: 3,3; gapColor: #ffffff; displayWidth: 0.25mm;width: 5m; outline: 0.25mm;}
+    }
+  }  
 
-  NODE "railway_station"
-    LABEL WITH COLOR #000000 MINMAG county PRIO 3
-    SYMBOL circle #00ff00aa 4 WITH MINMAG world
+  [TYPE "railway_station"] {
+    AREA {color: #cb4040;}
+    
+    AREA.SYMBOL {style: circle; color: #00ff00aa; size: 4; }
+    NODE.SYMBOL {style: circle; color: #00ff00aa; size: 4; }
+    
+    [MAG county-] {
+      AREA.LABEL {style: normal; priority: 2;}
+      NODE.LABEL {style: normal; priority: 2;}
+    }
+  }
 
-  AREA "railway_station"
-    FILL #cb4040
-    LABEL WITH COLOR #000000 MINMAG county PRIO 3
-    SYMBOL circle #00ff00aa 4 WITH MINMAG world
+  [TYPE "railway_halt"] {
+    NODE.LABEL [MAG region-] {color: #aaaaaa; priority: 4;}
+    NODE.SYMBOL [MAG county-] {style: circle; color: #00ff0055; size: 4;}
+  }
 
-  NODE "railway_halt"
-    LABEL WITH COLOR #aaaaaa MINMAG region PRIO 4
-    SYMBOL circle #00ff0055 4 WITH MINMAG county
-
-  NODE "place_city"
-    LABEL WITH STYLE emphasize SIZE 1.3 MINMAG stateOver PRIO 1
-    SYMBOL circle #ff0000aa 4 WITH MINMAG world
-
-  NODE "place_town"
-    LABEL WITH STYLE emphasize SIZE 1.2 MINMAG county PRIO 2
-    SYMBOL circle #ff000055 4 WITH MINMAG county
+  [TYPE "place_city" MAG stateOver-] {
+	NODE.LABEL {style: emphasize; size: 1.3; priority: 1;}
+    NODE.SYMBOL {style: circle; color:  #ff0000aa; size: 4; }
+  }
+  
+  [TYPE "place_town" MAG county-] {
+    NODE.LABEL { style: normal; priority: 3;}
+    NODE.SYMBOL {style: circle; color: #ff000055; size: 4;}
+  }  
 END

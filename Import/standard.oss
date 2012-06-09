@@ -85,10 +85,11 @@ OSS
      WAY {color: #b5d0d0; displayWidth: 0.1mm; width: 15m;}
   
    [TYPE "waterway_dock",
-         "waterway_riverbank"]
+         "waterway_riverbank"] {
      AREA { color: #b5d0d0; }
      AREA.LABEL { style: normal;}
-  }  
+   }  
+ }  
 
  [MAG cityOver-] {
    [TYPE "waterway_stream"] WAY {color: #b5d0d0; displayWidth: 0.25mm; width: 2m;}

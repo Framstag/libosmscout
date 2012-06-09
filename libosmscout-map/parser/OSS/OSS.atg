@@ -166,19 +166,19 @@ PRODUCTIONS
                 .                 
 
   STYLE<StyleFilter filter>
-              =   STYLEFILTER<filter>
+              = [
+                  STYLEFILTER<filter>
+                ]  
+                (
                   (
                     "{"
-                       {
-                         STYLE<filter>
-                       }  
-                    "}"
-                  |
-                    STYLEDEF<filter>
                     {
-                      STYLEDEF<filter>
-                    }  
-                  )  
+                      STYLE<filter>
+                    }
+                    "}"
+                  )    
+                  | STYLEDEF<filter>
+                )  
                 .
                  
   STYLEFILTER<StyleFilter& filter>

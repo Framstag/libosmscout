@@ -1,21 +1,32 @@
 OSS
-  WAY "highway_motorway" MINMAG continent
-    LINE #809bc0 WITH OUTLINECOLOR #777777 MINWIDTH 0.45mm WIDTH 20m OUTLINE 0.25mm
-    REF WITH STYLE plate COLOR #ffffff BGCOLOR #809bc0 BORDERCOLOR #ffffff MINMAG state PRIO 1 
-   
-  AREA "highway_services"
-    FILL #cb9999
-    LABEL WITH MINMAG close
-   
-  NODE "place_city"
-    LABEL WITH SIZE 1.3 MINMAG stateOver PRIO 2
-    SYMBOL circle #ff0000aa 4 WITH MINMAG world
+  ORDER WAYS
+    GROUP "highway_motorway"
 
-  NODE "place_town"
-    LABEL WITH SIZE 1.2 MINMAG county PRIO 3
-    SYMBOL circle #ff000055 4 WITH MINMAG county
+  [TYPE "highway_motorway"] {
+    WAY { color: #809bc0; outlineColor: #777777; displayWidth: 0.45mm; width: 20m; outline: 0.25mm; }
     
-  NODE "highway_services"
-    LABEL WITH STYLE normal MINMAG stateOver PRIO 4
-    SYMBOL circle #00ff0055 4 WITH MINMAG world
+    [MAG state-] {
+      WAY.REF {style: plate; color: #ffffff; backgroundColor: #809bc0; borderColor: #ffffff; priority: 2; }
+    }
+  }
+
+  [TYPE "highway_services"] {
+    AREA {color: #cb9999; }
+    NODE.SYMBOL {style: circle; color: #00ff0055; size: 4; }
+    
+    [MAG county-] {
+      AREA.LABEL {style: normal; priority: 3;}
+      NODE.LABEL {style: normal; priority: 3;}
+    }
+  } 
+
+  [TYPE "place_city" MAG stateOver-] {
+    NODE.SYMBOL {style: circle; color:  #ff0000aa; size: 4; }
+	NODE.LABEL {style: emphasize; size: 1.3; priority: 1;}
+  }
+  
+  [TYPE "place_town" MAG county-] {
+    NODE.LABEL { style: normal; size: 1.0; priority: 4;}
+    NODE.SYMBOL {style: circle; color: #ff000055; size: 4;}
+  }  
 END
