@@ -267,7 +267,10 @@ namespace osmscout {
       ObjectRef               ref;
       const SegmentAttributes *attributes;     //! Area attributes
       const FillStyle         *fillStyle;      //! Fill style
+      double                  minLat;
+      double                  maxLat;
       double                  minLon;
+      double                  maxLon;
       size_t                  transStart;      //! Start of coordinates in transformation buffer
       size_t                  transEnd;        //! End of coordinates in transformation buffer
       std::list<PolyData>     clippings;       // Clipping polygons to be used during drawing of this area

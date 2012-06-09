@@ -31,7 +31,22 @@ namespace osmscout {
 
   static inline bool AreaSortByLon(const MapPainter::AreaData& a, const MapPainter::AreaData& b)
   {
-    return a.minLon<b.minLon;
+    if (a.minLon==b.minLon) {
+      if (a.maxLon==b.maxLon) {
+        if (a.minLat==b.minLat) {
+          return a.maxLat>b.maxLat;
+        }
+        else {
+          return a.minLat<b.minLat;
+        }
+      }
+      else {
+        return a.maxLon>b.maxLon;
+      }
+    }
+    else {
+      return a.minLon<b.minLon;
+    }
   }
 
   MapParameter::MapParameter()
@@ -1291,10 +1306,16 @@ namespace osmscout {
     data.transStart=start;
     data.transEnd=end;
 
+    data.minLat=nodes[0].GetLat();
+    data.maxLat=nodes[0].GetLat();
     data.minLon=nodes[0].GetLon();
+    data.maxLon=nodes[0].GetLon();
 
     for (size_t i=1; i<nodes.size(); i++) {
+      data.minLat=std::min(data.minLat,nodes[i].GetLat());
+      data.maxLat=std::max(data.maxLat,nodes[i].GetLat());
       data.minLon=std::min(data.minLon,nodes[i].GetLon());
+      data.maxLon=std::max(data.maxLon,nodes[i].GetLon());
     }
 
     areaData.push_back(data);
