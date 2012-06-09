@@ -29,7 +29,7 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/StopClock.h>
 
-#define DEBUG_ROUTING
+//#define DEBUG_ROUTING
 
 namespace osmscout {
 
