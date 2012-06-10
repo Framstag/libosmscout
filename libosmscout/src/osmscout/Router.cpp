@@ -904,12 +904,7 @@ namespace osmscout {
   bool Router::TransformRouteDataToRouteDescription(const RouteData& data,
                                                     RouteDescription& description)
   {
-    TypeId routeType;
-    Way    tmp;
-
-    routeType=typeConfig->GetWayTypeId("_route");
-
-    assert(routeType!=typeIgnore);
+    description.Clear();
 
     if (data.Entries().empty()) {
       return true;

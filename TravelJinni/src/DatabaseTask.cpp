@@ -538,7 +538,8 @@ bool DatabaseTask::TransformRouteDataToRouteDescription(const osmscout::RouteDat
 
   if (!postprocessor.PostprocessRouteDescription(description,
                                                  routingProfile,
-                                                 *database,postprocessors)) {
+                                                 *database,
+                                                 postprocessors)) {
     return false;
   }
 

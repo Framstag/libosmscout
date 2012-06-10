@@ -633,6 +633,9 @@ void RoutingDialog::Route()
   osmscout::WayRef           endWay;
   osmscout::Way              routeWay;
 
+  route.routeSteps.clear();
+  routeModel->refresh();
+
   if (!dbThread.GetWay(route.startWay,startWay)) {
     std::cerr << "Cannot load start way" << std::endl;
     return;
@@ -654,8 +657,6 @@ void RoutingDialog::Route()
                                                 route.routeDescription,
                                                 route.start.toUtf8().constData(),
                                                 route.end.toUtf8().constData());
-
-  routeModel->refresh();
 
   size_t                         roundaboutCrossingCounter=0;
   std::list<RouteStep>::iterator lastStep=route.routeSteps.end();

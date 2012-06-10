@@ -595,6 +595,9 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
            routeAction->IsFinished()) {
     assert(hasStart && hasEnd);
 
+    result.routeSteps.clear();
+    routeModel->Notify();
+
     osmscout::Way way;
 
     if (!databaseTask->CalculateRoute(result.startWay,result.startNode,
