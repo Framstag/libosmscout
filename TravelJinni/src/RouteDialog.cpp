@@ -699,8 +699,6 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
         roundaboutCrossingCounter+=crossingWaysDescription->GetExitCount()-1;
       }
 
-      size_t lineCount=0;
-
       if (startDescription.Valid()) {
         DumpStartDescription(startDescription,
                              nameDescription);
