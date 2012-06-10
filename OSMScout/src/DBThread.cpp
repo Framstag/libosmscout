@@ -586,12 +586,24 @@ bool DBThread::TransformRouteDataToRouteDescription(const osmscout::RouteData& d
     return false;
   }
 
+  osmscout::TypeConfig *typeConfig=router.GetTypeConfig();
+
   std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors;
 
   postprocessors.push_back(new osmscout::RoutePostprocessor::DistanceAndTimePostprocessor());
   postprocessors.push_back(new osmscout::RoutePostprocessor::StartPostprocessor(start));
-  postprocessors.push_back(new osmscout::RoutePostprocessor::WayNamePostprocessor());
   postprocessors.push_back(new osmscout::RoutePostprocessor::TargetPostprocessor(target));
+  postprocessors.push_back(new osmscout::RoutePostprocessor::WayNamePostprocessor());
+  postprocessors.push_back(new osmscout::RoutePostprocessor::CrossingWaysPostprocessor());
+  postprocessors.push_back(new osmscout::RoutePostprocessor::DirectionPostprocessor());
+
+  osmscout::RoutePostprocessor::InstructionPostprocessor *instructionProcessor=new osmscout::RoutePostprocessor::InstructionPostprocessor();
+
+  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway"));
+  instructionProcessor->AddMotorwayLinkType(typeConfig->GetWayTypeId("highway_motorway_link"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_trunk"));
+  instructionProcessor->AddMotorwayLinkType(typeConfig->GetWayTypeId("highway_trunk_link"));
+  postprocessors.push_back(instructionProcessor);
 
   if (!routePostprocessor.PostprocessRouteDescription(description,
                                                       routingProfile,

@@ -66,11 +66,24 @@ private:
   RouteModelRef         routeModel;
 
 private:
-  void PrepareRouteStep(const std::list<osmscout::RouteDescription::Node>::const_iterator& prevNode,
-                        const std::list<osmscout::RouteDescription::Node>::const_iterator& node,
-                        size_t lineCount,
-                        RouteStep& step);
-  bool HasRelevantDescriptions(const osmscout::RouteDescription::Node& node);
+  void DumpStartDescription(const osmscout::RouteDescription::StartDescriptionRef& startDescription,
+                            const osmscout::RouteDescription::NameDescriptionRef& nameDescription);
+  void DumpTargetDescription(const osmscout::RouteDescription::TargetDescriptionRef& targetDescription);
+  void DumpTurnDescription(const osmscout::RouteDescription::TurnDescriptionRef& turnDescription,
+                           const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription,
+                           const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
+                           const osmscout::RouteDescription::NameDescriptionRef& nameDescription);
+  void DumpRoundaboutEnterDescription(const osmscout::RouteDescription::RoundaboutEnterDescriptionRef& roundaboutEnterDescription,
+                                      const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription);
+  void DumpRoundaboutLeaveDescription(const osmscout::RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
+                                      const osmscout::RouteDescription::NameDescriptionRef& nameDescription);
+  void DumpMotorwayEnterDescription(const osmscout::RouteDescription::MotorwayEnterDescriptionRef& motorwayEnterDescription,
+                                    const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription);
+  void DumpMotorwayChangeDescription(const osmscout::RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription);
+  void DumpMotorwayLeaveDescription(const osmscout::RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
+                                    const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
+                                    const osmscout::RouteDescription::NameDescriptionRef& nameDescription);
+  void DumpNameChangedDescription(const osmscout::RouteDescription::NameChangedDescriptionRef& nameChangedDescription);
 
 public:
   RouteDialog(DatabaseTask* databaseTask);

@@ -60,6 +60,81 @@ static std::wstring TimeToWString(double time)
   return Lum::Base::StringToWString(stream.str());
 }
 
+static std::wstring MoveToTurnCommand(osmscout::RouteDescription::DirectionDescription::Move move)
+{
+  switch (move) {
+  case osmscout::RouteDescription::DirectionDescription::sharpLeft:
+    return L"Turn sharp left";
+  case osmscout::RouteDescription::DirectionDescription::left:
+    return L"Turn left";
+  case osmscout::RouteDescription::DirectionDescription::slightlyLeft:
+    return L"Turn slightly left";
+  case osmscout::RouteDescription::DirectionDescription::straightOn:
+    return L"Straight on";
+  case osmscout::RouteDescription::DirectionDescription::slightlyRight:
+    return L"Turn slightly right";
+  case osmscout::RouteDescription::DirectionDescription::right:
+    return L"Turn right";
+  case osmscout::RouteDescription::DirectionDescription::sharpRight:
+    return L"Turn sharp right";
+  }
+
+  assert(false);
+
+  return L"???";
+}
+
+static std::string CrossingWaysDescriptionToString(const osmscout::RouteDescription::CrossingWaysDescription& crossingWaysDescription)
+{
+  std::set<std::string>                          names;
+  osmscout::RouteDescription::NameDescriptionRef originDescription=crossingWaysDescription.GetOriginDesccription();
+  osmscout::RouteDescription::NameDescriptionRef targetDescription=crossingWaysDescription.GetTargetDesccription();
+
+  if (originDescription.Valid()) {
+    std::string nameString=originDescription->GetDescription();
+
+    if (!nameString.empty()) {
+      names.insert(nameString);
+    }
+  }
+
+  if (targetDescription.Valid()) {
+    std::string nameString=targetDescription->GetDescription();
+
+    if (!nameString.empty()) {
+      names.insert(nameString);
+    }
+  }
+
+  for (std::list<osmscout::RouteDescription::NameDescriptionRef>::const_iterator name=crossingWaysDescription.GetDescriptions().begin();
+      name!=crossingWaysDescription.GetDescriptions().end();
+      ++name) {
+    std::string nameString=(*name)->GetDescription();
+
+    if (!nameString.empty()) {
+      names.insert(nameString);
+    }
+  }
+
+  if (names.size()>0) {
+    std::ostringstream stream;
+
+    for (std::set<std::string>::const_iterator name=names.begin();
+        name!=names.end();
+        ++name) {
+      if (name!=names.begin()) {
+        stream << ", ";
+      }
+      stream << "'" << *name << "'";
+    }
+
+    return stream.str();
+  }
+  else {
+    return "";
+  }
+}
+
 std::wstring RouteDialog::RouteModelPainter::GetCellData() const
 {
   const RouteStep step=dynamic_cast<const RouteModel*>(GetModel())->GetEntry(GetRow());
@@ -133,6 +208,214 @@ RouteDialog::RouteDialog(DatabaseTask* databaseTask)
   }
 }
 
+void RouteDialog::DumpStartDescription(const osmscout::RouteDescription::StartDescriptionRef& startDescription,
+                                       const osmscout::RouteDescription::NameDescriptionRef& nameDescription)
+{
+  RouteStep startAt;
+
+  startAt.description=L"Start at '"+Lum::Base::UTF8ToWString(startDescription->GetDescription())+L"'";
+  result.routeSteps.push_back(startAt);
+
+  if (nameDescription.Valid() &&
+      nameDescription->HasName()) {
+    RouteStep driveAlong;
+
+    driveAlong.description=L"Drive along '"+Lum::Base::UTF8ToWString(nameDescription->GetDescription())+L"'";
+    result.routeSteps.push_back(driveAlong);
+  }
+}
+
+void RouteDialog::DumpTargetDescription(const osmscout::RouteDescription::TargetDescriptionRef& targetDescription)
+{
+  RouteStep targetReached;
+
+  targetReached.description=L"Target reached '"+Lum::Base::UTF8ToWString(targetDescription->GetDescription())+L"'";
+  result.routeSteps.push_back(targetReached);
+}
+
+void RouteDialog::DumpTurnDescription(const osmscout::RouteDescription::TurnDescriptionRef& turnDescription,
+                                      const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription,
+                                      const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
+                                      const osmscout::RouteDescription::NameDescriptionRef& nameDescription)
+{
+  std::string crossingWaysString;
+
+  if (crossingWaysDescription.Valid()) {
+    crossingWaysString=CrossingWaysDescriptionToString(crossingWaysDescription);
+  }
+
+  if (!crossingWaysString.empty()) {
+    RouteStep at;
+
+    at.description=L"At crossing "+Lum::Base::UTF8ToWString(crossingWaysString);
+    result.routeSteps.push_back(at);
+  }
+
+  RouteStep turn;
+
+  if (directionDescription.Valid()) {
+    turn.description=MoveToTurnCommand(directionDescription->GetCurve());
+  }
+  else {
+    turn.description=L"Turn";
+  }
+
+  if (nameDescription.Valid() &&
+      nameDescription->HasName()) {
+    turn.description+=L" into '"+Lum::Base::UTF8ToWString(nameDescription->GetDescription())+L"'";
+  }
+
+  result.routeSteps.push_back(turn);
+}
+
+void RouteDialog::DumpRoundaboutEnterDescription(const osmscout::RouteDescription::RoundaboutEnterDescriptionRef& roundaboutEnterDescription,
+                                                 const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription)
+{
+  std::string crossingWaysString;
+
+  if (crossingWaysDescription.Valid()) {
+    crossingWaysString=CrossingWaysDescriptionToString(crossingWaysDescription);
+  }
+
+  if (!crossingWaysString.empty()) {
+    RouteStep   at;
+
+    at.description=L"At crossing ";
+    at.description+=Lum::Base::UTF8ToWString(crossingWaysString);
+
+    result.routeSteps.push_back(at);
+  }
+
+  RouteStep enter;
+
+  enter.description=L"Enter roundabout";
+
+  result.routeSteps.push_back(enter);
+}
+
+void RouteDialog::DumpRoundaboutLeaveDescription(const osmscout::RouteDescription::RoundaboutLeaveDescriptionRef& roundaboutLeaveDescription,
+                                                 const osmscout::RouteDescription::NameDescriptionRef& nameDescription)
+{
+  RouteStep leave;
+
+  leave.description=L"Leave roundabout (";
+  leave.description+=Lum::Base::NumberToWString(roundaboutLeaveDescription->GetExitCount());
+  leave.description+=L". exit)";
+
+  if (nameDescription.Valid() &&
+      nameDescription->HasName()) {
+    leave.description+=L" into street '";
+    leave.description+=Lum::Base::UTF8ToWString(nameDescription->GetDescription());
+    leave.description+=L"'";
+  }
+
+  result.routeSteps.push_back(leave);
+}
+
+void RouteDialog::DumpMotorwayEnterDescription(const osmscout::RouteDescription::MotorwayEnterDescriptionRef& motorwayEnterDescription,
+                                               const osmscout::RouteDescription::CrossingWaysDescriptionRef& crossingWaysDescription)
+{
+  std::string crossingWaysString;
+
+  if (crossingWaysDescription.Valid()) {
+    crossingWaysString=CrossingWaysDescriptionToString(crossingWaysDescription);
+  }
+
+  if (!crossingWaysString.empty()) {
+    RouteStep at;
+
+    at.description=L"At crossing ";
+    at.description+=Lum::Base::UTF8ToWString(crossingWaysString);
+    result.routeSteps.push_back(at);
+  }
+
+  RouteStep enter;
+
+  enter.description=L"Enter motorway";
+
+  if (motorwayEnterDescription->GetToDescription().Valid() &&
+      motorwayEnterDescription->GetToDescription()->HasName()) {
+    enter.description+=L" '";
+    enter.description+=Lum::Base::UTF8ToWString(motorwayEnterDescription->GetToDescription()->GetDescription());
+    enter.description+=L"'";
+  }
+
+  result.routeSteps.push_back(enter);
+}
+
+void RouteDialog::DumpMotorwayChangeDescription(const osmscout::RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription)
+{
+  RouteStep change;
+
+  change.description=L"Change motorway";
+
+  if (motorwayChangeDescription->GetFromDescription().Valid() &&
+      motorwayChangeDescription->GetFromDescription()->HasName()) {
+    change.description+=L" from '";
+    change.description+=Lum::Base::UTF8ToWString(motorwayChangeDescription->GetFromDescription()->GetDescription());
+    change.description+=L"'";
+  }
+
+  if (motorwayChangeDescription->GetToDescription().Valid() &&
+      motorwayChangeDescription->GetToDescription()->HasName()) {
+    change.description+=L" to '";
+    change.description+=Lum::Base::UTF8ToWString(motorwayChangeDescription->GetToDescription()->GetDescription());
+    change.description+=L"'";
+  }
+
+  result.routeSteps.push_back(change);
+}
+
+void RouteDialog::DumpMotorwayLeaveDescription(const osmscout::RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
+                                               const osmscout::RouteDescription::DirectionDescriptionRef& directionDescription,
+                                               const osmscout::RouteDescription::NameDescriptionRef& nameDescription)
+{
+  RouteStep leave;
+
+  leave.description=L"Leave motorway";
+
+  if (motorwayLeaveDescription->GetFromDescription().Valid() &&
+      motorwayLeaveDescription->GetFromDescription()->HasName()) {
+    leave.description+=L" '";
+    leave.description+=Lum::Base::UTF8ToWString(motorwayLeaveDescription->GetFromDescription()->GetDescription());
+    leave.description+=L"'";
+  }
+
+  if (directionDescription.Valid() &&
+      directionDescription->GetCurve()!=osmscout::RouteDescription::DirectionDescription::slightlyLeft &&
+      directionDescription->GetCurve()!=osmscout::RouteDescription::DirectionDescription::straightOn &&
+      directionDescription->GetCurve()!=osmscout::RouteDescription::DirectionDescription::slightlyRight) {
+    leave.description+=MoveToTurnCommand(directionDescription->GetCurve());
+  }
+
+  if (nameDescription.Valid() &&
+      nameDescription->HasName()) {
+    leave.description+=L" into '";
+    leave.description+=Lum::Base::UTF8ToWString(nameDescription->GetDescription());
+    leave.description+=L"'";
+  }
+
+  result.routeSteps.push_back(leave);
+}
+
+void RouteDialog::DumpNameChangedDescription(const osmscout::RouteDescription::NameChangedDescriptionRef& nameChangedDescription)
+{
+  RouteStep changed;
+
+  changed.description=L"Way changes name";
+  if (nameChangedDescription->GetOriginDesccription().Valid()) {
+    changed.description+=L" from '";
+    changed.description+=Lum::Base::UTF8ToWString(nameChangedDescription->GetOriginDesccription()->GetDescription());
+    changed.description+=L"'";
+  }
+
+  changed.description+=L"' to '";
+  changed.description+=Lum::Base::UTF8ToWString(nameChangedDescription->GetTargetDesccription()->GetDescription());
+  changed.description+=L"'";
+
+  result.routeSteps.push_back(changed);
+}
+
 Lum::Object* RouteDialog::GetContent()
 {
   Lum::Label            *label;
@@ -195,31 +478,6 @@ void RouteDialog::GetActions(std::vector<Lum::Dlg::ActionInfo>& actions)
                                     true));
 
   Lum::Dlg::ActionDialog::CreateActionInfosClose(actions,GetClosedAction());
-}
-
-bool RouteDialog::HasRelevantDescriptions(const osmscout::RouteDescription::Node& node)
-{
-  return node.HasDescription(osmscout::RouteDescription::NODE_START_DESC) ||
-         node.HasDescription(osmscout::RouteDescription::NODE_TARGET_DESC) ||
-         node.HasDescription(osmscout::RouteDescription::WAY_NAME_CHANGED_DESC);
-}
-
-void RouteDialog::PrepareRouteStep(const std::list<osmscout::RouteDescription::Node>::const_iterator& prevNode,
-                                   const std::list<osmscout::RouteDescription::Node>::const_iterator& node,
-                                   size_t lineCount,
-                                   RouteStep& step)
-{
-  if (lineCount==0) {
-    step.distance=DistanceToWString(node->GetDistance());
-    step.time=TimeToWString(node->GetTime());
-
-    if (prevNode!=result.routeDescription.Nodes().end() && node->GetDistance()-prevNode->GetDistance()!=0.0) {
-      step.distanceDelta=DistanceToWString(node->GetDistance()-prevNode->GetDistance());
-    }
-    if (prevNode!=result.routeDescription.Nodes().end() && node->GetTime()-prevNode->GetTime()!=0.0) {
-      step.timeDelta=TimeToWString(node->GetTime()-prevNode->GetTime());
-    }
-  }
 }
 
 void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& msg)
@@ -353,73 +611,163 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
                                                        Lum::Base::WStringToUTF8(result.start),
                                                        Lum::Base::WStringToUTF8(result.end));
 
+    size_t                         roundaboutCrossingCounter=0;
+    std::list<RouteStep>::iterator lastStep=result.routeSteps.end();
+
     std::list<osmscout::RouteDescription::Node>::const_iterator prevNode=result.routeDescription.Nodes().end();
     for (std::list<osmscout::RouteDescription::Node>::const_iterator node=result.routeDescription.Nodes().begin();
          node!=result.routeDescription.Nodes().end();
          ++node) {
+      osmscout::RouteDescription::DescriptionRef                 desc;
+      osmscout::RouteDescription::NameDescriptionRef             nameDescription;
+      osmscout::RouteDescription::DirectionDescriptionRef        directionDescription;
+      osmscout::RouteDescription::NameChangedDescriptionRef      nameChangedDescription;
+      osmscout::RouteDescription::CrossingWaysDescriptionRef     crossingWaysDescription;
 
-      if (!HasRelevantDescriptions(*node)) {
-        continue;
+      osmscout::RouteDescription::StartDescriptionRef            startDescription;
+      osmscout::RouteDescription::TargetDescriptionRef           targetDescription;
+      osmscout::RouteDescription::TurnDescriptionRef             turnDescription;
+      osmscout::RouteDescription::RoundaboutEnterDescriptionRef  roundaboutEnterDescription;
+      osmscout::RouteDescription::RoundaboutLeaveDescriptionRef  roundaboutLeaveDescription;
+      osmscout::RouteDescription::MotorwayEnterDescriptionRef    motorwayEnterDescription;
+      osmscout::RouteDescription::MotorwayChangeDescriptionRef   motorwayChangeDescription;
+      osmscout::RouteDescription::MotorwayLeaveDescriptionRef    motorwayLeaveDescription;
+
+      desc=node->GetDescription(osmscout::RouteDescription::WAY_NAME_DESC);
+      if (desc.Valid()) {
+        nameDescription=dynamic_cast<osmscout::RouteDescription::NameDescription*>(desc.Get());
+      }
+
+      desc=node->GetDescription(osmscout::RouteDescription::DIRECTION_DESC);
+      if (desc.Valid()) {
+        directionDescription=dynamic_cast<osmscout::RouteDescription::DirectionDescription*>(desc.Get());
+      }
+
+      desc=node->GetDescription(osmscout::RouteDescription::WAY_NAME_CHANGED_DESC);
+      if (desc.Valid()) {
+        nameChangedDescription=dynamic_cast<osmscout::RouteDescription::NameChangedDescription*>(desc.Get());
+      }
+
+      desc=node->GetDescription(osmscout::RouteDescription::CROSSING_WAYS_DESC);
+      if (desc.Valid()) {
+        crossingWaysDescription=dynamic_cast<osmscout::RouteDescription::CrossingWaysDescription*>(desc.Get());
+      }
+
+      desc=node->GetDescription(osmscout::RouteDescription::NODE_START_DESC);
+      if (desc.Valid()) {
+        startDescription=dynamic_cast<osmscout::RouteDescription::StartDescription*>(desc.Get());
+      }
+
+      desc=node->GetDescription(osmscout::RouteDescription::NODE_TARGET_DESC);
+      if (desc.Valid()) {
+        targetDescription=dynamic_cast<osmscout::RouteDescription::TargetDescription*>(desc.Get());
+      }
+
+      desc=node->GetDescription(osmscout::RouteDescription::TURN_DESC);
+      if (desc.Valid()) {
+        turnDescription=dynamic_cast<osmscout::RouteDescription::TurnDescription*>(desc.Get());
+      }
+
+      desc=node->GetDescription(osmscout::RouteDescription::ROUNDABOUT_ENTER_DESC);
+      if (desc.Valid()) {
+        roundaboutEnterDescription=dynamic_cast<osmscout::RouteDescription::RoundaboutEnterDescription*>(desc.Get());
+      }
+
+      desc=node->GetDescription(osmscout::RouteDescription::ROUNDABOUT_LEAVE_DESC);
+      if (desc.Valid()) {
+        roundaboutLeaveDescription=dynamic_cast<osmscout::RouteDescription::RoundaboutLeaveDescription*>(desc.Get());
+      }
+
+      desc=node->GetDescription(osmscout::RouteDescription::MOTORWAY_ENTER_DESC);
+      if (desc.Valid()) {
+        motorwayEnterDescription=dynamic_cast<osmscout::RouteDescription::MotorwayEnterDescription*>(desc.Get());
+      }
+
+      desc=node->GetDescription(osmscout::RouteDescription::MOTORWAY_CHANGE_DESC);
+      if (desc.Valid()) {
+        motorwayChangeDescription=dynamic_cast<osmscout::RouteDescription::MotorwayChangeDescription*>(desc.Get());
+      }
+
+      desc=node->GetDescription(osmscout::RouteDescription::MOTORWAY_LEAVE_DESC);
+      if (desc.Valid()) {
+        motorwayLeaveDescription=dynamic_cast<osmscout::RouteDescription::MotorwayLeaveDescription*>(desc.Get());
+      }
+
+      if (crossingWaysDescription.Valid() &&
+          roundaboutCrossingCounter>0 &&
+          crossingWaysDescription->GetExitCount()>1) {
+        roundaboutCrossingCounter+=crossingWaysDescription->GetExitCount()-1;
       }
 
       size_t lineCount=0;
 
-      if (node->HasDescription(osmscout::RouteDescription::NODE_START_DESC)) {
-        osmscout::RouteDescription::DescriptionRef   description=node->GetDescription(osmscout::RouteDescription::NODE_START_DESC);
-        osmscout::RouteDescription::StartDescription *startDescription=dynamic_cast<osmscout::RouteDescription::StartDescription*>(description.Get());
-        RouteStep                                    step;
-
-        PrepareRouteStep(prevNode,node,lineCount,step);
-
-        step.description=L"Start at \"" +Lum::Base::UTF8ToWString(startDescription->GetDescription()) + L"\"";
-
-        result.routeSteps.push_back(step);
-
-        lineCount++;
+      if (startDescription.Valid()) {
+        DumpStartDescription(startDescription,
+                             nameDescription);
       }
-      if (node->HasDescription(osmscout::RouteDescription::NODE_TARGET_DESC)) {
-        osmscout::RouteDescription::DescriptionRef    description=node->GetDescription(osmscout::RouteDescription::NODE_TARGET_DESC);
-        osmscout::RouteDescription::TargetDescription *targetDescription=dynamic_cast<osmscout::RouteDescription::TargetDescription*>(description.Get());
-        RouteStep                                     step;
-
-        PrepareRouteStep(prevNode,node,lineCount,step);
-        step.description=L"Target reached \"" + Lum::Base::UTF8ToWString(targetDescription->GetDescription()) + L"\"";
-
-        result.routeSteps.push_back(step);
-
-        lineCount++;
+      else if (targetDescription.Valid()) {
+        DumpTargetDescription(targetDescription);
       }
-      if (node->HasDescription(osmscout::RouteDescription::WAY_NAME_CHANGED_DESC)) {
-        osmscout::RouteDescription::DescriptionRef  description=node->GetDescription(osmscout::RouteDescription::WAY_NAME_DESC);
-        osmscout::RouteDescription::NameDescription *nameDescription=dynamic_cast<osmscout::RouteDescription::NameDescription*>(description.Get());
-        RouteStep                                   step;
+      else if (turnDescription.Valid()) {
+        DumpTurnDescription(turnDescription,
+                            crossingWaysDescription,
+                            directionDescription,
+                            nameDescription);
+      }
+      else if (roundaboutEnterDescription.Valid()) {
+        DumpRoundaboutEnterDescription(roundaboutEnterDescription,
+                                       crossingWaysDescription);
 
-        PrepareRouteStep(prevNode,node,lineCount,step);
+        roundaboutCrossingCounter=1;
+      }
+      else if (roundaboutLeaveDescription.Valid()) {
+        DumpRoundaboutLeaveDescription(roundaboutLeaveDescription,
+                                       nameDescription);
 
-        step.description=L"Way ";
+        roundaboutCrossingCounter=0;
+      }
+      else if (motorwayEnterDescription.Valid()) {
+        DumpMotorwayEnterDescription(motorwayEnterDescription,
+                                     crossingWaysDescription);
+      }
+      else if (motorwayChangeDescription.Valid()) {
+        DumpMotorwayChangeDescription(motorwayChangeDescription);
+      }
+      else if (motorwayLeaveDescription.Valid()) {
+        DumpMotorwayLeaveDescription(motorwayLeaveDescription,
+                                     directionDescription,
+                                     nameDescription);
+      }
+      else if (nameChangedDescription.Valid()) {
+        DumpNameChangedDescription(nameChangedDescription);
+      }
 
+      std::list<RouteStep>::iterator current;
 
-        if (!nameDescription->GetName().empty()) {
-          step.description+=Lum::Base::UTF8ToWString(nameDescription->GetName());
+      if (lastStep==result.routeSteps.end()) {
+        current=result.routeSteps.begin();
+      }
+      else {
+        current=lastStep;
+
+        current++;
+      }
+
+      if (current!=result.routeSteps.end()) {
+        current->distance=DistanceToWString(node->GetDistance());
+        current->time=TimeToWString(node->GetTime());
+
+        if (prevNode!=result.routeDescription.Nodes().end() && node->GetDistance()-prevNode->GetDistance()!=0.0) {
+          current->distanceDelta=DistanceToWString(node->GetDistance()-prevNode->GetDistance());
         }
-
-        if (!nameDescription->GetName().empty() &&
-            !nameDescription->GetRef().empty()) {
-          step.description+=L" (";
+        if (prevNode!=result.routeDescription.Nodes().end() && node->GetTime()-prevNode->GetTime()!=0.0) {
+          current->timeDelta=TimeToWString(node->GetTime()-prevNode->GetTime());
         }
+      }
 
-        if (!nameDescription->GetRef().empty()) {
-          step.description+=Lum::Base::UTF8ToWString(nameDescription->GetRef());
-        }
-
-        if (!nameDescription->GetName().empty() &&
-            !nameDescription->GetRef().empty()) {
-          step.description+=L")";
-        }
-
-        result.routeSteps.push_back(step);
-
-        lineCount++;
+      while (current!=result.routeSteps.end()) {
+        lastStep++;
+        current++;
       }
 
       prevNode=node;
