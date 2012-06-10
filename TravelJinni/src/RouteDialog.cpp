@@ -739,6 +739,9 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
       else if (nameChangedDescription.Valid()) {
         DumpNameChangedDescription(nameChangedDescription);
       }
+      else {
+        continue;
+      }
 
       std::list<RouteStep>::iterator current;
 
@@ -755,10 +758,13 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
         current->distance=DistanceToWString(node->GetDistance());
         current->time=TimeToWString(node->GetTime());
 
-        if (prevNode!=result.routeDescription.Nodes().end() && node->GetDistance()-prevNode->GetDistance()!=0.0) {
+        if (prevNode!=result.routeDescription.Nodes().end() &&
+            node->GetDistance()-prevNode->GetDistance()!=0.0) {
           current->distanceDelta=DistanceToWString(node->GetDistance()-prevNode->GetDistance());
         }
-        if (prevNode!=result.routeDescription.Nodes().end() && node->GetTime()-prevNode->GetTime()!=0.0) {
+
+        if (prevNode!=result.routeDescription.Nodes().end() &&
+            node->GetTime()-prevNode->GetTime()!=0.0) {
           current->timeDelta=TimeToWString(node->GetTime()-prevNode->GetTime());
         }
       }
