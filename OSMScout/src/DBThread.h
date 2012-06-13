@@ -81,6 +81,7 @@ private:
   osmscout::Router             router;
   osmscout::FastestPathRoutingProfile routingProfile;
   osmscout::RoutePostprocessor routePostprocessor;
+  QString                      iconDirectory;
 
   bool                         finish;
 

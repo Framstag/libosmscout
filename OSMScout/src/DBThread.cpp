@@ -34,6 +34,7 @@ DBThread::DBThread()
  : database(databaseParameter),
    styleConfig(NULL),
    router(routerParameter),
+   iconDirectory(),
    currentPixmap(NULL)
 #if defined(HAVE_LIB_QTOPENGL)
    ,currentGLPixmap(NULL)
@@ -65,11 +66,16 @@ void DBThread::FreeMaps()
 
 void DBThread::run()
 {
-  if (database.Open("../TravelJinni") && router.Open("../TravelJinni")) {
+  QStringList cmdLineArgs = QApplication::arguments();
+  QString databaseDirectory = cmdLineArgs.size() > 1 ? cmdLineArgs.at(1) : QDir::currentPath();
+  QString stylesheetFilename = cmdLineArgs.size() > 2 ? cmdLineArgs.at(2) : databaseDirectory + QDir::separator() + "standard.oss";
+  iconDirectory = cmdLineArgs.size() > 3 ? cmdLineArgs.at(3) : databaseDirectory + QDir::separator() + "icons";
+
+  if (database.Open(databaseDirectory.toLocal8Bit().data()) && router.Open(databaseDirectory.toLocal8Bit().data())) {
     if (database.GetTypeConfig()!=NULL) {
       styleConfig=new osmscout::StyleConfig(database.GetTypeConfig());
 
-      if (!osmscout::LoadStyleConfig("../TravelJinni/standard.oss",
+	  if (!osmscout::LoadStyleConfig(stylesheetFilename.toLocal8Bit().data(),
                                      *styleConfig)) {
         delete styleConfig;
         styleConfig=NULL;
@@ -222,7 +228,7 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
 
     std::list<std::string>        paths;
 
-    paths.push_back("../libosmscout/data/icons/14x14/standard/");
+	paths.push_back(iconDirectory.toLocal8Bit().data());
 
     //drawParameter.SetDPI(QApplication::desktop()->physicalDpiX());
     drawParameter.SetIconPaths(paths);
