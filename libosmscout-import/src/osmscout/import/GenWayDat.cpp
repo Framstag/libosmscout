@@ -24,6 +24,7 @@
 
 #include <osmscout/DataFile.h>
 
+#include <osmscout/util/Geometry.h>
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/String.h>
 
@@ -867,7 +868,6 @@ namespace osmscout {
         way.SetId(block[w]->GetId());
         way.SetType(block[w]->GetType());
 
-
         if (!way.SetTags(progress,
                          typeConfig,
                          block[w]->IsArea(),
@@ -906,7 +906,12 @@ namespace osmscout {
 
         // startIsJoint/endIsJoint
 
-        if (!way.IsArea()) {
+        if (way.IsArea()) {
+          if (!AreaIsSimple(way.nodes)) {
+            progress.Error("Area "+NumberToString(way.GetId())+" of type '"+typeConfig.GetTypeInfo(way.GetType()).GetName()+"' is not simple");
+          }
+        }
+        else {
           EndPointWayMap::const_iterator  wayJoint;
           EndPointAreaSet::const_iterator areaJoint;
           std::list<Id>::iterator         jointWayId;

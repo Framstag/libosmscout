@@ -119,7 +119,7 @@ namespace osmscout {
       RawNodeRef node;
 
       if (!nodeDataFile.Get(member.id,node)) {
-        progress.Error("Cannot resolve relation member of type node with id "+
+        progress.Error("Cannot resolve member of type node with id "+
                        NumberToString(member.id)+
                        " for relation "+
                        NumberToString(id)+" "+name);
@@ -142,7 +142,7 @@ namespace osmscout {
       RawWayRef way;
 
       if (!wayDataFile.Get(member.id,way)) {
-        progress.Error("Cannot resolve relation member of type way with id "+
+        progress.Error("Cannot resolve member of type way with id "+
                        NumberToString(member.id)+
                        " for relation "+
                        NumberToString(id)+" "+name);
@@ -152,7 +152,7 @@ namespace osmscout {
       std::vector<RawNodeRef> nodes;
 
       if (!nodeDataFile.Get(way->GetNodes(),nodes)) {
-        progress.Error("Cannot resolve nodes of relation member of type way with id "+
+        progress.Error("Cannot resolve nodes of member of type way with id "+
                        NumberToString(member.id)+
                        " for relation "+
                        NumberToString(id)+" "+name);
@@ -205,7 +205,7 @@ namespace osmscout {
 
 
       if (!relationDataFile.Get(member.id,relation)) {
-        progress.Error("Cannot resolve relation member of type relation with id "+
+        progress.Error("Cannot resolve member of type relation with id "+
                        NumberToString(member.id)+
                        " for relation "+
                        NumberToString(id)+" "+name);

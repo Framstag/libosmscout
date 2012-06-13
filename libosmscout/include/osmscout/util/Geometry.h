@@ -28,7 +28,7 @@
 #include <osmscout/system/Types.h>
 
 #include <osmscout/Point.h>
-
+#include <iostream>
 namespace osmscout {
   /**
    * Returns true, if the lines defined by the given coordinates intersect.
@@ -39,15 +39,16 @@ namespace osmscout {
                       const N& b1,
                       const N& b2)
   {
-    double ua_numr=(b2.x-b1.x)*(a1.y-b1.y)-(b2.y-b1.y)*(a1.x-b1.x);
-    double ub_numr=(a2.x-a1.x)*(a1.y-b1.y)-(a2.y-a1.y)*(a1.x-b1.x);
-    double denr=(b2.y-b1.y)*(a2.x-a1.x)-(b2.x-b1.x)*(a2.y-a1.y);
-
+    double denr=(b2.GetLat()-b1.GetLat())*(a2.GetLon()-a1.GetLon())-
+                (b2.GetLon()-b1.GetLon())*(a2.GetLat()-a1.GetLat());
     if(denr==0.0) {
-      // lines are coincident
-      return ua_numr==0.0 &&
-             ub_numr==0.0;
+      return false;
     }
+
+    double ua_numr=(b2.GetLon()-b1.GetLon())*(a1.GetLat()-b1.GetLat())-
+                   (b2.GetLat()-b1.GetLat())*(a1.GetLon()-b1.GetLon());
+    double ub_numr=(a2.GetLon()-a1.GetLon())*(a1.GetLat()-b1.GetLat())-
+                   (a2.GetLat()-a1.GetLat())*(a1.GetLon()-b1.GetLon());
 
     double ua=ua_numr/denr;
     double ub=ub_numr/denr;
@@ -202,10 +203,59 @@ namespace osmscout {
     return false;
   }
 
+  /**
+   * Returns true, if the handed polygon is simple (aka not complex).
+   *
+   * Currently the following checks are done:
+   * + Polygon has at least 3 points
+   * + Assure that the line segments that make up the polygon
+   *   only meet at their end points.
+   */
+  template<typename N>
+  bool AreaIsSimple(std::vector<N> points)
+  {
+    if (points.size()<3) {
+      return false;
+    }
+
+    points.push_back(points[0]);
+
+    size_t edgesIntersect=0;
+
+    for (size_t i=0; i<points.size()-1; i++) {
+      edgesIntersect=0;
+
+      for (size_t j=i+1; j<points.size()-1; j++) {
+        if (LinesIntersect(points[i],
+                           points[i+1],
+                           points[j],
+                           points[j+1])) {
+          edgesIntersect++;
+
+          if (i==0) {
+            if (edgesIntersect>2) {
+              return false;
+            }
+          }
+          else {
+            if (edgesIntersect>1) {
+              return false;
+            }
+          }
+        }
+      }
+    }
+
+    return true;
+  }
 
   /**
-   * Returns true, if the handed polygons are simple (aka not complex),
-   * that means, we have no intersections.
+   * Returns true, if the handed polygons are simple (aka not complex).
+   * This method supports passing multiple closed polygons and checks
+   * all of them.
+   *
+   * Currently it is checked, that the line segments that make up the
+   * polygon, only meet at their end points.
    */
   template<typename N>
   bool AreaIsSimple(const std::vector<std::pair<N,N> >& edges,
@@ -370,14 +420,6 @@ namespace osmscout {
     }
 
     return true;
-  }
-
-  template<typename N>
-  bool AreaIsValid(std::vector<N> &outerPoints)
-  {
-    std::vector<std::vector<N> > listListInnerPts; //empty
-
-    return AreaIsValid(outerPoints,listListInnerPts);
   }
 
   struct OSMSCOUT_API Coord

@@ -149,16 +149,26 @@ TYPES
   // These are currently special-cased in the style file  
   TYPE "amenity_hospital_building" = NODE AREA ("amenity"=="hospital" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE "amenity_hospital" = NODE AREA ("amenity"=="hospital")
-  
+
   TYPE "amenity_parking_building" = NODE AREA ("amenity"=="parking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE "amenity_parking" = NODE AREA ("amenity"=="parking")
   
+  TYPE "amenity_bicycle_parking_building" = NODE AREA ("amenity"=="bicycle_parking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+  TYPE "amenity_bicycle_parking" = NODE WAY AREA ("amenity"=="bicycle_parking")
+
+  TYPE "amenity_bus_station" = NODE AREA ("amenity"=="bus_station")
+
+  TYPE "amenity_kindergarten_building" = NODE AREA ("amenity"=="kindergarten" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+  TYPE "amenity_kindergarten" = NODE AREA ("amenity"=="kindergarten")
+  
+  TYPE "amenity_bench" = NODE WAY ("amenity"=="bench")
   TYPE "amenity_grave_yard" = NODE AREA ("amenity"=="grave_yard")
   TYPE "amenity_pharmacy" = NODE AREA ("amenity"=="pharmacy")
   TYPE "amenity_post_office_building" = NODE AREA ("amenity"=="post_office" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE "amenity_post_office" = NODE AREA ("amenity"=="post_office")
   TYPE "amenity_post_box" = NODE ("amenity"=="post_box")
   TYPE "amenity_taxi" = NODE AREA ("amenity"=="taxi")
+  TYPE "amenity_toilets" = NODE ("amenity"=="toilets")
 
   // Everything else is just an 'amenity' for now
   TYPE "amenity_building" = NODE AREA (EXISTS "amenity" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
@@ -213,7 +223,7 @@ TYPES
   TYPE "historic_monument" = NODE AREA ("historic"=="monument")
   TYPE "historic_memorial" = NODE AREA ("historic"=="memorial")
   TYPE "historic_archaeological_site" = NODE WAY AREA ("historic"=="archaeological_site")
-  TYPE "historic_ruins" = NODE AREA ("historic"=="ruins")
+  TYPE "historic_ruins" = NODE WAY AREA ("historic"=="ruins")
   TYPE "historic_battlefield" = NODE AREA ("historic"=="battlefield")
   TYPE "historic_wreck" = NODE AREA ("historic"=="wreck")
   
