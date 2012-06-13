@@ -211,7 +211,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\OSMScout\src\config.h"
+				RelativePath=".\include\config.h"
 				>
 			</File>
 			<File

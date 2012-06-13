@@ -191,7 +191,7 @@
 				Name="osmscout"
 				>
 				<File
-					RelativePath="..\..\libosmscout-map\include\osmscout\MapFeatures.h"
+					RelativePath=".\include\osmscout\MapFeatures.h"
 					>
 				</File>
 				<File

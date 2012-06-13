@@ -176,7 +176,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\libosmscout-map-qt\include\osmscout\MapQtFeatures.h"
+					RelativePath=".\include\osmscout\MapQtFeatures.h"
 					>
 				</File>
 				<Filter

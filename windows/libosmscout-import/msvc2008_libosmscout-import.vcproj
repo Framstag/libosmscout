@@ -321,7 +321,7 @@
 				Name="osmscout"
 				>
 				<File
-					RelativePath="..\..\libosmscout-import\include\osmscout\ImportFeatures.h"
+					RelativePath=".\include\osmscout\ImportFeatures.h"
 					>
 				</File>
 				<Filter

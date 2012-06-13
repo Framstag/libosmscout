@@ -390,7 +390,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\libosmscout\include\osmscout\CoreFeatures.h"
+					RelativePath=".\include\osmscout\CoreFeatures.h"
 					>
 				</File>
 				<File
@@ -525,7 +525,7 @@
 					Name="private"
 					>
 					<File
-						RelativePath="..\..\libosmscout\include\osmscout\private\Config.h"
+						RelativePath=".\include\osmscout\private\Config.h"
 						>
 					</File>
 					<File
