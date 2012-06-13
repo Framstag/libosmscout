@@ -29,7 +29,7 @@ AC_CHECK_SIZEOF([wchar_t])
 
 AC_SEARCH_LIBS([sqrt],[m])
 
-AC_CHECK_DECLS([log2(double), atanh(double)],[],[],[#include <cmath>])
+AC_CHECK_DECLS([log2(double), atanh(double), lround(double)],[],[],[#include <cmath>])
 AC_CHECK_FUNCS([mmap])
 
 if test "x$GXX" = xyes; then

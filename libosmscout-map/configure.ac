@@ -21,7 +21,7 @@ AC_TYPE_SIZE_T
 
 AC_SEARCH_LIBS([sqrt],[m])
 
-AC_CHECK_DECLS([log2(double), atanh(double)],[],[],[#include <cmath>])
+AC_CHECK_DECLS([log2(double), atanh(double), lround(double)],[],[],[#include <cmath>])
 
 if test "$GXX" = yes; then
   CPPFLAGS="$CPPFLAGS -Wall -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"

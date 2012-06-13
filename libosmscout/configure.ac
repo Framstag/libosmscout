@@ -36,7 +36,7 @@ AC_CHECK_HEADERS([sys/time.h unordered_map unordered_set])
 
 AC_SEARCH_LIBS([sqrt],[m])
 
-AC_CHECK_DECLS([log2(double), atanh(double)],[],[],[#include <cmath>])
+AC_CHECK_DECLS([log2(double), atanh(double), lround(double)],[],[],[#include <cmath>])
 AC_CHECK_FUNCS([mmap])
 
 AC_SYS_LARGEFILE
