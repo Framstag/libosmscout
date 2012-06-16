@@ -119,7 +119,7 @@ namespace osmscout {
       RawNodeRef node;
 
       if (!nodeDataFile.Get(member.id,node)) {
-        progress.Error("Cannot resolve member of type node with id "+
+        progress.Error("Cannot resolve node member "+
                        NumberToString(member.id)+
                        " for relation "+
                        NumberToString(id)+" "+name);
@@ -142,7 +142,7 @@ namespace osmscout {
       RawWayRef way;
 
       if (!wayDataFile.Get(member.id,way)) {
-        progress.Error("Cannot resolve member of type way with id "+
+        progress.Error("Cannot resolve way member "+
                        NumberToString(member.id)+
                        " for relation "+
                        NumberToString(id)+" "+name);
@@ -152,7 +152,7 @@ namespace osmscout {
       std::vector<RawNodeRef> nodes;
 
       if (!nodeDataFile.Get(way->GetNodes(),nodes)) {
-        progress.Error("Cannot resolve nodes of member of type way with id "+
+        progress.Error("Cannot resolve nodes of way member "+
                        NumberToString(member.id)+
                        " for relation "+
                        NumberToString(id)+" "+name);
@@ -205,7 +205,7 @@ namespace osmscout {
 
 
       if (!relationDataFile.Get(member.id,relation)) {
-        progress.Error("Cannot resolve member of type relation with id "+
+        progress.Error("Cannot resolve relation member "+
                        NumberToString(member.id)+
                        " for relation "+
                        NumberToString(id)+" "+name);
@@ -467,17 +467,16 @@ namespace osmscout {
         else {
           // if we havn't found another way and we have not closed
           // the current way we have to give up
-          progress.Error("Multipolygon relation "+NumberToString(relation.GetId())+
-                         ": Cannot find matching node for node id "+
-                         NumberToString(points.back().GetId()));
+          progress.Error("Cannot resolve match node "+NumberToString(points.back().GetId())+
+              " for multipolygon relation "+NumberToString(relation.GetId())+" "+relation.GetName());
           return false;
         }
       }
 
       // All roles have been consumed and we still have not closed the current way
       if (!finished) {
-        progress.Error("Multipolygon relation "+NumberToString(relation.GetId())+
-                       ": No ways left to close current ring");
+        progress.Error("No ways left to close current ring for multipolygon relation "+NumberToString(relation.GetId())+
+                       " "+relation.GetName());
         return false;
       }
 
@@ -493,6 +492,13 @@ namespace osmscout {
       // in the code we store areas without repeating the start, so we remove the final node again
       if (role.nodes.back().GetId()==role.nodes.front().GetId()) {
         role.nodes.pop_back();
+      }
+
+      if (!AreaIsSimple(role.nodes)) {
+        progress.Error("Resolved ring is not simple for multipolygon relation "+NumberToString(relation.GetId())+
+                       " "+relation.GetName());
+
+        return false;
       }
 
       rings.push_back(role);
@@ -560,8 +566,8 @@ namespace osmscout {
       top=FindTopLevel(rings,state,topIndex);
 
       if (top==rings.end()) {
-        progress.Warning("Multipolygon relation "+NumberToString(relation.GetId())+
-                         ": Error during ring grouping");
+        progress.Warning("Error during ring grouping for multipolygon relation "+NumberToString(relation.GetId())+
+                         " "+relation.GetName());
         return false;
       }
 
@@ -582,8 +588,8 @@ namespace osmscout {
     }
 
     if (groups.empty()) {
-      progress.Warning("Multipolygon relation "+NumberToString(relation.GetId())+
-                       ": No groups");
+      progress.Warning("No groups for multipolygon relation "+NumberToString(relation.GetId())+
+                       " "+relation.GetName());
       return false;
     }
 
@@ -935,8 +941,6 @@ namespace osmscout {
       // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
       if (rel.IsArea()) {
         if (!ResolveMultipolygon(progress,rel)) {
-          progress.Error("Cannot resolve multipolygon relation "+
-                         NumberToString(rawRel.GetId())+" "+rel.GetName());
           continue;
         }
       }

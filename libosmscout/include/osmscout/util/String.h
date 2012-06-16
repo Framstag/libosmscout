@@ -40,8 +40,10 @@ namespace osmscout {
     A      value(a);
     size_t res=0;
 
-    if (value<0) {
-      res++;
+    if (std::numeric_limits<A>::is_signed) {
+      if (value<0) {
+        res++;
+      }
     }
 
     while (value!=0) {

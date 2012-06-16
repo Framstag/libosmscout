@@ -13,7 +13,8 @@ AM_INIT_AUTOMAKE([nostdinc subdir-objects dist-bzip2 no-dist-gzip])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 AC_PROG_CXX
-AC_PROG_LIBTOOL
+AC_LANG(C++)
+LT_INIT([win32-dll])
 AC_PROG_INSTALL
 
 AX_CHECK_COMPILE_FLAG([-std=c++0x],
