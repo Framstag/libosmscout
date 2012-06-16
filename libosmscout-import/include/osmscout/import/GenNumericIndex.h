@@ -167,6 +167,9 @@ namespace osmscout {
         b1size=EncodeNumber(data.GetId()-lastId,b1);
         b2size=EncodeNumber(readPos-lastPos,b2);
 
+        assert(b1size<=10);
+        assert(b2size<=10);
+
         if (currentPageSize+b1size+b2size>pageSize) {
           // Next entry does not fit, fill rest of index page with zeros
           writer.FlushCurrentBlockWithZeros(pageSize);
@@ -224,6 +227,9 @@ namespace osmscout {
 
           b1size=EncodeNumber((si[i]-si[i-1]),b1);
           b2size=EncodeNumber(po[i]-po[i-1],b2);
+
+          assert(b1size<=10);
+          assert(b2size<=10);
 
           if (currentPageSize+b1size+b2size>pageSize) {
             // Fill rest of first index page with zeros

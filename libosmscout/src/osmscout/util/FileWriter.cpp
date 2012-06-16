@@ -25,7 +25,8 @@
 #include <cstdio>
 
 #include <osmscout/util/Number.h>
-
+#include <iostream>
+#include <iomanip>
 namespace osmscout {
 
   FileWriter::FileWriter()
@@ -158,14 +159,7 @@ namespace osmscout {
       return false;
     }
 
-    char         buffer[sizeof(int8_t)];
-    unsigned int mask=0xff;
-
-    for (size_t i=0; i<sizeof(int8_t); i++) {
-      buffer[i]=(number >> (i*8)) & mask;
-    }
-
-    hasError=fwrite(buffer,sizeof(char),sizeof(int8_t),file)!=sizeof(int8_t);
+    hasError=fwrite(&number,sizeof(char),sizeof(int8_t),file)!=sizeof(int8_t);
 
     return !hasError;
   }
@@ -176,7 +170,7 @@ namespace osmscout {
       return false;
     }
 
-    hasError=fwrite(&number,sizeof(char),sizeof(uint8_t),file)!=sizeof(uint8_t);
+    hasError=fwrite(&number,1,1,file)!=1;
 
     return !hasError;
   }
@@ -187,14 +181,12 @@ namespace osmscout {
       return false;
     }
 
-    char     buffer[sizeof(uint16_t)];
-    uint16_t mask=0xff;
+    char buffer[2];
 
-    for (size_t i=0; i<sizeof(uint16_t); i++) {
-      buffer[i]=(number >> (i*8)) & mask;
-    }
+    buffer[0]=((number >> 0) & 0xff);
+    buffer[1]=((number >> 8) & 0xff);
 
-    hasError=fwrite(buffer,sizeof(char),sizeof(uint16_t),file)!=sizeof(uint16_t);
+    hasError=fwrite(buffer,1,2,file)!=2;
 
     return !hasError;
   }
@@ -205,14 +197,14 @@ namespace osmscout {
       return false;
     }
 
-    char     buffer[sizeof(uint32_t)];
-    uint32_t mask=0xff;
+    char buffer[4];
 
-    for (size_t i=0; i<sizeof(uint32_t); i++) {
-      buffer[i]=(number >> (i*8)) & mask;
-    }
+    buffer[0]=((number >>  0) & 0xff);
+    buffer[1]=((number >>  8) & 0xff);
+    buffer[2]=((number >> 16) & 0xff);
+    buffer[3]=((number >> 24) & 0xff);
 
-    hasError=fwrite(buffer,sizeof(char),sizeof(uint32_t),file)!=sizeof(uint32_t);
+    hasError=fwrite(buffer,1,4,file)!=4;
 
     return !hasError;
   }
@@ -224,52 +216,83 @@ namespace osmscout {
       return false;
     }
 
-    char     buffer[sizeof(uint64_t)];
-    uint64_t mask=0xff;
+    char buffer[8];
 
-    for (size_t i=0; i<sizeof(uint64_t); i++) {
-      buffer[i]=(number >> (i*8)) & mask;
-    }
+    buffer[0]=((number >>  0) & 0xff);
+    buffer[1]=((number >>  8) & 0xff);
+    buffer[2]=((number >> 16) & 0xff);
+    buffer[3]=((number >> 24) & 0xff);
+    buffer[4]=((number >> 32) & 0xff);
+    buffer[5]=((number >> 40) & 0xff);
+    buffer[6]=((number >> 48) & 0xff);
+    buffer[7]=((number >> 56) & 0xff);
 
-    hasError=fwrite(buffer,sizeof(char),sizeof(uint64_t),file)!=sizeof(uint64_t);
+    hasError=fwrite(buffer,1,8,file)!=8;
 
     return !hasError;
   }
 #endif
 
-  bool FileWriter::WriteFileOffset(FileOffset offset)
-  {
-    if (sizeof(offset)==4) {
-      char buffer[4];
-
-      buffer[0]=0;
-      buffer[1]=0;
-      buffer[2]=0;
-      buffer[3]=0;
-
-      if (!Write(buffer,4)) {
-        return false;
-      }
-    }
-
-    return Write(offset);
-  }
-
-
-  bool FileWriter::Write(int32_t number)
+  bool FileWriter::WriteFileOffset(FileOffset fileOffset)
   {
     if (HasError()) {
       return false;
     }
 
-    char         buffer[sizeof(FileOffset)];
-    unsigned int mask=0xff;
+    char buffer[8];
 
-    for (size_t i=0; i<sizeof(FileOffset); i++) {
-      buffer[i]=(number >> (i*8)) & mask;
+    buffer[0]=((fileOffset >>  0) & 0xff);
+    buffer[1]=((fileOffset >>  8) & 0xff);
+    buffer[2]=((fileOffset >> 16) & 0xff);
+    buffer[3]=((fileOffset >> 24) & 0xff);
+    buffer[4]=((fileOffset >> 32) & 0xff);
+    buffer[5]=((fileOffset >> 40) & 0xff);
+    buffer[6]=((fileOffset >> 48) & 0xff);
+    buffer[7]=((fileOffset >> 56) & 0xff);
+
+    hasError=fwrite(buffer,1,8,file)!=8;
+
+    return !hasError;
+  }
+
+  /**
+    Write a numeric value to the file using some internal encoding
+    to reduce storage size. Note that this works only if the average number
+    is small.
+    */
+  bool FileWriter::WriteNumber(uint16_t number)
+  {
+    if (HasError()) {
+      return false;
     }
 
-    hasError=fwrite(buffer,sizeof(char),sizeof(FileOffset),file)!=sizeof(FileOffset);
+    char         buffer[10];
+    unsigned int bytes;
+
+    bytes=EncodeNumber(number,buffer);
+
+    hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
+
+    return !hasError;
+  }
+
+  /**
+    Write a numeric value to the file using some internal encoding
+    to reduce storage size. Note that this works only if the average number
+    is small.
+    */
+  bool FileWriter::WriteNumber(uint32_t number)
+  {
+    if (HasError()) {
+      return false;
+    }
+
+    char         buffer[10];
+    unsigned int bytes;
+
+    bytes=EncodeNumber(number,buffer);
+
+    hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
 
     return !hasError;
   }
@@ -297,47 +320,6 @@ namespace osmscout {
   }
 #endif
 
-  /**
-    Write a numeric value to the file using some internal encoding
-    to reduce storage size. Note that this works only if the average number
-    is small.
-    */
-  bool FileWriter::WriteNumber(uint32_t number)
-  {
-    if (HasError()) {
-      return false;
-    }
-
-    char         buffer[10];
-    unsigned int bytes;
-
-    bytes=EncodeNumber(number,buffer);
-
-    hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
-
-    return !hasError;
-  }
-
-  /**
-    Write a numeric value to the file using some internal encoding
-    to reduce storage size. Note that this works only if the average number
-    is small.
-    */
-  bool FileWriter::WriteNumber(uint16_t number)
-  {
-    if (HasError()) {
-      return false;
-    }
-
-    char         buffer[10];
-    unsigned int bytes;
-
-    bytes=EncodeNumber(number,buffer);
-
-    hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
-
-    return !hasError;
-  }
 
   bool FileWriter::FlushCurrentBlockWithZeros(size_t blockSize)
   {

@@ -72,7 +72,6 @@ namespace osmscout {
     bool WriteFileOffset(FileOffset offset);
 
     bool Write(int8_t number);
-    bool Write(int32_t number);
 
     bool WriteNumber(uint16_t number);
     bool WriteNumber(uint32_t number);

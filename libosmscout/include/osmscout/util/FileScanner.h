@@ -105,16 +105,12 @@ namespace osmscout {
     bool ReadFileOffset(FileOffset& offset);
 
     bool Read(int8_t& number);
-    bool Read(int32_t& number);
 
-    bool ReadNumber(uint8_t& number);
     bool ReadNumber(uint16_t& number);
     bool ReadNumber(uint32_t& number);
 #if defined(OSMSCOUT_HAVE_UINT64_T)
     bool ReadNumber(uint64_t& number);
 #endif
-
-    bool ReadNumber(int32_t& number);
   };
 }
 

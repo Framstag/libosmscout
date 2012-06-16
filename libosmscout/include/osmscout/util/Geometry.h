@@ -441,7 +441,7 @@ namespace osmscout {
     bool operator<(const Coord& other) const
     {
       return y<other.y ||
-      ( y==other.y && x<other.x);
+      (y==other.y && x<other.x);
     }
   };
 

@@ -439,7 +439,7 @@ namespace osmscout {
 
       boolean=buffer[offset]!=0;
 
-      offset+=sizeof(char);
+      offset++;
 
       return true;
     }
@@ -469,15 +469,15 @@ namespace osmscout {
 
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
-      if (offset+(FileOffset)sizeof(uint8_t)-1>=size) {
+      if (offset>=size) {
         std::cerr << "Cannot read uint8_t beyond file end!" << std::endl;
         hasError=true;
         return false;
       }
 
-        number=buffer[offset];
+      number=(uint8_t)buffer[offset];
 
-      offset+=sizeof(uint8_t);
+      offset++;
 
       return true;
     }
@@ -503,34 +503,52 @@ namespace osmscout {
 
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
-      if (offset+(FileOffset)sizeof(uint16_t)-1>=size) {
+      if (offset+2-1>=size) {
         std::cerr << "Cannot read uint16_t beyond file end!" << std::endl;
         hasError=true;
         return false;
       }
 
-      for (size_t i=0; i<sizeof(uint16_t); i++) {
-        number=number | (((unsigned char)buffer[offset+i]) << (i*8));
-      }
+      char     *dataPtr=&buffer[offset];
+      uint16_t add;
 
-      offset+=sizeof(uint16_t);
+      add=(unsigned char)(*dataPtr);
+      add=add << 0;
+      number|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 8;
+      number|=add;
+      dataPtr++;
+
+      offset+=2;
 
       return true;
     }
 #endif
 
-    unsigned char buffer[sizeof(uint16_t)];
+    unsigned char buffer[2];
 
-    hasError=fread(&buffer,sizeof(char),sizeof(uint16_t),file)!=sizeof(uint16_t);
+    hasError=fread(&buffer,1,2,file)!=2;
 
     if (hasError) {
       std::cerr << "Cannot read uint16_t beyond file end!" << std::endl;
       return false;
     }
 
-    for (size_t i=0; i<sizeof(uint16_t); i++) {
-      number=number | (buffer[i] << (i*8));
-    }
+    unsigned char *dataPtr=buffer;
+    uint16_t      add;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 0;
+    number|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 8;
+    number|=add;
+    dataPtr++;
 
     return true;
   }
@@ -545,34 +563,72 @@ namespace osmscout {
 
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
-      if (offset+(FileOffset)sizeof(uint32_t)-1>=size) {
+      if (offset+4-1>=size) {
         std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
         hasError=true;
         return false;
       }
 
-      for (size_t i=0; i<sizeof(uint32_t); i++) {
-      number=number | (((unsigned char)buffer[offset+i]) << (i*8));
-      }
+      char     *dataPtr=&buffer[offset];
+      uint32_t add;
 
-      offset+=sizeof(uint32_t);
+      add=(unsigned char)(*dataPtr);
+      add=add << 0;
+      number|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 8;
+      number|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 16;
+      number|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 24;
+      number|=add;
+      dataPtr++;
+
+      offset+=4;
 
       return true;
     }
 #endif
 
-    unsigned char buffer[sizeof(uint32_t)];
+    unsigned char buffer[4];
 
-    hasError=fread(&buffer,sizeof(unsigned char),sizeof(uint32_t),file)!=sizeof(uint32_t);
+    hasError=fread(&buffer,1,4,file)!=4;
 
     if (hasError) {
       std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
       return false;
     }
 
-    for (size_t i=0; i<sizeof(uint32_t); i++) {
-      number=number | (buffer[i] << (i*8));
-    }
+    unsigned char *dataPtr=buffer;
+    uint32_t      add;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 0;
+    number|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 8;
+    number|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 16;
+    number|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 24;
+    number|=add;
+    dataPtr++;
 
     return true;
   }
@@ -588,52 +644,236 @@ namespace osmscout {
 
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
-      if (offset+(FileOffset)sizeof(uint64_t)-1>=size) {
+      if (offset+8-1>=size) {
         std::cerr << "Cannot read uint64_t beyond file end!" << std::endl;
         hasError=true;
         return false;
       }
 
-      for (size_t i=0; i<sizeof(uint64_t); i++) {
-      number=number | (((unsigned char)buffer[offset+i]) << (i*8));
-      }
+      char     *dataPtr=&buffer[offset];
+      uint64_t add;
 
-      offset+=sizeof(uint64_t);
+      add=(unsigned char)(*dataPtr);
+      add=add << 0;
+      number|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 8;
+      number|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 16;
+      number|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 24;
+      number|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 32;
+      number|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 40;
+      number|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 48;
+      number|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 56;
+      number|=add;
+      dataPtr++;
+
+      offset+=8;
 
       return true;
     }
 #endif
 
-    unsigned char buffer[sizeof(uint64_t)];
+    unsigned char buffer[8];
 
-    hasError=fread(&buffer,sizeof(unsigned char),sizeof(uint64_t),file)!=sizeof(uint64_t);
+    hasError=fread(&buffer,1,8,file)!=8;
 
     if (hasError) {
       std::cerr << "Cannot read uint64_t beyond file end!" << std::endl;
       return false;
     }
 
-    for (size_t i=0; i<sizeof(uint64_t); i++) {
-      number=number | (buffer[i] << (i*8));
-    }
+    unsigned char *dataPtr=buffer;
+    uint64_t      add;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 0;
+    number|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 8;
+    number|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 16;
+    number|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 24;
+    number|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 32;
+    number|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 40;
+    number|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 48;
+    number|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 56;
+    number|=add;
+    dataPtr++;
 
     return true;
   }
 #endif
 
-  bool FileScanner::ReadFileOffset(FileOffset& offset)
+  bool FileScanner::ReadFileOffset(FileOffset& fileOffset)
   {
-    if (sizeof(FileOffset)==4) {
-      char buffer[4];
-
-      if (!Read(buffer,4)) {
-        return false;
-      }
+    if (HasError()) {
+      return false;
     }
 
-    return Read(offset);
-  }
+    fileOffset=0;
 
+#if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
+    if (buffer!=NULL) {
+      if (offset+8-1>=size) {
+        std::cerr << "Cannot read FileOffset beyond file end!" << std::endl;
+        hasError=true;
+        return false;
+      }
+
+      char       *dataPtr=&buffer[offset];
+      FileOffset add;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 0;
+      fileOffset|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 8;
+      fileOffset|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 16;
+      fileOffset|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 24;
+      fileOffset|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 32;
+      fileOffset|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 40;
+      fileOffset|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 48;
+      fileOffset|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 56;
+      fileOffset|=add;
+      dataPtr++;
+
+      offset+=8;
+
+      return true;
+    }
+#endif
+
+    unsigned char buffer[8];
+
+    hasError=fread(&buffer,1,8,file)!=8;
+
+    if (hasError) {
+      std::cerr << "Cannot read FileOffset beyond file end!" << std::endl;
+      return false;
+    }
+
+    unsigned char *dataPtr=buffer;
+    FileOffset    add;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 0;
+    fileOffset|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 8;
+    fileOffset|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 16;
+    fileOffset|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 24;
+    fileOffset|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 32;
+    fileOffset|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 40;
+    fileOffset|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 48;
+    fileOffset|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 56;
+    fileOffset|=add;
+    dataPtr++;
+
+    return true;
+  }
 
   bool FileScanner::Read(int8_t& number)
   {
@@ -645,39 +885,31 @@ namespace osmscout {
 
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
-      if (offset+(FileOffset)sizeof(int8_t)-1>=size) {
+      if (offset>=size) {
         std::cerr << "Cannot read int8_t beyond file end!" << std::endl;
         hasError=true;
         return false;
       }
 
-      for (size_t i=0; i<sizeof(int8_t); i++) {
-        number=number | (((unsigned char)buffer[offset+i]) << (i*8));
-      }
+      number=buffer[offset];
 
-      offset+=sizeof(int8_t);
+      offset++;
 
       return true;
     }
 #endif
 
-    unsigned char buffer[sizeof(int8_t)];
-
-    hasError=fread(&buffer,sizeof(char),sizeof(int8_t),file)!=sizeof(int8_t);
+    hasError=fread(&number,1,1,file)!=1;
 
     if (hasError) {
       std::cerr << "Cannot read int8_t beyond file end!" << std::endl;
       return false;
     }
 
-    for (size_t i=0; i<sizeof(int8_t); i++) {
-      number=number | (buffer[i] << (i*8));
-    }
-
     return true;
   }
 
-  bool FileScanner::Read(int32_t& number)
+  bool FileScanner::ReadNumber(uint16_t& number)
   {
     if (HasError()) {
       return false;
@@ -687,33 +919,109 @@ namespace osmscout {
 
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
-      if (offset+(FileOffset)sizeof(uint32_t)-1>=size) {
-        std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
+      if (offset>=size) {
+        std::cerr << "Cannot read uint16_t beyond file end!" << std::endl;
         hasError=true;
         return false;
       }
 
-      for (size_t i=0; i<sizeof(uint32_t); i++) {
-        number=number | (((unsigned char)buffer[offset+i]) << (i*8));
-      }
+      unsigned int bytes=DecodeNumber(&buffer[offset],number);
 
-      offset+=sizeof(uint32_t);
+      offset+=bytes;
 
       return true;
     }
 #endif
 
-    unsigned char buffer[sizeof(uint32_t)];
+    char buffer;
 
-    hasError=fread(&buffer,sizeof(char),sizeof(uint32_t),file)!=sizeof(uint32_t);
-
-    if (hasError) {
-      std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
+    if (fread(&buffer,sizeof(char),1,file)!=1) {
+      std::cerr << "Cannot read uint16_t beyond file end!" << std::endl;
+      hasError=true;
       return false;
     }
 
-    for (size_t i=0; i<sizeof(uint32_t); i++) {
-      number=number | (buffer[i] << (i*8));
+    unsigned int shift=0;
+
+    while (true) {
+      uint16_t add;
+
+      add=(unsigned char)buffer;
+      add=add & 0x7f;
+      add=add << shift;
+
+      number|=add;
+
+      if ((buffer & 0x80)==0) {
+        return true;
+      }
+
+      if (fread(&buffer,sizeof(char),1,file)!=1) {
+        std::cerr << "Cannot read uint16_t beyond file end!" << std::endl;
+        hasError=true;
+        return false;
+      }
+
+      shift+=7;
+    }
+
+    return true;
+  }
+
+  bool FileScanner::ReadNumber(uint32_t& number)
+  {
+    if (HasError()) {
+      return false;
+    }
+
+    number=0;
+
+#if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
+    if (buffer!=NULL) {
+      if (offset>=size) {
+        std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
+        hasError=true;
+        return false;
+      }
+
+      unsigned int bytes=DecodeNumber(&buffer[offset],number);
+
+      offset+=bytes;
+
+      return true;
+    }
+#endif
+
+    char buffer;
+
+    if (fread(&buffer,sizeof(char),1,file)!=1) {
+      std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
+      hasError=true;
+      return false;
+    }
+
+    unsigned int shift=0;
+
+    while (true) {
+      uint32_t add;
+
+      add=(unsigned char)buffer;
+      add=add & 0x7f;
+      add=add << shift;
+
+      number|=add;
+
+      if ((buffer & 0x80)==0) {
+        return true;
+      }
+
+      if (fread(&buffer,sizeof(char),1,file)!=1) {
+        std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
+        hasError=true;
+        return false;
+      }
+
+      shift+=7;
     }
 
     return true;
@@ -730,7 +1038,7 @@ namespace osmscout {
 
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
-      if (offset>=(FileOffset)size) {
+      if (offset>=size) {
         std::cerr << "Cannot read uint64_t beyond file end!" << std::endl;
         hasError=true;
         return false;
@@ -755,7 +1063,13 @@ namespace osmscout {
     unsigned int shift=0;
 
     while (true) {
-      number=number+((buffer & 0x7f) << shift);
+      uint64_t add;
+
+      add=(unsigned char)buffer;
+      add=add & 0x7f;
+      add=add << shift;
+
+      number|=add;
 
       if ((buffer & 0x80)==0) {
         return true;
@@ -773,220 +1087,5 @@ namespace osmscout {
     return true;
   }
 #endif
-
-  bool FileScanner::ReadNumber(uint32_t& number)
-  {
-    if (HasError()) {
-      return false;
-    }
-
-    number=0;
-
-#if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
-    if (buffer!=NULL) {
-      if (offset>=(FileOffset)size) {
-        std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
-        hasError=true;
-        return false;
-      }
-
-      unsigned int bytes=DecodeNumber(&buffer[offset],number);
-
-      offset+=bytes;
-
-      return true;
-    }
-#endif
-
-    char buffer;
-
-    if (fread(&buffer,sizeof(char),1,file)!=1) {
-      std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
-      hasError=true;
-      return false;
-    }
-
-    unsigned int shift=0;
-
-    while (true) {
-      number=number+((buffer & 0x7f) << shift);
-
-      if ((buffer & 0x80)==0) {
-        return true;
-      }
-
-      if (fread(&buffer,sizeof(char),1,file)!=1) {
-        std::cerr << "Cannot read uint64_t beyond file end!" << std::endl;
-        hasError=true;
-        return false;
-      }
-
-      shift+=7;
-    }
-
-    return true;
-  }
-
-  bool FileScanner::ReadNumber(uint16_t& number)
-  {
-    if (HasError()) {
-      return false;
-    }
-
-    number=0;
-
-#if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
-    if (buffer!=NULL) {
-      if (offset>=(FileOffset)size) {
-        std::cerr << "Cannot read uint16_t beyond file end!" << std::endl;
-        hasError=true;
-        return false;
-      }
-
-      unsigned int bytes=DecodeNumber(&buffer[offset],number);
-
-      offset+=bytes;
-
-      return true;
-    }
-#endif
-
-    char buffer;
-
-    if (fread(&buffer,sizeof(char),1,file)!=1) {
-      std::cerr << "Cannot read uint16_t beyond file end!" << std::endl;
-      hasError=true;
-      return false;
-    }
-
-    unsigned int shift=0;
-
-    while (true) {
-      number=number+((buffer & 0x7f) << shift);
-
-      if ((buffer & 0x80)==0) {
-        return true;
-      }
-
-      if (fread(&buffer,sizeof(char),1,file)!=1) {
-        std::cerr << "Cannot read uint16_t beyond file end!" << std::endl;
-        hasError=true;
-        return false;
-      }
-
-      shift+=7;
-    }
-
-    return true;
-  }
-
-  bool FileScanner::ReadNumber(uint8_t& number)
-  {
-    if (HasError()) {
-      return false;
-    }
-
-    number=0;
-
-#if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
-    if (buffer!=NULL) {
-      if (offset>=(FileOffset)size) {
-        std::cerr << "Cannot read uint8_t beyond file end!" << std::endl;
-        hasError=true;
-        return false;
-      }
-
-      unsigned int bytes=DecodeNumber(&buffer[offset],number);
-
-      offset+=bytes;
-
-      return true;
-    }
-#endif
-
-    char buffer;
-
-    if (fread(&buffer,sizeof(char),1,file)!=1) {
-      std::cerr << "Cannot read uint8_t beyond file end!" << std::endl;
-      hasError=true;
-      return false;
-    }
-
-    unsigned int shift=0;
-
-    while (true) {
-      number=number+((buffer & 0x7f) << shift);
-
-      if ((buffer & 0x80)==0) {
-        return true;
-      }
-
-      if (fread(&buffer,sizeof(char),1,file)!=1) {
-        std::cerr << "Cannot read uint8_t beyond file end!" << std::endl;
-        hasError=true;
-        return false;
-      }
-
-      shift+=7;
-    }
-
-    return true;
-  }
-
-  /**
-    TODO: Handle real negative numbers!
-    */
-  bool FileScanner::ReadNumber(int32_t& number)
-  {
-    if (HasError()) {
-      return false;
-    }
-
-    number=0;
-
-#if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
-    if (buffer!=NULL) {
-      if (offset>=(FileOffset)size) {
-        std::cerr << "Cannot read int32_t beyond file end!" << std::endl;
-        hasError=true;
-        return false;
-      }
-
-      unsigned int bytes=DecodeNumber(&buffer[offset],number);
-
-      offset+=bytes;
-
-      return true;
-    }
-#endif
-
-    char buffer;
-
-    if (fread(&buffer,sizeof(char),1,file)!=1) {
-      std::cerr << "Cannot read int32_t beyond file end!" << std::endl;
-      hasError=true;
-      return false;
-    }
-
-    unsigned int shift=0;
-
-    while (true) {
-      number=number+((buffer & 0x7f) << shift);
-
-      if ((buffer & 0x80)==0) {
-        return true;
-      }
-
-      if (fread(&buffer,sizeof(char),1,file)!=1) {
-        std::cerr << "Cannot read int64_t beyond file end!" << std::endl;
-        hasError=true;
-        return false;
-      }
-
-      shift+=7;
-    }
-
-    return true;
-  }
 }
 

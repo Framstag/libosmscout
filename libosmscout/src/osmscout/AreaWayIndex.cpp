@@ -27,7 +27,7 @@ namespace osmscout {
 
   AreaWayIndex::TypeData::TypeData()
   : indexLevel(0),
-    indexOffset(0),
+    bitmapOffset(0),
     cellXStart(0),
     cellXEnd(0),
     cellYStart(0),
@@ -71,9 +71,9 @@ namespace osmscout {
         wayTypeData.resize(type+1);
       }
 
-      scanner.ReadFileOffset(wayTypeData[type].indexOffset);
+      scanner.ReadFileOffset(wayTypeData[type].bitmapOffset);
 
-      if (wayTypeData[type].indexOffset>0) {
+      if (wayTypeData[type].bitmapOffset>0) {
         scanner.ReadNumber(wayTypeData[type].indexLevel);
 
         scanner.ReadNumber(wayTypeData[type].cellXStart);
@@ -97,9 +97,9 @@ namespace osmscout {
         relTypeData.resize(type+1);
       }
 
-      scanner.ReadFileOffset(relTypeData[type].indexOffset);
+      scanner.ReadFileOffset(relTypeData[type].bitmapOffset);
 
-      if (relTypeData[type].indexOffset>0) {
+      if (relTypeData[type].bitmapOffset>0) {
         scanner.ReadNumber(relTypeData[type].indexLevel);
 
         scanner.ReadNumber(relTypeData[type].cellXStart);
@@ -133,7 +133,7 @@ namespace osmscout {
                                 size_t currentSize,
                                 bool& sizeExceeded) const
   {
-    if (typeData.indexOffset==0) {
+    if (typeData.bitmapOffset==0) {
       // No data for this type available
       return true;
     }
@@ -164,14 +164,14 @@ namespace osmscout {
 
     // For each row
     for (size_t y=minyc; y<=maxyc; y++) {
-      FileOffset cellIndexOffset=typeData.indexOffset+
-                                 ((y-typeData.cellYStart)*typeData.cellXCount+
-                                  minxc-typeData.cellXStart)*sizeof(FileOffset);
+      FileOffset bitmapCellOffset=typeData.bitmapOffset+
+                                  ((y-typeData.cellYStart)*typeData.cellXCount+
+                                   minxc-typeData.cellXStart)*(FileOffset)8;
 
       cellDataOffsets.clear();
 
-      if (!scanner.SetPos(cellIndexOffset)) {
-        std::cerr << "Cannot go to type cell index position " << cellIndexOffset << std::endl;
+      if (!scanner.SetPos(bitmapCellOffset)) {
+        std::cerr << "Cannot go to type cell index position " << bitmapCellOffset << std::endl;
         return false;
       }
 
@@ -179,7 +179,7 @@ namespace osmscout {
       for (size_t x=minxc; x<=maxxc; x++) {
         FileOffset cellDataOffset;
 
-        if (!scanner.Read(cellDataOffset)) {
+        if (!scanner.ReadFileOffset(cellDataOffset)) {
           std::cerr << "Cannot read cell data position" << std::endl;
           return false;
         }
@@ -197,7 +197,7 @@ namespace osmscout {
 
       FileOffset offset=cellDataOffsets.front();
 
-      assert(offset>cellIndexOffset);
+      assert(offset>bitmapCellOffset);
 
       if (!scanner.SetPos(offset)) {
         std::cerr << "Cannot go to cell data position " << offset << std::endl;

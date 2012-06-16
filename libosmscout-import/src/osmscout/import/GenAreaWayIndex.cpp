@@ -545,7 +545,7 @@ namespace osmscout {
         }
 
         // Write the bitmap with offsets for each cell
-        // We prefill with zero and only overrite cells that have data
+        // We prefill with zero and only overwrite cells that have data
         // So zero means "no data for this cell"
         for (size_t i=0; i<wayTypeData[*type].cellXCount*wayTypeData[*type].cellYCount; i++) {
           FileOffset cellOffset=0;
@@ -559,9 +559,11 @@ namespace osmscout {
              ++cell) {
           FileOffset bitmapCellOffset=bitmapOffset+
                                       ((cell->first.y-wayTypeData[*type].cellYStart)*wayTypeData[*type].cellXCount+
-                                       cell->first.x-wayTypeData[*type].cellXStart)*sizeof(FileOffset);
+                                       cell->first.x-wayTypeData[*type].cellXStart)*(FileOffset)8;
           FileOffset previousOffset=0;
           FileOffset cellOffset;
+
+          assert(bitmapCellOffset>=bitmapOffset);
 
           if (!writer.GetPos(cellOffset)) {
             progress.Error("Cannot get cell start position in file");
@@ -572,6 +574,8 @@ namespace osmscout {
             progress.Error("Cannot go to cell start position in file");
             return false;
           }
+
+          assert(cellOffset>bitmapCellOffset);
 
           writer.WriteFileOffset(cellOffset);
 
@@ -725,9 +729,11 @@ namespace osmscout {
              ++cell) {
           FileOffset bitmapCellOffset=bitmapOffset+
                                       ((cell->first.y-relTypeData[*type].cellYStart)*relTypeData[*type].cellXCount+
-                                       cell->first.x-relTypeData[*type].cellXStart)*sizeof(FileOffset);
+                                       cell->first.x-relTypeData[*type].cellXStart)*(FileOffset)sizeof(8);
           FileOffset previousOffset=0;
           FileOffset cellOffset;
+
+          assert(bitmapCellOffset>=bitmapOffset);
 
           if (!writer.GetPos(cellOffset)) {
             progress.Error("Cannot get cell start position in file");
@@ -738,6 +744,8 @@ namespace osmscout {
             progress.Error("Cannot go to cell start position in file");
             return false;
           }
+
+          assert(cellOffset>=bitmapOffset);
 
           writer.WriteFileOffset(cellOffset);
 

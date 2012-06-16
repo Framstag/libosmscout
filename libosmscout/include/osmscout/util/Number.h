@@ -73,7 +73,13 @@ namespace osmscout {
     number=0;
 
     while (true) {
-      number=number+(((*buffer) & 0x7f) << shift);
+      N add;
+
+      add=(unsigned char)(*buffer);
+      add=add & 0x7f;
+      add=add << shift;
+
+      number|=add;
 
       if (((*buffer) & 0x80)==0) {
         return bytes;
