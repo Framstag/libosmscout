@@ -102,7 +102,6 @@ namespace osmscout {
     }
   };
 
-
   static bool ResolveMember(const TypeConfig& typeConfig,
                             Id id,
                             const std::string& name,
@@ -111,7 +110,6 @@ namespace osmscout {
                             DataFile<RawWay>& wayDataFile,
                             DataFile<RawRelation>& relationDataFile,
                             std::set<Id>& resolvedRelations,
-                            const std::string& roleName,
                             std::vector<Relation::Role>& roles,
                             Progress& progress)
   {
@@ -128,7 +126,7 @@ namespace osmscout {
 
       Relation::Role role;
 
-      role.role=roleName;
+      role.role=member.role;
       role.ring=0;
       role.nodes.push_back(Point(node->GetId(),
                            node->GetLat(),
@@ -162,7 +160,7 @@ namespace osmscout {
       bool           reverseNodes=false;
       Relation::Role role;
 
-      role.role=roleName;
+      role.role=member.role;
       role.ring=0;
       role.attributes.type=way->GetType();
 
@@ -223,7 +221,6 @@ namespace osmscout {
                            wayDataFile,
                            relationDataFile,
                            resolvedRelations,
-                           roleName,
                            roles,
                            progress)) {
           break;
@@ -357,11 +354,6 @@ namespace osmscout {
 
     // Make a local copy of the relation roles
     for (size_t i=0; i<relation.roles.size(); i++) {
-      // We have some marker nodes like "admin_centre", which we want to skip
-      if (relation.roles[i].nodes.size()==1) {
-        continue;
-      }
-
       // We can have ways that are of type way and still build a closed shape.
       // We are sure that they build an area and fix the data here
       if (relation.roles[i].nodes.size()>2 &&
@@ -608,6 +600,7 @@ namespace osmscout {
     thus reducing the number of roles and increasing the number of points per role
     (which gives us the change to optimize better for low magnification).
     */
+  /*
   static bool CompactRelation(Relation& relation,
                               const std::string& name,
                               Progress& progress)
@@ -688,6 +681,184 @@ namespace osmscout {
       if (progress.OutputDebug()) {
         progress.Debug("Compacted number of roles of relation "+NumberToString(relation.GetId())+" "+name+
                        " from "+NumberToString(oldSize)+" to "+NumberToString(relation.roles.size()));
+      }
+    }
+
+    return true;
+  }*/
+
+  static bool ResolveMultipolygonMembers(Progress& progress,
+                                         const TypeConfig& typeConfig,
+                                         std::set<Id>& wayAreaIndexBlacklist,
+                                         DataFile<RawNode>& nodeDataFile,
+                                         DataFile<RawWay>& wayDataFile,
+                                         DataFile<RawRelation>& relDataFile,
+                                         std::set<Id>& resolvedRelations,
+                                         RawRelation& rawRelation,
+                                         Relation& relation)
+  {
+    relation.roles.reserve(rawRelation.members.size());
+
+    for (std::vector<RawRelation::Member>::const_iterator member=rawRelation.members.begin();
+        member!=rawRelation.members.end();
+        member++) {
+      if (member->type==RawRelation::memberWay &&
+          (member->role=="inner" ||
+           member->role=="outer" ||
+           member->role.empty())) {
+        if (!ResolveMember(typeConfig,
+                           rawRelation.GetId(),
+                           relation.GetName(),
+                           *member,
+                           nodeDataFile,
+                           wayDataFile,
+                           relDataFile,
+                           resolvedRelations,
+                           relation.roles,
+                           progress)) {
+          return false;
+        }
+      }
+      if (member->type==RawRelation::memberRelation &&
+          (member->role=="inner" ||
+           member->role=="outer" ||
+           member->role.empty())) {
+        if (!ResolveMember(typeConfig,
+                           rawRelation.GetId(),
+                           relation.GetName(),
+                           *member,
+                           nodeDataFile,
+                           wayDataFile,
+                           relDataFile,
+                           resolvedRelations,
+                           relation.roles,
+                           progress)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  static bool HandleMultipolygonRelation(Progress& progress,
+                                         const TypeConfig& typeConfig,
+                                         std::set<Id>& wayAreaIndexBlacklist,
+                                         DataFile<RawNode>& nodeDataFile,
+                                         DataFile<RawWay>& wayDataFile,
+                                         DataFile<RawRelation>& relDataFile,
+                                         RawRelation& rawRelation,
+                                         Relation& relation)
+  {
+    std::set<Id> resolvedRelations;
+    bool         reverseNodes;
+
+    relation.SetId(rawRelation.GetId());
+    relation.SetType(rawRelation.GetType());
+
+
+    if (!relation.attributes.SetTags(progress,
+                                     typeConfig,
+                                     rawRelation.GetId(),
+                                     true,
+                                     rawRelation.tags,
+                                     reverseNodes)) {
+      return false;
+    }
+
+    if (!ResolveMultipolygonMembers(progress,
+                                    typeConfig,
+                                    wayAreaIndexBlacklist,
+                                    nodeDataFile,
+                                    wayDataFile,
+                                    relDataFile,
+                                    resolvedRelations,
+                                    rawRelation,
+                                    relation)) {
+      return false;
+    }
+
+    // Resolve type of multipolygon relations if the relation does
+    // not have a type
+    if (relation.GetType()==typeIgnore) {
+      bool   correct=true;
+      TypeId typeId=typeIgnore;
+
+      for (size_t m=0; m<relation.roles.size(); m++) {
+        if (relation.roles[m].role=="outer" &&
+            relation.roles[m].GetType()!=typeIgnore &&
+            typeConfig.GetTypeInfo(relation.roles[m].GetType()).CanBeArea()) {
+          if (typeId==typeIgnore) {
+            typeId=relation.roles[m].GetType();
+            if (progress.OutputDebug()) {
+              progress.Debug("Autodetecting type of multipolygon relation "+NumberToString(relation.GetId())+" as "+NumberToString(typeId));
+            }
+          }
+          else if (typeId!=typeIgnore &&
+                   typeId!=relation.roles[m].GetType()) {
+            if (progress.OutputDebug()) {
+              progress.Warning("Multipolygon relation "+NumberToString(relation.GetId())+" has conflicting types for outer boundary ("+
+                               typeConfig.GetTypeInfo(typeId).GetName()+ " vs. "+typeConfig.GetTypeInfo(relation.roles[m].GetType()).GetName()+")");
+            }
+            correct=false;
+          }
+        }
+      }
+
+      if (correct) {
+        relation.SetType(typeId);
+      }
+    }
+
+    if (relation.GetType()==typeIgnore) {
+      //std::cout << "Cannot identify type of relation " << rel.GetId() << std::endl;
+      return false;
+    }
+
+    if (typeConfig.GetTypeInfo(relation.GetType()).GetIgnore()) {
+      return false;
+    }
+
+    // Blacklist all ways that build the multipolygon relation
+    for (size_t m=0; m<rawRelation.members.size(); m++) {
+      if (rawRelation.members[m].type==RawRelation::memberWay) {
+        wayAreaIndexBlacklist.insert(rawRelation.members[m].id);
+      }
+    }
+
+    // Reconstruct multiploygon relation by applying the multipolygon resolving
+    // algorithm as destribed at
+    // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
+    if (!ResolveMultipolygon(progress,relation)) {
+      return false;
+    }
+
+    // Postprocessing of relation
+    for (size_t m=0; m<relation.roles.size(); m++) {
+
+      // Outer boundary inherits attributes from relation
+      if (relation.roles[m].ring==0) {
+        if (relation.roles[m].GetType()==typeIgnore) {
+          relation.roles[m].attributes.type=relation.GetType();
+        }
+
+        if (!relation.GetName().empty() &&
+            relation.roles[m].attributes.GetName().empty()) {
+          relation.roles[m].attributes.name=relation.GetName();
+        }
+        else if (relation.GetName().empty() &&
+            !relation.roles[m].attributes.GetName().empty()) {
+          relation.GetName()=relation.roles[m].attributes.name;
+        }
+
+        if (!relation.GetRefName().empty() &&
+            relation.roles[m].GetRefName().empty()) {
+          relation.roles[m].attributes.ref=relation.GetRefName();
+        }
+        else if (relation.GetRefName().empty() &&
+            !relation.roles[m].GetRefName().empty()) {
+          relation.GetRefName()=relation.roles[m].attributes.ref;
+        }
       }
     }
 
@@ -804,18 +975,12 @@ namespace osmscout {
         continue;
       }
 
-      Relation              rel;
-      bool                  error=false;
-      bool                  isArea=false;
-      bool                  reverseNodes;
+      bool isArea=false;
 
       selectedRelationCount++;
 
-      rel.SetId(rawRel.GetId());
-      rel.SetType(rawRel.GetType());
-
       // Check, if the type should be handled as multipolygon
-      isArea=typeConfig.GetTypeInfo(rel.GetType()).GetMultipolygon();
+      isArea=typeConfig.GetTypeInfo(rawRel.GetType()).GetMultipolygon();
 
       // Is it possibly a explicitly marked multipolygon?
       if (!isArea) {
@@ -834,173 +999,22 @@ namespace osmscout {
         }
       }
 
-      if (!rel.attributes.SetTags(progress,
-                                  typeConfig,
-                                  rel.GetId(),
-                                  isArea,
-                                  rawRel.tags,
-                                  reverseNodes)) {
-        continue;
-      }
+      Relation rel;
 
-      rel.roles.reserve(rawRel.members.size());
-
-      std::set<Id> resolvedRelations;
-
-      for (size_t m=0; m<rawRel.members.size(); m++) {
-        if (!ResolveMember(typeConfig,
-                           rawRel.GetId(),
-                           rel.GetName(),
-                           rawRel.members[m],
-                           nodeDataFile,
-                           wayDataFile,
-                           relDataFile,
-                           resolvedRelations,
-                           rawRel.members[m].role,
-                           rel.roles,
-                           progress)) {
-          error=true;
-          break;
-        }
-      }
-
-      resolvedRelations.clear();
-
-      if (error) {
-        continue;
-      }
-
-      // Resolve type of multipolygon relations if the relation does
-      // not have a type
-      if (rel.GetType()==typeIgnore) {
-        if (rel.IsArea()) {
-          bool   correct=true;
-          TypeId typeId=typeIgnore;
-
-          for (size_t m=0; m<rel.roles.size(); m++) {
-            if (rel.roles[m].role=="outer" &&
-                rel.roles[m].GetType()!=typeIgnore &&
-                typeConfig.GetTypeInfo(rel.roles[m].GetType()).CanBeArea()) {
-              if (typeId==typeIgnore) {
-                typeId=rel.roles[m].GetType();
-                if (progress.OutputDebug()) {
-                  progress.Debug("Autodetecting type of multipolygon relation "+NumberToString(rel.GetId())+" as "+NumberToString(typeId));
-                }
-              }
-              else if (typeId!=typeIgnore &&
-                       typeId!=rel.roles[m].GetType()) {
-                if (progress.OutputDebug()) {
-                  progress.Warning("Multipolygon relation "+NumberToString(rel.GetId())+" has conflicting types for outer boundary ("+
-                                   typeConfig.GetTypeInfo(typeId).GetName()+ " vs. "+typeConfig.GetTypeInfo(rel.roles[m].GetType()).GetName()+")");
-                }
-                correct=false;
-              }
-            }
-          }
-
-          if (correct) {
-            rel.SetType(typeId);
-          }
-        }
-      }
-
-      if (rel.GetType()==typeIgnore) {
-        //std::cout << "Cannot identify type of relation " << rel.GetId() << std::endl;
-        continue;
-      }
-
-      if (typeConfig.GetTypeInfo(rel.GetType()).GetIgnore()) {
-        continue;
-      }
-
-      if (!rel.IsArea()) {
-        continue;
-      }
-
-      // Blacklist all ways that build the multipolygon relation
-      if (rel.IsArea()) {
-        for (size_t m=0; m<rawRel.members.size(); m++) {
-          if (rawRel.members[m].type==RawRelation::memberWay) {
-            wayAreaIndexBlacklist.insert(rawRel.members[m].id);
-          }
-        }
-      }
-      // Blacklist all relation members that have the same type as relation itself
-      // from the areaWayIndex to assure that a way will not be returned twice,
-      // once as part of the relation and once as way itself
-      else if (typeConfig.GetTypeInfo(rel.GetType()).GetConsumeChildren()) {
-        for (size_t m=0; m<rel.roles.size(); m++) {
-          if (rel.GetType()==rel.roles[m].GetType()) {
-            wayAreaIndexBlacklist.insert(rawRel.members[m].id);
-          }
-        }
-      }
-
-      // Reconstruct multiploygon relation by applying the multipolygon resolving
-      // algorithm as destribed at
-      // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
-      if (rel.IsArea()) {
-        if (!ResolveMultipolygon(progress,rel)) {
+      if (isArea) {
+        if (!HandleMultipolygonRelation(progress,
+                                        typeConfig,
+                                        wayAreaIndexBlacklist,
+                                        nodeDataFile,
+                                        wayDataFile,
+                                        relDataFile,
+                                        rawRel,
+                                        rel)) {
           continue;
         }
       }
       else {
-        if (!CompactRelation(rel,rel.GetName(),progress)) {
-          progress.Error("Relation "+NumberToString(rel.GetId())+
-                         " cannot be compacted");
-          continue;
-        }
-      }
-
-      // Postprocessing of relation
-
-      if (rel.IsArea()) {
-        for (size_t m=0; m<rel.roles.size(); m++) {
-
-          // Outer boundary inherits attributes from relation
-          if (rel.roles[m].ring==0) {
-            if (rel.roles[m].GetType()==typeIgnore) {
-              rel.roles[m].attributes.type=rel.GetType();
-            }
-
-            if (!rel.GetName().empty() && rel.roles[m].attributes.GetName().empty()) {
-              rel.roles[m].attributes.name=rel.GetName();
-            }
-            else if (rel.GetName().empty() && !rel.roles[m].attributes.GetName().empty()) {
-              rel.GetName()=rel.roles[m].attributes.name;
-            }
-
-            if (!rel.GetRefName().empty() && rel.roles[m].GetRefName().empty()) {
-              rel.roles[m].attributes.ref=rel.GetRefName();
-            }
-            else if (rel.GetRefName().empty() && !rel.roles[m].GetRefName().empty()) {
-              rel.GetRefName()=rel.roles[m].attributes.ref;
-            }
-          }
-        }
-
-      }
-      else {
-        for (size_t m=0; m<rel.roles.size(); m++) {
-          if (rel.roles[m].GetType()==typeIgnore) {
-            // If a relation member does not have a type, it has the type of the relation
-            rel.roles[m].attributes.type=rel.GetType();
-          }
-
-          if (!rel.GetName().empty() && rel.roles[m].attributes.GetName().empty()) {
-            rel.roles[m].attributes.name=rel.GetName();
-          }
-          else if (rel.GetName().empty() && !rel.roles[m].attributes.GetName().empty()) {
-            rel.GetName()=rel.roles[m].attributes.name;
-          }
-
-          if (!rel.GetRefName().empty() && rel.roles[m].GetRefName().empty()) {
-            rel.roles[m].attributes.ref=rel.GetRefName();
-          }
-          else if (rel.GetRefName().empty() && !rel.roles[m].GetRefName().empty()) {
-            rel.GetRefName()=rel.roles[m].attributes.ref;
-          }
-        }
+        continue;
       }
 
       if (progress.OutputDebug()) {
