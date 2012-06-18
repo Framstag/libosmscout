@@ -39,17 +39,15 @@ namespace osmscout {
       return std::numeric_limits<double>::infinity();
     }
 
-    double u=((p.x-a.x)*xdelta+(p.y-a.y)*ydelta)/(pow(xdelta,2)+pow(ydelta,2));
+    double u=((p.x-a.x)*xdelta+(p.y-a.y)*ydelta)/(xdelta*xdelta+ydelta*ydelta);
 
     double cx,cy;
 
     if (u<0) {
-      u=0;
       cx=a.x;
       cy=a.y;
     }
     else if (u>1) {
-      u=1;
       cx=b.x;
       cy=b.y;
     }
@@ -58,7 +56,10 @@ namespace osmscout {
       cy=a.y+u*ydelta;
     }
 
-    return sqrt(pow(cx-p.x,2)+pow(cy-p.y,2));
+    double dx = cx-p.x;
+    double dy = cy-p.y;
+
+    return sqrt(dx*dx+dy*dy);
   }
 
   TransPolygon::TransPolygon()
