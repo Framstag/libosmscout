@@ -813,9 +813,10 @@ namespace osmscout {
       const RelationRef& relation=*r;
 
       for (size_t m=0; m<relation->roles.size(); m++) {
-        const LabelStyle  *labelStyle=styleConfig.GetAreaLabelStyle(relation->roles[m].GetType(),level);
-        IconStyle         *iconStyle=styleConfig.GetAreaIconStyle(relation->roles[m].GetType(),level);
-        const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetAreaSymbolStyle(relation->roles[m].GetType(),level);
+        TypeId            type=relation->roles[m].ring==0 ? relation->GetType() : relation->roles[m].GetType();
+        const LabelStyle  *labelStyle=styleConfig.GetAreaLabelStyle(type,level);
+        IconStyle         *iconStyle=styleConfig.GetAreaIconStyle(type,level);
+        const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetAreaSymbolStyle(type,level);
 
         bool hasLabel=labelStyle!=NULL &&
                       labelStyle->GetStyle()!=LabelStyle::none;
@@ -1388,19 +1389,29 @@ namespace osmscout {
         for (size_t i=0; i<relation->roles.size(); i++) {
           const Relation::Role& role=relation->roles[i];
 
-          if (role.ring==ring &&
-              role.GetType()!=typeIgnore)
+          if (role.ring==ring)
           {
-            std::list<PolyData> clippings;
+            const FillStyle *fillStyle=NULL;
 
-            foundRing=true;
-
-            const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(role.attributes.GetType(),level);
+            if (ring==0) {
+              if (relation->GetType()!=typeIgnore) {
+                fillStyle=styleConfig.GetAreaFillStyle(relation->GetType(),level);
+              }
+            }
+            else {
+              if (role.GetType()!=typeIgnore) {
+                fillStyle=styleConfig.GetAreaFillStyle(role.attributes.GetType(),level);
+              }
+            }
 
             if (fillStyle==NULL)
             {
               continue;
             }
+
+            std::list<PolyData> clippings;
+
+            foundRing=true;
 
             if (!IsVisible(projection,
                            role.nodes,

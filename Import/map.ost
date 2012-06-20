@@ -72,7 +72,7 @@ TYPES
   TYPE "aeroway_apron" = AREA ("aeroway"=="apron")
   TYPE "aeroway_gate" = NODE ("aeroway"=="gate")
 
-  TYPE "public_transport_platform" = WAY AREA ("public_transport"=="platform" OR "railway"=="platform")
+  TYPE "public_transport_platform" = WAY AREA ("public_transport"=="platform" OR "railway"=="platform"OR "highway"=="platform")
   
   TYPE "landuse_allotments" = NODE AREA ("landuse"=="allotments")
   TYPE "landuse_basin" = NODE AREA ("landuse"=="basin")
@@ -286,6 +286,8 @@ TYPES
   TYPE "power_station" = NODE AREA ("power"=="station")
   TYPE "power_sub_station" = NODE AREA ("power"=="sub_station")
   TYPE "power_generator" = NODE AREA ("power"=="generator")
+  
+  TYPE "man_made_wastewater_plant" = NODE AREA ("man_made"=="wastewater_plant")
   
   TYPE "building_garage" = AREA ("building"=="garage")
   TYPE "building" = AREA (EXISTS "building" AND !("building" IN ["no","false","0"]))

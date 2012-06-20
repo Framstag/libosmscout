@@ -189,9 +189,10 @@ OSS
 
  [MAG veryClose-] {  
    [TYPE "highway_track"] WAY {color: #90570c; outlineColor: #ffffff50; dash: 3,1; displayWidth: 0.4mm;  outline: 0.4mm;}
-   [TYPE "highway_pedestrian"] WAY {color: #555555; outlineColor: #ffffff50; dash: 8,2; displayWidth: 0.25mm; outline: 0.25mm;}
-   [TYPE "highway_path"] WAY {color: #4645fa; outlineColor: #ffffff50; dash: 1,1; displayWidth: 0.4mm; outline: 0.4mm; }
-   [TYPE "highway_cycleway"] WAY {color: #f64762; outlineColor: #ffffff50; dash: 1,1; displayWidth: 0.4mm; outline: 0.4mm; }
+   [TYPE "highway_pedestrian"] WAY {color: #ebeaea; outlineColor: #ffffff50; displayWidth: 0.1mm; outline: 0.25mm;}
+   [TYPE "highway_path"] WAY {color: #555555; outlineColor: #ffffff50; dash: 8,2; displayWidth: 0.25mm; outline: 0.25mm;}
+   [TYPE "highway_cycleway"] WAY {color: #4645fa; outlineColor: #ffffff50; dash: 1,1; displayWidth: 0.4mm; outline: 0.4mm; }
+   [TYPE "highway_footway"] WAY {color: #f64762; outlineColor: #ffffff50; dash: 1,1; displayWidth: 0.4mm; outline: 0.4mm; }
    [TYPE "highway_bridleway"] WAY {color: #90570c; displayWidth: 0.1mm; width: 2m; }
   }
 
@@ -248,6 +249,10 @@ OSS
    [TYPE "highway_services"] NODE.LABEL {style: normal; }
 
    [TYPE "highway_construction"] WAY.LABEL { style: contour;}
+   
+   [TYPE "leisure_building",
+         "sport_building",
+         "shop"] AREA.LABEL {style: normal; }
  }
  
  [MAG veryClose-] {
@@ -280,10 +285,7 @@ OSS
     
    [TYPE "highway_pedestrian",
          "highway_services",
-         "highway_footway",
-         "leisure_building",
-         "sport_building",
-         "shop"] AREA.LABEL { style: normal;}
+         "highway_footway"] AREA.LABEL { style: normal;}
 
    [TYPE "public_transport_platform"] AREA.LABEL { style: normal; color: #524a4a; size: 0.8;}
  }

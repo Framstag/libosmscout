@@ -102,8 +102,28 @@ namespace osmscout {
     }
   };
 
+  struct MultipolygonPart
+  {
+    Relation::Role       role;
+    std::vector<RawNode> nodes;
+    std::list<RawWayRef> ways;
+
+    bool IsArea() const
+    {
+      if (ways.size()==1) {
+        return ways.front()->IsArea() ||
+               ways.front()->GetNodes().front()==ways.front()->GetNodes().back();
+      }
+      else {
+        return false;
+      }
+    }
+  };
+
+
   static bool ResolveMember(const TypeConfig& typeConfig,
                             Id id,
+                            TypeInfo type,
                             const std::string& name,
                             const RawRelation::Member& member,
                             DataFile<RawNode>& nodeDataFile,
@@ -120,7 +140,7 @@ namespace osmscout {
         progress.Error("Cannot resolve node member "+
                        NumberToString(member.id)+
                        " for relation "+
-                       NumberToString(id)+" "+name);
+                       NumberToString(id)+" "+type.GetName()+ " "+name);
         return false;
       }
 
@@ -215,6 +235,7 @@ namespace osmscout {
       for (size_t m=0; m<relation->members.size(); m++) {
         if (!ResolveMember(typeConfig,
                            id,
+                           type,
                            name,
                            relation->members[m],
                            nodeDataFile,
@@ -250,12 +271,12 @@ namespace osmscout {
     A top level role is a role that is not included by any other unused role ("top level tree
     element").
     */
-  static std::list<Relation::Role>::const_iterator FindTopLevel(const std::list<Relation::Role>& rings,
-                                                                const GroupingState& state,
-                                                                size_t& topIndex)
+  static std::list<MultipolygonPart>::const_iterator FindTopLevel(const std::list<MultipolygonPart>& rings,
+                                                                  const GroupingState& state,
+                                                                  size_t& topIndex)
   {
     size_t i=0;
-    for (std::list<Relation::Role>::const_iterator r=rings.begin();
+    for (std::list<MultipolygonPart>::const_iterator r=rings.begin();
          r!=rings.end();
          r++) {
       if (!state.IsUsed(i)) {
@@ -287,13 +308,13 @@ namespace osmscout {
     A sub role is a role that is included by the given top role but is not included
     by any other role ("direct child tree element").
     */
-  static std::list<Relation::Role>::const_iterator FindSub(const std::list<Relation::Role>& rings,
-                                                           size_t topIndex,
-                                                           const GroupingState& state,
-                                                           size_t& subIndex)
+  static std::list<MultipolygonPart>::const_iterator FindSub(const std::list<MultipolygonPart>& rings,
+                                                             size_t topIndex,
+                                                             const GroupingState& state,
+                                                             size_t& subIndex)
   {
     size_t i=0;
-    for (std::list<Relation::Role>::const_iterator r=rings.begin();
+    for (std::list<MultipolygonPart>::const_iterator r=rings.begin();
          r!=rings.end(); r++) {
       if (!state.IsUsed(i) &&
           state.Includes(i,topIndex)) {
@@ -325,20 +346,20 @@ namespace osmscout {
     Recursivly consume all direct children and all direct children of that children)
     of the given role.
     */
-  static void ConsumeSubs(const std::list<Relation::Role>& rings,
-                          std::list<Relation::Role>& groups,
+  static void ConsumeSubs(const std::list<MultipolygonPart>& rings,
+                          std::list<MultipolygonPart>& groups,
                           GroupingState& state,
                           size_t topIndex,
                           size_t id)
   {
-    std::list<Relation::Role>::const_iterator sub;
-    size_t                                    subIndex;
+    std::list<MultipolygonPart>::const_iterator sub;
+    size_t                                      subIndex;
 
     sub=FindSub(rings,topIndex,state,subIndex);
     while (sub!=rings.end()) {
       state.SetUsed(subIndex);
       groups.push_back(*sub);
-      groups.back().ring=id;
+      groups.back().role.ring=id;
 
       ConsumeSubs(rings,groups,state,subIndex,id+1);
 
@@ -346,12 +367,13 @@ namespace osmscout {
     }
   }
 
-  static bool AssignRings(Relation& relation,
-                          std::list<Relation::Role>& rings,
-                          Progress& progress)
+  static bool BuildRings(Progress& progress,
+                         const Relation& relation,
+                         std::list<MultipolygonPart>& parts)
   {
-    std::list<Relation::Role> roles;
+    std::list<MultipolygonPart> rings;
 
+    /*
     // Make a local copy of the relation roles
     for (size_t i=0; i<relation.roles.size(); i++) {
       // We can have ways that are of type way and still build a closed shape.
@@ -363,87 +385,56 @@ namespace osmscout {
       }
 
       roles.push_back(relation.roles[i]);
-    }
+    }*/
 
     // Try to consume all roles
-    while (!roles.empty()) {
+    while (!parts.empty()) {
       size_t           rolesSelected=1;
       bool             finished=false;
-      Relation::Role   leadingRole=roles.front();
-      Relation::Role   role;
-      std::list<Point> points;
+      MultipolygonPart leadingPart=parts.front();
+      MultipolygonPart ring;
 
-      roles.pop_front();
+      parts.pop_front();
 
-      role.attributes=leadingRole.attributes;
-      role.attributes.flags|=SegmentAttributes::isArea;
-      role.ring=0;
-
-      // Take the first unused roles and copy all its points
-      for (size_t i=0; i<leadingRole.nodes.size(); i++) {
-        points.push_back(leadingRole.nodes[i]);
-      }
+      ring.role.ring=0;
+      ring.role.role=leadingPart.role.role;
+      ring.ways=leadingPart.ways;
+      ring.nodes=leadingPart.nodes;
 
       // TODO: All roles that make up a ring should have the same type
 
-      if (leadingRole.IsArea()) {
+      if (leadingPart.IsArea()) {
         finished=true;
       }
 
       // Now consume more roles that have the same start or end
       // until all joined points build a closed shape ("current way")
-      while (!roles.empty() &&
+      while (!parts.empty() &&
              !finished) {
         bool found=false;
 
         // Find a role that continues the current way
-        for (std::list<Relation::Role>::iterator r=roles.begin();
-             r!=roles.end();
+        for (std::list<MultipolygonPart>::iterator r=parts.begin();
+             r!=parts.end();
              ++r) {
-          if (points.back().GetId()==r->nodes.front().GetId()) {
+          if (ring.nodes.back().GetId()==r->nodes.front().GetId()) {
             for (size_t i=1; i<r->nodes.size(); i++) {
-              points.push_back(r->nodes[i]);
+              ring.nodes.push_back(r->nodes[i]);
             }
 
-            if (role.attributes.type==typeIgnore &&
-                r->GetType()!=typeIgnore) {
-              role.attributes.type=r->GetType();
-            }
-
-            if (role.GetName().empty() && !r->GetName().empty()) {
-              role.attributes.name=r->GetName();
-            }
-
-            if (role.GetRefName().empty() && !r->GetRefName().empty()) {
-              role.attributes.ref=r->GetRefName();
-            }
-
-            roles.erase(r);
+            parts.erase(r);
 
             rolesSelected++;
             found=true;
 
             break;
           }
-          else if (points.back().GetId()==r->nodes.back().GetId()) {
+          else if (ring.nodes.back().GetId()==r->nodes.back().GetId()) {
             for (size_t i=1; i<r->nodes.size(); i++) {
-              points.push_back(r->nodes[r->nodes.size()-i-1]);
+              ring.nodes.push_back(r->nodes[r->nodes.size()-i-1]);
             }
 
-            if (role.attributes.type==typeIgnore &&
-                r->GetType()!=typeIgnore) {
-              role.attributes.type=r->GetType();
-            }
-
-            if (role.GetName().empty() && !r->GetName().empty()) {
-              role.attributes.name=r->GetName();
-            }
-
-            if (role.GetRefName().empty() && !r->GetRefName().empty()) {
-              role.attributes.ref=r->GetRefName();
-            }
-
-            roles.erase(r);
+            parts.erase(r);
 
             rolesSelected++;
             found=true;
@@ -452,14 +443,14 @@ namespace osmscout {
         }
 
         if (found) {
-          if (points.front().GetId()==points.back().GetId()) {
+          if (ring.nodes.front().GetId()==ring.nodes.back().GetId()) {
             finished=true;
           }
         }
         else {
           // if we havn't found another way and we have not closed
           // the current way we have to give up
-          progress.Error("Cannot resolve match node "+NumberToString(points.back().GetId())+
+          progress.Error("Cannot resolve match node "+NumberToString(ring.nodes.back().GetId())+
               " for multipolygon relation "+NumberToString(relation.GetId())+" "+relation.GetName());
           return false;
         }
@@ -472,29 +463,23 @@ namespace osmscout {
         return false;
       }
 
-      role.nodes.reserve(points.size());
-
-      for (std::list<Point>::const_iterator point=points.begin();
-           point!=points.end();
-           ++point) {
-        role.nodes.push_back(*point);
-      }
-
       // During concatination we might define a closed ring with start==end, but everywhere else
       // in the code we store areas without repeating the start, so we remove the final node again
-      if (role.nodes.back().GetId()==role.nodes.front().GetId()) {
-        role.nodes.pop_back();
+      if (ring.nodes.back().GetId()==ring.nodes.front().GetId()) {
+        ring.nodes.pop_back();
       }
 
-      if (!AreaIsSimple(role.nodes)) {
+      if (!AreaIsSimple(ring.nodes)) {
         progress.Error("Resolved ring is not simple for multipolygon relation "+NumberToString(relation.GetId())+
                        " "+relation.GetName());
 
         return false;
       }
 
-      rings.push_back(role);
+      rings.push_back(ring);
     }
+
+    parts=rings;
 
     return true;
   }
@@ -505,18 +490,18 @@ namespace osmscout {
     See http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
     */
   static bool ResolveMultipolygon(Progress& progress,
-                                  Relation& relation)
+                                  const Relation& relation,
+                                  std::list<MultipolygonPart>& parts)
   {
-    std::list<Relation::Role> rings;
-    std::list<Relation::Role> groups;
+    std::list<MultipolygonPart> groups;
 
     //
     // Ring assignment
     //
 
-    if (!AssignRings(relation,
-                     rings,
-                     progress)) {
+    if (!BuildRings(progress,
+                    relation,
+                    parts)) {
       return false;
     }
 
@@ -524,16 +509,16 @@ namespace osmscout {
     // Ring grouping
     //
 
-    GroupingState state(rings.size());
+    GroupingState state(parts.size());
 
     size_t i=0;
-    for (std::list<Relation::Role>::const_iterator r1=rings.begin();
-         r1!=rings.end();
+    for (std::list<MultipolygonPart>::const_iterator r1=parts.begin();
+         r1!=parts.end();
          ++r1) {
       size_t j=0;
 
-      for (std::list<Relation::Role>::const_iterator r2=rings.begin();
-           r2!=rings.end();
+      for (std::list<MultipolygonPart>::const_iterator r2=parts.begin();
+           r2!=parts.end();
            ++r2) {
         if (i!=j &&
             IsAreaInArea(r2->nodes,r1->nodes)) {
@@ -551,13 +536,13 @@ namespace osmscout {
     //
 
     while (groups.size()<state.GetRingCount()) {
-      std::list<Relation::Role>::const_iterator top;
-      size_t                                    topIndex;
+      std::list<MultipolygonPart>::const_iterator top;
+      size_t                                      topIndex=0;
 
       // Find a ring that is not yet used and that is not contained by another unused ring
-      top=FindTopLevel(rings,state,topIndex);
+      top=FindTopLevel(parts,state,topIndex);
 
-      if (top==rings.end()) {
+      if (top==parts.end()) {
         progress.Warning("Error during ring grouping for multipolygon relation "+NumberToString(relation.GetId())+
                          " "+relation.GetName());
         return false;
@@ -566,16 +551,8 @@ namespace osmscout {
       state.SetUsed(topIndex);
       groups.push_back(*top);
 
-      //
-      // The outer ring(s) inherit attribute values from the relation
-      //
-
-      // Outer ring always has the type of the relation
-      groups.back().attributes.type=relation.GetType();
-      groups.back().ring=0;
-
       if (state.HasIncludes(topIndex)) {
-        ConsumeSubs(rings,groups,state,topIndex,1);
+        ConsumeSubs(parts,groups,state,topIndex,1);
       }
     }
 
@@ -589,7 +566,7 @@ namespace osmscout {
     // Copy back data
     //
 
-    relation.roles.assign(groups.begin(),groups.end());
+    parts=groups;
 
     return true;
   }
@@ -694,11 +671,10 @@ namespace osmscout {
                                          DataFile<RawWay>& wayDataFile,
                                          DataFile<RawRelation>& relDataFile,
                                          std::set<Id>& resolvedRelations,
+                                         const Relation& relation,
                                          RawRelation& rawRelation,
-                                         Relation& relation)
+                                         std::list<MultipolygonPart>& parts)
   {
-    relation.roles.reserve(rawRelation.members.size());
-
     for (std::vector<RawRelation::Member>::const_iterator member=rawRelation.members.begin();
         member!=rawRelation.members.end();
         member++) {
@@ -706,23 +682,52 @@ namespace osmscout {
           (member->role=="inner" ||
            member->role=="outer" ||
            member->role.empty())) {
-        if (!ResolveMember(typeConfig,
-                           rawRelation.GetId(),
-                           relation.GetName(),
-                           *member,
-                           nodeDataFile,
-                           wayDataFile,
-                           relDataFile,
-                           resolvedRelations,
-                           relation.roles,
-                           progress)) {
+        RawWayRef way;
+
+        if (!wayDataFile.Get(member->id,way)) {
+          progress.Error("Cannot resolve way member "+
+                         NumberToString(member->id)+
+                         " for relation "+
+                         NumberToString(relation.GetId())+" "+
+                         typeConfig.GetTypeInfo(relation.GetType()).GetName()+" "+
+                         relation.GetName());
           return false;
         }
+
+        std::vector<RawNodeRef> nodes;
+
+        if (!nodeDataFile.Get(way->GetNodes(),nodes)) {
+          progress.Error("Cannot resolve nodes of way member "+
+                         NumberToString(member->id)+
+                         " for relation "+
+                         NumberToString(relation.GetId())+" "+
+                         typeConfig.GetTypeInfo(relation.GetType()).GetName()+" "+
+                         relation.GetName());
+          return false;
+        }
+
+        MultipolygonPart part;
+
+        part.role.ring=0;
+        part.role.role=member->role;
+
+        for (size_t i=0; i<nodes.size();i++) {
+          part.nodes.push_back(*nodes[i]);
+        }
+
+        part.ways.push_back(way);
+
+        parts.push_back(part);
       }
       if (member->type==RawRelation::memberRelation &&
           (member->role=="inner" ||
            member->role=="outer" ||
            member->role.empty())) {
+        progress.Warning("Unsupported relation reference in relation "+
+                         NumberToString(relation.GetId())+" "+
+                         typeConfig.GetTypeInfo(relation.GetType()).GetName()+" "+
+                         relation.GetName());
+        /*
         if (!ResolveMember(typeConfig,
                            rawRelation.GetId(),
                            relation.GetName(),
@@ -734,7 +739,7 @@ namespace osmscout {
                            relation.roles,
                            progress)) {
           return false;
-        }
+        }*/
       }
     }
 
@@ -756,6 +761,111 @@ namespace osmscout {
     relation.SetId(rawRelation.GetId());
     relation.SetType(rawRelation.GetType());
 
+    std::list<MultipolygonPart> parts;
+
+    if (!ResolveMultipolygonMembers(progress,
+                                    typeConfig,
+                                    wayAreaIndexBlacklist,
+                                    nodeDataFile,
+                                    wayDataFile,
+                                    relDataFile,
+                                    resolvedRelations,
+                                    relation,
+                                    rawRelation,
+                                    parts)) {
+      return false;
+    }
+
+    // Reconstruct multiploygon relation by applying the multipolygon resolving
+    // algorithm as destribed at
+    // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
+    if (!ResolveMultipolygon(progress,
+                             relation,
+                             parts)) {
+      return false;
+    }
+
+    // Resolve SegmentAttributes for each ring
+
+    for (std::list<MultipolygonPart>::iterator ring=parts.begin();
+        ring!=parts.end();
+        ring++) {
+      if (ring->role.ring==0 &&
+          ring->IsArea() &&
+          ring->ways.front()->GetType()!=typeIgnore) {
+        std::vector<Tag> tags(ring->ways.front()->GetTags());
+
+        ring->role.attributes.type=ring->ways.front()->GetType();
+
+        if (!ring->role.attributes.SetTags(progress,
+                                           typeConfig,
+                                           ring->ways.front()->GetId(),
+                                           true,
+                                           tags,
+                                           reverseNodes)) {
+                return false;
+        }
+      }
+    }
+
+    // If a ring and the direct child ring have the same time, this is old school style for
+    // the child ring being a clip region. We set the type of the child to typeIgnore then...
+
+    for (std::list<MultipolygonPart>::iterator ring=parts.begin();
+        ring!=parts.end();
+        ring++) {
+      if (ring->IsArea()) {
+        std::list<MultipolygonPart>::iterator childRing=ring;
+
+        childRing++;
+        while (childRing!=parts.end() &&
+               childRing->role.ring==ring->role.ring+1) {
+
+          if (childRing->IsArea() &&
+              ring->role.GetType()==childRing->role.GetType()) {
+            childRing->role.attributes.type=typeIgnore;
+            wayAreaIndexBlacklist.insert(childRing->ways.front()->GetId());
+          }
+          childRing++;
+        }
+      }
+    }
+
+    // If the relation itself does not have a type, try to autodetect the type from the outer rings
+
+    if (relation.GetType()==typeIgnore) {
+      for (std::list<MultipolygonPart>::iterator ring=parts.begin();
+          ring!=parts.end();
+          ring++) {
+        if (ring->role.ring==0 &&
+            ring->IsArea() &&
+            ring->ways.front()->GetType()!=typeIgnore) {
+          if (relation.GetType()==typeIgnore ||
+              relation.GetType()==ring->ways.front()->GetType()) {
+            if (progress.OutputDebug()) {
+              progress.Debug("Autodetecting type of multipolygon relation "+NumberToString(relation.GetId())+" as "+NumberToString(relation.GetType()));
+            }
+
+            relation.SetType(ring->ways.front()->GetType());
+            ring->role.attributes.type=typeIgnore;
+            wayAreaIndexBlacklist.insert(ring->ways.front()->GetId());
+          }
+          else if (ring->ways.front()->GetType()!=typeIgnore) {
+            progress.Warning("Multipolygon relation "+NumberToString(relation.GetId())+" has conflicting types for outer boundary ("+
+                             typeConfig.GetTypeInfo(relation.GetType()).GetName()+ " vs. "+typeConfig.GetTypeInfo(ring->ways.front()->GetType()).GetName()+")");
+          }
+        }
+      }
+    }
+
+    if (relation.GetType()==typeIgnore) {
+      progress.Warning("Multipolygon relation "+NumberToString(relation.GetId())+" does not have a type, skipping");
+      return false;
+    }
+
+    if (typeConfig.GetTypeInfo(relation.GetType()).GetIgnore()) {
+      return false;
+    }
 
     if (!relation.attributes.SetTags(progress,
                                      typeConfig,
@@ -766,101 +876,43 @@ namespace osmscout {
       return false;
     }
 
-    if (!ResolveMultipolygonMembers(progress,
-                                    typeConfig,
-                                    wayAreaIndexBlacklist,
-                                    nodeDataFile,
-                                    wayDataFile,
-                                    relDataFile,
-                                    resolvedRelations,
-                                    rawRelation,
-                                    relation)) {
-      return false;
-    }
+    // Blacklisting areas
 
-    // Resolve type of multipolygon relations if the relation does
-    // not have a type
-    if (relation.GetType()==typeIgnore) {
-      bool   correct=true;
-      TypeId typeId=typeIgnore;
-
-      for (size_t m=0; m<relation.roles.size(); m++) {
-        if (relation.roles[m].role=="outer" &&
-            relation.roles[m].GetType()!=typeIgnore &&
-            typeConfig.GetTypeInfo(relation.roles[m].GetType()).CanBeArea()) {
-          if (typeId==typeIgnore) {
-            typeId=relation.roles[m].GetType();
-            if (progress.OutputDebug()) {
-              progress.Debug("Autodetecting type of multipolygon relation "+NumberToString(relation.GetId())+" as "+NumberToString(typeId));
-            }
-          }
-          else if (typeId!=typeIgnore &&
-                   typeId!=relation.roles[m].GetType()) {
-            if (progress.OutputDebug()) {
-              progress.Warning("Multipolygon relation "+NumberToString(relation.GetId())+" has conflicting types for outer boundary ("+
-                               typeConfig.GetTypeInfo(typeId).GetName()+ " vs. "+typeConfig.GetTypeInfo(relation.roles[m].GetType()).GetName()+")");
-            }
-            correct=false;
-          }
-        }
-      }
-
-      if (correct) {
-        relation.SetType(typeId);
-      }
-    }
-
-    if (relation.GetType()==typeIgnore) {
-      //std::cout << "Cannot identify type of relation " << rel.GetId() << std::endl;
-      return false;
-    }
-
-    if (typeConfig.GetTypeInfo(relation.GetType()).GetIgnore()) {
-      return false;
-    }
-
-    // Blacklist all ways that build the multipolygon relation
-    for (size_t m=0; m<rawRelation.members.size(); m++) {
-      if (rawRelation.members[m].type==RawRelation::memberWay) {
-        wayAreaIndexBlacklist.insert(rawRelation.members[m].id);
-      }
-    }
-
-    // Reconstruct multiploygon relation by applying the multipolygon resolving
-    // algorithm as destribed at
-    // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
-    if (!ResolveMultipolygon(progress,relation)) {
-      return false;
-    }
-
-    // Postprocessing of relation
     for (size_t m=0; m<relation.roles.size(); m++) {
-
-      // Outer boundary inherits attributes from relation
-      if (relation.roles[m].ring==0) {
-        if (relation.roles[m].GetType()==typeIgnore) {
-          relation.roles[m].attributes.type=relation.GetType();
-        }
-
-        if (!relation.GetName().empty() &&
-            relation.roles[m].attributes.GetName().empty()) {
-          relation.roles[m].attributes.name=relation.GetName();
-        }
-        else if (relation.GetName().empty() &&
-            !relation.roles[m].attributes.GetName().empty()) {
-          relation.GetName()=relation.roles[m].attributes.name;
-        }
-
-        if (!relation.GetRefName().empty() &&
-            relation.roles[m].GetRefName().empty()) {
-          relation.roles[m].attributes.ref=relation.GetRefName();
-        }
-        else if (relation.GetRefName().empty() &&
-            !relation.roles[m].GetRefName().empty()) {
-          relation.GetRefName()=relation.roles[m].attributes.ref;
+      for (std::list<MultipolygonPart>::const_iterator ring=parts.begin();
+          ring!=parts.end();
+          ring++) {
+        if (ring->ways.front()->GetType()!=typeIgnore &&
+            ring->IsArea()) {
+          wayAreaIndexBlacklist.insert(ring->ways.front()->GetId());
         }
       }
     }
+
+    // (Re)create roles for relation
+
+    relation.roles.reserve(parts.size());
+    for (std::list<MultipolygonPart>::iterator ring=parts.begin();
+        ring!=parts.end();
+        ring++) {
+      for (std::vector<RawNode>::const_iterator node=ring->nodes.begin();
+          node!=ring->nodes.end();
+          node++) {
+        Point point;
+
+        point.Set(node->GetId(),
+                  node->GetLat(),
+                  node->GetLon());
+
+        ring->role.nodes.push_back(point);
+      }
+
+      assert(!ring->role.nodes.empty());
+
+      relation.roles.push_back(ring->role);
+    }
+
+    assert(!relation.roles.empty());
 
     return true;
   }
