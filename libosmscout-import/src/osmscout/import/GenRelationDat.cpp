@@ -675,6 +675,14 @@ namespace osmscout {
                                          RawRelation& rawRelation,
                                          std::list<MultipolygonPart>& parts)
   {
+    TypeId boundaryId;
+
+    boundaryId=typeConfig.GetWayTypeId("boundary_administrative");
+
+    if (boundaryId==typeIgnore) {
+      boundaryId=typeConfig.GetAreaTypeId("boundary_administrative");
+    }
+
     for (std::vector<RawRelation::Member>::const_iterator member=rawRelation.members.begin();
         member!=rawRelation.members.end();
         member++) {
@@ -723,10 +731,50 @@ namespace osmscout {
           (member->role=="inner" ||
            member->role=="outer" ||
            member->role.empty())) {
-        progress.Warning("Unsupported relation reference in relation "+
-                         NumberToString(relation.GetId())+" "+
-                         typeConfig.GetTypeInfo(relation.GetType()).GetName()+" "+
-                         relation.GetName());
+        if (boundaryId!=typeIgnore &&
+            relation.GetType()==boundaryId) {
+          RawRelationRef childRelation;
+
+          if (resolvedRelations.find(member->id)!=resolvedRelations.end()) {
+            progress.Error("Found self referencing relation "+
+                           NumberToString(member->id)+
+                           " during resolving of members of relation "+
+                           NumberToString(relation.GetId())+" "+relation.GetName());
+            return false;
+          }
+
+
+          if (!relDataFile.Get(member->id,childRelation)) {
+            progress.Error("Cannot resolve relation member "+
+                           NumberToString(member->id)+
+                           " for relation "+
+                           NumberToString(relation.GetId())+" "+relation.GetName());
+            return false;
+          }
+
+          resolvedRelations.insert(member->id);
+
+          for (size_t m=0; m<childRelation->members.size(); m++) {
+            if (!ResolveMultipolygonMembers(progress,
+                                            typeConfig,
+                                            wayAreaIndexBlacklist,
+                                            nodeDataFile,
+                                            wayDataFile,
+                                            relDataFile,
+                                            resolvedRelations,
+                                            relation,
+                                            *childRelation,
+                                            parts)) {
+              break;
+            }
+          }
+        }
+        else {
+          progress.Warning("Unsupported relation reference in relation "+
+                           NumberToString(relation.GetId())+" "+
+                           typeConfig.GetTypeInfo(relation.GetType()).GetName()+" "+
+                           relation.GetName());
+        }
         /*
         if (!ResolveMember(typeConfig,
                            rawRelation.GetId(),
@@ -757,6 +805,20 @@ namespace osmscout {
   {
     std::set<Id> resolvedRelations;
     bool         reverseNodes;
+    TagId        tagName=typeConfig.GetTagId("name");
+
+    // manually scan the tags of the raRelation just to get a name for the relation
+    // to improve the quality of further error output.
+    if (tagName!=tagIgnore) {
+      for (std::vector<Tag>::const_iterator tag=rawRelation.tags.begin();
+          tag!=rawRelation.tags.end();
+          tag++) {
+        if (tag->key==tagName) {
+          relation.attributes.name=tag->value;
+          break;
+        }
+      }
+    }
 
     relation.SetId(rawRelation.GetId());
     relation.SetType(rawRelation.GetType());
