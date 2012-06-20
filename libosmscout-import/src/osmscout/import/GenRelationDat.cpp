@@ -121,139 +121,6 @@ namespace osmscout {
   };
 
 
-  static bool ResolveMember(const TypeConfig& typeConfig,
-                            Id id,
-                            TypeInfo type,
-                            const std::string& name,
-                            const RawRelation::Member& member,
-                            DataFile<RawNode>& nodeDataFile,
-                            DataFile<RawWay>& wayDataFile,
-                            DataFile<RawRelation>& relationDataFile,
-                            std::set<Id>& resolvedRelations,
-                            std::vector<Relation::Role>& roles,
-                            Progress& progress)
-  {
-    if (member.type==RawRelation::memberNode) {
-      RawNodeRef node;
-
-      if (!nodeDataFile.Get(member.id,node)) {
-        progress.Error("Cannot resolve node member "+
-                       NumberToString(member.id)+
-                       " for relation "+
-                       NumberToString(id)+" "+type.GetName()+ " "+name);
-        return false;
-      }
-
-      Relation::Role role;
-
-      role.role=member.role;
-      role.ring=0;
-      role.nodes.push_back(Point(node->GetId(),
-                           node->GetLat(),
-                           node->GetLon()));
-
-      role.attributes.type=node->GetType();
-
-      roles.push_back(role);
-    }
-    else if (member.type==RawRelation::memberWay) {
-      RawWayRef way;
-
-      if (!wayDataFile.Get(member.id,way)) {
-        progress.Error("Cannot resolve way member "+
-                       NumberToString(member.id)+
-                       " for relation "+
-                       NumberToString(id)+" "+name);
-        return false;
-      }
-
-      std::vector<RawNodeRef> nodes;
-
-      if (!nodeDataFile.Get(way->GetNodes(),nodes)) {
-        progress.Error("Cannot resolve nodes of way member "+
-                       NumberToString(member.id)+
-                       " for relation "+
-                       NumberToString(id)+" "+name);
-        return false;
-      }
-
-      bool           reverseNodes=false;
-      Relation::Role role;
-
-      role.role=member.role;
-      role.ring=0;
-      role.attributes.type=way->GetType();
-
-      std::vector<Tag> tags(way->GetTags());
-
-      if (!role.attributes.SetTags(progress,
-                                   typeConfig,
-                                   way->GetId(),
-                                   way->IsArea(),
-                                   tags,
-                                   reverseNodes)) {
-        return false;
-      }
-
-      role.nodes.reserve(nodes.size());
-      for (size_t i=0; i<nodes.size(); i++) {
-        Point point;
-
-        point.Set(nodes[i]->GetId(),
-                  nodes[i]->GetLat(),
-                  nodes[i]->GetLon());
-
-        role.nodes.push_back(point);
-      }
-
-      roles.push_back(role);
-
-      return true;
-    }
-    else if (member.type==RawRelation::memberRelation) {
-      RawRelationRef relation;
-
-      if (resolvedRelations.find(member.id)!=resolvedRelations.end()) {
-        progress.Error("Found self referencing relation "+
-                       NumberToString(member.id)+
-                       " during resolving of members of relation "+
-                       NumberToString(id)+" "+name);
-        return false;
-      }
-
-
-      if (!relationDataFile.Get(member.id,relation)) {
-        progress.Error("Cannot resolve relation member "+
-                       NumberToString(member.id)+
-                       " for relation "+
-                       NumberToString(id)+" "+name);
-        return false;
-      }
-
-      resolvedRelations.insert(member.id);
-
-      for (size_t m=0; m<relation->members.size(); m++) {
-        if (!ResolveMember(typeConfig,
-                           id,
-                           type,
-                           name,
-                           relation->members[m],
-                           nodeDataFile,
-                           wayDataFile,
-                           relationDataFile,
-                           resolvedRelations,
-                           roles,
-                           progress)) {
-          break;
-        }
-      }
-
-      return true;
-    }
-
-    return false;
-  }
-
   /**
     Returns true, if area a is in area b
     */
@@ -373,20 +240,6 @@ namespace osmscout {
   {
     std::list<MultipolygonPart> rings;
 
-    /*
-    // Make a local copy of the relation roles
-    for (size_t i=0; i<relation.roles.size(); i++) {
-      // We can have ways that are of type way and still build a closed shape.
-      // We are sure that they build an area and fix the data here
-      if (relation.roles[i].nodes.size()>2 &&
-          relation.roles[i].nodes.front().GetId()==relation.roles[i].nodes.back().GetId()) {
-        relation.roles[i].attributes.flags|=SegmentAttributes::isArea;
-        relation.roles[i].nodes.pop_back();
-      }
-
-      roles.push_back(relation.roles[i]);
-    }*/
-
     // Try to consume all roles
     while (!parts.empty()) {
       size_t           rolesSelected=1;
@@ -400,8 +253,6 @@ namespace osmscout {
       ring.role.role=leadingPart.role.role;
       ring.ways=leadingPart.ways;
       ring.nodes=leadingPart.nodes;
-
-      // TODO: All roles that make up a ring should have the same type
 
       if (leadingPart.IsArea()) {
         finished=true;
@@ -571,99 +422,6 @@ namespace osmscout {
     return true;
   }
 
-  /**
-    Merge relations roles where nodes build a connected way (start/end nodes match)
-    and where all relevant relations values are the same (no visible difference in drawing)
-    thus reducing the number of roles and increasing the number of points per role
-    (which gives us the change to optimize better for low magnification).
-    */
-  /*
-  static bool CompactRelation(Relation& relation,
-                              const std::string& name,
-                              Progress& progress)
-  {
-    size_t oldSize=relation.roles.size();
-
-    if (oldSize<=1) {
-      // Nothing to compact
-      return true;
-    }
-
-    std::vector<Relation::Role>::iterator role=relation.roles.begin();
-    while (role!=relation.roles.end()) {
-      bool merged=false;
-
-      std::vector<Relation::Role>::iterator cand=role; // candidate role
-
-      ++cand;
-
-      while (cand!=relation.roles.end()) {
-        if (role->GetType()!=cand->GetType() ||
-            role->GetFlags()!=cand->GetFlags() ||
-            role->GetLayer()!=cand->GetLayer() ||
-            role->role!=cand->role ||
-            role->GetName()!=cand->GetName() ||
-            role->GetRefName()!=cand->GetRefName()) {
-          ++cand;
-          continue;
-        }
-
-        if (role->nodes.front().GetId()==cand->nodes.front().GetId()) {
-          role->nodes.reserve(role->nodes.size()+
-                              cand->nodes.size()-1);
-          for (size_t i=1; i<cand->nodes.size(); i++) {
-            role->nodes.insert(role->nodes.begin(),cand->nodes[i]);
-          }
-          merged=true;
-          relation.roles.erase(cand);
-        }
-        else if (role->nodes.front().GetId()==cand->nodes.back().GetId()) {
-          role->nodes.reserve(role->nodes.size()+
-                              cand->nodes.size()-1);
-          for (size_t i=1; i<cand->nodes.size(); i++) {
-            role->nodes.insert(role->nodes.begin(),cand->nodes[cand->nodes.size()-1-i]);
-          }
-          merged=true;
-          relation.roles.erase(cand);
-        }
-        else if (role->nodes.back().GetId()==cand->nodes.front().GetId()) {
-          role->nodes.reserve(role->nodes.size()+
-                              cand->nodes.size()-1);
-          for (size_t i=1; i<cand->nodes.size(); i++) {
-            role->nodes.push_back(cand->nodes[i]);
-          }
-          merged=true;
-          relation.roles.erase(cand);
-        }
-        else if (role->nodes.back().GetId()==cand->nodes.back().GetId()) {
-          role->nodes.reserve(role->nodes.size()+
-                              cand->nodes.size()-1);
-          for (size_t i=1; i<cand->nodes.size(); i++) {
-            role->nodes.push_back(cand->nodes[cand->nodes.size()-1-i]);
-          }
-          merged=true;
-          relation.roles.erase(cand);
-        }
-        else {
-          ++cand;
-        }
-      }
-
-      if (!merged) {
-        ++role;
-      }
-    }
-
-    if (oldSize!=relation.roles.size()) {
-      if (progress.OutputDebug()) {
-        progress.Debug("Compacted number of roles of relation "+NumberToString(relation.GetId())+" "+name+
-                       " from "+NumberToString(oldSize)+" to "+NumberToString(relation.roles.size()));
-      }
-    }
-
-    return true;
-  }*/
-
   static bool ResolveMultipolygonMembers(Progress& progress,
                                          const TypeConfig& typeConfig,
                                          std::set<Id>& wayAreaIndexBlacklist,
@@ -775,19 +533,6 @@ namespace osmscout {
                            typeConfig.GetTypeInfo(relation.GetType()).GetName()+" "+
                            relation.GetName());
         }
-        /*
-        if (!ResolveMember(typeConfig,
-                           rawRelation.GetId(),
-                           relation.GetName(),
-                           *member,
-                           nodeDataFile,
-                           wayDataFile,
-                           relDataFile,
-                           resolvedRelations,
-                           relation.roles,
-                           progress)) {
-          return false;
-        }*/
       }
     }
 
