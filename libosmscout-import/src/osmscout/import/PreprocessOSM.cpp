@@ -575,20 +575,22 @@ namespace osmscout {
                   NumberToString(pp.wayCount+pp.areaCount));
     progress.Info(std::string("Relations:      ")+NumberToString(pp.relationCount));
 
-    if (pp.nodeSortingError) {
-      progress.Error("Nodes are not sorting by increasing id");
-    }
+    if (!parameter.GetRenumberIds()) {
+      if (pp.nodeSortingError) {
+        progress.Error("Nodes are not sorted by increasing id");
+      }
 
-    if (pp.waySortingError) {
-      progress.Error("Ways are not sorting by increasing id");
-    }
+      if (pp.waySortingError) {
+        progress.Error("Ways are not sorted by increasing id");
+      }
 
-    if (pp.relationSortingError) {
-      progress.Error("Relations are not sorting by increasing id");
-    }
+      if (pp.relationSortingError) {
+        progress.Error("Relations are not sorted by increasing id");
+      }
 
-    if (pp.nodeSortingError || pp.waySortingError || pp.relationSortingError) {
-      return false;
+      if (pp.nodeSortingError || pp.waySortingError || pp.relationSortingError) {
+        return false;
+      }
     }
 
     return true;

@@ -738,20 +738,22 @@ namespace osmscout {
                   NumberToString(wayCount+areaCount));
     progress.Info(std::string("Relations:      ")+NumberToString(relationCount));
 
-    if (nodeSortingError) {
-      progress.Error("Nodes are not sorting by increasing id");
-    }
+    if (!parameter.GetRenumberIds()) {
+      if (nodeSortingError) {
+        progress.Error("Nodes are not sorted by increasing id");
+      }
 
-    if (waySortingError) {
-      progress.Error("Ways are not sorting by increasing id");
-    }
+      if (waySortingError) {
+        progress.Error("Ways are not sorted by increasing id");
+      }
 
-    if (relationSortingError) {
-      progress.Error("Relations are not sorting by increasing id");
-    }
+      if (relationSortingError) {
+        progress.Error("Relations are not sorted by increasing id");
+      }
 
-    if (nodeSortingError || waySortingError || relationSortingError) {
-      return false;
+      if (nodeSortingError || waySortingError || relationSortingError) {
+        return false;
+      }
     }
 
     return true;
