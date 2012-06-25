@@ -174,6 +174,7 @@ namespace osmscout {
       void HandleDirectMotorwayLeave(RouteDescription::Node& node,
                                      const RouteDescription::NameDescriptionRef& fromName);
       bool HandleNameChange(const std::list<RouteDescription::Node>& path,
+                            std::list<RouteDescription::Node>::const_iterator& lastNode,
                             std::list<RouteDescription::Node>::iterator& node,
                             const std::map<Id,WayRef>& wayMap);
       bool HandleDirectionChange(const std::list<RouteDescription::Node>& path,

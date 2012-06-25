@@ -816,8 +816,7 @@ void RoutingDialog::Route()
     }
 
     while (current!=route.routeSteps.end()) {
-      lastStep++;
-      current++;
+      lastStep = current++;
     }
 
     prevNode=node;

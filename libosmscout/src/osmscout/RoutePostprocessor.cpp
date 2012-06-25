@@ -366,13 +366,12 @@ namespace osmscout {
     }
 
 
+    std::list<RouteDescription::Node>::const_iterator prevNode=description.Nodes().end();
     for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
-        node!=description.Nodes().end();
-        ++node) {
-      std::list<RouteDescription::Node>::iterator prevNode=node;
+         node!=description.Nodes().end();
+         prevNode=node++) {
       std::list<RouteDescription::Node>::iterator nextNode=node;
 
-      prevNode--;
       nextNode++;
 
       if (prevNode!=description.Nodes().end() &&
@@ -536,14 +535,12 @@ namespace osmscout {
   }
 
   bool RoutePostprocessor::InstructionPostprocessor::HandleNameChange(const std::list<RouteDescription::Node>& path,
+                                                                      std::list<RouteDescription::Node>::const_iterator& lastNode,
                                                                       std::list<RouteDescription::Node>::iterator& node,
                                                                       const std::map<Id,WayRef>& wayMap)
   {
-    std::list<RouteDescription::Node>::const_iterator lastNode=node;
-    RouteDescription::NameDescriptionRef              nextName;
-    RouteDescription::NameDescriptionRef              lastName;
-
-    lastNode--;
+    RouteDescription::NameDescriptionRef nextName;
+    RouteDescription::NameDescriptionRef lastName;
 
     if (lastNode==path.end()) {
       return false;
@@ -702,11 +699,9 @@ namespace osmscout {
     // Analyze crossing
     //
 
-    std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
+    std::list<RouteDescription::Node>::iterator       node=description.Nodes().begin();
+    std::list<RouteDescription::Node>::const_iterator lastNode=description.Nodes().end();
     while (node!=description.Nodes().end()) {
-      std::list<RouteDescription::Node>::iterator lastNode=node;
-
-      lastNode--;
 
       WayRef                               originWay;
       WayRef                               targetWay;
@@ -727,7 +722,7 @@ namespace osmscout {
 
       // First or last node
       if (originWay.Invalid() || targetWay.Invalid()) {
-        node++;
+        lastNode=node++;
         continue;
       }
 
@@ -736,7 +731,7 @@ namespace osmscout {
         HandleRoundaboutEnter(*node);
         inRoundabout=true;
         roundaboutCrossingCounter=0;
-        node++;
+        lastNode=node++;
         continue;
       }
 
@@ -746,7 +741,7 @@ namespace osmscout {
         HandleRoundaboutLeave(*node);
         inRoundabout=false;
 
-        node++;
+        lastNode=node++;
         continue;
       }
 
@@ -757,7 +752,7 @@ namespace osmscout {
         HandleDirectMotorwayEnter(*node,
                                   targetName);
 
-        node++;
+        lastNode=node++;
         continue;
       }
 
@@ -768,7 +763,7 @@ namespace osmscout {
         HandleDirectMotorwayLeave(*node,
                                   originName);
 
-        node++;
+        lastNode=node++;
         continue;
       }
 
@@ -806,7 +801,7 @@ namespace osmscout {
                                desc);
 
           node=next;
-          node++;
+          lastNode=node++;
           continue;
 
         }
@@ -822,7 +817,7 @@ namespace osmscout {
                                 wayMap);
 
           node=next;
-          node++;
+          lastNode=node++;
 
           continue;
         }
@@ -834,12 +829,12 @@ namespace osmscout {
                                desc);
 
           node=next;
-          node++;
+          lastNode=node++;
 
           continue;
         }
 
-        node++;
+        lastNode=node++;
         continue;
       }
 
@@ -849,18 +844,19 @@ namespace osmscout {
       else if (HandleDirectionChange(description.Nodes(),
                                      node,
                                      wayMap)) {
-        node++;
+        lastNode=node++;
         continue;
       }
 
       if (HandleNameChange(description.Nodes(),
+                           lastNode,
                            node,
                            wayMap)) {
-        node++;
+        lastNode=node++;
         continue;
       }
 
-      node++;
+      lastNode=node++;
     }
 
     return true;
