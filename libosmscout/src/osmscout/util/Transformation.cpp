@@ -63,7 +63,12 @@ namespace osmscout {
       double dx=cx-u*xdelta; // *-1 but we square below
       double dy=cy-u*ydelta; // *-1 but we square below
   
-      return sqrt(dx*dx+dy*dy);
+      return dx*dx+dy*dy;
+    }
+
+    double CalculateDistanceSquared(const TransPoint& p)
+    {
+      return sqrt(CalculateDistance(p));
     }
   };
 
@@ -113,25 +118,25 @@ namespace osmscout {
                                              size_t beginIndex,
                                              size_t endIndex,
                                              size_t endValueIndex,
-                                             double optimizeErrorTolerance)
+                                             double optimizeErrorToleranceSquared)
   {
     LineSegment lineSegment(points[beginIndex], points[endValueIndex]);
 
-    double maxDistance=0;
+    double maxDistanceSquared=0;
     size_t maxDistanceIndex=beginIndex;
 
     for(size_t i=beginIndex+1; i<endIndex; ++i){
       if (points[i].draw) {
-        double distance=lineSegment.CalculateDistance(points[i]);
+        double distanceSquared=lineSegment.CalculateDistanceSquared(points[i]);
         
-        if (distance>maxDistance) {
-          maxDistance=distance;
+        if (distanceSquared>maxDistanceSquared) {
+          maxDistanceSquared=distanceSquared;
           maxDistanceIndex=i;
         }
       }
     }
 
-    if (maxDistance<=optimizeErrorTolerance) {
+    if (maxDistanceSquared<=optimizeErrorToleranceSquared) {
 
       //we don't need to draw any extra points
       for(size_t i=beginIndex+1; i<endIndex; ++i){
@@ -146,13 +151,13 @@ namespace osmscout {
                                    beginIndex,
                                    maxDistanceIndex,
                                    maxDistanceIndex,
-                                   optimizeErrorTolerance );
+                                   optimizeErrorToleranceSquared);
 
     SimplifyPolyLineDouglasPeucker(points,
                                    maxDistanceIndex,
                                    endIndex,
                                    endValueIndex,
-                                   optimizeErrorTolerance );
+                                   optimizeErrorToleranceSquared);
   }
 
   TransPolygon::TransPolygon()
@@ -264,8 +269,9 @@ namespace osmscout {
 
   void TransPolygon::DropRedundantPointsDouglasPeucker(double optimizeErrorTolerance, bool isArea)
   {
-    //an implementation of Douglas-Peuker algorithm http://softsurfer.com/Archive/algorithm_0205/algorithm_0205.htm
+    // An implementation of Douglas-Peuker algorithm http://softsurfer.com/Archive/algorithm_0205/algorithm_0205.htm
 
+    double optimizeErrorToleranceSquared=optimizeErrorTolerance*optimizeErrorTolerance;
     size_t begin=0;
 
     while (begin<length &&
@@ -302,12 +308,12 @@ namespace osmscout {
                                      begin,
                                      maxDistIndex,
                                      maxDistIndex,
-                                     optimizeErrorTolerance);
+                                     optimizeErrorToleranceSquared);
       SimplifyPolyLineDouglasPeucker(points,
                                      maxDistIndex,
                                      length,
                                      begin,
-                                     optimizeErrorTolerance);
+                                     optimizeErrorToleranceSquared);
     }
     else {
       //not an area but polyline
@@ -326,7 +332,7 @@ namespace osmscout {
                                      begin,
                                      end,
                                      end,
-                                     optimizeErrorTolerance);
+                                     optimizeErrorToleranceSquared);
     }
   }
 
