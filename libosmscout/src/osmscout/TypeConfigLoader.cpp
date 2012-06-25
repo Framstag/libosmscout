@@ -127,6 +127,11 @@ namespace osmscout {
       bool        canBeRoute;
       bool        canBeIndexed;
       bool        consumeChildren;
+      bool        optimizeLowZoom;
+      bool        multipolygon;
+      bool        pinWay;
+      bool        ignore;
+      bool        ignoreSeaLand;
 
       if (!(scanner.ReadNumber(id) &&
             scanner.Read(name) &&
@@ -136,7 +141,12 @@ namespace osmscout {
             scanner.Read(canBeRelation) &&
             scanner.Read(canBeRoute) &&
             scanner.Read(canBeIndexed) &&
-            scanner.Read(consumeChildren))) {
+            scanner.Read(consumeChildren) &&
+            scanner.Read(optimizeLowZoom) &&
+            scanner.Read(multipolygon) &&
+            scanner.Read(pinWay) &&
+            scanner.Read(ignoreSeaLand) &&
+            scanner.Read(ignore))) {
 
         std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
         return false;
@@ -155,6 +165,11 @@ namespace osmscout {
       typeInfo.CanBeRoute(canBeRoute);
       typeInfo.CanBeIndexed(canBeIndexed);
       typeInfo.SetConsumeChildren(consumeChildren);
+      typeInfo.SetIgnore(optimizeLowZoom);
+      typeInfo.SetIgnore(multipolygon);
+      typeInfo.SetIgnore(pinWay );
+      typeInfo.SetIgnore(ignoreSeaLand);
+      typeInfo.SetIgnore(ignore);
 
       config.AddTypeInfo(typeInfo);
     }

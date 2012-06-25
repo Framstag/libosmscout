@@ -63,6 +63,7 @@ namespace osmscout {
     labelSpace(3.0),
     plateLabelSpace(5.0),
     sameLabelSpace(40.0),
+    renderSeaLand(false),
     debugPerformance(false)
   {
     // no code
@@ -146,6 +147,11 @@ namespace osmscout {
   void MapParameter::SetSameLabelSpace(double sameLabelSpace)
   {
     this->sameLabelSpace=sameLabelSpace;
+  }
+
+  void MapParameter::SetRenderSeaLand(bool render)
+  {
+    this->renderSeaLand=render;
   }
 
   void MapParameter::SetDebugPerformance(bool debug)
@@ -334,13 +340,13 @@ namespace osmscout {
                                    const MapData& data)
   {
     FillStyle landFill;
-    FillStyle seeFill;
+    FillStyle seaFill;
     FillStyle coastFill;
     FillStyle unknownFill;
     LabelStyle labelStyle;
 
     landFill.SetFillColor(Color(241.0/255,238.0/255,233.0/255,1.0));
-    seeFill.SetFillColor(Color(181.0/255,208.0/255,208.0/255,1.0));
+    seaFill.SetFillColor(Color(181.0/255,208.0/255,208.0/255,1.0));
     coastFill.SetFillColor(Color(255.0/255,192.0/255,203.0/255,1.0));
     unknownFill.SetFillColor(Color(255.0/255,255.0/255,173.0/255,1.0));
 
@@ -350,7 +356,11 @@ namespace osmscout {
              parameter,
              0,0,projection.GetWidth(),projection.GetHeight());
 
-    return;
+    if (!parameter.GetRenderSeaLand()) {
+      return;
+    }
+
+    //return;
 /*
     double cellWidth=360.0;
     double cellHeight=180.0;
@@ -375,7 +385,7 @@ namespace osmscout {
                  x1,y1,x2-x1,y2-y1);
         break;
       case GroundTile::water:
-        DrawArea(seeFill,
+        DrawArea(seaFill,
                  parameter,
                  x1,y1,x2-x1,y2-y1);
         break;

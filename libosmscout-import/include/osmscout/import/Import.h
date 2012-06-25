@@ -88,6 +88,9 @@ namespace osmscout {
 
     size_t      routeNodeBlockSize;       //! Number of route nodes loaded during import until ways get resolved
 
+    bool        assumeLand;               //! During sea/land detection,we either trust coastlines only or make some
+                                          //! assumptions which tiles are sea and which are land.
+
   public:
     ImportParameter();
 
@@ -140,6 +143,8 @@ namespace osmscout {
 
     size_t GetRouteNodeBlockSize() const;
 
+    bool GetAssumeLand() const;
+
     void SetMapfile(const std::string& mapfile);
     void SetTypefile(const std::string& typefile);
     void SetDestinationDirectory(const std::string& destinationDirectory);
@@ -173,6 +178,7 @@ namespace osmscout {
 
     void SetRouteNodeBlockSize(size_t blockSize);
 
+    void SetAssumeLand(bool assumeLand);
   };
 
   /**

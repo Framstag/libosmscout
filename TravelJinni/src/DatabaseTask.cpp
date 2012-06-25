@@ -138,6 +138,8 @@ void DatabaseTask::Run()
 
         drawParameter.SetDrawWaysWithFixedWidth(false);
 
+        drawParameter.SetRenderSeaLand(false);
+
         drawParameter.SetDebugPerformance(true);
 
         if (!dpi->IsNull()) {
@@ -213,12 +215,13 @@ void DatabaseTask::Run()
                              data.relationWays,
                              data.relationAreas);
 
-        /*
-        database->GetGroundTiles(projection.GetLonMin(),
-                                 projection.GetLatMin(),
-                                 projection.GetLonMax(),
-                                 projection.GetLatMax(),
-                                 data.groundTiles);*/
+        if (drawParameter.GetRenderSeaLand()) {
+          database->GetGroundTiles(projection.GetLonMin(),
+                                   projection.GetLatMin(),
+                                   projection.GetLonMax(),
+                                   projection.GetLatMax(),
+                                   data.groundTiles);
+        }
 
         dataRetrievalTimer.Stop();
 

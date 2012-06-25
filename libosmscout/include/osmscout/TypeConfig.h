@@ -199,6 +199,7 @@ namespace osmscout {
     bool         optimizeLowZoom;
     bool         multipolygon;
     bool         pinWay;
+    bool         ignoreSeaLand;
     bool         ignore;
 
   public:
@@ -350,6 +351,18 @@ namespace osmscout {
     inline bool GetPinWay() const
     {
       return pinWay;
+    }
+
+    inline TypeInfo& SetIgnoreSeaLand(bool ignoreSeaLand)
+    {
+      this->ignoreSeaLand=ignoreSeaLand;
+
+      return *this;
+    }
+
+    inline bool GetIgnoreSeaLand() const
+    {
+      return ignoreSeaLand;
     }
 
     inline TypeInfo& SetIgnore(bool ignore)

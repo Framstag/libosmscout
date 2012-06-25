@@ -70,6 +70,8 @@ namespace osmscout {
     double                 plateLabelSpace;    //! Space between plates in mm (default 5).
     double                 sameLabelSpace;     //! Space between labels with the same value in mm (default 40)
 
+    bool                   renderSeaLand;      //! Rendering of sea/land tiles
+
     bool                   debugPerformance;   //! Print out some performance information
 
     BreakerRef             breaker;            //! Breaker to abort processing on external request
@@ -100,6 +102,8 @@ namespace osmscout {
     void SetLabelSpace(double labelSpace);
     void SetPlateLabelSpace(double plateLabelSpace);
     void SetSameLabelSpace(double sameLabelSpace);
+
+    void SetRenderSeaLand(bool render);
 
     void SetDebugPerformance(bool debug);
 
@@ -178,6 +182,11 @@ namespace osmscout {
     inline double GetSameLabelSpace() const
     {
       return sameLabelSpace;
+    }
+
+    inline double GetRenderSeaLand() const
+    {
+      return renderSeaLand;
     }
 
     inline bool IsDebugPerformance() const

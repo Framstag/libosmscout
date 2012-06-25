@@ -99,7 +99,8 @@ namespace osmscout {
      optimizationMinMag(6),
      optimizationCellSizeAverage(16),
      optimizationCellSizeMax(256),
-     routeNodeBlockSize(1500000)
+     routeNodeBlockSize(1500000),
+     assumeLand(true)
   {
     // no code
   }
@@ -279,6 +280,11 @@ namespace osmscout {
     return routeNodeBlockSize;
   }
 
+  bool ImportParameter::GetAssumeLand() const
+  {
+    return assumeLand;
+  }
+
   void ImportParameter::SetMapfile(const std::string& mapfile)
   {
     this->mapfile=mapfile;
@@ -399,6 +405,11 @@ namespace osmscout {
   void ImportParameter::SetRouteNodeBlockSize(size_t blockSize)
   {
     this->routeNodeBlockSize=blockSize;
+  }
+
+  void ImportParameter::SetAssumeLand(bool assumeLand)
+  {
+    this->assumeLand=assumeLand;
   }
 
   ImportModule::~ImportModule()

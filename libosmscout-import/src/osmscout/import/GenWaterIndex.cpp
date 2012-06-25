@@ -37,6 +37,9 @@
 
 namespace osmscout {
 
+  /**
+   * Sets the size of the bitmap and initializes state of all tiles to "unknown"
+   */
   void WaterIndexGenerator::Area::SetSize(uint32_t cellXCount, uint32_t cellYCount)
   {
     this->cellXCount=cellXCount;
@@ -70,6 +73,11 @@ namespace osmscout {
     area[index]=(area[index] | (state << offset));
   }
 
+  /**
+   * Does a scan line conversion on all costline ways where the cell size equals the tile size.
+   * All tiles hit are marked as "coast".
+   *
+   */
   void WaterIndexGenerator::SetCoastlineCells()
   {
     for (std::list<Coast>::const_iterator coastline=coastlines.begin();
@@ -92,6 +100,12 @@ namespace osmscout {
     }
   }
 
+  /**
+   * We assume that coastlines do not intersect each other. We split each coastline into smaller line segments.
+   * We sort the segments first by minimum longitude and then by slope. We than assume that left of each
+   * line is either water or land, depending on the sloe direction. We then resort from right to left and do
+   * the estimation again.
+   */
   void WaterIndexGenerator::ScanCellsHorizontally()
   {
     std::list<Line> lines;
@@ -216,6 +230,9 @@ namespace osmscout {
     }
   }
 
+  /**
+   * See description for ScanCellsHorizontally()
+   */
   void WaterIndexGenerator::ScanCellsVertically()
   {
     std::list<Line> lines;
@@ -340,6 +357,77 @@ namespace osmscout {
     }
   }
 
+  /**
+   * Every tile that is unknown but contain a way, must be land.
+   */
+  bool WaterIndexGenerator::AssumeLand(const ImportParameter& parameter,
+                                       Progress& progress,
+                                       const TypeConfig& typeConfig)
+  {
+    FileScanner scanner;
+
+    TypeId      coastlineWayId=typeConfig.GetWayTypeId("natural_coastline");
+    uint32_t    wayCount=0;
+
+    assert(coastlineWayId!=typeIgnore);
+
+    // We do not yet know if we handle borders as ways or areas
+
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "ways.dat"))) {
+      progress.Error("Cannot open 'ways.dat'");
+      return false;
+    }
+
+    if (!scanner.Read(wayCount)) {
+      progress.Error("Error while reading number of data entries in file");
+      return false;
+    }
+
+    for (uint32_t w=1; w<=wayCount; w++) {
+      progress.SetProgress(w,wayCount);
+
+      Way way;
+
+      if (!way.Read(scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(w)+" of "+
+                       NumberToString(wayCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+        return false;
+      }
+
+      if (way.GetType()!=coastlineWayId &&
+          !typeConfig.GetTypeInfo(way.GetType()).GetIgnoreSeaLand()) {
+        if (!way.IsArea() &&
+            way.nodes.size()>=2) {
+          std::vector<ScanCell> cells;
+
+          ScanConvertLine(way.nodes,-180.0,cellWidth,-90.0,cellHeight,cells);
+
+          for (size_t i=0; i<cells.size(); i++) {
+            if (cells[i].x>=cellXStart &&
+                cells[i].x<=cellXEnd &&
+                cells[i].y>=cellYStart &&
+                cells[i].y<=cellYEnd) {
+              if (area.GetState(cells[i].x-cellXStart,cells[i].y-cellYStart)==unknown) {
+                //std::cout << "Way " << way.GetId() << " " << typeConfig.GetTypeInfo(way.GetType()).GetName() << " is defining area as land" << std::endl;
+                area.SetState(cells[i].x-cellXStart,cells[i].y-cellYStart,land);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Scanning from left to right and bottom to top: Every tile that is unknown but is places between land and coast or
+   * land tiles must be land, too.
+   */
   void WaterIndexGenerator::FillLand()
   {
     bool cont=true;
@@ -447,67 +535,9 @@ namespace osmscout {
     }
   }
 
-  bool WaterIndexGenerator::AssumeLand(const ImportParameter& parameter,
-                                       Progress& progress,
-                                       const TypeConfig& typeConfig)
-  {
-    FileScanner scanner;
-
-    TypeId      coastlineWayId=typeConfig.GetWayTypeId("natural_coastline");
-    uint32_t    wayCount=0;
-
-    assert(coastlineWayId!=typeIgnore);
-
-    // We do not yet know if we handle borders as ways or areas
-
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "ways.dat"))) {
-      progress.Error("Cannot open 'ways.dat'");
-      return false;
-    }
-
-    if (!scanner.Read(wayCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t w=1; w<=wayCount; w++) {
-      progress.SetProgress(w,wayCount);
-
-      Way way;
-
-      if (!way.Read(scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(w)+" of "+
-                       NumberToString(wayCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-        return false;
-      }
-
-      if (way.GetType()!=coastlineWayId) {
-        if (!way.IsArea() && way.nodes.size()>=2) {
-          std::vector<ScanCell> cells;
-
-          ScanConvertLine(way.nodes,-180.0,cellWidth,-90.0,cellHeight,cells);
-
-          for (size_t i=0; i<cells.size(); i++) {
-            if (cells[i].x>=cellXStart &&
-                cells[i].x<=cellXEnd &&
-                cells[i].y>=cellYStart &&
-                cells[i].y<=cellYEnd) {
-              if (area.GetState(cells[i].x-cellXStart,cells[i].y-cellYStart)==unknown) {
-                area.SetState(cells[i].x-cellXStart,cells[i].y-cellYStart,land);
-              }
-            }
-          }
-       }
-      }
-    }
-
-    return true;
-  }
-
+  /**
+   * Converts all tiles of state "unknown" that touch a tile with state "water" to state "water", too.
+   */
   void WaterIndexGenerator::FillWater()
   {
     for (size_t i=1; i<=3; i++) {
@@ -573,6 +603,7 @@ namespace osmscout {
     // We do not yet know if we handle borders as ways or areas
     assert(coastlineWayId!=typeIgnore);
 
+    // Calculate size of tile cells for the maximum zoom level
     cellWidth=360.0;
     cellHeight=180.0;
 
@@ -581,7 +612,9 @@ namespace osmscout {
       cellHeight=cellHeight/2;
     }
 
-    std::cout << "Cell dimension: " << cellWidth << "x" << cellHeight << std::endl;
+    //
+    // Read bounding box
+    //
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "bounding.dat"))) {
@@ -604,8 +637,6 @@ namespace osmscout {
     maxLat=maxLatDat/conversionFactor-90.0;
     maxLon=maxLonDat/conversionFactor-180.0;
 
-    std::cout << "Data bounding box: [" << minLat << "," << minLon << "] - [" << maxLat << "," << maxLon << "]" << std::endl;
-
     cellXStart=(uint32_t)floor((minLon+180.0)/cellWidth);
     cellXEnd=(uint32_t)floor((maxLon+180.0)/cellWidth);
     cellYStart=(uint32_t)floor((minLat+90.0)/cellHeight);
@@ -614,15 +645,13 @@ namespace osmscout {
     cellXCount=cellXEnd-cellXStart+1;
     cellYCount=cellYEnd-cellYStart+1;
 
-    std::cout << "Cell rectangle: [" << cellXStart << "," << cellYStart << "]x[" << cellXEnd << "," << cellYEnd << "]";
-    std::cout <<  " => " << cellXCount << "x" << cellYCount << std::endl;
-
-    std::cout << "Array size: " << cellXCount*cellYCount/4/1024 << "kb" << std::endl;
+    progress.Info("Size of sea/land bitmap for zoom level "+NumberToString(parameter.GetWaterIndexMaxMag())+
+        " is "+NumberToString(cellXCount*cellYCount/4/1024)+"kb");
 
     // In the beginning everything is undecided
     area.SetSize(cellXCount,cellYCount);
 
-    progress.SetAction("Scanning ways");
+    progress.SetAction("Scanning for coastlines ways");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "ways.dat"))) {
@@ -674,10 +703,13 @@ namespace osmscout {
     progress.SetAction("Scan coastlines vertically");
     ScanCellsVertically();
 
-    progress.SetAction("Assume land");
-    AssumeLand(parameter,
-               progress,
-               typeConfig);
+    if (parameter.GetAssumeLand()) {
+      progress.SetAction("Assume land");
+
+      AssumeLand(parameter,
+                 progress,
+                 typeConfig);
+    }
 
     progress.SetAction("Filling land");
     FillLand();

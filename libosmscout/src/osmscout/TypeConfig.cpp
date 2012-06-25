@@ -202,6 +202,7 @@ namespace osmscout {
      optimizeLowZoom(false),
      multipolygon(false),
      pinWay(false),
+     ignoreSeaLand(false),
      ignore(false)
   {
     // no code

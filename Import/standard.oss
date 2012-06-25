@@ -47,7 +47,7 @@ OSS
    [TYPE "natural_fell"] AREA { color: #f9f9f9; }
    [TYPE "natural_heath"] AREA { color: #ffffc0; }
    [TYPE "natural_wood"] AREA { color: #aed1a0; }
-   [TYPE "natural_marsh", "natural_wetland"] AREA { color: #f7f9f5; }
+   [TYPE "natural_marsh", "natural_wetland"] AREA { color: #bdd9d9; }
    [TYPE "natural_water"] AREA { color: #b5d0d0; }
    [TYPE "natural_beach"] AREA { color: #eecc55; }
    [TYPE "natural_land"] AREA { color: #ffffff; }

@@ -32,18 +32,18 @@ TYPES
   TYPE "highway_roundabout" = WAY AREA ("highway"=="roundabout") OPTIONS ROUTE PIN_WAY
   TYPE "highway_motorway_junction" = NODE ("highway"=="motorway_junction") OPTIONS ROUTE
   
-  TYPE "waterway_stream" = WAY ("waterway"=="stream") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE "waterway_river" = WAY ("waterway"=="river") OPTIONS OPTIMIZE_LOW_ZOOM
+  TYPE "waterway_stream" = WAY ("waterway"=="stream") OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
+  TYPE "waterway_river" = WAY ("waterway"=="river") OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
   TYPE "waterway_riverbank" = AREA ("waterway"=="riverbank")
-  TYPE "waterway_canal" = WAY ("waterway"=="canal") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE "waterway_ditch" = WAY ("waterway"=="ditch") OPTIONS OPTIMIZE_LOW_ZOOM
-  TYPE "waterway_drain" = WAY ("waterway"=="drain") OPTIONS OPTIMIZE_LOW_ZOOM
+  TYPE "waterway_canal" = WAY ("waterway"=="canal") OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
+  TYPE "waterway_ditch" = WAY ("waterway"=="ditch") OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
+  TYPE "waterway_drain" = WAY ("waterway"=="drain") OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
   TYPE "waterway_dock" = NODE AREA ("waterway"=="dock")
   TYPE "waterway_lock_gate" = NODE ("waterway"=="lock_gate")
   TYPE "waterway_turning_point" = NODE ("waterway"=="turning_point")
   TYPE "waterway_boatyard" = NODE AREA ("waterway"=="boatyard")
-  TYPE "waterway_weir" = NODE WAY ("waterway"=="weir")
-  TYPE "waterway_dam" = WAY AREA ("waterway"=="dam")
+  TYPE "waterway_weir" = NODE WAY ("waterway"=="weir") OPTIONS IGNORESEALAND
+  TYPE "waterway_dam" = WAY AREA ("waterway"=="dam") OPTIONS IGNORESEALAND
   
   TYPE "railway_rail" = WAY ("railway"=="rail") OPTIONS OPTIMIZE_LOW_ZOOM
   TYPE "railway_tram" = WAY ("railway"=="tram")
@@ -62,7 +62,7 @@ TYPES
   TYPE "railway_subway_entrance" = NODE ("railway"=="subway_entrance")
   TYPE "railway_turntable" = NODE AREA ("railway"=="turntable")
   
-  TYPE "route_ferry" = WAY ("route"=="ferry") OPTIONS OPTIMIZE_LOW_ZOOM
+  TYPE "route_ferry" = WAY ("route"=="ferry") OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
   
   TYPE "aeroway_aerodrome" = NODE AREA ("aeroway"=="aerodrome")
   TYPE "aeroway_terminal" = NODE AREA ("aeroway"=="terminal")
@@ -78,6 +78,7 @@ TYPES
   TYPE "landuse_basin" = NODE AREA ("landuse"=="basin")
   TYPE "landuse_brownfield" = NODE AREA ("landuse"=="brownfield")
   TYPE "landuse_cemetery" = AREA ("landuse"=="cemetery")
+  TYPE "landuse_cemetery_sea" = AREA ("landuse"=="cemetery" AND "cemetery"=="sea") OPTIONS IGNORESEALAND
   TYPE "landuse_commercial" = NODE AREA ("landuse"=="commercial")
   TYPE "landuse_construction" = NODE AREA ("landuse"=="construction")
   TYPE "landuse_farm" = AREA ("landuse"=="farm")
@@ -125,7 +126,7 @@ TYPES
   TYPE "natural_spring" = NODE ("natural"=="spring")
   TYPE "natural_tree" = NODE ("natural"=="tree")
   TYPE "natural_volcano" = NODE ("natural"=="volcano")
-  TYPE "natural_water" = NODE AREA ("natural"=="water")
+  TYPE "natural_water" = NODE AREA ("natural"=="water") OPTIONS IGNORESEALAND
   TYPE "natural_wetland" = NODE AREA ("natural"=="wetland")
   TYPE "natural_wood" = NODE AREA ("natural"=="wood")
   
@@ -197,7 +198,7 @@ TYPES
   
   // Do not delete the following type, they are required by the GenCityStreet import step
   TYPE "boundary_administrative" = WAY AREA ("boundary"=="administrative") OR
-                                   RELATION ("type"=="boundary" AND "boundary"=="administrative") OPTIONS MULTIPOLYGON
+                                   RELATION ("type"=="boundary" AND "boundary"=="administrative") OPTIONS MULTIPOLYGON IGNORESEALAND
                                     
   TYPE "boundary_civil" = AREA ("boundary"=="civil")
   TYPE "boundary_political" = AREA ("boundary"=="political")
@@ -294,7 +295,7 @@ TYPES
 
   // Currently not supported by stylesheet
   TYPE "barrier_hedge" = WAY AREA ("barrier"=="hedge")
-  TYPE "barrier_fence" = WAY AREA ("barrier"=="fence")
+  TYPE "barrier_fence" = WAY AREA ("barrier"=="fence") OPTIONS IGNORESEALAND
   TYPE "barrier_wall" = WAY AREA ("barrier"=="wall")
   TYPE "barrier_ditch" = WAY AREA ("barrier"=="ditch")
   TYPE "barrier_retaining_wall" = WAY AREA ("barrier"=="retaining_wall")

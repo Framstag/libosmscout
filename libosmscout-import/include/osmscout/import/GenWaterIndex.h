@@ -32,10 +32,10 @@ namespace osmscout {
   {
   private:
     enum State {
-      unknown = 0,
-      land    = 1, // left side of the coast
-      water   = 2, // right side of the coast
-      coast   = 3
+      unknown = 0, //! We do not know yet
+      land    = 1, //! left side of the coast => a land tile
+      water   = 2, //! right side of the coast => a water tile
+      coast   = 3  //! The coast itself => a coast tile
     };
 
     struct Area

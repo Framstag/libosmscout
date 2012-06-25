@@ -146,8 +146,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 35;
-	noSym = 35;
+	maxT = 36;
+	noSym = 36;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
@@ -183,6 +183,7 @@ void Scanner::Init() {
 	keywords.set("IGNORE", 32);
 	keywords.set("MULTIPOLYGON", 33);
 	keywords.set("PIN_WAY", 34);
+	keywords.set("IGNORESEALAND", 35);
 
 
   tvalLength = 128;

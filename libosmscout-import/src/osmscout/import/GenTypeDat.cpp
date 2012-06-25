@@ -71,6 +71,11 @@ namespace osmscout {
       writer.Write(type->CanBeRoute());
       writer.Write(type->CanBeIndexed());
       writer.Write(type->GetConsumeChildren());
+      writer.Write(type->GetOptimizeLowZoom());
+      writer.Write(type->GetMultipolygon());
+      writer.Write(type->GetPinWay());
+      writer.Write(type->GetIgnoreSeaLand());
+      writer.Write(type->GetIgnore());
     }
 
     return !writer.HasError() && writer.Close();

@@ -255,6 +255,7 @@ PRODUCTIONS
                | "IGNORE"            (. typeInfo.SetIgnore(true); .)
                | "MULTIPOLYGON"      (. typeInfo.SetMultipolygon(true); .)
                | "PIN_WAY"           (. typeInfo.SetPinWay(true); .)
+               | "IGNORESEALAND"     (. typeInfo.SetIgnoreSeaLand(true); .)
                .
 
 END OST.
