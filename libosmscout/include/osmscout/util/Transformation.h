@@ -51,14 +51,22 @@ namespace osmscout {
     size_t      end;
 
   public:
+    enum OptimizeMethod 
+    {
+      none = 0,
+      fast = 1,
+      quality = 2
+    };
+
     TransPoint* points;
 
   private:
     void InitializeDraw();
     void TransformGeoToPixel(const Projection& projection,
                              const std::vector<Point>& nodes);
-    void DropSimilarPoints();
-    void DropRedundantPoints();
+    void DropSimilarPoints(double optimizeErrorTolerance);
+    void DropRedundantPointsFast(double optimizeErrorTolerance);
+    void DropRedundantPointsDouglasPeucker(double optimizeErrorTolerance, bool isArea);
 
   public:
     TransPolygon();
@@ -85,11 +93,13 @@ namespace osmscout {
     }
 
     void TransformArea(const Projection& projection,
-                       bool optimize,
-                       const std::vector<Point>& nodes);
+                       OptimizeMethod optimize,
+                       const std::vector<Point>& nodes,
+                       double optimizeErrorTolerance);
     void TransformWay(const Projection& projection,
-                      bool optimize,
-                      const std::vector<Point>& nodes);
+                      OptimizeMethod optimize,
+                      const std::vector<Point>& nodes,
+                      double optimizeErrorTolerance);
 
     bool GetBoundingBox(double& xmin, double& ymin,
                         double& xmax, double& ymax) const;
@@ -118,13 +128,15 @@ namespace osmscout {
     void Reset();
 
     void TransformArea(const Projection& projection,
-                       bool optimize,
+                       TransPolygon::OptimizeMethod optimize,
                        const std::vector<Point>& nodes,
-                       size_t& start, size_t &end);
+                       size_t& start, size_t &end,
+                       double optimizeErrorTolerance);
     bool TransformWay(const Projection& projection,
-                      bool optimize,
+                      TransPolygon::OptimizeMethod optimize,
                       const std::vector<Point>& nodes,
-                      size_t& start, size_t &end);
+                      size_t& start, size_t &end,
+                      double optimizeErrorTolerance);
 
     bool GenerateParallelWay(size_t orgStart, size_t orgEnd,
                              double offset,

@@ -47,34 +47,34 @@ namespace osmscout {
   class OSMSCOUT_MAP_API MapParameter
   {
   private:
-    double                 dpi;                //! DPI of the display, default is 92
+    double                       dpi;                //! DPI of the display, default is 92
 
-    std::string            fontName;           //! Name of the font to use
-    double                 fontSize;           //! Metric size of base font (aka font size 100%) in millimeter
+    std::string                  fontName;           //! Name of the font to use
+    double                       fontSize;           //! Metric size of base font (aka font size 100%) in millimeter
 
-    std::list<std::string> iconPaths;          //! List of paths to search for images for icons
-    std::list<std::string> patternPaths;       //! List of paths to search for images for patterns
+    std::list<std::string>       iconPaths;          //! List of paths to search for images for icons
+    std::list<std::string>       patternPaths;       //! List of paths to search for images for patterns
 
-    double                 lineMinWidthPixel;  //! Minimum width of an line to be drawn
+    double                       lineMinWidthPixel;  //! Minimum width of an line to be drawn
 
-    double                 drawBridgeMagnification; //! Starting with this magnification, we draw bridges
-    double                 drawTunnelMagnification; //! Starting with this magnification, we draw tunnels
+    double                       drawBridgeMagnification; //! Starting with this magnification, we draw bridges
+    double                       drawTunnelMagnification; //! Starting with this magnification, we draw tunnels
 
-    bool                   optimizeWayNodes;   //! Try to reduce the number of nodes for a way
-    bool                   optimizeAreaNodes;  //! Try to reduce the number of nodes for an area
+    TransPolygon::OptimizeMethod optimizeWayNodes;   //! Try to reduce the number of nodes for
+    TransPolygon::OptimizeMethod optimizeAreaNodes;  //! Try to reduce the number of nodes for
+    double                       optimizeErrorToleranceMm;//! The maximum error to allow when optimizing lines, in mm
+    bool                         drawFadings;        //! Draw label fadings (default: true)
+    bool                         drawWaysWithFixedWidth; //! Draw ways using the size of the style sheet, if if the way has a width explicitely given
 
-    bool                   drawFadings;        //! Draw label fadings (default: true)
-    bool                   drawWaysWithFixedWidth; //! Draw ways using the size of the style sheet, if if the way has a width explicitely given
+    double                       labelSpace;         //! Space between point labels in mm (default 3).
+    double                       plateLabelSpace;    //! Space between plates in mm (default 5).
+    double                       sameLabelSpace;     //! Space between labels with the same value in mm (default 40)
 
-    double                 labelSpace;         //! Space between point labels in mm (default 3).
-    double                 plateLabelSpace;    //! Space between plates in mm (default 5).
-    double                 sameLabelSpace;     //! Space between labels with the same value in mm (default 40)
+    bool                         renderSeaLand;      //! Rendering of sea/land tiles
 
-    bool                   renderSeaLand;      //! Rendering of sea/land tiles
+    bool                         debugPerformance;   //! Print out some performance information
 
-    bool                   debugPerformance;   //! Print out some performance information
-
-    BreakerRef             breaker;            //! Breaker to abort processing on external request
+    BreakerRef                   breaker;            //! Breaker to abort processing on external request
 
   public:
     MapParameter();
@@ -93,8 +93,9 @@ namespace osmscout {
     void SetDrawBridgeMagnification(double magnification);
     void SetDrawTunnelMagnification(double magnification);
 
-    void SetOptimizeWayNodes(bool optimize);
-    void SetOptimizeAreaNodes(bool optimize);
+    void SetOptimizeWayNodes(TransPolygon::OptimizeMethod optimize);
+    void SetOptimizeAreaNodes(TransPolygon::OptimizeMethod optimize);
+    void SetOptimizeErrorToleranceMm(double errorToleranceMm);
 
     void SetDrawFadings(bool drawFadings);
     void SetDrawWaysWithFixedWidth(bool drawWaysWithFixedWidth);
@@ -149,14 +150,24 @@ namespace osmscout {
       return drawTunnelMagnification;
     }
 
-    inline bool GetOptimizeWayNodes() const
+    inline TransPolygon::OptimizeMethod GetOptimizeWayNodes() const
     {
       return optimizeWayNodes;
     }
 
-    inline bool GetOptimizeAreaNodes() const
+    inline TransPolygon::OptimizeMethod GetOptimizeAreaNodes() const
     {
       return optimizeAreaNodes;
+    }
+
+    inline double GetOptimizeErrorToleranceMm() const
+    {
+      return optimizeErrorToleranceMm;
+    }
+
+    inline double GetOptimizeErrorToleranceDots() const
+    {
+      return dpi*optimizeErrorToleranceMm/25.4;
     }
 
     inline bool GetDrawFadings() const

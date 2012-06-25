@@ -389,7 +389,8 @@ namespace osmscout
                                                    IdFileOffsetMap& offsets,
                                                    size_t width,
                                                    size_t height,
-                                                   double magnification)
+                                                   double magnification,
+                                                   TransPolygon::OptimizeMethod optimizeWayMethod)
   {
     size_t             wayCount=0;
     size_t             nodeCount=0;
@@ -408,7 +409,7 @@ namespace osmscout
       double             ymin;
       double             ymax;
 
-      polygon.TransformWay(projection,true,way->nodes);
+      polygon.TransformWay(projection,optimizeWayMethod,way->nodes, 1.0);
 
       polygon.GetBoundingBox(xmin,ymin,xmax,ymax);
 
@@ -656,7 +657,8 @@ namespace osmscout
                               newWays,
                               offsets,
                               800,640,
-                              magnification)) {
+                              magnification,
+                              parameter.GetOptimizationWayMethod())) {
         return false;
       }
 

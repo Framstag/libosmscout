@@ -133,8 +133,8 @@ void DatabaseTask::Run()
         drawParameter.SetIconPaths(paths);
         drawParameter.SetPatternPaths(paths);
 
-        drawParameter.SetOptimizeWayNodes(optimizeWays->Get());
-        drawParameter.SetOptimizeAreaNodes(optimizeAreas->Get());
+        drawParameter.SetOptimizeWayNodes(optimizeWays->Get() ? osmscout::TransPolygon::quality : osmscout::TransPolygon::none);
+        drawParameter.SetOptimizeAreaNodes(optimizeAreas->Get() ? osmscout::TransPolygon::quality : osmscout::TransPolygon::none);
 
         drawParameter.SetDrawWaysWithFixedWidth(false);
 

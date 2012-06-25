@@ -234,8 +234,8 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
     drawParameter.SetIconPaths(paths);
     drawParameter.SetPatternPaths(paths);
     drawParameter.SetDebugPerformance(true);
-    drawParameter.SetOptimizeWayNodes(true);
-    drawParameter.SetOptimizeAreaNodes(true);
+    drawParameter.SetOptimizeWayNodes(osmscout::TransPolygon::quality);
+    drawParameter.SetOptimizeAreaNodes(osmscout::TransPolygon::quality);
 
     std::cout << std::endl;
 

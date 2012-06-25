@@ -28,9 +28,48 @@
 #include <iostream>
 
 namespace osmscout {
-  static double relevantPosDeriviation=1.0;   // Pixel
 
-  static double distancePointToLineSegment(const TransPoint& p, const TransPoint& a, const TransPoint& b)
+  class LineSegment
+  {
+  private:
+    TransPoint ref;
+    double     xdelta;
+    double     ydelta;
+    double     inverseLength;
+  
+  public:
+    
+    LineSegment(const TransPoint& a, const TransPoint& b)
+    :ref(a)
+    {
+      xdelta=b.x-a.x;
+      ydelta=b.y-a.y;
+      inverseLength=1/(xdelta*xdelta+ydelta*ydelta);
+    }
+
+    bool IsValid()
+    {
+      return !(xdelta==0 && ydelta==0);
+    }
+
+    double CalculateDistance(const TransPoint& p)
+    {
+      double cx=p.x-ref.x;
+      double cy=p.y-ref.y;
+      double u=(cx*xdelta+cy*ydelta)*inverseLength;
+
+      u=std::min(1.0,std::max(0.0,u));
+  
+      double dx=cx-u*xdelta; // *-1 but we square below
+      double dy=cy-u*ydelta; // *-1 but we square below
+  
+      return sqrt(dx*dx+dy*dy);
+    }
+  };
+
+  static double CalculateDistancePointToLineSegment(const TransPoint& p,
+                                                    const TransPoint& a,
+                                                    const TransPoint& b)
   {
     double xdelta=b.x-a.x;
     double ydelta=b.y-a.y;
@@ -56,10 +95,64 @@ namespace osmscout {
       cy=a.y+u*ydelta;
     }
 
-    double dx = cx-p.x;
-    double dy = cy-p.y;
+    double dx=cx-p.x;
+    double dy=cy-p.y;
 
     return sqrt(dx*dx+dy*dy);
+  }
+
+  static double CalculateDistancePointToPoint(const TransPoint& a, const TransPoint& b)
+  {
+    double xdelta=b.x-a.x;
+    double ydelta=b.y-a.y;
+
+    return sqrt(xdelta*xdelta + ydelta*ydelta);
+  }
+
+  static void SimplifyPolyLineDouglasPeucker(TransPoint* points,
+                                             size_t beginIndex,
+                                             size_t endIndex,
+                                             size_t endValueIndex,
+                                             double optimizeErrorTolerance)
+  {
+    LineSegment lineSegment(points[beginIndex], points[endValueIndex]);
+
+    double maxDistance=0;
+    size_t maxDistanceIndex=beginIndex;
+
+    for(size_t i=beginIndex+1; i<endIndex; ++i){
+      if (points[i].draw) {
+        double distance=lineSegment.CalculateDistance(points[i]);
+        
+        if (distance>maxDistance) {
+          maxDistance=distance;
+          maxDistanceIndex=i;
+        }
+      }
+    }
+
+    if (maxDistance<=optimizeErrorTolerance) {
+
+      //we don't need to draw any extra points
+      for(size_t i=beginIndex+1; i<endIndex; ++i){
+        points[i].draw=false;
+      }
+
+      return;
+    }
+
+    //we need to split this line in two pieces
+    SimplifyPolyLineDouglasPeucker(points,
+                                   beginIndex,
+                                   maxDistanceIndex,
+                                   maxDistanceIndex,
+                                   optimizeErrorTolerance );
+
+    SimplifyPolyLineDouglasPeucker(points,
+                                   maxDistanceIndex,
+                                   endIndex,
+                                   endValueIndex,
+                                   optimizeErrorTolerance );
   }
 
   TransPolygon::TransPolygon()
@@ -97,7 +190,7 @@ namespace osmscout {
     }
   }
 
-  void TransPolygon::DropSimilarPoints()
+  void TransPolygon::DropSimilarPoints(double optimizeErrorTolerance)
   {
     for (size_t i=0; i<length; i++) {
       if (points[i].draw) {
@@ -105,8 +198,8 @@ namespace osmscout {
         while (j<length-1) {
           if (points[j].draw)
           {
-            if (std::fabs(points[j].x-points[i].x)<=relevantPosDeriviation &&
-                std::fabs(points[j].y-points[i].y)<=relevantPosDeriviation) {
+            if (std::fabs(points[j].x-points[i].x)<=optimizeErrorTolerance &&
+                std::fabs(points[j].y-points[i].y)<=optimizeErrorTolerance) {
               points[j].draw=false;
             }
             else {
@@ -120,7 +213,7 @@ namespace osmscout {
     }
   }
 
-  void TransPolygon::DropRedundantPoints()
+  void TransPolygon::DropRedundantPointsFast(double optimizeErrorTolerance)
   {
     // Drop every point that is (more or less) on direct line between two points A and B
     size_t prev=0;
@@ -154,11 +247,11 @@ namespace osmscout {
         break;
       }
 
-      double distance=distancePointToLineSegment(points[cur],
+      double distance=CalculateDistancePointToLineSegment(points[cur],
                                                  points[prev],
                                                  points[next]);
 
-      if (distance<=relevantPosDeriviation) {
+      if (distance<=optimizeErrorTolerance) {
         points[cur].draw=false;
 
         prev=next;
@@ -169,34 +262,108 @@ namespace osmscout {
     }
   }
 
-  void TransPolygon::TransformArea(const Projection& projection,
-                                   bool optimize,
-                                   const std::vector<Point>& nodes)
+  void TransPolygon::DropRedundantPointsDouglasPeucker(double optimizeErrorTolerance, bool isArea)
   {
-    if (nodes.size()<2)
-    {
+    //an implementation of Douglas-Peuker algorithm http://softsurfer.com/Archive/algorithm_0205/algorithm_0205.htm
+
+    size_t begin=0;
+
+    while (begin<length &&
+           !points[begin].draw) {
+      begin++;
+    }
+
+    if (begin>=length) {
+      return; //we found no single point that is drawn.
+    }
+
+    //if this polyon is an area, we start by finding the largest distance from begin point to all other points
+    if (isArea) {
+
+      double maxDist=0.0;
+      size_t maxDistIndex=begin;
+
+      for(size_t i=begin; i<length; ++i) {
+        if (points[i].draw) {
+          double dist=CalculateDistancePointToPoint(points[begin], points[i]);
+          
+          if (dist>maxDist) {
+            maxDist=dist;
+            maxDistIndex=i;
+          }
+        }
+      }
+
+      if (maxDistIndex==begin) {
+        return; //we only found 1 point to draw
+      }
+
+      SimplifyPolyLineDouglasPeucker(points,
+                                     begin,
+                                     maxDistIndex,
+                                     maxDistIndex,
+                                     optimizeErrorTolerance);
+      SimplifyPolyLineDouglasPeucker(points,
+                                     maxDistIndex,
+                                     length,
+                                     begin,
+                                     optimizeErrorTolerance);
+    }
+    else {
+      //not an area but polyline
+      //find last drawable point;
+      size_t end=length-1;
+      while (end>begin &&
+          !points[end].draw) {
+        end--;
+      }
+
+      if (end<=begin) {
+        return; //we only found 1 drawable point;
+      }
+
+      SimplifyPolyLineDouglasPeucker(points,
+                                     begin,
+                                     end,
+                                     end,
+                                     optimizeErrorTolerance);
+    }
+  }
+
+  void TransPolygon::TransformArea(const Projection& projection,
+                                   OptimizeMethod optimize,
+                                   const std::vector<Point>& nodes,
+                                   double optimizeErrorTolerance)
+  {
+    if (nodes.size()<2) {
       length=0;
+
       return;
     }
 
     length=nodes.size();
 
-    if (pointsSize<length)
-    {
+    if (pointsSize<length) {
       delete [] points;
+
       points=new TransPoint[length];
       pointsSize=nodes.size();
     }
 
-    if (optimize) {
+    if (optimize!=none) {
       InitializeDraw();
 
       TransformGeoToPixel(projection,
                           nodes);
 
-      DropSimilarPoints();
+      DropSimilarPoints(optimizeErrorTolerance);
 
-      DropRedundantPoints();
+      if (optimize==fast){
+        DropRedundantPointsFast(optimizeErrorTolerance);
+      }
+      else {
+        DropRedundantPointsDouglasPeucker(optimizeErrorTolerance,true);
+      }
 
       length=0;
       start=nodes.size();
@@ -231,33 +398,39 @@ namespace osmscout {
   }
 
   void TransPolygon::TransformWay(const Projection& projection,
-                                  bool optimize,
-                                  const std::vector<Point>& nodes)
+                                  OptimizeMethod optimize,
+                                  const std::vector<Point>& nodes,
+                                  double optimizeErrorTolerance)
   {
-    if (nodes.empty())
-    {
+    if (nodes.empty()) {
       length=0;
+
       return;
     }
 
     length=nodes.size();
 
-    if (pointsSize<length)
-    {
+    if (pointsSize<length) {
       delete [] points;
+
       points=new TransPoint[length];
       pointsSize=length;
     }
 
-    if (optimize) {
+    if (optimize != none) {
       InitializeDraw();
 
       TransformGeoToPixel(projection,
                           nodes);
 
-      DropSimilarPoints();
+      DropSimilarPoints(optimizeErrorTolerance);
 
-      DropRedundantPoints();
+      if (optimize == fast){
+        DropRedundantPointsFast(optimizeErrorTolerance);
+      }
+      else {
+        DropRedundantPointsDouglasPeucker(optimizeErrorTolerance, false);
+      }
 
       length=0;
       start=nodes.size();
@@ -370,21 +543,20 @@ namespace osmscout {
   }
 
   void TransBuffer::TransformArea(const Projection& projection,
-                                  bool optimize,
+                                  TransPolygon::OptimizeMethod optimize,
                                   const std::vector<Point>& nodes,
-                                  size_t& start, size_t &end)
+                                  size_t& start, size_t &end,
+                                  double optimizeErrorTolerance)
   {
-    transPolygon.TransformArea(projection, optimize,nodes);
+    transPolygon.TransformArea(projection, optimize, nodes, optimizeErrorTolerance);
 
     assert(!transPolygon.IsEmpty());
 
     AssureRoomForPoints(transPolygon.GetLength());
 
     start=usedPoints;
-    for (size_t i=transPolygon.GetStart(); i<=transPolygon.GetEnd(); i++)
-    {
-      if (transPolygon.points[i].draw)
-      {
+    for (size_t i=transPolygon.GetStart(); i<=transPolygon.GetEnd(); i++) {
+      if (transPolygon.points[i].draw) {
         buffer[usedPoints].x=transPolygon.points[i].x;
         buffer[usedPoints].y=transPolygon.points[i].y;
         usedPoints++;
@@ -395,24 +567,22 @@ namespace osmscout {
   }
 
   bool TransBuffer::TransformWay(const Projection& projection,
-                    bool optimize,
+                    TransPolygon::OptimizeMethod optimize,
                     const std::vector<Point>& nodes,
-                    size_t& start, size_t &end)
+                    size_t& start, size_t &end,
+                    double optimizeErrorTolerance)
   {
-    transPolygon.TransformWay(projection, optimize,nodes);
+    transPolygon.TransformWay(projection, optimize, nodes, optimizeErrorTolerance);
 
-    if (transPolygon.IsEmpty())
-    {
+    if (transPolygon.IsEmpty()) {
       return false;
     }
 
     AssureRoomForPoints(transPolygon.GetLength());
 
     start=usedPoints;
-    for (size_t i=transPolygon.GetStart(); i<=transPolygon.GetEnd(); i++)
-    {
-      if (transPolygon.points[i].draw)
-      {
+    for (size_t i=transPolygon.GetStart(); i<=transPolygon.GetEnd(); i++) {
+      if (transPolygon.points[i].draw) {
         buffer[usedPoints].x=transPolygon.points[i].x;
         buffer[usedPoints].y=transPolygon.points[i].y;
         usedPoints++;

@@ -462,6 +462,8 @@ int main(int argc, char* argv[])
 
   parameter.SetRouteNodeBlockSize(routeNodeBlockSize);
 
+  parameter.SetOptimizationWayMethod(osmscout::TransPolygon::quality);
+
   progress.SetStep("Dump parameter");
   progress.Info(std::string("Mapfile: ")+parameter.GetMapfile());
   progress.Info(std::string("typefile: ")+parameter.GetTypefile());

@@ -28,6 +28,8 @@
 
 #include <osmscout/util/Progress.h>
 
+#include <osmscout/util/Transformation.h>
+
 namespace osmscout {
 
   /**
@@ -40,56 +42,57 @@ namespace osmscout {
   class OSMSCOUT_IMPORT_API ImportParameter
   {
   private:
-    std::string mapfile;                  //! Name of the file containing the map (either *.osm or *.osm.pbf)
-    std::string typefile;                 //! Name and path ff type definition file (map.ost.xml)
-    std::string destinationDirectory;     //! Name of the destination directory
-    size_t      startStep;                //! Starting step for import
-    size_t      endStep;                  //! End step for import
+    std::string                  mapfile;                  //! Name of the file containing the map (either *.osm or *.osm.pbf)
+    std::string                  typefile;                 //! Name and path ff type definition file (map.ost.xml)
+    std::string                  destinationDirectory;     //! Name of the destination directory
+    size_t                       startStep;                //! Starting step for import
+    size_t                       endStep;                  //! End step for import
 
-    bool        renumberIds;              //! Renumber all Ids
-    size_t      renumberBlockSize;        //! Number of entries loaded in one renumber iterations
-    size_t      renumberMag;              //! Zoom level for individual renumber sorting cells
+    bool                         renumberIds;              //! Renumber all Ids
+    size_t                       renumberBlockSize;        //! Number of entries loaded in one renumber iterations
+    size_t                       renumberMag;              //! Zoom level for individual renumber sorting cells
 
-    size_t      numericIndexPageSize;     //! Size of an numeric index page in bytes
+    size_t                       numericIndexPageSize;     //! Size of an numeric index page in bytes
 
-    bool        rawNodeIndexMemoryMaped;  //! Use memory mapping for raw node index file access
-    bool        rawNodeDataMemoryMaped;   //! Use memory mapping for raw node data file access
-    size_t      rawNodeDataCacheSize;     //! Size of the raw node data cache
-    size_t      rawNodeIndexCacheSize;    //! Size of the raw node index cache
+    bool                         rawNodeIndexMemoryMaped;  //! Use memory mapping for raw node index file access
+    bool                         rawNodeDataMemoryMaped;   //! Use memory mapping for raw node data file access
+    size_t                       rawNodeDataCacheSize;     //! Size of the raw node data cache
+    size_t                       rawNodeIndexCacheSize;    //! Size of the raw node index cache
 
-    bool        rawWayIndexMemoryMaped;   //! Use memory mapping for raw way index file access
-    bool        rawWayDataMemoryMaped;    //! Use memory mapping for raw way data file access
-    size_t      rawWayDataCacheSize;      //! Size of the raw way data cache
-    size_t      rawWayIndexCacheSize;     //! Size of the raw way index cache
-    size_t      rawWayBlockSize;          //! Number of ways loaded during import until nodes get resolved
+    bool                         rawWayIndexMemoryMaped;   //! Use memory mapping for raw way index file access
+    bool                         rawWayDataMemoryMaped;    //! Use memory mapping for raw way data file access
+    size_t                       rawWayDataCacheSize;      //! Size of the raw way data cache
+    size_t                       rawWayIndexCacheSize;     //! Size of the raw way index cache
+    size_t                       rawWayBlockSize;          //! Number of ways loaded during import until nodes get resolved
 
-    bool        wayIndexMemoryMaped;      //! Use memory mapping for way index file access
-    bool        wayDataMemoryMaped;       //! Use memory mapping for way data file access
-    size_t      wayDataCacheSize;         //! Size of the way data cache
-    size_t      wayIndexCacheSize;        //! Size of the way index cache
-    size_t      waysLoadSize;             //! Maximum number of ways loaded into memory in one go
+    bool                         wayIndexMemoryMaped;      //! Use memory mapping for way index file access
+    bool                         wayDataMemoryMaped;       //! Use memory mapping for way data file access
+    size_t                       wayDataCacheSize;         //! Size of the way data cache
+    size_t                       wayIndexCacheSize;        //! Size of the way index cache
+    size_t                       waysLoadSize;             //! Maximum number of ways loaded into memory in one go
 
-    size_t      areaAreaIndexMaxMag;      //! Maximum depth of the index generated
+    size_t                       areaAreaIndexMaxMag;      //! Maximum depth of the index generated
 
-    size_t      areaWayMinMag;            //! Minimum magnification of index for individual type
-    size_t      areaWayIndexCellSizeAverage; //! Average entries per index cell
-    size_t      areaWayIndexCellSizeMax;  //! Maximum number of entries  per index cell
+    size_t                       areaWayMinMag;            //! Minimum magnification of index for individual type
+    size_t                       areaWayIndexCellSizeAverage; //! Average entries per index cell
+    size_t                       areaWayIndexCellSizeMax;  //! Maximum number of entries  per index cell
 
-    size_t      areaNodeMinMag;           //! Minimum magnification of index for individual type
-    size_t      areaNodeIndexCellSizeAverage; //! Average entries per index cell
-    size_t      areaNodeIndexCellSizeMax; //! Maximum number of entries  per index cell
+    size_t                       areaNodeMinMag;           //! Minimum magnification of index for individual type
+    size_t                       areaNodeIndexCellSizeAverage; //! Average entries per index cell
+    size_t                       areaNodeIndexCellSizeMax; //! Maximum number of entries  per index cell
 
-    size_t      waterIndexMaxMag;         //! Maximum depth of the index generated
+    size_t                       waterIndexMaxMag;         //! Maximum depth of the index generated
 
-    size_t      optimizationMaxMag;       //! Maximum magnification for optimization
-    size_t      optimizationMinMag;       //! Minimum magnification of index for individual type
-    size_t      optimizationCellSizeAverage; //! Average entries per index cell
-    size_t      optimizationCellSizeMax;  //! Maximum number of entries  per index cell
+    size_t                       optimizationMaxMag;       //! Maximum magnification for optimization
+    size_t                       optimizationMinMag;       //! Minimum magnification of index for individual type
+    size_t                       optimizationCellSizeAverage; //! Average entries per index cell
+    size_t                       optimizationCellSizeMax;  //! Maximum number of entries  per index cell
+    TransPolygon::OptimizeMethod optimizationWayMethod; //! what method to use to optimize ways
 
-    size_t      routeNodeBlockSize;       //! Number of route nodes loaded during import until ways get resolved
+    size_t                       routeNodeBlockSize;       //! Number of route nodes loaded during import until ways get resolved
 
-    bool        assumeLand;               //! During sea/land detection,we either trust coastlines only or make some
-                                          //! assumptions which tiles are sea and which are land.
+    bool                         assumeLand;               //! During sea/land detection,we either trust coastlines only or make some
+                                                           //! assumptions which tiles are sea and which are land.
 
   public:
     ImportParameter();
@@ -140,6 +143,7 @@ namespace osmscout {
     size_t GetOptimizationMinMag() const;
     size_t GetOptimizationCellSizeAverage() const;
     size_t GetOptimizationCellSizeMax() const;
+    TransPolygon::OptimizeMethod GetOptimizationWayMethod() const;
 
     size_t GetRouteNodeBlockSize() const;
 
@@ -175,6 +179,24 @@ namespace osmscout {
     void SetWayDataCacheSize(size_t wayDataCacheSize);
     void SetWayIndexCacheSize(size_t wayIndexCacheSize);
     void SetWaysLoadSize(size_t waysLoadSize);
+
+    void SetAreaAreaIndexMaxMag(size_t areaAreaIndexMaxMag);
+
+    void SetAreaWayMinMag(size_t areaWayMinMag);
+    void SetAreaWayIndexCellSizeAverage(size_t areaWayIndexCellSizeAverage);
+    void SetAreaWayIndexCellSizeMax(size_t areaWayIndexCellSizeMax);
+
+    void SetAreaNodeMinMag(size_t areaNodeMinMag);
+    void SetAreaNodeIndexCellSizeAverage(size_t areaNodeIndexCellSizeAverage);
+    void SetAreaNodeIndexCellSizeMax(size_t areaNodeIndexCellSizeMax);
+
+    void SetWaterIndexMaxMag(size_t waterIndexMaxMag);
+
+    void SetOptimizationMaxMag(size_t optimizationMaxMag);
+    void SetOptimizationMinMag(size_t optimizationMinMag);
+    void SetOptimizationCellSizeAverage(size_t optimizationCellSizeAverage);
+    void SetOptimizationCellSizeMax(size_t optimizationCellSizeMax);
+    void SetOptimizationWayMethod(TransPolygon::OptimizeMethod optimizationWayMethod);
 
     void SetRouteNodeBlockSize(size_t blockSize);
 

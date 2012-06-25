@@ -56,8 +56,9 @@ namespace osmscout {
     lineMinWidthPixel(0.2),
     drawBridgeMagnification(magVeryClose),
     drawTunnelMagnification(magVeryClose),
-    optimizeWayNodes(false),
-    optimizeAreaNodes(false),
+    optimizeWayNodes(TransPolygon::none),
+    optimizeAreaNodes(TransPolygon::none),
+    optimizeErrorToleranceMm(25.4/dpi), //1 pixel
     drawFadings(true),
     drawWaysWithFixedWidth(false),
     labelSpace(3.0),
@@ -114,14 +115,19 @@ namespace osmscout {
     this->drawTunnelMagnification=magnification;
   }
 
-  void MapParameter::SetOptimizeWayNodes(bool optimize)
+  void MapParameter::SetOptimizeWayNodes(TransPolygon::OptimizeMethod optimize)
   {
     optimizeWayNodes=optimize;
   }
 
-  void MapParameter::SetOptimizeAreaNodes(bool optimize)
+  void MapParameter::SetOptimizeAreaNodes(TransPolygon::OptimizeMethod optimize)
   {
     optimizeAreaNodes=optimize;
+  }
+
+  void MapParameter::SetOptimizeErrorToleranceMm(double errorToleranceMm)
+  {
+    optimizeErrorToleranceMm=errorToleranceMm;
   }
 
   void MapParameter::SetDrawFadings(bool drawFadings)
@@ -1307,7 +1313,8 @@ namespace osmscout {
     transBuffer.TransformArea(projection,
                               parameter.GetOptimizeAreaNodes(),
                               nodes,
-                              start,end);
+                              start,end,
+                              parameter.GetOptimizeErrorToleranceDots());
 
     AreaData data;
 
@@ -1387,7 +1394,8 @@ namespace osmscout {
         transBuffer.TransformArea(projection,
                                   parameter.GetOptimizeAreaNodes(),
                                   relation->roles[i].nodes,
-                                  data[i].transStart,data[i].transEnd);
+                                  data[i].transStart,data[i].transEnd,
+                                  parameter.GetOptimizeErrorToleranceDots());
       }
 
       size_t ring=0;
@@ -1553,7 +1561,8 @@ namespace osmscout {
     transBuffer.TransformWay(projection,
                              parameter.GetOptimizeAreaNodes(),
                              nodes,
-                             start,end);
+                             start,end,
+                             parameter.GetOptimizeErrorToleranceDots());
 
     data.attributes=&attributes;
     data.lineStyle=lineStyle;

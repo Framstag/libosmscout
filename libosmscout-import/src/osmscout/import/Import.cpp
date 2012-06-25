@@ -99,6 +99,7 @@ namespace osmscout {
      optimizationMinMag(6),
      optimizationCellSizeAverage(16),
      optimizationCellSizeMax(256),
+     optimizationWayMethod(TransPolygon::fast),
      routeNodeBlockSize(1500000),
      assumeLand(true)
   {
@@ -275,6 +276,11 @@ namespace osmscout {
     return optimizationCellSizeMax;
   }
 
+  TransPolygon::OptimizeMethod ImportParameter::GetOptimizationWayMethod() const
+  {
+    return optimizationWayMethod;
+  }
+
   size_t ImportParameter::GetRouteNodeBlockSize() const
   {
     return routeNodeBlockSize;
@@ -400,6 +406,73 @@ namespace osmscout {
   void ImportParameter::SetWaysLoadSize(size_t waysLoadSize)
   {
     this->waysLoadSize=waysLoadSize;
+  }
+
+  void ImportParameter::SetAreaAreaIndexMaxMag(size_t areaAreaIndexMaxMag)
+  {
+    this->areaAreaIndexMaxMag=areaAreaIndexMaxMag;
+  }
+
+  void ImportParameter::SetAreaWayMinMag(size_t areaWayMinMag)
+  {
+    this->areaWayMinMag=areaWayMinMag;
+  }
+
+  void ImportParameter::SetAreaWayIndexCellSizeAverage(size_t areaWayIndexCellSizeAverage)
+  {
+    this->areaWayIndexCellSizeAverage=areaWayIndexCellSizeAverage;
+  }
+
+  void ImportParameter::SetAreaWayIndexCellSizeMax(size_t areaWayIndexCellSizeMax)
+  {
+    this->areaWayIndexCellSizeMax=areaWayIndexCellSizeMax;
+  }
+
+  void ImportParameter::SetAreaNodeMinMag(size_t areaNodeMinMag)
+  {
+    this->areaNodeMinMag=areaNodeMinMag;
+  }
+
+  void ImportParameter::SetAreaNodeIndexCellSizeAverage(size_t areaNodeIndexCellSizeAverage)
+  {
+    this->areaNodeIndexCellSizeAverage=areaNodeIndexCellSizeAverage;
+  }
+
+  void ImportParameter::SetAreaNodeIndexCellSizeMax(size_t areaNodeIndexCellSizeMax)
+  {
+    this->areaNodeIndexCellSizeMax=areaNodeIndexCellSizeMax;
+  }
+
+  void ImportParameter::SetWaterIndexMaxMag(size_t waterIndexMaxMag)
+  {
+    this->waterIndexMaxMag=waterIndexMaxMag;
+  }
+
+  void ImportParameter::SetOptimizationMaxMag(size_t optimizationMaxMag)
+  {
+    this->optimizationMaxMag=optimizationMaxMag;
+  }
+
+  void ImportParameter::SetOptimizationMinMag(size_t optimizationMinMag)
+  {
+    this->optimizationMinMag=optimizationMinMag;
+  }
+
+  void ImportParameter::SetOptimizationCellSizeAverage(size_t optimizationCellSizeAverage)
+  {
+    this->optimizationCellSizeAverage=optimizationCellSizeAverage;
+  }
+
+
+  void ImportParameter::SetOptimizationCellSizeMax(size_t optimizationCellSizeMax)
+  {
+    this->optimizationCellSizeMax=optimizationCellSizeMax;
+  }
+
+
+  void ImportParameter::SetOptimizationWayMethod(TransPolygon::OptimizeMethod optimizationWayMethod)
+  {
+    this->optimizationWayMethod=optimizationWayMethod;
   }
 
   void ImportParameter::SetRouteNodeBlockSize(size_t blockSize)
