@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
   MainWindow   window;
   int          result;
 
-  qRegisterMetaType<RenderMapRequest>();
+  //qRegisterMetaType<RenderMapRequest>();
   qRegisterMetaType<DatabaseLoadedResponse>();
 
   dbThread.start();

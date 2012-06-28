@@ -68,7 +68,7 @@ signals:
   void Redraw();
 
 public slots:
-  void TriggerMapRendering(const RenderMapRequest& request);
+  void TriggerMapRendering();
 
 private:
   mutable QMutex               mutex;
@@ -83,21 +83,26 @@ private:
   osmscout::RoutePostprocessor routePostprocessor;
   QString                      iconDirectory;
 
-  bool                         finish;
-
-  QPixmap                      *currentPixmap;
+  QImage                       *currentImage;
 #if defined(HAVE_LIB_QTOPENGL)
   QGLPixelBuffer               *currentGLPixmap;
+  QSize                        currentGLPixmapSize;
 #endif
-  double                       currentLon,currentLat;
+  double                       currentLat;
+  double                       currentLon;
   double                       currentMagnification;
 
-  QPixmap                      *finishedPixmap;
+  QImage                       *finishedImage;
 #if defined(HAVE_LIB_QTOPENGL)
   QGLPixelBuffer               *finishedGLPixmap;
+  QSize                        finishedGLPixmapSize;
 #endif
-  double                       finishedLon,finishedLat;
+  double                       finishedLat;
+  double                       finishedLon;
   double                       finishedMagnification;
+
+  RenderMapRequest             currentRenderRequest;
+  bool                         doRender;
 
 private:
   void FreeMaps();
@@ -106,6 +111,8 @@ public:
   DBThread();
 
   void run();
+
+  void UpdateRenderRequest(const RenderMapRequest& request);
 
   bool RenderMap(QPainter& painter,
                  const RenderMapRequest& request);

@@ -40,7 +40,7 @@ private:
   bool   requestNewMap;
 
 signals:
-  void TriggerMapRendering(const RenderMapRequest& request);
+  void TriggerMapRenderingSignal();
 
 public slots:
   void InitialisationFinished(const DatabaseLoadedResponse& response);

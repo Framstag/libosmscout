@@ -28,7 +28,7 @@ MapWidget::MapWidget(QWidget *parent) :
   setFocusPolicy(Qt::StrongFocus);
 
   connect(&dbThread,SIGNAL(InitialisationFinished(DatabaseLoadedResponse)),this,SLOT(InitialisationFinished(DatabaseLoadedResponse)));
-  connect(this,SIGNAL(TriggerMapRendering(RenderMapRequest)),&dbThread,SLOT(TriggerMapRendering(RenderMapRequest)));
+  connect(this,SIGNAL(TriggerMapRenderingSignal()),&dbThread,SLOT(TriggerMapRendering()));
   connect(&dbThread,SIGNAL(HandleMapRenderingResult()),this,SLOT(DrawRenderResult()));
   connect(&dbThread,SIGNAL(Redraw()),this,SLOT(Redraw()));
 
@@ -88,7 +88,8 @@ void MapWidget::TriggerMapRendering()
   request.width=width();
   request.height=height();
 
-  emit TriggerMapRendering(request);
+  dbThread.UpdateRenderRequest(request);
+  emit TriggerMapRenderingSignal();
 }
 
 void MapWidget::keyPressEvent(QKeyEvent* event)

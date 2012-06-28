@@ -35,16 +35,23 @@ DBThread::DBThread()
    styleConfig(NULL),
    router(routerParameter),
    iconDirectory(),
-   currentPixmap(NULL)
+   currentImage(NULL)
 #if defined(HAVE_LIB_QTOPENGL)
    ,currentGLPixmap(NULL)
 #endif
-   ,finishedPixmap(NULL)
+   ,currentLat(0.0)
+   ,currentLon(0.0)
+   ,currentMagnification(0)
+   ,finishedImage(NULL)
 #if defined(HAVE_LIB_QTOPENGL)
    ,finishedGLPixmap(NULL)
 #endif
+   ,finishedLat(0.0)
+   ,finishedLon(0.0)
+   ,finishedMagnification(0)
+   ,currentRenderRequest()
+   ,doRender(false)
 {
-  // no code
 }
 
 void DBThread::FreeMaps()
@@ -57,11 +64,11 @@ void DBThread::FreeMaps()
   finishedGLPixmap=NULL;
 #endif
 
-  delete currentPixmap;
-  currentPixmap=NULL;
+  delete currentImage;
+  currentImage=NULL;
 
-  delete finishedPixmap;
-  finishedPixmap=NULL;
+  delete finishedImage;
+  finishedImage=NULL;
 }
 
 void DBThread::run()
@@ -71,12 +78,13 @@ void DBThread::run()
   QString stylesheetFilename = cmdLineArgs.size() > 2 ? cmdLineArgs.at(2) : databaseDirectory + QDir::separator() + "standard.oss";
   iconDirectory = cmdLineArgs.size() > 3 ? cmdLineArgs.at(3) : databaseDirectory + QDir::separator() + "icons";
 
-  if (database.Open(databaseDirectory.toLocal8Bit().data()) && router.Open(databaseDirectory.toLocal8Bit().data())) {
+  if (database.Open(databaseDirectory.toLocal8Bit().data()) &&
+      router.Open(databaseDirectory.toLocal8Bit().data())) {
     if (database.GetTypeConfig()!=NULL) {
       styleConfig=new osmscout::StyleConfig(database.GetTypeConfig());
 
 	  if (!osmscout::LoadStyleConfig(stylesheetFilename.toLocal8Bit().data(),
-                                     *styleConfig)) {
+                                   *styleConfig)) {
         delete styleConfig;
         styleConfig=NULL;
       }
@@ -178,41 +186,64 @@ void DBThread::run()
   }
 }
 
-void DBThread::TriggerMapRendering(const RenderMapRequest& request)
+void DBThread::UpdateRenderRequest(const RenderMapRequest& request)
 {
+  QMutexLocker locker(&mutex);
+
+  currentRenderRequest=request;
+  doRender=true;
+}
+
+void DBThread::TriggerMapRendering()
+{
+  RenderMapRequest request;
+  {
+    QMutexLocker locker(&mutex);
+
+    request=currentRenderRequest;
+    if (!doRender) {
+      return;
+    }
+
+    doRender=false;
+  }
 
 #if defined(HAVE_LIB_QTOPENGL)
-  QGLFormat format;
-
-  format.setAlpha(true);
-  format.setDepth(false);
-  format.setDoubleBuffer(false);
-  format.setSampleBuffers(true);
-
   if (QGLFormat::hasOpenGL()) {
     if (currentGLPixmap==NULL ||
-        currentGLPixmap->width()!=(int)request.width ||
-        currentGLPixmap->height()!=(int)request.height) {
+        currentGLPixmapSize.width()!=(int)request.width ||
+        currentGLPixmapSize.height()!=(int)request.height) {
+
+      QGLFormat format;
+      format.setAlpha(true);
+      format.setDepth(false);
+      format.setDoubleBuffer(false);
+      format.setSampleBuffers(true);
+
       delete currentGLPixmap;
-      currentGLPixmap=new QGLPixelBuffer(QSize(request.width,request.height),format);
+
+      currentGLPixmapSize=QSize(request.width,request.height);
+      currentGLPixmap=new QGLPixelBuffer(currentGLPixmapSize,format);
     }
   }
 
-  if (currentGLPixmap==NULL || !currentGLPixmap->isValid()) {
-    if (currentPixmap==NULL ||
-        currentPixmap->width()!=(int)request.width ||
-        currentPixmap->height()!=(int)request.height) {
-      delete currentPixmap;
-      currentPixmap=new QPixmap(QSize(request.width,request.height));
+  if (currentGLPixmap==NULL ||
+      !currentGLPixmap->isValid()) {
+    if (currentImage==NULL ||
+        currentImage->width()!=(int)request.width ||
+        currentImage->height()!=(int)request.height) {
+      delete currentImage;
+
+      currentImage=new QImage(QSize(request.width,request.height),QImage::Format_RGB32);
     }
   }
 #else
-  if (currentPixmap==NULL ||
-      currentPixmap->width()!=(int)request.width ||
-      currentPixmap->height()!=(int)request.height) {
-    delete currentPixmap;
+  if (currentImage==NULL ||
+      currentImage->width()!=(int)request.width ||
+      currentImage->height()!=(int)request.height) {
+    delete currentImage;
 
-    currentPixmap=new QPixmap(QSize(request.width,request.height));
+    currentImage=new QImage(QSize(request.width,request.height),QImage::Format_RGB32);
   }
 #endif
 
@@ -228,7 +259,7 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
 
     std::list<std::string>        paths;
 
-	paths.push_back(iconDirectory.toLocal8Bit().data());
+    paths.push_back(iconDirectory.toLocal8Bit().data());
 
     //drawParameter.SetDPI(QApplication::desktop()->physicalDpiX());
     drawParameter.SetIconPaths(paths);
@@ -290,14 +321,15 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
     QPainter *p=NULL;
 
 #if defined(HAVE_LIB_QTOPENGL)
-    if (currentGLPixmap!=NULL && currentGLPixmap->isValid()) {
+    if (currentGLPixmap!=NULL &&
+        currentGLPixmap->isValid()) {
       p=new QPainter(currentGLPixmap);
     }
     else {
-      p=new QPainter(currentPixmap);
+      p=new QPainter(currentImage);
     }
 #else
-    p=new QPainter(currentPixmap);
+    p=new QPainter(currentImage);
 #endif
 
     p->setRenderHint(QPainter::Antialiasing);
@@ -323,14 +355,15 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
     QPainter *p=NULL;
 
 #if defined(HAVE_LIB_QTOPENGL)
-    if (currentGLPixmap!=NULL && currentGLPixmap->isValid()) {
+    if (currentGLPixmap!=NULL &&
+        currentGLPixmap->isValid()) {
       p=new QPainter(currentGLPixmap);
     }
     else {
-      p=new QPainter(currentPixmap);
+      p=new QPainter(currentImage);
     }
 #else
-    p=new QPainter(currentPixmap);
+    p=new QPainter(currentImage);
 #endif
 
     p->setRenderHint(QPainter::Antialiasing);
@@ -354,9 +387,10 @@ void DBThread::TriggerMapRendering(const RenderMapRequest& request)
 
   QMutexLocker locker(&mutex);
 
-  std::swap(currentPixmap,finishedPixmap);
+  std::swap(currentImage,finishedImage);
 #if defined(HAVE_LIB_QTOPENGL)
   std::swap(currentGLPixmap,finishedGLPixmap);
+  std::swap(currentGLPixmapSize,finishedGLPixmapSize);
 #endif
   std::swap(currentLon,finishedLon);
   std::swap(currentLat,finishedLat);
@@ -371,9 +405,10 @@ bool DBThread::RenderMap(QPainter& painter,
   QMutexLocker locker(&mutex);
 
 #if defined(HAVE_LIB_QTOPENGL)
-  if (finishedPixmap==NULL && finishedGLPixmap==NULL) {
+  if (finishedImage==NULL &&
+      finishedGLPixmap==NULL) {
 #else
-  if (finishedPixmap==NULL) {
+  if (finishedImage==NULL) {
 #endif
     painter.fillRect(0,0,request.width,request.height,
                      QColor::fromRgbF(0.0,0.0,0.0,1.0));
@@ -395,17 +430,20 @@ bool DBThread::RenderMap(QPainter& painter,
   if (finishedGLPixmap!=NULL) {
     projection.Set(finishedLon,finishedLat,
                    finishedMagnification,
-                   finishedGLPixmap->width(),finishedGLPixmap->height());
+                   finishedGLPixmapSize.width(),
+                   finishedGLPixmapSize.height());
   }
   else {
     projection.Set(finishedLon,finishedLat,
                    finishedMagnification,
-                   finishedPixmap->width(),finishedPixmap->height());
+                   finishedImage->width(),
+                   finishedImage->height());
   }
 #else
   projection.Set(finishedLon,finishedLat,
                  finishedMagnification,
-                 finishedPixmap->width(),finishedPixmap->height());
+                 finishedImage->width(),
+                 finishedImage->height());
 #endif
 
   double lonMin,lonMax,latMin,latMax;
@@ -451,65 +489,31 @@ bool DBThread::RenderMap(QPainter& painter,
     painter.drawImage(dx,dy,image);
   }
   else {
-    painter.drawPixmap(dx,dy,*finishedPixmap);
+    painter.drawImage(dx,dy,*finishedImage);
   }
 #else
-  painter.drawPixmap(dx,dy,*finishedPixmap);
+  painter.drawImage(dx,dy,*finishedImage);
 #endif
-
-/*
-#if defined(LUM_HAVE_LIB_CAIRO)
-  if (dynamic_cast<Lum::OS::Cairo::DrawInfo*>(draw)!=NULL) {
-    cairo_t* cairo=dynamic_cast<Lum::OS::Cairo::DrawInfo*>(draw)->cairo;
-
-    cairo_set_source_surface(cairo,finishedSurface,x-dx,y+dy);
-    cairo_rectangle(cairo,x,y,finishedWidth,finishedHeight);
-    cairo_fill(cairo);
-
-    // Scale
-
-    cairo_save(cairo);
-
-    cairo_set_source_rgb(cairo,0,0,0);
-    cairo_set_line_width(cairo,2);
-    cairo_move_to(cairo,x+width/20,y+height*19/20);
-    cairo_line_to(cairo,x+width/20+scaleSize-1,y+height*19/20);
-    cairo_stroke(cairo);
-    cairo_move_to(cairo,x+width/20,y+height*19/20);
-    cairo_line_to(cairo,x+width/20,y+height*19/20-height/40);
-    cairo_stroke(cairo);
-    cairo_move_to(cairo,x+width/20+scaleSize-1,y+height*19/20);
-    cairo_line_to(cairo,x+width/20+scaleSize-1,y+height*19/20-height/40);
-    cairo_stroke(cairo);
-
-    cairo_move_to(cairo,x+width/20+scaleSize-1+10,y+height*19/20);
-    cairo_show_text(cairo,Lum::Base::NumberToString((size_t)scaleValue).c_str());
-    cairo_stroke(cairo);
-
-    cairo_restore(cairo);
-
-  }
-#endif
-*/
 
 #if defined(HAVE_LIB_QTOPENGL)
-  if (finishedGLPixmap!=NULL && finishedGLPixmap->isValid()) {
-    return finishedGLPixmap->width()==(int)request.width &&
-           finishedGLPixmap->height()==(int)request.height &&
+  if (finishedGLPixmap!=NULL &&
+      finishedGLPixmap->isValid()) {
+    return finishedGLPixmapSize.width()==(int)request.width &&
+           finishedGLPixmapSize.height()==(int)request.height &&
            finishedLon==request.lon &&
            finishedLat==request.lat &&
            finishedMagnification==request.magnification;
   }
   else {
-    return finishedPixmap->width()==(int)request.width &&
-           finishedPixmap->height()==(int)request.height &&
+    return finishedImage->width()==(int)request.width &&
+           finishedImage->height()==(int)request.height &&
            finishedLon==request.lon &&
            finishedLat==request.lat &&
            finishedMagnification==request.magnification;
   }
 #else
-    return finishedPixmap->width()==(int)request.width &&
-           finishedPixmap->height()==(int)request.height &&
+    return finishedImage->width()==(int)request.width &&
+           finishedImage->height()==(int)request.height &&
            finishedLon==request.lon &&
            finishedLat==request.lat &&
            finishedMagnification==request.magnification;
