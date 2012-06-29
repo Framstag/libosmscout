@@ -30,6 +30,31 @@
 
 DBThread dbThread;
 
+QBreaker::QBreaker()
+  :osmscout::Breaker()
+  ,aborted(false)
+{
+}
+
+bool QBreaker::Break(){
+  QMutexLocker locker(&mutex);
+  aborted = true;
+  return true;
+}
+
+bool QBreaker::IsAborted() const
+{
+  QMutexLocker locker(&mutex);
+  return aborted;
+}
+
+void QBreaker::Reset()
+{
+  QMutexLocker locker(&mutex);
+  aborted = false;
+}
+
+
 DBThread::DBThread()
  : database(databaseParameter),
    styleConfig(NULL),
@@ -51,6 +76,8 @@ DBThread::DBThread()
    ,finishedMagnification(0)
    ,currentRenderRequest()
    ,doRender(false)
+   , renderBreaker(new QBreaker())
+   , renderBreakerRef(renderBreaker)
 {
 }
 
@@ -192,6 +219,8 @@ void DBThread::UpdateRenderRequest(const RenderMapRequest& request)
 
   currentRenderRequest=request;
   doRender=true;
+
+  renderBreaker->Break();
 }
 
 void DBThread::TriggerMapRendering()
@@ -206,6 +235,8 @@ void DBThread::TriggerMapRendering()
     }
 
     doRender=false;
+
+    renderBreaker->Reset();
   }
 
 #if defined(HAVE_LIB_QTOPENGL)
@@ -257,6 +288,8 @@ void DBThread::TriggerMapRendering()
     osmscout::MapParameter        drawParameter;
     osmscout::AreaSearchParameter searchParameter;
 
+    searchParameter.SetBreaker(renderBreakerRef);
+
     std::list<std::string>        paths;
 
     paths.push_back(iconDirectory.toLocal8Bit().data());
@@ -267,6 +300,7 @@ void DBThread::TriggerMapRendering()
     drawParameter.SetDebugPerformance(true);
     drawParameter.SetOptimizeWayNodes(osmscout::TransPolygon::quality);
     drawParameter.SetOptimizeAreaNodes(osmscout::TransPolygon::quality);
+    drawParameter.SetBreaker(renderBreakerRef);
 
     std::cout << std::endl;
 
@@ -386,6 +420,7 @@ void DBThread::TriggerMapRendering()
   }
 
   QMutexLocker locker(&mutex);
+  if (renderBreaker->IsAborted()) return;
 
   std::swap(currentImage,finishedImage);
 #if defined(HAVE_LIB_QTOPENGL)

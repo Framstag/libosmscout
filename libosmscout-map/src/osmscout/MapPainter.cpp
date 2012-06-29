@@ -165,6 +165,11 @@ namespace osmscout {
     debugPerformance=debug;
   }
 
+  void MapParameter::SetBreaker(const BreakerRef& breaker)
+  {
+    this->breaker=breaker;
+  }
+
   MapPainter::MapPainter()
   {
     tunnelDash.push_back(0.4);

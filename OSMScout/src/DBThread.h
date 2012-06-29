@@ -37,6 +37,8 @@
 
 #include <osmscout/MapPainterQt.h>
 
+#include <osmscout/util/Breaker.h>
+
 struct RenderMapRequest
 {
   double lon;
@@ -57,6 +59,20 @@ struct DatabaseLoadedResponse
 };
 
 Q_DECLARE_METATYPE(DatabaseLoadedResponse)
+
+class QBreaker : public osmscout::Breaker
+{
+private:
+  mutable QMutex mutex;
+  bool           aborted;
+
+public:
+  QBreaker();
+
+  bool Break();
+  bool IsAborted() const;
+  void Reset();
+};
 
 class DBThread : public QObject
 {
@@ -105,6 +121,8 @@ private:
 
   RenderMapRequest             currentRenderRequest;
   bool                         doRender;
+  QBreaker*                    renderBreaker;
+  osmscout::BreakerRef         renderBreakerRef;
 
 private:
   void FreeMaps();
