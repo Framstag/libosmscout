@@ -58,7 +58,7 @@ struct DatabaseLoadedResponse
 
 Q_DECLARE_METATYPE(DatabaseLoadedResponse)
 
-class DBThread : public QThread
+class DBThread : public QObject
 {
   Q_OBJECT
 
@@ -69,6 +69,8 @@ signals:
 
 public slots:
   void TriggerMapRendering();
+  void Initialize();
+  void Finalize();
 
 private:
   mutable QMutex               mutex;
@@ -109,8 +111,6 @@ private:
 
 public:
   DBThread();
-
-  void run();
 
   void UpdateRenderRequest(const RenderMapRequest& request);
 

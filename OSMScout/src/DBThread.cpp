@@ -71,7 +71,7 @@ void DBThread::FreeMaps()
   finishedImage=NULL;
 }
 
-void DBThread::run()
+void DBThread::Initialize()
 {
   QStringList cmdLineArgs = QApplication::arguments();
   QString databaseDirectory = cmdLineArgs.size() > 1 ? cmdLineArgs.at(1) : QDir::currentPath();
@@ -172,9 +172,9 @@ void DBThread::run()
   std::cout << response.minLat <<"," << response.minLon << " - " << response.maxLat << "," << response.maxLon << "]" << std::endl;
 
   emit InitialisationFinished(response);
+}
 
-  exec();
-
+void DBThread::Finalize(){
   FreeMaps();
 
   if (router.IsOpen()) {

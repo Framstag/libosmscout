@@ -24,6 +24,10 @@
 
 int main(int argc, char* argv[])
 {
+#ifdef Q_WS_X11
+  QCoreApplication::setAttribute(Qt::AA_X11InitThreads);
+#endif
+
   QApplication app(argc,argv);
   MainWindow   window;
   int          result;
@@ -31,7 +35,12 @@ int main(int argc, char* argv[])
   //qRegisterMetaType<RenderMapRequest>();
   qRegisterMetaType<DatabaseLoadedResponse>();
 
-  dbThread.start();
+  QThread thread;
+  dbThread.connect(&thread, SIGNAL(started()), SLOT(Initialize()));
+  dbThread.connect(&thread, SIGNAL(finished()), SLOT(Finalize()));
+
+  dbThread.moveToThread(&thread);
+  thread.start();
 
   window.setWindowTitle("OSMScout");
   window.resize(800,480);
@@ -39,8 +48,8 @@ int main(int argc, char* argv[])
 
   result=app.exec();
 
-  dbThread.quit();
-  dbThread.wait();
+  thread.quit();
+  thread.wait();
 
   return result;
 }
