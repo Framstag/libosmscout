@@ -200,9 +200,6 @@ TYPES
   TYPE "boundary_administrative" = WAY AREA ("boundary"=="administrative") OR
                                    RELATION ("type"=="boundary" AND "boundary"=="administrative") OPTIONS MULTIPOLYGON IGNORESEALAND
                                     
-  TYPE "boundary_civil" = AREA ("boundary"=="civil")
-  TYPE "boundary_political" = AREA ("boundary"=="political")
-  
   TYPE "place_continent" = NODE AREA ("place"=="continent")
   TYPE "place_country" = NODE ("place"=="country")
   TYPE "place_state" = NODE AREA ("place"=="state")
@@ -348,9 +345,14 @@ TYPES
 
   TYPE "address" = RELATION ("type"=="address") OPTIONS IGNORE
   TYPE "border" = AREA RELATION ("type"=="border") OPTIONS IGNORE
-  TYPE "boundary_postal_code" = AREA RELATION ("boundary"=="postal_code") OPTIONS IGNORE
   TYPE "postal_code" = AREA RELATION ("type"=="postal_code") OPTIONS IGNORE
   TYPE "organization" = AREA RELATION ("type"=="organization") OPTIONS IGNORE
+
+  TYPE "boundary_civil" = AREA ("boundary"=="civil")  OPTIONS IGNORE
+  TYPE "boundary_national_park" = AREA RELATION ("boundary"=="national_park") OPTIONS IGNORE
+  TYPE "boundary_maritime" = AREA RELATION ("boundary"=="maritime") OPTIONS IGNORE
+  TYPE "boundary_political" = AREA ("boundary"=="political") OPTIONS IGNORE
+  TYPE "boundary_postal_code" = AREA RELATION ("boundary"=="postal_code") OPTIONS IGNORE
 
   TYPE "place_any" = RELATION ("type"=="place") OPTIONS IGNORE
   TYPE "amt_any" = RELATION ("type"=="amt") OPTIONS IGNORE
