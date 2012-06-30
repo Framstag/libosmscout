@@ -512,19 +512,17 @@ namespace osmscout {
 
           resolvedRelations.insert(member->id);
 
-          for (size_t m=0; m<childRelation->members.size(); m++) {
-            if (!ResolveMultipolygonMembers(progress,
-                                            typeConfig,
-                                            wayAreaIndexBlacklist,
-                                            nodeDataFile,
-                                            wayDataFile,
-                                            relDataFile,
-                                            resolvedRelations,
-                                            relation,
-                                            *childRelation,
-                                            parts)) {
-              break;
-            }
+          if (!ResolveMultipolygonMembers(progress,
+                                          typeConfig,
+                                          wayAreaIndexBlacklist,
+                                          nodeDataFile,
+                                          wayDataFile,
+                                          relDataFile,
+                                          resolvedRelations,
+                                          relation,
+                                          *childRelation,
+                                          parts)) {
+            break;
           }
         }
         else {
