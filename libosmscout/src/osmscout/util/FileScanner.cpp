@@ -353,7 +353,7 @@ namespace osmscout {
     }
 #endif
 
-    hasError=fread(buffer,sizeof(char),bytes,file)!=bytes;
+    hasError=fread(buffer,1,bytes,file)!=bytes;
 
     if (hasError) {
       std::cerr << "Cannot read byte array beyond file end!" << std::endl;
@@ -402,7 +402,7 @@ namespace osmscout {
 
     char character;
 
-    hasError=fread(&character,sizeof(char),1,file)!=1;
+    hasError=fread(&character,1,1,file)!=1;
 
     if (hasError) {
       std::cerr << "Cannot read string beyond file end!" << std::endl;
@@ -412,7 +412,7 @@ namespace osmscout {
     while (character!='\0') {
       value.append(1,character);
 
-      hasError=fread(&character,sizeof(char),1,file)!=1;
+      hasError=fread(&character,1,1,file)!=1;
 
       if (hasError) {
         std::cerr << "String has no terminating '\0' before file end!" << std::endl;
@@ -447,7 +447,7 @@ namespace osmscout {
 
     char value;
 
-    hasError=fread(&value,sizeof(char),1,file)!=1;
+    hasError=fread(&value,1,1,file)!=1;
 
     if (hasError) {
       std::cerr << "Cannot read bool beyond file end!" << std::endl;
@@ -483,7 +483,7 @@ namespace osmscout {
     }
 #endif
 
-    hasError=fread(&number,sizeof(char),sizeof(uint8_t),file)!=sizeof(uint8_t);
+    hasError=fread(&number,1,1,file)!=1;
 
     if (hasError) {
       std::cerr << "Cannot read uint8_t beyond file end!" << std::endl;
@@ -935,7 +935,7 @@ namespace osmscout {
 
     char buffer;
 
-    if (fread(&buffer,sizeof(char),1,file)!=1) {
+    if (fread(&buffer,1,1,file)!=1) {
       std::cerr << "Cannot read uint16_t beyond file end!" << std::endl;
       hasError=true;
       return false;
@@ -956,7 +956,7 @@ namespace osmscout {
         return true;
       }
 
-      if (fread(&buffer,sizeof(char),1,file)!=1) {
+      if (fread(&buffer,1,1,file)!=1) {
         std::cerr << "Cannot read uint16_t beyond file end!" << std::endl;
         hasError=true;
         return false;
@@ -994,7 +994,7 @@ namespace osmscout {
 
     char buffer;
 
-    if (fread(&buffer,sizeof(char),1,file)!=1) {
+    if (fread(&buffer,1,1,file)!=1) {
       std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
       hasError=true;
       return false;
@@ -1015,7 +1015,7 @@ namespace osmscout {
         return true;
       }
 
-      if (fread(&buffer,sizeof(char),1,file)!=1) {
+      if (fread(&buffer,1,1,file)!=1) {
         std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
         hasError=true;
         return false;
@@ -1054,7 +1054,7 @@ namespace osmscout {
 
     char buffer;
 
-    if (fread(&buffer,sizeof(char),1,file)!=1) {
+    if (fread(&buffer,1,1,file)!=1) {
       std::cerr << "Cannot read uint64_t beyond file end!" << std::endl;
       hasError=true;
       return false;
@@ -1075,7 +1075,7 @@ namespace osmscout {
         return true;
       }
 
-      if (fread(&buffer,sizeof(char),1,file)!=1) {
+      if (fread(&buffer,1,1,file)!=1) {
         std::cerr << "Cannot read uint64_t beyond file end!" << std::endl;
         hasError=true;
         return false;

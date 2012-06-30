@@ -220,6 +220,7 @@ void DatabaseTask::Run()
                                    projection.GetLatMin(),
                                    projection.GetLonMax(),
                                    projection.GetLatMax(),
+                                   projection.GetMagnification(),
                                    data.groundTiles);
         }
 

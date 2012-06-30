@@ -40,10 +40,25 @@ namespace osmscout {
   /**
    * Sets the size of the bitmap and initializes state of all tiles to "unknown"
    */
-  void WaterIndexGenerator::Area::SetSize(uint32_t cellXCount, uint32_t cellYCount)
+  void WaterIndexGenerator::Level::SetBox(double minLat, double maxLat,
+                                          double minLon, double maxLon,
+                                          double cellWidth, double cellHeight)
   {
-    this->cellXCount=cellXCount;
-    this->cellYCount=cellYCount;
+    this->cellWidth=cellWidth;
+    this->cellHeight=cellHeight;
+
+    minLat=minLat/conversionFactor-90.0;
+    maxLat=maxLat/conversionFactor-90.0;
+    minLon=minLon/conversionFactor-180.0;
+    maxLon=maxLon/conversionFactor-180.0;
+
+    cellXStart=(uint32_t)floor((minLon+180.0)/cellWidth);
+    cellXEnd=(uint32_t)floor((maxLon+180.0)/cellWidth);
+    cellYStart=(uint32_t)floor((minLat+90.0)/cellHeight);
+    cellYEnd=(uint32_t)floor((maxLat+90.0)/cellHeight);
+
+    cellXCount=cellXEnd-cellXStart+1;
+    cellYCount=cellYEnd-cellYStart+1;
 
     uint32_t size=cellXCount*cellYCount/4;
 
@@ -54,7 +69,15 @@ namespace osmscout {
     area.resize(size,0x00);
   }
 
-  WaterIndexGenerator::State WaterIndexGenerator::Area::GetState(uint32_t x, uint32_t y) const
+  bool WaterIndexGenerator::Level::IsIn(uint32_t x, uint32_t y) const
+  {
+    return x>=cellXStart &&
+           x<=cellXEnd &&
+           y>=cellYStart &&
+           y<=cellYEnd;
+  }
+
+  WaterIndexGenerator::State WaterIndexGenerator::Level::GetState(uint32_t x, uint32_t y) const
   {
     uint32_t cellId=y*cellXCount+x;
     uint32_t index=cellId/4;
@@ -63,7 +86,7 @@ namespace osmscout {
     return (State)((area[index] >> offset) & 3);
   }
 
-  void WaterIndexGenerator::Area::SetState(uint32_t x, uint32_t y, State state)
+  void WaterIndexGenerator::Level::SetState(uint32_t x, uint32_t y, State state)
   {
     uint32_t cellId=y*cellXCount+x;
     uint32_t index=cellId/4;
@@ -73,13 +96,19 @@ namespace osmscout {
     area[index]=(area[index] | (state << offset));
   }
 
+  void WaterIndexGenerator::Level::SetStateAbsolute(uint32_t x, uint32_t y, State state)
+  {
+    SetState(x-cellXStart,y-cellYStart,state);
+  }
+
   /**
    * Does a scan line conversion on all costline ways where the cell size equals the tile size.
    * All tiles hit are marked as "coast".
    *
    */
-  void WaterIndexGenerator::SetCoastlineCells()
+  void WaterIndexGenerator::SetCoastlineCells(Level& level)
   {
+
     for (std::list<Coast>::const_iterator coastline=coastlines.begin();
         coastline!=coastlines.end();
         ++coastline) {
@@ -87,14 +116,11 @@ namespace osmscout {
 
       std::vector<ScanCell> cells;
 
-      ScanConvertLine(coastline->coast,-180.0,cellWidth,-90.0,cellHeight,cells);
+      ScanConvertLine(coastline->coast,-180.0,level.cellWidth,-90.0,level.cellHeight,cells);
 
       for (size_t i=0; i<cells.size(); i++) {
-        if (cells[i].x>=cellXStart &&
-            cells[i].x<=cellXEnd &&
-            cells[i].y>=cellYStart &&
-            cells[i].y<=cellYEnd) {
-          area.SetState(cells[i].x-cellXStart,cells[i].y-cellYStart,coast);
+        if (level.IsIn(cells[i].x,cells[i].y)) {
+          level.SetStateAbsolute(cells[i].x,cells[i].y,coast);
         }
       }
     }
@@ -106,7 +132,7 @@ namespace osmscout {
    * line is either water or land, depending on the sloe direction. We then resort from right to left and do
    * the estimation again.
    */
-  void WaterIndexGenerator::ScanCellsHorizontally()
+  void WaterIndexGenerator::ScanCellsHorizontally(Level& level)
   {
     std::list<Line> lines;
 
@@ -136,24 +162,21 @@ namespace osmscout {
         ++line) {
       std::vector<ScanCell> cells;
 
-      ScanConvertLine((int)((line->a.GetLon()+180.0)/cellWidth),
-                      (int)((line->a.GetLat()+90.0)/cellHeight),
-                      (int)((line->b.GetLon()+180.0)/cellWidth),
-                      (int)((line->b.GetLat()+90.0)/cellHeight),
+      ScanConvertLine((int)((line->a.GetLon()+180.0)/level.cellWidth),
+                      (int)((line->a.GetLat()+90.0)/level.cellHeight),
+                      (int)((line->b.GetLon()+180.0)/level.cellWidth),
+                      (int)((line->b.GetLat()+90.0)/level.cellHeight),
                       cells);
 
       if (line->b.GetLat()>line->a.GetLat()) {
         // up
         for (size_t i=0; i<cells.size(); i++) {
-          if (cells[i].x>=cellXStart &&
-              cells[i].x<=cellXEnd &&
-              cells[i].y>=cellYStart &&
-              cells[i].y<=cellYEnd) {
-            int cx=cells[i].x-cellXStart;
-            int cy=cells[i].y-cellYStart;
+          if (level.IsIn(cells[i].x,cells[i].y)) {
+            int cx=cells[i].x-level.cellXStart;
+            int cy=cells[i].y-level.cellYStart;
 
-            if (cx-1>=0 && area.GetState(cx-1,cy)==unknown) {
-              area.SetState(cx-1,cy,land);
+            if (cx-1>=0 && level.GetState(cx-1,cy)==unknown) {
+              level.SetState(cx-1,cy,land);
             }
           }
         }
@@ -161,15 +184,12 @@ namespace osmscout {
       else if (line->b.GetLat()<line->a.GetLat()) {
         // down
         for (size_t i=0; i<cells.size(); i++) {
-          if (cells[i].x>=cellXStart &&
-              cells[i].x<=cellXEnd &&
-              cells[i].y>=cellYStart &&
-              cells[i].y<=cellYEnd) {
-            int cx=cells[i].x-cellXStart;
-            int cy=cells[i].y-cellYStart;
+          if (level.IsIn(cells[i].x,cells[i].y)) {
+            int cx=cells[i].x-level.cellXStart;
+            int cy=cells[i].y-level.cellYStart;
 
-            if (cx-1>=0 && area.GetState(cx-1,cy)==unknown) {
-              area.SetState(cx-1,cy,water);
+            if (cx-1>=0 && level.GetState(cx-1,cy)==unknown) {
+              level.SetState(cx-1,cy,water);
             }
           }
         }
@@ -190,23 +210,20 @@ namespace osmscout {
         ++line) {
       std::vector<ScanCell> cells;
 
-      ScanConvertLine((int)((line->a.GetLon()+180.0)/cellWidth),
-                      (int)((line->a.GetLat()+90.0)/cellHeight),
-                      (int)((line->b.GetLon()+180.0)/cellWidth),
-                      (int)((line->b.GetLat()+90.0)/cellHeight),
+      ScanConvertLine((int)((line->a.GetLon()+180.0)/level.cellWidth),
+                      (int)((line->a.GetLat()+90.0)/level.cellHeight),
+                      (int)((line->b.GetLon()+180.0)/level.cellWidth),
+                      (int)((line->b.GetLat()+90.0)/level.cellHeight),
                       cells);
       if (line->b.GetLat()>line->a.GetLat()) {
         // up
         for (size_t i=0; i<cells.size(); i++) {
-          if (cells[i].x>=cellXStart &&
-              cells[i].x<=cellXEnd &&
-              cells[i].y>=cellYStart &&
-              cells[i].y<=cellYEnd) {
-            int cx=cells[i].x-cellXStart;
-            int cy=cells[i].y-cellYStart;
+          if (level.IsIn(cells[i].x,cells[i].y)) {
+            int cx=cells[i].x-level.cellXStart;
+            int cy=cells[i].y-level.cellYStart;
 
-            if (cx+1<cellXCount && area.GetState(cx+1,cy)==unknown) {
-              area.SetState(cx+1,cy,water);
+            if (cx+1<level.cellXCount && level.GetState(cx+1,cy)==unknown) {
+              level.SetState(cx+1,cy,water);
             }
           }
         }
@@ -214,15 +231,12 @@ namespace osmscout {
       else if (line->b.GetLat()<line->a.GetLat()) {
         // down
         for (size_t i=0; i<cells.size(); i++) {
-          if (cells[i].x>=cellXStart &&
-              cells[i].x<=cellXEnd &&
-              cells[i].y>=cellYStart &&
-              cells[i].y<=cellYEnd) {
-            int cx=cells[i].x-cellXStart;
-            int cy=cells[i].y-cellYStart;
+          if (level.IsIn(cells[i].x,cells[i].y)) {
+            int cx=cells[i].x-level.cellXStart;
+            int cy=cells[i].y-level.cellYStart;
 
-            if (cx+1<cellXCount && area.GetState(cx+1,cy)==unknown) {
-              area.SetState(cx+1,cy,land);
+            if (cx+1<level.cellXCount && level.GetState(cx+1,cy)==unknown) {
+              level.SetState(cx+1,cy,land);
             }
           }
         }
@@ -233,7 +247,7 @@ namespace osmscout {
   /**
    * See description for ScanCellsHorizontally()
    */
-  void WaterIndexGenerator::ScanCellsVertically()
+  void WaterIndexGenerator::ScanCellsVertically(Level& level)
   {
     std::list<Line> lines;
 
@@ -263,24 +277,21 @@ namespace osmscout {
         ++line) {
       std::vector<ScanCell> cells;
 
-      ScanConvertLine((int)((line->a.GetLon()+180.0)/cellWidth),
-                      (int)((line->a.GetLat()+90.0)/cellHeight),
-                      (int)((line->b.GetLon()+180.0)/cellWidth),
-                      (int)((line->b.GetLat()+90.0)/cellHeight),
+      ScanConvertLine((int)((line->a.GetLon()+180.0)/level.cellWidth),
+                      (int)((line->a.GetLat()+90.0)/level.cellHeight),
+                      (int)((line->b.GetLon()+180.0)/level.cellWidth),
+                      (int)((line->b.GetLat()+90.0)/level.cellHeight),
                       cells);
 
       if (line->b.GetLon()>line->a.GetLon()) {
         // right
         for (size_t i=0; i<cells.size(); i++) {
-          if (cells[i].x>=cellXStart &&
-              cells[i].x<=cellXEnd &&
-              cells[i].y>=cellYStart &&
-              cells[i].y<=cellYEnd) {
-            int cx=cells[i].x-cellXStart;
-            int cy=cells[i].y-cellYStart;
+          if (level.IsIn(cells[i].x,cells[i].y)) {
+            int cx=cells[i].x-level.cellXStart;
+            int cy=cells[i].y-level.cellYStart;
 
-            if (cy-1>=0 && area.GetState(cx,cy-1)==unknown) {
-              area.SetState(cx,cy-1,water);
+            if (cy-1>=0 && level.GetState(cx,cy-1)==unknown) {
+              level.SetState(cx,cy-1,water);
             }
           }
         }
@@ -288,15 +299,12 @@ namespace osmscout {
       else if (line->b.GetLon()<line->a.GetLon()) {
         // left
         for (size_t i=0; i<cells.size(); i++) {
-          if (cells[i].x>=cellXStart &&
-              cells[i].x<=cellXEnd &&
-              cells[i].y>=cellYStart &&
-              cells[i].y<=cellYEnd) {
-            int cx=cells[i].x-cellXStart;
-            int cy=cells[i].y-cellYStart;
+          if (level.IsIn(cells[i].x,cells[i].y)) {
+            int cx=cells[i].x-level.cellXStart;
+            int cy=cells[i].y-level.cellYStart;
 
-            if (cy-1>=0 && area.GetState(cx,cy-1)==unknown) {
-              area.SetState(cx,cy-1,land);
+            if (cy-1>=0 && level.GetState(cx,cy-1)==unknown) {
+              level.SetState(cx,cy-1,land);
             }
           }
         }
@@ -317,23 +325,20 @@ namespace osmscout {
         ++line) {
       std::vector<ScanCell> cells;
 
-      ScanConvertLine((int)((line->a.GetLon()+180.0)/cellWidth),
-                      (int)((line->a.GetLat()+90.0)/cellHeight),
-                      (int)((line->b.GetLon()+180.0)/cellWidth),
-                      (int)((line->b.GetLat()+90.0)/cellHeight),
+      ScanConvertLine((int)((line->a.GetLon()+180.0)/level.cellWidth),
+                      (int)((line->a.GetLat()+90.0)/level.cellHeight),
+                      (int)((line->b.GetLon()+180.0)/level.cellWidth),
+                      (int)((line->b.GetLat()+90.0)/level.cellHeight),
                       cells);
       if (line->b.GetLon()>line->a.GetLon()) {
         // right
         for (size_t i=0; i<cells.size(); i++) {
-          if (cells[i].x>=cellXStart &&
-              cells[i].x<=cellXEnd &&
-              cells[i].y>=cellYStart &&
-              cells[i].y<=cellYEnd) {
-            int cx=cells[i].x-cellXStart;
-            int cy=cells[i].y-cellYStart;
+          if (level.IsIn(cells[i].x,cells[i].y)) {
+            int cx=cells[i].x-level.cellXStart;
+            int cy=cells[i].y-level.cellYStart;
 
-            if (cy+1<cellYCount && area.GetState(cx,cy+1)==unknown) {
-            area.SetState(cx,cy+1,land);
+            if (cy+1<level.cellYCount && level.GetState(cx,cy+1)==unknown) {
+              level.SetState(cx,cy+1,land);
             }
           }
         }
@@ -341,15 +346,12 @@ namespace osmscout {
       else if (line->b.GetLon()<line->a.GetLon()) {
         // left
         for (size_t i=0; i<cells.size(); i++) {
-          if (cells[i].x>=cellXStart &&
-              cells[i].x<=cellXEnd &&
-              cells[i].y>=cellYStart &&
-              cells[i].y<=cellYEnd) {
-            int cx=cells[i].x-cellXStart;
-            int cy=cells[i].y-cellYStart;
+          if (level.IsIn(cells[i].x,cells[i].y)) {
+            int cx=cells[i].x-level.cellXStart;
+            int cy=cells[i].y-level.cellYStart;
 
-            if (cy+1<cellYCount && area.GetState(cx,cy+1)==unknown) {
-              area.SetState(cx,cy+1,water);
+            if (cy+1<level.cellYCount && level.GetState(cx,cy+1)==unknown) {
+              level.SetState(cx,cy+1,water);
             }
           }
         }
@@ -362,7 +364,8 @@ namespace osmscout {
    */
   bool WaterIndexGenerator::AssumeLand(const ImportParameter& parameter,
                                        Progress& progress,
-                                       const TypeConfig& typeConfig)
+                                       const TypeConfig& typeConfig,
+                                       Level& level)
   {
     FileScanner scanner;
 
@@ -404,16 +407,13 @@ namespace osmscout {
             way.nodes.size()>=2) {
           std::vector<ScanCell> cells;
 
-          ScanConvertLine(way.nodes,-180.0,cellWidth,-90.0,cellHeight,cells);
+          ScanConvertLine(way.nodes,-180.0,level.cellWidth,-90.0,level.cellHeight,cells);
 
           for (size_t i=0; i<cells.size(); i++) {
-            if (cells[i].x>=cellXStart &&
-                cells[i].x<=cellXEnd &&
-                cells[i].y>=cellYStart &&
-                cells[i].y<=cellYEnd) {
-              if (area.GetState(cells[i].x-cellXStart,cells[i].y-cellYStart)==unknown) {
+            if (level.IsIn(cells[i].x,cells[i].y)) {
+              if (level.GetState(cells[i].x-level.cellXStart,cells[i].y-level.cellYStart)==unknown) {
                 //std::cout << "Way " << way.GetId() << " " << typeConfig.GetTypeInfo(way.GetType()).GetName() << " is defining area as land" << std::endl;
-                area.SetState(cells[i].x-cellXStart,cells[i].y-cellYStart,land);
+                level.SetStateAbsolute(cells[i].x,cells[i].y,land);
               }
             }
           }
@@ -428,7 +428,7 @@ namespace osmscout {
    * Scanning from left to right and bottom to top: Every tile that is unknown but is places between land and coast or
    * land tiles must be land, too.
    */
-  void WaterIndexGenerator::FillLand()
+  void WaterIndexGenerator::FillLand(Level& level)
   {
     bool cont=true;
 
@@ -436,22 +436,22 @@ namespace osmscout {
       cont=false;
 
       // Left to right
-      for (size_t y=0; y<cellYCount; y++) {
+      for (size_t y=0; y<level.cellYCount; y++) {
         int x=0;
         int start=0;
         int end=0;
         int state=0;
 
-        while (x<cellXCount) {
+        while (x<level.cellXCount) {
           switch (state) {
             case 0:
-              if (area.GetState(x,y)==land) {
+              if (level.GetState(x,y)==land) {
                 state=1;
               }
               x++;
               break;
             case 1:
-              if (area.GetState(x,y)==unknown) {
+              if (level.GetState(x,y)==unknown) {
                 state=2;
                 start=x;
                 end=x;
@@ -462,14 +462,14 @@ namespace osmscout {
               }
               break;
             case 2:
-              if (area.GetState(x,y)==unknown) {
+              if (level.GetState(x,y)==unknown) {
                 end=x;
                 x++;
               }
-              else if (area.GetState(x,y)==coast || area.GetState(x,y)==land) {
-                if (start<cellXCount && end<cellXCount && start<=end) {
+              else if (level.GetState(x,y)==coast || level.GetState(x,y)==land) {
+                if (start<level.cellXCount && end<level.cellXCount && start<=end) {
                   for (size_t i=start; i<=end; i++) {
-                    area.SetState(i,y,land);
+                    level.SetState(i,y,land);
                     cont=true;
                   }
                 }
@@ -485,22 +485,22 @@ namespace osmscout {
       }
 
       //Bottom Up
-      for (size_t x=0; x<cellXCount; x++) {
+      for (size_t x=0; x<level.cellXCount; x++) {
         int y=0;
         int start=0;
         int end=0;
         int state=0;
 
-        while (y<cellYCount) {
+        while (y<level.cellYCount) {
           switch (state) {
             case 0:
-              if (area.GetState(x,y)==land) {
+              if (level.GetState(x,y)==land) {
                 state=1;
               }
               y++;
               break;
             case 1:
-              if (area.GetState(x,y)==unknown) {
+              if (level.GetState(x,y)==unknown) {
                 state=2;
                 start=y;
                 end=y;
@@ -511,14 +511,14 @@ namespace osmscout {
               }
               break;
             case 2:
-              if (area.GetState(x,y)==unknown) {
+              if (level.GetState(x,y)==unknown) {
                 end=y;
                 y++;
               }
-              else if (area.GetState(x,y)==coast || area.GetState(x,y)==land) {
-                if (start<cellYCount && end<cellYCount && start<=end) {
+              else if (level.GetState(x,y)==coast || level.GetState(x,y)==land) {
+                if (start<level.cellYCount && end<level.cellYCount && start<=end) {
                   for (size_t i=start; i<=end; i++) {
-                    area.SetState(x,i,land);
+                    level.SetState(x,i,land);
                     cont=true;
                   }
                 }
@@ -538,43 +538,43 @@ namespace osmscout {
   /**
    * Converts all tiles of state "unknown" that touch a tile with state "water" to state "water", too.
    */
-  void WaterIndexGenerator::FillWater()
+  void WaterIndexGenerator::FillWater(Level& level, size_t tileCount)
   {
-    for (size_t i=1; i<=3; i++) {
+    for (size_t i=1; i<=tileCount; i++) {
 
-      Area newArea(area);
+      Level newLevel(level);
 
-      for (size_t y=0; y<cellYCount; y++) {
-        for (size_t x=0; x<cellXCount; x++) {
-          if (area.GetState(x,y)==water) {
+      for (size_t y=0; y<level.cellYCount; y++) {
+        for (size_t x=0; x<level.cellXCount; x++) {
+          if (level.GetState(x,y)==water) {
             if (y>0) {
-              if (area.GetState(x,y-1)==unknown) {
-                newArea.SetState(x,y-1,water);
+              if (level.GetState(x,y-1)==unknown) {
+                newLevel.SetState(x,y-1,water);
               }
             }
 
-            if (y<cellYCount-1) {
-              if (area.GetState(x,y+1)==unknown) {
-                newArea.SetState(x,y+1,water);
+            if (y<level.cellYCount-1) {
+              if (level.GetState(x,y+1)==unknown) {
+                newLevel.SetState(x,y+1,water);
               }
             }
 
             if (x>0) {
-              if (area.GetState(x-1,y)==unknown) {
-                newArea.SetState(x-1,y,water);
+              if (level.GetState(x-1,y)==unknown) {
+                newLevel.SetState(x-1,y,water);
               }
             }
 
-            if (x<cellXCount-1) {
-              if (area.GetState(x+1,y)==unknown) {
-                newArea.SetState(x+1,y,water);
+            if (x<level.cellXCount-1) {
+              if (level.GetState(x+1,y)==unknown) {
+                newLevel.SetState(x+1,y,water);
               }
             }
           }
         }
       }
 
-      area=newArea;
+      level=newLevel;
     }
   }
 
@@ -598,16 +598,14 @@ namespace osmscout {
 
     uint32_t    wayCount=0;
 
-    progress.SetAction("Setup");
-
-    // We do not yet know if we handle borders as ways or areas
+    // We must have coastline type defined
     assert(coastlineWayId!=typeIgnore);
 
     // Calculate size of tile cells for the maximum zoom level
-    cellWidth=360.0;
-    cellHeight=180.0;
+    double cellWidth=360.0;
+    double cellHeight=180.0;
 
-    for (size_t i=2; i<=parameter.GetWaterIndexMaxMag(); i++) {
+    for (size_t i=1; i<=parameter.GetWaterIndexMaxMag(); i++) {
       cellWidth=cellWidth/2;
       cellHeight=cellHeight/2;
     }
@@ -632,24 +630,13 @@ namespace osmscout {
       return false;
     }
 
-    minLat=minLatDat/conversionFactor-90.0;
-    minLon=minLonDat/conversionFactor-180.0;
-    maxLat=maxLatDat/conversionFactor-90.0;
-    maxLon=maxLonDat/conversionFactor-180.0;
+    levels.resize(parameter.GetWaterIndexMaxMag()+1);
 
-    cellXStart=(uint32_t)floor((minLon+180.0)/cellWidth);
-    cellXEnd=(uint32_t)floor((maxLon+180.0)/cellWidth);
-    cellYStart=(uint32_t)floor((minLat+90.0)/cellHeight);
-    cellYEnd=(uint32_t)floor((maxLat+90.0)/cellHeight);
-
-    cellXCount=cellXEnd-cellXStart+1;
-    cellYCount=cellYEnd-cellYStart+1;
-
-    progress.Info("Size of sea/land bitmap for zoom level "+NumberToString(parameter.GetWaterIndexMaxMag())+
-        " is "+NumberToString(cellXCount*cellYCount/4/1024)+"kb");
-
+    /*
     // In the beginning everything is undecided
-    area.SetSize(cellXCount,cellYCount);
+    levels.back().SetBox(minLatDat,maxLatDat,
+                         minLonDat,maxLonDat,
+                         cellWidth,cellHeight);*/
 
     progress.SetAction("Scanning for coastlines ways");
 
@@ -694,28 +681,117 @@ namespace osmscout {
       return false;
     }
 
-    progress.SetAction("Setting coastline cells");
-    SetCoastlineCells();
+    cellWidth=360.0;
+    cellHeight=180.0;
 
-    progress.SetAction("Scan coastlines horizontally");
-    ScanCellsHorizontally();
+    for (size_t level=0; level<levels.size(); level++) {
+      progress.SetAction("Building tiles for level "+NumberToString(level));
 
-    progress.SetAction("Scan coastlines vertically");
-    ScanCellsVertically();
+      levels[level].SetBox(minLatDat,maxLatDat,
+                           minLonDat,maxLonDat,
+                           cellWidth,cellHeight);
 
-    if (parameter.GetAssumeLand()) {
-      progress.SetAction("Assume land");
+      progress.SetAction("Setting coastline cells");
+      SetCoastlineCells(levels[level]);
 
-      AssumeLand(parameter,
-                 progress,
-                 typeConfig);
+      progress.SetAction("Scan coastlines horizontally");
+      ScanCellsHorizontally(levels[level]);
+
+      progress.SetAction("Scan coastlines vertically");
+      ScanCellsVertically(levels[level]);
+
+      if (parameter.GetAssumeLand()) {
+        progress.SetAction("Assume land");
+
+        AssumeLand(parameter,
+                   progress,
+                   typeConfig,
+                   levels[level]);
+      }
+
+      progress.SetAction("Filling land");
+      FillLand(levels[level]);
+
+      progress.SetAction("Filling water");
+      FillWater(levels[level],20);
+
+      cellWidth=cellWidth/2;
+      cellHeight=cellHeight/2;
     }
 
-    progress.SetAction("Filling land");
-    FillLand();
+    /*
+    for (size_t l=1; l<levels.size(); l++) {
+      size_t prev=levels.size()-l;
+      size_t current=levels.size()-l-1;
 
-    progress.SetAction("Filling water");
-    FillWater();
+      progress.SetAction("Propergating data from level "+NumberToString(prev)+" to "+NumberToString(current));
+
+      levels[current].SetBox(minLatDat,maxLatDat,
+                             minLonDat,maxLonDat,
+                             levels[prev].cellWidth*2,levels[prev].cellHeight*2);
+
+      for (size_t y=0; y<levels[current].cellYCount; y++) {
+        for (size_t x=0; x<levels[current].cellXCount; x++) {
+          State states[4];
+
+          states[0]=unknown;
+          states[1]=unknown;
+          states[2]=unknown;
+          states[3]=unknown;
+
+          if (levels[prev].IsIn(x*2,y*2)) {
+            states[0]=levels[prev].GetState(x*2,y*2);
+          }
+
+          if (levels[prev].IsIn(x*2+1,y*2)) {
+            states[1]=levels[prev].GetState(x*2+1,y*2);
+          }
+
+          if (levels[prev].IsIn(x*2,y*2+1)) {
+            states[2]=levels[prev].GetState(x*2,y*2+1);
+          }
+
+          if (levels[prev].IsIn(x*2+1,y*2+1)) {
+            states[3]=levels[prev].GetState(x*2+1,y*2+1);
+          }
+
+          size_t unknownCount=0;
+          size_t landCount=0;
+          size_t coastCount=0;
+          size_t waterCount=0;
+
+          for (size_t i=0; i<4; i++) {
+            switch (states[i]) {
+            case unknown:
+              unknownCount++;
+              break;
+            case land:
+              landCount++;
+              break;
+            case coast:
+              coastCount++;
+              break;
+            case water:
+              waterCount++;
+              break;
+            }
+          }
+
+          if (coastCount>0) {
+            levels[current].SetState(x,y,coast);
+          }
+          else if (landCount>0) {
+            levels[current].SetState(x,y,land);
+          }
+          else if (waterCount>0) {
+            levels[current].SetState(x,y,water);
+          }
+          else {
+            levels[current].SetState(x,y,unknown);
+          }
+        }
+      }
+    }*/
 
     progress.SetAction("Writing 'water.idx'");
 
@@ -728,13 +804,30 @@ namespace osmscout {
     }
 
     writer.WriteNumber((uint32_t)parameter.GetWaterIndexMaxMag());
-    writer.WriteNumber(cellXStart);
-    writer.WriteNumber(cellXEnd);
-    writer.WriteNumber(cellYStart);
-    writer.WriteNumber(cellYEnd);
 
-    for (size_t i=0; i<area.area.size(); i++) {
-      writer.Write(area.area[i]);
+    for (size_t level=0; level<levels.size(); level++) {
+      FileOffset offset=0;
+
+      writer.GetPos(levels[level].indexEntryOffset);
+      writer.WriteFileOffset(offset);
+
+      writer.WriteNumber(levels[level].cellXStart);
+      writer.WriteNumber(levels[level].cellXEnd);
+      writer.WriteNumber(levels[level].cellYStart);
+      writer.WriteNumber(levels[level].cellYEnd);
+    }
+
+    for (size_t level=0; level<levels.size(); level++) {
+      FileOffset indexOffset;
+
+      writer.GetPos(indexOffset);
+      writer.SetPos(levels[level].indexEntryOffset);
+      writer.WriteFileOffset(indexOffset);
+      writer.SetPos(indexOffset);
+
+      for (size_t c=0; c<levels[level].area.size(); c++) {
+        writer.Write((uint8_t)levels[level].area[c]);
+      }
     }
 
     if (writer.HasError() || !writer.Close()) {

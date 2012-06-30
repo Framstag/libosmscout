@@ -358,7 +358,8 @@ namespace osmscout {
 
     landFill.SetFillColor(Color(241.0/255,238.0/255,233.0/255,1.0));
     seaFill.SetFillColor(Color(181.0/255,208.0/255,208.0/255,1.0));
-    coastFill.SetFillColor(Color(255.0/255,192.0/255,203.0/255,1.0));
+    coastFill.SetFillColor(Color(181.0/255,208.0/255,208.0/255,1.0));
+    //coastFill.SetFillColor(Color(255.0/255,192.0/255,203.0/255,1.0));
     unknownFill.SetFillColor(Color(255.0/255,255.0/255,173.0/255,1.0));
 
     labelStyle.SetStyle(LabelStyle::normal);

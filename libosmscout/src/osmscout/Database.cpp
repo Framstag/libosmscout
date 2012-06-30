@@ -739,6 +739,7 @@ namespace osmscout {
 
   bool Database::GetGroundTiles(double lonMin, double latMin,
                                 double lonMax, double latMax,
+                                double magnification,
                                 std::list<GroundTile>& tiles) const
   {
     if (!IsOpen()) {
@@ -747,7 +748,12 @@ namespace osmscout {
 
     StopClock timer;
 
-    if (!waterIndex.GetRegions(lonMin, latMin, lonMax, latMax, tiles)) {
+    if (!waterIndex.GetRegions(lonMin,
+                               latMin,
+                               lonMax,
+                               latMax,
+                               magnification,
+                               tiles)) {
       std::cerr << "Error reading ground tiles in area!" << std::endl;
       return false;
     }

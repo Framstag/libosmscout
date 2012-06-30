@@ -19,7 +19,7 @@ TYPES
   TYPE "highway_pedestrian" = WAY AREA ("highway"=="pedestrian") OPTIONS ROUTE INDEX PIN_WAY
   TYPE "highway_services" = NODE AREA ("highway"=="services") OPTIONS ROUTE INDEX
   TYPE "highway_bus_guideway" = WAY ("highway"=="bus_guideway") OPTIONS ROUTE
-  TYPE "highway_path" = WAY ("highway"=="path") OPTIONS ROUTE
+  TYPE "highway_path" = WAY ("highway"=="path") OPTIONS ROUTE IGNORESEALAND
   TYPE "highway_cycleway" = WAY ("highway"=="cycleway") OPTIONS ROUTE
   TYPE "highway_footway" = WAY AREA ("highway"=="footway") OPTIONS ROUTE PIN_WAY
   TYPE "highway_bridleway" = WAY ("highway"=="bridleway") OPTIONS ROUTE

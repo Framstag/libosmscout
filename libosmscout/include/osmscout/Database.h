@@ -232,6 +232,7 @@ namespace osmscout {
 
     bool GetGroundTiles(double lonMin, double latMin,
                         double lonMax, double latMax,
+                        double magnification,
                         std::list<GroundTile>& tiles) const;
 
     bool GetNode(const Id& id,

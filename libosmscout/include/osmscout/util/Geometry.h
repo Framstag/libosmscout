@@ -21,6 +21,7 @@
 */
 
 #include <algorithm>
+#include <utility>
 #include <vector>
 
 #include <osmscout/private/CoreImportExport.h>

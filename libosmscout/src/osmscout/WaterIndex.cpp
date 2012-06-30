@@ -33,90 +33,115 @@ namespace osmscout {
     // no code
   }
 
-  GroundTile::Type WaterIndex::GetType(uint32_t x, uint32_t y) const
-  {
-    uint32_t cellId=y*cellXCount+x;
-    uint32_t index=cellId/4;
-    uint32_t offset=2*(cellId%4);
-
-    return (GroundTile::Type)((area[index] >> offset) & 3);
-  }
-
   bool WaterIndex::Load(const std::string& path)
   {
-    FileScanner scanner;
-    std::string file=path+"/"+filepart;
+    datafilename=path+"/"+filepart;
 
-    if (!scanner.Open(file)) {
-      std::cerr << "Cannot open file '" << file << "'" << std::endl;
+    if (!scanner.Open(datafilename)) {
+      std::cerr << "Cannot open file '" << datafilename << "'" << std::endl;
       return false;
     }
 
     uint32_t waterIndexMaxMag;
 
-    scanner.ReadNumber(waterIndexMaxMag);
-    scanner.ReadNumber(cellXStart);
-    scanner.ReadNumber(cellXEnd);
-    scanner.ReadNumber(cellYStart);
-    scanner.ReadNumber(cellYEnd);
-
-    if (scanner.HasError()) {
-      std::cerr << "Error while reading from file '" << file << "'" << std::endl;
+    if (!scanner.ReadNumber(waterIndexMaxMag)) {
+      std::cerr << "Error while reading from file '" << datafilename << "'" << std::endl;
       return false;
     }
 
-    cellXCount=cellXEnd-cellXStart+1;
-    cellYCount=cellYEnd-cellYStart+1;
+    levels.resize(waterIndexMaxMag+1);
 
-    cellWidth=360.0;
-    cellHeight=180.0;
+    levels[0].cellWidth=360.0;
+    levels[0].cellHeight=180.0;
 
-    for (size_t i=2; i<=waterIndexMaxMag; i++) {
-      cellWidth=cellWidth/2;
-      cellHeight=cellHeight/2;
+    for (size_t level=1; level<levels.size(); level++) {
+      levels[level].cellWidth=levels[level-1].cellWidth/2;
+      levels[level].cellHeight=levels[level-1].cellHeight/2;
     }
 
-    // In the beginning everything is undecided
-    area.resize(cellXCount*cellYCount/4,0x00);
+    for (size_t level=0; level<levels.size(); level++){
+      scanner.ReadFileOffset(levels[level].offset);
 
-    for (size_t i=0; i<area.size(); i++) {
-      if (!scanner.Read(area[i])) {
-        std::cerr << "Error while reading from file '" << file << "'" << std::endl;
-      }
+      scanner.ReadNumber(levels[level].cellXStart);
+      scanner.ReadNumber(levels[level].cellXEnd);
+      scanner.ReadNumber(levels[level].cellYStart);
+      scanner.ReadNumber(levels[level].cellYEnd);
+
+      levels[level].cellXCount=levels[level].cellXEnd-levels[level].cellXStart+1;
+      levels[level].cellYCount=levels[level].cellYEnd-levels[level].cellYStart+1;
     }
 
-    return !scanner.HasError() && scanner.Close();
+    if (scanner.HasError()) {
+      std::cerr << "Error while reading from file '" << datafilename << "'" << std::endl;
+      return false;
+    }
+
+    return scanner.Close();
   }
 
   bool WaterIndex::GetRegions(double minlon,
                               double minlat,
                               double maxlon,
                               double maxlat,
+                              double magnification,
                               std::list<GroundTile>& tiles) const
   {
     uint32_t cx1,cx2,cy1,cy2;
+    size_t level=MagToLevel(magnification);
+
+    if (levels.empty()) {
+      return true;
+    }
+
+    level+=5;
+
+    if (level>=levels.size()) {
+      level=levels.size()-1;
+    }
 
     tiles.clear();
 
-    cx1=(uint32_t)floor((minlon+180.0)/cellWidth);
-    cx2=(uint32_t)floor((maxlon+180.0)/cellWidth);
-    cy1=(uint32_t)floor((minlat+90.0)/cellHeight);
-    cy2=(uint32_t)floor((maxlat+90.0)/cellHeight);
+    if (!scanner.IsOpen()) {
+      if (!scanner.Open(datafilename)) {
+        std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
+        return false;
+      }
+    }
+
+    cx1=(uint32_t)floor((minlon+180.0)/levels[level].cellWidth);
+    cx2=(uint32_t)floor((maxlon+180.0)/levels[level].cellWidth);
+    cy1=(uint32_t)floor((minlat+90.0)/levels[level].cellHeight);
+    cy2=(uint32_t)floor((maxlat+90.0)/levels[level].cellHeight);
 
     for (size_t y=cy1; y<=cy2; y++) {
       for (size_t x=cx1; x<=cx2; x++) {
         GroundTile tile;
 
-        tile.minlon=x*cellWidth-180.0;
-        tile.maxlon=(x+1)*cellWidth-180.0;
-        tile.minlat=y*cellHeight-90.0;
-        tile.maxlat=(y+1)*cellHeight-90.0;
+        tile.minlon=x*levels[level].cellWidth-180.0;
+        tile.maxlon=(x+1)*levels[level].cellWidth-180.0;
+        tile.minlat=y*levels[level].cellHeight-90.0;
+        tile.maxlat=(y+1)*levels[level].cellHeight-90.0;
 
-        if (x<cellXStart || x>cellXEnd || y<cellYStart || y>cellYEnd) {
+        if (x<levels[level].cellXStart ||
+            x>levels[level].cellXEnd ||
+            y<levels[level].cellYStart ||
+            y>levels[level].cellYEnd) {
           tile.type=GroundTile::unknown;
         }
         else {
-          tile.type=GetType(x-cellXStart,y-cellYStart);
+          uint32_t cellId=(y-levels[level].cellYStart)*levels[level].cellXCount+x-levels[level].cellXStart;
+          uint32_t index=cellId/4;
+          uint32_t offset=2*(cellId%4);
+          uint8_t  cell;
+
+          scanner.SetPos(levels[level].offset+index);
+
+          if (!scanner.Read(cell)) {
+            std::cerr << "Error while reading from file '" << datafilename << "'" << std::endl;
+            return false;
+          }
+
+          tile.type=(GroundTile::Type)((cell >> offset) & 3);
         }
 
         tiles.push_back(tile);
@@ -128,7 +153,10 @@ namespace osmscout {
 
   void WaterIndex::DumpStatistics()
   {
-    std::cout << "WaterIndex size " << area.size() << ", memory " << area.size() << std::endl;
+    size_t entries=0;
+    size_t memeory=0;
+
+    std::cout << "WaterIndex size " << entries << ", memory " << memeory << std::endl;
   }
 }
 

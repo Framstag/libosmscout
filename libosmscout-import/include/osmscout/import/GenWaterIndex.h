@@ -38,16 +38,36 @@ namespace osmscout {
       coast   = 3  //! The coast itself => a coast tile
     };
 
-    struct Area
+    struct Level
     {
-      size_t                     cellXCount;
-      size_t                     cellYCount;
+      FileOffset                 indexEntryOffset;
+
+      double                     minLat;
+      double                     maxLat;
+      double                     minLon;
+      double                     maxLon;
+
+      double                     cellWidth;
+      double                     cellHeight;
+
+      uint32_t                   cellXStart;
+      uint32_t                   cellXEnd;
+      uint32_t                   cellYStart;
+      uint32_t                   cellYEnd;
+
+      uint32_t                   cellXCount;
+      uint32_t                   cellYCount;
       std::vector<unsigned char> area;
 
-      void SetSize(uint32_t cellXCount, uint32_t cellYCount);
+      void SetBox(double minLat, double maxLat,
+                  double minLon, double maxLon,
+                  double cellWidth, double cellHeight);
 
+      bool IsIn(uint32_t x, uint32_t y) const;
       State GetState(uint32_t x, uint32_t y) const;
+
       void SetState(uint32_t x, uint32_t y, State state);
+      void SetStateAbsolute(uint32_t x, uint32_t y, State state);
     };
 
     struct Coast
@@ -99,32 +119,19 @@ namespace osmscout {
     };
 
   private:
-    double           cellWidth;
-    double           cellHeight;
-    uint32_t         cellXStart;
-    uint32_t         cellXEnd;
-    uint32_t         cellYStart;
-    uint32_t         cellYEnd;
-    uint32_t         cellXCount;
-    uint32_t         cellYCount;
-
-    double           minLon;
-    double           minLat;
-    double           maxLon;
-    double           maxLat;
-
-    std::list<Coast> coastlines;
-    Area             area;
+    std::list<Coast>   coastlines;
+    std::vector<Level> levels;
 
   private:
-    void SetCoastlineCells();
-    void ScanCellsHorizontally();
-    void ScanCellsVertically();
+    void SetCoastlineCells(Level& level);
+    void ScanCellsHorizontally(Level& level);
+    void ScanCellsVertically(Level& level);
     bool AssumeLand(const ImportParameter& parameter,
                     Progress& progress,
-                    const TypeConfig& typeConfig);
-    void FillLand();
-    void FillWater();
+                    const TypeConfig& typeConfig,
+                    Level& level);
+    void FillLand(Level& level);
+    void FillWater(Level& level, size_t tileCount);
 
   public:
     std::string GetDescription() const;

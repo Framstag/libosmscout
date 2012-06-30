@@ -25,8 +25,9 @@
 #include <vector>
 
 #include <osmscout/GroundTile.h>
+#include <osmscout/Types.h>
 
-#include <osmscout/system/Types.h>
+#include <osmscout/util/FileScanner.h>
 
 namespace osmscout {
 
@@ -35,21 +36,29 @@ namespace osmscout {
   class WaterIndex
   {
   private:
-    std::string                filepart;
+    struct Level
+    {
+      FileOffset                 offset;
 
-    double                     cellWidth;
-    double                     cellHeight;
-    uint32_t                   cellXStart;
-    uint32_t                   cellXEnd;
-    uint32_t                   cellYStart;
-    uint32_t                   cellYEnd;
-    uint32_t                   cellXCount;
-    uint32_t                   cellYCount;
+      double                     cellWidth;
+      double                     cellHeight;
 
-    std::vector<unsigned char> area;
+      uint32_t                   cellXStart;
+      uint32_t                   cellXEnd;
+      uint32_t                   cellYStart;
+      uint32_t                   cellYEnd;
+      uint32_t                   cellXCount;
+      uint32_t                   cellYCount;
+    };
 
   private:
-    GroundTile::Type GetType(uint32_t x, uint32_t y) const;
+    std::string                filepart;       //! name of the data file
+    std::string                datafilename;   //! Fullpath and name of the data file
+    mutable FileScanner        scanner;        //! Scanner instance for reading this file
+
+    std::vector<Level>         levels;
+
+  private:
 
   public:
     WaterIndex();
@@ -60,6 +69,7 @@ namespace osmscout {
                     double minlat,
                     double maxlon,
                     double maxlat,
+                    double magnification,
                     std::list<GroundTile>& tiles) const;
 
     void DumpStatistics();
