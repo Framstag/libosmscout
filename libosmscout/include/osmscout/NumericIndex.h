@@ -246,7 +246,7 @@ namespace osmscout {
       scanner.ReadNumber(pageCounts[pageCounts.size()-1-i]);
     }
 
-    delete buffer;
+    delete [] buffer;
     buffer=new char[pageSize];
 
     //std::cout << entries << " entries to index, " << levels << " levels, pageSize " << pageSize << ", cache size " << cacheSize << std::endl;
