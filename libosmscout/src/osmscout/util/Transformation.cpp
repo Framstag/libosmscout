@@ -52,7 +52,7 @@ namespace osmscout {
       return !(xdelta==0 && ydelta==0);
     }
 
-    double CalculateDistance(const TransPoint& p)
+    double CalculateDistanceSquared(const TransPoint& p)
     {
       double cx=p.x-ref.x;
       double cy=p.y-ref.y;
@@ -66,7 +66,7 @@ namespace osmscout {
       return dx*dx+dy*dy;
     }
 
-    double CalculateDistanceSquared(const TransPoint& p)
+    double CalculateDistance(const TransPoint& p)
     {
       return sqrt(CalculateDistance(p));
     }
