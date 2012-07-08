@@ -70,6 +70,21 @@ namespace osmscout {
     {
       return lon;
     }
+
+    inline bool IsIdentical(const Point& other) const
+    {
+      return id==other.id;
+    }
+
+    inline bool IsSame(const Point& other) const
+    {
+      return lat==other.lat && lon==other.lon;
+    }
+
+    inline bool IsEqual(const Point& other) const
+    {
+      return id==other.id || (lat==other.lat && lon==other.lon);
+    }
   };
 }
 
