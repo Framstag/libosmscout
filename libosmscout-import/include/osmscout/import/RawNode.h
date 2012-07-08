@@ -72,6 +72,21 @@ namespace osmscout {
       return tags;
     }
 
+    inline bool IsIdentical(const RawNode& other) const
+    {
+      return id==other.id;
+    }
+
+    inline bool IsSame(const RawNode& other) const
+    {
+      return lat==other.lat && lon==other.lon;
+    }
+
+    inline bool IsEqual(const RawNode& other) const
+    {
+      return id==other.id || (lat==other.lat && lon==other.lon);
+    }
+
     void SetId(Id id);
     void SetType(TypeId type);
     void SetCoordinates(double lon, double lat);
