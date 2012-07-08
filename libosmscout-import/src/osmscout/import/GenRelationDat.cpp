@@ -424,7 +424,6 @@ namespace osmscout {
 
   static bool ResolveMultipolygonMembers(Progress& progress,
                                          const TypeConfig& typeConfig,
-                                         std::set<Id>& wayAreaIndexBlacklist,
                                          DataFile<RawNode>& nodeDataFile,
                                          DataFile<RawWay>& wayDataFile,
                                          DataFile<RawRelation>& relDataFile,
@@ -514,7 +513,6 @@ namespace osmscout {
 
           if (!ResolveMultipolygonMembers(progress,
                                           typeConfig,
-                                          wayAreaIndexBlacklist,
                                           nodeDataFile,
                                           wayDataFile,
                                           relDataFile,
@@ -570,7 +568,6 @@ namespace osmscout {
 
     if (!ResolveMultipolygonMembers(progress,
                                     typeConfig,
-                                    wayAreaIndexBlacklist,
                                     nodeDataFile,
                                     wayDataFile,
                                     relDataFile,
@@ -608,12 +605,12 @@ namespace osmscout {
                                            true,
                                            tags,
                                            reverseNodes)) {
-                return false;
+          return false;
         }
       }
     }
 
-    // If a ring and the direct child ring have the same time, this is old school style for
+    // If a ring and the direct child ring have the same type, this is old school style for
     // the child ring being a clip region. We set the type of the child to typeIgnore then...
 
     for (std::list<MultipolygonPart>::iterator ring=parts.begin();
@@ -629,7 +626,6 @@ namespace osmscout {
           if (childRing->IsArea() &&
               ring->role.GetType()==childRing->role.GetType()) {
             childRing->role.attributes.type=typeIgnore;
-            wayAreaIndexBlacklist.insert(childRing->ways.front()->GetId());
           }
           childRing++;
         }
@@ -653,7 +649,6 @@ namespace osmscout {
 
             relation.SetType(ring->ways.front()->GetType());
             ring->role.attributes.type=typeIgnore;
-            wayAreaIndexBlacklist.insert(ring->ways.front()->GetId());
           }
           else if (ring->ways.front()->GetType()!=typeIgnore) {
             progress.Warning("Multipolygon relation "+NumberToString(relation.GetId())+" has conflicting types for outer boundary ("+
@@ -687,8 +682,12 @@ namespace osmscout {
       for (std::list<MultipolygonPart>::const_iterator ring=parts.begin();
           ring!=parts.end();
           ring++) {
-        if (ring->ways.front()->GetType()!=typeIgnore &&
-            ring->IsArea()) {
+        if (ring->IsArea()) {
+          // TODO: We currently blacklist all areas, we we only should blacklist all
+          // areas that have a type. Because areas without a type are implicitely blacklisted anyway later on.
+          // However because we change the type of area rings to typeIgnore above we need some bookkeeping for this
+          // to work here.
+          // On the other hand do not fill the blacklist until you are sure that the relation will not be rejected.
           wayAreaIndexBlacklist.insert(ring->ways.front()->GetId());
         }
       }
