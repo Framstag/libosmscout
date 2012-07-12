@@ -31,6 +31,7 @@
 #include <osmscout/Point.h>
 #include <iostream>
 namespace osmscout {
+
   /**
    * Returns true, if the lines defined by the given coordinates intersect.
    */
@@ -40,16 +41,31 @@ namespace osmscout {
                       const N& b1,
                       const N& b2)
   {
+    if (a1.IsEqual(b1) ||
+        a1.IsEqual(b2) ||
+        a2.IsEqual(b1) ||
+        a2.IsEqual(b2)) {
+      return true;
+    }
+
     double denr=(b2.GetLat()-b1.GetLat())*(a2.GetLon()-a1.GetLon())-
                 (b2.GetLon()-b1.GetLon())*(a2.GetLat()-a1.GetLat());
-    if(denr==0.0) {
-      return false;
-    }
 
     double ua_numr=(b2.GetLon()-b1.GetLon())*(a1.GetLat()-b1.GetLat())-
                    (b2.GetLat()-b1.GetLat())*(a1.GetLon()-b1.GetLon());
     double ub_numr=(a2.GetLon()-a1.GetLon())*(a1.GetLat()-b1.GetLat())-
                    (a2.GetLat()-a1.GetLat())*(a1.GetLon()-b1.GetLon());
+
+    if (denr==0.0) {
+      if (ua_numr==0.0 && ub_numr==0.0) {
+        // This gives currently false hits because of number resolution problems, if two lines are very
+        // close together and for example are part of a very details node curve intersections are detected.
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
 
     double ua=ua_numr/denr;
     double ub=ub_numr/denr;
@@ -60,6 +76,13 @@ namespace osmscout {
            ub<=1.0;
   }
 
+  template<typename N>
+  double DistanceSquare(const N& a,
+                        const N& b)
+  {
+    return (a.GetLon()-b.GetLon())*(a.GetLon()-b.GetLon())+
+           (a.GetLat()-b.GetLat())*(a.GetLat()-b.GetLat());
+  }
 
   /**
     Returns true, if point in area.

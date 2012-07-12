@@ -287,6 +287,10 @@ namespace osmscout {
 
     TypeInfo ignore;
     TypeInfo route;
+    TypeInfo tileLand;
+    TypeInfo tileSea;
+    TypeInfo tileCoast;
+    TypeInfo tileUnknown;
 
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for typeIgnore
@@ -294,10 +298,25 @@ namespace osmscout {
 
     AddTypeInfo(ignore);
 
+    // Internal type for showing routes
     route.SetType("_route")
          .CanBeWay(true);
 
+    // Internal types for the land/sea/coast tiles building the base layer for map drawing
+    tileLand.SetType("_tile_land")
+            .CanBeArea(true);
+    tileSea.SetType("_tile_sea")
+           .CanBeArea(true);
+    tileCoast.SetType("_tile_coast")
+             .CanBeArea(true);
+    tileUnknown.SetType("_tile_unknown")
+               .CanBeArea(true);
+
     AddTypeInfo(route);
+    AddTypeInfo(tileLand);
+    AddTypeInfo(tileSea);
+    AddTypeInfo(tileCoast);
+    AddTypeInfo(tileUnknown);
 
     tagAdminLevel=GetTagId("admin_level");
     tagBoundary=GetTagId("boundary");

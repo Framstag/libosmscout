@@ -229,11 +229,12 @@ namespace osmscout {
       Copies object and creates new dynamic instance as copy.
       Expects type T to have a copy constructor!
     */
+    /*
     inline Ref(const T& value)
     {
       ptr=new T(value);
       ptr->AddReference();
-    }
+    }*/
 
     /**
       Copy constructor

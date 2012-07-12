@@ -684,7 +684,7 @@ void DBThread::AddRoute(const osmscout::Way& way)
 {
   QMutexLocker locker(&mutex);
 
-  data.poiWays.push_back(way);
+  data.poiWays.push_back(new osmscout::Way(way));
 
   FreeMaps();
 

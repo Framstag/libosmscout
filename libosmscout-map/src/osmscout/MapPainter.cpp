@@ -24,13 +24,24 @@
 
 #include <osmscout/util/HashSet.h>
 #include <osmscout/util/StopClock.h>
+#include <osmscout/util/String.h>
 
 #include <osmscout/private/Math.h>
 
 namespace osmscout {
 
-  static inline bool AreaSortByLon(const MapPainter::AreaData& a, const MapPainter::AreaData& b)
+  /**
+   * Return if a > b, a should be drawn before b
+   */
+  static inline bool AreaSorter(const MapPainter::AreaData& a, const MapPainter::AreaData& b)
   {
+    if (a.fillStyle->GetFillColor().IsSolid() && !b.fillStyle->GetFillColor().IsSolid()) {
+      return true;
+    }
+    else if (!a.fillStyle->GetFillColor().IsSolid() && b.fillStyle->GetFillColor().IsSolid()) {
+      return false;
+    }
+
     if (a.minLon==b.minLon) {
       if (a.maxLon==b.maxLon) {
         if (a.minLat==b.minLat) {
@@ -350,21 +361,14 @@ namespace osmscout {
                                    const MapParameter& parameter,
                                    const MapData& data)
   {
-    FillStyle landFill;
-    FillStyle seaFill;
-    FillStyle coastFill;
-    FillStyle unknownFill;
-    LabelStyle labelStyle;
+    size_t    level=MagToLevel(projection.GetMagnification());
+    FillStyle *landFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_land"),level);
 
-    landFill.SetFillColor(Color(241.0/255,238.0/255,233.0/255,1.0));
-    seaFill.SetFillColor(Color(181.0/255,208.0/255,208.0/255,1.0));
-    coastFill.SetFillColor(Color(181.0/255,208.0/255,208.0/255,1.0));
-    //coastFill.SetFillColor(Color(255.0/255,192.0/255,203.0/255,1.0));
-    unknownFill.SetFillColor(Color(255.0/255,255.0/255,173.0/255,1.0));
+    if (landFill==NULL) {
+      std::cout << " No fill style for background tile!" << std::endl;
+    }
 
-    labelStyle.SetStyle(LabelStyle::normal);
-
-    DrawArea(landFill,
+    DrawArea(*landFill,
              parameter,
              0,0,projection.GetWidth(),projection.GetHeight());
 
@@ -372,54 +376,91 @@ namespace osmscout {
       return;
     }
 
-    //return;
-/*
-    double cellWidth=360.0;
-    double cellHeight=180.0;
+    FillStyle *seaFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_sea"),level);
+    FillStyle *coastFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_coast"),level);
+    FillStyle *unknownFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_unknown"),level);
 
-    for (size_t i=2; i<=14; i++) {
-      cellWidth=cellWidth/2;
-      cellHeight=cellHeight/2;
-    }*/
+/*
+    LabelStyle labelStyle;
+
+    labelStyle.SetStyle(LabelStyle::normal);
+    labelStyle.SetPriority(100);
+    labelStyle.SetTextColor(Color(0,0,0));
+    labelStyle.SetSize(0.8);*/
 
     for (std::list<GroundTile>::const_iterator tile=data.groundTiles.begin();
         tile!=data.groundTiles.end();
         ++tile) {
-      double x1,x2,y1,y2;
-
-      projection.GeoToPixel(tile->minlon,tile->minlat,x1,y1);
-      projection.GeoToPixel(tile->maxlon,tile->maxlat,x2,y2);
+      AreaData areaData;
 
       switch (tile->type) {
       case GroundTile::land:
-        DrawArea(landFill,
-                 parameter,
-                 x1,y1,x2-x1,y2-y1);
+        areaData.fillStyle=landFill;
         break;
       case GroundTile::water:
-        DrawArea(seaFill,
-                 parameter,
-                 x1,y1,x2-x1,y2-y1);
+        areaData.fillStyle=seaFill;
         break;
       case GroundTile::coast:
-        DrawArea(coastFill,
-                 parameter,
-                 x1,y1,x2-x1,y2-y1);
+        areaData.fillStyle=coastFill;
         break;
       case GroundTile::unknown:
-        DrawArea(unknownFill,
-                 parameter,
-                 x1,y1,x2-x1,y2-y1);
+        areaData.fillStyle=unknownFill;
         break;
       }
-/*
+
+      if (tile->points.front().GetId()==0 || tile->type==GroundTile::land) {
+        size_t start,end;
+
+        transBuffer.TransformArea(projection,
+                                  parameter.GetOptimizeAreaNodes(),
+                                  tile->points,
+                                  start,end,
+                                  parameter.GetOptimizeErrorToleranceDots());
+
+        areaData.ref=ObjectRef();
+        areaData.attributes=NULL;
+        areaData.transStart=start;
+        areaData.transEnd=end;
+
+        areaData.minLat=tile->points[0].GetLat();
+        areaData.maxLat=tile->points[0].GetLat();
+        areaData.minLon=tile->points[0].GetLon();
+        areaData.maxLon=tile->points[0].GetLon();
+
+        for (size_t i=1; i<tile->points.size(); i++) {
+          areaData.minLat=std::min(areaData.minLat,tile->points[i].GetLat());
+          areaData.maxLat=std::max(areaData.maxLat,tile->points[i].GetLat());
+          areaData.minLon=std::min(areaData.minLon,tile->points[i].GetLon());
+          areaData.maxLon=std::max(areaData.maxLon,tile->points[i].GetLon());
+        }
+
+        if (areaData.fillStyle==NULL) {
+          std::cout << " No fill style for background tile!" << std::endl;
+        }
+
+        DrawArea(projection,parameter,areaData);
+      }
+
+      /*
+      double cellWidth=360.0;
+      double cellHeight=180.0;
+
+      for (size_t i=1; i<=MagToLevel(projection.GetLonMin()); i++) {
+        cellWidth=cellWidth/2;
+        cellHeight=cellHeight/2;
+      }
+
       std::string label;
 
       label=NumberToString((long)((tile->minlon+180)/cellWidth));
       label+=",";
       label+=NumberToString((long)((tile->minlat+90)/cellHeight));
 
-      DrawLabel(projection,parameter,labelStyle,label,x1+(x2-x1)/2,y1+(y2-y1)/2);*/
+      RegisterPointLabel(projection,
+                         parameter,
+                         labelStyle,
+                         label,
+                         x1+(x2-x1)/2,y1+(y2-y1)/2);*/
     }
   }
 
@@ -1482,7 +1523,7 @@ namespace osmscout {
       }
     }
 
-    areaData.sort(AreaSortByLon);
+    areaData.sort(AreaSorter);
   }
 
   void MapPainter::PrepareWaySegment(const StyleConfig& styleConfig,
@@ -1896,6 +1937,32 @@ namespace osmscout {
                parameter);
 
     labelsTimer.Stop();
+
+    SymbolStyle markerSymbol;
+
+    markerSymbol.SetFillColor(Color(1,0,0));
+    markerSymbol.SetStyle(SymbolStyle::circle);
+    markerSymbol.SetSize(1);
+
+    for (std::list<GroundTile>::const_iterator tile=data.groundTiles.begin();
+        tile!=data.groundTiles.end();
+        ++tile) {
+
+      if (!(tile->points.front().GetId()==0 ||
+            tile->type==GroundTile::land)) {
+        for (size_t p=0; p<tile->points.size(); p++) {
+          double x,y;
+
+          Transform(projection,
+                    parameter,
+                    tile->points[p].GetLon(),
+                    tile->points[p].GetLat(),
+                    x,y);
+
+          DrawSymbol(&markerSymbol,x,y);
+        }
+      }
+    }
 
     if (parameter.IsDebugPerformance()) {
 

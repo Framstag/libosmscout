@@ -22,9 +22,14 @@
 
 #include <vector>
 
+#include <osmscout/GroundTile.h>
 #include <osmscout/Point.h>
 
 #include <osmscout/import/Import.h>
+
+#include <osmscout/util/FileWriter.h>
+#include <osmscout/util/Geometry.h>
+#include <osmscout/util/Reference.h>
 
 namespace osmscout {
 
@@ -59,8 +64,8 @@ namespace osmscout {
       uint32_t                   cellYCount;
       std::vector<unsigned char> area;
 
-      void SetBox(double minLat, double maxLat,
-                  double minLon, double maxLon,
+      void SetBox(uint32_t minLat, uint32_t maxLat,
+                  uint32_t minLon, uint32_t maxLon,
                   double cellWidth, double cellHeight);
 
       bool IsIn(uint32_t x, uint32_t y) const;
@@ -70,11 +75,14 @@ namespace osmscout {
       void SetStateAbsolute(uint32_t x, uint32_t y, State state);
     };
 
-    struct Coast
+    struct Coast : public Referencable
     {
+      Id                 id;
       double             sortCriteria;
       std::vector<Point> coast;
     };
+
+    typedef Ref<Coast> CoastRef;
 
     struct Line
     {
@@ -119,19 +127,43 @@ namespace osmscout {
     };
 
   private:
-    std::list<Coast>   coastlines;
-    std::vector<Level> levels;
+    std::list<CoastRef> coastlines;
 
   private:
-    void SetCoastlineCells(Level& level);
-    void ScanCellsHorizontally(Level& level);
-    void ScanCellsVertically(Level& level);
+    bool LoadCoastlines(const ImportParameter& parameter,
+                        Progress& progress,
+                        const TypeConfig& typeConfig);
+    void MergeCoastlines(Progress& progress);
+    void MarkCoastlineCells(Progress& progress,
+                            Level& level);
+    void ScanCellsHorizontally(Progress& progress,
+                               Level& level);
+    void ScanCellsVertically(Progress& progress,
+                             Level& level);
     bool AssumeLand(const ImportParameter& parameter,
                     Progress& progress,
                     const TypeConfig& typeConfig,
                     Level& level);
-    void FillLand(Level& level);
-    void FillWater(Level& level, size_t tileCount);
+    void FillLand(Progress& progress,
+                  Level& level);
+    void FillWater(Progress& progress,
+                   Level& level,
+                   size_t tileCount);
+    void DumpIndexHeader(const ImportParameter& parameter,
+                         FileWriter& writer,
+                         std::vector<Level>&  levels);
+    void HandleAreaCoastlinesCompletelyInACell(const ImportParameter& parameter,
+                                               Progress& progress,
+                                               Projection& projection,
+                                               const Level& level,
+                                               const std::list<CoastRef>& coastlines,
+                                               std::map<Coord,std::list<GroundTile> >& cellGroundTileMap);
+    void HandleCoastlinesPartiallyInACell(const ImportParameter& parameter,
+                                          Progress& progress,
+                                          Projection& projection,
+                                          const Level& level,
+                                          const std::list<CoastRef>& coastlines,
+                                          std::map<Coord,std::list<GroundTile> >& cellGroundTileMap);
 
   public:
     std::string GetDescription() const;

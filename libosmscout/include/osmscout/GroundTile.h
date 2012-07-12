@@ -20,6 +20,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <vector>
+
+#include <osmscout/Point.h>
+
 namespace osmscout {
 
   struct GroundTile
@@ -31,11 +35,8 @@ namespace osmscout {
       coast   = 3
     };
 
-    Type   type;
-    double minlon;
-    double minlat;
-    double maxlon;
-    double maxlat;
+    Type               type;
+    std::vector<Point> points;
   };
 }
 

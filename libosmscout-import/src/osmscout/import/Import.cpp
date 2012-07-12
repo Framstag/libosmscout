@@ -94,7 +94,7 @@ namespace osmscout {
      areaNodeMinMag(8),
      areaNodeIndexCellSizeAverage(16),
      areaNodeIndexCellSizeMax(256),
-     waterIndexMaxMag(15),
+     waterIndexMaxMag(14),
      optimizationMaxMag(10),
      optimizationMinMag(6),
      optimizationCellSizeAverage(16),

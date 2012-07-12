@@ -31,6 +31,12 @@ OSS
 
  [MAG world-] {
    [TYPE "_route"] WAY {color: #ff000088; displayWidth: 1.5mm; }
+   
+   [TYPE "_tile_land"] AREA {color: #f1eee9;}
+   [TYPE "_tile_sea"] AREA {color: #b5d0d0;}
+   [TYPE "_tile_coast"] AREA {color: #b5d0d0;  borderColor: #000000; borderWidth: 0.1mm;}
+   //[TYPE "_tile_coast"] AREA {color: #aaaaaa;  borderColor: #000000; borderWidth: 0.1mm;}
+   [TYPE "_tile_unknown"] AREA {color: #ffffad;}
  }
 
  // -------------------------------------------------------
@@ -39,7 +45,7 @@ OSS
  //
 
  [MAG world-] {
-   [TYPE "natural_coastline"] WAY {color: #000000; displayWidth: 0.25mm;}
+   [TYPE "natural_coastline"] WAY {color: #ff0000; displayWidth: 0.1mm;}
  }
 
  [MAG county-] {
@@ -47,7 +53,8 @@ OSS
    [TYPE "natural_fell"] AREA { color: #f9f9f9; }
    [TYPE "natural_heath"] AREA { color: #ffffc0; }
    [TYPE "natural_wood"] AREA { color: #aed1a0; }
-   [TYPE "natural_marsh", "natural_wetland"] AREA { color: #bdd9d9; }
+   [TYPE "natural_marsh", "natural_wetland_marsh"] AREA { color: #efe8ff; }
+   [TYPE "natural_wetland", "natural_wetland_tidalflat"] AREA { color: #bdd8d8; }
    [TYPE "natural_water"] AREA { color: #b5d0d0; }
    [TYPE "natural_beach"] AREA { color: #eecc55; }
    [TYPE "natural_land"] AREA { color: #ffffff; }
@@ -385,7 +392,6 @@ OSS
    [TYPE "leisure_track"] AREA { color: #7fdac2; }
    [TYPE "leisure_pitch"]AREA { color: #90d3b9; borderColor: #b0b0b0; borderWidth: 0.1mm; }
    [TYPE "leisure_water_park"] AREA { color: #f1eee8; borderColor: #887b7b; borderWidth: 0.1mm; }
-   [TYPE "leisure_nature_reserve"] AREA { color: #abde96; }
    [TYPE "leisure_park"] AREA { color: #c6f0cf; }
    [TYPE "leisure_common"] AREA { color: #bde3cb; }
    
@@ -395,6 +401,9 @@ OSS
  }
 
  [MAG proximity-] {
+   // Semiransparent overlay
+   [TYPE "leisure_nature_reserve"] AREA { color: #abde9622; borderColor: #abde96; borderWidth: 0.2mm;}
+ 
    [TYPE "military_airfield",
          "military_bunker",
          "military_barracks",
@@ -498,7 +507,7 @@ OSS
 
   // Labels
 
- [MAG region-] {
+ [MAG proximity-] {
    [TYPE "leisure_nature_reserve"] AREA.LABEL { style: normal;}
  }
   

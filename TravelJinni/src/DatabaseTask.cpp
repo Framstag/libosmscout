@@ -138,7 +138,7 @@ void DatabaseTask::Run()
 
         drawParameter.SetDrawWaysWithFixedWidth(false);
 
-        drawParameter.SetRenderSeaLand(false);
+        drawParameter.SetRenderSeaLand(true);
 
         drawParameter.SetDebugPerformance(true);
 
@@ -575,7 +575,7 @@ void DatabaseTask::AddRoute(const osmscout::Way& way)
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
-  data.poiWays.push_back(osmscout::WayRef(way));
+  data.poiWays.push_back(new osmscout::Way(way));
 
   SignalRedraw();
 }

@@ -93,7 +93,7 @@ namespace osmscout {
       return true;
     }
 
-    level+=5;
+    level+=4;
 
     if (level>=levels.size()) {
       level=levels.size()-1;
@@ -113,26 +113,45 @@ namespace osmscout {
     cy1=(uint32_t)floor((minlat+90.0)/levels[level].cellHeight);
     cy2=(uint32_t)floor((maxlat+90.0)/levels[level].cellHeight);
 
+    GroundTile tile;
+
+    tile.points.reserve(5);
+
     for (size_t y=cy1; y<=cy2; y++) {
       for (size_t x=cx1; x<=cx2; x++) {
-        GroundTile tile;
+        tile.points.clear();
 
-        tile.minlon=x*levels[level].cellWidth-180.0;
-        tile.maxlon=(x+1)*levels[level].cellWidth-180.0;
-        tile.minlat=y*levels[level].cellHeight-90.0;
-        tile.maxlat=(y+1)*levels[level].cellHeight-90.0;
+        tile.points.push_back(Point(0,
+                                    y*levels[level].cellHeight-90.0,
+                                    x*levels[level].cellWidth-180.0));
+
+        tile.points.push_back(Point(1,
+                                    y*levels[level].cellHeight-90.0,
+                                    (x+1)*levels[level].cellWidth-180.0));
+
+        tile.points.push_back(Point(2,
+                                    (y+1)*levels[level].cellHeight-90.0,
+                                    (x+1)*levels[level].cellWidth-180.0));
+
+        tile.points.push_back(Point(3,
+                                    (y+1)*levels[level].cellHeight-90.0,
+                                    x*levels[level].cellWidth-180.0));
+
+        tile.points.push_back(tile.points.front());
 
         if (x<levels[level].cellXStart ||
             x>levels[level].cellXEnd ||
             y<levels[level].cellYStart ||
             y>levels[level].cellYEnd) {
           tile.type=GroundTile::unknown;
+
+          tiles.push_back(tile);
         }
         else {
-          uint32_t cellId=(y-levels[level].cellYStart)*levels[level].cellXCount+x-levels[level].cellXStart;
-          uint32_t index=cellId/4;
-          uint32_t offset=2*(cellId%4);
-          uint8_t  cell;
+          uint32_t   cellId=(y-levels[level].cellYStart)*levels[level].cellXCount+x-levels[level].cellXStart;
+
+          uint32_t   index=cellId*8;
+          FileOffset cell;
 
           scanner.SetPos(levels[level].offset+index);
 
@@ -141,10 +160,53 @@ namespace osmscout {
             return false;
           }
 
-          tile.type=(GroundTile::Type)((cell >> offset) & 3);
-        }
+          if (cell==(FileOffset)GroundTile::land ||
+              cell==(FileOffset)GroundTile::water ||
+              cell==(FileOffset)GroundTile::coast ||
+              cell==(FileOffset)GroundTile::unknown) {
+            tile.type=(GroundTile::Type)cell;
 
-        tiles.push_back(tile);
+            tiles.push_back(tile);
+          }
+          else {
+            size_t tileCount;
+
+            tile.type=GroundTile::coast;
+            tiles.push_back(tile);
+
+            scanner.SetPos(cell);
+            scanner.ReadNumber(tileCount);
+
+            for (size_t t=1; t<=tileCount; t++) {
+              uint8_t    tileType;
+              size_t     nodeCount;
+
+              scanner.Read(tileType);
+
+              tile.type=(GroundTile::Type)tileType;
+
+              scanner.ReadNumber(nodeCount);
+
+              tile.points.resize(nodeCount);
+
+              for (size_t n=0;n<nodeCount; n++) {
+                Id       id;
+                uint32_t latDat;
+                uint32_t lonDat;
+
+                scanner.ReadNumber(id);
+                scanner.ReadNumber(latDat);
+                scanner.ReadNumber(lonDat);
+
+                tile.points[n].Set(id,
+                                   latDat/conversionFactor-90.0,
+                                   lonDat/conversionFactor-180.0);
+              }
+
+              tiles.push_back(tile);
+            }
+          }
+        }
       }
     }
 

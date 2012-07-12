@@ -288,7 +288,7 @@ namespace osmscout
           break;
         }
 
-        newWays.push_back(*way);
+        newWays.push_back(new Way(*way));
       }
     }
   }
