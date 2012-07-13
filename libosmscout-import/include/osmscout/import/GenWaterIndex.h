@@ -43,6 +43,62 @@ namespace osmscout {
       coast   = 3  //! The coast itself => a coast tile
     };
 
+    struct Intersection
+    {
+      Point  point;              //! The intersection point
+      size_t prevWayPointIndex;  //! The index of the path point before the intersection
+      int    direction;          //! 1 in, 0 touch, -1 out
+      size_t borderIndex;        //! The index of the border that gets intersected
+      double distanceSquare;     //! The distance^2 between the path point and the intersectionPoint
+    };
+
+    typedef std::list<Intersection>::iterator IntersectionPtr;
+
+    struct IntersectionByPathComparator
+    {
+      inline bool operator()(const IntersectionPtr& a, const IntersectionPtr& b) const
+      {
+        if (a->prevWayPointIndex==b->prevWayPointIndex) {
+          return a->distanceSquare<b->distanceSquare;
+        }
+        else {
+          return a->prevWayPointIndex<b->prevWayPointIndex;
+        }
+      }
+
+      inline bool operator()(const Intersection& a, const Intersection& b) const
+      {
+        if (a.prevWayPointIndex==b.prevWayPointIndex) {
+          return a.distanceSquare<b.distanceSquare;
+        }
+        else {
+          return a.prevWayPointIndex<b.prevWayPointIndex;
+        }
+      }
+    };
+
+    struct IntersectionCCWComparator
+    {
+      inline bool operator()(const IntersectionPtr& a, const IntersectionPtr& b) const
+      {
+        if (a->borderIndex==b->borderIndex) {
+          switch (a->borderIndex) {
+          case 0:
+            return a->point.GetLon()>b->point.GetLon();
+          case 1:
+            return a->point.GetLat()<b->point.GetLat();
+          case 2:
+            return a->point.GetLon()<b->point.GetLon();
+          default: /* 3 */
+            return a->point.GetLat()>b->point.GetLat();
+          }
+        }
+        else {
+          return a->borderIndex<b->borderIndex;
+        }
+      }
+    };
+
     struct Level
     {
       FileOffset                 indexEntryOffset;
@@ -158,6 +214,13 @@ namespace osmscout {
                                                const Level& level,
                                                const std::list<CoastRef>& coastlines,
                                                std::map<Coord,std::list<GroundTile> >& cellGroundTileMap);
+    void GetCellIntersections(const Level& level,
+                              const std::vector<Point>& points,
+                              std::map<Coord,std::list<Intersection> >& cellIntersections);
+    void CloseSling(GroundTile& groundTile,
+                    const IntersectionPtr& incoming,
+                    const IntersectionPtr& outgoing,
+                    const Point borderPoints[]);
     void HandleCoastlinesPartiallyInACell(const ImportParameter& parameter,
                                           Progress& progress,
                                           Projection& projection,

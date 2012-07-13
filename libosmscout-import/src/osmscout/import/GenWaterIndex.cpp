@@ -36,11 +36,11 @@
 
 namespace osmscout {
 
-  bool GetLineIntersection(const Point& a1,
-                           const Point& a2,
-                           const Point& b1,
-                           const Point& b2,
-                           Point& intersection)
+  static bool GetLineIntersection(const Point& a1,
+                                  const Point& a2,
+                                  const Point& b1,
+                                  const Point& b2,
+                                  Point& intersection)
   {
     if (a1.IsEqual(b1) ||
         a1.IsEqual(b2) ||
@@ -871,14 +871,6 @@ namespace osmscout {
     }
   }
 
-  struct Intersection
-  {
-    Point  point;
-    size_t prevWayPointIndex;
-    int    direction; // 1 in, 0 touch, -1 out
-    size_t borderIndex;
-  };
-
   static bool IsLeftOnSameBorder(size_t border, const Point& a,const Point& b)
   {
     switch (border) {
@@ -897,6 +889,164 @@ namespace osmscout {
     return false;
   }
 
+  void WaterIndexGenerator::GetCellIntersections(const Level& level,
+                                                 const std::vector<Point>& points,
+                                                 std::map<Coord,std::list<Intersection> >& cellIntersections)
+  {
+    for (size_t p=0; p<points.size()-1; p++) {
+      uint32_t cx1=(uint32_t)floor((points[p].GetLon()+180.0)/level.cellWidth);
+      uint32_t cy1=(uint32_t)floor((points[p].GetLat()+90.0)/level.cellHeight);
+
+      uint32_t cx2=(uint32_t)floor((points[p+1].GetLon()+180.0)/level.cellWidth);
+      uint32_t cy2=(uint32_t)floor((points[p+1].GetLat()+90.0)/level.cellHeight);
+
+      if (cx1!=cx2 || cy1!=cy2) {
+        for (size_t x=std::min(cx1,cx2); x<=std::max(cx1,cx2); x++) {
+          for (size_t y=std::min(cy1,cy2); y<=std::max(cy1,cy2); y++) {
+            Coord              coord(x-level.cellXStart,y-level.cellYStart);
+            Point              borderPoints[5];
+            double             xmin,xmax,ymin,ymax;
+
+            xmin=x*level.cellWidth-180.0;
+            xmax=(x+1)*level.cellWidth-180.0;
+            ymin=y*level.cellHeight-90.0;
+            ymax=(y+1)*level.cellHeight-90.0;
+
+            borderPoints[0]=Point(1,ymax,xmin); // top left
+            borderPoints[1]=Point(2,ymax,xmax); // top right
+            borderPoints[2]=Point(3,ymin,xmax); // bottom right
+            borderPoints[3]=Point(4,ymin,xmin); // bottom left
+            borderPoints[4]=borderPoints[0];    // To avoid modula 4 on all indexes
+
+            size_t       intersectionCount=0;
+            Intersection firstIntersection;
+            Intersection secondIntersection;
+            size_t       border=0;
+
+            while (border<4) {
+              if (GetLineIntersection(points[p],
+                                      points[p+1],
+                                      borderPoints[border],
+                                      borderPoints[border+1],
+                                      firstIntersection.point)) {
+                intersectionCount++;
+
+                firstIntersection.prevWayPointIndex=p;
+                firstIntersection.borderIndex=border;
+                firstIntersection.distanceSquare=DistanceSquare(points[p],firstIntersection.point);
+
+                border++;
+                break;
+              }
+
+              border++;
+            }
+
+            while (border<4) {
+              if (GetLineIntersection(points[p],
+                                      points[p+1],
+                                      borderPoints[border],
+                                      borderPoints[border+1],
+                                      secondIntersection.point)) {
+                intersectionCount++;
+
+                secondIntersection.prevWayPointIndex=p;
+                secondIntersection.borderIndex=border;
+                secondIntersection.distanceSquare=DistanceSquare(points[p],secondIntersection.point);
+
+                border++;
+                break;
+              }
+
+              border++;
+            }
+
+            if (x==cx1 && y==cy1) {
+              // The segment always leaves the origin cell
+
+              assert(intersectionCount==1);
+
+              firstIntersection.direction=-1;
+              cellIntersections[coord].push_back(firstIntersection);
+            }
+            else if (x==cx2 && y==cy2) {
+              // The segment always enteres the detsination cell
+
+              assert(intersectionCount==1);
+
+              firstIntersection.direction=1;
+              cellIntersections[coord].push_back(firstIntersection);
+            }
+            else {
+              assert(intersectionCount==0 || intersectionCount==1 || intersectionCount==2);
+
+              if (intersectionCount==1) {
+                // If we only have one intersection with borders of cells between the starting borderPoints and the
+                // target borderPoints then this is a "touch"
+                firstIntersection.direction=0;
+                cellIntersections[coord].push_back(firstIntersection);
+              }
+              else if (intersectionCount==2) {
+                // If we have two intersections with borders of cells between the starting cell and the
+                // target cell then the one closer to the starting point is the incoming and the one farer
+                // away is the leaving one
+                double firstLength=DistanceSquare(firstIntersection.point,points[p]);
+                double secondLength=DistanceSquare(secondIntersection.point,points[p]);
+
+                if (firstLength<=secondLength) {
+                  firstIntersection.direction=1; // Enter
+                  cellIntersections[coord].push_back(firstIntersection);
+
+                  secondIntersection.direction=-1; // Leave
+                  cellIntersections[coord].push_back(secondIntersection);
+                }
+                else {
+                  secondIntersection.direction=1; // Enter
+                  cellIntersections[coord].push_back(secondIntersection);
+
+                  firstIntersection.direction=-1; // Leave
+                  cellIntersections[coord].push_back(firstIntersection);
+
+                }
+              }
+            }
+          }
+        }
+
+        //std::cout << "Cell " << x << "," << y << " intersects " << groundTile.points.size() << " times with coastline " << coast->id << std::endl;
+      }
+    }
+  }
+
+  void WaterIndexGenerator::CloseSling(GroundTile& groundTile,
+                                       const IntersectionPtr& incoming,
+                                       const IntersectionPtr& outgoing,
+                                       const Point borderPoints[])
+  {
+    size_t       startBorderPoint=outgoing->borderIndex;
+    size_t       endBorderPoint=(incoming->borderIndex+1)%4;
+
+    if (incoming->borderIndex!=outgoing->borderIndex ||
+        !IsLeftOnSameBorder(incoming->borderIndex,incoming->point,outgoing->point)) {
+      size_t borderPoint=startBorderPoint;
+
+      while (borderPoint!=endBorderPoint) {
+        groundTile.points.push_back(borderPoints[borderPoint]);
+
+        if (borderPoint==0) {
+          borderPoint=3;
+        }
+        else {
+          borderPoint--;
+        }
+      }
+      groundTile.points.push_back(borderPoints[borderPoint]);
+    }
+
+    groundTile.points.push_back(groundTile.points.front());
+  }
+
+
   /**
    * The algorithm is as following:
    *  1 If the list of intersections is empty, stop
@@ -904,7 +1054,7 @@ namespace osmscout {
    *  3 Follow the path to the next intersection point (must be outgoing)
    *  4 Search for the next intersection counter clock wise
    *  5 If it is the starting point of the polygon => close the polygon counter clock wise over the border
-   *    and remove all point spart of the current polygon
+   *    and remove all points part of the current polygon
    *    and goto 1
    *  6 Else search for the next intersection counter clock wise (must be incoming)
    *  7 Add path to the incoming intersection point following border counter clock wise
@@ -948,217 +1098,138 @@ namespace osmscout {
         }
       }
 
-      for (size_t p=0; p<points.size()-1; p++) {
-        uint32_t cx1=(uint32_t)floor((points[p].GetLon()+180.0)/level.cellWidth);
-        uint32_t cy1=(uint32_t)floor((points[p].GetLat()+90.0)/level.cellHeight);
-
-        uint32_t cx2=(uint32_t)floor((points[p+1].GetLon()+180.0)/level.cellWidth);
-        uint32_t cy2=(uint32_t)floor((points[p+1].GetLat()+90.0)/level.cellHeight);
-
-        if (cx1!=cx2 || cy1!=cy2) {
-          for (size_t x=std::min(cx1,cx2); x<=std::max(cx1,cx2); x++) {
-            for (size_t y=std::min(cy1,cy2); y<=std::max(cy1,cy2); y++) {
-              Coord              coord(x-level.cellXStart,y-level.cellYStart);
-              Point              borderPoints[5];
-              double             xmin,xmax,ymin,ymax;
-
-              xmin=x*level.cellWidth-180.0;
-              xmax=(x+1)*level.cellWidth-180.0;
-              ymin=y*level.cellHeight-90.0;
-              ymax=(y+1)*level.cellHeight-90.0;
-
-              borderPoints[0]=Point(1,ymax,xmin); // top left
-              borderPoints[1]=Point(2,ymax,xmax); // top right
-              borderPoints[2]=Point(3,ymin,xmax); // bottom right
-              borderPoints[3]=Point(4,ymin,xmin); // bottom left
-              borderPoints[4]=borderPoints[0];    // To avoid module 4 on all indexes
-
-              size_t       intersectionCount=0;
-              Intersection firstIntersection;
-              Intersection secondIntersection;
-              size_t       border=0;
-
-              while (border<4) {
-                if (GetLineIntersection(points[p],
-                                        points[p+1],
-                                        borderPoints[border],
-                                        borderPoints[border+1],
-                                        firstIntersection.point)) {
-                  intersectionCount++;
-
-                  firstIntersection.prevWayPointIndex=p;
-                  firstIntersection.borderIndex=border;
-
-                  border++;
-                  break;
-                }
-
-                border++;
-              }
-
-              while (border<4) {
-                if (GetLineIntersection(points[p],
-                                        points[p+1],
-                                        borderPoints[border],
-                                        borderPoints[border+1],
-                                        secondIntersection.point)) {
-                  intersectionCount++;
-
-                  secondIntersection.prevWayPointIndex=p;
-                  secondIntersection.borderIndex=border;
-
-                  border++;
-                  break;
-                }
-
-                border++;
-              }
-
-              if (x==cx1 && y==cy1) {
-                // The segment always leaves the origin borderPoints
-
-                assert(intersectionCount==1);
-
-                firstIntersection.direction=-1;
-                cellIntersections[coord].push_back(firstIntersection);
-              }
-              else if (x==cx2 && y==cy2) {
-                // The segment always enteres the origin borderPoints
-
-                assert(intersectionCount==1);
-
-                firstIntersection.direction=1;
-                cellIntersections[coord].push_back(firstIntersection);
-              }
-              else {
-                assert(intersectionCount==0 || intersectionCount==1 || intersectionCount==2);
-
-                if (intersectionCount==1) {
-                  // If we only have one intersection with borders of cells between the starting borderPoints and the
-                  // target borderPoints then this is a "touch"
-                  firstIntersection.direction=0;
-                  cellIntersections[coord].push_back(firstIntersection);
-                }
-                else if (intersectionCount==2) {
-                  // If we have two intersections with borders of cells between the starting cell and the
-                  // target cell then the one closer to the starting point is the incoming and the one farer
-                  // away is the leaving one
-                  double firstLength=DistanceSquare(firstIntersection.point,points[p]);
-                  double secondLength=DistanceSquare(secondIntersection.point,points[p]);
-
-                  if (firstLength<=secondLength) {
-                    firstIntersection.direction=1; // Enter
-                    cellIntersections[coord].push_back(firstIntersection);
-
-                    secondIntersection.direction=-1; // Leave
-                    cellIntersections[coord].push_back(secondIntersection);
-                  }
-                  else {
-                    secondIntersection.direction=1; // Enter
-                    cellIntersections[coord].push_back(secondIntersection);
-
-                    firstIntersection.direction=-1; // Leave
-                    cellIntersections[coord].push_back(firstIntersection);
-
-                  }
-                }
-              }
-            }
-          }
-
-          //std::cout << "Cell " << x << "," << y << " intersects " << groundTile.points.size() << " times with coastline " << coast->id << std::endl;
-        }
-      }
+      GetCellIntersections(level,
+                           points,
+                           cellIntersections);
 
       if (cellIntersections.size()==0) {
         continue;
       }
 
-      for (std::map<Coord,std::list<Intersection> >::const_iterator cell=cellIntersections.begin();
+      for (std::map<Coord,std::list<Intersection> >::iterator cell=cellIntersections.begin();
           cell!=cellIntersections.end();
           ++cell) {
         std::cout << "Cell " << cell->first.x << "," << cell->first.y << " has " << cell->second.size() << " intersection with coastline " << coast->id << std::endl;
 
-        for (std::list<Intersection>::const_iterator inter=cell->second.begin();
+        double xmin,xmax,ymin,ymax;
+        Point  borderPoints[4];
+
+        xmin=(level.cellXStart+cell->first.x)*level.cellWidth-180.0;
+        xmax=(level.cellXStart+cell->first.x+1)*level.cellWidth-180.0;
+        ymin=(level.cellYStart+cell->first.y)*level.cellHeight-90.0;
+        ymax=(level.cellYStart+cell->first.y+1)*level.cellHeight-90.0;
+
+        borderPoints[0]=Point(1,ymax,xmin); // top left
+        borderPoints[1]=Point(2,ymax,xmax); // top right
+        borderPoints[2]=Point(3,ymin,xmax); // bottom right
+        borderPoints[3]=Point(4,ymin,xmin); // bottom left
+
+        std::list<std::list<Intersection>::iterator> intersectionsPathOrder;
+        std::list<std::list<Intersection>::iterator> intersectionsCCW;
+
+        for (std::list<Intersection>::iterator inter=cell->second.begin();
             inter!=cell->second.end();
             ++inter) {
-          std::cout <<"- "  << inter->prevWayPointIndex << " " << inter->point.GetLat() << "," << inter->point.GetLon() << " " << inter->borderIndex << " " << inter->direction << std::endl;
+          intersectionsPathOrder.push_back(inter);
+          intersectionsCCW.push_back(inter);
         }
 
-        if (cell->second.size()==2) {
-          std::list<Intersection>::const_iterator first=cell->second.begin();
-          std::list<Intersection>::const_iterator second=first;
+        intersectionsPathOrder.sort(IntersectionByPathComparator());
+        intersectionsCCW.sort(IntersectionCCWComparator());
 
-          second++;
+        for (std::list<IntersectionPtr>::const_iterator iter=intersectionsPathOrder.begin();
+            iter!=intersectionsPathOrder.end();
+            ++iter) {
+          IntersectionPtr intersection=*iter;
+          std::cout <<"> "  << intersection->prevWayPointIndex << " " << intersection->distanceSquare << " " << intersection->point.GetLat() << "," << intersection->point.GetLon() << " " << intersection->borderIndex << " " << intersection->direction << std::endl;
+        }
 
-          double xmin,xmax,ymin,ymax;
-          Point  borderPoints[4];
+        for (std::list<IntersectionPtr>::const_iterator iter=intersectionsCCW.begin();
+            iter!=intersectionsCCW.end();
+            ++iter) {
+          IntersectionPtr intersection=*iter;
+          std::cout <<"* "  << intersection->prevWayPointIndex << " " << intersection->distanceSquare << " " << intersection->point.GetLat() << "," << intersection->point.GetLon() << " " << intersection->borderIndex << " " << intersection->direction << std::endl;
+        }
 
-          xmin=(level.cellXStart+cell->first.x)*level.cellWidth-180.0;
-          xmax=(level.cellXStart+cell->first.x+1)*level.cellWidth-180.0;
-          ymin=(level.cellYStart+cell->first.y)*level.cellHeight-90.0;
-          ymax=(level.cellYStart+cell->first.y+1)*level.cellHeight-90.0;
+        bool finished=false;
 
-          borderPoints[0]=Point(1,ymax,xmin); // top left
-          borderPoints[1]=Point(2,ymax,xmax); // top right
-          borderPoints[2]=Point(3,ymin,xmax); // bottom right
-          borderPoints[3]=Point(4,ymin,xmin); // bottom left
+        while (!finished) {
+          GroundTile                           groundTile;
+          std::list<IntersectionPtr>::iterator incomingIter;
 
-          if (first->direction==1 &&
-              second->direction==-1 &&
-              first->borderIndex==second->borderIndex &&
-              IsLeftOnSameBorder(first->borderIndex,first->point,second->point)) {
-            std::cout << "!!! Same border sling" << std::endl;
-            GroundTile   groundTile;
+          groundTile.type=GroundTile::land;
 
-            groundTile.type=GroundTile::land;
-
-            groundTile.points.push_back(first->point);
-
-            for (size_t p=first->prevWayPointIndex+1;
-                p<=second->prevWayPointIndex;
-                p++) {
-              groundTile.points.push_back(points[p]);
-            }
-
-            groundTile.points.push_back(second->point);
-
-            groundTile.points.push_back(groundTile.points.front());
-
-            cellGroundTileMap[cell->first].push_back(groundTile);
+          incomingIter=intersectionsPathOrder.begin();
+          while (incomingIter!=intersectionsPathOrder.end() &&
+                 (*incomingIter)->direction!=1) {
+            incomingIter++;
           }
-          else if (first->direction==1 && second->direction==-1) {
-            std::cout << "!!! cross border sling" << std::endl;
-            GroundTile   groundTile;
-            size_t       startBorderPoint=second->borderIndex;
-            size_t       endBorderPoint=(first->borderIndex+1)%4;
 
-            groundTile.type=GroundTile::land;
+          if (incomingIter==intersectionsPathOrder.end()) {
+            //std::cerr << "Cannot find any incoming intersection" << std::endl;
+            finished=true;
 
-            groundTile.points.push_back(first->point);
+            continue;
+          }
 
-            for (size_t p=first->prevWayPointIndex+1;
-                p<=second->prevWayPointIndex;
-                p++) {
-              groundTile.points.push_back(points[p]);
-            }
+          std::cout << "Incoming: " << (*incomingIter)->prevWayPointIndex << " " << (*incomingIter)->distanceSquare << std::endl;
 
-            groundTile.points.push_back(second->point);
+          groundTile.points.push_back((*incomingIter)->point);
 
-            size_t borderPoint=startBorderPoint;
-            while (borderPoint!=endBorderPoint) {
-              groundTile.points.push_back(borderPoints[borderPoint]);
+          std::list<IntersectionPtr>::iterator outgoingIter=incomingIter;
 
-              if (borderPoint==0) {
-                borderPoint=3;
-              }
-              else {
-                borderPoint--;
-              }
-            }
-            groundTile.points.push_back(borderPoints[borderPoint]);
+          outgoingIter++;
 
-            groundTile.points.push_back(groundTile.points.front());
+          if (outgoingIter==intersectionsPathOrder.end()) {
+            std::cerr << "There is no matching outgoing intersection for a incoming intersection" << std::endl;
+
+            finished=true;
+
+            continue;
+          }
+
+          std::cout << "Next: " << (*outgoingIter)->prevWayPointIndex << " " << (*outgoingIter)->distanceSquare << std::endl;
+
+          if ((*outgoingIter)->direction!=-1) {
+            std::cerr << "The intersection following an incoming intersection is not outgoing as expected" << std::endl;
+
+            finished=true;
+
+            continue;
+          }
+
+          for (size_t p=(*incomingIter)->prevWayPointIndex+1;
+              p<=(*outgoingIter)->prevWayPointIndex;
+              p++) {
+            groundTile.points.push_back(points[p]);
+          }
+
+          groundTile.points.push_back((*outgoingIter)->point);
+
+          std::list<IntersectionPtr>::iterator nextCCWIter=intersectionsCCW.begin();
+
+          while (nextCCWIter!=intersectionsCCW.end() &&
+                 (*nextCCWIter)!=(*outgoingIter)) {
+            nextCCWIter++;
+          }
+
+          assert(nextCCWIter!=intersectionsCCW.end());
+
+          nextCCWIter++;
+
+          if (nextCCWIter==intersectionsCCW.end()) {
+            nextCCWIter=intersectionsCCW.begin();
+          }
+
+          assert(nextCCWIter!=intersectionsCCW.end());
+
+          if ((*nextCCWIter)==(*incomingIter)) {
+            std::cout << "Polygon closed!" << std::endl;
+
+            CloseSling(groundTile,
+                       (*incomingIter),
+                       (*outgoingIter),
+                       borderPoints);
 
             /*
             for (size_t p=0; p<groundTile.points.size(); p++) {
@@ -1167,11 +1238,18 @@ namespace osmscout {
 
             cellGroundTileMap[cell->first].push_back(groundTile);
 
+            intersectionsPathOrder.remove(*incomingIter);
+            intersectionsPathOrder.remove(*outgoingIter);
+
+            intersectionsCCW.remove(*incomingIter);
+            intersectionsCCW.remove(*outgoingIter);
+          }
+          else {
+            std::cout << "Complex: " << (*nextCCWIter)->prevWayPointIndex << " " << (*nextCCWIter)->distanceSquare << std::endl;
+            finished=true;
           }
         }
       }
-
-      // Now calculate the rectangle
     }
   }
 
