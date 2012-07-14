@@ -380,13 +380,15 @@ namespace osmscout {
     FillStyle *coastFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_coast"),level);
     FillStyle *unknownFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_unknown"),level);
 
-/*
+
     LabelStyle labelStyle;
 
     labelStyle.SetStyle(LabelStyle::normal);
-    labelStyle.SetPriority(100);
-    labelStyle.SetTextColor(Color(0,0,0));
-    labelStyle.SetSize(0.8);*/
+    labelStyle.SetPriority(0);
+    labelStyle.SetTextColor(Color(0,0,0,0.5));
+    labelStyle.SetSize(1.2);
+
+    std::set<Coord> drawnLabels;
 
     for (std::list<GroundTile>::const_iterator tile=data.groundTiles.begin();
         tile!=data.groundTiles.end();
@@ -441,26 +443,71 @@ namespace osmscout {
         DrawArea(projection,parameter,areaData);
       }
 
-      /*
       double cellWidth=360.0;
       double cellHeight=180.0;
+      double level=MagToLevel(projection.GetMagnification())+4;
 
-      for (size_t i=1; i<=MagToLevel(projection.GetLonMin()); i++) {
+      if (level>14) {
+        level=14;
+      }
+
+      for (size_t i=1; i<=level; i++) {
         cellWidth=cellWidth/2;
         cellHeight=cellHeight/2;
       }
 
+      double ccLon=areaData.minLon+(areaData.maxLon-areaData.minLon)/2;
+      double ccLat=areaData.minLat+(areaData.maxLat-areaData.minLat)/2;
+
+      //std::cout << "L: " << ccLat << " " << cellHeight << " - " << ccLon << " " << cellWidth << std::endl;
+
       std::string label;
 
-      label=NumberToString((long)((tile->minlon+180)/cellWidth));
-      label+=",";
-      label+=NumberToString((long)((tile->minlat+90)/cellHeight));
+      size_t x=(ccLon+180)/cellWidth;
+      size_t y=(ccLat+90)/cellHeight;
 
+      label=NumberToString(tile->x);
+      label+=",";
+      label+=NumberToString(tile->y);
+
+      double lon=(x*cellWidth+cellWidth/2)-180.0;
+      double lat=(y*cellHeight+cellHeight/2)-90.0;
+
+      double px;
+      double py;
+
+      projection.GeoToPixel(lon,
+                            lat,
+                            px,py);
+
+
+      //std::cout << "Draw cell label " << label << " at " << px << "," << py << std::endl;
+
+      if (drawnLabels.find(Coord(x,y))!=drawnLabels.end()) {
+        continue;
+      }
+
+      LabelData labelData;
+
+      labelData.draw=true;
+      labelData.overlay=true;
+      labelData.x=px;
+      labelData.y=py;
+      labelData.alpha=0.5;
+      labelData.fontSize=1.2;
+      labelData.style=new LabelStyle(labelStyle);
+      labelData.text=label;
+
+      labels.push_back(labelData);
+
+      /*
       RegisterPointLabel(projection,
                          parameter,
                          labelStyle,
                          label,
-                         x1+(x2-x1)/2,y1+(y2-y1)/2);*/
+                         px,py);*/
+
+      drawnLabels.insert(Coord(x,y));
     }
   }
 

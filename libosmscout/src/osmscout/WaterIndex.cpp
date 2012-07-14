@@ -144,6 +144,8 @@ namespace osmscout {
             y<levels[level].cellYStart ||
             y>levels[level].cellYEnd) {
           tile.type=GroundTile::unknown;
+          tile.x=x-levels[level].cellXStart;
+          tile.y=y-levels[level].cellYStart;
 
           tiles.push_back(tile);
         }
@@ -165,6 +167,8 @@ namespace osmscout {
               cell==(FileOffset)GroundTile::coast ||
               cell==(FileOffset)GroundTile::unknown) {
             tile.type=(GroundTile::Type)cell;
+            tile.x=x-levels[level].cellXStart;
+            tile.y=y-levels[level].cellYStart;
 
             tiles.push_back(tile);
           }
@@ -172,6 +176,9 @@ namespace osmscout {
             size_t tileCount;
 
             tile.type=GroundTile::coast;
+            tile.x=x-levels[level].cellXStart;
+            tile.y=y-levels[level].cellYStart;
+
             tiles.push_back(tile);
 
             scanner.SetPos(cell);
@@ -184,6 +191,8 @@ namespace osmscout {
               scanner.Read(tileType);
 
               tile.type=(GroundTile::Type)tileType;
+              tile.x=x-levels[level].cellXStart;
+              tile.y=y-levels[level].cellYStart;
 
               scanner.ReadNumber(nodeCount);
 

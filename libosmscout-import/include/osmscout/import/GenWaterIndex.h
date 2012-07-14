@@ -77,20 +77,20 @@ namespace osmscout {
       }
     };
 
-    struct IntersectionCCWComparator
+    struct IntersectionCWComparator
     {
       inline bool operator()(const IntersectionPtr& a, const IntersectionPtr& b) const
       {
         if (a->borderIndex==b->borderIndex) {
           switch (a->borderIndex) {
           case 0:
-            return a->point.GetLon()>b->point.GetLon();
-          case 1:
-            return a->point.GetLat()<b->point.GetLat();
-          case 2:
             return a->point.GetLon()<b->point.GetLon();
-          default: /* 3 */
+          case 1:
             return a->point.GetLat()>b->point.GetLat();
+          case 2:
+            return a->point.GetLon()>b->point.GetLon();
+          default: /* 3 */
+            return a->point.GetLat()<b->point.GetLat();
           }
         }
         else {
@@ -217,10 +217,12 @@ namespace osmscout {
     void GetCellIntersections(const Level& level,
                               const std::vector<Point>& points,
                               std::map<Coord,std::list<Intersection> >& cellIntersections);
-    void CloseSling(GroundTile& groundTile,
-                    const IntersectionPtr& incoming,
-                    const IntersectionPtr& outgoing,
-                    const Point borderPoints[]);
+    void WalkBorderCW(GroundTile& groundTile,
+                      const IntersectionPtr& incoming,
+                      const IntersectionPtr& outgoing,
+                      const Point borderPoints[]);
+    IntersectionPtr GetNextCW(const std::list<IntersectionPtr>& intersectionsCW,
+                              const IntersectionPtr& current) const;
     void HandleCoastlinesPartiallyInACell(const ImportParameter& parameter,
                                           Progress& progress,
                                           Projection& projection,

@@ -36,6 +36,7 @@ namespace osmscout {
     };
 
     Type               type;
+    size_t             x,y;
     std::vector<Point> points;
   };
 }
