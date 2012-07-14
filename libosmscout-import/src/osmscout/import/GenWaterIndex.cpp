@@ -1151,65 +1151,57 @@ namespace osmscout {
           std::cout <<"* "  << intersection->prevWayPointIndex << " " << intersection->distanceSquare << " " << intersection->point.GetLat() << "," << intersection->point.GetLon() << " " << intersection->borderIndex << " " << intersection->direction << std::endl;
         }
 
-        bool finished=false;
+        while (!intersectionsPathOrder.empty()) {
+          // We expect an outgoing way...
+          if (intersectionsPathOrder.back()->direction!=-1) {
+            intersectionsCCW.remove(intersectionsPathOrder.back());
 
-        while (!finished) {
-          GroundTile                           groundTile;
-          std::list<IntersectionPtr>::iterator incomingIter;
+            intersectionsPathOrder.pop_back();
+
+            continue;
+          }
+
+          GroundTile      groundTile;
+          IntersectionPtr outgoing;
 
           groundTile.type=GroundTile::land;
 
-          incomingIter=intersectionsPathOrder.begin();
-          while (incomingIter!=intersectionsPathOrder.end() &&
-                 (*incomingIter)->direction!=1) {
-            incomingIter++;
-          }
+          outgoing=intersectionsPathOrder.back();
+          intersectionsPathOrder.pop_back();
 
-          if (incomingIter==intersectionsPathOrder.end()) {
-            //std::cerr << "Cannot find any incoming intersection" << std::endl;
-            finished=true;
+          std::cout << "Outgoing: " << outgoing->prevWayPointIndex << " " << outgoing->distanceSquare << std::endl;
 
-            continue;
-          }
-
-          std::cout << "Incoming: " << (*incomingIter)->prevWayPointIndex << " " << (*incomingIter)->distanceSquare << std::endl;
-
-          groundTile.points.push_back((*incomingIter)->point);
-
-          std::list<IntersectionPtr>::iterator outgoingIter=incomingIter;
-
-          outgoingIter++;
-
-          if (outgoingIter==intersectionsPathOrder.end()) {
+          if (intersectionsPathOrder.empty()) {
             std::cerr << "There is no matching outgoing intersection for a incoming intersection" << std::endl;
 
-            finished=true;
+            continue;
+          }
+
+          std::cout << "Incoming: " << intersectionsPathOrder.back()->prevWayPointIndex << " " << intersectionsPathOrder.back()->distanceSquare << std::endl;
+
+          if (intersectionsPathOrder.back()->direction!=1) {
+            std::cerr << "The intersection before the outgoing intersection is not incoming as expected" << std::endl;
 
             continue;
           }
 
-          std::cout << "Next: " << (*outgoingIter)->prevWayPointIndex << " " << (*outgoingIter)->distanceSquare << std::endl;
+          IntersectionPtr incoming=intersectionsPathOrder.back();
+          intersectionsPathOrder.pop_back();
 
-          if ((*outgoingIter)->direction!=-1) {
-            std::cerr << "The intersection following an incoming intersection is not outgoing as expected" << std::endl;
+          groundTile.points.push_back(incoming->point);
 
-            finished=true;
-
-            continue;
-          }
-
-          for (size_t p=(*incomingIter)->prevWayPointIndex+1;
-              p<=(*outgoingIter)->prevWayPointIndex;
+          for (size_t p=incoming->prevWayPointIndex+1;
+              p<=outgoing->prevWayPointIndex;
               p++) {
             groundTile.points.push_back(points[p]);
           }
 
-          groundTile.points.push_back((*outgoingIter)->point);
+          groundTile.points.push_back(outgoing->point);
 
           std::list<IntersectionPtr>::iterator nextCCWIter=intersectionsCCW.begin();
 
           while (nextCCWIter!=intersectionsCCW.end() &&
-                 (*nextCCWIter)!=(*outgoingIter)) {
+                 (*nextCCWIter)!=outgoing) {
             nextCCWIter++;
           }
 
@@ -1223,30 +1215,71 @@ namespace osmscout {
 
           assert(nextCCWIter!=intersectionsCCW.end());
 
-          if ((*nextCCWIter)==(*incomingIter)) {
-            std::cout << "Polygon closed!" << std::endl;
+          bool complex=false;
+          bool error=false;
 
-            CloseSling(groundTile,
-                       (*incomingIter),
-                       (*outgoingIter),
-                       borderPoints);
-
-            /*
-            for (size_t p=0; p<groundTile.points.size(); p++) {
-              std::cout << groundTile.points[p].GetId() << " " << groundTile.points[p].GetLat() << "," << groundTile.points[p].GetLon() << std::endl;
-            }*/
-
-            cellGroundTileMap[cell->first].push_back(groundTile);
-
-            intersectionsPathOrder.remove(*incomingIter);
-            intersectionsPathOrder.remove(*outgoingIter);
-
-            intersectionsCCW.remove(*incomingIter);
-            intersectionsCCW.remove(*outgoingIter);
-          }
-          else {
+          while ((*nextCCWIter)!=incoming &&
+                 !error) {
             std::cout << "Complex: " << (*nextCCWIter)->prevWayPointIndex << " " << (*nextCCWIter)->distanceSquare << std::endl;
-            finished=true;
+            complex=true;
+
+            if (intersectionsPathOrder.empty()) {
+              std::cerr << "Polygon is not closed, but there are no intersections left" << std::endl;
+
+              error=true;
+              continue;
+            }
+
+            if (intersectionsPathOrder.back()->direction!=-1) {
+              std::cerr << "We expect an outgoing intersection" << std::endl;
+
+              error=true;
+              continue;
+            }
+
+            outgoing=intersectionsPathOrder.back();
+            intersectionsPathOrder.pop_back();
+
+            std::cout << "Outgoing: " << outgoing->prevWayPointIndex << " " << outgoing->distanceSquare << std::endl;
+
+            if (intersectionsPathOrder.empty()) {
+              std::cerr << "Polygon is not closed, but there are no intersections left" << std::endl;
+
+              error=true;
+              continue;
+            }
+
+            if (intersectionsPathOrder.back()->direction!=1) {
+              std::cerr << "We expect an incoming intersection" << std::endl;
+
+              error=true;
+              continue;
+            }
+
+            incoming=intersectionsPathOrder.back();
+            intersectionsPathOrder.pop_back();
+
+            std::cout << "Incoming: " << incoming->prevWayPointIndex << " " << incoming->distanceSquare << std::endl;
+          }
+
+          if (error) {
+            continue;
+          }
+
+          std::cout << "Polygon closed!" << std::endl;
+
+          CloseSling(groundTile,
+                     incoming,
+                     outgoing,
+                     borderPoints);
+
+          /*
+          for (size_t p=0; p<groundTile.points.size(); p++) {
+            std::cout << groundTile.points[p].GetId() << " " << groundTile.points[p].GetLat() << "," << groundTile.points[p].GetLon() << std::endl;
+          }*/
+
+          if (!complex) {
+            cellGroundTileMap[cell->first].push_back(groundTile);
           }
         }
       }
