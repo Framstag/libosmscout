@@ -34,6 +34,8 @@
 
 #include <iostream>
 
+#define DEBUG_COASTLINE
+
 namespace osmscout {
 
   static bool GetLineIntersection(const Point& a1,
@@ -288,7 +290,7 @@ namespace osmscout {
    *
    */
   void WaterIndexGenerator::MarkCoastlineCells(Progress& progress,
-                                              Level& level)
+                                               Level& level)
   {
     progress.Info("Setting coastline cells");
 
@@ -846,7 +848,7 @@ namespace osmscout {
           double       maxX;
           double       minY;
           double       maxY;
-          GroundTile   groundTile;
+          GroundTile   groundTile(GroundTile::land);
 
           polygon.TransformArea(projection,parameter.GetOptimizationWayMethod(),coast->coast, 1.0);
 
@@ -856,7 +858,6 @@ namespace osmscout {
             continue;
           }
 
-          groundTile.type=GroundTile::land;
           groundTile.points.reserve(polygon.GetLength());
 
           for (size_t p=polygon.GetStart(); p<=polygon.GetEnd(); p++) {
@@ -1012,8 +1013,6 @@ namespace osmscout {
             }
           }
         }
-
-        //std::cout << "Cell " << x << "," << y << " intersects " << groundTile.points.size() << " times with coastline " << coast->id << std::endl;
       }
     }
   }
@@ -1074,6 +1073,45 @@ namespace osmscout {
     return *next;
   }
 
+  void WaterIndexGenerator::WalkPathBack(GroundTile& groundTile,
+                                         const IntersectionPtr& outgoing,
+                                         const IntersectionPtr& incoming,
+                                         const std::vector<Point>& points,
+                                         bool isArea)
+  {
+    if (isArea) {
+      size_t idx=outgoing->prevWayPointIndex;
+      size_t targetIdx=incoming->prevWayPointIndex+1;
+
+      if (targetIdx==points.size()) {
+        targetIdx=0;
+      }
+
+      while (idx!=targetIdx) {
+        groundTile.points.push_back(points[idx]);
+
+        if (idx>0) {
+          idx--;
+        }
+        else {
+          idx=points.size()-1;
+        }
+      }
+      groundTile.points.push_back(points[idx]);
+    }
+    else {
+      size_t targetIdx=incoming->prevWayPointIndex+1;
+
+      for (int idx=outgoing->prevWayPointIndex;
+          idx>=targetIdx;
+          idx--) {
+        groundTile.points.push_back(points[idx]);
+      }
+    }
+
+    groundTile.points.push_back(incoming->point);
+  }
+
   /**
    * The algorithm is as following:
    *  1 If the list of intersections is empty, stop
@@ -1109,8 +1147,11 @@ namespace osmscout {
       TransPolygon                             polygon;
       std::vector<Point>                       points;
       std::map<Coord,std::list<Intersection> > cellIntersections;
+      bool                                     isArea;
 
-      if (coast->coast.front().GetId()==coast->coast.back().GetId()) {
+      isArea=coast->coast.front().GetId()==coast->coast.back().GetId();
+
+      if (isArea) {
         // TODO: We already handled areas that are completely within one cell, we should skip them here
         polygon.TransformArea(projection,parameter.GetOptimizationWayMethod(),coast->coast, 1.0);
       }
@@ -1125,14 +1166,23 @@ namespace osmscout {
         }
       }
 
+      // Currently transformation optimization code some times draw the closing points for areas
+      if (isArea &&
+          points.front().GetId()!=points.back().GetId()) {
+        points.push_back(points.front());
+      }
+
+      // Calculate all intersections for all path steps for all cells covered
       GetCellIntersections(level,
                            points,
                            cellIntersections);
 
+      // No intersections
       if (cellIntersections.size()==0) {
         continue;
       }
 
+      // For every cell with intersections
       for (std::map<Coord,std::list<Intersection> >::iterator cell=cellIntersections.begin();
           cell!=cellIntersections.end();
           ++cell) {
@@ -1162,19 +1212,31 @@ namespace osmscout {
         intersectionsPathOrder.sort(IntersectionByPathComparator());
         intersectionsCW.sort(IntersectionCWComparator());
 
+        if (isArea &&
+            intersectionsPathOrder.front()->direction==-1) {
+          intersectionsPathOrder.push_back(intersectionsPathOrder.front());
+          intersectionsPathOrder.pop_front();
+        }
+
+#if defined(DEBUG_COASTLINE)
         std::cout << "-- Cell: " << cell->first.x << "," << cell->first.y << std::endl;
+#endif
         for (std::list<IntersectionPtr>::const_iterator iter=intersectionsPathOrder.begin();
             iter!=intersectionsPathOrder.end();
             ++iter) {
+#if defined(DEBUG_COASTLINE)
           IntersectionPtr intersection=*iter;
-          std::cout <<"> "  << intersection->prevWayPointIndex << " " << intersection->distanceSquare << " " << intersection->point.GetLat() << "," << intersection->point.GetLon() << " " << intersection->borderIndex << " " << intersection->direction << std::endl;
+          std::cout <<"> "  << points[intersection->prevWayPointIndex].GetId() << " " << intersection->prevWayPointIndex << " " << intersection->distanceSquare << " " << intersection->point.GetLat() << "," << intersection->point.GetLon() << " " << intersection->borderIndex << " " << intersection->direction << std::endl;
+#endif
         }
 
         for (std::list<IntersectionPtr>::const_iterator iter=intersectionsCW.begin();
             iter!=intersectionsCW.end();
             ++iter) {
+#if defined(DEBUG_COASTLINE)
           IntersectionPtr intersection=*iter;
-          std::cout <<"* "  << intersection->prevWayPointIndex << " " << intersection->distanceSquare << " " << intersection->point.GetLat() << "," << intersection->point.GetLon() << " " << intersection->borderIndex << " " << intersection->direction << std::endl;
+          std::cout <<"* "  << points[intersection->prevWayPointIndex].GetId() << " " << intersection->prevWayPointIndex << " " << intersection->distanceSquare << " " << intersection->point.GetLat() << "," << intersection->point.GetLon() << " " << intersection->borderIndex << " " << intersection->direction << std::endl;
+#endif
         }
 
         while (!intersectionsPathOrder.empty()) {
@@ -1187,28 +1249,38 @@ namespace osmscout {
             continue;
           }
 
-          GroundTile      groundTile;
+          GroundTile      groundTile(GroundTile::land);
           IntersectionPtr initialOutgoing;
-
-          groundTile.type=GroundTile::land;
 
           initialOutgoing=intersectionsPathOrder.back();
           intersectionsPathOrder.pop_back();
 
+#if defined(DEBUG_COASTLINE)
           std::cout << "Outgoing: " << initialOutgoing->prevWayPointIndex << " " << initialOutgoing->distanceSquare << std::endl;
+#endif
 
           groundTile.points.push_back(initialOutgoing->point);
 
           if (intersectionsPathOrder.empty()) {
+#if defined(DEBUG_COASTLINE)
             std::cerr << "There is no matching outgoing intersection for a incoming intersection" << std::endl;
+#endif
+
+            intersectionsCW.remove(initialOutgoing);
 
             continue;
           }
 
+#if defined(DEBUG_COASTLINE)
           std::cout << "Incoming: " << intersectionsPathOrder.back()->prevWayPointIndex << " " << intersectionsPathOrder.back()->distanceSquare << std::endl;
+#endif
 
           if (intersectionsPathOrder.back()->direction!=1) {
+#if defined(DEBUG_COASTLINE)
             std::cerr << "The intersection before the outgoing intersection is not incoming as expected" << std::endl;
+#endif
+
+            intersectionsCW.remove(initialOutgoing);
 
             continue;
           }
@@ -1216,42 +1288,45 @@ namespace osmscout {
           IntersectionPtr incoming=intersectionsPathOrder.back();
           intersectionsPathOrder.pop_back();
 
-          for (int p=initialOutgoing->prevWayPointIndex;
-              p>=incoming->prevWayPointIndex+1;
-              p--) {
-            groundTile.points.push_back(points[p]);
-          }
-
-          groundTile.points.push_back(incoming->point);
-
+          WalkPathBack(groundTile,
+                       initialOutgoing,
+                       incoming,
+                       points,
+                       isArea);
 
           IntersectionPtr nextCWIter=GetNextCW(intersectionsCW,
                                                incoming);
 
           bool error=false;
 
-          while (nextCWIter!=initialOutgoing &&
-                 !error) {
+          while (!error &&
+                 nextCWIter!=initialOutgoing) {
+#if defined(DEBUG_COASTLINE)
             std::cout << "Complex: " << nextCWIter->prevWayPointIndex << " " << nextCWIter->distanceSquare << std::endl;
+#endif
 
-            if (intersectionsPathOrder.empty()) {
-              std::cerr << "Polygon is not closed, but there are no intersections left" << std::endl;
+            IntersectionPtr outgoing=nextCWIter;
 
-              error=true;
-              continue;
-            }
-
-            if (intersectionsPathOrder.back()->direction!=-1) {
+            if (outgoing->direction!=-1) {
+#if defined(DEBUG_COASTLINE)
               std::cerr << "We expect an outgoing intersection" << std::endl;
+#endif
 
               error=true;
               continue;
             }
 
-            IntersectionPtr outgoing=intersectionsPathOrder.back();
-            intersectionsPathOrder.pop_back();
+            std::list<IntersectionPtr>::iterator outgoingIter=intersectionsPathOrder.begin();
+            while (outgoingIter!=intersectionsPathOrder.end() &&
+                   (*outgoingIter)!=outgoing) {
+              ++outgoingIter;
+            }
 
+            assert(outgoingIter!=intersectionsPathOrder.end());
+
+#if defined(DEBUG_COASTLINE)
             std::cout << "Outgoing: " << outgoing->prevWayPointIndex << " " << outgoing->distanceSquare << std::endl;
+#endif
 
             WalkBorderCW(groundTile,
                          incoming,
@@ -1259,31 +1334,50 @@ namespace osmscout {
                          borderPoints);
 
             if (intersectionsPathOrder.empty()) {
+#if defined(DEBUG_COASTLINE)
               std::cerr << "Polygon is not closed, but there are no intersections left" << std::endl;
+#endif
 
               error=true;
               continue;
             }
 
-            if (intersectionsPathOrder.back()->direction!=1) {
+            if (outgoingIter==intersectionsPathOrder.begin()) {
+#if defined(DEBUG_COASTLINE)
+              std::cerr << "Polygon is not closed, but cannot find incoming" << std::endl;
+#endif
+
+              error=true;
+              continue;
+            }
+
+            std::list<IntersectionPtr>::iterator incomingIter=outgoingIter;
+
+            incomingIter--;
+
+            if ((*incomingIter)->direction!=1) {
+#if defined(DEBUG_COASTLINE)
               std::cerr << "We expect an incoming intersection" << std::endl;
+#endif
 
               error=true;
               continue;
             }
 
-            incoming=intersectionsPathOrder.back();
-            intersectionsPathOrder.pop_back();
+            incoming=*incomingIter;
 
+            intersectionsPathOrder.erase(outgoingIter);
+            intersectionsPathOrder.erase(incomingIter);
+
+#if defined(DEBUG_COASTLINE)
             std::cout << "Incoming: " << incoming->prevWayPointIndex << " " << incoming->distanceSquare << std::endl;
+#endif
 
-            for (int p=outgoing->prevWayPointIndex;
-                p>=incoming->prevWayPointIndex+1;
-                p--) {
-              groundTile.points.push_back(points[p]);
-            }
-
-            groundTile.points.push_back(incoming->point);
+            WalkPathBack(groundTile,
+                         outgoing,
+                         incoming,
+                         points,
+                         isArea);
 
             nextCWIter=GetNextCW(intersectionsCW,
                                  incoming);
@@ -1293,17 +1387,14 @@ namespace osmscout {
             continue;
           }
 
+#if defined(DEBUG_COASTLINE)
           std::cout << "Polygon closed!" << std::endl;
+#endif
 
           WalkBorderCW(groundTile,
                        incoming,
                        initialOutgoing,
                        borderPoints);
-
-          /*
-          for (size_t p=0; p<groundTile.points.size(); p++) {
-            std::cout << groundTile.points[p].GetId() << " " << groundTile.points[p].GetLat() << "," << groundTile.points[p].GetLon() << std::endl;
-          }*/
 
           cellGroundTileMap[cell->first].push_back(groundTile);
         }
@@ -1490,6 +1581,8 @@ namespace osmscout {
         writer.SetPos(endPos);
       }
     }
+
+    coastlines.clear();
 
     if (writer.HasError() || !writer.Close()) {
       progress.Error("Error while closing 'water.idx'");

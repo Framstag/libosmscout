@@ -38,6 +38,17 @@ namespace osmscout {
     Type               type;
     size_t             x,y;
     std::vector<Point> points;
+
+    GroundTile()
+    {
+      // no code
+    }
+
+    GroundTile(Type type)
+    : type(type)
+    {
+      // no code
+    }
   };
 }
 

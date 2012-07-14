@@ -339,7 +339,6 @@ namespace osmscout {
     //@{
     std::vector<LabelData> labels;
     std::vector<ScanCell>  wayScanlines;
-
     //@}
 
     /**
@@ -358,6 +357,15 @@ namespace osmscout {
     size_t                 nodesDrawn;
 
     size_t                 labelsDrawn;
+    //@}
+
+    /**
+      Fallback styles in case they are missing for the style sheet
+      */
+    //@{
+    FillStyleRef  landFill;
+    FillStyleRef  seaFill;
+    LabelStyleRef debugLabel;
     //@}
 
   private:

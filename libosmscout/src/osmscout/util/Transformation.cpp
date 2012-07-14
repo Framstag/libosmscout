@@ -253,8 +253,8 @@ namespace osmscout {
       }
 
       double distance=CalculateDistancePointToLineSegment(points[cur],
-                                                 points[prev],
-                                                 points[next]);
+                                                          points[prev],
+                                                          points[next]);
 
       if (distance<=optimizeErrorTolerance) {
         points[cur].draw=false;
@@ -364,7 +364,7 @@ namespace osmscout {
 
       DropSimilarPoints(optimizeErrorTolerance);
 
-      if (optimize==fast){
+      if (optimize==fast) {
         DropRedundantPointsFast(optimizeErrorTolerance);
       }
       else {

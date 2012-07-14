@@ -187,6 +187,19 @@ namespace osmscout {
     tunnelDash.push_back(0.4);
 
     areaMarkStyle.SetFillColor(Color(1.0,0,0.0,0.5));
+
+    landFill=new FillStyle();
+    landFill->SetFillColor(Color(241.0/255,238.0/255,233.0,255));
+
+    seaFill=new FillStyle();
+    seaFill->SetFillColor(Color(181.0/255,208.0/255,208.0,255));
+
+    debugLabel=new LabelStyle();
+
+    debugLabel->SetStyle(LabelStyle::normal);
+    debugLabel->SetPriority(0);
+    debugLabel->SetTextColor(Color(0,0,0,0.5));
+    debugLabel->SetSize(1.2);
   }
 
   MapPainter::~MapPainter()
@@ -361,11 +374,11 @@ namespace osmscout {
                                    const MapParameter& parameter,
                                    const MapData& data)
   {
-    size_t    level=MagToLevel(projection.GetMagnification());
-    FillStyle *landFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_land"),level);
+    size_t       level=MagToLevel(projection.GetMagnification());
+    FillStyleRef landFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_land"),level);
 
-    if (landFill==NULL) {
-      std::cout << " No fill style for background tile!" << std::endl;
+    if (landFill.Invalid()) {
+      landFill=this->landFill;
     }
 
     DrawArea(*landFill,
@@ -376,17 +389,21 @@ namespace osmscout {
       return;
     }
 
-    FillStyle *seaFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_sea"),level);
-    FillStyle *coastFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_coast"),level);
-    FillStyle *unknownFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_unknown"),level);
+    FillStyleRef seaFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_sea"),level);
+    FillStyleRef coastFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_coast"),level);
+    FillStyleRef unknownFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_unknown"),level);
 
+    if (seaFill.Invalid()) {
+      seaFill=this->seaFill;
+    }
 
-    LabelStyle labelStyle;
+    if (coastFill.Invalid()) {
+      coastFill=this->seaFill;
+    }
 
-    labelStyle.SetStyle(LabelStyle::normal);
-    labelStyle.SetPriority(0);
-    labelStyle.SetTextColor(Color(0,0,0,0.5));
-    labelStyle.SetSize(1.2);
+    if (unknownFill.Invalid()) {
+      unknownFill=this->seaFill;
+    }
 
     std::set<Coord> drawnLabels;
 
@@ -436,13 +453,10 @@ namespace osmscout {
           areaData.maxLon=std::max(areaData.maxLon,tile->points[i].GetLon());
         }
 
-        if (areaData.fillStyle==NULL) {
-          std::cout << " No fill style for background tile!" << std::endl;
-        }
-
         DrawArea(projection,parameter,areaData);
       }
 
+      /*
       double cellWidth=360.0;
       double cellHeight=180.0;
       double level=MagToLevel(projection.GetMagnification())+4;
@@ -458,8 +472,6 @@ namespace osmscout {
 
       double ccLon=areaData.minLon+(areaData.maxLon-areaData.minLon)/2;
       double ccLat=areaData.minLat+(areaData.maxLat-areaData.minLat)/2;
-
-      //std::cout << "L: " << ccLat << " " << cellHeight << " - " << ccLon << " " << cellWidth << std::endl;
 
       std::string label;
 
@@ -481,8 +493,6 @@ namespace osmscout {
                             px,py);
 
 
-      //std::cout << "Draw cell label " << label << " at " << px << "," << py << std::endl;
-
       if (drawnLabels.find(Coord(x,y))!=drawnLabels.end()) {
         continue;
       }
@@ -495,19 +505,12 @@ namespace osmscout {
       labelData.y=py;
       labelData.alpha=0.5;
       labelData.fontSize=1.2;
-      labelData.style=new LabelStyle(labelStyle);
+      labelData.style=debugLabel;
       labelData.text=label;
 
       labels.push_back(labelData);
 
-      /*
-      RegisterPointLabel(projection,
-                         parameter,
-                         labelStyle,
-                         label,
-                         px,py);*/
-
-      drawnLabels.insert(Coord(x,y));
+      drawnLabels.insert(Coord(x,y));*/
     }
   }
 

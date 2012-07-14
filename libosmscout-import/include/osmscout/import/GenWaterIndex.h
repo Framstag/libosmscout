@@ -223,6 +223,11 @@ namespace osmscout {
                       const Point borderPoints[]);
     IntersectionPtr GetNextCW(const std::list<IntersectionPtr>& intersectionsCW,
                               const IntersectionPtr& current) const;
+    void WalkPathBack(GroundTile& groundTile,
+                      const IntersectionPtr& outgoing,
+                      const IntersectionPtr& incoming,
+                      const std::vector<Point>& points,
+                      bool isArea);
     void HandleCoastlinesPartiallyInACell(const ImportParameter& parameter,
                                           Progress& progress,
                                           Projection& projection,
