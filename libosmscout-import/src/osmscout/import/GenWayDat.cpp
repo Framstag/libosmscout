@@ -909,6 +909,8 @@ namespace osmscout {
         if (way.IsArea()) {
           if (!AreaIsSimple(way.nodes)) {
             progress.Error("Area "+NumberToString(way.GetId())+" of type '"+typeConfig.GetTypeInfo(way.GetType()).GetName()+"' is not simple");
+
+            continue;
           }
         }
         else {
