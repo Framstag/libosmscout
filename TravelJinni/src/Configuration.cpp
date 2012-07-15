@@ -180,6 +180,9 @@ bool SaveConfig()
     if (map->dir==currentMap) {
       node->SetAttribute(L"active",true);
     }
+    else {
+      node->SetAttribute(L"active",false);
+    }
 
     top->Add(node);
   }
@@ -193,6 +196,9 @@ bool SaveConfig()
 
     if (style->file==currentStyle) {
       node->SetAttribute(L"active",true);
+    }
+    else {
+      node->SetAttribute(L"active",false);
     }
 
     top->Add(node);
