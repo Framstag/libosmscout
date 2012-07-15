@@ -56,6 +56,13 @@ namespace osmscout {
       this->lon=lon;
     }
 
+    inline void Set(double lat,
+                    double lon)
+    {
+      this->lat=lat;
+      this->lon=lon;
+    }
+
     inline Id GetId() const
     {
       return id;

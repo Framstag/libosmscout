@@ -94,6 +94,7 @@ namespace osmscout {
      areaNodeMinMag(8),
      areaNodeIndexCellSizeAverage(16),
      areaNodeIndexCellSizeMax(256),
+     waterIndexMinMag(6),
      waterIndexMaxMag(14),
      optimizationMaxMag(10),
      optimizationMinMag(6),
@@ -249,6 +250,11 @@ namespace osmscout {
   size_t ImportParameter::GetAreaAreaIndexMaxMag() const
   {
     return areaAreaIndexMaxMag;
+  }
+
+  size_t ImportParameter::GetWaterIndexMinMag() const
+  {
+    return waterIndexMinMag;
   }
 
   size_t ImportParameter::GetWaterIndexMaxMag() const
@@ -441,6 +447,11 @@ namespace osmscout {
   void ImportParameter::SetAreaNodeIndexCellSizeMax(size_t areaNodeIndexCellSizeMax)
   {
     this->areaNodeIndexCellSizeMax=areaNodeIndexCellSizeMax;
+  }
+
+  void ImportParameter::SetWaterIndexMinMag(size_t waterIndexMinMag)
+  {
+    this->waterIndexMinMag=waterIndexMinMag;
   }
 
   void ImportParameter::SetWaterIndexMaxMag(size_t waterIndexMaxMag)

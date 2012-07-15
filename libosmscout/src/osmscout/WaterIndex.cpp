@@ -42,33 +42,51 @@ namespace osmscout {
       return false;
     }
 
-    uint32_t waterIndexMaxMag;
+    if (!scanner.ReadNumber(waterIndexMinMag)) {
+      std::cerr << "Error while reading from file '" << datafilename << "'" << std::endl;
+      return false;
+    }
 
     if (!scanner.ReadNumber(waterIndexMaxMag)) {
       std::cerr << "Error while reading from file '" << datafilename << "'" << std::endl;
       return false;
     }
 
-    levels.resize(waterIndexMaxMag+1);
+    levels.resize(waterIndexMaxMag-waterIndexMinMag+1);
 
-    levels[0].cellWidth=360.0;
-    levels[0].cellHeight=180.0;
+    double cellWidth=360.0;
+    double cellHeight=180.0;
 
-    for (size_t level=1; level<levels.size(); level++) {
-      levels[level].cellWidth=levels[level-1].cellWidth/2;
-      levels[level].cellHeight=levels[level-1].cellHeight/2;
+    for (size_t level=0; level<=waterIndexMaxMag; level++) {
+      if (level>=waterIndexMinMag && level<=waterIndexMaxMag) {
+        size_t idx=level-waterIndexMinMag;
+
+        levels[idx].cellWidth=cellWidth;
+        levels[idx].cellHeight=cellHeight;
+      }
+
+      cellWidth=cellWidth/2;
+      cellHeight=cellHeight/2;
     }
 
-    for (size_t level=0; level<levels.size(); level++){
-      scanner.ReadFileOffset(levels[level].offset);
+    for (size_t level=waterIndexMinMag; level<=waterIndexMaxMag; level++){
+      size_t idx=level-waterIndexMinMag;
 
-      scanner.ReadNumber(levels[level].cellXStart);
-      scanner.ReadNumber(levels[level].cellXEnd);
-      scanner.ReadNumber(levels[level].cellYStart);
-      scanner.ReadNumber(levels[level].cellYEnd);
+      scanner.ReadFileOffset(levels[idx].offset);
 
-      levels[level].cellXCount=levels[level].cellXEnd-levels[level].cellXStart+1;
-      levels[level].cellYCount=levels[level].cellYEnd-levels[level].cellYStart+1;
+      scanner.ReadNumber(levels[idx].cellXStart);
+      scanner.ReadNumber(levels[idx].cellXEnd);
+      scanner.ReadNumber(levels[idx].cellYStart);
+      scanner.ReadNumber(levels[idx].cellYEnd);
+
+      levels[idx].cellXCount=levels[idx].cellXEnd-levels[idx].cellXStart+1;
+      levels[idx].cellYCount=levels[idx].cellYEnd-levels[idx].cellYStart+1;
+
+      std::cout << idx+waterIndexMinMag << " ";
+      std::cout << levels[idx].offset << " ";
+      std::cout << levels[idx].cellWidth << "x" << levels[idx].cellHeight << " ";
+      std::cout << "[" << levels[idx].cellXStart << "-" << levels[idx].cellXEnd << "]" << "x";
+      std::cout << "[" << levels[idx].cellYStart << "-" << levels[idx].cellYEnd << "]" << std::endl;
     }
 
     if (scanner.HasError()) {
@@ -87,19 +105,20 @@ namespace osmscout {
                               std::list<GroundTile>& tiles) const
   {
     uint32_t cx1,cx2,cy1,cy2;
-    size_t level=MagToLevel(magnification);
+    size_t idx=MagToLevel(magnification);
 
     if (levels.empty()) {
       return true;
     }
 
-    level+=4;
+    idx+=4;
 
-    level=std::max(6u,level);
+    idx=std::max(waterIndexMinMag,idx);
+    idx=std::min(waterIndexMaxMag,idx);
 
-    if (level>=levels.size()) {
-      level=levels.size()-1;
-    }
+    idx-=waterIndexMinMag;
+
+    std::cout << "Level: " << idx << std::endl;
 
     tiles.clear();
 
@@ -110,10 +129,10 @@ namespace osmscout {
       }
     }
 
-    cx1=(uint32_t)floor((minlon+180.0)/levels[level].cellWidth);
-    cx2=(uint32_t)floor((maxlon+180.0)/levels[level].cellWidth);
-    cy1=(uint32_t)floor((minlat+90.0)/levels[level].cellHeight);
-    cy2=(uint32_t)floor((maxlat+90.0)/levels[level].cellHeight);
+    cx1=(uint32_t)floor((minlon+180.0)/levels[idx].cellWidth);
+    cx2=(uint32_t)floor((maxlon+180.0)/levels[idx].cellWidth);
+    cy1=(uint32_t)floor((minlat+90.0)/levels[idx].cellHeight);
+    cy2=(uint32_t)floor((maxlat+90.0)/levels[idx].cellHeight);
 
     GroundTile tile;
 
@@ -124,40 +143,39 @@ namespace osmscout {
         tile.points.clear();
 
         tile.points.push_back(Point(0,
-                                    y*levels[level].cellHeight-90.0,
-                                    x*levels[level].cellWidth-180.0));
+                                    y*levels[idx].cellHeight-90.0,
+                                    x*levels[idx].cellWidth-180.0));
 
         tile.points.push_back(Point(1,
-                                    y*levels[level].cellHeight-90.0,
-                                    (x+1)*levels[level].cellWidth-180.0));
+                                    y*levels[idx].cellHeight-90.0,
+                                    (x+1)*levels[idx].cellWidth-180.0));
 
         tile.points.push_back(Point(2,
-                                    (y+1)*levels[level].cellHeight-90.0,
-                                    (x+1)*levels[level].cellWidth-180.0));
+                                    (y+1)*levels[idx].cellHeight-90.0,
+                                    (x+1)*levels[idx].cellWidth-180.0));
 
         tile.points.push_back(Point(3,
-                                    (y+1)*levels[level].cellHeight-90.0,
-                                    x*levels[level].cellWidth-180.0));
+                                    (y+1)*levels[idx].cellHeight-90.0,
+                                    x*levels[idx].cellWidth-180.0));
 
         tile.points.push_back(tile.points.front());
 
-        if (x<levels[level].cellXStart ||
-            x>levels[level].cellXEnd ||
-            y<levels[level].cellYStart ||
-            y>levels[level].cellYEnd) {
+        if (x<levels[idx].cellXStart ||
+            x>levels[idx].cellXEnd ||
+            y<levels[idx].cellYStart ||
+            y>levels[idx].cellYEnd) {
           tile.type=GroundTile::unknown;
-          tile.x=x-levels[level].cellXStart;
-          tile.y=y-levels[level].cellYStart;
+          tile.x=x-levels[idx].cellXStart;
+          tile.y=y-levels[idx].cellYStart;
 
           tiles.push_back(tile);
         }
         else {
-          uint32_t   cellId=(y-levels[level].cellYStart)*levels[level].cellXCount+x-levels[level].cellXStart;
-
+          uint32_t   cellId=(y-levels[idx].cellYStart)*levels[idx].cellXCount+x-levels[idx].cellXStart;
           uint32_t   index=cellId*8;
           FileOffset cell;
 
-          scanner.SetPos(levels[level].offset+index);
+          scanner.SetPos(levels[idx].offset+index);
 
           if (!scanner.Read(cell)) {
             std::cerr << "Error while reading from file '" << datafilename << "'" << std::endl;
@@ -169,8 +187,8 @@ namespace osmscout {
               cell==(FileOffset)GroundTile::coast ||
               cell==(FileOffset)GroundTile::unknown) {
             tile.type=(GroundTile::Type)cell;
-            tile.x=x-levels[level].cellXStart;
-            tile.y=y-levels[level].cellYStart;
+            tile.x=x-levels[idx].cellXStart;
+            tile.y=y-levels[idx].cellYStart;
 
             tiles.push_back(tile);
           }
@@ -178,8 +196,8 @@ namespace osmscout {
             size_t tileCount;
 
             tile.type=GroundTile::coast;
-            tile.x=x-levels[level].cellXStart;
-            tile.y=y-levels[level].cellYStart;
+            tile.x=x-levels[idx].cellXStart;
+            tile.y=y-levels[idx].cellYStart;
 
             tiles.push_back(tile);
 
@@ -193,8 +211,8 @@ namespace osmscout {
               scanner.Read(tileType);
 
               tile.type=(GroundTile::Type)tileType;
-              tile.x=x-levels[level].cellXStart;
-              tile.y=y-levels[level].cellYStart;
+              tile.x=x-levels[idx].cellXStart;
+              tile.y=y-levels[idx].cellYStart;
 
               scanner.ReadNumber(nodeCount);
 

@@ -455,8 +455,7 @@ namespace osmscout {
 
         DrawArea(projection,parameter,areaData);
       }
-
-      /*
+/*
       double cellWidth=360.0;
       double cellHeight=180.0;
       double level=MagToLevel(projection.GetMagnification())+4;

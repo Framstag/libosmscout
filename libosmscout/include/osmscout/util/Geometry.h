@@ -76,6 +76,58 @@ namespace osmscout {
            ub<=1.0;
   }
 
+  /**
+   * Returns true, if the lines defined by the given coordinates intersect. Returns the intersection.
+   */
+  template<typename N>
+  bool GetLineIntersection(const N& a1,
+                           const N& a2,
+                           const N& b1,
+                           const N& b2,
+                           N& intersection)
+  {
+    if (a1.IsEqual(b1) ||
+        a1.IsEqual(b2) ||
+        a2.IsEqual(b1) ||
+        a2.IsEqual(b2)) {
+      return true;
+    }
+
+    double denr=(b2.GetLat()-b1.GetLat())*(a2.GetLon()-a1.GetLon())-
+                (b2.GetLon()-b1.GetLon())*(a2.GetLat()-a1.GetLat());
+
+    double ua_numr=(b2.GetLon()-b1.GetLon())*(a1.GetLat()-b1.GetLat())-
+                   (b2.GetLat()-b1.GetLat())*(a1.GetLon()-b1.GetLon());
+    double ub_numr=(a2.GetLon()-a1.GetLon())*(a1.GetLat()-b1.GetLat())-
+                   (a2.GetLat()-a1.GetLat())*(a1.GetLon()-b1.GetLon());
+
+    if (denr==0.0) {
+      if (ua_numr==0.0 && ub_numr==0.0) {
+        // This gives currently false hits because of number resolution problems, if two lines are very
+        // close together and for example are part of a very details node curve intersections are detected.
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+
+    double ua=ua_numr/denr;
+    double ub=ub_numr/denr;
+
+    if (ua>=0.0 &&
+        ua<=1.0 &&
+        ub>=0.0 &&
+        ub<=1.0) {
+      intersection.Set(a1.GetLat()+ua*(a2.GetLat()-a1.GetLat()),
+                       a1.GetLon()+ua*(a2.GetLon()-a1.GetLon()));
+      return true;
+    }
+
+    return false;
+  }
+
+
   template<typename N>
   double DistanceSquare(const N& a,
                         const N& b)

@@ -34,57 +34,10 @@
 
 #include <iostream>
 
-#define DEBUG_COASTLINE
+//#define DEBUG_COASTLINE
+//#define DEBUG_TILING
 
 namespace osmscout {
-
-  static bool GetLineIntersection(const Point& a1,
-                                  const Point& a2,
-                                  const Point& b1,
-                                  const Point& b2,
-                                  Point& intersection)
-  {
-    if (a1.IsEqual(b1) ||
-        a1.IsEqual(b2) ||
-        a2.IsEqual(b1) ||
-        a2.IsEqual(b2)) {
-      return true;
-    }
-
-    double denr=(b2.GetLat()-b1.GetLat())*(a2.GetLon()-a1.GetLon())-
-                (b2.GetLon()-b1.GetLon())*(a2.GetLat()-a1.GetLat());
-
-    double ua_numr=(b2.GetLon()-b1.GetLon())*(a1.GetLat()-b1.GetLat())-
-                   (b2.GetLat()-b1.GetLat())*(a1.GetLon()-b1.GetLon());
-    double ub_numr=(a2.GetLon()-a1.GetLon())*(a1.GetLat()-b1.GetLat())-
-                   (a2.GetLat()-a1.GetLat())*(a1.GetLon()-b1.GetLon());
-
-    if (denr==0.0) {
-      if (ua_numr==0.0 && ub_numr==0.0) {
-        // This gives currently false hits because of number resolution problems, if two lines are very
-        // close together and for example are part of a very details node curve intersections are detected.
-        return true;
-      }
-      else {
-        return false;
-      }
-    }
-
-    double ua=ua_numr/denr;
-    double ub=ub_numr/denr;
-
-    if (ua>=0.0 &&
-        ua<=1.0 &&
-        ub>=0.0 &&
-        ub<=1.0) {
-      intersection.Set(4711,
-                       a1.GetLat()+ua*(a2.GetLat()-a1.GetLat()),
-                       a1.GetLon()+ua*(a2.GetLon()-a1.GetLon()));
-      return true;
-    }
-
-    return false;
-  }
 
   /**
    * Sets the size of the bitmap and initializes state of all tiles to "unknown"
@@ -307,6 +260,9 @@ namespace osmscout {
 
       for (size_t i=0; i<cells.size(); i++) {
         if (level.IsIn(cells[i].x,cells[i].y)) {
+#if defined(DEBUG_TILING)
+          std::cout << "Coastline: " << cells[i].x << "," << cells[i].y << std::endl;
+#endif
           level.SetStateAbsolute(cells[i].x,cells[i].y,coast);
         }
       }
@@ -368,6 +324,9 @@ namespace osmscout {
             int cy=cells[i].y-level.cellYStart;
 
             if (cx-1>=0 && level.GetState(cx-1,cy)==unknown) {
+#if defined(DEBUG_TILING)
+              std::cout << "Land beneath coast: " << cx-1 << "," << cy << std::endl;
+#endif
               level.SetState(cx-1,cy,land);
             }
           }
@@ -381,6 +340,9 @@ namespace osmscout {
             int cy=cells[i].y-level.cellYStart;
 
             if (cx-1>=0 && level.GetState(cx-1,cy)==unknown) {
+#if defined(DEBUG_TILING)
+              std::cout << "Water beneath coast: " << cx-1 << "," << cy << std::endl;
+#endif
               level.SetState(cx-1,cy,water);
             }
           }
@@ -415,6 +377,9 @@ namespace osmscout {
             int cy=cells[i].y-level.cellYStart;
 
             if (cx+1<level.cellXCount && level.GetState(cx+1,cy)==unknown) {
+#if defined(DEBUG_TILING)
+              std::cout << "Water beneath coast: " << cx+1 << "," << cy << std::endl;
+#endif
               level.SetState(cx+1,cy,water);
             }
           }
@@ -428,6 +393,9 @@ namespace osmscout {
             int cy=cells[i].y-level.cellYStart;
 
             if (cx+1<level.cellXCount && level.GetState(cx+1,cy)==unknown) {
+#if defined(DEBUG_TILING)
+              std::cout << "Land beneath coast: " << cx+1 << "," << cy << std::endl;
+#endif
               level.SetState(cx+1,cy,land);
             }
           }
@@ -488,6 +456,9 @@ namespace osmscout {
             int cy=cells[i].y-level.cellYStart;
 
             if (cy-1>=0 && level.GetState(cx,cy-1)==unknown) {
+#if defined(DEBUG_TILING)
+              std::cout << "Water beneath coast: " << cx << "," << cy-1 << std::endl;
+#endif
               level.SetState(cx,cy-1,water);
             }
           }
@@ -501,6 +472,9 @@ namespace osmscout {
             int cy=cells[i].y-level.cellYStart;
 
             if (cy-1>=0 && level.GetState(cx,cy-1)==unknown) {
+#if defined(DEBUG_TILING)
+              std::cout << "Land beneath coast: " << cx << "," << cy-1 << std::endl;
+#endif
               level.SetState(cx,cy-1,land);
             }
           }
@@ -535,6 +509,9 @@ namespace osmscout {
             int cy=cells[i].y-level.cellYStart;
 
             if (cy+1<level.cellYCount && level.GetState(cx,cy+1)==unknown) {
+#if defined(DEBUG_TILING)
+              std::cout << "Land beneath coast: " << cx << "," << cy+1 << std::endl;
+#endif
               level.SetState(cx,cy+1,land);
             }
           }
@@ -548,6 +525,9 @@ namespace osmscout {
             int cy=cells[i].y-level.cellYStart;
 
             if (cy+1<level.cellYCount && level.GetState(cx,cy+1)==unknown) {
+#if defined(DEBUG_TILING)
+              std::cout << "Water beneath coast: " << cx << "," << cy+1 << std::endl;
+#endif
               level.SetState(cx,cy+1,water);
             }
           }
@@ -611,7 +591,9 @@ namespace osmscout {
           for (size_t i=0; i<cells.size(); i++) {
             if (level.IsIn(cells[i].x,cells[i].y)) {
               if (level.GetState(cells[i].x-level.cellXStart,cells[i].y-level.cellYStart)==unknown) {
-                //std::cout << "Way " << way.GetId() << " " << typeConfig.GetTypeInfo(way.GetType()).GetName() << " is defining area as land" << std::endl;
+#if defined(DEBUG_TILING)
+          std::cout << "Way " << way.GetId() << " " << typeConfig.GetTypeInfo(way.GetType()).GetName() << " is defining area as land" << std::endl;
+#endif
                 level.SetStateAbsolute(cells[i].x,cells[i].y,land);
               }
             }
@@ -671,6 +653,9 @@ namespace osmscout {
               else if (level.GetState(x,y)==coast || level.GetState(x,y)==land) {
                 if (start<level.cellXCount && end<level.cellXCount && start<=end) {
                   for (size_t i=start; i<=end; i++) {
+#if defined(DEBUG_TILING)
+                    std::cout << "Land between: " << i << "," << y << std::endl;
+#endif
                     level.SetState(i,y,land);
                     cont=true;
                   }
@@ -720,6 +705,9 @@ namespace osmscout {
               else if (level.GetState(x,y)==coast || level.GetState(x,y)==land) {
                 if (start<level.cellYCount && end<level.cellYCount && start<=end) {
                   for (size_t i=start; i<=end; i++) {
+#if defined(DEBUG_TILING)
+                    std::cout << "Land between: " << x << "," << i << std::endl;
+#endif
                     level.SetState(x,i,land);
                     cont=true;
                   }
@@ -755,24 +743,36 @@ namespace osmscout {
           if (level.GetState(x,y)==water) {
             if (y>0) {
               if (level.GetState(x,y-1)==unknown) {
+#if defined(DEBUG_TILING)
+                std::cout << "Water beneeth water: " << x << "," << y-1 << std::endl;
+#endif
                 newLevel.SetState(x,y-1,water);
               }
             }
 
             if (y<level.cellYCount-1) {
               if (level.GetState(x,y+1)==unknown) {
+#if defined(DEBUG_TILING)
+                std::cout << "Water beneeth water: " << x << "," << y+1 << std::endl;
+#endif
                 newLevel.SetState(x,y+1,water);
               }
             }
 
             if (x>0) {
               if (level.GetState(x-1,y)==unknown) {
+#if defined(DEBUG_TILING)
+                std::cout << "Water beneeth water: " << x-1 << "," << y << std::endl;
+#endif
                 newLevel.SetState(x-1,y,water);
               }
             }
 
             if (x<level.cellXCount-1) {
               if (level.GetState(x+1,y)==unknown) {
+#if defined(DEBUG_TILING)
+                std::cout << "Water beneeth water: " << x+1 << "," << y << std::endl;
+#endif
                 newLevel.SetState(x+1,y,water);
               }
             }
@@ -788,6 +788,7 @@ namespace osmscout {
                                             FileWriter& writer,
                                             std::vector<Level>& levels)
   {
+    writer.WriteNumber((uint32_t)(parameter.GetWaterIndexMinMag()));
     writer.WriteNumber((uint32_t)(parameter.GetWaterIndexMaxMag()));
 
     for (size_t level=0; level<levels.size(); level++) {
@@ -1442,15 +1443,18 @@ namespace osmscout {
     // Initialize levels
     //
 
-    levels.resize(parameter.GetWaterIndexMaxMag()+1);
+    levels.resize(parameter.GetWaterIndexMaxMag()-parameter.GetWaterIndexMinMag()+1);
 
     cellWidth=360.0;
     cellHeight=180.0;
 
-    for (size_t level=0; level<levels.size(); level++) {
-      levels[level].SetBox(minLatDat,maxLatDat,
-                           minLonDat,maxLonDat,
-                           cellWidth,cellHeight);
+    for (size_t level=0; level<=parameter.GetWaterIndexMaxMag(); level++) {
+      if (level>=parameter.GetWaterIndexMinMag() &&
+          level<=parameter.GetWaterIndexMaxMag()) {
+        levels[level-parameter.GetWaterIndexMinMag()].SetBox(minLatDat,maxLatDat,
+                                                             minLonDat,maxLonDat,
+                                                             cellWidth,cellHeight);
+      }
 
       cellWidth=cellWidth/2;
       cellHeight=cellHeight/2;
@@ -1485,9 +1489,9 @@ namespace osmscout {
       FileOffset         indexOffset;
       MercatorProjection projection;
 
-      projection.Set(0,0,pow(2,level),640,480);
+      projection.Set(0,0,pow(2,level+parameter.GetWaterIndexMinMag()),640,480);
 
-      progress.SetAction("Building tiles for level "+NumberToString(level));
+      progress.SetAction("Building tiles for level "+NumberToString(level+parameter.GetWaterIndexMinMag()));
 
       MarkCoastlineCells(progress,
                          levels[level]);

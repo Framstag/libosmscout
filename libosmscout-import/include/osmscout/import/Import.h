@@ -81,7 +81,8 @@ namespace osmscout {
     size_t                       areaNodeIndexCellSizeAverage; //! Average entries per index cell
     size_t                       areaNodeIndexCellSizeMax; //! Maximum number of entries  per index cell
 
-    size_t                       waterIndexMaxMag;         //! Maximum depth of the index generated
+    size_t                       waterIndexMinMag;         //! Minimum level of the generated water index
+    size_t                       waterIndexMaxMag;         //! Maximum level of the generated water index
 
     size_t                       optimizationMaxMag;       //! Maximum magnification for optimization
     size_t                       optimizationMinMag;       //! Minimum magnification of index for individual type
@@ -137,6 +138,7 @@ namespace osmscout {
 
     size_t GetAreaAreaIndexMaxMag() const;
 
+    size_t GetWaterIndexMinMag() const;
     size_t GetWaterIndexMaxMag() const;
 
     size_t GetOptimizationMaxMag() const;
@@ -190,6 +192,7 @@ namespace osmscout {
     void SetAreaNodeIndexCellSizeAverage(size_t areaNodeIndexCellSizeAverage);
     void SetAreaNodeIndexCellSizeMax(size_t areaNodeIndexCellSizeMax);
 
+    void SetWaterIndexMinMag(size_t waterIndexMinMag);
     void SetWaterIndexMaxMag(size_t waterIndexMaxMag);
 
     void SetOptimizationMaxMag(size_t optimizationMaxMag);

@@ -56,6 +56,8 @@ namespace osmscout {
     std::string                datafilename;   //! Fullpath and name of the data file
     mutable FileScanner        scanner;        //! Scanner instance for reading this file
 
+    uint32_t                   waterIndexMinMag;
+    uint32_t                   waterIndexMaxMag;
     std::vector<Level>         levels;
 
   private:
