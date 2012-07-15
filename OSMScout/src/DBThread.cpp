@@ -300,6 +300,7 @@ void DBThread::TriggerMapRendering()
     drawParameter.SetDebugPerformance(true);
     drawParameter.SetOptimizeWayNodes(osmscout::TransPolygon::quality);
     drawParameter.SetOptimizeAreaNodes(osmscout::TransPolygon::quality);
+    drawParameter.SetRenderSeaLand(false);
     drawParameter.SetBreaker(renderBreakerRef);
 
     std::cout << std::endl;
@@ -341,12 +342,15 @@ void DBThread::TriggerMapRendering()
                         data.areas,
                         data.relationWays,
                         data.relationAreas);
-    /*
-    database.GetGroundTiles(projection.GetLonMin(),
-                            projection.GetLatMin(),
-                            projection.GetLonMax(),
-                            projection.GetLatMax(),
-                            data.groundTiles);*/
+
+    if (drawParameter.GetRenderSeaLand()) {
+      database.GetGroundTiles(projection.GetLonMin(),
+                              projection.GetLatMin(),
+                              projection.GetLonMax(),
+                              projection.GetLatMax(),
+                              projection.GetMagnification(),
+                              data.groundTiles);
+    }
 
     dataRetrievalTimer.Stop();
 

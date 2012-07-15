@@ -31,15 +31,16 @@ OSS
 
  [MAG world-] {
    [TYPE "_route"] WAY {color: #ff000088; displayWidth: 1.5mm; }
-   
-   /*
-   [TYPE "_tile_land"] AREA {color: #f1eee9;}
+
+   /*   
    [TYPE "_tile_sea"] AREA {color: #b5d0d0;}
-   [TYPE "_tile_coast"] AREA {color: #b5d0d0;  borderColor: #000000; borderWidth: 0.1mm;}
+   [TYPE "_tile_coast"] AREA {color: #b5d0d0;}
+   //[TYPE "_tile_coast"] AREA {color: #b5d0d0;  borderColor: #000000; borderWidth: 0.1mm;}
    //[TYPE "_tile_coast"] AREA {color: #aaaaaa;  borderColor: #000000; borderWidth: 0.1mm;}
+   [TYPE "_tile_land"] AREA {color: #f1eee9;}
    [TYPE "_tile_unknown"] AREA {color: #ffffad;}
-   
    */
+   
    [TYPE "natural_coastline"] WAY {color: #ff0000; displayWidth: 0.1mm;}
  }
 

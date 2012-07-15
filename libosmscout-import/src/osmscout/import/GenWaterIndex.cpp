@@ -557,7 +557,7 @@ namespace osmscout {
   }
 
   /**
-   * Every tile that is unknown but contain a way, must be land.
+   * Every tile that is unknown but contains a way, must be land.
    */
   bool WaterIndexGenerator::AssumeLand(const ImportParameter& parameter,
                                        Progress& progress,
@@ -624,7 +624,7 @@ namespace osmscout {
   }
 
   /**
-   * Scanning from left to right and bottom to top: Every tile that is unknown but is places between land and coast or
+   * Scanning from left to right and bottom to top: Every tile that is unknown but is placed between land and coast or
    * land tiles must be land, too.
    */
   void WaterIndexGenerator::FillLand(Progress& progress,
