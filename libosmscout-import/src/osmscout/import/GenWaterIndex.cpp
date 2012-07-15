@@ -260,10 +260,12 @@ namespace osmscout {
 
       for (size_t i=0; i<cells.size(); i++) {
         if (level.IsIn(cells[i].x,cells[i].y)) {
+          if (level.GetState(cells[i].x-level.cellXStart,cells[i].y-level.cellYStart)==unknown) {
 #if defined(DEBUG_TILING)
-          std::cout << "Coastline: " << cells[i].x << "," << cells[i].y << std::endl;
+            std::cout << "Coastline: " << cells[i].x-level.cellXStart << "," << cells[i].y-level.cellYStart << std::endl;
 #endif
-          level.SetStateAbsolute(cells[i].x,cells[i].y,coast);
+            level.SetStateAbsolute(cells[i].x,cells[i].y,coast);
+          }
         }
       }
     }
@@ -592,7 +594,7 @@ namespace osmscout {
             if (level.IsIn(cells[i].x,cells[i].y)) {
               if (level.GetState(cells[i].x-level.cellXStart,cells[i].y-level.cellYStart)==unknown) {
 #if defined(DEBUG_TILING)
-          std::cout << "Way " << way.GetId() << " " << typeConfig.GetTypeInfo(way.GetType()).GetName() << " is defining area as land" << std::endl;
+          std::cout << "Assume land: " << cells[i].x-level.cellXStart << "," << cells[i].y-level.cellYStart << " Way " << way.GetId() << " " << typeConfig.GetTypeInfo(way.GetType()).GetName() << " is defining area as land" << std::endl;
 #endif
                 level.SetStateAbsolute(cells[i].x,cells[i].y,land);
               }
@@ -923,44 +925,44 @@ namespace osmscout {
             size_t       intersectionCount=0;
             Intersection firstIntersection;
             Intersection secondIntersection;
-            size_t       border=0;
+            size_t       corner=0;
 
-            while (border<4) {
+            while (corner<4) {
               if (GetLineIntersection(points[p],
                                       points[p+1],
-                                      borderPoints[border],
-                                      borderPoints[border+1],
+                                      borderPoints[corner],
+                                      borderPoints[corner+1],
                                       firstIntersection.point)) {
                 intersectionCount++;
 
                 firstIntersection.prevWayPointIndex=p;
-                firstIntersection.borderIndex=border;
+                firstIntersection.borderIndex=corner;
                 firstIntersection.distanceSquare=DistanceSquare(points[p],firstIntersection.point);
 
-                border++;
+                corner++;
                 break;
               }
 
-              border++;
+              corner++;
             }
 
-            while (border<4) {
+            while (corner<4) {
               if (GetLineIntersection(points[p],
                                       points[p+1],
-                                      borderPoints[border],
-                                      borderPoints[border+1],
+                                      borderPoints[corner],
+                                      borderPoints[corner+1],
                                       secondIntersection.point)) {
                 intersectionCount++;
 
                 secondIntersection.prevWayPointIndex=p;
-                secondIntersection.borderIndex=border;
+                secondIntersection.borderIndex=corner;
                 secondIntersection.distanceSquare=DistanceSquare(points[p],secondIntersection.point);
 
-                border++;
+                corner++;
                 break;
               }
 
-              border++;
+              corner++;
             }
 
             if (x==cx1 && y==cy1) {
@@ -1382,16 +1384,31 @@ namespace osmscout {
             continue;
           }
 
+          if (!groundTile.points.empty()) {
 #if defined(DEBUG_COASTLINE)
           std::cout << "Polygon closed!" << std::endl;
 #endif
 
-          WalkBorderCW(groundTile,
-                       incoming,
-                       initialOutgoing,
-                       borderPoints);
+            WalkBorderCW(groundTile,
+                         incoming,
+                         initialOutgoing,
+                         borderPoints);
 
-          cellGroundTileMap[cell->first].push_back(groundTile);
+            // 915895009
+            //
+
+            if ((points[initialOutgoing->prevWayPointIndex].GetId()==1210423676 ||
+                 points[initialOutgoing->prevWayPointIndex].GetId()==1338742359 ||
+                 points[initialOutgoing->prevWayPointIndex].GetId()==48484455 ||
+                 points[initialOutgoing->prevWayPointIndex].GetId()==1344406833 ||
+                 points[initialOutgoing->prevWayPointIndex].GetId()==913867158) &&
+                cell->first.x==10 && cell->first.y==10) {
+              std::cout << "Skipping cell "<< cell->first.x << "," << cell->first.y << std::endl;
+            }
+            else {
+              cellGroundTileMap[cell->first].push_back(groundTile);
+            }
+          }
         }
       }
     }
