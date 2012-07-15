@@ -217,6 +217,9 @@ namespace osmscout {
     void GetCellIntersections(const Level& level,
                               const std::vector<Point>& points,
                               std::map<Coord,std::list<Intersection> >& cellIntersections);
+    IntersectionPtr GetPreviousIntersection(std::list<Intersection>& intersections,
+                                            std::list<IntersectionPtr>& intersectionsPathOrder,
+                                            const IntersectionPtr& current);
     void WalkBorderCW(GroundTile& groundTile,
                       const IntersectionPtr& incoming,
                       const IntersectionPtr& outgoing,

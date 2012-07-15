@@ -40,7 +40,7 @@ OSS
    [TYPE "_tile_unknown"] AREA {color: #ffffad;}
    
    */
-	[TYPE "natural_coastline"] WAY {color: #ff0000; displayWidth: 0.1mm;}
+   [TYPE "natural_coastline"] WAY {color: #ff0000; displayWidth: 0.1mm;}
  }
 
  // -------------------------------------------------------

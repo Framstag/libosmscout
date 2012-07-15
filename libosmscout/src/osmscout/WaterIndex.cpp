@@ -95,6 +95,8 @@ namespace osmscout {
 
     level+=4;
 
+    level=std::max(9u,level);
+
     if (level>=levels.size()) {
       level=levels.size()-1;
     }
