@@ -118,7 +118,7 @@ namespace osmscout {
 
     idx-=waterIndexMinMag;
 
-    std::cout << "Level: " << idx << std::endl;
+    std::cout << "Level: " << idx+waterIndexMinMag << std::endl;
 
     tiles.clear();
 
