@@ -281,7 +281,7 @@ TYPES
   
   TYPE "power_tower" = NODE ("power"=="tower")
   TYPE "power_pole" = NODE ("power"=="pole")
-  TYPE "power_line" = WAY ("power"=="line")
+  TYPE "power_line" = WAY ("power"=="line") OPTIONS IGNORESEALAND
   TYPE "power_minor_line" = WAY ("power"=="minor_line")
   TYPE "power_station" = NODE AREA ("power"=="station")
   TYPE "power_sub_station" = NODE AREA ("power"=="sub_station")
@@ -297,7 +297,7 @@ TYPES
   TYPE "barrier_fence" = WAY AREA ("barrier"=="fence") OPTIONS IGNORESEALAND
   TYPE "barrier_wall" = WAY AREA ("barrier"=="wall")
   TYPE "barrier_ditch" = WAY AREA ("barrier"=="ditch")
-  TYPE "barrier_retaining_wall" = WAY AREA ("barrier"=="retaining_wall")
+  TYPE "barrier_retaining_wall" = WAY AREA ("barrier"=="retaining_wall") OPTIONS IGNORESEALAND
   TYPE "barrier_city_wall" = WAY AREA ("barrier"=="city_wall")
   TYPE "barrier_bollard" = NODE WAY ("barrier"=="bollard")
   TYPE "barrier_cycle_barrier" = NODE ("barrier"=="cycle_barrier")
