@@ -39,8 +39,8 @@ OSS
    //[TYPE "_tile_coast"] AREA {color: #aaaaaa;  borderColor: #000000; borderWidth: 0.1mm;}
    [TYPE "_tile_unknown"] AREA {color: #ffffad;}
    
-	[TYPE "natural_coastline"] WAY {color: #ff0000; displayWidth: 0.1mm;}
    */
+	[TYPE "natural_coastline"] WAY {color: #ff0000; displayWidth: 0.1mm;}
  }
 
  // -------------------------------------------------------
@@ -316,7 +316,8 @@ OSS
  }
 
  [MAG proximity-] {    
-   [TYPE "landuse_military"] AREA { color: #fe9898; }
+   // Semiransparent overlay
+   [TYPE "landuse_military"] AREA { color: #fe989822; borderColor: #fe9898; borderWidth: 0.2mm;}
  }
  
  [MAG city-] {
