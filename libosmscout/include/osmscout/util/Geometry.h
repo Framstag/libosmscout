@@ -132,8 +132,10 @@ namespace osmscout {
   double DistanceSquare(const N& a,
                         const N& b)
   {
-    return (a.GetLon()-b.GetLon())*(a.GetLon()-b.GetLon())+
-           (a.GetLat()-b.GetLat())*(a.GetLat()-b.GetLat());
+    double lonDelta=a.GetLon()-b.GetLon();
+    double latDelta=a.GetLat()-b.GetLat();
+
+    return lonDelta*lonDelta+latDelta*latDelta;
   }
 
   /**
