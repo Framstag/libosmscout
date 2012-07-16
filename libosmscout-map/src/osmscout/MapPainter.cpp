@@ -189,10 +189,10 @@ namespace osmscout {
     areaMarkStyle.SetFillColor(Color(1.0,0,0.0,0.5));
 
     landFill=new FillStyle();
-    landFill->SetFillColor(Color(241.0/255,238.0/255,233.0));
+    landFill->SetFillColor(Color(241.0/255,238.0/255,233.0/255));
 
     seaFill=new FillStyle();
-    seaFill->SetFillColor(Color(181.0/255,208.0/255,208.0));
+    seaFill->SetFillColor(Color(181.0/255,208.0/255,208.0/255));
 
     debugLabel=new LabelStyle();
 
