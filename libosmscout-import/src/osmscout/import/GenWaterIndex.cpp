@@ -895,6 +895,7 @@ namespace osmscout {
 
   void WaterIndexGenerator::GetCellIntersections(const Level& level,
                                                  const std::vector<Point>& points,
+                                                 size_t coastline,
                                                  std::map<Coord,std::list<Intersection> >& cellIntersections)
   {
     for (size_t p=0; p<points.size()-1; p++) {
@@ -935,9 +936,10 @@ namespace osmscout {
                                       firstIntersection.point)) {
                 intersectionCount++;
 
+                firstIntersection.coastline=coastline;
                 firstIntersection.prevWayPointIndex=p;
-                firstIntersection.borderIndex=corner;
                 firstIntersection.distanceSquare=DistanceSquare(points[p],firstIntersection.point);
+                firstIntersection.borderIndex=corner;
 
                 corner++;
                 break;
@@ -954,9 +956,10 @@ namespace osmscout {
                                       secondIntersection.point)) {
                 intersectionCount++;
 
+                secondIntersection.coastline=coastline;
                 secondIntersection.prevWayPointIndex=p;
-                secondIntersection.borderIndex=corner;
                 secondIntersection.distanceSquare=DistanceSquare(points[p],secondIntersection.point);
+                secondIntersection.borderIndex=corner;
 
                 corner++;
                 break;
@@ -1020,8 +1023,7 @@ namespace osmscout {
     }
   }
 
-  WaterIndexGenerator::IntersectionPtr WaterIndexGenerator::GetPreviousIntersection(std::list<Intersection>& intersections,
-                                                                                    std::list<IntersectionPtr>& intersectionsPathOrder,
+  WaterIndexGenerator::IntersectionPtr WaterIndexGenerator::GetPreviousIntersection(std::list<IntersectionPtr>& intersectionsPathOrder,
                                                                                     const IntersectionPtr& current)
   {
     std::list<IntersectionPtr>::iterator currentIter=intersectionsPathOrder.begin();
@@ -1032,11 +1034,11 @@ namespace osmscout {
     }
 
     if (currentIter==intersectionsPathOrder.end()) {
-      return intersections.end();
+      return NULL;
     }
 
     if (currentIter==intersectionsPathOrder.begin()) {
-      return intersections.end();
+      return NULL;
     }
 
     currentIter--;
@@ -1152,24 +1154,28 @@ namespace osmscout {
   {
     progress.Info("Handle coastlines partially in a cell");
 
+    std::set<Coord>                                        coastCells;
+    std::vector<std::map<Coord,std::list<Intersection> > > cellIntersections;
+    std::vector<bool>                                      isArea;
+    std::vector<std::vector<Point> >                       points;
+
+    cellIntersections.resize(coastlines.size());
+    isArea.resize(coastlines.size());
+    points.resize(coastlines.size());
+
     size_t currentCoastline=0;
     for (std::list<CoastRef>::const_iterator c=coastlines.begin();
         c!=coastlines.end();
         ++c) {
       const  CoastRef& coast=*c;
 
-      currentCoastline++;
       progress.SetProgress(currentCoastline,coastlines.size());
 
+      TransPolygon polygon;
 
-      TransPolygon                             polygon;
-      std::vector<Point>                       points;
-      std::map<Coord,std::list<Intersection> > cellIntersections;
-      bool                                     isArea;
+      isArea[currentCoastline]=coast->coast.front().GetId()==coast->coast.back().GetId();
 
-      isArea=coast->coast.front().GetId()==coast->coast.back().GetId();
-
-      if (isArea) {
+      if (isArea[currentCoastline]) {
         // TODO: We already handled areas that are completely within one cell, we should skip them here
         polygon.TransformArea(projection,parameter.GetOptimizationWayMethod(),coast->coast, 1.0);
       }
@@ -1180,235 +1186,264 @@ namespace osmscout {
       points.reserve(coast->coast.size());
       for (size_t p=polygon.GetStart(); p<=polygon.GetEnd(); p++) {
         if (polygon.points[p].draw) {
-          points.push_back(coast->coast[p]);
+          points[currentCoastline].push_back(coast->coast[p]);
         }
       }
 
       // Currently transformation optimization code some times draw the closing points for areas
-      if (isArea &&
-          points.front().GetId()!=points.back().GetId()) {
-        points.push_back(points.front());
+      if (isArea[currentCoastline] &&
+          points[currentCoastline].front().GetId()!=points[currentCoastline].back().GetId()) {
+        points[currentCoastline].push_back(points[currentCoastline].front());
       }
 
       // Calculate all intersections for all path steps for all cells covered
       GetCellIntersections(level,
-                           points,
-                           cellIntersections);
+                           points[currentCoastline],
+                           currentCoastline,
+                           cellIntersections[currentCoastline]);
 
-      // No intersections
-      if (cellIntersections.size()==0) {
-        continue;
+      for (std::map<Coord,std::list<Intersection> >::iterator cell=cellIntersections[currentCoastline].begin();
+          cell!=cellIntersections[currentCoastline].end();
+          ++cell) {
+        coastCells.insert(cell->first);
       }
 
-      // For every cell with intersections
-      for (std::map<Coord,std::list<Intersection> >::iterator cell=cellIntersections.begin();
-          cell!=cellIntersections.end();
-          ++cell) {
-        double xmin,xmax,ymin,ymax;
-        Point  borderPoints[4];
+      currentCoastline++;
 
-        xmin=(level.cellXStart+cell->first.x)*level.cellWidth-180.0;
-        xmax=(level.cellXStart+cell->first.x+1)*level.cellWidth-180.0;
-        ymin=(level.cellYStart+cell->first.y)*level.cellHeight-90.0;
-        ymax=(level.cellYStart+cell->first.y+1)*level.cellHeight-90.0;
+    }
 
-        borderPoints[0]=Point(1,ymax,xmin); // top left
-        borderPoints[1]=Point(2,ymax,xmax); // top right
-        borderPoints[2]=Point(3,ymin,xmax); // bottom right
-        borderPoints[3]=Point(4,ymin,xmin); // bottom left
 
-        std::list<IntersectionPtr> intersectionsOuter;
-        std::list<IntersectionPtr> intersectionsPathOrder;
-        std::list<IntersectionPtr> intersectionsCW;
+    // For every cell with intersections
+    for (std::set<Coord>::const_iterator cell=coastCells.begin();
+         cell!=coastCells.end();
+        ++cell) {
+      std::list<IntersectionPtr>               intersectionsCW;
+      std::list<IntersectionPtr>               intersectionsOuter;
+      std::vector<std::list<IntersectionPtr> > intersectionsPathOrder;
 
-        // Build list of intersections in path order and list of intersections in clock wise order
-        for (IntersectionPtr inter=cell->second.begin();
-            inter!=cell->second.end();
-            ++inter) {
-          intersectionsPathOrder.push_back(inter);
-          intersectionsCW.push_back(inter);
+      intersectionsPathOrder.resize(coastlines.size());
+
+      for (size_t currentCoastline=0;
+          currentCoastline<coastlines.size();
+          currentCoastline++) {
+        std::map<Coord,std::list<Intersection> >::iterator cellData=cellIntersections[currentCoastline].find(*cell);
+
+        if (cellData==cellIntersections[currentCoastline].end()) {
+          continue;
         }
 
-        intersectionsPathOrder.sort(IntersectionByPathComparator());
-        intersectionsCW.sort(IntersectionCWComparator());
+        // Build list of intersections in path order and list of intersections in clock wise order
+        for (std::list<Intersection>::iterator inter=cellData->second.begin();
+            inter!=cellData->second.end();
+            ++inter) {
+          IntersectionPtr intersection=&(*inter);
 
-        for (std::list<IntersectionPtr>::reverse_iterator inter=intersectionsPathOrder.rbegin();
-            inter!=intersectionsPathOrder.rend();
+          intersectionsPathOrder[currentCoastline].push_back(intersection);
+          intersectionsCW.push_back(intersection);
+        }
+
+        intersectionsPathOrder[currentCoastline].sort(IntersectionByPathComparator());
+
+        // Fix intersection order for areas
+        if (isArea[currentCoastline] &&
+            intersectionsPathOrder[currentCoastline].front()->direction==-1) {
+          intersectionsPathOrder[currentCoastline].push_back(intersectionsPathOrder[currentCoastline].front());
+          intersectionsPathOrder[currentCoastline].pop_front();
+        }
+
+        for (std::list<IntersectionPtr>::reverse_iterator inter=intersectionsPathOrder[currentCoastline].rbegin();
+            inter!=intersectionsPathOrder[currentCoastline].rend();
             inter++) {
           if ((*inter)->direction==-1) {
             intersectionsOuter.push_back(*inter);
           }
         }
-
-        // Fix intersection order for areas
-        if (isArea &&
-            intersectionsPathOrder.front()->direction==-1) {
-          intersectionsPathOrder.push_back(intersectionsPathOrder.front());
-          intersectionsPathOrder.pop_front();
-        }
+      }
 
 
-#if defined(DEBUG_COASTLINE)
-        std::cout << "-- Cell: " << cell->first.x << "," << cell->first.y << std::endl;
+      intersectionsCW.sort(IntersectionCWComparator());
 
-        for (std::list<IntersectionPtr>::const_iterator iter=intersectionsPathOrder.begin();
-            iter!=intersectionsPathOrder.end();
-            ++iter) {
-          IntersectionPtr intersection=*iter;
-          std::cout <<"> "  << points[intersection->prevWayPointIndex].GetId() << " " << intersection->prevWayPointIndex << " " << intersection->distanceSquare << " " << intersection->point.GetLat() << "," << intersection->point.GetLon() << " " << intersection->borderIndex << " " << intersection->direction << std::endl;
-        }
+      double xmin,xmax,ymin,ymax;
+      Point  borderPoints[4];
 
-        for (std::list<IntersectionPtr>::const_iterator iter=intersectionsCW.begin();
-            iter!=intersectionsCW.end();
-            ++iter) {
-          IntersectionPtr intersection=*iter;
-          std::cout <<"* "  << points[intersection->prevWayPointIndex].GetId() << " " << intersection->prevWayPointIndex << " " << intersection->distanceSquare << " " << intersection->point.GetLat() << "," << intersection->point.GetLon() << " " << intersection->borderIndex << " " << intersection->direction << std::endl;
-        }
-#endif
+      xmin=(level.cellXStart+cell->x)*level.cellWidth-180.0;
+      xmax=(level.cellXStart+cell->x+1)*level.cellWidth-180.0;
+      ymin=(level.cellYStart+cell->y)*level.cellHeight-90.0;
+      ymax=(level.cellYStart+cell->y+1)*level.cellHeight-90.0;
 
-        while (!intersectionsOuter.empty()) {
-          GroundTile      groundTile(GroundTile::land);
-          IntersectionPtr initialOutgoing;
-
-          // Take an unused outgoing intersection as far possible down the path
-          initialOutgoing=intersectionsOuter.front();
-          intersectionsOuter.pop_front();
+      borderPoints[0]=Point(1,ymax,xmin); // top left
+      borderPoints[1]=Point(2,ymax,xmax); // top right
+      borderPoints[2]=Point(3,ymin,xmax); // bottom right
+      borderPoints[3]=Point(4,ymin,xmin); // bottom left
 
 #if defined(DEBUG_COASTLINE)
-          std::cout << "Outgoing: " << initialOutgoing->prevWayPointIndex << " " << initialOutgoing->distanceSquare << std::endl;
+      std::cout << "-- Cell: " << cell->x << "," << cell->y << std::endl;
+
+      for (size_t currentCoastline=0;
+          currentCoastline<coastlines.size();
+          currentCoastline++) {
+        if (!intersectionsPathOrder[currentCoastline].empty()) {
+          std::cout << "Coastline " << currentCoastline << std::endl;
+          for (std::list<IntersectionPtr>::const_iterator iter=intersectionsPathOrder[currentCoastline].begin();
+              iter!=intersectionsPathOrder[currentCoastline].end();
+              ++iter) {
+            IntersectionPtr intersection=*iter;
+            std::cout <<"> "  << intersection->coastline << " " << points[intersection->coastline][intersection->prevWayPointIndex].GetId() << " " << intersection->prevWayPointIndex << " " << intersection->distanceSquare << " " << intersection->point.GetLat() << "," << intersection->point.GetLon() << " " << (unsigned int)intersection->borderIndex << " " << (int)intersection->direction << std::endl;
+          }
+        }
+      }
+
+      for (std::list<IntersectionPtr>::const_iterator iter=intersectionsCW.begin();
+          iter!=intersectionsCW.end();
+          ++iter) {
+        IntersectionPtr intersection=*iter;
+        std::cout <<"* "  << intersection->coastline << " " << points[intersection->coastline][intersection->prevWayPointIndex].GetId() << " " << (unsigned int)intersection->prevWayPointIndex << " " << intersection->distanceSquare << " " << intersection->point.GetLat() << "," << intersection->point.GetLon() << " " << (unsigned int)intersection->borderIndex << " " << (int)intersection->direction << std::endl;
+      }
+
+      std::cout << "=> " << intersectionsOuter.size() << " outers" << std::endl;
 #endif
 
-          groundTile.points.push_back(initialOutgoing->point);
+      while (!intersectionsOuter.empty()) {
+        GroundTile      groundTile(GroundTile::land);
+        IntersectionPtr initialOutgoing;
 
+        // Take an unused outgoing intersection as far possible down the path
+        initialOutgoing=intersectionsOuter.front();
+        intersectionsOuter.pop_front();
 
-          IntersectionPtr incoming=GetPreviousIntersection(cell->second,
-                                                           intersectionsPathOrder,
-                                                           initialOutgoing);
-
-          if (incoming==cell->second.end()) {
 #if defined(DEBUG_COASTLINE)
-            std::cerr << "Polygon is not closed, but cannot find incoming" << std::endl;
+        std::cout << "Outgoing: " << initialOutgoing->coastline << " " << initialOutgoing->prevWayPointIndex << " " << initialOutgoing->distanceSquare << std::endl;
 #endif
 
+        groundTile.points.push_back(initialOutgoing->point);
+
+
+        IntersectionPtr incoming=GetPreviousIntersection(intersectionsPathOrder[initialOutgoing->coastline],
+                                                         initialOutgoing);
+
+        if (incoming==NULL) {
+#if defined(DEBUG_COASTLINE)
+          std::cerr << "Polygon is not closed, but cannot find incoming" << std::endl;
+#endif
+
+          continue;
+        }
+
+#if defined(DEBUG_COASTLINE)
+        std::cout << "Incoming: " << incoming->coastline << " " << incoming->prevWayPointIndex << " " << incoming->distanceSquare << std::endl;
+#endif
+
+        if (incoming->direction!=1) {
+#if defined(DEBUG_COASTLINE)
+          std::cerr << "The intersection before the outgoing intersection is not incoming as expected" << std::endl;
+#endif
+
+          continue;
+        }
+
+        WalkPathBack(groundTile,
+                     initialOutgoing,
+                     incoming,
+                     points[initialOutgoing->coastline],
+                     isArea[initialOutgoing->coastline]);
+
+        IntersectionPtr nextCWIter=GetNextCW(intersectionsCW,
+                                             incoming);
+
+        bool error=false;
+
+        while (!error &&
+               nextCWIter!=initialOutgoing) {
+#if defined(DEBUG_COASTLINE)
+          std::cout << "Next CW: " << nextCWIter->coastline << " " << nextCWIter->prevWayPointIndex << " " << nextCWIter->distanceSquare << std::endl;
+#endif
+
+          IntersectionPtr outgoing=nextCWIter;
+
+#if defined(DEBUG_COASTLINE)
+          std::cout << "Outgoing: " << outgoing->coastline << " " << outgoing->prevWayPointIndex << " " << outgoing->distanceSquare << std::endl;
+#endif
+
+          if (outgoing->direction!=-1) {
+#if defined(DEBUG_COASTLINE)
+            std::cerr << "We expect an outgoing intersection" << std::endl;
+#endif
+
+            error=true;
+            continue;
+          }
+
+          intersectionsOuter.remove(outgoing);
+
+          WalkBorderCW(groundTile,
+                       incoming,
+                       outgoing,
+                       borderPoints);
+
+          incoming=GetPreviousIntersection(intersectionsPathOrder[outgoing->coastline],
+                                           outgoing);
+
+          if (incoming==NULL) {
+#if defined(DEBUG_COASTLINE)
+            std::cerr << "Polygon is not closed, but there are no intersections left" << std::endl;
+#endif
+
+            error=true;
             continue;
           }
 
 #if defined(DEBUG_COASTLINE)
-          std::cout << "Incoming: " << incoming->prevWayPointIndex << " " << incoming->distanceSquare << std::endl;
+          std::cout << "Incoming: " << incoming->coastline << " " << incoming->prevWayPointIndex << " " << incoming->distanceSquare << std::endl;
 #endif
 
           if (incoming->direction!=1) {
 #if defined(DEBUG_COASTLINE)
-            std::cerr << "The intersection before the outgoing intersection is not incoming as expected" << std::endl;
+            std::cerr << "We expect an incoming intersection" << std::endl;
 #endif
 
+            error=true;
             continue;
           }
 
           WalkPathBack(groundTile,
-                       initialOutgoing,
+                       outgoing,
                        incoming,
-                       points,
-                       isArea);
+                       points[outgoing->coastline],
+                       isArea[outgoing->coastline]);
 
-          IntersectionPtr nextCWIter=GetNextCW(intersectionsCW,
-                                               incoming);
+          nextCWIter=GetNextCW(intersectionsCW,
+                               incoming);
+        }
 
-          bool error=false;
+        if (error) {
+          continue;
+        }
 
-          while (!error &&
-                 nextCWIter!=initialOutgoing) {
+        if (!groundTile.points.empty()) {
 #if defined(DEBUG_COASTLINE)
-            std::cout << "Next CW: " << nextCWIter->prevWayPointIndex << " " << nextCWIter->distanceSquare << std::endl;
+        std::cout << "Polygon closed!" << std::endl;
 #endif
 
-            IntersectionPtr outgoing=nextCWIter;
+          WalkBorderCW(groundTile,
+                       incoming,
+                       initialOutgoing,
+                       borderPoints);
 
-#if defined(DEBUG_COASTLINE)
-            std::cout << "Outgoing: " << outgoing->prevWayPointIndex << " " << outgoing->distanceSquare << std::endl;
-#endif
+          // 915895009
+          //
 
-            if (outgoing->direction!=-1) {
-#if defined(DEBUG_COASTLINE)
-              std::cerr << "We expect an outgoing intersection" << std::endl;
-#endif
-
-              error=true;
-              continue;
-            }
-
-            intersectionsOuter.remove(outgoing);
-
-            WalkBorderCW(groundTile,
-                         incoming,
-                         outgoing,
-                         borderPoints);
-
-            incoming=GetPreviousIntersection(cell->second,
-                                             intersectionsPathOrder,
-                                             outgoing);
-
-            if (incoming==cell->second.end()) {
-#if defined(DEBUG_COASTLINE)
-              std::cerr << "Polygon is not closed, but there are no intersections left" << std::endl;
-#endif
-
-              error=true;
-              continue;
-            }
-
-#if defined(DEBUG_COASTLINE)
-            std::cout << "Incoming: " << incoming->prevWayPointIndex << " " << incoming->distanceSquare << std::endl;
-#endif
-
-            if (incoming->direction!=1) {
-#if defined(DEBUG_COASTLINE)
-              std::cerr << "We expect an incoming intersection" << std::endl;
-#endif
-
-              error=true;
-              continue;
-            }
-
-            WalkPathBack(groundTile,
-                         outgoing,
-                         incoming,
-                         points,
-                         isArea);
-
-            nextCWIter=GetNextCW(intersectionsCW,
-                                 incoming);
+          /*
+          if ((points[currentCoastline][initialOutgoing->prevWayPointIndex].GetId()==1210423676 ||
+               points[currentCoastline][initialOutgoing->prevWayPointIndex].GetId()==1338742359 ||
+               points[currentCoastline][initialOutgoing->prevWayPointIndex].GetId()==48484455 ||
+               points[currentCoastline][initialOutgoing->prevWayPointIndex].GetId()==1344406833 ||
+               points[currentCoastline][initialOutgoing->prevWayPointIndex].GetId()==913867158) &&
+              cellData->first.x==10 && cellData->first.y==10) {
+            std::cout << "Skipping cell "<< cellData->first.x << "," << cellData->first.y << std::endl;
           }
-
-          if (error) {
-            continue;
-          }
-
-          if (!groundTile.points.empty()) {
-#if defined(DEBUG_COASTLINE)
-          std::cout << "Polygon closed!" << std::endl;
-#endif
-
-            WalkBorderCW(groundTile,
-                         incoming,
-                         initialOutgoing,
-                         borderPoints);
-
-            // 915895009
-            //
-
-            if ((points[initialOutgoing->prevWayPointIndex].GetId()==1210423676 ||
-                 points[initialOutgoing->prevWayPointIndex].GetId()==1338742359 ||
-                 points[initialOutgoing->prevWayPointIndex].GetId()==48484455 ||
-                 points[initialOutgoing->prevWayPointIndex].GetId()==1344406833 ||
-                 points[initialOutgoing->prevWayPointIndex].GetId()==913867158) &&
-                cell->first.x==10 && cell->first.y==10) {
-              std::cout << "Skipping cell "<< cell->first.x << "," << cell->first.y << std::endl;
-            }
-            else {
-              cellGroundTileMap[cell->first].push_back(groundTile);
-            }
-          }
+          else {*/
+            cellGroundTileMap[*cell].push_back(groundTile);
+          //}
         }
       }
     }
@@ -1506,7 +1541,7 @@ namespace osmscout {
       FileOffset         indexOffset;
       MercatorProjection projection;
 
-      projection.Set(0,0,pow(2,level+parameter.GetWaterIndexMinMag()),640,480);
+      projection.Set(0,0,pow(2.0,(double)(level+parameter.GetWaterIndexMinMag())),640,480);
 
       progress.SetAction("Building tiles for level "+NumberToString(level+parameter.GetWaterIndexMinMag()));
 

@@ -45,14 +45,15 @@ namespace osmscout {
 
     struct Intersection
     {
-      Point  point;              //! The intersection point
-      size_t prevWayPointIndex;  //! The index of the path point before the intersection
-      int    direction;          //! 1 in, 0 touch, -1 out
-      size_t borderIndex;        //! The index of the border that gets intersected
-      double distanceSquare;     //! The distance^2 between the path point and the intersectionPoint
+      size_t        coastline;          //! Running number of the intersecting coastline
+      size_t        prevWayPointIndex;  //! The index of the path point before the intersection
+      Point         point;              //! The intersection point
+      double        distanceSquare;     //! The distance^2 between the path point and the intersectionPoint
+      char          direction;          //! 1 in, 0 touch, -1 out
+      unsigned char borderIndex;        //! The index of the border that gets intersected
     };
 
-    typedef std::list<Intersection>::iterator IntersectionPtr;
+    typedef Intersection *IntersectionPtr;
 
     struct IntersectionByPathComparator
     {
@@ -216,9 +217,9 @@ namespace osmscout {
                                                std::map<Coord,std::list<GroundTile> >& cellGroundTileMap);
     void GetCellIntersections(const Level& level,
                               const std::vector<Point>& points,
+                              size_t coastline,
                               std::map<Coord,std::list<Intersection> >& cellIntersections);
-    IntersectionPtr GetPreviousIntersection(std::list<Intersection>& intersections,
-                                            std::list<IntersectionPtr>& intersectionsPathOrder,
+    IntersectionPtr GetPreviousIntersection(std::list<IntersectionPtr>& intersectionsPathOrder,
                                             const IntersectionPtr& current);
     void WalkBorderCW(GroundTile& groundTile,
                       const IntersectionPtr& incoming,
