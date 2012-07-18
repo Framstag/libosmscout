@@ -321,7 +321,7 @@ namespace osmscout {
       }
 
       if (!AreaIsSimple(ring.nodes)) {
-        progress.Error("Resolved ring is not simple for multipolygon relation "+NumberToString(relation.GetId())+
+        progress.Error("Resolved ring including way "+NumberToString(ring.ways.front()->GetId())+" is not simple for multipolygon relation "+NumberToString(relation.GetId())+
                        " "+relation.GetName());
 
         return false;
