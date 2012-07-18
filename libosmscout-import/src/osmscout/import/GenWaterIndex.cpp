@@ -746,7 +746,7 @@ namespace osmscout {
             if (y>0) {
               if (level.GetState(x,y-1)==unknown) {
 #if defined(DEBUG_TILING)
-                std::cout << "Water beneeth water: " << x << "," << y-1 << std::endl;
+                std::cout << "Water beneath water: " << x << "," << y-1 << std::endl;
 #endif
                 newLevel.SetState(x,y-1,water);
               }
@@ -755,7 +755,7 @@ namespace osmscout {
             if (y<level.cellYCount-1) {
               if (level.GetState(x,y+1)==unknown) {
 #if defined(DEBUG_TILING)
-                std::cout << "Water beneeth water: " << x << "," << y+1 << std::endl;
+                std::cout << "Water beneath water: " << x << "," << y+1 << std::endl;
 #endif
                 newLevel.SetState(x,y+1,water);
               }
@@ -764,7 +764,7 @@ namespace osmscout {
             if (x>0) {
               if (level.GetState(x-1,y)==unknown) {
 #if defined(DEBUG_TILING)
-                std::cout << "Water beneeth water: " << x-1 << "," << y << std::endl;
+                std::cout << "Water beneath water: " << x-1 << "," << y << std::endl;
 #endif
                 newLevel.SetState(x-1,y,water);
               }
@@ -773,7 +773,7 @@ namespace osmscout {
             if (x<level.cellXCount-1) {
               if (level.GetState(x+1,y)==unknown) {
 #if defined(DEBUG_TILING)
-                std::cout << "Water beneeth water: " << x+1 << "," << y << std::endl;
+                std::cout << "Water beneath water: " << x+1 << "," << y << std::endl;
 #endif
                 newLevel.SetState(x+1,y,water);
               }
@@ -1109,24 +1109,33 @@ namespace osmscout {
                                          bool isArea)
   {
     if (isArea) {
-      size_t idx=outgoing->prevWayPointIndex;
-      size_t targetIdx=incoming->prevWayPointIndex+1;
-
-      if (targetIdx==points.size()) {
-        targetIdx=0;
+      if (outgoing->prevWayPointIndex==incoming->prevWayPointIndex &&
+          outgoing->distanceSquare>incoming->distanceSquare) {
+        groundTile.points.push_back(incoming->point);
       }
+      else {
+        size_t idx=outgoing->prevWayPointIndex;
+        size_t targetIdx=incoming->prevWayPointIndex+1;
 
-      while (idx!=targetIdx) {
+        if (targetIdx==points.size()) {
+          targetIdx=0;
+        }
+
+        while (idx!=targetIdx) {
+          groundTile.points.push_back(points[idx]);
+
+          if (idx>0) {
+            idx--;
+          }
+          else {
+            idx=points.size()-1;
+          }
+        }
+
         groundTile.points.push_back(points[idx]);
 
-        if (idx>0) {
-          idx--;
-        }
-        else {
-          idx=points.size()-1;
-        }
+        groundTile.points.push_back(incoming->point);
       }
-      groundTile.points.push_back(points[idx]);
     }
     else {
       size_t targetIdx=incoming->prevWayPointIndex+1;
@@ -1136,9 +1145,10 @@ namespace osmscout {
           idx--) {
         groundTile.points.push_back(points[idx]);
       }
+
+      groundTile.points.push_back(incoming->point);
     }
 
-    groundTile.points.push_back(incoming->point);
   }
 
   /**
@@ -1154,7 +1164,7 @@ namespace osmscout {
   {
     progress.Info("Handle coastlines partially in a cell");
 
-    std::set<Coord>                                        coastCells;
+    std::map<Coord,std::list<size_t> >                     cellCoastlines;
     std::vector<std::map<Coord,std::list<Intersection> > > cellIntersections;
     std::vector<bool>                                      isArea;
     std::vector<std::vector<Point> >                       points;
@@ -1205,30 +1215,34 @@ namespace osmscout {
       for (std::map<Coord,std::list<Intersection> >::iterator cell=cellIntersections[currentCoastline].begin();
           cell!=cellIntersections[currentCoastline].end();
           ++cell) {
-        coastCells.insert(cell->first);
+        cellCoastlines[cell->first].push_back(currentCoastline);
       }
 
       currentCoastline++;
 
     }
 
-
     // For every cell with intersections
-    for (std::set<Coord>::const_iterator cell=coastCells.begin();
-         cell!=coastCells.end();
+    size_t currentCell=0;
+    for (std::map<Coord,std::list<size_t> >::const_iterator cell=cellCoastlines.begin();
+         cell!=cellCoastlines.end();
         ++cell) {
+      progress.SetProgress(currentCell,cellCoastlines.size());
+
+      currentCell++;
+
       std::list<IntersectionPtr>               intersectionsCW;
       std::list<IntersectionPtr>               intersectionsOuter;
       std::vector<std::list<IntersectionPtr> > intersectionsPathOrder;
 
       intersectionsPathOrder.resize(coastlines.size());
 
-      for (size_t currentCoastline=0;
-          currentCoastline<coastlines.size();
-          currentCoastline++) {
-        std::map<Coord,std::list<Intersection> >::iterator cellData=cellIntersections[currentCoastline].find(*cell);
+      for (std::list<size_t>::const_iterator currentCoastline=cell->second.begin();
+          currentCoastline!=cell->second.end();
+          ++currentCoastline) {
+        std::map<Coord,std::list<Intersection> >::iterator cellData=cellIntersections[*currentCoastline].find(cell->first);
 
-        if (cellData==cellIntersections[currentCoastline].end()) {
+        if (cellData==cellIntersections[*currentCoastline].end()) {
           continue;
         }
 
@@ -1238,21 +1252,21 @@ namespace osmscout {
             ++inter) {
           IntersectionPtr intersection=&(*inter);
 
-          intersectionsPathOrder[currentCoastline].push_back(intersection);
+          intersectionsPathOrder[*currentCoastline].push_back(intersection);
           intersectionsCW.push_back(intersection);
         }
 
-        intersectionsPathOrder[currentCoastline].sort(IntersectionByPathComparator());
+        intersectionsPathOrder[*currentCoastline].sort(IntersectionByPathComparator());
 
         // Fix intersection order for areas
-        if (isArea[currentCoastline] &&
-            intersectionsPathOrder[currentCoastline].front()->direction==-1) {
-          intersectionsPathOrder[currentCoastline].push_back(intersectionsPathOrder[currentCoastline].front());
-          intersectionsPathOrder[currentCoastline].pop_front();
+        if (isArea[*currentCoastline] &&
+            intersectionsPathOrder[*currentCoastline].front()->direction==-1) {
+          intersectionsPathOrder[*currentCoastline].push_back(intersectionsPathOrder[*currentCoastline].front());
+          intersectionsPathOrder[*currentCoastline].pop_front();
         }
 
-        for (std::list<IntersectionPtr>::reverse_iterator inter=intersectionsPathOrder[currentCoastline].rbegin();
-            inter!=intersectionsPathOrder[currentCoastline].rend();
+        for (std::list<IntersectionPtr>::reverse_iterator inter=intersectionsPathOrder[*currentCoastline].rbegin();
+            inter!=intersectionsPathOrder[*currentCoastline].rend();
             inter++) {
           if ((*inter)->direction==-1) {
             intersectionsOuter.push_back(*inter);
@@ -1266,10 +1280,10 @@ namespace osmscout {
       double xmin,xmax,ymin,ymax;
       Point  borderPoints[4];
 
-      xmin=(level.cellXStart+cell->x)*level.cellWidth-180.0;
-      xmax=(level.cellXStart+cell->x+1)*level.cellWidth-180.0;
-      ymin=(level.cellYStart+cell->y)*level.cellHeight-90.0;
-      ymax=(level.cellYStart+cell->y+1)*level.cellHeight-90.0;
+      xmin=(level.cellXStart+cell->first.x)*level.cellWidth-180.0;
+      xmax=(level.cellXStart+cell->first.x+1)*level.cellWidth-180.0;
+      ymin=(level.cellYStart+cell->first.y)*level.cellHeight-90.0;
+      ymax=(level.cellYStart+cell->first.y+1)*level.cellHeight-90.0;
 
       borderPoints[0]=Point(1,ymax,xmin); // top left
       borderPoints[1]=Point(2,ymax,xmax); // top right
@@ -1277,7 +1291,7 @@ namespace osmscout {
       borderPoints[3]=Point(4,ymin,xmin); // bottom left
 
 #if defined(DEBUG_COASTLINE)
-      std::cout << "-- Cell: " << cell->x << "," << cell->y << std::endl;
+      std::cout << "-- Cell: " << cell->first.x << "," << cell->first.y << std::endl;
 
       for (size_t currentCoastline=0;
           currentCoastline<coastlines.size();
@@ -1293,14 +1307,13 @@ namespace osmscout {
         }
       }
 
+      std::cout << "-" << std::endl;
       for (std::list<IntersectionPtr>::const_iterator iter=intersectionsCW.begin();
           iter!=intersectionsCW.end();
           ++iter) {
         IntersectionPtr intersection=*iter;
         std::cout <<"* "  << intersection->coastline << " " << points[intersection->coastline][intersection->prevWayPointIndex].GetId() << " " << (unsigned int)intersection->prevWayPointIndex << " " << intersection->distanceSquare << " " << intersection->point.GetLat() << "," << intersection->point.GetLon() << " " << (unsigned int)intersection->borderIndex << " " << (int)intersection->direction << std::endl;
       }
-
-      std::cout << "=> " << intersectionsOuter.size() << " outers" << std::endl;
 #endif
 
       while (!intersectionsOuter.empty()) {
@@ -1312,7 +1325,7 @@ namespace osmscout {
         intersectionsOuter.pop_front();
 
 #if defined(DEBUG_COASTLINE)
-        std::cout << "Outgoing: " << initialOutgoing->coastline << " " << initialOutgoing->prevWayPointIndex << " " << initialOutgoing->distanceSquare << std::endl;
+        std::cout << "Outgoing: " << initialOutgoing->coastline << " " << initialOutgoing->prevWayPointIndex << " " << initialOutgoing->distanceSquare << " " << isArea[initialOutgoing->coastline] << std::endl;
 #endif
 
         groundTile.points.push_back(initialOutgoing->point);
@@ -1429,21 +1442,7 @@ namespace osmscout {
                        initialOutgoing,
                        borderPoints);
 
-          // 915895009
-          //
-
-          /*
-          if ((points[currentCoastline][initialOutgoing->prevWayPointIndex].GetId()==1210423676 ||
-               points[currentCoastline][initialOutgoing->prevWayPointIndex].GetId()==1338742359 ||
-               points[currentCoastline][initialOutgoing->prevWayPointIndex].GetId()==48484455 ||
-               points[currentCoastline][initialOutgoing->prevWayPointIndex].GetId()==1344406833 ||
-               points[currentCoastline][initialOutgoing->prevWayPointIndex].GetId()==913867158) &&
-              cellData->first.x==10 && cellData->first.y==10) {
-            std::cout << "Skipping cell "<< cellData->first.x << "," << cellData->first.y << std::endl;
-          }
-          else {*/
-            cellGroundTileMap[*cell].push_back(groundTile);
-          //}
+          cellGroundTileMap[cell->first].push_back(groundTile);
         }
       }
     }
