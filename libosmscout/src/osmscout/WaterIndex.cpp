@@ -105,7 +105,7 @@ namespace osmscout {
                               std::list<GroundTile>& tiles) const
   {
     uint32_t cx1,cx2,cy1,cy2;
-    size_t idx=MagToLevel(magnification);
+    uint32_t idx=(uint32_t)MagToLevel(magnification);
 
     if (levels.empty()) {
       return true;
@@ -193,7 +193,7 @@ namespace osmscout {
             tiles.push_back(tile);
           }
           else {
-            size_t tileCount;
+            uint32_t tileCount;
 
             tile.type=GroundTile::coast;
             tile.x=x-levels[idx].cellXStart;
@@ -206,7 +206,7 @@ namespace osmscout {
 
             for (size_t t=1; t<=tileCount; t++) {
               uint8_t    tileType;
-              size_t     nodeCount;
+              uint32_t   nodeCount;
 
               scanner.Read(tileType);
 
