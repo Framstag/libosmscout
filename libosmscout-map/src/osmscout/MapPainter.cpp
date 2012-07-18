@@ -28,6 +28,8 @@
 
 #include <osmscout/private/Math.h>
 
+//#define DEBUG_GROUNDTILES
+
 namespace osmscout {
 
   /**
@@ -455,7 +457,8 @@ namespace osmscout {
 
         DrawArea(projection,parameter,areaData);
       }
-/*
+
+#if defined(DEBUG_GROUNDTILES)
       double cellWidth=360.0;
       double cellHeight=180.0;
       double level=MagToLevel(projection.GetMagnification())+4;
@@ -509,7 +512,8 @@ namespace osmscout {
 
       labels.push_back(labelData);
 
-      drawnLabels.insert(Coord(x,y));*/
+      drawnLabels.insert(Coord(x,y));
+#endif
     }
   }
 
