@@ -376,8 +376,12 @@ namespace osmscout {
                                    const MapParameter& parameter,
                                    const MapData& data)
   {
-    size_t       level=MagToLevel(projection.GetMagnification());
-    FillStyleRef landFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_land"),level);
+    size_t            level=MagToLevel(projection.GetMagnification());
+    FillStyleRef      landFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_land"),level);
+
+#if defined(DEBUG_GROUNDTILES)
+      std::set<Coord> drawnLabels;
+#endif
 
     if (landFill.Invalid()) {
       landFill=this->landFill;
@@ -391,9 +395,11 @@ namespace osmscout {
       return;
     }
 
-    FillStyleRef seaFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_sea"),level);
-    FillStyleRef coastFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_coast"),level);
-    FillStyleRef unknownFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_unknown"),level);
+    FillStyleRef       seaFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_sea"),level);
+    FillStyleRef       coastFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_coast"),level);
+    FillStyleRef       unknownFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_unknown"),level);
+    std::vector<Point> points;
+    size_t             start,end;
 
     if (seaFill.Invalid()) {
       seaFill=this->seaFill;
@@ -406,8 +412,6 @@ namespace osmscout {
     if (unknownFill.Invalid()) {
       unknownFill=this->seaFill;
     }
-
-    std::set<Coord> drawnLabels;
 
     for (std::list<GroundTile>::const_iterator tile=data.groundTiles.begin();
         tile!=data.groundTiles.end();
@@ -429,63 +433,98 @@ namespace osmscout {
         break;
       }
 
-      if (tile->points.front().GetId()==0 || tile->type==GroundTile::land) {
-        size_t start,end;
+      areaData.minLat=tile->yAbs*tile->cellHeight-90.0;
+      areaData.maxLat=areaData.minLat+tile->cellHeight;
+      areaData.minLon=tile->xAbs*tile->cellWidth-180.0;
+      areaData.maxLon=areaData.minLon+tile->cellWidth;
+
+      if (tile->coords.empty()) {
+        points.resize(5);
+
+        points[0].Set(areaData.minLat,areaData.minLon);
+        points[1].Set(areaData.minLat,areaData.maxLon);
+        points[2].Set(areaData.maxLat,areaData.maxLon);
+        points[3].Set(areaData.maxLat,areaData.minLon);
+        points[4]=points[0];
 
         transBuffer.TransformArea(projection,
-                                  parameter.GetOptimizeAreaNodes(),
-                                  tile->points,
+                                  TransPolygon::none,
+                                  points,
                                   start,end,
                                   parameter.GetOptimizeErrorToleranceDots());
 
-        areaData.ref=ObjectRef();
-        areaData.attributes=NULL;
-        areaData.transStart=start;
-        areaData.transEnd=end;
+        transBuffer.buffer[start+0].x=floor(transBuffer.buffer[start+0].x);
+        transBuffer.buffer[start+0].y=ceil(transBuffer.buffer[start+0].y);
 
-        areaData.minLat=tile->points[0].GetLat();
-        areaData.maxLat=tile->points[0].GetLat();
-        areaData.minLon=tile->points[0].GetLon();
-        areaData.maxLon=tile->points[0].GetLon();
+        transBuffer.buffer[start+1].x=ceil(transBuffer.buffer[start+1].x);
+        transBuffer.buffer[start+1].y=ceil(transBuffer.buffer[start+1].y);
 
-        for (size_t i=1; i<tile->points.size(); i++) {
-          areaData.minLat=std::min(areaData.minLat,tile->points[i].GetLat());
-          areaData.maxLat=std::max(areaData.maxLat,tile->points[i].GetLat());
-          areaData.minLon=std::min(areaData.minLon,tile->points[i].GetLon());
-          areaData.maxLon=std::max(areaData.maxLon,tile->points[i].GetLon());
+        transBuffer.buffer[start+2].x=ceil(transBuffer.buffer[start+2].x);
+        transBuffer.buffer[start+2].y=floor(transBuffer.buffer[start+2].y);
+
+        transBuffer.buffer[start+3].x=floor(transBuffer.buffer[start+3].x);
+        transBuffer.buffer[start+3].y=floor(transBuffer.buffer[start+3].y);
+
+        transBuffer.buffer[start+4]=transBuffer.buffer[start];
+      }
+      else {
+        points.resize(tile->coords.size());
+
+        for (size_t i=0; i<tile->coords.size(); i++) {
+          double lat;
+          double lon;
+
+          lat=areaData.minLat+tile->coords[i].y*tile->cellHeight/TileCoord::CELL_MAX;
+          lon=areaData.minLon+tile->coords[i].x*tile->cellWidth/TileCoord::CELL_MAX;
+
+          points[i].Set(lat,lon);
         }
 
-        DrawArea(projection,parameter,areaData);
+        transBuffer.TransformArea(projection,
+                                  TransPolygon::none,
+                                  points,
+                                  start,end,
+                                  parameter.GetOptimizeErrorToleranceDots());
+
+        for (size_t i=0; i<points.size(); i++) {
+          if (tile->coords[i].x==0) {
+            transBuffer.buffer[start+i].x=floor(transBuffer.buffer[start+i].x);
+          }
+          if (tile->coords[i].x==TileCoord::CELL_MAX) {
+            transBuffer.buffer[start+i].x=ceil(transBuffer.buffer[start+i].x);
+          }
+
+          if (tile->coords[i].y==0) {
+            transBuffer.buffer[start+i].y=ceil(transBuffer.buffer[start+i].y);
+          }
+          if (tile->coords[i].y==TileCoord::CELL_MAX) {
+            transBuffer.buffer[start+i].y=floor(transBuffer.buffer[start+i].y);
+          }
+        }
       }
+
+      areaData.ref=ObjectRef();
+      areaData.attributes=NULL;
+      areaData.transStart=start;
+      areaData.transEnd=end;
+
+      DrawArea(projection,parameter,areaData);
 
 #if defined(DEBUG_GROUNDTILES)
-      double cellWidth=360.0;
-      double cellHeight=180.0;
-      double level=MagToLevel(projection.GetMagnification())+4;
-
-      if (level>14) {
-        level=14;
-      }
-
-      for (size_t i=1; i<=level; i++) {
-        cellWidth=cellWidth/2;
-        cellHeight=cellHeight/2;
-      }
-
       double ccLon=areaData.minLon+(areaData.maxLon-areaData.minLon)/2;
       double ccLat=areaData.minLat+(areaData.maxLat-areaData.minLat)/2;
 
       std::string label;
 
-      size_t x=(ccLon+180)/cellWidth;
-      size_t y=(ccLat+90)/cellHeight;
+      size_t x=(ccLon+180)/tile->cellWidth;
+      size_t y=(ccLat+90)/tile->cellHeight;
 
-      label=NumberToString(tile->x);
+      label=NumberToString(tile->xRel);
       label+=",";
-      label+=NumberToString(tile->y);
+      label+=NumberToString(tile->yRel);
 
-      double lon=(x*cellWidth+cellWidth/2)-180.0;
-      double lat=(y*cellHeight+cellHeight/2)-90.0;
+      double lon=(x*tile->cellWidth+tile->cellWidth/2)-180.0;
+      double lat=(y*tile->cellHeight+tile->cellHeight/2)-90.0;
 
       double px;
       double py;
@@ -1990,32 +2029,6 @@ namespace osmscout {
                parameter);
 
     labelsTimer.Stop();
-
-    SymbolStyle markerSymbol;
-
-    markerSymbol.SetFillColor(Color(1,0,0));
-    markerSymbol.SetStyle(SymbolStyle::circle);
-    markerSymbol.SetSize(1);
-
-    for (std::list<GroundTile>::const_iterator tile=data.groundTiles.begin();
-        tile!=data.groundTiles.end();
-        ++tile) {
-
-      if (!(tile->points.front().GetId()==0 ||
-            tile->type==GroundTile::land)) {
-        for (size_t p=0; p<tile->points.size(); p++) {
-          double x,y;
-
-          Transform(projection,
-                    parameter,
-                    tile->points[p].GetLon(),
-                    tile->points[p].GetLat(),
-                    x,y);
-
-          DrawSymbol(&markerSymbol,x,y);
-        }
-      }
-    }
 
     if (parameter.IsDebugPerformance()) {
 

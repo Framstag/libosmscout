@@ -206,6 +206,11 @@ namespace osmscout {
     void FillWater(Progress& progress,
                    Level& level,
                    size_t tileCount);
+    TileCoord Transform(const Point& point,
+                        const Level& level,
+                        double cellMinLat,
+                        double cellMinLon);
+
     void DumpIndexHeader(const ImportParameter& parameter,
                          FileWriter& writer,
                          std::vector<Level>&  levels);
@@ -222,12 +227,18 @@ namespace osmscout {
     IntersectionPtr GetPreviousIntersection(std::list<IntersectionPtr>& intersectionsPathOrder,
                                             const IntersectionPtr& current);
     void WalkBorderCW(GroundTile& groundTile,
+                      const Level& level,
+                      double cellMinLat,
+                      double cellMinLon,
                       const IntersectionPtr& incoming,
                       const IntersectionPtr& outgoing,
-                      const Point borderPoints[]);
+                      const TileCoord borderCoords[]);
     IntersectionPtr GetNextCW(const std::list<IntersectionPtr>& intersectionsCW,
                               const IntersectionPtr& current) const;
     void WalkPathBack(GroundTile& groundTile,
+                      const Level& level,
+                      double cellMinLat,
+                      double cellMinLon,
                       const IntersectionPtr& outgoing,
                       const IntersectionPtr& incoming,
                       const std::vector<Point>& points,

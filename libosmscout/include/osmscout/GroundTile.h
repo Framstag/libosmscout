@@ -26,7 +26,34 @@
 
 namespace osmscout {
 
-  struct GroundTile
+  struct OSMSCOUT_API TileCoord
+  {
+    static const uint16_t CELL_MAX;
+
+    uint16_t x;
+    uint16_t y;
+
+    TileCoord()
+    {
+      // no code
+    }
+
+    TileCoord(uint16_t x,
+              uint16_t y)
+    {
+      this->x=x;
+      this->y=y;
+    }
+
+    void Set(uint16_t x,
+             uint16_t y)
+    {
+    this->x=x;
+    this->y=y;
+    }
+  };
+
+  struct OSMSCOUT_API GroundTile
   {
     enum Type {
       unknown = 0,
@@ -35,9 +62,14 @@ namespace osmscout {
       coast   = 3
     };
 
-    Type               type;
-    size_t             x,y;
-    std::vector<Point> points;
+    Type                   type;
+    size_t                 xAbs;
+    size_t                 yAbs;
+    size_t                 xRel;
+    size_t                 yRel;
+    double                 cellWidth;
+    double                 cellHeight;
+    std::vector<TileCoord> coords;
 
     GroundTile()
     {

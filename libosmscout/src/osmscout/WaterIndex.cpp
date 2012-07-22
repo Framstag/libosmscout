@@ -81,12 +81,6 @@ namespace osmscout {
 
       levels[idx].cellXCount=levels[idx].cellXEnd-levels[idx].cellXStart+1;
       levels[idx].cellYCount=levels[idx].cellYEnd-levels[idx].cellYStart+1;
-
-      std::cout << idx+waterIndexMinMag << " ";
-      std::cout << levels[idx].offset << " ";
-      std::cout << levels[idx].cellWidth << "x" << levels[idx].cellHeight << " ";
-      std::cout << "[" << levels[idx].cellXStart << "-" << levels[idx].cellXEnd << "]" << "x";
-      std::cout << "[" << levels[idx].cellYStart << "-" << levels[idx].cellYEnd << "]" << std::endl;
     }
 
     if (scanner.HasError()) {
@@ -118,8 +112,6 @@ namespace osmscout {
 
     idx-=waterIndexMinMag;
 
-    std::cout << "Level: " << idx+waterIndexMinMag << std::endl;
-
     tiles.clear();
 
     if (!scanner.IsOpen()) {
@@ -136,37 +128,23 @@ namespace osmscout {
 
     GroundTile tile;
 
-    tile.points.reserve(5);
+    tile.coords.reserve(5);
+    tile.cellWidth=levels[idx].cellWidth;
+    tile.cellHeight=levels[idx].cellHeight;
 
     for (size_t y=cy1; y<=cy2; y++) {
       for (size_t x=cx1; x<=cx2; x++) {
-        tile.points.clear();
-
-        tile.points.push_back(Point(0,
-                                    y*levels[idx].cellHeight-90.0,
-                                    x*levels[idx].cellWidth-180.0));
-
-        tile.points.push_back(Point(1,
-                                    y*levels[idx].cellHeight-90.0,
-                                    (x+1)*levels[idx].cellWidth-180.0));
-
-        tile.points.push_back(Point(2,
-                                    (y+1)*levels[idx].cellHeight-90.0,
-                                    (x+1)*levels[idx].cellWidth-180.0));
-
-        tile.points.push_back(Point(3,
-                                    (y+1)*levels[idx].cellHeight-90.0,
-                                    x*levels[idx].cellWidth-180.0));
-
-        tile.points.push_back(tile.points.front());
+        tile.xAbs=x;
+        tile.yAbs=y;
+        tile.xRel=x-levels[idx].cellXStart;
+        tile.yRel=y-levels[idx].cellYStart;
 
         if (x<levels[idx].cellXStart ||
             x>levels[idx].cellXEnd ||
             y<levels[idx].cellYStart ||
             y>levels[idx].cellYEnd) {
           tile.type=GroundTile::unknown;
-          tile.x=x-levels[idx].cellXStart;
-          tile.y=y-levels[idx].cellYStart;
+          tile.coords.clear();
 
           tiles.push_back(tile);
         }
@@ -187,8 +165,7 @@ namespace osmscout {
               cell==(FileOffset)GroundTile::coast ||
               cell==(FileOffset)GroundTile::unknown) {
             tile.type=(GroundTile::Type)cell;
-            tile.x=x-levels[idx].cellXStart;
-            tile.y=y-levels[idx].cellYStart;
+            tile.coords.clear();
 
             tiles.push_back(tile);
           }
@@ -196,8 +173,7 @@ namespace osmscout {
             uint32_t tileCount;
 
             tile.type=GroundTile::coast;
-            tile.x=x-levels[idx].cellXStart;
-            tile.y=y-levels[idx].cellYStart;
+            tile.coords.clear();
 
             tiles.push_back(tile);
 
@@ -206,30 +182,24 @@ namespace osmscout {
 
             for (size_t t=1; t<=tileCount; t++) {
               uint8_t    tileType;
-              uint32_t   nodeCount;
+              uint32_t   coordCount;
 
               scanner.Read(tileType);
 
               tile.type=(GroundTile::Type)tileType;
-              tile.x=x-levels[idx].cellXStart;
-              tile.y=y-levels[idx].cellYStart;
 
-              scanner.ReadNumber(nodeCount);
+              scanner.ReadNumber(coordCount);
 
-              tile.points.resize(nodeCount);
+              tile.coords.resize(coordCount);
 
-              for (size_t n=0;n<nodeCount; n++) {
-                Id       id;
-                uint32_t latDat;
-                uint32_t lonDat;
+              for (size_t n=0;n<coordCount; n++) {
+                uint16_t x;
+                uint16_t y;
 
-                scanner.ReadNumber(id);
-                scanner.ReadNumber(latDat);
-                scanner.ReadNumber(lonDat);
+                scanner.Read(x);
+                scanner.Read(y);
 
-                tile.points[n].Set(id,
-                                   latDat/conversionFactor-90.0,
-                                   lonDat/conversionFactor-180.0);
+                tile.coords[n].Set(x,y);
               }
 
               tiles.push_back(tile);

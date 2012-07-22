@@ -39,6 +39,17 @@
 
 namespace osmscout {
 
+  TileCoord WaterIndexGenerator::Transform(const Point& point,
+                                           const Level& level,
+                                           double cellMinLat,
+                                           double cellMinLon)
+  {
+    TileCoord coord(floor((point.GetLon()-cellMinLon)/level.cellWidth*TileCoord::CELL_MAX+0.5),
+                    floor((point.GetLat()-cellMinLat)/level.cellHeight*TileCoord::CELL_MAX+0.5));
+
+    return coord;
+  }
+
   /**
    * Sets the size of the bitmap and initializes state of all tiles to "unknown"
    */
@@ -844,6 +855,9 @@ namespace osmscout {
         cy1=(uint32_t)floor((minLat+90.0)/level.cellHeight);
         cy2=(uint32_t)floor((maxLat+90.0)/level.cellHeight);
 
+        double cellMinLat=level.cellHeight*cy1-90.0;
+        double cellMinLon=level.cellWidth*cx1-180.0;
+
         if (cx1==cx2 && cy1==cy2) {
           Coord        coord(cx1-level.cellXStart,cy1-level.cellYStart);
           TransPolygon polygon;
@@ -861,11 +875,13 @@ namespace osmscout {
             continue;
           }
 
-          groundTile.points.reserve(polygon.GetLength());
+          groundTile.coords.reserve(polygon.GetLength());
 
           for (size_t p=polygon.GetStart(); p<=polygon.GetEnd(); p++) {
             if (polygon.points[p].draw) {
-              groundTile.points.push_back(coast->coast[p]);
+              TileCoord coord=Transform(coast->coast[p],level,cellMinLat,cellMinLon);
+
+              groundTile.coords.push_back(coord);
             }
           }
 
@@ -910,17 +926,17 @@ namespace osmscout {
           for (size_t y=std::min(cy1,cy2); y<=std::max(cy1,cy2); y++) {
             Coord              coord(x-level.cellXStart,y-level.cellYStart);
             Point              borderPoints[5];
-            double             xmin,xmax,ymin,ymax;
+            double             lonMin,lonMax,latMin,latMax;
 
-            xmin=x*level.cellWidth-180.0;
-            xmax=(x+1)*level.cellWidth-180.0;
-            ymin=y*level.cellHeight-90.0;
-            ymax=(y+1)*level.cellHeight-90.0;
+            lonMin=x*level.cellWidth-180.0;
+            lonMax=(x+1)*level.cellWidth-180.0;
+            latMin=y*level.cellHeight-90.0;
+            latMax=(y+1)*level.cellHeight-90.0;
 
-            borderPoints[0]=Point(1,ymax,xmin); // top left
-            borderPoints[1]=Point(2,ymax,xmax); // top right
-            borderPoints[2]=Point(3,ymin,xmax); // bottom right
-            borderPoints[3]=Point(4,ymin,xmin); // bottom left
+            borderPoints[0]=Point(1,latMax,lonMin); // top left
+            borderPoints[1]=Point(2,latMax,lonMax); // top right
+            borderPoints[2]=Point(3,latMin,lonMax); // bottom right
+            borderPoints[3]=Point(4,latMin,lonMin); // bottom left
             borderPoints[4]=borderPoints[0];    // To avoid modula 4 on all indexes
 
             size_t       intersectionCount=0;
@@ -1051,9 +1067,12 @@ namespace osmscout {
    * border.
    */
   void WaterIndexGenerator::WalkBorderCW(GroundTile& groundTile,
+                                         const Level& level,
+                                         double cellMinLat,
+                                         double cellMinLon,
                                          const IntersectionPtr& incoming,
                                          const IntersectionPtr& outgoing,
-                                         const Point borderPoints[])
+                                         const TileCoord borderCoords[])
   {
 
     if (outgoing->borderIndex!=incoming->borderIndex ||
@@ -1062,7 +1081,7 @@ namespace osmscout {
       size_t endBorderPoint=outgoing->borderIndex;
 
       while (borderPoint!=endBorderPoint) {
-        groundTile.points.push_back(borderPoints[borderPoint]);
+        groundTile.coords.push_back(borderCoords[borderPoint]);
 
         if (borderPoint==3) {
           borderPoint=0;
@@ -1072,10 +1091,10 @@ namespace osmscout {
         }
       }
 
-      groundTile.points.push_back(borderPoints[borderPoint]);
+      groundTile.coords.push_back(borderCoords[borderPoint]);
     }
 
-    groundTile.points.push_back(outgoing->point);
+    groundTile.coords.push_back(Transform(outgoing->point,level,cellMinLat,cellMinLon));
   }
 
 
@@ -1103,6 +1122,9 @@ namespace osmscout {
   }
 
   void WaterIndexGenerator::WalkPathBack(GroundTile& groundTile,
+                                         const Level& level,
+                                         double cellMinLat,
+                                         double cellMinLon,
                                          const IntersectionPtr& outgoing,
                                          const IntersectionPtr& incoming,
                                          const std::vector<Point>& points,
@@ -1111,7 +1133,7 @@ namespace osmscout {
     if (isArea) {
       if (outgoing->prevWayPointIndex==incoming->prevWayPointIndex &&
           outgoing->distanceSquare>incoming->distanceSquare) {
-        groundTile.points.push_back(incoming->point);
+        groundTile.coords.push_back(Transform(incoming->point,level,cellMinLat,cellMinLon));
       }
       else {
         size_t idx=outgoing->prevWayPointIndex;
@@ -1122,7 +1144,7 @@ namespace osmscout {
         }
 
         while (idx!=targetIdx) {
-          groundTile.points.push_back(points[idx]);
+          groundTile.coords.push_back(Transform(points[idx],level,cellMinLat,cellMinLon));
 
           if (idx>0) {
             idx--;
@@ -1132,9 +1154,9 @@ namespace osmscout {
           }
         }
 
-        groundTile.points.push_back(points[idx]);
+        groundTile.coords.push_back(Transform(points[idx],level,cellMinLat,cellMinLon));
 
-        groundTile.points.push_back(incoming->point);
+        groundTile.coords.push_back(Transform(incoming->point,level,cellMinLat,cellMinLon));
       }
     }
     else {
@@ -1143,12 +1165,11 @@ namespace osmscout {
       for (int idx=outgoing->prevWayPointIndex;
           idx>=targetIdx;
           idx--) {
-        groundTile.points.push_back(points[idx]);
+        groundTile.coords.push_back(Transform(points[idx],level,cellMinLat,cellMinLon));
       }
 
-      groundTile.points.push_back(incoming->point);
+      groundTile.coords.push_back(Transform(incoming->point,level,cellMinLat,cellMinLon));
     }
-
   }
 
   /**
@@ -1277,18 +1298,24 @@ namespace osmscout {
 
       intersectionsCW.sort(IntersectionCWComparator());
 
-      double xmin,xmax,ymin,ymax;
-      Point  borderPoints[4];
+      double    lonMin,lonMax,latMin,latMax;
+      Point     borderPoints[4];
+      TileCoord borderCoords[4];
 
-      xmin=(level.cellXStart+cell->first.x)*level.cellWidth-180.0;
-      xmax=(level.cellXStart+cell->first.x+1)*level.cellWidth-180.0;
-      ymin=(level.cellYStart+cell->first.y)*level.cellHeight-90.0;
-      ymax=(level.cellYStart+cell->first.y+1)*level.cellHeight-90.0;
+      lonMin=(level.cellXStart+cell->first.x)*level.cellWidth-180.0;
+      lonMax=(level.cellXStart+cell->first.x+1)*level.cellWidth-180.0;
+      latMin=(level.cellYStart+cell->first.y)*level.cellHeight-90.0;
+      latMax=(level.cellYStart+cell->first.y+1)*level.cellHeight-90.0;
 
-      borderPoints[0]=Point(1,ymax,xmin); // top left
-      borderPoints[1]=Point(2,ymax,xmax); // top right
-      borderPoints[2]=Point(3,ymin,xmax); // bottom right
-      borderPoints[3]=Point(4,ymin,xmin); // bottom left
+      borderPoints[0]=Point(1,latMax,lonMin); // top left
+      borderPoints[1]=Point(2,latMax,lonMax); // top right
+      borderPoints[2]=Point(3,latMin,lonMax); // bottom right
+      borderPoints[3]=Point(4,latMin,lonMin); // bottom left
+
+      borderCoords[0].Set(0,TileCoord::CELL_MAX);                   // top left
+      borderCoords[1].Set(TileCoord::CELL_MAX,TileCoord::CELL_MAX); // top right
+      borderCoords[2].Set(TileCoord::CELL_MAX,0);                   // bottom right
+      borderCoords[3].Set(0,0);                                     // bottom left
 
 #if defined(DEBUG_COASTLINE)
       std::cout << "-- Cell: " << cell->first.x << "," << cell->first.y << std::endl;
@@ -1328,7 +1355,7 @@ namespace osmscout {
         std::cout << "Outgoing: " << initialOutgoing->coastline << " " << initialOutgoing->prevWayPointIndex << " " << initialOutgoing->distanceSquare << " " << isArea[initialOutgoing->coastline] << std::endl;
 #endif
 
-        groundTile.points.push_back(initialOutgoing->point);
+        groundTile.coords.push_back(Transform(initialOutgoing->point,level,latMin,lonMin));
 
 
         IntersectionPtr incoming=GetPreviousIntersection(intersectionsPathOrder[initialOutgoing->coastline],
@@ -1355,6 +1382,9 @@ namespace osmscout {
         }
 
         WalkPathBack(groundTile,
+                     level,
+                     latMin,
+                     lonMin,
                      initialOutgoing,
                      incoming,
                      points[initialOutgoing->coastline],
@@ -1389,9 +1419,12 @@ namespace osmscout {
           intersectionsOuter.remove(outgoing);
 
           WalkBorderCW(groundTile,
+                       level,
+                       latMin,
+                       lonMin,
                        incoming,
                        outgoing,
-                       borderPoints);
+                       borderCoords);
 
           incoming=GetPreviousIntersection(intersectionsPathOrder[outgoing->coastline],
                                            outgoing);
@@ -1419,6 +1452,9 @@ namespace osmscout {
           }
 
           WalkPathBack(groundTile,
+                       level,
+                       latMin,
+                       lonMin,
                        outgoing,
                        incoming,
                        points[outgoing->coastline],
@@ -1432,15 +1468,18 @@ namespace osmscout {
           continue;
         }
 
-        if (!groundTile.points.empty()) {
+        if (!groundTile.coords.empty()) {
 #if defined(DEBUG_COASTLINE)
         std::cout << "Polygon closed!" << std::endl;
 #endif
 
           WalkBorderCW(groundTile,
+                       level,
+                       latMin,
+                       lonMin,
                        incoming,
                        initialOutgoing,
-                       borderPoints);
+                       borderCoords);
 
           cellGroundTileMap[cell->first].push_back(groundTile);
         }
@@ -1602,18 +1641,17 @@ namespace osmscout {
 
         writer.GetPos(startPos);
 
-        writer.WriteNumber(coord->second.size());
+        writer.WriteNumber((uint32_t)coord->second.size());
 
         for (std::list<GroundTile>::const_iterator tile=coord->second.begin();
             tile!=coord->second.end();
             ++tile) {
           writer.Write((uint8_t)tile->type);
 
-          writer.WriteNumber(tile->points.size());
-          for (size_t t=0; t<tile->points.size(); t++) {
-            writer.WriteNumber(tile->points[t].GetId());
-            writer.WriteNumber((uint32_t)floor((tile->points[t].GetLat()+90.0)*conversionFactor+0.5));
-            writer.WriteNumber((uint32_t)floor((tile->points[t].GetLon()+180.0)*conversionFactor+0.5));
+          writer.WriteNumber((uint32_t)tile->coords.size());
+          for (size_t c=0; c<tile->coords.size(); c++) {
+            writer.Write(tile->coords[c].x);
+            writer.Write(tile->coords[c].y);
 
           }
         }
