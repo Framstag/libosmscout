@@ -33,9 +33,10 @@
 #include <osmscout/private/Math.h>
 
 #include <iostream>
+#include <iomanip>
 
 //#define DEBUG_COASTLINE
-//#define DEBUG_TILING
+#define DEBUG_TILING
 
 namespace osmscout {
 
@@ -265,20 +266,23 @@ namespace osmscout {
 
       // Marks cells on the path as coast
 
-      std::vector<ScanCell> cells;
+      std::set<Coord> coords;
 
-      ScanConvertLine(coastline->coast,-180.0,level.cellWidth,-90.0,level.cellHeight,cells);
+      GetCells(level,coastline->coast,coords);
 
-      for (size_t i=0; i<cells.size(); i++) {
-        if (level.IsIn(cells[i].x,cells[i].y)) {
-          if (level.GetState(cells[i].x-level.cellXStart,cells[i].y-level.cellYStart)==unknown) {
+      for (std::set<Coord>::const_iterator coord=coords.begin();
+          coord!=coords.end();
+          ++coord) {
+        if (level.IsIn(coord->x,coord->y)) {
+          if (level.GetState(coord->x-level.cellXStart,coord->y-level.cellYStart)==unknown) {
 #if defined(DEBUG_TILING)
-            std::cout << "Coastline: " << cells[i].x-level.cellXStart << "," << cells[i].y-level.cellYStart << std::endl;
+            std::cout << "Coastline: " << coord->x-level.cellXStart << "," << coord->y-level.cellYStart << std::endl;
 #endif
-            level.SetStateAbsolute(cells[i].x,cells[i].y,coast);
+            level.SetStateAbsolute(coord->x,coord->y,coast);
           }
         }
       }
+
     }
   }
 
@@ -288,260 +292,349 @@ namespace osmscout {
    * line is either water or land, depending on the slope direction. We then resort from right to left and do
    * the estimation again.
    */
-  void WaterIndexGenerator::ScanCellsHorizontally(Progress& progress,
-                                                  Level& level)
+  void WaterIndexGenerator::CalculateLandSeaCells(Progress& progress,
+                                                  Level& level,
+                                                  CoastlineData& data)
   {
     progress.Info("Scan coastlines horizontally");
 
-    std::list<Line> lines;
+    size_t currentCell=0;
+    for (std::map<Coord,std::list<size_t> >::const_iterator cell=data.cellCoastlines.begin();
+         cell!=data.cellCoastlines.end();
+        ++cell) {
+      progress.SetProgress(currentCell,data.cellCoastlines.size());
 
-    for (std::list<CoastRef>::const_iterator c=coastlines.begin();
-        c!=coastlines.end();
-        ++c) {
-      const CoastRef& coastline=*c;
+      currentCell++;
 
-      for (size_t i=0; i<coastline->coast.size()-1; i++) {
-        Line line;
+      std::vector<std::list<IntersectionPtr> > intersectionsPathOrder;
 
-        line.a=coastline->coast[i];
-        line.b=coastline->coast[i+1];
-        lines.push_back(line);
+      intersectionsPathOrder.resize(coastlines.size());
+
+      for (std::list<size_t>::const_iterator currentCoastline=cell->second.begin();
+          currentCoastline!=cell->second.end();
+          ++currentCoastline) {
+        std::map<Coord,std::list<Intersection> >::iterator cellData=data.cellIntersections[*currentCoastline].find(cell->first);
+
+        if (cellData==data.cellIntersections[*currentCoastline].end()) {
+          continue;
+        }
+
+        // Build list of intersections in path order and list of intersections in clock wise order
+        for (std::list<Intersection>::iterator inter=cellData->second.begin();
+            inter!=cellData->second.end();
+            ++inter) {
+          const IntersectionPtr intersection=&(*inter);
+
+          intersectionsPathOrder[*currentCoastline].push_back(intersection);
+        }
+
+        intersectionsPathOrder[*currentCoastline].sort(IntersectionByPathComparator());
+
+        // Fix intersection order for areas
+        if (data.isArea[*currentCoastline] &&
+            intersectionsPathOrder[*currentCoastline].front()->direction==-1) {
+          intersectionsPathOrder[*currentCoastline].push_back(intersectionsPathOrder[*currentCoastline].front());
+          intersectionsPathOrder[*currentCoastline].pop_front();
+        }
       }
-    }
 
-    for (std::list<Line>::iterator line=lines.begin();
-        line!=lines.end();
-        ++line) {
-      line->sortCriteria1=std::min(line->a.GetLon(),line->b.GetLon());
-      line->sortCriteria2=std::abs((line->b.GetLat()-line->a.GetLat())/(line->b.GetLon()-line->a.GetLon()));
-    }
+      // Left of cell
 
-    lines.sort(SmallerLineSort());
+      bool            valid;
 
-    for (std::list<Line>::const_iterator line=lines.begin();
-        line!=lines.end();
-        ++line) {
-      std::vector<ScanCell> cells;
+      IntersectionPtr leftLineStart=NULL;
+      IntersectionPtr leftLineEnd=NULL;
 
-      ScanConvertLine((int)((line->a.GetLon()+180.0)/level.cellWidth),
-                      (int)((line->a.GetLat()+90.0)/level.cellHeight),
-                      (int)((line->b.GetLon()+180.0)/level.cellWidth),
-                      (int)((line->b.GetLat()+90.0)/level.cellHeight),
-                      cells);
+      valid=true;
+      for (std::vector<std::list<IntersectionPtr> >::const_iterator coast=intersectionsPathOrder.begin();
+           coast!=intersectionsPathOrder.end() && valid;
+           ++coast) {
+        std::list<IntersectionPtr>::const_iterator current=coast->begin();
 
-      if (line->b.GetLat()>line->a.GetLat()) {
-        // up
-        for (size_t i=0; i<cells.size(); i++) {
-          if (level.IsIn(cells[i].x,cells[i].y)) {
-            int cx=cells[i].x-level.cellXStart;
-            int cy=cells[i].y-level.cellYStart;
+        while (current!=coast->end() &&
+               valid) {
+          if ((*current)->direction==3) {
+            valid=false;
+            break;
+          }
+
+          if ((*current)->direction==1) {
+            std::list<IntersectionPtr>::const_iterator next=current;
+
+            next++;
+
+            if (next!=coast->end()) {
+              if ((*next)->direction==-1) {
+                if (leftLineStart==NULL ||
+                    std::min((*current)->point.GetLon(),(*next)->point.GetLon())<
+                    std::min(leftLineStart->point.GetLon(),leftLineEnd->point.GetLon())) {
+                  leftLineStart=*current;
+                  leftLineEnd=*next;
+                }
+
+                current=next;
+              }
+            }
+          }
+
+          current++;
+        }
+      }
+
+      if (valid &&
+          leftLineStart!=NULL &&
+          leftLineEnd!=NULL) {
+        if (leftLineEnd->point.GetLat()>leftLineStart->point.GetLat()) {
+          // up
+          if (level.IsIn(cell->first.x+level.cellXStart,cell->first.y+level.cellYStart)) {
+            int cx=cell->first.x;
+            int cy=cell->first.y;
 
             if (cx-1>=0 && level.GetState(cx-1,cy)==unknown) {
-#if defined(DEBUG_TILING)
-              std::cout << "Land beneath coast: " << cx-1 << "," << cy << std::endl;
-#endif
+  #if defined(DEBUG_TILING)
+              std::cout << "Land left of coast: " << cx-1 << "," << cy << " " << data.points[leftLineStart->coastline][leftLineStart->prevWayPointIndex].GetId() << "=>" << data.points[leftLineEnd->coastline][leftLineEnd->prevWayPointIndex].GetId() << std::endl;
+  #endif
+
               level.SetState(cx-1,cy,land);
             }
           }
         }
-      }
-      else if (line->b.GetLat()<line->a.GetLat()) {
-        // down
-        for (size_t i=0; i<cells.size(); i++) {
-          if (level.IsIn(cells[i].x,cells[i].y)) {
-            int cx=cells[i].x-level.cellXStart;
-            int cy=cells[i].y-level.cellYStart;
+        else if (leftLineEnd->point.GetLat()<leftLineStart->point.GetLat()) {
+          // down
+          if (level.IsIn(cell->first.x+level.cellXStart,cell->first.y+level.cellYStart)) {
+            int cx=cell->first.x;
+            int cy=cell->first.y;
 
             if (cx-1>=0 && level.GetState(cx-1,cy)==unknown) {
-#if defined(DEBUG_TILING)
-              std::cout << "Water beneath coast: " << cx-1 << "," << cy << std::endl;
-#endif
+  #if defined(DEBUG_TILING)
+              std::cout << "Water left of coast: " << cx-1 << "," << cy << " " <<  data.points[leftLineStart->coastline][leftLineStart->prevWayPointIndex].GetId() << "=>" << data.points[leftLineEnd->coastline][leftLineEnd->prevWayPointIndex].GetId() << std::endl;
+  #endif
               level.SetState(cx-1,cy,water);
             }
           }
         }
       }
-    }
 
-    for (std::list<Line>::iterator line=lines.begin();
-        line!=lines.end();
-        ++line) {
-      line->sortCriteria1=std::max(line->a.GetLon(),line->b.GetLon());
-      line->sortCriteria2=std::abs((line->b.GetLat()-line->a.GetLat())/(line->b.GetLon()-line->a.GetLon()));
-    }
+      // Right of cell
 
-    lines.sort(BiggerLineSort());
+      IntersectionPtr rightLineStart=NULL;
+      IntersectionPtr rightLineEnd=NULL;
 
-    for (std::list<Line>::const_iterator line=lines.begin();
-        line!=lines.end();
-        ++line) {
-      std::vector<ScanCell> cells;
+      valid=true;
+      for (std::vector<std::list<IntersectionPtr> >::const_iterator coast=intersectionsPathOrder.begin();
+           coast!=intersectionsPathOrder.end() && valid;
+           ++coast) {
+        std::list<IntersectionPtr>::const_iterator current=coast->begin();
 
-      ScanConvertLine((int)((line->a.GetLon()+180.0)/level.cellWidth),
-                      (int)((line->a.GetLat()+90.0)/level.cellHeight),
-                      (int)((line->b.GetLon()+180.0)/level.cellWidth),
-                      (int)((line->b.GetLat()+90.0)/level.cellHeight),
-                      cells);
-      if (line->b.GetLat()>line->a.GetLat()) {
-        // up
-        for (size_t i=0; i<cells.size(); i++) {
-          if (level.IsIn(cells[i].x,cells[i].y)) {
-            int cx=cells[i].x-level.cellXStart;
-            int cy=cells[i].y-level.cellYStart;
+        while (current!=coast->end() &&
+               valid) {
+          if ((*current)->direction==1) {
+            valid=false;
+            break;
+          }
 
-            if (cx+1<level.cellXCount && level.GetState(cx+1,cy)==unknown) {
-#if defined(DEBUG_TILING)
-              std::cout << "Water beneath coast: " << cx+1 << "," << cy << std::endl;
-#endif
+          if ((*current)->direction==1) {
+            std::list<IntersectionPtr>::const_iterator next=current;
+
+            next++;
+
+            if (next!=coast->end()) {
+              if ((*next)->direction==-1) {
+                if (rightLineStart==NULL ||
+                    std::max((*current)->point.GetLon(),(*next)->point.GetLon())>
+                    std::max(rightLineStart->point.GetLon(),rightLineEnd->point.GetLon())) {
+                  rightLineStart=*current;
+                  rightLineEnd=*next;
+                }
+
+                current=next;
+              }
+            }
+          }
+
+          current++;
+        }
+      }
+
+      if (valid &&
+          rightLineStart!=NULL &&
+          rightLineEnd!=NULL) {
+        if (rightLineEnd->point.GetLat()>rightLineStart->point.GetLat()) {
+          // up
+          if (level.IsIn(cell->first.x+level.cellXStart,cell->first.y+level.cellYStart)) {
+            int cx=cell->first.x;
+            int cy=cell->first.y;
+
+            if (cx+1<=level.cellXCount && level.GetState(cx+1,cy)==unknown) {
+  #if defined(DEBUG_TILING)
+              std::cout << "Water right of coast: " << cx+1 << "," << cy << " " << data.points[rightLineStart->coastline][rightLineStart->prevWayPointIndex].GetId() << "=>" << data.points[rightLineEnd->coastline][rightLineEnd->prevWayPointIndex].GetId() << std::endl;
+  #endif
+
               level.SetState(cx+1,cy,water);
             }
           }
         }
-      }
-      else if (line->b.GetLat()<line->a.GetLat()) {
-        // down
-        for (size_t i=0; i<cells.size(); i++) {
-          if (level.IsIn(cells[i].x,cells[i].y)) {
-            int cx=cells[i].x-level.cellXStart;
-            int cy=cells[i].y-level.cellYStart;
+        else if (rightLineEnd->point.GetLat()<rightLineStart->point.GetLat()) {
+          // down
+          if (level.IsIn(cell->first.x+level.cellXStart,cell->first.y+level.cellYStart)) {
+            int cx=cell->first.x;
+            int cy=cell->first.y;
 
-            if (cx+1<level.cellXCount && level.GetState(cx+1,cy)==unknown) {
-#if defined(DEBUG_TILING)
-              std::cout << "Land beneath coast: " << cx+1 << "," << cy << std::endl;
-#endif
+            if (cx+1<=level.cellXCount && level.GetState(cx+1,cy)==unknown) {
+  #if defined(DEBUG_TILING)
+              std::cout << "Land right of coast: " << cx+1 << "," << cy << " " <<  data.points[rightLineStart->coastline][rightLineStart->prevWayPointIndex].GetId() << "=>" << data.points[rightLineEnd->coastline][rightLineEnd->prevWayPointIndex].GetId() << std::endl;
+  #endif
               level.SetState(cx+1,cy,land);
             }
           }
         }
       }
-    }
-  }
 
-  /**
-   * See description for ScanCellsHorizontally()
-   */
-  void WaterIndexGenerator::ScanCellsVertically(Progress& progress,
-                                                Level& level)
-  {
-    progress.Info("Scan coastlines vertically");
+      // Top of cell
 
-    std::list<Line> lines;
+      IntersectionPtr topLineStart=NULL;
+      IntersectionPtr topLineEnd=NULL;
 
-    for (std::list<CoastRef>::const_iterator c=coastlines.begin();
-        c!=coastlines.end();
-        ++c) {
-      const CoastRef& coastline=*c;
+      valid=true;
+      for (std::vector<std::list<IntersectionPtr> >::const_iterator coast=intersectionsPathOrder.begin();
+           coast!=intersectionsPathOrder.end() && valid;
+           ++coast) {
+        std::list<IntersectionPtr>::const_iterator current=coast->begin();
 
-      for (size_t i=0; i<coastline->coast.size()-1; i++) {
-        Line line;
+        while (current!=coast->end() &&
+               valid) {
+          if ((*current)->direction==0) {
+            valid=false;
+            break;
+          }
 
-        line.a=coastline->coast[i];
-        line.b=coastline->coast[i+1];
-        lines.push_back(line);
-      }
-    }
+          if ((*current)->direction==1) {
+            std::list<IntersectionPtr>::const_iterator next=current;
 
-    for (std::list<Line>::iterator line=lines.begin();
-        line!=lines.end();
-        ++line) {
-      line->sortCriteria1=std::min(line->a.GetLat(),line->b.GetLat());
-      line->sortCriteria2=std::abs((line->b.GetLon()-line->a.GetLon())/(line->b.GetLat()-line->a.GetLat()));
-    }
+            next++;
 
-    lines.sort(SmallerLineSort());
+            if (next!=coast->end()) {
+              if ((*next)->direction==-1) {
+                if (topLineStart==NULL ||
+                    std::max((*current)->point.GetLat(),(*next)->point.GetLat())>
+                    std::max(topLineStart->point.GetLat(),topLineEnd->point.GetLat())) {
+                  topLineStart=*current;
+                  topLineEnd=*next;
+                }
 
-    for (std::list<Line>::const_iterator line=lines.begin();
-        line!=lines.end();
-        ++line) {
-      std::vector<ScanCell> cells;
-
-      ScanConvertLine((int)((line->a.GetLon()+180.0)/level.cellWidth),
-                      (int)((line->a.GetLat()+90.0)/level.cellHeight),
-                      (int)((line->b.GetLon()+180.0)/level.cellWidth),
-                      (int)((line->b.GetLat()+90.0)/level.cellHeight),
-                      cells);
-
-      if (line->b.GetLon()>line->a.GetLon()) {
-        // right
-        for (size_t i=0; i<cells.size(); i++) {
-          if (level.IsIn(cells[i].x,cells[i].y)) {
-            int cx=cells[i].x-level.cellXStart;
-            int cy=cells[i].y-level.cellYStart;
-
-            if (cy-1>=0 && level.GetState(cx,cy-1)==unknown) {
-#if defined(DEBUG_TILING)
-              std::cout << "Water beneath coast: " << cx << "," << cy-1 << std::endl;
-#endif
-              level.SetState(cx,cy-1,water);
+                current=next;
+              }
             }
           }
+
+          current++;
         }
       }
-      else if (line->b.GetLon()<line->a.GetLon()) {
-        // left
-        for (size_t i=0; i<cells.size(); i++) {
-          if (level.IsIn(cells[i].x,cells[i].y)) {
-            int cx=cells[i].x-level.cellXStart;
-            int cy=cells[i].y-level.cellYStart;
 
-            if (cy-1>=0 && level.GetState(cx,cy-1)==unknown) {
-#if defined(DEBUG_TILING)
-              std::cout << "Land beneath coast: " << cx << "," << cy-1 << std::endl;
-#endif
-              level.SetState(cx,cy-1,land);
-            }
-          }
-        }
-      }
-    }
-
-    for (std::list<Line>::iterator line=lines.begin();
-        line!=lines.end();
-        ++line) {
-      line->sortCriteria1=std::max(line->a.GetLat(),line->b.GetLat());
-      line->sortCriteria2=std::abs((line->b.GetLon()-line->a.GetLon())/(line->b.GetLat()-line->a.GetLat()));
-    }
-
-    lines.sort(BiggerLineSort());
-
-    for (std::list<Line>::const_iterator line=lines.begin();
-        line!=lines.end();
-        ++line) {
-      std::vector<ScanCell> cells;
-
-      ScanConvertLine((int)((line->a.GetLon()+180.0)/level.cellWidth),
-                      (int)((line->a.GetLat()+90.0)/level.cellHeight),
-                      (int)((line->b.GetLon()+180.0)/level.cellWidth),
-                      (int)((line->b.GetLat()+90.0)/level.cellHeight),
-                      cells);
-      if (line->b.GetLon()>line->a.GetLon()) {
-        // right
-        for (size_t i=0; i<cells.size(); i++) {
-          if (level.IsIn(cells[i].x,cells[i].y)) {
-            int cx=cells[i].x-level.cellXStart;
-            int cy=cells[i].y-level.cellYStart;
+      if (valid &&
+          topLineStart!=NULL &&
+          topLineEnd!=NULL) {
+        if (topLineEnd->point.GetLon()>topLineStart->point.GetLon()) {
+          // right
+          if (level.IsIn(cell->first.x+level.cellXStart,cell->first.y+level.cellYStart)) {
+            int cx=cell->first.x;
+            int cy=cell->first.y;
 
             if (cy+1<level.cellYCount && level.GetState(cx,cy+1)==unknown) {
-#if defined(DEBUG_TILING)
-              std::cout << "Land beneath coast: " << cx << "," << cy+1 << std::endl;
-#endif
+  #if defined(DEBUG_TILING)
+              std::cout << "Land above coast: " << cx << "," << cy+1 << " " << data.points[topLineStart->coastline][topLineStart->prevWayPointIndex].GetId() << "=>" << data.points[topLineEnd->coastline][topLineEnd->prevWayPointIndex].GetId() << std::endl;
+  #endif
+
               level.SetState(cx,cy+1,land);
             }
           }
         }
-      }
-      else if (line->b.GetLon()<line->a.GetLon()) {
-        // left
-        for (size_t i=0; i<cells.size(); i++) {
-          if (level.IsIn(cells[i].x,cells[i].y)) {
-            int cx=cells[i].x-level.cellXStart;
-            int cy=cells[i].y-level.cellYStart;
+        else if (topLineEnd->point.GetLon()<topLineStart->point.GetLon()) {
+          // left
+          if (level.IsIn(cell->first.x+level.cellXStart,cell->first.y+level.cellYStart)) {
+            int cx=cell->first.x;
+            int cy=cell->first.y;
 
             if (cy+1<level.cellYCount && level.GetState(cx,cy+1)==unknown) {
-#if defined(DEBUG_TILING)
-              std::cout << "Water beneath coast: " << cx << "," << cy+1 << std::endl;
-#endif
+  #if defined(DEBUG_TILING)
+              std::cout << "Water above coast: " << cx << "," << cy+1 << " " <<  data.points[topLineStart->coastline][topLineStart->prevWayPointIndex].GetId() << "=>" << data.points[topLineEnd->coastline][topLineEnd->prevWayPointIndex].GetId() << std::endl;
+  #endif
               level.SetState(cx,cy+1,water);
+            }
+          }
+        }
+      }
+
+      // Bottom cell
+
+      IntersectionPtr bottomLineStart=NULL;
+      IntersectionPtr bottomLineEnd=NULL;
+
+      valid=true;
+      for (std::vector<std::list<IntersectionPtr> >::const_iterator coast=intersectionsPathOrder.begin();
+           coast!=intersectionsPathOrder.end() && valid;
+           ++coast) {
+        std::list<IntersectionPtr>::const_iterator current=coast->begin();
+
+        while (current!=coast->end() &&
+               valid) {
+          if ((*current)->direction==2) {
+            valid=false;
+            break;
+          }
+
+          if ((*current)->direction==1) {
+            std::list<IntersectionPtr>::const_iterator next=current;
+
+            next++;
+
+            if (next!=coast->end()) {
+              if ((*next)->direction==-1) {
+                if (bottomLineStart==NULL ||
+                    std::min((*current)->point.GetLat(),(*next)->point.GetLat())<
+                    std::min(bottomLineStart->point.GetLat(),bottomLineEnd->point.GetLat())) {
+                  bottomLineStart=*current;
+                  bottomLineEnd=*next;
+                }
+
+                current=next;
+              }
+            }
+          }
+
+          current++;
+        }
+      }
+
+      if (valid &&
+          bottomLineStart!=NULL &&
+          bottomLineEnd!=NULL) {
+        if (bottomLineEnd->point.GetLon()>bottomLineStart->point.GetLon()) {
+          // right
+          if (level.IsIn(cell->first.x+level.cellXStart,cell->first.y+level.cellYStart)) {
+            int cx=cell->first.x;
+            int cy=cell->first.y;
+
+            if (cy-1>=0 && level.GetState(cx,cy-1)==unknown) {
+  #if defined(DEBUG_TILING)
+              std::cout << "Water below coast: " << cx << "," << cy-1 << " " << data.points[bottomLineStart->coastline][bottomLineStart->prevWayPointIndex].GetId() << "=>" << data.points[bottomLineEnd->coastline][bottomLineEnd->prevWayPointIndex].GetId() << std::endl;
+  #endif
+
+              level.SetState(cx,cy-1,water);
+            }
+          }
+        }
+        else if (bottomLineEnd->point.GetLon()<bottomLineStart->point.GetLon()) {
+          // left
+          if (level.IsIn(cell->first.x+level.cellXStart,cell->first.y+level.cellYStart)) {
+            int cx=cell->first.x;
+            int cy=cell->first.y;
+
+            if (cy-1>=0 && level.GetState(cx,cy-1)==unknown) {
+  #if defined(DEBUG_TILING)
+              std::cout << "Land below coast: " << cx << "," << cy-1 << " " <<  data.points[bottomLineStart->coastline][bottomLineStart->prevWayPointIndex].GetId() << "=>" << data.points[bottomLineEnd->coastline][bottomLineEnd->prevWayPointIndex].GetId() << std::endl;
+  #endif
+              level.SetState(cx,cy-1,land);
             }
           }
         }
@@ -597,17 +690,19 @@ namespace osmscout {
           !typeConfig.GetTypeInfo(way.GetType()).GetIgnoreSeaLand()) {
         if (!way.IsArea() &&
             way.nodes.size()>=2) {
-          std::vector<ScanCell> cells;
+          std::set<Coord> coords;
 
-          ScanConvertLine(way.nodes,-180.0,level.cellWidth,-90.0,level.cellHeight,cells);
+          GetCells(level,way.nodes,coords);
 
-          for (size_t i=0; i<cells.size(); i++) {
-            if (level.IsIn(cells[i].x,cells[i].y)) {
-              if (level.GetState(cells[i].x-level.cellXStart,cells[i].y-level.cellYStart)==unknown) {
+          for (std::set<Coord>::const_iterator coord=coords.begin();
+              coord!=coords.end();
+              ++coord) {
+            if (level.IsIn(coord->x,coord->y)) {
+              if (level.GetState(coord->x-level.cellXStart,coord->y-level.cellYStart)==unknown) {
 #if defined(DEBUG_TILING)
-          std::cout << "Assume land: " << cells[i].x-level.cellXStart << "," << cells[i].y-level.cellYStart << " Way " << way.GetId() << " " << typeConfig.GetTypeInfo(way.GetType()).GetName() << " is defining area as land" << std::endl;
+          std::cout << "Assume land: " << coord->x-level.cellXStart << "," << coord->y-level.cellYStart << " Way " << way.GetId() << " " << typeConfig.GetTypeInfo(way.GetType()).GetName() << " is defining area as land" << std::endl;
 #endif
-                level.SetStateAbsolute(cells[i].x,cells[i].y,land);
+                level.SetStateAbsolute(coord->x,coord->y,land);
               }
             }
           }
@@ -757,7 +852,7 @@ namespace osmscout {
             if (y>0) {
               if (level.GetState(x,y-1)==unknown) {
 #if defined(DEBUG_TILING)
-                std::cout << "Water beneath water: " << x << "," << y-1 << std::endl;
+                std::cout << "Water below water: " << x << "," << y-1 << std::endl;
 #endif
                 newLevel.SetState(x,y-1,water);
               }
@@ -766,7 +861,7 @@ namespace osmscout {
             if (y<level.cellYCount-1) {
               if (level.GetState(x,y+1)==unknown) {
 #if defined(DEBUG_TILING)
-                std::cout << "Water beneath water: " << x << "," << y+1 << std::endl;
+                std::cout << "Water above water: " << x << "," << y+1 << std::endl;
 #endif
                 newLevel.SetState(x,y+1,water);
               }
@@ -775,7 +870,7 @@ namespace osmscout {
             if (x>0) {
               if (level.GetState(x-1,y)==unknown) {
 #if defined(DEBUG_TILING)
-                std::cout << "Water beneath water: " << x-1 << "," << y << std::endl;
+                std::cout << "Water left of water: " << x-1 << "," << y << std::endl;
 #endif
                 newLevel.SetState(x-1,y,water);
               }
@@ -784,7 +879,7 @@ namespace osmscout {
             if (x<level.cellXCount-1) {
               if (level.GetState(x+1,y)==unknown) {
 #if defined(DEBUG_TILING)
-                std::cout << "Water beneath water: " << x+1 << "," << y << std::endl;
+                std::cout << "Water right of water: " << x+1 << "," << y << std::endl;
 #endif
                 newLevel.SetState(x+1,y,water);
               }
@@ -895,18 +990,78 @@ namespace osmscout {
   {
     switch (border) {
     case 0:
-      return b.GetLon()>a.GetLon();
+      return b.GetLon()>=a.GetLon();
     case 1:
-      return b.GetLat()<a.GetLat();
+      return b.GetLat()<=a.GetLat();
     case 2:
-      return b.GetLon()<a.GetLon();
+      return b.GetLon()<=a.GetLon();
     case 3:
-      return b.GetLat()>a.GetLat();
+      return b.GetLat()>=a.GetLat();
     }
 
     assert(false);
 
     return false;
+  }
+
+  void WaterIndexGenerator::GetCells(const Level& level,
+                                     const Point& a,
+                                     const Point& b,
+                                     std::set<Coord>& cellIntersections)
+  {
+    uint32_t cx1=(uint32_t)((a.GetLon()+180.0)/level.cellWidth);
+    uint32_t cy1=(uint32_t)((a.GetLat()+90.0)/level.cellHeight);
+
+    uint32_t cx2=(uint32_t)((b.GetLon()+180.0)/level.cellWidth);
+    uint32_t cy2=(uint32_t)((b.GetLat()+90.0)/level.cellHeight);
+
+    cellIntersections.insert(Coord(cx1,cy1));
+
+    if (cx1!=cx2 || cy1!=cy2) {
+      for (size_t x=std::min(cx1,cx2); x<=std::max(cx1,cx2); x++) {
+        for (size_t y=std::min(cy1,cy2); y<=std::max(cy1,cy2); y++) {
+
+          Coord  coord(x,y);
+          Point  borderPoints[5];
+          double lonMin,lonMax,latMin,latMax;
+
+          lonMin=x*level.cellWidth-180.0;
+          lonMax=lonMin+level.cellWidth;
+          latMin=y*level.cellHeight-90.0;
+          latMax=latMin+level.cellHeight;
+
+          borderPoints[0]=Point(1,latMax,lonMin); // top left
+          borderPoints[1]=Point(2,latMax,lonMax); // top right
+          borderPoints[2]=Point(3,latMin,lonMax); // bottom right
+          borderPoints[3]=Point(4,latMin,lonMin); // bottom left
+          borderPoints[4]=borderPoints[0];    // To avoid "% 4" on all indexes
+
+          size_t corner=0;
+
+          while (corner<4) {
+            if (LinesIntersect(a,
+                               b,
+                               borderPoints[corner],
+                               borderPoints[corner+1])) {
+              cellIntersections.insert(coord);
+
+              break;
+            }
+
+            corner++;
+          }
+        }
+      }
+    }
+  }
+
+  void WaterIndexGenerator::GetCells(const Level& level,
+                                     const std::vector<Point>& points,
+                                     std::set<Coord>& cellIntersections)
+  {
+    for (size_t p=0; p<points.size()-1; p++) {
+      GetCells(level,points[p],points[p+1],cellIntersections);
+    }
   }
 
   void WaterIndexGenerator::GetCellIntersections(const Level& level,
@@ -915,15 +1070,16 @@ namespace osmscout {
                                                  std::map<Coord,std::list<Intersection> >& cellIntersections)
   {
     for (size_t p=0; p<points.size()-1; p++) {
-      uint32_t cx1=(uint32_t)floor((points[p].GetLon()+180.0)/level.cellWidth);
-      uint32_t cy1=(uint32_t)floor((points[p].GetLat()+90.0)/level.cellHeight);
+      uint32_t cx1=(uint32_t)((points[p].GetLon()+180.0)/level.cellWidth);
+      uint32_t cy1=(uint32_t)((points[p].GetLat()+90.0)/level.cellHeight);
 
-      uint32_t cx2=(uint32_t)floor((points[p+1].GetLon()+180.0)/level.cellWidth);
-      uint32_t cy2=(uint32_t)floor((points[p+1].GetLat()+90.0)/level.cellHeight);
+      uint32_t cx2=(uint32_t)((points[p+1].GetLon()+180.0)/level.cellWidth);
+      uint32_t cy2=(uint32_t)((points[p+1].GetLat()+90.0)/level.cellHeight);
 
       if (cx1!=cx2 || cy1!=cy2) {
         for (size_t x=std::min(cx1,cx2); x<=std::max(cx1,cx2); x++) {
           for (size_t y=std::min(cy1,cy2); y<=std::max(cy1,cy2); y++) {
+
             Coord              coord(x-level.cellXStart,y-level.cellYStart);
             Point              borderPoints[5];
             double             lonMin,lonMax,latMin,latMax;
@@ -1036,6 +1192,97 @@ namespace osmscout {
           }
         }
       }
+    }
+  }
+
+  void WaterIndexGenerator::GetCoastlineData(const ImportParameter& parameter,
+                                             Progress& progress,
+                                             Projection& projection,
+                                             const Level& level,
+                                             const std::list<CoastRef>& coastlines,
+                                             CoastlineData& data)
+  {
+    progress.Info("Calculate coastline data");
+
+    data.isArea.resize(coastlines.size());
+    data.isCompletelyInCell.resize(coastlines.size(),false);
+    data.cell.resize(coastlines.size(),Coord(0,0));
+    data.points.resize(coastlines.size());
+    data.cellIntersections.resize(coastlines.size());
+
+    size_t curCoast=0;
+    for (std::list<CoastRef>::const_iterator c=coastlines.begin();
+        c!=coastlines.end();
+        ++c) {
+      const  CoastRef& coast=*c;
+      BoundingBox      boundingBox;
+
+      progress.SetProgress(curCoast,coastlines.size());
+
+      data.isArea[curCoast]=coast->coast.front().GetId()==coast->coast.back().GetId();
+
+      boundingBox.minLat=coast->coast[0].GetLat();
+      boundingBox.maxLat=boundingBox.minLat;
+      boundingBox.minLon=coast->coast[0].GetLon();
+      boundingBox.maxLon=boundingBox.minLon;
+
+      for (size_t p=1; p<coast->coast.size(); p++) {
+        boundingBox.minLat=std::min(boundingBox.minLat,coast->coast[p].GetLat());
+        boundingBox.maxLat=std::max(boundingBox.maxLat,coast->coast[p].GetLat());
+
+        boundingBox.minLon=std::min(boundingBox.minLon,coast->coast[p].GetLon());
+        boundingBox.maxLon=std::max(boundingBox.maxLon,coast->coast[p].GetLon());
+      }
+
+      uint32_t cx1,cx2,cy1,cy2;
+
+      cx1=(uint32_t)floor((boundingBox.minLon+180.0)/level.cellWidth);
+      cx2=(uint32_t)floor((boundingBox.maxLon+180.0)/level.cellWidth);
+      cy1=(uint32_t)floor((boundingBox.minLat+90.0)/level.cellHeight);
+      cy2=(uint32_t)floor((boundingBox.maxLat+90.0)/level.cellHeight);
+
+      if (cx1==cx2 && cy1==cy2) {
+        data.cell[curCoast].x=cx1;
+        data.cell[curCoast].y=cy1;
+        data.isCompletelyInCell[curCoast]=true;
+      }
+
+      TransPolygon polygon;
+
+      if (data.isArea[curCoast]) {
+        // TODO: We already handled areas that are completely within one cell, we should skip them here
+        polygon.TransformArea(projection,parameter.GetOptimizationWayMethod(),coast->coast, 1.0);
+      }
+      else {
+        polygon.TransformWay(projection,parameter.GetOptimizationWayMethod(),coast->coast, 1.0);
+      }
+
+      data.points.reserve(coast->coast.size());
+      for (size_t p=polygon.GetStart(); p<=polygon.GetEnd(); p++) {
+        if (polygon.points[p].draw) {
+          data.points[curCoast].push_back(coast->coast[p]);
+        }
+      }
+
+      // Currently transformation optimization code sometimes does not correctly handle the closing point for areas
+      if (data.isArea[curCoast] &&
+          data.points[curCoast].front().GetId()!=data.points[curCoast].back().GetId()) {
+        data.points[curCoast].push_back(data.points[curCoast].front());
+      }
+
+      // Calculate all intersections for all path steps for all cells covered
+      GetCellIntersections(level,
+                           data.points[curCoast],
+                           curCoast,
+                           data.cellIntersections[curCoast]);
+
+      for (std::map<Coord,std::list<Intersection> >::iterator cell=data.cellIntersections[curCoast].begin();
+          cell!=data.cellIntersections[curCoast].end();
+          ++cell) {
+        data.cellCoastlines[cell->first].push_back(curCoast);
+      }
+
+      curCoast++;
     }
   }
 
@@ -1180,75 +1427,17 @@ namespace osmscout {
                                                              Progress& progress,
                                                              Projection& projection,
                                                              const Level& level,
-                                                             const std::list<CoastRef>& coastlines,
-                                                             std::map<Coord,std::list<GroundTile> >& cellGroundTileMap)
+                                                             std::map<Coord,std::list<GroundTile> >& cellGroundTileMap,
+                                                             CoastlineData& data)
   {
     progress.Info("Handle coastlines partially in a cell");
 
-    std::map<Coord,std::list<size_t> >                     cellCoastlines;
-    std::vector<std::map<Coord,std::list<Intersection> > > cellIntersections;
-    std::vector<bool>                                      isArea;
-    std::vector<std::vector<Point> >                       points;
-
-    cellIntersections.resize(coastlines.size());
-    isArea.resize(coastlines.size());
-    points.resize(coastlines.size());
-
-    size_t currentCoastline=0;
-    for (std::list<CoastRef>::const_iterator c=coastlines.begin();
-        c!=coastlines.end();
-        ++c) {
-      const  CoastRef& coast=*c;
-
-      progress.SetProgress(currentCoastline,coastlines.size());
-
-      TransPolygon polygon;
-
-      isArea[currentCoastline]=coast->coast.front().GetId()==coast->coast.back().GetId();
-
-      if (isArea[currentCoastline]) {
-        // TODO: We already handled areas that are completely within one cell, we should skip them here
-        polygon.TransformArea(projection,parameter.GetOptimizationWayMethod(),coast->coast, 1.0);
-      }
-      else {
-        polygon.TransformWay(projection,parameter.GetOptimizationWayMethod(),coast->coast, 1.0);
-      }
-
-      points.reserve(coast->coast.size());
-      for (size_t p=polygon.GetStart(); p<=polygon.GetEnd(); p++) {
-        if (polygon.points[p].draw) {
-          points[currentCoastline].push_back(coast->coast[p]);
-        }
-      }
-
-      // Currently transformation optimization code some times draw the closing points for areas
-      if (isArea[currentCoastline] &&
-          points[currentCoastline].front().GetId()!=points[currentCoastline].back().GetId()) {
-        points[currentCoastline].push_back(points[currentCoastline].front());
-      }
-
-      // Calculate all intersections for all path steps for all cells covered
-      GetCellIntersections(level,
-                           points[currentCoastline],
-                           currentCoastline,
-                           cellIntersections[currentCoastline]);
-
-      for (std::map<Coord,std::list<Intersection> >::iterator cell=cellIntersections[currentCoastline].begin();
-          cell!=cellIntersections[currentCoastline].end();
-          ++cell) {
-        cellCoastlines[cell->first].push_back(currentCoastline);
-      }
-
-      currentCoastline++;
-
-    }
-
     // For every cell with intersections
     size_t currentCell=0;
-    for (std::map<Coord,std::list<size_t> >::const_iterator cell=cellCoastlines.begin();
-         cell!=cellCoastlines.end();
+    for (std::map<Coord,std::list<size_t> >::const_iterator cell=data.cellCoastlines.begin();
+         cell!=data.cellCoastlines.end();
         ++cell) {
-      progress.SetProgress(currentCell,cellCoastlines.size());
+      progress.SetProgress(currentCell,data.cellCoastlines.size());
 
       currentCell++;
 
@@ -1261,9 +1450,9 @@ namespace osmscout {
       for (std::list<size_t>::const_iterator currentCoastline=cell->second.begin();
           currentCoastline!=cell->second.end();
           ++currentCoastline) {
-        std::map<Coord,std::list<Intersection> >::iterator cellData=cellIntersections[*currentCoastline].find(cell->first);
+        std::map<Coord,std::list<Intersection> >::iterator cellData=data.cellIntersections[*currentCoastline].find(cell->first);
 
-        if (cellData==cellIntersections[*currentCoastline].end()) {
+        if (cellData==data.cellIntersections[*currentCoastline].end()) {
           continue;
         }
 
@@ -1271,7 +1460,7 @@ namespace osmscout {
         for (std::list<Intersection>::iterator inter=cellData->second.begin();
             inter!=cellData->second.end();
             ++inter) {
-          IntersectionPtr intersection=&(*inter);
+          const IntersectionPtr intersection=&(*inter);
 
           intersectionsPathOrder[*currentCoastline].push_back(intersection);
           intersectionsCW.push_back(intersection);
@@ -1280,7 +1469,7 @@ namespace osmscout {
         intersectionsPathOrder[*currentCoastline].sort(IntersectionByPathComparator());
 
         // Fix intersection order for areas
-        if (isArea[*currentCoastline] &&
+        if (data.isArea[*currentCoastline] &&
             intersectionsPathOrder[*currentCoastline].front()->direction==-1) {
           intersectionsPathOrder[*currentCoastline].push_back(intersectionsPathOrder[*currentCoastline].front());
           intersectionsPathOrder[*currentCoastline].pop_front();
@@ -1318,6 +1507,7 @@ namespace osmscout {
       borderCoords[3].Set(0,0);                                     // bottom left
 
 #if defined(DEBUG_COASTLINE)
+      std::cout << std::setiosflags(std::ios::fixed) << std::setprecision(6);
       std::cout << "-- Cell: " << cell->first.x << "," << cell->first.y << std::endl;
 
       for (size_t currentCoastline=0;
@@ -1387,8 +1577,8 @@ namespace osmscout {
                      lonMin,
                      initialOutgoing,
                      incoming,
-                     points[initialOutgoing->coastline],
-                     isArea[initialOutgoing->coastline]);
+                     data.points[initialOutgoing->coastline],
+                     data.isArea[initialOutgoing->coastline]);
 
         IntersectionPtr nextCWIter=GetNextCW(intersectionsCW,
                                              incoming);
@@ -1457,8 +1647,8 @@ namespace osmscout {
                        lonMin,
                        outgoing,
                        incoming,
-                       points[outgoing->coastline],
-                       isArea[outgoing->coastline]);
+                       data.points[outgoing->coastline],
+                       data.isArea[outgoing->coastline]);
 
           nextCWIter=GetNextCW(intersectionsCW,
                                incoming);
@@ -1480,6 +1670,16 @@ namespace osmscout {
                        incoming,
                        initialOutgoing,
                        borderCoords);
+
+          /*
+          if (cell->first.x==2 && cell->first.y==10 &&
+              initialOutgoing->coastline==16148) {
+            std::cout << ">>>" << std::endl;
+            for (size_t b=0; b<groundTile.coords.size();b++) {
+              std::cout << b << " " << groundTile.coords[b].x << "," << groundTile.coords[b].y << std::endl;
+            }
+            std::cout << "<<<" << std::endl;
+          }*/
 
           cellGroundTileMap[cell->first].push_back(groundTile);
         }
@@ -1586,11 +1786,21 @@ namespace osmscout {
       MarkCoastlineCells(progress,
                          levels[level]);
 
-      ScanCellsHorizontally(progress,
-                            levels[level]);
+      CoastlineData data;
 
+      GetCoastlineData(parameter,
+                       progress,
+                       projection,
+                       levels[level],
+                       coastlines,
+                       data);
+
+      CalculateLandSeaCells(progress,
+                            levels[level],
+                            data);
+      /*
       ScanCellsVertically(progress,
-                          levels[level]);
+                          levels[level]);*/
 
       if (parameter.GetAssumeLand()) {
         AssumeLand(parameter,
@@ -1623,8 +1833,8 @@ namespace osmscout {
                                        progress,
                                        projection,
                                        levels[level],
-                                       coastlines,
-                                       cellGroundTileMap);
+                                       cellGroundTileMap,
+                                       data);
 
       for (size_t y=0; y<levels[level].cellYCount; y++) {
         for (size_t x=0; x<levels[level].cellXCount; x++) {
@@ -1644,8 +1854,8 @@ namespace osmscout {
         writer.WriteNumber((uint32_t)coord->second.size());
 
         for (std::list<GroundTile>::const_iterator tile=coord->second.begin();
-            tile!=coord->second.end();
-            ++tile) {
+             tile!=coord->second.end();
+             ++tile) {
           writer.Write((uint8_t)tile->type);
 
           writer.WriteNumber((uint32_t)tile->coords.size());
