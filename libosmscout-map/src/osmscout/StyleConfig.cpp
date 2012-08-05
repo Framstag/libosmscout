@@ -38,6 +38,19 @@ namespace osmscout {
     // no code
   }
 
+  LineStyle::LineStyle(const LineStyle& style)
+  {
+    this->lineColor=style.lineColor;
+    this->alternateColor=style.alternateColor;
+    this->outlineColor=style.outlineColor;
+    this->gapColor=style.gapColor;
+    this->displayWidth=style.displayWidth;
+    this->width=style.width;
+    this->fixedWidth=style.fixedWidth;
+    this->outline=style.outline;
+    this->dash=style.dash;
+  }
+
   LineStyle& LineStyle::SetLineColor(const Color& color)
   {
     this->lineColor=color;
@@ -113,6 +126,17 @@ namespace osmscout {
     // no code
   }
 
+  FillStyle::FillStyle(const FillStyle& style)
+  {
+    this->fillColor=style.fillColor;
+    this->pattern=style.pattern;
+    this->patternId=style.patternId;
+    this->patternMinMag=style.patternMinMag;
+    this->borderColor=style.borderColor;
+    this->borderWidth=style.borderWidth;
+    this->borderDash=style.borderDash;
+  }
+
   FillStyle& FillStyle::SetFillColor(const Color& color)
   {
     fillColor=color;
@@ -172,6 +196,17 @@ namespace osmscout {
     // no code
   }
 
+  LabelStyle::LabelStyle(const LabelStyle& style)
+  {
+    this->style=style.style;
+    this->priority=style.priority;
+    this->scaleAndFadeMag=style.scaleAndFadeMag;
+    this->size=style.size;
+    this->textColor=style.textColor;
+    this->bgColor=style.bgColor;
+    this->borderColor=style.borderColor;
+  }
+
   LabelStyle& LabelStyle::SetStyle(Style style)
   {
     this->style=style;
@@ -229,6 +264,13 @@ namespace osmscout {
     // no code
   }
 
+  SymbolStyle::SymbolStyle(const SymbolStyle& style)
+  {
+    this->style=style.style;
+    this->size=style.size;
+    this->fillColor=style.fillColor;
+  }
+
   SymbolStyle& SymbolStyle::SetStyle(Style style)
   {
     this->style=style;
@@ -254,6 +296,12 @@ namespace osmscout {
    : id(0)
   {
     // no code
+  }
+
+  IconStyle::IconStyle(const IconStyle& style)
+  {
+    this->id=style.id;
+    this->iconName=style.iconName;
   }
 
   IconStyle& IconStyle::SetId(size_t id)

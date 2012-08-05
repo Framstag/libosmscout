@@ -52,6 +52,7 @@ namespace osmscout {
 
   public:
     LineStyle();
+    LineStyle(const LineStyle& style);
 
     LineStyle& SetLineColor(const Color& color);
     LineStyle& SetAlternateColor(const Color& color);
@@ -142,6 +143,7 @@ namespace osmscout {
 
   public:
     FillStyle();
+    FillStyle(const FillStyle& style);
 
     FillStyle& SetFillColor(const Color& color);
     void SetPatternId(size_t id) const;
@@ -232,6 +234,7 @@ namespace osmscout {
 
   public:
     LabelStyle();
+    LabelStyle(const LabelStyle& style);
 
     LabelStyle& SetStyle(Style style);
     LabelStyle& SetPriority(uint8_t priority);
@@ -317,6 +320,7 @@ namespace osmscout {
 
   public:
     SymbolStyle();
+    SymbolStyle(const SymbolStyle& style);
 
     SymbolStyle& SetStyle(Style style);
     SymbolStyle& SetSize(double size);
@@ -357,6 +361,7 @@ namespace osmscout {
 
   public:
     IconStyle();
+    IconStyle(const IconStyle& style);
 
     IconStyle& SetId(size_t id);
     IconStyle& SetIconName(const std::string& iconName);
