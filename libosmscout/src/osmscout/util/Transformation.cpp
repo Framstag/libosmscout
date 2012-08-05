@@ -36,9 +36,9 @@ namespace osmscout {
     double     xdelta;
     double     ydelta;
     double     inverseLength;
-  
+
   public:
-    
+
     LineSegment(const TransPoint& a, const TransPoint& b)
     :ref(a)
     {
@@ -59,10 +59,10 @@ namespace osmscout {
       double u=(cx*xdelta+cy*ydelta)*inverseLength;
 
       u=std::min(1.0,std::max(0.0,u));
-  
+
       double dx=cx-u*xdelta; // *-1 but we square below
       double dy=cy-u*ydelta; // *-1 but we square below
-  
+
       return dx*dx+dy*dy;
     }
 
@@ -128,7 +128,7 @@ namespace osmscout {
     for(size_t i=beginIndex+1; i<endIndex; ++i){
       if (points[i].draw) {
         double distanceSquared=lineSegment.CalculateDistanceSquared(points[i]);
-        
+
         if (distanceSquared>maxDistanceSquared) {
           maxDistanceSquared=distanceSquared;
           maxDistanceIndex=i;
@@ -292,7 +292,7 @@ namespace osmscout {
       for(size_t i=begin; i<length; ++i) {
         if (points[i].draw) {
           double dist=CalculateDistancePointToPoint(points[begin], points[i]);
-          
+
           if (dist>maxDist) {
             maxDist=dist;
             maxDistIndex=i;
@@ -386,6 +386,14 @@ namespace osmscout {
 
           end=i;
         }
+      }
+
+      if (points[start].x!=points[end].x ||
+          points[start].y!=points[end].y) {
+        end++;
+        length++;
+
+        points[end]=points[start];
       }
     }
     else {
