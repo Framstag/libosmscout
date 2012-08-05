@@ -32,6 +32,7 @@ namespace osmscout {
 
     uint16_t x;
     uint16_t y;
+    bool     coast;
 
     TileCoord()
     {
@@ -39,17 +40,21 @@ namespace osmscout {
     }
 
     TileCoord(uint16_t x,
-              uint16_t y)
+              uint16_t y,
+              bool coast)
     {
       this->x=x;
       this->y=y;
+      this->coast=coast;
     }
 
     void Set(uint16_t x,
-             uint16_t y)
+             uint16_t y,
+             bool coast)
     {
-    this->x=x;
-    this->y=y;
+      this->x=x;
+      this->y=y;
+      this->coast=coast;
     }
   };
 

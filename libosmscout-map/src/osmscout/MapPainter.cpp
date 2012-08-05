@@ -202,6 +202,8 @@ namespace osmscout {
     debugLabel->SetPriority(0);
     debugLabel->SetTextColor(Color(0,0,0,0.5));
     debugLabel->SetSize(1.2);
+
+    coastlineSegmentAttributes.layer=0;
   }
 
   MapPainter::~MapPainter()
@@ -398,6 +400,7 @@ namespace osmscout {
     FillStyleRef       seaFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_sea"),level);
     FillStyleRef       coastFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_coast"),level);
     FillStyleRef       unknownFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_unknown"),level);
+    LineStyleRef       coastlineLine=styleConfig.GetWayLineStyle(styleConfig.GetTypeConfig()->GetWayTypeId("_tile_coastline"),level);
     std::vector<Point> points;
     size_t             start,end;
 
@@ -499,6 +502,51 @@ namespace osmscout {
           }
           if (tile->coords[i].y==TileCoord::CELL_MAX) {
             transBuffer.buffer[start+i].y=floor(transBuffer.buffer[start+i].y);
+          }
+        }
+
+        if (coastlineLine.Valid()) {
+          size_t lineStart=0;
+          size_t lineEnd;
+
+          while (lineStart<tile->coords.size()) {
+            while (lineStart<tile->coords.size() &&
+                   !tile->coords[lineStart].coast) {
+              lineStart++;
+            }
+
+            if (lineStart>=tile->coords.size()) {
+              continue;
+            }
+
+            lineEnd=lineStart;
+
+            while (lineEnd<tile->coords.size() &&
+                   tile->coords[lineEnd].coast) {
+              lineEnd++;
+            }
+
+            if (lineStart!=lineEnd) {
+              WayData data;
+
+              data.attributes=&coastlineSegmentAttributes;
+              data.lineStyle=coastlineLine.Get();
+              data.nameLabelStyle=NULL;
+              data.refLabelStyle=NULL;
+              data.prio=std::numeric_limits<size_t>::max();
+              data.transStart=start+lineStart;
+              data.transEnd=start+lineEnd;
+              data.lineWidth=GetProjectedWidth(projection,
+                                               ConvertWidthToPixel(parameter,coastlineLine->GetDisplayWidth()),
+                                               coastlineLine->GetWidth());
+              data.drawBridge=false;
+              data.drawTunnel=false;
+              data.outline=false;
+
+              wayData.push_back(data);
+            }
+
+            lineStart=lineEnd+1;
           }
         }
       }

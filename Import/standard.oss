@@ -1,7 +1,7 @@
 OSS
  ORDER WAYS
   GROUP "highway_motorway", "waterway_river", "waterway_canal", "waterway_drain", "natural_coastline", "_route"
-  GROUP "highway_trunk" 
+  GROUP "highway_trunk"
   GROUP "highway_primary"
   GROUP "highway_secondary"
   GROUP "highway_tertiary"
@@ -10,12 +10,12 @@ OSS
   GROUP "railway_rail",
      "aeroway_runway", "aeroway_taxiway"
   GROUP "highway_living_street", "highway_service", "highway_bus_guideway",
-     "railway_tram", "railway_light_rail", "railway_subway", "public_transport_platform" 
+     "railway_tram", "railway_light_rail", "railway_subway", "public_transport_platform"
   GROUP "highway_track", "highway_pedestrian", "highway_path", "highway_cycleway",
      "highway_footway", "highway_bridleway", "highway_byway", "highway_construction",
      "leisure_track",
 	   "waterway_stream","route_ferry"
-  GROUP "highway_steps", "barrier_fence"      
+  GROUP "highway_steps", "barrier_fence"
 
  // -------------------------------------------------------
  //
@@ -32,16 +32,16 @@ OSS
  [MAG world-] {
    [TYPE "_route"] WAY {color: #ff000088; displayWidth: 1.5mm; }
 
-   /*   
-   [TYPE "_tile_sea"] AREA {color: #b5d0d0;}
+   //[TYPE "_tile_sea"] AREA {color: #b5d0d0;}
+   //[TYPE "_tile_coast"] AREA {color: #ff0000;}
    [TYPE "_tile_coast"] AREA {color: #b5d0d0;}
    //[TYPE "_tile_coast"] AREA {color: #b5d0d0;  borderColor: #000000; borderWidth: 0.1mm;}
    //[TYPE "_tile_coast"] AREA {color: #aaaaaa;  borderColor: #000000; borderWidth: 0.1mm;}
-   [TYPE "_tile_land"] AREA {color: #f1eee9;}
-   [TYPE "_tile_unknown"] AREA {color: #ffffad;}
-   */
-   
-   [TYPE "natural_coastline"] WAY {color: #ff0000; displayWidth: 0.1mm;}
+   //[TYPE "_tile_land"] AREA {color: #f1eee9;}
+   //[TYPE "_tile_unknown"] AREA {color: #ffffad;}
+
+   //[TYPE "_tile_coastline"] WAY {color: #ff0000; displayWidth: 0.1mm;}
+   //[TYPE "natural_coastline"] WAY {color: #ff0000; displayWidth: 0.1mm;}
  }
 
  // -------------------------------------------------------
@@ -61,7 +61,7 @@ OSS
    [TYPE "natural_land"] AREA { color: #ffffff; }
    [TYPE "natural_scrub"] AREA { color: #b5e2b5; pattern: "scrub"; patternMinMag: cityOver; }
  }
- 
+
  [MAG detail-] {
    [TYPE "natural_glacier",
          "natural_fell",
@@ -74,30 +74,30 @@ OSS
          "natural_beach",
          "natural_land"]
      AREA.LABEL { style: normal; }
-   
-   [TYPE "natural_peak"] NODE.LABEL { style: emphasize; color: #9c5329;} 
- }  
+
+   [TYPE "natural_peak"] NODE.LABEL { style: emphasize; color: #9c5329;}
+ }
 
  [MAG city-] {
    [TYPE "natural_peak"] NODE.SYMBOL { style: triangle; color: #9c5e29; size: 8; }
- }  
+ }
 
  // -------------------------------------------------------
  //
  // waterway_*
  //
- 
+
  [MAG proximity-] {
    [TYPE "waterway_river",
          "waterway_canal"]
      WAY {color: #b5d0d0; displayWidth: 0.1mm; width: 15m;}
-  
+
    [TYPE "waterway_dock",
          "waterway_riverbank"] {
      AREA { color: #b5d0d0; }
      AREA.LABEL { style: normal;}
-   }  
- }  
+   }
+ }
 
  [MAG cityOver-] {
    [TYPE "waterway_stream"] WAY {color: #b5d0d0; displayWidth: 0.25mm; width: 2m;}
@@ -113,13 +113,13 @@ OSS
 
    [TYPE "waterway_riverbank"]
      AREA.LABEL { style: normal;}
- }    
+ }
 
  // -------------------------------------------------------
  //
  // highway_*, railway_*, route_ferry
  //
-  
+
  [TYPE "highway_motorway",
        "highway_motorway_link",
        "highway_trunk",
@@ -135,17 +135,17 @@ OSS
        "highway_service",
        "highway_living_street",
        "highway_pedestrian"] WAY {outline: 0.25mm;}
-  
- [MAG continent-] { 
-   [TYPE "highway_motorway"] WAY { color: #809bc0; outlineColor: #777777; displayWidth: 0.45mm; width: 20m;}
- }   
 
- [MAG county-] { 
+ [MAG continent-] {
+   [TYPE "highway_motorway"] WAY { color: #809bc0; outlineColor: #777777; displayWidth: 0.45mm; width: 20m;}
+ }
+
+ [MAG county-] {
    [TYPE "highway_trunk"] WAY { color: #a8daa8; outlineColor: #777777; displayWidth: 0.45mm; width: 18m;}
    [TYPE "highway_primary"] WAY { color: #ec989a; outlineColor: #a56769; displayWidth: 0.4mm; width: 14m; }
    [TYPE "highway_services"] AREA { color: #cb9999; }
  }
- 
+
  [MAG proximity-] {
    [TYPE "highway_secondary"] WAY { color: #fdd6a4; outlineColor: #bfbfbf; altColor: #fdd654; displayWidth: 0.25mm; width: 12m; }
  }
@@ -157,18 +157,18 @@ OSS
    [TYPE "highway_road"] WAY { color: #ffffff; outlineColor: #bfbfbf; altColor: #888888; displayWidth: 0.1mm; width: 8m; }
    [TYPE "railway_rail"] WAY {color: #939393; altColor: #777777; outlineColor: #b3b3b3; dash: 3,3; gapColor: #ffffff; displayWidth: 0.25mm;width: 5m; outline: 0.25mm;}
    [TYPE "route_ferry"] WAY {color: #0000ff; outlineColor: #ffffff50; dash: 1,1; displayWidth: 0.5mm; width: 2m; outline: 0.4mm;}
- }   
+ }
 
  [MAG city-] {
    [TYPE "highway_primary_link"] WAY { color: #ec989a; outlineColor: #777777; displayWidth: 0.4mm; width: 14m; }
    [TYPE "highway_secondary_link"] WAY { color: #fdd6a4; outlineColor: #777777; altColor: #fdd654; displayWidth: 0.25mm; width: 12m; }
    [TYPE "highway_unclassified",
          "highway_residential"] WAY { color: #ffffff; outlineColor: #bfbfbf; altColor: #999999; displayWidth: 0.1mm; width: 8m; }
-         
+
    [TYPE "railway_tram"] WAY {color: #444444; displayWidth: 0.25mm; width: 5m;}
    [TYPE "railway_light_rail"] WAY {color: #b3b3b3; displayWidth: 0.25mm; width: 5m;}
    [TYPE "railway_subway"] WAY {color: #b3b3b3; outlineColor: #ffffff50; displayWidth: 0.25mm; width: 5m; outline: 0.25mm;}
-   
+
    [TYPE "railway_station"] AREA { color: #cb4040; }
  }
 
@@ -177,14 +177,14 @@ OSS
    [TYPE "highway_living_street"] WAY { color: #bababa; outlineColor: #bfbfbf; displayWidth: 0.25mm; width: 8m;}
    [TYPE "highway_bus_guideway"] WAY {color: #90570c; displayWidth: 0.1mm; width: 2m; }
  }
-    
+
  [MAG close-] {
    [TYPE "railway_station"] NODE.SYMBOL { style: box; color: #7885b0; size: 8; }
    [TYPE "highway_bus_stop"] NODE.ICON { name: bus_stop;}
                              NODE.SYMBOL { style: circle; color: #7885b0; size: 4; }
- 
+
    [TYPE "highway_construction"] WAY {color: #99cccc; displayWidth: 0.1mm; width: 2m;}
-  
+
    [TYPE "highway_pedestrian"] WAY {color: #ebeaea; displayWidth: 0.1mm; width: 8m; }
                                AREA { color: #ededed; borderColor: #c5c5c5; borderWidth: 0.1mm; }
 
@@ -195,7 +195,7 @@ OSS
    [TYPE  "highway_footway"] AREA { color: #ededed; borderColor: #c5c5c5; borderWidth: 0.1mm; }
  }
 
- [MAG veryClose-] {  
+ [MAG veryClose-] {
    [TYPE "highway_track"] WAY {color: #90570c; outlineColor: #ffffff50; dash: 3,1; displayWidth: 0.4mm;  outline: 0.4mm;}
    [TYPE "highway_pedestrian"] WAY {color: #ebeaea; outlineColor: #ffffff50; displayWidth: 0.1mm; outline: 0.25mm;}
    [TYPE "highway_path"] WAY {color: #555555; outlineColor: #ffffff50; dash: 8,2; displayWidth: 0.25mm; outline: 0.25mm;}
@@ -249,7 +249,7 @@ OSS
          "highway_secondary_link",
          "route_ferry"] WAY.LABEL{ style: contour;}
  }
- 
+
  [MAG close-] {
    [TYPE "railway_station"] NODE.LABEL { style: emphasize; color: #8888fd;}
    [TYPE "railway_halt"] NODE.LABEL { style: emphasize; color: #8888fd;}
@@ -257,12 +257,12 @@ OSS
    [TYPE "highway_services"] NODE.LABEL {style: normal; }
 
    [TYPE "highway_construction"] WAY.LABEL { style: contour;}
-   
+
    [TYPE "leisure_building",
          "sport_building",
          "shop"] AREA.LABEL {style: normal; }
  }
- 
+
  [MAG veryClose-] {
    [TYPE "highway_tertiary",
          "highway_unclassified",
@@ -277,7 +277,7 @@ OSS
  }
 
  [MAG block-] {
-   [TYPE "highway_bus_guideway", 
+   [TYPE "highway_bus_guideway",
          "highway_pedestrian",
          "highway_path",
          "highway_cycleway",
@@ -290,14 +290,14 @@ OSS
          "railway_light_rail",
          "railway_subway",
          "public_transport_platform"] WAY.LABEL { style: contour;}
-    
+
    [TYPE "highway_pedestrian",
          "highway_services",
          "highway_footway"] AREA.LABEL { style: normal;}
 
    [TYPE "public_transport_platform"] AREA.LABEL { style: normal; color: #524a4a; size: 0.8;}
  }
-    
+
  // -------------------------------------------------------
  //
  // Landuse
@@ -316,11 +316,11 @@ OSS
          "landuse_village_green"] AREA { color: #cfeca8; }
  }
 
- [MAG proximity-] {    
+ [MAG proximity-] {
    // Semiransparent overlay
    [TYPE "landuse_military"] AREA { color: #fe989822; borderColor: #fe9898; borderWidth: 0.2mm;}
  }
- 
+
  [MAG city-] {
    [TYPE "landuse_farm",
          "landuse_farmland"] AREA { color: #ead8bd; }
@@ -346,7 +346,7 @@ OSS
  }
 
  // Labels
- [MAG detail-] {  
+ [MAG detail-] {
    [TYPE "landuse_residential",
          "landuse_retail",
          "landuse_brownfield",
@@ -355,8 +355,8 @@ OSS
 
    [TYPE "landuse_forest"] AREA.LABEL { style: emphasize;}
  }
- 
- [MAG close-] {   
+
+ [MAG close-] {
    [TYPE "landuse_farm",
          "landuse_farmland",
          "landuse_farmyard_building",
@@ -377,16 +377,16 @@ OSS
    [TYPE "landuse_industrial",
          "landuse_allotments"] AREA.LABEL { style: emphasize;}
  }
- 
- [MAG veryClose-] {   
+
+ [MAG veryClose-] {
    [TYPE "landuse_railway",
          "landuse_construction"] AREA.LABEL { style: normal;}
  }
-    
+
  // -------------------------------------------------------
  //
  // Man made:
- // amenity, tourism, history,Leisure, military, buildings, power, barrier  
+ // amenity, tourism, history,Leisure, military, buildings, power, barrier
  //
 
  [MAG county-] {
@@ -396,7 +396,7 @@ OSS
    [TYPE "leisure_water_park"] AREA { color: #f1eee8; borderColor: #887b7b; borderWidth: 0.1mm; }
    [TYPE "leisure_park"] AREA { color: #c6f0cf; }
    [TYPE "leisure_common"] AREA { color: #bde3cb; }
-   
+
    [TYPE "leisure_marina",
          "leisure_fishing",
          "leisure_ice_rink"] AREA { color: #b5d6f1; }
@@ -405,7 +405,7 @@ OSS
  [MAG proximity-] {
    // Semiransparent overlay
    [TYPE "leisure_nature_reserve"] AREA { color: #abde9622; borderColor: #abde96; borderWidth: 0.2mm;}
- 
+
    [TYPE "military_airfield",
          "military_bunker",
          "military_barracks",
@@ -450,7 +450,7 @@ OSS
          "historic_memorial",
          "historic_ruins",
          "historic_wreck"] AREA { color: #7172db; }
- }        
+ }
 
  [MAG close-] {
    [TYPE "amenity_hospital"] NODE.ICON { name: hospital;}
@@ -466,7 +466,7 @@ OSS
    [TYPE "building"] AREA { color: #bcbcbc; borderColor: #887b7b; borderWidth: 0.1mm; }
 
    [TYPE "amenity_hospital_building"] AREA { color: #b89c9c; borderColor: #887b7b; borderWidth: 0.1mm; }
- } 
+ }
 
  [MAG city-] {
    [TYPE "amenity_parking_building"] AREA { color: #c4c393; borderColor: #887b7b; borderWidth: 0.1mm; }
@@ -483,7 +483,7 @@ OSS
    [TYPE "amenity"] AREA { color: #f0f0d8; }
    [TYPE "power_generator"] AREA { color: #bca9a9; }
  }
- 
+
  [MAG close-] {
    [TYPE "amenity_hospital",
          "amenity_hospital_building"] AREA.ICON { name: hospital;}
@@ -512,8 +512,8 @@ OSS
  [MAG proximity-] {
    [TYPE "leisure_nature_reserve"] AREA.LABEL { style: normal;}
  }
-  
- [MAG close-]{ 
+
+ [MAG close-]{
    [TYPE "leisure_sports_centre",
          "leisure_golf_course",
          "leisure_stadium",
@@ -534,7 +534,7 @@ OSS
          "military_naval_base"] AREA.LABEL { style: normal;}
 
    [TYPE "railway_station"] AREA.LABEL { style: emphasize; color: #8888fd;}
- }  
+ }
 
  [MAG veryClose-] {
    [TYPE "amenity_hospital"] NODE.LABEL { style: emphasize; color: #da0092; size: 1.1; }
@@ -545,7 +545,7 @@ OSS
          "amenity_hospital"] AREA.LABEL { style: emphasize; color: #da0092; size: 1.1;}
 
    [TYPE "amenity_grave_yard"] AREA.LABEL { style: emphasize; color: #000000; size: 1.1;}
- } 
+ }
 
  [MAG block-] {
    [TYPE "amenity_pharmacy"] NODE.LABEL { style: emphasize; color: #da0092; size: 1.1;}
@@ -562,7 +562,7 @@ OSS
          "shop"] AREA.LABEL { style: normal;}
 
    [TYPE "building"] AREA.LABEL { style: normal; color: #524a4a; size: 0.8; }
-  
+
    [TYPE "power_station",
          "power_sub_station",
          "power_generator",
@@ -596,24 +596,24 @@ OSS
    [TYPE "amenity_parking",
          "amenity_parking_building"] AREA.LABEL { style: emphasize; color: #4bb2da; size: 1.1; }
  }
-  
-  
+
+
  // -------------------------------------------------------
- // 
+ //
  // Places
  //
- 
+
  [MAG world-city] {
    [TYPE "place_continent"] NODE.LABEL { style: emphasize; priority: 1; }
- }  
+ }
 
  [MAG stateOver-city] {
    [TYPE "place_country"] NODE.LABEL { style: emphasize; priority: 2; }
- }  
+ }
 
  [MAG state-county] {
    [TYPE "place_state"] NODE.LABEL { style: emphasize; size: 1.7; scaleMag: state; priority: 3; }
- }  
+ }
 
  [MAG region-city] {
    [TYPE "place_region"] NODE.LABEL { style: emphasize; priority: 4; }
@@ -621,40 +621,40 @@ OSS
 
  [MAG county-city] {
    [TYPE "place_county"] NODE.LABEL { style: emphasize; priority: 5;}
- }  
+ }
 
  [MAG stateOver-city] {
    [TYPE "place_city"] NODE.LABEL { style: emphasize; size: 1.3; scaleMag: county; priority: 6;}
- }  
+ }
 
  [MAG region-city] {
    [TYPE "place_town"] NODE.LABEL { style: emphasize; size: 1.2; scaleMag: region; priority: 7;}
- }  
+ }
 
  [MAG cityOver-veryClose] {
    [TYPE "place_village"] NODE.LABEL { style: emphasize; size: 1.2; scaleMag: suburb; priority: 8;}
- }  
+ }
 
  [MAG city-veryClose] {
    [TYPE "place_hamlet"] NODE.LABEL { style: emphasize; size: 1.0; scaleMag: city; priority: 9;}
- }  
+ }
 
  [MAG cityOver-veryClose] {
    [TYPE"place_suburb"] NODE.LABEL { style: emphasize; size: 1.3; scaleMag: city; priority: 10;}
- }  
+ }
 
  [MAG close-] {
    [TYPE "place_locality"] NODE.LABEL { style: emphasize; size: 1.1; priority: 11;}
- }  
+ }
 
  [MAG region-veryClose] {
    [TYPE "place_island"] NODE.LABEL { style: emphasize; priority: 1;}
- }  
-  
+ }
+
  // -------------------------------------------------------
  //
  // Aeroway
- // 
+ //
 
  [MAG cityOver-] {
    [TYPE "aeroway_aerodrome",
@@ -664,11 +664,11 @@ OSS
    [TYPE "aeroway_runway"] AREA { color: #bbbbcc; }
    [TYPE "aeroway_apron"] AREA { color: #e8d1fe; }
  }
- 
- [MAG suburb-] { 
+
+ [MAG suburb-] {
    [TYPE "aeroway_runway"] WAY {color: #bbbbcc; displayWidth: 0.5mm; width: 20m;}
    [TYPE "aeroway_taxiway"] WAY {color: #bbbbcc; displayWidth: 0.5mm; width: 15m;}
- }  
+ }
 
  [MAG close-] {
    [TYPE "aeroway_taxiway",
@@ -679,5 +679,5 @@ OSS
          "aeroway_helipad",
          "aeroway_runway",
          "aeroway_apron"] AREA.LABEL{ style: normal;}
- } 
+ }
 END

@@ -363,9 +363,10 @@ namespace osmscout {
       Fallback styles in case they are missing for the style sheet
       */
     //@{
-    FillStyleRef  landFill;
-    FillStyleRef  seaFill;
-    LabelStyleRef debugLabel;
+    FillStyleRef           landFill;
+    FillStyleRef           seaFill;
+    LabelStyleRef          debugLabel;
+    SegmentAttributes      coastlineSegmentAttributes;
     //@}
 
   private:

@@ -523,7 +523,7 @@ namespace osmscout {
     std::sort(relationAreaOffsets.begin(),relationAreaOffsets.end());
 
     if (!GetNodesByOffset(nodeOffsets,
-                  nodes)) {
+                          nodes)) {
       std::cout << "Error reading nodes in area!" << std::endl;
       return false;
     }
@@ -537,7 +537,7 @@ namespace osmscout {
     StopClock waysTimer;
 
     if (!GetWaysByOffset(wayWayOffsets,
-                 ways)) {
+                         ways)) {
       std::cout << "Error reading ways in area!" << std::endl;
       return false;
     }
@@ -551,7 +551,7 @@ namespace osmscout {
     StopClock areasTimer;
 
     if (!GetWaysByOffset(wayAreaOffsets,
-                 areas)) {
+                         areas)) {
       std::cout << "Error reading areas in area!" << std::endl;
       return false;
     }
@@ -565,7 +565,7 @@ namespace osmscout {
     StopClock relationWaysTimer;
 
     if (!GetRelationsByOffset(relationWayOffsets,
-                      relationWays)) {
+                              relationWays)) {
       std::cout << "Error reading relation ways in area!" << std::endl;
       return false;
     }
@@ -579,7 +579,7 @@ namespace osmscout {
     StopClock relationAreasTimer;
 
     if (!GetRelationsByOffset(relationAreaOffsets,
-                      relationAreas)) {
+                              relationAreas)) {
       std::cerr << "Error reading relation areas in area!" << std::endl;
       return false;
     }

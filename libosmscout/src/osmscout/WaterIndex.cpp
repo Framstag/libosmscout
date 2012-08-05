@@ -110,6 +110,8 @@ namespace osmscout {
     idx=std::max(waterIndexMinMag,idx);
     idx=std::min(waterIndexMaxMag,idx);
 
+    std::cout << "Effective level: " << idx << std::endl;
+
     idx-=waterIndexMinMag;
 
     tiles.clear();
@@ -192,14 +194,16 @@ namespace osmscout {
 
               tile.coords.resize(coordCount);
 
-              for (size_t n=0;n<coordCount; n++) {
+              for (size_t n=0; n<coordCount; n++) {
                 uint16_t x;
                 uint16_t y;
 
                 scanner.Read(x);
                 scanner.Read(y);
 
-                tile.coords[n].Set(x,y);
+                tile.coords[n].Set(x & ~(1 << 15),
+                                   y,
+                                   x & (1 << 15));
               }
 
               tiles.push_back(tile);

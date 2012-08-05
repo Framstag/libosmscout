@@ -43,10 +43,12 @@ namespace osmscout {
   TileCoord WaterIndexGenerator::Transform(const Point& point,
                                            const Level& level,
                                            double cellMinLat,
-                                           double cellMinLon)
+                                           double cellMinLon,
+                                           bool coast)
   {
     TileCoord coord(floor((point.GetLon()-cellMinLon)/level.cellWidth*TileCoord::CELL_MAX+0.5),
-                    floor((point.GetLat()-cellMinLat)/level.cellHeight*TileCoord::CELL_MAX+0.5));
+                    floor((point.GetLat()-cellMinLat)/level.cellHeight*TileCoord::CELL_MAX+0.5),
+                    coast);
 
     return coord;
   }
@@ -974,7 +976,14 @@ namespace osmscout {
 
           for (size_t p=polygon.GetStart(); p<=polygon.GetEnd(); p++) {
             if (polygon.points[p].draw) {
-              TileCoord coord=Transform(coast->coast[p],level,cellMinLat,cellMinLon);
+              TileCoord coord;
+
+              if (p==polygon.GetEnd()) {
+                coord=Transform(coast->coast[polygon.GetStart()],level,cellMinLat,cellMinLon,false);
+              }
+              else {
+                coord=Transform(coast->coast[p],level,cellMinLat,cellMinLon,true);
+              }
 
               groundTile.coords.push_back(coord);
             }
@@ -1341,7 +1350,7 @@ namespace osmscout {
       groundTile.coords.push_back(borderCoords[borderPoint]);
     }
 
-    groundTile.coords.push_back(Transform(outgoing->point,level,cellMinLat,cellMinLon));
+    groundTile.coords.push_back(Transform(outgoing->point,level,cellMinLat,cellMinLon,false));
   }
 
 
@@ -1377,10 +1386,12 @@ namespace osmscout {
                                          const std::vector<Point>& points,
                                          bool isArea)
   {
+    groundTile.coords.back().coast=true;
+
     if (isArea) {
       if (outgoing->prevWayPointIndex==incoming->prevWayPointIndex &&
           outgoing->distanceSquare>incoming->distanceSquare) {
-        groundTile.coords.push_back(Transform(incoming->point,level,cellMinLat,cellMinLon));
+        groundTile.coords.push_back(Transform(incoming->point,level,cellMinLat,cellMinLon,false));
       }
       else {
         size_t idx=outgoing->prevWayPointIndex;
@@ -1391,7 +1402,7 @@ namespace osmscout {
         }
 
         while (idx!=targetIdx) {
-          groundTile.coords.push_back(Transform(points[idx],level,cellMinLat,cellMinLon));
+          groundTile.coords.push_back(Transform(points[idx],level,cellMinLat,cellMinLon,true));
 
           if (idx>0) {
             idx--;
@@ -1401,9 +1412,9 @@ namespace osmscout {
           }
         }
 
-        groundTile.coords.push_back(Transform(points[idx],level,cellMinLat,cellMinLon));
+        groundTile.coords.push_back(Transform(points[idx],level,cellMinLat,cellMinLon,true));
 
-        groundTile.coords.push_back(Transform(incoming->point,level,cellMinLat,cellMinLon));
+        groundTile.coords.push_back(Transform(incoming->point,level,cellMinLat,cellMinLon,false));
       }
     }
     else {
@@ -1412,10 +1423,10 @@ namespace osmscout {
       for (int idx=outgoing->prevWayPointIndex;
           idx>=targetIdx;
           idx--) {
-        groundTile.coords.push_back(Transform(points[idx],level,cellMinLat,cellMinLon));
+        groundTile.coords.push_back(Transform(points[idx],level,cellMinLat,cellMinLon,true));
       }
 
-      groundTile.coords.push_back(Transform(incoming->point,level,cellMinLat,cellMinLon));
+      groundTile.coords.push_back(Transform(incoming->point,level,cellMinLat,cellMinLon,false));
     }
   }
 
@@ -1501,10 +1512,10 @@ namespace osmscout {
       borderPoints[2]=Point(3,latMin,lonMax); // bottom right
       borderPoints[3]=Point(4,latMin,lonMin); // bottom left
 
-      borderCoords[0].Set(0,TileCoord::CELL_MAX);                   // top left
-      borderCoords[1].Set(TileCoord::CELL_MAX,TileCoord::CELL_MAX); // top right
-      borderCoords[2].Set(TileCoord::CELL_MAX,0);                   // bottom right
-      borderCoords[3].Set(0,0);                                     // bottom left
+      borderCoords[0].Set(0,TileCoord::CELL_MAX,false);                   // top left
+      borderCoords[1].Set(TileCoord::CELL_MAX,TileCoord::CELL_MAX,false); // top right
+      borderCoords[2].Set(TileCoord::CELL_MAX,0,false);                   // bottom right
+      borderCoords[3].Set(0,0,false);                                     // bottom left
 
 #if defined(DEBUG_COASTLINE)
       std::cout << std::setiosflags(std::ios::fixed) << std::setprecision(6);
@@ -1545,7 +1556,7 @@ namespace osmscout {
         std::cout << "Outgoing: " << initialOutgoing->coastline << " " << initialOutgoing->prevWayPointIndex << " " << initialOutgoing->distanceSquare << " " << isArea[initialOutgoing->coastline] << std::endl;
 #endif
 
-        groundTile.coords.push_back(Transform(initialOutgoing->point,level,latMin,lonMin));
+        groundTile.coords.push_back(Transform(initialOutgoing->point,level,latMin,lonMin,false));
 
 
         IntersectionPtr incoming=GetPreviousIntersection(intersectionsPathOrder[initialOutgoing->coastline],
@@ -1671,16 +1682,6 @@ namespace osmscout {
                        initialOutgoing,
                        borderCoords);
 
-          /*
-          if (cell->first.x==2 && cell->first.y==10 &&
-              initialOutgoing->coastline==16148) {
-            std::cout << ">>>" << std::endl;
-            for (size_t b=0; b<groundTile.coords.size();b++) {
-              std::cout << b << " " << groundTile.coords[b].x << "," << groundTile.coords[b].y << std::endl;
-            }
-            std::cout << "<<<" << std::endl;
-          }*/
-
           cellGroundTileMap[cell->first].push_back(groundTile);
         }
       }
@@ -1798,9 +1799,6 @@ namespace osmscout {
       CalculateLandSeaCells(progress,
                             levels[level],
                             data);
-      /*
-      ScanCellsVertically(progress,
-                          levels[level]);*/
 
       if (parameter.GetAssumeLand()) {
         AssumeLand(parameter,
@@ -1859,10 +1857,17 @@ namespace osmscout {
           writer.Write((uint8_t)tile->type);
 
           writer.WriteNumber((uint32_t)tile->coords.size());
-          for (size_t c=0; c<tile->coords.size(); c++) {
-            writer.Write(tile->coords[c].x);
-            writer.Write(tile->coords[c].y);
 
+          for (size_t c=0; c<tile->coords.size(); c++) {
+            if (tile->coords[c].coast) {
+              uint16_t x=tile->coords[c].x | uint16_t(1 << 15);
+
+              writer.Write(x);
+            }
+            else {
+              writer.Write(tile->coords[c].x);
+            }
+            writer.Write(tile->coords[c].y);
           }
         }
 

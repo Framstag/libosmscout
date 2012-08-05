@@ -192,7 +192,8 @@ namespace osmscout {
     TileCoord Transform(const Point& point,
                         const Level& level,
                         double cellMinLat,
-                        double cellMinLon);
+                        double cellMinLon,
+                        bool coast);
 
     void DumpIndexHeader(const ImportParameter& parameter,
                          FileWriter& writer,
