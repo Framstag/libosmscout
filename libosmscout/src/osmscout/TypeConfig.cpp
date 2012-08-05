@@ -291,6 +291,7 @@ namespace osmscout {
     TypeInfo tileSea;
     TypeInfo tileCoast;
     TypeInfo tileUnknown;
+    TypeInfo tileCoastline;
 
     // Make sure, that this is always registered first.
     // It assures that id 0 is always reserved for typeIgnore
@@ -311,12 +312,15 @@ namespace osmscout {
              .CanBeArea(true);
     tileUnknown.SetType("_tile_unknown")
                .CanBeArea(true);
+    tileCoastline.SetType("_tile_coastline")
+               .CanBeWay(true);
 
     AddTypeInfo(route);
     AddTypeInfo(tileLand);
     AddTypeInfo(tileSea);
     AddTypeInfo(tileCoast);
     AddTypeInfo(tileUnknown);
+    AddTypeInfo(tileCoastline);
 
     tagAdminLevel=GetTagId("admin_level");
     tagBoundary=GetTagId("boundary");
