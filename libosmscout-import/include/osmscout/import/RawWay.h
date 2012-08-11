@@ -32,9 +32,16 @@ namespace osmscout {
   class RawWay : public Referencable
   {
   private:
+    // Attribute availability flags (for optimized attribute storage)
+
+    const static uint8_t isArea  = 1 <<  0; //! We are an area
+    const static uint8_t hasType = 1 <<  1; //! We have a type
+    const static uint8_t hasTags = 1 <<  2; //! We have tags
+
+  private:
     Id               id;
     TypeId           type;
-    bool             isArea;
+    mutable uint8_t  flags;
     std::vector<Tag> tags;
     std::vector<Id>  nodes;
 
@@ -43,7 +50,7 @@ namespace osmscout {
   public:
     inline RawWay()
     : type(typeIgnore),
-      isArea(false)
+      flags(0)
     {
       // no code
     }
@@ -60,7 +67,7 @@ namespace osmscout {
 
     inline bool IsArea() const
     {
-      return isArea;
+      return (flags & isArea)!=0;
     }
 
     inline const std::vector<Tag>& GetTags() const
@@ -84,7 +91,7 @@ namespace osmscout {
     }
 
     void SetId(Id id);
-    void SetType(TypeId type, bool isArea);
+    void SetType(TypeId type, bool area);
     void SetTags(const std::vector<Tag>& tags);
     void SetNodes(const std::vector<Id>& nodes);
 

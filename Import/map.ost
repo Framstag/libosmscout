@@ -31,7 +31,7 @@ TYPES
   TYPE "highway_construction" = WAY ("highway"=="construction")
   TYPE "highway_roundabout" = WAY AREA ("highway"=="roundabout") OPTIONS ROUTE PIN_WAY
   TYPE "highway_motorway_junction" = NODE ("highway"=="motorway_junction") OPTIONS ROUTE
-  
+
   TYPE "waterway_stream" = WAY ("waterway"=="stream") OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
   TYPE "waterway_river" = WAY ("waterway"=="river") OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
   TYPE "waterway_riverbank" = AREA ("waterway"=="riverbank")
@@ -44,7 +44,7 @@ TYPES
   TYPE "waterway_boatyard" = NODE AREA ("waterway"=="boatyard")
   TYPE "waterway_weir" = NODE WAY ("waterway"=="weir") OPTIONS IGNORESEALAND
   TYPE "waterway_dam" = WAY AREA ("waterway"=="dam") OPTIONS IGNORESEALAND
-  
+
   TYPE "railway_rail" = WAY ("railway"=="rail") OPTIONS OPTIMIZE_LOW_ZOOM
   TYPE "railway_tram" = WAY ("railway"=="tram")
   TYPE "railway_light_rail" = WAY ("railway"=="light_rail")
@@ -61,9 +61,9 @@ TYPES
   TYPE "railway_level_crossing" = NODE ("railway"=="level_crossing")
   TYPE "railway_subway_entrance" = NODE ("railway"=="subway_entrance")
   TYPE "railway_turntable" = NODE AREA ("railway"=="turntable")
-  
+
   TYPE "route_ferry" = WAY ("route"=="ferry") OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
-  
+
   TYPE "aeroway_aerodrome" = NODE AREA ("aeroway"=="aerodrome")
   TYPE "aeroway_terminal" = NODE AREA ("aeroway"=="terminal")
   TYPE "aeroway_helipad" = NODE AREA ("aeroway"=="helipad")
@@ -73,7 +73,7 @@ TYPES
   TYPE "aeroway_gate" = NODE ("aeroway"=="gate")
 
   TYPE "public_transport_platform" = WAY AREA ("public_transport"=="platform" OR "railway"=="platform"OR "highway"=="platform")
-  
+
   TYPE "landuse_allotments" = NODE AREA ("landuse"=="allotments")
   TYPE "landuse_basin" = NODE AREA ("landuse"=="basin")
   TYPE "landuse_brownfield" = NODE AREA ("landuse"=="brownfield")
@@ -105,14 +105,15 @@ TYPES
   TYPE "landuse_village_green" = NODE AREA ("landuse"=="village_green")
   TYPE "landuse_vineyard" = NODE AREA ("landuse"=="vineyard")
   TYPE "landuse_wood" = NODE AREA ("landuse"=="wood")
-  
+
   TYPE "natural_bay" = NODE AREA ("natural"=="bay")
   TYPE "natural_beach" = NODE AREA ("natural"=="beach")
   TYPE "natural_cave_entrance" = NODE AREA ("natural"=="cave_entrance")
   TYPE "natural_cliff" = NODE WAY AREA ("natural"=="cliff")
-  
+
   // Do not delete the following type, they are required by the GenWaterIndex import step
-  TYPE "natural_coastline" = WAY ("natural"=="coastline") OPTIONS OPTIMIZE_LOW_ZOOM
+  TYPE "natural_coastline" = WAY ("natural"=="coastline")
+
   TYPE "natural_fell" = NODE AREA ("natural"=="fell")
   TYPE "natural_glacier" = NODE AREA ("natural"=="glacier")
   TYPE "natural_heath" = NODE AREA ("natural"=="heath")
@@ -131,7 +132,7 @@ TYPES
   TYPE "natural_wetland_tidalflat" = NODE AREA ("natural"=="wetland" AND "wetland"=="tidalflat")
   TYPE "natural_wetland" = NODE AREA ("natural"=="wetland")
   TYPE "natural_wood" = NODE AREA ("natural"=="wood")
-  
+
   TYPE "leisure_building" = NODE AREA (EXISTS "leisure" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE "leisure_sports_centre" = NODE AREA ("leisure"=="sports_centre")
   TYPE "leisure_golf_course" = NODE AREA ("leisure"=="golf_course")
@@ -149,13 +150,13 @@ TYPES
   TYPE "leisure_common" = NODE AREA ("leisure"=="common")
   TYPE "leisure_ice_rink" = NODE AREA ("leisure"=="ice_rink")
 
-  // These are currently special-cased in the style file  
+  // These are currently special-cased in the style file
   TYPE "amenity_hospital_building" = NODE AREA ("amenity"=="hospital" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE "amenity_hospital" = NODE AREA ("amenity"=="hospital")
 
   TYPE "amenity_parking_building" = NODE AREA ("amenity"=="parking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE "amenity_parking" = NODE AREA ("amenity"=="parking")
-  
+
   TYPE "amenity_bicycle_parking_building" = NODE AREA ("amenity"=="bicycle_parking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE "amenity_bicycle_parking" = NODE WAY AREA ("amenity"=="bicycle_parking")
 
@@ -163,7 +164,7 @@ TYPES
 
   TYPE "amenity_kindergarten_building" = NODE AREA ("amenity"=="kindergarten" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE "amenity_kindergarten" = NODE AREA ("amenity"=="kindergarten")
-  
+
   TYPE "amenity_bench" = NODE WAY ("amenity"=="bench")
   TYPE "amenity_grave_yard" = NODE AREA ("amenity"=="grave_yard")
   TYPE "amenity_pharmacy" = NODE AREA ("amenity"=="pharmacy")
@@ -176,10 +177,10 @@ TYPES
   // Everything else is just an 'amenity' for now
   TYPE "amenity_building" = NODE AREA (EXISTS "amenity" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE "amenity" = NODE AREA (EXISTS "amenity")
-  
+
   // Currently all shops are the same...
   TYPE "shop" = NODE AREA (EXISTS "shop")
-  
+
   TYPE "tourism_alpine_hut" = NODE AREA ("tourism"=="alpine_hut")
   TYPE "tourism_aquarium" = NODE AREA ("tourism"=="aquarium")
   TYPE "tourism_attraction" = NODE AREA ("tourism"=="attraction")
@@ -197,27 +198,27 @@ TYPES
   TYPE "tourism_theme_park" = NODE AREA ("tourism"=="theme_park")
   TYPE "tourism_viewpoint" = NODE ("tourism"=="viewpoint")
   TYPE "tourism_zoo" = NODE AREA ("tourism"=="zoo")
-  
+
   // Do not delete the following type, they are required by the GenCityStreet import step
   TYPE "boundary_administrative" = WAY AREA ("boundary"=="administrative") OR
                                    RELATION ("type"=="boundary" AND "boundary"=="administrative") OPTIONS MULTIPOLYGON IGNORESEALAND
-                                    
+
   TYPE "place_continent" = NODE AREA ("place"=="continent")
   TYPE "place_country" = NODE ("place"=="country")
   TYPE "place_state" = NODE AREA ("place"=="state")
   TYPE "place_region" = NODE AREA ("place"=="region")
   TYPE "place_county" = NODE AREA ("place"=="county")
-  
+
   // Do not delete the following types, they are required by the GenCityStreet import step
   TYPE "place_city" = NODE AREA ("place"=="city")
   TYPE "place_town" = NODE AREA ("place"=="town")
   TYPE "place_village" = NODE AREA ("place"=="village")
   TYPE "place_hamlet" = NODE AREA ("place"=="hamlet")
   TYPE "place_suburb" = NODE AREA ("place"=="suburb")
-  
+
   TYPE "place_locality" = NODE AREA ("place"=="locality")
   TYPE "place_island" = NODE AREA ("place"=="island")
-  
+
   TYPE "historic_castle" = NODE AREA ("historic"=="castle")
   TYPE "historic_manor" = NODE AREA ("historic"=="manor")
   TYPE "historic_monument" = NODE AREA ("historic"=="monument")
@@ -226,14 +227,14 @@ TYPES
   TYPE "historic_ruins" = NODE WAY AREA ("historic"=="ruins")
   TYPE "historic_battlefield" = NODE AREA ("historic"=="battlefield")
   TYPE "historic_wreck" = NODE AREA ("historic"=="wreck")
-  
+
   TYPE "military_airfield" = NODE AREA ("military"=="airfield")
   TYPE "military_bunker" = NODE AREA ("military"=="bunker")
   TYPE "military_barracks" = NODE AREA ("military"=="barracks")
   TYPE "military_danger_area" = NODE AREA ("military"=="danger_area")
   TYPE "military_range" = NODE AREA ("military"=="range")
   TYPE "military_naval_base" = NODE AREA ("military"=="naval_base")
-  
+
   TYPE "sport_building" = NODE AREA (EXISTS "sport" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE "sport_9pin" = NODE AREA ("sport"=="9pin")
   TYPE "sport_10pin" = NODE AREA ("sport"=="10pin")
@@ -278,7 +279,7 @@ TYPES
   TYPE "sport_team_handball" = NODE AREA ("sport"=="team_handball")
   TYPE "sport_tennis" = NODE AREA ("sport"=="tennis")
   TYPE "sport_volleyball" = NODE AREA ("sport"=="volleyball")
-  
+
   TYPE "power_tower" = NODE ("power"=="tower")
   TYPE "power_pole" = NODE ("power"=="pole")
   TYPE "power_line" = WAY ("power"=="line") OPTIONS IGNORESEALAND
@@ -286,9 +287,9 @@ TYPES
   TYPE "power_station" = NODE AREA ("power"=="station")
   TYPE "power_sub_station" = NODE AREA ("power"=="sub_station")
   TYPE "power_generator" = NODE AREA ("power"=="generator")
-  
+
   TYPE "man_made_wastewater_plant" = NODE AREA ("man_made"=="wastewater_plant")
-  
+
   TYPE "building_garage" = AREA ("building"=="garage")
   TYPE "building" = AREA (EXISTS "building" AND !("building" IN ["no","false","0"]))
 

@@ -30,10 +30,16 @@ namespace osmscout {
     this->id=id;
   }
 
-  void RawWay::SetType(TypeId type, bool isArea)
+  void RawWay::SetType(TypeId type, bool area)
   {
     this->type=type;
-    this->isArea=isArea;
+
+    if (area) {
+      this->flags|=isArea;
+    }
+    else {
+      this->flags&=~isArea;
+    }
   }
 
   void RawWay::SetTags(const std::vector<Tag>& tags)
@@ -52,33 +58,44 @@ namespace osmscout {
       return false;
     }
 
-    uint32_t tmpType;
-
-    if (!scanner.ReadNumber(tmpType)) {
+    if (!scanner.Read(flags)) {
       return false;
     }
 
-    type=(TypeId)tmpType;
+    if ((flags & hasType)!=0) {
+      uint32_t tmpType;
 
-    if (!scanner.Read(isArea)) {
-      return false;
+      if (!scanner.ReadNumber(tmpType)) {
+        return false;
+      }
+
+      type=(TypeId)tmpType;
+    }
+    else {
+      type=typeIgnore;
     }
 
-    uint32_t tagCount;
     uint32_t nodeCount;
 
-    if (!scanner.ReadNumber(tagCount)) {
-      return false;
-    }
+    if ((flags & hasTags)!=0) {
+      uint32_t tagCount;
 
-    tags.resize(tagCount);
-    for (size_t i=0; i<tagCount; i++) {
-      if (!scanner.ReadNumber(tags[i].key)) {
+      if (!scanner.ReadNumber(tagCount)) {
         return false;
       }
-      if (!scanner.Read(tags[i].value)) {
-        return false;
+
+      tags.resize(tagCount);
+      for (size_t i=0; i<tagCount; i++) {
+        if (!scanner.ReadNumber(tags[i].key)) {
+          return false;
+        }
+        if (!scanner.Read(tags[i].value)) {
+          return false;
+        }
       }
+    }
+    else {
+      tags.clear();
     }
 
     if (!scanner.ReadNumber(nodeCount)) {
@@ -111,13 +128,33 @@ namespace osmscout {
   bool RawWay::Write(FileWriter& writer) const
   {
     writer.WriteNumber(id);
-    writer.WriteNumber(type);
-    writer.Write(isArea);
 
-    writer.WriteNumber((uint32_t)tags.size());
-    for (size_t i=0; i<tags.size(); i++) {
-      writer.WriteNumber(tags[i].key);
-      writer.Write(tags[i].value);
+    if (type!=typeIgnore) {
+      flags|=hasType;
+    }
+    else {
+      flags&=~hasType;
+    }
+
+    if (!tags.empty()) {
+      flags|=hasTags;
+    }
+    else {
+      flags&=~hasTags;
+    }
+
+    writer.Write(flags);
+
+    if (type!=typeIgnore) {
+      writer.WriteNumber(type);
+    }
+
+    if (!tags.empty()) {
+      writer.WriteNumber((uint32_t)tags.size());
+      for (size_t i=0; i<tags.size(); i++) {
+        writer.WriteNumber(tags[i].key);
+        writer.Write(tags[i].value);
+      }
     }
 
     writer.WriteNumber((uint32_t)nodes.size());
