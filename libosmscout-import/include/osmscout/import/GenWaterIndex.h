@@ -127,6 +127,7 @@ namespace osmscout {
 
       bool IsIn(uint32_t x, uint32_t y) const;
       State GetState(uint32_t x, uint32_t y) const;
+      State GetStateAbsolute(uint32_t x, uint32_t y) const;
 
       void SetState(uint32_t x, uint32_t y, State state);
       void SetStateAbsolute(uint32_t x, uint32_t y, State state);
@@ -177,9 +178,12 @@ namespace osmscout {
     void MergeCoastlines(Progress& progress);
     void MarkCoastlineCells(Progress& progress,
                             Level& level);
-    void CalculateLandSeaCells(Progress& progress,
-                               Level& level,
-                               CoastlineData& data);
+
+    void CalculateLandCells(Progress& progress,
+                            Level& level,
+                            CoastlineData& data,
+                            std::map<Coord,std::list<GroundTile> >& cellGroundTileMap);
+
     bool AssumeLand(const ImportParameter& parameter,
                     Progress& progress,
                     const TypeConfig& typeConfig,

@@ -138,7 +138,7 @@ void DatabaseTask::Run()
 
         drawParameter.SetDrawWaysWithFixedWidth(false);
 
-        drawParameter.SetRenderSeaLand(false);
+        drawParameter.SetRenderSeaLand(true);
 
         drawParameter.SetDebugPerformance(true);
 
