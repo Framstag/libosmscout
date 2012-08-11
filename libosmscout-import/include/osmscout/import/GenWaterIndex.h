@@ -36,6 +36,7 @@ namespace osmscout {
   class WaterIndexGenerator : public ImportModule
   {
   private:
+    /** State of a cell */
     enum State {
       unknown = 0, //! We do not know yet
       land    = 1, //! left side of the coast => a land tile
@@ -43,6 +44,9 @@ namespace osmscout {
       coast   = 3  //! The coast itself => a coast tile
     };
 
+    /**
+     * Information about a single intersection of a coastline with a cell
+     */
     struct Intersection
     {
       size_t        coastline;          //! Running number of the intersecting coastline
@@ -55,6 +59,9 @@ namespace osmscout {
 
     typedef Intersection *IntersectionPtr;
 
+    /**
+     * Sort intersections in path order
+     */
     struct IntersectionByPathComparator
     {
       inline bool operator()(const IntersectionPtr& a, const IntersectionPtr& b) const
@@ -66,18 +73,11 @@ namespace osmscout {
           return a->prevWayPointIndex<b->prevWayPointIndex;
         }
       }
-
-      inline bool operator()(const Intersection& a, const Intersection& b) const
-      {
-        if (a.prevWayPointIndex==b.prevWayPointIndex) {
-          return a.distanceSquare<b.distanceSquare;
-        }
-        else {
-          return a.prevWayPointIndex<b.prevWayPointIndex;
-        }
-      }
     };
 
+    /**
+     * Sort intersections close wise order(clock wise around the cell border)
+     */
     struct IntersectionCWComparator
     {
       inline bool operator()(const IntersectionPtr& a, const IntersectionPtr& b) const
@@ -100,6 +100,9 @@ namespace osmscout {
       }
     };
 
+    /**
+     * A tile bitmap/zoom level.
+     */
     struct Level
     {
       FileOffset                 indexEntryOffset;
@@ -133,6 +136,9 @@ namespace osmscout {
       void SetStateAbsolute(uint32_t x, uint32_t y, State state);
     };
 
+    /**
+     * A individual coastline
+     */
     struct Coast : public Referencable
     {
       Id                 id;
@@ -150,6 +156,10 @@ namespace osmscout {
       double maxLat;
     };
 
+    /**
+     * Holds all generated, calculated and extracted information about an
+     * individual coastline
+     */
     struct CoastlineData
     {
       std::vector<bool>                                       isArea;             //! true,if the boundary forms an area
@@ -160,58 +170,35 @@ namespace osmscout {
       std::map<Coord, std::list<size_t> >                     cellCoastlines;     //! Contains for each cell the list of coastlines
     };
 
-    struct CoastlineSort : public std::binary_function<Coast, Coast, bool>
-    {
-      bool operator()(const Coast& a, const Coast& b) const
-      {
-        return a.sortCriteria<b.sortCriteria;
-      }
-    };
-
   private:
     std::list<CoastRef> coastlines;
 
   private:
+    GroundTile::Coord Transform(const Point& point,
+                                const Level& level,
+                                double cellMinLat,
+                                double cellMinLon,
+                                bool coast);
+
     bool LoadCoastlines(const ImportParameter& parameter,
                         Progress& progress,
                         const TypeConfig& typeConfig);
+
     void MergeCoastlines(Progress& progress);
+
     void MarkCoastlineCells(Progress& progress,
                             Level& level);
 
     void CalculateLandCells(Progress& progress,
                             Level& level,
-                            CoastlineData& data,
-                            std::map<Coord,std::list<GroundTile> >& cellGroundTileMap);
+                            const CoastlineData& data,
+                            const std::map<Coord,std::list<GroundTile> >& cellGroundTileMap);
 
-    bool AssumeLand(const ImportParameter& parameter,
-                    Progress& progress,
-                    const TypeConfig& typeConfig,
-                    Level& level);
-    void FillLand(Progress& progress,
-                  Level& level);
-    void FillWater(Progress& progress,
-                   Level& level,
-                   size_t tileCount);
-    TileCoord Transform(const Point& point,
-                        const Level& level,
-                        double cellMinLat,
-                        double cellMinLon,
-                        bool coast);
-
-    void DumpIndexHeader(const ImportParameter& parameter,
-                         FileWriter& writer,
-                         std::vector<Level>&  levels);
-    void HandleAreaCoastlinesCompletelyInACell(const ImportParameter& parameter,
-                                               Progress& progress,
-                                               Projection& projection,
-                                               const Level& level,
-                                               const std::list<CoastRef>& coastlines,
-                                               std::map<Coord,std::list<GroundTile> >& cellGroundTileMap);
     void GetCells(const Level& level,
                   const Point& a,
                   const Point& b,
                   std::set<Coord>& cellIntersections);
+
     void GetCells(const Level& level,
                   const std::vector<Point>& points,
                   std::set<Coord>& cellIntersections);
@@ -228,17 +215,43 @@ namespace osmscout {
                           const std::list<CoastRef>& coastlines,
                           CoastlineData& data);
 
+    bool AssumeLand(const ImportParameter& parameter,
+                    Progress& progress,
+                    const TypeConfig& typeConfig,
+                    Level& level);
+
+    void FillWater(Progress& progress,
+                   Level& level,
+                   size_t tileCount);
+
+    void FillLand(Progress& progress,
+                  Level& level);
+
+    void DumpIndexHeader(const ImportParameter& parameter,
+                         FileWriter& writer,
+                         std::vector<Level>&  levels);
+
+    void HandleAreaCoastlinesCompletelyInACell(const ImportParameter& parameter,
+                                               Progress& progress,
+                                               Projection& projection,
+                                               const Level& level,
+                                               const std::list<CoastRef>& coastlines,
+                                               std::map<Coord,std::list<GroundTile> >& cellGroundTileMap);
+
     IntersectionPtr GetPreviousIntersection(std::list<IntersectionPtr>& intersectionsPathOrder,
                                             const IntersectionPtr& current);
+
     void WalkBorderCW(GroundTile& groundTile,
                       const Level& level,
                       double cellMinLat,
                       double cellMinLon,
                       const IntersectionPtr& incoming,
                       const IntersectionPtr& outgoing,
-                      const TileCoord borderCoords[]);
+                      const GroundTile::Coord borderCoords[]);
+
     IntersectionPtr GetNextCW(const std::list<IntersectionPtr>& intersectionsCW,
                               const IntersectionPtr& current) const;
+
     void WalkPathBack(GroundTile& groundTile,
                       const Level& level,
                       double cellMinLat,
@@ -247,6 +260,7 @@ namespace osmscout {
                       const IntersectionPtr& incoming,
                       const std::vector<Point>& points,
                       bool isArea);
+
     void HandleCoastlinesPartiallyInACell(const ImportParameter& parameter,
                                           Progress& progress,
                                           Projection& projection,

@@ -477,8 +477,8 @@ namespace osmscout {
           double lat;
           double lon;
 
-          lat=areaData.minLat+tile->coords[i].y*tile->cellHeight/TileCoord::CELL_MAX;
-          lon=areaData.minLon+tile->coords[i].x*tile->cellWidth/TileCoord::CELL_MAX;
+          lat=areaData.minLat+tile->coords[i].y*tile->cellHeight/GroundTile::Coord::CELL_MAX;
+          lon=areaData.minLon+tile->coords[i].x*tile->cellWidth/GroundTile::Coord::CELL_MAX;
 
           points[i].Set(lat,lon);
         }
@@ -493,14 +493,14 @@ namespace osmscout {
           if (tile->coords[i].x==0) {
             transBuffer.buffer[start+i].x=floor(transBuffer.buffer[start+i].x);
           }
-          if (tile->coords[i].x==TileCoord::CELL_MAX) {
+          if (tile->coords[i].x==GroundTile::Coord::CELL_MAX) {
             transBuffer.buffer[start+i].x=ceil(transBuffer.buffer[start+i].x);
           }
 
           if (tile->coords[i].y==0) {
             transBuffer.buffer[start+i].y=ceil(transBuffer.buffer[start+i].y);
           }
-          if (tile->coords[i].y==TileCoord::CELL_MAX) {
+          if (tile->coords[i].y==GroundTile::Coord::CELL_MAX) {
             transBuffer.buffer[start+i].y=floor(transBuffer.buffer[start+i].y);
           }
         }

@@ -22,6 +22,6 @@
 #include <iostream>
 
 namespace osmscout {
-  const uint16_t TileCoord::CELL_MAX=32767;
+  const uint16_t GroundTile::Coord::CELL_MAX=32767;
 }
 

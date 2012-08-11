@@ -40,15 +40,15 @@
 
 namespace osmscout {
 
-  TileCoord WaterIndexGenerator::Transform(const Point& point,
-                                           const Level& level,
-                                           double cellMinLat,
-                                           double cellMinLon,
-                                           bool coast)
+  GroundTile::Coord WaterIndexGenerator::Transform(const Point& point,
+                                                   const Level& level,
+                                                   double cellMinLat,
+                                                   double cellMinLon,
+                                                   bool coast)
   {
-    TileCoord coord(floor((point.GetLon()-cellMinLon)/level.cellWidth*TileCoord::CELL_MAX+0.5),
-                    floor((point.GetLat()-cellMinLat)/level.cellHeight*TileCoord::CELL_MAX+0.5),
-                    coast);
+    GroundTile::Coord coord(floor((point.GetLon()-cellMinLon)/level.cellWidth*GroundTile::Coord::CELL_MAX+0.5),
+                            floor((point.GetLat()-cellMinLat)/level.cellHeight*GroundTile::Coord::CELL_MAX+0.5),
+                            coast);
 
     return coord;
   }
@@ -257,14 +257,13 @@ namespace osmscout {
 
 
   /**
-   * Does a scan line conversion on all costline ways where the cell size equals the tile size.
-   * All tiles hit are marked as "coast".
+   * Markes as cells as "coast", if one of the coastlines intersects with it..
    *
    */
   void WaterIndexGenerator::MarkCoastlineCells(Progress& progress,
                                                Level& level)
   {
-    progress.Info("Setting coastline cells");
+    progress.Info("Marking cells containing coastlines");
 
     for (std::list<CoastRef>::const_iterator c=coastlines.begin();
         c!=coastlines.end();
@@ -295,8 +294,8 @@ namespace osmscout {
 
   void WaterIndexGenerator::CalculateLandCells(Progress& progress,
                                                Level& level,
-                                               CoastlineData& data,
-                                               std::map<Coord,std::list<GroundTile> >& cellGroundTileMap)
+                                               const CoastlineData& data,
+                                               const std::map<Coord,std::list<GroundTile> >& cellGroundTileMap)
   {
     progress.Info("Calculate land cells");
 
@@ -336,18 +335,18 @@ namespace osmscout {
         for (size_t c=0; c<tile->coords.size()-1;c++) {
           // Top
           if (tile->coords[c].x==0 &&
-              tile->coords[c].y==TileCoord::CELL_MAX &&
-              tile->coords[c+1].x==TileCoord::CELL_MAX &&
-              tile->coords[c+1].y==TileCoord::CELL_MAX) {
+              tile->coords[c].y==GroundTile::Coord::CELL_MAX &&
+              tile->coords[c+1].x==GroundTile::Coord::CELL_MAX &&
+              tile->coords[c+1].y==GroundTile::Coord::CELL_MAX) {
             if (state[0]!=unknown) {
               continue;
             }
 
             state[0]=land;
           }
-          else if (tile->coords[c].y==TileCoord::CELL_MAX &&
+          else if (tile->coords[c].y==GroundTile::Coord::CELL_MAX &&
                    tile->coords[c].x!=0 &&
-                   tile->coords[c].x!=TileCoord::CELL_MAX) {
+                   tile->coords[c].x!=GroundTile::Coord::CELL_MAX) {
             if (state[0]!=unknown) {
               continue;
             }
@@ -356,9 +355,9 @@ namespace osmscout {
           }
 
           // Right
-          if (tile->coords[c].x==TileCoord::CELL_MAX &&
-              tile->coords[c].y==TileCoord::CELL_MAX &&
-              tile->coords[c+1].x==TileCoord::CELL_MAX &&
+          if (tile->coords[c].x==GroundTile::Coord::CELL_MAX &&
+              tile->coords[c].y==GroundTile::Coord::CELL_MAX &&
+              tile->coords[c+1].x==GroundTile::Coord::CELL_MAX &&
               tile->coords[c+1].y==0) {
             if (state[1]!=unknown) {
               continue;
@@ -366,9 +365,9 @@ namespace osmscout {
 
             state[1]=land;
           }
-          else if (tile->coords[c].x==TileCoord::CELL_MAX &&
+          else if (tile->coords[c].x==GroundTile::Coord::CELL_MAX &&
                    tile->coords[c].y!=0 &&
-                   tile->coords[c].y!=TileCoord::CELL_MAX) {
+                   tile->coords[c].y!=GroundTile::Coord::CELL_MAX) {
             if (state[1]!=unknown) {
               continue;
             }
@@ -377,7 +376,7 @@ namespace osmscout {
           }
 
           // Below
-          if (tile->coords[c].x==TileCoord::CELL_MAX &&
+          if (tile->coords[c].x==GroundTile::Coord::CELL_MAX &&
               tile->coords[c].y==0 &&
               tile->coords[c+1].x==0 &&
               tile->coords[c+1].y==0) {
@@ -389,7 +388,7 @@ namespace osmscout {
           }
           else if (tile->coords[c].y==0 &&
                    tile->coords[c].x!=0 &&
-                   tile->coords[c].x!=TileCoord::CELL_MAX) {
+                   tile->coords[c].x!=GroundTile::Coord::CELL_MAX) {
             if (state[2]!=unknown) {
               continue;
             }
@@ -401,7 +400,7 @@ namespace osmscout {
           if (tile->coords[c].x==0 &&
               tile->coords[c].y==0 &&
               tile->coords[c+1].x==0 &&
-              tile->coords[c+1].y==TileCoord::CELL_MAX) {
+              tile->coords[c+1].y==GroundTile::Coord::CELL_MAX) {
             if (state[3]!=unknown) {
               continue;
             }
@@ -410,7 +409,7 @@ namespace osmscout {
           }
           else if (tile->coords[c].x==0 &&
                    tile->coords[c].y!=0 &&
-                   tile->coords[c].y!=TileCoord::CELL_MAX) {
+                   tile->coords[c].y!=GroundTile::Coord::CELL_MAX) {
             if (state[3]!=unknown) {
               continue;
             }
@@ -459,7 +458,8 @@ namespace osmscout {
   }
 
   /**
-   * Every tile that is unknown but contains a way, must be land.
+   * Every cell that is unknown but contains a way (that is marked
+   * as "to be ignored"), must be land.
    */
   bool WaterIndexGenerator::AssumeLand(const ImportParameter& parameter,
                                        Progress& progress,
@@ -530,8 +530,68 @@ namespace osmscout {
   }
 
   /**
-   * Scanning from left to right and bottom to top: Every tile that is unknown but is placed between land and coast or
-   * land tiles must be land, too.
+   * Converts all cells of state "unknown" that touch a tile with state
+   * "water" to state "water", too.
+   */
+  void WaterIndexGenerator::FillWater(Progress& progress,
+                                      Level& level,
+                                      size_t tileCount)
+  {
+    progress.Info("Filling water");
+
+    for (size_t i=1; i<=tileCount; i++) {
+
+      Level newLevel(level);
+
+      for (size_t y=0; y<level.cellYCount; y++) {
+        for (size_t x=0; x<level.cellXCount; x++) {
+          if (level.GetState(x,y)==water) {
+            if (y>0) {
+              if (level.GetState(x,y-1)==unknown) {
+#if defined(DEBUG_TILING)
+                std::cout << "Water below water: " << x << "," << y-1 << std::endl;
+#endif
+                newLevel.SetState(x,y-1,water);
+              }
+            }
+
+            if (y<level.cellYCount-1) {
+              if (level.GetState(x,y+1)==unknown) {
+#if defined(DEBUG_TILING)
+                std::cout << "Water above water: " << x << "," << y+1 << std::endl;
+#endif
+                newLevel.SetState(x,y+1,water);
+              }
+            }
+
+            if (x>0) {
+              if (level.GetState(x-1,y)==unknown) {
+#if defined(DEBUG_TILING)
+                std::cout << "Water left of water: " << x-1 << "," << y << std::endl;
+#endif
+                newLevel.SetState(x-1,y,water);
+              }
+            }
+
+            if (x<level.cellXCount-1) {
+              if (level.GetState(x+1,y)==unknown) {
+#if defined(DEBUG_TILING)
+                std::cout << "Water right of water: " << x+1 << "," << y << std::endl;
+#endif
+                newLevel.SetState(x+1,y,water);
+              }
+            }
+          }
+        }
+      }
+
+      level=newLevel;
+    }
+  }
+
+  /**
+   * Scanning from left to right and bottom to top: Every tile that is unknown
+   * but is placed between land and coast or land cells must be land, too.
    */
   void WaterIndexGenerator::FillLand(Progress& progress,
                                      Level& level)
@@ -649,65 +709,6 @@ namespace osmscout {
     }
   }
 
-  /**
-   * Converts all tiles of state "unknown" that touch a tile with state "water" to state "water", too.
-   */
-  void WaterIndexGenerator::FillWater(Progress& progress,
-                                      Level& level,
-                                      size_t tileCount)
-  {
-    progress.Info("Filling water");
-
-    for (size_t i=1; i<=tileCount; i++) {
-
-      Level newLevel(level);
-
-      for (size_t y=0; y<level.cellYCount; y++) {
-        for (size_t x=0; x<level.cellXCount; x++) {
-          if (level.GetState(x,y)==water) {
-            if (y>0) {
-              if (level.GetState(x,y-1)==unknown) {
-#if defined(DEBUG_TILING)
-                std::cout << "Water below water: " << x << "," << y-1 << std::endl;
-#endif
-                newLevel.SetState(x,y-1,water);
-              }
-            }
-
-            if (y<level.cellYCount-1) {
-              if (level.GetState(x,y+1)==unknown) {
-#if defined(DEBUG_TILING)
-                std::cout << "Water above water: " << x << "," << y+1 << std::endl;
-#endif
-                newLevel.SetState(x,y+1,water);
-              }
-            }
-
-            if (x>0) {
-              if (level.GetState(x-1,y)==unknown) {
-#if defined(DEBUG_TILING)
-                std::cout << "Water left of water: " << x-1 << "," << y << std::endl;
-#endif
-                newLevel.SetState(x-1,y,water);
-              }
-            }
-
-            if (x<level.cellXCount-1) {
-              if (level.GetState(x+1,y)==unknown) {
-#if defined(DEBUG_TILING)
-                std::cout << "Water right of water: " << x+1 << "," << y << std::endl;
-#endif
-                newLevel.SetState(x+1,y,water);
-              }
-            }
-          }
-        }
-      }
-
-      level=newLevel;
-    }
-  }
-
   void WaterIndexGenerator::DumpIndexHeader(const ImportParameter& parameter,
                                             FileWriter& writer,
                                             std::vector<Level>& levels)
@@ -790,7 +791,7 @@ namespace osmscout {
 
           for (size_t p=polygon.GetStart(); p<=polygon.GetEnd(); p++) {
             if (polygon.points[p].draw) {
-              TileCoord coord;
+              GroundTile::Coord coord;
 
               if (p==polygon.GetEnd()) {
                 coord=Transform(coast->coast[polygon.GetStart()],level,cellMinLat,cellMinLon,false);
@@ -1018,6 +1019,9 @@ namespace osmscout {
     }
   }
 
+  /**
+   * Collects, calculates and generates a number of data about a coastline.
+   */
   void WaterIndexGenerator::GetCoastlineData(const ImportParameter& parameter,
                                              Progress& progress,
                                              Projection& projection,
@@ -1142,7 +1146,7 @@ namespace osmscout {
                                          double cellMinLon,
                                          const IntersectionPtr& incoming,
                                          const IntersectionPtr& outgoing,
-                                         const TileCoord borderCoords[])
+                                         const GroundTile::Coord borderCoords[])
   {
 
     if (outgoing->borderIndex!=incoming->borderIndex ||
@@ -1314,7 +1318,7 @@ namespace osmscout {
 
       double    lonMin,lonMax,latMin,latMax;
       Point     borderPoints[4];
-      TileCoord borderCoords[4];
+      GroundTile::Coord borderCoords[4];
 
       lonMin=(level.cellXStart+cell->first.x)*level.cellWidth-180.0;
       lonMax=(level.cellXStart+cell->first.x+1)*level.cellWidth-180.0;
@@ -1326,9 +1330,9 @@ namespace osmscout {
       borderPoints[2]=Point(3,latMin,lonMax); // bottom right
       borderPoints[3]=Point(4,latMin,lonMin); // bottom left
 
-      borderCoords[0].Set(0,TileCoord::CELL_MAX,false);                   // top left
-      borderCoords[1].Set(TileCoord::CELL_MAX,TileCoord::CELL_MAX,false); // top right
-      borderCoords[2].Set(TileCoord::CELL_MAX,0,false);                   // bottom right
+      borderCoords[0].Set(0,GroundTile::Coord::CELL_MAX,false);                   // top left
+      borderCoords[1].Set(GroundTile::Coord::CELL_MAX,GroundTile::Coord::CELL_MAX,false); // top right
+      borderCoords[2].Set(GroundTile::Coord::CELL_MAX,0,false);                   // bottom right
       borderCoords[3].Set(0,0,false);                                     // bottom left
 
 #if defined(DEBUG_COASTLINE)
@@ -1642,11 +1646,11 @@ namespace osmscout {
                    levels[level]);
       }
 
-      FillLand(progress,
-               levels[level]);
-
       FillWater(progress,
                 levels[level],20);
+
+      FillLand(progress,
+               levels[level]);
 
       for (size_t y=0; y<levels[level].cellYCount; y++) {
         for (size_t x=0; x<levels[level].cellXCount; x++) {

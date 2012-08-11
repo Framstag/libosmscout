@@ -26,38 +26,9 @@
 
 namespace osmscout {
 
-  struct OSMSCOUT_API TileCoord
-  {
-    static const uint16_t CELL_MAX;
-
-    uint16_t x;
-    uint16_t y;
-    bool     coast;
-
-    TileCoord()
-    {
-      // no code
-    }
-
-    TileCoord(uint16_t x,
-              uint16_t y,
-              bool coast)
-    {
-      this->x=x;
-      this->y=y;
-      this->coast=coast;
-    }
-
-    void Set(uint16_t x,
-             uint16_t y,
-             bool coast)
-    {
-      this->x=x;
-      this->y=y;
-      this->coast=coast;
-    }
-  };
-
+  /**
+   * A single ground tile cell.
+   */
   struct OSMSCOUT_API GroundTile
   {
     enum Type {
@@ -67,14 +38,49 @@ namespace osmscout {
       coast   = 3
     };
 
-    Type                   type;
-    size_t                 xAbs;
-    size_t                 yAbs;
-    size_t                 xRel;
-    size_t                 yRel;
-    double                 cellWidth;
-    double                 cellHeight;
-    std::vector<TileCoord> coords;
+    /**
+     * A Coordinate for a point in a ground tile path.
+     */
+    struct OSMSCOUT_API Coord
+    {
+      static const uint16_t CELL_MAX;
+
+      uint16_t x;
+      uint16_t y;
+      bool     coast;
+
+      Coord()
+      {
+        // no code
+      }
+
+      Coord(uint16_t x,
+                uint16_t y,
+                bool coast)
+      {
+        this->x=x;
+        this->y=y;
+        this->coast=coast;
+      }
+
+      void Set(uint16_t x,
+               uint16_t y,
+               bool coast)
+      {
+        this->x=x;
+        this->y=y;
+        this->coast=coast;
+      }
+    };
+
+    Type               type;
+    size_t             xAbs;
+    size_t             yAbs;
+    size_t             xRel;
+    size_t             yRel;
+    double             cellWidth;
+    double             cellHeight;
+    std::vector<Coord> coords;
 
     GroundTile()
     {
