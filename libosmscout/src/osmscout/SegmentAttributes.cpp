@@ -31,7 +31,7 @@ namespace osmscout {
   bool SegmentAttributes::SetTags(Progress& progress,
                                   const TypeConfig& typeConfig,
                                   Id id,
-                                  bool isArea,
+                                  bool area,
                                   std::vector<Tag>& tags,
                                   bool& reverseNodes)
   {
@@ -53,7 +53,7 @@ namespace osmscout {
 
     flags|=hasAccess;
 
-    if (isArea) {
+    if (area) {
       flags|=isArea;
     }
 

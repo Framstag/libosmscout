@@ -176,7 +176,7 @@ namespace osmscout {
     bool SetTags(Progress& progress,
                  const TypeConfig& typeConfig,
                  Id id,
-                 bool isArea,
+                 bool area,
                  std::vector<Tag>& tags,
                  bool& reverseNodes);
 
