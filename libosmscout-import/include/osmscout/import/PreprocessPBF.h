@@ -26,60 +26,38 @@
 
 #include <osmscout/Types.h>
 
-#include <osmscout/import/RawNode.h>
 #include <osmscout/import/RawRelation.h>
-#include <osmscout/import/RawWay.h>
 
-#include <osmscout/import/Import.h>
+#include <osmscout/import/Preprocess.h>
 
 #include <osmscout/import/pbf/fileformat.pb.h>
 #include <osmscout/import/pbf/osmformat.pb.h>
 
 namespace osmscout {
 
-  class PreprocessPBF : public ImportModule
+  class PreprocessPBF : public Preprocess
   {
   private:
-    RawNode                     rawNode;
-    RawWay                      rawWay;
-    RawRelation                 rawRel;
-    std::vector<Tag>            tags;
-    std::map<TagId,std::string> tagMap;
-    std::vector<Id>             nodes;
-
-    uint32_t                    nodeCount;
-    uint32_t                    wayCount;
-    uint32_t                    areaCount;
-    uint32_t                    relationCount;
-
-    uint32_t                    lastNodeId;
-    uint32_t                    lastWayId;
-    uint32_t                    lastRelationId;
-    bool                        nodeSortingError;
-    bool                        waySortingError;
-    bool                        relationSortingError;
-
+    std::map<TagId,std::string>      tagMap;
+    std::vector<Id>                  nodes;
+    std::vector<RawRelation::Member> members;
 
   private:
     void ReadNodes(const TypeConfig& typeConfig,
                    const PBF::PrimitiveBlock& block,
-                   const PBF::PrimitiveGroup &group,
-                   FileWriter& nodeWriter);
+                   const PBF::PrimitiveGroup &group);
 
     void ReadDenseNodes(const TypeConfig& typeConfig,
                         const PBF::PrimitiveBlock& block,
-                        const PBF::PrimitiveGroup &group,
-                        FileWriter& nodeWriter);
+                        const PBF::PrimitiveGroup &group);
 
     void ReadWays(const TypeConfig& typeConfig,
                   const PBF::PrimitiveBlock& block,
-                  const PBF::PrimitiveGroup &group,
-                  FileWriter& wayWriter);
+                  const PBF::PrimitiveGroup &group);
 
     void ReadRelations(const TypeConfig& typeConfig,
                        const PBF::PrimitiveBlock& block,
-                       const PBF::PrimitiveGroup &group,
-                       FileWriter& relationWriter);
+                       const PBF::PrimitiveGroup &group);
 
   public:
     std::string GetDescription() const;

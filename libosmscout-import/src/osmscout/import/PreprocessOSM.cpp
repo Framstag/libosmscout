@@ -38,248 +38,6 @@
 
 namespace osmscout {
 
-  class Preprocessor
-  {
-  private:
-    const TypeConfig& config;
-    FileWriter        nodeWriter;
-    FileWriter        wayWriter;
-    FileWriter        relationWriter;
-
-    std::vector<Tag>  tags;
-
-  public:
-    uint32_t nodeCount;
-    uint32_t wayCount;
-    uint32_t areaCount;
-    uint32_t relationCount;
-
-    uint32_t lastNodeId;
-    uint32_t lastWayId;
-    uint32_t lastRelationId;
-    bool     nodeSortingError;
-    bool     waySortingError;
-    bool     relationSortingError;
-
-  public:
-    Preprocessor(const ImportParameter& parameter,
-                 const TypeConfig& config);
-    virtual ~Preprocessor();
-
-    void Process(const Id& id,
-                 const double& lon, const double& lat,
-                 const std::map<TagId,std::string>& tags);
-    void Process(const Id& id,
-                 std::vector<Id>& nodes,
-                 const std::map<TagId,std::string>& tags);
-    void Process(const Id& id,
-                 const std::vector<RawRelation::Member>& members,
-                 const std::map<TagId,std::string>& tags);
-
-    void Cleanup();
-  };
-
-  Preprocessor::Preprocessor(const ImportParameter& parameter,
-                             const TypeConfig& config)
-   : config(config),
-     nodeCount(0),
-     wayCount(0),
-     areaCount(0),
-     relationCount(0),
-     lastNodeId(0),
-     lastWayId(0),
-     lastRelationId(0),
-     nodeSortingError(false),
-     waySortingError(false),
-     relationSortingError(false)
-  {
-    nodeWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                    "rawnodes.dat"));
-    nodeWriter.Write(nodeCount);
-
-    wayWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                   "rawways.dat"));
-    wayWriter.Write(wayCount+areaCount);
-
-    relationWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        "rawrels.dat"));
-    relationWriter.Write(relationCount);
-  }
-
-  Preprocessor::~Preprocessor()
-  {
-    // no code
-  }
-
-  void Preprocessor::Process(const Id& id,
-                             const double& lon, const double& lat,
-                             const std::map<TagId,std::string>& tagMap)
-  {
-    RawNode node;
-    TypeId  type=typeIgnore;
-
-    if (id<lastNodeId) {
-      nodeSortingError=true;
-    }
-
-    config.GetNodeTypeId(tagMap,type);
-    config.ResolveTags(tagMap,tags);
-
-    node.SetId(id);
-    node.SetType(type);
-    node.SetCoordinates(lon,lat);
-    node.SetTags(tags);
-
-    node.Write(nodeWriter);
-
-    nodeCount++;
-    lastNodeId=id;
-  }
-
-  void Preprocessor::Process(const Id& id,
-                             std::vector<Id>& nodes,
-                             const std::map<TagId,std::string>& tagMap)
-  {
-    TypeId                                      areaType=typeIgnore;
-    TypeId                                      wayType=typeIgnore;
-    int                                         isArea=0; // 0==unknown, 1==true, -1==false
-    std::map<TagId,std::string>::const_iterator areaTag;
-    RawWay                                      way;
-
-    if (id<lastWayId) {
-      waySortingError=true;
-    }
-
-    way.SetId(id);
-
-    areaTag=tagMap.find(config.tagArea);
-
-    if (areaTag==tagMap.end()) {
-      isArea=0;
-    }
-    else if (areaTag->second=="no" ||
-             areaTag->second=="false" ||
-             areaTag->second=="0") {
-      isArea=-1;
-    }
-    else {
-      isArea=1;
-    }
-
-    config.GetWayAreaTypeId(tagMap,wayType,areaType);
-    config.ResolveTags(tagMap,tags);
-
-    if (isArea==1 &&
-        areaType==typeIgnore) {
-      isArea=0;
-    }
-    else if (isArea==-1 &&
-             wayType==typeIgnore) {
-      isArea=0;
-    }
-
-    if (isArea==0) {
-      if (wayType!=typeIgnore && areaType==typeIgnore) {
-        isArea=-1;
-      }
-      else if (wayType==typeIgnore && areaType!=typeIgnore) {
-        isArea=1;
-      }
-      else if (areaType!=typeIgnore &&
-          nodes.size()>2 &&
-          nodes.front()==nodes.back()) {
-        if (config.GetTypeInfo(wayType).GetPinWay()) {
-          isArea=-1;
-        }
-        else {
-          isArea=1;
-        }
-      }
-      else {
-        isArea=-1;
-      }
-    }
-
-    if (isArea==1) {
-      way.SetType(areaType,true);
-
-      if (nodes.size()>2 &&
-          nodes.front()==nodes.back()) {
-        nodes.pop_back();
-      }
-
-      areaCount++;
-    }
-    else if (isArea==-1) {
-      way.SetType(wayType,false);
-      wayCount++;
-    }
-    else {
-      if (nodes.size()>1 &&
-          nodes.front()==nodes.back()) {
-        way.SetType(typeIgnore,
-                    true);
-
-        nodes.pop_back();
-
-        areaCount++;
-      }
-      else {
-        way.SetType(typeIgnore,
-                    false);
-        wayCount++;
-      }
-    }
-
-    way.SetNodes(nodes);
-    way.SetTags(tags);
-
-    way.Write(wayWriter);
-
-    lastWayId=id;
-  }
-
-  void Preprocessor::Process(const Id& id,
-                             const std::vector<RawRelation::Member>& members,
-                             const std::map<TagId,std::string>& tagMap)
-  {
-    RawRelation relation;
-    TypeId      type;
-
-    if (id<lastRelationId) {
-      relationSortingError=true;
-    }
-
-    relation.SetId(id);
-    relation.members=members;
-
-    config.GetRelationTypeId(tagMap,type);
-    config.ResolveTags(tagMap,relation.tags);
-
-    relation.SetType(type);
-
-    relation.Write(relationWriter);
-
-    relationCount++;
-    lastRelationId=id;
-  }
-
-  void Preprocessor::Cleanup()
-  {
-    nodeWriter.SetPos(0);
-    nodeWriter.Write(nodeCount);
-
-    wayWriter.SetPos(0);
-    wayWriter.Write(wayCount+areaCount);
-
-    relationWriter.SetPos(0);
-    relationWriter.Write(relationCount);
-
-    nodeWriter.Close();
-    wayWriter.Close();
-    relationWriter.Close();
-  }
-
   class Parser
   {
     enum Context {
@@ -291,7 +49,7 @@ namespace osmscout {
 
   private:
     Context                          context;
-    Preprocessor&                    pp;
+    PreprocessOSM&                    pp;
     const TypeConfig&                typeConfig;
     Id                               id;
     double                           lon,lat;
@@ -300,7 +58,7 @@ namespace osmscout {
     std::vector<RawRelation::Member> members;
 
   public:
-    Parser(Preprocessor& pp,
+    Parser(PreprocessOSM& pp,
            const TypeConfig& typeConfig)
     : pp(pp),
       typeConfig(typeConfig)
@@ -500,18 +258,28 @@ namespace osmscout {
     void EndElement(const xmlChar *name)
     {
       if (strcmp((const char*)name,"node")==0) {
-        pp.Process(id,lon,lat,tags);
+        pp.ProcessNode(typeConfig,
+                       id,
+                       lon,
+                       lat,
+                       tags);
         tags.clear();
         context=contextUnknown;
       }
       else if (strcmp((const char*)name,"way")==0) {
-        pp.Process(id,nodes,tags);
+        pp.ProcessWay(typeConfig,
+                      id,
+                      nodes,
+                      tags);
         nodes.clear();
         tags.clear();
         context=contextUnknown;
       }
       else if (strcmp((const char*)name,"relation")==0) {
-        pp.Process(id,members,tags);
+        pp.ProcessRelation(typeConfig,
+                           id,
+                           members,
+                           tags);
         members.clear();
         tags.clear();
         context=contextUnknown;
@@ -552,11 +320,12 @@ namespace osmscout {
                              Progress& progress,
                              const TypeConfig& typeConfig)
   {
-    Preprocessor  pp(parameter,
-                     typeConfig);
-    Parser        parser(pp,typeConfig);
-
+    Parser        parser(*this,typeConfig);
     xmlSAXHandler saxParser;
+
+    if (!Initialize(parameter)) {
+      return false;
+    }
 
     memset(&saxParser,0,sizeof(xmlSAXHandler));
     saxParser.initialized=XML_SAX2_MAGIC;
@@ -567,33 +336,8 @@ namespace osmscout {
 
     xmlSAXUserParseFile(&saxParser,&parser,parameter.GetMapfile().c_str());
 
-    pp.Cleanup();
-
-    progress.Info(std::string("Nodes:          ")+NumberToString(pp.nodeCount));
-    progress.Info(std::string("Ways/Areas/Sum: ")+NumberToString(pp.wayCount)+" "+
-                  NumberToString(pp.areaCount)+" "+
-                  NumberToString(pp.wayCount+pp.areaCount));
-    progress.Info(std::string("Relations:      ")+NumberToString(pp.relationCount));
-
-    if (!parameter.GetRenumberIds()) {
-      if (pp.nodeSortingError) {
-        progress.Error("Nodes are not sorted by increasing id");
-      }
-
-      if (pp.waySortingError) {
-        progress.Error("Ways are not sorted by increasing id");
-      }
-
-      if (pp.relationSortingError) {
-        progress.Error("Relations are not sorted by increasing id");
-      }
-
-      if (pp.nodeSortingError || pp.waySortingError || pp.relationSortingError) {
-        return false;
-      }
-    }
-
-    return true;
+    return Cleanup(parameter,
+                   progress);
   }
 }
 

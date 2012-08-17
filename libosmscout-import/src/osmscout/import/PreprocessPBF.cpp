@@ -37,6 +37,8 @@
 #include <osmscout/util/File.h>
 #include <osmscout/util/String.h>
 
+#include "osmscout/import/Preprocess.h"
+
 #define MAX_BLOCK_HEADER_SIZE (64*1024)
 #define MAX_BLOB_SIZE         (32*1024*1024)
 #define NANO                  (1000.0*1000.0*1000.0)
@@ -275,22 +277,11 @@ namespace osmscout {
 
   void PreprocessPBF::ReadNodes(const TypeConfig& typeConfig,
                                 const PBF::PrimitiveBlock& block,
-                                const PBF::PrimitiveGroup& group,
-                                FileWriter& nodeWriter)
+                                const PBF::PrimitiveGroup& group)
   {
     for (int n=0; n<group.nodes_size(); n++) {
-      TypeId          type=typeIgnore;
       const PBF::Node &inputNode=group.nodes(n);
 
-      if (inputNode.id()<lastNodeId) {
-        nodeSortingError=true;
-      }
-
-      rawNode.SetId(inputNode.id());
-      rawNode.SetCoordinates((inputNode.lon()*block.granularity()+block.lon_offset())/NANO,
-                             (inputNode.lat()*block.granularity()+block.lat_offset())/NANO);
-
-      tags.clear();
       tagMap.clear();
 
       for (int t=0; t<inputNode.keys_size(); t++) {
@@ -301,23 +292,17 @@ namespace osmscout {
         }
       }
 
-      typeConfig.GetNodeTypeId(tagMap,type);
-      typeConfig.ResolveTags(tagMap,tags);
-
-      rawNode.SetType(type);
-      rawNode.SetTags(tags);
-
-      rawNode.Write(nodeWriter);
-
-      nodeCount++;
-      lastNodeId=inputNode.id();
+      ProcessNode(typeConfig,
+                  inputNode.id(),
+                  (inputNode.lon()*block.granularity()+block.lon_offset())/NANO,
+                  (inputNode.lat()*block.granularity()+block.lat_offset())/NANO,
+                  tagMap);
     }
   }
 
   void PreprocessPBF::ReadDenseNodes(const TypeConfig& typeConfig,
                                      const PBF::PrimitiveBlock& block,
-                                     const PBF::PrimitiveGroup& group,
-                                     FileWriter& nodeWriter)
+                                     const PBF::PrimitiveGroup& group)
   {
     const PBF::DenseNodes &dense=group.dense();
     unsigned long dId=0;
@@ -326,21 +311,10 @@ namespace osmscout {
     int           t=0;
 
     for (int d=0; d<dense.id_size();d++) {
-      TypeId type=typeIgnore;
-
       dId+=dense.id(d);
       dLat+=dense.lat(d);
       dLon+=dense.lon(d);
 
-      if (dId<lastNodeId) {
-        nodeSortingError=true;
-      }
-
-      rawNode.SetId(dId);
-      rawNode.SetCoordinates((dLon*block.granularity()+block.lon_offset())/NANO,
-                             (dLat*block.granularity()+block.lat_offset())/NANO);
-
-      tags.clear();
       tagMap.clear();
 
       while (true) {
@@ -362,36 +336,23 @@ namespace osmscout {
         t+=2;
       }
 
-      typeConfig.GetNodeTypeId(tagMap,type);
-      typeConfig.ResolveTags(tagMap,tags);
-
-      rawNode.SetType(type);
-      rawNode.SetTags(tags);
-
-      rawNode.Write(nodeWriter);
-
-      nodeCount++;
-      lastNodeId=dId;
+      ProcessNode(typeConfig,
+                  dId,
+                  (dLon*block.granularity()+block.lon_offset())/NANO,
+                  (dLat*block.granularity()+block.lat_offset())/NANO,
+                  tagMap);
     }
   }
 
   void PreprocessPBF::ReadWays(const TypeConfig& typeConfig,
                                const PBF::PrimitiveBlock& block,
-                               const PBF::PrimitiveGroup& group,
-                               FileWriter& wayWriter)
+                               const PBF::PrimitiveGroup& group)
   {
     for (int w=0; w<group.ways_size(); w++) {
       const PBF::Way &inputWay=group.ways(w);
 
       nodes.clear();
-      tags.clear();
       tagMap.clear();
-
-      if (inputWay.id()<lastWayId) {
-        waySortingError=true;
-      }
-
-      rawWay.SetId(inputWay.id());
 
       for (int t=0; t<inputWay.keys_size(); t++) {
         TagId id=typeConfig.GetTagId(block.stringtable().s(inputWay.keys(t)).c_str());
@@ -408,131 +369,21 @@ namespace osmscout {
         nodes.push_back(ref);
       }
 
-      TypeId                                      areaType=typeIgnore;
-      TypeId                                      wayType=typeIgnore;
-      int                                         isArea=0; // 0==unknown, 1==true, -1==false
-      std::map<TagId,std::string>::const_iterator areaTag;
-
-      areaTag=tagMap.find(typeConfig.tagArea);
-
-      if (areaTag==tagMap.end()) {
-        isArea=0;
-      }
-      else if (areaTag->second=="no" ||
-               areaTag->second=="false" ||
-               areaTag->second=="0") {
-        isArea=-1;
-      }
-      else {
-        isArea=1;
-      }
-
-      typeConfig.GetWayAreaTypeId(tagMap,wayType,areaType);
-      typeConfig.ResolveTags(tagMap,tags);
-
-      if (isArea==1 &&
-          areaType==typeIgnore) {
-        isArea=0;
-      }
-      else if (isArea==-1 &&
-               wayType==typeIgnore) {
-        isArea=0;
-      }
-
-      if (isArea==0) {
-        if (wayType!=typeIgnore && areaType==typeIgnore) {
-          isArea=-1;
-        }
-        else if (wayType==typeIgnore && areaType!=typeIgnore) {
-          isArea=1;
-        }
-        else if (areaType!=typeIgnore &&
-            nodes.size()>2 &&
-            nodes.front()==nodes.back()) {
-          if (typeConfig.GetTypeInfo(wayType).GetPinWay()) {
-            isArea=-1;
-          }
-          else {
-            isArea=1;
-          }
-        }
-        else if (wayType==typeIgnore &&
-                 areaType==typeIgnore &&
-                 nodes.size()>2 &&
-                 nodes.front()==nodes.back()) {
-          isArea=1;
-        }
-
-        else {
-          isArea=-1;
-        }
-      }
-
-      if (isArea==1) {
-        rawWay.SetType(areaType,true);
-
-        if (nodes.size()>2 &&
-            nodes.front()==nodes.back()) {
-          nodes.pop_back();
-        }
-
-        areaCount++;
-      }
-      else if (isArea==-1) {
-        rawWay.SetType(wayType,false);
-        wayCount++;
-      }
-      else {
-        if (nodes.size()>2 &&
-            nodes.front()==nodes.back()) {
-          rawWay.SetType(typeIgnore,
-                         true);
-
-          nodes.pop_back();
-
-          areaCount++;
-        }
-        else {
-          rawWay.SetType(typeIgnore,
-                         false);
-
-          wayCount++;
-        }
-        // Unidentified way
-        /*
-        std::cout << "--- " << id << std::endl;
-        for (size_t tag=0; tag<tags.size(); tag++) {
-          std::cout << tags[tag].key << "/" << tags[tag].value << std::endl;
-        }*/
-      }
-
-      rawWay.SetTags(tags);
-      rawWay.SetNodes(nodes);
-
-      rawWay.Write(wayWriter);
-
-      lastWayId=inputWay.id();
+      ProcessWay(typeConfig,
+                 inputWay.id(),
+                 nodes,
+                 tagMap);
     }
   }
 
   void PreprocessPBF::ReadRelations(const TypeConfig& typeConfig,
                                     const PBF::PrimitiveBlock& block,
-                                    const PBF::PrimitiveGroup& group,
-                                    FileWriter& relationWriter)
+                                    const PBF::PrimitiveGroup& group)
   {
     for (int r=0; r<group.relations_size(); r++) {
       const PBF::Relation &inputRelation=group.relations(r);
 
-      rawRel.tags.clear();
-      rawRel.members.clear();
-
-      if (inputRelation.id()<lastRelationId) {
-        relationSortingError=true;
-      }
-
-      rawRel.SetId(inputRelation.id());
-      rawRel.SetType(typeIgnore);
-
+      members.clear();
       tagMap.clear();
 
       for (int t=0; t<inputRelation.keys_size(); t++) {
@@ -564,20 +415,13 @@ namespace osmscout {
         member.id=ref;
         member.role=block.stringtable().s(inputRelation.roles_sid(r));
 
-        rawRel.members.push_back(member);
+        members.push_back(member);
       }
 
-      TypeId type;
-
-      typeConfig.GetRelationTypeId(tagMap,type);
-      typeConfig.ResolveTags(tagMap,rawRel.tags);
-
-      rawRel.SetType(type);
-
-      rawRel.Write(relationWriter);
-
-      relationCount++;
-      lastRelationId=inputRelation.id();
+      ProcessRelation(typeConfig,
+                      inputRelation.id(),
+                      members,
+                      tagMap);
     }
   }
 
@@ -585,23 +429,6 @@ namespace osmscout {
                              Progress& progress,
                              const TypeConfig& typeConfig)
   {
-    FileWriter nodeWriter;
-    FileWriter wayWriter;
-    FileWriter relationWriter;
-
-    nodeCount=0;
-    wayCount=0;
-    areaCount=0;
-    relationCount=0;
-
-    lastNodeId=0;
-    lastWayId=0;
-    lastRelationId=0;
-
-    nodeSortingError=false;
-    waySortingError=false;
-    relationSortingError=false;
-
     progress.SetAction(std::string("Parsing PBF file '")+parameter.GetMapfile()+"'");
 
     FILE* file;
@@ -613,17 +440,9 @@ namespace osmscout {
       return false;
     }
 
-    nodeWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                    "rawnodes.dat"));
-    nodeWriter.Write(nodeCount);
-
-    wayWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                   "rawways.dat"));
-    wayWriter.Write(wayCount+areaCount);
-
-    relationWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        "rawrels.dat"));
-    relationWriter.Write(relationCount);
+    if (!Initialize(parameter)) {
+      return false;
+    }
 
     // BlockHeader
 
@@ -660,16 +479,16 @@ namespace osmscout {
       }
     }
 
-    tags.reserve(20);
     nodes.reserve(20000);
-
-    rawRel.tags.reserve(20);
-    rawRel.members.reserve(2000);
+    members.reserve(2000);
 
     while (true) {
       PBF::BlockHeader blockHeader;
 
-      if (!ReadBlockHeader(progress,file,blockHeader,true)) {
+      if (!ReadBlockHeader(progress,
+                           file,
+                           blockHeader,
+                           true)) {
         fclose(file);
         break;
       }
@@ -696,67 +515,30 @@ namespace osmscout {
         const PBF::PrimitiveGroup &group=block.primitivegroup(currentGroup);
 
         if (group.nodes_size()>0) {
-          ReadNodes(typeConfig,block,group,nodeWriter);
+          ReadNodes(typeConfig,
+                    block,
+                    group);
         }
         else if (group.ways_size()>0) {
           ReadWays(typeConfig,
                    block,
-                   group,
-                   wayWriter);
+                   group);
         }
         else if (group.relations_size()>0) {
           ReadRelations(typeConfig,
                         block,
-                        group,
-                        relationWriter);
+                        group);
         }
         else if (group.has_dense()) {
           ReadDenseNodes(typeConfig,
                          block,
-                         group,
-                         nodeWriter);
+                         group);
         }
       }
     }
 
-    nodeWriter.SetPos(0);
-    nodeWriter.Write(nodeCount);
-
-    wayWriter.SetPos(0);
-    wayWriter.Write(wayCount+areaCount);
-
-    relationWriter.SetPos(0);
-    relationWriter.Write(relationCount);
-
-    nodeWriter.Close();
-    wayWriter.Close();
-    relationWriter.Close();
-
-    progress.Info(std::string("Nodes:          ")+NumberToString(nodeCount));
-    progress.Info(std::string("Ways/Areas/Sum: ")+NumberToString(wayCount)+" "+
-                  NumberToString(areaCount)+" "+
-                  NumberToString(wayCount+areaCount));
-    progress.Info(std::string("Relations:      ")+NumberToString(relationCount));
-
-    if (!parameter.GetRenumberIds()) {
-      if (nodeSortingError) {
-        progress.Error("Nodes are not sorted by increasing id");
-      }
-
-      if (waySortingError) {
-        progress.Error("Ways are not sorted by increasing id");
-      }
-
-      if (relationSortingError) {
-        progress.Error("Relations are not sorted by increasing id");
-      }
-
-      if (nodeSortingError || waySortingError || relationSortingError) {
-        return false;
-      }
-    }
-
-    return true;
+    return Cleanup(parameter,
+                   progress);
   }
 }
 

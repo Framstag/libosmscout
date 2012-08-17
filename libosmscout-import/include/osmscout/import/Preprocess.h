@@ -21,15 +21,55 @@
 */
 
 #include <osmscout/import/Import.h>
+#include <osmscout/import/RawRelation.h>
+
+#include <osmscout/util/FileWriter.h>
 
 namespace osmscout {
   class Preprocess : public ImportModule
   {
+  private:
+    FileWriter        nodeWriter;
+    FileWriter        wayWriter;
+    FileWriter        relationWriter;
+
+    std::vector<Tag>  tags;
+
+    uint32_t          nodeCount;
+    uint32_t          wayCount;
+    uint32_t          areaCount;
+    uint32_t          relationCount;
+
+    uint32_t          lastNodeId;
+    uint32_t          lastWayId;
+    uint32_t          lastRelationId;
+    bool              nodeSortingError;
+    bool              waySortingError;
+    bool              relationSortingError;
+
   public:
     std::string GetDescription() const;
     bool Import(const ImportParameter& parameter,
                 Progress& progress,
                 const TypeConfig& typeConfig);
+
+    bool Initialize(const ImportParameter& parameter);
+
+    void ProcessNode(const TypeConfig& typeConfig,
+                     const Id& id,
+                     const double& lon, const double& lat,
+                     const std::map<TagId,std::string>& tags);
+    void ProcessWay(const TypeConfig& typeConfig,
+                    const Id& id,
+                    std::vector<Id>& nodes,
+                    const std::map<TagId,std::string>& tags);
+    void ProcessRelation(const TypeConfig& typeConfig,
+                         const Id& id,
+                         const std::vector<RawRelation::Member>& members,
+                         const std::map<TagId,std::string>& tags);
+
+    bool Cleanup(const ImportParameter& parameter,
+                 Progress& progress);
   };
 }
 
