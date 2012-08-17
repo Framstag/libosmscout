@@ -32,6 +32,9 @@ AC_SEARCH_LIBS([sqrt],[m])
 AC_CHECK_DECLS([log2(double), atanh(double), lround(double)],[],[],[#include <cmath>])
 AC_CHECK_FUNCS([mmap])
 
+AC_SYS_LARGEFILE
+AC_FUNC_FSEEKO
+
 if test "x$GXX" = xyes; then
   CPPFLAGS="$CPPFLAGS -Wall -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
 fi
