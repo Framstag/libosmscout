@@ -110,8 +110,6 @@ namespace osmscout {
     idx=std::max(waterIndexMinMag,idx);
     idx=std::min(waterIndexMaxMag,idx);
 
-    std::cout << "Effective level: " << idx << std::endl;
-
     idx-=waterIndexMinMag;
 
     tiles.clear();
