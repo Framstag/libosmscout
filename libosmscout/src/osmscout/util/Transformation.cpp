@@ -349,11 +349,11 @@ namespace osmscout {
 
     length=nodes.size();
 
-    if (pointsSize<length) {
+    if (pointsSize<nodes.size()+1) {
       delete [] points;
 
-      points=new TransPoint[length];
-      pointsSize=nodes.size();
+      points=new TransPoint[nodes.size()+1];
+      pointsSize=nodes.size()+1;
     }
 
     if (optimize!=none) {
@@ -393,6 +393,7 @@ namespace osmscout {
         end++;
         length++;
 
+        assert(end<pointsSize);
         points[end]=points[start];
       }
     }
