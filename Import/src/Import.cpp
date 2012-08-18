@@ -28,12 +28,12 @@
 
 static bool StringToBool(const char* string, bool& value)
 {
-  if (strcmp(string,"true")) {
+  if (strcmp(string,"true")==0) {
     value=true;
 
     return true;
   }
-  else if (strcmp(string,"false")) {
+  else if (strcmp(string,"false")==0) {
     value=false;
 
     return true;
