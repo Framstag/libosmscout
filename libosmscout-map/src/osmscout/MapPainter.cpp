@@ -1647,10 +1647,16 @@ namespace osmscout {
             a.transStart=data[i].transStart;
             a.transEnd=data[i].transEnd;
 
+            a.minLat=role.nodes[0].GetLat();
+            a.maxLat=role.nodes[0].GetLat();
+            a.maxLon=role.nodes[0].GetLon();
             a.minLon=role.nodes[0].GetLon();
 
             for (size_t i=1; i<role.nodes.size(); i++) {
+              a.minLat=std::min(a.minLat,role.nodes[i].GetLat());
+              a.maxLat=std::min(a.maxLat,role.nodes[i].GetLat());
               a.minLon=std::min(a.minLon,role.nodes[i].GetLon());
+              a.maxLon=std::min(a.maxLon,role.nodes[i].GetLon());
             }
 
             areaData.push_back(a);
