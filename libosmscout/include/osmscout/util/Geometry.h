@@ -29,7 +29,7 @@
 #include <osmscout/system/Types.h>
 
 #include <osmscout/Point.h>
-#include <iostream>
+
 namespace osmscout {
 
   /**
