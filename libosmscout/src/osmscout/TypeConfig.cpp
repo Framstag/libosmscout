@@ -1,4 +1,4 @@
-/*
+  /*
   This source is part of the libosmscout library
   Copyright (C) 2009  Tim Teulings
 
@@ -264,19 +264,14 @@ namespace osmscout {
     // It assures that id 0 is always reserved for tagIgnore
     RegisterTagForInternalUse("");
 
-    RegisterTagForExternalUse("admin_level");
-    RegisterTagForExternalUse("boundary");
-    RegisterTagForExternalUse("bridge");
-    RegisterTagForExternalUse("layer");
     RegisterTagForExternalUse("name");
-    RegisterTagForExternalUse("oneway");
-    RegisterTagForExternalUse("place");
-    RegisterTagForExternalUse("place_name");
     RegisterTagForExternalUse("ref");
+    RegisterTagForExternalUse("bridge");
     RegisterTagForExternalUse("tunnel");
+    RegisterTagForExternalUse("layer");
     RegisterTagForExternalUse("type");
     RegisterTagForExternalUse("width");
-    RegisterTagForExternalUse("area");
+    RegisterTagForExternalUse("oneway");
     RegisterTagForExternalUse("addr:housenumber");
     RegisterTagForExternalUse("junction");
     RegisterTagForExternalUse("maxspeed");
@@ -284,6 +279,13 @@ namespace osmscout {
     RegisterTagForExternalUse("restriction");
     RegisterTagForExternalUse("surface");
     RegisterTagForExternalUse("tracktype");
+    RegisterTagForExternalUse("place");
+    RegisterTagForExternalUse("place_name");
+    RegisterTagForExternalUse("boundary");
+    RegisterTagForExternalUse("admin_level");
+
+    RegisterTagForInternalUse("area");
+    RegisterTagForInternalUse("natural");
 
     TypeInfo ignore;
     TypeInfo route;
@@ -342,6 +344,7 @@ namespace osmscout {
     tagRestriction=GetTagId("restriction");
     tagSurface=GetTagId("surface");
     tagTracktype=GetTagId("tracktype");
+    tagNatural=GetTagId("natural");
 
     assert(tagAdminLevel!=tagIgnore);
     assert(tagBoundary!=tagIgnore);
@@ -363,6 +366,7 @@ namespace osmscout {
     assert(tagRestriction!=tagIgnore);
     assert(tagSurface!=tagIgnore);
     assert(tagTracktype!=tagIgnore);
+    assert(tagNatural!=tagIgnore);
   }
 
   TypeConfig::~TypeConfig()

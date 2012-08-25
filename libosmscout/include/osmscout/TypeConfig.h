@@ -392,22 +392,15 @@ namespace osmscout {
     OSMSCOUT_HASHMAP<TypeId,TypeInfo>      idToTypeMap;
 
   public:
-    // Internal use (only available during preprocessing)
-
     // External use (also available in "normal" types, if not explicitly deleted)
-    TagId                                  tagAdminLevel;
-    TagId                                  tagBoundary;
-    TagId                                  tagBridge;
-    TagId                                  tagLayer;
     TagId                                  tagName;
-    TagId                                  tagOneway;
-    TagId                                  tagPlace;
-    TagId                                  tagPlaceName;
     TagId                                  tagRef;
+    TagId                                  tagBridge;
     TagId                                  tagTunnel;
+    TagId                                  tagLayer;
     TagId                                  tagType;
     TagId                                  tagWidth;
-    TagId                                  tagArea;
+    TagId                                  tagOneway;
     TagId                                  tagHouseNr;
     TagId                                  tagJunction;
     TagId                                  tagMaxSpeed;
@@ -415,6 +408,14 @@ namespace osmscout {
     TagId                                  tagRestriction;
     TagId                                  tagSurface;
     TagId                                  tagTracktype;
+    TagId                                  tagPlace;
+    TagId                                  tagPlaceName;
+    TagId                                  tagBoundary;
+    TagId                                  tagAdminLevel;
+
+    // Internal use (only available during preprocessing)
+    TagId                                  tagArea;
+    TagId                                  tagNatural;
 
   public:
     TypeConfig();
