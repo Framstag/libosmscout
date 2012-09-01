@@ -19,6 +19,7 @@
 
 #include <osmscout/import/Preprocess.h>
 
+#include <osmscout/import/RawCoastline.h>
 #include <osmscout/import/RawNode.h>
 #include <osmscout/import/RawWay.h>
 
@@ -85,9 +86,12 @@ namespace osmscout {
     wayCount=0;
     areaCount=0;
     relationCount=0;
+    coastlineCount=0;
+
     lastNodeId=0;
     lastWayId=0;
     lastRelationId=0;
+
     nodeSortingError=false;
     waySortingError=false;
     relationSortingError=false;
@@ -104,9 +108,14 @@ namespace osmscout {
                                         "rawrels.dat"));
     relationWriter.Write(relationCount);
 
+    coastlineWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                        "rawcoastline.dat"));
+    coastlineWriter.Write(coastlineCount);
+
     return !nodeWriter.HasError() &&
            !wayWriter.HasError() &&
-           !relationWriter.HasError();
+           !relationWriter.HasError() &&
+           !coastlineWriter.HasError();
   }
 
   void Preprocess::ProcessNode(const TypeConfig& typeConfig,
@@ -145,7 +154,9 @@ namespace osmscout {
     TypeId                                      wayType=typeIgnore;
     int                                         isArea=0; // 0==unknown, 1==true, -1==false
     std::map<TagId,std::string>::const_iterator areaTag;
+    std::map<TagId,std::string>::const_iterator naturalTag;
     RawWay                                      way;
+    bool                                        isCoastline=false;
 
     if (id<lastWayId) {
       waySortingError=true;
@@ -167,6 +178,13 @@ namespace osmscout {
       isArea=1;
     }
 
+    naturalTag=tagMap.find(typeConfig.tagNatural);
+
+    if (naturalTag!=tagMap.end() &&
+        naturalTag->second=="coastline") {
+      isCoastline=true;
+    }
+
     typeConfig.GetWayAreaTypeId(tagMap,wayType,areaType);
     typeConfig.ResolveTags(tagMap,tags);
 
@@ -180,10 +198,12 @@ namespace osmscout {
     }
 
     if (isArea==0) {
-      if (wayType!=typeIgnore && areaType==typeIgnore) {
+      if (wayType!=typeIgnore &&
+          areaType==typeIgnore) {
         isArea=-1;
       }
-      else if (wayType==typeIgnore && areaType!=typeIgnore) {
+      else if (wayType==typeIgnore &&
+               areaType!=typeIgnore) {
         isArea=1;
       }
       else if (areaType!=typeIgnore &&
@@ -238,6 +258,18 @@ namespace osmscout {
     way.Write(wayWriter);
 
     lastWayId=id;
+
+    if (isCoastline) {
+      RawCoastline coastline;
+
+      coastline.SetId(way.GetId());
+      coastline.SetType(way.IsArea());
+      coastline.SetNodes(way.GetNodes());
+
+      coastline.Write(coastlineWriter);
+
+      coastlineCount++;
+    }
   }
 
   void Preprocess::ProcessRelation(const TypeConfig& typeConfig,
@@ -278,15 +310,20 @@ namespace osmscout {
     relationWriter.SetPos(0);
     relationWriter.Write(relationCount);
 
+    coastlineWriter.SetPos(0);
+    coastlineWriter.Write(coastlineCount);
+
     nodeWriter.Close();
     wayWriter.Close();
     relationWriter.Close();
+    coastlineWriter.Close();
 
     progress.Info(std::string("Nodes:          ")+NumberToString(nodeCount));
     progress.Info(std::string("Ways/Areas/Sum: ")+NumberToString(wayCount)+" "+
                   NumberToString(areaCount)+" "+
                   NumberToString(wayCount+areaCount));
     progress.Info(std::string("Relations:      ")+NumberToString(relationCount));
+    progress.Info(std::string("Coastlines:     ")+NumberToString(coastlineCount));
 
     if (!parameter.GetRenumberIds()) {
       if (nodeSortingError) {

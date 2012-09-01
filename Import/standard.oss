@@ -1,6 +1,6 @@
 OSS
  ORDER WAYS
-  GROUP "highway_motorway", "waterway_river", "waterway_canal", "waterway_drain", "natural_coastline", "_route"
+  GROUP "highway_motorway", "waterway_river", "waterway_canal", "waterway_drain", "_route"
   GROUP "highway_trunk"
   GROUP "highway_primary"
   GROUP "highway_secondary"
@@ -41,8 +41,7 @@ OSS
    //[TYPE "_tile_land"] AREA {color: #f1eee9; borderColor: #000000; borderWidth: 0.1mm;}
    //[TYPE "_tile_unknown"] AREA {color: #ffffad;}
 
-   //[TYPE "_tile_coastline"] WAY {color: #ff0000; displayWidth: 0.1mm;}
-   //[TYPE "natural_coastline"] WAY {color: #ff0000; displayWidth: 0.1mm;}
+   [TYPE "_tile_coastline"] WAY {color: #ff0000; displayWidth: 0.1mm;}
  }
 
  // -------------------------------------------------------

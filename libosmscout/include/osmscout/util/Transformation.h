@@ -51,7 +51,7 @@ namespace osmscout {
     size_t      end;
 
   public:
-    enum OptimizeMethod 
+    enum OptimizeMethod
     {
       none = 0,
       fast = 1,
@@ -61,7 +61,6 @@ namespace osmscout {
     TransPoint* points;
 
   private:
-    void InitializeDraw();
     void TransformGeoToPixel(const Projection& projection,
                              const std::vector<Point>& nodes);
     void DropSimilarPoints(double optimizeErrorTolerance);

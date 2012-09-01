@@ -142,6 +142,7 @@ namespace osmscout {
     struct Coast : public Referencable
     {
       Id                 id;
+      bool               isArea;
       double             sortCriteria;
       std::vector<Point> coast;
     };

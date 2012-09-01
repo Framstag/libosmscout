@@ -15,7 +15,8 @@ libosmscoutimport_la_LDFLAGS  = -no-undefined \
                                 $(PROTOBUF_LIBS) \
                                 $(ZLIB_LIBS)
 
-libosmscoutimport_la_SOURCES = osmscout/import/RawNode.cpp \
+libosmscoutimport_la_SOURCES = osmscout/import/RawCoastline.cpp \
+                               osmscout/import/RawNode.cpp \
                                osmscout/import/RawRelation.cpp \
                                osmscout/import/RawWay.cpp \
                                osmscout/import/GenAreaAreaIndex.cpp \

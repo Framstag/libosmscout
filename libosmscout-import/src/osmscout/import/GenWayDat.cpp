@@ -841,6 +841,8 @@ namespace osmscout {
         std::cerr << "Cannot read nodes!" << std::endl;
         continue;
       }
+      
+      nodeIds.clear();
 
       for (std::vector<RawNodeRef>::const_iterator node=nodes.begin();
           node!=nodes.end();
@@ -848,7 +850,6 @@ namespace osmscout {
         nodesMap[(*node)->GetId()]=*node;
       }
 
-      nodeIds.clear();
       nodes.clear();
 
       for (size_t w=0; w<blockCount; w++) {

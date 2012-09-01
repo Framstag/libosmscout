@@ -22,8 +22,11 @@
 #include <cassert>
 #include <vector>
 
+#include <osmscout/import/RawCoastline.h>
+#include <osmscout/import/RawNode.h>
+
+#include <osmscout/DataFile.h>
 #include <osmscout/Point.h>
-#include <osmscout/Relation.h>
 #include <osmscout/Way.h>
 
 #include <osmscout/util/File.h>
@@ -34,6 +37,8 @@
 
 #include <iostream>
 #include <iomanip>
+
+#include "osmscout/import/RawCoastline.h"
 
 //#define DEBUG_COASTLINE
 //#define DEBUG_TILING
@@ -128,49 +133,121 @@ namespace osmscout {
                                            const TypeConfig& typeConfig)
   {
     // We must have coastline type defined
-    TypeId      coastlineWayId=typeConfig.GetWayTypeId("natural_coastline");
-    TypeId      coastlineAreaId=typeConfig.GetAreaTypeId("natural_coastline");
-    FileScanner scanner;
-    uint32_t    wayCount=0;
+    FileScanner                scanner;
+    uint32_t                   coastlineCount=0;
+    std::list<RawCoastlineRef> rawCoastlines;
 
-    progress.SetAction("Scanning for coastlines ways");
+    progress.SetAction("Scanning for coastlines");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "ways.dat"))) {
-      progress.Error("Cannot open 'ways.dat'");
+                                      "rawcoastline.dat"))) {
+      progress.Error("Cannot open 'rawcoastline.dat'");
       return false;
     }
 
-    if (!scanner.Read(wayCount)) {
+    if (!scanner.Read(coastlineCount)) {
       progress.Error("Error while reading number of data entries in file");
       return false;
     }
 
-    for (uint32_t w=1; w<=wayCount; w++) {
-      progress.SetProgress(w,wayCount);
+    for (uint32_t c=1; c<=coastlineCount; c++) {
+      progress.SetProgress(c,coastlineCount);
 
-      Way way;
+      RawCoastlineRef coastline(new RawCoastline());
 
-      if (!way.Read(scanner)) {
+      if (!coastline->Read(scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(w)+" of "+
-                       NumberToString(wayCount)+
+                       NumberToString(c)+" of "+
+                       NumberToString(coastlineCount)+
                        " in file '"+
                        scanner.GetFilename()+"'");
         return false;
       }
 
-      if (way.GetType()!=coastlineWayId &&
-          way.GetType()!=coastlineAreaId) {
-        continue;
+      rawCoastlines.push_back(coastline);
+    }
+
+    progress.SetAction("Resolving nodes of coastline");
+
+    DataFile<RawNode> nodeDataFile("rawnodes.dat",
+                                   "rawnode.idx",
+                                   parameter.GetRawNodeDataCacheSize(),
+                                   parameter.GetRawNodeIndexCacheSize());
+
+    if (!nodeDataFile.Open(parameter.GetDestinationDirectory(),
+                           parameter.GetRawNodeIndexMemoryMaped(),
+                           parameter.GetRawNodeDataMemoryMaped())) {
+      std::cerr << "Cannot open raw node data file!" << std::endl;
+      return false;
+    }
+
+    std::set<Id> nodeIds;
+
+    for (std::list<RawCoastlineRef>::const_iterator c=rawCoastlines.begin();
+         c!=rawCoastlines.end();
+         ++c) {
+      RawCoastlineRef coastline(*c);
+
+      for (size_t n=0; n<coastline->GetNodeCount(); n++) {
+        nodeIds.insert(coastline->GetNodeId(n));
       }
+    }
+
+    std::vector<RawNodeRef> nodes;
+    std::map<Id,RawNodeRef> nodesMap;
+
+    if (!nodeDataFile.Get(nodeIds,nodes)) {
+      std::cerr << "Cannot read nodes!" << std::endl;
+      return false;
+    }
+
+    nodeIds.clear();
+
+    for (std::vector<RawNodeRef>::const_iterator node=nodes.begin();
+        node!=nodes.end();
+        node++) {
+      nodesMap[(*node)->GetId()]=*node;
+    }
+
+    nodes.clear();
+
+    progress.SetAction("Enriching coastline with node data");
+
+    while (!rawCoastlines.empty()) {
+      RawCoastlineRef coastline=rawCoastlines.front();
+      bool            processingError=false;
+
+      rawCoastlines.pop_front();
 
       CoastRef coast=new Coast();
 
-      coast->id=way.GetId();
-      coast->coast=way.nodes;
+      coast->id=coastline->GetId();
+      coast->isArea=coastline->IsArea();
 
-      coastlines.push_back(coast);
+      coast->coast.resize(coastline->GetNodeCount());
+
+      for (size_t n=0; n<coastline->GetNodeCount(); n++) {
+        std::map<Id,RawNodeRef>::const_iterator node=nodesMap.find(coastline->GetNodeId(n));
+
+        if (node==nodesMap.end()) {
+          processingError=true;
+
+          progress.Error("Cannot resolve node with id "+
+                         NumberToString(coastline->GetNodeId(n))+
+                         " for coastline "+
+                         NumberToString(coastline->GetId()));
+
+          break;
+        }
+
+        coast->coast[n].Set(node->second->GetId(),
+                            node->second->GetLat(),
+                            node->second->GetLon());
+      }
+
+      if (!processingError) {
+        coastlines.push_back(coast);
+      }
     }
 
     if (!scanner.Close()) {
@@ -195,7 +272,7 @@ namespace osmscout {
     while( c!=coastlines.end()) {
       CoastRef coast=*c;
 
-      if (coast->coast.front().GetId()!=coast->coast.back().GetId()) {
+      if (!coast->isArea) {
         coastStartMap.insert(std::make_pair(coast->coast.front().GetId(),coast));
 
         c++;
@@ -229,6 +306,7 @@ namespace osmscout {
           for (size_t i=1; i<other->second->coast.size(); i++) {
             coast->coast.push_back(other->second->coast[i]);
           }
+
           other->second->coast.clear();
 
           blacklist.insert(other->second->id);
@@ -243,11 +321,18 @@ namespace osmscout {
     for (std::list<CoastRef>::iterator c=coastlines.begin();
         c!=coastlines.end();
         ++c) {
-      if (blacklist.find((*c)->id)!=blacklist.end()) {
+      CoastRef coastline(*c);
+
+      if (blacklist.find(coastline->id)!=blacklist.end()) {
         continue;
       }
 
-      mergedCoastlines.push_back(*c);
+      if (coastline->coast.front().GetId()==coastline->coast.back().GetId()) {
+        coastline->isArea=true;
+        coastline->coast.pop_back();
+      }
+
+      mergedCoastlines.push_back(coastline);
     }
 
     progress.Info("Final coastline count: "+NumberToString(mergedCoastlines.size()));
@@ -470,10 +555,7 @@ namespace osmscout {
 
     FileScanner scanner;
 
-    TypeId      coastlineWayId=typeConfig.GetWayTypeId("natural_coastline");
     uint32_t    wayCount=0;
-
-    assert(coastlineWayId!=typeIgnore);
 
     // We do not yet know if we handle borders as ways or areas
 
@@ -502,8 +584,7 @@ namespace osmscout {
         return false;
       }
 
-      if (way.GetType()!=coastlineWayId &&
-          !typeConfig.GetTypeInfo(way.GetType()).GetIgnoreSeaLand()) {
+      if (!typeConfig.GetTypeInfo(way.GetType()).GetIgnoreSeaLand()) {
         if (!way.IsArea() &&
             way.nodes.size()>=2) {
           std::set<Coord> coords;
@@ -745,7 +826,7 @@ namespace osmscout {
       currentCoastline++;
       progress.SetProgress(currentCoastline,coastlines.size());
 
-      if (coast->coast.front().GetId()==coast->coast.back().GetId()) {
+      if (coast->isArea) {
         double   minLat,maxLat,minLon,maxLon;
         uint32_t cx1,cx2,cy1,cy2;
 
@@ -754,7 +835,7 @@ namespace osmscout {
         minLon=coast->coast[0].GetLon();
         maxLon=minLon;
 
-        for (size_t p=1; p<coast->coast.size()-1; p++) {
+        for (size_t p=1; p<coast->coast.size(); p++) {
           minLat=std::min(minLat,coast->coast[p].GetLat());
           maxLat=std::max(maxLat,coast->coast[p].GetLat());
 
@@ -770,7 +851,8 @@ namespace osmscout {
         double cellMinLat=level.cellHeight*cy1-90.0;
         double cellMinLon=level.cellWidth*cx1-180.0;
 
-        if (cx1==cx2 && cy1==cy2) {
+        if (cx1==cx2 &&
+            cy1==cy2) {
           Coord        coord(cx1-level.cellXStart,cy1-level.cellYStart);
           TransPolygon polygon;
           double       minX;
@@ -779,11 +861,12 @@ namespace osmscout {
           double       maxY;
           GroundTile   groundTile(GroundTile::land);
 
-          polygon.TransformArea(projection,parameter.GetOptimizationWayMethod(),coast->coast, 1.0);
+          polygon.TransformArea(projection,parameter.GetOptimizationWayMethod(),coast->coast,1.0);
 
           polygon.GetBoundingBox(minX,minY,maxX,maxY);
 
-          if (maxX-minX<=1.0 && maxY-minY<=1.0) {
+          if (maxX-minX<=1.0 &&
+              maxY-minY<=1.0) {
             continue;
           }
 
@@ -793,16 +876,14 @@ namespace osmscout {
             if (polygon.points[p].draw) {
               GroundTile::Coord coord;
 
-              if (p==polygon.GetEnd()) {
-                coord=Transform(coast->coast[polygon.GetStart()],level,cellMinLat,cellMinLon,false);
-              }
-              else {
-                coord=Transform(coast->coast[p],level,cellMinLat,cellMinLon,true);
-              }
+              coord=Transform(coast->coast[p],level,cellMinLat,cellMinLon,true);
 
               groundTile.coords.push_back(coord);
             }
           }
+
+          groundTile.coords.push_back(groundTile.coords.front());
+          groundTile.coords.back().coast=false;
 
           cellGroundTileMap[coord].push_back(groundTile);
         }
@@ -964,7 +1045,8 @@ namespace osmscout {
               corner++;
             }
 
-            if (x==cx1 && y==cy1) {
+            if (x==cx1 &&
+                y==cy1) {
               // The segment always leaves the origin cell
 
               assert(intersectionCount==1);
@@ -972,7 +1054,8 @@ namespace osmscout {
               firstIntersection.direction=-1;
               cellIntersections[coord].push_back(firstIntersection);
             }
-            else if (x==cx2 && y==cy2) {
+            else if (x==cx2 &&
+                     y==cy2) {
               // The segment always enteres the detsination cell
 
               assert(intersectionCount==1);
@@ -981,7 +1064,9 @@ namespace osmscout {
               cellIntersections[coord].push_back(firstIntersection);
             }
             else {
-              assert(intersectionCount==0 || intersectionCount==1 || intersectionCount==2);
+              assert(intersectionCount==0 ||
+                     intersectionCount==1 ||
+                     intersectionCount==2);
 
               if (intersectionCount==1) {
                 // If we only have one intersection with borders of cells between the starting borderPoints and the
@@ -1046,7 +1131,7 @@ namespace osmscout {
 
       progress.SetProgress(curCoast,coastlines.size());
 
-      data.isArea[curCoast]=coast->coast.front().GetId()==coast->coast.back().GetId();
+      data.isArea[curCoast]=coast->isArea;
 
       boundingBox.minLat=coast->coast[0].GetLat();
       boundingBox.maxLat=boundingBox.minLat;
@@ -1092,8 +1177,7 @@ namespace osmscout {
       }
 
       // Currently transformation optimization code sometimes does not correctly handle the closing point for areas
-      if (data.isArea[curCoast] &&
-          data.points[curCoast].front().GetId()!=data.points[curCoast].back().GetId()) {
+      if (data.isArea[curCoast]) {
         data.points[curCoast].push_back(data.points[curCoast].front());
       }
 

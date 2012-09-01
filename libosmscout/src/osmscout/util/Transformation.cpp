@@ -175,23 +175,15 @@ namespace osmscout {
     delete [] points;
   }
 
-  void TransPolygon::InitializeDraw()
-  {
-    for (size_t i=0; i<length; i++) {
-      points[i].draw=true;
-    }
-  }
-
   void TransPolygon::TransformGeoToPixel(const Projection& projection,
                                          const std::vector<Point>& nodes)
   {
-    for (size_t i=0; i<length; i++) {
-      if (points[i].draw) {
-        projection.GeoToPixel(nodes[i].GetLon(),
-                              nodes[i].GetLat(),
-                              points[i].x,
-                              points[i].y);
-      }
+    for (size_t i=0; i<nodes.size(); i++) {
+      projection.GeoToPixel(nodes[i].GetLon(),
+                            nodes[i].GetLat(),
+                            points[i].x,
+                            points[i].y);
+      points[i].draw=true;
     }
   }
 
@@ -347,18 +339,14 @@ namespace osmscout {
       return;
     }
 
-    length=nodes.size();
-
-    if (pointsSize<nodes.size()+1) {
+    if (pointsSize<nodes.size()) {
       delete [] points;
 
-      points=new TransPoint[nodes.size()+1];
-      pointsSize=nodes.size()+1;
+      points=new TransPoint[nodes.size()];
+      pointsSize=nodes.size();
     }
 
     if (optimize!=none) {
-      InitializeDraw();
-
       TransformGeoToPixel(projection,
                           nodes);
 
@@ -387,28 +375,14 @@ namespace osmscout {
           end=i;
         }
       }
-
-      if (points[start].x!=points[end].x ||
-          points[start].y!=points[end].y) {
-        end++;
-        length++;
-
-        assert(end<pointsSize);
-        points[end]=points[start];
-      }
     }
     else {
+      TransformGeoToPixel(projection,
+                          nodes);
+
       start=0;
       end=nodes.size()-1;
       length=nodes.size();
-
-      for (size_t i=0; i<nodes.size(); i++) {
-        points[i].draw=true;
-        projection.GeoToPixel(nodes[i].GetLon(),
-                              nodes[i].GetLat(),
-                              points[i].x,
-                              points[i].y);
-      }
     }
   }
 
@@ -423,18 +397,14 @@ namespace osmscout {
       return;
     }
 
-    length=nodes.size();
-
-    if (pointsSize<length) {
+    if (pointsSize<nodes.size()) {
       delete [] points;
 
-      points=new TransPoint[length];
-      pointsSize=length;
+      points=new TransPoint[nodes.size()];
+      pointsSize=nodes.size();
     }
 
-    if (optimize != none) {
-      InitializeDraw();
-
+    if (optimize!=none) {
       TransformGeoToPixel(projection,
                           nodes);
 
@@ -464,17 +434,12 @@ namespace osmscout {
       }
     }
     else {
+      TransformGeoToPixel(projection,
+                          nodes);
+
       start=0;
       end=nodes.size()-1;
       length=nodes.size();
-
-      for (size_t i=0; i<nodes.size(); i++) {
-        points[i].draw=true;
-        projection.GeoToPixel(nodes[i].GetLon(),
-                              nodes[i].GetLat(),
-                              points[i].x,
-                              points[i].y);
-      }
     }
   }
 
@@ -485,19 +450,26 @@ namespace osmscout {
       return false;
     }
 
-    xmin=points[start].x;
-    xmax=points[start].x;
-    ymin=points[start].y;
-    ymax=points[start].y;
+    size_t pos=start;
 
-    for (size_t j=start+1; j<=end; j++) {
-      if (points[j].draw)
-      {
-        xmin=std::min(xmin,points[j].x);
-        xmax=std::max(xmax,points[j].x);
-        ymin=std::min(ymin,points[j].y);
-        ymax=std::max(ymax,points[j].y);
+    while (!points[pos].draw) {
+      pos++;
+    }
+
+    xmin=points[pos].x;
+    xmax=xmin;
+    ymin=points[pos].y;
+    ymax=ymin;
+
+    while (pos<=end) {
+      if (points[pos].draw) {
+        xmin=std::min(xmin,points[pos].x);
+        xmax=std::max(xmax,points[pos].x);
+        ymin=std::min(ymin,points[pos].y);
+        ymax=std::max(ymax,points[pos].y);
       }
+
+      pos++;
     }
 
     return true;

@@ -111,9 +111,6 @@ TYPES
   TYPE "natural_cave_entrance" = NODE AREA ("natural"=="cave_entrance")
   TYPE "natural_cliff" = NODE WAY AREA ("natural"=="cliff")
 
-  // Do not delete the following type, they are required by the GenWaterIndex import step
-  TYPE "natural_coastline" = WAY ("natural"=="coastline")
-
   TYPE "natural_fell" = NODE AREA ("natural"=="fell")
   TYPE "natural_glacier" = NODE AREA ("natural"=="glacier")
   TYPE "natural_heath" = NODE AREA ("natural"=="heath")
