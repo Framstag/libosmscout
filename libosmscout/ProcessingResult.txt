@@ -23,6 +23,9 @@ rawway.idx (import only):
 rawrels.dat (import only):
  * Raw dump of all relations in import data
 
+rawcoastline.dat (import only):
+* List of coastlines as parsed from import file 
+
 rawturnrestr.dat (import only):
  * List of restrictions as parsed from rawrels.dat
 
@@ -85,17 +88,16 @@ nameregion.idx (export):
    areas (e.g. cities) and indexed objects within these areas
    (e.g. streets).
 
-water.idx (export, unfinished):
+water.idx (export):
  * Index that for a given region returns tiles that are either
    of ground type 'water' or of ground type 'land' or ground type
-   'both'. This will in future allow to correctly use the correct
-   background color.
+   'coast'. Tiles of type coast also hold information about
+   coastline within the tile and land regions within the tile.
 
 optimized.dat (export)
  * Combined index and data file for returning (in the map.ost
    marked) ways in low zoom. Ways are merged and nodes are reduced
    to minimize the amount of data to load and render.
-
 
 route.dat (export)
  * Contains the route graph.
