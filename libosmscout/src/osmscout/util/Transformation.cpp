@@ -178,11 +178,13 @@ namespace osmscout {
   void TransPolygon::TransformGeoToPixel(const Projection& projection,
                                          const std::vector<Point>& nodes)
   {
+    Projection::BatchTransformer batchTransformer(projection);
+
     for (size_t i=0; i<nodes.size(); i++) {
-      projection.GeoToPixel(nodes[i].GetLon(),
-                            nodes[i].GetLat(),
-                            points[i].x,
-                            points[i].y);
+       batchTransformer.GeoToPixel(nodes[i].GetLon(),
+                                   nodes[i].GetLat(),
+                                   points[i].x,
+                                   points[i].y);
       points[i].draw=true;
     }
   }

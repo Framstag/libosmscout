@@ -42,6 +42,11 @@ AC_CHECK_FUNCS([mmap])
 AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
 
+dnl Check for SSE2 & Co.
+AX_EXT
+
+CPPFLAGS="$CPPFLAGS $SIMD_FLAGS"
+
 if test "x$GXX" = xyes; then
   CPPFLAGS="$CPPFLAGS -Wall -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
 fi
@@ -94,6 +99,10 @@ fi
 
 if test "x$ac_cv_header_unordered_set" = xyes; then
   AC_DEFINE([OSMSCOUT_HAVE_UNORDERED_SET],[1],[system header <unordered_set> is available])
+fi
+
+if test "x$ax_cv_have_sse2_ext" = xyes; then
+  AC_DEFINE([OSMSCOUT_HAVE_SSE2],[1],[SSE2 processor extension available])
 fi
 
 if test "$build_os" != "mingw32"; then

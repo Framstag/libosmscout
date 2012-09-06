@@ -8,4 +8,5 @@ Name: libosmscout                       # human-readable name
 Description: osm navigation library     # human-readable description
 Version: @VERSION@
 Libs: -L${libdir} -losmscout
-Cflags: -I${includedir}
+Cflags: -I${includedir} \
+        @SIMD_FLAGS@

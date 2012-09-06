@@ -89,4 +89,9 @@
 
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 /* #undef size_t */
+
+/* Enable SSE Math */
+/* dont use "#if _M_IX86_FP >= 2" since that can mess up templats in projects using this library which compile without this flag */
+#define USE_SSE2_MATH
+
 #endif LIBOSMSCOUT_CONFIG_H

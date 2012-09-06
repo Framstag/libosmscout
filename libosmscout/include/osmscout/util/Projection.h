@@ -24,11 +24,89 @@
 
 #include <osmscout/private/CoreImportExport.h>
 
+#include <osmscout/CoreFeatures.h>
+
+#ifdef OSMSCOUT_HAVE_SSE2
+#include <osmscout/system/SSEMathPublic.h>
+#endif
+
 namespace osmscout {
 
   class OSMSCOUT_API Projection
   {
   public:
+
+    /* This class is used to hide internal complexity concerned with batching GeoToPixel calls*/
+    class BatchTransformer
+    {
+    public:
+      //this should be private, but that would exclude future projection
+      // implementors. I don't know a nice way to handle this
+      const Projection&  projection;
+#ifdef OSMSCOUT_HAVE_SSE2
+      int                count;
+      ALIGN16_BEG double lon[2] ALIGN16_END;
+      ALIGN16_BEG double lat[2] ALIGN16_END;
+      double*            xPointer[2];
+      double*            yPointer[2];
+#endif
+
+    public:
+      explicit BatchTransformer(const Projection& projection)
+        : projection(projection)
+#ifdef OSMSCOUT_HAVE_SSE2
+          ,count(0)
+#endif
+      {
+      }
+
+      ~BatchTransformer()
+      {
+        Flush();
+      }
+
+      bool GeoToPixel(double lon,
+                      double lat,
+                      double& x,
+                      double& y)
+      {
+#ifdef OSMSCOUT_HAVE_SSE2
+
+        this->lon[count]=lon;
+        this->lat[count]=lat;
+        xPointer[count]=&x;
+        yPointer[count]=&y;
+        count++;
+
+        if (count==2)
+        {
+          count=0;
+          return projection.GeoToPixel(*this);
+        }
+
+        return true;
+
+#else
+
+        return projection.GeoToPixel(lon, lat, x, y);
+
+#endif
+      }
+
+      void Flush()
+      {
+#ifdef OSMSCOUT_HAVE_SSE2
+        if (count!=0) {
+          count=0;
+          projection.GeoToPixel(lon[0],
+                                lat[0],
+                                *xPointer[0],
+                                *yPointer[0]);
+        }
+#endif
+      }
+    };
+
     virtual ~Projection();
 
     virtual double GetLon() const = 0;
@@ -59,6 +137,12 @@ namespace osmscout {
                                double& lonMax, double& latMax) const = 0;
 
     virtual double GetPixelSize() const = 0;
+
+  protected:
+
+    virtual bool GeoToPixel(const BatchTransformer& transformData) const = 0;
+
+    friend class BatchTransformer;
   };
 
   class OSMSCOUT_API MercatorProjection : public Projection
@@ -77,6 +161,16 @@ namespace osmscout {
     double              lonOffset;
     double              latOffset;
     double              scale;
+    double              scaleGradtorad; //!Precalculated scale*Gradtorad
+
+#ifdef OSMSCOUT_HAVE_SSE2
+    //some extra vars for special sse needs
+    v2df                sse2LonOffset;
+    v2df                sse2LatOffset;
+    v2df                sse2Scale;
+    v2df                sse2ScaleGradtorad;
+    v2df                sse2Height;
+#endif
 
     double              pixelSize;     //! Size of a pixel in meter
 
@@ -151,6 +245,11 @@ namespace osmscout {
                        double& lonMax, double& latMax) const;
 
     double GetPixelSize() const;
+
+  protected:
+
+     bool GeoToPixel(const BatchTransformer& transformData) const;
+
   };
 }
 

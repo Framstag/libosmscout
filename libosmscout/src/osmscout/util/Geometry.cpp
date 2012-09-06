@@ -21,6 +21,10 @@
 
 #include <osmscout/util/Geometry.h>
 
+#ifdef USE_SSE2_MATH
+#include <osmscout/system/SSEMath.h>
+#endif
+
 #include <cassert>
 #include <cstdlib>
 
@@ -53,7 +57,11 @@ namespace osmscout {
     double dLat=(bLat-aLat)*M_PI/180;
     double dLon=(bLon-aLon)*M_PI/180;
 
-    double a = sin(dLat/2)*sin(dLat/2)+cos(dLon/2)*cos(dLat/2)*sin(dLon/2)*sin(dLon/2);
+    double sindLonDiv2;
+    double cosdLonDiv2;
+    sincos(dLon/2, sindLonDiv2, cosdLonDiv2);
+
+    double a = sin(dLat/2)*sin(dLat/2)+cosdLonDiv2*cosdLonDiv2*sindLonDiv2*sindLonDiv2;
 
     double c = 2*atan2(sqrt(a),sqrt(1-a));
 
@@ -79,12 +87,14 @@ namespace osmscout {
     double omega=lambda2 - lambda1;
 
     double U1=atan((1.0 - f) * tan(phi1));
-    double sinU1=sin(U1);
-    double cosU1=cos(U1);
+    double sinU1;
+    double cosU1;
+    sincos(U1, sinU1, cosU1);
 
     double U2=atan((1.0 - f) * tan(phi2));
-    double sinU2=sin(U2);
-    double cosU2=cos(U2);
+    double sinU2;
+    double cosU2;
+    sincos(U2, sinU2, cosU2);
 
     double sinU1sinU2=sinU1 * sinU2;
     double cosU1sinU2=cosU1 * sinU2;
@@ -103,8 +113,9 @@ namespace osmscout {
     {
       lambda0=lambda;
 
-      double sinlambda=sin(lambda);
-      double coslambda=cos(lambda);
+      double sinlambda;
+      double coslambda;
+      sincos(lambda, sinlambda, coslambda);
 
       double sin2sigma=(cosU2 * sinlambda * cosU2 * sinlambda) +
                         (cosU1sinU2 - sinU1cosU2 * coslambda) *
@@ -167,8 +178,15 @@ namespace osmscout {
     bLat=bLat*M_PI/180;
 
     double dLon=bLon-aLon;
-    double y=sin(dLon)*cos(bLat);
-    double x=cos(aLat)*sin(bLat)-sin(aLat)*cos(bLat)*cos(dLon);
+
+    double sindLon, sinaLat, sinbLat;
+    double cosdLon, cosaLat, cosbLat;
+    sincos(dLon, sindLon, cosdLon);
+    sincos(aLat, sinaLat, cosaLat);
+    sincos(bLat, sinbLat, cosbLat);
+
+    double y=sindLon*cosbLat;
+    double x=cosaLat*sinbLat-sinaLat*cosbLat*cosdLon;
 
     double bearing=atan2(y,x);
     //double bearing=fmod(atan2(y,x)+2*M_PI,2*M_PI);
@@ -189,8 +207,15 @@ namespace osmscout {
     bLat=bLat*M_PI/180;
 
     double dLon=aLon-bLon;
-    double y=sin(dLon)*cos(aLat);
-    double x=cos(bLat)*sin(aLat)-sin(bLat)*cos(aLat)*cos(dLon);
+
+    double sindLon, sinaLat, sinbLat;
+    double cosdLon, cosaLat, cosbLat;
+    sincos(dLon, sindLon, cosdLon);
+    sincos(aLat, sinaLat, cosaLat);
+    sincos(bLat, sinbLat, cosbLat);
+
+    double y=sindLon*cosaLat;
+    double x=cosbLat*sinaLat-sinbLat*cosaLat*cosdLon;
 
     double bearing=atan2(y,x);
 

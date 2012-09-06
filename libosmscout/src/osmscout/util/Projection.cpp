@@ -23,7 +23,16 @@
 
 #include <osmscout/private/Math.h>
 #include <iostream>
+
+#ifdef OSMSCOUT_HAVE_SSE2
+#include <osmscout/system/SSEMath.h>
+#endif
+
 namespace osmscout {
+
+#ifdef OSMSCOUT_HAVE_SSE2
+  static const ALIGN16_BEG double sseGradtorad[] ALIGN16_END = {2*M_PI/360, 2*M_PI/360};
+#endif
 
   static const double gradtorad=2*M_PI/360;
 
@@ -71,7 +80,7 @@ namespace osmscout {
     // We have three projections:
     // * Mercator projection of longitudes to X-coordinates
     // * Mercator projections of latitudes to Y-coordinates
-    // * Projection of X and Y coordinates as result of mercator projection to on screen cooridnates
+    // * Projection of X and Y coordinates as result of mercator projection to on screen coordinates
     //
 
     double boxWidth=360/magnification; // Part of the full earth circle that has to be shown, in degree
@@ -81,6 +90,7 @@ namespace osmscout {
     lonMax=lon+boxWidth/2;
 
     scale=(width-1)/(gradtorad*(lonMax-lonMin));
+    scaleGradtorad = scale * gradtorad;
 
     // Width of an pixel in meter
     double d=(lonMax-lonMin)*gradtorad;
@@ -106,7 +116,15 @@ namespace osmscout {
     std::cout << "The complete screen are " << d*180*60/M_PI*1852.216 << " meters" << std::endl;
     std::cout << "1 pixel are " << pixelSize << " meters" << std::endl;
     std::cout << "20 meters are " << 20/(d*180*60/M_PI*1852.216/width) << " pixels" << std::endl;*/
-    
+
+#ifdef OSMSCOUT_HAVE_SSE2
+    sse2LonOffset      = _mm_set1_pd(lonOffset);
+    sse2LatOffset      = _mm_set1_pd(latOffset);
+    sse2Scale          = _mm_set1_pd(scale);
+    sse2ScaleGradtorad = _mm_set1_pd(scaleGradtorad);
+    sse2Height         = _mm_set1_pd(height);
+#endif
+
     return true;
   }
 
@@ -161,66 +179,114 @@ namespace osmscout {
     std::cout << "1 pixel are " << pixelSize << " meters" << std::endl;
     std::cout << "20 meters are " << 20/(d*180*60/M_PI*1852.216/width) << " pixels" << std::endl;*/
 
+#ifdef OSMSCOUT_HAVE_SSE2
+    sse2LonOffset      = _mm_set1_pd(lonOffset);
+    sse2LatOffset      = _mm_set1_pd(latOffset);
+    sse2Scale          = _mm_set1_pd(scale);
+    sse2ScaleGradtorad = _mm_set1_pd(scaleGradtorad);
+    sse2Height         = _mm_set1_pd(height);
+#endif
+
+
     return true;
   }
-  
+
   bool MercatorProjection::GeoIsIn(double lon, double lat) const
   {
     assert(valid);
-    
+
     return lon>=lonMin && lon<=lonMax && lat>=latMin && lat<=latMax;
   }
-  
+
   bool MercatorProjection::GeoIsIn(double lonMin, double latMin,
                                    double lonMax, double latMax) const
   {
     assert(valid);
-    
+
     return !(lonMin>this->lonMax ||
              lonMax<this->lonMin ||
              latMin>this->latMax ||
              latMax<this->latMin);
   }
-  
+
   bool MercatorProjection::PixelToGeo(double x, double y,
                                       double& lon, double& lat) const
   {
     assert(valid);
-  
+
     lon=(x+lonOffset)/(scale*gradtorad);
     lat=atan(sinh((height-y+latOffset)/scale))/gradtorad;
 
     return true;
   }
 
+#ifdef OSMSCOUT_HAVE_SSE2
+
   bool MercatorProjection::GeoToPixel(double lon, double lat,
                                       double& x, double& y) const
   {
     assert(valid);
-    
-    x=lon*scale*gradtorad-lonOffset;
+
+    x=lon*scaleGradtorad-lonOffset;
+    y=height-(scale*atanh_sin_pd(lat*gradtorad)-latOffset);
+
+    return true;
+  }
+
+  //this basically transforms 2 coordinates in 1 call
+  bool MercatorProjection::GeoToPixel(const BatchTransformer& transformData) const
+  {
+    v2df x = _mm_sub_pd(_mm_mul_pd( ARRAY2V2DF(transformData.lon), sse2ScaleGradtorad), sse2LonOffset);
+    __m128d test = ARRAY2V2DF(transformData.lat);
+    v2df y = _mm_sub_pd(sse2Height, _mm_sub_pd(_mm_mul_pd(sse2Scale, atanh_sin_pd( _mm_mul_pd( test,  ARRAY2V2DF(sseGradtorad)))), sse2LatOffset));
+
+    //store results:
+    _mm_storel_pd (transformData.xPointer[0], x);
+    _mm_storeh_pd (transformData.xPointer[1], x);
+    _mm_storel_pd (transformData.yPointer[0], y);
+    _mm_storeh_pd (transformData.yPointer[1], y);
+
+    return true;
+  }
+
+#else
+
+  bool MercatorProjection::GeoToPixel(double lon, double lat,
+                                      double& x, double& y) const
+  {
+    assert(valid);
+
+    x=lon*scaleGradtorad-lonOffset;
     y=height-(scale*atanh(sin(lat*gradtorad))-latOffset);
 
     return true;
   }
-  
+
+  bool MercatorProjection::GeoToPixel(const BatchTransformer& transformData) const
+  {
+    assert(false); //should not be called
+    return false;
+  }
+
+#endif
+
   bool MercatorProjection::GetDimensions(double& lonMin, double& latMin,
                                          double& lonMax, double& latMax) const
   {
     assert(valid);
-    
+
     lonMin=this->lonMin;
     latMin=this->latMin;
     lonMax=this->lonMax;
     latMax=this->latMax;
-    
+
     return true;
   }
-  
+
   double MercatorProjection::GetPixelSize() const
   {
     assert(valid);
-    
+
     return pixelSize;
   }
 }

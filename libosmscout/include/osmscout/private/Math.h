@@ -54,4 +54,14 @@
   }
 #endif
 
+#if !defined(USE_SSE2_MATH)
+  inline void sincos(double x, double& resSin, double& resCos)
+  {
+    resSin = sin(x);
+    resCos = cos(x);
+  }
+#else
+  #define sincos sin_cos_pd
+#endif
+
 #endif

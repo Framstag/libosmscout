@@ -37,3 +37,6 @@
 /* uint64_t is available */
 #undef OSMSCOUT_HAVE_UINT64_T
 
+/* SSE2 processor extension available */
+#undef OSMSCOUT_HAVE_SSE2
+

@@ -359,6 +359,14 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="system"
+					>
+					<File
+						RelativePath="..\..\libosmscout\src\osmscout\system\SSEMath.cpp"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter
@@ -540,6 +548,14 @@
 				<Filter
 					Name="system"
 					>
+					<File
+						RelativePath="..\..\libosmscout\include\osmscout\system\SSEMath.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\libosmscout\include\osmscout\system\SSEMathPublic.h"
+						>
+					</File>
 					<File
 						RelativePath="..\..\libosmscout\include\osmscout\system\Types.h"
 						>
