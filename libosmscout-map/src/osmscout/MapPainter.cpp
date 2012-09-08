@@ -1752,7 +1752,7 @@ namespace osmscout {
     size_t start,end;
 
     transBuffer.TransformWay(projection,
-                             parameter.GetOptimizeAreaNodes(),
+                             parameter.GetOptimizeWayNodes(),
                              nodes,
                              start,end,
                              parameter.GetOptimizeErrorToleranceDots());
