@@ -89,9 +89,11 @@ namespace osmscout {
      waysLoadSize(1000000),
      areaAreaIndexMaxMag(17),
      areaWayMinMag(14),
+     areaWayIndexMinFillRate(0.1),
      areaWayIndexCellSizeAverage(16),
      areaWayIndexCellSizeMax(256),
      areaNodeMinMag(8),
+     areaNodeIndexMinFillRate(0.1),
      areaNodeIndexCellSizeAverage(16),
      areaNodeIndexCellSizeMax(256),
      waterIndexMinMag(6),
@@ -222,6 +224,11 @@ namespace osmscout {
     return areaNodeMinMag;
   }
 
+  double ImportParameter::GetAreaNodeIndexMinFillRate() const
+  {
+    return areaNodeIndexMinFillRate;
+  }
+
   size_t ImportParameter::GetAreaNodeIndexCellSizeAverage() const
   {
     return areaNodeIndexCellSizeAverage;
@@ -235,6 +242,11 @@ namespace osmscout {
   size_t ImportParameter::GetAreaWayMinMag() const
   {
     return areaWayMinMag;
+  }
+
+  double ImportParameter::GetAreaWayIndexMinFillRate() const
+  {
+    return areaWayIndexMinFillRate;
   }
 
   size_t ImportParameter::GetAreaWayIndexCellSizeAverage() const
@@ -419,24 +431,14 @@ namespace osmscout {
     this->areaAreaIndexMaxMag=areaAreaIndexMaxMag;
   }
 
-  void ImportParameter::SetAreaWayMinMag(size_t areaWayMinMag)
-  {
-    this->areaWayMinMag=areaWayMinMag;
-  }
-
-  void ImportParameter::SetAreaWayIndexCellSizeAverage(size_t areaWayIndexCellSizeAverage)
-  {
-    this->areaWayIndexCellSizeAverage=areaWayIndexCellSizeAverage;
-  }
-
-  void ImportParameter::SetAreaWayIndexCellSizeMax(size_t areaWayIndexCellSizeMax)
-  {
-    this->areaWayIndexCellSizeMax=areaWayIndexCellSizeMax;
-  }
-
   void ImportParameter::SetAreaNodeMinMag(size_t areaNodeMinMag)
   {
     this->areaNodeMinMag=areaNodeMinMag;
+  }
+
+  void ImportParameter::SetAreaNodeIndexMinFillRate(double areaNodeIndexMinFillRate)
+  {
+    this->areaNodeIndexMinFillRate=areaNodeIndexMinFillRate;
   }
 
   void ImportParameter::SetAreaNodeIndexCellSizeAverage(size_t areaNodeIndexCellSizeAverage)
@@ -447,6 +449,26 @@ namespace osmscout {
   void ImportParameter::SetAreaNodeIndexCellSizeMax(size_t areaNodeIndexCellSizeMax)
   {
     this->areaNodeIndexCellSizeMax=areaNodeIndexCellSizeMax;
+  }
+
+  void ImportParameter::SetAreaWayMinMag(size_t areaWayMinMag)
+  {
+    this->areaWayMinMag=areaWayMinMag;
+  }
+
+  void ImportParameter::SetAreaWayIndexMinFillRate(double areaWayIndexMinFillRate)
+  {
+    this->areaWayIndexMinFillRate=areaWayIndexMinFillRate;
+  }
+
+  void ImportParameter::SetAreaWayIndexCellSizeAverage(size_t areaWayIndexCellSizeAverage)
+  {
+    this->areaWayIndexCellSizeAverage=areaWayIndexCellSizeAverage;
+  }
+
+  void ImportParameter::SetAreaWayIndexCellSizeMax(size_t areaWayIndexCellSizeMax)
+  {
+    this->areaWayIndexCellSizeMax=areaWayIndexCellSizeMax;
   }
 
   void ImportParameter::SetWaterIndexMinMag(size_t waterIndexMinMag)
