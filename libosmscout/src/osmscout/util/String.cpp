@@ -19,7 +19,10 @@
 
 #include <osmscout/util/String.h>
 
+#include <iomanip>
+
 #include <osmscout/private/Config.h>
+#include <osmscout/private/Math.h>
 
 namespace osmscout {
 
@@ -128,6 +131,32 @@ namespace osmscout {
     return result;
   }
 
+std::string ByteSizeToString(double value)
+    {
+      std::stringstream buffer;
+
+      buffer.imbue(std::locale(""));
+      buffer.setf(std::ios::fixed);
+      buffer << std::setprecision(1);
+
+      if (ceil(value)>=1024.0*1024*1024*1024*0.5) {
+        buffer << value/(1024.0*1024*1024*1024) << " TiB";
+      }
+      else if (ceil(value)>=1024.0*1024*1024*0.5) {
+        buffer << value/(1024.0*1024*1024) << " GiB";
+      }
+      else if (ceil(value)>=1024.0*1024*0.5) {
+        buffer << value/(1024.0*1024) << " MiB";
+      }
+      else if (ceil(value)>=1024.0*0.5) {
+        buffer << value/1024.0 << " KiB";
+      }
+      else {
+        buffer << value << " B";
+      }
+
+      return buffer.str();
+    }
 #if defined(OSMSCOUT_HAVE_STD__WSTRING)
 
   /**
