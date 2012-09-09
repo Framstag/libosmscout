@@ -371,9 +371,10 @@ namespace osmscout {
       for (std::list<MultipolygonPart>::const_iterator r2=parts.begin();
            r2!=parts.end();
            ++r2) {
-        if (i!=j &&
-            IsAreaInArea(r2->nodes,r1->nodes)) {
-          state.SetIncluded(i,j);
+        if (i!=j) {
+          if (IsAreaInArea(r2->nodes,r1->nodes)) {
+            state.SetIncluded(i,j);
+          }
         }
 
         j++;
@@ -476,6 +477,7 @@ namespace osmscout {
         part.role.ring=0;
         part.role.role=member->role;
 
+        part.nodes.reserve(nodes.size());
         for (size_t i=0; i<nodes.size();i++) {
           part.nodes.push_back(*nodes[i]);
         }
@@ -678,18 +680,16 @@ namespace osmscout {
 
     // Blacklisting areas
 
-    for (size_t m=0; m<relation.roles.size(); m++) {
-      for (std::list<MultipolygonPart>::const_iterator ring=parts.begin();
-          ring!=parts.end();
-          ring++) {
-        if (ring->IsArea()) {
-          // TODO: We currently blacklist all areas, we we only should blacklist all
-          // areas that have a type. Because areas without a type are implicitely blacklisted anyway later on.
-          // However because we change the type of area rings to typeIgnore above we need some bookkeeping for this
-          // to work here.
-          // On the other hand do not fill the blacklist until you are sure that the relation will not be rejected.
-          wayAreaIndexBlacklist.insert(ring->ways.front()->GetId());
-        }
+    for (std::list<MultipolygonPart>::const_iterator ring=parts.begin();
+        ring!=parts.end();
+        ring++) {
+      if (ring->IsArea()) {
+        // TODO: We currently blacklist all areas, we we only should blacklist all
+        // areas that have a type. Because areas without a type are implicitely blacklisted anyway later on.
+        // However because we change the type of area rings to typeIgnore above we need some bookkeeping for this
+        // to work here.
+        // On the other hand do not fill the blacklist until you are sure that the relation will not be rejected.
+        wayAreaIndexBlacklist.insert(ring->ways.front()->GetId());
       }
     }
 
@@ -787,7 +787,8 @@ namespace osmscout {
     areaNodeTypeCount.resize(typeConfig.GetMaxTypeId()+1,0);
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "rawrels.dat"))) {
+                                      "rawrels.dat"),
+                      true)) {
       progress.Error("Cannot open 'rawrels.dat'");
       return false;
     }

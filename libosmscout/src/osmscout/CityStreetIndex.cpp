@@ -265,7 +265,7 @@ namespace osmscout {
     FileScanner   scanner;
     std::string   indexFile=AppendFileToDir(path,"nameregion.idx");
 
-    if (!scanner.Open(indexFile)) {
+    if (!scanner.Open(indexFile,true)) {
       std::cerr << "Cannot open file '" << indexFile << "'!" << std::endl;
       return false;
     }
@@ -364,7 +364,7 @@ namespace osmscout {
 
     std::string regionFile=AppendFileToDir(path,"region.dat");
 
-    if (!scanner.Open(regionFile)) {
+    if (!scanner.Open(regionFile,true)) {
       std::cerr << "Cannot open file '" << regionFile << "'!" << std::endl;
       return false;
     }
@@ -408,7 +408,7 @@ namespace osmscout {
     FileScanner scanner;
     std::string file=AppendFileToDir(path,"region.dat");
 
-    if (!scanner.Open(file)) {
+    if (!scanner.Open(file,true)) {
       std::cerr << "Cannot open file '" << file << "'!" << std::endl;
       return false;
     }

@@ -63,7 +63,8 @@ namespace osmscout {
     uint32_t    restrictionCount=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "turnrestr.dat"))) {
+                                      "turnrestr.dat"),
+                      true)) {
       progress.Error("Cannot open 'turnrestr.dat'");
       return false;
     }
@@ -150,7 +151,6 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "ways.dat"),
-                                      true,
                                       parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.dat'");
       return false;
@@ -235,7 +235,6 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "ways.dat"),
-                                      true,
                                       parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.dat'");
       return false;
@@ -454,7 +453,6 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "ways.dat"),
-                                      true,
                                       parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.dat'");
       return false;

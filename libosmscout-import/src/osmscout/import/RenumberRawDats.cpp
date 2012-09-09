@@ -51,7 +51,6 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawnodes.dat"),
-                                      true,
                                       parameter.GetRawNodeDataMemoryMaped())) {
       progress.Error("Cannot open 'rawnodes.dat'");
       return false;
@@ -245,7 +244,6 @@ namespace osmscout {
 
     if (!origScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                           "rawways.dat"),
-                          true,
                           parameter.GetRawWayDataMemoryMaped())) {
       progress.Error("Cannot open 'rawways.dat'");
       return false;
@@ -253,7 +251,6 @@ namespace osmscout {
 
     copyScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      "rawways2.dat"),
-                     true,
                      parameter.GetRawWayDataMemoryMaped());
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -375,7 +372,6 @@ namespace osmscout {
 
     if (!origScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                           "rawrels.dat"),
-                          true,
                           true/*TODO*/)) {
       progress.Error("Cannot open 'rawrels.dat'");
       return false;
@@ -383,7 +379,6 @@ namespace osmscout {
 
     copyScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      "rawrels2.dat"),
-                     true,
                      true/*TODO*/);
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -501,7 +496,6 @@ namespace osmscout {
 
     if (!nodeScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                           "rawnodes2.dat"),
-                          true,
                           parameter.GetRawNodeDataMemoryMaped())) {
       progress.Error("Cannot open 'rawnodes2.dat'");
       return false;
@@ -527,7 +521,6 @@ namespace osmscout {
 
     if (!wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                          "rawways2.dat"),
-                         true,
                          parameter.GetRawWayDataMemoryMaped())) {
       progress.Error("Cannot open 'rawways2.dat'");
       return false;
@@ -722,7 +715,6 @@ namespace osmscout {
 
     if (!origScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                           "rawrels2.dat"),
-                          true,
                           true/*TODO*/)) {
       progress.Error("Cannot open 'rawrels2.dat'");
       return false;
@@ -730,7 +722,6 @@ namespace osmscout {
 
     copyScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      "rawrels3.dat"),
-                     true,
                      true/*TODO*/);
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),

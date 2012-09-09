@@ -51,12 +51,13 @@ namespace osmscout {
     };
 
   private:
-    bool                isOpen;        //! If true,the data file is opened
-    std::string         datafile;      //! Basename part fo the data file name
-    std::string         datafilename;  //! complete filename for data file
-    mutable DataCache   cache;         //! Entry cache
-    mutable FileScanner scanner;       //! File stream to the data file
-    DataIndex           index;         //! Index
+    bool                isOpen;          //! If true,the data file is opened
+    std::string         datafile;        //! Basename part fo the data file name
+    std::string         datafilename;    //! complete filename for data file
+    bool                memoryMapedData; //! Use memory mapped files for data access
+    mutable DataCache   cache;           //! Entry cache
+    mutable FileScanner scanner;         //! File stream to the data file
+    DataIndex           index;           //! Index
 
   public:
     DataFile(const std::string& datafile,
@@ -66,7 +67,9 @@ namespace osmscout {
 
     virtual ~DataFile();
 
-    bool Open(const std::string& path, bool memoryMapedIndex, bool memoryMapedData);
+    bool Open(const std::string& path,
+              bool memoryMapedIndex,
+              bool memoryMapedData);
     bool Close();
 
     bool GetOffsets(const std::set<Id>& ids,
@@ -116,11 +119,15 @@ namespace osmscout {
   }
 
   template <class N>
-  bool DataFile<N>::Open(const std::string& path, bool memoryMapedIndex, bool memoryMapedData)
+  bool DataFile<N>::Open(const std::string& path,
+                         bool memoryMapedIndex,
+                         bool memoryMapedData)
   {
     datafilename=AppendFileToDir(path,datafile);
+    this->memoryMapedData=memoryMapedData;
 
-    isOpen=index.Open(path,memoryMapedIndex) && scanner.Open(datafilename,true,memoryMapedData);
+    isOpen=index.Open(path,memoryMapedIndex) &&
+           scanner.Open(datafilename,memoryMapedData);
 
     return isOpen;
   }
@@ -161,12 +168,12 @@ namespace osmscout {
 
   template <class N>
   bool DataFile<N>::GetByOffset(const std::vector<FileOffset>& offsets,
-                        std::vector<ValueType>& data) const
+                                std::vector<ValueType>& data) const
   {
     assert(isOpen);
 
     if (!scanner.IsOpen()) {
-      if (!scanner.Open(datafilename)) {
+      if (!scanner.Open(datafilename,memoryMapedData)) {
         std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
         return false;
       }
@@ -204,12 +211,12 @@ namespace osmscout {
 
   template <class N>
   bool DataFile<N>::GetByOffset(const std::list<FileOffset>& offsets,
-                        std::vector<ValueType>& data) const
+                                std::vector<ValueType>& data) const
   {
     assert(isOpen);
 
     if (!scanner.IsOpen()) {
-      if (!scanner.Open(datafilename)) {
+      if (!scanner.Open(datafilename,memoryMapedData)) {
         std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
         return false;
       }
@@ -247,12 +254,12 @@ namespace osmscout {
 
   template <class N>
   bool DataFile<N>::GetByOffset(const std::set<FileOffset>& offsets,
-                        std::vector<ValueType>& data) const
+                                std::vector<ValueType>& data) const
   {
     assert(isOpen);
 
     if (!scanner.IsOpen()) {
-      if (!scanner.Open(datafilename)) {
+      if (!scanner.Open(datafilename,memoryMapedData)) {
         std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
         return false;
       }

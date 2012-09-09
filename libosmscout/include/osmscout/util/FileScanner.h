@@ -49,7 +49,6 @@ namespace osmscout {
     std::string  filename;
     FILE         *file;
     mutable bool hasError;
-    bool         readOnly;
 
     // For mmap usage
     char         *buffer;
@@ -68,7 +67,8 @@ namespace osmscout {
     FileScanner();
     virtual ~FileScanner();
 
-    bool Open(const std::string& filename, bool readOnly=true, bool useMmap=true);
+    bool Open(const std::string& filename,
+              bool useMmap);
     bool Close();
 
     inline bool IsOpen() const

@@ -178,13 +178,15 @@ namespace osmscout {
     }
 
     if (!wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                         "ways.dat"))) {
+                                         "ways.dat"),
+                         parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.dat'");
       return false;
     }
 
     if (!relScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                         "relations.dat"))) {
+                                         "relations.dat"),
+                         true)) {
       progress.Error("Cannot open 'relations.dat'");
       return false;
     }

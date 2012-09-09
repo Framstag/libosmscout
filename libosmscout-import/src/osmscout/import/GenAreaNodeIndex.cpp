@@ -67,7 +67,8 @@ namespace osmscout {
     nodeTypeData.resize(typeConfig.GetTypes().size());
 
     if (!nodeScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                         "nodes.dat"))) {
+                                         "nodes.dat"),
+                          true)) {
       progress.Error("Cannot open 'nodes.dat'");
       return false;
     }

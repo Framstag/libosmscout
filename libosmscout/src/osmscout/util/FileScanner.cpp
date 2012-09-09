@@ -86,21 +86,14 @@ namespace osmscout {
 #endif
   }
 
-  bool FileScanner::Open(const std::string& filename, bool readOnly, bool useMmap)
+  bool FileScanner::Open(const std::string& filename, bool useMmap)
   {
     if (file!=NULL) {
-      std::cerr << "File already opened, cannot open it again!" << std::endl;
+      std::cerr << "File '" << filename << "' already opened, cannot open it again!" << std::endl;
       return false;
     }
 
-    this->readOnly=readOnly;
-
-    if (readOnly) {
-      file=fopen(filename.c_str(),"rb");
-    }
-    else {
-      file=fopen(filename.c_str(),"r+b");
-    }
+    file=fopen(filename.c_str(),"rb");
 
     if (file==NULL) {
       hasError=true;
@@ -158,7 +151,7 @@ namespace osmscout {
 #endif
 
 #if defined(HAVE_MMAP)
-    if (file!=NULL && readOnly && useMmap && this->size>0) {
+    if (file!=NULL && useMmap && this->size>0) {
       FreeBuffer();
 
       buffer=(char*)mmap(NULL,size,PROT_READ,MAP_SHARED,fileno(file),0);
@@ -171,9 +164,7 @@ namespace osmscout {
       }
     }
 #elif  defined(__WIN32__) || defined(WIN32)
-    if (file!=NULL &&
-        readOnly &&
-        useMmap && this->size>0) {
+    if (file!=NULL && useMmap && this->size>0) {
       FreeBuffer();
 
       mmfHandle=CreateFileMapping((HANDLE)_get_osfhandle(_fileno(file)),

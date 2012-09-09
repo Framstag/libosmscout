@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 
   osmscout::FileScanner scanner;
 
-  if (!scanner.Open(filename)) {
+  if (!scanner.Open(filename,true)) {
     std::cerr << "Cannot open file '" << filename << "'!" << std::endl;
     return 1;
   }

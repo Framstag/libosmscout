@@ -140,7 +140,8 @@ namespace osmscout {
     progress.SetAction("Scanning for coastlines");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "rawcoastline.dat"))) {
+                                      "rawcoastline.dat"),
+                      true)) {
       progress.Error("Cannot open 'rawcoastline.dat'");
       return false;
     }
@@ -560,7 +561,8 @@ namespace osmscout {
     // We do not yet know if we handle borders as ways or areas
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "ways.dat"))) {
+                                      "ways.dat"),
+                      parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.dat'");
       return false;
     }
@@ -1617,7 +1619,8 @@ namespace osmscout {
     //
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "bounding.dat"))) {
+                                      "bounding.dat"),
+                      true)) {
       progress.Error("Cannot open 'bounding.dat'");
       return false;
     }

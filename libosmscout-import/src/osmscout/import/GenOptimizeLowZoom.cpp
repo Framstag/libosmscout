@@ -600,7 +600,8 @@ namespace osmscout
                 dataOffsets);
 
     if (!wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-        "ways.dat"))) {
+                                         "ways.dat"),
+                         parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.dat'");
       return false;
     }

@@ -201,7 +201,8 @@ namespace osmscout {
     bool c=false;
 
     for (i=0, j=nodes.size()-1; i<(int)nodes.size(); j=i++) {
-      if (point.GetId()==nodes[i].GetId()) {
+      if (point.GetId()==nodes[i].GetId() ||
+          point.GetId()==nodes[j].GetId()) {
         return true;
       }
 

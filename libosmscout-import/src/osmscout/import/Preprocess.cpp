@@ -217,7 +217,7 @@ namespace osmscout {
         }
       }
       else {
-        isArea=-1;
+        isArea=0;
       }
     }
 

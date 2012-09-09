@@ -48,7 +48,8 @@ namespace osmscout {
     progress.SetAction("Loading way blacklist");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "wayblack.dat"))) {
+                                      "wayblack.dat"),
+                      true)) {
       progress.Error("Cannot open 'wayblack.dat'");
       return false;
     }
@@ -76,7 +77,8 @@ namespace osmscout {
     uint32_t    restrictionCount=0;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "rawturnrestr.dat"))) {
+                                      "rawturnrestr.dat"),
+                      true)) {
       progress.Error("Cannot open 'rawturnrestr.dat'");
       return false;
     }
@@ -164,7 +166,6 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawways.dat"),
-                                      true,
                                       parameter.GetRawWayDataMemoryMaped())) {
       progress.Error("Cannot open 'rawways.dat'");
       return false;
@@ -224,7 +225,6 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawways.dat"),
-                                      true,
                                       parameter.GetRawWayDataMemoryMaped())) {
       progress.Error("Cannot open 'rawways.dat'");
       return false;
@@ -664,7 +664,8 @@ namespace osmscout {
     BlacklistSet                         wayBlacklist;
 
 #if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
-    endPointWayMap.reserve(200000);
+    endPointWayMap.reserve(2000000);
+    endPointAreaSet.reserve(100000);
 #endif
 
     //
@@ -741,7 +742,6 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawways.dat"),
-                                      true,
                                       parameter.GetRawWayDataMemoryMaped())) {
       progress.Error("Cannot open 'rawways.dat'");
       return false;
@@ -810,10 +810,6 @@ namespace osmscout {
         blockCount++;
       }
 
-      std::set<Id>            nodeIds;
-      std::vector<RawNodeRef> nodes;
-      std::map<Id,RawNodeRef> nodesMap;
-
       progress.SetAction("Merging ways");
       // Join with potential joined ways
       if (!JoinWays(progress,
@@ -829,7 +825,11 @@ namespace osmscout {
         return false;
       }
 
-      progress.SetAction("Writing ways");
+      progress.SetAction("Loading nodes");
+
+      std::set<Id>                    nodeIds;
+      std::vector<RawNodeRef>         nodes;
+      OSMSCOUT_HASHMAP<Id,RawNodeRef> nodesMap;
 
       for (size_t w=0; w<blockCount; w++) {
         for (size_t n=0; n<block[w]->GetNodeCount(); n++) {
@@ -841,8 +841,12 @@ namespace osmscout {
         std::cerr << "Cannot read nodes!" << std::endl;
         continue;
       }
-      
+
       nodeIds.clear();
+
+#if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
+      nodesMap.reserve(nodes.size());
+#endif
 
       for (std::vector<RawNodeRef>::const_iterator node=nodes.begin();
           node!=nodes.end();
@@ -851,6 +855,8 @@ namespace osmscout {
       }
 
       nodes.clear();
+
+      progress.SetAction("Writing ways");
 
       for (size_t w=0; w<blockCount; w++) {
         // Way has been joined, no need to write it
@@ -881,7 +887,7 @@ namespace osmscout {
 
         bool success=true;
         for (size_t n=0; n<block[w]->GetNodeCount(); n++) {
-          std::map<Id,RawNodeRef>::const_iterator node=nodesMap.find(block[w]->GetNodeId(n));
+          OSMSCOUT_HASHMAP<Id,RawNodeRef>::const_iterator node=nodesMap.find(block[w]->GetNodeId(n));
 
           if (node==nodesMap.end()) {
             progress.Error("Cannot resolve node with id "+
@@ -984,11 +990,11 @@ namespace osmscout {
       return false;
     }
 
-    progress.SetAction("Storing back updated turn restrictions");
+    // Cleaning up...
 
-    WriteTurnRestrictions(parameter,
-                          progress,
-                          restrictions);
+    endPointWayMap.clear();
+    endPointAreaSet.clear();
+    wayBlacklist.clear();
 
     if (!rawWayIndex.Close()) {
       return false;
@@ -998,15 +1004,15 @@ namespace osmscout {
       return false;
     }
 
+    progress.SetAction("Storing back updated turn restrictions");
+
+    WriteTurnRestrictions(parameter,
+                          progress,
+                          restrictions);
+
     progress.Info(NumberToString(rawWayCount) + " raw way(s) read, "+
                   NumberToString(writtenWayCount) + " way(s) written, "+
                   NumberToString(mergeCount) + " merges");
-
-    // Cleaning up...
-
-    endPointWayMap.clear();
-    endPointAreaSet.clear();
-    wayBlacklist.clear();
 
     return true;
   }

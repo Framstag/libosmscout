@@ -259,7 +259,7 @@ namespace osmscout {
     FileScanner scanner;
     std::string file=AppendFileToDir(path,"bounding.dat");
 
-    if (!scanner.Open(file)) {
+    if (!scanner.Open(file,true)) {
       std::cerr << "Cannot open 'bounding.dat'" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
@@ -482,7 +482,7 @@ namespace osmscout {
                                  parameter.GetMaximumWays(),
                                  wayWayOffsets,
                                  relationWayOffsets)) {
-      std::cout << "Error getting ways and relations from area way index!" << std::endl;
+      std::cout << "Error getting ways Glations from area way index!" << std::endl;
       return false;
     }
 
@@ -504,7 +504,7 @@ namespace osmscout {
                                   parameter.GetMaximumAreas(),
                                   wayAreaOffsets,
                                   relationAreaOffsets)) {
-      std::cout << "Error getting ways and relations from area index!" << std::endl;
+      std::cout << "Error getting areas from area index!" << std::endl;
       return false;
     }
 

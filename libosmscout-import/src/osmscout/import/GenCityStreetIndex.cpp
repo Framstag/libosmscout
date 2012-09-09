@@ -115,7 +115,8 @@ namespace osmscout {
     uint32_t    nodeCount;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "nodes.dat"))) {
+                                      "nodes.dat"),
+                      true)) {
       progress.Error("Cannot open 'nodes.dat'");
       return false;
     }
@@ -181,7 +182,8 @@ namespace osmscout {
     uint32_t    wayCount;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "ways.dat"))) {
+                                      "ways.dat"),
+                      parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.dat'");
       return false;
     }
@@ -205,7 +207,8 @@ namespace osmscout {
         return false;
       }
 
-      if (way.IsArea() && cityIds.find(way.GetType())!=cityIds.end()) {
+      if (way.IsArea() &&
+          cityIds.find(way.GetType())!=cityIds.end()) {
         std::string name=way.GetName();
 
         for (size_t i=0; i<way.GetTagCount(); i++) {
@@ -631,7 +634,8 @@ namespace osmscout {
     progress.SetAction("Scanning for city boundaries of type 'area'");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "ways.dat"))) {
+                                      "ways.dat"),
+                      parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.dat'");
       return false;
     }
@@ -683,7 +687,8 @@ namespace osmscout {
     progress.SetAction("Scanning for city boundaries of type 'relation'");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "relations.dat"))) {
+                                      "relations.dat"),
+                      true)) {
       progress.Error("Cannot open 'relations.dat'");
       return false;
     }
@@ -927,7 +932,8 @@ namespace osmscout {
     StopClock waToAClock;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "ways.dat"))) {
+                                      "ways.dat"),
+                      parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.dat'");
       return false;
     }
@@ -996,7 +1002,8 @@ namespace osmscout {
     progress.SetAction("Resolve nodes to areas");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "nodes.dat"))) {
+                                      "nodes.dat"),
+                      true)) {
       progress.Error("Cannot open 'nodes.dat'");
       return false;
     }
