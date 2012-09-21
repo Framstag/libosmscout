@@ -258,7 +258,7 @@ namespace osmscout {
       bool                    drawTunnel;      //! Draw as tunnel
       bool                    outline;         //! Draw outline
 
-      inline bool operator<(const WayData& other)
+      inline bool operator<(const WayData& other) const
       {
         if (!lineStyle->GetLineColor().IsSolid() && other.lineStyle->GetLineColor().IsSolid()) {
           return false;
