@@ -1,6 +1,6 @@
 /*
   This source is part of the libosmscout-map library
-  Copyright (C) 2009  Tim Teulings
+  Copyright (C) 2009  Tim Teulings, Vladimir Vyskocil
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
