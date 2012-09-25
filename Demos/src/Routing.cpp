@@ -34,7 +34,7 @@
   Examples for the nordrhein-westfalen.osm:
 
   Long:
-  src/Routing ../TravelJinni/ 14332719 138190834 10414977 283372120
+  src/Routing ../TravelJinni/ 45756746 1301658778 33879936 388178882
 
   Medium:
   src/Routing ../TravelJinni/ 33879936 388178882 38363871 453298626
