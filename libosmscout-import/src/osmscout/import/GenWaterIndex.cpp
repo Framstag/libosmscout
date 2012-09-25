@@ -142,7 +142,7 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawcoastline.dat"),
-                      FileScanner::SequentialScan,
+                      FileScanner::Sequential,
                       true)) {
       progress.Error("Cannot open 'rawcoastline.dat'");
       return false;
@@ -559,7 +559,7 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "ways.dat"),
-                      FileScanner::SequentialScan,
+                      FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.dat'");
       return false;
@@ -1674,7 +1674,7 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "bounding.dat"),
-                      FileScanner::SequentialScan,
+                      FileScanner::Sequential,
                       true)) {
       progress.Error("Cannot open 'bounding.dat'");
       return false;

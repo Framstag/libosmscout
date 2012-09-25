@@ -66,7 +66,7 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawnodes.dat"),
-                      FileScanner::SequentialScan,
+                      FileScanner::Sequential,
                       parameter.GetRawNodeDataMemoryMaped())) {
       progress.Error("Cannot open 'rawnodes.dat'");
       return false;

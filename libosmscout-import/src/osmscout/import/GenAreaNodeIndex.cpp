@@ -68,7 +68,7 @@ namespace osmscout {
 
     if (!nodeScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                          "nodes.dat"),
-                          FileScanner::SequentialScan,
+                          FileScanner::Sequential,
                           true)) {
       progress.Error("Cannot open 'nodes.dat'");
       return false;

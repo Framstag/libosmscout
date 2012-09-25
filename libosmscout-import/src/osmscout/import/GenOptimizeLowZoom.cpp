@@ -599,7 +599,7 @@ namespace osmscout
 
     if (!wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                          "ways.dat"),
-                         FileScanner::SequentialScan,
+                         FileScanner::Sequential,
                          parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.dat'");
       return false;

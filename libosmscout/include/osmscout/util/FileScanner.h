@@ -48,8 +48,9 @@ namespace osmscout {
   public:
     enum Mode
     {
-      SequentialScan,
-      FastRandomRead,
+      Sequential,
+      FastRandom,
+      LowMemRandom,
       Normal
     };
 

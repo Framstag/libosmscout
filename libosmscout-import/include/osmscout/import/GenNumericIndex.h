@@ -109,7 +109,7 @@ namespace osmscout {
       return false;
     }
 
-    if (!scanner.Open(datafile,FileScanner::SequentialScan,true)) {
+    if (!scanner.Open(datafile,FileScanner::Sequential,true)) {
       progress.Error(std::string("Cannot open '")+datafile+"'");
       return false;
     }

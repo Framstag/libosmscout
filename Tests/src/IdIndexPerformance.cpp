@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
 
   osmscout::FileScanner scanner;
 
-  if (!scanner.Open(filename,osmscout::FileScanner::SequentialScan,true)) {
+  if (!scanner.Open(filename,osmscout::FileScanner::Sequential,true)) {
     std::cerr << "Cannot open file '" << filename << "'!" << std::endl;
     return 1;
   }
@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 
   osmscout::NumericIndex<osmscout::Id> wayIndex("way.idx",1000);
 
-  if (!wayIndex.Open(".",osmscout::FileScanner::FastRandomRead,true)) {
+  if (!wayIndex.Open(".",osmscout::FileScanner::FastRandom,true)) {
     std::cerr << "Cannot open way index file!" << std::endl;
     return 1;
   }

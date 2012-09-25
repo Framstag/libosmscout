@@ -48,7 +48,7 @@ namespace osmscout {
     isOpen=false;
     coordPageOffsetMap.clear();
 
-    if (scanner.Open(datafilename,FileScanner::FastRandomRead,false)) {
+    if (scanner.Open(datafilename,FileScanner::FastRandom,false)) {
       FileOffset mapOffset;
 
       if (!scanner.Read(coordPageSize)) {

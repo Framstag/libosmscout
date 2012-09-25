@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
 
   osmscout::FileScanner scanner;
 
-  if (!scanner.Open(filename,osmscout::FileScanner::SequentialScan,true)) {
+  if (!scanner.Open(filename,osmscout::FileScanner::Sequential,true)) {
     std::cerr << "Cannot open of file '" << filename << "'!" << std::endl;
     return 1;
   }

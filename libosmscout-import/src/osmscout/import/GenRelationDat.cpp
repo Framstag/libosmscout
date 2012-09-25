@@ -921,15 +921,15 @@ namespace osmscout {
     }
 
     if (!wayDataFile.Open(parameter.GetDestinationDirectory(),
-                          FileScanner::FastRandomRead,
+                          FileScanner::FastRandom,
                           parameter.GetRawWayIndexMemoryMaped(),
-                          FileScanner::FastRandomRead,
+                          FileScanner::FastRandom,
                           parameter.GetRawWayDataMemoryMaped())) {
       std::cerr << "Cannot open raw way data files!" << std::endl;
       return false;
     }
 
-    if (!relDataFile.Open(parameter.GetDestinationDirectory(),FileScanner::FastRandomRead,true,FileScanner::FastRandomRead,true)) {
+    if (!relDataFile.Open(parameter.GetDestinationDirectory(),FileScanner::FastRandom,true,FileScanner::FastRandom,true)) {
       std::cerr << "Cannot open raw relation data files!" << std::endl;
       return false;
     }
@@ -957,7 +957,7 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawrels.dat"),
-                      FileScanner::SequentialScan,
+                      FileScanner::Sequential,
                       true)) {
       progress.Error("Cannot open 'rawrels.dat'");
       return false;

@@ -50,7 +50,7 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "wayblack.dat"),
-                      FileScanner::SequentialScan,
+                      FileScanner::Sequential,
                       true)) {
       progress.Error("Cannot open 'wayblack.dat'");
       return false;
@@ -80,7 +80,7 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawturnrestr.dat"),
-                      FileScanner::SequentialScan,
+                      FileScanner::Sequential,
                       true)) {
       progress.Error("Cannot open 'rawturnrestr.dat'");
       return false;
@@ -169,7 +169,7 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawways.dat"),
-                      FileScanner::SequentialScan,
+                      FileScanner::Sequential,
                       parameter.GetRawWayDataMemoryMaped())) {
       progress.Error("Cannot open 'rawways.dat'");
       return false;
@@ -229,7 +229,7 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawways.dat"),
-                      FileScanner::SequentialScan,
+                      FileScanner::Sequential,
                       parameter.GetRawWayDataMemoryMaped())) {
       progress.Error("Cannot open 'rawways.dat'");
       return false;
@@ -735,7 +735,7 @@ namespace osmscout {
     }
 
     if (!rawWayIndex.Open(parameter.GetDestinationDirectory(),
-                          FileScanner::FastRandomRead,
+                          FileScanner::FastRandom,
                           parameter.GetRawWayIndexMemoryMaped())) {
       std::cerr << "Cannot open raw way index file!" << std::endl;
       return false;
@@ -743,7 +743,7 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawways.dat"),
-                      FileScanner::SequentialScan,
+                      FileScanner::Sequential,
                       parameter.GetRawWayDataMemoryMaped())) {
       progress.Error("Cannot open 'rawways.dat'");
       return false;

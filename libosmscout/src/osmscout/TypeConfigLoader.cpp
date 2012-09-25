@@ -81,7 +81,7 @@ namespace osmscout {
     FileScanner scanner;
 
     if (!scanner.Open(AppendFileToDir(path,"types.dat"),
-                      FileScanner::SequentialScan,
+                      FileScanner::Sequential,
                       true)) {
       std::cerr << "Cannot open file '" << scanner.GetFilename() << "'" << std::endl;
      return false;

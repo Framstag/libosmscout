@@ -64,7 +64,7 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "turnrestr.dat"),
-                      FileScanner::SequentialScan,
+                      FileScanner::Sequential,
                       true)) {
       progress.Error("Cannot open 'turnrestr.dat'");
       return false;
@@ -152,7 +152,7 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "ways.dat"),
-                      FileScanner::SequentialScan,
+                      FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.dat'");
       return false;
@@ -237,7 +237,7 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "ways.dat"),
-                      FileScanner::SequentialScan,
+                      FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.dat'");
       return false;
@@ -443,7 +443,7 @@ namespace osmscout {
     NumericIndex<Id> wayIndex("way.idx",parameter.GetWayIndexCacheSize());
 
     if (!wayIndex.Open(parameter.GetDestinationDirectory(),
-                       FileScanner::SequentialScan,
+                       FileScanner::Sequential,
                        parameter.GetWayIndexMemoryMaped())) {
       progress.Error("Cannot open 'way.idx'!");
       return false;
@@ -457,7 +457,7 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "ways.dat"),
-                      FileScanner::SequentialScan,
+                      FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.dat'");
       return false;

@@ -53,7 +53,7 @@ namespace osmscout {
   {
     datafilename=path+"/"+filepart;
 
-    if (!scanner.Open(datafilename,FileScanner::Normal,true)) {
+    if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
       std::cerr << "Cannot open file '" << datafilename << "'" << std::endl;
       return false;
     }
@@ -248,7 +248,7 @@ namespace osmscout {
                                 std::vector<FileOffset>& relationWayOffsets) const
   {
     if (!scanner.IsOpen()) {
-      if (!scanner.Open(datafilename,FileScanner::Normal,true)) {
+      if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
         std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
         return false;
       }

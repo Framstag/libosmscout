@@ -157,13 +157,18 @@ namespace osmscout {
 #endif
 
 #if defined(HAVE_POSIX_FADVISE)
-    if (mode==FastRandomRead) {
+    if (mode==FastRandom) {
       if (posix_fadvise(fileno(file),0,size,POSIX_FADV_WILLNEED)<0) {
         std::cerr << "Cannot set file access advice: " << strerror(errno) << std::endl;
       }
     }
-    else if (mode==SequentialScan) {
+    else if (mode==Sequential) {
       if (posix_fadvise(fileno(file),0,size,POSIX_FADV_SEQUENTIAL)<0) {
+        std::cerr << "Cannot set file access advice: " << strerror(errno) << std::endl;
+      }
+    }
+    else if (mode==LowMemRandom) {
+      if (posix_fadvise(fileno(file),0,size,POSIX_FADV_RANDOM)<0) {
         std::cerr << "Cannot set file access advice: " << strerror(errno) << std::endl;
       }
     }
@@ -177,13 +182,18 @@ namespace osmscout {
       if (buffer!=MAP_FAILED) {
         offset=0;
 #if defined(HAVE_POSIX_MADVISE)
-        if (mode==FastRandomRead) {
+        if (mode==FastRandom) {
           if (posix_madvise(buffer,size,POSIX_MADV_WILLNEED)<0) {
             std::cerr << "Cannot set mmaped file access advice: " << strerror(errno) << std::endl;
           }
         }
-        else if (mode==SequentialScan) {
+        else if (mode==Sequential) {
           if (posix_madvise(buffer,size,POSIX_MADV_SEQUENTIAL)<0) {
+            std::cerr << "Cannot set mmaped file access advice: " << strerror(errno) << std::endl;
+          }
+        }
+        else if (mode==LowMemRandom) {
+          if (posix_madvise(buffer,size,POSIX_MADV_RANDOM)<0) {
             std::cerr << "Cannot set mmaped file access advice: " << strerror(errno) << std::endl;
           }
         }
