@@ -27,6 +27,7 @@
 #include <osmscout/util/String.h>
 
 #include <osmscout/private/Config.h>
+#include <osmscout/private/Math.h>
 
 #if defined(HAVE_LIB_XML)
   #include <osmscout/import/PreprocessOSM.h>
@@ -36,7 +37,48 @@
   #include <osmscout/import/PreprocessPBF.h>
 #endif
 
+#include <iostream>
 namespace osmscout {
+
+  static uint32_t coordPageSize=64;
+
+  bool Preprocess::StoreCoord(Id id, double lat, double lon)
+  {
+    Id                                 pageId=id/coordPageSize;
+    Id                                 coordPageOffset=id%coordPageSize;
+    CoordPageOffsetMap::const_iterator pageOffsetEntry=coordIndex.find(pageId);
+
+    if (pageOffsetEntry==coordIndex.end()) {
+      FileOffset pageOffset=coordPageCount*coordPageSize*2*sizeof(uint32_t);
+
+      if (!coordWriter.SetPos(pageOffset)) {
+        return false;
+      }
+
+      for (size_t i=1; i<=coordPageSize; i++) {
+        uint32_t coord=0;
+
+        coordWriter.Write(coord);
+        coordWriter.Write(coord);
+      }
+
+      pageOffsetEntry=coordIndex.insert(std::make_pair(pageId,pageOffset)).first;
+
+      coordPageCount++;
+    }
+
+    if (!coordWriter.SetPos(pageOffsetEntry->second+coordPageOffset*2*sizeof(uint32_t))) {
+      return false;
+    }
+
+    uint32_t latValue=(uint32_t)floor((lat+90.0)*conversionFactor+0.5);
+    uint32_t lonValue=(uint32_t)floor((lon+180.0)*conversionFactor+0.5);
+
+    coordWriter.Write(latValue);
+    coordWriter.Write(lonValue);
+
+    return !coordWriter.HasError();
+  }
 
   std::string Preprocess::GetDescription() const
   {
@@ -82,6 +124,8 @@ namespace osmscout {
 
   bool Preprocess::Initialize(const ImportParameter& parameter)
   {
+    coordPageCount=0;
+
     nodeCount=0;
     wayCount=0;
     areaCount=0;
@@ -112,10 +156,21 @@ namespace osmscout {
                                         "rawcoastline.dat"));
     coastlineWriter.Write(coastlineCount);
 
+    coordWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     "coord.dat"));
+
+    FileOffset offset=0;
+
+    coordWriter.Write(offset);
+    coordWriter.FlushCurrentBlockWithZeros(coordPageSize*2*sizeof(uint32_t));
+
+    coordPageCount++;
+
     return !nodeWriter.HasError() &&
            !wayWriter.HasError() &&
            !relationWriter.HasError() &&
-           !coastlineWriter.HasError();
+           !coastlineWriter.HasError() &&
+           !coordWriter.HasError();
   }
 
   void Preprocess::ProcessNode(const TypeConfig& typeConfig,
@@ -131,17 +186,24 @@ namespace osmscout {
       nodeSortingError=true;
     }
 
+    StoreCoord(id,lat,lon);
+
     typeConfig.GetNodeTypeId(tagMap,type);
-    typeConfig.ResolveTags(tagMap,tags);
 
-    node.SetId(id);
-    node.SetType(type);
-    node.SetCoordinates(lon,lat);
-    node.SetTags(tags);
+    if (type!=typeIgnore) {
+      typeConfig.ResolveTags(tagMap,tags);
 
-    node.Write(nodeWriter);
+      node.SetId(id);
+      node.SetType(type);
+      node.SetCoordinates(lon,lat);
+      node.SetTags(tags);
 
-    nodeCount++;
+      node.Write(nodeWriter);
+
+
+      nodeCount++;
+    }
+
     lastNodeId=id;
   }
 
@@ -313,10 +375,29 @@ namespace osmscout {
     coastlineWriter.SetPos(0);
     coastlineWriter.Write(coastlineCount);
 
+    coordWriter.SetPos(0);
+
+    coordWriter.Write((uint32_t)coordPageSize);
+
+    FileOffset coordIndexOffset=coordPageCount*coordPageSize*2*sizeof(uint32_t);
+
+    coordWriter.Write(coordIndexOffset);
+
+    coordWriter.SetPos(coordIndexOffset);
+    coordWriter.Write((uint32_t)coordIndex.size());
+
+    for (CoordPageOffsetMap::const_iterator entry=coordIndex.begin();
+         entry!=coordIndex.end();
+         ++entry) {
+      coordWriter.Write(entry->first);
+      coordWriter.Write(entry->second);
+    }
+
     nodeWriter.Close();
     wayWriter.Close();
     relationWriter.Close();
     coastlineWriter.Close();
+    coordWriter.Close();
 
     progress.Info(std::string("Nodes:          ")+NumberToString(nodeCount));
     progress.Info(std::string("Ways/Areas/Sum: ")+NumberToString(wayCount)+" "+
@@ -324,6 +405,7 @@ namespace osmscout {
                   NumberToString(wayCount+areaCount));
     progress.Info(std::string("Relations:      ")+NumberToString(relationCount));
     progress.Info(std::string("Coastlines:     ")+NumberToString(coastlineCount));
+    progress.Info(std::string("Coord pages:    ")+NumberToString(coordIndex.size()));
 
     if (!parameter.GetRenumberIds()) {
       if (nodeSortingError) {

@@ -6,6 +6,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/import/RawNode.h \
                         osmscout/import/RawRelation.h \
                         osmscout/import/RawWay.h \
+                        osmscout/import/CoordDataFile.h \
                         osmscout/import/GenAreaAreaIndex.h \
                         osmscout/import/GenAreaNodeIndex.h \
                         osmscout/import/GenAreaWayIndex.h \

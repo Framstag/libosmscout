@@ -48,6 +48,8 @@ namespace osmscout {
     size_t                       startStep;                //! Starting step for import
     size_t                       endStep;                  //! End step for import
 
+    bool                         strictAreas;              //! Assure that areas conform to "simple" definition
+
     bool                         renumberIds;              //! Renumber all Ids
     size_t                       renumberBlockSize;        //! Number of entries loaded in one renumber iterations
     size_t                       renumberMag;              //! Zoom level for individual renumber sorting cells
@@ -107,6 +109,8 @@ namespace osmscout {
     size_t GetStartStep() const;
     size_t GetEndStep() const;
 
+    bool GetStrictAreas() const;
+
     bool GetRenumberIds() const;
     size_t GetRenumberBlockSize() const;
     size_t GetRenumberMag() const;
@@ -161,6 +165,8 @@ namespace osmscout {
 
     void SetStartStep(size_t startStep);
     void SetSteps(size_t startStep, size_t endStep);
+
+    void SetStrictAreas(bool strictAreas);
 
     void SetRenumberIds(bool renumberIds);
     void SetRenumberBlockSize(size_t renumberBlockSize);

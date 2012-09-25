@@ -33,6 +33,10 @@
   #include <sys/mman.h>
 #endif
 
+#if defined(HAVE_FCNTL_H)
+  #include <fcntl.h>
+#endif
+
 #if defined(__WIN32__) || defined(WIN32)
   #include<io.h>
 
@@ -86,7 +90,9 @@ namespace osmscout {
 #endif
   }
 
-  bool FileScanner::Open(const std::string& filename, bool useMmap)
+  bool FileScanner::Open(const std::string& filename,
+                         Mode mode,
+                         bool useMmap)
   {
     if (file!=NULL) {
       std::cerr << "File '" << filename << "' already opened, cannot open it again!" << std::endl;
@@ -150,13 +156,38 @@ namespace osmscout {
     }
 #endif
 
+#if defined(HAVE_POSIX_FADVISE)
+    if (mode==FastRandomRead) {
+      if (posix_fadvise(fileno(file),0,size,POSIX_FADV_WILLNEED)<0) {
+        std::cerr << "Cannot set file access advice: " << strerror(errno) << std::endl;
+      }
+    }
+    else if (mode==SequentialScan) {
+      if (posix_fadvise(fileno(file),0,size,POSIX_FADV_SEQUENTIAL)<0) {
+        std::cerr << "Cannot set file access advice: " << strerror(errno) << std::endl;
+      }
+    }
+#endif
+
 #if defined(HAVE_MMAP)
     if (file!=NULL && useMmap && this->size>0) {
       FreeBuffer();
 
-      buffer=(char*)mmap(NULL,size,PROT_READ,MAP_SHARED,fileno(file),0);
+      buffer=(char*)mmap(NULL,size,PROT_READ,MAP_PRIVATE,fileno(file),0);
       if (buffer!=MAP_FAILED) {
         offset=0;
+#if defined(HAVE_POSIX_MADVISE)
+        if (mode==FastRandomRead) {
+          if (posix_madvise(buffer,size,POSIX_MADV_WILLNEED)<0) {
+            std::cerr << "Cannot set mmaped file access advice: " << strerror(errno) << std::endl;
+          }
+        }
+        else if (mode==SequentialScan) {
+          if (posix_madvise(buffer,size,POSIX_MADV_SEQUENTIAL)<0) {
+            std::cerr << "Cannot set mmaped file access advice: " << strerror(errno) << std::endl;
+          }
+        }
+#endif
       }
       else {
         std::cerr << "Cannot mmap file " << filename << " of size " << size << ": " << strerror(errno) << std::endl;
@@ -1078,5 +1109,145 @@ namespace osmscout {
     return true;
   }
 #endif
+
+  bool FileScanner::ReadCoord(double& lat,
+                              double& lon)
+  {
+    if (HasError()) {
+      return false;
+    }
+
+    uint32_t latDat;
+    uint32_t lonDat;
+
+    latDat=0;
+    lonDat=0;
+
+#if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
+    if (buffer!=NULL) {
+      if (offset+8-1>=size) {
+        std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
+        hasError=true;
+        return false;
+      }
+
+      char     *dataPtr=&buffer[offset];
+      uint32_t add;
+
+      // Latitude
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 0;
+      latDat|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 8;
+      latDat|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 16;
+      latDat|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 24;
+      latDat|=add;
+      dataPtr++;
+
+      // Longitude
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 0;
+      lonDat|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 8;
+      lonDat|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 16;
+      lonDat|=add;
+      dataPtr++;
+
+      add=(unsigned char)(*dataPtr);
+      add=add << 24;
+      lonDat|=add;
+      dataPtr++;
+
+      offset+=2*4;
+
+
+      lat=latDat/conversionFactor-90.0;
+      lon=lonDat/conversionFactor-180.0;
+
+      return true;
+    }
+#endif
+
+    unsigned char buffer[8];
+
+    hasError=fread(&buffer,1,8,file)!=8;
+
+    if (hasError) {
+      std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
+      return false;
+    }
+
+    unsigned char *dataPtr=buffer;
+    uint32_t      add;
+
+    // Latitude
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 0;
+    latDat|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 8;
+    latDat|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 16;
+    latDat|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 24;
+    latDat|=add;
+    dataPtr++;
+
+    // Longitude
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 0;
+    lonDat|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 8;
+    lonDat|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 16;
+    lonDat|=add;
+    dataPtr++;
+
+    add=(unsigned char)(*dataPtr);
+    add=add << 24;
+    lonDat|=add;
+    dataPtr++;
+
+    lat=latDat/conversionFactor-90.0;
+    lon=lonDat/conversionFactor-180.0;
+
+    return true;
+  }
 }
 

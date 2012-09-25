@@ -23,32 +23,43 @@
 #include <osmscout/import/Import.h>
 #include <osmscout/import/RawRelation.h>
 
+#include <osmscout/util/HashMap.h>
 #include <osmscout/util/FileWriter.h>
 
 namespace osmscout {
   class Preprocess : public ImportModule
   {
   private:
-    FileWriter        nodeWriter;
-    FileWriter        wayWriter;
-    FileWriter        relationWriter;
-    FileWriter        coastlineWriter;
+    typedef OSMSCOUT_HASHMAP<Id,FileOffset> CoordPageOffsetMap;
 
-    std::vector<Tag>  tags;
+  private:
+    FileWriter         nodeWriter;
+    FileWriter         wayWriter;
+    FileWriter         relationWriter;
+    FileWriter         coastlineWriter;
+    FileWriter         coordWriter;
 
-    uint32_t          nodeCount;
-    uint32_t          wayCount;
-    uint32_t          areaCount;
-    uint32_t          relationCount;
-    uint32_t          coastlineCount;
+    size_t             coordPageCount;
+    CoordPageOffsetMap coordIndex;
 
-    uint32_t          lastNodeId;
-    uint32_t          lastWayId;
-    uint32_t          lastRelationId;
-    
-    bool              nodeSortingError;
-    bool              waySortingError;
-    bool              relationSortingError;
+    std::vector<Tag>   tags;
+
+    uint32_t           nodeCount;
+    uint32_t           wayCount;
+    uint32_t           areaCount;
+    uint32_t           relationCount;
+    uint32_t           coastlineCount;
+
+    uint32_t           lastNodeId;
+    uint32_t           lastWayId;
+    uint32_t           lastRelationId;
+
+    bool               nodeSortingError;
+    bool               waySortingError;
+    bool               relationSortingError;
+
+  private:
+    bool StoreCoord(Id id, double lat, double lon);
 
   public:
     std::string GetDescription() const;

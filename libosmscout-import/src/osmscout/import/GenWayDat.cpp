@@ -31,6 +31,7 @@
 #include <osmscout/import/RawNode.h>
 #include <osmscout/import/RawRelation.h>
 #include <osmscout/import/RawWay.h>
+#include <osmscout/import/CoordDataFile.h>
 
 namespace osmscout {
 
@@ -49,6 +50,7 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "wayblack.dat"),
+                      FileScanner::SequentialScan,
                       true)) {
       progress.Error("Cannot open 'wayblack.dat'");
       return false;
@@ -78,6 +80,7 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawturnrestr.dat"),
+                      FileScanner::SequentialScan,
                       true)) {
       progress.Error("Cannot open 'rawturnrestr.dat'");
       return false;
@@ -166,7 +169,8 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawways.dat"),
-                                      parameter.GetRawWayDataMemoryMaped())) {
+                      FileScanner::SequentialScan,
+                      parameter.GetRawWayDataMemoryMaped())) {
       progress.Error("Cannot open 'rawways.dat'");
       return false;
     }
@@ -225,7 +229,8 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawways.dat"),
-                                      parameter.GetRawWayDataMemoryMaped())) {
+                      FileScanner::SequentialScan,
+                      parameter.GetRawWayDataMemoryMaped())) {
       progress.Error("Cannot open 'rawways.dat'");
       return false;
     }
@@ -721,28 +726,25 @@ namespace osmscout {
 
     progress.Info(NumberToString(endPointWayMap.size())+ " endpoints collected");
 
-    DataFile<RawNode> nodeDataFile("rawnodes.dat",
-                                   "rawnode.idx",
-                                   parameter.GetRawNodeDataCacheSize(),
-                                   parameter.GetRawNodeIndexCacheSize());
+    CoordDataFile     coordDataFile("coord.dat");
     NumericIndex<Id>  rawWayIndex("rawway.idx",parameter.GetRawWayIndexCacheSize());
 
-    if (!nodeDataFile.Open(parameter.GetDestinationDirectory(),
-                           parameter.GetRawNodeIndexMemoryMaped(),
-                           parameter.GetRawNodeDataMemoryMaped())) {
-      std::cerr << "Cannot open raw node data file!" << std::endl;
+    if (!coordDataFile.Open(parameter.GetDestinationDirectory())) {
+      std::cerr << "Cannot open coord data file!" << std::endl;
       return false;
     }
 
     if (!rawWayIndex.Open(parameter.GetDestinationDirectory(),
-                           parameter.GetRawWayIndexMemoryMaped())) {
+                          FileScanner::FastRandomRead,
+                          parameter.GetRawWayIndexMemoryMaped())) {
       std::cerr << "Cannot open raw way index file!" << std::endl;
       return false;
     }
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawways.dat"),
-                                      parameter.GetRawWayDataMemoryMaped())) {
+                      FileScanner::SequentialScan,
+                      parameter.GetRawWayDataMemoryMaped())) {
       progress.Error("Cannot open 'rawways.dat'");
       return false;
     }
@@ -827,9 +829,9 @@ namespace osmscout {
 
       progress.SetAction("Loading nodes");
 
-      std::set<Id>                    nodeIds;
-      std::vector<RawNodeRef>         nodes;
-      OSMSCOUT_HASHMAP<Id,RawNodeRef> nodesMap;
+      std::set<Id>               nodeIds;
+      std::vector<Point>         coords;
+      OSMSCOUT_HASHMAP<Id,Point> coordsMap;
 
       for (size_t w=0; w<blockCount; w++) {
         for (size_t n=0; n<block[w]->GetNodeCount(); n++) {
@@ -837,7 +839,9 @@ namespace osmscout {
         }
       }
 
-      if (!nodeDataFile.Get(nodeIds,nodes)) {
+      coords.reserve(nodeIds.size());
+
+      if (!coordDataFile.Get(nodeIds.begin(),nodeIds.end(),coords)) {
         std::cerr << "Cannot read nodes!" << std::endl;
         continue;
       }
@@ -845,16 +849,16 @@ namespace osmscout {
       nodeIds.clear();
 
 #if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
-      nodesMap.reserve(nodes.size());
+      coordsMap.reserve(coords.size());
 #endif
 
-      for (std::vector<RawNodeRef>::const_iterator node=nodes.begin();
-          node!=nodes.end();
-          node++) {
-        nodesMap[(*node)->GetId()]=*node;
+      for (std::vector<Point>::const_iterator coord=coords.begin();
+          coord!=coords.end();
+          coord++) {
+        coordsMap[coord->GetId()]=*coord;
       }
 
-      nodes.clear();
+      coords.clear();
 
       progress.SetAction("Writing ways");
 
@@ -887,9 +891,9 @@ namespace osmscout {
 
         bool success=true;
         for (size_t n=0; n<block[w]->GetNodeCount(); n++) {
-          OSMSCOUT_HASHMAP<Id,RawNodeRef>::const_iterator node=nodesMap.find(block[w]->GetNodeId(n));
+          OSMSCOUT_HASHMAP<Id,Point>::const_iterator coord=coordsMap.find(block[w]->GetNodeId(n));
 
-          if (node==nodesMap.end()) {
+          if (coord==coordsMap.end()) {
             progress.Error("Cannot resolve node with id "+
                            NumberToString(block[w]->GetNodeId(n))+
                            " for Way "+
@@ -898,9 +902,7 @@ namespace osmscout {
             break;
           }
 
-          way.nodes[n].Set(node->second->GetId(),
-                           node->second->GetLat(),
-                           node->second->GetLon());
+          way.nodes[n]=coord->second;
         }
 
         if (!success) {
@@ -914,7 +916,8 @@ namespace osmscout {
         // startIsJoint/endIsJoint
 
         if (way.IsArea()) {
-          if (!AreaIsSimple(way.nodes)) {
+          if (parameter.GetStrictAreas() &&
+              !AreaIsSimple(way.nodes)) {
             progress.Error("Area "+NumberToString(way.GetId())+" of type '"+typeConfig.GetTypeInfo(way.GetType()).GetName()+"' is not simple");
 
             continue;
@@ -1000,7 +1003,7 @@ namespace osmscout {
       return false;
     }
 
-    if (!nodeDataFile.Close()) {
+    if (!coordDataFile.Close()) {
       return false;
     }
 

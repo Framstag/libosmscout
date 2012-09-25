@@ -259,7 +259,7 @@ namespace osmscout {
     FileScanner scanner;
     std::string file=AppendFileToDir(path,"bounding.dat");
 
-    if (!scanner.Open(file,true)) {
+    if (!scanner.Open(file,FileScanner::Normal,true)) {
       std::cerr << "Cannot open 'bounding.dat'" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
@@ -288,21 +288,21 @@ namespace osmscout {
     maxLon=maxLonDat/conversionFactor-180.0;
     maxLat=maxLatDat/conversionFactor-90.0;
 
-    if (!nodeDataFile.Open(path,true,true)) {
+    if (!nodeDataFile.Open(path,FileScanner::Normal,true,FileScanner::Normal,true)) {
       std::cerr << "Cannot open 'nodes.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
     }
 
-    if (!wayDataFile.Open(path,true,true)) {
+    if (!wayDataFile.Open(path,FileScanner::Normal,true,FileScanner::Normal,true)) {
       std::cerr << "Cannot open 'ways.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
     }
 
-    if (!relationDataFile.Open(path,true,true)) {
+    if (!relationDataFile.Open(path,FileScanner::Normal,true,FileScanner::Normal,true)) {
       std::cerr << "Cannot open 'relations.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;

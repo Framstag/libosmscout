@@ -462,9 +462,9 @@ namespace osmscout {
     PBF::HeaderBlock headerBlock;
 
     if (!ReadHeaderBlock(progress,
-        file,
-        blockHeader,
-        headerBlock)) {
+                         file,
+                         blockHeader,
+                         headerBlock)) {
       fclose(file);
       return false;
     }

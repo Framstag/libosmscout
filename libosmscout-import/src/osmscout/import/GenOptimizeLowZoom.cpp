@@ -166,8 +166,7 @@ namespace osmscout
           std::map<Id, std::list<WayRef> >::iterator match;
 
           match=waysByJoin.find(way->nodes.front().GetId());
-          if (match!=waysByJoin.end())
-          {
+          if (match!=waysByJoin.end()) {
             std::list<WayRef>::iterator otherWay;
 
             // Search for matching way that has the same endpoint, the same ref name (and is not the way itself)
@@ -232,8 +231,7 @@ namespace osmscout
           }
 
           match=waysByJoin.find(way->nodes.back().GetId());
-          if (match!=waysByJoin.end())
-          {
+          if (match!=waysByJoin.end()) {
             std::list<WayRef>::iterator otherWay;
 
             // Search for matching way that has the same endpoint, the same ref name (and is not the way itself)
@@ -601,6 +599,7 @@ namespace osmscout
 
     if (!wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                          "ways.dat"),
+                         FileScanner::SequentialScan,
                          parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.dat'");
       return false;

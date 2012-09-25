@@ -466,6 +466,11 @@ OSS
    [TYPE "building"] AREA { color: #bcbcbc; borderColor: #887b7b; borderWidth: 0.1mm; }
 
    [TYPE "amenity_hospital_building"] AREA { color: #b89c9c; borderColor: #887b7b; borderWidth: 0.1mm; }
+
+   [TYPE "man_made_pier"] {
+     WAY {color: #ffffff; displayWidth: 0.1mm; width: 5.0m;}
+    AREA { color: #ffffff; }
+   }
  }
 
  [MAG city-] {

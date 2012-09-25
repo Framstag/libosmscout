@@ -74,6 +74,7 @@ namespace osmscout {
 
     if (!wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                          "ways.dat"),
+                         FileScanner::SequentialScan,
                          parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.dat'");
       return false;
@@ -81,6 +82,7 @@ namespace osmscout {
 
     if (!relScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                          "relations.dat"),
+                         FileScanner::SequentialScan,
                          true)) {
       progress.Error("Cannot open 'relations.dat'");
       return false;

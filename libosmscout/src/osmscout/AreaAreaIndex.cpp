@@ -42,7 +42,7 @@ namespace osmscout {
       cacheRef=indexCache.SetEntry(cacheEntry);
 
       if (!scanner.IsOpen()) {
-        if (!scanner.Open(datafilename,true)) {
+        if (!scanner.Open(datafilename,FileScanner::Normal,true)) {
           std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
           return false;
         }
@@ -130,7 +130,7 @@ namespace osmscout {
   {
     datafilename=path+"/"+filepart;
 
-    if (!scanner.Open(datafilename,true)) {
+    if (!scanner.Open(datafilename,FileScanner::Normal,true)) {
       std::cerr << "Cannot open file '" << datafilename << "'" << std::endl;
       return false;
     }

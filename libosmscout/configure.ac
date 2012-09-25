@@ -32,12 +32,12 @@ AC_CHECK_TYPES([uint64_t],,,[#include <stdint.h>])
 
 AC_CHECK_SIZEOF([wchar_t])
 
-AC_CHECK_HEADERS([sys/time.h unordered_map unordered_set])
+AC_CHECK_HEADERS([fcntl.h sys/time.h unordered_map unordered_set])
 
 AC_SEARCH_LIBS([sqrt],[m])
 
 AC_CHECK_DECLS([log2(double), atanh(double), lround(double)],[],[],[#include <cmath>])
-AC_CHECK_FUNCS([mmap])
+AC_CHECK_FUNCS([mmap posix_fadvise posix_madvise])
 
 AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO

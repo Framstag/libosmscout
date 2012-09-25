@@ -64,6 +64,7 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "turnrestr.dat"),
+                      FileScanner::SequentialScan,
                       true)) {
       progress.Error("Cannot open 'turnrestr.dat'");
       return false;
@@ -151,7 +152,8 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "ways.dat"),
-                                      parameter.GetWayDataMemoryMaped())) {
+                      FileScanner::SequentialScan,
+                      parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.dat'");
       return false;
     }
@@ -235,7 +237,8 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "ways.dat"),
-                                      parameter.GetWayDataMemoryMaped())) {
+                      FileScanner::SequentialScan,
+                      parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.dat'");
       return false;
     }
@@ -440,7 +443,8 @@ namespace osmscout {
     NumericIndex<Id> wayIndex("way.idx",parameter.GetWayIndexCacheSize());
 
     if (!wayIndex.Open(parameter.GetDestinationDirectory(),
-                           parameter.GetWayIndexMemoryMaped())) {
+                       FileScanner::SequentialScan,
+                       parameter.GetWayIndexMemoryMaped())) {
       progress.Error("Cannot open 'way.idx'!");
       return false;
     }
@@ -453,7 +457,8 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "ways.dat"),
-                                      parameter.GetWayDataMemoryMaped())) {
+                      FileScanner::SequentialScan,
+                      parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.dat'");
       return false;
     }

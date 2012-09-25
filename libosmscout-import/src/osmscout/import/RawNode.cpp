@@ -52,24 +52,16 @@ namespace osmscout {
 
     uint32_t tmpType;
     uint32_t tagCount;
-    uint32_t latValue;
-    uint32_t lonValue;
 
     if (!scanner.ReadNumber(tmpType)) {
       return false;
     }
 
-    if (!scanner.Read(latValue)) {
-      return false;
-    }
-
-    if (!scanner.Read(lonValue)) {
-      return false;
-    }
-
     type=(TypeId)tmpType;
-    lat=latValue/conversionFactor-90.0;
-    lon=lonValue/conversionFactor-180.0;
+
+    if (!scanner.ReadCoord(lat,lon)) {
+      return false;
+    }
 
     if (!scanner.ReadNumber(tagCount)) {
       return false;

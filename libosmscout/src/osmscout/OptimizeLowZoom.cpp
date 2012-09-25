@@ -53,7 +53,7 @@ namespace osmscout
   {
     datafilename=AppendFileToDir(path,datafile);
 
-    if (!scanner.Open(datafilename,true)) {
+    if (!scanner.Open(datafilename,FileScanner::Normal,true)) {
       return false;
     }
 
@@ -240,7 +240,7 @@ namespace osmscout
     std::vector<FileOffset> offsets;
 
     if (!scanner.IsOpen()) {
-      if (!scanner.Open(datafilename,true)) {
+      if (!scanner.Open(datafilename,FileScanner::Normal,true)) {
         std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
         return false;
       }

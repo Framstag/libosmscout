@@ -69,6 +69,7 @@ namespace osmscout {
    : typefile("map.ost"),
      startStep(defaultStartStep),
      endStep(defaultEndStep),
+     strictAreas(false),
      renumberIds(false),
      renumberBlockSize(40000000),
      renumberMag(14),
@@ -132,6 +133,11 @@ namespace osmscout {
   size_t ImportParameter::GetEndStep() const
   {
     return endStep;
+  }
+
+  bool ImportParameter::GetStrictAreas() const
+  {
+    return strictAreas;
   }
 
   bool ImportParameter::GetRenumberIds() const
@@ -334,6 +340,11 @@ namespace osmscout {
   {
     this->startStep=startStep;
     this->endStep=endStep;
+  }
+
+  void ImportParameter::SetStrictAreas(bool strictAreas)
+  {
+    this->strictAreas=strictAreas;
   }
 
   void ImportParameter::SetRenumberIds(bool renumberIds)

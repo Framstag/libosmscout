@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 
   osmscout::FileScanner scanner;
 
-  if (!scanner.Open(filename,true)) {
+  if (!scanner.Open(filename,osmscout::FileScanner::SequentialScan,true)) {
     std::cerr << "Cannot open file '" << filename << "'!" << std::endl;
     return 1;
   }
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
   for (size_t i=1; i<=7; i++) {
     osmscout::WayDataFile wayDataFile("ways.dat","way.idx",dataCacheSize,indexCacheSize);
 
-    if (!wayDataFile.Open(".",true,true)) {
+    if (!wayDataFile.Open(".",osmscout::FileScanner::FastRandomRead,true,osmscout::FileScanner::FastRandomRead,true)) {
       std::cerr << "Cannot open way data file!" << std::endl;
       return 1;
     }

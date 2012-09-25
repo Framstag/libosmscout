@@ -81,6 +81,7 @@ namespace osmscout {
     unsigned long                  cacheSize;
     mutable FileScanner            scanner;
     bool                           memoryMaped;
+    FileScanner::Mode              mode;
     uint32_t                       pageSize;
     uint32_t                       levels;
     std::vector<uint32_t>          pageCounts;
@@ -98,6 +99,7 @@ namespace osmscout {
     virtual ~NumericIndex();
 
     bool Open(const std::string& path,
+              FileScanner::Mode mode,
               bool memoryMaped);
     bool Close();
 
@@ -167,7 +169,7 @@ namespace osmscout {
     page->entries.reserve(pageSize);
 
     if (!scanner.IsOpen() &&
-        !scanner.Open(filename,memoryMaped)) {
+        !scanner.Open(filename,mode,memoryMaped)) {
       std::cerr << "Cannot open '" << filename << "'!" << std::endl;
       return false;
     }
@@ -216,7 +218,9 @@ namespace osmscout {
   }
 
   template <class N>
-  bool NumericIndex<N>::Open(const std::string& path, bool memoryMaped)
+  bool NumericIndex<N>::Open(const std::string& path,
+                             FileScanner::Mode mode,
+                             bool memoryMaped)
   {
     uint32_t    entries;
     FileOffset  lastLevelPageStart;
@@ -224,8 +228,9 @@ namespace osmscout {
 
     filename=AppendFileToDir(path,filepart);
     this->memoryMaped=memoryMaped;
+    this->mode=mode;
 
-    if (!scanner.Open(filename,memoryMaped)) {
+    if (!scanner.Open(filename,mode,memoryMaped)) {
       std::cerr << "Cannot open index file '" << filename << "'" << std::endl;
       return false;
     }

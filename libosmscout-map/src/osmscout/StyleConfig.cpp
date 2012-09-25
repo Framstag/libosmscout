@@ -368,8 +368,6 @@ namespace osmscout {
     areaSymbolStyles.resize(typeConfig->GetMaxTypeId()+1);
     areaLabelStyles.resize(typeConfig->GetMaxTypeId()+1);
     areaIconStyles.resize(typeConfig->GetMaxTypeId()+1);
-
-    std::cout << "Size long: " << sizeof(long) << std::endl;
   }
 
   StyleConfig::~StyleConfig()

@@ -130,6 +130,9 @@ TYPES
   TYPE "natural_wetland" = NODE AREA ("natural"=="wetland")
   TYPE "natural_wood" = NODE AREA ("natural"=="wood")
 
+  TYPE "man_made_wastewater_plant" = NODE AREA ("man_made"=="wastewater_plant")
+  TYPE "man_made_pier" = WAY AREA ("man_made"=="pier")
+
   TYPE "leisure_building" = NODE AREA (EXISTS "leisure" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE "leisure_sports_centre" = NODE AREA ("leisure"=="sports_centre")
   TYPE "leisure_golf_course" = NODE AREA ("leisure"=="golf_course")
@@ -284,8 +287,6 @@ TYPES
   TYPE "power_station" = NODE AREA ("power"=="station")
   TYPE "power_sub_station" = NODE AREA ("power"=="sub_station")
   TYPE "power_generator" = NODE AREA ("power"=="generator")
-
-  TYPE "man_made_wastewater_plant" = NODE AREA ("man_made"=="wastewater_plant")
 
   TYPE "building_garage" = AREA ("building"=="garage")
   TYPE "building" = AREA (EXISTS "building" AND !("building" IN ["no","false","0"]))

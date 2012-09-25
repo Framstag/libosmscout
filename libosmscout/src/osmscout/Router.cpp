@@ -107,14 +107,14 @@ namespace osmscout {
       return false;
     }
 
-    if (!wayDataFile.Open(path,true,false)) {
+    if (!wayDataFile.Open(path,FileScanner::Normal,true,FileScanner::Normal,false)) {
       std::cerr << "Cannot open 'ways.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
     }
 
-    if (!routeNodeDataFile.Open(path,true,true)) {
+    if (!routeNodeDataFile.Open(path,FileScanner::Normal,true,FileScanner::Normal,true)) {
       std::cerr << "Cannot open 'route.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;

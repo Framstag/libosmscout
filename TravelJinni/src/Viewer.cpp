@@ -575,8 +575,6 @@ public:
                               L"No map and/or style configured!");
       }
 
-      std::cout << "Status: " << databaseTask->IsOpen() << " " << (styleConfig!=NULL) << std::endl;
-
       map->RequestNewMap();
     }
     else if (model==GetClosedAction() && GetClosedAction()->IsFinished()) {

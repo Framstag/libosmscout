@@ -22,6 +22,7 @@
 #include <cassert>
 #include <vector>
 
+#include <osmscout/import/CoordDataFile.h>
 #include <osmscout/import/RawCoastline.h>
 #include <osmscout/import/RawNode.h>
 
@@ -141,6 +142,7 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawcoastline.dat"),
+                      FileScanner::SequentialScan,
                       true)) {
       progress.Error("Cannot open 'rawcoastline.dat'");
       return false;
@@ -170,15 +172,10 @@ namespace osmscout {
 
     progress.SetAction("Resolving nodes of coastline");
 
-    DataFile<RawNode> nodeDataFile("rawnodes.dat",
-                                   "rawnode.idx",
-                                   parameter.GetRawNodeDataCacheSize(),
-                                   parameter.GetRawNodeIndexCacheSize());
+    CoordDataFile coordDataFile("coord.dat");
 
-    if (!nodeDataFile.Open(parameter.GetDestinationDirectory(),
-                           parameter.GetRawNodeIndexMemoryMaped(),
-                           parameter.GetRawNodeDataMemoryMaped())) {
-      std::cerr << "Cannot open raw node data file!" << std::endl;
+    if (!coordDataFile.Open(parameter.GetDestinationDirectory())) {
+      std::cerr << "Cannot open coord data file!" << std::endl;
       return false;
     }
 
@@ -194,23 +191,25 @@ namespace osmscout {
       }
     }
 
-    std::vector<RawNodeRef> nodes;
-    std::map<Id,RawNodeRef> nodesMap;
+    std::vector<Point> coords;
+    std::map<Id,Point> coordsMap;
 
-    if (!nodeDataFile.Get(nodeIds,nodes)) {
+    if (!coordDataFile.Get(nodeIds.begin(),
+                           nodeIds.end(),
+                           coords)) {
       std::cerr << "Cannot read nodes!" << std::endl;
       return false;
     }
 
     nodeIds.clear();
 
-    for (std::vector<RawNodeRef>::const_iterator node=nodes.begin();
-        node!=nodes.end();
-        node++) {
-      nodesMap[(*node)->GetId()]=*node;
+    for (std::vector<Point>::const_iterator coord=coords.begin();
+        coord!=coords.end();
+        coord++) {
+      coordsMap[coord->GetId()]=*coord;
     }
 
-    nodes.clear();
+    coords.clear();
 
     progress.SetAction("Enriching coastline with node data");
 
@@ -228,9 +227,9 @@ namespace osmscout {
       coast->coast.resize(coastline->GetNodeCount());
 
       for (size_t n=0; n<coastline->GetNodeCount(); n++) {
-        std::map<Id,RawNodeRef>::const_iterator node=nodesMap.find(coastline->GetNodeId(n));
+        std::map<Id,Point>::const_iterator coord=coordsMap.find(coastline->GetNodeId(n));
 
-        if (node==nodesMap.end()) {
+        if (coord==coordsMap.end()) {
           processingError=true;
 
           progress.Error("Cannot resolve node with id "+
@@ -241,9 +240,7 @@ namespace osmscout {
           break;
         }
 
-        coast->coast[n].Set(node->second->GetId(),
-                            node->second->GetLat(),
-                            node->second->GetLon());
+        coast->coast[n]=coord->second;
       }
 
       if (!processingError) {
@@ -562,6 +559,7 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "ways.dat"),
+                      FileScanner::SequentialScan,
                       parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.dat'");
       return false;
@@ -830,7 +828,7 @@ namespace osmscout {
 
       if (coast->isArea) {
         double   minLat,maxLat,minLon,maxLon;
-        uint32_t cx1,cx2,cy1,cy2;
+        uint32_t cxMin,cxMax,cyMin,cyMax;
 
         minLat=coast->coast[0].GetLat();
         maxLat=minLat;
@@ -845,17 +843,17 @@ namespace osmscout {
           maxLon=std::max(maxLon,coast->coast[p].GetLon());
         }
 
-        cx1=(uint32_t)floor((minLon+180.0)/level.cellWidth);
-        cx2=(uint32_t)floor((maxLon+180.0)/level.cellWidth);
-        cy1=(uint32_t)floor((minLat+90.0)/level.cellHeight);
-        cy2=(uint32_t)floor((maxLat+90.0)/level.cellHeight);
+        cxMin=(uint32_t)floor((minLon+180.0)/level.cellWidth);
+        cxMax=(uint32_t)floor((maxLon+180.0)/level.cellWidth);
+        cyMin=(uint32_t)floor((minLat+90.0)/level.cellHeight);
+        cyMax=(uint32_t)floor((maxLat+90.0)/level.cellHeight);
 
-        double cellMinLat=level.cellHeight*cy1-90.0;
-        double cellMinLon=level.cellWidth*cx1-180.0;
+        double cellMinLat=level.cellHeight*cyMin-90.0;
+        double cellMinLon=level.cellWidth*cxMin-180.0;
 
-        if (cx1==cx2 &&
-            cy1==cy2) {
-          Coord        coord(cx1-level.cellXStart,cy1-level.cellYStart);
+        if (cxMin==cxMax &&
+            cyMin==cyMax) {
+          Coord        coord(cxMin-level.cellXStart,cyMin-level.cellYStart);
           TransPolygon polygon;
           double       minX;
           double       maxX;
@@ -867,7 +865,7 @@ namespace osmscout {
 
           polygon.GetBoundingBox(minX,minY,maxX,maxY);
 
-          if (maxX-minX<=1.0 &&
+          if (maxX-minX<=1.0 ||
               maxY-minY<=1.0) {
             continue;
           }
@@ -884,10 +882,12 @@ namespace osmscout {
             }
           }
 
-          groundTile.coords.push_back(groundTile.coords.front());
-          groundTile.coords.back().coast=false;
+          if (!groundTile.coords.empty()) {
+            groundTile.coords.push_back(groundTile.coords.front());
+            groundTile.coords.back().coast=false;
 
-          cellGroundTileMap[coord].push_back(groundTile);
+            cellGroundTileMap[coord].push_back(groundTile);
+          }
         }
       }
     }
@@ -1049,21 +1049,71 @@ namespace osmscout {
 
             if (x==cx1 &&
                 y==cy1) {
-              // The segment always leaves the origin cell
+              assert(intersectionCount==1 ||
+                     intersectionCount==2);
 
-              assert(intersectionCount==1);
+              if (intersectionCount==1) {
+                // The segment always leaves the origin cell
+                firstIntersection.direction=-1;
+                cellIntersections[coord].push_back(firstIntersection);
+              }
+              else if (intersectionCount==2) {
+                // If we have two intersections with borders of cells between the starting cell and the
+                // target cell then the one closer to the starting point is the incoming and the one farer
+                // away is the leaving one
+                double firstLength=DistanceSquare(firstIntersection.point,points[p]);
+                double secondLength=DistanceSquare(secondIntersection.point,points[p]);
 
-              firstIntersection.direction=-1;
-              cellIntersections[coord].push_back(firstIntersection);
+                if (firstLength<=secondLength) {
+                  firstIntersection.direction=1; // Enter
+                  cellIntersections[coord].push_back(firstIntersection);
+
+                  secondIntersection.direction=-1; // Leave
+                  cellIntersections[coord].push_back(secondIntersection);
+                }
+                else {
+                  secondIntersection.direction=1; // Enter
+                  cellIntersections[coord].push_back(secondIntersection);
+
+                  firstIntersection.direction=-1; // Leave
+                  cellIntersections[coord].push_back(firstIntersection);
+
+                }
+              }
             }
             else if (x==cx2 &&
                      y==cy2) {
-              // The segment always enteres the detsination cell
+              assert(intersectionCount==1 ||
+                     intersectionCount==2);
 
-              assert(intersectionCount==1);
+              if (intersectionCount==1) {
+                // The segment always enters the target cell
+                firstIntersection.direction=1;
+                cellIntersections[coord].push_back(firstIntersection);
+              }
+              else if (intersectionCount==2) {
+                // If we have two intersections with borders of cells between the starting cell and the
+                // target cell then the one closer to the starting point is the incoming and the one farer
+                // away is the leaving one
+                double firstLength=DistanceSquare(firstIntersection.point,points[p]);
+                double secondLength=DistanceSquare(secondIntersection.point,points[p]);
 
-              firstIntersection.direction=1;
-              cellIntersections[coord].push_back(firstIntersection);
+                if (firstLength<=secondLength) {
+                  firstIntersection.direction=1; // Enter
+                  cellIntersections[coord].push_back(firstIntersection);
+
+                  secondIntersection.direction=-1; // Leave
+                  cellIntersections[coord].push_back(secondIntersection);
+                }
+                else {
+                  secondIntersection.direction=1; // Enter
+                  cellIntersections[coord].push_back(secondIntersection);
+
+                  firstIntersection.direction=-1; // Leave
+                  cellIntersections[coord].push_back(firstIntersection);
+
+                }
+              }
             }
             else {
               assert(intersectionCount==0 ||
@@ -1148,17 +1198,21 @@ namespace osmscout {
         boundingBox.maxLon=std::max(boundingBox.maxLon,coast->coast[p].GetLon());
       }
 
-      uint32_t cx1,cx2,cy1,cy2;
+      uint32_t cxMin,cxMax,cyMin,cyMax;
 
-      cx1=(uint32_t)floor((boundingBox.minLon+180.0)/level.cellWidth);
-      cx2=(uint32_t)floor((boundingBox.maxLon+180.0)/level.cellWidth);
-      cy1=(uint32_t)floor((boundingBox.minLat+90.0)/level.cellHeight);
-      cy2=(uint32_t)floor((boundingBox.maxLat+90.0)/level.cellHeight);
+      cxMin=(uint32_t)floor((boundingBox.minLon+180.0)/level.cellWidth);
+      cxMax=(uint32_t)floor((boundingBox.maxLon+180.0)/level.cellWidth);
+      cyMin=(uint32_t)floor((boundingBox.minLat+90.0)/level.cellHeight);
+      cyMax=(uint32_t)floor((boundingBox.maxLat+90.0)/level.cellHeight);
 
-      if (cx1==cx2 && cy1==cy2) {
-        data.cell[curCoast].x=cx1;
-        data.cell[curCoast].y=cy1;
+      if (cxMin==cxMax && cyMin==cyMax) {
+        data.cell[curCoast].x=cxMin;
+        data.cell[curCoast].y=cyMin;
         data.isCompletelyInCell[curCoast]=true;
+
+        curCoast++;
+
+        continue;
       }
 
       TransPolygon polygon;
@@ -1620,6 +1674,7 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "bounding.dat"),
+                      FileScanner::SequentialScan,
                       true)) {
       progress.Error("Cannot open 'bounding.dat'");
       return false;

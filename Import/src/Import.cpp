@@ -63,6 +63,8 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --typefile <path>                    path and name of the map.ost file (default: " << parameter.GetTypefile() << ")" << std::endl;
   std::cout << " --destinationDirectory <path>        destination for generated map files (default: " << parameter.GetDestinationDirectory() << ")" << std::endl;
 
+  std::cout << " --strictAreas true|false             assure that areas are simple (default: " << BoolToString(parameter.GetStrictAreas()) << ")" << std::endl;
+
   std::cout << " --numericIndexPageSize <number>      size of an numeric index page in bytes (default: " << parameter.GetNumericIndexPageSize() << ")" << std::endl;
 
   std::cout << " --rawNodeIndexMemoryMaped true|false memory map raw node index file access (default: " << BoolToString(parameter.GetRawNodeIndexMemoryMaped()) << ")" << std::endl;
@@ -98,6 +100,8 @@ int main(int argc, char* argv[])
 
   size_t                    startStep=parameter.GetStartStep();
   size_t                    endStep=parameter.GetEndStep();
+
+  bool                      strictAreas=parameter.GetStrictAreas();
 
   size_t                    numericIndexPageSize=parameter.GetNumericIndexPageSize();
 
@@ -186,6 +190,20 @@ int main(int argc, char* argv[])
       }
       else {
         std::cerr << "Missing parameter after --destinationDirectory option" << std::endl;
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--strictAreas")==0) {
+      i++;
+
+      if (i<argc) {
+        if (!StringToBool(argv[i],strictAreas)) {
+          std::cerr << "Cannot parse strictAreas '" << argv[i] << "'" << std::endl;
+          parameterError=true;
+        }
+      }
+      else {
+        std::cerr << "Missing parameter after --strictAreas option" << std::endl;
         parameterError=true;
       }
     }
@@ -439,6 +457,8 @@ int main(int argc, char* argv[])
   parameter.SetDestinationDirectory(destinationDirectory);
   parameter.SetSteps(startStep,endStep);
 
+  parameter.SetStrictAreas(strictAreas);
+
   parameter.SetNumericIndexPageSize(numericIndexPageSize);
 
   parameter.SetRenumberBlockSize(renumberBlockSize);
@@ -472,6 +492,9 @@ int main(int argc, char* argv[])
                 osmscout::NumberToString(parameter.GetStartStep())+
                 " - "+
                 osmscout::NumberToString(parameter.GetEndStep()));
+
+  progress.Info(std::string("StrictAreas: ")+
+                (parameter.GetStrictAreas() ? "true" : "false"));
 
   progress.Info(std::string("NumericIndexPageSize: ")+
                 osmscout::NumberToString(parameter.GetNumericIndexPageSize()));

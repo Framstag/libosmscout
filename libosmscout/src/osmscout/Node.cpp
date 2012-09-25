@@ -48,17 +48,13 @@ namespace osmscout {
   {
     uint32_t tmpType;
     uint32_t tagCount;
-    uint32_t latValue;
-    uint32_t lonValue;
 
     scanner.ReadNumber(id);
-    scanner.ReadNumber(tmpType);
-    scanner.Read(latValue);
-    scanner.Read(lonValue);
 
+    scanner.ReadNumber(tmpType);
     type=(TypeId)tmpType;
-    lat=latValue/conversionFactor-90.0;
-    lon=lonValue/conversionFactor-180.0;
+
+    scanner.ReadCoord(lat,lon);
 
     scanner.ReadNumber(tagCount);
 

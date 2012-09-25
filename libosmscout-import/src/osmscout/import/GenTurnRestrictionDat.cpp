@@ -49,7 +49,8 @@ namespace osmscout {
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawrels.dat"),
-                                      true)) {
+                      FileScanner::SequentialScan,
+                      true)) {
       progress.Error("Cannot open 'rawrels.dat'");
       return false;
     }

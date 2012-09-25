@@ -54,6 +54,7 @@ namespace osmscout {
     bool                isOpen;          //! If true,the data file is opened
     std::string         datafile;        //! Basename part fo the data file name
     std::string         datafilename;    //! complete filename for data file
+    FileScanner::Mode   modeData;        //! Type of file access
     bool                memoryMapedData; //! Use memory mapped files for data access
     mutable DataCache   cache;           //! Entry cache
     mutable FileScanner scanner;         //! File stream to the data file
@@ -68,7 +69,9 @@ namespace osmscout {
     virtual ~DataFile();
 
     bool Open(const std::string& path,
+              FileScanner::Mode modeIndex,
               bool memoryMapedIndex,
+              FileScanner::Mode modeData,
               bool memoryMapedData);
     bool Close();
 
@@ -120,14 +123,17 @@ namespace osmscout {
 
   template <class N>
   bool DataFile<N>::Open(const std::string& path,
+                         FileScanner::Mode modeIndex,
                          bool memoryMapedIndex,
+                         FileScanner::Mode modeData,
                          bool memoryMapedData)
   {
     datafilename=AppendFileToDir(path,datafile);
     this->memoryMapedData=memoryMapedData;
+    this->modeData=modeData;
 
-    isOpen=index.Open(path,memoryMapedIndex) &&
-           scanner.Open(datafilename,memoryMapedData);
+    isOpen=index.Open(path,modeIndex,memoryMapedIndex) &&
+           scanner.Open(datafilename,modeData,memoryMapedData);
 
     return isOpen;
   }
@@ -173,7 +179,7 @@ namespace osmscout {
     assert(isOpen);
 
     if (!scanner.IsOpen()) {
-      if (!scanner.Open(datafilename,memoryMapedData)) {
+      if (!scanner.Open(datafilename,modeData,memoryMapedData)) {
         std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
         return false;
       }
@@ -216,7 +222,7 @@ namespace osmscout {
     assert(isOpen);
 
     if (!scanner.IsOpen()) {
-      if (!scanner.Open(datafilename,memoryMapedData)) {
+      if (!scanner.Open(datafilename,modeData,memoryMapedData)) {
         std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
         return false;
       }
@@ -259,7 +265,7 @@ namespace osmscout {
     assert(isOpen);
 
     if (!scanner.IsOpen()) {
-      if (!scanner.Open(datafilename,memoryMapedData)) {
+      if (!scanner.Open(datafilename,modeData,memoryMapedData)) {
         std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
         return false;
       }

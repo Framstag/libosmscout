@@ -45,6 +45,14 @@ namespace osmscout {
     */
   class OSMSCOUT_API FileScanner
   {
+  public:
+    enum Mode
+    {
+      SequentialScan,
+      FastRandomRead,
+      Normal
+    };
+
   private:
     std::string  filename;
     FILE         *file;
@@ -68,6 +76,7 @@ namespace osmscout {
     virtual ~FileScanner();
 
     bool Open(const std::string& filename,
+              Mode mode,
               bool useMmap);
     bool Close();
 
@@ -111,6 +120,9 @@ namespace osmscout {
 #if defined(OSMSCOUT_HAVE_UINT64_T)
     bool ReadNumber(uint64_t& number);
 #endif
+
+    bool ReadCoord(double& lat,
+                   double& lon);
   };
 }
 
