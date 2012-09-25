@@ -268,37 +268,40 @@ namespace osmscout {
                areaType!=typeIgnore) {
         isArea=1;
       }
-      else if (areaType!=typeIgnore &&
-          nodes.size()>2 &&
-          nodes.front()==nodes.back()) {
-        if (typeConfig.GetTypeInfo(wayType).GetPinWay()) {
-          isArea=-1;
+      else if (wayType!=typeIgnore &&
+               areaType!=typeIgnore) {
+        if (nodes.size()>3 &&
+            nodes.front()==nodes.back()) {
+          if (typeConfig.GetTypeInfo(wayType).GetPinWay()) {
+            isArea=-1;
+          }
+          else {
+            isArea=1;
+          }
         }
         else {
-          isArea=1;
+          isArea=-1;
         }
-      }
-      else {
-        isArea=0;
       }
     }
 
-    if (isArea==1) {
+    switch (isArea) {
+    case 1:
       way.SetType(areaType,true);
 
-      if (nodes.size()>2 &&
+      if (nodes.size()>3 &&
           nodes.front()==nodes.back()) {
         nodes.pop_back();
       }
 
       areaCount++;
-    }
-    else if (isArea==-1) {
+      break;
+    case -1:
       way.SetType(wayType,false);
       wayCount++;
-    }
-    else {
-      if (nodes.size()>1 &&
+      break;
+    default:
+      if (nodes.size()>3 &&
           nodes.front()==nodes.back()) {
         way.SetType(typeIgnore,
                     true);
