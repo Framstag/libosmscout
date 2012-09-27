@@ -1737,9 +1737,10 @@ namespace osmscout {
                     levels);
 
     for (size_t level=0; level<levels.size(); level++) {
-      FileOffset         indexOffset;
-      MercatorProjection projection;
-      CoastlineData      data;
+      FileOffset                             indexOffset;
+      MercatorProjection                     projection;
+      CoastlineData                          data;
+      std::map<Coord,std::list<GroundTile> > cellGroundTileMap;
 
       projection.Set(0,0,pow(2.0,(double)(level+parameter.GetWaterIndexMinMag())),640,480);
 
@@ -1750,31 +1751,31 @@ namespace osmscout {
       writer.WriteFileOffset(indexOffset);
       writer.SetPos(indexOffset);
 
-      MarkCoastlineCells(progress,
-                         levels[level]);
+      if (!coastlines.empty()) {
+        MarkCoastlineCells(progress,
+                           levels[level]);
 
-      GetCoastlineData(parameter,
-                       progress,
-                       projection,
-                       levels[level],
-                       coastlines,
-                       data);
+        GetCoastlineData(parameter,
+                         progress,
+                         projection,
+                         levels[level],
+                         coastlines,
+                         data);
 
-      std::map<Coord,std::list<GroundTile> > cellGroundTileMap;
+        HandleAreaCoastlinesCompletelyInACell(parameter,
+                                              progress,
+                                              projection,
+                                              levels[level],
+                                              coastlines,
+                                              cellGroundTileMap);
 
-      HandleAreaCoastlinesCompletelyInACell(parameter,
-                                            progress,
-                                            projection,
-                                            levels[level],
-                                            coastlines,
-                                            cellGroundTileMap);
-
-      HandleCoastlinesPartiallyInACell(parameter,
-                                       progress,
-                                       projection,
-                                       levels[level],
-                                       cellGroundTileMap,
-                                       data);
+        HandleCoastlinesPartiallyInACell(parameter,
+                                         progress,
+                                         projection,
+                                         levels[level],
+                                         cellGroundTileMap,
+                                         data);
+      }
 
       CalculateLandCells(progress,
                          levels[level],
@@ -1788,8 +1789,10 @@ namespace osmscout {
                    levels[level]);
       }
 
-      FillWater(progress,
-                levels[level],20);
+      if (!coastlines.empty()) {
+        FillWater(progress,
+                  levels[level],20);
+      }
 
       FillLand(progress,
                levels[level]);
