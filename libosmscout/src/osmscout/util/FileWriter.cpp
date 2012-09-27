@@ -17,6 +17,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+// Make sure that 64 file access activation works, by first importing
+// The Config.h, than our class and then std io.
 #include <osmscout/private/Config.h>
 
 #include <osmscout/util/FileWriter.h>
@@ -25,8 +27,9 @@
 #include <cstdio>
 
 #include <osmscout/util/Number.h>
-#include <iostream>
-#include <iomanip>
+
+#include <osmscout/private/Math.h>
+
 namespace osmscout {
 
   FileWriter::FileWriter()
@@ -320,6 +323,31 @@ namespace osmscout {
   }
 #endif
 
+  bool FileWriter::WriteCoord(double lat, double lon)
+  {
+    if (HasError()) {
+      return false;
+    }
+
+    uint32_t latValue=(uint32_t)floor((lat+90.0)*conversionFactor+0.5);
+    uint32_t lonValue=(uint32_t)floor((lon+180.0)*conversionFactor+0.5);
+
+    char buffer[8];
+
+    buffer[0]=((latValue >>  0) & 0xff);
+    buffer[1]=((latValue >>  8) & 0xff);
+    buffer[2]=((latValue >> 16) & 0xff);
+    buffer[3]=((latValue >> 24) & 0xff);
+
+    buffer[4]=((lonValue >>  0) & 0xff);
+    buffer[5]=((lonValue >>  8) & 0xff);
+    buffer[6]=((lonValue >> 16) & 0xff);
+    buffer[7]=((lonValue >> 24) & 0xff);
+
+    hasError=fwrite(buffer,1,8,file)!=8;
+
+    return !hasError;
+  }
 
   bool FileWriter::FlushCurrentBlockWithZeros(size_t blockSize)
   {

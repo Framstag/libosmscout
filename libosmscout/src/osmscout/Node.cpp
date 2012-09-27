@@ -73,13 +73,9 @@ namespace osmscout {
 
   bool Node::Write(FileWriter& writer) const
   {
-    uint32_t latValue=(uint32_t)floor((lat+90.0)*conversionFactor+0.5);
-    uint32_t lonValue=(uint32_t)floor((lon+180.0)*conversionFactor+0.5);
-
     writer.WriteNumber(id);
     writer.WriteNumber(type);
-    writer.Write(latValue);
-    writer.Write(lonValue);
+    writer.WriteCoord(lat,lon);
 
     writer.WriteNumber((uint32_t)tags.size());
     for (size_t i=0; i<tags.size(); i++) {

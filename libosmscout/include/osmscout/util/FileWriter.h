@@ -79,6 +79,8 @@ namespace osmscout {
     bool WriteNumber(uint64_t number);
 #endif
 
+    bool WriteCoord(double lat, double lon);
+
     bool FlushCurrentBlockWithZeros(size_t blockSize);
   };
 }
