@@ -22,15 +22,20 @@
 
 #include <osmscout/Database.h>
 
+#include <osmscout/util/FileScanner.h>
+
 /*
  * Example:
  *   src/DumpData ../TravelJinni/ -n 25293125 -w 4290108 -w 26688152 -r 531985
  */
 
+typedef OSMSCOUT_HASHMAP<osmscout::Id,osmscout::FileOffset> CoordPageOffsetMap;
+
 struct Job
 {
   enum Type
   {
+    Coord,
     Node,
     Way,
     Relation
@@ -52,6 +57,15 @@ static void DumpIndent(size_t indent)
   for (size_t i=1; i<=indent; i++) {
     std::cout << " ";
   }
+}
+
+static void DumpCoord(osmscout::Id id,double lat, double lon)
+{
+  std::cout << "Coord {" << std::endl;
+  std::cout << "  id: " << id << std::endl;
+  std::cout << "  lat: " << lat << std::endl;
+  std::cout << "  lon: " << lon << std::endl;
+  std::cout << "}" << std::endl;
 }
 
 static void DumpNode(const osmscout::TypeConfig* typeConfig,
@@ -281,9 +295,10 @@ int main(int argc, char* argv[])
   int            arg=1;
   std::string    map;
   std::list<Job> jobs;
+  bool           needCoordFile=false;
 
   if (argc<2) {
-    std::cerr << "DumpData <map directory> {-n <Id>|-w <Id>|-r <Id>}" << std::endl;
+    std::cerr << "DumpData <map directory> {-c <Id>|-n <Id>|-w <Id>|-r <Id>}" << std::endl;
     return 1;
   }
 
@@ -292,7 +307,27 @@ int main(int argc, char* argv[])
   arg++;
 
   while (arg<argc) {
-    if (strcmp(argv[arg],"-n")==0) {
+    if (strcmp(argv[arg],"-c")==0) {
+      unsigned long id;
+
+      arg++;
+      if (arg>=argc) {
+        std::cerr << "Option -c requires parameter!" << std::endl;
+        return 1;
+      }
+
+      if (sscanf(argv[arg],"%lu",&id)!=1) {
+        std::cerr << "Node id is not numeric!" << std::endl;
+        return 1;
+      }
+
+      jobs.push_back(Job(Job::Coord,id));
+
+      needCoordFile=true;
+
+      arg++;
+    }
+    else if (strcmp(argv[arg],"-n")==0) {
       unsigned long id;
 
       arg++;
@@ -361,6 +396,54 @@ int main(int argc, char* argv[])
     return 1;
   }
 
+  osmscout::FileScanner coordDataFile;
+  uint32_t              coordPageSize;
+  CoordPageOffsetMap    coordPageIdOffsetMap;
+
+  if (needCoordFile) {
+    if (coordDataFile.Open(osmscout::AppendFileToDir(map,"coord.dat"),
+                           osmscout::FileScanner::LowMemRandom,
+                           false)) {
+      osmscout::FileOffset mapFileOffset;
+
+      if (!coordDataFile.Read(coordPageSize))
+      {
+        std::cerr << "Error while reading page size from coord.dat" << std::endl;
+        return 1;
+      }
+
+      if (!coordDataFile.Read(mapFileOffset)) {
+        std::cerr << "Error while reading map offset from coord.dat" << std::endl;
+        return 1;
+      }
+
+      coordDataFile.SetPos(mapFileOffset);
+
+      uint32_t mapSize;
+
+      if (!coordDataFile.Read(mapSize)) {
+        std::cerr << "Error while reading map size from coord.dat" << std::endl;
+        return 1;
+      }
+
+      for (size_t i=1; i<=mapSize; i++) {
+        osmscout::Id         pageId;
+        osmscout::FileOffset pageOffset;
+
+        if (!coordDataFile.Read(pageId)) {
+          std::cerr << "Error while reading pageId from coord.dat" << std::endl;
+          return 1;
+        }
+        if (!coordDataFile.Read(pageOffset)) {
+          std::cerr << "Error while reading pageOffset from coord.dat" << std::endl;
+          return 1;
+        }
+
+        coordPageIdOffsetMap[pageId]=pageOffset;
+      }
+    }
+  }
+
   std::cout << std::endl;
 
   for (std::list<Job>::const_iterator job=jobs.begin();
@@ -370,7 +453,31 @@ int main(int argc, char* argv[])
       std::cout << std::endl;
     }
 
-    if (job->type==Job::Node) {
+    if (job->type==Job::Coord) {
+      if (!coordDataFile.IsOpen()) {
+        continue;
+      }
+
+      double                             lat;
+      double                             lon;
+      osmscout::Id                       coordPageId=job->id/coordPageSize;
+      CoordPageOffsetMap::const_iterator pageOffset=coordPageIdOffsetMap.find(coordPageId);
+
+      if (pageOffset==coordPageIdOffsetMap.end()) {
+        continue;
+      }
+
+      coordDataFile.SetPos(pageOffset->second+(job->id%coordPageSize)*2*sizeof(uint32_t));
+      coordDataFile.ReadCoord(lat,lon);
+
+      if (coordDataFile.HasError()) {
+        std::cerr << "Error while reading data from offset " << pageOffset->second << " of file " << coordDataFile.GetFilename() << "!" << std::endl;
+        continue;
+      }
+
+      DumpCoord(job->id,lat,lon);
+    }
+    else if (job->type==Job::Node) {
       osmscout::NodeRef node;
 
       if (!database.GetNode(job->id,node)) {

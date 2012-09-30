@@ -861,7 +861,7 @@ namespace osmscout {
         ring!=parts.end();
         ring++) {
       if (ring->IsArea()) {
-        // TODO: We currently blacklist all areas, we we only should blacklist all
+        // TODO: We currently blacklist all areas, we only should blacklist all
         // areas that have a type. Because areas without a type are implicitely blacklisted anyway later on.
         // However because we change the type of area rings to typeIgnore above we need some bookkeeping for this
         // to work here.
@@ -876,11 +876,7 @@ namespace osmscout {
     for (std::list<MultipolygonPart>::iterator ring=parts.begin();
         ring!=parts.end();
         ring++) {
-      for (std::vector<Point>::const_iterator node=ring->nodes.begin();
-          node!=ring->nodes.end();
-          node++) {
-        ring->role.nodes.push_back(*node);
-      }
+      ring->role.nodes=ring->nodes;
 
       assert(!ring->role.nodes.empty());
 

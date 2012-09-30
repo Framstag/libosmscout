@@ -42,42 +42,65 @@ namespace osmscout {
 
   static uint32_t coordPageSize=64;
 
+  bool Preprocess::StoreCurrentPage()
+  {
+    if (!coordWriter.SetPos(currentPageOffset)) {
+      return false;
+    }
+
+    for (size_t i=0; i<coordPageSize; i++) {
+      coordWriter.WriteCoord(lats[i],lons[i]);
+    }
+
+    currentPageId=0;
+
+    return !coordWriter.HasError();
+  }
+
   bool Preprocess::StoreCoord(Id id, double lat, double lon)
   {
-    Id                                 pageId=id/coordPageSize;
-    Id                                 coordPageOffset=id%coordPageSize;
+    Id pageId=id/coordPageSize;
+    Id coordPageOffset=id%coordPageSize;
+
+    if (currentPageId!=0 &&
+             currentPageId==pageId) {
+      lats[coordPageOffset]=lat;
+      lons[coordPageOffset]=lon;
+
+      return true;
+    }
+
+    if (currentPageId!=0 &&
+        currentPageId!=pageId) {
+      StoreCurrentPage();
+    }
+
     CoordPageOffsetMap::const_iterator pageOffsetEntry=coordIndex.find(pageId);
 
     if (pageOffsetEntry==coordIndex.end()) {
+      lats.resize(coordPageSize,0.0);
+      lons.resize(coordPageSize,0.0);
+
+      lats[coordPageOffset]=lat;
+      lons[coordPageOffset]=lon;
+
       FileOffset pageOffset=coordPageCount*coordPageSize*2*sizeof(uint32_t);
 
-      if (!coordWriter.SetPos(pageOffset)) {
-        return false;
-      }
-
-      for (size_t i=1; i<=coordPageSize; i++) {
-        uint32_t coord=0;
-
-        coordWriter.Write(coord);
-        coordWriter.Write(coord);
-      }
+      currentPageId=pageId;
+      currentPageOffset=pageOffset;
 
       pageOffsetEntry=coordIndex.insert(std::make_pair(pageId,pageOffset)).first;
 
       coordPageCount++;
+
+      return true;
     }
 
     if (!coordWriter.SetPos(pageOffsetEntry->second+coordPageOffset*2*sizeof(uint32_t))) {
       return false;
     }
 
-    uint32_t latValue=(uint32_t)floor((lat+90.0)*conversionFactor+0.5);
-    uint32_t lonValue=(uint32_t)floor((lon+180.0)*conversionFactor+0.5);
-
-    coordWriter.Write(latValue);
-    coordWriter.Write(lonValue);
-
-    return !coordWriter.HasError();
+    return coordWriter.WriteCoord(lat,lon);
   }
 
   std::string Preprocess::GetDescription() const
@@ -125,6 +148,7 @@ namespace osmscout {
   bool Preprocess::Initialize(const ImportParameter& parameter)
   {
     coordPageCount=0;
+    currentPageId=0;
 
     nodeCount=0;
     wayCount=0;
@@ -161,6 +185,7 @@ namespace osmscout {
 
     FileOffset offset=0;
 
+    coordWriter.Write(coordPageSize);
     coordWriter.Write(offset);
     coordWriter.FlushCurrentBlockWithZeros(coordPageSize*2*sizeof(uint32_t));
 
@@ -185,6 +210,9 @@ namespace osmscout {
     if (id<lastNodeId) {
       nodeSortingError=true;
     }
+
+    assert(lat!=-90.0);
+    assert(lat!=-180.0);
 
     StoreCoord(id,lat,lon);
 
@@ -366,6 +394,10 @@ namespace osmscout {
   bool Preprocess::Cleanup(const ImportParameter& parameter,
                            Progress& progress)
   {
+    if (currentPageId!=0) {
+      StoreCurrentPage();
+    }
+
     nodeWriter.SetPos(0);
     nodeWriter.Write(nodeCount);
 
@@ -380,7 +412,7 @@ namespace osmscout {
 
     coordWriter.SetPos(0);
 
-    coordWriter.Write((uint32_t)coordPageSize);
+    coordWriter.Write(coordPageSize);
 
     FileOffset coordIndexOffset=coordPageCount*coordPageSize*2*sizeof(uint32_t);
 

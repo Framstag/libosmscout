@@ -33,32 +33,38 @@ namespace osmscout {
     typedef OSMSCOUT_HASHMAP<Id,FileOffset> CoordPageOffsetMap;
 
   private:
-    FileWriter         nodeWriter;
-    FileWriter         wayWriter;
-    FileWriter         relationWriter;
-    FileWriter         coastlineWriter;
-    FileWriter         coordWriter;
+    FileWriter          nodeWriter;
+    FileWriter          wayWriter;
+    FileWriter          relationWriter;
+    FileWriter          coastlineWriter;
+    FileWriter          coordWriter;
 
-    size_t             coordPageCount;
-    CoordPageOffsetMap coordIndex;
+    Id                  coordPageCount;
+    CoordPageOffsetMap  coordIndex;
 
-    std::vector<Tag>   tags;
+    std::vector<Tag>    tags;
 
-    uint32_t           nodeCount;
-    uint32_t           wayCount;
-    uint32_t           areaCount;
-    uint32_t           relationCount;
-    uint32_t           coastlineCount;
+    uint32_t            nodeCount;
+    uint32_t            wayCount;
+    uint32_t            areaCount;
+    uint32_t            relationCount;
+    uint32_t            coastlineCount;
 
-    uint32_t           lastNodeId;
-    uint32_t           lastWayId;
-    uint32_t           lastRelationId;
+    uint32_t            lastNodeId;
+    uint32_t            lastWayId;
+    uint32_t            lastRelationId;
 
-    bool               nodeSortingError;
-    bool               waySortingError;
-    bool               relationSortingError;
+    bool                nodeSortingError;
+    bool                waySortingError;
+    bool                relationSortingError;
+
+    Id                  currentPageId;
+    FileOffset          currentPageOffset;
+    std::vector<double> lats;
+    std::vector<double> lons;
 
   private:
+    bool StoreCurrentPage();
     bool StoreCoord(Id id, double lat, double lon);
 
   public:

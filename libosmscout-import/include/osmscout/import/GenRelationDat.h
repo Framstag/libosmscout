@@ -122,7 +122,7 @@ namespace osmscout {
       std::vector<Point>   nodes;
       std::list<RawWayRef> ways;
 
-      bool IsArea() const
+      inline bool IsArea() const
       {
         if (ways.size()==1) {
           return ways.front()->IsArea() ||

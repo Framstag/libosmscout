@@ -827,8 +827,6 @@ namespace osmscout {
         return false;
       }
 
-      progress.SetAction("Loading nodes");
-
       std::set<Id>               nodeIds;
       std::vector<Point>         coords;
       OSMSCOUT_HASHMAP<Id,Point> coordsMap;
@@ -838,6 +836,8 @@ namespace osmscout {
           nodeIds.insert(block[w]->GetNodeId(n));
         }
       }
+
+      progress.SetAction("Loading "+NumberToString(nodeIds.size())+" nodes");
 
       coords.reserve(nodeIds.size());
 
