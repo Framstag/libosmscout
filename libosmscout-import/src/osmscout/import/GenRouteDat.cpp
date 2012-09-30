@@ -667,6 +667,8 @@ namespace osmscout {
             int    currentNode=0;
             double distance;
 
+            // In path direction
+
             while (currentNode<(int)way->nodes.size() &&
                   way->nodes[currentNode].GetId()!=node->first) {
               currentNode++;
@@ -720,60 +722,65 @@ namespace osmscout {
               routeNode.paths.push_back(path);
             }
 
-            if (!way->IsOneway()) {
-              int prevNode=currentNode-1;
+            // Against path direction
+
+            int prevNode=currentNode-1;
+
+            if (prevNode<0) {
+              prevNode=(int)(way->nodes.size()-1);
+            }
+
+            distance=GetSphericalDistance(way->nodes[currentNode].GetLon(),
+                                          way->nodes[currentNode].GetLat(),
+                                          way->nodes[prevNode].GetLon(),
+                                          way->nodes[prevNode].GetLat());
+
+            while (prevNode!=currentNode &&
+                nodeWayMap.find(way->nodes[prevNode].GetId())==nodeWayMap.end()) {
+              int lastNode=prevNode;
+              prevNode--;
 
               if (prevNode<0) {
                 prevNode=(int)(way->nodes.size()-1);
               }
 
-              distance=GetSphericalDistance(way->nodes[currentNode].GetLon(),
-                                            way->nodes[currentNode].GetLat(),
-                                            way->nodes[prevNode].GetLon(),
-                                            way->nodes[prevNode].GetLat());
+              if (prevNode!=currentNode) {
+                distance+=GetSphericalDistance(way->nodes[lastNode].GetLon(),
+                                               way->nodes[lastNode].GetLat(),
+                                               way->nodes[prevNode].GetLon(),
+                                               way->nodes[prevNode].GetLat());
+              }
+            }
 
-              while (prevNode!=currentNode &&
-                  nodeWayMap.find(way->nodes[prevNode].GetId())==nodeWayMap.end()) {
-                int lastNode=prevNode;
-                prevNode--;
+            if (prevNode!=currentNode &&
+                prevNode!=nextNode &&
+                way->nodes[prevNode].GetId()!=routeNode.id) {
+              RouteNode::Path path;
 
-                if (prevNode<0) {
-                  prevNode=(int)(way->nodes.size()-1);
-                }
+              path.id=way->nodes[prevNode].GetId();
+              path.wayIndex=routeNode.ways.size()-1;
+              path.type=way->GetType();
+              path.maxSpeed=way->GetMaxSpeed();
+              path.grade=way->GetGrade();
+              path.bearing=CalculateEncodedBearing(way,prevNode,nextNode,false);
+              path.flags=CopyFlags(*way);
 
-                if (prevNode!=currentNode) {
-                  distance+=GetSphericalDistance(way->nodes[lastNode].GetLon(),
-                                                 way->nodes[lastNode].GetLat(),
-                                                 way->nodes[prevNode].GetLon(),
-                                                 way->nodes[prevNode].GetLat());
-                }
+              if (way->IsOneway()) {
+                path.flags|=RouteNode::wrongDirectionOneway;
               }
 
-              if (prevNode!=currentNode &&
-                  prevNode!=nextNode &&
-                  way->nodes[prevNode].GetId()!=routeNode.id) {
-                RouteNode::Path path;
+              path.lat=way->nodes[prevNode].GetLat();
+              path.lon=way->nodes[prevNode].GetLon();
+              path.distance=distance;
 
-                path.id=way->nodes[prevNode].GetId();
-                path.wayIndex=routeNode.ways.size()-1;
-                path.type=way->GetType();
-                path.maxSpeed=way->GetMaxSpeed();
-                path.grade=way->GetGrade();
-                path.bearing=CalculateEncodedBearing(way,prevNode,nextNode,false);
-                path.flags=CopyFlags(*way);
-                path.lat=way->nodes[prevNode].GetLat();
-                path.lon=way->nodes[prevNode].GetLon();
-                path.distance=distance;
-
-                routeNode.paths.push_back(path);
-              }
+              routeNode.paths.push_back(path);
             }
           }
           // Normal way routing
           else {
             for (size_t i=0; i<way->nodes.size(); i++) {
               if (way->nodes[i].GetId()==routeNode.id) {
-                if (i>0 && !way->IsOneway()) {
+                if (i>0) {
                   int j=i-1;
 
                   while (j>=0) {
@@ -795,6 +802,11 @@ namespace osmscout {
                     path.grade=way->GetGrade();
                     path.bearing=CalculateEncodedBearing(way,i,j,false);
                     path.flags=CopyFlags(*way);
+
+                    if (way->IsOneway()) {
+                      path.flags|=RouteNode::wrongDirectionOneway;
+                    }
+
                     path.lat=way->nodes[j].GetLat();
                     path.lon=way->nodes[j].GetLon();
 

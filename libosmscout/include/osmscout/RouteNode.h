@@ -38,7 +38,8 @@ namespace osmscout {
   class OSMSCOUT_API RouteNode : public Referencable
   {
   public:
-    const static uint8_t hasAccess = 1 <<  0; //! We do have access rights to this way/area
+    const static uint8_t hasAccess            = 1 << 0; //! We do have access rights to this way/area
+    const static uint8_t wrongDirectionOneway = 1 << 1; //! We are traveling a oneway in the wrong Direction
 
     /**
      * Exclude regarding use of paths. You cannot use the path with the index "targetPath" if you come

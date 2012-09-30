@@ -18,6 +18,7 @@
 */
 
 #include <cmath>
+#include <cstring>
 #include <iostream>
 #include <iomanip>
 #include <list>
@@ -34,16 +35,19 @@
   Examples for the nordrhein-westfalen.osm:
 
   Long:
-  src/Routing ../TravelJinni/ 45756746 1301658778 33879936 388178882
+    45756746 1301658778 33879936 388178882
 
   Medium:
-  src/Routing ../TravelJinni/ 33879936 388178882 38363871 453298626
+    33879936 388178882 38363871 453298626
 
   Short:
-  src/Routing ../TravelJinni/ 33879936 388178882 24922615 270813923
+    33879936 388178882 24922615 270813923
 
   Roundabout
-  src/Routing ../TravelJinni/ 24998462 271758830 42123520 523731341
+    24998462 271758830 42123520 523731341
+
+  Oneway Routing:
+    17427184 431436677 23360047 274386485
 */
 
 static std::string TimeToString(double time)
@@ -368,35 +372,57 @@ static void DumpNameChangedDescription(size_t& lineCount,
 
 int main(int argc, char* argv[])
 {
-  std::string   map;
-  unsigned long startWayId;
-  unsigned long startNodeId;
-  unsigned long targetWayId;
-  unsigned long targetNodeId;
+  osmscout::FastestPathRoutingProfile routingProfile;
+  std::string                         map;
+  unsigned long                       startWayId;
+  unsigned long                       startNodeId;
+  unsigned long                       targetWayId;
+  unsigned long                       targetNodeId;
 
-  if (argc!=6) {
-    std::cerr << "Routing <map directory> <start way id> <start node id> <target way id> <target node id>" << std::endl;
+  int currentArg=1;
+  while (currentArg<argc) {
+    if (strcmp(argv[currentArg],"-r")==0) {
+      routingProfile.SetTravelOnewaysInWrongDirection(true);
+      currentArg++;
+    }
+    else {
+      // No more "special" arguments
+      break;
+    }
+  }
+
+  if (argc-currentArg!=5) {
+    std::cout << "Routing [-r] <map directory> <start way id> <start node id> <target way id> <target node id>" << std::endl;
+    std::cout << " -r  allow using oneways the wrong direction" << std::endl;
     return 1;
   }
 
-  map=argv[1];
+  map=argv[currentArg];
 
-  if (sscanf(argv[2],"%lu",&startWayId)!=1) {
+  currentArg++;
+
+  if (sscanf(argv[currentArg],"%lu",&startWayId)!=1) {
     std::cerr << "start way id is not numeric!" << std::endl;
     return 1;
   }
 
-  if (sscanf(argv[3],"%lu",&startNodeId)!=1) {
+  currentArg++;
+
+  if (sscanf(argv[currentArg],"%lu",&startNodeId)!=1) {
     std::cerr << "start node id is not numeric!" << std::endl;
     return 1;
   }
 
-  if (sscanf(argv[4],"%lu",&targetWayId)!=1) {
+  currentArg++;
+
+  if (sscanf(argv[currentArg],"%lu",&targetWayId)!=1) {
     std::cerr << "target way id is not numeric!" << std::endl;
     return 1;
   }
 
-  if (sscanf(argv[5],"%lu",&targetNodeId)!=1) {
+  currentArg++;
+
+  if (sscanf(argv[currentArg],"%lu",&targetNodeId)!=1) {
     std::cerr << "target node id is not numeric!" << std::endl;
     return 1;
   }
@@ -414,7 +440,6 @@ int main(int argc, char* argv[])
   osmscout::TypeConfig                *typeConfig=router.GetTypeConfig();
 
   //osmscout::ShortestPathRoutingProfile routingProfile;
-  osmscout::FastestPathRoutingProfile routingProfile;
   osmscout::RouteData                 data;
   osmscout::RouteDescription          description;
 

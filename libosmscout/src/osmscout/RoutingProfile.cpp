@@ -32,7 +32,8 @@ namespace osmscout {
   AbstractRoutingProfile::AbstractRoutingProfile()
    : minSpeed(0),
      maxSpeed(0),
-     vehicleMaxSpeed(std::numeric_limits<double>::max())
+     vehicleMaxSpeed(std::numeric_limits<double>::max()),
+     wrongDirectionOneway(false)
   {
     // no code
   }
@@ -40,6 +41,11 @@ namespace osmscout {
   void AbstractRoutingProfile::SetVehicleMaxSpeed(double maxSpeed)
   {
     vehicleMaxSpeed=maxSpeed;
+  }
+
+  void AbstractRoutingProfile::SetTravelOnewaysInWrongDirection(bool wrongDirectionOneway)
+  {
+    this->wrongDirectionOneway=wrongDirectionOneway;
   }
 
   void AbstractRoutingProfile::AddType(TypeId type, double speed)

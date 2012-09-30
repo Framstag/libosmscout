@@ -58,17 +58,25 @@ namespace osmscout {
     double              minSpeed;
     double              maxSpeed;
     double              vehicleMaxSpeed;
+    bool                wrongDirectionOneway;
 
   public:
     AbstractRoutingProfile();
 
     void SetVehicleMaxSpeed(double maxSpeed);
+    void SetTravelOnewaysInWrongDirection(bool wrongDirectionOneway);
 
     void AddType(TypeId type, double speed);
 
     inline bool CanUse(const RouteNode& currentNode,
                        size_t pathIndex) const
     {
+      // Path is a "oneway in wrong direction" path that we cannot use
+      if (!wrongDirectionOneway &&
+          (currentNode.paths[pathIndex].flags & RouteNode::wrongDirectionOneway)) {
+        return false;
+      }
+
       TypeId type=currentNode.paths[pathIndex].type;
 
       return type<speeds.size() && speeds[type]>0.0;
