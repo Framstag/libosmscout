@@ -22,11 +22,20 @@
 
 #include <osmscout/import/Import.h>
 
+#include <list>
+#include <map>
+
+#include <osmscout/util/FileWriter.h>
+#include <osmscout/util/Geometry.h>
+
 namespace osmscout {
 
   class AreaWayIndexGenerator : public ImportModule
   {
   private:
+    typedef std::map<Coord,size_t>                 CoordCountMap;
+    typedef std::map<Coord,std::list<FileOffset> > CoordOffsetsMap;
+
     struct TypeData
     {
       uint32_t   indexLevel;   //! magnification level of index
@@ -50,6 +59,21 @@ namespace osmscout {
                indexEntries>0;
       }
     };
+
+  private:
+    void CalculateStatistics(size_t level,
+                             TypeData& typeData,
+                             const CoordCountMap& cellFillCount);
+    bool FitsIndexCriteria(const ImportParameter& parameter,
+                           Progress& progress,
+                           const TypeInfo& typeInfo,
+                           const TypeData& typeData,
+                           const CoordCountMap& cellFillCount);
+    bool WriteBitmap(Progress& progress,
+                     FileWriter& writer,
+                     const TypeInfo& typeInfo,
+                     const TypeData& typeData,
+                     const CoordOffsetsMap& typeCellOffsets);
 
   public:
     std::string GetDescription() const;
