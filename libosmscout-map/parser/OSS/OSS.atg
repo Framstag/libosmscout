@@ -64,7 +64,7 @@ inline void ToRGBA(const char* str, Color& color)
   else {
     a=1.0;
   }
-  
+
   color=Color(r,g,b,a);
 }
 
@@ -116,7 +116,7 @@ PRODUCTIONS
               	  }*/
                 .)
                 .
-  
+
   WAYORDER    = "ORDER" "WAYS"
                 (. size_t priority=1;.)
                 {
@@ -163,12 +163,12 @@ PRODUCTIONS
                       }
                   .)
                 }
-                .                 
+                .
 
   STYLE<StyleFilter filter>
               = [
                   STYLEFILTER<filter>
-                ]  
+                ]
                 (
                   (
                     "{"
@@ -176,22 +176,22 @@ PRODUCTIONS
                       STYLE<filter>
                     }
                     "}"
-                  )    
+                  )
                   | STYLEDEF<filter>
-                )  
+                )
                 .
-                 
+
   STYLEFILTER<StyleFilter& filter>
               = "["
                    [
                      (.TypeSet types;.)
-                     
+
                      "TYPE"
                      string
                      (.
                        std::string name=Destring(t->val);
                        TypeId      type=config.GetTypeConfig()->GetTypeId(name);
-                  
+
                        if (type==typeIgnore) {
                          std::string e="Unknown type '"+name+"'";
 
@@ -213,7 +213,7 @@ PRODUCTIONS
                        (.
                          std::string name=Destring(t->val);
                          TypeId      type=config.GetTypeConfig()->GetTypeId(name);
-                  
+
                          if (type==typeIgnore) {
                            std::string e="Unknown type '"+name+"'";
 
@@ -230,7 +230,7 @@ PRODUCTIONS
                          }
                        .)
                      }
-                     
+
                      (. filter.SetTypes(types); .)
                    ]
                    [
@@ -240,7 +240,7 @@ PRODUCTIONS
                        MAG<mag>
                        (.
                           size_t level=MagToLevel(mag);
-                          
+
                           if (level<filter.GetMinLevel()) {
                            std::string e="The magnification interval start is not within the parent magnification range";
 
@@ -257,7 +257,7 @@ PRODUCTIONS
                        MAG<mag>
                        (.
                           size_t level=MagToLevel(mag);
-                          
+
                           if (level>filter.GetMaxLevel()) {
                            std::string e="The magnification interval end is not within the parent magnification range";
 
@@ -271,13 +271,13 @@ PRODUCTIONS
                    ]
                 "]"
                 .
-                
+
   STYLEDEF<StyleFilter filter>
               =   NODESTYLEDEF<filter>
                 | WAYSTYLEDEF<filter>
                 | AREASTYLEDEF<filter>
                 .
-                
+
   NODESTYLEDEF<StyleFilter filter>
               = SYNC "NODE" "."
                 (
@@ -287,7 +287,7 @@ PRODUCTIONS
                 | NODEICONSTYLE<filter>
                 )
                 .
-                
+
   NODELABELSTYLE<StyleFilter filter>
               = SYNC "LABEL"
                 [
@@ -295,48 +295,48 @@ PRODUCTIONS
                 ]
                 (.
                   LabelStyleList labelStyles;
-                
-                  config.GetNodeNameLabelStyles(filter,labelStyles); 
+
+                  config.GetNodeNameLabelStyles(filter,labelStyles);
                 .)
                 SYNC "{"
                 {
                   LABELDEF<labelStyles>
                 }
                 SYNC "}"
-                .  
+                .
 
   NODEREFSTYLE<StyleFilter filter>
-              = SYNC "REF"  
+              = SYNC "REF"
                 [
                   STYLEFILTER<filter>
                 ]
                 (.
                   LabelStyleList labelStyles;
-                    
-                  config.GetNodeRefLabelStyles(filter,labelStyles); 
+
+                  config.GetNodeRefLabelStyles(filter,labelStyles);
                 .)
                 SYNC "{"
                 {
                 	REFDEF<labelStyles>
                 }
-                SYNC "}"  
+                SYNC "}"
                 .
 
   NODESYMBOLSTYLE<StyleFilter filter>
-              = SYNC "SYMBOL"  
+              = SYNC "SYMBOL"
                 [
                   STYLEFILTER<filter>
                 ]
                 (.
                   SymbolStyleList symbolStyles;
-                    
-                  config.GetNodeSymbolStyles(filter,symbolStyles); 
+
+                  config.GetNodeSymbolStyles(filter,symbolStyles);
                 .)
                 SYNC "{"
                 {
                   SYMBOLDEF<symbolStyles>
                 }
-                SYNC "}"  
+                SYNC "}"
                 .
 
   NODEICONSTYLE<StyleFilter filter>
@@ -346,16 +346,16 @@ PRODUCTIONS
                 ]
                 (.
                   IconStyleList iconStyles;
-                    
-                  config.GetNodeIconStyles(filter,iconStyles); 
+
+                  config.GetNodeIconStyles(filter,iconStyles);
                 .)
                 SYNC "{"
                 {
                   ICONDEF<iconStyles>
                 }
-                SYNC "}"  
+                SYNC "}"
                 .
-               
+
   WAYSTYLEDEF<StyleFilter filter>
               = SYNC "WAY"
                 (
@@ -366,22 +366,22 @@ PRODUCTIONS
                   |  WAYREFSTYLE<filter>
                   )
                 )
-                .  
-                
+                .
+
   WAYSTYLE<StyleFilter filter>
               = [
                   STYLEFILTER<filter>
                 ]
                 (.
                   LineStyleList lineStyles;
-                    
-                  config.GetWayLineStyles(filter,lineStyles); 
+
+                  config.GetWayLineStyles(filter,lineStyles);
                 .)
                 SYNC "{"
                 {
                    LINEDEF<lineStyles>
                 }
-                SYNC "}"   
+                SYNC "}"
                    .
 
   WAYLABELSTYLE<StyleFilter filter>
@@ -391,14 +391,14 @@ PRODUCTIONS
                 ]
                 (.
                   LabelStyleList labelStyles;
-                    
-                  config.GetWayNameLabelStyles(filter,labelStyles); 
+
+                  config.GetWayNameLabelStyles(filter,labelStyles);
                 .)
                 "{"
                 {
                   LABELDEF<labelStyles>
                 }
-                "}"  
+                "}"
                 .
 
   WAYREFSTYLE<StyleFilter filter>
@@ -408,16 +408,16 @@ PRODUCTIONS
                 ]
                 (.
                   LabelStyleList labelStyles;
-                    
-                  config.GetWayRefLabelStyles(filter,labelStyles); 
+
+                  config.GetWayRefLabelStyles(filter,labelStyles);
                 .)
                 SYNC "{"
                 {
                   LABELDEF<labelStyles>
                 }
-                SYNC "}"  
+                SYNC "}"
                 .
-              
+
   AREASTYLEDEF<StyleFilter filter>
               = SYNC "AREA"
                 (
@@ -429,23 +429,23 @@ PRODUCTIONS
                   | AREAICONSTYLE<filter>
                   )
                 )
-                .  
-                
+                .
+
   AREASTYLE<StyleFilter filter>
               = [
                   STYLEFILTER<filter>
                 ]
-                  
+
                 (.
                   FillStyleList fillStyles;
-                    
-                  config.GetAreaFillStyles(filter,fillStyles); 
+
+                  config.GetAreaFillStyles(filter,fillStyles);
                 .)
-                SYNC "{"  
+                SYNC "{"
                 {
                   FILLDEF<fillStyles>
                 }
-                SYNC "}"  
+                SYNC "}"
                 .
 
   AREALABELSTYLE<StyleFilter filter>
@@ -455,14 +455,14 @@ PRODUCTIONS
                 ]
                 (.
                   LabelStyleList labelStyles;
-                
-                  config.GetAreaLabelStyles(filter,labelStyles); 
+
+                  config.GetAreaLabelStyles(filter,labelStyles);
                 .)
-                SYNC "{"  
+                SYNC "{"
                 {
                   LABELDEF<labelStyles>
                 }
-                SYNC "}"  
+                SYNC "}"
                 .
 
   AREASYMBOLSTYLE<StyleFilter filter>
@@ -472,14 +472,14 @@ PRODUCTIONS
                 ]
                 (.
                   SymbolStyleList symbolStyles;
-                 
-                  config.GetAreaSymbolStyles(filter,symbolStyles); 
+
+                  config.GetAreaSymbolStyles(filter,symbolStyles);
                 .)
-                SYNC "{"  
+                SYNC "{"
                 {
                   SYMBOLDEF<symbolStyles>
                 }
-                SYNC "}"  
+                SYNC "}"
                 .
 
   AREAICONSTYLE<StyleFilter filter>
@@ -489,14 +489,14 @@ PRODUCTIONS
                 ]
                 (.
                   IconStyleList iconStyles;
-                
-                  config.GetAreaIconStyles(filter,iconStyles); 
+
+                  config.GetAreaIconStyles(filter,iconStyles);
                 .)
-                SYNC "{"  
+                SYNC "{"
                 {
                   ICONDEF<iconStyles>
                 }
-                SYNC "}"  
+                SYNC "}"
                 .
 
 
@@ -508,10 +508,10 @@ PRODUCTIONS
                      for (LineStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       LineStyleRef style(*s);   
-                          
+                       LineStyleRef style(*s);
+
                   	   style->SetLineColor(lineColor);
-                  	 }  
+                  	 }
                   .)
                 | (. Color alternateColor; .)
                   "altColor" ":" COLOR<alternateColor> WEAK ";"               // OBSOLETE!
@@ -520,9 +520,9 @@ PRODUCTIONS
                           s!=styles.end();
                           ++s) {
                        LineStyleRef style(*s);
-                          
+
                   	   style->SetAlternateColor(alternateColor);
-                  	 }  
+                  	 }
                   .)
                 | (. Color outlineColor;.)
                   "outlineColor" ":" COLOR<outlineColor> WEAK ";"
@@ -531,9 +531,9 @@ PRODUCTIONS
                           s!=styles.end();
                           ++s) {
                        LineStyleRef style(*s);
-                          
+
                   	   style->SetOutlineColor(outlineColor);
-                  	 }  
+                  	 }
                   .)
                 | (.
                     std::vector<double> dashes;
@@ -550,7 +550,7 @@ PRODUCTIONS
                           s!=styles.end();
                           ++s) {
                        LineStyleRef style(*s);
-                          
+
                        style->SetDashes(dashes);
                      }
                   .)
@@ -562,9 +562,9 @@ PRODUCTIONS
                           s!=styles.end();
                           ++s) {
                        LineStyleRef style(*s);
-                          
+
                   	   style->SetGapColor(gapColor);
-                  	 }  
+                  	 }
                   .)
                 | (. double displayWidth; .)
                   "displayWidth" ":"  DISPLAYSIZE<displayWidth> WEAK ";"
@@ -573,9 +573,9 @@ PRODUCTIONS
                           s!=styles.end();
                           ++s) {
                        LineStyleRef style(*s);
-                          
+
                   	   style->SetDisplayWidth(displayWidth);
-                  	 }  
+                  	 }
                   .)
                 | (. double width; .)
                   "width" ":" MAPSIZE<width> WEAK ";"
@@ -584,9 +584,20 @@ PRODUCTIONS
                           s!=styles.end();
                           ++s) {
                        LineStyleRef style(*s);
-                          
+
                   	   style->SetWidth(width);
-                  	 }  
+                  	 }
+                  .)
+                | (. LineStyle::CapStyle capStyle; .)
+                  "cap" ":" CAPSTYLE<capStyle> WEAK ";"
+                  (.
+                     for (LineStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       LineStyleRef style(*s);
+
+                  	   style->SetCapStyle(capStyle);
+                  	 }
                   .)
                 | (. double outline; .)
                   "outline" ":" DISPLAYSIZE<outline> WEAK ";"
@@ -595,9 +606,9 @@ PRODUCTIONS
                           s!=styles.end();
                           ++s) {
                        LineStyleRef style(*s);
-                          
+
                   	   style->SetOutline(outline);
-                  	 }  
+                  	 }
                   .)
                 )
                 .
@@ -611,9 +622,9 @@ PRODUCTIONS
                           s!=styles.end();
                           ++s) {
                        FillStyleRef style(*s);
-                          
+
                   	   style->SetFillColor(fillColor);
-                  	 }  
+                  	 }
                   .)
                 | (. std::string patternName; .)
                   "pattern" ":" string
@@ -624,9 +635,9 @@ PRODUCTIONS
                           s!=styles.end();
                           ++s) {
                        FillStyleRef style(*s);
-                          
+
                   	   style->SetPattern(patternName);
-                  	 }  
+                  	 }
                   .)
                 | (. Mag minMag; .)
                   "patternMinMag" ":" MAG<minMag> WEAK ";"
@@ -635,9 +646,9 @@ PRODUCTIONS
                           s!=styles.end();
                           ++s) {
                        FillStyleRef style(*s);
-                          
+
                   	   style->SetPatternMinMag(minMag);
-                  	 }  
+                  	 }
                   .)
                 | (. Color borderColor; .)
                   "borderColor" ":" COLOR<borderColor> WEAK ";"
@@ -646,9 +657,9 @@ PRODUCTIONS
                           s!=styles.end();
                           ++s) {
                        FillStyleRef style(*s);
-                          
+
                   	   style->SetBorderColor(borderColor);
-                  	 }  
+                  	 }
                   .)
                 | (. double width; .)
 	              "borderWidth" ":" DISPLAYSIZE<width> WEAK ";"
@@ -657,9 +668,9 @@ PRODUCTIONS
                           s!=styles.end();
                           ++s) {
                        FillStyleRef style(*s);
-                          
+
                   	   style->SetBorderWidth(width);
-                  	 }  
+                  	 }
                   .)
                 | (.
                     std::vector<double> dashes;
@@ -676,12 +687,12 @@ PRODUCTIONS
                           s!=styles.end();
                           ++s) {
                        FillStyleRef style(*s);
-                       
+
                        style->SetBorderDashes(dashes);
-                     }  
+                     }
                   .)
                   WEAK ";"
-                )  
+                )
                 .
 
   LABELDEF<LabelStyleList& styles>
@@ -692,10 +703,10 @@ PRODUCTIONS
                      for (LabelStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       LabelStyleRef style(*s);   
-                       
+                       LabelStyleRef style(*s);
+
                   	   style->SetStyle(labelStyle);
-                  	 }  
+                  	 }
                   .)
                 | (. Color textColor; .)
                   "color" ":" COLOR<textColor> WEAK ";"
@@ -703,10 +714,10 @@ PRODUCTIONS
                      for (LabelStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       LabelStyleRef style(*s);   
-                       
+                       LabelStyleRef style(*s);
+
                   	   style->SetTextColor(textColor);
-                  	 }  
+                  	 }
                   .)
                 | (. Color bgColor; .)
                   "backgroundColor" ":" COLOR<bgColor> WEAK ";"
@@ -714,10 +725,10 @@ PRODUCTIONS
                      for (LabelStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       LabelStyleRef style(*s);   
-                       
+                       LabelStyleRef style(*s);
+
                   	   style->SetBgColor(bgColor);
-                  	 }  
+                  	 }
                   .)
                 | (. Color borderColor; .)
 	              "borderColor" ":" COLOR<borderColor> WEAK ";"
@@ -725,10 +736,10 @@ PRODUCTIONS
                      for (LabelStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       LabelStyleRef style(*s);   
-                       
+                       LabelStyleRef style(*s);
+
                   	   style->SetBorderColor(borderColor);
-                  	 }  
+                  	 }
                   .)
                 | (. double size; .)
                   "size" ":" DOUBLE<size> WEAK ";"
@@ -736,10 +747,10 @@ PRODUCTIONS
                      for (LabelStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       LabelStyleRef style(*s);   
-                       
+                       LabelStyleRef style(*s);
+
                   	   style->SetSize(size);
-                  	 }  
+                  	 }
                   .)
                 | (. Mag scaleMag; .)
                   "scaleMag" ":" MAG<scaleMag> WEAK ";"
@@ -747,10 +758,10 @@ PRODUCTIONS
                      for (LabelStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       LabelStyleRef style(*s);   
-                       
+                       LabelStyleRef style(*s);
+
                   	   style->SetScaleAndFadeMag(scaleMag);
-                  	 }  
+                  	 }
                   .)
                 | (. size_t priority; .)
                   "priority" ":" INTEGER<priority> WEAK ";"
@@ -759,15 +770,15 @@ PRODUCTIONS
                       for (LabelStyleList::iterator s=styles.begin();
                            s!=styles.end();
                            ++s) {
-                        LabelStyleRef style(*s);   
-                       
+                        LabelStyleRef style(*s);
+
                   	    style->SetPriority((uint8_t)priority);
-                  	  }  
+                  	  }
 	                }
 	                else {
 	                  std::string e="Priority must be in the interval [0,"+
 	                                NumberToString(std::numeric_limits<uint8_t>::max())+"[";
-	                                
+
 	                  SemErr(e.c_str());
 	                }
 	               .)
@@ -779,10 +790,10 @@ PRODUCTIONS
                   for (LabelStyleList::iterator s=styles.begin();
                        s!=styles.end();
                        ++s) {
-                    LabelStyleRef style(*s);   
-                       
+                    LabelStyleRef style(*s);
+
                     style->SetStyle(LabelStyle::plate);
-                  }  
+                  }
                 .)
                 (
                   (. LabelStyle::Style labelStyle; .)
@@ -791,10 +802,10 @@ PRODUCTIONS
                      for (LabelStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       LabelStyleRef style(*s);   
-                       
+                       LabelStyleRef style(*s);
+
                   	   style->SetStyle(labelStyle);
-                  	 }  
+                  	 }
                   .)
                 | (. Color textColor; .)
                   "color" ":" COLOR<textColor> WEAK ";"
@@ -802,10 +813,10 @@ PRODUCTIONS
                      for (LabelStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       LabelStyleRef style(*s);   
-                       
+                       LabelStyleRef style(*s);
+
                   	   style->SetTextColor(textColor);
-                  	 }  
+                  	 }
                   .)
                 | (. Color bgColor; .)
                   "backgroundColor" ":" COLOR<bgColor> WEAK ";"
@@ -813,10 +824,10 @@ PRODUCTIONS
                      for (LabelStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       LabelStyleRef style(*s);   
-                       
+                       LabelStyleRef style(*s);
+
                   	   style->SetBgColor(bgColor);
-                  	 }  
+                  	 }
                   .)
                 | (. Color borderColor; .)
 	              "borderColor" ":" COLOR<borderColor> WEAK ";"
@@ -824,10 +835,10 @@ PRODUCTIONS
                      for (LabelStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       LabelStyleRef style(*s);   
-                       
+                       LabelStyleRef style(*s);
+
                   	   style->SetBorderColor(borderColor);
-                  	 }  
+                  	 }
                   .)
                 | (. double size; .)
                   "size" ":" DOUBLE<size> WEAK ";"
@@ -835,10 +846,10 @@ PRODUCTIONS
                      for (LabelStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       LabelStyleRef style(*s);   
-                       
+                       LabelStyleRef style(*s);
+
                   	   style->SetSize(size);
-                  	 }  
+                  	 }
                   .)
                 | (. Mag scaleMag; .)
                   "scaleMag" ":" MAG<scaleMag> WEAK ";"
@@ -846,10 +857,10 @@ PRODUCTIONS
                      for (LabelStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       LabelStyleRef style(*s);   
-                       
+                       LabelStyleRef style(*s);
+
                   	   style->SetScaleAndFadeMag(scaleMag);
-                  	 }  
+                  	 }
                   .)
                 | (. size_t priority; .)
                   "priority" ":" INTEGER<priority> WEAK ";"
@@ -858,15 +869,15 @@ PRODUCTIONS
                       for (LabelStyleList::iterator s=styles.begin();
                            s!=styles.end();
                            ++s) {
-                        LabelStyleRef style(*s);   
-                       
+                        LabelStyleRef style(*s);
+
                   	    style->SetPriority((uint8_t)priority);
-                  	  }  
+                  	  }
 	                }
 	                else {
 	                  std::string e="Priority must be in the interval [0,"+
 	                                NumberToString(std::numeric_limits<uint8_t>::max())+"[";
-	                                
+
 	                  SemErr(e.c_str());
 	                }
 	               .)
@@ -881,10 +892,10 @@ PRODUCTIONS
                      for (SymbolStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       SymbolStyleRef style(*s);   
-                       
+                       SymbolStyleRef style(*s);
+
                   	   style->SetStyle(symbolStyle);
-                  	 }  
+                  	 }
                   .)
                 | (. Color fillColor; .)
                   "color" ":" COLOR<fillColor> WEAK ";"
@@ -892,10 +903,10 @@ PRODUCTIONS
                      for (SymbolStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       SymbolStyleRef style(*s);   
-                       
+                       SymbolStyleRef style(*s);
+
                   	   style->SetFillColor(fillColor);
-                  	 }  
+                  	 }
                   .)
                 | (. double size; .)
                   "size" ":" DOUBLE<size> WEAK ";"
@@ -903,12 +914,12 @@ PRODUCTIONS
                      for (SymbolStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       SymbolStyleRef style(*s);   
-                       
+                       SymbolStyleRef style(*s);
+
                   	   style->SetSize(size);
-                  	 }  
+                  	 }
                   .)
-                )  
+                )
                 .
 
   ICONDEF<IconStyleList& styles>
@@ -921,13 +932,20 @@ PRODUCTIONS
                      for (IconStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       IconStyleRef style(*s);   
-                       
+                       IconStyleRef style(*s);
+
                   	   style->SetIconName(name);
-                  	 }  
+                  	 }
                   .)
                 )
                 .
+
+  CAPSTYLE<LineStyle::CapStyle& style>
+              = (
+                  "butt"    (. style=LineStyle::capButt; .)
+                | "round"   (. style=LineStyle::capRound; .)
+                | "square"  (. style=LineStyle::capSquare; .)
+                ).
 
   LABELSTYLE<LabelStyle::Style& style>
               = (
@@ -974,11 +992,11 @@ PRODUCTIONS
                | "block"     (. mag=magBlock; .)
                .
 
-  /** Size in units of screen (currently millimeter) */ 
+  /** Size in units of screen (currently millimeter) */
   DISPLAYSIZE <double& value>
               = DOUBLE<value> "mm".
-              
-  /** Size in units of map (currently meter) */ 
+
+  /** Size in units of map (currently meter) */
   MAPSIZE <double& value>
               = DOUBLE<value> "m".
 

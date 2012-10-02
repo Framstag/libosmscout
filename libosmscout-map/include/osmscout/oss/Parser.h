@@ -163,7 +163,7 @@ inline void ToRGBA(const char* str, Color& color)
   else {
     a=1.0;
   }
-  
+
   color=Color(r,g,b,a);
 }
 
@@ -207,6 +207,7 @@ inline void ToRGBA(const char* str, Color& color)
 	void DOUBLE(double& value);
 	void DISPLAYSIZE(double& value);
 	void MAPSIZE(double& value);
+	void CAPSTYLE(LineStyle::CapStyle& style);
 	void LABELSTYLE(LabelStyle::Style& style);
 	void INTEGER(size_t& value);
 	void SYMBOLSTYLE(SymbolStyle::Style& style);

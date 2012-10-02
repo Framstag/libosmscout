@@ -85,16 +85,16 @@ namespace osmscout {
                   const Color& color,
                   double width,
                   const std::vector<double>& dash,
-                  CapStyle startCap,
-                  CapStyle endCap,
+                  LineStyle::CapStyle startCap,
+                  LineStyle::CapStyle endCap,
                   size_t transStart, size_t transEnd);
 
     void DrawPath(const Projection& projection,
                   const MapParameter& parameter,
                   const std::string& styleName,
                   double width,
-                  CapStyle startCap,
-                  CapStyle endCap,
+                  LineStyle::CapStyle startCap,
+                  LineStyle::CapStyle endCap,
                   size_t transStart, size_t transEnd);
 
     void DrawWayOutline(const StyleConfig& styleConfig,

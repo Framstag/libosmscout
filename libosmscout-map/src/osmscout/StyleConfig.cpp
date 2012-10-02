@@ -33,6 +33,7 @@ namespace osmscout {
      displayWidth(0),
      width(0),
      fixedWidth(false),
+     capStyle(capRound),
      outline(0)
   {
     // no code
@@ -97,6 +98,13 @@ namespace osmscout {
   LineStyle& LineStyle::SetFixedWidth(bool fixedWidth)
   {
     this->fixedWidth=fixedWidth;
+
+    return *this;
+  }
+
+  LineStyle& LineStyle::SetCapStyle(CapStyle capStyle)
+  {
+    this->capStyle=capStyle;
 
     return *this;
   }

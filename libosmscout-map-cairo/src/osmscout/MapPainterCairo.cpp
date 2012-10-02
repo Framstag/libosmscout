@@ -774,19 +774,22 @@ namespace osmscout {
                                  const Color& color,
                                  double width,
                                  const std::vector<double>& dash,
-                                 CapStyle startCap,
-                                 CapStyle endCap,
+                                 LineStyle::CapStyle startCap,
+                                 LineStyle::CapStyle endCap,
                                  size_t transStart, size_t transEnd)
   {
     SetLineAttributes(color,width,dash);
 
-    if (startCap==capRound &&
-        endCap==capRound &&
-        dash.empty()) {
-      cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
+   if (startCap==LineStyle::capButt ||
+       endCap==LineStyle::capButt) {
+      cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
+    }
+    else if (startCap==LineStyle::capSquare ||
+             endCap==LineStyle::capSquare) {
+      cairo_set_line_cap(draw,CAIRO_LINE_CAP_SQUARE);
     }
     else {
-      cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
+      cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
     }
 
     for (size_t i=transStart; i<=transEnd; i++) {
@@ -805,10 +808,10 @@ namespace osmscout {
 
     cairo_stroke(draw);
 
-    if ((startCap==capRound || endCap==capRound) &&
+    if ((startCap==LineStyle::capRound || endCap==LineStyle::capRound) &&
         cairo_get_line_cap(draw)!=CAIRO_LINE_CAP_ROUND)
     {
-      if (startCap==capRound) {
+      if (startCap==LineStyle::capRound) {
         cairo_new_path(draw);
         cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
         cairo_set_dash(draw,NULL,0,0);
@@ -819,7 +822,7 @@ namespace osmscout {
         cairo_stroke(draw);
       }
 
-      if (endCap==capRound) {
+      if (endCap==LineStyle::capRound) {
         cairo_new_path(draw);
         cairo_set_line_cap(draw,CAIRO_LINE_CAP_ROUND);
         cairo_set_dash(draw,NULL,0,0);

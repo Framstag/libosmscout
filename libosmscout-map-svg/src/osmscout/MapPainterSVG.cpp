@@ -264,8 +264,8 @@ namespace osmscout {
                                const Color& color,
                                double width,
                                const std::vector<double>& dash,
-                               CapStyle startCap,
-                               CapStyle endCap,
+                               LineStyle::CapStyle startCap,
+                               LineStyle::CapStyle endCap,
                                size_t transStart, size_t transEnd)
   {
     stream << "    <polyline fill=\"none\" stroke=\"" << GetColorValue(color) << "\" stroke-width=\"" << width << "\"" << std::endl;
@@ -287,8 +287,8 @@ namespace osmscout {
                                const MapParameter& parameter,
                                const std::string& styleName,
                                double width,
-                               CapStyle startCap,
-                               CapStyle endCap,
+                               LineStyle::CapStyle startCap,
+                               LineStyle::CapStyle endCap,
                                size_t transStart, size_t transEnd)
   {
     stream << "    <polyline class=\"" << styleName  << "\" stroke-width=\"" << width << "\"" << std::endl;
@@ -321,8 +321,8 @@ namespace osmscout {
                  data.lineStyle->GetOutlineColor(),
                  data.outlineWidth,
                  tunnelDash,
-                 data.attributes->StartIsJoint() ? capButt : capRound,
-                 data.attributes->EndIsJoint() ? capButt : capRound,
+                 data.attributes->StartIsJoint() ? LineStyle::capButt : LineStyle::capRound,
+                 data.attributes->EndIsJoint() ? LineStyle::capButt : LineStyle::capRound,
                  data.transStart,data.transEnd);
      }
       else if (projection.GetMagnification()>=10000) {
@@ -333,8 +333,8 @@ namespace osmscout {
                  Color(0.5,0.5,0.5),
                  data.outlineWidth,
                  tunnelDash,
-                 data.attributes->StartIsJoint() ? capButt : capRound,
-                 data.attributes->EndIsJoint() ? capButt : capRound,
+                 data.attributes->StartIsJoint() ? LineStyle::capButt : LineStyle::capRound,
+                 data.attributes->EndIsJoint() ? LineStyle::capButt : LineStyle::capRound,
                  data.transStart,data.transEnd);
       }
       else {
@@ -345,8 +345,8 @@ namespace osmscout {
                  Color(0.5,0.5,0.5),
                  data.outlineWidth,
                  tunnelDash,
-                 data.attributes->StartIsJoint() ? capButt : capRound,
-                 data.attributes->EndIsJoint() ? capButt : capRound,
+                 data.attributes->StartIsJoint() ? LineStyle::capButt : LineStyle::capRound,
+                 data.attributes->EndIsJoint() ? LineStyle::capButt : LineStyle::capRound,
                      data.transStart,data.transEnd);
       }
     }
@@ -357,8 +357,8 @@ namespace osmscout {
                parameter,
                typeConfig->GetTypeInfo(data.attributes->GetType()).GetName()+"_way_outline",
                data.outlineWidth,
-               data.attributes->StartIsJoint() ? capButt : capRound,
-               data.attributes->EndIsJoint() ? capButt : capRound,
+               data.attributes->StartIsJoint() ? LineStyle::capButt : LineStyle::capRound,
+               data.attributes->EndIsJoint() ? LineStyle::capButt : LineStyle::capRound,
                data.transStart,data.transEnd);
     }
 
@@ -383,8 +383,8 @@ namespace osmscout {
                  data.lineStyle->GetGapColor(),
                  data.lineWidth,
                  emptyDash,
-                 capRound,
-                 capRound,
+                 LineStyle::capRound,
+                 LineStyle::capRound,
                  data.transStart,data.transEnd);
       }
 
@@ -393,8 +393,8 @@ namespace osmscout {
                color,
                data.lineWidth,
                data.lineStyle->GetDash(),
-               capRound,
-               capRound,
+               LineStyle::capRound,
+               LineStyle::capRound,
                data.transStart,data.transEnd);
     }
     else {
@@ -405,8 +405,8 @@ namespace osmscout {
                  data.lineStyle->GetGapColor(),
                  data.lineWidth,
                  emptyDash,
-                 capRound,
-                 capRound,
+                 LineStyle::capRound,
+                 LineStyle::capRound,
                  data.transStart,data.transEnd);
       }
 
@@ -414,8 +414,8 @@ namespace osmscout {
                parameter,
                typeConfig->GetTypeInfo(data.attributes->GetType()).GetName()+"_way",
                data.lineWidth,
-               capRound,
-               capRound,
+               LineStyle::capRound,
+               LineStyle::capRound,
                data.transStart,data.transEnd);
 
       if (data.drawBridge) {
@@ -423,16 +423,16 @@ namespace osmscout {
                  parameter,
                  "bridge_marker",
                  1,
-                 capButt,
-                 capButt,
+                 LineStyle::capButt,
+                 LineStyle::capButt,
                  data.par1Start,data.par1End);
 
         DrawPath(projection,
                  parameter,
                  "bridge_marker",
                  1,
-                 capButt,
-                 capButt,
+                 LineStyle::capButt,
+                 LineStyle::capButt,
                  data.par2Start,data.par2End);
       }
     }

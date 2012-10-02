@@ -438,8 +438,8 @@ namespace osmscout {
                                const Color& color,
                                double width,
                                const std::vector<double>& dash,
-                               CapStyle startCap,
-                               CapStyle endCap,
+                               LineStyle::CapStyle startCap,
+                               LineStyle::CapStyle endCap,
                                size_t transStart, size_t transEnd)
   {
     agg::path_storage p;
@@ -463,12 +463,16 @@ namespace osmscout {
 
       stroke.width(width);
 
-      if (startCap==capRound &&
-          endCap==capRound) {
-        stroke.line_cap(agg::round_cap);
+      if (startCap==LineStyle::capButt ||
+          endCap==LineStyle::capButt) {
+        stroke.line_cap(agg::butt_cap);
+      }
+      else if (startCap==LineStyle::capSquare ||
+               endCap==LineStyle::capSquare) {
+        stroke.line_cap(agg::square_cap);
       }
       else {
-        stroke.line_cap(agg::butt_cap);
+        stroke.line_cap(agg::round_cap);
       }
 
       rasterizer->add_path(stroke);
@@ -481,7 +485,17 @@ namespace osmscout {
 
       stroke.width(width);
 
-      stroke.line_cap(agg::butt_cap);
+      if (startCap==LineStyle::capButt ||
+          endCap==LineStyle::capButt) {
+        stroke.line_cap(agg::butt_cap);
+      }
+      else if (startCap==LineStyle::capSquare ||
+               endCap==LineStyle::capSquare) {
+        stroke.line_cap(agg::square_cap);
+      }
+      else {
+        stroke.line_cap(agg::round_cap);
+      }
 
       for (size_t i=0; i<dash.size(); i+=2) {
         dasher.add_dash(dash[i]*width,dash[i+1]*width);

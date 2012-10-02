@@ -389,8 +389,8 @@ namespace osmscout {
                               const Color& color,
                               double width,
                               const std::vector<double>& dash,
-                              CapStyle startCap,
-                              CapStyle endCap,
+                              LineStyle::CapStyle startCap,
+                              LineStyle::CapStyle endCap,
                               size_t transStart, size_t transEnd)
   {
     QPen pen;
@@ -402,13 +402,16 @@ namespace osmscout {
     pen.setWidthF(width);
     pen.setJoinStyle(Qt::RoundJoin);
 
-    if (startCap==capRound &&
-        endCap==capRound &&
-        dash.empty()) {
-      pen.setCapStyle(Qt::RoundCap);
+   if (startCap==LineStyle::capButt ||
+       endCap==LineStyle::capButt) {
+      pen.setCapStyle(Qt::FlatCap);
+    }
+    else if (startCap==LineStyle::capSquare ||
+             endCap==LineStyle::capSquare) {
+      pen.setCapStyle(Qt::SquareCap);
     }
     else {
-      pen.setCapStyle(Qt::FlatCap);
+      pen.setCapStyle(Qt::RoundCap);
     }
 
     if (dash.empty()) {
@@ -461,8 +464,8 @@ namespace osmscout {
     painter->drawPolyline(polygon);*/
 
     if (dash.empty() &&
-        startCap==capRound &&
-        endCap!=capRound) {
+        startCap==LineStyle::capRound &&
+        endCap!=LineStyle::capRound) {
       painter->setBrush(QBrush(QColor::fromRgbF(color.GetR(),
                                                 color.GetG(),
                                                 color.GetB(),
@@ -474,8 +477,8 @@ namespace osmscout {
     }
 
     if (dash.empty() &&
-      endCap==capRound &&
-      startCap!=capRound) {
+      endCap==LineStyle::capRound &&
+      startCap!=LineStyle::capRound) {
       painter->setBrush(QBrush(QColor::fromRgbF(color.GetR(),
                                                 color.GetG(),
                                                 color.GetB(),

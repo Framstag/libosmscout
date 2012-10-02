@@ -231,13 +231,6 @@ namespace osmscout {
   class OSMSCOUT_MAP_API MapPainter
   {
   public:
-    enum CapStyle
-    {
-      capButt,
-      capRound
-    };
-
-  public:
     struct OSMSCOUT_MAP_API WayData
     {
       ObjectRef               ref;
@@ -562,8 +555,8 @@ namespace osmscout {
                           const Color& color,
                           double width,
                           const std::vector<double>& dash,
-                          CapStyle startCap,
-                          CapStyle endCap,
+                          LineStyle::CapStyle startCap,
+                          LineStyle::CapStyle endCap,
                           size_t transStart, size_t transEnd) = 0;
 
     /**

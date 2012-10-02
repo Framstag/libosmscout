@@ -39,6 +39,13 @@ namespace osmscout {
    */
   class OSMSCOUT_MAP_API LineStyle : public Referencable
   {
+  public:
+    enum CapStyle {
+      capButt,
+      capRound,
+      capSquare
+    };
+
   private:
     Color               lineColor;
     Color               alternateColor;
@@ -47,6 +54,7 @@ namespace osmscout {
     double              displayWidth;
     double              width;
     double              fixedWidth;
+    CapStyle            capStyle;
     double              outline;
     std::vector<double> dash;
 
@@ -61,6 +69,7 @@ namespace osmscout {
     LineStyle& SetDisplayWidth(double value);
     LineStyle& SetWidth(double value);
     LineStyle& SetFixedWidth(bool fixedWidth);
+    LineStyle& SetCapStyle(CapStyle capStyle);
     LineStyle& SetOutline(double value);
     LineStyle& SetDashes(const std::vector<double> dashes);
 
@@ -108,6 +117,11 @@ namespace osmscout {
       return fixedWidth;
     }
 
+    inline CapStyle GetCapStyle() const
+    {
+      return capStyle;
+    }
+
     inline double GetOutline() const
     {
       return outline;
@@ -131,7 +145,6 @@ namespace osmscout {
    */
   class OSMSCOUT_MAP_API FillStyle : public Referencable
   {
-  public:
   private:
     Color               fillColor;
     std::string         pattern;

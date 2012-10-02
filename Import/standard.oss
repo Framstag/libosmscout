@@ -155,8 +155,8 @@ OSS
    [TYPE "highway_trunk_link"] WAY { color: #a8daa8; outlineColor: #777777; displayWidth: 0.45mm; width: 18m; }
    [TYPE "highway_tertiary"] WAY { color: #fefeb3; outlineColor: #bfbfbf; altColor: #fefe73; displayWidth: 0.25mm; width: 10m; }
    [TYPE "highway_road"] WAY { color: #ffffff; outlineColor: #bfbfbf; altColor: #888888; displayWidth: 0.1mm; width: 8m; }
-   [TYPE "railway_rail"] WAY {color: #939393; altColor: #777777; outlineColor: #b3b3b3; dash: 3,3; gapColor: #ffffff; displayWidth: 0.25mm;width: 5m; outline: 0.25mm;}
-   [TYPE "route_ferry"] WAY {color: #0000ff; outlineColor: #ffffff50; dash: 1,1; displayWidth: 0.5mm; width: 2m; outline: 0.4mm;}
+   [TYPE "railway_rail"] WAY {color: #939393; altColor: #777777; outlineColor: #b3b3b3; dash: 3,3; cap: butt; gapColor: #ffffff; displayWidth: 0.25mm;width: 5m; outline: 0.25mm;}
+   [TYPE "route_ferry"] WAY {color: #0000ff; outlineColor: #ffffff50; dash: 1,1; cap: butt; displayWidth: 0.5mm; width: 2m; outline: 0.4mm;}
  }
 
  [MAG city-] {
@@ -196,11 +196,11 @@ OSS
  }
 
  [MAG veryClose-] {
-   [TYPE "highway_track"] WAY {color: #90570c; outlineColor: #ffffff50; dash: 3,1; displayWidth: 0.4mm;  outline: 0.4mm;}
+   [TYPE "highway_track"] WAY {color: #90570c; outlineColor: #ffffff50; dash: 3,1; cap: butt; displayWidth: 0.4mm;  outline: 0.4mm;}
    [TYPE "highway_pedestrian"] WAY {color: #ebeaea; outlineColor: #ffffff50; displayWidth: 0.1mm; outline: 0.25mm;}
-   [TYPE "highway_path"] WAY {color: #555555; outlineColor: #ffffff50; dash: 8,2; displayWidth: 0.25mm; outline: 0.25mm;}
-   [TYPE "highway_cycleway"] WAY {color: #4645fa; outlineColor: #ffffff50; dash: 1,1; displayWidth: 0.4mm; outline: 0.4mm; }
-   [TYPE "highway_footway"] WAY {color: #f64762; outlineColor: #ffffff50; dash: 1,1; displayWidth: 0.4mm; outline: 0.4mm; }
+   [TYPE "highway_path"] WAY {color: #555555; outlineColor: #ffffff50; dash: 8,2; cap: butt; displayWidth: 0.25mm; outline: 0.25mm;}
+   [TYPE "highway_cycleway"] WAY {color: #4645fa; outlineColor: #ffffff50; dash: 1,1; cap: butt; displayWidth: 0.4mm; outline: 0.4mm; }
+   [TYPE "highway_footway"] WAY {color: #f64762; outlineColor: #ffffff50; dash: 1,1; cap: butt; displayWidth: 0.4mm; outline: 0.4mm; }
    [TYPE "highway_bridleway"] WAY {color: #90570c; displayWidth: 0.1mm; width: 2m; }
   }
 
@@ -211,7 +211,7 @@ OSS
 
    [TYPE "highway_byway"] WAY {color: #90570c; displayWidth: 0.1mm; width: 2m; }
 
-   [TYPE "highway_steps"] WAY {color: #fe9897; dash: 0.25,0.25; displayWidth: 1.25mm;}
+   [TYPE "highway_steps"] WAY {color: #fe9897; dash: 0.25,0.25; cap: butt; displayWidth: 1.25mm;}
  }
 
  // WAY.REF
