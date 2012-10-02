@@ -20,6 +20,7 @@
 #include <osmscout/util/String.h>
 
 #include <iomanip>
+#include <locale>
 
 #include <osmscout/private/Config.h>
 #include <osmscout/private/Math.h>
@@ -135,7 +136,6 @@ std::string ByteSizeToString(double value)
     {
       std::stringstream buffer;
 
-      buffer.imbue(std::locale(""));
       buffer.setf(std::ios::fixed);
       buffer << std::setprecision(1);
 
