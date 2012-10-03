@@ -349,7 +349,7 @@ namespace osmscout {
            r2!=parts.end();
            ++r2) {
         if (i!=j) {
-          if (IsAreaInArea(r2->nodes,r1->nodes)) {
+          if (IsAreaSubOfArea(r2->nodes,r1->nodes)) {
             state.SetIncluded(i,j);
           }
         }
@@ -771,8 +771,7 @@ namespace osmscout {
     for (std::list<MultipolygonPart>::iterator ring=parts.begin();
         ring!=parts.end();
         ring++) {
-      if (ring->role.ring==0 &&
-          ring->IsArea() &&
+      if (ring->IsArea() &&
           ring->ways.front()->GetType()!=typeIgnore) {
         std::vector<Tag> tags(ring->ways.front()->GetTags());
 
@@ -806,6 +805,7 @@ namespace osmscout {
               ring->role.GetType()==childRing->role.GetType()) {
             childRing->role.attributes.type=typeIgnore;
           }
+
           childRing++;
         }
       }
@@ -819,9 +819,8 @@ namespace osmscout {
           ring++) {
         if (ring->role.ring==0 &&
             ring->IsArea() &&
-            ring->ways.front()->GetType()!=typeIgnore) {
-          if (relation.GetType()==typeIgnore ||
-              relation.GetType()==ring->ways.front()->GetType()) {
+            ring->role.GetType()!=typeIgnore) {
+          if (relation.GetType()==typeIgnore) {
             if (progress.OutputDebug()) {
               progress.Debug("Autodetecting type of multipolygon relation "+NumberToString(relation.GetId())+" as "+NumberToString(relation.GetType()));
             }
@@ -829,7 +828,7 @@ namespace osmscout {
             relation.SetType(ring->ways.front()->GetType());
             ring->role.attributes.type=typeIgnore;
           }
-          else if (ring->ways.front()->GetType()!=typeIgnore) {
+          else if (relation.GetType()!=ring->role.GetType()) {
             progress.Warning("Multipolygon relation "+NumberToString(relation.GetId())+" has conflicting types for outer boundary ("+
                              typeConfig.GetTypeInfo(relation.GetType()).GetName()+ " vs. "+typeConfig.GetTypeInfo(ring->ways.front()->GetType()).GetName()+")");
           }
@@ -862,7 +861,7 @@ namespace osmscout {
         ring++) {
       if (ring->IsArea()) {
         // TODO: We currently blacklist all areas, we only should blacklist all
-        // areas that have a type. Because areas without a type are implicitely blacklisted anyway later on.
+        // areas that have a type. Because areas without a type are implicitly blacklisted anyway later on.
         // However because we change the type of area rings to typeIgnore above we need some bookkeeping for this
         // to work here.
         // On the other hand do not fill the blacklist until you are sure that the relation will not be rejected.
