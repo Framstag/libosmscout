@@ -173,8 +173,8 @@ namespace osmscout {
         rings.push_back(*part);
       }
       else {
-        partsByEnd[part->nodes.front().GetId()].push_back(&(*part));
-        partsByEnd[part->nodes.back().GetId()].push_back(&(*part));
+        partsByEnd[part->role.nodes.front().GetId()].push_back(&(*part));
+        partsByEnd[part->role.nodes.back().GetId()].push_back(&(*part));
       }
     }
 
@@ -221,8 +221,8 @@ namespace osmscout {
         ring.ways=part->ways;
 
         ringParts.push_back(part);
-        nodeCount=part->nodes.size();
-        backId=part->nodes.back().GetId();
+        nodeCount=part->role.nodes.size();
+        backId=part->role.nodes.back().GetId();
 
         while (true) {
           std::map<Id, std::list<MultipolygonPart*> >::iterator match=partsByEnd.find(backId);
@@ -238,17 +238,17 @@ namespace osmscout {
             }
 
             if (otherPart!=match->second.end()) {
-              if (backId==(*otherPart)->nodes.front().GetId()) {
-                backId=(*otherPart)->nodes.back().GetId();
+              if (backId==(*otherPart)->role.nodes.front().GetId()) {
+                backId=(*otherPart)->role.nodes.back().GetId();
               }
               else {
-                backId=(*otherPart)->nodes.front().GetId();
+                backId=(*otherPart)->role.nodes.front().GetId();
               }
 
               ring.ways.push_back((*otherPart)->ways.front());
 
               ringParts.push_back(*otherPart);
-              nodeCount+=(*otherPart)->nodes.size()-1;
+              nodeCount+=(*otherPart)->role.nodes.size()-1;
 
               usedParts.insert(*otherPart);
               match->second.erase(otherPart);
@@ -261,7 +261,7 @@ namespace osmscout {
           break;
         }
 
-        ring.nodes.reserve(nodeCount);
+        ring.role.nodes.reserve(nodeCount);
 
         for (std::list<MultipolygonPart*>::const_iterator p=ringParts.begin();
              p!=ringParts.end();
@@ -269,32 +269,32 @@ namespace osmscout {
           MultipolygonPart* part=*p;
 
           if (p==ringParts.begin()) {
-            for (size_t i=0; i<part->nodes.size(); i++) {
-              ring.nodes.push_back(part->nodes[i]);
+            for (size_t i=0; i<part->role.nodes.size(); i++) {
+              ring.role.nodes.push_back(part->role.nodes[i]);
             }
           }
-          else if (ring.nodes.back().GetId()==part->nodes.front().GetId()) {
-            for (size_t i=1; i<part->nodes.size(); i++) {
-              ring.nodes.push_back(part->nodes[i]);
+          else if (ring.role.nodes.back().GetId()==part->role.nodes.front().GetId()) {
+            for (size_t i=1; i<part->role.nodes.size(); i++) {
+              ring.role.nodes.push_back(part->role.nodes[i]);
             }
           }
           else {
-            for (size_t i=1; i<part->nodes.size(); i++) {
-              size_t idx=part->nodes.size()-1-i;
+            for (size_t i=1; i<part->role.nodes.size(); i++) {
+              size_t idx=part->role.nodes.size()-1-i;
 
-              ring.nodes.push_back(part->nodes[idx]);
+              ring.role.nodes.push_back(part->role.nodes[idx]);
             }
           }
         }
 
         // During concatination we might define a closed ring with start==end, but everywhere else
         // in the code we store areas without repeating the start, so we remove the final node again
-        if (ring.nodes.back().GetId()==ring.nodes.front().GetId()) {
-          ring.nodes.pop_back();
+        if (ring.role.nodes.back().GetId()==ring.role.nodes.front().GetId()) {
+          ring.role.nodes.pop_back();
         }
 
         if (parameter.GetStrictAreas() &&
-            !AreaIsSimple(ring.nodes)) {
+            !AreaIsSimple(ring.role.nodes)) {
           progress.Error("Resolved ring including way "+NumberToString(ring.ways.front()->GetId())+" is not simple for multipolygon relation "+NumberToString(relation.GetId())+
                          " "+relation.GetName());
 
@@ -349,7 +349,7 @@ namespace osmscout {
            r2!=parts.end();
            ++r2) {
         if (i!=j) {
-          if (IsAreaSubOfArea(r2->nodes,r1->nodes)) {
+          if (IsAreaSubOfArea(r2->role.nodes,r1->role.nodes)) {
             state.SetIncluded(i,j);
           }
         }
@@ -481,7 +481,7 @@ namespace osmscout {
         part.role.ring=0;
         part.role.role=member->role;
 
-        part.nodes.reserve(way->GetNodeCount());
+        part.role.nodes.reserve(way->GetNodeCount());
         for (std::vector<Id>::const_iterator id=way->GetNodes().begin();
              id!=way->GetNodes().end();
              ++id) {
@@ -498,7 +498,7 @@ namespace osmscout {
             return false;
           }
 
-          part.nodes.push_back(coordEntry->second);
+          part.role.nodes.push_back(coordEntry->second);
         }
 
         part.ways.push_back(way);
@@ -875,8 +875,6 @@ namespace osmscout {
     for (std::list<MultipolygonPart>::iterator ring=parts.begin();
         ring!=parts.end();
         ring++) {
-      ring->role.nodes=ring->nodes;
-
       assert(!ring->role.nodes.empty());
 
       relation.roles.push_back(ring->role);
