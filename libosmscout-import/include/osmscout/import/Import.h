@@ -88,11 +88,12 @@ namespace osmscout {
     size_t                       waterIndexMinMag;         //! Minimum level of the generated water index
     size_t                       waterIndexMaxMag;         //! Maximum level of the generated water index
 
+    size_t                       optimizationMaxWayCount;  //! Maximum number of ways for one iteration
     size_t                       optimizationMaxMag;       //! Maximum magnification for optimization
     size_t                       optimizationMinMag;       //! Minimum magnification of index for individual type
     size_t                       optimizationCellSizeAverage; //! Average entries per index cell
     size_t                       optimizationCellSizeMax;  //! Maximum number of entries  per index cell
-    TransPolygon::OptimizeMethod optimizationWayMethod; //! what method to use to optimize ways
+    TransPolygon::OptimizeMethod optimizationWayMethod;    //! what method to use to optimize ways
 
     size_t                       routeNodeBlockSize;       //! Number of route nodes loaded during import until ways get resolved
 
@@ -149,6 +150,7 @@ namespace osmscout {
     size_t GetWaterIndexMinMag() const;
     size_t GetWaterIndexMaxMag() const;
 
+    size_t GetOptimizationMaxWayCount() const;
     size_t GetOptimizationMaxMag() const;
     size_t GetOptimizationMinMag() const;
     size_t GetOptimizationCellSizeAverage() const;
@@ -207,6 +209,7 @@ namespace osmscout {
     void SetWaterIndexMinMag(size_t waterIndexMinMag);
     void SetWaterIndexMaxMag(size_t waterIndexMaxMag);
 
+    void SetOptimizationMaxWayCount(size_t optimizationMaxWayCount);
     void SetOptimizationMaxMag(size_t optimizationMaxMag);
     void SetOptimizationMinMag(size_t optimizationMinMag);
     void SetOptimizationCellSizeAverage(size_t optimizationCellSizeAverage);

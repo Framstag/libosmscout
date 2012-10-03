@@ -73,10 +73,11 @@ namespace osmscout {
                      size_t optimizeMaxMap,
                      std::map<TypeId,FileOffset>& typeOffsetMap);
 
-    bool GetWaysToOptimize(Progress& progress,
+    bool GetWaysToOptimize(const ImportParameter& parameter,
+                           Progress& progress,
                            FileScanner& scanner,
-                           TypeId type,
-                           std::list<WayRef>& ways);
+                           std::set<TypeId>& types,
+                           std::vector<std::list<WayRef> >& ways);
 
     void MergeWays(const std::list<WayRef>& ways,
                    std::list<WayRef>& newWays);

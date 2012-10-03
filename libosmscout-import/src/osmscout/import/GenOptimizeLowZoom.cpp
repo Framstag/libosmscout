@@ -30,7 +30,7 @@
 #include <osmscout/util/Transformation.h>
 
 #include <osmscout/private/Math.h>
-
+#include <iostream>
 namespace osmscout
 {
   OptimizeLowZoomGenerator::TypeData::TypeData()
@@ -89,13 +89,17 @@ namespace osmscout
     }
   }
 
-  bool OptimizeLowZoomGenerator::GetWaysToOptimize(Progress& progress,
+  bool OptimizeLowZoomGenerator::GetWaysToOptimize(const ImportParameter& parameter,
+                                                   Progress& progress,
                                                    FileScanner& scanner,
-                                                   TypeId type,
-                                                   std::list<WayRef>& ways)
+                                                   std::set<TypeId>& types,
+                                                   std::vector<std::list<WayRef> >& ways)
   {
-    size_t   nodes=0;
-    uint32_t wayCount=0;
+    uint32_t         wayCount=0;
+    size_t           collectedWaysCount=0;
+    std::set<TypeId> currentTypes(types);
+
+    progress.SetAction("Collecting way data to optimize");
 
     if (!scanner.GotoBegin()) {
       progress.Error("Error while positioning at start of file");
@@ -122,14 +126,40 @@ namespace osmscout
       }
 
       if (!way->IsArea() &&
-          way->GetType()==type &&
+          currentTypes.find(way->GetType())!=currentTypes.end() &&
           way->nodes.size()>=2) {
-        ways.push_back(way);
-        nodes+=way->nodes.size();
+        ways[way->GetType()].push_back(way);
+
+        collectedWaysCount++;
+
+        while (collectedWaysCount>parameter.GetOptimizationMaxWayCount() &&
+               currentTypes.size()>1) {
+          size_t victimType=ways.size();
+
+          for (size_t i=0; i<ways.size(); i++) {
+            if (ways[i].size()>0 &&
+                (victimType>=ways.size() ||
+                 ways[i].size()<ways[victimType].size())) {
+              victimType=i;
+            }
+          }
+
+          if (victimType<ways.size()) {
+            collectedWaysCount-=ways[victimType].size();
+            ways[victimType].clear();
+            currentTypes.erase(victimType);
+          }
+        }
       }
     }
 
-    progress.Info(NumberToString(ways.size())+ " ways, " + NumberToString(nodes)+ " nodes");
+    for (std::set<TypeId>::const_iterator type=currentTypes.begin();
+         type!=currentTypes.end();
+         ++type) {
+      types.erase(*type);
+    }
+
+    progress.SetAction("Collected "+NumberToString(collectedWaysCount)+" ways for "+NumberToString(currentTypes.size())+" types");
 
     return true;
   }
@@ -439,8 +469,6 @@ namespace osmscout
       nodeCount+=way->nodes.size();
     }
 
-    progress.Info(NumberToString(wayCount)+ " ways, "+NumberToString(nodeCount)+ " nodes");
-
     return true;
   }
 
@@ -577,8 +605,6 @@ namespace osmscout
 
     magnification=pow(2.0,(int)parameter.GetOptimizationMaxMag());
 
-    progress.SetAction("Getting types to optimize");
-
     GetTypesToOptimize(typeConfig,types);
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -605,70 +631,80 @@ namespace osmscout
       return false;
     }
 
-    for (std::set<TypeId>::const_iterator type=types.begin();
-         type!=types.end();
-         type++) {
-      std::list<WayRef> ways;
-      std::list<WayRef> newWays;
-      IdFileOffsetMap   offsets;
+    std::vector<std::list<WayRef> > allWays(typeConfig.GetTypes().size());
 
+    while (true) {
       //
       // Load type data
       //
 
-      progress.SetAction("Scanning ways for type '" + typeConfig.GetTypeInfo(*type).GetName() + "' to gather data to optimize");
-
-
-      if (!GetWaysToOptimize(progress,
+      if (!GetWaysToOptimize(parameter,
+                             progress,
                              wayScanner,
-                             *type,
-                             ways))
-      {
+                             types,
+                             allWays)) {
         return false;
       }
 
-      //
-      // Join ways
-      //
+      for (size_t type=0; type<allWays.size(); type++) {
+        if (allWays[type].empty()) {
+          continue;
+        }
 
-      progress.SetAction("Merging ways");
+        progress.SetAction("Handling type "+ typeConfig.GetTypeInfo(type).GetName());
 
-      MergeWays(ways,newWays);
+        //
+        // Join ways
+        //
 
-      ways.clear();
+        std::list<WayRef> newWays;
+        IdFileOffsetMap   offsets;
 
-      if (newWays.empty()) {
-        continue;
+        progress.Info("Merging "+NumberToString(allWays[type].size())+" ways");
+
+        MergeWays(allWays[type],newWays);
+
+        progress.Info("Merged to "+NumberToString(newWays.size())+" ways");
+
+        allWays[type].clear();
+
+        if (newWays.empty()) {
+          continue;
+        }
+
+        GetIndexLevel(parameter,
+                      progress,
+                      newWays,
+                      typesData[type]);
+
+        //
+        // Transform/Optimize the way and store it
+        //
+
+        // TODO: Wee need to make import parameters for the width and the height
+
+        if (!WriteOptimizedWays(progress,
+                                writer,
+                                newWays,
+                                offsets,
+                                800,640,
+                                magnification,
+                                parameter.GetOptimizationWayMethod())) {
+          return false;
+        }
+
+        if (!WriteBitmap(progress,
+                         writer,
+                         typeConfig.GetTypeInfo(type),
+                         newWays,
+                         offsets,
+                         typesData[type])) {
+          return false;
+        }
       }
 
-      GetIndexLevel(parameter,
-                    progress,
-                    newWays,
-                    typesData[*type]);
-
-      //
-      // Transform/Optimize the way and store it
-      //
-
-      // TODO: Wee need to make import parameters for the width and the height
-
-      if (!WriteOptimizedWays(progress,
-                              writer,
-                              newWays,
-                              offsets,
-                              800,640,
-                              magnification,
-                              parameter.GetOptimizationWayMethod())) {
-        return false;
-      }
-
-      if (!WriteBitmap(progress,
-                       writer,
-                       typeConfig.GetTypeInfo(*type),
-                       newWays,
-                       offsets,
-                       typesData[*type])) {
-        return false;
+      if (types.empty()) {
+        break;
       }
     }
 
