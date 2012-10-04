@@ -323,13 +323,17 @@ namespace osmscout {
                                   FileScanner& scanner,
                                   NumericIndex<Id>& rawWayIndex,
                                   const std::set<Id>& ids,
-                                  std::map<Id,RawWayRef>& ways)
+                                  IdRawWayMap& ways)
   {
     std::vector<FileOffset> offsets;
 
     if (!rawWayIndex.GetOffsets(ids,offsets)) {
       return false;
     }
+
+#if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
+    ways.reserve(offsets.size());
+#endif
 
     FileOffset oldPos;
 
@@ -435,10 +439,10 @@ namespace osmscout {
                                   std::multimap<Id,TurnRestrictionRef>& restrictions,
                                   size_t& mergeCount)
   {
-    std::vector<bool>      hasBeenMerged(blockCount, true);
-    std::map<Id,RawWayRef> mergedWays;
-    bool                   somethingHasMerged=true;
-    SilentProgress         silentProgress;
+    std::vector<bool> hasBeenMerged(blockCount, true);
+    IdRawWayMap       mergedWays;
+    bool              somethingHasMerged=true;
+    SilentProgress    silentProgress;
 
     while (somethingHasMerged) {
       somethingHasMerged=false;
@@ -464,7 +468,7 @@ namespace osmscout {
 
       // Now load all candidate ways by id as calculated above
 
-      std::map<Id,RawWayRef> ways;
+      IdRawWayMap ways;
 
       progress.Info("Loading " + NumberToString(allCandidates.size())+ " candidate(s)");
       if (!LoadWays(progress,
@@ -514,7 +518,7 @@ namespace osmscout {
           for (std::set<Id>::const_iterator id=candidates.begin();
               id!=candidates.end();
               ++id) {
-            std::map<Id,RawWayRef>::const_iterator wayEntry;
+            IdRawWayMap::const_iterator wayEntry;
 
             wayEntry=ways.find(*id);
 
@@ -539,7 +543,7 @@ namespace osmscout {
 
             // Assure that we do not work on an old version from disk,
             // but take the local version if we already had done merges on them
-            std::map<Id,RawWayRef>::const_iterator allreadyMergedCandidate=mergedWays.find(candidate->GetId());
+            IdRawWayMap::const_iterator allreadyMergedCandidate=mergedWays.find(candidate->GetId());
 
             if (allreadyMergedCandidate!=mergedWays.end()) {
               candidate=allreadyMergedCandidate->second;

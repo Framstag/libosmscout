@@ -42,6 +42,7 @@ namespace osmscout {
     typedef OSMSCOUT_HASHMAP<Id,std::list<Id> > EndPointWayMap;
     typedef OSMSCOUT_HASHSET<Id>                EndPointAreaSet;
     typedef OSMSCOUT_HASHSET<Id>                BlacklistSet;
+    typedef OSMSCOUT_HASHMAP<Id,RawWayRef>      IdRawWayMap;
 
     bool ReadWayBlacklist(const ImportParameter& parameter,
                           Progress& progress,
@@ -75,7 +76,7 @@ namespace osmscout {
                   FileScanner& scanner,
                   NumericIndex<Id>& rawWayIndex,
                   const std::set<Id>& ids,
-                  std::map<Id,RawWayRef>& ways);
+                  IdRawWayMap& ways);
 
     bool CompareWays(const RawWay& a,
                      const RawWay& b) const;
