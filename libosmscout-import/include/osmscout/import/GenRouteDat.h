@@ -21,8 +21,12 @@
 */
 
 #include <osmscout/NumericIndex.h>
+#include <osmscout/RouteNode.h>
 #include <osmscout/TurnRestriction.h>
 #include <osmscout/Way.h>
+
+#include <osmscout/util/HashMap.h>
+#include <osmscout/util/HashSet.h>
 
 #include <osmscout/import/Import.h>
 
@@ -30,6 +34,9 @@ namespace osmscout {
 
   class RouteDataGenerator : public ImportModule
   {
+  private:
+    typedef std::map<Id,std::list<Id> > NodeIdWayIdMap;
+
   private:
     bool ReadTurnRestrictions(const ImportParameter& parameter,
                               Progress& progress,
@@ -42,24 +49,34 @@ namespace osmscout {
     bool ReadJunctions(const ImportParameter& parameter,
                        Progress& progress,
                        const TypeConfig& typeConfig,
-                       std::set<Id>& junctions);
+                       OSMSCOUT_HASHSET<Id>& junctions);
 
     bool ReadWayEndpoints(const ImportParameter& parameter,
                           Progress& progress,
                           const TypeConfig& typeConfig,
-                          const std::set<Id>& junctions,
-                          std::map<Id,std::list<Id> >& endPointWayMap);
+                          const OSMSCOUT_HASHSET<Id>& junctions,
+                          NodeIdWayIdMap& endPointWayMap);
 
     bool LoadWays(Progress& progress,
                   FileScanner& scanner,
                   NumericIndex<Id>& wayIndex,
                   const std::set<Id>& ids,
-                  std::list<WayRef>& ways);
+                  OSMSCOUT_HASHMAP<Id,WayRef>& waysMap);
 
-    uint8_t CalculateEncodedBearing(const WayRef& way,
+    uint8_t CalculateEncodedBearing(const Way& way,
                                     size_t currentNode,
                                     size_t nextNode,
                                     bool clockwise) const;
+
+    void CalculateAreaPaths(RouteNode& routeNode,
+                            const Way& way,
+                            const NodeIdWayIdMap& nodeWayMap);
+    void CalculateCircularWayPaths(RouteNode& routeNode,
+                                   const Way& way,
+                                   const NodeIdWayIdMap& nodeWayMap);
+    void CalculateWayPaths(RouteNode& routeNode,
+                           const Way& way,
+                           const NodeIdWayIdMap& nodeWayMap);
 
   public:
     std::string GetDescription() const;

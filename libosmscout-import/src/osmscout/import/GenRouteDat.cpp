@@ -26,8 +26,6 @@
 
 #include <osmscout/DataFile.h>
 
-#include <osmscout/RouteNode.h>
-
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/String.h>
@@ -144,7 +142,7 @@ namespace osmscout {
   bool RouteDataGenerator::ReadJunctions(const ImportParameter& parameter,
                                          Progress& progress,
                                          const TypeConfig& typeConfig,
-                                         std::set<Id>& junctions)
+                                         OSMSCOUT_HASHSET<Id>& junctions)
   {
     FileScanner         scanner;
     uint32_t            wayCount=0;
@@ -229,8 +227,8 @@ namespace osmscout {
   bool RouteDataGenerator::ReadWayEndpoints(const ImportParameter& parameter,
                                             Progress& progress,
                                             const TypeConfig& typeConfig,
-                                            const std::set<Id>& junctions,
-                                            std::map<Id,std::list<Id> >& endPointWayMap)
+                                            const OSMSCOUT_HASHSET<Id>& junctions,
+                                            NodeIdWayIdMap& endPointWayMap)
   {
     FileScanner scanner;
     uint32_t    wayCount=0;
@@ -297,7 +295,7 @@ namespace osmscout {
                                     FileScanner& scanner,
                                     NumericIndex<Id>& wayIndex,
                                     const std::set<Id>& ids,
-                                    std::list<WayRef>& ways)
+                                    OSMSCOUT_HASHMAP<Id,WayRef>& waysMap)
   {
     std::vector<FileOffset> offsets;
 
@@ -311,6 +309,10 @@ namespace osmscout {
       progress.Error("Error while getting current file position");
       return false;
     }
+
+#if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
+    waysMap.reserve(offsets.size());
+#endif
 
     for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
          offset!=offsets.end();
@@ -329,7 +331,7 @@ namespace osmscout {
         return false;
       }
 
-      ways.push_back(way);
+      waysMap[way->GetId()]=way;
     }
 
     if (!scanner.SetPos(oldPos)) {
@@ -340,7 +342,7 @@ namespace osmscout {
     return true;
   }
 
-  uint8_t RouteDataGenerator::CalculateEncodedBearing(const WayRef& way,
+  uint8_t RouteDataGenerator::CalculateEncodedBearing(const Way& way,
                                                       size_t currentNode,
                                                       size_t nextNode,
                                                       bool clockwise) const
@@ -349,22 +351,22 @@ namespace osmscout {
     size_t nextNodePrecursor;
 
     if (clockwise) {
-      currentNodeFollower=currentNode==way->nodes.size()-1 ? 0 : currentNode+1;
-      nextNodePrecursor=nextNode>0 ? nextNode-1 :way->nodes.size()-1;
+      currentNodeFollower=currentNode==way.nodes.size()-1 ? 0 : currentNode+1;
+      nextNodePrecursor=nextNode>0 ? nextNode-1 :way.nodes.size()-1;
     }
     else {
-      currentNodeFollower=currentNode>0 ? currentNode-1 :way->nodes.size()-1;
-      nextNodePrecursor=nextNode==way->nodes.size()-1 ? 0 : nextNode+1;
+      currentNodeFollower=currentNode>0 ? currentNode-1 :way.nodes.size()-1;
+      nextNodePrecursor=nextNode==way.nodes.size()-1 ? 0 : nextNode+1;
     }
 
-    double initialBearing=GetSphericalBearingInitial(way->nodes[currentNode].GetLon(),
-                                                     way->nodes[currentNode].GetLat(),
-                                                     way->nodes[currentNodeFollower].GetLon(),
-                                                     way->nodes[currentNodeFollower].GetLat());
-    double finalBearing=GetSphericalBearingInitial(way->nodes[nextNodePrecursor].GetLon(),
-                                                   way->nodes[nextNodePrecursor].GetLat(),
-                                                   way->nodes[nextNode].GetLon(),
-                                                   way->nodes[nextNode].GetLat());
+    double initialBearing=GetSphericalBearingInitial(way.nodes[currentNode].GetLon(),
+                                                     way.nodes[currentNode].GetLat(),
+                                                     way.nodes[currentNodeFollower].GetLon(),
+                                                     way.nodes[currentNodeFollower].GetLat());
+    double finalBearing=GetSphericalBearingInitial(way.nodes[nextNodePrecursor].GetLon(),
+                                                   way.nodes[nextNodePrecursor].GetLat(),
+                                                   way.nodes[nextNode].GetLon(),
+                                                   way.nodes[nextNode].GetLat());
 
     // Transform in 0..360 Degree
 
@@ -374,6 +376,328 @@ namespace osmscout {
     uint8_t bearing=initialBearing/10+100+finalBearing/10;
 
     return bearing;
+  }
+
+  void RouteDataGenerator::CalculateAreaPaths(RouteNode& routeNode,
+                                              const Way& way,
+                                              const NodeIdWayIdMap& nodeWayMap)
+  {
+    int    currentNode=0;
+    double distance;
+
+    // Find current route node in area
+    while (currentNode<(int)way.nodes.size() &&
+          way.nodes[currentNode].GetId()!=routeNode.id) {
+      currentNode++;
+    }
+
+    // Make sure we found it
+    assert(currentNode<(int)way.nodes.size());
+
+    // Find next routing node in order
+
+    int nextNode=currentNode+1;
+
+    if (nextNode>=(int)way.nodes.size()) {
+      nextNode=0;
+    }
+
+    distance=GetSphericalDistance(way.nodes[currentNode].GetLon(),
+                                  way.nodes[currentNode].GetLat(),
+                                  way.nodes[nextNode].GetLon(),
+                                  way.nodes[nextNode].GetLat());
+
+    while (nextNode!=currentNode &&
+           nodeWayMap.find(way.nodes[nextNode].GetId())==nodeWayMap.end()) {
+      int lastNode=nextNode;
+      nextNode++;
+
+      if (nextNode>=(int)way.nodes.size()) {
+        nextNode=0;
+      }
+
+      if (nextNode!=currentNode) {
+        distance+=GetSphericalDistance(way.nodes[lastNode].GetLon(),
+                                       way.nodes[lastNode].GetLat(),
+                                       way.nodes[nextNode].GetLon(),
+                                       way.nodes[nextNode].GetLat());
+      }
+    }
+
+    // Found next routing node in order
+    if (nextNode!=currentNode &&
+        way.nodes[nextNode].GetId()!=routeNode.id) {
+      RouteNode::Path path;
+
+      path.id=way.nodes[nextNode].GetId();
+      path.wayIndex=routeNode.ways.size()-1;
+      path.type=way.GetType();
+      path.maxSpeed=way.GetMaxSpeed();
+      path.grade=way.GetGrade();
+      path.bearing=CalculateEncodedBearing(way,currentNode,nextNode,true);
+      path.flags=CopyFlags(way);
+      path.lat=way.nodes[nextNode].GetLat();
+      path.lon=way.nodes[nextNode].GetLon();
+      path.distance=distance;
+
+      routeNode.paths.push_back(path);
+    }
+
+    // Find next routing node against order
+
+    int prevNode=currentNode-1;
+
+    if (prevNode<0) {
+      prevNode=(int)(way.nodes.size()-1);
+    }
+
+    distance=GetSphericalDistance(way.nodes[currentNode].GetLon(),
+                                  way.nodes[currentNode].GetLat(),
+                                  way.nodes[prevNode].GetLon(),
+                                  way.nodes[prevNode].GetLat());
+
+    while (prevNode!=currentNode &&
+        nodeWayMap.find(way.nodes[prevNode].GetId())==nodeWayMap.end()) {
+      int lastNode=prevNode;
+      prevNode--;
+
+      if (prevNode<0) {
+        prevNode=(int)(way.nodes.size()-1);
+      }
+
+      if (prevNode!=currentNode) {
+        distance+=GetSphericalDistance(way.nodes[lastNode].GetLon(),
+                                       way.nodes[lastNode].GetLat(),
+                                       way.nodes[prevNode].GetLon(),
+                                       way.nodes[prevNode].GetLat());
+      }
+    }
+
+    // Found next routing node against order
+
+    if (prevNode!=currentNode &&
+        prevNode!=nextNode &&
+        way.nodes[prevNode].GetId()!=routeNode.id) {
+      RouteNode::Path path;
+
+      path.id=way.nodes[prevNode].GetId();
+      path.wayIndex=routeNode.ways.size()-1;
+      path.type=way.GetType();
+      path.maxSpeed=way.GetMaxSpeed();
+      path.grade=way.GetGrade();
+      path.bearing=CalculateEncodedBearing(way,currentNode,prevNode,false);
+      path.flags=CopyFlags(way);
+      path.lat=way.nodes[prevNode].GetLat();
+      path.lon=way.nodes[prevNode].GetLon();
+      path.distance=distance;
+
+      routeNode.paths.push_back(path);
+    }
+  }
+
+  void RouteDataGenerator::CalculateCircularWayPaths(RouteNode& routeNode,
+                                                     const Way& way,
+                                                     const NodeIdWayIdMap& nodeWayMap)
+  {
+    int    currentNode=0;
+    double distance;
+
+    // In path direction
+
+    while (currentNode<(int)way.nodes.size() &&
+          way.nodes[currentNode].GetId()!=routeNode.id) {
+      currentNode++;
+    }
+
+    assert(currentNode<(int)way.nodes.size());
+
+    int nextNode=currentNode+1;
+
+    if (nextNode>=(int)way.nodes.size()) {
+      nextNode=0;
+    }
+
+    distance=GetSphericalDistance(way.nodes[currentNode].GetLon(),
+                                  way.nodes[currentNode].GetLat(),
+                                  way.nodes[nextNode].GetLon(),
+                                  way.nodes[nextNode].GetLat());
+
+    while (nextNode!=currentNode &&
+        nodeWayMap.find(way.nodes[nextNode].GetId())==nodeWayMap.end()) {
+      int lastNode=nextNode;
+      nextNode++;
+
+      if (nextNode>=(int)way.nodes.size()) {
+        nextNode=0;
+      }
+
+      if (nextNode!=currentNode) {
+        distance+=GetSphericalDistance(way.nodes[lastNode].GetLon(),
+                                       way.nodes[lastNode].GetLat(),
+                                       way.nodes[nextNode].GetLon(),
+                                       way.nodes[nextNode].GetLat());
+      }
+    }
+
+    if (nextNode!=currentNode &&
+        way.nodes[nextNode].GetId()!=routeNode.id) {
+      RouteNode::Path path;
+
+      path.id=way.nodes[nextNode].GetId();
+      path.wayIndex=routeNode.ways.size()-1;
+      path.type=way.GetType();
+      path.maxSpeed=way.GetMaxSpeed();
+      path.grade=way.GetGrade();
+      path.bearing=CalculateEncodedBearing(way,currentNode,nextNode,true);
+      path.flags=CopyFlags(way);
+      path.lat=way.nodes[nextNode].GetLat();
+      path.lon=way.nodes[nextNode].GetLon();
+      path.distance=distance;
+
+      routeNode.paths.push_back(path);
+    }
+
+    // Against path direction
+
+    int prevNode=currentNode-1;
+
+    if (prevNode<0) {
+      prevNode=(int)(way.nodes.size()-1);
+    }
+
+    distance=GetSphericalDistance(way.nodes[currentNode].GetLon(),
+                                  way.nodes[currentNode].GetLat(),
+                                  way.nodes[prevNode].GetLon(),
+                                  way.nodes[prevNode].GetLat());
+
+    while (prevNode!=currentNode &&
+        nodeWayMap.find(way.nodes[prevNode].GetId())==nodeWayMap.end()) {
+      int lastNode=prevNode;
+      prevNode--;
+
+      if (prevNode<0) {
+        prevNode=(int)(way.nodes.size()-1);
+      }
+
+      if (prevNode!=currentNode) {
+        distance+=GetSphericalDistance(way.nodes[lastNode].GetLon(),
+                                       way.nodes[lastNode].GetLat(),
+                                       way.nodes[prevNode].GetLon(),
+                                       way.nodes[prevNode].GetLat());
+      }
+    }
+
+    if (prevNode!=currentNode &&
+        prevNode!=nextNode &&
+        way.nodes[prevNode].GetId()!=routeNode.id) {
+      RouteNode::Path path;
+
+      path.id=way.nodes[prevNode].GetId();
+      path.wayIndex=routeNode.ways.size()-1;
+      path.type=way.GetType();
+      path.maxSpeed=way.GetMaxSpeed();
+      path.grade=way.GetGrade();
+      path.bearing=CalculateEncodedBearing(way,prevNode,nextNode,false);
+      path.flags=CopyFlags(way);
+
+      if (way.IsOneway()) {
+        path.flags|=RouteNode::wrongDirectionOneway;
+      }
+
+      path.lat=way.nodes[prevNode].GetLat();
+      path.lon=way.nodes[prevNode].GetLon();
+      path.distance=distance;
+
+      routeNode.paths.push_back(path);
+    }
+  }
+
+  void RouteDataGenerator::CalculateWayPaths(RouteNode& routeNode,
+                                             const Way& way,
+                                             const NodeIdWayIdMap& nodeWayMap)
+  {
+    for (size_t i=0; i<way.nodes.size(); i++) {
+      if (way.nodes[i].GetId()==routeNode.id) {
+        if (i>0) {
+          int j=i-1;
+
+          while (j>=0) {
+            if (nodeWayMap.find(way.nodes[j].GetId())!=nodeWayMap.end()) {
+              break;
+            }
+
+            j--;
+          }
+
+          if (j>=0 &&
+              way.nodes[j].GetId()!=routeNode.id) {
+            RouteNode::Path path;
+
+            path.id=way.nodes[j].GetId();
+            path.wayIndex=routeNode.ways.size()-1;
+            path.type=way.GetType();
+            path.maxSpeed=way.GetMaxSpeed();
+            path.grade=way.GetGrade();
+            path.bearing=CalculateEncodedBearing(way,i,j,false);
+            path.flags=CopyFlags(way);
+
+            if (way.IsOneway()) {
+              path.flags|=RouteNode::wrongDirectionOneway;
+            }
+
+            path.lat=way.nodes[j].GetLat();
+            path.lon=way.nodes[j].GetLon();
+
+            path.distance=0.0;
+            for (size_t d=j;d<i; d++) {
+              path.distance+=GetSphericalDistance(way.nodes[d].GetLon(),
+                                                  way.nodes[d].GetLat(),
+                                                  way.nodes[d+1].GetLon(),
+                                                  way.nodes[d+1].GetLat());
+            }
+
+            routeNode.paths.push_back(path);
+          }
+        }
+
+        if (i+1<way.nodes.size()) {
+          size_t j=i+1;
+
+          while (j<way.nodes.size()) {
+            if (nodeWayMap.find(way.nodes[j].GetId())!=nodeWayMap.end()) {
+              break;
+            }
+
+            j++;
+          }
+
+          if (j<way.nodes.size() &&
+              way.nodes[j].GetId()!=routeNode.id) {
+            RouteNode::Path path;
+
+            path.id=way.nodes[j].GetId();
+            path.wayIndex=routeNode.ways.size()-1;
+            path.type=way.GetType();
+            path.maxSpeed=way.GetMaxSpeed();
+            path.grade=way.GetGrade();
+            path.bearing=CalculateEncodedBearing(way,i,j,true);
+            path.flags=CopyFlags(way);
+            path.lat=way.nodes[j].GetLat();
+            path.lon=way.nodes[j].GetLon();
+
+            path.distance=0.0;
+            for (size_t d=i;d<j; d++) {
+              path.distance+=GetSphericalDistance(way.nodes[d].GetLon(),
+                                                  way.nodes[d].GetLat(),
+                                                  way.nodes[d+1].GetLon(),
+                                                  way.nodes[d+1].GetLat());
+            }
+
+            routeNode.paths.push_back(path);
+          }
+        }
+      }
+    }
   }
 
   bool RouteDataGenerator::Import(const ImportParameter& parameter,
@@ -392,8 +716,8 @@ namespace osmscout {
     uint32_t                               writtenRouteNodeCount=0;
     uint32_t                               writtenRoutePathCount=0;
 
-    std::set<Id>                           junctions;
-    std::map<Id,std::list<Id> >            nodeWayMap;
+    OSMSCOUT_HASHSET<Id>                   junctions;
+    NodeIdWayIdMap                         nodeWayMap;
 
     //
     // Handling of restriction relations
@@ -471,9 +795,9 @@ namespace osmscout {
 
     writer.Write(writtenRouteNodeCount);
 
-    std::vector<std::map<Id,std::list<Id> >::iterator> block(parameter.GetRouteNodeBlockSize());
+    std::vector<NodeIdWayIdMap::iterator> block(parameter.GetRouteNodeBlockSize());
 
-    std::map<Id,std::list<Id> >::iterator node=nodeWayMap.begin();
+    NodeIdWayIdMap::iterator node=nodeWayMap.begin();
     while (node!=nodeWayMap.end()) {
 
       // Fill the current block of nodes to be processed
@@ -510,29 +834,23 @@ namespace osmscout {
         continue;
       }
 
+      OSMSCOUT_HASHMAP<Id,WayRef> waysMap;
+
       if (!LoadWays(progress,
                     scanner,
                     wayIndex,
                     wayIds,
-                    ways)) {
+                    waysMap)) {
         return false;
       }
 
+      wayIds.clear();
+
       progress.SetAction("Storing route nodes");
 
-      // Put all ways into a map by id
-
-      std::map<Id,WayRef> waysMap;
-
-      for (std::list<WayRef>::const_iterator way=ways.begin();
-          way!=ways.end();
-          way++) {
-        waysMap[(*way)->GetId()]=*way;
-      }
-
       for (size_t w=0; w<blockCount; w++) {
-        std::map<Id,std::list<Id> >::iterator node=block[w];
-        RouteNode                             routeNode;
+        NodeIdWayIdMap::iterator node=block[w];
+        RouteNode                routeNode;
 
         routeNode.id=node->first;
 
@@ -559,307 +877,21 @@ namespace osmscout {
 
           // Area routing
           if (way->IsArea()) {
-            int    currentNode=0;
-            double distance;
-
-            while (currentNode<(int)way->nodes.size() &&
-                  way->nodes[currentNode].GetId()!=node->first) {
-              currentNode++;
-            }
-
-            assert(currentNode<(int)way->nodes.size());
-
-            int nextNode=currentNode+1;
-
-            if (nextNode>=(int)way->nodes.size()) {
-              nextNode=0;
-            }
-
-            distance=GetSphericalDistance(way->nodes[currentNode].GetLon(),
-                                          way->nodes[currentNode].GetLat(),
-                                          way->nodes[nextNode].GetLon(),
-                                          way->nodes[nextNode].GetLat());
-
-            while (nextNode!=currentNode &&
-                nodeWayMap.find(way->nodes[nextNode].GetId())==nodeWayMap.end()) {
-              int lastNode=nextNode;
-              nextNode++;
-
-              if (nextNode>=(int)way->nodes.size()) {
-                nextNode=0;
-              }
-
-              if (nextNode!=currentNode) {
-                distance+=GetSphericalDistance(way->nodes[lastNode].GetLon(),
-                                               way->nodes[lastNode].GetLat(),
-                                               way->nodes[nextNode].GetLon(),
-                                               way->nodes[nextNode].GetLat());
-              }
-            }
-
-            if (nextNode!=currentNode &&
-                way->nodes[nextNode].GetId()!=routeNode.id) {
-              RouteNode::Path path;
-
-              path.id=way->nodes[nextNode].GetId();
-              path.wayIndex=routeNode.ways.size()-1;
-              path.type=way->GetType();
-              path.maxSpeed=way->GetMaxSpeed();
-              path.grade=way->GetGrade();
-              path.bearing=CalculateEncodedBearing(way,currentNode,nextNode,true);
-              path.flags=CopyFlags(*way);
-              path.lat=way->nodes[nextNode].GetLat();
-              path.lon=way->nodes[nextNode].GetLon();
-              path.distance=distance;
-
-              routeNode.paths.push_back(path);
-            }
-
-            int prevNode=currentNode-1;
-
-            if (prevNode<0) {
-              prevNode=(int)(way->nodes.size()-1);
-            }
-
-            distance=GetSphericalDistance(way->nodes[currentNode].GetLon(),
-                                          way->nodes[currentNode].GetLat(),
-                                          way->nodes[prevNode].GetLon(),
-                                          way->nodes[prevNode].GetLat());
-
-            while (prevNode!=currentNode &&
-                nodeWayMap.find(way->nodes[prevNode].GetId())==nodeWayMap.end()) {
-              int lastNode=prevNode;
-              prevNode--;
-
-              if (prevNode<0) {
-                prevNode=(int)(way->nodes.size()-1);
-              }
-
-              if (prevNode!=currentNode) {
-                distance+=GetSphericalDistance(way->nodes[lastNode].GetLon(),
-                                               way->nodes[lastNode].GetLat(),
-                                               way->nodes[prevNode].GetLon(),
-                                               way->nodes[prevNode].GetLat());
-              }
-            }
-
-            if (prevNode!=currentNode &&
-                prevNode!=nextNode &&
-                way->nodes[prevNode].GetId()!=routeNode.id) {
-              RouteNode::Path path;
-
-              path.id=way->nodes[prevNode].GetId();
-              path.wayIndex=routeNode.ways.size()-1;
-              path.type=way->GetType();
-              path.maxSpeed=way->GetMaxSpeed();
-              path.grade=way->GetGrade();
-              path.bearing=CalculateEncodedBearing(way,currentNode,prevNode,false);
-              path.flags=CopyFlags(*way);
-              path.lat=way->nodes[prevNode].GetLat();
-              path.lon=way->nodes[prevNode].GetLon();
-              path.distance=distance;
-
-              routeNode.paths.push_back(path);
-            }
+            CalculateAreaPaths(routeNode,
+                               *way,
+                               nodeWayMap);
           }
           // Circular way routing (similar to current area routing, but respecting isOneway())
           else if (way->nodes.front().GetId()==way->nodes.back().GetId()) {
-            int    currentNode=0;
-            double distance;
-
-            // In path direction
-
-            while (currentNode<(int)way->nodes.size() &&
-                  way->nodes[currentNode].GetId()!=node->first) {
-              currentNode++;
-            }
-
-            assert(currentNode<(int)way->nodes.size());
-
-            int nextNode=currentNode+1;
-
-            if (nextNode>=(int)way->nodes.size()) {
-              nextNode=0;
-            }
-
-            distance=GetSphericalDistance(way->nodes[currentNode].GetLon(),
-                                          way->nodes[currentNode].GetLat(),
-                                          way->nodes[nextNode].GetLon(),
-                                          way->nodes[nextNode].GetLat());
-
-            while (nextNode!=currentNode &&
-                nodeWayMap.find(way->nodes[nextNode].GetId())==nodeWayMap.end()) {
-              int lastNode=nextNode;
-              nextNode++;
-
-              if (nextNode>=(int)way->nodes.size()) {
-                nextNode=0;
-              }
-
-              if (nextNode!=currentNode) {
-                distance+=GetSphericalDistance(way->nodes[lastNode].GetLon(),
-                                               way->nodes[lastNode].GetLat(),
-                                               way->nodes[nextNode].GetLon(),
-                                               way->nodes[nextNode].GetLat());
-              }
-            }
-
-            if (nextNode!=currentNode &&
-                way->nodes[nextNode].GetId()!=routeNode.id) {
-              RouteNode::Path path;
-
-              path.id=way->nodes[nextNode].GetId();
-              path.wayIndex=routeNode.ways.size()-1;
-              path.type=way->GetType();
-              path.maxSpeed=way->GetMaxSpeed();
-              path.grade=way->GetGrade();
-              path.bearing=CalculateEncodedBearing(way,currentNode,nextNode,true);
-              path.flags=CopyFlags(*way);
-              path.lat=way->nodes[nextNode].GetLat();
-              path.lon=way->nodes[nextNode].GetLon();
-              path.distance=distance;
-
-              routeNode.paths.push_back(path);
-            }
-
-            // Against path direction
-
-            int prevNode=currentNode-1;
-
-            if (prevNode<0) {
-              prevNode=(int)(way->nodes.size()-1);
-            }
-
-            distance=GetSphericalDistance(way->nodes[currentNode].GetLon(),
-                                          way->nodes[currentNode].GetLat(),
-                                          way->nodes[prevNode].GetLon(),
-                                          way->nodes[prevNode].GetLat());
-
-            while (prevNode!=currentNode &&
-                nodeWayMap.find(way->nodes[prevNode].GetId())==nodeWayMap.end()) {
-              int lastNode=prevNode;
-              prevNode--;
-
-              if (prevNode<0) {
-                prevNode=(int)(way->nodes.size()-1);
-              }
-
-              if (prevNode!=currentNode) {
-                distance+=GetSphericalDistance(way->nodes[lastNode].GetLon(),
-                                               way->nodes[lastNode].GetLat(),
-                                               way->nodes[prevNode].GetLon(),
-                                               way->nodes[prevNode].GetLat());
-              }
-            }
-
-            if (prevNode!=currentNode &&
-                prevNode!=nextNode &&
-                way->nodes[prevNode].GetId()!=routeNode.id) {
-              RouteNode::Path path;
-
-              path.id=way->nodes[prevNode].GetId();
-              path.wayIndex=routeNode.ways.size()-1;
-              path.type=way->GetType();
-              path.maxSpeed=way->GetMaxSpeed();
-              path.grade=way->GetGrade();
-              path.bearing=CalculateEncodedBearing(way,prevNode,nextNode,false);
-              path.flags=CopyFlags(*way);
-
-              if (way->IsOneway()) {
-                path.flags|=RouteNode::wrongDirectionOneway;
-              }
-
-              path.lat=way->nodes[prevNode].GetLat();
-              path.lon=way->nodes[prevNode].GetLon();
-              path.distance=distance;
-
-              routeNode.paths.push_back(path);
-            }
+            CalculateCircularWayPaths(routeNode,
+                                      *way,
+                                      nodeWayMap);
           }
           // Normal way routing
           else {
-            for (size_t i=0; i<way->nodes.size(); i++) {
-              if (way->nodes[i].GetId()==routeNode.id) {
-                if (i>0) {
-                  int j=i-1;
-
-                  while (j>=0) {
-                    if (nodeWayMap.find(way->nodes[j].GetId())!=nodeWayMap.end()) {
-                      break;
-                    }
-
-                    j--;
-                  }
-
-                  if (j>=0 &&
-                      way->nodes[j].GetId()!=routeNode.id) {
-                    RouteNode::Path path;
-
-                    path.id=way->nodes[j].GetId();
-                    path.wayIndex=routeNode.ways.size()-1;
-                    path.type=way->GetType();
-                    path.maxSpeed=way->GetMaxSpeed();
-                    path.grade=way->GetGrade();
-                    path.bearing=CalculateEncodedBearing(way,i,j,false);
-                    path.flags=CopyFlags(*way);
-
-                    if (way->IsOneway()) {
-                      path.flags|=RouteNode::wrongDirectionOneway;
-                    }
-
-                    path.lat=way->nodes[j].GetLat();
-                    path.lon=way->nodes[j].GetLon();
-
-                    path.distance=0.0;
-                    for (size_t d=j;d<i; d++) {
-                      path.distance+=GetSphericalDistance(way->nodes[d].GetLon(),
-                                                          way->nodes[d].GetLat(),
-                                                          way->nodes[d+1].GetLon(),
-                                                          way->nodes[d+1].GetLat());
-                    }
-
-                    routeNode.paths.push_back(path);
-                  }
-                }
-
-                if (i+1<way->nodes.size()) {
-                  size_t j=i+1;
-
-                  while (j<way->nodes.size()) {
-                    if (nodeWayMap.find(way->nodes[j].GetId())!=nodeWayMap.end()) {
-                      break;
-                    }
-
-                    j++;
-                  }
-
-                  if (j<way->nodes.size() &&
-                      way->nodes[j].GetId()!=routeNode.id) {
-                    RouteNode::Path path;
-
-                    path.id=way->nodes[j].GetId();
-                    path.wayIndex=routeNode.ways.size()-1;
-                    path.type=way->GetType();
-                    path.maxSpeed=way->GetMaxSpeed();
-                    path.grade=way->GetGrade();
-                    path.bearing=CalculateEncodedBearing(way,i,j,true);
-                    path.flags=CopyFlags(*way);
-                    path.lat=way->nodes[j].GetLat();
-                    path.lon=way->nodes[j].GetLon();
-
-                    path.distance=0.0;
-                    for (size_t d=i;d<j; d++) {
-                      path.distance+=GetSphericalDistance(way->nodes[d].GetLon(),
-                                                          way->nodes[d].GetLat(),
-                                                          way->nodes[d+1].GetLon(),
-                                                          way->nodes[d+1].GetLat());
-                    }
-
-                    routeNode.paths.push_back(path);
-                  }
-                }
-              }
-            }
+            CalculateWayPaths(routeNode,
+                              *way,
+                              nodeWayMap);
           }
         }
 
