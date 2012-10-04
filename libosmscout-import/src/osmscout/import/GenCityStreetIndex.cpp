@@ -36,6 +36,7 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/HashSet.h>
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/String.h>
 
@@ -107,7 +108,7 @@ namespace osmscout {
     */
   static bool GetCityNodes(const ImportParameter& parameter,
                            const TypeConfig& typeConfig,
-                           const std::set<TypeId>& cityIds,
+                           const OSMSCOUT_HASHSET<TypeId>& cityIds,
                            std::list<Node>& cityNodes,
                            Progress& progress)
   {
@@ -175,7 +176,7 @@ namespace osmscout {
     */
   static bool GetCityAreas(const ImportParameter& parameter,
                            const TypeConfig& typeConfig,
-                           const std::set<TypeId>& cityIds,
+                           const OSMSCOUT_HASHSET<TypeId>& cityIds,
                            std::list<Way>& cityAreas,
                            Progress& progress)
   {
@@ -541,7 +542,7 @@ namespace osmscout {
                                         Progress& progress,
                                         const TypeConfig& typeConfig)
   {
-    std::set<TypeId>               cityIds;
+    OSMSCOUT_HASHSET<TypeId>       cityIds;
     TypeId                         boundaryId;
     TypeId                         typeId;
     FileScanner                    scanner;
@@ -747,8 +748,6 @@ namespace osmscout {
 
     progress.SetAction("Inserting boundary relations and areas into area tree");
 
-    StopClock insertAClock;
-
     for (size_t l=1; l<=10; l++) {
       size_t count;
 
@@ -826,10 +825,6 @@ namespace osmscout {
         }
       }
     }
-
-    insertAClock.Stop();
-
-    progress.Info(std::string("Time for insertion: ")+insertAClock.ResultString());
 
     size_t count;
 
