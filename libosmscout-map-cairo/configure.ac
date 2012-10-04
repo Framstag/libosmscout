@@ -64,13 +64,19 @@ PKG_CHECK_MODULES(LIBCAIRO, cairo,
                    AC_SUBST(LIBCAIRO_LIBS)
                    AC_DEFINE(HAVE_LIB_CAIRO,1,[libcairo found])])
 
+PKG_CHECK_MODULES(LIBPANGO, pangocairo,
+                  [AC_SUBST(LIBPANGO_CFLAGS)
+                   AC_SUBST(LIBPANGO_LIBS)
+                   AC_DEFINE(HAVE_LIB_PANGO,1,[libpango found])
+                   AC_DEFINE(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO,1,[libpango found])])
+
 PKG_CHECK_MODULES(LIBPNG,libpng,
                   HASPNG=true
                   [AC_SUBST(LIBPNG_CFLAGS)
                    AC_SUBST(LIBPNG_LIBS)
                    AC_DEFINE(HAVE_LIB_PNG,1,[libpng found])],
                    [HASPNG=false])
-                   
+
 AM_CONDITIONAL(HAVE_LIB_PNG,[test "$HASPNG" = "true"])
 
 

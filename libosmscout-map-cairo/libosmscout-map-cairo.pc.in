@@ -11,10 +11,12 @@ Libs: -L${libdir} \
       -losmscoutmapcairo \
       @LIBOSMSCOUTMAP_LIBS@ \
       @LIBOSMSCOUT_LIBS@ \
+      @LIBPANGO_LIBS@ \
       @LIBCAIRO_LIBS@ \
       @LIBPNG_LIBS@
 Cflags: -I${includedir} \
         @LIBOSMSCOUTMAP_CFLAGS@ \
         @LIBOSMSCOUT_CFLAGS@ \
+        @LIBPANGO_CFLAGS@ \
         @LIBCAIRO_CFLAGS@ \
         @LIBPNG_CFLAGS@

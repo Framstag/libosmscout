@@ -28,6 +28,10 @@
   #include <cairo/cairo.h>
 #endif
 
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+  #include <pango/pangocairo.h>
+#endif
+
 #include <osmscout/private/MapCairoImportExport.h>
 
 #include <osmscout/util/HashMap.h>
@@ -39,16 +43,21 @@ namespace osmscout {
   class OSMSCOUT_MAP_CAIRO_API MapPainterCairo : public MapPainter
   {
   private:
-    typedef OSMSCOUT_HASHMAP<size_t,cairo_scaled_font_t*> FontMap;
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+    typedef PangoFontDescription*          Font;
+#else
+    typedef cairo_scaled_font_t*           Font;
+#endif
+    typedef OSMSCOUT_HASHMAP<size_t,Font>  FontMap;
 
     cairo_t                       *draw;     //! The cairo cairo_t for the mask
     std::vector<cairo_surface_t*> images;    //! vector of cairo surfaces for icons
     std::vector<cairo_pattern_t*> patterns;  //! cairo pattern structure for patterns
-    FontMap                       font;      //! Cached scaled font
+    FontMap                       fonts;     //! Cached scaled font
 
   private:
-    cairo_scaled_font_t* GetScaledFont(const MapParameter& parameter,
-                                       double fontSize);
+    Font GetFont(const MapParameter& parameter,
+                 double fontSize);
 
     void SetLineAttributes(const Color& color,
                            double width,

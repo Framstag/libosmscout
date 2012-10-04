@@ -240,8 +240,9 @@ namespace osmscout {
 
 
   /* Projects the current text path of cr onto the provided path. */
-  static void MapCurrentTextPathOnPath(cairo_t *cr,
+  static void MapCurrentTextPathOnPath(cairo_t *draw,
                                        double xOffset,
+                                       double yOffset,
                                        double textWidth,
                                        double textHeight,
                                        cairo_path_t *path,
@@ -250,17 +251,17 @@ namespace osmscout {
     cairo_path_t *textPath;
     double       *segmentLengths=CalculatePathSegmentLengths(path);
 
-    textPath=cairo_copy_path(cr);
+    textPath=cairo_copy_path(draw);
 
     // Center text on path
     TransformTextOntoPath(textPath,
                           path,
                           (pathLength-textWidth)/2+xOffset,
-                          textHeight,
+                          textHeight-yOffset,
                           segmentLengths);
 
-    cairo_new_path(cr);
-    cairo_append_path(cr,textPath);
+    cairo_new_path(draw);
+    cairo_append_path(draw,textPath);
 
     cairo_path_destroy(textPath);
 
@@ -268,12 +269,56 @@ namespace osmscout {
   }
 
 
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+  static void DrawContourLabelPangoCairo(cairo_t *draw,
+                                         double pathLength,
+                                         PangoLayout *layout,
+                                         const PangoRectangle& extends)
+  {
+    cairo_path_t *path;
+
+    /* Decrease tolerance a bit, since it's going to be magnified */
+    //cairo_set_tolerance (cr, 0.01);
+
+    /* Using cairo_copy_path() here shows our deficiency in handling
+      * Bezier curves, specially around sharper curves.
+      *
+      * Using cairo_copy_path_flat() on the other hand, magnifies the
+      * flattening error with large off-path values. We decreased
+      * tolerance for that reason. Increase tolerance to see that
+      * artifact.
+    */
+
+    // Make a copy of the path of the line we should draw along
+    path=cairo_copy_path_flat(draw);
+
+    // Create a new path for the text we should draw along the curve
+    cairo_new_path(draw);
+    pango_cairo_layout_path(draw,layout);
+
+    // Now transform the text path so that it maps to the contour of the line
+    MapCurrentTextPathOnPath(draw,
+                            extends.x,
+                            1.5*extends.height,
+                            extends.width,
+                            extends.height,
+                            path,
+                            pathLength);
+
+    // Draw the text path
+    cairo_fill(draw);
+
+    cairo_path_destroy(path);
+  }
+
+#else
   static void DrawContourLabelCairo(cairo_t *cr,
                                     double pathLength,
                                     double xOffset,
+                                    double yOffset,
                                     double textWidth,
                                     double textHeight,
-                                    const char *text)
+                                    const std::string& text)
   {
     cairo_path_t *path;
 
@@ -295,11 +340,12 @@ namespace osmscout {
     // Create a new path for the text we should draw along the curve
     cairo_new_path(cr);
     cairo_move_to(cr,0,0);
-    cairo_text_path(cr,text);
+    cairo_text_path(cr,text.c_str());
 
     // Now transform the text path so that it maps to the contour of the line
     MapCurrentTextPathOnPath(cr,
                             xOffset,
+                            yOffset,
                             textWidth,
                             textHeight,
                             path,
@@ -310,6 +356,7 @@ namespace osmscout {
 
     cairo_path_destroy(path);
   }
+#endif
 
   MapPainterCairo::MapPainterCairo()
   {
@@ -334,25 +381,47 @@ namespace osmscout {
       }
     }
 
-    for (FontMap::const_iterator entry=font.begin();
-         entry!=font.end();
+    for (FontMap::const_iterator entry=fonts.begin();
+         entry!=fonts.end();
          ++entry) {
       if (entry->second!=NULL) {
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+        pango_font_description_free(entry->second);
+#else
         cairo_scaled_font_destroy(entry->second);
+#endif
       }
     }
   }
 
-  cairo_scaled_font_t* MapPainterCairo::GetScaledFont(const MapParameter& parameter,
-                                                      double fontSize)
+  MapPainterCairo::Font MapPainterCairo::GetFont(const MapParameter& parameter,
+                                                 double fontSize)
   {
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
     FontMap::const_iterator f;
 
     fontSize=fontSize*ConvertWidthToPixel(parameter,parameter.GetFontSize());
 
-    f=font.find(fontSize);
+    f=fonts.find(fontSize);
 
-    if (f!=font.end()) {
+    if (f!=fonts.end()) {
+      return f->second;
+    }
+
+    PangoFontDescription* font=pango_font_description_new();
+
+    pango_font_description_set_family(font,parameter.GetFontName().c_str());
+    pango_font_description_set_absolute_size(font,fontSize*PANGO_SCALE);
+
+    return fonts.insert(std::make_pair(fontSize,font)).first->second;
+#else
+    FontMap::const_iterator f;
+
+    fontSize=fontSize*ConvertWidthToPixel(parameter,parameter.GetFontSize());
+
+    f=fonts.find(fontSize);
+
+    if (f!=fonts.end()) {
       return f->second;
     }
 
@@ -381,7 +450,8 @@ namespace osmscout {
     cairo_font_options_destroy(options);
     cairo_font_face_destroy(fontFace);
 
-    return font.insert(std::pair<size_t,cairo_scaled_font_t*>(fontSize,scaledFont)).first->second;
+    return fonts.insert(std::make_pair(fontSize,scaledFont)).first->second;
+#endif
   }
 
   void MapPainterCairo::SetLineAttributes(const Color& color,
@@ -500,12 +570,32 @@ namespace osmscout {
                                          double& width,
                                          double& height)
   {
-    cairo_scaled_font_t *font;
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+    Font           font;
+    PangoLayout    *layout=pango_cairo_create_layout(draw);
+    PangoRectangle extends;
+
+    font=GetFont(parameter,
+                 fontSize);
+
+    pango_layout_set_font_description(layout,font);
+    pango_layout_set_text(layout,text.c_str(),text.length());
+
+    pango_layout_get_pixel_extents(layout,&extends,NULL);
+
+    xOff=extends.x;
+    yOff=extends.y;
+    width=extends.width;
+    height=pango_font_description_get_size(font)/PANGO_SCALE;
+
+    g_object_unref(layout);
+#else
+    Font                 font;
     cairo_text_extents_t textExtents;
     cairo_font_extents_t fontExtents;
 
-    font=GetScaledFont(parameter,
-                       fontSize);
+    font=GetFont(parameter,
+                 fontSize);
 
     cairo_scaled_font_extents(font,&fontExtents);
 
@@ -517,6 +607,7 @@ namespace osmscout {
     yOff=textExtents.y_bearing;
     width=textExtents.width;
     height=fontExtents.height;
+#endif
   }
 
   void MapPainterCairo::DrawLabel(const Projection& projection,
@@ -526,11 +617,43 @@ namespace osmscout {
     double               r=label.style->GetTextColor().GetR();
     double               g=label.style->GetTextColor().GetG();
     double               b=label.style->GetTextColor().GetB();
-    cairo_scaled_font_t  *font;
-    cairo_font_extents_t fontExtents;
+    Font                 font=GetFont(parameter,
+                                      label.fontSize);
+;
 
-    font=GetScaledFont(parameter,
-                       label.fontSize);
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+    PangoLayout *layout=pango_cairo_create_layout(draw);
+
+    pango_layout_set_font_description(layout,font);
+    pango_layout_set_text(layout,label.text.c_str(),label.text.length());
+
+    cairo_set_source_rgba(draw,r,g,b,label.alpha);
+
+    cairo_move_to(draw,
+                  label.x,
+                  label.y);
+
+    if (label.style->GetStyle()==LabelStyle::normal) {
+      pango_cairo_show_layout(draw,
+                              layout);
+      cairo_stroke(draw);
+    }
+    else {
+      pango_cairo_layout_path(draw,
+                              layout);
+
+      cairo_set_source_rgba(draw,1,1,1,label.alpha);
+      cairo_set_line_width(draw,2.0);
+      cairo_stroke_preserve(draw);
+
+      cairo_set_source_rgba(draw,r,g,b,label.alpha);
+      cairo_fill(draw);
+    }
+
+    g_object_unref(layout);
+
+#else
+    cairo_font_extents_t fontExtents;
 
     cairo_set_scaled_font(draw,font);
 
@@ -557,22 +680,13 @@ namespace osmscout {
       cairo_set_source_rgba(draw,r,g,b,label.alpha);
       cairo_fill(draw);
     }
+#endif
   }
 
   void MapPainterCairo::DrawPlateLabel(const Projection& projection,
                                        const MapParameter& parameter,
                                        const LabelData& label)
   {
-    cairo_scaled_font_t  *font;
-    cairo_font_extents_t fontExtents;
-
-    font=GetScaledFont(parameter,
-                       label.fontSize);
-
-    cairo_set_scaled_font(draw,font);
-
-    cairo_scaled_font_extents(font,&fontExtents);
-
     cairo_set_dash(draw,NULL,0,0);
     cairo_set_line_width(draw,1);
     cairo_set_source_rgba(draw,
@@ -606,12 +720,40 @@ namespace osmscout {
                           label.style->GetTextColor().GetG(),
                           label.style->GetTextColor().GetB(),
                           label.style->GetTextColor().GetA());
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+    Font        font=GetFont(parameter,
+                             label.fontSize);
+    PangoLayout *layout=pango_cairo_create_layout(draw);
+
+    pango_layout_set_font_description(layout,font);
+    pango_layout_set_text(layout,label.text.c_str(),label.text.length());
+
+    cairo_move_to(draw,
+                  label.x,
+                  label.y);
+
+    pango_cairo_show_layout(draw,
+                            layout);
+    cairo_stroke(draw);
+
+    g_object_unref(layout);
+
+#else
+    Font                 font=GetFont(parameter,
+                                      label.fontSize);
+    cairo_font_extents_t fontExtents;
+
+    cairo_set_scaled_font(draw,font);
+
+    cairo_scaled_font_extents(font,&fontExtents);
 
     cairo_move_to(draw,
                   label.x,
                   label.y+fontExtents.ascent);
+
     cairo_show_text(draw,label.text.c_str());
     cairo_stroke(draw);
+#endif
   }
 
   void MapPainterCairo::DrawContourLabel(const Projection& projection,
@@ -621,11 +763,6 @@ namespace osmscout {
                                          size_t transStart, size_t transEnd)
   {
     assert(style.GetStyle()==LabelStyle::contour);
-
-    cairo_scaled_font_t *font=GetScaledFont(parameter,
-                                            style.GetSize());
-
-    cairo_set_scaled_font(draw,font);
 
     double lineLength=0;
     double xo=0;
@@ -674,6 +811,36 @@ namespace osmscout {
       }
     }
 
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+    Font           font=GetFont(parameter,
+                                style.GetSize());
+    PangoLayout    *layout=pango_cairo_create_layout(draw);
+    PangoRectangle extends;
+
+    pango_layout_set_font_description(layout,font);
+    pango_layout_set_text(layout,
+                          text.c_str(),
+                          text.length());
+    pango_layout_get_pixel_extents(layout,&extends,NULL);
+
+    if (extends.width<=lineLength) {
+      cairo_set_source_rgba(draw,
+                            style.GetTextColor().GetR(),
+                            style.GetTextColor().GetG(),
+                            style.GetTextColor().GetB(),
+                            style.GetTextColor().GetA());
+
+      DrawContourLabelPangoCairo(draw,
+                                 lineLength,
+                                 layout,
+                                 extends);
+    }
+
+    g_object_unref(layout);
+
+#else
+    Font                 font=GetFont(parameter,
+                                      style.GetSize());
     cairo_text_extents_t textExtents;
 
     cairo_scaled_font_text_extents(font,
@@ -696,12 +863,16 @@ namespace osmscout {
                           style.GetTextColor().GetB(),
                           style.GetTextColor().GetA());
 
+    cairo_set_scaled_font(draw,font);
+
     DrawContourLabelCairo(draw,
                           lineLength,
                           textExtents.x_bearing,
+                          textExtents.y_bearing,
                           textExtents.width,
                           fontExtents.ascent+textExtents.y_bearing,
-                          text.c_str());
+                          text);
+#endif
   }
 
   void MapPainterCairo::DrawSymbol(const SymbolStyle* style,
