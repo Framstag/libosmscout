@@ -40,6 +40,18 @@ namespace osmscout {
   {
     double x;
     double y;
+
+    inline Pixel()
+    {
+      // no code
+    }
+
+    inline Pixel (double x, double y)
+    : x(x),
+      y(y)
+    {
+      // no code
+    }
   };
 
   class OSMSCOUT_API TransPolygon
