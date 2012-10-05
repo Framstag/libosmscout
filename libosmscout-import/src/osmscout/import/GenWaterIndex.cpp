@@ -834,47 +834,33 @@ namespace osmscout {
                                                                   Progress& progress,
                                                                   Projection& projection,
                                                                   const Level& level,
-                                                                  CoastlineData& data,
+                                                                  Data& data,
                                                                   std::map<Coord,std::list<GroundTile> >& cellGroundTileMap)
   {
     progress.Info("Handle area coastline completely in a cell");
 
-    for (size_t i=0; i<data.isCompletelyInCell.size(); i++) {
-      progress.SetProgress(i,data.isCompletelyInCell.size());
+    size_t currentCoastline=1;
+    for (std::vector<CoastlineData>::iterator coastline=data.coastlines.begin();
+         coastline!=data.coastlines.end();
+         ++coastline) {
+      progress.SetProgress(currentCoastline,data.coastlines.size());
 
-      if (data.isArea[i] &&
-          data.isCompletelyInCell[i]) {
-        Coord        coord(data.cell[i].x-level.cellXStart,data.cell[i].y-level.cellYStart);
-        double       minX;
-        double       maxX;
-        double       minY;
-        double       maxY;
+      currentCoastline++;
+
+      if (coastline->isArea &&
+          coastline->isCompletelyInCell &&
+          coastline->pixelWidth>=1.0 &&
+          coastline->pixelHeight>=1.0) {
+        Coord        coord(coastline->cell.x-level.cellXStart,coastline->cell.y-level.cellYStart);
         GroundTile   groundTile(GroundTile::land);
 
-        double cellMinLat=level.cellHeight*data.cell[i].y-90.0;
-        double cellMinLon=level.cellWidth*data.cell[i].x-180.0;
+        double cellMinLat=level.cellHeight*coastline->cell.y-90.0;
+        double cellMinLon=level.cellWidth*coastline->cell.x-180.0;
 
-        minX=data.pixel[i][0].x;
-        minY=data.pixel[i][0].y;
-        maxX=minX;
-        maxY=minY;
+        groundTile.coords.reserve(coastline->points.size());
 
-        for (size_t p=1; p<data.pixel[i].size(); p++) {
-          minX=std::min(minX,data.pixel[i][p].x);
-          maxX=std::max(maxX,data.pixel[i][p].x);
-          minY=std::min(minY,data.pixel[i][p].y);
-          maxY=std::max(maxY,data.pixel[i][p].y);
-        }
-
-        if (maxX-minX<=1.0 ||
-            maxY-minY<=1.0) {
-          continue;
-        }
-
-        groundTile.coords.reserve(data.points[i].size());
-
-        for (size_t p=0; p<=data.points[i].size(); p++) {
-          groundTile.coords.push_back(Transform(data.points[i][p],level,cellMinLat,cellMinLon,true));
+        for (size_t p=0; p<=coastline->points.size(); p++) {
+          groundTile.coords.push_back(Transform(coastline->points[p],level,cellMinLat,cellMinLon,true));
         }
 
         if (!groundTile.coords.empty()) {
@@ -1158,16 +1144,11 @@ namespace osmscout {
                                              Projection& projection,
                                              const Level& level,
                                              const std::list<CoastRef>& coastlines,
-                                             CoastlineData& data)
+                                             Data& data)
   {
     progress.Info("Calculate coastline data");
 
-    data.isArea.resize(coastlines.size());
-    data.isCompletelyInCell.resize(coastlines.size(),false);
-    data.cell.resize(coastlines.size(),Coord(0,0));
-    data.points.resize(coastlines.size());
-    data.pixel.resize(coastlines.size());
-    data.cellIntersections.resize(coastlines.size());
+    data.coastlines.resize(coastlines.size());
 
     size_t curCoast=0;
     for (std::list<CoastRef>::const_iterator c=coastlines.begin();
@@ -1178,7 +1159,7 @@ namespace osmscout {
 
       progress.SetProgress(curCoast,coastlines.size());
 
-      data.isArea[curCoast]=coast->isArea;
+      data.coastlines[curCoast].isArea=coast->isArea;
 
       boundingBox.minLat=coast->coast[0].GetLat();
       boundingBox.maxLat=boundingBox.minLat;
@@ -1201,17 +1182,17 @@ namespace osmscout {
       cyMax=(uint32_t)floor((boundingBox.maxLat+90.0)/level.cellHeight);
 
       if (cxMin==cxMax && cyMin==cyMax) {
-        data.cell[curCoast].x=cxMin;
-        data.cell[curCoast].y=cyMin;
-        data.isCompletelyInCell[curCoast]=true;
+        data.coastlines[curCoast].cell.x=cxMin;
+        data.coastlines[curCoast].cell.y=cyMin;
+        data.coastlines[curCoast].isCompletelyInCell=true;
       }
       else {
-        data.isCompletelyInCell[curCoast]=false;
+        data.coastlines[curCoast].isCompletelyInCell=false;
       }
 
       TransPolygon polygon;
 
-      if (data.isArea[curCoast]) {
+      if (data.coastlines[curCoast].isArea) {
         // TODO: We already handled areas that are completely within one cell, we should skip them here
         polygon.TransformArea(projection,parameter.GetOptimizationWayMethod(),coast->coast, 1.0);
       }
@@ -1219,36 +1200,49 @@ namespace osmscout {
         polygon.TransformWay(projection,parameter.GetOptimizationWayMethod(),coast->coast, 1.0);
       }
 
-      data.points[curCoast].reserve(polygon.GetLength());
-      data.pixel[curCoast].reserve(polygon.GetLength());
+      data.coastlines[curCoast].points.reserve(polygon.GetLength());
       for (size_t p=polygon.GetStart(); p<=polygon.GetEnd(); p++) {
         if (polygon.points[p].draw) {
-          data.points[curCoast].push_back(coast->coast[p]);
-          data.pixel[curCoast].push_back(Pixel(polygon.points[p].x,polygon.points[p].y));
+          data.coastlines[curCoast].points.push_back(coast->coast[p]);
         }
       }
 
       // Currently transformation optimization code sometimes does not correctly handle the closing point for areas
-      if (data.isArea[curCoast]) {
-        data.points[curCoast].push_back(data.points[curCoast].front());
+      if (data.coastlines[curCoast].isArea) {
+        data.coastlines[curCoast].points.push_back(data.coastlines[curCoast].points.front());
       }
 
-      if (data.isCompletelyInCell[curCoast]) {
-        curCoast++;
+      if (data.coastlines[curCoast].isArea &&
+          data.coastlines[curCoast].isCompletelyInCell) {
+        double minX=polygon.points[polygon.GetStart()].x;
+        double minY=polygon.points[polygon.GetStart()].y;
+        double maxX=minX;
+        double maxY=minY;
 
-        continue;
+        for (size_t p=polygon.GetStart()+1; p<=polygon.GetEnd(); p++) {
+          if (polygon.points[p].draw) {
+            minX=std::min(minX,polygon.points[p].x);
+            maxX=std::max(maxX,polygon.points[p].x);
+            minY=std::min(minY,polygon.points[p].y);
+            maxY=std::max(maxY,polygon.points[p].y);
+          }
+        }
+
+        data.coastlines[curCoast].pixelWidth=maxX-minX;
+        data.coastlines[curCoast].pixelHeight=maxY-minY;
       }
+      else if (!data.coastlines[curCoast].isCompletelyInCell) {
+        // Calculate all intersections for all path steps for all cells covered
+        GetCellIntersections(level,
+                             data.coastlines[curCoast].points,
+                             curCoast,
+                             data.coastlines[curCoast].cellIntersections);
 
-      // Calculate all intersections for all path steps for all cells covered
-      GetCellIntersections(level,
-                           data.points[curCoast],
-                           curCoast,
-                           data.cellIntersections[curCoast]);
-
-      for (std::map<Coord,std::list<Intersection> >::iterator cell=data.cellIntersections[curCoast].begin();
-          cell!=data.cellIntersections[curCoast].end();
-          ++cell) {
-        data.cellCoastlines[cell->first].push_back(curCoast);
+        for (std::map<Coord,std::list<Intersection> >::iterator cell=data.coastlines[curCoast].cellIntersections.begin();
+            cell!=data.coastlines[curCoast].cellIntersections.end();
+            ++cell) {
+          data.cellCoastlines[cell->first].push_back(curCoast);
+        }
       }
 
       curCoast++;
@@ -1399,7 +1393,7 @@ namespace osmscout {
                                                              Projection& projection,
                                                              const Level& level,
                                                              std::map<Coord,std::list<GroundTile> >& cellGroundTileMap,
-                                                             CoastlineData& data)
+                                                             Data& data)
   {
     progress.Info("Handle coastlines partially in a cell");
 
@@ -1421,9 +1415,9 @@ namespace osmscout {
       for (std::list<size_t>::const_iterator currentCoastline=cell->second.begin();
           currentCoastline!=cell->second.end();
           ++currentCoastline) {
-        std::map<Coord,std::list<Intersection> >::iterator cellData=data.cellIntersections[*currentCoastline].find(cell->first);
+        std::map<Coord,std::list<Intersection> >::iterator cellData=data.coastlines[*currentCoastline].cellIntersections.find(cell->first);
 
-        if (cellData==data.cellIntersections[*currentCoastline].end()) {
+        if (cellData==data.coastlines[*currentCoastline].cellIntersections.end()) {
           continue;
         }
 
@@ -1440,7 +1434,7 @@ namespace osmscout {
         intersectionsPathOrder[*currentCoastline].sort(IntersectionByPathComparator());
 
         // Fix intersection order for areas
-        if (data.isArea[*currentCoastline] &&
+        if (data.coastlines[*currentCoastline].isArea &&
             intersectionsPathOrder[*currentCoastline].front()->direction==-1) {
           intersectionsPathOrder[*currentCoastline].push_back(intersectionsPathOrder[*currentCoastline].front());
           intersectionsPathOrder[*currentCoastline].pop_front();
@@ -1548,8 +1542,8 @@ namespace osmscout {
                      lonMin,
                      initialOutgoing,
                      incoming,
-                     data.points[initialOutgoing->coastline],
-                     data.isArea[initialOutgoing->coastline]);
+                     data.coastlines[initialOutgoing->coastline].points,
+                     data.coastlines[initialOutgoing->coastline].isArea);
 
         IntersectionPtr nextCWIter=GetNextCW(intersectionsCW,
                                              incoming);
@@ -1618,8 +1612,8 @@ namespace osmscout {
                        lonMin,
                        outgoing,
                        incoming,
-                       data.points[outgoing->coastline],
-                       data.isArea[outgoing->coastline]);
+                       data.coastlines[outgoing->coastline].points,
+                       data.coastlines[outgoing->coastline].isArea);
 
           nextCWIter=GetNextCW(intersectionsCW,
                                incoming);
@@ -1741,7 +1735,7 @@ namespace osmscout {
     for (size_t level=0; level<levels.size(); level++) {
       FileOffset                             indexOffset;
       MercatorProjection                     projection;
-      CoastlineData                          data;
+      Data                                   data;
       std::map<Coord,std::list<GroundTile> > cellGroundTileMap;
 
       projection.Set(0,0,pow(2.0,(double)(level+parameter.GetWaterIndexMinMag())),640,480);

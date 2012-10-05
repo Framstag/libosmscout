@@ -163,13 +163,19 @@ namespace osmscout {
      */
     struct CoastlineData
     {
-      std::vector<bool>                                       isArea;             //! true,if the boundary forms an area
-      std::vector<bool>                                       isCompletelyInCell; //! true, if the complete coastline is within one cell
-      std::vector<Coord>                                      cell;               //! The cell that completely contains the coastline
-      std::vector<std::vector<Point> >                        points;             //! The points of the coastline
-      std::vector<std::vector<Pixel> >                        pixel;              //! The pixel coordinates of the coastline
-      std::vector<std::map<Coord, std::list<Intersection> > > cellIntersections;  //! All intersections for each cell
-      std::map<Coord, std::list<size_t> >                     cellCoastlines;     //! Contains for each cell the list of coastlines
+      bool                                       isArea;             //! true,if the boundary forms an area
+      bool                                       isCompletelyInCell; //! true, if the complete coastline is within one cell
+      Coord                                      cell;               //! The cell that completely contains the coastline
+      double                                     pixelWidth;         //! Size of coastline in pixel
+      double                                     pixelHeight;        //! Size of coastline in pixel
+      std::vector<Point>                         points;             //! The points of the coastline
+      std::map<Coord, std::list<Intersection> >  cellIntersections;  //! All intersections for each cell
+    };
+
+    struct Data
+    {
+      std::vector<CoastlineData>          coastlines;         //! data for each coastline
+      std::map<Coord, std::list<size_t> > cellCoastlines;     //! Contains for each cell the list of coastlines
     };
 
   private:
@@ -214,7 +220,7 @@ namespace osmscout {
                           Projection& projection,
                           const Level& level,
                           const std::list<CoastRef>& coastlines,
-                          CoastlineData& data);
+                          Data& data);
 
     bool AssumeLand(const ImportParameter& parameter,
                     Progress& progress,
@@ -236,7 +242,7 @@ namespace osmscout {
                                                Progress& progress,
                                                Projection& projection,
                                                const Level& level,
-                                               CoastlineData& data,
+                                               Data& data,
                                                std::map<Coord,std::list<GroundTile> >& cellGroundTileMap);
 
     IntersectionPtr GetPreviousIntersection(std::list<IntersectionPtr>& intersectionsPathOrder,
@@ -267,7 +273,7 @@ namespace osmscout {
                                           Projection& projection,
                                           const Level& level,
                                           std::map<Coord,std::list<GroundTile> >& cellGroundTileMap,
-                                          CoastlineData& data);
+                                          Data& data);
 
   public:
     std::string GetDescription() const;
