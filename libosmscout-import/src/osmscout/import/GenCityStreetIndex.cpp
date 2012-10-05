@@ -45,18 +45,25 @@
 namespace osmscout {
 
   /**
-    A location within an area
-    */
-  struct Loc
+   * An area can contain an number of location nodes. Since they do not have
+   * their own area we define the nod ename as an alias for the containing
+   * area, since this is the best aproximation.
+   */
+  struct RegionAlias
   {
-    ObjectRef              reference;
-    std::string            name;
+    ObjectRef              reference; //! Reference of the object that
+                                      //! is the alias
+    std::string            name;      //! The alias itsef
   };
 
-  struct LocRef
+  /**
+   * Reference to an area
+   */
+  struct RegionRef
   {
-    FileOffset             offset;
-    ObjectRef              reference;
+    FileOffset             offset;    //! Fileoffset of the area
+    ObjectRef              reference; //! Reference of the object that
+                                      //! is the alias
   };
 
   /**
@@ -65,23 +72,25 @@ namespace osmscout {
     An area has a name and also a number of locations, which are possibly
     within the area but area currently also represented by this area.
     */
-  struct Area
+  struct Region
   {
     FileOffset                           offset;    //! Offset into the index file
+
     ObjectRef                            reference; //! The id for this area
     std::string                          name;      //! The name of this area
-    std::list<Loc>                       locations; //! Location that are represented by this area
-    std::vector<Point>                   area;      //! the geometric area of this area
+
+    std::list<RegionAlias>               locations; //! Location that are represented by this region
+    std::vector<Point>                   area;      //! the geometric area of this region
 
     double                               minlon;
     double                               minlat;
     double                               maxlon;
     double                               maxlat;
 
-    std::map<std::string,std::list<Id> > nodes;     //! list of indexed nodes in this area
-    std::map<std::string,std::list<Id> > ways;      //! list of indexed ways in this area
+    std::map<std::string,std::list<Id> > nodes;     //! list of indexed nodes in this region
+    std::map<std::string,std::list<Id> > ways;      //! list of indexed ways in this region
 
-    std::list<Area>                      areas;     //! A list of sub areas
+    std::list<Region>                    areas;     //! A list of sub regions
 
     void CalculateMinMax()
     {
@@ -369,10 +378,10 @@ namespace osmscout {
     return scanner.Close();
   }
 
-  static void AddArea(Area& parent,
-                      const Area& area)
+  static void AddRegion(Region& parent,
+                        const Region& area)
   {
-    for (std::list<Area>::iterator a=parent.areas.begin();
+    for (std::list<Region>::iterator a=parent.areas.begin();
          a!=parent.areas.end();
          a++) {
       if (!(area.maxlon<a->minlon) &&
@@ -383,7 +392,7 @@ namespace osmscout {
           // If we already have the same name and are a "minor" reference, we skip...
           if (!(area.name==a->name &&
                 area.reference.type<a->reference.type)) {
-            AddArea(*a,area);
+            AddRegion(*a,area);
           }
           return;
         }
@@ -393,19 +402,19 @@ namespace osmscout {
     parent.areas.push_back(area);
   }
 
-  static void AddLocationToArea(Area& area,
-                                const Loc& location,
-                                const Point& node)
+  static void AddLocationToRegion(Region& area,
+                                  const RegionAlias& location,
+                                  const Point& node)
                                 {
     if (area.name==location.name) {
       return;
     }
 
-    for (std::list<Area>::iterator a=area.areas.begin();
+    for (std::list<Region>::iterator a=area.areas.begin();
          a!=area.areas.end();
          a++) {
       if (IsPointInArea(node,a->area)) {
-        AddLocationToArea(*a,location,node);
+        AddLocationToRegion(*a,location,node);
         return;
       }
     }
@@ -413,13 +422,13 @@ namespace osmscout {
     area.locations.push_back(location);
   }
 
-  static void BuildAreaTreeFromAreas(Progress& progress,
-                                     const TypeConfig& typeConfig,
-                                     const std::list<Way>& boundaryAreas,
-                                     const std::list<Relation>& boundaryRelations,
-                                     const std::list<Way>& cityAreas,
-                                     const std::list<Node>& cityNodes,
-                                     Area& rootArea)
+  static void BuildRegionTreeFromAreas(Progress& progress,
+                                       const TypeConfig& typeConfig,
+                                       const std::list<Way>& boundaryAreas,
+                                       const std::list<Relation>& boundaryRelations,
+                                       const std::list<Way>& cityAreas,
+                                       const std::list<Node>& cityNodes,
+                                       Region& rootRegion)
   {
     size_t currentCount=1;
     size_t maxCount=boundaryAreas.size()+boundaryRelations.size()+cityAreas.size()+cityNodes.size();
@@ -442,15 +451,15 @@ namespace osmscout {
         if (level==l) {
           for (size_t i=0; i<rel->roles.size(); i++) {
             if (rel->roles[i].ring==0) {
-              Area area;
+              Region region;
 
-              area.reference.Set(rel->GetId(),refRelation);
-              area.name=name.empty() ? "???" : name;
-              area.area=rel->roles[i].nodes;
+              region.reference.Set(rel->GetId(),refRelation);
+              region.name=name.empty() ? "???" : name;
+              region.area=rel->roles[i].nodes;
 
-              area.CalculateMinMax();
+              region.CalculateMinMax();
 
-              AddArea(rootArea,area);
+              AddRegion(rootRegion,region);
             }
           }
 
@@ -473,15 +482,15 @@ namespace osmscout {
         }
 
         if (level==l) {
-          Area area;
+          Region region;
 
-          area.reference.Set(a->GetId(),refWay);
-          area.name=name.empty() ? "???" : name;
-          area.area=a->nodes;
+          region.reference.Set(a->GetId(),refWay);
+          region.name=name.empty() ? "???" : name;
+          region.area=a->nodes;
 
-          area.CalculateMinMax();
+          region.CalculateMinMax();
 
-          AddArea(rootArea,area);
+          AddRegion(rootRegion,region);
 
           currentCount++;
         }
@@ -502,15 +511,15 @@ namespace osmscout {
         }
       }
 
-      Area area;
+      Region region;
 
-      area.reference.Set(a->GetId(),refWay);
-      area.name=name;
-      area.area=a->nodes;
+      region.reference.Set(a->GetId(),refWay);
+      region.name=name;
+      region.area=a->nodes;
 
-      area.CalculateMinMax();
+      region.CalculateMinMax();
 
-      AddArea(rootArea,area);
+      AddRegion(rootRegion,region);
 
       currentCount++;
     }
@@ -529,16 +538,16 @@ namespace osmscout {
         }
       }
 
-      Loc location;
+      RegionAlias alias;
 
-      location.reference.Set(city->GetId(),refNode);
-      location.name=name;
+      alias.reference.Set(city->GetId(),refNode);
+      alias.name=name;
 
       Point node(city->GetId(),
                  city->GetLat(),
                  city->GetLon());
 
-      AddLocationToArea(rootArea,location,node);
+      AddLocationToRegion(rootRegion,alias,node);
 
       currentCount++;
     }
@@ -557,14 +566,14 @@ namespace osmscout {
     if one point of an object is in a area it is very likely that all points of the object
     are in the area.
     */
-  static bool AddObjectToArea(Area& area,
-                              const Way& way,
-                              double minlon,
-                              double minlat,
-                              double maxlon,
-                              double maxlat)
+  static bool AddWayToRegion(Region& area,
+                             const Way& way,
+                             double minlon,
+                             double minlat,
+                             double maxlon,
+                             double maxlat)
   {
-    for (std::list<Area>::iterator a=area.areas.begin();
+    for (std::list<Region>::iterator a=area.areas.begin();
          a!=area.areas.end();
          a++) {
       // Fast check, if the object is in the bounds of the area
@@ -576,7 +585,7 @@ namespace osmscout {
         bool match=IsPointInArea(way.nodes[0],a->area);
 
         if (match) {
-          bool completeMatch=AddObjectToArea(*a,way,minlon,minlat,maxlon,maxlat);
+          bool completeMatch=AddWayToRegion(*a,way,minlon,minlat,maxlon,maxlat);
 
           if (completeMatch) {
             // We are done, the object is completely enclosed by one of our sub areas
@@ -598,7 +607,7 @@ namespace osmscout {
                                 Progress& progress,
                                 const TypeConfig& typeConfig,
                                 const std::set<TypeId>& indexables,
-                                Area& rootArea)
+                                Region& rootArea)
   {
     FileScanner scanner;
     uint32_t    wayCount;
@@ -648,7 +657,7 @@ namespace osmscout {
             maxlat=std::max(maxlat,way.nodes[n].GetLat());
           }
 
-          AddObjectToArea(rootArea,way,minlon,minlat,maxlon,maxlat);
+          AddWayToRegion(rootArea,way,minlon,minlat,maxlon,maxlat);
         }
       }
     }
@@ -656,15 +665,15 @@ namespace osmscout {
     return scanner.Close();
   }
 
-  static void AddNodeToArea(Area& area,
-                            const Node& node,
-                            const std::string& name)
+  static void AddNodeToRegion(Region& area,
+                              const Node& node,
+                              const std::string& name)
   {
-    for (std::list<Area>::iterator a=area.areas.begin();
+    for (std::list<Region>::iterator a=area.areas.begin();
          a!=area.areas.end();
          a++) {
       if (IsPointInArea(node,a->area)) {
-        AddNodeToArea(*a,node,name);
+        AddNodeToRegion(*a,node,name);
         return;
       }
     }
@@ -676,7 +685,7 @@ namespace osmscout {
                          Progress& progress,
                          const TypeConfig& typeConfig,
                          const std::set<TypeId>& indexables,
-                         Area& rootArea)
+                         Region& rootArea)
   {
     FileScanner scanner;
     uint32_t    nodeCount;
@@ -719,7 +728,7 @@ namespace osmscout {
         }
 
         if (!name.empty()) {
-          AddNodeToArea(rootArea,node,name);
+          AddNodeToRegion(rootArea,node,name);
         }
       }
     }
@@ -727,9 +736,9 @@ namespace osmscout {
     return scanner.Close();
   }
 
-  static void DumpArea(const Area& parent, size_t indent)
+  static void DumpRegion(const Region& parent, size_t indent)
   {
-    for (std::list<Area>::const_iterator a=parent.areas.begin();
+    for (std::list<Region>::const_iterator a=parent.areas.begin();
          a!=parent.areas.end();
          a++) {
       for (size_t i=0; i<indent; i++) {
@@ -737,7 +746,7 @@ namespace osmscout {
       }
       std::cout << a->name << " " << a->reference.GetTypeName() << " " << a->reference.GetId() << " " << a->areas.size() << " " << a->nodes.size() << " " << a->ways.size() << " " << a->locations.size() << std::endl;
 
-      for (std::list<Loc>::const_iterator l=a->locations.begin();
+      for (std::list<RegionAlias>::const_iterator l=a->locations.begin();
            l!=a->locations.end();
            l++) {
         for (size_t i=0; i<indent; i++) {
@@ -746,39 +755,39 @@ namespace osmscout {
         std::cout << " =" << l->name << " " << l->reference.GetTypeName() << " " << l->reference.GetId() << std::endl;
       }
 
-      DumpArea(*a,indent+2);
+      DumpRegion(*a,indent+2);
     }
   }
 
-  static unsigned long GetAreaTreeDepth(const Area& area)
+  static unsigned long GetRegionTreeDepth(const Region& area)
   {
     unsigned long depth=0;
 
-    for (std::list<Area>::const_iterator a=area.areas.begin();
+    for (std::list<Region>::const_iterator a=area.areas.begin();
          a!=area.areas.end();
          a++) {
-      depth=std::max(depth,GetAreaTreeDepth(*a));
+      depth=std::max(depth,GetRegionTreeDepth(*a));
     }
 
     return depth+1;
   }
 
 
-  static void SortInArea(Area& area,
-                         std::vector<std::list<Area*> >& areaTree,
-                         unsigned long level)
+  static void SortInRegion(Region& area,
+                           std::vector<std::list<Region*> >& areaTree,
+                           unsigned long level)
   {
     areaTree[level].push_back(&area);
 
-    for (std::list<Area>::iterator a=area.areas.begin();
+    for (std::list<Region>::iterator a=area.areas.begin();
          a!=area.areas.end();
          a++) {
-      SortInArea(*a,areaTree,level+1);
+      SortInRegion(*a,areaTree,level+1);
     }
   }
 
-  static bool WriteArea(FileWriter& writer,
-                        Area& area, FileOffset parentOffset)
+  static bool WriteRegion(FileWriter& writer,
+                          Region& area, FileOffset parentOffset)
   {
     writer.GetPos(area.offset);
 
@@ -786,10 +795,10 @@ namespace osmscout {
     writer.WriteNumber(parentOffset);
 
     writer.WriteNumber((uint32_t)area.areas.size());
-    for (std::list<Area>::iterator a=area.areas.begin();
+    for (std::list<Region>::iterator a=area.areas.begin();
          a!=area.areas.end();
          a++) {
-      if (!WriteArea(writer,*a,area.offset)) {
+      if (!WriteRegion(writer,*a,area.offset)) {
         return false;
       }
     }
@@ -837,13 +846,13 @@ namespace osmscout {
     return !writer.HasError();
   }
 
-  static bool WriteAreas(FileWriter& writer,
-                         Area& root)
+  static bool WriteRegions(FileWriter& writer,
+                           Region& root)
   {
-    for (std::list<Area>::iterator a=root.areas.begin();
+    for (std::list<Region>::iterator a=root.areas.begin();
          a!=root.areas.end();
          ++a) {
-      if (!WriteArea(writer,*a,0)) {
+      if (!WriteRegion(writer,*a,0)) {
         return false;
       }
     }
@@ -851,17 +860,17 @@ namespace osmscout {
     return true;
   }
 
-  static void GetLocationRefs(const Area& area,
-                              std::map<std::string,std::list<LocRef> >& locationRefs)
+  static void GetLocationRefs(const Region& area,
+                              std::map<std::string,std::list<RegionRef> >& locationRefs)
   {
-    LocRef locRef;
+    RegionRef locRef;
 
     locRef.offset=area.offset;
     locRef.reference=area.reference;
 
     locationRefs[area.name].push_back(locRef);
 
-    for (std::list<Loc>::const_iterator l=area.locations.begin();
+    for (std::list<RegionAlias>::const_iterator l=area.locations.begin();
          l!=area.locations.end();
          ++l) {
       locRef.offset=area.offset;
@@ -870,7 +879,7 @@ namespace osmscout {
       locationRefs[l->name].push_back(locRef);
     }
 
-    for (std::list<Area>::const_iterator a=area.areas.begin();
+    for (std::list<Region>::const_iterator a=area.areas.begin();
          a!=area.areas.end();
          a++) {
       GetLocationRefs(*a,locationRefs);
@@ -878,11 +887,11 @@ namespace osmscout {
   }
 
   static bool WriteLocationRefs(FileWriter& writer,
-                                const std::map<std::string,std::list<LocRef> >& locationRefs)
+                                const std::map<std::string,std::list<RegionRef> >& locationRefs)
   {
     writer.WriteNumber((uint32_t)locationRefs.size());
 
-    for (std::map<std::string,std::list<LocRef> >::const_iterator n=locationRefs.begin();
+    for (std::map<std::string,std::list<RegionRef> >::const_iterator n=locationRefs.begin();
          n!=locationRefs.end();
          ++n) {
       if (!writer.Write(n->first)) {
@@ -893,7 +902,7 @@ namespace osmscout {
         return false;
       }
 
-      for (std::list<LocRef>::const_iterator o=n->second.begin();
+      for (std::list<RegionRef>::const_iterator o=n->second.begin();
            o!=n->second.end();
            ++o) {
         if (!writer.WriteNumber((uint32_t)o->reference.type)) {
@@ -922,21 +931,21 @@ namespace osmscout {
                                         Progress& progress,
                                         const TypeConfig& typeConfig)
   {
-    OSMSCOUT_HASHSET<TypeId>       cityIds;
-    std::set<TypeId>               indexables;
-    TypeId                         boundaryId;
-    TypeId                         typeId;
-    Area                           rootArea;
-    std::list<Node>                cityNodes;
-    std::list<Way>                 cityAreas;
-    std::list<Way>                 boundaryAreas;
-    std::list<Relation>            boundaryRelations;
-    std::vector<std::list<Area*> > areaTree;
+    OSMSCOUT_HASHSET<TypeId>         cityIds;
+    std::set<TypeId>                 indexables;
+    TypeId                           boundaryId;
+    TypeId                           typeId;
+    Region                           rootRegion;
+    std::list<Node>                  cityNodes;
+    std::list<Way>                   cityAreas;
+    std::list<Way>                   boundaryAreas;
+    std::list<Relation>              boundaryRelations;
+    std::vector<std::list<Region*> > regionTree;
 
     progress.SetAction("Setup");
 
-    rootArea.name="<root>";
-    rootArea.offset=0;
+    rootRegion.name="<root>";
+    rootRegion.offset=0;
 
     // We ignore (besides strange ones ;-)):
     // continent
@@ -1044,13 +1053,13 @@ namespace osmscout {
 
     progress.SetAction("Inserting boundaries and cities into area tree");
 
-    BuildAreaTreeFromAreas(progress,
+    BuildRegionTreeFromAreas(progress,
                            typeConfig,
                            boundaryAreas,
                            boundaryRelations,
                            cityAreas,
                            cityNodes,
-                           rootArea);
+                           rootRegion);
 
     progress.SetAction("Delete temporary data");
 
@@ -1061,16 +1070,16 @@ namespace osmscout {
 
     progress.SetAction("Calculating bounds of areas");
 
-    areaTree.resize(GetAreaTreeDepth(rootArea));
+    regionTree.resize(GetRegionTreeDepth(rootRegion));
 
-    progress.Info(std::string("Area tree depth: ")+NumberToString(areaTree.size()));
+    progress.Info(std::string("Area tree depth: ")+NumberToString(regionTree.size()));
 
     progress.SetAction("Sorting areas in levels");
 
-    SortInArea(rootArea,areaTree,0);
+    SortInRegion(rootRegion,regionTree,0);
 
-    for (size_t i=0; i<areaTree.size(); i++) {
-      progress.Info(std::string("Area tree index ")+NumberToString(i)+" size: "+NumberToString(areaTree[i].size()));
+    for (size_t i=0; i<regionTree.size(); i++) {
+      progress.Info(std::string("Area tree index ")+NumberToString(i)+" size: "+NumberToString(regionTree[i].size()));
     }
 
     progress.SetAction("Index ways and areas");
@@ -1079,15 +1088,15 @@ namespace osmscout {
                            progress,
                            typeConfig,
                            indexables,
-                           rootArea)) {
+                           rootRegion)) {
       return false;
     }
 
-    for (size_t i=0; i<areaTree.size(); i++) {
+    for (size_t i=0; i<regionTree.size(); i++) {
       unsigned long count=0;
 
-      for (std::list<Area*>::const_iterator iter=areaTree[i].begin();
-           iter!=areaTree[i].end();
+      for (std::list<Region*>::const_iterator iter=regionTree[i].begin();
+           iter!=regionTree[i].end();
            ++iter) {
         count+=(*iter)->ways.size();
       }
@@ -1100,7 +1109,7 @@ namespace osmscout {
                     progress,
                     typeConfig,
                     indexables,
-                    rootArea)) {
+                    rootRegion)) {
       return false;
     }
 
@@ -1118,7 +1127,7 @@ namespace osmscout {
       return false;
     }
 
-    if (!WriteAreas(writer,rootArea)) {
+    if (!WriteRegions(writer,rootRegion)) {
       return false;
     }
 
@@ -1128,17 +1137,17 @@ namespace osmscout {
 
     progress.SetAction("Dumping areas");
 
-    DumpArea(rootArea,0);
+    DumpRegion(rootRegion,0);
 
     //
     // Generate file with all area names, each referencing the areas where it is contained
     //
 
-    std::map<std::string,std::list<LocRef> > locationRefs;
+    std::map<std::string,std::list<RegionRef> > locationRefs;
 
     progress.SetAction("Write 'nameregion.idx'");
 
-    GetLocationRefs(rootArea,locationRefs);
+    GetLocationRefs(rootRegion,locationRefs);
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      "nameregion.idx"))) {
