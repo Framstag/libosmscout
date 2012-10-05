@@ -136,6 +136,8 @@ namespace osmscout {
     // We must have coastline type defined
     FileScanner                scanner;
     uint32_t                   coastlineCount=0;
+    size_t                     wayCoastCount=0;
+    size_t                     areaCoastCount=0;
     std::list<RawCoastlineRef> rawCoastlines;
 
     progress.SetAction("Scanning for coastlines");
@@ -192,7 +194,9 @@ namespace osmscout {
     }
 
     std::vector<Point> coords;
-    std::map<Id,Point> coordsMap;
+    OSMSCOUT_HASHMAP<Id,Point> coordsMap;
+
+    coords.reserve(nodeIds.size());
 
     if (!coordDataFile.Get(nodeIds.begin(),
                            nodeIds.end(),
@@ -202,6 +206,10 @@ namespace osmscout {
     }
 
     nodeIds.clear();
+
+#if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
+    coordsMap.reserve(coords.size());
+#endif
 
     for (std::vector<Point>::const_iterator coord=coords.begin();
         coord!=coords.end();
@@ -227,7 +235,7 @@ namespace osmscout {
       coast->coast.resize(coastline->GetNodeCount());
 
       for (size_t n=0; n<coastline->GetNodeCount(); n++) {
-        std::map<Id,Point>::const_iterator coord=coordsMap.find(coastline->GetNodeId(n));
+        OSMSCOUT_HASHMAP<Id,Point>::const_iterator coord=coordsMap.find(coastline->GetNodeId(n));
 
         if (coord==coordsMap.end()) {
           processingError=true;
@@ -244,6 +252,13 @@ namespace osmscout {
       }
 
       if (!processingError) {
+        if (coast->isArea) {
+          areaCoastCount++;
+        }
+        else {
+          wayCoastCount++;
+        }
+
         coastlines.push_back(coast);
       }
     }
@@ -253,6 +268,8 @@ namespace osmscout {
       return false;
     }
 
+    progress.Info(NumberToString(wayCoastCount)+" way coastline(s), "+NumberToString(areaCoastCount)+" area coastline(s)");
+
     return true;
   }
 
@@ -260,11 +277,11 @@ namespace osmscout {
   {
     progress.SetAction("Merging coastlines");
 
-    progress.Info("Initial coastline count: "+NumberToString(coastlines.size()));
-
     std::map<Id,CoastRef> coastStartMap;
     std::list<CoastRef>   mergedCoastlines;
     std::set<Id>          blacklist;
+    size_t                wayCoastCount=0;
+    size_t                areaCoastCount=0;
 
     std::list<CoastRef>::iterator c=coastlines.begin();
     while( c!=coastlines.end()) {
@@ -276,6 +293,7 @@ namespace osmscout {
         c++;
       }
       else {
+        areaCoastCount++;
         mergedCoastlines.push_back(coast);
 
         c=coastlines.erase(c);
@@ -328,12 +346,17 @@ namespace osmscout {
       if (coastline->coast.front().GetId()==coastline->coast.back().GetId()) {
         coastline->isArea=true;
         coastline->coast.pop_back();
+
+        areaCoastCount++;
+      }
+      else {
+        wayCoastCount++;
       }
 
       mergedCoastlines.push_back(coastline);
     }
 
-    progress.Info("Final coastline count: "+NumberToString(mergedCoastlines.size()));
+    progress.Info(NumberToString(wayCoastCount)+" way coastline(s), "+NumberToString(areaCoastCount)+" area coastline(s)");
 
     coastlines=mergedCoastlines;
   }
@@ -377,7 +400,6 @@ namespace osmscout {
 
   void WaterIndexGenerator::CalculateLandCells(Progress& progress,
                                                Level& level,
-                                               const CoastlineData& data,
                                                const std::map<Coord,std::list<GroundTile> >& cellGroundTileMap)
   {
     progress.Info("Calculate land cells");
@@ -812,82 +834,54 @@ namespace osmscout {
                                                                   Progress& progress,
                                                                   Projection& projection,
                                                                   const Level& level,
-                                                                  const std::list<CoastRef>& coastlines,
+                                                                  CoastlineData& data,
                                                                   std::map<Coord,std::list<GroundTile> >& cellGroundTileMap)
   {
     progress.Info("Handle area coastline completely in a cell");
 
-    size_t currentCoastline=0;
-    for (std::list<CoastRef>::const_iterator c=coastlines.begin();
-        c!=coastlines.end();
-        ++c) {
-      const  CoastRef& coast=*c;
+    for (size_t i=0; i<data.isCompletelyInCell.size(); i++) {
+      progress.SetProgress(i,data.isCompletelyInCell.size());
 
-      currentCoastline++;
-      progress.SetProgress(currentCoastline,coastlines.size());
+      if (data.isArea[i] &&
+          data.isCompletelyInCell[i]) {
+        Coord        coord(data.cell[i].x-level.cellXStart,data.cell[i].y-level.cellYStart);
+        double       minX;
+        double       maxX;
+        double       minY;
+        double       maxY;
+        GroundTile   groundTile(GroundTile::land);
 
-      if (coast->isArea) {
-        double   minLat,maxLat,minLon,maxLon;
-        uint32_t cxMin,cxMax,cyMin,cyMax;
+        double cellMinLat=level.cellHeight*data.cell[i].y-90.0;
+        double cellMinLon=level.cellWidth*data.cell[i].x-180.0;
 
-        minLat=coast->coast[0].GetLat();
-        maxLat=minLat;
-        minLon=coast->coast[0].GetLon();
-        maxLon=minLon;
+        minX=data.pixel[i][0].x;
+        minY=data.pixel[i][0].y;
+        maxX=minX;
+        maxY=minY;
 
-        for (size_t p=1; p<coast->coast.size(); p++) {
-          minLat=std::min(minLat,coast->coast[p].GetLat());
-          maxLat=std::max(maxLat,coast->coast[p].GetLat());
-
-          minLon=std::min(minLon,coast->coast[p].GetLon());
-          maxLon=std::max(maxLon,coast->coast[p].GetLon());
+        for (size_t p=1; p<data.pixel[i].size(); p++) {
+          minX=std::min(minX,data.pixel[i][p].x);
+          maxX=std::max(maxX,data.pixel[i][p].x);
+          minY=std::min(minY,data.pixel[i][p].y);
+          maxY=std::max(maxY,data.pixel[i][p].y);
         }
 
-        cxMin=(uint32_t)floor((minLon+180.0)/level.cellWidth);
-        cxMax=(uint32_t)floor((maxLon+180.0)/level.cellWidth);
-        cyMin=(uint32_t)floor((minLat+90.0)/level.cellHeight);
-        cyMax=(uint32_t)floor((maxLat+90.0)/level.cellHeight);
+        if (maxX-minX<=1.0 ||
+            maxY-minY<=1.0) {
+          continue;
+        }
 
-        double cellMinLat=level.cellHeight*cyMin-90.0;
-        double cellMinLon=level.cellWidth*cxMin-180.0;
+        groundTile.coords.reserve(data.points[i].size());
 
-        if (cxMin==cxMax &&
-            cyMin==cyMax) {
-          Coord        coord(cxMin-level.cellXStart,cyMin-level.cellYStart);
-          TransPolygon polygon;
-          double       minX;
-          double       maxX;
-          double       minY;
-          double       maxY;
-          GroundTile   groundTile(GroundTile::land);
+        for (size_t p=0; p<=data.points[i].size(); p++) {
+          groundTile.coords.push_back(Transform(data.points[i][p],level,cellMinLat,cellMinLon,true));
+        }
 
-          polygon.TransformArea(projection,parameter.GetOptimizationWayMethod(),coast->coast,1.0);
+        if (!groundTile.coords.empty()) {
+          groundTile.coords.push_back(groundTile.coords.front());
+          groundTile.coords.back().coast=false;
 
-          polygon.GetBoundingBox(minX,minY,maxX,maxY);
-
-          if (maxX-minX<=1.0 ||
-              maxY-minY<=1.0) {
-            continue;
-          }
-
-          groundTile.coords.reserve(polygon.GetLength());
-
-          for (size_t p=polygon.GetStart(); p<=polygon.GetEnd(); p++) {
-            if (polygon.points[p].draw) {
-              GroundTile::Coord coord;
-
-              coord=Transform(coast->coast[p],level,cellMinLat,cellMinLon,true);
-
-              groundTile.coords.push_back(coord);
-            }
-          }
-
-          if (!groundTile.coords.empty()) {
-            groundTile.coords.push_back(groundTile.coords.front());
-            groundTile.coords.back().coast=false;
-
-            cellGroundTileMap[coord].push_back(groundTile);
-          }
+          cellGroundTileMap[coord].push_back(groundTile);
         }
       }
     }
@@ -1172,6 +1166,7 @@ namespace osmscout {
     data.isCompletelyInCell.resize(coastlines.size(),false);
     data.cell.resize(coastlines.size(),Coord(0,0));
     data.points.resize(coastlines.size());
+    data.pixel.resize(coastlines.size());
     data.cellIntersections.resize(coastlines.size());
 
     size_t curCoast=0;
@@ -1179,7 +1174,7 @@ namespace osmscout {
         c!=coastlines.end();
         ++c) {
       const  CoastRef& coast=*c;
-      BoundingBox      boundingBox;
+      GeoBoundingBox      boundingBox;
 
       progress.SetProgress(curCoast,coastlines.size());
 
@@ -1209,10 +1204,9 @@ namespace osmscout {
         data.cell[curCoast].x=cxMin;
         data.cell[curCoast].y=cyMin;
         data.isCompletelyInCell[curCoast]=true;
-
-        curCoast++;
-
-        continue;
+      }
+      else {
+        data.isCompletelyInCell[curCoast]=false;
       }
 
       TransPolygon polygon;
@@ -1225,16 +1219,24 @@ namespace osmscout {
         polygon.TransformWay(projection,parameter.GetOptimizationWayMethod(),coast->coast, 1.0);
       }
 
-      data.points.reserve(coast->coast.size());
+      data.points[curCoast].reserve(polygon.GetLength());
+      data.pixel[curCoast].reserve(polygon.GetLength());
       for (size_t p=polygon.GetStart(); p<=polygon.GetEnd(); p++) {
         if (polygon.points[p].draw) {
           data.points[curCoast].push_back(coast->coast[p]);
+          data.pixel[curCoast].push_back(Pixel(polygon.points[p].x,polygon.points[p].y));
         }
       }
 
       // Currently transformation optimization code sometimes does not correctly handle the closing point for areas
       if (data.isArea[curCoast]) {
         data.points[curCoast].push_back(data.points[curCoast].front());
+      }
+
+      if (data.isCompletelyInCell[curCoast]) {
+        curCoast++;
+
+        continue;
       }
 
       // Calculate all intersections for all path steps for all cells covered
@@ -1766,7 +1768,7 @@ namespace osmscout {
                                               progress,
                                               projection,
                                               levels[level],
-                                              coastlines,
+                                              data,
                                               cellGroundTileMap);
 
         HandleCoastlinesPartiallyInACell(parameter,
@@ -1779,7 +1781,6 @@ namespace osmscout {
 
       CalculateLandCells(progress,
                          levels[level],
-                         data,
                          cellGroundTileMap);
 
       if (parameter.GetAssumeLand()) {

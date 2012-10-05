@@ -149,7 +149,7 @@ namespace osmscout {
 
     typedef Ref<Coast> CoastRef;
 
-    struct BoundingBox
+    struct GeoBoundingBox
     {
       double minLon;
       double maxLon;
@@ -167,6 +167,7 @@ namespace osmscout {
       std::vector<bool>                                       isCompletelyInCell; //! true, if the complete coastline is within one cell
       std::vector<Coord>                                      cell;               //! The cell that completely contains the coastline
       std::vector<std::vector<Point> >                        points;             //! The points of the coastline
+      std::vector<std::vector<Pixel> >                        pixel;              //! The pixel coordinates of the coastline
       std::vector<std::map<Coord, std::list<Intersection> > > cellIntersections;  //! All intersections for each cell
       std::map<Coord, std::list<size_t> >                     cellCoastlines;     //! Contains for each cell the list of coastlines
     };
@@ -192,7 +193,6 @@ namespace osmscout {
 
     void CalculateLandCells(Progress& progress,
                             Level& level,
-                            const CoastlineData& data,
                             const std::map<Coord,std::list<GroundTile> >& cellGroundTileMap);
 
     void GetCells(const Level& level,
@@ -236,7 +236,7 @@ namespace osmscout {
                                                Progress& progress,
                                                Projection& projection,
                                                const Level& level,
-                                               const std::list<CoastRef>& coastlines,
+                                               CoastlineData& data,
                                                std::map<Coord,std::list<GroundTile> >& cellGroundTileMap);
 
     IntersectionPtr GetPreviousIntersection(std::list<IntersectionPtr>& intersectionsPathOrder,
