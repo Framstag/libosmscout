@@ -128,7 +128,7 @@ namespace osmscout {
                   uint32_t minLon, uint32_t maxLon,
                   double cellWidth, double cellHeight);
 
-      bool IsIn(uint32_t x, uint32_t y) const;
+      bool IsInAbsolute(uint32_t x, uint32_t y) const;
       State GetState(uint32_t x, uint32_t y) const;
       State GetStateAbsolute(uint32_t x, uint32_t y) const;
 

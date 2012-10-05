@@ -92,7 +92,7 @@ namespace osmscout {
     area.resize(size,0x00);
   }
 
-  bool WaterIndexGenerator::Level::IsIn(uint32_t x, uint32_t y) const
+  bool WaterIndexGenerator::Level::IsInAbsolute(uint32_t x, uint32_t y) const
   {
     return x>=cellXStart &&
            x<=cellXEnd &&
@@ -117,11 +117,6 @@ namespace osmscout {
 
     area[index]=(area[index] & ~(3 << offset));
     area[index]=(area[index] | (state << offset));
-  }
-
-  WaterIndexGenerator::State WaterIndexGenerator::Level::GetStateAbsolute(uint32_t x, uint32_t y) const
-  {
-    return GetState(x+cellXStart,y+cellYStart);
   }
 
   void WaterIndexGenerator::Level::SetStateAbsolute(uint32_t x, uint32_t y, State state)
@@ -385,7 +380,7 @@ namespace osmscout {
       for (std::set<Coord>::const_iterator coord=coords.begin();
           coord!=coords.end();
           ++coord) {
-        if (level.IsIn(coord->x,coord->y)) {
+        if (level.IsInAbsolute(coord->x,coord->y)) {
           if (level.GetState(coord->x-level.cellXStart,coord->y-level.cellYStart)==unknown) {
 #if defined(DEBUG_TILING)
             std::cout << "Coastline: " << coord->x-level.cellXStart << "," << coord->y-level.cellYStart << std::endl;
@@ -616,7 +611,7 @@ namespace osmscout {
           for (std::set<Coord>::const_iterator coord=coords.begin();
               coord!=coords.end();
               ++coord) {
-            if (level.IsIn(coord->x,coord->y)) {
+            if (level.IsInAbsolute(coord->x,coord->y)) {
               if (level.GetState(coord->x-level.cellXStart,coord->y-level.cellYStart)==unknown) {
 #if defined(DEBUG_TILING)
           std::cout << "Assume land: " << coord->x-level.cellXStart << "," << coord->y-level.cellYStart << " Way " << way.GetId() << " " << typeConfig.GetTypeInfo(way.GetType()).GetName() << " is defining area as land" << std::endl;
@@ -851,6 +846,10 @@ namespace osmscout {
           coastline->isCompletelyInCell &&
           coastline->pixelWidth>=1.0 &&
           coastline->pixelHeight>=1.0) {
+        if (!level.IsInAbsolute(coastline->cell.x,coastline->cell.y)) {
+          continue;
+        }
+
         Coord        coord(coastline->cell.x-level.cellXStart,coastline->cell.y-level.cellYStart);
         GroundTile   groundTile(GroundTile::land);
 
@@ -966,6 +965,10 @@ namespace osmscout {
       if (cx1!=cx2 || cy1!=cy2) {
         for (size_t x=std::min(cx1,cx2); x<=std::max(cx1,cx2); x++) {
           for (size_t y=std::min(cy1,cy2); y<=std::max(cy1,cy2); y++) {
+
+            if (!level.IsInAbsolute(x,y)) {
+              continue;
+            }
 
             Coord              coord(x-level.cellXStart,y-level.cellYStart);
             Point              borderPoints[5];
@@ -1155,7 +1158,7 @@ namespace osmscout {
         c!=coastlines.end();
         ++c) {
       const  CoastRef& coast=*c;
-      GeoBoundingBox      boundingBox;
+      GeoBoundingBox   boundingBox;
 
       progress.SetProgress(curCoast,coastlines.size());
 
@@ -1181,7 +1184,8 @@ namespace osmscout {
       cyMin=(uint32_t)floor((boundingBox.minLat+90.0)/level.cellHeight);
       cyMax=(uint32_t)floor((boundingBox.maxLat+90.0)/level.cellHeight);
 
-      if (cxMin==cxMax && cyMin==cyMax) {
+      if (cxMin==cxMax &&
+          cyMin==cyMax) {
         data.coastlines[curCoast].cell.x=cxMin;
         data.coastlines[curCoast].cell.y=cyMin;
         data.coastlines[curCoast].isCompletelyInCell=true;
@@ -1193,7 +1197,6 @@ namespace osmscout {
       TransPolygon polygon;
 
       if (data.coastlines[curCoast].isArea) {
-        // TODO: We already handled areas that are completely within one cell, we should skip them here
         polygon.TransformArea(projection,parameter.GetOptimizationWayMethod(),coast->coast, 1.0);
       }
       else {
@@ -1466,10 +1469,10 @@ namespace osmscout {
       borderPoints[2]=Point(3,latMin,lonMax); // bottom right
       borderPoints[3]=Point(4,latMin,lonMin); // bottom left
 
-      borderCoords[0].Set(0,GroundTile::Coord::CELL_MAX,false);                   // top left
+      borderCoords[0].Set(0,GroundTile::Coord::CELL_MAX,false);                           // top left
       borderCoords[1].Set(GroundTile::Coord::CELL_MAX,GroundTile::Coord::CELL_MAX,false); // top right
-      borderCoords[2].Set(GroundTile::Coord::CELL_MAX,0,false);                   // bottom right
-      borderCoords[3].Set(0,0,false);                                     // bottom left
+      borderCoords[2].Set(GroundTile::Coord::CELL_MAX,0,false);                           // bottom right
+      borderCoords[3].Set(0,0,false);                                                     // bottom left
 
 #if defined(DEBUG_COASTLINE)
       std::cout << std::setiosflags(std::ios::fixed) << std::setprecision(6);
