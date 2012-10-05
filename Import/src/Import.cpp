@@ -21,7 +21,6 @@
 #include <cstring>
 #include <cstdio>
 #include <iostream>
-#include <locale>
 
 #include <osmscout/util/String.h>
 
@@ -126,8 +125,6 @@ int main(int argc, char* argv[])
   size_t                    wayIndexCacheSize=parameter.GetWayIndexCacheSize();
 
   size_t                    routeNodeBlockSize=parameter.GetRouteNodeBlockSize();
-
-  std::locale::global(std::locale(""));
 
   // Simple way to analyse command line parameters, but enough for now...
   int i=1;
