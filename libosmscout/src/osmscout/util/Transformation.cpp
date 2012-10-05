@@ -412,11 +412,11 @@ namespace osmscout {
 
       DropSimilarPoints(optimizeErrorTolerance);
 
-      if (optimize == fast){
+      if (optimize==fast){
         DropRedundantPointsFast(optimizeErrorTolerance);
       }
       else {
-        DropRedundantPointsDouglasPeucker(optimizeErrorTolerance, false);
+        DropRedundantPointsDouglasPeucker(optimizeErrorTolerance,false);
       }
 
       length=0;
