@@ -1073,7 +1073,7 @@ namespace osmscout {
       progress.Info(std::string("Area tree index ")+NumberToString(i)+" size: "+NumberToString(areaTree[i].size()));
     }
 
-    progress.SetAction("Resolve ways and areas to areas");
+    progress.SetAction("Index ways and areas");
 
     if (!IndexAreasAndWays(parameter,
                            progress,
@@ -1094,7 +1094,7 @@ namespace osmscout {
       progress.Info(std::string("Area tree index ")+NumberToString(i)+" way count size: "+NumberToString(count));
     }
 
-    progress.SetAction("Resolve nodes to areas");
+    progress.SetAction("Index nodes");
 
     if (!IndexNodes(parameter,
                     progress,
