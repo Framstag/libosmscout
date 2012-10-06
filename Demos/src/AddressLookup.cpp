@@ -30,7 +30,6 @@ int main(int argc, char* argv[])
   std::string                      area;
   std::string                      location;
   std::list<osmscout::AdminRegion> areas;
-  std::list<osmscout::Location>    locations;
   bool                             limitReached;
 
   if (argc!=3 && argc!=4) {
@@ -65,7 +64,6 @@ int main(int argc, char* argv[])
     std::cout << "Looking for location '" << location << "' in area '" << area << "'..." << std::endl;
   }
 
-
   if (!database.GetMatchingAdminRegions(area,areas,RESULT_SET_MAX_SIZE,limitReached,false)) {
     std::cerr << "Error while accessing database, quitting..." << std::endl;
     database.Close();
@@ -81,6 +79,7 @@ int main(int argc, char* argv[])
   for (std::list<osmscout::AdminRegion>::const_iterator area=areas.begin();
       area!=areas.end();
       ++area) {
+    std::list<osmscout::Location> locations;
 
     if (!location.empty()) {
       if (!database.GetMatchingLocations(*area,location,locations,RESULT_SET_MAX_SIZE,limitReached,false)) {
@@ -102,24 +101,7 @@ int main(int argc, char* argv[])
       std::cout << " (" << osmscout::StringListToString(area->path) << ")";
     }
 
-    std::cout << " ~ ";
-
-    switch (area->reference.GetType()) {
-    case osmscout::refNone:
-      std::cout << "<none>";
-      break;
-    case osmscout::refNode:
-      std::cout << "Node";
-      break;
-    case osmscout::refWay:
-      std::cout << "Way";
-      break;
-    case osmscout::refRelation:
-      std::cout << "Relation";
-      break;
-    }
-
-    std::cout << " " << area->reference.GetId() << std::endl;
+    std::cout << " ~ " << area->reference.GetTypeName() << " " << area->reference.GetId() << std::endl;
 
     for (std::list<osmscout::Location>::const_iterator location=locations.begin();
         location!=locations.end();
@@ -135,24 +117,7 @@ int main(int argc, char* argv[])
       for (std::list<osmscout::ObjectRef>::const_iterator reference=location->references.begin();
           reference!=location->references.end();
           ++reference) {
-        std::cout << "     ~ ";
-
-        switch (reference->GetType()) {
-        case osmscout::refNone:
-          std::cout << "<none>";
-          break;
-        case osmscout::refNode:
-          std::cout << "Node";
-          break;
-        case osmscout::refWay:
-          std::cout << "Way";
-          break;
-        case osmscout::refRelation:
-          std::cout << "Relation";
-          break;
-        }
-
-        std::cout << " " << reference->GetId() << std::endl;
+        std::cout << "     ~ " << reference->GetTypeName() << " " << reference->GetId() << std::endl;
       }
     }
   }
