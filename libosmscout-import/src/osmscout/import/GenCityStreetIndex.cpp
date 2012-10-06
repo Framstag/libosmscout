@@ -78,7 +78,7 @@ namespace osmscout {
     ObjectRef                            reference; //! The id for this area
     std::string                          name;      //! The name of this area
 
-    std::list<RegionAlias>               locations; //! Location that are represented by this region
+    std::list<RegionAlias>               aliases;   //! Location that are represented by this region
     std::vector<Point>                   area;      //! the geometric area of this region
 
     double                               minlon;
@@ -111,16 +111,24 @@ namespace osmscout {
     }
   };
 
+  struct Boundary
+  {
+    ObjectRef                        reference;
+    std::string                      name;
+    size_t                           level;
+    std::vector<std::vector<Point> > areas;
+  };
+
   struct CityArea
   {
-    Id                 id;
+    ObjectRef          reference;
     std::string        name;
     std::vector<Point> nodes;
   };
 
   struct CityNode
   {
-    Id          id;
+    ObjectRef   reference;
     std::string name;
     Point       node;
   };
@@ -186,7 +194,7 @@ namespace osmscout {
 
         CityNode cityNode;
 
-        cityNode.id=node.GetId();
+        cityNode.reference.Set(node.GetId(),refNode);
         cityNode.name=name;
         cityNode.node.Set(node.GetId(),node.GetLat(),node.GetLon());
 
@@ -249,7 +257,7 @@ namespace osmscout {
 
         CityArea cityArea;
 
-        cityArea.id=way.GetId();
+        cityArea.reference.Set(way.GetId(),refWay);
         cityArea.name=name;
         cityArea.nodes=way.nodes;
 
@@ -287,7 +295,7 @@ namespace osmscout {
         }
 
         if (hits==0) {
-          progress.Warning("Could not resolve name of way "+NumberToString(area->id)+", skipping");
+          progress.Warning("Could not resolve name of way "+NumberToString(area->reference.GetId())+", skipping");
           area=cityAreas.erase(area);
         }
         else if (hits==1) {
@@ -298,7 +306,7 @@ namespace osmscout {
           area++;
         }
         else {
-          progress.Warning("Area "+NumberToString(area->id)+" contains multiple city nodes, skipping");
+          progress.Warning("Area "+NumberToString(area->reference.GetId())+" contains multiple city nodes, skipping");
           area=cityAreas.erase(area);
         }
       }
@@ -314,7 +322,7 @@ namespace osmscout {
   static bool GetBoundaryAreas(const ImportParameter& parameter,
                                const TypeConfig& typeConfig,
                                TypeId boundaryId,
-                               std::list<Way>& boundaryAreas,
+                               std::list<Boundary>& boundaryAreas,
                                Progress& progress)
   {
     FileScanner scanner;
@@ -358,7 +366,14 @@ namespace osmscout {
         for (size_t i=0; i<way.GetTagCount(); i++) {
           if (way.GetTagKey(i)==typeConfig.tagAdminLevel) {
             if (StringToNumber(way.GetTagValue(i),level)) {
-              boundaryAreas.push_back(way);
+              Boundary boundary;
+
+              boundary.reference.Set(way.GetId(),refWay);
+              boundary.name=way.GetName();
+              boundary.level=level;
+              boundary.areas.push_back(way.nodes);
+
+              boundaryAreas.push_back(boundary);
             }
             else {
               progress.Info("Could not parse admin_level of way "+
@@ -380,7 +395,7 @@ namespace osmscout {
   static bool GetBoundaryRelations(const ImportParameter& parameter,
                                    const TypeConfig& typeConfig,
                                    TypeId boundaryId,
-                                   std::list<Relation>& boundaryRelations,
+                                   std::list<Boundary>& boundaryRelations,
                                    Progress& progress)
   {
     FileScanner scanner;
@@ -423,7 +438,21 @@ namespace osmscout {
         for (size_t i=0; i<relation.GetTagCount(); i++) {
           if (relation.GetTagKey(i)==typeConfig.tagAdminLevel) {
             if (StringToNumber(relation.GetTagValue(i),level)) {
-              boundaryRelations.push_back(relation);
+              Boundary boundary;
+
+              boundary.reference.Set(relation.GetId(),refRelation);
+              boundary.name=relation.GetName();
+              boundary.level=level;
+
+              for (std::vector<Relation::Role>::const_iterator role=relation.roles.begin();
+                   role!=relation.roles.end();
+                   ++role) {
+                if (role->ring==0) {
+                  boundary.areas.push_back(role->nodes);
+                }
+              }
+
+              boundaryRelations.push_back(boundary);
             }
             else {
               progress.Info("Could not parse admin_level of relation "+
@@ -485,13 +514,13 @@ namespace osmscout {
       }
     }
 
-    area.locations.push_back(location);
+    area.aliases.push_back(location);
   }
 
   static void BuildRegionTreeFromAreas(Progress& progress,
                                        const TypeConfig& typeConfig,
-                                       const std::list<Way>& boundaryAreas,
-                                       const std::list<Relation>& boundaryRelations,
+                                       const std::list<Boundary>& boundaryAreas,
+                                       const std::list<Boundary>& boundaryRelations,
                                        const std::list<CityArea>& cityAreas,
                                        const std::list<CityNode>& cityNodes,
                                        Region& rootRegion)
@@ -500,59 +529,45 @@ namespace osmscout {
     size_t maxCount=boundaryAreas.size()+boundaryRelations.size()+cityAreas.size()+cityNodes.size();
 
     for (size_t l=1; l<=10; l++) {
-      for (std::list<Relation>::const_iterator rel=boundaryRelations.begin();
+      for (std::list<Boundary>::const_iterator rel=boundaryRelations.begin();
            rel!=boundaryRelations.end();
            ++rel) {
         progress.SetProgress(currentCount,maxCount);
 
-        size_t      level=0;
-        std::string name=rel->GetName();
-
-        for (size_t i=0; i<rel->GetTagCount() && level==0; i++) {
-          if (rel->GetTagKey(i)==typeConfig.tagAdminLevel) {
-            StringToNumber(rel->GetTagValue(i),level);
-          }
-        }
+        size_t      level=rel->level;
+        std::string name=rel->name;
 
         if (level==l) {
-          for (size_t i=0; i<rel->roles.size(); i++) {
-            if (rel->roles[i].ring==0) {
-              Region region;
+          for (size_t i=0; i<rel->areas.size(); i++) {
+            Region region;
 
-              region.reference.Set(rel->GetId(),refRelation);
-              region.name=name.empty() ? "???" : name;
-              region.area=rel->roles[i].nodes;
+            region.reference=rel->reference;
+            region.name=name.empty() ? "???" : name;
+            region.area=rel->areas[i];
 
-              region.CalculateMinMax();
+            region.CalculateMinMax();
 
-              AddRegion(rootRegion,region);
-            }
+            AddRegion(rootRegion,region);
           }
 
           currentCount++;
         }
       }
 
-      for (std::list<Way>::const_iterator a=boundaryAreas.begin();
+      for (std::list<Boundary>::const_iterator a=boundaryAreas.begin();
            a!=boundaryAreas.end();
            ++a) {
         progress.SetProgress(currentCount,maxCount);
 
-        size_t      level=0;
-        std::string name=a->GetName();
-
-        for (size_t i=0; i<a->GetTagCount() && level==0; i++) {
-          if (a->GetTagKey(i)==typeConfig.tagAdminLevel) {
-            StringToNumber(a->GetTagValue(i),level);
-          }
-        }
+        size_t      level=a->level;
+        std::string name=a->name;
 
         if (level==l) {
           Region region;
 
-          region.reference.Set(a->GetId(),refWay);
+          region.reference=a->reference;
           region.name=name.empty() ? "???" : name;
-          region.area=a->nodes;
+          region.area=a->areas.front();
 
           region.CalculateMinMax();
 
@@ -563,16 +578,16 @@ namespace osmscout {
       }
     }
 
-    for (std::list<CityArea>::const_iterator a=cityAreas.begin();
-         a!=cityAreas.end();
-         ++a) {
+    for (std::list<CityArea>::const_iterator city=cityAreas.begin();
+         city!=cityAreas.end();
+         ++city) {
       progress.SetProgress(currentCount,maxCount);
 
       Region region;
 
-      region.reference.Set(a->id,refWay);
-      region.name=a->name;
-      region.area=a->nodes;
+      region.reference=city->reference;
+      region.name=city->name;
+      region.area=city->nodes;
 
       region.CalculateMinMax();
 
@@ -588,7 +603,7 @@ namespace osmscout {
 
       RegionAlias alias;
 
-      alias.reference.Set(city->id,refNode);
+      alias.reference=city->reference;
       alias.name=city->name;
 
       AddLocationToRegion(rootRegion,alias,city->node);
@@ -639,7 +654,8 @@ namespace osmscout {
       }
     }
 
-    // We partly contain it, add it to the area but continue
+    // We (at least partly) contain it, add it to the area but continue
+
     area.ways[way.GetName()].push_back(way.GetId());
 
     bool completeMatch=IsAreaInArea(way.nodes,area.area);
@@ -788,10 +804,10 @@ namespace osmscout {
       for (size_t i=0; i<indent; i++) {
         std::cout << " ";
       }
-      std::cout << a->name << " " << a->reference.GetTypeName() << " " << a->reference.GetId() << " " << a->areas.size() << " " << a->nodes.size() << " " << a->ways.size() << " " << a->locations.size() << std::endl;
+      std::cout << a->name << " " << a->reference.GetTypeName() << " " << a->reference.GetId() << " " << a->areas.size() << " " << a->nodes.size() << " " << a->ways.size() << " " << a->aliases.size() << std::endl;
 
-      for (std::list<RegionAlias>::const_iterator l=a->locations.begin();
-           l!=a->locations.end();
+      for (std::list<RegionAlias>::const_iterator l=a->aliases.begin();
+           l!=a->aliases.end();
            l++) {
         for (size_t i=0; i<indent; i++) {
           std::cout << " ";
@@ -914,8 +930,8 @@ namespace osmscout {
 
     locationRefs[area.name].push_back(locRef);
 
-    for (std::list<RegionAlias>::const_iterator l=area.locations.begin();
-         l!=area.locations.end();
+    for (std::list<RegionAlias>::const_iterator l=area.aliases.begin();
+         l!=area.aliases.end();
          ++l) {
       locRef.offset=area.offset;
       locRef.reference=l->reference;
@@ -982,8 +998,8 @@ namespace osmscout {
     Region                           rootRegion;
     std::list<CityNode>              cityNodes;
     std::list<CityArea>              cityAreas;
-    std::list<Way>                   boundaryAreas;
-    std::list<Relation>              boundaryRelations;
+    std::list<Boundary>              boundaryAreas;
+    std::list<Boundary>              boundaryRelations;
     std::vector<std::list<Region*> > regionTree;
 
     progress.SetAction("Setup");

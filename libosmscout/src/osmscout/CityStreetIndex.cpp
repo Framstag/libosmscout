@@ -105,7 +105,7 @@ namespace osmscout {
       scanner.ReadNumber(regionOffset);
 
       if (location.path.empty()) {
-        // We dot not want something like "'Dortmund' in 'Dortmund'"!
+        // We do not want something like "'Dortmund' in 'Dortmund'"!
         if (name!=locationName) {
           location.path.push_back(name);
         }
@@ -362,40 +362,45 @@ namespace osmscout {
       return true;
     }
 
-    std::string regionFile=AppendFileToDir(path,"region.dat");
+    if (!regions.empty()) {
+      if (!scanner.Open(AppendFileToDir(path,
+                                        "region.dat"),
+                        FileScanner::LowMemRandom,
+                        true)) {
+        std::cerr << "Cannot open file '" << scanner.GetFilename() << "'!" << std::endl;
+        return false;
+      }
 
-    if (!scanner.Open(regionFile,FileScanner::LowMemRandom,true)) {
-      std::cerr << "Cannot open file '" << regionFile << "'!" << std::endl;
-      return false;
-    }
+      // If there are results, build up path for each hit by following
+      // the parent relation up to the top of the tree.
 
-    // If there are results, build up path for each hit by following
-    // the parent relation up to the top of the tree.
+      for (std::list<AdminRegion>::iterator area=regions.begin();
+           area!=regions.end();
+           ++area) {
+        FileOffset offset=area->offset;
 
-    for (std::list<AdminRegion>::iterator area=regions.begin();
-         area!=regions.end();
-         ++area) {
-      FileOffset offset=area->offset;
+        while (offset!=0) {
+          std::string name;
 
-      while (offset!=0) {
-        std::string name;
+          scanner.SetPos(offset);
+          scanner.Read(name);
+          scanner.ReadNumber(offset);
 
-        scanner.SetPos(offset);
-        scanner.Read(name);
-        scanner.ReadNumber(offset);
-
-        if (area->path.empty()) {
-          if (name!=area->name) {
+          if (area->path.empty()) {
+            if (name!=area->name) {
+              area->path.push_back(name);
+            }
+          }
+          else {
             area->path.push_back(name);
           }
         }
-        else {
-          area->path.push_back(name);
-        }
       }
+
+      return !scanner.HasError() && scanner.Close();
     }
 
-    return !scanner.HasError() && scanner.Close();
+    return true;
   }
 
   bool CityStreetIndex::GetMatchingLocations(const AdminRegion& region,
@@ -406,10 +411,12 @@ namespace osmscout {
                                              bool startWith) const
   {
     FileScanner scanner;
-    std::string file=AppendFileToDir(path,"region.dat");
 
-    if (!scanner.Open(file,FileScanner::LowMemRandom,true)) {
-      std::cerr << "Cannot open file '" << file << "'!" << std::endl;
+    if (!scanner.Open(AppendFileToDir(path,
+                                      "region.dat"),
+                      FileScanner::LowMemRandom,
+                      true)) {
+      std::cerr << "Cannot open file '" << scanner.GetFilename() << "'!" << std::endl;
       return false;
     }
 
