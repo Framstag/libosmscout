@@ -49,23 +49,23 @@ namespace osmscout {
       uint16_t y;
       bool     coast;
 
-      Coord()
+      inline Coord()
       {
         // no code
       }
 
-      Coord(uint16_t x,
-                uint16_t y,
-                bool coast)
+      inline Coord(uint16_t x,
+                   uint16_t y,
+                   bool coast)
       {
         this->x=x;
         this->y=y;
         this->coast=coast;
       }
 
-      void Set(uint16_t x,
-               uint16_t y,
-               bool coast)
+      inline void Set(uint16_t x,
+                      uint16_t y,
+                      bool coast)
       {
         this->x=x;
         this->y=y;
@@ -82,12 +82,12 @@ namespace osmscout {
     double             cellHeight;
     std::vector<Coord> coords;
 
-    GroundTile()
+    inline GroundTile()
     {
       // no code
     }
 
-    GroundTile(Type type)
+    inline GroundTile(Type type)
     : type(type)
     {
       // no code
