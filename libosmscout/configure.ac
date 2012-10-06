@@ -15,7 +15,8 @@ LT_INIT([win32-dll])
 AC_PROG_INSTALL
 
 AX_CHECK_COMPILE_FLAG([-std=c++0x],
-                      [CPPFLAGS="$CPPFLAGS -std=c++0x"])
+                      [CPP0XFLAGS="-std=c++0x"
+                       AC_SUBST(CPP0XFLAGS)])
 
 AC_TYPE_SIZE_T
 

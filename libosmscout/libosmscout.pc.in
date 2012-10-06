@@ -9,4 +9,5 @@ Description: osm navigation library     # human-readable description
 Version: @VERSION@
 Libs: -L${libdir} -losmscout
 Cflags: -I${includedir} \
+        @CPP0XFLAGS@ \
         @SIMD_FLAGS@

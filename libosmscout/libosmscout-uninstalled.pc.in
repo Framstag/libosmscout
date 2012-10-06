@@ -3,4 +3,5 @@ Description: osm navigation library     # human-readable description
 Version: @VERSION@
 Libs: -L@abs_builddir@/src/.libs -losmscout
 Cflags: -I@abs_builddir@/include \
+        @CPP0XFLAGS@ \
         @SIMD_FLAGS@

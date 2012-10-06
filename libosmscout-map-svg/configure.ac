@@ -14,9 +14,6 @@ AC_LANG(C++)
 LT_INIT([win32-dll])
 AC_PROG_INSTALL
 
-AX_CHECK_COMPILE_FLAG([-std=c++0x],
-                      [CPPFLAGS="$CPPFLAGS -std=c++0x"])
-
 AC_TYPE_SIZE_T
 
 AC_SEARCH_LIBS([sqrt],[m])

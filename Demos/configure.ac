@@ -17,9 +17,6 @@ AC_LANG(C++)
 LT_INIT([win32-dll])
 AC_PROG_INSTALL
 
-AX_CHECK_COMPILE_FLAG([-std=c++0x],
-                      [CPPFLAGS="$CPPFLAGS -std=c++0x"])
-
 if test "$GXX" = yes; then
   CPPFLAGS="$CPPFLAGS -Wall -pedantic -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls"
 fi

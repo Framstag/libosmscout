@@ -21,9 +21,6 @@ AC_ARG_WITH(protoc,
 
 AC_SUBST(protoc)
 
-AX_CHECK_COMPILE_FLAG([-std=c++0x],
-                      [CPPFLAGS="$CPPFLAGS -std=c++0x"])
-
 AC_TYPE_SIZE_T
 AC_CHECK_SIZEOF([wchar_t])
 
