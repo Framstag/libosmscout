@@ -183,7 +183,7 @@ namespace osmscout {
 
         locations[name].nodes.push_back(id+lastId);
 
-        lastId=id;
+        lastId+=id;
       }
     }
 
@@ -212,7 +212,7 @@ namespace osmscout {
 
         locations[name].ways.push_back(id+lastId);
 
-        lastId=id;
+        lastId+=id;
       }
     }
 
