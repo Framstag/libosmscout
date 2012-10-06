@@ -14,9 +14,19 @@ AC_LANG(C++)
 LT_INIT([win32-dll])
 AC_PROG_INSTALL
 
-AX_CHECK_COMPILE_FLAG([-std=c++0x],
-                      [CPP0XFLAGS="-std=c++0x"
-                       AC_SUBST(CPP0XFLAGS)])
+AC_ARG_ENABLE(see2-support,
+              [AS_HELP_STRING([--disable-see2-support],
+                              [do not make use of SEE2 cpu extensions])])
+
+AC_ARG_ENABLE(cpp0x-support,
+              [AS_HELP_STRING([--disable-cpp0x-support],
+                              [do not make use of C++0x compiler support])])
+
+if test "$enable_cpp0x_support" != "no"; then
+  AX_CHECK_COMPILE_FLAG([-std=c++0x],
+                        [CPP0XFLAGS="-std=c++0x"
+                         AC_SUBST(CPP0XFLAGS)])
+fi
 
 AC_TYPE_SIZE_T
 
@@ -44,9 +54,9 @@ AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
 
 dnl Check for SSE2 & Co.
-AX_EXT
-
-CPPFLAGS="$CPPFLAGS $SIMD_FLAGS"
+if test "$enable_see2_support" != "no"; then
+  AX_EXT
+fi
 
 if test "x$GXX" = xyes; then
   CPPFLAGS="$CPPFLAGS -Wall -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
