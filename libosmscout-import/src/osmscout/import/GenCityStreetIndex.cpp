@@ -37,7 +37,6 @@
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/HashSet.h>
-#include <osmscout/util/StopClock.h>
 #include <osmscout/util/String.h>
 
 #include <osmscout/private/Math.h>
@@ -112,13 +111,28 @@ namespace osmscout {
     }
   };
 
+  struct CityArea
+  {
+    Id                 id;
+    std::string        name;
+    std::vector<Point> nodes;
+  };
+
+  struct CityNode
+  {
+    Id          id;
+    std::string name;
+    Point       node;
+  };
+
+
   /**
     Return the list of nodes ids with the given type.
     */
   static bool GetCityNodes(const ImportParameter& parameter,
                            const TypeConfig& typeConfig,
                            const OSMSCOUT_HASHSET<TypeId>& cityIds,
-                           std::list<Node>& cityNodes,
+                           std::list<CityNode>& cityNodes,
                            Progress& progress)
   {
     FileScanner scanner;
@@ -166,12 +180,17 @@ namespace osmscout {
         }
 
         if (name.empty()) {
-          progress.Warning(std::string("node ")+NumberToString(node.GetId())+" has no name, skipping");
+          progress.Warning(std::string("Node ")+NumberToString(node.GetId())+" has no name, skipping");
           continue;
         }
 
-        //std::cout << "Found node of type city: " << node.GetId() << " " << name << " " << node.GetLat() <<"," <<  node.GetLon() << std::endl;
-        cityNodes.push_back(node);
+        CityNode cityNode;
+
+        cityNode.id=node.GetId();
+        cityNode.name=name;
+        cityNode.node.Set(node.GetId(),node.GetLat(),node.GetLon());
+
+        cityNodes.push_back(cityNode);
       }
     }
 
@@ -184,7 +203,7 @@ namespace osmscout {
   static bool GetCityAreas(const ImportParameter& parameter,
                            const TypeConfig& typeConfig,
                            const OSMSCOUT_HASHSET<TypeId>& cityIds,
-                           std::list<Way>& cityAreas,
+                           std::list<CityArea>& cityAreas,
                            Progress& progress)
   {
     FileScanner scanner;
@@ -228,18 +247,65 @@ namespace osmscout {
           }
         }
 
-        if (name.empty()) {
-          progress.Warning(std::string("area ")+NumberToString(way.GetId())+" has no name, skipping");
-          continue;
-        }
+        CityArea cityArea;
 
-        //std::cout << "Found area of type city: " << way.GetId() << " " << name << std::endl;
+        cityArea.id=way.GetId();
+        cityArea.name=name;
+        cityArea.nodes=way.nodes;
 
-        cityAreas.push_back(way);
+        cityAreas.push_back(cityArea);
       }
     }
 
     return scanner.Close();
+  }
+
+  static void MergeCityAreasAndNodes(Progress& progress,
+                                     std::list<CityArea>& cityAreas,
+                                     std::list<CityNode>& cityNodes)
+  {
+    std::list<CityArea>::iterator area=cityAreas.begin();
+    while (area!=cityAreas.end()) {
+      if (area->name.empty()) {
+        size_t                    hits=0;
+        std::list<CityNode>::iterator candidate=cityNodes.end();
+
+        std::list<CityNode>::iterator node=cityNodes.begin();
+        while (hits<=1 &&
+               node!=cityNodes.end()) {
+          if (IsPointInArea(node->node,area->nodes)) {
+            hits++;
+
+            if (candidate==cityNodes.end()) {
+              candidate=node;
+            }
+          }
+
+          if (hits<=1) {
+            node++;
+          }
+        }
+
+        if (hits==0) {
+          progress.Warning("Could not resolve name of way "+NumberToString(area->id)+", skipping");
+          area=cityAreas.erase(area);
+        }
+        else if (hits==1) {
+          area->name=candidate->name;
+
+          cityNodes.erase(candidate);
+
+          area++;
+        }
+        else {
+          progress.Warning("Area "+NumberToString(area->id)+" contains multiple city nodes, skipping");
+          area=cityAreas.erase(area);
+        }
+      }
+      else {
+        area++;
+      }
+    }
   }
 
   /**
@@ -426,8 +492,8 @@ namespace osmscout {
                                        const TypeConfig& typeConfig,
                                        const std::list<Way>& boundaryAreas,
                                        const std::list<Relation>& boundaryRelations,
-                                       const std::list<Way>& cityAreas,
-                                       const std::list<Node>& cityNodes,
+                                       const std::list<CityArea>& cityAreas,
+                                       const std::list<CityNode>& cityNodes,
                                        Region& rootRegion)
   {
     size_t currentCount=1;
@@ -497,24 +563,15 @@ namespace osmscout {
       }
     }
 
-    for (std::list<Way>::const_iterator a=cityAreas.begin();
+    for (std::list<CityArea>::const_iterator a=cityAreas.begin();
          a!=cityAreas.end();
          ++a) {
       progress.SetProgress(currentCount,maxCount);
 
-      std::string name=a->GetName();
-
-      for (size_t i=0; i<a->GetTagCount(); i++) {
-        if (a->GetTagKey(i)==typeConfig.tagPlaceName) {
-          name=a->GetTagValue(i);
-          break;
-        }
-      }
-
       Region region;
 
-      region.reference.Set(a->GetId(),refWay);
-      region.name=name;
+      region.reference.Set(a->id,refWay);
+      region.name=a->name;
       region.area=a->nodes;
 
       region.CalculateMinMax();
@@ -524,30 +581,17 @@ namespace osmscout {
       currentCount++;
     }
 
-    for (std::list<Node>::const_iterator city=cityNodes.begin();
+    for (std::list<CityNode>::const_iterator city=cityNodes.begin();
          city!=cityNodes.end();
          ++city) {
       progress.SetProgress(currentCount,maxCount);
 
-      std::string name;
-
-      for (size_t i=0; i<city->GetTagCount(); i++) {
-        if (city->GetTagKey(i)==typeConfig.tagName) {
-          name=city->GetTagValue(i);
-          break;
-        }
-      }
-
       RegionAlias alias;
 
-      alias.reference.Set(city->GetId(),refNode);
-      alias.name=name;
+      alias.reference.Set(city->id,refNode);
+      alias.name=city->name;
 
-      Point node(city->GetId(),
-                 city->GetLat(),
-                 city->GetLon());
-
-      AddLocationToRegion(rootRegion,alias,node);
+      AddLocationToRegion(rootRegion,alias,city->node);
 
       currentCount++;
     }
@@ -936,8 +980,8 @@ namespace osmscout {
     TypeId                           boundaryId;
     TypeId                           typeId;
     Region                           rootRegion;
-    std::list<Node>                  cityNodes;
-    std::list<Way>                   cityAreas;
+    std::list<CityNode>              cityNodes;
+    std::list<CityArea>              cityAreas;
     std::list<Way>                   boundaryAreas;
     std::list<Relation>              boundaryRelations;
     std::vector<std::list<Region*> > regionTree;
@@ -1020,6 +1064,12 @@ namespace osmscout {
 
     progress.Info(std::string("Found ")+NumberToString(cityAreas.size())+" cities of type 'area'");
 
+    progress.SetAction("Merging city areas and city nodes");
+
+    MergeCityAreasAndNodes(progress,
+                           cityAreas,
+                           cityNodes);
+
     //
     // Getting all areas of type 'administrative boundary'.
     //
@@ -1054,12 +1104,12 @@ namespace osmscout {
     progress.SetAction("Inserting boundaries and cities into area tree");
 
     BuildRegionTreeFromAreas(progress,
-                           typeConfig,
-                           boundaryAreas,
-                           boundaryRelations,
-                           cityAreas,
-                           cityNodes,
-                           rootRegion);
+                             typeConfig,
+                             boundaryAreas,
+                             boundaryRelations,
+                             cityAreas,
+                             cityNodes,
+                             rootRegion);
 
     progress.SetAction("Delete temporary data");
 
@@ -1160,4 +1210,3 @@ namespace osmscout {
     return !writer.HasError() && writer.Close();
   }
 }
-
