@@ -559,25 +559,28 @@ bool DBThread::RenderMap(QPainter& painter,
 #endif
 }
 
-bool DBThread::GetNode(osmscout::Id id, osmscout::NodeRef& node) const
+bool DBThread::GetNodeByOffset(osmscout::FileOffset offset,
+                               osmscout::NodeRef& node) const
 {
   QMutexLocker locker(&mutex);
 
-  return database.GetNode(id,node);
+  return database.GetNodeByOffset(offset,node);
 }
 
-bool DBThread::GetWay(osmscout::Id id, osmscout::WayRef& way) const
+bool DBThread::GetWayByOffset(osmscout::FileOffset offset,
+                              osmscout::WayRef& way) const
 {
   QMutexLocker locker(&mutex);
 
-  return database.GetWay(id,way);
+  return database.GetWayByOffset(offset,way);
 }
 
-bool DBThread::GetRelation(osmscout::Id id, osmscout::RelationRef& relation) const
+bool DBThread::GetRelationByOffset(osmscout::FileOffset offset,
+                                   osmscout::RelationRef& relation) const
 {
   QMutexLocker locker(&mutex);
 
-  return database.GetRelation(id,relation);
+  return database.GetRelationByOffset(offset,relation);
 }
 
 bool DBThread::GetMatchingAdminRegions(const QString& name,

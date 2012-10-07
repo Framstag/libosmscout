@@ -298,12 +298,12 @@ namespace osmscout {
 
     // Now transform the text path so that it maps to the contour of the line
     MapCurrentTextPathOnPath(draw,
-                            extends.x,
-                            1.5*extends.height,
-                            extends.width,
-                            extends.height,
-                            path,
-                            pathLength);
+                             extends.x,
+                             1.5*extends.height,
+                             extends.width,
+                             extends.height,
+                             path,
+                             pathLength);
 
     // Draw the text path
     cairo_fill(draw);

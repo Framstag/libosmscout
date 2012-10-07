@@ -32,9 +32,9 @@ namespace osmscout {
   class OSMSCOUT_API Location
   {
   public:
-    std::string            name;
-    std::list<std::string> path;
-    std::list<ObjectRef>   references;
+    std::string              name;
+    std::list<std::string>   path;
+    std::list<ObjectFileRef> references;
 
   public:
     Location();

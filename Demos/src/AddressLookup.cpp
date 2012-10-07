@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
       std::cout << " (" << osmscout::StringListToString(area->path) << ")";
     }
 
-    std::cout << " ~ " << area->reference.GetTypeName() << " " << area->reference.GetId() << std::endl;
+    std::cout << " ~ " << area->reference.GetTypeName() << " offset " << area->reference.GetFileOffset() << std::endl;
 
     for (std::list<osmscout::Location>::const_iterator location=locations.begin();
         location!=locations.end();
@@ -114,10 +114,10 @@ int main(int argc, char* argv[])
 
       std::cout << std::endl;
 
-      for (std::list<osmscout::ObjectRef>::const_iterator reference=location->references.begin();
+      for (std::list<osmscout::ObjectFileRef>::const_iterator reference=location->references.begin();
           reference!=location->references.end();
           ++reference) {
-        std::cout << "     ~ " << reference->GetTypeName() << " " << reference->GetId() << std::endl;
+        std::cout << "     ~ " << reference->GetTypeName() << " offset " << reference->GetFileOffset() << std::endl;
       }
     }
   }

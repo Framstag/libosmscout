@@ -430,13 +430,15 @@ public:
     Object::Resync(model,msg);
   }
 
-  void ShowReference(const osmscout::ObjectRef& reference,
+  void ShowReference(const osmscout::ObjectFileRef& reference,
                      const osmscout::Mag& magnification)
   {
+    std::cout << "Showing " << reference.GetTypeName() << " at file offset "<< reference.GetFileOffset() << "..." << std::endl;
+
     if (reference.GetType()==osmscout::refNode) {
       osmscout::NodeRef node;
 
-      if (database->GetNode(reference.GetId(),node)) {
+      if (database->GetNodeByOffset(reference.GetFileOffset(),node)) {
         lon=node->GetLon();
         lat=node->GetLat();
         this->magnification=magnification;
@@ -447,7 +449,7 @@ public:
     else if (reference.GetType()==osmscout::refWay) {
       osmscout::WayRef way;
 
-      if (database->GetWay(reference.GetId(),way)) {
+      if (database->GetWayByOffset(reference.GetFileOffset(),way)) {
         if (way->GetCenter(lat,lon)) {
           this->magnification=magnification;
 
@@ -458,7 +460,7 @@ public:
     else if (reference.GetType()==osmscout::refRelation) {
       osmscout::RelationRef relation;
 
-      if (database->GetRelation(reference.GetId(),relation)) {
+      if (database->GetRelationByOffset(reference.GetFileOffset(),relation)) {
         if (relation->GetCenter(lat,lon)) {
           this->magnification=magnification;
 
@@ -577,10 +579,12 @@ public:
 
       map->RequestNewMap();
     }
-    else if (model==GetClosedAction() && GetClosedAction()->IsFinished()) {
+    else if (model==GetClosedAction() &&
+             GetClosedAction()->IsFinished()) {
       SaveConfig();
     }
-    else if (model==locationSearchAction && locationSearchAction->IsFinished()) {
+    else if (model==locationSearchAction &&
+             locationSearchAction->IsFinished()) {
       osmscout::Location location;
       bool               hasResult=false;
 
@@ -601,10 +605,12 @@ public:
       delete dialog;
 
       if (hasResult) {
-        map->ShowReference(location.references.front(),osmscout::magVeryClose);
+        map->ShowReference(location.references.front(),
+                           osmscout::magVeryClose);
       }
     }
-    else if (model==routeAction && routeAction->IsFinished()) {
+    else if (model==routeAction &&
+             routeAction->IsFinished()) {
       RouteDialog *dialog;
 
       dialog=new RouteDialog(databaseTask);
@@ -616,7 +622,8 @@ public:
 
       delete dialog;
     }
-    else if (model==settingsAction && settingsAction->IsFinished()) {
+    else if (model==settingsAction &&
+             settingsAction->IsFinished()) {
       Lum::Def::PropGroup           *props=new Lum::Def::PropGroup();
       std::wstring                  label;
       osmscout::AreaSearchParameter searchParameter;

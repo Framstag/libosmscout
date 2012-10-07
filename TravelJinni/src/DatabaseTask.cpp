@@ -436,8 +436,8 @@ bool DatabaseTask::GetBoundingBox(double& minLat,double& minLon,
   return database->GetBoundingBox(minLat,minLon,maxLat,maxLon);
 }
 
-bool DatabaseTask::GetWay(osmscout::Id id,
-                          osmscout::WayRef& way) const
+bool DatabaseTask::GetWayByOffset(osmscout::FileOffset offset,
+                                  osmscout::WayRef& way) const
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
 
@@ -445,7 +445,7 @@ bool DatabaseTask::GetWay(osmscout::Id id,
     return false;
   }
 
-  return database->GetWay(id,way);
+  return database->GetWayByOffset(offset,way);
 }
 
 bool DatabaseTask::GetMatchingAdminRegions(const std::wstring& name,

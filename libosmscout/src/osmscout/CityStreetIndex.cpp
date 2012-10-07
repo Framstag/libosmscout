@@ -74,16 +74,16 @@ namespace osmscout {
 
     location.name=locationName;
 
-    for (std::list<Id>::const_iterator i=loc.nodes.begin();
-         i!=loc.nodes.end();
-         ++i) {
-      location.references.push_back(ObjectRef(*i,refNode));
+    for (std::list<FileOffset>::const_iterator offset=loc.nodes.begin();
+         offset!=loc.nodes.end();
+         ++offset) {
+      location.references.push_back(ObjectFileRef(*offset,refNode));
     }
 
-    for (std::list<Id>::const_iterator i=loc.ways.begin();
-         i!=loc.ways.end();
-         ++i) {
-      location.references.push_back(ObjectRef(*i,refWay));
+    for (std::list<FileOffset>::const_iterator offset=loc.ways.begin();
+         offset!=loc.ways.end();
+         ++offset) {
+      location.references.push_back(ObjectFileRef(*offset,refWay));
     }
 
     // Build up path for each hit by following
@@ -164,26 +164,23 @@ namespace osmscout {
 
     for (size_t i=0; i<nodeCount; i++) {
       std::string name;
-      uint32_t    idCount;
-      Id          lastId=0;
+      uint32_t    fileOffsetCount;
 
       if (!scanner.Read(name) ||
-          !scanner.ReadNumber(idCount)) {
+          !scanner.ReadNumber(fileOffsetCount)) {
         return false;
       }
 
       locations[name].offset=offset;
 
-      for (size_t j=0; j<idCount; j++) {
-        Id id;
+      for (size_t j=0; j<fileOffsetCount; j++) {
+        FileOffset offset;
 
-        if (!scanner.ReadNumber(id)) {
+        if (!scanner.ReadFileOffset(offset)) {
           return false;
         }
 
-        locations[name].nodes.push_back(id+lastId);
-
-        lastId+=id;
+        locations[name].nodes.push_back(offset);
       }
     }
 
@@ -193,26 +190,23 @@ namespace osmscout {
 
     for (size_t i=0; i<wayCount; i++) {
       std::string name;
-      uint32_t    idCount;
-      Id          lastId=0;
+      uint32_t    fileOffsetCount;
 
       if (!scanner.Read(name) ||
-          !scanner.ReadNumber(idCount)) {
+          !scanner.ReadNumber(fileOffsetCount)) {
         return false;
       }
 
       locations[name].offset=offset;
 
-      for (size_t j=0; j<idCount; j++) {
-        Id id;
+      for (size_t j=0; j<fileOffsetCount; j++) {
+        FileOffset offset;
 
-        if (!scanner.ReadNumber(id)) {
+        if (!scanner.ReadNumber(offset)) {
           return false;
         }
 
-        locations[name].ways.push_back(id+lastId);
-
-        lastId+=id;
+        locations[name].ways.push_back(offset);
       }
     }
 
@@ -300,7 +294,7 @@ namespace osmscout {
 
         region.reference.type=(RefType)type;
 
-        if (!scanner.ReadNumber(region.reference.id)) {
+        if (!scanner.ReadFileOffset(region.reference.offset)) {
           return false;
         }
 

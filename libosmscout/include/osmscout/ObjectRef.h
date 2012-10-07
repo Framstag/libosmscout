@@ -46,14 +46,16 @@ namespace osmscout {
       // no code
     }
 
-    inline ObjectRef(Id id, RefType type)
+    inline ObjectRef(Id id,
+                     RefType type)
     : id(id),
       type(type)
     {
       // no code
     }
 
-    inline void Set(const Id& id, const RefType& type)
+    inline void Set(const Id& id,
+                    const RefType& type)
     {
       this->id=id;
       this->type=type;
@@ -77,6 +79,58 @@ namespace osmscout {
     inline bool operator==(const ObjectRef& reference) const
     {
       return type==reference.type && id==reference.id;
+    }
+
+    const char* GetTypeName() const;
+  };
+
+  class OSMSCOUT_API ObjectFileRef
+  {
+  public:
+    FileOffset offset;
+    RefType    type;
+
+  public:
+    inline ObjectFileRef()
+    : offset(0),
+      type(refNone)
+    {
+      // no code
+    }
+
+    inline ObjectFileRef(FileOffset offset,
+                         RefType type)
+    : offset(offset),
+      type(type)
+    {
+      // no code
+    }
+
+    inline void Set(const FileOffset& offset,
+                    const RefType& type)
+    {
+      this->offset=offset;
+      this->type=type;
+    }
+
+    inline const FileOffset& GetFileOffset() const
+    {
+      return offset;
+    }
+
+    inline const RefType& GetType() const
+    {
+      return type;
+    }
+
+    inline bool operator<(const ObjectFileRef& reference) const
+    {
+      return type<reference.type || (type==reference.type &&  offset<reference.offset);
+    }
+
+    inline bool operator==(const ObjectFileRef& reference) const
+    {
+      return type==reference.type && offset==reference.offset;
     }
 
     const char* GetTypeName() const;

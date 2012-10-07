@@ -167,7 +167,8 @@ namespace osmscout {
     }
 
     for (size_t i=index; i<way->nodes.size(); i++) {
-      routeNodeDataFile.Get(way->nodes[i].GetId(),routeNode);
+      routeNodeDataFile.Get(way->nodes[i].GetId(),
+                            routeNode);
 
       if (routeNode.Valid()) {
         pos=i;
@@ -426,7 +427,7 @@ namespace osmscout {
         return false;
       }
 
-      // Find the path with need to go to reach the next route node
+      // Find the path we need to go to reach the next route node
       for (size_t i=0; i<node->paths.size(); i++) {
         if (node->ways[node->paths[i].wayIndex]==(*nn)->wayId) {
           pathIndex=i;
@@ -517,9 +518,11 @@ namespace osmscout {
     }
 
     GetClosestForwardRouteNode(startWay,startNodeId,
-                               startForwardRouteNode,startForwardNodePos);
+                               startForwardRouteNode,
+                               startForwardNodePos);
     GetClosestBackwardRouteNode(startWay,startNodeId,
-                                startBackwardRouteNode,startBackwardNodePos);
+                                startBackwardRouteNode,
+                                startBackwardNodePos);
 
     if (startForwardRouteNode.Invalid() &&
         startBackwardRouteNode.Invalid()) {

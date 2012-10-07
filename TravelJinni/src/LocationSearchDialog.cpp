@@ -133,7 +133,7 @@ void LocationSearchDialog::Search()
 
     stopClock.Stop();
 
-    std::cout << "Number of hits for region " << Lum::Base::WStringToString(city) << ": " << regions.size() << ", time: " << stopClock << std::endl;
+    std::cout << "Number of hits for region '" << Lum::Base::WStringToString(city) << "': " << regions.size() << ", time: " << stopClock << std::endl;
 
     if (limitReached) {
       locationsModel->SetEmptyText(L"- too many hits -");
@@ -190,7 +190,7 @@ void LocationSearchDialog::Search()
 
     stopClock.Stop();
 
-    std::cout << "Number of hits for location " << Lum::Base::WStringToString(street) << " in region " << region->name << ": " << locs.size() << ", time: " << stopClock << std::endl;
+    std::cout << "Number of hits for location '" << Lum::Base::WStringToString(street) << "' in region '" << region->name << "': " << locs.size() << ", time: " << stopClock << std::endl;
 
     if (limitReached) {
       std::cout << "Limit reached." << std::endl;
@@ -252,7 +252,8 @@ void LocationSearchDialog::Resync(Lum::Base::Model* model, const Lum::Base::Resy
   if (model==GetClosedAction() &&  GetClosedAction()->IsFinished()) {
     Exit();
   }
-  else if (model==searchTimerAction && searchTimerAction->IsFinished()) {
+  else if (model==searchTimerAction &&
+           searchTimerAction->IsFinished()) {
     Search();
   }
   else if (model==locationName) {
@@ -272,7 +273,9 @@ void LocationSearchDialog::Resync(Lum::Base::Model* model, const Lum::Base::Resy
       okAction->Disable();
     }
   }
-  else if (model==okAction && okAction->IsEnabled() && okAction->IsFinished()) {
+  else if (model==okAction &&
+           okAction->IsEnabled() &&
+           okAction->IsFinished()) {
     assert(locationSelection->HasSelection());
 
     resultLocation=locationsModel->GetEntry(locationSelection->GetLine());

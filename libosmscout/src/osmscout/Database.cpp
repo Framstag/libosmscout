@@ -763,7 +763,8 @@ namespace osmscout {
     return true;
   }
 
-  bool Database::GetNode(const Id& id, NodeRef& node) const
+  bool Database::GetNode(const Id& id,
+                         NodeRef& node) const
   {
     if (!IsOpen()) {
       return false;
@@ -784,16 +785,6 @@ namespace osmscout {
     return false;
   }
 
-  bool Database::GetNodesByOffset(const std::vector<FileOffset>& offsets,
-                          std::vector<NodeRef>& nodes) const
-  {
-    if (!IsOpen()) {
-      return false;
-    }
-
-    return nodeDataFile.GetByOffset(offsets,nodes);
-  }
-
   bool Database::GetNodes(const std::vector<Id>& ids,
                           std::vector<NodeRef>& nodes) const
   {
@@ -804,47 +795,40 @@ namespace osmscout {
     return nodeDataFile.Get(ids,nodes);
   }
 
-  bool Database::GetWaysByOffset(const std::vector<FileOffset>& offsets,
-                         std::vector<WayRef>& ways) const
+  bool Database::GetNodeByOffset(const FileOffset& offset,
+                                 NodeRef& node) const
   {
     if (!IsOpen()) {
       return false;
     }
 
-    return wayDataFile.GetByOffset(offsets,ways);
+    std::vector<FileOffset> offsets;
+    std::vector<NodeRef>    nodes;
+
+    offsets.push_back(offset);
+
+    if (GetNodesByOffset(offsets,nodes)) {
+      if (!nodes.empty()) {
+        node=*nodes.begin();
+        return true;
+      }
+    }
+
+    return false;
   }
 
-  bool Database::GetWaysByOffset(const std::list<FileOffset>& offsets,
-                         std::vector<WayRef>& ways) const
+  bool Database::GetNodesByOffset(const std::vector<FileOffset>& offsets,
+                                  std::vector<NodeRef>& nodes) const
   {
     if (!IsOpen()) {
       return false;
     }
 
-    return wayDataFile.GetByOffset(offsets,ways);
+    return nodeDataFile.GetByOffset(offsets,nodes);
   }
 
-  bool Database::GetRelationsByOffset(const std::vector<FileOffset>& offsets,
-                              std::vector<RelationRef>& relations) const
-  {
-    if (!IsOpen()) {
-      return false;
-    }
-
-    return relationDataFile.GetByOffset(offsets,relations);
-  }
-
-  bool Database::GetRelationsByOffset(const std::list<FileOffset>& offsets,
-                              std::vector<RelationRef>& relations) const
-  {
-    if (!IsOpen()) {
-      return false;
-    }
-
-    return relationDataFile.GetByOffset(offsets,relations);
-  }
-
-  bool Database::GetWay(const Id& id, WayRef& way) const
+  bool Database::GetWay(const Id& id,
+                        WayRef& way) const
   {
     if (!IsOpen()) {
       return false;
@@ -885,6 +869,48 @@ namespace osmscout {
     return wayDataFile.Get(ids,ways);
   }
 
+  bool Database::GetWayByOffset(const FileOffset& offset,
+                                WayRef& way) const
+  {
+    if (!IsOpen()) {
+      return false;
+    }
+
+    std::vector<FileOffset> offsets;
+    std::vector<WayRef>     ways;
+
+    offsets.push_back(offset);
+
+    if (GetWaysByOffset(offsets,ways)) {
+      if (!ways.empty()) {
+        way=*ways.begin();
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool Database::GetWaysByOffset(const std::vector<FileOffset>& offsets,
+                                 std::vector<WayRef>& ways) const
+  {
+    if (!IsOpen()) {
+      return false;
+    }
+
+    return wayDataFile.GetByOffset(offsets,ways);
+  }
+
+  bool Database::GetWaysByOffset(const std::list<FileOffset>& offsets,
+                                 std::vector<WayRef>& ways) const
+  {
+    if (!IsOpen()) {
+      return false;
+    }
+
+    return wayDataFile.GetByOffset(offsets,ways);
+  }
+
   bool Database::GetRelation(const Id& id,
                              RelationRef& relation) const
   {
@@ -892,7 +918,19 @@ namespace osmscout {
       return false;
     }
 
-    return relationDataFile.Get(id,relation);
+    std::vector<Id>          ids;
+    std::vector<RelationRef> relations;
+
+    ids.push_back(id);
+
+    if (GetRelations(ids,relations)) {
+      if (!relations.empty()) {
+        relation=*relations.begin();
+        return true;
+      }
+    }
+
+    return false;
   }
 
   bool Database::GetRelations(const std::vector<Id>& ids,
@@ -903,6 +941,48 @@ namespace osmscout {
     }
 
     return relationDataFile.Get(ids,relations);
+  }
+
+  bool Database::GetRelationByOffset(const FileOffset& offset,
+                                     RelationRef& relation) const
+  {
+    if (!IsOpen()) {
+      return false;
+    }
+
+    std::vector<FileOffset>  offsets;
+    std::vector<RelationRef> relations;
+
+    offsets.push_back(offset);
+
+    if (GetRelationsByOffset(offsets,relations)) {
+      if (!relations.empty()) {
+        relation=*relations.begin();
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool Database::GetRelationsByOffset(const std::vector<FileOffset>& offsets,
+                                      std::vector<RelationRef>& relations) const
+  {
+    if (!IsOpen()) {
+      return false;
+    }
+
+    return relationDataFile.GetByOffset(offsets,relations);
+  }
+
+  bool Database::GetRelationsByOffset(const std::list<FileOffset>& offsets,
+                                      std::vector<RelationRef>& relations) const
+  {
+    if (!IsOpen()) {
+      return false;
+    }
+
+    return relationDataFile.GetByOffset(offsets,relations);
   }
 
   bool Database::GetMatchingAdminRegions(const std::string& name,

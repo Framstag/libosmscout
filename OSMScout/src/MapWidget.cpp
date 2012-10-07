@@ -277,13 +277,13 @@ void MapWidget::ZoomOut(double zoomFactor)
   TriggerMapRendering();
 }
 
-void MapWidget::ShowReference(const osmscout::ObjectRef& reference,
+void MapWidget::ShowReference(const osmscout::ObjectFileRef& reference,
                               const osmscout::Mag& magnification)
 {
   if (reference.GetType()==osmscout::refNode) {
     osmscout::NodeRef node;
 
-    if (dbThread.GetNode(reference.GetId(),node)) {
+    if (dbThread.GetNodeByOffset(reference.GetFileOffset(),node)) {
       lon=node->GetLon();
       lat=node->GetLat();
       this->magnification=magnification;
@@ -294,7 +294,7 @@ void MapWidget::ShowReference(const osmscout::ObjectRef& reference,
   else if (reference.GetType()==osmscout::refWay) {
     osmscout::WayRef way;
 
-    if (dbThread.GetWay(reference.GetId(),way)) {
+    if (dbThread.GetWayByOffset(reference.GetFileOffset(),way)) {
       if (way->GetCenter(lat,lon)) {
         this->magnification=magnification;
 
@@ -305,7 +305,7 @@ void MapWidget::ShowReference(const osmscout::ObjectRef& reference,
   else if (reference.GetType()==osmscout::refRelation) {
     osmscout::RelationRef relation;
 
-    if (dbThread.GetRelation(reference.GetId(),relation)) {
+    if (dbThread.GetRelationByOffset(reference.GetFileOffset(),relation)) {
       if (relation->GetCenter(lat,lon)) {
         this->magnification=magnification;
 

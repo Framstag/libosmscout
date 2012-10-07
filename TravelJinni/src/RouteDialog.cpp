@@ -504,9 +504,10 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
 
         assert(location.references.front().GetType()==osmscout::refWay);
 
-       result.startWay=location.references.front().GetId();
+        osmscout::FileOffset offset=location.references.front().GetFileOffset();
 
-        if (databaseTask->GetWay(result.startWay,way)) {
+        if (databaseTask->GetWayByOffset(offset,way)) {
+          result.startWay=way->GetId();
           result.startNode=way->nodes[0].GetId();
 
           if (location.path.empty()) {
@@ -556,9 +557,10 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
 
         assert(location.references.front().GetType()==osmscout::refWay);
 
-        result.endWay=location.references.front().GetId();
+        osmscout::FileOffset offset=location.references.front().GetFileOffset();
 
-        if (databaseTask->GetWay(result.endWay,way)) {
+        if (databaseTask->GetWayByOffset(offset,way)) {
+          result.endWay=way->GetId();
           result.endNode=way->nodes[0].GetId();
 
           if (location.path.empty()) {

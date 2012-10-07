@@ -342,9 +342,10 @@ void RoutingDialog::SelectFrom()
 
     location=dialog.GetLocationResult();
 
-    route.startWay=location.references.front().GetId();
+    osmscout::FileOffset offset=location.references.front().GetFileOffset();
 
-    if (dbThread.GetWay(route.startWay,way)) {
+    if (dbThread.GetWayByOffset(offset,way)) {
+      route.startWay=way->GetId();
       route.startNode=way->nodes[0].GetId();
 
       if (location.path.empty()) {
@@ -386,9 +387,10 @@ void RoutingDialog::SelectTo()
 
     location=dialog.GetLocationResult();
 
-    route.endWay=location.references.front().GetId();
+    osmscout::FileOffset offset=location.references.front().GetFileOffset();
 
-    if (dbThread.GetWay(route.endWay,way)) {
+    if (dbThread.GetWayByOffset(offset,way)) {
+      route.endWay=way->GetId();
       route.endNode=way->nodes[0].GetId();
 
       if (location.path.empty()) {
@@ -626,28 +628,14 @@ void RoutingDialog::DumpNameChangedDescription(const osmscout::RouteDescription:
 
 void RoutingDialog::Route()
 {
-  std::cout << "Route" << std::endl;
-
-  osmscout::RouteData        routeData;
-  osmscout::WayRef           startWay;
-  osmscout::WayRef           endWay;
-  osmscout::Way              routeWay;
+  osmscout::RouteData routeData;
+  osmscout::Way       routeWay;
 
   route.routeSteps.clear();
   routeModel->refresh();
 
-  if (!dbThread.GetWay(route.startWay,startWay)) {
-    std::cerr << "Cannot load start way" << std::endl;
-    return;
-  }
-
-  if (!dbThread.GetWay(route.endWay,endWay)) {
-    std::cerr << "Cannot load end way" << std::endl;
-    return;
-  }
-
-  if (!dbThread.CalculateRoute(startWay->GetId(),startWay->nodes.front().GetId(),
-                               endWay->GetId(),endWay->nodes.back().GetId(),
+  if (!dbThread.CalculateRoute(route.startWay,route.startNode,
+                               route.endWay,route.endNode,
                                routeData)) {
     std::cerr << "There was an error while routing!" << std::endl;
     return;

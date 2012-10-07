@@ -101,7 +101,8 @@ public:
   bool GetBoundingBox(double& minLat,double& minLon,
                       double& maxLat,double& maxLon) const;
 
-  bool GetWay(osmscout::Id id, osmscout::WayRef& way) const;
+  bool GetWayByOffset(osmscout::FileOffset offset,
+                      osmscout::WayRef& way) const;
 
   bool GetMatchingAdminRegions(const std::wstring& name,
                                std::list<osmscout::AdminRegion>& regions,
