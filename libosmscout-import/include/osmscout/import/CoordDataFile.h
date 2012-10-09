@@ -70,28 +70,26 @@ namespace osmscout {
 
         CoordPageOffsetMap::const_iterator pageOffset=coordPageOffsetMap.find(coordPageId);
 
-        if (pageOffset==coordPageOffsetMap.end()) {
-          return false;
+        if (pageOffset!=coordPageOffsetMap.end()) {
+          scanner.SetPos(pageOffset->second+((*id)%coordPageSize)*2*sizeof(uint32_t));
+
+          double lat;
+          double lon;
+
+          scanner.ReadCoord(lat,lon);
+
+          if (scanner.HasError()) {
+            std::cerr << "Error while reading data from offset " << pageOffset->second << " of file " << datafilename << "!" << std::endl;
+            scanner.Close();
+            return false;
+          }
+
+          Point point(*id,
+                      lat,
+                      lon);
+
+          data.push_back(point);
         }
-
-        scanner.SetPos(pageOffset->second+((*id)%coordPageSize)*2*sizeof(uint32_t));
-
-        double lat;
-        double lon;
-
-        scanner.ReadCoord(lat,lon);
-
-        Point point(*id,
-                    lat,
-                    lon);
-
-        if (scanner.HasError()) {
-          std::cerr << "Error while reading data from offset " << pageOffset->second << " of file " << datafilename << "!" << std::endl;
-          scanner.Close();
-          return false;
-        }
-
-        data.push_back(point);
       }
 
       return true;
