@@ -38,6 +38,7 @@ LOCAL_SRC_FILES := ../../../libosmscout/src/osmscout/AreaAreaIndex.cpp \
                    ../../../libosmscout/src/osmscout/AreaWayIndex.cpp \
                    ../../../libosmscout/src/osmscout/CityStreetIndex.cpp \
                    ../../../libosmscout/src/osmscout/Database.cpp \
+                   ../../../libosmscout/src/osmscout/GroundTile.cpp \
                    ../../../libosmscout/src/osmscout/Location.cpp \
                    ../../../libosmscout/src/osmscout/Node.cpp \
                    ../../../libosmscout/src/osmscout/OptimizeLowZoom.cpp \
