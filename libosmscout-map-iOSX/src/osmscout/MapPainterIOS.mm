@@ -568,19 +568,23 @@ namespace osmscout {
                   const Color& color,
                   double width,
                   const std::vector<double>& dash,
-                  CapStyle startCap,
-                  CapStyle endCap,
+                  LineStyle::CapStyle startCap,
+                  LineStyle::CapStyle endCap,
                   size_t transStart, size_t transEnd){
         CGContextSaveGState(cg);
         CGContextSetRGBStrokeColor(cg, color.GetR(), color.GetG(), color.GetB(), color.GetA());
         CGContextSetLineWidth(cg, width);
         switch (startCap) {
-            case MapPainter::capButt :
+            case LineStyle::capButt :
                 CGContextSetLineCap(cg, kCGLineCapButt);
                 break;
-            case MapPainter::capRound :
+            case LineStyle::capRound :
                 CGContextSetLineCap(cg, kCGLineCapRound);
                 break;
+            case LineStyle::capSquare :
+                CGContextSetLineCap(cg, kCGLineCapSquare);
+                break;
+
             default:
                 break;
         }
