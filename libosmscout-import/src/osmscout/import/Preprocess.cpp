@@ -49,7 +49,17 @@ namespace osmscout {
     }
 
     for (size_t i=0; i<coordPageSize; i++) {
-      coordWriter.WriteCoord(lats[i],lons[i]);
+
+      if (!isSet[i]) {
+        uint32_t latValue=0xffffffff;
+        uint32_t lonValue=0xffffffff;
+
+        coordWriter.Write(latValue);
+        coordWriter.Write(lonValue);
+      }
+      else {
+        coordWriter.WriteCoord(lats[i],lons[i]);
+      }
     }
 
     currentPageId=0;
@@ -62,27 +72,27 @@ namespace osmscout {
     Id pageId=id/coordPageSize;
     Id coordPageOffset=id%coordPageSize;
 
-    if (currentPageId!=0 &&
-             currentPageId==pageId) {
-      lats[coordPageOffset]=lat;
-      lons[coordPageOffset]=lon;
+    if (currentPageId!=0) {
+      if (currentPageId==pageId) {
+        lats[coordPageOffset]=lat;
+        lons[coordPageOffset]=lon;
+        isSet[coordPageOffset]=true;
 
-      return true;
-    }
-
-    if (currentPageId!=0 &&
-        currentPageId!=pageId) {
-      StoreCurrentPage();
+        return true;
+      }
+      else {
+        StoreCurrentPage();
+      }
     }
 
     CoordPageOffsetMap::const_iterator pageOffsetEntry=coordIndex.find(pageId);
 
     if (pageOffsetEntry==coordIndex.end()) {
-      lats.resize(coordPageSize,0.0);
-      lons.resize(coordPageSize,0.0);
+      isSet.assign(coordPageSize,false);
 
       lats[coordPageOffset]=lat;
       lons[coordPageOffset]=lon;
+      isSet[coordPageOffset]=true;
 
       FileOffset pageOffset=coordPageCount*coordPageSize*2*sizeof(uint32_t);
 
@@ -191,6 +201,10 @@ namespace osmscout {
 
     coordPageCount++;
 
+    lats.resize(coordPageSize);
+    lons.resize(coordPageSize);
+    isSet.resize(coordPageSize);
+
     return !nodeWriter.HasError() &&
            !wayWriter.HasError() &&
            !relationWriter.HasError() &&
@@ -210,9 +224,6 @@ namespace osmscout {
     if (id<lastNodeId) {
       nodeSortingError=true;
     }
-
-    assert(lat!=-90.0);
-    assert(lat!=-180.0);
 
     StoreCoord(id,lat,lon);
 

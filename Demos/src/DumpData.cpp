@@ -468,7 +468,17 @@ int main(int argc, char* argv[])
       }
 
       coordDataFile.SetPos(pageOffset->second+(job->id%coordPageSize)*2*sizeof(uint32_t));
-      coordDataFile.ReadCoord(lat,lon);
+
+      uint32_t latDat;
+      uint32_t lonDat;
+
+      coordDataFile.Read(latDat);
+      coordDataFile.Read(lonDat);
+
+      if (latDat==0xffffffff || lonDat==0xffffffff) {
+        std::cerr << "Cannot load coord " << job->id << std::endl;
+        continue;
+      }
 
       if (coordDataFile.HasError()) {
         std::cerr << "Error while reading data from offset " << pageOffset->second << " of file " << coordDataFile.GetFilename() << "!" << std::endl;
