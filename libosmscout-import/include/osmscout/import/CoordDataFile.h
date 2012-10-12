@@ -73,10 +73,15 @@ namespace osmscout {
         if (pageOffset!=coordPageOffsetMap.end()) {
           scanner.SetPos(pageOffset->second+((*id)%coordPageSize)*2*sizeof(uint32_t));
 
-          double lat;
-          double lon;
+          uint32_t latDat;
+          uint32_t lonDat;
 
-          scanner.ReadCoord(lat,lon);
+          scanner.Read(latDat);
+          scanner.Read(lonDat);
+
+          if (latDat==0xffffffff || lonDat==0xffffffff) {
+            continue;
+          }
 
           if (scanner.HasError()) {
             std::cerr << "Error while reading data from offset " << pageOffset->second << " of file " << datafilename << "!" << std::endl;
@@ -85,8 +90,8 @@ namespace osmscout {
           }
 
           Point point(*id,
-                      lat,
-                      lon);
+                      latDat/conversionFactor-90.0,
+                      lonDat/conversionFactor-180.0);
 
           data.push_back(point);
         }

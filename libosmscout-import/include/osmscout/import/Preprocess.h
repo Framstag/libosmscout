@@ -62,6 +62,7 @@ namespace osmscout {
     FileOffset          currentPageOffset;
     std::vector<double> lats;
     std::vector<double> lons;
+    std::vector<bool>   isSet;
 
   private:
     bool StoreCurrentPage();
