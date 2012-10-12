@@ -219,7 +219,7 @@ namespace osmscout {
                           double& width,
                           double& height){
         Font *font = GetFont(parameter,fontSize);
-        NSString *str = [NSString stringWithCString:text.c_str() encoding:NSUTF8StringEncoding];
+        NSString *str = [NSString stringWithUTF8String:text.c_str()];
 #if TARGET_OS_IPHONE
         CGSize size = [str sizeWithFont:font];
 #else
@@ -254,6 +254,7 @@ namespace osmscout {
         CGContextSetTextDrawingMode(cg, kCGTextFill);
         Font *font = GetFont(parameter,label.fontSize);
         NSString *str = [NSString stringWithCString:label.text.c_str() encoding:NSUTF8StringEncoding];
+        //std::cout << "label : "<< label.text << " font size : " << label.fontSize << std::endl;
         
         if (label.style->GetStyle()==LabelStyle::normal) {
             CGContextSetRGBFillColor(cg, r, g, b, label.alpha);
@@ -574,21 +575,17 @@ namespace osmscout {
         CGContextSaveGState(cg);
         CGContextSetRGBStrokeColor(cg, color.GetR(), color.GetG(), color.GetB(), color.GetA());
         CGContextSetLineWidth(cg, width);
-        switch (startCap) {
-            case LineStyle::capButt :
-                CGContextSetLineCap(cg, kCGLineCapButt);
-                break;
-            case LineStyle::capRound :
-                CGContextSetLineCap(cg, kCGLineCapRound);
-                break;
-            case LineStyle::capSquare :
-                CGContextSetLineCap(cg, kCGLineCapSquare);
-                break;
-
-            default:
-                break;
-        }
+        CGContextSetLineJoin(cg, kCGLineJoinRound);
         
+        if (startCap==LineStyle::capButt ||
+            endCap==LineStyle::capButt) {
+            CGContextSetLineCap(cg, kCGLineCapButt);        }
+        else if (startCap==LineStyle::capSquare ||
+                 endCap==LineStyle::capSquare) {
+            CGContextSetLineCap(cg, kCGLineCapSquare);
+        } else {
+            CGContextSetLineCap(cg, kCGLineCapRound);
+        }
         if (dash.empty()) {
             CGContextSetLineDash(cg, 0.0, NULL, 0);
         } else {
@@ -606,6 +603,23 @@ namespace osmscout {
             CGContextAddLineToPoint (cg,transBuffer.buffer[i].x,transBuffer.buffer[i].y);
         }
         CGContextStrokePath(cg);
+        if (dash.empty() &&
+            startCap==LineStyle::capRound &&
+            endCap!=LineStyle::capRound) {
+            CGContextSetRGBFillColor(cg, color.GetR(), color.GetG(), color.GetB(), color.GetA());
+            CGContextFillEllipseInRect(cg, CGRectMake(transBuffer.buffer[transStart].x-width/4,
+                                                     transBuffer.buffer[transStart].y-width/4,
+                                                     width/2,width/2));
+        }
+        if (dash.empty() &&
+            endCap==LineStyle::capRound &&
+            startCap!=LineStyle::capRound) {
+            CGContextSetRGBFillColor(cg, color.GetR(), color.GetG(), color.GetB(), color.GetA());
+            CGContextFillEllipseInRect(cg, CGRectMake(transBuffer.buffer[transEnd].x-width/4,
+                                                     transBuffer.buffer[transEnd].y-width/4,
+                                                     width/2,width/2));
+        }
+
         CGContextRestoreGState(cg);
     }
     
