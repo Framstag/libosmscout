@@ -189,31 +189,15 @@ namespace osmscout {
       }
     }
 
-    std::vector<Point> coords;
     OSMSCOUT_HASHMAP<Id,Point> coordsMap;
 
-    coords.reserve(nodeIds.size());
-
-    if (!coordDataFile.Get(nodeIds.begin(),
-                           nodeIds.end(),
-                           coords)) {
+    if (!coordDataFile.Get(nodeIds,
+                           coordsMap)) {
       std::cerr << "Cannot read nodes!" << std::endl;
       return false;
     }
 
     nodeIds.clear();
-
-#if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
-    coordsMap.reserve(coords.size());
-#endif
-
-    for (std::vector<Point>::const_iterator coord=coords.begin();
-        coord!=coords.end();
-        coord++) {
-      coordsMap[coord->GetId()]=*coord;
-    }
-
-    coords.clear();
 
     progress.SetAction("Enriching coastline with node data");
 

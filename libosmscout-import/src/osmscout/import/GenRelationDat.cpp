@@ -671,13 +671,8 @@ namespace osmscout {
 
     // Now load all node coordinates
 
-    std::vector<Point> coords;
-
-    coords.reserve(nodeIds.size());
-
-    if (!coordDataFile.Get(nodeIds.begin(),
-                           nodeIds.end(),
-                           coords)) {
+    if (!coordDataFile.Get(nodeIds,
+                           coordMap)) {
       progress.Error("Cannot resolve child nodes of relation "+
                      NumberToString(relation.GetId())+" "+
                      typeConfig.GetTypeInfo(relation.GetType()).GetName()+" "+
@@ -685,18 +680,7 @@ namespace osmscout {
       return false;
     }
 
-#if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
-    coordMap.reserve(coords.size());
-#endif
-
-    for (std::vector<Point>::const_iterator coord=coords.begin();
-         coord!=coords.end();
-         ++coord) {
-      coordMap[coord->GetId()]=*coord;
-    }
-
     nodeIds.clear();
-    coords.clear();
 
     // Now build together everything
 
