@@ -171,7 +171,8 @@ namespace osmscout {
 
     CoordDataFile coordDataFile("coord.dat");
 
-    if (!coordDataFile.Open(parameter.GetDestinationDirectory())) {
+    if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
+                            parameter.GetCoordDataMemoryMaped())) {
       std::cerr << "Cannot open coord data file!" << std::endl;
       return false;
     }

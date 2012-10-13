@@ -908,7 +908,8 @@ namespace osmscout {
                                       parameter.GetRawWayDataCacheSize(),
                                       parameter.GetRawWayIndexCacheSize());
 
-    if (!coordDataFile.Open(parameter.GetDestinationDirectory())) {
+    if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
+                            parameter.GetCoordDataMemoryMaped())) {
       std::cerr << "Cannot open coord data files!" << std::endl;
       return false;
     }

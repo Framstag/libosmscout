@@ -41,14 +41,17 @@ namespace osmscout {
   }
 
 
-  bool CoordDataFile::Open(const std::string& path)
+  bool CoordDataFile::Open(const std::string& path,
+                           bool memoryMapedData)
   {
     datafilename=AppendFileToDir(path,datafile);
 
     isOpen=false;
     coordPageOffsetMap.clear();
 
-    if (scanner.Open(datafilename,FileScanner::FastRandom,false)) {
+    if (scanner.Open(datafilename,
+                     FileScanner::FastRandom,
+                     memoryMapedData)) {
       FileOffset mapOffset;
 
       if (!scanner.Read(coordPageSize)) {

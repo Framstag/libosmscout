@@ -51,7 +51,8 @@ namespace osmscout {
 
     virtual ~CoordDataFile();
 
-    bool Open(const std::string& path);
+    bool Open(const std::string& path,
+              bool memoryMapedData);
     bool Close();
 
     template <class InputIterator>

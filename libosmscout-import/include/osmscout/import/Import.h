@@ -56,6 +56,8 @@ namespace osmscout {
 
     size_t                       numericIndexPageSize;     //! Size of an numeric index page in bytes
 
+    bool                         coordDataMemoryMaped;     //! Use memory mapping for coord data file access
+
     bool                         rawNodeIndexMemoryMaped;  //! Use memory mapping for raw node index file access
     bool                         rawNodeDataMemoryMaped;   //! Use memory mapping for raw node data file access
     size_t                       rawNodeDataCacheSize;     //! Size of the raw node data cache
@@ -118,6 +120,8 @@ namespace osmscout {
 
     size_t GetNumericIndexPageSize() const;
 
+    bool GetCoordDataMemoryMaped() const;
+
     bool GetRawNodeIndexMemoryMaped() const;
     bool GetRawNodeDataMemoryMaped() const;
     size_t GetRawNodeDataCacheSize() const;
@@ -175,6 +179,8 @@ namespace osmscout {
     void SetRenumberMag(size_t renumberMag);
 
     void SetNumericIndexPageSize(size_t numericIndexPageSize);
+
+    void SetCoordDataMemoryMaped(bool memoryMaped);
 
     void SetRawNodeIndexMemoryMaped(bool memoryMaped);
     void SetRawNodeDataMemoryMaped(bool memoryMaped);

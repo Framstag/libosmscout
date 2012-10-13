@@ -74,6 +74,7 @@ namespace osmscout {
      renumberBlockSize(40000000),
      renumberMag(14),
      numericIndexPageSize(4096),
+     coordDataMemoryMaped(false),
      rawNodeIndexMemoryMaped(true),
      rawNodeDataMemoryMaped(false),
      rawNodeDataCacheSize(10000),
@@ -159,6 +160,11 @@ namespace osmscout {
   size_t ImportParameter::GetNumericIndexPageSize() const
   {
     return numericIndexPageSize;
+  }
+
+  bool ImportParameter::GetCoordDataMemoryMaped() const
+  {
+    return coordDataMemoryMaped;
   }
 
   bool ImportParameter::GetRawNodeIndexMemoryMaped() const
@@ -376,6 +382,11 @@ namespace osmscout {
   void ImportParameter::SetRawNodeIndexMemoryMaped(bool memoryMaped)
   {
     this->rawNodeIndexMemoryMaped=memoryMaped;
+  }
+
+  void ImportParameter::SetCoordDataMemoryMaped(bool memoryMaped)
+  {
+    this->coordDataMemoryMaped=memoryMaped;
   }
 
   void ImportParameter::SetRawNodeDataMemoryMaped(bool memoryMaped)
