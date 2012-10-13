@@ -67,21 +67,23 @@ void DumpHelp(osmscout::ImportParameter& parameter)
 
   std::cout << " --numericIndexPageSize <number>      size of an numeric index page in bytes (default: " << parameter.GetNumericIndexPageSize() << ")" << std::endl;
 
-  std::cout << " --rawNodeIndexMemoryMaped true|false memory map raw node index file access (default: " << BoolToString(parameter.GetRawNodeIndexMemoryMaped()) << ")" << std::endl;
-  std::cout << " --rawNodeDataMemoryMaped true|false  memory map raw node data file access (default: " << BoolToString(parameter.GetRawNodeDataMemoryMaped()) << ")" << std::endl;
+  std::cout << " --coordDataMemoryMaped true|false    memory maped coord data file access (default: " << BoolToString(parameter.GetCoordDataMemoryMaped()) << ")" << std::endl;
+
+  std::cout << " --rawNodeIndexMemoryMaped true|false memory maped raw node index file access (default: " << BoolToString(parameter.GetRawNodeIndexMemoryMaped()) << ")" << std::endl;
+  std::cout << " --rawNodeDataMemoryMaped true|false  memory maped raw node data file access (default: " << BoolToString(parameter.GetRawNodeDataMemoryMaped()) << ")" << std::endl;
   std::cout << " --rawNodeDataCacheSize <number>      raw node data cache size (default: " << parameter.GetRawNodeDataCacheSize() << ")" << std::endl;
   std::cout << " --rawNodeIndexCacheSize <number>     raw node index cache size (default: " << parameter.GetRawNodeIndexCacheSize() << ")" << std::endl;
 
-  std::cout << " --rawWayIndexMemoryMaped true|false  memory map raw way index file access (default: " << BoolToString(parameter.GetRawWayIndexMemoryMaped()) << ")" << std::endl;
-  std::cout << " --rawWayDataMemoryMaped true|false   memory map raw way data file access (default: " << BoolToString(parameter.GetRawWayDataMemoryMaped()) << ")" << std::endl;
+  std::cout << " --rawWayIndexMemoryMaped true|false  memory maped raw way index file access (default: " << BoolToString(parameter.GetRawWayIndexMemoryMaped()) << ")" << std::endl;
+  std::cout << " --rawWayDataMemoryMaped true|false   memory maped raw way data file access (default: " << BoolToString(parameter.GetRawWayDataMemoryMaped()) << ")" << std::endl;
   std::cout << " --rawWayDataCacheSize <number>       raw way data cache size (default: " << parameter.GetRawWayDataCacheSize() << ")" << std::endl;
   std::cout << " --rawWayIndexCacheSize <number>      raw way index cache size (default: " << parameter.GetRawWayIndexCacheSize() << ")" << std::endl;
   std::cout << " --rawWayBlockSize <number>           number of raw ways resolved in block (default: " << parameter.GetRawWayBlockSize() << ")" << std::endl;
 
   std::cout << " --renumberBlockSize <number>         size of one data block during renumbering (default: " << parameter.GetRenumberBlockSize() << ")" << std::endl;
 
-  std::cout << " --wayIndexMemoryMaped true|false     memory map way index file access (default: " << BoolToString(parameter.GetWayIndexMemoryMaped()) << ")" << std::endl;
-  std::cout << " --wayDataMemoryMaped true|false      memory map way data file access (default: " << BoolToString(parameter.GetWayDataMemoryMaped()) << ")" << std::endl;
+  std::cout << " --wayIndexMemoryMaped true|false     memory maped way index file access (default: " << BoolToString(parameter.GetWayIndexMemoryMaped()) << ")" << std::endl;
+  std::cout << " --wayDataMemoryMaped true|false      memory maped way data file access (default: " << BoolToString(parameter.GetWayDataMemoryMaped()) << ")" << std::endl;
   std::cout << " --wayDataCacheSize <number>          way data cache size (default: " << parameter.GetWayDataCacheSize() << ")" << std::endl;
   std::cout << " --wayIndexCacheSize <number>         way index cache size (default: " << parameter.GetWayIndexCacheSize() << ")" << std::endl;
 
@@ -107,6 +109,8 @@ int main(int argc, char* argv[])
 
   size_t                    renumberBlockSize=parameter.GetRenumberBlockSize();
 
+  bool                      coordDataMemoryMaped=parameter.GetCoordDataMemoryMaped();
+
   bool                      rawNodeIndexMemoryMaped=parameter.GetRawNodeIndexMemoryMaped();
   bool                      rawNodeDataMemoryMaped=parameter.GetRawNodeDataMemoryMaped();
   size_t                    rawNodeDataCacheSize=parameter.GetRawNodeDataCacheSize();
@@ -117,7 +121,6 @@ int main(int argc, char* argv[])
   size_t                    rawWayDataCacheSize=parameter.GetRawWayDataCacheSize();
   size_t                    rawWayIndexCacheSize=parameter.GetRawWayIndexCacheSize();
   size_t                    rawWayBlockSize=parameter.GetRawWayBlockSize();
-
 
   bool                      wayIndexMemoryMaped=parameter.GetWayIndexMemoryMaped();
   bool                      wayDataMemoryMaped=parameter.GetWayDataMemoryMaped();
@@ -218,6 +221,20 @@ int main(int argc, char* argv[])
       }
       else {
         std::cerr << "Missing parameter after --numericIndexPageSize option" << std::endl;
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--coordDataMemoryMaped")==0) {
+      i++;
+
+      if (i<argc) {
+        if (!StringToBool(argv[i],coordDataMemoryMaped)) {
+          std::cerr << "Cannot parse coordDataMemoryMaped '" << argv[i] << "'" << std::endl;
+          parameterError=true;
+        }
+      }
+      else {
+        std::cerr << "Missing parameter after --coordDataMemoryMaped option" << std::endl;
         parameterError=true;
       }
     }
@@ -463,6 +480,8 @@ int main(int argc, char* argv[])
 
   parameter.SetRenumberBlockSize(renumberBlockSize);
 
+  parameter.SetCoordDataMemoryMaped(coordDataMemoryMaped);
+
   parameter.SetRawNodeIndexMemoryMaped(rawNodeIndexMemoryMaped);
   parameter.SetRawNodeDataMemoryMaped(rawNodeDataMemoryMaped);
   parameter.SetRawNodeDataCacheSize(rawNodeDataCacheSize);
@@ -498,6 +517,9 @@ int main(int argc, char* argv[])
 
   progress.Info(std::string("NumericIndexPageSize: ")+
                 osmscout::NumberToString(parameter.GetNumericIndexPageSize()));
+
+  progress.Info(std::string("CoordDataMemoryMaped: ")+
+                (parameter.GetCoordDataMemoryMaped() ? "true" : "false"));
 
   progress.Info(std::string("RawNodeIndexMemoryMaped: ")+
                 (parameter.GetRawNodeIndexMemoryMaped() ? "true" : "false"));
