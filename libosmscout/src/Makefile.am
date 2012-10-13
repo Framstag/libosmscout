@@ -1,6 +1,5 @@
 AM_CPPFLAGS = $(LIB_CXXFLAGS) \
               $(SIMD_FLAGS) \
-              $(CPP0XFLAGS) \
               -DOSMSCOUTDLL -I$(top_srcdir)/include
 
 lib_LTLIBRARIES = libosmscout.la

@@ -23,9 +23,12 @@ AC_ARG_ENABLE(cpp0x-support,
                               [do not make use of C++0x compiler support])])
 
 if test "$enable_cpp0x_support" != "no"; then
-  AX_CHECK_COMPILE_FLAG([-std=c++0x],
-                        [CPP0XFLAGS="-std=c++0x"
-                         AC_SUBST(CPP0XFLAGS)])
+ AX_CHECK_COMPILE_FLAG([-std=c++0x],
+                       [CPP0XFLAGS="-std=c++0x"
+                        CPPFLAGS="$CPPFLAGS -std=c++0x"
+                        AC_SUBST(CPP0XFLAGS)])
+
+
 fi
 
 AC_TYPE_SIZE_T
