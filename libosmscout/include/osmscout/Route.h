@@ -407,7 +407,6 @@ namespace osmscout {
     {
     private:
       Id                                           currentNodeId;
-      std::vector<Id>                              ways;
       std::vector<Path>                            paths;
       Id                                           pathWayId;
       Id                                           targetNodeId;
@@ -418,7 +417,6 @@ namespace osmscout {
 
     public:
       Node(Id currentNodeId,
-           const std::vector<Id>& ways,
            const std::vector<Path>& paths,
            Id pathWayId,
            Id targetNodeId);
@@ -426,11 +424,6 @@ namespace osmscout {
       inline Id GetCurrentNodeId() const
       {
         return currentNodeId;
-      }
-
-      inline const std::vector<Id>& GetWays() const
-      {
-        return ways;
       }
 
       inline const std::vector<Path>& GetPaths() const
@@ -493,7 +486,6 @@ namespace osmscout {
     void Clear();
 
     void AddNode(Id currentNodeId,
-                 const std::vector<Id>& ways,
                  const std::vector<Path>& paths,
                  Id pathWayId,
                  Id targetNodeId);

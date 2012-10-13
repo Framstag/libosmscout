@@ -960,7 +960,6 @@ namespace osmscout {
          iter!=data.Entries().end();
          ++iter) {
       description.AddNode(iter->GetCurrentNodeId(),
-                          iter->GetWays(),
                           iter->GetPaths(),
                           iter->GetPathWayId(),
                           iter->GetTargetNodeId());

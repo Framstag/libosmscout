@@ -140,10 +140,10 @@ namespace osmscout {
         wayIds.insert(node->GetPathWayId());
       }
 
-      for (std::vector<Id>::const_iterator id=node->GetWays().begin();
-          id!=node->GetWays().end();
-          ++id) {
-        wayIds.insert(*id);
+      for (std::vector<Path>::const_iterator path=node->GetPaths().begin();
+          path!=node->GetPaths().end();
+          ++path) {
+        wayIds.insert(path->GetWayId());
       }
     }
 
@@ -205,10 +205,10 @@ namespace osmscout {
                                                                                   const WayRef& targetWay,
                                                                                   const std::map<Id,WayRef>& wayMap)
   {
-    for (std::vector<Id>::const_iterator id=node.GetWays().begin();
-        id!=node.GetWays().end();
-        ++id) {
-      std::map<Id,WayRef>::const_iterator way=wayMap.find(*id);
+    for (std::vector<Path>::const_iterator path=node.GetPaths().begin();
+        path!=node.GetPaths().end();
+        ++path) {
+      std::map<Id,WayRef>::const_iterator way=wayMap.find(path->GetWayId());
 
       if (way!=wayMap.end()) {
         // Way is origin way and starts or end here so it is not an additional crossing way
@@ -260,10 +260,10 @@ namespace osmscout {
         wayIds.insert(node->GetPathWayId());
       }
 
-      for (std::vector<Id>::const_iterator id=node->GetWays().begin();
-          id!=node->GetWays().end();
-          ++id) {
-        wayIds.insert(*id);
+      for (std::vector<Path>::const_iterator path=node->GetPaths().begin();
+          path!=node->GetPaths().end();
+          ++path) {
+        wayIds.insert(path->GetWayId());
       }
     }
 
@@ -284,10 +284,11 @@ namespace osmscout {
     // Analyze crossing
     //
 
+    std::list<RouteDescription::Node>::iterator lastCrossing=description.Nodes().end();
     std::list<RouteDescription::Node>::iterator lastNode=description.Nodes().end();
     std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
     while (node!=description.Nodes().end()) {
-      if (node->GetWays().empty()) {
+      if (node->GetPaths().empty()) {
         lastNode=node;
         node++;
 
@@ -305,7 +306,21 @@ namespace osmscout {
       WayRef originWay=wayMap[lastNode->GetPathWayId()];
       WayRef targetWay=wayMap[node->GetPathWayId()];
 
-      RouteDescription::CrossingWaysDescriptionRef desc=new RouteDescription::CrossingWaysDescription(node->GetPaths().size(),
+      // Count existing exits
+      size_t exitCount=0;
+
+      for (size_t i=0; i<node->GetPaths().size(); i++) {
+        // Leave out the path back to the last crossing (if it exists)
+        if (lastCrossing!=description.Nodes().end() &&
+            node->GetPaths()[i].GetTargetNodeId()==lastCrossing->GetCurrentNodeId() &&
+            node->GetPaths()[i].GetWayId()==lastCrossing->GetPathWayId()) {
+          continue;
+        }
+
+        exitCount++;
+      }
+
+      RouteDescription::CrossingWaysDescriptionRef desc=new RouteDescription::CrossingWaysDescription(exitCount,
                                                                                                       new RouteDescription::NameDescription(originWay->GetName(),
                                                                                                                                             originWay->GetRefName()),
                                                                                                       new RouteDescription::NameDescription(targetWay->GetName(),
@@ -316,10 +331,13 @@ namespace osmscout {
                                   originWay,
                                   targetWay,
                                   wayMap);
+
       node->AddDescription(RouteDescription::CROSSING_WAYS_DESC,
                            desc);
 
       lastNode=node;
+      lastCrossing=node;
+
       node++;
     }
 
@@ -502,6 +520,8 @@ namespace osmscout {
     if (node.HasDescription(RouteDescription::CROSSING_WAYS_DESC)) {
       RouteDescription::CrossingWaysDescriptionRef crossing=dynamic_cast<RouteDescription::CrossingWaysDescription*>(node.GetDescription(RouteDescription::CROSSING_WAYS_DESC));
 
+      std::cout << "Exits at node: " << node.GetCurrentNodeId() << " " << crossing->GetExitCount() << std::endl;
+
       if (crossing->GetExitCount()>1) {
         roundaboutCrossingCounter+=crossing->GetExitCount()-1;
       }
@@ -662,10 +682,10 @@ namespace osmscout {
         wayIds.insert(node->GetPathWayId());
       }
 
-      for (std::vector<Id>::const_iterator id=node->GetWays().begin();
-          id!=node->GetWays().end();
-          ++id) {
-        wayIds.insert(*id);
+      for (std::vector<Path>::const_iterator path=node->GetPaths().begin();
+          path!=node->GetPaths().end();
+          ++path) {
+        wayIds.insert(path->GetWayId());
       }
     }
 
