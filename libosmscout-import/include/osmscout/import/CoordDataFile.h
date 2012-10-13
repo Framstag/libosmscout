@@ -100,6 +100,51 @@ namespace osmscout {
 
       return true;
     }
+
+    bool Get(std::set<Id>& ids,
+             OSMSCOUT_HASHMAP<Id,Point>& coordsMap) const
+    {
+      assert(isOpen);
+
+      coordsMap.clear();
+#if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
+      coordsMap.reserve(ids.size());
+#endif
+
+      for (std::set<Id>::const_iterator id=ids.begin();
+           id!=ids.end();
+           ++id) {
+        Id coordPageId=*id/coordPageSize;
+
+        CoordPageOffsetMap::const_iterator pageOffset=coordPageOffsetMap.find(coordPageId);
+
+        if (pageOffset!=coordPageOffsetMap.end()) {
+          scanner.SetPos(pageOffset->second+((*id)%coordPageSize)*2*sizeof(uint32_t));
+
+          uint32_t latDat;
+          uint32_t lonDat;
+
+          scanner.Read(latDat);
+          scanner.Read(lonDat);
+
+          if (latDat==0xffffffff || lonDat==0xffffffff) {
+            continue;
+          }
+
+          if (scanner.HasError()) {
+            std::cerr << "Error while reading data from offset " << pageOffset->second << " of file " << datafilename << "!" << std::endl;
+            scanner.Close();
+            return false;
+          }
+
+          coordsMap[*id]=Point(*id,
+                               latDat/conversionFactor-90.0,
+                               lonDat/conversionFactor-180.0);
+        }
+      }
+
+      return true;
+    }
   };
 }
 

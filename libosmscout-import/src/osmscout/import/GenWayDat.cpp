@@ -833,7 +833,6 @@ namespace osmscout {
       }
 
       std::set<Id>               nodeIds;
-      std::vector<Point>         coords;
       OSMSCOUT_HASHMAP<Id,Point> coordsMap;
 
       for (size_t w=0; w<blockCount; w++) {
@@ -844,26 +843,12 @@ namespace osmscout {
 
       progress.SetAction("Loading "+NumberToString(nodeIds.size())+" nodes");
 
-      coords.reserve(nodeIds.size());
-
-      if (!coordDataFile.Get(nodeIds.begin(),nodeIds.end(),coords)) {
+      if (!coordDataFile.Get(nodeIds,coordsMap)) {
         std::cerr << "Cannot read nodes!" << std::endl;
         continue;
       }
 
       nodeIds.clear();
-
-#if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
-      coordsMap.reserve(coords.size());
-#endif
-
-      for (std::vector<Point>::const_iterator coord=coords.begin();
-          coord!=coords.end();
-          coord++) {
-        coordsMap[coord->GetId()]=*coord;
-      }
-
-      coords.clear();
 
       progress.SetAction("Writing ways");
 
