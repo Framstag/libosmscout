@@ -79,6 +79,8 @@ namespace osmscout {
                     std::vector<FileOffset>& offsets) const;
     bool GetOffsets(const std::vector<Id>& ids,
                     std::vector<FileOffset>& offsets) const;
+    bool GetOffset(const Id& id,
+                   FileOffset& offset) const;
 
     bool GetByOffset(const std::vector<FileOffset>& offsets,
                      std::vector<ValueType>& data) const;
@@ -87,6 +89,9 @@ namespace osmscout {
     bool GetByOffset(const std::set<FileOffset>& offsets,
                      std::vector<ValueType>& data) const;
 
+    bool GetByOffset(const FileOffset& offset,
+                     ValueType& entry) const;
+
     bool Get(const std::vector<Id>& ids,
              std::vector<ValueType>& data) const;
     bool Get(const std::list<Id>& ids,
@@ -94,7 +99,8 @@ namespace osmscout {
     bool Get(const std::set<Id>& ids,
              std::vector<ValueType>& data) const;
 
-    bool Get(const Id& id, ValueType& entry) const;
+    bool Get(const Id& id,
+             ValueType& entry) const;
 
     void FlushCache();
     void DumpStatistics() const;
@@ -170,6 +176,13 @@ namespace osmscout {
                                std::vector<FileOffset>& offsets) const
   {
     return index.GetOffsets(ids,offsets);
+  }
+
+  template <class N>
+  bool DataFile<N>::GetOffset(const Id& id,
+                              FileOffset& offset) const
+  {
+    return index.GetOffset(id,offset);
   }
 
   template <class N>
@@ -302,6 +315,43 @@ namespace osmscout {
   }
 
   template <class N>
+  bool DataFile<N>::GetByOffset(const FileOffset& offset,
+                                ValueType& entry) const
+  {
+    assert(isOpen);
+
+    if (!scanner.IsOpen()) {
+      if (!scanner.Open(datafilename,modeData,memoryMapedData)) {
+        std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
+        return false;
+      }
+    }
+
+    typename DataCache::CacheRef cacheRef;
+
+    if (!cache.GetEntry(offset,cacheRef)) {
+      typename DataCache::CacheEntry cacheEntry(offset);
+
+      cacheRef=cache.SetEntry(cacheEntry);
+
+      scanner.SetPos(offset);
+      cacheRef->value=new N();
+      cacheRef->value->Read(scanner);
+
+      if (scanner.HasError()) {
+        std::cerr << "Error while reading data from offset " << offset << " of file " << datafilename << "!" << std::endl;
+        // TODO: Remove broken entry from cache
+        scanner.Close();
+        return false;
+      }
+    }
+
+    entry=cacheRef->value;
+
+    return true;
+  }
+
+  template <class N>
   bool DataFile<N>::Get(const std::vector<Id>& ids,
                         std::vector<ValueType>& data) const
   {
@@ -310,7 +360,6 @@ namespace osmscout {
     std::vector<FileOffset> offsets;
 
     if (!index.GetOffsets(ids,offsets)) {
-      std::cerr << "Ids not found in index" << std::endl;
       return false;
     }
 
@@ -326,7 +375,6 @@ namespace osmscout {
     std::vector<FileOffset> offsets;
 
     if (!index.GetOffsets(ids,offsets)) {
-      std::cerr << "Ids not found in index" << std::endl;
       return false;
     }
 
@@ -351,7 +399,6 @@ namespace osmscout {
     std::vector<FileOffset> offsets;
 
     if (!index.GetOffsets(i,offsets)) {
-      std::cerr << "Ids not found in index" << std::endl;
       return false;
     }
 
@@ -359,22 +406,18 @@ namespace osmscout {
   }
 
   template <class N>
-  bool DataFile<N>::Get(const Id& id, ValueType& entry) const
+  bool DataFile<N>::Get(const Id& id,
+                        ValueType& entry) const
   {
     assert(isOpen);
 
-    std::vector<Id>        ids;
-    std::vector<ValueType> data;
+    FileOffset offset;
 
-    ids.push_back(id);
-
-    if (Get(ids,data) && data.size()==1) {
-      entry=data.front();
-      return true;
-    }
-    else {
+    if (!index.GetOffset(id,offset)) {
       return false;
     }
+
+    return GetByOffset(offset,entry);
   }
 
   template <class N>
