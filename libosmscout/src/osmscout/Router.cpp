@@ -666,10 +666,14 @@ namespace osmscout {
 #if defined(DEBUG_ROUTING)
       std::cout << "Analysing follower of node " << currentRouteNode->GetId() << " " << current->currentCost << " " << current->estimateCost << " " << current->overallCost << std::endl;
 #endif
-      for (size_t i=0; i<currentRouteNode->paths.size(); i++) {
-        if (currentRouteNode->paths[i].offset==current->prev) {
+      size_t i=0;
+      for (std::vector<osmscout::RouteNode::Path>::const_iterator path=currentRouteNode->paths.begin();
+           path!=currentRouteNode->paths.end();
+           ++path,
+           ++i) {
+        if (path->offset==current->prev) {
 #if defined(DEBUG_ROUTING)
-          std::cout << "  Skipping route from " << currentRouteNode->id << " to " << currentRouteNode->paths[i].id << " (back the the last node visited)" << std::endl;
+          std::cout << "  Skipping route from " << currentRouteNode->id << " to " << path->id << " (back the the last node visited)" << std::endl;
 #endif
           nodesIgnoredCount++;
           continue;
@@ -677,16 +681,16 @@ namespace osmscout {
 
         if (!profile.CanUse(*currentRouteNode,i)) {
 #if defined(DEBUG_ROUTING)
-          std::cout << "  Skipping route from " << currentRouteNode->id << " to " << currentRouteNode->paths[i].id << " (wrong type " << typeConfig->GetTypeInfo(currentRouteNode->paths[i].type).GetName()  << ")" << std::endl;
+          std::cout << "  Skipping route from " << currentRouteNode->id << " to " << path->id << " (wrong type " << typeConfig->GetTypeInfo(path->type).GetName()  << ")" << std::endl;
 #endif
           nodesIgnoredCount++;
           continue;
         }
 
         if (!current->access &&
-            currentRouteNode->paths[i].HasAccess()) {
+            path->HasAccess()) {
 #if defined(DEBUG_ROUTING)
-          std::cout << "  Skipping route from " << currentRouteNode->id << " to " << currentRouteNode->paths[i].id << " (moving from non-accessible way back to accessible way)" << std::endl;
+          std::cout << "  Skipping route from " << currentRouteNode->id << " to " << path->id << " (moving from non-accessible way back to accessible way)" << std::endl;
 #endif
           nodesIgnoredCount++;
           continue;
@@ -702,7 +706,7 @@ namespace osmscout {
               WayRef targetWay;
 
               wayDataFile.Get(current->wayId,sourceWay);
-              wayDataFile.Get(currentRouteNode->ways[currentRouteNode->paths[i].wayIndex],targetWay);
+              wayDataFile.Get(currentRouteNode->ways[path->wayIndex],targetWay);
 
               std::cout << "  Node " <<  currentRouteNode->id << ": ";
               std::cout << "Cannot turn from " << current->wayId << " " << sourceWay->GetName() << " (" << sourceWay->GetRefName()  << ")";
@@ -720,11 +724,9 @@ namespace osmscout {
           }
         }
 
-        CloseMap::const_iterator closeEntry=closeMap.find(currentRouteNode->paths[i].offset);
-
-        if (closeEntry!=closeMap.end()) {
+        if (closeMap.find(path->offset)!=closeMap.end()) {
 #if defined(DEBUG_ROUTING)
-          std::cout << "  Skipping route node " << currentRouteNode->paths[i].id << "/" << currentRouteNode->paths[i].offset << " (closed)" << std::endl;
+          std::cout << "  Skipping route node " << path->id << "/" << currentRouteNode->paths[i].offset << " (closed)" << std::endl;
 #endif
           continue;
         }
@@ -734,7 +736,7 @@ namespace osmscout {
 
         // TODO: Turn costs
 
-        OpenMap::iterator openEntry=openMap.find(currentRouteNode->paths[i].offset);
+        OpenMap::iterator openEntry=openMap.find(path->offset);
 
         // Check, if we already have a cheaper path to the new node. If yes, do not put the new path
         // into the open list
@@ -746,8 +748,8 @@ namespace osmscout {
           continue;
         }
 
-        double distanceToTarget=GetSphericalDistance(currentRouteNode->paths[i].lon,
-                                                     currentRouteNode->paths[i].lat,
+        double distanceToTarget=GetSphericalDistance(path->lon,
+                                                     path->lat,
                                                      targetLon,
                                                      targetLat);
         // Estimate costs for the rest of the distance to the target
@@ -760,7 +762,7 @@ namespace osmscout {
           RNodeRef node=*openEntry->second;
 
           node->prev=current->nodeOffset;
-          node->wayId=currentRouteNode->ways[currentRouteNode->paths[i].wayIndex];
+          node->wayId=currentRouteNode->ways[path->wayIndex];
 
           node->currentCost=currentCost;
           node->estimateCost=estimateCost;
@@ -777,14 +779,14 @@ namespace osmscout {
           openEntry->second=result.first;
         }
         else {
-          RNodeRef node=new RNode(currentRouteNode->paths[i].offset,
-                                  currentRouteNode->ways[currentRouteNode->paths[i].wayIndex],
+          RNodeRef node=new RNode(path->offset,
+                                  currentRouteNode->ways[path->wayIndex],
                                   current->nodeOffset);
 
           node->currentCost=currentCost;
           node->estimateCost=estimateCost;
           node->overallCost=overallCost;
-          node->access=currentRouteNode->paths[i].HasAccess();
+          node->access=path->HasAccess();
 
 #if defined(DEBUG_ROUTING)
           std::cout << "  Inserting route " << current->nodeOffset <<  " via way " << node->wayId  << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->id << std::endl;
