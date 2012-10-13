@@ -392,8 +392,6 @@ int main(int argc, char* argv[])
 
   if (!database.Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
-
-    return 1;
   }
 
   osmscout::FileScanner coordDataFile;
@@ -458,8 +456,6 @@ int main(int argc, char* argv[])
         continue;
       }
 
-      double                             lat;
-      double                             lon;
       osmscout::Id                       coordPageId=job->id/coordPageSize;
       CoordPageOffsetMap::const_iterator pageOffset=coordPageIdOffsetMap.find(coordPageId);
 
@@ -485,9 +481,15 @@ int main(int argc, char* argv[])
         continue;
       }
 
-      DumpCoord(job->id,lat,lon);
+      DumpCoord(job->id,
+                latDat/osmscout::conversionFactor-90.0,
+                lonDat/osmscout::conversionFactor-180.0);
     }
     else if (job->type==Job::Node) {
+      if (!database.IsOpen()) {
+        continue;
+      }
+
       osmscout::NodeRef node;
 
       if (!database.GetNode(job->id,node)) {
@@ -498,6 +500,10 @@ int main(int argc, char* argv[])
       DumpNode(database.GetTypeConfig(),node);
     }
     else if (job->type==Job::Way) {
+      if (!database.IsOpen()) {
+        continue;
+      }
+
       osmscout::WayRef way;
 
       if (!database.GetWay(job->id,way)) {
@@ -508,6 +514,10 @@ int main(int argc, char* argv[])
       DumpWay(database.GetTypeConfig(),way);
     }
     else if (job->type==Job::Relation) {
+      if (!database.IsOpen()) {
+        continue;
+      }
+
       osmscout::RelationRef relation;
 
       if (!database.GetRelation(job->id,relation)) {
