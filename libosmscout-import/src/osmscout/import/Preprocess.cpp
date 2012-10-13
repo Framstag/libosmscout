@@ -19,6 +19,8 @@
 
 #include <osmscout/import/Preprocess.h>
 
+#include <limits>
+
 #include <osmscout/import/RawCoastline.h>
 #include <osmscout/import/RawNode.h>
 #include <osmscout/import/RawWay.h>
@@ -62,7 +64,7 @@ namespace osmscout {
       }
     }
 
-    currentPageId=0;
+    currentPageId=std::numeric_limits<Id>::max();
 
     return !coordWriter.HasError();
   }
@@ -72,7 +74,7 @@ namespace osmscout {
     Id pageId=id/coordPageSize;
     Id coordPageOffset=id%coordPageSize;
 
-    if (currentPageId!=0) {
+    if (currentPageId!=std::numeric_limits<Id>::max()) {
       if (currentPageId==pageId) {
         lats[coordPageOffset]=lat;
         lons[coordPageOffset]=lon;
@@ -158,7 +160,7 @@ namespace osmscout {
   bool Preprocess::Initialize(const ImportParameter& parameter)
   {
     coordPageCount=0;
-    currentPageId=0;
+    currentPageId=std::numeric_limits<Id>::max();
 
     nodeCount=0;
     wayCount=0;
