@@ -27,7 +27,7 @@
 #include <osmscout/Router.h>
 #include <osmscout/RoutePostprocessor.h>
 
-//#define POINTS_DEBUG
+//#define POINTSDEBUG
 //#define ROUTE_DEBUG
 //#define NODE_DEBUG
 
@@ -343,7 +343,7 @@ static void DumpMotorwayLeaveDescription(size_t& lineCount,
       directionDescription->GetCurve()!=osmscout::RouteDescription::DirectionDescription::slightlyLeft &&
       directionDescription->GetCurve()!=osmscout::RouteDescription::DirectionDescription::straightOn &&
       directionDescription->GetCurve()!=osmscout::RouteDescription::DirectionDescription::slightlyRight) {
-    std::cout << MoveToTurnCommand(directionDescription->GetCurve());
+    std::cout << " " << MoveToTurnCommand(directionDescription->GetCurve());
   }
 
   if (nameDescription.Valid() &&
@@ -365,7 +365,7 @@ static void DumpNameChangedDescription(size_t& lineCount,
     std::cout << "'" << nameChangedDescription->GetOriginDesccription()->GetDescription() << "'";
   }
 
-  std::cout << "' to '";
+  std::cout << " to '";
   std::cout << nameChangedDescription->GetTargetDesccription()->GetDescription();
   std::cout << "'" << std::endl;
 }
