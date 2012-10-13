@@ -50,7 +50,7 @@ namespace osmscout
 
   std::string OptimizeLowZoomGenerator::GetDescription() const
   {
-    return "Generate 'optimize.dat'";
+    return "Generate 'optimized.dat'";
   }
 
   void OptimizeLowZoomGenerator::GetTypesToOptimize(const TypeConfig& typeConfig,
