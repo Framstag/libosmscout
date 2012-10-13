@@ -80,6 +80,7 @@ namespace osmscout {
       uint32_t distanceValue;
 
       scanner.ReadNumber(paths[i].id);
+      scanner.ReadFileOffset(paths[i].offset);
       scanner.ReadNumber(paths[i].wayIndex);
       scanner.ReadNumber(paths[i].type);
       scanner.Read(paths[i].maxSpeed);
@@ -138,6 +139,7 @@ namespace osmscout {
       uint32_t distanceValue=(uint32_t)floor(paths[i].distance*(1000.0*100.0)+0.5);
 
       writer.WriteNumber(paths[i].id);
+      writer.WriteFileOffset(paths[i].offset);
       writer.WriteNumber(paths[i].wayIndex);
       writer.WriteNumber(paths[i].type);
       writer.Write(paths[i].maxSpeed);

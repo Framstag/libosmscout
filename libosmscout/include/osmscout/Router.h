@@ -83,27 +83,27 @@ namespace osmscout {
      */
     struct RNode : public Referencable
     {
-      Id     nodeId;
-      Id     wayId;
+      FileOffset nodeOffset;
+      Id         wayId;
 
-      double currentCost;
-      double estimateCost;
-      double overallCost;
+      double     currentCost;
+      double     estimateCost;
+      double     overallCost;
 
-      Id     prev;
+      FileOffset prev;
 
-      bool   access;
+      bool       access;
 
       RNode()
-      : nodeId(0),
+      : nodeOffset(0),
         wayId(0)
       {
         // no code
       }
 
-      RNode(Id nodeId,
+      RNode(FileOffset nodeOffset,
             Id wayId)
-      : nodeId(nodeId),
+      : nodeOffset(nodeOffset),
         wayId(wayId),
         currentCost(0),
         estimateCost(0),
@@ -114,10 +114,10 @@ namespace osmscout {
         // no code
       }
 
-      RNode(Id nodeId,
+      RNode(FileOffset nodeOffset,
             Id wayId,
-            Id prev)
-      : nodeId(nodeId),
+            FileOffset prev)
+      : nodeOffset(nodeOffset),
         wayId(wayId),
         currentCost(0),
         estimateCost(0),
@@ -130,12 +130,12 @@ namespace osmscout {
 
       inline bool operator==(const RNode& other)
       {
-        return nodeId==other.nodeId;
+        return nodeOffset==other.nodeOffset;
       }
 
       inline bool operator<(const RNode& other) const
       {
-        return nodeId<other.nodeId;
+        return nodeOffset<other.nodeOffset;
       }
     };
 
@@ -146,7 +146,7 @@ namespace osmscout {
       inline bool operator()(const RNodeRef& a, const RNodeRef& b) const
       {
         if (a->overallCost==b->overallCost) {
-         return a->nodeId<b->nodeId;
+         return a->nodeOffset<b->nodeOffset;
         }
         else {
           return a->overallCost<b->overallCost;
@@ -154,11 +154,11 @@ namespace osmscout {
       }
     };
 
-    typedef std::set<RNodeRef,RNodeCostCompare>           OpenList;
-    typedef std::set<RNodeRef,RNodeCostCompare>::iterator OpenListRef;
+    typedef std::set<RNodeRef,RNodeCostCompare>              OpenList;
+    typedef std::set<RNodeRef,RNodeCostCompare>::iterator    OpenListRef;
 
-    typedef OSMSCOUT_HASHMAP<Id,Router::OpenListRef>      OpenMap;
-    typedef OSMSCOUT_HASHMAP<Id,Router::RNodeRef>         CloseMap;
+    typedef OSMSCOUT_HASHMAP<FileOffset,Router::OpenListRef> OpenMap;
+    typedef OSMSCOUT_HASHMAP<FileOffset,Router::RNodeRef>    CloseMap;
 
   private:
     bool                  isOpen;            //! true, if opened

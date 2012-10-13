@@ -213,8 +213,7 @@ namespace osmscout {
                                    const CloseMap& closeMap,
                                    std::list<RNodeRef>& nodes)
   {
-    CloseMap::const_iterator current=closeMap.find(end->nodeId);
-    RouteNodeRef                     routeNode;
+    CloseMap::const_iterator current=closeMap.find(end->nodeOffset);
 
     while (current->second->prev!=0) {
       CloseMap::const_iterator prev=closeMap.find(current->second->prev);
@@ -368,14 +367,22 @@ namespace osmscout {
       return true;
     }
 
-    if (startNodeId!=nodes.front()->nodeId) {
+    RouteNodeRef initialNode;
+
+    // TODO: Optimize node=nextNode of the last step!
+    if (!routeNodeDataFile.GetByOffset(nodes.front()->nodeOffset,initialNode)) {
+      std::cerr << "Cannot load route node with offset " << nodes.front()->nodeOffset << std::endl;
+      return false;
+    }
+
+    if (startNodeId!=initialNode->GetId()) {
       // Start node to initial route node
       AddNodes(route,
                std::vector<Id>(),
                std::vector<Path>(),
                startNodeId,
                startWayId,
-               nodes.front()->nodeId);
+               initialNode->GetId());
     }
 
     for (std::list<RNodeRef>::const_iterator n=nodes.begin();
@@ -388,8 +395,8 @@ namespace osmscout {
       RouteNodeRef node;
 
       // TODO: Optimize node=nextNode of the last step!
-      if (!routeNodeDataFile.Get((*n)->nodeId,node)) {
-        std::cerr << "Cannot load route node with id " << (*n)->nodeId << std::endl;
+      if (!routeNodeDataFile.GetByOffset((*n)->nodeOffset,node)) {
+        std::cerr << "Cannot load route node with offset " << (*n)->nodeOffset << std::endl;
         return false;
       }
 
@@ -397,11 +404,11 @@ namespace osmscout {
       // We do not have any follower node, push the final entry (leading nowhere)
       // to the route
       if (nn==nodes.end()) {
-        if ((*n)->nodeId!=targetNodeId) {
+        if (node->GetId()!=targetNodeId) {
           AddNodes(route,
                    node->ways,
                    node->GetPaths(),
-                   (*n)->nodeId,
+                   node->GetId(),
                    targetWayId,
                    targetNodeId);
 
@@ -410,7 +417,7 @@ namespace osmscout {
                          0);
         }
         else {
-          route.AddEntry((*n)->nodeId,
+          route.AddEntry(node->GetId(),
                          0,
                          0);
         }
@@ -422,8 +429,8 @@ namespace osmscout {
       WayRef       way;
       size_t       pathIndex=0;
 
-      if (!routeNodeDataFile.Get((*nn)->nodeId,nextNode)) {
-        std::cerr << "Cannot load route node with id " << (*nn)->nodeId << std::endl;
+      if (!routeNodeDataFile.GetByOffset((*nn)->nodeOffset,nextNode)) {
+        std::cerr << "Cannot load route node with offst " << (*nn)->nodeOffset << std::endl;
         return false;
       }
 
@@ -456,16 +463,20 @@ namespace osmscout {
 
     RouteNodeRef             startForwardRouteNode;
     size_t                   startForwardNodePos;
+    FileOffset               startForwardOffset;
     RouteNodeRef             startBackwardRouteNode;
     size_t                   startBackwardNodePos;
+    FileOffset               startBackwardOffset;
 
     WayRef                   targetWay;
     double                   targetLon=0.0L,targetLat=0.0L;
 
     RouteNodeRef             targetForwardRouteNode;
     size_t                   targetForwardNodePos;
+    FileOffset               targetForwardOffset;
     RouteNodeRef             targetBackwardRouteNode;
     size_t                   targetBackwardNodePos;
+    FileOffset               targetBackwardOffset;
 
     WayRef                   currentWay;
 
@@ -517,10 +528,12 @@ namespace osmscout {
       return false;
     }
 
-    GetClosestForwardRouteNode(startWay,startNodeId,
+    GetClosestForwardRouteNode(startWay,
+                               startNodeId,
                                startForwardRouteNode,
                                startForwardNodePos);
-    GetClosestBackwardRouteNode(startWay,startNodeId,
+    GetClosestBackwardRouteNode(startWay,
+                                startNodeId,
                                 startBackwardRouteNode,
                                 startBackwardNodePos);
 
@@ -546,10 +559,14 @@ namespace osmscout {
       return false;
     }
 
-    GetClosestForwardRouteNode(targetWay,targetNodeId,
-                               targetForwardRouteNode,targetForwardNodePos);
-    GetClosestBackwardRouteNode(targetWay,targetNodeId,
-                                targetBackwardRouteNode,targetBackwardNodePos);
+    GetClosestForwardRouteNode(targetWay,
+                               targetNodeId,
+                               targetForwardRouteNode,
+                               targetForwardNodePos);
+    GetClosestBackwardRouteNode(targetWay,
+                                targetNodeId,
+                                targetBackwardRouteNode,
+                                targetBackwardNodePos);
 
     if (targetForwardRouteNode.Invalid() &&
         targetBackwardRouteNode.Invalid()) {
@@ -557,8 +574,27 @@ namespace osmscout {
       return false;
     }
 
+    if (targetForwardRouteNode.Valid()) {
+      if (!routeNodeDataFile.GetOffset(targetForwardRouteNode->id,
+                                       targetForwardOffset)) {
+        std::cerr << "Cannot get offset of targetForwardRouteNode" << std::endl;
+      }
+    }
+
+    if (targetBackwardRouteNode.Valid()) {
+      if (!routeNodeDataFile.GetOffset(targetBackwardRouteNode->id,
+                                       targetBackwardOffset)) {
+        std::cerr << "Cannot get offset of targetBackwardRouteNode" << std::endl;
+      }
+    }
+
     if (startForwardRouteNode.Valid()) {
-      RNodeRef node=new RNode(startForwardRouteNode->id,
+      if (!routeNodeDataFile.GetOffset(startForwardRouteNode->id,
+                                       startForwardOffset)) {
+        std::cerr << "Cannot get offset of startForwardRouteNode" << std::endl;
+      }
+
+      RNodeRef node=new RNode(startForwardOffset,
                               startWay->GetId());
 
       node->currentCost=profile.GetCosts(startWay,
@@ -574,11 +610,16 @@ namespace osmscout {
       node->overallCost=node->currentCost+node->estimateCost;
 
       std::pair<OpenListRef,bool> result=openList.insert(node);
-      openMap[node->nodeId]=result.first;
+      openMap[node->nodeOffset]=result.first;
     }
 
     if (startBackwardRouteNode.Valid()) {
-      RNodeRef node=new RNode(startBackwardRouteNode->id,
+      if (!routeNodeDataFile.GetOffset(startBackwardRouteNode->id,
+                                       startBackwardOffset)) {
+        std::cerr << "Cannot get offset of startBackwardRouteNode" << std::endl;
+      }
+
+      RNodeRef node=new RNode(startBackwardOffset,
                               startWay->GetId());
 
       node->currentCost=profile.GetCosts(startWay,
@@ -594,7 +635,7 @@ namespace osmscout {
       node->overallCost=node->currentCost+node->estimateCost;
 
       std::pair<OpenListRef,bool> result=openList.insert(node);
-      openMap[node->nodeId]=result.first;
+      openMap[node->nodeOffset]=result.first;
     }
 
     currentWay=NULL;
@@ -609,12 +650,12 @@ namespace osmscout {
 
       current=*openList.begin();
 
-      openMap.erase(current->nodeId);
+      openMap.erase(current->nodeOffset);
       openList.erase(openList.begin());
 
-      if (!routeNodeDataFile.Get(current->nodeId,currentRouteNode) ||
-          !currentRouteNode.Valid()) {
-        std::cerr << "Cannot load route node with id " << current->nodeId << std::endl;
+      if (!routeNodeDataFile.GetByOffset(current->nodeOffset,
+                                         currentRouteNode)) {
+        std::cerr << "Cannot load route node with id " << current->nodeOffset << std::endl;
         return false;
       }
 
@@ -670,11 +711,11 @@ namespace osmscout {
           }
         }
 
-        CloseMap::const_iterator closeEntry=closeMap.find(currentRouteNode->paths[i].id);
+        CloseMap::const_iterator closeEntry=closeMap.find(currentRouteNode->paths[i].offset);
 
         if (closeEntry!=closeMap.end()) {
 #if defined(DEBUG_ROUTING)
-          std::cout << "  Skipping route node " << currentRouteNode->paths[i].id << " (closed)" << std::endl;
+          std::cout << "  Skipping route node " << currentRouteNode->paths[i].id << "/" << currentRouteNode->paths[i].offset << " (closed)" << std::endl;
 #endif
           continue;
         }
@@ -684,14 +725,14 @@ namespace osmscout {
 
         // TODO: Turn costs
 
-        OpenMap::iterator openEntry=openMap.find(currentRouteNode->paths[i].id);
+        OpenMap::iterator openEntry=openMap.find(currentRouteNode->paths[i].offset);
 
         // Check, if we already have a cheaper path to the new node. If yes, do not put the new path
         // into the open list
         if (openEntry!=openMap.end() &&
             (*openEntry->second)->currentCost<=currentCost) {
 #if defined(DEBUG_ROUTING)
-          std::cout << "  Skipping route node " << currentRouteNode->paths[i].id << " (cheaper route exists " << currentCost << "<=>" << (*openEntry->second)->currentCost << ")" << std::endl;
+          std::cout << "  Skipping route node " << currentRouteNode->paths[i].id << "/" << currentRouteNode->paths[i].offset << " (cheaper route exists " << currentCost << "<=>" << (*openEntry->second)->currentCost << ")" << std::endl;
 #endif
           continue;
         }
@@ -709,7 +750,7 @@ namespace osmscout {
         if (openEntry!=openMap.end()) {
           RNodeRef node=*openEntry->second;
 
-          node->prev=currentRouteNode->id;
+          node->prev=current->nodeOffset;
           node->wayId=currentRouteNode->ways[currentRouteNode->paths[i].wayIndex];
 
           node->currentCost=currentCost;
@@ -718,7 +759,7 @@ namespace osmscout {
           node->access=currentRouteNode->paths[i].HasAccess();
 
 #if defined(DEBUG_ROUTING)
-          std::cout << "  Updating route " << node->nodeId << " via way " << node->wayId << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->id << std::endl;
+          std::cout << "  Updating route " << current->nodeOffset << " via way " << node->wayId << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->id << std::endl;
 #endif
 
           openList.erase(openEntry->second);
@@ -727,9 +768,9 @@ namespace osmscout {
           openEntry->second=result.first;
         }
         else {
-          RNodeRef node=new RNode(currentRouteNode->paths[i].id,
+          RNodeRef node=new RNode(currentRouteNode->paths[i].offset,
                                   currentRouteNode->ways[currentRouteNode->paths[i].wayIndex],
-                                  currentRouteNode->id);
+                                  current->nodeOffset);
 
           node->currentCost=currentCost;
           node->estimateCost=estimateCost;
@@ -737,11 +778,11 @@ namespace osmscout {
           node->access=currentRouteNode->paths[i].HasAccess();
 
 #if defined(DEBUG_ROUTING)
-          std::cout << "  Inserting route " << node->nodeId <<  " via way " << node->wayId  << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->id << std::endl;
+          std::cout << "  Inserting route " << current->nodeOffset <<  " via way " << node->wayId  << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->id << std::endl;
 #endif
 
           std::pair<OpenListRef,bool> result=openList.insert(node);
-          openMap[node->nodeId]=result.first;
+          openMap[node->nodeOffset]=result.first;
         }
       }
 
@@ -749,14 +790,14 @@ namespace osmscout {
       // Added current node to close map
       //
 
-      closeMap[current->nodeId]=current;
+      closeMap[current->nodeOffset]=current;
 
       maxOpenList=std::max(maxOpenList,openMap.size());
       maxCloseMap=std::max(maxCloseMap,closeMap.size());
 
     } while (!openList.empty() &&
-             (targetForwardRouteNode.Invalid() || current->nodeId!=targetForwardRouteNode->id) &&
-             (targetBackwardRouteNode.Invalid() || current->nodeId!=targetBackwardRouteNode->id));
+             (targetForwardRouteNode.Invalid() || current->nodeOffset!=targetForwardOffset) &&
+             (targetBackwardRouteNode.Invalid() || current->nodeOffset!=targetBackwardOffset));
 
     clock.Stop();
 
@@ -771,8 +812,8 @@ namespace osmscout {
     std::cout << "Max. OpenList size:  " << maxOpenList << std::endl;
     std::cout << "Max. CloseMap size:  " << maxCloseMap << std::endl;
 
-    if (!((targetForwardRouteNode.Invalid() || current->nodeId==targetForwardRouteNode->id) ||
-          (targetBackwardRouteNode.Invalid() || current->nodeId==targetBackwardRouteNode->id))) {
+    if (!((targetForwardRouteNode.Invalid() || currentRouteNode->GetId()==targetForwardRouteNode->id) ||
+          (targetBackwardRouteNode.Invalid() || currentRouteNode->GetId()==targetBackwardRouteNode->id))) {
       std::cout << "No route found!" << std::endl;
       return false;
     }
@@ -787,8 +828,10 @@ namespace osmscout {
     }
 
     if (!ResolveRNodesToRouteData(nodes,
-                                  startWayId,startNodeId,
-                                  targetWayId,targetNodeId,
+                                  startWayId,
+                                  startNodeId,
+                                  targetWayId,
+                                  targetNodeId,
                                   route)) {
       //std::cerr << "Cannot convert routing result to route data" << std::endl;
       return false;

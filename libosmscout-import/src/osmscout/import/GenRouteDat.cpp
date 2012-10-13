@@ -64,7 +64,7 @@ namespace osmscout {
                                       "turnrestr.dat"),
                       FileScanner::Sequential,
                       true)) {
-      progress.Error("Cannot open 'turnrestr.dat'");
+      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
       return false;
     }
 
@@ -152,7 +152,8 @@ namespace osmscout {
                                       "ways.dat"),
                       FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open 'ways.dat'");
+      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
+
       return false;
     }
 
@@ -237,7 +238,8 @@ namespace osmscout {
                                       "ways.dat"),
                       FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open 'ways.dat'");
+      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
+
       return false;
     }
 
@@ -700,6 +702,135 @@ namespace osmscout {
     }
   }
 
+  bool RouteDataGenerator::AddFileOffsetsToRouteNodes(const ImportParameter& parameter,
+                                                      Progress& progress,
+                                                      FileWriter& writer,
+                                                      uint32_t routeNodeCount)
+  {
+    uint32_t   currentRouteNode=0;
+    FileOffset nextOffset=0;
+
+    while (currentRouteNode<routeNodeCount) {
+      FileScanner                     scanner;
+      OSMSCOUT_HASHMAP<Id,FileOffset> idOffsetMap;
+
+      if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                        "route.dat"),
+                        FileScanner::Sequential,
+                        parameter.GetWayDataMemoryMaped())) {
+        progress.Error("Cannot open '"+scanner.GetFilename()+"'");
+        return false;
+      }
+
+      if (nextOffset==0) {
+        uint32_t routeNodeCount;
+
+        if (!scanner.Read(routeNodeCount)) {
+          progress.Error("Error while reading number of entries in file");
+          return false;
+        }
+
+        nextOffset=4;
+      }
+      else {
+        if (!scanner.SetPos(nextOffset)) {
+          progress.Error("Error while moving to way at offset " + NumberToString(nextOffset));
+          return false;
+        }
+      }
+
+      progress.SetAction("Loading up to " + NumberToString(1500000) + " route nodes");
+
+      uint32_t blockCount=0;
+      while (currentRouteNode<routeNodeCount &&
+             blockCount<1500000) {
+        RouteNode  node;
+
+        currentRouteNode++;
+        blockCount++;
+
+        progress.SetProgress(blockCount,1500000);
+
+        if (!node.Read(scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(currentRouteNode)+" of "+
+                         NumberToString(routeNodeCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
+
+        idOffsetMap[node.GetId()]=nextOffset;
+
+        if (!scanner.GetPos(nextOffset)) {
+          progress.Error(std::string("Error while reading offset of data entry ")+
+                         NumberToString(currentRouteNode)+" of "+
+                         NumberToString(routeNodeCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
+      }
+
+      if (!scanner.SetPos(4)) {
+          progress.Error("Error while moving to way at offset " + NumberToString(4));
+          return false;
+      }
+
+      progress.SetAction("Updating route nodes");
+
+      for (size_t r=1; r<=routeNodeCount; r++) {
+        progress.SetProgress(r,routeNodeCount);
+
+        FileOffset offset;
+        RouteNode  node;
+
+        if (!scanner.GetPos(offset)) {
+          progress.Error(std::string("Error while reading offset of data entry ")+
+                         NumberToString(r)+" of "+
+                         NumberToString(routeNodeCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
+
+        if (!node.Read(scanner)) {
+          progress.Error(std::string("Error while reading data entry ")+
+                         NumberToString(currentRouteNode)+" of "+
+                         NumberToString(routeNodeCount)+
+                         " in file '"+
+                         scanner.GetFilename()+"'");
+          return false;
+        }
+
+        bool hasChanged=false;
+
+        for (size_t i=0; i<node.paths.size(); i++) {
+          OSMSCOUT_HASHMAP<Id,FileOffset>::const_iterator offset=idOffsetMap.find(node.paths[i].id);
+
+          if (offset!=idOffsetMap.end()) {
+            node.paths[i].offset=offset->second;
+
+            hasChanged=true;
+          }
+        }
+
+        if (hasChanged) {
+          if (!writer.SetPos(offset)) {
+            progress.Error("Error while moving to way at offset " + NumberToString(offset));
+            return false;
+          }
+
+          if (!node.Write(writer)) {
+            progress.Error("Error while updating route node with id "+NumberToString(node.GetId()));
+          }
+        }
+      }
+    }
+
+    return true;
+  }
+
   bool RouteDataGenerator::Import(const ImportParameter& parameter,
                                   Progress& progress,
                                   const TypeConfig& typeConfig)
@@ -783,7 +914,7 @@ namespace osmscout {
                                       "ways.dat"),
                       FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open 'ways.dat'");
+      progress.Error("Cannot open '"+scanner.GetFilename()+"'");
       return false;
     }
 
@@ -819,8 +950,7 @@ namespace osmscout {
 
       // Collect way ids of all ways in current block and load them
 
-      std::set<Id>      wayIds;
-      std::list<WayRef> ways;
+      std::set<Id> wayIds;
 
       for (size_t w=0; w<blockCount; w++) {
         for (std::list<Id>::const_iterator wayId=block[w]->second.begin();
@@ -850,7 +980,7 @@ namespace osmscout {
 
       for (size_t w=0; w<blockCount; w++) {
         NodeIdWayIdMap::iterator node=block[w];
-        RouteNode                routeNode;
+        RouteNode routeNode;
 
         routeNode.id=node->first;
 
@@ -936,18 +1066,18 @@ namespace osmscout {
       }
     }
 
+    // Cleaning up...
+
+    nodeWayMap.clear();
+    restrictions.clear();
+
     if (!scanner.Close()) {
-      progress.Error("Cannot close file 'route.dat'");
+      progress.Error("Cannot close file '"+scanner.GetFilename()+"'");
       return false;
     }
 
     writer.SetPos(0);
     writer.Write(writtenRouteNodeCount);
-
-
-    if (!writer.Close()) {
-      return false;
-    }
 
     if (!wayIndex.Close()) {
       return false;
@@ -955,10 +1085,18 @@ namespace osmscout {
 
     progress.Info(NumberToString(writtenRouteNodeCount) + " route node(s) and " + NumberToString(writtenRoutePathCount)+ " paths written");
 
-    // Cleaning up...
+    progress.SetAction("Setting path offsets in route nodes");
 
-    nodeWayMap.clear();
-    restrictions.clear();
+    if (!AddFileOffsetsToRouteNodes(parameter,
+                                    progress,
+                                    writer,
+                                    writtenRouteNodeCount)) {
+      return false;
+    }
+
+    if (!writer.Close()) {
+      return false;
+    }
 
     return true;
   }

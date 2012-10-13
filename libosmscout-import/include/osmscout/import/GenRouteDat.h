@@ -25,6 +25,7 @@
 #include <osmscout/TurnRestriction.h>
 #include <osmscout/Way.h>
 
+#include <osmscout/util/FileWriter.h>
 #include <osmscout/util/HashMap.h>
 #include <osmscout/util/HashSet.h>
 
@@ -77,6 +78,11 @@ namespace osmscout {
     void CalculateWayPaths(RouteNode& routeNode,
                            const Way& way,
                            const NodeIdWayIdMap& nodeWayMap);
+
+    bool AddFileOffsetsToRouteNodes(const ImportParameter& parameter,
+                                    Progress& progress,
+                                    FileWriter& writer,
+                                    uint32_t writtenRouteNodeCount);
 
   public:
     std::string GetDescription() const;

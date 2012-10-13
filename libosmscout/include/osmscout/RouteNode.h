@@ -57,16 +57,17 @@ namespace osmscout {
      */
     struct OSMSCOUT_API Path
     {
-      Id       id;       //! Id of the target routing node if you take this route path
-      uint32_t wayIndex; //! The index of the way to use from this route node to the target route node
-      TypeId   type;     //! The type of the way
-      uint8_t  maxSpeed; //! Maximum speed allowed on the way
-      uint8_t  grade;    //! Quality of road/track 1 (good)...5 (bad)
-      uint8_t  bearing;  //! Encoded initial and final bearing of this path
-      uint8_t  flags;    //! Certain flags
-      double   distance; //! Distance from the current route node to the target route node
-      double   lat;      //! Latitude of the target node
-      double   lon;      //! Longitude of the target node
+      Id         id;       //! Id of the target routing node if you take this route path
+      FileOffset offset;   //! File Offset of the  targeting route node
+      uint32_t   wayIndex; //! The index of the way to use from this route node to the target route node
+      TypeId     type;     //! The type of the way
+      uint8_t    maxSpeed; //! Maximum speed allowed on the way
+      uint8_t    grade;    //! Quality of road/track 1 (good)...5 (bad)
+      uint8_t    bearing;  //! Encoded initial and final bearing of this path
+      uint8_t    flags;    //! Certain flags
+      double     distance; //! Distance from the current route node to the target route node
+      double     lat;      //! Latitude of the target node
+      double     lon;      //! Longitude of the target node
 
       inline bool HasAccess() const
       {
