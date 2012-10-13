@@ -667,6 +667,14 @@ namespace osmscout {
       std::cout << "Analysing follower of node " << currentRouteNode->GetId() << " " << current->currentCost << " " << current->estimateCost << " " << current->overallCost << std::endl;
 #endif
       for (size_t i=0; i<currentRouteNode->paths.size(); i++) {
+        if (currentRouteNode->paths[i].offset==current->prev) {
+#if defined(DEBUG_ROUTING)
+          std::cout << "  Skipping route from " << currentRouteNode->id << " to " << currentRouteNode->paths[i].id << " (back the the last node visited)" << std::endl;
+#endif
+          nodesIgnoredCount++;
+          continue;
+        }
+
         if (!profile.CanUse(*currentRouteNode,i)) {
 #if defined(DEBUG_ROUTING)
           std::cout << "  Skipping route from " << currentRouteNode->id << " to " << currentRouteNode->paths[i].id << " (wrong type " << typeConfig->GetTypeInfo(currentRouteNode->paths[i].type).GetName()  << ")" << std::endl;
@@ -675,7 +683,8 @@ namespace osmscout {
           continue;
         }
 
-        if (!current->access && currentRouteNode->paths[i].HasAccess()) {
+        if (!current->access &&
+            currentRouteNode->paths[i].HasAccess()) {
 #if defined(DEBUG_ROUTING)
           std::cout << "  Skipping route from " << currentRouteNode->id << " to " << currentRouteNode->paths[i].id << " (moving from non-accessible way back to accessible way)" << std::endl;
 #endif
