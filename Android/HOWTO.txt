@@ -12,10 +12,10 @@
 1. Build environment and used software
 
   - Linux or Windows (not tested yet on other platforms).
-  - Android SDK r18 (developer.android.com/sdk/index.html).
-  - Android NDK r7c (developer.android.com/sdk/ndk/index.html).
-  - Eclipse IDE 3.7.0 (www.eclipse.org/downloads).
-  - Eclipse ADT Plugin v18.0.0 (developer.android.com/sdk/eclipse-adt.html).
+  - Android SDK r20.0.3 (developer.android.com/sdk/index.html).
+  - Android NDK r8b (developer.android.com/sdk/ndk/index.html).
+  - Eclipse IDE 3.7.2 (www.eclipse.org/downloads).
+  - Eclipse ADT Plugin v20.0.3 (developer.android.com/sdk/eclipse-adt.html).
 
 
 2. Environment variables 

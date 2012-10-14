@@ -28,10 +28,10 @@ LOCAL_MODULE := osmscout-arm
 
 LOCAL_C_INCLUDES := ../../../libosmscout/include \
                     ../../../libosmscout-map/include \
-                    $(ANDROID_NDK_PATH)/sources/cxx-stl/gnu-libstdc++/include \
-                    $(ANDROID_NDK_PATH)/sources/cxx-stl/gnu-libstdc++/libs/armeabi/include
+                    $(ANDROID_NDK_PATH)/sources/cxx-stl/gnu-libstdc++/4.6/include \
+                    $(ANDROID_NDK_PATH)/sources/cxx-stl/gnu-libstdc++/4.6/libs/armeabi/include
 
-LOCAL_CFLAGS := -std=gnu++0x
+LOCAL_CFLAGS := -std=gnu++0x -Wno-psabi
 
 LOCAL_SRC_FILES := ../../../libosmscout/src/osmscout/AreaAreaIndex.cpp \
                    ../../../libosmscout/src/osmscout/AreaNodeIndex.cpp \
@@ -66,7 +66,7 @@ LOCAL_SRC_FILES := ../../../libosmscout/src/osmscout/AreaAreaIndex.cpp \
                    ../../../libosmscout-map/src/osmscout/oss/Parser.cpp \
                    ../../../libosmscout-map/src/osmscout/oss/Scanner.cpp
 
-LOCAL_LDLIBS := -L$(ANDROID_NDK_PATH)/sources/cxx-stl/gnu-libstdc++/libs/armeabi/ \
+LOCAL_LDLIBS := -L$(ANDROID_NDK_PATH)/sources/cxx-stl/gnu-libstdc++/4.6/libs/armeabi/ \
                 -lstdc++ -lgnustl_shared -llog
 
 include $(BUILD_STATIC_LIBRARY)
@@ -81,12 +81,12 @@ LOCAL_MODULE := osmscout-jni
 LOCAL_C_INCLUDES := ./include \
                     ../../../libosmscout/include \
                     ../../../libosmscout-map/include \
-                    $(ANDROID_NDK_PATH)/sources/cxx-stl/gnu-libstdc++/include \
-                    $(ANDROID_NDK_PATH)/sources/cxx-stl/gnu-libstdc++/libs/armeabi/include
+                    $(ANDROID_NDK_PATH)/sources/cxx-stl/gnu-libstdc++/4.6/include \
+                    $(ANDROID_NDK_PATH)/sources/cxx-stl/gnu-libstdc++/4.6/libs/armeabi/include
 					
-LOCAL_CFLAGS := -std=gnu++0x
+LOCAL_CFLAGS := -std=gnu++0x -Wno-psabi
 
-LOCAL_LDLIBS := -L$(ANDROID_NDK_PATH)/sources/cxx-stl/gnu-libstdc++/libs/armeabi/ \
+LOCAL_LDLIBS := -L$(ANDROID_NDK_PATH)/sources/cxx-stl/gnu-libstdc++/4.6/libs/armeabi/ \
                 -L$(ANDROID_NDK_PATH)/platforms/android-5/arch-arm/usr/lib \
                 -lstdc++ -lgnustl_shared -llog
 

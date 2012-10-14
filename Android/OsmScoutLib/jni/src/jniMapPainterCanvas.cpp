@@ -115,8 +115,8 @@ namespace osmscout {
                   const Color& color,
                   double width,
                   const std::vector<double>& dash,
-                  CapStyle startCap,
-                  CapStyle endCap,
+                  LineStyle::CapStyle startCap,
+                  LineStyle::CapStyle endCap,
                   size_t transStart, size_t transEnd)
   {
     jint javaColor=GetColorInt(color);
@@ -149,10 +149,10 @@ namespace osmscout {
 
     if (dash.empty()) {
 
-      if (startCap==capRound)
+      if (startCap==LineStyle::capRound)
         roundedStartCap=JNI_TRUE;
 
-      if (endCap==capRound)
+      if (endCap==LineStyle::capRound)
         roundedEndCap=JNI_TRUE;
     }
     

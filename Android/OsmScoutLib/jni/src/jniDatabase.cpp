@@ -175,11 +175,11 @@ jobjectArray Java_osm_scout_Database_jniGetMatchingAdminRegions(JNIEnv *env,
                                             iter!=nativeRegions.end(); iter++)
     {
       jint type=iter->reference.type;
-      jlong id=iter->reference.id;
+      jlong fileOffset=iter->reference.GetFileOffset();
 
       jobject javaRegion=env->NewObject(javaClass, methodId,
                                     env->NewStringUTF(iter->name.c_str()),
-                                    type, id);
+                                    type, fileOffset);
 
       env->SetObjectArrayElement(javaRegions, pos, javaRegion);
 

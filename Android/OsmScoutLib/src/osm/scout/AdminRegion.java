@@ -21,21 +21,22 @@ package osm.scout;
 
 public class AdminRegion {
 	
-  public ObjectRef        reference; //! Reference to the object defining the region
-  //long                  offset;    //! Offset into the region datafile
-  public String           name;      //! name of the region
-  //Vector<String>        path;      //! Admin region names higher up in the hierarchy
-
-  public AdminRegion(String name, int refType, long id) {
+	public ObjectFileRef    mReference; //! Reference to the object defining the region
+	public String           mName;      //! name of the region
+	
+	//long                   offset;     //! Offset into the region datafile
+	//Vector<String>         path;       //! Admin region names higher up in the hierarchy
+	
+	public AdminRegion(String name, int refType, long fileOffset) {
 		
-    this.name=name;
-    reference=new ObjectRef(refType, id);		
-  }
-
-  public String toString() {
-
-    return name;
-  }
-
+		mName=name;
+		
+		mReference=new ObjectFileRef(refType, fileOffset);
+	}
+	
+	public String toString() {
+		
+		return mName;
+	}
 }
 

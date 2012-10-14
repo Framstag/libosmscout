@@ -61,7 +61,7 @@ CALL ndk-build
 REM ###################################################################
 REM # Copy the GNU STL shared library to the project lib directory
 
-SET SRC_FILE="%ANDROID_NDK_PATH%\sources\cxx-stl\gnu-libstdc++\libs\armeabi\libgnustl_shared.so"
+SET SRC_FILE="%ANDROID_NDK_PATH%\sources\cxx-stl\gnu-libstdc++\4.6\libs\armeabi\libgnustl_shared.so"
 SET DST_FILE="..\libs\armeabi\libgnustl_shared.so"
 
 ECHO Copying the GNU STL shared library...

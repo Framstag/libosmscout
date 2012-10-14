@@ -22,9 +22,7 @@ package osm.scout;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -37,6 +35,8 @@ public class OsmScoutMapView extends View {
   private Bitmap mMapBitmap=null;
   private MapPainterCanvas mMapPainter=null;
   private OsmScoutMapEventListener mMapEventListener=null;
+  
+  private Paint mPaint=new Paint();
 
   public OsmScoutMapView(Context context) {
     super(context);
@@ -97,9 +97,7 @@ public class OsmScoutMapView extends View {
     if (mMapBitmap==null)
       return;
 
-    Paint paint=new Paint();
-
-    canvas.drawBitmap(mMapBitmap, 0, 0, paint);
+    canvas.drawBitmap(mMapBitmap, 0, 0, mPaint);
   }
 
   @Override
