@@ -95,6 +95,7 @@ LOCAL_STATIC_LIBRARIES := osmscout-arm
 LOCAL_SRC_FILES := src/jniDatabase.cpp \
                    src/jniMapData.cpp \
                    src/jniMapPainterCanvas.cpp \
+                   src/jniMapParameter.cpp \
                    src/jniMercatorProjection.cpp \
                    src/jniObjectTypeSets.cpp \
                    src/jniOnLoad.cpp \
