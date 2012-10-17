@@ -247,6 +247,10 @@ namespace osmscout {
     void MapPainterIOS::DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
                    const LabelData& label){
+        if(label.y <= MAP_PAINTER_Y_LABEL_MARGIN ||
+           label.y >= projection.GetHeight() - MAP_PAINTER_Y_LABEL_MARGIN){
+            return;
+        }
         double r=label.style->GetTextColor().GetR();
         double g=label.style->GetTextColor().GetG();
         double b=label.style->GetTextColor().GetB();
@@ -290,6 +294,13 @@ namespace osmscout {
     void MapPainterIOS::DrawPlateLabel(const Projection& projection,
                                        const MapParameter& parameter,
                                        const LabelData& label){
+        if(label.bx1 <= MAP_PAINTER_PLATE_LABEL_MARGIN ||
+           label.by1 <= MAP_PAINTER_PLATE_LABEL_MARGIN ||
+           label.bx2 >= projection.GetWidth()-MAP_PAINTER_PLATE_LABEL_MARGIN ||
+           label.by2 >= projection.GetHeight()-MAP_PAINTER_PLATE_LABEL_MARGIN
+           ){
+            return;
+        }
         CGContextSaveGState(cg);
         CGContextSetRGBFillColor(cg,
                                  label.style->GetBgColor().GetR(),
