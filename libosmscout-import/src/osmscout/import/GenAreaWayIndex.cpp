@@ -211,6 +211,8 @@ namespace osmscout {
 
       writer.WriteNumber((uint32_t)cell->second.size());
 
+      // FileOffsets are already in increasing order, since
+      // File is scanned from start to end
       for (std::list<FileOffset>::const_iterator offset=cell->second.begin();
            offset!=cell->second.end();
            ++offset) {

@@ -258,6 +258,31 @@ namespace osmscout {
     return !hasError;
   }
 
+  bool FileWriter::WriteFileOffset(FileOffset fileOffset,
+                                   size_t bytes)
+  {
+    if (HasError()) {
+      return false;
+    }
+
+    assert(bytes>0 && bytes<=8);
+
+    char buffer[8];
+
+    buffer[0]=((fileOffset >>  0) & 0xff);
+    buffer[1]=((fileOffset >>  8) & 0xff);
+    buffer[2]=((fileOffset >> 16) & 0xff);
+    buffer[3]=((fileOffset >> 24) & 0xff);
+    buffer[4]=((fileOffset >> 32) & 0xff);
+    buffer[5]=((fileOffset >> 40) & 0xff);
+    buffer[6]=((fileOffset >> 48) & 0xff);
+    buffer[7]=((fileOffset >> 56) & 0xff);
+
+    hasError=fwrite(buffer,1,bytes,file)!=bytes;
+
+    return !hasError;
+  }
+
   /**
     Write a numeric value to the file using some internal encoding
     to reduce storage size. Note that this works only if the average number

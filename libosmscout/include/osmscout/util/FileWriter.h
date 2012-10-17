@@ -70,6 +70,8 @@ namespace osmscout {
 #endif
 
     bool WriteFileOffset(FileOffset offset);
+    bool WriteFileOffset(FileOffset offset,
+                         size_t bytes);
 
     bool Write(int8_t number);
 

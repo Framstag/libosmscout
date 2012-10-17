@@ -113,6 +113,8 @@ namespace osmscout {
 #endif
 
     bool ReadFileOffset(FileOffset& offset);
+    bool ReadFileOffset(FileOffset& offset,
+                        size_t bytes);
 
     bool Read(int8_t& number);
 
