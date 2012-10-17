@@ -36,6 +36,7 @@ using namespace osmscout;
 
 extern JniObjectArray<MapData>              *gMapDataArray;
 extern JniObjectArray<MapPainterCanvas>     *gMapPainterArray;
+extern JniObjectArray<MapParameter>         *gMapParameterArray;
 extern JniObjectArray<MercatorProjection>   *gProjectionArray;
 extern JniObjectArray<StyleConfig>          *gStyleConfigArray;
 
@@ -53,14 +54,82 @@ namespace osmscout {
                  const MapParameter& parameter,
                  IconStyle& style)
   {
-    // TODO
+    if (style.GetId()==std::numeric_limits<size_t>::max()) {
+      return false;
+    }
+
+    if (style.GetId()!=0) {
+      return true;
+    }
+
+    jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "loadIconPNG",
+                                            "(Ljava/lang/String;)I");
+
+    if (!methodId)
+      return false;
+
+    for (std::list<std::string>::const_iterator path=parameter.GetIconPaths().begin();
+         path!=parameter.GetIconPaths().end(); ++path)
+    {
+      std::string filename=*path+"/"+style.GetIconName()+".png";
+
+      jstring iconName=mJniEnv->NewStringUTF(filename.c_str());
+
+      int id=mJniEnv->CallIntMethod(mPainterObject, methodId, iconName);
+
+      mJniEnv->DeleteLocalRef(iconName);
+
+      if (id>0)
+      {
+        style.SetId(id);    
+        return true;
+      }
+    }
+
+    // Error loading icon file
+    style.SetId(std::numeric_limits<size_t>::max());
     return false;
   }
   
   bool MapPainterCanvas::HasPattern(const MapParameter& parameter,
                     const FillStyle& style)
   {
-    // TODO
+    // Was not able to load pattern
+    if (style.GetPatternId()==std::numeric_limits<size_t>::max()) {
+      return false;
+    }
+
+    // Pattern already loaded
+    if (style.GetPatternId()!=0) {
+      return true;
+    }
+
+    jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "loadPatternPNG",
+                                            "(Ljava/lang/String;)I");
+
+    if (!methodId)
+      return false;
+
+    for (std::list<std::string>::const_iterator path=parameter.GetPatternPaths().begin();
+         path!=parameter.GetPatternPaths().end();
+         ++path) {
+      std::string filename=*path+"/"+style.GetPatternName()+".png";
+
+      jstring iconName=mJniEnv->NewStringUTF(filename.c_str());
+
+      int id=mJniEnv->CallIntMethod(mPainterObject, methodId, iconName);
+
+      mJniEnv->DeleteLocalRef(iconName);
+
+      if (id>0)
+      {
+        style.SetPatternId(id);
+        return true;
+      }
+    }
+
+    // Error loading icon file
+    style.SetPatternId(std::numeric_limits<size_t>::max());
     return false;
   }
 
@@ -72,21 +141,88 @@ namespace osmscout {
                           double& width,
                           double& height)
   {
-    // TODO
+    jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "getTextDimension",
+                               "(Ljava/lang/String;F)Landroid/graphics/Rect;");
+
+    if (!methodId)
+      return;
+
+    jfloat javaFontSize=fontSize;
+
+    jstring javaText=mJniEnv->NewStringUTF(text.c_str());
+    
+    jobject javaRect=mJniEnv->CallObjectMethod(mPainterObject, methodId,
+                                               javaText, javaFontSize);
+
+    mJniEnv->DeleteLocalRef(javaText);
+
+    xOff=yOff=0.0;
+
+    jclass rectClass=mJniEnv->FindClass("android/graphics/Rect");
+
+    methodId=mJniEnv->GetMethodID(rectClass, "width", "()I");
+    width=(double)mJniEnv->CallIntMethod(javaRect, methodId);
+
+    methodId=mJniEnv->GetMethodID(rectClass, "height", "()I");
+    height=(double)mJniEnv->CallIntMethod(javaRect, methodId);
+
+    mJniEnv->DeleteLocalRef(javaRect);
+    mJniEnv->DeleteLocalRef(rectClass);
   }
                           
   void MapPainterCanvas::DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
                    const LabelData& label)
   {
-    // TODO
+    jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "drawLabel",
+                               "(Ljava/lang/String;FFFII)V");
+
+    if (!methodId)
+      return;
+
+    jint textColor=GetColorInt(
+                               label.style->GetTextColor().GetR(),
+                               label.style->GetTextColor().GetG(),
+                               label.style->GetTextColor().GetB(),
+                               label.alpha);
+
+    jstring javaText=mJniEnv->NewStringUTF(label.text.c_str());
+
+    jint labelStyle=label.style->GetStyle();
+
+    mJniEnv->CallVoidMethod(mPainterObject, methodId, javaText, label.fontSize,
+                            (jfloat)label.x, (jfloat)label.y, textColor,
+                            labelStyle);
+
+    mJniEnv->DeleteLocalRef(javaText);
   }
 
   void MapPainterCanvas::DrawPlateLabel(const Projection& projection,
                         const MapParameter& parameter,
                         const LabelData& label)
   {
-    // TODO
+    jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "drawPlateLabel",
+                        "(Ljava/lang/String;FLandroid/graphics/RectF;III)V");
+
+    if (!methodId)
+      return;
+
+    jclass rectClass=mJniEnv->FindClass("android/graphics/RectF");
+    jmethodID rectMethodId=mJniEnv->GetMethodID(rectClass,"<init>","(FFFF)V");
+    jobject box=mJniEnv->NewObject(rectClass, rectMethodId, (jfloat)label.bx1,
+                   (jfloat)label.by1, (jfloat)label.bx2+1, (jfloat)label.by2+1);
+
+    jint textColor=GetColorInt(label.style->GetTextColor());
+    jint bgColor=GetColorInt(label.style->GetBgColor());
+    jint borderColor=GetColorInt(label.style->GetBorderColor());
+
+    jstring javaText=mJniEnv->NewStringUTF(label.text.c_str());
+
+    mJniEnv->CallVoidMethod(mPainterObject, methodId, javaText,
+                           (jfloat)label.fontSize, box, textColor,
+                           bgColor, borderColor);
+
+    mJniEnv->DeleteLocalRef(javaText);
   }
                         
   void MapPainterCanvas::DrawContourLabel(const Projection& projection,
@@ -95,19 +231,101 @@ namespace osmscout {
                           const std::string& text,
                           size_t transStart, size_t transEnd)
   {
-    // TODO
+    jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "drawContourLabel",
+                     "(Ljava/lang/String;IFF[F[F)V");
+    
+    if (!methodId)
+      return;
+
+    jstring javaText=mJniEnv->NewStringUTF(text.c_str());
+
+    jint textColor=GetColorInt(style.GetTextColor());
+
+    jfloat pathLenght=0.0;
+
+    int numPoints=transEnd-transStart+1;
+    
+    float *x=new float[numPoints];
+    float *y=new float[numPoints];
+
+    if (transBuffer.buffer[transStart].x<=transBuffer.buffer[transEnd].x)
+    {
+      // Path orientation is from left to right
+      // Direct copy of the data
+    
+      for(int i=0; i<numPoints; i++)
+      {
+        x[i]=(float)transBuffer.buffer[transStart+i].x;
+        y[i]=(float)transBuffer.buffer[transStart+i].y;
+
+        if (i!=0)
+          pathLenght+=sqrt(pow(x[i]-x[i-1], 2.0)+pow(y[i]-y[i-1], 2.0));
+      }
+    }
+    else
+    {
+      // Path orientation is from right to left
+      // Inverse copy of the data
+
+      for(int i=0; i<numPoints; i++)
+      {
+        x[i]=(float)transBuffer.buffer[transEnd-i].x;
+        y[i]=(float)transBuffer.buffer[transEnd-i].y;
+
+        if (i!=0)
+          pathLenght+=sqrt(pow(x[i]-x[i-1], 2.0)+pow(y[i]-y[i-1], 2.0));
+      }
+    }
+    
+    jfloatArray jArrayX=mJniEnv->NewFloatArray(numPoints);
+    jfloatArray jArrayY=mJniEnv->NewFloatArray(numPoints);
+    
+    mJniEnv->SetFloatArrayRegion(jArrayX, 0, numPoints, x);
+    mJniEnv->SetFloatArrayRegion(jArrayY, 0, numPoints, y);
+        
+    mJniEnv->CallVoidMethod(mPainterObject, methodId, javaText,
+                            textColor, (jfloat)style.GetSize(),
+                            pathLenght, jArrayX, jArrayY);
+
+    delete x;
+    delete y;
+
+    mJniEnv->DeleteLocalRef(jArrayX);
+    mJniEnv->DeleteLocalRef(jArrayY);
   }
 
   void MapPainterCanvas::DrawSymbol(const SymbolStyle* style,
                     double x, double y)
   {
-    // TODO
+    jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "drawSymbol",
+                                            "(IIFFF)V");
+
+    if (!methodId)
+      return;
+
+    jint javaStyle=style->GetStyle();
+
+    jint javaColor=GetColorInt(style->GetFillColor());
+    
+    jfloat javaSize=style->GetSize();
+
+    mJniEnv->CallVoidMethod(mPainterObject, methodId, javaStyle, javaColor,
+                            (jfloat) javaSize, (jfloat) x, (jfloat) y);
   }
 
   void MapPainterCanvas::DrawIcon(const IconStyle* style,
                   double x, double y)
   {
-    // TODO
+    jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "drawIcon",
+                                            "(IFF)V");
+
+    if (!methodId)
+      return;
+
+    int iconIndex=style->GetId()-1;
+
+    mJniEnv->CallVoidMethod(mPainterObject, methodId, iconIndex,
+                           (jfloat) x, (jfloat) y);
   }
 
   void MapPainterCanvas::DrawPath(const Projection& projection,
@@ -121,7 +339,7 @@ namespace osmscout {
   {
     jint javaColor=GetColorInt(color);
     
-    jmethodID methodId=mJniEnv->GetMethodID(mJavaClass, "drawPath",
+    jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "drawPath",
                                             "(IF[FZZ[F[F)V");
     
     if (!methodId)
@@ -173,7 +391,7 @@ namespace osmscout {
     mJniEnv->SetFloatArrayRegion(jArrayX, 0, numPoints, x);
     mJniEnv->SetFloatArrayRegion(jArrayY, 0, numPoints, y);
         
-    mJniEnv->CallVoidMethod(mObject, methodId, javaColor, (jfloat)width,
+    mJniEnv->CallVoidMethod(mPainterObject, methodId, javaColor, (jfloat)width,
                             javaDash, roundedStartCap, roundedEndCap,
                             jArrayX, jArrayY);
 
@@ -194,29 +412,58 @@ namespace osmscout {
                   const MapParameter& parameter,
                   const AreaData& area)
   {
-    /*
-     * TODO: Handle patterns
-     * TODO: Handle clipping regions
-     */
-     
-    jint fillColor=GetColorInt(area.fillStyle->GetFillColor());
-
-    jint borderColor=GetColorInt(area.fillStyle->GetBorderColor());
-
-    jfloat borderWidth=ConvertWidthToPixel(parameter,
-                                           area.fillStyle->GetBorderWidth());
-
-    if (borderWidth<parameter.GetLineMinWidthPixel())
+    // First, check if there is any clipping area
+    if (!area.clippings.empty())
     {
-      // Set an invalid border width so no border will be drawn
-      borderWidth=-1.0;
+      // Clip areas within the area
+      for (std::list<PolyData>::const_iterator c=area.clippings.begin();
+          c!=area.clippings.end(); c++)
+      {
+        const PolyData& clipData=*c;
+
+        int numPoints=clipData.transEnd-clipData.transStart+1;
+    
+        float *x=new float[numPoints];
+        float *y=new float[numPoints];
+    
+        for(int i=0; i<numPoints; i++)
+        {
+        	x[i]=(float)transBuffer.buffer[clipData.transStart+i].x;
+        	y[i]=(float)transBuffer.buffer[clipData.transStart+i].y;
+        }
+    
+        jfloatArray jClipArrayX=mJniEnv->NewFloatArray(numPoints);
+        jfloatArray jClipArrayY=mJniEnv->NewFloatArray(numPoints);
+    
+        mJniEnv->SetFloatArrayRegion(jClipArrayX, 0, numPoints, x);
+        mJniEnv->SetFloatArrayRegion(jClipArrayY, 0, numPoints, y);
+
+        jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "addClipArea",
+                                            "([F[F)V");
+   
+        if (!methodId)
+          return;
+    
+        mJniEnv->CallVoidMethod(mPainterObject, methodId,
+                                                jClipArrayX, jClipArrayY);
+
+        delete x;
+        delete y;
+    
+        mJniEnv->DeleteLocalRef(jClipArrayX);
+        mJniEnv->DeleteLocalRef(jClipArrayY);
+      }
     }
 
-    jmethodID methodId=mJniEnv->GetMethodID(mJavaClass,"drawArea","(IIF[F[F)V");
-    
-    if (!methodId)
-      return;
-    
+    jint patternId=-1;
+
+    if (area.fillStyle->HasPattern() &&
+        projection.GetMagnification()>=area.fillStyle->GetPatternMinMag() &&
+        HasPattern(parameter, *area.fillStyle)) {
+
+          patternId=area.fillStyle->GetPatternId();
+    }
+
     int numPoints=area.transEnd-area.transStart+1;
     
     float *x=new float[numPoints];
@@ -233,9 +480,44 @@ namespace osmscout {
     
     mJniEnv->SetFloatArrayRegion(jArrayX, 0, numPoints, x);
     mJniEnv->SetFloatArrayRegion(jArrayY, 0, numPoints, y);
+
+    if (patternId<0)
+    {
+      // Draw a filled area
+     
+      jint fillColor=GetColorInt(area.fillStyle->GetFillColor());
+
+      jint borderColor=GetColorInt(area.fillStyle->GetBorderColor());
+
+      jfloat borderWidth=ConvertWidthToPixel(parameter,
+                                           area.fillStyle->GetBorderWidth());
+
+      if (borderWidth<parameter.GetLineMinWidthPixel())
+      {
+        // Set an invalid border width so no border will be drawn
+        borderWidth=-1.0;
+      }
+
+      jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "drawFilledArea",
+                                            "(IIF[F[F)V");
     
-    mJniEnv->CallVoidMethod(mObject, methodId, fillColor, borderColor,
+      if (!methodId)
+        return;
+    
+      mJniEnv->CallVoidMethod(mPainterObject, methodId, fillColor, borderColor,
                             borderWidth, jArrayX, jArrayY);
+    }
+    else
+    {
+      jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "drawPatternArea",
+                                            "(I[F[F)V");
+    
+      if (!methodId)
+        return;
+    
+      mJniEnv->CallVoidMethod(mPainterObject, methodId, patternId-1,
+                                              jArrayX, jArrayY);
+    }
 
     delete x;
     delete y;
@@ -253,13 +535,14 @@ namespace osmscout {
   {
     jint color=GetColorInt(style.GetFillColor());
     
-    jmethodID methodId=mJniEnv->GetMethodID(mJavaClass,"drawArea","(IFFFF)V");
+    jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "drawArea",
+                                            "(IFFFF)V");
     
     if (!methodId)
       return;
     
-    mJniEnv->CallVoidMethod(mObject, methodId, color, (jfloat)x, (jfloat)y,
-    						(jfloat)width, (jfloat)height);	
+    mJniEnv->CallVoidMethod(mPainterObject, methodId, color, (jfloat)x,
+                                    (jfloat)y, (jfloat)width, (jfloat)height);	
   }
   
   bool MapPainterCanvas::DrawMap(const StyleConfig& styleConfig,
@@ -270,8 +553,8 @@ namespace osmscout {
                  jobject object)
   {
     mJniEnv=env;
-    mJavaClass=env->FindClass("osm/scout/MapPainterCanvas");
-    mObject=object;
+    mPainterClass=env->FindClass("osm/scout/MapPainterCanvas");
+    mPainterObject=object;
 
     return Draw(styleConfig, projection, parameter, data);
   }
@@ -324,7 +607,8 @@ void Java_osm_scout_MapPainterCanvas_jniDestructor(JNIEnv *env, jobject object,
 
 jboolean Java_osm_scout_MapPainterCanvas_jniDrawMap(JNIEnv *env, jobject object,
                     int mapPainterIndex, int styleConfigIndex,
-                    int projectionIndex, int mapDataIndex)
+                    int projectionIndex, int mapParameterIndex,
+                    int mapDataIndex)
 {
   MapPainterCanvas *nativeMapPainter=gMapPainterArray->Get(mapPainterIndex);
 
@@ -353,6 +637,15 @@ jboolean Java_osm_scout_MapPainterCanvas_jniDrawMap(JNIEnv *env, jobject object,
     return JNI_FALSE;
   }
 
+  MapParameter *nativeMapParameter=gMapParameterArray->Get(mapParameterIndex);
+
+  if (!nativeMapParameter)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniDrawMap(): NULL MapParameter pointer");
+    return JNI_FALSE;
+  }
+	
   MapData *nativeMapData=gMapDataArray->Get(mapDataIndex);
 
   if (!nativeMapData)
@@ -362,10 +655,21 @@ jboolean Java_osm_scout_MapPainterCanvas_jniDrawMap(JNIEnv *env, jobject object,
     return JNI_FALSE;
   }
 	
-  osmscout::MapParameter mapParameter;
-  
-  return nativeMapPainter->DrawMap(*nativeStyleConfig, *nativeProjection,
-                              mapParameter, *nativeMapData, env, object);
+  bool result=nativeMapPainter->DrawMap(*nativeStyleConfig, *nativeProjection,
+                              *nativeMapParameter, *nativeMapData, env, object);
+
+  if (result)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniDrawMap(): DrawMap() Ok!");
+  }
+  else
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniDrawMap(): DrawMap() failed!");
+  }
+
+  return result;
 }
 
 #ifdef __cplusplus
