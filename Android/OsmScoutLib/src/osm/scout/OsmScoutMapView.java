@@ -67,12 +67,13 @@ public class OsmScoutMapView extends View {
   }
 
   public void drawMap(StyleConfig styleConfig, MercatorProjection projection,
-		  				MapData mapData) {
+		  				MapParameter mapParameter, MapData mapData) {
 
     if (mMapBitmap==null)
       return;
 
-    mMapPainter.drawMap(styleConfig, projection, mapData, new Canvas(mMapBitmap));
+    mMapPainter.drawMap(styleConfig, projection, mapParameter, mapData,
+    					new Canvas(mMapBitmap));
 
     invalidate();
   }

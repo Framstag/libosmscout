@@ -19,6 +19,8 @@
 
 package osm.scout.viewer;
 
+import java.util.Vector;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -31,6 +33,7 @@ import osm.scout.Database;
 import osm.scout.GeoBox;
 import osm.scout.GeoPos;
 import osm.scout.MapData;
+import osm.scout.MapParameter;
 import osm.scout.OsmScoutLib;
 import osm.scout.OsmScoutMapEventListener;
 import osm.scout.MercatorProjection;
@@ -44,6 +47,7 @@ public class OsmScoutViewerActivity extends Activity implements OsmScoutMapEvent
 	private Database mDatabase=null;
 	private MercatorProjection mProjection=null;
 	private StyleConfig mStyleConfig=null;
+	private MapParameter mMapParameter=null;
 	
 	// GUI objects
 	private OsmScoutMapView	mOsmScoutMapView=null;
@@ -51,6 +55,9 @@ public class OsmScoutViewerActivity extends Activity implements OsmScoutMapEvent
 	
 	// Map (Database) path 
 	private static String mMapPath="/mnt/sdcard/map";
+	
+	// Icons and patterns path 
+	private static String mIconsPath="/mnt/sdcard/map/icons";
 	
 	// Geographic position of the user's screen down action
 	GeoPos mActionDownPos;
@@ -95,6 +102,15 @@ public class OsmScoutViewerActivity extends Activity implements OsmScoutMapEvent
         	finishActivity("Error loading style config");
         	return;
         }
+        
+        // Set icons and pattern paths in MapParameter
+        mMapParameter=new MapParameter();
+        
+        Vector<String> iconPaths=new Vector<String>();
+        iconPaths.add(mIconsPath); 
+        
+        mMapParameter.setIconPaths(iconPaths);
+        mMapParameter.setPatternPaths(iconPaths);
         
         // Get map boundaries
         GeoBox mapBounds=mDatabase.getBoundingBox();
@@ -184,7 +200,7 @@ public class OsmScoutViewerActivity extends Activity implements OsmScoutMapEvent
     	MapData mapData=mDatabase.getObjects(typeSets, mProjection);
     
     	// Redraws map
-    	mOsmScoutMapView.drawMap(mStyleConfig, mProjection, mapData);
+    	mOsmScoutMapView.drawMap(mStyleConfig, mProjection, mMapParameter, mapData);
     }
 
 	public void onMapSizeChanged(int width, int height) {

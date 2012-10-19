@@ -30,8 +30,8 @@ namespace osmscout {
   private:
 
     JNIEnv   *mJniEnv;
-    jclass   mJavaClass;
-    jobject  mObject;
+    jclass   mPainterClass;
+    jobject  mPainterObject;
     
     int GetColorInt(double r, double g, double b, double a);
     int GetColorInt(Color color);

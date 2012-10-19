@@ -35,6 +35,9 @@
 
 #include <osmscout/MapPainter.h>
 
+#define MAP_PAINTER_PLATE_LABEL_MARGIN 10
+#define MAP_PAINTER_Y_LABEL_MARGIN 10
+
 namespace osmscout {
     typedef struct { double x; double y; } Pt;
     

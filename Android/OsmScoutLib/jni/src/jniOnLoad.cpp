@@ -35,6 +35,7 @@ using namespace osmscout;
 JniObjectArray<Database>             *gDatabaseArray;
 JniObjectArray<MapData>              *gMapDataArray;
 JniObjectArray<MapPainterCanvas>     *gMapPainterArray;
+JniObjectArray<MapParameter>         *gMapParameterArray;
 JniObjectArray<MercatorProjection>   *gProjectionArray;
 JniObjectArray<ObjectTypeSets>       *gObjectTypeSetsArray;
 JniObjectArray<StyleConfig>          *gStyleConfigArray;
@@ -45,6 +46,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
   gDatabaseArray=new JniObjectArray<Database>();
   gMapDataArray=new JniObjectArray<MapData>();
   gMapPainterArray=new JniObjectArray<MapPainterCanvas>();
+  gMapParameterArray=new JniObjectArray<MapParameter>();
   gProjectionArray=new JniObjectArray<MercatorProjection>();
   gObjectTypeSetsArray=new JniObjectArray<ObjectTypeSets>();
   gStyleConfigArray=new JniObjectArray<StyleConfig>();
