@@ -48,6 +48,7 @@ namespace osmscout {
     this->displayWidth=style.displayWidth;
     this->width=style.width;
     this->fixedWidth=style.fixedWidth;
+    this->capStyle=style.capStyle;
     this->outline=style.outline;
     this->dash=style.dash;
   }
