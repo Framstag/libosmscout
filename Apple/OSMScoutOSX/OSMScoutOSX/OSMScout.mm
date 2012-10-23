@@ -32,8 +32,11 @@ void OSMScoutCPP::drawMap(CGContextRef paintCG, double lat, double lon, double z
             return;
         }
     }
-    
+#if TARGET_OS_IPHONE
     osmscout::MercatorProjection  projection;
+#else
+    osmscout::ReversedYAxisMercatorProjection  projection;
+#endif
     osmscout::MapParameter        drawParameter;
     osmscout::AreaSearchParameter searchParameter;
     osmscout::MapData             data;

@@ -147,6 +147,7 @@ namespace osmscout {
 
   class OSMSCOUT_API MercatorProjection : public Projection
   {
+  protected:
     bool                valid;         //! projects is valid
     double              lon;           //! Longitude coordinate of the center of the image
     double              lat;           //! Latitude coordinate of the center of the image
@@ -154,7 +155,7 @@ namespace osmscout {
     double              latMin;        //! Latitude of the upper left corner of the image
     double              lonMax;        //! Longitude of the lower right corner of the image
     double              latMax;        //! Latitude of the lower right corner of the image
-    double              magnification; //! Current maginification
+
     size_t              width;         //! Width of image
     size_t              height;        //! Height of image
 
@@ -162,15 +163,18 @@ namespace osmscout {
     double              latOffset;
     double              scale;
     double              scaleGradtorad; //!Precalculated scale*Gradtorad
-
+      
 #ifdef OSMSCOUT_HAVE_SSE2
-    //some extra vars for special sse needs
-    v2df                sse2LonOffset;
-    v2df                sse2LatOffset;
-    v2df                sse2Scale;
-    v2df                sse2ScaleGradtorad;
-    v2df                sse2Height;
+      //some extra vars for special sse needs
+      v2df                sse2LonOffset;
+      v2df                sse2LatOffset;
+      v2df                sse2Scale;
+      v2df                sse2ScaleGradtorad;
+      v2df                sse2Height;
 #endif
+
+  private:
+    double              magnification; //! Current maginification
 
     double              pixelSize;     //! Size of a pixel in meter
 
@@ -250,6 +254,14 @@ namespace osmscout {
 
      bool GeoToPixel(const BatchTransformer& transformData) const;
 
+  };
+    
+  class OSMSCOUT_API ReversedYAxisMercatorProjection : public MercatorProjection
+  {
+    bool PixelToGeo(double x, double y, double& lon, double& lat) const;
+    bool GeoToPixel(double lon, double lat, double& x, double& y) const;
+  protected:
+    bool GeoToPixel(const BatchTransformer& transformData) const;
   };
 }
 

@@ -257,21 +257,26 @@ namespace osmscout {
     double xMax;
     double yMin;
     double yMax;
+    double y1;
+    double y2;
 
     if (!projection.GeoToPixel(lonMin,
                                latMax,
                                xMin,
-                               yMin)) {
+                               y1)) {
       return false;
     }
 
     if (!projection.GeoToPixel(lonMax,
                                latMin,
                                xMax,
-                               yMax)) {
+                               y2)) {
       return false;
     }
 
+    yMax = fmax(y1,y2);
+    yMin = fmin(y1,y2);
+      
     xMin-=pixelOffset;
     yMin-=pixelOffset;
 
