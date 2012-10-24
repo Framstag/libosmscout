@@ -200,9 +200,9 @@ namespace osmscout {
    */
   static void TransformTextOntoPath(cairo_path_t *textPath,
                                     cairo_path_t *path,
+                                    double *pathSegmentLengths,
                                     double xOffset,
-                                    double yOffset,
-                                    double *pathSegmentLengths)
+                                    double yOffset)
   {
     for (int i=0; i<textPath->num_data; i+=textPath->data[i].header.length) {
       cairo_path_data_t *data=&textPath->data[i];
@@ -240,30 +240,23 @@ namespace osmscout {
 
 
   /* Projects the current text path of cr onto the provided path. */
-  static void MapCurrentTextPathOnPath(cairo_t *draw,
-                                       double xOffset,
-                                       double yOffset,
-                                       double textWidth,
-                                       double textHeight,
-                                       cairo_path_t *path,
-                                       double pathLength)
+  static void MapPathOnPath(cairo_t *draw,
+                            cairo_path_t *textPath,
+                            cairo_path_t *path,
+                            double xOffset,
+                            double yOffset)
   {
-    cairo_path_t *textPath;
-    double       *segmentLengths=CalculatePathSegmentLengths(path);
-
-    textPath=cairo_copy_path(draw);
+    double *segmentLengths=CalculatePathSegmentLengths(path);
 
     // Center text on path
     TransformTextOntoPath(textPath,
                           path,
-                          (pathLength-textWidth)/2+xOffset,
-                          textHeight-yOffset,
-                          segmentLengths);
+                          segmentLengths,
+                          xOffset,
+                          yOffset);
 
     cairo_new_path(draw);
     cairo_append_path(draw,textPath);
-
-    cairo_path_destroy(textPath);
 
     delete [] segmentLengths;
   }
@@ -271,48 +264,33 @@ namespace osmscout {
 
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
   static void DrawContourLabelPangoCairo(cairo_t *draw,
+                                         cairo_path_t *path,
                                          double pathLength,
                                          PangoLayout *layout,
                                          const PangoRectangle& extends)
   {
-    cairo_path_t *path;
-
-    /* Decrease tolerance a bit, since it's going to be magnified */
-    //cairo_set_tolerance (cr, 0.01);
-
-    /* Using cairo_copy_path() here shows our deficiency in handling
-      * Bezier curves, specially around sharper curves.
-      *
-      * Using cairo_copy_path_flat() on the other hand, magnifies the
-      * flattening error with large off-path values. We decreased
-      * tolerance for that reason. Increase tolerance to see that
-      * artifact.
-    */
-
-    // Make a copy of the path of the line we should draw along
-    path=cairo_copy_path_flat(draw);
-
     // Create a new path for the text we should draw along the curve
     cairo_new_path(draw);
     pango_cairo_layout_path(draw,layout);
 
+    cairo_path_t *textPath=cairo_copy_path(draw);
+
     // Now transform the text path so that it maps to the contour of the line
-    MapCurrentTextPathOnPath(draw,
-                             extends.x,
-                             1.5*extends.height,
-                             extends.width,
-                             extends.height,
-                             path,
-                             pathLength);
+    MapPathOnPath(draw,
+                  textPath,
+                  path,
+                  (pathLength-extends.width)/2-extends.x,
+                  -0.5*extends.height);
+
+    cairo_path_destroy(textPath);
 
     // Draw the text path
     cairo_fill(draw);
-
-    cairo_path_destroy(path);
   }
 
 #else
-  static void DrawContourLabelCairo(cairo_t *cr,
+  static void DrawContourLabelCairo(cairo_t *draw,
+                                    cairo_path_t *path,
                                     double pathLength,
                                     double xOffset,
                                     double yOffset,
@@ -320,41 +298,24 @@ namespace osmscout {
                                     double textHeight,
                                     const std::string& text)
   {
-    cairo_path_t *path;
-
-    /* Decrease tolerance a bit, since it's going to be magnified */
-    //cairo_set_tolerance (cr, 0.01);
-
-    /* Using cairo_copy_path() here shows our deficiency in handling
-      * Bezier curves, specially around sharper curves.
-      *
-      * Using cairo_copy_path_flat() on the other hand, magnifies the
-      * flattening error with large off-path values. We decreased
-      * tolerance for that reason. Increase tolerance to see that
-      * artifact.
-    */
-
-    // Make a copy of the path of the line we should draw along
-    path=cairo_copy_path_flat(cr);
-
     // Create a new path for the text we should draw along the curve
-    cairo_new_path(cr);
-    cairo_move_to(cr,0,0);
-    cairo_text_path(cr,text.c_str());
+    cairo_new_path(draw);
+    cairo_move_to(draw,0,0);
+    cairo_text_path(draw,text.c_str());
+
+    cairo_path_t *textPath=cairo_copy_path(draw);
 
     // Now transform the text path so that it maps to the contour of the line
-    MapCurrentTextPathOnPath(cr,
-                            xOffset,
-                            yOffset,
-                            textWidth,
-                            textHeight,
-                            path,
-                            pathLength);
+    MapPathOnPath(draw,
+                  textPath,
+                  path,
+                  (pathLength-textWidth)/2-xOffset,
+                  -0.5*textHeigh);
+
+    cairo_path_destroy(textPath);
 
     // Draw the text path
     cairo_fill(cr);
-
-    cairo_path_destroy(path);
   }
 #endif
 
@@ -782,7 +743,7 @@ namespace osmscout {
                         transBuffer.buffer[j].x,
                         transBuffer.buffer[j].y);
           lineLength+=sqrt(pow(transBuffer.buffer[j].x-xo,2)+
-                       pow(transBuffer.buffer[j].y-yo,2));
+                           pow(transBuffer.buffer[j].y-yo,2));
         }
 
         xo=transBuffer.buffer[j].x;
@@ -803,7 +764,7 @@ namespace osmscout {
                         transBuffer.buffer[idx].x,
                         transBuffer.buffer[idx].y);
           lineLength+=sqrt(pow(transBuffer.buffer[idx].x-xo,2)+
-                       pow(transBuffer.buffer[idx].y-yo,2));
+                           pow(transBuffer.buffer[idx].y-yo,2));
         }
 
         xo=transBuffer.buffer[idx].x;
@@ -824,6 +785,58 @@ namespace osmscout {
     pango_layout_get_pixel_extents(layout,&extends,NULL);
 
     if (extends.width<=lineLength) {
+      cairo_path_t *path;
+
+      /* Decrease tolerance a bit, since it's going to be magnified */
+      //cairo_set_tolerance (cr, 0.01);
+
+      /* Using cairo_copy_path() here shows our deficiency in handling
+        * Bezier curves, specially around sharper curves.
+        *
+        * Using cairo_copy_path_flat() on the other hand, magnifies the
+        * flattening error with large off-path values. We decreased
+        * tolerance for that reason. Increase tolerance to see that
+        * artifact.
+      */
+
+      // Make a copy of the path of the line we should draw along
+      path=cairo_copy_path_flat(draw);
+
+/*
+      cairo_new_path(draw);
+      cairo_set_source_rgb(draw,0.0,0.0,1.0);
+      cairo_set_line_width(draw,0);
+      cairo_set_dash(draw,NULL,0,0);
+
+      size_t offset=0;
+
+      while (offset+20<lineLength) {
+        cairo_move_to(draw,offset+0.0,2.0);
+        cairo_line_to(draw,offset+10.0,2.0);
+        cairo_line_to(draw,offset+10.0,0.0);
+        cairo_line_to(draw,offset+15.0,2.5);
+        cairo_line_to(draw,offset+10.0,5.0);
+        cairo_line_to(draw,offset+10.0,3.0);
+        cairo_line_to(draw,offset+0.0,3.0);
+        cairo_close_path(draw);
+
+        offset+=25+50;
+      }
+
+      cairo_path_t *patternPath=cairo_copy_path_flat(draw);
+
+      // Now transform the text path so that it maps to the contour of the line
+      MapPathOnPath(draw,
+                    patternPath,
+                    path,
+                    0,
+                    -2.5);
+
+      cairo_path_destroy(patternPath);
+
+      // Draw the text path
+      cairo_fill(draw);*/
+
       cairo_set_source_rgba(draw,
                             style.GetTextColor().GetR(),
                             style.GetTextColor().GetG(),
@@ -831,9 +844,12 @@ namespace osmscout {
                             style.GetTextColor().GetA());
 
       DrawContourLabelPangoCairo(draw,
+                                 path,
                                  lineLength,
                                  layout,
                                  extends);
+
+      cairo_path_destroy(path);
     }
 
     g_object_unref(layout);
@@ -866,6 +882,7 @@ namespace osmscout {
     cairo_set_scaled_font(draw,font);
 
     DrawContourLabelCairo(draw,
+                          path,
                           lineLength,
                           textExtents.x_bearing,
                           textExtents.y_bearing,
