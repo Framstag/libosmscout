@@ -45,9 +45,9 @@ namespace osmscout {
   : valid(false),
     lon(0),
     lat(0),
-    magnification(1),
     width(0),
-    height(0)
+    height(0),
+    magnification(1)
   {
     Set(lon,lat,magnification,width,height);
   }
@@ -289,70 +289,70 @@ namespace osmscout {
 
     return pixelSize;
   }
-    
+
 //
 // ReversedYAxisMercatorProjection class
 //
-    
+
   bool ReversedYAxisMercatorProjection::PixelToGeo(double x, double y,
                                         double& lon, double& lat) const
   {
         assert(valid);
-        
+
         lon=(x+lonOffset)/(scale*gradtorad);
         lat=atan(sinh((height-y+latOffset)/scale))/gradtorad;
-        
+
         return true;
     }
-    
+
 #ifdef OSMSCOUT_HAVE_SSE2
-    
+
     bool ReversedYAxisMercatorProjection::GeoToPixel(double lon, double lat,
                                         double& x, double& y) const
     {
         assert(valid);
-        
+
         x=lon*scaleGradtorad-lonOffset;
         y=(scale*atanh_sin_pd(lat*gradtorad)-latOffset);
-        
+
         return true;
     }
-    
+
     //this basically transforms 2 coordinates in 1 call
     bool ReversedYAxisMercatorProjection::GeoToPixel(const BatchTransformer& transformData) const
     {
         v2df x = _mm_sub_pd(_mm_mul_pd( ARRAY2V2DF(transformData.lon), sse2ScaleGradtorad), sse2LonOffset);
         __m128d test = ARRAY2V2DF(transformData.lat);
         v2df y = _mm_sub_pd(_mm_mul_pd(sse2Scale, atanh_sin_pd( _mm_mul_pd( test,ARRAY2V2DF(sseGradtorad)))),sse2LatOffset);
-        
+
         //store results:
         _mm_storel_pd (transformData.xPointer[0], x);
         _mm_storeh_pd (transformData.xPointer[1], x);
         _mm_storel_pd (transformData.yPointer[0], y);
         _mm_storeh_pd (transformData.yPointer[1], y);
-        
+
         return true;
     }
-    
+
 #else
-    
+
     bool ReversedYAxisMercatorProjection::GeoToPixel(double lon, double lat,
                                         double& x, double& y) const
     {
         assert(valid);
-        
+
         x=lon*scaleGradtorad-lonOffset;
         y=(scale*atanh(sin(lat*gradtorad))-latOffset);
-        
+
         return true;
     }
-    
+
     bool ReversedYAxisMercatorProjection::GeoToPixel(const BatchTransformer& transformData) const
     {
         assert(false); //should not be called
         return false;
     }
-    
+
 #endif
 
 }
