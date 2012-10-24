@@ -33,12 +33,16 @@ namespace osmscout {
   class OSMSCOUT_API Path
   {
   private:
-    Id wayId;
-    Id targetNodeId;
+    Id   wayId;
+    Id   targetNodeId;
+    bool traversable;
 
   public:
     Path(Id wayId,
          Id targetNodeId);
+    Path(Id wayId,
+         Id targetNodeId,
+         bool traversable);
     Path(const Path& other);
     virtual ~Path();
 
@@ -50,6 +54,11 @@ namespace osmscout {
     inline Id GetTargetNodeId() const
     {
       return targetNodeId;
+    }
+
+    inline bool IsTraversable() const
+    {
+      return traversable;
     }
   };
 }

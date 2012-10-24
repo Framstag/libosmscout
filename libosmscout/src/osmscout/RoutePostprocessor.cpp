@@ -317,6 +317,10 @@ namespace osmscout {
           continue;
         }
 
+        if (!node->GetPaths()[i].IsTraversable()) {
+          continue;
+        }
+
         exitCount++;
       }
 

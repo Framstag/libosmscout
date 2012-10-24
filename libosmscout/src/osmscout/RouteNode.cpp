@@ -25,19 +25,6 @@
 
 namespace osmscout {
 
-  std::vector<Path> RouteNode::GetPaths() const
-  {
-    std::vector<osmscout::Path> result;
-
-    for (std::vector<Path>::const_iterator p=paths.begin();
-        p!=paths.end();
-        ++p) {
-      result.push_back(osmscout::Path(ways[p->wayIndex],p->id));
-    }
-
-    return result;
-  }
-
   bool RouteNode::Read(FileScanner& scanner)
   {
     uint32_t wayCount;

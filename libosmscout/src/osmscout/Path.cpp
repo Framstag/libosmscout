@@ -24,7 +24,18 @@ namespace osmscout {
   Path::Path(Id wayId,
              Id targetNodeId)
   : wayId(wayId),
-    targetNodeId(targetNodeId)
+    targetNodeId(targetNodeId),
+    traversable(true)
+  {
+    // no code
+  }
+
+  Path::Path(Id wayId,
+             Id targetNodeId,
+             bool traversable)
+  : wayId(wayId),
+    targetNodeId(targetNodeId),
+    traversable(traversable)
   {
     // no code
   }
@@ -33,6 +44,7 @@ namespace osmscout {
   {
     this->wayId=other.wayId;
     this->targetNodeId=other.targetNodeId;
+    this->traversable=other.traversable;
   }
 
   Path::~Path()

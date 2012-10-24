@@ -86,8 +86,6 @@ namespace osmscout {
       return id;
     }
 
-    std::vector<osmscout::Path> GetPaths() const;
-
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;
   };

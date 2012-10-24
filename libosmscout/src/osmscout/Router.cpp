@@ -231,7 +231,6 @@ namespace osmscout {
   }
 
   bool Router::AddNodes(RouteData& route,
-                        const std::vector<Id>& startCrossingWaysIds,
                         const std::vector<Path>& startPaths,
                         Id startNodeId,
                         Id wayId,
@@ -264,14 +263,12 @@ namespace osmscout {
 
     if (std::max(start,end)-std::min(start,end)==1) {
       route.AddEntry(way->nodes[start].GetId(),
-                     startCrossingWaysIds,
                      startPaths,
                      way->GetId(),
                      targetNodeId);
     }
     else if (start<end) {
       route.AddEntry(way->nodes[start].GetId(),
-                     startCrossingWaysIds,
                      startPaths,
                      way->GetId(),
                      way->nodes[start+1].GetId());
@@ -300,7 +297,6 @@ namespace osmscout {
       }
 
       route.AddEntry(startNodeId,
-                     startCrossingWaysIds,
                      startPaths,
                      way->GetId(),
                      way->nodes[pos].GetId());
@@ -327,7 +323,6 @@ namespace osmscout {
     }
     else {
       route.AddEntry(way->nodes[start].GetId(),
-                     startCrossingWaysIds,
                      startPaths,
                      way->GetId(),
                      way->nodes[start-1].GetId());
@@ -346,7 +341,24 @@ namespace osmscout {
     return true;
   }
 
-  bool Router::ResolveRNodesToRouteData(const std::list<RNodeRef>& nodes,
+ std::vector<Path> Router::TransformPaths(const RoutingProfile& profile,
+                                          const RouteNode& node)
+ {
+    std::vector<osmscout::Path> result;
+
+    for (size_t i=0; i<node.paths.size(); i++) {
+      bool traversable=profile.CanUse(node,i);
+
+      result.push_back(osmscout::Path(node.ways[node.paths[i].wayIndex],
+                                      node.paths[i].id,
+                                      traversable));
+    }
+
+    return result;
+  }
+
+  bool Router::ResolveRNodesToRouteData(const RoutingProfile& profile,
+                                        const std::list<RNodeRef>& nodes,
                                         Id startWayId,
                                         Id startNodeId,
                                         Id targetWayId,
@@ -355,7 +367,6 @@ namespace osmscout {
   {
     if (nodes.empty()) {
       AddNodes(route,
-               std::vector<Id>(),
                std::vector<Path>(),
                startNodeId,
                startWayId,
@@ -378,7 +389,6 @@ namespace osmscout {
     if (startNodeId!=initialNode->GetId()) {
       // Start node to initial route node
       AddNodes(route,
-               std::vector<Id>(),
                std::vector<Path>(),
                startNodeId,
                startWayId,
@@ -406,8 +416,7 @@ namespace osmscout {
       if (nn==nodes.end()) {
         if (node->GetId()!=targetNodeId) {
           AddNodes(route,
-                   node->ways,
-                   node->GetPaths(),
+                   TransformPaths(profile,node),
                    node->GetId(),
                    targetWayId,
                    targetNodeId);
@@ -443,8 +452,7 @@ namespace osmscout {
       }
 
       AddNodes(route,
-               node->ways,
-               node->GetPaths(),
+               TransformPaths(profile,node),
                node->id,
                node->ways[node->paths[pathIndex].wayIndex],
                nextNode->id);
@@ -838,7 +846,8 @@ namespace osmscout {
       return false;
     }
 
-    if (!ResolveRNodesToRouteData(nodes,
+    if (!ResolveRNodesToRouteData(profile,
+                                  nodes,
                                   startWayId,
                                   startNodeId,
                                   targetWayId,

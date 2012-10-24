@@ -183,19 +183,21 @@ namespace osmscout {
     bool ResolveRNodesToList(const RNodeRef& end,
                              const CloseMap& closeMap,
                              std::list<RNodeRef>& nodes);
-    bool ResolveRNodesToRouteData(const std::list<RNodeRef>& nodes,
+    bool ResolveRNodesToRouteData(const RoutingProfile& profile,
+                                  const std::list<RNodeRef>& nodes,
                                   Id startWayId,
                                   Id startNodeId,
                                   Id targetWayId,
                                   Id targetNodeId,
                                   RouteData& route);
     bool AddNodes(RouteData& route,
-                  const std::vector<Id>& startCrossingWaysIds,
                   const std::vector<Path>& startPaths,
                   Id startNodeId,
                   Id wayId,
                   Id targetNodeId);
 
+    std::vector<Path> TransformPaths(const RoutingProfile& profile,
+                                     const RouteNode& node);
 
   public:
     Router(const RouterParameter& parameter);
