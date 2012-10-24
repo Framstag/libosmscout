@@ -1,0 +1,449 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		F51E3F85161A651F00D51926 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F51E3F84161A651F00D51926 /* Foundation.framework */; };
+		F51E3F9D161A658300D51926 /* MapPainter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F94161A658300D51926 /* MapPainter.cpp */; };
+		F51E3F9E161A658300D51926 /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F99161A658300D51926 /* Parser.cpp */; };
+		F51E3F9F161A658300D51926 /* Scanner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F9A161A658300D51926 /* Scanner.cpp */; };
+		F51E3FA0161A658300D51926 /* StyleConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F9B161A658300D51926 /* StyleConfig.cpp */; };
+		F51E3FA1161A658300D51926 /* StyleConfigLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F9C161A658300D51926 /* StyleConfigLoader.cpp */; };
+		F53BD16F163883E7006C7AE1 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F53BD16E163883E7006C7AE1 /* Cocoa.framework */; };
+		F53BD1D71638871C006C7AE1 /* MapPainter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F94161A658300D51926 /* MapPainter.cpp */; };
+		F53BD1D81638871F006C7AE1 /* StyleConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F9B161A658300D51926 /* StyleConfig.cpp */; };
+		F53BD1D916388723006C7AE1 /* StyleConfigLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F9C161A658300D51926 /* StyleConfigLoader.cpp */; };
+		F53BD1DA16388729006C7AE1 /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F99161A658300D51926 /* Parser.cpp */; };
+		F53BD1DB1638872E006C7AE1 /* Scanner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3F9A161A658300D51926 /* Scanner.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F51E3F7F161A651F00D51926 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/${PRODUCT_NAME}";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		F51E3F81161A651F00D51926 /* libosmscoutmap.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libosmscoutmap.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		F51E3F84161A651F00D51926 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		F51E3F94161A658300D51926 /* MapPainter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MapPainter.cpp; path = "../../../../libosmscout-map/src/osmscout/MapPainter.cpp"; sourceTree = "<group>"; };
+		F51E3F99161A658300D51926 /* Parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Parser.cpp; sourceTree = "<group>"; };
+		F51E3F9A161A658300D51926 /* Scanner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Scanner.cpp; sourceTree = "<group>"; };
+		F51E3F9B161A658300D51926 /* StyleConfig.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StyleConfig.cpp; path = "../../../../libosmscout-map/src/osmscout/StyleConfig.cpp"; sourceTree = "<group>"; };
+		F51E3F9C161A658300D51926 /* StyleConfigLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StyleConfigLoader.cpp; path = "../../../../libosmscout-map/src/osmscout/StyleConfigLoader.cpp"; sourceTree = "<group>"; };
+		F51E3FA3161A65C000D51926 /* MapFeatures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapFeatures.h; sourceTree = "<group>"; };
+		F51E3FA5161A65C000D51926 /* MapPainter.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = MapPainter.h; sourceTree = "<group>"; };
+		F51E3FA7161A65C000D51926 /* Parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Parser.h; sourceTree = "<group>"; };
+		F51E3FA8161A65C000D51926 /* Scanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Scanner.h; sourceTree = "<group>"; };
+		F51E3FAA161A65C000D51926 /* Config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
+		F51E3FAC161A65C000D51926 /* MapImportExport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapImportExport.h; sourceTree = "<group>"; };
+		F51E3FAD161A65C000D51926 /* Math.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Math.h; sourceTree = "<group>"; };
+		F51E3FB0161A65C000D51926 /* StyleConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StyleConfig.h; sourceTree = "<group>"; };
+		F51E3FB1161A65C000D51926 /* StyleConfigLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StyleConfigLoader.h; sourceTree = "<group>"; };
+		F53BD16D163883E7006C7AE1 /* libosmscoutmap-OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libosmscoutmap-OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F53BD16E163883E7006C7AE1 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
+		F53BD171163883E7006C7AE1 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		F53BD172163883E7006C7AE1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		F53BD173163883E7006C7AE1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F51E3F7E161A651F00D51926 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F51E3F85161A651F00D51926 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F53BD16A163883E7006C7AE1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F53BD16F163883E7006C7AE1 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F51E3F76161A651F00D51926 = {
+			isa = PBXGroup;
+			children = (
+				F51E3F86161A651F00D51926 /* libosmscoutmap */,
+				F51E3F83161A651F00D51926 /* Frameworks */,
+				F51E3F82161A651F00D51926 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F51E3F82161A651F00D51926 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F51E3F81161A651F00D51926 /* libosmscoutmap.a */,
+				F53BD16D163883E7006C7AE1 /* libosmscoutmap-OSX.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F51E3F83161A651F00D51926 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F51E3F84161A651F00D51926 /* Foundation.framework */,
+				F53BD16E163883E7006C7AE1 /* Cocoa.framework */,
+				F53BD170163883E7006C7AE1 /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F51E3F86161A651F00D51926 /* libosmscoutmap */ = {
+			isa = PBXGroup;
+			children = (
+				F51E3F93161A654600D51926 /* include */,
+				F51E3F92161A653C00D51926 /* src */,
+			);
+			path = libosmscoutmap;
+			sourceTree = "<group>";
+		};
+		F51E3F92161A653C00D51926 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				F51E3F94161A658300D51926 /* MapPainter.cpp */,
+				F51E3F95161A658300D51926 /* oss */,
+				F51E3F9B161A658300D51926 /* StyleConfig.cpp */,
+				F51E3F9C161A658300D51926 /* StyleConfigLoader.cpp */,
+			);
+			name = src;
+			sourceTree = "<group>";
+		};
+		F51E3F93161A654600D51926 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				F51E3FA2161A65C000D51926 /* osmscout */,
+			);
+			name = include;
+			sourceTree = "<group>";
+		};
+		F51E3F95161A658300D51926 /* oss */ = {
+			isa = PBXGroup;
+			children = (
+				F51E3F99161A658300D51926 /* Parser.cpp */,
+				F51E3F9A161A658300D51926 /* Scanner.cpp */,
+			);
+			name = oss;
+			path = "../../../../libosmscout-map/src/osmscout/oss";
+			sourceTree = "<group>";
+		};
+		F51E3FA2161A65C000D51926 /* osmscout */ = {
+			isa = PBXGroup;
+			children = (
+				F51E3FA3161A65C000D51926 /* MapFeatures.h */,
+				F51E3FA5161A65C000D51926 /* MapPainter.h */,
+				F51E3FA6161A65C000D51926 /* oss */,
+				F51E3FA9161A65C000D51926 /* private */,
+				F51E3FB0161A65C000D51926 /* StyleConfig.h */,
+				F51E3FB1161A65C000D51926 /* StyleConfigLoader.h */,
+			);
+			name = osmscout;
+			path = "../../../../libosmscout-map/include/osmscout";
+			sourceTree = "<group>";
+		};
+		F51E3FA6161A65C000D51926 /* oss */ = {
+			isa = PBXGroup;
+			children = (
+				F51E3FA7161A65C000D51926 /* Parser.h */,
+				F51E3FA8161A65C000D51926 /* Scanner.h */,
+			);
+			path = oss;
+			sourceTree = "<group>";
+		};
+		F51E3FA9161A65C000D51926 /* private */ = {
+			isa = PBXGroup;
+			children = (
+				F51E3FAA161A65C000D51926 /* Config.h */,
+				F51E3FAC161A65C000D51926 /* MapImportExport.h */,
+				F51E3FAD161A65C000D51926 /* Math.h */,
+			);
+			path = private;
+			sourceTree = "<group>";
+		};
+		F53BD170163883E7006C7AE1 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F53BD171163883E7006C7AE1 /* AppKit.framework */,
+				F53BD172163883E7006C7AE1 /* CoreData.framework */,
+				F53BD173163883E7006C7AE1 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		F53BD16B163883E7006C7AE1 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		F51E3F80161A651F00D51926 /* libosmscoutmap */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F51E3F8F161A651F00D51926 /* Build configuration list for PBXNativeTarget "libosmscoutmap" */;
+			buildPhases = (
+				F51E3F7D161A651F00D51926 /* Sources */,
+				F51E3F7E161A651F00D51926 /* Frameworks */,
+				F51E3F7F161A651F00D51926 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = libosmscoutmap;
+			productName = libosmscoutmap;
+			productReference = F51E3F81161A651F00D51926 /* libosmscoutmap.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		F53BD16C163883E7006C7AE1 /* libosmscoutmap-OSX */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F53BD17C163883E7006C7AE1 /* Build configuration list for PBXNativeTarget "libosmscoutmap-OSX" */;
+			buildPhases = (
+				F53BD169163883E7006C7AE1 /* Sources */,
+				F53BD16A163883E7006C7AE1 /* Frameworks */,
+				F53BD16B163883E7006C7AE1 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "libosmscoutmap-OSX";
+			productName = "libosmscoutmap-OSX";
+			productReference = F53BD16D163883E7006C7AE1 /* libosmscoutmap-OSX.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F51E3F78161A651F00D51926 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0450;
+				ORGANIZATIONNAME = "Vladimir Vyskocil";
+			};
+			buildConfigurationList = F51E3F7B161A651F00D51926 /* Build configuration list for PBXProject "libosmscoutmap" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = F51E3F76161A651F00D51926;
+			productRefGroup = F51E3F82161A651F00D51926 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F51E3F80161A651F00D51926 /* libosmscoutmap */,
+				F53BD16C163883E7006C7AE1 /* libosmscoutmap-OSX */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F51E3F7D161A651F00D51926 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F51E3F9D161A658300D51926 /* MapPainter.cpp in Sources */,
+				F51E3F9E161A658300D51926 /* Parser.cpp in Sources */,
+				F51E3F9F161A658300D51926 /* Scanner.cpp in Sources */,
+				F51E3FA0161A658300D51926 /* StyleConfig.cpp in Sources */,
+				F51E3FA1161A658300D51926 /* StyleConfigLoader.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F53BD169163883E7006C7AE1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F53BD1D71638871C006C7AE1 /* MapPainter.cpp in Sources */,
+				F53BD1D81638871F006C7AE1 /* StyleConfig.cpp in Sources */,
+				F53BD1D916388723006C7AE1 /* StyleConfigLoader.cpp in Sources */,
+				F53BD1DA16388729006C7AE1 /* Parser.cpp in Sources */,
+				F53BD1DB1638872E006C7AE1 /* Scanner.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		F51E3F8D161A651F00D51926 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../../../libosmscout/include,
+					"../../../libosmscout-map/include",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		F51E3F8E161A651F00D51926 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../../../libosmscout/include,
+					"../../../libosmscout-map/include",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		F51E3F90161A651F00D51926 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
+				CLANG_CXX_LIBRARY = "compiler-default";
+				DSTROOT = /tmp/libosmscoutmap.dst;
+				EXECUTABLE_PREFIX = "";
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		F51E3F91161A651F00D51926 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
+				CLANG_CXX_LIBRARY = "compiler-default";
+				DSTROOT = /tmp/libosmscoutmap.dst;
+				EXECUTABLE_PREFIX = "";
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		F53BD17A163883E7006C7AE1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				EXECUTABLE_PREFIX = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SYSTEM_APPS_DIR)/Xcode.app/Contents/Developer/Library/Frameworks\"",
+				);
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		F53BD17B163883E7006C7AE1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXECUTABLE_PREFIX = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SYSTEM_APPS_DIR)/Xcode.app/Contents/Developer/Library/Frameworks\"",
+				);
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F51E3F7B161A651F00D51926 /* Build configuration list for PBXProject "libosmscoutmap" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F51E3F8D161A651F00D51926 /* Debug */,
+				F51E3F8E161A651F00D51926 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F51E3F8F161A651F00D51926 /* Build configuration list for PBXNativeTarget "libosmscoutmap" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F51E3F90161A651F00D51926 /* Debug */,
+				F51E3F91161A651F00D51926 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F53BD17C163883E7006C7AE1 /* Build configuration list for PBXNativeTarget "libosmscoutmap-OSX" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F53BD17A163883E7006C7AE1 /* Debug */,
+				F53BD17B163883E7006C7AE1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F51E3F78161A651F00D51926 /* Project object */;
+}
