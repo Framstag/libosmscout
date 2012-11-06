@@ -1103,7 +1103,7 @@ namespace osmscout {
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
       if (offset>=size) {
-        std::cerr << "Cannot read uint16_t beyond file end!" << std::endl;
+        std::cerr << "Cannot read uint16_t number beyond file end!" << std::endl;
         hasError=true;
         return false;
       }
@@ -1119,7 +1119,7 @@ namespace osmscout {
     char buffer;
 
     if (fread(&buffer,1,1,file)!=1) {
-      std::cerr << "Cannot read uint16_t beyond file end!" << std::endl;
+      std::cerr << "Cannot read uint16_t number beyond file end!" << std::endl;
       hasError=true;
       return false;
     }
@@ -1140,7 +1140,7 @@ namespace osmscout {
       }
 
       if (fread(&buffer,1,1,file)!=1) {
-        std::cerr << "Cannot read uint16_t beyond file end!" << std::endl;
+        std::cerr << "Cannot read uint16_t number beyond file end!" << std::endl;
         hasError=true;
         return false;
       }
@@ -1162,7 +1162,7 @@ namespace osmscout {
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
       if (offset>=size) {
-        std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
+        std::cerr << "Cannot read uint32_t number beyond file end!" << std::endl;
         hasError=true;
         return false;
       }
@@ -1178,7 +1178,7 @@ namespace osmscout {
     char buffer;
 
     if (fread(&buffer,1,1,file)!=1) {
-      std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
+      std::cerr << "Cannot read uint32_t number beyond file end!" << std::endl;
       hasError=true;
       return false;
     }
@@ -1199,7 +1199,7 @@ namespace osmscout {
       }
 
       if (fread(&buffer,1,1,file)!=1) {
-        std::cerr << "Cannot read uint32_t beyond file end!" << std::endl;
+        std::cerr << "Cannot read uint32_t number beyond file end!" << std::endl;
         hasError=true;
         return false;
       }
@@ -1222,7 +1222,7 @@ namespace osmscout {
 #if defined(HAVE_MMAP) || defined(__WIN32__) || defined(WIN32)
     if (buffer!=NULL) {
       if (offset>=size) {
-        std::cerr << "Cannot read uint64_t beyond file end!" << std::endl;
+        std::cerr << "Cannot read uint64_t number beyond file end!" << std::endl;
         hasError=true;
         return false;
       }
@@ -1238,7 +1238,7 @@ namespace osmscout {
     char buffer;
 
     if (fread(&buffer,1,1,file)!=1) {
-      std::cerr << "Cannot read uint64_t beyond file end!" << std::endl;
+      std::cerr << "Cannot read uint64_t number beyond file end!" << std::endl;
       hasError=true;
       return false;
     }
@@ -1259,7 +1259,7 @@ namespace osmscout {
       }
 
       if (fread(&buffer,1,1,file)!=1) {
-        std::cerr << "Cannot read uint64_t beyond file end!" << std::endl;
+        std::cerr << "Cannot read uint64_t number beyond file end!" << std::endl;
         hasError=true;
         return false;
       }
