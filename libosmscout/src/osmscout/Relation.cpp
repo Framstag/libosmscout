@@ -184,8 +184,8 @@ namespace osmscout {
 
         for (size_t j=0; j<roles[i].nodes.size(); j++) {
           minId=std::min(minId,roles[i].nodes[j].GetId());
-          minLat=std::min(minLat,(uint32_t)floor((roles[i].nodes[j].GetLat()+90.0)*conversionFactor+0.5));
-          minLon=std::min(minLon,(uint32_t)floor((roles[i].nodes[j].GetLon()+180.0)*conversionFactor+0.5));
+          minLat=std::min(minLat,(uint32_t)round((roles[i].nodes[j].GetLat()+90.0)*conversionFactor));
+          minLon=std::min(minLon,(uint32_t)round((roles[i].nodes[j].GetLon()+180.0)*conversionFactor));
         }
 
         writer.WriteNumber(minId);
@@ -193,8 +193,8 @@ namespace osmscout {
         writer.Write(minLon);
 
         for (size_t j=0; j<roles[i].nodes.size(); j++) {
-          uint32_t latValue=(uint32_t)floor((roles[i].nodes[j].GetLat()+90.0)*conversionFactor+0.5);
-          uint32_t lonValue=(uint32_t)floor((roles[i].nodes[j].GetLon()+180.0)*conversionFactor+0.5);
+          uint32_t latValue=(uint32_t)round((roles[i].nodes[j].GetLat()+90.0)*conversionFactor);
+          uint32_t lonValue=(uint32_t)round((roles[i].nodes[j].GetLon()+180.0)*conversionFactor);
 
           writer.WriteNumber(roles[i].nodes[j].GetId()-minId);
           writer.WriteNumber(latValue-minLat);

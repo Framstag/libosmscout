@@ -20,7 +20,6 @@
 #include <osmscout/Way.h>
 
 #include <cassert>
-#include <limits>
 
 #include <osmscout/private/Math.h>
 
@@ -134,35 +133,31 @@ namespace osmscout {
       return false;
     }
 
-    scanner.ReadNumber(nodeCount);
-
-    if (scanner.HasError()) {
+    if (!scanner.ReadNumber(nodeCount)) {
       return false;
     }
 
-    if (nodeCount>0) {
-      Id       minId;
-      uint32_t minLat;
-      uint32_t minLon;
+    Id       minId;
+    uint32_t minLat;
+    uint32_t minLon;
 
-      scanner.ReadNumber(minId),
-      scanner.Read(minLat);
-      scanner.Read(minLon);
+    scanner.ReadNumber(minId),
+    scanner.Read(minLat);
+    scanner.Read(minLon);
 
-      nodes.resize(nodeCount);
-      for (size_t i=0; i<nodeCount; i++) {
-        Id       id;
-        uint32_t latValue;
-        uint32_t lonValue;
+    nodes.resize(nodeCount);
+    for (size_t i=0; i<nodeCount; i++) {
+      Id       id;
+      uint32_t latValue;
+      uint32_t lonValue;
 
-        scanner.ReadNumber(id);
-        scanner.ReadNumber(latValue);
-        scanner.ReadNumber(lonValue);
+      scanner.ReadNumber(id);
+      scanner.ReadNumber(latValue);
+      scanner.ReadNumber(lonValue);
 
-        nodes[i].Set(minId+id,
-                     (minLat+latValue)/conversionFactor-90.0,
-                     (minLon+lonValue)/conversionFactor-180.0);
-      }
+      nodes[i].Set(minId+id,
+                   (minLat+latValue)/conversionFactor-90.0,
+                   (minLon+lonValue)/conversionFactor-180.0);
     }
 
     return !scanner.HasError();
@@ -170,6 +165,8 @@ namespace osmscout {
 
   bool Way::Write(FileWriter& writer) const
   {
+    assert(!nodes.empty());
+
     writer.WriteNumber(id);
 
     if (!attributes.Write(writer)) {
@@ -178,29 +175,32 @@ namespace osmscout {
 
     writer.WriteNumber((uint32_t)nodes.size());
 
-    if (!nodes.empty()) {
-      Id       minId=std::numeric_limits<Id>::max();
-      uint32_t minLat=std::numeric_limits<uint32_t>::max();
-      uint32_t minLon=std::numeric_limits<uint32_t>::max();
+    Id       minId=nodes[0].GetId();
+    double   minLat=nodes[0].GetLat();
+    double   minLon=nodes[0].GetLon();
+    uint32_t minLatValue;
+    uint32_t minLonValue;
 
-      for (size_t i=0; i<nodes.size(); i++) {
-        minId=std::min(minId,nodes[i].GetId());
-        minLat=std::min(minLat,(uint32_t)floor((nodes[i].GetLat()+90.0)*conversionFactor+0.5));
-        minLon=std::min(minLon,(uint32_t)floor((nodes[i].GetLon()+180.0)*conversionFactor+0.5));
-      }
+    for (size_t i=1; i<nodes.size(); i++) {
+      minId=std::min(minId,nodes[i].GetId());
+      minLat=std::min(minLat,nodes[i].GetLat());
+      minLon=std::min(minLon,nodes[i].GetLon());
+    }
 
-      writer.WriteNumber(minId);
-      writer.Write(minLat);
-      writer.Write(minLon);
+    minLatValue=(uint32_t)round((minLat+90.0)*conversionFactor);
+    minLonValue=(uint32_t)round((minLon+180.0)*conversionFactor);
 
-      for (size_t i=0; i<nodes.size(); i++) {
-        uint32_t latValue=(uint32_t)floor((nodes[i].GetLat()+90.0)*conversionFactor+0.5);
-        uint32_t lonValue=(uint32_t)floor((nodes[i].GetLon()+180.0)*conversionFactor+0.5);
+    writer.WriteNumber(minId);
+    writer.Write(minLatValue);
+    writer.Write(minLonValue);
 
-        writer.WriteNumber(nodes[i].GetId()-minId);
-        writer.WriteNumber(latValue-minLat);
-        writer.WriteNumber(lonValue-minLon);
-      }
+    for (size_t i=0; i<nodes.size(); i++) {
+      uint32_t latValue=(uint32_t)round((nodes[i].GetLat()+90.0)*conversionFactor);
+      uint32_t lonValue=(uint32_t)round((nodes[i].GetLon()+180.0)*conversionFactor);
+
+      writer.WriteNumber(nodes[i].GetId()-minId);
+      writer.WriteNumber(latValue-minLatValue);
+      writer.WriteNumber(lonValue-minLonValue);
     }
 
     return !writer.HasError();
