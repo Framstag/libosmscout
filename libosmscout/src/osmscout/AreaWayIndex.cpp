@@ -62,6 +62,8 @@ namespace osmscout {
 
     scanner.Read(indexEntries);
 
+    std::cout << "Number of entries: " << indexEntries << std::endl;
+
     for (size_t i=0; i<indexEntries; i++) {
       TypeId type;
 
@@ -74,6 +76,8 @@ namespace osmscout {
       scanner.ReadFileOffset(wayTypeData[type].bitmapOffset);
 
       if (wayTypeData[type].bitmapOffset>0) {
+        scanner.Read(wayTypeData[type].dataOffsetBytes);
+
         scanner.ReadNumber(wayTypeData[type].indexLevel);
 
         scanner.ReadNumber(wayTypeData[type].cellXStart);
@@ -100,6 +104,8 @@ namespace osmscout {
       scanner.ReadFileOffset(relTypeData[type].bitmapOffset);
 
       if (relTypeData[type].bitmapOffset>0) {
+        scanner.Read(relTypeData[type].dataOffsetBytes);
+
         scanner.ReadNumber(relTypeData[type].indexLevel);
 
         scanner.ReadNumber(relTypeData[type].cellXStart);
@@ -162,11 +168,14 @@ namespace osmscout {
 
     cellDataOffsets.reserve(maxxc-minxc+1);
 
+    FileOffset dataOffset=typeData.bitmapOffset+
+                          typeData.cellXCount*typeData.cellYCount*(FileOffset)typeData.dataOffsetBytes;
+
     // For each row
     for (size_t y=minyc; y<=maxyc; y++) {
       FileOffset bitmapCellOffset=typeData.bitmapOffset+
                                   ((y-typeData.cellYStart)*typeData.cellXCount+
-                                   minxc-typeData.cellXStart)*(FileOffset)8;
+                                   minxc-typeData.cellXStart)*(FileOffset)typeData.dataOffsetBytes;
 
       cellDataOffsets.clear();
 
@@ -179,7 +188,8 @@ namespace osmscout {
       for (size_t x=minxc; x<=maxxc; x++) {
         FileOffset cellDataOffset;
 
-        if (!scanner.ReadFileOffset(cellDataOffset)) {
+        if (!scanner.ReadFileOffset(cellDataOffset,
+                                    typeData.dataOffsetBytes)) {
           std::cerr << "Cannot read cell data position" << std::endl;
           return false;
         }
@@ -188,7 +198,7 @@ namespace osmscout {
           continue;
         }
 
-        cellDataOffsets.push_back(cellDataOffset);
+        cellDataOffsets.push_back(dataOffset+cellDataOffset);
       }
 
       if (cellDataOffsets.empty()) {

@@ -27,6 +27,7 @@
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
+#include <osmscout/util/Number.h>
 #include <osmscout/util/String.h>
 
 #include <osmscout/private/Math.h>
@@ -135,18 +136,33 @@ namespace osmscout {
                                           const CoordOffsetsMap& typeCellOffsets)
   {
     size_t indexEntries=0;
+    size_t dataSize=0;
+    char   buffer[10];
 
     for (CoordOffsetsMap::const_iterator cell=typeCellOffsets.begin();
          cell!=typeCellOffsets.end();
          ++cell) {
       indexEntries+=cell->second.size();
+
+      dataSize+=EncodeNumber(cell->second.size(),buffer);
+
+      FileOffset previousOffset=0;
+      for (std::list<FileOffset>::const_iterator offset=cell->second.begin();
+           offset!=cell->second.end();
+           ++offset) {
+        FileOffset data=*offset-previousOffset;
+
+        dataSize+=EncodeNumber(data,buffer);
+
+        previousOffset=*offset;
+      }
     }
 
-    progress.Info("Writing bitmap for "+
-                  typeInfo.GetName()+" ("+NumberToString(typeInfo.GetId())+"), "+
-                  NumberToString(typeCellOffsets.size())+" cells, "+
-                  NumberToString(indexEntries)+" entries, "+
-                  ByteSizeToString(1.0*sizeof(FileOffset)*typeData.cellXCount*typeData.cellYCount)+" bitmap");
+    uint8_t dataOffsetBytes=BytesNeeededToAddressFileData(dataSize);
+
+    progress.Info("Writing map for "+
+                  typeInfo.GetName()+" , "+
+                  ByteSizeToString(1.0*dataOffsetBytes*typeData.cellXCount*typeData.cellYCount+dataSize));
 
     FileOffset bitmapOffset;
 
@@ -163,6 +179,7 @@ namespace osmscout {
     }
 
     writer.WriteFileOffset(bitmapOffset);
+    writer.Write(dataOffsetBytes);
 
     if (!writer.SetPos(bitmapOffset)) {
       progress.Error("Cannot go to type index start position in file");
@@ -175,7 +192,14 @@ namespace osmscout {
     for (size_t i=0; i<typeData.cellXCount*typeData.cellYCount; i++) {
       FileOffset cellOffset=0;
 
-      writer.WriteFileOffset(cellOffset);
+      writer.WriteFileOffset(cellOffset,dataOffsetBytes);
+    }
+
+    FileOffset dataStartOffset;
+
+    if (!writer.GetPos(dataStartOffset)) {
+      progress.Error("Cannot get start of data section after bitmap");
+      return false;
     }
 
     // Now write the list of offsets of objects for every cell with content
@@ -184,7 +208,7 @@ namespace osmscout {
          ++cell) {
       FileOffset bitmapCellOffset=bitmapOffset+
                                   ((cell->first.y-typeData.cellYStart)*typeData.cellXCount+
-                                   cell->first.x-typeData.cellXStart)*(FileOffset)8;
+                                    cell->first.x-typeData.cellXStart)*(FileOffset)dataOffsetBytes;
       FileOffset previousOffset=0;
       FileOffset cellOffset;
 
@@ -202,7 +226,7 @@ namespace osmscout {
 
       assert(cellOffset>bitmapCellOffset);
 
-      writer.WriteFileOffset(cellOffset);
+      writer.WriteFileOffset(cellOffset-dataStartOffset,dataOffsetBytes);
 
       if (!writer.SetPos(cellOffset)) {
         progress.Error("Cannot go back to cell start position in file");
@@ -496,6 +520,7 @@ namespace osmscout {
            wayTypeData[i].HasEntries()) ||
           (typeConfig.GetTypeInfo(i).CanBeRelation() &&
            relTypeData[i].HasEntries())) {
+        uint8_t    dataOffsetBytes=0;
         FileOffset bitmapOffset=0;
 
         writer.WriteNumber(typeConfig.GetTypeInfo(i).GetId());
@@ -505,6 +530,7 @@ namespace osmscout {
         writer.WriteFileOffset(bitmapOffset);
 
         if (wayTypeData[i].HasEntries()) {
+          writer.Write(dataOffsetBytes);
           writer.WriteNumber(wayTypeData[i].indexLevel);
           writer.WriteNumber(wayTypeData[i].cellXStart);
           writer.WriteNumber(wayTypeData[i].cellXEnd);
@@ -517,6 +543,7 @@ namespace osmscout {
         writer.WriteFileOffset(bitmapOffset);
 
         if (relTypeData[i].HasEntries()) {
+          writer.Write(dataOffsetBytes);
           writer.WriteNumber(relTypeData[i].indexLevel);
           writer.WriteNumber(relTypeData[i].cellXStart);
           writer.WriteNumber(relTypeData[i].cellXEnd);

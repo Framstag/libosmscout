@@ -80,7 +80,9 @@ namespace osmscout
       scanner.Read(data.cellXEnd);
       scanner.Read(data.cellYStart);
       scanner.Read(data.cellYEnd);
+
       scanner.Read(data.bitmapOffset);
+      scanner.Read(data.dataOffsetBytes);
 
       data.cellXCount=data.cellXEnd-data.cellXStart+1;
       data.cellYCount=data.cellYEnd-data.cellYStart+1;
@@ -155,11 +157,14 @@ namespace osmscout
 
     cellDataOffsets.reserve(maxxc-minxc+1);
 
+    FileOffset dataOffset=typeData.bitmapOffset+
+                          typeData.cellXCount*typeData.cellYCount*(FileOffset)typeData.dataOffsetBytes;
+
     // For each row
     for (size_t y=minyc; y<=maxyc; y++) {
       FileOffset cellIndexOffset=typeData.bitmapOffset+
                                  ((y-typeData.cellYStart)*typeData.cellXCount+
-                                  minxc-typeData.cellXStart)*sizeof(FileOffset);
+                                  minxc-typeData.cellXStart)*typeData.dataOffsetBytes;
 
       cellDataOffsets.clear();
 
@@ -172,7 +177,8 @@ namespace osmscout
       for (size_t x=minxc; x<=maxxc; x++) {
         FileOffset cellDataOffset;
 
-        if (!scanner.ReadFileOffset(cellDataOffset)) {
+        if (!scanner.ReadFileOffset(cellDataOffset,
+                                    typeData.dataOffsetBytes)) {
           std::cerr << "Cannot read cell data position" << std::endl;
           return false;
         }
@@ -181,7 +187,7 @@ namespace osmscout
           continue;
         }
 
-        cellDataOffsets.push_back(cellDataOffset);
+        cellDataOffsets.push_back(dataOffset+cellDataOffset);
       }
 
       if (cellDataOffsets.empty()) {

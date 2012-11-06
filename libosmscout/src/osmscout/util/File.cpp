@@ -115,4 +115,20 @@ namespace osmscout {
     return result;
 #endif
   }
+
+  uint8_t BytesNeeededToAddressFileData(FileOffset size)
+  {
+    uint8_t bytes=0;
+
+    while (size>0) {
+      size=size/256;
+      bytes++;
+    }
+
+    if (bytes==0) {
+      bytes=1;
+    }
+
+    return bytes;
+  }
 }

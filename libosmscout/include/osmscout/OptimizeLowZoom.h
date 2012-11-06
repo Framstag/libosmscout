@@ -38,6 +38,7 @@ namespace osmscout {
     {
       uint32_t   indexLevel;   //! magnification level of index
       FileOffset bitmapOffset; //! Position in file where the offset of the bitmap is written
+      uint8_t    dataOffsetBytes;
 
       uint32_t   cellXStart;
       uint32_t   cellXEnd;

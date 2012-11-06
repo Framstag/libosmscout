@@ -53,6 +53,7 @@ namespace osmscout {
       uint32_t   cellYCount;
 
       FileOffset bitmapOffset; //! Position in file where the offset of the bitmap is written
+      uint8_t    dataOffsetBytes; //! Number of bytes per entry in bitmap
 
       TypeData();
 
@@ -70,8 +71,7 @@ namespace osmscout {
     void WriteHeader(FileWriter& writer,
                      const std::set<TypeId>& types,
                      const std::vector<TypeData>& typesData,
-                     size_t optimizeMaxMap,
-                     std::map<TypeId,FileOffset>& typeOffsetMap);
+                     size_t optimizeMaxMap);
 
     bool GetWaysToOptimize(const ImportParameter& parameter,
                            Progress& progress,

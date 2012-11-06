@@ -24,6 +24,8 @@
 
 #include <osmscout/private/CoreImportExport.h>
 
+#include <osmscout/Types.h>
+
 namespace osmscout {
 
   /**
@@ -48,6 +50,11 @@ namespace osmscout {
    * delimiter if necessary.
    */
   extern OSMSCOUT_API std::string AppendFileToDir(const std::string& dir, const std::string& file);
+
+  /**
+   * Number of bytes needed to address the given size.
+   */
+  extern OSMSCOUT_API uint8_t BytesNeeededToAddressFileData(FileOffset size);
 }
 
 #endif
