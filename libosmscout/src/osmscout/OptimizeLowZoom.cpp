@@ -153,20 +153,16 @@ namespace osmscout
     minyc=std::max(minyc,typeData.cellYStart);
     maxyc=std::min(maxyc,typeData.cellYEnd);
 
-    std::vector<FileOffset> cellDataOffsets;
-
-    cellDataOffsets.reserve(maxxc-minxc+1);
-
     FileOffset dataOffset=typeData.bitmapOffset+
                           typeData.cellXCount*typeData.cellYCount*(FileOffset)typeData.dataOffsetBytes;
 
     // For each row
     for (size_t y=minyc; y<=maxyc; y++) {
+      FileOffset initialCellDataOffset=0;
+      size_t     cellDataOffsetCount=0;
       FileOffset cellIndexOffset=typeData.bitmapOffset+
                                  ((y-typeData.cellYStart)*typeData.cellXCount+
                                   minxc-typeData.cellXStart)*typeData.dataOffsetBytes;
-
-      cellDataOffsets.clear();
 
       if (!scanner.SetPos(cellIndexOffset)) {
         std::cerr << "Cannot go to type cell index position " << cellIndexOffset << std::endl;
@@ -187,24 +183,26 @@ namespace osmscout
           continue;
         }
 
-        cellDataOffsets.push_back(dataOffset+cellDataOffset);
+        if (initialCellDataOffset==0) {
+          initialCellDataOffset=dataOffset+cellDataOffset;
+        }
+
+        cellDataOffsetCount++;
       }
 
-      if (cellDataOffsets.empty()) {
+      if (cellDataOffsetCount==0) {
         continue;
       }
 
-      FileOffset offset=cellDataOffsets.front();
+      assert(initialCellDataOffset>=cellIndexOffset);
 
-      assert(offset>cellIndexOffset);
-
-      if (!scanner.SetPos(offset)) {
-        std::cerr << "Cannot go to cell data position " << offset << std::endl;
+      if (!scanner.SetPos(initialCellDataOffset)) {
+        std::cerr << "Cannot go to cell data position " << initialCellDataOffset << std::endl;
         return false;
       }
 
       // For each data cell in row found
-      for (size_t i=0; i<cellDataOffsets.size(); i++) {
+      for (size_t i=0; i<cellDataOffsetCount; i++) {
         uint32_t   dataCount;
         FileOffset lastOffset=0;
 
