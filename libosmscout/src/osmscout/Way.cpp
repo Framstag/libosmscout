@@ -195,12 +195,12 @@ namespace osmscout {
     writer.Write(minLonValue);
 
     for (size_t i=0; i<nodes.size(); i++) {
-      uint32_t latValue=(uint32_t)round((nodes[i].GetLat()+90.0)*conversionFactor);
-      uint32_t lonValue=(uint32_t)round((nodes[i].GetLon()+180.0)*conversionFactor);
+      uint32_t latValue=(uint32_t)round((nodes[i].GetLat()-minLat)*conversionFactor);
+      uint32_t lonValue=(uint32_t)round((nodes[i].GetLon()-minLon)*conversionFactor);
 
       writer.WriteNumber(nodes[i].GetId()-minId);
-      writer.WriteNumber(latValue-minLatValue);
-      writer.WriteNumber(lonValue-minLonValue);
+      writer.WriteNumber(latValue);
+      writer.WriteNumber(lonValue);
     }
 
     return !writer.HasError();

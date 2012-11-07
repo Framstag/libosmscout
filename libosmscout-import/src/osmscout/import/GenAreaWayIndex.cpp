@@ -192,7 +192,8 @@ namespace osmscout {
     for (size_t i=0; i<typeData.cellXCount*typeData.cellYCount; i++) {
       FileOffset cellOffset=0;
 
-      writer.WriteFileOffset(cellOffset,dataOffsetBytes);
+      writer.WriteFileOffset(cellOffset,
+                             dataOffsetBytes);
     }
 
     FileOffset dataStartOffset;
