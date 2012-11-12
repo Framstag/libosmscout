@@ -286,24 +286,22 @@ namespace osmscout {
       double                  maxLon;
       size_t                  transStart;      //! Start of coordinates in transformation buffer
       size_t                  transEnd;        //! End of coordinates in transformation buffer
-      std::list<PolyData>     clippings;       // Clipping polygons to be used during drawing of this area
+      std::list<PolyData>     clippings;       //! Clipping polygons to be used during drawing of this area
     };
 
     struct OSMSCOUT_API LabelData
     {
-      bool              draw;     // Draw this label
-      bool              overlay;  // The Label has a alpha channel and acts as overlay text
-      bool              mark;     // Labels can temporary marked during label coverage conflict resolution
-      double            x;        // Coordinate of the left, top edge of the text
-      double            y;        // Coordinate of the left, top edge of the text
-      double            bx1;      // Dimensions of bounding box
-      double            by1;      // Dimensions of bounding box
-      double            bx2;      // Dimensions of bounding box
-      double            by2;      // Dimensions of bounding box
-      double            alpha;    // Alpha value of the label
-      double            fontSize; // Font size to be used
-      const LabelStyle* style;    // Style for drawing
-      std::string       text;     // The label text
+      bool              mark;     //! Labels can temporary get marked during label coverage conflict resolution
+      double            x;        //! Coordinate of the left, top edge of the text
+      double            y;        //! Coordinate of the left, top edge of the text
+      double            bx1;      //! Dimensions of bounding box
+      double            by1;      //! Dimensions of bounding box
+      double            bx2;      //! Dimensions of bounding box
+      double            by2;      //! Dimensions of bounding box
+      double            alpha;    //! Alpha value of the label
+      double            fontSize; //! Font size to be used
+      const LabelStyle* style;    //! Style for drawing
+      std::string       text;     //! The label text
     };
 
   protected:
@@ -330,7 +328,8 @@ namespace osmscout {
       Temporary data structures for intelligent label positioning
       */
     //@{
-    std::vector<LabelData> labels;
+    std::list<LabelData>   labels;
+    std::list<LabelData>   overlayLabels;
     std::vector<ScanCell>  wayScanlines;
     //@}
 
@@ -373,6 +372,25 @@ namespace osmscout {
                                       const LabelStyle& style,
                                       double& fontSize,
                                       double& alpha);
+
+    void ClearLabelMarks(std::list<LabelData>& labels);
+    void RemoveMarkedLabels(std::list<LabelData>& labels);
+    bool MarkAllInBoundingBox(double bx1,
+                              double bx2,
+                              double by1,
+                              double by2,
+                              const LabelStyle& style,
+                              double plateLabelSpace,
+                              double labelSpace,
+                              std::list<LabelData>& labels);
+    bool MarkCloseLabelsWithSameText(double bx1,
+                                     double bx2,
+                                     double by1,
+                                     double by2,
+                                     const LabelStyle& style,
+                                     double sameLabelSpace,
+                                     const std::string& text,
+                                     std::list<LabelData>& labels);
 
     /**
       Private draw algorithm implementation routines.

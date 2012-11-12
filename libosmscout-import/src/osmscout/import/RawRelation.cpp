@@ -99,9 +99,9 @@ namespace osmscout {
     writer.WriteNumber((uint32_t)members.size());
 
     if (!members.empty()) {
-      Id minId=std::numeric_limits<Id>::max();
+      Id minId=members[0].id;
 
-      for (size_t i=0; i<members.size(); i++) {
+      for (size_t i=1; i<members.size(); i++) {
         minId=std::min(minId,members[i].id);
       }
 

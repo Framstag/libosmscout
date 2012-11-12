@@ -42,6 +42,7 @@ namespace osmscout {
     {
       uint32_t   indexLevel;
 
+      uint8_t    dataOffsetBytes;
       FileOffset bitmapOffset;
 
       uint32_t   cellXStart;

@@ -28,6 +28,7 @@
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/Number.h>
 #include <osmscout/util/String.h>
 
 #include <osmscout/private/Math.h>
@@ -251,12 +252,14 @@ namespace osmscout {
       if (typeConfig.GetTypeInfo(i).CanBeNode() &&
           nodeTypeData[i].HasEntries()) {
         FileOffset bitmapOffset=0;
+        uint8_t    dataOffsetBytes=0;
 
         writer.WriteNumber(typeConfig.GetTypeInfo(i).GetId());
 
         writer.GetPos(nodeTypeData[i].indexOffset);
 
         writer.WriteFileOffset(bitmapOffset);
+        writer.Write(dataOffsetBytes);
 
         writer.WriteNumber(nodeTypeData[i].indexLevel);
         writer.WriteNumber(nodeTypeData[i].cellXStart);
@@ -332,18 +335,36 @@ namespace osmscout {
       for (std::set<TypeId>::const_iterator type=indexTypes.begin();
            type!=indexTypes.end();
            ++type) {
-        size_t   indexEntries=0;
+        size_t indexEntries=0;
+        size_t dataSize=0;
+        char   buffer[10];
+
         for (std::map<Coord,std::list<FileOffset> >::const_iterator cell=typeCellOffsets[*type].begin();
              cell!=typeCellOffsets[*type].end();
              ++cell) {
           indexEntries+=cell->second.size();
+
+          dataSize+=EncodeNumber(cell->second.size(),buffer);
+
+          FileOffset previousOffset=0;
+          for (std::list<FileOffset>::const_iterator offset=cell->second.begin();
+               offset!=cell->second.end();
+               ++offset) {
+            FileOffset data=*offset-previousOffset;
+
+            dataSize+=EncodeNumber(data,buffer);
+
+            previousOffset=*offset;
+          }
         }
 
-        progress.Info("Writing bitmap for "+
-                      typeConfig.GetTypeInfo(*type).GetName()+" ("+NumberToString(*type)+"), "+
+        uint8_t dataOffsetBytes=BytesNeeededToAddressFileData(dataSize);
+
+        progress.Info("Writing map for "+
+                      typeConfig.GetTypeInfo(*type).GetName()+", "+
                       NumberToString(typeCellOffsets[*type].size())+" cells, "+
                       NumberToString(indexEntries)+" entries, "+
-                      ByteSizeToString(1.0*sizeof(FileOffset)*nodeTypeData[*type].cellXCount*nodeTypeData[*type].cellYCount)+" bitmap");
+                      ByteSizeToString(1.0*dataOffsetBytes*nodeTypeData[*type].cellXCount*nodeTypeData[*type].cellYCount));
 
         FileOffset bitmapOffset;
 
@@ -360,6 +381,7 @@ namespace osmscout {
         }
 
         writer.WriteFileOffset(bitmapOffset);
+        writer.Write(dataOffsetBytes);
 
         if (!writer.SetPos(bitmapOffset)) {
           progress.Error("Cannot go to type index start position in file");
@@ -372,7 +394,15 @@ namespace osmscout {
         for (size_t i=0; i<nodeTypeData[*type].cellXCount*nodeTypeData[*type].cellYCount; i++) {
           FileOffset cellOffset=0;
 
-          writer.WriteFileOffset(cellOffset);
+          writer.WriteFileOffset(cellOffset,
+                                 dataOffsetBytes);
+        }
+
+        FileOffset dataStartOffset;
+
+        if (!writer.GetPos(dataStartOffset)) {
+          progress.Error("Cannot get start of data section after bitmap");
+          return false;
         }
 
         // Now write the list of offsets of objects for every cell with content
@@ -381,7 +411,7 @@ namespace osmscout {
              ++cell) {
           FileOffset bitmapCellOffset=bitmapOffset+
                                       ((cell->first.y-nodeTypeData[*type].cellYStart)*nodeTypeData[*type].cellXCount+
-                                       cell->first.x-nodeTypeData[*type].cellXStart)*sizeof(FileOffset);
+                                       cell->first.x-nodeTypeData[*type].cellXStart)*dataOffsetBytes;
           FileOffset previousOffset=0;
           FileOffset cellOffset;
 
@@ -395,7 +425,8 @@ namespace osmscout {
             return false;
           }
 
-          writer.WriteFileOffset(cellOffset);
+          writer.WriteFileOffset(cellOffset-dataStartOffset,
+                                 dataOffsetBytes);
 
           if (!writer.SetPos(cellOffset)) {
             progress.Error("Cannot go back to cell start position in file");

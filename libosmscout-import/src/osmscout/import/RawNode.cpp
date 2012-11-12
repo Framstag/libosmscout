@@ -83,8 +83,8 @@ namespace osmscout {
 
   bool RawNode::Write(FileWriter& writer) const
   {
-    uint32_t latValue=(uint32_t)floor((lat+90.0)*conversionFactor+0.5);
-    uint32_t lonValue=(uint32_t)floor((lon+180.0)*conversionFactor+0.5);
+    uint32_t latValue=(uint32_t)round((lat+90.0)*conversionFactor);
+    uint32_t lonValue=(uint32_t)round((lon+180.0)*conversionFactor);
 
     writer.WriteNumber(id);
 

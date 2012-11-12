@@ -276,7 +276,7 @@ namespace osmscout {
 
     yMax = fmax(y1,y2);
     yMin = fmin(y1,y2);
-      
+
     xMin-=pixelOffset;
     yMin-=pixelOffset;
 
@@ -307,6 +307,127 @@ namespace osmscout {
         }
       }
     }
+  }
+
+  void MapPainter::ClearLabelMarks(std::list<LabelData>& labels)
+  {
+    for (std::list<LabelData>::iterator label=labels.begin();
+         label!=labels.end();
+         ++label) {
+      label->mark=false;
+    }
+  }
+
+  void MapPainter::RemoveMarkedLabels(std::list<LabelData>& labels)
+  {
+    std::list<LabelData>::iterator label=labels.begin();
+
+    while (label!=labels.end()) {
+      if (label->mark) {
+        label=labels.erase(label);
+      }
+      else {
+        ++label;
+      }
+    }
+  }
+
+  bool MapPainter::MarkAllInBoundingBox(double bx1,
+                                        double bx2,
+                                        double by1,
+                                        double by2,
+                                        const LabelStyle& style,
+                                        double plateLabelSpace,
+                                        double labelSpace,
+                                        std::list<LabelData>& labels)
+  {
+    for (std::list<LabelData>::iterator l=labels.begin();
+        l!=labels.end();
+        ++l) {
+      LabelData& label=*l;
+
+      // We only look at labels, that are not already marked.
+      if (label.mark) {
+        continue;
+      }
+
+      double hx1;
+      double hx2;
+      double hy1;
+      double hy2;
+
+      if (style.GetStyle()==LabelStyle::plate &&
+          label.style->GetStyle()==LabelStyle::plate) {
+        hx1=bx1-plateLabelSpace;
+        hx2=bx2+plateLabelSpace;
+        hy1=by1-plateLabelSpace;
+        hy2=by2+plateLabelSpace;
+      }
+      else {
+        hx1=bx1-labelSpace;
+        hx2=bx2+labelSpace;
+        hy1=by1-labelSpace;
+        hy2=by2+labelSpace;
+      }
+
+      // Check for labels that intersect (including space). If our priority is lower,
+      // we stop processing, else we mark the other label (as to be deleted)
+      if (!(hx1>label.bx2 ||
+            hx2<label.bx1 ||
+            hy1>label.by2 ||
+            hy2<label.by1)) {
+        if (label.style->GetPriority()<=style.GetPriority()) {
+          return false;
+        }
+
+        label.mark=true;
+      }
+    }
+
+    return true;
+  }
+
+  bool MapPainter::MarkCloseLabelsWithSameText(double bx1,
+                                               double bx2,
+                                               double by1,
+                                               double by2,
+                                               const LabelStyle& style,
+                                               double sameLabelSpace,
+                                               const std::string& text,
+                                               std::list<LabelData>& labels)
+  {
+    for (std::list<LabelData>::iterator l=labels.begin();
+        l!=labels.end();
+        ++l) {
+      LabelData& label=*l;
+
+      if (label.mark) {
+        continue;
+      }
+
+      if (style.GetStyle()==label.style->GetStyle() &&
+          style.GetPriority()==label.style->GetPriority()) {
+        double hx1=bx1-sameLabelSpace;
+        double hx2=bx2+sameLabelSpace;
+        double hy1=by1-sameLabelSpace;
+        double hy2=by2+sameLabelSpace;
+
+        if (!(hx1>label.bx2 ||
+              hx2<label.bx1 ||
+              hy1>label.by2 ||
+              hy2<label.by1)) {
+          if (text==label.text) {
+            // TODO: It may be possible that the labels belong to the same "thing".
+            // perhaps we should not just draw one or the other, but also change
+            // final position of the label (but this would require more complex
+            // collision handling and perhaps processing labels in different order)?
+            return false;
+          }
+        }
+      }
+    }
+
+    return true;
   }
 
   void MapPainter::Transform(const Projection& projection,
@@ -593,8 +714,6 @@ namespace osmscout {
 
       LabelData labelData;
 
-      labelData.draw=true;
-      labelData.overlay=true;
       labelData.x=px;
       labelData.y=py;
       labelData.alpha=0.5;
@@ -658,77 +777,53 @@ namespace osmscout {
                                  fontSize,
                                  a);
 
-    // Something is a overlay, if its alpha is <0.8
+    // Something is an overlay, if its alpha is <0.8
     bool overlay=a<0.8;
 
-    // Reset all marks on labels, if something is solid, because we needs marks
+    // Reset all marks on labels, because we needs marks
     // for our internal collision handling
-    if (!overlay) {
-      for (size_t i=0; i<labels.size(); i++) {
-        labels[i].mark=false;
-      }
+    if (overlay) {
+      ClearLabelMarks(overlayLabels);
+    }
+    else {
+      ClearLabelMarks(labels);
     }
 
-    if (!overlay) {
-      // First rough minimum bounding box, estimated without calculating text dimensions (since this is expensive).
-      double bx1;
-      double bx2;
-      double by1;
-      double by2;
+    // First rough minimum bounding box, estimated without calculating text dimensions (since this is expensive).
+    double bx1;
+    double bx2;
+    double by1;
+    double by2;
 
-      if (style.GetStyle()==LabelStyle::plate) {
-        bx1=x-1-4;
-        bx2=x+1+4;
-        by1=y-fontSize/2-1-4;
-        by2=y+fontSize/2+1+4;
+    if (style.GetStyle()==LabelStyle::plate) {
+      bx1=x-1-4;
+      bx2=x+1+4;
+      by1=y-fontSize/2-1-4;
+      by2=y+fontSize/2+1+4;
+    }
+    else {
+      bx1=x;
+      bx2=x;
+      by1=y-fontSize/2;
+      by2=y+fontSize/2;
+    }
+
+    if (overlay) {
+      if (!MarkAllInBoundingBox(bx1,bx2,by1,by2,
+                                style,
+                                plateLabelSpace,
+                                labelSpace,
+                                overlayLabels)) {
+        return false;
       }
-      else {
-        bx1=x;
-        bx2=x;
-        by1=y-fontSize/2;
-        by2=y+fontSize/2;
-      }
-
-      for (std::vector<LabelData>::iterator l=labels.begin();
-          l!=labels.end();
-          ++l) {
-        LabelData& label=*l;
-
-        if (label.overlay || !label.draw || label.mark) {
-          continue;
-        }
-
-        double hx1;
-        double hx2;
-        double hy1;
-        double hy2;
-
-        if (style.GetStyle()==LabelStyle::plate &&
-            label.style->GetStyle()==LabelStyle::plate) {
-          hx1=bx1-plateLabelSpace;
-          hx2=bx2+plateLabelSpace;
-          hy1=by1-plateLabelSpace;
-          hy2=by2+plateLabelSpace;
-        }
-        else {
-          hx1=bx1-labelSpace;
-          hx2=bx2+labelSpace;
-          hy1=by1-labelSpace;
-          hy2=by2+labelSpace;
-        }
-
-        // Check for labels that intersect (including space). If our priority is lower,
-        // we stop processing, else we mark the other label (as to be deleted)
-        if (!(hx1>label.bx2 ||
-              hx2<label.bx1 ||
-              hy1>label.by2 ||
-              hy2<label.by1)) {
-          if (label.style->GetPriority()<=style.GetPriority()) {
-            return false;
-          }
-
-          label.mark=true;
-        }
+    }
+    else {
+      if (!MarkAllInBoundingBox(bx1,bx2,by1,by2,
+                                style,
+                                plateLabelSpace,
+                                labelSpace,
+                                labels)) {
+        return false;
       }
     }
 
@@ -741,11 +836,6 @@ namespace osmscout {
                      fontSize,
                      text,
                      xOff,yOff,width,height);
-
-    double bx1;
-    double bx2;
-    double by1;
-    double by2;
 
     if (style.GetStyle()==LabelStyle::plate) {
       bx1=x-width/2-4;
@@ -768,109 +858,68 @@ namespace osmscout {
       return false;
     }
 
-    // again for non-overlay labels we check for intersection with an existing label
-    // but now with the complete bounding box
+    if (overlay) {
+      if (!MarkAllInBoundingBox(bx1,bx2,by1,by2,
+                                style,
+                                plateLabelSpace,
+                                labelSpace,
+                                overlayLabels)) {
+        return false;
+      }
 
-    if (!overlay) {
-      for (std::vector<LabelData>::iterator l=labels.begin();
-          l!=labels.end();
-          ++l) {
-        LabelData& label=*l;
-
-        if (label.overlay || !label.draw || label.mark) {
-          continue;
-        }
-
-        double hx1;
-        double hx2;
-        double hy1;
-        double hy2;
-
-        if (style.GetStyle()==LabelStyle::plate &&
-            label.style->GetStyle()==LabelStyle::plate) {
-          hx1=bx1-plateLabelSpace;
-          hx2=bx2+plateLabelSpace;
-          hy1=by1-plateLabelSpace;
-          hy2=by2+plateLabelSpace;
-        }
-        else {
-          hx1=bx1-labelSpace;
-          hx2=bx2+labelSpace;
-          hy1=by1-labelSpace;
-          hy2=by2+labelSpace;
-        }
-
-        if (!(hx1>label.bx2 ||
-              hx2<label.bx1 ||
-              hy1>label.by2 ||
-              hy2<label.by1)) {
-          if (label.style->GetPriority()<=style.GetPriority()) {
-            return false;
-          }
-
-          label.mark=true;
+      // As an optional final processing step, we check if labels
+      // with the same value (text) have at least sameLabelSpace distance.
+      if (sameLabelSpace>plateLabelSpace) {
+        if (!MarkCloseLabelsWithSameText(bx1,
+                                         bx2,
+                                         by1,
+                                         by2,
+                                         style,
+                                         sameLabelSpace,
+                                         text,
+                                         overlayLabels)) {
+          return false;
         }
       }
+
+      // Remove every marked (aka "in conflict" or "intersecting but of lower
+      // priority") label.
+      RemoveMarkedLabels(overlayLabels);
     }
+    else {
+      if (!MarkAllInBoundingBox(bx1,bx2,by1,by2,
+                                style,
+                                plateLabelSpace,
+                                labelSpace,
+                                labels)) {
+        return false;
+      }
 
-    // As an optional final processing step, we check if labels
-    // with the same value (text) have at least sameLabelSpace distance.
-    if (!overlay &&
-        sameLabelSpace>plateLabelSpace) {
-      for (std::vector<LabelData>::iterator l=labels.begin();
-          l!=labels.end();
-          ++l) {
-        LabelData& label=*l;
-
-        if (label.overlay || !label.draw || label.mark) {
-          continue;
-        }
-
-        if (style.GetStyle()==label.style->GetStyle() &&
-            style.GetPriority()==label.style->GetPriority()) {
-          double hx1=bx1-sameLabelSpace;
-          double hx2=bx2+sameLabelSpace;
-          double hy1=by1-sameLabelSpace;
-          double hy2=by2+sameLabelSpace;
-
-          if (!(hx1>label.bx2 ||
-                hx2<label.bx1 ||
-                hy1>label.by2 ||
-                hy2<label.by1)) {
-            if (text==label.text) {
-              // TODO: It may be possible that the labels belong to the same "thing".
-              // perhaps we should not just draw one or the other, but also change
-              // final position of the label (but this would require more complex
-              // collision handling and perhaps processing labels in different order)?
-              return false;
-            }
-          }
+      // As an optional final processing step, we check if labels
+      // with the same value (text) have at least sameLabelSpace distance.
+      if (sameLabelSpace>plateLabelSpace) {
+        if (!MarkCloseLabelsWithSameText(bx1,
+                                         bx2,
+                                         by1,
+                                         by2,
+                                         style,
+                                         sameLabelSpace,
+                                         text,
+                                         labels)) {
+          return false;
         }
       }
+
+      // Remove every marked (aka "in conflict" or "intersecting but of lower
+      // priority") label.
+      RemoveMarkedLabels(labels);
     }
 
-    if (!overlay) {
-      // Set everything else to draw=false, if we marked it before as "intersecting but of lower
-      // priority". We also add our own (future) index to all the cells we intersect with
-
-      for (std::vector<LabelData>::iterator l=labels.begin();
-           l!=labels.end();
-           ++l) {
-        LabelData& label=*l;
-
-        if (label.mark) {
-          label.mark=false;
-          label.draw=false;
-        }
-      }
-    }
 
     // We passed the test, lets put ourself into the "draw label" job list
 
     LabelData label;
 
-    label.draw=true;
-    label.overlay=overlay;
     label.x=x-width/2;
     label.y=y-height/2;
     label.bx1=bx1;
@@ -882,7 +931,12 @@ namespace osmscout {
     label.style=&style;
     label.text=text;
 
-    labels.push_back(label);
+    if (overlay) {
+      overlayLabels.push_back(label);
+    }
+    else {
+      labels.push_back(label);
+    }
 
     return true;
   }
@@ -1433,23 +1487,20 @@ namespace osmscout {
     // Draw normal
     //
 
-    for (size_t i=0; i<labels.size(); i++) {
-      if (!labels[i].draw ||
-          labels[i].overlay) {
-        continue;
-      }
-
-      if (labels[i].style->GetStyle()==LabelStyle::normal ||
-          labels[i].style->GetStyle()==LabelStyle::emphasize) {
+    for (std::list<LabelData>::const_iterator label=labels.begin();
+         label!=labels.end();
+         ++label) {
+      if (label->style->GetStyle()==LabelStyle::normal ||
+          label->style->GetStyle()==LabelStyle::emphasize) {
         DrawLabel(projection,
                   parameter,
-                  labels[i]);
+                  *label);
         labelsDrawn++;
       }
-      else if (labels[i].style->GetStyle()==LabelStyle::plate) {
+      else if (label->style->GetStyle()==LabelStyle::plate) {
         DrawPlateLabel(projection,
                        parameter,
-                       labels[i]);
+                       *label);
         labelsDrawn++;
       }
     }
@@ -1458,23 +1509,20 @@ namespace osmscout {
     // Draw overlays
     //
 
-    for (size_t i=0; i<labels.size(); i++) {
-      if (!labels[i].draw ||
-          !labels[i].overlay) {
-        continue;
-      }
-
-      if (labels[i].style->GetStyle()==LabelStyle::normal ||
-          labels[i].style->GetStyle()==LabelStyle::emphasize) {
+    for (std::list<LabelData>::const_iterator label=overlayLabels.begin();
+         label!=overlayLabels.end();
+         ++label) {
+      if (label->style->GetStyle()==LabelStyle::normal ||
+          label->style->GetStyle()==LabelStyle::emphasize) {
         DrawLabel(projection,
                   parameter,
-                  labels[i]);
+                  *label);
         labelsDrawn++;
       }
-      else if (labels[i].style->GetStyle()==LabelStyle::plate) {
+      else if (label->style->GetStyle()==LabelStyle::plate) {
         DrawPlateLabel(projection,
                        parameter,
-                       labels[i]);
+                       *label);
         labelsDrawn++;
       }
     }
@@ -1916,6 +1964,7 @@ namespace osmscout {
     labelsDrawn=0;
 
     labels.clear();
+    overlayLabels.clear();
 
     transBuffer.Reset();
 
@@ -1928,7 +1977,7 @@ namespace osmscout {
       std::cout << projection.GetLatMin() <<",";
       std::cout << projection.GetLonMin() << " - ";
       std::cout << projection.GetLatMax() << ",";
-      std::cout << projection.GetLonMax() << "]  with mag. ";
+      std::cout << projection.GetLonMax() << "] with mag. ";
       std::cout << projection.GetMagnification() << "x" << "/" << log(projection.GetMagnification())/log(2.0);
       std::cout << " area " << projection.GetWidth() << "x" << projection.GetHeight() << " " << parameter.GetDPI()<< " DPI" << std::endl;
     }
@@ -2103,7 +2152,7 @@ namespace osmscout {
       std::cout << data.nodes.size() <<"+" << data.poiNodes.size() << "/" << nodesDrawn << " (pcs) ";
       std::cout << nodesTimer << "/" << poisTimer << " (sec)" << std::endl;
 
-      std::cout << "Labels: " << labels.size() << "/" << labelsDrawn << " (pcs) ";
+      std::cout << "Labels: " << labels.size() << "/" << overlayLabels.size() << "/" << labelsDrawn << " (pcs) ";
       std::cout << labelsTimer << " (sec)" << std::endl;
     }
 

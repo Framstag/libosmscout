@@ -843,12 +843,11 @@ namespace osmscout {
 
         groundTile.coords.reserve(coastline->points.size());
 
-        for (size_t p=0; p<=coastline->points.size(); p++) {
+        for (size_t p=0; p<coastline->points.size(); p++) {
           groundTile.coords.push_back(Transform(coastline->points[p],level,cellMinLat,cellMinLon,true));
         }
 
         if (!groundTile.coords.empty()) {
-          groundTile.coords.push_back(groundTile.coords.front());
           groundTile.coords.back().coast=false;
 
           cellGroundTileMap[coord].push_back(groundTile);

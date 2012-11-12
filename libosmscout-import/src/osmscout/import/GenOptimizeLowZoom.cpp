@@ -25,12 +25,13 @@
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/Number.h>
 #include <osmscout/util/Projection.h>
 #include <osmscout/util/String.h>
 #include <osmscout/util/Transformation.h>
 
 #include <osmscout/private/Math.h>
-#include <iostream>
+
 namespace osmscout
 {
   OptimizeLowZoomGenerator::TypeData::TypeData()
@@ -68,8 +69,7 @@ namespace osmscout
   void OptimizeLowZoomGenerator::WriteHeader(FileWriter& writer,
                                              const std::set<TypeId>& types,
                                              const std::vector<TypeData>& typesData,
-                                             size_t optimizeMaxMap,
-                                             std::map<TypeId,FileOffset>& typeOffsetMap)
+                                             size_t optimizeMaxMap)
   {
     writer.SetPos(0);
 
@@ -85,7 +85,9 @@ namespace osmscout
       writer.Write(typesData[*type].cellXEnd);
       writer.Write(typesData[*type].cellYStart);
       writer.Write(typesData[*type].cellYEnd);
+
       writer.WriteFileOffset(typesData[*type].bitmapOffset);
+      writer.Write(typesData[*type].dataOffsetBytes);
     }
   }
 
@@ -522,18 +524,36 @@ namespace osmscout
     }
 
     size_t indexEntries=0;
+    size_t dataSize=0;
+    char   buffer[10];
 
     for (std::map<Coord,std::list<FileOffset> >::const_iterator cell=cellOffsets.begin();
          cell!=cellOffsets.end();
          ++cell) {
       indexEntries+=cell->second.size();
+
+      dataSize+=EncodeNumber(cell->second.size(),buffer);
+
+      FileOffset previousOffset=0;
+      for (std::list<FileOffset>::const_iterator offset=cell->second.begin();
+           offset!=cell->second.end();
+           ++offset) {
+        FileOffset data=*offset-previousOffset;
+
+        dataSize+=EncodeNumber(data,buffer);
+
+        previousOffset=*offset;
+      }
     }
 
-    progress.Info("Writing bitmap for "+
-                  type.GetName()+" ("+NumberToString(type.GetId())+"), "+
+    data.dataOffsetBytes=BytesNeeededToAddressFileData(dataSize);
+
+    progress.Info("Writing map for "+
+                  type.GetName()+", "+
                   "level "+NumberToString(data.indexLevel)+", "+
                   NumberToString(cellOffsets.size())+" cells, "+
-                  NumberToString(indexEntries)+" entries");
+                  NumberToString(indexEntries)+" entries, "+
+                  ByteSizeToString(1.0*data.cellXCount*data.cellYCount*data.dataOffsetBytes+dataSize));
 
     if (!writer.GetPos(data.bitmapOffset)) {
       progress.Error("Cannot get type index start position in file");
@@ -546,7 +566,15 @@ namespace osmscout
     for (size_t i=0; i<data.cellXCount*data.cellYCount; i++) {
       FileOffset cellOffset=0;
 
-      writer.WriteFileOffset(cellOffset);
+      writer.WriteFileOffset(cellOffset,
+                             data.dataOffsetBytes);
+    }
+
+    FileOffset dataStartOffset;
+
+    if (!writer.GetPos(dataStartOffset)) {
+      progress.Error("Cannot get start of data section after bitmap");
+      return false;
     }
 
     // Now write the list of offsets of objects for every cell with content
@@ -555,7 +583,7 @@ namespace osmscout
          ++cell) {
       FileOffset bitmapCellOffset=data.bitmapOffset+
                                   ((cell->first.y-data.cellYStart)*data.cellXCount+
-                                   cell->first.x-data.cellXStart)*sizeof(FileOffset);
+                                   cell->first.x-data.cellXStart)*data.dataOffsetBytes;
       FileOffset previousOffset=0;
       FileOffset cellOffset;
 
@@ -569,7 +597,8 @@ namespace osmscout
         return false;
       }
 
-      writer.WriteFileOffset(cellOffset);
+      writer.WriteFileOffset(cellOffset-dataStartOffset,
+                             data.dataOffsetBytes);
 
       if (!writer.SetPos(cellOffset)) {
         progress.Error("Cannot go back to cell start position in file");
@@ -597,7 +626,6 @@ namespace osmscout
     std::set<TypeId>            types;         // Types we optimize
     FileScanner                 wayScanner;
     FileWriter                  writer;
-    std::map<TypeId,FileOffset> dataOffsets;   // FileOffset where we store the file offset of the type data
     double                      magnification; // Magnification, we optimize for
     std::vector<TypeData>       typesData;
 
@@ -620,8 +648,7 @@ namespace osmscout
     WriteHeader(writer,
                 types,
                 typesData,
-                parameter.GetOptimizationMaxMag(),
-                dataOffsets);
+                parameter.GetOptimizationMaxMag());
 
     if (!wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                          "ways.dat"),
@@ -711,10 +738,8 @@ namespace osmscout
     WriteHeader(writer,
                 types,
                 typesData,
-                parameter.GetOptimizationMaxMag(),
-                dataOffsets);
+                parameter.GetOptimizationMaxMag());
 
     return !wayScanner.HasError() && wayScanner.Close();
   }
 }
-
