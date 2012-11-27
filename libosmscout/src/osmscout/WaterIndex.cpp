@@ -136,8 +136,16 @@ namespace osmscout {
       for (size_t x=cx1; x<=cx2; x++) {
         tile.xAbs=x;
         tile.yAbs=y;
-        tile.xRel=x-levels[idx].cellXStart;
-        tile.yRel=y-levels[idx].cellYStart;
+
+        if (x>=levels[idx].cellXStart &&
+            y>=levels[idx].cellYStart) {
+          tile.xRel=x-levels[idx].cellXStart;
+          tile.yRel=y-levels[idx].cellYStart;
+        }
+        else {
+          tile.xRel=0;
+          tile.yRel=0;
+        }
 
         if (x<levels[idx].cellXStart ||
             x>levels[idx].cellXEnd ||
