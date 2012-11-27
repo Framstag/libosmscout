@@ -146,8 +146,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 76;
-	noSym = 76;
+	maxT = 77;
+	noSym = 77;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
@@ -169,62 +169,63 @@ void Scanner::Init() {
 	keywords.set("ORDER", 8);
 	keywords.set("WAYS", 9);
 	keywords.set("GROUP", 10);
-	keywords.set("TYPE", 15);
-	keywords.set("MAG", 16);
-	keywords.set("NODE", 19);
-	keywords.set("LABEL", 21);
-	keywords.set("REF", 22);
-	keywords.set("SYMBOL", 23);
-	keywords.set("ICON", 24);
-	keywords.set("WAY", 25);
-	keywords.set("AREA", 26);
-	keywords.set("color", 27);
-	keywords.set("altColor", 30);
-	keywords.set("outlineColor", 31);
-	keywords.set("dash", 32);
-	keywords.set("gapColor", 33);
-	keywords.set("displayWidth", 34);
-	keywords.set("width", 35);
-	keywords.set("cap", 36);
-	keywords.set("outline", 37);
-	keywords.set("pattern", 38);
-	keywords.set("patternMinMag", 39);
-	keywords.set("borderColor", 40);
-	keywords.set("borderWidth", 41);
-	keywords.set("borderDash", 42);
-	keywords.set("style", 43);
-	keywords.set("backgroundColor", 44);
-	keywords.set("size", 45);
-	keywords.set("scaleMag", 46);
-	keywords.set("priority", 47);
-	keywords.set("name", 48);
-	keywords.set("butt", 49);
-	keywords.set("round", 50);
-	keywords.set("square", 51);
-	keywords.set("normal", 52);
-	keywords.set("contour", 53);
-	keywords.set("plate", 54);
-	keywords.set("emphasize", 55);
-	keywords.set("none", 56);
-	keywords.set("box", 57);
-	keywords.set("triangle", 58);
-	keywords.set("circle", 59);
-	keywords.set("world", 60);
-	keywords.set("continent", 61);
-	keywords.set("state", 62);
-	keywords.set("stateOver", 63);
-	keywords.set("county", 64);
-	keywords.set("region", 65);
-	keywords.set("proximity", 66);
-	keywords.set("cityOver", 67);
-	keywords.set("city", 68);
-	keywords.set("suburb", 69);
-	keywords.set("detail", 70);
-	keywords.set("close", 71);
-	keywords.set("veryClose", 72);
-	keywords.set("block", 73);
-	keywords.set("mm", 74);
-	keywords.set("m", 75);
+	keywords.set("SYMBOL", 12);
+	keywords.set("POLYGON", 13);
+	keywords.set("RECTANGLE", 16);
+	keywords.set("x", 17);
+	keywords.set("CIRCLE", 18);
+	keywords.set("TYPE", 20);
+	keywords.set("MAG", 21);
+	keywords.set("NODE", 24);
+	keywords.set("LABEL", 26);
+	keywords.set("REF", 27);
+	keywords.set("ICON", 28);
+	keywords.set("WAY", 29);
+	keywords.set("AREA", 30);
+	keywords.set("color", 31);
+	keywords.set("altColor", 34);
+	keywords.set("outlineColor", 35);
+	keywords.set("dash", 36);
+	keywords.set("gapColor", 37);
+	keywords.set("displayWidth", 38);
+	keywords.set("width", 39);
+	keywords.set("cap", 40);
+	keywords.set("outline", 41);
+	keywords.set("pattern", 42);
+	keywords.set("patternMinMag", 43);
+	keywords.set("borderColor", 44);
+	keywords.set("borderWidth", 45);
+	keywords.set("borderDash", 46);
+	keywords.set("style", 47);
+	keywords.set("backgroundColor", 48);
+	keywords.set("size", 49);
+	keywords.set("scaleMag", 50);
+	keywords.set("priority", 51);
+	keywords.set("symbol", 52);
+	keywords.set("name", 53);
+	keywords.set("butt", 54);
+	keywords.set("round", 55);
+	keywords.set("square", 56);
+	keywords.set("normal", 57);
+	keywords.set("contour", 58);
+	keywords.set("plate", 59);
+	keywords.set("emphasize", 60);
+	keywords.set("world", 61);
+	keywords.set("continent", 62);
+	keywords.set("state", 63);
+	keywords.set("stateOver", 64);
+	keywords.set("county", 65);
+	keywords.set("region", 66);
+	keywords.set("proximity", 67);
+	keywords.set("cityOver", 68);
+	keywords.set("city", 69);
+	keywords.set("suburb", 70);
+	keywords.set("detail", 71);
+	keywords.set("close", 72);
+	keywords.set("veryClose", 73);
+	keywords.set("block", 74);
+	keywords.set("mm", 75);
+	keywords.set("m", 76);
 
 
   tvalLength = 128;
@@ -449,23 +450,23 @@ Token* Scanner::NextToken() {
 		case 18:
 			{t->kind = 11; break;}
 		case 19:
-			{t->kind = 12; break;}
-		case 20:
-			{t->kind = 13; break;}
-		case 21:
 			{t->kind = 14; break;}
+		case 20:
+			{t->kind = 15; break;}
+		case 21:
+			{t->kind = 19; break;}
 		case 22:
-			{t->kind = 18; break;}
+			{t->kind = 23; break;}
 		case 23:
-			{t->kind = 20; break;}
+			{t->kind = 25; break;}
 		case 24:
-			{t->kind = 28; break;}
+			{t->kind = 32; break;}
 		case 25:
-			{t->kind = 29; break;}
+			{t->kind = 33; break;}
 		case 26:
-			recEnd = pos; recKind = 17;
+			recEnd = pos; recKind = 22;
 			if ((ch >= '0' && ch <= '9')) {AddCh(); goto case_15;}
-			else {t->kind = 17; break;}
+			else {t->kind = 22; break;}
 
   }
   AppendVal(t);

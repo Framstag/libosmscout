@@ -346,8 +346,12 @@ namespace osmscout {
                        images[style->GetId()-1]);
   }
 
-  void MapPainterQt::DrawSymbol(const SymbolStyle* style, double x, double y)
+  void MapPainterQt::DrawSymbol(const Projection& projection,
+                                const MapParameter& parameter,
+                                const SymbolRef& symbol,
+                                double x, double y)
   {
+    /*
     QPainterPath path;
 
     switch (style->GetStyle()) {
@@ -381,7 +385,7 @@ namespace osmscout {
                                                      style->GetFillColor().GetA())));
     }
       break;
-    }
+    }*/
   }
 
   void MapPainterQt::DrawPath(const Projection& projection,

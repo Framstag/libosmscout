@@ -428,7 +428,10 @@ namespace osmscout {
     // TODO
   }
 
-  void MapPainterAgg::DrawSymbol(const SymbolStyle* style, double x, double y)
+  void MapPainterAgg::DrawSymbol(const Projection& projection,
+                                 const MapParameter& parameter,
+                                 const SymbolRef& symbol,
+                                 double x, double y)
   {
     // TODO
   }

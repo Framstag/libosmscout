@@ -561,7 +561,9 @@ namespace osmscout {
     /**
       Draw the Symbol as defined by the SymbolStyle at the givcen pixel coordinate.
      */
-    virtual void DrawSymbol(const SymbolStyle* style,
+    virtual void DrawSymbol(const Projection& projection,
+                            const MapParameter& parameter,
+                            const SymbolRef& symbol,
                             double x, double y) = 0;
 
     /**

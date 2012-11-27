@@ -247,8 +247,10 @@ namespace osmscout {
   {
   }
 
-  void MapPainterSVG::DrawSymbol(const SymbolStyle* style,
-                                   double x, double y)
+  void MapPainterSVG::DrawSymbol(const Projection& projection,
+                                 const MapParameter& parameter,
+                                 const SymbolRef& style,
+                                 double x, double y)
   {
   }
 

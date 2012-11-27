@@ -29,6 +29,7 @@
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/String.h>
+#include <osmscout/util/Transformation.h>
 
 
 #include <osmscout/oss/Scanner.h>
@@ -112,7 +113,6 @@ typedef std::list<FillStyleRef>   FillStyleList;
 typedef std::list<IconStyleRef>   IconStyleList;
 typedef std::list<LabelStyleRef>  LabelStyleList;
 typedef std::list<LineStyleRef>   LineStyleList;
-typedef std::list<SymbolStyleRef> SymbolStyleList;
 
 inline std::string Destring(const char* str)
 {
@@ -178,8 +178,17 @@ inline void ToRGBA(const char* str, Color& color)
 
 	void OSS();
 	void WAYORDER();
+	void SYMBOL();
 	void STYLE(StyleFilter filter);
 	void WAYGROUP(size_t priority);
+	void STRING(std::string& value);
+	void IDENT(std::string& value);
+	void POLYGON(Symbol& symbol);
+	void RECTANGLE(Symbol& symbol);
+	void CIRCLE(Symbol& symbol);
+	void PIXEL(Pixel& pixel);
+	void FILLDEF(FillStyleList& styles);
+	void DOUBLE(double& value);
 	void STYLEFILTER(StyleFilter& filter);
 	void STYLEDEF(StyleFilter filter);
 	void MAG(Mag& mag);
@@ -188,11 +197,9 @@ inline void ToRGBA(const char* str, Color& color)
 	void AREASTYLEDEF(StyleFilter filter);
 	void NODELABELSTYLE(StyleFilter filter);
 	void NODEREFSTYLE(StyleFilter filter);
-	void NODESYMBOLSTYLE(StyleFilter filter);
 	void NODEICONSTYLE(StyleFilter filter);
 	void LABELDEF(LabelStyleList& styles);
 	void REFDEF(LabelStyleList& styles);
-	void SYMBOLDEF(SymbolStyleList& styles);
 	void ICONDEF(IconStyleList& styles);
 	void WAYSTYLE(StyleFilter filter);
 	void WAYLABELSTYLE(StyleFilter filter);
@@ -200,17 +207,13 @@ inline void ToRGBA(const char* str, Color& color)
 	void LINEDEF(LineStyleList& styles);
 	void AREASTYLE(StyleFilter filter);
 	void AREALABELSTYLE(StyleFilter filter);
-	void AREASYMBOLSTYLE(StyleFilter filter);
 	void AREAICONSTYLE(StyleFilter filter);
-	void FILLDEF(FillStyleList& styles);
 	void COLOR(Color& color);
-	void DOUBLE(double& value);
 	void DISPLAYSIZE(double& value);
 	void MAPSIZE(double& value);
 	void CAPSTYLE(LineStyle::CapStyle& style);
 	void LABELSTYLE(LabelStyle::Style& style);
 	void INTEGER(size_t& value);
-	void SYMBOLSTYLE(SymbolStyle::Style& style);
 
   void Parse();
 

@@ -17,6 +17,40 @@ OSS
 	   "waterway_stream","route_ferry"
   GROUP "highway_steps", "barrier_fence"
 
+SYMBOL natural_peak
+  POLYGON 0,0 1.5,0 0.75,1.5 { color: #9c5e29; }
+
+SYMBOL railway_station
+  RECTANGLE 0,0 2 x 2 { color: #7885b0; }
+
+SYMBOL railway_halt
+  RECTANGLE 0,0 1 x 1 { color: #7885b0; }
+
+SYMBOL railway_tram_stop
+  RECTANGLE 0,0 1 x 1 { color: #7885b0; }
+
+SYMBOL highway_bus_stop
+  CIRCLE 0,0 0.75 {color: #7885b0; }
+
+SYMBOL amenity
+  RECTANGLE 0,0 1 x 1 { color: #b89c9c; }
+
+SYMBOL amenity_hospital
+  CIRCLE 0,0 0.75 {color: #da0092; }
+
+SYMBOL amenity_parking
+  CIRCLE 0,0 0.75 {color: #4bb2da; }
+
+SYMBOL amenity_post_box
+  RECTANGLE 0,0 1 x 1 { color: #ffcc00; }
+
+SYMBOL amenity_post_office
+  RECTANGLE 0,0 2 x 2 { color: #ffcc00; }
+
+SYMBOL christian_church_cross
+  RECTANGLE 0.5,2 0.5 x 2 { color: #000000; }
+  RECTANGLE 0,1.5 1.5 x 0.5 { color: #000000; }
+
  // -------------------------------------------------------
  //
  // Synthetic
@@ -35,13 +69,13 @@ OSS
    //[TYPE "_tile_sea"] AREA {color: #b5d0d0;}
    //[TYPE "_tile_coast"] AREA {color: #ff0000;}
    //[TYPE "_tile_coast"] AREA {color: #b5d0d0;}
-   //[TYPE "_tile_coast"] AREA {color: #b5d0d0;  borderColor: #000000; borderWidth: 0.1mm;}
+   [TYPE "_tile_coast"] AREA {color: #b5d0d0;  borderColor: #000000; borderWidth: 0.1mm;}
    //[TYPE "_tile_coast"] AREA {color: #aaaaaa;  borderColor: #000000; borderWidth: 0.1mm;}
    //[TYPE "_tile_land"] AREA {color: #f1eee9;}
    //[TYPE "_tile_land"] AREA {color: #f1eee9; borderColor: #000000; borderWidth: 0.1mm;}
    //[TYPE "_tile_unknown"] AREA {color: #ffffad;}
 
-   //[TYPE "_tile_coastline"] WAY {color: #ff0000; displayWidth: 0.1mm;}
+   [TYPE "_tile_coastline"] WAY {color: #ff0000; displayWidth: 0.1mm;}
  }
 
  // -------------------------------------------------------
@@ -79,7 +113,7 @@ OSS
  }
 
  [MAG city-] {
-   [TYPE "natural_peak"] NODE.SYMBOL { style: triangle; color: #9c5e29; size: 8; }
+   [TYPE "natural_peak"] NODE.ICON { symbol: natural_peak; }
  }
 
  // -------------------------------------------------------
@@ -156,7 +190,6 @@ OSS
    [TYPE "highway_tertiary"] WAY { color: #fefeb3; outlineColor: #bfbfbf; altColor: #fefe73; displayWidth: 0.25mm; width: 10m; }
    [TYPE "highway_road"] WAY { color: #ffffff; outlineColor: #bfbfbf; altColor: #888888; displayWidth: 0.1mm; width: 8m; }
    [TYPE "railway_rail"] WAY {color: #939393; altColor: #777777; outlineColor: #b3b3b3; dash: 3,3; cap: butt; gapColor: #ffffff; displayWidth: 0.25mm; width: 5m; outline: 0.25mm;}
-   [TYPE "route_ferry"] WAY {color: #0000ff; outlineColor: #ffffff50; dash: 1,1; cap: butt; displayWidth: 0.5mm; width: 2m; outline: 0.4mm;}
  }
 
  [MAG city-] {
@@ -170,6 +203,8 @@ OSS
    [TYPE "railway_subway"] WAY {color: #b3b3b3; outlineColor: #ffffff50; displayWidth: 0.25mm; width: 5m; outline: 0.25mm;}
 
    [TYPE "railway_station"] AREA { color: #cb4040; }
+
+   [TYPE "route_ferry"] WAY {color: #0000ff; outlineColor: #ffffff50; dash: 1,1; cap: butt; displayWidth: 0.5mm; width: 2m; outline: 0.4mm;}
  }
 
  [MAG detail-] {
@@ -181,17 +216,20 @@ OSS
  }
 
  [MAG close-] {
-   [TYPE "railway_station"] NODE.SYMBOL { style: box; color: #7885b0; size: 8; }
-   [TYPE "highway_bus_stop"] NODE.ICON { name: bus_stop;}
-                             NODE.SYMBOL { style: circle; color: #7885b0; size: 4; }
+   [TYPE "railway_station"] NODE.ICON { symbol: railway_station; }
+   [TYPE "highway_bus_stop"] NODE.ICON { symbol: highway_bus_stop; name: bus_stop;}
 
    [TYPE "highway_construction"] WAY {color: #99cccc; displayWidth: 0.1mm; width: 2m;}
 
-   [TYPE "highway_pedestrian"] WAY {color: #ebeaea; displayWidth: 0.1mm; width: 8m; }
-                               AREA { color: #ededed; borderColor: #c5c5c5; borderWidth: 0.1mm; }
+   [TYPE "highway_pedestrian"] {
+     WAY {color: #ebeaea; displayWidth: 0.1mm; width: 8m; }
+     AREA { color: #ededed; borderColor: #c5c5c5; borderWidth: 0.1mm; }
+   }
 
-   [TYPE "public_transport_platform"] WAY {color: #9b9b9c; outlineColor: #887b7b; displayWidth: 0.75mm; width: 2m; outline: 0.1mm;}
-                                      AREA { color: #9b9b9c; borderColor: #887b7b; borderWidth: 0.1mm; }
+   [TYPE "public_transport_platform"] {
+     WAY {color: #9b9b9c; outlineColor: #887b7b; displayWidth: 0.75mm; width: 2m; outline: 0.1mm;}
+     AREA { color: #9b9b9c; borderColor: #887b7b; borderWidth: 0.1mm; }
+   }
 
    [TYPE "highway_service"] AREA { color: #ffffff; borderColor: #cccccc; borderWidth: 0.1mm; }
    [TYPE  "highway_footway"] AREA { color: #ededed; borderColor: #c5c5c5; borderWidth: 0.1mm; }
@@ -207,9 +245,9 @@ OSS
   }
 
  [MAG block-] {
-   [TYPE "railway_halt"] NODE.SYMBOL { style: box; color: #7885b0; size: 8;}
+   [TYPE "railway_halt"] NODE.ICON { symbol: railway_halt;}
 
-   [TYPE "railway_tram_stop"] NODE.SYMBOL { style: box; color: #7885b0; size: 8;}
+   [TYPE "railway_tram_stop"] NODE.ICON { symbol: railway_tram_stop;}
 
    [TYPE "highway_byway"] WAY {color: #90570c; displayWidth: 0.1mm; width: 2m; }
 
@@ -455,11 +493,13 @@ OSS
  }
 
  [MAG close-] {
-   [TYPE "amenity_hospital"] NODE.ICON { name: hospital;}
-                             NODE.SYMBOL { style: circle; color: #da0092; size: 4; }
+   [TYPE "amenity_hospital"] {
+      NODE.ICON { symbol: amenity_hospital; name: hospital;}
+   }
 
-   [TYPE "amenity_parking"] NODE.SYMBOL { style: circle; color: #4bb2da; size: 4; }
-                            NODE.ICON { name: parking;}
+   [TYPE "amenity_parking"] {
+     NODE.ICON { symbol: amenity_parking; name: parking; }
+   }
 
    [TYPE "leisure_building"]AREA { color: #b89c9c; borderColor: #887b7b; borderWidth: 0.1mm; }
    [TYPE "leisure_sports_centre"] AREA { color: #bde3cb; }
@@ -471,20 +511,30 @@ OSS
 
    [TYPE "man_made_pier"] {
      WAY {color: #ffffff; displayWidth: 0.1mm; width: 5.0m;}
-    AREA { color: #ffffff; }
+     AREA { color: #ffffff; }
    }
  }
 
  [MAG city-] {
-   [TYPE "amenity_parking_building"] AREA { color: #c4c393; borderColor: #887b7b; borderWidth: 0.1mm; }
-                                     AREA.ICON { name: parking;}
+   [TYPE "amenity_parking_building"] {
+     AREA { color: #c4c393; borderColor: #887b7b; borderWidth: 0.1mm; }
+     AREA.ICON { name: parking;}
+   }
 
-   [TYPE "amenity_parking"] AREA { color: #f6eeb6; borderColor: #887b7b;borderWidth: 0.1mm; }
-                            AREA.ICON { name: parking;}
+   [TYPE "amenity_parking"] {
+     AREA { color: #f6eeb6; borderColor: #887b7b;borderWidth: 0.1mm; }
+     AREA.ICON { name: parking;}
+   }
 
    [TYPE "amenity_hospital"] AREA { color: #f0f0d8; borderColor: #887b7b; borderWidth: 0.1mm; }
+
+   [TYPE "christian_church_building"] {
+     AREA { color: #888888;  borderColor: #666666; borderWidth: 0.1mm;}
+   }
+
    [TYPE "amenity_post_office_building"] AREA { color: #ffcc00; borderColor: #887b7b; borderWidth: 0.1mm; }
    [TYPE "amenity_post_office"] AREA { color: #f0f0d8; }
+
    [TYPE "amenity_taxi"] AREA { color: #d2d2d2; }
    [TYPE "amenity_building"] AREA { color: #b89c9c; }
    [TYPE "amenity"] AREA { color: #f0f0d8; }
@@ -495,17 +545,17 @@ OSS
    [TYPE "amenity_hospital",
          "amenity_hospital_building"] AREA.ICON { name: hospital;}
 
-   [TYPE "railway_station"] AREA.SYMBOL { style: box; color: #7885b0; size: 8; }
+   [TYPE "railway_station"] AREA.ICON { symbol: railway_station; }
  }
 
  [MAG veryClose-] {
    [TYPE "amenity_pharmacy"] NODE.ICON { name: pharmacy;}
 
-   [TYPE "amenity_post_box"] NODE.SYMBOL { style: box; color: #ffcc00; size: 4; }
+   [TYPE "amenity_post_box"] NODE.ICON { symbol: amenity_post_box; }
 
-   [TYPE "amenity_post_office"] NODE.SYMBOL { style: box; color: #ffcc00; size: 8; }
+   [TYPE "amenity_post_office"] NODE.ICON { symbol: amenity_post_office; }
 
-   [TYPE "amenity"] NODE.SYMBOL { style: box; color: #b89c9c; size: 4; }
+   [TYPE "amenity"] NODE.ICON { symbol: amenity; }
 
    [TYPE "barrier_fence"] WAY {color: #aaaaaa; displayWidth: 0.1mm; width: 0.5m;}
 
@@ -545,6 +595,14 @@ OSS
 
  [MAG veryClose-] {
    [TYPE "amenity_hospital"] NODE.LABEL { style: emphasize; color: #da0092; size: 1.1; }
+
+   [TYPE "christian_church_building",
+         "christian_church"] {
+     AREA.LABEL { style: emphasize; color: #000000;}
+     AREA.ICON {symbol: christian_church_cross; }
+     NODE.LABEL { style: emphasize; color: #000000;}
+     NODE.ICON {symbol: christian_church_cross; }
+   }
 
    [TYPE "leisure_pitch"] AREA.LABEL { style: normal;}
 
@@ -651,7 +709,7 @@ OSS
 
  [MAG city-veryClose] {
    [TYPE "place_hamlet"] NODE.LABEL { style: emphasize; size: 1.0; scaleMag: city; priority: 9;}
- }
+}
 
  [MAG cityOver-veryClose] {
    [TYPE"place_suburb"] NODE.LABEL { style: emphasize; size: 1.3; scaleMag: city; priority: 10;}
@@ -659,7 +717,7 @@ OSS
 
  [MAG close-] {
    [TYPE "place_locality"] NODE.LABEL { style: emphasize; size: 1.1; priority: 11;}
- }
+}
 
  // -------------------------------------------------------
  //

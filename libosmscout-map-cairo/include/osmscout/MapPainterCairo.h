@@ -48,12 +48,13 @@ namespace osmscout {
 #else
     typedef cairo_scaled_font_t*           Font;
 #endif
-    typedef OSMSCOUT_HASHMAP<size_t,Font>  FontMap;
+    typedef OSMSCOUT_HASHMAP<size_t,Font>  FontMap;   //! Map type for mapping  font sizes to font
 
-    cairo_t                       *draw;     //! The cairo cairo_t for the mask
-    std::vector<cairo_surface_t*> images;    //! vector of cairo surfaces for icons
-    std::vector<cairo_pattern_t*> patterns;  //! cairo pattern structure for patterns
-    FontMap                       fonts;     //! Cached scaled font
+    cairo_t                                *draw;     //! The cairo cairo_t for the mask
+    std::vector<cairo_surface_t*>          images;    //! vector of cairo surfaces for icons
+    std::vector<cairo_pattern_t*>          patterns;  //! cairo pattern structure for patterns
+    FontMap                                fonts;     //! Cached scaled font
+    double                                 minimumLineWidth; //! Minimum width a line must have to be visible
 
   private:
     Font GetFont(const MapParameter& parameter,
@@ -62,6 +63,10 @@ namespace osmscout {
     void SetLineAttributes(const Color& color,
                            double width,
                            const std::vector<double>& dash);
+
+    void SetFillStyle(const Projection& projection,
+                      const MapParameter& parameter,
+                      const FillStyle& fill);
 
   protected:
     bool HasIcon(const StyleConfig& styleConfig,
@@ -93,7 +98,9 @@ namespace osmscout {
                           const std::string& text,
                           size_t transStart, size_t transEnd);
 
-    void DrawSymbol(const SymbolStyle* style,
+    void DrawSymbol(const Projection& projection,
+                    const MapParameter& parameter,
+                    const SymbolRef& symbol,
                     double x, double y);
 
     void DrawIcon(const IconStyle* style,

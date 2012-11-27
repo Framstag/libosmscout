@@ -6,6 +6,7 @@
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/String.h>
+#include <osmscout/util/Transformation.h>
 
 COMPILER OSS
 
@@ -13,7 +14,6 @@ typedef std::list<FillStyleRef>   FillStyleList;
 typedef std::list<IconStyleRef>   IconStyleList;
 typedef std::list<LabelStyleRef>  LabelStyleList;
 typedef std::list<LineStyleRef>   LineStyleList;
-typedef std::list<SymbolStyleRef> SymbolStyleList;
 
 inline std::string Destring(const char* str)
 {
@@ -94,6 +94,9 @@ PRODUCTIONS
                   WAYORDER
                 ]
                 {
+                  SYMBOL
+                }
+                {
                   (. StyleFilter filter; .)
                   STYLE<filter>
                 }
@@ -124,6 +127,7 @@ PRODUCTIONS
                   (. priority++;.)
                 }
                 .
+
   WAYGROUP<size_t priority>
               = "GROUP"
                 [
@@ -131,7 +135,7 @@ PRODUCTIONS
                      std::string wayTypeName;
                      TypeId      wayType;
                   .)
-                  string (. wayTypeName=Destring(t->val); .)
+                  STRING<wayTypeName>
                   (.
       	              wayType=config.GetTypeConfig()->GetWayTypeId(wayTypeName);
 
@@ -150,19 +154,124 @@ PRODUCTIONS
                      TypeId      wayType;
                   .)
                   ","
-                  string (. wayTypeName=Destring(t->val); .)
+                  STRING<wayTypeName>
                   (.
       	              wayType=config.GetTypeConfig()->GetWayTypeId(wayTypeName);
 
                       if (wayType==typeIgnore) {
                         std::string e="Unknown way type '"+wayTypeName+"'";
-	                    SemErr(e.c_str());
+  	                    SemErr(e.c_str());
                       }
                       else {
                         config.SetWayPrio(wayType,priority);
                       }
                   .)
                 }
+                .
+
+  SYMBOL      = "SYMBOL"
+                (.
+                  std::string name;
+                .)
+                IDENT<name>
+                (.
+                  SymbolRef   symbol=new Symbol(name);
+                .)
+                {
+                  POLYGON<*symbol>
+                | RECTANGLE<*symbol>
+                | CIRCLE<*symbol>
+                }
+                (.
+                  if (!config.RegisterSymbol(symbol)) {
+                    std::string e="Map symbol '"+symbol->GetName()+"' is already defined";
+                    SemErr(e.c_str());
+                  }
+                .)
+                .
+
+  POLYGON<Symbol& symbol>
+              = "POLYGON"
+                (.
+                  FillStyleRef        fillStyle(new FillStyle());
+                  PolygonPrimitiveRef polygon(new PolygonPrimitive(fillStyle));
+                  FillStyleList       fillStyles;
+                  Pixel               pixel;
+
+                  fillStyles.push_back(fillStyle);
+                .)
+                PIXEL<pixel>   (. polygon->AddPixel(pixel); .)
+                PIXEL<pixel>   (. polygon->AddPixel(pixel); .)
+                {
+                  PIXEL<pixel> (. polygon->AddPixel(pixel); .)
+                }
+                SYNC "{"
+                {
+                  FILLDEF<fillStyles>
+                }
+                SYNC "}"
+                (. symbol.AddPrimitive(polygon); .)
+                .
+
+  RECTANGLE<Symbol& symbol>
+              = "RECTANGLE"
+                (.
+                  FillStyleRef  fillStyle(new FillStyle());
+                  FillStyleList fillStyles;
+                  Pixel         topLeft;
+                  double        width;
+                  double        height;
+
+                  fillStyles.push_back(fillStyle);
+                .)
+                PIXEL<topLeft>
+                DOUBLE<width>
+                "x"
+                DOUBLE<height>
+
+                SYNC "{"
+                {
+                  FILLDEF<fillStyles>
+                }
+                SYNC "}"
+                (.
+                  symbol.AddPrimitive(new RectanglePrimitive(topLeft,
+                                                             width,height,
+                                                             fillStyle));
+                .)
+                .
+
+  CIRCLE<Symbol& symbol>
+              = "CIRCLE"
+                (.
+                  FillStyleRef  fillStyle(new FillStyle());
+                  FillStyleList fillStyles;
+                  Pixel         center;
+                  double        radius;
+
+                  fillStyles.push_back(fillStyle);
+                .)
+                PIXEL<center>
+                DOUBLE<radius>
+                SYNC "{"
+                {
+                  FILLDEF<fillStyles>
+                }
+                SYNC "}"
+                (.
+                  symbol.AddPrimitive(new CirclePrimitive(center,
+                                                          radius,
+                                                          fillStyle));
+                .)
+                .
+
+  PIXEL<Pixel& pixel>
+              = (.
+                   double x;
+                   double y;
+                .)
+                DOUBLE<x> "," DOUBLE<y>
+                (. pixel=Pixel(x,y); .)
                 .
 
   STYLE<StyleFilter filter>
@@ -184,13 +293,15 @@ PRODUCTIONS
   STYLEFILTER<StyleFilter& filter>
               = "["
                    [
-                     (.TypeSet types;.)
+                     (.
+                       TypeSet     types;
+                       std::string name;
+                     .)
 
                      "TYPE"
-                     string
+                     STRING<name>
                      (.
-                       std::string name=Destring(t->val);
-                       TypeId      type=config.GetTypeConfig()->GetTypeId(name);
+                       TypeId type=config.GetTypeConfig()->GetTypeId(name);
 
                        if (type==typeIgnore) {
                          std::string e="Unknown type '"+name+"'";
@@ -208,10 +319,10 @@ PRODUCTIONS
                        }
                      .)
                      {
+                       (. std::string name; .)
                        ","
-                       string
+                       STRING<name>
                        (.
-                         std::string name=Destring(t->val);
                          TypeId      type=config.GetTypeConfig()->GetTypeId(name);
 
                          if (type==typeIgnore) {
@@ -283,7 +394,6 @@ PRODUCTIONS
                 (
                   NODELABELSTYLE<filter>
                 | NODEREFSTYLE<filter>
-                | NODESYMBOLSTYLE<filter>
                 | NODEICONSTYLE<filter>
                 )
                 .
@@ -318,23 +428,6 @@ PRODUCTIONS
                 SYNC "{"
                 {
                 	REFDEF<labelStyles>
-                }
-                SYNC "}"
-                .
-
-  NODESYMBOLSTYLE<StyleFilter filter>
-              = SYNC "SYMBOL"
-                [
-                  STYLEFILTER<filter>
-                ]
-                (.
-                  SymbolStyleList symbolStyles;
-
-                  config.GetNodeSymbolStyles(filter,symbolStyles);
-                .)
-                SYNC "{"
-                {
-                  SYMBOLDEF<symbolStyles>
                 }
                 SYNC "}"
                 .
@@ -425,7 +518,6 @@ PRODUCTIONS
                 | "."
                   (
                     AREALABELSTYLE<filter>
-                  | AREASYMBOLSTYLE<filter>
                   | AREAICONSTYLE<filter>
                   )
                 )
@@ -461,23 +553,6 @@ PRODUCTIONS
                 SYNC "{"
                 {
                   LABELDEF<labelStyles>
-                }
-                SYNC "}"
-                .
-
-  AREASYMBOLSTYLE<StyleFilter filter>
-              = SYNC "SYMBOL"
-                [
-                  STYLEFILTER<filter>
-                ]
-                (.
-                  SymbolStyleList symbolStyles;
-
-                  config.GetAreaSymbolStyles(filter,symbolStyles);
-                .)
-                SYNC "{"
-                {
-                  SYMBOLDEF<symbolStyles>
                 }
                 SYNC "}"
                 .
@@ -627,8 +702,7 @@ PRODUCTIONS
                   	 }
                   .)
                 | (. std::string patternName; .)
-                  "pattern" ":" string
-                  (. patternName=Destring(t->val); .)
+                  "pattern" ":" STRING<patternName>
                    WEAK ";"
                   (.
                      for (FillStyleList::iterator s=styles.begin();
@@ -884,49 +958,32 @@ PRODUCTIONS
                 )
                 .
 
-  SYMBOLDEF<SymbolStyleList& styles>
-              = (
-                  (. SymbolStyle::Style symbolStyle; .)
-                  "style" ":" SYMBOLSTYLE<symbolStyle> WEAK ";"
-                  (.
-                     for (SymbolStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       SymbolStyleRef style(*s);
-
-                  	   style->SetStyle(symbolStyle);
-                  	 }
-                  .)
-                | (. Color fillColor; .)
-                  "color" ":" COLOR<fillColor> WEAK ";"
-                  (.
-                     for (SymbolStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       SymbolStyleRef style(*s);
-
-                  	   style->SetFillColor(fillColor);
-                  	 }
-                  .)
-                | (. double size; .)
-                  "size" ":" DOUBLE<size> WEAK ";"
-                  (.
-                     for (SymbolStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       SymbolStyleRef style(*s);
-
-                  	   style->SetSize(size);
-                  	 }
-                  .)
-                )
-                .
-
   ICONDEF<IconStyleList& styles>
               = (
-                  (. std::string name; .)
-                  "name" ":" ident
-                  (. name=Destring(t->val); .)
+                  (.
+                    std::string name;
+                    SymbolRef   symbol;
+                   .)
+                  "symbol" ":" IDENT<name> WEAK ";"
+                  (.
+                     symbol=config.GetSymbol(name);
+
+                     if (symbol.Invalid()) {
+                       std::string e="Map symbol '"+symbol->GetName()+"' is not defined";
+
+                       SemErr(e.c_str());
+                     }
+
+                     for (IconStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       IconStyleRef style(*s);
+
+                  	   style->SetSymbol(symbol);
+                  	 }
+                  .)
+                | (. std::string name; .)
+                  "name" ":" IDENT<name>
                   WEAK ";"
                   (.
                      for (IconStyleList::iterator s=styles.begin();
@@ -953,14 +1010,6 @@ PRODUCTIONS
                 | "contour"   (. style=LabelStyle::contour; .)
                 | "plate"     (. style=LabelStyle::plate; .)
                 | "emphasize" (. style=LabelStyle::emphasize; .)
-                ).
-
-  SYMBOLSTYLE<SymbolStyle::Style& style>
-              = (
-                  "none"      (. style=SymbolStyle::none; .)
-                | "box"       (. style=SymbolStyle::box; .)
-                | "triangle"  (. style=SymbolStyle::triangle; .)
-                | "circle"    (. style=SymbolStyle::circle; .)
                 ).
 
   COLOR<Color& color>
@@ -999,6 +1048,20 @@ PRODUCTIONS
   /** Size in units of map (currently meter) */
   MAPSIZE <double& value>
               = DOUBLE<value> "m".
+
+  IDENT<std::string& value>
+              = ident
+                (.
+                  value=t->val;
+                .)
+                .
+
+  STRING<std::string& value>
+              = string
+                (.
+                  value=Destring(t->val);
+                .)
+                .
 
   DOUBLE<double& value>
               = (  number
