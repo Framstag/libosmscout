@@ -25,6 +25,7 @@
 
 #include <agg2/agg_conv_curve.h>
 #include <agg2/agg_conv_contour.h>
+#include <agg2/agg_path_storage.h>
 #include <agg2/agg_pixfmt_rgb.h>
 #include <agg2/agg_rasterizer_scanline_aa.h>
 #include <agg2/agg_renderer_base.h>
@@ -88,6 +89,11 @@ namespace osmscout {
                          double y,
                          const std::wstring& text,
                          double width);
+
+    void DrawFill(const Projection& projection,
+                  const MapParameter& parameter,
+                  const FillStyle& fillStyle,
+                  agg::path_storage& path);
 
   protected:
     bool HasIcon(const StyleConfig& styleConfig,

@@ -27,7 +27,7 @@
 #include <agg2/agg_conv_dash.h>
 #include <agg2/agg_conv_segmentator.h>
 #include <agg2/agg_conv_stroke.h>
-#include <agg2/agg_path_storage.h>
+#include <agg2/agg_ellipse.h>
 #include <agg2/agg_trans_single_path.h>
 
 #include <osmscout/util/Geometry.h>
@@ -226,6 +226,59 @@ namespace osmscout {
         // increment pen position
         x += glyph->advance_x;
         y += glyph->advance_y;
+      }
+    }
+  }
+
+  void MapPainterAgg::DrawFill(const Projection& projection,
+                               const MapParameter& parameter,
+                               const FillStyle& fillStyle,
+                               agg::path_storage& path)
+  {
+    if (fillStyle.GetFillColor().IsVisible()) {
+      renderer_aa->color(agg::rgba(fillStyle.GetFillColor().GetR(),
+                                   fillStyle.GetFillColor().GetG(),
+                                   fillStyle.GetFillColor().GetB(),
+                                   fillStyle.GetFillColor().GetA()));
+
+      agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
+    }
+
+    double borderWidth=ConvertWidthToPixel(parameter,
+                                           fillStyle.GetBorderWidth());
+
+    if (borderWidth>=parameter.GetLineMinWidthPixel()) {
+      renderer_aa->color(agg::rgba(fillStyle.GetBorderColor().GetR(),
+                                   fillStyle.GetBorderColor().GetG(),
+                                   fillStyle.GetBorderColor().GetB(),
+                                   fillStyle.GetBorderColor().GetA()));
+
+      if (fillStyle.GetBorderDash().empty()) {
+        agg::conv_stroke<agg::path_storage> stroke(path);
+
+        stroke.width(borderWidth);
+        stroke.line_cap(agg::round_cap);
+
+        rasterizer->add_path(stroke);
+
+        agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
+      }
+      else {
+        agg::conv_dash<agg::path_storage>                    dasher(path);
+        agg::conv_stroke<agg::conv_dash<agg::path_storage> > stroke(dasher);
+
+        stroke.width(borderWidth);
+
+        stroke.line_cap(agg::butt_cap);
+
+        for (size_t i=0; i<fillStyle.GetBorderDash().size(); i+=2) {
+          dasher.add_dash(fillStyle.GetBorderDash()[i]*borderWidth,
+                          fillStyle.GetBorderDash()[i+1]*borderWidth);
+        }
+
+        rasterizer->add_path(stroke);
+
+        agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
       }
     }
   }
@@ -433,7 +486,98 @@ namespace osmscout {
                                  const SymbolRef& symbol,
                                  double x, double y)
   {
-    // TODO
+    if (!symbol.Valid()) {
+      return;
+    }
+
+    double minX;
+    double minY;
+    double maxX;
+    double maxY;
+    double centerX;
+    double centerY;
+
+    symbol->GetBoundingBox(minX,minY,maxX,maxY);
+
+    centerX=maxX-minX;
+    centerY=maxY-minY;
+
+    for (std::list<DrawPrimitiveRef>::const_iterator p=symbol->GetPrimitives().begin();
+         p!=symbol->GetPrimitives().end();
+         ++p) {
+      DrawPrimitive* primitive=p->Get();
+
+      if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
+        PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
+        FillStyleRef      style=polygon->GetFillStyle();
+        agg::path_storage path;
+
+        for (std::list<Pixel>::const_iterator pixel=polygon->GetPixels().begin();
+             pixel!=polygon->GetPixels().end();
+             ++pixel) {
+          if (pixel==polygon->GetPixels().begin()) {
+            path.move_to(x+ConvertWidthToPixel(parameter,pixel->x-centerX),
+                         y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
+          }
+          else {
+            path.line_to(x+ConvertWidthToPixel(parameter,pixel->x-centerX),
+                         y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
+          }
+        }
+
+        path.close_polygon();
+
+        rasterizer->add_path(path);
+
+        DrawFill(projection,
+                 parameter,
+                 *style,
+                 path);
+      }
+      else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL) {
+        RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
+        FillStyleRef        style=rectangle->GetFillStyle();
+        agg::path_storage   path;
+        double              xPos=x+ConvertWidthToPixel(parameter,rectangle->GetTopLeft().x-centerX);
+        double              yPos=y+ConvertWidthToPixel(parameter,maxY-rectangle->GetTopLeft().y-centerY);
+        double              width=ConvertWidthToPixel(parameter,rectangle->GetWidth());
+        double              height=ConvertWidthToPixel(parameter,rectangle->GetHeight());
+
+        path.move_to(xPos,yPos);
+        path.line_to(xPos+width,yPos);
+        path.line_to(xPos+width,yPos+height);
+        path.line_to(xPos,yPos+height);
+
+        path.close_polygon();
+
+        rasterizer->add_path(path);
+
+        DrawFill(projection,
+                 parameter,
+                 *style,
+                 path);
+      }
+      else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL) {
+        CirclePrimitive*  circle=dynamic_cast<CirclePrimitive*>(primitive);
+        FillStyleRef      style=circle->GetFillStyle();
+        agg::path_storage path;
+        double            radius=ConvertWidthToPixel(parameter,circle->GetRadius());
+
+        agg::ellipse ellipse(x+ConvertWidthToPixel(parameter,circle->GetCenter().x-centerX),
+                             y+ConvertWidthToPixel(parameter,maxY-circle->GetCenter().y-centerY),
+                             radius,
+                             radius);
+
+        path.concat_path(ellipse);
+
+        rasterizer->add_path(path);
+
+        DrawFill(projection,
+                 parameter,
+                 *style,
+                 path);
+      }
+    }
   }
 
   void MapPainterAgg::DrawPath(const Projection& projection,
@@ -518,12 +662,6 @@ namespace osmscout {
   {
     agg::path_storage path;
 
-    renderer_aa->color(agg::rgba(area.fillStyle->GetFillColor().GetR(),
-                                 area.fillStyle->GetFillColor().GetG(),
-                                 area.fillStyle->GetFillColor().GetB(),
-                                 area.fillStyle->GetFillColor().GetA()));
-
-
     if (!area.clippings.empty()) {
       rasterizer->filling_rule(agg::fill_even_odd);
     }
@@ -556,46 +694,10 @@ namespace osmscout {
       }
     }
 
-    agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
-
-    double borderWidth=ConvertWidthToPixel(parameter,
-                                           area.fillStyle->GetBorderWidth());
-
-
-    if (borderWidth>=parameter.GetLineMinWidthPixel()) {
-      renderer_aa->color(agg::rgba(area.fillStyle->GetBorderColor().GetR(),
-                                   area.fillStyle->GetBorderColor().GetG(),
-                                   area.fillStyle->GetBorderColor().GetB(),
-                                   area.fillStyle->GetBorderColor().GetA()));
-
-      if (area.fillStyle->GetBorderDash().empty()) {
-        agg::conv_stroke<agg::path_storage> stroke(path);
-
-        stroke.width(borderWidth);
-        stroke.line_cap(agg::round_cap);
-
-        rasterizer->add_path(stroke);
-
-        agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
-      }
-      else {
-        agg::conv_dash<agg::path_storage>                    dasher(path);
-        agg::conv_stroke<agg::conv_dash<agg::path_storage> > stroke(dasher);
-
-        stroke.width(borderWidth);
-
-        stroke.line_cap(agg::butt_cap);
-
-        for (size_t i=0; i<area.fillStyle->GetBorderDash().size(); i+=2) {
-          dasher.add_dash(area.fillStyle->GetBorderDash()[i]*borderWidth,
-                          area.fillStyle->GetBorderDash()[i+1]*borderWidth);
-        }
-
-        rasterizer->add_path(stroke);
-
-        agg::render_scanlines(*rasterizer,*scanlineP8,*renderer_aa);
-      }
-    }
+    DrawFill(projection,
+             parameter,
+             *area.fillStyle,
+             path);
   }
 
   void MapPainterAgg::DrawArea(const FillStyle& style,
