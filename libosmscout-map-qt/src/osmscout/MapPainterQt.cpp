@@ -394,9 +394,9 @@ namespace osmscout {
             path.lineTo(x+ConvertWidthToPixel(parameter,pixel->x-centerX),
                         y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
           }
-
-          painter->drawPath(path);
         }
+
+        painter->drawPath(path);
       }
       else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL) {
         RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
