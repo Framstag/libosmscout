@@ -728,6 +728,14 @@ namespace osmscout {
     }
   }
 
+  void MapPainter::DrawSymbol(const Projection& projection,
+                              const MapParameter& parameter,
+                              const SymbolRef& symbol,
+                              double x, double y)
+  {
+    // no code - must be implemented by derived classes!
+  }
+
   void MapPainter::RegisterPointWayLabel(const Projection& projection,
                                          const MapParameter& parameter,
                                          const LabelStyle& style,
