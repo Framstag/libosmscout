@@ -189,12 +189,26 @@ TYPES
   // Currently all shops are the same...
   TYPE "shop" = NODE AREA (EXISTS "shop")
 
-  TYPE "tourism_alpine_hut" = NODE AREA ("tourism"=="alpine_hut")
   TYPE "tourism_aquarium" = NODE AREA ("tourism"=="aquarium")
   TYPE "tourism_attraction" = NODE AREA ("tourism"=="attraction")
   TYPE "tourism_artwork" = NODE WAY AREA ("tourism"=="artwork")
   TYPE "tourism_camp_site" = NODE AREA ("tourism"=="camp_site")
   TYPE "tourism_caravan_site" = NODE AREA ("tourism"=="caravan_site")
+  TYPE "tourism_picnic_site" = NODE AREA ("tourism"=="picnic_site")
+  TYPE "tourism_theme_park" = NODE AREA ("tourism"=="theme_park")
+  TYPE "tourism_viewpoint" = NODE ("tourism"=="viewpoint")
+  TYPE "tourism_zoo" = NODE AREA ("tourism"=="zoo")
+
+  TYPE "tourism_alpine_hut_building" = NODE AREA ("tourism"=="alpine_hut" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+  TYPE "tourism_chalet_building" = AREA ("tourism"=="chalet" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+  TYPE "tourism_guest_house_building" = AREA ("tourism"=="guest_house" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+  TYPE "tourism_hostel_building" = AREA ("tourism"=="hostel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+  TYPE "tourism_hotel_building" = AREA ("tourism"=="hotel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+  TYPE "tourism_information_building" = AREA ("tourism"=="information" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+  TYPE "tourism_motel_building" = AREA ("tourism"=="motel" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+  TYPE "tourism_museum_building" = AREA ("tourism"=="museum" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+
+  TYPE "tourism_alpine_hut" = NODE AREA ("tourism"=="alpine_hut")
   TYPE "tourism_chalet" = NODE AREA ("tourism"=="chalet")
   TYPE "tourism_guest_house" = NODE AREA ("tourism"=="guest_house")
   TYPE "tourism_hostel" = NODE AREA ("tourism"=="hostel")
@@ -202,10 +216,6 @@ TYPES
   TYPE "tourism_information" = NODE AREA ("tourism"=="information")
   TYPE "tourism_motel" = NODE AREA ("tourism"=="motel")
   TYPE "tourism_museum" = NODE AREA ("tourism"=="museum")
-  TYPE "tourism_picnic_site" = NODE AREA ("tourism"=="picnic_site")
-  TYPE "tourism_theme_park" = NODE AREA ("tourism"=="theme_park")
-  TYPE "tourism_viewpoint" = NODE ("tourism"=="viewpoint")
-  TYPE "tourism_zoo" = NODE AREA ("tourism"=="zoo")
 
   // Do not delete the following type, they are required by the GenCityStreet import step
   TYPE "boundary_administrative" = WAY AREA ("boundary"=="administrative") OR
@@ -227,12 +237,17 @@ TYPES
   TYPE "place_locality" = NODE AREA ("place"=="locality")
   TYPE "place_island" = NODE AREA ("place"=="island")
 
+  TYPE "historic_castle_building" = NODE AREA ("historic"=="castle" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+  TYPE "historic_monument_building" = NODE WAY AREA ("historic"=="monument" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+  TYPE "historic_memorial_building" = NODE WAY AREA ("historic"=="memorial" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+  TYPE "historic_ruins_building" = NODE WAY AREA ("historic"=="ruins" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+
   TYPE "historic_castle" = NODE AREA ("historic"=="castle")
+  TYPE "historic_ruins" = NODE WAY AREA ("historic"=="ruins")
   TYPE "historic_manor" = NODE AREA ("historic"=="manor")
   TYPE "historic_monument" = NODE AREA ("historic"=="monument")
   TYPE "historic_memorial" = NODE AREA ("historic"=="memorial")
   TYPE "historic_archaeological_site" = NODE WAY AREA ("historic"=="archaeological_site")
-  TYPE "historic_ruins" = NODE WAY AREA ("historic"=="ruins")
   TYPE "historic_battlefield" = NODE AREA ("historic"=="battlefield")
   TYPE "historic_wreck" = NODE AREA ("historic"=="wreck")
 
