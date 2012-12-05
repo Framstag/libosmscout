@@ -292,7 +292,7 @@ namespace osmscout {
          ++pixel) {
       minX=std::min(minX,pixel->x);
       minY=std::min(minY,pixel->y);
-      
+
       maxX=std::max(maxX,pixel->x);
       maxY=std::max(maxY,pixel->y);
     }
@@ -480,7 +480,12 @@ namespace osmscout {
 
     entry=symbols.find(name);
 
-    return entry->second;
+    if (entry!=symbols.end()) {
+      return entry->second;
+    }
+    else {
+      return emptySymbol;
+    }
   }
 
   void StyleConfig::GetAllNodeTypes(std::list<TypeId>& types)

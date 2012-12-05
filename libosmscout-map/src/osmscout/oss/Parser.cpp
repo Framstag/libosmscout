@@ -1011,17 +1011,18 @@ void Parser::ICONDEF(IconStyleList& styles) {
 			symbol=config.GetSymbol(name);
 			
 			if (symbol.Invalid()) {
-			 std::string e="Map symbol '"+symbol->GetName()+"' is not defined";
+			 std::string e="Map symbol '"+name+"' is not defined";
 			
 			 SemErr(e.c_str());
 			}
+			else {
+			 for (IconStyleList::iterator s=styles.begin();
+			      s!=styles.end();
+			      ++s) {
+			   IconStyleRef style(*s);
 			
-			for (IconStyleList::iterator s=styles.begin();
-			    s!=styles.end();
-			    ++s) {
-			 IconStyleRef style(*s);
-			
-			style->SetSymbol(symbol);
+			   style->SetSymbol(symbol);
+			 }
 			}
 			
 		} else if (la->kind == 53 /* "name" */) {

@@ -571,6 +571,7 @@ namespace osmscout {
 
     // Symbol
     OSMSCOUT_HASHMAP<std::string,SymbolRef>    symbols;
+    SymbolRef                                  emptySymbol;
 
     // Node
 
