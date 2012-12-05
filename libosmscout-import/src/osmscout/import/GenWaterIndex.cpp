@@ -1818,7 +1818,7 @@ namespace osmscout {
 
         FileOffset endPos;
         uint32_t   cellId=coord->first.y*levels[level].cellXCount+coord->first.x;
-        uint32_t   index=cellId*8;
+        uint32_t   index=cellId*sizeof(FileOffset);
 
         writer.GetPos(endPos);
 

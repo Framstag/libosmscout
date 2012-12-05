@@ -2,9 +2,18 @@ OSS
   ORDER WAYS
     GROUP "highway_motorway"
 
+  SYMBOL highway_services
+    CIRCLE 0,0 0.75 {color: #00ff0055; }
+
+  SYMBOL place_city
+    CIRCLE 0,0 1.25 {color: #ff0000aa; }
+
+  SYMBOL place_town
+    CIRCLE 0,0 0.75 {color: #ff000055; }
+
   [TYPE "highway_motorway"] {
     WAY { color: #809bc0; outlineColor: #777777; displayWidth: 0.45mm; width: 20m; outline: 0.25mm; }
-    
+
     [MAG state-] {
       WAY.REF {style: plate; color: #ffffff; backgroundColor: #809bc0; borderColor: #ffffff; priority: 2; }
     }
@@ -12,21 +21,21 @@ OSS
 
   [TYPE "highway_services"] {
     AREA {color: #cb9999; }
-    NODE.SYMBOL {style: circle; color: #00ff0055; size: 4; }
-    
+    NODE.ICON {symbol: highway_services; }
+
     [MAG county-] {
       AREA.LABEL {style: normal; priority: 3;}
       NODE.LABEL {style: normal; priority: 3;}
     }
-  } 
+  }
 
   [TYPE "place_city" MAG stateOver-] {
-    NODE.SYMBOL {style: circle; color:  #ff0000aa; size: 4; }
-	NODE.LABEL {style: emphasize; size: 1.3; priority: 1;}
+    NODE.ICON {symbol: place_city; }
+	  NODE.LABEL {style: emphasize; size: 1.3; priority: 1;}
   }
-  
+
   [TYPE "place_town" MAG county-] {
+    NODE.ICON {symbol: place_town;}
     NODE.LABEL { style: normal; size: 1.0; priority: 4;}
-    NODE.SYMBOL {style: circle; color: #ff000055; size: 4;}
-  }  
+  }
 END

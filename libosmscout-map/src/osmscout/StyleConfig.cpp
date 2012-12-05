@@ -19,6 +19,7 @@
 
 #include <osmscout/StyleConfig.h>
 
+#include <limits>
 #include <set>
 
 #include <iostream>
@@ -265,40 +266,115 @@ namespace osmscout {
     return *this;
   }
 
-  SymbolStyle::SymbolStyle()
-   : style(none),
-     size(8),
-     fillColor(1,0,0)
+  DrawPrimitive::~DrawPrimitive()
   {
     // no code
   }
 
-  SymbolStyle::SymbolStyle(const SymbolStyle& style)
+  PolygonPrimitive::PolygonPrimitive(const FillStyleRef& fillStyle)
+  : fillStyle(fillStyle)
   {
-    this->style=style.style;
-    this->size=style.size;
-    this->fillColor=style.fillColor;
+    // no code
   }
 
-  SymbolStyle& SymbolStyle::SetStyle(Style style)
+  void PolygonPrimitive::GetBoundingBox(double& minX,
+                                        double& minY,
+                                        double& maxX,
+                                        double& maxY) const
   {
-    this->style=style;
+    minX=std::numeric_limits<double>::max();
+    minY=std::numeric_limits<double>::max();
+    maxX=std::numeric_limits<double>::min();
+    maxY=std::numeric_limits<double>::min();
 
-    return *this;
+    for (std::list<Pixel>::const_iterator pixel=pixels.begin();
+         pixel!=pixels.end();
+         ++pixel) {
+      minX=std::min(minX,pixel->x);
+      minY=std::min(minY,pixel->y);
+
+      maxX=std::max(maxX,pixel->x);
+      maxY=std::max(maxY,pixel->y);
+    }
   }
 
-  SymbolStyle& SymbolStyle::SetSize(double size)
+  void PolygonPrimitive::AddPixel(const Pixel& pixel)
   {
-    this->size=size;
-
-    return *this;
+    pixels.push_back(pixel);
   }
 
-  SymbolStyle& SymbolStyle::SetFillColor(const Color& color)
+  RectanglePrimitive::RectanglePrimitive(const Pixel& topLeft,
+                                         double width,
+                                         double height,
+                                         const FillStyleRef& fillStyle)
+  : topLeft(topLeft),
+    width(width),
+    height(height),
+    fillStyle(fillStyle)
   {
-    fillColor=color;
+    // no code
+  }
 
-    return *this;
+  void RectanglePrimitive::GetBoundingBox(double& minX,
+                                         double& minY,
+                                         double& maxX,
+                                         double& maxY) const
+  {
+    minX=topLeft.x;
+    minY=topLeft.y;
+
+    maxX=topLeft.x+width;
+    maxY=topLeft.y+height;
+  }
+
+  CirclePrimitive::CirclePrimitive(const Pixel& center,
+                                   double radius,
+                                   const FillStyleRef& fillStyle)
+  : center(center),
+    radius(radius),
+    fillStyle(fillStyle)
+  {
+    // no code
+  }
+
+  void CirclePrimitive::GetBoundingBox(double& minX,
+                                       double& minY,
+                                       double& maxX,
+                                       double& maxY) const
+  {
+    minX=center.x-radius;
+    minY=center.y-radius;
+
+    maxX=center.x+radius;
+    maxY=center.y+radius;
+  }
+
+  Symbol::Symbol(const std::string& name)
+  : name(name),
+    minX(std::numeric_limits<double>::max()),
+    minY(std::numeric_limits<double>::max()),
+    maxX(std::numeric_limits<double>::min()),
+    maxY(std::numeric_limits<double>::min())
+  {
+    // no code
+  }
+
+  void Symbol::AddPrimitive(const DrawPrimitiveRef& primitive)
+  {
+    double minX;
+    double minY;
+    double maxX;
+    double maxY;
+
+    primitive->GetBoundingBox(minX,minY,maxX,maxY);
+
+    this->minX=std::min(this->minX,minX);
+    this->minY=std::min(this->minY,minY);
+
+    this->maxX=std::max(this->maxX,maxX);
+    this->maxY=std::max(this->maxY,maxY);
+
+    primitives.push_back(primitive);
   }
 
   IconStyle::IconStyle()
@@ -311,6 +387,13 @@ namespace osmscout {
   {
     this->id=style.id;
     this->iconName=style.iconName;
+  }
+
+  IconStyle& IconStyle::SetSymbol(const SymbolRef& symbol)
+  {
+    this->symbol=symbol;
+
+    return *this;
   }
 
   IconStyle& IconStyle::SetId(size_t id)
@@ -363,7 +446,6 @@ namespace osmscout {
   StyleConfig::StyleConfig(TypeConfig* typeConfig)
    : typeConfig(typeConfig)
   {
-    nodeSymbolStyles.resize(typeConfig->GetMaxTypeId()+1);
     nodeRefLabelStyles.resize(typeConfig->GetMaxTypeId()+1);
     nodeLabelStyles.resize(typeConfig->GetMaxTypeId()+1);
     nodeIconStyles.resize(typeConfig->GetMaxTypeId()+1);
@@ -374,7 +456,6 @@ namespace osmscout {
     wayNameLabelStyles.resize(typeConfig->GetMaxTypeId()+1);
 
     areaFillStyles.resize(typeConfig->GetMaxTypeId()+1);
-    areaSymbolStyles.resize(typeConfig->GetMaxTypeId()+1);
     areaLabelStyles.resize(typeConfig->GetMaxTypeId()+1);
     areaIconStyles.resize(typeConfig->GetMaxTypeId()+1);
   }
@@ -382,6 +463,29 @@ namespace osmscout {
   StyleConfig::~StyleConfig()
   {
     // no code
+  }
+
+  bool StyleConfig::RegisterSymbol(const SymbolRef& symbol)
+  {
+    std::pair<OSMSCOUT_HASHMAP<std::string,SymbolRef>::iterator,bool> result;
+
+    result=symbols.insert(std::make_pair(symbol->GetName(),symbol));
+
+    return result.second;
+  }
+
+  SymbolRef& StyleConfig::GetSymbol(const std::string& name)
+  {
+    OSMSCOUT_HASHMAP<std::string,SymbolRef>::iterator entry;
+
+    entry=symbols.find(name);
+
+    if (entry!=symbols.end()) {
+      return entry->second;
+    }
+    else {
+      return emptySymbol;
+    }
   }
 
   void StyleConfig::GetAllNodeTypes(std::list<TypeId>& types)
@@ -445,7 +549,6 @@ namespace osmscout {
   {
     CleanupStyles(nodeLabelStyles);
     CleanupStyles(nodeRefLabelStyles);
-    CleanupStyles(nodeSymbolStyles);
     CleanupStyles(nodeIconStyles);
 
     size_t maxLevel=0;
@@ -456,7 +559,6 @@ namespace osmscout {
 
       maxLevel=std::max(maxLevel,nodeLabelStyles[type].size());
       maxLevel=std::max(maxLevel,nodeRefLabelStyles[type].size());
-      maxLevel=std::max(maxLevel,nodeSymbolStyles[type].size());
       maxLevel=std::max(maxLevel,nodeIconStyles[type].size());
     }
 
@@ -478,9 +580,6 @@ namespace osmscout {
           nodeTypeSets[level].SetType(type);
         }
         else if (HasStyle(nodeRefLabelStyles[type],level)) {
-          nodeTypeSets[level].SetType(type);
-        }
-        else if (HasStyle(nodeSymbolStyles[type],level)) {
           nodeTypeSets[level].SetType(type);
         }
         else if (HasStyle(nodeIconStyles[type],level)) {
@@ -550,7 +649,6 @@ namespace osmscout {
   void StyleConfig::PostprocessAreas()
   {
     CleanupStyles(areaFillStyles);
-    CleanupStyles(areaSymbolStyles);
     CleanupStyles(areaLabelStyles);
     CleanupStyles(areaIconStyles);
 
@@ -561,7 +659,6 @@ namespace osmscout {
       }
 
       maxLevel=std::max(maxLevel,areaFillStyles[type].size());
-      maxLevel=std::max(maxLevel,areaSymbolStyles[type].size());
       maxLevel=std::max(maxLevel,areaLabelStyles[type].size());
       maxLevel=std::max(maxLevel,areaIconStyles[type].size());
     }
@@ -581,9 +678,6 @@ namespace osmscout {
         }
 
         if (HasStyle(areaFillStyles[type],level)) {
-          areaTypeSets[level].SetType(type);
-        }
-        else if (HasStyle(areaSymbolStyles[type],level)) {
           areaTypeSets[level].SetType(type);
         }
         else if (HasStyle(areaLabelStyles[type],level)) {
@@ -689,17 +783,6 @@ namespace osmscout {
     }
   }
 
-  void StyleConfig::GetNodeSymbolStyles(const StyleFilter& filter,
-                                        std::list<SymbolStyleRef>& styles)
-  {
-    styles.clear();
-
-    GetMatchingStyles(*typeConfig,
-                      filter,
-                      nodeSymbolStyles,
-                      styles);
-  }
-
   void StyleConfig::GetNodeRefLabelStyles(const StyleFilter& filter,
                                           std::list<LabelStyleRef>& styles)
   {
@@ -786,17 +869,6 @@ namespace osmscout {
 
   }
 
-  void StyleConfig::GetAreaSymbolStyles(const StyleFilter& filter, std::list<SymbolStyleRef>& styles)
-  {
-    styles.clear();
-
-    GetMatchingStyles(*typeConfig,
-                      filter,
-                      areaSymbolStyles,
-                      styles);
-
-  }
-
   void StyleConfig::GetAreaIconStyles(const StyleFilter& filter, std::list<IconStyleRef>& styles)
   {
     styles.clear();
@@ -817,7 +889,7 @@ namespace osmscout {
   }
 
   void StyleConfig::GetWayTypesByPrioWithMaxMag(double maxMag,
-                                             std::vector<TypeSet>& types) const
+                                                std::vector<TypeSet>& types) const
   {
     if (!wayTypeSets.empty()) {
       types=wayTypeSets[std::min(MagToLevel(maxMag),wayTypeSets.size()-1)];
@@ -852,11 +924,6 @@ namespace osmscout {
     else {
       return NULL;
     }
-  }
-
-  SymbolStyle* StyleConfig::GetNodeSymbolStyle(TypeId type, size_t level) const
-  {
-    return GetStyle(nodeSymbolStyles,type,level);
   }
 
   IconStyle* StyleConfig::GetNodeIconStyle(TypeId type,
@@ -898,11 +965,6 @@ namespace osmscout {
   LabelStyle* StyleConfig::GetAreaLabelStyle(TypeId type, size_t level) const
   {
     return GetStyle(areaLabelStyles,type,level);
-  }
-
-  SymbolStyle* StyleConfig::GetAreaSymbolStyle(TypeId type, size_t level) const
-  {
-    return GetStyle(areaSymbolStyles,type,level);
   }
 
   IconStyle* StyleConfig::GetAreaIconStyle(TypeId type, size_t level) const

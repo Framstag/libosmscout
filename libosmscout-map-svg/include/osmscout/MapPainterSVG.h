@@ -74,7 +74,9 @@ namespace osmscout {
                           const std::string& text,
                           size_t transStart, size_t transEnd);
 
-    void DrawSymbol(const SymbolStyle* style,
+    void DrawSymbol(const Projection& projection,
+                    const MapParameter& parameter,
+                    const SymbolRef& style,
                     double x, double y);
 
     void DrawIcon(const IconStyle* style,

@@ -728,6 +728,14 @@ namespace osmscout {
     }
   }
 
+  void MapPainter::DrawSymbol(const Projection& projection,
+                              const MapParameter& parameter,
+                              const SymbolRef& symbol,
+                              double x, double y)
+  {
+    // no code - must be implemented by derived classes!
+  }
+
   void MapPainter::RegisterPointWayLabel(const Projection& projection,
                                          const MapParameter& parameter,
                                          const LabelStyle& style,
@@ -989,16 +997,11 @@ namespace osmscout {
 
       const LabelStyle  *labelStyle=styleConfig.GetAreaLabelStyle(area->GetType(),level);
       IconStyle         *iconStyle=styleConfig.GetAreaIconStyle(area->GetType(),level);
-      const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetAreaSymbolStyle(area->GetType(),level);
-
-      bool hasLabel=labelStyle!=NULL &&
-                    labelStyle->GetStyle()!=LabelStyle::none;
-
-      bool hasSymbol=symbolStyle!=NULL;
-
-      bool hasIcon=iconStyle!=NULL;
-
-      std::string label;
+      bool              hasLabel=labelStyle!=NULL &&
+                        labelStyle->GetStyle()!=LabelStyle::none;
+      bool              hasSymbol=iconStyle!=NULL && iconStyle->GetSymbol().Valid();
+      bool              hasIcon=iconStyle!=NULL && !iconStyle->GetIconName().empty();
+      std::string       label;
 
       if (hasIcon) {
         hasIcon=HasIcon(styleConfig,
@@ -1030,7 +1033,9 @@ namespace osmscout {
 
       double x,y;
 
-      if (!GetCenterPixel(projection,area->nodes,x,y)) {
+      if (!GetCenterPixel(projection,
+                          area->nodes,
+                          x,y)) {
         continue;
       }
 
@@ -1040,7 +1045,9 @@ namespace osmscout {
                              parameter,
                              *labelStyle,
                              label,
-                             x,y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
+                             x,y+ConvertWidthToPixel(parameter,iconStyle->GetSymbol()->GetHeight())/2+
+                                 ConvertWidthToPixel(parameter,1.0)+
+                                 ConvertWidthToPixel(parameter,labelStyle->GetSize())/2);
         }
         else if (hasIcon) {
           RegisterPointLabel(projection,
@@ -1063,9 +1070,11 @@ namespace osmscout {
       if (hasIcon) {
         DrawIcon(iconStyle,x,y);
       }
-
-      if (hasSymbol) {
-        DrawSymbol(symbolStyle,x,y);
+      else if (hasSymbol) {
+        DrawSymbol(projection,
+                   parameter,
+                   iconStyle->GetSymbol(),
+                   x,y);
       }
     }
 
@@ -1078,16 +1087,11 @@ namespace osmscout {
         TypeId            type=relation->roles[m].ring==0 ? relation->GetType() : relation->roles[m].GetType();
         const LabelStyle  *labelStyle=styleConfig.GetAreaLabelStyle(type,level);
         IconStyle         *iconStyle=styleConfig.GetAreaIconStyle(type,level);
-        const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetAreaSymbolStyle(type,level);
-
-        bool hasLabel=labelStyle!=NULL &&
-                      labelStyle->GetStyle()!=LabelStyle::none;
-
-        bool hasSymbol=symbolStyle!=NULL;
-
-        bool hasIcon=iconStyle!=NULL;
-
-        std::string label;
+        bool              hasLabel=labelStyle!=NULL &&
+                                   labelStyle->GetStyle()!=LabelStyle::none;
+        bool              hasSymbol=iconStyle!=NULL && iconStyle->GetSymbol().Valid();
+        bool              hasIcon=iconStyle!=NULL && !iconStyle->GetIconName().empty();
+        std::string       label;
 
         if (hasIcon) {
           hasIcon=HasIcon(styleConfig,
@@ -1116,7 +1120,9 @@ namespace osmscout {
 
         double x,y;
 
-        if (!GetCenterPixel(projection,relation->roles[m].nodes,x,y)) {
+        if (!GetCenterPixel(projection,
+                            relation->roles[m].nodes,
+                            x,y)) {
           continue;
         }
 
@@ -1126,7 +1132,9 @@ namespace osmscout {
                                parameter,
                                *labelStyle,
                                label,
-                               x,y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
+                                x,y+ConvertWidthToPixel(parameter,iconStyle->GetSymbol()->GetHeight())/2+
+                                    ConvertWidthToPixel(parameter,1.0)+
+                                    ConvertWidthToPixel(parameter,labelStyle->GetSize())/2);
           }
           else if (hasIcon) {
             RegisterPointLabel(projection,
@@ -1149,9 +1157,11 @@ namespace osmscout {
         if (hasIcon) {
           DrawIcon(iconStyle,x,y);
         }
-
-        if (hasSymbol) {
-          DrawSymbol(symbolStyle,x,y);
+        else if (hasSymbol) {
+          DrawSymbol(projection,
+                     parameter,
+                     iconStyle->GetSymbol(),
+                     x,y);
         }
       }
     }
@@ -1165,10 +1175,9 @@ namespace osmscout {
     size_t            level=MagToLevel(projection.GetMagnification());
     const LabelStyle  *labelStyle=styleConfig.GetNodeLabelStyle(node->GetType(),level);
     IconStyle         *iconStyle=styleConfig.GetNodeIconStyle(node->GetType(),level);
-    const SymbolStyle *symbolStyle=iconStyle!=NULL ? NULL : styleConfig.GetNodeSymbolStyle(node->GetType(),level);
     bool              hasLabel=labelStyle!=NULL;
-    bool              hasSymbol=symbolStyle!=NULL;
-    bool              hasIcon=iconStyle!=NULL;
+    bool              hasSymbol=iconStyle!=NULL && iconStyle->GetSymbol().Valid();
+    bool              hasIcon=iconStyle!=NULL && !iconStyle->GetIconName().empty();
 
     std::string label;
 
@@ -1216,7 +1225,9 @@ namespace osmscout {
                            parameter,
                            *labelStyle,
                            label,
-                           x,y+symbolStyle->GetSize()+5); // TODO: Better layout to real size of symbol
+                           x,y+ConvertWidthToPixel(parameter,iconStyle->GetSymbol()->GetHeight())/2+
+                               ConvertWidthToPixel(parameter,1.0)+
+                               ConvertWidthToPixel(parameter,labelStyle->GetSize())/2);
       }
       else if (hasIcon) {
         RegisterPointLabel(projection,
@@ -1237,9 +1248,11 @@ namespace osmscout {
     if (hasIcon) {
       DrawIcon(iconStyle,x,y);
     }
-
-    if (hasSymbol) {
-      DrawSymbol(symbolStyle,x,y);
+    else if (hasSymbol) {
+      DrawSymbol(projection,
+                 parameter,
+                 iconStyle->GetSymbol(),
+                 x,y);
     }
 
     nodesDrawn++;

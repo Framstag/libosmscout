@@ -44,10 +44,9 @@ namespace osmscout {
     void SetPen(const LineStyle& style,
                 double lineWidth);
 
-    void SetBrush();
-    void SetBrush(const Projection& projection,
-                  const MapParameter& parameter,
-                  const FillStyle& fillStyle);
+    void SetFill(const Projection& projection,
+                 const MapParameter& parameter,
+                 const FillStyle& fillStyle);
 
   protected:
     bool HasIcon(const StyleConfig& styleConfig,
@@ -82,7 +81,9 @@ namespace osmscout {
     void DrawIcon(const IconStyle* style,
                   double x, double y);
 
-    void DrawSymbol(const SymbolStyle* style,
+    void DrawSymbol(const Projection& projection,
+                    const MapParameter& parameter,
+                    const SymbolRef& symbol,
                     double x, double y);
 
     void DrawPath(const Projection& projection,

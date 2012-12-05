@@ -62,8 +62,6 @@ namespace osmscout {
 
     scanner.Read(indexEntries);
 
-    std::cout << "Number of entries: " << indexEntries << std::endl;
-
     for (size_t i=0; i<indexEntries; i++) {
       TypeId type;
 

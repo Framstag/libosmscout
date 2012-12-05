@@ -31,6 +31,7 @@
 
 #include <osmscout/util/Color.h>
 #include <osmscout/util/Reference.h>
+#include <osmscout/util/Transformation.h>
 
 namespace osmscout {
 
@@ -311,57 +312,174 @@ namespace osmscout {
 
   typedef Ref<LabelStyle> LabelStyleRef;
 
-  /**
-    Nodes and areas can have a symbol style.A symbol is a internal predefined simple
-    iconic image, most of the time simple geometric forms lice circles, crosses and
-    similar.
-   */
-  class OSMSCOUT_MAP_API SymbolStyle : public Referencable
+  class OSMSCOUT_MAP_API DrawPrimitive : public Referencable
   {
   public:
-    enum Style {
-      none,
-      box,
-      circle,
-      triangle
-    };
+    virtual ~DrawPrimitive();
 
+    virtual void GetBoundingBox(double& minX,
+                                double& minY,
+                                double& maxX,
+                                double& maxY) const = 0;
+  };
+
+  typedef Ref<DrawPrimitive> DrawPrimitiveRef;
+
+  class OSMSCOUT_MAP_API PolygonPrimitive : public DrawPrimitive
+  {
   private:
-    Style  style;
-    double size;
-    Color  fillColor;
+    FillStyleRef      fillStyle;
+    std::list<Pixel>  pixels;
 
   public:
-    SymbolStyle();
-    SymbolStyle(const SymbolStyle& style);
+    PolygonPrimitive(const FillStyleRef& fillStyle);
 
-    SymbolStyle& SetStyle(Style style);
-    SymbolStyle& SetSize(double size);
-    SymbolStyle& SetFillColor(const Color& color);
+    void AddPixel(const Pixel& pixel);
 
-    inline bool IsVisible() const
+    inline const std::list<Pixel>& GetPixels() const
     {
-      return style!=none &&
-             fillColor.IsVisible();
+      return pixels;
     }
 
-    inline const Style& GetStyle() const
+    inline const FillStyleRef& GetFillStyle() const
     {
-      return style;
+      return fillStyle;
     }
 
-    inline double GetSize() const
+    void GetBoundingBox(double& minX,
+                        double& minY,
+                        double& maxX,
+                        double& maxY) const;
+  };
+
+  typedef Ref<PolygonPrimitive> PolygonPrimitiveRef;
+
+  class OSMSCOUT_MAP_API RectanglePrimitive : public DrawPrimitive
+  {
+  private:
+    Pixel        topLeft;
+    double       width;
+    double       height;
+    FillStyleRef fillStyle;
+
+  public:
+    RectanglePrimitive(const Pixel& topLeft,
+                       double width,
+                       double height,
+                       const FillStyleRef& fillStyle);
+
+    inline const Pixel& GetTopLeft() const
     {
-      return size;
+      return topLeft;
     }
 
-    inline const Color& GetFillColor() const
+    inline const double& GetWidth() const
     {
-      return fillColor;
+      return width;
+    }
+
+    inline const double& GetHeight() const
+    {
+      return height;
+    }
+
+    inline const FillStyleRef& GetFillStyle() const
+    {
+      return fillStyle;
+    }
+
+    void GetBoundingBox(double& minX,
+                        double& minY,
+                        double& maxX,
+                        double& maxY) const;
+  };
+
+  typedef Ref<RectanglePrimitive> RectanglePrimitiveRef;
+
+  class OSMSCOUT_MAP_API CirclePrimitive : public DrawPrimitive
+  {
+  private:
+    Pixel        center;
+    double       radius;
+    FillStyleRef fillStyle;
+
+  public:
+    CirclePrimitive(const Pixel& center,
+                    double radius,
+                    const FillStyleRef& fillStyle);
+
+    inline const Pixel& GetCenter() const
+    {
+      return center;
+    }
+
+    inline const double& GetRadius() const
+    {
+      return radius;
+    }
+
+    inline const FillStyleRef& GetFillStyle() const
+    {
+      return fillStyle;
+    }
+
+    void GetBoundingBox(double& minX,
+                        double& minY,
+                        double& maxX,
+                        double& maxY) const;
+  };
+
+  typedef Ref<CirclePrimitive> CirclePrimitiveRef;
+
+  class OSMSCOUT_MAP_API Symbol : public Referencable
+  {
+  private:
+    std::string                 name;
+    std::list<DrawPrimitiveRef> primitives;
+    double                      minX;
+    double                      minY;
+    double                      maxX;
+    double                      maxY;
+
+  public:
+    Symbol(const std::string& name);
+
+    void AddPrimitive(const DrawPrimitiveRef& primitive);
+
+    inline std::string GetName() const
+    {
+      return name;
+    }
+
+    inline const std::list<DrawPrimitiveRef>& GetPrimitives() const
+    {
+      return primitives;
+    }
+
+    inline void GetBoundingBox(double& minX,
+                               double& minY,
+                               double& maxX,
+                               double& maxY) const
+    {
+      minX=this->minX;
+      minY=this->minY;
+
+      maxX=this->maxX;
+      maxY=this->maxY;
+    }
+
+    inline double GetWidth() const
+    {
+      return maxX-minX;
+    }
+
+    inline double GetHeight() const
+    {
+      return maxY-minY;
     }
   };
 
-  typedef Ref<SymbolStyle> SymbolStyleRef;
+  typedef Ref<Symbol> SymbolRef;
 
   /**
     IconStyle is for define drawing of external images as icons for nodes and areas
@@ -370,18 +488,26 @@ namespace osmscout {
   {
   private:
     size_t      id;       //! Internal id for fast lookup. 0 == no id defined (yet), max(size_t) == error
+    SymbolRef   symbol;
     std::string iconName; //! name of the icon as given in style
 
   public:
     IconStyle();
     IconStyle(const IconStyle& style);
 
+    IconStyle& SetSymbol(const SymbolRef& symbol);
     IconStyle& SetId(size_t id);
     IconStyle& SetIconName(const std::string& iconName);
 
     inline bool IsVisible() const
     {
-      return !iconName.empty();
+      return !iconName.empty() ||
+              symbol.Valid();
+    }
+
+    inline const SymbolRef& GetSymbol() const
+    {
+      return symbol;
     }
 
     inline size_t GetId() const
@@ -443,9 +569,12 @@ namespace osmscout {
   private:
     TypeConfig                                 *typeConfig;
 
+    // Symbol
+    OSMSCOUT_HASHMAP<std::string,SymbolRef>    symbols;
+    SymbolRef                                  emptySymbol;
+
     // Node
 
-    std::vector<std::vector<SymbolStyleRef> >  nodeSymbolStyles;
     std::vector<std::vector<LabelStyleRef> >   nodeRefLabelStyles;
     std::vector<std::vector<LabelStyleRef> >   nodeLabelStyles;
     std::vector<std::vector<IconStyleRef> >    nodeIconStyles;
@@ -465,7 +594,6 @@ namespace osmscout {
     // Area
 
     std::vector<std::vector<FillStyleRef> >    areaFillStyles;
-    std::vector<std::vector<SymbolStyleRef> >  areaSymbolStyles;
     std::vector<std::vector<LabelStyleRef> >   areaLabelStyles;
     std::vector<std::vector<IconStyleRef> >    areaIconStyles;
 
@@ -485,13 +613,15 @@ namespace osmscout {
     StyleConfig(TypeConfig* typeConfig);
     virtual ~StyleConfig();
 
+    bool RegisterSymbol(const SymbolRef& symbol);
+    SymbolRef& GetSymbol(const std::string& name);
+
     void Postprocess();
 
     TypeConfig* GetTypeConfig() const;
 
     StyleConfig& SetWayPrio(TypeId type, size_t prio);
 
-    void GetNodeSymbolStyles(const StyleFilter& filter, std::list<SymbolStyleRef>& styles);
     void GetNodeRefLabelStyles(const StyleFilter& filter, std::list<LabelStyleRef>& styles);
     void GetNodeNameLabelStyles(const StyleFilter& filter, std::list<LabelStyleRef>& styles);
     void GetNodeIconStyles(const StyleFilter& filter, std::list<IconStyleRef>& styles);
@@ -502,7 +632,6 @@ namespace osmscout {
 
     void GetAreaFillStyles(const StyleFilter& filter, std::list<FillStyleRef>& styles);
     void GetAreaLabelStyles(const StyleFilter& filter, std::list<LabelStyleRef>& styles);
-    void GetAreaSymbolStyles(const StyleFilter& filter, std::list<SymbolStyleRef>& styles);
     void GetAreaIconStyles(const StyleFilter& filter, std::list<IconStyleRef>& styles);
 
     void GetNodeTypesWithMaxMag(double maxMag,
@@ -523,7 +652,6 @@ namespace osmscout {
       }
     }
 
-    SymbolStyle* GetNodeSymbolStyle(TypeId type, size_t level) const;
     IconStyle* GetNodeIconStyle(TypeId type, size_t level) const;
     LabelStyle* GetNodeRefLabelStyle(TypeId type, size_t level) const;
     LabelStyle* GetNodeLabelStyle(TypeId type, size_t level) const;
@@ -534,7 +662,6 @@ namespace osmscout {
 
     FillStyle* GetAreaFillStyle(TypeId type, size_t level) const;
     LabelStyle* GetAreaLabelStyle(TypeId type, size_t level) const;
-    SymbolStyle* GetAreaSymbolStyle(TypeId type, size_t level) const;
     IconStyle* GetAreaIconStyle(TypeId type, size_t level) const;
   };
 }

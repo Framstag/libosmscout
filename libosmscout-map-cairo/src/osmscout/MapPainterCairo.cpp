@@ -442,6 +442,59 @@ namespace osmscout {
     }
   }
 
+  void MapPainterCairo::DrawFillStyle(const Projection& projection,
+                                      const MapParameter& parameter,
+                                      const FillStyle& fill)
+  {
+    bool hasFill;
+    bool hasBorder=fill.GetBorderWidth()>0 &&
+                   fill.GetBorderColor().IsVisible() &&
+                   fill.GetBorderWidth()>=minimumLineWidth;
+
+    if (fill.HasPattern() &&
+        projection.GetMagnification()>=fill.GetPatternMinMag() &&
+        HasPattern(parameter,fill)) {
+      assert(fill.GetPatternId()<=images.size());
+      assert(images[fill.GetPatternId()-1]!=NULL);
+
+      cairo_set_source(draw,patterns[fill.GetPatternId()-1]);
+      hasFill=true;
+    }
+    else if (fill.GetFillColor().IsVisible()) {
+      cairo_set_source_rgba(draw,
+                            fill.GetFillColor().GetR(),
+                            fill.GetFillColor().GetG(),
+                            fill.GetFillColor().GetB(),
+                            fill.GetFillColor().GetA());
+      hasFill=true;
+    }
+    else {
+      hasFill=false;
+    }
+
+    if (hasFill && hasBorder) {
+      cairo_fill_preserve(draw);
+    }
+    else if (hasFill) {
+      cairo_fill(draw);
+    }
+
+    if (hasBorder) {
+      double borderWidth=ConvertWidthToPixel(parameter,
+                                             fill.GetBorderWidth());
+
+      if (borderWidth>=parameter.GetLineMinWidthPixel()) {
+        SetLineAttributes(fill.GetBorderColor(),
+                          borderWidth,
+                          fill.GetBorderDash());
+
+        cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
+
+        cairo_stroke(draw);
+      }
+    }
+  }
+
   bool MapPainterCairo::HasIcon(const StyleConfig& styleConfig,
                                 const MapParameter& parameter,
                                 IconStyle& style)
@@ -892,57 +945,93 @@ namespace osmscout {
 #endif
   }
 
-  void MapPainterCairo::DrawSymbol(const SymbolStyle* style,
+  void MapPainterCairo::DrawSymbol(const Projection& projection,
+                                   const MapParameter& parameter,
+                                   const SymbolRef& symbol,
                                    double x, double y)
   {
-    switch (style->GetStyle()) {
-    case SymbolStyle::none:
-      break;
-    case SymbolStyle::box:
-      cairo_new_path(draw);
-      cairo_set_source_rgba(draw,
-                            style->GetFillColor().GetR(),
-                            style->GetFillColor().GetG(),
-                            style->GetFillColor().GetB(),
-                            style->GetFillColor().GetA());
-      cairo_set_line_width(draw,1);
-
-      cairo_rectangle(draw,
-                      x-style->GetSize()/2,y-style->GetSize()/2,
-                      style->GetSize(),style->GetSize());
-      cairo_fill(draw);
-      break;
-    case SymbolStyle::circle:
-      cairo_new_path(draw);
-      cairo_set_source_rgba(draw,
-                            style->GetFillColor().GetR(),
-                            style->GetFillColor().GetG(),
-                            style->GetFillColor().GetB(),
-                            style->GetFillColor().GetA());
-      cairo_set_line_width(draw,1);
-
-      cairo_arc(draw,
-                x,y,
-                style->GetSize(),
-                0,2*M_PI);
-      cairo_fill(draw);
-      break;
-    case SymbolStyle::triangle:
-      cairo_new_path(draw);
-      cairo_set_source_rgba(draw,
-                            style->GetFillColor().GetR(),
-                            style->GetFillColor().GetG(),
-                            style->GetFillColor().GetB(),
-                            style->GetFillColor().GetA());
-      cairo_set_line_width(draw,1);
-
-      cairo_move_to(draw,x-style->GetSize()/2,y+style->GetSize()/2);
-      cairo_line_to(draw,x,y-style->GetSize()/2);
-      cairo_line_to(draw,x+style->GetSize()/2,y+style->GetSize()/2);
-      cairo_line_to(draw,x-style->GetSize()/2,y+style->GetSize()/2);
-      cairo_fill(draw);
-      break;
+    if (!symbol.Valid()) {
+      return;
     }
+
+    cairo_save(draw);
+
+    double minX;
+    double minY;
+    double maxX;
+    double maxY;
+    double centerX;
+    double centerY;
+
+    symbol->GetBoundingBox(minX,minY,maxX,maxY);
+
+    centerX=maxX-minX;
+    centerY=maxY-minY;
+
+    for (std::list<DrawPrimitiveRef>::const_iterator p=symbol->GetPrimitives().begin();
+         p!=symbol->GetPrimitives().end();
+         ++p) {
+      DrawPrimitive* primitive=p->Get();
+
+      if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
+        PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
+        FillStyleRef      style=polygon->GetFillStyle();
+
+        for (std::list<Pixel>::const_iterator pixel=polygon->GetPixels().begin();
+             pixel!=polygon->GetPixels().end();
+             ++pixel) {
+          if (pixel==polygon->GetPixels().begin()) {
+            cairo_new_path(draw);
+            cairo_move_to(draw,
+                          x+ConvertWidthToPixel(parameter,pixel->x-centerX),
+                          y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
+          }
+          else {
+            cairo_line_to(draw,
+                          x+ConvertWidthToPixel(parameter,pixel->x-centerX),
+                          y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
+          }
+        }
+
+        DrawFillStyle(projection,
+                      parameter,
+                      *style);
+      }
+      else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL) {
+        RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
+        FillStyleRef        style=rectangle->GetFillStyle();
+
+        cairo_new_path(draw);
+
+        cairo_rectangle(draw,
+                        x+ConvertWidthToPixel(parameter,rectangle->GetTopLeft().x-centerX),
+                        y+ConvertWidthToPixel(parameter,maxY-rectangle->GetTopLeft().y-centerY),
+                        ConvertWidthToPixel(parameter,rectangle->GetWidth()),
+                        ConvertWidthToPixel(parameter,rectangle->GetHeight()));
+
+        DrawFillStyle(projection,
+                      parameter,
+                      *style);
+      }
+      else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL) {
+        CirclePrimitive* circle=dynamic_cast<CirclePrimitive*>(primitive);
+        FillStyleRef     style=circle->GetFillStyle();
+
+        cairo_new_path(draw);
+
+        cairo_arc(draw,
+                  x+ConvertWidthToPixel(parameter,circle->GetCenter().x-centerX),
+                  y+ConvertWidthToPixel(parameter,maxY-circle->GetCenter().y-centerY),
+                  ConvertWidthToPixel(parameter,circle->GetRadius()),
+                  0,2*M_PI);
+
+        DrawFillStyle(projection,
+                      parameter,
+                      *style);
+      }
+    }
+
+    cairo_restore(draw);
   }
 
   void MapPainterCairo::DrawIcon(const IconStyle* style,
@@ -1029,23 +1118,6 @@ namespace osmscout {
   {
     cairo_save(draw);
 
-    if (area.fillStyle->HasPattern() &&
-        projection.GetMagnification()>=area.fillStyle->GetPatternMinMag() &&
-        HasPattern(parameter,*area.fillStyle)) {
-      assert(area.fillStyle->GetPatternId()<=images.size());
-      assert(images[area.fillStyle->GetPatternId()-1]!=NULL);
-
-      cairo_set_source(draw,patterns[area.fillStyle->GetPatternId()-1]);
-    }
-    else {
-      cairo_set_source_rgba(draw,
-                            area.fillStyle->GetFillColor().GetR(),
-                            area.fillStyle->GetFillColor().GetG(),
-                            area.fillStyle->GetFillColor().GetB(),
-                            area.fillStyle->GetFillColor().GetA());
-      cairo_set_line_width(draw,0.0);
-    }
-
     if (!area.clippings.empty()) {
       cairo_set_fill_rule (draw,CAIRO_FILL_RULE_EVEN_ODD);
     }
@@ -1071,25 +1143,12 @@ namespace osmscout {
           cairo_line_to(draw,transBuffer.buffer[i].x,transBuffer.buffer[i].y);
         }
         cairo_close_path(draw);
-
-        //cairo_fill(draw);
       }
     }
 
-    cairo_fill_preserve(draw);
-
-    double borderWidth=ConvertWidthToPixel(parameter,
-                                           area.fillStyle->GetBorderWidth());
-
-    if (borderWidth>=parameter.GetLineMinWidthPixel()) {
-      SetLineAttributes(area.fillStyle->GetBorderColor(),
-                        borderWidth,
-                        area.fillStyle->GetBorderDash());
-
-      cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
-
-      cairo_stroke(draw);
-    }
+    DrawFillStyle(projection,
+                  parameter,
+                  *area.fillStyle);
 
     cairo_restore(draw);
   }
@@ -1118,6 +1177,8 @@ namespace osmscout {
                                 cairo_t *draw)
   {
     this->draw=draw;
+
+    minimumLineWidth=parameter.GetLineMinWidthPixel()*25.4/parameter.GetDPI();
 
     Draw(styleConfig,
          projection,

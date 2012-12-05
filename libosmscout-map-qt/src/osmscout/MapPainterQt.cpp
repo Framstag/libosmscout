@@ -26,6 +26,7 @@
 #include <osmscout/util/Geometry.h>
 
 #include <osmscout/private/Math.h>
+#include <qt4/QtGui/qpainterpath.h>
 
 namespace osmscout {
 
@@ -346,41 +347,91 @@ namespace osmscout {
                        images[style->GetId()-1]);
   }
 
-  void MapPainterQt::DrawSymbol(const SymbolStyle* style, double x, double y)
+  void MapPainterQt::DrawSymbol(const Projection& projection,
+                                const MapParameter& parameter,
+                                const SymbolRef& symbol,
+                                double x, double y)
   {
-    QPainterPath path;
-
-    switch (style->GetStyle()) {
-    case SymbolStyle::none:
-      break;
-    case SymbolStyle::box:
-      path.addRect(x-style->GetSize()/2,y-style->GetSize()/2,
-                   style->GetSize(),style->GetSize());
-      painter->fillPath(path,QBrush(QColor::fromRgbF(style->GetFillColor().GetR(),
-                                                     style->GetFillColor().GetG(),
-                                                     style->GetFillColor().GetB(),
-                                                     style->GetFillColor().GetA())));
-      break;
-    case SymbolStyle::circle:
-      path.addEllipse(QPointF(x,y),
-                      (double)style->GetSize(),
-                      (double)style->GetSize());
-      painter->fillPath(path,QBrush(QColor::fromRgbF(style->GetFillColor().GetR(),
-                                                     style->GetFillColor().GetG(),
-                                                     style->GetFillColor().GetB(),
-                                                     style->GetFillColor().GetA())));
-      break;
-    case SymbolStyle::triangle: {
-      path.moveTo(x-style->GetSize()/2,y+style->GetSize()/2);
-      path.lineTo(x,y-style->GetSize()/2);
-      path.lineTo(x+style->GetSize()/2,y+style->GetSize()/2);
-      path.lineTo(x-style->GetSize()/2,y+style->GetSize()/2);
-      painter->fillPath(path,QBrush(QColor::fromRgbF(style->GetFillColor().GetR(),
-                                                     style->GetFillColor().GetG(),
-                                                     style->GetFillColor().GetB(),
-                                                     style->GetFillColor().GetA())));
+    if (!symbol.Valid()) {
+      return;
     }
-      break;
+
+    double minX;
+    double minY;
+    double maxX;
+    double maxY;
+    double centerX;
+    double centerY;
+
+    symbol->GetBoundingBox(minX,minY,maxX,maxY);
+
+    centerX=maxX-minX;
+    centerY=maxY-minY;
+
+    for (std::list<DrawPrimitiveRef>::const_iterator p=symbol->GetPrimitives().begin();
+         p!=symbol->GetPrimitives().end();
+         ++p) {
+      DrawPrimitive* primitive=p->Get();
+
+      if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
+        PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
+        FillStyleRef      style=polygon->GetFillStyle();
+
+        SetFill(projection,
+                parameter,
+                *style);
+
+        QPainterPath path;
+
+        for (std::list<Pixel>::const_iterator pixel=polygon->GetPixels().begin();
+             pixel!=polygon->GetPixels().end();
+             ++pixel) {
+          if (pixel==polygon->GetPixels().begin()) {
+            path.moveTo(x+ConvertWidthToPixel(parameter,pixel->x-centerX),
+                        y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
+          }
+          else {
+            path.lineTo(x+ConvertWidthToPixel(parameter,pixel->x-centerX),
+                        y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
+          }
+        }
+
+        painter->drawPath(path);
+      }
+      else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL) {
+        RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
+        FillStyleRef        style=rectangle->GetFillStyle();
+
+        SetFill(projection,
+                parameter,
+                *style);
+
+        QPainterPath path;
+
+        path.addRect(x+ConvertWidthToPixel(parameter,rectangle->GetTopLeft().x-centerX),
+                     y+ConvertWidthToPixel(parameter,maxY-rectangle->GetTopLeft().y-centerY),
+                     ConvertWidthToPixel(parameter,rectangle->GetWidth()),
+                     ConvertWidthToPixel(parameter,rectangle->GetHeight()));
+
+        painter->drawPath(path);
+      }
+      else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL) {
+        CirclePrimitive* circle=dynamic_cast<CirclePrimitive*>(primitive);
+        FillStyleRef     style=circle->GetFillStyle();
+
+        SetFill(projection,
+                parameter,
+                *style);
+
+        QPainterPath path;
+
+        path.addEllipse(QPointF(x+ConvertWidthToPixel(parameter,circle->GetCenter().x-centerX),
+                                y+ConvertWidthToPixel(parameter,maxY-circle->GetCenter().y-centerY)),
+                        ConvertWidthToPixel(parameter,circle->GetRadius()),
+                        ConvertWidthToPixel(parameter,circle->GetRadius()));
+
+        painter->drawPath(path);
+      }
     }
   }
 
@@ -516,42 +567,9 @@ namespace osmscout {
       }
     }
 
-    double borderWidth=ConvertWidthToPixel(parameter,
-                                           area.fillStyle->GetBorderWidth());
-
-    if (borderWidth>=parameter.GetLineMinWidthPixel()) {
-      QPen pen;
-
-      pen.setColor(QColor::fromRgbF(area.fillStyle->GetBorderColor().GetR(),
-                                    area.fillStyle->GetBorderColor().GetG(),
-                                    area.fillStyle->GetBorderColor().GetB(),
-                                    area.fillStyle->GetBorderColor().GetA()));
-      pen.setWidthF(borderWidth);
-
-      if (area.fillStyle->GetBorderDash().empty()) {
-        pen.setStyle(Qt::SolidLine);
-        pen.setCapStyle(Qt::RoundCap);
-      }
-      else {
-        QVector<qreal> dashes;
-
-        for (size_t i=0; i<area.fillStyle->GetBorderDash().size(); i++) {
-          dashes << area.fillStyle->GetBorderDash()[i];
-        }
-
-        pen.setDashPattern(dashes);
-        pen.setCapStyle(Qt::FlatCap);
-      }
-
-      painter->setPen(pen);
-    }
-    else {
-      painter->setPen(Qt::NoPen);
-    }
-
-    SetBrush(projection,
-             parameter,
-             *area.fillStyle);
+    SetFill(projection,
+            parameter,
+            *area.fillStyle);
 
     painter->drawPath(path);
   }
@@ -599,27 +617,58 @@ namespace osmscout {
     painter->setPen(pen);
   }
 
-  void MapPainterQt::SetBrush()
+  void MapPainterQt::SetFill(const Projection& projection,
+                             const MapParameter& parameter,
+                             const FillStyle& fillStyle)
   {
-    painter->setBrush(Qt::NoBrush);
-  }
-
-  void MapPainterQt::SetBrush(const Projection& projection,
-                              const MapParameter& parameter,
-                              const FillStyle& fillStyle)
-  {
+    double borderWidth=ConvertWidthToPixel(parameter,
+                                           fillStyle.GetBorderWidth());
 
     if (fillStyle.HasPattern() &&
         projection.GetMagnification()>=fillStyle.GetPatternMinMag() &&
         HasPattern(parameter,fillStyle)) {
       painter->setBrush(patterns[fillStyle.GetPatternId()-1]);
     }
-    else {
+    else if (fillStyle.GetFillColor().IsVisible()) {
       painter->setBrush(QBrush(QColor::fromRgbF(fillStyle.GetFillColor().GetR(),
                                                 fillStyle.GetFillColor().GetG(),
                                                 fillStyle.GetFillColor().GetB(),
                                                 fillStyle.GetFillColor().GetA())));
     }
+    else {
+      painter->setBrush(Qt::NoBrush);
+    }
+
+    if (borderWidth>=parameter.GetLineMinWidthPixel()) {
+      QPen pen;
+
+      pen.setColor(QColor::fromRgbF(fillStyle.GetBorderColor().GetR(),
+                                    fillStyle.GetBorderColor().GetG(),
+                                    fillStyle.GetBorderColor().GetB(),
+                                    fillStyle.GetBorderColor().GetA()));
+      pen.setWidthF(borderWidth);
+
+      if (fillStyle.GetBorderDash().empty()) {
+        pen.setStyle(Qt::SolidLine);
+        pen.setCapStyle(Qt::RoundCap);
+      }
+      else {
+        QVector<qreal> dashes;
+
+        for (size_t i=0; i<fillStyle.GetBorderDash().size(); i++) {
+          dashes << fillStyle.GetBorderDash()[i];
+        }
+
+        pen.setDashPattern(dashes);
+        pen.setCapStyle(Qt::FlatCap);
+      }
+
+      painter->setPen(pen);
+    }
+    else {
+      painter->setPen(Qt::NoPen);
+    }
+
   }
 
   bool MapPainterQt::DrawMap(const StyleConfig& styleConfig,
