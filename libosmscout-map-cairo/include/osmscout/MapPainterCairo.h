@@ -64,9 +64,9 @@ namespace osmscout {
                            double width,
                            const std::vector<double>& dash);
 
-    void SetFillStyle(const Projection& projection,
-                      const MapParameter& parameter,
-                      const FillStyle& fill);
+    void DrawFillStyle(const Projection& projection,
+                       const MapParameter& parameter,
+                       const FillStyle& fill);
 
   protected:
     bool HasIcon(const StyleConfig& styleConfig,

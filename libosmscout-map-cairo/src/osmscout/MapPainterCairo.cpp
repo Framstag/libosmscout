@@ -442,10 +442,15 @@ namespace osmscout {
     }
   }
 
-  void MapPainterCairo::SetFillStyle(const Projection& projection,
-                                     const MapParameter& parameter,
-                                     const FillStyle& fill)
+  void MapPainterCairo::DrawFillStyle(const Projection& projection,
+                                      const MapParameter& parameter,
+                                      const FillStyle& fill)
   {
+    bool hasFill;
+    bool hasBorder=fill.GetBorderWidth()>0 &&
+                   fill.GetBorderColor().IsVisible() &&
+                   fill.GetBorderWidth()>=minimumLineWidth;
+
     if (fill.HasPattern() &&
         projection.GetMagnification()>=fill.GetPatternMinMag() &&
         HasPattern(parameter,fill)) {
@@ -453,14 +458,40 @@ namespace osmscout {
       assert(images[fill.GetPatternId()-1]!=NULL);
 
       cairo_set_source(draw,patterns[fill.GetPatternId()-1]);
+      hasFill=true;
     }
-    else {
+    else if (fill.GetFillColor().IsVisible()) {
       cairo_set_source_rgba(draw,
                             fill.GetFillColor().GetR(),
                             fill.GetFillColor().GetG(),
                             fill.GetFillColor().GetB(),
                             fill.GetFillColor().GetA());
-      cairo_set_line_width(draw,0.0);
+      hasFill=true;
+    }
+    else {
+      hasFill=false;
+    }
+
+    if (hasFill && hasBorder) {
+      cairo_fill_preserve(draw);
+    }
+    else if (hasFill) {
+      cairo_fill(draw);
+    }
+
+    if (hasBorder) {
+      double borderWidth=ConvertWidthToPixel(parameter,
+                                             fill.GetBorderWidth());
+
+      if (borderWidth>=parameter.GetLineMinWidthPixel()) {
+        SetLineAttributes(fill.GetBorderColor(),
+                          borderWidth,
+                          fill.GetBorderDash());
+
+        cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
+
+        cairo_stroke(draw);
+      }
     }
   }
 
@@ -923,6 +954,8 @@ namespace osmscout {
       return;
     }
 
+    cairo_save(draw);
+
     double minX;
     double minY;
     double maxX;
@@ -944,10 +977,6 @@ namespace osmscout {
         PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
         FillStyleRef      style=polygon->GetFillStyle();
 
-        SetFillStyle(projection,
-                     parameter,
-                     *style);
-
         for (std::list<Pixel>::const_iterator pixel=polygon->GetPixels().begin();
              pixel!=polygon->GetPixels().end();
              ++pixel) {
@@ -964,32 +993,13 @@ namespace osmscout {
           }
         }
 
-        if (style->GetFillColor().IsVisible()) {
-          cairo_fill_preserve(draw);
-        }
-
-        if (style->GetBorderWidth()>=minimumLineWidth) {
-          double borderWidth=ConvertWidthToPixel(parameter,
-                                                 style->GetBorderWidth());
-
-          if (borderWidth>=parameter.GetLineMinWidthPixel()) {
-            SetLineAttributes(style->GetBorderColor(),
-                              borderWidth,
-                              style->GetBorderDash());
-
-            cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
-
-            cairo_stroke(draw);
-          }
-        }
+        DrawFillStyle(projection,
+                      parameter,
+                      *style);
       }
       else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL) {
         RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
         FillStyleRef        style=rectangle->GetFillStyle();
-
-        SetFillStyle(projection,
-                     parameter,
-                     *style);
 
         cairo_new_path(draw);
 
@@ -999,32 +1009,13 @@ namespace osmscout {
                         ConvertWidthToPixel(parameter,rectangle->GetWidth()),
                         ConvertWidthToPixel(parameter,rectangle->GetHeight()));
 
-        if (style->GetFillColor().IsVisible()) {
-          cairo_fill_preserve(draw);
-        }
-
-        if (style->GetBorderWidth()>=minimumLineWidth) {
-          double borderWidth=ConvertWidthToPixel(parameter,
-                                                 style->GetBorderWidth());
-
-          if (borderWidth>=parameter.GetLineMinWidthPixel()) {
-            SetLineAttributes(style->GetBorderColor(),
-                              borderWidth,
-                              style->GetBorderDash());
-
-            cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
-
-            cairo_stroke(draw);
-          }
-        }
+        DrawFillStyle(projection,
+                      parameter,
+                      *style);
       }
       else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL) {
         CirclePrimitive* circle=dynamic_cast<CirclePrimitive*>(primitive);
         FillStyleRef     style=circle->GetFillStyle();
-
-        SetFillStyle(projection,
-                     parameter,
-                     *style);
 
         cairo_new_path(draw);
 
@@ -1034,26 +1025,13 @@ namespace osmscout {
                   ConvertWidthToPixel(parameter,circle->GetRadius()),
                   0,2*M_PI);
 
-        if (style->GetFillColor().IsVisible()) {
-          cairo_fill_preserve(draw);
-        }
-        
-        if (style->GetBorderWidth()>=minimumLineWidth) {
-          double borderWidth=ConvertWidthToPixel(parameter,
-                                                 style->GetBorderWidth());
-
-          if (borderWidth>=parameter.GetLineMinWidthPixel()) {
-            SetLineAttributes(style->GetBorderColor(),
-                              borderWidth,
-                              style->GetBorderDash());
-
-            cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
-
-            cairo_stroke(draw);
-          }
-        }
+        DrawFillStyle(projection,
+                      parameter,
+                      *style);
       }
     }
+
+    cairo_restore(draw);
   }
 
   void MapPainterCairo::DrawIcon(const IconStyle* style,
@@ -1140,10 +1118,6 @@ namespace osmscout {
   {
     cairo_save(draw);
 
-    SetFillStyle(projection,
-                 parameter,
-                 *area.fillStyle);
-
     if (!area.clippings.empty()) {
       cairo_set_fill_rule (draw,CAIRO_FILL_RULE_EVEN_ODD);
     }
@@ -1169,29 +1143,12 @@ namespace osmscout {
           cairo_line_to(draw,transBuffer.buffer[i].x,transBuffer.buffer[i].y);
         }
         cairo_close_path(draw);
-
-        //cairo_fill(draw);
       }
     }
 
-    if (area.fillStyle->GetFillColor().IsVisible()) {
-      cairo_fill_preserve(draw);
-    }
-
-    if (area.fillStyle->GetBorderWidth()>=minimumLineWidth) {
-      double borderWidth=ConvertWidthToPixel(parameter,
-                                             area.fillStyle->GetBorderWidth());
-
-      if (borderWidth>=parameter.GetLineMinWidthPixel()) {
-        SetLineAttributes(area.fillStyle->GetBorderColor(),
-                          borderWidth,
-                          area.fillStyle->GetBorderDash());
-
-        cairo_set_line_cap(draw,CAIRO_LINE_CAP_BUTT);
-
-        cairo_stroke(draw);
-      }
-    }
+    DrawFillStyle(projection,
+                  parameter,
+                  *area.fillStyle);
 
     cairo_restore(draw);
   }
