@@ -26,7 +26,7 @@
 #include <osmscout/util/Geometry.h>
 
 #include <osmscout/private/Math.h>
-#include <qt4/QtGui/qpainterpath.h>
+#include <QPainterPath>
 
 namespace osmscout {
 
