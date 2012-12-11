@@ -31,6 +31,7 @@
 #import <AppKit/AppKit.h>
 #define Font NSFont
 #define Image CGImageRef
+#define OSMSCOUT_REVERSED_Y_AXIS 1
 #endif
 
 #include <osmscout/MapPainter.h>
@@ -90,7 +91,9 @@ namespace osmscout {
         void DrawIcon(const IconStyle* style,
                       double x, double y);
         
-        void DrawSymbol(const SymbolStyle* style,
+        void DrawSymbol(const Projection& projection,
+                        const MapParameter& parameter,
+                        const SymbolRef& symbol,
                         double x, double y);
         
         void DrawPath(const Projection& projection,
@@ -113,10 +116,9 @@ namespace osmscout {
                       double width,
                       double height);
         
-        void SetBrush();
-        void SetBrush(const Projection& projection,
-                      const MapParameter& parameter,
-                      const FillStyle& fillStyle);
+        void SetFill(const Projection& projection,
+                     const MapParameter& parameter,
+                     const FillStyle& fillStyle);
 
         double textLength(const MapParameter& parameter, double fontSize, std::string text);
         
