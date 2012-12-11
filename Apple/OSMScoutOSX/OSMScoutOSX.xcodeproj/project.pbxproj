@@ -26,9 +26,9 @@
 		F53BD1511638829E006C7AE1 /* libosmscout.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F5953EA5163880BC0026B30F /* libosmscout.a */; };
 		F53BD152163882A2006C7AE1 /* libosmscoutmap.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F5953E9F163880A40026B30F /* libosmscoutmap.a */; };
 		F53BD153163882A5006C7AE1 /* libosmscoutmapiosx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F5953E99163880820026B30F /* libosmscoutmapiosx.a */; };
-		F53BD1A2163885E9006C7AE1 /* liblibosmscout-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F53BD19516388431006C7AE1 /* liblibosmscout-OSX.a */; };
-		F53BD1A3163885ED006C7AE1 /* liblibosmscoutmap-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F53BD19816388431006C7AE1 /* liblibosmscoutmap-OSX.a */; };
-		F53BD1A4163885F3006C7AE1 /* liblibosmscoutmapiosx-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F53BD19B16388431006C7AE1 /* liblibosmscoutmapiosx-OSX.a */; };
+		F53BD1A2163885E9006C7AE1 /* libosmscout-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F53BD19516388431006C7AE1 /* libosmscout-OSX.a */; };
+		F53BD1A3163885ED006C7AE1 /* libosmscoutmap-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F53BD19816388431006C7AE1 /* libosmscoutmap-OSX.a */; };
+		F53BD1A4163885F3006C7AE1 /* libosmscoutmapiosx-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F53BD19B16388431006C7AE1 /* libosmscoutmapiosx-OSX.a */; };
 		F5DD1BB6160B880500084E83 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5DD1BB5160B880400084E83 /* UIKit.framework */; };
 		F5DD1BB8160B880500084E83 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5DD1BB7160B880500084E83 /* Foundation.framework */; };
 		F5DD1BBA160B880500084E83 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5DD1BB9160B880500084E83 /* CoreGraphics.framework */; };
@@ -197,9 +197,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F53BD1A2163885E9006C7AE1 /* liblibosmscout-OSX.a in Frameworks */,
-				F53BD1A3163885ED006C7AE1 /* liblibosmscoutmap-OSX.a in Frameworks */,
-				F53BD1A4163885F3006C7AE1 /* liblibosmscoutmapiosx-OSX.a in Frameworks */,
+				F53BD1A2163885E9006C7AE1 /* libosmscout-OSX.a in Frameworks */,
+				F53BD1A3163885ED006C7AE1 /* libosmscoutmap-OSX.a in Frameworks */,
+				F53BD1A4163885F3006C7AE1 /* libosmscoutmapiosx-OSX.a in Frameworks */,
 				E50B832215E0136800C685B3 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -338,7 +338,7 @@
 			isa = PBXGroup;
 			children = (
 				F5953E99163880820026B30F /* libosmscoutmapiosx.a */,
-				F53BD19B16388431006C7AE1 /* liblibosmscoutmapiosx-OSX.a */,
+				F53BD19B16388431006C7AE1 /* libosmscoutmapiosx-OSX.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -347,7 +347,7 @@
 			isa = PBXGroup;
 			children = (
 				F5953E9F163880A40026B30F /* libosmscoutmap.a */,
-				F53BD19816388431006C7AE1 /* liblibosmscoutmap-OSX.a */,
+				F53BD19816388431006C7AE1 /* libosmscoutmap-OSX.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -356,7 +356,7 @@
 			isa = PBXGroup;
 			children = (
 				F5953EA5163880BC0026B30F /* libosmscout.a */,
-				F53BD19516388431006C7AE1 /* liblibosmscout-OSX.a */,
+				F53BD19516388431006C7AE1 /* libosmscout-OSX.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -485,24 +485,24 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		F53BD19516388431006C7AE1 /* liblibosmscout-OSX.a */ = {
+		F53BD19516388431006C7AE1 /* libosmscout-OSX.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = "liblibosmscout-OSX.a";
+			path = "libosmscout-OSX.a";
 			remoteRef = F53BD19416388431006C7AE1 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		F53BD19816388431006C7AE1 /* liblibosmscoutmap-OSX.a */ = {
+		F53BD19816388431006C7AE1 /* libosmscoutmap-OSX.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = "liblibosmscoutmap-OSX.a";
+			path = "libosmscoutmap-OSX.a";
 			remoteRef = F53BD19716388431006C7AE1 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		F53BD19B16388431006C7AE1 /* liblibosmscoutmapiosx-OSX.a */ = {
+		F53BD19B16388431006C7AE1 /* libosmscoutmapiosx-OSX.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = "liblibosmscoutmapiosx-OSX.a";
+			path = "libosmscoutmapiosx-OSX.a";
 			remoteRef = F53BD19A16388431006C7AE1 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
