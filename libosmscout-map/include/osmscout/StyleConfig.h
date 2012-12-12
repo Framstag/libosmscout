@@ -314,8 +314,17 @@ namespace osmscout {
 
   class OSMSCOUT_MAP_API DrawPrimitive : public Referencable
   {
+  private:
+    FillStyleRef fillStyle;
+
   public:
+    DrawPrimitive(const FillStyleRef& fillStyle);
     virtual ~DrawPrimitive();
+
+    inline const FillStyleRef& GetFillStyle() const
+    {
+      return fillStyle;
+    }
 
     virtual void GetBoundingBox(double& minX,
                                 double& minY,
@@ -328,7 +337,6 @@ namespace osmscout {
   class OSMSCOUT_MAP_API PolygonPrimitive : public DrawPrimitive
   {
   private:
-    FillStyleRef      fillStyle;
     std::list<Pixel>  pixels;
 
   public:
@@ -339,11 +347,6 @@ namespace osmscout {
     inline const std::list<Pixel>& GetPixels() const
     {
       return pixels;
-    }
-
-    inline const FillStyleRef& GetFillStyle() const
-    {
-      return fillStyle;
     }
 
     void GetBoundingBox(double& minX,
@@ -360,7 +363,6 @@ namespace osmscout {
     Pixel        topLeft;
     double       width;
     double       height;
-    FillStyleRef fillStyle;
 
   public:
     RectanglePrimitive(const Pixel& topLeft,
@@ -383,11 +385,6 @@ namespace osmscout {
       return height;
     }
 
-    inline const FillStyleRef& GetFillStyle() const
-    {
-      return fillStyle;
-    }
-
     void GetBoundingBox(double& minX,
                         double& minY,
                         double& maxX,
@@ -401,7 +398,6 @@ namespace osmscout {
   private:
     Pixel        center;
     double       radius;
-    FillStyleRef fillStyle;
 
   public:
     CirclePrimitive(const Pixel& center,
@@ -416,11 +412,6 @@ namespace osmscout {
     inline const double& GetRadius() const
     {
       return radius;
-    }
-
-    inline const FillStyleRef& GetFillStyle() const
-    {
-      return fillStyle;
     }
 
     void GetBoundingBox(double& minX,
@@ -614,7 +605,7 @@ namespace osmscout {
     virtual ~StyleConfig();
 
     bool RegisterSymbol(const SymbolRef& symbol);
-    SymbolRef& GetSymbol(const std::string& name);
+    const SymbolRef& GetSymbol(const std::string& name) const;
 
     void Postprocess();
 

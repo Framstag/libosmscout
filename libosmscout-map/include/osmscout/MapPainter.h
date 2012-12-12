@@ -373,6 +373,20 @@ namespace osmscout {
                                       double& fontSize,
                                       double& alpha);
 
+    /**
+     Ground tile drawing
+     */
+    //@{
+    void DrawGroundTiles(const StyleConfig& styleConfig,
+                         const Projection& projection,
+                         const MapParameter& parameter,
+                         const MapData& data);
+    //@}
+
+    /**
+     Label placement routines
+     */
+    //@{
     void ClearLabelMarks(std::list<LabelData>& labels);
     void RemoveMarkedLabels(std::list<LabelData>& labels);
     bool MarkAllInBoundingBox(double bx1,
@@ -391,6 +405,7 @@ namespace osmscout {
                                      double sameLabelSpace,
                                      const std::string& text,
                                      std::list<LabelData>& labels);
+    //@}
 
     /**
       Private draw algorithm implementation routines.
@@ -420,11 +435,6 @@ namespace osmscout {
                      const MapParameter& parameter,
                      const MapData& data);
 
-    void DrawGroundTiles(const StyleConfig& styleConfig,
-                         const Projection& projection,
-                         const MapParameter& parameter,
-                         const MapData& data);
-
     void RegisterPointWayLabel(const Projection& projection,
                                const MapParameter& parameter,
                                const LabelStyle& style,
@@ -438,7 +448,10 @@ namespace osmscout {
                             double x,
                             double y);
 
-
+    void DrawWayDecorations(const StyleConfig& styleConfig,
+                            const Projection& projection,
+                            const MapParameter& parameter,
+                            const MapData& data);
 
     void DrawWayLabels(const StyleConfig& styleConfig,
                        const Projection& projection,
@@ -512,6 +525,16 @@ namespace osmscout {
                          IconStyle& style)= 0;
 
     /**
+      Draw the given text as a contour of the given path in a style defined
+      by the given LabelStyle.
+     */
+    virtual void DrawContourSymbol(const Projection& projection,
+                                   const MapParameter& parameter,
+                                   const SymbolRef& symbol,
+                                   double space,
+                                   size_t transStart, size_t transEnd);
+
+    /**
       Return the bounding box of the given text.
 
       The backend may decide to relayout the given text, however it must assure
@@ -564,7 +587,7 @@ namespace osmscout {
     virtual void DrawSymbol(const Projection& projection,
                             const MapParameter& parameter,
                             const SymbolRef& symbol,
-                            double x, double y) = 0;
+                            double x, double y);
 
     /**
       Draw simple line with the given style,the given color, the given width

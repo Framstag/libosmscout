@@ -84,6 +84,12 @@ namespace osmscout {
                           double& width,
                           double& height);
 
+    void DrawContourSymbol(const Projection& projection,
+                           const MapParameter& parameter,
+                           const SymbolRef& symbol,
+                           double space,
+                           size_t transStart, size_t transEnd);
+
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
                    const LabelData& label);
@@ -97,6 +103,15 @@ namespace osmscout {
                           const LabelStyle& style,
                           const std::string& text,
                           size_t transStart, size_t transEnd);
+
+    void DrawPrimitivePath(const Projection& projection,
+                           const MapParameter& parameter,
+                           const DrawPrimitiveRef& primitive,
+                           double x, double y,
+                           double minX,
+                           double minY,
+                           double maxX,
+                           double maxY);
 
     void DrawSymbol(const Projection& projection,
                     const MapParameter& parameter,

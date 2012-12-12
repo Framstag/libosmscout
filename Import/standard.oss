@@ -17,6 +17,9 @@ OSS
 	   "waterway_stream","route_ferry"
   GROUP "highway_steps", "barrier_fence"
 
+SYMBOL oneway_arrow
+  POLYGON 0,0.5 1,0 0,-0.5 { color: #00000033; borderWidth: 0.1mm; borderColor: #00000044; }
+
 SYMBOL natural_peak
   POLYGON 0,0 1.5,0 0.75,1.5 { color: #9c5e29; }
 
@@ -55,8 +58,8 @@ SYMBOL amenity_post_office
   RECTANGLE 0,0 2 x 2 { color: #ffcc00; }
 
 SYMBOL christian_church_cross
-  RECTANGLE 0.5,2 0.5 x 2 { color: #000000; }   // horizontal bar
-  RECTANGLE 0,1.5 1.5 x 0.5 { color: #000000; } // vertical bar
+  RECTANGLE 0.5,2 0.5 x 2 { color: #000000; }   // vertical bar
+  RECTANGLE 0,1.5 1.5 x 0.5 { color: #000000; } // horizontal bar
 
  // -------------------------------------------------------
  //

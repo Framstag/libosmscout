@@ -271,8 +271,14 @@ namespace osmscout {
     // no code
   }
 
-  PolygonPrimitive::PolygonPrimitive(const FillStyleRef& fillStyle)
+  DrawPrimitive::DrawPrimitive(const FillStyleRef& fillStyle)
   : fillStyle(fillStyle)
+  {
+    // no code
+  }
+
+  PolygonPrimitive::PolygonPrimitive(const FillStyleRef& fillStyle)
+  : DrawPrimitive(fillStyle)
   {
     // no code
   }
@@ -307,32 +313,32 @@ namespace osmscout {
                                          double width,
                                          double height,
                                          const FillStyleRef& fillStyle)
-  : topLeft(topLeft),
+  : DrawPrimitive(fillStyle),
+    topLeft(topLeft),
     width(width),
-    height(height),
-    fillStyle(fillStyle)
+    height(height)
   {
     // no code
   }
 
   void RectanglePrimitive::GetBoundingBox(double& minX,
-                                         double& minY,
-                                         double& maxX,
-                                         double& maxY) const
+                                          double& minY,
+                                          double& maxX,
+                                          double& maxY) const
   {
     minX=topLeft.x;
-    minY=topLeft.y;
+    minY=topLeft.y-height;
 
     maxX=topLeft.x+width;
-    maxY=topLeft.y+height;
+    maxY=topLeft.y;
   }
 
   CirclePrimitive::CirclePrimitive(const Pixel& center,
                                    double radius,
                                    const FillStyleRef& fillStyle)
-  : center(center),
-    radius(radius),
-    fillStyle(fillStyle)
+  : DrawPrimitive(fillStyle),
+    center(center),
+    radius(radius)
   {
     // no code
   }
@@ -474,9 +480,9 @@ namespace osmscout {
     return result.second;
   }
 
-  SymbolRef& StyleConfig::GetSymbol(const std::string& name)
+  const SymbolRef& StyleConfig::GetSymbol(const std::string& name) const
   {
-    OSMSCOUT_HASHMAP<std::string,SymbolRef>::iterator entry;
+    OSMSCOUT_HASHMAP<std::string,SymbolRef>::const_iterator entry;
 
     entry=symbols.find(name);
 

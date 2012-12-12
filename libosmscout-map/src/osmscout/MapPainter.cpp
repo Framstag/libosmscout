@@ -736,6 +736,15 @@ namespace osmscout {
     // no code - must be implemented by derived classes!
   }
 
+  void MapPainter::DrawContourSymbol(const Projection& projection,
+                                     const MapParameter& parameter,
+                                     const SymbolRef& symbol,
+                                     double space,
+                                     size_t transStart, size_t transEnd)
+  {
+    // no code - must be implemented by derived classes!
+  }
+
   void MapPainter::RegisterPointWayLabel(const Projection& projection,
                                          const MapParameter& parameter,
                                          const LabelStyle& style,
@@ -1423,6 +1432,29 @@ namespace osmscout {
     }
   }
 
+  void MapPainter::DrawWayDecorations(const StyleConfig& styleConfig,
+                                      const Projection& projection,
+                                      const MapParameter& parameter,
+                                      const MapData& data)
+  {
+    SymbolRef onewayArrow=styleConfig.GetSymbol("oneway_arrow");
+    double onewaySpace=ConvertWidthToPixel(parameter,15);
+
+    for (std::list<WayData>::const_iterator way=wayData.begin();
+        way!=wayData.end();
+        way++)
+    {
+      if (projection.GetMagnification()>=magVeryClose &&
+          onewayArrow.Valid() &&
+          way->attributes->IsOneway()) {
+        DrawContourSymbol(projection,
+                          parameter,
+                          onewayArrow,
+                          onewaySpace,
+                          way->transStart, way->transEnd);
+      }
+    }
+  }
 
   void MapPainter::DrawWayLabels(const StyleConfig& styleConfig,
                                  const Projection& projection,
@@ -2067,6 +2099,23 @@ namespace osmscout {
              data);
 
     pathsTimer.Stop();
+
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
+    //
+    // Path decorations (like arrows and similar)
+    //
+
+    StopClock pathDecorationsTimer;
+
+    DrawWayDecorations(styleConfig,
+                       projection,
+                       parameter,
+                       data);
+
+    pathDecorationsTimer.Stop();
 
     if (parameter.IsAborted()) {
       return false;

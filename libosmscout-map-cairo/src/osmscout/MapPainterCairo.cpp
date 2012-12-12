@@ -624,6 +624,93 @@ namespace osmscout {
 #endif
   }
 
+  void MapPainterCairo::DrawContourSymbol(const Projection& projection,
+                                          const MapParameter& parameter,
+                                          const SymbolRef& symbol,
+                                          double space,
+                                          size_t transStart, size_t transEnd)
+  {
+    double lineLength=0;
+    double xo=0;
+    double yo=0;
+
+    cairo_save(draw);
+
+    cairo_new_path(draw);
+
+    for (size_t j=transStart; j<=transEnd; j++) {
+      if (j==transStart) {
+        cairo_move_to(draw,
+                      transBuffer.buffer[j].x,
+                      transBuffer.buffer[j].y);
+      }
+      else {
+        cairo_line_to(draw,
+                      transBuffer.buffer[j].x,
+                      transBuffer.buffer[j].y);
+        lineLength+=sqrt(pow(transBuffer.buffer[j].x-xo,2)+
+                         pow(transBuffer.buffer[j].y-yo,2));
+      }
+
+      xo=transBuffer.buffer[j].x;
+      yo=transBuffer.buffer[j].y;
+    }
+
+    cairo_path_t *path=cairo_copy_path_flat(draw);
+
+    double minX;
+    double minY;
+    double maxX;
+    double maxY;
+
+    symbol->GetBoundingBox(minX,minY,maxX,maxY);
+
+    double width=ConvertWidthToPixel(parameter,maxX-minX);
+    double height=ConvertWidthToPixel(parameter,maxY-minY);
+
+    for (std::list<DrawPrimitiveRef>::const_iterator p=symbol->GetPrimitives().begin();
+         p!=symbol->GetPrimitives().end();
+         ++p) {
+      FillStyleRef fillStyle=(*p)->GetFillStyle();
+
+      size_t offset=space/2;
+
+      cairo_new_path(draw);
+
+      while (offset+width<lineLength) {
+        DrawPrimitivePath(projection,
+                          parameter,
+                          *p,
+                          offset+width/2,0,
+                          minX,
+                          minY,
+                          maxX,
+                          maxY);
+
+        offset+=width+space;
+      }
+
+      cairo_path_t *patternPath=cairo_copy_path_flat(draw);
+
+      // Now transform the text path so that it maps to the contour of the line
+      MapPathOnPath(draw,
+                    patternPath,
+                    path,
+                    0,
+                    height/2);
+
+      DrawFillStyle(projection,
+                    parameter,
+                    *fillStyle);
+
+      cairo_path_destroy(patternPath);
+    }
+
+    cairo_path_destroy(path);
+
+    cairo_restore(draw);
+  }
+
   void MapPainterCairo::DrawLabel(const Projection& projection,
                                   const MapParameter& parameter,
                                   const LabelData& label)
@@ -855,41 +942,6 @@ namespace osmscout {
       // Make a copy of the path of the line we should draw along
       path=cairo_copy_path_flat(draw);
 
-/*
-      cairo_new_path(draw);
-      cairo_set_source_rgb(draw,0.0,0.0,1.0);
-      cairo_set_line_width(draw,0);
-      cairo_set_dash(draw,NULL,0,0);
-
-      size_t offset=0;
-
-      while (offset+20<lineLength) {
-        cairo_move_to(draw,offset+0.0,2.0);
-        cairo_line_to(draw,offset+10.0,2.0);
-        cairo_line_to(draw,offset+10.0,0.0);
-        cairo_line_to(draw,offset+15.0,2.5);
-        cairo_line_to(draw,offset+10.0,5.0);
-        cairo_line_to(draw,offset+10.0,3.0);
-        cairo_line_to(draw,offset+0.0,3.0);
-        cairo_close_path(draw);
-
-        offset+=25+50;
-      }
-
-      cairo_path_t *patternPath=cairo_copy_path_flat(draw);
-
-      // Now transform the text path so that it maps to the contour of the line
-      MapPathOnPath(draw,
-                    patternPath,
-                    path,
-                    0,
-                    -2.5);
-
-      cairo_path_destroy(patternPath);
-
-      // Draw the text path
-      cairo_fill(draw);*/
-
       cairo_set_source_rgba(draw,
                             style.GetTextColor().GetR(),
                             style.GetTextColor().GetG(),
@@ -945,6 +997,59 @@ namespace osmscout {
 #endif
   }
 
+  void MapPainterCairo::DrawPrimitivePath(const Projection& projection,
+                                          const MapParameter& parameter,
+                                          const DrawPrimitiveRef& p,
+                                          double x, double y,
+                                          double minX,
+                                          double minY,
+                                          double maxX,
+                                          double maxY)
+  {
+    DrawPrimitive* primitive=p.Get();
+    double         centerX=maxX-minX;
+    double         centerY=maxY-minY;
+
+    if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
+      PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
+
+      for (std::list<Pixel>::const_iterator pixel=polygon->GetPixels().begin();
+           pixel!=polygon->GetPixels().end();
+           ++pixel) {
+        if (pixel==polygon->GetPixels().begin()) {
+          cairo_move_to(draw,
+                        x+ConvertWidthToPixel(parameter,pixel->x-centerX),
+                        y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
+        }
+        else {
+          cairo_line_to(draw,
+                        x+ConvertWidthToPixel(parameter,pixel->x-centerX),
+                        y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
+        }
+      }
+
+      cairo_close_path(draw);
+    }
+    else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL) {
+      RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
+
+      cairo_rectangle(draw,
+                      x+ConvertWidthToPixel(parameter,rectangle->GetTopLeft().x-centerX),
+                      y+ConvertWidthToPixel(parameter,maxY-rectangle->GetTopLeft().y-centerY),
+                      ConvertWidthToPixel(parameter,rectangle->GetWidth()),
+                      ConvertWidthToPixel(parameter,rectangle->GetHeight()));
+    }
+    else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL) {
+      CirclePrimitive* circle=dynamic_cast<CirclePrimitive*>(primitive);
+
+      cairo_arc(draw,
+                x+ConvertWidthToPixel(parameter,circle->GetCenter().x-centerX),
+                y+ConvertWidthToPixel(parameter,maxY-circle->GetCenter().y-centerY),
+                ConvertWidthToPixel(parameter,circle->GetRadius()),
+                0,2*M_PI);
+    }
+  }
+
   void MapPainterCairo::DrawSymbol(const Projection& projection,
                                    const MapParameter& parameter,
                                    const SymbolRef& symbol,
@@ -954,84 +1059,31 @@ namespace osmscout {
       return;
     }
 
-    cairo_save(draw);
-
     double minX;
     double minY;
     double maxX;
     double maxY;
-    double centerX;
-    double centerY;
 
     symbol->GetBoundingBox(minX,minY,maxX,maxY);
-
-    centerX=maxX-minX;
-    centerY=maxY-minY;
 
     for (std::list<DrawPrimitiveRef>::const_iterator p=symbol->GetPrimitives().begin();
          p!=symbol->GetPrimitives().end();
          ++p) {
-      DrawPrimitive* primitive=p->Get();
+      FillStyleRef fillStyle=(*p)->GetFillStyle();
 
-      if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
-        PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
-        FillStyleRef      style=polygon->GetFillStyle();
+      DrawPrimitivePath(projection,
+                        parameter,
+                        *p,
+                        x,y,
+                        minX,
+                        minY,
+                        maxX,
+                        maxY);
 
-        for (std::list<Pixel>::const_iterator pixel=polygon->GetPixels().begin();
-             pixel!=polygon->GetPixels().end();
-             ++pixel) {
-          if (pixel==polygon->GetPixels().begin()) {
-            cairo_new_path(draw);
-            cairo_move_to(draw,
-                          x+ConvertWidthToPixel(parameter,pixel->x-centerX),
-                          y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
-          }
-          else {
-            cairo_line_to(draw,
-                          x+ConvertWidthToPixel(parameter,pixel->x-centerX),
-                          y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
-          }
-        }
-
-        DrawFillStyle(projection,
-                      parameter,
-                      *style);
-      }
-      else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL) {
-        RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
-        FillStyleRef        style=rectangle->GetFillStyle();
-
-        cairo_new_path(draw);
-
-        cairo_rectangle(draw,
-                        x+ConvertWidthToPixel(parameter,rectangle->GetTopLeft().x-centerX),
-                        y+ConvertWidthToPixel(parameter,maxY-rectangle->GetTopLeft().y-centerY),
-                        ConvertWidthToPixel(parameter,rectangle->GetWidth()),
-                        ConvertWidthToPixel(parameter,rectangle->GetHeight()));
-
-        DrawFillStyle(projection,
-                      parameter,
-                      *style);
-      }
-      else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL) {
-        CirclePrimitive* circle=dynamic_cast<CirclePrimitive*>(primitive);
-        FillStyleRef     style=circle->GetFillStyle();
-
-        cairo_new_path(draw);
-
-        cairo_arc(draw,
-                  x+ConvertWidthToPixel(parameter,circle->GetCenter().x-centerX),
-                  y+ConvertWidthToPixel(parameter,maxY-circle->GetCenter().y-centerY),
-                  ConvertWidthToPixel(parameter,circle->GetRadius()),
-                  0,2*M_PI);
-
-        DrawFillStyle(projection,
-                      parameter,
-                      *style);
-      }
+      DrawFillStyle(projection,
+                    parameter,
+                    *fillStyle);
     }
-
-    cairo_restore(draw);
   }
 
   void MapPainterCairo::DrawIcon(const IconStyle* style,
