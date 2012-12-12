@@ -79,13 +79,20 @@ SYMBOL christian_church_cross
    //[TYPE "_tile_sea"] AREA {color: #b5d0d0;}
    //[TYPE "_tile_coast"] AREA {color: #ff0000;}
    //[TYPE "_tile_coast"] AREA {color: #b5d0d0;}
-   [TYPE "_tile_coast"] AREA {color: #b5d0d0;  borderColor: #000000; borderWidth: 0.1mm;}
+   //[TYPE "_tile_coast"] AREA {color: #b5d0d0;  borderColor: #000000; borderWidth: 0.1mm;}
    //[TYPE "_tile_coast"] AREA {color: #aaaaaa;  borderColor: #000000; borderWidth: 0.1mm;}
    //[TYPE "_tile_land"] AREA {color: #f1eee9;}
    //[TYPE "_tile_land"] AREA {color: #f1eee9; borderColor: #000000; borderWidth: 0.1mm;}
    //[TYPE "_tile_unknown"] AREA {color: #ffffad;}
 
-   [TYPE "_tile_coastline"] WAY {color: #ff0000; displayWidth: 0.1mm;}
+   /*
+   [TYPE "_tile_land"] AREA {color: #fcfbe7;}
+   [TYPE "_tile_sea"] AREA {color: #c4dff6;}
+   [TYPE "_tile_coast"] AREA {color: #c4dff6;}
+   [TYPE "_tile_unknown"] AREA {color: #c4dff6;}
+   */
+
+   //[TYPE "_tile_coastline"] WAY {color: #ff0000; displayWidth: 0.1mm;}
  }
 
  // -------------------------------------------------------

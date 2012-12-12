@@ -483,13 +483,9 @@ namespace osmscout {
 
   void MapPainterAgg::DrawSymbol(const Projection& projection,
                                  const MapParameter& parameter,
-                                 const SymbolRef& symbol,
+                                 const Symbol& symbol,
                                  double x, double y)
   {
-    if (!symbol.Valid()) {
-      return;
-    }
-
     double minX;
     double minY;
     double maxX;
@@ -497,13 +493,13 @@ namespace osmscout {
     double centerX;
     double centerY;
 
-    symbol->GetBoundingBox(minX,minY,maxX,maxY);
+    symbol.GetBoundingBox(minX,minY,maxX,maxY);
 
     centerX=maxX-minX;
     centerY=maxY-minY;
 
-    for (std::list<DrawPrimitiveRef>::const_iterator p=symbol->GetPrimitives().begin();
-         p!=symbol->GetPrimitives().end();
+    for (std::list<DrawPrimitiveRef>::const_iterator p=symbol.GetPrimitives().begin();
+         p!=symbol.GetPrimitives().end();
          ++p) {
       DrawPrimitive* primitive=p->Get();
 

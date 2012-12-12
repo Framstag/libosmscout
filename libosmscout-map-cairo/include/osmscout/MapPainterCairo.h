@@ -86,7 +86,7 @@ namespace osmscout {
 
     void DrawContourSymbol(const Projection& projection,
                            const MapParameter& parameter,
-                           const SymbolRef& symbol,
+                           const Symbol& symbol,
                            double space,
                            size_t transStart, size_t transEnd);
 
@@ -115,7 +115,7 @@ namespace osmscout {
 
     void DrawSymbol(const Projection& projection,
                     const MapParameter& parameter,
-                    const SymbolRef& symbol,
+                    const Symbol& symbol,
                     double x, double y);
 
     void DrawIcon(const IconStyle* style,

@@ -730,7 +730,7 @@ namespace osmscout {
 
   void MapPainter::DrawSymbol(const Projection& projection,
                               const MapParameter& parameter,
-                              const SymbolRef& symbol,
+                              const Symbol& symbol,
                               double x, double y)
   {
     // no code - must be implemented by derived classes!
@@ -738,7 +738,7 @@ namespace osmscout {
 
   void MapPainter::DrawContourSymbol(const Projection& projection,
                                      const MapParameter& parameter,
-                                     const SymbolRef& symbol,
+                                     const Symbol& symbol,
                                      double space,
                                      size_t transStart, size_t transEnd)
   {
@@ -1082,7 +1082,7 @@ namespace osmscout {
       else if (hasSymbol) {
         DrawSymbol(projection,
                    parameter,
-                   iconStyle->GetSymbol(),
+                   *iconStyle->GetSymbol(),
                    x,y);
       }
     }
@@ -1169,7 +1169,7 @@ namespace osmscout {
         else if (hasSymbol) {
           DrawSymbol(projection,
                      parameter,
-                     iconStyle->GetSymbol(),
+                     *iconStyle->GetSymbol(),
                      x,y);
         }
       }
@@ -1260,7 +1260,7 @@ namespace osmscout {
     else if (hasSymbol) {
       DrawSymbol(projection,
                  parameter,
-                 iconStyle->GetSymbol(),
+                 *iconStyle->GetSymbol(),
                  x,y);
     }
 
@@ -1449,7 +1449,7 @@ namespace osmscout {
           way->attributes->IsOneway()) {
         DrawContourSymbol(projection,
                           parameter,
-                          onewayArrow,
+                          *onewayArrow,
                           onewaySpace,
                           way->transStart, way->transEnd);
       }

@@ -626,7 +626,7 @@ namespace osmscout {
 
   void MapPainterCairo::DrawContourSymbol(const Projection& projection,
                                           const MapParameter& parameter,
-                                          const SymbolRef& symbol,
+                                          const Symbol& symbol,
                                           double space,
                                           size_t transStart, size_t transEnd)
   {
@@ -663,13 +663,13 @@ namespace osmscout {
     double maxX;
     double maxY;
 
-    symbol->GetBoundingBox(minX,minY,maxX,maxY);
+    symbol.GetBoundingBox(minX,minY,maxX,maxY);
 
     double width=ConvertWidthToPixel(parameter,maxX-minX);
     double height=ConvertWidthToPixel(parameter,maxY-minY);
 
-    for (std::list<DrawPrimitiveRef>::const_iterator p=symbol->GetPrimitives().begin();
-         p!=symbol->GetPrimitives().end();
+    for (std::list<DrawPrimitiveRef>::const_iterator p=symbol.GetPrimitives().begin();
+         p!=symbol.GetPrimitives().end();
          ++p) {
       FillStyleRef fillStyle=(*p)->GetFillStyle();
 
@@ -1052,22 +1052,18 @@ namespace osmscout {
 
   void MapPainterCairo::DrawSymbol(const Projection& projection,
                                    const MapParameter& parameter,
-                                   const SymbolRef& symbol,
+                                   const Symbol& symbol,
                                    double x, double y)
   {
-    if (!symbol.Valid()) {
-      return;
-    }
-
     double minX;
     double minY;
     double maxX;
     double maxY;
 
-    symbol->GetBoundingBox(minX,minY,maxX,maxY);
+    symbol.GetBoundingBox(minX,minY,maxX,maxY);
 
-    for (std::list<DrawPrimitiveRef>::const_iterator p=symbol->GetPrimitives().begin();
-         p!=symbol->GetPrimitives().end();
+    for (std::list<DrawPrimitiveRef>::const_iterator p=symbol.GetPrimitives().begin();
+         p!=symbol.GetPrimitives().end();
          ++p) {
       FillStyleRef fillStyle=(*p)->GetFillStyle();
 

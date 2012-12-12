@@ -127,7 +127,7 @@ namespace osmscout {
 
     void DrawSymbol(const Projection& projection,
                     const MapParameter& parameter,
-                    const SymbolRef& symbol,
+                    const Symbol& symbol,
                     double x, double y);
 
     void DrawPath(const Projection& projection,
