@@ -155,7 +155,7 @@ TYPES
   TYPE "amenity_hospital" = NODE AREA ("amenity"=="hospital")
 
   TYPE "amenity_parking_building" = AREA ("amenity"=="parking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
-  TYPE "amenity_parking" = NODE ("amenity"=="parking")
+  TYPE "amenity_parking" = NODE AREA ("amenity"=="parking")
 
   TYPE "amenity_bicycle_parking_building" = AREA ("amenity"=="bicycle_parking" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE "amenity_bicycle_parking" = NODE WAY AREA ("amenity"=="bicycle_parking")
