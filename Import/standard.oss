@@ -18,7 +18,7 @@ OSS
   GROUP "highway_steps", "barrier_fence"
 
 SYMBOL oneway_arrow
-  POLYGON 0,0.5 1,0 0,-0.5 { color: #00000033; borderWidth: 0.1mm; borderColor: #00000044; }
+  POLYGON 0,0.3 1,0 0,-0.3 { color: #00000033; borderWidth: 0.1mm; borderColor: #00000044; }
 
 SYMBOL natural_peak
   POLYGON 0,0 1.5,0 0.75,1.5 { color: #9c5e29; }
