@@ -202,11 +202,11 @@ void Parser::STYLE(StyleFilter filter) {
 
 void Parser::WAYGROUP(size_t priority) {
 		Expect(10 /* "GROUP" */);
-		if (la->kind == _string) {
+		if (la->kind == _ident) {
 			std::string wayTypeName;
 			TypeId      wayType;
 			
-			STRING(wayTypeName);
+			IDENT(wayTypeName);
 			wayType=config.GetTypeConfig()->GetWayTypeId(wayTypeName);
 			
 			if (wayType==typeIgnore) {
@@ -223,7 +223,7 @@ void Parser::WAYGROUP(size_t priority) {
 			TypeId      wayType;
 			
 			Get();
-			STRING(wayTypeName);
+			IDENT(wayTypeName);
 			wayType=config.GetTypeConfig()->GetWayTypeId(wayTypeName);
 			
 			if (wayType==typeIgnore) {
@@ -235,12 +235,6 @@ void Parser::WAYGROUP(size_t priority) {
 			}
 			
 		}
-}
-
-void Parser::STRING(std::string& value) {
-		Expect(_string);
-		value=Destring(t->val);
-		
 }
 
 void Parser::IDENT(std::string& value) {
@@ -474,7 +468,7 @@ void Parser::STYLEFILTER(StyleFilter& filter) {
 			std::string name;
 			
 			Get();
-			STRING(name);
+			IDENT(name);
 			TypeId type=config.GetTypeConfig()->GetTypeId(name);
 			
 			if (type==typeIgnore) {
@@ -495,7 +489,7 @@ void Parser::STYLEFILTER(StyleFilter& filter) {
 			while (la->kind == 11 /* "," */) {
 				std::string name; 
 				Get();
-				STRING(name);
+				IDENT(name);
 				TypeId      type=config.GetTypeConfig()->GetTypeId(name);
 				
 				if (type==typeIgnore) {
@@ -1341,6 +1335,12 @@ void Parser::CAPSTYLE(LineStyle::CapStyle& style) {
 			Get();
 			style=LineStyle::capSquare; 
 		} else SynErr(125);
+}
+
+void Parser::STRING(std::string& value) {
+		Expect(_string);
+		value=Destring(t->val);
+		
 }
 
 void Parser::LABELSTYLE(LabelStyle::Style& style) {

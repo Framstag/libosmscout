@@ -150,6 +150,7 @@ void Scanner::Init() {
 	noSym = 77;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
+	for (i = 95; i <= 95; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
 	for (i = 48; i <= 57; ++i) start.set(i, 15);
 	start.set(45, 26);
@@ -373,7 +374,7 @@ Token* Scanner::NextToken() {
 		case 1:
 			case_1:
 			recEnd = pos; recKind = 1;
-			if ((ch >= 'A' && ch <= 'Z') || ch == '_' || (ch >= 'a' && ch <= 'z')) {AddCh(); goto case_1;}
+			if ((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z') || ch == '_' || (ch >= 'a' && ch <= 'z')) {AddCh(); goto case_1;}
 			else {t->kind = 1; char *literal = coco_string_create(tval, 0, tlen); t->kind = keywords.get(literal, t->kind); coco_string_delete(literal); break;}
 		case 2:
 			case_2:

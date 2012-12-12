@@ -26,7 +26,7 @@ CHARACTERS
   quotchar   = ANY.
 
 TOKENS
-  ident      = letter {letter | '_'}.
+  ident      = letter {letter | digit | '_'}.
   number     = digit {digit}.
   string     = '"' {stringchar | '\\' quotchar} '"'.
 
@@ -39,12 +39,13 @@ PRODUCTIONS
   OST         = SYNC "OST" [TYPES] [TAGS] "END".
   TYPES       = SYNC "TYPES" TYPE {TYPE}.
   TYPE        = (.
+                  std::string   name;
                   Condition     *condition=NULL;
                   TypeInfo      typeInfo;
                   unsigned char types;
                 .)
                 SYNC "TYPE"
-                string                         (. typeInfo.SetType(Destring(t->val)); .)
+                IDENT<name>                    (. typeInfo.SetType(name); .)
 
                 "="
                 TYPEKINDS<types>
@@ -70,7 +71,7 @@ PRODUCTIONS
                 string
                 (.
                    std::string tagName=Destring(t->val);
-                
+
                    if (tagName.empty()) {
                      std::string e="Empty tags are not allowed";
 
@@ -80,7 +81,7 @@ PRODUCTIONS
                      config.RegisterTagForExternalUse(tagName);
                    }
                 .)
-                .              
+                .
 
   CONDITION<Condition*& condition>
               = (.
@@ -258,5 +259,11 @@ PRODUCTIONS
                | "IGNORESEALAND"     (. typeInfo.SetIgnoreSeaLand(true); .)
                .
 
+  IDENT<std::string& value>
+              = ident
+                (.
+                  value=t->val;
+                .)
+                .
 END OST.
 

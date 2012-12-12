@@ -77,7 +77,7 @@ CHARACTERS
   quotchar   = ANY.
 
 TOKENS
-  ident      = letter {letter | '_'}.
+  ident      = ('_' | letter) {letter | digit | '_'}.
   number     = ['-'] digit {digit}.
   double     = ['-'] digit {digit} '.' digit {digit}.
   color      = "#" hexdigit hexdigit hexdigit hexdigit hexdigit hexdigit [hexdigit hexdigit].
@@ -135,7 +135,7 @@ PRODUCTIONS
                      std::string wayTypeName;
                      TypeId      wayType;
                   .)
-                  STRING<wayTypeName>
+                  IDENT<wayTypeName>
                   (.
       	              wayType=config.GetTypeConfig()->GetWayTypeId(wayTypeName);
 
@@ -154,7 +154,7 @@ PRODUCTIONS
                      TypeId      wayType;
                   .)
                   ","
-                  STRING<wayTypeName>
+                  IDENT<wayTypeName>
                   (.
       	              wayType=config.GetTypeConfig()->GetWayTypeId(wayTypeName);
 
@@ -299,7 +299,7 @@ PRODUCTIONS
                      .)
 
                      "TYPE"
-                     STRING<name>
+                     IDENT<name>
                      (.
                        TypeId type=config.GetTypeConfig()->GetTypeId(name);
 
@@ -321,7 +321,7 @@ PRODUCTIONS
                      {
                        (. std::string name; .)
                        ","
-                       STRING<name>
+                       IDENT<name>
                        (.
                          TypeId      type=config.GetTypeConfig()->GetTypeId(name);
 

@@ -181,7 +181,6 @@ inline void ToRGBA(const char* str, Color& color)
 	void SYMBOL();
 	void STYLE(StyleFilter filter);
 	void WAYGROUP(size_t priority);
-	void STRING(std::string& value);
 	void IDENT(std::string& value);
 	void POLYGON(Symbol& symbol);
 	void RECTANGLE(Symbol& symbol);
@@ -212,6 +211,7 @@ inline void ToRGBA(const char* str, Color& color)
 	void DISPLAYSIZE(double& value);
 	void MAPSIZE(double& value);
 	void CAPSTYLE(LineStyle::CapStyle& style);
+	void STRING(std::string& value);
 	void LABELSTYLE(LabelStyle::Style& style);
 	void INTEGER(size_t& value);
 

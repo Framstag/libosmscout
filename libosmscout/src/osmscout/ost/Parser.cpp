@@ -158,14 +158,15 @@ void Parser::TAGS() {
 }
 
 void Parser::TYPE() {
+		std::string   name;
 		Condition     *condition=NULL;
 		TypeInfo      typeInfo;
 		unsigned char types;
 		
 		while (!(la->kind == _EOF || la->kind == 7 /* "TYPE" */)) {SynErr(40); Get();}
 		Expect(7 /* "TYPE" */);
-		Expect(_string);
-		typeInfo.SetType(Destring(t->val)); 
+		IDENT(name);
+		typeInfo.SetType(name); 
 		Expect(8 /* "=" */);
 		TYPEKINDS(types);
 		Expect(9 /* "(" */);
@@ -185,6 +186,12 @@ void Parser::TYPE() {
 			TYPEOPTIONS(typeInfo);
 		}
 		config.AddTypeInfo(typeInfo);
+		
+}
+
+void Parser::IDENT(std::string& value) {
+		Expect(_ident);
+		value=t->val;
 		
 }
 
