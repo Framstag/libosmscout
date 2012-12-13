@@ -74,6 +74,12 @@ namespace osmscout {
                               double& width,
                               double& height);
         
+        void DrawContourSymbol(const Projection& projection,
+                               const MapParameter& parameter,
+                               const Symbol& symbol,
+                               double space,
+                               size_t transStart, size_t transEnd);
+        
         void DrawLabel(const Projection& projection,
                        const MapParameter& parameter,
                        const LabelData& label);
@@ -91,9 +97,18 @@ namespace osmscout {
         void DrawIcon(const IconStyle* style,
                       double x, double y);
         
+        void DrawPrimitivePath(const Projection& projection,
+                               const MapParameter& parameter,
+                               const DrawPrimitiveRef& primitive,
+                               double x, double y,
+                               double minX,
+                               double minY,
+                               double maxX,
+                               double maxY);
+        
         void DrawSymbol(const Projection& projection,
                         const MapParameter& parameter,
-                        const SymbolRef& symbol,
+                        const Symbol& symbol,
                         double x, double y);
         
         void DrawPath(const Projection& projection,
@@ -116,7 +131,7 @@ namespace osmscout {
                       double width,
                       double height);
         
-        void SetFill(const Projection& projection,
+        void DrawFillStyle(const Projection& projection,
                      const MapParameter& parameter,
                      const FillStyle& fillStyle);
 
@@ -125,8 +140,8 @@ namespace osmscout {
     private:
         Font *GetFont(const MapParameter& parameter, double fontSize);
         CGFloat pathLength(size_t transStart, size_t transEnd);
-        Pt originForPositionAlongPath(CGFloat *l, CGFloat nextW, size_t transStart, size_t transEnd);
-        CGFloat slopeForPositionAlongPath(CGFloat* l, CGFloat nextW, size_t transStart, size_t transEnd);
+        Pt originForPositionAlongPath(CGFloat l, CGFloat nextW, size_t transStart, size_t transEnd);
+        CGFloat slopeForPositionAlongPath(CGFloat l, CGFloat nextW, size_t transStart, size_t transEnd);
     };
 }
 
