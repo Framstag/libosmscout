@@ -523,9 +523,9 @@ namespace osmscout {
   {
     if (node.HasDescription(RouteDescription::CROSSING_WAYS_DESC)) {
       RouteDescription::CrossingWaysDescriptionRef crossing=dynamic_cast<RouteDescription::CrossingWaysDescription*>(node.GetDescription(RouteDescription::CROSSING_WAYS_DESC));
-
+#ifdef DEBUG
       std::cout << "Exits at node: " << node.GetCurrentNodeId() << " " << crossing->GetExitCount() << std::endl;
-
+#endif
       if (crossing->GetExitCount()>1) {
         roundaboutCrossingCounter+=crossing->GetExitCount()-1;
       }
