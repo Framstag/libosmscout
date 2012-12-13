@@ -5,17 +5,17 @@ OSS
   SYMBOL place_town
     CIRCLE 0,0 0.75 {color: #ff000055; }
 
-  [TYPE "boundary_administrative"] {
+  [TYPE boundary_administrative] {
     AREA {color: #cccccc; borderColor: #000000; borderWidth: 0.5mm;}
     AREA.LABEL { style: emphasize; size: 1.5; priority: 1; }
   }
 
-  [TYPE "place_city" MAG stateOver-] {
+  [TYPE place_city MAG stateOver-] {
 	NODE.LABEL {style: normal; size: 1.3; priority: 2;}
     NODE.ICON {symbol: place_city; }
   }
 
-  [TYPE "place_town" MAG county-] {
+  [TYPE place_town MAG county-] {
     NODE.LABEL { style: normal;  priority: 3;}
     NODE.ICON {symbol: place_town;}
   }
