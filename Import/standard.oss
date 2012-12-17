@@ -124,9 +124,9 @@ SYMBOL christian_church_cross
          natural_water,
          natural_beach,
          natural_land]
-     AREA.LABEL { style: normal; }
+     AREA.TEXT { label: name; }
 
-   [TYPE natural_peak] NODE.LABEL { style: emphasize; color: #9c5329;}
+   [TYPE natural_peak] NODE.TEXT { label: name; style: emphasize; color: #9c5329;}
  }
 
  [MAG city-] {
@@ -146,7 +146,7 @@ SYMBOL christian_church_cross
    [TYPE waterway_dock,
          waterway_riverbank] {
      AREA { color: #b5d0d0; }
-     AREA.LABEL { style: normal;}
+     AREA.TEXT { label: name; }
    }
  }
 
@@ -160,10 +160,10 @@ SYMBOL christian_church_cross
          waterway_drain,
          waterway_river,
          waterway_canal]
-     WAY.LABEL { style: contour;}
+     WAY.TEXT { label: name;}
 
    [TYPE waterway_riverbank]
-     AREA.LABEL { style: normal;}
+     AREA.TEXT { label: name; }
  }
 
  // -------------------------------------------------------
@@ -271,28 +271,28 @@ SYMBOL christian_church_cross
    [TYPE highway_steps] WAY {color: #fe9897; dash: 0.25,0.25; cap: butt; displayWidth: 1.25mm;}
  }
 
- // WAY.REF
+ // WAY.SHIELD
 
  [MAG state-] {
-   [TYPE highway_motorway] WAY.REF { style: plate; color: #ffffff; backgroundColor: #809bc0; borderColor: #ffffff; priority: 20;}
+   [TYPE highway_motorway] WAY.SHIELD { label: ref; color: #ffffff; backgroundColor: #809bc0; borderColor: #ffffff; priority: 20;}
  }
 
  [MAG proximity-] {
-   [TYPE highway_trunk] WAY.REF { style: plate; color: #ffffff; backgroundColor: #7ec87e; borderColor: #ffffff; priority: 20;}
+   [TYPE highway_trunk] WAY.SHIELD { label: ref; color: #ffffff; backgroundColor: #7ec87e; borderColor: #ffffff; priority: 20;}
  }
 
  [MAG cityOver-] {
-   [TYPE highway_primary] WAY.REF { style: plate; color: #ffffff; backgroundColor: #e46d71; borderColor: #ffffff; priority: 20;}
+   [TYPE highway_primary] WAY.SHIELD { label: ref; color: #ffffff; backgroundColor: #e46d71; borderColor: #ffffff; priority: 20;}
  }
 
  [MAG detail-] {
-   [TYPE highway_motorway_junction] WAY.REF { style: plate; color: #ffffff; backgroundColor: #e46d71; borderColor: #ffffff; priority: 20;}
+   [TYPE highway_motorway_junction] WAY.SHIELD { label: ref; color: #ffffff; backgroundColor: #e46d71; borderColor: #ffffff; priority: 20;}
  }
 
  // Labels
 
  [MAG city-] {
-   [TYPE highway_motorway_junction] NODE.LABEL { style: emphasize; color: #809bc0;}
+   [TYPE highway_motorway_junction] NODE.TEXT { label: name; style: emphasize; color: #809bc0;}
  }
 
  [MAG detail-] {
@@ -304,20 +304,20 @@ SYMBOL christian_church_cross
          highway_primary_link,
          highway_secondary,
          highway_secondary_link,
-         route_ferry] WAY.LABEL{ style: contour;}
+         route_ferry] WAY.TEXT{ label: name;}
  }
 
  [MAG close-] {
-   [TYPE railway_station] NODE.LABEL { style: emphasize; color: #8888fd;}
-   [TYPE railway_halt] NODE.LABEL { style: emphasize; color: #8888fd;}
-   [TYPE railway_tram_stop] NODE.LABEL { style: emphasize; color: #8888fd;}
-   [TYPE highway_services] NODE.LABEL {style: normal; }
+   [TYPE railway_station] NODE.TEXT {label: name; style: emphasize; color: #8888fd;}
+   [TYPE railway_halt] NODE.TEXT {label: name; style: emphasize; color: #8888fd;}
+   [TYPE railway_tram_stop] NODE.TEXT {label: name; style: emphasize; color: #8888fd;}
+   [TYPE highway_services] NODE.TEXT {label: name; }
 
-   [TYPE highway_construction] WAY.LABEL { style: contour;}
+   [TYPE highway_construction] WAY.TEXT { label: name;}
 
    [TYPE leisure_building,
          sport_building,
-         shop] AREA.LABEL {style: normal; }
+         shop] AREA.TEXT { label: name; }
  }
 
  [MAG veryClose-] {
@@ -328,9 +328,9 @@ SYMBOL christian_church_cross
          highway_living_street,
          highway_service,
          highway_track,
-         leisure_track] WAY.LABEL { style: contour;}
+         leisure_track] WAY.TEXT { label: name;}
 
-   [TYPE highway_service] AREA.LABEL { style: normal;}
+   [TYPE highway_service] AREA.TEXT { label: name; }
  }
 
  [MAG block-] {
@@ -346,13 +346,13 @@ SYMBOL christian_church_cross
          railway_tram,
          railway_light_rail,
          railway_subway,
-         public_transport_platform] WAY.LABEL { style: contour;}
+         public_transport_platform] WAY.TEXT { label: name;}
 
    [TYPE highway_pedestrian,
          highway_services,
-         highway_footway] AREA.LABEL { style: normal;}
+         highway_footway] AREA.TEXT { label: name; }
 
-   [TYPE public_transport_platform] AREA.LABEL { style: normal; color: #524a4a; size: 0.8;}
+   [TYPE public_transport_platform] AREA.TEXT { label: name; color: #524a4a; size: 0.8;}
  }
 
  // -------------------------------------------------------
@@ -408,9 +408,9 @@ SYMBOL christian_church_cross
          landuse_retail,
          landuse_brownfield,
          landuse_commercial,
-         landuse_military] AREA.LABEL { style: normal; }
+         landuse_military] AREA.TEXT { label: name; }
 
-   [TYPE landuse_forest] AREA.LABEL { style: emphasize;}
+   [TYPE landuse_forest] AREA.TEXT { label: name; style: emphasize;}
  }
 
  [MAG close-] {
@@ -429,15 +429,15 @@ SYMBOL christian_church_cross
          landuse_cemetery,
          landuse_meadow,
          landuse_village_green,
-         landuse_recreation_ground] AREA.LABEL { style: normal;}
+         landuse_recreation_ground] AREA.TEXT { label: name; }
 
    [TYPE landuse_industrial,
-         landuse_allotments] AREA.LABEL { style: emphasize;}
+         landuse_allotments] AREA.TEXT { label: name; style: emphasize;}
  }
 
  [MAG veryClose-] {
    [TYPE landuse_railway,
-         landuse_construction] AREA.LABEL { style: normal;}
+         landuse_construction] AREA.TEXT { label: name; }
  }
 
  // -------------------------------------------------------
@@ -593,7 +593,7 @@ SYMBOL christian_church_cross
   // Labels
 
  [MAG proximity-] {
-   [TYPE leisure_nature_reserve] AREA.LABEL { style: normal;}
+   [TYPE leisure_nature_reserve] AREA.TEXT { label: name; }
  }
 
  [MAG close-]{
@@ -614,46 +614,46 @@ SYMBOL christian_church_cross
          military_barracks,
          military_danger_area,
          military_range,
-         military_naval_base] AREA.LABEL { style: normal;}
+         military_naval_base] AREA.TEXT { label: name; }
 
-   [TYPE railway_station] AREA.LABEL { style: emphasize; color: #8888fd;}
+   [TYPE railway_station] AREA.TEXT { label: name; style: emphasize; color: #8888fd;}
  }
 
  [MAG veryClose-] {
-   [TYPE amenity_hospital] NODE.LABEL { style: emphasize; color: #da0092; size: 1.1; }
+   [TYPE amenity_hospital] NODE.TEXT {label: name; style: emphasize; color: #da0092; size: 1.1; }
 
    [TYPE christian_church_building,
          christian_church] {
-     AREA.LABEL { style: emphasize; color: #000000;}
+     AREA.TEXT { label: name; style: emphasize; color: #000000;}
      AREA.ICON {symbol: christian_church_cross; }
 
-     NODE.LABEL { style: emphasize; color: #000000;}
+     NODE.TEXT {label: name; style: emphasize; color: #000000;}
      NODE.ICON {symbol: christian_church_cross; }
    }
 
-   [TYPE leisure_pitch] AREA.LABEL { style: normal;}
+   [TYPE leisure_pitch] AREA.TEXT { label: name; }
 
    [TYPE amenity_hospital_building,
-         amenity_hospital] AREA.LABEL { style: emphasize; color: #da0092; size: 1.1;}
+         amenity_hospital] AREA.TEXT { label: name; style: emphasize; color: #da0092; size: 1.1;}
 
-   [TYPE amenity_grave_yard] AREA.LABEL { style: emphasize; color: #000000; size: 1.1;}
+   [TYPE amenity_grave_yard] AREA.TEXT { label: name; style: emphasize; color: #000000; size: 1.1;}
  }
 
  [MAG block-] {
-   [TYPE amenity_pharmacy] NODE.LABEL { style: emphasize; color: #da0092; size: 1.1;}
+   [TYPE amenity_pharmacy] NODE.TEXT {label: name; style: emphasize; color: #da0092; size: 1.1;}
 
    [TYPE amenity,
-         tourism_attraction] NODE.LABEL { style: emphasize;color: #000000; size: 1.1; }
+         tourism_attraction] NODE.TEXT {label: name; style: emphasize;color: #000000; size: 1.1; }
 
-   [TYPE shop] NODE.LABEL {style: normal; }
+   [TYPE shop] NODE.TEXT {label: name; }
 
-   [TYPE amenity_parking] AREA.LABEL { style: emphasize; color: #4bb2da; size: 1.1; }
+   [TYPE amenity_parking] AREA.TEXT { label: name; style: emphasize; color: #4bb2da; size: 1.1; }
 
    [TYPE leisure_building,
          sport_building,
-         shop] AREA.LABEL { style: normal;}
+         shop] AREA.TEXT { label: name; }
 
-   [TYPE building] AREA.LABEL { style: normal; color: #524a4a; size: 0.8; }
+   [TYPE building] AREA.TEXT { label: name; color: #524a4a; size: 0.8; }
 
    [TYPE power_station,
          power_sub_station,
@@ -683,10 +683,10 @@ SYMBOL christian_church_cross
          amenity_post_office,
          amenity_taxi,
          amenity_building,
-         amenity] AREA.LABEL { style: emphasize; color: #000000; size: 1.1; }
+         amenity] AREA.TEXT { label: name; style: emphasize; color: #000000; size: 1.1; }
 
    [TYPE amenity_parking,
-         amenity_parking_building] AREA.LABEL { style: emphasize; color: #4bb2da; size: 1.1; }
+         amenity_parking_building] AREA.TEXT { label: name; style: emphasize; color: #4bb2da; size: 1.1; }
  }
 
 
@@ -696,54 +696,54 @@ SYMBOL christian_church_cross
  //
 
  [MAG world-city] {
-   [TYPE place_continent] NODE.LABEL { style: emphasize; priority: 1; }
+   [TYPE place_continent] NODE.TEXT {label: name; style: emphasize; priority: 1; }
  }
 
  [MAG stateOver-city] {
-   [TYPE place_country] NODE.LABEL { style: emphasize; priority: 2; }
+   [TYPE place_country] NODE.TEXT {label: name; style: emphasize; priority: 2; }
  }
 
  [MAG state-county] {
-   [TYPE place_state] NODE.LABEL { style: emphasize; size: 1.7; scaleMag: state; priority: 3; }
+   [TYPE place_state] NODE.TEXT {label: name; style: emphasize; size: 1.7; scaleMag: state; priority: 3; }
  }
 
  [MAG region-city] {
-   [TYPE place_region] NODE.LABEL { style: emphasize; priority: 4; }
+   [TYPE place_region] NODE.TEXT {label: name; style: emphasize; priority: 4; }
  }
 
  [MAG county-city] {
-   [TYPE place_county] NODE.LABEL { style: emphasize; priority: 5;}
+   [TYPE place_county] NODE.TEXT {label: name; style: emphasize; priority: 5;}
  }
 
  [MAG stateOver-city] {
-   [TYPE place_city] NODE.LABEL { style: emphasize; size: 1.3; scaleMag: county; priority: 6;}
+   [TYPE place_city] NODE.TEXT {label: name; style: emphasize; size: 1.3; scaleMag: county; priority: 6;}
  }
 
  [MAG region-city] {
-   [TYPE place_town] NODE.LABEL { style: emphasize; size: 1.2; scaleMag: region; priority: 7;}
+   [TYPE place_town] NODE.TEXT {label: name; style: emphasize; size: 1.2; scaleMag: region; priority: 7;}
  }
 
  [MAG region-veryClose] {
    [TYPE place_island] {
-     NODE.LABEL { style: emphasize; size: 1.3; priority: 1;}
-     AREA.LABEL { style: emphasize; size: 1.3; }
+     NODE.TEXT {label: name; style: emphasize; size: 1.3; priority: 1;}
+     AREA.TEXT { label: name; style: emphasize; size: 1.3; }
    }
  }
 
  [MAG cityOver-veryClose] {
-   [TYPE place_village] NODE.LABEL { style: emphasize; size: 1.2; scaleMag: suburb; priority: 8;}
+   [TYPE place_village] NODE.TEXT {label: name; style: emphasize; size: 1.2; scaleMag: suburb; priority: 8;}
  }
 
  [MAG city-veryClose] {
-   [TYPE place_hamlet] NODE.LABEL { style: emphasize; size: 1.0; scaleMag: city; priority: 9;}
+   [TYPE place_hamlet] NODE.TEXT {label: name; style: emphasize; size: 1.0; scaleMag: city; priority: 9;}
 }
 
  [MAG cityOver-veryClose] {
-   [TYPE place_suburb] NODE.LABEL { style: emphasize; size: 1.3; scaleMag: city; priority: 10;}
+   [TYPE place_suburb] NODE.TEXT {label: name; style: emphasize; size: 1.3; scaleMag: city; priority: 10;}
  }
 
  [MAG close-] {
-   [TYPE place_locality] NODE.LABEL { style: emphasize; size: 1.1; priority: 11;}
+   [TYPE place_locality] NODE.TEXT {label: name; style: emphasize; size: 1.1; priority: 11;}
 }
 
  // -------------------------------------------------------
@@ -767,12 +767,12 @@ SYMBOL christian_church_cross
 
  [MAG close-] {
    [TYPE aeroway_taxiway,
-         aeroway_runway] WAY.LABEL { style: contour;}
+         aeroway_runway] WAY.TEXT { label: name;}
 
    [TYPE aeroway_aerodrome,
          aeroway_terminal,
          aeroway_helipad,
          aeroway_runway,
-         aeroway_apron] AREA.LABEL{ style: normal;}
+         aeroway_apron] AREA.TEXT { label: name; }
  }
 END

@@ -166,15 +166,16 @@ namespace osmscout {
                                const MapParameter& parameter,
                                const LabelData& label)
   {
-    double r=label.style->GetTextColor().GetR();
-    double g=label.style->GetTextColor().GetG();
-    double b=label.style->GetTextColor().GetB();
+    const TextStyle* style=dynamic_cast<const TextStyle*>(label.style);
+    double           r=style->GetTextColor().GetR();
+    double           g=style->GetTextColor().GetG();
+    double           b=style->GetTextColor().GetB();
 
     QFont        font(GetFont(parameter,label.fontSize));
     QString      string=QString::fromUtf8(label.text.c_str());
     QFontMetrics metrics=QFontMetrics(font);
 
-    if (label.style->GetStyle()==LabelStyle::normal) {
+    if (style->GetStyle()==TextStyle::normal) {
       painter->setPen(QColor::fromRgbF(r,g,b,label.alpha));
       painter->setBrush(Qt::NoBrush);
       painter->setFont(font);
@@ -182,7 +183,7 @@ namespace osmscout {
                                 label.y+metrics.ascent()),
                         string);
     }
-    else if (label.style->GetStyle()==LabelStyle::emphasize) {
+    else if (style->GetStyle()==TextStyle::emphasize) {
       QPainterPath path;
       QPen         pen;
 
@@ -205,23 +206,24 @@ namespace osmscout {
                                     const MapParameter& parameter,
                                     const LabelData& label)
   {
-    QFont        font(GetFont(parameter,label.fontSize));
-    QFontMetrics metrics=QFontMetrics(font);
-    QString      string=QString::fromUtf8(label.text.c_str());
+    const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style);
+    QFont              font(GetFont(parameter,label.fontSize));
+    QFontMetrics       metrics=QFontMetrics(font);
+    QString            string=QString::fromUtf8(label.text.c_str());
 
     painter->fillRect(QRectF(label.bx1,
                              label.by1,
                              label.bx2-label.bx1+1,
                              label.by2-label.by1+1),
-                      QBrush(QColor::fromRgbF(label.style->GetBgColor().GetR(),
-                                              label.style->GetBgColor().GetG(),
-                                              label.style->GetBgColor().GetB(),
+                      QBrush(QColor::fromRgbF(style->GetBgColor().GetR(),
+                                              style->GetBgColor().GetG(),
+                                              style->GetBgColor().GetB(),
                                               1)));
 
-    painter->setPen(QColor::fromRgbF(label.style->GetBorderColor().GetR(),
-                                     label.style->GetBorderColor().GetG(),
-                                     label.style->GetBorderColor().GetB(),
-                                     label.style->GetBorderColor().GetA()));
+    painter->setPen(QColor::fromRgbF(style->GetBorderColor().GetR(),
+                                     style->GetBorderColor().GetG(),
+                                     style->GetBorderColor().GetB(),
+                                     style->GetBorderColor().GetA()));
     painter->setBrush(Qt::NoBrush);
 
     painter->drawRect(QRectF(label.bx1+2,
@@ -229,10 +231,10 @@ namespace osmscout {
                              label.bx2-label.bx1+1-4,
                              label.by2-label.by1+1-4));
 
-    painter->setPen(QColor::fromRgbF(label.style->GetTextColor().GetR(),
-                                     label.style->GetTextColor().GetG(),
-                                     label.style->GetTextColor().GetB(),
-                                     label.style->GetTextColor().GetA()));
+    painter->setPen(QColor::fromRgbF(style->GetTextColor().GetR(),
+                                     style->GetTextColor().GetG(),
+                                     style->GetTextColor().GetB(),
+                                     style->GetTextColor().GetA()));
     painter->setBrush(Qt::NoBrush);
     painter->setFont(font);
     painter->drawText(QPointF(label.x,
@@ -242,7 +244,7 @@ namespace osmscout {
 
   void MapPainterQt::DrawContourLabel(const Projection& projection,
                                       const MapParameter& parameter,
-                                      const LabelStyle& style,
+                                      const PathTextStyle& style,
                                       const std::string& text,
                                       size_t transStart, size_t transEnd)
   {

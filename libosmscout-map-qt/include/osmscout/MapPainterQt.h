@@ -74,7 +74,7 @@ namespace osmscout {
 
     void DrawContourLabel(const Projection& projection,
                           const MapParameter& parameter,
-                          const LabelStyle& style,
+                          const PathTextStyle& style,
                           const std::string& text,
                           size_t transStart, size_t transEnd);
 

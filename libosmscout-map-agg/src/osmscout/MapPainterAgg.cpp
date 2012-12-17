@@ -307,12 +307,13 @@ namespace osmscout {
                                const MapParameter& parameter,
                                const LabelData& label)
   {
-    double       r=label.style->GetTextColor().GetR();
-    double       g=label.style->GetTextColor().GetG();
-    double       b=label.style->GetTextColor().GetB();
-    std::wstring wideText(UTF8StringToWString(label.text));
+    const TextStyle* style=dynamic_cast<const TextStyle*>(label.style);
+    double           r=style->GetTextColor().GetR();
+    double           g=style->GetTextColor().GetG();
+    double           b=style->GetTextColor().GetB();
+    std::wstring     wideText(UTF8StringToWString(label.text));
 
-    if (label.style->GetStyle()==LabelStyle::normal) {
+    if (style->GetStyle()==TextStyle::normal) {
 
       SetFont(parameter,
               label.fontSize);
@@ -324,7 +325,7 @@ namespace osmscout {
                label.y+fontEngine->ascender(),
                wideText);
     }
-    else if (label.style->GetStyle()==LabelStyle::emphasize) {
+    else if (style->GetStyle()==TextStyle::emphasize) {
       SetOutlineFont(parameter,
                      label.fontSize);
 
@@ -357,7 +358,7 @@ namespace osmscout {
 
   void MapPainterAgg::DrawContourLabel(const Projection& projection,
                                        const MapParameter& parameter,
-                                       const LabelStyle& style,
+                                       const PathTextStyle& style,
                                        const std::string& text,
                                        size_t transStart, size_t transEnd)
   {

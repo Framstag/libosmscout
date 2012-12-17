@@ -222,46 +222,93 @@ namespace osmscout {
 
   typedef Ref<FillStyle> FillStyleRef;
 
+  class OSMSCOUT_MAP_API LabelStyle : public Referencable
+  {
+  private:
+    uint8_t priority;
+    double  size;
+
+  public:
+    LabelStyle();
+    LabelStyle(const LabelStyle& style);
+    virtual ~LabelStyle();
+
+    virtual bool IsVisible() const = 0;
+    virtual double GetAlpha() const = 0;
+
+    LabelStyle& SetPriority(uint8_t priority);
+    LabelStyle& SetSize(double size);
+
+    inline uint8_t GetPriority() const
+    {
+      return priority;
+    }
+
+    inline double GetSize() const
+    {
+      return size;
+    }
+
+  };
+
+  typedef Ref<LabelStyle> LabelStyleRef;
+
   /**
     Nodes, ways and areas can have a label style for drawing text. Text can be formatted
     in different ways.
    */
-  class OSMSCOUT_MAP_API LabelStyle : public Referencable
+  class OSMSCOUT_MAP_API TextStyle : public LabelStyle
   {
   public:
     enum Style {
-      none,
       normal,
-      contour,
-      plate,
       emphasize
+    };
+
+    enum Label {
+      none,
+      name,
+      ref
     };
 
   private:
     Style   style;
-    uint8_t priority;
     Mag     scaleAndFadeMag;
-    double  size;
+    Label   label;
     Color   textColor;
     Color   bgColor;
     Color   borderColor;
 
   public:
-    LabelStyle();
-    LabelStyle(const LabelStyle& style);
+    TextStyle();
+    TextStyle(const TextStyle& style);
 
-    LabelStyle& SetStyle(Style style);
-    LabelStyle& SetPriority(uint8_t priority);
-    LabelStyle& SetScaleAndFadeMag(Mag mag);
-    LabelStyle& SetSize(double size);
-    LabelStyle& SetTextColor(const Color& color);
-    LabelStyle& SetBgColor(const Color& color);
-    LabelStyle& SetBorderColor(const Color& color);
+    TextStyle& SetPriority(uint8_t priority);
+    TextStyle& SetSize(double size);
+    TextStyle& SetLabel(Label label);
+    TextStyle& SetTextColor(const Color& color);
+    TextStyle& SetStyle(Style style);
+    TextStyle& SetScaleAndFadeMag(Mag mag);
 
     inline bool IsVisible() const
     {
-      return style!=none &&
-          textColor.IsVisible();
+      return label!=none &&
+             GetTextColor().IsVisible();
+    }
+
+    inline double GetAlpha() const
+    {
+      return textColor.GetA();
+    }
+
+    inline Label GetLabel() const
+    {
+      return label;
+    }
+
+    inline const Color& GetTextColor() const
+    {
+      return textColor;
     }
 
     inline const Style& GetStyle() const
@@ -269,29 +316,58 @@ namespace osmscout {
       return style;
     }
 
-    inline bool IsPointStyle() const
-    {
-      return style==normal || style==plate || style==emphasize;
-    }
-
-    inline bool IsContourStyle() const
-    {
-      return style==contour;
-    }
-
-    inline uint8_t GetPriority() const
-    {
-      return priority;
-    }
-
     inline Mag GetScaleAndFadeMag() const
     {
       return scaleAndFadeMag;
     }
+  };
 
-    inline double GetSize() const
+  typedef Ref<TextStyle> TextStyleRef;
+
+  /**
+    Nodes, ways and areas can have a label style for drawing text. Text can be formatted
+    in different ways.
+   */
+  class OSMSCOUT_MAP_API ShieldStyle : public LabelStyle
+  {
+  public:
+    enum Label {
+      none,
+      name,
+      ref
+    };
+
+  private:
+    Label   label;
+    Color   textColor;
+    Color   bgColor;
+    Color   borderColor;
+
+  public:
+    ShieldStyle();
+    ShieldStyle(const ShieldStyle& style);
+
+    ShieldStyle& SetLabel(Label label);
+    ShieldStyle& SetPriority(uint8_t priority);
+    ShieldStyle& SetSize(double size);
+    ShieldStyle& SetTextColor(const Color& color);
+    ShieldStyle& SetBgColor(const Color& color);
+    ShieldStyle& SetBorderColor(const Color& color);
+
+    inline bool IsVisible() const
     {
-      return size;
+      return label!=none &&
+             GetTextColor().IsVisible();
+    }
+
+    inline double GetAlpha() const
+    {
+      return textColor.GetA();
+    }
+
+    inline Label GetLabel() const
+    {
+      return label;
     }
 
     inline const Color& GetTextColor() const
@@ -310,7 +386,57 @@ namespace osmscout {
     }
   };
 
-  typedef Ref<LabelStyle> LabelStyleRef;
+  typedef Ref<ShieldStyle> ShieldStyleRef;
+
+  /**
+    Nodes, ways and areas can have a label style for drawing text. Text can be formatted
+    in different ways.
+   */
+  class OSMSCOUT_MAP_API PathTextStyle : public Referencable
+  {
+  public:
+    enum Label {
+      none,
+      name,
+      ref
+    };
+
+  private:
+    Label   label;
+    double  size;
+    Color   textColor;
+
+  public:
+    PathTextStyle();
+    PathTextStyle(const PathTextStyle& style);
+
+    PathTextStyle& SetLabel(Label label);
+    PathTextStyle& SetSize(double size);
+    PathTextStyle& SetTextColor(const Color& color);
+
+    inline bool IsVisible() const
+    {
+      return label!=none &&
+             textColor.IsVisible();
+    }
+
+    inline Label GetLabel() const
+    {
+      return label;
+    }
+
+    inline double GetSize() const
+    {
+      return size;
+    }
+
+    inline const Color& GetTextColor() const
+    {
+      return textColor;
+    }
+  };
+
+  typedef Ref<PathTextStyle> PathTextStyleRef;
 
   class OSMSCOUT_MAP_API DrawPrimitive : public Referencable
   {
@@ -566,8 +692,7 @@ namespace osmscout {
 
     // Node
 
-    std::vector<std::vector<LabelStyleRef> >   nodeRefLabelStyles;
-    std::vector<std::vector<LabelStyleRef> >   nodeLabelStyles;
+    std::vector<std::vector<TextStyleRef> >    nodeTextStyles;
     std::vector<std::vector<IconStyleRef> >    nodeIconStyles;
 
     std::vector<TypeSet>                       nodeTypeSets;
@@ -577,15 +702,15 @@ namespace osmscout {
     std::vector<size_t>                        wayPrio;
 
     std::vector<std::vector<LineStyleRef> >    wayLineStyles;
-    std::vector<std::vector<LabelStyleRef> >   wayRefLabelStyles;
-    std::vector<std::vector<LabelStyleRef> >   wayNameLabelStyles;
+    std::vector<std::vector<PathTextStyleRef> > wayPathTextStyles;
+    std::vector<std::vector<ShieldStyleRef> >  wayShieldStyles;
 
     std::vector<std::vector<TypeSet> >         wayTypeSets;
 
     // Area
 
     std::vector<std::vector<FillStyleRef> >    areaFillStyles;
-    std::vector<std::vector<LabelStyleRef> >   areaLabelStyles;
+    std::vector<std::vector<TextStyleRef> >    areaTextStyles;
     std::vector<std::vector<IconStyleRef> >    areaIconStyles;
 
     std::vector<TypeSet>                       areaTypeSets;
@@ -613,16 +738,15 @@ namespace osmscout {
 
     StyleConfig& SetWayPrio(TypeId type, size_t prio);
 
-    void GetNodeRefLabelStyles(const StyleFilter& filter, std::list<LabelStyleRef>& styles);
-    void GetNodeNameLabelStyles(const StyleFilter& filter, std::list<LabelStyleRef>& styles);
+    void GetNodeTextStyles(const StyleFilter& filter, std::list<TextStyleRef>& styles);
     void GetNodeIconStyles(const StyleFilter& filter, std::list<IconStyleRef>& styles);
 
     void GetWayLineStyles(const StyleFilter& filter, std::list<LineStyleRef>& styles);
-    void GetWayRefLabelStyles(const StyleFilter& filter, std::list<LabelStyleRef>& styles);
-    void GetWayNameLabelStyles(const StyleFilter& filter, std::list<LabelStyleRef>& styles);
+    void GetWayPathTextStyles(const StyleFilter& filter, std::list<PathTextStyleRef>& styles);
+    void GetWayShieldStyles(const StyleFilter& filter, std::list<ShieldStyleRef>& styles);
 
     void GetAreaFillStyles(const StyleFilter& filter, std::list<FillStyleRef>& styles);
-    void GetAreaLabelStyles(const StyleFilter& filter, std::list<LabelStyleRef>& styles);
+    void GetAreaTextStyles(const StyleFilter& filter, std::list<TextStyleRef>& styles);
     void GetAreaIconStyles(const StyleFilter& filter, std::list<IconStyleRef>& styles);
 
     void GetNodeTypesWithMaxMag(double maxMag,
@@ -644,15 +768,14 @@ namespace osmscout {
     }
 
     IconStyle* GetNodeIconStyle(TypeId type, size_t level) const;
-    LabelStyle* GetNodeRefLabelStyle(TypeId type, size_t level) const;
-    LabelStyle* GetNodeLabelStyle(TypeId type, size_t level) const;
+    TextStyle* GetNodeTextStyle(TypeId type, size_t level) const;
 
     LineStyle* GetWayLineStyle(TypeId type, size_t level) const;
-    LabelStyle* GetWayRefLabelStyle(TypeId type, size_t level) const;
-    LabelStyle* GetWayNameLabelStyle(TypeId type, size_t level) const;
+    PathTextStyle* GetWayPathTextStyle(TypeId type, size_t level) const;
+    ShieldStyle* GetWayShieldStyle(TypeId type, size_t level) const;
 
     FillStyle* GetAreaFillStyle(TypeId type, size_t level) const;
-    LabelStyle* GetAreaLabelStyle(TypeId type, size_t level) const;
+    TextStyle* GetAreaTextStyle(TypeId type, size_t level) const;
     IconStyle* GetAreaIconStyle(TypeId type, size_t level) const;
   };
 }

@@ -196,9 +196,9 @@ namespace osmscout {
     seaFill=new FillStyle();
     seaFill->SetFillColor(Color(181.0/255,208.0/255,208.0/255));
 
-    debugLabel=new LabelStyle();
+    debugLabel=new TextStyle();
 
-    debugLabel->SetStyle(LabelStyle::normal);
+    debugLabel->SetStyle(TextStyle::normal);
     debugLabel->SetPriority(0);
     debugLabel->SetTextColor(Color(0,0,0,0.5));
     debugLabel->SetSize(1.2);
@@ -295,15 +295,19 @@ namespace osmscout {
                                                 double& fontSize,
                                                 double& alpha)
   {
-    // Calculate effective font size and alpha value
-    if (projection.GetMagnification()>style.GetScaleAndFadeMag()) {
-      if (parameter.GetDrawFadings()) {
-        double factor=log2(projection.GetMagnification())-log2(style.GetScaleAndFadeMag());
-        fontSize=fontSize*pow(2,factor);
-        alpha=alpha/factor;
+    if (dynamic_cast<const TextStyle*>(&style)!=NULL) {
+      const TextStyle* textStyle=dynamic_cast<const TextStyle*>(&style);
 
-        if (alpha>1.0) {
-          alpha=1.0;
+      // Calculate effective font size and alpha value
+      if (projection.GetMagnification()>textStyle->GetScaleAndFadeMag()) {
+        if (parameter.GetDrawFadings()) {
+          double factor=log2(projection.GetMagnification())-log2(textStyle->GetScaleAndFadeMag());
+          fontSize=fontSize*pow(2,factor);
+          alpha=alpha/factor;
+
+          if (alpha>1.0) {
+            alpha=1.0;
+          }
         }
       }
     }
@@ -337,8 +341,6 @@ namespace osmscout {
                                         double by1,
                                         double by2,
                                         const LabelStyle& style,
-                                        double plateLabelSpace,
-                                        double labelSpace,
                                         std::list<LabelData>& labels)
   {
     for (std::list<LabelData>::iterator l=labels.begin();
@@ -356,19 +358,18 @@ namespace osmscout {
       double hy1;
       double hy2;
 
-      if (style.GetStyle()==LabelStyle::plate &&
-          label.style->GetStyle()==LabelStyle::plate) {
-        hx1=bx1-plateLabelSpace;
-        hx2=bx2+plateLabelSpace;
-        hy1=by1-plateLabelSpace;
-        hy2=by2+plateLabelSpace;
-      }
-      else {
-        hx1=bx1-labelSpace;
-        hx2=bx2+labelSpace;
-        hy1=by1-labelSpace;
-        hy2=by2+labelSpace;
-      }
+      double horizLabelSpace;
+      double vertLabelSpace;
+
+      GetLabelSpace(style,
+                    *label.style,
+                    horizLabelSpace,
+                    vertLabelSpace);
+
+      hx1=bx1-horizLabelSpace;
+      hx2=bx2+horizLabelSpace;
+      hy1=by1-vertLabelSpace;
+      hy2=by2+vertLabelSpace;
 
       // Check for labels that intersect (including space). If our priority is lower,
       // we stop processing, else we mark the other label (as to be deleted)
@@ -392,7 +393,6 @@ namespace osmscout {
                                                double by1,
                                                double by2,
                                                const LabelStyle& style,
-                                               double sameLabelSpace,
                                                const std::string& text,
                                                std::list<LabelData>& labels)
   {
@@ -405,8 +405,8 @@ namespace osmscout {
         continue;
       }
 
-      if (style.GetStyle()==label.style->GetStyle() &&
-          style.GetPriority()==label.style->GetPriority()) {
+      if (dynamic_cast<const ShieldStyle*>(&style)!=NULL &&
+          dynamic_cast<const ShieldStyle*>(label.style)!=NULL) {
         double hx1=bx1-sameLabelSpace;
         double hx2=bx2+sameLabelSpace;
         double hy1=by1-sameLabelSpace;
@@ -657,8 +657,8 @@ namespace osmscout {
 
               data.attributes=&coastlineSegmentAttributes;
               data.lineStyle=coastlineLine.Get();
-              data.nameLabelStyle=NULL;
-              data.refLabelStyle=NULL;
+              data.pathTextStyle=NULL;
+              data.shieldStyle=NULL;
               data.prio=std::numeric_limits<size_t>::max();
               data.transStart=start+lineStart;
               data.transEnd=start+lineEnd;
@@ -747,14 +747,10 @@ namespace osmscout {
 
   void MapPainter::RegisterPointWayLabel(const Projection& projection,
                                          const MapParameter& parameter,
-                                         const LabelStyle& style,
+                                         const ShieldStyle& shieldStyle,
                                          const std::string& text,
                                          size_t transStart, size_t transEnd)
   {
-    if (style.GetStyle()!=LabelStyle::plate) {
-      return;
-    }
-
     double stepSizeInPixel=ConvertWidthToPixel(parameter,parameter.GetLabelSpace());
 
     wayScanlines.clear();
@@ -764,7 +760,7 @@ namespace osmscout {
     while (i<wayScanlines.size()) {
       RegisterPointLabel(projection,
                          parameter,
-                         style,
+                         shieldStyle,
                          text,
                          wayScanlines[i].x+0.5,
                          wayScanlines[i].y+0.5);
@@ -780,17 +776,12 @@ namespace osmscout {
                                       double x,
                                       double y)
   {
-    assert(style.IsPointStyle());
-
     double fontSize=style.GetSize();
-    double a=style.GetTextColor().GetA();
-    double labelSpace=ConvertWidthToPixel(parameter,parameter.GetLabelSpace());
-    double plateLabelSpace=ConvertWidthToPixel(parameter,parameter.GetPlateLabelSpace());
-    double sameLabelSpace=ConvertWidthToPixel(parameter,parameter.GetSameLabelSpace());
+    double a=style.GetAlpha();
 
     CalculateEffectiveLabelStyle(projection,
                                  parameter,
-                                 style,
+                                 *dynamic_cast<const TextStyle*>(&style),
                                  fontSize,
                                  a);
 
@@ -812,24 +803,21 @@ namespace osmscout {
     double by1;
     double by2;
 
-    if (style.GetStyle()==LabelStyle::plate) {
-      bx1=x-1-4;
-      bx2=x+1+4;
-      by1=y-fontSize/2-1-4;
-      by2=y+fontSize/2+1+4;
-    }
-    else {
-      bx1=x;
-      bx2=x;
-      by1=y-fontSize/2;
-      by2=y+fontSize/2;
-    }
+    double frameHoriz;
+    double frameVert;
+
+    GetLabelFrame(style,
+                  frameHoriz,
+                  frameVert);
+
+    bx1=x-frameHoriz;
+    bx2=x+frameHoriz;
+    by1=y-fontSize/2-frameVert;
+    by2=y+fontSize/2+frameVert;
 
     if (overlay) {
       if (!MarkAllInBoundingBox(bx1,bx2,by1,by2,
                                 style,
-                                plateLabelSpace,
-                                labelSpace,
                                 overlayLabels)) {
         return false;
       }
@@ -837,8 +825,6 @@ namespace osmscout {
     else {
       if (!MarkAllInBoundingBox(bx1,bx2,by1,by2,
                                 style,
-                                plateLabelSpace,
-                                labelSpace,
                                 labels)) {
         return false;
       }
@@ -854,18 +840,10 @@ namespace osmscout {
                      text,
                      xOff,yOff,width,height);
 
-    if (style.GetStyle()==LabelStyle::plate) {
-      bx1=x-width/2-4;
-      bx2=x+width/2+4;
-      by1=y-height/2-4;
-      by2=y+height/2+4;
-    }
-    else {
-      bx1=x-width/2;
-      bx2=x+width/2;
-      by1=y-height/2;
-      by2=y+height/2;
-    }
+    bx1=x-width/2-frameHoriz;
+    bx2=x+width/2+frameHoriz;
+    by1=y-height/2-frameVert;
+    by2=y+height/2+frameVert;
 
     // is box visible?
     if (bx1>=projection.GetWidth() ||
@@ -878,21 +856,18 @@ namespace osmscout {
     if (overlay) {
       if (!MarkAllInBoundingBox(bx1,bx2,by1,by2,
                                 style,
-                                plateLabelSpace,
-                                labelSpace,
                                 overlayLabels)) {
         return false;
       }
 
       // As an optional final processing step, we check if labels
       // with the same value (text) have at least sameLabelSpace distance.
-      if (sameLabelSpace>plateLabelSpace) {
+      if (sameLabelSpace>shieldLabelSpace) {
         if (!MarkCloseLabelsWithSameText(bx1,
                                          bx2,
                                          by1,
                                          by2,
                                          style,
-                                         sameLabelSpace,
                                          text,
                                          overlayLabels)) {
           return false;
@@ -906,21 +881,18 @@ namespace osmscout {
     else {
       if (!MarkAllInBoundingBox(bx1,bx2,by1,by2,
                                 style,
-                                plateLabelSpace,
-                                labelSpace,
                                 labels)) {
         return false;
       }
 
       // As an optional final processing step, we check if labels
       // with the same value (text) have at least sameLabelSpace distance.
-      if (sameLabelSpace>plateLabelSpace) {
+      if (sameLabelSpace>shieldLabelSpace) {
         if (!MarkCloseLabelsWithSameText(bx1,
                                          bx2,
                                          by1,
                                          by2,
                                          style,
-                                         sameLabelSpace,
                                          text,
                                          labels)) {
           return false;
@@ -1004,10 +976,10 @@ namespace osmscout {
          ++a) {
       const WayRef& area=*a;
 
-      const LabelStyle  *labelStyle=styleConfig.GetAreaLabelStyle(area->GetType(),level);
+      const TextStyle  *labelStyle=styleConfig.GetAreaTextStyle(area->GetType(),level);
       IconStyle         *iconStyle=styleConfig.GetAreaIconStyle(area->GetType(),level);
       bool              hasLabel=labelStyle!=NULL &&
-                        labelStyle->GetStyle()!=LabelStyle::none;
+                        labelStyle->IsVisible();
       bool              hasSymbol=iconStyle!=NULL && iconStyle->GetSymbol().Valid();
       bool              hasIcon=iconStyle!=NULL && !iconStyle->GetIconName().empty();
       std::string       label;
@@ -1094,10 +1066,10 @@ namespace osmscout {
 
       for (size_t m=0; m<relation->roles.size(); m++) {
         TypeId            type=relation->roles[m].ring==0 ? relation->GetType() : relation->roles[m].GetType();
-        const LabelStyle  *labelStyle=styleConfig.GetAreaLabelStyle(type,level);
+        const TextStyle  *labelStyle=styleConfig.GetAreaTextStyle(type,level);
         IconStyle         *iconStyle=styleConfig.GetAreaIconStyle(type,level);
         bool              hasLabel=labelStyle!=NULL &&
-                                   labelStyle->GetStyle()!=LabelStyle::none;
+                                   labelStyle->IsVisible();
         bool              hasSymbol=iconStyle!=NULL && iconStyle->GetSymbol().Valid();
         bool              hasIcon=iconStyle!=NULL && !iconStyle->GetIconName().empty();
         std::string       label;
@@ -1118,6 +1090,9 @@ namespace osmscout {
           }
           else if (!relation->roles[m].GetName().empty()) {
             label=relation->roles[m].GetName();
+          }
+          else if (!relation->roles[m].GetAttributes().GetHouseNr().empty()) {
+            label=relation->roles[m].GetAttributes().GetHouseNr();
           }
 
           hasLabel=!label.empty();
@@ -1181,12 +1156,12 @@ namespace osmscout {
                             const MapParameter& parameter,
                             const NodeRef& node)
   {
-    size_t            level=MagToLevel(projection.GetMagnification());
-    const LabelStyle  *labelStyle=styleConfig.GetNodeLabelStyle(node->GetType(),level);
-    IconStyle         *iconStyle=styleConfig.GetNodeIconStyle(node->GetType(),level);
-    bool              hasLabel=labelStyle!=NULL;
-    bool              hasSymbol=iconStyle!=NULL && iconStyle->GetSymbol().Valid();
-    bool              hasIcon=iconStyle!=NULL && !iconStyle->GetIconName().empty();
+    size_t           level=MagToLevel(projection.GetMagnification());
+    const TextStyle  *labelStyle=styleConfig.GetNodeTextStyle(node->GetType(),level);
+    IconStyle        *iconStyle=styleConfig.GetNodeIconStyle(node->GetType(),level);
+    bool             hasLabel=labelStyle!=NULL;
+    bool             hasSymbol=iconStyle!=NULL && iconStyle->GetSymbol().Valid();
+    bool             hasIcon=iconStyle!=NULL && !iconStyle->GetIconName().empty();
 
     std::string label;
 
@@ -1465,44 +1440,50 @@ namespace osmscout {
         way!=wayData.end();
         way++)
     {
-      if (way->nameLabelStyle!=NULL) {
-        if (way->nameLabelStyle->IsContourStyle()) {
+      if (way->pathTextStyle!=NULL) {
+        switch (way->pathTextStyle->GetLabel()) {
+        case PathTextStyle::none:
+          break;
+        case PathTextStyle::name:
           DrawContourLabel(projection,
                            parameter,
-                           *way->nameLabelStyle,
+                           *way->pathTextStyle,
                            way->attributes->GetName(),
-                           way->transStart, way->transEnd);
-
-        }
-        else {
-          RegisterPointWayLabel(projection,
-                                parameter,
-                                *way->nameLabelStyle,
-                                way->attributes->GetName(),
-                                way->transStart,way->transEnd);
-        }
-
+                           way->transStart,way->transEnd);
         waysLabelDrawn++;
+        break;
+        case PathTextStyle::ref:
+          DrawContourLabel(projection,
+                           parameter,
+                           *way->pathTextStyle,
+                           way->attributes->GetRefName(),
+                           way->transStart,way->transEnd);
+        waysLabelDrawn++;
+        break;
+        }
       }
 
-      if (way->refLabelStyle!=NULL) {
-        if (way->refLabelStyle->IsContourStyle()) {
-          DrawContourLabel(projection,
-                           parameter,
-                           *way->refLabelStyle,
-                           way->attributes->GetRefName(),
-                           way->transStart, way->transEnd);
-
-        }
-        else {
+      if (way->shieldStyle!=NULL) {
+        switch(way->shieldStyle->GetLabel()) {
+        case ShieldStyle::none:
+          break;
+        case ShieldStyle::name:
           RegisterPointWayLabel(projection,
                                 parameter,
-                                *way->refLabelStyle,
+                                *way->shieldStyle,
+                                way->attributes->GetName(),
+                                way->transStart,way->transEnd);
+        waysLabelDrawn++;
+        break;
+        case ShieldStyle::ref:
+          RegisterPointWayLabel(projection,
+                                parameter,
+                                *way->shieldStyle,
                                 way->attributes->GetRefName(),
                                 way->transStart,way->transEnd);
+          waysLabelDrawn++;
+          break;
         }
-
-        waysLabelDrawn++;
       }
     }
   }
@@ -1535,14 +1516,13 @@ namespace osmscout {
     for (std::list<LabelData>::const_iterator label=labels.begin();
          label!=labels.end();
          ++label) {
-      if (label->style->GetStyle()==LabelStyle::normal ||
-          label->style->GetStyle()==LabelStyle::emphasize) {
+      if (dynamic_cast<const TextStyle*>(label->style)!=NULL) {
         DrawLabel(projection,
                   parameter,
                   *label);
         labelsDrawn++;
       }
-      else if (label->style->GetStyle()==LabelStyle::plate) {
+      else if (dynamic_cast<const ShieldStyle*>(label->style)) {
         DrawPlateLabel(projection,
                        parameter,
                        *label);
@@ -1557,14 +1537,13 @@ namespace osmscout {
     for (std::list<LabelData>::const_iterator label=overlayLabels.begin();
          label!=overlayLabels.end();
          ++label) {
-      if (label->style->GetStyle()==LabelStyle::normal ||
-          label->style->GetStyle()==LabelStyle::emphasize) {
+      if (dynamic_cast<const TextStyle*>(label->style)!=NULL) {
         DrawLabel(projection,
                   parameter,
                   *label);
         labelsDrawn++;
       }
-      else if (label->style->GetStyle()==LabelStyle::plate) {
+      else if (dynamic_cast<const ShieldStyle*>(label->style)) {
         DrawPlateLabel(projection,
                        parameter,
                        *label);
@@ -1858,39 +1837,37 @@ namespace osmscout {
     data.attributes=&attributes;
     data.lineStyle=lineStyle;
 
-    data.nameLabelStyle=NULL;
-    data.refLabelStyle=NULL;
+    data.pathTextStyle=NULL;
+    data.shieldStyle=NULL;
 
-    if (!attributes.GetName().empty()) {
-      const LabelStyle *style=styleConfig.GetWayNameLabelStyle(attributes.GetType(),level);
+    if (!attributes.GetName().empty() || !attributes.GetRefName().empty()) {
+      const ShieldStyle   *shieldStyle=styleConfig.GetWayShieldStyle(attributes.GetType(),level);
+      const PathTextStyle *pathTextStyle=styleConfig.GetWayPathTextStyle(attributes.GetType(),level);
 
-      if (style!=NULL) {
-        if (style->IsContourStyle()) {
-          if (IsVisible(projection,
-                       nodes,
-                       style->GetSize())) {
-            data.nameLabelStyle=style;
-          }
+      if (shieldStyle!=NULL) {
+        if (shieldStyle->GetLabel()==ShieldStyle::name &&
+            !attributes.GetName().empty()) {
+          data.shieldStyle=shieldStyle;
         }
-        else {
-          data.nameLabelStyle=style;
+
+        if (shieldStyle->GetLabel()==ShieldStyle::ref &&
+            !attributes.GetRefName().empty()) {
+          data.shieldStyle=shieldStyle;
         }
       }
-    }
 
-    if (!attributes.GetRefName().empty()) {
-      const LabelStyle *style=styleConfig.GetWayRefLabelStyle(attributes.GetType(),level);
-
-      if (style!=NULL) {
-        if (style->IsContourStyle()) {
-          if (IsVisible(projection,
-                       nodes,
-                       style->GetSize())) {
-            data.refLabelStyle=style;
-          }
+      if (pathTextStyle!=NULL &&
+          IsVisible(projection,
+                    nodes,
+                    pathTextStyle->GetSize())) {
+        if (pathTextStyle->GetLabel()==PathTextStyle::name &&
+            !attributes.GetName().empty()) {
+          data.pathTextStyle=pathTextStyle;
         }
-        else {
-          data.refLabelStyle=style;
+
+        if (pathTextStyle->GetLabel()==PathTextStyle::ref &&
+            !attributes.GetRefName().empty()) {
+          data.pathTextStyle=pathTextStyle;
         }
       }
     }
@@ -1990,6 +1967,35 @@ namespace osmscout {
     wayData.sort();
   }
 
+  void MapPainter::GetLabelFrame(const LabelStyle& style,
+                                 double& horizontal,
+                                 double& vertical)
+  {
+    horizontal=0;
+    vertical=0;
+
+    if (dynamic_cast<const ShieldStyle*>(&style)!=NULL) {
+      horizontal=5;
+      vertical=5;
+    }
+  }
+
+  void MapPainter::GetLabelSpace(const LabelStyle& styleA,
+                                 const LabelStyle& styleB,
+                                 double& horizontal,
+                                 double& vertical)
+  {
+    if (dynamic_cast<const ShieldStyle*>(&styleA)!=NULL &&
+        dynamic_cast<const ShieldStyle*>(&styleB)!=NULL) {
+      horizontal=shieldLabelSpace;
+      vertical=shieldLabelSpace;
+    }
+    else {
+      horizontal=labelSpace;
+      vertical=labelSpace;
+    }
+  }
+
   bool MapPainter::Draw(const StyleConfig& styleConfig,
                         const Projection& projection,
                         const MapParameter& parameter,
@@ -2012,6 +2018,10 @@ namespace osmscout {
     overlayLabels.clear();
 
     transBuffer.Reset();
+
+    labelSpace=ConvertWidthToPixel(parameter,parameter.GetLabelSpace());
+    shieldLabelSpace=ConvertWidthToPixel(parameter,parameter.GetPlateLabelSpace());
+    sameLabelSpace=ConvertWidthToPixel(parameter,parameter.GetSameLabelSpace());
 
     if (parameter.IsAborted()) {
       return false;

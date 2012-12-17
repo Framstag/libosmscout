@@ -109,10 +109,12 @@ private:
 public:
   Errors  *errors;
 
-typedef std::list<FillStyleRef>   FillStyleList;
-typedef std::list<IconStyleRef>   IconStyleList;
-typedef std::list<LabelStyleRef>  LabelStyleList;
-typedef std::list<LineStyleRef>   LineStyleList;
+typedef std::list<FillStyleRef>     FillStyleList;
+typedef std::list<IconStyleRef>     IconStyleList;
+typedef std::list<TextStyleRef>     TextStyleList;
+typedef std::list<LineStyleRef>     LineStyleList;
+typedef std::list<PathTextStyleRef> PathTextStyleList;
+typedef std::list<ShieldStyleRef>   ShieldStyleList;
 
 inline std::string Destring(const char* str)
 {
@@ -194,26 +196,29 @@ inline void ToRGBA(const char* str, Color& color)
 	void NODESTYLEDEF(StyleFilter filter);
 	void WAYSTYLEDEF(StyleFilter filter);
 	void AREASTYLEDEF(StyleFilter filter);
-	void NODELABELSTYLE(StyleFilter filter);
-	void NODEREFSTYLE(StyleFilter filter);
+	void NODETEXTSTYLE(StyleFilter filter);
 	void NODEICONSTYLE(StyleFilter filter);
-	void LABELDEF(LabelStyleList& styles);
-	void REFDEF(LabelStyleList& styles);
+	void TEXTDEF(TextStyleList& styles);
 	void ICONDEF(IconStyleList& styles);
 	void WAYSTYLE(StyleFilter filter);
-	void WAYLABELSTYLE(StyleFilter filter);
-	void WAYREFSTYLE(StyleFilter filter);
+	void WAYPATHTEXTSTYLE(StyleFilter filter);
+	void WAYSHIELDSTYLE(StyleFilter filter);
 	void LINEDEF(LineStyleList& styles);
+	void PATHTEXTDEF(PathTextStyleList& styles);
+	void SHIELDDEF(ShieldStyleList& styles);
 	void AREASTYLE(StyleFilter filter);
-	void AREALABELSTYLE(StyleFilter filter);
+	void AREATEXTSTYLE(StyleFilter filter);
 	void AREAICONSTYLE(StyleFilter filter);
 	void COLOR(Color& color);
 	void DISPLAYSIZE(double& value);
 	void MAPSIZE(double& value);
 	void CAPSTYLE(LineStyle::CapStyle& style);
 	void STRING(std::string& value);
-	void LABELSTYLE(LabelStyle::Style& style);
+	void TEXTLABEL(TextStyle::Label& label);
+	void LABELSTYLE(TextStyle::Style& style);
 	void INTEGER(size_t& value);
+	void SHIELDLABEL(ShieldStyle::Label& label);
+	void PATHTEXTLABEL(PathTextStyle::Label& label);
 
   void Parse();
 

@@ -236,8 +236,8 @@ namespace osmscout {
       ObjectRef               ref;
       const SegmentAttributes *attributes;     //! Attributes of line segment
       const LineStyle         *lineStyle;      //! Line style
-      const LabelStyle        *nameLabelStyle; //! LabelStyle for name
-      const LabelStyle        *refLabelStyle;  //! LabelStyle for ref
+      const PathTextStyle     *pathTextStyle;  //! Text along the path
+      const ShieldStyle       *shieldStyle;    //! ShieldStyle
       size_t                  prio;            //! Priority of way (from style sheet)
       size_t                  transStart;      //! Start of coordinates in transformation buffer
       size_t                  transEnd;        //! End of coordinates in transformation buffer
@@ -357,8 +357,17 @@ namespace osmscout {
     //@{
     FillStyleRef           landFill;
     FillStyleRef           seaFill;
-    LabelStyleRef          debugLabel;
+    TextStyleRef           debugLabel;
     SegmentAttributes      coastlineSegmentAttributes;
+    //@}
+
+    /**
+     Precalculations
+      */
+    //@{
+    double labelSpace;
+    double shieldLabelSpace;
+    double sameLabelSpace;
     //@}
 
   private:
@@ -394,15 +403,12 @@ namespace osmscout {
                               double by1,
                               double by2,
                               const LabelStyle& style,
-                              double plateLabelSpace,
-                              double labelSpace,
                               std::list<LabelData>& labels);
     bool MarkCloseLabelsWithSameText(double bx1,
                                      double bx2,
                                      double by1,
                                      double by2,
                                      const LabelStyle& style,
-                                     double sameLabelSpace,
                                      const std::string& text,
                                      std::list<LabelData>& labels);
     //@}
@@ -437,7 +443,7 @@ namespace osmscout {
 
     void RegisterPointWayLabel(const Projection& projection,
                                const MapParameter& parameter,
-                               const LabelStyle& style,
+                               const ShieldStyle& style,
                                const std::string& text,
                                size_t transStart, size_t transEnd);
 
@@ -550,6 +556,21 @@ namespace osmscout {
                                   double& height) = 0;
 
     /**
+      Return the size of the frame around the label text.
+     */
+    virtual void GetLabelFrame(const LabelStyle& style,
+                               double& horizontal,
+                               double& vertical);
+
+    /**
+      Return the size of the frame around a labels.
+     */
+    virtual void GetLabelSpace(const LabelStyle& styleA,
+                               const LabelStyle& styleB,
+                               double& horizontal,
+                               double& vertical);
+
+    /**
       Draw the given text at the given pixel coordinate in a style defined
       by the given LabelStyle.
      */
@@ -571,7 +592,7 @@ namespace osmscout {
      */
     virtual void DrawContourLabel(const Projection& projection,
                                   const MapParameter& parameter,
-                                  const LabelStyle& style,
+                                  const PathTextStyle& style,
                                   const std::string& text,
                                   size_t transStart, size_t transEnd) = 0;
 

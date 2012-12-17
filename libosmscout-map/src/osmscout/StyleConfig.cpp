@@ -195,45 +195,26 @@ namespace osmscout {
   }
 
   LabelStyle::LabelStyle()
-   : style(none),
-     priority(0),
-     scaleAndFadeMag((Mag)1000000),
-     size(1),
-     textColor(0,0,0),
-     bgColor(1,1,1),
-     borderColor(0,0,0)
+   : priority(0),
+     size(1)
   {
     // no code
   }
 
   LabelStyle::LabelStyle(const LabelStyle& style)
   {
-    this->style=style.style;
     this->priority=style.priority;
-    this->scaleAndFadeMag=style.scaleAndFadeMag;
     this->size=style.size;
-    this->textColor=style.textColor;
-    this->bgColor=style.bgColor;
-    this->borderColor=style.borderColor;
   }
 
-  LabelStyle& LabelStyle::SetStyle(Style style)
+  LabelStyle::~LabelStyle()
   {
-    this->style=style;
-
-    return *this;
+    // no code
   }
 
   LabelStyle& LabelStyle::SetPriority(uint8_t priority)
   {
     this->priority=priority;
-
-    return *this;
-  }
-
-  LabelStyle& LabelStyle::SetScaleAndFadeMag(Mag mag)
-  {
-    this->scaleAndFadeMag=mag;
 
     return *this;
   }
@@ -245,23 +226,159 @@ namespace osmscout {
     return *this;
   }
 
-  LabelStyle& LabelStyle::SetTextColor(const Color& color)
+  TextStyle::TextStyle()
+   : style(normal),
+     scaleAndFadeMag((Mag)1000000),
+          label(none),
+     textColor(0,0,0)
+
+  {
+    // no code
+  }
+
+  TextStyle::TextStyle(const TextStyle& style)
+  : LabelStyle(style)
+  {
+    this->style=style.style;
+    this->scaleAndFadeMag=style.scaleAndFadeMag;
+    this->label=label;
+    this->textColor=style.textColor;
+  }
+
+  TextStyle& TextStyle::SetStyle(Style style)
+  {
+    this->style=style;
+
+    return *this;
+  }
+
+  TextStyle& TextStyle::SetPriority(uint8_t priority)
+  {
+    LabelStyle::SetPriority(priority);
+
+    return *this;
+  }
+
+  TextStyle& TextStyle::SetScaleAndFadeMag(Mag mag)
+  {
+    this->scaleAndFadeMag=mag;
+
+    return *this;
+  }
+
+  TextStyle& TextStyle::SetSize(double size)
+  {
+    LabelStyle::SetSize(size);
+
+    return *this;
+  }
+
+  TextStyle& TextStyle::SetLabel(Label label)
+  {
+    this->label=label;
+
+    return *this;
+  }
+
+  TextStyle& TextStyle::SetTextColor(const Color& color)
   {
     this->textColor=color;
 
     return *this;
   }
 
-  LabelStyle& LabelStyle::SetBgColor(const Color& color)
+  ShieldStyle::ShieldStyle()
+   : label(none),
+     textColor(0,0,0),
+     bgColor(1,1,1),
+     borderColor(0,0,0)
+  {
+    // no code
+  }
+
+  ShieldStyle::ShieldStyle(const ShieldStyle& style)
+  : LabelStyle(style)
+  {
+    this->label=style.label;
+    this->textColor=style.textColor;
+    this->bgColor=style.bgColor;
+    this->borderColor=style.borderColor;
+  }
+
+  ShieldStyle& ShieldStyle::SetLabel(Label label)
+  {
+    this->label=label;
+
+    return *this;
+  }
+
+  ShieldStyle& ShieldStyle::SetPriority(uint8_t priority)
+  {
+    LabelStyle::SetPriority(priority);
+
+    return *this;
+  }
+
+  ShieldStyle& ShieldStyle::SetSize(double size)
+  {
+    LabelStyle::SetSize(size);
+
+    return *this;
+  }
+
+  ShieldStyle& ShieldStyle::SetTextColor(const Color& color)
+  {
+    this->textColor=color;
+
+    return *this;
+  }
+
+  ShieldStyle& ShieldStyle::SetBgColor(const Color& color)
   {
     this->bgColor=color;
 
     return *this;
   }
 
-  LabelStyle& LabelStyle::SetBorderColor(const Color& color)
+  ShieldStyle& ShieldStyle::SetBorderColor(const Color& color)
   {
     this->borderColor=color;
+
+    return *this;
+  }
+
+  PathTextStyle::PathTextStyle()
+   : label(none),
+     size(1),
+     textColor(0,0,0)
+  {
+    // no code
+  }
+
+  PathTextStyle::PathTextStyle(const PathTextStyle& style)
+  {
+    this->label=style.label;
+    this->size=style.size;
+    this->textColor=style.textColor;
+  }
+
+  PathTextStyle& PathTextStyle::SetLabel(Label label)
+  {
+    this->label=label;
+
+    return *this;
+  }
+
+  PathTextStyle& PathTextStyle::SetSize(double size)
+  {
+    this->size=size;
+
+    return *this;
+  }
+
+  PathTextStyle& PathTextStyle::SetTextColor(const Color& color)
+  {
+    this->textColor=color;
 
     return *this;
   }
@@ -452,17 +569,16 @@ namespace osmscout {
   StyleConfig::StyleConfig(TypeConfig* typeConfig)
    : typeConfig(typeConfig)
   {
-    nodeRefLabelStyles.resize(typeConfig->GetMaxTypeId()+1);
-    nodeLabelStyles.resize(typeConfig->GetMaxTypeId()+1);
+    nodeTextStyles.resize(typeConfig->GetMaxTypeId()+1);
     nodeIconStyles.resize(typeConfig->GetMaxTypeId()+1);
 
     wayPrio.resize(typeConfig->GetMaxTypeId()+1,std::numeric_limits<size_t>::max());
     wayLineStyles.resize(typeConfig->GetMaxTypeId()+1);
-    wayRefLabelStyles.resize(typeConfig->GetMaxTypeId()+1);
-    wayNameLabelStyles.resize(typeConfig->GetMaxTypeId()+1);
+    wayPathTextStyles.resize(typeConfig->GetMaxTypeId()+1);
+    wayShieldStyles.resize(typeConfig->GetMaxTypeId()+1);
 
     areaFillStyles.resize(typeConfig->GetMaxTypeId()+1);
-    areaLabelStyles.resize(typeConfig->GetMaxTypeId()+1);
+    areaTextStyles.resize(typeConfig->GetMaxTypeId()+1);
     areaIconStyles.resize(typeConfig->GetMaxTypeId()+1);
   }
 
@@ -553,8 +669,7 @@ namespace osmscout {
 
   void StyleConfig::PostprocessNodes()
   {
-    CleanupStyles(nodeLabelStyles);
-    CleanupStyles(nodeRefLabelStyles);
+    CleanupStyles(nodeTextStyles);
     CleanupStyles(nodeIconStyles);
 
     size_t maxLevel=0;
@@ -563,8 +678,7 @@ namespace osmscout {
         continue;
       }
 
-      maxLevel=std::max(maxLevel,nodeLabelStyles[type].size());
-      maxLevel=std::max(maxLevel,nodeRefLabelStyles[type].size());
+      maxLevel=std::max(maxLevel,nodeTextStyles[type].size());
       maxLevel=std::max(maxLevel,nodeIconStyles[type].size());
     }
 
@@ -582,10 +696,7 @@ namespace osmscout {
           continue;
         }
 
-        if (HasStyle(nodeLabelStyles[type],level)) {
-          nodeTypeSets[level].SetType(type);
-        }
-        else if (HasStyle(nodeRefLabelStyles[type],level)) {
+        if (HasStyle(nodeTextStyles[type],level)) {
           nodeTypeSets[level].SetType(type);
         }
         else if (HasStyle(nodeIconStyles[type],level)) {
@@ -598,8 +709,8 @@ namespace osmscout {
   void StyleConfig::PostprocessWays()
   {
     CleanupStyles(wayLineStyles);
-    CleanupStyles(wayNameLabelStyles);
-    CleanupStyles(wayRefLabelStyles);
+    CleanupStyles(wayPathTextStyles);
+    CleanupStyles(wayShieldStyles);
 
     size_t maxLevel=0;
     for (TypeId type=0; type<=typeConfig->GetMaxTypeId(); type++) {
@@ -608,8 +719,8 @@ namespace osmscout {
       }
 
       maxLevel=std::max(maxLevel,wayLineStyles[type].size());
-      maxLevel=std::max(maxLevel,wayNameLabelStyles[type].size());
-      maxLevel=std::max(maxLevel,wayRefLabelStyles[type].size());
+      maxLevel=std::max(maxLevel,wayPathTextStyles[type].size());
+      maxLevel=std::max(maxLevel,wayShieldStyles[type].size());
     }
 
     wayTypeSets.resize(maxLevel);
@@ -637,10 +748,10 @@ namespace osmscout {
             if (HasStyle(wayLineStyles[type],level)) {
               typeSet.SetType(type);
             }
-            else if (HasStyle(wayRefLabelStyles[type],level)) {
+            else if (HasStyle(wayPathTextStyles[type],level)) {
               typeSet.SetType(type);
             }
-            else if (HasStyle(wayNameLabelStyles[type],level)) {
+            else if (HasStyle(wayShieldStyles[type],level)) {
               typeSet.SetType(type);
             }
           }
@@ -655,7 +766,7 @@ namespace osmscout {
   void StyleConfig::PostprocessAreas()
   {
     CleanupStyles(areaFillStyles);
-    CleanupStyles(areaLabelStyles);
+    CleanupStyles(areaTextStyles);
     CleanupStyles(areaIconStyles);
 
     size_t maxLevel=0;
@@ -665,7 +776,7 @@ namespace osmscout {
       }
 
       maxLevel=std::max(maxLevel,areaFillStyles[type].size());
-      maxLevel=std::max(maxLevel,areaLabelStyles[type].size());
+      maxLevel=std::max(maxLevel,areaTextStyles[type].size());
       maxLevel=std::max(maxLevel,areaIconStyles[type].size());
     }
 
@@ -686,7 +797,7 @@ namespace osmscout {
         if (HasStyle(areaFillStyles[type],level)) {
           areaTypeSets[level].SetType(type);
         }
-        else if (HasStyle(areaLabelStyles[type],level)) {
+        else if (HasStyle(areaTextStyles[type],level)) {
           areaTypeSets[level].SetType(type);
         }
         else if (HasStyle(areaIconStyles[type],level)) {
@@ -789,25 +900,14 @@ namespace osmscout {
     }
   }
 
-  void StyleConfig::GetNodeRefLabelStyles(const StyleFilter& filter,
-                                          std::list<LabelStyleRef>& styles)
+  void StyleConfig::GetNodeTextStyles(const StyleFilter& filter,
+                                      std::list<TextStyleRef>& styles)
   {
     styles.clear();
 
     GetMatchingStyles(*typeConfig,
                       filter,
-                      nodeRefLabelStyles,
-                      styles);
-  }
-
-  void StyleConfig::GetNodeNameLabelStyles(const StyleFilter& filter,
-                                           std::list<LabelStyleRef>& styles)
-  {
-    styles.clear();
-
-    GetMatchingStyles(*typeConfig,
-                      filter,
-                      nodeLabelStyles,
+                      nodeTextStyles,
                       styles);
   }
 
@@ -833,28 +933,30 @@ namespace osmscout {
                       styles);
   }
 
-  void StyleConfig::GetWayRefLabelStyles(const StyleFilter& filter,
-                                         std::list<LabelStyleRef>& styles)
+  void StyleConfig::GetWayPathTextStyles(const StyleFilter& filter,
+                                         std::list<PathTextStyleRef>& styles)
   {
     styles.clear();
 
     GetMatchingStyles(*typeConfig,
                       filter,
-                      wayRefLabelStyles,
+                      wayPathTextStyles,
                       styles);
   }
 
-  void StyleConfig::GetWayNameLabelStyles(const StyleFilter& filter, std::list<LabelStyleRef>& styles)
+  void StyleConfig::GetWayShieldStyles(const StyleFilter& filter,
+                                       std::list<ShieldStyleRef>& styles)
   {
     styles.clear();
 
     GetMatchingStyles(*typeConfig,
                       filter,
-                      wayNameLabelStyles,
+                      wayShieldStyles,
                       styles);
   }
 
-  void StyleConfig::GetAreaFillStyles(const StyleFilter& filter, std::list<FillStyleRef>& styles)
+  void StyleConfig::GetAreaFillStyles(const StyleFilter& filter,
+                                      std::list<FillStyleRef>& styles)
   {
     styles.clear();
 
@@ -864,18 +966,20 @@ namespace osmscout {
                       styles);
   }
 
-  void StyleConfig::GetAreaLabelStyles(const StyleFilter& filter, std::list<LabelStyleRef>& styles)
+  void StyleConfig::GetAreaTextStyles(const StyleFilter& filter,
+                                       std::list<TextStyleRef>& styles)
   {
     styles.clear();
 
     GetMatchingStyles(*typeConfig,
                       filter,
-                      areaLabelStyles,
+                      areaTextStyles,
                       styles);
 
   }
 
-  void StyleConfig::GetAreaIconStyles(const StyleFilter& filter, std::list<IconStyleRef>& styles)
+  void StyleConfig::GetAreaIconStyles(const StyleFilter& filter,
+                                      std::list<IconStyleRef>& styles)
   {
     styles.clear();
 
@@ -938,14 +1042,9 @@ namespace osmscout {
     return GetStyle(nodeIconStyles,type,level);
   }
 
-  LabelStyle* StyleConfig::GetNodeRefLabelStyle(TypeId type, size_t level) const
+  TextStyle* StyleConfig::GetNodeTextStyle(TypeId type, size_t level) const
   {
-    return GetStyle(nodeRefLabelStyles,type,level);
-  }
-
-  LabelStyle* StyleConfig::GetNodeLabelStyle(TypeId type, size_t level) const
-  {
-    return GetStyle(nodeLabelStyles,type,level);
+    return GetStyle(nodeTextStyles,type,level);
   }
 
   LineStyle* StyleConfig::GetWayLineStyle(TypeId type, size_t level) const
@@ -953,14 +1052,14 @@ namespace osmscout {
     return GetStyle(wayLineStyles,type,level);
   }
 
-  LabelStyle* StyleConfig::GetWayRefLabelStyle(TypeId type, size_t level) const
+  PathTextStyle* StyleConfig::GetWayPathTextStyle(TypeId type, size_t level) const
   {
-    return GetStyle(wayRefLabelStyles,type,level);
+    return GetStyle(wayPathTextStyles,type,level);
   }
 
-  LabelStyle* StyleConfig::GetWayNameLabelStyle(TypeId type, size_t level) const
+  ShieldStyle* StyleConfig::GetWayShieldStyle(TypeId type, size_t level) const
   {
-    return GetStyle(wayNameLabelStyles,type,level);
+    return GetStyle(wayShieldStyles,type,level);
   }
 
   FillStyle* StyleConfig::GetAreaFillStyle(TypeId type, size_t level) const
@@ -968,9 +1067,9 @@ namespace osmscout {
     return GetStyle(areaFillStyles,type,level);
   }
 
-  LabelStyle* StyleConfig::GetAreaLabelStyle(TypeId type, size_t level) const
+  TextStyle* StyleConfig::GetAreaTextStyle(TypeId type, size_t level) const
   {
-    return GetStyle(areaLabelStyles,type,level);
+    return GetStyle(areaTextStyles,type,level);
   }
 
   IconStyle* StyleConfig::GetAreaIconStyle(TypeId type, size_t level) const

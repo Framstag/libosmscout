@@ -715,12 +715,12 @@ namespace osmscout {
                                   const MapParameter& parameter,
                                   const LabelData& label)
   {
-    double               r=label.style->GetTextColor().GetR();
-    double               g=label.style->GetTextColor().GetG();
-    double               b=label.style->GetTextColor().GetB();
-    Font                 font=GetFont(parameter,
-                                      label.fontSize);
-;
+    const TextStyle* style=dynamic_cast<const TextStyle*>(label.style);
+    double           r=style->GetTextColor().GetR();
+    double           g=style->GetTextColor().GetG();
+    double           b=style->GetTextColor().GetB();
+    Font             font=GetFont(parameter,
+                                  label.fontSize);
 
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
     PangoLayout *layout=pango_cairo_create_layout(draw);
@@ -734,7 +734,7 @@ namespace osmscout {
                   label.x,
                   label.y);
 
-    if (label.style->GetStyle()==LabelStyle::normal) {
+    if (style->GetStyle()==TextStyle::normal) {
       pango_cairo_show_layout(draw,
                               layout);
       cairo_stroke(draw);
@@ -766,7 +766,7 @@ namespace osmscout {
                   label.x,
                   label.y+fontExtents.ascent);
 
-    if (label.style->GetStyle()==LabelStyle::normal) {
+    if (style->GetStyle()==TextStyle::normal) {
 
       cairo_show_text(draw,label.text.c_str());
       cairo_stroke(draw);
@@ -788,13 +788,15 @@ namespace osmscout {
                                        const MapParameter& parameter,
                                        const LabelData& label)
   {
+    const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style);
+
     cairo_set_dash(draw,NULL,0,0);
     cairo_set_line_width(draw,1);
     cairo_set_source_rgba(draw,
-                          label.style->GetBgColor().GetR(),
-                          label.style->GetBgColor().GetG(),
-                          label.style->GetBgColor().GetB(),
-                          label.style->GetBgColor().GetA());
+                          style->GetBgColor().GetR(),
+                          style->GetBgColor().GetG(),
+                          style->GetBgColor().GetB(),
+                          style->GetBgColor().GetA());
 
     cairo_rectangle(draw,
                     label.bx1,
@@ -804,10 +806,10 @@ namespace osmscout {
     cairo_fill(draw);
 
     cairo_set_source_rgba(draw,
-                          label.style->GetBorderColor().GetR(),
-                          label.style->GetBorderColor().GetG(),
-                          label.style->GetBorderColor().GetB(),
-                          label.style->GetBorderColor().GetA());
+                          style->GetBorderColor().GetR(),
+                          style->GetBorderColor().GetG(),
+                          style->GetBorderColor().GetB(),
+                          style->GetBorderColor().GetA());
 
     cairo_rectangle(draw,
                     label.bx1+2,
@@ -817,10 +819,10 @@ namespace osmscout {
     cairo_stroke(draw);
 
     cairo_set_source_rgba(draw,
-                          label.style->GetTextColor().GetR(),
-                          label.style->GetTextColor().GetG(),
-                          label.style->GetTextColor().GetB(),
-                          label.style->GetTextColor().GetA());
+                          style->GetTextColor().GetR(),
+                          style->GetTextColor().GetG(),
+                          style->GetTextColor().GetB(),
+                          style->GetTextColor().GetA());
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
     Font        font=GetFont(parameter,
                              label.fontSize);
@@ -859,12 +861,10 @@ namespace osmscout {
 
   void MapPainterCairo::DrawContourLabel(const Projection& projection,
                                          const MapParameter& parameter,
-                                         const LabelStyle& style,
+                                         const PathTextStyle& style,
                                          const std::string& text,
                                          size_t transStart, size_t transEnd)
   {
-    assert(style.GetStyle()==LabelStyle::contour);
-
     double lineLength=0;
     double xo=0;
     double yo=0;

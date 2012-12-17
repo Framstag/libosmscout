@@ -10,10 +10,12 @@
 
 COMPILER OSS
 
-typedef std::list<FillStyleRef>   FillStyleList;
-typedef std::list<IconStyleRef>   IconStyleList;
-typedef std::list<LabelStyleRef>  LabelStyleList;
-typedef std::list<LineStyleRef>   LineStyleList;
+typedef std::list<FillStyleRef>     FillStyleList;
+typedef std::list<IconStyleRef>     IconStyleList;
+typedef std::list<TextStyleRef>     TextStyleList;
+typedef std::list<LineStyleRef>     LineStyleList;
+typedef std::list<PathTextStyleRef> PathTextStyleList;
+typedef std::list<ShieldStyleRef>   ShieldStyleList;
 
 inline std::string Destring(const char* str)
 {
@@ -392,42 +394,24 @@ PRODUCTIONS
   NODESTYLEDEF<StyleFilter filter>
               = SYNC "NODE" "."
                 (
-                  NODELABELSTYLE<filter>
-                | NODEREFSTYLE<filter>
+                  NODETEXTSTYLE<filter>
                 | NODEICONSTYLE<filter>
                 )
                 .
 
-  NODELABELSTYLE<StyleFilter filter>
-              = SYNC "LABEL"
+  NODETEXTSTYLE<StyleFilter filter>
+              = SYNC "TEXT"
                 [
                   STYLEFILTER<filter>
                 ]
                 (.
-                  LabelStyleList labelStyles;
+                  TextStyleList textStyles;
 
-                  config.GetNodeNameLabelStyles(filter,labelStyles);
+                  config.GetNodeTextStyles(filter,textStyles);
                 .)
                 SYNC "{"
                 {
-                  LABELDEF<labelStyles>
-                }
-                SYNC "}"
-                .
-
-  NODEREFSTYLE<StyleFilter filter>
-              = SYNC "REF"
-                [
-                  STYLEFILTER<filter>
-                ]
-                (.
-                  LabelStyleList labelStyles;
-
-                  config.GetNodeRefLabelStyles(filter,labelStyles);
-                .)
-                SYNC "{"
-                {
-                	REFDEF<labelStyles>
+                  TEXTDEF<textStyles>
                 }
                 SYNC "}"
                 .
@@ -455,8 +439,8 @@ PRODUCTIONS
                   WAYSTYLE<filter>
                 | "."
                   (
-                     WAYLABELSTYLE<filter>
-                  |  WAYREFSTYLE<filter>
+                     WAYPATHTEXTSTYLE<filter>
+                  |  WAYSHIELDSTYLE<filter>
                   )
                 )
                 .
@@ -477,36 +461,36 @@ PRODUCTIONS
                 SYNC "}"
                    .
 
-  WAYLABELSTYLE<StyleFilter filter>
-              = SYNC "LABEL"
+  WAYPATHTEXTSTYLE<StyleFilter filter>
+              = SYNC "TEXT"
                 [
                   STYLEFILTER<filter>
                 ]
                 (.
-                  LabelStyleList labelStyles;
+                  PathTextStyleList pathTextStyles;
 
-                  config.GetWayNameLabelStyles(filter,labelStyles);
+                  config.GetWayPathTextStyles(filter,pathTextStyles);
                 .)
                 "{"
                 {
-                  LABELDEF<labelStyles>
+                  PATHTEXTDEF<pathTextStyles>
                 }
                 "}"
                 .
 
-  WAYREFSTYLE<StyleFilter filter>
-              = SYNC "REF"
+  WAYSHIELDSTYLE<StyleFilter filter>
+              = SYNC "SHIELD"
                 [
                   STYLEFILTER<filter>
                 ]
                 (.
-                  LabelStyleList labelStyles;
+                  ShieldStyleList shieldStyles;
 
-                  config.GetWayRefLabelStyles(filter,labelStyles);
+                  config.GetWayShieldStyles(filter,shieldStyles);
                 .)
                 SYNC "{"
                 {
-                  LABELDEF<labelStyles>
+                  SHIELDDEF<shieldStyles>
                 }
                 SYNC "}"
                 .
@@ -517,7 +501,7 @@ PRODUCTIONS
                   AREASTYLE<filter>
                 | "."
                   (
-                    AREALABELSTYLE<filter>
+                    AREATEXTSTYLE<filter>
                   | AREAICONSTYLE<filter>
                   )
                 )
@@ -540,19 +524,19 @@ PRODUCTIONS
                 SYNC "}"
                 .
 
-  AREALABELSTYLE<StyleFilter filter>
-              = SYNC "LABEL"
+  AREATEXTSTYLE<StyleFilter filter>
+              = SYNC "TEXT"
                 [
                   STYLEFILTER<filter>
                 ]
                 (.
-                  LabelStyleList labelStyles;
+                  TextStyleList textStyles;
 
-                  config.GetAreaLabelStyles(filter,labelStyles);
+                  config.GetAreaTextStyles(filter,textStyles);
                 .)
                 SYNC "{"
                 {
-                  LABELDEF<labelStyles>
+                  TEXTDEF<textStyles>
                 }
                 SYNC "}"
                 .
@@ -769,15 +753,26 @@ PRODUCTIONS
                 )
                 .
 
-  LABELDEF<LabelStyleList& styles>
+  TEXTDEF<TextStyleList& styles>
               = (
-                  (. LabelStyle::Style labelStyle; .)
-                  "style" ":" LABELSTYLE<labelStyle> WEAK ";"
+                  (. TextStyle::Label label; .)
+                  "label" ":" TEXTLABEL<label> WEAK ";"
                   (.
-                     for (LabelStyleList::iterator s=styles.begin();
+                     for (TextStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       LabelStyleRef style(*s);
+                       TextStyleRef style(*s);
+
+                  	   style->SetLabel(label);
+                  	 }
+                  .)
+                | (. TextStyle::Style labelStyle; .)
+                  "style" ":" LABELSTYLE<labelStyle> WEAK ";"
+                  (.
+                     for (TextStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       TextStyleRef style(*s);
 
                   	   style->SetStyle(labelStyle);
                   	 }
@@ -785,43 +780,21 @@ PRODUCTIONS
                 | (. Color textColor; .)
                   "color" ":" COLOR<textColor> WEAK ";"
                   (.
-                     for (LabelStyleList::iterator s=styles.begin();
+                     for (TextStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       LabelStyleRef style(*s);
+                       TextStyleRef style(*s);
 
                   	   style->SetTextColor(textColor);
-                  	 }
-                  .)
-                | (. Color bgColor; .)
-                  "backgroundColor" ":" COLOR<bgColor> WEAK ";"
-                  (.
-                     for (LabelStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       LabelStyleRef style(*s);
-
-                  	   style->SetBgColor(bgColor);
-                  	 }
-                  .)
-                | (. Color borderColor; .)
-	              "borderColor" ":" COLOR<borderColor> WEAK ";"
-                  (.
-                     for (LabelStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       LabelStyleRef style(*s);
-
-                  	   style->SetBorderColor(borderColor);
                   	 }
                   .)
                 | (. double size; .)
                   "size" ":" DOUBLE<size> WEAK ";"
                   (.
-                     for (LabelStyleList::iterator s=styles.begin();
+                     for (TextStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       LabelStyleRef style(*s);
+                       TextStyleRef style(*s);
 
                   	   style->SetSize(size);
                   	 }
@@ -829,10 +802,10 @@ PRODUCTIONS
                 | (. Mag scaleMag; .)
                   "scaleMag" ":" MAG<scaleMag> WEAK ";"
                   (.
-                     for (LabelStyleList::iterator s=styles.begin();
+                     for (TextStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       LabelStyleRef style(*s);
+                       TextStyleRef style(*s);
 
                   	   style->SetScaleAndFadeMag(scaleMag);
                   	 }
@@ -841,10 +814,10 @@ PRODUCTIONS
                   "priority" ":" INTEGER<priority> WEAK ";"
 	              (.
 	                if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
-                      for (LabelStyleList::iterator s=styles.begin();
+                      for (TextStyleList::iterator s=styles.begin();
                            s!=styles.end();
                            ++s) {
-                        LabelStyleRef style(*s);
+                        TextStyleRef style(*s);
 
                   	    style->SetPriority((uint8_t)priority);
                   	  }
@@ -859,35 +832,26 @@ PRODUCTIONS
                 )
                 .
 
-  REFDEF<LabelStyleList& styles>
-              = (.
-                  for (LabelStyleList::iterator s=styles.begin();
-                       s!=styles.end();
-                       ++s) {
-                    LabelStyleRef style(*s);
-
-                    style->SetStyle(LabelStyle::plate);
-                  }
-                .)
-                (
-                  (. LabelStyle::Style labelStyle; .)
-                  "style" ":" LABELSTYLE<labelStyle> WEAK ";"
+  SHIELDDEF<ShieldStyleList& styles>
+              = (
+                  (. ShieldStyle::Label label; .)
+                  "label" ":" SHIELDLABEL<label> WEAK ";"
                   (.
-                     for (LabelStyleList::iterator s=styles.begin();
+                     for (ShieldStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       LabelStyleRef style(*s);
+                       ShieldStyleRef style(*s);
 
-                  	   style->SetStyle(labelStyle);
+                  	   style->SetLabel(label);
                   	 }
                   .)
                 | (. Color textColor; .)
                   "color" ":" COLOR<textColor> WEAK ";"
                   (.
-                     for (LabelStyleList::iterator s=styles.begin();
+                     for (ShieldStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       LabelStyleRef style(*s);
+                       ShieldStyleRef style(*s);
 
                   	   style->SetTextColor(textColor);
                   	 }
@@ -895,10 +859,10 @@ PRODUCTIONS
                 | (. Color bgColor; .)
                   "backgroundColor" ":" COLOR<bgColor> WEAK ";"
                   (.
-                     for (LabelStyleList::iterator s=styles.begin();
+                     for (ShieldStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       LabelStyleRef style(*s);
+                       ShieldStyleRef style(*s);
 
                   	   style->SetBgColor(bgColor);
                   	 }
@@ -906,10 +870,10 @@ PRODUCTIONS
                 | (. Color borderColor; .)
 	              "borderColor" ":" COLOR<borderColor> WEAK ";"
                   (.
-                     for (LabelStyleList::iterator s=styles.begin();
+                     for (ShieldStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       LabelStyleRef style(*s);
+                       ShieldStyleRef style(*s);
 
                   	   style->SetBorderColor(borderColor);
                   	 }
@@ -917,33 +881,22 @@ PRODUCTIONS
                 | (. double size; .)
                   "size" ":" DOUBLE<size> WEAK ";"
                   (.
-                     for (LabelStyleList::iterator s=styles.begin();
+                     for (ShieldStyleList::iterator s=styles.begin();
                           s!=styles.end();
                           ++s) {
-                       LabelStyleRef style(*s);
+                       ShieldStyleRef style(*s);
 
                   	   style->SetSize(size);
-                  	 }
-                  .)
-                | (. Mag scaleMag; .)
-                  "scaleMag" ":" MAG<scaleMag> WEAK ";"
-                  (.
-                     for (LabelStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       LabelStyleRef style(*s);
-
-                  	   style->SetScaleAndFadeMag(scaleMag);
                   	 }
                   .)
                 | (. size_t priority; .)
                   "priority" ":" INTEGER<priority> WEAK ";"
 	              (.
 	                if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
-                      for (LabelStyleList::iterator s=styles.begin();
+                      for (ShieldStyleList::iterator s=styles.begin();
                            s!=styles.end();
                            ++s) {
-                        LabelStyleRef style(*s);
+                        ShieldStyleRef style(*s);
 
                   	    style->SetPriority((uint8_t)priority);
                   	  }
@@ -955,6 +908,44 @@ PRODUCTIONS
 	                  SemErr(e.c_str());
 	                }
 	               .)
+                )
+                .
+
+  PATHTEXTDEF<PathTextStyleList& styles>
+              = (
+                  (. PathTextStyle::Label label; .)
+                  "label" ":" PATHTEXTLABEL<label> WEAK ";"
+                  (.
+                     for (PathTextStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       PathTextStyleRef style(*s);
+
+                  	   style->SetLabel(label);
+                  	 }
+                  .)
+                | (. Color textColor; .)
+                  "color" ":" COLOR<textColor> WEAK ";"
+                  (.
+                     for (PathTextStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       PathTextStyleRef style(*s);
+
+                  	   style->SetTextColor(textColor);
+                  	 }
+                  .)
+                | (. double size; .)
+                  "size" ":" DOUBLE<size> WEAK ";"
+                  (.
+                     for (PathTextStyleList::iterator s=styles.begin();
+                          s!=styles.end();
+                          ++s) {
+                       PathTextStyleRef style(*s);
+
+                  	   style->SetSize(size);
+                  	 }
+                  .)
                 )
                 .
 
@@ -1005,12 +996,28 @@ PRODUCTIONS
                 | "square"  (. style=LineStyle::capSquare; .)
                 ).
 
-  LABELSTYLE<LabelStyle::Style& style>
+  LABELSTYLE<TextStyle::Style& style>
               = (
-                  "normal"    (. style=LabelStyle::normal; .)
-                | "contour"   (. style=LabelStyle::contour; .)
-                | "plate"     (. style=LabelStyle::plate; .)
-                | "emphasize" (. style=LabelStyle::emphasize; .)
+                  "normal"    (. style=TextStyle::normal; .)
+                | "emphasize" (. style=TextStyle::emphasize; .)
+                ).
+
+  TEXTLABEL<TextStyle::Label& label>
+              = (
+                  "name" (. label=TextStyle::name; .)
+                | "ref"  (. label=TextStyle::ref; .)
+                ).
+
+  SHIELDLABEL<ShieldStyle::Label& label>
+              = (
+                  "name" (. label=ShieldStyle::name; .)
+                | "ref"  (. label=ShieldStyle::ref; .)
+                ).
+
+  PATHTEXTLABEL<PathTextStyle::Label& label>
+              = (
+                  "name" (. label=PathTextStyle::name; .)
+                | "ref"  (. label=PathTextStyle::ref; .)
                 ).
 
   COLOR<Color& color>
