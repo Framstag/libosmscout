@@ -161,9 +161,6 @@ SYMBOL christian_church_cross
          waterway_river,
          waterway_canal]
      WAY.TEXT { label: name;}
-
-   [TYPE waterway_riverbank]
-     AREA.TEXT { label: name; }
  }
 
  // -------------------------------------------------------
