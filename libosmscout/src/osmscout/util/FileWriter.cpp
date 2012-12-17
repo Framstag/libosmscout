@@ -24,7 +24,6 @@
 #include <osmscout/util/FileWriter.h>
 
 #include <cstring>
-#include <cstdio>
 
 #include <osmscout/util/Number.h>
 
