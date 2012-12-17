@@ -294,6 +294,7 @@ namespace osmscout {
     mJniEnv->DeleteLocalRef(jArrayY);
   }
 
+/*
   void MapPainterCanvas::DrawSymbol(const SymbolStyle* style,
                     double x, double y)
   {
@@ -311,6 +312,13 @@ namespace osmscout {
 
     mJniEnv->CallVoidMethod(mPainterObject, methodId, javaStyle, javaColor,
                             (jfloat) javaSize, (jfloat) x, (jfloat) y);
+  }
+*/
+
+  void MapPainterCanvas::DrawSymbol(const Projection& projection,
+                     const MapParameter& parameter, const SymbolRef& symbol,
+                     double x, double y)
+  {
   }
 
   void MapPainterCanvas::DrawIcon(const IconStyle* style,
