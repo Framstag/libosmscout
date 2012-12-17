@@ -324,6 +324,12 @@ namespace osmscout {
     AddTypeInfo(tileUnknown);
     AddTypeInfo(tileCoastline);
 
+    typeTileLand=GetTypeId("_tile_land");
+    typeTileSea=GetTypeId("_tile_sea");
+    typeTileCoast=GetTypeId("_tile_coast");
+    typeTileUnknown=GetTypeId("_tile_unknown");
+    typeTileCoastline=GetTypeId("_tile_coastline");
+
     tagAdminLevel=GetTagId("admin_level");
     tagBoundary=GetTagId("boundary");
     tagBridge=GetTagId("bridge");

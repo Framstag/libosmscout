@@ -29,6 +29,10 @@
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeSet.h>
 
+#include <osmscout/Node.h>
+#include <osmscout/Relation.h>
+#include <osmscout/Way.h>
+
 #include <osmscout/util/Color.h>
 #include <osmscout/util/Reference.h>
 #include <osmscout/util/Transformation.h>
@@ -767,16 +771,30 @@ namespace osmscout {
       }
     }
 
-    IconStyle* GetNodeIconStyle(TypeId type, size_t level) const;
-    TextStyle* GetNodeTextStyle(TypeId type, size_t level) const;
+    IconStyle* GetNodeIconStyle(const Node& node,
+                                size_t level) const;
+    TextStyle* GetNodeTextStyle(const Node& node,
+                                size_t level) const;
 
-    LineStyle* GetWayLineStyle(TypeId type, size_t level) const;
-    PathTextStyle* GetWayPathTextStyle(TypeId type, size_t level) const;
-    ShieldStyle* GetWayShieldStyle(TypeId type, size_t level) const;
+    LineStyle* GetWayLineStyle(const SegmentAttributes& way,
+                               size_t level) const;
+    PathTextStyle* GetWayPathTextStyle(const SegmentAttributes& way,
+                                       size_t level) const;
+    ShieldStyle* GetWayShieldStyle(const SegmentAttributes& way,
+                                   size_t level) const;
 
-    FillStyle* GetAreaFillStyle(TypeId type, size_t level) const;
-    TextStyle* GetAreaTextStyle(TypeId type, size_t level) const;
-    IconStyle* GetAreaIconStyle(TypeId type, size_t level) const;
+    FillStyle* GetAreaFillStyle(const SegmentAttributes& area,
+                                size_t level) const;
+    TextStyle* GetAreaTextStyle(const SegmentAttributes& area,
+                                size_t level) const;
+    IconStyle* GetAreaIconStyle(const SegmentAttributes& area,
+                                size_t level) const;
+
+    FillStyle* GetLandFillStyle(size_t level) const;
+    FillStyle* GetSeaFillStyle(size_t level) const;
+    FillStyle* GetCoastFillStyle(size_t level) const;
+    FillStyle* GetUnknownFillStyle(size_t level) const;
+    LineStyle* GetCoastlineLineStyle(size_t level) const;
   };
 }
 

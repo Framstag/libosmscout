@@ -795,7 +795,10 @@ namespace osmscout {
       }
     }
 
+
+    //
     // If the relation itself does not have a type, try to autodetect the type from the outer rings
+    //
 
     if (relation.GetType()==typeIgnore) {
       for (std::list<MultipolygonPart>::iterator ring=parts.begin();

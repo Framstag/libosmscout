@@ -99,7 +99,11 @@ namespace osmscout {
     for (std::vector<TypeInfo>::const_iterator typeInfo=styleConfig.GetTypeConfig()->GetTypes().begin();
         typeInfo!=styleConfig.GetTypeConfig()->GetTypes().end();
         typeInfo++) {
-      const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(typeInfo->GetId(),MagToLevel(projection.GetMagnification()));
+      SegmentAttributes attributes;
+      const FillStyle   *fillStyle;
+
+      attributes.type=typeInfo->GetId();
+      fillStyle=styleConfig.GetAreaFillStyle(attributes,MagToLevel(projection.GetMagnification()));
 
       if (fillStyle!=NULL) {
         stream << "        ." << typeInfo->GetName() << "_area {";
@@ -142,7 +146,11 @@ namespace osmscout {
         continue;
       }
 
-      const LineStyle *lineStyle=styleConfig.GetWayLineStyle(typeInfo->GetId(),MagToLevel(projection.GetMagnification()));
+      SegmentAttributes attributes;
+      const LineStyle   *lineStyle;
+
+      attributes.type=typeInfo->GetId();
+      lineStyle=styleConfig.GetWayLineStyle(attributes,MagToLevel(projection.GetMagnification()));
 
       if (lineStyle!=NULL) {
         double lineWidth;

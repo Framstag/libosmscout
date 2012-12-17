@@ -392,6 +392,12 @@ namespace osmscout {
     OSMSCOUT_HASHMAP<TypeId,TypeInfo>      idToTypeMap;
 
   public:
+    TypeId                                 typeTileLand;
+    TypeId                                 typeTileSea;
+    TypeId                                 typeTileCoast;
+    TypeId                                 typeTileUnknown;
+    TypeId                                 typeTileCoastline;
+
     // External use (also available in "normal" types, if not explicitly deleted)
     TagId                                  tagName;
     TagId                                  tagRef;

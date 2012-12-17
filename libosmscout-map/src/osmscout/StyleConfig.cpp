@@ -1036,45 +1036,74 @@ namespace osmscout {
     }
   }
 
-  IconStyle* StyleConfig::GetNodeIconStyle(TypeId type,
+  IconStyle* StyleConfig::GetNodeIconStyle(const Node& node,
                                            size_t level) const
   {
-    return GetStyle(nodeIconStyles,type,level);
+    return GetStyle(nodeIconStyles,node.GetType(),level);
   }
 
-  TextStyle* StyleConfig::GetNodeTextStyle(TypeId type, size_t level) const
+  TextStyle* StyleConfig::GetNodeTextStyle(const Node& node,
+                                           size_t level) const
   {
-    return GetStyle(nodeTextStyles,type,level);
+    return GetStyle(nodeTextStyles,node.GetType(),level);
   }
 
-  LineStyle* StyleConfig::GetWayLineStyle(TypeId type, size_t level) const
+  LineStyle* StyleConfig::GetWayLineStyle(const SegmentAttributes& way,
+                                          size_t level) const
   {
-    return GetStyle(wayLineStyles,type,level);
+    return GetStyle(wayLineStyles,way.GetType(),level);
   }
 
-  PathTextStyle* StyleConfig::GetWayPathTextStyle(TypeId type, size_t level) const
+  PathTextStyle* StyleConfig::GetWayPathTextStyle(const SegmentAttributes& way,
+                                                  size_t level) const
   {
-    return GetStyle(wayPathTextStyles,type,level);
+    return GetStyle(wayPathTextStyles,way.GetType(),level);
   }
 
-  ShieldStyle* StyleConfig::GetWayShieldStyle(TypeId type, size_t level) const
+  ShieldStyle* StyleConfig::GetWayShieldStyle(const SegmentAttributes& way,
+                                              size_t level) const
   {
-    return GetStyle(wayShieldStyles,type,level);
+    return GetStyle(wayShieldStyles,way.GetType(),level);
   }
 
-  FillStyle* StyleConfig::GetAreaFillStyle(TypeId type, size_t level) const
+  FillStyle* StyleConfig::GetAreaFillStyle(const SegmentAttributes& area, size_t level) const
   {
-    return GetStyle(areaFillStyles,type,level);
+    return GetStyle(areaFillStyles,area.GetType(),level);
   }
 
-  TextStyle* StyleConfig::GetAreaTextStyle(TypeId type, size_t level) const
+  TextStyle* StyleConfig::GetAreaTextStyle(const SegmentAttributes& area, size_t level) const
   {
-    return GetStyle(areaTextStyles,type,level);
+    return GetStyle(areaTextStyles,area.GetType(),level);
   }
 
-  IconStyle* StyleConfig::GetAreaIconStyle(TypeId type, size_t level) const
+  IconStyle* StyleConfig::GetAreaIconStyle(const SegmentAttributes& area, size_t level) const
   {
-    return GetStyle(areaIconStyles,type,level);
+    return GetStyle(areaIconStyles,area.GetType(),level);
+  }
+
+  FillStyle* StyleConfig::GetLandFillStyle(size_t level) const
+  {
+    return GetStyle(areaFillStyles,typeConfig->typeTileLand,level);
+  }
+
+  FillStyle* StyleConfig::GetSeaFillStyle(size_t level) const
+  {
+    return GetStyle(areaFillStyles,typeConfig->typeTileSea,level);
+  }
+
+  FillStyle* StyleConfig::GetCoastFillStyle(size_t level) const
+  {
+    return GetStyle(areaFillStyles,typeConfig->typeTileCoast,level);
+  }
+
+  FillStyle* StyleConfig::GetUnknownFillStyle(size_t level) const
+  {
+    return GetStyle(areaFillStyles,typeConfig->typeTileUnknown,level);
+  }
+
+  LineStyle* StyleConfig::GetCoastlineLineStyle(size_t level) const
+  {
+    return GetStyle(wayLineStyles,typeConfig->typeTileCoastline,level);
   }
 }
 

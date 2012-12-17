@@ -505,7 +505,7 @@ namespace osmscout {
                                    const MapData& data)
   {
     size_t            level=MagToLevel(projection.GetMagnification());
-    FillStyleRef      landFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_land"),level);
+    FillStyleRef      landFill=styleConfig.GetLandFillStyle(level);
 
 #if defined(DEBUG_GROUNDTILES)
       std::set<Coord> drawnLabels;
@@ -523,10 +523,10 @@ namespace osmscout {
       return;
     }
 
-    FillStyleRef       seaFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_sea"),level);
-    FillStyleRef       coastFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_coast"),level);
-    FillStyleRef       unknownFill=styleConfig.GetAreaFillStyle(styleConfig.GetTypeConfig()->GetAreaTypeId("_tile_unknown"),level);
-    LineStyleRef       coastlineLine=styleConfig.GetWayLineStyle(styleConfig.GetTypeConfig()->GetWayTypeId("_tile_coastline"),level);
+    FillStyleRef       seaFill=styleConfig.GetSeaFillStyle(level);
+    FillStyleRef       coastFill=styleConfig.GetCoastFillStyle(level);
+    FillStyleRef       unknownFill=styleConfig.GetUnknownFillStyle(level);
+    LineStyleRef       coastlineLine=styleConfig.GetCoastlineLineStyle(level);
     std::vector<Point> points;
     size_t             start,end;
 
@@ -976,8 +976,8 @@ namespace osmscout {
          ++a) {
       const WayRef& area=*a;
 
-      const TextStyle  *labelStyle=styleConfig.GetAreaTextStyle(area->GetType(),level);
-      IconStyle         *iconStyle=styleConfig.GetAreaIconStyle(area->GetType(),level);
+      const TextStyle  *labelStyle=styleConfig.GetAreaTextStyle(area->GetAttributes(),level);
+      IconStyle         *iconStyle=styleConfig.GetAreaIconStyle(area->GetAttributes(),level);
       bool              hasLabel=labelStyle!=NULL &&
                         labelStyle->IsVisible();
       bool              hasSymbol=iconStyle!=NULL && iconStyle->GetSymbol().Valid();
@@ -1065,9 +1065,8 @@ namespace osmscout {
       const RelationRef& relation=*r;
 
       for (size_t m=0; m<relation->roles.size(); m++) {
-        TypeId            type=relation->roles[m].ring==0 ? relation->GetType() : relation->roles[m].GetType();
-        const TextStyle  *labelStyle=styleConfig.GetAreaTextStyle(type,level);
-        IconStyle         *iconStyle=styleConfig.GetAreaIconStyle(type,level);
+        const TextStyle  *labelStyle=styleConfig.GetAreaTextStyle(relation->roles[m].attributes,level);
+        IconStyle         *iconStyle=styleConfig.GetAreaIconStyle(relation->roles[m].attributes,level);
         bool              hasLabel=labelStyle!=NULL &&
                                    labelStyle->IsVisible();
         bool              hasSymbol=iconStyle!=NULL && iconStyle->GetSymbol().Valid();
@@ -1157,8 +1156,8 @@ namespace osmscout {
                             const NodeRef& node)
   {
     size_t           level=MagToLevel(projection.GetMagnification());
-    const TextStyle  *labelStyle=styleConfig.GetNodeTextStyle(node->GetType(),level);
-    IconStyle        *iconStyle=styleConfig.GetNodeIconStyle(node->GetType(),level);
+    const TextStyle  *labelStyle=styleConfig.GetNodeTextStyle(node,level);
+    IconStyle        *iconStyle=styleConfig.GetNodeIconStyle(node,level);
     bool             hasLabel=labelStyle!=NULL;
     bool             hasSymbol=iconStyle!=NULL && iconStyle->GetSymbol().Valid();
     bool             hasIcon=iconStyle!=NULL && !iconStyle->GetIconName().empty();
@@ -1561,7 +1560,7 @@ namespace osmscout {
   {
     size_t level=MagToLevel(projection.GetMagnification());
 
-    const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(attributes.GetType(),level);
+    const FillStyle *fillStyle=styleConfig.GetAreaFillStyle(attributes,level);
 
     if (fillStyle==NULL)
     {
@@ -1671,18 +1670,17 @@ namespace osmscout {
         for (size_t i=0; i<relation->roles.size(); i++) {
           const Relation::Role& role=relation->roles[i];
 
-          if (role.ring==ring)
-          {
-            const FillStyle *fillStyle=NULL;
+          if (role.ring==ring) {
+            const FillStyle *fillStyle;
 
-            if (ring==0) {
+            if (role.ring==0) {
               if (relation->GetType()!=typeIgnore) {
-                fillStyle=styleConfig.GetAreaFillStyle(relation->GetType(),level);
+                fillStyle=styleConfig.GetAreaFillStyle(relation->GetAttributes(),level);
               }
             }
             else {
-              if (role.GetType()!=typeIgnore) {
-                fillStyle=styleConfig.GetAreaFillStyle(role.attributes.GetType(),level);
+              if (relation->GetType()!=typeIgnore) {
+                fillStyle=styleConfig.GetAreaFillStyle(role.GetAttributes(),level);
               }
             }
 
@@ -1690,8 +1688,6 @@ namespace osmscout {
             {
               continue;
             }
-
-            std::list<PolyData> clippings;
 
             foundRing=true;
 
@@ -1758,7 +1754,7 @@ namespace osmscout {
   {
     size_t level=MagToLevel(projection.GetMagnification());
 
-    const LineStyle *lineStyle=styleConfig.GetWayLineStyle(attributes.GetType(),level);
+    const LineStyle *lineStyle=styleConfig.GetWayLineStyle(attributes,level);
 
     if (lineStyle==NULL) {
       return;
@@ -1841,8 +1837,8 @@ namespace osmscout {
     data.shieldStyle=NULL;
 
     if (!attributes.GetName().empty() || !attributes.GetRefName().empty()) {
-      const ShieldStyle   *shieldStyle=styleConfig.GetWayShieldStyle(attributes.GetType(),level);
-      const PathTextStyle *pathTextStyle=styleConfig.GetWayPathTextStyle(attributes.GetType(),level);
+      const ShieldStyle   *shieldStyle=styleConfig.GetWayShieldStyle(attributes,level);
+      const PathTextStyle *pathTextStyle=styleConfig.GetWayPathTextStyle(attributes,level);
 
       if (shieldStyle!=NULL) {
         if (shieldStyle->GetLabel()==ShieldStyle::name &&
