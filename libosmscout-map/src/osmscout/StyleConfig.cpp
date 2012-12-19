@@ -1187,28 +1187,6 @@ namespace osmscout {
     }
   }
 
-  template<typename S>
-  S* GetStyle(const std::vector<std::vector<Ref<S> > >& styles,
-              TypeId type,
-              size_t level)
-  {
-    if (type>=styles.size()) {
-      return NULL;
-    }
-
-    size_t size=styles[type].size();
-
-    if (level<size) {
-      return styles[type][level];
-    }
-    else if (size>0) {
-      return styles[type][size-1];
-    }
-    else {
-      return NULL;
-    }
-  }
-
   template <class S, class A>
   void GetStyle(std::list<StyleSelector<S,A> > styleSelectors,
                 size_t level,
