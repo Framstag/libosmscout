@@ -38,6 +38,110 @@
 #include <osmscout/util/Transformation.h>
 
 namespace osmscout {
+  class OSMSCOUT_MAP_API StyleFilter
+  {
+  public:
+
+  private:
+    TypeSet types;
+    size_t  minLevel;
+    size_t  maxLevel;
+    bool    oneway;
+
+  public:
+    StyleFilter();
+    StyleFilter(const StyleFilter& other);
+
+    StyleFilter& SetTypes(const TypeSet& types);
+
+    StyleFilter& SetMinLevel(size_t level);
+    StyleFilter& SetMaxLevel(size_t level);
+    StyleFilter& SetOneway(bool oneway);
+
+    inline bool HasTypes() const
+    {
+      return types.HasTypes();
+    }
+
+    inline bool HasType(TypeId typeId) const
+    {
+      return types.IsTypeSet(typeId);
+    }
+
+    inline size_t GetMinLevel() const
+    {
+      return minLevel;
+    }
+
+    inline size_t GetMaxLevel() const
+    {
+      return maxLevel;
+    }
+
+    inline bool GetOneway() const
+    {
+      return oneway;
+    }
+
+    inline bool HasMaxLevel() const
+    {
+      return maxLevel!=std::numeric_limits<size_t>::max();
+    }
+  };
+
+  class OSMSCOUT_MAP_API StyleCriteria
+  {
+  public:
+
+  private:
+    size_t minLevel;
+    size_t maxLevel;
+    bool   oneway;
+
+  public:
+    StyleCriteria();
+    StyleCriteria(const StyleFilter& other);
+    StyleCriteria(const StyleCriteria& other);
+
+    inline size_t GetMinLevel() const
+    {
+      return minLevel;
+    }
+
+    inline size_t GetMaxLevel() const
+    {
+      return maxLevel;
+    }
+
+    inline bool GetOneway() const
+    {
+      return oneway;
+    }
+
+    inline bool HasMaxLevel() const
+    {
+      return maxLevel!=std::numeric_limits<size_t>::max();
+    }
+
+   bool Matches(size_t level) const;
+   bool Matches(const SegmentAttributes& attributes,
+                size_t level) const;
+  };
+
+  template<class S, class A>
+  struct StyleSelector
+  {
+    StyleCriteria  criteria;
+    std::set<A>    attributes;
+    Ref<S>         style;
+
+    StyleSelector(StyleFilter& filter)
+    : criteria(filter),
+    style(new S())
+    {
+      // no code
+    }
+  };
 
   /**
    * Ways can have a line style
@@ -158,7 +262,9 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef Ref<LineStyle> LineStyleRef;
+  typedef Ref<LineStyle>                                LineStyleRef;
+  typedef StyleSelector<LineStyle,LineStyle::Attribute> LineStyleSelector;
+  typedef std::list<LineStyleSelector>                  LineStyleSelectorList;
 
   /**
    * Areas can have a fill style, filling the area with one color
@@ -252,7 +358,9 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef Ref<FillStyle> FillStyleRef;
+  typedef Ref<FillStyle>                                FillStyleRef;
+  typedef StyleSelector<FillStyle,FillStyle::Attribute> FillStyleSelector;
+  typedef std::list<FillStyleSelector>                  FillStyleSelectorList;
 
   class OSMSCOUT_MAP_API LabelStyle : public Referencable
   {
@@ -364,7 +472,9 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef Ref<TextStyle> TextStyleRef;
+  typedef Ref<TextStyle>                                TextStyleRef;
+  typedef StyleSelector<TextStyle,TextStyle::Attribute> TextStyleSelector;
+  typedef std::list<TextStyleSelector>                  TextStyleSelectorList;
 
   /**
     Nodes, ways and areas can have a label style for drawing text. Text can be formatted
@@ -440,7 +550,9 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef Ref<ShieldStyle> ShieldStyleRef;
+  typedef Ref<ShieldStyle>                                  ShieldStyleRef;
+  typedef StyleSelector<ShieldStyle,ShieldStyle::Attribute> ShieldStyleSelector;
+  typedef std::list<ShieldStyleSelector>                    ShieldStyleSelectorList;
 
   /**
     Nodes, ways and areas can have a label style for drawing text. Text can be formatted
@@ -499,7 +611,9 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef Ref<PathTextStyle> PathTextStyleRef;
+  typedef Ref<PathTextStyle>                                    PathTextStyleRef;
+  typedef StyleSelector<PathTextStyle,PathTextStyle::Attribute> PathTextStyleSelector;
+  typedef std::list<PathTextStyleSelector>                      PathTextStyleSelectorList;
 
   class OSMSCOUT_MAP_API DrawPrimitive : public Referencable
   {
@@ -710,130 +824,9 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef Ref<IconStyle> IconStyleRef;
-
-  class OSMSCOUT_MAP_API StyleFilter
-  {
-  public:
-
-  private:
-    TypeSet types;
-    size_t  minLevel;
-    size_t  maxLevel;
-    bool    oneway;
-
-  public:
-    StyleFilter();
-    StyleFilter(const StyleFilter& other);
-
-    StyleFilter& SetTypes(const TypeSet& types);
-
-    StyleFilter& SetMinLevel(size_t level);
-    StyleFilter& SetMaxLevel(size_t level);
-    StyleFilter& SetOneway(bool oneway);
-
-    inline bool HasTypes() const
-    {
-      return types.HasTypes();
-    }
-
-    inline bool HasType(TypeId typeId) const
-    {
-      return types.IsTypeSet(typeId);
-    }
-
-    inline size_t GetMinLevel() const
-    {
-      return minLevel;
-    }
-
-    inline size_t GetMaxLevel() const
-    {
-      return maxLevel;
-    }
-
-    inline bool GetOneway() const
-    {
-      return oneway;
-    }
-
-    inline bool HasMaxLevel() const
-    {
-      return maxLevel!=std::numeric_limits<size_t>::max();
-    }
-  };
-
-  class OSMSCOUT_MAP_API StyleCriteria
-  {
-  public:
-
-  private:
-    size_t minLevel;
-    size_t maxLevel;
-    bool   oneway;
-
-  public:
-    StyleCriteria();
-    StyleCriteria(const StyleFilter& other);
-    StyleCriteria(const StyleCriteria& other);
-
-    inline size_t GetMinLevel() const
-    {
-      return minLevel;
-    }
-
-    inline size_t GetMaxLevel() const
-    {
-      return maxLevel;
-    }
-
-    inline bool GetOneway() const
-    {
-      return oneway;
-    }
-
-    inline bool HasMaxLevel() const
-    {
-      return maxLevel!=std::numeric_limits<size_t>::max();
-    }
-
-   bool Matches(size_t level) const;
-   bool Matches(const SegmentAttributes& attributes,
-                size_t level) const;
-  };
-
-  template<class S, class A>
-  struct StyleSelector
-  {
-    StyleCriteria  criteria;
-    std::set<A>    attributes;
-    Ref<S>         style;
-
-    StyleSelector(StyleFilter& filter)
-    : criteria(filter),
-    style(new S())
-    {
-      // no code
-    }
-  };
-
-  typedef StyleSelector<TextStyle,TextStyle::Attribute>         TextStyleSelector;
-  typedef std::list<TextStyleSelector>                          TextStyleSelectorList;
-
-  typedef StyleSelector<ShieldStyle,ShieldStyle::Attribute>     ShieldStyleSelector;
-  typedef std::list<ShieldStyleSelector>                        ShieldStyleSelectorList;
-
-  typedef StyleSelector<PathTextStyle,PathTextStyle::Attribute> PathTextStyleSelector;
-  typedef std::list<PathTextStyleSelector>                      PathTextStyleSelectorList;
-
-  typedef StyleSelector<IconStyle,IconStyle::Attribute>         IconStyleSelector;
-  typedef std::list<IconStyleSelector>                          IconStyleSelectorList;
-
-  typedef StyleSelector<LineStyle,LineStyle::Attribute>         LineStyleSelector;
-  typedef std::list<LineStyleSelector>                          LineStyleSelectorList;
-
-  typedef StyleSelector<FillStyle,FillStyle::Attribute>         FillStyleSelector;
-  typedef std::list<FillStyleSelector>                          FillStyleSelectorList;
+  typedef Ref<IconStyle>                                IconStyleRef;
+  typedef StyleSelector<IconStyle,IconStyle::Attribute> IconStyleSelector;
+  typedef std::list<IconStyleSelector>                  IconStyleSelectorList;
 
   /**
    * A complete style definition
