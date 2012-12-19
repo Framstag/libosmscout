@@ -195,12 +195,13 @@ PRODUCTIONS
   POLYGON<Symbol& symbol>
               = "POLYGON"
                 (.
-                  FillStyleRef        fillStyle(new FillStyle());
-                  PolygonPrimitiveRef polygon(new PolygonPrimitive(fillStyle));
-                  FillStyleList       fillStyles;
-                  Pixel               pixel;
+                  StyleFilter         filter;
+                  FillStyleSelector   selector(filter);
 
-                  fillStyles.push_back(fillStyle);
+                  selector.style=new FillStyle();
+
+                  PolygonPrimitiveRef polygon(new PolygonPrimitive(selector.style));
+                  Pixel               pixel;
                 .)
                 PIXEL<pixel>   (. polygon->AddPixel(pixel); .)
                 PIXEL<pixel>   (. polygon->AddPixel(pixel); .)
@@ -209,7 +210,7 @@ PRODUCTIONS
                 }
                 SYNC "{"
                 {
-                  FILLDEF<fillStyles>
+                  FILLDEF<selector>
                 }
                 SYNC "}"
                 (. symbol.AddPrimitive(polygon); .)
@@ -218,13 +219,13 @@ PRODUCTIONS
   RECTANGLE<Symbol& symbol>
               = "RECTANGLE"
                 (.
-                  FillStyleRef  fillStyle(new FillStyle());
-                  FillStyleList fillStyles;
-                  Pixel         topLeft;
-                  double        width;
-                  double        height;
+                  StyleFilter       filter;
+                  FillStyleSelector selector(filter);
+                  Pixel             topLeft;
+                  double            width;
+                  double            height;
 
-                  fillStyles.push_back(fillStyle);
+                  selector.style=new FillStyle();
                 .)
                 PIXEL<topLeft>
                 DOUBLE<width>
@@ -233,37 +234,37 @@ PRODUCTIONS
 
                 SYNC "{"
                 {
-                  FILLDEF<fillStyles>
+                  FILLDEF<selector>
                 }
                 SYNC "}"
                 (.
                   symbol.AddPrimitive(new RectanglePrimitive(topLeft,
                                                              width,height,
-                                                             fillStyle));
+                                                             selector.style));
                 .)
                 .
 
   CIRCLE<Symbol& symbol>
               = "CIRCLE"
                 (.
-                  FillStyleRef  fillStyle(new FillStyle());
-                  FillStyleList fillStyles;
-                  Pixel         center;
-                  double        radius;
+                  Pixel             center;
+                  double            radius;
+                  StyleFilter       filter;
+                  FillStyleSelector selector(filter);
 
-                  fillStyles.push_back(fillStyle);
+                  selector.style=new FillStyle();
                 .)
                 PIXEL<center>
                 DOUBLE<radius>
                 SYNC "{"
                 {
-                  FILLDEF<fillStyles>
+                  FILLDEF<selector>
                 }
                 SYNC "}"
                 (.
                   symbol.AddPrimitive(new CirclePrimitive(center,
                                                           radius,
-                                                          fillStyle));
+                                                          selector.style));
                 .)
                 .
 
@@ -382,6 +383,12 @@ PRODUCTIONS
                        .)
                      ]
                    ]
+                   [
+                     "ONEWAY"
+                     (.
+                       filter.SetOneway(true);
+                     .)
+                   ]
                 "]"
                 .
 
@@ -405,15 +412,16 @@ PRODUCTIONS
                   STYLEFILTER<filter>
                 ]
                 (.
-                  TextStyleList textStyles;
-
-                  config.GetNodeTextStyles(filter,textStyles);
+                  TextStyleSelector selector(filter);
                 .)
                 SYNC "{"
                 {
-                  TEXTDEF<textStyles>
+                  TEXTDEF<selector>
                 }
                 SYNC "}"
+                (.
+                  config.SetNodeTextSelector(filter,selector);
+                .)
                 .
 
   NODEICONSTYLE<StyleFilter filter>
@@ -422,15 +430,16 @@ PRODUCTIONS
                   STYLEFILTER<filter>
                 ]
                 (.
-                  IconStyleList iconStyles;
-
-                  config.GetNodeIconStyles(filter,iconStyles);
+                  IconStyleSelector selector(filter);
                 .)
                 SYNC "{"
                 {
-                  ICONDEF<iconStyles>
+                  ICONDEF<selector>
                 }
                 SYNC "}"
+                (.
+                  config.SetNodeIconSelector(filter,selector);
+                .)
                 .
 
   WAYSTYLEDEF<StyleFilter filter>
@@ -450,16 +459,17 @@ PRODUCTIONS
                   STYLEFILTER<filter>
                 ]
                 (.
-                  LineStyleList lineStyles;
-
-                  config.GetWayLineStyles(filter,lineStyles);
+                  LineStyleSelector selector(filter);
                 .)
                 SYNC "{"
                 {
-                   LINEDEF<lineStyles>
+                   LINEDEF<selector>
                 }
                 SYNC "}"
-                   .
+                (.
+                  config.SetWayLineSelector(filter,selector);
+                .)
+                .
 
   WAYPATHTEXTSTYLE<StyleFilter filter>
               = SYNC "TEXT"
@@ -467,15 +477,16 @@ PRODUCTIONS
                   STYLEFILTER<filter>
                 ]
                 (.
-                  PathTextStyleList pathTextStyles;
-
-                  config.GetWayPathTextStyles(filter,pathTextStyles);
+                  PathTextStyleSelector selector(filter);
                 .)
-                "{"
+                SYNC "{"
                 {
-                  PATHTEXTDEF<pathTextStyles>
+                  PATHTEXTDEF<selector>
                 }
-                "}"
+                SYNC "}"
+                (.
+                  config.SetWayPathTextSelector(filter,selector);
+                .)
                 .
 
   WAYSHIELDSTYLE<StyleFilter filter>
@@ -484,15 +495,16 @@ PRODUCTIONS
                   STYLEFILTER<filter>
                 ]
                 (.
-                  ShieldStyleList shieldStyles;
-
-                  config.GetWayShieldStyles(filter,shieldStyles);
+                  ShieldStyleSelector selector(filter);
                 .)
                 SYNC "{"
                 {
-                  SHIELDDEF<shieldStyles>
+                  SHIELDDEF<selector>
                 }
                 SYNC "}"
+                (.
+                  config.SetWayShieldSelector(filter,selector);
+                .)
                 .
 
   AREASTYLEDEF<StyleFilter filter>
@@ -513,15 +525,16 @@ PRODUCTIONS
                 ]
 
                 (.
-                  FillStyleList fillStyles;
-
-                  config.GetAreaFillStyles(filter,fillStyles);
+                  FillStyleSelector selector(filter);
                 .)
                 SYNC "{"
                 {
-                  FILLDEF<fillStyles>
+                  FILLDEF<selector>
                 }
                 SYNC "}"
+                (.
+                  config.SetAreaFillSelector(filter,selector);
+                .)
                 .
 
   AREATEXTSTYLE<StyleFilter filter>
@@ -530,15 +543,16 @@ PRODUCTIONS
                   STYLEFILTER<filter>
                 ]
                 (.
-                  TextStyleList textStyles;
-
-                  config.GetAreaTextStyles(filter,textStyles);
+                  TextStyleSelector selector(filter);
                 .)
                 SYNC "{"
                 {
-                  TEXTDEF<textStyles>
+                  TEXTDEF<selector>
                 }
                 SYNC "}"
+                (.
+                  config.SetAreaTextSelector(filter,selector);
+                .)
                 .
 
   AREAICONSTYLE<StyleFilter filter>
@@ -547,52 +561,38 @@ PRODUCTIONS
                   STYLEFILTER<filter>
                 ]
                 (.
-                  IconStyleList iconStyles;
-
-                  config.GetAreaIconStyles(filter,iconStyles);
+                  IconStyleSelector selector(filter);
                 .)
                 SYNC "{"
                 {
-                  ICONDEF<iconStyles>
+                  ICONDEF<selector>
                 }
                 SYNC "}"
+                (.
+                  config.SetAreaIconSelector(filter,selector);
+                .)
                 .
 
 
-  LINEDEF<LineStyleList& styles>
+  LINEDEF<LineStyleSelector& selector>
               = (
                   (. Color lineColor; .)
                   "color" ":" COLOR<lineColor> WEAK ";"
                   (.
-                     for (LineStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       LineStyleRef style(*s);
-
-                  	   style->SetLineColor(lineColor);
-                  	 }
+                  	 selector.style->SetLineColor(lineColor);
+                     selector.attributes.insert(LineStyle::attrLineColor);
                   .)
                 | (. Color alternateColor; .)
                   "altColor" ":" COLOR<alternateColor> WEAK ";"               // OBSOLETE!
                   (.
-                     for (LineStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       LineStyleRef style(*s);
-
-                  	   style->SetAlternateColor(alternateColor);
-                  	 }
+                  	 selector.style->SetAlternateColor(alternateColor);
+                     selector.attributes.insert(LineStyle::attrAlternateColor);
                   .)
                 | (. Color outlineColor;.)
                   "outlineColor" ":" COLOR<outlineColor> WEAK ";"
                   (.
-                     for (LineStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       LineStyleRef style(*s);
-
-                  	   style->SetOutlineColor(outlineColor);
-                  	 }
+                  	 selector.style->SetOutlineColor(outlineColor);
+                     selector.attributes.insert(LineStyle::attrOutlineColor);
                   .)
                 | (.
                     std::vector<double> dashes;
@@ -605,130 +605,82 @@ PRODUCTIONS
                     DOUBLE<dash>  (. dashes.push_back(dash); .)
                   }
                   (.
-                     for (LineStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       LineStyleRef style(*s);
-
-                       style->SetDashes(dashes);
-                     }
+                  	 selector.style->SetDashes(dashes);
+                     selector.attributes.insert(LineStyle::attrDashes);
                   .)
                   WEAK ";"
                 | (. Color gapColor; .)
                   "gapColor" ":" COLOR<gapColor> WEAK ";"
                   (.
-                     for (LineStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       LineStyleRef style(*s);
-
-                  	   style->SetGapColor(gapColor);
-                  	 }
+                  	 selector.style->SetGapColor(gapColor);
+                     selector.attributes.insert(LineStyle::attrGapColor);
                   .)
                 | (. double displayWidth; .)
                   "displayWidth" ":"  DISPLAYSIZE<displayWidth> WEAK ";"
                   (.
-                     for (LineStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       LineStyleRef style(*s);
-
-                  	   style->SetDisplayWidth(displayWidth);
-                  	 }
+                  	 selector.style->SetDisplayWidth(displayWidth);
+                     selector.attributes.insert(LineStyle::attrDisplayWidth);
                   .)
                 | (. double width; .)
                   "width" ":" MAPSIZE<width> WEAK ";"
                   (.
-                     for (LineStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       LineStyleRef style(*s);
-
-                  	   style->SetWidth(width);
-                  	 }
+                  	 selector.style->SetWidth(width);
+                     selector.attributes.insert(LineStyle::attrWidth);
                   .)
+/*
+                | (. bool fixedWidth; .)
+                  "fixedWidth" ":" BOOL<fixedWidth> WEAK ";"
+                  (.
+                  	 selector.style->SetFixedWidth(fixedWidth);
+                     selector.attributes.insert(LineStyle::attrFixedWidth);
+                  .)*/
                 | (. LineStyle::CapStyle capStyle; .)
                   "cap" ":" CAPSTYLE<capStyle> WEAK ";"
                   (.
-                     for (LineStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       LineStyleRef style(*s);
-
-                  	   style->SetCapStyle(capStyle);
-                  	 }
+                  	 selector.style->SetCapStyle(capStyle);
+                     selector.attributes.insert(LineStyle::attrCapStyle);
                   .)
                 | (. double outline; .)
                   "outline" ":" DISPLAYSIZE<outline> WEAK ";"
                   (.
-                     for (LineStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       LineStyleRef style(*s);
-
-                  	   style->SetOutline(outline);
-                  	 }
+                  	 selector.style->SetOutline(outline);
+                     selector.attributes.insert(LineStyle::attrOutline);
                   .)
                 )
                 .
 
-  FILLDEF<FillStyleList& styles>
+  FILLDEF<FillStyleSelector& selector>
               = (
                   (. Color fillColor; .)
                   "color" ":" COLOR<fillColor> WEAK ";"
                   (.
-                     for (FillStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       FillStyleRef style(*s);
-
-                  	   style->SetFillColor(fillColor);
-                  	 }
+                  	 selector.style->SetFillColor(fillColor);
+                     selector.attributes.insert(FillStyle::attrFillColor);
                   .)
                 | (. std::string patternName; .)
                   "pattern" ":" STRING<patternName>
                    WEAK ";"
                   (.
-                     for (FillStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       FillStyleRef style(*s);
-
-                  	   style->SetPattern(patternName);
-                  	 }
+                  	 selector.style->SetPattern(patternName);
+                     selector.attributes.insert(FillStyle::attrPattern);
                   .)
                 | (. Mag minMag; .)
                   "patternMinMag" ":" MAG<minMag> WEAK ";"
                   (.
-                     for (FillStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       FillStyleRef style(*s);
-
-                  	   style->SetPatternMinMag(minMag);
-                  	 }
+                  	 selector.style->SetPatternMinMag(minMag);
+                     selector.attributes.insert(FillStyle::attrPatternMinMag);
                   .)
                 | (. Color borderColor; .)
                   "borderColor" ":" COLOR<borderColor> WEAK ";"
                   (.
-                     for (FillStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       FillStyleRef style(*s);
-
-                  	   style->SetBorderColor(borderColor);
-                  	 }
+                  	 selector.style->SetBorderColor(borderColor);
+                     selector.attributes.insert(FillStyle::attrBorderColor);
                   .)
                 | (. double width; .)
 	              "borderWidth" ":" DISPLAYSIZE<width> WEAK ";"
                   (.
-                     for (FillStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       FillStyleRef style(*s);
-
-                  	   style->SetBorderWidth(width);
-                  	 }
+                  	 selector.style->SetBorderWidth(width);
+                     selector.attributes.insert(FillStyle::attrBorderWidth);
                   .)
                 | (.
                     std::vector<double> dashes;
@@ -741,86 +693,51 @@ PRODUCTIONS
                     DOUBLE<dash>  (. dashes.push_back(dash); .)
                   }
                   (.
-                     for (FillStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       FillStyleRef style(*s);
-
-                       style->SetBorderDashes(dashes);
-                     }
+                  	 selector.style->SetBorderDashes(dashes);
+                     selector.attributes.insert(FillStyle::attrBorderDashes);
                   .)
                   WEAK ";"
                 )
                 .
 
-  TEXTDEF<TextStyleList& styles>
+  TEXTDEF<TextStyleSelector& selector>
               = (
                   (. TextStyle::Label label; .)
                   "label" ":" TEXTLABEL<label> WEAK ";"
                   (.
-                     for (TextStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       TextStyleRef style(*s);
-
-                  	   style->SetLabel(label);
-                  	 }
+                     selector.style->SetLabel(label);
+                     selector.attributes.insert(TextStyle::attrLabel);
                   .)
                 | (. TextStyle::Style labelStyle; .)
                   "style" ":" LABELSTYLE<labelStyle> WEAK ";"
                   (.
-                     for (TextStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       TextStyleRef style(*s);
-
-                  	   style->SetStyle(labelStyle);
-                  	 }
+                     selector.style->SetStyle(labelStyle);
+                     selector.attributes.insert(TextStyle::attrStyle);
                   .)
                 | (. Color textColor; .)
                   "color" ":" COLOR<textColor> WEAK ";"
                   (.
-                     for (TextStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       TextStyleRef style(*s);
-
-                  	   style->SetTextColor(textColor);
-                  	 }
+                     selector.style->SetTextColor(textColor);
+                     selector.attributes.insert(TextStyle::attrTextColor);
                   .)
                 | (. double size; .)
                   "size" ":" DOUBLE<size> WEAK ";"
                   (.
-                     for (TextStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       TextStyleRef style(*s);
-
-                  	   style->SetSize(size);
-                  	 }
+                     selector.style->SetSize(size);
+                     selector.attributes.insert(TextStyle::attrSize);
                   .)
                 | (. Mag scaleMag; .)
                   "scaleMag" ":" MAG<scaleMag> WEAK ";"
                   (.
-                     for (TextStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       TextStyleRef style(*s);
-
-                  	   style->SetScaleAndFadeMag(scaleMag);
-                  	 }
+                     selector.style->SetScaleAndFadeMag(scaleMag);
+                     selector.attributes.insert(TextStyle::attrScaleAndFadeMag);
                   .)
                 | (. size_t priority; .)
                   "priority" ":" INTEGER<priority> WEAK ";"
 	              (.
 	                if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
-                      for (TextStyleList::iterator s=styles.begin();
-                           s!=styles.end();
-                           ++s) {
-                        TextStyleRef style(*s);
-
-                  	    style->SetPriority((uint8_t)priority);
-                  	  }
+                     selector.style->SetPriority((uint8_t)priority);
+                     selector.attributes.insert(TextStyle::attrPriority);
 	                }
 	                else {
 	                  std::string e="Priority must be in the interval [0,"+
@@ -832,74 +749,44 @@ PRODUCTIONS
                 )
                 .
 
-  SHIELDDEF<ShieldStyleList& styles>
+  SHIELDDEF<ShieldStyleSelector& selector>
               = (
                   (. ShieldStyle::Label label; .)
                   "label" ":" SHIELDLABEL<label> WEAK ";"
                   (.
-                     for (ShieldStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       ShieldStyleRef style(*s);
-
-                  	   style->SetLabel(label);
-                  	 }
+                     selector.style->SetLabel(label);
+                     selector.attributes.insert(ShieldStyle::attrLabel);
                   .)
                 | (. Color textColor; .)
                   "color" ":" COLOR<textColor> WEAK ";"
                   (.
-                     for (ShieldStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       ShieldStyleRef style(*s);
-
-                  	   style->SetTextColor(textColor);
-                  	 }
+                     selector.style->SetTextColor(textColor);
+                     selector.attributes.insert(ShieldStyle::attrTextColor);
                   .)
                 | (. Color bgColor; .)
                   "backgroundColor" ":" COLOR<bgColor> WEAK ";"
                   (.
-                     for (ShieldStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       ShieldStyleRef style(*s);
-
-                  	   style->SetBgColor(bgColor);
-                  	 }
+                     selector.style->SetBgColor(bgColor);
+                     selector.attributes.insert(ShieldStyle::attrBgColor);
                   .)
                 | (. Color borderColor; .)
 	              "borderColor" ":" COLOR<borderColor> WEAK ";"
                   (.
-                     for (ShieldStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       ShieldStyleRef style(*s);
-
-                  	   style->SetBorderColor(borderColor);
-                  	 }
+                     selector.style->SetBorderColor(borderColor);
+                     selector.attributes.insert(ShieldStyle::attrBorderColor);
                   .)
                 | (. double size; .)
                   "size" ":" DOUBLE<size> WEAK ";"
                   (.
-                     for (ShieldStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       ShieldStyleRef style(*s);
-
-                  	   style->SetSize(size);
-                  	 }
+                     selector.style->SetSize(size);
+                     selector.attributes.insert(ShieldStyle::attrSize);
                   .)
                 | (. size_t priority; .)
                   "priority" ":" INTEGER<priority> WEAK ";"
 	              (.
 	                if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
-                      for (ShieldStyleList::iterator s=styles.begin();
-                           s!=styles.end();
-                           ++s) {
-                        ShieldStyleRef style(*s);
-
-                  	    style->SetPriority((uint8_t)priority);
-                  	  }
+                     selector.style->SetPriority((uint8_t)priority);
+                     selector.attributes.insert(ShieldStyle::attrPriority);
 	                }
 	                else {
 	                  std::string e="Priority must be in the interval [0,"+
@@ -911,45 +798,30 @@ PRODUCTIONS
                 )
                 .
 
-  PATHTEXTDEF<PathTextStyleList& styles>
+  PATHTEXTDEF<PathTextStyleSelector& selector>
               = (
                   (. PathTextStyle::Label label; .)
                   "label" ":" PATHTEXTLABEL<label> WEAK ";"
                   (.
-                     for (PathTextStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       PathTextStyleRef style(*s);
-
-                  	   style->SetLabel(label);
-                  	 }
+                     selector.style->SetLabel(label);
+                     selector.attributes.insert(PathTextStyle::attrLabel);
                   .)
                 | (. Color textColor; .)
                   "color" ":" COLOR<textColor> WEAK ";"
                   (.
-                     for (PathTextStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       PathTextStyleRef style(*s);
-
-                  	   style->SetTextColor(textColor);
-                  	 }
+                     selector.style->SetTextColor(textColor);
+                     selector.attributes.insert(PathTextStyle::attrTextColor);
                   .)
                 | (. double size; .)
                   "size" ":" DOUBLE<size> WEAK ";"
                   (.
-                     for (PathTextStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       PathTextStyleRef style(*s);
-
-                  	   style->SetSize(size);
-                  	 }
+                     selector.style->SetSize(size);
+                     selector.attributes.insert(PathTextStyle::attrSize);
                   .)
                 )
                 .
 
-  ICONDEF<IconStyleList& styles>
+  ICONDEF<IconStyleSelector& selector>
               = (
                   (.
                     std::string name;
@@ -965,26 +837,16 @@ PRODUCTIONS
                        SemErr(e.c_str());
                      }
                      else {
-                       for (IconStyleList::iterator s=styles.begin();
-                            s!=styles.end();
-                            ++s) {
-                         IconStyleRef style(*s);
-
-                         style->SetSymbol(symbol);
-                       }
+                       selector.style->SetSymbol(symbol);
+                       selector.attributes.insert(IconStyle::attrSymbol);
                      }
                   .)
                 | (. std::string name; .)
                   "name" ":" IDENT<name>
                   WEAK ";"
                   (.
-                     for (IconStyleList::iterator s=styles.begin();
-                          s!=styles.end();
-                          ++s) {
-                       IconStyleRef style(*s);
-
-                  	   style->SetIconName(name);
-                  	 }
+                      selector.style->SetIconName(name);
+                      selector.attributes.insert(IconStyle::attrIconName);
                   .)
                 )
                 .

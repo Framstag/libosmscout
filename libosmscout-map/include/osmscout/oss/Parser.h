@@ -188,7 +188,7 @@ inline void ToRGBA(const char* str, Color& color)
 	void RECTANGLE(Symbol& symbol);
 	void CIRCLE(Symbol& symbol);
 	void PIXEL(Pixel& pixel);
-	void FILLDEF(FillStyleList& styles);
+	void FILLDEF(FillStyleSelector& selector);
 	void DOUBLE(double& value);
 	void STYLEFILTER(StyleFilter& filter);
 	void STYLEDEF(StyleFilter filter);
@@ -198,14 +198,14 @@ inline void ToRGBA(const char* str, Color& color)
 	void AREASTYLEDEF(StyleFilter filter);
 	void NODETEXTSTYLE(StyleFilter filter);
 	void NODEICONSTYLE(StyleFilter filter);
-	void TEXTDEF(TextStyleList& styles);
-	void ICONDEF(IconStyleList& styles);
+	void TEXTDEF(TextStyleSelector& selector);
+	void ICONDEF(IconStyleSelector& selector);
 	void WAYSTYLE(StyleFilter filter);
 	void WAYPATHTEXTSTYLE(StyleFilter filter);
 	void WAYSHIELDSTYLE(StyleFilter filter);
-	void LINEDEF(LineStyleList& styles);
-	void PATHTEXTDEF(PathTextStyleList& styles);
-	void SHIELDDEF(ShieldStyleList& styles);
+	void LINEDEF(LineStyleSelector& selector);
+	void PATHTEXTDEF(PathTextStyleSelector& selector);
+	void SHIELDDEF(ShieldStyleSelector& selector);
 	void AREASTYLE(StyleFilter filter);
 	void AREATEXTSTYLE(StyleFilter filter);
 	void AREAICONSTYLE(StyleFilter filter);

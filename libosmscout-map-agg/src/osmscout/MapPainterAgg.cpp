@@ -307,7 +307,7 @@ namespace osmscout {
                                const MapParameter& parameter,
                                const LabelData& label)
   {
-    const TextStyle* style=dynamic_cast<const TextStyle*>(label.style);
+    const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.Get());
     double           r=style->GetTextColor().GetR();
     double           g=style->GetTextColor().GetG();
     double           b=style->GetTextColor().GetB();

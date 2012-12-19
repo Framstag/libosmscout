@@ -235,9 +235,9 @@ namespace osmscout {
     {
       ObjectRef               ref;
       const SegmentAttributes *attributes;     //! Attributes of line segment
-      const LineStyle         *lineStyle;      //! Line style
-      const PathTextStyle     *pathTextStyle;  //! Text along the path
-      const ShieldStyle       *shieldStyle;    //! ShieldStyle
+      LineStyleRef            lineStyle;       //! Line style
+      PathTextStyleRef        pathTextStyle;   //! Text along the path
+      ShieldStyleRef          shieldStyle;    //! ShieldStyle
       size_t                  prio;            //! Priority of way (from style sheet)
       size_t                  transStart;      //! Start of coordinates in transformation buffer
       size_t                  transEnd;        //! End of coordinates in transformation buffer
@@ -279,7 +279,7 @@ namespace osmscout {
     {
       ObjectRef               ref;
       const SegmentAttributes *attributes;     //! Area attributes
-      const FillStyle         *fillStyle;      //! Fill style
+      FillStyleRef            fillStyle;      //! Fill style
       double                  minLat;
       double                  maxLat;
       double                  minLon;
@@ -300,7 +300,7 @@ namespace osmscout {
       double            by2;      //! Dimensions of bounding box
       double            alpha;    //! Alpha value of the label
       double            fontSize; //! Font size to be used
-      const LabelStyle* style;    //! Style for drawing
+      LabelStyleRef     style;    //! Style for drawing
       std::string       text;     //! The label text
     };
 
@@ -443,13 +443,13 @@ namespace osmscout {
 
     void RegisterPointWayLabel(const Projection& projection,
                                const MapParameter& parameter,
-                               const ShieldStyle& style,
+                               const ShieldStyleRef& style,
                                const std::string& text,
                                size_t transStart, size_t transEnd);
 
     bool RegisterPointLabel(const Projection& projection,
                             const MapParameter& parameter,
-                            const LabelStyle& style,
+                            const LabelStyleRef& style,
                             const std::string& text,
                             double x,
                             double y);

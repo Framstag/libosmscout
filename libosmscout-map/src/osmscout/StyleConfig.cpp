@@ -19,7 +19,6 @@
 
 #include <osmscout/StyleConfig.h>
 
-#include <limits>
 #include <set>
 
 #include <iostream>
@@ -41,23 +40,23 @@ namespace osmscout {
   }
 
   LineStyle::LineStyle(const LineStyle& style)
+  : lineColor(style.lineColor),
+    alternateColor(style.alternateColor),
+    outlineColor(style.outlineColor),
+    gapColor(style.gapColor),
+    displayWidth(style.displayWidth),
+    width(style.width),
+    fixedWidth(style.fixedWidth),
+    capStyle(style.capStyle),
+    outline(style.outline),
+    dash(style.dash)
   {
-    this->lineColor=style.lineColor;
-    this->alternateColor=style.alternateColor;
-    this->outlineColor=style.outlineColor;
-    this->gapColor=style.gapColor;
-    this->displayWidth=style.displayWidth;
-    this->width=style.width;
-    this->fixedWidth=style.fixedWidth;
-    this->capStyle=style.capStyle;
-    this->outline=style.outline;
-    this->dash=style.dash;
+    // no code
   }
 
   LineStyle& LineStyle::SetLineColor(const Color& color)
   {
     this->lineColor=color;
-    this->alternateColor=color;
 
     return *this;
   }
@@ -125,6 +124,46 @@ namespace osmscout {
     return *this;
   }
 
+  void LineStyle::CopyAttributes(const LineStyle& other,
+                                 const std::set<Attribute>& attributes)
+  {
+    for (std::set<Attribute>::const_iterator a=attributes.begin();
+         a!=attributes.end();
+         ++a) {
+      switch (*a) {
+      case attrLineColor:
+        lineColor=other.lineColor;
+        break;
+      case attrAlternateColor:
+        alternateColor=other.alternateColor;
+        break;
+      case attrOutlineColor:
+        outlineColor=other.outlineColor;
+        break;
+      case attrGapColor:
+        gapColor=other.gapColor;
+        break;
+      case attrDisplayWidth:
+        displayWidth=other.displayWidth;
+        break;
+      case attrWidth:
+        width=other.width;
+        break;
+      case attrFixedWidth:
+        fixedWidth=other.fixedWidth;
+        break;
+      case attrCapStyle:
+        capStyle=other.capStyle;
+        break;
+      case attrOutline:
+        outline=other.outline;
+        break;
+      case attrDashes:
+        dash=other.dash;
+        break;
+      }
+    }
+  }
 
   FillStyle::FillStyle()
    : fillColor(1.0,0.0,0.0,0.0),
@@ -194,6 +233,35 @@ namespace osmscout {
     return *this;
   }
 
+  void FillStyle::CopyAttributes(const FillStyle& other,
+                                 const std::set<Attribute>& attributes)
+  {
+    for (std::set<Attribute>::const_iterator a=attributes.begin();
+         a!=attributes.end();
+         ++a) {
+      switch (*a) {
+      case attrFillColor:
+        fillColor=other.fillColor;
+        break;
+      case attrPattern:
+        pattern=other.pattern;
+        break;
+      case attrPatternMinMag:
+        patternMinMag=other.patternMinMag;
+        break;
+      case attrBorderColor:
+        borderColor=other.borderColor;
+        break;
+      case attrBorderWidth:
+        borderWidth=other.borderWidth;
+        break;
+      case attrBorderDashes:
+        borderDash=other.borderDash;
+        break;
+      }
+    }
+  }
+
   LabelStyle::LabelStyle()
    : priority(0),
      size(1)
@@ -229,7 +297,7 @@ namespace osmscout {
   TextStyle::TextStyle()
    : style(normal),
      scaleAndFadeMag((Mag)1000000),
-          label(none),
+     label(none),
      textColor(0,0,0)
 
   {
@@ -237,12 +305,13 @@ namespace osmscout {
   }
 
   TextStyle::TextStyle(const TextStyle& style)
-  : LabelStyle(style)
+  : LabelStyle(style),
+    style(style.style),
+    scaleAndFadeMag(style.scaleAndFadeMag),
+    label(style.label),
+    textColor(style.textColor)
   {
-    this->style=style.style;
-    this->scaleAndFadeMag=style.scaleAndFadeMag;
-    this->label=label;
-    this->textColor=style.textColor;
+    // no code
   }
 
   TextStyle& TextStyle::SetStyle(Style style)
@@ -285,6 +354,35 @@ namespace osmscout {
     this->textColor=color;
 
     return *this;
+  }
+
+  void TextStyle::CopyAttributes(const TextStyle& other,
+                                 const std::set<Attribute>& attributes)
+  {
+    for (std::set<Attribute>::const_iterator a=attributes.begin();
+         a!=attributes.end();
+         ++a) {
+      switch (*a) {
+      case attrPriority:
+        SetPriority(other.GetPriority());
+        break;
+      case attrSize:
+        SetSize(other.GetSize());
+        break;
+      case attrLabel:
+        label=other.label;
+        break;
+      case attrTextColor:
+        textColor=other.textColor;
+        break;
+      case attrStyle:
+        style=other.style;
+        break;
+      case attrScaleAndFadeMag:
+        scaleAndFadeMag=other.scaleAndFadeMag;
+        break;
+      }
+    }
   }
 
   ShieldStyle::ShieldStyle()
@@ -347,6 +445,35 @@ namespace osmscout {
     return *this;
   }
 
+  void ShieldStyle::CopyAttributes(const ShieldStyle& other,
+                                   const std::set<Attribute>& attributes)
+  {
+    for (std::set<Attribute>::const_iterator a=attributes.begin();
+         a!=attributes.end();
+         ++a) {
+      switch (*a) {
+      case attrPriority:
+        SetPriority(other.GetPriority());
+        break;
+      case attrSize:
+        SetSize(other.GetSize());
+        break;
+      case attrLabel:
+        label=other.label;
+        break;
+      case attrTextColor:
+        textColor=other.textColor;
+        break;
+      case attrBgColor:
+        bgColor=other.bgColor;
+        break;
+      case attrBorderColor:
+        borderColor=other.borderColor;
+        break;
+      }
+    }
+  }
+
   PathTextStyle::PathTextStyle()
    : label(none),
      size(1),
@@ -381,6 +508,25 @@ namespace osmscout {
     this->textColor=color;
 
     return *this;
+  }
+
+  void PathTextStyle::CopyAttributes(const PathTextStyle& other,
+                                     const std::set<Attribute>& attributes)
+  {
+    for (std::set<Attribute>::const_iterator a=attributes.begin();
+         a!=attributes.end();
+         ++a) {
+      switch (*a) {
+      case attrLabel:
+        label=other.label;
+        break;
+      case attrSize:
+        size=other.size;
+      case attrTextColor:
+        textColor=other.textColor;
+        break;
+      }
+    }
   }
 
   DrawPrimitive::~DrawPrimitive()
@@ -533,11 +679,37 @@ namespace osmscout {
     return *this;
   }
 
+  void IconStyle::CopyAttributes(const IconStyle& other,
+                                 const std::set<Attribute>& attributes)
+  {
+    for (std::set<Attribute>::const_iterator a=attributes.begin();
+         a!=attributes.end();
+         ++a) {
+      switch (*a) {
+      case attrSymbol:
+        symbol=other.symbol;
+        break;
+      case attrIconName:
+        iconName=other.iconName;
+        break;
+      }
+    }
+  }
+
   StyleFilter::StyleFilter()
   : minLevel(0),
-    maxLevel(std::numeric_limits<size_t>::max())
+    maxLevel(std::numeric_limits<size_t>::max()),
+    oneway(false)
   {
     // no code
+  }
+
+  StyleFilter::StyleFilter(const StyleFilter& other)
+  {
+    this->types=other.types;
+    this->minLevel=other.minLevel;
+    this->maxLevel=other.maxLevel;
+    this->oneway=other.oneway;
   }
 
   StyleFilter& StyleFilter::SetTypes(const TypeSet& types)
@@ -561,25 +733,79 @@ namespace osmscout {
     return *this;
   }
 
-  bool StyleFilter::HasMaxLevel() const
+  StyleFilter& StyleFilter::SetOneway(bool oneway)
   {
-    return maxLevel!=std::numeric_limits<size_t>::max();
+    this->oneway=oneway;
+
+    return *this;
+  }
+
+  StyleCriteria::StyleCriteria()
+  : minLevel(0),
+    maxLevel(std::numeric_limits<size_t>::max()),
+    oneway(false)
+  {
+    // no code
+  }
+
+  StyleCriteria::StyleCriteria(const StyleFilter& other)
+  {
+    this->minLevel=other.GetMinLevel();
+    this->maxLevel=other.GetMaxLevel();
+    this->oneway=other.GetOneway();
+  }
+
+  StyleCriteria::StyleCriteria(const StyleCriteria& other)
+  {
+    this->minLevel=other.minLevel;
+    this->maxLevel=other.maxLevel;
+    this->oneway=other.oneway;
+  }
+
+  bool StyleCriteria::Matches(size_t level) const
+  {
+    if (!(level>=minLevel &&
+          level<=maxLevel)) {
+      return false;
+    }
+
+    if (oneway) {
+      return false;
+    }
+
+    return true;
+  }
+
+  bool StyleCriteria::Matches(const SegmentAttributes& attributes,
+                              size_t level) const
+  {
+    if (!(level>=minLevel &&
+          level<=maxLevel)) {
+      return false;
+    }
+
+    if (oneway &&
+        !attributes.IsOneway()) {
+      return false;
+    }
+
+    return true;
   }
 
   StyleConfig::StyleConfig(TypeConfig* typeConfig)
    : typeConfig(typeConfig)
   {
-    nodeTextStyles.resize(typeConfig->GetMaxTypeId()+1);
-    nodeIconStyles.resize(typeConfig->GetMaxTypeId()+1);
+    nodeTextStyleSelectors.resize(typeConfig->GetMaxTypeId()+1);
+    nodeIconStyleSelectors.resize(typeConfig->GetMaxTypeId()+1);
 
     wayPrio.resize(typeConfig->GetMaxTypeId()+1,std::numeric_limits<size_t>::max());
-    wayLineStyles.resize(typeConfig->GetMaxTypeId()+1);
-    wayPathTextStyles.resize(typeConfig->GetMaxTypeId()+1);
-    wayShieldStyles.resize(typeConfig->GetMaxTypeId()+1);
+    wayLineStyleSelectors.resize(typeConfig->GetMaxTypeId()+1);
+    wayPathTextStyleSelectors.resize(typeConfig->GetMaxTypeId()+1);
+    wayShieldStyleSelectors.resize(typeConfig->GetMaxTypeId()+1);
 
-    areaFillStyles.resize(typeConfig->GetMaxTypeId()+1);
-    areaTextStyles.resize(typeConfig->GetMaxTypeId()+1);
-    areaIconStyles.resize(typeConfig->GetMaxTypeId()+1);
+    areaFillStyleSelectors.resize(typeConfig->GetMaxTypeId()+1);
+    areaTextStyleSelectors.resize(typeConfig->GetMaxTypeId()+1);
+    areaIconStyleSelectors.resize(typeConfig->GetMaxTypeId()+1);
   }
 
   StyleConfig::~StyleConfig()
@@ -637,49 +863,54 @@ namespace osmscout {
     }
   }
 
-  template<typename S>
-  void CleanupStyles(std::vector<std::vector<Ref<S> > >& styles)
+  template <class S, class A>
+  void GetMaxLevelInSelectors(const std::list<StyleSelector<S,A> >& selectors, size_t& maxLevel)
   {
-    for (TypeId type=0;type<styles.size(); type++) {
-      for (size_t level=0; level<styles[type].size(); level++) {
-        if (styles[type][level].Valid() &&
-            !styles[type][level]->IsVisible()) {
-          styles[type][level]=NULL;
+    for (typename std::list<StyleSelector<S,A> >::const_iterator s=selectors.begin();
+         s!=selectors.end();
+         ++s) {
+      const StyleSelector<S,A>& selector=*s;
+
+      maxLevel=std::max(maxLevel,selector.criteria.GetMinLevel()+1);
+
+      if (selector.criteria.HasMaxLevel()) {
+        maxLevel=std::max(maxLevel,selector.criteria.GetMaxLevel()+1);
+      }
+    }
+  }
+
+  template <class S, class A>
+  void CalculateUsedTypes(std::list<StyleSelector<S,A> >& selectors,
+                          size_t maxLevel,
+                          TypeId type,
+                          std::vector<TypeSet>& typeSets)
+  {
+    for (size_t level=0;
+        level<maxLevel;
+        ++level) {
+      for (typename std::list<StyleSelector<S,A> >::const_iterator s=selectors.begin();
+           s!=selectors.end();
+           ++s) {
+        const StyleSelector<S,A>& selector=*s;
+
+        if (selector.criteria.Matches(level)) {
+          typeSets[level].SetType(type);
         }
       }
     }
   }
 
-  template<typename S>
-  bool HasStyle(const std::vector<Ref<S> >& styles, size_t level)
-  {
-    size_t size=styles.size();
-
-    if (size==0) {
-      return false;
-    }
-
-    if (level<size) {
-      return styles[level].Valid();
-    }
-    else {
-      return styles[size-1].Valid();
-    }
-  }
-
   void StyleConfig::PostprocessNodes()
   {
-    CleanupStyles(nodeTextStyles);
-    CleanupStyles(nodeIconStyles);
-
     size_t maxLevel=0;
+
     for (TypeId type=0; type<=typeConfig->GetMaxTypeId(); type++) {
       if (!typeConfig->GetTypeInfo(type).CanBeNode()) {
         continue;
       }
 
-      maxLevel=std::max(maxLevel,nodeTextStyles[type].size());
-      maxLevel=std::max(maxLevel,nodeIconStyles[type].size());
+      GetMaxLevelInSelectors(nodeTextStyleSelectors[type],maxLevel);
+      GetMaxLevelInSelectors(nodeIconStyleSelectors[type],maxLevel);
     }
 
     nodeTypeSets.reserve(maxLevel);
@@ -688,39 +919,27 @@ namespace osmscout {
       nodeTypeSets.push_back(TypeSet(*typeConfig));
     }
 
-    for (size_t level=0;
-        level<maxLevel;
-        ++level) {
-      for (TypeId type=0; type<=typeConfig->GetMaxTypeId(); type++) {
-        if (!typeConfig->GetTypeInfo(type).CanBeNode()) {
-          continue;
-        }
-
-        if (HasStyle(nodeTextStyles[type],level)) {
-          nodeTypeSets[level].SetType(type);
-        }
-        else if (HasStyle(nodeIconStyles[type],level)) {
-          nodeTypeSets[level].SetType(type);
-        }
+    for (TypeId type=0; type<=typeConfig->GetMaxTypeId(); type++) {
+      if (!typeConfig->GetTypeInfo(type).CanBeNode()) {
+        continue;
       }
+
+      CalculateUsedTypes(nodeTextStyleSelectors[type],maxLevel,type,nodeTypeSets);
+      CalculateUsedTypes(nodeIconStyleSelectors[type],maxLevel,type,nodeTypeSets);
     }
   }
 
   void StyleConfig::PostprocessWays()
   {
-    CleanupStyles(wayLineStyles);
-    CleanupStyles(wayPathTextStyles);
-    CleanupStyles(wayShieldStyles);
-
     size_t maxLevel=0;
     for (TypeId type=0; type<=typeConfig->GetMaxTypeId(); type++) {
       if (!typeConfig->GetTypeInfo(type).CanBeWay()) {
         continue;
       }
 
-      maxLevel=std::max(maxLevel,wayLineStyles[type].size());
-      maxLevel=std::max(maxLevel,wayPathTextStyles[type].size());
-      maxLevel=std::max(maxLevel,wayShieldStyles[type].size());
+      GetMaxLevelInSelectors(wayLineStyleSelectors[type],maxLevel);
+      GetMaxLevelInSelectors(wayPathTextStyleSelectors[type],maxLevel);
+      GetMaxLevelInSelectors(wayShieldStyleSelectors[type],maxLevel);
     }
 
     wayTypeSets.resize(maxLevel);
@@ -745,14 +964,34 @@ namespace osmscout {
           }
 
           if (wayPrio[type]==*prio) {
-            if (HasStyle(wayLineStyles[type],level)) {
-              typeSet.SetType(type);
+            for (LineStyleSelectorList::const_iterator s=wayLineStyleSelectors[type].begin();
+                 s!=wayLineStyleSelectors[type].end();
+                 ++s) {
+              const LineStyleSelector& selector=*s;
+
+              if (selector.criteria.Matches(level)) {
+                typeSet.SetType(type);
+              }
             }
-            else if (HasStyle(wayPathTextStyles[type],level)) {
-              typeSet.SetType(type);
+
+            for (PathTextStyleSelectorList::const_iterator s=wayPathTextStyleSelectors[type].begin();
+                 s!=wayPathTextStyleSelectors[type].end();
+                 ++s) {
+              const PathTextStyleSelector& selector=*s;
+
+              if (selector.criteria.Matches(level)) {
+                typeSet.SetType(type);
+              }
             }
-            else if (HasStyle(wayShieldStyles[type],level)) {
-              typeSet.SetType(type);
+
+            for (ShieldStyleSelectorList::const_iterator s=wayShieldStyleSelectors[type].begin();
+                 s!=wayShieldStyleSelectors[type].end();
+                 ++s) {
+              const ShieldStyleSelector& selector=*s;
+
+              if (selector.criteria.Matches(level)) {
+                typeSet.SetType(type);
+              }
             }
           }
         }
@@ -765,19 +1004,15 @@ namespace osmscout {
 
   void StyleConfig::PostprocessAreas()
   {
-    CleanupStyles(areaFillStyles);
-    CleanupStyles(areaTextStyles);
-    CleanupStyles(areaIconStyles);
-
     size_t maxLevel=0;
     for (TypeId type=0; type<=typeConfig->GetMaxTypeId(); type++) {
       if (!typeConfig->GetTypeInfo(type).CanBeArea()) {
         continue;
       }
 
-      maxLevel=std::max(maxLevel,areaFillStyles[type].size());
-      maxLevel=std::max(maxLevel,areaTextStyles[type].size());
-      maxLevel=std::max(maxLevel,areaIconStyles[type].size());
+      GetMaxLevelInSelectors(areaFillStyleSelectors[type],maxLevel);
+      GetMaxLevelInSelectors(areaTextStyleSelectors[type],maxLevel);
+      GetMaxLevelInSelectors(areaIconStyleSelectors[type],maxLevel);
     }
 
     areaTypeSets.reserve(maxLevel);
@@ -786,24 +1021,14 @@ namespace osmscout {
       areaTypeSets.push_back(TypeSet(*typeConfig));
     }
 
-    for (size_t level=0;
-        level<maxLevel;
-        ++level) {
-      for (TypeId type=0; type<areaFillStyles.size(); type++) {
-        if (!typeConfig->GetTypeInfo(type).CanBeArea()) {
-          continue;
-        }
-
-        if (HasStyle(areaFillStyles[type],level)) {
-          areaTypeSets[level].SetType(type);
-        }
-        else if (HasStyle(areaTextStyles[type],level)) {
-          areaTypeSets[level].SetType(type);
-        }
-        else if (HasStyle(areaIconStyles[type],level)) {
-          areaTypeSets[level].SetType(type);
-        }
+    for (TypeId type=0; type<areaFillStyleSelectors.size(); type++) {
+      if (!typeConfig->GetTypeInfo(type).CanBeArea()) {
+        continue;
       }
+
+      CalculateUsedTypes(areaFillStyleSelectors[type],maxLevel,type,areaTypeSets);
+      CalculateUsedTypes(areaTextStyleSelectors[type],maxLevel,type,areaTypeSets);
+      CalculateUsedTypes(areaIconStyleSelectors[type],maxLevel,type,areaTypeSets);
     }
   }
 
@@ -826,168 +1051,116 @@ namespace osmscout {
     return *this;
   }
 
-  template<typename S>
-  void GetMatchingStyles(const TypeConfig& typeConfig,
-                         const StyleFilter& filter,
-                         std::vector<std::vector<Ref<S> > >& allStyles,
-                         std::list<Ref<S> >& matchingStyles)
+  void StyleConfig::SetNodeTextSelector(const StyleFilter& filter,
+                                        TextStyleSelector& selector)
   {
-    // Create style, if not available yet
     for (TypeId type=0;
-        type<=typeConfig.GetMaxTypeId();
+        type<=typeConfig->GetMaxTypeId();
         type++) {
       if (!filter.HasType(type)) {
         continue;
       }
 
-      size_t maxLevel;
-
-      if (filter.HasMaxLevel()) {
-        maxLevel=filter.GetMaxLevel()+1;
-      }
-      else {
-        maxLevel=filter.GetMinLevel();
-      }
-
-      assert(type<allStyles.size());
-
-      if (allStyles[type].size()<maxLevel+1) {
-        size_t oldSize=allStyles[type].size();
-        Ref<S> originalValue;
-
-        if (oldSize>0) {
-          originalValue=allStyles[type][oldSize-1];
-        }
-        else {
-          originalValue=new S();
-        }
-
-        allStyles[type].resize(maxLevel+1);
-
-        for (size_t i=oldSize; i<allStyles[type].size(); i++) {
-          allStyles[type][i]=new S(*originalValue);
-        }
-
-        if (filter.HasMaxLevel()) {
-          allStyles[type][filter.GetMaxLevel()+1]=new S();
-        }
-      }
+      nodeTextStyleSelectors[type].push_back(selector);
     }
+  }
 
+  void StyleConfig::SetNodeIconSelector(const StyleFilter& filter,
+                                        IconStyleSelector& selector)
+  {
     for (TypeId type=0;
-        type<=typeConfig.GetMaxTypeId();
+        type<=typeConfig->GetMaxTypeId();
         type++) {
       if (!filter.HasType(type)) {
         continue;
       }
 
-      size_t minIndex=filter.GetMinLevel();
-      size_t maxIndex;
-
-      if (filter.HasMaxLevel()) {
-        maxIndex=filter.GetMaxLevel();
-      }
-      else {
-        maxIndex=allStyles[type].size()-1;
-      }
-
-      for (size_t i=minIndex; i<=maxIndex; i++) {
-        assert(type<allStyles.size());
-        assert(i<allStyles[type].size());
-        assert(allStyles[type][i].Valid());
-        matchingStyles.push_back(allStyles[type][i]);
-      }
+      nodeIconStyleSelectors[type].push_back(selector);
     }
   }
 
-  void StyleConfig::GetNodeTextStyles(const StyleFilter& filter,
-                                      std::list<TextStyleRef>& styles)
+  void StyleConfig::SetWayLineSelector(const StyleFilter& filter,
+                                       LineStyleSelector& selector)
   {
-    styles.clear();
+    for (TypeId type=0;
+        type<=typeConfig->GetMaxTypeId();
+        type++) {
+      if (!filter.HasType(type)) {
+        continue;
+      }
 
-    GetMatchingStyles(*typeConfig,
-                      filter,
-                      nodeTextStyles,
-                      styles);
+      wayLineStyleSelectors[type].push_back(selector);
+    }
   }
 
-  void StyleConfig::GetNodeIconStyles(const StyleFilter& filter,
-                                      std::list<IconStyleRef>& styles)
+  void StyleConfig::SetWayPathTextSelector(const StyleFilter& filter,
+                                           PathTextStyleSelector& selector)
   {
-    styles.clear();
+    for (TypeId type=0;
+        type<=typeConfig->GetMaxTypeId();
+        type++) {
+      if (!filter.HasType(type)) {
+        continue;
+      }
 
-    GetMatchingStyles(*typeConfig,
-                      filter,
-                      nodeIconStyles,
-                      styles);
+      wayPathTextStyleSelectors[type].push_back(selector);
+    }
   }
 
-  void StyleConfig::GetWayLineStyles(const StyleFilter& filter,
-                                     std::list<LineStyleRef>& styles)
+  void StyleConfig::SetWayShieldSelector(const StyleFilter& filter,
+                                         ShieldStyleSelector& selector)
   {
-    styles.clear();
+    for (TypeId type=0;
+        type<=typeConfig->GetMaxTypeId();
+        type++) {
+      if (!filter.HasType(type)) {
+        continue;
+      }
 
-    GetMatchingStyles(*typeConfig,
-                      filter,
-                      wayLineStyles,
-                      styles);
+      wayShieldStyleSelectors[type].push_back(selector);
+    }
   }
 
-  void StyleConfig::GetWayPathTextStyles(const StyleFilter& filter,
-                                         std::list<PathTextStyleRef>& styles)
+  void StyleConfig::SetAreaFillSelector(const StyleFilter& filter,
+                                        FillStyleSelector& selector)
   {
-    styles.clear();
+    for (TypeId type=0;
+        type<=typeConfig->GetMaxTypeId();
+        type++) {
+      if (!filter.HasType(type)) {
+        continue;
+      }
 
-    GetMatchingStyles(*typeConfig,
-                      filter,
-                      wayPathTextStyles,
-                      styles);
+      areaFillStyleSelectors[type].push_back(selector);
+    }
   }
 
-  void StyleConfig::GetWayShieldStyles(const StyleFilter& filter,
-                                       std::list<ShieldStyleRef>& styles)
+  void StyleConfig::SetAreaTextSelector(const StyleFilter& filter,
+                                        TextStyleSelector& selector)
   {
-    styles.clear();
+    for (TypeId type=0;
+        type<=typeConfig->GetMaxTypeId();
+        type++) {
+      if (!filter.HasType(type)) {
+        continue;
+      }
 
-    GetMatchingStyles(*typeConfig,
-                      filter,
-                      wayShieldStyles,
-                      styles);
+      areaTextStyleSelectors[type].push_back(selector);
+    }
   }
 
-  void StyleConfig::GetAreaFillStyles(const StyleFilter& filter,
-                                      std::list<FillStyleRef>& styles)
+  void StyleConfig::SetAreaIconSelector(const StyleFilter& filter,
+                                        IconStyleSelector& selector)
   {
-    styles.clear();
+    for (TypeId type=0;
+        type<=typeConfig->GetMaxTypeId();
+        type++) {
+      if (!filter.HasType(type)) {
+        continue;
+      }
 
-    GetMatchingStyles(*typeConfig,
-                      filter,
-                      areaFillStyles,
-                      styles);
-  }
-
-  void StyleConfig::GetAreaTextStyles(const StyleFilter& filter,
-                                       std::list<TextStyleRef>& styles)
-  {
-    styles.clear();
-
-    GetMatchingStyles(*typeConfig,
-                      filter,
-                      areaTextStyles,
-                      styles);
-
-  }
-
-  void StyleConfig::GetAreaIconStyles(const StyleFilter& filter,
-                                      std::list<IconStyleRef>& styles)
-  {
-    styles.clear();
-
-    GetMatchingStyles(*typeConfig,
-                      filter,
-                      areaIconStyles,
-                      styles);
-
+      areaIconStyleSelectors[type].push_back(selector);
+    }
   }
 
   void StyleConfig::GetNodeTypesWithMaxMag(double maxMag,
@@ -1036,74 +1209,226 @@ namespace osmscout {
     }
   }
 
-  IconStyle* StyleConfig::GetNodeIconStyle(const Node& node,
-                                           size_t level) const
+  template <class S, class A>
+  void GetStyle(std::list<StyleSelector<S,A> > styleSelectors,
+                size_t level,
+                Ref<S>& style)
   {
-    return GetStyle(nodeIconStyles,node.GetType(),level);
+    bool fastpath=style.Invalid();
+
+    style=NULL;
+
+    for (typename std::list<StyleSelector<S,A> >::const_iterator s=styleSelectors.begin();
+         s!=styleSelectors.end();
+         ++s) {
+      const StyleSelector<S,A>& selector=*s;
+
+      if (!selector.criteria.Matches(level)) {
+        continue;
+      }
+
+      if (style.Invalid()) {
+        style=selector.style;
+        continue;
+      }
+      else if (fastpath) {
+        style=new S(selector.style);
+        fastpath=false;
+      }
+
+      style->CopyAttributes(*selector.style,
+                            selector.attributes);
+    }
   }
 
-  TextStyle* StyleConfig::GetNodeTextStyle(const Node& node,
-                                           size_t level) const
+  template <class S, class A>
+  void GetNodeStyle(std::list<StyleSelector<S,A> > styleSelectors,
+                    const Node& node,
+                    size_t level,
+                    Ref<S>& style)
   {
-    return GetStyle(nodeTextStyles,node.GetType(),level);
+    bool fastpath=false;
+
+    style=NULL;
+
+    for (typename std::list<StyleSelector<S,A> >::const_iterator s=styleSelectors.begin();
+         s!=styleSelectors.end();
+         ++s) {
+      const StyleSelector<S,A>& selector=*s;
+
+      if (!selector.criteria.Matches(level)) {
+        continue;
+      }
+
+      if (style.Invalid()) {
+        style=selector.style;
+        fastpath=true;
+
+        continue;
+      }
+      else if (fastpath) {
+        style=new S(style);
+        fastpath=false;
+      }
+
+      style->CopyAttributes(*selector.style,
+                            selector.attributes);
+    }
   }
 
-  LineStyle* StyleConfig::GetWayLineStyle(const SegmentAttributes& way,
-                                          size_t level) const
+  template <class S, class A>
+  void GetSegmentAttributesStyle(std::list<StyleSelector<S,A> > styleSelectors,
+                                 const SegmentAttributes& attributes,
+                                 size_t level,
+                                 Ref<S>& style)
   {
-    return GetStyle(wayLineStyles,way.GetType(),level);
+    bool fastpath=false;
+
+    style=NULL;
+
+    for (typename std::list<StyleSelector<S,A> >::const_iterator s=styleSelectors.begin();
+         s!=styleSelectors.end();
+         ++s) {
+      const StyleSelector<S,A>& selector=*s;
+
+      if (!selector.criteria.Matches(attributes,level)) {
+        continue;
+      }
+
+      if (style.Invalid()) {
+        style=selector.style;
+        fastpath=true;
+
+        continue;
+      }
+      else if (fastpath) {
+        style=new S(style);
+        fastpath=false;
+      }
+
+      style->CopyAttributes(*selector.style,
+                            selector.attributes);
+    }
   }
 
-  PathTextStyle* StyleConfig::GetWayPathTextStyle(const SegmentAttributes& way,
-                                                  size_t level) const
+  void StyleConfig::GetNodeTextStyle(const Node& node,
+                                     size_t level,
+                                     TextStyleRef& textStyle) const
   {
-    return GetStyle(wayPathTextStyles,way.GetType(),level);
+    GetNodeStyle(nodeTextStyleSelectors[node.GetType()],
+                 node,
+                 level,
+                 textStyle);
   }
 
-  ShieldStyle* StyleConfig::GetWayShieldStyle(const SegmentAttributes& way,
-                                              size_t level) const
+  void StyleConfig::GetNodeIconStyle(const Node& node,
+                                     size_t level,
+                                     IconStyleRef& iconStyle) const
   {
-    return GetStyle(wayShieldStyles,way.GetType(),level);
+    GetNodeStyle(nodeIconStyleSelectors[node.GetType()],
+                 node,
+                 level,
+                 iconStyle);
   }
 
-  FillStyle* StyleConfig::GetAreaFillStyle(const SegmentAttributes& area, size_t level) const
+  void StyleConfig::GetWayLineStyle(const SegmentAttributes& way,
+                                    size_t level,
+                                    LineStyleRef& lineStyle) const
   {
-    return GetStyle(areaFillStyles,area.GetType(),level);
+    GetSegmentAttributesStyle(wayLineStyleSelectors[way.GetType()],
+                              way,
+                              level,
+                              lineStyle);
   }
 
-  TextStyle* StyleConfig::GetAreaTextStyle(const SegmentAttributes& area, size_t level) const
+  void StyleConfig::GetWayPathTextStyle(const SegmentAttributes& way,
+                                        size_t level,
+                                        PathTextStyleRef& pathTextStyle) const
   {
-    return GetStyle(areaTextStyles,area.GetType(),level);
+    GetSegmentAttributesStyle(wayPathTextStyleSelectors[way.GetType()],
+                              way,
+                              level,
+                              pathTextStyle);
   }
 
-  IconStyle* StyleConfig::GetAreaIconStyle(const SegmentAttributes& area, size_t level) const
+  void StyleConfig::GetWayShieldStyle(const SegmentAttributes& way,
+                                      size_t level,
+                                      ShieldStyleRef& shieldStyle) const
   {
-    return GetStyle(areaIconStyles,area.GetType(),level);
+    GetSegmentAttributesStyle(wayShieldStyleSelectors[way.GetType()],
+                              way,
+                              level,
+                              shieldStyle);
   }
 
-  FillStyle* StyleConfig::GetLandFillStyle(size_t level) const
+  void StyleConfig::GetAreaFillStyle(const SegmentAttributes& area,
+                                     size_t level,
+                                     FillStyleRef& fillStyle) const
   {
-    return GetStyle(areaFillStyles,typeConfig->typeTileLand,level);
+    GetSegmentAttributesStyle(areaFillStyleSelectors[area.GetType()],
+                              area,
+                              level,
+                              fillStyle);
   }
 
-  FillStyle* StyleConfig::GetSeaFillStyle(size_t level) const
+  void StyleConfig::GetAreaTextStyle(const SegmentAttributes& area,
+                                     size_t level,
+                                     TextStyleRef& textStyle) const
   {
-    return GetStyle(areaFillStyles,typeConfig->typeTileSea,level);
+    GetSegmentAttributesStyle(areaTextStyleSelectors[area.GetType()],
+                              area,
+                              level,
+                              textStyle);
   }
 
-  FillStyle* StyleConfig::GetCoastFillStyle(size_t level) const
+  void StyleConfig::GetAreaIconStyle(const SegmentAttributes& area,
+                                     size_t level,
+                                     IconStyleRef& iconStyle) const
   {
-    return GetStyle(areaFillStyles,typeConfig->typeTileCoast,level);
+    GetSegmentAttributesStyle(areaIconStyleSelectors[area.GetType()],
+                              area,
+                              level,
+                              iconStyle);
   }
 
-  FillStyle* StyleConfig::GetUnknownFillStyle(size_t level) const
+  void StyleConfig::GetLandFillStyle(size_t level,
+                                     FillStyleRef& fillStyle) const
   {
-    return GetStyle(areaFillStyles,typeConfig->typeTileUnknown,level);
+    GetStyle(areaFillStyleSelectors[typeConfig->typeTileLand],
+             level,
+             fillStyle);
   }
 
-  LineStyle* StyleConfig::GetCoastlineLineStyle(size_t level) const
+  void StyleConfig::GetSeaFillStyle(size_t level,
+                                    FillStyleRef& fillStyle) const
   {
-    return GetStyle(wayLineStyles,typeConfig->typeTileCoastline,level);
+    GetStyle(areaFillStyleSelectors[typeConfig->typeTileSea],
+             level,
+             fillStyle);
+  }
+
+  void StyleConfig::GetCoastFillStyle(size_t level,
+                                      FillStyleRef& fillStyle) const
+  {
+    GetStyle(areaFillStyleSelectors[typeConfig->typeTileCoast],
+             level,
+             fillStyle);
+  }
+
+  void StyleConfig::GetUnknownFillStyle(size_t level,
+                                        FillStyleRef& fillStyle) const
+  {
+    GetStyle(areaFillStyleSelectors[typeConfig->typeTileUnknown],
+             level,
+             fillStyle);
+  }
+
+  void StyleConfig::GetCoastlineLineStyle(size_t level,
+                                       LineStyleRef& lineStyle) const
+  {
+    GetStyle(wayLineStyleSelectors[typeConfig->typeTileCoastline],
+             level,
+             lineStyle);
   }
 }
 

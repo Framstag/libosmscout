@@ -100,12 +100,12 @@ namespace osmscout {
         typeInfo!=styleConfig.GetTypeConfig()->GetTypes().end();
         typeInfo++) {
       SegmentAttributes attributes;
-      const FillStyle   *fillStyle;
+      FillStyleRef      fillStyle;
 
       attributes.type=typeInfo->GetId();
-      fillStyle=styleConfig.GetAreaFillStyle(attributes,MagToLevel(projection.GetMagnification()));
+      styleConfig.GetAreaFillStyle(attributes,MagToLevel(projection.GetMagnification()),fillStyle);
 
-      if (fillStyle!=NULL) {
+      if (fillStyle.Valid()) {
         stream << "        ." << typeInfo->GetName() << "_area {";
 
         stream << "fill:" << GetColorValue(fillStyle->GetFillColor());
@@ -147,12 +147,13 @@ namespace osmscout {
       }
 
       SegmentAttributes attributes;
-      const LineStyle   *lineStyle;
+      LineStyleRef      lineStyle;
 
       attributes.type=typeInfo->GetId();
-      lineStyle=styleConfig.GetWayLineStyle(attributes,MagToLevel(projection.GetMagnification()));
 
-      if (lineStyle!=NULL) {
+      styleConfig.GetWayLineStyle(attributes,MagToLevel(projection.GetMagnification()),lineStyle);
+
+      if (lineStyle.Valid()) {
         double lineWidth;
 
         if (lineStyle->GetWidth()==0) {

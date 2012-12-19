@@ -181,8 +181,7 @@ SYMBOL christian_church_cross
        highway_unclassified,
        highway_residential,
        highway_service,
-       highway_living_street,
-       highway_pedestrian] WAY {outline: 0.25mm;}
+       highway_living_street] WAY {outline: 0.25mm;}
 
  [MAG continent-] {
    [TYPE highway_motorway] WAY { color: #809bc0; outlineColor: #777777; displayWidth: 0.45mm; width: 20m;}
@@ -190,7 +189,7 @@ SYMBOL christian_church_cross
 
  [MAG county-] {
    [TYPE highway_trunk] WAY { color: #a8daa8; outlineColor: #777777; displayWidth: 0.45mm; width: 18m;}
-   [TYPE highway_primary] WAY { color: #ec989a; outlineColor: #a56769; displayWidth: 0.4mm; width: 14m; }
+   [TYPE highway_primary] WAY { color: #ec989a; outlineColor: #a56769; displayWidth: 0.4mm; width: 14m;}
    [TYPE highway_services] AREA { color: #cb9999; }
  }
 
@@ -351,6 +350,27 @@ SYMBOL christian_church_cross
 
    [TYPE public_transport_platform] AREA.TEXT { label: name; color: #524a4a; size: 0.8;}
  }
+
+ // Oneways
+
+ /*
+ [TYPE highway_motorway,
+       highway_motorway_link,
+       highway_trunk,
+       highway_trunk_link,
+       highway_primary,
+       highway_primary_link,
+       highway_secondary,
+       highway_secondary_link,
+       highway_tertiary,
+       highway_road,
+       highway_unclassified,
+       highway_residential,
+       highway_service,
+       highway_living_street,
+       highway_pedestrian
+  MAG veryClose-
+  ONEWAY] WAY {color: #ff0000; }*/
 
  // -------------------------------------------------------
  //

@@ -146,8 +146,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 77;
-	noSym = 77;
+	maxT = 78;
+	noSym = 78;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 95; i <= 95; ++i) start.set(i, 1);
@@ -177,56 +177,57 @@ void Scanner::Init() {
 	keywords.set("CIRCLE", 18);
 	keywords.set("TYPE", 20);
 	keywords.set("MAG", 21);
-	keywords.set("NODE", 24);
-	keywords.set("TEXT", 26);
-	keywords.set("ICON", 27);
-	keywords.set("WAY", 28);
-	keywords.set("SHIELD", 29);
-	keywords.set("AREA", 30);
-	keywords.set("color", 31);
-	keywords.set("altColor", 34);
-	keywords.set("outlineColor", 35);
-	keywords.set("dash", 36);
-	keywords.set("gapColor", 37);
-	keywords.set("displayWidth", 38);
-	keywords.set("width", 39);
-	keywords.set("cap", 40);
-	keywords.set("outline", 41);
-	keywords.set("pattern", 42);
-	keywords.set("patternMinMag", 43);
-	keywords.set("borderColor", 44);
-	keywords.set("borderWidth", 45);
-	keywords.set("borderDash", 46);
-	keywords.set("label", 47);
-	keywords.set("style", 48);
-	keywords.set("size", 49);
-	keywords.set("scaleMag", 50);
-	keywords.set("priority", 51);
-	keywords.set("backgroundColor", 52);
-	keywords.set("symbol", 53);
-	keywords.set("name", 54);
-	keywords.set("butt", 55);
-	keywords.set("round", 56);
-	keywords.set("square", 57);
-	keywords.set("normal", 58);
-	keywords.set("emphasize", 59);
-	keywords.set("ref", 60);
-	keywords.set("world", 61);
-	keywords.set("continent", 62);
-	keywords.set("state", 63);
-	keywords.set("stateOver", 64);
-	keywords.set("county", 65);
-	keywords.set("region", 66);
-	keywords.set("proximity", 67);
-	keywords.set("cityOver", 68);
-	keywords.set("city", 69);
-	keywords.set("suburb", 70);
-	keywords.set("detail", 71);
-	keywords.set("close", 72);
-	keywords.set("veryClose", 73);
-	keywords.set("block", 74);
-	keywords.set("mm", 75);
-	keywords.set("m", 76);
+	keywords.set("ONEWAY", 23);
+	keywords.set("NODE", 25);
+	keywords.set("TEXT", 27);
+	keywords.set("ICON", 28);
+	keywords.set("WAY", 29);
+	keywords.set("SHIELD", 30);
+	keywords.set("AREA", 31);
+	keywords.set("color", 32);
+	keywords.set("altColor", 35);
+	keywords.set("outlineColor", 36);
+	keywords.set("dash", 37);
+	keywords.set("gapColor", 38);
+	keywords.set("displayWidth", 39);
+	keywords.set("width", 40);
+	keywords.set("cap", 41);
+	keywords.set("outline", 42);
+	keywords.set("pattern", 43);
+	keywords.set("patternMinMag", 44);
+	keywords.set("borderColor", 45);
+	keywords.set("borderWidth", 46);
+	keywords.set("borderDash", 47);
+	keywords.set("label", 48);
+	keywords.set("style", 49);
+	keywords.set("size", 50);
+	keywords.set("scaleMag", 51);
+	keywords.set("priority", 52);
+	keywords.set("backgroundColor", 53);
+	keywords.set("symbol", 54);
+	keywords.set("name", 55);
+	keywords.set("butt", 56);
+	keywords.set("round", 57);
+	keywords.set("square", 58);
+	keywords.set("normal", 59);
+	keywords.set("emphasize", 60);
+	keywords.set("ref", 61);
+	keywords.set("world", 62);
+	keywords.set("continent", 63);
+	keywords.set("state", 64);
+	keywords.set("stateOver", 65);
+	keywords.set("county", 66);
+	keywords.set("region", 67);
+	keywords.set("proximity", 68);
+	keywords.set("cityOver", 69);
+	keywords.set("city", 70);
+	keywords.set("suburb", 71);
+	keywords.set("detail", 72);
+	keywords.set("close", 73);
+	keywords.set("veryClose", 74);
+	keywords.set("block", 75);
+	keywords.set("mm", 76);
+	keywords.set("m", 77);
 
 
   tvalLength = 128;
@@ -457,13 +458,13 @@ Token* Scanner::NextToken() {
 		case 21:
 			{t->kind = 19; break;}
 		case 22:
-			{t->kind = 23; break;}
+			{t->kind = 24; break;}
 		case 23:
-			{t->kind = 25; break;}
+			{t->kind = 26; break;}
 		case 24:
-			{t->kind = 32; break;}
-		case 25:
 			{t->kind = 33; break;}
+		case 25:
+			{t->kind = 34; break;}
 		case 26:
 			recEnd = pos; recKind = 22;
 			if ((ch >= '0' && ch <= '9')) {AddCh(); goto case_15;}

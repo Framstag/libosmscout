@@ -166,7 +166,7 @@ namespace osmscout {
                                const MapParameter& parameter,
                                const LabelData& label)
   {
-    const TextStyle* style=dynamic_cast<const TextStyle*>(label.style);
+    const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.Get());
     double           r=style->GetTextColor().GetR();
     double           g=style->GetTextColor().GetG();
     double           b=style->GetTextColor().GetB();
@@ -206,7 +206,7 @@ namespace osmscout {
                                     const MapParameter& parameter,
                                     const LabelData& label)
   {
-    const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style);
+    const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.Get());
     QFont              font(GetFont(parameter,label.fontSize));
     QFontMetrics       metrics=QFontMetrics(font);
     QString            string=QString::fromUtf8(label.text.c_str());

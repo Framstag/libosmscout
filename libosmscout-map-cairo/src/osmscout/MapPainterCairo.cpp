@@ -715,7 +715,7 @@ namespace osmscout {
                                   const MapParameter& parameter,
                                   const LabelData& label)
   {
-    const TextStyle* style=dynamic_cast<const TextStyle*>(label.style);
+    const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.Get());
     double           r=style->GetTextColor().GetR();
     double           g=style->GetTextColor().GetG();
     double           b=style->GetTextColor().GetB();
@@ -788,7 +788,7 @@ namespace osmscout {
                                        const MapParameter& parameter,
                                        const LabelData& label)
   {
-    const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style);
+    const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.Get());
 
     cairo_set_dash(draw,NULL,0,0);
     cairo_set_line_width(draw,1);

@@ -51,6 +51,19 @@ namespace osmscout {
       capSquare
     };
 
+    enum Attribute {
+      attrLineColor,
+      attrAlternateColor,
+      attrOutlineColor,
+      attrGapColor,
+      attrDisplayWidth,
+      attrWidth,
+      attrFixedWidth,
+      attrCapStyle,
+      attrOutline,
+      attrDashes
+    };
+
   private:
     Color               lineColor;
     Color               alternateColor;
@@ -58,7 +71,7 @@ namespace osmscout {
     Color               gapColor;
     double              displayWidth;
     double              width;
-    double              fixedWidth;
+    bool                fixedWidth;
     CapStyle            capStyle;
     double              outline;
     std::vector<double> dash;
@@ -81,8 +94,7 @@ namespace osmscout {
     inline bool IsVisible() const
     {
       return (displayWidth>0.0 ||
-              width>0.0 ||
-              fixedWidth>0.0) &&
+              width>0.0) &&
              (lineColor.IsVisible() ||
               outlineColor.IsVisible());
     }
@@ -141,6 +153,9 @@ namespace osmscout {
     {
       return dash;
     }
+
+    void CopyAttributes(const LineStyle& other,
+                        const std::set<Attribute>& attributes);
   };
 
   typedef Ref<LineStyle> LineStyleRef;
@@ -150,6 +165,16 @@ namespace osmscout {
    */
   class OSMSCOUT_MAP_API FillStyle : public Referencable
   {
+  public:
+    enum Attribute {
+      attrFillColor,
+      attrPattern,
+      attrPatternMinMag,
+      attrBorderColor,
+      attrBorderWidth,
+      attrBorderDashes
+    };
+
   private:
     Color               fillColor;
     std::string         pattern;
@@ -222,6 +247,9 @@ namespace osmscout {
     {
       return borderDash;
     }
+
+    void CopyAttributes(const FillStyle& other,
+                        const std::set<Attribute>& attributes);
   };
 
   typedef Ref<FillStyle> FillStyleRef;
@@ -275,13 +303,20 @@ namespace osmscout {
       ref
     };
 
+    enum Attribute {
+      attrPriority,
+      attrSize,
+      attrLabel,
+      attrTextColor,
+      attrStyle,
+      attrScaleAndFadeMag
+    };
+
   private:
     Style   style;
     Mag     scaleAndFadeMag;
     Label   label;
     Color   textColor;
-    Color   bgColor;
-    Color   borderColor;
 
   public:
     TextStyle();
@@ -324,6 +359,9 @@ namespace osmscout {
     {
       return scaleAndFadeMag;
     }
+
+    void CopyAttributes(const TextStyle& other,
+                        const std::set<Attribute>& attributes);
   };
 
   typedef Ref<TextStyle> TextStyleRef;
@@ -339,6 +377,15 @@ namespace osmscout {
       none,
       name,
       ref
+    };
+
+    enum Attribute {
+      attrPriority,
+      attrSize,
+      attrLabel,
+      attrTextColor,
+      attrBgColor,
+      attrBorderColor
     };
 
   private:
@@ -388,6 +435,9 @@ namespace osmscout {
     {
       return borderColor;
     }
+
+    void CopyAttributes(const ShieldStyle& other,
+                        const std::set<Attribute>& attributes);
   };
 
   typedef Ref<ShieldStyle> ShieldStyleRef;
@@ -403,6 +453,12 @@ namespace osmscout {
       none,
       name,
       ref
+    };
+
+    enum Attribute {
+      attrLabel,
+      attrSize,
+      attrTextColor
     };
 
   private:
@@ -438,6 +494,9 @@ namespace osmscout {
     {
       return textColor;
     }
+
+    void CopyAttributes(const PathTextStyle& other,
+                        const std::set<Attribute>& attributes);
   };
 
   typedef Ref<PathTextStyle> PathTextStyleRef;
@@ -607,6 +666,12 @@ namespace osmscout {
     */
   class OSMSCOUT_MAP_API IconStyle : public Referencable
   {
+  public:
+    enum Attribute {
+      attrSymbol,
+      attrIconName,
+    };
+
   private:
     size_t      id;       //! Internal id for fast lookup. 0 == no id defined (yet), max(size_t) == error
     SymbolRef   symbol;
@@ -640,47 +705,135 @@ namespace osmscout {
     {
       return iconName;
     }
+
+    void CopyAttributes(const IconStyle& other,
+                        const std::set<Attribute>& attributes);
   };
 
   typedef Ref<IconStyle> IconStyleRef;
 
   class OSMSCOUT_MAP_API StyleFilter
   {
+  public:
+
   private:
     TypeSet types;
     size_t  minLevel;
     size_t  maxLevel;
+    bool    oneway;
 
   public:
     StyleFilter();
+    StyleFilter(const StyleFilter& other);
 
     StyleFilter& SetTypes(const TypeSet& types);
 
     StyleFilter& SetMinLevel(size_t level);
     StyleFilter& SetMaxLevel(size_t level);
+    StyleFilter& SetOneway(bool oneway);
 
-    bool HasTypes() const
+    inline bool HasTypes() const
     {
       return types.HasTypes();
     }
 
-    bool HasType(TypeId typeId) const
+    inline bool HasType(TypeId typeId) const
     {
       return types.IsTypeSet(typeId);
     }
 
-    size_t GetMinLevel() const
+    inline size_t GetMinLevel() const
     {
       return minLevel;
     }
 
-    size_t GetMaxLevel() const
+    inline size_t GetMaxLevel() const
     {
       return maxLevel;
     }
 
-    bool HasMaxLevel() const;
+    inline bool GetOneway() const
+    {
+      return oneway;
+    }
+
+    inline bool HasMaxLevel() const
+    {
+      return maxLevel!=std::numeric_limits<size_t>::max();
+    }
   };
+
+  class OSMSCOUT_MAP_API StyleCriteria
+  {
+  public:
+
+  private:
+    size_t minLevel;
+    size_t maxLevel;
+    bool   oneway;
+
+  public:
+    StyleCriteria();
+    StyleCriteria(const StyleFilter& other);
+    StyleCriteria(const StyleCriteria& other);
+
+    inline size_t GetMinLevel() const
+    {
+      return minLevel;
+    }
+
+    inline size_t GetMaxLevel() const
+    {
+      return maxLevel;
+    }
+
+    inline bool GetOneway() const
+    {
+      return oneway;
+    }
+
+    inline bool HasMaxLevel() const
+    {
+      return maxLevel!=std::numeric_limits<size_t>::max();
+    }
+
+   bool Matches(size_t level) const;
+   bool Matches(const SegmentAttributes& attributes,
+                size_t level) const;
+  };
+
+  template<class S, class A>
+  struct StyleSelector
+  {
+    StyleCriteria  criteria;
+    std::set<A>    attributes;
+    Ref<S>         style;
+
+    StyleSelector(StyleFilter& filter)
+    : criteria(filter),
+    style(new S())
+    {
+      // no code
+    }
+  };
+
+  typedef StyleSelector<TextStyle,TextStyle::Attribute>         TextStyleSelector;
+  typedef std::list<TextStyleSelector>                          TextStyleSelectorList;
+
+  typedef StyleSelector<ShieldStyle,ShieldStyle::Attribute>     ShieldStyleSelector;
+  typedef std::list<ShieldStyleSelector>                        ShieldStyleSelectorList;
+
+  typedef StyleSelector<PathTextStyle,PathTextStyle::Attribute> PathTextStyleSelector;
+  typedef std::list<PathTextStyleSelector>                      PathTextStyleSelectorList;
+
+  typedef StyleSelector<IconStyle,IconStyle::Attribute>         IconStyleSelector;
+  typedef std::list<IconStyleSelector>                          IconStyleSelectorList;
+
+  typedef StyleSelector<LineStyle,LineStyle::Attribute>         LineStyleSelector;
+  typedef std::list<LineStyleSelector>                          LineStyleSelectorList;
+
+  typedef StyleSelector<FillStyle,FillStyle::Attribute>         FillStyleSelector;
+  typedef std::list<FillStyleSelector>                          FillStyleSelectorList;
 
   /**
    * A complete style definition
@@ -696,8 +849,8 @@ namespace osmscout {
 
     // Node
 
-    std::vector<std::vector<TextStyleRef> >    nodeTextStyles;
-    std::vector<std::vector<IconStyleRef> >    nodeIconStyles;
+    std::vector<TextStyleSelectorList>         nodeTextStyleSelectors;
+    std::vector<IconStyleSelectorList>         nodeIconStyleSelectors;
 
     std::vector<TypeSet>                       nodeTypeSets;
 
@@ -705,17 +858,17 @@ namespace osmscout {
 
     std::vector<size_t>                        wayPrio;
 
-    std::vector<std::vector<LineStyleRef> >    wayLineStyles;
-    std::vector<std::vector<PathTextStyleRef> > wayPathTextStyles;
-    std::vector<std::vector<ShieldStyleRef> >  wayShieldStyles;
+    std::vector<LineStyleSelectorList>         wayLineStyleSelectors;
+    std::vector<PathTextStyleSelectorList>     wayPathTextStyleSelectors;
+    std::vector<ShieldStyleSelectorList>       wayShieldStyleSelectors;
 
     std::vector<std::vector<TypeSet> >         wayTypeSets;
 
     // Area
 
-    std::vector<std::vector<FillStyleRef> >    areaFillStyles;
-    std::vector<std::vector<TextStyleRef> >    areaTextStyles;
-    std::vector<std::vector<IconStyleRef> >    areaIconStyles;
+    std::vector<FillStyleSelectorList>         areaFillStyleSelectors;
+    std::vector<TextStyleSelectorList>         areaTextStyleSelectors;
+    std::vector<IconStyleSelectorList>         areaIconStyleSelectors;
 
     std::vector<TypeSet>                       areaTypeSets;
 
@@ -742,16 +895,24 @@ namespace osmscout {
 
     StyleConfig& SetWayPrio(TypeId type, size_t prio);
 
-    void GetNodeTextStyles(const StyleFilter& filter, std::list<TextStyleRef>& styles);
-    void GetNodeIconStyles(const StyleFilter& filter, std::list<IconStyleRef>& styles);
+    void SetNodeTextSelector(const StyleFilter& filter,
+                             TextStyleSelector& selector);
+    void SetNodeIconSelector(const StyleFilter& filter,
+                             IconStyleSelector& selector);
 
-    void GetWayLineStyles(const StyleFilter& filter, std::list<LineStyleRef>& styles);
-    void GetWayPathTextStyles(const StyleFilter& filter, std::list<PathTextStyleRef>& styles);
-    void GetWayShieldStyles(const StyleFilter& filter, std::list<ShieldStyleRef>& styles);
+    void SetWayLineSelector(const StyleFilter& filter,
+                            LineStyleSelector& selector);
+    void SetWayPathTextSelector(const StyleFilter& filter,
+                                PathTextStyleSelector& selector);
+    void SetWayShieldSelector(const StyleFilter& filter,
+                              ShieldStyleSelector& selector);
 
-    void GetAreaFillStyles(const StyleFilter& filter, std::list<FillStyleRef>& styles);
-    void GetAreaTextStyles(const StyleFilter& filter, std::list<TextStyleRef>& styles);
-    void GetAreaIconStyles(const StyleFilter& filter, std::list<IconStyleRef>& styles);
+    void SetAreaFillSelector(const StyleFilter& filter,
+                             FillStyleSelector& selector);
+    void SetAreaTextSelector(const StyleFilter& filter,
+                             TextStyleSelector& selector);
+    void SetAreaIconSelector(const StyleFilter& filter,
+                             IconStyleSelector& selector);
 
     void GetNodeTypesWithMaxMag(double maxMag,
                                 TypeSet& types) const;
@@ -771,30 +932,44 @@ namespace osmscout {
       }
     }
 
-    IconStyle* GetNodeIconStyle(const Node& node,
-                                size_t level) const;
-    TextStyle* GetNodeTextStyle(const Node& node,
-                                size_t level) const;
+    void GetNodeTextStyle(const Node& node,
+                          size_t level,
+                          TextStyleRef& textStyle) const;
 
-    LineStyle* GetWayLineStyle(const SegmentAttributes& way,
-                               size_t level) const;
-    PathTextStyle* GetWayPathTextStyle(const SegmentAttributes& way,
-                                       size_t level) const;
-    ShieldStyle* GetWayShieldStyle(const SegmentAttributes& way,
-                                   size_t level) const;
+    void GetNodeIconStyle(const Node& node,
+                          size_t level,
+                          IconStyleRef& iconStyle) const;
 
-    FillStyle* GetAreaFillStyle(const SegmentAttributes& area,
-                                size_t level) const;
-    TextStyle* GetAreaTextStyle(const SegmentAttributes& area,
-                                size_t level) const;
-    IconStyle* GetAreaIconStyle(const SegmentAttributes& area,
-                                size_t level) const;
+    void GetWayLineStyle(const SegmentAttributes& way,
+                         size_t level,
+                         LineStyleRef& lineStyle) const;
+    void GetWayPathTextStyle(const SegmentAttributes& way,
+                             size_t level,
+                             PathTextStyleRef& pathTextStyle) const;
+    void GetWayShieldStyle(const SegmentAttributes& way,
+                           size_t level,
+                           ShieldStyleRef& shieldStyle) const;
 
-    FillStyle* GetLandFillStyle(size_t level) const;
-    FillStyle* GetSeaFillStyle(size_t level) const;
-    FillStyle* GetCoastFillStyle(size_t level) const;
-    FillStyle* GetUnknownFillStyle(size_t level) const;
-    LineStyle* GetCoastlineLineStyle(size_t level) const;
+    void GetAreaFillStyle(const SegmentAttributes& area,
+                          size_t level,
+                          FillStyleRef& fillStyle) const;
+    void GetAreaTextStyle(const SegmentAttributes& area,
+                          size_t level,
+                          TextStyleRef& textStyle) const;
+    void GetAreaIconStyle(const SegmentAttributes& area,
+                          size_t level,
+                          IconStyleRef& iconStyle) const;
+
+    void GetLandFillStyle(size_t level,
+                          FillStyleRef& fillStyle) const;
+    void GetSeaFillStyle(size_t level,
+                         FillStyleRef& fillStyle) const;
+    void GetCoastFillStyle(size_t level,
+                           FillStyleRef& fillStyle) const;
+    void GetUnknownFillStyle(size_t level,
+                             FillStyleRef& fillStyle) const;
+    void GetCoastlineLineStyle(size_t level,
+                               LineStyleRef& lineStyle) const;
   };
 }
 
