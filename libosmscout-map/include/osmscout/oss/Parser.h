@@ -202,9 +202,11 @@ inline void ToRGBA(const char* str, Color& color)
 	void ICONDEF(IconStyleSelector& selector);
 	void WAYSTYLE(StyleFilter filter);
 	void WAYPATHTEXTSTYLE(StyleFilter filter);
+	void WAYPATHSYMBOLSTYLE(StyleFilter filter);
 	void WAYSHIELDSTYLE(StyleFilter filter);
 	void LINEDEF(LineStyleSelector& selector);
 	void PATHTEXTDEF(PathTextStyleSelector& selector);
+	void PATHSYMBOLDEF(PathSymbolStyleSelector& selector);
 	void SHIELDDEF(ShieldStyleSelector& selector);
 	void AREASTYLE(StyleFilter filter);
 	void AREATEXTSTYLE(StyleFilter filter);

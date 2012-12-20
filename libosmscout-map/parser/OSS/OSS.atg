@@ -449,6 +449,7 @@ PRODUCTIONS
                 | "."
                   (
                      WAYPATHTEXTSTYLE<filter>
+                  |  WAYPATHSYMBOLSTYLE<filter>
                   |  WAYSHIELDSTYLE<filter>
                   )
                 )
@@ -486,6 +487,24 @@ PRODUCTIONS
                 SYNC "}"
                 (.
                   config.SetWayPathTextSelector(filter,selector);
+                .)
+                .
+
+  WAYPATHSYMBOLSTYLE<StyleFilter filter>
+              = SYNC "SYMBOL"
+                [
+                  STYLEFILTER<filter>
+                ]
+                (.
+                  PathSymbolStyleSelector selector(filter);
+                .)
+                SYNC "{"
+                {
+                  PATHSYMBOLDEF<selector>
+                }
+                SYNC "}"
+                (.
+                  config.SetWayPathSymbolSelector(filter,selector);
                 .)
                 .
 
@@ -817,6 +836,35 @@ PRODUCTIONS
                   (.
                      selector.style->SetSize(size);
                      selector.attributes.insert(PathTextStyle::attrSize);
+                  .)
+                )
+                .
+
+  PATHSYMBOLDEF<PathSymbolStyleSelector& selector>
+              = (
+                  (.
+                    std::string name;
+                    SymbolRef   symbol;
+                   .)
+                  "symbol" ":" IDENT<name> WEAK ";"
+                  (.
+                     symbol=config.GetSymbol(name);
+
+                     if (symbol.Invalid()) {
+                       std::string e="Map symbol '"+name+"' is not defined";
+
+                       SemErr(e.c_str());
+                     }
+                     else {
+                       selector.style->SetSymbol(symbol);
+                       selector.attributes.insert(PathSymbolStyle::attrSymbol);
+                     }
+                  .)
+                | (. double symbolSpace; .)
+                  "symbolSpace" ":" DISPLAYSIZE<symbolSpace> WEAK ";"
+                  (.
+                     selector.style->SetSymbolSpace(symbolSpace);
+                     selector.attributes.insert(PathSymbolStyle::attrSymbolSpace);
                   .)
                 )
                 .

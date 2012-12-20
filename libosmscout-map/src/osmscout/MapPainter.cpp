@@ -1434,20 +1434,26 @@ namespace osmscout {
                                       const MapParameter& parameter,
                                       const MapData& data)
   {
-    SymbolRef onewayArrow=styleConfig.GetSymbol("oneway_arrow");
-    double onewaySpace=ConvertWidthToPixel(parameter,15);
+    size_t level=MagToLevel(projection.GetMagnification());
 
     for (std::list<WayData>::const_iterator way=wayData.begin();
         way!=wayData.end();
         way++)
     {
-      if (projection.GetMagnification()>=magVeryClose &&
-          onewayArrow.Valid() &&
-          way->attributes->IsOneway()) {
+      PathSymbolStyleRef pathSymbolStyle;
+
+      styleConfig.GetWayPathSymbolStyle(*way->attributes,
+                                        level,
+                                        pathSymbolStyle);
+
+      if (pathSymbolStyle.Valid()) {
+        double symbolSpace=ConvertWidthToPixel(parameter,
+                                               pathSymbolStyle->GetSymbolSpace());
+
         DrawContourSymbol(projection,
                           parameter,
-                          *onewayArrow,
-                          onewaySpace,
+                          pathSymbolStyle->GetSymbol(),
+                          symbolSpace,
                           way->transStart, way->transEnd);
       }
     }

@@ -696,6 +696,50 @@ namespace osmscout {
     }
   }
 
+  PathSymbolStyle::PathSymbolStyle()
+  : symbolSpace(15)
+  {
+    // no code
+  }
+
+  PathSymbolStyle::PathSymbolStyle(const PathSymbolStyle& style)
+  : symbol(style.symbol),
+    symbolSpace(style.symbolSpace)
+  {
+    // no code
+  }
+
+  PathSymbolStyle& PathSymbolStyle::SetSymbol(const SymbolRef& symbol)
+  {
+    this->symbol=symbol;
+
+    return *this;
+  }
+
+  PathSymbolStyle& PathSymbolStyle::SetSymbolSpace(double space)
+  {
+    symbolSpace=space;
+
+    return *this;
+  }
+
+  void PathSymbolStyle::CopyAttributes(const PathSymbolStyle& other,
+                                       const std::set<Attribute>& attributes)
+  {
+    for (std::set<Attribute>::const_iterator a=attributes.begin();
+         a!=attributes.end();
+         ++a) {
+      switch (*a) {
+      case attrSymbol:
+        symbol=other.symbol;
+        break;
+      case attrSymbolSpace:
+        symbolSpace=other.symbolSpace;
+        break;
+      }
+    }
+  }
+
   StyleFilter::StyleFilter()
   : minLevel(0),
     maxLevel(std::numeric_limits<size_t>::max()),
@@ -801,6 +845,7 @@ namespace osmscout {
     wayPrio.resize(typeConfig->GetMaxTypeId()+1,std::numeric_limits<size_t>::max());
     wayLineStyleSelectors.resize(typeConfig->GetMaxTypeId()+1);
     wayPathTextStyleSelectors.resize(typeConfig->GetMaxTypeId()+1);
+    wayPathSymbolStyleSelectors.resize(typeConfig->GetMaxTypeId()+1);
     wayShieldStyleSelectors.resize(typeConfig->GetMaxTypeId()+1);
 
     areaFillStyleSelectors.resize(typeConfig->GetMaxTypeId()+1);
@@ -939,6 +984,7 @@ namespace osmscout {
 
       GetMaxLevelInSelectors(wayLineStyleSelectors[type],maxLevel);
       GetMaxLevelInSelectors(wayPathTextStyleSelectors[type],maxLevel);
+      GetMaxLevelInSelectors(wayPathSymbolStyleSelectors[type],maxLevel);
       GetMaxLevelInSelectors(wayShieldStyleSelectors[type],maxLevel);
     }
 
@@ -978,6 +1024,16 @@ namespace osmscout {
                  s!=wayPathTextStyleSelectors[type].end();
                  ++s) {
               const PathTextStyleSelector& selector=*s;
+
+              if (selector.criteria.Matches(level)) {
+                typeSet.SetType(type);
+              }
+            }
+
+            for (PathSymbolStyleSelectorList::const_iterator s=wayPathSymbolStyleSelectors[type].begin();
+                 s!=wayPathSymbolStyleSelectors[type].end();
+                 ++s) {
+              const PathSymbolStyleSelector& selector=*s;
 
               if (selector.criteria.Matches(level)) {
                 typeSet.SetType(type);
@@ -1104,6 +1160,20 @@ namespace osmscout {
       }
 
       wayPathTextStyleSelectors[type].push_back(selector);
+    }
+  }
+
+  void StyleConfig::SetWayPathSymbolSelector(const StyleFilter& filter,
+                                             PathSymbolStyleSelector& selector)
+  {
+    for (TypeId type=0;
+        type<=typeConfig->GetMaxTypeId();
+        type++) {
+      if (!filter.HasType(type)) {
+        continue;
+      }
+
+      wayPathSymbolStyleSelectors[type].push_back(selector);
     }
   }
 
@@ -1327,6 +1397,16 @@ namespace osmscout {
                               way,
                               level,
                               pathTextStyle);
+  }
+
+  void StyleConfig::GetWayPathSymbolStyle(const SegmentAttributes& way,
+                                          size_t level,
+                                          PathSymbolStyleRef& pathSymbolStyle) const
+  {
+    GetSegmentAttributesStyle(wayPathSymbolStyleSelectors[way.GetType()],
+                              way,
+                              level,
+                              pathSymbolStyle);
   }
 
   void StyleConfig::GetWayShieldStyle(const SegmentAttributes& way,

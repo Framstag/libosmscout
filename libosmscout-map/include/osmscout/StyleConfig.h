@@ -829,6 +829,53 @@ namespace osmscout {
   typedef std::list<IconStyleSelector>                  IconStyleSelectorList;
 
   /**
+    Nodes, ways and areas can have a label style for drawing text. Text can be formatted
+    in different ways.
+   */
+  class OSMSCOUT_MAP_API PathSymbolStyle : public Referencable
+  {
+  public:
+
+    enum Attribute {
+      attrSymbol,
+      attrSymbolSpace
+    };
+
+  private:
+    SymbolRef symbol;
+    double    symbolSpace;
+
+  public:
+    PathSymbolStyle();
+    PathSymbolStyle(const PathSymbolStyle& style);
+
+    PathSymbolStyle& SetSymbol(const SymbolRef& symbol);
+    PathSymbolStyle& SetSymbolSpace(double space);
+
+    inline bool IsVisible() const
+    {
+      return symbol.Valid();
+    }
+
+    inline const SymbolRef& GetSymbol() const
+    {
+      return symbol;
+    }
+
+    inline double GetSymbolSpace() const
+    {
+      return symbolSpace;
+    }
+
+    void CopyAttributes(const PathSymbolStyle& other,
+                        const std::set<Attribute>& attributes);
+  };
+
+  typedef Ref<PathSymbolStyle>                                      PathSymbolStyleRef;
+  typedef StyleSelector<PathSymbolStyle,PathSymbolStyle::Attribute> PathSymbolStyleSelector;
+  typedef std::list<PathSymbolStyleSelector>                        PathSymbolStyleSelectorList;
+
+  /**
    * A complete style definition
    */
   class OSMSCOUT_MAP_API StyleConfig
@@ -853,6 +900,7 @@ namespace osmscout {
 
     std::vector<LineStyleSelectorList>         wayLineStyleSelectors;
     std::vector<PathTextStyleSelectorList>     wayPathTextStyleSelectors;
+    std::vector<PathSymbolStyleSelectorList>   wayPathSymbolStyleSelectors;
     std::vector<ShieldStyleSelectorList>       wayShieldStyleSelectors;
 
     std::vector<std::vector<TypeSet> >         wayTypeSets;
@@ -897,6 +945,8 @@ namespace osmscout {
                             LineStyleSelector& selector);
     void SetWayPathTextSelector(const StyleFilter& filter,
                                 PathTextStyleSelector& selector);
+    void SetWayPathSymbolSelector(const StyleFilter& filter,
+                                  PathSymbolStyleSelector& selector);
     void SetWayShieldSelector(const StyleFilter& filter,
                               ShieldStyleSelector& selector);
 
@@ -939,6 +989,9 @@ namespace osmscout {
     void GetWayPathTextStyle(const SegmentAttributes& way,
                              size_t level,
                              PathTextStyleRef& pathTextStyle) const;
+    void GetWayPathSymbolStyle(const SegmentAttributes& way,
+                               size_t level,
+                               PathSymbolStyleRef& pathSymbolStyle) const;
     void GetWayShieldStyle(const SegmentAttributes& way,
                            size_t level,
                            ShieldStyleRef& shieldStyle) const;

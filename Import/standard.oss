@@ -353,7 +353,6 @@ SYMBOL christian_church_cross
 
  // Oneways
 
- /*
  [TYPE highway_motorway,
        highway_motorway_link,
        highway_trunk,
@@ -370,7 +369,7 @@ SYMBOL christian_church_cross
        highway_living_street,
        highway_pedestrian
   MAG veryClose-
-  ONEWAY] WAY {color: #ff0000; }*/
+  ONEWAY] WAY.SYMBOL {symbol: oneway_arrow; }
 
  // -------------------------------------------------------
  //
