@@ -158,12 +158,12 @@ void Scanner::Init() {
 	start.set(34, 13);
 	start.set(44, 18);
 	start.set(123, 19);
-	start.set(125, 20);
-	start.set(91, 21);
-	start.set(93, 22);
-	start.set(46, 23);
-	start.set(58, 24);
-	start.set(59, 25);
+	start.set(59, 20);
+	start.set(125, 21);
+	start.set(91, 22);
+	start.set(93, 23);
+	start.set(46, 24);
+	start.set(58, 25);
 		start.set(Buffer::EoF, -1);
 	keywords.set("OSS", 6);
 	keywords.set("END", 7);
@@ -172,19 +172,19 @@ void Scanner::Init() {
 	keywords.set("GROUP", 10);
 	keywords.set("SYMBOL", 12);
 	keywords.set("POLYGON", 13);
-	keywords.set("RECTANGLE", 16);
-	keywords.set("x", 17);
-	keywords.set("CIRCLE", 18);
-	keywords.set("TYPE", 20);
-	keywords.set("MAG", 21);
-	keywords.set("ONEWAY", 23);
-	keywords.set("NODE", 25);
-	keywords.set("TEXT", 27);
-	keywords.set("ICON", 28);
-	keywords.set("WAY", 29);
-	keywords.set("SHIELD", 30);
-	keywords.set("AREA", 31);
-	keywords.set("color", 32);
+	keywords.set("RECTANGLE", 17);
+	keywords.set("x", 18);
+	keywords.set("CIRCLE", 19);
+	keywords.set("TYPE", 21);
+	keywords.set("MAG", 22);
+	keywords.set("ONEWAY", 24);
+	keywords.set("NODE", 26);
+	keywords.set("TEXT", 28);
+	keywords.set("ICON", 29);
+	keywords.set("WAY", 30);
+	keywords.set("SHIELD", 31);
+	keywords.set("AREA", 32);
+	keywords.set("color", 33);
 	keywords.set("altColor", 35);
 	keywords.set("outlineColor", 36);
 	keywords.set("dash", 37);
@@ -457,19 +457,19 @@ Token* Scanner::NextToken() {
 		case 20:
 			{t->kind = 15; break;}
 		case 21:
-			{t->kind = 19; break;}
+			{t->kind = 16; break;}
 		case 22:
-			{t->kind = 24; break;}
+			{t->kind = 20; break;}
 		case 23:
-			{t->kind = 26; break;}
+			{t->kind = 25; break;}
 		case 24:
-			{t->kind = 33; break;}
+			{t->kind = 27; break;}
 		case 25:
 			{t->kind = 34; break;}
 		case 26:
-			recEnd = pos; recKind = 22;
+			recEnd = pos; recKind = 23;
 			if ((ch >= '0' && ch <= '9')) {AddCh(); goto case_15;}
-			else {t->kind = 22; break;}
+			else {t->kind = 23; break;}
 
   }
   AppendVal(t);

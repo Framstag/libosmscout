@@ -210,7 +210,7 @@ PRODUCTIONS
                 }
                 SYNC "{"
                 {
-                  FILLDEF<selector>
+                  FILLDEF<selector> WEAK ";"
                 }
                 SYNC "}"
                 (. symbol.AddPrimitive(polygon); .)
@@ -234,7 +234,7 @@ PRODUCTIONS
 
                 SYNC "{"
                 {
-                  FILLDEF<selector>
+                  FILLDEF<selector> WEAK ";"
                 }
                 SYNC "}"
                 (.
@@ -258,7 +258,7 @@ PRODUCTIONS
                 DOUBLE<radius>
                 SYNC "{"
                 {
-                  FILLDEF<selector>
+                  FILLDEF<selector> WEAK ";"
                 }
                 SYNC "}"
                 (.
@@ -416,7 +416,7 @@ PRODUCTIONS
                 .)
                 SYNC "{"
                 {
-                  TEXTDEF<selector>
+                  TEXTDEF<selector> WEAK ";"
                 }
                 SYNC "}"
                 (.
@@ -434,7 +434,7 @@ PRODUCTIONS
                 .)
                 SYNC "{"
                 {
-                  ICONDEF<selector>
+                  ICONDEF<selector> WEAK ";"
                 }
                 SYNC "}"
                 (.
@@ -464,7 +464,7 @@ PRODUCTIONS
                 .)
                 SYNC "{"
                 {
-                   LINEDEF<selector>
+                   LINEDEF<selector> WEAK ";"
                 }
                 SYNC "}"
                 (.
@@ -482,7 +482,7 @@ PRODUCTIONS
                 .)
                 SYNC "{"
                 {
-                  PATHTEXTDEF<selector>
+                  PATHTEXTDEF<selector> WEAK ";"
                 }
                 SYNC "}"
                 (.
@@ -500,7 +500,7 @@ PRODUCTIONS
                 .)
                 SYNC "{"
                 {
-                  PATHSYMBOLDEF<selector>
+                  PATHSYMBOLDEF<selector> WEAK ";"
                 }
                 SYNC "}"
                 (.
@@ -518,7 +518,7 @@ PRODUCTIONS
                 .)
                 SYNC "{"
                 {
-                  SHIELDDEF<selector>
+                  SHIELDDEF<selector> WEAK ";"
                 }
                 SYNC "}"
                 (.
@@ -548,7 +548,7 @@ PRODUCTIONS
                 .)
                 SYNC "{"
                 {
-                  FILLDEF<selector>
+                  FILLDEF<selector> WEAK ";"
                 }
                 SYNC "}"
                 (.
@@ -566,7 +566,7 @@ PRODUCTIONS
                 .)
                 SYNC "{"
                 {
-                  TEXTDEF<selector>
+                  TEXTDEF<selector> WEAK ";"
                 }
                 SYNC "}"
                 (.
@@ -584,7 +584,7 @@ PRODUCTIONS
                 .)
                 SYNC "{"
                 {
-                  ICONDEF<selector>
+                  ICONDEF<selector> WEAK ";"
                 }
                 SYNC "}"
                 (.
@@ -596,19 +596,19 @@ PRODUCTIONS
   LINEDEF<LineStyleSelector& selector>
               = (
                   (. Color lineColor; .)
-                  "color" ":" COLOR<lineColor> WEAK ";"
+                  "color" ":" COLOR<lineColor>
                   (.
                   	 selector.style->SetLineColor(lineColor);
                      selector.attributes.insert(LineStyle::attrLineColor);
                   .)
                 | (. Color alternateColor; .)
-                  "altColor" ":" COLOR<alternateColor> WEAK ";"               // OBSOLETE!
+                  "altColor" ":" COLOR<alternateColor>               // OBSOLETE!
                   (.
                   	 selector.style->SetAlternateColor(alternateColor);
                      selector.attributes.insert(LineStyle::attrAlternateColor);
                   .)
                 | (. Color outlineColor;.)
-                  "outlineColor" ":" COLOR<outlineColor> WEAK ";"
+                  "outlineColor" ":" COLOR<outlineColor>
                   (.
                   	 selector.style->SetOutlineColor(outlineColor);
                      selector.attributes.insert(LineStyle::attrOutlineColor);
@@ -627,40 +627,39 @@ PRODUCTIONS
                   	 selector.style->SetDashes(dashes);
                      selector.attributes.insert(LineStyle::attrDashes);
                   .)
-                  WEAK ";"
                 | (. Color gapColor; .)
-                  "gapColor" ":" COLOR<gapColor> WEAK ";"
+                  "gapColor" ":" COLOR<gapColor>
                   (.
                   	 selector.style->SetGapColor(gapColor);
                      selector.attributes.insert(LineStyle::attrGapColor);
                   .)
                 | (. double displayWidth; .)
-                  "displayWidth" ":"  DISPLAYSIZE<displayWidth> WEAK ";"
+                  "displayWidth" ":"  DISPLAYSIZE<displayWidth>
                   (.
                   	 selector.style->SetDisplayWidth(displayWidth);
                      selector.attributes.insert(LineStyle::attrDisplayWidth);
                   .)
                 | (. double width; .)
-                  "width" ":" MAPSIZE<width> WEAK ";"
+                  "width" ":" MAPSIZE<width>
                   (.
                   	 selector.style->SetWidth(width);
                      selector.attributes.insert(LineStyle::attrWidth);
                   .)
 /*
                 | (. bool fixedWidth; .)
-                  "fixedWidth" ":" BOOL<fixedWidth> WEAK ";"
+                  "fixedWidth" ":" BOOL<fixedWidth>
                   (.
                   	 selector.style->SetFixedWidth(fixedWidth);
                      selector.attributes.insert(LineStyle::attrFixedWidth);
                   .)*/
                 | (. LineStyle::CapStyle capStyle; .)
-                  "cap" ":" CAPSTYLE<capStyle> WEAK ";"
+                  "cap" ":" CAPSTYLE<capStyle>
                   (.
                   	 selector.style->SetCapStyle(capStyle);
                      selector.attributes.insert(LineStyle::attrCapStyle);
                   .)
                 | (. double outline; .)
-                  "outline" ":" DISPLAYSIZE<outline> WEAK ";"
+                  "outline" ":" DISPLAYSIZE<outline>
                   (.
                   	 selector.style->SetOutline(outline);
                      selector.attributes.insert(LineStyle::attrOutline);
@@ -671,32 +670,31 @@ PRODUCTIONS
   FILLDEF<FillStyleSelector& selector>
               = (
                   (. Color fillColor; .)
-                  "color" ":" COLOR<fillColor> WEAK ";"
+                  "color" ":" COLOR<fillColor>
                   (.
                   	 selector.style->SetFillColor(fillColor);
                      selector.attributes.insert(FillStyle::attrFillColor);
                   .)
                 | (. std::string patternName; .)
                   "pattern" ":" STRING<patternName>
-                   WEAK ";"
                   (.
                   	 selector.style->SetPattern(patternName);
                      selector.attributes.insert(FillStyle::attrPattern);
                   .)
                 | (. Mag minMag; .)
-                  "patternMinMag" ":" MAG<minMag> WEAK ";"
+                  "patternMinMag" ":" MAG<minMag>
                   (.
                   	 selector.style->SetPatternMinMag(minMag);
                      selector.attributes.insert(FillStyle::attrPatternMinMag);
                   .)
                 | (. Color borderColor; .)
-                  "borderColor" ":" COLOR<borderColor> WEAK ";"
+                  "borderColor" ":" COLOR<borderColor>
                   (.
                   	 selector.style->SetBorderColor(borderColor);
                      selector.attributes.insert(FillStyle::attrBorderColor);
                   .)
                 | (. double width; .)
-	              "borderWidth" ":" DISPLAYSIZE<width> WEAK ";"
+	              "borderWidth" ":" DISPLAYSIZE<width>
                   (.
                   	 selector.style->SetBorderWidth(width);
                      selector.attributes.insert(FillStyle::attrBorderWidth);
@@ -715,44 +713,43 @@ PRODUCTIONS
                   	 selector.style->SetBorderDashes(dashes);
                      selector.attributes.insert(FillStyle::attrBorderDashes);
                   .)
-                  WEAK ";"
                 )
                 .
 
   TEXTDEF<TextStyleSelector& selector>
               = (
                   (. TextStyle::Label label; .)
-                  "label" ":" TEXTLABEL<label> WEAK ";"
+                  "label" ":" TEXTLABEL<label>
                   (.
                      selector.style->SetLabel(label);
                      selector.attributes.insert(TextStyle::attrLabel);
                   .)
                 | (. TextStyle::Style labelStyle; .)
-                  "style" ":" LABELSTYLE<labelStyle> WEAK ";"
+                  "style" ":" LABELSTYLE<labelStyle>
                   (.
                      selector.style->SetStyle(labelStyle);
                      selector.attributes.insert(TextStyle::attrStyle);
                   .)
                 | (. Color textColor; .)
-                  "color" ":" COLOR<textColor> WEAK ";"
+                  "color" ":" COLOR<textColor>
                   (.
                      selector.style->SetTextColor(textColor);
                      selector.attributes.insert(TextStyle::attrTextColor);
                   .)
                 | (. double size; .)
-                  "size" ":" DOUBLE<size> WEAK ";"
+                  "size" ":" DOUBLE<size>
                   (.
                      selector.style->SetSize(size);
                      selector.attributes.insert(TextStyle::attrSize);
                   .)
                 | (. Mag scaleMag; .)
-                  "scaleMag" ":" MAG<scaleMag> WEAK ";"
+                  "scaleMag" ":" MAG<scaleMag>
                   (.
                      selector.style->SetScaleAndFadeMag(scaleMag);
                      selector.attributes.insert(TextStyle::attrScaleAndFadeMag);
                   .)
                 | (. size_t priority; .)
-                  "priority" ":" INTEGER<priority> WEAK ";"
+                  "priority" ":" INTEGER<priority>
 	              (.
 	                if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
                      selector.style->SetPriority((uint8_t)priority);
@@ -771,37 +768,37 @@ PRODUCTIONS
   SHIELDDEF<ShieldStyleSelector& selector>
               = (
                   (. ShieldStyle::Label label; .)
-                  "label" ":" SHIELDLABEL<label> WEAK ";"
+                  "label" ":" SHIELDLABEL<label>
                   (.
                      selector.style->SetLabel(label);
                      selector.attributes.insert(ShieldStyle::attrLabel);
                   .)
                 | (. Color textColor; .)
-                  "color" ":" COLOR<textColor> WEAK ";"
+                  "color" ":" COLOR<textColor>
                   (.
                      selector.style->SetTextColor(textColor);
                      selector.attributes.insert(ShieldStyle::attrTextColor);
                   .)
                 | (. Color bgColor; .)
-                  "backgroundColor" ":" COLOR<bgColor> WEAK ";"
+                  "backgroundColor" ":" COLOR<bgColor>
                   (.
                      selector.style->SetBgColor(bgColor);
                      selector.attributes.insert(ShieldStyle::attrBgColor);
                   .)
                 | (. Color borderColor; .)
-	              "borderColor" ":" COLOR<borderColor> WEAK ";"
+	              "borderColor" ":" COLOR<borderColor>
                   (.
                      selector.style->SetBorderColor(borderColor);
                      selector.attributes.insert(ShieldStyle::attrBorderColor);
                   .)
                 | (. double size; .)
-                  "size" ":" DOUBLE<size> WEAK ";"
+                  "size" ":" DOUBLE<size>
                   (.
                      selector.style->SetSize(size);
                      selector.attributes.insert(ShieldStyle::attrSize);
                   .)
                 | (. size_t priority; .)
-                  "priority" ":" INTEGER<priority> WEAK ";"
+                  "priority" ":" INTEGER<priority>
 	              (.
 	                if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
                      selector.style->SetPriority((uint8_t)priority);
@@ -820,19 +817,19 @@ PRODUCTIONS
   PATHTEXTDEF<PathTextStyleSelector& selector>
               = (
                   (. PathTextStyle::Label label; .)
-                  "label" ":" PATHTEXTLABEL<label> WEAK ";"
+                  "label" ":" PATHTEXTLABEL<label>
                   (.
                      selector.style->SetLabel(label);
                      selector.attributes.insert(PathTextStyle::attrLabel);
                   .)
                 | (. Color textColor; .)
-                  "color" ":" COLOR<textColor> WEAK ";"
+                  "color" ":" COLOR<textColor>
                   (.
                      selector.style->SetTextColor(textColor);
                      selector.attributes.insert(PathTextStyle::attrTextColor);
                   .)
                 | (. double size; .)
-                  "size" ":" DOUBLE<size> WEAK ";"
+                  "size" ":" DOUBLE<size>
                   (.
                      selector.style->SetSize(size);
                      selector.attributes.insert(PathTextStyle::attrSize);
@@ -846,7 +843,7 @@ PRODUCTIONS
                     std::string name;
                     SymbolRef   symbol;
                    .)
-                  "symbol" ":" IDENT<name> WEAK ";"
+                  "symbol" ":" IDENT<name>
                   (.
                      symbol=config.GetSymbol(name);
 
@@ -861,7 +858,7 @@ PRODUCTIONS
                      }
                   .)
                 | (. double symbolSpace; .)
-                  "symbolSpace" ":" DISPLAYSIZE<symbolSpace> WEAK ";"
+                  "symbolSpace" ":" DISPLAYSIZE<symbolSpace>
                   (.
                      selector.style->SetSymbolSpace(symbolSpace);
                      selector.attributes.insert(PathSymbolStyle::attrSymbolSpace);
@@ -875,7 +872,7 @@ PRODUCTIONS
                     std::string name;
                     SymbolRef   symbol;
                    .)
-                  "symbol" ":" IDENT<name> WEAK ";"
+                  "symbol" ":" IDENT<name>
                   (.
                      symbol=config.GetSymbol(name);
 
@@ -891,7 +888,6 @@ PRODUCTIONS
                   .)
                 | (. std::string name; .)
                   "name" ":" IDENT<name>
-                  WEAK ";"
                   (.
                       selector.style->SetIconName(name);
                       selector.attributes.insert(IconStyle::attrIconName);
