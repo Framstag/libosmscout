@@ -38,6 +38,7 @@
 #include <osmscout/util/Transformation.h>
 
 namespace osmscout {
+
   class OSMSCOUT_MAP_API StyleFilter
   {
   public:
@@ -136,6 +137,21 @@ namespace osmscout {
 
     PartialStyle()
     : style(new S())
+    {
+      // no code
+    }
+  };
+
+  template<class S, class A>
+  struct ConditionalStyle
+  {
+    StyleFilter       filter;
+    PartialStyle<S,A> style;
+
+    ConditionalStyle(const StyleFilter& filter,
+                     const PartialStyle<S,A>& style)
+    : filter(filter),
+      style(style)
     {
       // no code
     }
@@ -277,10 +293,11 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef Ref<LineStyle>                                LineStyleRef;
-  typedef PartialStyle<LineStyle,LineStyle::Attribute>  LinePartialStyle;
-  typedef StyleSelector<LineStyle,LineStyle::Attribute> LineStyleSelector;
-  typedef std::list<LineStyleSelector>                  LineStyleSelectorList;
+  typedef Ref<LineStyle>                                   LineStyleRef;
+  typedef PartialStyle<LineStyle,LineStyle::Attribute>     LinePartialStyle;
+  typedef ConditionalStyle<LineStyle,LineStyle::Attribute> LineConditionalStyle;
+  typedef StyleSelector<LineStyle,LineStyle::Attribute>    LineStyleSelector;
+  typedef std::list<LineStyleSelector>                     LineStyleSelectorList;
 
   /**
    * Areas can have a fill style, filling the area with one color
@@ -374,10 +391,11 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef Ref<FillStyle>                                FillStyleRef;
-  typedef PartialStyle<FillStyle,FillStyle::Attribute>  FillPartialStyle;
-  typedef StyleSelector<FillStyle,FillStyle::Attribute> FillStyleSelector;
-  typedef std::list<FillStyleSelector>                  FillStyleSelectorList;
+  typedef Ref<FillStyle>                                   FillStyleRef;
+  typedef PartialStyle<FillStyle,FillStyle::Attribute>     FillPartialStyle;
+  typedef ConditionalStyle<FillStyle,FillStyle::Attribute> FillConditionalStyle;
+  typedef StyleSelector<FillStyle,FillStyle::Attribute>    FillStyleSelector;
+  typedef std::list<FillStyleSelector>                     FillStyleSelectorList;
 
   class OSMSCOUT_MAP_API LabelStyle : public Referencable
   {
@@ -489,10 +507,11 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef Ref<TextStyle>                                TextStyleRef;
-  typedef PartialStyle<TextStyle,TextStyle::Attribute>  TextPartialStyle;
-  typedef StyleSelector<TextStyle,TextStyle::Attribute> TextStyleSelector;
-  typedef std::list<TextStyleSelector>                  TextStyleSelectorList;
+  typedef Ref<TextStyle>                                   TextStyleRef;
+  typedef PartialStyle<TextStyle,TextStyle::Attribute>     TextPartialStyle;
+  typedef ConditionalStyle<TextStyle,TextStyle::Attribute> TextConditionalStyle;
+  typedef StyleSelector<TextStyle,TextStyle::Attribute>    TextStyleSelector;
+  typedef std::list<TextStyleSelector>                    TextStyleSelectorList;
 
   /**
     Nodes, ways and areas can have a label style for drawing text. Text can be formatted
@@ -568,10 +587,11 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef Ref<ShieldStyle>                                  ShieldStyleRef;
-  typedef PartialStyle<ShieldStyle,ShieldStyle::Attribute>  ShieldPartialStyle;
-  typedef StyleSelector<ShieldStyle,ShieldStyle::Attribute> ShieldStyleSelector;
-  typedef std::list<ShieldStyleSelector>                    ShieldStyleSelectorList;
+  typedef Ref<ShieldStyle>                                     ShieldStyleRef;
+  typedef PartialStyle<ShieldStyle,ShieldStyle::Attribute>     ShieldPartialStyle;
+  typedef ConditionalStyle<ShieldStyle,ShieldStyle::Attribute> ShieldConditionalStyle;
+  typedef StyleSelector<ShieldStyle,ShieldStyle::Attribute>    ShieldStyleSelector;
+  typedef std::list<ShieldStyleSelector>                       ShieldStyleSelectorList;
 
   /**
     Nodes, ways and areas can have a label style for drawing text. Text can be formatted
@@ -630,10 +650,11 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef Ref<PathTextStyle>                                    PathTextStyleRef;
-  typedef PartialStyle<PathTextStyle,PathTextStyle::Attribute>  PathTextPartialStyle;
-  typedef StyleSelector<PathTextStyle,PathTextStyle::Attribute> PathTextStyleSelector;
-  typedef std::list<PathTextStyleSelector>                      PathTextStyleSelectorList;
+  typedef Ref<PathTextStyle>                                       PathTextStyleRef;
+  typedef PartialStyle<PathTextStyle,PathTextStyle::Attribute>     PathTextPartialStyle;
+  typedef ConditionalStyle<PathTextStyle,PathTextStyle::Attribute> PathTextConditionalStyle;
+  typedef StyleSelector<PathTextStyle,PathTextStyle::Attribute>    PathTextStyleSelector;
+  typedef std::list<PathTextStyleSelector>                         PathTextStyleSelectorList;
 
   class OSMSCOUT_MAP_API DrawPrimitive : public Referencable
   {
@@ -844,10 +865,11 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef Ref<IconStyle>                                IconStyleRef;
-  typedef PartialStyle<IconStyle,IconStyle::Attribute>  IconPartialStyle;
-  typedef StyleSelector<IconStyle,IconStyle::Attribute> IconStyleSelector;
-  typedef std::list<IconStyleSelector>                  IconStyleSelectorList;
+  typedef Ref<IconStyle>                                  IconStyleRef;
+  typedef PartialStyle<IconStyle,IconStyle::Attribute>     IconPartialStyle;
+  typedef ConditionalStyle<IconStyle,IconStyle::Attribute> IconConditionalStyle;
+  typedef StyleSelector<IconStyle,IconStyle::Attribute>    IconStyleSelector;
+  typedef std::list<IconStyleSelector>                     IconStyleSelectorList;
 
   /**
     Nodes, ways and areas can have a label style for drawing text. Text can be formatted
@@ -892,10 +914,11 @@ namespace osmscout {
                         const std::set<Attribute>& attributes);
   };
 
-  typedef Ref<PathSymbolStyle>                                      PathSymbolStyleRef;
-  typedef PartialStyle<PathSymbolStyle,PathSymbolStyle::Attribute>  PathSymbolPartialStyle;
-  typedef StyleSelector<PathSymbolStyle,PathSymbolStyle::Attribute> PathSymbolStyleSelector;
-  typedef std::list<PathSymbolStyleSelector>                        PathSymbolStyleSelectorList;
+  typedef Ref<PathSymbolStyle>                                         PathSymbolStyleRef;
+  typedef PartialStyle<PathSymbolStyle,PathSymbolStyle::Attribute>     PathSymbolPartialStyle;
+  typedef ConditionalStyle<PathSymbolStyle,PathSymbolStyle::Attribute> PathSymbolConditionalStyle;
+  typedef StyleSelector<PathSymbolStyle,PathSymbolStyle::Attribute>    PathSymbolStyleSelector;
+  typedef std::list<PathSymbolStyleSelector>                           PathSymbolStyleSelectorList;
 
   /**
    * A complete style definition
@@ -911,6 +934,9 @@ namespace osmscout {
 
     // Node
 
+    std::list<TextConditionalStyle>            nodeTextStyleConditionals;
+    std::list<IconConditionalStyle>            nodeIconStyleConditionals;
+
     std::vector<TextStyleSelectorList>         nodeTextStyleSelectors;
     std::vector<IconStyleSelectorList>         nodeIconStyleSelectors;
 
@@ -920,6 +946,11 @@ namespace osmscout {
 
     std::vector<size_t>                        wayPrio;
 
+    std::list<LineConditionalStyle>            wayLineStyleConditionals;
+    std::list<PathTextConditionalStyle>        wayPathTextStyleConditionals;
+    std::list<PathSymbolConditionalStyle>      wayPathSymbolStyleConditionals;
+    std::list<ShieldConditionalStyle>          wayShieldStyleConditionals;
+
     std::vector<LineStyleSelectorList>         wayLineStyleSelectors;
     std::vector<PathTextStyleSelectorList>     wayPathTextStyleSelectors;
     std::vector<PathSymbolStyleSelectorList>   wayPathSymbolStyleSelectors;
@@ -928,6 +959,10 @@ namespace osmscout {
     std::vector<std::vector<TypeSet> >         wayTypeSets;
 
     // Area
+
+    std::list<FillConditionalStyle>            areaFillStyleConditionals;
+    std::list<TextConditionalStyle>            areaTextStyleConditionals;
+    std::list<IconConditionalStyle>            areaIconStyleConditionals;
 
     std::vector<FillStyleSelectorList>         areaFillStyleSelectors;
     std::vector<TextStyleSelectorList>         areaTextStyleSelectors;

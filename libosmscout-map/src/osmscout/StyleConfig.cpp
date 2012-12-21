@@ -839,18 +839,7 @@ namespace osmscout {
   StyleConfig::StyleConfig(TypeConfig* typeConfig)
    : typeConfig(typeConfig)
   {
-    nodeTextStyleSelectors.resize(typeConfig->GetMaxTypeId()+1);
-    nodeIconStyleSelectors.resize(typeConfig->GetMaxTypeId()+1);
-
     wayPrio.resize(typeConfig->GetMaxTypeId()+1,std::numeric_limits<size_t>::max());
-    wayLineStyleSelectors.resize(typeConfig->GetMaxTypeId()+1);
-    wayPathTextStyleSelectors.resize(typeConfig->GetMaxTypeId()+1);
-    wayPathSymbolStyleSelectors.resize(typeConfig->GetMaxTypeId()+1);
-    wayShieldStyleSelectors.resize(typeConfig->GetMaxTypeId()+1);
-
-    areaFillStyleSelectors.resize(typeConfig->GetMaxTypeId()+1);
-    areaTextStyleSelectors.resize(typeConfig->GetMaxTypeId()+1);
-    areaIconStyleSelectors.resize(typeConfig->GetMaxTypeId()+1);
   }
 
   StyleConfig::~StyleConfig()
@@ -909,38 +898,78 @@ namespace osmscout {
   }
 
   template <class S, class A>
-  void GetMaxLevelInSelectors(const std::list<StyleSelector<S,A> >& selectors, size_t& maxLevel)
+  void GetMaxLevelInConditionals(const std::list<ConditionalStyle<S,A> >& conditionals, size_t& maxLevel)
   {
-    for (typename std::list<StyleSelector<S,A> >::const_iterator s=selectors.begin();
-         s!=selectors.end();
-         ++s) {
-      const StyleSelector<S,A>& selector=*s;
+    for (typename std::list<ConditionalStyle<S,A> >::const_iterator c=conditionals.begin();
+         c!=conditionals.end();
+         ++c) {
+      const ConditionalStyle<S,A>& conditional=*c;
 
-      maxLevel=std::max(maxLevel,selector.criteria.GetMinLevel()+1);
+      maxLevel=std::max(maxLevel,conditional.filter.GetMinLevel()+1);
 
-      if (selector.criteria.HasMaxLevel()) {
-        maxLevel=std::max(maxLevel,selector.criteria.GetMaxLevel()+1);
+      if (conditional.filter.HasMaxLevel()) {
+        maxLevel=std::max(maxLevel,conditional.filter.GetMaxLevel()+1);
       }
     }
   }
 
   template <class S, class A>
-  void CalculateUsedTypes(std::list<StyleSelector<S,A> >& selectors,
+  void CalculateUsedTypes(const TypeConfig typeConfig,
+                          const std::list<ConditionalStyle<S,A> >& conditionals,
                           size_t maxLevel,
-                          TypeId type,
                           std::vector<TypeSet>& typeSets)
   {
     for (size_t level=0;
         level<maxLevel;
         ++level) {
-      for (typename std::list<StyleSelector<S,A> >::const_iterator s=selectors.begin();
-           s!=selectors.end();
-           ++s) {
-        const StyleSelector<S,A>& selector=*s;
+      for (typename std::list<ConditionalStyle<S,A> >::const_iterator c=conditionals.begin();
+           c!=conditionals.end();
+           ++c) {
+        const ConditionalStyle<S,A>& conditional=*c;
 
-        if (selector.criteria.Matches(level)) {
+        for (TypeId type=0;
+            type<=typeConfig.GetMaxTypeId();
+            type++) {
+          if (!conditional.filter.HasType(type)) {
+            continue;
+          }
+
+          if (level<conditional.filter.GetMinLevel()) {
+            continue;
+          }
+
+          if (conditional.filter.HasMaxLevel() &&
+              level>conditional.filter.GetMaxLevel()) {
+            continue;
+          }
+
           typeSets[level].SetType(type);
         }
+      }
+    }
+  }
+
+  template <class S, class A>
+  void SortInConditionals(const TypeConfig typeConfig,
+                          std::list<ConditionalStyle<S,A> >& conditionals,
+                          size_t maxLevel,
+                          std::vector<std::list<StyleSelector<S,A> > >& selectors)
+  {
+    selectors.resize(typeConfig.GetMaxTypeId()+1);
+
+    for (typename std::list<ConditionalStyle<S,A> >::const_iterator conditional=conditionals.begin();
+         conditional!=conditionals.end();
+         ++conditional) {
+      StyleSelector<S,A> selector(conditional->filter,conditional->style);
+
+      for (TypeId type=0;
+          type<=typeConfig.GetMaxTypeId();
+          type++) {
+        if (!conditional->filter.HasType(type)) {
+          continue;
+        }
+
+        selectors[type].push_back(selector);
       }
     }
   }
@@ -949,14 +978,19 @@ namespace osmscout {
   {
     size_t maxLevel=0;
 
-    for (TypeId type=0; type<=typeConfig->GetMaxTypeId(); type++) {
-      if (!typeConfig->GetTypeInfo(type).CanBeNode()) {
-        continue;
-      }
+    GetMaxLevelInConditionals(nodeTextStyleConditionals,
+                              maxLevel);
+    GetMaxLevelInConditionals(nodeIconStyleConditionals,
+                              maxLevel);
 
-      GetMaxLevelInSelectors(nodeTextStyleSelectors[type],maxLevel);
-      GetMaxLevelInSelectors(nodeIconStyleSelectors[type],maxLevel);
-    }
+    SortInConditionals(*typeConfig,
+                       nodeTextStyleConditionals,
+                       maxLevel,
+                       nodeTextStyleSelectors);
+    SortInConditionals(*typeConfig,
+                       nodeIconStyleConditionals,
+                       maxLevel,
+                       nodeIconStyleSelectors);
 
     nodeTypeSets.reserve(maxLevel);
 
@@ -964,29 +998,48 @@ namespace osmscout {
       nodeTypeSets.push_back(TypeSet(*typeConfig));
     }
 
-    for (TypeId type=0; type<=typeConfig->GetMaxTypeId(); type++) {
-      if (!typeConfig->GetTypeInfo(type).CanBeNode()) {
-        continue;
-      }
+    CalculateUsedTypes(*typeConfig,
+                       nodeTextStyleConditionals,
+                       maxLevel,
+                       nodeTypeSets);
+    CalculateUsedTypes(*typeConfig,
+                       nodeIconStyleConditionals,
+                       maxLevel,
+                       nodeTypeSets);
 
-      CalculateUsedTypes(nodeTextStyleSelectors[type],maxLevel,type,nodeTypeSets);
-      CalculateUsedTypes(nodeIconStyleSelectors[type],maxLevel,type,nodeTypeSets);
-    }
+    nodeTextStyleConditionals.clear();
+    nodeIconStyleConditionals.clear();
   }
 
   void StyleConfig::PostprocessWays()
   {
     size_t maxLevel=0;
-    for (TypeId type=0; type<=typeConfig->GetMaxTypeId(); type++) {
-      if (!typeConfig->GetTypeInfo(type).CanBeWay()) {
-        continue;
-      }
 
-      GetMaxLevelInSelectors(wayLineStyleSelectors[type],maxLevel);
-      GetMaxLevelInSelectors(wayPathTextStyleSelectors[type],maxLevel);
-      GetMaxLevelInSelectors(wayPathSymbolStyleSelectors[type],maxLevel);
-      GetMaxLevelInSelectors(wayShieldStyleSelectors[type],maxLevel);
-    }
+    GetMaxLevelInConditionals(wayLineStyleConditionals,
+                              maxLevel);
+    GetMaxLevelInConditionals(wayPathTextStyleConditionals,
+                              maxLevel);
+    GetMaxLevelInConditionals(wayPathSymbolStyleConditionals,
+                              maxLevel);
+    GetMaxLevelInConditionals(wayShieldStyleConditionals,
+                              maxLevel);
+
+    SortInConditionals(*typeConfig,
+                       wayLineStyleConditionals,
+                       maxLevel,
+                       wayLineStyleSelectors);
+    SortInConditionals(*typeConfig,
+                       wayPathTextStyleConditionals,
+                       maxLevel,
+                       wayPathTextStyleSelectors);
+    SortInConditionals(*typeConfig,
+                       wayPathSymbolStyleConditionals,
+                       maxLevel,
+                       wayPathSymbolStyleSelectors);
+    SortInConditionals(*typeConfig,
+                       wayShieldStyleConditionals,
+                       maxLevel,
+                       wayShieldStyleSelectors);
 
     wayTypeSets.resize(maxLevel);
 
@@ -1056,20 +1109,36 @@ namespace osmscout {
         wayTypeSets[level].push_back(typeSet);
       }
     }
+
+    wayLineStyleConditionals.clear();
+    wayPathTextStyleConditionals.clear();
+    wayPathSymbolStyleConditionals.clear();
+    wayShieldStyleConditionals.clear();
   }
 
   void StyleConfig::PostprocessAreas()
   {
     size_t maxLevel=0;
-    for (TypeId type=0; type<=typeConfig->GetMaxTypeId(); type++) {
-      if (!typeConfig->GetTypeInfo(type).CanBeArea()) {
-        continue;
-      }
 
-      GetMaxLevelInSelectors(areaFillStyleSelectors[type],maxLevel);
-      GetMaxLevelInSelectors(areaTextStyleSelectors[type],maxLevel);
-      GetMaxLevelInSelectors(areaIconStyleSelectors[type],maxLevel);
-    }
+    GetMaxLevelInConditionals(areaFillStyleConditionals,
+                              maxLevel);
+    GetMaxLevelInConditionals(areaTextStyleConditionals,
+                              maxLevel);
+    GetMaxLevelInConditionals(areaIconStyleConditionals,
+                              maxLevel);
+
+    SortInConditionals(*typeConfig,
+                       areaFillStyleConditionals,
+                       maxLevel,
+                       areaFillStyleSelectors);
+    SortInConditionals(*typeConfig,
+                       areaTextStyleConditionals,
+                       maxLevel,
+                       areaTextStyleSelectors);
+    SortInConditionals(*typeConfig,
+                       areaIconStyleConditionals,
+                       maxLevel,
+                       areaIconStyleSelectors);
 
     areaTypeSets.reserve(maxLevel);
 
@@ -1077,15 +1146,22 @@ namespace osmscout {
       areaTypeSets.push_back(TypeSet(*typeConfig));
     }
 
-    for (TypeId type=0; type<areaFillStyleSelectors.size(); type++) {
-      if (!typeConfig->GetTypeInfo(type).CanBeArea()) {
-        continue;
-      }
+    CalculateUsedTypes(*typeConfig,
+                       areaFillStyleConditionals,
+                       maxLevel,
+                       areaTypeSets);
+    CalculateUsedTypes(*typeConfig,
+                       areaTextStyleConditionals,
+                       maxLevel,
+                       areaTypeSets);
+    CalculateUsedTypes(*typeConfig,
+                       areaIconStyleConditionals,
+                       maxLevel,
+                       areaTypeSets);
 
-      CalculateUsedTypes(areaFillStyleSelectors[type],maxLevel,type,areaTypeSets);
-      CalculateUsedTypes(areaTextStyleSelectors[type],maxLevel,type,areaTypeSets);
-      CalculateUsedTypes(areaIconStyleSelectors[type],maxLevel,type,areaTypeSets);
-    }
+    areaFillStyleConditionals.clear();
+    areaTextStyleConditionals.clear();
+    areaIconStyleConditionals.clear();
   }
 
   void StyleConfig::Postprocess()
@@ -1110,145 +1186,73 @@ namespace osmscout {
   void StyleConfig::AddNodeTextStyle(const StyleFilter& filter,
                                      TextPartialStyle& style)
   {
-    TextStyleSelector selector(filter,style);
+    TextConditionalStyle conditional(filter,style);
 
-    for (TypeId type=0;
-        type<=typeConfig->GetMaxTypeId();
-        type++) {
-      if (!filter.HasType(type)) {
-        continue;
-      }
-
-      nodeTextStyleSelectors[type].push_back(selector);
-    }
+    nodeTextStyleConditionals.push_back(conditional);
   }
 
   void StyleConfig::AddNodeIconStyle(const StyleFilter& filter,
                                         IconPartialStyle& style)
   {
-    IconStyleSelector selector(filter,style);
+    IconConditionalStyle conditional(filter,style);
 
-    for (TypeId type=0;
-        type<=typeConfig->GetMaxTypeId();
-        type++) {
-      if (!filter.HasType(type)) {
-        continue;
-      }
-
-      nodeIconStyleSelectors[type].push_back(selector);
-    }
+    nodeIconStyleConditionals.push_back(conditional);
   }
 
   void StyleConfig::AddWayLineStyle(const StyleFilter& filter,
                                     LinePartialStyle& style)
   {
-    LineStyleSelector selector(filter,style);
+    LineConditionalStyle conditional(filter,style);
 
-    for (TypeId type=0;
-        type<=typeConfig->GetMaxTypeId();
-        type++) {
-      if (!filter.HasType(type)) {
-        continue;
-      }
-
-      wayLineStyleSelectors[type].push_back(selector);
-    }
+    wayLineStyleConditionals.push_back(conditional);
   }
 
   void StyleConfig::AddWayPathTextStyle(const StyleFilter& filter,
                                         PathTextPartialStyle& style)
   {
-    PathTextStyleSelector selector(filter,style);
+    PathTextConditionalStyle conditional(filter,style);
 
-    for (TypeId type=0;
-        type<=typeConfig->GetMaxTypeId();
-        type++) {
-      if (!filter.HasType(type)) {
-        continue;
-      }
-
-      wayPathTextStyleSelectors[type].push_back(selector);
-    }
+    wayPathTextStyleConditionals.push_back(conditional);
   }
 
   void StyleConfig::AddWayPathSymbolStyle(const StyleFilter& filter,
                                           PathSymbolPartialStyle& style)
   {
-    PathSymbolStyleSelector selector(filter,style);
+    PathSymbolConditionalStyle conditional(filter,style);
 
-    for (TypeId type=0;
-        type<=typeConfig->GetMaxTypeId();
-        type++) {
-      if (!filter.HasType(type)) {
-        continue;
-      }
-
-      wayPathSymbolStyleSelectors[type].push_back(selector);
-    }
+    wayPathSymbolStyleConditionals.push_back(conditional);
   }
 
   void StyleConfig::AddWayShieldStyle(const StyleFilter& filter,
                                       ShieldPartialStyle& style)
   {
-    ShieldStyleSelector selector(filter,style);
+    ShieldConditionalStyle conditional(filter,style);
 
-    for (TypeId type=0;
-        type<=typeConfig->GetMaxTypeId();
-        type++) {
-      if (!filter.HasType(type)) {
-        continue;
-      }
-
-      wayShieldStyleSelectors[type].push_back(selector);
-    }
+    wayShieldStyleConditionals.push_back(conditional);
   }
 
   void StyleConfig::AddAreaFillStyle(const StyleFilter& filter,
                                      FillPartialStyle& style)
   {
-    FillStyleSelector selector(filter,style);
+    FillConditionalStyle conditional(filter,style);
 
-    for (TypeId type=0;
-        type<=typeConfig->GetMaxTypeId();
-        type++) {
-      if (!filter.HasType(type)) {
-        continue;
-      }
-
-      areaFillStyleSelectors[type].push_back(selector);
-    }
+    areaFillStyleConditionals.push_back(conditional);
   }
 
   void StyleConfig::AddAreaTextStyle(const StyleFilter& filter,
                                      TextPartialStyle& style)
   {
-    TextStyleSelector selector(filter,style);
+    TextConditionalStyle conditional(filter,style);
 
-    for (TypeId type=0;
-        type<=typeConfig->GetMaxTypeId();
-        type++) {
-      if (!filter.HasType(type)) {
-        continue;
-      }
-
-      areaTextStyleSelectors[type].push_back(selector);
-    }
+    areaTextStyleConditionals.push_back(conditional);
   }
 
   void StyleConfig::AddAreaIconStyle(const StyleFilter& filter,
                                      IconPartialStyle& style)
   {
-    IconStyleSelector selector(filter,style);
+    IconConditionalStyle conditional(filter,style);
 
-    for (TypeId type=0;
-        type<=typeConfig->GetMaxTypeId();
-        type++) {
-      if (!filter.HasType(type)) {
-        continue;
-      }
-
-      areaIconStyleSelectors[type].push_back(selector);
-    }
+    areaIconStyleConditionals.push_back(conditional);
   }
 
   void StyleConfig::GetNodeTypesWithMaxMag(double maxMag,
