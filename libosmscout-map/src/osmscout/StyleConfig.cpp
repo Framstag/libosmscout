@@ -1107,9 +1107,11 @@ namespace osmscout {
     return *this;
   }
 
-  void StyleConfig::SetNodeTextSelector(const StyleFilter& filter,
-                                        TextStyleSelector& selector)
+  void StyleConfig::AddNodeTextStyle(const StyleFilter& filter,
+                                     TextPartialStyle& style)
   {
+    TextStyleSelector selector(filter,style);
+
     for (TypeId type=0;
         type<=typeConfig->GetMaxTypeId();
         type++) {
@@ -1121,9 +1123,11 @@ namespace osmscout {
     }
   }
 
-  void StyleConfig::SetNodeIconSelector(const StyleFilter& filter,
-                                        IconStyleSelector& selector)
+  void StyleConfig::AddNodeIconStyle(const StyleFilter& filter,
+                                        IconPartialStyle& style)
   {
+    IconStyleSelector selector(filter,style);
+
     for (TypeId type=0;
         type<=typeConfig->GetMaxTypeId();
         type++) {
@@ -1135,9 +1139,11 @@ namespace osmscout {
     }
   }
 
-  void StyleConfig::SetWayLineSelector(const StyleFilter& filter,
-                                       LineStyleSelector& selector)
+  void StyleConfig::AddWayLineStyle(const StyleFilter& filter,
+                                    LinePartialStyle& style)
   {
+    LineStyleSelector selector(filter,style);
+
     for (TypeId type=0;
         type<=typeConfig->GetMaxTypeId();
         type++) {
@@ -1149,9 +1155,11 @@ namespace osmscout {
     }
   }
 
-  void StyleConfig::SetWayPathTextSelector(const StyleFilter& filter,
-                                           PathTextStyleSelector& selector)
+  void StyleConfig::AddWayPathTextStyle(const StyleFilter& filter,
+                                        PathTextPartialStyle& style)
   {
+    PathTextStyleSelector selector(filter,style);
+
     for (TypeId type=0;
         type<=typeConfig->GetMaxTypeId();
         type++) {
@@ -1163,9 +1171,11 @@ namespace osmscout {
     }
   }
 
-  void StyleConfig::SetWayPathSymbolSelector(const StyleFilter& filter,
-                                             PathSymbolStyleSelector& selector)
+  void StyleConfig::AddWayPathSymbolStyle(const StyleFilter& filter,
+                                          PathSymbolPartialStyle& style)
   {
+    PathSymbolStyleSelector selector(filter,style);
+
     for (TypeId type=0;
         type<=typeConfig->GetMaxTypeId();
         type++) {
@@ -1177,9 +1187,11 @@ namespace osmscout {
     }
   }
 
-  void StyleConfig::SetWayShieldSelector(const StyleFilter& filter,
-                                         ShieldStyleSelector& selector)
+  void StyleConfig::AddWayShieldStyle(const StyleFilter& filter,
+                                      ShieldPartialStyle& style)
   {
+    ShieldStyleSelector selector(filter,style);
+
     for (TypeId type=0;
         type<=typeConfig->GetMaxTypeId();
         type++) {
@@ -1191,9 +1203,11 @@ namespace osmscout {
     }
   }
 
-  void StyleConfig::SetAreaFillSelector(const StyleFilter& filter,
-                                        FillStyleSelector& selector)
+  void StyleConfig::AddAreaFillStyle(const StyleFilter& filter,
+                                     FillPartialStyle& style)
   {
+    FillStyleSelector selector(filter,style);
+
     for (TypeId type=0;
         type<=typeConfig->GetMaxTypeId();
         type++) {
@@ -1205,9 +1219,11 @@ namespace osmscout {
     }
   }
 
-  void StyleConfig::SetAreaTextSelector(const StyleFilter& filter,
-                                        TextStyleSelector& selector)
+  void StyleConfig::AddAreaTextStyle(const StyleFilter& filter,
+                                     TextPartialStyle& style)
   {
+    TextStyleSelector selector(filter,style);
+
     for (TypeId type=0;
         type<=typeConfig->GetMaxTypeId();
         type++) {
@@ -1219,9 +1235,11 @@ namespace osmscout {
     }
   }
 
-  void StyleConfig::SetAreaIconSelector(const StyleFilter& filter,
-                                        IconStyleSelector& selector)
+  void StyleConfig::AddAreaIconStyle(const StyleFilter& filter,
+                                     IconPartialStyle& style)
   {
+    IconStyleSelector selector(filter,style);
+
     for (TypeId type=0;
         type<=typeConfig->GetMaxTypeId();
         type++) {

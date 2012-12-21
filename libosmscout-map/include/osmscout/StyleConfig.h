@@ -129,15 +129,30 @@ namespace osmscout {
   };
 
   template<class S, class A>
+  struct PartialStyle
+  {
+    std::set<A>    attributes;
+    Ref<S>         style;
+
+    PartialStyle()
+    : style(new S())
+    {
+      // no code
+    }
+  };
+
+  template<class S, class A>
   struct StyleSelector
   {
     StyleCriteria  criteria;
     std::set<A>    attributes;
     Ref<S>         style;
 
-    StyleSelector(StyleFilter& filter)
+    StyleSelector(const StyleFilter& filter,
+                  const PartialStyle<S,A>& style)
     : criteria(filter),
-    style(new S())
+    attributes(style.attributes),
+      style(style.style)
     {
       // no code
     }
@@ -263,6 +278,7 @@ namespace osmscout {
   };
 
   typedef Ref<LineStyle>                                LineStyleRef;
+  typedef PartialStyle<LineStyle,LineStyle::Attribute>  LinePartialStyle;
   typedef StyleSelector<LineStyle,LineStyle::Attribute> LineStyleSelector;
   typedef std::list<LineStyleSelector>                  LineStyleSelectorList;
 
@@ -359,6 +375,7 @@ namespace osmscout {
   };
 
   typedef Ref<FillStyle>                                FillStyleRef;
+  typedef PartialStyle<FillStyle,FillStyle::Attribute>  FillPartialStyle;
   typedef StyleSelector<FillStyle,FillStyle::Attribute> FillStyleSelector;
   typedef std::list<FillStyleSelector>                  FillStyleSelectorList;
 
@@ -473,6 +490,7 @@ namespace osmscout {
   };
 
   typedef Ref<TextStyle>                                TextStyleRef;
+  typedef PartialStyle<TextStyle,TextStyle::Attribute>  TextPartialStyle;
   typedef StyleSelector<TextStyle,TextStyle::Attribute> TextStyleSelector;
   typedef std::list<TextStyleSelector>                  TextStyleSelectorList;
 
@@ -551,6 +569,7 @@ namespace osmscout {
   };
 
   typedef Ref<ShieldStyle>                                  ShieldStyleRef;
+  typedef PartialStyle<ShieldStyle,ShieldStyle::Attribute>  ShieldPartialStyle;
   typedef StyleSelector<ShieldStyle,ShieldStyle::Attribute> ShieldStyleSelector;
   typedef std::list<ShieldStyleSelector>                    ShieldStyleSelectorList;
 
@@ -612,6 +631,7 @@ namespace osmscout {
   };
 
   typedef Ref<PathTextStyle>                                    PathTextStyleRef;
+  typedef PartialStyle<PathTextStyle,PathTextStyle::Attribute>  PathTextPartialStyle;
   typedef StyleSelector<PathTextStyle,PathTextStyle::Attribute> PathTextStyleSelector;
   typedef std::list<PathTextStyleSelector>                      PathTextStyleSelectorList;
 
@@ -825,6 +845,7 @@ namespace osmscout {
   };
 
   typedef Ref<IconStyle>                                IconStyleRef;
+  typedef PartialStyle<IconStyle,IconStyle::Attribute>  IconPartialStyle;
   typedef StyleSelector<IconStyle,IconStyle::Attribute> IconStyleSelector;
   typedef std::list<IconStyleSelector>                  IconStyleSelectorList;
 
@@ -872,6 +893,7 @@ namespace osmscout {
   };
 
   typedef Ref<PathSymbolStyle>                                      PathSymbolStyleRef;
+  typedef PartialStyle<PathSymbolStyle,PathSymbolStyle::Attribute>  PathSymbolPartialStyle;
   typedef StyleSelector<PathSymbolStyle,PathSymbolStyle::Attribute> PathSymbolStyleSelector;
   typedef std::list<PathSymbolStyleSelector>                        PathSymbolStyleSelectorList;
 
@@ -936,26 +958,26 @@ namespace osmscout {
 
     StyleConfig& SetWayPrio(TypeId type, size_t prio);
 
-    void SetNodeTextSelector(const StyleFilter& filter,
-                             TextStyleSelector& selector);
-    void SetNodeIconSelector(const StyleFilter& filter,
-                             IconStyleSelector& selector);
+    void AddNodeTextStyle(const StyleFilter& filter,
+                          TextPartialStyle& stype);
+    void AddNodeIconStyle(const StyleFilter& filter,
+                          IconPartialStyle& style);
 
-    void SetWayLineSelector(const StyleFilter& filter,
-                            LineStyleSelector& selector);
-    void SetWayPathTextSelector(const StyleFilter& filter,
-                                PathTextStyleSelector& selector);
-    void SetWayPathSymbolSelector(const StyleFilter& filter,
-                                  PathSymbolStyleSelector& selector);
-    void SetWayShieldSelector(const StyleFilter& filter,
-                              ShieldStyleSelector& selector);
+    void AddWayLineStyle(const StyleFilter& filter,
+                         LinePartialStyle& style);
+    void AddWayPathTextStyle(const StyleFilter& filter,
+                             PathTextPartialStyle& style);
+    void AddWayPathSymbolStyle(const StyleFilter& filter,
+                               PathSymbolPartialStyle& style);
+    void AddWayShieldStyle(const StyleFilter& filter,
+                           ShieldPartialStyle& style);
 
-    void SetAreaFillSelector(const StyleFilter& filter,
-                             FillStyleSelector& selector);
-    void SetAreaTextSelector(const StyleFilter& filter,
-                             TextStyleSelector& selector);
-    void SetAreaIconSelector(const StyleFilter& filter,
-                             IconStyleSelector& selector);
+    void AddAreaFillStyle(const StyleFilter& filter,
+                          FillPartialStyle& style);
+    void AddAreaTextStyle(const StyleFilter& filter,
+                          TextPartialStyle& style);
+    void AddAreaIconStyle(const StyleFilter& filter,
+                          IconPartialStyle& style);
 
     void GetNodeTypesWithMaxMag(double maxMag,
                                 TypeSet& types) const;

@@ -196,11 +196,8 @@ PRODUCTIONS
               = "POLYGON"
                 (.
                   StyleFilter         filter;
-                  FillStyleSelector   selector(filter);
-
-                  selector.style=new FillStyle();
-
-                  PolygonPrimitiveRef polygon(new PolygonPrimitive(selector.style));
+                  FillPartialStyle    style;
+                  PolygonPrimitiveRef polygon(new PolygonPrimitive(style.style));
                   Pixel               pixel;
                 .)
                 PIXEL<pixel>   (. polygon->AddPixel(pixel); .)
@@ -210,7 +207,7 @@ PRODUCTIONS
                 }
                 SYNC "{"
                 {
-                  FILLDEF<selector> WEAK ";"
+                  FILLSTYLEATTR<style> WEAK ";"
                 }
                 SYNC "}"
                 (. symbol.AddPrimitive(polygon); .)
@@ -220,12 +217,10 @@ PRODUCTIONS
               = "RECTANGLE"
                 (.
                   StyleFilter       filter;
-                  FillStyleSelector selector(filter);
+                  FillPartialStyle  style;
                   Pixel             topLeft;
                   double            width;
                   double            height;
-
-                  selector.style=new FillStyle();
                 .)
                 PIXEL<topLeft>
                 DOUBLE<width>
@@ -234,13 +229,13 @@ PRODUCTIONS
 
                 SYNC "{"
                 {
-                  FILLDEF<selector> WEAK ";"
+                  FILLSTYLEATTR<style> WEAK ";"
                 }
                 SYNC "}"
                 (.
                   symbol.AddPrimitive(new RectanglePrimitive(topLeft,
                                                              width,height,
-                                                             selector.style));
+                                                             style.style));
                 .)
                 .
 
@@ -250,21 +245,19 @@ PRODUCTIONS
                   Pixel             center;
                   double            radius;
                   StyleFilter       filter;
-                  FillStyleSelector selector(filter);
-
-                  selector.style=new FillStyle();
+                  FillPartialStyle  style;
                 .)
                 PIXEL<center>
                 DOUBLE<radius>
                 SYNC "{"
                 {
-                  FILLDEF<selector> WEAK ";"
+                  FILLSTYLEATTR<style> WEAK ";"
                 }
                 SYNC "}"
                 (.
                   symbol.AddPrimitive(new CirclePrimitive(center,
                                                           radius,
-                                                          selector.style));
+                                                          style.style));
                 .)
                 .
 
@@ -412,15 +405,15 @@ PRODUCTIONS
                   STYLEFILTER<filter>
                 ]
                 (.
-                  TextStyleSelector selector(filter);
+                  TextPartialStyle style;
                 .)
                 SYNC "{"
                 {
-                  TEXTDEF<selector> WEAK ";"
+                  TEXTSTYLEATTR<style> WEAK ";"
                 }
                 SYNC "}"
                 (.
-                  config.SetNodeTextSelector(filter,selector);
+                  config.AddNodeTextStyle(filter,style);
                 .)
                 .
 
@@ -430,15 +423,15 @@ PRODUCTIONS
                   STYLEFILTER<filter>
                 ]
                 (.
-                  IconStyleSelector selector(filter);
+                  IconPartialStyle style;
                 .)
                 SYNC "{"
                 {
-                  ICONDEF<selector> WEAK ";"
+                  ICONSTYLEATTR<style> WEAK ";"
                 }
                 SYNC "}"
                 (.
-                  config.SetNodeIconSelector(filter,selector);
+                  config.AddNodeIconStyle(filter,style);
                 .)
                 .
 
@@ -460,15 +453,15 @@ PRODUCTIONS
                   STYLEFILTER<filter>
                 ]
                 (.
-                  LineStyleSelector selector(filter);
+                  LinePartialStyle style;
                 .)
                 SYNC "{"
                 {
-                   LINEDEF<selector> WEAK ";"
+                   LINESTYLEATTR<style> WEAK ";"
                 }
                 SYNC "}"
                 (.
-                  config.SetWayLineSelector(filter,selector);
+                  config.AddWayLineStyle(filter,style);
                 .)
                 .
 
@@ -478,15 +471,15 @@ PRODUCTIONS
                   STYLEFILTER<filter>
                 ]
                 (.
-                  PathTextStyleSelector selector(filter);
+                  PathTextPartialStyle style;
                 .)
                 SYNC "{"
                 {
-                  PATHTEXTDEF<selector> WEAK ";"
+                  PATHTEXTSTYLEATTR<style> WEAK ";"
                 }
                 SYNC "}"
                 (.
-                  config.SetWayPathTextSelector(filter,selector);
+                  config.AddWayPathTextStyle(filter,style);
                 .)
                 .
 
@@ -496,15 +489,15 @@ PRODUCTIONS
                   STYLEFILTER<filter>
                 ]
                 (.
-                  PathSymbolStyleSelector selector(filter);
+                  PathSymbolPartialStyle style;
                 .)
                 SYNC "{"
                 {
-                  PATHSYMBOLDEF<selector> WEAK ";"
+                  PATHSYMBOLSTYLEATTR<style> WEAK ";"
                 }
                 SYNC "}"
                 (.
-                  config.SetWayPathSymbolSelector(filter,selector);
+                  config.AddWayPathSymbolStyle(filter,style);
                 .)
                 .
 
@@ -514,15 +507,15 @@ PRODUCTIONS
                   STYLEFILTER<filter>
                 ]
                 (.
-                  ShieldStyleSelector selector(filter);
+                  ShieldPartialStyle style;
                 .)
                 SYNC "{"
                 {
-                  SHIELDDEF<selector> WEAK ";"
+                  SHIELDSTYLEATTR<style> WEAK ";"
                 }
                 SYNC "}"
                 (.
-                  config.SetWayShieldSelector(filter,selector);
+                  config.AddWayShieldStyle(filter,style);
                 .)
                 .
 
@@ -544,15 +537,15 @@ PRODUCTIONS
                 ]
 
                 (.
-                  FillStyleSelector selector(filter);
+                  FillPartialStyle style;
                 .)
                 SYNC "{"
                 {
-                  FILLDEF<selector> WEAK ";"
+                  FILLSTYLEATTR<style> WEAK ";"
                 }
                 SYNC "}"
                 (.
-                  config.SetAreaFillSelector(filter,selector);
+                  config.AddAreaFillStyle(filter,style);
                 .)
                 .
 
@@ -562,15 +555,15 @@ PRODUCTIONS
                   STYLEFILTER<filter>
                 ]
                 (.
-                  TextStyleSelector selector(filter);
+                  TextPartialStyle style;
                 .)
                 SYNC "{"
                 {
-                  TEXTDEF<selector> WEAK ";"
+                  TEXTSTYLEATTR<style> WEAK ";"
                 }
                 SYNC "}"
                 (.
-                  config.SetAreaTextSelector(filter,selector);
+                  config.AddAreaTextStyle(filter,style);
                 .)
                 .
 
@@ -580,38 +573,38 @@ PRODUCTIONS
                   STYLEFILTER<filter>
                 ]
                 (.
-                  IconStyleSelector selector(filter);
+                  IconPartialStyle style;
                 .)
                 SYNC "{"
                 {
-                  ICONDEF<selector> WEAK ";"
+                  ICONSTYLEATTR<style> WEAK ";"
                 }
                 SYNC "}"
                 (.
-                  config.SetAreaIconSelector(filter,selector);
+                  config.AddAreaIconStyle(filter,style);
                 .)
                 .
 
 
-  LINEDEF<LineStyleSelector& selector>
+  LINESTYLEATTR<LinePartialStyle& style>
               = (
                   (. Color lineColor; .)
                   "color" ":" COLOR<lineColor>
                   (.
-                  	 selector.style->SetLineColor(lineColor);
-                     selector.attributes.insert(LineStyle::attrLineColor);
+                  	 style.style->SetLineColor(lineColor);
+                     style.attributes.insert(LineStyle::attrLineColor);
                   .)
                 | (. Color alternateColor; .)
                   "altColor" ":" COLOR<alternateColor>               // OBSOLETE!
                   (.
-                  	 selector.style->SetAlternateColor(alternateColor);
-                     selector.attributes.insert(LineStyle::attrAlternateColor);
+                  	 style.style->SetAlternateColor(alternateColor);
+                     style.attributes.insert(LineStyle::attrAlternateColor);
                   .)
                 | (. Color outlineColor;.)
                   "outlineColor" ":" COLOR<outlineColor>
                   (.
-                  	 selector.style->SetOutlineColor(outlineColor);
-                     selector.attributes.insert(LineStyle::attrOutlineColor);
+                  	 style.style->SetOutlineColor(outlineColor);
+                     style.attributes.insert(LineStyle::attrOutlineColor);
                   .)
                 | (.
                     std::vector<double> dashes;
@@ -624,80 +617,80 @@ PRODUCTIONS
                     DOUBLE<dash>  (. dashes.push_back(dash); .)
                   }
                   (.
-                  	 selector.style->SetDashes(dashes);
-                     selector.attributes.insert(LineStyle::attrDashes);
+                  	 style.style->SetDashes(dashes);
+                     style.attributes.insert(LineStyle::attrDashes);
                   .)
                 | (. Color gapColor; .)
                   "gapColor" ":" COLOR<gapColor>
                   (.
-                  	 selector.style->SetGapColor(gapColor);
-                     selector.attributes.insert(LineStyle::attrGapColor);
+                  	 style.style->SetGapColor(gapColor);
+                     style.attributes.insert(LineStyle::attrGapColor);
                   .)
                 | (. double displayWidth; .)
                   "displayWidth" ":"  DISPLAYSIZE<displayWidth>
                   (.
-                  	 selector.style->SetDisplayWidth(displayWidth);
-                     selector.attributes.insert(LineStyle::attrDisplayWidth);
+                  	 style.style->SetDisplayWidth(displayWidth);
+                     style.attributes.insert(LineStyle::attrDisplayWidth);
                   .)
                 | (. double width; .)
                   "width" ":" MAPSIZE<width>
                   (.
-                  	 selector.style->SetWidth(width);
-                     selector.attributes.insert(LineStyle::attrWidth);
+                  	 style.style->SetWidth(width);
+                     style.attributes.insert(LineStyle::attrWidth);
                   .)
 /*
                 | (. bool fixedWidth; .)
                   "fixedWidth" ":" BOOL<fixedWidth>
                   (.
-                  	 selector.style->SetFixedWidth(fixedWidth);
-                     selector.attributes.insert(LineStyle::attrFixedWidth);
+                  	 style.style->SetFixedWidth(fixedWidth);
+                     style.attributes.insert(LineStyle::attrFixedWidth);
                   .)*/
                 | (. LineStyle::CapStyle capStyle; .)
                   "cap" ":" CAPSTYLE<capStyle>
                   (.
-                  	 selector.style->SetCapStyle(capStyle);
-                     selector.attributes.insert(LineStyle::attrCapStyle);
+                  	 style.style->SetCapStyle(capStyle);
+                     style.attributes.insert(LineStyle::attrCapStyle);
                   .)
                 | (. double outline; .)
                   "outline" ":" DISPLAYSIZE<outline>
                   (.
-                  	 selector.style->SetOutline(outline);
-                     selector.attributes.insert(LineStyle::attrOutline);
+                  	 style.style->SetOutline(outline);
+                     style.attributes.insert(LineStyle::attrOutline);
                   .)
                 )
                 .
 
-  FILLDEF<FillStyleSelector& selector>
+  FILLSTYLEATTR<FillPartialStyle& style>
               = (
                   (. Color fillColor; .)
                   "color" ":" COLOR<fillColor>
                   (.
-                  	 selector.style->SetFillColor(fillColor);
-                     selector.attributes.insert(FillStyle::attrFillColor);
+                  	 style.style->SetFillColor(fillColor);
+                     style.attributes.insert(FillStyle::attrFillColor);
                   .)
                 | (. std::string patternName; .)
                   "pattern" ":" STRING<patternName>
                   (.
-                  	 selector.style->SetPattern(patternName);
-                     selector.attributes.insert(FillStyle::attrPattern);
+                  	 style.style->SetPattern(patternName);
+                     style.attributes.insert(FillStyle::attrPattern);
                   .)
                 | (. Mag minMag; .)
                   "patternMinMag" ":" MAG<minMag>
                   (.
-                  	 selector.style->SetPatternMinMag(minMag);
-                     selector.attributes.insert(FillStyle::attrPatternMinMag);
+                  	 style.style->SetPatternMinMag(minMag);
+                     style.attributes.insert(FillStyle::attrPatternMinMag);
                   .)
                 | (. Color borderColor; .)
                   "borderColor" ":" COLOR<borderColor>
                   (.
-                  	 selector.style->SetBorderColor(borderColor);
-                     selector.attributes.insert(FillStyle::attrBorderColor);
+                  	 style.style->SetBorderColor(borderColor);
+                     style.attributes.insert(FillStyle::attrBorderColor);
                   .)
                 | (. double width; .)
 	              "borderWidth" ":" DISPLAYSIZE<width>
                   (.
-                  	 selector.style->SetBorderWidth(width);
-                     selector.attributes.insert(FillStyle::attrBorderWidth);
+                  	 style.style->SetBorderWidth(width);
+                     style.attributes.insert(FillStyle::attrBorderWidth);
                   .)
                 | (.
                     std::vector<double> dashes;
@@ -710,50 +703,50 @@ PRODUCTIONS
                     DOUBLE<dash>  (. dashes.push_back(dash); .)
                   }
                   (.
-                  	 selector.style->SetBorderDashes(dashes);
-                     selector.attributes.insert(FillStyle::attrBorderDashes);
+                  	 style.style->SetBorderDashes(dashes);
+                     style.attributes.insert(FillStyle::attrBorderDashes);
                   .)
                 )
                 .
 
-  TEXTDEF<TextStyleSelector& selector>
+  TEXTSTYLEATTR<TextPartialStyle& style>
               = (
                   (. TextStyle::Label label; .)
                   "label" ":" TEXTLABEL<label>
                   (.
-                     selector.style->SetLabel(label);
-                     selector.attributes.insert(TextStyle::attrLabel);
+                     style.style->SetLabel(label);
+                     style.attributes.insert(TextStyle::attrLabel);
                   .)
                 | (. TextStyle::Style labelStyle; .)
                   "style" ":" LABELSTYLE<labelStyle>
                   (.
-                     selector.style->SetStyle(labelStyle);
-                     selector.attributes.insert(TextStyle::attrStyle);
+                     style.style->SetStyle(labelStyle);
+                     style.attributes.insert(TextStyle::attrStyle);
                   .)
                 | (. Color textColor; .)
                   "color" ":" COLOR<textColor>
                   (.
-                     selector.style->SetTextColor(textColor);
-                     selector.attributes.insert(TextStyle::attrTextColor);
+                     style.style->SetTextColor(textColor);
+                     style.attributes.insert(TextStyle::attrTextColor);
                   .)
                 | (. double size; .)
                   "size" ":" DOUBLE<size>
                   (.
-                     selector.style->SetSize(size);
-                     selector.attributes.insert(TextStyle::attrSize);
+                     style.style->SetSize(size);
+                     style.attributes.insert(TextStyle::attrSize);
                   .)
                 | (. Mag scaleMag; .)
                   "scaleMag" ":" MAG<scaleMag>
                   (.
-                     selector.style->SetScaleAndFadeMag(scaleMag);
-                     selector.attributes.insert(TextStyle::attrScaleAndFadeMag);
+                     style.style->SetScaleAndFadeMag(scaleMag);
+                     style.attributes.insert(TextStyle::attrScaleAndFadeMag);
                   .)
                 | (. size_t priority; .)
                   "priority" ":" INTEGER<priority>
 	              (.
 	                if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
-                     selector.style->SetPriority((uint8_t)priority);
-                     selector.attributes.insert(TextStyle::attrPriority);
+                     style.style->SetPriority((uint8_t)priority);
+                     style.attributes.insert(TextStyle::attrPriority);
 	                }
 	                else {
 	                  std::string e="Priority must be in the interval [0,"+
@@ -765,44 +758,44 @@ PRODUCTIONS
                 )
                 .
 
-  SHIELDDEF<ShieldStyleSelector& selector>
+  SHIELDSTYLEATTR<ShieldPartialStyle& style>
               = (
                   (. ShieldStyle::Label label; .)
                   "label" ":" SHIELDLABEL<label>
                   (.
-                     selector.style->SetLabel(label);
-                     selector.attributes.insert(ShieldStyle::attrLabel);
+                     style.style->SetLabel(label);
+                     style.attributes.insert(ShieldStyle::attrLabel);
                   .)
                 | (. Color textColor; .)
                   "color" ":" COLOR<textColor>
                   (.
-                     selector.style->SetTextColor(textColor);
-                     selector.attributes.insert(ShieldStyle::attrTextColor);
+                     style.style->SetTextColor(textColor);
+                     style.attributes.insert(ShieldStyle::attrTextColor);
                   .)
                 | (. Color bgColor; .)
                   "backgroundColor" ":" COLOR<bgColor>
                   (.
-                     selector.style->SetBgColor(bgColor);
-                     selector.attributes.insert(ShieldStyle::attrBgColor);
+                     style.style->SetBgColor(bgColor);
+                     style.attributes.insert(ShieldStyle::attrBgColor);
                   .)
                 | (. Color borderColor; .)
 	              "borderColor" ":" COLOR<borderColor>
                   (.
-                     selector.style->SetBorderColor(borderColor);
-                     selector.attributes.insert(ShieldStyle::attrBorderColor);
+                     style.style->SetBorderColor(borderColor);
+                     style.attributes.insert(ShieldStyle::attrBorderColor);
                   .)
                 | (. double size; .)
                   "size" ":" DOUBLE<size>
                   (.
-                     selector.style->SetSize(size);
-                     selector.attributes.insert(ShieldStyle::attrSize);
+                     style.style->SetSize(size);
+                     style.attributes.insert(ShieldStyle::attrSize);
                   .)
                 | (. size_t priority; .)
                   "priority" ":" INTEGER<priority>
 	              (.
 	                if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
-                     selector.style->SetPriority((uint8_t)priority);
-                     selector.attributes.insert(ShieldStyle::attrPriority);
+                     style.style->SetPriority((uint8_t)priority);
+                     style.attributes.insert(ShieldStyle::attrPriority);
 	                }
 	                else {
 	                  std::string e="Priority must be in the interval [0,"+
@@ -814,30 +807,30 @@ PRODUCTIONS
                 )
                 .
 
-  PATHTEXTDEF<PathTextStyleSelector& selector>
+  PATHTEXTSTYLEATTR<PathTextPartialStyle& style>
               = (
                   (. PathTextStyle::Label label; .)
                   "label" ":" PATHTEXTLABEL<label>
                   (.
-                     selector.style->SetLabel(label);
-                     selector.attributes.insert(PathTextStyle::attrLabel);
+                     style.style->SetLabel(label);
+                     style.attributes.insert(PathTextStyle::attrLabel);
                   .)
                 | (. Color textColor; .)
                   "color" ":" COLOR<textColor>
                   (.
-                     selector.style->SetTextColor(textColor);
-                     selector.attributes.insert(PathTextStyle::attrTextColor);
+                     style.style->SetTextColor(textColor);
+                     style.attributes.insert(PathTextStyle::attrTextColor);
                   .)
                 | (. double size; .)
                   "size" ":" DOUBLE<size>
                   (.
-                     selector.style->SetSize(size);
-                     selector.attributes.insert(PathTextStyle::attrSize);
+                     style.style->SetSize(size);
+                     style.attributes.insert(PathTextStyle::attrSize);
                   .)
                 )
                 .
 
-  PATHSYMBOLDEF<PathSymbolStyleSelector& selector>
+  PATHSYMBOLSTYLEATTR<PathSymbolPartialStyle& style>
               = (
                   (.
                     std::string name;
@@ -853,20 +846,20 @@ PRODUCTIONS
                        SemErr(e.c_str());
                      }
                      else {
-                       selector.style->SetSymbol(symbol);
-                       selector.attributes.insert(PathSymbolStyle::attrSymbol);
+                       style.style->SetSymbol(symbol);
+                       style.attributes.insert(PathSymbolStyle::attrSymbol);
                      }
                   .)
                 | (. double symbolSpace; .)
                   "symbolSpace" ":" DISPLAYSIZE<symbolSpace>
                   (.
-                     selector.style->SetSymbolSpace(symbolSpace);
-                     selector.attributes.insert(PathSymbolStyle::attrSymbolSpace);
+                     style.style->SetSymbolSpace(symbolSpace);
+                     style.attributes.insert(PathSymbolStyle::attrSymbolSpace);
                   .)
                 )
                 .
 
-  ICONDEF<IconStyleSelector& selector>
+  ICONSTYLEATTR<IconPartialStyle& style>
               = (
                   (.
                     std::string name;
@@ -882,15 +875,15 @@ PRODUCTIONS
                        SemErr(e.c_str());
                      }
                      else {
-                       selector.style->SetSymbol(symbol);
-                       selector.attributes.insert(IconStyle::attrSymbol);
+                       style.style->SetSymbol(symbol);
+                       style.attributes.insert(IconStyle::attrSymbol);
                      }
                   .)
                 | (. std::string name; .)
                   "name" ":" IDENT<name>
                   (.
-                      selector.style->SetIconName(name);
-                      selector.attributes.insert(IconStyle::attrIconName);
+                      style.style->SetIconName(name);
+                      style.attributes.insert(IconStyle::attrIconName);
                   .)
                 )
                 .
