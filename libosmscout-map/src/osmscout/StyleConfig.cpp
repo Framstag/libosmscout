@@ -953,9 +953,15 @@ namespace osmscout {
   void SortInConditionals(const TypeConfig typeConfig,
                           std::list<ConditionalStyle<S,A> >& conditionals,
                           size_t maxLevel,
-                          std::vector<std::list<StyleSelector<S,A> > >& selectors)
+                          std::vector<std::vector<std::list<StyleSelector<S,A> > > >& selectors)
   {
     selectors.resize(typeConfig.GetMaxTypeId()+1);
+
+    for (TypeId type=0;
+        type<=typeConfig.GetMaxTypeId();
+        type++) {
+      selectors[type].resize(maxLevel+1);
+    }
 
     for (typename std::list<ConditionalStyle<S,A> >::const_iterator conditional=conditionals.begin();
          conditional!=conditionals.end();
@@ -969,7 +975,19 @@ namespace osmscout {
           continue;
         }
 
-        selectors[type].push_back(selector);
+        size_t minLvl=conditional->filter.GetMinLevel();
+        size_t maxLvl=maxLevel;
+
+        if (conditional->filter.HasMaxLevel()) {
+          maxLvl=conditional->filter.GetMaxLevel();
+        }
+        else {
+          maxLvl=maxLevel;
+        }
+
+        for (size_t level=minLvl; level<=maxLvl; level++) {
+          selectors[type][level].push_back(selector);
+        }
       }
     }
   }
@@ -1063,44 +1081,20 @@ namespace osmscout {
           }
 
           if (wayPrio[type]==*prio) {
-            for (LineStyleSelectorList::const_iterator s=wayLineStyleSelectors[type].begin();
-                 s!=wayLineStyleSelectors[type].end();
-                 ++s) {
-              const LineStyleSelector& selector=*s;
-
-              if (selector.criteria.Matches(level)) {
-                typeSet.SetType(type);
-              }
+            if (!wayLineStyleSelectors[type][level].empty()) {
+              typeSet.SetType(type);
             }
 
-            for (PathTextStyleSelectorList::const_iterator s=wayPathTextStyleSelectors[type].begin();
-                 s!=wayPathTextStyleSelectors[type].end();
-                 ++s) {
-              const PathTextStyleSelector& selector=*s;
-
-              if (selector.criteria.Matches(level)) {
-                typeSet.SetType(type);
-              }
+            if (!wayPathTextStyleSelectors[type][level].empty()) {
+              typeSet.SetType(type);
             }
 
-            for (PathSymbolStyleSelectorList::const_iterator s=wayPathSymbolStyleSelectors[type].begin();
-                 s!=wayPathSymbolStyleSelectors[type].end();
-                 ++s) {
-              const PathSymbolStyleSelector& selector=*s;
-
-              if (selector.criteria.Matches(level)) {
-                typeSet.SetType(type);
-              }
+            if (!wayPathSymbolStyleSelectors[type][level].empty()) {
+              typeSet.SetType(type);
             }
 
-            for (ShieldStyleSelectorList::const_iterator s=wayShieldStyleSelectors[type].begin();
-                 s!=wayShieldStyleSelectors[type].end();
-                 ++s) {
-              const ShieldStyleSelector& selector=*s;
-
-              if (selector.criteria.Matches(level)) {
-                typeSet.SetType(type);
-              }
+            if (!wayShieldStyleSelectors[type][level].empty()) {
+              typeSet.SetType(type);
             }
           }
         }
@@ -1280,16 +1274,20 @@ namespace osmscout {
   }
 
   template <class S, class A>
-  void GetStyle(std::list<StyleSelector<S,A> > styleSelectors,
+  void GetStyle(const std::vector<std::list<StyleSelector<S,A> > >& styleSelectors,
                 size_t level,
                 Ref<S>& style)
   {
     bool fastpath=style.Invalid();
 
+    if (level>=styleSelectors.size()) {
+      level=styleSelectors.size()-1;
+    }
+
     style=NULL;
 
-    for (typename std::list<StyleSelector<S,A> >::const_iterator s=styleSelectors.begin();
-         s!=styleSelectors.end();
+    for (typename std::list<StyleSelector<S,A> >::const_iterator s=styleSelectors[level].begin();
+         s!=styleSelectors[level].end();
          ++s) {
       const StyleSelector<S,A>& selector=*s;
 
@@ -1312,17 +1310,21 @@ namespace osmscout {
   }
 
   template <class S, class A>
-  void GetNodeStyle(std::list<StyleSelector<S,A> > styleSelectors,
+  void GetNodeStyle(const std::vector<std::list<StyleSelector<S,A> > >& styleSelectors,
                     const Node& node,
                     size_t level,
                     Ref<S>& style)
   {
     bool fastpath=false;
 
+    if (level>=styleSelectors.size()) {
+      level=styleSelectors.size()-1;
+    }
+
     style=NULL;
 
-    for (typename std::list<StyleSelector<S,A> >::const_iterator s=styleSelectors.begin();
-         s!=styleSelectors.end();
+    for (typename std::list<StyleSelector<S,A> >::const_iterator s=styleSelectors[level].begin();
+         s!=styleSelectors[level].end();
          ++s) {
       const StyleSelector<S,A>& selector=*s;
 
@@ -1347,17 +1349,21 @@ namespace osmscout {
   }
 
   template <class S, class A>
-  void GetSegmentAttributesStyle(std::list<StyleSelector<S,A> > styleSelectors,
+  void GetSegmentAttributesStyle(const std::vector<std::list<StyleSelector<S,A> > >& styleSelectors,
                                  const SegmentAttributes& attributes,
                                  size_t level,
                                  Ref<S>& style)
   {
     bool fastpath=false;
 
+    if (level>=styleSelectors.size()) {
+      level=styleSelectors.size()-1;
+    }
+
     style=NULL;
 
-    for (typename std::list<StyleSelector<S,A> >::const_iterator s=styleSelectors.begin();
-         s!=styleSelectors.end();
+    for (typename std::list<StyleSelector<S,A> >::const_iterator s=styleSelectors[level].begin();
+         s!=styleSelectors[level].end();
          ++s) {
       const StyleSelector<S,A>& selector=*s;
 

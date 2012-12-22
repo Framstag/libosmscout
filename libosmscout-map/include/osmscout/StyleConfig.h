@@ -298,7 +298,7 @@ namespace osmscout {
   typedef ConditionalStyle<LineStyle,LineStyle::Attribute> LineConditionalStyle;
   typedef StyleSelector<LineStyle,LineStyle::Attribute>    LineStyleSelector;
   typedef std::list<LineStyleSelector>                     LineStyleSelectorList;
-  typedef std::vector<LineStyleSelectorList>               LineStyleLookupTable;
+  typedef std::vector<std::vector<LineStyleSelectorList> > LineStyleLookupTable;
 
   /**
    * Areas can have a fill style, filling the area with one color
@@ -397,7 +397,7 @@ namespace osmscout {
   typedef ConditionalStyle<FillStyle,FillStyle::Attribute> FillConditionalStyle;
   typedef StyleSelector<FillStyle,FillStyle::Attribute>    FillStyleSelector;
   typedef std::list<FillStyleSelector>                     FillStyleSelectorList;
-  typedef std::vector<FillStyleSelectorList>               FillStyleLookupTable;
+  typedef std::vector<std::vector<FillStyleSelectorList> > FillStyleLookupTable;
 
   class OSMSCOUT_MAP_API LabelStyle : public Referencable
   {
@@ -514,7 +514,7 @@ namespace osmscout {
   typedef ConditionalStyle<TextStyle,TextStyle::Attribute> TextConditionalStyle;
   typedef StyleSelector<TextStyle,TextStyle::Attribute>    TextStyleSelector;
   typedef std::list<TextStyleSelector>                     TextStyleSelectorList;
-  typedef std::vector<TextStyleSelectorList>               TextStyleLookupTable;
+  typedef std::vector<std::vector<TextStyleSelectorList> > TextStyleLookupTable;
 
   /**
     Nodes, ways and areas can have a label style for drawing text. Text can be formatted
@@ -595,7 +595,7 @@ namespace osmscout {
   typedef ConditionalStyle<ShieldStyle,ShieldStyle::Attribute> ShieldConditionalStyle;
   typedef StyleSelector<ShieldStyle,ShieldStyle::Attribute>    ShieldStyleSelector;
   typedef std::list<ShieldStyleSelector>                       ShieldStyleSelectorList;
-  typedef std::vector<ShieldStyleSelectorList>                 ShieldStyleLookupTable;
+  typedef std::vector<std::vector<ShieldStyleSelectorList> >   ShieldStyleLookupTable;
 
   /**
     Nodes, ways and areas can have a label style for drawing text. Text can be formatted
@@ -659,8 +659,7 @@ namespace osmscout {
   typedef ConditionalStyle<PathTextStyle,PathTextStyle::Attribute> PathTextConditionalStyle;
   typedef StyleSelector<PathTextStyle,PathTextStyle::Attribute>    PathTextStyleSelector;
   typedef std::list<PathTextStyleSelector>                         PathTextStyleSelectorList;
-  typedef std::vector<PathTextStyleSelectorList>                   PathTextStyleLookupTable;
-  typedef std::vector<PathTextStyleSelectorList>                   PathTextStyleLookupTable;
+  typedef std::vector<std::vector<PathTextStyleSelectorList> >     PathTextStyleLookupTable;
 
   class OSMSCOUT_MAP_API DrawPrimitive : public Referencable
   {
@@ -876,7 +875,7 @@ namespace osmscout {
   typedef ConditionalStyle<IconStyle,IconStyle::Attribute> IconConditionalStyle;
   typedef StyleSelector<IconStyle,IconStyle::Attribute>    IconStyleSelector;
   typedef std::list<IconStyleSelector>                     IconStyleSelectorList;
-  typedef std::vector<IconStyleSelectorList>               IconStyleLookupTable;
+  typedef std::vector<std::vector<IconStyleSelectorList> > IconStyleLookupTable;
 
   /**
     Nodes, ways and areas can have a label style for drawing text. Text can be formatted
@@ -926,8 +925,7 @@ namespace osmscout {
   typedef ConditionalStyle<PathSymbolStyle,PathSymbolStyle::Attribute> PathSymbolConditionalStyle;
   typedef StyleSelector<PathSymbolStyle,PathSymbolStyle::Attribute>    PathSymbolStyleSelector;
   typedef std::list<PathSymbolStyleSelector>                           PathSymbolStyleSelectorList;
-  typedef std::vector<PathSymbolStyleSelectorList>                     PathSymbolStyleLookupTable;
-  typedef std::vector<PathSymbolStyleSelectorList>                     PathSymbolStyleLookupTable;
+  typedef std::vector<std::vector<PathSymbolStyleSelectorList> >       PathSymbolStyleLookupTable;
 
   /**
    * A complete style definition
@@ -963,7 +961,7 @@ namespace osmscout {
     LineStyleLookupTable                       wayLineStyleSelectors;
     PathTextStyleLookupTable                   wayPathTextStyleSelectors;
     PathSymbolStyleLookupTable                 wayPathSymbolStyleSelectors;
-    std::vector<ShieldStyleSelectorList>       wayShieldStyleSelectors;
+    ShieldStyleLookupTable                     wayShieldStyleSelectors;
 
     std::vector<std::vector<TypeSet> >         wayTypeSets;
 
