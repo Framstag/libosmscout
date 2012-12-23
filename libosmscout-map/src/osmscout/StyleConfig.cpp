@@ -21,8 +21,6 @@
 
 #include <set>
 
-#include <iostream>
-
 namespace osmscout {
 
   LineStyle::LineStyle()
@@ -785,34 +783,33 @@ namespace osmscout {
   }
 
   StyleCriteria::StyleCriteria()
-  : minLevel(0),
-    maxLevel(std::numeric_limits<size_t>::max()),
-    oneway(false)
+  : oneway(false)
   {
     // no code
   }
 
   StyleCriteria::StyleCriteria(const StyleFilter& other)
   {
-    this->minLevel=other.GetMinLevel();
-    this->maxLevel=other.GetMaxLevel();
     this->oneway=other.GetOneway();
   }
 
   StyleCriteria::StyleCriteria(const StyleCriteria& other)
   {
-    this->minLevel=other.minLevel;
-    this->maxLevel=other.maxLevel;
     this->oneway=other.oneway;
+  }
+
+  bool StyleCriteria::operator==(const StyleCriteria& other) const
+  {
+    return oneway==other.oneway;
+  }
+
+  bool StyleCriteria::operator!=(const StyleCriteria& other) const
+  {
+    return oneway!=other.oneway;
   }
 
   bool StyleCriteria::Matches(size_t level) const
   {
-    if (!(level>=minLevel &&
-          level<=maxLevel)) {
-      return false;
-    }
-
     if (oneway) {
       return false;
     }
@@ -823,11 +820,6 @@ namespace osmscout {
   bool StyleCriteria::Matches(const SegmentAttributes& attributes,
                               size_t level) const
   {
-    if (!(level>=minLevel &&
-          level<=maxLevel)) {
-      return false;
-    }
-
     if (oneway &&
         !attributes.IsOneway()) {
       return false;
@@ -988,6 +980,50 @@ namespace osmscout {
         for (size_t level=minLvl; level<=maxLvl; level++) {
           selectors[type][level].push_back(selector);
         }
+      }
+    }
+
+    for (TypeId type=0;
+        type<selectors.size();
+        type++) {
+      for (size_t level=0; level<selectors[type].size(); level++) {
+
+        if (selectors[type][level].size()>=2) {
+          // If two consecutive conditions are equal, one can be remove and the style can get merged
+          typename std::list<StyleSelector<S,A> >::iterator prevSelector=selectors[type][level].begin();
+          typename std::list<StyleSelector<S,A> >::iterator curSelector=prevSelector;
+
+          curSelector++;
+
+          while (curSelector!=selectors[type][level].end()) {
+            if (prevSelector->criteria==curSelector->criteria) {
+              prevSelector->attributes.insert(curSelector->attributes.begin(),
+                                              curSelector->attributes.end());
+              prevSelector->style=new S(*prevSelector->style);
+              prevSelector->style->CopyAttributes(curSelector->style,
+                                                  curSelector->attributes);
+
+              curSelector=selectors[type][level].erase(curSelector);
+            }
+            else {
+              prevSelector=curSelector;
+              curSelector++;
+            }
+          }
+        }
+
+        // If there is only one conditional and it is not visible, we can remove it
+        if (selectors[type][level].size()==1 &&
+            !selectors[type][level].front().style->IsVisible()) {
+          selectors[type][level].clear();
+        }
+      }
+    }
+
+    for (TypeId type=0;
+        type<selectors.size();
+        type++) {
+      for (size_t level=0; level<selectors[type].size(); level++) {
       }
     }
   }

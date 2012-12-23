@@ -95,33 +95,19 @@ namespace osmscout {
   public:
 
   private:
-    size_t minLevel;
-    size_t maxLevel;
-    bool   oneway;
+    bool oneway;
 
   public:
     StyleCriteria();
     StyleCriteria(const StyleFilter& other);
     StyleCriteria(const StyleCriteria& other);
 
-    inline size_t GetMinLevel() const
-    {
-      return minLevel;
-    }
-
-    inline size_t GetMaxLevel() const
-    {
-      return maxLevel;
-    }
+    bool operator==(const StyleCriteria& other) const;
+    bool operator!=(const StyleCriteria& other) const;
 
     inline bool GetOneway() const
     {
       return oneway;
-    }
-
-    inline bool HasMaxLevel() const
-    {
-      return maxLevel!=std::numeric_limits<size_t>::max();
     }
 
    bool Matches(size_t level) const;
