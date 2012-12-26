@@ -506,7 +506,7 @@ namespace osmscout {
     Nodes, ways and areas can have a label style for drawing text. Text can be formatted
     in different ways.
    */
-  class OSMSCOUT_MAP_API ShieldStyle : public LabelStyle
+  class OSMSCOUT_MAP_API PathShieldStyle : public LabelStyle
   {
   public:
     enum Label {
@@ -531,15 +531,15 @@ namespace osmscout {
     Color   borderColor;
 
   public:
-    ShieldStyle();
-    ShieldStyle(const ShieldStyle& style);
+    PathShieldStyle();
+    PathShieldStyle(const PathShieldStyle& style);
 
-    ShieldStyle& SetLabel(Label label);
-    ShieldStyle& SetPriority(uint8_t priority);
-    ShieldStyle& SetSize(double size);
-    ShieldStyle& SetTextColor(const Color& color);
-    ShieldStyle& SetBgColor(const Color& color);
-    ShieldStyle& SetBorderColor(const Color& color);
+    PathShieldStyle& SetLabel(Label label);
+    PathShieldStyle& SetPriority(uint8_t priority);
+    PathShieldStyle& SetSize(double size);
+    PathShieldStyle& SetTextColor(const Color& color);
+    PathShieldStyle& SetBgColor(const Color& color);
+    PathShieldStyle& SetBorderColor(const Color& color);
 
     inline bool IsVisible() const
     {
@@ -572,16 +572,16 @@ namespace osmscout {
       return borderColor;
     }
 
-    void CopyAttributes(const ShieldStyle& other,
+    void CopyAttributes(const PathShieldStyle& other,
                         const std::set<Attribute>& attributes);
   };
 
-  typedef Ref<ShieldStyle>                                     ShieldStyleRef;
-  typedef PartialStyle<ShieldStyle,ShieldStyle::Attribute>     ShieldPartialStyle;
-  typedef ConditionalStyle<ShieldStyle,ShieldStyle::Attribute> ShieldConditionalStyle;
-  typedef StyleSelector<ShieldStyle,ShieldStyle::Attribute>    ShieldStyleSelector;
-  typedef std::list<ShieldStyleSelector>                       ShieldStyleSelectorList;
-  typedef std::vector<std::vector<ShieldStyleSelectorList> >   ShieldStyleLookupTable;
+  typedef Ref<PathShieldStyle>                                         PathShieldStyleRef;
+  typedef PartialStyle<PathShieldStyle,PathShieldStyle::Attribute>     PathShieldPartialStyle;
+  typedef ConditionalStyle<PathShieldStyle,PathShieldStyle::Attribute> PathShieldConditionalStyle;
+  typedef StyleSelector<PathShieldStyle,PathShieldStyle::Attribute>    PathShieldStyleSelector;
+  typedef std::list<PathShieldStyleSelector>                           PathShieldStyleSelectorList;
+  typedef std::vector<std::vector<PathShieldStyleSelectorList> >       PathShieldStyleLookupTable;
 
   /**
     Nodes, ways and areas can have a label style for drawing text. Text can be formatted
@@ -942,12 +942,12 @@ namespace osmscout {
     std::list<LineConditionalStyle>            wayLineStyleConditionals;
     std::list<PathTextConditionalStyle>        wayPathTextStyleConditionals;
     std::list<PathSymbolConditionalStyle>      wayPathSymbolStyleConditionals;
-    std::list<ShieldConditionalStyle>          wayShieldStyleConditionals;
+    std::list<PathShieldConditionalStyle>      wayPathShieldStyleConditionals;
 
     LineStyleLookupTable                       wayLineStyleSelectors;
     PathTextStyleLookupTable                   wayPathTextStyleSelectors;
     PathSymbolStyleLookupTable                 wayPathSymbolStyleSelectors;
-    ShieldStyleLookupTable                     wayShieldStyleSelectors;
+    PathShieldStyleLookupTable                 wayPathShieldStyleSelectors;
 
     std::vector<std::vector<TypeSet> >         wayTypeSets;
 
@@ -997,8 +997,8 @@ namespace osmscout {
                              PathTextPartialStyle& style);
     void AddWayPathSymbolStyle(const StyleFilter& filter,
                                PathSymbolPartialStyle& style);
-    void AddWayShieldStyle(const StyleFilter& filter,
-                           ShieldPartialStyle& style);
+    void AddWayPathShieldStyle(const StyleFilter& filter,
+                               PathShieldPartialStyle& style);
 
     void AddAreaFillStyle(const StyleFilter& filter,
                           FillPartialStyle& style);
@@ -1042,9 +1042,9 @@ namespace osmscout {
     void GetWayPathSymbolStyle(const SegmentAttributes& way,
                                size_t level,
                                PathSymbolStyleRef& pathSymbolStyle) const;
-    void GetWayShieldStyle(const SegmentAttributes& way,
-                           size_t level,
-                           ShieldStyleRef& shieldStyle) const;
+    void GetWayPathShieldStyle(const SegmentAttributes& way,
+                               size_t level,
+                               PathShieldStyleRef& pathShieldStyle) const;
 
     void GetAreaFillStyle(const SegmentAttributes& area,
                           size_t level,

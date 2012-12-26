@@ -10,12 +10,12 @@
 
 COMPILER OSS
 
-typedef std::list<FillStyleRef>     FillStyleList;
-typedef std::list<IconStyleRef>     IconStyleList;
-typedef std::list<TextStyleRef>     TextStyleList;
-typedef std::list<LineStyleRef>     LineStyleList;
-typedef std::list<PathTextStyleRef> PathTextStyleList;
-typedef std::list<ShieldStyleRef>   ShieldStyleList;
+typedef std::list<FillStyleRef>       FillStyleList;
+typedef std::list<IconStyleRef>       IconStyleList;
+typedef std::list<TextStyleRef>       TextStyleList;
+typedef std::list<LineStyleRef>       LineStyleList;
+typedef std::list<PathTextStyleRef>   PathTextStyleList;
+typedef std::list<PathShieldStyleRef> PathShieldStyleList;
 
 inline std::string Destring(const char* str)
 {
@@ -507,7 +507,7 @@ PRODUCTIONS
                   STYLEFILTER<filter>
                 ]
                 (.
-                  ShieldPartialStyle style;
+                  PathShieldPartialStyle style;
                 .)
                 SYNC "{"
                 {
@@ -515,7 +515,7 @@ PRODUCTIONS
                 }
                 SYNC "}"
                 (.
-                  config.AddWayShieldStyle(filter,style);
+                  config.AddWayPathShieldStyle(filter,style);
                 .)
                 .
 
@@ -758,44 +758,44 @@ PRODUCTIONS
                 )
                 .
 
-  SHIELDSTYLEATTR<ShieldPartialStyle& style>
+  SHIELDSTYLEATTR<PathShieldPartialStyle& style>
               = (
-                  (. ShieldStyle::Label label; .)
+                  (. PathShieldStyle::Label label; .)
                   "label" ":" SHIELDLABEL<label>
                   (.
                      style.style->SetLabel(label);
-                     style.attributes.insert(ShieldStyle::attrLabel);
+                     style.attributes.insert(PathShieldStyle::attrLabel);
                   .)
                 | (. Color textColor; .)
                   "color" ":" COLOR<textColor>
                   (.
                      style.style->SetTextColor(textColor);
-                     style.attributes.insert(ShieldStyle::attrTextColor);
+                     style.attributes.insert(PathShieldStyle::attrTextColor);
                   .)
                 | (. Color bgColor; .)
                   "backgroundColor" ":" COLOR<bgColor>
                   (.
                      style.style->SetBgColor(bgColor);
-                     style.attributes.insert(ShieldStyle::attrBgColor);
+                     style.attributes.insert(PathShieldStyle::attrBgColor);
                   .)
                 | (. Color borderColor; .)
 	              "borderColor" ":" COLOR<borderColor>
                   (.
                      style.style->SetBorderColor(borderColor);
-                     style.attributes.insert(ShieldStyle::attrBorderColor);
+                     style.attributes.insert(PathShieldStyle::attrBorderColor);
                   .)
                 | (. double size; .)
                   "size" ":" DOUBLE<size>
                   (.
                      style.style->SetSize(size);
-                     style.attributes.insert(ShieldStyle::attrSize);
+                     style.attributes.insert(PathShieldStyle::attrSize);
                   .)
                 | (. size_t priority; .)
                   "priority" ":" INTEGER<priority>
 	              (.
 	                if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
                      style.style->SetPriority((uint8_t)priority);
-                     style.attributes.insert(ShieldStyle::attrPriority);
+                     style.attributes.insert(PathShieldStyle::attrPriority);
 	                }
 	                else {
 	                  std::string e="Priority must be in the interval [0,"+
@@ -907,10 +907,10 @@ PRODUCTIONS
                 | "ref"  (. label=TextStyle::ref; .)
                 ).
 
-  SHIELDLABEL<ShieldStyle::Label& label>
+  SHIELDLABEL<PathShieldStyle::Label& label>
               = (
-                  "name" (. label=ShieldStyle::name; .)
-                | "ref"  (. label=ShieldStyle::ref; .)
+                  "name" (. label=PathShieldStyle::name; .)
+                | "ref"  (. label=PathShieldStyle::ref; .)
                 ).
 
   PATHTEXTLABEL<PathTextStyle::Label& label>

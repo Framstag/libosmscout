@@ -383,7 +383,7 @@ namespace osmscout {
     }
   }
 
-  ShieldStyle::ShieldStyle()
+  PathShieldStyle::PathShieldStyle()
    : label(none),
      textColor(0,0,0),
      bgColor(1,1,1),
@@ -392,7 +392,7 @@ namespace osmscout {
     // no code
   }
 
-  ShieldStyle::ShieldStyle(const ShieldStyle& style)
+  PathShieldStyle::PathShieldStyle(const PathShieldStyle& style)
   : LabelStyle(style)
   {
     this->label=style.label;
@@ -401,49 +401,49 @@ namespace osmscout {
     this->borderColor=style.borderColor;
   }
 
-  ShieldStyle& ShieldStyle::SetLabel(Label label)
+  PathShieldStyle& PathShieldStyle::SetLabel(Label label)
   {
     this->label=label;
 
     return *this;
   }
 
-  ShieldStyle& ShieldStyle::SetPriority(uint8_t priority)
+  PathShieldStyle& PathShieldStyle::SetPriority(uint8_t priority)
   {
     LabelStyle::SetPriority(priority);
 
     return *this;
   }
 
-  ShieldStyle& ShieldStyle::SetSize(double size)
+  PathShieldStyle& PathShieldStyle::SetSize(double size)
   {
     LabelStyle::SetSize(size);
 
     return *this;
   }
 
-  ShieldStyle& ShieldStyle::SetTextColor(const Color& color)
+  PathShieldStyle& PathShieldStyle::SetTextColor(const Color& color)
   {
     this->textColor=color;
 
     return *this;
   }
 
-  ShieldStyle& ShieldStyle::SetBgColor(const Color& color)
+  PathShieldStyle& PathShieldStyle::SetBgColor(const Color& color)
   {
     this->bgColor=color;
 
     return *this;
   }
 
-  ShieldStyle& ShieldStyle::SetBorderColor(const Color& color)
+  PathShieldStyle& PathShieldStyle::SetBorderColor(const Color& color)
   {
     this->borderColor=color;
 
     return *this;
   }
 
-  void ShieldStyle::CopyAttributes(const ShieldStyle& other,
+  void PathShieldStyle::CopyAttributes(const PathShieldStyle& other,
                                    const std::set<Attribute>& attributes)
   {
     for (std::set<Attribute>::const_iterator a=attributes.begin();
@@ -1075,7 +1075,7 @@ namespace osmscout {
                               maxLevel);
     GetMaxLevelInConditionals(wayPathSymbolStyleConditionals,
                               maxLevel);
-    GetMaxLevelInConditionals(wayShieldStyleConditionals,
+    GetMaxLevelInConditionals(wayPathShieldStyleConditionals,
                               maxLevel);
 
     SortInConditionals(*typeConfig,
@@ -1091,9 +1091,9 @@ namespace osmscout {
                        maxLevel,
                        wayPathSymbolStyleSelectors);
     SortInConditionals(*typeConfig,
-                       wayShieldStyleConditionals,
+                       wayPathShieldStyleConditionals,
                        maxLevel,
-                       wayShieldStyleSelectors);
+                       wayPathShieldStyleSelectors);
 
     wayTypeSets.resize(maxLevel);
 
@@ -1129,7 +1129,7 @@ namespace osmscout {
               typeSet.SetType(type);
             }
 
-            if (!wayShieldStyleSelectors[type][level].empty()) {
+            if (!wayPathShieldStyleSelectors[type][level].empty()) {
               typeSet.SetType(type);
             }
           }
@@ -1143,7 +1143,7 @@ namespace osmscout {
     wayLineStyleConditionals.clear();
     wayPathTextStyleConditionals.clear();
     wayPathSymbolStyleConditionals.clear();
-    wayShieldStyleConditionals.clear();
+    wayPathShieldStyleConditionals.clear();
   }
 
   void StyleConfig::PostprocessAreas()
@@ -1253,12 +1253,12 @@ namespace osmscout {
     wayPathSymbolStyleConditionals.push_back(conditional);
   }
 
-  void StyleConfig::AddWayShieldStyle(const StyleFilter& filter,
-                                      ShieldPartialStyle& style)
+  void StyleConfig::AddWayPathShieldStyle(const StyleFilter& filter,
+                                         PathShieldPartialStyle& style)
   {
-    ShieldConditionalStyle conditional(filter,style);
+    PathShieldConditionalStyle conditional(filter,style);
 
-    wayShieldStyleConditionals.push_back(conditional);
+    wayPathShieldStyleConditionals.push_back(conditional);
   }
 
   void StyleConfig::AddAreaFillStyle(const StyleFilter& filter,
@@ -1473,14 +1473,14 @@ namespace osmscout {
                               pathSymbolStyle);
   }
 
-  void StyleConfig::GetWayShieldStyle(const SegmentAttributes& way,
-                                      size_t level,
-                                      ShieldStyleRef& shieldStyle) const
+  void StyleConfig::GetWayPathShieldStyle(const SegmentAttributes& way,
+                                         size_t level,
+                                         PathShieldStyleRef& pathShieldStyle) const
   {
-    GetSegmentAttributesStyle(wayShieldStyleSelectors[way.GetType()],
+    GetSegmentAttributesStyle(wayPathShieldStyleSelectors[way.GetType()],
                               way,
                               level,
-                              shieldStyle);
+                              pathShieldStyle);
   }
 
   void StyleConfig::GetAreaFillStyle(const SegmentAttributes& area,

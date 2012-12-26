@@ -851,7 +851,7 @@ void Parser::WAYSHIELDSTYLE(StyleFilter filter) {
 		if (la->kind == 20 /* "[" */) {
 			STYLEFILTER(filter);
 		}
-		ShieldPartialStyle style;
+		PathShieldPartialStyle style;
 		
 		while (!(la->kind == _EOF || la->kind == 14 /* "{" */)) {SynErr(117); Get();}
 		Expect(14 /* "{" */);
@@ -861,7 +861,7 @@ void Parser::WAYSHIELDSTYLE(StyleFilter filter) {
 		}
 		while (!(la->kind == _EOF || la->kind == 16 /* "}" */)) {SynErr(118); Get();}
 		Expect(16 /* "}" */);
-		config.AddWayShieldStyle(filter,style);
+		config.AddWayPathShieldStyle(filter,style);
 		
 }
 
@@ -1028,15 +1028,15 @@ void Parser::PATHSYMBOLSTYLEATTR(PathSymbolPartialStyle& style) {
 		} else SynErr(121);
 }
 
-void Parser::SHIELDSTYLEATTR(ShieldPartialStyle& style) {
+void Parser::SHIELDSTYLEATTR(PathShieldPartialStyle& style) {
 		switch (la->kind) {
 		case 48 /* "label" */: {
-			ShieldStyle::Label label; 
+			PathShieldStyle::Label label; 
 			Get();
 			Expect(34 /* ":" */);
 			SHIELDLABEL(label);
 			style.style->SetLabel(label);
-			style.attributes.insert(ShieldStyle::attrLabel);
+			style.attributes.insert(PathShieldStyle::attrLabel);
 			
 			break;
 		}
@@ -1046,7 +1046,7 @@ void Parser::SHIELDSTYLEATTR(ShieldPartialStyle& style) {
 			Expect(34 /* ":" */);
 			COLOR(textColor);
 			style.style->SetTextColor(textColor);
-			style.attributes.insert(ShieldStyle::attrTextColor);
+			style.attributes.insert(PathShieldStyle::attrTextColor);
 			
 			break;
 		}
@@ -1056,7 +1056,7 @@ void Parser::SHIELDSTYLEATTR(ShieldPartialStyle& style) {
 			Expect(34 /* ":" */);
 			COLOR(bgColor);
 			style.style->SetBgColor(bgColor);
-			style.attributes.insert(ShieldStyle::attrBgColor);
+			style.attributes.insert(PathShieldStyle::attrBgColor);
 			
 			break;
 		}
@@ -1066,7 +1066,7 @@ void Parser::SHIELDSTYLEATTR(ShieldPartialStyle& style) {
 			Expect(34 /* ":" */);
 			COLOR(borderColor);
 			style.style->SetBorderColor(borderColor);
-			style.attributes.insert(ShieldStyle::attrBorderColor);
+			style.attributes.insert(PathShieldStyle::attrBorderColor);
 			
 			break;
 		}
@@ -1076,7 +1076,7 @@ void Parser::SHIELDSTYLEATTR(ShieldPartialStyle& style) {
 			Expect(34 /* ":" */);
 			DOUBLE(size);
 			style.style->SetSize(size);
-			style.attributes.insert(ShieldStyle::attrSize);
+			style.attributes.insert(PathShieldStyle::attrSize);
 			
 			break;
 		}
@@ -1087,7 +1087,7 @@ void Parser::SHIELDSTYLEATTR(ShieldPartialStyle& style) {
 			INTEGER(priority);
 			if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
 			   style.style->SetPriority((uint8_t)priority);
-			   style.attributes.insert(ShieldStyle::attrPriority);
+			   style.attributes.insert(PathShieldStyle::attrPriority);
 			}
 			else {
 			 std::string e="Priority must be in the interval [0,"+
@@ -1231,13 +1231,13 @@ void Parser::INTEGER(size_t& value) {
 		
 }
 
-void Parser::SHIELDLABEL(ShieldStyle::Label& label) {
+void Parser::SHIELDLABEL(PathShieldStyle::Label& label) {
 		if (la->kind == 56 /* "name" */) {
 			Get();
-			label=ShieldStyle::name; 
+			label=PathShieldStyle::name; 
 		} else if (la->kind == 62 /* "ref" */) {
 			Get();
-			label=ShieldStyle::ref; 
+			label=PathShieldStyle::ref; 
 		} else SynErr(134);
 }
 

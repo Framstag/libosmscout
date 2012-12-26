@@ -405,8 +405,8 @@ namespace osmscout {
         continue;
       }
 
-      if (dynamic_cast<const ShieldStyle*>(&style)!=NULL &&
-          dynamic_cast<const ShieldStyle*>(label.style.Get())!=NULL) {
+      if (dynamic_cast<const PathShieldStyle*>(&style)!=NULL &&
+          dynamic_cast<const PathShieldStyle*>(label.style.Get())!=NULL) {
         double hx1=bx1-sameLabelSpace;
         double hx2=bx2+sameLabelSpace;
         double hy1=by1-sameLabelSpace;
@@ -754,7 +754,7 @@ namespace osmscout {
 
   void MapPainter::RegisterPointWayLabel(const Projection& projection,
                                          const MapParameter& parameter,
-                                         const ShieldStyleRef& shieldStyle,
+                                         const PathShieldStyleRef& shieldStyle,
                                          const std::string& text,
                                          size_t transStart, size_t transEnd)
   {
@@ -1493,9 +1493,9 @@ namespace osmscout {
 
       if (way->shieldStyle.Valid()) {
         switch(way->shieldStyle->GetLabel()) {
-        case ShieldStyle::none:
+        case PathShieldStyle::none:
           break;
-        case ShieldStyle::name:
+        case PathShieldStyle::name:
           RegisterPointWayLabel(projection,
                                 parameter,
                                 way->shieldStyle,
@@ -1503,7 +1503,7 @@ namespace osmscout {
                                 way->transStart,way->transEnd);
         waysLabelDrawn++;
         break;
-        case ShieldStyle::ref:
+        case PathShieldStyle::ref:
           RegisterPointWayLabel(projection,
                                 parameter,
                                 way->shieldStyle,
@@ -1550,7 +1550,7 @@ namespace osmscout {
                   *label);
         labelsDrawn++;
       }
-      else if (dynamic_cast<const ShieldStyle*>(label->style.Get())) {
+      else if (dynamic_cast<const PathShieldStyle*>(label->style.Get())) {
         DrawPlateLabel(projection,
                        parameter,
                        *label);
@@ -1571,7 +1571,7 @@ namespace osmscout {
                   *label);
         labelsDrawn++;
       }
-      else if (dynamic_cast<const ShieldStyle*>(label->style.Get())) {
+      else if (dynamic_cast<const PathShieldStyle*>(label->style.Get())) {
         DrawPlateLabel(projection,
                        parameter,
                        *label);
@@ -1869,19 +1869,19 @@ namespace osmscout {
     data.shieldStyle=NULL;
 
     if (!attributes.GetName().empty() || !attributes.GetRefName().empty()) {
-      ShieldStyleRef   shieldStyle;
+      PathShieldStyleRef   shieldStyle;
       PathTextStyleRef pathTextStyle;
 
-      styleConfig.GetWayShieldStyle(attributes,level,shieldStyle);
+      styleConfig.GetWayPathShieldStyle(attributes,level,shieldStyle);
       styleConfig.GetWayPathTextStyle(attributes,level,pathTextStyle);
 
       if (shieldStyle.Valid()) {
-        if (shieldStyle->GetLabel()==ShieldStyle::name &&
+        if (shieldStyle->GetLabel()==PathShieldStyle::name &&
             !attributes.GetName().empty()) {
           data.shieldStyle=shieldStyle;
         }
 
-        if (shieldStyle->GetLabel()==ShieldStyle::ref &&
+        if (shieldStyle->GetLabel()==PathShieldStyle::ref &&
             !attributes.GetRefName().empty()) {
           data.shieldStyle=shieldStyle;
         }
@@ -2005,7 +2005,7 @@ namespace osmscout {
     horizontal=0;
     vertical=0;
 
-    if (dynamic_cast<const ShieldStyle*>(&style)!=NULL) {
+    if (dynamic_cast<const PathShieldStyle*>(&style)!=NULL) {
       horizontal=5;
       vertical=5;
     }
@@ -2016,8 +2016,8 @@ namespace osmscout {
                                  double& horizontal,
                                  double& vertical)
   {
-    if (dynamic_cast<const ShieldStyle*>(&styleA)!=NULL &&
-        dynamic_cast<const ShieldStyle*>(&styleB)!=NULL) {
+    if (dynamic_cast<const PathShieldStyle*>(&styleA)!=NULL &&
+        dynamic_cast<const PathShieldStyle*>(&styleB)!=NULL) {
       horizontal=shieldLabelSpace;
       vertical=shieldLabelSpace;
     }

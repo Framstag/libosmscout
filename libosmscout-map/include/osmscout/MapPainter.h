@@ -237,7 +237,7 @@ namespace osmscout {
       const SegmentAttributes *attributes;     //! Attributes of line segment
       LineStyleRef            lineStyle;       //! Line style
       PathTextStyleRef        pathTextStyle;   //! Text along the path
-      ShieldStyleRef          shieldStyle;    //! ShieldStyle
+      PathShieldStyleRef      shieldStyle;     //! ShieldStyle
       size_t                  prio;            //! Priority of way (from style sheet)
       size_t                  transStart;      //! Start of coordinates in transformation buffer
       size_t                  transEnd;        //! End of coordinates in transformation buffer
@@ -443,7 +443,7 @@ namespace osmscout {
 
     void RegisterPointWayLabel(const Projection& projection,
                                const MapParameter& parameter,
-                               const ShieldStyleRef& style,
+                               const PathShieldStyleRef& style,
                                const std::string& text,
                                size_t transStart, size_t transEnd);
 

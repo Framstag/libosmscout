@@ -109,12 +109,12 @@ private:
 public:
   Errors  *errors;
 
-typedef std::list<FillStyleRef>     FillStyleList;
-typedef std::list<IconStyleRef>     IconStyleList;
-typedef std::list<TextStyleRef>     TextStyleList;
-typedef std::list<LineStyleRef>     LineStyleList;
-typedef std::list<PathTextStyleRef> PathTextStyleList;
-typedef std::list<ShieldStyleRef>   ShieldStyleList;
+typedef std::list<FillStyleRef>       FillStyleList;
+typedef std::list<IconStyleRef>       IconStyleList;
+typedef std::list<TextStyleRef>       TextStyleList;
+typedef std::list<LineStyleRef>       LineStyleList;
+typedef std::list<PathTextStyleRef>   PathTextStyleList;
+typedef std::list<PathShieldStyleRef> PathShieldStyleList;
 
 inline std::string Destring(const char* str)
 {
@@ -207,7 +207,7 @@ inline void ToRGBA(const char* str, Color& color)
 	void LINESTYLEATTR(LinePartialStyle& style);
 	void PATHTEXTSTYLEATTR(PathTextPartialStyle& style);
 	void PATHSYMBOLSTYLEATTR(PathSymbolPartialStyle& style);
-	void SHIELDSTYLEATTR(ShieldPartialStyle& style);
+	void SHIELDSTYLEATTR(PathShieldPartialStyle& style);
 	void AREASTYLE(StyleFilter filter);
 	void AREATEXTSTYLE(StyleFilter filter);
 	void AREAICONSTYLE(StyleFilter filter);
@@ -219,7 +219,7 @@ inline void ToRGBA(const char* str, Color& color)
 	void TEXTLABEL(TextStyle::Label& label);
 	void LABELSTYLE(TextStyle::Style& style);
 	void INTEGER(size_t& value);
-	void SHIELDLABEL(ShieldStyle::Label& label);
+	void SHIELDLABEL(PathShieldStyle::Label& label);
 	void PATHTEXTLABEL(PathTextStyle::Label& label);
 
   void Parse();
