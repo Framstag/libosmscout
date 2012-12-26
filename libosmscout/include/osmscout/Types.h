@@ -28,7 +28,6 @@
 
 namespace osmscout {
 
-
 #if defined(OSMSCOUT_HAVE_UINT64_T)
   typedef uint64_t Id;
   typedef uint64_t FileOffset;
@@ -58,6 +57,100 @@ namespace osmscout {
    magClose     =     2*2*2*2*1024, // 14
    magVeryClose =   2*2*2*2*2*1024, // 15
    magBlock     = 2*2*2*2*2*2*1024  // 16
+  };
+
+  class OSMSCOUT_API Magnification
+  {
+  public:
+    enum Mag {
+      magWorld     =                1, //  0
+      magContinent =               16, //  4
+      magState     =               32, //  5
+      magStateOver =               64, //  6
+      magCounty    =              128, //  7
+      magRegion    =              256, //  8
+      magProximity =              512, //  9
+      magCityOver  =             1024, // 10
+      magCity      =           2*1024, // 11
+      magSuburb    =         2*2*1014, // 12
+      magDetail    =       2*2*2*1024, // 13
+      magClose     =     2*2*2*2*1024, // 14
+      magVeryClose =   2*2*2*2*2*1024, // 15
+      magBlock     = 2*2*2*2*2*2*1024  // 16
+    };
+
+  private:
+    double magnification;
+    size_t level;
+
+  public:
+    inline Magnification()
+    : magnification(1),
+      level(0)
+    {
+      // no code
+    }
+
+    inline Magnification(const Magnification& other)
+    : magnification(other.magnification),
+      level(other.level)
+    {
+      // no code
+    }
+
+    void SetMagnification(double magnification);
+    void SetMagnification(Mag magnification);
+    void SetLevel(size_t level);
+
+    inline double GetMagnification() const
+    {
+      return magnification;
+    }
+
+    inline size_t GetLevel() const
+    {
+      return level;
+    }
+
+    inline const Magnification& operator=(const Magnification& other)
+    {
+      if (this!=&other) {
+        this->magnification=other.magnification;
+        this->level=other.level;
+      }
+
+      return *this;
+    }
+
+    inline bool operator==(const Magnification& other) const
+    {
+      return magnification==other.magnification;
+    }
+
+    inline bool operator!=(const Magnification& other) const
+    {
+      return magnification!=other.magnification;
+    }
+
+    inline bool operator<(const Magnification& other) const
+    {
+      return magnification<other.magnification;
+    }
+
+    inline bool operator<=(const Magnification& other) const
+    {
+      return magnification<=other.magnification;
+    }
+
+    inline bool operator>=(const Magnification& other) const
+    {
+      return magnification>=other.magnification;
+    }
+
+    inline bool operator>(const Magnification& other) const
+    {
+      return magnification>other.magnification;
+    }
   };
 
   /**
