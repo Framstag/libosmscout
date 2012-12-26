@@ -664,8 +664,6 @@ namespace osmscout {
 
               data.attributes=&coastlineSegmentAttributes;
               data.lineStyle=coastlineLine;
-              data.pathTextStyle=NULL;
-              data.shieldStyle=NULL;
               data.prio=std::numeric_limits<size_t>::max();
               data.transStart=start+lineStart;
               data.transEnd=start+lineEnd;
@@ -971,6 +969,100 @@ namespace osmscout {
     }
   }
 
+  void MapPainter::DrawAreaLabel(const StyleConfig& styleConfig,
+                                 const Projection& projection,
+                                 const MapParameter& parameter,
+                                 const SegmentAttributes& attributes,
+                                 const std::vector<Point>& nodes,
+                                 size_t level)
+  {
+    TextStyleRef  textStyle;
+    IconStyleRef  iconStyle;
+
+    styleConfig.GetAreaTextStyle(attributes,level,textStyle);
+    styleConfig.GetAreaIconStyle(attributes,level,iconStyle);
+
+    bool          hasLabel=textStyle.Valid() &&
+                           textStyle->IsVisible();
+    bool          hasSymbol=iconStyle.Valid() && iconStyle->GetSymbol().Valid();
+    bool          hasIcon=iconStyle.Valid() && !iconStyle->GetIconName().empty();
+    std::string   label;
+
+    if (hasIcon) {
+      hasIcon=HasIcon(styleConfig,
+                      parameter,
+                      *iconStyle);
+    }
+
+    if (!hasSymbol && !hasLabel && !hasIcon) {
+      return;
+    }
+
+    if (hasLabel) {
+      if (!attributes.GetRefName().empty()) {
+        label=attributes.GetRefName();
+      }
+      else if (!attributes.GetName().empty()) {
+        label=attributes.GetName();
+      }
+      else if (!attributes.GetHouseNr().empty()) {
+        label=attributes.GetHouseNr();
+      }
+
+      hasLabel=!label.empty();
+    }
+
+    if (!hasSymbol && !hasLabel && !hasIcon) {
+      return;
+    }
+
+    double x,y;
+
+    if (!GetCenterPixel(projection,
+                        nodes,
+                        x,y)) {
+      return;
+    }
+
+    if (hasLabel) {
+      if (hasSymbol) {
+        RegisterPointLabel(projection,
+                           parameter,
+                           textStyle,
+                           label,
+                           x,y+ConvertWidthToPixel(parameter,iconStyle->GetSymbol()->GetHeight())/2+
+                               ConvertWidthToPixel(parameter,1.0)+
+                               ConvertWidthToPixel(parameter,textStyle->GetSize())/2);
+      }
+      else if (hasIcon) {
+        RegisterPointLabel(projection,
+                           parameter,
+                           textStyle,
+                           label,
+                           x,y+14+5); // TODO: Better layout to real size of icon
+      }
+      else {
+        RegisterPointLabel(projection,
+                           parameter,
+                           textStyle,
+                           label,
+                           x,y);
+      }
+
+      areasLabelDrawn++;
+    }
+
+    if (hasIcon) {
+      DrawIcon(iconStyle,x,y);
+    }
+    else if (hasSymbol) {
+      DrawSymbol(projection,
+                 parameter,
+                 *iconStyle->GetSymbol(),
+                 x,y);
+    }
+  }
+
   void MapPainter::DrawAreaLabels(const StyleConfig& styleConfig,
                                   const Projection& projection,
                                   const MapParameter& parameter,
@@ -981,92 +1073,12 @@ namespace osmscout {
     for (std::vector<WayRef>::const_iterator a=data.areas.begin();
          a!=data.areas.end();
          ++a) {
-      const WayRef& area=*a;
-      TextStyleRef  textStyle;
-      IconStyleRef  iconStyle;
-
-      styleConfig.GetAreaTextStyle(area->GetAttributes(),level,textStyle);
-      styleConfig.GetAreaIconStyle(area->GetAttributes(),level,iconStyle);
-
-      bool          hasLabel=textStyle.Valid() &&
-                             textStyle->IsVisible();
-      bool          hasSymbol=iconStyle.Valid() && iconStyle->GetSymbol().Valid();
-      bool          hasIcon=iconStyle.Valid() && !iconStyle->GetIconName().empty();
-      std::string   label;
-
-      if (hasIcon) {
-        hasIcon=HasIcon(styleConfig,
-                        parameter,
-                        *iconStyle);
-      }
-
-      if (!hasSymbol && !hasLabel && !hasIcon) {
-        continue;
-      }
-
-      if (hasLabel) {
-        if (!area->GetRefName().empty()) {
-          label=area->GetRefName();
-        }
-        else if (!area->GetName().empty()) {
-          label=area->GetName();
-        }
-        else if (!area->GetHouseNr().empty()) {
-          label=area->GetHouseNr();
-        }
-
-        hasLabel=!label.empty();
-      }
-
-      if (!hasSymbol && !hasLabel && !hasIcon) {
-        continue;
-      }
-
-      double x,y;
-
-      if (!GetCenterPixel(projection,
-                          area->nodes,
-                          x,y)) {
-        continue;
-      }
-
-      if (hasLabel) {
-        if (hasSymbol) {
-          RegisterPointLabel(projection,
-                             parameter,
-                             textStyle,
-                             label,
-                             x,y+ConvertWidthToPixel(parameter,iconStyle->GetSymbol()->GetHeight())/2+
-                                 ConvertWidthToPixel(parameter,1.0)+
-                                 ConvertWidthToPixel(parameter,textStyle->GetSize())/2);
-        }
-        else if (hasIcon) {
-          RegisterPointLabel(projection,
-                             parameter,
-                             textStyle,
-                             label,
-                             x,y+14+5); // TODO: Better layout to real size of icon
-        }
-        else {
-          RegisterPointLabel(projection,
-                             parameter,
-                             textStyle,
-                             label,
-                             x,y);
-        }
-
-        areasLabelDrawn++;
-      }
-
-      if (hasIcon) {
-        DrawIcon(iconStyle,x,y);
-      }
-      else if (hasSymbol) {
-        DrawSymbol(projection,
-                   parameter,
-                   *iconStyle->GetSymbol(),
-                   x,y);
-      }
+      DrawAreaLabel(styleConfig,
+                    projection,
+                    parameter,
+                    (*a)->GetAttributes(),
+                    (*a)->nodes,
+                    level);
     }
 
     for (std::vector<RelationRef>::const_iterator r=data.relationAreas.begin();
@@ -1075,91 +1087,12 @@ namespace osmscout {
       const RelationRef& relation=*r;
 
       for (size_t m=0; m<relation->roles.size(); m++) {
-        TextStyleRef     textStyle;
-        IconStyleRef     iconStyle;
-
-        styleConfig.GetAreaTextStyle(relation->roles[m].attributes,level,textStyle);
-        styleConfig.GetAreaIconStyle(relation->roles[m].attributes,level,iconStyle);
-
-        bool             hasLabel=textStyle.Valid() &&
-                                  textStyle->IsVisible();
-        bool             hasSymbol=iconStyle.Valid() && iconStyle->GetSymbol().Valid();
-        bool             hasIcon=iconStyle.Valid() && !iconStyle->GetIconName().empty();
-        std::string      label;
-
-        if (hasIcon) {
-          hasIcon=HasIcon(styleConfig,
-                          parameter,
-                          *iconStyle);
-        }
-
-        if (!hasSymbol && !hasLabel && !hasIcon) {
-          continue;
-        }
-
-        if (hasLabel) {
-          if (!relation->roles[m].GetRefName().empty()) {
-            label=relation->roles[m].GetRefName();
-          }
-          else if (!relation->roles[m].GetName().empty()) {
-            label=relation->roles[m].GetName();
-          }
-          else if (!relation->roles[m].GetAttributes().GetHouseNr().empty()) {
-            label=relation->roles[m].GetAttributes().GetHouseNr();
-          }
-
-          hasLabel=!label.empty();
-        }
-
-        if (!hasSymbol && !hasLabel && !hasIcon) {
-          continue;
-        }
-
-        double x,y;
-
-        if (!GetCenterPixel(projection,
+              DrawAreaLabel(styleConfig,
+                            projection,
+                            parameter,
+                            relation->roles[m].attributes,
                             relation->roles[m].nodes,
-                            x,y)) {
-          continue;
-        }
-
-        if (hasLabel) {
-          if (hasSymbol) {
-            RegisterPointLabel(projection,
-                               parameter,
-                               textStyle,
-                               label,
-                                x,y+ConvertWidthToPixel(parameter,iconStyle->GetSymbol()->GetHeight())/2+
-                                    ConvertWidthToPixel(parameter,1.0)+
-                                    ConvertWidthToPixel(parameter,textStyle->GetSize())/2);
-          }
-          else if (hasIcon) {
-            RegisterPointLabel(projection,
-                               parameter,
-                               textStyle,
-                               label,
-                               x,y+14+5); // TODO: Better layout to real size of icon
-          }
-          else {
-            RegisterPointLabel(projection,
-                               parameter,
-                               textStyle,
-                               label,
-                               x,y);
-          }
-
-          areasLabelDrawn++;
-        }
-
-        if (hasIcon) {
-          DrawIcon(iconStyle,x,y);
-        }
-        else if (hasSymbol) {
-          DrawSymbol(projection,
-                     parameter,
-                     *iconStyle->GetSymbol(),
-                     x,y);
-        }
+                            level);
       }
     }
   }
@@ -1459,60 +1392,97 @@ namespace osmscout {
     }
   }
 
+  void MapPainter::DrawWayLabel(const StyleConfig& styleConfig,
+                                const Projection& projection,
+                                const MapParameter& parameter,
+                                const WayData& data,
+                                size_t level)
+  {
+    if (data.attributes->GetName().empty() &&
+        data.attributes->GetRefName().empty()) {
+      return;
+    }
+
+    PathShieldStyleRef shieldStyle;
+    PathTextStyleRef   pathTextStyle;
+
+    styleConfig.GetWayPathShieldStyle(*data.attributes,level,shieldStyle);
+    styleConfig.GetWayPathTextStyle(*data.attributes,level,pathTextStyle);
+
+    if (pathTextStyle.Valid()) {
+      switch (pathTextStyle->GetLabel()) {
+      case PathTextStyle::none:
+        break;
+      case PathTextStyle::name:
+        if (!data.attributes->name.empty()) {
+          DrawContourLabel(projection,
+                           parameter,
+                           *pathTextStyle,
+                           data.attributes->GetName(),
+                           data.transStart,
+                           data.transEnd);
+          waysLabelDrawn++;
+        }
+        break;
+      case PathTextStyle::ref:
+        if (!data.attributes->ref.empty()) {
+          DrawContourLabel(projection,
+                           parameter,
+                           *pathTextStyle,
+                           data.attributes->GetRefName(),
+                           data.transStart,
+                           data.transEnd);
+          waysLabelDrawn++;
+        }
+        break;
+      }
+    }
+
+    if (shieldStyle.Valid()) {
+      switch(shieldStyle->GetLabel()) {
+      case PathShieldStyle::none:
+        break;
+      case PathShieldStyle::name:
+        if (!data.attributes->name.empty()) {
+          RegisterPointWayLabel(projection,
+                                parameter,
+                                shieldStyle,
+                                data.attributes->GetName(),
+                                data.transStart,
+                                data.transEnd);
+          waysLabelDrawn++;
+        }
+        break;
+      case PathShieldStyle::ref:
+        if (!data.attributes->ref.empty()) {
+          RegisterPointWayLabel(projection,
+                                parameter,
+                                shieldStyle,
+                                data.attributes->GetRefName(),
+                                data.transStart,
+                                data.transEnd);
+          waysLabelDrawn++;
+        }
+        break;
+      }
+    }
+  }
+
   void MapPainter::DrawWayLabels(const StyleConfig& styleConfig,
                                  const Projection& projection,
                                  const MapParameter& parameter,
                                  const MapData& data)
   {
+    size_t level=MagToLevel(projection.GetMagnification());
+
     for (std::list<WayData>::const_iterator way=wayData.begin();
         way!=wayData.end();
-        way++)
-    {
-      if (way->pathTextStyle.Valid()) {
-        switch (way->pathTextStyle->GetLabel()) {
-        case PathTextStyle::none:
-          break;
-        case PathTextStyle::name:
-          DrawContourLabel(projection,
-                           parameter,
-                           *way->pathTextStyle,
-                           way->attributes->GetName(),
-                           way->transStart,way->transEnd);
-        waysLabelDrawn++;
-        break;
-        case PathTextStyle::ref:
-          DrawContourLabel(projection,
-                           parameter,
-                           *way->pathTextStyle,
-                           way->attributes->GetRefName(),
-                           way->transStart,way->transEnd);
-        waysLabelDrawn++;
-        break;
-        }
-      }
-
-      if (way->shieldStyle.Valid()) {
-        switch(way->shieldStyle->GetLabel()) {
-        case PathShieldStyle::none:
-          break;
-        case PathShieldStyle::name:
-          RegisterPointWayLabel(projection,
-                                parameter,
-                                way->shieldStyle,
-                                way->attributes->GetName(),
-                                way->transStart,way->transEnd);
-        waysLabelDrawn++;
-        break;
-        case PathShieldStyle::ref:
-          RegisterPointWayLabel(projection,
-                                parameter,
-                                way->shieldStyle,
-                                way->attributes->GetRefName(),
-                                way->transStart,way->transEnd);
-          waysLabelDrawn++;
-          break;
-        }
-      }
+        way++) {
+      DrawWayLabel(styleConfig,
+                   projection,
+                   parameter,
+                   *way,
+                   level);
     }
   }
 
@@ -1864,47 +1834,7 @@ namespace osmscout {
 
     data.attributes=&attributes;
     data.lineStyle=lineStyle;
-
-    data.pathTextStyle=NULL;
-    data.shieldStyle=NULL;
-
-    if (!attributes.GetName().empty() || !attributes.GetRefName().empty()) {
-      PathShieldStyleRef   shieldStyle;
-      PathTextStyleRef pathTextStyle;
-
-      styleConfig.GetWayPathShieldStyle(attributes,level,shieldStyle);
-      styleConfig.GetWayPathTextStyle(attributes,level,pathTextStyle);
-
-      if (shieldStyle.Valid()) {
-        if (shieldStyle->GetLabel()==PathShieldStyle::name &&
-            !attributes.GetName().empty()) {
-          data.shieldStyle=shieldStyle;
-        }
-
-        if (shieldStyle->GetLabel()==PathShieldStyle::ref &&
-            !attributes.GetRefName().empty()) {
-          data.shieldStyle=shieldStyle;
-        }
-      }
-
-      if (pathTextStyle.Valid() &&
-          IsVisible(projection,
-                    nodes,
-                    pathTextStyle->GetSize())) {
-        if (pathTextStyle->GetLabel()==PathTextStyle::name &&
-            !attributes.GetName().empty()) {
-          data.pathTextStyle=pathTextStyle;
-        }
-
-        if (pathTextStyle->GetLabel()==PathTextStyle::ref &&
-            !attributes.GetRefName().empty()) {
-          data.pathTextStyle=pathTextStyle;
-        }
-      }
-    }
-
     data.prio=styleConfig.GetWayPrio(attributes.GetType());
-
     data.transStart=start;
     data.transEnd=end;
     data.drawBridge=attributes.IsBridge();

@@ -236,8 +236,6 @@ namespace osmscout {
       ObjectRef               ref;
       const SegmentAttributes *attributes;     //! Attributes of line segment
       LineStyleRef            lineStyle;       //! Line style
-      PathTextStyleRef        pathTextStyle;   //! Text along the path
-      PathShieldStyleRef      shieldStyle;     //! ShieldStyle
       size_t                  prio;            //! Priority of way (from style sheet)
       size_t                  transStart;      //! Start of coordinates in transformation buffer
       size_t                  transEnd;        //! End of coordinates in transformation buffer
@@ -279,7 +277,7 @@ namespace osmscout {
     {
       ObjectRef               ref;
       const SegmentAttributes *attributes;     //! Area attributes
-      FillStyleRef            fillStyle;      //! Fill style
+      FillStyleRef            fillStyle;       //! Fill style
       double                  minLat;
       double                  maxLat;
       double                  minLon;
@@ -365,9 +363,9 @@ namespace osmscout {
      Precalculations
       */
     //@{
-    double labelSpace;
-    double shieldLabelSpace;
-    double sameLabelSpace;
+    double                 labelSpace;
+    double                 shieldLabelSpace;
+    double                 sameLabelSpace;
     //@}
 
   private:
@@ -459,10 +457,23 @@ namespace osmscout {
                             const MapParameter& parameter,
                             const MapData& data);
 
+    void DrawWayLabel(const StyleConfig& styleConfig,
+                      const Projection& projection,
+                      const MapParameter& parameter,
+                      const WayData& data,
+                      size_t level);
+
     void DrawWayLabels(const StyleConfig& styleConfig,
                        const Projection& projection,
                        const MapParameter& parameter,
                        const MapData& data);
+
+    void DrawAreaLabel(const StyleConfig& styleConfig,
+                       const Projection& projection,
+                       const MapParameter& parameter,
+                       const SegmentAttributes& attributes,
+                       const std::vector<Point>& nodes,
+                       size_t level);
 
     void DrawAreaLabels(const StyleConfig& styleConfig,
                         const Projection& projection,
