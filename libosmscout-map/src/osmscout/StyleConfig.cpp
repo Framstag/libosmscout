@@ -1315,6 +1315,7 @@ namespace osmscout {
                 Ref<S>& style)
   {
     bool fastpath=style.Invalid();
+    bool composed=false;
 
     if (level>=styleSelectors.size()) {
       level=styleSelectors.size()-1;
@@ -1342,6 +1343,12 @@ namespace osmscout {
 
       style->CopyAttributes(*selector.style,
                             selector.attributes);
+      composed=true;
+    }
+
+    if (composed &&
+        !style->IsVisible()) {
+      style=NULL;
     }
   }
 
@@ -1352,6 +1359,7 @@ namespace osmscout {
                     Ref<S>& style)
   {
     bool fastpath=false;
+    bool composed=false;
 
     if (level>=styleSelectors.size()) {
       level=styleSelectors.size()-1;
@@ -1381,6 +1389,12 @@ namespace osmscout {
 
       style->CopyAttributes(*selector.style,
                             selector.attributes);
+      composed=true;
+    }
+
+    if (composed &&
+        !style->IsVisible()) {
+      style=NULL;
     }
   }
 
@@ -1391,6 +1405,7 @@ namespace osmscout {
                                  Ref<S>& style)
   {
     bool fastpath=false;
+    bool composed=false;
 
     if (level>=styleSelectors.size()) {
       level=styleSelectors.size()-1;
@@ -1420,6 +1435,12 @@ namespace osmscout {
 
       style->CopyAttributes(*selector.style,
                             selector.attributes);
+      composed=true;
+    }
+    
+    if (composed &&
+        !style->IsVisible()) {
+      style=NULL;
     }
   }
 

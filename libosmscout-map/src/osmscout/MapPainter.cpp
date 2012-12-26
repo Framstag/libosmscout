@@ -982,8 +982,7 @@ namespace osmscout {
     styleConfig.GetAreaTextStyle(attributes,level,textStyle);
     styleConfig.GetAreaIconStyle(attributes,level,iconStyle);
 
-    bool          hasLabel=textStyle.Valid() &&
-                           textStyle->IsVisible();
+    bool          hasLabel=textStyle.Valid();
     bool          hasSymbol=iconStyle.Valid() && iconStyle->GetSymbol().Valid();
     bool          hasIcon=iconStyle.Valid() && !iconStyle->GetIconName().empty();
     std::string   label;
@@ -1110,7 +1109,7 @@ namespace osmscout {
     styleConfig.GetNodeIconStyle(node,level,iconStyle);
 
     //const TextStyle  *textStyle=styleConfig.GetNodeTextStyle(node,level);
-    bool             hasLabel=textStyle.Valid() && textStyle->IsVisible();
+    bool             hasLabel=textStyle.Valid();
     bool             hasSymbol=iconStyle.Valid() && iconStyle->GetSymbol().Valid();
     bool             hasIcon=iconStyle.Valid() && !iconStyle->GetIconName().empty();
 

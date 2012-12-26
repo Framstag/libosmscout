@@ -198,14 +198,14 @@ namespace osmscout {
    * Project a path using a function. Each point of the path (including
    * Bezier control points) is passed to the function for transformation.
    */
-  static void TransformTextOntoPath(cairo_path_t *textPath,
-                                    cairo_path_t *path,
+  static void TransformPathOntoPath(cairo_path_t *srcPath,
+                                    cairo_path_t *dstPath,
                                     double *pathSegmentLengths,
                                     double xOffset,
                                     double yOffset)
   {
-    for (int i=0; i<textPath->num_data; i+=textPath->data[i].header.length) {
-      cairo_path_data_t *data=&textPath->data[i];
+    for (int i=0; i<srcPath->num_data; i+=srcPath->data[i].header.length) {
+      cairo_path_data_t *data=&srcPath->data[i];
 
       switch (data->header.type) {
       case CAIRO_PATH_CURVE_TO:
@@ -215,19 +215,19 @@ namespace osmscout {
         data[2].point.y+=yOffset;
         data[3].point.x+=xOffset;
         data[3].point.y+=yOffset;
-        PathPointTransformer(data[1].point.x, data[1].point.y,path,pathSegmentLengths);
-        PathPointTransformer(data[2].point.x, data[2].point.y,path,pathSegmentLengths);
-        PathPointTransformer(data[3].point.x, data[3].point.y,path,pathSegmentLengths);
+        PathPointTransformer(data[1].point.x, data[1].point.y,dstPath,pathSegmentLengths);
+        PathPointTransformer(data[2].point.x, data[2].point.y,dstPath,pathSegmentLengths);
+        PathPointTransformer(data[3].point.x, data[3].point.y,dstPath,pathSegmentLengths);
         break;
       case CAIRO_PATH_MOVE_TO:
         data[1].point.x+=xOffset;
         data[1].point.y+=yOffset;
-        PathPointTransformer(data[1].point.x, data[1].point.y,path,pathSegmentLengths);
+        PathPointTransformer(data[1].point.x, data[1].point.y,dstPath,pathSegmentLengths);
         break;
       case CAIRO_PATH_LINE_TO:
         data[1].point.x+=xOffset;
         data[1].point.y+=yOffset;
-        PathPointTransformer(data[1].point.x, data[1].point.y,path,pathSegmentLengths);
+        PathPointTransformer(data[1].point.x, data[1].point.y,dstPath,pathSegmentLengths);
         break;
       case CAIRO_PATH_CLOSE_PATH:
         break;
@@ -241,22 +241,22 @@ namespace osmscout {
 
   /* Projects the current text path of cr onto the provided path. */
   static void MapPathOnPath(cairo_t *draw,
-                            cairo_path_t *textPath,
-                            cairo_path_t *path,
+                            cairo_path_t *srcPath,
+                            cairo_path_t *dstPath,
                             double xOffset,
                             double yOffset)
   {
-    double *segmentLengths=CalculatePathSegmentLengths(path);
+    double *segmentLengths=CalculatePathSegmentLengths(dstPath);
 
     // Center text on path
-    TransformTextOntoPath(textPath,
-                          path,
+    TransformPathOntoPath(srcPath,
+                          dstPath,
                           segmentLengths,
                           xOffset,
                           yOffset);
 
     cairo_new_path(draw);
-    cairo_append_path(draw,textPath);
+    cairo_append_path(draw,srcPath);
 
     delete [] segmentLengths;
   }
