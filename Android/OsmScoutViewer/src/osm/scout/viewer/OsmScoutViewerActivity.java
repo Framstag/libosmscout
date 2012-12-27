@@ -125,7 +125,7 @@ public class OsmScoutViewerActivity extends Activity implements OsmScoutMapEvent
         
         // Set projection position to the center of the map and zoom 12 
         mProjection.setPos(mapCenter, Math.pow(2.0, 12.0));
-    	
+        
         // Create controls from resource layout
         setContentView(R.layout.main);
         

@@ -294,35 +294,272 @@ namespace osmscout {
     mJniEnv->DeleteLocalRef(jArrayY);
   }
 
-/*
-  void MapPainterCanvas::DrawSymbol(const SymbolStyle* style,
-                    double x, double y)
+  void MapPainterCanvas::DrawPrimitivePath(const Projection& projection,
+                                           const MapParameter& parameter,
+                                           const DrawPrimitiveRef& p,
+                                           double x, double y,
+                                           double minX,
+                                           double minY,
+                                           double maxX,
+                                           double maxY)
   {
-    jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "drawSymbol",
-                                            "(IIFFF)V");
-
-    if (!methodId)
-      return;
-
-    jint javaStyle=style->GetStyle();
-
-    jint javaColor=GetColorInt(style->GetFillColor());
-    
-    jfloat javaSize=style->GetSize();
-
-    mJniEnv->CallVoidMethod(mPainterObject, methodId, javaStyle, javaColor,
-                            (jfloat) javaSize, (jfloat) x, (jfloat) y);
+    DrawPrimitivePath(projection,
+                      parameter,
+                      p,
+                      x, y,
+                      minX,
+                      minY,
+                      maxX,
+                      maxY,
+                      NULL, NULL, NULL);
   }
-*/
+
+  void MapPainterCanvas::DrawPrimitivePath(const Projection& projection,
+                                           const MapParameter& parameter,
+                                           const DrawPrimitiveRef& p,
+                                           double x, double y,
+                                           double minX,
+                                           double minY,
+                                           double maxX,
+                                           double maxY,
+                                           double* onPathX, double* onPathY,
+                                           double* segmentLengths)
+  {
+    DrawPrimitive* primitive=p.Get();
+    double         width=maxX-minX;
+    double         height=maxY-minY;
+
+    if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL)
+    {
+      PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
+
+      int numPoints=polygon->GetPixels().size();
+
+      float *arrayX=new float[numPoints];
+      float *arrayY=new float[numPoints];
+
+      int i=0;
+
+      for (std::list<Pixel>::const_iterator pixel=polygon->GetPixels().begin();
+           pixel!=polygon->GetPixels().end(); ++pixel)
+      {
+        arrayX[i]=x+ConvertWidthToPixel(parameter, pixel->x-width/2);
+        arrayY[i]=y+ConvertWidthToPixel(parameter, maxY-pixel->y-height/2);
+
+        i++;
+      }
+
+      MapPathOnPath(arrayX, arrayY, numPoints,
+                    onPathX, onPathY, segmentLengths);
+
+      SetPolygonFillPath(arrayX, arrayY, numPoints);
+
+      delete arrayX;
+      delete arrayY;
+    }
+    else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL)
+    {
+      RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
+
+      float *arrayX=new float[4];
+      float *arrayY=new float[4];
+
+      // Top-left corner
+      arrayX[0]=x+ConvertWidthToPixel(parameter, rectangle->GetTopLeft().x-width/2);
+      arrayY[0]=y+ConvertWidthToPixel(parameter, maxY-rectangle->GetTopLeft().y-height/2);
+
+      // Top-right corner
+      arrayX[1]=arrayX[0]+ConvertWidthToPixel(parameter,rectangle->GetWidth());
+      arrayY[1]=arrayY[0];
+
+      // Bottom-right corner
+      arrayX[2]=arrayX[1];
+      arrayY[2]=arrayY[0]+ConvertWidthToPixel(parameter,rectangle->GetHeight());
+
+      // Bottom-left corner
+      arrayX[3]=arrayX[0];
+      arrayY[3]=arrayY[2];
+
+      MapPathOnPath(arrayX, arrayY, 4,
+                    onPathX, onPathY, segmentLengths);
+
+      SetPolygonFillPath(arrayX, arrayY, 4);
+
+      delete arrayX;
+      delete arrayY;
+    }
+    else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL)
+    {
+      CirclePrimitive* circle=dynamic_cast<CirclePrimitive*>(primitive);
+
+      jmethodID methodId=mJniEnv->GetMethodID(mPainterClass,
+                                  "setCircleFillPath", "(FFF)V");
+
+      jfloat posX=x+ConvertWidthToPixel(parameter, circle->GetCenter().x-width/2);
+      jfloat posY=y+ConvertWidthToPixel(parameter, maxY-circle->GetCenter().y-height/2);
+      jfloat radius=ConvertWidthToPixel(parameter, circle->GetRadius());
+
+      mJniEnv->CallVoidMethod(mPainterObject, methodId, posX, posY, radius);
+    }
+  }
 
   void MapPainterCanvas::DrawSymbol(const Projection& projection,
-                     const MapParameter& parameter, const SymbolRef& symbol,
+                     const MapParameter& parameter, const Symbol& symbol,
                      double x, double y)
   {
+    double minX;
+    double minY;
+    double maxX;
+    double maxY;
+
+    symbol.GetBoundingBox(minX,minY,maxX,maxY);
+
+    for (std::list<DrawPrimitiveRef>::const_iterator p=symbol.GetPrimitives().begin();
+         p!=symbol.GetPrimitives().end();
+         ++p) {
+      FillStyleRef fillStyle=(*p)->GetFillStyle();
+
+      DrawPrimitivePath(projection,
+                        parameter,
+                        *p,
+                        x, y,
+                        minX,
+                        minY,
+                        maxX,
+                        maxY);
+
+      DrawFillStyle(projection,
+                    parameter,
+                    *fillStyle);
+    }
   }
 
-  void MapPainterCanvas::DrawIcon(const IconStyle* style,
-                  double x, double y)
+  void MapPainterCanvas::DrawContourSymbol(const Projection& projection,
+                                           const MapParameter& parameter,
+                                           const Symbol& symbol,
+                                           double space,
+                                           size_t transStart, size_t transEnd)
+  {
+    double lineLength=0;
+
+    int numPoints=transEnd-transStart+1;
+
+    double *onPathX=new double[numPoints];
+    double *onPathY=new double[numPoints];
+
+    double *segmentLengths=new double[numPoints-1];
+
+    for(int i=0; i<numPoints; i++)
+    {
+      onPathX[i]=(double)transBuffer.buffer[transStart+i].x;
+      onPathY[i]=(double)transBuffer.buffer[transStart+i].y;
+
+      if (i!=0)
+        segmentLengths[i-1]=sqrt(pow(onPathX[i]-onPathX[i-1], 2.0)+
+                                 pow(onPathY[i]-onPathY[i-1], 2.0));
+
+      lineLength+=segmentLengths[i-1];
+    }
+
+    double minX;
+    double minY;
+    double maxX;
+    double maxY;
+
+    symbol.GetBoundingBox(minX,minY,maxX,maxY);
+
+    double width=ConvertWidthToPixel(parameter,maxX-minX);
+    double height=ConvertWidthToPixel(parameter,maxY-minY);
+
+    for (std::list<DrawPrimitiveRef>::const_iterator p=symbol.GetPrimitives().begin();
+         p!=symbol.GetPrimitives().end();
+         ++p)
+    {
+      FillStyleRef fillStyle=(*p)->GetFillStyle();
+
+      double offset=space/2;
+
+      while (offset+width<lineLength)
+      {
+        DrawPrimitivePath(projection,
+                          parameter,
+                          *p,
+                          offset+width/2,
+                          0,
+                          minX,
+                          minY,
+                          maxX,
+                          maxY,
+                          onPathX, onPathY,
+                          segmentLengths);
+
+        DrawFillStyle(projection,
+                      parameter,
+                      *fillStyle);
+
+        offset+=width+space;
+      }
+    }
+  }
+
+  void MapPainterCanvas::SetPolygonFillPath(float* x, float* y, int numPoints)
+  {
+    jfloatArray jArrayX=mJniEnv->NewFloatArray(numPoints);
+    jfloatArray jArrayY=mJniEnv->NewFloatArray(numPoints);
+    
+    mJniEnv->SetFloatArrayRegion(jArrayX, 0, numPoints, x);
+    mJniEnv->SetFloatArrayRegion(jArrayY, 0, numPoints, y);
+
+    jmethodID methodId=mJniEnv->GetMethodID(mPainterClass,
+                                  "setPolygonFillPath", "([F[F)V");
+
+    mJniEnv->CallVoidMethod(mPainterObject, methodId, jArrayX, jArrayY);
+
+    mJniEnv->DeleteLocalRef(jArrayX);
+    mJniEnv->DeleteLocalRef(jArrayY);
+  }
+
+  void MapPainterCanvas::MapPathOnPath(float* arrayX, float* arrayY,
+                                       int numPoints,
+                                       double* onPathX, double* onPathY,
+                                       double* segmentLengths)
+  {
+    if ((onPathX==NULL) || (onPathY==NULL) || (segmentLengths==NULL))
+      return;
+  
+    for(int i=0; i<numPoints; i++)
+    {
+      // First, find the segment for the given point
+      int s=0;
+
+      while(arrayX[i]>segmentLengths[s])
+      {
+        arrayX[i]-=segmentLengths[s];
+        s++;
+      }
+
+      // Relative offset in the current segment ([0..1])
+      double ratio = arrayX[i] / segmentLengths[s];
+
+      // Line polynomial
+      double x = onPathX[s] * (1 - ratio) + onPathX[s+1] * ratio;
+      double y = onPathY[s] * (1 - ratio) + onPathY[s+1] * ratio;
+
+      // Line gradient
+      double dx = -(onPathX[s] - onPathX[s+1]);
+      double dy = -(onPathY[s] - onPathY[s+1]);
+
+      // optimization for: ratio = the_y / sqrt (dx * dx + dy * dy)
+      ratio = arrayY[i] / segmentLengths[s];
+      x += -dy * ratio;
+      y += dx * ratio;
+
+      arrayX[i]=(float)x;
+      arrayY[i]=(float)y;
+    }
+  }
+
+  void MapPainterCanvas::DrawIcon(const IconStyle* style, double x, double y)
   {
     jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "drawIcon",
                                             "(IFF)V");
@@ -436,8 +673,8 @@ namespace osmscout {
     
         for(int i=0; i<numPoints; i++)
         {
-        	x[i]=(float)transBuffer.buffer[clipData.transStart+i].x;
-        	y[i]=(float)transBuffer.buffer[clipData.transStart+i].y;
+          x[i]=(float)transBuffer.buffer[clipData.transStart+i].x;
+          y[i]=(float)transBuffer.buffer[clipData.transStart+i].y;
         }
     
         jfloatArray jClipArrayX=mJniEnv->NewFloatArray(numPoints);
@@ -463,15 +700,7 @@ namespace osmscout {
       }
     }
 
-    jint patternId=-1;
-
-    if (area.fillStyle->HasPattern() &&
-        projection.GetMagnification()>=area.fillStyle->GetPatternMinMag() &&
-        HasPattern(parameter, *area.fillStyle)) {
-
-          patternId=area.fillStyle->GetPatternId();
-    }
-
+    // Second step, set fill path
     int numPoints=area.transEnd-area.transStart+1;
     
     float *x=new float[numPoints];
@@ -482,56 +711,86 @@ namespace osmscout {
     	x[i]=(float)transBuffer.buffer[area.transStart+i].x;
     	y[i]=(float)transBuffer.buffer[area.transStart+i].y;
     }
-    
-    jfloatArray jArrayX=mJniEnv->NewFloatArray(numPoints);
-    jfloatArray jArrayY=mJniEnv->NewFloatArray(numPoints);
-    
-    mJniEnv->SetFloatArrayRegion(jArrayX, 0, numPoints, x);
-    mJniEnv->SetFloatArrayRegion(jArrayY, 0, numPoints, y);
 
-    if (patternId<0)
-    {
-      // Draw a filled area
-     
-      jint fillColor=GetColorInt(area.fillStyle->GetFillColor());
-
-      jint borderColor=GetColorInt(area.fillStyle->GetBorderColor());
-
-      jfloat borderWidth=ConvertWidthToPixel(parameter,
-                                           area.fillStyle->GetBorderWidth());
-
-      if (borderWidth<parameter.GetLineMinWidthPixel())
-      {
-        // Set an invalid border width so no border will be drawn
-        borderWidth=-1.0;
-      }
-
-      jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "drawFilledArea",
-                                            "(IIF[F[F)V");
-    
-      if (!methodId)
-        return;
-    
-      mJniEnv->CallVoidMethod(mPainterObject, methodId, fillColor, borderColor,
-                            borderWidth, jArrayX, jArrayY);
-    }
-    else
-    {
-      jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "drawPatternArea",
-                                            "(I[F[F)V");
-    
-      if (!methodId)
-        return;
-    
-      mJniEnv->CallVoidMethod(mPainterObject, methodId, patternId-1,
-                                              jArrayX, jArrayY);
-    }
+    SetPolygonFillPath(x, y, numPoints);
 
     delete x;
     delete y;
     
-    mJniEnv->DeleteLocalRef(jArrayX);
-    mJniEnv->DeleteLocalRef(jArrayY);
+    // Finally, draw fill style
+    DrawFillStyle(projection, parameter, *area.fillStyle);
+  }
+
+  void MapPainterCanvas::DrawFillStyle(const Projection& projection,
+                                      const MapParameter& parameter,
+                                      const FillStyle& fill)
+  {
+    if (fill.HasPattern() &&
+        projection.GetMagnification()>=fill.GetPatternMinMag() &&
+        HasPattern(parameter,fill)) {
+
+      jint patternId=fill.GetPatternId()-1;
+
+      jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "drawPatternArea",
+                                            "(I)V");
+    
+      if (!methodId)
+        return;
+    
+      mJniEnv->CallVoidMethod(mPainterObject, methodId, patternId);
+    }
+    else if (fill.GetFillColor().IsVisible()) {
+
+      jint color=GetColorInt(fill.GetFillColor());
+
+      jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "drawFilledArea",
+                                            "(I)V");
+    
+      if (!methodId)
+        return;
+    
+      mJniEnv->CallVoidMethod(mPainterObject, methodId, color);
+    }
+
+    // Draw  border
+    if (fill.GetBorderWidth()>0 &&
+        fill.GetBorderColor().IsVisible() &&
+        fill.GetBorderWidth()>=mMinimumLineWidth)
+    {
+      double borderWidth=ConvertWidthToPixel(parameter,
+                                             fill.GetBorderWidth());
+
+      if (borderWidth>=parameter.GetLineMinWidthPixel()) {
+
+        jfloatArray javaDash=NULL;
+        float *dashArray=NULL;
+
+        std::vector<double> dash=fill.GetBorderDash();
+
+        if (!dash.empty())
+        {
+          javaDash=mJniEnv->NewFloatArray(dash.size());
+
+          dashArray=new float[dash.size()];
+
+          for(int i=0; i<dash.size(); i++)
+          {
+            dashArray[i]=dash[i]*borderWidth;
+          }
+
+          mJniEnv->SetFloatArrayRegion(javaDash, 0, dash.size(), dashArray);
+        }
+
+        jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "drawAreaBorder",
+                                            "(IF[F)V");
+
+        jint javaColor=GetColorInt(fill.GetBorderColor());
+    
+        mJniEnv->CallVoidMethod(mPainterObject, methodId, javaColor,
+                               (jfloat)borderWidth, javaDash);
+
+      }
+    }
   }
 
   void MapPainterCanvas::DrawArea(const FillStyle& style,
@@ -563,6 +822,8 @@ namespace osmscout {
     mJniEnv=env;
     mPainterClass=env->FindClass("osm/scout/MapPainterCanvas");
     mPainterObject=object;
+
+    mMinimumLineWidth=parameter.GetLineMinWidthPixel()*25.4/parameter.GetDPI();
 
     return Draw(styleConfig, projection, parameter, data);
   }

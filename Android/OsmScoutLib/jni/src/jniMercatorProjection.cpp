@@ -42,7 +42,7 @@ jint Java_osm_scout_MercatorProjection_jniConstructor(JNIEnv *env, jobject objec
   return gProjectionArray->Add(nativeProjection);
 }
 
-void Java_osm_scout_MarcatorProjection_jniDestructor(JNIEnv *env, jobject object,
+void Java_osm_scout_MercatorProjection_jniDestructor(JNIEnv *env, jobject object,
                                int projectionIndex)
 {
   MercatorProjection *nativeProjection=
