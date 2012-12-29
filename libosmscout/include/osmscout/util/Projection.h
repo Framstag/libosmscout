@@ -30,6 +30,8 @@
 #include <osmscout/system/SSEMathPublic.h>
 #endif
 
+#include <osmscout/util/Magnification.h>
+
 namespace osmscout {
 
   class OSMSCOUT_API Projection
@@ -117,10 +119,10 @@ namespace osmscout {
     virtual double GetLatMin() const = 0;
     virtual double GetLonMax() const = 0;
     virtual double GetLatMax() const = 0;
-    virtual double GetMagnification() const = 0;
+    virtual Magnification GetMagnification() const = 0;
 
     virtual bool Set(double lon, double lat,
-                     double magnification,
+                     const Magnification& magnification,
                      size_t width, size_t height) = 0;
 
     virtual bool GeoIsIn(double lon, double lat) const = 0;
@@ -163,18 +165,18 @@ namespace osmscout {
     double              latOffset;
     double              scale;
     double              scaleGradtorad; //!Precalculated scale*Gradtorad
-      
+
 #ifdef OSMSCOUT_HAVE_SSE2
       //some extra vars for special sse needs
-      v2df                sse2LonOffset;
-      v2df                sse2LatOffset;
-      v2df                sse2Scale;
-      v2df                sse2ScaleGradtorad;
-      v2df                sse2Height;
+      v2df              sse2LonOffset;
+      v2df              sse2LatOffset;
+      v2df              sse2Scale;
+      v2df              sse2ScaleGradtorad;
+      v2df              sse2Height;
 #endif
 
   private:
-    double              magnification; //! Current maginification
+    Magnification       magnification; //! Current maginification
 
     double              pixelSize;     //! Size of a pixel in meter
 
@@ -221,18 +223,18 @@ namespace osmscout {
       return latMax;
     }
 
-    inline double GetMagnification() const
+    inline Magnification GetMagnification() const
     {
       return magnification;
     }
 
     bool Set(double lon, double lat,
-             double magnification,
+             const Magnification& magnification,
              size_t width, size_t height);
 
     bool Set(double lonMin, double latMin,
              double lonMax, double latMax,
-             double magnification,
+             const Magnification& magnification,
              size_t width);
 
     bool GeoIsIn(double lon, double lat) const;
@@ -255,7 +257,7 @@ namespace osmscout {
      bool GeoToPixel(const BatchTransformer& transformData) const;
 
   };
-    
+
   class OSMSCOUT_API ReversedYAxisMercatorProjection : public MercatorProjection
   {
     bool PixelToGeo(double x, double y, double& lon, double& lat) const;

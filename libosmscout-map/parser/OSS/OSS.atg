@@ -343,10 +343,10 @@ PRODUCTIONS
                    [
                      "MAG"
                      [
-                       (. Mag mag; .)
-                       MAG<mag>
+                       (. Magnification magnification; .)
+                       MAG<magnification>
                        (.
-                          size_t level=MagToLevel(mag);
+                          size_t level=magnification.GetLevel();
 
                           if (level<filter.GetMinLevel()) {
                            std::string e="The magnification interval start is not within the parent magnification range";
@@ -360,10 +360,10 @@ PRODUCTIONS
                      ]
                      "-"
                      [
-                       (. Mag mag; .)
-                       MAG<mag>
+                       (. Magnification magnification; .)
+                       MAG<magnification>
                        (.
-                          size_t level=MagToLevel(mag);
+                          size_t level=magnification.GetLevel();
 
                           if (level>filter.GetMaxLevel()) {
                            std::string e="The magnification interval end is not within the parent magnification range";
@@ -674,7 +674,7 @@ PRODUCTIONS
                   	 style.style->SetPattern(patternName);
                      style.attributes.insert(FillStyle::attrPattern);
                   .)
-                | (. Mag minMag; .)
+                | (. Magnification minMag; .)
                   "patternMinMag" ":" MAG<minMag>
                   (.
                   	 style.style->SetPatternMinMag(minMag);
@@ -735,7 +735,7 @@ PRODUCTIONS
                      style.style->SetSize(size);
                      style.attributes.insert(TextStyle::attrSize);
                   .)
-                | (. Mag scaleMag; .)
+                | (. Magnification scaleMag; .)
                   "scaleMag" ":" MAG<scaleMag>
                   (.
                      style.style->SetScaleAndFadeMag(scaleMag);
@@ -931,21 +931,21 @@ PRODUCTIONS
                   }
                 .).
 
-  MAG<Mag& mag>
-              =  "world"     (. mag=magWorld; .)
-               | "continent" (. mag=magContinent; .)
-               | "state"     (. mag=magState; .)
-               | "stateOver" (. mag=magStateOver; .)
-               | "county"    (. mag=magCounty; .)
-               | "region"    (. mag=magRegion; .)
-               | "proximity" (. mag=magProximity; .)
-               | "cityOver"  (. mag=magCityOver; .)
-               | "city"      (. mag=magCity; .)
-               | "suburb"    (. mag=magSuburb; .)
-               | "detail"    (. mag=magDetail; .)
-               | "close"     (. mag=magClose; .)
-               | "veryClose" (. mag=magVeryClose; .)
-               | "block"     (. mag=magBlock; .)
+  MAG<Magnification& magnification>
+              =  "world"     (. magnification.SetMagnification(Magnification::magWorld); .)
+               | "continent" (. magnification.SetMagnification(Magnification::magContinent); .)
+               | "state"     (. magnification.SetMagnification(Magnification::magState); .)
+               | "stateOver" (. magnification.SetMagnification(Magnification::magStateOver); .)
+               | "county"    (. magnification.SetMagnification(Magnification::magCounty); .)
+               | "region"    (. magnification.SetMagnification(Magnification::magRegion); .)
+               | "proximity" (. magnification.SetMagnification(Magnification::magProximity); .)
+               | "cityOver"  (. magnification.SetMagnification(Magnification::magCityOver); .)
+               | "city"      (. magnification.SetMagnification(Magnification::magCity); .)
+               | "suburb"    (. magnification.SetMagnification(Magnification::magSuburb); .)
+               | "detail"    (. magnification.SetMagnification(Magnification::magDetail); .)
+               | "close"     (. magnification.SetMagnification(Magnification::magClose); .)
+               | "veryClose" (. magnification.SetMagnification(Magnification::magVeryClose); .)
+               | "block"     (. magnification.SetMagnification(Magnification::magBlock); .)
                .
 
   /** Size in units of screen (currently millimeter) */

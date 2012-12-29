@@ -609,7 +609,7 @@ bool DatabaseTask::DrawResult(Lum::OS::Window* window,
                               int x, int y,
                               size_t width, size_t height,
                               double lon, double lat,
-                              double magnification,
+                              const osmscout::Magnification& magnification,
                               osmscout::Projection& projection)
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);

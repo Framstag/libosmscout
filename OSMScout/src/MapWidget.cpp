@@ -68,7 +68,7 @@ void MapWidget::InitialisationFinished(const DatabaseLoadedResponse& response)
 
   magnification=zoom;
 
-  std::cout << "Magnification: " << magnification << "x" << std::endl;
+  std::cout << "Magnification: " << magnification.GetMagnification() << "x" << std::endl;
 
   TriggerMapRendering();
 }
@@ -255,11 +255,11 @@ void MapWidget::resizeEvent(QResizeEvent* event)
 
 void MapWidget::ZoomIn(double zoomFactor)
 {
-  if (magnification*zoomFactor>200000) {
-    magnification=200000;
+  if (magnification.GetMagnification()*zoomFactor>200000) {
+    magnification.SetMagnification(200000);
   }
   else {
-    magnification*=zoomFactor;
+    magnification.SetMagnification(magnification.GetMagnification()*zoomFactor);
   }
 
   TriggerMapRendering();
@@ -267,18 +267,18 @@ void MapWidget::ZoomIn(double zoomFactor)
 
 void MapWidget::ZoomOut(double zoomFactor)
 {
-  if (magnification/zoomFactor<1) {
-    magnification=1;
+  if (magnification.GetMagnification()/zoomFactor<1) {
+    magnification.SetMagnification(1);
   }
   else {
-    magnification/=zoomFactor;
+    magnification.SetMagnification(magnification.GetMagnification()/zoomFactor);
   }
 
   TriggerMapRendering();
 }
 
 void MapWidget::ShowReference(const osmscout::ObjectFileRef& reference,
-                              const osmscout::Mag& magnification)
+                              const osmscout::Magnification& magnification)
 {
   if (reference.GetType()==osmscout::refNode) {
     osmscout::NodeRef node;

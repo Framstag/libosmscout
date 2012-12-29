@@ -1721,11 +1721,14 @@ namespace osmscout {
 
     for (size_t level=0; level<levels.size(); level++) {
       FileOffset                             indexOffset;
+      Magnification                          magnification;
       MercatorProjection                     projection;
       Data                                   data;
       std::map<Coord,std::list<GroundTile> > cellGroundTileMap;
 
-      projection.Set(0,0,pow(2.0,(double)(level+parameter.GetWaterIndexMinMag())),640,480);
+      magnification.SetLevel(level+parameter.GetWaterIndexMinMag());
+
+      projection.Set(0,0,magnification,640,480);
 
       progress.SetAction("Building tiles for level "+NumberToString(level+parameter.GetWaterIndexMinMag()));
 

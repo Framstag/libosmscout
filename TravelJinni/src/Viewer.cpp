@@ -73,14 +73,14 @@ static DatabaseTask          *databaseTask=NULL;
 class MapControl : public Lum::Object
 {
 private:
-  bool                  initial;
-  double                lon;
-  double                lat;
-  double                magnification;
-  double                startLon,startLat;
-  int                   startX,startY;
-  bool                  requestNewMap;
-  Lum::OS::ColorRef     backgroundColor;
+  bool                    initial;
+  double                  lon;
+  double                  lat;
+  osmscout::Magnification magnification;
+  double                  startLon,startLat;
+  int                     startX,startY;
+  bool                    requestNewMap;
+  Lum::OS::ColorRef       backgroundColor;
 
 public:
   MapControl()
@@ -228,7 +228,7 @@ public:
 
         std::cout << "Showing initial bounding box [";
         std::cout << minLat <<"," << minLon << " - " << maxLat << "," << maxLon << "]";
-        std::cout << ", mag. " << magnification << "x" << std::endl;
+        std::cout << ", mag. " << magnification.GetMagnification() << "x" << std::endl;
 
         initial=false;
       }
@@ -268,11 +268,11 @@ public:
 
   void ZoomIn(double zoomFactor)
   {
-    if (magnification*zoomFactor>200000) {
-      magnification=200000;
+    if (magnification.GetMagnification()*zoomFactor>200000) {
+      magnification.SetMagnification(200000);
     }
     else {
-      magnification*=zoomFactor;
+      magnification.SetMagnification(magnification.GetMagnification()*zoomFactor);
     }
 
     RequestNewMap();
@@ -280,11 +280,11 @@ public:
 
   void ZoomOut(double zoomFactor)
   {
-    if (magnification/zoomFactor<1) {
-      magnification=1;
+    if (magnification.GetMagnification()/zoomFactor<1) {
+      magnification.SetMagnification(1);
     }
     else {
-      magnification/=zoomFactor;
+      magnification.SetMagnification(magnification.GetMagnification()/zoomFactor);
     }
 
     RequestNewMap();
@@ -431,7 +431,7 @@ public:
   }
 
   void ShowReference(const osmscout::ObjectFileRef& reference,
-                     const osmscout::Mag& magnification)
+                     const osmscout::Magnification& magnification)
   {
     std::cout << "Showing " << reference.GetTypeName() << " at file offset "<< reference.GetFileOffset() << "..." << std::endl;
 
@@ -606,7 +606,7 @@ public:
 
       if (hasResult) {
         map->ShowReference(location.references.front(),
-                           osmscout::magVeryClose);
+                           osmscout::Magnification::magVeryClose);
       }
     }
     else if (model==routeAction &&

@@ -103,7 +103,9 @@ namespace osmscout {
       FillStyleRef      fillStyle;
 
       attributes.type=typeInfo->GetId();
-      styleConfig.GetAreaFillStyle(attributes,MagToLevel(projection.GetMagnification()),fillStyle);
+      styleConfig.GetAreaFillStyle(attributes,
+                                   projection.GetMagnification().GetLevel(),
+                                   fillStyle);
 
       if (fillStyle.Valid()) {
         stream << "        ." << typeInfo->GetName() << "_area {";
@@ -151,7 +153,9 @@ namespace osmscout {
 
       attributes.type=typeInfo->GetId();
 
-      styleConfig.GetWayLineStyle(attributes,MagToLevel(projection.GetMagnification()),lineStyle);
+      styleConfig.GetWayLineStyle(attributes,
+                                  projection.GetMagnification().GetLevel(),
+                                  lineStyle);
 
       if (lineStyle.Valid()) {
         double lineWidth;
@@ -336,7 +340,7 @@ namespace osmscout {
                  data.attributes->EndIsJoint() ? LineStyle::capButt : LineStyle::capRound,
                  data.transStart,data.transEnd);
      }
-      else if (projection.GetMagnification()>=10000) {
+      else if (projection.GetMagnification().GetMagnification()>=10000) {
         // light grey dashes
 
         DrawPath(projection,

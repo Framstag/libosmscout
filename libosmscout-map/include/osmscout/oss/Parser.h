@@ -192,7 +192,7 @@ inline void ToRGBA(const char* str, Color& color)
 	void DOUBLE(double& value);
 	void STYLEFILTER(StyleFilter& filter);
 	void STYLEDEF(StyleFilter filter);
-	void MAG(Mag& mag);
+	void MAG(Magnification& magnification);
 	void NODESTYLEDEF(StyleFilter filter);
 	void WAYSTYLEDEF(StyleFilter filter);
 	void AREASTYLEDEF(StyleFilter filter);

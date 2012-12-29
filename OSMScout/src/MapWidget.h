@@ -30,14 +30,14 @@ class MapWidget: public QWidget
 
 
 private:
-  double lon;
-  double lat;
-  double magnification;
+  double                  lon;
+  double                  lat;
+  osmscout::Magnification magnification;
 
   // Drag and drop
-  double startLon,startLat;
-  int    startX,startY;
-  bool   requestNewMap;
+  double                  startLon,startLat;
+  int                     startX,startY;
+  bool                    requestNewMap;
 
 signals:
   void TriggerMapRenderingSignal();
@@ -67,7 +67,7 @@ public:
   void ZoomIn(double zoomFactor);
   void ZoomOut(double zoomFactor);
   void ShowReference(const osmscout::ObjectFileRef& reference,
-                     const osmscout::Mag& magnification);
+                     const osmscout::Magnification& magnification);
 
 };
 

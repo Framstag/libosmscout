@@ -95,11 +95,11 @@ namespace osmscout {
                               double minlat,
                               double maxlon,
                               double maxlat,
-                              double magnification,
+                              const Magnification& magnification,
                               std::list<GroundTile>& tiles) const
   {
     uint32_t cx1,cx2,cy1,cy2;
-    uint32_t idx=(uint32_t)MagToLevel(magnification);
+    uint32_t idx=magnification.GetLevel();
 
     if (levels.empty()) {
       return true;

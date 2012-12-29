@@ -46,14 +46,13 @@ namespace osmscout {
     lon(0),
     lat(0),
     width(0),
-    height(0),
-    magnification(1)
+    height(0)
   {
     Set(lon,lat,magnification,width,height);
   }
 
   bool MercatorProjection::Set(double lon, double lat,
-                               double magnification,
+                               const Magnification& magnification,
                                size_t width, size_t height)
   {
     if (valid &&
@@ -83,7 +82,7 @@ namespace osmscout {
     // * Projection of X and Y coordinates as result of mercator projection to on screen coordinates
     //
 
-    double boxWidth=360/magnification; // Part of the full earth circle that has to be shown, in degree
+    double boxWidth=360/magnification.GetMagnification(); // Part of the full earth circle that has to be shown, in degree
 
     // longitude does scale linear, so left and right longitude borders is easy to calculate
     lonMin=lon-boxWidth/2;
@@ -130,7 +129,7 @@ namespace osmscout {
 
   bool MercatorProjection::Set(double lonMin, double latMin,
                                double lonMax, double latMax,
-                               double magnification,
+                               const Magnification& magnification,
                                size_t width)
   {
     if (valid &&

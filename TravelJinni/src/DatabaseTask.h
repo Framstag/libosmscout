@@ -40,11 +40,11 @@
 
 struct Job
 {
-  double lon;
-  double lat;
-  double magnification;
-  size_t width;
-  size_t height;
+  double                  lon;
+  double                  lat;
+  osmscout::Magnification magnification;
+  size_t                  width;
+  size_t                  height;
 };
 
 class DatabaseTask : public Lum::OS::Thread
@@ -69,12 +69,12 @@ private:
   cairo_t                   *currentCairo;
   size_t                    currentWidth,currentHeight;
   double                    currentLon,currentLat;
-  double                    currentMagnification;
+  osmscout::Magnification   currentMagnification;
   cairo_surface_t           *finishedSurface;
   cairo_t                   *finishedCairo;
   size_t                    finishedWidth,finishedHeight;
   double                    finishedLon,finishedLat;
-  double                    finishedMagnification;
+  osmscout::Magnification   finishedMagnification;
 
 private:
   void SignalRedraw();
@@ -135,7 +135,7 @@ public:
                   int x, int y,
                   size_t width, size_t height,
                   double lon, double lat,
-                  double magnification,
+                  const osmscout::Magnification& magnification,
                   osmscout::Projection& projection);
 };
 

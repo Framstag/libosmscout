@@ -15,6 +15,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/util/Geometry.cpp \
                         osmscout/util/HashMap.cpp \
                         osmscout/util/HashSet.cpp \
+                        osmscout/util/Magnification.cpp \
                         osmscout/util/Number.cpp \
                         osmscout/util/NumberSet.cpp \
                         osmscout/util/Progress.cpp \

@@ -28,6 +28,7 @@
 #include <osmscout/Types.h>
 
 #include <osmscout/util/FileScanner.h>
+#include <osmscout/util/Magnification.h>
 
 namespace osmscout {
 
@@ -71,7 +72,7 @@ namespace osmscout {
                     double minlat,
                     double maxlon,
                     double maxlat,
-                    double magnification,
+                    const Magnification& magnification,
                     std::list<GroundTile>& tiles) const;
 
     void DumpStatistics();

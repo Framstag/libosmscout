@@ -351,7 +351,7 @@ void Parser::FILLSTYLEATTR(FillPartialStyle& style) {
 			break;
 		}
 		case 44 /* "patternMinMag" */: {
-			Mag minMag; 
+			Magnification minMag; 
 			Get();
 			Expect(34 /* ":" */);
 			MAG(minMag);
@@ -474,9 +474,9 @@ void Parser::STYLEFILTER(StyleFilter& filter) {
 		if (la->kind == 22 /* "MAG" */) {
 			Get();
 			if (StartOf(4)) {
-				Mag mag; 
-				MAG(mag);
-				size_t level=MagToLevel(mag);
+				Magnification magnification; 
+				MAG(magnification);
+				size_t level=magnification.GetLevel();
 				
 				if (level<filter.GetMinLevel()) {
 				std::string e="The magnification interval start is not within the parent magnification range";
@@ -490,9 +490,9 @@ void Parser::STYLEFILTER(StyleFilter& filter) {
 			}
 			Expect(23 /* "-" */);
 			if (StartOf(4)) {
-				Mag mag; 
-				MAG(mag);
-				size_t level=MagToLevel(mag);
+				Magnification magnification; 
+				MAG(magnification);
+				size_t level=magnification.GetLevel();
 				
 				if (level>filter.GetMaxLevel()) {
 				std::string e="The magnification interval end is not within the parent magnification range";
@@ -523,76 +523,76 @@ void Parser::STYLEDEF(StyleFilter filter) {
 		} else SynErr(90);
 }
 
-void Parser::MAG(Mag& mag) {
+void Parser::MAG(Magnification& magnification) {
 		switch (la->kind) {
 		case 63 /* "world" */: {
 			Get();
-			mag=magWorld; 
+			magnification.SetMagnification(Magnification::magWorld); 
 			break;
 		}
 		case 64 /* "continent" */: {
 			Get();
-			mag=magContinent; 
+			magnification.SetMagnification(Magnification::magContinent); 
 			break;
 		}
 		case 65 /* "state" */: {
 			Get();
-			mag=magState; 
+			magnification.SetMagnification(Magnification::magState); 
 			break;
 		}
 		case 66 /* "stateOver" */: {
 			Get();
-			mag=magStateOver; 
+			magnification.SetMagnification(Magnification::magStateOver); 
 			break;
 		}
 		case 67 /* "county" */: {
 			Get();
-			mag=magCounty; 
+			magnification.SetMagnification(Magnification::magCounty); 
 			break;
 		}
 		case 68 /* "region" */: {
 			Get();
-			mag=magRegion; 
+			magnification.SetMagnification(Magnification::magRegion); 
 			break;
 		}
 		case 69 /* "proximity" */: {
 			Get();
-			mag=magProximity; 
+			magnification.SetMagnification(Magnification::magProximity); 
 			break;
 		}
 		case 70 /* "cityOver" */: {
 			Get();
-			mag=magCityOver; 
+			magnification.SetMagnification(Magnification::magCityOver); 
 			break;
 		}
 		case 71 /* "city" */: {
 			Get();
-			mag=magCity; 
+			magnification.SetMagnification(Magnification::magCity); 
 			break;
 		}
 		case 72 /* "suburb" */: {
 			Get();
-			mag=magSuburb; 
+			magnification.SetMagnification(Magnification::magSuburb); 
 			break;
 		}
 		case 73 /* "detail" */: {
 			Get();
-			mag=magDetail; 
+			magnification.SetMagnification(Magnification::magDetail); 
 			break;
 		}
 		case 74 /* "close" */: {
 			Get();
-			mag=magClose; 
+			magnification.SetMagnification(Magnification::magClose); 
 			break;
 		}
 		case 75 /* "veryClose" */: {
 			Get();
-			mag=magVeryClose; 
+			magnification.SetMagnification(Magnification::magVeryClose); 
 			break;
 		}
 		case 76 /* "block" */: {
 			Get();
-			mag=magBlock; 
+			magnification.SetMagnification(Magnification::magBlock); 
 			break;
 		}
 		default: SynErr(91); break;
@@ -725,7 +725,7 @@ void Parser::TEXTSTYLEATTR(TextPartialStyle& style) {
 			break;
 		}
 		case 51 /* "scaleMag" */: {
-			Mag scaleMag; 
+			Magnification scaleMag; 
 			Get();
 			Expect(34 /* ":" */);
 			MAG(scaleMag);

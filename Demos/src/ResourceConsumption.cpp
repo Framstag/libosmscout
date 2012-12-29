@@ -40,7 +40,7 @@ struct Action
 {
   double lon;
   double lat;
-  double zoom;
+  double magnification;
 };
 
 void DumpHelp()
@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
 
     arg++;
 
-    if (sscanf(argv[arg],"%lf",&action.zoom)!=1) {
+    if (sscanf(argv[arg],"%lf",&action.magnification)!=1) {
       std::cerr << "zoom is not numeric!" << std::endl;
       return 1;
     }
@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
          action!=actions.end();
          ++action) {
       std::cout << "-------------------" << std::endl;
-      std::cout << "# Rendering " << action->lat << "," << action->lon << " with zoom " << action->zoom << " and size " << width << "x" << height << std::endl;
+      std::cout << "# Rendering " << action->lat << "," << action->lon << " with zoom " << action->magnification << " and size " << width << "x" << height << std::endl;
 
       osmscout::MercatorProjection  projection;
       osmscout::AreaSearchParameter searchParameter;
@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
 
       projection.Set(action->lon,
                      action->lat,
-                     action->zoom,
+                     action->magnification,
                      width,
                      height);
 

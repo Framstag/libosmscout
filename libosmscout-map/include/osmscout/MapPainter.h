@@ -57,8 +57,8 @@ namespace osmscout {
 
     double                       lineMinWidthPixel;  //! Minimum width of an line to be drawn
 
-    double                       drawBridgeMagnification; //! Starting with this magnification, we draw bridges
-    double                       drawTunnelMagnification; //! Starting with this magnification, we draw tunnels
+    Magnification                drawBridgeMagnification; //! Starting with this magnification, we draw bridges
+    Magnification                drawTunnelMagnification; //! Starting with this magnification, we draw tunnels
 
     TransPolygon::OptimizeMethod optimizeWayNodes;   //! Try to reduce the number of nodes for
     TransPolygon::OptimizeMethod optimizeAreaNodes;  //! Try to reduce the number of nodes for
@@ -90,8 +90,8 @@ namespace osmscout {
 
     void SetLineMinWidthPixel(double lineMinWidthPixel);
 
-    void SetDrawBridgeMagnification(double magnification);
-    void SetDrawTunnelMagnification(double magnification);
+    void SetDrawBridgeMagnification(const Magnification& magnification);
+    void SetDrawTunnelMagnification(const Magnification& magnification);
 
     void SetOptimizeWayNodes(TransPolygon::OptimizeMethod optimize);
     void SetOptimizeAreaNodes(TransPolygon::OptimizeMethod optimize);
@@ -140,12 +140,12 @@ namespace osmscout {
       return lineMinWidthPixel;
     }
 
-    inline double GetDrawBridgeMagnification() const
+    inline Magnification GetDrawBridgeMagnification() const
     {
       return drawBridgeMagnification;
     }
 
-    inline double GetDrawTunnelMagnification() const
+    inline Magnification GetDrawTunnelMagnification() const
     {
       return drawTunnelMagnification;
     }

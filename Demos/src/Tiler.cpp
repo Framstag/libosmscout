@@ -180,6 +180,9 @@ int main(int argc, char* argv[])
     unsigned long           bitmapSize=tileWidth*tileHeight*3*xTileCount*yTileCount;
     unsigned char           *buffer=new unsigned char[bitmapSize];
     osmscout::MapPainterAgg painter;
+    osmscout::Magnification magnification;
+
+    magnification.SetLevel(zoom);
 
     memset(buffer,0,bitmapSize);
 
@@ -196,13 +199,13 @@ int main(int argc, char* argv[])
     std::vector<osmscout::TypeSet> wayTypes;
     osmscout::TypeSet              areaTypes;
 
-    styleConfig.GetNodeTypesWithMaxMag(projection.GetMagnification(),
+    styleConfig.GetNodeTypesWithMaxMag(magnification,
                                        nodeTypes);
 
-    styleConfig.GetWayTypesByPrioWithMaxMag(projection.GetMagnification(),
+    styleConfig.GetWayTypesByPrioWithMaxMag(magnification,
                                             wayTypes);
 
-    styleConfig.GetAreaTypesWithMaxMag(projection.GetMagnification(),
+    styleConfig.GetAreaTypesWithMaxMag(magnification,
                                        areaTypes);
 
     for (size_t y=yTileStart; y<=yTileEnd; y++) {
@@ -220,7 +223,7 @@ int main(int argc, char* argv[])
         //std::cout << x-xTileStart << "," << y-yTileStart << std::endl;
 
         projection.Set(lon,lat,
-                       pow(2.0,zoom),
+                       magnification,
                        tileWidth,
                        tileHeight);
 

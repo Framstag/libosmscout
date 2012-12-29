@@ -67,8 +67,8 @@ namespace osmscout {
     fontName("sans-serif"),
     fontSize(2.0),
     lineMinWidthPixel(0.2),
-    drawBridgeMagnification(magVeryClose),
-    drawTunnelMagnification(magVeryClose),
+    drawBridgeMagnification(Magnification::magVeryClose),
+    drawTunnelMagnification(Magnification::magVeryClose),
     optimizeWayNodes(TransPolygon::none),
     optimizeAreaNodes(TransPolygon::none),
     optimizeErrorToleranceMm(25.4/dpi), //1 pixel
@@ -118,12 +118,12 @@ namespace osmscout {
     this->lineMinWidthPixel=lineMinWidthPixel;
   }
 
-  void MapParameter::SetDrawBridgeMagnification(double magnification)
+  void MapParameter::SetDrawBridgeMagnification(const Magnification& magnification)
   {
     this->drawBridgeMagnification=magnification;
   }
 
-  void MapParameter::SetDrawTunnelMagnification(double magnification)
+  void MapParameter::SetDrawTunnelMagnification(const Magnification& magnification)
   {
     this->drawTunnelMagnification=magnification;
   }
@@ -301,7 +301,7 @@ namespace osmscout {
       // Calculate effective font size and alpha value
       if (projection.GetMagnification()>textStyle->GetScaleAndFadeMag()) {
         if (parameter.GetDrawFadings()) {
-          double factor=log2(projection.GetMagnification())-log2(textStyle->GetScaleAndFadeMag());
+          double factor=projection.GetMagnification().GetLevel()-textStyle->GetScaleAndFadeMag().GetLevel();
           fontSize=fontSize*pow(2,factor);
           alpha=alpha/factor;
 
@@ -504,14 +504,14 @@ namespace osmscout {
                                    const MapParameter& parameter,
                                    const MapData& data)
   {
-    size_t            level=MagToLevel(projection.GetMagnification());
     FillStyleRef      landFill;
 
 #if defined(DEBUG_GROUNDTILES)
       std::set<Coord> drawnLabels;
 #endif
 
-    styleConfig.GetLandFillStyle(level,landFill);
+    styleConfig.GetLandFillStyle(projection.GetMagnification().GetLevel(),
+                                 landFill);
 
     if (landFill.Invalid()) {
       landFill=this->landFill;
@@ -532,10 +532,14 @@ namespace osmscout {
     std::vector<Point> points;
     size_t             start,end;
 
-    styleConfig.GetSeaFillStyle(level,seaFill);
-    styleConfig.GetCoastFillStyle(level,coastFill);
-    styleConfig.GetUnknownFillStyle(level,unknownFill);
-    styleConfig.GetCoastlineLineStyle(level,coastlineLine);
+    styleConfig.GetSeaFillStyle(projection.GetMagnification().GetLevel(),
+                                seaFill);
+    styleConfig.GetCoastFillStyle(projection.GetMagnification().GetLevel(),
+                                  coastFill);
+    styleConfig.GetUnknownFillStyle(projection.GetMagnification().GetLevel(),
+                                    unknownFill);
+    styleConfig.GetCoastlineLineStyle(projection.GetMagnification().GetLevel(),
+                                      coastlineLine);
 
     if (seaFill.Invalid()) {
       seaFill=this->seaFill;
@@ -1067,8 +1071,6 @@ namespace osmscout {
                                   const MapParameter& parameter,
                                   const MapData& data)
   {
-    size_t level=MagToLevel(projection.GetMagnification());
-
     for (std::vector<WayRef>::const_iterator a=data.areas.begin();
          a!=data.areas.end();
          ++a) {
@@ -1077,7 +1079,7 @@ namespace osmscout {
                     parameter,
                     (*a)->GetAttributes(),
                     (*a)->nodes,
-                    level);
+                    projection.GetMagnification().GetLevel());
     }
 
     for (std::vector<RelationRef>::const_iterator r=data.relationAreas.begin();
@@ -1091,7 +1093,7 @@ namespace osmscout {
                             parameter,
                             relation->roles[m].attributes,
                             relation->roles[m].nodes,
-                            level);
+                            projection.GetMagnification().GetLevel());
       }
     }
   }
@@ -1101,12 +1103,15 @@ namespace osmscout {
                             const MapParameter& parameter,
                             const NodeRef& node)
   {
-    size_t           level=MagToLevel(projection.GetMagnification());
-    TextStyleRef     textStyle;
-    IconStyleRef     iconStyle;
+    TextStyleRef textStyle;
+    IconStyleRef iconStyle;
 
-    styleConfig.GetNodeTextStyle(node,level,textStyle);
-    styleConfig.GetNodeIconStyle(node,level,iconStyle);
+    styleConfig.GetNodeTextStyle(node,
+                                 projection.GetMagnification().GetLevel(),
+                                 textStyle);
+    styleConfig.GetNodeIconStyle(node,
+                                 projection.GetMagnification().GetLevel(),
+                                 iconStyle);
 
     //const TextStyle  *textStyle=styleConfig.GetNodeTextStyle(node,level);
     bool             hasLabel=textStyle.Valid();
@@ -1211,7 +1216,7 @@ namespace osmscout {
                  data.attributes->EndIsJoint() ? LineStyle::capButt : LineStyle::capRound,
                  data.transStart,data.transEnd);
       }
-      else if (projection.GetMagnification()>=10000) {
+      else if (projection.GetMagnification().GetMagnification()>=10000) {
         // light grey dashes
 
         DrawPath(projection,
@@ -1366,8 +1371,6 @@ namespace osmscout {
                                       const MapParameter& parameter,
                                       const MapData& data)
   {
-    size_t level=MagToLevel(projection.GetMagnification());
-
     for (std::list<WayData>::const_iterator way=wayData.begin();
         way!=wayData.end();
         way++)
@@ -1375,7 +1378,7 @@ namespace osmscout {
       PathSymbolStyleRef pathSymbolStyle;
 
       styleConfig.GetWayPathSymbolStyle(*way->attributes,
-                                        level,
+                                        projection.GetMagnification().GetLevel(),
                                         pathSymbolStyle);
 
       if (pathSymbolStyle.Valid()) {
@@ -1472,8 +1475,6 @@ namespace osmscout {
                                  const MapParameter& parameter,
                                  const MapData& data)
   {
-    size_t level=MagToLevel(projection.GetMagnification());
-
     for (std::list<WayData>::const_iterator way=wayData.begin();
         way!=wayData.end();
         way++) {
@@ -1481,7 +1482,7 @@ namespace osmscout {
                    projection,
                    parameter,
                    *way,
-                   level);
+                   projection.GetMagnification().GetLevel());
     }
   }
 
@@ -1556,18 +1557,21 @@ namespace osmscout {
                                       const SegmentAttributes& attributes,
                                       const std::vector<Point>& nodes)
   {
-    size_t       level=MagToLevel(projection.GetMagnification());
     FillStyleRef fillStyle;
 
 
-    styleConfig.GetAreaFillStyle(attributes,level,fillStyle);
+    styleConfig.GetAreaFillStyle(attributes,
+                                 projection.GetMagnification().GetLevel(),
+                                 fillStyle);
 
     if (fillStyle.Invalid())
     {
       return false;
     }
 
-    if (!IsVisible(projection, nodes, fillStyle->GetBorderWidth()/2)) {
+    if (!IsVisible(projection,
+                   nodes,
+                   fillStyle->GetBorderWidth()/2)) {
       return false;
     }
 
@@ -1611,8 +1615,6 @@ namespace osmscout {
                                 const MapParameter& parameter,
                                 const MapData& data)
   {
-    size_t level=MagToLevel(projection.GetMagnification());
-
     areaData.clear();
 
     // Simple areas
@@ -1675,12 +1677,16 @@ namespace osmscout {
 
             if (role.ring==0) {
               if (relation->GetType()!=typeIgnore) {
-                styleConfig.GetAreaFillStyle(relation->GetAttributes(),level,fillStyle);
+                styleConfig.GetAreaFillStyle(relation->GetAttributes(),
+                                             projection.GetMagnification().GetLevel(),
+                                             fillStyle);
               }
             }
             else {
               if (relation->GetType()!=typeIgnore) {
-                styleConfig.GetAreaFillStyle(role.GetAttributes(),level,fillStyle);
+                styleConfig.GetAreaFillStyle(role.GetAttributes(),
+                                             projection.GetMagnification().GetLevel(),
+                                             fillStyle);
               }
             }
 
@@ -1752,10 +1758,11 @@ namespace osmscout {
                                      const SegmentAttributes& attributes,
                                      const std::vector<Point>& nodes)
   {
-    size_t       level=MagToLevel(projection.GetMagnification());
     LineStyleRef lineStyle;
 
-    styleConfig.GetWayLineStyle(attributes,level,lineStyle);
+    styleConfig.GetWayLineStyle(attributes,
+                                projection.GetMagnification().GetLevel(),
+                                lineStyle);
 
     if (lineStyle.Invalid()) {
       return;
@@ -1993,7 +2000,7 @@ namespace osmscout {
       std::cout << projection.GetLonMin() << " - ";
       std::cout << projection.GetLatMax() << ",";
       std::cout << projection.GetLonMax() << "] with mag. ";
-      std::cout << projection.GetMagnification() << "x" << "/" << log(projection.GetMagnification())/log(2.0);
+      std::cout << projection.GetMagnification().GetMagnification() << "x" << "/" << projection.GetMagnification().GetLevel();
       std::cout << " area " << projection.GetWidth() << "x" << projection.GetHeight() << " " << parameter.GetDPI()<< " DPI" << std::endl;
     }
 

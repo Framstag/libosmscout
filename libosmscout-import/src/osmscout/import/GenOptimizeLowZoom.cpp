@@ -419,7 +419,7 @@ namespace osmscout
                                                    IdFileOffsetMap& offsets,
                                                    size_t width,
                                                    size_t height,
-                                                   double magnification,
+                                                   const Magnification& magnification,
                                                    TransPolygon::OptimizeMethod optimizeWayMethod)
   {
     size_t             wayCount=0;
@@ -626,12 +626,12 @@ namespace osmscout
     std::set<TypeId>            types;         // Types we optimize
     FileScanner                 wayScanner;
     FileWriter                  writer;
-    double                      magnification; // Magnification, we optimize for
+    Magnification               magnification; // Magnification, we optimize for
     std::vector<TypeData>       typesData;
 
     typesData.resize(typeConfig.GetTypes().size());
 
-    magnification=pow(2.0,(int)parameter.GetOptimizationMaxMag());
+    magnification.SetLevel(parameter.GetOptimizationMaxMag());
 
     GetTypesToOptimize(typeConfig,types);
 

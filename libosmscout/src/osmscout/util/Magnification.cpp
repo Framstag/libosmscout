@@ -1,9 +1,6 @@
-#ifndef OSMSCOUT_TYPES_H
-#define OSMSCOUT_TYPES_H
-
 /*
   This source is part of the libosmscout library
-  Copyright (C) 2009  Tim Teulings
+  Copyright (C) 2012  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,31 +17,27 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/private/CoreImportExport.h>
+#include <osmscout/util/Magnification.h>
 
-#include <osmscout/CoreFeatures.h>
-
-#include <osmscout/system/Types.h>
+#include <osmscout/private/Math.h>
 
 namespace osmscout {
 
-#if defined(OSMSCOUT_HAVE_UINT64_T)
-  typedef uint64_t Id;
-  typedef uint64_t FileOffset;
-#else
-  typedef uint32_t Id;
-  typedef uint64_t FileOffset;
-#endif
+  void Magnification::SetMagnification(double magnification)
+  {
+    this->magnification=magnification;
+    this->level=(size_t)log2(this->magnification);
+  }
 
-  typedef uint16_t TypeId;
+  void Magnification::SetMagnification(Mag magnification)
+  {
+    this->magnification=magnification;
+    this->level=(size_t)log2(this->magnification);
+  }
 
-  /**
-    Coordinates will be stored as unsigned long values in file.
-    For the conversion the float value is shifted to positive
-    value sand afterwards multiplied by conversion factor
-    to get long values without significant values after colon.
-    */
-  extern OSMSCOUT_API const double conversionFactor;
+  void Magnification::SetLevel(size_t level)
+  {
+    this->magnification=pow(2,level);
+    this->level=level;
+  }
 }
-
-#endif

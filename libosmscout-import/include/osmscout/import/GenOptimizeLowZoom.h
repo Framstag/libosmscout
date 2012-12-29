@@ -93,7 +93,7 @@ namespace osmscout {
                             IdFileOffsetMap& offsets,
                             size_t width,
                             size_t height,
-                            double magnification,
+                            const Magnification& magnification,
                             TransPolygon::OptimizeMethod optimizeWayMethod);
 
     bool WriteBitmap(Progress& progress,

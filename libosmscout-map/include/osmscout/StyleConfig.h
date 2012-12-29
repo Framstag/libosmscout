@@ -305,7 +305,7 @@ namespace osmscout {
     Color               fillColor;
     std::string         pattern;
     mutable size_t      patternId;
-    Mag                 patternMinMag;
+    Magnification       patternMinMag;
     Color               borderColor;
     double              borderWidth;
     std::vector<double> borderDash;
@@ -317,7 +317,7 @@ namespace osmscout {
     FillStyle& SetFillColor(const Color& color);
     void SetPatternId(size_t id) const;
     FillStyle& SetPattern(const std::string& pattern);
-    FillStyle& SetPatternMinMag(Mag mag);
+    FillStyle& SetPatternMinMag(const Magnification& mag);
     FillStyle& SetBorderColor(const Color& color);
     FillStyle& SetBorderWidth(double value);
     FillStyle& SetBorderDashes(const std::vector<double> dashes);
@@ -349,7 +349,7 @@ namespace osmscout {
       return pattern;
     }
 
-    inline const Mag& GetPatternMinMag() const
+    inline const Magnification& GetPatternMinMag() const
     {
       return patternMinMag;
     }
@@ -444,10 +444,10 @@ namespace osmscout {
     };
 
   private:
-    Style   style;
-    Mag     scaleAndFadeMag;
-    Label   label;
-    Color   textColor;
+    Style         style;
+    Magnification scaleAndFadeMag;
+    Label         label;
+    Color         textColor;
 
   public:
     TextStyle();
@@ -458,7 +458,7 @@ namespace osmscout {
     TextStyle& SetLabel(Label label);
     TextStyle& SetTextColor(const Color& color);
     TextStyle& SetStyle(Style style);
-    TextStyle& SetScaleAndFadeMag(Mag mag);
+    TextStyle& SetScaleAndFadeMag(const Magnification& mag);
 
     inline bool IsVisible() const
     {
@@ -486,7 +486,7 @@ namespace osmscout {
       return style;
     }
 
-    inline Mag GetScaleAndFadeMag() const
+    inline Magnification GetScaleAndFadeMag() const
     {
       return scaleAndFadeMag;
     }
@@ -1007,11 +1007,11 @@ namespace osmscout {
     void AddAreaIconStyle(const StyleFilter& filter,
                           IconPartialStyle& style);
 
-    void GetNodeTypesWithMaxMag(double maxMag,
+    void GetNodeTypesWithMaxMag(const Magnification& maxMag,
                                 TypeSet& types) const;
-    void GetWayTypesByPrioWithMaxMag(double mag,
+    void GetWayTypesByPrioWithMaxMag(const Magnification& mag,
                                      std::vector<TypeSet>& types) const;
-    void GetAreaTypesWithMaxMag(double maxMag,
+    void GetAreaTypesWithMaxMag(const Magnification& maxMag,
                                 TypeSet& types) const;
 
 

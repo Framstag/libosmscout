@@ -166,7 +166,7 @@ namespace osmscout {
   FillStyle::FillStyle()
    : fillColor(1.0,0.0,0.0,0.0),
      patternId(0),
-     patternMinMag(magWorld),
+     patternMinMag(Magnification::magWorld),
      borderColor(1.0,0.0,0.0,0.0),
      borderWidth(0.0)
   {
@@ -203,7 +203,7 @@ namespace osmscout {
     return *this;
   }
 
-  FillStyle& FillStyle::SetPatternMinMag(Mag mag)
+  FillStyle& FillStyle::SetPatternMinMag(const Magnification& mag)
   {
     patternMinMag=mag;
 
@@ -294,7 +294,7 @@ namespace osmscout {
 
   TextStyle::TextStyle()
    : style(normal),
-     scaleAndFadeMag((Mag)1000000),
+     scaleAndFadeMag(1000000),
      label(none),
      textColor(0,0,0)
 
@@ -326,7 +326,7 @@ namespace osmscout {
     return *this;
   }
 
-  TextStyle& TextStyle::SetScaleAndFadeMag(Mag mag)
+  TextStyle& TextStyle::SetScaleAndFadeMag(const Magnification& mag)
   {
     this->scaleAndFadeMag=mag;
 
@@ -1285,27 +1285,27 @@ namespace osmscout {
     areaIconStyleConditionals.push_back(conditional);
   }
 
-  void StyleConfig::GetNodeTypesWithMaxMag(double maxMag,
+  void StyleConfig::GetNodeTypesWithMaxMag(const Magnification& maxMag,
                                            TypeSet& types) const
   {
     if (!nodeTypeSets.empty()) {
-      types=nodeTypeSets[std::min(MagToLevel(maxMag),nodeTypeSets.size()-1)];
+      types=nodeTypeSets[std::min(maxMag.GetLevel(),nodeTypeSets.size()-1)];
     }
   }
 
-  void StyleConfig::GetWayTypesByPrioWithMaxMag(double maxMag,
+  void StyleConfig::GetWayTypesByPrioWithMaxMag(const Magnification& maxMag,
                                                 std::vector<TypeSet>& types) const
   {
     if (!wayTypeSets.empty()) {
-      types=wayTypeSets[std::min(MagToLevel(maxMag),wayTypeSets.size()-1)];
+      types=wayTypeSets[std::min(maxMag.GetLevel(),wayTypeSets.size()-1)];
     }
   }
 
-  void StyleConfig::GetAreaTypesWithMaxMag(double maxMag,
+  void StyleConfig::GetAreaTypesWithMaxMag(const Magnification& maxMag,
                                            TypeSet& types) const
   {
     if (!areaTypeSets.empty()) {
-      types=areaTypeSets[std::min(MagToLevel(maxMag),areaTypeSets.size()-1)];
+      types=areaTypeSets[std::min(maxMag.GetLevel(),areaTypeSets.size()-1)];
     }
   }
 
@@ -1437,7 +1437,7 @@ namespace osmscout {
                             selector.attributes);
       composed=true;
     }
-    
+
     if (composed &&
         !style->IsVisible()) {
       style=NULL;

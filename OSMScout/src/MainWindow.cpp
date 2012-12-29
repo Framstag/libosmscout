@@ -67,7 +67,7 @@ void MainWindow::SearchLocation()
 
     location=dialog.GetLocationResult();
 
-    map->ShowReference(location.references.front(),osmscout::magVeryClose);
+    map->ShowReference(location.references.front(),osmscout::Magnification::magVeryClose);
   }
 }
 

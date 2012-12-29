@@ -402,7 +402,7 @@ namespace osmscout {
                             const TypeSet& areaTypes,
                             double lonMin, double latMin,
                             double lonMax, double latMax,
-                            double magnification,
+                            const Magnification& magnification,
                             const AreaSearchParameter& parameter,
                             std::vector<NodeRef>& nodes,
                             std::vector<WayRef>& ways,
@@ -424,7 +424,6 @@ namespace osmscout {
     std::vector<FileOffset> relationWayOffsets;
     std::vector<FileOffset> wayAreaOffsets;
     std::vector<FileOffset> relationAreaOffsets;
-    double                  magLevel=log2(magnification);
 
     nodes.clear();
     ways.clear();
@@ -455,7 +454,7 @@ namespace osmscout {
     StopClock wayIndexTimer;
 
     if (parameter.GetUseLowZoomOptimization() &&
-        optimizeLowZoom.HasOptimizations(magnification)) {
+        optimizeLowZoom.HasOptimizations(magnification.GetMagnification())) {
       optimizeLowZoom.GetWays(lonMin,
                               latMin,
                               lonMax,
@@ -498,7 +497,7 @@ namespace osmscout {
                                   latMin,
                                   lonMax,
                                   latMax,
-                                  ((size_t)ceil(magLevel))+
+                                  magnification.GetLevel()+
                                   parameter.GetMaximumAreaLevel(),
                                   areaTypes,
                                   parameter.GetMaximumAreas(),
@@ -739,7 +738,7 @@ namespace osmscout {
 
   bool Database::GetGroundTiles(double lonMin, double latMin,
                                 double lonMax, double latMax,
-                                double magnification,
+                                const Magnification& magnification,
                                 std::list<GroundTile>& tiles) const
   {
     if (!IsOpen()) {

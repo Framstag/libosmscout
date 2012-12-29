@@ -41,11 +41,11 @@
 
 struct RenderMapRequest
 {
-  double lon;
-  double lat;
-  double magnification;
-  size_t width;
-  size_t height;
+  double                  lon;
+  double                  lat;
+  osmscout::Magnification magnification;
+  size_t                  width;
+  size_t                  height;
 };
 
 Q_DECLARE_METATYPE(RenderMapRequest)
@@ -108,7 +108,7 @@ private:
 #endif
   double                       currentLat;
   double                       currentLon;
-  double                       currentMagnification;
+  osmscout::Magnification      currentMagnification;
 
   QImage                       *finishedImage;
 #if defined(HAVE_LIB_QTOPENGL)
@@ -117,7 +117,7 @@ private:
 #endif
   double                       finishedLat;
   double                       finishedLon;
-  double                       finishedMagnification;
+  osmscout::Magnification      finishedMagnification;
 
   RenderMapRequest             currentRenderRequest;
   bool                         doRender;

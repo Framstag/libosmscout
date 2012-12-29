@@ -197,7 +197,7 @@ namespace osmscout {
                     const TypeSet& areaTypes,
                     double lonMin, double latMin,
                     double lonMax, double latMax,
-                    double magnification,
+                    const Magnification& magnification,
                     const AreaSearchParameter& parameter,
                     std::vector<NodeRef>& nodes,
                     std::vector<WayRef>& ways,
@@ -216,7 +216,7 @@ namespace osmscout {
 
     bool GetGroundTiles(double lonMin, double latMin,
                         double lonMax, double latMax,
-                        double magnification,
+                        const Magnification& magnification,
                         std::list<GroundTile>& tiles) const;
 
     bool GetNode(const Id& id,
