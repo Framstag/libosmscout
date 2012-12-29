@@ -207,7 +207,7 @@ inline void ToRGBA(const char* str, Color& color)
 	void LINESTYLEATTR(LinePartialStyle& style);
 	void PATHTEXTSTYLEATTR(PathTextPartialStyle& style);
 	void PATHSYMBOLSTYLEATTR(PathSymbolPartialStyle& style);
-	void SHIELDSTYLEATTR(PathShieldPartialStyle& style);
+	void PATHSHIELDSTYLEATTR(PathShieldPartialStyle& style);
 	void AREASTYLE(StyleFilter filter);
 	void AREATEXTSTYLE(StyleFilter filter);
 	void AREAICONSTYLE(StyleFilter filter);
