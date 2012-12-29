@@ -590,14 +590,6 @@ namespace osmscout {
                            const LabelData& label) = 0;
 
     /**
-      Draw the given text at the given pixel coordinate in a style defined
-      by the given LabelStyle. Draw a plate style icon around the text.
-     */
-    virtual void DrawPlateLabel(const Projection& projection,
-                                const MapParameter& parameter,
-                                const LabelData& label) = 0;
-
-    /**
       Draw the given text as a contour of the given path in a style defined
       by the given LabelStyle.
      */

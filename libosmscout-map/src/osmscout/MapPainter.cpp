@@ -1514,18 +1514,10 @@ namespace osmscout {
     for (std::list<LabelData>::const_iterator label=labels.begin();
          label!=labels.end();
          ++label) {
-      if (dynamic_cast<const TextStyle*>(label->style.Get())!=NULL) {
-        DrawLabel(projection,
-                  parameter,
-                  *label);
-        labelsDrawn++;
-      }
-      else if (dynamic_cast<const ShieldStyle*>(label->style.Get())) {
-        DrawPlateLabel(projection,
-                       parameter,
-                       *label);
-        labelsDrawn++;
-      }
+      DrawLabel(projection,
+                parameter,
+                *label);
+      labelsDrawn++;
     }
 
     //
@@ -1535,18 +1527,10 @@ namespace osmscout {
     for (std::list<LabelData>::const_iterator label=overlayLabels.begin();
          label!=overlayLabels.end();
          ++label) {
-      if (dynamic_cast<const TextStyle*>(label->style.Get())!=NULL) {
-        DrawLabel(projection,
-                  parameter,
-                  *label);
-        labelsDrawn++;
-      }
-      else if (dynamic_cast<const ShieldStyle*>(label->style.Get())) {
-        DrawPlateLabel(projection,
-                       parameter,
-                       *label);
-        labelsDrawn++;
-      }
+      DrawLabel(projection,
+                parameter,
+                *label);
+      labelsDrawn++;
     }
   }
 

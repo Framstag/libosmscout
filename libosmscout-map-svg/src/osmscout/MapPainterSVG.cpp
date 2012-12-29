@@ -246,12 +246,6 @@ namespace osmscout {
   {
   }
 
-  void MapPainterSVG::DrawPlateLabel(const Projection& projection,
-                                       const MapParameter& parameter,
-                                       const LabelData& label)
-  {
-  }
-
   void MapPainterSVG::DrawContourLabel(const Projection& projection,
                                        const MapParameter& parameter,
                                        const PathTextStyle& style,

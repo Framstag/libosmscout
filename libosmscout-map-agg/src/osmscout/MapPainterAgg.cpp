@@ -304,56 +304,51 @@ namespace osmscout {
   }
 
   void MapPainterAgg::DrawLabel(const Projection& projection,
-                               const MapParameter& parameter,
-                               const LabelData& label)
+                                const MapParameter& parameter,
+                                const LabelData& label)
   {
-    const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.Get());
-    double           r=style->GetTextColor().GetR();
-    double           g=style->GetTextColor().GetG();
-    double           b=style->GetTextColor().GetB();
-    std::wstring     wideText(UTF8StringToWString(label.text));
+    if (dynamic_cast<const TextStyle*>(label.style.Get())!=NULL) {
+      const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.Get());
+      double           r=style->GetTextColor().GetR();
+      double           g=style->GetTextColor().GetG();
+      double           b=style->GetTextColor().GetB();
+      std::wstring     wideText(UTF8StringToWString(label.text));
 
-    if (style->GetStyle()==TextStyle::normal) {
+      if (style->GetStyle()==TextStyle::normal) {
 
-      SetFont(parameter,
-              label.fontSize);
+        SetFont(parameter,
+                label.fontSize);
 
-      //renderer_bin->color(agg::rgba(r,g,b,a));
-      renderer_aa->color(agg::rgba(r,g,b,label.alpha));
+        //renderer_bin->color(agg::rgba(r,g,b,a));
+        renderer_aa->color(agg::rgba(r,g,b,label.alpha));
 
-      DrawText(label.x,
-               label.y+fontEngine->ascender(),
-               wideText);
+        DrawText(label.x,
+                 label.y+fontEngine->ascender(),
+                 wideText);
+      }
+      else if (style->GetStyle()==TextStyle::emphasize) {
+        SetOutlineFont(parameter,
+                       label.fontSize);
+
+        //renderer_bin->color(agg::rgba(r,g,b,a));
+        renderer_aa->color(agg::rgba(1,1,1,label.alpha));
+
+        DrawOutlineText(label.x,
+                        label.y+fontEngine->ascender(),
+                        wideText,
+                        2);
+
+        SetFont(parameter,
+                label.fontSize);
+
+        //renderer_bin->color(agg::rgba(r,g,b,a));
+        renderer_aa->color(agg::rgba(r,g,b,label.alpha));
+
+        DrawText(label.x,
+                 label.y+fontEngine->ascender(),
+                 wideText);
+      }
     }
-    else if (style->GetStyle()==TextStyle::emphasize) {
-      SetOutlineFont(parameter,
-                     label.fontSize);
-
-      //renderer_bin->color(agg::rgba(r,g,b,a));
-      renderer_aa->color(agg::rgba(1,1,1,label.alpha));
-
-      DrawOutlineText(label.x,
-                      label.y+fontEngine->ascender(),
-                      wideText,
-                      2);
-
-      SetFont(parameter,
-              label.fontSize);
-
-      //renderer_bin->color(agg::rgba(r,g,b,a));
-      renderer_aa->color(agg::rgba(r,g,b,label.alpha));
-
-      DrawText(label.x,
-               label.y+fontEngine->ascender(),
-               wideText);
-    }
-  }
-
-  void MapPainterAgg::DrawPlateLabel(const Projection& projection,
-                                     const MapParameter& parameter,
-                                     const LabelData& label)
-  {
-    // TODO
   }
 
   void MapPainterAgg::DrawContourLabel(const Projection& projection,
