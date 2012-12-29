@@ -39,6 +39,10 @@
 
 namespace osmscout {
 
+  /**
+   * Holds the all accumulated filter conditions as defined in the style sheet
+   * for a style.
+   */
   class OSMSCOUT_MAP_API StyleFilter
   {
   public:
@@ -90,6 +94,11 @@ namespace osmscout {
     }
   };
 
+  /**
+   * Holds all filter criteria (minus type and zoomlevel criteria which are
+   * directly handled by the lookup table) for a concrete style which have to
+   * evaluated during runtime.
+   */
   class OSMSCOUT_MAP_API StyleCriteria
   {
   public:
@@ -115,6 +124,10 @@ namespace osmscout {
                 size_t level) const;
   };
 
+  /**
+   * A Style together with a set of the attributes that are explicitely
+   * set in the stye.
+   */
   template<class S, class A>
   struct PartialStyle
   {
@@ -128,6 +141,10 @@ namespace osmscout {
     }
   };
 
+  /**
+   * A line in a style sheet. Connecting a set of filter criteria together with
+   * a partial style definition.
+   */
   template<class S, class A>
   struct ConditionalStyle
   {
@@ -143,6 +160,11 @@ namespace osmscout {
     }
   };
 
+  /**
+   * Correlation of a StyleFilter and a PartialStyle. For an object
+   * (node, way, area) all ConditionalStyle styles matching the criteria
+   * are summed up to build the final style attribute set.
+   */
   template<class S, class A>
   struct StyleSelector
   {
@@ -153,7 +175,7 @@ namespace osmscout {
     StyleSelector(const StyleFilter& filter,
                   const PartialStyle<S,A>& style)
     : criteria(filter),
-    attributes(style.attributes),
+      attributes(style.attributes),
       style(style.style)
     {
       // no code
@@ -161,7 +183,7 @@ namespace osmscout {
   };
 
   /**
-   * Ways can have a line style
+   * Style options for a line.
    */
   class OSMSCOUT_MAP_API LineStyle : public Referencable
   {
@@ -287,7 +309,7 @@ namespace osmscout {
   typedef std::vector<std::vector<LineStyleSelectorList> > LineStyleLookupTable;
 
   /**
-   * Areas can have a fill style, filling the area with one color
+   * Style options for filling an area.
    */
   class OSMSCOUT_MAP_API FillStyle : public Referencable
   {
@@ -385,6 +407,10 @@ namespace osmscout {
   typedef std::list<FillStyleSelector>                     FillStyleSelectorList;
   typedef std::vector<std::vector<FillStyleSelectorList> > FillStyleLookupTable;
 
+  /**
+   * Abstract base class for all (point) labels. All point labels have priority
+   * and a alpha value.
+   */
   class OSMSCOUT_MAP_API LabelStyle : public Referencable
   {
   private:
@@ -411,14 +437,12 @@ namespace osmscout {
     {
       return size;
     }
-
   };
 
   typedef Ref<LabelStyle> LabelStyleRef;
 
   /**
-    Nodes, ways and areas can have a label style for drawing text. Text can be formatted
-    in different ways.
+   * A textual label.
    */
   class OSMSCOUT_MAP_API TextStyle : public LabelStyle
   {
@@ -503,10 +527,9 @@ namespace osmscout {
   typedef std::vector<std::vector<TextStyleSelectorList> > TextStyleLookupTable;
 
   /**
-    Nodes, ways and areas can have a label style for drawing text. Text can be formatted
-    in different ways.
+   * A shield or plate label (text placed on a plate).
    */
-  class OSMSCOUT_MAP_API PathShieldStyle : public LabelStyle
+  class OSMSCOUT_MAP_API ShieldStyle : public LabelStyle
   {
   public:
     enum Label {
@@ -531,15 +554,15 @@ namespace osmscout {
     Color   borderColor;
 
   public:
-    PathShieldStyle();
-    PathShieldStyle(const PathShieldStyle& style);
+    ShieldStyle();
+    ShieldStyle(const ShieldStyle& style);
 
-    PathShieldStyle& SetLabel(Label label);
-    PathShieldStyle& SetPriority(uint8_t priority);
-    PathShieldStyle& SetSize(double size);
-    PathShieldStyle& SetTextColor(const Color& color);
-    PathShieldStyle& SetBgColor(const Color& color);
-    PathShieldStyle& SetBorderColor(const Color& color);
+    ShieldStyle& SetLabel(Label label);
+    ShieldStyle& SetPriority(uint8_t priority);
+    ShieldStyle& SetSize(double size);
+    ShieldStyle& SetTextColor(const Color& color);
+    ShieldStyle& SetBgColor(const Color& color);
+    ShieldStyle& SetBorderColor(const Color& color);
 
     inline bool IsVisible() const
     {
@@ -572,6 +595,101 @@ namespace osmscout {
       return borderColor;
     }
 
+    void CopyAttributes(const ShieldStyle& other,
+                        const std::set<Attribute>& attributes);
+  };
+
+  typedef Ref<ShieldStyle>                                     ShieldStyleRef;
+  typedef PartialStyle<ShieldStyle,ShieldStyle::Attribute>     ShieldPartialStyle;
+  typedef ConditionalStyle<ShieldStyle,ShieldStyle::Attribute> ShieldConditionalStyle;
+  typedef StyleSelector<ShieldStyle,ShieldStyle::Attribute>    ShieldStyleSelector;
+  typedef std::list<ShieldStyleSelector>                       ShieldStyleSelectorList;
+  typedef std::vector<std::vector<ShieldStyleSelectorList> >   ShieldStyleLookupTable;
+
+  /**
+   * A stle definng repretive drawing of a shiled label along a path. It consists
+   * mainly of the attributes of the shield itself (it internally holds a shield
+   * label for this) and some more attributes defining the way of repetition.
+   */
+  class OSMSCOUT_MAP_API PathShieldStyle : public Referencable
+  {
+  public:
+    enum Attribute {
+      attrPriority,
+      attrSize,
+      attrLabel,
+      attrTextColor,
+      attrBgColor,
+      attrBorderColor,
+      attrShieldSpace
+    };
+
+  private:
+    ShieldStyleRef shieldStyle;
+    double         shieldSpace;
+
+  public:
+    PathShieldStyle();
+    PathShieldStyle(const PathShieldStyle& style);
+
+    PathShieldStyle& SetLabel(ShieldStyle::Label label);
+    PathShieldStyle& SetPriority(uint8_t priority);
+    PathShieldStyle& SetSize(double size);
+    PathShieldStyle& SetTextColor(const Color& color);
+    PathShieldStyle& SetBgColor(const Color& color);
+    PathShieldStyle& SetBorderColor(const Color& color);
+    PathShieldStyle& SetShieldSpace(double shieldSpace);
+
+    inline bool IsVisible() const
+    {
+      return shieldStyle->IsVisible();
+    }
+
+    inline double GetAlpha() const
+    {
+      return shieldStyle->GetAlpha();
+    }
+
+    inline uint8_t GetPriority() const
+    {
+      return shieldStyle->GetPriority();
+    }
+
+    inline double GetSize() const
+    {
+      return shieldStyle->GetSize();
+    }
+
+    inline ShieldStyle::Label GetLabel() const
+    {
+      return shieldStyle->GetLabel();
+    }
+
+    inline const Color& GetTextColor() const
+    {
+      return shieldStyle->GetTextColor();
+    }
+
+    inline const Color& GetBgColor() const
+    {
+      return shieldStyle->GetBgColor();
+    }
+
+    inline const Color& GetBorderColor() const
+    {
+      return shieldStyle->GetBorderColor();
+    }
+
+    inline double GetShieldSpace() const
+    {
+      return shieldSpace;
+    }
+
+    inline const ShieldStyleRef& GetShieldStyle() const
+    {
+      return shieldStyle;
+    }
+
     void CopyAttributes(const PathShieldStyle& other,
                         const std::set<Attribute>& attributes);
   };
@@ -584,8 +702,8 @@ namespace osmscout {
   typedef std::vector<std::vector<PathShieldStyleSelectorList> >       PathShieldStyleLookupTable;
 
   /**
-    Nodes, ways and areas can have a label style for drawing text. Text can be formatted
-    in different ways.
+   * A style for drawing text onto a path, the text following the
+   * contour of the path.
    */
   class OSMSCOUT_MAP_API PathTextStyle : public Referencable
   {
@@ -757,6 +875,10 @@ namespace osmscout {
 
   typedef Ref<CirclePrimitive> CirclePrimitiveRef;
 
+  /**
+   * Definition of a symbol. A symbol consists of a list of DrawPrimitives
+   * with with assigned rendeirng styes.
+   */
   class OSMSCOUT_MAP_API Symbol : public Referencable
   {
   private:
@@ -808,8 +930,8 @@ namespace osmscout {
   typedef Ref<Symbol> SymbolRef;
 
   /**
-    IconStyle is for define drawing of external images as icons for nodes and areas
-    */
+   * The icon style allow the rendering of external images or internal symbols.
+   */
   class OSMSCOUT_MAP_API IconStyle : public Referencable
   {
   public:
@@ -864,8 +986,7 @@ namespace osmscout {
   typedef std::vector<std::vector<IconStyleSelectorList> > IconStyleLookupTable;
 
   /**
-    Nodes, ways and areas can have a label style for drawing text. Text can be formatted
-    in different ways.
+   * Style for repretive drawing of symbols on top of a path.
    */
   class OSMSCOUT_MAP_API PathSymbolStyle : public Referencable
   {

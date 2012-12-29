@@ -1031,7 +1031,7 @@ void Parser::PATHSYMBOLSTYLEATTR(PathSymbolPartialStyle& style) {
 void Parser::SHIELDSTYLEATTR(PathShieldPartialStyle& style) {
 		switch (la->kind) {
 		case 48 /* "label" */: {
-			PathShieldStyle::Label label; 
+			ShieldStyle::Label label; 
 			Get();
 			Expect(34 /* ":" */);
 			SHIELDLABEL(label);
@@ -1231,13 +1231,13 @@ void Parser::INTEGER(size_t& value) {
 		
 }
 
-void Parser::SHIELDLABEL(PathShieldStyle::Label& label) {
+void Parser::SHIELDLABEL(ShieldStyle::Label& label) {
 		if (la->kind == 56 /* "name" */) {
 			Get();
-			label=PathShieldStyle::name; 
+			label=ShieldStyle::name; 
 		} else if (la->kind == 62 /* "ref" */) {
 			Get();
-			label=PathShieldStyle::ref; 
+			label=ShieldStyle::ref; 
 		} else SynErr(134);
 }
 

@@ -219,7 +219,7 @@ inline void ToRGBA(const char* str, Color& color)
 	void TEXTLABEL(TextStyle::Label& label);
 	void LABELSTYLE(TextStyle::Style& style);
 	void INTEGER(size_t& value);
-	void SHIELDLABEL(PathShieldStyle::Label& label);
+	void SHIELDLABEL(ShieldStyle::Label& label);
 	void PATHTEXTLABEL(PathTextStyle::Label& label);
 
   void Parse();

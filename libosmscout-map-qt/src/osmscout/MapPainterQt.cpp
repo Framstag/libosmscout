@@ -206,10 +206,10 @@ namespace osmscout {
                                     const MapParameter& parameter,
                                     const LabelData& label)
   {
-    const PathShieldStyle* style=dynamic_cast<const PathShieldStyle*>(label.style.Get());
-    QFont                  font(GetFont(parameter,label.fontSize));
-    QFontMetrics           metrics=QFontMetrics(font);
-    QString                string=QString::fromUtf8(label.text.c_str());
+    const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.Get());
+    QFont              font(GetFont(parameter,label.fontSize));
+    QFontMetrics       metrics=QFontMetrics(font);
+    QString            string=QString::fromUtf8(label.text.c_str());
 
     painter->fillRect(QRectF(label.bx1,
                              label.by1,

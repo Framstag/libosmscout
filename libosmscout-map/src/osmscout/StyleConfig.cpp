@@ -383,7 +383,7 @@ namespace osmscout {
     }
   }
 
-  PathShieldStyle::PathShieldStyle()
+  ShieldStyle::ShieldStyle()
    : label(none),
      textColor(0,0,0),
      bgColor(1,1,1),
@@ -392,7 +392,7 @@ namespace osmscout {
     // no code
   }
 
-  PathShieldStyle::PathShieldStyle(const PathShieldStyle& style)
+  ShieldStyle::ShieldStyle(const ShieldStyle& style)
   : LabelStyle(style)
   {
     this->label=style.label;
@@ -401,49 +401,49 @@ namespace osmscout {
     this->borderColor=style.borderColor;
   }
 
-  PathShieldStyle& PathShieldStyle::SetLabel(Label label)
+  ShieldStyle& ShieldStyle::SetLabel(Label label)
   {
     this->label=label;
 
     return *this;
   }
 
-  PathShieldStyle& PathShieldStyle::SetPriority(uint8_t priority)
+  ShieldStyle& ShieldStyle::SetPriority(uint8_t priority)
   {
     LabelStyle::SetPriority(priority);
 
     return *this;
   }
 
-  PathShieldStyle& PathShieldStyle::SetSize(double size)
+  ShieldStyle& ShieldStyle::SetSize(double size)
   {
     LabelStyle::SetSize(size);
 
     return *this;
   }
 
-  PathShieldStyle& PathShieldStyle::SetTextColor(const Color& color)
+  ShieldStyle& ShieldStyle::SetTextColor(const Color& color)
   {
     this->textColor=color;
 
     return *this;
   }
 
-  PathShieldStyle& PathShieldStyle::SetBgColor(const Color& color)
+  ShieldStyle& ShieldStyle::SetBgColor(const Color& color)
   {
     this->bgColor=color;
 
     return *this;
   }
 
-  PathShieldStyle& PathShieldStyle::SetBorderColor(const Color& color)
+  ShieldStyle& ShieldStyle::SetBorderColor(const Color& color)
   {
     this->borderColor=color;
 
     return *this;
   }
 
-  void PathShieldStyle::CopyAttributes(const PathShieldStyle& other,
+  void ShieldStyle::CopyAttributes(const ShieldStyle& other,
                                    const std::set<Attribute>& attributes)
   {
     for (std::set<Attribute>::const_iterator a=attributes.begin();
@@ -467,6 +467,101 @@ namespace osmscout {
         break;
       case attrBorderColor:
         borderColor=other.borderColor;
+        break;
+      }
+    }
+  }
+
+  PathShieldStyle::PathShieldStyle()
+   : shieldStyle(new ShieldStyle()),
+     shieldSpace(3.0)
+  {
+    // no code
+  }
+
+  PathShieldStyle::PathShieldStyle(const PathShieldStyle& style)
+   : shieldStyle(new ShieldStyle(*style.GetShieldStyle().Get())),
+     shieldSpace(style.shieldSpace)
+  {
+    // no code
+  }
+
+  PathShieldStyle& PathShieldStyle::SetLabel(ShieldStyle::Label label)
+  {
+    shieldStyle->SetLabel(label);
+
+    return *this;
+  }
+
+  PathShieldStyle& PathShieldStyle::SetPriority(uint8_t priority)
+  {
+    shieldStyle->SetPriority(priority);
+
+    return *this;
+  }
+
+  PathShieldStyle& PathShieldStyle::SetSize(double size)
+  {
+    shieldStyle->SetSize(size);
+
+    return *this;
+  }
+
+  PathShieldStyle& PathShieldStyle::SetTextColor(const Color& color)
+  {
+    shieldStyle->SetTextColor(color);
+
+    return *this;
+  }
+
+  PathShieldStyle& PathShieldStyle::SetBgColor(const Color& color)
+  {
+    shieldStyle->SetBgColor(color);
+
+    return *this;
+  }
+
+  PathShieldStyle& PathShieldStyle::SetBorderColor(const Color& color)
+  {
+    shieldStyle->SetBorderColor(color);
+
+    return *this;
+  }
+
+  PathShieldStyle& PathShieldStyle::SetShieldSpace(double shieldSpace)
+  {
+    this->shieldSpace=shieldSpace;
+
+    return *this;
+  }
+
+  void PathShieldStyle::CopyAttributes(const PathShieldStyle& other,
+                                   const std::set<Attribute>& attributes)
+  {
+    for (std::set<Attribute>::const_iterator a=attributes.begin();
+         a!=attributes.end();
+         ++a) {
+      switch (*a) {
+      case attrPriority:
+        SetPriority(other.GetPriority());
+        break;
+      case attrSize:
+        SetSize(other.GetSize());
+        break;
+      case attrLabel:
+        SetLabel(other.GetLabel());
+        break;
+      case attrTextColor:
+        SetTextColor(other.GetTextColor());
+        break;
+      case attrBgColor:
+        SetBgColor(other.GetBgColor());
+        break;
+      case attrBorderColor:
+        SetBorderColor(other.GetBorderColor());
+        break;
+      case attrShieldSpace:
+        this->shieldSpace=other.shieldSpace;
         break;
       }
     }

@@ -760,7 +760,7 @@ PRODUCTIONS
 
   SHIELDSTYLEATTR<PathShieldPartialStyle& style>
               = (
-                  (. PathShieldStyle::Label label; .)
+                  (. ShieldStyle::Label label; .)
                   "label" ":" SHIELDLABEL<label>
                   (.
                      style.style->SetLabel(label);
@@ -907,10 +907,10 @@ PRODUCTIONS
                 | "ref"  (. label=TextStyle::ref; .)
                 ).
 
-  SHIELDLABEL<PathShieldStyle::Label& label>
+  SHIELDLABEL<ShieldStyle::Label& label>
               = (
-                  "name" (. label=PathShieldStyle::name; .)
-                | "ref"  (. label=PathShieldStyle::ref; .)
+                  "name" (. label=ShieldStyle::name; .)
+                | "ref"  (. label=ShieldStyle::ref; .)
                 ).
 
   PATHTEXTLABEL<PathTextStyle::Label& label>

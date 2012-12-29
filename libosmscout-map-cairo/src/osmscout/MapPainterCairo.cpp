@@ -788,7 +788,7 @@ namespace osmscout {
                                        const MapParameter& parameter,
                                        const LabelData& label)
   {
-    const PathShieldStyle* style=dynamic_cast<const PathShieldStyle*>(label.style.Get());
+    const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.Get());
 
     cairo_set_dash(draw,NULL,0,0);
     cairo_set_line_width(draw,1);

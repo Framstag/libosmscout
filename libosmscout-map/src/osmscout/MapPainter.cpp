@@ -405,8 +405,8 @@ namespace osmscout {
         continue;
       }
 
-      if (dynamic_cast<const PathShieldStyle*>(&style)!=NULL &&
-          dynamic_cast<const PathShieldStyle*>(label.style.Get())!=NULL) {
+      if (dynamic_cast<const ShieldStyle*>(&style)!=NULL &&
+          dynamic_cast<const ShieldStyle*>(label.style.Get())!=NULL) {
         double hx1=bx1-sameLabelSpace;
         double hx2=bx2+sameLabelSpace;
         double hy1=by1-sameLabelSpace;
@@ -760,7 +760,7 @@ namespace osmscout {
                                          const std::string& text,
                                          size_t transStart, size_t transEnd)
   {
-    double stepSizeInPixel=ConvertWidthToPixel(parameter,parameter.GetLabelSpace());
+    double stepSizeInPixel=ConvertWidthToPixel(parameter,shieldStyle->GetShieldSpace());
 
     wayScanlines.clear();
     ScanConvertLine(transStart,transEnd,1,1,wayScanlines);
@@ -769,7 +769,7 @@ namespace osmscout {
     while (i<wayScanlines.size()) {
       RegisterPointLabel(projection,
                          parameter,
-                         shieldStyle,
+                         shieldStyle->GetShieldStyle(),
                          text,
                          wayScanlines[i].x+0.5,
                          wayScanlines[i].y+0.5);
@@ -1442,9 +1442,9 @@ namespace osmscout {
 
     if (shieldStyle.Valid()) {
       switch(shieldStyle->GetLabel()) {
-      case PathShieldStyle::none:
+      case ShieldStyle::none:
         break;
-      case PathShieldStyle::name:
+      case ShieldStyle::name:
         if (!data.attributes->name.empty()) {
           RegisterPointWayLabel(projection,
                                 parameter,
@@ -1455,7 +1455,7 @@ namespace osmscout {
           waysLabelDrawn++;
         }
         break;
-      case PathShieldStyle::ref:
+      case ShieldStyle::ref:
         if (!data.attributes->ref.empty()) {
           RegisterPointWayLabel(projection,
                                 parameter,
@@ -1520,7 +1520,7 @@ namespace osmscout {
                   *label);
         labelsDrawn++;
       }
-      else if (dynamic_cast<const PathShieldStyle*>(label->style.Get())) {
+      else if (dynamic_cast<const ShieldStyle*>(label->style.Get())) {
         DrawPlateLabel(projection,
                        parameter,
                        *label);
@@ -1541,7 +1541,7 @@ namespace osmscout {
                   *label);
         labelsDrawn++;
       }
-      else if (dynamic_cast<const PathShieldStyle*>(label->style.Get())) {
+      else if (dynamic_cast<const ShieldStyle*>(label->style.Get())) {
         DrawPlateLabel(projection,
                        parameter,
                        *label);
@@ -1941,7 +1941,7 @@ namespace osmscout {
     horizontal=0;
     vertical=0;
 
-    if (dynamic_cast<const PathShieldStyle*>(&style)!=NULL) {
+    if (dynamic_cast<const ShieldStyle*>(&style)!=NULL) {
       horizontal=5;
       vertical=5;
     }
@@ -1952,8 +1952,8 @@ namespace osmscout {
                                  double& horizontal,
                                  double& vertical)
   {
-    if (dynamic_cast<const PathShieldStyle*>(&styleA)!=NULL &&
-        dynamic_cast<const PathShieldStyle*>(&styleB)!=NULL) {
+    if (dynamic_cast<const ShieldStyle*>(&styleA)!=NULL &&
+        dynamic_cast<const ShieldStyle*>(&styleB)!=NULL) {
       horizontal=shieldLabelSpace;
       vertical=shieldLabelSpace;
     }
