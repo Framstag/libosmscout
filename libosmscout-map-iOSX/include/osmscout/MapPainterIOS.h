@@ -41,6 +41,7 @@
 
 namespace osmscout {
     typedef struct { double x; double y; } Pt;
+    typedef struct { double x; double y; double slope ;} XYSlope;
     
     class MapPainterIOS : public MapPainter {
     private:
@@ -136,12 +137,13 @@ namespace osmscout {
                      const FillStyle& fillStyle);
 
         double textLength(const MapParameter& parameter, double fontSize, std::string text);
+        double textHeight(const MapParameter& parameter, double fontSize, std::string text);
         
     private:
         Font *GetFont(const MapParameter& parameter, double fontSize);
         CGFloat pathLength(size_t transStart, size_t transEnd);
-        Pt originForPositionAlongPath(CGFloat l, CGFloat nextW, size_t transStart, size_t transEnd);
-        CGFloat slopeForPositionAlongPath(CGFloat l, CGFloat nextW, size_t transStart, size_t transEnd);
+        XYSlope originAndSlopeAlongPath(CGFloat l, CGFloat nextW, size_t transStart, size_t transEnd,
+                                        CGFloat &posX, CGFloat &posY, size_t &i, CGFloat &currentL);
     };
 }
 

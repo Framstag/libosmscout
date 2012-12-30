@@ -237,6 +237,14 @@ namespace osmscout {
         return width;
     }
     
+    double MapPainterIOS::textHeight(const MapParameter& parameter, double fontSize, std::string text){
+        double xOff;
+        double yOff;
+        double width;
+        double height;
+        GetTextDimension(parameter,fontSize,text,xOff,yOff,width,height);
+        return height;
+    }
     /*
      * DrawLabel(const Projection& projection, const MapParameter& parameter, const LabelData& label)
      */
@@ -263,7 +271,8 @@ namespace osmscout {
 #else
             NSColor *color = [NSColor colorWithSRGBRed:label.style->GetTextColor().GetR() green:label.style->GetTextColor().GetG() blue:label.style->GetTextColor().GetB() alpha:label.style->GetTextColor().GetA()];
             NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
-            [str drawAtPoint:CGPointMake(label.x, label.y) withAttributes:attrsDictionary];
+            double height = textHeight(parameter, label.fontSize, label.text);
+            [str drawAtPoint:CGPointMake(label.x, label.y - height - 5) withAttributes:attrsDictionary];
     
 #endif
         } else if (label.style->GetStyle()==LabelStyle::emphasize) {
@@ -276,7 +285,8 @@ namespace osmscout {
 #else
             NSColor *color = [NSColor colorWithSRGBRed:label.style->GetTextColor().GetR() green:label.style->GetTextColor().GetG() blue:label.style->GetTextColor().GetB() alpha:label.style->GetTextColor().GetA()];
             NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
-            [str drawAtPoint:CGPointMake(label.x, label.y) withAttributes:attrsDictionary];
+            double height = textHeight(parameter, label.fontSize, label.text);
+            [str drawAtPoint:CGPointMake(label.x, label.y - height - 5) withAttributes:attrsDictionary];
 #endif
             CGColorRelease(haloColor);
             CGColorSpaceRelease(colorSpace);
@@ -345,18 +355,17 @@ namespace osmscout {
         }
         return len;
     }
-    
-    Pt MapPainterIOS::originForPositionAlongPath(CGFloat l, CGFloat nextW, size_t transStart, size_t transEnd) {
-        CGFloat widthToGo = l + nextW;
-        Pt pos = {-1, -1};
+
+    XYSlope MapPainterIOS::originAndSlopeAlongPath(CGFloat l, CGFloat nextW, size_t transStart, size_t transEnd,
+                                                   CGFloat &posX, CGFloat &posY, size_t &i, CGFloat &currentL) {
+        CGFloat widthToGo = l - currentL;
+        XYSlope pos = {-1, -1, -1};
+        Pt pos1 = {NAN, NAN};
         
         size_t pathSize = labs(transEnd - transStart);
-        CGFloat posX = transBuffer.buffer[transStart].x;
-        CGFloat posY = transBuffer.buffer[transStart].y;
         int direction = (transStart < transEnd) ? 1 : -1;
-        size_t i=0;
-        
-        while(widthToGo >= 0) {
+
+        while(widthToGo+nextW >= 0) {
             //out of path, return invalid point
             if(i+direction >= pathSize) {
                 return pos;
@@ -369,31 +378,31 @@ namespace osmscout {
             CGFloat yDiff = (nextY - posY)*direction;
             CGFloat distToNext = sqrt(xDiff*xDiff + yDiff*yDiff);
             
-            CGFloat fracToGo = widthToGo/distToNext;
+            CGFloat fracToGo1 = widthToGo/distToNext;
+            if(fracToGo1 < 1 && std::isnan(pos1.x)){
+                pos1.x = posX+(xDiff*fracToGo1);
+                pos1.y = posY+(yDiff*fracToGo1);
+            }
+            
+            CGFloat fracToGo2 = (widthToGo+nextW)/distToNext;
             //point is before next point in path, interpolate the answer
-            if(fracToGo < 1) {
-                pos.x = posX+(xDiff*fracToGo);
-                pos.y = posY+(yDiff*fracToGo);
+            if(fracToGo2 < 1) {
+                pos.x = posX+(xDiff*fracToGo2);
+                pos.y = posY+(yDiff*fracToGo2);
+                pos.slope = atan2(pos.y-pos1.y, pos.x-pos1.x);
+                pos.x = (pos.x + pos1.x)/2;
+                pos.y = (pos.y + pos1.y)/2;
                 return pos;
             }
             
             //advance to next point on the path
             widthToGo -= distToNext;
+            currentL += distToNext;
             posX = nextX;
             posY = nextY;
             i+=direction;
         }
         return pos;
-    }
-    
-    CGFloat MapPainterIOS::slopeForPositionAlongPath(CGFloat l, CGFloat nextW, size_t transStart, size_t transEnd) {
-        Pt begin = originForPositionAlongPath(l, 0, transStart, transEnd);
-        Pt end = originForPositionAlongPath(l, nextW, transStart, transEnd);
-        
-        CGFloat xDiff = end.x - begin.x;
-        CGFloat yDiff = end.y - begin.y;
-        
-        return atan2(yDiff, xDiff);
     }
     
     void MapPainterIOS::DrawContourSymbol(const Projection& projection,
@@ -413,32 +422,37 @@ namespace osmscout {
         
         double width=ConvertWidthToPixel(parameter,maxX-minX);
         double height=ConvertWidthToPixel(parameter,maxY-minY);
-#ifdef OSMSCOUT_REVERSED_Y_AXIS
-        CGAffineTransform transform=CGAffineTransformMake(1.0, 0.0, 0.0, 1.0, -width/2, height);
-#else
-        CGAffineTransform transform=CGAffineTransformMake(1.0, 0.0, 0.0, 1.0, -width/2, height/2);
-#endif
+        CGAffineTransform transform=CGAffineTransformMake(1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
         for (std::list<DrawPrimitiveRef>::const_iterator p=symbol.GetPrimitives().begin();
              p!=symbol.GetPrimitives().end();
              ++p) {
             FillStyleRef fillStyle=(*p)->GetFillStyle();
             
             CGContextBeginPath(cg);
+            DrawFillStyle(projection,
+                          parameter,
+                          *fillStyle);
             
             CGFloat lenUpToNow = space/2;
+            CGFloat posX = transBuffer.buffer[transStart].x;
+            CGFloat posY = transBuffer.buffer[transStart].y;
+            size_t segment = 0;
+            CGFloat currentL = 0;
             while (lenUpToNow+width<lineLength) {
-                Pt origin = originForPositionAlongPath(lenUpToNow, 0, transStart, transEnd);
-                CGFloat slope = slopeForPositionAlongPath(lenUpToNow, width, transStart, transEnd);
+                XYSlope origin = originAndSlopeAlongPath(lenUpToNow, width, transStart, transEnd, posX, posY, segment, currentL);
                 CGContextSaveGState(cg);
                 
                 CGContextTranslateCTM(cg, origin.x, origin.y);
-                CGAffineTransform ct = CGAffineTransformConcat(transform, CGAffineTransformMakeRotation(slope));
+                CGAffineTransform ct = CGAffineTransformConcat(transform, CGAffineTransformMakeRotation(origin.slope));
                 CGContextConcatCTM(cg, ct);
-                CGContextTranslateCTM(cg, -origin.x, -origin.y);
                 DrawPrimitivePath(projection,
                                   parameter,
                                   *p,
-                                  origin.x,origin.y,
+#ifdef OSMSCOUT_REVERSED_Y_AXIS
+                                  -width/2,height,
+#else
+                                  -width/2,height/2,
+#endif
                                   minX,
                                   minY,
                                   maxX,
@@ -448,9 +462,6 @@ namespace osmscout {
                 lenUpToNow+=width+space;
             }
             
-            DrawFillStyle(projection,
-                          parameter,
-                          *fillStyle);
             CGContextFillPath(cg);
         }
         CGContextRestoreGState(cg);
@@ -500,33 +511,34 @@ namespace osmscout {
         CGFloat lenUpToNow = 10;
         
         NSString *nsText= [NSString stringWithCString:text.c_str() encoding:NSUTF8StringEncoding];
-
+        CGFloat posX = transBuffer.buffer[transStart].x;
+        CGFloat posY = transBuffer.buffer[transStart].y;
         int charIndex = 0;
+        size_t segment = 0;
+        CGFloat currentL = 0.0;
         for(int i=0;i<[nsText length];i++) {
             
             NSString *str = [nsText substringWithRange:NSMakeRange(i, 1)];
             
             float nww = textLength(parameter,style.GetSize(),[str cStringUsingEncoding:NSUTF8StringEncoding]);
             
-            Pt charOrigin = originForPositionAlongPath(lenUpToNow, 0, tStart, tEnd);
+            XYSlope charOrigin = originAndSlopeAlongPath(lenUpToNow, nww, tStart, tEnd, posX, posY, segment, currentL);
             if(charOrigin.x == -1 && charOrigin.y == -1){
                 CGContextRestoreGState(cg);
                 return;
             }
-            CGFloat slope = slopeForPositionAlongPath(lenUpToNow, nww, tStart, tEnd);
-            //std::cout << " CHARACTER " << [str UTF8String] << " placed at " << charOrigin.x << "," << charOrigin.y << " slope "<< slope << std::endl;
+            //std::cout << " CHARACTER " << [str UTF8String] << " placed at " << charOrigin.x << "," << charOrigin.y << " slope "<< charOrigin.slope << std::endl;
             
             CGContextSaveGState(cg);
             
             CGContextTranslateCTM(cg, charOrigin.x, charOrigin.y);
-            CGAffineTransform ct = CGAffineTransformConcat(transform, CGAffineTransformMakeRotation(slope));
+            CGAffineTransform ct = CGAffineTransformConcat(transform, CGAffineTransformMakeRotation(charOrigin.slope));
             CGContextConcatCTM(cg, ct);
-            CGContextTranslateCTM(cg, -charOrigin.x, -charOrigin.y);
             
 #if TARGET_OS_IPHONE
-            [str drawAtPoint:CGPointMake(charOrigin.x, charOrigin.y) withFont:font];
+            [str drawAtPoint:CGPointMake(-nww/2,0) withFont:font];
 #else
-            [str drawAtPoint:CGPointMake(charOrigin.x, charOrigin.y) withAttributes:attrsDictionary];
+            [str drawAtPoint:CGPointMake(-nww/2,0) withAttributes:attrsDictionary];
 #endif
             CGContextRestoreGState(cg);
             lenUpToNow += nww;
