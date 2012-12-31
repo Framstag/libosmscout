@@ -104,7 +104,7 @@ namespace osmscout {
 
       attributes.type=typeInfo->GetId();
       styleConfig.GetAreaFillStyle(attributes,
-                                   projection.GetMagnification().GetLevel(),
+                                   projection,
                                    fillStyle);
 
       if (fillStyle.Valid()) {
@@ -154,7 +154,7 @@ namespace osmscout {
       attributes.type=typeInfo->GetId();
 
       styleConfig.GetWayLineStyle(attributes,
-                                  projection.GetMagnification().GetLevel(),
+                                  projection,
                                   lineStyle);
 
       if (lineStyle.Valid()) {

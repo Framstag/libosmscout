@@ -510,7 +510,7 @@ namespace osmscout {
       std::set<Coord> drawnLabels;
 #endif
 
-    styleConfig.GetLandFillStyle(projection.GetMagnification().GetLevel(),
+    styleConfig.GetLandFillStyle(projection,
                                  landFill);
 
     if (landFill.Invalid()) {
@@ -532,13 +532,13 @@ namespace osmscout {
     std::vector<Point> points;
     size_t             start,end;
 
-    styleConfig.GetSeaFillStyle(projection.GetMagnification().GetLevel(),
+    styleConfig.GetSeaFillStyle(projection,
                                 seaFill);
-    styleConfig.GetCoastFillStyle(projection.GetMagnification().GetLevel(),
+    styleConfig.GetCoastFillStyle(projection,
                                   coastFill);
-    styleConfig.GetUnknownFillStyle(projection.GetMagnification().GetLevel(),
+    styleConfig.GetUnknownFillStyle(projection,
                                     unknownFill);
-    styleConfig.GetCoastlineLineStyle(projection.GetMagnification().GetLevel(),
+    styleConfig.GetCoastlineLineStyle(projection,
                                       coastlineLine);
 
     if (seaFill.Invalid()) {
@@ -977,14 +977,13 @@ namespace osmscout {
                                  const Projection& projection,
                                  const MapParameter& parameter,
                                  const SegmentAttributes& attributes,
-                                 const std::vector<Point>& nodes,
-                                 size_t level)
+                                 const std::vector<Point>& nodes)
   {
     TextStyleRef  textStyle;
     IconStyleRef  iconStyle;
 
-    styleConfig.GetAreaTextStyle(attributes,level,textStyle);
-    styleConfig.GetAreaIconStyle(attributes,level,iconStyle);
+    styleConfig.GetAreaTextStyle(attributes,projection,textStyle);
+    styleConfig.GetAreaIconStyle(attributes,projection,iconStyle);
 
     bool          hasLabel=textStyle.Valid();
     bool          hasSymbol=iconStyle.Valid() && iconStyle->GetSymbol().Valid();
@@ -1078,8 +1077,7 @@ namespace osmscout {
                     projection,
                     parameter,
                     (*a)->GetAttributes(),
-                    (*a)->nodes,
-                    projection.GetMagnification().GetLevel());
+                    (*a)->nodes);
     }
 
     for (std::vector<RelationRef>::const_iterator r=data.relationAreas.begin();
@@ -1092,8 +1090,7 @@ namespace osmscout {
                             projection,
                             parameter,
                             relation->roles[m].attributes,
-                            relation->roles[m].nodes,
-                            projection.GetMagnification().GetLevel());
+                            relation->roles[m].nodes);
       }
     }
   }
@@ -1107,20 +1104,16 @@ namespace osmscout {
     IconStyleRef iconStyle;
 
     styleConfig.GetNodeTextStyle(node,
-                                 projection.GetMagnification().GetLevel(),
+                                 projection,
                                  textStyle);
     styleConfig.GetNodeIconStyle(node,
-                                 projection.GetMagnification().GetLevel(),
+                                 projection,
                                  iconStyle);
 
-    //const TextStyle  *textStyle=styleConfig.GetNodeTextStyle(node,level);
-    bool             hasLabel=textStyle.Valid();
-    bool             hasSymbol=iconStyle.Valid() && iconStyle->GetSymbol().Valid();
-    bool             hasIcon=iconStyle.Valid() && !iconStyle->GetIconName().empty();
-
-    std::string label;
-
-    //nodesDrawnCount++;
+    bool         hasLabel=textStyle.Valid();
+    bool         hasSymbol=iconStyle.Valid() && iconStyle->GetSymbol().Valid();
+    bool         hasIcon=iconStyle.Valid() && !iconStyle->GetIconName().empty();
+    std::string  label;
 
     if (hasLabel) {
       for (size_t i=0; i<node->GetTagCount(); i++) {
@@ -1378,7 +1371,7 @@ namespace osmscout {
       PathSymbolStyleRef pathSymbolStyle;
 
       styleConfig.GetWayPathSymbolStyle(*way->attributes,
-                                        projection.GetMagnification().GetLevel(),
+                                        projection,
                                         pathSymbolStyle);
 
       if (pathSymbolStyle.Valid()) {
@@ -1397,8 +1390,7 @@ namespace osmscout {
   void MapPainter::DrawWayLabel(const StyleConfig& styleConfig,
                                 const Projection& projection,
                                 const MapParameter& parameter,
-                                const WayData& data,
-                                size_t level)
+                                const WayData& data)
   {
     if (data.attributes->GetName().empty() &&
         data.attributes->GetRefName().empty()) {
@@ -1408,8 +1400,8 @@ namespace osmscout {
     PathShieldStyleRef shieldStyle;
     PathTextStyleRef   pathTextStyle;
 
-    styleConfig.GetWayPathShieldStyle(*data.attributes,level,shieldStyle);
-    styleConfig.GetWayPathTextStyle(*data.attributes,level,pathTextStyle);
+    styleConfig.GetWayPathShieldStyle(*data.attributes,projection,shieldStyle);
+    styleConfig.GetWayPathTextStyle(*data.attributes,projection,pathTextStyle);
 
     if (pathTextStyle.Valid()) {
       switch (pathTextStyle->GetLabel()) {
@@ -1481,8 +1473,7 @@ namespace osmscout {
       DrawWayLabel(styleConfig,
                    projection,
                    parameter,
-                   *way,
-                   projection.GetMagnification().GetLevel());
+                   *way);
     }
   }
 
@@ -1545,7 +1536,7 @@ namespace osmscout {
 
 
     styleConfig.GetAreaFillStyle(attributes,
-                                 projection.GetMagnification().GetLevel(),
+                                 projection,
                                  fillStyle);
 
     if (fillStyle.Invalid())
@@ -1662,14 +1653,14 @@ namespace osmscout {
             if (role.ring==0) {
               if (relation->GetType()!=typeIgnore) {
                 styleConfig.GetAreaFillStyle(relation->GetAttributes(),
-                                             projection.GetMagnification().GetLevel(),
+                                             projection,
                                              fillStyle);
               }
             }
             else {
               if (relation->GetType()!=typeIgnore) {
                 styleConfig.GetAreaFillStyle(role.GetAttributes(),
-                                             projection.GetMagnification().GetLevel(),
+                                             projection,
                                              fillStyle);
               }
             }
@@ -1745,7 +1736,7 @@ namespace osmscout {
     LineStyleRef lineStyle;
 
     styleConfig.GetWayLineStyle(attributes,
-                                projection.GetMagnification().GetLevel(),
+                                projection,
                                 lineStyle);
 
     if (lineStyle.Invalid()) {
@@ -1778,7 +1769,7 @@ namespace osmscout {
       double convertedOutlineWidth=ConvertWidthToPixel(parameter,2*lineStyle->GetOutline());
 
       if (lineStyle->GetOutlineColor().IsSolid()) {
-        data.outline=lineWidth>convertedOutlineWidth;
+        data.outline=lineWidth>=2*convertedOutlineWidth;
       }
       else {
         data.outline=true;
@@ -1981,11 +1972,11 @@ namespace osmscout {
     if (parameter.IsDebugPerformance()) {
       std::cout << "Draw [";
       std::cout << projection.GetLatMin() <<",";
-      std::cout << projection.GetLonMin() << " - ";
+      std::cout << projection.GetLonMin() << "-";
       std::cout << projection.GetLatMax() << ",";
-      std::cout << projection.GetLonMax() << "] with mag. ";
-      std::cout << projection.GetMagnification().GetMagnification() << "x" << "/" << projection.GetMagnification().GetLevel();
-      std::cout << " area " << projection.GetWidth() << "x" << projection.GetHeight() << " " << parameter.GetDPI()<< " DPI" << std::endl;
+      std::cout << projection.GetLonMax() << "] ";
+      std::cout << projection.GetMagnification().GetMagnification() << "x" << "/" << projection.GetMagnification().GetLevel() << " ";
+      std::cout << projection.GetWidth() << "x" << projection.GetHeight() << " " << parameter.GetDPI()<< " DPI" << std::endl;
     }
 
     //

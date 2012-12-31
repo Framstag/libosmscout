@@ -460,8 +460,7 @@ namespace osmscout {
     void DrawWayLabel(const StyleConfig& styleConfig,
                       const Projection& projection,
                       const MapParameter& parameter,
-                      const WayData& data,
-                      size_t level);
+                      const WayData& data);
 
     void DrawWayLabels(const StyleConfig& styleConfig,
                        const Projection& projection,
@@ -472,8 +471,7 @@ namespace osmscout {
                        const Projection& projection,
                        const MapParameter& parameter,
                        const SegmentAttributes& attributes,
-                       const std::vector<Point>& nodes,
-                       size_t level);
+                       const std::vector<Point>& nodes);
 
     void DrawAreaLabels(const StyleConfig& styleConfig,
                         const Projection& projection,
@@ -518,6 +516,16 @@ namespace osmscout {
                              double minPixel,
                              double width) const;
 
+    /**
+     * Convert a width in mm into the equivalent pixel size based on the given DPI
+     *
+     * @param parameter
+     *    MapParameter also holding the DPI inforamtion
+     * @param width
+     *    Width in mm
+     * @return
+     *    Width in screen pixel
+     */
     inline double ConvertWidthToPixel(const MapParameter& parameter,
                                       double width) const
     {

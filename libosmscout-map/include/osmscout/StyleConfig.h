@@ -1147,45 +1147,45 @@ namespace osmscout {
     }
 
     void GetNodeTextStyle(const Node& node,
-                          size_t level,
+                          const Projection& projection,
                           TextStyleRef& textStyle) const;
 
     void GetNodeIconStyle(const Node& node,
-                          size_t level,
+                          const Projection& projection,
                           IconStyleRef& iconStyle) const;
 
     void GetWayLineStyle(const SegmentAttributes& way,
-                         size_t level,
+                         const Projection& projection,
                          LineStyleRef& lineStyle) const;
     void GetWayPathTextStyle(const SegmentAttributes& way,
-                             size_t level,
+                             const Projection& projection,
                              PathTextStyleRef& pathTextStyle) const;
     void GetWayPathSymbolStyle(const SegmentAttributes& way,
-                               size_t level,
+                               const Projection& projection,
                                PathSymbolStyleRef& pathSymbolStyle) const;
     void GetWayPathShieldStyle(const SegmentAttributes& way,
-                               size_t level,
+                               const Projection& projection,
                                PathShieldStyleRef& pathShieldStyle) const;
 
     void GetAreaFillStyle(const SegmentAttributes& area,
-                          size_t level,
+                          const Projection& projection,
                           FillStyleRef& fillStyle) const;
     void GetAreaTextStyle(const SegmentAttributes& area,
-                          size_t level,
+                          const Projection& projection,
                           TextStyleRef& textStyle) const;
     void GetAreaIconStyle(const SegmentAttributes& area,
-                          size_t level,
+                          const Projection& projection,
                           IconStyleRef& iconStyle) const;
 
-    void GetLandFillStyle(size_t level,
+    void GetLandFillStyle(const Projection& projection,
                           FillStyleRef& fillStyle) const;
-    void GetSeaFillStyle(size_t level,
+    void GetSeaFillStyle(const Projection& projection,
                          FillStyleRef& fillStyle) const;
-    void GetCoastFillStyle(size_t level,
+    void GetCoastFillStyle(const Projection& projection,
                            FillStyleRef& fillStyle) const;
-    void GetUnknownFillStyle(size_t level,
+    void GetUnknownFillStyle(const Projection& projection,
                              FillStyleRef& fillStyle) const;
-    void GetCoastlineLineStyle(size_t level,
+    void GetCoastlineLineStyle(const Projection& projection,
                                LineStyleRef& lineStyle) const;
   };
 }

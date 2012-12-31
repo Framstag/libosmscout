@@ -1406,11 +1406,12 @@ namespace osmscout {
 
   template <class S, class A>
   void GetStyle(const std::vector<std::list<StyleSelector<S,A> > >& styleSelectors,
-                size_t level,
+                const Projection& projection,
                 Ref<S>& style)
   {
-    bool fastpath=style.Invalid();
-    bool composed=false;
+    bool   fastpath=style.Invalid();
+    bool   composed=false;
+    size_t level=projection.GetMagnification().GetLevel();
 
     if (level>=styleSelectors.size()) {
       level=styleSelectors.size()-1;
@@ -1450,11 +1451,12 @@ namespace osmscout {
   template <class S, class A>
   void GetNodeStyle(const std::vector<std::list<StyleSelector<S,A> > >& styleSelectors,
                     const Node& node,
-                    size_t level,
+                    const Projection& projection,
                     Ref<S>& style)
   {
-    bool fastpath=false;
-    bool composed=false;
+    bool   fastpath=false;
+    bool   composed=false;
+    size_t level=projection.GetMagnification().GetLevel();
 
     if (level>=styleSelectors.size()) {
       level=styleSelectors.size()-1;
@@ -1496,11 +1498,12 @@ namespace osmscout {
   template <class S, class A>
   void GetSegmentAttributesStyle(const std::vector<std::list<StyleSelector<S,A> > >& styleSelectors,
                                  const SegmentAttributes& attributes,
-                                 size_t level,
+                                 const Projection& projection,
                                  Ref<S>& style)
   {
-    bool fastpath=false;
-    bool composed=false;
+    bool   fastpath=false;
+    bool   composed=false;
+    size_t level=projection.GetMagnification().GetLevel();
 
     if (level>=styleSelectors.size()) {
       level=styleSelectors.size()-1;
@@ -1540,132 +1543,132 @@ namespace osmscout {
   }
 
   void StyleConfig::GetNodeTextStyle(const Node& node,
-                                     size_t level,
+                                     const Projection& projection,
                                      TextStyleRef& textStyle) const
   {
     GetNodeStyle(nodeTextStyleSelectors[node.GetType()],
                  node,
-                 level,
+                 projection,
                  textStyle);
   }
 
   void StyleConfig::GetNodeIconStyle(const Node& node,
-                                     size_t level,
+                                     const Projection& projection,
                                      IconStyleRef& iconStyle) const
   {
     GetNodeStyle(nodeIconStyleSelectors[node.GetType()],
                  node,
-                 level,
+                 projection,
                  iconStyle);
   }
 
   void StyleConfig::GetWayLineStyle(const SegmentAttributes& way,
-                                    size_t level,
+                                    const Projection& projection,
                                     LineStyleRef& lineStyle) const
   {
     GetSegmentAttributesStyle(wayLineStyleSelectors[way.GetType()],
                               way,
-                              level,
+                              projection,
                               lineStyle);
   }
 
   void StyleConfig::GetWayPathTextStyle(const SegmentAttributes& way,
-                                        size_t level,
+                                        const Projection& projection,
                                         PathTextStyleRef& pathTextStyle) const
   {
     GetSegmentAttributesStyle(wayPathTextStyleSelectors[way.GetType()],
                               way,
-                              level,
+                              projection,
                               pathTextStyle);
   }
 
   void StyleConfig::GetWayPathSymbolStyle(const SegmentAttributes& way,
-                                          size_t level,
+                                          const Projection& projection,
                                           PathSymbolStyleRef& pathSymbolStyle) const
   {
     GetSegmentAttributesStyle(wayPathSymbolStyleSelectors[way.GetType()],
                               way,
-                              level,
+                              projection,
                               pathSymbolStyle);
   }
 
   void StyleConfig::GetWayPathShieldStyle(const SegmentAttributes& way,
-                                         size_t level,
-                                         PathShieldStyleRef& pathShieldStyle) const
+                                          const Projection& projection,
+                                          PathShieldStyleRef& pathShieldStyle) const
   {
     GetSegmentAttributesStyle(wayPathShieldStyleSelectors[way.GetType()],
                               way,
-                              level,
+                              projection,
                               pathShieldStyle);
   }
 
   void StyleConfig::GetAreaFillStyle(const SegmentAttributes& area,
-                                     size_t level,
+                                     const Projection& projection,
                                      FillStyleRef& fillStyle) const
   {
     GetSegmentAttributesStyle(areaFillStyleSelectors[area.GetType()],
                               area,
-                              level,
+                              projection,
                               fillStyle);
   }
 
   void StyleConfig::GetAreaTextStyle(const SegmentAttributes& area,
-                                     size_t level,
+                                     const Projection& projection,
                                      TextStyleRef& textStyle) const
   {
     GetSegmentAttributesStyle(areaTextStyleSelectors[area.GetType()],
                               area,
-                              level,
+                              projection,
                               textStyle);
   }
 
   void StyleConfig::GetAreaIconStyle(const SegmentAttributes& area,
-                                     size_t level,
+                                     const Projection& projection,
                                      IconStyleRef& iconStyle) const
   {
     GetSegmentAttributesStyle(areaIconStyleSelectors[area.GetType()],
                               area,
-                              level,
+                              projection,
                               iconStyle);
   }
 
-  void StyleConfig::GetLandFillStyle(size_t level,
+  void StyleConfig::GetLandFillStyle(const Projection& projection,
                                      FillStyleRef& fillStyle) const
   {
     GetStyle(areaFillStyleSelectors[typeConfig->typeTileLand],
-             level,
+             projection,
              fillStyle);
   }
 
-  void StyleConfig::GetSeaFillStyle(size_t level,
+  void StyleConfig::GetSeaFillStyle(const Projection& projection,
                                     FillStyleRef& fillStyle) const
   {
     GetStyle(areaFillStyleSelectors[typeConfig->typeTileSea],
-             level,
+             projection,
              fillStyle);
   }
 
-  void StyleConfig::GetCoastFillStyle(size_t level,
+  void StyleConfig::GetCoastFillStyle(const Projection& projection,
                                       FillStyleRef& fillStyle) const
   {
     GetStyle(areaFillStyleSelectors[typeConfig->typeTileCoast],
-             level,
+             projection,
              fillStyle);
   }
 
-  void StyleConfig::GetUnknownFillStyle(size_t level,
+  void StyleConfig::GetUnknownFillStyle(const Projection& projection,
                                         FillStyleRef& fillStyle) const
   {
     GetStyle(areaFillStyleSelectors[typeConfig->typeTileUnknown],
-             level,
+             projection,
              fillStyle);
   }
 
-  void StyleConfig::GetCoastlineLineStyle(size_t level,
-                                       LineStyleRef& lineStyle) const
+  void StyleConfig::GetCoastlineLineStyle(const Projection& projection,
+                                          LineStyleRef& lineStyle) const
   {
     GetStyle(wayLineStyleSelectors[typeConfig->typeTileCoastline],
-             level,
+             projection,
              lineStyle);
   }
 }
