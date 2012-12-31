@@ -437,12 +437,14 @@ namespace osmscout {
 
     StopClock nodeIndexTimer;
 
-    if (!areaNodeIndex.GetOffsets(lonMin,latMin,lonMax,latMax,
-                                  nodeTypes,
-                                  parameter.GetMaximumNodes(),
-                                  nodeOffsets)) {
-      std::cout << "Error getting nodes from area node index!" << std::endl;
-      return false;
+    if (nodeTypes.HasTypes()) {
+      if (!areaNodeIndex.GetOffsets(lonMin,latMin,lonMax,latMax,
+                                    nodeTypes,
+                                    parameter.GetMaximumNodes(),
+                                    nodeOffsets)) {
+        std::cout << "Error getting nodes from area node index!" << std::endl;
+        return false;
+      }
     }
 
     nodeIndexTimer.Stop();
@@ -453,36 +455,40 @@ namespace osmscout {
 
     StopClock wayIndexTimer;
 
-    if (parameter.GetUseLowZoomOptimization() &&
-        optimizeLowZoom.HasOptimizations(magnification.GetMagnification())) {
-      optimizeLowZoom.GetWays(lonMin,
-                              latMin,
-                              lonMax,
-                              latMax,
-                              parameter.GetMaximumWays(),
-                              internalWayTypes,
-                              ways);
+    if (!internalWayTypes.empty()) {
+      if (parameter.GetUseLowZoomOptimization() &&
+          optimizeLowZoom.HasOptimizations(magnification.GetMagnification())) {
+        optimizeLowZoom.GetWays(lonMin,
+                                latMin,
+                                lonMax,
+                                latMax,
+                                parameter.GetMaximumWays(),
+                                internalWayTypes,
+                                ways);
 
-      /* TODO:
-      for (size_t i=0; i<wayTypes.size(); i++) {
-        std::cout << "Warning: Loading type " << typeConfig->GetTypeInfo(wayTypes[i]).GetName() << " via normal index" << std::endl;
-      }*/
+        /* TODO:
+        for (size_t i=0; i<wayTypes.size(); i++) {
+          std::cout << "Warning: Loading type " << typeConfig->GetTypeInfo(wayTypes[i]).GetName() << " via normal index" << std::endl;
+        }*/
+      }
     }
 
     if (parameter.IsAborted()) {
       return false;
     }
 
-    if (!areaWayIndex.GetOffsets(lonMin,
-                                 latMin,
-                                 lonMax,
-                                 latMax,
-                                 internalWayTypes,
-                                 parameter.GetMaximumWays(),
-                                 wayWayOffsets,
-                                 relationWayOffsets)) {
-      std::cout << "Error getting ways Glations from area way index!" << std::endl;
-      return false;
+    if (!internalWayTypes.empty()) {
+      if (!areaWayIndex.GetOffsets(lonMin,
+                                   latMin,
+                                   lonMax,
+                                   latMax,
+                                   internalWayTypes,
+                                   parameter.GetMaximumWays(),
+                                   wayWayOffsets,
+                                   relationWayOffsets)) {
+        std::cout << "Error getting ways Glations from area way index!" << std::endl;
+        return false;
+      }
     }
 
     if (parameter.IsAborted()) {
@@ -493,18 +499,20 @@ namespace osmscout {
 
     StopClock areaAreaIndexTimer;
 
-    if (!areaAreaIndex.GetOffsets(lonMin,
-                                  latMin,
-                                  lonMax,
-                                  latMax,
-                                  magnification.GetLevel()+
-                                  parameter.GetMaximumAreaLevel(),
-                                  areaTypes,
-                                  parameter.GetMaximumAreas(),
-                                  wayAreaOffsets,
-                                  relationAreaOffsets)) {
-      std::cout << "Error getting areas from area index!" << std::endl;
-      return false;
+    if (areaTypes.HasTypes()) {
+      if (!areaAreaIndex.GetOffsets(lonMin,
+                                    latMin,
+                                    lonMax,
+                                    latMax,
+                                    magnification.GetLevel()+
+                                    parameter.GetMaximumAreaLevel(),
+                                    areaTypes,
+                                    parameter.GetMaximumAreas(),
+                                    wayAreaOffsets,
+                                    relationAreaOffsets)) {
+        std::cout << "Error getting areas from area index!" << std::endl;
+        return false;
+      }
     }
 
     areaAreaIndexTimer.Stop();
@@ -513,13 +521,18 @@ namespace osmscout {
       return false;
     }
 
-    StopClock nodesTimer;
+    StopClock sortTimer;
 
     std::sort(nodeOffsets.begin(),nodeOffsets.end());
     std::sort(wayWayOffsets.begin(),wayWayOffsets.end());
     std::sort(wayAreaOffsets.begin(),wayAreaOffsets.end());
     std::sort(relationWayOffsets.begin(),relationWayOffsets.end());
     std::sort(relationAreaOffsets.begin(),relationAreaOffsets.end());
+
+    sortTimer.Stop();
+
+    StopClock nodesTimer;
+
 
     if (!GetNodesByOffset(nodeOffsets,
                           nodes)) {
@@ -535,10 +548,12 @@ namespace osmscout {
 
     StopClock waysTimer;
 
-    if (!GetWaysByOffset(wayWayOffsets,
-                         ways)) {
-      std::cout << "Error reading ways in area!" << std::endl;
-      return false;
+    if (!wayWayOffsets.empty()) {
+      if (!GetWaysByOffset(wayWayOffsets,
+                           ways)) {
+        std::cout << "Error reading ways in area!" << std::endl;
+        return false;
+      }
     }
 
     waysTimer.Stop();
@@ -549,10 +564,12 @@ namespace osmscout {
 
     StopClock areasTimer;
 
-    if (!GetWaysByOffset(wayAreaOffsets,
-                         areas)) {
-      std::cout << "Error reading areas in area!" << std::endl;
-      return false;
+    if (!wayAreaOffsets.empty()) {
+      if (!GetWaysByOffset(wayAreaOffsets,
+                           areas)) {
+        std::cout << "Error reading areas in area!" << std::endl;
+        return false;
+      }
     }
 
     areasTimer.Stop();
@@ -563,10 +580,12 @@ namespace osmscout {
 
     StopClock relationWaysTimer;
 
-    if (!GetRelationsByOffset(relationWayOffsets,
-                              relationWays)) {
-      std::cout << "Error reading relation ways in area!" << std::endl;
-      return false;
+    if (!relationWayOffsets.empty()) {
+      if (!GetRelationsByOffset(relationWayOffsets,
+                                relationWays)) {
+        std::cout << "Error reading relation ways in area!" << std::endl;
+        return false;
+      }
     }
 
     relationWaysTimer.Stop();
@@ -577,10 +596,12 @@ namespace osmscout {
 
     StopClock relationAreasTimer;
 
-    if (!GetRelationsByOffset(relationAreaOffsets,
-                              relationAreas)) {
-      std::cerr << "Error reading relation areas in area!" << std::endl;
-      return false;
+    if (!relationAreaOffsets.empty()) {
+      if (!GetRelationsByOffset(relationAreaOffsets,
+                                relationAreas)) {
+        std::cerr << "Error reading relation areas in area!" << std::endl;
+        return false;
+      }
     }
 
     relationAreasTimer.Stop();
@@ -590,7 +611,9 @@ namespace osmscout {
       std::cout << "n " << nodeIndexTimer << " ";
       std::cout << "w " << wayIndexTimer << " ";
       std::cout << "a " << areaAreaIndexTimer;
-      std::cout << " - ";
+      std::cout << " ";
+      std::cout << sortTimer;
+      std::cout << " ";
       std::cout << "n " << nodesTimer << " ";
       std::cout << "w " << waysTimer << "/" << relationWaysTimer << " ";
       std::cout << "a " << areasTimer << "/" << relationAreasTimer;
