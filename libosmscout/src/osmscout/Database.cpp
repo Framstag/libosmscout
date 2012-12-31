@@ -611,9 +611,9 @@ namespace osmscout {
       std::cout << "n " << nodeIndexTimer << " ";
       std::cout << "w " << wayIndexTimer << " ";
       std::cout << "a " << areaAreaIndexTimer;
-      std::cout << " ";
-      std::cout << sortTimer;
-      std::cout << " ";
+      std::cout << " - ";
+      std::cout << "s "  << sortTimer;
+      std::cout << " - ";
       std::cout << "n " << nodesTimer << " ";
       std::cout << "w " << waysTimer << "/" << relationWaysTimer << " ";
       std::cout << "a " << areasTimer << "/" << relationAreasTimer;
