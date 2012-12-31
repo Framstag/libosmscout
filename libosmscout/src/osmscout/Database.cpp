@@ -533,7 +533,6 @@ namespace osmscout {
 
     StopClock nodesTimer;
 
-
     if (!GetNodesByOffset(nodeOffsets,
                           nodes)) {
       std::cout << "Error reading nodes in area!" << std::endl;
@@ -694,6 +693,16 @@ namespace osmscout {
 
     areaAreaIndexTimer.Stop();
 
+    StopClock sortTimer;
+
+    std::sort(nodeOffsets.begin(),nodeOffsets.end());
+    std::sort(wayWayOffsets.begin(),wayWayOffsets.end());
+    std::sort(wayAreaOffsets.begin(),wayAreaOffsets.end());
+    std::sort(relationWayOffsets.begin(),relationWayOffsets.end());
+    std::sort(relationAreaOffsets.begin(),relationAreaOffsets.end());
+
+    sortTimer.Stop();
+
     StopClock nodesTimer;
 
     if (!GetNodesByOffset(nodeOffsets,
@@ -749,6 +758,8 @@ namespace osmscout {
       std::cout << "n " << nodeIndexTimer << " ";
       std::cout << "w " << wayIndexTimer << " ";
       std::cout << "a " << areaAreaIndexTimer;
+      std::cout << " - ";
+      std::cout << "s "  << sortTimer;
       std::cout << " - ";
       std::cout << "n " << nodesTimer << " ";
       std::cout << "w " << waysTimer << "/" << relationWaysTimer << " ";
