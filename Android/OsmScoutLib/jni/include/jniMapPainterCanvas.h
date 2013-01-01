@@ -32,10 +32,45 @@ namespace osmscout {
     JNIEnv   *mJniEnv;
     jclass   mPainterClass;
     jobject  mPainterObject;
+
+    double   mMinimumLineWidth; //! Minimum width a line must have to be visible
     
     int GetColorInt(double r, double g, double b, double a);
     int GetColorInt(Color color);
-  
+
+  private:
+
+    void DrawPrimitivePath(const Projection& projection,
+                           const MapParameter& parameter,
+                           const DrawPrimitiveRef& primitive,
+                           double x, double y,
+                           double minX,
+                           double minY,
+                           double maxX,
+                           double maxY);
+
+    void DrawPrimitivePath(const Projection& projection,
+                           const MapParameter& parameter,
+                           const DrawPrimitiveRef& primitive,
+                           double x, double y,
+                           double minX,
+                           double minY,
+                           double maxX,
+                           double maxY,
+                           double* onPathX, double* onPathY,
+                           double* segmentLengths);
+
+    void DrawFillStyle(const Projection& projection,
+                       const MapParameter& parameter,
+                       const FillStyle& fill);
+
+    void SetPolygonFillPath(float* x, float* y, int numPoints);
+
+    void MapPathOnPath(float* arrayX, float* arrayY,
+                       int numPoints,
+                       double* onPathX, double* onPathY,
+                       double* segmentLengths);
+
   protected:
 
     bool HasIcon(const StyleConfig& styleConfig,
@@ -67,8 +102,16 @@ namespace osmscout {
                           const std::string& text,
                           size_t transStart, size_t transEnd);
 
-    void DrawSymbol(const SymbolStyle* style,
+    void DrawSymbol(const Projection& projection,
+                    const MapParameter& parameter,
+                    const Symbol& symbol,
                     double x, double y);
+
+    void DrawContourSymbol(const Projection& projection,
+                           const MapParameter& parameter,
+                           const Symbol& symbol,
+                           double space,
+                           size_t transStart, size_t transEnd);
 
     void DrawIcon(const IconStyle* style,
                   double x, double y);

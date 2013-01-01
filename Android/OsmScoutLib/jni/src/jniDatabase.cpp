@@ -300,6 +300,37 @@ jobject Java_osm_scout_Database_jniGetObjects(JNIEnv *env, jobject object,
   return javaMapData;
 }
 
+jboolean Java_osm_scout_Database_jniGetGroundTiles(JNIEnv *env, jobject object,
+                                int databaseIndex, int mapDataIndex,
+                                double lonMin, double latMin, double lonMax,
+                                double latMax, double magnification)
+{
+  __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniGetGroundTiles(): GetGroundTiles() starts...");
+
+  Database *nativeDatabase=gDatabaseArray->Get(databaseIndex);
+
+  if (!nativeDatabase)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniGetGroundTiles(): NULL Database object");
+    return JNI_FALSE;
+  }
+
+  MapData *nativeMapData=gMapDataArray->Get(mapDataIndex);
+
+  if (!nativeMapData)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniGetGroundTiles(): NULL MapData object");
+    return JNI_FALSE;
+  }
+
+  return nativeDatabase->GetGroundTiles(
+                             lonMin, latMin, lonMax, latMax,
+                             magnification, nativeMapData->groundTiles);
+}
+
 jobject Java_osm_scout_Database_jniGetTypeConfig(JNIEnv *env, jobject object,
                                 int databaseIndex)
 {

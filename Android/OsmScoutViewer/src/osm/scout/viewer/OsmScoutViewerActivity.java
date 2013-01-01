@@ -106,6 +106,9 @@ public class OsmScoutViewerActivity extends Activity implements OsmScoutMapEvent
         // Set icons and pattern paths in MapParameter
         mMapParameter=new MapParameter();
         
+        // Activate sea/land rendering
+        mMapParameter.setRenderSeaLand(true);
+        
         Vector<String> iconPaths=new Vector<String>();
         iconPaths.add(mIconsPath); 
         
@@ -122,7 +125,7 @@ public class OsmScoutViewerActivity extends Activity implements OsmScoutMapEvent
         
         // Set projection position to the center of the map and zoom 12 
         mProjection.setPos(mapCenter, Math.pow(2.0, 12.0));
-    	
+        
         // Create controls from resource layout
         setContentView(R.layout.main);
         
@@ -198,6 +201,12 @@ public class OsmScoutViewerActivity extends Activity implements OsmScoutMapEvent
     
     	// Get database objects for given object type sets and current projection
     	MapData mapData=mDatabase.getObjects(typeSets, mProjection);
+    	
+    	// Get ground tiles if sea/land rendering is enabled
+    	if (mMapParameter.getRenderSeaLand()) {
+    		
+    		mDatabase.getGroundTiles(mProjection, mapData);    		
+    	}
     
     	// Redraws map
     	mOsmScoutMapView.drawMap(mStyleConfig, mProjection, mMapParameter, mapData);

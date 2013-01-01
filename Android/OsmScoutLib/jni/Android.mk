@@ -31,7 +31,7 @@ LOCAL_C_INCLUDES := ../../../libosmscout/include \
                     $(ANDROID_NDK_PATH)/sources/cxx-stl/gnu-libstdc++/4.6/include \
                     $(ANDROID_NDK_PATH)/sources/cxx-stl/gnu-libstdc++/4.6/libs/armeabi/include
 
-LOCAL_CFLAGS := -std=gnu++0x -Wno-psabi
+LOCAL_CFLAGS := -std=gnu++0x -Wno-psabi -frtti
 
 LOCAL_SRC_FILES := ../../../libosmscout/src/osmscout/AreaAreaIndex.cpp \
                    ../../../libosmscout/src/osmscout/AreaNodeIndex.cpp \

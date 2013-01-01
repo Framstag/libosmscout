@@ -120,6 +120,36 @@ void Java_osm_scout_MapParameter_jniSetPatternPaths(JNIEnv *env, jobject object,
   nativeMapParameter->SetPatternPaths(nativePaths);
 }
 
+void Java_osm_scout_MapParameter_jniSetRenderSeaLand(JNIEnv *env, jobject object,
+                          int mapParameterIndex, jboolean render)
+{
+  MapParameter *nativeMapParameter=gMapParameterArray->Get(mapParameterIndex);
+
+  if (!nativeMapParameter)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniSetRenderSeaLand(): NULL object");
+    return;
+  }
+
+  nativeMapParameter->SetRenderSeaLand(render);
+}
+
+jboolean Java_osm_scout_MapParameter_jniGetRenderSeaLand(JNIEnv *env, jobject object,
+                          int mapParameterIndex)
+{
+  MapParameter *nativeMapParameter=gMapParameterArray->Get(mapParameterIndex);
+
+  if (!nativeMapParameter)
+  {
+    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG,
+                        "jniGetRenderSeaLand(): NULL object");
+    return JNI_FALSE;
+  }
+
+  return nativeMapParameter->GetRenderSeaLand();
+}
+
 #ifdef __cplusplus
 }
 #endif

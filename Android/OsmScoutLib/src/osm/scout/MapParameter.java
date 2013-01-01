@@ -71,15 +71,30 @@ public class MapParameter {
 
 		jniSetPatternPaths(mJniMapParameterIndex, pathsArray);
 	}
+	
+	public void setRenderSeaLand(boolean render) {
+		
+		jniSetRenderSeaLand(mJniMapParameterIndex, render);
+	}
+
+	public boolean getRenderSeaLand() {
+		
+		return jniGetRenderSeaLand(mJniMapParameterIndex);
+	}
 
 	// Native methods
 	private native int jniConstructor();
 
-	private native void jniDestructor(int jniObjectTypeSetsIndex);
+	private native void jniDestructor(int jniMapParameterIndex);
 
-	private native void jniSetIconPaths(int jniObjectTypeSetsIndex,
+	private native void jniSetIconPaths(int jniMapParameterIndex,
 											String[] pathsArray);
 
-	private native void jniSetPatternPaths(int jniObjectTypeSetsIndex,
+	private native void jniSetPatternPaths(int jniMapParameterIndex,
 											String[] pathsArray);
+	
+	private native void jniSetRenderSeaLand(int jniMapParameterIndex,
+											boolean render);
+	
+	private native boolean jniGetRenderSeaLand(int jniMapParameterIndex);
 }

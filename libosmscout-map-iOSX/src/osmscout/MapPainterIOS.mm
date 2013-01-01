@@ -237,6 +237,14 @@ namespace osmscout {
         return width;
     }
     
+    double MapPainterIOS::textHeight(const MapParameter& parameter, double fontSize, std::string text){
+        double xOff;
+        double yOff;
+        double width;
+        double height;
+        GetTextDimension(parameter,fontSize,text,xOff,yOff,width,height);
+        return height;
+    }
     /*
      * DrawLabel(const Projection& projection, const MapParameter& parameter, const LabelData& label)
      */
@@ -263,7 +271,8 @@ namespace osmscout {
 #else
             NSColor *color = [NSColor colorWithSRGBRed:label.style->GetTextColor().GetR() green:label.style->GetTextColor().GetG() blue:label.style->GetTextColor().GetB() alpha:label.style->GetTextColor().GetA()];
             NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
-            [str drawAtPoint:CGPointMake(label.x, label.y) withAttributes:attrsDictionary];
+            double height = textHeight(parameter, label.fontSize, label.text);
+            [str drawAtPoint:CGPointMake(label.x, label.y - height - 5) withAttributes:attrsDictionary];
     
 #endif
         } else if (label.style->GetStyle()==LabelStyle::emphasize) {
@@ -276,7 +285,8 @@ namespace osmscout {
 #else
             NSColor *color = [NSColor colorWithSRGBRed:label.style->GetTextColor().GetR() green:label.style->GetTextColor().GetG() blue:label.style->GetTextColor().GetB() alpha:label.style->GetTextColor().GetA()];
             NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
-            [str drawAtPoint:CGPointMake(label.x, label.y) withAttributes:attrsDictionary];
+            double height = textHeight(parameter, label.fontSize, label.text);
+            [str drawAtPoint:CGPointMake(label.x, label.y - height - 5) withAttributes:attrsDictionary];
 #endif
             CGColorRelease(haloColor);
             CGColorSpaceRelease(colorSpace);
@@ -340,23 +350,22 @@ namespace osmscout {
     CGFloat MapPainterIOS::pathLength(size_t transStart, size_t transEnd){
         CGFloat len = 0;
         for(size_t j=transStart; j<transEnd; j++) {
-            len += (transBuffer.buffer[j].x - transBuffer.buffer[j+1].x) * (transBuffer.buffer[j].x - transBuffer.buffer[j+1].x)
-            +(transBuffer.buffer[j].y - transBuffer.buffer[j+1].y) * (transBuffer.buffer[j].y - transBuffer.buffer[j+1].y);
+            len += sqrtf((transBuffer.buffer[j].x - transBuffer.buffer[j+1].x) * (transBuffer.buffer[j].x - transBuffer.buffer[j+1].x)
+            +(transBuffer.buffer[j].y - transBuffer.buffer[j+1].y) * (transBuffer.buffer[j].y - transBuffer.buffer[j+1].y));
         }
-        return sqrt(len);
+        return len;
     }
-    
-    Pt MapPainterIOS::originForPositionAlongPath(CGFloat *l, CGFloat nextW, size_t transStart, size_t transEnd) {
-        CGFloat widthToGo = *l + nextW;
-        Pt pos = {-1, -1};
+
+    XYSlope MapPainterIOS::originAndSlopeAlongPath(CGFloat l, CGFloat nextW, size_t transStart, size_t transEnd,
+                                                   CGFloat &posX, CGFloat &posY, size_t &i, CGFloat &currentL) {
+        CGFloat widthToGo = l - currentL;
+        XYSlope pos = {-1, -1, -1};
+        Pt pos1 = {NAN, NAN};
         
         size_t pathSize = labs(transEnd - transStart);
-        CGFloat posX = transBuffer.buffer[transStart].x;
-        CGFloat posY = transBuffer.buffer[transStart].y;
         int direction = (transStart < transEnd) ? 1 : -1;
-        size_t i=0;
-        
-        while(widthToGo >= 0) {
+
+        while(widthToGo+nextW >= 0) {
             //out of path, return invalid point
             if(i+direction >= pathSize) {
                 return pos;
@@ -369,16 +378,26 @@ namespace osmscout {
             CGFloat yDiff = (nextY - posY)*direction;
             CGFloat distToNext = sqrt(xDiff*xDiff + yDiff*yDiff);
             
-            CGFloat fracToGo = widthToGo/distToNext;
+            CGFloat fracToGo1 = widthToGo/distToNext;
+            if(fracToGo1 < 1 && std::isnan(pos1.x)){
+                pos1.x = posX+(xDiff*fracToGo1);
+                pos1.y = posY+(yDiff*fracToGo1);
+            }
+            
+            CGFloat fracToGo2 = (widthToGo+nextW)/distToNext;
             //point is before next point in path, interpolate the answer
-            if(fracToGo < 1) {
-                pos.x = posX+(xDiff*fracToGo);
-                pos.y = posY+(yDiff*fracToGo);
+            if(fracToGo2 < 1) {
+                pos.x = posX+(xDiff*fracToGo2);
+                pos.y = posY+(yDiff*fracToGo2);
+                pos.slope = atan2(pos.y-pos1.y, pos.x-pos1.x);
+                pos.x = (pos.x + pos1.x)/2;
+                pos.y = (pos.y + pos1.y)/2;
                 return pos;
             }
             
             //advance to next point on the path
             widthToGo -= distToNext;
+            currentL += distToNext;
             posX = nextX;
             posY = nextY;
             i+=direction;
@@ -386,16 +405,68 @@ namespace osmscout {
         return pos;
     }
     
-    CGFloat MapPainterIOS::slopeForPositionAlongPath(CGFloat* l, CGFloat nextW, size_t transStart, size_t transEnd) {
-        Pt begin = originForPositionAlongPath(l, 0, transStart, transEnd);
-        Pt end = originForPositionAlongPath(l, nextW, transStart, transEnd);
+    void MapPainterIOS::DrawContourSymbol(const Projection& projection,
+                                            const MapParameter& parameter,
+                                            const Symbol& symbol,
+                                            double space,
+                                            size_t transStart, size_t transEnd){
+        double lineLength=pathLength(transStart, transEnd);
+        CGContextSaveGState(cg);
         
-        CGFloat xDiff = end.x - begin.x;
-        CGFloat yDiff = end.y - begin.y;
+        double minX;
+        double minY;
+        double maxX;
+        double maxY;
         
-        return atan2(yDiff, xDiff);
+        symbol.GetBoundingBox(minX,minY,maxX,maxY);
+        
+        double width=ConvertWidthToPixel(parameter,maxX-minX);
+        double height=ConvertWidthToPixel(parameter,maxY-minY);
+        CGAffineTransform transform=CGAffineTransformMake(1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+        for (std::list<DrawPrimitiveRef>::const_iterator p=symbol.GetPrimitives().begin();
+             p!=symbol.GetPrimitives().end();
+             ++p) {
+            FillStyleRef fillStyle=(*p)->GetFillStyle();
+            
+            CGContextBeginPath(cg);
+            DrawFillStyle(projection,
+                          parameter,
+                          *fillStyle);
+            
+            CGFloat lenUpToNow = space/2;
+            CGFloat posX = transBuffer.buffer[transStart].x;
+            CGFloat posY = transBuffer.buffer[transStart].y;
+            size_t segment = 0;
+            CGFloat currentL = 0;
+            while (lenUpToNow+width<lineLength) {
+                XYSlope origin = originAndSlopeAlongPath(lenUpToNow, width, transStart, transEnd, posX, posY, segment, currentL);
+                CGContextSaveGState(cg);
+                
+                CGContextTranslateCTM(cg, origin.x, origin.y);
+                CGAffineTransform ct = CGAffineTransformConcat(transform, CGAffineTransformMakeRotation(origin.slope));
+                CGContextConcatCTM(cg, ct);
+                DrawPrimitivePath(projection,
+                                  parameter,
+                                  *p,
+#ifdef OSMSCOUT_REVERSED_Y_AXIS
+                                  -width/2,height,
+#else
+                                  -width/2,height/2,
+#endif
+                                  minX,
+                                  minY,
+                                  maxX,
+                                  maxY);
+                CGContextRestoreGState(cg);
+                
+                lenUpToNow+=width+space;
+            }
+            
+            CGContextFillPath(cg);
+        }
+        CGContextRestoreGState(cg);
     }
-    
+
     /*
      * DrawContourLabel(const Projection& projection,
      *                  const MapParameter& parameter,
@@ -440,33 +511,34 @@ namespace osmscout {
         CGFloat lenUpToNow = 10;
         
         NSString *nsText= [NSString stringWithCString:text.c_str() encoding:NSUTF8StringEncoding];
-
+        CGFloat posX = transBuffer.buffer[transStart].x;
+        CGFloat posY = transBuffer.buffer[transStart].y;
         int charIndex = 0;
+        size_t segment = 0;
+        CGFloat currentL = 0.0;
         for(int i=0;i<[nsText length];i++) {
             
             NSString *str = [nsText substringWithRange:NSMakeRange(i, 1)];
             
             float nww = textLength(parameter,style.GetSize(),[str cStringUsingEncoding:NSUTF8StringEncoding]);
             
-            Pt charOrigin = originForPositionAlongPath(&lenUpToNow, 0, tStart, tEnd);
+            XYSlope charOrigin = originAndSlopeAlongPath(lenUpToNow, nww, tStart, tEnd, posX, posY, segment, currentL);
             if(charOrigin.x == -1 && charOrigin.y == -1){
                 CGContextRestoreGState(cg);
                 return;
             }
-            CGFloat slope = slopeForPositionAlongPath(&lenUpToNow, nww, tStart, tEnd);
-            //std::cout << " CHARACTER " << [str UTF8String] << " placed at " << charOrigin.x << "," << charOrigin.y << " slope "<< slope << std::endl;
+            //std::cout << " CHARACTER " << [str UTF8String] << " placed at " << charOrigin.x << "," << charOrigin.y << " slope "<< charOrigin.slope << std::endl;
             
             CGContextSaveGState(cg);
             
             CGContextTranslateCTM(cg, charOrigin.x, charOrigin.y);
-            CGAffineTransform ct = CGAffineTransformConcat(transform, CGAffineTransformMakeRotation(slope));
+            CGAffineTransform ct = CGAffineTransformConcat(transform, CGAffineTransformMakeRotation(charOrigin.slope));
             CGContextConcatCTM(cg, ct);
-            CGContextTranslateCTM(cg, -charOrigin.x, -charOrigin.y);
             
 #if TARGET_OS_IPHONE
-            [str drawAtPoint:CGPointMake(charOrigin.x, charOrigin.y) withFont:font];
+            [str drawAtPoint:CGPointMake(-nww/2,0) withFont:font];
 #else
-            [str drawAtPoint:CGPointMake(charOrigin.x, charOrigin.y) withAttributes:attrsDictionary];
+            [str drawAtPoint:CGPointMake(-nww/2,0) withAttributes:attrsDictionary];
 #endif
             CGContextRestoreGState(cg);
             lenUpToNow += nww;
@@ -508,6 +580,82 @@ namespace osmscout {
 #endif
     }
     
+    void MapPainterIOS::DrawPrimitivePath(const Projection& projection,
+                                            const MapParameter& parameter,
+                                            const DrawPrimitiveRef& p,
+                                            double x, double y,
+                                            double minX,
+                                            double minY,
+                                            double maxX,
+                                            double maxY)
+    {
+        DrawPrimitive* primitive=p.Get();
+        double         centerX=maxX-minX;
+        double         centerY=maxY-minY;
+        
+        if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
+            PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
+            
+            CGContextBeginPath(cg);
+            for (std::list<Pixel>::const_iterator pixel=polygon->GetPixels().begin();
+                 pixel!=polygon->GetPixels().end();
+                 ++pixel) {
+                if (pixel==polygon->GetPixels().begin()) {
+#ifdef OSMSCOUT_REVERSED_Y_AXIS
+                    CGContextMoveToPoint(cg,x+ConvertWidthToPixel(parameter,pixel->x-centerX),
+                                         y+ConvertWidthToPixel(parameter,pixel->y-centerY));
+#else
+                    CGContextMoveToPoint(cg,x+ConvertWidthToPixel(parameter,pixel->x-centerX),
+                                         y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
+#endif
+                }
+                else {
+#ifdef OSMSCOUT_REVERSED_Y_AXIS
+                    CGContextAddLineToPoint(cg,x+ConvertWidthToPixel(parameter,pixel->x-centerX),
+                                            y+ConvertWidthToPixel(parameter,pixel->y-centerY));
+#else
+                    CGContextAddLineToPoint(cg,x+ConvertWidthToPixel(parameter,pixel->x-centerX),
+                                            y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
+#endif
+                }
+            }
+            
+            CGContextDrawPath(cg, kCGPathFill);
+        }
+        else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL) {
+            RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
+#ifdef OSMSCOUT_REVERSED_Y_AXIS
+            CGRect rect = CGRectMake(x+ConvertWidthToPixel(parameter,rectangle->GetTopLeft().x-centerX),
+                                     y+ConvertWidthToPixel(parameter,rectangle->GetTopLeft().y-minY-rectangle->GetHeight()),
+                                     ConvertWidthToPixel(parameter,rectangle->GetWidth()),
+                                     ConvertWidthToPixel(parameter,rectangle->GetHeight()));
+#else
+            CGRect rect = CGRectMake(x+ConvertWidthToPixel(parameter,rectangle->GetTopLeft().x-centerX),
+                                     y+ConvertWidthToPixel(parameter,maxY-rectangle->GetTopLeft().y-centerY),
+                                     ConvertWidthToPixel(parameter,rectangle->GetWidth()),
+                                     ConvertWidthToPixel(parameter,rectangle->GetHeight()));
+#endif
+            CGContextAddRect(cg,rect);
+            CGContextDrawPath(cg, kCGPathFill);
+        }
+        else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL) {
+            CirclePrimitive* circle=dynamic_cast<CirclePrimitive*>(primitive);
+#ifdef OSMSCOUT_REVERSED_Y_AXIS
+            CGRect rect = CGRectMake(x+ConvertWidthToPixel(parameter,circle->GetCenter().x-centerX),
+                                     y+ConvertWidthToPixel(parameter,circle->GetCenter().y+centerY),
+                                     ConvertWidthToPixel(parameter,circle->GetRadius()),
+                                     ConvertWidthToPixel(parameter,circle->GetRadius()));
+#else
+            CGRect rect = CGRectMake(x+ConvertWidthToPixel(parameter,circle->GetCenter().x-centerX),
+                                     y+ConvertWidthToPixel(parameter,maxY-circle->GetCenter().y-centerY),
+                                     ConvertWidthToPixel(parameter,circle->GetRadius()),
+                                     ConvertWidthToPixel(parameter,circle->GetRadius()));
+#endif
+            CGContextAddEllipseInRect(cg, rect);
+            CGContextDrawPath(cg, kCGPathFill);
+        }
+    }
+    
     /*
      * DrawSymbol(const Projection& projection,
      *            const MapParameter& parameter,
@@ -516,112 +664,38 @@ namespace osmscout {
      */
     void MapPainterIOS::DrawSymbol(const Projection& projection,
                     const MapParameter& parameter,
-                    const SymbolRef& symbol,
+                    const Symbol& symbol,
                     double x, double y){
-        if (!symbol.Valid()) {
-            return;
-        }
         
         double minX;
         double minY;
         double maxX;
         double maxY;
-        double centerX;
-        double centerY;
-#ifdef OSMSCOUT_REVERSED_Y_AXIS
-        double viewHeight = projection.GetHeight();
-#endif
         
-        symbol->GetBoundingBox(minX,minY,maxX,maxY);
+        symbol.GetBoundingBox(minX,minY,maxX,maxY);
         
-        centerX=maxX-minX;
-        centerY=maxY-minY;
+        CGContextSaveGState(cg);
         
-        for (std::list<DrawPrimitiveRef>::const_iterator p=symbol->GetPrimitives().begin();
-             p!=symbol->GetPrimitives().end();
+        for (std::list<DrawPrimitiveRef>::const_iterator p=symbol.GetPrimitives().begin();
+             p!=symbol.GetPrimitives().end();
              ++p) {
-            DrawPrimitive* primitive=p->Get();
+            FillStyleRef fillStyle=(*p)->GetFillStyle();
             
-            if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
-                PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
-                FillStyleRef      style=polygon->GetFillStyle();
-                
-                SetFill(projection,
-                        parameter,
-                        *style);
-                
-                CGContextBeginPath(cg);
-                
-                for (std::list<Pixel>::const_iterator pixel=polygon->GetPixels().begin();
-                     pixel!=polygon->GetPixels().end();
-                     ++pixel) {
-                    if (pixel==polygon->GetPixels().begin()) {
-#ifdef OSMSCOUT_REVERSED_Y_AXIS
-                        CGContextMoveToPoint(cg,x+ConvertWidthToPixel(parameter,pixel->x-centerX),
-                                             y+ConvertWidthToPixel(parameter,pixel->y-centerY));
-#else
-                        CGContextMoveToPoint(cg,x+ConvertWidthToPixel(parameter,pixel->x-centerX),
-                                             y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
-#endif
-                    }
-                    else {
-#ifdef OSMSCOUT_REVERSED_Y_AXIS
-                        CGContextAddLineToPoint(cg,x+ConvertWidthToPixel(parameter,pixel->x-centerX),
-                                                y+ConvertWidthToPixel(parameter,pixel->y-centerY));
-#else
-                        CGContextAddLineToPoint(cg,x+ConvertWidthToPixel(parameter,pixel->x-centerX),
-                                                y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
-#endif
-                    }
-                }
-                
-                CGContextDrawPath(cg, kCGPathFill);
-            }
-            else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL) {
-                RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
-                FillStyleRef        style=rectangle->GetFillStyle();
-                
-                SetFill(projection,
-                        parameter,
-                        *style);
-                
-#ifdef OSMSCOUT_REVERSED_Y_AXIS
-                CGRect rect = CGRectMake(x+ConvertWidthToPixel(parameter,rectangle->GetTopLeft().x-centerX),
-                                         y+ConvertWidthToPixel(parameter,rectangle->GetTopLeft().y-minY-rectangle->GetHeight()),
-                                         ConvertWidthToPixel(parameter,rectangle->GetWidth()),
-                                         ConvertWidthToPixel(parameter,rectangle->GetHeight()));
-#else
-                CGRect rect = CGRectMake(x+ConvertWidthToPixel(parameter,rectangle->GetTopLeft().x-centerX),
-                                         y+ConvertWidthToPixel(parameter,maxY-rectangle->GetTopLeft().y-centerY),
-                                         ConvertWidthToPixel(parameter,rectangle->GetWidth()),
-                                         ConvertWidthToPixel(parameter,rectangle->GetHeight()));
-#endif
-                CGContextAddRect(cg,rect);
-                CGContextDrawPath(cg, kCGPathFill);
-            }
-            else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL) {
-                CirclePrimitive* circle=dynamic_cast<CirclePrimitive*>(primitive);
-                FillStyleRef     style=circle->GetFillStyle();
-                
-                SetFill(projection,
-                        parameter,
-                        *style);
-                
- #ifdef OSMSCOUT_REVERSED_Y_AXIS               
-                CGRect rect = CGRectMake(x+ConvertWidthToPixel(parameter,circle->GetCenter().x-centerX),
-                                         y+ConvertWidthToPixel(parameter,circle->GetCenter().y+centerY),
-                                         ConvertWidthToPixel(parameter,circle->GetRadius()),
-                                         ConvertWidthToPixel(parameter,circle->GetRadius()));
-#else
-                CGRect rect = CGRectMake(x+ConvertWidthToPixel(parameter,circle->GetCenter().x-centerX),
-                                         y+ConvertWidthToPixel(parameter,maxY-circle->GetCenter().y-centerY),
-                                         ConvertWidthToPixel(parameter,circle->GetRadius()),
-                                         ConvertWidthToPixel(parameter,circle->GetRadius()));
-#endif
-                CGContextAddEllipseInRect(cg, rect);
-                CGContextDrawPath(cg, kCGPathFill);
-            }
-        }     
+            DrawFillStyle(projection,
+                          parameter,
+                          *fillStyle);
+
+            DrawPrimitivePath(projection,
+                              parameter,
+                              *p,
+                              x,y,
+                              minX,
+                              minY,
+                              maxX,
+                              maxY);
+            
+        }
+        CGContextRestoreGState(cg);
     }
     
     /*
@@ -698,9 +772,10 @@ namespace osmscout {
      *          const MapParameter& parameter,
      *          const FillStyle& fillStyle)
      */
-    void MapPainterIOS::SetFill(const Projection& projection,
-                                 const MapParameter& parameter,
-                                 const FillStyle& fillStyle) {
+    
+    void MapPainterIOS::DrawFillStyle(const Projection& projection,
+                                        const MapParameter& parameter,
+                                        const FillStyle& fillStyle) {
         double borderWidth=ConvertWidthToPixel(parameter,
                                                fillStyle.GetBorderWidth());
 
@@ -805,7 +880,7 @@ namespace osmscout {
             drawingMode = kCGPathFillStroke;
         } 
         //
-        SetFill(projection, parameter,*area.fillStyle);
+        DrawFillStyle(projection, parameter,*area.fillStyle);
         CGContextDrawPath(cg, drawingMode);
         CGContextRestoreGState(cg);
     }

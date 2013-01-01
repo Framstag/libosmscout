@@ -82,6 +82,16 @@ public class Database {
 	            projection.getMagnification());
 	}
 	
+	public boolean getGroundTiles(Projection projection, MapData mapData) {
+		
+		GeoBox bounds=projection.getBoundaries();
+		
+		return jniGetGroundTiles(mJniDatabaseIndex, mapData.getJniObjectIndex(),
+	            bounds.getLonMin(), bounds.getLatMin(),
+	            bounds.getLonMax(), bounds.getLatMax(),
+	            projection.getMagnification());
+	}
+	
 	public TypeConfig getTypeConfig() {
 		return jniGetTypeConfig(mJniDatabaseIndex);
 	}
@@ -102,6 +112,11 @@ public class Database {
 	
 	private native MapData jniGetObjects(
 			int databaseIndex, int objectTypeSetsIndex,
+            double lonMin, double latMin, double lonMax, double latMax,
+            double magnification);
+	
+	private native boolean jniGetGroundTiles(
+			int databaseIndex, int mapDataIndex,
             double lonMin, double latMin, double lonMax, double latMax,
             double magnification);
 	

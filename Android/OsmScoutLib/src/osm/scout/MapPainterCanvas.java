@@ -46,6 +46,8 @@ public class MapPainterCanvas {
 
 	private Vector<Path> mClippingPaths=null;
 	
+	private Path mFillPath=null;
+	
 	private final static float FONT_SCALE=10;
 		
 	public MapPainterCanvas() {
@@ -59,7 +61,9 @@ public class MapPainterCanvas {
 		mIconArray=new Vector<Bitmap>();
 		mPatternArray=new Vector<Bitmap>();
 		
-		mClippingPaths=new Vector<Path>();		
+		mClippingPaths=new Vector<Path>();
+		
+		mFillPath=new Path();
 	}
 	
 	protected void finalize() throws Throwable {
@@ -82,40 +86,6 @@ public class MapPainterCanvas {
 		return jniDrawMap(mJniMapPainterIndex, styleConfig.getJniObjectIndex(),
                 projection.getJniObjectIndex(), mapParameter.getJniObjectIndex(),
                 mapData.getJniObjectIndex());
-	}
-	
-	public void drawSymbol(int style, int color, float size, float x, float y) {
-		
-		mPaint.setColor(color);
-		mPaint.setStyle(Paint.Style.FILL);
-		mPaint.setStrokeWidth(1);
-		
-		switch(style) {
-		
-		case 1: // Box
-			
-			mCanvas.drawRect(x-size/2, y-size/2, x+size/2, y+size/2, mPaint);
-			break;
-			
-		case 2: // Circle
-			
-			mCanvas.drawCircle(x, y, size, mPaint);
-			break;
-			
-		case 3: // Triangle
-			
-			Path path=new Path();
-			path.moveTo(x-size/2, y+size/2);
-			path.lineTo(x, y-size/2);
-			path.lineTo(x+size/2, y+size/2);
-			path.close();
-			
-			mCanvas.drawPath(path, mPaint);
-			break;
-			
-		default: // None or undefined
-			break;
-		}
 	}
 	
 	public int loadIconPNG(String iconPath) {
@@ -243,102 +213,70 @@ public class MapPainterCanvas {
 		mClippingPaths.add(clipPath);
 	}
 	
-	public void drawFilledArea(int fillColor, int borderColor, float borderWidth,
-			float[] x, float[] y) {
+	public void setPolygonFillPath(float[] x, float[] y) {
 		
-		Path areaPath=new Path();
+		mFillPath.reset();
 		
-		areaPath.moveTo(x[0], y[0]);
+		mFillPath.moveTo(x[0], y[0]);
 		
-		for(int i=1; i<x.length; i++) {
+		int numPoints=x.length;
+		
+		for(int i=0; i<numPoints; i++) {
 			
-			areaPath.lineTo(x[i], y[i]);
+			mFillPath.lineTo(x[i], y[i]);
 		}
-		
-		areaPath.close();
-		
-		// Add internal clipping paths (if any) to outer area path
-		if (mClippingPaths.size()>0) {
-			
-			Enumeration<Path> e=mClippingPaths.elements();
-					
-			while(e.hasMoreElements()) {
-						
-				areaPath.addPath(e.nextElement());
-			}
-		
-			areaPath.setFillType(Path.FillType.EVEN_ODD);
-		}
-		
-		// Draw area fill
-		mPaint.setColor(fillColor);
-		mPaint.setStyle(Paint.Style.FILL);
-					
-		mCanvas.drawPath(areaPath, mPaint);
-		
-		if (borderWidth>0) {
-			
-			// Draw area border
-			mPaint.setColor(borderColor);
-			mPaint.setStyle(Paint.Style.STROKE);
-			mPaint.setStrokeWidth(borderWidth);
-							
-			mCanvas.drawPath(areaPath, mPaint);
-		}
-		
-		if (mClippingPaths.size()>0) {
-			removeClippingPaths();
-		}
+				
+		mFillPath.close();		
 	}
 	
-	public void drawPatternArea(int patternId, float[] x, float[] y) {
+	public void setCircleFillPath(float x, float y, float radius) {
 		
-		Path areaPath=new Path();
+		mFillPath.reset();
 		
-		areaPath.moveTo(x[0], y[0]);
+		mFillPath.addCircle(x, y, radius, Path.Direction.CW);		
+	}
+
+	private void setClippingPaths() {
 		
-		RectF box=new RectF(x[0], y[0], x[0], y[0]);
-		
-		for(int i=1; i<x.length; i++) {
-			
-			areaPath.lineTo(x[i], y[i]);
-			
-			if (x[i]<box.left)
-				box.left=x[i];
-			
-			if (x[i]>box.right)
-				box.right=x[i];
-			
-			if (y[i]<box.top)
-				box.top=y[i];
-			
-			if (y[i]>box.bottom)
-				box.bottom=y[i];
+		// Set internal clipping paths (if any) to outer area path
+		if (mClippingPaths.size()>0) {
+						
+			Enumeration<Path> e=mClippingPaths.elements();
+								
+			while(e.hasMoreElements()) {
+									
+				mFillPath.addPath(e.nextElement());
+			}
+					
+			mFillPath.setFillType(Path.FillType.EVEN_ODD);
 		}
+	}
+					
+	private void removeClippingPaths() {
 		
-		areaPath.close();
+		mClippingPaths.removeAllElements();
+		
+		// Restore full screen clipping region 
+		mCanvas.clipRect(mCanvasSize, Region.Op.REPLACE);
+	}
+	
+	public void drawPatternArea(int patternId) {
+		
+		// Get fill path bounds
+		RectF bounds=new RectF();
+		
+		mFillPath.computeBounds(bounds, true);		
 		
 		// Set clipping region
-		mCanvas.clipPath(areaPath);
+		mCanvas.clipPath(mFillPath);
 		
-		// Add internal clipping paths (if any) to outer area path
-		if (mClippingPaths.size()>0) {
-					
-			Enumeration<Path> e=mClippingPaths.elements();
-							
-			while(e.hasMoreElements()) {
-								
-				areaPath.addPath(e.nextElement());
-			}
-				
-			areaPath.setFillType(Path.FillType.EVEN_ODD);
-		}
-				
+		setClippingPaths();
+		
 		Bitmap pattern=mPatternArray.elementAt(patternId);
 		
-		for (float xpos=box.left; xpos<=box.right; xpos+=pattern.getWidth()) {
+		for (float xpos=bounds.left; xpos<=bounds.right; xpos+=pattern.getWidth()) {
 			
-			for (float ypos=box.top; ypos<box.bottom; ypos+=pattern.getHeight()) {
+			for (float ypos=bounds.top; ypos<bounds.bottom; ypos+=pattern.getHeight()) {
 				
 				mCanvas.drawBitmap(pattern, xpos, ypos, mPaint);
 			}	
@@ -347,45 +285,17 @@ public class MapPainterCanvas {
 		removeClippingPaths();
 	}
 	
-	private void removeClippingPaths() {
-		
-		mClippingPaths.removeAllElements();
-		
-		// Restore full screen clipping region 
-		mCanvas.clipRect(mCanvasSize, Region.Op.REPLACE);
-	}
-
-	public void drawArea(int fillColor, int borderColor, float borderWidth,
-			float[] x, float[] y) {
-		
-		Path areaPath=new Path();
-		
-		areaPath.moveTo(x[0], y[0]);
-		
-		int numPoints=x.length;
-		
-		for(int i=0; i<numPoints; i++) {
-			
-			areaPath.lineTo(x[i], y[i]);
-		}
-		
-		areaPath.close();
+	public void drawFilledArea(int fillColor) {
 		
 		// Draw area fill
 		mPaint.setColor(fillColor);
 		mPaint.setStyle(Paint.Style.FILL);
-					
-		mCanvas.drawPath(areaPath, mPaint);
 		
-		if (borderWidth>0.0) {
-			
-			// Draw area border
-			mPaint.setColor(borderColor);
-			mPaint.setStyle(Paint.Style.STROKE);
-			mPaint.setStrokeWidth(borderWidth);
-							
-			mCanvas.drawPath(areaPath, mPaint);
-		}
+		setClippingPaths();
+					
+		mCanvas.drawPath(mFillPath, mPaint);
+		
+		removeClippingPaths();
 	}
 	
 	public void drawArea(int color, float x, float y, float width, float height) {
@@ -396,6 +306,27 @@ public class MapPainterCanvas {
 		mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 		
 		mCanvas.drawRect(rect, mPaint);
+	}
+	
+	public void drawAreaBorder(int borderColor, float borderWidth,
+			float[] dash) {
+		
+		// Draw area border
+		mPaint.setColor(borderColor);
+		mPaint.setStyle(Paint.Style.STROKE);
+		mPaint.setStrokeWidth(borderWidth);
+		
+		if ((dash!=null) && (dash.length>=2)) {
+			
+			DashPathEffect dashPathEffect=new DashPathEffect(dash, 0);		
+			mPaint.setPathEffect(dashPathEffect);
+		}
+		else {
+			
+			mPaint.setPathEffect(null);
+		}
+		
+		mCanvas.drawPath(mFillPath, mPaint);
 	}
 	
 	public Rect getTextDimension(String text, float fontSize) {
