@@ -264,8 +264,6 @@ namespace osmscout {
   void MapPainterSVG::DrawIcon(const IconStyle* style,
                                  double x, double y)
   {
-    assert(style->GetId()>0);
-    assert(style->GetId()!=std::numeric_limits<size_t>::max());
   }
 
   void MapPainterSVG::DrawPath(const Projection& projection,

@@ -243,6 +243,7 @@ namespace osmscout {
         break;
       case attrPattern:
         pattern=other.pattern;
+        patternId=other.patternId;
         break;
       case attrPatternMinMag:
         patternMinMag=other.patternMinMag;
@@ -740,15 +741,15 @@ namespace osmscout {
   }
 
   IconStyle::IconStyle()
-   : id(0)
+   : iconId(0)
   {
     // no code
   }
 
   IconStyle::IconStyle(const IconStyle& style)
   {
-    this->id=style.id;
     this->iconName=style.iconName;
+    this->iconId=style.iconId;
   }
 
   IconStyle& IconStyle::SetSymbol(const SymbolRef& symbol)
@@ -758,16 +759,16 @@ namespace osmscout {
     return *this;
   }
 
-  IconStyle& IconStyle::SetId(size_t id)
+  IconStyle& IconStyle::SetIconName(const std::string& iconName)
   {
-    this->id=id;
+    this->iconName=iconName;
 
     return *this;
   }
 
-  IconStyle& IconStyle::SetIconName(const std::string& iconName)
+  IconStyle& IconStyle::SetIconId(size_t id)
   {
-    this->iconName=iconName;
+    this->iconId=id;
 
     return *this;
   }
@@ -784,6 +785,7 @@ namespace osmscout {
         break;
       case attrIconName:
         iconName=other.iconName;
+        iconId=other.iconId;
         break;
       }
     }
@@ -1289,11 +1291,72 @@ namespace osmscout {
     areaIconStyleConditionals.clear();
   }
 
+  void StyleConfig::PostprocessIconId()
+  {
+    OSMSCOUT_HASHMAP<std::string,size_t> symbolIdMap;
+    size_t                               nextId=1;
+
+    for (size_t type=0; type<areaIconStyleSelectors.size(); type++) {
+      for (size_t level=0; level<areaIconStyleSelectors[type].size(); level++) {
+        for (std::list<IconStyleSelector>::iterator selector=areaIconStyleSelectors[type][level].begin();
+             selector!=areaIconStyleSelectors[type][level].end();
+             ++selector) {
+          if (!selector->style->GetIconName().empty()) {
+            OSMSCOUT_HASHMAP<std::string,size_t>::iterator entry=symbolIdMap.find(selector->style->GetIconName());
+
+            if (entry==symbolIdMap.end()) {
+              symbolIdMap.insert(std::make_pair(selector->style->GetIconName(),nextId));
+
+              selector->style->SetIconId(nextId);
+
+              nextId++;
+            }
+            else {
+              selector->style->SetIconId(entry->second);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  void StyleConfig::PostprocessPatternId()
+  {
+    OSMSCOUT_HASHMAP<std::string,size_t> symbolIdMap;
+    size_t                               nextId=1;
+
+    for (size_t type=0; type<areaFillStyleSelectors.size(); type++) {
+      for (size_t level=0; level<areaFillStyleSelectors[type].size(); level++) {
+        for (std::list<FillStyleSelector>::iterator selector=areaFillStyleSelectors[type][level].begin();
+             selector!=areaFillStyleSelectors[type][level].end();
+             ++selector) {
+          if (!selector->style->GetPatternName().empty()) {
+            OSMSCOUT_HASHMAP<std::string,size_t>::iterator entry=symbolIdMap.find(selector->style->GetPatternName());
+
+            if (entry==symbolIdMap.end()) {
+              symbolIdMap.insert(std::make_pair(selector->style->GetPatternName(),nextId));
+
+              selector->style->SetPatternId(nextId);
+
+              nextId++;
+            }
+            else {
+              selector->style->SetPatternId(entry->second);
+            }
+          }
+        }
+      }
+    }
+  }
+
   void StyleConfig::Postprocess()
   {
     PostprocessNodes();
     PostprocessWays();
     PostprocessAreas();
+
+    PostprocessIconId();
+    PostprocessPatternId();
   }
 
   TypeConfig* StyleConfig::GetTypeConfig() const

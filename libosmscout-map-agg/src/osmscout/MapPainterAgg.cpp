@@ -287,17 +287,6 @@ namespace osmscout {
                              const MapParameter& parameter,
                              IconStyle& style)
   {
-    if (style.GetId()==std::numeric_limits<size_t>::max()) {
-      return false;
-    }
-
-    if (style.GetId()!=0) {
-      return true;
-    }
-
-    std::string filename=std::string("../libosmscout/data/icons/14x14/standard/")+
-                         style.GetIconName()+".png";
-
     //TODO
 
     return false;
@@ -469,11 +458,6 @@ namespace osmscout {
   void MapPainterAgg::DrawIcon(const IconStyle* style,
                               double x, double y)
   {
-    assert(style->GetId()>0);
-    assert(style->GetId()!=std::numeric_limits<size_t>::max());
-    //assert(style->GetId()<=images.size());
-    //assert(!images[style->GetId()-1].isNull());
-
     // TODO
   }
 

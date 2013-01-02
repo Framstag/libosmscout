@@ -71,11 +71,14 @@ namespace osmscout {
                              const MapParameter& parameter,
                              IconStyle& style)
   {
-    if (style.GetId()==std::numeric_limits<size_t>::max()) {
+    if (style.GetIconId()==0) {
       return false;
     }
 
-    if (style.GetId()!=0) {
+    size_t idx=style.GetIconId()-1;
+
+    if (idx<images.size() &&
+        !images[idx].isNull()) {
       return true;
     }
 
@@ -88,16 +91,20 @@ namespace osmscout {
       QImage image;
 
       if (image.load(filename.c_str())) {
-        images.resize(images.size()+1,image);
-        style.SetId(images.size());
-        std::cout << "Loaded image " << filename << " => id " << style.GetId() << std::endl;
+        if (idx>=images.size()) {
+          images.resize(idx+1);
+        }
+
+        images[idx]=image;
+
+        std::cout << "Loaded image '" << filename << "'" << std::endl;
 
         return true;
       }
     }
 
-    std::cerr << "ERROR while loading icon file '" << style.GetIconName() << "'" << std::endl;
-    style.SetId(std::numeric_limits<size_t>::max());
+    std::cerr << "ERROR while loading image '" << style.GetIconName() << "'" << std::endl;
+    style.SetIconId(0);
 
     return false;
   }
@@ -108,12 +115,14 @@ namespace osmscout {
     assert(style.HasPattern());
 
     // Was not able to load pattern
-    if (style.GetPatternId()==std::numeric_limits<size_t>::max()) {
+    if (style.GetPatternId()==0) {
       return false;
     }
 
-    // Pattern already loaded
-    if (style.GetPatternId()!=0) {
+    size_t idx=style.GetPatternId()-1;
+
+    if (idx<patterns.size() &&
+        !patternImages[idx].isNull()) {
       return true;
     }
 
@@ -125,20 +134,26 @@ namespace osmscout {
       QImage image;
 
       if (image.load(filename.c_str())) {
-        images.resize(images.size()+1,image);
-        style.SetPatternId(images.size());
-        patterns.resize(images.size());
+        if (idx>=patternImages.size()) {
+          patternImages.resize(idx+1);
+        }
 
-        patterns[patterns.size()-1].setTextureImage(image);
+        patternImages[idx]=image;
 
-        std::cout << "Loaded image " << filename << " => id " << style.GetPatternId() << std::endl;
+        if (idx>=patterns.size()) {
+          patterns.resize(idx+1);
+        }
+
+        patterns[idx].setTextureImage(image);
+
+        std::cout << "Loaded image '" << filename << "'" << std::endl;
 
         return true;
       }
     }
 
-    std::cerr << "ERROR while loading icon file '" << style.GetPatternName() << "'" << std::endl;
-    style.SetPatternId(std::numeric_limits<size_t>::max());
+    std::cerr << "ERROR while loading image '" << style.GetPatternName() << "'" << std::endl;
+    style.SetPatternId(0);
 
     return false;
   }
@@ -337,14 +352,14 @@ namespace osmscout {
   void MapPainterQt::DrawIcon(const IconStyle* style,
                               double x, double y)
   {
-    assert(style->GetId()>0);
-    assert(style->GetId()!=std::numeric_limits<size_t>::max());
-    assert(style->GetId()<=images.size());
-    assert(!images[style->GetId()-1].isNull());
+    size_t idx=style->GetIconId()-1;
 
-    painter->drawImage(QPointF(x-images[style->GetId()-1].width()/2,
-                               y-images[style->GetId()-1].height()/2),
-                       images[style->GetId()-1]);
+    assert(idx<images.size());
+    assert(!images[idx].isNull());
+
+    painter->drawImage(QPointF(x-images[idx].width()/2,
+                               y-images[idx].height()/2),
+                       images[idx]);
   }
 
   void MapPainterQt::DrawSymbol(const Projection& projection,
@@ -623,7 +638,9 @@ namespace osmscout {
     if (fillStyle.HasPattern() &&
         projection.GetMagnification()>=fillStyle.GetPatternMinMag() &&
         HasPattern(parameter,fillStyle)) {
-      painter->setBrush(patterns[fillStyle.GetPatternId()-1]);
+      size_t idx=fillStyle.GetPatternId()-1;
+
+      painter->setBrush(patterns[idx]);
     }
     else if (fillStyle.GetFillColor().IsVisible()) {
       painter->setBrush(QBrush(QColor::fromRgbF(fillStyle.GetFillColor().GetR(),

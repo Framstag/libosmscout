@@ -342,6 +342,14 @@ namespace osmscout {
       }
     }
 
+    for (std::vector<cairo_surface_t*>::iterator image=patternImages.begin();
+         image!=patternImages.end();
+         ++image) {
+      if (*image!=NULL) {
+        cairo_surface_destroy(*image);
+      }
+    }
+
     for (FontMap::const_iterator entry=fonts.begin();
          entry!=fonts.end();
          ++entry) {
@@ -454,10 +462,12 @@ namespace osmscout {
     if (fill.HasPattern() &&
         projection.GetMagnification()>=fill.GetPatternMinMag() &&
         HasPattern(parameter,fill)) {
-      assert(fill.GetPatternId()<=images.size());
-      assert(images[fill.GetPatternId()-1]!=NULL);
+      size_t idx=fill.GetPatternId()-1;
 
-      cairo_set_source(draw,patterns[fill.GetPatternId()-1]);
+      assert(idx<patterns.size());
+      assert(patterns[idx]!=NULL);
+
+      cairo_set_source(draw,patterns[idx]);
       hasFill=true;
     }
     else if (fill.GetFillColor().IsVisible()) {
@@ -499,11 +509,16 @@ namespace osmscout {
                                 const MapParameter& parameter,
                                 IconStyle& style)
   {
-    if (style.GetId()==std::numeric_limits<size_t>::max()) {
+    // Already loaded with error
+    if (style.GetIconId()==0) {
       return false;
     }
 
-    if (style.GetId()!=0) {
+    size_t idx=style.GetIconId()-1;
+
+    // Already cached?
+    if (idx<images.size() &&
+        images[idx]!=NULL) {
       return true;
     }
 
@@ -515,16 +530,20 @@ namespace osmscout {
       cairo_surface_t *image=osmscout::LoadPNG(filename);
 
       if (image!=NULL) {
-        images.resize(images.size()+1,image);
-        style.SetId(images.size());
-        std::cout << "Loaded image " << filename << " => id " << style.GetId() << std::endl;
+        if (idx>=images.size()) {
+          images.resize(idx+1,NULL);
+        }
+
+        images[idx]=image;
+
+        std::cout << "Loaded image '" << filename << "'" << std::endl;
 
         return true;
       }
     }
 
-    std::cerr << "ERROR while loading icon '" << style.GetIconName() << "'" << std::endl;
-    style.SetId(std::numeric_limits<size_t>::max());
+    std::cerr << "ERROR while loading image '" << style.GetIconName() << "'" << std::endl;
+    style.SetIconId(0);
 
     return false;
   }
@@ -534,13 +553,16 @@ namespace osmscout {
   {
     assert(style.HasPattern()) ;
 
-    // Was not able to load pattern
-    if (style.GetPatternId()==std::numeric_limits<size_t>::max()) {
+    // Already loaded with error
+    if (style.GetPatternId()==0) {
       return false;
     }
 
-    // Pattern already loaded
-    if (style.GetPatternId()!=0) {
+    size_t idx=style.GetPatternId()-1;
+
+    // Already cached?
+    if (idx<patterns.size() &&
+        patterns[idx]!=NULL) {
       return true;
     }
 
@@ -552,26 +574,32 @@ namespace osmscout {
       cairo_surface_t *image=osmscout::LoadPNG(filename);
 
       if (image!=NULL) {
-        images.resize(images.size()+1,image);
-        style.SetPatternId(images.size());
-        patterns.resize(images.size(),NULL);
+        if (idx>=patternImages.size()) {
+          patternImages.resize(idx+1,NULL);
+        }
 
-        patterns[patterns.size()-1]=cairo_pattern_create_for_surface(images[images.size()-1]);
-        cairo_pattern_set_extend(patterns[patterns.size()-1],CAIRO_EXTEND_REPEAT);
+        patternImages[idx]=image;
+
+        if (idx>=patterns.size()) {
+          patterns.resize(idx+1,NULL);
+        }
+
+        patterns[idx]=cairo_pattern_create_for_surface(patternImages[idx]);
+        cairo_pattern_set_extend(patterns[idx],CAIRO_EXTEND_REPEAT);
 
         cairo_matrix_t matrix;
 
         cairo_matrix_init_scale(&matrix,1,1);
-        cairo_pattern_set_matrix(patterns[patterns.size()-1],&matrix);
+        cairo_pattern_set_matrix(patterns[idx],&matrix);
 
-        std::cout << "Loaded image " << filename << " => id " << style.GetPatternId() << std::endl;
+        std::cout << "Loaded pattern image '" << filename << "'" << std::endl;
 
         return true;
       }
     }
 
-    std::cerr << "ERROR while loading pattern file '" << style.GetPatternName() << "'" << std::endl;
-    style.SetPatternId(std::numeric_limits<size_t>::max());
+    std::cerr << "ERROR while loading pattern image '" << style.GetPatternName() << "'" << std::endl;
+    style.SetPatternId(0);
 
     return false;
   }
@@ -1083,12 +1111,12 @@ namespace osmscout {
   void MapPainterCairo::DrawIcon(const IconStyle* style,
                                  double x, double y)
   {
-    assert(style->GetId()>0);
-    assert(style->GetId()!=std::numeric_limits<size_t>::max());
-    assert(style->GetId()<=images.size());
-    assert(images[style->GetId()-1]!=NULL);
+    size_t idx=style->GetIconId()-1;
 
-    cairo_set_source_surface(draw,images[style->GetId()-1],x-7,y-7);
+    assert(idx<images.size());
+    assert(images[idx]!=NULL);
+
+    cairo_set_source_surface(draw,images[idx],x-7,y-7);
     cairo_paint(draw);
   }
 

@@ -337,8 +337,8 @@ namespace osmscout {
     FillStyle(const FillStyle& style);
 
     FillStyle& SetFillColor(const Color& color);
-    void SetPatternId(size_t id) const;
     FillStyle& SetPattern(const std::string& pattern);
+    void SetPatternId(size_t id) const;
     FillStyle& SetPatternMinMag(const Magnification& mag);
     FillStyle& SetBorderColor(const Color& color);
     FillStyle& SetBorderWidth(double value);
@@ -361,14 +361,14 @@ namespace osmscout {
       return !pattern.empty();
     }
 
-    inline size_t GetPatternId() const
-    {
-      return patternId;
-    }
-
     inline std::string GetPatternName() const
     {
       return pattern;
+    }
+
+    inline size_t GetPatternId() const
+    {
+      return patternId;
     }
 
     inline const Magnification& GetPatternMinMag() const
@@ -941,17 +941,17 @@ namespace osmscout {
     };
 
   private:
-    size_t      id;       //! Internal id for fast lookup. 0 == no id defined (yet), max(size_t) == error
     SymbolRef   symbol;
     std::string iconName; //! name of the icon as given in style
+    size_t      iconId;   //! Id for external resource binding
 
   public:
     IconStyle();
     IconStyle(const IconStyle& style);
 
     IconStyle& SetSymbol(const SymbolRef& symbol);
-    IconStyle& SetId(size_t id);
     IconStyle& SetIconName(const std::string& iconName);
+    IconStyle& SetIconId(size_t id);
 
     inline bool IsVisible() const
     {
@@ -964,21 +964,21 @@ namespace osmscout {
       return symbol;
     }
 
-    inline size_t GetId() const
-    {
-      return id;
-    }
-
     inline std::string GetIconName() const
     {
       return iconName;
+    }
+
+    inline size_t GetIconId() const
+    {
+      return iconId;
     }
 
     void CopyAttributes(const IconStyle& other,
                         const std::set<Attribute>& attributes);
   };
 
-  typedef Ref<IconStyle>                                  IconStyleRef;
+  typedef Ref<IconStyle>                                   IconStyleRef;
   typedef PartialStyle<IconStyle,IconStyle::Attribute>     IconPartialStyle;
   typedef ConditionalStyle<IconStyle,IconStyle::Attribute> IconConditionalStyle;
   typedef StyleSelector<IconStyle,IconStyle::Attribute>    IconStyleSelector;
@@ -1093,6 +1093,8 @@ namespace osmscout {
     void PostprocessNodes();
     void PostprocessWays();
     void PostprocessAreas();
+    void PostprocessIconId();
+    void PostprocessPatternId();
 
   public:
     StyleConfig(TypeConfig* typeConfig);

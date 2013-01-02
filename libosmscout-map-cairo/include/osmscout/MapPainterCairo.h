@@ -48,12 +48,13 @@ namespace osmscout {
 #else
     typedef cairo_scaled_font_t*           Font;
 #endif
-    typedef OSMSCOUT_HASHMAP<size_t,Font>  FontMap;   //! Map type for mapping  font sizes to font
+    typedef OSMSCOUT_HASHMAP<size_t,Font>  FontMap;          //! Map type for mapping  font sizes to font
 
-    cairo_t                                *draw;     //! The cairo cairo_t for the mask
-    std::vector<cairo_surface_t*>          images;    //! vector of cairo surfaces for icons
-    std::vector<cairo_pattern_t*>          patterns;  //! cairo pattern structure for patterns
-    FontMap                                fonts;     //! Cached scaled font
+    cairo_t                                *draw;            //! The cairo cairo_t for the mask
+    std::vector<cairo_surface_t*>          images;           //! vector of cairo surfaces for icons
+    std::vector<cairo_surface_t*>          patternImages;    //! vector of cairo surfaces for patterns
+    std::vector<cairo_pattern_t*>          patterns;         //! cairo pattern structure for patterns
+    FontMap                                fonts;            //! Cached scaled font
     double                                 minimumLineWidth; //! Minimum width a line must have to be visible
 
   private:
