@@ -219,33 +219,25 @@ namespace osmscout {
                         const Magnification& magnification,
                         std::list<GroundTile>& tiles) const;
 
-    bool GetNode(const Id& id,
-                 NodeRef& node) const;
-    bool GetNodes(const std::vector<Id>& ids,
-                  std::vector<NodeRef>& nodes) const;
     bool GetNodeByOffset(const FileOffset& offset,
                          NodeRef& node) const;
     bool GetNodesByOffset(const std::vector<FileOffset>& offsets,
                           std::vector<NodeRef>& nodes) const;
 
-
+  public:
     bool GetWay(const Id& id,
                 WayRef& way) const;
     bool GetWays(const std::vector<Id>& ids,
                  std::vector<WayRef>& ways) const;
     bool GetWays(const std::set<Id>& ids,
                  std::vector<WayRef>& ways) const;
+  public:
     bool GetWayByOffset(const FileOffset& offset,
                         WayRef& way) const;
     bool GetWaysByOffset(const std::vector<FileOffset>& offsets,
                          std::vector<WayRef>& ways) const;
     bool GetWaysByOffset(const std::list<FileOffset>& offsets,
                          std::vector<WayRef>& ways) const;
-
-    bool GetRelation(const Id& id,
-                     RelationRef& relation) const;
-    bool GetRelations(const std::vector<Id>& ids,
-                      std::vector<RelationRef>& relations) const;
     bool GetRelationByOffset(const FileOffset& offset,
                              RelationRef& relation) const;
     bool GetRelationsByOffset(const std::vector<FileOffset>& offsets,

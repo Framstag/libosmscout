@@ -55,6 +55,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/RoutePostprocessor.cpp \
                         osmscout/RoutingProfile.cpp \
                         osmscout/Database.cpp \
+                        osmscout/DebugDatabase.cpp \
                         osmscout/Router.cpp
 
 #ifdef OSMSCOUT_HAVE_SSE2

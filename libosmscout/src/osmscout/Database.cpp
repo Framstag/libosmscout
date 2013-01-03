@@ -796,38 +796,6 @@ namespace osmscout {
     return true;
   }
 
-  bool Database::GetNode(const Id& id,
-                         NodeRef& node) const
-  {
-    if (!IsOpen()) {
-      return false;
-    }
-
-    std::vector<Id>      ids;
-    std::vector<NodeRef> nodes;
-
-    ids.push_back(id);
-
-    if (GetNodes(ids,nodes)) {
-      if (!nodes.empty()) {
-        node=*nodes.begin();
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  bool Database::GetNodes(const std::vector<Id>& ids,
-                          std::vector<NodeRef>& nodes) const
-  {
-    if (!IsOpen()) {
-      return false;
-    }
-
-    return nodeDataFile.Get(ids,nodes);
-  }
-
   bool Database::GetNodeByOffset(const FileOffset& offset,
                                  NodeRef& node) const
   {
@@ -942,38 +910,6 @@ namespace osmscout {
     }
 
     return wayDataFile.GetByOffset(offsets,ways);
-  }
-
-  bool Database::GetRelation(const Id& id,
-                             RelationRef& relation) const
-  {
-    if (!IsOpen()) {
-      return false;
-    }
-
-    std::vector<Id>          ids;
-    std::vector<RelationRef> relations;
-
-    ids.push_back(id);
-
-    if (GetRelations(ids,relations)) {
-      if (!relations.empty()) {
-        relation=*relations.begin();
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  bool Database::GetRelations(const std::vector<Id>& ids,
-                              std::vector<RelationRef>& relations) const
-  {
-    if (!IsOpen()) {
-      return false;
-    }
-
-    return relationDataFile.Get(ids,relations);
   }
 
   bool Database::GetRelationByOffset(const FileOffset& offset,

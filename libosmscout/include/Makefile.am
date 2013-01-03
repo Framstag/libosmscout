@@ -56,6 +56,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/RoutePostprocessor.h \
                         osmscout/RoutingProfile.h \
                         osmscout/Database.h \
+                        osmscout/DebugDatabase.h \
                         osmscout/Router.h
 
 #ifdef OSMSCOUT_HAVE_SSE2

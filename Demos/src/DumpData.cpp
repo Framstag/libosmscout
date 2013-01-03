@@ -20,7 +20,7 @@
 #include <cstring>
 #include <iostream>
 
-#include <osmscout/Database.h>
+#include <osmscout/DebugDatabase.h>
 
 #include <osmscout/util/FileScanner.h>
 
@@ -387,8 +387,8 @@ int main(int argc, char* argv[])
     }
   }
 
-  osmscout::DatabaseParameter databaseParameter;
-  osmscout::Database          database(databaseParameter);
+  osmscout::DebugDatabaseParameter databaseParameter;
+  osmscout::DebugDatabase          database(databaseParameter);
 
   if (!database.Open(map.c_str())) {
     std::cerr << "Cannot open database" << std::endl;
