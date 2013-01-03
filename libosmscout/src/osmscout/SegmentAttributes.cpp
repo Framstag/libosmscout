@@ -26,7 +26,16 @@
 
 #include <osmscout/private/Math.h>
 
+#include <cstring>
 namespace osmscout {
+
+  static const char* postfixes[] =  {"-Straße", " Straße", "straße",
+                                     "-Strasse"," Strasse", "strasse",
+                                     "-Weg", " Weg", "weg",
+                                     "-Allee", " Allee", "allee",
+                                     "-Platz", " Platz", "platz",
+                                     "-Ring", " Ring", "ring",
+                                     NULL};
 
   bool SegmentAttributes::SetTags(Progress& progress,
                                   const TypeConfig& typeConfig,
@@ -61,6 +70,20 @@ namespace osmscout {
     while (tag!=tags.end()) {
       if (tag->key==typeConfig.tagName) {
         name=tag->value;
+
+        /*
+        size_t i=0;
+        while (postfixes[i]!=NULL) {
+          size_t pos=name.rfind(postfixes[i]);
+          if (pos!=std::string::npos &&
+              pos==name.length()-strlen(postfixes[i])) {
+            name=name.substr(0,pos);
+            break;
+          }
+
+          i++;
+        }*/
+
         tag=tags.erase(tag);
       }
       else if (tag->key==typeConfig.tagRef) {
