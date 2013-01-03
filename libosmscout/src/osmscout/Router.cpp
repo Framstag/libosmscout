@@ -360,11 +360,30 @@ namespace osmscout {
   bool Router::ResolveRNodesToRouteData(const RoutingProfile& profile,
                                         const std::list<RNodeRef>& nodes,
                                         Id startWayId,
-                                        Id startNodeId,
+                                        size_t startNodeIndex,
                                         Id targetWayId,
-                                        Id targetNodeId,
+                                        size_t targetNodeIndex,
                                         RouteData& route)
   {
+    WayRef startWay;
+    Id     startNodeId;
+    WayRef targetWay;
+    Id     targetNodeId;
+
+    if (!wayDataFile.Get(startWayId,startWay)) {
+      std::cerr << "Cannot load way with id " << startWayId << std::endl;
+      return false;
+    }
+
+    startNodeId=startWay->nodes[startNodeIndex].GetId();
+
+    if (!wayDataFile.Get(targetWayId,targetWay)) {
+      std::cerr << "Cannot load way with id " << targetWayId << std::endl;
+      return false;
+    }
+
+    targetNodeId=targetWay->nodes[targetNodeIndex].GetId();
+
     if (nodes.empty()) {
       AddNodes(route,
                std::vector<Path>(),
@@ -410,7 +429,6 @@ namespace osmscout {
         return false;
       }
 
-
       // We do not have any follower node, push the final entry (leading nowhere)
       // to the route
       if (nn==nodes.end()) {
@@ -435,7 +453,6 @@ namespace osmscout {
       }
 
       RouteNodeRef nextNode;
-      WayRef       way;
       size_t       pathIndex=0;
 
       if (!routeNodeDataFile.GetByOffset((*nn)->nodeOffset,nextNode)) {
@@ -462,12 +479,13 @@ namespace osmscout {
   }
 
   bool Router::CalculateRoute(const RoutingProfile& profile,
-                              Id startWayId, Id startNodeId,
-                              Id targetWayId, Id targetNodeId,
+                              Id startWayId, size_t startNodeIndex,
+                              Id targetWayId, size_t targetNodeIndex,
                               RouteData& route)
   {
     WayRef                   startWay;
-    double                   startLon=0.0L,startLat=0.0L;
+    double                   startLon=0.0L;
+    double                   startLat=0.0L;
 
     RouteNodeRef             startForwardRouteNode;
     size_t                   startForwardNodePos;
@@ -520,28 +538,20 @@ namespace osmscout {
       return false;
     }
 
-    size_t index=0;
-    while (index<startWay->nodes.size()) {
-      if (startWay->nodes[index].GetId()==startNodeId) {
-        startLon=startWay->nodes[index].GetLon();
-        startLat=startWay->nodes[index].GetLat();
-        break;
-      }
-
-      index++;
-    }
-
-    if (index>=startWay->nodes.size()) {
-      std::cerr << "Given start node is not part of start way" << std::endl;
+    if (startNodeIndex>=startWay->nodes.size()) {
+      std::cerr << "Given start node index " << startNodeIndex << " is not within valid range [0," << startWay->nodes.size()-1 << std::endl;
       return false;
     }
 
+    startLon=startWay->nodes[startNodeIndex].GetLon();
+    startLat=startWay->nodes[startNodeIndex].GetLat();
+
     GetClosestForwardRouteNode(startWay,
-                               startNodeId,
+                               startWay->nodes[startNodeIndex].GetId(),
                                startForwardRouteNode,
                                startForwardNodePos);
     GetClosestBackwardRouteNode(startWay,
-                                startNodeId,
+                                startWay->nodes[startNodeIndex].GetId(),
                                 startBackwardRouteNode,
                                 startBackwardNodePos);
 
@@ -551,28 +561,17 @@ namespace osmscout {
       return false;
     }
 
-    index=0;
-    while (index<targetWay->nodes.size()) {
-      if (targetWay->nodes[index].GetId()==targetNodeId) {
-        targetLon=targetWay->nodes[index].GetLon();
-        targetLat=targetWay->nodes[index].GetLat();
-        break;
-      }
-
-      index++;
-    }
-
-    if (index>=targetWay->nodes.size()) {
-      std::cerr << "Given target node is not part of target way" << std::endl;
+    if (targetNodeIndex>=targetWay->nodes.size()) {
+      std::cerr << "Given target node index " << targetNodeIndex << " is not within valid range [0," << targetWay->nodes.size()-1 << std::endl;
       return false;
     }
 
     GetClosestForwardRouteNode(targetWay,
-                               targetNodeId,
+                               targetWay->nodes[targetNodeIndex].GetId(),
                                targetForwardRouteNode,
                                targetForwardNodePos);
     GetClosestBackwardRouteNode(targetWay,
-                                targetNodeId,
+                                targetWay->nodes[targetNodeIndex].GetId(),
                                 targetBackwardRouteNode,
                                 targetBackwardNodePos);
 
@@ -820,8 +819,8 @@ namespace osmscout {
 
     clock.Stop();
 
-    std::cout << "From:                " << startWayId << "[" << startNodeId << "]" << std::endl;
-    std::cout << "To:                  " << targetWayId << "[" << targetNodeId << "]" << std::endl;
+    std::cout << "From:                " << startWayId << "[" << startNodeIndex << "]" << std::endl;
+    std::cout << "To:                  " << targetWayId << "[" << targetNodeIndex << "]" << std::endl;
     std::cout << "Time:                " << clock << std::endl;
 #if defined(DEBUG_ROUTING)
     std::cout << "Cost:                " << current->currentCost << " " << current->estimateCost << " " << current->overallCost << std::endl;
@@ -849,9 +848,9 @@ namespace osmscout {
     if (!ResolveRNodesToRouteData(profile,
                                   nodes,
                                   startWayId,
-                                  startNodeId,
+                                  startNodeIndex,
                                   targetWayId,
-                                  targetNodeId,
+                                  targetNodeIndex,
                                   route)) {
       //std::cerr << "Cannot convert routing result to route data" << std::endl;
       return false;

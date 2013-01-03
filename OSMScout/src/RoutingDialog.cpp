@@ -136,10 +136,10 @@ struct RouteSelection
 {
   QString                    start;
   osmscout::Id               startWay;
-  osmscout::Id               startNode;
+  size_t                     startNodeIndex;
   QString                    end;
   osmscout::Id               endWay;
-  osmscout::Id               endNode;
+  size_t                     endNodeIndex;
   osmscout::RouteData        routeData;
   osmscout::RouteDescription routeDescription;
   std::list<RouteStep>       routeSteps;
@@ -346,7 +346,7 @@ void RoutingDialog::SelectFrom()
 
     if (dbThread.GetWayByOffset(offset,way)) {
       route.startWay=way->GetId();
-      route.startNode=way->nodes[0].GetId();
+      route.startNodeIndex=0;
 
       if (location.path.empty()) {
         route.start=QString::fromUtf8(location.name.c_str());
@@ -391,7 +391,7 @@ void RoutingDialog::SelectTo()
 
     if (dbThread.GetWayByOffset(offset,way)) {
       route.endWay=way->GetId();
-      route.endNode=way->nodes[0].GetId();
+      route.endNodeIndex=0;
 
       if (location.path.empty()) {
         route.end=QString::fromUtf8(location.name.c_str());
@@ -634,8 +634,8 @@ void RoutingDialog::Route()
   route.routeSteps.clear();
   routeModel->refresh();
 
-  if (!dbThread.CalculateRoute(route.startWay,route.startNode,
-                               route.endWay,route.endNode,
+  if (!dbThread.CalculateRoute(route.startWay,route.startNodeIndex,
+                               route.endWay,route.endNodeIndex,
                                routeData)) {
     std::cerr << "There was an error while routing!" << std::endl;
     return;

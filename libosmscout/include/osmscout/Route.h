@@ -489,7 +489,7 @@ namespace osmscout {
                  const std::vector<Path>& paths,
                  Id pathWayId,
                  Id targetNodeId);
-
+  
     inline std::list<Node>& Nodes()
     {
       return nodes;

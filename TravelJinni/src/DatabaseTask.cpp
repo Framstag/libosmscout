@@ -484,8 +484,8 @@ bool DatabaseTask::GetMatchingLocations(const osmscout::AdminRegion& region,
                                         false);
 }
 
-bool DatabaseTask::CalculateRoute(osmscout::Id startWayId, osmscout::Id startNodeId,
-                                  osmscout::Id targetWayId, osmscout::Id targetNodeId,
+bool DatabaseTask::CalculateRoute(osmscout::Id startWayId, size_t startNodeIndex,
+                                  osmscout::Id targetWayId, size_t targetNodeIndex,
                                   osmscout::RouteData& route)
 {
   Lum::OS::Guard<Lum::OS::Mutex> guard(mutex);
@@ -496,9 +496,9 @@ bool DatabaseTask::CalculateRoute(osmscout::Id startWayId, osmscout::Id startNod
 
   return router->CalculateRoute(routingProfile,
                                 startWayId,
-                                startNodeId,
+                                startNodeIndex,
                                 targetWayId,
-                                targetNodeId,
+                                targetNodeIndex,
                                 route);
 }
 

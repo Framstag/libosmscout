@@ -186,9 +186,9 @@ namespace osmscout {
     bool ResolveRNodesToRouteData(const RoutingProfile& profile,
                                   const std::list<RNodeRef>& nodes,
                                   Id startWayId,
-                                  Id startNodeId,
+                                  size_t startNodeIndex,
                                   Id targetWayId,
-                                  Id targetNodeId,
+                                  size_t targetNodeIndex,
                                   RouteData& route);
     bool AddNodes(RouteData& route,
                   const std::vector<Path>& startPaths,
@@ -212,8 +212,8 @@ namespace osmscout {
     TypeConfig* GetTypeConfig() const;
 
     bool CalculateRoute(const RoutingProfile& profile,
-                        Id startWayId, Id startNodeId,
-                        Id targetWayId, Id targetNodeId,
+                        Id startWayId, size_t startNodeIndex,
+                        Id targetWayId, size_t targetNodeIndex,
                         RouteData& route);
 
     bool TransformRouteDataToWay(const RouteData& data,

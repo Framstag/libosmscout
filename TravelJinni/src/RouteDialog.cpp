@@ -162,10 +162,10 @@ struct RouteSelection
 {
   std::wstring               start;
   osmscout::Id               startWay;
-  osmscout::Id               startNode;
+  size_t                     startNodeIndex;
   std::wstring               end;
   osmscout::Id               endWay;
-  osmscout::Id               endNode;
+  size_t                     endNodeIndex;
   osmscout::RouteData        routeData;
   osmscout::RouteDescription routeDescription;
   std::list<RouteStep>       routeSteps;
@@ -508,7 +508,7 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
 
         if (databaseTask->GetWayByOffset(offset,way)) {
           result.startWay=way->GetId();
-          result.startNode=way->nodes[0].GetId();
+          result.startNodeIndex=0;
 
           if (location.path.empty()) {
             result.start=Lum::Base::UTF8ToWString(location.name);
@@ -561,7 +561,7 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
 
         if (databaseTask->GetWayByOffset(offset,way)) {
           result.endWay=way->GetId();
-          result.endNode=way->nodes[0].GetId();
+          result.endNodeIndex=0;
 
           if (location.path.empty()) {
             result.end=Lum::Base::UTF8ToWString(location.name);
@@ -602,8 +602,8 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
 
     osmscout::Way way;
 
-    if (!databaseTask->CalculateRoute(result.startWay,result.startNode,
-                                      result.endWay,result.endNode,
+    if (!databaseTask->CalculateRoute(result.startWay,result.startNodeIndex,
+                                      result.endWay,result.endNodeIndex,
                                       result.routeData)) {
       std::cerr << "There was an error while routing!" << std::endl;
       return;

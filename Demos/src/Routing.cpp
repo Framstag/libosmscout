@@ -35,7 +35,7 @@
   Examples for the nordrhein-westfalen.osm:
 
   Long:
-    45756746 1301658778 33879936 388178882
+    45756746 12 33879936 1
 
   Medium:
     33879936 388178882 38363871 453298626
@@ -374,10 +374,10 @@ int main(int argc, char* argv[])
 {
   osmscout::FastestPathRoutingProfile routingProfile;
   std::string                         map;
-  unsigned long                       startWayId;
-  unsigned long                       startNodeId;
-  unsigned long                       targetWayId;
-  unsigned long                       targetNodeId;
+  osmscout::Id                        startWayId;
+  size_t                              startNodeIndex;
+  osmscout::Id                        targetWayId;
+  size_t                              targetNodeIndex;
 
   int currentArg=1;
   while (currentArg<argc) {
@@ -408,7 +408,7 @@ int main(int argc, char* argv[])
 
   currentArg++;
 
-  if (sscanf(argv[currentArg],"%lu",&startNodeId)!=1) {
+  if (sscanf(argv[currentArg],"%lu",&startNodeIndex)!=1) {
     std::cerr << "start node id is not numeric!" << std::endl;
     return 1;
   }
@@ -422,7 +422,7 @@ int main(int argc, char* argv[])
 
   currentArg++;
 
-  if (sscanf(argv[currentArg],"%lu",&targetNodeId)!=1) {
+  if (sscanf(argv[currentArg],"%lu",&targetNodeIndex)!=1) {
     std::cerr << "target node id is not numeric!" << std::endl;
     return 1;
   }
@@ -502,8 +502,8 @@ int main(int argc, char* argv[])
   routingProfile.AddType(type,30.0);
 
   if (!router.CalculateRoute(routingProfile,
-                             startWayId,startNodeId,
-                             targetWayId,targetNodeId,
+                             startWayId,startNodeIndex,
+                             targetWayId,targetNodeIndex,
                              data)) {
     std::cerr << "There was an error while calculating the route!" << std::endl;
     router.Close();
