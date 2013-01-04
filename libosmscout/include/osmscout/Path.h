@@ -33,22 +33,22 @@ namespace osmscout {
   class OSMSCOUT_API Path
   {
   private:
-    Id   wayId;
-    Id   targetNodeId;
-    bool traversable;
+    FileOffset wayOffset;
+    Id         targetNodeId;
+    bool       traversable;
 
   public:
-    Path(Id wayId,
+    Path(FileOffset wayOffset,
          Id targetNodeId);
-    Path(Id wayId,
+    Path(FileOffset wayOffset,
          Id targetNodeId,
          bool traversable);
     Path(const Path& other);
     virtual ~Path();
 
-    inline Id GetWayId() const
+    inline FileOffset GetWayOffset() const
     {
-      return wayId;
+      return wayOffset;
     }
 
     inline Id GetTargetNodeId() const

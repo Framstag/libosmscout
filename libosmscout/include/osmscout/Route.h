@@ -408,7 +408,7 @@ namespace osmscout {
     private:
       Id                                           currentNodeId;
       std::vector<Path>                            paths;
-      Id                                           pathWayId;
+      FileOffset                                   pathWayOffset;
       Id                                           targetNodeId;
       double                                       distance;
       double                                       time;
@@ -418,7 +418,7 @@ namespace osmscout {
     public:
       Node(Id currentNodeId,
            const std::vector<Path>& paths,
-           Id pathWayId,
+           FileOffset pathWayOffset,
            Id targetNodeId);
 
       inline Id GetCurrentNodeId() const
@@ -438,12 +438,12 @@ namespace osmscout {
 
       inline bool HasPathWay() const
       {
-        return pathWayId!=0;
+        return pathWayOffset!=0;
       }
 
-      inline Id GetPathWayId() const
+      inline Id GetPathWayOffset() const
       {
-        return pathWayId;
+        return pathWayOffset;
       }
 
       inline Id GetTargetNodeId() const
@@ -487,9 +487,9 @@ namespace osmscout {
 
     void AddNode(Id currentNodeId,
                  const std::vector<Path>& paths,
-                 Id pathWayId,
+                 FileOffset pathWayOffset,
                  Id targetNodeId);
-  
+
     inline std::list<Node>& Nodes()
     {
       return nodes;

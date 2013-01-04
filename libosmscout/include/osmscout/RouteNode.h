@@ -47,8 +47,8 @@ namespace osmscout {
      */
     struct OSMSCOUT_API Exclude
     {
-      Id       sourceWay;  //! The source way
-      uint32_t targetPath; //! The index of the target path
+      FileOffset sourceWay;  //! The source way
+      uint32_t   targetPath; //! The index of the target path
     };
 
     /**
@@ -76,10 +76,10 @@ namespace osmscout {
     };
 
   public:
-    Id                   id;       //! Id of the route node, equal the id of the underlying node
-    std::vector<Id>      ways;     //! List of id of the ways that cross this route node
-    std::vector<Path>    paths;    //! List of paths that can in principle be used from this node
-    std::vector<Exclude> excludes; //! List of potential excludes regarding use of paths
+    Id                      id;       //! Id of the route node, equal the id of the underlying node
+    std::vector<FileOffset> ways;     //! List of file offsets of the ways that cross this route node
+    std::vector<Path>       paths;    //! List of paths that can in principle be used from this node
+    std::vector<Exclude>    excludes; //! List of potential excludes regarding use of paths
 
     inline Id GetId() const
     {

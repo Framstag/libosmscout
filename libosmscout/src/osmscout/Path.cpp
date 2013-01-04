@@ -21,19 +21,19 @@
 
 namespace osmscout {
 
-  Path::Path(Id wayId,
+  Path::Path(FileOffset wayOffset,
              Id targetNodeId)
-  : wayId(wayId),
+  : wayOffset(wayOffset),
     targetNodeId(targetNodeId),
     traversable(true)
   {
     // no code
   }
 
-  Path::Path(Id wayId,
+  Path::Path(FileOffset wayOffset,
              Id targetNodeId,
              bool traversable)
-  : wayId(wayId),
+  : wayOffset(wayOffset),
     targetNodeId(targetNodeId),
     traversable(traversable)
   {
@@ -42,7 +42,7 @@ namespace osmscout {
 
   Path::Path(const Path& other)
   {
-    this->wayId=other.wayId;
+    this->wayOffset=other.wayOffset;
     this->targetNodeId=other.targetNodeId;
     this->traversable=other.traversable;
   }

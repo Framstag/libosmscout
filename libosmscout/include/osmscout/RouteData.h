@@ -36,17 +36,17 @@ namespace osmscout {
     private:
       Id                currentNodeId;
       std::vector<Path> paths;
-      Id                pathWayId;
+      FileOffset        pathWayOffset;
       Id                targetNodeId;
 
     public:
       RouteEntry(Id currentNodeId,
-                 Id pathWayId,
+                 FileOffset pathWayOffset,
                  Id targetNodeId);
 
       RouteEntry(Id currentNodeId,
                  const std::vector<Path>& paths,
-                 Id pathWayId,
+                 FileOffset pathWayOffset,
                  Id targetNodeId);
 
       inline Id GetCurrentNodeId() const
@@ -54,9 +54,9 @@ namespace osmscout {
         return currentNodeId;
       }
 
-      inline Id GetPathWayId() const
+      inline Id GetPathWayOffset() const
       {
-        return pathWayId;
+        return pathWayOffset;
       }
 
       inline Id GetTargetNodeId() const
@@ -79,12 +79,12 @@ namespace osmscout {
     void Clear();
 
     void AddEntry(Id currentNodeId,
-                  Id pathWayId,
+                  FileOffset pathWayOffset,
                   Id targetNodeId);
 
     void AddEntry(Id currentNodeId,
                   const std::vector<Path>& paths,
-                  Id pathWayId,
+                  FileOffset pathWayOffset,
                   Id targetNodeId);
 
     inline const std::list<RouteEntry>& Entries() const

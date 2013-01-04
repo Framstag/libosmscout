@@ -84,7 +84,7 @@ namespace osmscout {
     struct RNode : public Referencable
     {
       FileOffset nodeOffset;
-      Id         wayId;
+      FileOffset wayOffset;
 
       double     currentCost;
       double     estimateCost;
@@ -96,15 +96,15 @@ namespace osmscout {
 
       RNode()
       : nodeOffset(0),
-        wayId(0)
+        wayOffset(0)
       {
         // no code
       }
 
       RNode(FileOffset nodeOffset,
-            Id wayId)
+            FileOffset wayOffset)
       : nodeOffset(nodeOffset),
-        wayId(wayId),
+        wayOffset(wayOffset),
         currentCost(0),
         estimateCost(0),
         overallCost(0),
@@ -115,10 +115,10 @@ namespace osmscout {
       }
 
       RNode(FileOffset nodeOffset,
-            Id wayId,
+            FileOffset wayOffset,
             FileOffset prev)
       : nodeOffset(nodeOffset),
-        wayId(wayId),
+        wayOffset(wayOffset),
         currentCost(0),
         estimateCost(0),
         overallCost(0),
@@ -185,15 +185,15 @@ namespace osmscout {
                              std::list<RNodeRef>& nodes);
     bool ResolveRNodesToRouteData(const RoutingProfile& profile,
                                   const std::list<RNodeRef>& nodes,
-                                  Id startWayId,
+                                  FileOffset startWayId,
                                   size_t startNodeIndex,
-                                  Id targetWayId,
+                                  FileOffset targetWayId,
                                   size_t targetNodeIndex,
                                   RouteData& route);
     bool AddNodes(RouteData& route,
                   const std::vector<Path>& startPaths,
                   Id startNodeId,
-                  Id wayId,
+                  FileOffset wayId,
                   Id targetNodeId);
 
     std::vector<Path> TransformPaths(const RoutingProfile& profile,

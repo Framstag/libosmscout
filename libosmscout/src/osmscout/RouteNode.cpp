@@ -46,18 +46,18 @@ namespace osmscout {
       return false;
     }
 
-    Id lastId=0;
+    FileOffset lastOffset=0;
     ways.resize(wayCount);
     for (size_t i=0; i<wayCount; i++) {
       scanner.ReadNumber(ways[i]);
 
-      ways[i]+=lastId;
+      ways[i]+=lastOffset;
 
       if (i>0) {
         assert(ways[i]>=ways[i-1]);
       }
 
-      lastId=ways[i];
+      lastOffset=ways[i];
     }
 
     paths.resize(pathCount);
@@ -85,7 +85,7 @@ namespace osmscout {
 
     excludes.resize(excludesCount);
     for (size_t i=0; i<excludesCount; i++) {
-      scanner.ReadNumber(excludes[i].sourceWay);
+      scanner.ReadFileOffset(excludes[i].sourceWay);
       scanner.ReadNumber(excludes[i].targetPath);
     }
 
@@ -111,13 +111,13 @@ namespace osmscout {
     writer.Write(minLat);
     writer.Write(minLon);
 
-    Id lastId=0;
+    FileOffset lastOffset=0;
     for (size_t i=0; i<ways.size(); i++) {
-      assert(ways[i]>=lastId);
+      assert(ways[i]>=lastOffset);
 
-      writer.WriteNumber(ways[i]-lastId);
+      writer.WriteNumber(ways[i]-lastOffset);
 
-      lastId=ways[i];
+      lastOffset=ways[i];
     }
 
     for (size_t i=0; i<paths.size(); i++) {
@@ -139,7 +139,7 @@ namespace osmscout {
     }
 
     for (size_t i=0; i<excludes.size(); i++) {
-      writer.WriteNumber(excludes[i].sourceWay);
+      writer.WriteFileOffset(excludes[i].sourceWay);
       writer.WriteNumber(excludes[i].targetPath);
     }
 

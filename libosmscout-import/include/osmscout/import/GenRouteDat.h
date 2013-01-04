@@ -36,16 +36,30 @@ namespace osmscout {
   class RouteDataGenerator : public ImportModule
   {
   private:
-    typedef std::map<Id,std::list<Id> > NodeIdWayIdMap;
+    struct TurnRestrictionData
+    {
+      enum Type
+      {
+        Allow  = 0,
+        Forbit = 1
+      };
+
+      FileOffset fromWayOffset;
+      Id         viaNodeId;
+      FileOffset toWayOffset;
+      Type       type;
+    };
+
+    typedef std::map<Id,std::list<FileOffset> > NodeIdWayOffsetMap;
 
   private:
     bool ReadTurnRestrictions(const ImportParameter& parameter,
                               Progress& progress,
-                              std::map<Id,std::vector<TurnRestrictionRef> >& restrictions);
+                              std::map<Id,std::vector<TurnRestrictionData> >& restrictions);
 
-    bool CanTurn(const std::vector<TurnRestrictionRef>& restrictions,
-                 Id from,
-                 Id to) const;
+    bool CanTurn(const std::vector<TurnRestrictionData>& restrictions,
+                 FileOffset from,
+                 FileOffset to) const;
 
     bool ReadJunctions(const ImportParameter& parameter,
                        Progress& progress,
@@ -56,13 +70,12 @@ namespace osmscout {
                           Progress& progress,
                           const TypeConfig& typeConfig,
                           const OSMSCOUT_HASHSET<Id>& junctions,
-                          NodeIdWayIdMap& endPointWayMap);
+                          NodeIdWayOffsetMap& endPointWayMap);
 
     bool LoadWays(Progress& progress,
                   FileScanner& scanner,
-                  NumericIndex<Id>& wayIndex,
-                  const std::set<Id>& ids,
-                  OSMSCOUT_HASHMAP<Id,WayRef>& waysMap);
+                  const std::set<FileOffset>& fileOffsets,
+                  OSMSCOUT_HASHMAP<FileOffset,WayRef>& waysMap);
 
     uint8_t CalculateEncodedBearing(const Way& way,
                                     size_t currentNode,
@@ -71,13 +84,13 @@ namespace osmscout {
 
     void CalculateAreaPaths(RouteNode& routeNode,
                             const Way& way,
-                            const NodeIdWayIdMap& nodeWayMap);
+                            const NodeIdWayOffsetMap& nodeWayMap);
     void CalculateCircularWayPaths(RouteNode& routeNode,
                                    const Way& way,
-                                   const NodeIdWayIdMap& nodeWayMap);
+                                   const NodeIdWayOffsetMap& nodeWayMap);
     void CalculateWayPaths(RouteNode& routeNode,
                            const Way& way,
-                           const NodeIdWayIdMap& nodeWayMap);
+                           const NodeIdWayOffsetMap& nodeWayMap);
 
     bool AddFileOffsetsToRouteNodes(const ImportParameter& parameter,
                                     Progress& progress,
