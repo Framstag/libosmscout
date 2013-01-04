@@ -173,13 +173,13 @@ namespace osmscout {
 
   private:
     void GetClosestForwardRouteNode(const WayRef& way,
-                                    Id nodeId,
+                                    size_t nodeIndex,
                                     RouteNodeRef& routeNode,
-                                    size_t& pos);
+                                    size_t& routeNodeIndex);
     void GetClosestBackwardRouteNode(const WayRef& way,
-                                     Id nodeId,
+                                     size_t nodeIndex,
                                      RouteNodeRef& routeNode,
-                                     size_t& pos);
+                                     size_t& routeNodeIndex);
     bool ResolveRNodesToList(const RNodeRef& end,
                              const CloseMap& closeMap,
                              std::list<RNodeRef>& nodes);
@@ -197,7 +197,8 @@ namespace osmscout {
                   Id targetNodeId);
 
     std::vector<Path> TransformPaths(const RoutingProfile& profile,
-                                     const RouteNode& node);
+                                     const RouteNode& node,
+                                     Id nextNodeId);
 
   public:
     Router(const RouterParameter& parameter);

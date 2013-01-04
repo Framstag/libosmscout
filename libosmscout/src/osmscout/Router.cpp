@@ -151,58 +151,40 @@ namespace osmscout {
   }
 
   void Router::GetClosestForwardRouteNode(const WayRef& way,
-                                          Id nodeId,
+                                          size_t nodeIndex,
                                           RouteNodeRef& routeNode,
-                                          size_t& pos)
+                                          size_t& routeNodeIndex)
   {
     routeNode=NULL;
 
-    size_t index=0;
-    while (index<way->nodes.size()) {
-      if (way->nodes[index].GetId()==nodeId) {
-        break;
-      }
-
-      index++;
-    }
-
-    for (size_t i=index; i<way->nodes.size(); i++) {
+    for (size_t i=nodeIndex; i<way->nodes.size(); i++) {
       routeNodeDataFile.Get(way->nodes[i].GetId(),
                             routeNode);
 
       if (routeNode.Valid()) {
-        pos=i;
+        routeNodeIndex=i;
         return;
       }
     }
   }
 
   void Router::GetClosestBackwardRouteNode(const WayRef& way,
-                                           Id nodeId,
+                                           size_t nodeIndex,
                                            RouteNodeRef& routeNode,
-                                           size_t& pos)
+                                           size_t& routeNodeIndex)
   {
     routeNode=NULL;
 
-    size_t index=0;
-    while (index<way->nodes.size()) {
-      if (way->nodes[index].GetId()==nodeId) {
-        break;
-      }
-
-      index++;
-    }
-
-    if (index>=way->nodes.size()) {
+    if (nodeIndex>=way->nodes.size()) {
       return;
     }
 
     if (!way->IsOneway()) {
-      for (int i=index-1; i>=0; i--) {
+      for (int i=nodeIndex-1; i>=0; i--) {
         routeNodeDataFile.Get(way->nodes[i].GetId(),routeNode);
 
         if (routeNode.Valid()) {
-          pos=(size_t)i;
+          routeNodeIndex=(size_t)i;
           return;
         }
       }
@@ -342,7 +324,8 @@ namespace osmscout {
   }
 
  std::vector<Path> Router::TransformPaths(const RoutingProfile& profile,
-                                          const RouteNode& node)
+                                          const RouteNode& node,
+                                          Id nextNodeId)
  {
     std::vector<osmscout::Path> result;
 
@@ -350,7 +333,7 @@ namespace osmscout {
       bool traversable=profile.CanUse(node,i);
 
       result.push_back(osmscout::Path(node.ways[node.paths[i].wayIndex],
-                                      node.paths[i].id,
+                                      nextNodeId,
                                       traversable));
     }
 
@@ -434,7 +417,7 @@ namespace osmscout {
       if (nn==nodes.end()) {
         if (node->GetId()!=targetNodeId) {
           AddNodes(route,
-                   TransformPaths(profile,node),
+                   TransformPaths(profile,node,targetNodeId),
                    node->GetId(),
                    targetWayOffset,
                    targetNodeId);
@@ -469,7 +452,7 @@ namespace osmscout {
       }
 
       AddNodes(route,
-               TransformPaths(profile,node),
+               TransformPaths(profile,node,nextNode->id),
                node->id,
                node->ways[node->paths[pathIndex].wayIndex],
                nextNode->id);
@@ -561,11 +544,11 @@ namespace osmscout {
     startLat=startWay->nodes[startNodeIndex].GetLat();
 
     GetClosestForwardRouteNode(startWay,
-                               startWay->nodes[startNodeIndex].GetId(),
+                               startNodeIndex,
                                startForwardRouteNode,
                                startForwardNodePos);
     GetClosestBackwardRouteNode(startWay,
-                                startWay->nodes[startNodeIndex].GetId(),
+                                startNodeIndex,
                                 startBackwardRouteNode,
                                 startBackwardNodePos);
 
@@ -581,11 +564,11 @@ namespace osmscout {
     }
 
     GetClosestForwardRouteNode(targetWay,
-                               targetWay->nodes[targetNodeIndex].GetId(),
+                               targetNodeIndex,
                                targetForwardRouteNode,
                                targetForwardNodePos);
     GetClosestBackwardRouteNode(targetWay,
-                                targetWay->nodes[targetNodeIndex].GetId(),
+                                targetNodeIndex,
                                 targetBackwardRouteNode,
                                 targetBackwardNodePos);
 
