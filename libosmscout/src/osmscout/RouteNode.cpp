@@ -66,13 +66,12 @@ namespace osmscout {
       uint32_t lonValue;
       uint32_t distanceValue;
 
-      scanner.ReadNumber(paths[i].id);
       scanner.ReadFileOffset(paths[i].offset);
       scanner.ReadNumber(paths[i].wayIndex);
       scanner.ReadNumber(paths[i].type);
       scanner.Read(paths[i].maxSpeed);
       scanner.Read(paths[i].grade);
-      scanner.Read(paths[i].bearing);
+      //scanner.Read(paths[i].bearing);
       scanner.Read(paths[i].flags);
       scanner.ReadNumber(distanceValue);
       scanner.ReadNumber(latValue);
@@ -125,13 +124,12 @@ namespace osmscout {
       uint32_t lonValue=(uint32_t)floor((paths[i].lon+180.0)*conversionFactor+0.5);
       uint32_t distanceValue=(uint32_t)floor(paths[i].distance*(1000.0*100.0)+0.5);
 
-      writer.WriteNumber(paths[i].id);
       writer.WriteFileOffset(paths[i].offset);
       writer.WriteNumber(paths[i].wayIndex);
       writer.WriteNumber(paths[i].type);
       writer.Write(paths[i].maxSpeed);
       writer.Write(paths[i].grade);
-      writer.Write(paths[i].bearing);
+      //writer.Write(paths[i].bearing);
       writer.Write(paths[i].flags);
       writer.WriteNumber(distanceValue);
       writer.WriteNumber(latValue-minLat);

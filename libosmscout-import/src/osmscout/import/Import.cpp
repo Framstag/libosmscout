@@ -106,7 +106,7 @@ namespace osmscout {
      optimizationCellSizeAverage(16),
      optimizationCellSizeMax(256),
      optimizationWayMethod(TransPolygon::fast),
-     routeNodeBlockSize(1500000),
+     routeNodeBlockSize(500000),
      assumeLand(true)
   {
     // no code

@@ -50,12 +50,34 @@ namespace osmscout {
       Type       type;
     };
 
-    typedef std::map<Id,std::list<FileOffset> > NodeIdWayOffsetMap;
+    struct PendingOffset
+    {
+      FileOffset routeNodeOffset;
+      size_t     index;
+    };
+
+    typedef OSMSCOUT_HASHMAP<Id, FileOffset>               NodeIdOffsetMap;
+    typedef std::map<Id,std::list<FileOffset> >            NodeIdWayOffsetMap;
+    typedef std::map<Id,std::list<PendingOffset> >         PendingRouteNodeOffsetsMap;
+    typedef std::map<Id,std::vector<TurnRestrictionData> > ViaTurnRestrictionMap;
 
   private:
+    bool ReadTurnRestrictionWayIds(const ImportParameter& parameter,
+                                   Progress& progress,
+                                   std::map<Id,FileOffset>& wayIdOffsetMap);
+
+    bool ResolveWayIdsToFileOffsets(const ImportParameter& parameter,
+                                    Progress& progress,
+                                    std::map<Id,FileOffset>& wayIdOffsetMap);
+
+    bool ReadTurnRestrictionData(const ImportParameter& parameter,
+                                 Progress& progress,
+                                 const std::map<Id,FileOffset>& wayIdOffsetMap,
+                                 ViaTurnRestrictionMap& restrictions);
+
     bool ReadTurnRestrictions(const ImportParameter& parameter,
                               Progress& progress,
-                              std::map<Id,std::vector<TurnRestrictionData> >& restrictions);
+                              ViaTurnRestrictionMap& restrictions);
 
     bool CanTurn(const std::vector<TurnRestrictionData>& restrictions,
                  FileOffset from,
@@ -77,25 +99,42 @@ namespace osmscout {
                   const std::set<FileOffset>& fileOffsets,
                   OSMSCOUT_HASHMAP<FileOffset,WayRef>& waysMap);
 
+    /*
     uint8_t CalculateEncodedBearing(const Way& way,
                                     size_t currentNode,
                                     size_t nextNode,
-                                    bool clockwise) const;
+                                    bool clockwise) const;*/
 
     void CalculateAreaPaths(RouteNode& routeNode,
                             const Way& way,
-                            const NodeIdWayOffsetMap& nodeWayMap);
+                            FileOffset routeNodeOffset,
+                            const NodeIdWayOffsetMap& nodeWayMap,
+                            const NodeIdOffsetMap& nodeIdOffsetMap,
+                            PendingRouteNodeOffsetsMap& pendingOffsetsMap);
     void CalculateCircularWayPaths(RouteNode& routeNode,
                                    const Way& way,
-                                   const NodeIdWayOffsetMap& nodeWayMap);
+                                   FileOffset routeNodeOffset,
+                                   const NodeIdWayOffsetMap& nodeWayMap,
+                                   const NodeIdOffsetMap& nodeIdOffsetMap,
+                                   PendingRouteNodeOffsetsMap& pendingOffsetsMap);
     void CalculateWayPaths(RouteNode& routeNode,
                            const Way& way,
-                           const NodeIdWayOffsetMap& nodeWayMap);
+                           FileOffset routeNodeOffset,
+                           const NodeIdWayOffsetMap& nodeWayMap,
+                           const NodeIdOffsetMap& nodeIdOffsetMap,
+                           PendingRouteNodeOffsetsMap& pendingOffsetsMap);
 
-    bool AddFileOffsetsToRouteNodes(const ImportParameter& parameter,
-                                    Progress& progress,
-                                    FileWriter& writer,
-                                    uint32_t writtenRouteNodeCount);
+    void FillRoutePathExcludes(RouteNode& routeNode,
+                               const std::list<FileOffset>& wayOffsets,
+                               const ViaTurnRestrictionMap& restrictions);
+
+    bool HandlePendingOffsets(const ImportParameter& parameter,
+                              Progress& progress,
+                              const NodeIdOffsetMap& routeNodeIdOffsetMap,
+                              PendingRouteNodeOffsetsMap& pendingOffsetsMap,
+                              FileWriter& routeNodeWriter,
+                              std::vector<NodeIdWayOffsetMap::iterator>& block,
+                              size_t blockCount);
 
   public:
     std::string GetDescription() const;
