@@ -828,48 +828,6 @@ namespace osmscout {
     return nodeDataFile.GetByOffset(offsets,nodes);
   }
 
-  bool Database::GetWay(const Id& id,
-                        WayRef& way) const
-  {
-    if (!IsOpen()) {
-      return false;
-    }
-
-    std::vector<Id>     ids;
-    std::vector<WayRef> ways;
-
-    ids.push_back(id);
-
-    if (GetWays(ids,ways)) {
-      if (!ways.empty()) {
-        way=*ways.begin();
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  bool Database::GetWays(const std::vector<Id>& ids,
-                         std::vector<WayRef>& ways) const
-  {
-    if (!IsOpen()) {
-      return false;
-    }
-
-    return wayDataFile.Get(ids,ways);
-  }
-
-  bool Database::GetWays(const std::set<Id>& ids,
-                         std::vector<WayRef>& ways) const
-  {
-    if (!IsOpen()) {
-      return false;
-    }
-
-    return wayDataFile.Get(ids,ways);
-  }
-
   bool Database::GetWayByOffset(const FileOffset& offset,
                                 WayRef& way) const
   {
