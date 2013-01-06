@@ -217,17 +217,11 @@ namespace osmscout {
      areaNodeIndex(/*parameter.GetAreaNodeIndexCacheSize()*/),
      areaWayIndex(),
      nodeDataFile("nodes.dat",
-                  "node.idx",
-                  parameter.GetNodeCacheSize(),
-                  parameter.GetNodeIndexCacheSize()),
+                  parameter.GetNodeCacheSize()),
      relationDataFile("relations.dat",
-                      "relation.idx",
-                      parameter.GetRelationCacheSize(),
-                      parameter.GetRelationIndexCacheSize()),
+                      parameter.GetRelationCacheSize()),
      wayDataFile("ways.dat",
-                 "way.idx",
-                  parameter.GetWayCacheSize(),
-                  parameter.GetWayIndexCacheSize()),
+                  parameter.GetWayCacheSize()),
      typeConfig(NULL),
      hashFunction(NULL)
   {
@@ -288,21 +282,21 @@ namespace osmscout {
     maxLon=maxLonDat/conversionFactor-180.0;
     maxLat=maxLatDat/conversionFactor-90.0;
 
-    if (!nodeDataFile.Open(path,FileScanner::LowMemRandom,true,FileScanner::LowMemRandom,true)) {
+    if (!nodeDataFile.Open(path,FileScanner::LowMemRandom,true)) {
       std::cerr << "Cannot open 'nodes.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
     }
 
-    if (!wayDataFile.Open(path,FileScanner::LowMemRandom,true,FileScanner::LowMemRandom,true)) {
+    if (!wayDataFile.Open(path,FileScanner::LowMemRandom,true)) {
       std::cerr << "Cannot open 'ways.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
     }
 
-    if (!relationDataFile.Open(path,FileScanner::LowMemRandom,true,FileScanner::LowMemRandom,true)) {
+    if (!relationDataFile.Open(path,FileScanner::LowMemRandom,true)) {
       std::cerr << "Cannot open 'relations.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;

@@ -513,8 +513,8 @@ namespace osmscout {
   bool RelationDataGenerator::ResolveMultipolygonMembers(Progress& progress,
                                                          const TypeConfig& typeConfig,
                                                          CoordDataFile& coordDataFile,
-                                                         DataFile<RawWay>& wayDataFile,
-                                                         DataFile<RawRelation>& relDataFile,
+                                                         IndexedDataFile<RawWay>& wayDataFile,
+                                                         IndexedDataFile<RawRelation>& relDataFile,
                                                          IdSet& resolvedRelations,
                                                          const Relation& relation,
                                                          RawRelation& rawRelation,
@@ -701,8 +701,8 @@ namespace osmscout {
                                                          const TypeConfig& typeConfig,
                                                          IdSet& wayAreaIndexBlacklist,
                                                          CoordDataFile& coordDataFile,
-                                                         DataFile<RawWay>& wayDataFile,
-                                                         DataFile<RawRelation>& relDataFile,
+                                                         IndexedDataFile<RawWay>& wayDataFile,
+                                                         IndexedDataFile<RawRelation>& relDataFile,
                                                          RawRelation& rawRelation,
                                                          Relation& relation)
   {
@@ -881,19 +881,19 @@ namespace osmscout {
                                      Progress& progress,
                                      const TypeConfig& typeConfig)
   {
-    IdSet                 wayAreaIndexBlacklist;
+    IdSet                        wayAreaIndexBlacklist;
 
-    CoordDataFile         coordDataFile("coord.dat");
+    CoordDataFile                coordDataFile("coord.dat");
 
-    DataFile<RawWay>      wayDataFile("rawways.dat",
-                                      "rawway.idx",
-                                      parameter.GetRawWayDataCacheSize(),
-                                      parameter.GetRawWayIndexCacheSize());
+    IndexedDataFile<RawWay>      wayDataFile("rawways.dat",
+                                             "rawway.idx",
+                                             parameter.GetRawWayDataCacheSize(),
+                                             parameter.GetRawWayIndexCacheSize());
 
-    DataFile<RawRelation> relDataFile("rawrels.dat",
-                                      "rawrel.idx",
-                                      parameter.GetRawWayDataCacheSize(),
-                                      parameter.GetRawWayIndexCacheSize());
+    IndexedDataFile<RawRelation> relDataFile("rawrels.dat",
+                                             "rawrel.idx",
+                                             parameter.GetRawWayDataCacheSize(),
+                                             parameter.GetRawWayIndexCacheSize());
 
     if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
                             parameter.GetCoordDataMemoryMaped())) {

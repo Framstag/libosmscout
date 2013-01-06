@@ -161,15 +161,15 @@ namespace osmscout {
     typedef OSMSCOUT_HASHMAP<FileOffset,Router::RNodeRef>    CloseMap;
 
   private:
-    bool                  isOpen;            //! true, if opened
-    bool                  debugPerformance;
+    bool                       isOpen;            //! true, if opened
+    bool                       debugPerformance;
 
-    std::string           path;              //! Path to the directory containing all files
+    std::string                path;              //! Path to the directory containing all files
 
-    WayDataFile           wayDataFile;       //! Cached access to the 'ways.dat' file
-    RouteNodeDataFile     routeNodeDataFile; //! Cached access to the 'route.dat' file
+    IndexedDataFile<Way>       wayDataFile;       //! Cached access to the 'ways.dat' file
+    IndexedDataFile<RouteNode> routeNodeDataFile; //! Cached access to the 'route.dat' file
 
-    TypeConfig            *typeConfig;       //! Type config for the currently opened map
+    TypeConfig                 *typeConfig;       //! Type config for the currently opened map
 
   private:
     void GetClosestForwardRouteNode(const WayRef& way,

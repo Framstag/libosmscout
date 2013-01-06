@@ -78,15 +78,15 @@ namespace osmscout {
   class OSMSCOUT_API DebugDatabase
   {
   private:
-    bool                  isOpen;          //! true, if opened
+    bool                      isOpen;          //! true, if opened
 
-    std::string           path;             //! Path to the directory containing all files
+    std::string               path;             //! Path to the directory containing all files
 
-    NodeDataFile          nodeDataFile;     //! Cached access to the 'nodes.dat' file
-    RelationDataFile      relationDataFile; //! Cached access to the 'relations.dat' file
-    WayDataFile           wayDataFile;      //! Cached access to the 'ways.dat' file
+    IndexedDataFile<Node>     nodeDataFile;     //! Cached access to the 'nodes.dat' file
+    IndexedDataFile<Relation> relationDataFile; //! Cached access to the 'relations.dat' file
+    IndexedDataFile<Way>      wayDataFile;      //! Cached access to the 'ways.dat' file
 
-    TypeConfig            *typeConfig;      //! Type config for the currently opened map
+    TypeConfig                *typeConfig;      //! Type config for the currently opened map
 
   public:
     DebugDatabase(const DebugDatabaseParameter& parameter);

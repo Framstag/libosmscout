@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
   size_t indexCacheSize=1;
 
   for (size_t i=1; i<=7; i++) {
-    osmscout::WayDataFile wayDataFile("ways.dat","way.idx",dataCacheSize,indexCacheSize);
+    osmscout::IndexedDataFile<osmscout::Way> wayDataFile("ways.dat","way.idx",dataCacheSize,indexCacheSize);
 
     if (!wayDataFile.Open(".",osmscout::FileScanner::FastRandom,true,osmscout::FileScanner::FastRandom,true)) {
       std::cerr << "Cannot open way data file!" << std::endl;
