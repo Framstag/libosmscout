@@ -64,13 +64,10 @@ namespace osmscout {
     unsigned long areaAreaIndexCacheSize;
     unsigned long areaNodeIndexCacheSize;
 
-    unsigned long nodeIndexCacheSize;
     unsigned long nodeCacheSize;
 
-    unsigned long wayIndexCacheSize;
     unsigned long wayCacheSize;
 
-    unsigned long relationIndexCacheSize;
     unsigned long relationCacheSize;
 
     bool          debugPerformance;
@@ -81,13 +78,10 @@ namespace osmscout {
     void SetAreaAreaIndexCacheSize(unsigned long areaAreaIndexCacheSize);
     void SetAreaNodeIndexCacheSize(unsigned long areaNodeIndexCacheSize);
 
-    void SetNodeIndexCacheSize(unsigned long nodeIndexCacheSize);
     void SetNodeCacheSize(unsigned long nodeCacheSize);
 
-    void SetWayIndexCacheSize(unsigned long wayIndexCacheSize);
     void SetWayCacheSize(unsigned long wayCacheSize);
 
-    void SetRelationIndexCacheSize(unsigned long relationIndexCacheSize);
     void SetRelationCacheSize(unsigned long relationCacheSize);
 
     void SetDebugPerformance(bool debug);
@@ -95,13 +89,10 @@ namespace osmscout {
     unsigned long GetAreaAreaIndexCacheSize() const;
     unsigned long GetAreaNodeIndexCacheSize() const;
 
-    unsigned long GetNodeIndexCacheSize() const;
     unsigned long GetNodeCacheSize() const;
 
-    unsigned long GetWayIndexCacheSize() const;
     unsigned long GetWayCacheSize() const;
 
-    unsigned long GetRelationIndexCacheSize() const;
     unsigned long GetRelationCacheSize() const;
 
     bool IsDebugPerformance() const;
@@ -223,7 +214,7 @@ namespace osmscout {
                          NodeRef& node) const;
     bool GetNodesByOffset(const std::vector<FileOffset>& offsets,
                           std::vector<NodeRef>& nodes) const;
-    
+
     bool GetWayByOffset(const FileOffset& offset,
                         WayRef& way) const;
     bool GetWaysByOffset(const std::vector<FileOffset>& offsets,

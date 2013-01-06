@@ -34,11 +34,8 @@ namespace osmscout {
   DatabaseParameter::DatabaseParameter()
   : areaAreaIndexCacheSize(1000),
     areaNodeIndexCacheSize(1000),
-    nodeIndexCacheSize(1000),
     nodeCacheSize(1000),
-    wayIndexCacheSize(2000),
     wayCacheSize(8000),
-    relationIndexCacheSize(1000),
     relationCacheSize(1000),
     debugPerformance(false)
   {
@@ -55,29 +52,14 @@ namespace osmscout {
     this->areaNodeIndexCacheSize=areaNodeIndexCacheSize;
   }
 
-  void DatabaseParameter::SetNodeIndexCacheSize(unsigned long nodeIndexCacheSize)
-  {
-    this->nodeIndexCacheSize=nodeIndexCacheSize;
-  }
-
   void DatabaseParameter::SetNodeCacheSize(unsigned long nodeCacheSize)
   {
     this->nodeCacheSize=nodeCacheSize;
   }
 
-  void DatabaseParameter::SetWayIndexCacheSize(unsigned long wayIndexCacheSize)
-  {
-    this->wayIndexCacheSize=wayIndexCacheSize;
-  }
-
   void DatabaseParameter::SetWayCacheSize(unsigned long wayCacheSize)
   {
     this->wayCacheSize=wayCacheSize;
-  }
-
-  void DatabaseParameter::SetRelationIndexCacheSize(unsigned long relationIndexCacheSize)
-  {
-    this->relationIndexCacheSize=relationIndexCacheSize;
   }
 
   void DatabaseParameter::SetRelationCacheSize(unsigned long relationCacheSize)
@@ -100,29 +82,14 @@ namespace osmscout {
     return areaNodeIndexCacheSize;
   }
 
-  unsigned long DatabaseParameter::GetNodeIndexCacheSize() const
-  {
-    return nodeIndexCacheSize;
-  }
-
   unsigned long DatabaseParameter::GetNodeCacheSize() const
   {
     return nodeCacheSize;
   }
 
-  unsigned long DatabaseParameter::GetWayIndexCacheSize() const
-  {
-    return wayIndexCacheSize;
-  }
-
   unsigned long DatabaseParameter::GetWayCacheSize() const
   {
     return wayCacheSize;
-  }
-
-  unsigned long DatabaseParameter::GetRelationIndexCacheSize() const
-  {
-    return relationIndexCacheSize;
   }
 
   unsigned long DatabaseParameter::GetRelationCacheSize() const
