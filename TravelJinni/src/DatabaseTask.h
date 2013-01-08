@@ -115,8 +115,10 @@ public:
                             size_t limit,
                             bool& limitReached) const;
 
-  bool CalculateRoute(osmscout::Id startWayId, size_t startNodeIndex,
-                      osmscout::Id targetWayId, size_t targetNodeIndex,
+  bool CalculateRoute(osmscout::FileOffset startWayOffset,
+                      size_t startNodeIndex,
+                      osmscout::FileOffset targetWayOffset,
+                      size_t targetNodeIndex,
                       osmscout::RouteData& route);
   bool TransformRouteDataToRouteDescription(const osmscout::RouteData& data,
                                             osmscout::RouteDescription& description,

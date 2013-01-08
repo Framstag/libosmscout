@@ -35,6 +35,7 @@ namespace osmscout {
   {
   private:
     Id                 id;
+    FileOffset         fileOffset;
     SegmentAttributes  attributes;
 
   public:
@@ -45,10 +46,16 @@ namespace osmscout {
     {
       // no code
     }
-
+  //private:
     inline Id GetId() const
     {
       return id;
+    }
+  //public:
+
+    inline FileOffset GetFileOffset() const
+    {
+      return fileOffset;
     }
 
     inline const SegmentAttributes& GetAttributes() const

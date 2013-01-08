@@ -1601,7 +1601,7 @@ namespace osmscout {
       PrepareAreaSegment(styleConfig,
                          projection,
                          parameter,
-                         ObjectRef(area->GetId(),refWay),
+                         ObjectRef(0/*area->GetId()*/,refWay), // TODO
                          area->GetAttributes(),
                          area->nodes);
     }
@@ -1616,7 +1616,7 @@ namespace osmscout {
         PrepareAreaSegment(styleConfig,
                            projection,
                            parameter,
-                           ObjectRef(area->GetId(),refWay),
+                           ObjectRef(0/*area->GetId()*/,refWay), // TODO
                            area->GetAttributes(),
                            area->nodes);
       }
@@ -1695,7 +1695,7 @@ namespace osmscout {
               j++;
             }
 
-            a.ref=ObjectRef(relation->GetId(),refRelation);
+            a.ref=ObjectRef(0/*relation->GetId()*/,refRelation); // TODO
             a.attributes=&role.attributes;
             a.fillStyle=fillStyle;
             a.transStart=data[i].transStart;
@@ -1867,7 +1867,7 @@ namespace osmscout {
       PrepareWaySegment(styleConfig,
                         projection,
                         parameter,
-                        ObjectRef(way->GetId(),refWay),
+                        ObjectRef(0/*way->GetId()*/,refWay), // TODO
                         way->GetAttributes(),
                         way->nodes);
     }
@@ -1885,7 +1885,7 @@ namespace osmscout {
         PrepareWaySegment(styleConfig,
                           projection,
                           parameter,
-                          ObjectRef(relation->GetId(),refRelation),
+                          ObjectRef(0/*relation->GetId()*/,refRelation), // TODO
                           role.GetAttributes(),
                           role.nodes);
       }
@@ -1900,7 +1900,7 @@ namespace osmscout {
         PrepareWaySegment(styleConfig,
                           projection,
                           parameter,
-                          ObjectRef(way->GetId(),refWay),
+                          ObjectRef(0 /*way->GetId()*/,refWay), // TODO
                           way->GetAttributes(),
                           way->nodes);
       }

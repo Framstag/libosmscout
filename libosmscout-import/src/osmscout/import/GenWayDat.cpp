@@ -865,8 +865,9 @@ namespace osmscout {
         std::vector<Tag> tags(block[w]->GetTags());
         Way              way;
         bool             reverseNodes=false;
+        Id               wayId=block[w]->GetId();
 
-        way.SetId(block[w]->GetId());
+        way.SetId(wayId);
         way.SetType(block[w]->GetType());
 
         if (!way.SetTags(progress,
@@ -887,7 +888,7 @@ namespace osmscout {
             progress.Error("Cannot resolve node with id "+
                            NumberToString(block[w]->GetNodeId(n))+
                            " for Way "+
-                           NumberToString(way.GetId()));
+                           NumberToString(wayId));
             success=false;
             break;
           }
@@ -908,7 +909,7 @@ namespace osmscout {
         if (way.IsArea()) {
           if (parameter.GetStrictAreas() &&
               !AreaIsSimple(way.nodes)) {
-            progress.Error("Area "+NumberToString(way.GetId())+" of type '"+typeConfig.GetTypeInfo(way.GetType()).GetName()+"' is not simple");
+            progress.Error("Area "+NumberToString(wayId)+" of type '"+typeConfig.GetTypeInfo(way.GetType()).GetName()+"' is not simple");
 
             continue;
           }

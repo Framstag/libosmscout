@@ -218,7 +218,7 @@ namespace osmscout {
       if (way!=wayMap.end()) {
         // Way is origin way and starts or end here so it is not an additional crossing way
         if (originWay.Valid() &&
-            way->second->GetId()==originWay->GetId() &&
+            way->second->GetFileOffset()==originWay->GetFileOffset() &&
             (way->second->nodes.front().GetId()==node.GetCurrentNodeId() ||
              way->second->nodes.back().GetId()==node.GetCurrentNodeId())) {
           continue;
@@ -226,7 +226,7 @@ namespace osmscout {
 
         // Way is target way and starts or end here so it is not an additional crossing way
         if (targetWay.Valid() &&
-            way->second->GetId()==targetWay->GetId() &&
+            way->second->GetFileOffset()==targetWay->GetFileOffset() &&
             (way->second->nodes.front().GetId()==node.GetCurrentNodeId() ||
              way->second->nodes.back().GetId()==node.GetCurrentNodeId())) {
           continue;
@@ -235,8 +235,8 @@ namespace osmscout {
         // ways is origin way and way is target way so it is not an additional crossing way
         if (originWay.Valid() &&
             targetWay.Valid() &&
-            way->second->GetId()==originWay->GetId() &&
-            way->second->GetId()==targetWay->GetId()) {
+            way->second->GetFileOffset()==originWay->GetFileOffset() &&
+            way->second->GetFileOffset()==targetWay->GetFileOffset()) {
           continue;
         }
 

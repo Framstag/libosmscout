@@ -249,18 +249,7 @@ namespace osmscout {
     for (uint32_t w=1; w<=wayCount; w++) {
       progress.SetProgress(w,wayCount);
 
-      Way        way;
-      FileOffset offset;
-
-      if (!scanner.GetPos(offset)) {
-        progress.Error(std::string("Cannot get file offset of data entry ")+
-                       NumberToString(w)+" of "+
-                       NumberToString(wayCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-
-        return false;
-      }
+      Way way;
 
       if (!way.Read(scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
@@ -284,8 +273,8 @@ namespace osmscout {
 
         CityArea cityArea;
 
-        cityArea.id=way.GetId();
-        cityArea.reference.Set(offset,refWay);
+        cityArea.id=0;//way.GetId(); TODO
+        cityArea.reference.Set(way.GetFileOffset(),refWay);
         cityArea.name=name;
         cityArea.nodes=way.nodes;
 
@@ -370,18 +359,7 @@ namespace osmscout {
     }
 
     for (uint32_t w=1; w<=wayCount; w++) {
-      Way        way;
-      FileOffset offset;
-
-      if (!scanner.GetPos(offset)) {
-        progress.Error(std::string("Cannot get file offset of data entry ")+
-                       NumberToString(w)+" of "+
-                       NumberToString(wayCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-
-        return false;
-      }
+      Way way;
 
       progress.SetProgress(w,wayCount);
 
@@ -399,7 +377,7 @@ namespace osmscout {
         size_t level=0;
 
         if (way.GetName().empty()) {
-          progress.Warning(std::string("Area boundary ")+NumberToString(way.GetId())+" has no name");
+          progress.Warning(std::string("Area boundary ")+NumberToString(way.GetFileOffset())+" has no name");
         }
 
         for (size_t i=0; i<way.GetTagCount(); i++) {
@@ -407,7 +385,7 @@ namespace osmscout {
             if (StringToNumber(way.GetTagValue(i),level)) {
               Boundary boundary;
 
-              boundary.reference.Set(offset,refWay);
+              boundary.reference.Set(way.GetFileOffset(),refWay);
               boundary.name=way.GetName();
               boundary.level=level;
               boundary.areas.push_back(way.nodes);
@@ -416,7 +394,7 @@ namespace osmscout {
             }
             else {
               progress.Info("Could not parse admin_level of way "+
-                            NumberToString(way.GetType() )+" "+NumberToString(way.GetId()));
+                            NumberToString(way.GetType() )+" "+NumberToString(way.GetFileOffset()));
             }
 
             break;
@@ -482,7 +460,9 @@ namespace osmscout {
         size_t level=0;
 
         if (relation.GetName().empty()) {
-          progress.Warning(std::string("Relation boundary ")+NumberToString(relation.GetId())+" has no name");
+          progress.Warning(std::string("Relation boundary ")+
+                           NumberToString(relation.GetType())+" "+
+                           NumberToString(relation.GetFileOffset())+" has no name");
         }
 
         for (size_t i=0; i<relation.GetTagCount(); i++) {
@@ -506,7 +486,8 @@ namespace osmscout {
             }
             else {
               progress.Info("Could not parse admin_level of relation "+
-                            NumberToString(relation.GetType())+" "+NumberToString(relation.GetId()));
+                            NumberToString(relation.GetType())+" "+
+                            NumberToString(relation.GetFileOffset()));
             }
 
             break;
@@ -515,7 +496,8 @@ namespace osmscout {
 
         if (level==0) {
           progress.Info("No tag 'admin_level' for relation "+
-                        NumberToString(relation.GetType())+" "+NumberToString(relation.GetId()));
+                        NumberToString(relation.GetType())+" "+
+                        NumberToString(relation.GetFileOffset()));
         }
       }
     }

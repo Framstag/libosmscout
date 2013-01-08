@@ -151,11 +151,13 @@ namespace osmscout {
 
     bool BuildRings(const ImportParameter& parameter,
                     Progress& progress,
+                    Id id,
                     const Relation& relation,
                     std::list<MultipolygonPart>& parts);
 
     bool ResolveMultipolygon(const ImportParameter& parameter,
                              Progress& progress,
+                             Id id,
                              const Relation& relation,
                              std::list<MultipolygonPart>& parts);
 

@@ -151,9 +151,9 @@ public:
                             size_t limit,
                             bool& limitReached) const;
 
-  bool CalculateRoute(osmscout::Id startWayId,
+  bool CalculateRoute(osmscout::FileOffset startWayOffset,
                       size_t startNodeIndex,
-                      osmscout::Id targetWayId,
+                      osmscout::FileOffset targetWayOffset,
                       size_t targetNodeIndex,
                       osmscout::RouteData& route);
 

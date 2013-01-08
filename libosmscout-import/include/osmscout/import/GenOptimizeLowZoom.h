@@ -37,7 +37,7 @@ namespace osmscout {
   class OptimizeLowZoomGenerator : public ImportModule
   {
   private:
-    typedef OSMSCOUT_HASHMAP<Id,FileOffset> IdFileOffsetMap;
+    typedef OSMSCOUT_HASHMAP<FileOffset,FileOffset> FileOffsetFileOffsetMap;
 
     struct TypeData
     {
@@ -90,7 +90,7 @@ namespace osmscout {
     bool WriteOptimizedWays(Progress& progress,
                             FileWriter& writer,
                             const std::list<WayRef>& ways,
-                            IdFileOffsetMap& offsets,
+                            FileOffsetFileOffsetMap& offsets,
                             size_t width,
                             size_t height,
                             const Magnification& magnification,
@@ -100,7 +100,7 @@ namespace osmscout {
                      FileWriter& writer,
                      const TypeInfo& type,
                      const std::list<WayRef>& ways,
-                     const IdFileOffsetMap& offsets,
+                     const FileOffsetFileOffsetMap& offsets,
                      TypeData& data);
 
   public:

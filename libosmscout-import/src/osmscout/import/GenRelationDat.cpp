@@ -141,6 +141,7 @@ namespace osmscout {
 
   bool RelationDataGenerator::BuildRings(const ImportParameter& parameter,
                                          Progress& progress,
+                                         Id id,
                                          const Relation& relation,
                                          std::list<MultipolygonPart>& parts)
   {
@@ -184,14 +185,16 @@ namespace osmscout {
       if (entry->second.size()<2) {
           progress.Error("Node "+NumberToString(entry->first)+
                          " of way "+NumberToString(entry->second.front()->ways.front()->GetId())+
-                         " cannot be joined with any other way of the relation "+NumberToString(relation.GetId())+" "+relation.GetName());
+                         " cannot be joined with any other way of the relation "+
+                         NumberToString(id)+" "+relation.GetName());
           return false;
       }
 
       if (entry->second.size()%2!=0) {
           progress.Error("Node "+NumberToString(entry->first)+
                          " of way "+NumberToString(entry->second.front()->ways.front()->GetId())+
-                         " can be joined with uneven number of ways of the relation "+NumberToString(relation.GetId())+" "+relation.GetName());
+                         " can be joined with uneven number of ways of the relation "+
+                         NumberToString(id)+" "+relation.GetName());
           return false;
       }
     }
@@ -295,8 +298,9 @@ namespace osmscout {
 
         if (parameter.GetStrictAreas() &&
             !AreaIsSimple(ring.role.nodes)) {
-          progress.Error("Resolved ring including way "+NumberToString(ring.ways.front()->GetId())+" is not simple for multipolygon relation "+NumberToString(relation.GetId())+
-                         " "+relation.GetName());
+          progress.Error("Resolved ring including way "+NumberToString(ring.ways.front()->GetId())+
+                         " is not simple for multipolygon relation "+NumberToString(id)+" "+
+                         relation.GetName());
 
           return false;
         }
@@ -317,6 +321,7 @@ namespace osmscout {
     */
   bool RelationDataGenerator::ResolveMultipolygon(const ImportParameter& parameter,
                                                   Progress& progress,
+                                                  Id id,
                                                   const Relation& relation,
                                                   std::list<MultipolygonPart>& parts)
   {
@@ -328,6 +333,7 @@ namespace osmscout {
 
     if (!BuildRings(parameter,
                     progress,
+                    id,
                     relation,
                     parts)) {
       return false;
@@ -372,8 +378,9 @@ namespace osmscout {
       top=FindTopLevel(parts,state,topIndex);
 
       if (top==parts.end()) {
-        progress.Warning("Error during ring grouping for multipolygon relation "+NumberToString(relation.GetId())+
-                         " "+relation.GetName());
+        progress.Warning("Error during ring grouping for multipolygon relation "+
+                         NumberToString(id)+" "+
+                         relation.GetName());
         return false;
       }
 
@@ -386,8 +393,8 @@ namespace osmscout {
     }
 
     if (groups.empty()) {
-      progress.Warning("No groups for multipolygon relation "+NumberToString(relation.GetId())+
-                       " "+relation.GetName());
+      progress.Warning("No groups for multipolygon relation "+NumberToString(id)+" "+
+                       relation.GetName());
       return false;
     }
 
@@ -426,7 +433,7 @@ namespace osmscout {
             progress.Error("Cannot resolve relation member "+
                            NumberToString(member->id)+
                            " for relation "+
-                           NumberToString(relation.GetId())+" "+
+                           NumberToString(rawRelation.GetId())+" "+
                            typeConfig.GetTypeInfo(relation.GetType()).GetName()+" "+
                            relation.GetName());
 
@@ -452,7 +459,7 @@ namespace osmscout {
         }
         else {
           progress.Warning("Unsupported relation reference in relation "+
-                           NumberToString(relation.GetId())+" "+
+                           NumberToString(rawRelation.GetId())+" "+
                            typeConfig.GetTypeInfo(relation.GetType()).GetName()+" "+
                            relation.GetName());
         }
@@ -467,7 +474,7 @@ namespace osmscout {
           progress.Error("Cannot resolve way member "+
                          NumberToString(member->id)+
                          " for relation "+
-                         NumberToString(relation.GetId())+" "+
+                         NumberToString(rawRelation.GetId())+" "+
                          typeConfig.GetTypeInfo(relation.GetType()).GetName()+" "+
                          relation.GetName());
 
@@ -491,7 +498,7 @@ namespace osmscout {
             progress.Error("Cannot resolve node member "+
                            NumberToString(*id)+
                            " for relation "+
-                           NumberToString(relation.GetId())+" "+
+                           NumberToString(rawRelation.GetId())+" "+
                            typeConfig.GetTypeInfo(relation.GetType()).GetName()+" "+
                            relation.GetName());
 
@@ -557,7 +564,7 @@ namespace osmscout {
             progress.Error("Found self referencing relation "+
                            NumberToString(member->id)+
                            " during resolving of members of relation "+
-                           NumberToString(relation.GetId())+" "+relation.GetName());
+                           NumberToString(rawRelation.GetId())+" "+relation.GetName());
             return false;
           }
 
@@ -565,7 +572,7 @@ namespace osmscout {
         }
         else {
           progress.Warning("Unsupported relation reference in relation "+
-                           NumberToString(relation.GetId())+" "+
+                           NumberToString(rawRelation.GetId())+" "+
                            typeConfig.GetTypeInfo(relation.GetType()).GetName()+" "+
                            relation.GetName());
         }
@@ -582,7 +589,7 @@ namespace osmscout {
       if (!relDataFile.Get(relationIds,
                            childRelations)) {
         progress.Error("Cannot resolve child relations of relation "+
-                       NumberToString(relation.GetId())+" "+relation.GetName());
+                       NumberToString(rawRelation.GetId())+" "+relation.GetName());
         return false;
       }
 
@@ -614,7 +621,7 @@ namespace osmscout {
                 progress.Error("Found self referencing relation "+
                                NumberToString(member->id)+
                                " during resolving of members of relation "+
-                               NumberToString(relation.GetId())+" "+
+                               NumberToString(rawRelation.GetId())+" "+
                                typeConfig.GetTypeInfo(relation.GetType()).GetName()+" "+
                                relation.GetName());
                 return false;
@@ -624,7 +631,7 @@ namespace osmscout {
             }
             else {
               progress.Warning("Unsupported relation reference in relation "+
-                               NumberToString(relation.GetId())+" "+
+                               NumberToString(rawRelation.GetId())+" "+
                                typeConfig.GetTypeInfo(relation.GetType()).GetName()+" "+
                                relation.GetName());
             }
@@ -642,7 +649,7 @@ namespace osmscout {
     if (!wayDataFile.Get(wayIds,
                          ways)) {
       progress.Error("Cannot resolve child ways of relation "+
-                     NumberToString(relation.GetId())+" "+
+                     NumberToString(rawRelation.GetId())+" "+
                      typeConfig.GetTypeInfo(relation.GetType()).GetName()+" "+
                      relation.GetName());
       return false;
@@ -674,7 +681,7 @@ namespace osmscout {
     if (!coordDataFile.Get(nodeIds,
                            coordMap)) {
       progress.Error("Cannot resolve child nodes of relation "+
-                     NumberToString(relation.GetId())+" "+
+                     NumberToString(rawRelation.GetId())+" "+
                      typeConfig.GetTypeInfo(relation.GetType()).GetName()+" "+
                      relation.GetName());
       return false;
@@ -723,7 +730,6 @@ namespace osmscout {
       }
     }
 
-    relation.SetId(rawRelation.GetId());
     relation.SetType(rawRelation.GetType());
 
     std::list<MultipolygonPart> parts;
@@ -745,6 +751,7 @@ namespace osmscout {
     // http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
     if (!ResolveMultipolygon(parameter,
                              progress,
+                             rawRelation.GetId(),
                              relation,
                              parts)) {
       return false;
@@ -809,22 +816,26 @@ namespace osmscout {
             ring->role.GetType()!=typeIgnore) {
           if (relation.GetType()==typeIgnore) {
             if (progress.OutputDebug()) {
-              progress.Debug("Autodetecting type of multipolygon relation "+NumberToString(relation.GetId())+" as "+NumberToString(relation.GetType()));
+              progress.Debug("Autodetecting type of multipolygon relation "+
+                             NumberToString(rawRelation.GetId())+" as "+
+                             NumberToString(relation.GetType()));
             }
 
             relation.SetType(ring->ways.front()->GetType());
             ring->role.attributes.type=typeIgnore;
           }
           else if (relation.GetType()!=ring->role.GetType()) {
-            progress.Warning("Multipolygon relation "+NumberToString(relation.GetId())+" has conflicting types for outer boundary ("+
-                             typeConfig.GetTypeInfo(relation.GetType()).GetName()+ " vs. "+typeConfig.GetTypeInfo(ring->ways.front()->GetType()).GetName()+")");
+            progress.Warning("Multipolygon relation "+NumberToString(rawRelation.GetId())+
+                             " has conflicting types for outer boundary ("+
+                             typeConfig.GetTypeInfo(relation.GetType()).GetName()+
+                             " vs. "+typeConfig.GetTypeInfo(ring->ways.front()->GetType()).GetName()+")");
           }
         }
       }
     }
 
     if (relation.GetType()==typeIgnore) {
-      progress.Warning("Multipolygon relation "+NumberToString(relation.GetId())+" does not have a type, skipping");
+      progress.Warning("Multipolygon relation "+NumberToString(rawRelation.GetId())+" does not have a type, skipping");
       return false;
     }
 
@@ -1028,7 +1039,10 @@ namespace osmscout {
       }
 
       if (progress.OutputDebug()) {
-        progress.Debug("Storing relation "+NumberToString(rel.GetId())+" "+NumberToString(rel.GetType())+" "+rel.GetName());
+        progress.Debug("Storing relation "+
+                       NumberToString(rawRel.GetId())+" "+
+                       NumberToString(rel.GetType())+" "+
+                       rel.GetName());
       }
 
       if (rel.IsArea()) {

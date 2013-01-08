@@ -611,18 +611,18 @@ bool DBThread::GetMatchingLocations(const osmscout::AdminRegion& region,
                                        false);
 }
 
-bool DBThread::CalculateRoute(osmscout::Id startWayId,
+bool DBThread::CalculateRoute(osmscout::FileOffset startWayOffset,
                               size_t startNodeIndex,
-                              osmscout::Id targetWayId,
+                              osmscout::FileOffset targetWayOffset,
                               size_t targetNodeIndex,
                               osmscout::RouteData& route)
 {
   QMutexLocker locker(&mutex);
 
   return router.CalculateRoute(routingProfile,
-                               startWayId,
+                               startWayOffset,
                                startNodeIndex,
-                               targetWayId,
+                               targetWayOffset,
                                targetNodeIndex,
                                route);
 }

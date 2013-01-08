@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
   for (std::vector<osmscout::WayRef>::const_iterator way=ways.begin();
       way!=ways.end();
       way++) {
-    std::cout << "+ Way " << (*way)->GetId();
+    std::cout << "+ Way " << (*way)->GetFileOffset();
     std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*way)->GetType()).GetName();
     std::cout << " " << (*way)->GetName() << std::endl;
   }
@@ -177,7 +177,7 @@ int main(int argc, char* argv[])
   for (std::vector<osmscout::RelationRef>::const_iterator way=relationWays.begin();
       way!=relationWays.end();
       way++) {
-    std::cout << "+ Way " << (*way)->GetId();
+    std::cout << "+ Way " << (*way)->GetFileOffset();
     std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*way)->GetType()).GetName();
     std::cout << " " << (*way)->GetName() << std::endl;
   }
@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
   for (std::vector<osmscout::WayRef>::const_iterator area=areas.begin();
       area!=areas.end();
       area++) {
-    std::cout << "+ Area " << (*area)->GetId();
+    std::cout << "+ Area " << (*area)->GetFileOffset();
     std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*area)->GetType()).GetName();
     std::cout << " " << (*area)->GetName() << std::endl;
   }
@@ -193,7 +193,7 @@ int main(int argc, char* argv[])
   for (std::vector<osmscout::RelationRef>::const_iterator area=relationAreas.begin();
       area!=relationAreas.end();
       area++) {
-    std::cout << "+ Area " << (*area)->GetId();
+    std::cout << "+ Area " << (*area)->GetFileOffset();
     std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*area)->GetType()).GetName();
     std::cout << " " << (*area)->GetName() << std::endl;
   }

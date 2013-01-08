@@ -642,46 +642,36 @@ namespace osmscout {
                                                                                 "rawrel.idx")));
     /* 7 */
     modules.push_back(new RelationDataGenerator());
+
     /* 8 */
-    modules.push_back(new NumericIndexGenerator<Id,Relation>("Generating 'relation.idx'",
-                                                             AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                             "relations.dat"),
-                                                             AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                             "relation.idx")));
-    /* 9 */
     modules.push_back(new NodeDataGenerator());
-    /* 10 */
+    /* 9 */
     modules.push_back(new NumericIndexGenerator<Id,Node>("Generating 'node.idx'",
                                                          AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                          "nodes.dat"),
                                                          AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                          "node.idx")));
-    /* 11 */
+    /* 10 */
     modules.push_back(new TurnRestrictionDataGenerator());
 
-    /* 12 */
+    /* 11 */
     modules.push_back(new WayDataGenerator());
-    /* 13 */
-    modules.push_back(new NumericIndexGenerator<Id,Way>("Generating 'way.idx'",
-                                                        AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                        "ways.dat"),
-                                                        AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                        "way.idx")));
-    /* 14 */
+
+    /* 12 */
     modules.push_back(new AreaAreaIndexGenerator());
-    /* 15 */
+    /* 13 */
     modules.push_back(new AreaWayIndexGenerator());
-    /* 16 */
+    /* 14 */
     modules.push_back(new AreaNodeIndexGenerator());
-    /* 17 */
+    /* 15 */
     modules.push_back(new CityStreetIndexGenerator());
-    /* 18 */
+    /* 16 */
     modules.push_back(new WaterIndexGenerator());
-    /* 19 */
+    /* 17 */
     modules.push_back(new OptimizeLowZoomGenerator());
-    /* 20 */
+    /* 18 */
     modules.push_back(new RouteDataGenerator());
-    /* 21 */
+    /* 19 */
     modules.push_back(new NumericIndexGenerator<Id,RouteNode>("Generating 'route.idx'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               "route.dat"),

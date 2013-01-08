@@ -198,7 +198,9 @@ static void DumpWay(const osmscout::TypeConfig* typeConfig,
     std::cout << "Way {" << std::endl;
   }
 
-  std::cout << "  id: " << way->GetId() << std::endl;
+  // TODO!
+  //std::cout << "  id: " << way->GetId() << std::endl;
+  std::cout << "  fileOffset: " << way->GetFileOffset() << std::endl;
 
   if (way->IsArea()) {
     DumpAreaSegmentAttributes(way->GetAttributes(),
@@ -239,7 +241,8 @@ static void DumpRelation(const osmscout::TypeConfig* typeConfig,
   else {
     std::cout << "WayRelation {" << std::endl;
   }
-  std::cout << "  id: " << relation->GetId() << std::endl;
+  // TODO: Resolve id and dump it, too
+  std::cout << "  fileOffset: " << relation->GetFileOffset() << std::endl;
 
   if (relation->IsArea()) {
     DumpAreaSegmentAttributes(relation->GetAttributes(),

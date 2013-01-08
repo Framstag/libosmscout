@@ -166,7 +166,7 @@ namespace osmscout {
 
     std::string                path;              //! Path to the directory containing all files
 
-    IndexedDataFile<Way>       wayDataFile;       //! Cached access to the 'ways.dat' file
+    DataFile<Way>              wayDataFile;       //! Cached access to the 'ways.dat' file
     IndexedDataFile<RouteNode> routeNodeDataFile; //! Cached access to the 'route.dat' file
 
     TypeConfig                 *typeConfig;       //! Type config for the currently opened map
@@ -213,8 +213,8 @@ namespace osmscout {
     TypeConfig* GetTypeConfig() const;
 
     bool CalculateRoute(const RoutingProfile& profile,
-                        Id startWayId, size_t startNodeIndex,
-                        Id targetWayId, size_t targetNodeIndex,
+                        FileOffset startWayOffset, size_t startNodeIndex,
+                        FileOffset targetWayOffset, size_t targetNodeIndex,
                         RouteData& route);
 
     bool TransformRouteDataToWay(const RouteData& data,

@@ -75,9 +75,7 @@ namespace osmscout {
    : isOpen(false),
      debugPerformance(parameter.IsDebugPerformance()),
      wayDataFile("ways.dat",
-                 "way.idx",
-                  parameter.GetWayCacheSize(),
-                  parameter.GetWayIndexCacheSize()),
+                  parameter.GetWayCacheSize()),
      routeNodeDataFile("route.dat",
                        "route.idx",
                        0,
@@ -107,7 +105,7 @@ namespace osmscout {
       return false;
     }
 
-    if (!wayDataFile.Open(path,FileScanner::Normal,true,FileScanner::Normal,false)) {
+    if (!wayDataFile.Open(path,FileScanner::Normal,false)) {
       std::cerr << "Cannot open 'ways.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
@@ -462,12 +460,11 @@ namespace osmscout {
   }
 
   bool Router::CalculateRoute(const RoutingProfile& profile,
-                              Id startWayId, size_t startNodeIndex,
-                              Id targetWayId, size_t targetNodeIndex,
+                              FileOffset startWayOffset, size_t startNodeIndex,
+                              FileOffset targetWayOffset, size_t targetNodeIndex,
                               RouteData& route)
   {
     WayRef                   startWay;
-    FileOffset               startWayOffset;
     double                   startLon=0.0L;
     double                   startLat=0.0L;
 
@@ -479,7 +476,6 @@ namespace osmscout {
     FileOffset               startBackwardOffset;
 
     WayRef                   targetWay;
-    FileOffset               targetWayOffset;
     double                   targetLon=0.0L,targetLat=0.0L;
 
     RouteNodeRef             targetForwardRouteNode;
@@ -510,18 +506,6 @@ namespace osmscout {
     openMap.reserve(10000);
     closeMap.reserve(250000);
 #endif
-
-    if (!wayDataFile.GetOffset(startWayId,
-                               startWayOffset)) {
-      std::cerr << "Cannot get start way file offset!" << std::endl;
-      return false;
-    }
-
-    if (!wayDataFile.GetOffset(targetWayId,
-                               targetWayOffset)) {
-      std::cerr << "Cannot get target way file offset!" << std::endl;
-      return false;
-    }
 
     if (!wayDataFile.GetByOffset(startWayOffset,
                                  startWay)) {
@@ -816,8 +800,8 @@ namespace osmscout {
 
     clock.Stop();
 
-    std::cout << "From:                " << startWayId << "[" << startNodeIndex << "]" << std::endl;
-    std::cout << "To:                  " << targetWayId << "[" << targetNodeIndex << "]" << std::endl;
+    std::cout << "From:                " << startWayOffset << "[" << startNodeIndex << "]" << std::endl;
+    std::cout << "To:                  " << targetWayOffset << "[" << targetNodeIndex << "]" << std::endl;
     std::cout << "Time:                " << clock << std::endl;
 #if defined(DEBUG_ROUTING)
     std::cout << "Cost:                " << current->currentCost << " " << current->estimateCost << " " << current->overallCost << std::endl;
@@ -882,7 +866,7 @@ namespace osmscout {
       if (iter->GetPathWayOffset()!=0) {
         WayRef w;
 
-        if (!wayDataFile.Get(iter->GetPathWayOffset(),w)) {
+        if (!wayDataFile.GetByOffset(iter->GetPathWayOffset(),w)) {
           return false;
         }
 
@@ -925,8 +909,8 @@ namespace osmscout {
       if (iter->GetPathWayOffset()!=0) {
 
         if (w.Invalid() ||
-            w->GetId()!=iter->GetPathWayOffset()) {
-          if (!wayDataFile.Get(iter->GetPathWayOffset(),w)) {
+            w->GetFileOffset()!=iter->GetPathWayOffset()) {
+          if (!wayDataFile.GetByOffset(iter->GetPathWayOffset(),w)) {
             std::cerr << "Cannot load way with id " << iter->GetPathWayOffset() << std::endl;
             return false;
           }

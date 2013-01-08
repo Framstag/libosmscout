@@ -35,20 +35,22 @@
   Examples for the nordrhein-westfalen.osm:
 
   Long:
-    45756746 12 33879936 0
+    "In den Hüchten" Dortmund 51.5717798, 7.4587852 Promenadenweg Bonn 50.6890143, 7.1360549
 
   Medium:
-    33879936 0 38363871 2
+    "In den Hüchten" Dortmund 51.5717798, 7.4587852 "Zur Taubeneiche" Arnsberg 51.3846946, 8.0771719
 
   Short:
-    33879936 0 24922615 9
+    "In den Hüchten" Dortmund 51.5717798, 7.4587852 "An der Dorndelle" Bergkamen 51.6217831, 7.6026704
 
   Roundabout
-    24998462 0 42123520 0
+    "Am Hohen Kamp" Bergkamen 51.6163438, 7.5952355 Opferweg Bergkamen 51.6237998, 7.6419474
 
   Oneway Routing:
-    17427184 0 23360047 2
+    Viktoriastraße Dortmund 51.5130296, 7.4681888 Schwanenwall Dortmund 51.5146904, 7.4725241
 */
+
+const static size_t RESULT_SET_MAX_SIZE = 1000;
 
 static std::string TimeToString(double time)
 {
@@ -61,6 +63,96 @@ static std::string TimeToString(double time)
   stream << std::setfill('0') << std::setw(2) << (int)floor(60*time+0.5);
 
   return stream.str();
+}
+
+static bool LookupClosedNodeAtLocation(osmscout::Database& database,
+                                       const std::string& location,
+                                       const std::string& area,
+                                       double lat,
+                                       double lon,
+                                       std::string& locationDesc,
+                                       osmscout::WayRef& way,
+                                       size_t& nodeIndex)
+{
+  std::list<osmscout::AdminRegion> areas;
+  bool                             limitReached;
+  double                           minDistance=std::numeric_limits<double>::max();
+
+  if (!database.GetMatchingAdminRegions(area,
+                                        areas,
+                                        RESULT_SET_MAX_SIZE,
+                                        limitReached,
+                                        false)) {
+    std::cerr << "Error while accessing database, quitting..." << std::endl;
+    return 1;
+  }
+
+  if (limitReached) {
+    std::cerr << "To many hits for area, quitting..." << std::endl;
+    return 1;
+  }
+
+  for (std::list<osmscout::AdminRegion>::const_iterator area=areas.begin();
+      area!=areas.end();
+      ++area) {
+    std::list<osmscout::Location> locations;
+
+    if (!location.empty()) {
+      if (!database.GetMatchingLocations(*area,
+                                         location,
+                                         locations,
+                                         RESULT_SET_MAX_SIZE,
+                                         limitReached,
+                                         false)) {
+        std::cerr << "Error while accessing database, quitting..." << std::endl;
+        database.Close();
+        return 1;
+      }
+
+      if (limitReached) {
+        std::cerr << "To many hits for area, quitting..." << std::endl;
+        database.Close();
+        return 1;
+      }
+    }
+
+    for (std::list<osmscout::Location>::const_iterator location=locations.begin();
+        location!=locations.end();
+        ++location) {
+      for (std::list<osmscout::ObjectFileRef>::const_iterator reference=location->references.begin();
+          reference!=location->references.end();
+          ++reference) {
+
+        if (reference->GetType()==osmscout::RefType::refWay) {
+          osmscout::WayRef tmpWay;
+
+          if (database.GetWayByOffset(reference->GetFileOffset(),tmpWay)) {
+            for (size_t i=0;  i<tmpWay->nodes.size(); i++) {
+              double distance=sqrt((tmpWay->nodes[i].GetLat()-lat)*(tmpWay->nodes[i].GetLat()-lat)+
+                                   (tmpWay->nodes[i].GetLon()-lon)*(tmpWay->nodes[i].GetLon()-lon));
+
+              if (distance<minDistance) {
+                minDistance=distance;
+
+                locationDesc=location->name;
+
+                if (!location->path.empty()) {
+                  locationDesc+=" ("+osmscout::StringListToString(location->path)+")";
+                }
+
+                way=tmpWay;
+                nodeIndex=i;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return way.Valid() &&
+         nodeIndex>=0 &&
+         nodeIndex<way->nodes.size();
 }
 
 static std::string MoveToTurnCommand(osmscout::RouteDescription::DirectionDescription::Move move)
@@ -374,9 +466,23 @@ int main(int argc, char* argv[])
 {
   osmscout::FastestPathRoutingProfile routingProfile;
   std::string                         map;
-  osmscout::Id                        startWayId;
+
+  std::string                         startLocation;
+  std::string                         startArea;
+  double                              startLat;
+  double                              startLon;
+  std::string                         startLocationDesc;
+
+  std::string                         targetLocation;
+  std::string                         targetArea;
+  double                              targetLat;
+  double                              targetLon;
+  std::string                         targetLocationDesc;
+
+  osmscout::WayRef                    startWay;
   size_t                              startNodeIndex;
-  osmscout::Id                        targetWayId;
+
+  osmscout::WayRef                    targetWay;
   size_t                              targetNodeIndex;
 
   int currentArg=1;
@@ -391,39 +497,81 @@ int main(int argc, char* argv[])
     }
   }
 
-  if (argc-currentArg!=5) {
-    std::cout << "Routing [-r] <map directory> <start way id> <start node id> <target way id> <target node id>" << std::endl;
+  if (argc-currentArg!=9) {
+    std::cout << "Routing [-r] <map directory> <start location> <start area> <start lat> <start lon> <target location> <target area> <target lat> <target lon>" << std::endl;
     std::cout << " -r  allow using oneways the wrong direction" << std::endl;
     return 1;
   }
 
   map=argv[currentArg];
-
   currentArg++;
 
-  if (sscanf(argv[currentArg],"%lu",&startWayId)!=1) {
-    std::cerr << "start way id is not numeric!" << std::endl;
+  startLocation=argv[currentArg];
+  currentArg++;
+
+  startArea=argv[currentArg];
+  currentArg++;
+
+  if (sscanf(argv[currentArg],"%lf",&startLat)!=1) {
+    std::cerr << "lat is not numeric!" << std::endl;
+    return 1;
+  }
+  currentArg++;
+
+  if (sscanf(argv[currentArg],"%lf",&startLon)!=1) {
+    std::cerr << "lon is not numeric!" << std::endl;
+    return 1;
+  }
+  currentArg++;
+
+  targetLocation=argv[currentArg];
+  currentArg++;
+
+  targetArea=argv[currentArg];
+  currentArg++;
+
+  if (sscanf(argv[currentArg],"%lf",&targetLat)!=1) {
+    std::cerr << "lat is not numeric!" << std::endl;
+    return 1;
+  }
+  currentArg++;
+
+  if (sscanf(argv[currentArg],"%lf",&targetLon)!=1) {
+    std::cerr << "lon is not numeric!" << std::endl;
+    return 1;
+  }
+  currentArg++;
+
+  osmscout::DatabaseParameter databaseParameter;
+  osmscout::Database          database(databaseParameter);
+
+  if (!database.Open(map.c_str())) {
+    std::cerr << "Cannot open database" << std::endl;
+
     return 1;
   }
 
-  currentArg++;
-
-  if (sscanf(argv[currentArg],"%lu",&startNodeIndex)!=1) {
-    std::cerr << "start node id is not numeric!" << std::endl;
+  if (!LookupClosedNodeAtLocation(database,
+                                  startLocation,
+                                  startArea,
+                                  startLat,
+                                  startLon,
+                                  startLocationDesc,
+                                  startWay,
+                                  startNodeIndex)) {
+    std::cerr << "Cannot find start node for start location '" << startLocation << ", " << startArea << "'" << std::endl;
     return 1;
   }
 
-  currentArg++;
-
-  if (sscanf(argv[currentArg],"%lu",&targetWayId)!=1) {
-    std::cerr << "target way id is not numeric!" << std::endl;
-    return 1;
-  }
-
-  currentArg++;
-
-  if (sscanf(argv[currentArg],"%lu",&targetNodeIndex)!=1) {
-    std::cerr << "target node id is not numeric!" << std::endl;
+  if (!LookupClosedNodeAtLocation(database,
+                                  targetLocation,
+                                  targetArea,
+                                  targetLat,
+                                  targetLon,
+                                  targetLocationDesc,
+                                  targetWay,
+                                  targetNodeIndex)) {
+    std::cerr << "Cannot find target node for target location '" << targetLocation << ", " << targetArea << "'" << std::endl;
     return 1;
   }
 
@@ -502,8 +650,10 @@ int main(int argc, char* argv[])
   routingProfile.AddType(type,30.0);
 
   if (!router.CalculateRoute(routingProfile,
-                             startWayId,startNodeIndex,
-                             targetWayId,targetNodeIndex,
+                             startWay->GetFileOffset(),
+                             startNodeIndex,
+                             targetWay->GetFileOffset(),
+                             targetNodeIndex,
                              data)) {
     std::cerr << "There was an error while calculating the route!" << std::endl;
     router.Close();
@@ -515,8 +665,8 @@ int main(int argc, char* argv[])
   std::list<osmscout::RoutePostprocessor::PostprocessorRef> postprocessors;
 
   postprocessors.push_back(new osmscout::RoutePostprocessor::DistanceAndTimePostprocessor());
-  postprocessors.push_back(new osmscout::RoutePostprocessor::StartPostprocessor("Start"));
-  postprocessors.push_back(new osmscout::RoutePostprocessor::TargetPostprocessor("Target"));
+  postprocessors.push_back(new osmscout::RoutePostprocessor::StartPostprocessor(startLocationDesc));
+  postprocessors.push_back(new osmscout::RoutePostprocessor::TargetPostprocessor(targetLocationDesc));
   postprocessors.push_back(new osmscout::RoutePostprocessor::WayNamePostprocessor());
   postprocessors.push_back(new osmscout::RoutePostprocessor::CrossingWaysPostprocessor());
   postprocessors.push_back(new osmscout::RoutePostprocessor::DirectionPostprocessor());
@@ -529,16 +679,8 @@ int main(int argc, char* argv[])
   instructionProcessor->AddMotorwayLinkType(typeConfig->GetWayTypeId("highway_trunk_link"));
   postprocessors.push_back(instructionProcessor);
 
-  osmscout::DatabaseParameter  databaseParameter;
-  osmscout::Database           database(databaseParameter);
   osmscout::RoutePostprocessor postprocessor;
   size_t                       roundaboutCrossingCounter=0;
-
-  if (!database.Open(map.c_str())) {
-    std::cerr << "Cannot open database" << std::endl;
-
-    return 1;
-  }
 
 #if defined(POINTS_DEBUG)
   std::list<osmscout::Point> points;

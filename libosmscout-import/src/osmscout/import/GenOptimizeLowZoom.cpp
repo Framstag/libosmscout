@@ -170,7 +170,7 @@ namespace osmscout
                                            std::list<WayRef>& newWays)
   {
     std::map<Id, std::list<WayRef > > waysByJoin;
-    std::set<Id>                      usedWays;
+    std::set<FileOffset>              usedWays;
 
     for (std::list<WayRef>::const_iterator way=ways.begin();
         way!=ways.end();
@@ -188,11 +188,11 @@ namespace osmscout
 
         entry->second.pop_front();
 
-        if (usedWays.find(way->GetId())!=usedWays.end()) {
+        if (usedWays.find(way->GetFileOffset())!=usedWays.end()) {
           continue;
         }
 
-        usedWays.insert(way->GetId());
+        usedWays.insert(way->GetFileOffset());
 
         while (true) {
           std::map<Id, std::list<WayRef> >::iterator match;
@@ -204,7 +204,7 @@ namespace osmscout
             // Search for matching way that has the same endpoint, the same ref name (and is not the way itself)
             otherWay=match->second.begin();
             while (otherWay!=match->second.end() &&
-                   (usedWays.find((*otherWay)->GetId())!=usedWays.end() ||
+                   (usedWays.find((*otherWay)->GetFileOffset())!=usedWays.end() ||
                     way->GetRefName()!=(*otherWay)->GetRefName())) {
               otherWay++;
             }
@@ -215,7 +215,7 @@ namespace osmscout
 
               stillOtherWay++;
               while (stillOtherWay!=match->second.end() &&
-                     (usedWays.find((*stillOtherWay)->GetId())!=usedWays.end() ||
+                     (usedWays.find((*stillOtherWay)->GetFileOffset())!=usedWays.end() ||
                       way->GetRefName()!=(*stillOtherWay)->GetRefName())) {
                 stillOtherWay++;
               }
@@ -255,7 +255,7 @@ namespace osmscout
                 way->nodes=newNodes;
               }
 
-              usedWays.insert((*otherWay)->GetId());
+              usedWays.insert((*otherWay)->GetFileOffset());
               match->second.erase(otherWay);
 
               continue;
@@ -269,7 +269,7 @@ namespace osmscout
             // Search for matching way that has the same endpoint, the same ref name (and is not the way itself)
             otherWay=match->second.begin();
             while (otherWay!=match->second.end() &&
-                   (usedWays.find((*otherWay)->GetId())!=usedWays.end() ||
+                   (usedWays.find((*otherWay)->GetFileOffset())!=usedWays.end() ||
                      way->GetRefName()!=(*otherWay)->GetRefName())) {
               otherWay++;
             }
@@ -280,7 +280,7 @@ namespace osmscout
 
               stillOtherWay++;
               while (stillOtherWay!=match->second.end() &&
-                     (usedWays.find((*stillOtherWay)->GetId())!=usedWays.end() ||
+                     (usedWays.find((*stillOtherWay)->GetFileOffset())!=usedWays.end() ||
                       way->GetRefName()!=(*stillOtherWay)->GetRefName())) {
                 stillOtherWay++;
               }
@@ -308,7 +308,7 @@ namespace osmscout
                 }
               }
 
-              usedWays.insert((*otherWay)->GetId());
+              usedWays.insert((*otherWay)->GetFileOffset());
               match->second.erase(otherWay);
 
               continue;
@@ -416,7 +416,7 @@ namespace osmscout
   bool OptimizeLowZoomGenerator::WriteOptimizedWays(Progress& progress,
                                                    FileWriter& writer,
                                                    const std::list<WayRef>& ways,
-                                                   IdFileOffsetMap& offsets,
+                                                   FileOffsetFileOffsetMap& offsets,
                                                    size_t width,
                                                    size_t height,
                                                    const Magnification& magnification,
@@ -459,7 +459,7 @@ namespace osmscout
 
       writer.GetPos(offset);
 
-      offsets[way->GetId()]=offset;
+      offsets[way->GetFileOffset()]=offset;
 
       way->nodes=newNodes;
 
@@ -478,7 +478,7 @@ namespace osmscout
                                              FileWriter& writer,
                                              const TypeInfo& type,
                                              const std::list<WayRef>& ways,
-                                             const IdFileOffsetMap& offsets,
+                                             const FileOffsetFileOffsetMap& offsets,
                                              TypeData& data)
   {
     // We do not write a bitmap, if there is not data to map
@@ -498,7 +498,7 @@ namespace osmscout
       double                          maxLon;
       double                          minLat;
       double                          maxLat;
-      IdFileOffsetMap::const_iterator offset=offsets.find(way->GetId());
+      FileOffsetFileOffsetMap::const_iterator offset=offsets.find(way->GetFileOffset());
 
       if (offset==offsets.end()) {
         continue;
@@ -685,7 +685,7 @@ namespace osmscout
         //
 
         std::list<WayRef> newWays;
-        IdFileOffsetMap   offsets;
+        FileOffsetFileOffsetMap   offsets;
 
         progress.Info("Merging "+NumberToString(allWays[type].size())+" ways");
 

@@ -135,10 +135,10 @@ static std::string CrossingWaysDescriptionToString(const osmscout::RouteDescript
 struct RouteSelection
 {
   QString                    start;
-  osmscout::Id               startWay;
+  osmscout::FileOffset       startWayOffset;
   size_t                     startNodeIndex;
   QString                    end;
-  osmscout::Id               endWay;
+  osmscout::FileOffset       endWayOffset;
   size_t                     endNodeIndex;
   osmscout::RouteData        routeData;
   osmscout::RouteDescription routeDescription;
@@ -345,7 +345,7 @@ void RoutingDialog::SelectFrom()
     osmscout::FileOffset offset=location.references.front().GetFileOffset();
 
     if (dbThread.GetWayByOffset(offset,way)) {
-      route.startWay=way->GetId();
+      route.startWayOffset=way->GetFileOffset();
       route.startNodeIndex=0;
 
       if (location.path.empty()) {
@@ -390,7 +390,7 @@ void RoutingDialog::SelectTo()
     osmscout::FileOffset offset=location.references.front().GetFileOffset();
 
     if (dbThread.GetWayByOffset(offset,way)) {
-      route.endWay=way->GetId();
+      route.endWayOffset=way->GetFileOffset();
       route.endNodeIndex=0;
 
       if (location.path.empty()) {
@@ -634,8 +634,10 @@ void RoutingDialog::Route()
   route.routeSteps.clear();
   routeModel->refresh();
 
-  if (!dbThread.CalculateRoute(route.startWay,route.startNodeIndex,
-                               route.endWay,route.endNodeIndex,
+  if (!dbThread.CalculateRoute(route.startWayOffset,
+                               route.startNodeIndex,
+                               route.endWayOffset,
+                               route.endNodeIndex,
                                routeData)) {
     std::cerr << "There was an error while routing!" << std::endl;
     return;

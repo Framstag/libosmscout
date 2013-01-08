@@ -127,6 +127,10 @@ namespace osmscout {
   {
     uint32_t nodeCount;
 
+    if (!scanner.GetPos(fileOffset)) {
+      return false;
+    }
+
     scanner.ReadNumber(id);
 
     if (!attributes.Read(scanner)) {

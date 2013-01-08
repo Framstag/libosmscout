@@ -98,11 +98,11 @@ namespace osmscout {
     };
 
   private:
-    Id                 id;
+    FileOffset        fileOffset;
 
   public:
-    SegmentAttributes  attributes;
-    std::vector<Role>  roles;
+    SegmentAttributes attributes;
+    std::vector<Role> roles;
 
   public:
     inline Relation()
@@ -110,9 +110,9 @@ namespace osmscout {
       // no code
     }
 
-    inline Id GetId() const
+    inline FileOffset GetFileOffset() const
     {
-      return id;
+      return fileOffset;
     }
 
     inline const SegmentAttributes& GetAttributes() const
@@ -192,7 +192,6 @@ namespace osmscout {
                         double& minLat,
                         double& maxLat) const;
 
-    void SetId(Id id);
     void SetType(TypeId type);
 
     bool Read(FileScanner& scanner);

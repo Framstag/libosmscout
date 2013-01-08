@@ -91,11 +91,6 @@ namespace osmscout {
     }
   }
 
-  void Relation::SetId(Id id)
-  {
-    this->id=id;
-  }
-
   void Relation::SetType(TypeId type)
   {
     attributes.type=type;
@@ -105,7 +100,9 @@ namespace osmscout {
   {
     uint32_t roleCount;
 
-    scanner.ReadNumber(id);
+    if (!scanner.GetPos(fileOffset)) {
+      return false;
+    }
 
     if (!attributes.Read(scanner)) {
       return false;
@@ -160,8 +157,6 @@ namespace osmscout {
 
   bool Relation::Write(FileWriter& writer) const
   {
-    writer.WriteNumber(id);
-
     if (!attributes.Write(writer)) {
       return false;
     }
