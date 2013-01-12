@@ -49,11 +49,6 @@ namespace osmscout {
     return true;
   }
 
-  void Way::SetId(Id id)
-  {
-    this->id=id;
-  }
-
   void Way::SetType(TypeId type)
   {
     attributes.type=type;
@@ -61,6 +56,7 @@ namespace osmscout {
 
   bool Way::SetTags(Progress& progress,
                     const TypeConfig& typeConfig,
+                    Id id,
                     bool isArea,
                     std::vector<Tag>& tags,
                     bool& reverseNodes)
@@ -131,8 +127,6 @@ namespace osmscout {
       return false;
     }
 
-    scanner.ReadNumber(id);
-
     if (!attributes.Read(scanner)) {
       return false;
     }
@@ -170,8 +164,6 @@ namespace osmscout {
   bool Way::Write(FileWriter& writer) const
   {
     assert(!nodes.empty());
-
-    writer.WriteNumber(id);
 
     if (!attributes.Write(writer)) {
       return false;

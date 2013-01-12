@@ -111,7 +111,7 @@ namespace osmscout {
     progress.Info("Resolving turn restriction way ids to way file offsets");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "ways.dat"),
+                                      "way.idmap"),
                       FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open '"+scanner.GetFilename()+"'");
@@ -127,20 +127,12 @@ namespace osmscout {
     for (uint32_t w=1; w<=wayCount; w++) {
       progress.SetProgress(w,wayCount);
 
+      Id         wayId;
       FileOffset wayOffset;
-      Way        way;
 
-      if (!scanner.GetPos(wayOffset)) {
-        progress.Error(std::string("Error while reading file offset of way for entry ")+
-                       NumberToString(w)+" of "+
-                       NumberToString(wayCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-        return false;
-      }
-
-      if (!way.Read(scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
+      if (!scanner.Read(wayId) ||
+          !scanner.ReadFileOffset(wayOffset)) {
+        progress.Error(std::string("Error while reading idmap file entry ")+
                        NumberToString(w)+" of "+
                        NumberToString(wayCount)+
                        " in file '"+
@@ -151,7 +143,7 @@ namespace osmscout {
       std::map<Id,FileOffset>::iterator idOffsetEntry;
 
 
-      idOffsetEntry=wayIdOffsetMap.find(way.GetId());
+      idOffsetEntry=wayIdOffsetMap.find(wayId);
 
       if (idOffsetEntry!=wayIdOffsetMap.end()) {
         idOffsetEntry->second=wayOffset;
@@ -159,7 +151,7 @@ namespace osmscout {
     }
 
     if (!scanner.Close()) {
-      progress.Error("Cannot close file 'ways.dat'");
+      progress.Error(std::string("Cannot close file '")+scanner.GetFilename()+"'");
       return false;
     }
 

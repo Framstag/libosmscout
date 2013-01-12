@@ -34,7 +34,6 @@ namespace osmscout {
   class OSMSCOUT_API Way : public Referencable
   {
   private:
-    Id                 id;
     FileOffset         fileOffset;
     SegmentAttributes  attributes;
 
@@ -46,12 +45,6 @@ namespace osmscout {
     {
       // no code
     }
-  //private:
-    inline Id GetId() const
-    {
-      return id;
-    }
-  //public:
 
     inline FileOffset GetFileOffset() const
     {
@@ -173,11 +166,11 @@ namespace osmscout {
                         double& lat,
                         double& lon) const;
 
-    void SetId(Id id);
     void SetType(TypeId type);
 
     bool SetTags(Progress& progress,
                  const TypeConfig& typeConfig,
+                 Id id,
                  bool isArea,
                  std::vector<Tag>& tags,
                  bool& reverseNodes);

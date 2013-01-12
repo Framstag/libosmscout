@@ -933,7 +933,8 @@ namespace osmscout {
     progress.SetAction("Generate relations.dat");
 
     FileScanner         scanner;
-    FileWriter          writer;
+    FileWriter          relWriter;
+    FileWriter          mapWriter;
     uint32_t            rawRelationCount=0;
     size_t              selectedRelationCount=0;
     uint32_t            writtenRelationCount=0;
@@ -960,13 +961,21 @@ namespace osmscout {
       return false;
     }
 
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+    if (!relWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      "relations.dat"))) {
       progress.Error("Cannot create 'relations.dat'");
       return false;
     }
 
-    writer.Write(writtenRelationCount);
+    relWriter.Write(writtenRelationCount);
+
+    if (!mapWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     "relation.idmap"))) {
+      progress.Error("Cannot create 'relation.idmap'");
+      return false;
+    }
+
+    mapWriter.Write(writtenRelationCount);
 
     for (uint32_t r=1; r<=rawRelationCount; r++) {
       progress.SetProgress(r,rawRelationCount);
@@ -1061,7 +1070,19 @@ namespace osmscout {
         }
       }
 
-      rel.Write(writer);
+      FileOffset fileOffset;
+
+      if (!relWriter.GetPos(fileOffset)) {
+        progress.Error(std::string("Error while reading current fileOffset in file '")+
+                       relWriter.GetFilename()+"'");
+        return false;
+      }
+
+      rel.Write(relWriter);
+
+      mapWriter.Write(rawRel.GetId());
+      mapWriter.Write(fileOffset);
+
       writtenRelationCount++;
     }
 
@@ -1069,11 +1090,15 @@ namespace osmscout {
                   ", "+NumberToString(selectedRelationCount)+" relation selected"+
                   ", "+NumberToString(writtenRelationCount)+" relations written");
 
-    writer.SetPos(0);
-    writer.Write(writtenRelationCount);
+    relWriter.SetPos(0);
+    relWriter.Write(writtenRelationCount);
+
+    mapWriter.SetPos(0);
+    mapWriter.Write(writtenRelationCount);
 
     if (!(scanner.Close() &&
-          writer.Close() &&
+          relWriter.Close() &&
+          mapWriter.Close() &&
           wayDataFile.Close() &&
           coordDataFile.Close())) {
       return false;
@@ -1081,7 +1106,7 @@ namespace osmscout {
 
     progress.SetAction("Generate wayblack.dat");
 
-    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+    if (!relWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      "wayblack.dat"))) {
       progress.Error("Cannot create 'wayblack.dat'");
       return false;
@@ -1090,7 +1115,7 @@ namespace osmscout {
     for (IdSet::const_iterator id=wayAreaIndexBlacklist.begin();
          id!=wayAreaIndexBlacklist.end();
          ++id) {
-      writer.WriteNumber(*id);
+      relWriter.WriteNumber(*id);
     }
 
     progress.Info(NumberToString(wayAreaIndexBlacklist.size())+" ways written to blacklist");
@@ -1105,6 +1130,6 @@ namespace osmscout {
       progress.Debug(buffer);
     }
 
-    return writer.Close();
+    return relWriter.Close();
   }
 }

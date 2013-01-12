@@ -852,7 +852,6 @@ namespace osmscout {
 
     way=tmp;
 
-    way.SetId(0);
     way.SetType(routeType);
     way.nodes.reserve(data.Entries().size());
 
