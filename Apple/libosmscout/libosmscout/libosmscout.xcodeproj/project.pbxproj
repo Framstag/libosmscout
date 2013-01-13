@@ -109,6 +109,8 @@
 		F53BD1D4163886B2006C7AE1 /* StopClock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EF9161A5FEC00D51926 /* StopClock.cpp */; };
 		F53BD1D5163886B2006C7AE1 /* String.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EFA161A5FEC00D51926 /* String.cpp */; };
 		F53BD1D6163886B2006C7AE1 /* Transformation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F51E3EFB161A5FEC00D51926 /* Transformation.cpp */; };
+		F57B4946169341C7008E1B2C /* Magnification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F57B4945169341C7008E1B2C /* Magnification.cpp */; };
+		F57B4947169343BC008E1B2C /* Magnification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F57B4945169341C7008E1B2C /* Magnification.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -243,6 +245,8 @@
 		F53BD15C16388375006C7AE1 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		F53BD15D16388375006C7AE1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		F53BD15E16388375006C7AE1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		F57B4943169341A3008E1B2C /* Magnification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Magnification.h; sourceTree = "<group>"; };
+		F57B4945169341C7008E1B2C /* Magnification.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Magnification.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -372,6 +376,7 @@
 		F51E3ED8161A5FEC00D51926 /* util */ = {
 			isa = PBXGroup;
 			children = (
+				F57B4945169341C7008E1B2C /* Magnification.cpp */,
 				F51E3EEB161A5FEC00D51926 /* Breaker.cpp */,
 				F51E3EEC161A5FEC00D51926 /* Cache.cpp */,
 				F51E3EED161A5FEC00D51926 /* Color.cpp */,
@@ -475,6 +480,7 @@
 		F51E3F61161A604300D51926 /* util */ = {
 			isa = PBXGroup;
 			children = (
+				F57B4943169341A3008E1B2C /* Magnification.h */,
 				F51E3F62161A604300D51926 /* Breaker.h */,
 				F51E3F63161A604300D51926 /* Cache.h */,
 				F51E3F64161A604300D51926 /* Color.h */,
@@ -635,6 +641,7 @@
 				F51E3F2D161A5FEC00D51926 /* Transformation.cpp in Sources */,
 				F51E3F2E161A5FEC00D51926 /* WaterIndex.cpp in Sources */,
 				F51E3F2F161A5FEC00D51926 /* Way.cpp in Sources */,
+				F57B4946169341C7008E1B2C /* Magnification.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -692,6 +699,7 @@
 				F53BD1D4163886B2006C7AE1 /* StopClock.cpp in Sources */,
 				F53BD1D5163886B2006C7AE1 /* String.cpp in Sources */,
 				F53BD1D6163886B2006C7AE1 /* Transformation.cpp in Sources */,
+				F57B4947169343BC008E1B2C /* Magnification.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -848,6 +856,7 @@
 				F53BD16616388375006C7AE1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -251,100 +251,105 @@ namespace osmscout {
     void MapPainterIOS::DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
                    const LabelData& label){
-        if(label.y <= MAP_PAINTER_Y_LABEL_MARGIN ||
-           label.y >= projection.GetHeight() - MAP_PAINTER_Y_LABEL_MARGIN){
-            return;
-        }
-        double r=label.style->GetTextColor().GetR();
-        double g=label.style->GetTextColor().GetG();
-        double b=label.style->GetTextColor().GetB();
-        CGContextSaveGState(cg);
-        CGContextSetTextDrawingMode(cg, kCGTextFill);
-        Font *font = GetFont(parameter,label.fontSize);
-        NSString *str = [NSString stringWithCString:label.text.c_str() encoding:NSUTF8StringEncoding];
-        //std::cout << "label : "<< label.text << " font size : " << label.fontSize << std::endl;
         
-        if (label.style->GetStyle()==LabelStyle::normal) {
-            CGContextSetRGBFillColor(cg, r, g, b, label.alpha);
+        if (dynamic_cast<const TextStyle*>(label.style.Get())!=NULL) {
+            
+            if(label.y <= MAP_PAINTER_Y_LABEL_MARGIN ||
+               label.y >= projection.GetHeight() - MAP_PAINTER_Y_LABEL_MARGIN){
+                return;
+            }
+            
+            const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.Get());
+            double           r=style->GetTextColor().GetR();
+            double           g=style->GetTextColor().GetG();
+            double           b=style->GetTextColor().GetB();
+            
+            CGContextSaveGState(cg);
+            CGContextSetTextDrawingMode(cg, kCGTextFill);
+            Font *font = GetFont(parameter,label.fontSize);
+            NSString *str = [NSString stringWithCString:label.text.c_str() encoding:NSUTF8StringEncoding];
+            //std::cout << "label : "<< label.text << " font size : " << label.fontSize << std::endl;
+            
+            if (style->GetStyle()==TextStyle::normal) {
+                CGContextSetRGBFillColor(cg, r, g, b, label.alpha);
 #if TARGET_OS_IPHONE
+                [str drawAtPoint:CGPointMake(label.x, label.y) withFont:font];
+#else
+                NSColor *color = [NSColor colorWithSRGBRed:style->GetTextColor().GetR() green:style->GetTextColor().GetG() blue:style->GetTextColor().GetB() alpha:style->GetTextColor().GetA()];
+                NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
+                double height = textHeight(parameter, label.fontSize, label.text);
+                [str drawAtPoint:CGPointMake(label.x, label.y - height - 5) withAttributes:attrsDictionary];
+                
+#endif
+            } else if (style->GetStyle()==TextStyle::emphasize) {
+                CGContextSetRGBFillColor(cg, r, g, b, label.alpha);
+                CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+                CGColorRef haloColor = CGColorCreate(colorSpace, (CGFloat[]){ 1, 1, 1, static_cast<CGFloat>(label.alpha) });
+                CGContextSetShadowWithColor( cg, CGSizeMake( 0.0, 0.0 ), 2.0f, haloColor );
+#if TARGET_OS_IPHONE
+                [str drawAtPoint:CGPointMake(label.x, label.y) withFont:font];
+#else
+                NSColor *color = [NSColor colorWithSRGBRed:style->GetTextColor().GetR() green:style->GetTextColor().GetG() blue:style->GetTextColor().GetB() alpha:style->GetTextColor().GetA()];
+                NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
+                double height = textHeight(parameter, label.fontSize, label.text);
+                [str drawAtPoint:CGPointMake(label.x, label.y - height - 5) withAttributes:attrsDictionary];
+#endif
+                CGColorRelease(haloColor);
+                CGColorSpaceRelease(colorSpace);
+            }
+            CGContextRestoreGState(cg);
+        }
+        
+        else if (dynamic_cast<const ShieldStyle*>(label.style.Get())!=NULL) {
+            const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.Get());
+            
+            
+            if(label.bx1 <= MAP_PAINTER_PLATE_LABEL_MARGIN ||
+               label.by1 <= MAP_PAINTER_PLATE_LABEL_MARGIN ||
+               label.bx2 >= projection.GetWidth()-MAP_PAINTER_PLATE_LABEL_MARGIN ||
+               label.by2 >= projection.GetHeight()-MAP_PAINTER_PLATE_LABEL_MARGIN
+               ){
+                return;
+            }
+            CGContextSaveGState(cg);
+            CGContextSetRGBFillColor(cg,
+                                     style->GetBgColor().GetR(),
+                                     style->GetBgColor().GetG(),
+                                     style->GetBgColor().GetB(),
+                                     1);
+            CGContextSetRGBStrokeColor(cg,style->GetBorderColor().GetR(),
+                                       style->GetBorderColor().GetG(),
+                                       style->GetBorderColor().GetB(),
+                                       style->GetBorderColor().GetA());
+            CGContextAddRect(cg, CGRectMake(label.bx1,
+                                            label.by1,
+                                            label.bx2-label.bx1+1,
+                                            label.by2-label.by1+1));
+            CGContextDrawPath(cg, kCGPathFillStroke);
+            
+            CGContextAddRect(cg, CGRectMake(label.bx1+2,
+                                            label.by1+2,
+                                            label.bx2-label.bx1+1-4,
+                                            label.by2-label.by1+1-4));
+            CGContextDrawPath(cg, kCGPathStroke);
+            
+            
+            Font *font = GetFont(parameter,label.fontSize);
+            NSString *str = [NSString stringWithUTF8String:label.text.c_str()];
+#if TARGET_OS_IPHONE
+            CGContextSetRGBFillColor(cg,style->GetTextColor().GetR(),
+                                     style->GetTextColor().GetG(),
+                                     style->GetTextColor().GetB(),
+                                     style->GetTextColor().GetA());
             [str drawAtPoint:CGPointMake(label.x, label.y) withFont:font];
 #else
-            NSColor *color = [NSColor colorWithSRGBRed:label.style->GetTextColor().GetR() green:label.style->GetTextColor().GetG() blue:label.style->GetTextColor().GetB() alpha:label.style->GetTextColor().GetA()];
+            NSColor *color = [NSColor colorWithSRGBRed:style->GetTextColor().GetR() green:style->GetTextColor().GetG() blue:style->GetTextColor().GetB() alpha:style->GetTextColor().GetA()];
             NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
-            double height = textHeight(parameter, label.fontSize, label.text);
-            [str drawAtPoint:CGPointMake(label.x, label.y - height - 5) withAttributes:attrsDictionary];
-    
+            [str drawAtPoint:CGPointMake(label.x, label.y) withAttributes:attrsDictionary];
 #endif
-        } else if (label.style->GetStyle()==LabelStyle::emphasize) {
-            CGContextSetRGBFillColor(cg, r, g, b, label.alpha);
-            CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-            CGColorRef haloColor = CGColorCreate(colorSpace, (CGFloat[]){ 1, 1, 1, static_cast<CGFloat>(label.alpha) });
-            CGContextSetShadowWithColor( cg, CGSizeMake( 0.0, 0.0 ), 2.0f, haloColor );
-#if TARGET_OS_IPHONE
-            [str drawAtPoint:CGPointMake(label.x, label.y) withFont:font];
-#else
-            NSColor *color = [NSColor colorWithSRGBRed:label.style->GetTextColor().GetR() green:label.style->GetTextColor().GetG() blue:label.style->GetTextColor().GetB() alpha:label.style->GetTextColor().GetA()];
-            NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
-            double height = textHeight(parameter, label.fontSize, label.text);
-            [str drawAtPoint:CGPointMake(label.x, label.y - height - 5) withAttributes:attrsDictionary];
-#endif
-            CGColorRelease(haloColor);
-            CGColorSpaceRelease(colorSpace);
+            CGContextRestoreGState(cg);
+            
         }
-        CGContextRestoreGState(cg);
-
-    }
-    
-    /*
-     *
-     */
-    void MapPainterIOS::DrawPlateLabel(const Projection& projection,
-                                       const MapParameter& parameter,
-                                       const LabelData& label){
-        if(label.bx1 <= MAP_PAINTER_PLATE_LABEL_MARGIN ||
-           label.by1 <= MAP_PAINTER_PLATE_LABEL_MARGIN ||
-           label.bx2 >= projection.GetWidth()-MAP_PAINTER_PLATE_LABEL_MARGIN ||
-           label.by2 >= projection.GetHeight()-MAP_PAINTER_PLATE_LABEL_MARGIN
-           ){
-            return;
-        }
-        CGContextSaveGState(cg);
-        CGContextSetRGBFillColor(cg,
-                                 label.style->GetBgColor().GetR(),
-                                 label.style->GetBgColor().GetG(),
-                                 label.style->GetBgColor().GetB(),
-                                 1);
-        CGContextSetRGBStrokeColor(cg,label.style->GetBorderColor().GetR(),
-                                   label.style->GetBorderColor().GetG(),
-                                   label.style->GetBorderColor().GetB(),
-                                   label.style->GetBorderColor().GetA());
-        CGContextAddRect(cg, CGRectMake(label.bx1,
-                                        label.by1,
-                                        label.bx2-label.bx1+1,
-                                        label.by2-label.by1+1));
-        CGContextDrawPath(cg, kCGPathFillStroke);
-        
-        CGContextAddRect(cg, CGRectMake(label.bx1+2,
-                                        label.by1+2,
-                                        label.bx2-label.bx1+1-4,
-                                        label.by2-label.by1+1-4));
-        CGContextDrawPath(cg, kCGPathStroke);
-        
-
-        Font *font = GetFont(parameter,label.fontSize);
-        NSString *str = [NSString stringWithUTF8String:label.text.c_str()];
-#if TARGET_OS_IPHONE
-        CGContextSetRGBFillColor(cg,label.style->GetTextColor().GetR(),
-                                 label.style->GetTextColor().GetG(),
-                                 label.style->GetTextColor().GetB(),
-                                 label.style->GetTextColor().GetA());
-        [str drawAtPoint:CGPointMake(label.x, label.y) withFont:font];
-#else
-        NSColor *color = [NSColor colorWithSRGBRed:label.style->GetTextColor().GetR() green:label.style->GetTextColor().GetG() blue:label.style->GetTextColor().GetB() alpha:label.style->GetTextColor().GetA()];
-        NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
-        [str drawAtPoint:CGPointMake(label.x, label.y) withAttributes:attrsDictionary];
-#endif
-        CGContextRestoreGState(cg);
     }
     
     CGFloat MapPainterIOS::pathLength(size_t transStart, size_t transEnd){
@@ -470,13 +475,13 @@ namespace osmscout {
     /*
      * DrawContourLabel(const Projection& projection,
      *                  const MapParameter& parameter,
-     *                  const LabelStyle& style,
+     *                  const PathTextStyle& style,
      *                  const std::string& text,
      *                  size_t transStart, size_t transEnd)
      */
     void MapPainterIOS::DrawContourLabel(const Projection& projection,
                           const MapParameter& parameter,
-                          const LabelStyle& style,
+                          const PathTextStyle& style,
                           const std::string& text,
                           size_t transStart, size_t transEnd){
         Font *font = GetFont(parameter,style.GetSize());
