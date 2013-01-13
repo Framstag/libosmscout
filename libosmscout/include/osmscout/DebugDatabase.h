@@ -59,19 +59,15 @@ namespace osmscout {
     void SetNodeIndexCacheSize(unsigned long nodeIndexCacheSize);
     void SetNodeCacheSize(unsigned long nodeCacheSize);
 
-    void SetWayIndexCacheSize(unsigned long wayIndexCacheSize);
     void SetWayCacheSize(unsigned long wayCacheSize);
 
-    void SetRelationIndexCacheSize(unsigned long relationIndexCacheSize);
     void SetRelationCacheSize(unsigned long relationCacheSize);
 
     unsigned long GetNodeIndexCacheSize() const;
     unsigned long GetNodeCacheSize() const;
 
-    unsigned long GetWayIndexCacheSize() const;
     unsigned long GetWayCacheSize() const;
 
-    unsigned long GetRelationIndexCacheSize() const;
     unsigned long GetRelationCacheSize() const;
   };
 
@@ -83,8 +79,6 @@ namespace osmscout {
     std::string               path;             //! Path to the directory containing all files
 
     IndexedDataFile<Node>     nodeDataFile;     //! Cached access to the 'nodes.dat' file
-    IndexedDataFile<Relation> relationDataFile; //! Cached access to the 'relations.dat' file
-    IndexedDataFile<Way>      wayDataFile;      //! Cached access to the 'ways.dat' file
 
     TypeConfig                *typeConfig;      //! Type config for the currently opened map
 
@@ -98,22 +92,21 @@ namespace osmscout {
 
     TypeConfig* GetTypeConfig() const;
 
-    bool GetNode(const Id& id,
-                 NodeRef& node) const;
+    bool GetCoords(const std::vector<Id>& ids,
+                   std::vector<Point>& coords) const;
+
     bool GetNodes(const std::vector<Id>& ids,
                   std::vector<NodeRef>& nodes) const;
 
-    bool GetWay(const Id& id,
-                WayRef& way) const;
-    bool GetWays(const std::vector<Id>& ids,
-                 std::vector<WayRef>& ways) const;
-    bool GetWays(const std::set<Id>& ids,
-                 std::vector<WayRef>& ways) const;
+    bool ResolveWayIdsAndOffsets(const std::set<Id>& ids,
+                                 std::map<Id,FileOffset>& idFileOffsetMap,
+                                 const std::set<FileOffset>& fileOffsets,
+                                 std::map<FileOffset,Id>& fileOffsetIdMap);
 
-    bool GetRelation(const Id& id,
-                     RelationRef& relation) const;
-    bool GetRelations(const std::vector<Id>& ids,
-                      std::vector<RelationRef>& relations) const;
+    bool ResolveRelationIdsAndOffsets(const std::set<Id>& ids,
+                                      std::map<Id,FileOffset>& idFileOffsetMap,
+                                      const std::set<FileOffset>& fileOffsets,
+                                      std::map<FileOffset,Id>& fileOffsetIdMap);
   };
 }
 
