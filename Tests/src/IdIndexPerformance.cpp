@@ -21,7 +21,7 @@
 #include <iostream>
 
 #include <osmscout/NumericIndex.h>
-#include <osmscout/Way.h>
+#include <osmscout/Node.h>
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/StopClock.h>
@@ -40,9 +40,9 @@ int main(int argc, char* argv[])
 {
   std::vector<osmscout::Id> ids;
   std::vector<osmscout::Id> queries;
-  std::string               filename="ways.dat";
+  std::string               filename="nodes.dat";
   unsigned long             filesize=0;
-  size_t                    readerWayCount;
+  size_t                    readerNodeCount;
 
   if (!osmscout::GetFileSize(filename,filesize)) {
     std::cerr << "Cannot get file size of file '" << filename << "'!" << std::endl;
@@ -60,13 +60,13 @@ int main(int argc, char* argv[])
 
   std::cout << "Start reading files using FileScanner..." << std::endl;
 
-  readerWayCount=0;
+  readerNodeCount=0;
   while (!scanner.HasError()) {
-    osmscout::Way way;
+    osmscout::Node node;
 
-    if (way.Read(scanner)) {
-      ids.push_back(way.GetId());
-      readerWayCount++;
+    if (node.Read(scanner)) {
+      ids.push_back(node.GetId());
+      readerNodeCount++;
     }
   }
 
@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
 
   readerTimer.Stop();
 
-  std::cout << "Reading " << readerWayCount << " ways via FileReader took " << readerTimer << std::endl;
+  std::cout << "Reading " << readerNodeCount << " nodes via FileReader took " << readerTimer << std::endl;
 
   queries.reserve(QUERY_COUNT);
 
@@ -82,9 +82,9 @@ int main(int argc, char* argv[])
     queries.push_back(ids[(int)(QUERY_COUNT*rand()/(RAND_MAX+1.0))]);
   }
 
-  osmscout::NumericIndex<osmscout::Id> wayIndex("way.idx",1000);
+  osmscout::NumericIndex<osmscout::Id> nodeIndex("node.idx",1000);
 
-  if (!wayIndex.Open(".",osmscout::FileScanner::FastRandom,true)) {
+  if (!nodeIndex.Open(".",osmscout::FileScanner::FastRandom,true)) {
     std::cerr << "Cannot open way index file!" << std::endl;
     return 1;
   }
@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
 
     ids.push_back(queries[i]);
 
-    wayIndex.GetOffsets(ids,offsets);
+    nodeIndex.GetOffsets(ids,offsets);
 
     if (offsets.size()!=1) {
       std::cerr << "Cannot read way id " << queries[i] << " from index!" << std::endl;

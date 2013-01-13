@@ -20,8 +20,8 @@
 #include <cstdlib>
 #include <iostream>
 
-#include <osmscout/Way.h>
-#include <osmscout/WayDataFile.h>
+#include <osmscout/Node.h>
+#include <osmscout/NodeDataFile.h>
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/StopClock.h>
@@ -40,8 +40,8 @@ int main(int argc, char* argv[])
 {
   std::vector<osmscout::Id> ids;
   std::vector<osmscout::Id> queries;
-  std::string               filename="ways.dat";
-  size_t                    readerWayCount;
+  std::string               filename="nodes.dat";
+  size_t                    readerNodeCount;
 
   osmscout::StopClock readerTimer;
 
@@ -54,13 +54,13 @@ int main(int argc, char* argv[])
 
   std::cout << "Start reading files using FileReader..." << std::endl;
 
-  readerWayCount=0;
+  readerNodeCount=0;
   while (!scanner.HasError()) {
-    osmscout::Way way;
+    osmscout::Node node;
 
-    if (way.Read(scanner)) {
-      ids.push_back(way.GetId());
-      readerWayCount++;
+    if (node.Read(scanner)) {
+      ids.push_back(node.GetId());
+      readerNodeCount++;
     }
   }
 
@@ -68,22 +68,22 @@ int main(int argc, char* argv[])
 
   readerTimer.Stop();
 
-  std::cout << "Reading " << readerWayCount << " ways via FileReader took " << readerTimer << std::endl;
+  std::cout << "Reading " << readerNodeCount << " nodes via FileReader took " << readerTimer << std::endl;
 
-  queries.reserve(readerWayCount/10);
+  queries.reserve(readerNodeCount/10);
 
-  for (size_t i=0; i<readerWayCount/10; i++) {
-    queries.push_back(ids[(int)(readerWayCount/10*rand()/(RAND_MAX+1.0))]);
+  for (size_t i=0; i<readerNodeCount/10; i++) {
+    queries.push_back(ids[(int)(readerNodeCount/10*rand()/(RAND_MAX+1.0))]);
   }
 
   size_t dataCacheSize=1;
   size_t indexCacheSize=1;
 
   for (size_t i=1; i<=7; i++) {
-    osmscout::IndexedDataFile<osmscout::Way> wayDataFile("ways.dat","way.idx",dataCacheSize,indexCacheSize);
+    osmscout::IndexedDataFile<osmscout::Node> nodeDataFile("nodes.dat","node.idx",dataCacheSize,indexCacheSize);
 
-    if (!wayDataFile.Open(".",osmscout::FileScanner::FastRandom,true,osmscout::FileScanner::FastRandom,true)) {
-      std::cerr << "Cannot open way data file!" << std::endl;
+    if (!nodeDataFile.Open(".",osmscout::FileScanner::FastRandom,true,osmscout::FileScanner::FastRandom,true)) {
+      std::cerr << "Cannot open node data file!" << std::endl;
       return 1;
     }
 
@@ -92,9 +92,9 @@ int main(int argc, char* argv[])
     for (size_t r=1; r<=retryCount; r++) {
       for (size_t i=0; i<queries.size(); i++) {
         size_t           idx=(int)(queries.size()*rand()/(RAND_MAX+1.0));
-        osmscout::WayRef way;
+        osmscout::NodeRef node;
 
-        if (!wayDataFile.Get(queries[idx],way)) {
+        if (!nodeDataFile.Get(queries[idx],node)) {
           std::cerr << "Cannot read way with id " << queries[idx] << " from data file!" << std::endl;
         }
       }
@@ -106,9 +106,9 @@ int main(int argc, char* argv[])
 
     for (size_t r=1; r<=retryCount; r++) {
       for (size_t i=0; i<queries.size(); i++) {
-        osmscout::WayRef way;
+        osmscout::NodeRef node;
 
-        if (wayDataFile.Get((osmscout::Id)-1,way)) {
+        if (nodeDataFile.Get((osmscout::Id)-1,node)) {
           std::cerr << "Unexpecte dsuccessful read from data file!" << std::endl;
         }
       }
@@ -117,10 +117,10 @@ int main(int argc, char* argv[])
     cacheMissTimer.Stop();
 
 
-    std::cout << "Reading " << retryCount*queries.size() << " random ways from data file with cache size " << dataCacheSize << "," << indexCacheSize << " took " << cacheTimer << std::endl;
+    std::cout << "Reading " << retryCount*queries.size() << " random nodes from data file with cache size " << dataCacheSize << "," << indexCacheSize << " took " << cacheTimer << std::endl;
     std::cout << "Reading " << retryCount*queries.size() << " misses from data file with cache size " << dataCacheSize << "," << indexCacheSize << " took " << cacheMissTimer << std::endl;
 
-    wayDataFile.Close();
+    nodeDataFile.Close();
 
     dataCacheSize=dataCacheSize*10;
     indexCacheSize=indexCacheSize*10;
