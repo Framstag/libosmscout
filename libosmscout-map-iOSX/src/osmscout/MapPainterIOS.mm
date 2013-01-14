@@ -90,11 +90,15 @@ namespace osmscout {
     bool MapPainterIOS::HasIcon(const StyleConfig& styleConfig,
                                 const MapParameter& parameter,
                                 IconStyle& style){
-        if (style.GetId()==std::numeric_limits<size_t>::max()) {
+        if (style.GetIconId()==0) {
             return false;
         }
         
-        if (style.GetId()!=0) {
+        size_t idx=style.GetIconId()-1;
+        
+        if (idx<images.size() &&
+            !images[idx]) {
+
             return true;
         }
         
@@ -118,15 +122,20 @@ namespace osmscout {
                 CGImageRef imgRef= [image CGImageForProposedRect:&rect context:[NSGraphicsContext currentContext] hints:NULL];
 #endif
                 CGImageRetain(imgRef);
-                images.resize(images.size()+1,imgRef);
-                style.SetId(images.size());
-                std::cout << "Loaded image " << filename << " => id " << style.GetId() << std::endl;
+                
+                if (idx>=images.size()) {
+                    images.resize(idx+1);
+                }
+                
+                images[idx]=imgRef;                
+                std::cout << "Loaded image '" << filename << "'" << std::endl;
+
                 return true;
             }
         }
         
-        std::cerr << "ERROR while loading icon file '" << style.GetIconName() << "'" << std::endl;
-        style.SetId(std::numeric_limits<size_t>::max());
+        std::cerr << "ERROR while loading image '" << style.GetIconName() << "'" << std::endl;
+        style.SetIconId(0);
         
         return false;
 }
@@ -154,12 +163,15 @@ namespace osmscout {
         assert(style.HasPattern());
         
         // Was not able to load pattern
-        if (style.GetPatternId()==std::numeric_limits<size_t>::max()) {
+        if (style.GetPatternId()==0) {
             return false;
         }
         
-        // Pattern already loaded
-        if (style.GetPatternId()!=0) {
+        size_t idx=style.GetPatternId()-1;
+        
+        if (idx<patterns.size() &&
+            patterns[idx]) {
+
             return true;
         }
         
@@ -560,26 +572,22 @@ namespace osmscout {
      */
     void MapPainterIOS::DrawIcon(const IconStyle* style,
                   double x, double y){
-        assert(style->GetId()>0);
-        assert(style->GetId()!=std::numeric_limits<size_t>::max());
-        if(style->GetId()>images.size()){
-            return;
-        }
-        assert(style->GetId()<=images.size());
-        assert(images[style->GetId()-1]);
-        unsigned long int imIndex = style->GetId()-1;
-
+        size_t idx=style->GetIconId()-1;
+        
+        assert(idx<images.size());
+        assert(images[idx]);
+        
 #if TARGET_OS_IPHONE
-        CGRect rect = CGRectMake(x-CGImageGetWidth(images[imIndex])/2, CGImageGetHeight(images[imIndex])-y-1.5*CGImageGetHeight(images[imIndex]), CGImageGetWidth(images[imIndex]), CGImageGetHeight(images[imIndex]));
+        CGRect rect = CGRectMake(x-CGImageGetWidth(images[idx])/2, CGImageGetHeight(images[idx])-y-1.5*CGImageGetHeight(images[idx]), CGImageGetWidth(images[idx]), CGImageGetHeight(images[idx]));
 #else
-        CGRect rect = CGRectMake(x-CGImageGetWidth(images[imIndex])/2, y-CGImageGetHeight(images[imIndex])/2, CGImageGetWidth(images[imIndex]), CGImageGetHeight(images[imIndex]));
+        CGRect rect = CGRectMake(x-CGImageGetWidth(images[idx])/2, y-CGImageGetHeight(images[idx])/2, CGImageGetWidth(images[idx]), CGImageGetHeight(images[idx]));
 #endif
         
 #if TARGET_OS_IPHONE
         CGContextSaveGState(cg);
         CGContextScaleCTM(cg, 1.0, -1.0);
 #endif
-        CGContextDrawImage(cg, rect, images[imIndex]);
+        CGContextDrawImage(cg, rect, images[idx]);
 #if TARGET_OS_IPHONE        
         CGContextRestoreGState(cg);
 #endif
@@ -791,7 +799,7 @@ namespace osmscout {
             CGContextSetFillColorSpace (cg, sp);
             CGColorSpaceRelease (sp);
             CGFloat components = 1.0;
-            unsigned long patternIndex = fillStyle.GetPatternId()-1;
+            size_t patternIndex = fillStyle.GetPatternId()-1;
             CGPatternRef pattern = patterns[patternIndex];
             CGContextSetFillPattern(cg, pattern, &components);
         } else if (fillStyle.GetFillColor().IsVisible()) {
