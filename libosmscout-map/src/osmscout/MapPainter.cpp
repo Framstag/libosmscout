@@ -686,7 +686,7 @@ namespace osmscout {
         }
       }
 
-      areaData.ref=ObjectRef();
+      areaData.ref=ObjectFileRef();
       areaData.attributes=NULL;
       areaData.transStart=start;
       areaData.transEnd=end;
@@ -1528,7 +1528,7 @@ namespace osmscout {
   bool MapPainter::PrepareAreaSegment(const StyleConfig& styleConfig,
                                       const Projection& projection,
                                       const MapParameter& parameter,
-                                      const ObjectRef& ref,
+                                      const ObjectFileRef& ref,
                                       const SegmentAttributes& attributes,
                                       const std::vector<Point>& nodes)
   {
@@ -1601,7 +1601,7 @@ namespace osmscout {
       PrepareAreaSegment(styleConfig,
                          projection,
                          parameter,
-                         ObjectRef(0/*area->GetId()*/,refWay), // TODO
+                         ObjectFileRef(area->GetFileOffset(),refWay),
                          area->GetAttributes(),
                          area->nodes);
     }
@@ -1616,7 +1616,7 @@ namespace osmscout {
         PrepareAreaSegment(styleConfig,
                            projection,
                            parameter,
-                           ObjectRef(0/*area->GetId()*/,refWay), // TODO
+                           ObjectFileRef(area->GetFileOffset(),refWay),
                            area->GetAttributes(),
                            area->nodes);
       }
@@ -1695,7 +1695,7 @@ namespace osmscout {
               j++;
             }
 
-            a.ref=ObjectRef(0/*relation->GetId()*/,refRelation); // TODO
+            a.ref=ObjectFileRef(relation->GetFileOffset(),refRelation);
             a.attributes=&role.attributes;
             a.fillStyle=fillStyle;
             a.transStart=data[i].transStart;
@@ -1729,7 +1729,7 @@ namespace osmscout {
   void MapPainter::PrepareWaySegment(const StyleConfig& styleConfig,
                                      const Projection& projection,
                                      const MapParameter& parameter,
-                                     const ObjectRef& ref,
+                                     const ObjectFileRef& ref,
                                      const SegmentAttributes& attributes,
                                      const std::vector<Point>& nodes)
   {
@@ -1867,7 +1867,7 @@ namespace osmscout {
       PrepareWaySegment(styleConfig,
                         projection,
                         parameter,
-                        ObjectRef(0/*way->GetId()*/,refWay), // TODO
+                        ObjectFileRef(way->GetFileOffset(),refWay),
                         way->GetAttributes(),
                         way->nodes);
     }
@@ -1885,7 +1885,7 @@ namespace osmscout {
         PrepareWaySegment(styleConfig,
                           projection,
                           parameter,
-                          ObjectRef(0/*relation->GetId()*/,refRelation), // TODO
+                          ObjectFileRef(relation->GetFileOffset(),refRelation),
                           role.GetAttributes(),
                           role.nodes);
       }
@@ -1900,7 +1900,7 @@ namespace osmscout {
         PrepareWaySegment(styleConfig,
                           projection,
                           parameter,
-                          ObjectRef(0 /*way->GetId()*/,refWay), // TODO
+                          ObjectFileRef(way->GetFileOffset(),refWay),
                           way->GetAttributes(),
                           way->nodes);
       }

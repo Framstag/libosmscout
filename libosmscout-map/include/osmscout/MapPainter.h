@@ -233,7 +233,7 @@ namespace osmscout {
   public:
     struct OSMSCOUT_MAP_API WayData
     {
-      ObjectRef               ref;
+      ObjectFileRef           ref;
       const SegmentAttributes *attributes;     //! Attributes of line segment
       LineStyleRef            lineStyle;       //! Line style
       size_t                  prio;            //! Priority of way (from style sheet)
@@ -275,7 +275,7 @@ namespace osmscout {
 
     struct OSMSCOUT_API AreaData
     {
-      ObjectRef               ref;
+      ObjectFileRef           ref;
       const SegmentAttributes *attributes;     //! Area attributes
       FillStyleRef            fillStyle;       //! Fill style
       double                  minLat;
@@ -418,7 +418,7 @@ namespace osmscout {
     bool PrepareAreaSegment(const StyleConfig& styleConfig,
                             const Projection& projection,
                             const MapParameter& parameter,
-                            const ObjectRef& ref,
+                            const ObjectFileRef& ref,
                             const SegmentAttributes& attributes,
                             const std::vector<Point>& nodes);
 
@@ -430,7 +430,7 @@ namespace osmscout {
     void PrepareWaySegment(const StyleConfig& styleConfig,
                            const Projection& projection,
                            const MapParameter& parameter,
-                           const ObjectRef& ref,
+                           const ObjectFileRef& ref,
                            const SegmentAttributes& attributes,
                            const std::vector<Point>& nodes);
 
