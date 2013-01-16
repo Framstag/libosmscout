@@ -40,7 +40,7 @@ namespace osmscout {
    * location. Areas are currently build by scanning administrative boundaries and the
    * various sized city typed locations and areas.
    */
-  class CityStreetIndex
+  class OSMSCOUT_API CityStreetIndex
   {
   private:
     struct Region

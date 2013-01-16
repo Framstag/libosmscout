@@ -43,7 +43,7 @@ namespace osmscout {
     Internally the index is implemented as quadtree. As a result each index entry
     has 4 children (besides entries in the lowest level).
     */
-  class AreaAreaIndex
+  class OSMSCOUT_API AreaAreaIndex
   {
   private:
     /**

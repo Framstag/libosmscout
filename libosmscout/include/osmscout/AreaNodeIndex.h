@@ -34,7 +34,7 @@ namespace osmscout {
 
     Ways can be limited by type and result count.
     */
-  class AreaNodeIndex
+  class OSMSCOUT_API AreaNodeIndex
   {
   private:
     struct TypeData

@@ -35,7 +35,7 @@ namespace osmscout {
 
     Ways can be limited by type and result count.
     */
-  class AreaWayIndex
+  class OSMSCOUT_API AreaWayIndex
   {
   private:
     struct TypeData

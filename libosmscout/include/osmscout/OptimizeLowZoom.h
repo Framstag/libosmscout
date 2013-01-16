@@ -31,7 +31,7 @@
 
 namespace osmscout {
 
-  class OptimizeLowZoom
+  class OSMSCOUT_API OptimizeLowZoom
   {
   private:
     struct TypeData

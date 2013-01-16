@@ -34,7 +34,7 @@ namespace osmscout {
 
   /**
     */
-  class WaterIndex
+  class OSMSCOUT_API WaterIndex
   {
   private:
     struct Level
