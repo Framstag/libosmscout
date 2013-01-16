@@ -34,6 +34,9 @@ namespace osmscout {
     jobject  mPainterObject;
 
     double   mMinimumLineWidth; //! Minimum width a line must have to be visible
+
+    std::vector<bool>    mIconLoaded;    // Vector for icon load status
+    std::vector<bool>    mPatternLoaded; // Vector for pattern load status
     
     int GetColorInt(double r, double g, double b, double a);
     int GetColorInt(Color color);
@@ -92,13 +95,9 @@ namespace osmscout {
                    const MapParameter& parameter,
                    const LabelData& label);
 
-    void DrawPlateLabel(const Projection& projection,
-                        const MapParameter& parameter,
-                        const LabelData& label);
-
     void DrawContourLabel(const Projection& projection,
                           const MapParameter& parameter,
-                          const LabelStyle& style,
+                          const PathTextStyle& style,
                           const std::string& text,
                           size_t transStart, size_t transEnd);
 

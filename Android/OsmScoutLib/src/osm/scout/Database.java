@@ -68,9 +68,11 @@ public class Database {
 		return true;
 	}
 	
+	/*
 	public Node getNode(long id) {
 		return jniGetNode(mJniDatabaseIndex, id);
 	}
+	*/
 	
 	public MapData getObjects(ObjectTypeSets objectTypeSets, Projection projection) {
 		
