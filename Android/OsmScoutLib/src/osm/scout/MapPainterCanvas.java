@@ -88,34 +88,30 @@ public class MapPainterCanvas {
                 mapData.getJniObjectIndex());
 	}
 	
-	public int loadIconPNG(String iconPath) {
+	public boolean loadIconPNG(String iconPath, int iconIndex) {
 		
 		Bitmap bitmap=BitmapFactory.decodeFile(iconPath);
 		
-		if (bitmap==null) {
-			
-			// Error loading icon file
-			return -1;
+		if (iconIndex>=mIconArray.size()) {
+			mIconArray.setSize(iconIndex+1);
 		}
 		
-		mIconArray.add(bitmap);
+		mIconArray.setElementAt(bitmap, iconIndex);
 		
-		return mIconArray.size();
+		return bitmap!=null;
 	}
 	
-	public int loadPatternPNG(String patternPath) {
+	public boolean loadPatternPNG(String patternPath, int patternIndex) {
 		
 		Bitmap bitmap=BitmapFactory.decodeFile(patternPath);
 		
-		if (bitmap==null) {
-			
-			// Error loading icon file
-			return -1;
+		if (patternIndex>=mPatternArray.size()) {
+			mPatternArray.setSize(patternIndex+1);
 		}
 		
-		mPatternArray.add(bitmap);
+		mPatternArray.setElementAt(bitmap, patternIndex);
 		
-		return mPatternArray.size();
+		return bitmap!=null;
 	}
 	
 	public void drawIcon(int iconIndex, float x, float y) {
@@ -341,7 +337,27 @@ public class MapPainterCanvas {
 	}
 	
 	public void drawLabel(String text, float fontSize, float x, float y,
-			int textColor, int labelStyle) {
+						   int textColor, int labelStyle,
+						   RectF box, int bgColor, int borderColor) {
+		
+		if (box!=null) {
+			
+			// Draw shield around label			
+			mPaint.setColor(bgColor);
+			mPaint.setStrokeCap(Paint.Cap.ROUND);
+			mPaint.setStyle(Paint.Style.FILL);
+			
+			mCanvas.drawRoundRect(box, 2, 2, mPaint);
+			
+			// Reduce size of box to draw box border
+			box.inset(2, 2);
+			
+			mPaint.setColor(borderColor);
+			mPaint.setStyle(Paint.Style.STROKE);
+			mPaint.setStrokeWidth(1);
+			
+			mCanvas.drawRoundRect(box, 2, 2, mPaint);
+		}
 		
 		mPaint.setTextSize(fontSize*FONT_SCALE);
 		mPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -351,7 +367,7 @@ public class MapPainterCanvas {
 		
 		switch(labelStyle) {
 		
-		case 1: // Normal
+		case 0: // Normal
 			
 			break;
 		
@@ -359,7 +375,7 @@ public class MapPainterCanvas {
 			
 			mPaint.setColor(Color.WHITE);
 			mPaint.setStyle(Paint.Style.STROKE);
-			mPaint.setStrokeWidth(1);
+			mPaint.setStrokeWidth(2);
 			mCanvas.drawText(text, x, y-fontMetrics.ascent, mPaint);
 			
 			break;
@@ -371,6 +387,7 @@ public class MapPainterCanvas {
 		mCanvas.drawText(text, x, y-fontMetrics.ascent, mPaint);		
 	}
 	
+	/*
 	public void drawPlateLabel(String text, float fontSize, RectF box,
 			int textColor, int bgColor, int borderColor) {
 		
@@ -396,6 +413,7 @@ public class MapPainterCanvas {
 		
 		mCanvas.drawText(text, box.left+2, box.bottom-3, mPaint);
 	}
+	*/
 	
 	public void drawContourLabel(String text, int textColor, float fontSize,
 								float pathLenght, float[] x, float[] y) {

@@ -202,6 +202,7 @@ jobjectArray Java_osm_scout_Database_jniGetMatchingAdminRegions(JNIEnv *env,
   return javaRegions;
 }
 
+/*
 jobject Java_osm_scout_Database_jniGetNode(JNIEnv *env, jobject object,
                                            int databaseIndex,  long id)
 {
@@ -229,6 +230,7 @@ jobject Java_osm_scout_Database_jniGetNode(JNIEnv *env, jobject object,
 
   return node;			
 }
+*/
 
 jobject Java_osm_scout_Database_jniGetObjects(JNIEnv *env, jobject object,
                                 int databaseIndex, int objectTypeSetsIndex,

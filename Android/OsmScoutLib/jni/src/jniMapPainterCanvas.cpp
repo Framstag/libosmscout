@@ -51,19 +51,25 @@ namespace osmscout {
   }
   
   bool MapPainterCanvas::HasIcon(const StyleConfig& styleConfig,
-                 const MapParameter& parameter,
-                 IconStyle& style)
+                                 const MapParameter& parameter,
+                                 IconStyle& style)
   {
-    if (style.GetId()==std::numeric_limits<size_t>::max()) {
+    // Already loaded with error
+    if (style.GetIconId()==0)
+    {
       return false;
     }
 
-    if (style.GetId()!=0) {
+    int iconIndex=style.GetIconId()-1;
+
+    if (iconIndex<mIconLoaded.size() &&
+        mIconLoaded[iconIndex])
+    {
       return true;
     }
 
     jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "loadIconPNG",
-                                            "(Ljava/lang/String;)I");
+                                            "(Ljava/lang/String;I)Z");
 
     if (!methodId)
       return false;
@@ -75,37 +81,47 @@ namespace osmscout {
 
       jstring iconName=mJniEnv->NewStringUTF(filename.c_str());
 
-      int id=mJniEnv->CallIntMethod(mPainterObject, methodId, iconName);
+      bool loaded=mJniEnv->CallIntMethod(mPainterObject, methodId,
+                                            iconName, iconIndex);
 
       mJniEnv->DeleteLocalRef(iconName);
 
-      if (id>0)
+      if (loaded)
       {
-        style.SetId(id);    
+        if (iconIndex>=mIconLoaded.size())
+        {
+          mIconLoaded.resize(iconIndex+1, false);
+        }
+
+        mIconLoaded[iconIndex]=true;
+
         return true;
       }
     }
 
     // Error loading icon file
-    style.SetId(std::numeric_limits<size_t>::max());
+    style.SetIconId(0);
     return false;
   }
   
   bool MapPainterCanvas::HasPattern(const MapParameter& parameter,
                     const FillStyle& style)
   {
-    // Was not able to load pattern
-    if (style.GetPatternId()==std::numeric_limits<size_t>::max()) {
+    // Pattern already loaded with error
+    if (style.GetPatternId()==0) {
       return false;
     }
 
-    // Pattern already loaded
-    if (style.GetPatternId()!=0) {
+    int patternIndex=style.GetPatternId()-1;
+
+    if (patternIndex<mPatternLoaded.size() &&
+        mPatternLoaded[patternIndex])
+    {
       return true;
     }
 
     jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "loadPatternPNG",
-                                            "(Ljava/lang/String;)I");
+                                            "(Ljava/lang/String;I)Z");
 
     if (!methodId)
       return false;
@@ -115,21 +131,28 @@ namespace osmscout {
          ++path) {
       std::string filename=*path+"/"+style.GetPatternName()+".png";
 
-      jstring iconName=mJniEnv->NewStringUTF(filename.c_str());
+      jstring patternName=mJniEnv->NewStringUTF(filename.c_str());
 
-      int id=mJniEnv->CallIntMethod(mPainterObject, methodId, iconName);
+      bool loaded=mJniEnv->CallIntMethod(mPainterObject, methodId,
+                                         patternName, patternIndex);
 
-      mJniEnv->DeleteLocalRef(iconName);
+      mJniEnv->DeleteLocalRef(patternName);
 
-      if (id>0)
+      if (loaded)
       {
-        style.SetPatternId(id);
+        if (patternIndex>=mPatternLoaded.size())
+        {
+          mPatternLoaded.resize(patternIndex+1, false);
+        }
+
+        mPatternLoaded[patternIndex]=true;
+
         return true;
       }
     }
 
     // Error loading icon file
-    style.SetPatternId(std::numeric_limits<size_t>::max());
+    style.SetPatternId(0);
     return false;
   }
 
@@ -174,62 +197,75 @@ namespace osmscout {
                    const MapParameter& parameter,
                    const LabelData& label)
   {
+    jstring javaText;
+    jint    javaTextColor;
+    jint    javaTextStyle;
+    jfloat  javaFontSize;
+    jfloat  javaX;
+    jfloat  javaY;
+    jobject javaBox;
+    jint    javaBgColor;
+    jint    javaBorderColor;
+
+    javaText=mJniEnv->NewStringUTF(label.text.c_str());
+    javaFontSize=label.fontSize;
+    javaX=(jfloat)label.x;
+    javaY=(jfloat)label.y;
+
+    if (dynamic_cast<const TextStyle*>(label.style.Get())!=NULL) {
+
+      const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.Get());
+
+      javaTextColor=GetColorInt(style->GetTextColor().GetR(),
+                                style->GetTextColor().GetG(),
+                                style->GetTextColor().GetB(),
+                                style->GetTextColor().GetA());
+
+      javaTextStyle=style->GetStyle();
+
+      javaBox=NULL;
+    }
+    else if (dynamic_cast<const ShieldStyle*>(label.style.Get())!=NULL) {
+
+      const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.Get());
+
+      javaTextColor=GetColorInt(style->GetTextColor().GetR(),
+                                style->GetTextColor().GetG(),
+                                style->GetTextColor().GetB(),
+                                style->GetTextColor().GetA());
+
+      javaTextStyle=TextStyle::normal;
+
+      jclass rectClass=mJniEnv->FindClass("android/graphics/RectF");
+      jmethodID rectMethodId=mJniEnv->GetMethodID(rectClass,"<init>","(FFFF)V");
+      javaBox=mJniEnv->NewObject(rectClass, rectMethodId,
+                                 (jfloat)label.bx1, (jfloat)label.by1+1,
+                                 (jfloat)label.bx2+1, (jfloat)label.by2+2);
+
+      javaBgColor=GetColorInt(style->GetBgColor());
+      javaBorderColor=GetColorInt(style->GetBorderColor());
+    }
+    else
+      return;
+
     jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "drawLabel",
-                               "(Ljava/lang/String;FFFII)V");
+                       "(Ljava/lang/String;FFFIILandroid/graphics/RectF;II)V");
 
     if (!methodId)
       return;
 
-    jint textColor=GetColorInt(
-                               label.style->GetTextColor().GetR(),
-                               label.style->GetTextColor().GetG(),
-                               label.style->GetTextColor().GetB(),
-                               label.alpha);
-
-    jstring javaText=mJniEnv->NewStringUTF(label.text.c_str());
-
-    jint labelStyle=label.style->GetStyle();
-
-    mJniEnv->CallVoidMethod(mPainterObject, methodId, javaText, label.fontSize,
-                            (jfloat)label.x, (jfloat)label.y, textColor,
-                            labelStyle);
+    mJniEnv->CallVoidMethod(mPainterObject, methodId, javaText, javaFontSize,
+                            javaX, javaY, javaTextColor, javaTextStyle,
+                            javaBox, javaBgColor, javaBorderColor);
 
     mJniEnv->DeleteLocalRef(javaText);
   }
 
-  void MapPainterCanvas::DrawPlateLabel(const Projection& projection,
-                        const MapParameter& parameter,
-                        const LabelData& label)
-  {
-    jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "drawPlateLabel",
-                        "(Ljava/lang/String;FLandroid/graphics/RectF;III)V");
-
-    if (!methodId)
-      return;
-
-    jclass rectClass=mJniEnv->FindClass("android/graphics/RectF");
-    jmethodID rectMethodId=mJniEnv->GetMethodID(rectClass,"<init>","(FFFF)V");
-    jobject box=mJniEnv->NewObject(rectClass, rectMethodId, (jfloat)label.bx1,
-                   (jfloat)label.by1, (jfloat)label.bx2+1, (jfloat)label.by2+1);
-
-    jint textColor=GetColorInt(label.style->GetTextColor());
-    jint bgColor=GetColorInt(label.style->GetBgColor());
-    jint borderColor=GetColorInt(label.style->GetBorderColor());
-
-    jstring javaText=mJniEnv->NewStringUTF(label.text.c_str());
-
-    mJniEnv->CallVoidMethod(mPainterObject, methodId, javaText,
-                           (jfloat)label.fontSize, box, textColor,
-                           bgColor, borderColor);
-
-    mJniEnv->DeleteLocalRef(javaText);
-  }
-                        
   void MapPainterCanvas::DrawContourLabel(const Projection& projection,
-                          const MapParameter& parameter,
-                          const LabelStyle& style,
-                          const std::string& text,
-                          size_t transStart, size_t transEnd)
+                                          const MapParameter& parameter,
+                                          const PathTextStyle& style,
+                                          const std::string& text,
+                                          size_t transStart, size_t transEnd)
   {
     jmethodID methodId=mJniEnv->GetMethodID(mPainterClass, "drawContourLabel",
                      "(Ljava/lang/String;IFF[F[F)V");
@@ -567,7 +603,7 @@ namespace osmscout {
     if (!methodId)
       return;
 
-    int iconIndex=style->GetId()-1;
+    jint iconIndex=style->GetIconId()-1;
 
     mJniEnv->CallVoidMethod(mPainterObject, methodId, iconIndex,
                            (jfloat) x, (jfloat) y);
