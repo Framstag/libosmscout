@@ -23,6 +23,22 @@
 
 namespace osmscout {
 
+  StyleVariable::StyleVariable()
+  {
+    // no code
+  }
+
+    StyleVariable::~StyleVariable()
+  {
+    // no code
+  }
+
+  StyleVariableColor::StyleVariableColor(const Color& color)
+  : color(color)
+  {
+    // no code
+  }
+
   LineStyle::LineStyle()
    : lineColor(1.0,0.0,0.0,0.0),
      alternateColor(1,0.0,0.0,0.0),
@@ -934,6 +950,25 @@ namespace osmscout {
   StyleConfig::~StyleConfig()
   {
     // no code
+  }
+
+  StyleVariableRef StyleConfig::GetVariableByName(const std::string& name) const
+  {
+    StyleVariableRef result;
+
+    OSMSCOUT_HASHMAP<std::string,StyleVariableRef>::const_iterator entry=variables.find(name);
+
+    if (entry!=variables.end()) {
+      result=entry->second;
+    }
+
+    return result;
+  }
+
+  void StyleConfig::AddVariable(const std::string& name,
+                                const StyleVariableRef& variable)
+  {
+    variables.insert(std::make_pair(name,variable));
   }
 
   bool StyleConfig::RegisterSymbol(const SymbolRef& symbol)

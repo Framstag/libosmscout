@@ -83,6 +83,7 @@ TOKENS
   number     = ['-'] digit {digit}.
   double     = ['-'] digit {digit} '.' digit {digit}.
   color      = "#" hexdigit hexdigit hexdigit hexdigit hexdigit hexdigit [hexdigit hexdigit].
+  variable   = "@" ('_' | letter) {letter | digit | '_'}.
   string     = '"' {stringchar | '\\' quotchar} '"'.
 
 COMMENTS FROM "/*" TO "*/" NESTED
@@ -95,6 +96,9 @@ PRODUCTIONS
                 [
                   WAYORDER
                 ]
+                {
+                  CONST
+                }
                 {
                   SYMBOL
                 }
@@ -177,7 +181,7 @@ PRODUCTIONS
                 .)
                 IDENT<name>
                 (.
-                  SymbolRef   symbol=new Symbol(name);
+                  SymbolRef symbol=new Symbol(name);
                 .)
                 {
                   POLYGON<*symbol>
@@ -268,6 +272,41 @@ PRODUCTIONS
                 .)
                 DOUBLE<x> "," DOUBLE<y>
                 (. pixel=Pixel(x,y); .)
+                .
+
+  CONST       = "CONST"
+                {
+                  CONSTDEF ";"
+                }
+                .
+
+  CONSTDEF    = COLORCONSTDEF
+                .
+
+  COLORCONSTDEF
+              = (.
+                  std::string      name;
+                  StyleVariableRef variable;
+                  Color            color;
+                .)
+                "COLOR"
+                IDENT<name>
+                (.
+                  variable=config.GetVariableByName(name);
+
+                  if (variable.Valid()) {
+                    std::string e="Constant already defined";
+
+                    SemErr(e.c_str());
+                  }
+                .)
+                "="
+                COLOR<color>
+                (.
+                  if (!errors->hasErrors) {
+                    config.AddVariable(name,new StyleVariableColor(color));
+                  }
+                .)
                 .
 
   STYLE<StyleFilter filter>
@@ -926,16 +965,41 @@ PRODUCTIONS
                 ).
 
   COLOR<Color& color>
-              = color
-                (.
-                  if (strlen(t->val)==7 ||
-                      strlen(t->val)==9) {
-                    ToRGBA(t->val,color);
-                  }
-                  else {
-                    color=Color();
-                  }
-                .).
+              =   color
+                  (.
+                    if (strlen(t->val)!=7 &&
+                        strlen(t->val)!=9) {
+                     std::string e="Illegal color value";
+
+                      SemErr(e.c_str());
+                    }
+
+                    if (!errors->hasErrors) {
+                      ToRGBA(t->val,color);
+                    }
+                  .)
+                | variable
+                  (.
+                    StyleVariableRef variable=config.GetVariableByName(t->val+1);
+
+                    if (!variable.Valid()) {
+                      std::string e="Variable not defined";
+
+                      SemErr(e.c_str());
+                    }
+                    else if (dynamic_cast<StyleVariableColor*>(variable.Get())==NULL) {
+                      std::string e="Variable is not of type 'COLOR'";
+
+                      SemErr(e.c_str());
+                    }
+
+                    if (!errors->hasErrors) {
+                      StyleVariableColor* colorVariable=dynamic_cast<StyleVariableColor*>(variable.Get());
+
+                      color=colorVariable->GetColor();
+                    }
+                  .)
+                .
 
   MAG<Magnification& magnification>
               =  "world"     (. magnification.SetMagnification(Magnification::magWorld); .)

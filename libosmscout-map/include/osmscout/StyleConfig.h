@@ -38,6 +38,28 @@
 #include <osmscout/util/Transformation.h>
 
 namespace osmscout {
+  class OSMSCOUT_MAP_API StyleVariable : public Referencable
+  {
+  public:
+    StyleVariable();
+    virtual ~StyleVariable();
+  };
+
+  typedef Ref<StyleVariable> StyleVariableRef;
+
+  class OSMSCOUT_MAP_API StyleVariableColor : public StyleVariable
+  {
+  private:
+    Color color;
+
+  public:
+    StyleVariableColor(const Color& color);
+
+    inline const Color& GetColor()
+    {
+      return color;
+    }
+  };
 
   /**
    * Holds the all accumulated filter conditions as defined in the style sheet
@@ -1084,6 +1106,8 @@ namespace osmscout {
 
     std::vector<TypeSet>                       areaTypeSets;
 
+    OSMSCOUT_HASHMAP<std::string,StyleVariableRef> variables;
+
 
   private:
     void GetAllNodeTypes(std::list<TypeId>& types);
@@ -1099,6 +1123,10 @@ namespace osmscout {
   public:
     StyleConfig(TypeConfig* typeConfig);
     virtual ~StyleConfig();
+
+    StyleVariableRef GetVariableByName(const std::string& name) const;
+    void AddVariable(const std::string& name,
+                     const StyleVariableRef& variable);
 
     bool RegisterSymbol(const SymbolRef& symbol);
     const SymbolRef& GetSymbol(const std::string& name) const;

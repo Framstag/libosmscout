@@ -83,7 +83,8 @@ private:
 		_number=2,
 		_double=3,
 		_color=4,
-		_string=5
+		_variable=5,
+		_string=6
 	};
 	int maxT;
 
@@ -180,6 +181,7 @@ inline void ToRGBA(const char* str, Color& color)
 
 	void OSS();
 	void WAYORDER();
+	void CONST();
 	void SYMBOL();
 	void STYLE(StyleFilter filter);
 	void WAYGROUP(size_t priority);
@@ -190,6 +192,9 @@ inline void ToRGBA(const char* str, Color& color)
 	void PIXEL(Pixel& pixel);
 	void FILLSTYLEATTR(FillPartialStyle& style);
 	void DOUBLE(double& value);
+	void CONSTDEF();
+	void COLORCONSTDEF();
+	void COLOR(Color& color);
 	void STYLEFILTER(StyleFilter& filter);
 	void STYLEDEF(StyleFilter filter);
 	void MAG(Magnification& magnification);
@@ -211,7 +216,6 @@ inline void ToRGBA(const char* str, Color& color)
 	void AREASTYLE(StyleFilter filter);
 	void AREATEXTSTYLE(StyleFilter filter);
 	void AREAICONSTYLE(StyleFilter filter);
-	void COLOR(Color& color);
 	void DISPLAYSIZE(double& value);
 	void MAPSIZE(double& value);
 	void CAPSTYLE(LineStyle::CapStyle& style);

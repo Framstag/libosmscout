@@ -17,45 +17,106 @@ OSS
 	      waterway_stream, route_ferry
   GROUP highway_steps, barrier_fence
 
+CONST
+  COLOR red                 = #ff0000;
+
+  // Ground tiles
+  COLOR seaColor            = #b5d0d0;
+  COLOR landColor           = #f1eee9;
+  COLOR unknownColor        = @seaColor;
+
+  /*
+  COLOR seaColor            = #c4dff6;
+  COLOR landColor           = #fcfbe7;
+  COLOR unknownColor        = #c4dff6;*/
+
+  // Landuse, water
+  COLOR allotmentsColor     = #c8b084;
+  COLOR beachColor          = #eecc55;
+  COLOR brownFieldColor     = #ebd7fe;
+  COLOR cemeteryColor       = #a9caae;
+  COLOR commercialColor     = #efc8c8;
+  COLOR constructionColor   = #9d9d6c;
+  COLOR farmColor           = #ead8bd;
+  COLOR farmyardColor       = #dcbe92;
+  COLOR fellColor           = #f9f9f9;
+  COLOR forestColor         = #8dc56c;
+  COLOR glacierColor        = #ddecec;
+  COLOR grassColor          = #cfeca8;
+  COLOR greenFieldColor     = #dcdcc8;
+  COLOR heathColor          = #ffffc0;
+  COLOR industrialColor     = #dfd1d6;
+  COLOR landFillColor       = #b6b591;
+  COLOR militaryColor       = #fe989822;
+  COLOR quarryColor         = #b3b3b3;
+  COLOR recreationColor     = #bce2ca;
+  COLOR residentialColor    = #dcdcdc;
+  COLOR retailColor         = #feeaea;
+  COLOR scrubColor          = #b5e2b5;
+  COLOR vineyardColor       = #b3e2a8;
+  COLOR waterColor          = #b5d0d0;
+  COLOR wetlandColor        = #bdd8d8;
+  COLOR woodColor           = #aed1a0;
+
+  // Symbols
+  COLOR railwaySymbolColor  = #7885b0;
+  COLOR busSymbolColor      = #7885b0;
+  COLOR onewayArrowColor    = #00000028;
+  COLOR peakSymbolColor     = #9c5e29;
+  COLOR hospitalSymbolColor = #da0092;
+  COLOR pharmacySymbolColor = #da0092;
+
+  // Ways
+  COLOR motorwayColor       = #809bc0;
+  COLOR trunkColor          = #a8daa8;
+  COLOR primaryColor        = #ec989a;
+  COLOR secondaryColor      = #fdd6a4;
+  COLOR tertiaryColor       = #fefeb3;
+  COLOR roadColor           = #ffffff;
+  COLOR roadBColor          = #bfbfbf;
+
+  // Amenity
+  COLOR postColor           = #ffcc00;
+
 SYMBOL oneway_arrow
-  POLYGON 0,0.5 1,0 0,-0.5 { color: #00000028; }
+  POLYGON 0,0.5 1,0 0,-0.5 { color:  @onewayArrowColor; }
 
 SYMBOL natural_peak
-  POLYGON 0,0 1.5,0 0.75,1.5 { color: #9c5e29; }
+  POLYGON 0,0 1.5,0 0.75,1.5 { color: @peakSymbolColor; }
 
 SYMBOL railway_station
-  RECTANGLE 0,0 2 x 2 { color: #7885b0; }
+  RECTANGLE 0,0 2 x 2 { color: @railwaySymbolColor; }
 
 SYMBOL railway_halt
-  RECTANGLE 0,0 1 x 1 { color: #7885b0; }
+  RECTANGLE 0,0 1 x 1 { color: @railwaySymbolColor; }
 
 SYMBOL railway_tram_stop
-  RECTANGLE 0,0 1 x 1 { color: #7885b0; }
+  RECTANGLE 0,0 1 x 1 { color: @railwaySymbolColor; }
 
 SYMBOL highway_bus_stop
-  CIRCLE 0,0 0.75 {color: #7885b0; }
+  CIRCLE 0,0 0.75 {color: @busSymbolColor; }
 
 SYMBOL amenity
   RECTANGLE 0,0 1 x 1 { color: #b89c9c; }
 
 SYMBOL amenity_hospital
-  CIRCLE 0,0 1.5 {borderColor: #da0092; borderWidth: 0.2mm; }
-  RECTANGLE -1,0.25 2 x 0.5 { color: #da0092; }
-  RECTANGLE -0.25,1 0.5 x 2 { color: #da0092; }
+  CIRCLE 0,0 1.5 {borderColor: @hospitalSymbolColor; borderWidth: 0.2mm; }
+  RECTANGLE -1,0.25 2 x 0.5 { color: @hospitalSymbolColor; }
+  RECTANGLE -0.25,1 0.5 x 2 { color: @hospitalSymbolColor; }
 
 SYMBOL amenity_pharmacy
-  RECTANGLE -1,1 2 x 2 {borderColor: #da0092; borderWidth: 0.2mm; }
-  RECTANGLE -0.75,0.25 1.5 x 0.5 { color: #da0092; }
-  RECTANGLE -0.25,0.75 0.5 x 1.5 { color: #da0092; }
+  RECTANGLE -1,1 2 x 2 {borderColor: @pharmacySymbolColor; borderWidth: 0.2mm; }
+  RECTANGLE -0.75,0.25 1.5 x 0.5 { color: @pharmacySymbolColor; }
+  RECTANGLE -0.25,0.75 0.5 x 1.5 { color: @pharmacySymbolColor; }
 
 SYMBOL amenity_parking
   CIRCLE 0,0 0.75 {color: #4bb2da; }
 
 SYMBOL amenity_post_box
-  RECTANGLE 0,0 1 x 1 { color: #ffcc00; }
+  RECTANGLE 0,0 1 x 1 { color: @postColor; }
 
 SYMBOL amenity_post_office
-  RECTANGLE 0,0 2 x 2 { color: #ffcc00; }
+  RECTANGLE 0,0 2 x 2 { color: @postColor; }
 
 SYMBOL christian_church_cross
   RECTANGLE 0.5,2 0.5 x 2 { color: #000000; }   // vertical bar
@@ -76,21 +137,11 @@ SYMBOL christian_church_cross
  [MAG world-] {
    [TYPE _route] WAY {color: #ff000088; displayWidth: 1.5mm; }
 
-   //[TYPE _tile_sea] AREA {color: #b5d0d0;}
-   //[TYPE _tile_coast] AREA {color: #ff0000;}
-   //[TYPE _tile_coast] AREA {color: #b5d0d0;}
-   //[TYPE _tile_coast] AREA {color: #b5d0d0;  borderColor: #000000; borderWidth: 0.1mm;}
-   //[TYPE _tile_coast] AREA {color: #aaaaaa;  borderColor: #000000; borderWidth: 0.1mm;}
-   //[TYPE _tile_land] AREA {color: #f1eee9;}
-   //[TYPE _tile_land] AREA {color: #f1eee9; borderColor: #000000; borderWidth: 0.1mm;}
-   //[TYPE _tile_unknown] AREA {color: #ffffad;}
-
-   /*
-   [TYPE _tile_land] AREA {color: #fcfbe7;}
-   [TYPE _tile_sea] AREA {color: #c4dff6;}
-   [TYPE _tile_coast] AREA {color: #c4dff6;}
-   [TYPE _tile_unknown] AREA {color: #c4dff6;}
-   */
+   [TYPE _tile_sea] AREA {color: @seaColor;}
+   [TYPE _tile_coast] AREA {color: @seaColor;}
+   //[TYPE _tile_coast] AREA {color: @seaColor;  borderColor: #000000; borderWidth: 0.1mm;}
+   [TYPE _tile_land] AREA {color: @landColor;}
+   [TYPE _tile_unknown] AREA {color: @unknownColor;}
 
    //[TYPE _tile_coastline] WAY {color: #ff0000; displayWidth: 0.1mm;}
  }
@@ -101,16 +152,16 @@ SYMBOL christian_church_cross
  //
 
  [MAG county-] {
-   [TYPE natural_glacier] AREA { color: #ddecec; }
-   [TYPE natural_fell] AREA { color: #f9f9f9; }
-   [TYPE natural_heath] AREA { color: #ffffc0; }
-   [TYPE natural_wood] AREA { color: #aed1a0; }
+   [TYPE natural_glacier] AREA { color: @glacierColor; }
+   [TYPE natural_fell] AREA { color: @fellColor; }
+   [TYPE natural_heath] AREA { color: @heathColor; }
+   [TYPE natural_wood] AREA { color: @woodColor; }
    [TYPE natural_marsh, natural_wetland_marsh] AREA { color: #efe8ff; }
-   [TYPE natural_wetland, natural_wetland_tidalflat] AREA { color: #bdd8d8; }
-   [TYPE natural_water] AREA { color: #b5d0d0; }
-   [TYPE natural_beach] AREA { color: #eecc55; }
-   [TYPE natural_land] AREA { color: #ffffff; }
-   [TYPE natural_scrub] AREA { color: #b5e2b5; pattern: "scrub"; patternMinMag: cityOver; }
+   [TYPE natural_wetland, natural_wetland_tidalflat] AREA { color: @wetlandColor; }
+   [TYPE natural_water] AREA { color: @waterColor; }
+   [TYPE natural_beach] AREA { color: @beachColor; }
+   [TYPE natural_land] AREA { color: @landColor; }
+   [TYPE natural_scrub] AREA { color: @scrubColor; pattern: "scrub"; patternMinMag: cityOver; }
  }
 
  [MAG detail-] {
@@ -141,18 +192,18 @@ SYMBOL christian_church_cross
  [MAG proximity-] {
    [TYPE waterway_river,
          waterway_canal]
-     WAY {color: #b5d0d0; displayWidth: 0.1mm; width: 15m;}
+     WAY {color: @waterColor; displayWidth: 0.1mm; width: 15m;}
 
    [TYPE waterway_dock,
          waterway_riverbank] {
-     AREA { color: #b5d0d0; }
+     AREA { color: @waterColor; }
      AREA.TEXT { label: name; }
    }
  }
 
  [MAG cityOver-] {
-   [TYPE waterway_stream] WAY {color: #b5d0d0; displayWidth: 0.25mm; width: 2m;}
-   [TYPE waterway_drain] WAY {color: #b5d0d0; displayWidth: 0.1mm; width: 3m;}
+   [TYPE waterway_stream] WAY {color: @waterColor; displayWidth: 0.25mm; width: 2m;}
+   [TYPE waterway_drain] WAY {color: @waterColor; displayWidth: 0.1mm; width: 3m;}
  }
 
  [MAG block-] {
@@ -184,32 +235,33 @@ SYMBOL christian_church_cross
        highway_living_street] WAY {outline: 0.25mm;}
 
  [MAG continent-] {
-   [TYPE highway_motorway] WAY { color: #809bc0; outlineColor: #777777; displayWidth: 0.45mm; width: 20m;}
+   [TYPE highway_motorway] WAY { color: @motorwayColor; outlineColor: #777777; displayWidth: 0.45mm; width: 20m;}
  }
 
  [MAG county-] {
-   [TYPE highway_trunk] WAY { color: #a8daa8; outlineColor: #777777; displayWidth: 0.45mm; width: 18m;}
-   [TYPE highway_primary] WAY { color: #ec989a; outlineColor: #a56769; displayWidth: 0.4mm; width: 14m;}
-   [TYPE highway_services] AREA { color: #cb9999; }
+   [TYPE highway_trunk] WAY { color: @trunkColor; outlineColor: #777777; displayWidth: 0.45mm; width: 18m;}
+   [TYPE highway_primary] WAY { color: @primaryColor; outlineColor: #a56769; displayWidth: 0.4mm; width: 14m;}
  }
 
  [MAG proximity-] {
-   [TYPE highway_secondary] WAY { color: #fdd6a4; outlineColor: #bfbfbf; altColor: #fdd654; displayWidth: 0.25mm; width: 12m; }
+   [TYPE highway_secondary] WAY { color: @secondaryColor; outlineColor: #bfbfbf; altColor: #fdd654; displayWidth: 0.25mm; width: 12m; }
  }
 
  [MAG cityOver-] {
-   [TYPE highway_motorway_link] WAY { color: #809bc0; outlineColor: #777777; displayWidth: 0.45mm; width: 20m; }
-   [TYPE highway_trunk_link] WAY { color: #a8daa8; outlineColor: #777777; displayWidth: 0.45mm; width: 18m; }
-   [TYPE highway_tertiary] WAY { color: #fefeb3; outlineColor: #bfbfbf; altColor: #fefe73; displayWidth: 0.25mm; width: 10m; }
-   [TYPE highway_road] WAY { color: #ffffff; outlineColor: #bfbfbf; altColor: #888888; displayWidth: 0.1mm; width: 8m; }
+   [TYPE highway_motorway_link] WAY { color: @motorwayColor; outlineColor: #777777; displayWidth: 0.45mm; width: 20m; }
+   [TYPE highway_trunk_link] WAY { color: @trunkColor; outlineColor: #777777; displayWidth: 0.45mm; width: 18m; }
+   [TYPE highway_tertiary] WAY { color: @tertiaryColor; outlineColor: #bfbfbf; altColor: #fefe73; displayWidth: 0.25mm; width: 10m; }
+   [TYPE highway_road] WAY { color: @roadColor; outlineColor: @roadBColor; altColor: #888888; displayWidth: 0.1mm; width: 8m; }
    [TYPE railway_rail] WAY {color: #939393; altColor: #777777; outlineColor: #b3b3b3; dash: 3,3; cap: butt; gapColor: #ffffff; displayWidth: 0.25mm; width: 5m; outline: 0.25mm;}
  }
 
  [MAG city-] {
-   [TYPE highway_primary_link] WAY { color: #ec989a; outlineColor: #777777; displayWidth: 0.4mm; width: 14m; }
-   [TYPE highway_secondary_link] WAY { color: #fdd6a4; outlineColor: #777777; altColor: #fdd654; displayWidth: 0.25mm; width: 12m; }
+   [TYPE highway_primary_link] WAY { color: @primaryColor; outlineColor: #777777; displayWidth: 0.4mm; width: 14m; }
+   [TYPE highway_secondary_link] WAY { color: @secondaryColor; outlineColor: #777777; altColor: #fdd654; displayWidth: 0.25mm; width: 12m; }
    [TYPE highway_unclassified,
-         highway_residential] WAY { color: #ffffff; outlineColor: #bfbfbf; altColor: #999999; displayWidth: 0.1mm; width: 8m; }
+         highway_residential] WAY { color: @roadColor; outlineColor: @roadBColor; altColor: #999999; displayWidth: 0.1mm; width: 8m; }
+
+   [TYPE highway_services] AREA { color: #cb9999; }
 
    [TYPE railway_station] AREA { color: #cb4040; }
 
@@ -217,8 +269,8 @@ SYMBOL christian_church_cross
  }
 
  [MAG close-] {
-   [TYPE highway_service] WAY { color: #ffffff; outlineColor: #bfbfbf; altColor: #999999; displayWidth: 0.1mm; width: 8m; }
-   [TYPE highway_living_street] WAY { color: #bababa; outlineColor: #bfbfbf; displayWidth: 0.25mm; width: 8m;}
+   [TYPE highway_service] WAY { color: @roadColor; outlineColor: @roadBColor; altColor: #999999; displayWidth: 0.1mm; width: 8m; }
+   [TYPE highway_living_street] WAY { color: #bababa; outlineColor: @roadBColor; displayWidth: 0.25mm; width: 8m;}
    [TYPE highway_bus_guideway] WAY {color: #90570c; displayWidth: 0.1mm; width: 2m; }
 
    [TYPE railway_disused] WAY {color: #939393; dash: 1.5,1.5; cap: butt; displayWidth: 0.2mm; width: 4m;}
@@ -242,7 +294,7 @@ SYMBOL christian_church_cross
      AREA { color: #9b9b9c; borderColor: #887b7b; borderWidth: 0.1mm; }
    }
 
-   [TYPE highway_service] AREA { color: #ffffff; borderColor: #cccccc; borderWidth: 0.1mm; }
+   [TYPE highway_service] AREA { color: @roadColor; borderColor: @roadBColor; borderWidth: 0.1mm; }
    [TYPE highway_footway] AREA { color: #ededed; borderColor: #c5c5c5; borderWidth: 0.1mm; }
  }
 
@@ -375,12 +427,12 @@ SYMBOL christian_church_cross
  //
 
  [MAG county-] {
-   [TYPE landuse_quarry] AREA { color: #b3b3b3; }
-   [TYPE landuse_forest] AREA { color: #8dc56c; pattern: "forest"; patternMinMag: cityOver; }
-   [TYPE landuse_basin] AREA { color: #b3d1d4; borderColor: #887b7b; borderWidth: 0.1mm; }
-   [TYPE landuse_reservoir] AREA { color: #b4d5f0; }
-   [TYPE landuse_residential] AREA { color: #dcdcdc; }
-   [TYPE landuse_recreation_ground] AREA { color: #bce2ca; }
+   [TYPE landuse_quarry] AREA { color: @quarryColor; }
+   [TYPE landuse_forest] AREA { color: @forestColor; pattern: "forest"; patternMinMag: cityOver; }
+   [TYPE landuse_basin] AREA { color: @waterColor; borderColor: #887b7b; borderWidth: 0.1mm; }
+   [TYPE landuse_reservoir] AREA { color: @waterColor; }
+   [TYPE landuse_residential] AREA { color: @residentialColor; }
+   [TYPE landuse_recreation_ground] AREA { color: @recreationColor; }
 
    [TYPE landuse_orchard,
          landuse_meadow,
@@ -389,29 +441,29 @@ SYMBOL christian_church_cross
 
  [MAG proximity-] {
    // Semiransparent overlay
-   [TYPE landuse_military] AREA { color: #fe989822; borderColor: #fe9898; borderWidth: 0.2mm;}
+   [TYPE landuse_military] AREA { color: @militaryColor; borderColor: #fe9898; borderWidth: 0.2mm;}
  }
 
  [MAG city-] {
    [TYPE landuse_farm,
-         landuse_farmland] AREA { color: #ead8bd; }
+         landuse_farmland] AREA { color: @farmColor; }
 
-   [TYPE landuse_farmyard] AREA { color: #dcbe92; }
-   [TYPE landuse_landfill] AREA { color: #b6b591; }
-   [TYPE landuse_allotments] AREA { color: #c8b084; }
-   [TYPE landuse_vineyard] AREA { color: #b3e2a8; }
-   [TYPE landuse_retail] AREA { color: #feeaea; borderColor: #c5a0a0; borderWidth: 0.1mm; }
-   [TYPE landuse_commercial] AREA { color: #efc8c8; }
-   [TYPE landuse_industrial] AREA { color: #dfd1d6; }
-   [TYPE landuse_brownfield] AREA { color: #ebd7fe; }
-   [TYPE landuse_greenfield] AREA { color: #dcdcc8; }
+   [TYPE landuse_farmyard] AREA { color: @farmyardColor; }
+   [TYPE landuse_landfill] AREA { color: @landFillColor; }
+   [TYPE landuse_allotments] AREA { color: @allotmentsColor; }
+   [TYPE landuse_vineyard] AREA { color: @vineyardColor; }
+   [TYPE landuse_retail] AREA { color: @retailColor; borderColor: #c5a0a0; borderWidth: 0.1mm; }
+   [TYPE landuse_commercial] AREA { color: @commercialColor; }
+   [TYPE landuse_industrial] AREA { color: @industrialColor; }
+   [TYPE landuse_brownfield] AREA { color: @brownFieldColor; }
+   [TYPE landuse_greenfield] AREA { color: @greenFieldColor; }
    [TYPE landuse_railway] AREA { color: #dcdcc8; }
-   [TYPE landuse_construction] AREA { color: #9d9d6c; }
-   [TYPE landuse_cemetery] AREA { color: #a9caae; pattern: "cemetery"; patternMinMag: detail; }
+   [TYPE landuse_construction] AREA { color: @constructionColor; }
+   [TYPE landuse_cemetery] AREA { color: @cemeteryColor; pattern: "cemetery"; patternMinMag: detail; }
  }
 
  [MAG close-] {
-   [TYPE landuse_grass] AREA { color: #cfeca8; }
+   [TYPE landuse_grass] AREA { color: @grassColor; }
 
    [TYPE landuse_farmyard_building] AREA { color: #bcbcbc; borderColor: #887b7b; borderWidth: 0.1mm; }
  }
@@ -537,7 +589,7 @@ SYMBOL christian_church_cross
  }
 
  [MAG close-] {
-   [TYPE leisure_building]AREA { color: #b89c9c; borderColor: #887b7b; borderWidth: 0.1mm; }
+   [TYPE leisure_building] AREA { color: #b89c9c; borderColor: #887b7b; borderWidth: 0.1mm; }
    [TYPE leisure_sports_centre] AREA { color: #bde3cb; }
    [TYPE leisure_playground] AREA { color: #ccffff; }
    [TYPE leisure_garden] AREA { color: #ceeca8; }
@@ -563,7 +615,7 @@ SYMBOL christian_church_cross
      AREA { color: #888888;  borderColor: #666666; borderWidth: 0.1mm;}
    }
 
-   [TYPE amenity_post_office_building] AREA { color: #ffcc00; borderColor: #887b7b; borderWidth: 0.1mm; }
+   [TYPE amenity_post_office_building] AREA { color: @postColor; borderColor: #887b7b; borderWidth: 0.1mm; }
    [TYPE amenity_post_office] AREA { color: #f0f0d8; }
 
    [TYPE amenity_taxi] AREA { color: #d2d2d2; }
