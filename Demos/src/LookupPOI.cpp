@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
       }
     }
 
-    std::cout << "+ Node " << (*node)->GetId();
+    std::cout << "+ Node " << (*node)->GetFileOffset();
     std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*node)->GetType()).GetName();
     std::cout << " " << name << std::endl;
   }

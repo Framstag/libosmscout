@@ -208,10 +208,12 @@ static void DumpCoord(const osmscout::Point& coord)
 }
 
 static void DumpNode(const osmscout::TypeConfig* typeConfig,
-                     const osmscout::NodeRef node)
+                     const osmscout::NodeRef node,
+                     osmscout::Id id)
 {
   std::cout << "Node {" << std::endl;
-  std::cout << "  id: " << node->GetId() << std::endl;
+  std::cout << "  id: " << id << std::endl;
+  std::cout << "  fileOffset: " << node->GetFileOffset() << std::endl;
 
   if (node->GetType()!=osmscout::typeIgnore) {
     std::cout << "  type: " << typeConfig->GetTypeInfo(node->GetType()).GetName() << std::endl;
@@ -501,10 +503,22 @@ int main(int argc, char* argv[])
     }
   }
 
+  std::map<osmscout::Id,osmscout::FileOffset> nodeIdFileOffsetMap;
+  std::map<osmscout::FileOffset,osmscout::Id> nodeFileOffsetIdMap;
   std::map<osmscout::Id,osmscout::FileOffset> wayIdFileOffsetMap;
   std::map<osmscout::FileOffset,osmscout::Id> wayFileOffsetIdMap;
   std::map<osmscout::Id,osmscout::FileOffset> relIdFileOffsetMap;
   std::map<osmscout::FileOffset,osmscout::Id> relFileOffsetIdMap;
+
+  if (!nodeIds.empty() ||
+      !nodeFileOffsets.empty()) {
+    if (!debugDatabase.ResolveNodeIdsAndOffsets(nodeIds,
+                                                nodeIdFileOffsetMap,
+                                                nodeFileOffsets,
+                                                nodeFileOffsetIdMap)) {
+      std::cerr << "Error while resolving node ids and file offsets" << std::endl;
+    }
+  }
 
   if (!wayIds.empty() ||
       !wayFileOffsets.empty()) {
@@ -540,12 +554,18 @@ int main(int argc, char* argv[])
     }
   }
 
-  if (!nodeIds.empty()) {
-    std::vector<osmscout::Id> ids(nodeIds.begin(),nodeIds.end());
+  if (!nodeFileOffsetIdMap.empty()) {
+    std::list<osmscout::FileOffset> offsets;
 
-    if (!debugDatabase.GetNodes(ids,
-                                nodes)) {
-      std::cerr << "Error whole loading nodes by id" << std::endl;
+    for (std::map<osmscout::FileOffset,osmscout::Id>::const_iterator entry=nodeFileOffsetIdMap.begin();
+         entry!=nodeFileOffsetIdMap.end();
+         ++entry) {
+      offsets.push_back(entry->first);
+    }
+
+    if (!database.GetNodesByOffset(offsets,
+                                   nodes)) {
+      std::cerr << "Error whole loading nodes by offset" << std::endl;
     }
   }
 
@@ -603,9 +623,15 @@ int main(int argc, char* argv[])
     }
 
     if (job->idRef.GetType()==osmscout::refNode) {
+      std::map<osmscout::Id,osmscout::FileOffset>::const_iterator offset=nodeIdFileOffsetMap.find(job->idRef.GetId());
+
+      if (offset==nodeIdFileOffsetMap.end()) {
+        std::cerr << "Cannot find node with id " << job->idRef.GetId() << std::endl;
+      }
+
       for (size_t i=0; i<nodes.size(); i++) {
-        if (nodes[i]->GetId()==job->idRef.GetId()) {
-          DumpNode(debugDatabase.GetTypeConfig(),nodes[i]);
+        if (nodes[i]->GetFileOffset()==offset->second) {
+          DumpNode(debugDatabase.GetTypeConfig(),nodes[i],job->idRef.GetId());
           break;
         }
       }
@@ -620,6 +646,20 @@ int main(int argc, char* argv[])
       for (size_t i=0; i<ways.size(); i++) {
         if (ways[i]->GetFileOffset()==offset->second) {
           DumpWay(debugDatabase.GetTypeConfig(),ways[i],job->idRef.GetId());
+          break;
+        }
+      }
+    }
+    else if (job->fileRef.GetType()==osmscout::refNode) {
+      std::map<osmscout::FileOffset,osmscout::Id>::const_iterator id=nodeFileOffsetIdMap.find(job->fileRef.GetFileOffset());
+
+      if (id==nodeFileOffsetIdMap.end()) {
+        std::cerr << "Cannot find node with file offset " << job->fileRef.GetFileOffset() << std::endl;
+      }
+
+      for (size_t i=0; i<nodes.size(); i++) {
+        if (nodes[i]->GetFileOffset()==job->fileRef.GetFileOffset()) {
+          DumpNode(debugDatabase.GetTypeConfig(),nodes[i],id->second);
           break;
         }
       }

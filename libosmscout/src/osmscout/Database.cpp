@@ -789,6 +789,16 @@ namespace osmscout {
     return nodeDataFile.GetByOffset(offsets,nodes);
   }
 
+  bool Database::GetNodesByOffset(const std::list<FileOffset>& offsets,
+                                  std::vector<NodeRef>& nodes) const
+  {
+    if (!IsOpen()) {
+      return false;
+    }
+
+    return nodeDataFile.GetByOffset(offsets,nodes);
+  }
+
   bool Database::GetWayByOffset(const FileOffset& offset,
                                 WayRef& way) const
   {

@@ -25,6 +25,8 @@
 
 #include <osmscout/TypeConfigLoader.h>
 
+#include <osmscout/util/File.h>
+#include <osmscout/util/FileScanner.h>
 #include <osmscout/util/HashMap.h>
 #include <osmscout/util/StopClock.h>
 
@@ -33,60 +35,12 @@
 namespace osmscout {
 
   DebugDatabaseParameter::DebugDatabaseParameter()
-  : nodeIndexCacheSize(1000),
-    nodeCacheSize(1000),
-    wayCacheSize(8000),
-    relationCacheSize(1000)
   {
     // no code
   }
 
-  void DebugDatabaseParameter::SetNodeIndexCacheSize(unsigned long nodeIndexCacheSize)
-  {
-    this->nodeIndexCacheSize=nodeIndexCacheSize;
-  }
-
-  void DebugDatabaseParameter::SetNodeCacheSize(unsigned long nodeCacheSize)
-  {
-    this->nodeCacheSize=nodeCacheSize;
-  }
-
-  void DebugDatabaseParameter::SetWayCacheSize(unsigned long wayCacheSize)
-  {
-    this->wayCacheSize=wayCacheSize;
-  }
-
-  void DebugDatabaseParameter::SetRelationCacheSize(unsigned long relationCacheSize)
-  {
-    this->relationCacheSize=relationCacheSize;
-  }
-
-  unsigned long DebugDatabaseParameter::GetNodeIndexCacheSize() const
-  {
-    return nodeIndexCacheSize;
-  }
-
-  unsigned long DebugDatabaseParameter::GetNodeCacheSize() const
-  {
-    return nodeCacheSize;
-  }
-
-  unsigned long DebugDatabaseParameter::GetWayCacheSize() const
-  {
-    return wayCacheSize;
-  }
-
-  unsigned long DebugDatabaseParameter::GetRelationCacheSize() const
-  {
-    return relationCacheSize;
-  }
-
   DebugDatabase::DebugDatabase(const DebugDatabaseParameter& parameter)
    : isOpen(false),
-     nodeDataFile("nodes.dat",
-                  "node.idx",
-                  parameter.GetNodeCacheSize(),
-                  parameter.GetNodeIndexCacheSize()),
      typeConfig(NULL)
   {
     // no code
@@ -112,15 +66,6 @@ namespace osmscout {
       return false;
     }
 
-    if (!nodeDataFile.Open(path,
-                           FileScanner::LowMemRandom,true,
-                           FileScanner::LowMemRandom,true)) {
-      std::cerr << "Cannot open 'nodes.dat'!" << std::endl;
-      delete typeConfig;
-      typeConfig=NULL;
-      return false;
-    }
-
     isOpen=true;
 
     return true;
@@ -134,8 +79,6 @@ namespace osmscout {
 
   void DebugDatabase::Close()
   {
-    nodeDataFile.Close();
-
     isOpen=false;
   }
 
@@ -147,7 +90,7 @@ namespace osmscout {
   bool DebugDatabase::GetCoords(const std::vector<Id>& ids,
                                 std::vector<Point>& coords) const
   {
-    osmscout::FileScanner           coordDataFile;
+    FileScanner                     coordDataFile;
     uint32_t                        coordPageSize;
     OSMSCOUT_HASHMAP<Id,FileOffset> coordPageIdOffsetMap;
 
@@ -158,7 +101,7 @@ namespace osmscout {
 
     }
 
-    osmscout::FileOffset mapFileOffset;
+    FileOffset mapFileOffset;
 
     if (!coordDataFile.Read(coordPageSize))
     {
@@ -232,14 +175,46 @@ namespace osmscout {
     return true;
   }
 
-  bool DebugDatabase::GetNodes(const std::vector<Id>& ids,
-                               std::vector<NodeRef>& nodes) const
+  bool DebugDatabase::ResolveNodeIdsAndOffsets(const std::set<Id>& ids,
+                                               std::map<Id,FileOffset>& idFileOffsetMap,
+                                               const std::set<FileOffset>& fileOffsets,
+                                               std::map<FileOffset,Id>& fileOffsetIdMap)
   {
-    if (!IsOpen()) {
+    FileScanner scanner;
+    uint32_t    entryCount;
+    std::string filename=AppendFileToDir(path,"node.idmap");
+
+    if (!scanner.Open(filename,FileScanner::LowMemRandom,false)) {
       return false;
     }
 
-    return nodeDataFile.Get(ids,nodes);
+    if (!scanner.Read(entryCount)) {
+      return false;
+    }
+
+    for (size_t i=1; i<=entryCount; i++) {
+      Id         id;
+      FileOffset fileOffset;
+
+      if (!scanner.Read(id)) {
+        return false;
+      }
+
+      if (!scanner.ReadFileOffset(fileOffset)) {
+        return false;
+      }
+
+      if (ids.find(id)!=ids.end()) {
+        idFileOffsetMap.insert(std::make_pair(id,fileOffset));
+        fileOffsetIdMap.insert(std::make_pair(fileOffset,id));
+      }
+      else if (fileOffsets.find(fileOffset)!=fileOffsets.end()) {
+        idFileOffsetMap.insert(std::make_pair(id,fileOffset));
+        fileOffsetIdMap.insert(std::make_pair(fileOffset,id));
+      }
+    }
+
+    return scanner.Close();
   }
 
   bool DebugDatabase::ResolveWayIdsAndOffsets(const std::set<Id>& ids,

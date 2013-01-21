@@ -63,6 +63,7 @@ namespace osmscout {
 
     FileScanner scanner;
     FileWriter  writer;
+    FileWriter  mapWriter;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawnodes.dat"),
@@ -83,7 +84,15 @@ namespace osmscout {
       return false;
     }
 
+    if (!mapWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                        "node.idmap"))) {
+      progress.Error("Cannot create 'node.idmap'");
+      return false;
+    }
+
+
     writer.Write(nodesWrittenCount);
+    mapWriter.Write(nodesWrittenCount);
 
     for (uint32_t n=1; n<=rawNodeCount; n++) {
       progress.SetProgress(n,rawNodeCount);
@@ -117,12 +126,23 @@ namespace osmscout {
 
       if (rawNode.GetType()!=typeIgnore &&
           !typeConfig.GetTypeInfo(rawNode.GetType()).GetIgnore()) {
-        node.SetId(rawNode.GetId());
         node.SetType(rawNode.GetType());
         node.SetCoordinates(rawNode.GetLon(),rawNode.GetLat());
         node.SetTags(rawNode.GetTags());
 
+        FileOffset fileOffset;
+
+        if (!writer.GetPos(fileOffset)) {
+          progress.Error(std::string("Error while reading current fileOffset in file '")+
+                         writer.GetFilename()+"'");
+          return false;
+        }
+
         node.Write(writer);
+
+        mapWriter.Write(rawNode.GetId());
+        mapWriter.WriteFileOffset(fileOffset);
+
         nodesWrittenCount++;
       }
 
@@ -136,6 +156,14 @@ namespace osmscout {
     writer.Write(nodesWrittenCount);
 
     if (!writer.Close()) {
+      return false;
+    }
+
+    mapWriter.SetPos(0);
+    mapWriter.Write(nodesWrittenCount);
+
+
+    if (!mapWriter.Close()) {
       return false;
     }
 

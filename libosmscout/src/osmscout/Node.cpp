@@ -23,11 +23,6 @@
 
 namespace osmscout {
 
-  void Node::SetId(Id id)
-  {
-    this->id=id;
-  }
-
   void Node::SetType(TypeId type)
   {
     this->type=type;
@@ -49,7 +44,9 @@ namespace osmscout {
     uint32_t tmpType;
     uint32_t tagCount;
 
-    scanner.ReadNumber(id);
+    if (!scanner.GetPos(fileOffset)) {
+      return false;
+    }
 
     scanner.ReadNumber(tmpType);
     type=(TypeId)tmpType;
@@ -73,7 +70,6 @@ namespace osmscout {
 
   bool Node::Write(FileWriter& writer) const
   {
-    writer.WriteNumber(id);
     writer.WriteNumber(type);
     writer.WriteCoord(lat,lon);
 

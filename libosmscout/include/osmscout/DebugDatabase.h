@@ -27,10 +27,7 @@
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeSet.h>
 
-// Datafiles
-#include <osmscout/NodeDataFile.h>
-#include <osmscout/RelationDataFile.h>
-#include <osmscout/WayDataFile.h>
+#include <osmscout/Point.h>
 
 namespace osmscout {
 
@@ -44,31 +41,10 @@ namespace osmscout {
   class OSMSCOUT_API DebugDatabaseParameter
   {
   private:
-    unsigned long nodeIndexCacheSize;
-    unsigned long nodeCacheSize;
-
-    unsigned long wayIndexCacheSize;
-    unsigned long wayCacheSize;
-
-    unsigned long relationIndexCacheSize;
-    unsigned long relationCacheSize;
 
   public:
     DebugDatabaseParameter();
 
-    void SetNodeIndexCacheSize(unsigned long nodeIndexCacheSize);
-    void SetNodeCacheSize(unsigned long nodeCacheSize);
-
-    void SetWayCacheSize(unsigned long wayCacheSize);
-
-    void SetRelationCacheSize(unsigned long relationCacheSize);
-
-    unsigned long GetNodeIndexCacheSize() const;
-    unsigned long GetNodeCacheSize() const;
-
-    unsigned long GetWayCacheSize() const;
-
-    unsigned long GetRelationCacheSize() const;
   };
 
   class OSMSCOUT_API DebugDatabase
@@ -77,8 +53,6 @@ namespace osmscout {
     bool                      isOpen;          //! true, if opened
 
     std::string               path;             //! Path to the directory containing all files
-
-    IndexedDataFile<Node>     nodeDataFile;     //! Cached access to the 'nodes.dat' file
 
     TypeConfig                *typeConfig;      //! Type config for the currently opened map
 
@@ -95,8 +69,10 @@ namespace osmscout {
     bool GetCoords(const std::vector<Id>& ids,
                    std::vector<Point>& coords) const;
 
-    bool GetNodes(const std::vector<Id>& ids,
-                  std::vector<NodeRef>& nodes) const;
+    bool ResolveNodeIdsAndOffsets(const std::set<Id>& ids,
+                                  std::map<Id,FileOffset>& idFileOffsetMap,
+                                  const std::set<FileOffset>& fileOffsets,
+                                  std::map<FileOffset,Id>& fileOffsetIdMap);
 
     bool ResolveWayIdsAndOffsets(const std::set<Id>& ids,
                                  std::map<Id,FileOffset>& idFileOffsetMap,

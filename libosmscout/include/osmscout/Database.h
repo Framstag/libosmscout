@@ -214,6 +214,8 @@ namespace osmscout {
                          NodeRef& node) const;
     bool GetNodesByOffset(const std::vector<FileOffset>& offsets,
                           std::vector<NodeRef>& nodes) const;
+    bool GetNodesByOffset(const std::list<FileOffset>& offsets,
+                          std::vector<NodeRef>& nodes) const;
 
     bool GetWayByOffset(const FileOffset& offset,
                         WayRef& way) const;
@@ -221,6 +223,7 @@ namespace osmscout {
                          std::vector<WayRef>& ways) const;
     bool GetWaysByOffset(const std::list<FileOffset>& offsets,
                          std::vector<WayRef>& ways) const;
+    
     bool GetRelationByOffset(const FileOffset& offset,
                              RelationRef& relation) const;
     bool GetRelationsByOffset(const std::vector<FileOffset>& offsets,

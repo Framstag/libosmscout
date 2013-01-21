@@ -50,7 +50,6 @@ namespace osmscout {
    */
   struct RegionAlias
   {
-    Id                     id;        //! The id of the underlying object
     ObjectFileRef          reference; //! Reference of the object that
                                       //! is the alias
     std::string            name;      //! The alias itsef
@@ -76,7 +75,6 @@ namespace osmscout {
   {
     FileOffset                           offset;    //! Offset into the index file
 
-    Id                                   id;        //! The id of the underlying object
     ObjectFileRef                        reference; //! Reference to the object this area is based on
     std::string                          name;      //! The name of this area
 
@@ -123,7 +121,6 @@ namespace osmscout {
 
   struct CityArea
   {
-    Id                 id;        //! The id of the underlying object
     ObjectFileRef      reference;
     std::string        name;
     std::vector<Point> nodes;
@@ -131,7 +128,6 @@ namespace osmscout {
 
   struct CityNode
   {
-    Id            id;        //! The id of the underlying object
     ObjectFileRef reference;
     std::string   name;
     Point         node;
@@ -166,18 +162,7 @@ namespace osmscout {
     for (uint32_t n=1; n<=nodeCount; n++) {
       progress.SetProgress(n,nodeCount);
 
-      Node       node;
-      FileOffset offset;
-
-      if (!scanner.GetPos(offset)) {
-        progress.Error(std::string("Cannot get file offset of data entry ")+
-                       NumberToString(n)+" of "+
-                       NumberToString(nodeCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-
-        return false;
-      }
+      Node node;
 
       if (!node.Read(scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
@@ -203,16 +188,15 @@ namespace osmscout {
         }
 
         if (name.empty()) {
-          progress.Warning(std::string("Node ")+NumberToString(node.GetId())+" has no name, skipping");
+          progress.Warning(std::string("Node ")+NumberToString(node.GetFileOffset())+" has no name, skipping");
           continue;
         }
 
         CityNode cityNode;
 
-        cityNode.id=node.GetId();
-        cityNode.reference.Set(offset,refNode);
+        cityNode.reference.Set(node.GetFileOffset(),refNode);
         cityNode.name=name;
-        cityNode.node.Set(node.GetId(),node.GetLat(),node.GetLon());
+        cityNode.node.Set(0/*TODO*/,node.GetLat(),node.GetLon());
 
         cityNodes.push_back(cityNode);
       }
@@ -273,7 +257,6 @@ namespace osmscout {
 
         CityArea cityArea;
 
-        cityArea.id=0;//way.GetId(); TODO
         cityArea.reference.Set(way.GetFileOffset(),refWay);
         cityArea.name=name;
         cityArea.nodes=way.nodes;
@@ -312,7 +295,7 @@ namespace osmscout {
         }
 
         if (hits==0) {
-          progress.Warning("Could not resolve name of way "+NumberToString(area->id)+", skipping");
+          progress.Warning(std::string("Could not resolve name of ")+area->reference.GetTypeName()+NumberToString(area->reference.GetFileOffset())+", skipping");
           area=cityAreas.erase(area);
         }
         else if (hits==1) {
@@ -323,7 +306,7 @@ namespace osmscout {
           area++;
         }
         else {
-          progress.Warning("Area "+NumberToString(area->id)+" contains multiple city nodes, skipping");
+          progress.Warning(area->reference.GetTypeName()+NumberToString(area->reference.GetFileOffset())+" contains multiple city nodes, skipping");
           area=cityAreas.erase(area);
         }
       }
@@ -617,7 +600,6 @@ namespace osmscout {
 
       Region region;
 
-      region.id=city->id;
       region.reference=city->reference;
       region.name=city->name;
       region.area=city->nodes;
@@ -636,7 +618,6 @@ namespace osmscout {
 
       RegionAlias alias;
 
-      alias.id=city->id;
       alias.reference=city->reference;
       alias.name=city->name;
 
@@ -779,7 +760,7 @@ namespace osmscout {
     for (std::list<Region>::iterator a=area.areas.begin();
          a!=area.areas.end();
          a++) {
-      if (IsPointInArea(node,a->area)) {
+      if (IsPointInAreaNoId(node,a->area)) {
         AddNodeToRegion(*a,node,name,offset);
         return;
       }
@@ -862,7 +843,7 @@ namespace osmscout {
       for (size_t i=0; i<indent; i++) {
         std::cout << " ";
       }
-      std::cout << a->name << " " << a->reference.GetTypeName() << " " << a->id << " " << a->areas.size() << " " << a->nodes.size() << " " << a->ways.size() << " " << a->aliases.size() << std::endl;
+      std::cout << a->name << " " << a->reference.GetTypeName() << " " << a->reference.GetFileOffset() << " " << a->areas.size() << " " << a->nodes.size() << " " << a->ways.size() << " " << a->aliases.size() << std::endl;
 
       for (std::list<RegionAlias>::const_iterator l=a->aliases.begin();
            l!=a->aliases.end();
@@ -870,7 +851,7 @@ namespace osmscout {
         for (size_t i=0; i<indent; i++) {
           std::cout << " ";
         }
-        std::cout << " =" << l->name << " " << l->reference.GetTypeName() << " " << l->id << std::endl;
+        std::cout << " =" << l->name << " " << l->reference.GetTypeName() << " " << l->reference.GetFileOffset() << std::endl;
       }
 
       DumpRegion(*a,indent+2);

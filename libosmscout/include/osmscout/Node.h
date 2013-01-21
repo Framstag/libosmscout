@@ -34,7 +34,7 @@ namespace osmscout {
   class OSMSCOUT_API Node : public Referencable
   {
   private:
-    Id                id;
+    FileOffset        fileOffset;
     TypeId            type;
     double            lon;
     double            lat;
@@ -47,11 +47,12 @@ namespace osmscout {
       // no code
     }
 
-    inline Id GetId() const
+    inline FileOffset GetFileOffset() const
     {
-      return id;
+      return fileOffset;
     }
 
+  public:
     inline TypeId GetType() const
     {
       return type;
@@ -87,7 +88,6 @@ namespace osmscout {
       return tags[idx].value;
     }
 
-    void SetId(Id id);
     void SetType(TypeId type);
     void SetCoordinates(double lon, double lat);
     void SetTags(const std::vector<Tag>& tags);

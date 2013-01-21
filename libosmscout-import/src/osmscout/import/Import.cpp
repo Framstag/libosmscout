@@ -645,33 +645,30 @@ namespace osmscout {
 
     /* 8 */
     modules.push_back(new NodeDataGenerator());
+
     /* 9 */
-    modules.push_back(new NumericIndexGenerator<Id,Node>("Generating 'node.idx'",
-                                                         AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                         "nodes.dat"),
-                                                         AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                         "node.idx")));
-    /* 10 */
     modules.push_back(new TurnRestrictionDataGenerator());
 
-    /* 11 */
+    /* 10 */
     modules.push_back(new WayDataGenerator());
 
-    /* 12 */
+    /* 11 */
     modules.push_back(new AreaAreaIndexGenerator());
-    /* 13 */
+    /* 12 */
     modules.push_back(new AreaWayIndexGenerator());
-    /* 14 */
+    /* 13 */
     modules.push_back(new AreaNodeIndexGenerator());
-    /* 15 */
+    
+    /* 14 */
     modules.push_back(new CityStreetIndexGenerator());
-    /* 16 */
+    /* 15 */
     modules.push_back(new WaterIndexGenerator());
-    /* 17 */
+    /* 16 */
     modules.push_back(new OptimizeLowZoomGenerator());
-    /* 18 */
+
+    /* 17 */
     modules.push_back(new RouteDataGenerator());
-    /* 19 */
+    /* 18 */
     modules.push_back(new NumericIndexGenerator<Id,RouteNode>("Generating 'route.idx'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               "route.dat"),
