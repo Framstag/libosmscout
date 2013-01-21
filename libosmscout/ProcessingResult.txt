@@ -24,7 +24,7 @@ rawrels.dat (import only):
  * Raw dump of all relations in import data
 
 rawcoastline.dat (import only):
-* List of coastlines as parsed from import file 
+* List of coastlines as parsed from import file
 
 rawturnrestr.dat (import only):
  * List of restrictions as parsed from rawrels.dat
@@ -49,22 +49,22 @@ bounding.dat(export):
 nodes.dat (export):
  * All nodes that have a matching type during preprocessing.
 
-node.idx (export):
- * Index by numeric id over all nodes in 'nodes.dat'.
+node.idmap (debug only):
+ * Maps node ids to file offset. Only used for debugging using DumpData.
 
 ways.dat (export):
  * All ways/areas that have a matching type during preprocessing.
 
-way.idx (export):
- * Index by numeric id over all ways/areas in 'ways.dat'.
+way.idmap (debug only):
+ * Maps way ids to file offset. Only used for debugging using DumpData.
 
 relations.dat (export):
  * All relations that have a matching type during preprocessing.
  * For all relations of type multipolygon members have been
    merged by type.
 
-relation.idx (export):
- * Index by numeric id over all relations in 'relations.dat'.
+relation.idmap (debug only):
+ * Maps relation ids to file offset. Only used for debugging using DumpData.
 
 areaarea.idx (export):
  * Area index returning all areas in a given bounding box
