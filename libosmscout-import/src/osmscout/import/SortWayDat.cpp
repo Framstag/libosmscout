@@ -31,7 +31,7 @@ namespace osmscout {
 
   std::string SortWayDataGenerator::GetDescription() const
   {
-    return "Sort ways";
+    return "Sort/copy ways";
   }
 
   bool SortWayDataGenerator::RenumberWays(const ImportParameter& parameter,
@@ -47,10 +47,12 @@ namespace osmscout {
     size_t      minIndex=0;
     size_t      maxIndex=cellCount-1;
 
+    progress.SetAction("Sorting ways");
+
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "ways.tmp"),
                       FileScanner::Sequential,
-                      parameter.GetRawNodeDataMemoryMaped())) {
+                      parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.tmp'");
       return false;
     }
@@ -77,7 +79,7 @@ namespace osmscout {
     mapWriter.Write(waysCount);
 
     while (true) {
-      progress.SetAction("Reading ways in cell range "+NumberToString(minIndex)+ "-"+NumberToString(maxIndex)+" from 'ways.tmp'");
+      progress.Info("Reading ways in cell range "+NumberToString(minIndex)+ "-"+NumberToString(maxIndex)+" from 'ways.tmp'");
 
       if (!scanner.GotoBegin()) {
         progress.Error(std::string("Error while setting current position in file '")+
@@ -171,7 +173,7 @@ namespace osmscout {
         progress.Info("Cell range was reduced to "+NumberToString(minIndex)+ "-"+NumberToString(maxIndex));
       }
 
-      progress.SetAction("Copy renumbered ways to 'ways.dat");
+      progress.Info("Copy renumbered ways to 'ways.dat");
 
       size_t copyCount=0;
       for (std::map<size_t,std::list<WayEntry> >::iterator iter=waysByCell.begin();
@@ -253,10 +255,12 @@ namespace osmscout {
     FileWriter  mapWriter;
     uint32_t    waysCount;
 
+    progress.SetAction("Copy ways");
+
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "ways.tmp"),
                       FileScanner::Sequential,
-                      parameter.GetRawNodeDataMemoryMaped())) {
+                      parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.tmp'");
       return false;
     }

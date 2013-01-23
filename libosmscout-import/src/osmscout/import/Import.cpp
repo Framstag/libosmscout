@@ -73,7 +73,7 @@ namespace osmscout {
      strictAreas(false),
      renumberIds(false),
      renumberBlockSize(40000000),
-     renumberMag(14),
+     renumberMag(15),
      numericIndexPageSize(4096),
      coordDataMemoryMaped(false),
      rawNodeIndexMemoryMaped(true),

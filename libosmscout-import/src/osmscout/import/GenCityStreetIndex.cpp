@@ -645,7 +645,7 @@ namespace osmscout {
           !(maxlat<a->minlat) &&
           !(minlat>a->maxlat)) {
         // Check if one point is in the area
-        bool match=IsAreaAtLeastPartlyInArea(way.nodes,a->area);
+        bool match=IsPointInArea(way.nodes[0],a->area);
 
         if (match) {
           bool completeMatch=AddWayToRegion(*a,way,minlon,minlat,maxlon,maxlat);
