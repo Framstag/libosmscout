@@ -36,7 +36,6 @@
 #include <osmscout/import/GenTypeDat.h>
 
 #include <osmscout/import/Preprocess.h>
-#include <osmscout/import/RenumberRawDats.h>
 
 #include <osmscout/import/GenTurnRestrictionDat.h>
 
@@ -621,57 +620,54 @@ namespace osmscout {
     modules.push_back(new Preprocess());
 
     /* 3 */
-    modules.push_back(new RenumberRawDatsGenerator());
-
-    /* 4 */
     modules.push_back(new NumericIndexGenerator<Id,RawNode>("Generating 'rawnode.idx'",
                                                             AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                             "rawnodes.dat"),
                                                             AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                             "rawnode.idx")));
-    /* 5 */
+    /* 4 */
     modules.push_back(new NumericIndexGenerator<Id,RawWay>("Generating 'rawway.idx'",
                                                            AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                            "rawways.dat"),
                                                            AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                            "rawway.idx")));
-    /* 6 */
+    /* 5 */
     modules.push_back(new NumericIndexGenerator<Id,RawRelation>("Generating 'rawrel.idx'",
                                                                 AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                                 "rawrels.dat"),
                                                                 AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                                 "rawrel.idx")));
-    /* 7 */
+    /* 6 */
     modules.push_back(new RelationDataGenerator());
 
-    /* 8 */
+    /* 7 */
     modules.push_back(new NodeDataGenerator());
 
-    /* 9 */
+    /* 8 */
     modules.push_back(new TurnRestrictionDataGenerator());
 
-    /* 10 */
+    /* 9 */
     modules.push_back(new WayDataGenerator());
-    /* 11 */
+    /* 10 */
     modules.push_back(new SortWayDataGenerator());
 
-    /* 12 */
+    /* 11 */
     modules.push_back(new AreaAreaIndexGenerator());
-    /* 13 */
+    /* 12 */
     modules.push_back(new AreaWayIndexGenerator());
-    /* 14 */
+    /* 13 */
     modules.push_back(new AreaNodeIndexGenerator());
 
-    /* 15 */
+    /* 14 */
     modules.push_back(new CityStreetIndexGenerator());
-    /* 16 */
+    /* 15 */
     modules.push_back(new WaterIndexGenerator());
-    /* 17 */
+    /* 16 */
     modules.push_back(new OptimizeLowZoomGenerator());
 
-    /* 18 */
+    /* 17 */
     modules.push_back(new RouteDataGenerator());
-    /* 19 */
+    /* 18 */
     modules.push_back(new NumericIndexGenerator<Id,RouteNode>("Generating 'route.idx'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               "route.dat"),
