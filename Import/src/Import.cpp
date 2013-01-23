@@ -59,7 +59,7 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " -d                                   show debug output" << std::endl;
   std::cout << " -s <start step>                      set starting step" << std::endl;
   std::cout << " -s <end step>                        set final step" << std::endl;
-  std::cout << " -r                                   renumber ids" << std::endl;
+  std::cout << " -S                                   sort objects" << std::endl;
   std::cout << " --typefile <path>                    path and name of the map.ost file (default: " << parameter.GetTypefile() << ")" << std::endl;
   std::cout << " --destinationDirectory <path>        destination for generated map files (default: " << parameter.GetDestinationDirectory() << ")" << std::endl;
 
@@ -80,7 +80,7 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --rawWayIndexCacheSize <number>      raw way index cache size (default: " << parameter.GetRawWayIndexCacheSize() << ")" << std::endl;
   std::cout << " --rawWayBlockSize <number>           number of raw ways resolved in block (default: " << parameter.GetRawWayBlockSize() << ")" << std::endl;
 
-  std::cout << " --renumberBlockSize <number>         size of one data block during renumbering (default: " << parameter.GetRenumberBlockSize() << ")" << std::endl;
+  std::cout << " --sortBlockSize <number>             size of one data block during sorting (default: " << parameter.GetSortBlockSize() << ")" << std::endl;
 
   std::cout << " --wayIndexMemoryMaped true|false     memory maped way index file access (default: " << BoolToString(parameter.GetWayIndexMemoryMaped()) << ")" << std::endl;
   std::cout << " --wayDataMemoryMaped true|false      memory maped way data file access (default: " << BoolToString(parameter.GetWayDataMemoryMaped()) << ")" << std::endl;
@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
 
   size_t                    numericIndexPageSize=parameter.GetNumericIndexPageSize();
 
-  size_t                    renumberBlockSize=parameter.GetRenumberBlockSize();
+  size_t                    sortBlockSize=parameter.GetSortBlockSize();
 
   bool                      coordDataMemoryMaped=parameter.GetCoordDataMemoryMaped();
 
@@ -160,8 +160,8 @@ int main(int argc, char* argv[])
         parameterError=true;
       }
     }
-    else if (strcmp(argv[i],"-r")==0) {
-      parameter.SetRenumberIds(true);
+    else if (strcmp(argv[i],"-S")==0) {
+      parameter.SetSortObjects(true);
     }
     else if (strcmp(argv[i],"-d")==0) {
       progress.SetOutputDebug(true);
@@ -364,12 +364,12 @@ int main(int argc, char* argv[])
         parameterError=true;
       }
     }
-    else if (strcmp(argv[i],"--renumberBlockSize")==0) {
+    else if (strcmp(argv[i],"--sortBlockSize")==0) {
       i++;
 
       if (i<argc) {
-        if (!osmscout::StringToNumber(argv[i],renumberBlockSize)) {
-          std::cerr << "Cannot parse renumberBlockSize '" << argv[i] << "'" << std::endl;
+        if (!osmscout::StringToNumber(argv[i],sortBlockSize)) {
+          std::cerr << "Cannot parse sortBlockSize '" << argv[i] << "'" << std::endl;
           parameterError=true;
         }
       }
@@ -478,7 +478,7 @@ int main(int argc, char* argv[])
 
   parameter.SetNumericIndexPageSize(numericIndexPageSize);
 
-  parameter.SetRenumberBlockSize(renumberBlockSize);
+  parameter.SetSortBlockSize(sortBlockSize);
 
   parameter.SetCoordDataMemoryMaped(coordDataMemoryMaped);
 
@@ -543,9 +543,9 @@ int main(int argc, char* argv[])
 
 
   progress.Info(std::string("RenumberIds: ")+
-                (parameter.GetRenumberIds() ? "true" : "false"));
-  progress.Info(std::string("RenumberBlockSize: ")+
-                osmscout::NumberToString(parameter.GetRenumberBlockSize()));
+                (parameter.GetSortObjects() ? "true" : "false"));
+  progress.Info(std::string("SortBlockSize: ")+
+                osmscout::NumberToString(parameter.GetSortBlockSize()));
 
   progress.Info(std::string("WayIndexMemoryMaped: ")+
                 (parameter.GetWayIndexMemoryMaped() ? "true" : "false"));

@@ -70,9 +70,9 @@ namespace osmscout {
      startStep(defaultStartStep),
      endStep(defaultEndStep),
      strictAreas(false),
-     renumberIds(false),
-     renumberBlockSize(40000000),
-     renumberMag(15),
+     sortObjects(false),
+     sortBlockSize(40000000),
+     sortTileMag(15),
      numericIndexPageSize(4096),
      coordDataMemoryMaped(false),
      rawNodeIndexMemoryMaped(true),
@@ -142,19 +142,19 @@ namespace osmscout {
     return strictAreas;
   }
 
-  bool ImportParameter::GetRenumberIds() const
+  bool ImportParameter::GetSortObjects() const
   {
-    return renumberIds;
+    return sortObjects;
   }
 
-  size_t ImportParameter::GetRenumberBlockSize() const
+  size_t ImportParameter::GetSortBlockSize() const
   {
-    return renumberBlockSize;
+    return sortBlockSize;
   }
 
-  size_t ImportParameter::GetRenumberMag() const
+  size_t ImportParameter::GetSortTileMag() const
   {
-    return renumberMag;
+    return sortTileMag;
   }
 
   size_t ImportParameter::GetNumericIndexPageSize() const
@@ -359,19 +359,19 @@ namespace osmscout {
     this->strictAreas=strictAreas;
   }
 
-  void ImportParameter::SetRenumberIds(bool renumberIds)
+  void ImportParameter::SetSortObjects(bool renumberIds)
   {
-    this->renumberIds=renumberIds;
+    this->sortObjects=renumberIds;
   }
 
-  void ImportParameter::SetRenumberBlockSize(size_t renumberBlockSize)
+  void ImportParameter::SetSortBlockSize(size_t sortBlockSize)
   {
-    this->renumberBlockSize=renumberBlockSize;
+    this->sortBlockSize=sortBlockSize;
   }
 
-  void ImportParameter::SetRenumberMag(size_t renumberMag)
+  void ImportParameter::SetSortTileMag(size_t sortTileMag)
   {
-    this->renumberMag=renumberMag;
+    this->sortTileMag=sortTileMag;
   }
 
   void ImportParameter::SetNumericIndexPageSize(size_t numericIndexPageSize)

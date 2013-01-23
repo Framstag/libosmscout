@@ -50,9 +50,9 @@ namespace osmscout {
 
     bool                         strictAreas;              //! Assure that areas conform to "simple" definition
 
-    bool                         renumberIds;              //! Renumber all Ids
-    size_t                       renumberBlockSize;        //! Number of entries loaded in one renumber iterations
-    size_t                       renumberMag;              //! Zoom level for individual renumber sorting cells
+    bool                         sortObjects;              //! Sort all objects
+    size_t                       sortBlockSize;            //! Number of entries loaded in one sort iteration
+    size_t                       sortTileMag;              //! Zoom level for individual sorting cells
 
     size_t                       numericIndexPageSize;     //! Size of an numeric index page in bytes
 
@@ -114,9 +114,9 @@ namespace osmscout {
 
     bool GetStrictAreas() const;
 
-    bool GetRenumberIds() const;
-    size_t GetRenumberBlockSize() const;
-    size_t GetRenumberMag() const;
+    bool GetSortObjects() const;
+    size_t GetSortBlockSize() const;
+    size_t GetSortTileMag() const;
 
     size_t GetNumericIndexPageSize() const;
 
@@ -174,9 +174,9 @@ namespace osmscout {
 
     void SetStrictAreas(bool strictAreas);
 
-    void SetRenumberIds(bool renumberIds);
-    void SetRenumberBlockSize(size_t renumberBlockSize);
-    void SetRenumberMag(size_t renumberMag);
+    void SetSortObjects(bool sortObjects);
+    void SetSortBlockSize(size_t sortBlockSize);
+    void SetSortTileMag(size_t sortTileMag);
 
     void SetNumericIndexPageSize(size_t numericIndexPageSize);
 

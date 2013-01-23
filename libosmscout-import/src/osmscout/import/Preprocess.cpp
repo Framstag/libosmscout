@@ -455,22 +455,20 @@ namespace osmscout {
     progress.Info(std::string("Coastlines:     ")+NumberToString(coastlineCount));
     progress.Info(std::string("Coord pages:    ")+NumberToString(coordIndex.size()));
 
-    if (!parameter.GetRenumberIds()) {
-      if (nodeSortingError) {
-        progress.Error("Nodes are not sorted by increasing id");
-      }
+    if (nodeSortingError) {
+      progress.Error("Nodes are not sorted by increasing id");
+    }
 
-      if (waySortingError) {
-        progress.Error("Ways are not sorted by increasing id");
-      }
+    if (waySortingError) {
+      progress.Error("Ways are not sorted by increasing id");
+    }
 
-      if (relationSortingError) {
-        progress.Error("Relations are not sorted by increasing id");
-      }
+    if (relationSortingError) {
+      progress.Error("Relations are not sorted by increasing id");
+    }
 
-      if (nodeSortingError || waySortingError || relationSortingError) {
-        return false;
-      }
+    if (nodeSortingError || waySortingError || relationSortingError) {
+      return false;
     }
 
     return true;

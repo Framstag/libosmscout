@@ -42,7 +42,7 @@ namespace osmscout {
     FileWriter  mapWriter;
     uint32_t    waysCount;
     uint32_t    waysCopyiedCount=0;
-    double      zoomLevel=pow(2.0,(double)parameter.GetRenumberMag());
+    double      zoomLevel=pow(2.0,(double)parameter.GetSortTileMag());
     size_t      cellCount=zoomLevel*zoomLevel;
     size_t      minIndex=0;
     size_t      maxIndex=cellCount-1;
@@ -140,15 +140,15 @@ namespace osmscout {
 
         // Reduce cell interval,deleting all already stored nodes beyond the new
         // cell range end.
-        if (currentEntries>parameter.GetRenumberBlockSize()) {
+        if (currentEntries>parameter.GetSortBlockSize()) {
           size_t                                          count=0;
           std::map<size_t,std::list<WayEntry> >::iterator cutOff=waysByCell.end();
 
           for (std::map<size_t,std::list<WayEntry> >::iterator iter=waysByCell.begin();
               iter!=waysByCell.end();
               ++iter) {
-            if (count<=parameter.GetRenumberBlockSize() &&
-                count+iter->second.size()>parameter.GetRenumberBlockSize()) {
+            if (count<=parameter.GetSortBlockSize() &&
+                count+iter->second.size()>parameter.GetSortBlockSize()) {
               cutOff=iter;
               break;
             }
@@ -340,7 +340,7 @@ namespace osmscout {
                                     Progress& progress,
                                     const TypeConfig& typeConfig)
   {
-    if (parameter.GetRenumberIds()) {
+    if (parameter.GetSortObjects()) {
       if (!RenumberWays(parameter,
                         progress)) {
         return false;
