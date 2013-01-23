@@ -755,7 +755,7 @@ namespace osmscout {
     }
   }
 
-  void TypeConfig::GetIndexables(std::set<TypeId>& types) const
+  void TypeConfig::GetIndexables(OSMSCOUT_HASHSET<TypeId>& types) const
   {
     types.clear();
 

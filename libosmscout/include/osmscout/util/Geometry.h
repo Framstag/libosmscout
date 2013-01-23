@@ -29,7 +29,7 @@
 #include <osmscout/system/Types.h>
 
 #include <osmscout/Point.h>
-
+#include <iostream>
 namespace osmscout {
 
   /**
@@ -217,8 +217,8 @@ namespace osmscout {
   }
 
   template<typename N, typename M>
-  bool IsPointInAreaNoId(const N& point,
-                         const std::vector<M>& nodes)
+  bool IsCoordInArea(const N& point,
+                     const std::vector<M>& nodes)
   {
     int  i,j;
     bool c=false;
@@ -263,15 +263,31 @@ namespace osmscout {
   }
 
   /**
-    Return true, if area a is in area b
+    Return true, if area a is completely in area b
     */
   template<typename N,typename M>
-  bool IsAreaInArea(const std::vector<N>& a,
-                    const std::vector<M>& b)
+  bool IsAreaCompletelyInArea(const std::vector<N>& a,
+                              const std::vector<M>& b)
   {
     for (typename std::vector<N>::const_iterator i=a.begin(); i!=a.end(); i++) {
-      if (!IsPointInArea(*i,b)) {
+      if (GetRelationOfPointToArea(*i,b)<0) {
         return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+    Return true, if at leats one point of area a in within area b
+    */
+  template<typename N,typename M>
+  bool IsAreaAtLeastPartlyInArea(const std::vector<N>& a,
+                                 const std::vector<M>& b)
+  {
+    for (typename std::vector<N>::const_iterator i=a.begin(); i!=a.end(); i++) {
+      if (GetRelationOfPointToArea(*i,b)>=0) {
+        return true;
       }
     }
 

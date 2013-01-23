@@ -31,6 +31,7 @@
 #include <osmscout/Types.h>
 
 #include <osmscout/util/HashMap.h>
+#include <osmscout/util/HashSet.h>
 #include <osmscout/util/Reference.h>
 
 namespace osmscout {
@@ -462,7 +463,7 @@ namespace osmscout {
     TypeId GetRelationTypeId(const std::string& name) const;
 
     void GetRoutables(std::set<TypeId>& types) const;
-    void GetIndexables(std::set<TypeId>& types) const;
+    void GetIndexables(OSMSCOUT_HASHSET<TypeId>& types) const;
   };
 }
 

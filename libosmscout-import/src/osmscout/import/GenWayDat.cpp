@@ -37,7 +37,7 @@ namespace osmscout {
 
   std::string WayDataGenerator::GetDescription() const
   {
-    return "Generate 'ways.dat'";
+    return "Generate 'ways.tmp'";
   }
 
   bool WayDataGenerator::ReadWayBlacklist(const ImportParameter& parameter,
@@ -656,11 +656,10 @@ namespace osmscout {
                                 Progress& progress,
                                 const TypeConfig& typeConfig)
   {
-    progress.SetAction("Generate ways.dat");
+    progress.SetAction("Generate ways.tmp");
 
     FileScanner                          scanner;
     FileWriter                           wayWriter;
-    FileWriter                           mapWriter;
     uint32_t                             rawWayCount=0;
 
     // List of restrictions for a way
@@ -761,20 +760,12 @@ namespace osmscout {
     }
 
     if (!wayWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "ways.dat"))) {
-      progress.Error("Cannot create 'ways.dat'");
+                                     "ways.tmp"))) {
+      progress.Error("Cannot create 'ways.tmp'");
       return false;
     }
 
     wayWriter.Write(writtenWayCount);
-
-    if (!mapWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "way.idmap"))) {
-      progress.Error("Cannot create 'way.idmap'");
-      return false;
-    }
-
-    mapWriter.Write(writtenWayCount);
 
     uint32_t               currentWay=1;
     size_t                 mergeCount=0;
@@ -975,18 +966,8 @@ namespace osmscout {
           way.SetEndIsJoint(endNodeJointCount>0 || areaJoint!=endPointAreaSet.end());
         }
 
-        FileOffset fileOffset;
-
-        if (!wayWriter.GetPos(fileOffset)) {
-          progress.Error(std::string("Error while reading current fileOffset in file '")+
-                         wayWriter.GetFilename()+"'");
-          return false;
-        }
-
+        wayWriter.Write(wayId);
         way.Write(wayWriter);
-
-        mapWriter.Write(wayId);
-        mapWriter.WriteFileOffset(fileOffset);
 
         writtenWayCount++;
       }
@@ -1002,14 +983,6 @@ namespace osmscout {
 
 
     if (!wayWriter.Close()) {
-      return false;
-    }
-
-    mapWriter.SetPos(0);
-    mapWriter.Write(writtenWayCount);
-
-
-    if (!mapWriter.Close()) {
       return false;
     }
 

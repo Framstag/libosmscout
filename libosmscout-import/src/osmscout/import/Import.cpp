@@ -43,6 +43,7 @@
 #include <osmscout/import/GenNodeDat.h>
 #include <osmscout/import/GenRelationDat.h>
 #include <osmscout/import/GenWayDat.h>
+#include <osmscout/import/SortWayDat.h>
 
 #include <osmscout/import/GenNumericIndex.h>
 
@@ -651,24 +652,26 @@ namespace osmscout {
 
     /* 10 */
     modules.push_back(new WayDataGenerator());
-
     /* 11 */
-    modules.push_back(new AreaAreaIndexGenerator());
+    modules.push_back(new SortWayDataGenerator());
+
     /* 12 */
-    modules.push_back(new AreaWayIndexGenerator());
+    modules.push_back(new AreaAreaIndexGenerator());
     /* 13 */
-    modules.push_back(new AreaNodeIndexGenerator());
-    
+    modules.push_back(new AreaWayIndexGenerator());
     /* 14 */
-    modules.push_back(new CityStreetIndexGenerator());
+    modules.push_back(new AreaNodeIndexGenerator());
+
     /* 15 */
-    modules.push_back(new WaterIndexGenerator());
+    modules.push_back(new CityStreetIndexGenerator());
     /* 16 */
+    modules.push_back(new WaterIndexGenerator());
+    /* 17 */
     modules.push_back(new OptimizeLowZoomGenerator());
 
-    /* 17 */
-    modules.push_back(new RouteDataGenerator());
     /* 18 */
+    modules.push_back(new RouteDataGenerator());
+    /* 19 */
     modules.push_back(new NumericIndexGenerator<Id,RouteNode>("Generating 'route.idx'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               "route.dat"),

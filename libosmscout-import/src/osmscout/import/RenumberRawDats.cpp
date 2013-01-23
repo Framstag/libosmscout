@@ -842,6 +842,7 @@ namespace osmscout {
                                         Progress& progress,
                                         const TypeConfig& typeConfig)
   {
+#if 0
     if (parameter.GetRenumberIds()) {
       /*
       if (!RenumberRawNodes(parameter,
@@ -882,6 +883,7 @@ namespace osmscout {
                                  "rawrels.dat"));
     }
     else {
+#endif
       progress.SetAction("Deleting leftover renumber files");
 
       RemoveFile(AppendFileToDir(parameter.GetDestinationDirectory(),
@@ -906,8 +908,9 @@ namespace osmscout {
                  "rawrels3.tmp"));
       RemoveFile(AppendFileToDir(parameter.GetDestinationDirectory(),
                  "rawrels3.dat"));
+#if 0
     }
-
+#endif
     return true;
   }
 }
