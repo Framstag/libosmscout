@@ -9,7 +9,8 @@ bin_PROGRAMS = AddressLookup \
                DumpData \
                ResourceConsumption \
                Routing \
-               LookupPOI
+               LookupPOI \
+               Srtm
 
 if HAVE_LIB_OSMSCOUTMAPSVG
 bin_PROGRAMS += DrawMapSVG
@@ -75,4 +76,6 @@ Tiler_LDADD = $(LIBOSMSCOUTMAPAGG_LIBS) \
               $(LIBOSMSCOUTMAP_LIBS) \
               $(LIBOSMSCOUT_LIBS)
 
+Srtm_SOURCES = Srtm.cpp
+Srtm_LDADD = $(LIBOSMSCOUT_LIBS)
 
