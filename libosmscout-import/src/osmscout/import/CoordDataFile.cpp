@@ -136,7 +136,7 @@ namespace osmscout {
 
       if (pageOffset!=coordPageOffsetMap.end()) {
         FileOffset offset=pageOffset->second+((*id)%coordPageSize)*2*sizeof(uint32_t);
-        Id         substituteId=pageOffset->second/2*sizeof(uint32_t)+((*id)%coordPageSize);
+        Id         substituteId=(offset-2*sizeof(FileOffset))/2*sizeof(uint32_t);
 
         scanner.SetPos(offset);
 
