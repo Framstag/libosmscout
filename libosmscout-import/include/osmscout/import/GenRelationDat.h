@@ -44,7 +44,6 @@ namespace osmscout {
   private:
     typedef OSMSCOUT_HASHSET<Id>           IdSet;
 
-    typedef OSMSCOUT_HASHMAP<Id,Point>     IdCoordMap;
     typedef OSMSCOUT_HASHMAP<Id,RawWayRef> IdRawWayMap;
 
   private:
@@ -164,7 +163,7 @@ namespace osmscout {
     bool ComposeMultipolygonMembers(Progress& progress,
                                     const TypeConfig& typeConfig,
                                     TypeId boundaryId,
-                                    const IdCoordMap& coordMap,
+                                    const CoordDataFile::CoordResultMap& coordMap,
                                     const IdRawWayMap& wayMap,
                                     const std::map<Id,RawRelationRef>& relationMap,
                                     IdSet& resolvedRelations,

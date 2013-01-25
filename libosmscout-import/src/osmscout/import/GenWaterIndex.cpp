@@ -189,7 +189,7 @@ namespace osmscout {
       }
     }
 
-    OSMSCOUT_HASHMAP<Id,Point> coordsMap;
+    CoordDataFile::CoordResultMap coordsMap;
 
     if (!coordDataFile.Get(nodeIds,
                            coordsMap)) {
@@ -215,7 +215,7 @@ namespace osmscout {
       coast->coast.resize(coastline->GetNodeCount());
 
       for (size_t n=0; n<coastline->GetNodeCount(); n++) {
-        OSMSCOUT_HASHMAP<Id,Point>::const_iterator coord=coordsMap.find(coastline->GetNodeId(n));
+        CoordDataFile::CoordResultMap::const_iterator coord=coordsMap.find(coastline->GetNodeId(n));
 
         if (coord==coordsMap.end()) {
           processingError=true;

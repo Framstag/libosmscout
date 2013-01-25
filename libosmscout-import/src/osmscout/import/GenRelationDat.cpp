@@ -410,7 +410,7 @@ namespace osmscout {
   bool RelationDataGenerator::ComposeMultipolygonMembers(Progress& progress,
                                                          const TypeConfig& typeConfig,
                                                          TypeId boundaryId,
-                                                         const IdCoordMap& coordMap,
+                                                         const CoordDataFile::CoordResultMap& coordMap,
                                                          const IdRawWayMap& wayMap,
                                                          const std::map<Id,RawRelationRef>& relationMap,
                                                          IdSet& resolvedRelations,
@@ -492,7 +492,7 @@ namespace osmscout {
         for (std::vector<Id>::const_iterator id=way->GetNodes().begin();
              id!=way->GetNodes().end();
              ++id) {
-          IdCoordMap::const_iterator coordEntry=coordMap.find(*id);
+          CoordDataFile::CoordResultMap::const_iterator coordEntry=coordMap.find(*id);
 
           if (coordEntry==coordMap.end()) {
             progress.Error("Cannot resolve node member "+
@@ -535,13 +535,13 @@ namespace osmscout {
       boundaryId=typeConfig.GetAreaTypeId("boundary_administrative");
     }
 
-    std::set<Id>                nodeIds;
-    std::set<Id>                wayIds;
-    std::set<Id>                relationIds;
+    std::set<Id>                  nodeIds;
+    std::set<Id>                  wayIds;
+    std::set<Id>                  relationIds;
 
-    IdCoordMap                  coordMap;
-    IdRawWayMap                 wayMap;
-    std::map<Id,RawRelationRef> relationMap;
+    CoordDataFile::CoordResultMap coordMap;
+    IdRawWayMap                   wayMap;
+    std::map<Id,RawRelationRef>   relationMap;
 
     // Initial collection of all relation and way ids of the top level relation
 

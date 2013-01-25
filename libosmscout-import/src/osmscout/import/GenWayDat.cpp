@@ -832,8 +832,8 @@ namespace osmscout {
         return false;
       }
 
-      std::set<Id>               nodeIds;
-      OSMSCOUT_HASHMAP<Id,Point> coordsMap;
+      std::set<Id>                  nodeIds;
+      CoordDataFile::CoordResultMap coordsMap;
 
       for (size_t w=0; w<blockCount; w++) {
         for (size_t n=0; n<block[w]->GetNodeCount(); n++) {
@@ -882,7 +882,7 @@ namespace osmscout {
 
         bool success=true;
         for (size_t n=0; n<block[w]->GetNodeCount(); n++) {
-          OSMSCOUT_HASHMAP<Id,Point>::const_iterator coord=coordsMap.find(block[w]->GetNodeId(n));
+          CoordDataFile::CoordResultMap::const_iterator coord=coordsMap.find(block[w]->GetNodeId(n));
 
           if (coord==coordsMap.end()) {
             progress.Error("Cannot resolve node with id "+
