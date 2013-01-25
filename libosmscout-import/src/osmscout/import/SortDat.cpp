@@ -1,6 +1,3 @@
-#ifndef OSMSCOUT_IMPORT_SORTWAYDAT_H
-#define OSMSCOUT_IMPORT_SORTWAYDAT_H
-
 /*
   This source is part of the libosmscout library
   Copyright (C) 2013  Tim Teulings
@@ -22,40 +19,5 @@
 
 #include <osmscout/import/SortDat.h>
 
-#include <osmscout/Way.h>
-
 namespace osmscout {
-
-  class SortWayDataGenerator : public SortDataGenerator<Way>
-  {
-  private:
-    void GetTopLeftCoordinate(const Way& data,
-                              double& maxLat,
-                              double& minLon)
-    {
-      maxLat=data.nodes[0].GetLat();
-      minLon=data.nodes[0].GetLon();
-
-      for (size_t n=1; n<data.nodes.size(); n++) {
-        maxLat=std::max(maxLat,data.nodes[n].GetLat());
-        minLon=std::min(minLon,data.nodes[n].GetLon());
-      }
-    }
-
-
-  public:
-    SortWayDataGenerator()
-    : SortDataGenerator("ways.dat","way.idmap","ways.tmp")
-    {
-      // no code
-    }
-
-    std::string GetDescription() const
-    {
-      return "Sort/copy ways";
-    }
-  };
-
 }
-
-#endif

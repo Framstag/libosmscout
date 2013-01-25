@@ -930,11 +930,10 @@ namespace osmscout {
     // Analysing distribution of nodes in the given interval size
     //
 
-    progress.SetAction("Generate relations.dat");
+    progress.SetAction("Generate relations.tmp");
 
     FileScanner         scanner;
     FileWriter          relWriter;
-    FileWriter          mapWriter;
     uint32_t            rawRelationCount=0;
     size_t              selectedRelationCount=0;
     uint32_t            writtenRelationCount=0;
@@ -962,20 +961,12 @@ namespace osmscout {
     }
 
     if (!relWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "relations.dat"))) {
-      progress.Error("Cannot create 'relations.dat'");
+                                     "relations.tmp"))) {
+      progress.Error("Cannot create 'relations.tmp'");
       return false;
     }
 
     relWriter.Write(writtenRelationCount);
-
-    if (!mapWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "relation.idmap"))) {
-      progress.Error("Cannot create 'relation.idmap'");
-      return false;
-    }
-
-    mapWriter.Write(writtenRelationCount);
 
     for (uint32_t r=1; r<=rawRelationCount; r++) {
       progress.SetProgress(r,rawRelationCount);
@@ -1078,10 +1069,8 @@ namespace osmscout {
         return false;
       }
 
+      relWriter.Write(rawRel.GetId());
       rel.Write(relWriter);
-
-      mapWriter.Write(rawRel.GetId());
-      mapWriter.Write(fileOffset);
 
       writtenRelationCount++;
     }
@@ -1093,12 +1082,8 @@ namespace osmscout {
     relWriter.SetPos(0);
     relWriter.Write(writtenRelationCount);
 
-    mapWriter.SetPos(0);
-    mapWriter.Write(writtenRelationCount);
-
     if (!(scanner.Close() &&
           relWriter.Close() &&
-          mapWriter.Close() &&
           wayDataFile.Close() &&
           coordDataFile.Close())) {
       return false;
@@ -1107,7 +1092,7 @@ namespace osmscout {
     progress.SetAction("Generate wayblack.dat");
 
     if (!relWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "wayblack.dat"))) {
+                                        "wayblack.dat"))) {
       progress.Error("Cannot create 'wayblack.dat'");
       return false;
     }

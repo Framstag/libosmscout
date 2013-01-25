@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_IMPORT_SORTWAYDAT_H
-#define OSMSCOUT_IMPORT_SORTWAYDAT_H
+#ifndef OSMSCOUT_IMPORT_SORTRELATIONDAT_H
+#define OSMSCOUT_IMPORT_SORTRELATIONDAT_H
 
 /*
   This source is part of the libosmscout library
@@ -22,37 +22,44 @@
 
 #include <osmscout/import/SortDat.h>
 
-#include <osmscout/Way.h>
+#include <osmscout/Relation.h>
 
 namespace osmscout {
 
-  class SortWayDataGenerator : public SortDataGenerator<Way>
+  class SortRelationDataGenerator : public SortDataGenerator<Relation>
   {
   private:
-    void GetTopLeftCoordinate(const Way& data,
+    void GetTopLeftCoordinate(const Relation& data,
                               double& maxLat,
                               double& minLon)
     {
-      maxLat=data.nodes[0].GetLat();
-      minLon=data.nodes[0].GetLon();
+      assert(!data.roles.empty());
+      assert(!data.roles[0].nodes.empty());
 
-      for (size_t n=1; n<data.nodes.size(); n++) {
-        maxLat=std::max(maxLat,data.nodes[n].GetLat());
-        minLon=std::min(minLon,data.nodes[n].GetLon());
+      maxLat=data.roles[0].nodes[0].GetLat();
+      minLon=data.roles[0].nodes[0].GetLon();
+
+      for (std::vector<Relation::Role>::const_iterator role=data.roles.begin();
+           role!=data.roles.end();
+           ++role) {
+        for (size_t i=0; i<role->nodes.size(); i++) {
+          maxLat=std::max(maxLat,role->nodes[i].GetLat());
+          minLon=std::min(minLon,role->nodes[i].GetLon());
+        }
       }
     }
 
 
   public:
-    SortWayDataGenerator()
-    : SortDataGenerator("ways.dat","way.idmap","ways.tmp")
+    SortRelationDataGenerator()
+    : SortDataGenerator("relations.dat","relation.idmap","relations.tmp")
     {
       // no code
     }
 
     std::string GetDescription() const
     {
-      return "Sort/copy ways";
+      return "Sort/copy relations";
     }
   };
 

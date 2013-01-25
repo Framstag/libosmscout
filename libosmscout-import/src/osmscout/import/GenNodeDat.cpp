@@ -37,7 +37,7 @@ namespace osmscout {
 
   std::string NodeDataGenerator::GetDescription() const
   {
-    return "Generate 'nodes.dat'";
+    return "Generate 'nodes.tmp'";
   }
 
   bool NodeDataGenerator::Import(const ImportParameter& parameter,
@@ -59,11 +59,10 @@ namespace osmscout {
     // Count the bounding box by the way...
     //
 
-    progress.SetAction("Generating nodes.dat");
+    progress.SetAction("Generating nodes.tmp");
 
     FileScanner scanner;
     FileWriter  writer;
-    FileWriter  mapWriter;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "rawnodes.dat"),
@@ -79,20 +78,12 @@ namespace osmscout {
     }
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "nodes.dat"))) {
-      progress.Error("Cannot create 'nodes.dat'");
+                                     "nodes.tmp"))) {
+      progress.Error("Cannot create 'nodes.tmp'");
       return false;
     }
-
-    if (!mapWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        "node.idmap"))) {
-      progress.Error("Cannot create 'node.idmap'");
-      return false;
-    }
-
 
     writer.Write(nodesWrittenCount);
-    mapWriter.Write(nodesWrittenCount);
 
     for (uint32_t n=1; n<=rawNodeCount; n++) {
       progress.SetProgress(n,rawNodeCount);
@@ -138,10 +129,8 @@ namespace osmscout {
           return false;
         }
 
+        writer.Write(rawNode.GetId());
         node.Write(writer);
-
-        mapWriter.Write(rawNode.GetId());
-        mapWriter.WriteFileOffset(fileOffset);
 
         nodesWrittenCount++;
       }
@@ -156,14 +145,6 @@ namespace osmscout {
     writer.Write(nodesWrittenCount);
 
     if (!writer.Close()) {
-      return false;
-    }
-
-    mapWriter.SetPos(0);
-    mapWriter.Write(nodesWrittenCount);
-
-
-    if (!mapWriter.Close()) {
       return false;
     }
 

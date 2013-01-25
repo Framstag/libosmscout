@@ -59,7 +59,6 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " -d                                   show debug output" << std::endl;
   std::cout << " -s <start step>                      set starting step" << std::endl;
   std::cout << " -s <end step>                        set final step" << std::endl;
-  std::cout << " -S                                   sort objects" << std::endl;
   std::cout << " --typefile <path>                    path and name of the map.ost file (default: " << parameter.GetTypefile() << ")" << std::endl;
   std::cout << " --destinationDirectory <path>        destination for generated map files (default: " << parameter.GetDestinationDirectory() << ")" << std::endl;
 
@@ -80,6 +79,7 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --rawWayIndexCacheSize <number>      raw way index cache size (default: " << parameter.GetRawWayIndexCacheSize() << ")" << std::endl;
   std::cout << " --rawWayBlockSize <number>           number of raw ways resolved in block (default: " << parameter.GetRawWayBlockSize() << ")" << std::endl;
 
+  std::cout << " --noSort                             do not sort objects" << std::endl;
   std::cout << " --sortBlockSize <number>             size of one data block during sorting (default: " << parameter.GetSortBlockSize() << ")" << std::endl;
 
   std::cout << " --wayIndexMemoryMaped true|false     memory maped way index file access (default: " << BoolToString(parameter.GetWayIndexMemoryMaped()) << ")" << std::endl;
@@ -159,9 +159,6 @@ int main(int argc, char* argv[])
         std::cerr << "Missing parameter after -e option" << std::endl;
         parameterError=true;
       }
-    }
-    else if (strcmp(argv[i],"-S")==0) {
-      parameter.SetSortObjects(true);
     }
     else if (strcmp(argv[i],"-d")==0) {
       progress.SetOutputDebug(true);
@@ -364,6 +361,9 @@ int main(int argc, char* argv[])
         parameterError=true;
       }
     }
+    else if (strcmp(argv[i],"-noSort")==0) {
+      parameter.SetSortObjects(false);
+    }
     else if (strcmp(argv[i],"--sortBlockSize")==0) {
       i++;
 
@@ -542,7 +542,7 @@ int main(int argc, char* argv[])
                 osmscout::NumberToString(parameter.GetRawWayBlockSize()));
 
 
-  progress.Info(std::string("RenumberIds: ")+
+  progress.Info(std::string("SortObjects: ")+
                 (parameter.GetSortObjects() ? "true" : "false"));
   progress.Info(std::string("SortBlockSize: ")+
                 osmscout::NumberToString(parameter.GetSortBlockSize()));

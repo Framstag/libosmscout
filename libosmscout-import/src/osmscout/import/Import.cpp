@@ -40,9 +40,13 @@
 #include <osmscout/import/GenTurnRestrictionDat.h>
 
 #include <osmscout/import/GenNodeDat.h>
-#include <osmscout/import/GenRelationDat.h>
+#include <osmscout/import/SortNodeDat.h>
+
 #include <osmscout/import/GenWayDat.h>
 #include <osmscout/import/SortWayDat.h>
+
+#include <osmscout/import/GenRelationDat.h>
+#include <osmscout/import/SortRelationDat.h>
 
 #include <osmscout/import/GenNumericIndex.h>
 
@@ -70,9 +74,9 @@ namespace osmscout {
      startStep(defaultStartStep),
      endStep(defaultEndStep),
      strictAreas(false),
-     sortObjects(false),
+     sortObjects(true),
      sortBlockSize(40000000),
-     sortTileMag(15),
+     sortTileMag(13),
      numericIndexPageSize(4096),
      coordDataMemoryMaped(false),
      rawNodeIndexMemoryMaped(true),
@@ -639,35 +643,39 @@ namespace osmscout {
                                                                                 "rawrel.idx")));
     /* 6 */
     modules.push_back(new RelationDataGenerator());
-
     /* 7 */
-    modules.push_back(new NodeDataGenerator());
+    modules.push_back(new SortRelationDataGenerator());
 
     /* 8 */
+    modules.push_back(new NodeDataGenerator());
+    /* 9 */
+    modules.push_back(new SortNodeDataGenerator());
+
+    /* 10 */
     modules.push_back(new TurnRestrictionDataGenerator());
 
-    /* 9 */
+    /* 11 */
     modules.push_back(new WayDataGenerator());
-    /* 10 */
+    /* 12 */
     modules.push_back(new SortWayDataGenerator());
 
-    /* 11 */
-    modules.push_back(new AreaAreaIndexGenerator());
-    /* 12 */
-    modules.push_back(new AreaWayIndexGenerator());
     /* 13 */
+    modules.push_back(new AreaAreaIndexGenerator());
+    /* 14 */
+    modules.push_back(new AreaWayIndexGenerator());
+    /* 15 */
     modules.push_back(new AreaNodeIndexGenerator());
 
-    /* 14 */
-    modules.push_back(new CityStreetIndexGenerator());
-    /* 15 */
-    modules.push_back(new WaterIndexGenerator());
     /* 16 */
+    modules.push_back(new CityStreetIndexGenerator());
+    /* 17 */
+    modules.push_back(new WaterIndexGenerator());
+    /* 18 */
     modules.push_back(new OptimizeLowZoomGenerator());
 
-    /* 17 */
+    /* 19 */
     modules.push_back(new RouteDataGenerator());
-    /* 18 */
+    /* 20 */
     modules.push_back(new NumericIndexGenerator<Id,RouteNode>("Generating 'route.idx'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               "route.dat"),
