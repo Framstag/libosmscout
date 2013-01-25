@@ -98,6 +98,8 @@ namespace osmscout {
       return false;
     }
 
+    this->filename=filename;
+
     file=fopen(filename.c_str(),"rb");
 
     if (file==NULL) {
@@ -234,10 +236,6 @@ namespace osmscout {
 #endif
 
     hasError=file==NULL;
-
-    if (!hasError) {
-      this->filename=filename;
-    }
 
     return !hasError;
   }
