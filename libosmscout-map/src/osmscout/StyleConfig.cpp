@@ -666,23 +666,23 @@ namespace osmscout {
     maxX=std::numeric_limits<double>::min();
     maxY=std::numeric_limits<double>::min();
 
-    for (std::list<Pixel>::const_iterator pixel=pixels.begin();
-         pixel!=pixels.end();
-         ++pixel) {
-      minX=std::min(minX,pixel->x);
-      minY=std::min(minY,pixel->y);
+    for (std::list<Coord>::const_iterator coord=coords.begin();
+         coord!=coords.end();
+         ++coord) {
+      minX=std::min(minX,coord->x);
+      minY=std::min(minY,coord->y);
 
-      maxX=std::max(maxX,pixel->x);
-      maxY=std::max(maxY,pixel->y);
+      maxX=std::max(maxX,coord->x);
+      maxY=std::max(maxY,coord->y);
     }
   }
 
-  void PolygonPrimitive::AddPixel(const Pixel& pixel)
+  void PolygonPrimitive::AddCoord(const Coord& coord)
   {
-    pixels.push_back(pixel);
+    coords.push_back(coord);
   }
 
-  RectanglePrimitive::RectanglePrimitive(const Pixel& topLeft,
+  RectanglePrimitive::RectanglePrimitive(const Coord& topLeft,
                                          double width,
                                          double height,
                                          const FillStyleRef& fillStyle)
@@ -706,7 +706,7 @@ namespace osmscout {
     maxY=topLeft.y;
   }
 
-  CirclePrimitive::CirclePrimitive(const Pixel& center,
+  CirclePrimitive::CirclePrimitive(const Coord& center,
                                    double radius,
                                    const FillStyleRef& fillStyle)
   : DrawPrimitive(fillStyle),

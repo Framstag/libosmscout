@@ -26,6 +26,8 @@
 #include <list>
 #include <sstream>
 
+#include <osmscout/Coord.h>
+
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/String.h>
@@ -189,7 +191,7 @@ inline void ToRGBA(const char* str, Color& color)
 	void POLYGON(Symbol& symbol);
 	void RECTANGLE(Symbol& symbol);
 	void CIRCLE(Symbol& symbol);
-	void PIXEL(Pixel& pixel);
+	void COORD(Coord& coord);
 	void FILLSTYLEATTR(FillPartialStyle& style);
 	void DOUBLE(double& value);
 	void CONSTDEF();

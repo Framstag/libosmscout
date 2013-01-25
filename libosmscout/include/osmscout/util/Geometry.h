@@ -535,34 +535,6 @@ namespace osmscout {
     return true;
   }
 
-  struct OSMSCOUT_API Coord
-  {
-    uint32_t x;
-    uint32_t y;
-
-    Coord()
-    {
-      // no code
-    }
-
-    Coord(uint32_t x, uint32_t y)
-     :x(x),y(y)
-    {
-      // no code
-    }
-
-    inline bool operator==(const Coord& other) const
-    {
-      return x==other.x && y==other.y;
-    }
-
-    inline bool operator<(const Coord& other) const
-    {
-      return y<other.y ||
-      (y==other.y && x<other.x);
-    }
-  };
-
   extern OSMSCOUT_API size_t Pow(size_t a, size_t b);
   extern OSMSCOUT_API double GetSphericalDistance(double aLon, double aLat,
                                                   double bLon, double bLat);

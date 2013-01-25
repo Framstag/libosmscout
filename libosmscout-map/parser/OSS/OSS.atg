@@ -3,6 +3,8 @@
 #include <list>
 #include <sstream>
 
+#include <osmscout/Coord.h>
+
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/String.h>
@@ -202,12 +204,12 @@ PRODUCTIONS
                   StyleFilter         filter;
                   FillPartialStyle    style;
                   PolygonPrimitiveRef polygon(new PolygonPrimitive(style.style));
-                  Pixel               pixel;
+                  Coord               coord;
                 .)
-                PIXEL<pixel>   (. polygon->AddPixel(pixel); .)
-                PIXEL<pixel>   (. polygon->AddPixel(pixel); .)
+                COORD<coord>   (. polygon->AddCoord(coord); .)
+                COORD<coord>   (. polygon->AddCoord(coord); .)
                 {
-                  PIXEL<pixel> (. polygon->AddPixel(pixel); .)
+                  COORD<coord> (. polygon->AddCoord(coord); .)
                 }
                 SYNC "{"
                 {
@@ -222,11 +224,11 @@ PRODUCTIONS
                 (.
                   StyleFilter       filter;
                   FillPartialStyle  style;
-                  Pixel             topLeft;
+                  Coord             topLeft;
                   double            width;
                   double            height;
                 .)
-                PIXEL<topLeft>
+                COORD<topLeft>
                 DOUBLE<width>
                 "x"
                 DOUBLE<height>
@@ -246,12 +248,12 @@ PRODUCTIONS
   CIRCLE<Symbol& symbol>
               = "CIRCLE"
                 (.
-                  Pixel             center;
+                  Coord             center;
                   double            radius;
                   StyleFilter       filter;
                   FillPartialStyle  style;
                 .)
-                PIXEL<center>
+                COORD<center>
                 DOUBLE<radius>
                 SYNC "{"
                 {
@@ -265,13 +267,13 @@ PRODUCTIONS
                 .)
                 .
 
-  PIXEL<Pixel& pixel>
+  COORD<Coord& coord>
               = (.
                    double x;
                    double y;
                 .)
                 DOUBLE<x> "," DOUBLE<y>
-                (. pixel=Pixel(x,y); .)
+                (. coord=Coord(x,y); .)
                 .
 
   CONST       = "CONST"

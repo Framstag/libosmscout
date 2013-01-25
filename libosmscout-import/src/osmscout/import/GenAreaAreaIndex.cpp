@@ -38,12 +38,12 @@ namespace osmscout {
     return "Generate 'areaarea.idx'";
   }
 
-  void AreaAreaIndexGenerator::SetOffsetOfChildren(const std::map<Coord,AreaLeaf>& leafs,
-                                                   std::map<Coord,AreaLeaf>& newAreaLeafs)
+  void AreaAreaIndexGenerator::SetOffsetOfChildren(const std::map<Pixel,AreaLeaf>& leafs,
+                                                   std::map<Pixel,AreaLeaf>& newAreaLeafs)
   {
     // For every cell that had entries in one of its children we create
     // an index entry.
-    for (std::map<Coord,AreaLeaf>::const_iterator leaf=leafs.begin();
+    for (std::map<Pixel,AreaLeaf>::const_iterator leaf=leafs.begin();
          leaf!=leafs.end();
          ++leaf) {
       // Coordinates of the children in "children dimension" calculated from the tile id
@@ -76,16 +76,16 @@ namespace osmscout {
 
       assert(leaf->second.offset!=0);
 
-      newAreaLeafs[Coord(xc/2,yc/2)].children[index]=leaf->second.offset;
+      newAreaLeafs[Pixel(xc/2,yc/2)].children[index]=leaf->second.offset;
     }
   }
 
   bool AreaAreaIndexGenerator::WriteIndexLevel(const ImportParameter& parameter,
                                                FileWriter& writer,
                                                int level,
-                                               std::map<Coord,AreaLeaf>& leafs)
+                                               std::map<Pixel,AreaLeaf>& leafs)
   {
-    for (std::map<Coord,AreaLeaf>::iterator leaf=leafs.begin();
+    for (std::map<Pixel,AreaLeaf>::iterator leaf=leafs.begin();
          leaf!=leafs.end();
          ++leaf) {
       writer.GetPos(leaf->second.offset);
@@ -147,8 +147,8 @@ namespace osmscout {
     size_t                    relsConsumed=0; // Number of relations consumed
     std::vector<double>       cellWidth;
     std::vector<double>       cellHeight;
-    std::map<Coord,AreaLeaf>  leafs;
-    std::map<Coord,AreaLeaf>  newAreaLeafs;
+    std::map<Pixel,AreaLeaf>  leafs;
+    std::map<Pixel,AreaLeaf>  newAreaLeafs;
 
     cellWidth.resize(parameter.GetAreaAreaIndexMaxMag()+1);
     cellHeight.resize(parameter.GetAreaAreaIndexMaxMag()+1);
@@ -308,7 +308,7 @@ namespace osmscout {
             entry.offset=offset;
 
             // Add this area to the tile where the center of the area lies in.
-            leafs[Coord((minxc+maxxc)/2,(minyc+maxyc)/2)].areas.push_back(entry);
+            leafs[Pixel((minxc+maxxc)/2,(minyc+maxyc)/2)].areas.push_back(entry);
             areaLevelEntries++;
 
             waysConsumed++;
@@ -410,7 +410,7 @@ namespace osmscout {
             entry.offset=offset;
 
             // Add this area to the tile where the center of the area lies in.
-            leafs[Coord((minxc+maxxc)/2,(minyc+maxyc)/2)].relAreas.push_back(entry);
+            leafs[Pixel((minxc+maxxc)/2,(minyc+maxyc)/2)].relAreas.push_back(entry);
             relAreaLevelEntries++;
 
             relsConsumed++;

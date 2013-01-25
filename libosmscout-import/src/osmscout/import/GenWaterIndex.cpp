@@ -358,11 +358,11 @@ namespace osmscout {
 
       // Marks cells on the path as coast
 
-      std::set<Coord> coords;
+      std::set<Pixel> coords;
 
       GetCells(level,coastline->coast,coords);
 
-      for (std::set<Coord>::const_iterator coord=coords.begin();
+      for (std::set<Pixel>::const_iterator coord=coords.begin();
           coord!=coords.end();
           ++coord) {
         if (level.IsInAbsolute(coord->x,coord->y)) {
@@ -380,11 +380,11 @@ namespace osmscout {
 
   void WaterIndexGenerator::CalculateLandCells(Progress& progress,
                                                Level& level,
-                                               const std::map<Coord,std::list<GroundTile> >& cellGroundTileMap)
+                                               const std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap)
   {
     progress.Info("Calculate land cells");
 
-    for (std::map<Coord,std::list<GroundTile> >::const_iterator coord=cellGroundTileMap.begin();
+    for (std::map<Pixel,std::list<GroundTile> >::const_iterator coord=cellGroundTileMap.begin();
         coord!=cellGroundTileMap.end();
         ++coord) {
       State state[4]; // top, right, bottom, left
@@ -589,11 +589,11 @@ namespace osmscout {
       if (!typeConfig.GetTypeInfo(way.GetType()).GetIgnoreSeaLand()) {
         if (!way.IsArea() &&
             way.nodes.size()>=2) {
-          std::set<Coord> coords;
+          std::set<Pixel> coords;
 
           GetCells(level,way.nodes,coords);
 
-          for (std::set<Coord>::const_iterator coord=coords.begin();
+          for (std::set<Pixel>::const_iterator coord=coords.begin();
               coord!=coords.end();
               ++coord) {
             if (level.IsInAbsolute(coord->x,coord->y)) {
@@ -815,7 +815,7 @@ namespace osmscout {
                                                                   Projection& projection,
                                                                   const Level& level,
                                                                   Data& data,
-                                                                  std::map<Coord,std::list<GroundTile> >& cellGroundTileMap)
+                                                                  std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap)
   {
     progress.Info("Handle area coastline completely in a cell");
 
@@ -835,8 +835,8 @@ namespace osmscout {
           continue;
         }
 
-        Coord        coord(coastline->cell.x-level.cellXStart,coastline->cell.y-level.cellYStart);
-        GroundTile   groundTile(GroundTile::land);
+        Pixel      coord(coastline->cell.x-level.cellXStart,coastline->cell.y-level.cellYStart);
+        GroundTile groundTile(GroundTile::land);
 
         double cellMinLat=level.cellHeight*coastline->cell.y-90.0;
         double cellMinLon=level.cellWidth*coastline->cell.x-180.0;
@@ -877,7 +877,7 @@ namespace osmscout {
   void WaterIndexGenerator::GetCells(const Level& level,
                                      const Point& a,
                                      const Point& b,
-                                     std::set<Coord>& cellIntersections)
+                                     std::set<Pixel>& cellIntersections)
   {
     uint32_t cx1=(uint32_t)((a.GetLon()+180.0)/level.cellWidth);
     uint32_t cy1=(uint32_t)((a.GetLat()+90.0)/level.cellHeight);
@@ -885,13 +885,13 @@ namespace osmscout {
     uint32_t cx2=(uint32_t)((b.GetLon()+180.0)/level.cellWidth);
     uint32_t cy2=(uint32_t)((b.GetLat()+90.0)/level.cellHeight);
 
-    cellIntersections.insert(Coord(cx1,cy1));
+    cellIntersections.insert(Pixel(cx1,cy1));
 
     if (cx1!=cx2 || cy1!=cy2) {
       for (size_t x=std::min(cx1,cx2); x<=std::max(cx1,cx2); x++) {
         for (size_t y=std::min(cy1,cy2); y<=std::max(cy1,cy2); y++) {
 
-          Coord  coord(x,y);
+          Pixel  coord(x,y);
           Point  borderPoints[5];
           double lonMin,lonMax,latMin,latMax;
 
@@ -927,7 +927,7 @@ namespace osmscout {
 
   void WaterIndexGenerator::GetCells(const Level& level,
                                      const std::vector<Point>& points,
-                                     std::set<Coord>& cellIntersections)
+                                     std::set<Pixel>& cellIntersections)
   {
     for (size_t p=0; p<points.size()-1; p++) {
       GetCells(level,points[p],points[p+1],cellIntersections);
@@ -937,7 +937,7 @@ namespace osmscout {
   void WaterIndexGenerator::GetCellIntersections(const Level& level,
                                                  const std::vector<Point>& points,
                                                  size_t coastline,
-                                                 std::map<Coord,std::list<Intersection> >& cellIntersections)
+                                                 std::map<Pixel,std::list<Intersection> >& cellIntersections)
   {
     for (size_t p=0; p<points.size()-1; p++) {
       uint32_t cx1=(uint32_t)((points[p].GetLon()+180.0)/level.cellWidth);
@@ -954,9 +954,9 @@ namespace osmscout {
               continue;
             }
 
-            Coord              coord(x-level.cellXStart,y-level.cellYStart);
-            Point              borderPoints[5];
-            double             lonMin,lonMax,latMin,latMax;
+            Pixel  coord(x-level.cellXStart,y-level.cellYStart);
+            Point  borderPoints[5];
+            double lonMin,lonMax,latMin,latMax;
 
             lonMin=x*level.cellWidth-180.0;
             lonMax=(x+1)*level.cellWidth-180.0;
@@ -1225,7 +1225,7 @@ namespace osmscout {
                              curCoast,
                              data.coastlines[curCoast].cellIntersections);
 
-        for (std::map<Coord,std::list<Intersection> >::iterator cell=data.coastlines[curCoast].cellIntersections.begin();
+        for (std::map<Pixel,std::list<Intersection> >::iterator cell=data.coastlines[curCoast].cellIntersections.begin();
             cell!=data.coastlines[curCoast].cellIntersections.end();
             ++cell) {
           data.cellCoastlines[cell->first].push_back(curCoast);
@@ -1379,14 +1379,14 @@ namespace osmscout {
                                                              Progress& progress,
                                                              Projection& projection,
                                                              const Level& level,
-                                                             std::map<Coord,std::list<GroundTile> >& cellGroundTileMap,
+                                                             std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
                                                              Data& data)
   {
     progress.Info("Handle coastlines partially in a cell");
 
     // For every cell with intersections
     size_t currentCell=0;
-    for (std::map<Coord,std::list<size_t> >::const_iterator cell=data.cellCoastlines.begin();
+    for (std::map<Pixel,std::list<size_t> >::const_iterator cell=data.cellCoastlines.begin();
          cell!=data.cellCoastlines.end();
         ++cell) {
       progress.SetProgress(currentCell,data.cellCoastlines.size());
@@ -1402,7 +1402,7 @@ namespace osmscout {
       for (std::list<size_t>::const_iterator currentCoastline=cell->second.begin();
           currentCoastline!=cell->second.end();
           ++currentCoastline) {
-        std::map<Coord,std::list<Intersection> >::iterator cellData=data.coastlines[*currentCoastline].cellIntersections.find(cell->first);
+        std::map<Pixel,std::list<Intersection> >::iterator cellData=data.coastlines[*currentCoastline].cellIntersections.find(cell->first);
 
         if (cellData==data.coastlines[*currentCoastline].cellIntersections.end()) {
           continue;
@@ -1724,7 +1724,7 @@ namespace osmscout {
       Magnification                          magnification;
       MercatorProjection                     projection;
       Data                                   data;
-      std::map<Coord,std::list<GroundTile> > cellGroundTileMap;
+      std::map<Pixel,std::list<GroundTile> > cellGroundTileMap;
 
       magnification.SetLevel(level+parameter.GetWaterIndexMinMag());
 
@@ -1790,7 +1790,7 @@ namespace osmscout {
         }
       }
 
-      for (std::map<Coord,std::list<GroundTile> >::const_iterator coord=cellGroundTileMap.begin();
+      for (std::map<Pixel,std::list<GroundTile> >::const_iterator coord=cellGroundTileMap.begin();
           coord!=cellGroundTileMap.end();
           ++coord) {
         FileOffset startPos;

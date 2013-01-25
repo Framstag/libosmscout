@@ -25,13 +25,15 @@
 
 #include <osmscout/private/MapImportExport.h>
 
+#include <osmscout/Coord.h>
 #include <osmscout/Types.h>
-#include <osmscout/TypeConfig.h>
 #include <osmscout/TypeSet.h>
 
 #include <osmscout/Node.h>
 #include <osmscout/Relation.h>
 #include <osmscout/Way.h>
+
+#include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/Color.h>
 #include <osmscout/util/Reference.h>
@@ -812,16 +814,16 @@ namespace osmscout {
   class OSMSCOUT_MAP_API PolygonPrimitive : public DrawPrimitive
   {
   private:
-    std::list<Pixel>  pixels;
+    std::list<Coord> coords;
 
   public:
     PolygonPrimitive(const FillStyleRef& fillStyle);
 
-    void AddPixel(const Pixel& pixel);
+    void AddCoord(const Coord& coord);
 
-    inline const std::list<Pixel>& GetPixels() const
+    inline const std::list<Coord>& GetCoords() const
     {
-      return pixels;
+      return coords;
     }
 
     void GetBoundingBox(double& minX,
@@ -835,17 +837,17 @@ namespace osmscout {
   class OSMSCOUT_MAP_API RectanglePrimitive : public DrawPrimitive
   {
   private:
-    Pixel        topLeft;
-    double       width;
-    double       height;
+    Coord  topLeft;
+    double width;
+    double height;
 
   public:
-    RectanglePrimitive(const Pixel& topLeft,
+    RectanglePrimitive(const Coord& topLeft,
                        double width,
                        double height,
                        const FillStyleRef& fillStyle);
 
-    inline const Pixel& GetTopLeft() const
+    inline const Coord& GetTopLeft() const
     {
       return topLeft;
     }
@@ -871,15 +873,15 @@ namespace osmscout {
   class OSMSCOUT_MAP_API CirclePrimitive : public DrawPrimitive
   {
   private:
-    Pixel        center;
-    double       radius;
+    Coord  center;
+    double radius;
 
   public:
-    CirclePrimitive(const Pixel& center,
+    CirclePrimitive(const Coord& center,
                     double radius,
                     const FillStyleRef& fillStyle);
 
-    inline const Pixel& GetCenter() const
+    inline const Coord& GetCenter() const
     {
       return center;
     }

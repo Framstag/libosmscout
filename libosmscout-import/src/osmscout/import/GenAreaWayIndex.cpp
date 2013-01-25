@@ -355,7 +355,7 @@ namespace osmscout {
 
         for (size_t y=minyc; y<=maxyc; y++) {
           for (size_t x=minxc; x<=maxxc; x++) {
-            cellFillCount[way.GetType()][Coord(x,y)]++;
+            cellFillCount[way.GetType()][Pixel(x,y)]++;
           }
         }
       }
@@ -456,7 +456,7 @@ namespace osmscout {
 
         for (size_t y=minyc; y<=maxyc; y++) {
           for (size_t x=minxc; x<=maxxc; x++) {
-            cellFillCount[rel.GetType()][Coord(x,y)]++;
+            cellFillCount[rel.GetType()][Pixel(x,y)]++;
           }
         }
       }
@@ -628,7 +628,7 @@ namespace osmscout {
 
         for (size_t y=minyc; y<=maxyc; y++) {
           for (size_t x=minxc; x<=maxxc; x++) {
-            typeCellOffsets[way.GetType()][Coord(x,y)].push_back(offset);
+            typeCellOffsets[way.GetType()][Pixel(x,y)].push_back(offset);
           }
         }
       }
@@ -720,7 +720,7 @@ namespace osmscout {
 
         for (size_t y=minyc; y<=maxyc; y++) {
           for (size_t x=minxc; x<=maxxc; x++) {
-            typeCellOffsets[rel.GetType()][Coord(x,y)].push_back(offset);
+            typeCellOffsets[rel.GetType()][Pixel(x,y)].push_back(offset);
           }
         }
       }

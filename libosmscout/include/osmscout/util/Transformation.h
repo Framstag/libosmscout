@@ -36,24 +36,6 @@ namespace osmscout {
     double y;
   };
 
-  struct OSMSCOUT_API Pixel
-  {
-    double x;
-    double y;
-
-    inline Pixel()
-    {
-      // no code
-    }
-
-    inline Pixel (double x, double y)
-    : x(x),
-      y(y)
-    {
-      // no code
-    }
-  };
-
   class OSMSCOUT_API TransPolygon
   {
   private:
@@ -121,6 +103,25 @@ namespace osmscout {
 
   class OSMSCOUT_API TransBuffer
   {
+  public:
+    struct OSMSCOUT_API Pixel
+    {
+      double x;
+      double y;
+
+      inline Pixel()
+      {
+        // no code
+      }
+
+      inline Pixel (double x, double y)
+      : x(x),
+        y(y)
+      {
+        // no code
+      }
+    };
+
   private:
     TransPolygon transPolygon;
     size_t       bufferSize;

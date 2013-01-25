@@ -29,6 +29,9 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/TypeConfigLoader.h \
                         osmscout/AdminRegion.h \
                         osmscout/GroundTile.h \
+                        osmscout/Coord.h \
+                        osmscout/GeoCoord.h \
+                        osmscout/Pixel.h \
                         osmscout/Node.h \
                         osmscout/Path.h \
                         osmscout/Point.h \

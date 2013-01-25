@@ -394,10 +394,10 @@ namespace osmscout {
 
         QPainterPath path;
 
-        for (std::list<Pixel>::const_iterator pixel=polygon->GetPixels().begin();
-             pixel!=polygon->GetPixels().end();
+        for (std::list<Coord>::const_iterator pixel=polygon->GetCoords().begin();
+             pixel!=polygon->GetCoords().end();
              ++pixel) {
-          if (pixel==polygon->GetPixels().begin()) {
+          if (pixel==polygon->GetCoords().begin()) {
             path.moveTo(x+ConvertWidthToPixel(parameter,pixel->x-centerX),
                         y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
           }

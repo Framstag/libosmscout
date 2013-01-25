@@ -23,6 +23,8 @@
 #include <map>
 #include <set>
 
+#include <osmscout/Pixel.h>
+
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Geometry.h>
 
@@ -57,13 +59,13 @@ namespace osmscout {
     };
 
   private:
-    void SetOffsetOfChildren(const std::map<Coord,AreaLeaf>& leafs,
-                             std::map<Coord,AreaLeaf>& newAreaLeafs);
+    void SetOffsetOfChildren(const std::map<Pixel,AreaLeaf>& leafs,
+                             std::map<Pixel,AreaLeaf>& newAreaLeafs);
 
     bool WriteIndexLevel(const ImportParameter& parameter,
                          FileWriter& writer,
                          int level,
-                         std::map<Coord,AreaLeaf>& leafs);
+                         std::map<Pixel,AreaLeaf>& leafs);
 
 
   public:

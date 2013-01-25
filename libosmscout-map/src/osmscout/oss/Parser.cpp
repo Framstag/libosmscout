@@ -259,15 +259,15 @@ void Parser::POLYGON(Symbol& symbol) {
 		StyleFilter         filter;
 		FillPartialStyle    style;
 		PolygonPrimitiveRef polygon(new PolygonPrimitive(style.style));
-		Pixel               pixel;
+		Coord               coord;
 		
-		PIXEL(pixel);
-		polygon->AddPixel(pixel); 
-		PIXEL(pixel);
-		polygon->AddPixel(pixel); 
+		COORD(coord);
+		polygon->AddCoord(coord); 
+		COORD(coord);
+		polygon->AddCoord(coord); 
 		while (la->kind == _number || la->kind == _double) {
-			PIXEL(pixel);
-			polygon->AddPixel(pixel); 
+			COORD(coord);
+			polygon->AddCoord(coord); 
 		}
 		while (!(la->kind == _EOF || la->kind == 15 /* "{" */)) {SynErr(87); Get();}
 		Expect(15 /* "{" */);
@@ -284,11 +284,11 @@ void Parser::RECTANGLE(Symbol& symbol) {
 		Expect(18 /* "RECTANGLE" */);
 		StyleFilter       filter;
 		FillPartialStyle  style;
-		Pixel             topLeft;
+		Coord             topLeft;
 		double            width;
 		double            height;
 		
-		PIXEL(topLeft);
+		COORD(topLeft);
 		DOUBLE(width);
 		Expect(19 /* "x" */);
 		DOUBLE(height);
@@ -308,12 +308,12 @@ void Parser::RECTANGLE(Symbol& symbol) {
 
 void Parser::CIRCLE(Symbol& symbol) {
 		Expect(20 /* "CIRCLE" */);
-		Pixel             center;
+		Coord             center;
 		double            radius;
 		StyleFilter       filter;
 		FillPartialStyle  style;
 		
-		PIXEL(center);
+		COORD(center);
 		DOUBLE(radius);
 		while (!(la->kind == _EOF || la->kind == 15 /* "{" */)) {SynErr(91); Get();}
 		Expect(15 /* "{" */);
@@ -329,14 +329,14 @@ void Parser::CIRCLE(Symbol& symbol) {
 		
 }
 
-void Parser::PIXEL(Pixel& pixel) {
+void Parser::COORD(Coord& coord) {
 		double x;
 		double y;
 		
 		DOUBLE(x);
 		Expect(12 /* "," */);
 		DOUBLE(y);
-		pixel=Pixel(x,y); 
+		coord=Coord(x,y); 
 }
 
 void Parser::FILLSTYLEATTR(FillPartialStyle& style) {

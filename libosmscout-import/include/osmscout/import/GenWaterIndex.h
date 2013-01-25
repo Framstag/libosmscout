@@ -23,6 +23,7 @@
 #include <vector>
 
 #include <osmscout/GroundTile.h>
+#include <osmscout/Pixel.h>
 #include <osmscout/Point.h>
 
 #include <osmscout/import/Import.h>
@@ -165,17 +166,17 @@ namespace osmscout {
     {
       bool                                       isArea;             //! true,if the boundary forms an area
       bool                                       isCompletelyInCell; //! true, if the complete coastline is within one cell
-      Coord                                      cell;               //! The cell that completely contains the coastline
+      Pixel                                      cell;               //! The cell that completely contains the coastline
       double                                     pixelWidth;         //! Size of coastline in pixel
       double                                     pixelHeight;        //! Size of coastline in pixel
       std::vector<Point>                         points;             //! The points of the coastline
-      std::map<Coord, std::list<Intersection> >  cellIntersections;  //! All intersections for each cell
+      std::map<Pixel, std::list<Intersection> >  cellIntersections;  //! All intersections for each cell
     };
 
     struct Data
     {
       std::vector<CoastlineData>          coastlines;         //! data for each coastline
-      std::map<Coord, std::list<size_t> > cellCoastlines;     //! Contains for each cell the list of coastlines
+      std::map<Pixel, std::list<size_t> > cellCoastlines;     //! Contains for each cell the list of coastlines
     };
 
   private:
@@ -199,21 +200,21 @@ namespace osmscout {
 
     void CalculateLandCells(Progress& progress,
                             Level& level,
-                            const std::map<Coord,std::list<GroundTile> >& cellGroundTileMap);
+                            const std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap);
 
     void GetCells(const Level& level,
                   const Point& a,
                   const Point& b,
-                  std::set<Coord>& cellIntersections);
+                  std::set<Pixel>& cellIntersections);
 
     void GetCells(const Level& level,
                   const std::vector<Point>& points,
-                  std::set<Coord>& cellIntersections);
+                  std::set<Pixel>& cellIntersections);
 
     void GetCellIntersections(const Level& level,
                               const std::vector<Point>& points,
                               size_t coastline,
-                              std::map<Coord,std::list<Intersection> >& cellIntersections);
+                              std::map<Pixel,std::list<Intersection> >& cellIntersections);
 
     void GetCoastlineData(const ImportParameter& parameter,
                           Progress& progress,
@@ -243,7 +244,7 @@ namespace osmscout {
                                                Projection& projection,
                                                const Level& level,
                                                Data& data,
-                                               std::map<Coord,std::list<GroundTile> >& cellGroundTileMap);
+                                               std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap);
 
     IntersectionPtr GetPreviousIntersection(std::list<IntersectionPtr>& intersectionsPathOrder,
                                             const IntersectionPtr& current);
@@ -272,7 +273,7 @@ namespace osmscout {
                                           Progress& progress,
                                           Projection& projection,
                                           const Level& level,
-                                          std::map<Coord,std::list<GroundTile> >& cellGroundTileMap,
+                                          std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
                                           Data& data);
 
   public:

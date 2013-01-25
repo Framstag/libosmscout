@@ -21,6 +21,7 @@
 
 #include <cassert>
 
+#include <osmscout/Pixel.h>
 #include <osmscout/Way.h>
 
 #include <osmscout/util/File.h>
@@ -333,7 +334,7 @@ namespace osmscout
     while (true) {
       double                 cellWidth=360.0/pow(2.0,(int)level);
       double                 cellHeight=180.0/pow(2.0,(int)level);
-      std::map<Coord,size_t> cellFillCount;
+      std::map<Pixel,size_t> cellFillCount;
 
       for (std::list<WayRef>::const_iterator w=newWays.begin();
           w!=newWays.end();
@@ -359,7 +360,7 @@ namespace osmscout
 
         for (size_t y=minyc; y<=maxyc; y++) {
           for (size_t x=minxc; x<=maxxc; x++) {
-            cellFillCount[Coord(x,y)]++;
+            cellFillCount[Pixel(x,y)]++;
           }
         }
       }
@@ -368,7 +369,7 @@ namespace osmscout
       size_t entryCount=0;
       size_t max=0;
 
-      for (std::map<Coord,size_t>::const_iterator cell=cellFillCount.begin();
+      for (std::map<Pixel,size_t>::const_iterator cell=cellFillCount.begin();
            cell!=cellFillCount.end();
            ++cell) {
         entryCount+=cell->second;
@@ -390,7 +391,7 @@ namespace osmscout
           typeData.cellXEnd=typeData.cellXStart;
           typeData.cellYEnd=typeData.cellYStart;
 
-          for (std::map<Coord,size_t>::const_iterator cell=cellFillCount.begin();
+          for (std::map<Pixel,size_t>::const_iterator cell=cellFillCount.begin();
                cell!=cellFillCount.end();
                ++cell) {
             typeData.indexEntries+=cell->second;
@@ -488,7 +489,7 @@ namespace osmscout
 
     double                                 cellWidth=360.0/pow(2.0,(int)data.indexLevel);
     double                                 cellHeight=180.0/pow(2.0,(int)data.indexLevel);
-    std::map<Coord,std::list<FileOffset> > cellOffsets;
+    std::map<Pixel,std::list<FileOffset> > cellOffsets;
 
     for (std::list<WayRef>::const_iterator w=ways.begin();
         w!=ways.end();
@@ -518,7 +519,7 @@ namespace osmscout
 
       for (size_t y=minyc; y<=maxyc; y++) {
         for (size_t x=minxc; x<=maxxc; x++) {
-          cellOffsets[Coord(x,y)].push_back(offset->second);
+          cellOffsets[Pixel(x,y)].push_back(offset->second);
         }
       }
     }
@@ -527,7 +528,7 @@ namespace osmscout
     size_t dataSize=0;
     char   buffer[10];
 
-    for (std::map<Coord,std::list<FileOffset> >::const_iterator cell=cellOffsets.begin();
+    for (std::map<Pixel,std::list<FileOffset> >::const_iterator cell=cellOffsets.begin();
          cell!=cellOffsets.end();
          ++cell) {
       indexEntries+=cell->second.size();
@@ -578,7 +579,7 @@ namespace osmscout
     }
 
     // Now write the list of offsets of objects for every cell with content
-    for (std::map<Coord,std::list<FileOffset> >::const_iterator cell=cellOffsets.begin();
+    for (std::map<Pixel,std::list<FileOffset> >::const_iterator cell=cellOffsets.begin();
          cell!=cellOffsets.end();
          ++cell) {
       FileOffset bitmapCellOffset=data.bitmapOffset+
