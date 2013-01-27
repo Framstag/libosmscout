@@ -144,10 +144,12 @@ namespace osmscout {
      */
     struct Coast : public Referencable
     {
-      Id                 id;
-      bool               isArea;
-      double             sortCriteria;
-      std::vector<Point> coast;
+      Id                    id;
+      bool                  isArea;
+      double                sortCriteria;
+      Id                    frontNodeId;
+      Id                    backNodeId;
+      std::vector<GeoCoord> coast;
     };
 
     typedef Ref<Coast> CoastRef;
@@ -182,9 +184,6 @@ namespace osmscout {
     };
 
   private:
-    std::list<CoastRef> coastlines;
-
-  private:
     GroundTile::Coord Transform(const GeoCoord& point,
                                 const Level& level,
                                 double cellMinLat,
@@ -193,11 +192,14 @@ namespace osmscout {
 
     bool LoadCoastlines(const ImportParameter& parameter,
                         Progress& progress,
-                        const TypeConfig& typeConfig);
+                        const TypeConfig& typeConfig,
+                        std::list<CoastRef>& coastlines);
 
-    void MergeCoastlines(Progress& progress);
+    void MergeCoastlines(Progress& progress,
+                         std::list<CoastRef>& coastlines);
 
     void MarkCoastlineCells(Progress& progress,
+                            const std::list<CoastRef>& coastlines,
                             Level& level);
 
     void CalculateLandCells(Progress& progress,
@@ -278,6 +280,7 @@ namespace osmscout {
     void HandleCoastlinesPartiallyInACell(const ImportParameter& parameter,
                                           Progress& progress,
                                           Projection& projection,
+                                          const std::list<CoastRef>& coastlines,
                                           const Level& level,
                                           std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
                                           Data& data);

@@ -126,7 +126,8 @@ namespace osmscout {
 
   bool WaterIndexGenerator::LoadCoastlines(const ImportParameter& parameter,
                                            Progress& progress,
-                                           const TypeConfig& typeConfig)
+                                           const TypeConfig& typeConfig,
+                                           std::list<CoastRef>& coastlines)
   {
     // We must have coastline type defined
     FileScanner                scanner;
@@ -134,6 +135,8 @@ namespace osmscout {
     size_t                     wayCoastCount=0;
     size_t                     areaCoastCount=0;
     std::list<RawCoastlineRef> rawCoastlines;
+
+    coastlines.clear();
 
     progress.SetAction("Scanning for coastlines");
 
@@ -228,6 +231,14 @@ namespace osmscout {
           break;
         }
 
+        if (n==0) {
+          coast->frontNodeId=coord->second.GetId();
+        }
+
+        if (n==coastline->GetNodeCount()-1) {
+          coast->backNodeId=coord->second.GetId();
+        }
+
         coast->coast[n].Set(coord->second.GetLat(),coord->second.GetLon());
       }
 
@@ -253,7 +264,8 @@ namespace osmscout {
     return true;
   }
 
-  void WaterIndexGenerator::MergeCoastlines(Progress& progress)
+  void WaterIndexGenerator::MergeCoastlines(Progress& progress,
+                                            std::list<CoastRef>& coastlines)
   {
     progress.SetAction("Merging coastlines");
 
@@ -268,7 +280,7 @@ namespace osmscout {
       CoastRef coast=*c;
 
       if (!coast->isArea) {
-        coastStartMap.insert(std::make_pair(coast->coast.front().GetId(),coast));
+        coastStartMap.insert(std::make_pair(coast->frontNodeId,coast));
 
         c++;
       }
@@ -294,12 +306,13 @@ namespace osmscout {
 
         CoastRef coast=*c;
 
-        std::map<Id,CoastRef>::iterator other=coastStartMap.find(coast->coast.back().GetId());
+        std::map<Id,CoastRef>::iterator other=coastStartMap.find(coast->backNodeId);
 
         if (other!=coastStartMap.end() &&
             blacklist.find(other->second->id)==blacklist.end() &&
             coast->id!=other->second->id) {
           for (size_t i=1; i<other->second->coast.size(); i++) {
+            coast->backNodeId=other->second->backNodeId;
             coast->coast.push_back(other->second->coast[i]);
           }
 
@@ -323,7 +336,7 @@ namespace osmscout {
         continue;
       }
 
-      if (coastline->coast.front().GetId()==coastline->coast.back().GetId()) {
+      if (coastline->frontNodeId==coastline->backNodeId) {
         coastline->isArea=true;
         coastline->coast.pop_back();
 
@@ -347,6 +360,7 @@ namespace osmscout {
    *
    */
   void WaterIndexGenerator::MarkCoastlineCells(Progress& progress,
+                                               const std::list<CoastRef>& coastlines,
                                                Level& level)
   {
     progress.Info("Marking cells containing coastlines");
@@ -1390,6 +1404,7 @@ namespace osmscout {
   void WaterIndexGenerator::HandleCoastlinesPartiallyInACell(const ImportParameter& parameter,
                                                              Progress& progress,
                                                              Projection& projection,
+                                                             const std::list<CoastRef>& coastlines,
                                                              const Level& level,
                                                              std::map<Pixel,std::list<GroundTile> >& cellGroundTileMap,
                                                              Data& data)
@@ -1650,18 +1665,20 @@ namespace osmscout {
                                    Progress& progress,
                                    const TypeConfig& typeConfig)
   {
-    FileScanner        scanner;
+    std::list<CoastRef> coastlines;
 
-    uint32_t           minLonDat;
-    uint32_t           minLatDat;
-    uint32_t           maxLonDat;
-    uint32_t           maxLatDat;
+    FileScanner         scanner;
 
-    std::vector<Level> levels;
+    uint32_t            minLonDat;
+    uint32_t            minLatDat;
+    uint32_t            maxLonDat;
+    uint32_t            maxLatDat;
+
+    std::vector<Level>  levels;
 
     // Calculate size of tile cells for the maximum zoom level
-    double             cellWidth;
-    double             cellHeight;
+    double              cellWidth;
+    double              cellHeight;
 
     //
     // Read bounding box
@@ -1712,9 +1729,11 @@ namespace osmscout {
 
     LoadCoastlines(parameter,
                    progress,
-                   typeConfig);
+                   typeConfig,
+                   coastlines);
 
-    MergeCoastlines(progress);
+    MergeCoastlines(progress,
+                    coastlines);
 
 
     progress.SetAction("Writing 'water.idx'");
@@ -1751,6 +1770,7 @@ namespace osmscout {
 
       if (!coastlines.empty()) {
         MarkCoastlineCells(progress,
+                           coastlines,
                            levels[level]);
 
         GetCoastlineData(parameter,
@@ -1770,6 +1790,7 @@ namespace osmscout {
         HandleCoastlinesPartiallyInACell(parameter,
                                          progress,
                                          projection,
+                                         coastlines,
                                          levels[level],
                                          cellGroundTileMap,
                                          data);

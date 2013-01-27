@@ -59,8 +59,6 @@ namespace osmscout {
   private:
     void TransformGeoToPixel(const Projection& projection,
                              const std::vector<GeoCoord>& nodes);
-    void TransformGeoToPixel(const Projection& projection,
-                             const std::vector<Point>& nodes);
     void DropSimilarPoints(double optimizeErrorTolerance);
     void DropRedundantPointsFast(double optimizeErrorTolerance);
     void DropRedundantPointsDouglasPeucker(double optimizeErrorTolerance, bool isArea);
@@ -93,18 +91,10 @@ namespace osmscout {
                        OptimizeMethod optimize,
                        const std::vector<GeoCoord>& nodes,
                        double optimizeErrorTolerance);
-    void TransformArea(const Projection& projection,
-                       OptimizeMethod optimize,
-                       const std::vector<Point>& nodes,
-                       double optimizeErrorTolerance);
 
     void TransformWay(const Projection& projection,
                       OptimizeMethod optimize,
                       const std::vector<GeoCoord>& nodes,
-                      double optimizeErrorTolerance);
-    void TransformWay(const Projection& projection,
-                      OptimizeMethod optimize,
-                      const std::vector<Point>& nodes,
                       double optimizeErrorTolerance);
 
     bool GetBoundingBox(double& xmin, double& ymin,
