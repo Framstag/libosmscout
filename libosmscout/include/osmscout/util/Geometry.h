@@ -28,6 +28,7 @@
 
 #include <osmscout/system/Types.h>
 
+#include <osmscout/GeoCoord.h>
 #include <osmscout/Point.h>
 #include <iostream>
 namespace osmscout {
@@ -262,6 +263,27 @@ namespace osmscout {
     return c ? 1 : -1;
   }
 
+  inline int GetRelationOfPointToArea(const GeoCoord& point,
+                                      const std::vector<GeoCoord>& nodes)
+  {
+    int  i,j;
+    bool c=false;
+
+    for (i=0, j=nodes.size()-1; i<(int)nodes.size(); j=i++) {
+      if (point==nodes[i]) {
+        return 0;
+      }
+
+      if ((nodes[i].GetLat()>point.GetLat())!=(nodes[j].GetLat()>point.GetLat()) &&
+          (point.GetLon()<(nodes[j].GetLon()-nodes[i].GetLon())*(point.GetLat()-nodes[i].GetLat()) /
+           (nodes[j].GetLat()-nodes[i].GetLat())+nodes[i].GetLon()))  {
+        c=!c;
+      }
+    }
+
+    return c ? 1 : -1;
+  }
+
   /**
     Return true, if area a is completely in area b
     */
@@ -303,6 +325,23 @@ namespace osmscout {
                        const std::vector<M>& b)
   {
     for (typename std::vector<N>::const_iterator i=a.begin(); i!=a.end(); i++) {
+      int relPos=GetRelationOfPointToArea(*i,b);
+
+      if (relPos>0) {
+        return true;
+      }
+      else if (relPos<0) {
+        return false;
+      }
+    }
+
+    return false;
+  }
+
+  inline bool IsAreaSubOfArea(const std::vector<GeoCoord>& a,
+                              const std::vector<GeoCoord>& b)
+  {
+    for (typename std::vector<GeoCoord>::const_iterator i=a.begin(); i!=a.end(); i++) {
       int relPos=GetRelationOfPointToArea(*i,b);
 
       if (relPos>0) {

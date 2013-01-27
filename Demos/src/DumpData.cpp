@@ -366,7 +366,7 @@ static void DumpWay(const osmscout::TypeConfig* typeConfig,
     std::cout << std::endl;
 
     for (size_t n=0; n<way->nodes.size(); n++) {
-      std::cout << "  node[" << n << "] { id: " << way->nodes[n].GetId() << " lat: " << way->nodes[n].GetLat() << " lon: "<< way->nodes[n].GetLon() << " }" << std::endl;
+      std::cout << "  node[" << n << "] { id: " << way->ids[n] << " lat: " << way->nodes[n].GetLat() << " lon: "<< way->nodes[n].GetLon() << " }" << std::endl;
     }
   }
 

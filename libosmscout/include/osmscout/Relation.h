@@ -20,7 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/Point.h>
+#include <osmscout/GeoCoord.h>
 
 #include <osmscout/SegmentAttributes.h>
 #include <osmscout/TypeConfig.h>
@@ -40,10 +40,11 @@ namespace osmscout {
     class Role
     {
     public:
-      SegmentAttributes  attributes;
-      std::string        role;
-      uint8_t            ring;
-      std::vector<Point> nodes;
+      SegmentAttributes     attributes;
+      std::string           role;
+      uint8_t               ring;
+      std::vector<Id>       ids;
+      std::vector<GeoCoord> nodes;
 
     public:
       inline const SegmentAttributes& GetAttributes() const

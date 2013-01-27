@@ -60,6 +60,11 @@ namespace osmscout {
       return lon;
     }
 
+    inline bool IsEqual(const GeoCoord& other) const
+    {
+      return lat==other.lat && lon==other.lon;
+    }
+
     inline bool operator==(const GeoCoord& other) const
     {
       return lat==other.lat && lon==other.lon;

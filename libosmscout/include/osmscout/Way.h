@@ -20,7 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/Point.h>
+#include <osmscout/GeoCoord.h>
 #include <osmscout/SegmentAttributes.h>
 #include <osmscout/Tag.h>
 #include <osmscout/TypeConfig.h>
@@ -34,11 +34,12 @@ namespace osmscout {
   class OSMSCOUT_API Way : public Referencable
   {
   private:
-    FileOffset         fileOffset;
-    SegmentAttributes  attributes;
+    FileOffset            fileOffset;
+    SegmentAttributes     attributes;
 
   public:
-    std::vector<Point> nodes;
+    std::vector<Id>       ids;
+    std::vector<GeoCoord> nodes;
 
   public:
     inline Way()

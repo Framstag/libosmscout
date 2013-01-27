@@ -878,6 +878,7 @@ namespace osmscout {
           continue;
         }
 
+        way.ids.resize(block[w]->GetNodeCount());
         way.nodes.resize(block[w]->GetNodeCount());
 
         bool success=true;
@@ -893,7 +894,8 @@ namespace osmscout {
             break;
           }
 
-          way.nodes[n]=coord->second;
+          way.ids[n]=coord->second.GetId();
+          way.nodes[n].Set(coord->second.GetLat(),coord->second.GetLon());
         }
 
         if (!success) {
@@ -901,6 +903,7 @@ namespace osmscout {
         }
 
         if (reverseNodes) {
+          std::reverse(way.ids.begin(),way.ids.end());
           std::reverse(way.nodes.begin(),way.nodes.end());
         }
 
@@ -921,7 +924,7 @@ namespace osmscout {
           size_t                          startNodeJointCount=0;
           size_t                          endNodeJointCount=0;
 
-          wayJoint=endPointWayMap.find(way.nodes.front().GetId());
+          wayJoint=endPointWayMap.find(way.ids.front());
 
           if (wayJoint!=endPointWayMap.end()) {
             for (std::list<Id>::const_iterator jointWayId=wayJoint->second.begin();
@@ -938,12 +941,12 @@ namespace osmscout {
           }
 
           if (startNodeJointCount==0) {
-            areaJoint=endPointAreaSet.find(way.nodes.front().GetId());
+            areaJoint=endPointAreaSet.find(way.ids.front());
           }
 
           way.SetStartIsJoint(startNodeJointCount>0 || areaJoint!=endPointAreaSet.end());
 
-          wayJoint=endPointWayMap.find(way.nodes.back().GetId());
+          wayJoint=endPointWayMap.find(way.ids.back());
 
           if (wayJoint!=endPointWayMap.end()) {
             for (std::list<Id>::const_iterator jointWayId=wayJoint->second.begin();
@@ -960,7 +963,7 @@ namespace osmscout {
           }
 
           if (endNodeJointCount==0) {
-            areaJoint=endPointAreaSet.find(way.nodes.back().GetId());
+            areaJoint=endPointAreaSet.find(way.ids.back());
           }
 
           way.SetEndIsJoint(endNodeJointCount>0 || areaJoint!=endPointAreaSet.end());

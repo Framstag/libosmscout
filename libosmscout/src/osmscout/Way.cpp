@@ -108,7 +108,7 @@ namespace osmscout {
                            double& lon) const
   {
     for (size_t i=0; i<nodes.size(); i++) {
-      if (nodes[i].GetId()==nodeId) {
+      if (ids[i]==nodeId) {
         lat=nodes[i].GetLat();
         lon=nodes[i].GetLon();
 
@@ -139,22 +139,29 @@ namespace osmscout {
     uint32_t minLat;
     uint32_t minLon;
 
-    scanner.ReadNumber(minId),
+    scanner.ReadNumber(minId);
+
+    ids.resize(nodeCount);
+    for (size_t i=0; i<nodeCount; i++) {
+      Id id;
+
+      scanner.ReadNumber(id);
+
+      ids[i]=minId+id;
+    }
+
     scanner.Read(minLat);
     scanner.Read(minLon);
 
     nodes.resize(nodeCount);
     for (size_t i=0; i<nodeCount; i++) {
-      Id       id;
       uint32_t latValue;
       uint32_t lonValue;
 
-      scanner.ReadNumber(id);
       scanner.ReadNumber(latValue);
       scanner.ReadNumber(lonValue);
 
-      nodes[i].Set(minId+id,
-                   (minLat+latValue)/conversionFactor-90.0,
+      nodes[i].Set((minLat+latValue)/conversionFactor-90.0,
                    (minLon+lonValue)/conversionFactor-180.0);
     }
 
@@ -171,14 +178,23 @@ namespace osmscout {
 
     writer.WriteNumber((uint32_t)nodes.size());
 
-    Id       minId=nodes[0].GetId();
+    Id       minId=ids[0];
     double   minLat=nodes[0].GetLat();
     double   minLon=nodes[0].GetLon();
     uint32_t minLatValue;
     uint32_t minLonValue;
 
+    for (size_t i=1; i<ids.size(); i++) {
+      minId=std::min(minId,ids[i]);
+    }
+
+    writer.WriteNumber(minId);
+
+    for (size_t i=0; i<nodes.size(); i++) {
+      writer.WriteNumber(ids[i]-minId);
+    }
+
     for (size_t i=1; i<nodes.size(); i++) {
-      minId=std::min(minId,nodes[i].GetId());
       minLat=std::min(minLat,nodes[i].GetLat());
       minLon=std::min(minLon,nodes[i].GetLon());
     }
@@ -186,7 +202,6 @@ namespace osmscout {
     minLatValue=(uint32_t)round((minLat+90.0)*conversionFactor);
     minLonValue=(uint32_t)round((minLon+180.0)*conversionFactor);
 
-    writer.WriteNumber(minId);
     writer.Write(minLatValue);
     writer.Write(minLonValue);
 
@@ -194,7 +209,6 @@ namespace osmscout {
       uint32_t latValue=(uint32_t)round((nodes[i].GetLat()-minLat)*conversionFactor);
       uint32_t lonValue=(uint32_t)round((nodes[i].GetLon()-minLon)*conversionFactor);
 
-      writer.WriteNumber(nodes[i].GetId()-minId);
       writer.WriteNumber(latValue);
       writer.WriteNumber(lonValue);
     }

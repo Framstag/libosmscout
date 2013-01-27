@@ -176,6 +176,20 @@ namespace osmscout {
   }
 
   void TransPolygon::TransformGeoToPixel(const Projection& projection,
+                                         const std::vector<GeoCoord>& nodes)
+  {
+    Projection::BatchTransformer batchTransformer(projection);
+
+    for (size_t i=0; i<nodes.size(); i++) {
+       batchTransformer.GeoToPixel(nodes[i].GetLon(),
+                                   nodes[i].GetLat(),
+                                   points[i].x,
+                                   points[i].y);
+      points[i].draw=true;
+    }
+  }
+
+  void TransPolygon::TransformGeoToPixel(const Projection& projection,
                                          const std::vector<Point>& nodes)
   {
     Projection::BatchTransformer batchTransformer(projection);
@@ -332,6 +346,64 @@ namespace osmscout {
 
   void TransPolygon::TransformArea(const Projection& projection,
                                    OptimizeMethod optimize,
+                                   const std::vector<GeoCoord>& nodes,
+                                   double optimizeErrorTolerance)
+  {
+    if (nodes.size()<2) {
+      length=0;
+
+      return;
+    }
+
+    if (pointsSize<nodes.size()) {
+      delete [] points;
+
+      points=new TransPoint[nodes.size()];
+      pointsSize=nodes.size();
+    }
+
+    if (optimize!=none) {
+      TransformGeoToPixel(projection,
+                          nodes);
+
+      DropSimilarPoints(optimizeErrorTolerance);
+
+      if (optimize==fast) {
+        DropRedundantPointsFast(optimizeErrorTolerance);
+      }
+      else {
+        DropRedundantPointsDouglasPeucker(optimizeErrorTolerance,true);
+      }
+
+      length=0;
+      start=nodes.size();
+      end=0;
+
+      // Calculate start, end and length
+      for (size_t i=0; i<nodes.size(); i++) {
+        if (points[i].draw) {
+          length++;
+
+          if (i<start) {
+            start=i;
+          }
+
+          end=i;
+        }
+      }
+    }
+    else {
+      TransformGeoToPixel(projection,
+                          nodes);
+
+      start=0;
+      end=nodes.size()-1;
+      length=nodes.size();
+    }
+  }
+
+  void TransPolygon::TransformArea(const Projection& projection,
+                                   OptimizeMethod optimize,
                                    const std::vector<Point>& nodes,
                                    double optimizeErrorTolerance)
   {
@@ -374,6 +446,63 @@ namespace osmscout {
             start=i;
           }
 
+          end=i;
+        }
+      }
+    }
+    else {
+      TransformGeoToPixel(projection,
+                          nodes);
+
+      start=0;
+      end=nodes.size()-1;
+      length=nodes.size();
+    }
+  }
+
+  void TransPolygon::TransformWay(const Projection& projection,
+                                  OptimizeMethod optimize,
+                                  const std::vector<GeoCoord>& nodes,
+                                  double optimizeErrorTolerance)
+  {
+    if (nodes.empty()) {
+      length=0;
+
+      return;
+    }
+
+    if (pointsSize<nodes.size()) {
+      delete [] points;
+
+      points=new TransPoint[nodes.size()];
+      pointsSize=nodes.size();
+    }
+
+    if (optimize!=none) {
+      TransformGeoToPixel(projection,
+                          nodes);
+
+      DropSimilarPoints(optimizeErrorTolerance);
+
+      if (optimize==fast){
+        DropRedundantPointsFast(optimizeErrorTolerance);
+      }
+      else {
+        DropRedundantPointsDouglasPeucker(optimizeErrorTolerance,false);
+      }
+
+      length=0;
+      start=nodes.size();
+      end=0;
+
+      // Calculate start & end
+      for (size_t i=0; i<nodes.size(); i++) {
+        if (points[i].draw) {
+          length++;
+
+          if (i<start) {
+            start=i;
+          }
           end=i;
         }
       }
@@ -533,7 +662,7 @@ namespace osmscout {
 
   void TransBuffer::TransformArea(const Projection& projection,
                                   TransPolygon::OptimizeMethod optimize,
-                                  const std::vector<Point>& nodes,
+                                  const std::vector<GeoCoord>& nodes,
                                   size_t& start, size_t &end,
                                   double optimizeErrorTolerance)
   {
@@ -557,7 +686,7 @@ namespace osmscout {
 
   bool TransBuffer::TransformWay(const Projection& projection,
                     TransPolygon::OptimizeMethod optimize,
-                    const std::vector<Point>& nodes,
+                    const std::vector<GeoCoord>& nodes,
                     size_t& start, size_t &end,
                     double optimizeErrorTolerance)
   {

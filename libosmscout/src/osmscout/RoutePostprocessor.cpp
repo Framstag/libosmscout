@@ -97,7 +97,7 @@ namespace osmscout {
         }
 
         for (size_t i=0; i<nextWay->nodes.size(); i++) {
-          if (nextWay->nodes[i].GetId()==iter->GetCurrentNodeId()) {
+          if (nextWay->ids[i]==iter->GetCurrentNodeId()) {
             nextNode=i;
             break;
           }
@@ -219,16 +219,16 @@ namespace osmscout {
         // Way is origin way and starts or end here so it is not an additional crossing way
         if (originWay.Valid() &&
             way->second->GetFileOffset()==originWay->GetFileOffset() &&
-            (way->second->nodes.front().GetId()==node.GetCurrentNodeId() ||
-             way->second->nodes.back().GetId()==node.GetCurrentNodeId())) {
+            (way->second->ids.front()==node.GetCurrentNodeId() ||
+             way->second->ids.back()==node.GetCurrentNodeId())) {
           continue;
         }
 
         // Way is target way and starts or end here so it is not an additional crossing way
         if (targetWay.Valid() &&
             way->second->GetFileOffset()==targetWay->GetFileOffset() &&
-            (way->second->nodes.front().GetId()==node.GetCurrentNodeId() ||
-             way->second->nodes.back().GetId()==node.GetCurrentNodeId())) {
+            (way->second->ids.front()==node.GetCurrentNodeId() ||
+             way->second->ids.back()==node.GetCurrentNodeId())) {
           continue;
         }
 

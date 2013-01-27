@@ -156,7 +156,7 @@ namespace osmscout {
     routeNode=NULL;
 
     for (size_t i=nodeIndex; i<way->nodes.size(); i++) {
-      routeNodeDataFile.Get(way->nodes[i].GetId(),
+      routeNodeDataFile.Get(way->ids[i],
                             routeNode);
 
       if (routeNode.Valid()) {
@@ -179,7 +179,7 @@ namespace osmscout {
 
     if (!way->IsOneway()) {
       for (int i=nodeIndex-1; i>=0; i--) {
-        routeNodeDataFile.Get(way->nodes[i].GetId(),routeNode);
+        routeNodeDataFile.Get(way->ids[i],routeNode);
 
         if (routeNode.Valid()) {
           routeNodeIndex=(size_t)i;
@@ -226,13 +226,13 @@ namespace osmscout {
 
     size_t start=0;
     while (start<way->nodes.size() &&
-        way->nodes[start].GetId()!=startNodeId) {
+        way->ids[start]!=startNodeId) {
       start++;
     }
 
     size_t end=0;
     while (end<way->nodes.size() &&
-        way->nodes[end].GetId()!=targetNodeId) {
+        way->ids[end]!=targetNodeId) {
       end++;
     }
 
@@ -242,24 +242,24 @@ namespace osmscout {
     }
 
     if (std::max(start,end)-std::min(start,end)==1) {
-      route.AddEntry(way->nodes[start].GetId(),
+      route.AddEntry(way->ids[start],
                      startPaths,
                      wayOffset,
                      targetNodeId);
     }
     else if (start<end) {
-      route.AddEntry(way->nodes[start].GetId(),
+      route.AddEntry(way->ids[start],
                      startPaths,
                      wayOffset,
-                     way->nodes[start+1].GetId());
+                     way->ids[start+1]);
 
       for (size_t i=start+1; i<end-1; i++) {
-        route.AddEntry(way->nodes[i].GetId(),
+        route.AddEntry(way->ids[i],
                        wayOffset,
-                       way->nodes[i+1].GetId());
+                       way->ids[i+1]);
       }
 
-      route.AddEntry(way->nodes[end-1].GetId(),
+      route.AddEntry(way->ids[end-1],
                      wayOffset,
                      targetNodeId);
     }
@@ -279,12 +279,12 @@ namespace osmscout {
       route.AddEntry(startNodeId,
                      startPaths,
                      wayOffset,
-                     way->nodes[pos].GetId());
+                     way->ids[pos]);
 
-      while (way->nodes[next].GetId()!=way->nodes[end].GetId()) {
-        route.AddEntry(way->nodes[pos].GetId(),
+      while (way->ids[next]!=way->ids[end]) {
+        route.AddEntry(way->ids[pos],
                        wayOffset,
-                       way->nodes[next].GetId());
+                       way->ids[next]);
 
         pos++;
         if (pos>=way->nodes.size()) {
@@ -297,23 +297,23 @@ namespace osmscout {
         }
       }
 
-      route.AddEntry(way->nodes[pos].GetId(),
+      route.AddEntry(way->ids[pos],
                      wayOffset,
                      targetNodeId);
     }
     else {
-      route.AddEntry(way->nodes[start].GetId(),
+      route.AddEntry(way->ids[start],
                      startPaths,
                      wayOffset,
-                     way->nodes[start-1].GetId());
+                     way->ids[start-1]);
 
       for (int i=start-1; i>(int)end+1; i--) {
-        route.AddEntry(way->nodes[i].GetId(),
+        route.AddEntry(way->ids[i],
                        wayOffset,
-                       way->nodes[i-1].GetId());
+                       way->ids[i-1]);
       }
 
-      route.AddEntry(way->nodes[end+1].GetId(),
+      route.AddEntry(way->ids[end+1],
                      wayOffset,
                      targetNodeId);
     }
@@ -356,14 +356,14 @@ namespace osmscout {
       return false;
     }
 
-    startNodeId=startWay->nodes[startNodeIndex].GetId();
+    startNodeId=startWay->ids[startNodeIndex];
 
     if (!wayDataFile.GetByOffset(targetWayOffset,targetWay)) {
       std::cerr << "Cannot load way with id " << targetWayOffset << std::endl;
       return false;
     }
 
-    targetNodeId=targetWay->nodes[targetNodeIndex].GetId();
+    targetNodeId=targetWay->ids[targetNodeIndex];
 
     if (nodes.empty()) {
       AddNodes(route,
@@ -872,7 +872,8 @@ namespace osmscout {
         // Initial starting point
         if (iter==data.Entries().begin()) {
           for (size_t i=0; i<w->nodes.size(); i++) {
-            if (w->nodes[i].GetId()==iter->GetCurrentNodeId()) {
+            if (w->ids[i]==iter->GetCurrentNodeId()) {
+              way.ids.push_back(w->ids[i]);
               way.nodes.push_back(w->nodes[i]);
               break;
             }
@@ -880,7 +881,8 @@ namespace osmscout {
         }
 
         for (size_t i=0; i<w->nodes.size(); i++) {
-          if (w->nodes[i].GetId()==iter->GetTargetNodeId()) {
+          if (w->ids[i]==iter->GetTargetNodeId()) {
+            way.ids.push_back(w->ids[i]);
             way.nodes.push_back(w->nodes[i]);
             break;
           }
@@ -918,8 +920,8 @@ namespace osmscout {
         // Initial starting point
         if (iter==data.Entries().begin()) {
           for (size_t i=0; i<w->nodes.size(); i++) {
-            if (w->nodes[i].GetId()==iter->GetCurrentNodeId()) {
-              points.push_back(Point(w->nodes[i].GetId(),
+            if (w->ids[i]==iter->GetCurrentNodeId()) {
+              points.push_back(Point(w->ids[i],
                                      w->nodes[i].GetLat(),
                                      w->nodes[i].GetLon()));
               break;
@@ -929,10 +931,10 @@ namespace osmscout {
 
         // target node of current path
         for (size_t i=0; i<w->nodes.size(); i++) {
-          if (w->nodes[i].GetId()==iter->GetTargetNodeId()) {
+          if (w->ids[i]==iter->GetTargetNodeId()) {
             Point point;
 
-            point.Set(w->nodes[i].GetId(),
+            point.Set(w->ids[i],
                       w->nodes[i].GetLat(),
                       w->nodes[i].GetLon());
 

@@ -233,7 +233,7 @@ namespace osmscout {
   }
 
   bool MapPainter::IsVisible(const Projection& projection,
-                             const std::vector<Point>& nodes,
+                             const std::vector<GeoCoord>& nodes,
                              double pixelOffset) const
   {
     if (nodes.empty()) {
@@ -441,7 +441,7 @@ namespace osmscout {
                           x,y);
   }
 
-  bool MapPainter::GetBoundingBox(const std::vector<Point>& nodes,
+  bool MapPainter::GetBoundingBox(const std::vector<GeoCoord>& nodes,
                                   double& xmin, double& ymin,
                                   double& xmax, double& ymax) const
   {
@@ -465,7 +465,7 @@ namespace osmscout {
   }
 
   bool MapPainter::GetCenterPixel(const Projection& projection,
-                                  const std::vector<Point>& nodes,
+                                  const std::vector<GeoCoord>& nodes,
                                   double& cx,
                                   double& cy) const
   {
@@ -525,12 +525,12 @@ namespace osmscout {
       return;
     }
 
-    FillStyleRef       seaFill;
-    FillStyleRef       coastFill;
-    FillStyleRef       unknownFill;
-    LineStyleRef       coastlineLine;
-    std::vector<Point> points;
-    size_t             start,end;
+    FillStyleRef          seaFill;
+    FillStyleRef          coastFill;
+    FillStyleRef          unknownFill;
+    LineStyleRef          coastlineLine;
+    std::vector<GeoCoord> points;
+    size_t                start,end;
 
     styleConfig.GetSeaFillStyle(projection,
                                 seaFill);
@@ -977,7 +977,7 @@ namespace osmscout {
                                  const Projection& projection,
                                  const MapParameter& parameter,
                                  const SegmentAttributes& attributes,
-                                 const std::vector<Point>& nodes)
+                                 const std::vector<GeoCoord>& nodes)
   {
     TextStyleRef  textStyle;
     IconStyleRef  iconStyle;
@@ -1530,7 +1530,7 @@ namespace osmscout {
                                       const MapParameter& parameter,
                                       const ObjectFileRef& ref,
                                       const SegmentAttributes& attributes,
-                                      const std::vector<Point>& nodes)
+                                      const std::vector<GeoCoord>& nodes)
   {
     FillStyleRef fillStyle;
 
@@ -1731,7 +1731,7 @@ namespace osmscout {
                                      const MapParameter& parameter,
                                      const ObjectFileRef& ref,
                                      const SegmentAttributes& attributes,
-                                     const std::vector<Point>& nodes)
+                                     const std::vector<GeoCoord>& nodes)
   {
     LineStyleRef lineStyle;
 

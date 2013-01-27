@@ -46,7 +46,7 @@
 
 namespace osmscout {
 
-  GroundTile::Coord WaterIndexGenerator::Transform(const Point& point,
+  GroundTile::Coord WaterIndexGenerator::Transform(const GeoCoord& point,
                                                    const Level& level,
                                                    double cellMinLat,
                                                    double cellMinLon,
@@ -228,7 +228,7 @@ namespace osmscout {
           break;
         }
 
-        coast->coast[n]=coord->second;
+        coast->coast[n].Set(coord->second.GetLat(),coord->second.GetLon());
       }
 
       if (!processingError) {
@@ -343,7 +343,7 @@ namespace osmscout {
 
 
   /**
-   * Markes as cells as "coast", if one of the coastlines intersects with it..
+   * Markes a cell as "coast", if one of the coastlines intersects with it..
    *
    */
   void WaterIndexGenerator::MarkCoastlineCells(Progress& progress,
@@ -856,7 +856,7 @@ namespace osmscout {
     }
   }
 
-  static bool IsLeftOnSameBorder(size_t border, const Point& a,const Point& b)
+  static bool IsLeftOnSameBorder(size_t border, const GeoCoord& a,const GeoCoord& b)
   {
     switch (border) {
     case 0:
@@ -875,8 +875,8 @@ namespace osmscout {
   }
 
   void WaterIndexGenerator::GetCells(const Level& level,
-                                     const Point& a,
-                                     const Point& b,
+                                     const GeoCoord& a,
+                                     const GeoCoord& b,
                                      std::set<Pixel>& cellIntersections)
   {
     uint32_t cx1=(uint32_t)((a.GetLon()+180.0)/level.cellWidth);
@@ -891,19 +891,19 @@ namespace osmscout {
       for (size_t x=std::min(cx1,cx2); x<=std::max(cx1,cx2); x++) {
         for (size_t y=std::min(cy1,cy2); y<=std::max(cy1,cy2); y++) {
 
-          Pixel  coord(x,y);
-          Point  borderPoints[5];
-          double lonMin,lonMax,latMin,latMax;
+          Pixel    coord(x,y);
+          GeoCoord borderPoints[5];
+          double   lonMin,lonMax,latMin,latMax;
 
           lonMin=x*level.cellWidth-180.0;
           lonMax=lonMin+level.cellWidth;
           latMin=y*level.cellHeight-90.0;
           latMax=latMin+level.cellHeight;
 
-          borderPoints[0]=Point(1,latMax,lonMin); // top left
-          borderPoints[1]=Point(2,latMax,lonMax); // top right
-          borderPoints[2]=Point(3,latMin,lonMax); // bottom right
-          borderPoints[3]=Point(4,latMin,lonMin); // bottom left
+          borderPoints[0].Set(latMax,lonMin); // top left
+          borderPoints[1].Set(latMax,lonMax); // top right
+          borderPoints[2].Set(latMin,lonMax); // bottom right
+          borderPoints[3].Set(latMin,lonMin); // bottom left
           borderPoints[4]=borderPoints[0];    // To avoid "% 4" on all indexes
 
           size_t corner=0;
@@ -926,7 +926,7 @@ namespace osmscout {
   }
 
   void WaterIndexGenerator::GetCells(const Level& level,
-                                     const std::vector<Point>& points,
+                                     const std::vector<GeoCoord>& points,
                                      std::set<Pixel>& cellIntersections)
   {
     for (size_t p=0; p<points.size()-1; p++) {
@@ -934,8 +934,20 @@ namespace osmscout {
     }
   }
 
+  void WaterIndexGenerator::GetCells(const Level& level,
+                                     const std::vector<Point>& points,
+                                     std::set<Pixel>& cellIntersections)
+  {
+    for (size_t p=0; p<points.size()-1; p++) {
+      GetCells(level,
+               GeoCoord(points[p].GetLat(),points[p].GetLon()),
+               GeoCoord(points[p+1].GetLat(),points[p+1].GetLon()),
+               cellIntersections);
+    }
+  }
+
   void WaterIndexGenerator::GetCellIntersections(const Level& level,
-                                                 const std::vector<Point>& points,
+                                                 const std::vector<GeoCoord>& points,
                                                  size_t coastline,
                                                  std::map<Pixel,std::list<Intersection> >& cellIntersections)
   {
@@ -954,19 +966,19 @@ namespace osmscout {
               continue;
             }
 
-            Pixel  coord(x-level.cellXStart,y-level.cellYStart);
-            Point  borderPoints[5];
-            double lonMin,lonMax,latMin,latMax;
+            Pixel    coord(x-level.cellXStart,y-level.cellYStart);
+            GeoCoord borderPoints[5];
+            double   lonMin,lonMax,latMin,latMax;
 
             lonMin=x*level.cellWidth-180.0;
             lonMax=(x+1)*level.cellWidth-180.0;
             latMin=y*level.cellHeight-90.0;
             latMax=(y+1)*level.cellHeight-90.0;
 
-            borderPoints[0]=Point(1,latMax,lonMin); // top left
-            borderPoints[1]=Point(2,latMax,lonMax); // top right
-            borderPoints[2]=Point(3,latMin,lonMax); // bottom right
-            borderPoints[3]=Point(4,latMin,lonMin); // bottom left
+            borderPoints[0].Set(latMax,lonMin); // top left
+            borderPoints[1].Set(latMax,lonMax); // top right
+            borderPoints[2].Set(latMin,lonMax); // bottom right
+            borderPoints[3].Set(latMin,lonMin); // bottom left
             borderPoints[4]=borderPoints[0];    // To avoid modula 4 on all indexes
 
             size_t       intersectionCount=0;
@@ -1190,7 +1202,7 @@ namespace osmscout {
       data.coastlines[curCoast].points.reserve(polygon.GetLength());
       for (size_t p=polygon.GetStart(); p<=polygon.GetEnd(); p++) {
         if (polygon.points[p].draw) {
-          data.coastlines[curCoast].points.push_back(coast->coast[p]);
+          data.coastlines[curCoast].points.push_back(GeoCoord(coast->coast[p].GetLat(),coast->coast[p].GetLon()));
         }
       }
 
@@ -1324,7 +1336,7 @@ namespace osmscout {
                                          double cellMinLon,
                                          const IntersectionPtr& outgoing,
                                          const IntersectionPtr& incoming,
-                                         const std::vector<Point>& points,
+                                         const std::vector<GeoCoord>& points,
                                          bool isArea)
   {
     groundTile.coords.back().coast=true;

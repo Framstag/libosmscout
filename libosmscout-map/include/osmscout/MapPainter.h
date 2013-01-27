@@ -420,7 +420,7 @@ namespace osmscout {
                             const MapParameter& parameter,
                             const ObjectFileRef& ref,
                             const SegmentAttributes& attributes,
-                            const std::vector<Point>& nodes);
+                            const std::vector<GeoCoord>& nodes);
 
     void PrepareAreas(const StyleConfig& styleConfig,
                       const Projection& projection,
@@ -432,7 +432,7 @@ namespace osmscout {
                            const MapParameter& parameter,
                            const ObjectFileRef& ref,
                            const SegmentAttributes& attributes,
-                           const std::vector<Point>& nodes);
+                           const std::vector<GeoCoord>& nodes);
 
     void PrepareWays(const StyleConfig& styleConfig,
                      const Projection& projection,
@@ -471,7 +471,7 @@ namespace osmscout {
                        const Projection& projection,
                        const MapParameter& parameter,
                        const SegmentAttributes& attributes,
-                       const std::vector<Point>& nodes);
+                       const std::vector<GeoCoord>& nodes);
 
     void DrawAreaLabels(const StyleConfig& styleConfig,
                         const Projection& projection,
@@ -494,7 +494,7 @@ namespace osmscout {
      */
     //@{
     bool IsVisible(const Projection& projection,
-                   const std::vector<Point>& nodes,
+                   const std::vector<GeoCoord>& nodes,
                    double pixelOffset) const;
 
     void Transform(const Projection& projection,
@@ -504,11 +504,11 @@ namespace osmscout {
                    double& x,
                    double& y);
 
-    bool GetBoundingBox(const std::vector<Point>& nodes,
+    bool GetBoundingBox(const std::vector<GeoCoord>& nodes,
                         double& xmin, double& ymin,
                         double& xmax, double& ymax) const;
     bool GetCenterPixel(const Projection& projection,
-                        const std::vector<Point>& nodes,
+                        const std::vector<GeoCoord>& nodes,
                         double& cx,
                         double& cy) const;
 

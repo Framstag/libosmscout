@@ -25,6 +25,8 @@
 
 #include <osmscout/CoreFeatures.h>
 
+#include <osmscout/Point.h>
+
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/RouteNode.h>

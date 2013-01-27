@@ -174,8 +174,8 @@ namespace osmscout {
         rings.push_back(*part);
       }
       else {
-        partsByEnd[part->role.nodes.front().GetId()].push_back(&(*part));
-        partsByEnd[part->role.nodes.back().GetId()].push_back(&(*part));
+        partsByEnd[part->role.ids.front()].push_back(&(*part));
+        partsByEnd[part->role.ids.back()].push_back(&(*part));
       }
     }
 
@@ -225,7 +225,7 @@ namespace osmscout {
 
         ringParts.push_back(part);
         nodeCount=part->role.nodes.size();
-        backId=part->role.nodes.back().GetId();
+        backId=part->role.ids.back();
 
         while (true) {
           std::map<Id, std::list<MultipolygonPart*> >::iterator match=partsByEnd.find(backId);
@@ -241,11 +241,11 @@ namespace osmscout {
             }
 
             if (otherPart!=match->second.end()) {
-              if (backId==(*otherPart)->role.nodes.front().GetId()) {
-                backId=(*otherPart)->role.nodes.back().GetId();
+              if (backId==(*otherPart)->role.ids.front()) {
+                backId=(*otherPart)->role.ids.back();
               }
               else {
-                backId=(*otherPart)->role.nodes.front().GetId();
+                backId=(*otherPart)->role.ids.front();
               }
 
               ring.ways.push_back((*otherPart)->ways.front());
@@ -264,6 +264,7 @@ namespace osmscout {
           break;
         }
 
+        ring.role.ids.reserve(nodeCount);
         ring.role.nodes.reserve(nodeCount);
 
         for (std::list<MultipolygonPart*>::const_iterator p=ringParts.begin();
@@ -273,11 +274,13 @@ namespace osmscout {
 
           if (p==ringParts.begin()) {
             for (size_t i=0; i<part->role.nodes.size(); i++) {
+              ring.role.ids.push_back(part->role.ids[i]);
               ring.role.nodes.push_back(part->role.nodes[i]);
             }
           }
-          else if (ring.role.nodes.back().GetId()==part->role.nodes.front().GetId()) {
+          else if (ring.role.ids.back()==part->role.ids.front()) {
             for (size_t i=1; i<part->role.nodes.size(); i++) {
+              ring.role.ids.push_back(part->role.ids[i]);
               ring.role.nodes.push_back(part->role.nodes[i]);
             }
           }
@@ -285,6 +288,7 @@ namespace osmscout {
             for (size_t i=1; i<part->role.nodes.size(); i++) {
               size_t idx=part->role.nodes.size()-1-i;
 
+              ring.role.ids.push_back(part->role.ids[idx]);
               ring.role.nodes.push_back(part->role.nodes[idx]);
             }
           }
@@ -292,7 +296,8 @@ namespace osmscout {
 
         // During concatination we might define a closed ring with start==end, but everywhere else
         // in the code we store areas without repeating the start, so we remove the final node again
-        if (ring.role.nodes.back().GetId()==ring.role.nodes.front().GetId()) {
+        if (ring.role.ids.back()==ring.role.ids.front()) {
+          ring.role.ids.pop_back();
           ring.role.nodes.pop_back();
         }
 
@@ -488,6 +493,7 @@ namespace osmscout {
         part.role.ring=0;
         part.role.role=member->role;
 
+        part.role.ids.reserve(way->GetNodeCount());
         part.role.nodes.reserve(way->GetNodeCount());
         for (std::vector<Id>::const_iterator id=way->GetNodes().begin();
              id!=way->GetNodes().end();
@@ -505,7 +511,8 @@ namespace osmscout {
             return false;
           }
 
-          part.role.nodes.push_back(coordEntry->second);
+          part.role.ids.push_back(coordEntry->second.GetId());
+          part.role.nodes.push_back(GeoCoord(coordEntry->second.GetLat(),coordEntry->second.GetLon()));
         }
 
         part.ways.push_back(way);

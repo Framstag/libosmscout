@@ -79,7 +79,7 @@ namespace osmscout {
     std::string                          name;      //! The name of this area
 
     std::list<RegionAlias>               aliases;   //! Location that are represented by this region
-    std::vector<Point>                   area;      //! the geometric area of this region
+    std::vector<GeoCoord>                area;      //! the geometric area of this region
 
     double                               minlon;
     double                               minlat;
@@ -113,24 +113,24 @@ namespace osmscout {
 
   struct Boundary
   {
-    ObjectFileRef                    reference;
-    std::string                      name;
-    size_t                           level;
-    std::vector<std::vector<Point> > areas;
+    ObjectFileRef                       reference;
+    std::string                         name;
+    size_t                              level;
+    std::vector<std::vector<GeoCoord> > areas;
   };
 
   struct CityArea
   {
-    ObjectFileRef      reference;
-    std::string        name;
-    std::vector<Point> nodes;
+    ObjectFileRef         reference;
+    std::string           name;
+    std::vector<GeoCoord> nodes;
   };
 
   struct CityNode
   {
     ObjectFileRef reference;
     std::string   name;
-    Point         node;
+    GeoCoord      node;
   };
 
 
@@ -196,7 +196,7 @@ namespace osmscout {
 
         cityNode.reference.Set(node.GetFileOffset(),refNode);
         cityNode.name=name;
-        cityNode.node.Set(0/*IGNORE*/,node.GetLat(),node.GetLon());
+        cityNode.node.Set(node.GetLat(),node.GetLon());
 
         cityNodes.push_back(cityNode);
       }
@@ -281,7 +281,7 @@ namespace osmscout {
         std::list<CityNode>::iterator node=cityNodes.begin();
         while (hits<=1 &&
                node!=cityNodes.end()) {
-          if (IsPointInArea(node->node,area->nodes)) {
+          if (IsCoordInArea(node->node,area->nodes)) {
             hits++;
 
             if (candidate==cityNodes.end()) {
@@ -503,7 +503,7 @@ namespace osmscout {
 
   static void AddLocationToRegion(Region& area,
                                   const RegionAlias& location,
-                                  const Point& node)
+                                  const GeoCoord& node)
                                 {
     if (area.name==location.name) {
       return;
@@ -645,7 +645,7 @@ namespace osmscout {
           !(maxlat<a->minlat) &&
           !(minlat>a->maxlat)) {
         // Check if one point is in the area
-        bool match=IsPointInArea(way.nodes[0],a->area);
+        bool match=IsCoordInArea(way.nodes[0],a->area);
 
         if (match) {
           bool completeMatch=AddWayToRegion(*a,way,minlon,minlat,maxlon,maxlat);

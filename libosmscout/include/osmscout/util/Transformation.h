@@ -24,7 +24,9 @@
 
 #include <osmscout/private/CoreImportExport.h>
 
+#include <osmscout/GeoCoord.h>
 #include <osmscout/Point.h>
+
 #include <osmscout/util/Projection.h>
 
 namespace osmscout {
@@ -55,6 +57,8 @@ namespace osmscout {
     TransPoint* points;
 
   private:
+    void TransformGeoToPixel(const Projection& projection,
+                             const std::vector<GeoCoord>& nodes);
     void TransformGeoToPixel(const Projection& projection,
                              const std::vector<Point>& nodes);
     void DropSimilarPoints(double optimizeErrorTolerance);
@@ -87,8 +91,17 @@ namespace osmscout {
 
     void TransformArea(const Projection& projection,
                        OptimizeMethod optimize,
+                       const std::vector<GeoCoord>& nodes,
+                       double optimizeErrorTolerance);
+    void TransformArea(const Projection& projection,
+                       OptimizeMethod optimize,
                        const std::vector<Point>& nodes,
                        double optimizeErrorTolerance);
+
+    void TransformWay(const Projection& projection,
+                      OptimizeMethod optimize,
+                      const std::vector<GeoCoord>& nodes,
+                      double optimizeErrorTolerance);
     void TransformWay(const Projection& projection,
                       OptimizeMethod optimize,
                       const std::vector<Point>& nodes,
@@ -141,12 +154,12 @@ namespace osmscout {
 
     void TransformArea(const Projection& projection,
                        TransPolygon::OptimizeMethod optimize,
-                       const std::vector<Point>& nodes,
+                       const std::vector<GeoCoord>& nodes,
                        size_t& start, size_t &end,
                        double optimizeErrorTolerance);
     bool TransformWay(const Projection& projection,
                       TransPolygon::OptimizeMethod optimize,
-                      const std::vector<Point>& nodes,
+                      const std::vector<GeoCoord>& nodes,
                       size_t& start, size_t &end,
                       double optimizeErrorTolerance);
 
