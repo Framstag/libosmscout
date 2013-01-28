@@ -25,7 +25,6 @@
 #include <osmscout/private/CoreImportExport.h>
 
 #include <osmscout/GeoCoord.h>
-#include <osmscout/Point.h>
 
 #include <osmscout/util/Projection.h>
 

@@ -29,8 +29,7 @@
 #include <osmscout/system/Types.h>
 
 #include <osmscout/GeoCoord.h>
-#include <osmscout/Point.h>
-#include <iostream>
+
 namespace osmscout {
 
   /**
@@ -193,30 +192,6 @@ namespace osmscout {
 
     See http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
     */
-
-  template<typename N, typename M>
-  bool IsPointInArea(const N& point,
-                     const std::vector<M>& nodes)
-  {
-    int  i,j;
-    bool c=false;
-
-    for (i=0, j=nodes.size()-1; i<(int)nodes.size(); j=i++) {
-      if (point.GetId()==nodes[i].GetId() ||
-          point.GetId()==nodes[j].GetId()) {
-        return true;
-      }
-
-      if ((nodes[i].GetLat()>point.GetLat())!=(nodes[j].GetLat()>point.GetLat()) &&
-          (point.GetLon()<(nodes[j].GetLon()-nodes[i].GetLon())*(point.GetLat()-nodes[i].GetLat()) /
-           (nodes[j].GetLat()-nodes[i].GetLat())+nodes[i].GetLon()))  {
-        c=!c;
-      }
-    }
-
-    return c;
-  }
-
   template<typename N, typename M>
   bool IsCoordInArea(const N& point,
                      const std::vector<M>& nodes)
@@ -241,28 +216,6 @@ namespace osmscout {
     If -1 returned, the point is outside the area, if 0, the point is on the area boundary, 1
     the point is within the area.
    */
-  template<typename N, typename M>
-  int GetRelationOfPointToArea(const N& point,
-                               const std::vector<M>& nodes)
-  {
-    int  i,j;
-    bool c=false;
-
-    for (i=0, j=nodes.size()-1; i<(int)nodes.size(); j=i++) {
-      if (point.GetId()==nodes[i].GetId()) {
-        return 0;
-      }
-
-      if ((nodes[i].GetLat()>point.GetLat())!=(nodes[j].GetLat()>point.GetLat()) &&
-          (point.GetLon()<(nodes[j].GetLon()-nodes[i].GetLon())*(point.GetLat()-nodes[i].GetLat()) /
-           (nodes[j].GetLat()-nodes[i].GetLat())+nodes[i].GetLon()))  {
-        c=!c;
-      }
-    }
-
-    return c ? 1 : -1;
-  }
-
   inline int GetRelationOfPointToArea(const GeoCoord& point,
                                       const std::vector<GeoCoord>& nodes)
   {
@@ -598,10 +551,6 @@ namespace osmscout {
 
   void OSMSCOUT_API ScanConvertLine(int x1, int y1,
                                     int x2, int y2,
-                                    std::vector<ScanCell>& cells);
-  void OSMSCOUT_API ScanConvertLine(const std::vector<Point>& points,
-                                    double xTrans, double cellWidth,
-                                    double yTrans, double cellHeight,
                                     std::vector<ScanCell>& cells);
 }
 

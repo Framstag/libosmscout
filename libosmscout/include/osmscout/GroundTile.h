@@ -22,7 +22,7 @@
 
 #include <vector>
 
-#include <osmscout/Point.h>
+#include <osmscout/Types.h>
 
 namespace osmscout {
 

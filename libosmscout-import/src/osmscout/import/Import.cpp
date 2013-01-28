@@ -24,7 +24,6 @@
 #include <osmscout/TypeConfigLoader.h>
 
 #include <osmscout/Node.h>
-#include <osmscout/Point.h>
 #include <osmscout/Relation.h>
 #include <osmscout/RouteNode.h>
 #include <osmscout/Way.h>

@@ -28,7 +28,6 @@
 
 #include <osmscout/Node.h>
 #include <osmscout/ObjectRef.h>
-#include <osmscout/Point.h>
 #include <osmscout/Relation.h>
 #include <osmscout/Way.h>
 

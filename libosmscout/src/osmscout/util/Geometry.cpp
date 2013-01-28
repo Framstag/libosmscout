@@ -307,21 +307,4 @@ namespace osmscout {
       }
     }
   }
-
-  void ScanConvertLine(const std::vector<Point>& points,
-                       double xTrans, double cellWidth,
-                       double yTrans, double cellHeight,
-                       std::vector<ScanCell>& cells)
-  {
-    assert(points.size()>=2);
-
-    for (size_t i=0; i<points.size()-1; i++) {
-      int x1=int((points[i].GetLon()-xTrans)/cellWidth);
-      int x2=int((points[i+1].GetLon()-xTrans)/cellWidth);
-      int y1=int((points[i].GetLat()-yTrans)/cellHeight);
-      int y2=int((points[i+1].GetLat()-yTrans)/cellHeight);
-
-      ScanConvertLine(x1,y1,x2,y2,cells);
-    }
-  }
 }

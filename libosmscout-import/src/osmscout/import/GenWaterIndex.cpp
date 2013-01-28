@@ -27,7 +27,6 @@
 #include <osmscout/import/RawNode.h>
 
 #include <osmscout/DataFile.h>
-#include <osmscout/Point.h>
 #include <osmscout/Way.h>
 
 #include <osmscout/util/File.h>
@@ -945,18 +944,6 @@ namespace osmscout {
   {
     for (size_t p=0; p<points.size()-1; p++) {
       GetCells(level,points[p],points[p+1],cellIntersections);
-    }
-  }
-
-  void WaterIndexGenerator::GetCells(const Level& level,
-                                     const std::vector<Point>& points,
-                                     std::set<Pixel>& cellIntersections)
-  {
-    for (size_t p=0; p<points.size()-1; p++) {
-      GetCells(level,
-               GeoCoord(points[p].GetLat(),points[p].GetLon()),
-               GeoCoord(points[p+1].GetLat(),points[p+1].GetLon()),
-               cellIntersections);
     }
   }
 

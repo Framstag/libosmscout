@@ -24,7 +24,6 @@
 
 #include <osmscout/GeoCoord.h>
 #include <osmscout/Pixel.h>
-#include <osmscout/Point.h>
 
 #include <osmscout/GroundTile.h>
 
@@ -213,10 +212,6 @@ namespace osmscout {
 
     void GetCells(const Level& level,
                   const std::vector<GeoCoord>& points,
-                  std::set<Pixel>& cellIntersections);
-
-    void GetCells(const Level& level,
-                  const std::vector<Point>& points,
                   std::set<Pixel>& cellIntersections);
 
     void GetCellIntersections(const Level& level,
