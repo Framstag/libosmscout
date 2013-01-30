@@ -39,7 +39,7 @@ namespace osmscout {
 
   public:
     SortNodeDataGenerator()
-    : SortDataGenerator("nodes.dat","node.idmap","nodes.tmp")
+    : SortDataGenerator<Node>("nodes.dat","node.idmap","nodes.tmp")
     {
       // no code
     }

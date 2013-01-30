@@ -52,7 +52,7 @@ namespace osmscout {
 
   public:
     SortRelationDataGenerator()
-    : SortDataGenerator("relations.dat","relation.idmap","relations.tmp")
+    : SortDataGenerator<Relation>("relations.dat","relation.idmap","relations.tmp")
     {
       // no code
     }

@@ -45,7 +45,7 @@ namespace osmscout {
 
   public:
     SortWayDataGenerator()
-    : SortDataGenerator("ways.dat","way.idmap","ways.tmp")
+    : SortDataGenerator<Way>("ways.dat","way.idmap","ways.tmp")
     {
       // no code
     }

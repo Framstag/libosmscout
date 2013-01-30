@@ -294,7 +294,7 @@ namespace osmscout {
   inline bool IsAreaSubOfArea(const std::vector<GeoCoord>& a,
                               const std::vector<GeoCoord>& b)
   {
-    for (typename std::vector<GeoCoord>::const_iterator i=a.begin(); i!=a.end(); i++) {
+    for (std::vector<GeoCoord>::const_iterator i=a.begin(); i!=a.end(); i++) {
       int relPos=GetRelationOfPointToArea(*i,b);
 
       if (relPos>0) {
