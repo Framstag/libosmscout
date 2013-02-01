@@ -52,6 +52,7 @@ namespace osmscout {
     }
 
     TypeSet(const TypeConfig& typeConfig)
+    : typeCount(0)
     {
       types.resize(typeConfig.GetMaxTypeId()+1,false);
     }
@@ -71,9 +72,14 @@ namespace osmscout {
       typeCount=0;
     }
 
-    bool HasTypes() const
+    inline bool HasTypes() const
     {
       return typeCount>0;
+    }
+
+    inline size_t GetSize() const
+    {
+      return typeCount;
     }
 
     void SetType(TypeId type)

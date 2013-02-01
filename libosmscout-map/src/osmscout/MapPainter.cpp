@@ -1970,7 +1970,7 @@ namespace osmscout {
     }
 
     if (parameter.IsDebugPerformance()) {
-      std::cout << "Draw [";
+      std::cout << "Draw: [";
       std::cout << projection.GetLatMin() <<",";
       std::cout << projection.GetLonMin() << "-";
       std::cout << projection.GetLatMax() << ",";

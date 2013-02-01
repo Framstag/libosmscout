@@ -1244,31 +1244,28 @@ namespace osmscout {
         TypeSet typeSet(*typeConfig);
 
         for (TypeId type=0; type<wayPrio.size(); type++) {
-          if (!typeConfig->GetTypeInfo(type).CanBeWay()) {
+          if (!typeConfig->GetTypeInfo(type).CanBeWay() ||
+              wayPrio[type]!=*prio) {
             continue;
           }
 
-          if (wayPrio[type]==*prio) {
-            if (!wayLineStyleSelectors[type][level].empty()) {
-              typeSet.SetType(type);
-            }
-
-            if (!wayPathTextStyleSelectors[type][level].empty()) {
-              typeSet.SetType(type);
-            }
-
-            if (!wayPathSymbolStyleSelectors[type][level].empty()) {
-              typeSet.SetType(type);
-            }
-
-            if (!wayPathShieldStyleSelectors[type][level].empty()) {
-              typeSet.SetType(type);
-            }
+          if (!wayLineStyleSelectors[type][level].empty()) {
+            typeSet.SetType(type);
+          }
+          else if (!wayPathTextStyleSelectors[type][level].empty()) {
+            typeSet.SetType(type);
+          }
+          else if (!wayPathSymbolStyleSelectors[type][level].empty()) {
+            typeSet.SetType(type);
+          }
+          else if (!wayPathShieldStyleSelectors[type][level].empty()) {
+            typeSet.SetType(type);
           }
         }
 
-        // TODO: Is type set not empty?
-        wayTypeSets[level].push_back(typeSet);
+        if (typeSet.HasTypes()) {
+          wayTypeSets[level].push_back(typeSet);
+        }
       }
     }
 

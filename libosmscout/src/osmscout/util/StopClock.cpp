@@ -113,7 +113,7 @@ namespace osmscout {
 
     timersub(&clock.pimpl->stop,&clock.pimpl->start,&diff);
 
-    stream << diff.tv_sec << "." << std::setw(3) << std::setfill('0') << diff.tv_usec/1000;
+    stream << diff.tv_sec << stream << "." << std::setw(3) << std::setfill('0') << diff.tv_usec/1000;
 #else
     stream << "X.XXX";
 #endif
@@ -139,6 +139,7 @@ namespace osmscout {
     millis=NumberToString(diff.tv_usec/1000);
 
     result=seconds;
+
     result+=".";
 
     for (size_t i=millis.length()+1; i<=3; i++) {

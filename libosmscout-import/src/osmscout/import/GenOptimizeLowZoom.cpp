@@ -70,11 +70,11 @@ namespace osmscout
   void OptimizeLowZoomGenerator::WriteHeader(FileWriter& writer,
                                              const std::set<TypeId>& types,
                                              const std::vector<TypeData>& typesData,
-                                             size_t optimizeMaxMap)
+                                             uint32_t optimizeMaxMap)
   {
     writer.SetPos(0);
 
-    writer.Write((uint32_t)optimizeMaxMap);
+    writer.Write(optimizeMaxMap);
     writer.Write((uint32_t)types.size());
 
     for (std::set<TypeId>::const_iterator type=types.begin();
@@ -473,10 +473,9 @@ namespace osmscout
 
       offsets[way->GetFileOffset()]=offset;
 
-      way->ids.resize(newNodes.size(),0);
       way->nodes=newNodes;
 
-      if (!way->Write(writer)) {
+      if (!way->WriteOptimized(writer)) {
         return false;
       }
 
@@ -642,11 +641,12 @@ namespace osmscout
     Magnification               magnification; // Magnification, we optimize for
     std::vector<TypeData>       typesData;
 
-    typesData.resize(typeConfig.GetTypes().size());
 
     magnification.SetLevel(parameter.GetOptimizationMaxMag());
 
     GetTypesToOptimize(typeConfig,types);
+
+    typesData.resize(typeConfig.GetMaxTypeId()+1);
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      "optimized.dat"))) {
@@ -661,7 +661,7 @@ namespace osmscout
     WriteHeader(writer,
                 types,
                 typesData,
-                parameter.GetOptimizationMaxMag());
+                (uint32_t)parameter.GetOptimizationMaxMag());
 
     if (!wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                          "ways.dat"),
@@ -671,6 +671,7 @@ namespace osmscout
       return false;
     }
 
+    std::set<TypeId>                typesToProcess(types);
     std::vector<std::list<WayRef> > allWays(typeConfig.GetTypes().size());
 
     while (true) {
@@ -681,7 +682,7 @@ namespace osmscout
       if (!GetWaysToOptimize(parameter,
                              progress,
                              wayScanner,
-                             types,
+                             typesToProcess,
                              allWays)) {
         return false;
       }
@@ -697,8 +698,8 @@ namespace osmscout
         // Join ways
         //
 
-        std::list<WayRef> newWays;
-        FileOffsetFileOffsetMap   offsets;
+        std::list<WayRef>       newWays;
+        FileOffsetFileOffsetMap offsets;
 
         progress.Info("Merging "+NumberToString(allWays[type].size())+" ways");
 
@@ -743,7 +744,7 @@ namespace osmscout
         }
       }
 
-      if (types.empty()) {
+      if (typesToProcess.empty()) {
         break;
       }
     }
@@ -751,7 +752,7 @@ namespace osmscout
     WriteHeader(writer,
                 types,
                 typesData,
-                parameter.GetOptimizationMaxMag());
+                (uint32_t)parameter.GetOptimizationMaxMag());
 
     return !wayScanner.HasError() && wayScanner.Close();
   }

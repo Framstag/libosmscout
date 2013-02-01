@@ -81,7 +81,7 @@ namespace osmscout
       scanner.Read(data.cellYStart);
       scanner.Read(data.cellYEnd);
 
-      scanner.Read(data.bitmapOffset);
+      scanner.ReadFileOffset(data.bitmapOffset);
       scanner.Read(data.dataOffsetBytes);
 
       data.cellXCount=data.cellXEnd-data.cellXStart+1;
@@ -277,7 +277,7 @@ namespace osmscout
 
             WayRef way=new Way();
 
-            if (!way->Read(scanner)) {
+            if (!way->ReadOptimized(scanner)) {
               std::cerr << "Error while reading data entry of type " << type->first << " from file " << datafilename  << std::endl;
               continue;
             }

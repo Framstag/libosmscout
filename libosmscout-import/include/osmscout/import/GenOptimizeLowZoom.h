@@ -71,7 +71,7 @@ namespace osmscout {
     void WriteHeader(FileWriter& writer,
                      const std::set<TypeId>& types,
                      const std::vector<TypeData>& typesData,
-                     size_t optimizeMaxMap);
+                     uint32_t optimizeMaxMap);
 
     bool GetWaysToOptimize(const ImportParameter& parameter,
                            Progress& progress,

@@ -168,6 +168,43 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
+  bool Way::ReadOptimized(FileScanner& scanner)
+  {
+    uint32_t nodeCount;
+
+    if (!scanner.GetPos(fileOffset)) {
+      return false;
+    }
+
+    if (!attributes.Read(scanner)) {
+      return false;
+    }
+
+    if (!scanner.ReadNumber(nodeCount)) {
+      return false;
+    }
+
+    uint32_t minLat;
+    uint32_t minLon;
+
+    scanner.Read(minLat);
+    scanner.Read(minLon);
+
+    nodes.resize(nodeCount);
+    for (size_t i=0; i<nodeCount; i++) {
+      uint32_t latValue;
+      uint32_t lonValue;
+
+      scanner.ReadNumber(latValue);
+      scanner.ReadNumber(lonValue);
+
+      nodes[i].Set((minLat+latValue)/conversionFactor-90.0,
+                   (minLon+lonValue)/conversionFactor-180.0);
+    }
+
+    return !scanner.HasError();
+  }
+
   bool Way::Write(FileWriter& writer) const
   {
     assert(!nodes.empty());
@@ -193,6 +230,43 @@ namespace osmscout {
     for (size_t i=0; i<nodes.size(); i++) {
       writer.WriteNumber(ids[i]-minId);
     }
+
+    for (size_t i=1; i<nodes.size(); i++) {
+      minLat=std::min(minLat,nodes[i].GetLat());
+      minLon=std::min(minLon,nodes[i].GetLon());
+    }
+
+    minLatValue=(uint32_t)round((minLat+90.0)*conversionFactor);
+    minLonValue=(uint32_t)round((minLon+180.0)*conversionFactor);
+
+    writer.Write(minLatValue);
+    writer.Write(minLonValue);
+
+    for (size_t i=0; i<nodes.size(); i++) {
+      uint32_t latValue=(uint32_t)round((nodes[i].GetLat()-minLat)*conversionFactor);
+      uint32_t lonValue=(uint32_t)round((nodes[i].GetLon()-minLon)*conversionFactor);
+
+      writer.WriteNumber(latValue);
+      writer.WriteNumber(lonValue);
+    }
+
+    return !writer.HasError();
+  }
+
+  bool Way::WriteOptimized(FileWriter& writer) const
+  {
+    assert(!nodes.empty());
+
+    if (!attributes.Write(writer)) {
+      return false;
+    }
+
+    writer.WriteNumber((uint32_t)nodes.size());
+
+    double   minLat=nodes[0].GetLat();
+    double   minLon=nodes[0].GetLon();
+    uint32_t minLatValue;
+    uint32_t minLonValue;
 
     for (size_t i=1; i<nodes.size(); i++) {
       minLat=std::min(minLat,nodes[i].GetLat());

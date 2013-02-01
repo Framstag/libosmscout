@@ -180,7 +180,9 @@ namespace osmscout {
     void SetEndIsJoint(bool isJoint);
 
     bool Read(FileScanner& scanner);
+    bool ReadOptimized(FileScanner& scanner);
     bool Write(FileWriter& writer) const;
+    bool WriteOptimized(FileWriter& writer) const;
   };
 
   typedef Ref<Way> WayRef;

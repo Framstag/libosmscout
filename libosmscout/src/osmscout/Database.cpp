@@ -414,7 +414,7 @@ namespace osmscout {
       return false;
     }
 
-    StopClock wayIndexTimer;
+    StopClock wayOptimizedTimer;
 
     if (!internalWayTypes.empty()) {
       if (parameter.GetUseLowZoomOptimization() &&
@@ -434,9 +434,13 @@ namespace osmscout {
       }
     }
 
+    wayOptimizedTimer.Stop();
+
     if (parameter.IsAborted()) {
       return false;
     }
+
+    StopClock wayIndexTimer;
 
     if (!internalWayTypes.empty()) {
       if (!areaWayIndex.GetOffsets(lonMin,
@@ -567,15 +571,16 @@ namespace osmscout {
     relationAreasTimer.Stop();
 
     if (debugPerformance) {
-      std::cout << "I/O: ";
+      std::cout << "Query: ";
       std::cout << "n " << nodeIndexTimer << " ";
       std::cout << "w " << wayIndexTimer << " ";
-      std::cout << "a " << areaAreaIndexTimer;
-      std::cout << " - ";
+      std::cout << "a " << areaAreaIndexTimer << std::endl;
+
+      std::cout << "Load: ";
       std::cout << "s "  << sortTimer;
       std::cout << " - ";
       std::cout << "n " << nodesTimer << " ";
-      std::cout << "w " << waysTimer << "/" << relationWaysTimer << " ";
+      std::cout << "w " << wayOptimizedTimer << "/" << waysTimer << "/" << relationWaysTimer << " ";
       std::cout << "a " << areasTimer << "/" << relationAreasTimer;
       std::cout << std::endl;
     }
