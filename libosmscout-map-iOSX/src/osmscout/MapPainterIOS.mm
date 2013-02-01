@@ -36,6 +36,9 @@ namespace osmscout {
         for(std::vector<Image>::const_iterator image=images.begin(); image<images.end();image++){
             CGImageRelease(*image);
         }
+        for(std::vector<Image>::const_iterator image=patternImages.begin(); image<patternImages.end();image++){
+            CGImageRelease(*image);
+        }
         for(std::vector<CGPatternRef>::const_iterator p=patterns.begin(); p<patterns.end();p++){
             CGPatternRelease(*p);
         }
@@ -97,7 +100,7 @@ namespace osmscout {
         size_t idx=style.GetIconId()-1;
         
         if (idx<images.size() &&
-            !images[idx]) {
+            images[idx]!=NULL) {
 
             return true;
         }
@@ -124,7 +127,7 @@ namespace osmscout {
                 CGImageRetain(imgRef);
                 
                 if (idx>=images.size()) {
-                    images.resize(idx+1);
+                    images.resize(idx+1, NULL);
                 }
                 
                 images[idx]=imgRef;                
@@ -199,10 +202,10 @@ namespace osmscout {
                 CGImageRef imgRef= [image CGImageForProposedRect:&rect context:[NSGraphicsContext currentContext] hints:NULL];
 #endif
                 CGImageRetain(imgRef);
-                images.resize(images.size()+1,imgRef);
-                style.SetPatternId(images.size());
+                patternImages.resize(patternImages.size()+1,imgRef);
+                style.SetPatternId(patternImages.size());
                 CGPatternRef pattern = CGPatternCreate(imgRef, CGRectMake(0,0, imgWidth, imgHeight), CGAffineTransformIdentity, imgWidth, imgHeight, kCGPatternTilingNoDistortion, true, &patternCallbacks);
-                patterns.resize(images.size(),pattern);
+                patterns.resize(patternImages.size(),pattern);
                 
                 std::cout << "Loaded image " << filename << " (" <<  imgWidth << "x" << imgHeight <<  ") => id " << style.GetPatternId() << std::endl;
                 
@@ -610,10 +613,10 @@ namespace osmscout {
             PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
             
             CGContextBeginPath(cg);
-            for (std::list<Pixel>::const_iterator pixel=polygon->GetPixels().begin();
-                 pixel!=polygon->GetPixels().end();
+            for (std::list<Coord>::const_iterator pixel=polygon->GetCoords().begin();
+                 pixel!=polygon->GetCoords().end();
                  ++pixel) {
-                if (pixel==polygon->GetPixels().begin()) {
+                if (pixel==polygon->GetCoords().begin()) {
 #ifdef OSMSCOUT_REVERSED_Y_AXIS
                     CGContextMoveToPoint(cg,x+ConvertWidthToPixel(parameter,pixel->x-centerX),
                                          y+ConvertWidthToPixel(parameter,pixel->y-centerY));

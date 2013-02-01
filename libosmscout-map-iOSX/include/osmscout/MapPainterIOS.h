@@ -47,6 +47,7 @@ namespace osmscout {
     private:
         CGContextRef                cg;
         std::vector<Image>          images;         // Cached CGImage for icons
+        std::vector<Image>          patternImages;  // Cached CGImage for patterns
         std::vector<CGPatternRef>   patterns;       // vector of Brush for fill patterns
         std::map<size_t,Font *>     fonts;          // Cached fonts
         
