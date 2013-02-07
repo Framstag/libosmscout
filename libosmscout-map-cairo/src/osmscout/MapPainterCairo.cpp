@@ -293,7 +293,6 @@ namespace osmscout {
                                     cairo_path_t *path,
                                     double pathLength,
                                     double xOffset,
-                                    double yOffset,
                                     double textWidth,
                                     double textHeight,
                                     const std::string& text)
@@ -310,12 +309,12 @@ namespace osmscout {
                   textPath,
                   path,
                   (pathLength-textWidth)/2-xOffset,
-                  -0.5*textHeigh);
+                  0.5*textHeight);
 
     cairo_path_destroy(textPath);
 
     // Draw the text path
-    cairo_fill(cr);
+    cairo_fill(draw);
   }
 #endif
 
@@ -994,32 +993,33 @@ namespace osmscout {
                                    text.c_str(),
                                    &textExtents);
 
-    if (lineLength<textExtents.width) {
-      // Text is longer than path to draw on
-      return;
+    if (textExtents.width<=lineLength) {
+      cairo_font_extents_t fontExtents;
+      cairo_path_t         *path;
+
+      cairo_scaled_font_extents(font,
+                                &fontExtents);
+
+      path=cairo_copy_path_flat(draw);
+
+      cairo_set_source_rgba(draw,
+                            style.GetTextColor().GetR(),
+                            style.GetTextColor().GetG(),
+                            style.GetTextColor().GetB(),
+                            style.GetTextColor().GetA());
+
+      cairo_set_scaled_font(draw,font);
+
+      DrawContourLabelCairo(draw,
+                            path,
+                            lineLength,
+                            textExtents.x_bearing,
+                            textExtents.width,
+                            textExtents.height,
+                            text);
+
+      cairo_path_destroy(path);
     }
-
-    cairo_font_extents_t fontExtents;
-
-    cairo_scaled_font_extents(font,
-                              &fontExtents);
-
-    cairo_set_source_rgba(draw,
-                          style.GetTextColor().GetR(),
-                          style.GetTextColor().GetG(),
-                          style.GetTextColor().GetB(),
-                          style.GetTextColor().GetA());
-
-    cairo_set_scaled_font(draw,font);
-
-    DrawContourLabelCairo(draw,
-                          path,
-                          lineLength,
-                          textExtents.x_bearing,
-                          textExtents.y_bearing,
-                          textExtents.width,
-                          fontExtents.ascent+textExtents.y_bearing,
-                          text);
 #endif
   }
 
