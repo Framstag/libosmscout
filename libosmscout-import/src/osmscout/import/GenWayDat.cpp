@@ -920,11 +920,10 @@ namespace osmscout {
         else {
           EndPointWayMap::const_iterator  wayJoint;
           EndPointAreaSet::const_iterator areaJoint;
-          std::list<Id>::iterator         jointWayId;
           size_t                          startNodeJointCount=0;
           size_t                          endNodeJointCount=0;
 
-          wayJoint=endPointWayMap.find(way.ids.front());
+          wayJoint=endPointWayMap.find(block[w]->GetNodes().front());
 
           if (wayJoint!=endPointWayMap.end()) {
             for (std::list<Id>::const_iterator jointWayId=wayJoint->second.begin();
@@ -941,12 +940,12 @@ namespace osmscout {
           }
 
           if (startNodeJointCount==0) {
-            areaJoint=endPointAreaSet.find(way.ids.front());
+            areaJoint=endPointAreaSet.find(block[w]->GetNodes().front());
           }
 
           way.SetStartIsJoint(startNodeJointCount>0 || areaJoint!=endPointAreaSet.end());
 
-          wayJoint=endPointWayMap.find(way.ids.back());
+          wayJoint=endPointWayMap.find(block[w]->GetNodes().back());
 
           if (wayJoint!=endPointWayMap.end()) {
             for (std::list<Id>::const_iterator jointWayId=wayJoint->second.begin();
@@ -963,7 +962,7 @@ namespace osmscout {
           }
 
           if (endNodeJointCount==0) {
-            areaJoint=endPointAreaSet.find(way.ids.back());
+            areaJoint=endPointAreaSet.find(block[w]->GetNodes().back());
           }
 
           way.SetEndIsJoint(endNodeJointCount>0 || areaJoint!=endPointAreaSet.end());
