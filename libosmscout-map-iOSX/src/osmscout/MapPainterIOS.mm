@@ -736,16 +736,7 @@ namespace osmscout {
         CGContextSetRGBStrokeColor(cg, color.GetR(), color.GetG(), color.GetB(), color.GetA());
         CGContextSetLineWidth(cg, width);
         CGContextSetLineJoin(cg, kCGLineJoinRound);
-        
-        if (startCap==LineStyle::capButt ||
-            endCap==LineStyle::capButt) {
-            CGContextSetLineCap(cg, kCGLineCapButt);        }
-        else if (startCap==LineStyle::capSquare ||
-                 endCap==LineStyle::capSquare) {
-            CGContextSetLineCap(cg, kCGLineCapSquare);
-        } else {
-            CGContextSetLineCap(cg, kCGLineCapRound);
-        }
+
         if (dash.empty()) {
             CGContextSetLineDash(cg, 0.0, NULL, 0);
         } else {
@@ -763,23 +754,18 @@ namespace osmscout {
             CGContextAddLineToPoint (cg,transBuffer.buffer[i].x,transBuffer.buffer[i].y);
         }
         CGContextStrokePath(cg);
-        if (dash.empty() &&
-            startCap==LineStyle::capRound &&
-            endCap!=LineStyle::capRound) {
+        if (startCap==LineStyle::capRound) {
             CGContextSetRGBFillColor(cg, color.GetR(), color.GetG(), color.GetB(), color.GetA());
-            CGContextFillEllipseInRect(cg, CGRectMake(transBuffer.buffer[transStart].x-width/4,
-                                                     transBuffer.buffer[transStart].y-width/4,
-                                                     width/2,width/2));
+            CGContextFillEllipseInRect(cg, CGRectMake(transBuffer.buffer[transStart].x-width/2,
+                                                     transBuffer.buffer[transStart].y-width/2,
+                                                     width,width));
         }
-        if (dash.empty() &&
-            endCap==LineStyle::capRound &&
-            startCap!=LineStyle::capRound) {
+        if (endCap==LineStyle::capRound) {
             CGContextSetRGBFillColor(cg, color.GetR(), color.GetG(), color.GetB(), color.GetA());
-            CGContextFillEllipseInRect(cg, CGRectMake(transBuffer.buffer[transEnd].x-width/4,
-                                                     transBuffer.buffer[transEnd].y-width/4,
-                                                     width/2,width/2));
+            CGContextFillEllipseInRect(cg, CGRectMake(transBuffer.buffer[transEnd].x-width/2,
+                                                     transBuffer.buffer[transEnd].y-width/2,
+                                                     width,width));
         }
-
         CGContextRestoreGState(cg);
     }
         
@@ -822,7 +808,6 @@ namespace osmscout {
             
             if (fillStyle.GetBorderDash().empty()) {
                 CGContextSetLineDash(cg, 0.0, NULL, 0);
-                CGContextSetLineCap(cg, kCGLineCapRound);
             }
             else {
                 CGFloat *dashes = (CGFloat *)malloc(sizeof(CGFloat)*fillStyle.GetBorderDash().size());
@@ -883,7 +868,6 @@ namespace osmscout {
             
             if (area.fillStyle->GetBorderDash().empty()) {
                 CGContextSetLineDash(cg, 0.0, NULL, 0);     // SolidLine
-                CGContextSetLineCap(cg, kCGLineCapRound);   // RoundCap
             } else {
                 CGFloat *dashes = (CGFloat *)malloc(sizeof(CGFloat)*area.fillStyle->GetBorderDash().size());
                 for (size_t i=0; i<area.fillStyle->GetBorderDash().size(); i++) {
