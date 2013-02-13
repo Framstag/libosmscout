@@ -138,7 +138,7 @@ namespace osmscout {
         
     private:
         Font *GetFont(const MapParameter& parameter, double fontSize);
-        CGFloat pathLength(size_t transStart, size_t transEnd);
+        double pathLength(size_t transStart, size_t transEnd);
         XYSlope originAndSlopeAlongPath(CGFloat l, CGFloat nextW, size_t transStart, size_t transEnd,
                                         CGFloat &posX, CGFloat &posY, size_t &i, CGFloat &currentL);
     };

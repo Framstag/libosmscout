@@ -121,8 +121,7 @@ namespace osmscout {
 #if TARGET_OS_IPHONE
                 CGImageRef imgRef= [image CGImage];
 #else
-                NSRect rect = CGRectMake(0, 0, [image size].width, [image size].height);
-                CGImageRef imgRef= [image CGImageForProposedRect:&rect context:[NSGraphicsContext currentContext] hints:NULL];
+                CGImageRef imgRef= [image CGImageForProposedRect:NULL context:[NSGraphicsContext currentContext] hints:NULL];
 #endif
                 CGImageRetain(imgRef);
                 
@@ -292,8 +291,7 @@ namespace osmscout {
 #else
                 NSColor *color = [NSColor colorWithSRGBRed:style->GetTextColor().GetR() green:style->GetTextColor().GetG() blue:style->GetTextColor().GetB() alpha:style->GetTextColor().GetA()];
                 NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
-                double height = textHeight(parameter, label.fontSize, label.text);
-                [str drawAtPoint:CGPointMake(label.x, label.y - height - 5) withAttributes:attrsDictionary];
+                [str drawAtPoint:CGPointMake(label.x, label.y) withAttributes:attrsDictionary];
                 
 #endif
             } else if (style->GetStyle()==TextStyle::emphasize) {
@@ -306,8 +304,7 @@ namespace osmscout {
 #else
                 NSColor *color = [NSColor colorWithSRGBRed:style->GetTextColor().GetR() green:style->GetTextColor().GetG() blue:style->GetTextColor().GetB() alpha:style->GetTextColor().GetA()];
                 NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
-                double height = textHeight(parameter, label.fontSize, label.text);
-                [str drawAtPoint:CGPointMake(label.x, label.y - height - 5) withAttributes:attrsDictionary];
+                [str drawAtPoint:CGPointMake(label.x, label.y) withAttributes:attrsDictionary];
 #endif
                 CGColorRelease(haloColor);
                 CGColorSpaceRelease(colorSpace);
@@ -367,11 +364,13 @@ namespace osmscout {
         }
     }
     
-    CGFloat MapPainterIOS::pathLength(size_t transStart, size_t transEnd){
-        CGFloat len = 0;
+    double MapPainterIOS::pathLength(size_t transStart, size_t transEnd){
+        double len = 0.0;
+        double deltaX, deltaY;
         for(size_t j=transStart; j<transEnd; j++) {
-            len += sqrtf((transBuffer.buffer[j].x - transBuffer.buffer[j+1].x) * (transBuffer.buffer[j].x - transBuffer.buffer[j+1].x)
-            +(transBuffer.buffer[j].y - transBuffer.buffer[j+1].y) * (transBuffer.buffer[j].y - transBuffer.buffer[j+1].y));
+            deltaX = transBuffer.buffer[j].x - transBuffer.buffer[j+1].x;
+            deltaY = transBuffer.buffer[j].y - transBuffer.buffer[j+1].y;
+            len += sqrt(deltaX*deltaX + deltaY*deltaY);
         }
         return len;
     }
@@ -465,18 +464,9 @@ namespace osmscout {
                 CGContextTranslateCTM(cg, origin.x, origin.y);
                 CGAffineTransform ct = CGAffineTransformConcat(transform, CGAffineTransformMakeRotation(origin.slope));
                 CGContextConcatCTM(cg, ct);
-                DrawPrimitivePath(projection,
-                                  parameter,
-                                  *p,
-#ifdef OSMSCOUT_REVERSED_Y_AXIS
-                                  -width/2,height,
-#else
-                                  -width/2,height/2,
-#endif
-                                  minX,
-                                  minY,
-                                  maxX,
-                                  maxY);
+                DrawPrimitivePath(projection, parameter, *p,
+                                  width,height/2,
+                                  minX, minY, maxX, maxY);
                 CGContextRestoreGState(cg);
                 
                 lenUpToNow+=width+space;
@@ -540,7 +530,7 @@ namespace osmscout {
             
             NSString *str = [nsText substringWithRange:NSMakeRange(i, 1)];
             
-            float nww = textLength(parameter,style.GetSize(),[str cStringUsingEncoding:NSUTF8StringEncoding]);
+            double nww = textLength(parameter,style.GetSize(),[str cStringUsingEncoding:NSUTF8StringEncoding]);
             
             XYSlope charOrigin = originAndSlopeAlongPath(lenUpToNow, nww, tStart, tEnd, posX, posY, segment, currentL);
             if(charOrigin.x == -1 && charOrigin.y == -1){
@@ -580,20 +570,11 @@ namespace osmscout {
         assert(idx<images.size());
         assert(images[idx]);
         
-#if TARGET_OS_IPHONE
         CGRect rect = CGRectMake(x-CGImageGetWidth(images[idx])/2, CGImageGetHeight(images[idx])-y-1.5*CGImageGetHeight(images[idx]), CGImageGetWidth(images[idx]), CGImageGetHeight(images[idx]));
-#else
-        CGRect rect = CGRectMake(x-CGImageGetWidth(images[idx])/2, y-CGImageGetHeight(images[idx])/2, CGImageGetWidth(images[idx]), CGImageGetHeight(images[idx]));
-#endif
-        
-#if TARGET_OS_IPHONE
         CGContextSaveGState(cg);
         CGContextScaleCTM(cg, 1.0, -1.0);
-#endif
         CGContextDrawImage(cg, rect, images[idx]);
-#if TARGET_OS_IPHONE        
         CGContextRestoreGState(cg);
-#endif
     }
     
     void MapPainterIOS::DrawPrimitivePath(const Projection& projection,
@@ -611,28 +592,28 @@ namespace osmscout {
         
         if (dynamic_cast<PolygonPrimitive*>(primitive)!=NULL) {
             PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
-            
+#ifdef DEBUG_DRAW_POLYGON_IOSX
+            CGContextSaveGState(cg);
+            CGContextSetLineWidth(cg, 1.0);
+            CGContextSetRGBStrokeColor(cg, 1.0, 0, 0, 1);
+            CGContextBeginPath(cg);
+            CGContextMoveToPoint(cg, x, y-10);
+            CGContextAddLineToPoint(cg, x, y+10);
+            CGContextMoveToPoint(cg, x-10, y);
+            CGContextAddLineToPoint(cg, x+10,y);
+            CGContextDrawPath(cg, kCGPathStroke);
+            CGContextRestoreGState(cg);
+#endif
             CGContextBeginPath(cg);
             for (std::list<Coord>::const_iterator pixel=polygon->GetCoords().begin();
                  pixel!=polygon->GetCoords().end();
                  ++pixel) {
                 if (pixel==polygon->GetCoords().begin()) {
-#ifdef OSMSCOUT_REVERSED_Y_AXIS
-                    CGContextMoveToPoint(cg,x+ConvertWidthToPixel(parameter,pixel->x-centerX),
-                                         y+ConvertWidthToPixel(parameter,pixel->y-centerY));
-#else
                     CGContextMoveToPoint(cg,x+ConvertWidthToPixel(parameter,pixel->x-centerX),
                                          y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
-#endif
-                }
-                else {
-#ifdef OSMSCOUT_REVERSED_Y_AXIS
-                    CGContextAddLineToPoint(cg,x+ConvertWidthToPixel(parameter,pixel->x-centerX),
-                                            y+ConvertWidthToPixel(parameter,pixel->y-centerY));
-#else
+                } else {
                     CGContextAddLineToPoint(cg,x+ConvertWidthToPixel(parameter,pixel->x-centerX),
                                             y+ConvertWidthToPixel(parameter,maxY-pixel->y-centerY));
-#endif
                 }
             }
             
@@ -640,33 +621,19 @@ namespace osmscout {
         }
         else if (dynamic_cast<RectanglePrimitive*>(primitive)!=NULL) {
             RectanglePrimitive* rectangle=dynamic_cast<RectanglePrimitive*>(primitive);
-#ifdef OSMSCOUT_REVERSED_Y_AXIS
-            CGRect rect = CGRectMake(x+ConvertWidthToPixel(parameter,rectangle->GetTopLeft().x-centerX),
-                                     y+ConvertWidthToPixel(parameter,rectangle->GetTopLeft().y-minY-rectangle->GetHeight()),
-                                     ConvertWidthToPixel(parameter,rectangle->GetWidth()),
-                                     ConvertWidthToPixel(parameter,rectangle->GetHeight()));
-#else
             CGRect rect = CGRectMake(x+ConvertWidthToPixel(parameter,rectangle->GetTopLeft().x-centerX),
                                      y+ConvertWidthToPixel(parameter,maxY-rectangle->GetTopLeft().y-centerY),
                                      ConvertWidthToPixel(parameter,rectangle->GetWidth()),
                                      ConvertWidthToPixel(parameter,rectangle->GetHeight()));
-#endif
             CGContextAddRect(cg,rect);
             CGContextDrawPath(cg, kCGPathFill);
         }
         else if (dynamic_cast<CirclePrimitive*>(primitive)!=NULL) {
             CirclePrimitive* circle=dynamic_cast<CirclePrimitive*>(primitive);
-#ifdef OSMSCOUT_REVERSED_Y_AXIS
-            CGRect rect = CGRectMake(x+ConvertWidthToPixel(parameter,circle->GetCenter().x-centerX),
-                                     y+ConvertWidthToPixel(parameter,circle->GetCenter().y+centerY),
-                                     ConvertWidthToPixel(parameter,circle->GetRadius()),
-                                     ConvertWidthToPixel(parameter,circle->GetRadius()));
-#else
             CGRect rect = CGRectMake(x+ConvertWidthToPixel(parameter,circle->GetCenter().x-centerX),
                                      y+ConvertWidthToPixel(parameter,maxY-circle->GetCenter().y-centerY),
                                      ConvertWidthToPixel(parameter,circle->GetRadius()),
                                      ConvertWidthToPixel(parameter,circle->GetRadius()));
-#endif
             CGContextAddEllipseInRect(cg, rect);
             CGContextDrawPath(cg, kCGPathFill);
         }
