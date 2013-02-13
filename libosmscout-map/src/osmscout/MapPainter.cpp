@@ -1247,6 +1247,26 @@ namespace osmscout {
                data.transStart,data.transEnd);
     }
 
+    if (data.drawBridge) {
+      DrawPath(projection,
+               parameter,
+               Color::BLACK,
+               1,
+               emptyDash,
+               LineStyle::capButt,
+               LineStyle::capButt,
+               data.par1Start,data.par1End);
+
+      DrawPath(projection,
+               parameter,
+               Color::BLACK,
+               1,
+               emptyDash,
+               LineStyle::capButt,
+               LineStyle::capButt,
+               data.par2Start,data.par2End);
+    }
+
     waysOutlineDrawn++;
   }
 
@@ -1295,26 +1315,6 @@ namespace osmscout {
              data.lineStyle->GetCapStyle(),
              data.lineStyle->GetCapStyle(),
              data.transStart,data.transEnd);
-
-    if (data.drawBridge) {
-      DrawPath(projection,
-               parameter,
-               Color::BLACK,
-               1,
-               emptyDash,
-               LineStyle::capButt,
-               LineStyle::capButt,
-               data.par1Start,data.par1End);
-
-      DrawPath(projection,
-               parameter,
-               Color::BLACK,
-               1,
-               emptyDash,
-               LineStyle::capButt,
-               LineStyle::capButt,
-               data.par2Start,data.par2End);
-    }
 
     waysDrawn++;
   }
