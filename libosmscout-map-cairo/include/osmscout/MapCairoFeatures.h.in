@@ -6,5 +6,9 @@
 
 /* The cairo backend can make use of pango */
 #undef OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO
+
+/* libosmscout needs to include <math.h> */
+#undef OSMSCOUT_REQUIRES_MATHH
+
 #endif
 

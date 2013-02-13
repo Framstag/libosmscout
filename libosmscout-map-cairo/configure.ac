@@ -18,7 +18,20 @@ AC_TYPE_SIZE_T
 
 AC_SEARCH_LIBS([sqrt],[m])
 
-AC_CHECK_DECLS([log2(double), atanh(double), lround(double)],[],[],[#include <cmath>])
+AC_MSG_CHECKING([if C++ include <cmath> defines C math symbols, too])
+AC_TRY_COMPILE([#include <cmath>],
+               [sin(1);],
+               [AC_MSG_RESULT(yes)],
+               [AC_DEFINE([OSMSCOUT_REQUIRES_MATHH],[1],[libosmscout needs to include <math.h>])
+                AC_MSG_RESULT(no)])
+
+AC_CHECK_DECLS([log2(double), atanh(double), lround(double)],
+               [],
+               [],
+               [#include <cmath>
+                #if defined(OSMSCOUT_REQUIRES_MATHH)
+                  #include <math.h>
+                #endif])
 
 if test "$GXX" = yes; then
   CPPFLAGS="$CPPFLAGS -Wall -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"

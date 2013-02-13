@@ -25,7 +25,13 @@
   #define _USE_MATH_DEFINES
 #endif
 
+#include <osmscout/ImportFeatures.h>
+
 #include <cmath>
+
+#if defined(OSMSCOUT_REQUIRES_MATHH)
+  #include <math.h>
+#endif
 
 #include <osmscout/private/Config.h>
 

@@ -4,5 +4,8 @@
 /* Illumination uses special gcc compiler features to explicitely export symbols */
 #undef OSMSCOUT_MAP_QT_EXPORT_SYMBOLS
 
+/* libosmscout needs to include <math.h> */
+#undef OSMSCOUT_REQUIRES_MATHH
+
 #endif
 
