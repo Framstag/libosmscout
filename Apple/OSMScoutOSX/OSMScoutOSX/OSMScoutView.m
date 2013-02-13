@@ -11,10 +11,10 @@
 @implementation OSMScoutView
 
 // This should point to OSM data generated with the OSMScout Import tool
-#define OSMSCOUTDATA @"/Users/vlad/osmscout-map/OSMScout"
+#define OSMSCOUTDATA @"/Users/vlad/Desktop/japon"
 // The center of the displayed map
-#define LATITUDE 43.694417
-#define LONGITUDE 7.279332
+#define LATITUDE 35.68068
+#define LONGITUDE 139.76339
 // The zoom level
 #define ZOOM 16
 
@@ -44,9 +44,13 @@
 }
 
 - (void)drawRect:(NSRect)rect {
-     NSGraphicsContext *nsgc = [NSGraphicsContext currentContext];
-    CGContextRef cg = (CGContextRef)[nsgc graphicsPort];
+    NSImage* img = [[NSImage alloc] initWithSize:rect.size];
+    [img lockFocusFlipped:YES];
+    CGContextRef cg = [[NSGraphicsContext currentContext] graphicsPort];
     [osmScout drawMapTo:cg location:_location zoom:_zoom size:rect.size];
+    [img unlockFocus];    
+    [img drawAtPoint:NSMakePoint(0.0, 0.0) fromRect:rect operation:NSCompositeCopy fraction:1.0];
+
 }
 
 - (CLLocationCoordinate2D) location {
