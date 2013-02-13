@@ -50,6 +50,12 @@ AC_CHECK_HEADERS([fcntl.h sys/time.h unordered_map unordered_set])
 
 AC_SEARCH_LIBS([sqrt],[m])
 
+AC_MSG_CHECKING([if C++ include <cmath> defines C math symbols, too])
+AC_TRY_COMPILE([#include <cmath>],
+               [sin(1);],
+               [AC_MSG_RESULT(yes)],
+               [AC_MSG_RESULT(no)])
+
 AC_CHECK_DECLS([log2(double), atanh(double), lround(double)],[],[],[#include <cmath>])
 AC_CHECK_FUNCS([mmap posix_fadvise posix_madvise])
 
