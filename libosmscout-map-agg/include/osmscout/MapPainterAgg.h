@@ -20,9 +20,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <climits>
-#include <cstdlib>
-
 #include <agg2/agg_conv_curve.h>
 #include <agg2/agg_conv_contour.h>
 #include <agg2/agg_path_storage.h>

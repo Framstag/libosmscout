@@ -21,15 +21,10 @@
 #if !defined(osmscout_oss_SCANNER_H)
 #define osmscout_oss_SCANNER_H
 
-#include <limits.h>
-
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-
-#include <iostream>
 #include <string>
 #include <map>
+
+#include <osmscout/system/Types.h>
 
 #include <osmscout/util/Reference.h>
 

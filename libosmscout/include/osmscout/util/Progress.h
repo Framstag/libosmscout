@@ -58,7 +58,7 @@ namespace osmscout {
   class OSMSCOUT_API ConsoleProgress : public Progress
   {
   private:
-    time_t lastProgressDump;
+    std::time_t lastProgressDump;
 
   public:
     void SetStep(const std::string& step);

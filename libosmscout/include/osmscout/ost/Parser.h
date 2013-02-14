@@ -21,12 +21,6 @@
 #if !defined(osmscout_ost_PARSER_H)
 #define osmscout_ost_PARSER_H
 
-#include <cassert>
-#include <iostream>
-
-#include <osmscout/TypeConfig.h>
-
-
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/ost/Scanner.h>

@@ -40,6 +40,7 @@
 
 #include <osmscout/ost/Scanner.h>
 
+#include <iostream>
 #include <sstream>
 
 namespace osmscout {
@@ -549,9 +550,9 @@ void Errors::SynErr(int line, int col, int n)
     default:
     {
       std::stringstream buffer;
-      
+
       buffer << "error " << n;
-      
+
       s = coco_string_create(buffer.str().c_str());
     }
     break;

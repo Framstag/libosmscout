@@ -33,7 +33,7 @@ namespace osmscout {
   {
   private:
     std::string filename;
-    FILE        *file;
+    std::FILE   *file;
     bool        hasError;
 
   public:

@@ -463,15 +463,17 @@ void Parser::COLORCONSTDEF() {
 void Parser::COLOR(Color& color) {
 		if (la->kind == _color) {
 			Get();
-			if (strlen(t->val)!=7 &&
-			   strlen(t->val)!=9) {
+			std::string c(t->val);
+			
+			if (c.length()!=7 &&
+			   c.length()!=9) {
 			std::string e="Illegal color value";
 			
 			 SemErr(e.c_str());
 			}
 			
 			if (!errors->hasErrors) {
-			 ToRGBA(t->val,color);
+			 ToRGBA(c,color);
 			}
 			
 		} else if (la->kind == _variable) {

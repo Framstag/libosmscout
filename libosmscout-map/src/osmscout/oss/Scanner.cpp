@@ -37,6 +37,7 @@
 */
 
 #include <cstring>
+#include <iostream>
 
 #include <osmscout/oss/Scanner.h>
 
@@ -117,7 +118,7 @@ int Buffer::GetPos()
 
 void Buffer::SetPos(int value) {
   if ((value < 0) || (value > bufLen)) {
-    printf("--- buffer out of bounds access, position: %d\n", value);
+    std::cerr << "--- buffer out of bounds access, position: " <<  value << std::endl;
     exit(1);
   }
 

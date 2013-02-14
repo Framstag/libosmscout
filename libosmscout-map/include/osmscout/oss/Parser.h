@@ -155,14 +155,14 @@ inline size_t GetHexDigitValue(char c)
   assert(false);
 }
 
-inline void ToRGBA(const char* str, Color& color)
+inline void ToRGBA(const std::string& str, Color& color)
 {
   double r=(16*GetHexDigitValue(str[1])+GetHexDigitValue(str[2]))/255.0;
   double g=(16*GetHexDigitValue(str[3])+GetHexDigitValue(str[4]))/255.0;
   double b=(16*GetHexDigitValue(str[5])+GetHexDigitValue(str[6]))/255.0;
   double a;
 
-  if (strlen(str)==9) {
+  if (str.length()==9) {
     a=(16*GetHexDigitValue(str[7])+GetHexDigitValue(str[8]))/255.0;
   }
   else {

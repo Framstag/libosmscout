@@ -57,7 +57,7 @@ namespace osmscout {
 
   private:
     std::string  filename;
-    FILE         *file;
+    std::FILE    *file;
     mutable bool hasError;
 
     // For mmap usage

@@ -21,7 +21,8 @@
 */
 
 #include <cassert>
-#include <cstdio>
+
+#include <osmscout/system/Types.h>
 
 #include <osmscout/private/CoreImportExport.h>
 

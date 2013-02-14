@@ -8,9 +8,6 @@
 #define -->prefixPARSER_H
 
 -->headerdef
-
-#include <osmscout/TypeConfig.h>
-
 #include <osmscout/ost/Scanner.h>
 
 -->namespace_open
@@ -118,6 +115,7 @@ public:
 
 #include <osmscout/ost/Scanner.h>
 
+#include <iostream>
 #include <sstream>
 
 -->namespace_open
@@ -256,9 +254,9 @@ void Errors::SynErr(int line, int col, int n)
     default:
     {
       std::stringstream buffer;
-      
+
       buffer << "error " << n;
-      
+
       s = coco_string_create(buffer.str().c_str());
     }
     break;

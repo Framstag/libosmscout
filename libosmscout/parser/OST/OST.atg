@@ -1,6 +1,3 @@
-#include <cassert>
-#include <iostream>
-
 #include <osmscout/TypeConfig.h>
 
 COMPILER OST
