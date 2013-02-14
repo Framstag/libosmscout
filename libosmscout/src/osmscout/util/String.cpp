@@ -22,8 +22,9 @@
 #include <iomanip>
 #include <locale>
 
+#include <osmscout/system/Math.h>
+
 #include <osmscout/private/Config.h>
-#include <osmscout/private/Math.h>
 
 namespace osmscout {
 

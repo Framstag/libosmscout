@@ -21,24 +21,21 @@
 
 #include <cassert>
 #include <vector>
-
-#include <osmscout/import/CoordDataFile.h>
-#include <osmscout/import/RawCoastline.h>
-#include <osmscout/import/RawNode.h>
+#include <iostream>
+#include <iomanip>
 
 #include <osmscout/DataFile.h>
 #include <osmscout/Way.h>
+
+#include <osmscout/system/Math.h>
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/String.h>
 
-#include <osmscout/private/Math.h>
-
-#include <iostream>
-#include <iomanip>
-
-#include "osmscout/import/RawCoastline.h"
+#include <osmscout/import/CoordDataFile.h>
+#include <osmscout/import/RawCoastline.h>
+#include <osmscout/import/RawNode.h>
 
 //#define DEBUG_COASTLINE
 //#define DEBUG_TILING

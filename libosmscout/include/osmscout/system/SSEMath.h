@@ -22,8 +22,7 @@
 
 #include <osmscout/private/Config.h>
 
-#include <osmscout/private/Math.h>
-
+#include <osmscout/system/Math.h>
 #include <osmscout/system/Types.h>
 #include <osmscout/system/SSEMathPublic.h>
 

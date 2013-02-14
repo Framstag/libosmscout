@@ -21,15 +21,16 @@
 
 #include <limits>
 
-#include <osmscout/import/RawCoastline.h>
-#include <osmscout/import/RawNode.h>
-#include <osmscout/import/RawWay.h>
+#include <osmscout/system/Math.h>
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/String.h>
 
+#include <osmscout/import/RawCoastline.h>
+#include <osmscout/import/RawNode.h>
+#include <osmscout/import/RawWay.h>
+
 #include <osmscout/private/Config.h>
-#include <osmscout/private/Math.h>
 
 #if defined(HAVE_LIB_XML)
   #include <osmscout/import/PreprocessOSM.h>

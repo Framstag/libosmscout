@@ -23,7 +23,7 @@
 #include <cstring>
 #include <limits>
 
-#include <osmscout/private/Math.h>
+#include <osmscout/system/Math.h>
 
 #include <iostream>
 

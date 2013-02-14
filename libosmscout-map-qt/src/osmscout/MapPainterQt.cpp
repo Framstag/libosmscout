@@ -23,10 +23,11 @@
 #include <iostream>
 #include <limits>
 
-#include <osmscout/util/Geometry.h>
-
-#include <osmscout/private/Math.h>
 #include <QPainterPath>
+
+#include <osmscout/system/Math.h>
+
+#include <osmscout/util/Geometry.h>
 
 namespace osmscout {
 

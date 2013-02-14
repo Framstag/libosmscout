@@ -25,12 +25,12 @@
 
 #include <osmscout/TypeConfigLoader.h>
 
+#include <osmscout/system/Math.h>
+
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/HashMap.h>
 #include <osmscout/util/StopClock.h>
-
-#include <osmscout/private/Math.h>
 
 namespace osmscout {
 

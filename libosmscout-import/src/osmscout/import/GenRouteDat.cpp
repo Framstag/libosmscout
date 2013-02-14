@@ -22,9 +22,9 @@
 #include <algorithm>
 #include <cassert>
 
-#include <osmscout/private/Math.h>
-
 #include <osmscout/DataFile.h>
+
+#include <osmscout/system/Math.h>
 
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/StopClock.h>

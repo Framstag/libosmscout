@@ -17,8 +17,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/private/Math.h>
-
 #include <osmscout/MapPainterCairo.h>
 
 #include <cassert>
@@ -29,6 +27,8 @@
 #include <cstdlib>
 
 #include <osmscout/LoaderPNG.h>
+
+#include <osmscout/system/Math.h>
 
 namespace osmscout {
 

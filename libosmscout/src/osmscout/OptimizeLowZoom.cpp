@@ -23,13 +23,13 @@
 
 #include <osmscout/Way.h>
 
+#include <osmscout/system/Math.h>
+
 #include <osmscout/util/File.h>
 #include <osmscout/util/Projection.h>
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/String.h>
 #include <osmscout/util/Transformation.h>
-
-#include <osmscout/private/Math.h>
 
 #include <iostream>
 

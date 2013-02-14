@@ -26,7 +26,7 @@
 #include <list>
 #include <cstdlib>
 
-#include <osmscout/private/Math.h>
+#include <osmscout/system/Math.h>
 
 namespace osmscout {
 

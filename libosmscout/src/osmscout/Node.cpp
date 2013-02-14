@@ -19,8 +19,6 @@
 
 #include <osmscout/Node.h>
 
-#include <osmscout/private/Math.h>
-
 namespace osmscout {
 
   void Node::SetType(TypeId type)

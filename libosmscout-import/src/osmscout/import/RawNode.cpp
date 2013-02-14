@@ -19,7 +19,7 @@
 
 #include <osmscout/import/RawNode.h>
 
-#include <osmscout/private/Math.h>
+#include <osmscout/system/Math.h>
 
 namespace osmscout {
 

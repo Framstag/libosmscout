@@ -1,6 +1,6 @@
 nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/private/ImportImportExport.h \
-                        osmscout/private/Math.h \
+                        osmscout/system/Math.h \
                         osmscout/ImportFeatures.h \
                         osmscout/import/RawCoastline.h \
                         osmscout/import/RawNode.h \

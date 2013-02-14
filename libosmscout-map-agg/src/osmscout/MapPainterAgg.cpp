@@ -30,10 +30,10 @@
 #include <agg2/agg_ellipse.h>
 #include <agg2/agg_trans_single_path.h>
 
+#include <osmscout/system/Math.h>
+
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/String.h>
-
-#include <osmscout/private/Math.h>
 
 namespace osmscout {
 

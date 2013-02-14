@@ -24,14 +24,14 @@
 #include <osmscout/Pixel.h>
 #include <osmscout/Way.h>
 
+#include <osmscout/system/Math.h>
+
 #include <osmscout/util/File.h>
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/Number.h>
 #include <osmscout/util/Projection.h>
 #include <osmscout/util/String.h>
 #include <osmscout/util/Transformation.h>
-
-#include <osmscout/private/Math.h>
 
 namespace osmscout
 {

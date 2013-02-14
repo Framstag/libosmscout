@@ -25,9 +25,9 @@
 
 #include <osmscout/TypeConfigLoader.h>
 
-#include <osmscout/util/StopClock.h>
+#include <osmscout/system/Math.h>
 
-#include <osmscout/private/Math.h>
+#include <osmscout/util/StopClock.h>
 
 namespace osmscout {
 

@@ -65,6 +65,18 @@ AC_CHECK_DECLS([log2(double), atanh(double), lround(double)],
                   #include <math.h>
                 #endif])
 
+if test "x$ac_cv_have_decl_log2_double_" = xyes; then
+  AC_DEFINE([OSMSCOUT_HAVE_LOG2],[1],[math function log2(double) is available])
+fi
+
+if test "x$ac_cv_have_decl_atanh_double_" = xyes; then
+  AC_DEFINE([OSMSCOUT_HAVE_ATANH],[1],[math function atanh(double) is available])
+fi
+
+if test "x$ac_cv_have_decl_lround_double_" = xyes; then
+  AC_DEFINE([OSMSCOUT_HAVE_LROUND],[1],[math function lround(double) is available])
+fi
+
 AC_CHECK_FUNCS([mmap posix_fadvise posix_madvise])
 
 AC_SYS_LARGEFILE

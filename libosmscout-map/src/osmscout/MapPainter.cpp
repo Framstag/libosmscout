@@ -22,11 +22,11 @@
 #include <iostream>
 #include <limits>
 
+#include <osmscout/system/Math.h>
+
 #include <osmscout/util/HashSet.h>
 #include <osmscout/util/StopClock.h>
 #include <osmscout/util/String.h>
-
-#include <osmscout/private/Math.h>
 
 //#define DEBUG_GROUNDTILES
 

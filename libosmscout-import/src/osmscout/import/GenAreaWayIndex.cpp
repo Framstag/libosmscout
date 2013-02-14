@@ -25,12 +25,12 @@
 #include <osmscout/Relation.h>
 #include <osmscout/Way.h>
 
+#include <osmscout/system/Math.h>
+
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/Number.h>
 #include <osmscout/util/String.h>
-
-#include <osmscout/private/Math.h>
 
 namespace osmscout {
 

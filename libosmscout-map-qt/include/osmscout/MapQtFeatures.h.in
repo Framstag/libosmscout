@@ -5,7 +5,16 @@
 #undef OSMSCOUT_MAP_QT_EXPORT_SYMBOLS
 
 /* libosmscout needs to include <math.h> */
-#undef OSMSCOUT_REQUIRES_MATHH
+#undef OSMSCOUT_MAP_QT_REQUIRES_MATHH
+
+/* math function log2(double) is available */
+#undef OSMSCOUT_MAP_QT_HAVE_LOG2
+
+/* math function atanh(double) is available */
+#undef OSMSCOUT_MAP_QT_HAVE_ATANH
+
+/* math function lround(double) is available */
+#undef OSMSCOUT_MAP_QT_HAVE_LROUND
 
 #endif
 

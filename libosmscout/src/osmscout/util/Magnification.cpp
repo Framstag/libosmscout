@@ -17,9 +17,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/util/Magnification.h>
+#include <osmscout/system/Math.h>
 
-#include <osmscout/private/Math.h>
+#include <osmscout/util/Magnification.h>
 
 namespace osmscout {
 

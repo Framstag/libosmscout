@@ -42,3 +42,12 @@
 
 /* libosmscout needs to include <math.h> */
 #undef OSMSCOUT_REQUIRES_MATHH
+
+/* math function log2(double) is available */
+#undef OSMSCOUT_HAVE_LOG2
+
+/* math function atanh(double) is available */
+#undef OSMSCOUT_HAVE_ATANH
+
+/* math function lround(double) is available */
+#undef OSMSCOUT_HAVE_LROUND

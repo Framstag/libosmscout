@@ -25,9 +25,9 @@
 
 #include <cstring>
 
-#include <osmscout/util/Number.h>
+#include <osmscout/system/Math.h>
 
-#include <osmscout/private/Math.h>
+#include <osmscout/util/Number.h>
 
 namespace osmscout {
 

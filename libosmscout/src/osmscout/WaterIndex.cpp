@@ -21,9 +21,9 @@
 
 #include <iostream>
 
-#include <osmscout/util/FileScanner.h>
+#include <osmscout/system/Math.h>
 
-#include <osmscout/private/Math.h>
+#include <osmscout/util/FileScanner.h>
 
 namespace osmscout {
 

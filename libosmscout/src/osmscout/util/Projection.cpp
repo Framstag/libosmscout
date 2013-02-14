@@ -21,8 +21,7 @@
 
 #include <cassert>
 
-#include <osmscout/private/Math.h>
-#include <iostream>
+#include <osmscout/system/Math.h>
 
 #ifdef OSMSCOUT_HAVE_SSE2
 #include <osmscout/system/SSEMath.h>

@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_UTIL_MATH_H
-#define OSMSCOUT_UTIL_MATH_H
+#ifndef OSMSCOUT_MAP_AGG_SYSTEM_MATH_H
+#define OSMSCOUT_MAP_AGG_SYSTEM_MATH_H
 
 /*
   This source is part of the libosmscout library
@@ -25,49 +25,37 @@
   #define _USE_MATH_DEFINES
 #endif
 
-#include <osmscout/CoreFeatures.h>
+#include <osmscout/MapAggFeatures.h>
 
 #include <cmath>
 
-#if defined(OSMSCOUT_REQUIRES_MATHH)
+#if defined(OSMSCOUT_MAP_AGG_REQUIRES_MATHH)
   #include <math.h>
 #endif
-
-#include <osmscout/private/Config.h>
 
 #if !defined(M_PI)
   #define M_PI 3.14159265358979323846
 #endif
 
-#if !defined(HAVE_DECL_LOG2)
+#if !defined(OSMSCOUT_MAP_AGG_HAVE_LOG2)
   inline double log2(double x)
   {
     return log(x)/log(2.0l);
   }
 #endif
 
-#if !defined(HAVE_DECL_ATANH)
+#if !defined(OSMSCOUT_MAP_AGG_HAVE_ATANH)
   inline double atanh(double x)
   {
     return log((1.0+x)/(1.0-x))/2.0;
   }
 #endif
 
-#if !defined(HAVE_DECL_LROUND)
+#if !defined(OSMSCOUT_MAP_AGG_HAVE_LROUND)
   inline long lround(double d)
   {
     return (long)(d>0 ? d+0.5 : ceil(d-0.5));
   }
-#endif
-
-#if !defined(USE_SSE2_MATH)
-  inline void sincos(double x, double& resSin, double& resCos)
-  {
-    resSin = sin(x);
-    resCos = cos(x);
-  }
-#else
-  #define sincos sin_cos_pd
 #endif
 
 #endif

@@ -22,9 +22,9 @@
 #include <cassert>
 #include <limits>
 
-#include <osmscout/util/String.h>
+#include <osmscout/system/Math.h>
 
-#include <osmscout/private/Math.h>
+#include <osmscout/util/String.h>
 
 #include <cstring>
 namespace osmscout {

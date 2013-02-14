@@ -22,7 +22,7 @@ AC_MSG_CHECKING([if C++ include <cmath> defines C math symbols, too])
 AC_TRY_COMPILE([#include <cmath>],
                [sin(1);],
                [AC_MSG_RESULT(yes)],
-               [AC_DEFINE([OSMSCOUT_REQUIRES_MATHH],[1],[libosmscout needs to include <math.h>])
+               [AC_DEFINE([OSMSCOUT_MAP_REQUIRES_MATHH],[1],[libosmscout needs to include <math.h>])
                 AC_MSG_RESULT(no)])
 
 AC_CHECK_DECLS([log2(double), atanh(double), lround(double)],
@@ -32,6 +32,18 @@ AC_CHECK_DECLS([log2(double), atanh(double), lround(double)],
                 #if defined(OSMSCOUT_REQUIRES_MATHH)
                   #include <math.h>
                 #endif])
+
+if test "x$ac_cv_have_decl_log2_double_" = xyes; then
+  AC_DEFINE([OSMSCOUT_MAP_HAVE_LOG2],[1],[math function log2(double) is available])
+fi
+
+if test "x$ac_cv_have_decl_atanh_double_" = xyes; then
+  AC_DEFINE([OSMSCOUT_MAP_HAVE_ATANH],[1],[math function atanh(double) is available])
+fi
+
+if test "x$ac_cv_have_decl_lround_double_" = xyes; then
+  AC_DEFINE([OSMSCOUT_MAP_HAVE_LROUND],[1],[math function lround(double) is available])
+fi
 
 if test "$GXX" = yes; then
   CPPFLAGS="$CPPFLAGS -Wall -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
