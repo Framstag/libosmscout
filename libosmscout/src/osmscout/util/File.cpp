@@ -21,8 +21,8 @@
 
 #include <osmscout/util/File.h>
 
-#include <cstdio>
-#include <cstdlib>
+#include <stdio.h>
+#include <stdlib.h>
 
 namespace osmscout {
 

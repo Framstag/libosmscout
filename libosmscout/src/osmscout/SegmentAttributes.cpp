@@ -26,7 +26,6 @@
 
 #include <osmscout/util/String.h>
 
-#include <cstring>
 namespace osmscout {
 
   static const char* postfixes[] =  {"-Straße", " Straße", "straße",

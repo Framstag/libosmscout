@@ -26,7 +26,6 @@
 #endif
 
 #include <cassert>
-#include <cstdlib>
 
 namespace osmscout {
 

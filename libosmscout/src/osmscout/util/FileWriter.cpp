@@ -23,7 +23,9 @@
 
 #include <osmscout/util/FileWriter.h>
 
-#include <cstring>
+#include <string.h>
+
+#include <stdio.h>
 
 #include <osmscout/system/Math.h>
 

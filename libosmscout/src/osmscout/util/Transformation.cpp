@@ -19,8 +19,9 @@
 
 #include <osmscout/util/Transformation.h>
 
+#include <string.h>
+
 #include <cassert>
-#include <cstring>
 #include <limits>
 
 #include <osmscout/system/Math.h>

@@ -19,7 +19,6 @@
 
 #include <osmscout/TypeConfigLoader.h>
 
-#include <cstdio>
 #include <iostream>
 
 #include <osmscout/ost/Parser.h>

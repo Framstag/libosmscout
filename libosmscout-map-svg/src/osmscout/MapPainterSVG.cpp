@@ -24,7 +24,6 @@
 #include <iomanip>
 #include <limits>
 #include <list>
-#include <cstdlib>
 
 #include <osmscout/system/Math.h>
 

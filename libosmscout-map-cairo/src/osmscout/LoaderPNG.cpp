@@ -20,7 +20,6 @@
 #include <osmscout/LoaderPNG.h>
 
 #include <cstdio>
-#include <cstdlib>
 
 #include <png.h>
 
@@ -35,7 +34,7 @@ namespace osmscout {
 
   cairo_surface_t* LoadPNG(const std::string& filename)
   {
-    FILE            *file;
+    std::FILE       *file;
     png_structp     png_ptr;
     png_infop       info_ptr;
     png_uint_32     width, height;
@@ -54,7 +53,7 @@ namespace osmscout {
     littleEndian=IsLowerByteSet((unsigned char*)&endian);
 
     /* open the file */
-    file=fopen(filename.c_str(),"rb");
+    file=std::fopen(filename.c_str(),"rb");
 
     if (file==NULL) {
       return NULL;
@@ -64,20 +63,20 @@ namespace osmscout {
 
     png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,NULL,NULL,NULL);
     if (!png_ptr) {
-      fclose(file);
+      std::fclose(file);
       return NULL;   /* out of memory */
     }
 
     info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr) {
       png_destroy_read_struct(&png_ptr,NULL,NULL);
-      fclose(file);
+      std::fclose(file);
       return NULL;   /* out of memory */
     }
 
     if (setjmp(png_jmpbuf(png_ptr))) {
       png_destroy_read_struct(&png_ptr,&info_ptr,NULL);
-      fclose(file);
+      std::fclose(file);
       return NULL;
     }
 
@@ -89,7 +88,7 @@ namespace osmscout {
 
     if (setjmp(png_jmpbuf(png_ptr))) {
       png_destroy_read_struct(&png_ptr,&info_ptr,NULL);
-      fclose(file);
+      std::fclose(file);
       return NULL;
     }
 
@@ -137,14 +136,14 @@ namespace osmscout {
 
     if ((image_data=(unsigned char *)malloc(rowbytes*height)) == NULL) {
       png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
-      fclose(file);
+      std::fclose(file);
       return NULL;
     }
 
     if ((row_pointers=(png_bytepp)malloc(height*sizeof(png_bytep))) == NULL) {
       png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
       free(image_data);
-      fclose(file);
+      std::fclose(file);
       return NULL;
     }
 
@@ -235,7 +234,7 @@ namespace osmscout {
 
     png_destroy_read_struct(&png_ptr,&info_ptr,NULL);
     free(image_data);
-    fclose(file);
+    std::fclose(file);
 
     return image;
   }

@@ -19,8 +19,9 @@
 
 #include <osmscout/Route.h>
 
-#include <cmath>
 #include <sstream>
+
+#include <osmscout/system/Math.h>
 
 #include <osmscout/util/String.h>
 

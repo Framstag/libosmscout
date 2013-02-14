@@ -21,9 +21,11 @@
 
 #include <osmscout/util/FileScanner.h>
 
+#include <errno.h>
+#include <stdio.h>
+#include <string.h>
+
 #include <cassert>
-#include <cerrno>
-#include <cstring>
 #include <iostream>
 #include <limits>
 
