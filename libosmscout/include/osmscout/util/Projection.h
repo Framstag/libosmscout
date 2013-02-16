@@ -22,11 +22,7 @@
 
 #include <osmscout/private/CoreImportExport.h>
 
-#include <osmscout/CoreFeatures.h>
-
-#ifdef OSMSCOUT_HAVE_SSE2
 #include <osmscout/system/SSEMathPublic.h>
-#endif
 
 #include <osmscout/util/Magnification.h>
 

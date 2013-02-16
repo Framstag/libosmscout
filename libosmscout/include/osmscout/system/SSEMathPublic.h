@@ -20,6 +20,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <osmscout/CoreFeatures.h>
+
+#if defined(OSMSCOUT_HAVE_SSE2)
+
 //include sse and sse2 headers
 #include <xmmintrin.h>
 #include <emmintrin.h>
@@ -32,12 +36,23 @@
 # define ALIGN16_BEG
 # define ALIGN16_END __attribute__((aligned(16)))
 #endif
+#endif
 
 namespace osmscout {
+
+#if defined(OSMSCOUT_HAVE_SSE2)
+  #define sincos sin_cos_pd
 
   /* __m128 is ugly to write */
   typedef __m128d v2df;  // vector of 2 double (sse2)
   typedef __m128i v2di;  // vector of 2 int (sse2)
+#else
+  inline void sincos(double x, double& resSin, double& resCos)
+  {
+    resSin = sin(x);
+    resCos = cos(x);
+  }
+#endif
 }
 
 #endif

@@ -58,14 +58,4 @@
   }
 #endif
 
-#if !defined(OSMSCOUT_HAVE_SSE2)
-  inline void sincos(double x, double& resSin, double& resCos)
-  {
-    resSin = sin(x);
-    resCos = cos(x);
-  }
-#else
-  #define sincos sin_cos_pd
-#endif
-
 #endif
