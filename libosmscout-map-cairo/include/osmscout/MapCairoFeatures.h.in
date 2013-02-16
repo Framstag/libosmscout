@@ -7,17 +7,5 @@
 /* The cairo backend can make use of pango */
 #undef OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO
 
-/* libosmscout needs to include <math.h> */
-#undef OSMSCOUT_MAP_CAIRO_REQUIRES_MATHH
-
-/* math function log2(double) is available */
-#undef OSMSCOUT_MAP_CAIRO_HAVE_LOG2
-
-/* math function atanh(double) is available */
-#undef OSMSCOUT_MAP_CAIRO_HAVE_ATANH
-
-/* math function lround(double) is available */
-#undef OSMSCOUT_MAP_CAIRO_HAVE_LROUND
-
 #endif
 

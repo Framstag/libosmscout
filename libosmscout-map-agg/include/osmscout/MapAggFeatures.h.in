@@ -4,17 +4,5 @@
 /* Illumination uses special gcc compiler features to explicitely export symbols */
 #undef OSMSCOUT_MAP_AGG_EXPORT_SYMBOLS
 
-/* libosmscout needs to include <math.h> */
-#undef OSMSCOUT_MAP_AGG_REQUIRES_MATHH
-
-/* math function log2(double) is available */
-#undef OSMSCOUT_MAP_AGG_HAVE_LOG2
-
-/* math function atanh(double) is available */
-#undef OSMSCOUT_MAP_AGG_HAVE_ATANH
-
-/* math function lround(double) is available */
-#undef OSMSCOUT_MAP_AGG_HAVE_LROUND
-
 #endif
 
