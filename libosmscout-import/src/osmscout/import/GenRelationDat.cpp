@@ -20,7 +20,8 @@
 #include <osmscout/import/GenRelationDat.h>
 
 #include <algorithm>
-#include <cassert>
+
+#include <osmscout/system/Assert.h>
 
 #include <osmscout/util/Geometry.h>
 

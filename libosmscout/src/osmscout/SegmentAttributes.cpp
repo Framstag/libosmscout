@@ -19,9 +19,9 @@
 
 #include <osmscout/SegmentAttributes.h>
 
-#include <cassert>
 #include <limits>
 
+#include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/String.h>

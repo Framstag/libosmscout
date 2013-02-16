@@ -22,12 +22,13 @@
 
 #include <osmscout/CoreFeatures.h>
 
-#include <cassert>
 #include <iostream>
 
 
 #include <list>
 #include <vector>
+
+#include <osmscout/system/Assert.h>
 
 #include <osmscout/util/HashMap.h>
 

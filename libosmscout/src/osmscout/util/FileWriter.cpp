@@ -27,6 +27,7 @@
 
 #include <stdio.h>
 
+#include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/Number.h>

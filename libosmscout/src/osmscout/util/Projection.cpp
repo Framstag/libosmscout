@@ -19,8 +19,7 @@
 
 #include <osmscout/util/Projection.h>
 
-#include <cassert>
-
+#include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
 #ifdef OSMSCOUT_HAVE_SSE2

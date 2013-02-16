@@ -20,11 +20,11 @@
 #include <osmscout/DebugDatabase.h>
 
 #include <algorithm>
-#include <cassert>
 #include <iostream>
 
 #include <osmscout/TypeConfigLoader.h>
 
+#include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/File.h>

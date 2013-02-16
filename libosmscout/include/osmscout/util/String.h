@@ -20,13 +20,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <cassert>
 #include <limits>
 #include <list>
 #include <sstream>
 #include <string>
 
 #include <osmscout/CoreFeatures.h>
+
+#include <osmscout/system/Assert.h>
 
 #include <osmscout/private/CoreImportExport.h>
 
@@ -172,7 +173,7 @@ namespace osmscout {
                                                      const std::string& separator="/");
 
   extern OSMSCOUT_API std::string ByteSizeToString(double size);
-  
+
 #if defined(OSMSCOUT_HAVE_STD__WSTRING)
   extern OSMSCOUT_API std::wstring UTF8StringToWString(const std::string& text);
 #endif

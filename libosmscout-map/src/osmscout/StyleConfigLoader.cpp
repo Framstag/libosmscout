@@ -21,9 +21,10 @@
 
 #include <string.h>
 
-#include <cassert>
 #include <iostream>
 #include <sstream>
+
+#include <osmscout/system/Assert.h>
 
 #include <osmscout/util/File.h>
 

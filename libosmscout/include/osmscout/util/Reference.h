@@ -20,8 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <cassert>
-
+#include <osmscout/system/Assert.h>
 #include <osmscout/system/Types.h>
 
 #include <osmscout/private/CoreImportExport.h>

@@ -19,7 +19,8 @@
 
 #include <osmscout/TypeConfig.h>
 
-#include <cassert>
+#include <osmscout/system/Assert.h>
+
 #include <iostream>
 namespace osmscout {
 

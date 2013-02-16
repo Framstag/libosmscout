@@ -25,7 +25,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <cassert>
 #include <iostream>
 #include <limits>
 
@@ -45,6 +44,8 @@
     #define _fileno(__F) ((__F)->_file)
   #endif
 #endif
+
+#include <osmscout/system/Assert.h>
 
 #include <osmscout/util/Number.h>
 

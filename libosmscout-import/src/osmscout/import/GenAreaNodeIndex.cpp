@@ -19,12 +19,12 @@
 
 #include <osmscout/import/GenAreaNodeIndex.h>
 
-#include <cassert>
 #include <vector>
 
 #include <osmscout/Node.h>
 #include <osmscout/Pixel.h>
 
+#include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/File.h>

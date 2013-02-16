@@ -19,8 +19,7 @@
 
 #include <osmscout/Way.h>
 
-#include <cassert>
-
+#include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
 namespace osmscout {

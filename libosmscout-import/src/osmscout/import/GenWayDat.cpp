@@ -20,9 +20,10 @@
 #include <osmscout/import/GenWayDat.h>
 
 #include <algorithm>
-#include <cassert>
 
 #include <osmscout/DataFile.h>
+
+#include <osmscout/system/Assert.h>
 
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/StopClock.h>

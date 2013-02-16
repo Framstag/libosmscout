@@ -95,7 +95,7 @@ private:
   int minErrDist;
 
   void SynErr(int n);
-  
+
   void Get();
   void Expect(int n);
   bool StartOf(int s);
@@ -177,7 +177,7 @@ inline void ToRGBA(const std::string& str, Color& color)
   Parser(Scanner *scanner,
          StyleConfig& config);
   ~Parser();
-  
+
   void SemErr(const char* msg);
   void SemWarning(const char* msg);
 

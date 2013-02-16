@@ -19,11 +19,10 @@
 
 #include <osmscout/import/GenOptimizeLowZoom.h>
 
-#include <cassert>
-
 #include <osmscout/Pixel.h>
 #include <osmscout/Way.h>
 
+#include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/File.h>

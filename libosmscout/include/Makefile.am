@@ -1,5 +1,6 @@
 nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/private/CoreImportExport.h \
+                        osmscout/system/Assert.h \
                         osmscout/system/Math.h \
                         osmscout/system/Types.h \
                         osmscout/util/Breaker.h \

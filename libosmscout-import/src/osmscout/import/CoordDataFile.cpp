@@ -19,7 +19,7 @@
 
 #include "osmscout/import/CoordDataFile.h"
 
-#include <cassert>
+#include <osmscout/system/Assert.h>
 
 #include <osmscout/util/File.h>
 

@@ -19,8 +19,9 @@
 
 #include <osmscout/RoutingProfile.h>
 
-#include <cassert>
 #include <limits>
+
+#include <osmscout/system/Assert.h>
 
 namespace osmscout {
 

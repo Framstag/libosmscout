@@ -20,11 +20,12 @@
 #include <osmscout/Router.h>
 
 #include <algorithm>
-#include <cassert>
 #include <iostream>
 
 #include <osmscout/RoutingProfile.h>
 #include <osmscout/TypeConfigLoader.h>
+
+#include <osmscout/system/Assert.h>
 
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/StopClock.h>

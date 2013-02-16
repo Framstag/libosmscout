@@ -24,8 +24,6 @@
 
 #include <stddef.h>
 
-#include <cassert>
-
 namespace osmscout {
 
   /**

@@ -19,7 +19,6 @@
 
 #include <osmscout/MapPainterAgg.h>
 
-#include <cassert>
 #include <iostream>
 #include <limits>
 
@@ -30,6 +29,7 @@
 #include <agg2/agg_ellipse.h>
 #include <agg2/agg_trans_single_path.h>
 
+#include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/Geometry.h>

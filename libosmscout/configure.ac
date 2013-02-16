@@ -27,8 +27,6 @@ if test "$enable_cpp0x_support" != "no"; then
                        [CPP0XFLAGS="-std=c++0x"
                         CPPFLAGS="$CPPFLAGS -std=c++0x"
                         AC_SUBST(CPP0XFLAGS)])
-
-
 fi
 
 AC_TYPE_SIZE_T
@@ -49,6 +47,13 @@ AC_CHECK_SIZEOF([wchar_t])
 AC_CHECK_HEADERS([fcntl.h sys/time.h unordered_map unordered_set])
 
 AC_SEARCH_LIBS([sqrt],[m])
+
+AC_MSG_CHECKING([if C++ include <cassert> defines assert() without namespace])
+AC_TRY_COMPILE([#include <cassert>],
+               [assert(true);],
+               [AC_MSG_RESULT(yes)],
+               [AC_DEFINE([OSMSCOUT_REQUIRES_ASSERTH],[1],[libosmscout needs to include <assert.h>])
+                AC_MSG_RESULT(no)])
 
 AC_MSG_CHECKING([if C++ include <cmath> defines C math symbols, too])
 AC_TRY_COMPILE([#include <cmath>],

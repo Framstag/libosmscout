@@ -20,10 +20,10 @@
 #include <osmscout/import/GenRouteDat.h>
 
 #include <algorithm>
-#include <cassert>
 
 #include <osmscout/DataFile.h>
 
+#include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/Geometry.h>

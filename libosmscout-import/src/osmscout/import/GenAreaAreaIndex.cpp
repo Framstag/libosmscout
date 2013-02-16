@@ -19,12 +19,12 @@
 
 #include <osmscout/import/GenAreaAreaIndex.h>
 
-#include <cassert>
 #include <vector>
 
 #include <osmscout/Relation.h>
 #include <osmscout/Way.h>
 
+#include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/File.h>

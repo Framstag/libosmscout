@@ -38,12 +38,13 @@
 
 #include <osmscout/oss/Parser.h>
 
-#include <cassert>
 #include <sstream>
 
-#include <osmscout/oss/Scanner.h>
+#include <osmscout/system/Assert.h>
 
 #include <osmscout/util/String.h>
+
+#include <osmscout/oss/Scanner.h>
 
 namespace osmscout {
 namespace oss {
@@ -1541,9 +1542,9 @@ void Errors::SynErr(int line, int col, int n)
     default:
     {
       std::stringstream buffer;
-      
+
       buffer << "error " << n;
-      
+
       s = coco_string_create(buffer.str().c_str());
     }
     break;

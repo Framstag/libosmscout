@@ -19,10 +19,9 @@
 
 #include <osmscout/OptimizeLowZoom.h>
 
-#include <cassert>
-
 #include <osmscout/Way.h>
 
+#include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/File.h>

@@ -19,12 +19,12 @@
 
 #include <osmscout/MapPainterQt.h>
 
-#include <cassert>
 #include <iostream>
 #include <limits>
 
 #include <QPainterPath>
 
+#include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/Geometry.h>

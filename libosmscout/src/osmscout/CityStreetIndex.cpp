@@ -19,8 +19,9 @@
 
 #include <osmscout/CityStreetIndex.h>
 
-#include <cassert>
 #include <iostream>
+
+#include <osmscout/system/Assert.h>
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/StopClock.h>

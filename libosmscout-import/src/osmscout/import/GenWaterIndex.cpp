@@ -19,7 +19,6 @@
 
 #include <osmscout/import/GenWaterIndex.h>
 
-#include <cassert>
 #include <vector>
 #include <iostream>
 #include <iomanip>
@@ -27,6 +26,7 @@
 #include <osmscout/DataFile.h>
 #include <osmscout/Way.h>
 
+#include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/File.h>

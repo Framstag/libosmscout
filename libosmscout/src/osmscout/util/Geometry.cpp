@@ -25,7 +25,7 @@
 #include <osmscout/system/SSEMath.h>
 #endif
 
-#include <cassert>
+#include <osmscout/system/Assert.h>
 
 namespace osmscout {
 

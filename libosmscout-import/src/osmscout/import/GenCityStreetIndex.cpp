@@ -19,7 +19,6 @@
 
 #include <osmscout/import/GenCityStreetIndex.h>
 
-#include <cassert>
 #include <iostream>
 #include <limits>
 #include <list>
@@ -31,6 +30,7 @@
 #include <osmscout/Relation.h>
 #include <osmscout/Way.h>
 
+#include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/File.h>

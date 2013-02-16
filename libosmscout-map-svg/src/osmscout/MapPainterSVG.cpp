@@ -19,12 +19,12 @@
 
 #include <osmscout/MapPainterSVG.h>
 
-#include <cassert>
 #include <iostream>
 #include <iomanip>
 #include <limits>
 #include <list>
 
+#include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
 namespace osmscout {
