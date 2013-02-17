@@ -9,17 +9,17 @@
 /*
  This source is part of the libosmscout library
  Copyright (C) 2009  Tim Teulings
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
@@ -27,11 +27,14 @@
 
 #include <ostream>
 #include <sstream>
+
 #include <osmscout/SRTM.h>
-#include <math.h>
+
+#include <osmscout/system/Math.h>
+#include <osmscout/system/Types.h>
 
 namespace osmscout {
-    
+
     size_t SRTM::rows = SRTM3_GRID;
     size_t SRTM::columns = SRTM3_GRID;
     size_t SRTM::patchSize = 2*rows*columns;
@@ -41,13 +44,13 @@ namespace osmscout {
         currentFilename = "";
         heights = NULL;
     }
-    
+
     SRTM::~SRTM(){
         if(heights){
             delete heights;
         }
     }
-    
+
     /**
      * generate SRTM3 filename like N43E006.hgt from integer part of latitude and longitude
      */
@@ -57,7 +60,7 @@ namespace osmscout {
             fileName << "N";
         } else {
             fileName << "S";
-            patchLat = abs(patchLat);
+            patchLat = std::abs(patchLat);
         }
         if(patchLat<10){
             fileName<<"0";
@@ -67,7 +70,7 @@ namespace osmscout {
             fileName << "E";
         } else {
             fileName << "W";
-            patchLon = abs(patchLon);
+            patchLon = std::abs(patchLon);
         }
         if(patchLon<10){
             fileName<<"0";
@@ -76,10 +79,10 @@ namespace osmscout {
             fileName<<"0";
         }
         fileName << patchLon << ".hgt";
-        
+
         return *(new std::string(fileName.str()));
     }
-    
+
     /**
      * return the height at (latitude,longitude) or SRTM::nodata if no data at the location
      */
@@ -144,5 +147,5 @@ namespace osmscout {
 	    return SRTM::nodata;
 	}
     }
-    
+
 }

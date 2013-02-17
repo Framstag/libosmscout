@@ -21,6 +21,8 @@
 
 #include <osmscout/util/Geometry.h>
 
+#include <osmscout/system/SSEMathPublic.h>
+
 #ifdef OSMSCOUT_HAVE_SSE2
 #include <osmscout/system/SSEMath.h>
 #endif

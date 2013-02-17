@@ -19,6 +19,7 @@
 
 #include <osmscout/system/Math.h>
 
+#include <osmscout/util/Geometry.h>
 #include <osmscout/util/Magnification.h>
 
 namespace osmscout {
@@ -37,7 +38,7 @@ namespace osmscout {
 
   void Magnification::SetLevel(size_t level)
   {
-    this->magnification=pow(2,level);
+    this->magnification=Pow(2,level);
     this->level=level;
   }
 }

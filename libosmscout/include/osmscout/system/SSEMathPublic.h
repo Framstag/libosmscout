@@ -36,6 +36,9 @@
 # define ALIGN16_BEG
 # define ALIGN16_END __attribute__((aligned(16)))
 #endif
+
+#else
+#include <osmscout/system/Math.h>
 #endif
 
 namespace osmscout {
