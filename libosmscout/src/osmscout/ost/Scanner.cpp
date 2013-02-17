@@ -37,6 +37,7 @@
 */
 
 #include <string.h>
+#include <stdlib.h>
 
 #include <iostream>
 
@@ -120,7 +121,7 @@ int Buffer::GetPos()
 void Buffer::SetPos(int value) {
   if ((value < 0) || (value > bufLen)) {
     std::cerr << "--- buffer out of bounds access, position: " << value << std::endl;
-    std::exit(1);
+    exit(1);
   }
 
   bufPos = value;
@@ -199,7 +200,7 @@ void Scanner::Init() {
     NextCh(); int ch2 = ch;
     if (ch1 != 0xBB || ch2 != 0xBF) {
       std::cerr << "Illegal byte order mark at start of file" << std::endl;
-      std::exit(1);
+      exit(1);
     }
     NextCh();
   }
