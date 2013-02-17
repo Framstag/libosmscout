@@ -37,6 +37,7 @@
 */
 
 #include <string.h>
+#include <stdlib.h>
 
 #include <iostream>
 
@@ -248,7 +249,7 @@ void Scanner::Init() {
     NextCh(); int ch1 = ch;
     NextCh(); int ch2 = ch;
     if (ch1 != 0xBB || ch2 != 0xBF) {
-      printf("Illegal byte order mark at start of file");
+      std::cerr << "Illegal byte order mark at start of file" << std::endl;
       exit(1);
     }
     NextCh();
