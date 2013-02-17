@@ -83,4 +83,26 @@ public abstract class Projection {
 	public Point geoToPixel(GeoPos pos) {
 		return geoToPixel(pos.getLon(), pos.getLat());
 	}
+	
+	public static int lon2tilex(double lon, long zoom) {
+		
+		return (int) Math.floor((lon+180.0)/360.0*Math.pow(2.0, zoom));
+	}
+	
+	public static int lat2tiley(double lat, long zoom) {
+		
+		return (int) Math.floor((1.0-Math.log(Math.tan(lat*Math.PI/180.0)+1.0/Math.cos(lat*Math.PI/180.0))/Math.PI)/2.0*Math.pow(2.0, zoom));
+	}
+
+	public static double tilex2long(long x, long zoom) {
+		
+		return x/Math.pow(2.0, zoom)*360.0-180.0;
+	}
+	
+	public static double tiley2lat(long y, long zoom) {
+		
+		double n =Math.PI-2.0*Math.PI*y/Math.pow(2.0, zoom);
+		
+		return 180.0/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n)));
+	}
 }
