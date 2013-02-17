@@ -369,15 +369,15 @@ namespace osmscout {
     {
       PolygonPrimitive* polygon=dynamic_cast<PolygonPrimitive*>(primitive);
 
-      int numPoints=polygon->GetPixels().size();
+      int numPoints=polygon->GetCoords().size();
 
       float *arrayX=new float[numPoints];
       float *arrayY=new float[numPoints];
 
       int i=0;
 
-      for (std::list<Pixel>::const_iterator pixel=polygon->GetPixels().begin();
-           pixel!=polygon->GetPixels().end(); ++pixel)
+      for (std::list<Coord>::const_iterator pixel=polygon->GetCoords().begin();
+           pixel!=polygon->GetCoords().end(); ++pixel)
       {
         arrayX[i]=x+ConvertWidthToPixel(parameter, pixel->x-width/2);
         arrayY[i]=y+ConvertWidthToPixel(parameter, maxY-pixel->y-height/2);
