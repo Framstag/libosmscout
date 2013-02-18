@@ -7,6 +7,7 @@ AM_CPPFLAGS=$(LIBOSMSCOUTMAPSVG_CFLAGS) \
 
 bin_PROGRAMS = AddressLookup \
                DumpData \
+               PerformanceTest \
                ResourceConsumption \
                Routing \
                LookupPOI \
@@ -59,9 +60,14 @@ DumpData_LDADD = $(LIBOSMSCOUT_LIBS)
 LookupPOI_SOURCES = LookupPOI.cpp
 LookupPOI_LDADD = $(LIBOSMSCOUT_LIBS)
 
+PerformanceTest_SOURCES = PerformanceTest.cpp
+PerformanceTest_LDADD = $(LIBOSMSCOUTMAPCAIRO_LIBS) \
+                        $(LIBOSMSCOUTMAP_LIBS) \
+                        $(LIBOSMSCOUT_LIBS)
+
 ResourceConsumption_SOURCES = ResourceConsumption.cpp
-ResourceConsumption_LDADD = $(LIBOSMSCOUT_LIBS) \
-                            $(LIBOSMSCOUTMAP_LIBS)
+ResourceConsumption_LDADD = $(LIBOSMSCOUTMAP_LIBS) \
+                            $(LIBOSMSCOUT_LIBS)
 
 ResourceConsumptionQt_SOURCES = ResourceConsumptionQt.cpp
 ResourceConsumptionQt_LDADD = $(LIBOSMSCOUTMAPQT_LIBS) \
