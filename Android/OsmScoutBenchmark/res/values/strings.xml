@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">OsmScoutBenchmark</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="start">Start</string>
+    <string name="max_lat">Max Lat</string>
+    <string name="min_lat">Min Lat</string>
+    <string name="max_lon">Max Lon</string>
+    <string name="min_lon">Min Lon</string>
+    <string name="min_zoom">Min Zoom</string>
+    <string name="max_zoom">Max Zoom</string>
+    <string name="width">Width</string>
+    <string name="height">Height</string>
+
+</resources>
