@@ -374,6 +374,17 @@ namespace osmscout {
     return !hasError;
   }
 
+  bool FileWriter::Flush()
+  {
+    if (HasError()) {
+      return false;
+    }
+
+    hasError=fflush(file)!=0;
+
+    return !hasError;
+  }
+
   bool FileWriter::FlushCurrentBlockWithZeros(size_t blockSize)
   {
     if (HasError()) {

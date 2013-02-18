@@ -1317,6 +1317,8 @@ namespace osmscout {
         node++;
       }
 
+      writer.Flush();
+
       if (!HandlePendingOffsets(parameter,
                                 progress,
                                 routeNodeIdOffsetMap,

@@ -84,6 +84,7 @@ namespace osmscout {
 
     bool WriteCoord(double lat, double lon);
 
+    bool Flush();
     bool FlushCurrentBlockWithZeros(size_t blockSize);
   };
 }
