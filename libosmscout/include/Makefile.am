@@ -2,6 +2,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/private/CoreImportExport.h \
                         osmscout/system/Assert.h \
                         osmscout/system/Math.h \
+                        osmscout/system/SSEMathPublic.h \
                         osmscout/system/Types.h \
                         osmscout/util/Breaker.h \
                         osmscout/util/Cache.h \
@@ -61,9 +62,9 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/RoutingProfile.h \
                         osmscout/Database.h \
                         osmscout/DebugDatabase.h \
-                        osmscout/Router.h
+                        osmscout/Router.h \
+                        osmscout/SRTM.h
 
 #ifdef OSMSCOUT_HAVE_SSE2
-nobase_include_HEADERS+=osmscout/system/SSEMathPublic.h \
-                        osmscout/system/SSEMath.h
+nobase_include_HEADERS+=osmscout/system/SSEMath.h
 #endif
