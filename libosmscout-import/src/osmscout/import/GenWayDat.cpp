@@ -806,14 +806,24 @@ namespace osmscout {
           continue;
         }
 
-        if (block[blockCount]->GetNodeCount()<2) {
-          progress.Error(std::string("Way ")+
-                         NumberToString(block[blockCount]->GetId())+" has only "+
-                         NumberToString(block[blockCount]->GetNodeCount())+
-                         " node(s) but requires at least 2 nodes");
-          continue;
+        if (block[blockCount]->IsArea()) {
+          if (block[blockCount]->GetNodeCount()<3) {
+            progress.Error(std::string("Area ")+
+                           NumberToString(block[blockCount]->GetId())+" has only "+
+                           NumberToString(block[blockCount]->GetNodeCount())+
+                           " node(s) but requires at least 3 nodes");
+            continue;
+          }
         }
-
+        else {
+          if (block[blockCount]->GetNodeCount()<2) {
+            progress.Error(std::string("Way ")+
+                           NumberToString(block[blockCount]->GetId())+" has only "+
+                           NumberToString(block[blockCount]->GetNodeCount())+
+                           " node(s) but requires at least 2 nodes");
+            continue;
+          }
+        }
 
         blockCount++;
       }
