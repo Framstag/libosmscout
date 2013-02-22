@@ -961,7 +961,7 @@ namespace osmscout {
   public:
     enum Attribute {
       attrSymbol,
-      attrIconName,
+      attrIconName
     };
 
   private:
