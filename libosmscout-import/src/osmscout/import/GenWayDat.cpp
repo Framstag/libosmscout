@@ -36,6 +36,50 @@
 
 namespace osmscout {
 
+  void WayDataGenerator::SetNodeUsed(NodeUseMap& nodeUseMap,
+                                     Id id)
+  {
+    Id offset=id/16;
+
+    NodeUseMap::iterator entry=nodeUseMap.find(offset);
+
+    if (entry==nodeUseMap.end()) {
+      entry=nodeUseMap.insert(std::make_pair(offset,0)).first;
+    }
+
+    int index=(id%16)*2;
+
+    uint32_t data=entry->second;
+
+    if (data & (1<<(index+1))) {
+      // do nothing
+    }
+    else if (data & (1<<index)) {
+      entry->second|=(1 << (index+1));
+    }
+    else {
+      entry->second|=(1 << index);
+    }
+  }
+
+  bool WayDataGenerator::IsNodeUsedAtLeastTwice(const NodeUseMap& nodeUseMap,
+                                                Id id) const
+  {
+    Id offset=id/16;
+
+    NodeUseMap::const_iterator entry=nodeUseMap.find(offset);
+
+    if (entry==nodeUseMap.end()) {
+      return false;
+    }
+
+    int index=(id%16)*2+1;
+
+    bool result=entry->second & (1 << index);
+
+    return result;
+  }
+
   std::string WayDataGenerator::GetDescription() const
   {
     return "Generate 'ways.tmp'";
@@ -163,7 +207,8 @@ namespace osmscout {
   bool WayDataGenerator::ReadWayEndpoints(const ImportParameter& parameter,
                                           Progress& progress,
                                           const TypeConfig& typeConfig,
-                                          EndPointWayMap& endPointWayMap)
+                                          EndPointWayMap& endPointWayMap,
+                                          NodeUseMap& nodeUseMap)
   {
     FileScanner scanner;
     uint32_t    rawWayCount=0;
@@ -182,9 +227,11 @@ namespace osmscout {
     }
 
     for (uint32_t w=1; w<=rawWayCount; w++) {
+      RawWay               rawWay;
+      OSMSCOUT_HASHSET<Id> nodeSet;
+
       progress.SetProgress(w,rawWayCount);
 
-      RawWay rawWay;
 
       if (!rawWay.Read(scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
@@ -201,6 +248,16 @@ namespace osmscout {
 
       if (typeConfig.GetTypeInfo(rawWay.GetType()).GetIgnore()) {
         continue;
+      }
+
+      for (size_t i=0; i<rawWay.GetNodeCount(); i++) {
+        Id nodeId=rawWay.GetNodeId(i);
+
+        if (nodeSet.find(nodeId)==nodeSet.end()) {
+          SetNodeUsed(nodeUseMap,nodeId);
+        }
+
+        nodeSet.insert(nodeId);
       }
 
       if (rawWay.IsArea()) {
@@ -209,73 +266,6 @@ namespace osmscout {
 
       endPointWayMap[rawWay.GetNodes().front()].push_back(rawWay.GetId());
       endPointWayMap[rawWay.GetNodes().back()].push_back(rawWay.GetId());
-    }
-
-    if (!scanner.Close()) {
-      progress.Error("Cannot close file 'rawways.dat'");
-      return false;
-    }
-
-    return true;
-  }
-
-  bool WayDataGenerator::ReadAreasIncludingEndpoints(const ImportParameter& parameter,
-                                                     Progress& progress,
-                                                     const TypeConfig& typeConfig,
-                                                     const EndPointWayMap& endPointWayMap,
-                                                     EndPointAreaSet& endPointAreaSet)
-  {
-    FileScanner scanner;
-    uint32_t    rawWayCount=0;
-
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "rawways.dat"),
-                      FileScanner::Sequential,
-                      parameter.GetRawWayDataMemoryMaped())) {
-      progress.Error("Cannot open 'rawways.dat'");
-      return false;
-    }
-
-    if (!scanner.Read(rawWayCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t w=1; w<=rawWayCount; w++) {
-      progress.SetProgress(w,rawWayCount);
-
-      RawWay rawWay;
-
-      if (!rawWay.Read(scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(w)+" of "+
-                       NumberToString(rawWayCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-        return false;
-      }
-
-      if (rawWay.GetType()==typeIgnore) {
-        continue;
-      }
-
-      if (typeConfig.GetTypeInfo(rawWay.GetType()).GetIgnore()) {
-        continue;
-      }
-
-      if (!rawWay.IsArea()) {
-        continue;
-      }
-
-      for (size_t i=0; i<rawWay.GetNodeCount(); i++) {
-        EndPointWayMap::const_iterator nodeUse;
-
-        nodeUse=endPointWayMap.find(rawWay.GetNodeId(i));
-
-        if (nodeUse!=endPointWayMap.end()) {
-          endPointAreaSet.insert(rawWay.GetNodeId(i));
-        }
-      }
     }
 
     if (!scanner.Close()) {
@@ -668,14 +658,14 @@ namespace osmscout {
 
     uint32_t                             writtenWayCount=0;
 
+    NodeUseMap                           nodeUseMap;
     EndPointWayMap                       endPointWayMap;
-    EndPointAreaSet                      endPointAreaSet;
 
     BlacklistSet                         wayBlacklist;
 
 #if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
+    nodeUseMap.reserve(2000000);
     endPointWayMap.reserve(2000000);
-    endPointAreaSet.reserve(100000);
 #endif
 
     //
@@ -711,21 +701,8 @@ namespace osmscout {
     if (!ReadWayEndpoints(parameter,
                           progress,
                           typeConfig,
-                          endPointWayMap)) {
-      return false;
-    }
-
-    //
-    // Now enriching this map with areas that include this endpoints as node
-    //
-
-    progress.SetAction("Enriching way endpoints");
-
-    if (!ReadAreasIncludingEndpoints(parameter,
-                                     progress,
-                                     typeConfig,
-                                     endPointWayMap,
-                                     endPointAreaSet)) {
+                          endPointWayMap,
+                          nodeUseMap)) {
       return false;
     }
 
@@ -929,54 +906,8 @@ namespace osmscout {
           }
         }
         else {
-          EndPointWayMap::const_iterator  wayJoint;
-          EndPointAreaSet::const_iterator areaJoint;
-          size_t                          startNodeJointCount=0;
-          size_t                          endNodeJointCount=0;
-
-          wayJoint=endPointWayMap.find(block[w]->GetNodes().front());
-
-          if (wayJoint!=endPointWayMap.end()) {
-            for (std::list<Id>::const_iterator jointWayId=wayJoint->second.begin();
-                jointWayId!=wayJoint->second.end();
-                ++jointWayId) {
-              if (wayBlacklist.find(*jointWayId)==wayBlacklist.end()) {
-                startNodeJointCount++;
-              }
-            }
-          }
-
-          if (startNodeJointCount==1) {
-            startNodeJointCount=0;
-          }
-
-          if (startNodeJointCount==0) {
-            areaJoint=endPointAreaSet.find(block[w]->GetNodes().front());
-          }
-
-          way.SetStartIsJoint(startNodeJointCount>0 || areaJoint!=endPointAreaSet.end());
-
-          wayJoint=endPointWayMap.find(block[w]->GetNodes().back());
-
-          if (wayJoint!=endPointWayMap.end()) {
-            for (std::list<Id>::const_iterator jointWayId=wayJoint->second.begin();
-                jointWayId!=wayJoint->second.end();
-                ++jointWayId) {
-              if (wayBlacklist.find(*jointWayId)==wayBlacklist.end()) {
-                endNodeJointCount++;
-              }
-            }
-          }
-
-          if (endNodeJointCount==1) {
-            endNodeJointCount=0;
-          }
-
-          if (endNodeJointCount==0) {
-            areaJoint=endPointAreaSet.find(block[w]->GetNodes().back());
-          }
-
-          way.SetEndIsJoint(endNodeJointCount>0 || areaJoint!=endPointAreaSet.end());
+          way.SetStartIsJoint(IsNodeUsedAtLeastTwice(nodeUseMap,block[w]->GetNodes().front()));
+          way.SetEndIsJoint(IsNodeUsedAtLeastTwice(nodeUseMap,block[w]->GetNodes().back()));
         }
 
         wayWriter.Write(wayId);
@@ -1002,7 +933,6 @@ namespace osmscout {
     // Cleaning up...
 
     endPointWayMap.clear();
-    endPointAreaSet.clear();
     wayBlacklist.clear();
 
     if (!rawWayIndex.Close()) {

@@ -39,10 +39,17 @@ namespace osmscout {
   class WayDataGenerator : public ImportModule
   {
   private:
+    typedef OSMSCOUT_HASHMAP<Id,uint32_t>       NodeUseMap;
     typedef OSMSCOUT_HASHMAP<Id,std::list<Id> > EndPointWayMap;
     typedef OSMSCOUT_HASHSET<Id>                EndPointAreaSet;
     typedef OSMSCOUT_HASHSET<Id>                BlacklistSet;
     typedef OSMSCOUT_HASHMAP<Id,RawWayRef>      IdRawWayMap;
+
+    void SetNodeUsed(NodeUseMap& nodeUseMap,
+                     Id id);
+
+    bool IsNodeUsedAtLeastTwice(const NodeUseMap& nodeUseMap,
+                                Id id) const;
 
     bool ReadWayBlacklist(const ImportParameter& parameter,
                           Progress& progress,
@@ -59,13 +66,8 @@ namespace osmscout {
     bool ReadWayEndpoints(const ImportParameter& parameter,
                           Progress& progress,
                           const TypeConfig& typeConfig,
-                          EndPointWayMap& endPointWayMap);
-
-    bool ReadAreasIncludingEndpoints(const ImportParameter& parameter,
-                                     Progress& progress,
-                                     const TypeConfig& typeConfig,
-                                     const EndPointWayMap& endPointWayMap,
-                                     EndPointAreaSet& endPointAreaSet);
+                          EndPointWayMap& endPointWayMap,
+                          NodeUseMap& nodeUseMap);
 
     void GetWayMergeCandidates(const RawWay& way,
                                const EndPointWayMap& endPointWayMap,
