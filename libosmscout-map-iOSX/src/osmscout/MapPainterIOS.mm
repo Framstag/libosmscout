@@ -259,6 +259,7 @@ namespace osmscout {
         GetTextDimension(parameter,fontSize,text,xOff,yOff,width,height);
         return height;
     }
+    
     /*
      * DrawLabel(const Projection& projection, const MapParameter& parameter, const LabelData& label)
      */
@@ -490,8 +491,22 @@ namespace osmscout {
                           const std::string& text,
                           size_t transStart, size_t transEnd){
         Font *font = GetFont(parameter,style.GetSize());
+        size_t tStart, tEnd;
+        if(transBuffer.buffer[transStart].x<transBuffer.buffer[transEnd].x){
+            tStart = transStart;
+            tEnd = transEnd;
+        } else {
+            tStart = transEnd;
+            tEnd = transStart;
+        }
+        double pathLen = pathLength(transStart, transEnd);
+        double textLen = textLength(parameter,style.GetSize()*ConvertWidthToPixel(parameter,parameter.GetFontSize()),text)+MAP_PAINTER_DRAW_CONTOUR_LABEL_MARGIN*2;
+        if (textLen > pathLen) {
+             return;
+         }
+        
         CGContextSaveGState(cg);
-#if TARGET_OS_IPHONE        
+#if TARGET_OS_IPHONE
         CGContextSetTextDrawingMode(cg, kCGTextFill);
         CGContextSetLineWidth(cg, 1.0);
         CGContextSetRGBFillColor(cg, style.GetTextColor().GetR(), style.GetTextColor().GetG(), style.GetTextColor().GetB(), style.GetTextColor().GetA());
@@ -505,20 +520,8 @@ namespace osmscout {
         NSColor *color = [NSColor colorWithSRGBRed:style.GetTextColor().GetR() green:style.GetTextColor().GetG() blue:style.GetTextColor().GetB() alpha:style.GetTextColor().GetA()];
         NSDictionary *attrsDictionary = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName,color,NSForegroundColorAttributeName, nil];
 #endif
-        size_t tStart, tEnd;
-        if(transBuffer.buffer[transStart].x<transBuffer.buffer[transEnd].x){
-            tStart = transStart;
-            tEnd = transEnd;
-        } else {
-            tStart = transEnd;
-            tEnd = transStart;
-        }
-        if (pathLength(transStart, transEnd)<textLength(parameter,style.GetSize(),text)-20) {
-             return;
-         } 
-  
         CGAffineTransform transform=CGAffineTransformMake(1.0, 0.0, 0.0, 1.0, 0.0, -6.0);
-        CGFloat lenUpToNow = 10;
+        CGFloat lenUpToNow = MAP_PAINTER_DRAW_CONTOUR_LABEL_MARGIN;
         
         NSString *nsText= [NSString stringWithCString:text.c_str() encoding:NSUTF8StringEncoding];
         CGFloat posX = transBuffer.buffer[transStart].x;
