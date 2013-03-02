@@ -1205,8 +1205,8 @@ namespace osmscout {
                  data.lineStyle->GetOutlineColor(),
                  data.outlineWidth,
                  tunnelDash,
-                 data.attributes->StartIsJoint() ? LineStyle::capButt : LineStyle::capRound,
-                 data.attributes->EndIsJoint() ? LineStyle::capButt : LineStyle::capRound,
+                 data.startIsClosed ? LineStyle::capRound :LineStyle::capButt,
+                 data.endIsClosed ? LineStyle::capRound :LineStyle::capButt,
                  data.transStart,data.transEnd);
       }
       else if (projection.GetMagnification().GetMagnification()>=10000) {
@@ -1217,8 +1217,8 @@ namespace osmscout {
                  Color(0.5,0.5,0.5),
                  data.outlineWidth,
                  tunnelDash,
-                 data.attributes->StartIsJoint() ? LineStyle::capButt : LineStyle::capRound,
-                 data.attributes->EndIsJoint() ? LineStyle::capButt : LineStyle::capRound,
+                 data.startIsClosed ? LineStyle::capRound :LineStyle::capButt,
+                 data.endIsClosed ? LineStyle::capRound :LineStyle::capButt,
                  data.transStart,data.transEnd);
       }
       else {
@@ -1229,8 +1229,8 @@ namespace osmscout {
                  Color(0.5,0.5,0.5),
                  data.outlineWidth,
                  tunnelDash,
-                 data.attributes->StartIsJoint() ? LineStyle::capButt : LineStyle::capRound,
-                 data.attributes->EndIsJoint() ? LineStyle::capButt : LineStyle::capRound,
+                 data.startIsClosed ? LineStyle::capRound :LineStyle::capButt,
+                 data.endIsClosed ? LineStyle::capRound :LineStyle::capButt,
                      data.transStart,data.transEnd);
       }
     }
@@ -1242,8 +1242,8 @@ namespace osmscout {
                data.lineStyle->GetOutlineColor(),
                data.outlineWidth,
                emptyDash,
-               data.attributes->StartIsJoint() ? LineStyle::capButt : LineStyle::capRound,
-               data.attributes->EndIsJoint() ? LineStyle::capButt : LineStyle::capRound,
+               data.startIsClosed ? LineStyle::capRound :LineStyle::capButt,
+               data.endIsClosed ? LineStyle::capRound :LineStyle::capButt,
                data.transStart,data.transEnd);
     }
 
@@ -1731,7 +1731,8 @@ namespace osmscout {
                                      const MapParameter& parameter,
                                      const ObjectFileRef& ref,
                                      const SegmentAttributes& attributes,
-                                     const std::vector<GeoCoord>& nodes)
+                                     const std::vector<GeoCoord>& nodes,
+                                     const std::vector<Id>& ids)
   {
     LineStyleRef lineStyle;
 
@@ -1818,6 +1819,8 @@ namespace osmscout {
     data.prio=styleConfig.GetWayPrio(attributes.GetType());
     data.transStart=start;
     data.transEnd=end;
+    data.startIsClosed=ids.empty() || ids[0]==0;
+    data.endIsClosed=ids.empty() || ids[ids.size()-1]==0;
     data.drawBridge=attributes.IsBridge();
     data.drawTunnel=attributes.IsTunnel();
 
@@ -1869,7 +1872,8 @@ namespace osmscout {
                         parameter,
                         ObjectFileRef(way->GetFileOffset(),refWay),
                         way->GetAttributes(),
-                        way->nodes);
+                        way->nodes,
+                        way->ids);
     }
 
     for (std::vector<RelationRef>::const_iterator r=data.relationWays.begin();
@@ -1887,7 +1891,8 @@ namespace osmscout {
                           parameter,
                           ObjectFileRef(relation->GetFileOffset(),refRelation),
                           role.GetAttributes(),
-                          role.nodes);
+                          role.nodes,
+                          role.ids);
       }
     }
 
@@ -1902,7 +1907,8 @@ namespace osmscout {
                           parameter,
                           ObjectFileRef(way->GetFileOffset(),refWay),
                           way->GetAttributes(),
-                          way->nodes);
+                          way->nodes,
+                          way->ids);
       }
     }
 

@@ -911,10 +911,6 @@ namespace osmscout {
             continue;
           }
         }
-        else {
-          way.SetStartIsJoint(IsNodeUsedAtLeastTwice(nodeUseMap,block[w]->GetNodes().front()));
-          way.SetEndIsJoint(IsNodeUsedAtLeastTwice(nodeUseMap,block[w]->GetNodes().back()));
-        }
 
         wayWriter.Write(wayId);
         way.Write(wayWriter);

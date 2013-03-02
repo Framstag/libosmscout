@@ -245,6 +245,8 @@ namespace osmscout {
       size_t                  par2End;         //! Coordinates of lower line (bridge marker)
       double                  lineWidth;       //! Line width
       double                  outlineWidth;    //! Line width including outline
+      bool                    startIsClosed;   //! The end of the way is closed, it does not lead to another way or area
+      bool                    endIsClosed;     //! The end of the way is closed, it does not lead to another way or area
       bool                    drawBridge;      //! Draw bridge marker
       bool                    drawTunnel;      //! Draw as tunnel
       bool                    outline;         //! Draw outline
@@ -432,7 +434,8 @@ namespace osmscout {
                            const MapParameter& parameter,
                            const ObjectFileRef& ref,
                            const SegmentAttributes& attributes,
-                           const std::vector<GeoCoord>& nodes);
+                           const std::vector<GeoCoord>& nodes,
+                           const std::vector<Id>& ids);
 
     void PrepareWays(const StyleConfig& styleConfig,
                      const Projection& projection,

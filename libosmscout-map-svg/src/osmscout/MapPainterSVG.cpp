@@ -327,8 +327,8 @@ namespace osmscout {
                  data.lineStyle->GetOutlineColor(),
                  data.outlineWidth,
                  tunnelDash,
-                 data.attributes->StartIsJoint() ? LineStyle::capButt : LineStyle::capRound,
-                 data.attributes->EndIsJoint() ? LineStyle::capButt : LineStyle::capRound,
+                 data.startIsClosed ? LineStyle::capRound :LineStyle::capButt,
+                 data.endIsClosed ? LineStyle::capRound :LineStyle::capButt,
                  data.transStart,data.transEnd);
      }
       else if (projection.GetMagnification().GetMagnification()>=10000) {
@@ -339,8 +339,8 @@ namespace osmscout {
                  Color(0.5,0.5,0.5),
                  data.outlineWidth,
                  tunnelDash,
-                 data.attributes->StartIsJoint() ? LineStyle::capButt : LineStyle::capRound,
-                 data.attributes->EndIsJoint() ? LineStyle::capButt : LineStyle::capRound,
+                 data.startIsClosed ? LineStyle::capRound :LineStyle::capButt,
+                 data.endIsClosed ? LineStyle::capRound :LineStyle::capButt,
                  data.transStart,data.transEnd);
       }
       else {
@@ -351,9 +351,9 @@ namespace osmscout {
                  Color(0.5,0.5,0.5),
                  data.outlineWidth,
                  tunnelDash,
-                 data.attributes->StartIsJoint() ? LineStyle::capButt : LineStyle::capRound,
-                 data.attributes->EndIsJoint() ? LineStyle::capButt : LineStyle::capRound,
-                     data.transStart,data.transEnd);
+                 data.startIsClosed ? LineStyle::capRound :LineStyle::capButt,
+                 data.endIsClosed ? LineStyle::capRound :LineStyle::capButt,
+                 data.transStart,data.transEnd);
       }
     }
     else {
@@ -363,8 +363,8 @@ namespace osmscout {
                parameter,
                typeConfig->GetTypeInfo(data.attributes->GetType()).GetName()+"_way_outline",
                data.outlineWidth,
-               data.attributes->StartIsJoint() ? LineStyle::capButt : LineStyle::capRound,
-               data.attributes->EndIsJoint() ? LineStyle::capButt : LineStyle::capRound,
+               data.startIsClosed ? LineStyle::capRound :LineStyle::capButt,
+               data.endIsClosed ? LineStyle::capRound :LineStyle::capButt,
                data.transStart,data.transEnd);
     }
 

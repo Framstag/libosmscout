@@ -68,26 +68,6 @@ namespace osmscout {
                               reverseNodes);
   }
 
-  void Way::SetStartIsJoint(bool isJoint)
-  {
-    if (isJoint) {
-      attributes.flags|=SegmentAttributes::startIsJoint;
-    }
-    else {
-      attributes.flags&=~SegmentAttributes::startIsJoint;
-    }
-  }
-
-  void Way::SetEndIsJoint(bool isJoint)
-  {
-    if (isJoint) {
-      attributes.flags|=SegmentAttributes::endIsJoint;
-    }
-    else {
-      attributes.flags&=~SegmentAttributes::endIsJoint;
-    }
-  }
-
   void Way::GetBoundingBox(double& minLon,
                            double& maxLon,
                            double& minLat,

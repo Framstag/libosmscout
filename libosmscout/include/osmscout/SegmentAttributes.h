@@ -54,10 +54,8 @@ namespace osmscout {
     // Way flags
     const static uint16_t isBridge        = 1 <<  2; //! We are a bridge
     const static uint16_t isTunnel        = 1 <<  3; //! We are a tunnel
-    const static uint16_t startIsJoint    = 1 <<  4; //! Start node is a joint node
-    const static uint16_t endIsJoint      = 1 <<  5; //! End node is a joint node
-    const static uint16_t isOneway        = 1 <<  6; //! We are a oneway (in way direction)
-    const static uint16_t isRoundabout    = 1 <<  7; //! We are a roundabout
+    const static uint16_t isOneway        = 1 <<  4; //! We are a oneway (in way direction)
+    const static uint16_t isRoundabout    = 1 <<  5; //! We are a roundabout
 
   public:
     TypeId           type;     //! type of the way/relation
@@ -156,16 +154,6 @@ namespace osmscout {
     inline bool HasAccess() const
     {
       return (flags & hasAccess)!=0;
-    }
-
-    inline bool StartIsJoint() const
-    {
-      return (flags & startIsJoint)!=0;
-    }
-
-    inline bool EndIsJoint() const
-    {
-      return (flags & endIsJoint)!=0;
     }
 
     inline const std::vector<Tag>& GetTags() const

@@ -127,16 +127,6 @@ namespace osmscout {
       return attributes.HasAccess();
     }
 
-    inline bool StartIsJoint() const
-    {
-      return attributes.StartIsJoint();
-    }
-
-    inline bool EndIsJoint() const
-    {
-      return attributes.EndIsJoint();
-    }
-
     inline bool HasTags() const
     {
       return !attributes.tags.empty();
@@ -175,9 +165,6 @@ namespace osmscout {
                  bool isArea,
                  std::vector<Tag>& tags,
                  bool& reverseNodes);
-
-    void SetStartIsJoint(bool isJoint);
-    void SetEndIsJoint(bool isJoint);
 
     bool Read(FileScanner& scanner);
     bool ReadOptimized(FileScanner& scanner);

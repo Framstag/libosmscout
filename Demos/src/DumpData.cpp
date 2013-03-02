@@ -317,16 +317,6 @@ static void DumpWaySegmentAttributes(const osmscout::SegmentAttributes& attribut
 
   DumpIndent(indent);
   std::cout << "grade: " << (size_t)attributes.GetGrade() << std::endl;
-
-  if (attributes.StartIsJoint()) {
-    DumpIndent(indent);
-    std::cout << "startIsJoint: true" << std::endl;
-  }
-
-  if (attributes.EndIsJoint()) {
-    DumpIndent(indent);
-    std::cout << "endIsJoint: true" << std::endl;
-  }
 }
 
 static void DumpWay(const osmscout::TypeConfig* typeConfig,
