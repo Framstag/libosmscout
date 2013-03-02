@@ -63,8 +63,8 @@ static bool ParseArguments(int argc,
                            std::list<Job>& jobs)
 {
   if (argc<2) {
-    std::cerr << "DumpData <map directory> {-c <Id>|-n <Id>|-w <Id>|-r <Id>}" << std::endl;
-    return 1;
+    std::cerr << "DumpData <map directory> {-c <Id>|-n <Id>|-w <Id>|-wo <FileOffset>|-r <Id>|-ro <FileOffset>}" << std::endl;
+    return false;
   }
 
   int arg=1;
@@ -80,12 +80,12 @@ static bool ParseArguments(int argc,
       arg++;
       if (arg>=argc) {
         std::cerr << "Option -c requires parameter!" << std::endl;
-        return 1;
+        return false;
       }
 
       if (sscanf(argv[arg],"%lu",&id)!=1) {
         std::cerr << "Node id is not numeric!" << std::endl;
-        return 1;
+        return false;
       }
 
       coordIds.push_back(id);
@@ -98,12 +98,12 @@ static bool ParseArguments(int argc,
       arg++;
       if (arg>=argc) {
         std::cerr << "Option -n requires parameter!" << std::endl;
-        return 1;
+        return false;
       }
 
       if (sscanf(argv[arg],"%lu",&id)!=1) {
         std::cerr << "Node id is not numeric!" << std::endl;
-        return 1;
+        return false;
       }
 
       jobs.push_back(Job(osmscout::ObjectRef(id,osmscout::refNode)));
@@ -116,12 +116,12 @@ static bool ParseArguments(int argc,
       arg++;
       if (arg>=argc) {
         std::cerr << "Option -w requires parameter!" << std::endl;
-        return 1;
+        return false;
       }
 
       if (sscanf(argv[arg],"%lu",&id)!=1) {
         std::cerr << "Node id is not numeric!" << std::endl;
-        return 1;
+        return false;
       }
 
       jobs.push_back(Job(osmscout::ObjectRef(id,osmscout::refWay)));
@@ -134,12 +134,12 @@ static bool ParseArguments(int argc,
       arg++;
       if (arg>=argc) {
         std::cerr << "Option -wo requires parameter!" << std::endl;
-        return 1;
+        return false;
       }
 
       if (sscanf(argv[arg],"%lu",&fileOffset)!=1) {
         std::cerr << "Way file offset is not numeric!" << std::endl;
-        return 1;
+        return false;
       }
 
       jobs.push_back(Job(osmscout::ObjectFileRef(fileOffset,osmscout::refWay)));
@@ -152,12 +152,12 @@ static bool ParseArguments(int argc,
       arg++;
       if (arg>=argc) {
         std::cerr << "Option -r requires parameter!" << std::endl;
-        return 1;
+        return false;
       }
 
       if (sscanf(argv[arg],"%lu",&id)!=1) {
         std::cerr << "Relation id is not numeric!" << std::endl;
-        return 1;
+        return false;
       }
 
       jobs.push_back(Job(osmscout::ObjectRef(id,osmscout::refRelation)));
@@ -170,12 +170,12 @@ static bool ParseArguments(int argc,
       arg++;
       if (arg>=argc) {
         std::cerr << "Option -ro requires parameter!" << std::endl;
-        return 1;
+        return false;
       }
 
       if (sscanf(argv[arg],"%lu",&fileOffset)!=1) {
         std::cerr << "Relation file offset is not numeric!" << std::endl;
-        return 1;
+        return false;
       }
 
       jobs.push_back(Job(osmscout::ObjectFileRef(fileOffset,osmscout::refRelation)));
@@ -184,7 +184,7 @@ static bool ParseArguments(int argc,
     }
     else {
       std::cerr << "Unknown parameter '" << argv[arg] << "'!" << std::endl;
-      return 1;
+      return false;
     }
   }
 
@@ -366,7 +366,13 @@ static void DumpWay(const osmscout::TypeConfig* typeConfig,
     std::cout << std::endl;
 
     for (size_t n=0; n<way->nodes.size(); n++) {
-      std::cout << "  node[" << n << "] { id: " << way->ids[n] << " lat: " << way->nodes[n].GetLat() << " lon: "<< way->nodes[n].GetLon() << " }" << std::endl;
+      std::cout << "  node[" << n << "] {";
+
+      if (way->ids[n]!=0) {
+        std::cout << " id: " << way->ids[n];
+      }
+
+      std::cout << " lat: " << way->nodes[n].GetLat() << " lon: "<< way->nodes[n].GetLon() << " }" << std::endl;
     }
   }
 
@@ -602,16 +608,23 @@ int main(int argc, char* argv[])
   for (std::list<osmscout::Id>::const_iterator id=coordIds.begin();
        id!=coordIds.end();
        ++id) {
-      for (size_t i=0; i<coords.size(); i++) {
-        if (coords[i].GetId()==*id) {
-          if (id!=coordIds.begin()) {
-            std::cout << std::endl;
-          }
+    bool found=false;
 
-          DumpCoord(coords[i]);
-          break;
+    for (size_t i=0; i<coords.size(); i++) {
+      if (coords[i].GetId()==*id) {
+        if (id!=coordIds.begin()) {
+          std::cout << std::endl;
         }
+
+        DumpCoord(coords[i]);
+        found=true;
+        break;
       }
+    }
+
+    if (!found) {
+        std::cerr << "Cannot find coord with id " << *id << std::endl;
+    }
   }
 
   for (std::list<Job>::const_iterator job=jobs.begin();

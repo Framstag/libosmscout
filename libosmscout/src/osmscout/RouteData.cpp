@@ -21,24 +21,24 @@
 
 namespace osmscout {
 
-  RouteData::RouteEntry::RouteEntry(Id currentNodeId,
+  RouteData::RouteEntry::RouteEntry(size_t currentNodeIndex,
                                     FileOffset pathWayOffset,
-                                    Id targetNodeId)
-   : currentNodeId(currentNodeId),
+                                    size_t targetNodeIndex)
+   : currentNodeIndex(currentNodeIndex),
      pathWayOffset(pathWayOffset),
-     targetNodeId(targetNodeId)
+     targetNodeIndex(targetNodeIndex)
   {
     // no code
   }
 
-  RouteData::RouteEntry::RouteEntry(Id currentNodeId,
+  RouteData::RouteEntry::RouteEntry(Id currentNodeIndex,
                                     const std::vector<Path>& paths,
                                     FileOffset pathWayOffset,
-                                    Id targetNodeId)
-   : currentNodeId(currentNodeId),
+                                    Id targetNodeIndex)
+   : currentNodeIndex(currentNodeIndex),
      paths(paths),
      pathWayOffset(pathWayOffset),
-     targetNodeId(targetNodeId)
+     targetNodeIndex(targetNodeIndex)
   {
     // no code
   }
@@ -53,24 +53,24 @@ namespace osmscout {
     entries.clear();
   }
 
-  void RouteData::AddEntry(Id currentNodeId,
+  void RouteData::AddEntry(size_t currentNodeIndex,
                            FileOffset pathWayOffset,
-                           Id targetNodeId)
+                           size_t targetNodeIndex)
   {
-    entries.push_back(RouteEntry(currentNodeId,
+    entries.push_back(RouteEntry(currentNodeIndex,
                                  pathWayOffset,
-                                 targetNodeId));
+                                 targetNodeIndex));
   }
 
-  void RouteData::AddEntry(Id currentNodeId,
+  void RouteData::AddEntry(size_t currentNodeIndex,
                            const std::vector<Path>& paths,
                            FileOffset pathWayOffset,
-                           Id targetNodeId)
+                           size_t targetNodeIndex)
   {
-    entries.push_back(RouteEntry(currentNodeId,
+    entries.push_back(RouteEntry(currentNodeIndex,
                                  paths,
                                  pathWayOffset,
-                                 targetNodeId));
+                                 targetNodeIndex));
   }
 }
 

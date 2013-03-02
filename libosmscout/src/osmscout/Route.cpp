@@ -371,10 +371,10 @@ namespace osmscout {
                                const std::vector<Path>& paths,
                                FileOffset pathWayOffset,
                                Id targetNodeId)
-  : currentNodeId(currentNodeId),
+  : currentNodeIndex(currentNodeId),
     paths(paths),
     pathWayOffset(pathWayOffset),
-    targetNodeId(targetNodeId),
+    targetNodeIndex(targetNodeId),
     distance(0.0),
     time(0.0)
   {
@@ -436,15 +436,15 @@ namespace osmscout {
     nodes.clear();
   }
 
-  void RouteDescription::AddNode(Id currentNodeId,
+  void RouteDescription::AddNode(size_t currentNodeIndex,
                                  const std::vector<Path>& paths,
                                  FileOffset pathWayOffset,
-                                 Id targetNodeId)
+                                 size_t targetNodeIndex)
   {
-    nodes.push_back(Node(currentNodeId,
+    nodes.push_back(Node(currentNodeIndex,
                          paths,
                          pathWayOffset,
-                         targetNodeId));
+                         targetNodeIndex));
   }
 }
 

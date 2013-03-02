@@ -163,7 +163,7 @@ namespace osmscout {
                         double& maxLon,
                         double& minLat,
                         double& maxLat) const;
-    bool GetCoordinates(Id nodeId,
+    void GetCoordinates(size_t nodeIndex,
                         double& lat,
                         double& lon) const;
 

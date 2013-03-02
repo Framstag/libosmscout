@@ -192,11 +192,11 @@ namespace osmscout {
                                   FileOffset targetWayId,
                                   size_t targetNodeIndex,
                                   RouteData& route);
-    bool AddNodes(RouteData& route,
+    void AddNodes(RouteData& route,
                   const std::vector<Path>& startPaths,
-                  Id startNodeId,
-                  FileOffset wayId,
-                  Id targetNodeId);
+                  size_t startNodeIndex,
+                  const WayRef& way,
+                  size_t targetNodeIndex);
 
     std::vector<Path> TransformPaths(const RoutingProfile& profile,
                                      const RouteNode& node,

@@ -882,7 +882,13 @@ namespace osmscout {
             break;
           }
 
-          way.ids[n]=coord->second.GetId();
+          if (IsNodeUsedAtLeastTwice(nodeUseMap,block[w]->GetNodeId(n))) {
+            way.ids[n]=coord->second.GetId();
+          }
+          else {
+            way.ids[n]=0;
+          }
+
           way.nodes[n].Set(coord->second.GetLat(),coord->second.GetLon());
         }
 

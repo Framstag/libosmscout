@@ -70,10 +70,10 @@ namespace osmscout {
   {
     FileOffset prevWayOffset=0;
     WayRef     prevWay;
-    FileOffset nextWayOffset=0;
-    WayRef     nextWay;
-    Id         prevNode=0;
-    Id         nextNode=0;
+    FileOffset curWayOffset=0;
+    WayRef     curWay;
+    size_t     prevNodeIndex=0;
+    size_t     curNodeIndex=0;
     double     distance=0.0;
     double     time=0.0;
 
@@ -84,31 +84,26 @@ namespace osmscout {
       if (iter->HasPathWay()) {
         // Only load the next way, if it is different from the old one
         if (prevWay.Invalid() || prevWayOffset!=iter->GetPathWayOffset()) {
-          if (!database.GetWayByOffset(iter->GetPathWayOffset(),nextWay)) {
+          if (!database.GetWayByOffset(iter->GetPathWayOffset(),curWay)) {
             std::cout << "Error while loading way with offset " << iter->GetPathWayOffset() << std::endl;
             return false;
           }
 
-          nextWayOffset=iter->GetPathWayOffset();
+          curWayOffset=iter->GetPathWayOffset();
         }
         else {
-          nextWay=prevWay;
-          nextWayOffset=prevWayOffset;
+          curWay=prevWay;
+          curWayOffset=prevWayOffset;
         }
 
-        for (size_t i=0; i<nextWay->nodes.size(); i++) {
-          if (nextWay->ids[i]==iter->GetCurrentNodeId()) {
-            nextNode=i;
-            break;
-          }
-        }
+        curNodeIndex=iter->GetCurrentNodeIndex();
 
         if (prevWay.Valid()) {
-          double deltaDistance=GetEllipsoidalDistance(prevWay->nodes[prevNode].GetLon(),
-                                                      prevWay->nodes[prevNode].GetLat(),
-                                                      nextWay->nodes[nextNode].GetLon(),
-                                                      nextWay->nodes[nextNode].GetLat());
-          double deltaTime=profile.GetTime(nextWay,
+          double deltaDistance=GetEllipsoidalDistance(prevWay->nodes[prevNodeIndex].GetLon(),
+                                                      prevWay->nodes[prevNodeIndex].GetLat(),
+                                                      curWay->nodes[curNodeIndex].GetLon(),
+                                                      curWay->nodes[curNodeIndex].GetLat());
+          double deltaTime=profile.GetTime(curWay,
                                            deltaDistance);
 
           distance+=deltaDistance;
@@ -119,9 +114,9 @@ namespace osmscout {
       iter->SetDistance(distance);
       iter->SetTime(time);
 
-      prevWay=nextWay;
-      prevWayOffset=nextWayOffset;
-      prevNode=nextNode;
+      prevWay=curWay;
+      prevWayOffset=curWayOffset;
+      prevNodeIndex=curNodeIndex;
     }
 
     return true;
@@ -219,20 +214,21 @@ namespace osmscout {
         // Way is origin way and starts or end here so it is not an additional crossing way
         if (originWay.Valid() &&
             way->second->GetFileOffset()==originWay->GetFileOffset() &&
-            (way->second->ids.front()==node.GetCurrentNodeId() ||
-             way->second->ids.back()==node.GetCurrentNodeId())) {
+            targetWay.Valid() &&
+            (way->second->ids.front()==targetWay->ids[node.GetCurrentNodeIndex()] ||
+             way->second->ids.back()==targetWay->ids[node.GetCurrentNodeIndex()])) {
           continue;
         }
 
         // Way is target way and starts or end here so it is not an additional crossing way
         if (targetWay.Valid() &&
             way->second->GetFileOffset()==targetWay->GetFileOffset() &&
-            (way->second->ids.front()==node.GetCurrentNodeId() ||
-             way->second->ids.back()==node.GetCurrentNodeId())) {
+            (node.GetCurrentNodeIndex()==0 ||
+             node.GetCurrentNodeIndex()==targetWay->ids.size()-1)) {
           continue;
         }
 
-        // ways is origin way and way is target way so it is not an additional crossing way
+        // ways is origin way and target way so it is not an additional crossing way
         if (originWay.Valid() &&
             targetWay.Valid() &&
             way->second->GetFileOffset()==originWay->GetFileOffset() &&
@@ -289,8 +285,10 @@ namespace osmscout {
     //
 
     std::list<RouteDescription::Node>::iterator lastCrossing=description.Nodes().end();
+    WayRef                                      lastCrossingWay;
     std::list<RouteDescription::Node>::iterator lastNode=description.Nodes().end();
     std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
+
     while (node!=description.Nodes().end()) {
       if (node->GetPaths().empty()) {
         lastNode=node;
@@ -316,8 +314,8 @@ namespace osmscout {
       for (size_t i=0; i<node->GetPaths().size(); i++) {
         // Leave out the path back to the last crossing (if it exists)
         if (lastCrossing!=description.Nodes().end() &&
-            node->GetPaths()[i].GetTargetNodeId()==lastCrossing->GetCurrentNodeId() &&
-            node->GetPaths()[i].GetWayOffset()==lastCrossing->GetPathWayOffset()) {
+            node->GetPaths()[i].GetWayOffset()==lastCrossing->GetPathWayOffset() &&
+            node->GetPaths()[i].GetTargetNodeId()==lastCrossingWay->ids[lastCrossing->GetCurrentNodeIndex()]) {
           continue;
         }
 
@@ -345,6 +343,7 @@ namespace osmscout {
 
       lastNode=node;
       lastCrossing=node;
+      lastCrossingWay=targetWay;
 
       node++;
     }
@@ -413,9 +412,9 @@ namespace osmscout {
         double nextLat=0.0;
         double nextLon=0.0;
 
-        prevWay->GetCoordinates(prevNode->GetCurrentNodeId(),prevLat,prevLon);
-        way->GetCoordinates(node->GetCurrentNodeId(),lat,lon);
-        nextWay->GetCoordinates(nextNode->GetCurrentNodeId(),nextLat,nextLon);
+        prevWay->GetCoordinates(prevNode->GetCurrentNodeIndex(),prevLat,prevLon);
+        way->GetCoordinates(node->GetCurrentNodeIndex(),lat,lon);
+        nextWay->GetCoordinates(nextNode->GetCurrentNodeIndex(),nextLat,nextLon);
 
         double inBearing=GetSphericalBearingFinal(prevLon,prevLat,lon,lat)*180/M_PI;
         double outBearing=GetSphericalBearingInitial(lon,lat,nextLon,nextLat)*180/M_PI;
@@ -457,8 +456,8 @@ namespace osmscout {
             double lookupLat;
             double lookupLon;
 
-            wayB->GetCoordinates(curveB->GetCurrentNodeId(),curveBLat,curveBLon);
-            wayLookup->GetCoordinates(lookup->GetCurrentNodeId(),lookupLat,lookupLon);
+            wayB->GetCoordinates(curveB->GetCurrentNodeIndex(),curveBLat,curveBLon);
+            wayLookup->GetCoordinates(lookup->GetCurrentNodeIndex(),lookupLat,lookupLon);
 
             double lookupBearing=GetSphericalBearingInitial(curveBLon,curveBLat,lookupLon,lookupLat)*180/M_PI;
 
@@ -526,7 +525,7 @@ namespace osmscout {
     if (node.HasDescription(RouteDescription::CROSSING_WAYS_DESC)) {
       RouteDescription::CrossingWaysDescriptionRef crossing=dynamic_cast<RouteDescription::CrossingWaysDescription*>(node.GetDescription(RouteDescription::CROSSING_WAYS_DESC));
 #ifdef DEBUG
-      std::cout << "Exits at node: " << node.GetCurrentNodeId() << " " << crossing->GetExitCount() << std::endl;
+      std::cout << "Exits at node: " << node.GetCurrentNodeIndex() << " " << crossing->GetExitCount() << std::endl;
 #endif
       if (crossing->GetExitCount()>1) {
         roundaboutCrossingCounter+=crossing->GetExitCount()-1;

@@ -840,7 +840,14 @@ int main(int argc, char* argv[])
 
 #if defined(ROUTE_DEBUG) || defined(NODE_DEBUG)
     NextLine(lineCount);
-    std::cout << "// " << node->GetTime() << "h " << std::setw(0) << std::setprecision(3) << node->GetDistance() << "km " << node->GetCurrentNodeId() << " => " << node->GetPathWayId() << "[" << node->GetTargetNodeId() << "]" << std::endl;
+
+    std::cout << "// " << node->GetTime() << "h " << std::setw(0) << std::setprecision(3) << node->GetDistance() << "km ";
+
+    if (node->GetPathWayOffset()!=0) {
+      std::cout << node->GetPathWayOffset() << "[" << node->GetCurrentNodeIndex() << "] => " << node->GetPathWayOffset() << "[" << node->GetTargetNodeIndex() << "]";
+    }
+
+    std::cout << std::endl;
 
     for (std::list<osmscout::RouteDescription::DescriptionRef>::const_iterator d=node->GetDescriptions().begin();
         d!=node->GetDescriptions().end();

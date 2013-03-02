@@ -211,61 +211,44 @@ namespace osmscout {
     return true;
   }
 
-  bool Router::AddNodes(RouteData& route,
+  void Router::AddNodes(RouteData& route,
                         const std::vector<Path>& startPaths,
-                        Id startNodeId,
-                        FileOffset wayOffset,
-                        Id targetNodeId)
+                        size_t startNodeIndex,
+                        const WayRef& way,
+                        size_t targetNodeIndex)
   {
-    WayRef way;
+    assert(startNodeIndex<way->nodes.size());
+    assert(targetNodeIndex<way->nodes.size());
 
-    // Load the way to get all nodes between current route node and the next route node
-    if (!wayDataFile.GetByOffset(wayOffset,way)) {
-      std::cerr << "Cannot load way with file offset " << wayOffset << std::endl;
-      return false;
-    }
-
-    size_t start=0;
-    while (start<way->nodes.size() &&
-        way->ids[start]!=startNodeId) {
-      start++;
-    }
-
-    size_t end=0;
-    while (end<way->nodes.size() &&
-        way->ids[end]!=targetNodeId) {
-      end++;
-    }
-
-    if (start>=way->nodes.size() ||
-        end>=way->nodes.size()) {
-      return false;
-    }
-
-    if (std::max(start,end)-std::min(start,end)==1) {
-      route.AddEntry(way->ids[start],
+    if (std::max(startNodeIndex,targetNodeIndex)-std::min(startNodeIndex,targetNodeIndex)==1) {
+      // Form one node to the neighbour node (+1 or -1)
+      route.AddEntry(startNodeIndex,
                      startPaths,
-                     wayOffset,
-                     targetNodeId);
+                     way->GetFileOffset(),
+                     targetNodeIndex);
     }
-    else if (start<end) {
-      route.AddEntry(way->ids[start],
+    else if (startNodeIndex<targetNodeIndex) {
+      // Following the way
+      route.AddEntry(startNodeIndex,
                      startPaths,
-                     wayOffset,
-                     way->ids[start+1]);
+                     way->GetFileOffset(),
+                     startNodeIndex+1);
 
-      for (size_t i=start+1; i<end-1; i++) {
-        route.AddEntry(way->ids[i],
-                       wayOffset,
-                       way->ids[i+1]);
+      for (size_t i=startNodeIndex+1; i<targetNodeIndex-1; i++) {
+        route.AddEntry(i,
+                       way->GetFileOffset(),
+                       i+1);
       }
 
-      route.AddEntry(way->ids[end-1],
-                     wayOffset,
-                     targetNodeId);
+      route.AddEntry(targetNodeIndex-1,
+                     way->GetFileOffset(),
+                     targetNodeIndex);
     }
     else if (way->IsOneway()) {
-      size_t pos=start+1;
+      // startNodeIndex>tragetNodeIndex, but this is a oneway we assume
+      // that the way is either an area or is a roundabound
+      // TODO: proof this using the right assertions or checks
+      size_t pos=startNodeIndex+1;
       size_t next;
 
       if (pos>=way->nodes.size()) {
@@ -277,15 +260,15 @@ namespace osmscout {
         next=0;
       }
 
-      route.AddEntry(startNodeId,
+      route.AddEntry(startNodeIndex,
                      startPaths,
-                     wayOffset,
-                     way->ids[pos]);
+                     way->GetFileOffset(),
+                     pos);
 
-      while (way->ids[next]!=way->ids[end]) {
-        route.AddEntry(way->ids[pos],
-                       wayOffset,
-                       way->ids[next]);
+      while (next!=targetNodeIndex) {
+        route.AddEntry(pos,
+                       way->GetFileOffset(),
+                       next);
 
         pos++;
         if (pos>=way->nodes.size()) {
@@ -298,28 +281,27 @@ namespace osmscout {
         }
       }
 
-      route.AddEntry(way->ids[pos],
-                     wayOffset,
-                     targetNodeId);
+      route.AddEntry(pos,
+                     way->GetFileOffset(),
+                     targetNodeIndex);
     }
     else {
-      route.AddEntry(way->ids[start],
+      // We follow the way in the opposite direction
+      route.AddEntry(startNodeIndex,
                      startPaths,
-                     wayOffset,
-                     way->ids[start-1]);
+                     way->GetFileOffset(),
+                     startNodeIndex-1);
 
-      for (int i=start-1; i>(int)end+1; i--) {
-        route.AddEntry(way->ids[i],
-                       wayOffset,
-                       way->ids[i-1]);
+      for (int i=startNodeIndex-1; i>(int)targetNodeIndex+1; i--) {
+        route.AddEntry(i,
+                       way->GetFileOffset(),
+                       i-1);
       }
 
-      route.AddEntry(way->ids[end+1],
-                     wayOffset,
-                     targetNodeId);
+      route.AddEntry(targetNodeIndex+1,
+                     way->GetFileOffset(),
+                     targetNodeIndex);
     }
-
-    return true;
   }
 
  std::vector<Path> Router::TransformPaths(const RoutingProfile& profile,
@@ -347,33 +329,24 @@ namespace osmscout {
                                         size_t targetNodeIndex,
                                         RouteData& route)
   {
-    WayRef startWay;
-    Id     startNodeId;
-    WayRef targetWay;
-    Id     targetNodeId;
+    WayRef way;
 
-    if (!wayDataFile.GetByOffset(startWayOffset,startWay)) {
-      std::cerr << "Cannot load way with id " << startWayOffset << std::endl;
+    if (!wayDataFile.GetByOffset(startWayOffset,way)) {
+      std::cerr << "Cannot load way with file offset " << startWayOffset << std::endl;
       return false;
     }
-
-    startNodeId=startWay->ids[startNodeIndex];
-
-    if (!wayDataFile.GetByOffset(targetWayOffset,targetWay)) {
-      std::cerr << "Cannot load way with id " << targetWayOffset << std::endl;
-      return false;
-    }
-
-    targetNodeId=targetWay->ids[targetNodeIndex];
 
     if (nodes.empty()) {
+      // We assume that startNode and targetNode are on the same way (with no routing node in between)
+      assert(startWayOffset==targetWayOffset);
+
       AddNodes(route,
                std::vector<Path>(),
-               startNodeId,
-               startWayOffset,
-               targetNodeId);
+               startNodeIndex,
+               way,
+               targetNodeIndex);
 
-      route.AddEntry(targetNodeId,
+      route.AddEntry(targetNodeIndex,
                      0,
                      0);
       return true;
@@ -387,13 +360,20 @@ namespace osmscout {
       return false;
     }
 
-    if (startNodeId!=initialNode->GetId()) {
+    if (way->ids[startNodeIndex]!=initialNode->GetId()) {
+      size_t routeNodeIndex=0;
+
+      while (way->ids[routeNodeIndex]!=initialNode->GetId()) {
+        routeNodeIndex++;
+      }
+      assert(routeNodeIndex<way->ids.size());
+
       // Start node to initial route node
       AddNodes(route,
                std::vector<Path>(),
-               startNodeId,
-               startWayOffset,
-               initialNode->GetId());
+               startNodeIndex,
+               way,
+               routeNodeIndex);
     }
 
     for (std::list<RNodeRef>::const_iterator n=nodes.begin();
@@ -414,47 +394,64 @@ namespace osmscout {
       // We do not have any follower node, push the final entry (leading nowhere)
       // to the route
       if (nn==nodes.end()) {
-        if (node->GetId()!=targetNodeId) {
-          AddNodes(route,
-                   TransformPaths(profile,node,targetNodeId),
-                   node->GetId(),
-                   targetWayOffset,
-                   targetNodeId);
+        if (!wayDataFile.GetByOffset(targetWayOffset,way)) {
+          std::cerr << "Cannot load way with file offset " << targetWayOffset << std::endl;
+          return false;
+        }
 
-          route.AddEntry(targetNodeId,
-                         0,
-                         0);
+        size_t currentNodeIndex=0;
+
+        while (way->ids[currentNodeIndex]!=node->GetId()) {
+          currentNodeIndex++;
         }
-        else {
-          route.AddEntry(node->GetId(),
-                         0,
-                         0);
+        assert(currentNodeIndex<way->ids.size());
+
+        if (currentNodeIndex!=targetNodeIndex) {
+          AddNodes(route,
+                   TransformPaths(profile,node,way->ids[targetNodeIndex]),
+                   currentNodeIndex,
+                   way,
+                   targetNodeIndex);
         }
+
+        route.AddEntry(targetNodeIndex,
+                       0,
+                       0);
 
         break;
       }
 
       RouteNodeRef nextNode;
-      size_t       pathIndex=0;
 
       if (!routeNodeDataFile.GetByOffset((*nn)->nodeOffset,nextNode)) {
-        std::cerr << "Cannot load route node with offst " << (*nn)->nodeOffset << std::endl;
+        std::cerr << "Cannot load route node with offset " << (*nn)->nodeOffset << std::endl;
         return false;
       }
 
-      // Find the path we need to go to reach the next route node
-      for (size_t i=0; i<node->paths.size(); i++) {
-        if (node->ways[node->paths[i].wayIndex]==(*nn)->wayOffset) {
-          pathIndex=i;
-          break;
-        }
+      if (!wayDataFile.GetByOffset((*nn)->wayOffset,way)) {
+        std::cerr << "Cannot load way with file offset " << (*nn)->wayOffset << std::endl;
+        return false;
       }
+
+      size_t currentNodeIndex=0;
+
+      while (way->ids[currentNodeIndex]!=node->id) {
+        currentNodeIndex++;
+      }
+      assert(currentNodeIndex<way->ids.size());
+
+      size_t nextNodeIndex=0;
+
+      while (way->ids[nextNodeIndex]!=nextNode->id) {
+        nextNodeIndex++;
+      }
+      assert(nextNodeIndex<way->ids.size());
 
       AddNodes(route,
                TransformPaths(profile,node,nextNode->id),
-               node->id,
-               node->ways[node->paths[pathIndex].wayIndex],
-               nextNode->id);
+               currentNodeIndex,
+               way,
+               nextNodeIndex);
     }
 
     return true;
@@ -872,22 +869,16 @@ namespace osmscout {
 
         // Initial starting point
         if (iter==data.Entries().begin()) {
-          for (size_t i=0; i<w->nodes.size(); i++) {
-            if (w->ids[i]==iter->GetCurrentNodeId()) {
-              way.ids.push_back(w->ids[i]);
-              way.nodes.push_back(w->nodes[i]);
-              break;
-            }
-          }
+          size_t index=iter->GetCurrentNodeIndex();
+
+          way.ids.push_back(w->ids[index]);
+          way.nodes.push_back(w->nodes[index]);
         }
 
-        for (size_t i=0; i<w->nodes.size(); i++) {
-          if (w->ids[i]==iter->GetTargetNodeId()) {
-            way.ids.push_back(w->ids[i]);
-            way.nodes.push_back(w->nodes[i]);
-            break;
-          }
-        }
+        size_t index=iter->GetTargetNodeIndex();
+
+        way.ids.push_back(w->ids[index]);
+        way.nodes.push_back(w->nodes[index]);
       }
     }
 
@@ -920,29 +911,19 @@ namespace osmscout {
 
         // Initial starting point
         if (iter==data.Entries().begin()) {
-          for (size_t i=0; i<w->nodes.size(); i++) {
-            if (w->ids[i]==iter->GetCurrentNodeId()) {
-              points.push_back(Point(w->ids[i],
-                                     w->nodes[i].GetLat(),
-                                     w->nodes[i].GetLon()));
-              break;
-            }
-          }
+          size_t index=iter->GetCurrentNodeIndex();
+
+          points.push_back(Point(w->ids[index],
+                                 w->nodes[index].GetLat(),
+                                 w->nodes[index].GetLon()));
         }
 
         // target node of current path
-        for (size_t i=0; i<w->nodes.size(); i++) {
-          if (w->ids[i]==iter->GetTargetNodeId()) {
-            Point point;
+        size_t index=iter->GetTargetNodeIndex();
 
-            point.Set(w->ids[i],
-                      w->nodes[i].GetLat(),
-                      w->nodes[i].GetLon());
-
-            points.push_back(point);
-            break;
-          }
-        }
+        points.push_back(Point(w->ids[index],
+                               w->nodes[index].GetLat(),
+                               w->nodes[index].GetLon()));
       }
     }
 
@@ -961,10 +942,10 @@ namespace osmscout {
     for (std::list<RouteData::RouteEntry>::const_iterator iter=data.Entries().begin();
          iter!=data.Entries().end();
          ++iter) {
-      description.AddNode(iter->GetCurrentNodeId(),
+      description.AddNode(iter->GetCurrentNodeIndex(),
                           iter->GetPaths(),
                           iter->GetPathWayOffset(),
-                          iter->GetTargetNodeId());
+                          iter->GetTargetNodeIndex());
     }
 
     return true;

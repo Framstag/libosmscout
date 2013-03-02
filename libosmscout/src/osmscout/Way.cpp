@@ -108,20 +108,14 @@ namespace osmscout {
     }
   }
 
-  bool Way::GetCoordinates(Id nodeId,
+  void Way::GetCoordinates(size_t nodeIndex,
                            double& lat,
                            double& lon) const
   {
-    for (size_t i=0; i<nodes.size(); i++) {
-      if (ids[i]==nodeId) {
-        lat=nodes[i].GetLat();
-        lon=nodes[i].GetLon();
+    assert(nodeIndex<nodes.size());
 
-        return true;
-      }
-    }
-
-    return false;
+    lat=nodes[nodeIndex].GetLat();
+    lon=nodes[nodeIndex].GetLon();
   }
 
   bool Way::Read(FileScanner& scanner)
@@ -140,20 +134,8 @@ namespace osmscout {
       return false;
     }
 
-    Id       minId;
     uint32_t minLat;
     uint32_t minLon;
-
-    scanner.ReadNumber(minId);
-
-    ids.resize(nodeCount);
-    for (size_t i=0; i<nodeCount; i++) {
-      Id id;
-
-      scanner.ReadNumber(id);
-
-      ids[i]=minId+id;
-    }
 
     scanner.Read(minLat);
     scanner.Read(minLon);
@@ -168,6 +150,28 @@ namespace osmscout {
 
       nodes[i].Set((minLat+latValue)/conversionFactor-90.0,
                    (minLon+lonValue)/conversionFactor-180.0);
+    }
+
+    ids.resize(nodeCount,0);
+
+    uint32_t idCount;
+
+    scanner.ReadNumber(idCount);
+
+    if (idCount>0) {
+      Id  minId;
+
+      scanner.ReadNumber(minId);
+
+      for (size_t i=1; i<=idCount; i++) {
+        uint32_t index;
+        Id       id;
+
+        scanner.ReadNumber(index);
+        scanner.ReadNumber(id);
+
+        ids[index]=id+minId;
+      }
     }
 
     return !scanner.HasError();
@@ -220,21 +224,10 @@ namespace osmscout {
 
     writer.WriteNumber((uint32_t)nodes.size());
 
-    Id       minId=ids[0];
     double   minLat=nodes[0].GetLat();
     double   minLon=nodes[0].GetLon();
     uint32_t minLatValue;
     uint32_t minLonValue;
-
-    for (size_t i=1; i<ids.size(); i++) {
-      minId=std::min(minId,ids[i]);
-    }
-
-    writer.WriteNumber(minId);
-
-    for (size_t i=0; i<nodes.size(); i++) {
-      writer.WriteNumber(ids[i]-minId);
-    }
 
     for (size_t i=1; i<nodes.size(); i++) {
       minLat=std::min(minLat,nodes[i].GetLat());
@@ -253,6 +246,35 @@ namespace osmscout {
 
       writer.WriteNumber(latValue);
       writer.WriteNumber(lonValue);
+    }
+
+    uint32_t idCount=0;
+    Id       minId;
+
+    for (size_t i=0; i<ids.size(); i++) {
+      if (ids[i]!=0) {
+        if (idCount==0) {
+          minId=ids[i];
+        }
+        else {
+          minId=std::min(minId,ids[i]);
+        }
+
+        idCount++;
+      }
+    }
+
+    writer.WriteNumber(idCount);
+
+    if (idCount>0) {
+      writer.WriteNumber(minId);
+
+      for (size_t i=0; i<ids.size(); i++) {
+        if (ids[i]!=0) {
+          writer.WriteNumber((uint32_t)i);
+          writer.WriteNumber(ids[i]-minId);
+        }
+      }
     }
 
     return !writer.HasError();

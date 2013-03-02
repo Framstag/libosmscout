@@ -374,6 +374,10 @@ namespace osmscout {
       for (std::vector<Id>::const_iterator id=way.ids.begin();
           id!=way.ids.end();
           id++) {
+        if (*id==0) {
+          continue;
+        }
+
         if (nodeIds.find(*id)==nodeIds.end()) {
           std::map<Id,size_t>::iterator entry=nodeWayCountMap.find(*id);
 
@@ -397,6 +401,8 @@ namespace osmscout {
     for (std::map<Id,size_t>::iterator node=nodeWayCountMap.begin();
         node!=nodeWayCountMap.end();) {
       if (node->second>=2) {
+        assert(node->first!=0);
+
         junctions.insert(node->first);
       }
 
@@ -468,6 +474,10 @@ namespace osmscout {
       for (std::vector<Id>::const_iterator id=way.ids.begin();
           id!=way.ids.end();
           id++) {
+        if (*id==0) {
+          continue;
+        }
+
         if ((id==way.ids.begin() ||
             *id!=way.ids.front()) &&
             junctions.find(*id)!=junctions.end()) {

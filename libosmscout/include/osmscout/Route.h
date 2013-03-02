@@ -406,24 +406,24 @@ namespace osmscout {
     class OSMSCOUT_API Node
     {
     private:
-      Id                                           currentNodeId;
+      size_t                                       currentNodeIndex;
       std::vector<Path>                            paths;
       FileOffset                                   pathWayOffset;
-      Id                                           targetNodeId;
+      size_t                                       targetNodeIndex;
       double                                       distance;
       double                                       time;
       OSMSCOUT_HASHMAP<std::string,DescriptionRef> descriptionMap;
       std::list<DescriptionRef>                    descriptions;
 
     public:
-      Node(Id currentNodeId,
+      Node(size_t currentNodeIndex,
            const std::vector<Path>& paths,
            FileOffset pathWayOffset,
-           Id targetNodeId);
+           size_t targetNodeIndex);
 
-      inline Id GetCurrentNodeId() const
+      inline size_t GetCurrentNodeIndex() const
       {
-        return currentNodeId;
+        return currentNodeIndex;
       }
 
       inline const std::vector<Path>& GetPaths() const
@@ -446,9 +446,9 @@ namespace osmscout {
         return pathWayOffset;
       }
 
-      inline Id GetTargetNodeId() const
+      inline size_t GetTargetNodeIndex() const
       {
-        return targetNodeId;
+        return targetNodeIndex;
       }
 
       /**
@@ -485,10 +485,10 @@ namespace osmscout {
 
     void Clear();
 
-    void AddNode(Id currentNodeId,
+    void AddNode(size_t currentNodeIndex,
                  const std::vector<Path>& paths,
                  FileOffset pathWayOffset,
-                 Id targetNodeId);
+                 size_t targetNodeIndex);
 
     inline std::list<Node>& Nodes()
     {
