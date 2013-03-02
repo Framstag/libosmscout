@@ -306,7 +306,7 @@ namespace osmscout {
 
  std::vector<Path> Router::TransformPaths(const RoutingProfile& profile,
                                           const RouteNode& node,
-                                          Id nextNodeId)
+                                          size_t nextNodeIndex)
  {
     std::vector<osmscout::Path> result;
 
@@ -314,7 +314,7 @@ namespace osmscout {
       bool traversable=profile.CanUse(node,i);
 
       result.push_back(osmscout::Path(node.ways[node.paths[i].wayIndex],
-                                      nextNodeId,
+                                      nextNodeIndex,
                                       traversable));
     }
 
@@ -408,7 +408,7 @@ namespace osmscout {
 
         if (currentNodeIndex!=targetNodeIndex) {
           AddNodes(route,
-                   TransformPaths(profile,node,way->ids[targetNodeIndex]),
+                   TransformPaths(profile,node,targetNodeIndex),
                    currentNodeIndex,
                    way,
                    targetNodeIndex);
@@ -448,7 +448,7 @@ namespace osmscout {
       assert(nextNodeIndex<way->ids.size());
 
       AddNodes(route,
-               TransformPaths(profile,node,nextNode->id),
+               TransformPaths(profile,node,nextNodeIndex),
                currentNodeIndex,
                way,
                nextNodeIndex);

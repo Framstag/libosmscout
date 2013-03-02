@@ -34,14 +34,14 @@ namespace osmscout {
   {
   private:
     FileOffset wayOffset;
-    Id         targetNodeId;
+    size_t     targetNodeIndex;
     bool       traversable;
 
   public:
     Path(FileOffset wayOffset,
-         Id targetNodeId);
+         size_t targetNodeIndex);
     Path(FileOffset wayOffset,
-         Id targetNodeId,
+         size_t targetNodeIndex,
          bool traversable);
     Path(const Path& other);
     virtual ~Path();
@@ -51,9 +51,9 @@ namespace osmscout {
       return wayOffset;
     }
 
-    inline Id GetTargetNodeId() const
+    inline Id GetTargetNodeIndex() const
     {
-      return targetNodeId;
+      return targetNodeIndex;
     }
 
     inline bool IsTraversable() const

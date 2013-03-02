@@ -315,7 +315,7 @@ namespace osmscout {
         // Leave out the path back to the last crossing (if it exists)
         if (lastCrossing!=description.Nodes().end() &&
             node->GetPaths()[i].GetWayOffset()==lastCrossing->GetPathWayOffset() &&
-            node->GetPaths()[i].GetTargetNodeId()==lastCrossingWay->ids[lastCrossing->GetCurrentNodeIndex()]) {
+            node->GetPaths()[i].GetTargetNodeIndex()==lastCrossing->GetCurrentNodeIndex()) {
           continue;
         }
 

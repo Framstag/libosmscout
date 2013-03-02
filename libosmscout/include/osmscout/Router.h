@@ -200,7 +200,7 @@ namespace osmscout {
 
     std::vector<Path> TransformPaths(const RoutingProfile& profile,
                                      const RouteNode& node,
-                                     Id nextNodeId);
+                                     size_t nextNodeIndex);
 
   public:
     Router(const RouterParameter& parameter);
