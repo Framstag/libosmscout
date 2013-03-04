@@ -123,7 +123,7 @@ static bool LookupClosedNodeAtLocation(osmscout::Database& database,
           reference!=location->references.end();
           ++reference) {
 
-        if (reference->GetType()==osmscout::RefType::refWay) {
+        if (reference->GetType()==osmscout::refWay) {
           osmscout::WayRef tmpWay;
 
           if (database.GetWayByOffset(reference->GetFileOffset(),tmpWay)) {
