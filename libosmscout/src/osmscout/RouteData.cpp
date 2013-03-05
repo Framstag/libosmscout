@@ -31,10 +31,10 @@ namespace osmscout {
     // no code
   }
 
-  RouteData::RouteEntry::RouteEntry(Id currentNodeIndex,
+  RouteData::RouteEntry::RouteEntry(size_t currentNodeIndex,
                                     const std::vector<Path>& paths,
                                     FileOffset pathWayOffset,
-                                    Id targetNodeIndex)
+                                    size_t targetNodeIndex)
    : currentNodeIndex(currentNodeIndex),
      paths(paths),
      pathWayOffset(pathWayOffset),

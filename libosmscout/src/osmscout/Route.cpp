@@ -370,11 +370,11 @@ namespace osmscout {
   RouteDescription::Node::Node(Id currentNodeId,
                                const std::vector<Path>& paths,
                                FileOffset pathWayOffset,
-                               Id targetNodeId)
+                               size_t targetNodeIndex)
   : currentNodeIndex(currentNodeId),
     paths(paths),
     pathWayOffset(pathWayOffset),
-    targetNodeIndex(targetNodeId),
+    targetNodeIndex(targetNodeIndex),
     distance(0.0),
     time(0.0)
   {
