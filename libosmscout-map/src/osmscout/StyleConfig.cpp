@@ -1350,6 +1350,29 @@ namespace osmscout {
         }
       }
     }
+
+    for (size_t type=0; type<nodeIconStyleSelectors.size(); type++) {
+      for (size_t level=0; level<nodeIconStyleSelectors[type].size(); level++) {
+        for (std::list<IconStyleSelector>::iterator selector=nodeIconStyleSelectors[type][level].begin();
+             selector!=nodeIconStyleSelectors[type][level].end();
+             ++selector) {
+          if (!selector->style->GetIconName().empty()) {
+            OSMSCOUT_HASHMAP<std::string,size_t>::iterator entry=symbolIdMap.find(selector->style->GetIconName());
+
+            if (entry==symbolIdMap.end()) {
+              symbolIdMap.insert(std::make_pair(selector->style->GetIconName(),nextId));
+
+              selector->style->SetIconId(nextId);
+
+              nextId++;
+            }
+            else {
+              selector->style->SetIconId(entry->second);
+            }
+          }
+        }
+      }
+    }
   }
 
   void StyleConfig::PostprocessPatternId()
