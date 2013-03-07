@@ -367,11 +367,11 @@ namespace osmscout {
     return "Leave motorway";
   }
 
-  RouteDescription::Node::Node(Id currentNodeId,
+  RouteDescription::Node::Node(size_t currentNodeIndex,
                                const std::vector<Path>& paths,
                                FileOffset pathWayOffset,
                                size_t targetNodeIndex)
-  : currentNodeIndex(currentNodeId),
+  : currentNodeIndex(currentNodeIndex),
     paths(paths),
     pathWayOffset(pathWayOffset),
     targetNodeIndex(targetNodeIndex),
