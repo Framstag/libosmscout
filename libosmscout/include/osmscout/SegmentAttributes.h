@@ -35,6 +35,7 @@ namespace osmscout {
   {
   private:
     // Attribute availability flags (for optimized attribute storage)
+    const static uint16_t hasNameAlt      = 1 <<  7; //! We have an alternative name (mainly in a second language)
     const static uint16_t hasName         = 1 <<  8; //! We have a name
     const static uint16_t hasRef          = 1 <<  9; //! We have reference name
     const static uint16_t hasHouseNr      = 1 << 10; //! We have a house number
@@ -61,6 +62,7 @@ namespace osmscout {
     TypeId           type;     //! type of the way/relation
     mutable uint16_t flags;
     std::string      name;     //! name
+    std::string      nameAlt;  //! alternative name
     std::string      ref;      //! reference name (normally drawn in a plate)
     std::string      houseNr;  //! house number
     int8_t           layer;    //! layer to draw on
@@ -99,6 +101,11 @@ namespace osmscout {
     inline std::string GetName() const
     {
       return name;
+    }
+
+    inline std::string GetNameAlt() const
+    {
+      return nameAlt;
     }
 
     inline std::string GetRefName() const
