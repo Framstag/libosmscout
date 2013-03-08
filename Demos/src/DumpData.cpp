@@ -63,7 +63,7 @@ static bool ParseArguments(int argc,
                            std::list<Job>& jobs)
 {
   if (argc<2) {
-    std::cerr << "DumpData <map directory> {-c <Id>|-n <Id>|-w <Id>|-wo <FileOffset>|-r <Id>|-ro <FileOffset>}" << std::endl;
+    std::cerr << "DumpData <map directory> {-c <Id>|-n <Id>|-no <FileOffset>|-w <Id>|-wo <FileOffset>|-r <Id>|-ro <FileOffset>}" << std::endl;
     return false;
   }
 
@@ -107,6 +107,24 @@ static bool ParseArguments(int argc,
       }
 
       jobs.push_back(Job(osmscout::ObjectRef(id,osmscout::refNode)));
+
+      arg++;
+    }
+    else if (strcmp(argv[arg],"-no")==0) {
+      unsigned long fileOffset;
+
+      arg++;
+      if (arg>=argc) {
+        std::cerr << "Option -no requires parameter!" << std::endl;
+        return false;
+      }
+
+      if (sscanf(argv[arg],"%lu",&fileOffset)!=1) {
+        std::cerr << "Node id is not numeric!" << std::endl;
+        return false;
+      }
+
+      jobs.push_back(Job(osmscout::ObjectFileRef(fileOffset,osmscout::refNode)));
 
       arg++;
     }
@@ -245,6 +263,11 @@ static void DumpGeneralSegmentAttributes(const osmscout::SegmentAttributes& attr
   if (!attributes.GetName().empty()) {
     DumpIndent(indent);
     std::cout << "name: " << attributes.GetName() << std::endl;
+  }
+
+  if (!attributes.GetNameAlt().empty()) {
+    DumpIndent(indent);
+    std::cout << "nameAlt: " << attributes.GetNameAlt() << std::endl;
   }
 
   if (!attributes.GetRefName().empty()) {
