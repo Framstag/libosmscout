@@ -111,6 +111,44 @@ namespace osmscout {
       config.RestoreTagInfo(tagInfo);
     }
 
+    uint32_t nameTagCount;
+
+    if (!scanner.ReadNumber(nameTagCount)) {
+      std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+      return false;
+    }
+
+    for (size_t i=1; i<=nameTagCount; i++) {
+      TagId    id;
+      uint32_t priority;
+
+      if (!(scanner.ReadNumber(id) &&
+            scanner.ReadNumber(priority))) {
+        std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+      }
+
+      config.RestoreNameTagInfo(id,priority);
+    }
+
+    uint32_t nameAltTagCount;
+
+    if (!scanner.ReadNumber(nameAltTagCount)) {
+      std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+      return false;
+    }
+
+    for (size_t i=1; i<=nameAltTagCount; i++) {
+      TagId    id;
+      uint32_t priority;
+
+      if (!(scanner.ReadNumber(id) &&
+            scanner.ReadNumber(priority))) {
+        std::cerr << "Format error in file '" << scanner.GetFilename() << "'" << std::endl;
+      }
+
+      config.RestoreNameAltTagInfo(id,priority);
+    }
+
     uint32_t typeCount;
 
     if (!scanner.ReadNumber(typeCount)) {

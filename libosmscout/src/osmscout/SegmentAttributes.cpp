@@ -43,7 +43,10 @@ namespace osmscout {
                                   std::vector<Tag>& tags,
                                   bool& reverseNodes)
   {
-    bool hasGrade=false;
+    uint32_t priority;
+    uint32_t namePriority=0;
+    uint32_t nameAltPriority=0;
+    bool     hasGrade=false;
 
     name.clear();
     ref.clear();
@@ -67,8 +70,10 @@ namespace osmscout {
 
     std::vector<Tag>::iterator tag=tags.begin();
     while (tag!=tags.end()) {
-      if (tag->key==typeConfig.tagName) {
+      if (typeConfig.IsNameTag(tag->key,priority) &&
+          (name.empty() || priority>namePriority)) {
         name=tag->value;
+        namePriority=priority;
 
         /*
         size_t i=0;
@@ -82,6 +87,13 @@ namespace osmscout {
 
           i++;
         }*/
+
+        tag=tags.erase(tag);
+      }
+      else if (typeConfig.IsNameAltTag(tag->key,priority) &&
+          (nameAlt.empty() || priority>nameAltPriority)) {
+        nameAlt=tag->value;
+        nameAltPriority=priority;
 
         tag=tags.erase(tag);
       }
@@ -352,6 +364,10 @@ namespace osmscout {
       scanner.Read(name);
     }
 
+    if (flags & hasNameAlt) {
+      scanner.Read(nameAlt);
+    }
+
     if (flags & hasRef) {
       scanner.Read(ref);
     }
@@ -470,6 +486,10 @@ namespace osmscout {
 
     if (flags & hasName) {
       writer.Write(name);
+    }
+
+    if (flags & hasNameAlt) {
+      writer.Write(nameAlt);
     }
 
     if (flags & hasRef) {

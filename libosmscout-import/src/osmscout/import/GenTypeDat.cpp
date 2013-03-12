@@ -21,6 +21,7 @@
 
 #include <osmscout/util/File.h>
 #include <osmscout/util/FileWriter.h>
+#include <vector>
 
 namespace osmscout {
 
@@ -48,7 +49,6 @@ namespace osmscout {
     }
 
     writer.WriteNumber((uint32_t)typeConfig.GetTags().size());
-
     for (std::vector<TagInfo>::const_iterator tag=typeConfig.GetTags().begin();
          tag!=typeConfig.GetTags().end();
          ++tag) {
@@ -56,6 +56,48 @@ namespace osmscout {
       writer.Write(tag->GetName());
       writer.Write(tag->IsInternalOnly());
     }
+
+    uint32_t nameTagCount=0;
+    uint32_t nameAltTagCount=0;
+
+    for (std::vector<TagInfo>::const_iterator tag=typeConfig.GetTags().begin();
+         tag!=typeConfig.GetTags().end();
+         ++tag) {
+      uint32_t priority;
+
+      if (typeConfig.IsNameTag(tag->GetId(),priority)) {
+        nameTagCount++;
+      }
+
+      if (typeConfig.IsNameAltTag(tag->GetId(),priority)) {
+        nameAltTagCount++;
+      }
+    }
+
+    writer.WriteNumber(nameTagCount);
+    for (std::vector<TagInfo>::const_iterator tag=typeConfig.GetTags().begin();
+     tag!=typeConfig.GetTags().end();
+     ++tag) {
+      uint32_t priority;
+
+      if (typeConfig.IsNameTag(tag->GetId(),priority)) {
+        writer.WriteNumber(tag->GetId());
+        writer.WriteNumber((uint32_t)priority);
+      }
+    }
+
+    writer.WriteNumber(nameAltTagCount);
+    for (std::vector<TagInfo>::const_iterator tag=typeConfig.GetTags().begin();
+     tag!=typeConfig.GetTags().end();
+     ++tag) {
+      uint32_t priority;
+
+      if (typeConfig.IsNameAltTag(tag->GetId(),priority)) {
+        writer.WriteNumber(tag->GetId());
+        writer.WriteNumber((uint32_t)priority);
+      }
+    }
+
 
     writer.WriteNumber((uint32_t)typeConfig.GetTypes().size());
 

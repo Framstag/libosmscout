@@ -390,6 +390,8 @@ namespace osmscout {
     OSMSCOUT_HASHMAP<std::string,TagId>    stringToTagMap;
     OSMSCOUT_HASHMAP<std::string,TypeInfo> nameToTypeMap;
     OSMSCOUT_HASHMAP<TypeId,TypeInfo>      idToTypeMap;
+    OSMSCOUT_HASHMAP<TagId,uint32_t>       nameTagIdToPrioMap;
+    OSMSCOUT_HASHMAP<TagId,uint32_t>       nameAltTagIdToPrioMap;
 
   public:
     TypeId                                 typeTileLand;
@@ -399,7 +401,6 @@ namespace osmscout {
     TypeId                                 typeTileCoastline;
 
     // External use (also available in "normal" types, if not explicitly deleted)
-    TagId                                  tagName;
     TagId                                  tagRef;
     TagId                                  tagBridge;
     TagId                                  tagTunnel;
@@ -415,7 +416,6 @@ namespace osmscout {
     TagId                                  tagSurface;
     TagId                                  tagTracktype;
     TagId                                  tagPlace;
-    TagId                                  tagPlaceName;
     TagId                                  tagBoundary;
     TagId                                  tagAdminLevel;
 
@@ -428,9 +428,14 @@ namespace osmscout {
     virtual ~TypeConfig();
 
     void RestoreTagInfo(const TagInfo& tagInfo);
+    void RestoreNameTagInfo(TagId tagId, uint32_t priority);
+    void RestoreNameAltTagInfo(TagId tagId, uint32_t priority);
 
     TagId RegisterTagForInternalUse(const std::string& tagName);
     TagId RegisterTagForExternalUse(const std::string& tagName);
+
+    void RegisterNameTag(const std::string& tagName, uint32_t priority);
+    void RegisterNameAltTag(const std::string& tagName, uint32_t priority);
 
     TypeConfig& AddTypeInfo(TypeInfo& typeInfo);
 
@@ -446,6 +451,9 @@ namespace osmscout {
 
     void ResolveTags(const std::map<TagId,std::string>& map,
                      std::vector<Tag>& tags) const;
+
+    bool IsNameTag(TagId tag, uint32_t& priority) const;
+    bool IsNameAltTag(TagId tag, uint32_t& priority) const;
 
     bool GetNodeTypeId(const std::map<TagId,std::string>& tagMap,
                        TypeId &typeId) const;

@@ -1113,20 +1113,28 @@ namespace osmscout {
     bool         hasLabel=textStyle.Valid();
     bool         hasSymbol=iconStyle.Valid() && iconStyle->GetSymbol().Valid();
     bool         hasIcon=iconStyle.Valid() && !iconStyle->GetIconName().empty();
+    uint32_t     priority;
+    uint32_t     namePriority=0;
+    size_t       labelLevel=0; // 1=ref, 2=HouseNr, 3=label
     std::string  label;
 
     if (hasLabel) {
       for (size_t i=0; i<node->GetTagCount(); i++) {
-        // TODO: We should make sure we prefer one over the other
-        if (node->GetTagKey(i)==styleConfig.GetTypeConfig()->tagName) {
+        if (labelLevel<1 &&
+            node->GetTagKey(i)==styleConfig.GetTypeConfig()->tagRef)  {
           label=node->GetTagValue(i);
-          break;
+          labelLevel=1;
         }
-        else if (node->GetTagKey(i)==styleConfig.GetTypeConfig()->tagRef)  {
+        else if (labelLevel<2 &&
+                 node->GetTagKey(i)==styleConfig.GetTypeConfig()->tagHouseNr)  {
           label=node->GetTagValue(i);
+          labelLevel=2;
         }
-        else if (node->GetTagKey(i)==styleConfig.GetTypeConfig()->tagHouseNr)  {
+        else if (styleConfig.GetTypeConfig()->IsNameTag(node->GetTagKey(i),priority) &&
+            (priority>=namePriority)) {
           label=node->GetTagValue(i);
+          namePriority=priority;
+          labelLevel=3;
         }
       }
 

@@ -616,6 +616,9 @@ namespace osmscout {
       return false;
     }
 
+    typeConfig.RegisterNameTag("name",0);
+    typeConfig.RegisterNameTag("place_name",1);
+
     /* 1 */
     modules.push_back(new TypeDataGenerator());
 

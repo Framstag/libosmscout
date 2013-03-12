@@ -173,16 +173,16 @@ namespace osmscout {
       }
 
       if (cityIds.find(node.GetType())!=cityIds.end()) {
+        uint32_t    priority;
+        uint32_t    namePriority=0;
         std::string name;
 
         for (size_t i=0; i<node.GetTagCount(); i++) {
-          if (node.GetTagKey(i)==typeConfig.tagPlaceName) {
+          if (typeConfig.IsNameTag(node.GetTagKey(i),priority) &&
+              (name.empty() || priority>namePriority)) {
             name=node.GetTagValue(i);
+            namePriority=priority;
             break;
-          }
-          else if (node.GetTagKey(i)==typeConfig.tagName &&
-                   name.empty()) {
-            name=node.GetTagValue(i);
           }
         }
 
@@ -246,13 +246,6 @@ namespace osmscout {
       if (way.IsArea() &&
           cityIds.find(way.GetType())!=cityIds.end()) {
         std::string name=way.GetName();
-
-        for (size_t i=0; i<way.GetTagCount(); i++) {
-          if (way.GetTagKey(i)==typeConfig.tagPlaceName) {
-            name=way.GetTagValue(i);
-            break;
-          }
-        }
 
         CityArea cityArea;
 
@@ -791,10 +784,13 @@ namespace osmscout {
       }
 
       if (indexables.find(node.GetType())!=indexables.end()) {
+        uint32_t    priority;
+        uint32_t    namePriority=0;
         std::string name;
 
         for (size_t i=0; i<node.GetTagCount(); i++) {
-          if (node.GetTagKey(i)==typeConfig.tagName) {
+          if (typeConfig.IsNameTag(node.GetTagKey(i),priority) &&
+              (name.empty() || priority>namePriority)) {
             name=node.GetTagValue(i);
             break;
           }

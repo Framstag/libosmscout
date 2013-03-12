@@ -335,10 +335,8 @@ namespace osmscout {
     tagBoundary=GetTagId("boundary");
     tagBridge=GetTagId("bridge");
     tagLayer=GetTagId("layer");
-    tagName=GetTagId("name");
     tagOneway=GetTagId("oneway");
     tagPlace=GetTagId("place");
-    tagPlaceName=GetTagId("place_name");
     tagRef=GetTagId("ref");
     tagTunnel=GetTagId("tunnel");
     tagType=GetTagId("type");
@@ -357,10 +355,8 @@ namespace osmscout {
     assert(tagBoundary!=tagIgnore);
     assert(tagBridge!=tagIgnore);
     assert(tagLayer!=tagIgnore);
-    assert(tagName!=tagIgnore);
     assert(tagOneway!=tagIgnore);
     assert(tagPlace!=tagIgnore);
-    assert(tagPlaceName!=tagIgnore);
     assert(tagRef!=tagIgnore);
     assert(tagTunnel!=tagIgnore);
     assert(tagType!=tagIgnore);
@@ -443,6 +439,20 @@ namespace osmscout {
     return tagInfo.GetId();
   }
 
+  void TypeConfig::RegisterNameTag(const std::string& tagName, uint32_t priority)
+  {
+    TagId tagId=RegisterTagForExternalUse(tagName);
+
+    nameTagIdToPrioMap.insert(std::make_pair(tagId,priority));
+  }
+
+  void TypeConfig::RegisterNameAltTag(const std::string& tagName, uint32_t priority)
+  {
+    TagId tagId=RegisterTagForExternalUse(tagName);
+
+    nameAltTagIdToPrioMap.insert(std::make_pair(tagId,priority));
+  }
+
   void TypeConfig::RestoreTagInfo(const TagInfo& tagInfo)
   {
     // We have same tags, that are already and always
@@ -463,6 +473,16 @@ namespace osmscout {
 
     tags[tagInfo.GetId()]=tagInfo;
     stringToTagMap[tagInfo.GetName()]=tagInfo.GetId();
+  }
+
+  void TypeConfig::RestoreNameTagInfo(TagId tagId, uint32_t priority)
+  {
+    nameTagIdToPrioMap.insert(std::make_pair(tagId,priority));
+  }
+
+  void TypeConfig::RestoreNameAltTagInfo(TagId tagId, uint32_t priority)
+  {
+    nameAltTagIdToPrioMap.insert(std::make_pair(tagId,priority));
   }
 
   TypeConfig& TypeConfig::AddTypeInfo(TypeInfo& typeInfo)
@@ -545,6 +565,40 @@ namespace osmscout {
 
       tags.push_back(tag);
     }
+  }
+
+  bool TypeConfig::IsNameTag(TagId tag, uint32_t& priority) const
+  {
+    if (nameTagIdToPrioMap.empty()) {
+      return false;
+    }
+
+    OSMSCOUT_HASHMAP<TagId,uint32_t>::const_iterator entry=nameTagIdToPrioMap.find(tag);
+
+    if (entry==nameTagIdToPrioMap.end()) {
+      return false;
+    }
+
+    priority=entry->second;
+
+    return true;
+  }
+
+  bool TypeConfig::IsNameAltTag(TagId tag, uint32_t& priority) const
+  {
+    if (nameAltTagIdToPrioMap.empty()) {
+      return false;
+    }
+
+    OSMSCOUT_HASHMAP<TagId,uint32_t>::const_iterator entry=nameAltTagIdToPrioMap.find(tag);
+
+    if (entry==nameAltTagIdToPrioMap.end()) {
+      return false;
+    }
+
+    priority=entry->second;
+
+    return true;
   }
 
   bool TypeConfig::GetNodeTypeId(const std::map<TagId,std::string>& tagMap,
