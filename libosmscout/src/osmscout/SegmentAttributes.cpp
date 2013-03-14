@@ -438,6 +438,13 @@ namespace osmscout {
       flags&=~hasName;
     }
 
+    if (!nameAlt.empty()) {
+      flags|=hasNameAlt;
+    }
+    else {
+      flags&=~hasNameAlt;
+    }
+
     if (!ref.empty()) {
       flags|=hasRef;
     }
