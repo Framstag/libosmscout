@@ -25,7 +25,7 @@
 #include <osmscout/system/Math.h>
 
 #include <osmscout/util/String.h>
-
+#include <iostream>
 namespace osmscout {
 
   static const char* postfixes[] =  {"-Straße", " Straße", "straße",
@@ -43,7 +43,6 @@ namespace osmscout {
                                   std::vector<Tag>& tags,
                                   bool& reverseNodes)
   {
-    uint32_t priority;
     uint32_t namePriority=0;
     uint32_t nameAltPriority=0;
     bool     hasGrade=false;
@@ -70,10 +69,15 @@ namespace osmscout {
 
     std::vector<Tag>::iterator tag=tags.begin();
     while (tag!=tags.end()) {
-      if (typeConfig.IsNameTag(tag->key,priority) &&
-          (name.empty() || priority>namePriority)) {
+      uint32_t ntPrio;
+      bool     isNameTag=typeConfig.IsNameTag(tag->key,ntPrio);
+      uint32_t natPrio;
+      bool     isNameAltTag=typeConfig.IsNameAltTag(tag->key,natPrio);
+
+      if (isNameTag &&
+          (name.empty() || ntPrio>namePriority)) {
         name=tag->value;
-        namePriority=priority;
+        namePriority=ntPrio;
 
         /*
         size_t i=0;
@@ -87,14 +91,15 @@ namespace osmscout {
 
           i++;
         }*/
-
-        tag=tags.erase(tag);
       }
-      else if (typeConfig.IsNameAltTag(tag->key,priority) &&
-          (nameAlt.empty() || priority>nameAltPriority)) {
-        nameAlt=tag->value;
-        nameAltPriority=priority;
 
+      if (isNameAltTag &&
+          (nameAlt.empty() || natPrio>nameAltPriority)) {
+        nameAlt=tag->value;
+        nameAltPriority=natPrio;
+      }
+
+      if (isNameTag || isNameAltTag) {
         tag=tags.erase(tag);
       }
       else if (tag->key==typeConfig.tagRef) {
