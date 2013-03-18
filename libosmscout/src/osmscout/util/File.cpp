@@ -26,7 +26,7 @@
 
 namespace osmscout {
 
-  bool GetFileSize(const std::string& filename, unsigned long& size)
+  bool GetFileSize(const std::string& filename, FileOffset& size)
   {
     FILE *file;
 

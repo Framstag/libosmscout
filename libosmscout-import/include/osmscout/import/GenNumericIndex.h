@@ -96,7 +96,7 @@ namespace osmscout {
     FileOffset              lastLevelPageStartOffset;
 
     FileOffset              indexPageCountsOffset;
-    uint32_t                pageSize=parameter.GetNumericIndexPageSize();
+    size_t                  pageSize=parameter.GetNumericIndexPageSize();
 
     //
     // Writing index file
@@ -119,7 +119,7 @@ namespace osmscout {
       return false;
     }
 
-    writer.WriteNumber(pageSize);       // Size of one index page in bytes
+    writer.WriteNumber((uint32_t)pageSize);       // Size of one index page in bytes
     writer.WriteNumber(dataCount);      // Number of entries in data file
 
     writer.GetPos(levelsOffset);
@@ -138,7 +138,7 @@ namespace osmscout {
 
     progress.Info(std::string("Writing level ")+NumberToString(1)+" ("+NumberToString(dataCount)+" entries)");
 
-    uint32_t currentPageSize=0;
+    size_t currentPageSize=0;
 
     for (uint32_t d=0; d<dataCount; d++) {
       progress.SetProgress(d,dataCount);
@@ -215,7 +215,7 @@ namespace osmscout {
 
       progress.Info(std::string("Writing level ")+NumberToString(indexPageCounts.size()+1)+" ("+NumberToString(si.size())+" entries)");
 
-      uint32_t currentPageSize=0;
+      size_t currentPageSize=0;
 
       for (size_t i=0; i<si.size(); i++) {
 

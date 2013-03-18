@@ -196,10 +196,10 @@ namespace osmscout {
   bool IsCoordInArea(const N& point,
                      const std::vector<M>& nodes)
   {
-    int  i,j;
+    size_t  i,j;
     bool c=false;
 
-    for (i=0, j=nodes.size()-1; i<(int)nodes.size(); j=i++) {
+    for (i=0, j=nodes.size()-1; i<nodes.size(); j=i++) {
       if ((nodes[i].GetLat()>point.GetLat())!=(nodes[j].GetLat()>point.GetLat()) &&
           (point.GetLon()<(nodes[j].GetLon()-nodes[i].GetLon())*(point.GetLat()-nodes[i].GetLat()) /
            (nodes[j].GetLat()-nodes[i].GetLat())+nodes[i].GetLon()))  {
@@ -219,7 +219,7 @@ namespace osmscout {
   inline int GetRelationOfPointToArea(const GeoCoord& point,
                                       const std::vector<GeoCoord>& nodes)
   {
-    int  i,j;
+    size_t  i,j;
     bool c=false;
 
     for (i=0, j=nodes.size()-1; i<(int)nodes.size(); j=i++) {

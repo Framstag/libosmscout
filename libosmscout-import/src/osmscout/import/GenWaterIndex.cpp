@@ -636,8 +636,8 @@ namespace osmscout {
 
       Level newLevel(level);
 
-      for (size_t y=0; y<level.cellYCount; y++) {
-        for (size_t x=0; x<level.cellXCount; x++) {
+      for (uint32_t y=0; y<level.cellYCount; y++) {
+        for (uint32_t x=0; x<level.cellXCount; x++) {
           if (level.GetState(x,y)==water) {
             if (y>0) {
               if (level.GetState(x,y-1)==unknown) {
@@ -697,8 +697,8 @@ namespace osmscout {
       cont=false;
 
       // Left to right
-      for (size_t y=0; y<level.cellYCount; y++) {
-        int x=0;
+      for (uint32_t y=0; y<level.cellYCount; y++) {
+        uint32_t x=0;
         int start=0;
         int end=0;
         int state=0;
@@ -729,7 +729,7 @@ namespace osmscout {
               }
               else if (level.GetState(x,y)==coast || level.GetState(x,y)==land) {
                 if (start<level.cellXCount && end<level.cellXCount && start<=end) {
-                  for (size_t i=start; i<=end; i++) {
+                  for (uint32_t i=start; i<=end; i++) {
 #if defined(DEBUG_TILING)
                     std::cout << "Land between: " << i << "," << y << std::endl;
 #endif
@@ -749,8 +749,8 @@ namespace osmscout {
       }
 
       //Bottom Up
-      for (size_t x=0; x<level.cellXCount; x++) {
-        int y=0;
+      for (uint32_t x=0; x<level.cellXCount; x++) {
+        uint32_t y=0;
         int start=0;
         int end=0;
         int state=0;
@@ -781,7 +781,7 @@ namespace osmscout {
               }
               else if (level.GetState(x,y)==coast || level.GetState(x,y)==land) {
                 if (start<level.cellYCount && end<level.cellYCount && start<=end) {
-                  for (size_t i=start; i<=end; i++) {
+                  for (uint32_t i=start; i<=end; i++) {
 #if defined(DEBUG_TILING)
                     std::cout << "Land between: " << x << "," << i << std::endl;
 #endif
@@ -898,8 +898,8 @@ namespace osmscout {
     cellIntersections.insert(Pixel(cx1,cy1));
 
     if (cx1!=cx2 || cy1!=cy2) {
-      for (size_t x=std::min(cx1,cx2); x<=std::max(cx1,cx2); x++) {
-        for (size_t y=std::min(cy1,cy2); y<=std::max(cy1,cy2); y++) {
+      for (uint32_t x=std::min(cx1,cx2); x<=std::max(cx1,cx2); x++) {
+        for (uint32_t y=std::min(cy1,cy2); y<=std::max(cy1,cy2); y++) {
 
           Pixel    coord(x,y);
           GeoCoord borderPoints[5];
@@ -957,8 +957,8 @@ namespace osmscout {
       uint32_t cy2=(uint32_t)((points[p+1].GetLat()+90.0)/level.cellHeight);
 
       if (cx1!=cx2 || cy1!=cy2) {
-        for (size_t x=std::min(cx1,cx2); x<=std::max(cx1,cx2); x++) {
-          for (size_t y=std::min(cy1,cy2); y<=std::max(cy1,cy2); y++) {
+        for (uint32_t x=std::min(cx1,cx2); x<=std::max(cx1,cx2); x++) {
+          for (uint32_t y=std::min(cy1,cy2); y<=std::max(cy1,cy2); y++) {
 
             if (!level.IsInAbsolute(x,y)) {
               continue;
@@ -1371,7 +1371,7 @@ namespace osmscout {
     else {
       size_t targetIdx=incoming->prevWayPointIndex+1;
 
-      for (int idx=outgoing->prevWayPointIndex;
+      for (size_t idx=outgoing->prevWayPointIndex;
           idx>=targetIdx;
           idx--) {
         groundTile.coords.push_back(Transform(points[idx],level,cellMinLat,cellMinLon,true));
@@ -1741,7 +1741,7 @@ namespace osmscout {
       Data                                   data;
       std::map<Pixel,std::list<GroundTile> > cellGroundTileMap;
 
-      magnification.SetLevel(level+parameter.GetWaterIndexMinMag());
+      magnification.SetLevel((uint32_t)(level+parameter.GetWaterIndexMinMag()));
 
       projection.Set(0,0,magnification,640,480);
 
@@ -1799,8 +1799,8 @@ namespace osmscout {
       FillLand(progress,
                levels[level]);
 
-      for (size_t y=0; y<levels[level].cellYCount; y++) {
-        for (size_t x=0; x<levels[level].cellXCount; x++) {
+      for (uint32_t y=0; y<levels[level].cellYCount; y++) {
+        for (uint32_t x=0; x<levels[level].cellXCount; x++) {
           State state=levels[level].GetState(x,y);
 
           writer.WriteFileOffset((FileOffset)state);
@@ -1837,8 +1837,8 @@ namespace osmscout {
         }
 
         FileOffset endPos;
-        uint32_t   cellId=coord->first.y*levels[level].cellXCount+coord->first.x;
-        uint32_t   index=cellId*sizeof(FileOffset);
+        uint32_t cellId=coord->first.y*levels[level].cellXCount+coord->first.x;
+        size_t index=cellId*sizeof(FileOffset);
 
         writer.GetPos(endPos);
 

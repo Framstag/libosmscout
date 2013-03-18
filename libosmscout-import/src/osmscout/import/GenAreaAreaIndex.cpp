@@ -47,8 +47,8 @@ namespace osmscout {
          leaf!=leafs.end();
          ++leaf) {
       // Coordinates of the children in "children dimension" calculated from the tile id
-      size_t xc=leaf->first.x;
-      size_t yc=leaf->first.y;
+      uint32_t xc=leaf->first.x;
+      uint32_t yc=leaf->first.y;
 
       size_t index;
 
@@ -205,7 +205,7 @@ namespace osmscout {
       return false;
     }
 
-    int l=parameter.GetAreaAreaIndexMaxMag();
+    int64_t l=parameter.GetAreaAreaIndexMaxMag();
 
     while (l>=0) {
       size_t areaLevelEntries=0;
@@ -273,7 +273,7 @@ namespace osmscout {
           // hold the geometric center of the tile.
           //
 
-          int level=parameter.GetAreaAreaIndexMaxMag();
+          int64_t level=parameter.GetAreaAreaIndexMaxMag();
           while (level>=0) {
             if (maxLon-minLon<=cellWidth[level] &&
                 maxLat-minLat<=cellHeight[level]) {
@@ -297,10 +297,10 @@ namespace osmscout {
             // Calculate minimum and maximum tile ids that are covered
             // by the area
             //
-            size_t minyc=(size_t)floor(minLat/cellHeight[level]);
-            size_t maxyc=(size_t)floor(maxLat/cellHeight[level]);
-            size_t minxc=(size_t)floor(minLon/cellWidth[level]);
-            size_t maxxc=(size_t)floor(maxLon/cellWidth[level]);
+            uint32_t minyc=(uint32_t)floor(minLat/cellHeight[level]);
+            uint32_t maxyc=(uint32_t)floor(maxLat/cellHeight[level]);
+            uint32_t minxc=(uint32_t)floor(minLon/cellWidth[level]);
+            uint32_t maxxc=(uint32_t)floor(maxLon/cellWidth[level]);
 
             Entry entry;
 
@@ -374,7 +374,7 @@ namespace osmscout {
           // hold the geometric center of the tile.
           //
 
-          int level=parameter.GetAreaAreaIndexMaxMag();
+          int64_t level=parameter.GetAreaAreaIndexMaxMag();
 
           while (level>=l) {
             if (maxLon-minLon<=cellWidth[level] &&
@@ -399,10 +399,10 @@ namespace osmscout {
             // Calculate minimum and maximum tile ids that are covered
             // by the area
             //
-            size_t minyc=(size_t)floor(minLat/cellHeight[level]);
-            size_t maxyc=(size_t)floor(maxLat/cellHeight[level]);
-            size_t minxc=(size_t)floor(minLon/cellWidth[level]);
-            size_t maxxc=(size_t)floor(maxLon/cellWidth[level]);
+            uint32_t minyc=(uint32_t)floor(minLat/cellHeight[level]);
+            uint32_t maxyc=(uint32_t)floor(maxLat/cellHeight[level]);
+            uint32_t minxc=(uint32_t)floor(minLon/cellWidth[level]);
+            uint32_t maxxc=(uint32_t)floor(maxLon/cellWidth[level]);
 
             Entry entry;
 
@@ -433,7 +433,7 @@ namespace osmscout {
 
       if (!WriteIndexLevel(parameter,
                            writer,
-                           l,
+                           (int)l,
                            leafs)) {
         return false;
       }

@@ -132,8 +132,8 @@ namespace osmscout {
     tile.cellWidth=levels[idx].cellWidth;
     tile.cellHeight=levels[idx].cellHeight;
 
-    for (size_t y=cy1; y<=cy2; y++) {
-      for (size_t x=cx1; x<=cx2; x++) {
+    for (uint32_t y=cy1; y<=cy2; y++) {
+      for (uint32_t x=cx1; x<=cx2; x++) {
         tile.xAbs=x;
         tile.yAbs=y;
 

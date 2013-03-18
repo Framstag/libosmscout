@@ -33,7 +33,7 @@ namespace osmscout {
   bool LoadTypeConfig(const char* typeFile,
                       TypeConfig& config)
   {
-    unsigned long fileSize;
+    FileOffset    fileSize;
     FILE*         file;
     bool          success=false;
 
@@ -120,7 +120,7 @@ namespace osmscout {
 
     for (size_t i=1; i<=nameTagCount; i++) {
       TagId    id;
-      uint32_t priority;
+      uint32_t priority = 0;
 
       if (!(scanner.ReadNumber(id) &&
             scanner.ReadNumber(priority))) {
@@ -139,7 +139,7 @@ namespace osmscout {
 
     for (size_t i=1; i<=nameAltTagCount; i++) {
       TagId    id;
-      uint32_t priority;
+      uint32_t priority = 0;
 
       if (!(scanner.ReadNumber(id) &&
             scanner.ReadNumber(priority))) {

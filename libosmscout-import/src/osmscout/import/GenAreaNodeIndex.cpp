@@ -130,8 +130,8 @@ namespace osmscout {
         // If we still need to handle this type,
         // count number of entries per type and tile cell
         if (currentNodeTypes.find(node.GetType())!=currentNodeTypes.end()) {
-          size_t xc=(size_t)floor((node.GetLon()+180.0)/cellWidth);
-          size_t yc=(size_t)floor((node.GetLat()+90.0)/cellHeight);
+          uint32_t xc=(uint32_t)floor((node.GetLon()+180.0)/cellWidth);
+          uint32_t yc=(uint32_t)floor((node.GetLat()+90.0)/cellHeight);
 
           cellFillCount[node.GetType()][Pixel(xc,yc)]++;
         }
@@ -145,7 +145,7 @@ namespace osmscout {
           size_t entryCount=0;
           size_t max=0;
 
-          nodeTypeData[i].indexLevel=level;
+          nodeTypeData[i].indexLevel=(uint32_t)level;
           nodeTypeData[i].indexCells=cellFillCount[i].size();
           nodeTypeData[i].indexEntries=0;
 
@@ -323,8 +323,8 @@ namespace osmscout {
         }
 
         if (indexTypes.find(node.GetType())!=indexTypes.end()) {
-          size_t xc=(size_t)floor((node.GetLon()+180.0)/cellWidth);
-          size_t yc=(size_t)floor((node.GetLat()+90.0)/cellHeight);
+          uint32_t xc=(uint32_t)floor((node.GetLon()+180.0)/cellWidth);
+          uint32_t yc=(uint32_t)floor((node.GetLat()+90.0)/cellHeight);
 
           typeCellOffsets[node.GetType()][Pixel(xc,yc)].push_back(offset);
         }

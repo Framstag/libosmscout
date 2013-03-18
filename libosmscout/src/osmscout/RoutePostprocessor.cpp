@@ -423,7 +423,7 @@ namespace osmscout {
 
         double curveAngle=turnAngle;
 
-        if (abs(turnAngle)>=curveMinInitialAngle && abs(turnAngle)<=curveMaxInitialAngle) {
+        if (fabs(turnAngle)>=curveMinInitialAngle && fabs(turnAngle)<=curveMaxInitialAngle) {
           std::list<RouteDescription::Node>::iterator curveB=nextNode;
           double                                      currentBearing=outBearing;
           double                                      forwardDistance=nextNode->GetDistance()-node->GetDistance();
@@ -465,7 +465,7 @@ namespace osmscout {
             double lookupAngle=NormalizeRelativeAngel(lookupBearing-currentBearing);
 
             // The next node does not have enough direction change to be still part of a turn?
-            if (abs(lookupAngle)<curveMinAngle) {
+            if (fabs(lookupAngle)<curveMinAngle) {
               break;
             }
             // The turn direction changes?

@@ -1004,8 +1004,8 @@ namespace osmscout {
       if (!attributes.GetRefName().empty()) {
         label=attributes.GetRefName();
       }
-      else if (!attributes.GetName().empty()) {
-        label=attributes.GetName();
+      else if (!attributes.GetNameAlt().empty()) {
+        label=attributes.GetNameAlt();
       }
       else if (!attributes.GetHouseNr().empty()) {
         label=attributes.GetHouseNr();
@@ -1401,6 +1401,7 @@ namespace osmscout {
                                 const WayData& data)
   {
     if (data.attributes->GetName().empty() &&
+        data.attributes->GetNameAlt().empty() &&
         data.attributes->GetRefName().empty()) {
       return;
     }

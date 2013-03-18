@@ -48,7 +48,7 @@ namespace osmscout {
 
   private:
     double magnification;
-    size_t level;
+    uint32_t level;
 
   public:
     inline Magnification()
@@ -72,14 +72,14 @@ namespace osmscout {
 
     void SetMagnification(double magnification);
     void SetMagnification(Mag magnification);
-    void SetLevel(size_t level);
+    void SetLevel(uint32_t level);
 
     inline double GetMagnification() const
     {
       return magnification;
     }
 
-    inline size_t GetLevel() const
+    inline uint32_t GetLevel() const
     {
       return level;
     }

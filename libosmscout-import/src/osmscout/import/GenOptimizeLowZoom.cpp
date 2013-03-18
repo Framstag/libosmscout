@@ -363,13 +363,13 @@ namespace osmscout
         // by the way
         // Renormated coordinate space (everything is >=0)
         //
-        size_t minxc=(size_t)floor((minLon+180.0)/cellWidth);
-        size_t maxxc=(size_t)floor((maxLon+180.0)/cellWidth);
-        size_t minyc=(size_t)floor((minLat+90.0)/cellHeight);
-        size_t maxyc=(size_t)floor((maxLat+90.0)/cellHeight);
+        uint32_t minxc=(uint32_t)floor((minLon+180.0)/cellWidth);
+        uint32_t maxxc=(uint32_t)floor((maxLon+180.0)/cellWidth);
+        uint32_t minyc=(uint32_t)floor((minLat+90.0)/cellHeight);
+        uint32_t maxyc=(uint32_t)floor((maxLat+90.0)/cellHeight);
 
-        for (size_t y=minyc; y<=maxyc; y++) {
-          for (size_t x=minxc; x<=maxxc; x++) {
+        for (uint32_t y=minyc; y<=maxyc; y++) {
+          for (uint32_t x=minxc; x<=maxxc; x++) {
             cellFillCount[Pixel(x,y)]++;
           }
         }
@@ -390,7 +390,7 @@ namespace osmscout
 
       if (!(max>parameter.GetOptimizationCellSizeMax() ||
            average>parameter.GetOptimizationCellSizeAverage())) {
-        typeData.indexLevel=level;
+        typeData.indexLevel=(uint32_t)level;
         typeData.indexCells=cellFillCount.size();
         typeData.indexEntries=0;
 
@@ -522,13 +522,13 @@ namespace osmscout
       // by the way
       // Renormated coordinate space (everything is >=0)
       //
-      size_t minxc=(size_t)floor((minLon+180.0)/cellWidth);
-      size_t maxxc=(size_t)floor((maxLon+180.0)/cellWidth);
-      size_t minyc=(size_t)floor((minLat+90.0)/cellHeight);
-      size_t maxyc=(size_t)floor((maxLat+90.0)/cellHeight);
+      uint32_t minxc=(uint32_t)floor((minLon+180.0)/cellWidth);
+      uint32_t maxxc=(uint32_t)floor((maxLon+180.0)/cellWidth);
+      uint32_t minyc=(uint32_t)floor((minLat+90.0)/cellHeight);
+      uint32_t maxyc=(uint32_t)floor((maxLat+90.0)/cellHeight);
 
-      for (size_t y=minyc; y<=maxyc; y++) {
-        for (size_t x=minxc; x<=maxxc; x++) {
+      for (uint32_t y=minyc; y<=maxyc; y++) {
+        for (uint32_t x=minxc; x<=maxxc; x++) {
           cellOffsets[Pixel(x,y)].push_back(offset->second);
         }
       }
@@ -641,7 +641,7 @@ namespace osmscout
     std::vector<TypeData>       typesData;
 
 
-    magnification.SetLevel(parameter.GetOptimizationMaxMag());
+    magnification.SetLevel((uint32_t)parameter.GetOptimizationMaxMag());
 
     GetTypesToOptimize(typeConfig,types);
 

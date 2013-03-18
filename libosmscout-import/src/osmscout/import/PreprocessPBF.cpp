@@ -117,7 +117,7 @@ namespace osmscout {
     delete [] buffer;
 
     if (blob.has_raw()) {
-      length=blob.raw().length();
+      length=(uint32_t)blob.raw().length();
       buffer = new char[length];
       memcpy(buffer,blob.raw().data(),length);
     }
@@ -129,7 +129,7 @@ namespace osmscout {
       z_stream compressedStream;
 
       compressedStream.next_in=(Bytef*)const_cast<char*>(blob.zlib_data().data());
-      compressedStream.avail_in=blob.zlib_data().size();
+      compressedStream.avail_in=(uint32_t)blob.zlib_data().size();
       compressedStream.next_out=(Bytef*)buffer;
       compressedStream.avail_out=length;
       compressedStream.zalloc=Z_NULL;
@@ -209,7 +209,7 @@ namespace osmscout {
     delete [] buffer;
 
     if (blob.has_raw()) {
-      length=blob.raw().length();
+      length=(uint32_t)blob.raw().length();
       buffer = new char[length];
       memcpy(buffer,blob.raw().data(),length);
     }
@@ -221,7 +221,7 @@ namespace osmscout {
       z_stream compressedStream;
 
       compressedStream.next_in=(Bytef*)const_cast<char*>(blob.zlib_data().data());
-      compressedStream.avail_in=blob.zlib_data().size();
+      compressedStream.avail_in=(uint32_t)blob.zlib_data().size();
       compressedStream.next_out=(Bytef*)buffer;
       compressedStream.avail_out=length;
       compressedStream.zalloc=Z_NULL;

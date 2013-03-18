@@ -1502,7 +1502,7 @@ namespace osmscout {
                                            TypeSet& types) const
   {
     if (!nodeTypeSets.empty()) {
-      types=nodeTypeSets[std::min(maxMag.GetLevel(),nodeTypeSets.size()-1)];
+      types=nodeTypeSets[std::min((size_t)maxMag.GetLevel(),nodeTypeSets.size()-1)];
     }
   }
 
@@ -1510,7 +1510,7 @@ namespace osmscout {
                                                 std::vector<TypeSet>& types) const
   {
     if (!wayTypeSets.empty()) {
-      types=wayTypeSets[std::min(maxMag.GetLevel(),wayTypeSets.size()-1)];
+      types=wayTypeSets[std::min((size_t)maxMag.GetLevel(),wayTypeSets.size()-1)];
     }
   }
 
@@ -1518,7 +1518,7 @@ namespace osmscout {
                                            TypeSet& types) const
   {
     if (!areaTypeSets.empty()) {
-      types=areaTypeSets[std::min(maxMag.GetLevel(),areaTypeSets.size()-1)];
+      types=areaTypeSets[std::min((size_t)maxMag.GetLevel(),areaTypeSets.size()-1)];
     }
   }
 

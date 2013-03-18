@@ -27,16 +27,16 @@ namespace osmscout {
   void Magnification::SetMagnification(double magnification)
   {
     this->magnification=magnification;
-    this->level=(size_t)log2(this->magnification);
+    this->level=(uint32_t)log2(this->magnification);
   }
 
   void Magnification::SetMagnification(Mag magnification)
   {
     this->magnification=magnification;
-    this->level=(size_t)log2(this->magnification);
+    this->level=(uint32_t)log2(this->magnification);
   }
 
-  void Magnification::SetLevel(size_t level)
+  void Magnification::SetLevel(uint32_t level)
   {
     this->magnification=Pow(2,level);
     this->level=level;

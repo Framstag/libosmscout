@@ -179,11 +179,11 @@ namespace osmscout {
     }
 
     if (!way->IsOneway()) {
-      for (int i=nodeIndex-1; i>=0; i--) {
+      for (long int i=nodeIndex-1; i>=0; i--) {
         routeNodeDataFile.Get(way->ids[i],routeNode);
 
         if (routeNode.Valid()) {
-          routeNodeIndex=(size_t)i;
+          routeNodeIndex=i;
           return;
         }
       }
@@ -292,7 +292,7 @@ namespace osmscout {
                      way->GetFileOffset(),
                      startNodeIndex-1);
 
-      for (int i=startNodeIndex-1; i>(int)targetNodeIndex+1; i--) {
+      for (long int i=startNodeIndex-1; i>(int)targetNodeIndex+1; i--) {
         route.AddEntry(i,
                        way->GetFileOffset(),
                        i-1);

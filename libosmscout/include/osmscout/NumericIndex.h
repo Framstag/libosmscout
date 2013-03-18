@@ -137,12 +137,12 @@ namespace osmscout {
   template <class N>
   inline size_t NumericIndex<N>::GetPageIndex(const PageRef& page, Id id) const
   {
-    int size=page->entries.size();
+    size_t size=page->entries.size();
 
     if (size>0) {
-      int left=0;
-      int right=size-1;
-      int mid;
+      size_t left=0;
+      size_t right=size-1;
+      size_t mid;
 
       while (left<=right) {
         mid=(left+right)/2;

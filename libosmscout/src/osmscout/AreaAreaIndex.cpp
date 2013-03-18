@@ -219,7 +219,7 @@ namespace osmscout {
     //   reached maxLevel or maxAreaCount.
     // * copy no, ntx, nty to ctx, cty, co and go to next iteration
     stopArea=false;
-    for (size_t level=0;
+    for (uint32_t level=0;
          !stopArea &&
          level<=this->maxLevel &&
          !co.empty() &&

@@ -642,7 +642,7 @@ namespace osmscout {
         pendingOffsetsMap[way.ids[nextNode]].push_back(pendingOffset);
       }
 
-      path.wayIndex=routeNode.ways.size()-1;
+      path.wayIndex=(uint32_t)routeNode.ways.size()-1;
       path.type=way.GetType();
       path.maxSpeed=way.GetMaxSpeed();
       path.grade=way.GetGrade();
@@ -705,7 +705,7 @@ namespace osmscout {
         pendingOffsetsMap[way.ids[prevNode]].push_back(pendingOffset);
       }
 
-      path.wayIndex=routeNode.ways.size()-1;
+      path.wayIndex=(uint32_t)routeNode.ways.size()-1;
       path.type=way.GetType();
       path.maxSpeed=way.GetMaxSpeed();
       path.grade=way.GetGrade();
@@ -783,7 +783,7 @@ namespace osmscout {
         pendingOffsetsMap[way.ids[nextNode]].push_back(pendingOffset);
       }
 
-      path.wayIndex=routeNode.ways.size()-1;
+      path.wayIndex=(uint32_t)routeNode.ways.size()-1;
       path.type=way.GetType();
       path.maxSpeed=way.GetMaxSpeed();
       path.grade=way.GetGrade();
@@ -844,7 +844,7 @@ namespace osmscout {
         pendingOffsetsMap[way.ids[prevNode]].push_back(pendingOffset);
       }
 
-      path.wayIndex=routeNode.ways.size()-1;
+      path.wayIndex=(uint32_t)routeNode.ways.size()-1;
       path.type=way.GetType();
       path.maxSpeed=way.GetMaxSpeed();
       path.grade=way.GetGrade();
@@ -873,7 +873,7 @@ namespace osmscout {
     for (size_t i=0; i<way.nodes.size(); i++) {
       if (way.ids[i]==routeNode.id) {
         if (i>0) {
-          int j=i-1;
+          fpos_t j=i-1;
 
           while (j>=0) {
             if (nodeWayMap.find(way.ids[j])!=nodeWayMap.end()) {
@@ -900,7 +900,7 @@ namespace osmscout {
               pendingOffsetsMap[way.ids[j]].push_back(pendingOffset);
             }
 
-            path.wayIndex=routeNode.ways.size()-1;
+            path.wayIndex=(uint32_t)routeNode.ways.size()-1;
             path.type=way.GetType();
             path.maxSpeed=way.GetMaxSpeed();
             path.grade=way.GetGrade();
@@ -954,7 +954,7 @@ namespace osmscout {
               pendingOffsetsMap[way.ids[j]].push_back(pendingOffset);
             }
 
-            path.wayIndex=routeNode.ways.size()-1;
+            path.wayIndex=(uint32_t)routeNode.ways.size()-1;
             path.type=way.GetType();
             path.maxSpeed=way.GetMaxSpeed();
             path.grade=way.GetGrade();
@@ -1322,7 +1322,7 @@ namespace osmscout {
         }
 
         writtenRouteNodeCount++;
-        writtenRoutePathCount+=routeNode.paths.size();
+        writtenRoutePathCount+=(uint32_t)routeNode.paths.size();
 
         node++;
       }

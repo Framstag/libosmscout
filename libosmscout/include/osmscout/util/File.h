@@ -32,7 +32,7 @@ namespace osmscout {
    * Return the size of the file in the parameter size. Returns true, if the file size
    * could be calculated, else false.
    */
-  extern OSMSCOUT_API bool GetFileSize(const std::string& filename, unsigned long& size);
+  extern OSMSCOUT_API bool GetFileSize(const std::string& filename, FileOffset& size);
 
   /**
    * Deletes the given file

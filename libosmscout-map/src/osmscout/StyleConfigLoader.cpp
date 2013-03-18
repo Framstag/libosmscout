@@ -37,7 +37,7 @@ namespace osmscout {
   bool LoadStyleConfig(const char* styleFile,
                        StyleConfig& styleConfig)
   {
-    unsigned long fileSize;
+    FileOffset fileSize;
     FILE*         file;
     bool          success=false;
 
