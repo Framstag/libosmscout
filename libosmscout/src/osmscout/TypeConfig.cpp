@@ -24,133 +24,116 @@
 #include <iostream>
 namespace osmscout {
 
-  Condition::~Condition()
+  TagCondition::~TagCondition()
   {
     // no code
   }
 
-  NotCondition::NotCondition(Condition* condition)
+  TagNotCondition::TagNotCondition(TagCondition* condition)
   : condition(condition)
   {
     // no code
   }
 
-  bool NotCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
+  bool TagNotCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
   {
     return !condition->Evaluate(tagMap);
   }
 
-  AndCondition::AndCondition()
+  TagBoolCondition::TagBoolCondition(Type type)
+  : type(type)
   {
     // no code
   }
 
-  void AndCondition::AddCondition(Condition* condition)
+  void TagBoolCondition::AddCondition(TagCondition* condition)
   {
     conditions.push_back(condition);
   }
 
-  bool AndCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
+  bool TagBoolCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
   {
-    for (std::list<ConditionRef>::const_iterator condition=conditions.begin();
-         condition!=conditions.end();
-         ++condition) {
-      if (!(*condition)->Evaluate(tagMap)) {
-        return false;
+    switch (type) {
+    case boolAnd:
+      for (std::list<TagConditionRef>::const_iterator condition=conditions.begin();
+           condition!=conditions.end();
+           ++condition) {
+        if (!(*condition)->Evaluate(tagMap)) {
+          return false;
+        }
       }
-    }
 
-    return true;
-  }
-
-  OrCondition::OrCondition()
-  {
-    // no code
-  }
-
-  void OrCondition::AddCondition(Condition* condition)
-  {
-    conditions.push_back(condition);
-  }
-
-  bool OrCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
-  {
-    for (std::list<ConditionRef>::const_iterator condition=conditions.begin();
-         condition!=conditions.end();
-         ++condition) {
-      if ((*condition)->Evaluate(tagMap)) {
-        return true;
+      return true;
+    case boolOr:
+      for (std::list<TagConditionRef>::const_iterator condition=conditions.begin();
+           condition!=conditions.end();
+           ++condition) {
+        if ((*condition)->Evaluate(tagMap)) {
+          return true;
+        }
       }
-    }
 
-    return false;
+      return false;
+    default:
+      assert(false);
+    }
   }
 
-  ExistsCondition::ExistsCondition(TagId tag)
+  TagExistsCondition::TagExistsCondition(TagId tag)
   : tag(tag)
   {
     // no code
   }
 
-  bool ExistsCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
+  bool TagExistsCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
   {
     return tagMap.find(tag)!=tagMap.end();
   }
 
-  EqualsCondition::EqualsCondition(TagId tag,
-                                   const std::string& tagValue)
-  : tag(tag),
-    tagValue(tagValue)
-  {
-    // no code
-  }
-
-  bool EqualsCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
-  {
-    std::map<TagId,std::string>::const_iterator t;
-
-    t=tagMap.find(tag);
-
-    if (t==tagMap.end()) {
-      return false;
-    }
-
-    return t->second==tagValue;
-  }
-
-  NotEqualsCondition::NotEqualsCondition(TagId tag,
+  TagBinaryCondition::TagBinaryCondition(TagId tag,
+                                         BinaryOperator binaryOperator,
                                          const std::string& tagValue)
   : tag(tag),
+    binaryOperator(binaryOperator),
     tagValue(tagValue)
   {
     // no code
   }
 
-  bool NotEqualsCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
+  bool TagBinaryCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
   {
     std::map<TagId,std::string>::const_iterator t;
 
     t=tagMap.find(tag);
 
-    if (t==tagMap.end()) {
-      return false;
+    switch (binaryOperator) {
+    case  operatorEqual:
+      if (t==tagMap.end()) {
+        return false;
+      }
+      return t->second==tagValue;
+    case operatorNotEqual:
+      if (t==tagMap.end()) {
+        return true;
+      }
+      return t->second!=tagValue;
+    default:
+      assert(false);
     }
-
-    return t->second==tagValue;
   }
 
-  IsInCondition::IsInCondition(TagId tag)
+  TagIsInCondition::TagIsInCondition(TagId tag)
   : tag(tag)
   {
     // no code
   }
 
-  void IsInCondition::AddTagValue(const std::string& tagValue)
+  void TagIsInCondition::AddTagValue(const std::string& tagValue)
   {
     tagValues.insert(tagValue);
   }
 
-  bool IsInCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
+  bool TagIsInCondition::Evaluate(const std::map<TagId,std::string>& tagMap) const
   {
     std::map<TagId,std::string>::const_iterator t;
 
@@ -229,7 +212,7 @@ namespace osmscout {
   }
 
   TypeInfo& TypeInfo::AddCondition(unsigned char types,
-                                   Condition* condition)
+                                   TagCondition* condition)
   {
     TypeCondition typeCondition;
 

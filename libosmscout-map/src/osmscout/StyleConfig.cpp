@@ -39,6 +39,20 @@ namespace osmscout {
     // no code
   }
 
+  SizeFilter::SizeFilter()
+  {
+    // no code
+  }
+
+  void SizeFilter::Set(Operator op,
+                       double displaySize,
+                       SizeUnit sizeUnit)
+  {
+    this->op=op;
+    this->displaySize=displaySize;
+    this->sizeUnit=sizeUnit;
+  }
+
   LineStyle::LineStyle()
    : lineColor(1.0,0.0,0.0,0.0),
      alternateColor(1,0.0,0.0,0.0),
@@ -891,6 +905,13 @@ namespace osmscout {
   StyleFilter& StyleFilter::SetOneway(bool oneway)
   {
     this->oneway=oneway;
+
+    return *this;
+  }
+
+  StyleFilter& StyleFilter::AddSizeFilter(const SizeFilter& sizeFilter)
+  {
+    this->sizeFilter.push_back(sizeFilter);
 
     return *this;
   }

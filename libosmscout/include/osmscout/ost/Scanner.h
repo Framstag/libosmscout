@@ -62,8 +62,8 @@ class Buffer
 {
 private:
   unsigned char *buf; // input buffer
-  size_t bufLen;         // length of buffer
-  size_t bufPos;         // current position in buffer
+  size_t bufLen;      // length of buffer
+  size_t bufPos;      // current position in buffer
 
 public:
   static const int EoF = COCO_WCHAR_MAX + 1;
@@ -155,28 +155,28 @@ class Scanner
 {
 private:
   unsigned char EOL;
-  int eofSym;
-  int noSym;
-  int maxT;
-  int charSetSize;
-  StartStates start;
-  KeywordMap keywords;
+  int           eofSym;
+  int           noSym;
+  int           maxT;
+  int           charSetSize;
+  StartStates   start;
+  KeywordMap    keywords;
 
-  TokenRef t;      // current token
-  char *tval;      // text of current token
-  int tvalLength;  // length of text of current token
-  size_t tlen;     // length of current token
+  TokenRef      t;          // current token
+  char          *tval;      // text of current token
+  size_t        tvalLength; // length of text of current token
+  size_t        tlen;       // length of current token
 
-  TokenRef tokens; // list of tokens already peeked (first token is a dummy)
-  TokenRef pt;     // current peek token
+  TokenRef      tokens;     // list of tokens already peeked (first token is a dummy)
+  TokenRef      pt;         // current peek token
 
-  int ch;          // current input character
+  int           ch;         // current input character
 
-  size_t pos;      // byte position of current character
-  size_t charPos;     // position by unicode characters starting with 0
-  int line;        // line number of current character
-  int col;         // column number of current character
-  int oldEols;     // EOLs that appeared in a comment;
+  size_t        pos;        // byte position of current character
+  size_t        charPos;    // position by unicode characters starting with 0
+  int           line;       // line number of current character
+  int           col;        // column number of current character
+  int           oldEols;    // EOLs that appeared in a comment;
 
   Token* CreateToken();
   void AppendVal(Token *t);

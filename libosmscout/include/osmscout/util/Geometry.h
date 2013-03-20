@@ -222,7 +222,7 @@ namespace osmscout {
     size_t  i,j;
     bool c=false;
 
-    for (i=0, j=nodes.size()-1; i<(int)nodes.size(); j=i++) {
+    for (i=0, j=nodes.size()-1; i<nodes.size(); j=i++) {
       if (point==nodes[i]) {
         return 0;
       }

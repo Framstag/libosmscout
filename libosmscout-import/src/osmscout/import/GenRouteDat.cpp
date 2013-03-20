@@ -873,7 +873,7 @@ namespace osmscout {
     for (size_t i=0; i<way.nodes.size(); i++) {
       if (way.ids[i]==routeNode.id) {
         if (i>0) {
-          fpos_t j=i-1;
+          int j=i-1;
 
           while (j>=0) {
             if (nodeWayMap.find(way.ids[j])!=nodeWayMap.end()) {

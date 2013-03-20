@@ -51,7 +51,7 @@ namespace oss {
 
 char* coco_string_create(const char* value) {
   char* data;
-  size_t len = 0;
+  int len = 0;
   if (value) { len = strlen(value); }
   data = new char[len + 1];
   strncpy(data, value, len);
@@ -59,8 +59,8 @@ char* coco_string_create(const char* value) {
   return data;
 }
 
-char* coco_string_create(const char *value , int startIndex, size_t length) {
-  size_t len = 0;
+char* coco_string_create(const char *value , int startIndex, int length) {
+  int len = 0;
   char* data;
 
   if (value) { len = length; }
@@ -92,7 +92,7 @@ Token::~Token()
   delete [] val;
 }
 
-Buffer::Buffer(const unsigned char* buf, size_t len)
+Buffer::Buffer(const unsigned char* buf, int len)
 {
   this->buf = new unsigned char[len];
   memcpy(this->buf, buf, len*sizeof(unsigned char));
@@ -107,19 +107,19 @@ Buffer::~Buffer()
 
 int Buffer::Peek()
 {
-  size_t curPos = GetPos();
+  int curPos = GetPos();
   int ch = Read();
   SetPos(curPos);
   return ch;
 }
 
-size_t Buffer::GetPos()
+int Buffer::GetPos()
 {
   return bufPos;
 }
 
-void Buffer::SetPos(size_t value) {
-  if (value > bufLen) {
+void Buffer::SetPos(int value) {
+  if ((value < 0) || (value > bufLen)) {
     std::cerr << "--- buffer out of bounds access, position: " <<  value << std::endl;
     exit(1);
   }
@@ -136,7 +136,7 @@ int Buffer::Read()
   }
 }
 
-Scanner::Scanner(const unsigned char* buf, size_t len) {
+Scanner::Scanner(const unsigned char* buf, int len) {
   buffer = new Buffer(buf, len);
   Init();
 }
@@ -296,8 +296,7 @@ void Scanner::AddCh() {
 
 
 bool Scanner::Comment0() {
-    size_t pos0 = pos, charPos0 = charPos;
-	int level = 1,  line0 = line, col0 = col;
+	int level = 1, pos0 = pos, line0 = line, col0 = col, charPos0 = charPos;
 	NextCh();
 	if (ch == '/') {
 		NextCh();
@@ -316,8 +315,7 @@ bool Scanner::Comment0() {
 }
 
 bool Scanner::Comment1() {
-    size_t charPos0 = charPos, pos0 = pos;
-	int level = 1, line0 = line, col0 = col;
+	int level = 1, pos0 = pos, line0 = line, col0 = col, charPos0 = charPos;
 	NextCh();
 	if (ch == '*') {
 		NextCh();
@@ -365,7 +363,7 @@ Token* Scanner::NextToken() {
   ) NextCh();
 	if ((ch == '/' && Comment0()) || (ch == '/' && Comment1())) return NextToken();
   int recKind = noSym;
-  size_t recEnd = pos;
+  int recEnd = pos;
 
   t = CreateToken();
   t->pos = pos; t->col = col; t->line = line; t->charPos = charPos;

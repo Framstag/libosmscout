@@ -235,7 +235,7 @@ SYMBOL christian_church_cross
        highway_living_street] WAY {outline: 0.25mm;}
 
  [MAG continent-] {
-   [TYPE highway_motorway] WAY { color: @motorwayColor; outlineColor: #777777; displayWidth: 0.45mm; width: 20m;}
+   [TYPE highway_motorway] WAY { color: @motorwayColor; outlineColor: #777777; displayWidth: 0.45mm; width: 20m; }
  }
 
  [MAG county-] {

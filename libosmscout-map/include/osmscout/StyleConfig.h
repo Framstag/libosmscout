@@ -63,6 +63,34 @@ namespace osmscout {
     }
   };
 
+  class OSMSCOUT_MAP_API SizeFilter
+  {
+    public:
+      enum Operator {
+        less,
+        lessEqual,
+        greaterEqual,
+        greater
+      };
+
+      enum SizeUnit {
+        pixel,
+        mm
+      };
+
+  private:
+    Operator op;
+    double   displaySize;
+    SizeUnit sizeUnit;
+
+  public:
+    SizeFilter();
+
+    void Set(Operator op,
+             double displaySize,
+             SizeUnit sizeUnit);
+  };
+
   /**
    * Holds the all accumulated filter conditions as defined in the style sheet
    * for a style.
@@ -72,10 +100,11 @@ namespace osmscout {
   public:
 
   private:
-    TypeSet types;
-    size_t  minLevel;
-    size_t  maxLevel;
-    bool    oneway;
+    TypeSet               types;
+    size_t                minLevel;
+    size_t                maxLevel;
+    bool                  oneway;
+    std::list<SizeFilter> sizeFilter;
 
   public:
     StyleFilter();
@@ -86,6 +115,8 @@ namespace osmscout {
     StyleFilter& SetMinLevel(size_t level);
     StyleFilter& SetMaxLevel(size_t level);
     StyleFilter& SetOneway(bool oneway);
+
+    StyleFilter& AddSizeFilter(const SizeFilter& sizeFilter);
 
     inline bool HasTypes() const
     {

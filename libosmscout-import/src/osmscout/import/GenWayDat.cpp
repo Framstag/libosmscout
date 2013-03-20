@@ -47,7 +47,7 @@ namespace osmscout {
       entry=nodeUseMap.insert(std::make_pair(offset,0)).first;
     }
 
-    uint64_t index=(id%16)*2;
+    Id index=(id%16)*2;
 
     uint32_t data=entry->second;
 
@@ -73,7 +73,7 @@ namespace osmscout {
       return false;
     }
 
-    uint64_t index=(id%16)*2+1;
+    Id index=(id%16)*2+1;
 
     bool result=entry->second & (1 << index);
 

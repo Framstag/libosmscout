@@ -37,7 +37,7 @@ PRODUCTIONS
   TYPES       = SYNC "TYPES" TYPE {TYPE}.
   TYPE        = (.
                   std::string   name;
-                  Condition     *condition=NULL;
+                  TagCondition  *condition=NULL;
                   TypeInfo      typeInfo;
                   unsigned char types;
                 .)
@@ -80,10 +80,10 @@ PRODUCTIONS
                 .)
                 .
 
-  CONDITION<Condition*& condition>
+  CONDITION<TagCondition*& condition>
               = (.
-                  std::list<Condition*> conditions;
-                  Condition             *subCond;
+                  std::list<TagCondition*> conditions;
+                  TagCondition             *subCond;
                 .)
                 ANDCOND<subCond>   (. conditions.push_back(subCond); .)
                 {
@@ -95,9 +95,9 @@ PRODUCTIONS
                     condition=conditions.front();
                   }
                   else {
-                    OrCondition *orCondition=new OrCondition();
+                    TagBoolCondition *orCondition=new TagBoolCondition(TagBoolCondition::boolOr);
 
-                    for (std::list<Condition*>::const_iterator c=conditions.begin();
+                    for (std::list<TagCondition*>::const_iterator c=conditions.begin();
                          c!=conditions.end();
                          ++c) {
                       orCondition->AddCondition(*c);
@@ -107,10 +107,10 @@ PRODUCTIONS
                   }
                 .)
                 .
-  ANDCOND<Condition*& condition>
+  ANDCOND<TagCondition*& condition>
               = (.
-                  std::list<Condition*> conditions;
-                  Condition             *subCond;
+                  std::list<TagCondition*> conditions;
+                  TagCondition             *subCond;
                 .)
                 BOOLCOND<subCond>     (. conditions.push_back(subCond); .)
                 {
@@ -122,9 +122,9 @@ PRODUCTIONS
                     condition=conditions.front();
                   }
                   else {
-                    AndCondition *andCondition=new AndCondition();
+                    TagBoolCondition *andCondition=new TagBoolCondition(TagBoolCondition::boolAnd);
 
-                    for (std::list<Condition*>::const_iterator c=conditions.begin();
+                    for (std::list<TagCondition*>::const_iterator c=conditions.begin();
                          c!=conditions.end();
                          ++c) {
                       andCondition->AddCondition(*c);
@@ -134,14 +134,14 @@ PRODUCTIONS
                   }
                 .)
                 .
-  BOOLCOND<Condition*& condition>
+  BOOLCOND<TagCondition*& condition>
               =   BINARYCOND<condition>
                 | EXISTSCOND<condition>
                 | "(" CONDITION<condition> ")"
-                | "!" BOOLCOND<condition> (. condition=new NotCondition(condition); .)
+                | "!" BOOLCOND<condition> (. condition=new TagNotCondition(condition); .)
                 .
 
-  BINARYCOND<Condition*& condition>
+  BINARYCOND<TagCondition*& condition>
               = (.
                   std::string nameValue;
                 .)
@@ -153,7 +153,7 @@ PRODUCTIONS
                 )
                 .
 
-  EQUALSCOND<const std::string& tagName,Condition*& condition>
+  EQUALSCOND<const std::string& tagName,TagCondition*& condition>
               = (.
                   std::string valueValue;
                 .)
@@ -162,10 +162,10 @@ PRODUCTIONS
                 (.
                   TagId tagId=config.RegisterTagForInternalUse(tagName);
 
-                  condition=new EqualsCondition(tagId,valueValue);
+                  condition=new TagBinaryCondition(tagId,operatorEqual,valueValue);
                 .)
                 .
-  NOTEQUALSCOND<const std::string& tagName,Condition*& condition>
+  NOTEQUALSCOND<const std::string& tagName,TagCondition*& condition>
               = (.
                   std::string valueValue;
                 .)
@@ -174,10 +174,10 @@ PRODUCTIONS
                 (.
                   TagId tagId=config.RegisterTagForInternalUse(tagName);
 
-                  condition=new NotEqualsCondition(tagId,valueValue);
+                  condition=new TagBinaryCondition(tagId,operatorNotEqual,valueValue);
                 .)
                 .
-  ISINCOND<const std::string& tagName,Condition*& condition>
+  ISINCOND<const std::string& tagName,TagCondition*& condition>
               = (.
                  std::list<std::string> values;
                 .)
@@ -193,10 +193,10 @@ PRODUCTIONS
                   TagId tagId=config.RegisterTagForInternalUse(tagName);
 
                   if (values.size()==1) {
-                    condition=new EqualsCondition(tagId,values.front());
+                    condition=new TagBinaryCondition(tagId,operatorEqual,values.front());
                   }
                   else {
-                    IsInCondition *isInCondition=new IsInCondition(tagId);
+                    TagIsInCondition *isInCondition=new TagIsInCondition(tagId);
 
                     for (std::list<std::string>::const_iterator s=values.begin();
                          s!=values.end();
@@ -208,11 +208,11 @@ PRODUCTIONS
                   }
                 .)
                 .
-  EXISTSCOND<Condition*& condition>
+  EXISTSCOND<TagCondition*& condition>
               = "EXISTS"
                  string
                  (.
-                   condition=new ExistsCondition(config.RegisterTagForInternalUse(Destring(t->val)));
+                   condition=new TagExistsCondition(config.RegisterTagForInternalUse(Destring(t->val)));
                  .)
                  .
 

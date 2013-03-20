@@ -31,6 +31,7 @@
 
 #include <osmscout/util/HashMap.h>
 #include <osmscout/util/HashSet.h>
+#include <osmscout/util/Parser.h>
 #include <osmscout/util/Reference.h>
 
 namespace osmscout {
@@ -39,98 +40,81 @@ namespace osmscout {
 
   const static TypeId typeIgnore      = 0;
 
-  class OSMSCOUT_API Condition : public Referencable
+  class OSMSCOUT_API TagCondition : public Referencable
   {
   public:
-    virtual ~Condition();
+    virtual ~TagCondition();
 
     virtual bool Evaluate(const std::map<TagId,std::string>& tagMap) const = 0;
   };
 
-  typedef Ref<Condition> ConditionRef;
+  typedef Ref<TagCondition> TagConditionRef;
 
-  class OSMSCOUT_API NotCondition : public Condition
+  class OSMSCOUT_API TagNotCondition : public TagCondition
   {
   private:
-    ConditionRef condition;
+    TagConditionRef condition;
 
   public:
-    NotCondition(Condition* condition);
+    TagNotCondition(TagCondition* condition);
 
     bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
   };
 
-  class OSMSCOUT_API AndCondition : public Condition
+  class OSMSCOUT_API TagBoolCondition : public TagCondition
   {
+  public:
+    enum Type {
+      boolAnd,
+      boolOr
+    };
+
   private:
-    std::list<ConditionRef> conditions;
+    std::list<TagConditionRef> conditions;
+    Type                       type;
 
   public:
-    AndCondition();
+    TagBoolCondition(Type type);
 
-    void AddCondition(Condition* condition);
+    void AddCondition(TagCondition* condition);
 
     bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
   };
 
-  class OSMSCOUT_API OrCondition : public Condition
-  {
-  private:
-    std::list<ConditionRef> conditions;
-
-  public:
-    OrCondition();
-
-    void AddCondition(Condition* condition);
-
-    bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
-  };
-
-  class OSMSCOUT_API ExistsCondition : public Condition
+  class OSMSCOUT_API TagExistsCondition : public TagCondition
   {
   private:
     TagId tag;
 
   public:
-    ExistsCondition(TagId tag);
+    TagExistsCondition(TagId tag);
 
     bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
   };
 
-  class OSMSCOUT_API EqualsCondition : public Condition
+  class OSMSCOUT_API TagBinaryCondition : public TagCondition
   {
   private:
-    TagId       tag;
-    std::string tagValue;
+    TagId          tag;
+    BinaryOperator binaryOperator;
+    std::string    tagValue;
 
   public:
-    EqualsCondition(TagId tag,
-                    const std::string& tagValue);
-
-    bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
-  };
-
-  class OSMSCOUT_API NotEqualsCondition : public Condition
-  {
-  private:
-    TagId       tag;
-    std::string tagValue;
-
-  public:
-    NotEqualsCondition(TagId tag,
+    TagBinaryCondition(TagId tag,
+                       BinaryOperator binaryOperator,
                        const std::string& tagValue);
 
     bool Evaluate(const std::map<TagId,std::string>& tagMap) const;
   };
 
-  class OSMSCOUT_API IsInCondition : public Condition
+  class OSMSCOUT_API TagIsInCondition : public TagCondition
   {
   private:
     TagId                 tag;
     std::set<std::string> tagValues;
 
   public:
-    IsInCondition(TagId tag);
+    TagIsInCondition(TagId tag);
 
     void AddTagValue(const std::string& tagValue);
 
@@ -179,8 +163,8 @@ namespace osmscout {
   public:
     struct TypeCondition
     {
-      unsigned char types;
-      ConditionRef  condition;
+      unsigned char    types;
+      TagConditionRef  condition;
     };
 
   private:
@@ -211,7 +195,7 @@ namespace osmscout {
     TypeInfo& SetType(const std::string& name);
 
     TypeInfo& AddCondition(unsigned char types,
-                           Condition* condition);
+                           TagCondition* condition);
 
     inline TypeId GetId() const
     {

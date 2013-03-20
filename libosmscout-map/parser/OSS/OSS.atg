@@ -423,9 +423,51 @@ PRODUCTIONS
                        filter.SetOneway(true);
                      .)
                    ]
+/*
+                   [
+                     (. SizeFilter sizeFilter; .)
+                     "SIZE"
+                     SIZEFILTER<sizeFilter>   (. filter.AddSizeFilter(sizeFilter); .)
+                     {
+                       "AND"
+                       SIZEFILTER<sizeFilter> (. filter.AddSizeFilter(sizeFilter); .)
+                     }
+                   ]*/
                 "]"
                 .
+/*
+  SIZEFILTER<SizeFilter& filter>
+              = (. double               mapSize;
+                   SizeFilter::Operator op;
+                   double               displaySize;
+                   SizeFilter::SizeUnit sizeUnit;
+                .)
+                DOUBLE<mapSize> "m"
+                SIZEFILTEROPERATOR<op>
+                DOUBLE<displaySize>
+                (
+                  "mm"    (. sizeUnit=SizeFilter::mm; .)
+                | "pixel" (. sizeUnit=SizeFilter::pixel; .)
+                )
+                (.
+                  if (mapSize<=0.0) {
+	                  std::string e="map size be greater than 0.0";
 
+	                  SemErr(e.c_str());
+                  }
+                  else {
+                    filter.Set(op,displaySize/mapSize,sizeUnit);
+                  }
+                .)
+                .
+
+  SIZEFILTEROPERATOR<SizeFilter::Operator& op>
+              =   "<"  (. op=SizeFilter::less; .)
+                | "<=" (. op=SizeFilter::lessEqual; .)
+                | ">=" (. op=SizeFilter::greaterEqual; .)
+                | ">"  (. op=SizeFilter::greater; .)
+                .
+*/
   STYLEDEF<StyleFilter filter>
               =   NODESTYLEDEF<filter>
                 | WAYSTYLEDEF<filter>
@@ -820,7 +862,7 @@ PRODUCTIONS
                      style.attributes.insert(PathShieldStyle::attrBgColor);
                   .)
                 | (. Color borderColor; .)
-	              "borderColor" ":" COLOR<borderColor>
+   	              "borderColor" ":" COLOR<borderColor>
                   (.
                      style.style->SetBorderColor(borderColor);
                      style.attributes.insert(PathShieldStyle::attrBorderColor);

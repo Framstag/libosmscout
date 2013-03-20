@@ -246,8 +246,7 @@ void Scanner::AddCh() {
 
 
 bool Scanner::Comment0() {
-    size_t pos0 = pos, charPos0 = charPos;
-	int level = 1, line0 = line, col0 = col;
+	int level = 1, pos0 = pos, line0 = line, col0 = col, charPos0 = charPos;
 	NextCh();
 	if (ch == '/') {
 		NextCh();
@@ -266,8 +265,7 @@ bool Scanner::Comment0() {
 }
 
 bool Scanner::Comment1() {
-    size_t pos0 = pos, charPos0 = charPos;
-	int level = 1, line0 = line, col0 = col;
+	int level = 1, pos0 = pos, line0 = line, col0 = col, charPos0 = charPos;
 	NextCh();
 	if (ch == '*') {
 		NextCh();
@@ -412,7 +410,7 @@ void Scanner::SetScannerBehindT()
   buffer->SetPos(t->pos);
   NextCh();
   line = t->line; col = t->col; charPos = t->charPos;
-  for (int i = 0; i < tlen; i++) NextCh();
+  for (size_t i = 0; i < tlen; i++) NextCh();
 }
 
 

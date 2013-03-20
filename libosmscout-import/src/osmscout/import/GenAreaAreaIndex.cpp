@@ -205,7 +205,7 @@ namespace osmscout {
       return false;
     }
 
-    int64_t l=parameter.GetAreaAreaIndexMaxMag();
+    int l=parameter.GetAreaAreaIndexMaxMag();
 
     while (l>=0) {
       size_t areaLevelEntries=0;
@@ -273,7 +273,7 @@ namespace osmscout {
           // hold the geometric center of the tile.
           //
 
-          int64_t level=parameter.GetAreaAreaIndexMaxMag();
+          int level=parameter.GetAreaAreaIndexMaxMag();
           while (level>=0) {
             if (maxLon-minLon<=cellWidth[level] &&
                 maxLat-minLat<=cellHeight[level]) {
@@ -374,7 +374,7 @@ namespace osmscout {
           // hold the geometric center of the tile.
           //
 
-          int64_t level=parameter.GetAreaAreaIndexMaxMag();
+          int level=parameter.GetAreaAreaIndexMaxMag();
 
           while (level>=l) {
             if (maxLon-minLon<=cellWidth[level] &&

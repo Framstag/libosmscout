@@ -18,6 +18,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/util/Magnification.cpp \
                         osmscout/util/Number.cpp \
                         osmscout/util/NumberSet.cpp \
+                        osmscout/util/Parser.cpp \
                         osmscout/util/Progress.cpp \
                         osmscout/util/Projection.cpp \
                         osmscout/util/Reference.cpp \
