@@ -644,7 +644,7 @@ namespace osmscout {
       double det2=det(buffer[i].x-buffer[i-1].x, buffer[i].y-buffer[i-1].y,
                       buffer[i+1].x-buffer[i].x, buffer[i+1].y-buffer[i].y);
 
-      if (det2>0.0001) {
+      if (fabs(det2)>0.0001) {
         buffer[usedPoints].x=buffer[i].x+oax+det1/det2*(buffer[i].x-buffer[i-1].x);
         buffer[usedPoints].y=buffer[i].y+oay+det1/det2*(buffer[i].y-buffer[i-1].y);
       }
