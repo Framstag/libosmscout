@@ -175,8 +175,13 @@ namespace osmscout
     for (std::list<WayRef>::const_iterator way=ways.begin();
         way!=ways.end();
         way++) {
-      waysByJoin[(*way)->ids.front()].push_back(*way);
-      waysByJoin[(*way)->ids.back()].push_back(*way);
+      if ((*way)->ids.front()!=0) {
+        waysByJoin[(*way)->ids.front()].push_back(*way);
+      }
+
+      if ((*way)->ids.back()!=0) {
+        waysByJoin[(*way)->ids.back()].push_back(*way);
+      }
     }
 
     for (std::map<Id, std::list<WayRef> >::iterator entry=waysByJoin.begin();
