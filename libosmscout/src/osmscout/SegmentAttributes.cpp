@@ -552,6 +552,7 @@ namespace osmscout {
     }
 
     if (name!=other.name ||
+        nameAlt!=other.nameAlt ||
         ref!=other.ref ||
         houseNr!=other.houseNr ||
         layer!=other.layer ||
