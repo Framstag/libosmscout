@@ -50,9 +50,9 @@ namespace osmscout {
     uint32_t            relationCount;
     uint32_t            coastlineCount;
 
-    uint64_t            lastNodeId;
-    uint64_t            lastWayId;
-    uint64_t            lastRelationId;
+    Id                  lastNodeId;
+    Id                  lastWayId;
+    Id                  lastRelationId;
 
     bool                nodeSortingError;
     bool                waySortingError;
