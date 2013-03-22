@@ -270,18 +270,16 @@ namespace osmscout {
 
     writer.WriteNumber((uint32_t)nodes.size());
 
-    double   minLat=nodes[0].GetLat();
-    double   minLon=nodes[0].GetLon();
-    uint32_t minLatValue;
-    uint32_t minLonValue;
+    double minLat=nodes[0].GetLat();
+    double minLon=nodes[0].GetLon();
 
     for (size_t i=1; i<nodes.size(); i++) {
       minLat=std::min(minLat,nodes[i].GetLat());
       minLon=std::min(minLon,nodes[i].GetLon());
     }
 
-    minLatValue=(uint32_t)round((minLat+90.0)*conversionFactor);
-    minLonValue=(uint32_t)round((minLon+180.0)*conversionFactor);
+    uint32_t minLatValue=(uint32_t)round((minLat+90.0)*conversionFactor);
+    uint32_t minLonValue=(uint32_t)round((minLon+180.0)*conversionFactor);
 
     writer.Write(minLatValue);
     writer.Write(minLonValue);
