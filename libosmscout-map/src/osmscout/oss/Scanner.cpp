@@ -149,14 +149,14 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 94;
-	noSym = 94;
+	maxT = 86;
+	noSym = 86;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 95; i <= 95; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
 	for (i = 48; i <= 57; ++i) start.set(i, 17);
-	start.set(45, 34);
+	start.set(45, 30);
 	start.set(35, 4);
 	start.set(64, 13);
 	start.set(34, 15);
@@ -167,13 +167,9 @@ void Scanner::Init() {
 	start.set(61, 24);
 	start.set(91, 25);
 	start.set(93, 26);
-	start.set(40, 27);
-	start.set(41, 28);
-	start.set(33, 29);
-	start.set(60, 35);
-	start.set(62, 36);
-	start.set(46, 32);
-	start.set(58, 33);
+	start.set(58, 27);
+	start.set(60, 28);
+	start.set(46, 29);
 		start.set(Buffer::EoF, -1);
 	keywords.set("OSS", 7);
 	keywords.set("END", 8);
@@ -191,60 +187,58 @@ void Scanner::Init() {
 	keywords.set("MAG", 26);
 	keywords.set("ONEWAY", 28);
 	keywords.set("SIZE", 29);
-	keywords.set("OR", 31);
-	keywords.set("AND", 32);
-	keywords.set("m", 36);
-	keywords.set("mm", 37);
-	keywords.set("px", 38);
-	keywords.set("NODE", 43);
-	keywords.set("TEXT", 45);
-	keywords.set("ICON", 46);
-	keywords.set("WAY", 47);
-	keywords.set("SHIELD", 48);
-	keywords.set("AREA", 49);
-	keywords.set("color", 50);
-	keywords.set("outlineColor", 52);
-	keywords.set("dash", 53);
-	keywords.set("gapColor", 54);
-	keywords.set("displayWidth", 55);
-	keywords.set("width", 56);
-	keywords.set("cap", 57);
-	keywords.set("outline", 58);
-	keywords.set("pattern", 59);
-	keywords.set("patternMinMag", 60);
-	keywords.set("borderColor", 61);
-	keywords.set("borderWidth", 62);
-	keywords.set("borderDash", 63);
-	keywords.set("label", 64);
-	keywords.set("style", 65);
-	keywords.set("size", 66);
-	keywords.set("scaleMag", 67);
-	keywords.set("priority", 68);
-	keywords.set("backgroundColor", 69);
-	keywords.set("shieldSpace", 70);
-	keywords.set("symbol", 71);
-	keywords.set("symbolSpace", 72);
-	keywords.set("name", 73);
-	keywords.set("butt", 74);
-	keywords.set("round", 75);
-	keywords.set("square", 76);
-	keywords.set("normal", 77);
-	keywords.set("emphasize", 78);
-	keywords.set("ref", 79);
-	keywords.set("world", 80);
-	keywords.set("continent", 81);
-	keywords.set("state", 82);
-	keywords.set("stateOver", 83);
-	keywords.set("county", 84);
-	keywords.set("region", 85);
-	keywords.set("proximity", 86);
-	keywords.set("cityOver", 87);
-	keywords.set("city", 88);
-	keywords.set("suburb", 89);
-	keywords.set("detail", 90);
-	keywords.set("close", 91);
-	keywords.set("veryClose", 92);
-	keywords.set("block", 93);
+	keywords.set("m", 31);
+	keywords.set("mm", 32);
+	keywords.set("px", 34);
+	keywords.set("NODE", 36);
+	keywords.set("TEXT", 38);
+	keywords.set("ICON", 39);
+	keywords.set("WAY", 40);
+	keywords.set("SHIELD", 41);
+	keywords.set("AREA", 42);
+	keywords.set("color", 43);
+	keywords.set("outlineColor", 44);
+	keywords.set("dash", 45);
+	keywords.set("gapColor", 46);
+	keywords.set("displayWidth", 47);
+	keywords.set("width", 48);
+	keywords.set("cap", 49);
+	keywords.set("outline", 50);
+	keywords.set("pattern", 51);
+	keywords.set("patternMinMag", 52);
+	keywords.set("borderColor", 53);
+	keywords.set("borderWidth", 54);
+	keywords.set("borderDash", 55);
+	keywords.set("label", 56);
+	keywords.set("style", 57);
+	keywords.set("size", 58);
+	keywords.set("scaleMag", 59);
+	keywords.set("priority", 60);
+	keywords.set("backgroundColor", 61);
+	keywords.set("shieldSpace", 62);
+	keywords.set("symbol", 63);
+	keywords.set("symbolSpace", 64);
+	keywords.set("name", 65);
+	keywords.set("butt", 66);
+	keywords.set("round", 67);
+	keywords.set("square", 68);
+	keywords.set("normal", 69);
+	keywords.set("emphasize", 70);
+	keywords.set("ref", 71);
+	keywords.set("world", 72);
+	keywords.set("continent", 73);
+	keywords.set("state", 74);
+	keywords.set("stateOver", 75);
+	keywords.set("county", 76);
+	keywords.set("region", 77);
+	keywords.set("proximity", 78);
+	keywords.set("cityOver", 79);
+	keywords.set("city", 80);
+	keywords.set("suburb", 81);
+	keywords.set("detail", 82);
+	keywords.set("close", 83);
+	keywords.set("veryClose", 84);
+	keywords.set("block", 85);
 
 
   tvalLength = 128;
@@ -491,31 +485,13 @@ Token* Scanner::NextToken() {
 		case 27:
 			{t->kind = 33; break;}
 		case 28:
-			{t->kind = 34; break;}
-		case 29:
 			{t->kind = 35; break;}
+		case 29:
+			{t->kind = 37; break;}
 		case 30:
-			case_30:
-			{t->kind = 40; break;}
-		case 31:
-			case_31:
-			{t->kind = 41; break;}
-		case 32:
-			{t->kind = 44; break;}
-		case 33:
-			{t->kind = 51; break;}
-		case 34:
 			recEnd = pos; recKind = 27;
 			if ((ch >= '0' && ch <= '9')) {AddCh(); goto case_17;}
 			else {t->kind = 27; break;}
-		case 35:
-			recEnd = pos; recKind = 39;
-			if (ch == '=') {AddCh(); goto case_30;}
-			else {t->kind = 39; break;}
-		case 36:
-			recEnd = pos; recKind = 42;
-			if (ch == '=') {AddCh(); goto case_31;}
-			else {t->kind = 42; break;}
 
   }
   AppendVal(t);

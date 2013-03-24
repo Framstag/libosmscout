@@ -65,64 +65,32 @@ namespace osmscout {
 
   class OSMSCOUT_API SizeCondition : public Referencable
   {
+  private:
+    double minMM;
+    bool minMMSet;
+
+    double minPx;
+    bool minPxSet;
+
+    double maxMM;
+    bool maxMMSet;
+
+    double maxPx;
+    bool maxPxSet;
   public:
+    SizeCondition();
     virtual ~SizeCondition();
 
-    virtual bool Evaluate(double meterInPixel, double meterInMM) const = 0;
+    void SetMinMM(double minMM);
+    void SetMinPx(double minPx);
+
+    void SetMaxMM(double maxMM);
+    void SetMaxPx(double maxPx);
+
+    bool Evaluate(double meterInPixel, double meterInMM) const;
   };
 
   typedef Ref<SizeCondition> SizeConditionRef;
-
-  class OSMSCOUT_API SizeNotCondition : public SizeCondition
-  {
-  private:
-    SizeConditionRef condition;
-
-  public:
-    SizeNotCondition(SizeCondition* condition);
-
-    bool Evaluate(double meterInPixel, double meterInMM) const;
-  };
-
-  class OSMSCOUT_API SizeBoolCondition : public SizeCondition
-  {
-  public:
-    enum Type {
-      boolAnd,
-      boolOr
-    };
-
-  private:
-    std::list<SizeConditionRef> conditions;
-    Type                        type;
-
-  public:
-    SizeBoolCondition(Type type);
-
-    void AddCondition(SizeCondition* condition);
-
-    bool Evaluate(double meterInPixel, double meterInMM) const;
-  };
-
-  class OSMSCOUT_API SizeBinaryCondition : public SizeCondition
-  {
-  public:
-      enum SizeUnit {
-        pixel,
-        mm
-      };
-  private:
-    BinaryOperator op;
-    double         displaySize;
-    SizeUnit       sizeUnit;
-
-  public:
-    SizeBinaryCondition(BinaryOperator op,
-                        double displaySize,
-                        SizeUnit sizeUnit);
-
-    bool Evaluate(double meterInPixel, double meterInMM) const;
-  };
 
   /**
    * Holds the all accumulated filter conditions as defined in the style sheet

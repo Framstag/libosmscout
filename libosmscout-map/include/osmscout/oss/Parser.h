@@ -201,10 +201,6 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void STYLEDEF(StyleFilter filter);
 	void MAG(Magnification& magnification);
 	void SIZECONDITION(SizeCondition*& condition);
-	void SIZEANDCOND(SizeCondition*& condition);
-	void SIZEBOOLCOND(SizeCondition*& condition);
-	void SIZEBINCOND(SizeCondition*& condition);
-	void SIZEBINOPERATOR(BinaryOperator& op);
 	void NODESTYLEDEF(StyleFilter filter);
 	void WAYSTYLEDEF(StyleFilter filter);
 	void AREASTYLEDEF(StyleFilter filter);

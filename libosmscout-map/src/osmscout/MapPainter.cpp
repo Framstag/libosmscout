@@ -1792,28 +1792,12 @@ namespace osmscout {
       return;
     }
 
-    /*
-    if (lineStyle->GetWidth()==0) {
-      lineWidth=ConvertWidthToPixel(parameter,lineStyle->GetDisplayWidth());
-    }
-    else if (parameter.GetDrawWaysWithFixedWidth() ||
-        attributes.GetWidth()==0) {
-      lineWidth=GetProjectedWidth(projection,
-                                  ConvertWidthToPixel(parameter,lineStyle->GetDisplayWidth()),
-                                  lineStyle->GetWidth());
-    }
-    else {
-      lineWidth=GetProjectedWidth(projection,
-                                  ConvertWidthToPixel(parameter,lineStyle->GetDisplayWidth()),
-                                  attributes.GetWidth());
-    }*/
-
     WayData data;
 
     data.ref=ref;
     data.lineWidth=lineWidth;
 
-    if (lineStyle->GetOutline()>0.0) {
+    if (lineStyle->GetOutline()>0.0 && lineStyle->GetOutlineColor().IsVisible()) {
       double convertedOutlineWidth=ConvertWidthToPixel(parameter,2*lineStyle->GetOutline());
 
       data.outlineWidth=lineWidth+convertedOutlineWidth;
@@ -1824,31 +1808,7 @@ namespace osmscout {
       data.outline=false;
     }
 
-      /*
-    if (lineStyle->GetOutline()>0.0) {
-      double convertedOutlineWidth=ConvertWidthToPixel(parameter,2*lineStyle->GetOutline());
-
-      if (lineStyle->GetOutlineColor().IsSolid()) {
-        data.outline=lineWidth>=2*convertedOutlineWidth;
-      }
-      else {
-        data.outline=true;
-      }
-
-      if (data.outline) {
-        data.outlineWidth=lineWidth+convertedOutlineWidth;
-      }
-      else {
-        data.outlineWidth=lineWidth;
-      }
-    }
-    else {
-      data.outline=false;
-      data.outlineWidth=data.lineWidth;
-    }*/
-
     if (data.outline) {
-
       if (!IsVisible(projection,
                      nodes,
                      data.outlineWidth/2)) {
@@ -2218,13 +2178,6 @@ namespace osmscout {
     labelsTimer.Stop();
 
     if (parameter.IsDebugPerformance()) {
-
-      double meterInPixel=1/projection.GetPixelSize();
-      double meterInMM=ConvertPixelToWidth(parameter,meterInPixel);
-
-      std::cout << "1m = " << meterInPixel << "px" << " " << 20*meterInPixel << "px" << std::endl;
-      std::cout << "1m = " << meterInMM  << "mm" << " " << 20*meterInMM << "mm" << std::endl;
-
       std::cout << "Paths: ";
       std::cout << data.ways.size() << "+" << data.relationWays.size() << "/" << waysSegments << "/" << waysDrawn << "/" << waysOutlineDrawn << "/" << waysLabelDrawn << " (pcs) ";
       std::cout << prepareWaysTimer << "/" << pathsTimer << "/" << pathLabelsTimer << " (sec)" << std::endl;

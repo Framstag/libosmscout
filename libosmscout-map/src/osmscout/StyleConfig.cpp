@@ -39,107 +39,94 @@ namespace osmscout {
     // no code
   }
 
+  SizeCondition::SizeCondition()
+  : minMM(0.0),
+    minMMSet(false),
+    minPx(0.0),
+    minPxSet(false),
+    maxMM(0.0),
+    maxMMSet(false),
+    maxPx(0.0),
+    maxPxSet(false)
+  {
+    // no code
+  }
+
   SizeCondition::~SizeCondition()
   {
     // no code
   }
 
-  SizeNotCondition::SizeNotCondition(SizeCondition* condition)
-  : condition(condition)
+  void SizeCondition::SetMinMM(double minMM)
   {
-    // no code
+    this->minMM=minMM;
+    this->minMMSet=true;
   }
 
-  bool SizeNotCondition::Evaluate(double meterInPixel, double meterInMM) const
+  void SizeCondition::SetMinPx(double minPx)
   {
-    return !condition->Evaluate(meterInPixel,meterInMM);
+    this->minPx=minPx;
+    this->minPxSet=true;
   }
 
-  SizeBoolCondition::SizeBoolCondition(Type type)
-  : type(type)
+  void SizeCondition::SetMaxMM(double maxMM)
   {
-    // no code
+    this->maxMM=maxMM;
+    this->maxMMSet=true;
   }
 
-  void SizeBoolCondition::AddCondition(SizeCondition* condition)
+  void SizeCondition::SetMaxPx(double maxPx)
   {
-    conditions.push_back(condition);
+    this->maxPx=maxPx;
+    this->maxPxSet=true;
   }
 
-  bool SizeBoolCondition::Evaluate(double meterInPixel, double meterInMM) const
+  bool SizeCondition::Evaluate(double meterInPixel,
+                               double meterInMM) const
   {
-    switch (type) {
-    case boolAnd:
-      for (std::list<SizeConditionRef>::const_iterator condition=conditions.begin();
-           condition!=conditions.end();
-           ++condition) {
-        if (!(*condition)->Evaluate(meterInPixel,meterInMM)) {
-          return false;
-        }
-      }
+    bool matchesMinMM;
+    bool matchesMinPx;
 
-      return true;
-    case boolOr:
-      for (std::list<SizeConditionRef>::const_iterator condition=conditions.begin();
-           condition!=conditions.end();
-           ++condition) {
-        if ((*condition)->Evaluate(meterInPixel,meterInMM)) {
-          return true;
-        }
-      }
+    if (minMMSet) {
+      matchesMinMM=meterInMM>=minMM;
+    }
+    else {
+      matchesMinMM=true;
+    }
 
+    if (minPxSet) {
+      matchesMinPx=meterInPixel>=minPx;
+    }
+    else {
+      matchesMinPx=true;
+    }
+
+    if (!matchesMinMM || !matchesMinPx) {
       return false;
-    default:
-      assert(false);
-    }
-  }
-
-  SizeBinaryCondition::SizeBinaryCondition(BinaryOperator op,
-                                           double displaySize,
-                                           SizeUnit sizeUnit)
-  : op(op),
-    displaySize(displaySize),
-    sizeUnit(sizeUnit)
-  {
-    // no code
-  }
-
-  bool SizeBinaryCondition::Evaluate(double meterInPixel, double meterInMM) const
-  {
-    switch (sizeUnit) {
-    case pixel:
-      switch (op) {
-      case operatorLess:
-        return meterInPixel<displaySize;
-      case operatorLessEqual:
-        return meterInPixel<=displaySize;
-      case operatorEqual:
-        return meterInPixel==displaySize;
-      case operatorGreaterEqual:
-        return meterInPixel>=displaySize;
-      case operatorGreater:
-        return meterInPixel>displaySize;
-      default:
-        return false;
-      }
-    case mm:
-      switch (op) {
-      case operatorLess:
-        return meterInMM<displaySize;
-      case operatorLessEqual:
-        return meterInMM<=displaySize;
-      case operatorEqual:
-        return meterInMM==displaySize;
-      case operatorGreaterEqual:
-        return meterInMM>=displaySize;
-      case operatorGreater:
-        return meterInMM>displaySize;
-      default:
-        return false;
-      }
     }
 
-    return false;
+    bool matchesMaxMM;
+    bool matchesMaxPx;
+
+    if (maxMMSet) {
+      matchesMaxMM=meterInMM<maxMM;
+    }
+    else {
+      matchesMaxMM=true;
+    }
+
+    if (maxPxSet) {
+      matchesMaxPx=meterInPixel<maxPx;
+    }
+    else {
+      matchesMaxPx=true;
+    }
+
+    if (!matchesMaxMM && !matchesMaxPx) {
+      return false;
+    }
+
+    return true;
   }
 
   LineStyle::LineStyle()

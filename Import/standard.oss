@@ -192,8 +192,10 @@ SYMBOL christian_church_cross
  [MAG proximity-] {
    [TYPE waterway_river,
          waterway_canal] {
-     [SIZE 15m>=0.25mm AND 15m>=3px] WAY {color: @waterColor; width: 15m;}
-     [SIZE 15m<0.25mm OR 15m<3px] WAY {color: @waterColor; displayWidth: 0.25mm; }
+
+
+     [SIZE 15m 0.25mm:3px<] WAY {color: @waterColor; width: 15m;}
+     [SIZE 15m <0.25mm:3px] WAY {color: @waterColor; displayWidth: 0.25mm; }
    }
 
    [TYPE waterway_dock,
@@ -205,13 +207,13 @@ SYMBOL christian_church_cross
 
  [MAG cityOver-] {
    [TYPE waterway_stream] {
-     [SIZE 2m>=0.25mm AND 2m>=3px]  WAY {color: @waterColor; width: 2m;}
-     [SIZE 2m<0.25mm OR 2m<3px] WAY {color: @waterColor; displayWidth: 0.25mm;}
+     [SIZE 2m 0.25mm:3px<] WAY {color: @waterColor; width: 2m;}
+     [SIZE 2m <0.25mm:3px] WAY {color: @waterColor; displayWidth: 0.25mm;}
    }
 
    [TYPE waterway_drain] {
-     [SIZE 3m>=0.1mm AND 3m>=3px]  WAY {color: @waterColor; width: 3m;}
-     [SIZE 3m<0.1mm OR 3m<3px] WAY {color: @waterColor; displayWidth: 0.1mm; }
+     [SIZE 3m 0.1mm:3px<] WAY {color: @waterColor; width: 3m;}
+     [SIZE 3m <0.1mm:3px] WAY {color: @waterColor; displayWidth: 0.1mm; }
    }
  }
 
@@ -230,72 +232,72 @@ SYMBOL christian_church_cross
 
  [MAG continent-] {
    [TYPE highway_motorway] {
-     [SIZE 20m>=0.4mm AND 20m>=3px]  WAY { color: @motorwayColor; outlineColor: #777777; width: 20m; outline: 0.25mm;}
-     [SIZE 20m<0.4mm OR 20m<3px]  WAY { color: @motorwayColor; displayWidth: 0.4mm;}
+     [SIZE 20m 0.45mm:3px<] WAY { color: @motorwayColor; outlineColor: #777777; width: 20m; outline: 0.25mm;}
+     [SIZE 20m <0.45mm:3px] WAY { color: @motorwayColor; displayWidth: 0.45mm;}
    }
  }
 
  [MAG county-] {
    [TYPE highway_trunk] {
-     [SIZE 18m>=0.45mm AND 18m>=3px] WAY { color: @trunkColor; outlineColor: #777777; width: 18m; outline: 0.25mm;}
-     [SIZE 18m<0.45mm OR 18m<3px] WAY { color: @trunkColor; displayWidth: 0.45mm;}
+     [SIZE 18m 0.4mm:3px<] WAY { color: @trunkColor; outlineColor: #777777; width: 18m; outline: 0.25mm;}
+     [SIZE 18m <0.4mm:3px] WAY { color: @trunkColor; displayWidth: 0.4mm;}
    }
 
    [TYPE highway_primary] {
-     [SIZE 14m>=0.4mm AND 14m>=3px] WAY { color: @primaryColor; outlineColor: #a56769; width: 14m; outline: 0.25mm;}
-     [SIZE 14m<0.4mm OR 14m<3px] WAY { color: @primaryColor; displayWidth: 0.4mm;}
+     [SIZE 14m 0.4mm:3px<] WAY { color: @primaryColor; outlineColor: #a56769; width: 14m; outline: 0.25mm;}
+     [SIZE 14m <0.4mm:3px] WAY { color: @primaryColor; displayWidth: 0.4mm;}
    }
  }
 
  [MAG proximity-] {
    [TYPE highway_secondary] {
-     [SIZE 12m>=0.25mm AND 12m>=3px] WAY { color: @secondaryColor; outlineColor: #bfbfbf; width: 12m; outline: 0.25mm;}
-     [SIZE 12m<0.25mm OR 12m<3px] WAY { color: #fdd654; displayWidth: 0.25mm; }
+     [SIZE 12m 0.25mm:3px<] WAY { color: @secondaryColor; outlineColor: #bfbfbf; width: 12m; outline: 0.25mm;}
+     [SIZE 12m <0.25mm:3px] WAY { color: #fdd654; displayWidth: 0.25mm; }
    }
  }
 
  [MAG cityOver-] {
    [TYPE highway_motorway_link] {
-     [SIZE 20m>=0.45mm AND 20m>=3px] WAY { color: @motorwayColor; outlineColor: #777777; width: 20m; outline: 0.25mm;}
-     [SIZE 20m<0.45mm OR 20m<3px] WAY { color: @motorwayColor; displayWidth: 0.45mm; }
+     [SIZE 20m 0.45mm:3px<] WAY { color: @motorwayColor; outlineColor: #777777; width: 20m; outline: 0.25mm;}
+     [SIZE 20m <0.45mm:3px] WAY { color: @motorwayColor; displayWidth: 0.45mm; }
    }
 
    [TYPE highway_trunk_link] {
-     [SIZE 18m>=0.45mm AND 18m>=3px] WAY { color: @trunkColor; outlineColor: #777777; width: 18m; outline: 0.25mm;}
-     [SIZE 18m<0.45mm OR 18m<3px] WAY { color: @trunkColor; displayWidth: 0.45mm;  }
+     [SIZE 18m 0.4mm:3px<] WAY { color: @trunkColor; outlineColor: #777777; width: 18m; outline: 0.25mm;}
+     [SIZE 18m <0.4mm:3px] WAY { color: @trunkColor; displayWidth: 0.4mm;  }
    }
 
    [TYPE highway_tertiary] {
-     [SIZE 10m>=0.25mm AND 10m>=3px] WAY { color: @tertiaryColor; outlineColor: #bfbfbf; width: 10m; outline: 0.25mm;}
-     [SIZE 10m<0.25mm OR 10m<3px] WAY { color: #fefe73; displayWidth: 0.25mm;}
+     [SIZE 10m 0.25mm:3px<] WAY { color: @tertiaryColor; outlineColor: #bfbfbf; width: 10m; outline: 0.25mm;}
+     [SIZE 10m <0.25mm:3px] WAY { color: #fefe73; displayWidth: 0.25mm;}
    }
 
    [TYPE highway_road] {
-     [SIZE 8m>=0.1mm AND 8m>=3px] WAY { color: @roadColor; outlineColor: @roadBColor; width: 8m; outline: 0.25mm;}
-     [SIZE 8m<0.1mm OR 8m<3px] WAY { color: #888888; displayWidth: 0.1mm;}
+     [SIZE 8m 0.1mm:3px<] WAY { color: @roadColor; outlineColor: @roadBColor; width: 8m; outline: 0.25mm;}
+     [SIZE 8m <0.1mm:3px] WAY { color: #888888; displayWidth: 0.1mm;}
    }
 
    [TYPE railway_rail] {
-     [SIZE 5m>=0.25mm AND 5m>=3px] WAY {color: #939393;outlineColor: #b3b3b3; dash: 3,3; cap: butt; gapColor: #ffffff; width: 5m; outline: 0.25mm;}
-     [SIZE 5m<0.25mm OR 5m<3px] WAY {color: #777777; dash: 3,3; cap: butt; gapColor: #ffffff; displayWidth: 0.25mm;}
+     [SIZE 5m 0.25mm:3px<] WAY {color: #939393;outlineColor: #b3b3b3; dash: 3,3; cap: butt; gapColor: #ffffff; width: 5m; outline: 0.25mm;}
+     [SIZE 5m <0.25mm:3px] WAY {color: #777777; dash: 3,3; cap: butt; gapColor: #ffffff; displayWidth: 0.25mm;}
    }
  }
 
  [MAG city-] {
    [TYPE highway_primary_link] {
-     [SIZE 14m>=0.4mm AND 14m>=3px] WAY { color: @primaryColor; outlineColor: #777777; width: 14m; outline: 0.25mm;}
-     [SIZE 14m<0.4mm OR 14m<3px] WAY { color: @primaryColor; width: 14m;}
+     [SIZE 14m 0.4mm:3px<] WAY { color: @primaryColor; outlineColor: #777777; width: 14m; outline: 0.25mm;}
+     [SIZE 14m <0.4mm:3px] WAY { color: @primaryColor; displayWidth: 0.4mm;}
    }
 
    [TYPE highway_secondary_link] {
-     [SIZE 12m>=0.25mm AND 12m>=3px] WAY { color: @secondaryColor; outlineColor: #777777; width: 12m; outline: 0.25mm;}
-     [SIZE 12m<0.25mm OR 12m<3px] WAY { color: #fdd654; displayWidth: 0.25mm;}
+     [SIZE 12m 0.25mm:3px<] WAY { color: @secondaryColor; outlineColor: #777777; width: 12m; outline: 0.25mm;}
+     [SIZE 12m <0.25mm:3px] WAY { color: #fdd654; displayWidth: 0.25mm;}
    }
 
    [TYPE highway_unclassified,
          highway_residential] {
-     [SIZE 8m>=0.1mm AND 8m>=3px] WAY { color: @roadColor; outlineColor: @roadBColor; width: 8m; outline: 0.25mm;}
-     [SIZE 8m<0.1mm OR 8m<3px] WAY { color: #999999; outlineColor: @roadBColor; displayWidth: 0.1mm; }
+     [SIZE 8m 0.1mm:3px<] WAY { color: @roadColor; outlineColor: @roadBColor; width: 8m; outline: 0.25mm;}
+     [SIZE 8m <0.1mm:3px] WAY { color: #999999; outlineColor: @roadBColor; displayWidth: 0.1mm; }
    }
 
    [TYPE highway_services] AREA { color: #cb9999; }
@@ -307,13 +309,13 @@ SYMBOL christian_church_cross
 
  [MAG close-] {
    [TYPE highway_service] {
-     [SIZE 8m>=0.1mm AND 8m>=3px] WAY { color: @roadColor; outlineColor: @roadBColor; width: 8m; outline: 0.25mm;}
-     [SIZE 8m<0.1mm OR 8m<3px] WAY { color: #999999; displayWidth: 0.1mm;}
+     [SIZE 8m 0.1mm:3px<] WAY { color: @roadColor; outlineColor: @roadBColor; width: 8m; outline: 0.25mm;}
+     [SIZE 8m <0.1mm:3px] WAY { color: #999999; displayWidth: 0.1mm;}
    }
 
    [TYPE highway_living_street] {
-     [SIZE 8m>=0.25mm AND 8m>=3px] WAY { color: #bababa; outlineColor: @roadBColor; width: 8m; outline: 0.25mm;}
-     [SIZE 8m<0.25mm OR 8m<3px] WAY { color: #bababa; displayWidth: 0.25mm;}
+     [SIZE 8m 0.1mm:3px<] WAY { color: #bababa; outlineColor: @roadBColor; width: 8m; outline: 0.25mm;}
+     [SIZE 8m <0.1mm:3px] WAY { color: #bababa; displayWidth: 0.1mm;}
    }
 
    [TYPE highway_bus_guideway] WAY {color: #90570c; displayWidth: 0.1mm; }
@@ -330,8 +332,8 @@ SYMBOL christian_church_cross
    [TYPE highway_construction] WAY {color: #99cccc; displayWidth: 0.1mm; width: 2m;}
 
    [TYPE highway_pedestrian] {
-     [SIZE 8m>=0.1mm AND 8m>=3px] WAY {color: #ebeaea; width: 8m; }
-     [SIZE 8m<0.1mm OR 8m<3px] WAY {color: #ebeaea; displayWidth: 0.1mm; }
+     [SIZE 8m 0.1mm:3px<] WAY {color: #ebeaea; width: 8m; }
+     [SIZE 8m <0.1mm:3px] WAY {color: #ebeaea; displayWidth: 0.1mm; }
 
      AREA { color: #ededed; borderColor: #c5c5c5; borderWidth: 0.1mm; }
    }
@@ -646,8 +648,8 @@ SYMBOL christian_church_cross
    [TYPE amenity_hospital_building] AREA { color: #b89c9c; borderColor: #887b7b; borderWidth: 0.1mm; }
 
    [TYPE man_made_pier] {
-     [SIZE 5m>=0.1mm AND 5m>=3px] WAY {color: #ffffff; width: 5.0m;}
-     [SIZE 5m<0.1mm OR 5m<3px] WAY {color: #ffffff; displayWidth: 0.1mm;}
+     [SIZE 5m 0.1mm:3px<] WAY {color: #ffffff; width: 5.0m;}
+     [SIZE 5m <0.1mm:3px] WAY {color: #ffffff; displayWidth: 0.1mm;}
      AREA { color: #ffffff; }
    }
  }

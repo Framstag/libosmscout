@@ -434,94 +434,39 @@ PRODUCTIONS
 
   SIZECONDITION<SizeCondition*& condition>
               = (.
-                  std::list<SizeCondition*> conditions;
-                  SizeCondition             *subCond;
+                  condition=new SizeCondition();
+                  double widthInMeter;
                 .)
-                SIZEANDCOND<subCond>   (. conditions.push_back(subCond); .)
-                {
-                  "OR"
-                  SIZEANDCOND<subCond> (. conditions.push_back(subCond); .)
-                }
-                (.
-                  if (conditions.size()==1) {
-                    condition=conditions.front();
-                  }
-                  else {
-                    SizeBoolCondition *orCondition=new SizeBoolCondition(SizeBoolCondition::boolOr);
 
-                    for (std::list<SizeCondition*>::const_iterator c=conditions.begin();
-                         c!=conditions.end();
-                         ++c) {
-                      orCondition->AddCondition(*c);
-                    }
+                DOUBLE<widthInMeter> "m"
 
-                    condition=orCondition;
-                  }
-                .)
-                .
-  SIZEANDCOND<SizeCondition*& condition>
-              = (.
-                  std::list<SizeCondition*> conditions;
-                  SizeCondition             *subCond;
-                .)
-                SIZEBOOLCOND<subCond>     (. conditions.push_back(subCond); .)
-                {
-                  "AND"
-                  SIZEBOOLCOND<subCond>   (. conditions.push_back(subCond); .)
-                }
-                (.
-                  if (conditions.size()==1) {
-                    condition=conditions.front();
-                  }
-                  else {
-                    SizeBoolCondition *andCondition=new SizeBoolCondition(SizeBoolCondition::boolAnd);
-
-                    for (std::list<SizeCondition*>::const_iterator c=conditions.begin();
-                         c!=conditions.end();
-                         ++c) {
-                      andCondition->AddCondition(*c);
-                    }
-
-                    condition=andCondition;
-                  }
-                .)
-                .
-  SIZEBOOLCOND<SizeCondition*& condition>
-              =   SIZEBINCOND<condition>
-                | "(" SIZECONDITION<condition> ")"
-                | "!" SIZEBOOLCOND<condition> (. condition=new SizeNotCondition(condition); .)
-                .
-
-  SIZEBINCOND<SizeCondition*& condition>
-              = (. double                        mapSize;
-                   BinaryOperator                op;
-                   double                        displaySize;
-                   SizeBinaryCondition::SizeUnit sizeUnit=SizeBinaryCondition::mm;
-                .)
-                DOUBLE<mapSize> "m"
-                SIZEBINOPERATOR<op>
-                DOUBLE<displaySize>
-                (
-                  "mm" (. sizeUnit=SizeBinaryCondition::mm; .)
-                | "px" (. sizeUnit=SizeBinaryCondition::pixel; .)
-                )
-                (.
-                  if (mapSize<=0.0) {
-	                  std::string e="map size be greater than 0.0";
-
-	                  SemErr(e.c_str());
-                  }
-                  else {
-                    condition=new SizeBinaryCondition(op,displaySize/mapSize,sizeUnit);
-                  }
-                .)
-                .
-
-  SIZEBINOPERATOR<BinaryOperator& op>
-              =   "<"  (. op=operatorLess; .)
-                | "<=" (. op=operatorLessEqual; .)
-                | ">=" (. op=operatorGreaterEqual; .)
-                | ">"  (. op=operatorGreater; .)
+                [
+                  [
+                    (. double minMM; .)
+                    DOUBLE<minMM> "mm"
+                    (. condition->SetMinMM(minMM/widthInMeter); .)
+                  ]
+                  ":"
+                  [
+                    (. double minPx; .)
+                    DOUBLE<minPx> "px"
+                    (. condition->SetMinPx(minPx/widthInMeter); .)
+                  ]
+                ]
+                "<"
+                [
+                  [
+                    (. double maxMM; .)
+                    DOUBLE<maxMM> "mm"
+                    (. condition->SetMaxMM(maxMM/widthInMeter); .)
+                  ]
+                  ":"
+                  [
+                    (. double maxPx; .)
+                    DOUBLE<maxPx> "px"
+                    (. condition->SetMaxPx(maxPx/widthInMeter); .)
+                  ]
+                ]
                 .
 
   STYLEDEF<StyleFilter filter>
