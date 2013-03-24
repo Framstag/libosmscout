@@ -353,8 +353,8 @@ namespace osmscout {
   typedef PartialStyle<LineStyle,LineStyle::Attribute>     LinePartialStyle;
   typedef ConditionalStyle<LineStyle,LineStyle::Attribute> LineConditionalStyle;
   typedef StyleSelector<LineStyle,LineStyle::Attribute>    LineStyleSelector;
-  typedef std::list<LineStyleSelector>                     LineStyleSelectorList;
-  typedef std::vector<std::vector<LineStyleSelectorList> > LineStyleLookupTable;
+  typedef std::list<LineStyleSelector>                     LineStyleSelectorList; //! List of selectors
+  typedef std::vector<std::vector<LineStyleSelectorList> > LineStyleLookupTable;  //!Index selectors by type and level
 
   /**
    * Style options for filling an area.
@@ -452,8 +452,8 @@ namespace osmscout {
   typedef PartialStyle<FillStyle,FillStyle::Attribute>     FillPartialStyle;
   typedef ConditionalStyle<FillStyle,FillStyle::Attribute> FillConditionalStyle;
   typedef StyleSelector<FillStyle,FillStyle::Attribute>    FillStyleSelector;
-  typedef std::list<FillStyleSelector>                     FillStyleSelectorList;
-  typedef std::vector<std::vector<FillStyleSelectorList> > FillStyleLookupTable;
+  typedef std::list<FillStyleSelector>                     FillStyleSelectorList; //! List of selectors
+  typedef std::vector<std::vector<FillStyleSelectorList> > FillStyleLookupTable;  //!Index selectors by type and level
 
   /**
    * Abstract base class for all (point) labels. All point labels have priority
@@ -571,8 +571,8 @@ namespace osmscout {
   typedef PartialStyle<TextStyle,TextStyle::Attribute>     TextPartialStyle;
   typedef ConditionalStyle<TextStyle,TextStyle::Attribute> TextConditionalStyle;
   typedef StyleSelector<TextStyle,TextStyle::Attribute>    TextStyleSelector;
-  typedef std::list<TextStyleSelector>                     TextStyleSelectorList;
-  typedef std::vector<std::vector<TextStyleSelectorList> > TextStyleLookupTable;
+  typedef std::list<TextStyleSelector>                     TextStyleSelectorList; //! List of selectors
+  typedef std::vector<std::vector<TextStyleSelectorList> > TextStyleLookupTable;  //!Index selectors by type and level
 
   /**
    * A shield or plate label (text placed on a plate).
@@ -651,8 +651,8 @@ namespace osmscout {
   typedef PartialStyle<ShieldStyle,ShieldStyle::Attribute>     ShieldPartialStyle;
   typedef ConditionalStyle<ShieldStyle,ShieldStyle::Attribute> ShieldConditionalStyle;
   typedef StyleSelector<ShieldStyle,ShieldStyle::Attribute>    ShieldStyleSelector;
-  typedef std::list<ShieldStyleSelector>                       ShieldStyleSelectorList;
-  typedef std::vector<std::vector<ShieldStyleSelectorList> >   ShieldStyleLookupTable;
+  typedef std::list<ShieldStyleSelector>                       ShieldStyleSelectorList; //! List of selectors
+  typedef std::vector<std::vector<ShieldStyleSelectorList> >   ShieldStyleLookupTable;  //!Index selectors by type and level
 
   /**
    * A stle definng repretive drawing of a shiled label along a path. It consists
@@ -746,8 +746,8 @@ namespace osmscout {
   typedef PartialStyle<PathShieldStyle,PathShieldStyle::Attribute>     PathShieldPartialStyle;
   typedef ConditionalStyle<PathShieldStyle,PathShieldStyle::Attribute> PathShieldConditionalStyle;
   typedef StyleSelector<PathShieldStyle,PathShieldStyle::Attribute>    PathShieldStyleSelector;
-  typedef std::list<PathShieldStyleSelector>                           PathShieldStyleSelectorList;
-  typedef std::vector<std::vector<PathShieldStyleSelectorList> >       PathShieldStyleLookupTable;
+  typedef std::list<PathShieldStyleSelector>                           PathShieldStyleSelectorList; //! List of selectors
+  typedef std::vector<std::vector<PathShieldStyleSelectorList> >       PathShieldStyleLookupTable;  //!Index selectors by type and level
 
   /**
    * A style for drawing text onto a path, the text following the
@@ -810,8 +810,8 @@ namespace osmscout {
   typedef PartialStyle<PathTextStyle,PathTextStyle::Attribute>     PathTextPartialStyle;
   typedef ConditionalStyle<PathTextStyle,PathTextStyle::Attribute> PathTextConditionalStyle;
   typedef StyleSelector<PathTextStyle,PathTextStyle::Attribute>    PathTextStyleSelector;
-  typedef std::list<PathTextStyleSelector>                         PathTextStyleSelectorList;
-  typedef std::vector<std::vector<PathTextStyleSelectorList> >     PathTextStyleLookupTable;
+  typedef std::list<PathTextStyleSelector>                         PathTextStyleSelectorList; //! List of selectors
+  typedef std::vector<std::vector<PathTextStyleSelectorList> >     PathTextStyleLookupTable;  //!Index selectors by type and level
 
   class OSMSCOUT_MAP_API DrawPrimitive : public Referencable
   {
@@ -1030,8 +1030,8 @@ namespace osmscout {
   typedef PartialStyle<IconStyle,IconStyle::Attribute>     IconPartialStyle;
   typedef ConditionalStyle<IconStyle,IconStyle::Attribute> IconConditionalStyle;
   typedef StyleSelector<IconStyle,IconStyle::Attribute>    IconStyleSelector;
-  typedef std::list<IconStyleSelector>                     IconStyleSelectorList;
-  typedef std::vector<std::vector<IconStyleSelectorList> > IconStyleLookupTable;
+  typedef std::list<IconStyleSelector>                     IconStyleSelectorList; //! List of selectors
+  typedef std::vector<std::vector<IconStyleSelectorList> > IconStyleLookupTable;  //!Index selectors by type and level
 
   /**
    * Style for repretive drawing of symbols on top of a path.
@@ -1079,8 +1079,8 @@ namespace osmscout {
   typedef PartialStyle<PathSymbolStyle,PathSymbolStyle::Attribute>     PathSymbolPartialStyle;
   typedef ConditionalStyle<PathSymbolStyle,PathSymbolStyle::Attribute> PathSymbolConditionalStyle;
   typedef StyleSelector<PathSymbolStyle,PathSymbolStyle::Attribute>    PathSymbolStyleSelector;
-  typedef std::list<PathSymbolStyleSelector>                           PathSymbolStyleSelectorList;
-  typedef std::vector<std::vector<PathSymbolStyleSelectorList> >       PathSymbolStyleLookupTable;
+  typedef std::list<PathSymbolStyleSelector>                           PathSymbolStyleSelectorList; //! List of selectors
+  typedef std::vector<std::vector<PathSymbolStyleSelectorList> >       PathSymbolStyleLookupTable;  //!Index selectors by type and level
 
   /**
    * A complete style definition
