@@ -82,8 +82,8 @@ CHARACTERS
 
 TOKENS
   ident      = ('_' | letter) {letter | digit | '_'}.
-  number     = ['-'] digit {digit}.
-  double     = ['-'] digit {digit} '.' digit {digit}.
+  number     = digit {digit}.
+  double     = digit {digit} '.' digit {digit}.
   color      = "#" hexdigit hexdigit hexdigit hexdigit hexdigit hexdigit [hexdigit hexdigit].
   variable   = "@" ('_' | letter) {letter | digit | '_'}.
   string     = '"' {stringchar | '\\' quotchar} '"'.
@@ -229,9 +229,9 @@ PRODUCTIONS
                   double            height;
                 .)
                 COORD<topLeft>
-                DOUBLE<width>
+                UDOUBLE<width>
                 "x"
-                DOUBLE<height>
+                UDOUBLE<height>
 
                 SYNC "{"
                 {
@@ -254,7 +254,7 @@ PRODUCTIONS
                   FillPartialStyle  style;
                 .)
                 COORD<center>
-                DOUBLE<radius>
+                UDOUBLE<radius>
                 SYNC "{"
                 {
                   FILLSTYLEATTR<style> WEAK ";"
@@ -269,10 +269,12 @@ PRODUCTIONS
 
   COORD<Coord& coord>
               = (.
-                   double x;
-                   double y;
+                  double x;
+                  double y;
                 .)
-                DOUBLE<x> "," DOUBLE<y>
+                DOUBLE<x>
+                 ","
+                DOUBLE<y>
                 (. coord=Coord(x,y); .)
                 .
 
@@ -438,7 +440,7 @@ PRODUCTIONS
                   double widthInMeter;
                 .)
 
-                DOUBLE<widthInMeter> "m"
+                UDOUBLE<widthInMeter> "m"
                 (.
                   if (widthInMeter<0.0) {
                    std::string e="Width must be >= 0.0";
@@ -450,7 +452,7 @@ PRODUCTIONS
                 [
                   [
                     (. double minMM; .)
-                    DOUBLE<minMM> "mm"
+                    UDOUBLE<minMM> "mm"
                     (. if (widthInMeter>0.0) {
                          condition->SetMinMM(minMM/widthInMeter);
                        }
@@ -459,7 +461,7 @@ PRODUCTIONS
                   ":"
                   [
                     (. double minPx; .)
-                    DOUBLE<minPx> "px"
+                    UDOUBLE<minPx> "px"
                     (. if (widthInMeter>0.0) {
                          condition->SetMinPx(minPx/widthInMeter);
                         }
@@ -470,7 +472,7 @@ PRODUCTIONS
                 [
                   [
                     (. double maxMM; .)
-                    DOUBLE<maxMM> "mm"
+                    UDOUBLE<maxMM> "mm"
                     (. if (widthInMeter>0.0) {
                          condition->SetMaxMM(maxMM/widthInMeter);
                        }
@@ -479,7 +481,7 @@ PRODUCTIONS
                   ":"
                   [
                     (. double maxPx; .)
-                    DOUBLE<maxPx> "px"
+                    UDOUBLE<maxPx> "px"
                     (. if (widthInMeter>0.0) {
                          condition->SetMaxPx(maxPx/widthInMeter);
                        }
@@ -708,10 +710,10 @@ PRODUCTIONS
                     double              dash;
                    .)
                   "dash" ":"
-                   DOUBLE<dash>   (. dashes.push_back(dash); .)
+                   UDOUBLE<dash>   (. dashes.push_back(dash); .)
                   {
                     ","
-                    DOUBLE<dash>  (. dashes.push_back(dash); .)
+                    UDOUBLE<dash>  (. dashes.push_back(dash); .)
                   }
                   (.
                   	 style.style->SetDashes(dashes);
@@ -787,10 +789,10 @@ PRODUCTIONS
                     double              dash;
                    .)
                   "borderDash" ":"
-                   DOUBLE<dash>   (. dashes.push_back(dash); .)
+                   UDOUBLE<dash>   (. dashes.push_back(dash); .)
                   {
                     ","
-                    DOUBLE<dash>  (. dashes.push_back(dash); .)
+                    UDOUBLE<dash>  (. dashes.push_back(dash); .)
                   }
                   (.
                   	 style.style->SetBorderDashes(dashes);
@@ -820,7 +822,7 @@ PRODUCTIONS
                      style.attributes.insert(TextStyle::attrTextColor);
                   .)
                 | (. double size; .)
-                  "size" ":" DOUBLE<size>
+                  "size" ":" UDOUBLE<size>
                   (.
                      style.style->SetSize(size);
                      style.attributes.insert(TextStyle::attrSize);
@@ -832,7 +834,7 @@ PRODUCTIONS
                      style.attributes.insert(TextStyle::attrScaleAndFadeMag);
                   .)
                 | (. size_t priority; .)
-                  "priority" ":" INTEGER<priority>
+                  "priority" ":" UINT<priority>
 	              (.
 	                if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
                      style.style->SetPriority((uint8_t)priority);
@@ -875,13 +877,13 @@ PRODUCTIONS
                      style.attributes.insert(PathShieldStyle::attrBorderColor);
                   .)
                 | (. double size; .)
-                  "size" ":" DOUBLE<size>
+                  "size" ":" UDOUBLE<size>
                   (.
                      style.style->SetSize(size);
                      style.attributes.insert(PathShieldStyle::attrSize);
                   .)
                 | (. size_t priority; .)
-                  "priority" ":" INTEGER<priority>
+                  "priority" ":" UINT<priority>
 	              (.
 	                if (priority>=0 && priority<std::numeric_limits<uint8_t>::max()) {
                      style.style->SetPriority((uint8_t)priority);
@@ -918,7 +920,7 @@ PRODUCTIONS
                      style.attributes.insert(PathTextStyle::attrTextColor);
                   .)
                 | (. double size; .)
-                  "size" ":" DOUBLE<size>
+                  "size" ":" UDOUBLE<size>
                   (.
                      style.style->SetSize(size);
                      style.attributes.insert(PathTextStyle::attrSize);
@@ -1069,15 +1071,18 @@ PRODUCTIONS
                | "close"     (. magnification.SetMagnification(Magnification::magClose); .)
                | "veryClose" (. magnification.SetMagnification(Magnification::magVeryClose); .)
                | "block"     (. magnification.SetMagnification(Magnification::magBlock); .)
+               | (. size_t level; .)
+                 UINT<level>
+                 (. magnification.SetLevel((uint32_t)level); .)
                .
 
   /** Size in units of screen (currently millimeter) */
   DISPLAYSIZE <double& value>
-              = DOUBLE<value> "mm".
+              = UDOUBLE<value> "mm".
 
   /** Size in units of map (currently meter) */
   MAPSIZE <double& value>
-              = DOUBLE<value> "m".
+              = UDOUBLE<value> "m".
 
   IDENT<std::string& value>
               = ident
@@ -1093,7 +1098,7 @@ PRODUCTIONS
                 .)
                 .
 
-  DOUBLE<double& value>
+  UDOUBLE<double& value>
               = (  number
                   (.
                     if (!StringToDouble(t->val,value)) {
@@ -1112,7 +1117,39 @@ PRODUCTIONS
                   .)
                 ).
 
-  INTEGER<size_t& value>
+  DOUBLE<double& value>
+              = (. bool negate=false; .)
+                [
+                  "-" (. negate=true; .)
+                ]
+                (
+                  number
+                  (.
+                    if (!StringToDouble(t->val,value)) {
+                      std::string e="Cannot parse double '"+std::string(t->val)+"'";
+
+                      SemErr(e.c_str());
+                    }
+                  .)
+                |
+                  double
+                  (.
+                    if (!StringToDouble(t->val,value)) {
+                      std::string e="Cannot parse double '"+std::string(t->val)+"'";
+
+                      SemErr(e.c_str());
+                    }
+                  .)
+                )
+                (.
+                  if (negate) {
+                    value=-value;
+                  }
+                .)
+                .
+
+
+  UINT<size_t& value>
               = (  number
                   (.
                     if (!StringToNumber(t->val,value)) {

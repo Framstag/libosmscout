@@ -156,7 +156,6 @@ void Scanner::Init() {
 	for (i = 95; i <= 95; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
 	for (i = 48; i <= 57; ++i) start.set(i, 17);
-	start.set(45, 30);
 	start.set(35, 4);
 	start.set(64, 13);
 	start.set(34, 15);
@@ -166,10 +165,11 @@ void Scanner::Init() {
 	start.set(125, 23);
 	start.set(61, 24);
 	start.set(91, 25);
-	start.set(93, 26);
-	start.set(58, 27);
-	start.set(60, 28);
-	start.set(46, 29);
+	start.set(45, 26);
+	start.set(93, 27);
+	start.set(58, 28);
+	start.set(60, 29);
+	start.set(46, 30);
 		start.set(Buffer::EoF, -1);
 	keywords.set("OSS", 7);
 	keywords.set("END", 8);
@@ -481,17 +481,15 @@ Token* Scanner::NextToken() {
 		case 25:
 			{t->kind = 24; break;}
 		case 26:
-			{t->kind = 30; break;}
+			{t->kind = 27; break;}
 		case 27:
-			{t->kind = 33; break;}
+			{t->kind = 30; break;}
 		case 28:
-			{t->kind = 35; break;}
+			{t->kind = 33; break;}
 		case 29:
-			{t->kind = 37; break;}
+			{t->kind = 35; break;}
 		case 30:
-			recEnd = pos; recKind = 27;
-			if ((ch >= '0' && ch <= '9')) {AddCh(); goto case_17;}
-			else {t->kind = 27; break;}
+			{t->kind = 37; break;}
 
   }
   AppendVal(t);

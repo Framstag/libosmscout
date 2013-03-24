@@ -193,6 +193,7 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void CIRCLE(Symbol& symbol);
 	void COORD(Coord& coord);
 	void FILLSTYLEATTR(FillPartialStyle& style);
+	void UDOUBLE(double& value);
 	void DOUBLE(double& value);
 	void CONSTDEF();
 	void COLORCONSTDEF();
@@ -225,7 +226,7 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void STRING(std::string& value);
 	void TEXTLABEL(TextStyle::Label& label);
 	void LABELSTYLE(TextStyle::Style& style);
-	void INTEGER(size_t& value);
+	void UINT(size_t& value);
 	void SHIELDLABEL(ShieldStyle::Label& label);
 	void PATHTEXTLABEL(PathTextStyle::Label& label);
 
