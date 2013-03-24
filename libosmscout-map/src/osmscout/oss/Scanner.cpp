@@ -51,7 +51,7 @@ namespace oss {
 
 char* coco_string_create(const char* value) {
   char* data;
-  int len = 0;
+  size_t len = 0;
   if (value) { len = strlen(value); }
   data = new char[len + 1];
   strncpy(data, value, len);
@@ -59,7 +59,7 @@ char* coco_string_create(const char* value) {
   return data;
 }
 
-char* coco_string_create(const char *value , int startIndex, int length) {
+char* coco_string_create(const char *value , int startIndex, size_t length) {
   int len = 0;
   char* data;
 
@@ -92,7 +92,7 @@ Token::~Token()
   delete [] val;
 }
 
-Buffer::Buffer(const unsigned char* buf, int len)
+Buffer::Buffer(const unsigned char* buf, size_t len)
 {
   this->buf = new unsigned char[len];
   memcpy(this->buf, buf, len*sizeof(unsigned char));
@@ -107,19 +107,19 @@ Buffer::~Buffer()
 
 int Buffer::Peek()
 {
-  int curPos = GetPos();
+  size_t curPos = GetPos();
   int ch = Read();
   SetPos(curPos);
   return ch;
 }
 
-int Buffer::GetPos()
+size_t Buffer::GetPos()
 {
   return bufPos;
 }
 
-void Buffer::SetPos(int value) {
-  if ((value < 0) || (value > bufLen)) {
+void Buffer::SetPos(size_t value) {
+  if (value > bufLen) {
     std::cerr << "--- buffer out of bounds access, position: " <<  value << std::endl;
     exit(1);
   }
@@ -136,7 +136,7 @@ int Buffer::Read()
   }
 }
 
-Scanner::Scanner(const unsigned char* buf, int len) {
+Scanner::Scanner(const unsigned char* buf, size_t len) {
   buffer = new Buffer(buf, len);
   Init();
 }
@@ -149,14 +149,14 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 84;
-	noSym = 84;
+	maxT = 94;
+	noSym = 94;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 95; i <= 95; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
 	for (i = 48; i <= 57; ++i) start.set(i, 17);
-	start.set(45, 29);
+	start.set(45, 34);
 	start.set(35, 4);
 	start.set(64, 13);
 	start.set(34, 15);
@@ -167,8 +167,13 @@ void Scanner::Init() {
 	start.set(61, 24);
 	start.set(91, 25);
 	start.set(93, 26);
-	start.set(46, 27);
-	start.set(58, 28);
+	start.set(40, 27);
+	start.set(41, 28);
+	start.set(33, 29);
+	start.set(60, 35);
+	start.set(62, 36);
+	start.set(46, 32);
+	start.set(58, 33);
 		start.set(Buffer::EoF, -1);
 	keywords.set("OSS", 7);
 	keywords.set("END", 8);
@@ -185,58 +190,61 @@ void Scanner::Init() {
 	keywords.set("TYPE", 25);
 	keywords.set("MAG", 26);
 	keywords.set("ONEWAY", 28);
-	keywords.set("NODE", 30);
-	keywords.set("TEXT", 32);
-	keywords.set("ICON", 33);
-	keywords.set("WAY", 34);
-	keywords.set("SHIELD", 35);
-	keywords.set("AREA", 36);
-	keywords.set("color", 37);
-	keywords.set("altColor", 39);
-	keywords.set("outlineColor", 40);
-	keywords.set("dash", 41);
-	keywords.set("gapColor", 42);
-	keywords.set("displayWidth", 43);
-	keywords.set("width", 44);
-	keywords.set("cap", 45);
-	keywords.set("outline", 46);
-	keywords.set("pattern", 47);
-	keywords.set("patternMinMag", 48);
-	keywords.set("borderColor", 49);
-	keywords.set("borderWidth", 50);
-	keywords.set("borderDash", 51);
-	keywords.set("label", 52);
-	keywords.set("style", 53);
-	keywords.set("size", 54);
-	keywords.set("scaleMag", 55);
-	keywords.set("priority", 56);
-	keywords.set("backgroundColor", 57);
-	keywords.set("shieldSpace", 58);
-	keywords.set("symbol", 59);
-	keywords.set("symbolSpace", 60);
-	keywords.set("name", 61);
-	keywords.set("butt", 62);
-	keywords.set("round", 63);
-	keywords.set("square", 64);
-	keywords.set("normal", 65);
-	keywords.set("emphasize", 66);
-	keywords.set("ref", 67);
-	keywords.set("world", 68);
-	keywords.set("continent", 69);
-	keywords.set("state", 70);
-	keywords.set("stateOver", 71);
-	keywords.set("county", 72);
-	keywords.set("region", 73);
-	keywords.set("proximity", 74);
-	keywords.set("cityOver", 75);
-	keywords.set("city", 76);
-	keywords.set("suburb", 77);
-	keywords.set("detail", 78);
-	keywords.set("close", 79);
-	keywords.set("veryClose", 80);
-	keywords.set("block", 81);
-	keywords.set("mm", 82);
-	keywords.set("m", 83);
+	keywords.set("SIZE", 29);
+	keywords.set("OR", 31);
+	keywords.set("AND", 32);
+	keywords.set("m", 36);
+	keywords.set("mm", 37);
+	keywords.set("px", 38);
+	keywords.set("NODE", 43);
+	keywords.set("TEXT", 45);
+	keywords.set("ICON", 46);
+	keywords.set("WAY", 47);
+	keywords.set("SHIELD", 48);
+	keywords.set("AREA", 49);
+	keywords.set("color", 50);
+	keywords.set("outlineColor", 52);
+	keywords.set("dash", 53);
+	keywords.set("gapColor", 54);
+	keywords.set("displayWidth", 55);
+	keywords.set("width", 56);
+	keywords.set("cap", 57);
+	keywords.set("outline", 58);
+	keywords.set("pattern", 59);
+	keywords.set("patternMinMag", 60);
+	keywords.set("borderColor", 61);
+	keywords.set("borderWidth", 62);
+	keywords.set("borderDash", 63);
+	keywords.set("label", 64);
+	keywords.set("style", 65);
+	keywords.set("size", 66);
+	keywords.set("scaleMag", 67);
+	keywords.set("priority", 68);
+	keywords.set("backgroundColor", 69);
+	keywords.set("shieldSpace", 70);
+	keywords.set("symbol", 71);
+	keywords.set("symbolSpace", 72);
+	keywords.set("name", 73);
+	keywords.set("butt", 74);
+	keywords.set("round", 75);
+	keywords.set("square", 76);
+	keywords.set("normal", 77);
+	keywords.set("emphasize", 78);
+	keywords.set("ref", 79);
+	keywords.set("world", 80);
+	keywords.set("continent", 81);
+	keywords.set("state", 82);
+	keywords.set("stateOver", 83);
+	keywords.set("county", 84);
+	keywords.set("region", 85);
+	keywords.set("proximity", 86);
+	keywords.set("cityOver", 87);
+	keywords.set("city", 88);
+	keywords.set("suburb", 89);
+	keywords.set("detail", 90);
+	keywords.set("close", 91);
+	keywords.set("veryClose", 92);
+	keywords.set("block", 93);
 
 
   tvalLength = 128;
@@ -363,7 +371,7 @@ Token* Scanner::NextToken() {
   ) NextCh();
 	if ((ch == '/' && Comment0()) || (ch == '/' && Comment1())) return NextToken();
   int recKind = noSym;
-  int recEnd = pos;
+  size_t recEnd = pos;
 
   t = CreateToken();
   t->pos = pos; t->col = col; t->line = line; t->charPos = charPos;
@@ -479,15 +487,35 @@ Token* Scanner::NextToken() {
 		case 25:
 			{t->kind = 24; break;}
 		case 26:
-			{t->kind = 29; break;}
+			{t->kind = 30; break;}
 		case 27:
-			{t->kind = 31; break;}
+			{t->kind = 33; break;}
 		case 28:
-			{t->kind = 38; break;}
+			{t->kind = 34; break;}
 		case 29:
+			{t->kind = 35; break;}
+		case 30:
+			case_30:
+			{t->kind = 40; break;}
+		case 31:
+			case_31:
+			{t->kind = 41; break;}
+		case 32:
+			{t->kind = 44; break;}
+		case 33:
+			{t->kind = 51; break;}
+		case 34:
 			recEnd = pos; recKind = 27;
 			if ((ch >= '0' && ch <= '9')) {AddCh(); goto case_17;}
 			else {t->kind = 27; break;}
+		case 35:
+			recEnd = pos; recKind = 39;
+			if (ch == '=') {AddCh(); goto case_30;}
+			else {t->kind = 39; break;}
+		case 36:
+			recEnd = pos; recKind = 42;
+			if (ch == '=') {AddCh(); goto case_31;}
+			else {t->kind = 42; break;}
 
   }
   AppendVal(t);
@@ -510,7 +538,7 @@ void Scanner::SetScannerBehindT()
   buffer->SetPos(t->pos);
   NextCh();
   line = t->line; col = t->col; charPos = t->charPos;
-  for (int i = 0; i < tlen; i++) NextCh();
+  for (size_t i = 0; i < tlen; i++) NextCh();
 }
 
 // peek for the next token, ignore pragmas

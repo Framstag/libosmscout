@@ -42,16 +42,16 @@ PRODUCTIONS
                   unsigned char types;
                 .)
                 SYNC "TYPE"
-                IDENT<name>                    (. typeInfo.SetType(name); .)
+                IDENT<name>                       (. typeInfo.SetType(name); .)
 
                 "="
                 TYPEKINDS<types>
-                "(" CONDITION<condition> ")"   (. typeInfo.AddCondition(types,condition); .)
+                "(" TAGCONDITION<condition> ")"   (. typeInfo.AddCondition(types,condition); .)
 
                 {
                   "OR"
                   TYPEKINDS<types>
-                  "(" CONDITION<condition> ")" (. typeInfo.AddCondition(types,condition); .)
+                  "(" TAGCONDITION<condition> ")" (. typeInfo.AddCondition(types,condition); .)
                 }
 
                 [
@@ -80,15 +80,15 @@ PRODUCTIONS
                 .)
                 .
 
-  CONDITION<TagCondition*& condition>
+  TAGCONDITION<TagCondition*& condition>
               = (.
                   std::list<TagCondition*> conditions;
                   TagCondition             *subCond;
                 .)
-                ANDCOND<subCond>   (. conditions.push_back(subCond); .)
+                TAGANDCOND<subCond>   (. conditions.push_back(subCond); .)
                 {
                   "OR"
-                  ANDCOND<subCond> (. conditions.push_back(subCond); .)
+                  TAGANDCOND<subCond> (. conditions.push_back(subCond); .)
                 }
                 (.
                   if (conditions.size()==1) {
@@ -107,15 +107,15 @@ PRODUCTIONS
                   }
                 .)
                 .
-  ANDCOND<TagCondition*& condition>
+  TAGANDCOND<TagCondition*& condition>
               = (.
                   std::list<TagCondition*> conditions;
                   TagCondition             *subCond;
                 .)
-                BOOLCOND<subCond>     (. conditions.push_back(subCond); .)
+                TAGBOOLCOND<subCond>     (. conditions.push_back(subCond); .)
                 {
                   "AND"
-                  BOOLCOND<subCond>   (. conditions.push_back(subCond); .)
+                  TAGBOOLCOND<subCond>   (. conditions.push_back(subCond); .)
                 }
                 (.
                   if (conditions.size()==1) {
@@ -134,26 +134,26 @@ PRODUCTIONS
                   }
                 .)
                 .
-  BOOLCOND<TagCondition*& condition>
-              =   BINARYCOND<condition>
-                | EXISTSCOND<condition>
-                | "(" CONDITION<condition> ")"
-                | "!" BOOLCOND<condition> (. condition=new TagNotCondition(condition); .)
+  TAGBOOLCOND<TagCondition*& condition>
+              =   TAGBINCOND<condition>
+                | TAGEXISTSCOND<condition>
+                | "(" TAGCONDITION<condition> ")"
+                | "!" TAGBOOLCOND<condition> (. condition=new TagNotCondition(condition); .)
                 .
 
-  BINARYCOND<TagCondition*& condition>
+  TAGBINCOND<TagCondition*& condition>
               = (.
                   std::string nameValue;
                 .)
                 string (. nameValue=Destring(t->val); .)
                 (
-                  EQUALSCOND<nameValue,condition>
-                | NOTEQUALSCOND<nameValue,condition>
-                | ISINCOND<nameValue,condition>
+                  TAGEQUALSCOND<nameValue,condition>
+                | TAGNOTEQUALSCOND<nameValue,condition>
+                | TAGISINCOND<nameValue,condition>
                 )
                 .
 
-  EQUALSCOND<const std::string& tagName,TagCondition*& condition>
+  TAGEQUALSCOND<const std::string& tagName,TagCondition*& condition>
               = (.
                   std::string valueValue;
                 .)
@@ -165,7 +165,7 @@ PRODUCTIONS
                   condition=new TagBinaryCondition(tagId,operatorEqual,valueValue);
                 .)
                 .
-  NOTEQUALSCOND<const std::string& tagName,TagCondition*& condition>
+  TAGNOTEQUALSCOND<const std::string& tagName,TagCondition*& condition>
               = (.
                   std::string valueValue;
                 .)
@@ -177,7 +177,7 @@ PRODUCTIONS
                   condition=new TagBinaryCondition(tagId,operatorNotEqual,valueValue);
                 .)
                 .
-  ISINCOND<const std::string& tagName,TagCondition*& condition>
+  TAGISINCOND<const std::string& tagName,TagCondition*& condition>
               = (.
                  std::list<std::string> values;
                 .)
@@ -208,7 +208,7 @@ PRODUCTIONS
                   }
                 .)
                 .
-  EXISTSCOND<TagCondition*& condition>
+  TAGEXISTSCOND<TagCondition*& condition>
               = "EXISTS"
                  string
                  (.

@@ -39,28 +39,115 @@ namespace osmscout {
     // no code
   }
 
-  SizeFilter::SizeFilter()
+  SizeCondition::~SizeCondition()
   {
     // no code
   }
 
-  void SizeFilter::Set(Operator op,
-                       double displaySize,
-                       SizeUnit sizeUnit)
+  SizeNotCondition::SizeNotCondition(SizeCondition* condition)
+  : condition(condition)
   {
-    this->op=op;
-    this->displaySize=displaySize;
-    this->sizeUnit=sizeUnit;
+    // no code
+  }
+
+  bool SizeNotCondition::Evaluate(double meterInPixel, double meterInMM) const
+  {
+    return !condition->Evaluate(meterInPixel,meterInMM);
+  }
+
+  SizeBoolCondition::SizeBoolCondition(Type type)
+  : type(type)
+  {
+    // no code
+  }
+
+  void SizeBoolCondition::AddCondition(SizeCondition* condition)
+  {
+    conditions.push_back(condition);
+  }
+
+  bool SizeBoolCondition::Evaluate(double meterInPixel, double meterInMM) const
+  {
+    switch (type) {
+    case boolAnd:
+      for (std::list<SizeConditionRef>::const_iterator condition=conditions.begin();
+           condition!=conditions.end();
+           ++condition) {
+        if (!(*condition)->Evaluate(meterInPixel,meterInMM)) {
+          return false;
+        }
+      }
+
+      return true;
+    case boolOr:
+      for (std::list<SizeConditionRef>::const_iterator condition=conditions.begin();
+           condition!=conditions.end();
+           ++condition) {
+        if ((*condition)->Evaluate(meterInPixel,meterInMM)) {
+          return true;
+        }
+      }
+
+      return false;
+    default:
+      assert(false);
+    }
+  }
+
+  SizeBinaryCondition::SizeBinaryCondition(BinaryOperator op,
+                                           double displaySize,
+                                           SizeUnit sizeUnit)
+  : op(op),
+    displaySize(displaySize),
+    sizeUnit(sizeUnit)
+  {
+    // no code
+  }
+
+  bool SizeBinaryCondition::Evaluate(double meterInPixel, double meterInMM) const
+  {
+    switch (sizeUnit) {
+    case pixel:
+      switch (op) {
+      case operatorLess:
+        return meterInPixel<displaySize;
+      case operatorLessEqual:
+        return meterInPixel<=displaySize;
+      case operatorEqual:
+        return meterInPixel==displaySize;
+      case operatorGreaterEqual:
+        return meterInPixel>=displaySize;
+      case operatorGreater:
+        return meterInPixel>displaySize;
+      default:
+        return false;
+      }
+    case mm:
+      switch (op) {
+      case operatorLess:
+        return meterInMM<displaySize;
+      case operatorLessEqual:
+        return meterInMM<=displaySize;
+      case operatorEqual:
+        return meterInMM==displaySize;
+      case operatorGreaterEqual:
+        return meterInMM>=displaySize;
+      case operatorGreater:
+        return meterInMM>displaySize;
+      default:
+        return false;
+      }
+    }
+
+    return false;
   }
 
   LineStyle::LineStyle()
    : lineColor(1.0,0.0,0.0,0.0),
-     alternateColor(1,0.0,0.0,0.0),
      outlineColor(1,0.0,0.0,0.0),
      gapColor(1,0.0,0.0,0.0),
      displayWidth(0),
      width(0),
-     fixedWidth(false),
      capStyle(capRound),
      outline(0)
   {
@@ -69,12 +156,10 @@ namespace osmscout {
 
   LineStyle::LineStyle(const LineStyle& style)
   : lineColor(style.lineColor),
-    alternateColor(style.alternateColor),
     outlineColor(style.outlineColor),
     gapColor(style.gapColor),
     displayWidth(style.displayWidth),
     width(style.width),
-    fixedWidth(style.fixedWidth),
     capStyle(style.capStyle),
     outline(style.outline),
     dash(style.dash)
@@ -85,13 +170,6 @@ namespace osmscout {
   LineStyle& LineStyle::SetLineColor(const Color& color)
   {
     this->lineColor=color;
-
-    return *this;
-  }
-
-  LineStyle& LineStyle::SetAlternateColor(const Color& color)
-  {
-    this->alternateColor=color;
 
     return *this;
   }
@@ -120,13 +198,6 @@ namespace osmscout {
   LineStyle& LineStyle::SetWidth(double value)
   {
     width=value;
-
-    return *this;
-  }
-
-  LineStyle& LineStyle::SetFixedWidth(bool fixedWidth)
-  {
-    this->fixedWidth=fixedWidth;
 
     return *this;
   }
@@ -162,9 +233,6 @@ namespace osmscout {
       case attrLineColor:
         lineColor=other.lineColor;
         break;
-      case attrAlternateColor:
-        alternateColor=other.alternateColor;
-        break;
       case attrOutlineColor:
         outlineColor=other.outlineColor;
         break;
@@ -176,9 +244,6 @@ namespace osmscout {
         break;
       case attrWidth:
         width=other.width;
-        break;
-      case attrFixedWidth:
-        fixedWidth=other.fixedWidth;
         break;
       case attrCapStyle:
         capStyle=other.capStyle;
@@ -879,6 +944,7 @@ namespace osmscout {
     this->minLevel=other.minLevel;
     this->maxLevel=other.maxLevel;
     this->oneway=other.oneway;
+    this->sizeCondition=other.sizeCondition;
   }
 
   StyleFilter& StyleFilter::SetTypes(const TypeSet& types)
@@ -909,9 +975,9 @@ namespace osmscout {
     return *this;
   }
 
-  StyleFilter& StyleFilter::AddSizeFilter(const SizeFilter& sizeFilter)
+  StyleFilter& StyleFilter::SetSizeCondition(SizeCondition* condition)
   {
-    this->sizeFilter.push_back(sizeFilter);
+    this->sizeCondition=condition;
 
     return *this;
   }
@@ -925,38 +991,56 @@ namespace osmscout {
   StyleCriteria::StyleCriteria(const StyleFilter& other)
   {
     this->oneway=other.GetOneway();
+    this->sizeCondition=other.GetSizeCondition();
   }
 
   StyleCriteria::StyleCriteria(const StyleCriteria& other)
   {
     this->oneway=other.oneway;
+    this->sizeCondition=other.sizeCondition;
   }
 
   bool StyleCriteria::operator==(const StyleCriteria& other) const
   {
-    return oneway==other.oneway;
+    return oneway==other.oneway &&
+           this->sizeCondition==other.sizeCondition;
   }
 
   bool StyleCriteria::operator!=(const StyleCriteria& other) const
   {
-    return oneway!=other.oneway;
+    return oneway!=other.oneway ||
+           this->sizeCondition!=other.sizeCondition;
   }
 
-  bool StyleCriteria::Matches(size_t level) const
+  bool StyleCriteria::Matches(double meterInPixel,
+                              double meterInMM) const
   {
     if (oneway) {
       return false;
+    }
+
+    if (sizeCondition.Valid()) {
+      if (!sizeCondition->Evaluate(meterInPixel,meterInMM)) {
+        return false;
+      }
     }
 
     return true;
   }
 
   bool StyleCriteria::Matches(const SegmentAttributes& attributes,
-                              size_t level) const
+                              double meterInPixel,
+                              double meterInMM) const
   {
     if (oneway &&
         !attributes.IsOneway()) {
       return false;
+    }
+
+    if (sizeCondition.Valid()) {
+      if (!sizeCondition->Evaluate(meterInPixel,meterInMM)) {
+        return false;
+      }
     }
 
     return true;
@@ -1142,7 +1226,7 @@ namespace osmscout {
       for (size_t level=0; level<selectors[type].size(); level++) {
 
         if (selectors[type][level].size()>=2) {
-          // If two consecutive conditions are equal, one can be remove and the style can get merged
+          // If two consecutive conditions are equal, one can be removed and the style can get merged
           typename std::list<StyleSelector<S,A> >::iterator prevSelector=selectors[type][level].begin();
           typename std::list<StyleSelector<S,A> >::iterator curSelector=prevSelector;
 
@@ -1546,11 +1630,14 @@ namespace osmscout {
   template <class S, class A>
   void GetStyle(const std::vector<std::list<StyleSelector<S,A> > >& styleSelectors,
                 const Projection& projection,
+                double dpi,
                 Ref<S>& style)
   {
     bool   fastpath=style.Invalid();
     bool   composed=false;
     size_t level=projection.GetMagnification().GetLevel();
+    double meterInPixel=1/projection.GetPixelSize();
+    double meterInMM=meterInPixel*25.4/dpi;
 
     if (level>=styleSelectors.size()) {
       level=styleSelectors.size()-1;
@@ -1563,7 +1650,8 @@ namespace osmscout {
          ++s) {
       const StyleSelector<S,A>& selector=*s;
 
-      if (!selector.criteria.Matches(level)) {
+      if (!selector.criteria.Matches(meterInPixel,
+                                     meterInMM)) {
         continue;
       }
 
@@ -1591,11 +1679,14 @@ namespace osmscout {
   void GetNodeStyle(const std::vector<std::list<StyleSelector<S,A> > >& styleSelectors,
                     const Node& node,
                     const Projection& projection,
+                    double dpi,
                     Ref<S>& style)
   {
     bool   fastpath=false;
     bool   composed=false;
     size_t level=projection.GetMagnification().GetLevel();
+    double meterInPixel=1/projection.GetPixelSize();
+    double meterInMM=meterInPixel*25.4/dpi;
 
     if (level>=styleSelectors.size()) {
       level=styleSelectors.size()-1;
@@ -1608,7 +1699,8 @@ namespace osmscout {
          ++s) {
       const StyleSelector<S,A>& selector=*s;
 
-      if (!selector.criteria.Matches(level)) {
+      if (!selector.criteria.Matches(meterInPixel,
+                                     meterInMM)) {
         continue;
       }
 
@@ -1638,11 +1730,14 @@ namespace osmscout {
   void GetSegmentAttributesStyle(const std::vector<std::list<StyleSelector<S,A> > >& styleSelectors,
                                  const SegmentAttributes& attributes,
                                  const Projection& projection,
+                                 double dpi,
                                  Ref<S>& style)
   {
     bool   fastpath=false;
     bool   composed=false;
     size_t level=projection.GetMagnification().GetLevel();
+    double meterInPixel=1/projection.GetPixelSize();
+    double meterInMM=meterInPixel*25.4/dpi;
 
     if (level>=styleSelectors.size()) {
       level=styleSelectors.size()-1;
@@ -1655,7 +1750,9 @@ namespace osmscout {
          ++s) {
       const StyleSelector<S,A>& selector=*s;
 
-      if (!selector.criteria.Matches(attributes,level)) {
+      if (!selector.criteria.Matches(attributes,
+                                     meterInPixel,
+                                     meterInMM)) {
         continue;
       }
 
@@ -1683,131 +1780,159 @@ namespace osmscout {
 
   void StyleConfig::GetNodeTextStyle(const Node& node,
                                      const Projection& projection,
+                                     double dpi,
                                      TextStyleRef& textStyle) const
   {
     GetNodeStyle(nodeTextStyleSelectors[node.GetType()],
                  node,
                  projection,
+                 dpi,
                  textStyle);
   }
 
   void StyleConfig::GetNodeIconStyle(const Node& node,
                                      const Projection& projection,
+                                     double dpi,
                                      IconStyleRef& iconStyle) const
   {
     GetNodeStyle(nodeIconStyleSelectors[node.GetType()],
                  node,
                  projection,
+                 dpi,
                  iconStyle);
   }
 
   void StyleConfig::GetWayLineStyle(const SegmentAttributes& way,
                                     const Projection& projection,
+                                    double dpi,
                                     LineStyleRef& lineStyle) const
   {
     GetSegmentAttributesStyle(wayLineStyleSelectors[way.GetType()],
                               way,
                               projection,
+                              dpi,
                               lineStyle);
   }
 
   void StyleConfig::GetWayPathTextStyle(const SegmentAttributes& way,
                                         const Projection& projection,
+                                        double dpi,
                                         PathTextStyleRef& pathTextStyle) const
   {
     GetSegmentAttributesStyle(wayPathTextStyleSelectors[way.GetType()],
                               way,
                               projection,
+                              dpi,
                               pathTextStyle);
   }
 
   void StyleConfig::GetWayPathSymbolStyle(const SegmentAttributes& way,
                                           const Projection& projection,
+                                          double dpi,
                                           PathSymbolStyleRef& pathSymbolStyle) const
   {
     GetSegmentAttributesStyle(wayPathSymbolStyleSelectors[way.GetType()],
                               way,
                               projection,
+                              dpi,
                               pathSymbolStyle);
   }
 
   void StyleConfig::GetWayPathShieldStyle(const SegmentAttributes& way,
                                           const Projection& projection,
+                                          double dpi,
                                           PathShieldStyleRef& pathShieldStyle) const
   {
     GetSegmentAttributesStyle(wayPathShieldStyleSelectors[way.GetType()],
                               way,
                               projection,
+                              dpi,
                               pathShieldStyle);
   }
 
   void StyleConfig::GetAreaFillStyle(const SegmentAttributes& area,
                                      const Projection& projection,
+                                     double dpi,
                                      FillStyleRef& fillStyle) const
   {
     GetSegmentAttributesStyle(areaFillStyleSelectors[area.GetType()],
                               area,
                               projection,
+                              dpi,
                               fillStyle);
   }
 
   void StyleConfig::GetAreaTextStyle(const SegmentAttributes& area,
                                      const Projection& projection,
+                                     double dpi,
                                      TextStyleRef& textStyle) const
   {
     GetSegmentAttributesStyle(areaTextStyleSelectors[area.GetType()],
                               area,
                               projection,
+                              dpi,
                               textStyle);
   }
 
   void StyleConfig::GetAreaIconStyle(const SegmentAttributes& area,
                                      const Projection& projection,
+                                     double dpi,
                                      IconStyleRef& iconStyle) const
   {
     GetSegmentAttributesStyle(areaIconStyleSelectors[area.GetType()],
                               area,
                               projection,
+                              dpi,
                               iconStyle);
   }
 
   void StyleConfig::GetLandFillStyle(const Projection& projection,
+                                     double dpi,
                                      FillStyleRef& fillStyle) const
   {
     GetStyle(areaFillStyleSelectors[typeConfig->typeTileLand],
              projection,
+             dpi,
              fillStyle);
   }
 
   void StyleConfig::GetSeaFillStyle(const Projection& projection,
+                                    double dpi,
                                     FillStyleRef& fillStyle) const
   {
     GetStyle(areaFillStyleSelectors[typeConfig->typeTileSea],
              projection,
+             dpi,
              fillStyle);
   }
 
   void StyleConfig::GetCoastFillStyle(const Projection& projection,
+                                      double dpi,
                                       FillStyleRef& fillStyle) const
   {
     GetStyle(areaFillStyleSelectors[typeConfig->typeTileCoast],
              projection,
+             dpi,
              fillStyle);
   }
 
   void StyleConfig::GetUnknownFillStyle(const Projection& projection,
+                                        double dpi,
                                         FillStyleRef& fillStyle) const
   {
     GetStyle(areaFillStyleSelectors[typeConfig->typeTileUnknown],
              projection,
+             dpi,
              fillStyle);
   }
 
   void StyleConfig::GetCoastlineLineStyle(const Projection& projection,
+                                          double dpi,
                                           LineStyleRef& lineStyle) const
   {
     GetStyle(wayLineStyleSelectors[typeConfig->typeTileCoastline],
              projection,
+             dpi,
              lineStyle);
   }
 }

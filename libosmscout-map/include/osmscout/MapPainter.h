@@ -519,6 +519,12 @@ namespace osmscout {
                              double minPixel,
                              double width) const;
 
+    inline double GetProjectedWidth(const Projection& projection,
+                                    double width) const
+    {
+      return width/projection.GetPixelSize();
+    }
+
     /**
      * Convert a width in mm into the equivalent pixel size based on the given DPI
      *
@@ -533,6 +539,12 @@ namespace osmscout {
                                       double width) const
     {
       return width*parameter.GetDPI()/25.4;
+    }
+
+    inline double ConvertPixelToWidth(const MapParameter& parameter,
+                                      double pixel) const
+    {
+      return pixel*25.4/parameter.GetDPI();
     }
 
     //@}

@@ -47,8 +47,8 @@ class Token : public osmscout::Referencable
 {
 public:
   int      kind;    // token kind
-  int      pos;     // token position in the source text (starting at 0)
-  int      charPos; // token position in characters in the source text (starting at 0)
+  size_t   pos;     // token position in the source text (starting at 0)
+  size_t   charPos; // token position in characters in the source text (starting at 0)
   int      col;     // token column (starting at 1)
   int      line;    // token line (starting at 1)
   char*    val;     // token value
@@ -61,21 +61,21 @@ public:
 class Buffer
 {
 private:
-  unsigned char *buf; // input buffer
-  int bufLen;         // length of buffer
-  int bufPos;         // current position in buffer
+  unsigned char *buf;   // input buffer
+  size_t        bufLen; // length of buffer
+  size_t        bufPos; // current position in buffer
 
 public:
   static const int EoF = COCO_WCHAR_MAX + 1;
 
-  Buffer(const unsigned char* buf, int len);
+  Buffer(const unsigned char* buf, size_t len);
   virtual ~Buffer();
 
   int Read();
   int Peek();
   //wchar_t* GetString(int beg, int end);
-  int GetPos();
-  void SetPos(int value);
+  size_t GetPos();
+  void SetPos(size_t value);
 };
 
 //-----------------------------------------------------------------------------------
@@ -155,28 +155,28 @@ class Scanner
 {
 private:
   unsigned char EOL;
-  int eofSym;
-  int noSym;
-  int maxT;
-  int charSetSize;
-  StartStates start;
-  KeywordMap keywords;
+  int           eofSym;
+  int           noSym;
+  int           maxT;
+  int           charSetSize;
+  StartStates   start;
+  KeywordMap    keywords;
 
-  TokenRef t;      // current token
-  char *tval;      // text of current token
-  int tvalLength;  // length of text of current token
-  int tlen;        // length of current token
+  TokenRef      t;          // current token
+  char          *tval;      // text of current token
+  size_t        tvalLength; // length of text of current token
+  size_t        tlen;       // length of current token
 
-  TokenRef tokens; // list of tokens already peeked (first token is a dummy)
-  TokenRef pt;     // current peek token
+  TokenRef      tokens;     // list of tokens already peeked (first token is a dummy)
+  TokenRef      pt;         // current peek token
 
-  int ch;          // current input character
+  int           ch;         // current input character
 
-  int pos;         // byte position of current character
-  int charPos;     // position by unicode characters starting with 0
-  int line;        // line number of current character
-  int col;         // column number of current character
-  int oldEols;     // EOLs that appeared in a comment;
+  size_t        pos;        // byte position of current character
+  size_t        charPos;    // position by unicode characters starting with 0
+  int           line;       // line number of current character
+  int           col;        // column number of current character
+  int           oldEols;    // EOLs that appeared in a comment;
 
   Token* CreateToken();
   void AppendVal(Token *t);
@@ -192,7 +192,7 @@ private:
 public:
   Buffer *buffer;   // scanner buffer
 
-  Scanner(const unsigned char* buf, int len);
+  Scanner(const unsigned char* buf, size_t len);
   ~Scanner();
   Token* Scan();
   void SetScannerBehindT();

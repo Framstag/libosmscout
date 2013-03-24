@@ -511,6 +511,7 @@ namespace osmscout {
 #endif
 
     styleConfig.GetLandFillStyle(projection,
+                                 parameter.GetDPI(),
                                  landFill);
 
     if (landFill.Invalid()) {
@@ -533,12 +534,16 @@ namespace osmscout {
     size_t                start,end;
 
     styleConfig.GetSeaFillStyle(projection,
+                                parameter.GetDPI(),
                                 seaFill);
     styleConfig.GetCoastFillStyle(projection,
+                                  parameter.GetDPI(),
                                   coastFill);
     styleConfig.GetUnknownFillStyle(projection,
+                                    parameter.GetDPI(),
                                     unknownFill);
     styleConfig.GetCoastlineLineStyle(projection,
+                                      parameter.GetDPI(),
                                       coastlineLine);
 
     if (seaFill.Invalid()) {
@@ -982,8 +987,14 @@ namespace osmscout {
     TextStyleRef  textStyle;
     IconStyleRef  iconStyle;
 
-    styleConfig.GetAreaTextStyle(attributes,projection,textStyle);
-    styleConfig.GetAreaIconStyle(attributes,projection,iconStyle);
+    styleConfig.GetAreaTextStyle(attributes,
+                                 projection,
+                                 parameter.GetDPI(),
+                                 textStyle);
+    styleConfig.GetAreaIconStyle(attributes,
+                                 projection,
+                                 parameter.GetDPI(),
+                                 iconStyle);
 
     bool          hasLabel=textStyle.Valid();
     bool          hasSymbol=iconStyle.Valid() && iconStyle->GetSymbol().Valid();
@@ -1105,9 +1116,11 @@ namespace osmscout {
 
     styleConfig.GetNodeTextStyle(node,
                                  projection,
+                                 parameter.GetDPI(),
                                  textStyle);
     styleConfig.GetNodeIconStyle(node,
                                  projection,
+                                 parameter.GetDPI(),
                                  iconStyle);
 
     bool         hasLabel=textStyle.Valid();
@@ -1289,11 +1302,6 @@ namespace osmscout {
       // Draw line with normal color
       color=data.lineStyle->GetLineColor();
     }
-    else if (data.lineStyle->GetAlternateColor().IsVisible()) {
-      // Should draw outline, but resolution is too low
-      // Draw line with alternate color
-      color=data.lineStyle->GetAlternateColor();
-    }
     else {
       // Draw line with normal color
       color=data.lineStyle->GetLineColor();
@@ -1380,6 +1388,7 @@ namespace osmscout {
 
       styleConfig.GetWayPathSymbolStyle(*way->attributes,
                                         projection,
+                                        parameter.GetDPI(),
                                         pathSymbolStyle);
 
       if (pathSymbolStyle.Valid()) {
@@ -1408,8 +1417,14 @@ namespace osmscout {
     PathShieldStyleRef shieldStyle;
     PathTextStyleRef   pathTextStyle;
 
-    styleConfig.GetWayPathShieldStyle(*data.attributes,projection,shieldStyle);
-    styleConfig.GetWayPathTextStyle(*data.attributes,projection,pathTextStyle);
+    styleConfig.GetWayPathShieldStyle(*data.attributes,
+                                      projection,
+                                      parameter.GetDPI(),
+                                      shieldStyle);
+    styleConfig.GetWayPathTextStyle(*data.attributes,
+                                    projection,
+                                    parameter.GetDPI(),
+                                    pathTextStyle);
 
     if (pathTextStyle.Valid()) {
       switch (pathTextStyle->GetLabel()) {
@@ -1545,6 +1560,7 @@ namespace osmscout {
 
     styleConfig.GetAreaFillStyle(attributes,
                                  projection,
+                                 parameter.GetDPI(),
                                  fillStyle);
 
     if (fillStyle.Invalid())
@@ -1662,6 +1678,7 @@ namespace osmscout {
               if (relation->GetType()!=typeIgnore) {
                 styleConfig.GetAreaFillStyle(relation->GetAttributes(),
                                              projection,
+                                             parameter.GetDPI(),
                                              fillStyle);
               }
             }
@@ -1669,6 +1686,7 @@ namespace osmscout {
               if (relation->GetType()!=typeIgnore) {
                 styleConfig.GetAreaFillStyle(role.GetAttributes(),
                                              projection,
+                                             parameter.GetDPI(),
                                              fillStyle);
               }
             }
@@ -1746,6 +1764,7 @@ namespace osmscout {
 
     styleConfig.GetWayLineStyle(attributes,
                                 projection,
+                                parameter.GetDPI(),
                                 lineStyle);
 
     if (lineStyle.Invalid()) {
@@ -1754,6 +1773,26 @@ namespace osmscout {
 
     double lineWidth;
 
+    if (lineStyle->GetWidth()>0.0) {
+      if (attributes.GetWidth()>0.0) {
+        lineWidth=GetProjectedWidth(projection,
+                                    ConvertWidthToPixel(parameter,lineStyle->GetDisplayWidth()),
+                                    attributes.GetWidth());
+      }
+      else {
+        lineWidth=GetProjectedWidth(projection,
+                                    ConvertWidthToPixel(parameter,lineStyle->GetDisplayWidth()),
+                                    lineStyle->GetWidth());
+      }
+    }
+    else if (lineStyle->GetDisplayWidth()>0.0) {
+      lineWidth=ConvertWidthToPixel(parameter,lineStyle->GetDisplayWidth());
+    }
+    else {
+      return;
+    }
+
+    /*
     if (lineStyle->GetWidth()==0) {
       lineWidth=ConvertWidthToPixel(parameter,lineStyle->GetDisplayWidth());
     }
@@ -1767,13 +1806,25 @@ namespace osmscout {
       lineWidth=GetProjectedWidth(projection,
                                   ConvertWidthToPixel(parameter,lineStyle->GetDisplayWidth()),
                                   attributes.GetWidth());
-    }
+    }*/
 
     WayData data;
 
     data.ref=ref;
     data.lineWidth=lineWidth;
 
+    if (lineStyle->GetOutline()>0.0) {
+      double convertedOutlineWidth=ConvertWidthToPixel(parameter,2*lineStyle->GetOutline());
+
+      data.outlineWidth=lineWidth+convertedOutlineWidth;
+      data.outline=true;
+    }
+    else {
+      data.outlineWidth=data.lineWidth;
+      data.outline=false;
+    }
+
+      /*
     if (lineStyle->GetOutline()>0.0) {
       double convertedOutlineWidth=ConvertWidthToPixel(parameter,2*lineStyle->GetOutline());
 
@@ -1794,7 +1845,7 @@ namespace osmscout {
     else {
       data.outline=false;
       data.outlineWidth=data.lineWidth;
-    }
+    }*/
 
     if (data.outline) {
 
@@ -2167,6 +2218,12 @@ namespace osmscout {
     labelsTimer.Stop();
 
     if (parameter.IsDebugPerformance()) {
+
+      double meterInPixel=1/projection.GetPixelSize();
+      double meterInMM=ConvertPixelToWidth(parameter,meterInPixel);
+
+      std::cout << "1m = " << meterInPixel << "px" << " " << 20*meterInPixel << "px" << std::endl;
+      std::cout << "1m = " << meterInMM  << "mm" << " " << 20*meterInMM << "mm" << std::endl;
 
       std::cout << "Paths: ";
       std::cout << data.ways.size() << "+" << data.relationWays.size() << "/" << waysSegments << "/" << waysDrawn << "/" << waysOutlineDrawn << "/" << waysLabelDrawn << " (pcs) ";

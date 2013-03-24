@@ -63,32 +63,65 @@ namespace osmscout {
     }
   };
 
-  class OSMSCOUT_MAP_API SizeFilter
+  class OSMSCOUT_API SizeCondition : public Referencable
   {
-    public:
-      enum Operator {
-        less,
-        lessEqual,
-        greaterEqual,
-        greater
-      };
+  public:
+    virtual ~SizeCondition();
 
+    virtual bool Evaluate(double meterInPixel, double meterInMM) const = 0;
+  };
+
+  typedef Ref<SizeCondition> SizeConditionRef;
+
+  class OSMSCOUT_API SizeNotCondition : public SizeCondition
+  {
+  private:
+    SizeConditionRef condition;
+
+  public:
+    SizeNotCondition(SizeCondition* condition);
+
+    bool Evaluate(double meterInPixel, double meterInMM) const;
+  };
+
+  class OSMSCOUT_API SizeBoolCondition : public SizeCondition
+  {
+  public:
+    enum Type {
+      boolAnd,
+      boolOr
+    };
+
+  private:
+    std::list<SizeConditionRef> conditions;
+    Type                        type;
+
+  public:
+    SizeBoolCondition(Type type);
+
+    void AddCondition(SizeCondition* condition);
+
+    bool Evaluate(double meterInPixel, double meterInMM) const;
+  };
+
+  class OSMSCOUT_API SizeBinaryCondition : public SizeCondition
+  {
+  public:
       enum SizeUnit {
         pixel,
         mm
       };
-
   private:
-    Operator op;
-    double   displaySize;
-    SizeUnit sizeUnit;
+    BinaryOperator op;
+    double         displaySize;
+    SizeUnit       sizeUnit;
 
   public:
-    SizeFilter();
+    SizeBinaryCondition(BinaryOperator op,
+                        double displaySize,
+                        SizeUnit sizeUnit);
 
-    void Set(Operator op,
-             double displaySize,
-             SizeUnit sizeUnit);
+    bool Evaluate(double meterInPixel, double meterInMM) const;
   };
 
   /**
@@ -104,7 +137,7 @@ namespace osmscout {
     size_t                minLevel;
     size_t                maxLevel;
     bool                  oneway;
-    std::list<SizeFilter> sizeFilter;
+    SizeConditionRef      sizeCondition;
 
   public:
     StyleFilter();
@@ -116,7 +149,7 @@ namespace osmscout {
     StyleFilter& SetMaxLevel(size_t level);
     StyleFilter& SetOneway(bool oneway);
 
-    StyleFilter& AddSizeFilter(const SizeFilter& sizeFilter);
+    StyleFilter& SetSizeCondition(SizeCondition* condition);
 
     inline bool HasTypes() const
     {
@@ -147,6 +180,11 @@ namespace osmscout {
     {
       return maxLevel!=std::numeric_limits<size_t>::max();
     }
+
+    inline const SizeConditionRef& GetSizeCondition() const
+    {
+      return sizeCondition;
+    }
   };
 
   /**
@@ -159,7 +197,8 @@ namespace osmscout {
   public:
 
   private:
-    bool oneway;
+    bool             oneway;
+    SizeConditionRef sizeCondition;
 
   public:
     StyleCriteria();
@@ -174,9 +213,11 @@ namespace osmscout {
       return oneway;
     }
 
-   bool Matches(size_t level) const;
+   bool Matches(double meterInPixel,
+                double meterInMM) const;
    bool Matches(const SegmentAttributes& attributes,
-                size_t level) const;
+                double meterInPixel,
+                double meterInMM) const;
   };
 
   /**
@@ -251,12 +292,10 @@ namespace osmscout {
 
     enum Attribute {
       attrLineColor,
-      attrAlternateColor,
       attrOutlineColor,
       attrGapColor,
       attrDisplayWidth,
       attrWidth,
-      attrFixedWidth,
       attrCapStyle,
       attrOutline,
       attrDashes
@@ -264,12 +303,10 @@ namespace osmscout {
 
   private:
     Color               lineColor;
-    Color               alternateColor;
     Color               outlineColor;
     Color               gapColor;
     double              displayWidth;
     double              width;
-    bool                fixedWidth;
     CapStyle            capStyle;
     double              outline;
     std::vector<double> dash;
@@ -279,12 +316,10 @@ namespace osmscout {
     LineStyle(const LineStyle& style);
 
     LineStyle& SetLineColor(const Color& color);
-    LineStyle& SetAlternateColor(const Color& color);
     LineStyle& SetOutlineColor(const Color& color);
     LineStyle& SetGapColor(const Color& color);
     LineStyle& SetDisplayWidth(double value);
     LineStyle& SetWidth(double value);
-    LineStyle& SetFixedWidth(bool fixedWidth);
     LineStyle& SetCapStyle(CapStyle capStyle);
     LineStyle& SetOutline(double value);
     LineStyle& SetDashes(const std::vector<double> dashes);
@@ -300,11 +335,6 @@ namespace osmscout {
     inline const Color& GetLineColor() const
     {
       return lineColor;
-    }
-
-    inline const Color& GetAlternateColor() const
-    {
-      return alternateColor;
     }
 
     inline const Color& GetOutlineColor() const
@@ -325,11 +355,6 @@ namespace osmscout {
     inline double GetWidth() const
     {
       return width;
-    }
-
-    inline bool GetFixedWidth() const
-    {
-      return fixedWidth;
     }
 
     inline CapStyle GetCapStyle() const
@@ -1211,44 +1236,58 @@ namespace osmscout {
 
     void GetNodeTextStyle(const Node& node,
                           const Projection& projection,
+                          double dpi,
                           TextStyleRef& textStyle) const;
 
     void GetNodeIconStyle(const Node& node,
                           const Projection& projection,
+                          double dpi,
                           IconStyleRef& iconStyle) const;
 
     void GetWayLineStyle(const SegmentAttributes& way,
                          const Projection& projection,
+                          double dpi,
                          LineStyleRef& lineStyle) const;
     void GetWayPathTextStyle(const SegmentAttributes& way,
                              const Projection& projection,
+                             double dpi,
                              PathTextStyleRef& pathTextStyle) const;
     void GetWayPathSymbolStyle(const SegmentAttributes& way,
                                const Projection& projection,
+                               double dpi,
                                PathSymbolStyleRef& pathSymbolStyle) const;
     void GetWayPathShieldStyle(const SegmentAttributes& way,
                                const Projection& projection,
+                               double dpi,
                                PathShieldStyleRef& pathShieldStyle) const;
 
     void GetAreaFillStyle(const SegmentAttributes& area,
                           const Projection& projection,
+                          double dpi,
                           FillStyleRef& fillStyle) const;
     void GetAreaTextStyle(const SegmentAttributes& area,
                           const Projection& projection,
+                          double dpi,
                           TextStyleRef& textStyle) const;
     void GetAreaIconStyle(const SegmentAttributes& area,
                           const Projection& projection,
+                          double dpi,
                           IconStyleRef& iconStyle) const;
 
     void GetLandFillStyle(const Projection& projection,
+                          double dpi,
                           FillStyleRef& fillStyle) const;
     void GetSeaFillStyle(const Projection& projection,
+                          double dpi,
                          FillStyleRef& fillStyle) const;
     void GetCoastFillStyle(const Projection& projection,
+                          double dpi,
                            FillStyleRef& fillStyle) const;
     void GetUnknownFillStyle(const Projection& projection,
+                             double dpi,
                              FillStyleRef& fillStyle) const;
     void GetCoastlineLineStyle(const Projection& projection,
+                               double dpi,
                                LineStyleRef& lineStyle) const;
   };
 }

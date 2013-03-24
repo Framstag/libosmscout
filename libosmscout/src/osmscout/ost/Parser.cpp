@@ -171,14 +171,14 @@ void Parser::TYPE() {
 		Expect(8 /* "=" */);
 		TYPEKINDS(types);
 		Expect(9 /* "(" */);
-		CONDITION(condition);
+		TAGCONDITION(condition);
 		Expect(10 /* ")" */);
 		typeInfo.AddCondition(types,condition); 
 		while (la->kind == 11 /* "OR" */) {
 			Get();
 			TYPEKINDS(types);
 			Expect(9 /* "(" */);
-			CONDITION(condition);
+			TAGCONDITION(condition);
 			Expect(10 /* ")" */);
 			typeInfo.AddCondition(types,condition); 
 		}
@@ -208,15 +208,15 @@ void Parser::TYPEKINDS(unsigned char& types) {
 		}
 }
 
-void Parser::CONDITION(TagCondition*& condition) {
+void Parser::TAGCONDITION(TagCondition*& condition) {
 		std::list<TagCondition*> conditions;
 		TagCondition             *subCond;
 		
-		ANDCOND(subCond);
+		TAGANDCOND(subCond);
 		conditions.push_back(subCond); 
 		while (la->kind == 11 /* "OR" */) {
 			Get();
-			ANDCOND(subCond);
+			TAGANDCOND(subCond);
 			conditions.push_back(subCond); 
 		}
 		if (conditions.size()==1) {
@@ -260,15 +260,15 @@ void Parser::TAG() {
 		
 }
 
-void Parser::ANDCOND(TagCondition*& condition) {
+void Parser::TAGANDCOND(TagCondition*& condition) {
 		std::list<TagCondition*> conditions;
 		TagCondition             *subCond;
 		
-		BOOLCOND(subCond);
+		TAGBOOLCOND(subCond);
 		conditions.push_back(subCond); 
 		while (la->kind == 15 /* "AND" */) {
 			Get();
-			BOOLCOND(subCond);
+			TAGBOOLCOND(subCond);
 			conditions.push_back(subCond); 
 		}
 		if (conditions.size()==1) {
@@ -288,44 +288,44 @@ void Parser::ANDCOND(TagCondition*& condition) {
 		
 }
 
-void Parser::BOOLCOND(TagCondition*& condition) {
+void Parser::TAGBOOLCOND(TagCondition*& condition) {
 		if (la->kind == _string) {
-			BINARYCOND(condition);
+			TAGBINCOND(condition);
 		} else if (la->kind == 23 /* "EXISTS" */) {
-			EXISTSCOND(condition);
+			TAGEXISTSCOND(condition);
 		} else if (la->kind == 9 /* "(" */) {
 			Get();
-			CONDITION(condition);
+			TAGCONDITION(condition);
 			Expect(10 /* ")" */);
 		} else if (la->kind == 16 /* "!" */) {
 			Get();
-			BOOLCOND(condition);
+			TAGBOOLCOND(condition);
 			condition=new TagNotCondition(condition); 
 		} else SynErr(42);
 }
 
-void Parser::BINARYCOND(TagCondition*& condition) {
+void Parser::TAGBINCOND(TagCondition*& condition) {
 		std::string nameValue;
 		
 		Expect(_string);
 		nameValue=Destring(t->val); 
 		if (la->kind == 17 /* "==" */) {
-			EQUALSCOND(nameValue,condition);
+			TAGEQUALSCOND(nameValue,condition);
 		} else if (la->kind == 18 /* "!=" */) {
-			NOTEQUALSCOND(nameValue,condition);
+			TAGNOTEQUALSCOND(nameValue,condition);
 		} else if (la->kind == 19 /* "IN" */) {
-			ISINCOND(nameValue,condition);
+			TAGISINCOND(nameValue,condition);
 		} else SynErr(43);
 }
 
-void Parser::EXISTSCOND(TagCondition*& condition) {
+void Parser::TAGEXISTSCOND(TagCondition*& condition) {
 		Expect(23 /* "EXISTS" */);
 		Expect(_string);
 		condition=new TagExistsCondition(config.RegisterTagForInternalUse(Destring(t->val)));
 		
 }
 
-void Parser::EQUALSCOND(const std::string& tagName,TagCondition*& condition) {
+void Parser::TAGEQUALSCOND(const std::string& tagName,TagCondition*& condition) {
 		std::string valueValue;
 		
 		Expect(17 /* "==" */);
@@ -337,7 +337,7 @@ void Parser::EQUALSCOND(const std::string& tagName,TagCondition*& condition) {
 		
 }
 
-void Parser::NOTEQUALSCOND(const std::string& tagName,TagCondition*& condition) {
+void Parser::TAGNOTEQUALSCOND(const std::string& tagName,TagCondition*& condition) {
 		std::string valueValue;
 		
 		Expect(18 /* "!=" */);
@@ -349,7 +349,7 @@ void Parser::NOTEQUALSCOND(const std::string& tagName,TagCondition*& condition) 
 		
 }
 
-void Parser::ISINCOND(const std::string& tagName,TagCondition*& condition) {
+void Parser::TAGISINCOND(const std::string& tagName,TagCondition*& condition) {
 		std::list<std::string> values;
 		
 		Expect(19 /* "IN" */);
@@ -542,8 +542,8 @@ void Errors::SynErr(int line, int col, int n)
 			case 39: s = coco_string_create("this symbol not expected in TAGS"); break;
 			case 40: s = coco_string_create("this symbol not expected in TYPE"); break;
 			case 41: s = coco_string_create("this symbol not expected in TAG"); break;
-			case 42: s = coco_string_create("invalid BOOLCOND"); break;
-			case 43: s = coco_string_create("invalid BINARYCOND"); break;
+			case 42: s = coco_string_create("invalid TAGBOOLCOND"); break;
+			case 43: s = coco_string_create("invalid TAGBINCOND"); break;
 			case 44: s = coco_string_create("invalid TYPEKIND"); break;
 			case 45: s = coco_string_create("invalid TYPEOPTION"); break;
 
