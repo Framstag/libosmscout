@@ -699,9 +699,9 @@ namespace osmscout {
       // Left to right
       for (uint32_t y=0; y<level.cellYCount; y++) {
         uint32_t x=0;
-        int start=0;
-        int end=0;
-        int state=0;
+        uint32_t start=0;
+        uint32_t end=0;
+        uint32_t state=0;
 
         while (x<level.cellXCount) {
           switch (state) {
@@ -751,9 +751,9 @@ namespace osmscout {
       //Bottom Up
       for (uint32_t x=0; x<level.cellXCount; x++) {
         uint32_t y=0;
-        int start=0;
-        int end=0;
-        int state=0;
+        uint32_t start=0;
+        uint32_t end=0;
+        uint32_t state=0;
 
         while (y<level.cellYCount) {
           switch (state) {
