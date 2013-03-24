@@ -690,19 +690,31 @@ void Parser::SIZECONDITION(SizeCondition*& condition) {
 		
 		DOUBLE(widthInMeter);
 		Expect(31 /* "m" */);
+		if (widthInMeter<0.0) {
+		std::string e="Width must be >= 0.0";
+		
+		SemErr(e.c_str());
+		}
+		
 		if (la->kind == _number || la->kind == _double || la->kind == 33 /* ":" */) {
 			if (la->kind == _number || la->kind == _double) {
 				double minMM; 
 				DOUBLE(minMM);
 				Expect(32 /* "mm" */);
-				condition->SetMinMM(minMM/widthInMeter); 
+				if (widthInMeter>0.0) {
+				 condition->SetMinMM(minMM/widthInMeter);
+				}
+				
 			}
 			Expect(33 /* ":" */);
 			if (la->kind == _number || la->kind == _double) {
 				double minPx; 
 				DOUBLE(minPx);
 				Expect(34 /* "px" */);
-				condition->SetMinPx(minPx/widthInMeter); 
+				if (widthInMeter>0.0) {
+				 condition->SetMinPx(minPx/widthInMeter);
+				}
+				
 			}
 		}
 		Expect(35 /* "<" */);
@@ -711,14 +723,20 @@ void Parser::SIZECONDITION(SizeCondition*& condition) {
 				double maxMM; 
 				DOUBLE(maxMM);
 				Expect(32 /* "mm" */);
-				condition->SetMaxMM(maxMM/widthInMeter); 
+				if (widthInMeter>0.0) {
+				 condition->SetMaxMM(maxMM/widthInMeter);
+				}
+				
 			}
 			Expect(33 /* ":" */);
 			if (la->kind == _number || la->kind == _double) {
 				double maxPx; 
 				DOUBLE(maxPx);
 				Expect(34 /* "px" */);
-				condition->SetMaxPx(maxPx/widthInMeter); 
+				if (widthInMeter>0.0) {
+				 condition->SetMaxPx(maxPx/widthInMeter);
+				}
+				
 			}
 		}
 }

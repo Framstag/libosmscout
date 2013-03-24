@@ -439,18 +439,31 @@ PRODUCTIONS
                 .)
 
                 DOUBLE<widthInMeter> "m"
+                (.
+                  if (widthInMeter<0.0) {
+                   std::string e="Width must be >= 0.0";
+
+                   SemErr(e.c_str());
+                  }
+                .)
 
                 [
                   [
                     (. double minMM; .)
                     DOUBLE<minMM> "mm"
-                    (. condition->SetMinMM(minMM/widthInMeter); .)
+                    (. if (widthInMeter>0.0) {
+                         condition->SetMinMM(minMM/widthInMeter);
+                       }
+                    .)
                   ]
                   ":"
                   [
                     (. double minPx; .)
                     DOUBLE<minPx> "px"
-                    (. condition->SetMinPx(minPx/widthInMeter); .)
+                    (. if (widthInMeter>0.0) {
+                         condition->SetMinPx(minPx/widthInMeter);
+                        }
+                    .)
                   ]
                 ]
                 "<"
@@ -458,13 +471,19 @@ PRODUCTIONS
                   [
                     (. double maxMM; .)
                     DOUBLE<maxMM> "mm"
-                    (. condition->SetMaxMM(maxMM/widthInMeter); .)
+                    (. if (widthInMeter>0.0) {
+                         condition->SetMaxMM(maxMM/widthInMeter);
+                       }
+                    .)
                   ]
                   ":"
                   [
                     (. double maxPx; .)
                     DOUBLE<maxPx> "px"
-                    (. condition->SetMaxPx(maxPx/widthInMeter); .)
+                    (. if (widthInMeter>0.0) {
+                         condition->SetMaxPx(maxPx/widthInMeter);
+                       }
+                    .)
                   ]
                 ]
                 .
