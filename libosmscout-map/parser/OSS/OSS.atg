@@ -1071,6 +1071,8 @@ PRODUCTIONS
                | "close"     (. magnification.SetMagnification(Magnification::magClose); .)
                | "veryClose" (. magnification.SetMagnification(Magnification::magVeryClose); .)
                | "block"     (. magnification.SetMagnification(Magnification::magBlock); .)
+               | "street"    (. magnification.SetMagnification(Magnification::magStreet); .)
+               | "house"     (. magnification.SetMagnification(Magnification::magHouse); .)
                | (. size_t level; .)
                  UINT<level>
                  (. magnification.SetLevel((uint32_t)level); .)

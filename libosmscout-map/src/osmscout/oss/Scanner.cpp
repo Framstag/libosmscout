@@ -149,8 +149,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 86;
-	noSym = 86;
+	maxT = 88;
+	noSym = 88;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 95; i <= 95; ++i) start.set(i, 1);
@@ -239,6 +239,8 @@ void Scanner::Init() {
 	keywords.set("close", 83);
 	keywords.set("veryClose", 84);
 	keywords.set("block", 85);
+	keywords.set("street", 86);
+	keywords.set("house", 87);
 
 
   tvalLength = 128;
