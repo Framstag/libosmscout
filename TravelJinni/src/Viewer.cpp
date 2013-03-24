@@ -146,16 +146,13 @@ public:
 
     projection.GetDimensions(lonMin,latMin,lonMax,latMax);
 
-    double d=(lonMax-lonMin)*2*M_PI/360;
     double scaleSize;
     size_t minScaleWidth=width/20;
     size_t maxScaleWidth=width/10;
-    double scaleValue=d*180*60/M_PI*1852.216/(width/minScaleWidth);
-
-    //std::cout << "1/10 screen (" << width/10 << " pixels) are: " << scaleValue << " meters" << std::endl;
+    double scaleValue=projection.GetPixelSize()*minScaleWidth;
 
     scaleValue=pow(10,floor(log10(scaleValue))+1);
-    scaleSize=scaleValue/(d*180*60/M_PI*1852.216/width);
+    scaleSize=scaleValue/projection.GetPixelSize();
 
     if (scaleSize>minScaleWidth && scaleSize/2>minScaleWidth && scaleSize/2<=maxScaleWidth) {
       scaleValue=scaleValue/2;
