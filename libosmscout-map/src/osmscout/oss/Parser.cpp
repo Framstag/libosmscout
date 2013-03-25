@@ -800,7 +800,7 @@ void Parser::NODESTYLEDEF(StyleFilter filter) {
 void Parser::WAYSTYLEDEF(StyleFilter filter) {
 		while (!(la->kind == _EOF || la->kind == 40 /* "WAY" */)) {SynErr(105); Get();}
 		Expect(40 /* "WAY" */);
-		if (la->kind == 15 /* "{" */ || la->kind == 24 /* "[" */) {
+		if (la->kind == 15 /* "{" */) {
 			WAYSTYLE(filter);
 		} else if (la->kind == 37 /* "." */) {
 			Get();
@@ -817,7 +817,7 @@ void Parser::WAYSTYLEDEF(StyleFilter filter) {
 void Parser::AREASTYLEDEF(StyleFilter filter) {
 		while (!(la->kind == _EOF || la->kind == 42 /* "AREA" */)) {SynErr(108); Get();}
 		Expect(42 /* "AREA" */);
-		if (la->kind == 15 /* "{" */ || la->kind == 24 /* "[" */) {
+		if (la->kind == 15 /* "{" */) {
 			AREASTYLE(filter);
 		} else if (la->kind == 37 /* "." */) {
 			Get();
@@ -832,9 +832,6 @@ void Parser::AREASTYLEDEF(StyleFilter filter) {
 void Parser::NODETEXTSTYLE(StyleFilter filter) {
 		while (!(la->kind == _EOF || la->kind == 38 /* "TEXT" */)) {SynErr(111); Get();}
 		Expect(38 /* "TEXT" */);
-		if (la->kind == 24 /* "[" */) {
-			STYLEFILTER(filter);
-		}
 		TextPartialStyle style;
 		
 		while (!(la->kind == _EOF || la->kind == 15 /* "{" */)) {SynErr(112); Get();}
@@ -852,9 +849,6 @@ void Parser::NODETEXTSTYLE(StyleFilter filter) {
 void Parser::NODEICONSTYLE(StyleFilter filter) {
 		while (!(la->kind == _EOF || la->kind == 39 /* "ICON" */)) {SynErr(114); Get();}
 		Expect(39 /* "ICON" */);
-		if (la->kind == 24 /* "[" */) {
-			STYLEFILTER(filter);
-		}
 		IconPartialStyle style;
 		
 		while (!(la->kind == _EOF || la->kind == 15 /* "{" */)) {SynErr(115); Get();}
@@ -975,9 +969,6 @@ void Parser::ICONSTYLEATTR(IconPartialStyle& style) {
 }
 
 void Parser::WAYSTYLE(StyleFilter filter) {
-		if (la->kind == 24 /* "[" */) {
-			STYLEFILTER(filter);
-		}
 		LinePartialStyle style;
 		
 		while (!(la->kind == _EOF || la->kind == 15 /* "{" */)) {SynErr(119); Get();}
@@ -995,9 +986,6 @@ void Parser::WAYSTYLE(StyleFilter filter) {
 void Parser::WAYPATHTEXTSTYLE(StyleFilter filter) {
 		while (!(la->kind == _EOF || la->kind == 38 /* "TEXT" */)) {SynErr(121); Get();}
 		Expect(38 /* "TEXT" */);
-		if (la->kind == 24 /* "[" */) {
-			STYLEFILTER(filter);
-		}
 		PathTextPartialStyle style;
 		
 		while (!(la->kind == _EOF || la->kind == 15 /* "{" */)) {SynErr(122); Get();}
@@ -1015,9 +1003,6 @@ void Parser::WAYPATHTEXTSTYLE(StyleFilter filter) {
 void Parser::WAYPATHSYMBOLSTYLE(StyleFilter filter) {
 		while (!(la->kind == _EOF || la->kind == 13 /* "SYMBO" */)) {SynErr(124); Get();}
 		Expect(13 /* "SYMBO" */);
-		if (la->kind == 24 /* "[" */) {
-			STYLEFILTER(filter);
-		}
 		PathSymbolPartialStyle style;
 		
 		while (!(la->kind == _EOF || la->kind == 15 /* "{" */)) {SynErr(125); Get();}
@@ -1035,9 +1020,6 @@ void Parser::WAYPATHSYMBOLSTYLE(StyleFilter filter) {
 void Parser::WAYSHIELDSTYLE(StyleFilter filter) {
 		while (!(la->kind == _EOF || la->kind == 41 /* "SHIELD" */)) {SynErr(127); Get();}
 		Expect(41 /* "SHIELD" */);
-		if (la->kind == 24 /* "[" */) {
-			STYLEFILTER(filter);
-		}
 		PathShieldPartialStyle style;
 		
 		while (!(la->kind == _EOF || la->kind == 15 /* "{" */)) {SynErr(128); Get();}
@@ -1290,9 +1272,6 @@ void Parser::PATHSHIELDSTYLEATTR(PathShieldPartialStyle& style) {
 }
 
 void Parser::AREASTYLE(StyleFilter filter) {
-		if (la->kind == 24 /* "[" */) {
-			STYLEFILTER(filter);
-		}
 		FillPartialStyle style;
 		
 		while (!(la->kind == _EOF || la->kind == 15 /* "{" */)) {SynErr(134); Get();}
@@ -1310,9 +1289,6 @@ void Parser::AREASTYLE(StyleFilter filter) {
 void Parser::AREATEXTSTYLE(StyleFilter filter) {
 		while (!(la->kind == _EOF || la->kind == 38 /* "TEXT" */)) {SynErr(136); Get();}
 		Expect(38 /* "TEXT" */);
-		if (la->kind == 24 /* "[" */) {
-			STYLEFILTER(filter);
-		}
 		TextPartialStyle style;
 		
 		while (!(la->kind == _EOF || la->kind == 15 /* "{" */)) {SynErr(137); Get();}
@@ -1330,9 +1306,6 @@ void Parser::AREATEXTSTYLE(StyleFilter filter) {
 void Parser::AREAICONSTYLE(StyleFilter filter) {
 		while (!(la->kind == _EOF || la->kind == 39 /* "ICON" */)) {SynErr(139); Get();}
 		Expect(39 /* "ICON" */);
-		if (la->kind == 24 /* "[" */) {
-			STYLEFILTER(filter);
-		}
 		IconPartialStyle style;
 		
 		while (!(la->kind == _EOF || la->kind == 15 /* "{" */)) {SynErr(140); Get();}

@@ -506,9 +506,6 @@ PRODUCTIONS
 
   NODETEXTSTYLE<StyleFilter filter>
               = SYNC "TEXT"
-                [
-                  STYLEFILTER<filter>
-                ]
                 (.
                   TextPartialStyle style;
                 .)
@@ -524,9 +521,6 @@ PRODUCTIONS
 
   NODEICONSTYLE<StyleFilter filter>
               = SYNC "ICON"
-                [
-                  STYLEFILTER<filter>
-                ]
                 (.
                   IconPartialStyle style;
                 .)
@@ -554,10 +548,7 @@ PRODUCTIONS
                 .
 
   WAYSTYLE<StyleFilter filter>
-              = [
-                  STYLEFILTER<filter>
-                ]
-                (.
+              = (.
                   LinePartialStyle style;
                 .)
                 SYNC "{"
@@ -572,9 +563,6 @@ PRODUCTIONS
 
   WAYPATHTEXTSTYLE<StyleFilter filter>
               = SYNC "TEXT"
-                [
-                  STYLEFILTER<filter>
-                ]
                 (.
                   PathTextPartialStyle style;
                 .)
@@ -590,9 +578,6 @@ PRODUCTIONS
 
   WAYPATHSYMBOLSTYLE<StyleFilter filter>
               = SYNC "SYMBOL"
-                [
-                  STYLEFILTER<filter>
-                ]
                 (.
                   PathSymbolPartialStyle style;
                 .)
@@ -608,9 +593,6 @@ PRODUCTIONS
 
   WAYSHIELDSTYLE<StyleFilter filter>
               = SYNC "SHIELD"
-                [
-                  STYLEFILTER<filter>
-                ]
                 (.
                   PathShieldPartialStyle style;
                 .)
@@ -637,11 +619,7 @@ PRODUCTIONS
                 .
 
   AREASTYLE<StyleFilter filter>
-              = [
-                  STYLEFILTER<filter>
-                ]
-
-                (.
+              = (.
                   FillPartialStyle style;
                 .)
                 SYNC "{"
@@ -656,9 +634,6 @@ PRODUCTIONS
 
   AREATEXTSTYLE<StyleFilter filter>
               = SYNC "TEXT"
-                [
-                  STYLEFILTER<filter>
-                ]
                 (.
                   TextPartialStyle style;
                 .)
@@ -674,9 +649,6 @@ PRODUCTIONS
 
   AREAICONSTYLE<StyleFilter filter>
               = SYNC "ICON"
-                [
-                  STYLEFILTER<filter>
-                ]
                 (.
                   IconPartialStyle style;
                 .)
