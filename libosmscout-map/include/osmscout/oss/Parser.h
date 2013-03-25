@@ -91,8 +91,11 @@ private:
 	int maxT;
 
   TokenRef dummyToken;
-  int errDist;
-  int minErrDist;
+  int      errDist;
+  int      minErrDist;
+  Scanner  *scanner;
+  TokenRef t;  // last recognized token
+  TokenRef la; // lookahead token
 
   void SynErr(int n);
 
@@ -101,13 +104,6 @@ private:
   bool StartOf(int s);
   void ExpectWeak(int n, int follow);
   bool WeakSeparator(int n, int syFol, int repFol);
-
-  Scanner *scanner;
-
-  TokenRef t;  // last recognized token
-  TokenRef la; // lookahead token
-
-  StyleConfig& config;
 
 public:
   Errors  *errors;
@@ -118,6 +114,9 @@ typedef std::list<TextStyleRef>       TextStyleList;
 typedef std::list<LineStyleRef>       LineStyleList;
 typedef std::list<PathTextStyleRef>   PathTextStyleList;
 typedef std::list<PathShieldStyleRef> PathShieldStyleList;
+
+StyleConfig&                          config;
+MagnificationConverter                magnificationConverter;
 
 inline std::string Destring(const char* str)
 {

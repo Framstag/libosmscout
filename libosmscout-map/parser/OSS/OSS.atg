@@ -19,6 +19,9 @@ typedef std::list<LineStyleRef>       LineStyleList;
 typedef std::list<PathTextStyleRef>   PathTextStyleList;
 typedef std::list<PathShieldStyleRef> PathShieldStyleList;
 
+StyleConfig&                          config;
+MagnificationConverter                magnificationConverter;
+
 inline std::string Destring(const char* str)
 {
   std::string result(str);
@@ -1029,25 +1032,23 @@ PRODUCTIONS
                 .
 
   MAG<Magnification& magnification>
-              =  "world"     (. magnification.SetMagnification(Magnification::magWorld); .)
-               | "continent" (. magnification.SetMagnification(Magnification::magContinent); .)
-               | "state"     (. magnification.SetMagnification(Magnification::magState); .)
-               | "stateOver" (. magnification.SetMagnification(Magnification::magStateOver); .)
-               | "county"    (. magnification.SetMagnification(Magnification::magCounty); .)
-               | "region"    (. magnification.SetMagnification(Magnification::magRegion); .)
-               | "proximity" (. magnification.SetMagnification(Magnification::magProximity); .)
-               | "cityOver"  (. magnification.SetMagnification(Magnification::magCityOver); .)
-               | "city"      (. magnification.SetMagnification(Magnification::magCity); .)
-               | "suburb"    (. magnification.SetMagnification(Magnification::magSuburb); .)
-               | "detail"    (. magnification.SetMagnification(Magnification::magDetail); .)
-               | "close"     (. magnification.SetMagnification(Magnification::magClose); .)
-               | "veryClose" (. magnification.SetMagnification(Magnification::magVeryClose); .)
-               | "block"     (. magnification.SetMagnification(Magnification::magBlock); .)
-               | "street"    (. magnification.SetMagnification(Magnification::magStreet); .)
-               | "house"     (. magnification.SetMagnification(Magnification::magHouse); .)
-               | (. size_t level; .)
-                 UINT<level>
-                 (. magnification.SetLevel((uint32_t)level); .)
+              = (
+                  (. std::string name; .)
+                  IDENT<name>
+                  (.
+                    if (!magnificationConverter.Convert(name,magnification)) {
+                      std::string e="'"+std::string(name)+"' is not a valid magnification level";
+
+                      SemErr(e.c_str());
+                    }
+                  .)
+                )
+                |
+                (
+                  (. size_t level; .)
+                   UINT<level>
+                   (. magnification.SetLevel((uint32_t)level); .)
+                )
                .
 
   /** Size in units of screen (currently millimeter) */

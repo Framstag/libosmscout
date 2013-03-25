@@ -41,4 +41,41 @@ namespace osmscout {
     this->magnification=Pow(2,level);
     this->level=level;
   }
+
+    OSMSCOUT_HASHMAP<std::string,Magnification::Mag> stringToMagMap;
+
+  MagnificationConverter::MagnificationConverter()
+  {
+    stringToMagMap["world"]=Magnification::magWorld;
+    stringToMagMap["continent"]=Magnification::magContinent;
+    stringToMagMap["state"]=Magnification::magState;
+    stringToMagMap["stateOver"]=Magnification::magStateOver;
+    stringToMagMap["county"]=Magnification::magCounty;
+    stringToMagMap["region"]=Magnification::magRegion;
+    stringToMagMap["proximity"]=Magnification::magProximity;
+    stringToMagMap["cityOver"]=Magnification::magCityOver;
+    stringToMagMap["city"]=Magnification::magCity;
+    stringToMagMap["suburb"]=Magnification::magSuburb;
+    stringToMagMap["detail"]=Magnification::magDetail;
+    stringToMagMap["close"]=Magnification::magClose;
+    stringToMagMap["veryClose"]=Magnification::magVeryClose;
+    stringToMagMap["block"]=Magnification::magBlock;
+    stringToMagMap["street"]=Magnification::magStreet;
+    stringToMagMap["house"]=Magnification::magHouse;
+  }
+
+  bool MagnificationConverter::Convert(const std::string& name,
+                                       Magnification& magnification)
+  {
+    OSMSCOUT_HASHMAP<std::string,Magnification::Mag>::const_iterator entry=stringToMagMap.find(name);
+
+    if (entry==stringToMagMap.end()) {
+      return false;
+    }
+
+    magnification.SetMagnification(entry->second);
+
+    return true;
+  }
+
 }

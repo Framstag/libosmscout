@@ -149,8 +149,8 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 88;
-	noSym = 88;
+	maxT = 72;
+	noSym = 72;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 95; i <= 95; ++i) start.set(i, 1);
@@ -225,22 +225,6 @@ void Scanner::Init() {
 	keywords.set("normal", 69);
 	keywords.set("emphasize", 70);
 	keywords.set("ref", 71);
-	keywords.set("world", 72);
-	keywords.set("continent", 73);
-	keywords.set("state", 74);
-	keywords.set("stateOver", 75);
-	keywords.set("county", 76);
-	keywords.set("region", 77);
-	keywords.set("proximity", 78);
-	keywords.set("cityOver", 79);
-	keywords.set("city", 80);
-	keywords.set("suburb", 81);
-	keywords.set("detail", 82);
-	keywords.set("close", 83);
-	keywords.set("veryClose", 84);
-	keywords.set("block", 85);
-	keywords.set("street", 86);
-	keywords.set("house", 87);
 
 
   tvalLength = 128;

@@ -24,6 +24,8 @@
 
 #include <osmscout/system/Types.h>
 
+#include <osmscout/util/HashMap.h>
+
 namespace osmscout {
 
   class OSMSCOUT_API Magnification
@@ -126,6 +128,19 @@ namespace osmscout {
       return magnification>other.magnification;
     }
   };
+
+  class OSMSCOUT_API MagnificationConverter
+  {
+  private:
+    OSMSCOUT_HASHMAP<std::string,Magnification::Mag> stringToMagMap;
+    
+  public:
+    MagnificationConverter();
+
+    bool Convert(const std::string& name,
+                 Magnification& magnification);
+  };
+
 }
 
 #endif
