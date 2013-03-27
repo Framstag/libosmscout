@@ -236,37 +236,47 @@ namespace osmscout {
       ObjectFileRef           ref;
       const SegmentAttributes *attributes;     //! Attributes of line segment
       LineStyleRef            lineStyle;       //! Line style
-      size_t                  prio;            //! Priority of way (from style sheet)
+      size_t                  wayPriority;     //! Priority of way (from style sheet)
       size_t                  transStart;      //! Start of coordinates in transformation buffer
       size_t                  transEnd;        //! End of coordinates in transformation buffer
-      size_t                  par1Start;       //! Coordinates of upper line (bridge marker)
-      size_t                  par1End;         //! Coordinates of upper line (bridge marker)
-      size_t                  par2Start;       //! Coordinates of lower line (bridge marker)
-      size_t                  par2End;         //! Coordinates of lower line (bridge marker)
       double                  lineWidth;       //! Line width
-      double                  outlineWidth;    //! Line width including outline
       bool                    startIsClosed;   //! The end of the way is closed, it does not lead to another way or area
       bool                    endIsClosed;     //! The end of the way is closed, it does not lead to another way or area
-      bool                    drawBridge;      //! Draw bridge marker
-      bool                    drawTunnel;      //! Draw as tunnel
-      bool                    outline;         //! Draw outline
 
+      /**
+       * We then draw lines on order of layer (Smaller layers first)
+       *
+       * Within a layer, we draw lines in order of line style priority (first overlays, lower priority value first)
+       *
+       * Within a style priority, we draw transparent lines over solid lines
+       *
+       * Within a style priority we draw lines in order of style sheet way priority
+       * (more important ways on top of less important ways, higher prioruty value first))
+       *
+       * @param other
+       * @return
+       */
       inline bool operator<(const WayData& other) const
       {
-        if (!lineStyle->GetLineColor().IsSolid() && other.lineStyle->GetLineColor().IsSolid()) {
-          return false;
-        }
-        else if (lineStyle->GetLineColor().IsSolid() && !other.lineStyle->GetLineColor().IsSolid()) {
-          return true;
-        }
-        else if (attributes->GetLayer()==other.attributes->GetLayer())
+        if (attributes->GetLayer()!=other.attributes->GetLayer())
         {
-          return prio>other.prio;
-        }
-        else {
           return attributes->GetLayer()<other.attributes->GetLayer();
         }
+        else if (lineStyle->GetPriority()!=other.lineStyle->GetPriority()) {
+          return lineStyle->GetPriority()<other.lineStyle->GetPriority();
+        }
+        else {
+          return wayPriority>other.wayPriority;
+        }
       }
+    };
+
+    struct OSMSCOUT_API WayPathData
+    {
+      ObjectFileRef           ref;
+      const SegmentAttributes *attributes;     //! Attributes of line segment
+      size_t                  transStart;      //! Start of coordinates in transformation buffer
+      size_t                  transEnd;        //! End of coordinates in transformation buffer
     };
 
     struct OSMSCOUT_API PolyData
@@ -309,65 +319,66 @@ namespace osmscout {
        Scratch variables for path optimization algorithm
      */
     //@{
-    TransBuffer            transBuffer; //! Static (avoid reallocation) buffer of transformed coordinates
+    TransBuffer               transBuffer; //! Static (avoid reallocation) buffer of transformed coordinates
     //@}
 
     /**
       Presets and similar
      */
     //@{
-    std::vector<double>    emptyDash;         //! Empty dash array
-    std::vector<double>    tunnelDash;        //! Dash array for drawing tunnel border
-    FillStyle              areaMarkStyle;     //! Marker fill style for internal debugging
+    std::vector<double>       emptyDash;         //! Empty dash array
+    std::vector<double>       tunnelDash;        //! Dash array for drawing tunnel border
+    FillStyle                 areaMarkStyle;     //! Marker fill style for internal debugging
     //@}
 
-    std::list<AreaData>    areaData;
-    std::list<WayData>     wayData;
+    std::list<AreaData>       areaData;
+    std::list<WayData>        wayData;
+    std::list<WayPathData>    wayPathData;
 
     /**
       Temporary data structures for intelligent label positioning
       */
     //@{
-    std::list<LabelData>   labels;
-    std::list<LabelData>   overlayLabels;
-    std::vector<ScanCell>  wayScanlines;
+    std::list<LabelData>      labels;
+    std::list<LabelData>      overlayLabels;
+    std::vector<ScanCell>     wayScanlines;
     //@}
 
+    std::vector<LineStyleRef> lineStyles;     //! Temporary storage for StyleConfig return value
     /**
       Statistics counter
      */
     //@{
-    size_t                 waysSegments;
-    size_t                 waysDrawn;
-    size_t                 waysOutlineDrawn;
-    size_t                 waysLabelDrawn;
+    size_t                    waysSegments;
+    size_t                    waysDrawn;
+    size_t                    waysLabelDrawn;
 
-    size_t                 areasSegments;
-    size_t                 areasDrawn;
-    size_t                 areasLabelDrawn;
+    size_t                    areasSegments;
+    size_t                    areasDrawn;
+    size_t                    areasLabelDrawn;
 
-    size_t                 nodesDrawn;
+    size_t                    nodesDrawn;
 
-    size_t                 labelsDrawn;
+    size_t                    labelsDrawn;
     //@}
 
     /**
       Fallback styles in case they are missing for the style sheet
       */
     //@{
-    FillStyleRef           landFill;
-    FillStyleRef           seaFill;
-    TextStyleRef           debugLabel;
-    SegmentAttributes      coastlineSegmentAttributes;
+    FillStyleRef              landFill;
+    FillStyleRef              seaFill;
+    TextStyleRef              debugLabel;
+    SegmentAttributes         coastlineSegmentAttributes;
     //@}
 
     /**
      Precalculations
       */
     //@{
-    double                 labelSpace;
-    double                 shieldLabelSpace;
-    double                 sameLabelSpace;
+    double                    labelSpace;
+    double                    shieldLabelSpace;
+    double                    sameLabelSpace;
     //@}
 
   private:
@@ -463,7 +474,7 @@ namespace osmscout {
     void DrawWayLabel(const StyleConfig& styleConfig,
                       const Projection& projection,
                       const MapParameter& parameter,
-                      const WayData& data);
+                      const WayPathData& data);
 
     void DrawWayLabels(const StyleConfig& styleConfig,
                        const Projection& projection,
@@ -691,16 +702,6 @@ namespace osmscout {
                           const Projection& projection,
                           const MapParameter& parameter,
                           const NodeRef& node);
-
-    /**
-      Draw the outline of the way using LineStyle for the given type, the given
-      style modification attributes and the given path. Also draw sensfull
-      line end given that the path has joints with other pathes or not.
-     */
-    virtual void DrawWayOutline(const StyleConfig& styleConfig,
-                                const Projection& projection,
-                                const MapParameter& parameter,
-                                const WayData& data);
 
     virtual void DrawWay(const StyleConfig& styleConfig,
                          const Projection& projection,

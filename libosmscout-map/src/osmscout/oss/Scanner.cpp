@@ -149,27 +149,29 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 72;
-	noSym = 72;
+	maxT = 81;
+	noSym = 81;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 95; i <= 95; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
-	for (i = 48; i <= 57; ++i) start.set(i, 17);
-	start.set(35, 4);
-	start.set(64, 13);
-	start.set(34, 15);
-	start.set(44, 20);
-	start.set(123, 21);
-	start.set(59, 22);
-	start.set(125, 23);
-	start.set(61, 24);
-	start.set(91, 25);
-	start.set(45, 26);
-	start.set(93, 27);
-	start.set(58, 28);
-	start.set(60, 29);
-	start.set(46, 30);
+	for (i = 48; i <= 57; ++i) start.set(i, 16);
+	start.set(35, 32);
+	start.set(64, 12);
+	start.set(34, 14);
+	start.set(44, 19);
+	start.set(123, 20);
+	start.set(59, 21);
+	start.set(125, 22);
+	start.set(61, 23);
+	start.set(91, 24);
+	start.set(45, 25);
+	start.set(93, 26);
+	start.set(58, 27);
+	start.set(60, 28);
+	start.set(46, 29);
+	start.set(40, 30);
+	start.set(41, 31);
 		start.set(Buffer::EoF, -1);
 	keywords.set("OSS", 7);
 	keywords.set("END", 8);
@@ -186,45 +188,51 @@ void Scanner::Init() {
 	keywords.set("TYPE", 25);
 	keywords.set("MAG", 26);
 	keywords.set("ONEWAY", 28);
-	keywords.set("SIZE", 29);
-	keywords.set("m", 31);
-	keywords.set("mm", 32);
-	keywords.set("px", 34);
-	keywords.set("NODE", 36);
-	keywords.set("TEXT", 38);
-	keywords.set("ICON", 39);
-	keywords.set("WAY", 40);
-	keywords.set("SHIELD", 41);
-	keywords.set("AREA", 42);
-	keywords.set("color", 43);
-	keywords.set("outlineColor", 44);
-	keywords.set("dash", 45);
-	keywords.set("gapColor", 46);
-	keywords.set("displayWidth", 47);
-	keywords.set("width", 48);
-	keywords.set("cap", 49);
-	keywords.set("outline", 50);
-	keywords.set("pattern", 51);
-	keywords.set("patternMinMag", 52);
-	keywords.set("borderColor", 53);
-	keywords.set("borderWidth", 54);
-	keywords.set("borderDash", 55);
-	keywords.set("label", 56);
-	keywords.set("style", 57);
-	keywords.set("size", 58);
-	keywords.set("scaleMag", 59);
-	keywords.set("priority", 60);
-	keywords.set("backgroundColor", 61);
-	keywords.set("shieldSpace", 62);
-	keywords.set("symbol", 63);
-	keywords.set("symbolSpace", 64);
-	keywords.set("name", 65);
-	keywords.set("butt", 66);
-	keywords.set("round", 67);
-	keywords.set("square", 68);
-	keywords.set("normal", 69);
-	keywords.set("emphasize", 70);
-	keywords.set("ref", 71);
+	keywords.set("BRIDGE", 29);
+	keywords.set("TUNNEL", 30);
+	keywords.set("SIZE", 31);
+	keywords.set("m", 33);
+	keywords.set("mm", 34);
+	keywords.set("px", 36);
+	keywords.set("NODE", 38);
+	keywords.set("TEXT", 40);
+	keywords.set("ICON", 41);
+	keywords.set("WAY", 42);
+	keywords.set("SHIELD", 44);
+	keywords.set("AREA", 45);
+	keywords.set("color", 46);
+	keywords.set("dash", 47);
+	keywords.set("gapColor", 48);
+	keywords.set("displayWidth", 49);
+	keywords.set("width", 50);
+	keywords.set("displayOffset", 51);
+	keywords.set("offset", 52);
+	keywords.set("cap", 53);
+	keywords.set("joinCap", 54);
+	keywords.set("endCap", 55);
+	keywords.set("priority", 56);
+	keywords.set("pattern", 57);
+	keywords.set("patternMinMag", 58);
+	keywords.set("borderColor", 59);
+	keywords.set("borderWidth", 60);
+	keywords.set("borderDash", 61);
+	keywords.set("label", 62);
+	keywords.set("style", 63);
+	keywords.set("size", 64);
+	keywords.set("scaleMag", 65);
+	keywords.set("backgroundColor", 66);
+	keywords.set("shieldSpace", 67);
+	keywords.set("symbol", 68);
+	keywords.set("symbolSpace", 69);
+	keywords.set("name", 70);
+	keywords.set("butt", 71);
+	keywords.set("round", 72);
+	keywords.set("square", 73);
+	keywords.set("normal", 74);
+	keywords.set("emphasize", 75);
+	keywords.set("ref", 76);
+	keywords.set("lighten", 77);
+	keywords.set("darken", 80);
 
 
   tvalLength = 128;
@@ -384,6 +392,7 @@ Token* Scanner::NextToken() {
 			if ((ch >= '0' && ch <= '9')) {AddCh(); goto case_3;}
 			else {t->kind = 3; break;}
 		case 4:
+			case_4:
 			if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f')) {AddCh(); goto case_5;}
 			else {goto case_0;}
 		case 5:
@@ -404,78 +413,82 @@ Token* Scanner::NextToken() {
 			else {goto case_0;}
 		case 9:
 			case_9:
+			recEnd = pos; recKind = 4;
 			if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f')) {AddCh(); goto case_10;}
-			else {goto case_0;}
+			else {t->kind = 4; break;}
 		case 10:
 			case_10:
-			recEnd = pos; recKind = 4;
 			if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f')) {AddCh(); goto case_11;}
-			else {t->kind = 4; break;}
+			else {goto case_0;}
 		case 11:
 			case_11:
-			if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f')) {AddCh(); goto case_12;}
-			else {goto case_0;}
-		case 12:
-			case_12:
 			{t->kind = 4; break;}
-		case 13:
-			if ((ch >= 'A' && ch <= 'Z') || ch == '_' || (ch >= 'a' && ch <= 'z')) {AddCh(); goto case_14;}
+		case 12:
+			if ((ch >= 'A' && ch <= 'Z') || ch == '_' || (ch >= 'a' && ch <= 'z')) {AddCh(); goto case_13;}
 			else {goto case_0;}
+		case 13:
+			case_13:
+			recEnd = pos; recKind = 5;
+			if ((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z') || ch == '_' || (ch >= 'a' && ch <= 'z')) {AddCh(); goto case_13;}
+			else {t->kind = 5; break;}
 		case 14:
 			case_14:
-			recEnd = pos; recKind = 5;
-			if ((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z') || ch == '_' || (ch >= 'a' && ch <= 'z')) {AddCh(); goto case_14;}
-			else {t->kind = 5; break;}
+			if (ch <= '!' || (ch >= '#' && ch <= '[') || (ch >= ']' && ch <= 65535)) {AddCh(); goto case_14;}
+			else if (ch == '"') {AddCh(); goto case_15;}
+			else if (ch == 92) {AddCh(); goto case_17;}
+			else {goto case_0;}
 		case 15:
 			case_15:
-			if (ch <= '!' || (ch >= '#' && ch <= '[') || (ch >= ']' && ch <= 65535)) {AddCh(); goto case_15;}
-			else if (ch == '"') {AddCh(); goto case_16;}
-			else if (ch == 92) {AddCh(); goto case_18;}
-			else {goto case_0;}
+			{t->kind = 6; break;}
 		case 16:
 			case_16:
-			{t->kind = 6; break;}
-		case 17:
-			case_17:
 			recEnd = pos; recKind = 2;
-			if ((ch >= '0' && ch <= '9')) {AddCh(); goto case_17;}
+			if ((ch >= '0' && ch <= '9')) {AddCh(); goto case_16;}
 			else if (ch == '.') {AddCh(); goto case_2;}
 			else {t->kind = 2; break;}
+		case 17:
+			case_17:
+			if (ch <= '!' || (ch >= '#' && ch <= '[') || (ch >= ']' && ch <= 65535)) {AddCh(); goto case_14;}
+			else if (ch == 92) {AddCh(); goto case_17;}
+			else if (ch == '"') {AddCh(); goto case_18;}
+			else {goto case_0;}
 		case 18:
 			case_18:
-			if (ch <= '!' || (ch >= '#' && ch <= '[') || (ch >= ']' && ch <= 65535)) {AddCh(); goto case_15;}
-			else if (ch == 92) {AddCh(); goto case_18;}
-			else if (ch == '"') {AddCh(); goto case_19;}
-			else {goto case_0;}
-		case 19:
-			case_19:
 			recEnd = pos; recKind = 6;
-			if (ch <= '!' || (ch >= '#' && ch <= '[') || (ch >= ']' && ch <= 65535)) {AddCh(); goto case_15;}
-			else if (ch == '"') {AddCh(); goto case_16;}
-			else if (ch == 92) {AddCh(); goto case_18;}
+			if (ch <= '!' || (ch >= '#' && ch <= '[') || (ch >= ']' && ch <= 65535)) {AddCh(); goto case_14;}
+			else if (ch == '"') {AddCh(); goto case_15;}
+			else if (ch == 92) {AddCh(); goto case_17;}
 			else {t->kind = 6; break;}
-		case 20:
+		case 19:
 			{t->kind = 12; break;}
-		case 21:
+		case 20:
 			{t->kind = 15; break;}
-		case 22:
+		case 21:
 			{t->kind = 16; break;}
-		case 23:
+		case 22:
 			{t->kind = 17; break;}
-		case 24:
+		case 23:
 			{t->kind = 23; break;}
-		case 25:
+		case 24:
 			{t->kind = 24; break;}
-		case 26:
+		case 25:
 			{t->kind = 27; break;}
+		case 26:
+			{t->kind = 32; break;}
 		case 27:
-			{t->kind = 30; break;}
-		case 28:
-			{t->kind = 33; break;}
-		case 29:
 			{t->kind = 35; break;}
-		case 30:
+		case 28:
 			{t->kind = 37; break;}
+		case 29:
+			{t->kind = 39; break;}
+		case 30:
+			{t->kind = 78; break;}
+		case 31:
+			{t->kind = 79; break;}
+		case 32:
+			recEnd = pos; recKind = 43;
+			if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f')) {AddCh(); goto case_4;}
+			else {t->kind = 43; break;}
 
   }
   AppendVal(t);

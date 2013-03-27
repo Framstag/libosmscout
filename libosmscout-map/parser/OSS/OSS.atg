@@ -428,6 +428,18 @@ PRODUCTIONS
                        filter.SetOneway(true);
                      .)
                    ]
+                   [
+                     "BRIDGE"
+                     (.
+                       filter.SetBridge(true);
+                     .)
+                   ]
+                   [
+                     "TUNNEL"
+                     (.
+                       filter.SetTunnel(true);
+                     .)
+                   ]
 
                    [
                      (. SizeCondition* sizeCondition; .)
@@ -553,7 +565,12 @@ PRODUCTIONS
   WAYSTYLE<StyleFilter filter>
               = (.
                   LinePartialStyle style;
+                  std::string      slot;
                 .)
+                [
+                  "#"
+                  IDENT<slot> (. style.style->SetSlot(slot); .)
+                ]
                 SYNC "{"
                 {
                    LINESTYLEATTR<style> WEAK ";"
@@ -674,12 +691,6 @@ PRODUCTIONS
                   	 style.style->SetLineColor(lineColor);
                      style.attributes.insert(LineStyle::attrLineColor);
                   .)
-                | (. Color outlineColor;.)
-                  "outlineColor" ":" COLOR<outlineColor>
-                  (.
-                  	 style.style->SetOutlineColor(outlineColor);
-                     style.attributes.insert(LineStyle::attrOutlineColor);
-                  .)
                 | (.
                     std::vector<double> dashes;
                     double              dash;
@@ -701,28 +712,55 @@ PRODUCTIONS
                      style.attributes.insert(LineStyle::attrGapColor);
                   .)
                 | (. double displayWidth; .)
-                  "displayWidth" ":"  DISPLAYSIZE<displayWidth>
+                  "displayWidth" ":"  UDISPLAYSIZE<displayWidth>
                   (.
                   	 style.style->SetDisplayWidth(displayWidth);
                      style.attributes.insert(LineStyle::attrDisplayWidth);
                   .)
                 | (. double width; .)
-                  "width" ":" MAPSIZE<width>
+                  "width" ":" UMAPSIZE<width>
                   (.
                   	 style.style->SetWidth(width);
                      style.attributes.insert(LineStyle::attrWidth);
                   .)
+                | (. double displayOffset; .)
+                  "displayOffset" ":"  DISPLAYSIZE<displayOffset>
+                  (.
+                  	 style.style->SetDisplayOffset(displayOffset);
+                     style.attributes.insert(LineStyle::attrDisplayOffset);
+                  .)
+                | (. double offset; .)
+                  "offset" ":" MAPSIZE<offset>
+                  (.
+                  	 style.style->SetOffset(offset);
+                     style.attributes.insert(LineStyle::attrOffset);
+                  .)
                 | (. LineStyle::CapStyle capStyle; .)
                   "cap" ":" CAPSTYLE<capStyle>
                   (.
-                  	 style.style->SetCapStyle(capStyle);
-                     style.attributes.insert(LineStyle::attrCapStyle);
+                  	 style.style->SetJoinCap(capStyle);
+                     style.attributes.insert(LineStyle::attrJoinCap);
+
+                  	 style.style->SetEndCap(capStyle);
+                     style.attributes.insert(LineStyle::attrEndCap);
                   .)
-                | (. double outline; .)
-                  "outline" ":" DISPLAYSIZE<outline>
+                | (. LineStyle::CapStyle capStyle; .)
+                  "joinCap" ":" CAPSTYLE<capStyle>
                   (.
-                  	 style.style->SetOutline(outline);
-                     style.attributes.insert(LineStyle::attrOutline);
+                  	 style.style->SetJoinCap(capStyle);
+                     style.attributes.insert(LineStyle::attrJoinCap);
+                  .)
+                | (. LineStyle::CapStyle capStyle; .)
+                  "endCap" ":" CAPSTYLE<capStyle>
+                  (.
+                  	 style.style->SetEndCap(capStyle);
+                     style.attributes.insert(LineStyle::attrEndCap);
+                  .)
+                | (. int priority; .)
+                  "priority" ":" INT<priority>
+                  (.
+                  	 style.style->SetPriority(priority);
+                     style.attributes.insert(LineStyle::attrPriority);
                   .)
                 )
                 .
@@ -754,7 +792,7 @@ PRODUCTIONS
                      style.attributes.insert(FillStyle::attrBorderColor);
                   .)
                 | (. double width; .)
-	              "borderWidth" ":" DISPLAYSIZE<width>
+	              "borderWidth" ":" UDISPLAYSIZE<width>
                   (.
                   	 style.style->SetBorderWidth(width);
                      style.attributes.insert(FillStyle::attrBorderWidth);
@@ -872,7 +910,7 @@ PRODUCTIONS
 	                }
 	               .)
                 | (. double shieldSpace; .)
-                  "shieldSpace" ":" DISPLAYSIZE<shieldSpace>
+                  "shieldSpace" ":" UDISPLAYSIZE<shieldSpace>
                   (.
                      style.style->SetShieldSpace(shieldSpace);
                      style.attributes.insert(PathShieldStyle::attrShieldSpace);
@@ -924,7 +962,7 @@ PRODUCTIONS
                      }
                   .)
                 | (. double symbolSpace; .)
-                  "symbolSpace" ":" DISPLAYSIZE<symbolSpace>
+                  "symbolSpace" ":" UDISPLAYSIZE<symbolSpace>
                   (.
                      style.style->SetSymbolSpace(symbolSpace);
                      style.attributes.insert(PathSymbolStyle::attrSymbolSpace);
@@ -993,7 +1031,13 @@ PRODUCTIONS
                 ).
 
   COLOR<Color& color>
-              =   color
+              =   (. double factor; .)
+                  "lighten" "(" COLOR<color> "," UDOUBLE<factor> ")"
+                  (. color=color.Lighten(factor); .)
+                |  (. double factor; .)
+                  "darken" "(" COLOR<color> "," UDOUBLE<factor> ")"
+                  (. color=color.Darken(factor); .)
+                | color
                   (.
                     std::string c(t->val);
 
@@ -1051,13 +1095,21 @@ PRODUCTIONS
                 )
                .
 
-  /** Size in units of screen (currently millimeter) */
-  DISPLAYSIZE <double& value>
+  /* Size in units of screen (currently millimeter) */
+  UDISPLAYSIZE <double& value>
               = UDOUBLE<value> "mm".
 
-  /** Size in units of map (currently meter) */
-  MAPSIZE <double& value>
+  /* Size in units of screen (currently millimeter) */
+  DISPLAYSIZE <double& value>
+              = DOUBLE<value> "mm".
+
+  /* Size in units of map (currently meter) */
+  UMAPSIZE <double& value>
               = UDOUBLE<value> "m".
+
+  /* Size in units of map (currently meter) */
+  MAPSIZE <double& value>
+              = DOUBLE<value> "m".
 
   IDENT<std::string& value>
               = ident
@@ -1074,7 +1126,7 @@ PRODUCTIONS
                 .
 
   UDOUBLE<double& value>
-              = (  number
+              =   number
                   (.
                     if (!StringToDouble(t->val,value)) {
                       std::string e="Cannot parse double '"+std::string(t->val)+"'";
@@ -1090,7 +1142,7 @@ PRODUCTIONS
                       SemErr(e.c_str());
                     }
                   .)
-                ).
+                .
 
   DOUBLE<double& value>
               = (. bool negate=false; .)
@@ -1123,16 +1175,35 @@ PRODUCTIONS
                 .)
                 .
 
+  INT<int& value>
+              = (. bool negate=false; .)
+                [
+                  "-" (. negate=true; .)
+                ]
+                number
+                (.
+                  if (!StringToNumber(t->val,value)) {
+                    std::string e="Cannot parse number '"+std::string(t->val)+"'";
+
+                    SemErr(e.c_str());
+                  }
+                .)
+                (.
+                  if (negate) {
+                    value=-value;
+                  }
+                .)
+                .
 
   UINT<size_t& value>
-              = (  number
-                  (.
-                    if (!StringToNumber(t->val,value)) {
-                      std::string e="Cannot parse number '"+std::string(t->val)+"'";
+              = number
+                (.
+                  if (!StringToNumber(t->val,value)) {
+                    std::string e="Cannot parse number '"+std::string(t->val)+"'";
 
-                      SemErr(e.c_str());
-                    }
-                  .)
-                ).
+                    SemErr(e.c_str());
+                  }
+                .)
+                .
 END OSS.
 

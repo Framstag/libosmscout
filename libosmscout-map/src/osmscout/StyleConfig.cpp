@@ -131,39 +131,43 @@ namespace osmscout {
 
   LineStyle::LineStyle()
    : lineColor(1.0,0.0,0.0,0.0),
-     outlineColor(1,0.0,0.0,0.0),
      gapColor(1,0.0,0.0,0.0),
-     displayWidth(0),
-     width(0),
-     capStyle(capRound),
-     outline(0)
+     displayWidth(0.0),
+     width(0.0),
+     displayOffset(0.0),
+     offset(0.0),
+     joinCap(capRound),
+     endCap(capRound),
+     priority(0)
   {
     // no code
   }
 
   LineStyle::LineStyle(const LineStyle& style)
   : lineColor(style.lineColor),
-    outlineColor(style.outlineColor),
     gapColor(style.gapColor),
     displayWidth(style.displayWidth),
     width(style.width),
-    capStyle(style.capStyle),
-    outline(style.outline),
-    dash(style.dash)
+    displayOffset(style.displayOffset),
+    offset(style.offset),
+    joinCap(style.joinCap),
+    endCap(style.endCap),
+    dash(style.dash),
+    priority(style.priority)
   {
     // no code
+  }
+
+  LineStyle& LineStyle::SetSlot(const std::string& slot)
+  {
+    this->slot=slot;
+
+    return *this;
   }
 
   LineStyle& LineStyle::SetLineColor(const Color& color)
   {
     this->lineColor=color;
-
-    return *this;
-  }
-
-  LineStyle& LineStyle::SetOutlineColor(const Color& color)
-  {
-    outlineColor=color;
 
     return *this;
   }
@@ -189,16 +193,30 @@ namespace osmscout {
     return *this;
   }
 
-  LineStyle& LineStyle::SetCapStyle(CapStyle capStyle)
+  LineStyle& LineStyle::SetDisplayOffset(double value)
   {
-    this->capStyle=capStyle;
+    displayOffset=value;
 
     return *this;
   }
 
-  LineStyle& LineStyle::SetOutline(double value)
+  LineStyle& LineStyle::SetOffset(double value)
   {
-    outline=value;
+    offset=value;
+
+    return *this;
+  }
+
+  LineStyle& LineStyle::SetJoinCap(CapStyle joinCap)
+  {
+    this->joinCap=joinCap;
+
+    return *this;
+  }
+
+  LineStyle& LineStyle::SetEndCap(CapStyle endCap)
+  {
+    this->endCap=endCap;
 
     return *this;
   }
@@ -206,6 +224,13 @@ namespace osmscout {
   LineStyle& LineStyle::SetDashes(const std::vector<double> dashes)
   {
     dash=dashes;
+
+    return *this;
+  }
+
+  LineStyle& LineStyle::SetPriority(int priority)
+  {
+    this->priority=priority;
 
     return *this;
   }
@@ -220,9 +245,6 @@ namespace osmscout {
       case attrLineColor:
         lineColor=other.lineColor;
         break;
-      case attrOutlineColor:
-        outlineColor=other.outlineColor;
-        break;
       case attrGapColor:
         gapColor=other.gapColor;
         break;
@@ -232,14 +254,23 @@ namespace osmscout {
       case attrWidth:
         width=other.width;
         break;
-      case attrCapStyle:
-        capStyle=other.capStyle;
+      case attrDisplayOffset:
+        displayOffset=other.displayOffset;
         break;
-      case attrOutline:
-        outline=other.outline;
+      case attrOffset:
+        offset=other.offset;
+        break;
+      case attrJoinCap:
+        joinCap=other.joinCap;
+        break;
+      case attrEndCap:
+        endCap=other.endCap;
         break;
       case attrDashes:
         dash=other.dash;
+        break;
+      case attrPriority:
+        priority=other.priority;
         break;
       }
     }
@@ -920,6 +951,8 @@ namespace osmscout {
   StyleFilter::StyleFilter()
   : minLevel(0),
     maxLevel(std::numeric_limits<size_t>::max()),
+    bridge(false),
+    tunnel(false),
     oneway(false)
   {
     // no code
@@ -930,6 +963,8 @@ namespace osmscout {
     this->types=other.types;
     this->minLevel=other.minLevel;
     this->maxLevel=other.maxLevel;
+    this->bridge=other.bridge;
+    this->tunnel=other.tunnel;
     this->oneway=other.oneway;
     this->sizeCondition=other.sizeCondition;
   }
@@ -955,6 +990,20 @@ namespace osmscout {
     return *this;
   }
 
+  StyleFilter& StyleFilter::SetBridge(bool bridge)
+  {
+    this->bridge=bridge;
+
+    return *this;
+  }
+
+  StyleFilter& StyleFilter::SetTunnel(bool tunnel)
+  {
+    this->tunnel=tunnel;
+
+    return *this;
+  }
+
   StyleFilter& StyleFilter::SetOneway(bool oneway)
   {
     this->oneway=oneway;
@@ -970,38 +1019,56 @@ namespace osmscout {
   }
 
   StyleCriteria::StyleCriteria()
-  : oneway(false)
+  : bridge(false),
+    tunnel(false),
+    oneway(false)
   {
     // no code
   }
 
   StyleCriteria::StyleCriteria(const StyleFilter& other)
   {
+    this->bridge=other.GetBridge();
+    this->tunnel=other.GetTunnel();
     this->oneway=other.GetOneway();
     this->sizeCondition=other.GetSizeCondition();
   }
 
   StyleCriteria::StyleCriteria(const StyleCriteria& other)
   {
+    this->bridge=other.bridge;
+    this->tunnel=other.tunnel;
     this->oneway=other.oneway;
     this->sizeCondition=other.sizeCondition;
   }
 
   bool StyleCriteria::operator==(const StyleCriteria& other) const
   {
-    return oneway==other.oneway &&
-           this->sizeCondition==other.sizeCondition;
+    return bridge==other.bridge &&
+           tunnel==other.tunnel &&
+           oneway==other.oneway &&
+           sizeCondition==other.sizeCondition;
   }
 
   bool StyleCriteria::operator!=(const StyleCriteria& other) const
   {
-    return oneway!=other.oneway ||
-           this->sizeCondition!=other.sizeCondition;
+    return bridge!=other.bridge ||
+           tunnel!=other.tunnel ||
+           oneway!=other.oneway ||
+           sizeCondition!=other.sizeCondition;
   }
 
   bool StyleCriteria::Matches(double meterInPixel,
                               double meterInMM) const
   {
+    if (bridge) {
+      return false;
+    }
+
+    if (tunnel) {
+      return false;
+    }
+
     if (oneway) {
       return false;
     }
@@ -1019,6 +1086,16 @@ namespace osmscout {
                               double meterInPixel,
                               double meterInMM) const
   {
+    if (bridge &&
+        !attributes.IsBridge()) {
+      return false;
+    }
+
+    if (tunnel &&
+        !attributes.IsTunnel()) {
+      return false;
+    }
+
     if (oneway &&
         !attributes.IsOneway()) {
       return false;
@@ -1302,10 +1379,28 @@ namespace osmscout {
     GetMaxLevelInConditionals(wayPathShieldStyleConditionals,
                               maxLevel);
 
-    SortInConditionals(*typeConfig,
-                       wayLineStyleConditionals,
-                       maxLevel,
-                       wayLineStyleSelectors);
+    OSMSCOUT_HASHMAP<std::string,std::list<LineConditionalStyle> > lineStyleBySlot;
+
+    for (std::list<LineConditionalStyle>::const_iterator entry=wayLineStyleConditionals.begin();
+         entry!=wayLineStyleConditionals.end();
+         ++entry) {
+      lineStyleBySlot[entry->style.style->GetSlot()].push_back(*entry);
+    }
+
+    wayLineStyleSelectors.resize(lineStyleBySlot.size());
+
+    size_t idx=0;
+    for (OSMSCOUT_HASHMAP<std::string,std::list<LineConditionalStyle> >::iterator entry=lineStyleBySlot.begin();
+         entry!=lineStyleBySlot.end();
+         ++entry) {
+      SortInConditionals(*typeConfig,
+                         entry->second,
+                         maxLevel,
+                         wayLineStyleSelectors[idx]);
+
+      idx++;
+    }
+
     SortInConditionals(*typeConfig,
                        wayPathTextStyleConditionals,
                        maxLevel,
@@ -1341,10 +1436,13 @@ namespace osmscout {
             continue;
           }
 
-          if (!wayLineStyleSelectors[type][level].empty()) {
-            typeSet.SetType(type);
+          for (size_t slot=0; slot<wayLineStyleSelectors.size(); slot++) {
+            if (!wayLineStyleSelectors[slot][type][level].empty()) {
+              typeSet.SetType(type);
+            }
           }
-          else if (!wayPathTextStyleSelectors[type][level].empty()) {
+
+          if (!wayPathTextStyleSelectors[type][level].empty()) {
             typeSet.SetType(type);
           }
           else if (!wayPathSymbolStyleSelectors[type][level].empty()) {
@@ -1789,16 +1887,29 @@ namespace osmscout {
                  iconStyle);
   }
 
-  void StyleConfig::GetWayLineStyle(const SegmentAttributes& way,
-                                    const Projection& projection,
-                                    double dpi,
-                                    LineStyleRef& lineStyle) const
+  void StyleConfig::GetWayLineStyles(const SegmentAttributes& way,
+                                     const Projection& projection,
+                                     double dpi,
+                                     std::vector<LineStyleRef>& lineStyles) const
   {
-    GetSegmentAttributesStyle(wayLineStyleSelectors[way.GetType()],
-                              way,
-                              projection,
-                              dpi,
-                              lineStyle);
+    LineStyleRef style;
+
+    lineStyles.clear();
+    lineStyles.reserve(wayLineStyleSelectors.size());
+
+    for (size_t slot=0; slot<wayLineStyleSelectors.size(); slot++) {
+      style=NULL;
+
+      GetSegmentAttributesStyle(wayLineStyleSelectors[slot][way.GetType()],
+                                way,
+                                projection,
+                                dpi,
+                                style);
+
+      if (style.Valid()) {
+        lineStyles.push_back(style);
+      }
+    }
   }
 
   void StyleConfig::GetWayPathTextStyle(const SegmentAttributes& way,
@@ -1917,10 +2028,12 @@ namespace osmscout {
                                           double dpi,
                                           LineStyleRef& lineStyle) const
   {
-    GetStyle(wayLineStyleSelectors[typeConfig->typeTileCoastline],
-             projection,
-             dpi,
-             lineStyle);
+    for (size_t slot=0; slot<wayLineStyleSelectors.size(); slot++) {
+      GetStyle(wayLineStyleSelectors[slot][typeConfig->typeTileCoastline],
+               projection,
+               dpi,
+               lineStyle);
+    }
   }
 }
 

@@ -673,16 +673,12 @@ namespace osmscout {
 
               data.attributes=&coastlineSegmentAttributes;
               data.lineStyle=coastlineLine;
-              data.prio=std::numeric_limits<size_t>::max();
+              data.wayPriority=std::numeric_limits<size_t>::max();
               data.transStart=start+lineStart;
               data.transEnd=start+lineEnd;
               data.lineWidth=GetProjectedWidth(projection,
                                                ConvertWidthToPixel(parameter,coastlineLine->GetDisplayWidth()),
                                                coastlineLine->GetWidth());
-              data.drawBridge=false;
-              data.drawTunnel=false;
-              data.outline=false;
-
               wayData.push_back(data);
             }
 
@@ -1211,105 +1207,12 @@ namespace osmscout {
     nodesDrawn++;
   }
 
-  void MapPainter::DrawWayOutline(const StyleConfig& styleConfig,
-                                  const Projection& projection,
-                                  const MapParameter& parameter,
-                                  const WayData& data)
-  {
-    if (data.drawTunnel) {
-      tunnelDash[0]=4.0/data.lineWidth;
-      tunnelDash[1]=2.0/data.lineWidth;
-
-      if (data.outline) {
-        DrawPath(projection,
-                 parameter,
-                 data.lineStyle->GetOutlineColor(),
-                 data.outlineWidth,
-                 tunnelDash,
-                 data.startIsClosed ? LineStyle::capRound :LineStyle::capButt,
-                 data.endIsClosed ? LineStyle::capRound :LineStyle::capButt,
-                 data.transStart,data.transEnd);
-      }
-      else if (projection.GetMagnification().GetMagnification()>=10000) {
-        // light grey dashes
-
-        DrawPath(projection,
-                 parameter,
-                 Color(0.5,0.5,0.5),
-                 data.outlineWidth,
-                 tunnelDash,
-                 data.startIsClosed ? LineStyle::capRound :LineStyle::capButt,
-                 data.endIsClosed ? LineStyle::capRound :LineStyle::capButt,
-                 data.transStart,data.transEnd);
-      }
-      else {
-        // dark grey dashes
-
-        DrawPath(projection,
-                 parameter,
-                 Color(0.5,0.5,0.5),
-                 data.outlineWidth,
-                 tunnelDash,
-                 data.startIsClosed ? LineStyle::capRound :LineStyle::capButt,
-                 data.endIsClosed ? LineStyle::capRound :LineStyle::capButt,
-                     data.transStart,data.transEnd);
-      }
-    }
-    else {
-      // normal path, normal outline color
-
-      DrawPath(projection,
-               parameter,
-               data.lineStyle->GetOutlineColor(),
-               data.outlineWidth,
-               emptyDash,
-               data.startIsClosed ? LineStyle::capRound :LineStyle::capButt,
-               data.endIsClosed ? LineStyle::capRound :LineStyle::capButt,
-               data.transStart,data.transEnd);
-    }
-
-    if (data.drawBridge) {
-      DrawPath(projection,
-               parameter,
-               Color::BLACK,
-               1,
-               emptyDash,
-               LineStyle::capButt,
-               LineStyle::capButt,
-               data.par1Start,data.par1End);
-
-      DrawPath(projection,
-               parameter,
-               Color::BLACK,
-               1,
-               emptyDash,
-               LineStyle::capButt,
-               LineStyle::capButt,
-               data.par2Start,data.par2End);
-    }
-
-    waysOutlineDrawn++;
-  }
-
   void MapPainter::DrawWay(const StyleConfig& styleConfig,
                            const Projection& projection,
                            const MapParameter& parameter,
                            const WayData& data)
   {
-    Color color;
-
-    if (data.outline) {
-      // Draw line with normal color
-      color=data.lineStyle->GetLineColor();
-    }
-    else {
-      // Draw line with normal color
-      color=data.lineStyle->GetLineColor();
-    }
-
-    if (data.drawTunnel) {
-      color=color.Lighten(0.5);
-    }
+    Color color=data.lineStyle->GetLineColor();
 
     if (data.lineStyle->HasDashes() &&
         data.lineStyle->GetGapColor().GetA()>0.0) {
@@ -1318,8 +1221,8 @@ namespace osmscout {
                data.lineStyle->GetGapColor(),
                data.lineWidth,
                emptyDash,
-               LineStyle::capRound,
-               LineStyle::capRound,
+               data.startIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
+               data.endIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
                data.transStart,data.transEnd);
     }
 
@@ -1328,8 +1231,8 @@ namespace osmscout {
              color,
              data.lineWidth,
              data.lineStyle->GetDash(),
-             data.lineStyle->GetCapStyle(),
-             data.lineStyle->GetCapStyle(),
+             data.startIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
+             data.endIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
              data.transStart,data.transEnd);
 
     waysDrawn++;
@@ -1340,38 +1243,13 @@ namespace osmscout {
                             const MapParameter& parameter,
                             const MapData& data)
   {
-    std::list<WayData>::const_iterator start;
-
-    start=wayData.begin();
-    while (start!=wayData.end()) {
-
-      std::list<WayData>::const_iterator way;
-
-      way=start;
-      while (way!=wayData.end() && way->attributes->GetLayer()==start->attributes->GetLayer()) {
-        if (way->drawBridge ||
-            way->drawTunnel ||
-            way->outline) {
-          DrawWayOutline(styleConfig,
-                         projection,
-                         parameter,
-                         *way);
-        }
-
-        way++;
-      }
-
-      way=start;
-      while (way!=wayData.end() && way->attributes->GetLayer()==start->attributes->GetLayer()) {
-        DrawWay(styleConfig,
-                projection,
-                parameter,
-                *way);
-
-        way++;
-      }
-
-      start=way;
+    for (std::list<WayData>::const_iterator way=wayData.begin();
+         way!=wayData.end();
+         ++way) {
+      DrawWay(styleConfig,
+              projection,
+              parameter,
+              *way);
     }
   }
 
@@ -1380,8 +1258,8 @@ namespace osmscout {
                                       const MapParameter& parameter,
                                       const MapData& data)
   {
-    for (std::list<WayData>::const_iterator way=wayData.begin();
-        way!=wayData.end();
+    for (std::list<WayPathData>::const_iterator way=wayPathData.begin();
+        way!=wayPathData.end();
         way++)
     {
       PathSymbolStyleRef pathSymbolStyle;
@@ -1407,7 +1285,7 @@ namespace osmscout {
   void MapPainter::DrawWayLabel(const StyleConfig& styleConfig,
                                 const Projection& projection,
                                 const MapParameter& parameter,
-                                const WayData& data)
+                                const WayPathData& data)
   {
     if (data.attributes->GetName().empty() &&
         data.attributes->GetRefName().empty()) {
@@ -1490,8 +1368,8 @@ namespace osmscout {
                                  const MapParameter& parameter,
                                  const MapData& data)
   {
-    for (std::list<WayData>::const_iterator way=wayData.begin();
-        way!=wayData.end();
+    for (std::list<WayPathData>::const_iterator way=wayPathData.begin();
+        way!=wayPathData.end();
         way++) {
       DrawWayLabel(styleConfig,
                    projection,
@@ -1760,118 +1638,106 @@ namespace osmscout {
                                      const std::vector<GeoCoord>& nodes,
                                      const std::vector<Id>& ids)
   {
-    LineStyleRef lineStyle;
+    styleConfig.GetWayLineStyles(attributes,
+                                 projection,
+                                 parameter.GetDPI(),
+                                 lineStyles);
 
-    styleConfig.GetWayLineStyle(attributes,
-                                projection,
-                                parameter.GetDPI(),
-                                lineStyle);
-
-    if (lineStyle.Invalid()) {
+    if (lineStyles.empty()) {
       return;
     }
 
-    double lineWidth;
+    bool   transformed=false;
+    size_t transStart;
+    size_t transEnd;
 
-    if (lineStyle->GetWidth()>0.0) {
-      if (attributes.GetWidth()>0.0) {
-        lineWidth=GetProjectedWidth(projection,
-                                    ConvertWidthToPixel(parameter,lineStyle->GetDisplayWidth()),
-                                    attributes.GetWidth());
+    for (std::vector<LineStyleRef>::const_iterator ls=lineStyles.begin();
+         ls!=lineStyles.end();
+         ++ls) {
+      LineStyleRef lineStyle(*ls);
+      double       lineWidth=0.0;
+      double       lineOffset=0.0;
+
+      if (lineStyle->GetWidth()>0.0) {
+        if (attributes.GetWidth()>0.0) {
+          lineWidth+=GetProjectedWidth(projection,
+                                       attributes.GetWidth());
+        }
+        else {
+          lineWidth+=GetProjectedWidth(projection,
+                                       lineStyle->GetWidth());
+        }
       }
-      else {
-        lineWidth=GetProjectedWidth(projection,
-                                    ConvertWidthToPixel(parameter,lineStyle->GetDisplayWidth()),
-                                    lineStyle->GetWidth());
+
+      if (lineStyle->GetDisplayWidth()>0.0) {
+        lineWidth+=ConvertWidthToPixel(parameter,
+                                       lineStyle->GetDisplayWidth());
       }
-    }
-    else if (lineStyle->GetDisplayWidth()>0.0) {
-      lineWidth=ConvertWidthToPixel(parameter,lineStyle->GetDisplayWidth());
-    }
-    else {
-      return;
-    }
 
-    WayData data;
-
-    data.ref=ref;
-    data.lineWidth=lineWidth;
-
-    if (lineStyle->GetOutline()>0.0 && lineStyle->GetOutlineColor().IsVisible()) {
-      double convertedOutlineWidth=ConvertWidthToPixel(parameter,2*lineStyle->GetOutline());
-
-      data.outlineWidth=lineWidth+convertedOutlineWidth;
-      data.outline=true;
-    }
-    else {
-      data.outlineWidth=data.lineWidth;
-      data.outline=false;
-    }
-
-    if (data.outline) {
-      if (!IsVisible(projection,
-                     nodes,
-                     data.outlineWidth/2)) {
-        return;
+      if (lineWidth==0.0) {
+        continue;
       }
-    }
-    else {
-      data.outlineWidth=data.lineWidth;
+
+      if (lineStyle->GetOffset()!=0.0) {
+        lineOffset+=GetProjectedWidth(projection,
+                                      lineStyle->GetOffset());
+      }
+
+      if (lineStyle->GetDisplayOffset()!=0.0) {
+        lineOffset+=ConvertWidthToPixel(parameter,
+                                        lineStyle->GetDisplayOffset());
+      }
+
+      WayData data;
+
+      data.ref=ref;
+      data.lineWidth=lineWidth;
 
       if (!IsVisible(projection,
                     nodes,
                     lineWidth/2)) {
-        return;
+        continue;
       }
+
+      if (!transformed) {
+        transBuffer.TransformWay(projection,
+                                 parameter.GetOptimizeWayNodes(),
+                                 nodes,
+                                 transStart,
+                                 transEnd,
+                                 parameter.GetOptimizeErrorToleranceDots());
+
+        WayPathData pathData;
+
+        pathData.ref=ref;
+        pathData.attributes=&attributes;
+        pathData.transStart=transStart;
+        pathData.transEnd=transEnd;
+
+        wayPathData.push_back(pathData);
+
+        transformed=true;
+      }
+
+      data.attributes=&attributes;
+      data.lineStyle=lineStyle;
+      data.wayPriority=styleConfig.GetWayPrio(attributes.GetType());
+      data.startIsClosed=ids.empty() || ids[0]==0;
+      data.endIsClosed=ids.empty() || ids[ids.size()-1]==0;
+
+      if (lineOffset!=0.0) {
+        transBuffer.GenerateParallelWay(transStart,transEnd,
+                                        lineOffset,
+                                        data.transStart, data.transEnd);
+      }
+      else {
+        data.transStart=transStart;
+        data.transEnd=transEnd;
+      }
+
+      waysSegments++;
+      wayData.push_back(data);
     }
-
-    size_t start,end;
-
-    transBuffer.TransformWay(projection,
-                             parameter.GetOptimizeWayNodes(),
-                             nodes,
-                             start,end,
-                             parameter.GetOptimizeErrorToleranceDots());
-
-    data.attributes=&attributes;
-    data.lineStyle=lineStyle;
-    data.prio=styleConfig.GetWayPrio(attributes.GetType());
-    data.transStart=start;
-    data.transEnd=end;
-    data.startIsClosed=ids.empty() || ids[0]==0;
-    data.endIsClosed=ids.empty() || ids[ids.size()-1]==0;
-    data.drawBridge=attributes.IsBridge();
-    data.drawTunnel=attributes.IsTunnel();
-
-    if (data.drawBridge &&
-        projection.GetMagnification()<parameter.GetDrawBridgeMagnification()) {
-      data.drawBridge=false;
-    }
-
-    if (data.drawTunnel &&
-        projection.GetMagnification()<parameter.GetDrawTunnelMagnification()) {
-      data.drawTunnel=false;
-    }
-
-    // Drawing tunnel style for dashed lines is currently not supported
-    if (data.drawTunnel &&
-        lineStyle->HasDashes()) {
-      data.drawTunnel=false;
-    }
-
-    if (data.drawBridge) {
-      bool par1=transBuffer.GenerateParallelWay(data.transStart,data.transEnd,
-                                                data.outlineWidth/2+0.5,
-                                                data.par1Start, data.par1End);
-      bool par2=transBuffer.GenerateParallelWay(data.transStart,data.transEnd,
-                                                -(data.outlineWidth/2+0.5),
-                                                data.par2Start, data.par2End);
-
-      data.drawBridge=par1 && par2;
-    }
-
-    waysSegments++;
-    wayData.push_back(data);
   }
 
   void MapPainter::PrepareWays(const StyleConfig& styleConfig,
@@ -1880,6 +1746,7 @@ namespace osmscout {
                                const MapData& data)
   {
     wayData.clear();
+    wayPathData.clear();
 
     for (std::vector<WayRef>::const_iterator w=data.ways.begin();
          w!=data.ways.end();
@@ -1969,7 +1836,6 @@ namespace osmscout {
                         const MapData& data)
   {
     waysSegments=0;
-    waysOutlineDrawn=0;
     waysDrawn=0;
     waysLabelDrawn=0;
 
@@ -2179,7 +2045,7 @@ namespace osmscout {
 
     if (parameter.IsDebugPerformance()) {
       std::cout << "Paths: ";
-      std::cout << data.ways.size() << "+" << data.relationWays.size() << "/" << waysSegments << "/" << waysDrawn << "/" << waysOutlineDrawn << "/" << waysLabelDrawn << " (pcs) ";
+      std::cout << data.ways.size() << "+" << data.relationWays.size() << "/" << waysSegments << "/" << waysDrawn << "/" << waysLabelDrawn << " (pcs) ";
       std::cout << prepareWaysTimer << "/" << pathsTimer << "/" << pathLabelsTimer << " (sec)" << std::endl;
 
       std::cout << "Areas: ";

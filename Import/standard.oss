@@ -18,65 +18,68 @@ OSS
   GROUP highway_steps, barrier_fence
 
 CONST
-  COLOR red                 = #ff0000;
+  COLOR red                   = #ff0000;
 
   // Ground tiles
-  COLOR seaColor            = #b5d0d0;
-  COLOR landColor           = #f1eee9;
-  COLOR unknownColor        = @seaColor;
 
-  /*
-  COLOR seaColor            = #c4dff6;
-  COLOR landColor           = #fcfbe7;
-  COLOR unknownColor        = #c4dff6;*/
+  COLOR waterColor            = #9acffd; //#b5d0d0;
+  COLOR landColor             = #f1eee9;
+  COLOR unknownColor          = @waterColor;
+
+/*
+  COLOR seaColor              = #c4dff6;
+  COLOR landColor             = #fcfbe7;
+  COLOR unknownColor          = #c4dff6;*/
 
   // Landuse, water
-  COLOR allotmentsColor     = #c8b084;
-  COLOR beachColor          = #eecc55;
-  COLOR brownFieldColor     = #ebd7fe;
-  COLOR cemeteryColor       = #a9caae;
-  COLOR commercialColor     = #efc8c8;
-  COLOR constructionColor   = #9d9d6c;
-  COLOR farmColor           = #ead8bd;
-  COLOR farmyardColor       = #dcbe92;
-  COLOR fellColor           = #f9f9f9;
-  COLOR forestColor         = #8dc56c;
-  COLOR glacierColor        = #ddecec;
-  COLOR grassColor          = #cfeca8;
-  COLOR greenFieldColor     = #dcdcc8;
-  COLOR heathColor          = #ffffc0;
-  COLOR industrialColor     = #dfd1d6;
-  COLOR landFillColor       = #b6b591;
-  COLOR militaryColor       = #fe989822;
-  COLOR quarryColor         = #b3b3b3;
-  COLOR recreationColor     = #bce2ca;
-  COLOR residentialColor    = #dcdcdc;
-  COLOR retailColor         = #feeaea;
-  COLOR scrubColor          = #b5e2b5;
-  COLOR vineyardColor       = #b3e2a8;
-  COLOR waterColor          = #b5d0d0;
-  COLOR wetlandColor        = #bdd8d8;
-  COLOR woodColor           = #aed1a0;
+  COLOR allotmentsColor       = #c8b084;
+  COLOR beachColor            = #eecc55;
+  COLOR brownFieldColor       = #ebd7fe;
+  COLOR cemeteryColor         = #a9caae;
+  COLOR commercialColor       = #efc8c8;
+  COLOR constructionColor     = #9d9d6c;
+  COLOR farmColor             = #ead8bd;
+  COLOR farmyardColor         = #dcbe92;
+  COLOR fellColor             = #f9f9f9;
+  COLOR forestColor           = #8dc56c;
+  COLOR glacierColor          = #ddecec;
+  COLOR grassColor            = #cfeca8;
+  COLOR greenFieldColor       = #dcdcc8;
+  COLOR heathColor            = #ffffc0;
+  COLOR industrialColor       = #dfd1d6;
+  COLOR landFillColor         = #b6b591;
+  COLOR militaryColor         = #fe989822;
+  COLOR quarryColor           = #b3b3b3;
+  COLOR recreationColor       = #bce2ca;
+  COLOR residentialColor      = #dcdcdc;
+  COLOR retailColor           = #feeaea;
+  COLOR scrubColor            = #b5e2b5;
+  COLOR vineyardColor         = #b3e2a8;
+  COLOR wetlandColor          = #bdd8d8;
+  COLOR woodColor             = #aed1a0;
 
   // Symbols
-  COLOR railwaySymbolColor  = #7885b0;
-  COLOR busSymbolColor      = #7885b0;
-  COLOR onewayArrowColor    = #00000028;
-  COLOR peakSymbolColor     = #9c5e29;
-  COLOR hospitalSymbolColor = #da0092;
-  COLOR pharmacySymbolColor = #da0092;
+  COLOR railwaySymbolColor    = #7885b0;
+  COLOR busSymbolColor        = #7885b0;
+  COLOR onewayArrowColor      = #00000028;
+  COLOR peakSymbolColor       = #9c5e29;
+  COLOR hospitalSymbolColor   = #da0092;
+  COLOR pharmacySymbolColor   = #da0092;
 
   // Ways
-  COLOR motorwayColor       = #809bc0;
-  COLOR trunkColor          = #a8daa8;
-  COLOR primaryColor        = #ec989a;
-  COLOR secondaryColor      = #fdd6a4;
-  COLOR tertiaryColor       = #fefeb3;
-  COLOR roadColor           = #ffffff;
-  COLOR roadBColor          = #bfbfbf;
+  COLOR bridgeColor           = #000000;
+
+  COLOR motorwayColor         = #2c6ac0; // #809bc0;
+  COLOR trunkColor            = #3fda3f; // #a8daa8;
+  COLOR primaryColor          = #ec4044; // #ec989a;
+  COLOR secondaryColor        = #fdac44; // #fdd6a4;
+  COLOR tertiaryColor         = #fefe71; // #fefeb3;
+  COLOR roadColor             = #ffffff;
+  COLOR roadBColor            = #bfbfbf;
+  COLOR livingStreetColor     = #bababa;
 
   // Amenity
-  COLOR postColor           = #ffcc00;
+  COLOR postColor             = #ffcc00;
 
 SYMBOL oneway_arrow
   POLYGON 0,0.5 1,0 0,-0.5 { color:  @onewayArrowColor; }
@@ -137,9 +140,9 @@ SYMBOL christian_church_cross
  [MAG world-] {
    [TYPE _route] WAY {color: #ff000088; displayWidth: 1.5mm; }
 
-   [TYPE _tile_sea] AREA {color: @seaColor;}
-   [TYPE _tile_coast] AREA {color: @seaColor;}
-   //[TYPE _tile_coast] AREA {color: @seaColor;  borderColor: #000000; borderWidth: 0.1mm;}
+   [TYPE _tile_sea] AREA {color: @waterColor;}
+   [TYPE _tile_coast] AREA {color: @waterColor;}
+   //[TYPE _tile_coast] AREA {color: @waterColor;  borderColor: #000000; borderWidth: 0.1mm;}
    [TYPE _tile_land] AREA {color: @landColor;}
    [TYPE _tile_unknown] AREA {color: @unknownColor;}
 
@@ -232,90 +235,136 @@ SYMBOL christian_church_cross
 
  [MAG continent-] {
    [TYPE highway_motorway] {
-     [SIZE 20m 0.45mm:3px<] WAY { color: @motorwayColor; outlineColor: #777777; width: 20m; outline: 0.25mm;}
-     [SIZE 20m <0.45mm:3px] WAY { color: @motorwayColor; displayWidth: 0.45mm;}
+     [SIZE 20m 0.45mm:3px<] {
+       WAY#outline { color: darken(@motorwayColor,0.4); width: 20m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
+       WAY { color: @motorwayColor; width: 20m;}
+     }
+     [SIZE 20m <0.45mm:3px] WAY { color: lighten(@motorwayColor,0.3); displayWidth: 0.45mm;}
    }
  }
 
  [MAG county-] {
    [TYPE highway_trunk] {
-     [SIZE 18m 0.4mm:3px<] WAY { color: @trunkColor; outlineColor: #777777; width: 18m; outline: 0.25mm;}
-     [SIZE 18m <0.4mm:3px] WAY { color: @trunkColor; displayWidth: 0.4mm;}
+     [SIZE 18m 0.4mm:3px<] {
+       WAY#outline { color: darken(@trunkColor,0.4); width: 18m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
+       WAY { color: @trunkColor; width: 18m;}
+     }
+     [SIZE 18m <0.4mm:3px] WAY { color: lighten(@trunkColor,0.3); displayWidth: 0.4mm;}
    }
 
    [TYPE highway_primary] {
-     [SIZE 14m 0.4mm:3px<] WAY { color: @primaryColor; outlineColor: #a56769; width: 14m; outline: 0.25mm;}
-     [SIZE 14m <0.4mm:3px] WAY { color: @primaryColor; displayWidth: 0.4mm;}
+     [SIZE 14m 0.4mm:3px<] {
+       WAY#outline { color: darken(@primaryColor,0.4); width: 14m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
+       WAY { color: @primaryColor; width: 14m;}
+     }
+     [SIZE 14m <0.4mm:3px] WAY { color: lighten(@primaryColor,0.3); displayWidth: 0.4mm;}
    }
  }
 
  [MAG proximity-] {
    [TYPE highway_secondary] {
-     [SIZE 12m 0.25mm:3px<] WAY { color: @secondaryColor; outlineColor: #bfbfbf; width: 12m; outline: 0.25mm;}
+     [SIZE 12m 0.25mm:3px<] {
+       WAY#outline { color: darken(@secondaryColor,0.4); width: 12m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
+       WAY { color: @secondaryColor; width: 12m;}
+     }
      [SIZE 12m <0.25mm:3px] WAY { color: #fdd654; displayWidth: 0.25mm; }
    }
  }
 
  [MAG cityOver-] {
    [TYPE highway_motorway_link] {
-     [SIZE 20m 0.45mm:3px<] WAY { color: @motorwayColor; outlineColor: #777777; width: 20m; outline: 0.25mm;}
-     [SIZE 20m <0.45mm:3px] WAY { color: @motorwayColor; displayWidth: 0.45mm; }
+     [SIZE 20m 0.45mm:3px<] {
+       WAY#outline { color: darken(@motorwayColor,0.4); width: 20m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
+       WAY { color: @motorwayColor; width: 20m;}
+     }
+     [SIZE 20m <0.45mm:3px] WAY { color: lighten(@motorwayColor,0.3); displayWidth: 0.45mm;}
    }
 
+
    [TYPE highway_trunk_link] {
-     [SIZE 18m 0.4mm:3px<] WAY { color: @trunkColor; outlineColor: #777777; width: 18m; outline: 0.25mm;}
-     [SIZE 18m <0.4mm:3px] WAY { color: @trunkColor; displayWidth: 0.4mm;  }
+     [SIZE 18m 0.4mm:3px<] {
+       WAY#outline { color: darken(@trunkColor,0.4); width: 18m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
+       WAY { color: @trunkColor; width: 18m;}
+     }
+     [SIZE 18m <0.4mm:3px] WAY { color: lighten(@trunkColor,0.3); displayWidth: 0.4mm;}
    }
 
    [TYPE highway_tertiary] {
-     [SIZE 10m 0.25mm:3px<] WAY { color: @tertiaryColor; outlineColor: #bfbfbf; width: 10m; outline: 0.25mm;}
+     [SIZE 10m 0.25mm:3px<] {
+       WAY#outline { color: darken(@tertiaryColor,0.6); width: 10m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
+       WAY { color: @tertiaryColor; width: 10m;}
+     }
      [SIZE 10m <0.25mm:3px] WAY { color: #fefe73; displayWidth: 0.25mm;}
    }
 
    [TYPE highway_road] {
-     [SIZE 8m 0.1mm:3px<] WAY { color: @roadColor; outlineColor: @roadBColor; width: 8m; outline: 0.25mm;}
+     [SIZE 8m 0.1mm:3px<] {
+       WAY#outline { color: @roadBColor; width: 8m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
+       WAY { color: @roadColor; width: 8m;}
+     }
      [SIZE 8m <0.1mm:3px] WAY { color: #888888; displayWidth: 0.1mm;}
    }
 
    [TYPE railway_rail] {
-     [SIZE 5m 0.25mm:3px<] WAY {color: #939393;outlineColor: #b3b3b3; dash: 3,3; cap: butt; gapColor: #ffffff; width: 5m; outline: 0.25mm;}
+     [SIZE 5m 0.25mm:3px<] {
+       WAY#outline { color: #b3b3b3; width: 5m; displayWidth: 0.5mm; priority: -1; cap: butt; }
+       WAY {color: #939393; dash: 3,3; cap: butt; gapColor: #ffffff; width: 5m;}
+     }
      [SIZE 5m <0.25mm:3px] WAY {color: #777777; dash: 3,3; cap: butt; gapColor: #ffffff; displayWidth: 0.25mm;}
    }
  }
 
  [MAG city-] {
    [TYPE highway_primary_link] {
-     [SIZE 14m 0.4mm:3px<] WAY { color: @primaryColor; outlineColor: #777777; width: 14m; outline: 0.25mm;}
-     [SIZE 14m <0.4mm:3px] WAY { color: @primaryColor; displayWidth: 0.4mm;}
+     [SIZE 14m 0.4mm:3px<] {
+       WAY#outline { color: darken(@primaryColor,0.4); width: 14m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
+       WAY { color: @primaryColor; width: 14m;}
+     }
+     [SIZE 14m <0.4mm:3px] WAY { color: lighten(@primaryColor,0.3); displayWidth: 0.4mm;}
    }
 
    [TYPE highway_secondary_link] {
-     [SIZE 12m 0.25mm:3px<] WAY { color: @secondaryColor; outlineColor: #777777; width: 12m; outline: 0.25mm;}
+     [SIZE 12m 0.25mm:3px<] {
+       WAY#outline { color: darken(@secondaryColor,0.4); width: 12m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
+       WAY { color: @secondaryColor; width: 12m;}
+     }
      [SIZE 12m <0.25mm:3px] WAY { color: #fdd654; displayWidth: 0.25mm;}
    }
 
    [TYPE highway_unclassified,
          highway_residential] {
-     [SIZE 8m 0.1mm:3px<] WAY { color: @roadColor; outlineColor: @roadBColor; width: 8m; outline: 0.25mm;}
-     [SIZE 8m <0.1mm:3px] WAY { color: #999999; outlineColor: @roadBColor; displayWidth: 0.1mm; }
+     [SIZE 8m 0.1mm:3px<] {
+       WAY#outline { color: @roadBColor; width: 8m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
+       WAY { color: @roadColor; width: 8m;}
+     }
+     [SIZE 8m <0.1mm:3px] WAY { color: #999999; displayWidth: 0.1mm; }
    }
 
    [TYPE highway_services] AREA { color: #cb9999; }
 
    [TYPE railway_station] AREA { color: #cb4040; }
 
-   [TYPE route_ferry] WAY {color: #0000ff; outlineColor: #ffffff50; dash: 1,1; cap: butt; displayWidth: 0.5mm; width: 2m; outline: 0.4mm;}
+   [TYPE route_ferry] {
+     WAY#outline { color: #ffffff50; displayWidth: 0.8mm; priority: -1; cap: butt; }
+     WAY {color: #0000ff; dash: 1,1; cap: butt; displayWidth: 0.4mm;}
+   }
  }
 
  [MAG close-] {
    [TYPE highway_service] {
-     [SIZE 8m 0.1mm:3px<] WAY { color: @roadColor; outlineColor: @roadBColor; width: 8m; outline: 0.25mm;}
+     [SIZE 8m 0.1mm:3px<] {
+       WAY#outline { color: @roadBColor; width: 8m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
+       WAY { color: @roadColor; width: 8m;}
+     }
      [SIZE 8m <0.1mm:3px] WAY { color: #999999; displayWidth: 0.1mm;}
    }
 
    [TYPE highway_living_street] {
-     [SIZE 8m 0.1mm:3px<] WAY { color: #bababa; outlineColor: @roadBColor; width: 8m; outline: 0.25mm;}
-     [SIZE 8m <0.1mm:3px] WAY { color: #bababa; displayWidth: 0.1mm;}
+     [SIZE 8m 0.1mm:3px<] {
+       WAY#outline { color: @roadBColor; width: 8m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
+       WAY { color: @livingStreetColor; width: 8m;}
+     }
+     [SIZE 8m <0.1mm:3px] WAY { color: @livingStreetColor; displayWidth: 0.1mm;}
    }
 
    [TYPE highway_bus_guideway] WAY {color: #90570c; displayWidth: 0.1mm; }
@@ -324,7 +373,11 @@ SYMBOL christian_church_cross
 
    [TYPE railway_tram] WAY {color: #444444; displayWidth: 0.25mm; width: 5m;}
    [TYPE railway_light_rail] WAY {color: #b3b3b3; displayWidth: 0.25mm; width: 5m;}
-   [TYPE railway_subway] WAY {color: #b3b3b3; outlineColor: #ffffff50; displayWidth: 0.25mm; width: 5m; outline: 0.25mm;}
+
+   [TYPE railway_subway] {
+     WAY#outline { color: #ffffff50; width: 5m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
+     WAY {color: #b3b3b3; width: 5m;}
+   }
 
    [TYPE railway_station] NODE.ICON { symbol: railway_station; }
    [TYPE highway_bus_stop] NODE.ICON { symbol: highway_bus_stop; name: bus_stop;}
@@ -339,7 +392,9 @@ SYMBOL christian_church_cross
    }
 
    [TYPE public_transport_platform] {
-     WAY {color: #9b9b9c; outlineColor: #887b7b; displayWidth: 0.75mm; width: 2m; outline: 0.1mm;}
+     WAY#outline {color: #887b7b; width: 2m; displayWidth: 0.2mm;}
+     WAY {color: #9b9b9c; width: 2m; }
+
      AREA { color: #9b9b9c; borderColor: #887b7b; borderWidth: 0.1mm; }
    }
 
@@ -347,14 +402,196 @@ SYMBOL christian_church_cross
    [TYPE highway_footway] AREA { color: #ededed; borderColor: #c5c5c5; borderWidth: 0.1mm; }
  }
 
+ [MAG 15-] {
+   [TYPE highway_motorway, highway_motorway_link SIZE 20m 0.45mm:3px<] {
+     [TUNNEL] {
+       WAY#outline { dash: 0.5,0.5; }
+       WAY { color: lighten(@motorwayColor,0.3);}
+     }
+
+     [BRIDGE] {
+       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -10m; displayOffset: -0.25mm;}
+       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 10m; displayOffset: 0.25mm;}
+     }
+   }
+
+   [TYPE highway_trunk, highway_trunk_link SIZE 18m 0.4mm:3px<] {
+     [TUNNEL] {
+       WAY#outline { dash: 0.5,0.5; }
+       WAY { color: lighten(@trunkColor,0.3);}
+     }
+
+     [BRIDGE] {
+       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -9m; displayOffset: -0.25mm;}
+       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 9m; displayOffset: 0.25mm;}
+     }
+   }
+
+   [TYPE highway_primary, highway_primary_link SIZE 14m 0.4mm:3px<] {
+     [TUNNEL] {
+       WAY#outline { dash: 0.5,0.5; }
+       WAY { color: lighten(@primaryColor,0.3);}
+     }
+
+     [BRIDGE] {
+       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -7m; displayOffset: -0.25mm;}
+       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 7m; displayOffset: 0.25mm;}
+     }
+   }
+
+   [TYPE highway_secondary, highway_secondary_link SIZE 12m 0.25mm:3px<] {
+     [TUNNEL] {
+       WAY#outline { dash: 0.5,0.5; }
+       WAY { color: lighten(@secondaryColor,0.3);}
+     }
+
+     [BRIDGE] {
+       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -6m; displayOffset: -0.25mm;}
+       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 6m; displayOffset: 0.25mm;}
+     }
+   }
+
+   [TYPE highway_tertiary SIZE 10m 0.25mm:3px<] {
+     [TUNNEL] {
+       WAY#outline { dash: 0.5,0.5; }
+       WAY { color: lighten(@tertiaryColor,0.3);}
+     }
+
+     [BRIDGE] {
+       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -5m; displayOffset: -0.25mm;}
+       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 5m; displayOffset: 0.25mm;}
+     }
+   }
+
+   [TYPE highway_road SIZE 8m 0.1mm:3px<] {
+     [TUNNEL] {
+       WAY#outline { dash: 0.5,0.5; }
+       WAY { color: lighten(@roadColor,0.3);}
+     }
+
+     [BRIDGE] {
+       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -4m; displayOffset: -0.25mm;}
+       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 4m; displayOffset: 0.25mm;}
+     }
+   }
+
+   [TYPE railway_rail SIZE 5m 0.25mm:3px<] {
+     // Better rendering?
+     [TUNNEL] {
+       WAY#outline { dash: 0.5,0.5; }
+     }
+
+     [BRIDGE] {
+       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -2.5m; displayOffset: -0.25mm;}
+       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 2.5m; displayOffset: 0.25mm;}
+     }
+   }
+
+   [TYPE highway_unclassified, highway_residential SIZE 8m 0.1mm:3px<] {
+     // Better rendering?
+     [TUNNEL] {
+       WAY#outline { dash: 0.5,0.5; }
+     }
+
+     [BRIDGE] {
+       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -2.5m; displayOffset: -0.25mm;}
+       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 2.5m; displayOffset: 0.25mm;}
+     }
+   }
+
+   [TYPE highway_service SIZE 8m 0.1mm:3px<] {
+       // Better rendering?
+       [TUNNEL] {
+         WAY#outline { dash: 0.5,0.5; }
+       }
+
+     [BRIDGE] {
+       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -4m; displayOffset: -0.25mm;}
+       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 4m; displayOffset: 0.25mm;}
+     }
+   }
+
+   [TYPE highway_living_street SIZE 8m 0.1mm:3px<] {
+     [TUNNEL] {
+       WAY#outline { dash: 0.5,0.5; }
+       WAY { color: lighten(@livingStreetColor,0.3);}
+     }
+
+     [BRIDGE] {
+       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: -4m; displayOffset: -0.25mm;}
+       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; offset: 4m; displayOffset: 0.25mm;}
+     }
+   }
+ }
+
  [MAG veryClose-] {
-   [TYPE highway_track] WAY {color: #90570c; outlineColor: #ffffff50; dash: 3,1; cap: butt; displayWidth: 0.4mm;  outline: 0.4mm;}
-   [TYPE highway_pedestrian] WAY {color: #ebeaea; outlineColor: #ffffff50; displayWidth: 0.1mm; outline: 0.25mm;}
-   [TYPE highway_path] WAY {color: #555555; outlineColor: #ffffff50; dash: 8,2; cap: butt; displayWidth: 0.25mm; outline: 0.25mm;}
-   [TYPE highway_cycleway] WAY {color: #4645fa; outlineColor: #ffffff50; dash: 1,1; cap: butt; displayWidth: 0.4mm; outline: 0.4mm; }
-   [TYPE highway_footway] WAY {color: #f64762; outlineColor: #ffffff50; dash: 1,1; cap: butt; displayWidth: 0.4mm; outline: 0.4mm; }
-   [TYPE highway_bridleway] WAY {color: #90570c; displayWidth: 0.1mm; width: 2m; }
-   [TYPE leisure_track] WAY {color: #bde3cb; displayWidth: 0.25mm; width: 3m;}
+   [TYPE highway_track] {
+     WAY#outline {color: #ffffff50; displayWidth: 1.2mm; cap: butt;}
+     WAY {color: #90570c; dash: 3,1; cap: butt; displayWidth: 0.4mm;}
+
+     [BRIDGE] {
+       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.6mm;}
+       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.6mm;}
+     }
+   }
+
+   [TYPE highway_pedestrian] {
+     WAY#outline {color: #ffffff50; displayWidth: 0.6mm; cap: butt;}
+     WAY {color: #ebeaea; displayWidth: 0.1mm;}
+
+     [BRIDGE] {
+       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.3mm;}
+       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.3mm;}
+     }
+   }
+
+   [TYPE highway_path] {
+     WAY#outline {color: #ffffff50; displayWidth: 0.8mm; cap: butt;}
+     WAY {color: #555555; dash: 8,2; cap: butt; displayWidth: 0.25mm;}
+
+     [BRIDGE] {
+       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.4mm;}
+       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.4mm;}
+     }
+   }
+
+   [TYPE highway_cycleway] {
+     WAY#outline {color: #ffffff50; displayWidth: 1.2mm; cap: butt;}
+     WAY {color: #4645fa; dash: 1,1; cap: butt; displayWidth: 0.4mm;}
+
+     [BRIDGE] {
+       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.6mm;}
+       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.6mm;}
+     }
+   }
+
+   [TYPE highway_footway] {
+     WAY#outline {color: #ffffff50; displayWidth: 1.2mm; cap: butt;}
+     WAY {color: #f64762; dash: 1,1; cap: butt; displayWidth: 0.4mm; }
+
+     [BRIDGE] {
+       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.6mm;}
+       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.6mm;}
+     }
+   }
+
+   [TYPE highway_bridleway] {
+     WAY {color: #90570c; displayWidth: 0.4mm; cap: butt; }
+
+     [BRIDGE] {
+       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.2mm;}
+       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.2mm;}
+     }
+   }
+
+   [TYPE leisure_track] {
+     WAY {color: #bde3cb; displayWidth: 0.3mm; }
+
+     [BRIDGE] {
+       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.15mm;}
+       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.15mm;}
+     }
+   }
   }
 
  [MAG block-] {
@@ -362,9 +599,23 @@ SYMBOL christian_church_cross
 
    [TYPE railway_tram_stop] NODE.ICON { symbol: railway_tram_stop;}
 
-   [TYPE highway_byway] WAY {color: #90570c; displayWidth: 0.1mm; }
+   [TYPE highway_byway] {
+     WAY {color: #90570c; displayWidth: 0.3mm; }
 
-   [TYPE highway_steps] WAY {color: #fe9897; dash: 0.25,0.25; cap: butt; displayWidth: 1.25mm;}
+     [BRIDGE] {
+       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.15mm;}
+       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.15mm;}
+     }
+   }
+
+   [TYPE highway_steps] {
+      WAY {color: #fe9897; dash: 0.25,0.25; cap: butt; displayWidth: 1.3mm;}
+
+     [BRIDGE] {
+       WAY#lbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: -0.65mm;}
+       WAY#rbridge {color: @bridgeColor; displayWidth: 0.2mm; displayOffset: 0.65mm;}
+     }
+   }
  }
 
  // WAY.SHIELD

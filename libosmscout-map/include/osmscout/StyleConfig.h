@@ -104,6 +104,8 @@ namespace osmscout {
     TypeSet               types;
     size_t                minLevel;
     size_t                maxLevel;
+    bool                  bridge;
+    bool                  tunnel;
     bool                  oneway;
     SizeConditionRef      sizeCondition;
 
@@ -115,6 +117,8 @@ namespace osmscout {
 
     StyleFilter& SetMinLevel(size_t level);
     StyleFilter& SetMaxLevel(size_t level);
+    StyleFilter& SetBridge(bool bridge);
+    StyleFilter& SetTunnel(bool tunnel);
     StyleFilter& SetOneway(bool oneway);
 
     StyleFilter& SetSizeCondition(SizeCondition* condition);
@@ -137,6 +141,16 @@ namespace osmscout {
     inline size_t GetMaxLevel() const
     {
       return maxLevel;
+    }
+
+    inline bool GetBridge() const
+    {
+      return bridge;
+    }
+
+    inline bool GetTunnel() const
+    {
+      return tunnel;
     }
 
     inline bool GetOneway() const
@@ -165,6 +179,8 @@ namespace osmscout {
   public:
 
   private:
+    bool             bridge;
+    bool             tunnel;
     bool             oneway;
     SizeConditionRef sizeCondition;
 
@@ -175,6 +191,16 @@ namespace osmscout {
 
     bool operator==(const StyleCriteria& other) const;
     bool operator!=(const StyleCriteria& other) const;
+
+    inline bool GetBridge() const
+    {
+      return bridge;
+    }
+
+    inline bool GetTunnel() const
+    {
+      return tunnel;
+    }
 
     inline bool GetOneway() const
     {
@@ -260,54 +286,62 @@ namespace osmscout {
 
     enum Attribute {
       attrLineColor,
-      attrOutlineColor,
       attrGapColor,
       attrDisplayWidth,
       attrWidth,
-      attrCapStyle,
-      attrOutline,
-      attrDashes
+      attrDisplayOffset,
+      attrOffset,
+      attrJoinCap,
+      attrEndCap,
+      attrDashes,
+      attrPriority
     };
 
   private:
+    std::string         slot;
     Color               lineColor;
-    Color               outlineColor;
     Color               gapColor;
     double              displayWidth;
     double              width;
-    CapStyle            capStyle;
-    double              outline;
+    double              displayOffset;
+    double              offset;
+    CapStyle            joinCap;
+    CapStyle            endCap;
     std::vector<double> dash;
+    int                 priority;
 
   public:
     LineStyle();
     LineStyle(const LineStyle& style);
 
+    LineStyle& SetSlot(const std::string& slot);
+
     LineStyle& SetLineColor(const Color& color);
-    LineStyle& SetOutlineColor(const Color& color);
     LineStyle& SetGapColor(const Color& color);
     LineStyle& SetDisplayWidth(double value);
     LineStyle& SetWidth(double value);
-    LineStyle& SetCapStyle(CapStyle capStyle);
-    LineStyle& SetOutline(double value);
+    LineStyle& SetDisplayOffset(double value);
+    LineStyle& SetOffset(double value);
+    LineStyle& SetJoinCap(CapStyle joinCap);
+    LineStyle& SetEndCap(CapStyle endCap);
     LineStyle& SetDashes(const std::vector<double> dashes);
+    LineStyle& SetPriority(int priority);
 
     inline bool IsVisible() const
     {
       return (displayWidth>0.0 ||
               width>0.0) &&
-             (lineColor.IsVisible() ||
-              outlineColor.IsVisible());
+              lineColor.IsVisible();
+    }
+
+    inline const std::string& GetSlot() const
+    {
+      return slot;
     }
 
     inline const Color& GetLineColor() const
     {
       return lineColor;
-    }
-
-    inline const Color& GetOutlineColor() const
-    {
-      return outlineColor;
     }
 
     inline const Color& GetGapColor() const
@@ -325,14 +359,24 @@ namespace osmscout {
       return width;
     }
 
-    inline CapStyle GetCapStyle() const
+    inline double GetDisplayOffset() const
     {
-      return capStyle;
+      return displayOffset;
     }
 
-    inline double GetOutline() const
+    inline double GetOffset() const
     {
-      return outline;
+      return offset;
+    }
+
+    inline CapStyle GetJoinCap() const
+    {
+      return joinCap;
+    }
+
+    inline CapStyle GetEndCap() const
+    {
+      return endCap;
     }
 
     inline bool HasDashes() const
@@ -343,6 +387,11 @@ namespace osmscout {
     inline const std::vector<double>& GetDash() const
     {
       return dash;
+    }
+
+    inline int GetPriority() const
+    {
+      return priority;
     }
 
     void CopyAttributes(const LineStyle& other,
@@ -1113,7 +1162,7 @@ namespace osmscout {
     std::list<PathSymbolConditionalStyle>      wayPathSymbolStyleConditionals;
     std::list<PathShieldConditionalStyle>      wayPathShieldStyleConditionals;
 
-    LineStyleLookupTable                       wayLineStyleSelectors;
+    std::vector<LineStyleLookupTable>          wayLineStyleSelectors;
     PathTextStyleLookupTable                   wayPathTextStyleSelectors;
     PathSymbolStyleLookupTable                 wayPathSymbolStyleSelectors;
     PathShieldStyleLookupTable                 wayPathShieldStyleSelectors;
@@ -1212,10 +1261,10 @@ namespace osmscout {
                           double dpi,
                           IconStyleRef& iconStyle) const;
 
-    void GetWayLineStyle(const SegmentAttributes& way,
-                         const Projection& projection,
+    void GetWayLineStyles(const SegmentAttributes& way,
+                          const Projection& projection,
                           double dpi,
-                         LineStyleRef& lineStyle) const;
+                          std::vector<LineStyleRef>& lineStyles) const;
     void GetWayPathTextStyle(const SegmentAttributes& way,
                              const Projection& projection,
                              double dpi,

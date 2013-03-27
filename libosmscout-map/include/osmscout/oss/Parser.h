@@ -219,9 +219,12 @@ inline void ToRGBA(const std::string& str, Color& color)
 	void AREASTYLE(StyleFilter filter);
 	void AREATEXTSTYLE(StyleFilter filter);
 	void AREAICONSTYLE(StyleFilter filter);
+	void UDISPLAYSIZE(double& value);
+	void UMAPSIZE(double& value);
 	void DISPLAYSIZE(double& value);
 	void MAPSIZE(double& value);
 	void CAPSTYLE(LineStyle::CapStyle& style);
+	void INT(int& value);
 	void STRING(std::string& value);
 	void TEXTLABEL(TextStyle::Label& label);
 	void LABELSTYLE(TextStyle::Style& style);

@@ -41,7 +41,7 @@ namespace osmscout {
     double a;
 
   public:
-    Color()
+    inline Color()
     : r(1),
       g(0),
       b(0),
@@ -50,10 +50,10 @@ namespace osmscout {
       // no code
     }
 
-    Color(double r,
-          double g,
-          double b,
-          double a)
+    inline Color(double r,
+                 double g,
+                 double b,
+                 double a)
     : r(r),
       g(g),
       b(b),
@@ -62,9 +62,9 @@ namespace osmscout {
       // no code
     }
 
-    Color(double r,
-          double g,
-          double b)
+    inline Color(double r,
+                 double g,
+                 double b)
     : r(r),
       g(g),
       b(b),
@@ -73,7 +73,7 @@ namespace osmscout {
       // no code
     }
 
-    Color(const Color& other)
+    inline Color(const Color& other)
     {
       this->r=other.r;
       this->g=other.g;
@@ -81,7 +81,7 @@ namespace osmscout {
       this->a=other.a;
     }
 
-    Color& operator=(const Color& other)
+    inline Color& operator=(const Color& other)
     {
       if (&other!=this) {
         this->r=other.r;
@@ -93,41 +93,48 @@ namespace osmscout {
       return *this;
     }
 
-    double GetR() const
+    inline double GetR() const
     {
       return r;
     }
 
-    double GetG() const
+    inline double GetG() const
     {
       return g;
     }
 
-    double GetB() const
+    inline double GetB() const
     {
       return b;
     }
 
-    double GetA() const
+    inline double GetA() const
     {
       return a;
     }
 
-    bool IsSolid() const
+    inline bool IsSolid() const
     {
       return a==1.0;
     }
 
-    bool IsVisible() const
+    inline bool IsVisible() const
     {
       return a>0.0;
     }
 
-    Color Lighten(double factor) const
+    inline Color Lighten(double factor) const
     {
       return Color(r+(1-r)*factor,
                    g+(1-g)*factor,
                    b+(1-b)*factor);
+    }
+
+    inline Color Darken(double factor) const
+    {
+      return Color(r-(1-r)*factor,
+                   g-(1-g)*factor,
+                   b-(1-b)*factor);
     }
   };
 }

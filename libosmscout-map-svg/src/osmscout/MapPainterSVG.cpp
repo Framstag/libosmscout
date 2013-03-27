@@ -140,6 +140,7 @@ namespace osmscout {
 
     stream << std::endl;
 
+    /*
     for (std::vector<TypeInfo>::const_iterator typeInfo=styleConfig.GetTypeConfig()->GetTypes().begin();
         typeInfo!=styleConfig.GetTypeConfig()->GetTypes().end();
         typeInfo++) {
@@ -194,7 +195,7 @@ namespace osmscout {
 
         stream << "}" << std::endl;
       }
-    }
+    }*/
 
     stream << std::endl;
 
@@ -314,136 +315,30 @@ namespace osmscout {
     stream << "\" />" << std::endl;
   }
 
-  void MapPainterSVG::DrawWayOutline(const StyleConfig& styleConfig,
-                                     const Projection& projection,
-                                     const MapParameter& parameter,
-                                     const WayData& data)
-  {
-    if (data.drawTunnel) {
-      tunnelDash[0]=4.0/data.lineWidth;
-      tunnelDash[1]=2.0/data.lineWidth;
-
-      if (data.outline) {
-        DrawPath(projection,
-                 parameter,
-                 data.lineStyle->GetOutlineColor(),
-                 data.outlineWidth,
-                 tunnelDash,
-                 data.startIsClosed ? LineStyle::capRound :LineStyle::capButt,
-                 data.endIsClosed ? LineStyle::capRound :LineStyle::capButt,
-                 data.transStart,data.transEnd);
-     }
-      else if (projection.GetMagnification().GetMagnification()>=10000) {
-        // light grey dashes
-
-        DrawPath(projection,
-                 parameter,
-                 Color(0.5,0.5,0.5),
-                 data.outlineWidth,
-                 tunnelDash,
-                 data.startIsClosed ? LineStyle::capRound :LineStyle::capButt,
-                 data.endIsClosed ? LineStyle::capRound :LineStyle::capButt,
-                 data.transStart,data.transEnd);
-      }
-      else {
-        // dark grey dashes
-
-        DrawPath(projection,
-                 parameter,
-                 Color(0.5,0.5,0.5),
-                 data.outlineWidth,
-                 tunnelDash,
-                 data.startIsClosed ? LineStyle::capRound :LineStyle::capButt,
-                 data.endIsClosed ? LineStyle::capRound :LineStyle::capButt,
-                 data.transStart,data.transEnd);
-      }
-    }
-    else {
-      // normal path, normal outline color
-
-      DrawPath(projection,
-               parameter,
-               typeConfig->GetTypeInfo(data.attributes->GetType()).GetName()+"_way_outline",
-               data.outlineWidth,
-               data.startIsClosed ? LineStyle::capRound :LineStyle::capButt,
-               data.endIsClosed ? LineStyle::capRound :LineStyle::capButt,
-               data.transStart,data.transEnd);
-    }
-
-    waysOutlineDrawn++;
-  }
-
   void MapPainterSVG::DrawWay(const StyleConfig& styleConfig,
                               const Projection& projection,
                               const MapParameter& parameter,
                               const WayData& data)
   {
-    if (data.drawTunnel) {
-      Color color;
-
-      // Draw line with normal color
-      color=data.lineStyle->GetLineColor().Lighten(0.5);
-
-      if (!data.lineStyle->GetDash().empty() &&
-          data.lineStyle->GetGapColor().GetA()>0.0) {
-        DrawPath(projection,
-                 parameter,
-                 data.lineStyle->GetGapColor(),
-                 data.lineWidth,
-                 emptyDash,
-                 LineStyle::capRound,
-                 LineStyle::capRound,
-                 data.transStart,data.transEnd);
-      }
-
+    if (!data.lineStyle->GetDash().empty() &&
+        data.lineStyle->GetGapColor().GetA()>0.0) {
       DrawPath(projection,
                parameter,
-               color,
+               data.lineStyle->GetGapColor(),
                data.lineWidth,
-               data.lineStyle->GetDash(),
+               emptyDash,
                LineStyle::capRound,
                LineStyle::capRound,
                data.transStart,data.transEnd);
     }
-    else {
-      if (!data.lineStyle->GetDash().empty() &&
-          data.lineStyle->GetGapColor().GetA()>0.0) {
-        DrawPath(projection,
-                 parameter,
-                 data.lineStyle->GetGapColor(),
-                 data.lineWidth,
-                 emptyDash,
-                 LineStyle::capRound,
-                 LineStyle::capRound,
-                 data.transStart,data.transEnd);
-      }
 
-      DrawPath(projection,
-               parameter,
-               typeConfig->GetTypeInfo(data.attributes->GetType()).GetName()+"_way",
-               data.lineWidth,
-               LineStyle::capRound,
-               LineStyle::capRound,
-               data.transStart,data.transEnd);
-
-      if (data.drawBridge) {
-        DrawPath(projection,
-                 parameter,
-                 "bridge_marker",
-                 1,
-                 LineStyle::capButt,
-                 LineStyle::capButt,
-                 data.par1Start,data.par1End);
-
-        DrawPath(projection,
-                 parameter,
-                 "bridge_marker",
-                 1,
-                 LineStyle::capButt,
-                 LineStyle::capButt,
-                 data.par2Start,data.par2End);
-      }
-    }
+    DrawPath(projection,
+             parameter,
+             typeConfig->GetTypeInfo(data.attributes->GetType()).GetName()+"_way",
+             data.lineWidth,
+             LineStyle::capRound,
+             LineStyle::capRound,
+             data.transStart,data.transEnd);
 
     waysDrawn++;
   }
