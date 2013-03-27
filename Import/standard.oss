@@ -22,7 +22,7 @@ CONST
 
   // Ground tiles
 
-  COLOR waterColor            = #9acffd; //#b5d0d0;
+  COLOR waterColor            = #9acffd;
   COLOR landColor             = #f1eee9;
   COLOR unknownColor          = @waterColor;
 
@@ -67,16 +67,16 @@ CONST
   COLOR pharmacySymbolColor   = #da0092;
 
   // Ways
-  COLOR bridgeColor           = #000000;
+  COLOR bridgeColor           = #000000; // black
 
-  COLOR motorwayColor         = #2c6ac0; // #809bc0;
-  COLOR trunkColor            = #3fda3f; // #a8daa8;
-  COLOR primaryColor          = #ec4044; // #ec989a;
-  COLOR secondaryColor        = #fdac44; // #fdd6a4;
-  COLOR tertiaryColor         = #fef271; // #fefeb3;
-  COLOR roadColor             = #ffffff;
+  COLOR motorwayColor         = #4440ec; // dark blue
+  COLOR trunkColor            = #7674ec; // lighther blue
+  COLOR primaryColor          = #ec4044; // red
+  COLOR secondaryColor        = #fdac44; // orange
+  COLOR tertiaryColor         = #fef271; // yelow
+  COLOR roadColor             = #ffffff; // white
   COLOR roadBColor            = #bfbfbf;
-  COLOR livingStreetColor     = #bababa;
+  COLOR livingStreetColor     = #bababa; // grey
 
   // Amenity
   COLOR postColor             = #ffcc00;
