@@ -73,7 +73,7 @@ CONST
   COLOR trunkColor            = #3fda3f; // #a8daa8;
   COLOR primaryColor          = #ec4044; // #ec989a;
   COLOR secondaryColor        = #fdac44; // #fdd6a4;
-  COLOR tertiaryColor         = #fefe71; // #fefeb3;
+  COLOR tertiaryColor         = #fef271; // #fefeb3;
   COLOR roadColor             = #ffffff;
   COLOR roadBColor            = #bfbfbf;
   COLOR livingStreetColor     = #bababa;
