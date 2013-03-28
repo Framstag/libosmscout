@@ -22,6 +22,8 @@
 
 #include <osmscout/private/CoreImportExport.h>
 
+#include <string>
+
 #include <osmscout/system/Types.h>
 
 #include <osmscout/util/HashMap.h>
@@ -133,7 +135,7 @@ namespace osmscout {
   {
   private:
     OSMSCOUT_HASHMAP<std::string,Magnification::Mag> stringToMagMap;
-    
+
   public:
     MagnificationConverter();
 
