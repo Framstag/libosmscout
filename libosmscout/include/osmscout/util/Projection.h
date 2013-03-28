@@ -56,15 +56,15 @@ namespace osmscout {
       {
       }
 
-      ~BatchTransformer()
+      inline ~BatchTransformer()
       {
         Flush();
       }
 
-      bool GeoToPixel(double lon,
-                      double lat,
-                      double& x,
-                      double& y)
+      inline bool GeoToPixel(double lon,
+                             double lat,
+                             double& x,
+                             double& y)
       {
 #ifdef OSMSCOUT_HAVE_SSE2
 
@@ -247,7 +247,6 @@ namespace osmscout {
     double GetPixelSize() const;
 
   protected:
-
      bool GeoToPixel(const BatchTransformer& transformData) const;
 
   };

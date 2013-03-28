@@ -46,22 +46,22 @@ namespace osmscout {
 
   MagnificationConverter::MagnificationConverter()
   {
-    stringToMagMap["world"]=Magnification::magWorld;
-    stringToMagMap["continent"]=Magnification::magContinent;
-    stringToMagMap["state"]=Magnification::magState;
-    stringToMagMap["stateOver"]=Magnification::magStateOver;
-    stringToMagMap["county"]=Magnification::magCounty;
-    stringToMagMap["region"]=Magnification::magRegion;
-    stringToMagMap["proximity"]=Magnification::magProximity;
-    stringToMagMap["cityOver"]=Magnification::magCityOver;
-    stringToMagMap["city"]=Magnification::magCity;
-    stringToMagMap["suburb"]=Magnification::magSuburb;
-    stringToMagMap["detail"]=Magnification::magDetail;
-    stringToMagMap["close"]=Magnification::magClose;
-    stringToMagMap["veryClose"]=Magnification::magVeryClose;
-    stringToMagMap["block"]=Magnification::magBlock;
-    stringToMagMap["street"]=Magnification::magStreet;
-    stringToMagMap["house"]=Magnification::magHouse;
+    stringToMagMap[std::string("world")]=Magnification::magWorld;
+    stringToMagMap[std::string("continent")]=Magnification::magContinent;
+    stringToMagMap[std::string("state")]=Magnification::magState;
+    stringToMagMap[std::string("stateOver")]=Magnification::magStateOver;
+    stringToMagMap[std::string("county")]=Magnification::magCounty;
+    stringToMagMap[std::string("region")]=Magnification::magRegion;
+    stringToMagMap[std::string("proximity")]=Magnification::magProximity;
+    stringToMagMap[std::string("cityOver")]=Magnification::magCityOver;
+    stringToMagMap[std::string("city")]=Magnification::magCity;
+    stringToMagMap[std::string("suburb")]=Magnification::magSuburb;
+    stringToMagMap[std::string("detail")]=Magnification::magDetail;
+    stringToMagMap[std::string("close")]=Magnification::magClose;
+    stringToMagMap[std::string("veryClose")]=Magnification::magVeryClose;
+    stringToMagMap[std::string("block")]=Magnification::magBlock;
+    stringToMagMap[std::string("street")]=Magnification::magStreet;
+    stringToMagMap[std::string("house")]=Magnification::magHouse;
   }
 
   bool MagnificationConverter::Convert(const std::string& name,
