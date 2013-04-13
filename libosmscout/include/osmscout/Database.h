@@ -48,6 +48,7 @@
 #include <osmscout/Route.h>
 
 #include <osmscout/util/Breaker.h>
+#include <osmscout/util/StopClock.h>
 
 namespace osmscout {
 
@@ -111,6 +112,7 @@ namespace osmscout {
     unsigned long maxAreas;
     bool          useLowZoomOptimization;
     BreakerRef    breaker;
+    bool          useMultithreading;
 
   public:
     AreaSearchParameter();
@@ -123,6 +125,8 @@ namespace osmscout {
 
     void SetUseLowZoomOptimization(bool useLowZoomOptimization);
 
+    void SetUseMultithreading(bool useMultithreading);
+
     void SetBreaker(const BreakerRef& breaker);
 
     unsigned long GetMaximumAreaLevel() const;
@@ -132,6 +136,8 @@ namespace osmscout {
     unsigned long GetMaximumAreas() const;
 
     bool GetUseLowZoomOptimization() const;
+
+    bool GetUseMultithreading() const;
 
     bool IsAborted() const;
   };
@@ -147,9 +153,9 @@ namespace osmscout {
     double                maxLon;          //! bounding box of data
     double                maxLat;          //! bounding box of data
 
-    AreaAreaIndex         areaAreaIndex;
     AreaNodeIndex         areaNodeIndex;
     AreaWayIndex          areaWayIndex;
+    AreaAreaIndex         areaAreaIndex;
 
     CityStreetIndex       cityStreetIndex;
 
@@ -158,14 +164,59 @@ namespace osmscout {
     std::string           path;             //! Path to the directory containing all files
 
     NodeDataFile          nodeDataFile;     //! Cached access to the 'nodes.dat' file
-    RelationDataFile      relationDataFile; //! Cached access to the 'relations.dat' file
     WayDataFile           wayDataFile;      //! Cached access to the 'ways.dat' file
+    RelationDataFile      relationDataFile; //! Cached access to the 'relations.dat' file
 
     OptimizeLowZoom       optimizeLowZoom;  //! Optimized data for low zoom situations
 
     TypeConfig            *typeConfig;      //! Type config for the currently opened map
 
     std::string           (*hashFunction) (std::string);
+
+  private:
+    bool GetObjectsNodes(const AreaSearchParameter& parameter,
+                         const TypeSet &nodeTypes,
+                         double lonMin, double latMin,
+                         double lonMax, double latMax,
+                         std::string& nodeIndexTime,
+                         std::string& nodesTime,
+                         std::vector<NodeRef>& nodes) const;
+
+    bool GetObjectsWayOffsets(const AreaSearchParameter& parameter,
+                              const std::vector<TypeSet>& wayTypes,
+                              const Magnification& magnification,
+                              double lonMin, double latMin,
+                              double lonMax, double latMax,
+                              std::string& wayOptimizedTime,
+                              std::string& wayIndexTime,
+                              std::vector<FileOffset>& wayWayOffsets,
+                              std::vector<FileOffset>& relationWayOffsets,
+                              std::vector<WayRef>& ways) const;
+
+    bool GetObjectsAreaOffsets(const AreaSearchParameter& parameter,
+                               const TypeSet& areaTypes,
+                               const Magnification& magnification,
+                               double lonMin, double latMin,
+                               double lonMax, double latMax,
+                               std::string& areaIndexTime,
+                               std::vector<FileOffset>& wayAreaOffsets,
+                               std::vector<FileOffset>& relationAreaOffsets) const;
+
+    bool GetObjectsWaysAndAreas(const AreaSearchParameter& parameter,
+                                const std::vector<FileOffset>& wayWayOffsets,
+                                const std::vector<FileOffset>& wayAreaOffsets,
+                                std::string& waysTime,
+                                std::string& areasTime,
+                                std::vector<WayRef>& ways,
+                                std::vector<WayRef>& areas) const;
+
+    bool GetObjectsWaysAndAreasRel(const AreaSearchParameter& parameter,
+                                   const std::vector<FileOffset>& relationWayOffsets,
+                                   const std::vector<FileOffset>& relationAreaOffsets,
+                                   std::string& relationWaysTime,
+                                   std::string& relationAreasTime,
+                                   std::vector<RelationRef>& relationWays,
+                                   std::vector<RelationRef>& relationAreas) const;
 
   public:
     Database(const DatabaseParameter& parameter);
@@ -223,7 +274,7 @@ namespace osmscout {
                          std::vector<WayRef>& ways) const;
     bool GetWaysByOffset(const std::list<FileOffset>& offsets,
                          std::vector<WayRef>& ways) const;
-    
+
     bool GetRelationByOffset(const FileOffset& offset,
                              RelationRef& relation) const;
     bool GetRelationsByOffset(const std::vector<FileOffset>& offsets,

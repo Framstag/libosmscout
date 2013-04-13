@@ -22,6 +22,10 @@ AC_ARG_ENABLE(cpp0x-support,
               [AS_HELP_STRING([--disable-cpp0x-support],
                               [do not make use of C++0x compiler support])])
 
+AC_ARG_ENABLE(thread-support,
+              [AS_HELP_STRING([--disable-thread-support],
+                              [do not make use of C++0x thread support])])
+
 if test "$enable_cpp0x_support" != "no"; then
  AX_CHECK_COMPILE_FLAG([-std=c++0x],
                        [CPP0XFLAGS="-std=c++0x"
@@ -44,7 +48,15 @@ AC_CHECK_TYPES([uint64_t],,,[#include <stdint.h>])
 
 AC_CHECK_SIZEOF([wchar_t])
 
-AC_CHECK_HEADERS([fcntl.h sys/time.h unordered_map unordered_set])
+AC_CHECK_HEADERS([fcntl.h sys/time.h])
+
+if test "$enable_cpp0x_support" != "no"; then
+AC_CHECK_HEADERS([unordered_map unordered_set])
+fi
+
+if test "$enable_thread_support" != "no"; then
+AC_CHECK_HEADERS([thread])
+fi
 
 AC_SEARCH_LIBS([sqrt],[m])
 
@@ -106,6 +118,7 @@ if test "x$ac_cv_type_std__wstring" = xyes; then
   AC_DEFINE([OSMSCOUT_HAVE_STD__WSTRING],[1],[std::wstring is available])
 fi
 
+dnl Support for XintXX_T constants
 if test "x$ac_cv_type_int8_t" = xyes; then
   AC_DEFINE([OSMSCOUT_HAVE_INT8_T],[1],[int8_t is available])
 fi
@@ -138,6 +151,7 @@ if test "x$ac_cv_type_uint64_t" = xyes; then
   AC_DEFINE([OSMSCOUT_HAVE_UINT64_T],[1],[uint64_t is available])
 fi
 
+dnl c++ 11 extensions
 if test "x$ac_cv_header_unordered_map" = xyes; then
   AC_DEFINE([OSMSCOUT_HAVE_UNORDERED_MAP],[1],[system header <unordered_map> is available])
 fi
@@ -146,6 +160,11 @@ if test "x$ac_cv_header_unordered_set" = xyes; then
   AC_DEFINE([OSMSCOUT_HAVE_UNORDERED_SET],[1],[system header <unordered_set> is available])
 fi
 
+if test "x$ac_cv_header_thread" = xyes; then
+  AC_DEFINE([OSMSCOUT_HAVE_THREAD],[1],[system header <thread> is available])
+fi
+
+dnl SSE support
 if test "x$ax_cv_have_sse2_ext" = xyes; then
   AC_DEFINE([OSMSCOUT_HAVE_SSE2],[1],[SSE2 processor extension available])
 fi

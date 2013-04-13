@@ -20,6 +20,13 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <osmscout/CoreFeatures.h>
+
+#if defined(OSMSCOUT_HAVE_THREAD)
+#include <atomic>
+#include <thread>
+#endif
+
 #include <osmscout/private/CoreImportExport.h>
 
 #include <osmscout/util/Reference.h>
@@ -38,15 +45,27 @@ namespace osmscout {
 
   typedef Ref<Breaker> BreakerRef;
 
-  class OSMSCOUT_API BreakerDummy : public Referencable
+  class OSMSCOUT_API DummyBreaker : public Breaker
   {
   public:
-    BreakerDummy();
-    virtual ~BreakerDummy();
+    DummyBreaker();
 
-    virtual bool Abort();
+    virtual bool Break();
     virtual bool IsAborted();
   };
+
+#if defined(OSMSCOUT_HAVE_THREAD)
+  class OSMSCOUT_API ThreadedBreaker : public Breaker
+  {
+  private:
+    std::atomic_bool aborted;
+  public:
+    ThreadedBreaker();
+
+    virtual bool Break();
+    virtual bool IsAborted();
+  };
+#endif
 }
 
 #endif

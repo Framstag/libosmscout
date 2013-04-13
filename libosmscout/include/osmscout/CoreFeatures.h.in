@@ -54,3 +54,6 @@
 
 /* math function lround(double) is available */
 #undef OSMSCOUT_HAVE_LROUND
+
+/* system header <thread> is available */
+#undef OSMSCOUT_HAVE_THREAD

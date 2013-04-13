@@ -22,12 +22,14 @@
 #include <algorithm>
 #include <iostream>
 
+#if defined(OSMSCOUT_HAVE_THREAD)
+  #include <thread>
+#endif
+
 #include <osmscout/TypeConfigLoader.h>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
-
-#include <osmscout/util/StopClock.h>
 
 namespace osmscout {
 
@@ -107,7 +109,8 @@ namespace osmscout {
     maxNodes(2000),
     maxWays(10000),
     maxAreas(std::numeric_limits<unsigned long>::max()),
-    useLowZoomOptimization(true)
+    useLowZoomOptimization(true),
+    useMultithreading(false)
   {
     // no code
   }
@@ -135,6 +138,11 @@ namespace osmscout {
   void AreaSearchParameter::SetUseLowZoomOptimization(bool useLowZoomOptimization)
   {
     this->useLowZoomOptimization=useLowZoomOptimization;
+  }
+
+  void AreaSearchParameter::SetUseMultithreading(bool useMultithreading)
+  {
+    this->useMultithreading=useMultithreading;
   }
 
   void AreaSearchParameter::SetBreaker(const BreakerRef& breaker)
@@ -167,6 +175,11 @@ namespace osmscout {
     return useLowZoomOptimization;
   }
 
+  bool AreaSearchParameter::GetUseMultithreading() const
+  {
+    return useMultithreading;
+  }
+
   bool AreaSearchParameter::IsAborted() const
   {
     if (breaker.Valid()) {
@@ -180,15 +193,15 @@ namespace osmscout {
   Database::Database(const DatabaseParameter& parameter)
    : isOpen(false),
      debugPerformance(parameter.IsDebugPerformance()),
-     areaAreaIndex(parameter.GetAreaAreaIndexCacheSize()),
      areaNodeIndex(/*parameter.GetAreaNodeIndexCacheSize()*/),
      areaWayIndex(),
+     areaAreaIndex(parameter.GetAreaAreaIndexCacheSize()),
      nodeDataFile("nodes.dat",
                   parameter.GetNodeCacheSize()),
-     relationDataFile("relations.dat",
-                      parameter.GetRelationCacheSize()),
      wayDataFile("ways.dat",
                   parameter.GetWayCacheSize()),
+     relationDataFile("relations.dat",
+                      parameter.GetRelationCacheSize()),
      typeConfig(NULL),
      hashFunction(NULL)
   {
@@ -358,39 +371,21 @@ namespace osmscout {
     return true;
   }
 
-  bool Database::GetObjects(const TypeSet &nodeTypes,
-                            const std::vector<TypeSet>& wayTypes,
-                            const TypeSet& areaTypes,
-                            double lonMin, double latMin,
-                            double lonMax, double latMax,
-                            const Magnification& magnification,
-                            const AreaSearchParameter& parameter,
-                            std::vector<NodeRef>& nodes,
-                            std::vector<WayRef>& ways,
-                            std::vector<WayRef>& areas,
-                            std::vector<RelationRef>& relationWays,
-                            std::vector<RelationRef>& relationAreas) const
+  bool Database::GetObjectsNodes(const AreaSearchParameter& parameter,
+                                 const TypeSet &nodeTypes,
+                                 double lonMin, double latMin,
+                                 double lonMax, double latMax,
+                                 std::string& nodeIndexTime,
+                                 std::string& nodesTime,
+                                 std::vector<NodeRef>& nodes) const
   {
-    if (!IsOpen()) {
-      return false;
-    }
+    std::vector<FileOffset> nodeOffsets;
 
     if (parameter.IsAborted()) {
       return false;
     }
 
-    std::vector<TypeSet>    internalWayTypes(wayTypes);
-    std::vector<FileOffset> nodeOffsets;
-    std::vector<FileOffset> wayWayOffsets;
-    std::vector<FileOffset> relationWayOffsets;
-    std::vector<FileOffset> wayAreaOffsets;
-    std::vector<FileOffset> relationAreaOffsets;
-
     nodes.clear();
-    ways.clear();
-    areas.clear();
-    relationWays.clear();
-    relationAreas.clear();
 
     if (parameter.IsAborted()) {
       return false;
@@ -409,6 +404,52 @@ namespace osmscout {
     }
 
     nodeIndexTimer.Stop();
+    nodeIndexTime=nodeIndexTimer.ResultString();
+
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
+    std::sort(nodeOffsets.begin(),nodeOffsets.end());
+
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
+    StopClock nodesTimer;
+
+    if (!GetNodesByOffset(nodeOffsets,
+                          nodes)) {
+      std::cout << "Error reading nodes in area!" << std::endl;
+      return false;
+    }
+
+    nodesTimer.Stop();
+    nodesTime=nodesTimer.ResultString();
+
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  bool Database::GetObjectsWayOffsets(const AreaSearchParameter& parameter,
+                                      const std::vector<TypeSet>& wayTypes,
+                                      const Magnification& magnification,
+                                      double lonMin, double latMin,
+                                      double lonMax, double latMax,
+                                      std::string& wayOptimizedTime,
+                                      std::string& wayIndexTime,
+                                      std::vector<FileOffset>& wayWayOffsets,
+                                      std::vector<FileOffset>& relationWayOffsets,
+                                      std::vector<WayRef>& ways) const
+  {
+    std::vector<TypeSet> internalWayTypes(wayTypes);
+
+    if (parameter.IsAborted()) {
+      return false;
+    }
 
     if (parameter.IsAborted()) {
       return false;
@@ -426,15 +467,11 @@ namespace osmscout {
                                 parameter.GetMaximumWays(),
                                 internalWayTypes,
                                 ways);
-
-        /* TODO:
-        for (size_t i=0; i<wayTypes.size(); i++) {
-          std::cout << "Warning: Loading type " << typeConfig->GetTypeInfo(wayTypes[i]).GetName() << " via normal index" << std::endl;
-        }*/
       }
     }
 
     wayOptimizedTimer.Stop();
+    wayOptimizedTime=wayOptimizedTimer.ResultString();
 
     if (parameter.IsAborted()) {
       return false;
@@ -456,13 +493,37 @@ namespace osmscout {
       }
     }
 
+    wayIndexTimer.Stop();
+    wayIndexTime=wayIndexTimer.ResultString();
+
     if (parameter.IsAborted()) {
       return false;
     }
 
-    wayIndexTimer.Stop();
+    std::sort(wayWayOffsets.begin(),wayWayOffsets.end());
+    std::sort(relationWayOffsets.begin(),relationWayOffsets.end());
 
-    StopClock areaAreaIndexTimer;
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  bool Database::GetObjectsAreaOffsets(const AreaSearchParameter& parameter,
+                                       const TypeSet& areaTypes,
+                                       const Magnification& magnification,
+                                       double lonMin, double latMin,
+                                       double lonMax, double latMax,
+                                       std::string& areaIndexTime,
+                                       std::vector<FileOffset>& wayAreaOffsets,
+                                       std::vector<FileOffset>& relationAreaOffsets) const
+  {
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
+    StopClock areaIndexTimer;
 
     if (areaTypes.HasTypes()) {
       if (!areaAreaIndex.GetOffsets(lonMin,
@@ -480,32 +541,31 @@ namespace osmscout {
       }
     }
 
-    areaAreaIndexTimer.Stop();
+    areaIndexTimer.Stop();
+    areaIndexTime=areaIndexTimer.ResultString();
 
     if (parameter.IsAborted()) {
       return false;
     }
 
-    StopClock sortTimer;
-
-    std::sort(nodeOffsets.begin(),nodeOffsets.end());
-    std::sort(wayWayOffsets.begin(),wayWayOffsets.end());
     std::sort(wayAreaOffsets.begin(),wayAreaOffsets.end());
-    std::sort(relationWayOffsets.begin(),relationWayOffsets.end());
     std::sort(relationAreaOffsets.begin(),relationAreaOffsets.end());
 
-    sortTimer.Stop();
-
-    StopClock nodesTimer;
-
-    if (!GetNodesByOffset(nodeOffsets,
-                          nodes)) {
-      std::cout << "Error reading nodes in area!" << std::endl;
+    if (parameter.IsAborted()) {
       return false;
     }
 
-    nodesTimer.Stop();
+    return true;
+  }
 
+  bool Database::GetObjectsWaysAndAreas(const AreaSearchParameter& parameter,
+                                        const std::vector<FileOffset>& wayWayOffsets,
+                                        const std::vector<FileOffset>& wayAreaOffsets,
+                                        std::string& waysTime,
+                                        std::string& areasTime,
+                                        std::vector<WayRef>& ways,
+                                        std::vector<WayRef>& areas) const
+  {
     if (parameter.IsAborted()) {
       return false;
     }
@@ -521,6 +581,7 @@ namespace osmscout {
     }
 
     waysTimer.Stop();
+    waysTime=waysTimer.ResultString();
 
     if (parameter.IsAborted()) {
       return false;
@@ -537,7 +598,23 @@ namespace osmscout {
     }
 
     areasTimer.Stop();
+    areasTime=areasTimer.ResultString();
 
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  bool Database::GetObjectsWaysAndAreasRel(const AreaSearchParameter& parameter,
+                                           const std::vector<FileOffset>& relationWayOffsets,
+                                           const std::vector<FileOffset>& relationAreaOffsets,
+                                           std::string& relationWaysTime,
+                                           std::string& relationAreasTime,
+                                           std::vector<RelationRef>& relationWays,
+                                           std::vector<RelationRef>& relationAreas) const
+  {
     if (parameter.IsAborted()) {
       return false;
     }
@@ -553,6 +630,7 @@ namespace osmscout {
     }
 
     relationWaysTimer.Stop();
+    relationWaysTime=relationWaysTimer.ResultString();
 
     if (parameter.IsAborted()) {
       return false;
@@ -569,19 +647,207 @@ namespace osmscout {
     }
 
     relationAreasTimer.Stop();
+    relationAreasTime=relationAreasTimer.ResultString();
+
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  bool Database::GetObjects(const TypeSet &nodeTypes,
+                            const std::vector<TypeSet>& wayTypes,
+                            const TypeSet& areaTypes,
+                            double lonMin, double latMin,
+                            double lonMax, double latMax,
+                            const Magnification& magnification,
+                            const AreaSearchParameter& parameter,
+                            std::vector<NodeRef>& nodes,
+                            std::vector<WayRef>& ways,
+                            std::vector<WayRef>& areas,
+                            std::vector<RelationRef>& relationWays,
+                            std::vector<RelationRef>& relationAreas) const
+  {
+    std::vector<FileOffset> wayWayOffsets;
+    std::vector<FileOffset> relationWayOffsets;
+    std::vector<FileOffset> wayAreaOffsets;
+    std::vector<FileOffset> relationAreaOffsets;
+
+    std::string             nodeIndexTime;
+    std::string             nodesTime;
+
+    std::string             wayOptimizedTime;
+    std::string             wayIndexTime;
+    std::string             waysTime;
+    std::string             relationWaysTime;
+
+    std::string             areaIndexTime;
+    std::string             areasTime;
+    std::string             relationAreasTime;
+
+    if (!IsOpen()) {
+      return false;
+    }
+
+    ways.clear();
+    areas.clear();
+    relationWays.clear();
+    relationAreas.clear();
+
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
+#if defined(OSMSCOUT_HAVE_THREAD)
+    if (parameter.GetUseMultithreading()) {
+      bool nodeSuccess;
+      bool wayOffsetSuccess;
+      bool areaOffsetSuccess;
+
+      std::thread nodeThread([&]{nodeSuccess=GetObjectsNodes(parameter,
+                                                             nodeTypes,
+                                                             lonMin,
+                                                             latMin,
+                                                             lonMax,
+                                                             latMax,
+                                                             nodeIndexTime,
+                                                             nodesTime,
+                                                             nodes);});
+
+      std::thread wayOffsetThread([&]{wayOffsetSuccess=GetObjectsWayOffsets(parameter,
+                                                                            wayTypes,
+                                                                            magnification,
+                                                                            lonMin,
+                                                                            latMin,
+                                                                            lonMax,
+                                                                            latMax,
+                                                                            wayOptimizedTime,
+                                                                            wayIndexTime,
+                                                                            wayWayOffsets,
+                                                                            relationWayOffsets,
+                                                                            ways);});
+
+      std::thread areaOffsetThread([&]{areaOffsetSuccess=GetObjectsAreaOffsets(parameter,
+                                                                               areaTypes,
+                                                                               magnification,
+                                                                               lonMin,
+                                                                               latMin,
+                                                                               lonMax,
+                                                                               latMax,
+                                                                               areaIndexTime,
+                                                                               wayAreaOffsets,
+                                                                               relationAreaOffsets);});
+
+      nodeThread.join();
+      wayOffsetThread.join();
+      areaOffsetThread.join();
+
+      if (!nodeSuccess || !wayOffsetSuccess || !areaOffsetSuccess) {
+        return false;
+      }
+
+      bool waySuccess;
+      bool relSuccess;
+
+      std::thread wayThread([&]{waySuccess=GetObjectsWaysAndAreas(parameter,
+                                                                  wayWayOffsets,
+                                                                  wayAreaOffsets,
+                                                                  waysTime,
+                                                                  areasTime,
+                                                                  ways,
+                                                                  areas);});
+
+      std::thread relThread([&]{relSuccess=GetObjectsWaysAndAreasRel(parameter,
+                                                                     relationWayOffsets,
+                                                                     relationAreaOffsets,
+                                                                     relationWaysTime,
+                                                                     relationAreasTime,
+                                                                     relationWays,
+                                                                     relationAreas);});
+
+      wayThread.join();
+      relThread.join();
+
+      if (!waySuccess || !relSuccess) {
+        return false;
+      }
+    }
+    else {
+#endif
+      if (!GetObjectsNodes(parameter,
+                           nodeTypes,
+                           lonMin,
+                           latMin,
+                           lonMax,
+                           latMax,
+                           nodeIndexTime,
+                           nodesTime,
+                           nodes)) {
+        return false;
+      }
+
+      if (!GetObjectsWayOffsets(parameter,
+                                wayTypes,
+                                magnification,
+                                lonMin,
+                                latMin,
+                                lonMax,
+                                latMax,
+                                wayOptimizedTime,
+                                wayIndexTime,
+                                wayWayOffsets,
+                                relationWayOffsets,
+                                ways)) {
+        return false;
+      }
+
+      if (!GetObjectsAreaOffsets(parameter,
+                                 areaTypes,
+                                 magnification,
+                                 lonMin,
+                                 latMin,
+                                 lonMax,
+                                 latMax,
+                                 areaIndexTime,
+                                 wayAreaOffsets,
+                                 relationAreaOffsets)) {
+        return false;
+      }
+
+      if (!GetObjectsWaysAndAreas(parameter,
+                                  wayWayOffsets,
+                                  wayAreaOffsets,
+                                  waysTime,
+                                  areasTime,
+                                  ways,
+                                  areas)) {
+        return false;
+      }
+
+      if (!GetObjectsWaysAndAreasRel(parameter,
+                                     relationWayOffsets,
+                                     relationAreaOffsets,
+                                     relationWaysTime,
+                                     relationAreasTime,
+                                     relationWays,
+                                     relationAreas)) {
+        return false;
+      }
+#if defined(OSMSCOUT_HAVE_THREAD)
+    }
+#endif
 
     if (debugPerformance) {
       std::cout << "Query: ";
-      std::cout << "n " << nodeIndexTimer << " ";
-      std::cout << "w " << wayIndexTimer << " ";
-      std::cout << "a " << areaAreaIndexTimer << std::endl;
+      std::cout << "n " << nodeIndexTime << " ";
+      std::cout << "w " << wayIndexTime << " ";
+      std::cout << "a " << areaIndexTime << std::endl;
 
       std::cout << "Load: ";
-      std::cout << "s "  << sortTimer;
-      std::cout << " - ";
-      std::cout << "n " << nodesTimer << " ";
-      std::cout << "w " << wayOptimizedTimer << "/" << waysTimer << "/" << relationWaysTimer << " ";
-      std::cout << "a " << areasTimer << "/" << relationAreasTimer;
+      std::cout << "n " << nodesTime << " ";
+      std::cout << "w " << wayOptimizedTime << "/" << waysTime << "/" << relationWaysTime << " ";
+      std::cout << "a " << areasTime << "/" << relationAreasTime;
       std::cout << std::endl;
     }
 

@@ -290,6 +290,8 @@ void DBThread::TriggerMapRendering()
 
     searchParameter.SetBreaker(renderBreakerRef);
 
+   searchParameter.SetUseMultithreading(currentMagnification.GetMagnification()<=osmscout::Magnification::magCity);
+
     std::list<std::string>        paths;
 
     paths.push_back(iconDirectory.toLocal8Bit().data());

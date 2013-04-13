@@ -31,25 +31,39 @@ namespace osmscout {
     // no code
   }
 
-  BreakerDummy::BreakerDummy()
+  DummyBreaker::DummyBreaker()
   {
 
   }
 
-  BreakerDummy::~BreakerDummy()
-  {
-
-  }
-
-  bool BreakerDummy::Abort()
+  bool DummyBreaker::Break()
   {
     return false;
   }
 
-  bool BreakerDummy::IsAborted()
+  bool DummyBreaker::IsAborted()
   {
     return false;
   }
 
+  #if defined(OSMSCOUT_HAVE_THREAD)
+  ThreadedBreaker::ThreadedBreaker()
+  : aborted(false)
+  {
+
+  }
+
+  bool ThreadedBreaker::Break()
+  {
+    aborted=true;
+
+    return true;
+  }
+
+  bool ThreadedBreaker::IsAborted()
+  {
+    return aborted;
+  }
+#endif
 }
 
