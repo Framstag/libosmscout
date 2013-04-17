@@ -154,6 +154,10 @@ namespace osmscout {
           left=mid+1;
         }
         else {
+          if (mid==0) {
+            return size;
+          }
+
           right=mid-1;
         }
       }
