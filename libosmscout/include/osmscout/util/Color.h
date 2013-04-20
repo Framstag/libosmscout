@@ -22,6 +22,8 @@
 
 #include <osmscout/private/CoreImportExport.h>
 
+#include <osmscout/system/Assert.h>
+
 namespace osmscout {
 
   class OSMSCOUT_API Color
@@ -42,10 +44,10 @@ namespace osmscout {
 
   public:
     inline Color()
-    : r(1),
-      g(0),
-      b(0),
-      a(1)
+    : r(1.0),
+      g(0.0),
+      b(0.0),
+      a(1.0)
     {
       // no code
     }
@@ -59,7 +61,10 @@ namespace osmscout {
       b(b),
       a(a)
     {
-      // no code
+      assert(r>=0.0 && r<=1.0);
+      assert(g>=0.0 && g<=1.0);
+      assert(b>=0.0 && b<=1.0);
+      assert(a>=0.0 && a<=1.0);
     }
 
     inline Color(double r,
@@ -70,7 +75,10 @@ namespace osmscout {
       b(b),
       a(1)
     {
-      // no code
+      assert(r>=0.0 && r<=1.0);
+      assert(g>=0.0 && g<=1.0);
+      assert(b>=0.0 && b<=1.0);
+      assert(a>=0.0 && a<=1.0);
     }
 
     inline Color(const Color& other)
@@ -132,9 +140,9 @@ namespace osmscout {
 
     inline Color Darken(double factor) const
     {
-      return Color(r-(1-r)*factor,
-                   g-(1-g)*factor,
-                   b-(1-b)*factor);
+      return Color(r-r*factor,
+                   g-g*factor,
+                   b-b*factor);
     }
   };
 }

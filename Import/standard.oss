@@ -291,7 +291,7 @@ SYMBOL christian_church_cross
 
    [TYPE highway_tertiary] {
      [SIZE 10m 0.25mm:3px<] {
-       WAY#outline { color: darken(@tertiaryColor,0.6); width: 10m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
+       WAY#outline { color: darken(@tertiaryColor,0.4); width: 10m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
        WAY { color: @tertiaryColor; width: 10m;}
      }
      [SIZE 10m <0.25mm:3px] WAY { color: #fefe73; displayWidth: 0.25mm;}

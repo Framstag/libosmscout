@@ -499,7 +499,15 @@ void Parser::COLOR(Color& color) {
 			Expect(12 /* "," */);
 			UDOUBLE(factor);
 			Expect(79 /* ")" */);
-			color=color.Lighten(factor); 
+			if (factor>=0.0 && factor<=1.0) {
+			 color=color.Lighten(factor);
+			}
+			else {
+			std::string e="Factor must be in the range [0..1]";
+			
+			 SemErr(e.c_str());
+			}
+			
 		} else if (la->kind == 80 /* "darken" */) {
 			double factor; 
 			Get();
@@ -508,7 +516,15 @@ void Parser::COLOR(Color& color) {
 			Expect(12 /* "," */);
 			UDOUBLE(factor);
 			Expect(79 /* ")" */);
-			color=color.Darken(factor); 
+			if (factor>=0.0 && factor<=1.0) {
+			 color=color.Darken(factor);
+			}
+			else {
+			std::string e="Factor must be in the range [0..1]";
+			
+			 SemErr(e.c_str());
+			}
+			
 		} else if (la->kind == _color) {
 			Get();
 			std::string c(t->val);

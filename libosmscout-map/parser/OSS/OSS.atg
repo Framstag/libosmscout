@@ -1033,10 +1033,28 @@ PRODUCTIONS
   COLOR<Color& color>
               =   (. double factor; .)
                   "lighten" "(" COLOR<color> "," UDOUBLE<factor> ")"
-                  (. color=color.Lighten(factor); .)
-                |  (. double factor; .)
+                  (.
+                    if (factor>=0.0 && factor<=1.0) {
+                      color=color.Lighten(factor);
+                    }
+                    else {
+                     std::string e="Factor must be in the range [0..1]";
+
+                      SemErr(e.c_str());
+                    }
+                  .)
+                | (. double factor; .)
                   "darken" "(" COLOR<color> "," UDOUBLE<factor> ")"
-                  (. color=color.Darken(factor); .)
+                  (.
+                    if (factor>=0.0 && factor<=1.0) {
+                      color=color.Darken(factor);
+                    }
+                    else {
+                     std::string e="Factor must be in the range [0..1]";
+
+                      SemErr(e.c_str());
+                    }
+                  .)
                 | color
                   (.
                     std::string c(t->val);
