@@ -32,9 +32,38 @@
 #include <osmscout/import/RawNode.h>
 #include <osmscout/import/RawRelation.h>
 #include <osmscout/import/RawWay.h>
-#include <osmscout/import/CoordDataFile.h>
 
 namespace osmscout {
+
+  static inline bool WayByNodeCountSorter(const RawWayRef& a,
+                                          const RawWayRef& b)
+  {
+    return a->GetNodeCount()>b->GetNodeCount();
+  }
+
+  void WayDataGenerator::GetWayTypes(const TypeConfig& typeConfig,
+                                     std::set<TypeId>& types) const
+  {
+    for (std::vector<TypeInfo>::const_iterator type=typeConfig.GetTypes().begin();
+        type!=typeConfig.GetTypes().end();
+        type++) {
+      if (type->GetId()==typeIgnore) {
+        continue;
+      }
+
+      if (type->GetIgnore()) {
+        continue;
+      }
+
+      if (type->CanBeWay()) {
+        types.insert(type->GetId());
+      }
+
+      if (type->CanBeArea()) {
+        types.insert(type->GetId());
+      }
+    }
+  }
 
   void WayDataGenerator::SetNodeUsed(NodeUseMap& nodeUseMap,
                                      Id id)
@@ -90,8 +119,6 @@ namespace osmscout {
                                           BlacklistSet& wayBlacklist)
   {
     FileScanner scanner;
-
-    progress.SetAction("Loading way blacklist");
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "wayblack.dat"),
@@ -204,183 +231,127 @@ namespace osmscout {
     return true;
   }
 
-  bool WayDataGenerator::ReadWayEndpoints(const ImportParameter& parameter,
-                                          Progress& progress,
-                                          const TypeConfig& typeConfig,
-                                          EndPointWayMap& endPointWayMap,
-                                          NodeUseMap& nodeUseMap)
+  bool WayDataGenerator::GetWays(const ImportParameter& parameter,
+                                 Progress& progress,
+                                 const TypeConfig& typeConfig,
+                                 std::set<TypeId>& types,
+                                 const BlacklistSet& blacklist,
+                                 FileScanner& scanner,
+                                 std::vector<std::list<RawWayRef> >& ways,
+                                 std::vector<std::list<RawWayRef> >& areas,
+                                 NodeUseMap& nodeUseMap,
+                                bool buildNodeUseMap)
   {
-    FileScanner scanner;
-    uint32_t    rawWayCount=0;
+    uint32_t         wayCount=0;
+    size_t           collectedWaysCount=0;
+    size_t           typesWithWays=0;
+    std::set<TypeId> currentTypes(types);
 
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "rawways.dat"),
-                      FileScanner::Sequential,
-                      parameter.GetRawWayDataMemoryMaped())) {
-      progress.Error("Cannot open 'rawways.dat'");
+    if (!scanner.GotoBegin()) {
+      progress.Error("Error while positioning at start of file");
       return false;
     }
 
-    if (!scanner.Read(rawWayCount)) {
+    if (!scanner.Read(wayCount)) {
       progress.Error("Error while reading number of data entries in file");
       return false;
     }
 
-    for (uint32_t w=1; w<=rawWayCount; w++) {
-      RawWay               rawWay;
-      OSMSCOUT_HASHSET<Id> nodeSet;
-
-      progress.SetProgress(w,rawWayCount);
-
-
-      if (!rawWay.Read(scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(w)+" of "+
-                       NumberToString(rawWayCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-        return false;
-      }
-
-      if (rawWay.GetType()==typeIgnore) {
-        continue;
-      }
-
-      if (typeConfig.GetTypeInfo(rawWay.GetType()).GetIgnore()) {
-        continue;
-      }
-
-      for (size_t i=0; i<rawWay.GetNodeCount(); i++) {
-        Id nodeId=rawWay.GetNodeId(i);
-
-        if (nodeSet.find(nodeId)==nodeSet.end()) {
-          SetNodeUsed(nodeUseMap,nodeId);
-        }
-
-        nodeSet.insert(nodeId);
-      }
-
-      if (rawWay.IsArea()) {
-        continue;
-      }
-
-      endPointWayMap[rawWay.GetNodes().front()].push_back(rawWay.GetId());
-      endPointWayMap[rawWay.GetNodes().back()].push_back(rawWay.GetId());
-    }
-
-    if (!scanner.Close()) {
-      progress.Error("Cannot close file 'rawways.dat'");
-      return false;
-    }
-
-    return true;
-  }
-
-  void WayDataGenerator::GetWayMergeCandidates(const RawWay& way,
-                                               const EndPointWayMap& endPointWayMap,
-                                               const BlacklistSet& wayBlacklist,
-                                               std::set<Id>& candidates)
-  {
-    EndPointWayMap::const_iterator endPoints;
-
-    endPoints=endPointWayMap.find(way.GetNodes().front());
-
-    if (endPoints!=endPointWayMap.end()) {
-      for (std::list<Id>::const_iterator id=endPoints->second.begin();
-          id!=endPoints->second.end();
-          id++) {
-        if (*id>way.GetId() &&
-            wayBlacklist.find(*id)==wayBlacklist.end()) {
-          candidates.insert(*id);
-        }
-      }
-    }
-
-    endPoints=endPointWayMap.find(way.GetNodes().back());
-
-    if (endPoints!=endPointWayMap.end()) {
-      for (std::list<Id>::const_iterator id=endPoints->second.begin();
-          id!=endPoints->second.end();
-          id++) {
-        if (*id>way.GetId() &&
-            wayBlacklist.find(*id)==wayBlacklist.end()) {
-          candidates.insert(*id);
-        }
-      }
-    }
-  }
-
-  bool WayDataGenerator::LoadWays(Progress& progress,
-                                  FileScanner& scanner,
-                                  NumericIndex<Id>& rawWayIndex,
-                                  const std::set<Id>& ids,
-                                  IdRawWayMap& ways)
-  {
-    std::vector<FileOffset> offsets;
-
-    if (!rawWayIndex.GetOffsets(ids,offsets)) {
-      return false;
-    }
-
-#if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
-    ways.reserve(offsets.size());
-#endif
-
-    FileOffset oldPos;
-
-    if (!scanner.GetPos(oldPos)){
-      progress.Error("Error while getting current file position");
-      return false;
-    }
-
-    for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
-         offset!=offsets.end();
-         offset++) {
-      if (!scanner.SetPos(*offset)) {
-        progress.Error("Error while moving to way at offset " + NumberToString(*offset));
-        return false;
-      }
-
+    for (uint32_t w=1; w<=wayCount; w++) {
       RawWayRef way=new RawWay();
 
-      way->Read(scanner);
+      progress.SetProgress(w,wayCount);
 
-      if (scanner.HasError()) {
-        progress.Error("Error while loading way at offset " + NumberToString(*offset));
+      if (!way->Read(scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+            NumberToString(w)+" of "+
+            NumberToString(wayCount)+
+            " in file '"+
+            scanner.GetFilename()+"'");
         return false;
       }
 
-      ways[way->GetId()]=way;
-    }
+      if (buildNodeUseMap) {
+        OSMSCOUT_HASHSET<Id> nodeSet;
 
-    if (!scanner.SetPos(oldPos)) {
-      progress.Error("Error while resetting current file position");
-      return false;
-    }
+        for (size_t i=0; i<way->GetNodeCount(); i++) {
+          Id nodeId=way->GetNodeId(i);
 
-    return true;
-  }
+          if (nodeSet.find(nodeId)==nodeSet.end()) {
+            SetNodeUsed(nodeUseMap,nodeId);
+          }
 
-  bool WayDataGenerator::CompareWays(const RawWay& a,
-                                     const RawWay& b) const
-  {
-    if (a.GetType()!=b.GetType()) {
-      return false;
-    }
-
-    if (a.GetTags().size()!=b.GetTags().size()) {
-      return false;
-    }
-
-    for (size_t t=0; t<b.GetTags().size(); t++) {
-      if (a.GetTags()[t].key!=b.GetTags()[t].key) {
-        return false;
+          nodeSet.insert(nodeId);
+        }
       }
 
-      if (a.GetTags()[t].value!=b.GetTags()[t].value) {
-        return false;
+      if (currentTypes.find(way->GetType())==currentTypes.end()) {
+        continue;
+      }
+
+      if (way->IsArea()) {
+        if (way->GetNodeCount()<3) {
+          continue;
+        }
+      }
+      else {
+        if (way->GetNodeCount()<2) {
+          continue;
+        }
+      }
+
+      if (blacklist.find(way->GetId())!=blacklist.end()) {
+        continue;
+      }
+
+      if (ways[way->GetType()].empty() &&
+          areas[way->GetType()].empty()) {
+        typesWithWays++;
+      }
+
+      if (way->IsArea()) {
+        areas[way->GetType()].push_back(way);
+      }
+      else {
+        ways[way->GetType()].push_back(way);
+      }
+
+      collectedWaysCount++;
+
+      while (collectedWaysCount>parameter.GetRawWayBlockSize() &&
+             typesWithWays>1) {
+        size_t victimType=ways.size();
+
+        // Find the type with the smalest amount of ways loaded
+        for (size_t i=0; i<ways.size(); i++) {
+          if ((!ways[i].empty() ||
+               !areas[i].empty()) &&
+              (victimType>=ways.size() ||
+               (ways[i].size()+areas[i].size()<ways[victimType].size()+areas[victimType].size()))) {
+            victimType=i;
+          }
+        }
+
+        if (victimType<ways.size()) {
+          collectedWaysCount-=ways[victimType].size();
+          ways[victimType].clear();
+
+          collectedWaysCount-=areas[victimType].size();
+          areas[victimType].clear();
+
+          typesWithWays--;
+          currentTypes.erase(victimType);
+        }
       }
     }
+
+    for (std::set<TypeId>::const_iterator type=currentTypes.begin();
+         type!=currentTypes.end();
+         ++type) {
+      types.erase(*type);
+    }
+
+    progress.SetAction("Collected "+NumberToString(collectedWaysCount)+" ways for "+NumberToString(currentTypes.size())+" types");
 
     return true;
   }
@@ -389,8 +360,6 @@ namespace osmscout {
                                             Id oldId,
                                             Id newId)
   {
-    return;
-
     std::list<TurnRestrictionRef> oldRestrictions;
 
     std::pair<std::multimap<Id,TurnRestrictionRef>::iterator,
@@ -419,226 +388,309 @@ namespace osmscout {
     }
   }
 
-  bool WayDataGenerator::JoinWays(Progress& progress,
-                                  const TypeConfig& typeConfig,
-                                  FileScanner& scanner,
-                                  std::vector<RawWayRef>& rawWays,
-                                  size_t blockCount,
-                                  EndPointWayMap& endPointWayMap,
-                                  NumericIndex<Id>& rawWayIndex,
-                                  BlacklistSet& wayBlacklist,
-                                  std::multimap<Id,TurnRestrictionRef>& restrictions,
-                                  size_t& mergeCount)
+  bool WayDataGenerator::IsRestricted(const std::multimap<Id,TurnRestrictionRef>& restrictions,
+                                      Id wayId,
+                                      Id nodeId) const
   {
-    std::vector<bool> hasBeenMerged(blockCount, true);
-    IdRawWayMap       mergedWays;
-    bool              somethingHasMerged=true;
-    SilentProgress    silentProgress;
+    // We have an index entry for turn restriction, where the given way id is
+    // "from" or "to" so we can jst check for "via" == nodeId
 
-    while (somethingHasMerged) {
-      somethingHasMerged=false;
-
-      // Collect all candidate ids for all ways, that still have potential merges
-      // to be verified
-
-      std::set<Id> allCandidates;
-
-      for (size_t b=0; b<blockCount; b++) {
-        if (hasBeenMerged[b] &&
-            !rawWays[b]->IsArea()) {
-          GetWayMergeCandidates(rawWays[b],
-                                endPointWayMap,
-                                wayBlacklist,
-                                allCandidates);
-        }
+    std::pair<std::multimap<Id,TurnRestrictionRef>::const_iterator,
+              std::multimap<Id,TurnRestrictionRef>::const_iterator> hits=restrictions.equal_range(wayId);
+    for (std::multimap<Id,TurnRestrictionRef>::const_iterator hit=hits.first;
+        hit!=hits.second;
+        ++hit) {
+      if (hit->second->GetVia()==nodeId) {
+        return true;
       }
+    }
 
-      if (allCandidates.empty()) {
+    return false;
+  }
+
+  bool WayDataGenerator::MergeWays(Progress& progress,
+                                   const TypeConfig& typeConfig,
+                                   std::list<RawWayRef>& ways,
+                                   BlacklistSet& wayBlacklist,
+                                   std::multimap<Id,TurnRestrictionRef>& restrictions)
+  {
+    WaysByNodeMap  waysByNode;
+    SilentProgress silentProgress;
+    size_t         currentWay;
+    size_t         wayCount=ways.size();
+
+    ways.sort(WayByNodeCountSorter);
+
+    for (WayListPtr w=ways.begin();
+        w!=ways.end();
+        ++w) {
+      RawWayRef way(*w);
+      Id        firstNodeId=way->GetFirstNodeId();
+      Id        lastNodeId=way->GetLastNodeId();
+
+      if (firstNodeId!=lastNodeId) {
+        waysByNode[firstNodeId].push_back(w);
+        waysByNode[lastNodeId].push_back(w);
+      }
+    }
+
+    currentWay=1;
+    for (WayListPtr w=ways.begin();
+         w!=ways.end();
+         ++w) {
+      RawWayRef way(*w);
+      Id        lastNodeId=way->GetLastNodeId();
+
+      progress.SetProgress(currentWay,wayCount);
+
+      currentWay++;
+
+      WaysByNodeMap::iterator lastNodeCandidate=waysByNode.find(lastNodeId);
+
+      // Way is circular
+      if (lastNodeCandidate==waysByNode.end()) {
         continue;
       }
 
-      // Now load all candidate ways by id as calculated above
-
-      IdRawWayMap ways;
-
-      progress.Info("Loading " + NumberToString(allCandidates.size())+ " candidate(s)");
-      if (!LoadWays(progress,
-                    scanner,
-                    rawWayIndex,
-                    allCandidates,
-                    ways)) {
-        return false;
+      // Nothing to merge at all, since there is only us
+      if (lastNodeCandidate->second.size()==1) {
+        continue;
       }
 
-      allCandidates.clear();
+      SegmentAttributes origAttributes;
+      std::vector<Tag>  origTags(way->GetTags());
+      bool              origReverseNodes;
 
-      progress.Info("Merging");
-      for (size_t b=0; b<blockCount; b++) {
-        if (hasBeenMerged[b] &&
-            !rawWays[b]->IsArea()) {
-          RawWayRef rawWay=rawWays[b];
+      origAttributes.type=way->GetType();
+      if (!origAttributes.SetTags(silentProgress,
+                                  typeConfig,
+                                  way->GetId(),
+                                  way->IsArea(),
+                                  origTags,
+                                  origReverseNodes)) {
+        continue;
+      }
 
-          hasBeenMerged[b]=false;
+      //
+      // Remove lastNodeId entry from the WaysByNode map
+      //
+      lastNodeCandidate->second.remove(w);
 
-          // The way has already been merged (within this block)
-          if (wayBlacklist.find(rawWay->GetId())!=wayBlacklist.end()) {
+      while (lastNodeCandidate!=waysByNode.end()) {
+        bool hasMerged=false;
+
+        for (WayListPtrList::iterator c=lastNodeCandidate->second.begin();
+             c!=lastNodeCandidate->second.end();
+             ++c) {
+          RawWayRef candidate(*(*c));
+
+          // Can happen if we would close a way (something like A => B => A)
+          if (candidate->GetId()==way->GetId()) {
             continue;
           }
 
-          SegmentAttributes origAttributes;
-          std::vector<Tag>  origTags(rawWay->GetTags());
-          bool              origReverseNodes;
+          assert(candidate->GetId()!=way->GetId());
 
-          origAttributes.type=rawWay->GetType();
-          if (!origAttributes.SetTags(silentProgress,
-                                      typeConfig,
-                                      rawWay->GetId(),
-                                      rawWay->IsArea(),
-                                      origTags,
-                                      origReverseNodes)) {
+          SegmentAttributes candidateAttributes;
+          std::vector<Tag>  candidateTags(candidate->GetTags());
+          bool              candidateReverseNodes;
+
+          candidateAttributes.type=candidate->GetType();
+          if (!candidateAttributes.SetTags(silentProgress,
+                                           typeConfig,
+                                           candidate->GetId(),
+                                           candidate->IsArea(),
+                                           candidateTags,
+                                           candidateReverseNodes)) {
             continue;
           }
 
-          std::set<Id> candidates;
-
-          GetWayMergeCandidates(rawWay,
-                                endPointWayMap,
-                                wayBlacklist,
-                                candidates);
-
-          for (std::set<Id>::const_iterator id=candidates.begin();
-              id!=candidates.end();
-              ++id) {
-            IdRawWayMap::const_iterator wayEntry;
-
-            wayEntry=ways.find(*id);
-
-            if (wayEntry==ways.end()) {
-              progress.Error("Error while loading merge candidate "+
-                             NumberToString(*id) +
-                             " (Internal error?)");
-              continue;
-            }
-
-            RawWayRef candidate=wayEntry->second;
-
-            if (candidate->IsArea()) {
-              continue;
-            }
-
-            // We do not merge against ways, that are already on the blacklist
-            // because of previous merges
-            if(wayBlacklist.find(*id)!=wayBlacklist.end()) {
-              continue;
-            }
-
-            // Assure that we do not work on an old version from disk,
-            // but take the local version if we already had done merges on them
-            IdRawWayMap::const_iterator allreadyMergedCandidate=mergedWays.find(candidate->GetId());
-
-            if (allreadyMergedCandidate!=mergedWays.end()) {
-              candidate=allreadyMergedCandidate->second;
-            }
-
-            SegmentAttributes matchAttributes;
-            std::vector<Tag>  matchTags(candidate->GetTags());
-            bool              matchReverseNodes;
-
-            matchAttributes.type=candidate->GetType();
-            if (!matchAttributes.SetTags(silentProgress,
-                                         typeConfig,
-                                         candidate->GetId(),
-                                         candidate->IsArea(),
-                                         matchTags,
-                                         matchReverseNodes)) {
-              continue;
-            }
-
-            if (origAttributes!=matchAttributes) {
-              continue;
-            }
-
-            if (origReverseNodes!=matchReverseNodes) {
-              continue;
-            }
-
-            std::vector<Id> origNodes(rawWay->GetNodes());
-
-            if (origReverseNodes) {
-              std::reverse(origNodes.begin(),origNodes.end());
-              origReverseNodes=false;
-            }
-
-            if (matchReverseNodes) {
-              std::vector<Id> matchNodes(candidate->GetNodes());
-
-              std::reverse(matchNodes.begin(),matchNodes.end());
-              candidate->SetNodes(matchNodes);
-              matchReverseNodes=false;
-            }
-
-            if (!origAttributes.IsOneway() &&
-                origNodes.front()==candidate->GetNodes().front()) {
-              origNodes.reserve(origNodes.size()+candidate->GetNodeCount()-1);
-
-              for (size_t i=1; i<candidate->GetNodeCount(); i++) {
-                origNodes.insert(origNodes.begin(),candidate->GetNodeId(i));
-              }
-
-              endPointWayMap[origNodes.front()].push_back(rawWay->GetId());
-            }
-            else if (origNodes.front()==candidate->GetNodes().back()) {
-              origNodes.reserve(origNodes.size()+candidate->GetNodeCount()-1);
-
-              for (size_t i=1; i<candidate->GetNodeCount(); i++) {
-                origNodes.insert(origNodes.begin(),candidate->GetNodeId(candidate->GetNodeCount()-1-i));
-              }
-
-              endPointWayMap[origNodes.front()].push_back(rawWay->GetId());
-            }
-            else if (origNodes.back()==candidate->GetNodes().front()) {
-              origNodes.reserve(origNodes.size()+candidate->GetNodeCount()-1);
-
-              for (size_t i=1; i<candidate->GetNodeCount(); i++) {
-                origNodes.push_back(candidate->GetNodeId(i));
-              }
-
-              endPointWayMap[origNodes.back()].push_back(rawWay->GetId());
-            }
-            else if (!origAttributes.IsOneway() &&
-                     origNodes.back()==candidate->GetNodes().back()) {
-              origNodes.reserve(origNodes.size()+candidate->GetNodeCount()-1);
-
-              for (size_t i=1; i<candidate->GetNodeCount(); i++) {
-                origNodes.push_back(candidate->GetNodeId(candidate->GetNodeCount()-1-i));
-              }
-
-              endPointWayMap[origNodes.back()].push_back(rawWay->GetId());
-            }
-            else {
-              continue;
-            }
-
-            hasBeenMerged[b]=true;
-            somethingHasMerged=true;
-
-            UpdateRestrictions(restrictions,
-                               candidate->GetId(),
-                               rawWay->GetId());
-
-            wayBlacklist.insert(candidate->GetId());
-
-            rawWay->SetNodes(origNodes);
-
-            mergedWays[rawWay->GetId()]=rawWay;
-
-            mergeCount++;
-
-            break;
+          // Wrong direction
+          if (origReverseNodes!=candidateReverseNodes) {
+            continue;
           }
+
+          //Attributes do not match
+          if (origAttributes!=candidateAttributes) {
+            continue;
+          }
+
+          // Merging ways in the wrong way
+          if (lastNodeId==candidate->GetLastNodeId() &&
+              origAttributes.IsOneway()) {
+            continue;
+          }
+
+          if (IsRestricted(restrictions,
+                           way->GetId(),
+                           lastNodeId)) {
+            continue;
+          }
+
+          // This is a match
+          hasMerged=true;
+
+          wayBlacklist.insert(candidate->GetId());
+
+          UpdateRestrictions(restrictions,
+                             candidate->GetId(),
+                             way->GetId());
+
+          std::vector<Id> nodes(way->GetNodes());
+
+          nodes.reserve(nodes.size()+candidate->GetNodeCount()-1);
+
+          if (lastNodeId==candidate->GetFirstNodeId()) {
+            // Append candidate nodes
+            for (size_t i=1; i<candidate->GetNodeCount(); i++) {
+              nodes.push_back(candidate->GetNodeId(i));
+            }
+          }
+          else {
+            // Prepend candidate nodes
+             for (size_t i=1; i<candidate->GetNodeCount(); i++) {
+               nodes.push_back(candidate->GetNodeId(candidate->GetNodeCount()-1-i));
+             }
+          }
+
+          way->SetNodes(nodes);
+
+          WaysByNodeMap::iterator otherEntry;
+
+          // Erase the matched way from the map of ways (entry via the not matched node))
+          if (lastNodeId==candidate->GetFirstNodeId()) {
+            otherEntry=waysByNode.find(candidate->GetLastNodeId());
+          }
+          else {
+            otherEntry=waysByNode.find(candidate->GetFirstNodeId());
+          }
+
+          assert(otherEntry!=waysByNode.end());
+
+          // Erase the matched way from the list of ways to process
+          ways.erase(*c);
+
+          otherEntry->second.remove(*c);
+
+          // Erase the matched way from the map of ways (entry via the matched node))
+          lastNodeCandidate->second.erase(c);
+
+          // If the resulting entry is empty, delete it, too
+          if (lastNodeCandidate->second.empty()) {
+            waysByNode.erase(lastNodeCandidate);
+          }
+
+          // If the resulting entry is empty, delete it, too
+          if (otherEntry->second.empty()) {
+            waysByNode.erase(otherEntry);
+          }
+
+          // We found a merge
+          break;
+        }
+
+        // If we have merged a way search for the new candidates
+        if (hasMerged) {
+          lastNodeId=way->GetLastNodeId();
+
+          lastNodeCandidate=waysByNode.find(lastNodeId);
+        }
+        else {
+          lastNodeCandidate=waysByNode.end();
         }
       }
+
+      lastNodeId=way->GetLastNodeId();
+
+      // Add the (possibly new) lastNodeId to the wayByNode map (again))
+      // if the way is not now closed
+      if (way->GetFirstNodeId()!=lastNodeId) {
+        waysByNode[lastNodeId].push_back(w);
+      }
     }
+
+    return true;
+  }
+
+  bool WayDataGenerator::WriteWay(const ImportParameter& parameter,
+                                  Progress& progress,
+                                  const TypeConfig& typeConfig,
+                                  FileWriter& writer,
+                                  uint32_t& writtenWayCount,
+                                  const CoordDataFile::CoordResultMap& coordsMap,
+                                  const NodeUseMap& nodeUseMap,
+                                  const RawWay& rawWay)
+  {
+    std::vector<Tag> tags(rawWay.GetTags());
+    Way              way;
+    bool             reverseNodes=false;
+    Id               wayId=rawWay.GetId();
+
+    way.SetType(rawWay.GetType());
+
+    if (!way.SetTags(progress,
+                     typeConfig,
+                     wayId,
+                     rawWay.IsArea(),
+                     tags,
+                     reverseNodes)) {
+      return true;
+    }
+
+    way.ids.resize(rawWay.GetNodeCount());
+    way.nodes.resize(rawWay.GetNodeCount());
+
+    bool success=true;
+    for (size_t n=0; n<rawWay.GetNodeCount(); n++) {
+      CoordDataFile::CoordResultMap::const_iterator coord=coordsMap.find(rawWay.GetNodeId(n));
+
+      if (coord==coordsMap.end()) {
+        progress.Error("Cannot resolve node with id "+
+                       NumberToString(rawWay.GetNodeId(n))+
+                       " for Way "+
+                       NumberToString(wayId));
+        success=false;
+        break;
+      }
+
+      if (IsNodeUsedAtLeastTwice(nodeUseMap,rawWay.GetNodeId(n))) {
+        way.ids[n]=coord->second.GetId();
+      }
+      else {
+        way.ids[n]=0;
+      }
+
+      way.nodes[n].Set(coord->second.GetLat(),
+                       coord->second.GetLon());
+    }
+
+    if (!success) {
+      return true;
+    }
+
+    if (reverseNodes) {
+      std::reverse(way.ids.begin(),way.ids.end());
+      std::reverse(way.nodes.begin(),way.nodes.end());
+    }
+
+    // startIsJoint/endIsJoint
+    if (way.IsArea()) {
+      if (parameter.GetStrictAreas() &&
+          !AreaIsSimple(way.nodes)) {
+        progress.Error("Area "+NumberToString(wayId)+" of type '"+typeConfig.GetTypeInfo(way.GetType()).GetName()+"' is not simple");
+        return true;
+      }
+    }
+
+    if (!writer.Write(wayId)) {
+      return false;
+    }
+
+    if (!way.Write(writer)) {
+      return false;
+    }
+
+    writtenWayCount++;
 
     return true;
   }
@@ -649,24 +701,28 @@ namespace osmscout {
   {
     progress.SetAction("Generate ways.tmp");
 
+    std::set<TypeId>                     wayTypes;
+
+    BlacklistSet                         wayBlacklist; //! Map of ways, that should be handled
+
+    // List of restrictions for a way
+    std::multimap<Id,TurnRestrictionRef> restrictions; //! Map of restrictions
+
+    NodeUseMap                           nodeUseMap;   //! Bitmap of nodes that are at leats used twice
+
     FileScanner                          scanner;
     FileWriter                           wayWriter;
     uint32_t                             rawWayCount=0;
 
-    // List of restrictions for a way
-    std::multimap<Id,TurnRestrictionRef> restrictions;
-
     uint32_t                             writtenWayCount=0;
-
-    NodeUseMap                           nodeUseMap;
-    EndPointWayMap                       endPointWayMap;
-
-    BlacklistSet                         wayBlacklist;
+    uint32_t                             mergeCount=0;
 
 #if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
     nodeUseMap.reserve(2000000);
-    endPointWayMap.reserve(2000000);
 #endif
+
+    GetWayTypes(typeConfig,
+                wayTypes);
 
     //
     // load blacklist of wayId as a result from multipolygon relation parsing
@@ -692,35 +748,11 @@ namespace osmscout {
       return false;
     }
 
-    //
-    // Building a map of way endpoint ids and list of ways having this point as endpoint
-    //
-
-    progress.SetAction("Collecting way endpoints");
-
-    if (!ReadWayEndpoints(parameter,
-                          progress,
-                          typeConfig,
-                          endPointWayMap,
-                          nodeUseMap)) {
-      return false;
-    }
-
-    progress.Info(NumberToString(endPointWayMap.size())+ " endpoints collected");
-
     CoordDataFile     coordDataFile("coord.dat");
-    NumericIndex<Id>  rawWayIndex("rawway.idx",parameter.GetRawWayIndexCacheSize());
 
     if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
                             parameter.GetCoordDataMemoryMaped())) {
       std::cerr << "Cannot open coord data file!" << std::endl;
-      return false;
-    }
-
-    if (!rawWayIndex.Open(parameter.GetDestinationDirectory(),
-                          FileScanner::FastRandom,
-                          parameter.GetRawWayIndexMemoryMaped())) {
-      std::cerr << "Cannot open raw way index file!" << std::endl;
       return false;
     }
 
@@ -745,179 +777,139 @@ namespace osmscout {
 
     wayWriter.Write(writtenWayCount);
 
-    uint32_t               currentWay=1;
-    size_t                 mergeCount=0;
-    std::vector<RawWayRef> block(parameter.GetRawWayBlockSize());
+    /* ------ */
 
-    while (currentWay<rawWayCount) {
-      size_t blockCount=0;
+    size_t iteration=1;
+    while (!wayTypes.empty()) {
+      std::vector<std::list<RawWayRef> > waysByType(typeConfig.GetTypes().size());
+      std::vector<std::list<RawWayRef> > areasByType(typeConfig.GetTypes().size());
 
-      progress.SetAction("Loading up to " + NumberToString(block.size()) + " ways");
-      while (blockCount<block.size() && currentWay<rawWayCount) {
-        progress.SetProgress(currentWay,rawWayCount);
+      //
+      // Load type data
+      //
 
-        if (block[blockCount].Invalid()) {
-          block[blockCount]=new RawWay();
-        }
+      progress.SetAction("Collecting way data by type");
 
-        if (!block[blockCount]->Read(scanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(currentWay)+" of "+
-                         NumberToString(rawWayCount)+
-                         " in file '"+
-                         scanner.GetFilename()+"'");
-          return false;
-        }
-
-        currentWay++;
-
-        if (wayBlacklist.find(block[blockCount]->GetId())!=wayBlacklist.end()) {
-          continue;
-        }
-
-        if (block[blockCount]->GetType()==typeIgnore) {
-          continue;
-        }
-
-        if (typeConfig.GetTypeInfo(block[blockCount]->GetType()).GetIgnore()) {
-          continue;
-        }
-
-        if (block[blockCount]->IsArea()) {
-          if (block[blockCount]->GetNodeCount()<3) {
-            progress.Error(std::string("Area ")+
-                           NumberToString(block[blockCount]->GetId())+" has only "+
-                           NumberToString(block[blockCount]->GetNodeCount())+
-                           " node(s) but requires at least 3 nodes");
-            continue;
-          }
-        }
-        else {
-          if (block[blockCount]->GetNodeCount()<2) {
-            progress.Error(std::string("Way ")+
-                           NumberToString(block[blockCount]->GetId())+" has only "+
-                           NumberToString(block[blockCount]->GetNodeCount())+
-                           " node(s) but requires at least 2 nodes");
-            continue;
-          }
-        }
-
-        blockCount++;
-      }
-
-      progress.SetAction("Merging ways");
-      // Join with potential joined ways
-      if (!JoinWays(progress,
-                    typeConfig,
-                    scanner,
-                    block,
-                    blockCount,
-                    endPointWayMap,
-                    rawWayIndex,
-                    wayBlacklist,
-                    restrictions,
-                    mergeCount)) {
+      if (!GetWays(parameter,
+                   progress,
+                   typeConfig,
+                   wayTypes,
+                   wayBlacklist,
+                   scanner,
+                   waysByType,
+                   areasByType,
+                   nodeUseMap,
+                   iteration==1)) {
         return false;
       }
+
+      // TODO: only print it, if there is something to merge at all
+      progress.SetAction("Merging ways");
+
+      for (size_t type=0; type<waysByType.size(); type++) {
+        size_t originalWayCount=waysByType[type].size();
+
+        if (originalWayCount==0) {
+          continue;
+        }
+
+        progress.Info("Merging "+NumberToString(originalWayCount)+" ways of type '"+typeConfig.GetTypeInfo(type).GetName()+"'");
+
+        MergeWays(progress,
+                  typeConfig,
+                  waysByType[type],
+                  wayBlacklist,
+                  restrictions);
+
+        if (waysByType[type].size()<originalWayCount) {
+          progress.Info("Reduced to "+
+                        NumberToString(waysByType[type].size())+ " way(s)");
+        }
+
+        mergeCount+=originalWayCount-waysByType[type].size();
+      }
+
+      progress.SetAction("Collecting node ids");
 
       std::set<Id>                  nodeIds;
       CoordDataFile::CoordResultMap coordsMap;
 
-      for (size_t w=0; w<blockCount; w++) {
-        for (size_t n=0; n<block[w]->GetNodeCount(); n++) {
-          nodeIds.insert(block[w]->GetNodeId(n));
+      for (size_t type=0; type<waysByType.size(); type++) {
+        for (std::list<RawWayRef>::const_iterator w=waysByType[type].begin();
+             w!=waysByType[type].end();
+             ++w) {
+          RawWayRef way(*w);
+
+          for (size_t n=0; n<way->GetNodeCount(); n++) {
+            nodeIds.insert(way->GetNodeId(n));
+          }
+        }
+      }
+
+      for (size_t type=0; type<areasByType.size(); type++) {
+        for (std::list<RawWayRef>::const_iterator w=areasByType[type].begin();
+             w!=areasByType[type].end();
+             ++w) {
+          RawWayRef areas(*w);
+
+          for (size_t n=0; n<areas->GetNodeCount(); n++) {
+            nodeIds.insert(areas->GetNodeId(n));
+          }
         }
       }
 
       progress.SetAction("Loading "+NumberToString(nodeIds.size())+" nodes");
-
       if (!coordDataFile.Get(nodeIds,coordsMap)) {
         std::cerr << "Cannot read nodes!" << std::endl;
-        continue;
+        return false;
       }
 
       nodeIds.clear();
 
       progress.SetAction("Writing ways");
 
-      for (size_t w=0; w<blockCount; w++) {
-        // Way has been joined, no need to write it
-        BlacklistSet::iterator blacklistEntry=wayBlacklist.find(block[w]->GetId());
+      for (size_t type=0; type<waysByType.size(); type++) {
+        for (std::list<RawWayRef>::const_iterator w=waysByType[type].begin();
+             w!=waysByType[type].end();
+             ++w) {
+          RawWayRef rawWay(*w);
 
-        if (blacklistEntry!=wayBlacklist.end()) {
-          wayBlacklist.erase(blacklistEntry);
-
-          continue;
+          WriteWay(parameter,
+                   progress,
+                   typeConfig,
+                   wayWriter,
+                   writtenWayCount,
+                   coordsMap,
+                   nodeUseMap,
+                   *rawWay);
         }
 
-        std::vector<Tag> tags(block[w]->GetTags());
-        Way              way;
-        bool             reverseNodes=false;
-        Id               wayId=block[w]->GetId();
-
-        way.SetType(block[w]->GetType());
-
-        if (!way.SetTags(progress,
-                         typeConfig,
-                         wayId,
-                         block[w]->IsArea(),
-                         tags,
-                         reverseNodes)) {
-          continue;
-        }
-
-        way.ids.resize(block[w]->GetNodeCount());
-        way.nodes.resize(block[w]->GetNodeCount());
-
-        bool success=true;
-        for (size_t n=0; n<block[w]->GetNodeCount(); n++) {
-          CoordDataFile::CoordResultMap::const_iterator coord=coordsMap.find(block[w]->GetNodeId(n));
-
-          if (coord==coordsMap.end()) {
-            progress.Error("Cannot resolve node with id "+
-                           NumberToString(block[w]->GetNodeId(n))+
-                           " for Way "+
-                           NumberToString(wayId));
-            success=false;
-            break;
-          }
-
-          if (IsNodeUsedAtLeastTwice(nodeUseMap,block[w]->GetNodeId(n))) {
-            way.ids[n]=coord->second.GetId();
-          }
-          else {
-            way.ids[n]=0;
-          }
-
-          way.nodes[n].Set(coord->second.GetLat(),coord->second.GetLon());
-        }
-
-        if (!success) {
-          continue;
-        }
-
-        if (reverseNodes) {
-          std::reverse(way.ids.begin(),way.ids.end());
-          std::reverse(way.nodes.begin(),way.nodes.end());
-        }
-
-        // startIsJoint/endIsJoint
-
-        if (way.IsArea()) {
-          if (parameter.GetStrictAreas() &&
-              !AreaIsSimple(way.nodes)) {
-            progress.Error("Area "+NumberToString(wayId)+" of type '"+typeConfig.GetTypeInfo(way.GetType()).GetName()+"' is not simple");
-
-            continue;
-          }
-        }
-
-        wayWriter.Write(wayId);
-        way.Write(wayWriter);
-
-        writtenWayCount++;
+        waysByType[type].clear();
       }
+
+      for (size_t type=0; type<areasByType.size(); type++) {
+        for (std::list<RawWayRef>::const_iterator w=areasByType[type].begin();
+             w!=areasByType[type].end();
+             ++w) {
+          RawWayRef rawWay(*w);
+
+          WriteWay(parameter,
+                   progress,
+                   typeConfig,
+                   wayWriter,
+                   writtenWayCount,
+                   coordsMap,
+                   nodeUseMap,
+                   *rawWay);
+        }
+
+        areasByType[type].clear();
+      }
+
+      iteration++;
     }
+
+    /* -------*/
 
     if (!scanner.Close()) {
       progress.Error("Cannot close file 'rawways.dat'");
@@ -934,12 +926,8 @@ namespace osmscout {
 
     // Cleaning up...
 
-    endPointWayMap.clear();
+    nodeUseMap.clear();
     wayBlacklist.clear();
-
-    if (!rawWayIndex.Close()) {
-      return false;
-    }
 
     if (!coordDataFile.Close()) {
       return false;

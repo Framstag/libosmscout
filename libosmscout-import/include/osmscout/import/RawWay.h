@@ -90,6 +90,16 @@ namespace osmscout {
       return nodes[idx];
     }
 
+    inline Id GetFirstNodeId() const
+    {
+      return nodes[0];
+    }
+
+    inline Id GetLastNodeId() const
+    {
+      return nodes[nodes.size()-1];
+    }
+
     void SetId(Id id);
     void SetType(TypeId type, bool area);
     void SetTags(const std::vector<Tag>& tags);

@@ -31,6 +31,7 @@
 #include <osmscout/util/HashMap.h>
 #include <osmscout/util/HashSet.h>
 
+#include <osmscout/import/CoordDataFile.h>
 #include <osmscout/import/Import.h>
 #include <osmscout/import/RawWay.h>
 
@@ -44,6 +45,14 @@ namespace osmscout {
     typedef OSMSCOUT_HASHSET<Id>                EndPointAreaSet;
     typedef OSMSCOUT_HASHSET<Id>                BlacklistSet;
     typedef OSMSCOUT_HASHMAP<Id,RawWayRef>      IdRawWayMap;
+
+    typedef std::list<RawWayRef>                WayList;
+    typedef WayList::iterator                   WayListPtr;
+    typedef std::list<WayListPtr>               WayListPtrList;
+    typedef OSMSCOUT_HASHMAP<Id,WayListPtrList> WaysByNodeMap;
+
+    void GetWayTypes(const TypeConfig& typeConfig,
+                     std::set<TypeId>& types) const;
 
     void SetNodeUsed(NodeUseMap& nodeUseMap,
                      Id id);
@@ -63,40 +72,39 @@ namespace osmscout {
                                Progress& progress,
                                std::multimap<Id,TurnRestrictionRef>& restrictions);
 
-    bool ReadWayEndpoints(const ImportParameter& parameter,
-                          Progress& progress,
-                          const TypeConfig& typeConfig,
-                          EndPointWayMap& endPointWayMap,
-                          NodeUseMap& nodeUseMap);
-
-    void GetWayMergeCandidates(const RawWay& way,
-                               const EndPointWayMap& endPointWayMap,
-                               const BlacklistSet& wayBlacklist,
-                               std::set<Id>& candidates);
-
-    bool LoadWays(Progress& progress,
-                  FileScanner& scanner,
-                  NumericIndex<Id>& rawWayIndex,
-                  const std::set<Id>& ids,
-                  IdRawWayMap& ways);
-
-    bool CompareWays(const RawWay& a,
-                     const RawWay& b) const;
+    bool GetWays(const ImportParameter& parameter,
+                 Progress& progress,
+                 const TypeConfig& typeConfig,
+                 std::set<TypeId>& types,
+                 const BlacklistSet& blacklist,
+                 FileScanner& scanner,
+                 std::vector<std::list<RawWayRef> >& ways,
+                 std::vector<std::list<RawWayRef> >& areas,
+                 NodeUseMap& nodeUseMap,
+                 bool buildNodeUseMap);
 
     void UpdateRestrictions(std::multimap<Id,TurnRestrictionRef>& restrictions,
                             Id oldId,
                             Id newId);
 
-    bool JoinWays(Progress& progress,
+    bool IsRestricted(const std::multimap<Id,TurnRestrictionRef>& restrictions,
+                      Id wayId,
+                      Id nodeId) const;
+
+    bool MergeWays(Progress& progress,
+                   const TypeConfig& typeConfig,
+                   std::list<RawWayRef>& ways,
+                   BlacklistSet& wayBlacklist,
+                   std::multimap<Id,TurnRestrictionRef>& restrictions);
+
+    bool WriteWay(const ImportParameter& parameter,
+                  Progress& progress,
                   const TypeConfig& typeConfig,
-                  FileScanner& scanner,
-                  std::vector<RawWayRef>& rawWays,
-                  size_t blockCount,
-                  EndPointWayMap& endPointWayMap,
-                  NumericIndex<Id>& rawWayIndex,
-                  BlacklistSet& wayBlacklist,
-                  std::multimap<Id,TurnRestrictionRef>& restrictions,
-                  size_t& mergeCount);
+                  FileWriter& writer,
+                  uint32_t& writtenWayCount,
+                  const CoordDataFile::CoordResultMap& coordsMap,
+                  const NodeUseMap& nodeUseMap,
+                  const RawWay& rawWay);
 
   public:
     std::string GetDescription() const;
