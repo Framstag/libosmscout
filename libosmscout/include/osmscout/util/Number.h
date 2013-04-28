@@ -22,33 +22,126 @@
 
 #include <osmscout/private/CoreImportExport.h>
 
+#include <limits>
+
 #include <stddef.h>
 
 namespace osmscout {
-
   /**
-   * Encode a number into the given buffer using some variable length encoding.
+   * Encode a signed number into the given buffer using some variable length encoding.
    *
    * The current implementation requires the buffer to have at least space
-   * for sizeof(N)*8/7 bytes:
+   * for sizeof(N)*8/7 + 1/8 bytes:
    *
-   * This are 5 bytes for a 32bit value and 10 bytes for a64bit value.
+   * This are 5 bytes for a 32bit value and 10 bytes for a 64bit value.
    *
    * The methods returns the number of bytes written.
    */
   template<typename N>
-  unsigned int EncodeNumber(N number,
-                            char* buffer)
+  inline unsigned int EncodeNumberSigned(N number,
+                                         char* buffer)
   {
-    unsigned int bytes=0;
+    unsigned int bytes=1; // Number of bytes writte
+    char         val;     // value for current byte in buffer
 
-    while (number>0x7f) {
-      buffer[bytes]=((number & 0x7f) | 0x80);
-      number=number >> 7;
+    if (number<0) {
+      number^=static_cast<N>(-1);
+      val=static_cast<char>((number & 0x3f) << 1 | 0x01);
+    }
+    else {
+      val=static_cast<char>((number & 0x3f) << 1);
+    }
+
+    number>>=6;
+
+    while (number!=0) {
+      *(buffer++)=val | 0x80;
+      val=static_cast<char>(number & 0x7f);
+      number>>=7;
       bytes++;
     }
 
-    buffer[bytes]=number;
+    *buffer=val;
+
+    return bytes;
+  }
+
+
+  /**
+   * Decode a signed variable length encoded number from the buffer back to
+   * the variable.
+   *
+   * The methods returns the number of bytes read.
+   */
+  template<typename N>
+  inline unsigned int DecodeNumberSigned(const char* buffer,
+                                         N& number)
+  {
+    unsigned int shift=0;
+    unsigned int nextShift=0;
+    unsigned int bytes=1;
+
+    // negative form
+    if ((*buffer & 0x01)!=0) {
+      char val=(*buffer & 0x7e) >> 1;
+
+      number=-1;
+      nextShift=6;
+
+      while ((*(buffer++) & 0x80)!=0) {
+        number^=(val << shift);
+        val=*buffer & 0x7f;
+        shift=nextShift;
+        nextShift+=7;
+        bytes++;
+      }
+
+      number^=static_cast<N>(val) << shift;
+    }
+    else {
+      char val=(*buffer & 0x7e) >> 1;
+
+      number=0;
+      nextShift=6;
+
+      while ((*(buffer++) & 0x80)!=0) {
+        number|=(val << shift);
+        val=*buffer & 0x7f;
+        shift=nextShift;
+        nextShift+=7;
+        bytes++;
+      }
+
+      number|=static_cast<N>(val) << shift;
+    }
+    return bytes;
+  }
+
+
+
+  /**
+   * Encode an unsigned number into the given buffer using some variable length encoding.
+   *
+   * The current implementation requires the buffer to have at least space
+   * for sizeof(N)*8/7 bytes:
+   *
+   * This are 5 bytes for a 32bit value and 10 bytes for a 64bit value.
+   *
+   * The methods returns the number of bytes written.
+   */
+  template<typename N>
+  inline unsigned int EncodeNumberUnsigned(N number,
+                                           char* buffer)
+  {
+    unsigned int bytes=0;
+
+    while (number > 0x7f) {
+      buffer[bytes]=static_cast<char>((number & 0x7f) | 0x80);
+      number>>=7;
+      bytes++;
+    }
+
+    buffer[bytes]=static_cast<char>(number);
     bytes++;
 
     return bytes;
@@ -56,14 +149,14 @@ namespace osmscout {
 
 
   /**
-   * Decode a variable length encoded number from the buffer back to
+   * Decode an unsigned variable length encoded number from the buffer back to
    * the variable.
    *
    * The methods returns the number of bytes read.
    */
   template<typename N>
-  unsigned int DecodeNumber(const char* buffer,
-                            N& number)
+  inline unsigned int DecodeNumberUnsigned(const char* buffer,
+                                           N& number)
   {
     unsigned int shift=0;
     unsigned int bytes=1;
@@ -71,13 +164,7 @@ namespace osmscout {
     number=0;
 
     while (true) {
-      N add;
-
-      add=(unsigned char)(*buffer);
-      add=add & 0x7f;
-      add=add << shift;
-
-      number|=add;
+      number|=static_cast<N>(*buffer & 0x7f) << shift;
 
       if (((*buffer) & 0x80)==0) {
         return bytes;
@@ -89,6 +176,48 @@ namespace osmscout {
     }
 
     return bytes;
+  }
+
+  /**
+   * Encode a number into the given buffer using some variable length encoding.
+   *
+   * The current implementation requires the buffer to have at least space
+   * for sizeof(N)*8/7 bytes for an unsigned number
+   * and sizeof(N)*8/7 + 1/8 bytes for a signed number
+   *
+   * This are 5 bytes for a 32bit value and 10 bytes for a64bit value.
+   *
+   * The methods returns the number of bytes written.
+   */
+  template<typename N>
+  inline unsigned int EncodeNumber(N number,
+                                   char* buffer)
+  {
+    if (std::numeric_limits<N>::is_signed) {
+      return EncodeNumberSigned(number,buffer);
+    }
+    else {
+      return EncodeNumberUnsigned(number,buffer);
+    }
+  }
+
+
+  /**
+   * Decode a variable length encoded number from the buffer back to
+   * the variable.
+   *
+   * The methods returns the number of bytes read.
+   */
+  template<typename N>
+  inline unsigned int DecodeNumber(const char* buffer,
+                                   N& number)
+  {
+    if (std::numeric_limits<N>::is_signed) {
+      return DecodeNumberSigned(buffer,number);
+    }
+    else {
+      return DecodeNumberUnsigned(buffer,number);
+    }
   }
 }
 
