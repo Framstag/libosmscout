@@ -87,7 +87,7 @@ namespace osmscout {
 
     uint32_t                dataCount;
 
-    std::vector<Id>         startingIds;
+    std::vector<N>          startingIds;
     std::vector<FileOffset> pageStarts;
 
     std::vector<uint32_t>   indexPageCounts;
@@ -133,7 +133,7 @@ namespace osmscout {
 
     writer.FlushCurrentBlockWithZeros(pageSize);
 
-    Id         lastId=0;
+    N          lastId=0;
     FileOffset lastPos=0;
 
     progress.Info(std::string("Writing level ")+NumberToString(1)+" ("+NumberToString(dataCount)+" entries)");
@@ -161,11 +161,14 @@ namespace osmscout {
       if (currentPageSize>0) {
         char         b1[10];
         char         b2[10];
+        N            b1val=data.GetId()-lastId;
+        FileOffset   b2val=readPos-lastPos;
         unsigned int b1size;
         unsigned int b2size;
 
-        b1size=EncodeNumber(data.GetId()-lastId,b1);
-        b2size=EncodeNumber(readPos-lastPos,b2);
+
+        b1size=EncodeNumber(b1val,b1);
+        b2size=EncodeNumber(b2val,b2);
 
         assert(b1size<=10);
         assert(b2size<=10);
@@ -207,7 +210,7 @@ namespace osmscout {
     indexPageCounts.push_back(pageStarts.size());
 
     while (pageStarts.size()>1) {
-      std::vector<Id>         si(startingIds);
+      std::vector<N>          si(startingIds);
       std::vector<FileOffset> po(pageStarts);
 
       startingIds.clear();
@@ -222,11 +225,13 @@ namespace osmscout {
         if (currentPageSize>0) {
           char         b1[10];
           char         b2[10];
+          N            b1val=si[i]-si[i-1];
+          FileOffset   b2val=po[i]-po[i-1];
           unsigned int b1size;
           unsigned int b2size;
 
-          b1size=EncodeNumber((si[i]-si[i-1]),b1);
-          b2size=EncodeNumber(po[i]-po[i-1],b2);
+          b1size=EncodeNumber(b1val,b1);
+          b2size=EncodeNumber(b2val,b2);
 
           assert(b1size<=10);
           assert(b2size<=10);

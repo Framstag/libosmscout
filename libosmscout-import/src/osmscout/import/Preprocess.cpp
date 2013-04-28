@@ -242,7 +242,6 @@ namespace osmscout {
 
       node.Write(nodeWriter);
 
-
       nodeCount++;
     }
 

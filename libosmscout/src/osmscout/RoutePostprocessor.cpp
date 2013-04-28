@@ -203,7 +203,7 @@ namespace osmscout {
                                                                                   const RouteDescription::Node& node,
                                                                                   const WayRef& originWay,
                                                                                   const WayRef& targetWay,
-                                                                                  const std::map<Id,WayRef>& wayMap)
+                                                                                  const std::map<FileOffset,WayRef>& wayMap)
   {
     for (std::vector<Path>::const_iterator path=node.GetPaths().begin();
         path!=node.GetPaths().end();
@@ -491,7 +491,7 @@ namespace osmscout {
   }
 
   RoutePostprocessor::InstructionPostprocessor::State RoutePostprocessor::InstructionPostprocessor::GetInitialState(RouteDescription::Node& node,
-                                                                                                                    std::map<Id,WayRef>& wayMap)
+                                                                                                                    std::map<FileOffset,WayRef>& wayMap)
   {
     if (!node.HasPathWay()) {
       return street;
@@ -562,7 +562,7 @@ namespace osmscout {
   bool RoutePostprocessor::InstructionPostprocessor::HandleNameChange(const std::list<RouteDescription::Node>& path,
                                                                       std::list<RouteDescription::Node>::const_iterator& lastNode,
                                                                       std::list<RouteDescription::Node>::iterator& node,
-                                                                      const std::map<Id,WayRef>& wayMap)
+                                                                      const std::map<FileOffset,WayRef>& wayMap)
   {
     RouteDescription::NameDescriptionRef nextName;
     RouteDescription::NameDescriptionRef lastName;
@@ -609,7 +609,7 @@ namespace osmscout {
 
   bool RoutePostprocessor::InstructionPostprocessor::HandleDirectionChange(const std::list<RouteDescription::Node>& path,
                                                                            std::list<RouteDescription::Node>::iterator& node,
-                                                                           const std::map<Id,WayRef>& wayMap)
+                                                                           const std::map<FileOffset,WayRef>& wayMap)
   {
     if (node->GetPaths().size()<=1){
       return false;

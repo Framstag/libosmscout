@@ -49,7 +49,7 @@ namespace osmscout {
 
   private:
     Context                          context;
-    PreprocessOSM&                    pp;
+    PreprocessOSM&                   pp;
     const TypeConfig&                typeConfig;
     Id                               id;
     double                           lon,lat;

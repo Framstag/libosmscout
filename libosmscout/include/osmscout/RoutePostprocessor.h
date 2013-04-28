@@ -116,7 +116,7 @@ namespace osmscout {
                                        const RouteDescription::Node& node,
                                        const WayRef& originWay,
                                        const WayRef& targetWay,
-                                       const std::map<Id,WayRef>& wayMap);
+                                       const std::map<FileOffset,WayRef>& wayMap);
 
     public:
       bool Process(const RoutingProfile& profile,
@@ -164,7 +164,7 @@ namespace osmscout {
 
     private:
       State GetInitialState(RouteDescription::Node& node,
-                            std::map<Id,WayRef>& wayMap);
+                            std::map<FileOffset,WayRef>& wayMap);
 
       void HandleRoundaboutEnter(RouteDescription::Node& node);
       void HandleRoundaboutNode(RouteDescription::Node& node);
@@ -176,10 +176,10 @@ namespace osmscout {
       bool HandleNameChange(const std::list<RouteDescription::Node>& path,
                             std::list<RouteDescription::Node>::const_iterator& lastNode,
                             std::list<RouteDescription::Node>::iterator& node,
-                            const std::map<Id,WayRef>& wayMap);
+                            const std::map<FileOffset,WayRef>& wayMap);
       bool HandleDirectionChange(const std::list<RouteDescription::Node>& path,
                                  std::list<RouteDescription::Node>::iterator& node,
-                                 const std::map<Id,WayRef>& wayMap);
+                                 const std::map<FileOffset,WayRef>& wayMap);
 
     public:
       bool Process(const RoutingProfile& profile,

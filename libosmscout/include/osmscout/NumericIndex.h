@@ -46,7 +46,7 @@ namespace osmscout {
       */
     struct Entry
     {
-      Id         startId;
+      N          startId;
       FileOffset fileOffset;
     };
 
@@ -62,7 +62,7 @@ namespace osmscout {
 
     typedef LazyRef<Page> PageRef;
 
-    typedef Cache<Id,PageRef> PageCache;
+    typedef Cache<N,PageRef> PageCache;
 
     /**
       Returns the size of a individual cache entry
@@ -90,7 +90,7 @@ namespace osmscout {
     mutable std::vector<PageCache> leafs;
 
   private:
-    size_t GetPageIndex(const PageRef& page, Id id) const;
+    size_t GetPageIndex(const PageRef& page, N id) const;
     bool ReadPage(FileOffset offset, PageRef& page) const;
 
   public:
@@ -135,7 +135,7 @@ namespace osmscout {
     Binary search for index page for given id
     */
   template <class N>
-  inline size_t NumericIndex<N>::GetPageIndex(const PageRef& page, Id id) const
+  inline size_t NumericIndex<N>::GetPageIndex(const PageRef& page, N id) const
   {
     size_t size=page->entries.size();
 
@@ -186,27 +186,24 @@ namespace osmscout {
     }
 
     size_t     currentPos=0;
-    Id         sio=0;
+    N         sio=0;
     FileOffset poo=0;
 
     while (currentPos<pageSize &&
            buffer[currentPos]!=0) {
-      uint32_t     data;
       unsigned int bytes;
-      Id           si;
+      N            si;
       FileOffset   po;
       Entry        entry;
 
       bytes=DecodeNumber(&buffer[currentPos],
-                         data);
+                         si);
 
-      si=(Id)data;
       currentPos+=bytes;
 
       bytes=DecodeNumber(&buffer[currentPos],
-                         data);
+                         po);
 
-      po=(FileOffset)data;
       currentPos+=bytes;
 
       sio+=si;
@@ -316,7 +313,7 @@ namespace osmscout {
 
     offset=root->entries[r].fileOffset;
 
-    Id startId=root->entries[r].startId;
+    N startId=root->entries[r].startId;
     for (size_t level=0; level+2<=levels; level++) {
       typename PageCache::CacheRef cacheRef;
 

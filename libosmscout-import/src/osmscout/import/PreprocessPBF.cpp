@@ -305,10 +305,10 @@ namespace osmscout {
                                      const PBF::PrimitiveGroup& group)
   {
     const PBF::DenseNodes &dense=group.dense();
-    unsigned long dId=0;
-    double        dLat=0;
-    double        dLon=0;
-    int           t=0;
+    Id     dId=0;
+    double dLat=0;
+    double dLon=0;
+    int    t=0;
 
     for (int d=0; d<dense.id_size();d++) {
       dId+=dense.id(d);
@@ -394,7 +394,7 @@ namespace osmscout {
         }
       }
 
-      unsigned long ref=0;
+      Id ref=0;
       for (int r=0; r<inputRelation.types_size();r++) {
         RawRelation::Member member;
 

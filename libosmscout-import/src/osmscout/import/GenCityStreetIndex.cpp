@@ -873,7 +873,7 @@ namespace osmscout {
     }
 
     writer.WriteNumber((uint32_t)area.nodes.size());
-    for (std::map<std::string,std::list<Id> >::const_iterator node=area.nodes.begin();
+    for (std::map<std::string,std::list<FileOffset> >::const_iterator node=area.nodes.begin();
          node!=area.nodes.end();
          ++node) {
       writer.Write(node->first);                         // Node name

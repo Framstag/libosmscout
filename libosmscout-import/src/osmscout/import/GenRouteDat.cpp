@@ -1233,7 +1233,7 @@ namespace osmscout {
         }
       }
 
-      OSMSCOUT_HASHMAP<Id,WayRef> waysMap;
+      OSMSCOUT_HASHMAP<FileOffset,WayRef> waysMap;
 
       if (!LoadWays(progress,
                     scanner,
