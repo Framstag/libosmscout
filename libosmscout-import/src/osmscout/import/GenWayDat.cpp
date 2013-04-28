@@ -521,20 +521,29 @@ namespace osmscout {
             continue;
           }
 
-          if (IsRestricted(restrictions,
-                           way->GetId(),
-                           lastNodeId)) {
+          bool restricted=false;
+#pragma omp critical
+          {
+            restricted=IsRestricted(restrictions,
+                                    way->GetId(),
+                                    lastNodeId);
+          }
+
+          if (restricted) {
             continue;
           }
 
           // This is a match
           hasMerged=true;
 
-          wayBlacklist.insert(candidate->GetId());
+#pragma omp critical
+          {
+            wayBlacklist.insert(candidate->GetId());
 
-          UpdateRestrictions(restrictions,
-                             candidate->GetId(),
-                             way->GetId());
+            UpdateRestrictions(restrictions,
+                               candidate->GetId(),
+                               way->GetId());
+          }
 
           std::vector<Id> nodes(way->GetNodes());
 
@@ -806,6 +815,7 @@ namespace osmscout {
       // TODO: only print it, if there is something to merge at all
       progress.SetAction("Merging ways");
 
+#pragma omp parallel for
       for (size_t type=0; type<waysByType.size(); type++) {
         size_t originalWayCount=waysByType[type].size();
 
@@ -816,6 +826,7 @@ namespace osmscout {
                     wayBlacklist,
                     restrictions);
 
+#pragma omp critical
           if (waysByType[type].size()<originalWayCount) {
             progress.Info("Reduced ways of '"+typeConfig.GetTypeInfo(type).GetName()+"' from "+
                           NumberToString(originalWayCount)+" to "+NumberToString(waysByType[type].size())+ " way(s)");
