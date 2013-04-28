@@ -19,7 +19,6 @@
 
 
 #include <osmscout/Database.h>
-#include <osmscout/StyleConfigLoader.h>
 
 /*
   Example for the nordrhein-westfalen.osm (to be executed in the Demos top
