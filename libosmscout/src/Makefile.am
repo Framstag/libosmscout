@@ -1,4 +1,5 @@
 AM_CPPFLAGS = $(LIB_CXXFLAGS) \
+              $(OPENMP_CXXFLAGS) \
               $(SIMD_FLAGS) \
               -DOSMSCOUTDLL -I$(top_srcdir)/include
 

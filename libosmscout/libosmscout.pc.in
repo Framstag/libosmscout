@@ -10,4 +10,5 @@ Version: @VERSION@
 Libs: -L${libdir} -losmscout
 Cflags: -I${includedir} \
         @CPP0XFLAGS@ \
+        @OPENMP_CXXFLAGS@ \
         @SIMD_FLAGS@

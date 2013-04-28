@@ -22,8 +22,8 @@
 #include <algorithm>
 #include <iostream>
 
-#if defined(OSMSCOUT_HAVE_THREAD)
-  #include <thread>
+#if _OPENMP
+#include <omp.h>
 #endif
 
 #include <osmscout/TypeConfigLoader.h>
@@ -690,153 +690,98 @@ namespace osmscout {
       return false;
     }
 
-    ways.clear();
-    areas.clear();
-    relationWays.clear();
-    relationAreas.clear();
+    {
+      ways.clear();
+      areas.clear();
+      relationWays.clear();
+      relationAreas.clear();
+    }
 
     if (parameter.IsAborted()) {
       return false;
     }
 
-#if defined(OSMSCOUT_HAVE_THREAD)
-    if (parameter.GetUseMultithreading()) {
-      bool nodeSuccess;
-      bool wayOffsetSuccess;
-      bool areaOffsetSuccess;
+    bool nodesSuccess;
+    bool wayOffsetsSuccess;
+    bool areaOffsetsSuccess;
 
-      std::thread nodeThread([&]{nodeSuccess=GetObjectsNodes(parameter,
-                                                             nodeTypes,
-                                                             lonMin,
-                                                             latMin,
-                                                             lonMax,
-                                                             latMax,
-                                                             nodeIndexTime,
-                                                             nodesTime,
-                                                             nodes);});
+#pragma omp parallel if(parameter.GetUseMultithreading())
+#pragma omp sections
+    {
+#pragma omp section
+      nodesSuccess=GetObjectsNodes(parameter,
+                                   nodeTypes,
+                                   lonMin,
+                                   latMin,
+                                   lonMax,
+                                   latMax,
+                                   nodeIndexTime,
+                                   nodesTime,
+                                   nodes);
 
-      std::thread wayOffsetThread([&]{wayOffsetSuccess=GetObjectsWayOffsets(parameter,
-                                                                            wayTypes,
-                                                                            magnification,
-                                                                            lonMin,
-                                                                            latMin,
-                                                                            lonMax,
-                                                                            latMax,
-                                                                            wayOptimizedTime,
-                                                                            wayIndexTime,
-                                                                            wayWayOffsets,
-                                                                            relationWayOffsets,
-                                                                            ways);});
+#pragma omp section
+      wayOffsetsSuccess=GetObjectsWayOffsets(parameter,
+                                             wayTypes,
+                                             magnification,
+                                             lonMin,
+                                             latMin,
+                                             lonMax,
+                                             latMax,
+                                             wayOptimizedTime,
+                                             wayIndexTime,
+                                             wayWayOffsets,
+                                             relationWayOffsets,
+                                             ways);
 
-      std::thread areaOffsetThread([&]{areaOffsetSuccess=GetObjectsAreaOffsets(parameter,
-                                                                               areaTypes,
-                                                                               magnification,
-                                                                               lonMin,
-                                                                               latMin,
-                                                                               lonMax,
-                                                                               latMax,
-                                                                               areaIndexTime,
-                                                                               wayAreaOffsets,
-                                                                               relationAreaOffsets);});
-
-      nodeThread.join();
-      wayOffsetThread.join();
-      areaOffsetThread.join();
-
-      if (!nodeSuccess || !wayOffsetSuccess || !areaOffsetSuccess) {
-        return false;
-      }
-
-      bool waySuccess;
-      bool relSuccess;
-
-      std::thread wayThread([&]{waySuccess=GetObjectsWaysAndAreas(parameter,
-                                                                  wayWayOffsets,
-                                                                  wayAreaOffsets,
-                                                                  waysTime,
-                                                                  areasTime,
-                                                                  ways,
-                                                                  areas);});
-
-      std::thread relThread([&]{relSuccess=GetObjectsWaysAndAreasRel(parameter,
-                                                                     relationWayOffsets,
-                                                                     relationAreaOffsets,
-                                                                     relationWaysTime,
-                                                                     relationAreasTime,
-                                                                     relationWays,
-                                                                     relationAreas);});
-
-      wayThread.join();
-      relThread.join();
-
-      if (!waySuccess || !relSuccess) {
-        return false;
-      }
+#pragma omp section
+      areaOffsetsSuccess=GetObjectsAreaOffsets(parameter,
+                                               areaTypes,
+                                               magnification,
+                                               lonMin,
+                                               latMin,
+                                               lonMax,
+                                               latMax,
+                                               areaIndexTime,
+                                               wayAreaOffsets,
+                                               relationAreaOffsets);
     }
-    else {
-#endif
-      if (!GetObjectsNodes(parameter,
-                           nodeTypes,
-                           lonMin,
-                           latMin,
-                           lonMax,
-                           latMax,
-                           nodeIndexTime,
-                           nodesTime,
-                           nodes)) {
-        return false;
-      }
 
-      if (!GetObjectsWayOffsets(parameter,
-                                wayTypes,
-                                magnification,
-                                lonMin,
-                                latMin,
-                                lonMax,
-                                latMax,
-                                wayOptimizedTime,
-                                wayIndexTime,
-                                wayWayOffsets,
-                                relationWayOffsets,
-                                ways)) {
-        return false;
-      }
-
-      if (!GetObjectsAreaOffsets(parameter,
-                                 areaTypes,
-                                 magnification,
-                                 lonMin,
-                                 latMin,
-                                 lonMax,
-                                 latMax,
-                                 areaIndexTime,
-                                 wayAreaOffsets,
-                                 relationAreaOffsets)) {
-        return false;
-      }
-
-      if (!GetObjectsWaysAndAreas(parameter,
-                                  wayWayOffsets,
-                                  wayAreaOffsets,
-                                  waysTime,
-                                  areasTime,
-                                  ways,
-                                  areas)) {
-        return false;
-      }
-
-      if (!GetObjectsWaysAndAreasRel(parameter,
-                                     relationWayOffsets,
-                                     relationAreaOffsets,
-                                     relationWaysTime,
-                                     relationAreasTime,
-                                     relationWays,
-                                     relationAreas)) {
-        return false;
-      }
-#if defined(OSMSCOUT_HAVE_THREAD)
+    if (!nodesSuccess ||
+        !wayOffsetsSuccess ||
+        !areaOffsetsSuccess) {
+      return false;
     }
-#endif
+
+    bool waSuccess;
+    bool warSuccess;
+
+#pragma omp parallel if(parameter.GetUseMultithreading())
+#pragma omp sections
+    {
+
+#pragma omp section
+      waSuccess=GetObjectsWaysAndAreas(parameter,
+                                      wayWayOffsets,
+                                      wayAreaOffsets,
+                                      waysTime,
+                                      areasTime,
+                                      ways,
+                                      areas);
+
+#pragma omp section
+      warSuccess=GetObjectsWaysAndAreasRel(parameter,
+                                          relationWayOffsets,
+                                          relationAreaOffsets,
+                                          relationWaysTime,
+                                          relationAreasTime,
+                                          relationWays,
+                                          relationAreas);
+    }
+
+    if (!waSuccess ||
+        !warSuccess) {
+      return false;
+    }
 
     if (debugPerformance) {
       std::cout << "Query: ";

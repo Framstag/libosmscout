@@ -809,24 +809,19 @@ namespace osmscout {
       for (size_t type=0; type<waysByType.size(); type++) {
         size_t originalWayCount=waysByType[type].size();
 
-        if (originalWayCount==0) {
-          continue;
+        if (originalWayCount>0) {
+          MergeWays(progress,
+                    typeConfig,
+                    waysByType[type],
+                    wayBlacklist,
+                    restrictions);
+
+          if (waysByType[type].size()<originalWayCount) {
+            progress.Info("Reduced ways of '"+typeConfig.GetTypeInfo(type).GetName()+"' from "+
+                          NumberToString(originalWayCount)+" to "+NumberToString(waysByType[type].size())+ " way(s)");
+            mergeCount+=originalWayCount-waysByType[type].size();
+          }
         }
-
-        progress.Info("Merging "+NumberToString(originalWayCount)+" ways of type '"+typeConfig.GetTypeInfo(type).GetName()+"'");
-
-        MergeWays(progress,
-                  typeConfig,
-                  waysByType[type],
-                  wayBlacklist,
-                  restrictions);
-
-        if (waysByType[type].size()<originalWayCount) {
-          progress.Info("Reduced to "+
-                        NumberToString(waysByType[type].size())+ " way(s)");
-        }
-
-        mergeCount+=originalWayCount-waysByType[type].size();
       }
 
       progress.SetAction("Collecting node ids");

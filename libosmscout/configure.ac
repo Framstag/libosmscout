@@ -104,6 +104,8 @@ if test "$enable_see2_support" != "no"; then
   AX_EXT
 fi
 
+AX_OPENMP([AC_SUBST(OPENMP_CXXFLAGS)])
+
 if test "x$GXX" = xyes; then
   CPPFLAGS="$CPPFLAGS -Wall -Wpointer-arith -Wsign-compare -Wundef -Wcast-qual -Wcast-align -Wwrite-strings -Wredundant-decls -Wno-long-long"
 fi
