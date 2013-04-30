@@ -447,7 +447,7 @@ namespace osmscout {
 
       WaysByNodeMap::iterator lastNodeCandidate=waysByNode.find(lastNodeId);
 
-      // Way is circular
+      // Way is circular an dalready closed
       if (lastNodeCandidate==waysByNode.end()) {
         continue;
       }
@@ -576,12 +576,13 @@ namespace osmscout {
 
           assert(otherEntry!=waysByNode.end());
 
+          // Erase the matched way from the map of ways (entry via the node at the other end of the way)
+          otherEntry->second.remove(*c);
+
           // Erase the matched way from the list of ways to process
           ways.erase(*c);
 
-          otherEntry->second.remove(*c);
-
-          // Erase the matched way from the map of ways (entry via the matched node))
+          // Erase the matched way from the map of ways (entry via the matched node)
           lastNodeCandidate->second.erase(c);
 
           // If the resulting entry is empty, delete it, too
@@ -609,9 +610,10 @@ namespace osmscout {
         }
       }
 
+
       lastNodeId=way->GetLastNodeId();
 
-      // Add the (possibly new) lastNodeId to the wayByNode map (again))
+      // Add the (possibly new) lastNodeId to the wayByNode map (again)
       // if the way is not now closed
       if (way->GetFirstNodeId()!=lastNodeId) {
         waysByNode[lastNodeId].push_back(w);
