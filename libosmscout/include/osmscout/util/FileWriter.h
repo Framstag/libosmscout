@@ -63,6 +63,13 @@ namespace osmscout {
 
     bool Write(bool boolean);
 
+    bool Write(int8_t number);
+    bool Write(int16_t number);
+    bool Write(int32_t number);
+#if defined(OSMSCOUT_HAVE_INT64_T)
+    bool Write(int64_t number);
+#endif
+
     bool Write(uint8_t number);
     bool Write(uint16_t number);
     bool Write(uint32_t number);
@@ -74,7 +81,11 @@ namespace osmscout {
     bool WriteFileOffset(FileOffset offset,
                          size_t bytes);
 
-    bool Write(int8_t number);
+    bool WriteNumber(int16_t number);
+    bool WriteNumber(int32_t number);
+#if defined(OSMSCOUT_HAVE_INT64_T)
+    bool WriteNumber(int64_t number);
+#endif
 
     bool WriteNumber(uint16_t number);
     bool WriteNumber(uint32_t number);

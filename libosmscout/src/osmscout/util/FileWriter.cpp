@@ -167,6 +167,64 @@ namespace osmscout {
     return !hasError;
   }
 
+  bool FileWriter::Write(int16_t number)
+  {
+    if (HasError()) {
+      return false;
+    }
+
+    char buffer[2];
+
+    buffer[0]=((number >> 0) & 0xff);
+    buffer[1]=((number >> 8) & 0xff);
+
+    hasError=fwrite(buffer,1,2,file)!=2;
+
+    return !hasError;
+  }
+
+  bool FileWriter::Write(int32_t number)
+  {
+    if (HasError()) {
+      return false;
+    }
+
+    char buffer[4];
+
+    buffer[0]=((number >>  0) & 0xff);
+    buffer[1]=((number >>  8) & 0xff);
+    buffer[2]=((number >> 16) & 0xff);
+    buffer[3]=((number >> 24) & 0xff);
+
+    hasError=fwrite(buffer,1,4,file)!=4;
+
+    return !hasError;
+  }
+
+#if defined(OSMSCOUT_HAVE_INT64_T)
+  bool FileWriter::Write(int64_t number)
+  {
+    if (HasError()) {
+      return false;
+    }
+
+    char buffer[8];
+
+    buffer[0]=((number >>  0) & 0xff);
+    buffer[1]=((number >>  8) & 0xff);
+    buffer[2]=((number >> 16) & 0xff);
+    buffer[3]=((number >> 24) & 0xff);
+    buffer[4]=((number >> 32) & 0xff);
+    buffer[5]=((number >> 40) & 0xff);
+    buffer[6]=((number >> 48) & 0xff);
+    buffer[7]=((number >> 56) & 0xff);
+
+    hasError=fwrite(buffer,1,8,file)!=8;
+
+    return !hasError;
+  }
+#endif
+
   bool FileWriter::Write(uint8_t number)
   {
     if (HasError()) {
@@ -282,6 +340,71 @@ namespace osmscout {
 
     return !hasError;
   }
+
+  /**
+    Write a numeric value to the file using some internal encoding
+    to reduce storage size. Note that this works only if the average number
+    is small.
+    */
+  bool FileWriter::WriteNumber(int16_t number)
+  {
+    if (HasError()) {
+      return false;
+    }
+
+    char         buffer[3];
+    unsigned int bytes;
+
+    bytes=EncodeNumber(number,buffer);
+
+    hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
+
+    return !hasError;
+  }
+
+  /**
+    Write a numeric value to the file using some internal encoding
+    to reduce storage size. Note that this works only if the average number
+    is small.
+    */
+  bool FileWriter::WriteNumber(int32_t number)
+  {
+    if (HasError()) {
+      return false;
+    }
+
+    char         buffer[5];
+    unsigned int bytes;
+
+    bytes=EncodeNumber(number,buffer);
+
+    hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
+
+    return !hasError;
+  }
+
+#if defined(OSMSCOUT_HAVE_INT64_T)
+  /**
+    Write a numeric value to the file using some internal encoding
+    to reduce storage size. Note that this works only if the average number
+    is small.
+    */
+  bool FileWriter::WriteNumber(int64_t number)
+  {
+    if (HasError()) {
+      return false;
+    }
+
+    char         buffer[10];
+    unsigned int bytes;
+
+    bytes=EncodeNumber(number,buffer);
+
+    hasError=fwrite(buffer,sizeof(unsigned char),bytes,file)!=bytes;
+
+    return !hasError;
+  }
+#endif
 
   /**
     Write a numeric value to the file using some internal encoding
