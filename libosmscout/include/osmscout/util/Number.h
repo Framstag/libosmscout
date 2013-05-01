@@ -31,7 +31,11 @@ namespace osmscout {
   /**
    * Encode a signed number into the given buffer using some variable length encoding.
    *
-   * The current implementation requires the buffer to have at least space
+   * The first bit (if set) signals a negative numer. The highest bit in a byte
+   * is set, if there is an additional byte following. So we use one bit
+   * for signaling signess and use 7 of 8 bytes per byte for data.
+   *
+   * The current implementation thus requires the buffer to have at least space
    * for sizeof(N)*8/7 + 1/8 bytes:
    *
    * This are 5 bytes for a 32bit value and 10 bytes for a 64bit value.
@@ -68,6 +72,9 @@ namespace osmscout {
 
   /**
    * Encode an unsigned number into the given buffer using some variable length encoding.
+   *
+   * The highest bit in a byte is set, if there is an additional byte following.
+   * So we use 7 of 8 bytes per byte for data.
    *
    * The current implementation requires the buffer to have at least space
    * for sizeof(N)*8/7 bytes:
