@@ -35,7 +35,7 @@ namespace osmscout {
   class CoordDataFile
   {
   private:
-    typedef OSMSCOUT_HASHMAP<Id,FileOffset> CoordPageOffsetMap;
+    typedef OSMSCOUT_HASHMAP<PageId,FileOffset> CoordPageOffsetMap;
 
   public:
     typedef OSMSCOUT_HASHMAP<Id,Point> CoordResultMap;

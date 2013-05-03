@@ -81,7 +81,7 @@ namespace osmscout {
       }
 
       for (size_t i=1; i<=mapSize; i++) {
-        Id         id;
+        PageId     id;
         FileOffset offset;
 
         if (!scanner.Read(id) ||
@@ -130,13 +130,14 @@ namespace osmscout {
     for (std::set<Id>::const_iterator id=ids.begin();
          id!=ids.end();
          ++id) {
-      Id coordPageId=*id/coordPageSize;
+      PageId pageId=*id-std::numeric_limits<Id>::min();
+      PageId coordPageId=pageId/coordPageSize;
 
       CoordPageOffsetMap::const_iterator pageOffset=coordPageOffsetMap.find(coordPageId);
 
       if (pageOffset!=coordPageOffsetMap.end()) {
-        FileOffset offset=pageOffset->second+((*id)%coordPageSize)*2*sizeof(uint32_t);
-        Id         substituteId=(offset-2*sizeof(FileOffset))/2*sizeof(uint32_t);
+        FileOffset offset=pageOffset->second+(pageId%coordPageSize)*2*sizeof(uint32_t);
+        PageId     substituteId=(offset-2*sizeof(FileOffset))/2*sizeof(uint32_t);
 
         scanner.SetPos(offset);
 
