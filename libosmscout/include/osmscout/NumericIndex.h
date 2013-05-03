@@ -186,7 +186,7 @@ namespace osmscout {
     }
 
     size_t     currentPos=0;
-    N         sio=0;
+    N          sio=0;
     FileOffset poo=0;
 
     while (currentPos<pageSize &&

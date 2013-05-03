@@ -24,11 +24,13 @@
 
 #include <iostream>
 
-
+#include <limits>
 #include <list>
 #include <vector>
 
 #include <osmscout/system/Assert.h>
+
+#include <osmscout/Types.h>
 
 #include <osmscout/util/HashMap.h>
 
@@ -37,14 +39,16 @@ namespace osmscout {
   /**
     Generic FIFO cache implementation with O(n log n) semantic.
 
-    Template parameter class K holds the key value (must be an unsigned numerical value),
-    parameter class V holds the data class that is to be cached.
+    Template parameter class K holds the key value (must be a numerical value),
+    parameter class V holds the data class that is to be cached,
+    and parameter IK holds the internal key value, must be an unsigned value,
+    default is PageId.
 
     * The cache is not threadsafe.
     * It uses a std::vector<std::list>> as a hash table for data lookup
     * It uses an std::list for implementing FIFO characteristics.
    */
-  template <class K, class V>
+  template <class K, class V, class IK = PageId>
   class Cache
   {
   public:
@@ -109,6 +113,13 @@ namespace osmscout {
     Map           map;
 
   private:
+
+    inline IK KeyToInternalKey(K key)
+    {
+      return key - std::numeric_limits<K>::min();
+    }
+
+
     /**
       Clear the cache deleting the oldest cache entries
       until it has the given max size.
@@ -128,7 +139,8 @@ namespace osmscout {
 
         map.erase(iter);
 #else
-        unsigned long index=lastEntry->key % map.size();
+        IK            lastEntryInternalKey=KeyToInternalKey(lastEntry->key);
+        unsigned long index=lastEntryInternalKey % map.size();
 
         typename CacheRefList::iterator iter=map[index].begin();
         while (iter!=map[index].end() &&
@@ -201,7 +213,8 @@ namespace osmscout {
         return true;
       }
 #else
-      unsigned long index(key%map.size());
+      IK            internalKey=KeyToInternalKey(key);
+      unsigned long index(internalKey % map.size());
       CacheRefList  *refList=&map[index];
 
       for (typename CacheRefList::iterator iter(refList->begin());
@@ -263,7 +276,8 @@ namespace osmscout {
         StripCache();
       }
 #else
-      unsigned long                   index=entry.key%map.size();
+      IK                              internalKey=KeyToInternalKey(entry.key);
+      unsigned long                   index=internalKey % map.size();
       CacheRefList                    *refList=&map[index];
       typename CacheRefList::iterator iter=refList->begin();
 
