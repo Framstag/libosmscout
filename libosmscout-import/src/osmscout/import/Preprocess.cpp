@@ -65,17 +65,18 @@ namespace osmscout {
       }
     }
 
-    currentPageId=std::numeric_limits<Id>::max();
+    currentPageId=std::numeric_limits<PageId>::max();
 
     return !coordWriter.HasError();
   }
 
   bool Preprocess::StoreCoord(Id id, double lat, double lon)
   {
-    Id pageId=id/coordPageSize;
-    Id coordPageOffset=id%coordPageSize;
+    PageId relatedId=id-std::numeric_limits<Id>::min();
+    PageId pageId=relatedId/coordPageSize;
+    FileOffset coordPageOffset=relatedId%coordPageSize;
 
-    if (currentPageId!=std::numeric_limits<Id>::max()) {
+    if (currentPageId!=std::numeric_limits<PageId>::max()) {
       if (currentPageId==pageId) {
         lats[coordPageOffset]=lat;
         lons[coordPageOffset]=lon;
@@ -161,7 +162,7 @@ namespace osmscout {
   bool Preprocess::Initialize(const ImportParameter& parameter)
   {
     coordPageCount=0;
-    currentPageId=std::numeric_limits<Id>::max();
+    currentPageId=std::numeric_limits<PageId>::max();
 
     nodeCount=0;
     wayCount=0;
@@ -169,9 +170,9 @@ namespace osmscout {
     relationCount=0;
     coastlineCount=0;
 
-    lastNodeId=0;
-    lastWayId=0;
-    lastRelationId=0;
+    lastNodeId=std::numeric_limits<Id>::min();
+    lastWayId=std::numeric_limits<Id>::min();
+    lastRelationId=std::numeric_limits<Id>::min();
 
     nodeSortingError=false;
     waySortingError=false;

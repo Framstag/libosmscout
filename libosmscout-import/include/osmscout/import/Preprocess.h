@@ -30,7 +30,7 @@ namespace osmscout {
   class Preprocess : public ImportModule
   {
   private:
-    typedef OSMSCOUT_HASHMAP<Id,FileOffset> CoordPageOffsetMap;
+    typedef OSMSCOUT_HASHMAP<PageId,FileOffset> CoordPageOffsetMap;
 
   private:
     FileWriter          nodeWriter;
@@ -58,7 +58,7 @@ namespace osmscout {
     bool                waySortingError;
     bool                relationSortingError;
 
-    Id                  currentPageId;
+    PageId              currentPageId;
     FileOffset          currentPageOffset;
     std::vector<double> lats;
     std::vector<double> lons;
