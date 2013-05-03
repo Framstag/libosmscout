@@ -40,7 +40,7 @@ namespace osmscout {
   class WayDataGenerator : public ImportModule
   {
   private:
-    typedef OSMSCOUT_HASHMAP<Id,uint32_t>       NodeUseMap;
+    typedef OSMSCOUT_HASHMAP<PageId,uint32_t>   NodeUseMap;
     typedef OSMSCOUT_HASHMAP<Id,std::list<Id> > EndPointWayMap;
     typedef OSMSCOUT_HASHSET<Id>                EndPointAreaSet;
     typedef OSMSCOUT_HASHSET<Id>                BlacklistSet;

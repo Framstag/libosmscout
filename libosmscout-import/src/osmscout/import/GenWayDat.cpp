@@ -68,7 +68,8 @@ namespace osmscout {
   void WayDataGenerator::SetNodeUsed(NodeUseMap& nodeUseMap,
                                      Id id)
   {
-    Id offset=id/16;
+    PageId resolvedId=id-std::numeric_limits<Id>::min();
+    PageId offset=resolvedId/16;
 
     NodeUseMap::iterator entry=nodeUseMap.find(offset);
 
@@ -76,7 +77,7 @@ namespace osmscout {
       entry=nodeUseMap.insert(std::make_pair(offset,0)).first;
     }
 
-    Id index=(id%16)*2;
+    uint32_t index=(resolvedId%16)*2;
 
     uint32_t data=entry->second;
 
@@ -94,7 +95,8 @@ namespace osmscout {
   bool WayDataGenerator::IsNodeUsedAtLeastTwice(const NodeUseMap& nodeUseMap,
                                                 Id id) const
   {
-    Id offset=id/16;
+    PageId resolvedId=id-std::numeric_limits<Id>::min();
+    PageId offset=resolvedId/16;
 
     NodeUseMap::const_iterator entry=nodeUseMap.find(offset);
 
@@ -102,7 +104,7 @@ namespace osmscout {
       return false;
     }
 
-    Id index=(id%16)*2+1;
+    uint32_t index=(resolvedId%16)*2+1;
 
     bool result=entry->second & (1 << index);
 
