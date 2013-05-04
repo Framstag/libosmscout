@@ -51,7 +51,7 @@ namespace osmscout {
       return wayOffset;
     }
 
-    inline Id GetTargetNodeIndex() const
+    inline size_t GetTargetNodeIndex() const
     {
       return targetNodeIndex;
     }

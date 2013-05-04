@@ -441,7 +441,7 @@ namespace osmscout {
         return pathWayOffset!=0;
       }
 
-      inline Id GetPathWayOffset() const
+      inline FileOffset GetPathWayOffset() const
       {
         return pathWayOffset;
       }
