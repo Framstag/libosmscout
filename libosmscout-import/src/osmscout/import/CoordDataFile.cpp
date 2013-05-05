@@ -117,7 +117,7 @@ namespace osmscout {
     return success;
   }
 
-  bool CoordDataFile::Get(std::set<Id>& ids,
+  bool CoordDataFile::Get(std::set<OSMId>& ids,
                           CoordResultMap& coordsMap) const
   {
     assert(isOpen);
@@ -127,7 +127,7 @@ namespace osmscout {
     coordsMap.reserve(ids.size());
 #endif
 
-    for (std::set<Id>::const_iterator id=ids.begin();
+    for (std::set<OSMId>::const_iterator id=ids.begin();
          id!=ids.end();
          ++id) {
       PageId pageId=*id-std::numeric_limits<Id>::min();

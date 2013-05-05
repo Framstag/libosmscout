@@ -50,9 +50,9 @@ namespace osmscout {
     uint32_t            relationCount;
     uint32_t            coastlineCount;
 
-    Id                  lastNodeId;
-    Id                  lastWayId;
-    Id                  lastRelationId;
+    OSMId               lastNodeId;
+    OSMId               lastWayId;
+    OSMId               lastRelationId;
 
     bool                nodeSortingError;
     bool                waySortingError;
@@ -66,7 +66,7 @@ namespace osmscout {
 
   private:
     bool StoreCurrentPage();
-    bool StoreCoord(Id id, double lat, double lon);
+    bool StoreCoord(OSMId id, double lat, double lon);
 
   public:
     std::string GetDescription() const;
@@ -77,15 +77,15 @@ namespace osmscout {
     bool Initialize(const ImportParameter& parameter);
 
     void ProcessNode(const TypeConfig& typeConfig,
-                     const Id& id,
+                     const OSMId& id,
                      const double& lon, const double& lat,
                      const std::map<TagId,std::string>& tags);
     void ProcessWay(const TypeConfig& typeConfig,
-                    const Id& id,
-                    std::vector<Id>& nodes,
+                    const OSMId& id,
+                    std::vector<OSMId>& nodes,
                     const std::map<TagId,std::string>& tags);
     void ProcessRelation(const TypeConfig& typeConfig,
-                         const Id& id,
+                         const OSMId& id,
                          const std::vector<RawRelation::Member>& members,
                          const std::map<TagId,std::string>& tags);
 

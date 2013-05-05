@@ -39,7 +39,7 @@ namespace osmscout {
   {
   private:
     std::map<TagId,std::string>      tagMap;
-    std::vector<Id>                  nodes;
+    std::vector<OSMId>               nodes;
     std::vector<RawRelation::Member> members;
 
   private:

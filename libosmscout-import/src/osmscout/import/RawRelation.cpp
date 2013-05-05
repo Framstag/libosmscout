@@ -23,7 +23,7 @@
 
 namespace osmscout {
 
-  void RawRelation::SetId(Id id)
+  void RawRelation::SetId(OSMId id)
   {
     this->id=id;
   }
@@ -62,7 +62,7 @@ namespace osmscout {
     members.resize(memberCount);
 
     if (memberCount>0) {
-      Id minId;
+      OSMId minId;
 
       if (!scanner.ReadNumber(minId)) {
         return false;
@@ -70,7 +70,7 @@ namespace osmscout {
 
       for (size_t i=0; i<memberCount; i++) {
         uint32_t memberType;
-        Id       id;
+        OSMId    id;
 
         scanner.ReadNumber(memberType);
         members[i].type=(MemberType)memberType;
@@ -99,7 +99,7 @@ namespace osmscout {
     writer.WriteNumber((uint32_t)members.size());
 
     if (!members.empty()) {
-      Id minId=members[0].id;
+      OSMId minId=members[0].id;
 
       for (size_t i=1; i<members.size(); i++) {
         minId=std::min(minId,members[i].id);

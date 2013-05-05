@@ -66,7 +66,7 @@ namespace osmscout {
   }
 
   void WayDataGenerator::SetNodeUsed(NodeUseMap& nodeUseMap,
-                                     Id id)
+                                     OSMId id)
   {
     PageId resolvedId=id-std::numeric_limits<Id>::min();
     PageId offset=resolvedId/16;
@@ -93,7 +93,7 @@ namespace osmscout {
   }
 
   bool WayDataGenerator::IsNodeUsedAtLeastTwice(const NodeUseMap& nodeUseMap,
-                                                Id id) const
+                                                OSMId id) const
   {
     PageId resolvedId=id-std::numeric_limits<Id>::min();
     PageId offset=resolvedId/16;
@@ -131,7 +131,7 @@ namespace osmscout {
     }
 
     while (!scanner.IsEOF()) {
-      Id id;
+      OSMId id;
 
       scanner.ReadNumber(id);
 
@@ -147,7 +147,7 @@ namespace osmscout {
 
   bool WayDataGenerator::ReadTurnRestrictions(const ImportParameter& parameter,
                                               Progress& progress,
-                                              std::multimap<Id,TurnRestrictionRef>& restrictions)
+                                              std::multimap<OSMId,TurnRestrictionRef>& restrictions)
   {
     FileScanner scanner;
     uint32_t    restrictionCount=0;
@@ -195,11 +195,11 @@ namespace osmscout {
 
   bool WayDataGenerator::WriteTurnRestrictions(const ImportParameter& parameter,
                                                Progress& progress,
-                                               std::multimap<Id,TurnRestrictionRef>& restrictions)
+                                               std::multimap<OSMId,TurnRestrictionRef>& restrictions)
   {
     std::set<TurnRestrictionRef> restrictionsSet;
 
-    for (std::multimap<Id,TurnRestrictionRef>::const_iterator restriction=restrictions.begin();
+    for (std::multimap<OSMId,TurnRestrictionRef>::const_iterator restriction=restrictions.begin();
         restriction!=restrictions.end();
         ++restriction) {
       restrictionsSet.insert(restriction->second);
@@ -242,7 +242,7 @@ namespace osmscout {
                                  std::vector<std::list<RawWayRef> >& ways,
                                  std::vector<std::list<RawWayRef> >& areas,
                                  NodeUseMap& nodeUseMap,
-                                bool buildNodeUseMap)
+                                 bool buildNodeUseMap)
   {
     uint32_t         wayCount=0;
     size_t           collectedWaysCount=0;
@@ -358,15 +358,15 @@ namespace osmscout {
     return true;
   }
 
-  void WayDataGenerator::UpdateRestrictions(std::multimap<Id,TurnRestrictionRef>& restrictions,
-                                            Id oldId,
-                                            Id newId)
+  void WayDataGenerator::UpdateRestrictions(std::multimap<OSMId,TurnRestrictionRef>& restrictions,
+                                            OSMId oldId,
+                                            OSMId newId)
   {
     std::list<TurnRestrictionRef> oldRestrictions;
 
-    std::pair<std::multimap<Id,TurnRestrictionRef>::iterator,
-              std::multimap<Id,TurnRestrictionRef>::iterator> hits=restrictions.equal_range(oldId);
-    for (std::multimap<Id,TurnRestrictionRef>::iterator hit=hits.first;
+    std::pair<std::multimap<OSMId,TurnRestrictionRef>::iterator,
+              std::multimap<OSMId,TurnRestrictionRef>::iterator> hits=restrictions.equal_range(oldId);
+    for (std::multimap<OSMId,TurnRestrictionRef>::iterator hit=hits.first;
         hit!=hits.second;
         ++hit) {
       oldRestrictions.push_back(hit->second);
@@ -390,16 +390,16 @@ namespace osmscout {
     }
   }
 
-  bool WayDataGenerator::IsRestricted(const std::multimap<Id,TurnRestrictionRef>& restrictions,
-                                      Id wayId,
-                                      Id nodeId) const
+  bool WayDataGenerator::IsRestricted(const std::multimap<OSMId,TurnRestrictionRef>& restrictions,
+                                      OSMId wayId,
+                                      OSMId nodeId) const
   {
     // We have an index entry for turn restriction, where the given way id is
     // "from" or "to" so we can jst check for "via" == nodeId
 
-    std::pair<std::multimap<Id,TurnRestrictionRef>::const_iterator,
-              std::multimap<Id,TurnRestrictionRef>::const_iterator> hits=restrictions.equal_range(wayId);
-    for (std::multimap<Id,TurnRestrictionRef>::const_iterator hit=hits.first;
+    std::pair<std::multimap<OSMId,TurnRestrictionRef>::const_iterator,
+              std::multimap<OSMId,TurnRestrictionRef>::const_iterator> hits=restrictions.equal_range(wayId);
+    for (std::multimap<OSMId,TurnRestrictionRef>::const_iterator hit=hits.first;
         hit!=hits.second;
         ++hit) {
       if (hit->second->GetVia()==nodeId) {
@@ -414,7 +414,7 @@ namespace osmscout {
                                    const TypeConfig& typeConfig,
                                    std::list<RawWayRef>& ways,
                                    BlacklistSet& wayBlacklist,
-                                   std::multimap<Id,TurnRestrictionRef>& restrictions)
+                                   std::multimap<OSMId,TurnRestrictionRef>& restrictions)
   {
     WaysByNodeMap  waysByNode;
     SilentProgress silentProgress;
@@ -427,8 +427,8 @@ namespace osmscout {
         w!=ways.end();
         ++w) {
       RawWayRef way(*w);
-      Id        firstNodeId=way->GetFirstNodeId();
-      Id        lastNodeId=way->GetLastNodeId();
+      OSMId     firstNodeId=way->GetFirstNodeId();
+      OSMId     lastNodeId=way->GetLastNodeId();
 
       if (firstNodeId!=lastNodeId) {
         waysByNode[firstNodeId].push_back(w);
@@ -441,7 +441,7 @@ namespace osmscout {
          w!=ways.end();
          ++w) {
       RawWayRef way(*w);
-      Id        lastNodeId=way->GetLastNodeId();
+      OSMId     lastNodeId=way->GetLastNodeId();
 
       progress.SetProgress(currentWay,wayCount);
 
@@ -547,7 +547,7 @@ namespace osmscout {
                                way->GetId());
           }
 
-          std::vector<Id> nodes(way->GetNodes());
+          std::vector<OSMId> nodes(way->GetNodes());
 
           nodes.reserve(nodes.size()+candidate->GetNodeCount()-1);
 
@@ -637,7 +637,7 @@ namespace osmscout {
     std::vector<Tag> tags(rawWay.GetTags());
     Way              way;
     bool             reverseNodes=false;
-    Id               wayId=rawWay.GetId();
+    OSMId            wayId=rawWay.GetId();
 
     way.SetType(rawWay.GetType());
 
@@ -714,21 +714,21 @@ namespace osmscout {
   {
     progress.SetAction("Generate ways.tmp");
 
-    std::set<TypeId>                     wayTypes;
+    std::set<TypeId>                        wayTypes;
 
-    BlacklistSet                         wayBlacklist; //! Map of ways, that should be handled
+    BlacklistSet                            wayBlacklist; //! Map of ways, that should be handled
 
     // List of restrictions for a way
-    std::multimap<Id,TurnRestrictionRef> restrictions; //! Map of restrictions
+    std::multimap<OSMId,TurnRestrictionRef> restrictions; //! Map of restrictions
 
-    NodeUseMap                           nodeUseMap;   //! Bitmap of nodes that are at leats used twice
+    NodeUseMap                              nodeUseMap;   //! Bitmap of nodes that are at leats used twice
 
-    FileScanner                          scanner;
-    FileWriter                           wayWriter;
-    uint32_t                             rawWayCount=0;
+    FileScanner                             scanner;
+    FileWriter                              wayWriter;
+    uint32_t                                rawWayCount=0;
 
-    uint32_t                             writtenWayCount=0;
-    uint32_t                             mergeCount=0;
+    uint32_t                                writtenWayCount=0;
+    uint32_t                                mergeCount=0;
 
 #if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
     nodeUseMap.reserve(2000000);
@@ -841,7 +841,7 @@ namespace osmscout {
 
       progress.SetAction("Collecting node ids");
 
-      std::set<Id>                  nodeIds;
+      std::set<OSMId>               nodeIds;
       CoordDataFile::CoordResultMap coordsMap;
 
       for (size_t type=0; type<waysByType.size(); type++) {

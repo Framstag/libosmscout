@@ -42,9 +42,9 @@ namespace osmscout {
   class RelationDataGenerator : public ImportModule
   {
   private:
-    typedef OSMSCOUT_HASHSET<Id>           IdSet;
+    typedef OSMSCOUT_HASHSET<OSMId>           IdSet;
 
-    typedef OSMSCOUT_HASHMAP<Id,RawWayRef> IdRawWayMap;
+    typedef OSMSCOUT_HASHMAP<OSMId,RawWayRef> IdRawWayMap;
 
   private:
     class GroupingState
@@ -165,7 +165,7 @@ namespace osmscout {
                                     TypeId boundaryId,
                                     const CoordDataFile::CoordResultMap& coordMap,
                                     const IdRawWayMap& wayMap,
-                                    const std::map<Id,RawRelationRef>& relationMap,
+                                    const std::map<OSMId,RawRelationRef>& relationMap,
                                     IdSet& resolvedRelations,
                                     const Relation& relation,
                                     RawRelation& rawRelation,
@@ -174,8 +174,8 @@ namespace osmscout {
   bool ResolveMultipolygonMembers(Progress& progress,
                                   const TypeConfig& typeConfig,
                                   CoordDataFile& coordDataFile,
-                                  IndexedDataFile<RawWay>& wayDataFile,
-                                  IndexedDataFile<RawRelation>& relDataFile,
+                                  IndexedDataFile<OSMId,RawWay>& wayDataFile,
+                                  IndexedDataFile<OSMId,RawRelation>& relDataFile,
                                   IdSet& resolvedRelations,
                                   const Relation& relation,
                                   RawRelation& rawRelation,
@@ -186,8 +186,8 @@ namespace osmscout {
                                     const TypeConfig& typeConfig,
                                     IdSet& wayAreaIndexBlacklist,
                                     CoordDataFile& coordDataFile,
-                                    IndexedDataFile<RawWay>& wayDataFile,
-                                    IndexedDataFile<RawRelation>& relDataFile,
+                                    IndexedDataFile<OSMId,RawWay>& wayDataFile,
+                                    IndexedDataFile<OSMId,RawRelation>& relDataFile,
                                     RawRelation& rawRelation,
                                     Relation& relation);
 

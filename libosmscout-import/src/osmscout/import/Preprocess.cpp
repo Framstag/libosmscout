@@ -70,7 +70,7 @@ namespace osmscout {
     return !coordWriter.HasError();
   }
 
-  bool Preprocess::StoreCoord(Id id, double lat, double lon)
+  bool Preprocess::StoreCoord(OSMId id, double lat, double lon)
   {
     PageId relatedId=id-std::numeric_limits<Id>::min();
     PageId pageId=relatedId/coordPageSize;
@@ -217,7 +217,7 @@ namespace osmscout {
   }
 
   void Preprocess::ProcessNode(const TypeConfig& typeConfig,
-                               const Id& id,
+                               const OSMId& id,
                                const double& lon,
                                const double& lat,
                                const std::map<TagId,std::string>& tagMap)
@@ -250,8 +250,8 @@ namespace osmscout {
   }
 
   void Preprocess::ProcessWay(const TypeConfig& typeConfig,
-                              const Id& id,
-                              std::vector<Id>& nodes,
+                              const OSMId& id,
+                              std::vector<OSMId>& nodes,
                               const std::map<TagId,std::string>& tagMap)
   {
     TypeId                                      areaType=typeIgnore;
@@ -380,7 +380,7 @@ namespace osmscout {
   }
 
   void Preprocess::ProcessRelation(const TypeConfig& typeConfig,
-                                   const Id& id,
+                                   const OSMId& id,
                                    const std::vector<RawRelation::Member>& members,
                                    const std::map<TagId,std::string>& tagMap)
   {

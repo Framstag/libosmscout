@@ -418,7 +418,7 @@ namespace osmscout {
                                                          TypeId boundaryId,
                                                          const CoordDataFile::CoordResultMap& coordMap,
                                                          const IdRawWayMap& wayMap,
-                                                         const std::map<Id,RawRelationRef>& relationMap,
+                                                         const std::map<OSMId,RawRelationRef>& relationMap,
                                                          IdSet& resolvedRelations,
                                                          const Relation& relation,
                                                          RawRelation& rawRelation,
@@ -433,7 +433,7 @@ namespace osmscout {
            member->role.empty())) {
         if (boundaryId!=typeIgnore &&
             relation.GetType()==boundaryId) {
-          std::map<Id,RawRelationRef>::const_iterator relationEntry=relationMap.find(member->id);
+          std::map<OSMId,RawRelationRef>::const_iterator relationEntry=relationMap.find(member->id);
 
           if (relationEntry==relationMap.end()) {
             progress.Error("Cannot resolve relation member "+
@@ -496,7 +496,7 @@ namespace osmscout {
 
         part.role.ids.reserve(way->GetNodeCount());
         part.role.nodes.reserve(way->GetNodeCount());
-        for (std::vector<Id>::const_iterator id=way->GetNodes().begin();
+        for (std::vector<OSMId>::const_iterator id=way->GetNodes().begin();
              id!=way->GetNodes().end();
              ++id) {
           CoordDataFile::CoordResultMap::const_iterator coordEntry=coordMap.find(*id);
@@ -528,8 +528,8 @@ namespace osmscout {
   bool RelationDataGenerator::ResolveMultipolygonMembers(Progress& progress,
                                                          const TypeConfig& typeConfig,
                                                          CoordDataFile& coordDataFile,
-                                                         IndexedDataFile<RawWay>& wayDataFile,
-                                                         IndexedDataFile<RawRelation>& relDataFile,
+                                                         IndexedDataFile<OSMId,RawWay>& wayDataFile,
+                                                         IndexedDataFile<OSMId,RawRelation>& relDataFile,
                                                          IdSet& resolvedRelations,
                                                          const Relation& relation,
                                                          RawRelation& rawRelation,
@@ -543,13 +543,13 @@ namespace osmscout {
       boundaryId=typeConfig.GetAreaTypeId("boundary_administrative");
     }
 
-    std::set<Id>                  nodeIds;
-    std::set<Id>                  wayIds;
-    std::set<Id>                  relationIds;
+    std::set<OSMId>                nodeIds;
+    std::set<OSMId>                wayIds;
+    std::set<OSMId>                relationIds;
 
-    CoordDataFile::CoordResultMap coordMap;
-    IdRawWayMap                   wayMap;
-    std::map<Id,RawRelationRef>   relationMap;
+    CoordDataFile::CoordResultMap  coordMap;
+    IdRawWayMap                    wayMap;
+    std::map<OSMId,RawRelationRef> relationMap;
 
     // Initial collection of all relation and way ids of the top level relation
 
@@ -672,7 +672,7 @@ namespace osmscout {
          ++w) {
       RawWayRef way(*w);
 
-      for (std::vector<Id>::const_iterator id=way->GetNodes().begin();
+      for (std::vector<OSMId>::const_iterator id=way->GetNodes().begin();
            id!=way->GetNodes().end();
            ++id) {
         nodeIds.insert(*id);
@@ -716,8 +716,8 @@ namespace osmscout {
                                                          const TypeConfig& typeConfig,
                                                          IdSet& wayAreaIndexBlacklist,
                                                          CoordDataFile& coordDataFile,
-                                                         IndexedDataFile<RawWay>& wayDataFile,
-                                                         IndexedDataFile<RawRelation>& relDataFile,
+                                                         IndexedDataFile<OSMId,RawWay>& wayDataFile,
+                                                         IndexedDataFile<OSMId,RawRelation>& relDataFile,
                                                          RawRelation& rawRelation,
                                                          Relation& relation)
   {
@@ -900,19 +900,19 @@ namespace osmscout {
                                      Progress& progress,
                                      const TypeConfig& typeConfig)
   {
-    IdSet                        wayAreaIndexBlacklist;
+    IdSet                              wayAreaIndexBlacklist;
 
-    CoordDataFile                coordDataFile("coord.dat");
+    CoordDataFile                      coordDataFile("coord.dat");
 
-    IndexedDataFile<RawWay>      wayDataFile("rawways.dat",
-                                             "rawway.idx",
-                                             parameter.GetRawWayDataCacheSize(),
-                                             parameter.GetRawWayIndexCacheSize());
+    IndexedDataFile<OSMId,RawWay>      wayDataFile("rawways.dat",
+                                                   "rawway.idx",
+                                                   parameter.GetRawWayDataCacheSize(),
+                                                   parameter.GetRawWayIndexCacheSize());
 
-    IndexedDataFile<RawRelation> relDataFile("rawrels.dat",
-                                             "rawrel.idx",
-                                             parameter.GetRawWayDataCacheSize(),
-                                             parameter.GetRawWayIndexCacheSize());
+    IndexedDataFile<OSMId,RawRelation> relDataFile("rawrels.dat",
+                                                   "rawrel.idx",
+                                                   parameter.GetRawWayDataCacheSize(),
+                                                   parameter.GetRawWayIndexCacheSize());
 
     if (!coordDataFile.Open(parameter.GetDestinationDirectory(),
                             parameter.GetCoordDataMemoryMaped())) {

@@ -23,7 +23,7 @@
 
 namespace osmscout {
 
-  void RawNode::SetId(Id id)
+  void RawNode::SetId(OSMId id)
   {
     this->id=id;
   }

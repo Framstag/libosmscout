@@ -311,14 +311,14 @@ namespace osmscout {
     cache.DumpStatistics(datafile.c_str(),DataCacheValueSizer());
   }
 
-  template <class N>
+  template <class I, class N>
   class IndexedDataFile : public DataFile<N>
   {
   public:
     typedef Ref<N> ValueType;
 
   private:
-    typedef NumericIndex<Id> DataIndex;
+    typedef NumericIndex<I> DataIndex;
 
   private:
     DataIndex index;
@@ -336,43 +336,43 @@ namespace osmscout {
               bool memoryMapedData);
     bool Close();
 
-    bool GetOffsets(const std::set<Id>& ids,
+    bool GetOffsets(const std::set<I>& ids,
                     std::vector<FileOffset>& offsets) const;
-    bool GetOffsets(const std::vector<Id>& ids,
+    bool GetOffsets(const std::vector<I>& ids,
                     std::vector<FileOffset>& offsets) const;
-    bool GetOffset(const Id& id,
+    bool GetOffset(const I& id,
                    FileOffset& offset) const;
 
-    bool Get(const std::vector<Id>& ids,
+    bool Get(const std::vector<I>& ids,
              std::vector<ValueType>& data) const;
-    bool Get(const std::list<Id>& ids,
+    bool Get(const std::list<I>& ids,
              std::vector<ValueType>& data) const;
-    bool Get(const std::set<Id>& ids,
+    bool Get(const std::set<I>& ids,
              std::vector<ValueType>& data) const;
 
-    bool Get(const Id& id,
+    bool Get(const I& id,
              ValueType& entry) const;
 
     void DumpStatistics() const;
   };
 
-  template <class N>
-  IndexedDataFile<N>::IndexedDataFile(const std::string& datafile,
-                                      const std::string& indexfile,
-                                      unsigned long dataCacheSize,
-                                      unsigned long indexCacheSize)
+  template <class I, class N>
+  IndexedDataFile<I,N>::IndexedDataFile(const std::string& datafile,
+                                        const std::string& indexfile,
+                                        unsigned long dataCacheSize,
+                                        unsigned long indexCacheSize)
   : DataFile<N>(datafile,dataCacheSize),
     index(indexfile,indexCacheSize)
   {
     // no code
   }
 
-  template <class N>
-  bool IndexedDataFile<N>::Open(const std::string& path,
-                                FileScanner::Mode modeIndex,
-                                bool memoryMapedIndex,
-                                FileScanner::Mode modeData,
-                                bool memoryMapedData)
+  template <class I, class N>
+  bool IndexedDataFile<I,N>::Open(const std::string& path,
+                                  FileScanner::Mode modeIndex,
+                                  bool memoryMapedIndex,
+                                  FileScanner::Mode modeData,
+                                  bool memoryMapedData)
   {
     if (!DataFile<N>::Open(path,modeData,memoryMapedData)) {
       return false;
@@ -381,8 +381,8 @@ namespace osmscout {
     return index.Open(path,modeIndex,memoryMapedIndex);
   }
 
-  template <class N>
-  bool IndexedDataFile<N>::Close()
+  template <class I, class N>
+  bool IndexedDataFile<I,N>::Close()
   {
     bool success=DataFile<N>::Close();
 
@@ -393,30 +393,30 @@ namespace osmscout {
     return success;
   }
 
-  template <class N>
-  bool IndexedDataFile<N>::GetOffsets(const std::set<Id>& ids,
-                                      std::vector<FileOffset>& offsets) const
+  template <class I, class N>
+  bool IndexedDataFile<I,N>::GetOffsets(const std::set<I>& ids,
+                                        std::vector<FileOffset>& offsets) const
   {
     return index.GetOffsets(ids,offsets);
   }
 
-  template <class N>
-  bool IndexedDataFile<N>::GetOffsets(const std::vector<Id>& ids,
-                                      std::vector<FileOffset>& offsets) const
+  template <class I, class N>
+  bool IndexedDataFile<I,N>::GetOffsets(const std::vector<I>& ids,
+                                        std::vector<FileOffset>& offsets) const
   {
     return index.GetOffsets(ids,offsets);
   }
 
-  template <class N>
-  bool IndexedDataFile<N>::GetOffset(const Id& id,
-                                     FileOffset& offset) const
+  template <class I, class N>
+  bool IndexedDataFile<I,N>::GetOffset(const I& id,
+                                       FileOffset& offset) const
   {
     return index.GetOffset(id,offset);
   }
 
-  template <class N>
-  bool IndexedDataFile<N>::Get(const std::vector<Id>& ids,
-                               std::vector<ValueType>& data) const
+  template <class I, class N>
+  bool IndexedDataFile<I,N>::Get(const std::vector<I>& ids,
+                                 std::vector<ValueType>& data) const
   {
     assert(DataFile<N>::isOpen);
 
@@ -429,9 +429,9 @@ namespace osmscout {
     return DataFile<N>::GetByOffset(offsets,data);
   }
 
-  template <class N>
-  bool IndexedDataFile<N>::Get(const std::list<Id>& ids,
-                               std::vector<ValueType>& data) const
+  template <class I, class N>
+  bool IndexedDataFile<I,N>::Get(const std::list<I>& ids,
+                                 std::vector<ValueType>& data) const
   {
     assert(DataFile<N>::isOpen);
 
@@ -444,16 +444,16 @@ namespace osmscout {
     return DataFile<N>::GetByOffset(offsets,data);
   }
 
-  template <class N>
-  bool IndexedDataFile<N>::Get(const std::set<Id>& ids,
-                               std::vector<ValueType>& data) const
+  template <class I, class N>
+  bool IndexedDataFile<I,N>::Get(const std::set<I>& ids,
+                                 std::vector<ValueType>& data) const
   {
     assert(DataFile<N>::isOpen);
 
-    std::vector<Id> i;
+    std::vector<I> i;
 
     i.reserve(ids.size());
-    for (std::set<Id>::const_iterator id=ids.begin();
+    for (typename std::set<I>::const_iterator id=ids.begin();
          id!=ids.end();
          ++id) {
       i.push_back(*id);
@@ -468,9 +468,9 @@ namespace osmscout {
     return DataFile<N>::GetByOffset(offsets,data);
   }
 
-  template <class N>
-  bool IndexedDataFile<N>::Get(const Id& id,
-                               ValueType& entry) const
+  template <class I, class N>
+  bool IndexedDataFile<I,N>::Get(const I& id,
+                                 ValueType& entry) const
   {
     assert(DataFile<N>::isOpen);
 
@@ -483,8 +483,8 @@ namespace osmscout {
     return DataFile<N>::GetByOffset(offset,entry);
   }
 
-  template <class N>
-  void IndexedDataFile<N>::DumpStatistics() const
+  template <class I, class N>
+  void IndexedDataFile<I,N>::DumpStatistics() const
   {
     DataFile<N>::DumpStatistics();
 

@@ -51,10 +51,10 @@ namespace osmscout {
     Context                          context;
     PreprocessOSM&                   pp;
     const TypeConfig&                typeConfig;
-    Id                               id;
+    OSMId                            id;
     double                           lon,lat;
     std::map<TagId,std::string>      tags;
-    std::vector<Id>                  nodes;
+    std::vector<OSMId>               nodes;
     std::vector<RawRelation::Member> members;
 
   public:

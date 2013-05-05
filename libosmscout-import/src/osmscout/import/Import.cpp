@@ -626,23 +626,23 @@ namespace osmscout {
     modules.push_back(new Preprocess());
 
     /* 3 */
-    modules.push_back(new NumericIndexGenerator<Id,RawNode>("Generating 'rawnode.idx'",
-                                                            AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                            "rawnodes.dat"),
-                                                            AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                            "rawnode.idx")));
+    modules.push_back(new NumericIndexGenerator<OSMId,RawNode>("Generating 'rawnode.idx'",
+                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                               "rawnodes.dat"),
+                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                               "rawnode.idx")));
     /* 4 */
-    modules.push_back(new NumericIndexGenerator<Id,RawWay>("Generating 'rawway.idx'",
-                                                           AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                           "rawways.dat"),
-                                                           AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                           "rawway.idx")));
+    modules.push_back(new NumericIndexGenerator<OSMId,RawWay>("Generating 'rawway.idx'",
+                                                              AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                              "rawways.dat"),
+                                                              AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                              "rawway.idx")));
     /* 5 */
-    modules.push_back(new NumericIndexGenerator<Id,RawRelation>("Generating 'rawrel.idx'",
-                                                                AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                                "rawrels.dat"),
-                                                                AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                                "rawrel.idx")));
+    modules.push_back(new NumericIndexGenerator<OSMId,RawRelation>("Generating 'rawrel.idx'",
+                                                                   AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                                   "rawrels.dat"),
+                                                                   AppendFileToDir(parameter.GetDestinationDirectory(),
+                                                                                   "rawrel.idx")));
     /* 6 */
     modules.push_back(new RelationDataGenerator());
     /* 7 */

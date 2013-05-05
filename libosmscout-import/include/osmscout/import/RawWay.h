@@ -39,11 +39,11 @@ namespace osmscout {
     const static uint8_t hasTags = 1 <<  2; //! We have tags
 
   private:
-    Id               id;
-    TypeId           type;
-    mutable uint8_t  flags;
-    std::vector<Tag> tags;
-    std::vector<Id>  nodes;
+    OSMId              id;
+    TypeId             type;
+    mutable uint8_t    flags;
+    std::vector<Tag>   tags;
+    std::vector<OSMId> nodes;
 
   public:
 
@@ -55,7 +55,7 @@ namespace osmscout {
       // no code
     }
 
-    inline Id GetId() const
+    inline OSMId GetId() const
     {
       return id;
     }
@@ -75,7 +75,7 @@ namespace osmscout {
       return tags;
     }
 
-    inline const std::vector<Id>& GetNodes() const
+    inline const std::vector<OSMId>& GetNodes() const
     {
       return nodes;
     }
@@ -85,25 +85,25 @@ namespace osmscout {
       return nodes.size();
     }
 
-    inline Id GetNodeId(size_t idx) const
+    inline OSMId GetNodeId(size_t idx) const
     {
       return nodes[idx];
     }
 
-    inline Id GetFirstNodeId() const
+    inline OSMId GetFirstNodeId() const
     {
       return nodes[0];
     }
 
-    inline Id GetLastNodeId() const
+    inline OSMId GetLastNodeId() const
     {
       return nodes[nodes.size()-1];
     }
 
-    void SetId(Id id);
+    void SetId(OSMId id);
     void SetType(TypeId type, bool area);
     void SetTags(const std::vector<Tag>& tags);
-    void SetNodes(const std::vector<Id>& nodes);
+    void SetNodes(const std::vector<OSMId>& nodes);
 
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;

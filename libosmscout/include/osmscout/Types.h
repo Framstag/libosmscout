@@ -29,10 +29,12 @@
 namespace osmscout {
 
 #if defined(OSMSCOUT_HAVE_UINT64_T)
+  typedef int64_t  OSMId;
   typedef uint64_t Id;
   typedef uint64_t PageId;
   typedef uint64_t FileOffset;
 #else
+  typedef int32_t  OSMId;
   typedef uint32_t Id;
   typedef uint32_t PageId;
   typedef uint64_t FileOffset;

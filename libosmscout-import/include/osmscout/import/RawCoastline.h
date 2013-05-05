@@ -37,9 +37,9 @@ namespace osmscout {
     const static uint8_t isArea  = 1 <<  0; //! We are an area
 
   private:
-    Id               id;
-    mutable uint8_t  flags;
-    std::vector<Id>  nodes;
+    OSMId               id;
+    mutable uint8_t     flags;
+    std::vector<OSMId>  nodes;
 
   public:
 
@@ -50,7 +50,7 @@ namespace osmscout {
       // no code
     }
 
-    inline Id GetId() const
+    inline OSMId GetId() const
     {
       return id;
     }
@@ -60,7 +60,7 @@ namespace osmscout {
       return (flags & isArea)!=0;
     }
 
-    inline const std::vector<Id>& GetNodes() const
+    inline const std::vector<OSMId>& GetNodes() const
     {
       return nodes;
     }
@@ -70,14 +70,14 @@ namespace osmscout {
       return nodes.size();
     }
 
-    inline Id GetNodeId(size_t idx) const
+    inline OSMId GetNodeId(size_t idx) const
     {
       return nodes[idx];
     }
 
-    void SetId(Id id);
+    void SetId(OSMId id);
     void SetType(bool area);
-    void SetNodes(const std::vector<Id>& nodes);
+    void SetNodes(const std::vector<OSMId>& nodes);
 
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;

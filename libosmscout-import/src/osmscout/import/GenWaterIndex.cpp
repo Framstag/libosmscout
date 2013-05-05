@@ -176,7 +176,7 @@ namespace osmscout {
       return false;
     }
 
-    std::set<Id> nodeIds;
+    std::set<OSMId> nodeIds;
 
     for (std::list<RawCoastlineRef>::const_iterator c=rawCoastlines.begin();
          c!=rawCoastlines.end();

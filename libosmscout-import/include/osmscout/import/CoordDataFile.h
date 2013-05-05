@@ -38,7 +38,7 @@ namespace osmscout {
     typedef OSMSCOUT_HASHMAP<PageId,FileOffset> CoordPageOffsetMap;
 
   public:
-    typedef OSMSCOUT_HASHMAP<Id,Point> CoordResultMap;
+    typedef OSMSCOUT_HASHMAP<OSMId,Point> CoordResultMap;
 
   private:
     bool                isOpen;             //! If true,the data file is opened
@@ -57,7 +57,7 @@ namespace osmscout {
               bool memoryMapedData);
     bool Close();
 
-    bool Get(std::set<Id>& ids,
+    bool Get(std::set<OSMId>& ids,
              CoordResultMap& coordsMap) const;
   };
 }

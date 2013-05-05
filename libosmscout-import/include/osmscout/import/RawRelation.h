@@ -40,12 +40,12 @@ namespace osmscout {
     struct Member
     {
       MemberType  type;
-      Id          id;
+      OSMId       id;
       std::string role;
     };
 
   private:
-    Id                  id;
+    OSMId               id;
     TypeId              type;
 
   public:
@@ -59,7 +59,7 @@ namespace osmscout {
       // no code
     }
 
-    inline Id GetId() const
+    inline OSMId GetId() const
     {
       return id;
     }
@@ -69,7 +69,7 @@ namespace osmscout {
       return type;
     }
 
-    void SetId(Id id);
+    void SetId(OSMId id);
     void SetType(TypeId type);
 
     bool Read(FileScanner& scanner);

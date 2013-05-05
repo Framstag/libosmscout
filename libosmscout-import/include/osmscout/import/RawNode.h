@@ -34,7 +34,7 @@ namespace osmscout {
   class RawNode : public Referencable
   {
   private:
-    Id                id;
+    OSMId             id;
     TypeId            type;
     double            lon;
     double            lat;
@@ -47,7 +47,7 @@ namespace osmscout {
       // no code
     }
 
-    inline Id GetId() const
+    inline OSMId GetId() const
     {
       return id;
     }
@@ -87,7 +87,7 @@ namespace osmscout {
       return id==other.id || (lat==other.lat && lon==other.lon);
     }
 
-    void SetId(Id id);
+    void SetId(OSMId id);
     void SetType(TypeId type);
     void SetCoordinates(double lon, double lat);
     void SetTags(const std::vector<Tag>& tags);

@@ -25,7 +25,7 @@
 
 namespace osmscout {
 
-  void RawWay::SetId(Id id)
+  void RawWay::SetId(OSMId id)
   {
     this->id=id;
   }
@@ -47,7 +47,7 @@ namespace osmscout {
     this->tags=tags;
   }
 
-  void RawWay::SetNodes(const std::vector<Id>& nodes)
+  void RawWay::SetNodes(const std::vector<OSMId>& nodes)
   {
     this->nodes=nodes;
   }
@@ -105,14 +105,14 @@ namespace osmscout {
     nodes.resize(nodeCount);
 
     if (nodeCount>0) {
-      Id minId;
+      OSMId minId;
 
       if (!scanner.ReadNumber(minId)) {
         return false;
       }
 
       for (size_t i=0; i<nodeCount; i++) {
-        Id id;
+        OSMId id;
 
         if (!scanner.ReadNumber(id)) {
           return false;
@@ -160,7 +160,7 @@ namespace osmscout {
     writer.WriteNumber((uint32_t)nodes.size());
 
     if (!nodes.empty()) {
-      Id minId=std::numeric_limits<Id>::max();
+      OSMId minId=std::numeric_limits<OSMId>::max();
 
       for (size_t i=0; i<nodes.size(); i++) {
         minId=std::min(minId,nodes[i]);

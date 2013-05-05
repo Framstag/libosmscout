@@ -38,10 +38,10 @@ namespace osmscout {
     };
 
   private:
-    Type type;
-    Id   from; // Way id
-    Id   via;  // Node id
-    Id   to;   // Way id
+    Type  type;
+    OSMId from; // Way id
+    OSMId via;  // Node id
+    OSMId to;   // Way id
 
   public:
     inline TurnRestriction()
@@ -50,9 +50,9 @@ namespace osmscout {
     }
 
     inline TurnRestriction(Type type,
-                           Id from,
-                           Id via,
-                           Id to)
+                           OSMId from,
+                           OSMId via,
+                           OSMId to)
     : type(type),
       from(from),
       via(via),
@@ -71,22 +71,22 @@ namespace osmscout {
       this->from=from;
     }
 
-    inline Id GetFrom() const
+    inline OSMId GetFrom() const
     {
       return from;
     }
 
-    inline Id GetVia() const
+    inline OSMId GetVia() const
     {
       return via;
     }
 
-    inline Id GetTo() const
+    inline OSMId GetTo() const
     {
       return to;
     }
 
-    void inline SetTo(Id to)
+    void inline SetTo(OSMId to)
     {
       this->to=to;
     }
