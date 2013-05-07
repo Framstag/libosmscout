@@ -170,9 +170,9 @@ namespace osmscout {
     relationCount=0;
     coastlineCount=0;
 
-    lastNodeId=std::numeric_limits<Id>::min();
-    lastWayId=std::numeric_limits<Id>::min();
-    lastRelationId=std::numeric_limits<Id>::min();
+    lastNodeId=std::numeric_limits<OSMId>::min();
+    lastWayId=std::numeric_limits<OSMId>::min();
+    lastRelationId=std::numeric_limits<OSMId>::min();
 
     nodeSortingError=false;
     waySortingError=false;

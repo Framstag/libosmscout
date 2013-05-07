@@ -176,7 +176,7 @@ namespace osmscout {
           return;
         }
 
-        Id             node;
+        OSMId         node;
         const xmlChar *idValue=NULL;
 
         for (size_t i=0; atts[i]!=NULL && atts[i+1]!=NULL; i+=2) {
