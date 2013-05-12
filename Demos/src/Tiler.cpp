@@ -239,9 +239,7 @@ int main(int argc, char* argv[])
                             searchParameter,
                             data.nodes,
                             data.ways,
-                            data.areas,
-                            data.relationWays,
-                            data.relationAreas);
+                            data.areas);
 
         size_t bufferOffset=xTileCount*tileWidth*3*(y-yTileStart)*tileHeight+
                             (x-xTileStart)*tileWidth*3;

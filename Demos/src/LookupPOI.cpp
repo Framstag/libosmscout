@@ -122,11 +122,9 @@ int main(int argc, char* argv[])
     std::cout << std::endl;
   }
 
-  std::vector<osmscout::NodeRef>     nodes;
-  std::vector<osmscout::WayRef>      ways;
-  std::vector<osmscout::WayRef>      areas;
-  std::vector<osmscout::RelationRef> relationWays;
-  std::vector<osmscout::RelationRef> relationAreas;
+  std::vector<osmscout::NodeRef> nodes;
+  std::vector<osmscout::WayRef>  ways;
+  std::vector<osmscout::AreaRef> areas;
 
   osmscout::TagId nameTagId=database.GetTypeConfig()->GetTagId("name");
 
@@ -137,9 +135,7 @@ int main(int argc, char* argv[])
                            types,
                            nodes,
                            ways,
-                           areas,
-                           relationWays,
-                           relationAreas)) {
+                           areas)) {
     std::cerr << "Cannot load data from database" << std::endl;
 
     return 1;
@@ -173,24 +169,8 @@ int main(int argc, char* argv[])
     std::cout << " " << (*way)->GetName() << std::endl;
   }
 
-  for (std::vector<osmscout::RelationRef>::const_iterator way=relationWays.begin();
-      way!=relationWays.end();
-      way++) {
-    std::cout << "+ Way " << (*way)->GetFileOffset();
-    std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*way)->GetType()).GetName();
-    std::cout << " " << (*way)->GetName() << std::endl;
-  }
-
-  for (std::vector<osmscout::WayRef>::const_iterator area=areas.begin();
+  for (std::vector<osmscout::AreaRef>::const_iterator area=areas.begin();
       area!=areas.end();
-      area++) {
-    std::cout << "+ Area " << (*area)->GetFileOffset();
-    std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*area)->GetType()).GetName();
-    std::cout << " " << (*area)->GetName() << std::endl;
-  }
-
-  for (std::vector<osmscout::RelationRef>::const_iterator area=relationAreas.begin();
-      area!=relationAreas.end();
       area++) {
     std::cout << "+ Area " << (*area)->GetFileOffset();
     std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*area)->GetType()).GetName();

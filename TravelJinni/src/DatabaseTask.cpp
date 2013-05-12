@@ -213,9 +213,7 @@ void DatabaseTask::Run()
                              searchParameter,
                              data.nodes,
                              data.ways,
-                             data.areas,
-                             data.relationWays,
-                             data.relationAreas);
+                             data.areas);
 
         if (drawParameter.GetRenderSeaLand()) {
           database->GetGroundTiles(projection.GetLonMin(),
@@ -299,7 +297,7 @@ bool DatabaseTask::Open(const std::wstring& path)
     return false;
   }
 
-
+  /*
   if (!router->Open(Lum::Base::WStringToString(p.GetPath()).c_str())) {
     return false;
   }
@@ -362,7 +360,7 @@ bool DatabaseTask::Open(const std::wstring& path)
 
   type=typeConfig->GetWayTypeId("highway_service");
   assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,30.0);
+  routingProfile.AddType(type,30.0);*/
 
   return true;
 }

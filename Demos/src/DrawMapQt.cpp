@@ -137,9 +137,7 @@ int main(int argc, char* argv[])
                           searchParameter,
                           data.nodes,
                           data.ways,
-                          data.areas,
-                          data.relationWays,
-                          data.relationAreas);
+                          data.areas);
 
       if (mapPainter.DrawMap(styleConfig,
                              projection,

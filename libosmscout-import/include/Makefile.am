@@ -13,15 +13,16 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/import/GenNumericIndex.h \
                         osmscout/import/GenNodeDat.h \
                         osmscout/import/GenOptimizeLowZoom.h \
-                        osmscout/import/GenRelationDat.h \
+                        osmscout/import/GenRelAreaDat.h \
                         osmscout/import/GenRouteDat.h \
                         osmscout/import/GenTurnRestrictionDat.h \
                         osmscout/import/GenTypeDat.h \
                         osmscout/import/GenWaterIndex.h \
-                        osmscout/import/GenWayDat.h \
+                        osmscout/import/GenWayAreaDat.h \
+                        osmscout/import/GenWayWayDat.h \
                         osmscout/import/SortDat.h \
+                        osmscout/import/SortAreaDat.h \
                         osmscout/import/SortNodeDat.h \
-                        osmscout/import/SortRelationDat.h \
                         osmscout/import/SortWayDat.h \
                         osmscout/import/Import.h \
                         osmscout/import/Preprocess.h

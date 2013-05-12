@@ -42,12 +42,11 @@ namespace osmscout {
       }
     }
 
-
   public:
     SortWayDataGenerator()
-    : SortDataGenerator<Way>("ways.dat","way.idmap","ways.tmp")
+    : SortDataGenerator<Way>("ways.dat","ways.idmap")
     {
-      // no code
+      AddSource(OSMRefType::osmRefWay,"wayway.dat");
     }
 
     std::string GetDescription() const

@@ -94,34 +94,6 @@ namespace osmscout {
         wayTypeData[type].minLat=wayTypeData[type].cellYStart*wayTypeData[type].cellHeight-90.0;
         wayTypeData[type].maxLat=(wayTypeData[type].cellYEnd+1)*wayTypeData[type].cellHeight-90.0;
       }
-
-      if (type>=relTypeData.size()) {
-        relTypeData.resize(type+1);
-      }
-
-      scanner.ReadFileOffset(relTypeData[type].bitmapOffset);
-
-      if (relTypeData[type].bitmapOffset>0) {
-        scanner.Read(relTypeData[type].dataOffsetBytes);
-
-        scanner.ReadNumber(relTypeData[type].indexLevel);
-
-        scanner.ReadNumber(relTypeData[type].cellXStart);
-        scanner.ReadNumber(relTypeData[type].cellXEnd);
-        scanner.ReadNumber(relTypeData[type].cellYStart);
-        scanner.ReadNumber(relTypeData[type].cellYEnd);
-
-        relTypeData[type].cellXCount=relTypeData[type].cellXEnd-relTypeData[type].cellXStart+1;
-        relTypeData[type].cellYCount=relTypeData[type].cellYEnd-relTypeData[type].cellYStart+1;
-
-        relTypeData[type].cellWidth=360.0/pow(2.0,(int)relTypeData[type].indexLevel);
-        relTypeData[type].cellHeight=180.0/pow(2.0,(int)relTypeData[type].indexLevel);
-
-        relTypeData[type].minLon=relTypeData[type].cellXStart*relTypeData[type].cellWidth-180.0;
-        relTypeData[type].maxLon=(relTypeData[type].cellXEnd+1)*relTypeData[type].cellWidth-180.0;
-        relTypeData[type].minLat=relTypeData[type].cellYStart*relTypeData[type].cellHeight-90.0;
-        relTypeData[type].maxLat=(relTypeData[type].cellYEnd+1)*relTypeData[type].cellHeight-90.0;
-      }
     }
 
     return !scanner.HasError() && scanner.Close();
@@ -252,8 +224,7 @@ namespace osmscout {
                                 double maxlat,
                                 const std::vector<TypeSet>& wayTypes,
                                 size_t maxWayCount,
-                                std::vector<FileOffset>& wayWayOffsets,
-                                std::vector<FileOffset>& relationWayOffsets) const
+                                std::vector<FileOffset>& wayWayOffsets) const
   {
     if (!scanner.IsOpen()) {
       if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
@@ -264,19 +235,15 @@ namespace osmscout {
 
     bool                         sizeExceeded=false;
     OSMSCOUT_HASHSET<FileOffset> newWayWayOffsets;
-    OSMSCOUT_HASHSET<FileOffset> newRelationWayOffsets;
 
     wayWayOffsets.reserve(std::min(100000u,(uint32_t)maxWayCount));
-    relationWayOffsets.reserve(std::min(100000u,(uint32_t)maxWayCount));
 
 #if defined(OSMSCOUT_HASHSET_HAS_RESERVE)
     newWayWayOffsets.reserve(std::min(100000u,(uint32_t)maxWayCount));
-    newRelationWayOffsets.reserve(std::min(100000u,(uint32_t)maxWayCount));
 #endif
 
     for (size_t i=0; i<wayTypes.size(); i++) {
       newWayWayOffsets.clear();
-      newRelationWayOffsets.clear();
 
       for (size_t type=0;
           type<wayTypeData.size();
@@ -289,24 +256,7 @@ namespace osmscout {
                           maxlat,
                           maxWayCount,
                           newWayWayOffsets,
-                          wayWayOffsets.size()+
-                          relationWayOffsets.size(),
-                          sizeExceeded)) {
-            return false;
-          }
-
-          if (sizeExceeded) {
-            return true;
-          }
-
-          if (!GetOffsets(relTypeData[type],
-                          minlon,
-                          minlat,
-                          maxlon,
-                          maxlat,
-                          maxWayCount,
-                          newRelationWayOffsets,
-                          wayWayOffsets.size()+relationWayOffsets.size(),
+                          wayWayOffsets.size(),
                           sizeExceeded)) {
             return false;
           }
@@ -320,7 +270,6 @@ namespace osmscout {
       // Copy data from temporary set to final vector
 
       wayWayOffsets.insert(wayWayOffsets.end(),newWayWayOffsets.begin(),newWayWayOffsets.end());
-      relationWayOffsets.insert(relationWayOffsets.end(),newRelationWayOffsets.begin(),newRelationWayOffsets.end());
     }
 
     //std::cout << "Found " << wayWayOffsets.size() << "+" << relationWayOffsets.size()<< " offsets in 'areaway.idx'" << std::endl;

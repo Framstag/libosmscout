@@ -96,31 +96,6 @@ namespace osmscout {
 
         lastOffset=cacheRef->value.areas[c].offset;
       }
-
-      // Relation areas
-
-      if (!scanner.ReadNumber(offsetCount)) {
-        std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
-        return false;
-      }
-
-      cacheRef->value.relAreas.resize(offsetCount);
-
-      lastOffset=0;
-      for (size_t c=0; c<offsetCount; c++) {
-        if (!scanner.ReadNumber(cacheRef->value.relAreas[c].type)) {
-          std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
-          return false;
-        }
-        if (!scanner.ReadNumber(cacheRef->value.relAreas[c].offset)) {
-          std::cerr << "Cannot read index data for level " << level << " at offset " << offset << std::endl;
-          return false;
-        }
-
-        cacheRef->value.relAreas[c].offset+=lastOffset;
-
-        lastOffset=cacheRef->value.relAreas[c].offset;
-      }
     }
 
     return true;
@@ -167,8 +142,7 @@ namespace osmscout {
                                  size_t maxAreaLevel,
                                  const TypeSet& types,
                                  size_t maxAreaCount,
-                                 std::vector<FileOffset>& wayAreaOffsets,
-                                 std::vector<FileOffset>& relationAreaOffsets) const
+                                 std::vector<FileOffset>& wayAreaOffsets) const
   {
     std::vector<size_t>     ctx;               // tile x coordinates in this level
     std::vector<size_t>     cty;               // tile y coordinates in this level
@@ -179,7 +153,6 @@ namespace osmscout {
     std::vector<FileOffset> no;                // index cell offsets in next level
 
     std::vector<FileOffset> newWayAreaOffsets; // offsets collected in the current level
-    std::vector<FileOffset> newRelAreaOffsets; // offsets collected in the current level
 
     bool                    stopArea;          // to break out of iteration
 
@@ -190,15 +163,12 @@ namespace osmscout {
 
     // Clear result datastructures
     wayAreaOffsets.clear();
-    relationAreaOffsets.clear();
 
     // Make the vector preallocate memory for the expected data size
     // This should void reallocation
     wayAreaOffsets.reserve(std::min(100000u,(uint32_t)maxAreaCount));
-    relationAreaOffsets.reserve(std::min(100000u,(uint32_t)maxAreaCount));
 
     newWayAreaOffsets.reserve(std::min(100000u,(uint32_t)maxAreaCount));
-    newRelAreaOffsets.reserve(std::min(100000u,(uint32_t)maxAreaCount));
 
     //
     // Areas
@@ -230,7 +200,6 @@ namespace osmscout {
       no.clear();
 
       newWayAreaOffsets.clear();
-      newRelAreaOffsets.clear();
 
       for (size_t i=0; !stopArea && i<co.size(); i++) {
         size_t cx;
@@ -245,11 +214,8 @@ namespace osmscout {
         }
 
         if (wayAreaOffsets.size()+
-            relationAreaOffsets.size()+
             newWayAreaOffsets.size()+
-            newRelAreaOffsets.size()+
-            cell->value.areas.size()+
-            cell->value.relAreas.size()>=maxAreaCount) {
+            cell->value.areas.size()>=maxAreaCount) {
           stopArea=true;
           continue;
         }
@@ -259,14 +225,6 @@ namespace osmscout {
              ++entry) {
           if (types.IsTypeSet(entry->type)) {
             newWayAreaOffsets.push_back(entry->offset);
-          }
-        }
-
-        for (std::vector<IndexEntry>::const_iterator entry=cell->value.relAreas.begin();
-             entry!=cell->value.relAreas.end();
-             ++entry) {
-          if (types.IsTypeSet(entry->type)) {
-            newRelAreaOffsets.push_back(entry->offset);
           }
         }
 
@@ -337,7 +295,6 @@ namespace osmscout {
 
       if (!stopArea) {
         wayAreaOffsets.insert(wayAreaOffsets.end(),newWayAreaOffsets.begin(),newWayAreaOffsets.end());
-        relationAreaOffsets.insert(relationAreaOffsets.end(),newRelAreaOffsets.begin(),newRelAreaOffsets.end());
       }
 
       ctx=ntx;

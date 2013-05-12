@@ -137,8 +137,8 @@ public:
 
 
   bool GetNodeByOffset(osmscout::FileOffset offset, osmscout::NodeRef& node) const;
+  bool GetAreaByOffset(osmscout::FileOffset offset, osmscout::AreaRef& relation) const;
   bool GetWayByOffset(osmscout::FileOffset offset, osmscout::WayRef& way) const;
-  bool GetRelationByOffset(osmscout::FileOffset offset, osmscout::RelationRef& relation) const;
 
   bool GetMatchingAdminRegions(const QString& name,
                                std::list<osmscout::AdminRegion>& regions,

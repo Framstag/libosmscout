@@ -24,12 +24,20 @@
 
 namespace osmscout {
 
+  enum OSMRefType
+  {
+    osmRefNone     = 0,
+    osmRefNode     = 1,
+    osmRefWay      = 2,
+    osmRefRelation = 3
+  };
+
   enum RefType
   {
     refNone     = 0,
     refNode     = 1,
-    refWay      = 2,
-    refRelation = 3
+    refArea     = 2,
+    refWay      = 3
   };
 
   class OSMSCOUT_API ObjectRef
@@ -77,6 +85,58 @@ namespace osmscout {
     }
 
     inline bool operator==(const ObjectRef& reference) const
+    {
+      return type==reference.type && id==reference.id;
+    }
+
+    const char* GetTypeName() const;
+  };
+
+  class OSMSCOUT_API ObjectOSMRef
+  {
+  public:
+    Id         id;
+    OSMRefType type;
+
+  public:
+    inline ObjectOSMRef()
+    : id(0),
+      type(osmRefNone)
+    {
+      // no code
+    }
+
+    inline ObjectOSMRef(Id id,
+                        OSMRefType type)
+    : id(id),
+      type(type)
+    {
+      // no code
+    }
+
+    inline void Set(const Id& id,
+                    const OSMRefType& type)
+    {
+      this->id=id;
+      this->type=type;
+    }
+
+    inline const Id& GetId() const
+    {
+      return id;
+    }
+
+    inline const OSMRefType& GetType() const
+    {
+      return type;
+    }
+
+    inline bool operator<(const ObjectOSMRef& reference) const
+    {
+      return type<reference.type || (type==reference.type &&  id<reference.id);
+    }
+
+    inline bool operator==(const ObjectOSMRef& reference) const
     {
       return type==reference.type && id==reference.id;
     }

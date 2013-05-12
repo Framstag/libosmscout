@@ -198,10 +198,10 @@ namespace osmscout {
      areaAreaIndex(parameter.GetAreaAreaIndexCacheSize()),
      nodeDataFile("nodes.dat",
                   parameter.GetNodeCacheSize()),
+     areaDataFile("areas.dat",
+                  parameter.GetRelationCacheSize()),
      wayDataFile("ways.dat",
                   parameter.GetWayCacheSize()),
-     relationDataFile("relations.dat",
-                      parameter.GetRelationCacheSize()),
      typeConfig(NULL),
      hashFunction(NULL)
   {
@@ -269,15 +269,15 @@ namespace osmscout {
       return false;
     }
 
-    if (!wayDataFile.Open(path,FileScanner::LowMemRandom,true)) {
-      std::cerr << "Cannot open 'ways.dat'!" << std::endl;
+    if (!areaDataFile.Open(path,FileScanner::LowMemRandom,true)) {
+      std::cerr << "Cannot open 'areas.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
     }
 
-    if (!relationDataFile.Open(path,FileScanner::LowMemRandom,true)) {
-      std::cerr << "Cannot open 'relations.dat'!" << std::endl;
+    if (!wayDataFile.Open(path,FileScanner::LowMemRandom,true)) {
+      std::cerr << "Cannot open 'ways.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
@@ -311,15 +311,15 @@ namespace osmscout {
       return false;
     }
 
-    if (!cityStreetIndex.Load(path, hashFunction)) {
-      std::cerr << "Cannot load city street index!" << std::endl;
+    if (!waterIndex.Load(path)) {
+      std::cerr << "Cannot load water index!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
     }
 
-    if (!waterIndex.Load(path)) {
-      std::cerr << "Cannot load water index!" << std::endl;
+    if (!cityStreetIndex.Load(path, hashFunction)) {
+      std::cerr << "Cannot load city street index!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
@@ -347,8 +347,8 @@ namespace osmscout {
   void Database::FlushCache()
   {
     nodeDataFile.FlushCache();
+    areaDataFile.FlushCache();
     wayDataFile.FlushCache();
-    relationDataFile.FlushCache();
   }
 
   TypeConfig* Database::GetTypeConfig() const
@@ -442,7 +442,6 @@ namespace osmscout {
                                       std::string& wayOptimizedTime,
                                       std::string& wayIndexTime,
                                       std::vector<FileOffset>& wayWayOffsets,
-                                      std::vector<FileOffset>& relationWayOffsets,
                                       std::vector<WayRef>& ways) const
   {
     std::vector<TypeSet> internalWayTypes(wayTypes);
@@ -486,8 +485,7 @@ namespace osmscout {
                                    latMax,
                                    internalWayTypes,
                                    parameter.GetMaximumWays(),
-                                   wayWayOffsets,
-                                   relationWayOffsets)) {
+                                   wayWayOffsets)) {
         std::cout << "Error getting ways Glations from area way index!" << std::endl;
         return false;
       }
@@ -501,7 +499,6 @@ namespace osmscout {
     }
 
     std::sort(wayWayOffsets.begin(),wayWayOffsets.end());
-    std::sort(relationWayOffsets.begin(),relationWayOffsets.end());
 
     if (parameter.IsAborted()) {
       return false;
@@ -516,8 +513,7 @@ namespace osmscout {
                                        double lonMin, double latMin,
                                        double lonMax, double latMax,
                                        std::string& areaIndexTime,
-                                       std::vector<FileOffset>& wayAreaOffsets,
-                                       std::vector<FileOffset>& relationAreaOffsets) const
+                                       std::vector<FileOffset>& wayAreaOffsets) const
   {
     if (parameter.IsAborted()) {
       return false;
@@ -534,8 +530,7 @@ namespace osmscout {
                                     parameter.GetMaximumAreaLevel(),
                                     areaTypes,
                                     parameter.GetMaximumAreas(),
-                                    wayAreaOffsets,
-                                    relationAreaOffsets)) {
+                                    wayAreaOffsets)) {
         std::cout << "Error getting areas from area index!" << std::endl;
         return false;
       }
@@ -549,7 +544,6 @@ namespace osmscout {
     }
 
     std::sort(wayAreaOffsets.begin(),wayAreaOffsets.end());
-    std::sort(relationAreaOffsets.begin(),relationAreaOffsets.end());
 
     if (parameter.IsAborted()) {
       return false;
@@ -564,7 +558,7 @@ namespace osmscout {
                                         std::string& waysTime,
                                         std::string& areasTime,
                                         std::vector<WayRef>& ways,
-                                        std::vector<WayRef>& areas) const
+                                        std::vector<AreaRef>& areas) const
   {
     if (parameter.IsAborted()) {
       return false;
@@ -590,8 +584,8 @@ namespace osmscout {
     StopClock areasTimer;
 
     if (!wayAreaOffsets.empty()) {
-      if (!GetWaysByOffset(wayAreaOffsets,
-                           areas)) {
+      if (!GetAreasByOffset(wayAreaOffsets,
+                            areas)) {
         std::cout << "Error reading areas in area!" << std::endl;
         return false;
       }
@@ -599,55 +593,6 @@ namespace osmscout {
 
     areasTimer.Stop();
     areasTime=areasTimer.ResultString();
-
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
-    return true;
-  }
-
-  bool Database::GetObjectsWaysAndAreasRel(const AreaSearchParameter& parameter,
-                                           const std::vector<FileOffset>& relationWayOffsets,
-                                           const std::vector<FileOffset>& relationAreaOffsets,
-                                           std::string& relationWaysTime,
-                                           std::string& relationAreasTime,
-                                           std::vector<RelationRef>& relationWays,
-                                           std::vector<RelationRef>& relationAreas) const
-  {
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
-    StopClock relationWaysTimer;
-
-    if (!relationWayOffsets.empty()) {
-      if (!GetRelationsByOffset(relationWayOffsets,
-                                relationWays)) {
-        std::cout << "Error reading relation ways in area!" << std::endl;
-        return false;
-      }
-    }
-
-    relationWaysTimer.Stop();
-    relationWaysTime=relationWaysTimer.ResultString();
-
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
-    StopClock relationAreasTimer;
-
-    if (!relationAreaOffsets.empty()) {
-      if (!GetRelationsByOffset(relationAreaOffsets,
-                                relationAreas)) {
-        std::cerr << "Error reading relation areas in area!" << std::endl;
-        return false;
-      }
-    }
-
-    relationAreasTimer.Stop();
-    relationAreasTime=relationAreasTimer.ResultString();
 
     if (parameter.IsAborted()) {
       return false;
@@ -665,14 +610,10 @@ namespace osmscout {
                             const AreaSearchParameter& parameter,
                             std::vector<NodeRef>& nodes,
                             std::vector<WayRef>& ways,
-                            std::vector<WayRef>& areas,
-                            std::vector<RelationRef>& relationWays,
-                            std::vector<RelationRef>& relationAreas) const
+                            std::vector<AreaRef>& areas) const
   {
     std::vector<FileOffset> wayWayOffsets;
-    std::vector<FileOffset> relationWayOffsets;
     std::vector<FileOffset> wayAreaOffsets;
-    std::vector<FileOffset> relationAreaOffsets;
 
     std::string             nodeIndexTime;
     std::string             nodesTime;
@@ -680,11 +621,9 @@ namespace osmscout {
     std::string             wayOptimizedTime;
     std::string             wayIndexTime;
     std::string             waysTime;
-    std::string             relationWaysTime;
 
     std::string             areaIndexTime;
     std::string             areasTime;
-    std::string             relationAreasTime;
 
     if (!IsOpen()) {
       return false;
@@ -693,8 +632,6 @@ namespace osmscout {
     {
       ways.clear();
       areas.clear();
-      relationWays.clear();
-      relationAreas.clear();
     }
 
     if (parameter.IsAborted()) {
@@ -730,7 +667,6 @@ namespace osmscout {
                                              wayOptimizedTime,
                                              wayIndexTime,
                                              wayWayOffsets,
-                                             relationWayOffsets,
                                              ways);
 
 #pragma omp section
@@ -742,8 +678,7 @@ namespace osmscout {
                                                lonMax,
                                                latMax,
                                                areaIndexTime,
-                                               wayAreaOffsets,
-                                               relationAreaOffsets);
+                                               wayAreaOffsets);
     }
 
     if (!nodesSuccess ||
@@ -753,7 +688,6 @@ namespace osmscout {
     }
 
     bool waSuccess;
-    bool warSuccess;
 
 #pragma omp parallel if(parameter.GetUseMultithreading())
 #pragma omp sections
@@ -767,19 +701,9 @@ namespace osmscout {
                                       areasTime,
                                       ways,
                                       areas);
-
-#pragma omp section
-      warSuccess=GetObjectsWaysAndAreasRel(parameter,
-                                          relationWayOffsets,
-                                          relationAreaOffsets,
-                                          relationWaysTime,
-                                          relationAreasTime,
-                                          relationWays,
-                                          relationAreas);
     }
 
-    if (!waSuccess ||
-        !warSuccess) {
+    if (!waSuccess) {
       return false;
     }
 
@@ -791,8 +715,8 @@ namespace osmscout {
 
       std::cout << "Load: ";
       std::cout << "n " << nodesTime << " ";
-      std::cout << "w " << wayOptimizedTime << "/" << waysTime << "/" << relationWaysTime << " ";
-      std::cout << "a " << areasTime << "/" << relationAreasTime;
+      std::cout << "w " << wayOptimizedTime << "/" << waysTime << " ";
+      std::cout << "a " << areasTime;
       std::cout << std::endl;
     }
 
@@ -804,9 +728,7 @@ namespace osmscout {
                             const TypeSet& types,
                             std::vector<NodeRef>& nodes,
                             std::vector<WayRef>& ways,
-                            std::vector<WayRef>& areas,
-                            std::vector<RelationRef>& relationWays,
-                            std::vector<RelationRef>& relationAreas) const
+                            std::vector<AreaRef>& areas) const
   {
     if (!IsOpen()) {
       return false;
@@ -815,15 +737,11 @@ namespace osmscout {
     std::vector<TypeSet>    wayTypes;
     std::vector<FileOffset> nodeOffsets;
     std::vector<FileOffset> wayWayOffsets;
-    std::vector<FileOffset> relationWayOffsets;
     std::vector<FileOffset> wayAreaOffsets;
-    std::vector<FileOffset> relationAreaOffsets;
 
     nodes.clear();
     ways.clear();
     areas.clear();
-    relationWays.clear();
-    relationAreas.clear();
 
     wayTypes.push_back(types);;
 
@@ -847,8 +765,7 @@ namespace osmscout {
                                  latMax,
                                  wayTypes,
                                  std::numeric_limits<size_t>::max(),
-                                 wayWayOffsets,
-                                 relationWayOffsets)) {
+                                 wayWayOffsets)) {
       std::cout << "Error getting ways and relations from area way index!" << std::endl;
     }
 
@@ -863,8 +780,7 @@ namespace osmscout {
                                   std::numeric_limits<size_t>::max(),
                                   types,
                                   std::numeric_limits<size_t>::max(),
-                                  wayAreaOffsets,
-                                  relationAreaOffsets)) {
+                                  wayAreaOffsets)) {
       std::cout << "Error getting ways and relations from area index!" << std::endl;
     }
 
@@ -875,15 +791,13 @@ namespace osmscout {
     std::sort(nodeOffsets.begin(),nodeOffsets.end());
     std::sort(wayWayOffsets.begin(),wayWayOffsets.end());
     std::sort(wayAreaOffsets.begin(),wayAreaOffsets.end());
-    std::sort(relationWayOffsets.begin(),relationWayOffsets.end());
-    std::sort(relationAreaOffsets.begin(),relationAreaOffsets.end());
 
     sortTimer.Stop();
 
     StopClock nodesTimer;
 
     if (!GetNodesByOffset(nodeOffsets,
-                  nodes)) {
+                          nodes)) {
       std::cout << "Error reading nodes in area!" << std::endl;
       return false;
     }
@@ -893,7 +807,7 @@ namespace osmscout {
     StopClock waysTimer;
 
     if (!GetWaysByOffset(wayWayOffsets,
-                 ways)) {
+                         ways)) {
       std::cout << "Error reading ways in area!" << std::endl;
       return false;
     }
@@ -902,33 +816,13 @@ namespace osmscout {
 
     StopClock areasTimer;
 
-    if (!GetWaysByOffset(wayAreaOffsets,
-                 areas)) {
+    if (!GetAreasByOffset(wayAreaOffsets,
+                          areas)) {
       std::cout << "Error reading areas in area!" << std::endl;
       return false;
     }
 
     areasTimer.Stop();
-
-    StopClock relationWaysTimer;
-
-    if (!GetRelationsByOffset(relationWayOffsets,
-                      relationWays)) {
-      std::cout << "Error reading relation ways in area!" << std::endl;
-      return false;
-    }
-
-    relationWaysTimer.Stop();
-
-    StopClock relationAreasTimer;
-
-    if (!GetRelationsByOffset(relationAreaOffsets,
-                      relationAreas)) {
-      std::cerr << "Error reading relation areas in area!" << std::endl;
-      return false;
-    }
-
-    relationAreasTimer.Stop();
 
     if (debugPerformance) {
       std::cout << "I/O: ";
@@ -939,8 +833,8 @@ namespace osmscout {
       std::cout << "s "  << sortTimer;
       std::cout << " - ";
       std::cout << "n " << nodesTimer << " ";
-      std::cout << "w " << waysTimer << "/" << relationWaysTimer << " ";
-      std::cout << "a " << areasTimer << "/" << relationAreasTimer;
+      std::cout << "w " << waysTimer << " ";
+      std::cout << "a " << areasTimer;
       std::cout << std::endl;
     }
 
@@ -1015,6 +909,49 @@ namespace osmscout {
     return nodeDataFile.GetByOffset(offsets,nodes);
   }
 
+  bool Database::GetAreaByOffset(const FileOffset& offset,
+                                 AreaRef& area) const
+  {
+    if (!IsOpen()) {
+      return false;
+    }
+
+    std::vector<FileOffset>  offsets;
+    std::vector<AreaRef> areas;
+
+    offsets.push_back(offset);
+
+    if (GetAreasByOffset(offsets,areas)) {
+      if (!areas.empty()) {
+        area=*areas.begin();
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool Database::GetAreasByOffset(const std::vector<FileOffset>& offsets,
+                                  std::vector<AreaRef>& areas) const
+  {
+    if (!IsOpen()) {
+      return false;
+    }
+
+    return areaDataFile.GetByOffset(offsets,areas);
+  }
+
+  bool Database::GetAreasByOffset(const std::list<FileOffset>& offsets,
+                                  std::vector<AreaRef>& areas) const
+  {
+    if (!IsOpen()) {
+      return false;
+    }
+
+    return areaDataFile.GetByOffset(offsets,areas);
+  }
+
+
   bool Database::GetWayByOffset(const FileOffset& offset,
                                 WayRef& way) const
   {
@@ -1057,48 +994,6 @@ namespace osmscout {
     return wayDataFile.GetByOffset(offsets,ways);
   }
 
-  bool Database::GetRelationByOffset(const FileOffset& offset,
-                                     RelationRef& relation) const
-  {
-    if (!IsOpen()) {
-      return false;
-    }
-
-    std::vector<FileOffset>  offsets;
-    std::vector<RelationRef> relations;
-
-    offsets.push_back(offset);
-
-    if (GetRelationsByOffset(offsets,relations)) {
-      if (!relations.empty()) {
-        relation=*relations.begin();
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  bool Database::GetRelationsByOffset(const std::vector<FileOffset>& offsets,
-                                      std::vector<RelationRef>& relations) const
-  {
-    if (!IsOpen()) {
-      return false;
-    }
-
-    return relationDataFile.GetByOffset(offsets,relations);
-  }
-
-  bool Database::GetRelationsByOffset(const std::list<FileOffset>& offsets,
-                                      std::vector<RelationRef>& relations) const
-  {
-    if (!IsOpen()) {
-      return false;
-    }
-
-    return relationDataFile.GetByOffset(offsets,relations);
-  }
-
   bool Database::GetMatchingAdminRegions(const std::string& name,
                                          std::list<AdminRegion>& regions,
                                          size_t limit,
@@ -1138,8 +1033,8 @@ namespace osmscout {
   void Database::DumpStatistics()
   {
     nodeDataFile.DumpStatistics();
+    areaDataFile.DumpStatistics();
     wayDataFile.DumpStatistics();
-    relationDataFile.DumpStatistics();
 
     areaAreaIndex.DumpStatistics();
     areaNodeIndex.DumpStatistics();

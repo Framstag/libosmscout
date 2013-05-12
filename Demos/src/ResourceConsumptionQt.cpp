@@ -198,9 +198,7 @@ int main(int argc, char* argv[])
                         searchParameter,
                         data.nodes,
                         data.ways,
-                        data.areas,
-                        data.relationWays,
-                        data.relationAreas);
+                        data.areas);
 
     dbTimer.Stop();
 

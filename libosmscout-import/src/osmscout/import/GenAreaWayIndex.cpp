@@ -21,7 +21,6 @@
 
 #include <vector>
 
-#include <osmscout/Relation.h>
 #include <osmscout/Way.h>
 
 #include <osmscout/system/Assert.h>
@@ -253,31 +252,19 @@ namespace osmscout {
                                      const TypeConfig& typeConfig)
   {
     FileScanner           wayScanner;
-    FileScanner           relScanner;
     FileWriter            writer;
     std::set<TypeId>      remainingWayTypes;
-    std::set<TypeId>      remainingRelTypes;
     std::vector<TypeData> wayTypeData;
-    std::vector<TypeData> relTypeData;
     size_t                level;
     size_t                maxLevel=0;
 
     wayTypeData.resize(typeConfig.GetTypes().size());
-    relTypeData.resize(typeConfig.GetTypes().size());
 
     if (!wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                          "ways.dat"),
                          FileScanner::Sequential,
                          parameter.GetWayDataMemoryMaped())) {
       progress.Error("Cannot open 'ways.dat'");
-      return false;
-    }
-
-    if (!relScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                         "relations.dat"),
-                         FileScanner::Sequential,
-                         true)) {
-      progress.Error("Cannot open 'relations.dat'");
       return false;
     }
 
@@ -323,10 +310,6 @@ namespace osmscout {
                          " in file '"+
                          wayScanner.GetFilename()+"'");
           return false;
-        }
-
-        if (way.IsArea()) {
-          continue;
         }
 
         // Count number of entries per current type and coordinate
@@ -386,107 +369,6 @@ namespace osmscout {
       level++;
     }
 
-    progress.SetAction("Scanning level distribution of relation types");
-
-    for (size_t i=0; i<typeConfig.GetTypes().size(); i++) {
-      if (typeConfig.GetTypeInfo(i).CanBeRelation() &&
-          !typeConfig.GetTypeInfo(i).GetIgnore()) {
-        remainingRelTypes.insert(i);
-      }
-    }
-
-    level=parameter.GetAreaWayMinMag();
-    while (!remainingRelTypes.empty())  {
-      uint32_t                   relCount=0;
-      std::set<TypeId>           currentRelTypes(remainingRelTypes);
-      double                     cellWidth=360.0/pow(2.0,(int)level);
-      double                     cellHeight=180.0/pow(2.0,(int)level);
-      std::vector<CoordCountMap> cellFillCount(typeConfig.GetTypes().size());
-
-      progress.Info("Scanning Level "+NumberToString(level)+" ("+NumberToString(remainingRelTypes.size())+" types remaining)");
-
-      relScanner.GotoBegin();
-
-      if (!relScanner.Read(relCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
-
-      Relation rel;
-
-      for (uint32_t r=1; r<=relCount; r++) {
-        progress.SetProgress(r,relCount);
-
-        if (!rel.Read(relScanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(r)+" of "+
-                         NumberToString(relCount)+
-                         " in file '"+
-                         relScanner.GetFilename()+"'");
-          return false;
-        }
-
-        if (rel.IsArea()) {
-          continue;
-        }
-
-        // Count number of entries per current type and coordinate
-        if (currentRelTypes.find(rel.GetType())==currentRelTypes.end()) {
-          continue;
-        }
-
-        double minLon;
-        double maxLon;
-        double minLat;
-        double maxLat;
-
-        rel.GetBoundingBox(minLon,maxLon,minLat,maxLat);
-
-        //
-        // Calculate minimum and maximum tile ids that are covered
-        // by the way
-        // Renormated coordinate space (everything is >=0)
-        //
-        uint32_t minxc=(uint32_t)floor((minLon+180.0)/cellWidth);
-        uint32_t maxxc=(uint32_t)floor((maxLon+180.0)/cellWidth);
-        uint32_t minyc=(uint32_t)floor((minLat+90.0)/cellHeight);
-        uint32_t maxyc=(uint32_t)floor((maxLat+90.0)/cellHeight);
-
-        for (uint32_t y=minyc; y<=maxyc; y++) {
-          for (uint32_t x=minxc; x<=maxxc; x++) {
-            cellFillCount[rel.GetType()][Pixel(x,y)]++;
-          }
-        }
-      }
-
-      // Check if cell fill for current type is in defined limits
-      for (size_t i=0; i<typeConfig.GetTypes().size(); i++) {
-        if (currentRelTypes.find(i)!=currentRelTypes.end()) {
-          CalculateStatistics(level,relTypeData[i],cellFillCount[i]);
-
-          if (!FitsIndexCriteria(parameter,
-                                 progress,
-                                 typeConfig.GetTypeInfo(i),
-                                 relTypeData[i],
-                                 cellFillCount[i])) {
-            currentRelTypes.erase(i);
-          }
-        }
-      }
-
-      for (std::set<TypeId>::const_iterator crt=currentRelTypes.begin();
-           crt!=currentRelTypes.end();
-           crt++) {
-        maxLevel=std::max(maxLevel,level);
-
-        progress.Info("Type "+typeConfig.GetTypeInfo(*crt).GetName()+"(" + NumberToString(*crt)+"), "+NumberToString(relTypeData[*crt].indexCells)+" cells, "+NumberToString(relTypeData[*crt].indexEntries)+" objects");
-
-        remainingRelTypes.erase(*crt);
-      }
-
-      level++;
-    }
-
     //
     // Writing index file
     //
@@ -503,10 +385,8 @@ namespace osmscout {
 
     for (size_t i=0; i<typeConfig.GetTypes().size(); i++)
     {
-      if ((typeConfig.GetTypeInfo(i).CanBeWay() &&
-           wayTypeData[i].HasEntries()) ||
-          (typeConfig.GetTypeInfo(i).CanBeRelation() &&
-           relTypeData[i].HasEntries())) {
+      if (typeConfig.GetTypeInfo(i).CanBeWay() &&
+          wayTypeData[i].HasEntries()) {
         indexEntries++;
       }
     }
@@ -515,10 +395,8 @@ namespace osmscout {
 
     for (size_t i=0; i<typeConfig.GetTypes().size(); i++)
     {
-      if ((typeConfig.GetTypeInfo(i).CanBeWay() &&
-           wayTypeData[i].HasEntries()) ||
-          (typeConfig.GetTypeInfo(i).CanBeRelation() &&
-           relTypeData[i].HasEntries())) {
+      if (typeConfig.GetTypeInfo(i).CanBeWay() &&
+          wayTypeData[i].HasEntries()) {
         uint8_t    dataOffsetBytes=0;
         FileOffset bitmapOffset=0;
 
@@ -535,19 +413,6 @@ namespace osmscout {
           writer.WriteNumber(wayTypeData[i].cellXEnd);
           writer.WriteNumber(wayTypeData[i].cellYStart);
           writer.WriteNumber(wayTypeData[i].cellYEnd);
-        }
-
-        writer.GetPos(relTypeData[i].indexOffset);
-
-        writer.WriteFileOffset(bitmapOffset);
-
-        if (relTypeData[i].HasEntries()) {
-          writer.Write(dataOffsetBytes);
-          writer.WriteNumber(relTypeData[i].indexLevel);
-          writer.WriteNumber(relTypeData[i].cellXStart);
-          writer.WriteNumber(relTypeData[i].cellXEnd);
-          writer.WriteNumber(relTypeData[i].cellYStart);
-          writer.WriteNumber(relTypeData[i].cellYEnd);
         }
       }
     }
@@ -599,10 +464,6 @@ namespace osmscout {
           return false;
         }
 
-        if (way.IsArea()) {
-          continue;
-        }
-
         if (indexTypes.find(way.GetType())==indexTypes.end()) {
           continue;
         }
@@ -638,98 +499,6 @@ namespace osmscout {
                          writer,
                          typeConfig.GetTypeInfo(*type),
                          wayTypeData[*type],
-                         typeCellOffsets[*type])) {
-          return false;
-        }
-      }
-    }
-
-    for (size_t l=parameter.GetAreaWayMinMag(); l<=maxLevel; l++) {
-      std::set<TypeId> indexTypes;
-      uint32_t         relCount;
-      double           cellWidth=360.0/pow(2.0,(int)l);
-      double           cellHeight=180.0/pow(2.0,(int)l);
-
-      for (size_t i=0; i<typeConfig.GetTypes().size(); i++) {
-        if (typeConfig.GetTypeInfo(i).CanBeRelation() &&
-            relTypeData[i].HasEntries() &&
-            relTypeData[i].indexLevel==l) {
-          indexTypes.insert(i);
-        }
-      }
-
-      if (indexTypes.empty()) {
-        continue;
-      }
-
-      progress.Info("Scanning relations for index level "+NumberToString(l));
-
-      std::vector<CoordOffsetsMap> typeCellOffsets(typeConfig.GetTypes().size());
-
-      relScanner.GotoBegin();
-
-      if (!relScanner.Read(relCount)) {
-        progress.Error("Error while reading number of data entries in file");
-        return false;
-      }
-
-      Relation rel;
-
-      for (uint32_t r=1; r<=relCount; r++) {
-        progress.SetProgress(r,relCount);
-
-        FileOffset offset;
-
-        relScanner.GetPos(offset);
-
-        if (!rel.Read(relScanner)) {
-          progress.Error(std::string("Error while reading data entry ")+
-                         NumberToString(r)+" of "+
-                         NumberToString(relCount)+
-                         " in file '"+
-                         relScanner.GetFilename()+"'");
-          return false;
-        }
-
-        if (rel.IsArea()) {
-          continue;
-        }
-
-        if (indexTypes.find(rel.GetType())==indexTypes.end()) {
-          continue;
-        }
-
-        double minLon;
-        double maxLon;
-        double minLat;
-        double maxLat;
-
-        rel.GetBoundingBox(minLon,maxLon,minLat,maxLat);
-
-        //
-        // Calculate minum and maximum tile ids that are covered
-        // by the way
-        // Renormated coordinate space (everything is >=0)
-        //
-        uint32_t minxc=(uint32_t)floor((minLon+180.0)/cellWidth);
-        uint32_t maxxc=(uint32_t)floor((maxLon+180.0)/cellWidth);
-        uint32_t minyc=(uint32_t)floor((minLat+90.0)/cellHeight);
-        uint32_t maxyc=(uint32_t)floor((maxLat+90.0)/cellHeight);
-
-        for (uint32_t y=minyc; y<=maxyc; y++) {
-          for (uint32_t x=minxc; x<=maxxc; x++) {
-            typeCellOffsets[rel.GetType()][Pixel(x,y)].push_back(offset);
-          }
-        }
-      }
-
-      for (std::set<TypeId>::const_iterator type=indexTypes.begin();
-           type!=indexTypes.end();
-           ++type) {
-        if (!WriteBitmap(progress,
-                         writer,
-                         typeConfig.GetTypeInfo(*type),
-                         relTypeData[*type],
                          typeCellOffsets[*type])) {
           return false;
         }

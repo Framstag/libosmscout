@@ -15,9 +15,9 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
-*/
+ */
 
-#include <osmscout/import/GenRelationDat.h>
+#include <osmscout/import/GenRelAreaDat.h>
 
 #include <algorithm>
 
@@ -29,7 +29,7 @@ namespace osmscout {
 
   /**
     Returns true, if area a is in area b
-    */
+   */
   inline bool IsAreaInArea(const std::vector<bool>& includes,
                            size_t count,
                            size_t a,
@@ -43,10 +43,10 @@ namespace osmscout {
 
     A top level role is a role that is not included by any other unused role ("top level tree
     element").
-    */
-  std::list<RelationDataGenerator::MultipolygonPart>::const_iterator RelationDataGenerator::FindTopLevel(const std::list<MultipolygonPart>& rings,
-                                                                                                         const GroupingState& state,
-                                                                                                         size_t& topIndex)
+   */
+  std::list<RelAreaDataGenerator::MultipolygonPart>::const_iterator RelAreaDataGenerator::FindTopLevel(const std::list<MultipolygonPart>& rings,
+                                                                                                       const GroupingState& state,
+                                                                                                       size_t& topIndex)
   {
     size_t i=0;
     for (std::list<MultipolygonPart>::const_iterator r=rings.begin();
@@ -80,11 +80,11 @@ namespace osmscout {
 
     A sub role is a role that is included by the given top role but is not included
     by any other role ("direct child tree element").
-    */
-  std::list<RelationDataGenerator::MultipolygonPart>::const_iterator RelationDataGenerator::FindSub(const std::list<MultipolygonPart>& rings,
-                                                                                                    size_t topIndex,
-                                                                                                    const GroupingState& state,
-                                                                                                    size_t& subIndex)
+   */
+  std::list<RelAreaDataGenerator::MultipolygonPart>::const_iterator RelAreaDataGenerator::FindSub(const std::list<MultipolygonPart>& rings,
+                                                                                                  size_t topIndex,
+                                                                                                  const GroupingState& state,
+                                                                                                  size_t& subIndex)
   {
     size_t i=0;
     for (std::list<MultipolygonPart>::const_iterator r=rings.begin();
@@ -118,12 +118,12 @@ namespace osmscout {
   /**
     Recursivly consume all direct children and all direct children of that children)
     of the given role.
-    */
-  void RelationDataGenerator::ConsumeSubs(const std::list<MultipolygonPart>& rings,
-                                          std::list<MultipolygonPart>& groups,
-                                          GroupingState& state,
-                                          size_t topIndex,
-                                          size_t id)
+   */
+  void RelAreaDataGenerator::ConsumeSubs(const std::list<MultipolygonPart>& rings,
+                                         std::list<MultipolygonPart>& groups,
+                                         GroupingState& state,
+                                         size_t topIndex,
+                                         size_t id)
   {
     std::list<MultipolygonPart>::const_iterator sub;
     size_t                                      subIndex;
@@ -140,11 +140,11 @@ namespace osmscout {
     }
   }
 
-  bool RelationDataGenerator::BuildRings(const ImportParameter& parameter,
-                                         Progress& progress,
-                                         Id id,
-                                         const Relation& relation,
-                                         std::list<MultipolygonPart>& parts)
+  bool RelAreaDataGenerator::BuildRings(const ImportParameter& parameter,
+                                        Progress& progress,
+                                        Id id,
+                                        const Area& relation,
+                                        std::list<MultipolygonPart>& parts)
   {
     std::list<MultipolygonPart>                 rings;
     bool                                        allArea=true;
@@ -155,8 +155,8 @@ namespace osmscout {
     // First check, if relation only consists of closed areas
     // In this case nothing is to do
     for (std::list<MultipolygonPart>::iterator part=parts.begin();
-        part!=parts.end();
-        ++part) {
+         part!=parts.end();
+         ++part) {
       if (!part->IsArea()) {
         allArea=false;
       }
@@ -169,8 +169,8 @@ namespace osmscout {
 
     // Now build up temporary structures to merge all ways to closed areas
     for (std::list<MultipolygonPart>::iterator part=parts.begin();
-        part!=parts.end();
-        ++part) {
+         part!=parts.end();
+         ++part) {
       if (part->IsArea()) {
         rings.push_back(*part);
       }
@@ -181,28 +181,28 @@ namespace osmscout {
     }
 
     for (std::map<Id, std::list<MultipolygonPart*> >::iterator entry=partsByEnd.begin();
-        entry!=partsByEnd.end();
-        ++entry) {
+         entry!=partsByEnd.end();
+         ++entry) {
       if (entry->second.size()<2) {
-          progress.Error("Node "+NumberToString(entry->first)+
-                         " of way "+NumberToString(entry->second.front()->ways.front()->GetId())+
-                         " cannot be joined with any other way of the relation "+
-                         NumberToString(id)+" "+relation.GetName());
-          return false;
+        progress.Error("Node "+NumberToString(entry->first)+
+                       " of way "+NumberToString(entry->second.front()->ways.front()->GetId())+
+                       " cannot be joined with any other way of the relation "+
+                       NumberToString(id)+" "+relation.GetName());
+        return false;
       }
 
       if (entry->second.size()%2!=0) {
-          progress.Error("Node "+NumberToString(entry->first)+
-                         " of way "+NumberToString(entry->second.front()->ways.front()->GetId())+
-                         " can be joined with uneven number of ways of the relation "+
-                         NumberToString(id)+" "+relation.GetName());
-          return false;
+        progress.Error("Node "+NumberToString(entry->first)+
+                       " of way "+NumberToString(entry->second.front()->ways.front()->GetId())+
+                       " can be joined with uneven number of ways of the relation "+
+                       NumberToString(id)+" "+relation.GetName());
+        return false;
       }
     }
 
     for (std::map<Id, std::list<MultipolygonPart*> >::iterator entry=partsByEnd.begin();
-        entry!=partsByEnd.end();
-        ++entry) {
+         entry!=partsByEnd.end();
+         ++entry) {
       while (!entry->second.empty()) {
 
         MultipolygonPart* part=entry->second.front();
@@ -221,7 +221,6 @@ namespace osmscout {
         Id                           backId;
 
         ring.role.ring=0;
-        ring.role.role=part->role.role;
         ring.ways=part->ways;
 
         ringParts.push_back(part);
@@ -324,12 +323,12 @@ namespace osmscout {
     Try to resolve a multipolygon relation.
 
     See http://wiki.openstreetmap.org/wiki/Relation:multipolygon/Algorithm
-    */
-  bool RelationDataGenerator::ResolveMultipolygon(const ImportParameter& parameter,
-                                                  Progress& progress,
-                                                  Id id,
-                                                  const Relation& relation,
-                                                  std::list<MultipolygonPart>& parts)
+   */
+  bool RelAreaDataGenerator::ResolveMultipolygon(const ImportParameter& parameter,
+                                                 Progress& progress,
+                                                 Id id,
+                                                 const Area& relation,
+                                                 std::list<MultipolygonPart>& parts)
   {
     std::list<MultipolygonPart> groups;
 
@@ -413,20 +412,20 @@ namespace osmscout {
     return true;
   }
 
-  bool RelationDataGenerator::ComposeMultipolygonMembers(Progress& progress,
-                                                         const TypeConfig& typeConfig,
-                                                         TypeId boundaryId,
-                                                         const CoordDataFile::CoordResultMap& coordMap,
-                                                         const IdRawWayMap& wayMap,
-                                                         const std::map<OSMId,RawRelationRef>& relationMap,
-                                                         IdSet& resolvedRelations,
-                                                         const Relation& relation,
-                                                         RawRelation& rawRelation,
-                                                         std::list<MultipolygonPart>& parts)
+  bool RelAreaDataGenerator::ComposeMultipolygonMembers(Progress& progress,
+                                                        const TypeConfig& typeConfig,
+                                                        TypeId boundaryId,
+                                                        const CoordDataFile::CoordResultMap& coordMap,
+                                                        const IdRawWayMap& wayMap,
+                                                        const std::map<OSMId,RawRelationRef>& relationMap,
+                                                        IdSet& resolvedRelations,
+                                                        const Area& relation,
+                                                        RawRelation& rawRelation,
+                                                        std::list<MultipolygonPart>& parts)
   {
     for (std::vector<RawRelation::Member>::const_iterator member=rawRelation.members.begin();
-        member!=rawRelation.members.end();
-        member++) {
+         member!=rawRelation.members.end();
+         member++) {
       if (member->type==RawRelation::memberRelation &&
           (member->role=="inner" ||
            member->role=="outer" ||
@@ -471,9 +470,9 @@ namespace osmscout {
         }
       }
       else if (member->type==RawRelation::memberWay &&
-          (member->role=="inner" ||
-           member->role=="outer" ||
-           member->role.empty())) {
+               (member->role=="inner" ||
+                member->role=="outer" ||
+                member->role.empty())) {
         IdRawWayMap::const_iterator wayEntry=wayMap.find(member->id);
 
         if (wayEntry==wayMap.end()) {
@@ -492,7 +491,6 @@ namespace osmscout {
         MultipolygonPart part;
 
         part.role.ring=0;
-        part.role.role=member->role;
 
         part.role.ids.reserve(way->GetNodeCount());
         part.role.nodes.reserve(way->GetNodeCount());
@@ -525,15 +523,15 @@ namespace osmscout {
     return true;
   }
 
-  bool RelationDataGenerator::ResolveMultipolygonMembers(Progress& progress,
-                                                         const TypeConfig& typeConfig,
-                                                         CoordDataFile& coordDataFile,
-                                                         IndexedDataFile<OSMId,RawWay>& wayDataFile,
-                                                         IndexedDataFile<OSMId,RawRelation>& relDataFile,
-                                                         IdSet& resolvedRelations,
-                                                         const Relation& relation,
-                                                         RawRelation& rawRelation,
-                                                         std::list<MultipolygonPart>& parts)
+  bool RelAreaDataGenerator::ResolveMultipolygonMembers(Progress& progress,
+                                                        const TypeConfig& typeConfig,
+                                                        CoordDataFile& coordDataFile,
+                                                        IndexedDataFile<OSMId,RawWay>& wayDataFile,
+                                                        IndexedDataFile<OSMId,RawRelation>& relDataFile,
+                                                        IdSet& resolvedRelations,
+                                                        const Area& relation,
+                                                        RawRelation& rawRelation,
+                                                        std::list<MultipolygonPart>& parts)
   {
     TypeId boundaryId;
 
@@ -554,8 +552,8 @@ namespace osmscout {
     // Initial collection of all relation and way ids of the top level relation
 
     for (std::vector<RawRelation::Member>::const_iterator member=rawRelation.members.begin();
-        member!=rawRelation.members.end();
-        member++) {
+         member!=rawRelation.members.end();
+         member++) {
       if (member->type==RawRelation::memberWay &&
           (member->role=="inner" ||
            member->role=="outer" ||
@@ -563,9 +561,9 @@ namespace osmscout {
         wayIds.insert(member->id);
       }
       else if (member->type==RawRelation::memberRelation &&
-          (member->role=="inner" ||
-           member->role=="outer" ||
-           member->role.empty())) {
+               (member->role=="inner" ||
+                member->role=="outer" ||
+                member->role.empty())) {
         if (boundaryId!=typeIgnore &&
             relation.GetType()==boundaryId) {
           if (resolvedRelations.find(member->id)!=resolvedRelations.end()) {
@@ -611,8 +609,8 @@ namespace osmscout {
         relationMap[childRelation->GetId()]=childRelation;
 
         for (std::vector<RawRelation::Member>::const_iterator member=childRelation->members.begin();
-            member!=childRelation->members.end();
-            member++) {
+             member!=childRelation->members.end();
+             member++) {
           if (member->type==RawRelation::memberWay &&
               (member->role=="inner" ||
                member->role=="outer" ||
@@ -620,9 +618,9 @@ namespace osmscout {
             wayIds.insert(member->id);
           }
           else if (member->type==RawRelation::memberRelation &&
-              (member->role=="inner" ||
-               member->role=="outer" ||
-               member->role.empty())) {
+                   (member->role=="inner" ||
+                    member->role=="outer" ||
+                    member->role.empty())) {
             if (boundaryId!=typeIgnore &&
                 relation.GetType()==boundaryId) {
               if (resolvedRelations.find(member->id)!=resolvedRelations.end()) {
@@ -711,15 +709,15 @@ namespace osmscout {
                                       parts);
   }
 
-  bool RelationDataGenerator::HandleMultipolygonRelation(const ImportParameter& parameter,
-                                                         Progress& progress,
-                                                         const TypeConfig& typeConfig,
-                                                         IdSet& wayAreaIndexBlacklist,
-                                                         CoordDataFile& coordDataFile,
-                                                         IndexedDataFile<OSMId,RawWay>& wayDataFile,
-                                                         IndexedDataFile<OSMId,RawRelation>& relDataFile,
-                                                         RawRelation& rawRelation,
-                                                         Relation& relation)
+  bool RelAreaDataGenerator::HandleMultipolygonRelation(const ImportParameter& parameter,
+                                                        Progress& progress,
+                                                        const TypeConfig& typeConfig,
+                                                        IdSet& wayAreaIndexBlacklist,
+                                                        CoordDataFile& coordDataFile,
+                                                        IndexedDataFile<OSMId,RawWay>& wayDataFile,
+                                                        IndexedDataFile<OSMId,RawRelation>& relDataFile,
+                                                        RawRelation& rawRelation,
+                                                        Area& relation)
   {
     IdSet resolvedRelations;
     bool         reverseNodes;
@@ -729,8 +727,8 @@ namespace osmscout {
     // to improve the quality of further error output.
     if (tagName!=tagIgnore) {
       for (std::vector<Tag>::const_iterator tag=rawRelation.tags.begin();
-          tag!=rawRelation.tags.end();
-          tag++) {
+           tag!=rawRelation.tags.end();
+           tag++) {
         if (tag->key==tagName) {
           relation.attributes.name=tag->value;
           break;
@@ -768,8 +766,8 @@ namespace osmscout {
     // Resolve SegmentAttributes for each ring
 
     for (std::list<MultipolygonPart>::iterator ring=parts.begin();
-        ring!=parts.end();
-        ring++) {
+         ring!=parts.end();
+         ring++) {
       if (ring->IsArea() &&
           ring->ways.front()->GetType()!=typeIgnore) {
         std::vector<Tag> tags(ring->ways.front()->GetTags());
@@ -791,8 +789,8 @@ namespace osmscout {
     // the child ring being a clip region. We set the type of the child to typeIgnore then...
 
     for (std::list<MultipolygonPart>::iterator ring=parts.begin();
-        ring!=parts.end();
-        ring++) {
+         ring!=parts.end();
+         ring++) {
       if (ring->IsArea()) {
         std::list<MultipolygonPart>::iterator childRing=ring;
 
@@ -817,8 +815,8 @@ namespace osmscout {
 
     if (relation.GetType()==typeIgnore) {
       for (std::list<MultipolygonPart>::iterator ring=parts.begin();
-          ring!=parts.end();
-          ring++) {
+           ring!=parts.end();
+           ring++) {
         if (ring->role.ring==0 &&
             ring->IsArea() &&
             ring->role.GetType()!=typeIgnore) {
@@ -863,8 +861,8 @@ namespace osmscout {
     // Blacklisting areas
 
     for (std::list<MultipolygonPart>::const_iterator ring=parts.begin();
-        ring!=parts.end();
-        ring++) {
+         ring!=parts.end();
+         ring++) {
       if (ring->IsArea()) {
         // TODO: We currently blacklist all areas, we only should blacklist all
         // areas that have a type. Because areas without a type are implicitly blacklisted anyway later on.
@@ -879,8 +877,8 @@ namespace osmscout {
 
     relation.roles.reserve(parts.size());
     for (std::list<MultipolygonPart>::iterator ring=parts.begin();
-        ring!=parts.end();
-        ring++) {
+         ring!=parts.end();
+         ring++) {
       assert(!ring->role.nodes.empty());
 
       relation.roles.push_back(ring->role);
@@ -891,14 +889,14 @@ namespace osmscout {
     return true;
   }
 
-  std::string RelationDataGenerator::GetDescription() const
+  std::string RelAreaDataGenerator::GetDescription() const
   {
-    return "Generate 'relations.dat'";
+    return "Generate 'relarea.dat'";
   }
 
-  bool RelationDataGenerator::Import(const ImportParameter& parameter,
-                                     Progress& progress,
-                                     const TypeConfig& typeConfig)
+  bool RelAreaDataGenerator::Import(const ImportParameter& parameter,
+                                    Progress& progress,
+                                    const TypeConfig& typeConfig)
   {
     IdSet                              wayAreaIndexBlacklist;
 
@@ -938,7 +936,7 @@ namespace osmscout {
     // Analysing distribution of nodes in the given interval size
     //
 
-    progress.SetAction("Generate relations.tmp");
+    progress.SetAction("Generate relarea.dat");
 
     FileScanner         scanner;
     FileWriter          relWriter;
@@ -969,8 +967,8 @@ namespace osmscout {
     }
 
     if (!relWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "relations.tmp"))) {
-      progress.Error("Cannot create 'relations.tmp'");
+                                        "relarea.dat"))) {
+      progress.Error("Cannot create 'relarea.dat'");
       return false;
     }
 
@@ -1027,22 +1025,21 @@ namespace osmscout {
         }
       }
 
-      Relation rel;
-
-      if (isArea) {
-        if (!HandleMultipolygonRelation(parameter,
-                                        progress,
-                                        typeConfig,
-                                        wayAreaIndexBlacklist,
-                                        coordDataFile,
-                                        wayDataFile,
-                                        relDataFile,
-                                        rawRel,
-                                        rel)) {
-          continue;
-        }
+      if (!isArea) {
+        continue;
       }
-      else {
+
+      Area rel;
+
+      if (!HandleMultipolygonRelation(parameter,
+                                      progress,
+                                      typeConfig,
+                                      wayAreaIndexBlacklist,
+                                      coordDataFile,
+                                      wayDataFile,
+                                      relDataFile,
+                                      rawRel,
+                                      rel)) {
         continue;
       }
 
@@ -1053,19 +1050,10 @@ namespace osmscout {
                        rel.GetName());
       }
 
-      if (rel.IsArea()) {
-        areaTypeCount[rel.GetType()]++;
-        for (size_t i=0; i<rel.roles.size(); i++) {
-          if (rel.roles[i].ring==0) {
-            areaNodeTypeCount[rel.GetType()]+=rel.roles[i].nodes.size();
-          }
-        }
-      }
-      else {
-        wayTypeCount[rel.GetType()]++;
-
-        for (size_t i=0; i<rel.roles.size(); i++) {
-          wayNodeTypeCount[rel.GetType()]+=rel.roles[i].nodes.size();
+      areaTypeCount[rel.GetType()]++;
+      for (size_t i=0; i<rel.roles.size(); i++) {
+        if (rel.roles[i].ring==0) {
+          areaNodeTypeCount[rel.GetType()]+=rel.roles[i].nodes.size();
         }
       }
 
@@ -1097,10 +1085,10 @@ namespace osmscout {
       return false;
     }
 
-    progress.SetAction("Generate wayblack.dat");
+    progress.SetAction("Generate wayareablack.dat");
 
     if (!relWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        "wayblack.dat"))) {
+                                        "wayareablack.dat"))) {
       progress.Error("Cannot create 'wayblack.dat'");
       return false;
     }
@@ -1117,8 +1105,8 @@ namespace osmscout {
 
     for (size_t i=0; i<typeConfig.GetMaxTypeId(); i++) {
       std::string buffer=typeConfig.GetTypeInfo(i).GetName()+": "+
-                         NumberToString(wayTypeCount[i])+" "+NumberToString(wayNodeTypeCount[i])+" "+
-                         NumberToString(areaTypeCount[i])+" "+NumberToString(areaNodeTypeCount[i]);
+              NumberToString(wayTypeCount[i])+" "+NumberToString(wayNodeTypeCount[i])+" "+
+              NumberToString(areaTypeCount[i])+" "+NumberToString(areaNodeTypeCount[i]);
 
       progress.Debug(buffer);
     }

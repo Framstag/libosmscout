@@ -32,6 +32,8 @@
 #include <osmscout/util/HashMap.h>
 #include <osmscout/util/StopClock.h>
 
+#include "osmscout/ObjectRef.h"
+
 namespace osmscout {
 
   DebugDatabaseParameter::DebugDatabaseParameter()
@@ -175,16 +177,19 @@ namespace osmscout {
     return true;
   }
 
-  bool DebugDatabase::ResolveNodeIdsAndOffsets(const std::set<Id>& ids,
-                                               std::map<Id,FileOffset>& idFileOffsetMap,
-                                               const std::set<FileOffset>& fileOffsets,
-                                               std::map<FileOffset,Id>& fileOffsetIdMap)
+  bool DebugDatabase::ResolveReferences(const std::string& mapName,
+                                        RefType fileType,
+                                        const std::set<ObjectOSMRef>& ids,
+                                        const std::set<ObjectFileRef>& fileOffsets,
+                                        std::map<ObjectOSMRef,ObjectFileRef>& idFileOffsetMap,
+                                        std::map<ObjectFileRef,ObjectOSMRef>& fileOffsetIdMap)
   {
     FileScanner scanner;
     uint32_t    entryCount;
-    std::string filename=AppendFileToDir(path,"node.idmap");
+    std::string filename=AppendFileToDir(path,mapName);
 
     if (!scanner.Open(filename,FileScanner::LowMemRandom,false)) {
+      std::cerr << "Cannot open file '" << scanner.GetFilename() << "'!" << std::endl;
       return false;
     }
 
@@ -194,110 +199,125 @@ namespace osmscout {
 
     for (size_t i=1; i<=entryCount; i++) {
       Id         id;
+      uint8_t    typeByte;
+      OSMRefType osmType;
       FileOffset fileOffset;
 
       if (!scanner.Read(id)) {
         return false;
       }
 
+      if (!scanner.Read(typeByte)) {
+        return false;
+      }
+
+      osmType=(OSMRefType)typeByte;
+
       if (!scanner.ReadFileOffset(fileOffset)) {
         return false;
       }
 
-      if (ids.find(id)!=ids.end()) {
-        idFileOffsetMap.insert(std::make_pair(id,fileOffset));
-        fileOffsetIdMap.insert(std::make_pair(fileOffset,id));
-      }
-      else if (fileOffsets.find(fileOffset)!=fileOffsets.end()) {
-        idFileOffsetMap.insert(std::make_pair(id,fileOffset));
-        fileOffsetIdMap.insert(std::make_pair(fileOffset,id));
+      ObjectOSMRef  osmRef(id,osmType);
+      ObjectFileRef fileRef(fileOffset,fileType);
+
+      if (ids.find(osmRef)!=ids.end() ||
+          fileOffsets.find(fileRef)!=fileOffsets.end()) {
+        idFileOffsetMap.insert(std::make_pair(osmRef,fileRef));
+        fileOffsetIdMap.insert(std::make_pair(fileRef,osmRef));
       }
     }
 
     return scanner.Close();
   }
 
-  bool DebugDatabase::ResolveWayIdsAndOffsets(const std::set<Id>& ids,
-                                              std::map<Id,FileOffset>& idFileOffsetMap,
-                                              const std::set<FileOffset>& fileOffsets,
-                                              std::map<FileOffset,Id>& fileOffsetIdMap)
+  bool DebugDatabase::ResolveReferences(const std::set<ObjectOSMRef>& ids,
+                                        const std::set<ObjectFileRef>& fileOffsets,
+                                        std::map<ObjectOSMRef,ObjectFileRef>& idFileOffsetMap,
+                                        std::map<ObjectFileRef,ObjectOSMRef>& fileOffsetIdMap)
   {
-    FileScanner scanner;
-    uint32_t    entryCount;
-    std::string filename=AppendFileToDir(path,"way.idmap");
+    bool haveToScanNodes=false;
+    bool haveToScanAreas=false;
+    bool haveToScanWays=false;
 
-    if (!scanner.Open(filename,FileScanner::LowMemRandom,false)) {
-      return false;
+    for (std::set<ObjectOSMRef>::const_iterator ref=ids.begin();
+         ref!=ids.end();
+         ++ref) {
+      if (haveToScanNodes && haveToScanAreas && haveToScanWays) {
+        break;
+      }
+
+      switch (ref->GetType()) {
+      case osmRefNone:
+        break;
+      case osmRefNode:
+        haveToScanNodes=true;
+        break;
+      case osmRefWay:
+        haveToScanAreas=true;
+        haveToScanWays=true;
+        break;
+      case osmRefRelation:
+        haveToScanAreas=true;
+        break;
+      }
+
     }
 
-    if (!scanner.Read(entryCount)) {
-      return false;
+    for (std::set<ObjectFileRef>::const_iterator ref=fileOffsets.begin();
+         ref!=fileOffsets.end();
+         ++ref) {
+      if (haveToScanNodes && haveToScanAreas && haveToScanWays) {
+        break;
+      }
+
+      switch (ref->GetType()) {
+      case refNone:
+        break;
+      case refNode:
+        haveToScanNodes=true;
+        break;
+      case refWay:
+        haveToScanWays=true;
+        break;
+      case refArea:
+        haveToScanAreas=true;
+        break;
+      }
     }
 
-    for (size_t i=1; i<=entryCount; i++) {
-      Id         id;
-      FileOffset fileOffset;
-
-      if (!scanner.Read(id)) {
+    if (haveToScanNodes) {
+      if (!ResolveReferences("nodes.idmap",
+                             refNode,
+                             ids,
+                             fileOffsets,
+                             idFileOffsetMap,
+                             fileOffsetIdMap)) {
         return false;
       }
+    }
 
-      if (!scanner.ReadFileOffset(fileOffset)) {
+    if (haveToScanAreas) {
+      if (!ResolveReferences("areas.idmap",
+                             refArea,
+                             ids,
+                             fileOffsets,
+                             idFileOffsetMap,
+                             fileOffsetIdMap)) {
         return false;
       }
-
-      if (ids.find(id)!=ids.end()) {
-        idFileOffsetMap.insert(std::make_pair(id,fileOffset));
-        fileOffsetIdMap.insert(std::make_pair(fileOffset,id));
-      }
-      else if (fileOffsets.find(fileOffset)!=fileOffsets.end()) {
-        idFileOffsetMap.insert(std::make_pair(id,fileOffset));
-        fileOffsetIdMap.insert(std::make_pair(fileOffset,id));
-      }
     }
 
-    return scanner.Close();
-  }
-
-  bool DebugDatabase::ResolveRelationIdsAndOffsets(const std::set<Id>& ids,
-                                                   std::map<Id,FileOffset>& idFileOffsetMap,
-                                                   const std::set<FileOffset>& fileOffsets,
-                                                   std::map<FileOffset,Id>& fileOffsetIdMap)
-  {
-    FileScanner scanner;
-    uint32_t    entryCount;
-    std::string filename=AppendFileToDir(path,"relation.idmap");
-
-    if (!scanner.Open(filename,FileScanner::LowMemRandom,false)) {
-      return false;
-    }
-
-    if (!scanner.Read(entryCount)) {
-      return false;
-    }
-
-    for (size_t i=1; i<=entryCount; i++) {
-      Id         id;
-      FileOffset fileOffset;
-
-      if (!scanner.Read(id)) {
+    if (haveToScanWays) {
+      if (!ResolveReferences("ways.idmap",
+                             refWay,
+                             ids,
+                             fileOffsets,
+                             idFileOffsetMap,
+                             fileOffsetIdMap)) {
         return false;
       }
-
-      if (!scanner.ReadFileOffset(fileOffset)) {
-        return false;
-      }
-
-      if (ids.find(id)!=ids.end()) {
-        idFileOffsetMap.insert(std::make_pair(id,fileOffset));
-        fileOffsetIdMap.insert(std::make_pair(fileOffset,id));
-      }
-      else if (fileOffsets.find(fileOffset)!=fileOffsets.end()) {
-        idFileOffsetMap.insert(std::make_pair(id,fileOffset));
-        fileOffsetIdMap.insert(std::make_pair(fileOffset,id));
-      }
     }
 
-    return scanner.Close();
+    return true;
   }
 }

@@ -1,9 +1,9 @@
-#ifndef OSMSCOUT_IMPORT_GENWAYDAT_H
-#define OSMSCOUT_IMPORT_GENWAYDAT_H
+#ifndef OSMSCOUT_IMPORT_GENWAYAREADAT_H
+#define OSMSCOUT_IMPORT_GENWAYAREADAT_H
 
 /*
   This source is part of the libosmscout library
-  Copyright (C) 2009  Tim Teulings
+  Copyright (C) 2013  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -24,7 +24,7 @@
 
 #include <map>
 
-#include <osmscout/Way.h>
+#include <osmscout/Area.h>
 #include <osmscout/NumericIndex.h>
 #include <osmscout/TurnRestriction.h>
 
@@ -37,37 +37,19 @@
 
 namespace osmscout {
 
-  class WayDataGenerator : public ImportModule
+  class WayAreaDataGenerator : public ImportModule
   {
   private:
-    typedef OSMSCOUT_HASHMAP<PageId,uint32_t>      NodeUseMap;
     typedef OSMSCOUT_HASHSET<OSMId>                BlacklistSet;
 
     typedef std::list<RawWayRef>                   WayList;
-    typedef WayList::iterator                      WayListPtr;
-    typedef std::list<WayListPtr>                  WayListPtrList;
-    typedef OSMSCOUT_HASHMAP<OSMId,WayListPtrList> WaysByNodeMap;
 
     void GetWayTypes(const TypeConfig& typeConfig,
                      std::set<TypeId>& types) const;
 
-    void SetNodeUsed(NodeUseMap& nodeUseMap,
-                     OSMId id);
-
-    bool IsNodeUsedAtLeastTwice(const NodeUseMap& nodeUseMap,
-                                OSMId id) const;
-
     bool ReadWayBlacklist(const ImportParameter& parameter,
                           Progress& progress,
                           BlacklistSet& wayBlacklist);
-
-    bool ReadTurnRestrictions(const ImportParameter& parameter,
-                              Progress& progress,
-                              std::multimap<OSMId,TurnRestrictionRef>& restrictions);
-
-    bool WriteTurnRestrictions(const ImportParameter& parameter,
-                               Progress& progress,
-                               std::multimap<OSMId,TurnRestrictionRef>& restrictions);
 
     bool GetWays(const ImportParameter& parameter,
                  Progress& progress,
@@ -75,24 +57,7 @@ namespace osmscout {
                  std::set<TypeId>& types,
                  const BlacklistSet& blacklist,
                  FileScanner& scanner,
-                 std::vector<std::list<RawWayRef> >& ways,
-                 std::vector<std::list<RawWayRef> >& areas,
-                 NodeUseMap& nodeUseMap,
-                 bool buildNodeUseMap);
-
-    void UpdateRestrictions(std::multimap<OSMId,TurnRestrictionRef>& restrictions,
-                            OSMId oldId,
-                            OSMId newId);
-
-    bool IsRestricted(const std::multimap<OSMId,TurnRestrictionRef>& restrictions,
-                      OSMId wayId,
-                      OSMId nodeId) const;
-
-    bool MergeWays(Progress& progress,
-                   const TypeConfig& typeConfig,
-                   std::list<RawWayRef>& ways,
-                   BlacklistSet& wayBlacklist,
-                   std::multimap<OSMId,TurnRestrictionRef>& restrictions);
+                 std::vector<std::list<RawWayRef> >& areas);
 
     bool WriteWay(const ImportParameter& parameter,
                   Progress& progress,
@@ -100,7 +65,6 @@ namespace osmscout {
                   FileWriter& writer,
                   uint32_t& writtenWayCount,
                   const CoordDataFile::CoordResultMap& coordsMap,
-                  const NodeUseMap& nodeUseMap,
                   const RawWay& rawWay);
 
   public:

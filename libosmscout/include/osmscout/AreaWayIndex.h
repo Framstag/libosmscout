@@ -70,7 +70,6 @@ namespace osmscout {
     mutable FileScanner   scanner;        //! Scanner instance for reading this file
 
     std::vector<TypeData> wayTypeData;
-    std::vector<TypeData> relTypeData;
 
   private:
     bool GetOffsets(const TypeData& typeData,
@@ -94,8 +93,7 @@ namespace osmscout {
                     double maxlat,
                     const std::vector<TypeSet>& wayTypes,
                     size_t maxWayCount,
-                    std::vector<FileOffset>& wayWayOffsets,
-                    std::vector<FileOffset>& relationWayOffsets) const;
+                    std::vector<FileOffset>& wayWayOffsets) const;
 
     void DumpStatistics();
   };

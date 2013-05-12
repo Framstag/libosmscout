@@ -62,7 +62,6 @@ namespace osmscout {
     {
       FileOffset              children[4]; //! File index of each of the four children, or 0 if there is no child
       std::vector<IndexEntry> areas;
-      std::vector<IndexEntry> relAreas;
     };
 
     typedef Cache<FileOffset,IndexCell> IndexCache;
@@ -77,9 +76,6 @@ namespace osmscout {
 
         // Areas
         memory+=value.areas.size()*sizeof(IndexEntry);
-
-        // RelAreas
-        memory+=value.relAreas.size()*sizeof(IndexEntry);
 
         return memory;
       }
@@ -114,8 +110,7 @@ namespace osmscout {
                     size_t maxAreaLevel,
                     const TypeSet& types,
                     size_t maxAreaCount,
-                    std::vector<FileOffset>& wayAreaOffsets,
-                    std::vector<FileOffset>& relationAreaOffsets) const;
+                    std::vector<FileOffset>& wayAreaOffsets) const;
 
     void DumpStatistics();
   };

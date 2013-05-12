@@ -38,6 +38,7 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/Coord.cpp \
                         osmscout/GeoCoord.cpp \
                         osmscout/Pixel.cpp \
+                        osmscout/Area.cpp \
                         osmscout/Node.cpp \
                         osmscout/Path.cpp \
                         osmscout/Point.cpp \

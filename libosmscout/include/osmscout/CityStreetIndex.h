@@ -54,6 +54,7 @@ namespace osmscout {
     {
       FileOffset            offset; //! Offset of the admin region this location is in
       std::list<FileOffset> nodes;  //! List of node ids that belong to this location
+      std::list<FileOffset> areas;  //! List of area ids that belong to this location
       std::list<FileOffset> ways;   //! List of way ids that belong to this location
     };
 

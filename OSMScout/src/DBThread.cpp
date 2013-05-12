@@ -341,9 +341,7 @@ void DBThread::TriggerMapRendering()
                         searchParameter,
                         data.nodes,
                         data.ways,
-                        data.areas,
-                        data.relationWays,
-                        data.relationAreas);
+                        data.areas);
 
     if (drawParameter.GetRenderSeaLand()) {
       database.GetGroundTiles(projection.GetLonMin(),
@@ -569,20 +567,20 @@ bool DBThread::GetNodeByOffset(osmscout::FileOffset offset,
   return database.GetNodeByOffset(offset,node);
 }
 
+bool DBThread::GetAreaByOffset(osmscout::FileOffset offset,
+                               osmscout::AreaRef& area) const
+{
+  QMutexLocker locker(&mutex);
+
+  return database.GetAreaByOffset(offset,area);
+}
+
 bool DBThread::GetWayByOffset(osmscout::FileOffset offset,
                               osmscout::WayRef& way) const
 {
   QMutexLocker locker(&mutex);
 
   return database.GetWayByOffset(offset,way);
-}
-
-bool DBThread::GetRelationByOffset(osmscout::FileOffset offset,
-                                   osmscout::RelationRef& relation) const
-{
-  QMutexLocker locker(&mutex);
-
-  return database.GetRelationByOffset(offset,relation);
 }
 
 bool DBThread::GetMatchingAdminRegions(const QString& name,

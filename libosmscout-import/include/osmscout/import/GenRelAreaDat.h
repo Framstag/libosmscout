@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_IMPORT_GENRELATIONDAT_H
-#define OSMSCOUT_IMPORT_GENRELATIONDAT_H
+#ifndef OSMSCOUT_IMPORT_GENRELAREADAT_H
+#define OSMSCOUT_IMPORT_GENRELAREADAT_H
 
 /*
   This source is part of the libosmscout library
@@ -26,7 +26,7 @@
 
 #include <osmscout/DataFile.h>
 
-#include <osmscout/Relation.h>
+#include <osmscout/Area.h>
 
 #include <osmscout/util/Geometry.h>
 
@@ -39,7 +39,7 @@
 
 namespace osmscout {
 
-  class RelationDataGenerator : public ImportModule
+  class RelAreaDataGenerator : public ImportModule
   {
   private:
     typedef OSMSCOUT_HASHSET<OSMId>           IdSet;
@@ -117,7 +117,7 @@ namespace osmscout {
 
     struct MultipolygonPart
     {
-      Relation::Role       role;
+      Area::Role           role;
       std::list<RawWayRef> ways;
 
       inline bool IsArea() const
@@ -151,13 +151,13 @@ namespace osmscout {
     bool BuildRings(const ImportParameter& parameter,
                     Progress& progress,
                     Id id,
-                    const Relation& relation,
+                    const Area& relation,
                     std::list<MultipolygonPart>& parts);
 
     bool ResolveMultipolygon(const ImportParameter& parameter,
                              Progress& progress,
                              Id id,
-                             const Relation& relation,
+                             const Area& relation,
                              std::list<MultipolygonPart>& parts);
 
     bool ComposeMultipolygonMembers(Progress& progress,
@@ -167,7 +167,7 @@ namespace osmscout {
                                     const IdRawWayMap& wayMap,
                                     const std::map<OSMId,RawRelationRef>& relationMap,
                                     IdSet& resolvedRelations,
-                                    const Relation& relation,
+                                    const Area& relation,
                                     RawRelation& rawRelation,
                                     std::list<MultipolygonPart>& parts);
 
@@ -177,7 +177,7 @@ namespace osmscout {
                                   IndexedDataFile<OSMId,RawWay>& wayDataFile,
                                   IndexedDataFile<OSMId,RawRelation>& relDataFile,
                                   IdSet& resolvedRelations,
-                                  const Relation& relation,
+                                  const Area& relation,
                                   RawRelation& rawRelation,
                                   std::list<MultipolygonPart>& parts);
 
@@ -189,7 +189,7 @@ namespace osmscout {
                                     IndexedDataFile<OSMId,RawWay>& wayDataFile,
                                     IndexedDataFile<OSMId,RawRelation>& relDataFile,
                                     RawRelation& rawRelation,
-                                    Relation& relation);
+                                    Area& relation);
 
 
   public:

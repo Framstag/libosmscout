@@ -1,9 +1,6 @@
-#ifndef OSMSCOUT_RELATIONDATAFILE_H
-#define OSMSCOUT_RELATIONDATAFILE_H
-
 /*
   This source is part of the libosmscout library
-  Copyright (C) 2010  Tim Teulings
+  Copyright (C) 2013  Tim Teulings
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,14 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/DataFile.h>
-#include <osmscout/Relation.h>
+#include <osmscout/import/SortAreaDat.h>
 
 namespace osmscout {
-  /**
-    Abstraction for getting cached access to the 'relation.dat' file.
-    */
-  typedef DataFile<Relation> RelationDataFile;
 }
-
-#endif

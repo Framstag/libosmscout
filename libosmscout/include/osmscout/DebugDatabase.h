@@ -23,6 +23,8 @@
 #include <list>
 #include <set>
 
+#include <osmscout/ObjectRef.h>
+
 // Type and style sheet configuration
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeSet.h>
@@ -56,6 +58,14 @@ namespace osmscout {
 
     TypeConfig                *typeConfig;      //! Type config for the currently opened map
 
+  private:
+    bool ResolveReferences(const std::string& mapName,
+                           RefType fileType,
+                           const std::set<ObjectOSMRef>& ids,
+                           const std::set<ObjectFileRef>& fileOffsets,
+                           std::map<ObjectOSMRef,ObjectFileRef>& idFileOffsetMap,
+                           std::map<ObjectFileRef,ObjectOSMRef>& fileOffsetIdMap);
+
   public:
     DebugDatabase(const DebugDatabaseParameter& parameter);
     virtual ~DebugDatabase();
@@ -69,20 +79,10 @@ namespace osmscout {
     bool GetCoords(const std::vector<Id>& ids,
                    std::vector<Point>& coords) const;
 
-    bool ResolveNodeIdsAndOffsets(const std::set<Id>& ids,
-                                  std::map<Id,FileOffset>& idFileOffsetMap,
-                                  const std::set<FileOffset>& fileOffsets,
-                                  std::map<FileOffset,Id>& fileOffsetIdMap);
-
-    bool ResolveWayIdsAndOffsets(const std::set<Id>& ids,
-                                 std::map<Id,FileOffset>& idFileOffsetMap,
-                                 const std::set<FileOffset>& fileOffsets,
-                                 std::map<FileOffset,Id>& fileOffsetIdMap);
-
-    bool ResolveRelationIdsAndOffsets(const std::set<Id>& ids,
-                                      std::map<Id,FileOffset>& idFileOffsetMap,
-                                      const std::set<FileOffset>& fileOffsets,
-                                      std::map<FileOffset,Id>& fileOffsetIdMap);
+    bool ResolveReferences(const std::set<ObjectOSMRef>& ids,
+                           const std::set<ObjectFileRef>& fileOffsets,
+                           std::map<ObjectOSMRef,ObjectFileRef>& idFileOffsetMap,
+                           std::map<ObjectFileRef,ObjectOSMRef>& fileOffsetIdMap);
   };
 }
 

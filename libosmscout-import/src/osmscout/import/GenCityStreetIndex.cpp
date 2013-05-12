@@ -26,9 +26,9 @@
 #include <set>
 
 #include <osmscout/Node.h>
-#include <osmscout/ObjectRef.h>
-#include <osmscout/Relation.h>
+#include <osmscout/Area.h>
 #include <osmscout/Way.h>
+#include <osmscout/ObjectRef.h>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
@@ -86,9 +86,10 @@ namespace osmscout {
     double                               maxlat;
 
     std::map<std::string,std::list<FileOffset> > nodes;     //! list of indexed nodes in this region
+    std::map<std::string,std::list<FileOffset> > areas;      //! list of indexed areas in this region
     std::map<std::string,std::list<FileOffset> > ways;      //! list of indexed ways in this region
 
-    std::list<Region>                    areas;     //! A list of sub regions
+    std::list<Region>                            regions;     //! A list of sub regions
 
     void CalculateMinMax()
     {
@@ -214,46 +215,53 @@ namespace osmscout {
                            Progress& progress)
   {
     FileScanner scanner;
-    uint32_t    wayCount;
+    uint32_t    areaCount;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "ways.dat"),
+                                      "areas.dat"),
                       FileScanner::Sequential,
                       parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open 'ways.dat'");
+      progress.Error("Cannot open 'areas.dat'");
       return false;
     }
 
-    if (!scanner.Read(wayCount)) {
+    if (!scanner.Read(areaCount)) {
       progress.Error("Error while reading number of data entries in file");
       return false;
     }
 
-    for (uint32_t w=1; w<=wayCount; w++) {
-      progress.SetProgress(w,wayCount);
+    for (uint32_t a=1; a<=areaCount; a++) {
+      progress.SetProgress(a,areaCount);
 
-      Way way;
+      Area area;
 
-      if (!way.Read(scanner)) {
+      if (!area.Read(scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(w)+" of "+
-                       NumberToString(wayCount)+
+                       NumberToString(a)+" of "+
+                       NumberToString(areaCount)+
                        " in file '"+
                        scanner.GetFilename()+"'");
         return false;
       }
 
-      if (way.IsArea() &&
-          cityIds.find(way.GetType())!=cityIds.end()) {
-        std::string name=way.GetName();
+      if (cityIds.find(area.GetType())!=cityIds.end()) {
+        for (std::vector<Area::Role>::const_iterator role=area.roles.begin();
+             role!=area.roles.end();
+             ++role) {
+          if (role->ring!=0) {
+            continue;
+          }
 
-        CityArea cityArea;
+          std::string name=area.GetName();
 
-        cityArea.reference.Set(way.GetFileOffset(),refWay);
-        cityArea.name=name;
-        cityArea.nodes=way.nodes;
+          CityArea cityArea;
 
-        cityAreas.push_back(cityArea);
+          cityArea.reference.Set(area.GetFileOffset(),refArea);
+          cityArea.name=name;
+          cityArea.nodes=role->nodes;
+
+          cityAreas.push_back(cityArea);
+        }
       }
     }
 
@@ -318,140 +326,67 @@ namespace osmscout {
                                Progress& progress)
   {
     FileScanner scanner;
-    uint32_t    wayCount;
+    uint32_t    areaCount;
 
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "ways.dat"),
-                      FileScanner::Sequential,
-                      parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open 'ways.dat'");
-      return false;
-    }
-
-    if (!scanner.Read(wayCount)) {
-      progress.Error("Error while reading number of data entries in file");
-      return false;
-    }
-
-    for (uint32_t w=1; w<=wayCount; w++) {
-      Way way;
-
-      progress.SetProgress(w,wayCount);
-
-      if (!way.Read(scanner)) {
-        progress.Error(std::string("Error while reading data entry ")+
-                       NumberToString(w)+" of "+
-                       NumberToString(wayCount)+
-                       " in file '"+
-                       scanner.GetFilename()+"'");
-        return false;
-      }
-
-      if (way.IsArea() &&
-          way.GetType()==boundaryId) {
-        size_t level=0;
-
-        if (way.GetName().empty()) {
-          progress.Warning(std::string("Area boundary ")+NumberToString(way.GetFileOffset())+" has no name");
-        }
-
-        for (size_t i=0; i<way.GetTagCount(); i++) {
-          if (way.GetTagKey(i)==typeConfig.tagAdminLevel) {
-            if (StringToNumber(way.GetTagValue(i),level)) {
-              Boundary boundary;
-
-              boundary.reference.Set(way.GetFileOffset(),refWay);
-              boundary.name=way.GetName();
-              boundary.level=level;
-              boundary.areas.push_back(way.nodes);
-
-              boundaryAreas.push_back(boundary);
-            }
-            else {
-              progress.Info("Could not parse admin_level of way "+
-                            NumberToString(way.GetType() )+" "+NumberToString(way.GetFileOffset()));
-            }
-
-            break;
-          }
-        }
-      }
-    }
-
-    return scanner.Close();
-  }
-
-  /**
-    Return the list of ways of type administrative boundary.
-    */
-  static bool GetBoundaryRelations(const ImportParameter& parameter,
-                                   const TypeConfig& typeConfig,
-                                   TypeId boundaryId,
-                                   std::list<Boundary>& boundaryRelations,
-                                   Progress& progress)
-  {
-    FileScanner scanner;
-    uint32_t    relCount;
-
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "relations.dat"),
+                                      "areas.dat"),
                       FileScanner::Sequential,
                       true)) {
       progress.Error("Cannot open 'relations.dat'");
       return false;
     }
 
-    if (!scanner.Read(relCount)) {
+    if (!scanner.Read(areaCount)) {
       progress.Error("Error while reading number of data entries in file");
       return false;
     }
 
-    for (uint32_t r=1; r<=relCount; r++) {
-      progress.SetProgress(r,relCount);
+    for (uint32_t r=1; r<=areaCount; r++) {
+      progress.SetProgress(r,areaCount);
 
-      Relation relation;
+      Area area;
 
-      if (!relation.Read(scanner)) {
+      if (!area.Read(scanner)) {
         progress.Error(std::string("Error while reading data entry ")+
                        NumberToString(r)+" of "+
-                       NumberToString(relCount)+
+                       NumberToString(areaCount)+
                        " in file '"+
                        scanner.GetFilename()+"'");
         return false;
       }
 
-      if (relation.GetType()==boundaryId) {
+      if (area.GetType()==boundaryId) {
         size_t level=0;
 
-        if (relation.GetName().empty()) {
-          progress.Warning(std::string("Relation boundary ")+
-                           NumberToString(relation.GetType())+" "+
-                           NumberToString(relation.GetFileOffset())+" has no name");
+        if (area.GetName().empty()) {
+          progress.Warning(std::string("Area boundary ")+
+                           NumberToString(area.GetType())+" "+
+                           NumberToString(area.GetFileOffset())+" has no name");
         }
 
-        for (size_t i=0; i<relation.GetTagCount(); i++) {
-          if (relation.GetTagKey(i)==typeConfig.tagAdminLevel) {
-            if (StringToNumber(relation.GetTagValue(i),level)) {
+        for (size_t i=0; i<area.GetTagCount(); i++) {
+          if (area.GetTagKey(i)==typeConfig.tagAdminLevel) {
+            if (StringToNumber(area.GetTagValue(i),level)) {
               Boundary boundary;
 
-              boundary.reference.Set(relation.GetFileOffset(),refRelation);
-              boundary.name=relation.GetName();
+              boundary.reference.Set(area.GetFileOffset(),refArea);
+              boundary.name=area.GetName();
               boundary.level=level;
 
-              for (std::vector<Relation::Role>::const_iterator role=relation.roles.begin();
-                   role!=relation.roles.end();
+              for (std::vector<Area::Role>::const_iterator role=area.roles.begin();
+                   role!=area.roles.end();
                    ++role) {
                 if (role->ring==0) {
                   boundary.areas.push_back(role->nodes);
                 }
               }
 
-              boundaryRelations.push_back(boundary);
+              boundaryAreas.push_back(boundary);
             }
             else {
               progress.Info("Could not parse admin_level of relation "+
-                            NumberToString(relation.GetType())+" "+
-                            NumberToString(relation.GetFileOffset()));
+                            NumberToString(area.GetType())+" "+
+                            NumberToString(area.GetFileOffset()));
             }
 
             break;
@@ -460,8 +395,8 @@ namespace osmscout {
 
         if (level==0) {
           progress.Info("No tag 'admin_level' for relation "+
-                        NumberToString(relation.GetType())+" "+
-                        NumberToString(relation.GetFileOffset()));
+                        NumberToString(area.GetType())+" "+
+                        NumberToString(area.GetFileOffset()));
         }
       }
     }
@@ -470,27 +405,27 @@ namespace osmscout {
   }
 
   static void AddRegion(Region& parent,
-                        const Region& area)
+                        const Region& region)
   {
-    for (std::list<Region>::iterator a=parent.areas.begin();
-         a!=parent.areas.end();
-         a++) {
-      if (!(area.maxlon<a->minlon) &&
-          !(area.minlon>a->maxlon) &&
-          !(area.maxlat<a->minlat) &&
-          !(area.minlat>a->maxlat)) {
-        if (IsAreaSubOfArea(area.area,a->area)) {
+    for (std::list<Region>::iterator r=parent.regions.begin();
+         r!=parent.regions.end();
+         r++) {
+      if (!(region.maxlon<r->minlon) &&
+          !(region.minlon>r->maxlon) &&
+          !(region.maxlat<r->minlat) &&
+          !(region.minlat>r->maxlat)) {
+        if (IsAreaSubOfArea(region.area,r->area)) {
           // If we already have the same name and are a "minor" reference, we skip...
-          if (!(area.name==a->name &&
-                area.reference.type<a->reference.type)) {
-            AddRegion(*a,area);
+          if (!(region.name==r->name &&
+                region.reference.type<r->reference.type)) {
+            AddRegion(*r,region);
           }
           return;
         }
       }
     }
 
-    parent.areas.push_back(area);
+    parent.regions.push_back(region);
   }
 
   static void AddLocationToRegion(Region& area,
@@ -501,8 +436,8 @@ namespace osmscout {
       return;
     }
 
-    for (std::list<Region>::iterator a=area.areas.begin();
-         a!=area.areas.end();
+    for (std::list<Region>::iterator a=area.regions.begin();
+         a!=area.regions.end();
          a++) {
       if (IsCoordInArea(node,a->area)) {
         AddLocationToRegion(*a,location,node);
@@ -516,40 +451,14 @@ namespace osmscout {
   static void BuildRegionTreeFromAreas(Progress& progress,
                                        const TypeConfig& typeConfig,
                                        const std::list<Boundary>& boundaryAreas,
-                                       const std::list<Boundary>& boundaryRelations,
                                        const std::list<CityArea>& cityAreas,
                                        const std::list<CityNode>& cityNodes,
                                        Region& rootRegion)
   {
     size_t currentCount=1;
-    size_t maxCount=boundaryAreas.size()+boundaryRelations.size()+cityAreas.size()+cityNodes.size();
+    size_t maxCount=boundaryAreas.size()+cityAreas.size()+cityNodes.size();
 
     for (size_t l=1; l<=10; l++) {
-      for (std::list<Boundary>::const_iterator rel=boundaryRelations.begin();
-           rel!=boundaryRelations.end();
-           ++rel) {
-        progress.SetProgress(currentCount,maxCount);
-
-        size_t      level=rel->level;
-        std::string name=rel->name;
-
-        if (level==l) {
-          for (size_t i=0; i<rel->areas.size(); i++) {
-            Region region;
-
-            region.reference=rel->reference;
-            region.name=name.empty() ? "???" : name;
-            region.area=rel->areas[i];
-
-            region.CalculateMinMax();
-
-            AddRegion(rootRegion,region);
-          }
-
-          currentCount++;
-        }
-      }
-
       for (std::list<Boundary>::const_iterator a=boundaryAreas.begin();
            a!=boundaryAreas.end();
            ++a) {
@@ -608,6 +517,45 @@ namespace osmscout {
     }
   }
 
+  static bool AddAreaToRegion(Region& region,
+                              const Area& area,
+                              const Area::Role& role,
+                              double minlon,
+                              double minlat,
+                              double maxlon,
+                              double maxlat)
+  {
+    for (std::list<Region>::iterator r=region.regions.begin();
+         r!=region.regions.end();
+         r++) {
+      // Fast check, if the object is in the bounds of the area
+      if (!(maxlon<r->minlon) &&
+          !(minlon>r->maxlon) &&
+          !(maxlat<r->minlat) &&
+          !(minlat>r->maxlat)) {
+        // Check if one point is in the area
+        bool match=IsCoordInArea(role.nodes[0],r->area);
+
+        if (match) {
+          bool completeMatch=AddAreaToRegion(*r,area,role,minlon,minlat,maxlon,maxlat);
+
+          if (completeMatch) {
+            // We are done, the object is completely enclosed by one of our sub areas
+            return true;
+          }
+        }
+      }
+    }
+
+    // If we (at least partly) contain it, we add it to the area but continue
+
+    region.areas[area.GetName()].push_back(area.GetFileOffset());
+
+    bool completeMatch=IsAreaCompletelyInArea(role.nodes,region.area);
+
+    return completeMatch;
+  }
+
   /**
     Add the given object (currently only a way) to
     the hierachical area index.
@@ -621,26 +569,63 @@ namespace osmscout {
     if one point of an object is in a area it is very likely that all points of the object
     are in the area.
     */
-  static bool AddWayToRegion(Region& area,
+  static void AddAreaToRegion(Region& region,
+                              const Area& area,
+                              double minlon,
+                              double minlat,
+                              double maxlon,
+                              double maxlat)
+  {
+    for (std::vector<Area::Role>::const_iterator role=area.roles.begin();
+         role!=area.roles.end();
+         ++role) {
+      if (role->ring!=0) {
+        continue;
+      }
+
+      AddAreaToRegion(region,
+                      area,
+                      *role,
+                      minlon,
+                      minlat,
+                      maxlon,
+                      maxlat);
+    }
+  }
+
+  /**
+    Add the given object (currently only a way) to
+    the hierachical area index.
+
+    If the method returns true, the objects was completely contained
+    by the passed area (or one of its sub areas), else it returns false.
+    If it returns false, not all points of the object were covered by the area
+    and the parent area should add the object, too.
+
+    The code is designed to minimize the number of "point in area" checks, it assumes that
+    if one point of an object is in a area it is very likely that all points of the object
+    are in the area.
+    */
+  static bool AddWayToRegion(Region& region,
                              const Way& way,
                              double minlon,
                              double minlat,
                              double maxlon,
                              double maxlat)
   {
-    for (std::list<Region>::iterator a=area.areas.begin();
-         a!=area.areas.end();
-         a++) {
+    for (std::list<Region>::iterator r=region.regions.begin();
+         r!=region.regions.end();
+         r++) {
       // Fast check, if the object is in the bounds of the area
-      if (!(maxlon<a->minlon) &&
-          !(minlon>a->maxlon) &&
-          !(maxlat<a->minlat) &&
-          !(minlat>a->maxlat)) {
+      if (!(maxlon<r->minlon) &&
+          !(minlon>r->maxlon) &&
+          !(maxlat<r->minlat) &&
+          !(minlat>r->maxlat)) {
         // Check if one point is in the area
-        bool match=IsCoordInArea(way.nodes[0],a->area);
+        bool match=IsCoordInArea(way.nodes[0],r->area);
 
         if (match) {
-          bool completeMatch=AddWayToRegion(*a,way,minlon,minlat,maxlon,maxlat);
+          bool completeMatch=AddWayToRegion(*r,way,minlon,minlat,maxlon,maxlat);
 
           if (completeMatch) {
             // We are done, the object is completely enclosed by one of our sub areas
@@ -652,18 +637,70 @@ namespace osmscout {
 
     // If we (at least partly) contain it, we add it to the area but continue
 
-    area.ways[way.GetName()].push_back(way.GetFileOffset());
+    region.ways[way.GetName()].push_back(way.GetFileOffset());
 
-    bool completeMatch=IsAreaCompletelyInArea(way.nodes,area.area);
+    bool completeMatch=IsAreaCompletelyInArea(way.nodes,region.area);
 
     return completeMatch;
   }
 
-  static bool IndexAreasAndWays(const ImportParameter& parameter,
-                                Progress& progress,
-                                const TypeConfig& typeConfig,
-                                const OSMSCOUT_HASHSET<TypeId>& indexables,
-                                Region& rootArea)
+  static bool IndexAreas(const ImportParameter& parameter,
+                         Progress& progress,
+                         const TypeConfig& typeConfig,
+                         const OSMSCOUT_HASHSET<TypeId>& indexables,
+                         Region& rootArea)
+  {
+    FileScanner scanner;
+    uint32_t    areaCount;
+
+    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                      "areas.dat"),
+                      FileScanner::Sequential,
+                      parameter.GetWayDataMemoryMaped())) {
+      progress.Error("Cannot open 'areas.dat'");
+      return false;
+    }
+
+    if (!scanner.Read(areaCount)) {
+      progress.Error("Error while reading number of data entries in file");
+      return false;
+    }
+
+    for (uint32_t w=1; w<=areaCount; w++) {
+      progress.SetProgress(w,areaCount);
+
+      Area area;
+
+      if (!area.Read(scanner)) {
+        progress.Error(std::string("Error while reading data entry ")+
+                       NumberToString(w)+" of "+
+                       NumberToString(areaCount)+
+                       " in file '"+
+                       scanner.GetFilename()+"'");
+        return false;
+      }
+
+      if (indexables.find(area.GetType())!=indexables.end() &&
+          !area.GetName().empty()) {
+        double minlon;
+        double maxlon;
+        double minlat;
+        double maxlat;
+
+        area.GetBoundingBox(minlon,maxlon,minlat,maxlat);
+
+        AddAreaToRegion(rootArea,area,minlon,minlat,maxlon,maxlat);
+      }
+    }
+
+    return scanner.Close();
+  }
+
+  static bool IndexWays(const ImportParameter& parameter,
+                        Progress& progress,
+                        const TypeConfig& typeConfig,
+                        const OSMSCOUT_HASHSET<TypeId>& indexables,
+                        Region& rootArea)
   {
     FileScanner scanner;
     uint32_t    wayCount;
@@ -698,19 +735,12 @@ namespace osmscout {
 
       if (indexables.find(way.GetType())!=indexables.end() &&
           !way.GetName().empty()) {
-        double minlon=way.nodes[0].GetLon();
-        double maxlon=way.nodes[0].GetLon();
+        double minlon;
+        double maxlon;
+        double minlat;
+        double maxlat;
 
-        double minlat=way.nodes[0].GetLat();
-        double maxlat=way.nodes[0].GetLat();
-
-        for (size_t n=1; n<way.nodes.size(); n++) {
-          minlon=std::min(minlon,way.nodes[n].GetLon());
-          maxlon=std::max(maxlon,way.nodes[n].GetLon());
-
-          minlat=std::min(minlat,way.nodes[n].GetLat());
-          maxlat=std::max(maxlat,way.nodes[n].GetLat());
-        }
+        way.GetBoundingBox(minlon,maxlon,minlat,maxlat);
 
         AddWayToRegion(rootArea,way,minlon,minlat,maxlon,maxlat);
       }
@@ -724,8 +754,8 @@ namespace osmscout {
                               const std::string& name,
                               FileOffset offset)
   {
-    for (std::list<Region>::iterator a=area.areas.begin();
-         a!=area.areas.end();
+    for (std::list<Region>::iterator a=area.regions.begin();
+         a!=area.regions.end();
          a++) {
       if (IsCoordInArea(node,a->area)) {
         AddNodeToRegion(*a,node,name,offset);
@@ -807,16 +837,16 @@ namespace osmscout {
 
   static void DumpRegion(const Region& parent, size_t indent)
   {
-    for (std::list<Region>::const_iterator a=parent.areas.begin();
-         a!=parent.areas.end();
-         a++) {
+    for (std::list<Region>::const_iterator r=parent.regions.begin();
+         r!=parent.regions.end();
+         r++) {
       for (size_t i=0; i<indent; i++) {
         std::cout << " ";
       }
-      std::cout << a->name << " " << a->reference.GetTypeName() << " " << a->reference.GetFileOffset() << " " << a->areas.size() << " " << a->nodes.size() << " " << a->ways.size() << " " << a->aliases.size() << std::endl;
+      std::cout << r->name << " " << r->reference.GetTypeName() << " " << r->reference.GetFileOffset() << " " << r->areas.size() << " " << r->nodes.size() << " " << r->ways.size() << " " << r->aliases.size() << std::endl;
 
-      for (std::list<RegionAlias>::const_iterator l=a->aliases.begin();
-           l!=a->aliases.end();
+      for (std::list<RegionAlias>::const_iterator l=r->aliases.begin();
+           l!=r->aliases.end();
            l++) {
         for (size_t i=0; i<indent; i++) {
           std::cout << " ";
@@ -824,7 +854,7 @@ namespace osmscout {
         std::cout << " =" << l->name << " " << l->reference.GetTypeName() << " " << l->reference.GetFileOffset() << std::endl;
       }
 
-      DumpRegion(*a,indent+2);
+      DumpRegion(*r,indent+2);
     }
   }
 
@@ -832,8 +862,8 @@ namespace osmscout {
   {
     unsigned long depth=0;
 
-    for (std::list<Region>::const_iterator a=area.areas.begin();
-         a!=area.areas.end();
+    for (std::list<Region>::const_iterator a=area.regions.begin();
+         a!=area.regions.end();
          a++) {
       depth=std::max(depth,GetRegionTreeDepth(*a));
     }
@@ -848,33 +878,33 @@ namespace osmscout {
   {
     areaTree[level].push_back(&area);
 
-    for (std::list<Region>::iterator a=area.areas.begin();
-         a!=area.areas.end();
+    for (std::list<Region>::iterator a=area.regions.begin();
+         a!=area.regions.end();
          a++) {
       SortInRegion(*a,areaTree,level+1);
     }
   }
 
   static bool WriteRegion(FileWriter& writer,
-                          Region& area, FileOffset parentOffset)
+                          Region& region, FileOffset parentOffset)
   {
-    writer.GetPos(area.offset);
+    writer.GetPos(region.offset);
 
-    writer.Write(area.name);
+    writer.Write(region.name);
     writer.WriteNumber(parentOffset);
 
-    writer.WriteNumber((uint32_t)area.areas.size());
-    for (std::list<Region>::iterator a=area.areas.begin();
-         a!=area.areas.end();
-         a++) {
-      if (!WriteRegion(writer,*a,area.offset)) {
+    writer.WriteNumber((uint32_t)region.regions.size());
+    for (std::list<Region>::iterator r=region.regions.begin();
+         r!=region.regions.end();
+         r++) {
+      if (!WriteRegion(writer,*r,region.offset)) {
         return false;
       }
     }
 
-    writer.WriteNumber((uint32_t)area.nodes.size());
-    for (std::map<std::string,std::list<FileOffset> >::const_iterator node=area.nodes.begin();
-         node!=area.nodes.end();
+    writer.WriteNumber((uint32_t)region.nodes.size());
+    for (std::map<std::string,std::list<FileOffset> >::const_iterator node=region.nodes.begin();
+         node!=region.nodes.end();
          ++node) {
       writer.Write(node->first);                         // Node name
       writer.WriteNumber((uint32_t)node->second.size()); // Number of ids
@@ -886,9 +916,23 @@ namespace osmscout {
       }
     }
 
-    writer.WriteNumber((uint32_t)area.ways.size());
-    for (std::map<std::string,std::list<FileOffset> >::const_iterator way=area.ways.begin();
-         way!=area.ways.end();
+    writer.WriteNumber((uint32_t)region.areas.size());
+    for (std::map<std::string,std::list<FileOffset> >::const_iterator area=region.areas.begin();
+         area!=region.areas.end();
+         ++area) {
+      writer.Write(area->first);                         // Area name
+      writer.WriteNumber((uint32_t)area->second.size()); // Number of ids
+
+      for (std::list<FileOffset>::const_iterator offset=area->second.begin();
+           offset!=area->second.end();
+           ++offset) {
+        writer.WriteNumber(*offset); // File offset of area
+      }
+    }
+
+    writer.WriteNumber((uint32_t)region.ways.size());
+    for (std::map<std::string,std::list<FileOffset> >::const_iterator way=region.ways.begin();
+         way!=region.ways.end();
          ++way) {
       writer.Write(way->first);                         // Way name
       writer.WriteNumber((uint32_t)way->second.size()); // Number of ids
@@ -906,10 +950,10 @@ namespace osmscout {
   static bool WriteRegions(FileWriter& writer,
                            Region& root)
   {
-    for (std::list<Region>::iterator a=root.areas.begin();
-         a!=root.areas.end();
-         ++a) {
-      if (!WriteRegion(writer,*a,0)) {
+    for (std::list<Region>::iterator r=root.regions.begin();
+         r!=root.regions.end();
+         ++r) {
+      if (!WriteRegion(writer,*r,0)) {
         return false;
       }
     }
@@ -917,29 +961,29 @@ namespace osmscout {
     return true;
   }
 
-  static void GetLocationRefs(const Region& area,
+  static void GetLocationRefs(const Region& regions,
                               std::map<std::string,std::list<RegionRef> >& locationRefs)
   {
     RegionRef locRef;
 
-    locRef.reference=area.reference;
-    locRef.offset=area.offset;
+    locRef.reference=regions.reference;
+    locRef.offset=regions.offset;
 
-    locationRefs[area.name].push_back(locRef);
+    locationRefs[regions.name].push_back(locRef);
 
-    for (std::list<RegionAlias>::const_iterator l=area.aliases.begin();
-         l!=area.aliases.end();
+    for (std::list<RegionAlias>::const_iterator l=regions.aliases.begin();
+         l!=regions.aliases.end();
          ++l) {
       locRef.reference=l->reference;
-      locRef.offset=area.offset;
+      locRef.offset=regions.offset;
 
       locationRefs[l->name].push_back(locRef);
     }
 
-    for (std::list<Region>::const_iterator a=area.areas.begin();
-         a!=area.areas.end();
-         a++) {
-      GetLocationRefs(*a,locationRefs);
+    for (std::list<Region>::const_iterator r=regions.regions.begin();
+         r!=regions.regions.end();
+         r++) {
+      GetLocationRefs(*r,locationRefs);
     }
   }
 
@@ -996,7 +1040,6 @@ namespace osmscout {
     std::list<CityNode>              cityNodes;
     std::list<CityArea>              cityAreas;
     std::list<Boundary>              boundaryAreas;
-    std::list<Boundary>              boundaryRelations;
     std::vector<std::list<Region*> > regionTree;
 
     progress.SetAction("Setup");
@@ -1091,22 +1134,7 @@ namespace osmscout {
       return false;
     }
 
-    //
-    // Getting all relations of type 'administrative boundary'.
-    //
-
-    progress.SetAction("Scanning for administrative boundaries of type 'relation'");
-
-    if (!GetBoundaryRelations(parameter,
-                              typeConfig,
-                              boundaryId,
-                              boundaryRelations,
-                              progress)) {
-      return false;
-    }
-
     progress.Info(std::string("Found ")+NumberToString(boundaryAreas.size())+" areas of type 'administrative boundary'");
-    progress.Info(std::string("Found ")+NumberToString(boundaryRelations.size())+" relations of type 'administrative boundary'");
 
     progress.SetAction("Merging city areas and city nodes");
 
@@ -1119,7 +1147,6 @@ namespace osmscout {
     BuildRegionTreeFromAreas(progress,
                              typeConfig,
                              boundaryAreas,
-                             boundaryRelations,
                              cityAreas,
                              cityNodes,
                              rootRegion);
@@ -1129,7 +1156,6 @@ namespace osmscout {
     cityNodes.clear();
     cityAreas.clear();
     boundaryAreas.clear();
-    boundaryRelations.clear();
 
     progress.SetAction("Calculating bounds of areas");
 
@@ -1145,13 +1171,23 @@ namespace osmscout {
       progress.Info(std::string("Area tree index ")+NumberToString(i)+" size: "+NumberToString(regionTree[i].size()));
     }
 
-    progress.SetAction("Index ways and areas");
+    progress.SetAction("Index areas");
 
-    if (!IndexAreasAndWays(parameter,
-                           progress,
-                           typeConfig,
-                           indexables,
-                           rootRegion)) {
+    if (!IndexAreas(parameter,
+                    progress,
+                    typeConfig,
+                    indexables,
+                    rootRegion)) {
+      return false;
+    }
+
+    progress.SetAction("Index ways");
+
+    if (!IndexWays(parameter,
+                   progress,
+                   typeConfig,
+                   indexables,
+                   rootRegion)) {
       return false;
     }
 

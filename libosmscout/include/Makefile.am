@@ -35,6 +35,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/Coord.h \
                         osmscout/GeoCoord.h \
                         osmscout/Pixel.h \
+                        osmscout/Area.h \
                         osmscout/Node.h \
                         osmscout/Path.h \
                         osmscout/Point.h \
@@ -47,8 +48,8 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/ObjectRef.h \
                         osmscout/NumericIndex.h \
                         osmscout/DataFile.h \
+                        osmscout/AreaDataFile.h \
                         osmscout/NodeDataFile.h \
-                        osmscout/RelationDataFile.h \
                         osmscout/WayDataFile.h \
                         osmscout/AreaAreaIndex.h \
                         osmscout/AreaNodeIndex.h \

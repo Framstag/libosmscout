@@ -144,9 +144,7 @@ int main(int argc, char* argv[])
                       searchParameter,
                       data.nodes,
                       data.ways,
-                      data.areas,
-                      data.relationWays,
-                      data.relationAreas);
+                      data.areas);
 
   searchParameter.SetMaximumNodes(std::numeric_limits<size_t>::max());
   searchParameter.SetMaximumWays(std::numeric_limits<size_t>::max());

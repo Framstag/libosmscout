@@ -35,22 +35,22 @@
 
 struct Job
 {
-  osmscout::ObjectRef      idRef;
-  osmscout::ObjectFileRef  fileRef;
+  osmscout::ObjectOSMRef  osmRef;
+  osmscout::ObjectFileRef fileRef;
 
   Job()
   {
     // no code
   }
 
-  Job(const osmscout::ObjectRef& idRef)
-  : idRef(idRef)
+  Job(osmscout::OSMRefType type, osmscout::Id id)
+  : osmRef(id,type)
   {
     // no code
   }
 
-  Job(const osmscout::ObjectFileRef& fileRef)
-  : fileRef(fileRef)
+  Job(osmscout::RefType type, osmscout::FileOffset fileOffset)
+  : fileRef(fileOffset,type)
   {
     // no code
   }
@@ -92,6 +92,11 @@ static bool ParseArguments(int argc,
 
       arg++;
     }
+
+    //
+    // OSM types (nodes, ways, relations)
+    //
+
     else if (strcmp(argv[arg],"-n")==0) {
       unsigned long id;
 
@@ -106,25 +111,7 @@ static bool ParseArguments(int argc,
         return false;
       }
 
-      jobs.push_back(Job(osmscout::ObjectRef(id,osmscout::refNode)));
-
-      arg++;
-    }
-    else if (strcmp(argv[arg],"-no")==0) {
-      unsigned long fileOffset;
-
-      arg++;
-      if (arg>=argc) {
-        std::cerr << "Option -no requires parameter!" << std::endl;
-        return false;
-      }
-
-      if (sscanf(argv[arg],"%lu",&fileOffset)!=1) {
-        std::cerr << "Node id is not numeric!" << std::endl;
-        return false;
-      }
-
-      jobs.push_back(Job(osmscout::ObjectFileRef(fileOffset,osmscout::refNode)));
+      jobs.push_back(Job(osmscout::osmRefNode,id));
 
       arg++;
     }
@@ -142,25 +129,7 @@ static bool ParseArguments(int argc,
         return false;
       }
 
-      jobs.push_back(Job(osmscout::ObjectRef(id,osmscout::refWay)));
-
-      arg++;
-    }
-    else if (strcmp(argv[arg],"-wo")==0) {
-      unsigned long fileOffset;
-
-      arg++;
-      if (arg>=argc) {
-        std::cerr << "Option -wo requires parameter!" << std::endl;
-        return false;
-      }
-
-      if (sscanf(argv[arg],"%lu",&fileOffset)!=1) {
-        std::cerr << "Way file offset is not numeric!" << std::endl;
-        return false;
-      }
-
-      jobs.push_back(Job(osmscout::ObjectFileRef(fileOffset,osmscout::refWay)));
+      jobs.push_back(Job(osmscout::osmRefWay,id));
 
       arg++;
     }
@@ -178,11 +147,52 @@ static bool ParseArguments(int argc,
         return false;
       }
 
-      jobs.push_back(Job(osmscout::ObjectRef(id,osmscout::refRelation)));
+      jobs.push_back(Job(osmscout::osmRefRelation,id));
 
       arg++;
     }
-    else if (strcmp(argv[arg],"-ro")==0) {
+
+    //
+    // libosmscout types (nodes, ways, areas)
+    //
+
+    else if (strcmp(argv[arg],"-no")==0) {
+      unsigned long fileOffset;
+
+      arg++;
+      if (arg>=argc) {
+        std::cerr << "Option -no requires parameter!" << std::endl;
+        return false;
+      }
+
+      if (sscanf(argv[arg],"%lu",&fileOffset)!=1) {
+        std::cerr << "Node id is not numeric!" << std::endl;
+        return false;
+      }
+
+      jobs.push_back(Job(osmscout::refNode,fileOffset));
+
+      arg++;
+    }
+    else if (strcmp(argv[arg],"-wo")==0) {
+      unsigned long fileOffset;
+
+      arg++;
+      if (arg>=argc) {
+        std::cerr << "Option -wo requires parameter!" << std::endl;
+        return false;
+      }
+
+      if (sscanf(argv[arg],"%lu",&fileOffset)!=1) {
+        std::cerr << "Way file offset is not numeric!" << std::endl;
+        return false;
+      }
+
+      jobs.push_back(Job(osmscout::refWay,fileOffset));
+
+      arg++;
+    }
+    else if (strcmp(argv[arg],"-ao")==0) {
       unsigned long fileOffset;
 
       arg++;
@@ -196,10 +206,12 @@ static bool ParseArguments(int argc,
         return false;
       }
 
-      jobs.push_back(Job(osmscout::ObjectFileRef(fileOffset,osmscout::refRelation)));
+      jobs.push_back(Job(osmscout::refWay,fileOffset));
 
       arg++;
     }
+
+
     else {
       std::cerr << "Unknown parameter '" << argv[arg] << "'!" << std::endl;
       return false;
@@ -346,12 +358,7 @@ static void DumpWay(const osmscout::TypeConfig* typeConfig,
                     const osmscout::WayRef way,
                     osmscout::Id id)
 {
-  if (way->IsArea()) {
-    std::cout << "Area {" << std::endl;
-  }
-  else {
-    std::cout << "Way {" << std::endl;
-  }
+  std::cout << "Way {" << std::endl;
 
   std::cout << "  id: " << id << std::endl;
   std::cout << "  fileOffset: " << way->GetFileOffset() << std::endl;
@@ -392,63 +399,37 @@ static void DumpWay(const osmscout::TypeConfig* typeConfig,
   std::cout << "}" << std::endl;
 }
 
-static void DumpRelation(const osmscout::TypeConfig* typeConfig,
-                         const osmscout::RelationRef relation,
-                         osmscout::Id id)
+static void DumpArea(const osmscout::TypeConfig* typeConfig,
+                     const osmscout::AreaRef area,
+                     osmscout::Id id)
 {
-  if (relation->IsArea()) {
-    std::cout << "AreaRelation {" << std::endl;
-  }
-  else {
-    std::cout << "WayRelation {" << std::endl;
-  }
+  std::cout << "Area {" << std::endl;
 
   std::cout << "  id: " << id << std::endl;
-  std::cout << "  fileOffset: " << relation->GetFileOffset() << std::endl;
+  std::cout << "  fileOffset: " << area->GetFileOffset() << std::endl;
 
-  if (relation->IsArea()) {
-    DumpAreaSegmentAttributes(relation->GetAttributes(),
-                              typeConfig,
-                              2);
-  }
-  else {
-    DumpWaySegmentAttributes(relation->GetAttributes(),
-                             typeConfig,
-                             2);
-  }
+  DumpAreaSegmentAttributes(area->GetAttributes(),
+                            typeConfig,
+                            2);
 
-  for (size_t r=0; r<relation->roles.size(); r++) {
+  for (size_t r=0; r<area->roles.size(); r++) {
     std::cout << std::endl;
     std::cout << "  role[" << r << "] {" << std::endl;
 
-    if (!relation->IsArea() &&
-        !relation->roles[r].role.empty()) {
-      std::cout << "    role: " << relation->roles[r].role << std::endl;
-    }
+    std::cout << "    ring: " << (size_t)area->roles[r].ring << std::endl;
 
-    if (relation->IsArea()) {
-      std::cout << "    ring: " << (size_t)relation->roles[r].ring << std::endl;
-    }
-
-    if (relation->IsArea()) {
-      DumpAreaSegmentAttributes(relation->roles[r].GetAttributes(),
-                                typeConfig,
-                                4);
-    }
-    else {
-      DumpWaySegmentAttributes(relation->roles[r].GetAttributes(),
-                               typeConfig,
-                               4);
-    }
+    DumpAreaSegmentAttributes(area->roles[r].GetAttributes(),
+                              typeConfig,
+                              4);
 
     std::cout << "  }" << std::endl;
   }
 
-  if (relation->HasTags()) {
+  if (area->HasTags()) {
     std::cout << std::endl;
 
-    for (size_t t=0; t<relation->GetTagCount(); t++) {
-      std::cout << "  " << typeConfig->GetTagInfo(relation->GetTagKey(t)).GetName() << ": " << relation->GetTagValue(t) << std::endl;
+    for (size_t t=0; t<area->GetTagCount(); t++) {
+      std::cout << "  " << typeConfig->GetTagInfo(area->GetTagKey(t)).GetName() << ": " << area->GetTagValue(t) << std::endl;
     }
   }
 
@@ -483,27 +464,20 @@ int main(int argc, char* argv[])
     std::cerr << "Cannot open debug database" << std::endl;
   }
 
-  std::set<osmscout::Id>         nodeIds;
-  std::set<osmscout::Id>         wayIds;
-  std::set<osmscout::Id>         relIds;
-  std::set<osmscout::FileOffset> nodeFileOffsets;
-  std::set<osmscout::FileOffset> wayFileOffsets;
-  std::set<osmscout::FileOffset> relFileOffsets;
+  // OSM ids
+  std::set<osmscout::ObjectOSMRef>  osmRefs;
+  std::set<osmscout::ObjectFileRef> fileRefs;
 
   for (std::list<Job>::const_iterator job=jobs.begin();
        job!=jobs.end();
        ++job) {
-    switch (job->idRef.GetType()) {
-    case osmscout::refNone:
+    switch (job->osmRef.GetType()) {
+    case osmscout::osmRefNone:
       break;
-    case osmscout::refNode:
-      nodeIds.insert(job->idRef.GetId());
-      break;
-    case osmscout::refWay:
-      wayIds.insert(job->idRef.GetId());
-      break;
-    case osmscout::refRelation:
-      relIds.insert(job->idRef.GetId());
+    case osmscout::osmRefNode:
+    case osmscout::osmRefWay:
+    case osmscout::osmRefRelation:
+      osmRefs.insert(job->osmRef);
       break;
     }
 
@@ -511,58 +485,30 @@ int main(int argc, char* argv[])
     case osmscout::refNone:
       break;
     case osmscout::refNode:
-      nodeFileOffsets.insert(job->fileRef.GetFileOffset());
-      break;
+    case osmscout::refArea:
     case osmscout::refWay:
-      wayFileOffsets.insert(job->fileRef.GetFileOffset());
-      break;
-    case osmscout::refRelation:
-      relFileOffsets.insert(job->fileRef.GetFileOffset());
+      fileRefs.insert(job->fileRef);
       break;
     }
   }
 
-  std::map<osmscout::Id,osmscout::FileOffset> nodeIdFileOffsetMap;
-  std::map<osmscout::FileOffset,osmscout::Id> nodeFileOffsetIdMap;
-  std::map<osmscout::Id,osmscout::FileOffset> wayIdFileOffsetMap;
-  std::map<osmscout::FileOffset,osmscout::Id> wayFileOffsetIdMap;
-  std::map<osmscout::Id,osmscout::FileOffset> relIdFileOffsetMap;
-  std::map<osmscout::FileOffset,osmscout::Id> relFileOffsetIdMap;
+  std::map<osmscout::ObjectOSMRef,osmscout::ObjectFileRef> idFileOffsetMap;
+  std::map<osmscout::ObjectFileRef,osmscout::ObjectOSMRef> fileOffsetIdMap;
 
-  if (!nodeIds.empty() ||
-      !nodeFileOffsets.empty()) {
-    if (!debugDatabase.ResolveNodeIdsAndOffsets(nodeIds,
-                                                nodeIdFileOffsetMap,
-                                                nodeFileOffsets,
-                                                nodeFileOffsetIdMap)) {
+  if (!osmRefs.empty() ||
+      !fileRefs.empty()) {
+    if (!debugDatabase.ResolveReferences(osmRefs,
+                                         fileRefs,
+                                         idFileOffsetMap,
+                                         fileOffsetIdMap)) {
       std::cerr << "Error while resolving node ids and file offsets" << std::endl;
     }
   }
 
-  if (!wayIds.empty() ||
-      !wayFileOffsets.empty()) {
-    if (!debugDatabase.ResolveWayIdsAndOffsets(wayIds,
-                                               wayIdFileOffsetMap,
-                                               wayFileOffsets,
-                                               wayFileOffsetIdMap)) {
-      std::cerr << "Error while resolving way ids and file offsets" << std::endl;
-    }
-  }
-
-  if (!relIds.empty() ||
-      !relFileOffsets.empty()) {
-    if (!debugDatabase.ResolveRelationIdsAndOffsets(relIds,
-                                                    relIdFileOffsetMap,
-                                                    relFileOffsets,
-                                                    relFileOffsetIdMap)) {
-      std::cerr << "Error while resolving relation ids and file offsets" << std::endl;
-    }
-  }
-
-  std::vector<osmscout::Point>       coords;
-  std::vector<osmscout::NodeRef>     nodes;
-  std::vector<osmscout::WayRef>      ways;
-  std::vector<osmscout::RelationRef> relations;
+  std::vector<osmscout::Point>   coords;
+  std::vector<osmscout::NodeRef> nodes;
+  std::vector<osmscout::AreaRef> areas;
+  std::vector<osmscout::WayRef>  ways;
 
   if (!coordIds.empty()) {
     std::vector<osmscout::Id> ids(coordIds.begin(),coordIds.end());
@@ -573,13 +519,15 @@ int main(int argc, char* argv[])
     }
   }
 
-  if (!nodeFileOffsetIdMap.empty()) {
+  if (!fileOffsetIdMap.empty()) {
     std::list<osmscout::FileOffset> offsets;
 
-    for (std::map<osmscout::FileOffset,osmscout::Id>::const_iterator entry=nodeFileOffsetIdMap.begin();
-         entry!=nodeFileOffsetIdMap.end();
+    for (std::map<osmscout::ObjectFileRef,osmscout::ObjectOSMRef>::const_iterator entry=fileOffsetIdMap.begin();
+         entry!=fileOffsetIdMap.end();
          ++entry) {
-      offsets.push_back(entry->first);
+      if (entry->first.GetType()==osmscout::refNode) {
+        offsets.push_back(entry->first.GetFileOffset());
+      }
     }
 
     if (!database.GetNodesByOffset(offsets,
@@ -588,33 +536,37 @@ int main(int argc, char* argv[])
     }
   }
 
-  if (!wayFileOffsetIdMap.empty()) {
+  if (!fileOffsetIdMap.empty()) {
     std::list<osmscout::FileOffset> offsets;
 
-    for (std::map<osmscout::FileOffset,osmscout::Id>::const_iterator entry=wayFileOffsetIdMap.begin();
-         entry!=wayFileOffsetIdMap.end();
+    for (std::map<osmscout::ObjectFileRef,osmscout::ObjectOSMRef>::const_iterator entry=fileOffsetIdMap.begin();
+         entry!=fileOffsetIdMap.end();
          ++entry) {
-      offsets.push_back(entry->first);
+      if (entry->first.GetType()==osmscout::refArea) {
+        offsets.push_back(entry->first.GetFileOffset());
+      }
+    }
+
+    if (!database.GetAreasByOffset(offsets,
+                                   areas)) {
+      std::cerr << "Error whole loading areas by offset" << std::endl;
+    }
+  }
+
+  if (!fileOffsetIdMap.empty()) {
+    std::list<osmscout::FileOffset> offsets;
+
+    for (std::map<osmscout::ObjectFileRef,osmscout::ObjectOSMRef>::const_iterator entry=fileOffsetIdMap.begin();
+         entry!=fileOffsetIdMap.end();
+         ++entry) {
+      if (entry->first.GetType()==osmscout::refWay) {
+        offsets.push_back(entry->first.GetFileOffset());
+      }
     }
 
     if (!database.GetWaysByOffset(offsets,
                                   ways)) {
       std::cerr << "Error whole loading ways by offset" << std::endl;
-    }
-  }
-
-  if (!relFileOffsetIdMap.empty()) {
-    std::list<osmscout::FileOffset> offsets;
-
-    for (std::map<osmscout::FileOffset,osmscout::Id>::const_iterator entry=relFileOffsetIdMap.begin();
-         entry!=relFileOffsetIdMap.end();
-         ++entry) {
-      offsets.push_back(entry->first);
-    }
-
-    if (!database.GetRelationsByOffset(offsets,
-                                       relations)) {
-      std::cerr << "Error whole loading relations by offset" << std::endl;
     }
   }
 
@@ -648,88 +600,78 @@ int main(int argc, char* argv[])
       std::cout << std::endl;
     }
 
-    if (job->idRef.GetType()==osmscout::refNode) {
-      std::map<osmscout::Id,osmscout::FileOffset>::const_iterator offset=nodeIdFileOffsetMap.find(job->idRef.GetId());
+    if (job->osmRef.GetType()!=osmscout::osmRefNone) {
+      std::map<osmscout::ObjectOSMRef,osmscout::ObjectFileRef>::const_iterator reference=idFileOffsetMap.find(job->osmRef);
 
-      if (offset==nodeIdFileOffsetMap.end()) {
-        std::cerr << "Cannot find node with id " << job->idRef.GetId() << std::endl;
+      if (reference==idFileOffsetMap.end()) {
+        std::cerr << "Cannot find '" << job->osmRef.GetTypeName() << "' with id " << job->osmRef.GetId() << std::endl;
+        continue;
       }
 
-      for (size_t i=0; i<nodes.size(); i++) {
-        if (nodes[i]->GetFileOffset()==offset->second) {
-          DumpNode(debugDatabase.GetTypeConfig(),nodes[i],job->idRef.GetId());
-          break;
+      switch (reference->second.GetType()) {
+      case osmscout::refNone:
+        break;
+      case osmscout::refNode:
+        for (size_t i=0; i<nodes.size(); i++) {
+          if (reference->second.GetFileOffset()==nodes[i]->GetFileOffset()) {
+            DumpNode(debugDatabase.GetTypeConfig(),nodes[i],reference->first.GetId());
+            break;
+          }
         }
+        break;
+      case osmscout::refArea:
+        for (size_t i=0; i<areas.size(); i++) {
+          if (reference->second.GetFileOffset()==areas[i]->GetFileOffset()) {
+            DumpArea(debugDatabase.GetTypeConfig(),areas[i],reference->first.GetId());
+            break;
+          }
+        }
+        break;
+      case osmscout::refWay:
+        for (size_t i=0; i<ways.size(); i++) {
+          if (reference->second.GetFileOffset()==ways[i]->GetFileOffset()) {
+            DumpWay(debugDatabase.GetTypeConfig(),ways[i],reference->first.GetId());
+            break;
+          }
+        }
+        break;
       }
     }
-    else if (job->idRef.GetType()==osmscout::refWay) {
-      std::map<osmscout::Id,osmscout::FileOffset>::const_iterator offset=wayIdFileOffsetMap.find(job->idRef.GetId());
+    else if (job->fileRef.GetType()!=osmscout::refNone) {
+      std::map<osmscout::ObjectFileRef,osmscout::ObjectOSMRef>::const_iterator reference=fileOffsetIdMap.find(job->fileRef);
 
-      if (offset==wayIdFileOffsetMap.end()) {
-        std::cerr << "Cannot find way with id " << job->idRef.GetId() << std::endl;
+      if (reference==fileOffsetIdMap.end()) {
+        std::cerr << "Cannot find '" << job->fileRef.GetTypeName() << "' with offset " << job->fileRef.GetFileOffset() << std::endl;
+        continue;
       }
 
-      for (size_t i=0; i<ways.size(); i++) {
-        if (ways[i]->GetFileOffset()==offset->second) {
-          DumpWay(debugDatabase.GetTypeConfig(),ways[i],job->idRef.GetId());
-          break;
+      switch (reference->first.GetType()) {
+      case osmscout::refNone:
+        break;
+      case osmscout::refNode:
+        for (size_t i=0; i<nodes.size(); i++) {
+          if (reference->first.GetFileOffset()==nodes[i]->GetFileOffset()) {
+            DumpNode(debugDatabase.GetTypeConfig(),nodes[i],reference->second.GetId());
+            break;
+          }
         }
-      }
-    }
-    else if (job->fileRef.GetType()==osmscout::refNode) {
-      std::map<osmscout::FileOffset,osmscout::Id>::const_iterator id=nodeFileOffsetIdMap.find(job->fileRef.GetFileOffset());
-
-      if (id==nodeFileOffsetIdMap.end()) {
-        std::cerr << "Cannot find node with file offset " << job->fileRef.GetFileOffset() << std::endl;
-      }
-
-      for (size_t i=0; i<nodes.size(); i++) {
-        if (nodes[i]->GetFileOffset()==job->fileRef.GetFileOffset()) {
-          DumpNode(debugDatabase.GetTypeConfig(),nodes[i],id->second);
-          break;
+        break;
+      case osmscout::refArea:
+        for (size_t i=0; i<areas.size(); i++) {
+          if (reference->first.GetFileOffset()==areas[i]->GetFileOffset()) {
+            DumpArea(debugDatabase.GetTypeConfig(),areas[i],reference->second.GetId());
+            break;
+          }
         }
-      }
-    }
-    else if (job->fileRef.GetType()==osmscout::refWay) {
-      std::map<osmscout::FileOffset,osmscout::Id>::const_iterator id=wayFileOffsetIdMap.find(job->fileRef.GetFileOffset());
-
-      if (id==wayFileOffsetIdMap.end()) {
-        std::cerr << "Cannot find way with file offset " << job->fileRef.GetFileOffset() << std::endl;
-      }
-
-      for (size_t i=0; i<ways.size(); i++) {
-        if (ways[i]->GetFileOffset()==job->fileRef.GetFileOffset()) {
-          DumpWay(debugDatabase.GetTypeConfig(),ways[i],id->second);
-          break;
+        break;
+      case osmscout::refWay:
+        for (size_t i=0; i<ways.size(); i++) {
+          if (reference->first.GetFileOffset()==ways[i]->GetFileOffset()) {
+            DumpWay(debugDatabase.GetTypeConfig(),ways[i],reference->second.GetId());
+            break;
+          }
         }
-      }
-    }
-    else if (job->idRef.GetType()==osmscout::refRelation) {
-      std::map<osmscout::Id,osmscout::FileOffset>::const_iterator offset=relIdFileOffsetMap.find(job->idRef.GetId());
-
-      if (offset==relIdFileOffsetMap.end()) {
-        std::cerr << "Cannot find relation with id " << job->idRef.GetId() << std::endl;
-      }
-
-      for (size_t i=0; i<relations.size(); i++) {
-        if (relations[i]->GetFileOffset()==offset->second) {
-          DumpRelation(debugDatabase.GetTypeConfig(),relations[i],job->idRef.GetId());
-          break;
-        }
-      }
-    }
-    else if (job->fileRef.GetType()==osmscout::refRelation) {
-      std::map<osmscout::FileOffset,osmscout::Id>::const_iterator id=relFileOffsetIdMap.find(job->fileRef.GetFileOffset());
-
-      if (id==relFileOffsetIdMap.end()) {
-        std::cerr << "Cannot find relation with file offset " << job->fileRef.GetFileOffset() << std::endl;
-      }
-
-      for (size_t i=0; i<relations.size(); i++) {
-        if (relations[i]->GetFileOffset()==job->fileRef.GetFileOffset()) {
-          DumpRelation(debugDatabase.GetTypeConfig(),relations[i],id->second);
-          break;
-        }
+        break;
       }
     }
   }

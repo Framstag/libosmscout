@@ -127,8 +127,7 @@ namespace osmscout
         return false;
       }
 
-      if (!way->IsArea() &&
-          currentTypes.find(way->GetType())!=currentTypes.end() &&
+      if (currentTypes.find(way->GetType())!=currentTypes.end() &&
           way->nodes.size()>=2) {
         ways[way->GetType()].push_back(way);
 

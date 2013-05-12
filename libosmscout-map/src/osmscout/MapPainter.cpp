@@ -1065,27 +1065,17 @@ namespace osmscout {
                                   const MapParameter& parameter,
                                   const MapData& data)
   {
-    for (std::vector<WayRef>::const_iterator a=data.areas.begin();
-         a!=data.areas.end();
-         ++a) {
-      DrawAreaLabel(styleConfig,
-                    projection,
-                    parameter,
-                    (*a)->GetAttributes(),
-                    (*a)->nodes);
-    }
-
-    for (std::vector<RelationRef>::const_iterator r=data.relationAreas.begin();
-         r!=data.relationAreas.end();
+    for (std::vector<AreaRef>::const_iterator r=data.areas.begin();
+         r!=data.areas.end();
          ++r) {
-      const RelationRef& relation=*r;
+      const AreaRef& area=*r;
 
-      for (size_t m=0; m<relation->roles.size(); m++) {
+      for (size_t m=0; m<area->roles.size(); m++) {
               DrawAreaLabel(styleConfig,
                             projection,
                             parameter,
-                            relation->roles[m].attributes,
-                            relation->roles[m].nodes);
+                            area->roles[m].attributes,
+                            area->roles[m].nodes);
       }
     }
   }
@@ -1482,48 +1472,18 @@ namespace osmscout {
   {
     areaData.clear();
 
-    // Simple areas
-    for (std::vector<WayRef>::const_iterator a=data.areas.begin();
+    //Areas
+    for (std::vector<AreaRef>::const_iterator a=data.areas.begin();
          a!=data.areas.end();
          ++a) {
-      const WayRef& area=*a;
+      const AreaRef& area=*a;
 
-      PrepareAreaSegment(styleConfig,
-                         projection,
-                         parameter,
-                         ObjectFileRef(area->GetFileOffset(),refWay),
-                         area->GetAttributes(),
-                         area->nodes);
-    }
+      std::vector<PolyData> data(area->roles.size());
 
-    // external Ways that are of type 'area'
-    for (std::list<WayRef>::const_iterator p=data.poiWays.begin();
-         p!=data.poiWays.end();
-         ++p) {
-      if ((*p)->IsArea()) {
-        const WayRef& area=*p;
-
-        PrepareAreaSegment(styleConfig,
-                           projection,
-                           parameter,
-                           ObjectFileRef(area->GetFileOffset(),refWay),
-                           area->GetAttributes(),
-                           area->nodes);
-      }
-    }
-
-    //Relations
-    for (std::vector<RelationRef>::const_iterator a=data.relationAreas.begin();
-         a!=data.relationAreas.end();
-         ++a) {
-      const RelationRef& relation=*a;
-
-      std::vector<PolyData> data(relation->roles.size());
-
-      for (size_t i=0; i<relation->roles.size(); i++) {
+      for (size_t i=0; i<area->roles.size(); i++) {
         transBuffer.TransformArea(projection,
                                   parameter.GetOptimizeAreaNodes(),
-                                  relation->roles[i].nodes,
+                                  area->roles[i].nodes,
                                   data[i].transStart,data[i].transEnd,
                                   parameter.GetOptimizeErrorToleranceDots());
       }
@@ -1534,22 +1494,22 @@ namespace osmscout {
       while (foundRing) {
         foundRing=false;
 
-        for (size_t i=0; i<relation->roles.size(); i++) {
-          const Relation::Role& role=relation->roles[i];
+        for (size_t i=0; i<area->roles.size(); i++) {
+          const Area::Role& role=area->roles[i];
 
           if (role.ring==ring) {
             FillStyleRef fillStyle;
 
             if (role.ring==0) {
-              if (relation->GetType()!=typeIgnore) {
-                styleConfig.GetAreaFillStyle(relation->GetAttributes(),
+              if (area->GetType()!=typeIgnore) {
+                styleConfig.GetAreaFillStyle(area->GetAttributes(),
                                              projection,
                                              parameter.GetDPI(),
                                              fillStyle);
               }
             }
             else {
-              if (relation->GetType()!=typeIgnore) {
+              if (area->GetType()!=typeIgnore) {
                 styleConfig.GetAreaFillStyle(role.GetAttributes(),
                                              projection,
                                              parameter.GetDPI(),
@@ -1579,15 +1539,15 @@ namespace osmscout {
             // Since we know that rings a created deep first, we only take into account direct followers
             // in the list with ring+1.
             size_t j=i+1;
-            while (j<relation->roles.size() &&
-                   relation->roles[j].ring==ring+1 &&
-                   relation->roles[j].GetType()==typeIgnore) {
+            while (j<area->roles.size() &&
+                   area->roles[j].ring==ring+1 &&
+                   area->roles[j].GetType()==typeIgnore) {
               a.clippings.push_back(data[j]);
 
               j++;
             }
 
-            a.ref=ObjectFileRef(relation->GetFileOffset(),refRelation);
+            a.ref=ObjectFileRef(area->GetFileOffset(),refArea);
             a.attributes=&role.attributes;
             a.fillStyle=fillStyle;
             a.transStart=data[i].transStart;
@@ -1748,26 +1708,6 @@ namespace osmscout {
                         way->GetAttributes(),
                         way->nodes,
                         way->ids);
-    }
-
-    for (std::vector<RelationRef>::const_iterator r=data.relationWays.begin();
-         r!=data.relationWays.end();
-         ++r) {
-      const RelationRef& relation=*r;
-
-      for (std::vector<Relation::Role>::const_iterator r=relation->roles.begin();
-          r!=relation->roles.end();
-          r++) {
-        const Relation::Role& role=*r;
-
-        PrepareWaySegment(styleConfig,
-                          projection,
-                          parameter,
-                          ObjectFileRef(relation->GetFileOffset(),refRelation),
-                          role.GetAttributes(),
-                          role.nodes,
-                          role.ids);
-      }
     }
 
     for (std::list<WayRef>::const_iterator p=data.poiWays.begin();
@@ -2033,11 +1973,11 @@ namespace osmscout {
 
     if (parameter.IsDebugPerformance()) {
       std::cout << "Paths: ";
-      std::cout << data.ways.size() << "+" << data.relationWays.size() << "/" << waysSegments << "/" << waysDrawn << "/" << waysLabelDrawn << " (pcs) ";
+      std::cout << data.ways.size() << "/" << waysSegments << "/" << waysDrawn << "/" << waysLabelDrawn << " (pcs) ";
       std::cout << prepareWaysTimer << "/" << pathsTimer << "/" << pathLabelsTimer << " (sec)" << std::endl;
 
       std::cout << "Areas: ";
-      std::cout << data.areas.size() << "+" << data.relationAreas.size() << "/" << areasSegments << "/" << areasDrawn << "/" << areasLabelDrawn << " (pcs) ";
+      std::cout << data.areas.size() << "/" << areasSegments << "/" << areasDrawn << "/" << areasLabelDrawn << " (pcs) ";
       std::cout << prepareAreasTimer << "/" << areasTimer << "/" << areaLabelsTimer << " (sec)" << std::endl;
 
       std::cout << "Nodes: ";

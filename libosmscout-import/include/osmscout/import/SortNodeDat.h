@@ -39,9 +39,9 @@ namespace osmscout {
 
   public:
     SortNodeDataGenerator()
-    : SortDataGenerator<Node>("nodes.dat","node.idmap","nodes.tmp")
+    : SortDataGenerator<Node>("nodes.dat","nodes.idmap")
     {
-      // no code
+      AddSource(OSMRefType::osmRefNode,"nodes.tmp");
     }
 
     std::string GetDescription() const

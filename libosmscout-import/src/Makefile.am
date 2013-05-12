@@ -27,15 +27,16 @@ libosmscoutimport_la_SOURCES = osmscout/import/RawCoastline.cpp \
                                osmscout/import/GenNumericIndex.cpp \
                                osmscout/import/GenNodeDat.cpp \
                                osmscout/import/GenOptimizeLowZoom.cpp \
-                               osmscout/import/GenRelationDat.cpp \
+                               osmscout/import/GenRelAreaDat.cpp \
                                osmscout/import/GenRouteDat.cpp \
                                osmscout/import/GenTurnRestrictionDat.cpp \
                                osmscout/import/GenTypeDat.cpp \
                                osmscout/import/GenWaterIndex.cpp \
-                               osmscout/import/GenWayDat.cpp \
+                               osmscout/import/GenWayAreaDat.cpp \
+                               osmscout/import/GenWayWayDat.cpp \
                                osmscout/import/SortDat.cpp \
+                               osmscout/import/SortAreaDat.cpp \
                                osmscout/import/SortNodeDat.cpp \
-                               osmscout/import/SortRelationDat.cpp \
                                osmscout/import/SortWayDat.cpp \
                                osmscout/import/Import.cpp \
                                osmscout/import/Preprocess.cpp

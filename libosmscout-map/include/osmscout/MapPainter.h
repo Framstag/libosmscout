@@ -27,12 +27,12 @@
 
 #include <osmscout/util/Geometry.h>
 
-#include <osmscout/GroundTile.h>
 #include <osmscout/Node.h>
-#include <osmscout/ObjectRef.h>
-#include <osmscout/Relation.h>
-#include <osmscout/StyleConfig.h>
+#include <osmscout/Area.h>
 #include <osmscout/Way.h>
+#include <osmscout/GroundTile.h>
+#include <osmscout/ObjectRef.h>
+#include <osmscout/StyleConfig.h>
 
 #include <osmscout/util/Breaker.h>
 #include <osmscout/util/HashSet.h>
@@ -203,12 +203,11 @@ namespace osmscout {
   struct OSMSCOUT_MAP_API MapData
   {
     std::vector<NodeRef>     nodes;
+    std::vector<AreaRef>     areas;
     std::vector<WayRef>      ways;
-    std::vector<WayRef>      areas;
-    std::vector<RelationRef> relationWays;
-    std::vector<RelationRef> relationAreas;
-    std::list<WayRef>        poiWays;
     std::list<NodeRef>       poiNodes;
+    std::list<AreaRef>       poiAreas;
+    std::list<WayRef>        poiWays;
     std::list<GroundTile>    groundTiles;
   };
 

@@ -28,8 +28,8 @@
 #include <osmscout/TypeSet.h>
 
 // Datafiles
+#include <osmscout/AreaDataFile.h>
 #include <osmscout/NodeDataFile.h>
-#include <osmscout/RelationDataFile.h>
 #include <osmscout/WayDataFile.h>
 
 #include <osmscout/OptimizeLowZoom.h>
@@ -164,8 +164,8 @@ namespace osmscout {
     std::string           path;             //! Path to the directory containing all files
 
     NodeDataFile          nodeDataFile;     //! Cached access to the 'nodes.dat' file
+    AreaDataFile          areaDataFile;     //! Cached access to the 'areas.dat' file
     WayDataFile           wayDataFile;      //! Cached access to the 'ways.dat' file
-    RelationDataFile      relationDataFile; //! Cached access to the 'relations.dat' file
 
     OptimizeLowZoom       optimizeLowZoom;  //! Optimized data for low zoom situations
 
@@ -190,7 +190,6 @@ namespace osmscout {
                               std::string& wayOptimizedTime,
                               std::string& wayIndexTime,
                               std::vector<FileOffset>& wayWayOffsets,
-                              std::vector<FileOffset>& relationWayOffsets,
                               std::vector<WayRef>& ways) const;
 
     bool GetObjectsAreaOffsets(const AreaSearchParameter& parameter,
@@ -199,8 +198,7 @@ namespace osmscout {
                                double lonMin, double latMin,
                                double lonMax, double latMax,
                                std::string& areaIndexTime,
-                               std::vector<FileOffset>& wayAreaOffsets,
-                               std::vector<FileOffset>& relationAreaOffsets) const;
+                               std::vector<FileOffset>& areaOffsets) const;
 
     bool GetObjectsWaysAndAreas(const AreaSearchParameter& parameter,
                                 const std::vector<FileOffset>& wayWayOffsets,
@@ -208,15 +206,7 @@ namespace osmscout {
                                 std::string& waysTime,
                                 std::string& areasTime,
                                 std::vector<WayRef>& ways,
-                                std::vector<WayRef>& areas) const;
-
-    bool GetObjectsWaysAndAreasRel(const AreaSearchParameter& parameter,
-                                   const std::vector<FileOffset>& relationWayOffsets,
-                                   const std::vector<FileOffset>& relationAreaOffsets,
-                                   std::string& relationWaysTime,
-                                   std::string& relationAreasTime,
-                                   std::vector<RelationRef>& relationWays,
-                                   std::vector<RelationRef>& relationAreas) const;
+                                std::vector<AreaRef>& areas) const;
 
   public:
     Database(const DatabaseParameter& parameter);
@@ -243,18 +233,14 @@ namespace osmscout {
                     const AreaSearchParameter& parameter,
                     std::vector<NodeRef>& nodes,
                     std::vector<WayRef>& ways,
-                    std::vector<WayRef>& areas,
-                    std::vector<RelationRef>& relationWays,
-                    std::vector<RelationRef>& relationAreas) const;
+                    std::vector<AreaRef>& areas) const;
 
     bool GetObjects(double lonMin, double latMin,
                     double lonMax, double latMax,
                     const TypeSet& types,
                     std::vector<NodeRef>& nodes,
                     std::vector<WayRef>& ways,
-                    std::vector<WayRef>& areas,
-                    std::vector<RelationRef>& relationWays,
-                    std::vector<RelationRef>& relationAreas) const;
+                    std::vector<AreaRef>& areas) const;
 
     bool GetGroundTiles(double lonMin, double latMin,
                         double lonMax, double latMax,
@@ -268,20 +254,19 @@ namespace osmscout {
     bool GetNodesByOffset(const std::list<FileOffset>& offsets,
                           std::vector<NodeRef>& nodes) const;
 
+    bool GetAreaByOffset(const FileOffset& offset,
+                         AreaRef& area) const;
+    bool GetAreasByOffset(const std::vector<FileOffset>& offsets,
+                          std::vector<AreaRef>& areas) const;
+    bool GetAreasByOffset(const std::list<FileOffset>& offsets,
+                          std::vector<AreaRef>& areas) const;
+
     bool GetWayByOffset(const FileOffset& offset,
                         WayRef& way) const;
     bool GetWaysByOffset(const std::vector<FileOffset>& offsets,
                          std::vector<WayRef>& ways) const;
     bool GetWaysByOffset(const std::list<FileOffset>& offsets,
                          std::vector<WayRef>& ways) const;
-
-    bool GetRelationByOffset(const FileOffset& offset,
-                             RelationRef& relation) const;
-    bool GetRelationsByOffset(const std::vector<FileOffset>& offsets,
-                              std::vector<RelationRef>& relations) const;
-
-    bool GetRelationsByOffset(const std::list<FileOffset>& offsets,
-                              std::vector<RelationRef>& relations) const;
 
     bool GetMatchingAdminRegions(const std::string& name,
                                  std::list<AdminRegion>& regions,

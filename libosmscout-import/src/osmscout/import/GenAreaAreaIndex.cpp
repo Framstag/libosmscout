@@ -21,8 +21,7 @@
 
 #include <vector>
 
-#include <osmscout/Relation.h>
-#include <osmscout/Way.h>
+#include <osmscout/Area.h>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
@@ -91,7 +90,6 @@ namespace osmscout {
       writer.GetPos(leaf->second.offset);
 
       assert(!leaf->second.areas.empty() ||
-             !leaf->second.relAreas.empty() ||
              leaf->second.children[0]!=0 ||
              leaf->second.children[1]!=0 ||
              leaf->second.children[2]!=0 ||
@@ -117,19 +115,6 @@ namespace osmscout {
 
         lastOffset=entry->offset;
       }
-
-      // Relation areas
-      writer.WriteNumber((uint32_t)leaf->second.relAreas.size());
-
-      lastOffset=0;
-      for (std::list<Entry>::const_iterator entry=leaf->second.relAreas.begin();
-           entry!=leaf->second.relAreas.end();
-           entry++) {
-        writer.WriteNumber(entry->type);
-        writer.WriteNumber(entry->offset-lastOffset);
-
-        lastOffset=entry->offset;
-      }
     }
 
     return !writer.HasError();
@@ -140,11 +125,8 @@ namespace osmscout {
                                       const TypeConfig& typeConfig)
   {
     FileScanner               wayScanner;
-    FileScanner               relScanner;
     size_t                    ways=0;         // Number of ways found
     size_t                    waysConsumed=0; // Number of ways consumed
-    size_t                    rels=0;         // Number of relations found
-    size_t                    relsConsumed=0; // Number of relations consumed
     std::vector<double>       cellWidth;
     std::vector<double>       cellHeight;
     std::map<Pixel,AreaLeaf>  leafs;
@@ -178,18 +160,10 @@ namespace osmscout {
     }
 
     if (!wayScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                         "ways.dat"),
+                                         "areas.dat"),
                          FileScanner::Sequential,
                          parameter.GetWayDataMemoryMaped())) {
-      progress.Error("Cannot open 'ways.dat'");
-      return false;
-    }
-
-    if (!relScanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                         "relations.dat"),
-                         FileScanner::Sequential,
-                         true)) {
-      progress.Error("Cannot open 'relations.dat'");
+      progress.Error("Cannot open 'areas.dat'");
       return false;
     }
 
@@ -209,7 +183,6 @@ namespace osmscout {
 
     while (l>=0) {
       size_t areaLevelEntries=0;
-      size_t relAreaLevelEntries=0;
 
       progress.Info(std::string("Storing level ")+NumberToString(l)+"...");
 
@@ -241,21 +214,17 @@ namespace osmscout {
           progress.SetProgress(w,wayCount);
 
           FileOffset offset;
-          Way        way;
+          Area       area;
 
           wayScanner.GetPos(offset);
 
-          if (!way.Read(wayScanner)) {
+          if (!area.Read(wayScanner)) {
             progress.Error(std::string("Error while reading data entry ")+
                            NumberToString(w)+" of "+
                            NumberToString(wayCount)+
                            " in file '"+
                            wayScanner.GetFilename()+"'");
             return false;
-          }
-
-          if (!way.IsArea()) {
-            continue;
           }
 
           ways++;
@@ -265,7 +234,7 @@ namespace osmscout {
           double minLat;
           double maxLat;
 
-          way.GetBoundingBox(minLon,maxLon,minLat,maxLat);
+          area.GetBoundingBox(minLon,maxLon,minLat,maxLat);
 
           //
           // Calculate highest level where the bounding box completely
@@ -304,7 +273,7 @@ namespace osmscout {
 
             Entry entry;
 
-            entry.type=way.GetType();
+            entry.type=area.GetType();
             entry.offset=offset;
 
             // Add this area to the tile where the center of the area lies in.
@@ -316,111 +285,8 @@ namespace osmscout {
         }
       }
 
-      // Relations
-
-      if (rels==0 ||
-          (rels>0 && rels>relsConsumed)) {
-        uint32_t relCount=0;
-
-        progress.Info(std::string("Scanning relations.dat for relations of index level ")+NumberToString(l)+"...");
-
-        if (!relScanner.GotoBegin()) {
-          progress.Error("Cannot go to begin of relation file");
-        }
-
-        if (!relScanner.Read(relCount)) {
-          progress.Error("Error while reading number of data entries in file");
-          return false;
-        }
-
-        rels=0;
-        for (uint32_t r=1; r<=relCount; r++) {
-          progress.SetProgress(r,relCount);
-
-          FileOffset offset;
-          Relation   relation;
-
-          relScanner.GetPos(offset);
-
-          if (!relation.Read(relScanner)) {
-            progress.Error(std::string("Error while reading data entry ")+
-                           NumberToString(r)+" of "+
-                           NumberToString(relCount)+
-                           " in file '"+
-                           relScanner.GetFilename()+"'");
-            return false;
-          }
-
-          if (!relation.IsArea()) {
-            continue;
-          }
-
-          rels++;
-
-          //
-          // Bounding box calculation
-          //
-
-          double minLon;
-          double maxLon;
-          double minLat;
-          double maxLat;
-
-          relation.GetBoundingBox(minLon,maxLon,minLat,maxLat);
-
-          //
-          // Calculate highest level where the bounding box completely
-          // fits in the cell size and assign area to the tiles that
-          // hold the geometric center of the tile.
-          //
-
-          int level=parameter.GetAreaAreaIndexMaxMag();
-
-          while (level>=l) {
-            if (maxLon-minLon<=cellWidth[level] &&
-                maxLat-minLat<=cellHeight[level]) {
-              break;
-            }
-
-            level--;
-          }
-
-          if (level==l) {
-            //
-            // Renormated coordinate space (everything is >=0)
-            //
-
-            minLon+=180;
-            maxLon+=180;
-            minLat+=90;
-            maxLat+=90;
-
-            //
-            // Calculate minimum and maximum tile ids that are covered
-            // by the area
-            //
-            uint32_t minyc=(uint32_t)floor(minLat/cellHeight[level]);
-            uint32_t maxyc=(uint32_t)floor(maxLat/cellHeight[level]);
-            uint32_t minxc=(uint32_t)floor(minLon/cellWidth[level]);
-            uint32_t maxxc=(uint32_t)floor(maxLon/cellWidth[level]);
-
-            Entry entry;
-
-            entry.type=relation.GetType();
-            entry.offset=offset;
-
-            // Add this area to the tile where the center of the area lies in.
-            leafs[Pixel((minxc+maxxc)/2,(minyc+maxyc)/2)].relAreas.push_back(entry);
-            relAreaLevelEntries++;
-
-            relsConsumed++;
-          }
-        }
-      }
-
       progress.Debug(std::string("Writing ")+NumberToString(leafs.size())+" leafs ("+
-                     NumberToString(areaLevelEntries)+"/"+
-                     NumberToString(relAreaLevelEntries)+") "+
+                     NumberToString(areaLevelEntries)+") "+
                      "to index of level "+NumberToString(l)+"...");
 
       // Remember the offset of one cell in level '0'

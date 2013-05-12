@@ -291,22 +291,22 @@ void MapWidget::ShowReference(const osmscout::ObjectFileRef& reference,
       TriggerMapRendering();
     }
   }
-  else if (reference.GetType()==osmscout::refWay) {
-    osmscout::WayRef way;
+  else if (reference.GetType()==osmscout::refArea) {
+    osmscout::AreaRef area;
 
-    if (dbThread.GetWayByOffset(reference.GetFileOffset(),way)) {
-      if (way->GetCenter(lat,lon)) {
+    if (dbThread.GetAreaByOffset(reference.GetFileOffset(),area)) {
+      if (area->GetCenter(lat,lon)) {
         this->magnification=magnification;
 
         TriggerMapRendering();
       }
     }
   }
-  else if (reference.GetType()==osmscout::refRelation) {
-    osmscout::RelationRef relation;
+  else if (reference.GetType()==osmscout::refWay) {
+    osmscout::WayRef way;
 
-    if (dbThread.GetRelationByOffset(reference.GetFileOffset(),relation)) {
-      if (relation->GetCenter(lat,lon)) {
+    if (dbThread.GetWayByOffset(reference.GetFileOffset(),way)) {
+      if (way->GetCenter(lat,lon)) {
         this->magnification=magnification;
 
         TriggerMapRendering();

@@ -597,8 +597,7 @@ namespace osmscout {
       }
 
       if (!typeConfig.GetTypeInfo(way.GetType()).GetIgnoreSeaLand()) {
-        if (!way.IsArea() &&
-            way.nodes.size()>=2) {
+        if (way.nodes.size()>=2) {
           std::set<Pixel> coords;
 
           GetCells(level,way.nodes,coords);

@@ -17,7 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
-#include <osmscout/import/GenWayDat.h>
+#include <osmscout/import/GenWayWayDat.h>
 
 #include <algorithm>
 
@@ -41,8 +41,8 @@ namespace osmscout {
     return a->GetNodeCount()>b->GetNodeCount();
   }
 
-  void WayDataGenerator::GetWayTypes(const TypeConfig& typeConfig,
-                                     std::set<TypeId>& types) const
+  void WayWayDataGenerator::GetWayTypes(const TypeConfig& typeConfig,
+                                        std::set<TypeId>& types) const
   {
     for (std::vector<TypeInfo>::const_iterator type=typeConfig.GetTypes().begin();
         type!=typeConfig.GetTypes().end();
@@ -58,96 +58,17 @@ namespace osmscout {
       if (type->CanBeWay()) {
         types.insert(type->GetId());
       }
-
-      if (type->CanBeArea()) {
-        types.insert(type->GetId());
-      }
     }
   }
 
-  void WayDataGenerator::SetNodeUsed(NodeUseMap& nodeUseMap,
-                                     OSMId id)
+  std::string WayWayDataGenerator::GetDescription() const
   {
-    PageId resolvedId=id-std::numeric_limits<Id>::min();
-    PageId offset=resolvedId/16;
-
-    NodeUseMap::iterator entry=nodeUseMap.find(offset);
-
-    if (entry==nodeUseMap.end()) {
-      entry=nodeUseMap.insert(std::make_pair(offset,0)).first;
-    }
-
-    uint32_t index=(resolvedId%16)*2;
-
-    uint32_t data=entry->second;
-
-    if (data & (1<<(index+1))) {
-      // do nothing
-    }
-    else if (data & (1<<index)) {
-      entry->second|=(1 << (index+1));
-    }
-    else {
-      entry->second|=(1 << index);
-    }
+    return "Generate 'wayway.dat'";
   }
 
-  bool WayDataGenerator::IsNodeUsedAtLeastTwice(const NodeUseMap& nodeUseMap,
-                                                OSMId id) const
-  {
-    PageId resolvedId=id-std::numeric_limits<Id>::min();
-    PageId offset=resolvedId/16;
-
-    NodeUseMap::const_iterator entry=nodeUseMap.find(offset);
-
-    if (entry==nodeUseMap.end()) {
-      return false;
-    }
-
-    uint32_t index=(resolvedId%16)*2+1;
-
-    bool result=entry->second & (1 << index);
-
-    return result;
-  }
-
-  std::string WayDataGenerator::GetDescription() const
-  {
-    return "Generate 'ways.tmp'";
-  }
-
-  bool WayDataGenerator::ReadWayBlacklist(const ImportParameter& parameter,
-                                          Progress& progress,
-                                          BlacklistSet& wayBlacklist)
-  {
-    FileScanner scanner;
-
-    if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                      "wayblack.dat"),
-                      FileScanner::Sequential,
-                      true)) {
-      progress.Error("Cannot open 'wayblack.dat'");
-      return false;
-    }
-
-    while (!scanner.IsEOF()) {
-      OSMId id;
-
-      scanner.ReadNumber(id);
-
-      if (scanner.HasError()) {
-        return false;
-      }
-
-      wayBlacklist.insert(id);
-    }
-
-    return scanner.Close();
-  }
-
-  bool WayDataGenerator::ReadTurnRestrictions(const ImportParameter& parameter,
-                                              Progress& progress,
-                                              std::multimap<OSMId,TurnRestrictionRef>& restrictions)
+  bool WayWayDataGenerator::ReadTurnRestrictions(const ImportParameter& parameter,
+                                                 Progress& progress,
+                                                 std::multimap<OSMId,TurnRestrictionRef>& restrictions)
   {
     FileScanner scanner;
     uint32_t    restrictionCount=0;
@@ -193,9 +114,9 @@ namespace osmscout {
     return true;
   }
 
-  bool WayDataGenerator::WriteTurnRestrictions(const ImportParameter& parameter,
-                                               Progress& progress,
-                                               std::multimap<OSMId,TurnRestrictionRef>& restrictions)
+  bool WayWayDataGenerator::WriteTurnRestrictions(const ImportParameter& parameter,
+                                                  Progress& progress,
+                                                  std::multimap<OSMId,TurnRestrictionRef>& restrictions)
   {
     std::set<TurnRestrictionRef> restrictionsSet;
 
@@ -233,16 +154,12 @@ namespace osmscout {
     return true;
   }
 
-  bool WayDataGenerator::GetWays(const ImportParameter& parameter,
-                                 Progress& progress,
-                                 const TypeConfig& typeConfig,
-                                 std::set<TypeId>& types,
-                                 const BlacklistSet& blacklist,
-                                 FileScanner& scanner,
-                                 std::vector<std::list<RawWayRef> >& ways,
-                                 std::vector<std::list<RawWayRef> >& areas,
-                                 NodeUseMap& nodeUseMap,
-                                 bool buildNodeUseMap)
+  bool WayWayDataGenerator::GetWays(const ImportParameter& parameter,
+                                     Progress& progress,
+                                     const TypeConfig& typeConfig,
+                                     std::set<TypeId>& types,
+                                     FileScanner& scanner,
+                                     std::vector<std::list<RawWayRef> >& ways)
   {
     uint32_t         wayCount=0;
     size_t           collectedWaysCount=0;
@@ -273,50 +190,23 @@ namespace osmscout {
         return false;
       }
 
-      if (buildNodeUseMap) {
-        OSMSCOUT_HASHSET<Id> nodeSet;
-
-        for (size_t i=0; i<way->GetNodeCount(); i++) {
-          Id nodeId=way->GetNodeId(i);
-
-          if (nodeSet.find(nodeId)==nodeSet.end()) {
-            SetNodeUsed(nodeUseMap,nodeId);
-          }
-
-          nodeSet.insert(nodeId);
-        }
+      if (way->IsArea()) {
+        continue;
       }
 
       if (currentTypes.find(way->GetType())==currentTypes.end()) {
         continue;
       }
 
-      if (way->IsArea()) {
-        if (way->GetNodeCount()<3) {
-          continue;
-        }
-      }
-      else {
-        if (way->GetNodeCount()<2) {
-          continue;
-        }
-      }
-
-      if (blacklist.find(way->GetId())!=blacklist.end()) {
+      if (way->GetNodeCount()<2) {
         continue;
       }
 
-      if (ways[way->GetType()].empty() &&
-          areas[way->GetType()].empty()) {
+      if (ways[way->GetType()].empty()) {
         typesWithWays++;
       }
 
-      if (way->IsArea()) {
-        areas[way->GetType()].push_back(way);
-      }
-      else {
-        ways[way->GetType()].push_back(way);
-      }
+      ways[way->GetType()].push_back(way);
 
       collectedWaysCount++;
 
@@ -326,10 +216,9 @@ namespace osmscout {
 
         // Find the type with the smalest amount of ways loaded
         for (size_t i=0; i<ways.size(); i++) {
-          if ((!ways[i].empty() ||
-               !areas[i].empty()) &&
+          if (!ways[i].empty() &&
               (victimType>=ways.size() ||
-               (ways[i].size()+areas[i].size()<ways[victimType].size()+areas[victimType].size()))) {
+               ways[i].size()<ways[victimType].size())) {
             victimType=i;
           }
         }
@@ -337,9 +226,6 @@ namespace osmscout {
         if (victimType<ways.size()) {
           collectedWaysCount-=ways[victimType].size();
           ways[victimType].clear();
-
-          collectedWaysCount-=areas[victimType].size();
-          areas[victimType].clear();
 
           typesWithWays--;
           currentTypes.erase(victimType);
@@ -358,9 +244,9 @@ namespace osmscout {
     return true;
   }
 
-  void WayDataGenerator::UpdateRestrictions(std::multimap<OSMId,TurnRestrictionRef>& restrictions,
-                                            OSMId oldId,
-                                            OSMId newId)
+  void WayWayDataGenerator::UpdateRestrictions(std::multimap<OSMId,TurnRestrictionRef>& restrictions,
+                                               OSMId oldId,
+                                               OSMId newId)
   {
     std::list<TurnRestrictionRef> oldRestrictions;
 
@@ -390,9 +276,9 @@ namespace osmscout {
     }
   }
 
-  bool WayDataGenerator::IsRestricted(const std::multimap<OSMId,TurnRestrictionRef>& restrictions,
-                                      OSMId wayId,
-                                      OSMId nodeId) const
+  bool WayWayDataGenerator::IsRestricted(const std::multimap<OSMId,TurnRestrictionRef>& restrictions,
+                                         OSMId wayId,
+                                         OSMId nodeId) const
   {
     // We have an index entry for turn restriction, where the given way id is
     // "from" or "to" so we can jst check for "via" == nodeId
@@ -410,11 +296,10 @@ namespace osmscout {
     return false;
   }
 
-  bool WayDataGenerator::MergeWays(Progress& progress,
-                                   const TypeConfig& typeConfig,
-                                   std::list<RawWayRef>& ways,
-                                   BlacklistSet& wayBlacklist,
-                                   std::multimap<OSMId,TurnRestrictionRef>& restrictions)
+  bool WayWayDataGenerator::MergeWays(Progress& progress,
+                                      const TypeConfig& typeConfig,
+                                      std::list<RawWayRef>& ways,
+                                      std::multimap<OSMId,TurnRestrictionRef>& restrictions)
   {
     WaysByNodeMap  waysByNode;
     SilentProgress silentProgress;
@@ -538,15 +423,6 @@ namespace osmscout {
           // This is a match
           hasMerged=true;
 
-#pragma omp critical
-          {
-            wayBlacklist.insert(candidate->GetId());
-
-            UpdateRestrictions(restrictions,
-                               candidate->GetId(),
-                               way->GetId());
-          }
-
           std::vector<OSMId> nodes(way->GetNodes());
 
           nodes.reserve(nodes.size()+candidate->GetNodeCount()-1);
@@ -625,13 +501,12 @@ namespace osmscout {
     return true;
   }
 
-  bool WayDataGenerator::WriteWay(const ImportParameter& parameter,
+  bool WayWayDataGenerator::WriteWay(const ImportParameter& parameter,
                                   Progress& progress,
                                   const TypeConfig& typeConfig,
                                   FileWriter& writer,
                                   uint32_t& writtenWayCount,
                                   const CoordDataFile::CoordResultMap& coordsMap,
-                                  const NodeUseMap& nodeUseMap,
                                   const RawWay& rawWay)
   {
     std::vector<Tag> tags(rawWay.GetTags());
@@ -666,12 +541,7 @@ namespace osmscout {
         break;
       }
 
-      if (IsNodeUsedAtLeastTwice(nodeUseMap,rawWay.GetNodeId(n))) {
-        way.ids[n]=coord->second.GetId();
-      }
-      else {
-        way.ids[n]=0;
-      }
+      way.ids[n]=coord->second.GetId();
 
       way.nodes[n].Set(coord->second.GetLat(),
                        coord->second.GetLon());
@@ -684,15 +554,6 @@ namespace osmscout {
     if (reverseNodes) {
       std::reverse(way.ids.begin(),way.ids.end());
       std::reverse(way.nodes.begin(),way.nodes.end());
-    }
-
-    // startIsJoint/endIsJoint
-    if (way.IsArea()) {
-      if (parameter.GetStrictAreas() &&
-          !AreaIsSimple(way.nodes)) {
-        progress.Error("Area "+NumberToString(wayId)+" of type '"+typeConfig.GetTypeInfo(way.GetType()).GetName()+"' is not simple");
-        return true;
-      }
     }
 
     if (!writer.Write(wayId)) {
@@ -708,20 +569,16 @@ namespace osmscout {
     return true;
   }
 
-  bool WayDataGenerator::Import(const ImportParameter& parameter,
-                                Progress& progress,
-                                const TypeConfig& typeConfig)
+  bool WayWayDataGenerator::Import(const ImportParameter& parameter,
+                                   Progress& progress,
+                                   const TypeConfig& typeConfig)
   {
-    progress.SetAction("Generate ways.tmp");
+    progress.SetAction("Generate wayway.dat");
 
     std::set<TypeId>                        wayTypes;
 
-    BlacklistSet                            wayBlacklist; //! Map of ways, that should be handled
-
     // List of restrictions for a way
     std::multimap<OSMId,TurnRestrictionRef> restrictions; //! Map of restrictions
-
-    NodeUseMap                              nodeUseMap;   //! Bitmap of nodes that are at leats used twice
 
     FileScanner                             scanner;
     FileWriter                              wayWriter;
@@ -730,24 +587,8 @@ namespace osmscout {
     uint32_t                                writtenWayCount=0;
     uint32_t                                mergeCount=0;
 
-#if defined(OSMSCOUT_HASHMAP_HAS_RESERVE)
-    nodeUseMap.reserve(2000000);
-#endif
-
     GetWayTypes(typeConfig,
                 wayTypes);
-
-    //
-    // load blacklist of wayId as a result from multipolygon relation parsing
-    //
-
-    progress.SetAction("Reading way blacklist");
-
-    if (!ReadWayBlacklist(parameter,
-                          progress,
-                          wayBlacklist)) {
-      return false;
-    }
 
     //
     // handling of restriction relations
@@ -783,8 +624,8 @@ namespace osmscout {
     }
 
     if (!wayWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "ways.tmp"))) {
-      progress.Error("Cannot create 'ways.tmp'");
+                                     "wayway.dat"))) {
+      progress.Error("Cannot create 'wayway.dat'");
       return false;
     }
 
@@ -795,7 +636,6 @@ namespace osmscout {
     size_t iteration=1;
     while (!wayTypes.empty()) {
       std::vector<std::list<RawWayRef> > waysByType(typeConfig.GetTypes().size());
-      std::vector<std::list<RawWayRef> > areasByType(typeConfig.GetTypes().size());
 
       //
       // Load type data
@@ -807,12 +647,8 @@ namespace osmscout {
                    progress,
                    typeConfig,
                    wayTypes,
-                   wayBlacklist,
                    scanner,
-                   waysByType,
-                   areasByType,
-                   nodeUseMap,
-                   iteration==1)) {
+                   waysByType)) {
         return false;
       }
 
@@ -827,7 +663,6 @@ namespace osmscout {
           MergeWays(progress,
                     typeConfig,
                     waysByType[type],
-                    wayBlacklist,
                     restrictions);
 
 #pragma omp critical
@@ -856,18 +691,6 @@ namespace osmscout {
         }
       }
 
-      for (size_t type=0; type<areasByType.size(); type++) {
-        for (std::list<RawWayRef>::const_iterator w=areasByType[type].begin();
-             w!=areasByType[type].end();
-             ++w) {
-          RawWayRef areas(*w);
-
-          for (size_t n=0; n<areas->GetNodeCount(); n++) {
-            nodeIds.insert(areas->GetNodeId(n));
-          }
-        }
-      }
-
       progress.SetAction("Loading "+NumberToString(nodeIds.size())+" nodes");
       if (!coordDataFile.Get(nodeIds,coordsMap)) {
         std::cerr << "Cannot read nodes!" << std::endl;
@@ -890,30 +713,10 @@ namespace osmscout {
                    wayWriter,
                    writtenWayCount,
                    coordsMap,
-                   nodeUseMap,
                    *rawWay);
         }
 
         waysByType[type].clear();
-      }
-
-      for (size_t type=0; type<areasByType.size(); type++) {
-        for (std::list<RawWayRef>::const_iterator w=areasByType[type].begin();
-             w!=areasByType[type].end();
-             ++w) {
-          RawWayRef rawWay(*w);
-
-          WriteWay(parameter,
-                   progress,
-                   typeConfig,
-                   wayWriter,
-                   writtenWayCount,
-                   coordsMap,
-                   nodeUseMap,
-                   *rawWay);
-        }
-
-        areasByType[type].clear();
       }
 
       iteration++;
@@ -935,9 +738,6 @@ namespace osmscout {
     }
 
     // Cleaning up...
-
-    nodeUseMap.clear();
-    wayBlacklist.clear();
 
     if (!coordDataFile.Close()) {
       return false;

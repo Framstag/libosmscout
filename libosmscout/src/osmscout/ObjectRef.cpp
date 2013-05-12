@@ -26,9 +26,23 @@ namespace osmscout {
     switch (type) {
     case refNode:
       return "Node";
+    case refArea:
+      return "Area";
     case refWay:
       return "Way";
-    case refRelation:
+    default:
+      return "none";
+    }
+  }
+
+  const char* ObjectOSMRef::GetTypeName() const
+  {
+    switch (type) {
+    case osmRefNode:
+      return "Node";
+    case osmRefWay:
+      return "Way";
+    case osmRefRelation:
       return "Relation";
     default:
       return "none";
@@ -40,10 +54,10 @@ namespace osmscout {
     switch (type) {
     case refNode:
       return "Node";
+    case refArea:
+      return "Area";
     case refWay:
       return "Way";
-    case refRelation:
-      return "Relation";
     default:
       return "none";
     }

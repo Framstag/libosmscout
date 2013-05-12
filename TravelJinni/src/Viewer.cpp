@@ -443,22 +443,22 @@ public:
         RequestNewMap();
       }
     }
-    else if (reference.GetType()==osmscout::refWay) {
-      osmscout::WayRef way;
+    else if (reference.GetType()==osmscout::refArea) {
+      osmscout::AreaRef area;
 
-      if (database->GetWayByOffset(reference.GetFileOffset(),way)) {
-        if (way->GetCenter(lat,lon)) {
+      if (database->GetAreaByOffset(reference.GetFileOffset(),area)) {
+        if (area->GetCenter(lat,lon)) {
           this->magnification=magnification;
 
           RequestNewMap();
         }
       }
     }
-    else if (reference.GetType()==osmscout::refRelation) {
-      osmscout::RelationRef relation;
+    else if (reference.GetType()==osmscout::refWay) {
+      osmscout::WayRef way;
 
-      if (database->GetRelationByOffset(reference.GetFileOffset(),relation)) {
-        if (relation->GetCenter(lat,lon)) {
+      if (database->GetWayByOffset(reference.GetFileOffset(),way)) {
+        if (way->GetCenter(lat,lon)) {
           this->magnification=magnification;
 
           RequestNewMap();

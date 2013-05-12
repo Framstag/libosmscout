@@ -81,6 +81,12 @@ namespace osmscout {
       location.references.push_back(ObjectFileRef(*offset,refNode));
     }
 
+    for (std::list<FileOffset>::const_iterator offset=loc.areas.begin();
+         offset!=loc.areas.end();
+         ++offset) {
+      location.references.push_back(ObjectFileRef(*offset,refArea));
+    }
+
     for (std::list<FileOffset>::const_iterator offset=loc.ways.begin();
          offset!=loc.ways.end();
          ++offset) {
@@ -140,6 +146,7 @@ namespace osmscout {
     FileOffset                parentOffset;
     uint32_t                  childrenCount;
     uint32_t                  nodeCount;
+    uint32_t                  areaCount;
     uint32_t                  wayCount;
     std::map<std::string,Loc> locations;
 
@@ -182,6 +189,32 @@ namespace osmscout {
         }
 
         locations[name].nodes.push_back(offset);
+      }
+    }
+
+    if (!scanner.ReadNumber(areaCount)) {
+      return false;
+    }
+
+    for (size_t i=0; i<areaCount; i++) {
+      std::string name;
+      uint32_t    fileOffsetCount;
+
+      if (!scanner.Read(name) ||
+          !scanner.ReadNumber(fileOffsetCount)) {
+        return false;
+      }
+
+      locations[name].offset=offset;
+
+      for (size_t j=0; j<fileOffsetCount; j++) {
+        FileOffset offset;
+
+        if (!scanner.ReadNumber(offset)) {
+          return false;
+        }
+
+        locations[name].areas.push_back(offset);
       }
     }
 
