@@ -21,20 +21,6 @@
 
 namespace osmscout {
 
-  const char* ObjectRef::GetTypeName() const
-  {
-    switch (type) {
-    case refNode:
-      return "Node";
-    case refArea:
-      return "Area";
-    case refWay:
-      return "Way";
-    default:
-      return "none";
-    }
-  }
-
   const char* ObjectOSMRef::GetTypeName() const
   {
     switch (type) {
