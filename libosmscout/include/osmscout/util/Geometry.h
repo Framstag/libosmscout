@@ -266,7 +266,7 @@ namespace osmscout {
       }
     }
 
-    return true;
+    return false;
   }
 
   /**
