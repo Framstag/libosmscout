@@ -262,8 +262,8 @@ namespace osmscout {
       return false;
     }
 
-    yMax = fmax(y1,y2);
-    yMin = fmin(y1,y2);
+    yMax = std::max(y1,y2);
+    yMin = std::min(y1,y2);
 
     xMin-=pixelOffset;
     yMin-=pixelOffset;
