@@ -1071,11 +1071,20 @@ namespace osmscout {
       const AreaRef& area=*r;
 
       for (size_t m=0; m<area->roles.size(); m++) {
-              DrawAreaLabel(styleConfig,
-                            projection,
-                            parameter,
-                            area->roles[m].attributes,
-                            area->roles[m].nodes);
+        if (area->roles[m].ring==0) {
+          DrawAreaLabel(styleConfig,
+                        projection,
+                        parameter,
+                        area->attributes,
+                        area->roles[m].nodes);
+        }
+        else {
+          DrawAreaLabel(styleConfig,
+                        projection,
+                        parameter,
+                        area->roles[m].attributes,
+                        area->roles[m].nodes);
+        }
       }
     }
   }
