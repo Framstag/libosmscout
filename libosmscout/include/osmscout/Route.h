@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 
+#include <osmscout/ObjectRef.h>
 #include <osmscout/Path.h>
 
 #include <osmscout/util/HashMap.h>
@@ -133,6 +134,8 @@ namespace osmscout {
       std::string ref;
 
     public:
+      NameDescription(const std::string& name);
+
       NameDescription(const std::string& name,
                       const std::string& ref);
 
@@ -408,7 +411,7 @@ namespace osmscout {
     private:
       size_t                                       currentNodeIndex;
       std::vector<Path>                            paths;
-      FileOffset                                   pathWayOffset;
+      ObjectFileRef                                pathObject;
       size_t                                       targetNodeIndex;
       double                                       distance;
       double                                       time;
@@ -418,7 +421,7 @@ namespace osmscout {
     public:
       Node(size_t currentNodeIndex,
            const std::vector<Path>& paths,
-           FileOffset pathWayOffset,
+           const ObjectFileRef& pathObject,
            size_t targetNodeIndex);
 
       inline size_t GetCurrentNodeIndex() const
@@ -436,14 +439,14 @@ namespace osmscout {
         return descriptions;
       }
 
-      inline bool HasPathWay() const
+      inline bool HasPathObject() const
       {
-        return pathWayOffset!=0;
+        return pathObject.Valid();
       }
 
-      inline FileOffset GetPathWayOffset() const
+      inline ObjectFileRef GetPathObject() const
       {
-        return pathWayOffset;
+        return pathObject;
       }
 
       inline size_t GetTargetNodeIndex() const
@@ -487,7 +490,7 @@ namespace osmscout {
 
     void AddNode(size_t currentNodeIndex,
                  const std::vector<Path>& paths,
-                 FileOffset pathWayOffset,
+                 const ObjectFileRef& pathObject,
                  size_t targetNodeIndex);
 
     inline std::list<Node>& Nodes()

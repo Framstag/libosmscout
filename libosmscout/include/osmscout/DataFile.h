@@ -77,6 +77,9 @@ namespace osmscout {
     bool GetByOffset(const std::set<FileOffset>& offsets,
                      std::vector<ValueType>& data) const;
 
+    bool GetByOffset(const std::set<FileOffset>& offsets,
+                     OSMSCOUT_HASHMAP<FileOffset,ValueType>& dataMap) const;
+
     bool GetByOffset(const FileOffset& offset,
                      ValueType& entry) const;
 
@@ -257,6 +260,25 @@ namespace osmscout {
       }
 
       data.push_back(cacheRef->value);
+    }
+
+    return true;
+  }
+
+  template <class N>
+  bool DataFile<N>::GetByOffset(const std::set<FileOffset>& offsets,
+                                OSMSCOUT_HASHMAP<FileOffset,ValueType>& dataMap) const
+  {
+    std::vector<ValueType> data;
+
+    if (!GetByOffset(offsets,data)) {
+      return false;
+    }
+
+    for (typename std::vector<ValueType>::const_iterator v=data.begin();
+            v!=data.end();
+            ++v) {
+      dataMap.insert(std::make_pair((*v)->GetFileOffset(),*v));
     }
 
     return true;

@@ -69,6 +69,12 @@ namespace osmscout {
       this->type=type;
     }
 
+    inline void Invalidate()
+    {
+      this->id=0;
+      this->type=osmRefNone;
+    }
+
     inline const Id& GetId() const
     {
       return id;
@@ -79,6 +85,16 @@ namespace osmscout {
       return type;
     }
 
+    inline bool Valid() const
+    {
+      return type!=osmRefNone;
+    }
+
+    inline bool Invalid() const
+    {
+      return type==osmRefNone;
+    }
+
     inline bool operator<(const ObjectOSMRef& reference) const
     {
       return type<reference.type || (type==reference.type &&  id<reference.id);
@@ -87,6 +103,11 @@ namespace osmscout {
     inline bool operator==(const ObjectOSMRef& reference) const
     {
       return type==reference.type && id==reference.id;
+    }
+
+    inline bool operator!=(const ObjectOSMRef& reference) const
+    {
+      return type!=reference.type || id!=reference.id;
     }
 
     const char* GetTypeName() const;
@@ -121,6 +142,12 @@ namespace osmscout {
       this->type=type;
     }
 
+    inline void Invalidate()
+    {
+      this->offset=0;
+      this->type=refNone;
+    }
+
     inline const FileOffset& GetFileOffset() const
     {
       return offset;
@@ -131,6 +158,16 @@ namespace osmscout {
       return type;
     }
 
+    inline bool Valid() const
+    {
+      return type!=refNone;
+    }
+
+    inline bool Invalid() const
+    {
+      return type==refNone;
+    }
+
     inline bool operator<(const ObjectFileRef& reference) const
     {
       return type<reference.type || (type==reference.type &&  offset<reference.offset);
@@ -139,6 +176,11 @@ namespace osmscout {
     inline bool operator==(const ObjectFileRef& reference) const
     {
       return type==reference.type && offset==reference.offset;
+    }
+
+    inline bool operator!=(const ObjectFileRef& reference) const
+    {
+      return type!=reference.type || offset!=reference.offset;
     }
 
     const char* GetTypeName() const;

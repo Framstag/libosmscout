@@ -135,10 +135,10 @@ static std::string CrossingWaysDescriptionToString(const osmscout::RouteDescript
 struct RouteSelection
 {
   QString                    start;
-  osmscout::FileOffset       startWayOffset;
+  osmscout::ObjectFileRef    startObject;
   size_t                     startNodeIndex;
   QString                    end;
-  osmscout::FileOffset       endWayOffset;
+  osmscout::ObjectFileRef    endObject;
   size_t                     endNodeIndex;
   osmscout::RouteData        routeData;
   osmscout::RouteDescription routeDescription;
@@ -342,10 +342,10 @@ void RoutingDialog::SelectFrom()
 
     location=dialog.GetLocationResult();
 
-    osmscout::FileOffset offset=location.references.front().GetFileOffset();
-
-    if (dbThread.GetWayByOffset(offset,way)) {
-      route.startWayOffset=way->GetFileOffset();
+    switch (location.references.front().GetType()) {
+    case osmscout::refArea:
+    case osmscout::refWay:
+      route.startObject=location.references.front();
       route.startNodeIndex=0;
 
       if (location.path.empty()) {
@@ -361,14 +361,17 @@ void RoutingDialog::SelectFrom()
       from->setCursorPosition(0);
 
       hasStart=true;
-      if (hasStart && hasEnd) {
-        routeButton->setEnabled(true);
-      }
-    }
-    else {
+
+      break;
+    default:
+      // TODO: Open some error dialog
+      hasStart=false;
       route.start.clear();
       from->setText("");
+      break;
     }
+
+    routeButton->setEnabled(hasStart && hasEnd);
   }
 }
 
@@ -387,10 +390,10 @@ void RoutingDialog::SelectTo()
 
     location=dialog.GetLocationResult();
 
-    osmscout::FileOffset offset=location.references.front().GetFileOffset();
-
-    if (dbThread.GetWayByOffset(offset,way)) {
-      route.endWayOffset=way->GetFileOffset();
+    switch (location.references.front().GetType()) {
+    case osmscout::refArea:
+    case osmscout::refWay:
+      route.endObject=location.references.front();
       route.endNodeIndex=0;
 
       if (location.path.empty()) {
@@ -398,22 +401,24 @@ void RoutingDialog::SelectTo()
       }
       else {
         route.end=QString::fromUtf8(location.name.c_str())+
-                  " ("+QString::fromUtf8(osmscout::StringListToString(location.path).c_str())+")";
+                     " ("+QString::fromUtf8(osmscout::StringListToString(location.path).c_str())+")";
       }
 
       to->setText(route.end);
-      // Make sure, start of text is visible
+       // Make sure, start of text is visible
       to->setCursorPosition(0);
 
       hasEnd=true;
-      if (hasStart && hasEnd) {
-        routeButton->setEnabled(true);
-      }
+      break;
+    default:
+      // TODO: Open some error dialog
+      hasEnd=false;
+      route.end.clear();
+      to->setText("");
+      break;
     }
-    else {
-      route.start.clear();
-      from->setText("");
-    }
+
+    routeButton->setEnabled(hasStart && hasEnd);
   }
 }
 
@@ -634,9 +639,9 @@ void RoutingDialog::Route()
   route.routeSteps.clear();
   routeModel->refresh();
 
-  if (!dbThread.CalculateRoute(route.startWayOffset,
+  if (!dbThread.CalculateRoute(route.startObject,
                                route.startNodeIndex,
-                               route.endWayOffset,
+                               route.endObject,
                                route.endNodeIndex,
                                routeData)) {
     std::cerr << "There was an error while routing!" << std::endl;

@@ -24,6 +24,8 @@
 
 #include <osmscout/Types.h>
 
+#include <osmscout/ObjectRef.h>
+
 namespace osmscout {
 
   /**
@@ -33,22 +35,22 @@ namespace osmscout {
   class OSMSCOUT_API Path
   {
   private:
-    FileOffset wayOffset;
-    size_t     targetNodeIndex;
-    bool       traversable;
+    ObjectFileRef object;
+    size_t        targetNodeIndex;
+    bool          traversable;
 
   public:
-    Path(FileOffset wayOffset,
+    Path(ObjectFileRef Object,
          size_t targetNodeIndex);
-    Path(FileOffset wayOffset,
+    Path(ObjectFileRef object,
          size_t targetNodeIndex,
          bool traversable);
     Path(const Path& other);
     virtual ~Path();
 
-    inline FileOffset GetWayOffset() const
+    inline ObjectFileRef GetObject() const
     {
-      return wayOffset;
+      return object;
     }
 
     inline size_t GetTargetNodeIndex() const

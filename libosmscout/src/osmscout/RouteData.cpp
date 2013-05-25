@@ -22,10 +22,10 @@
 namespace osmscout {
 
   RouteData::RouteEntry::RouteEntry(size_t currentNodeIndex,
-                                    FileOffset pathWayOffset,
+                                    const ObjectFileRef& pathObject,
                                     size_t targetNodeIndex)
    : currentNodeIndex(currentNodeIndex),
-     pathWayOffset(pathWayOffset),
+     pathObject(pathObject),
      targetNodeIndex(targetNodeIndex)
   {
     // no code
@@ -33,11 +33,11 @@ namespace osmscout {
 
   RouteData::RouteEntry::RouteEntry(size_t currentNodeIndex,
                                     const std::vector<Path>& paths,
-                                    FileOffset pathWayOffset,
+                                    const ObjectFileRef& pathObject,
                                     size_t targetNodeIndex)
    : currentNodeIndex(currentNodeIndex),
      paths(paths),
-     pathWayOffset(pathWayOffset),
+     pathObject(pathObject),
      targetNodeIndex(targetNodeIndex)
   {
     // no code
@@ -54,22 +54,22 @@ namespace osmscout {
   }
 
   void RouteData::AddEntry(size_t currentNodeIndex,
-                           FileOffset pathWayOffset,
+                           const ObjectFileRef& pathObject,
                            size_t targetNodeIndex)
   {
     entries.push_back(RouteEntry(currentNodeIndex,
-                                 pathWayOffset,
+                                 pathObject,
                                  targetNodeIndex));
   }
 
   void RouteData::AddEntry(size_t currentNodeIndex,
                            const std::vector<Path>& paths,
-                           FileOffset pathWayOffset,
+                           const ObjectFileRef& pathObject,
                            size_t targetNodeIndex)
   {
     entries.push_back(RouteEntry(currentNodeIndex,
                                  paths,
-                                 pathWayOffset,
+                                 pathObject,
                                  targetNodeIndex));
   }
 }

@@ -161,10 +161,10 @@ std::wstring RouteDialog::RouteModelPainter::GetCellData() const
 struct RouteSelection
 {
   std::wstring               start;
-  osmscout::FileOffset       startWayOffset;
+  osmscout::ObjectFileRef    startObject;
   size_t                     startNodeIndex;
   std::wstring               end;
-  osmscout::FileOffset       endWayOffset;
+  osmscout::ObjectFileRef    endObject;
   size_t                     endNodeIndex;
   osmscout::RouteData        routeData;
   osmscout::RouteDescription routeDescription;
@@ -496,18 +496,13 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
       dialog->EventLoop();
       dialog->Close();
 
-      // TODO: Check that this is a way!
-
       if (dialog->HasResult()) {
-        osmscout::Location    location=dialog->GetResult();
-        osmscout::WayRef      way;
+        osmscout::Location  location=dialog->GetResult();
 
-        assert(location.references.front().GetType()==osmscout::refWay);
-
-        osmscout::FileOffset offset=location.references.front().GetFileOffset();
-
-        if (databaseTask->GetWayByOffset(offset,way)) {
-          result.startWayOffset=way->GetFileOffset();
+        switch (location.references.front().GetType()) {
+        case osmscout::refArea:
+        case osmscout::refWay:
+          result.startObject=location.references.front();
           result.startNodeIndex=0;
 
           if (location.path.empty()) {
@@ -521,10 +516,13 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
           start->Set(result.start);
 
           hasResult=true;
-        }
-        else {
+          break;
+        default:
+          // TODO: Open some error dialog
+          hasResult=false;
           result.start.clear();
           start->Set(L"");
+          break;
         }
       }
     }
@@ -555,12 +553,10 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
         osmscout::Location    location=dialog->GetResult();
         osmscout::WayRef      way;
 
-        assert(location.references.front().GetType()==osmscout::refWay);
-
-        osmscout::FileOffset offset=location.references.front().GetFileOffset();
-
-        if (databaseTask->GetWayByOffset(offset,way)) {
-          result.endWayOffset=way->GetFileOffset();
+        switch (location.references.front().GetType()) {
+        case osmscout::refArea:
+        case osmscout::refWay:
+          result.endObject=location.references.front();
           result.endNodeIndex=0;
 
           if (location.path.empty()) {
@@ -574,10 +570,13 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
           end->Set(result.end);
 
           hasResult=true;
-        }
-        else {
+          break;
+        default:
+          // TODO: Open some error dialog
+          hasResult=false;
           result.end.clear();
           end->Set(L"");
+          break;
         }
       }
     }
@@ -602,9 +601,9 @@ void RouteDialog::Resync(Lum::Base::Model* model, const Lum::Base::ResyncMsg& ms
 
     osmscout::Way way;
 
-    if (!databaseTask->CalculateRoute(result.startWayOffset,
+    if (!databaseTask->CalculateRoute(result.startObject,
                                       result.startNodeIndex,
-                                      result.endWayOffset,
+                                      result.endObject,
                                       result.endNodeIndex,
                                       result.routeData)) {
       std::cerr << "There was an error while routing!" << std::endl;

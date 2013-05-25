@@ -687,15 +687,14 @@ namespace osmscout {
     modules.push_back(new CityStreetIndexGenerator());
 
     /* 20 */
-    //modules.push_back(new RouteDataGenerator());
+    modules.push_back(new RouteDataGenerator());
 
     /* 21 */
-    /*
     modules.push_back(new NumericIndexGenerator<Id,RouteNode>("Generating 'route.idx'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               "route.dat"),
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
-                                                                              "route.idx")));*/
+                                                                              "route.idx")));
 
     bool result=ExecuteModules(modules,parameter,progress,typeConfig);
 

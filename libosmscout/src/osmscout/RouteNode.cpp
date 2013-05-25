@@ -33,6 +33,10 @@ namespace osmscout {
     uint32_t minLat;
     uint32_t minLon;
 
+    if (!scanner.GetPos(fileOffset)) {
+      return false;
+    }
+
     scanner.ReadNumber(id);
 
     scanner.ReadNumber(wayCount);
@@ -46,18 +50,16 @@ namespace osmscout {
       return false;
     }
 
-    FileOffset lastOffset=0;
-    ways.resize(wayCount);
+    //FileOffset lastOffset=0;
+    objects.resize(wayCount);
     for (size_t i=0; i<wayCount; i++) {
-      scanner.ReadNumber(ways[i]);
+      FileOffset fileOffset;
+      uint8_t    typeByte;
 
-      ways[i]+=lastOffset;
+      scanner.Read(typeByte);
+      scanner.ReadFileOffset(fileOffset);
 
-      if (i>0) {
-        assert(ways[i]>=ways[i-1]);
-      }
-
-      lastOffset=ways[i];
+      objects[i].Set(fileOffset,(RefType)typeByte);
     }
 
     paths.resize(pathCount);
@@ -67,7 +69,7 @@ namespace osmscout {
       uint32_t distanceValue;
 
       scanner.ReadFileOffset(paths[i].offset);
-      scanner.ReadNumber(paths[i].wayIndex);
+      scanner.ReadNumber(paths[i].objectIndex);
       scanner.ReadNumber(paths[i].type);
       scanner.Read(paths[i].maxSpeed);
       scanner.Read(paths[i].grade);
@@ -84,8 +86,14 @@ namespace osmscout {
 
     excludes.resize(excludesCount);
     for (size_t i=0; i<excludesCount; i++) {
-      scanner.ReadFileOffset(excludes[i].sourceWay);
-      scanner.ReadNumber(excludes[i].targetPath);
+      FileOffset fileOffset;
+      uint8_t    typeByte;
+
+      scanner.Read(typeByte);
+      scanner.ReadFileOffset(fileOffset);
+      scanner.ReadNumber(excludes[i].targetIndex);
+
+      excludes[i].source.Set(fileOffset,(RefType)typeByte);;
     }
 
     return !scanner.HasError();
@@ -95,7 +103,7 @@ namespace osmscout {
   {
     writer.WriteNumber(id);
 
-    writer.WriteNumber((uint32_t)ways.size());
+    writer.WriteNumber((uint32_t)objects.size());
     writer.WriteNumber((uint32_t)paths.size());
     writer.WriteNumber((uint32_t)excludes.size());
 
@@ -110,13 +118,16 @@ namespace osmscout {
     writer.Write(minLat);
     writer.Write(minLon);
 
-    FileOffset lastOffset=0;
-    for (size_t i=0; i<ways.size(); i++) {
-      assert(ways[i]>=lastOffset);
+    //FileOffset lastOffset=0;
+    for (size_t i=0; i<objects.size(); i++) {
+      //assert(objects[i]>=lastOffset);
 
-      writer.WriteNumber(ways[i]-lastOffset);
+      //writer.WriteNumber(objects[i]-lastOffset);
 
-      lastOffset=ways[i];
+      writer.Write((uint8_t)objects[i].GetType());
+      writer.WriteFileOffset(objects[i].GetFileOffset());
+
+      //lastOffset=objects[i];
     }
 
     for (size_t i=0; i<paths.size(); i++) {
@@ -125,7 +136,7 @@ namespace osmscout {
       uint32_t distanceValue=(uint32_t)floor(paths[i].distance*(1000.0*100.0)+0.5);
 
       writer.WriteFileOffset(paths[i].offset);
-      writer.WriteNumber(paths[i].wayIndex);
+      writer.WriteNumber(paths[i].objectIndex);
       writer.WriteNumber(paths[i].type);
       writer.Write(paths[i].maxSpeed);
       writer.Write(paths[i].grade);
@@ -137,8 +148,9 @@ namespace osmscout {
     }
 
     for (size_t i=0; i<excludes.size(); i++) {
-      writer.WriteFileOffset(excludes[i].sourceWay);
-      writer.WriteNumber(excludes[i].targetPath);
+      writer.Write((uint8_t)excludes[i].source.GetType());
+      writer.WriteFileOffset(excludes[i].source.GetFileOffset());
+      writer.WriteNumber(excludes[i].targetIndex);
     }
 
     return !writer.HasError();

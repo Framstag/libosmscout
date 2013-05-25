@@ -36,17 +36,17 @@ namespace osmscout {
     private:
       size_t            currentNodeIndex;
       std::vector<Path> paths;
-      FileOffset        pathWayOffset;
+      ObjectFileRef     pathObject;
       size_t            targetNodeIndex;
 
     public:
       RouteEntry(size_t currentNodeIndex,
-                 FileOffset pathWayOffset,
+                 const ObjectFileRef& pathObject,
                  size_t targetNodeIndex);
 
       RouteEntry(size_t currentNodeIndex,
                  const std::vector<Path>& paths,
-                 FileOffset pathWayOffset,
+                 const ObjectFileRef& pathObject,
                  size_t targetNodeIndex);
 
       inline size_t GetCurrentNodeIndex() const
@@ -54,9 +54,9 @@ namespace osmscout {
         return currentNodeIndex;
       }
 
-      inline FileOffset GetPathWayOffset() const
+      inline ObjectFileRef GetPathObject() const
       {
-        return pathWayOffset;
+        return pathObject;
       }
 
       inline size_t GetTargetNodeIndex() const
@@ -79,12 +79,12 @@ namespace osmscout {
     void Clear();
 
     void AddEntry(size_t currentNodeIndex,
-                  FileOffset pathWayOffset,
+                  const ObjectFileRef& pathObject,
                   size_t targetNodeIndex);
 
     void AddEntry(size_t currentNodeIndex,
                   const std::vector<Path>& paths,
-                  FileOffset pathWayOffset,
+                  const ObjectFileRef& pathObject,
                   size_t targetNodeIndex);
 
     inline const std::list<RouteEntry>& Entries() const

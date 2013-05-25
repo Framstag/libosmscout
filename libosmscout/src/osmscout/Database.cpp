@@ -899,6 +899,16 @@ namespace osmscout {
     return nodeDataFile.GetByOffset(offsets,nodes);
   }
 
+  bool Database::GetNodesByOffset(const std::set<FileOffset>& offsets,
+                                  std::vector<NodeRef>& nodes) const
+  {
+    if (!IsOpen()) {
+      return false;
+    }
+
+    return nodeDataFile.GetByOffset(offsets,nodes);
+  }
+
   bool Database::GetNodesByOffset(const std::list<FileOffset>& offsets,
                                   std::vector<NodeRef>& nodes) const
   {
@@ -941,7 +951,7 @@ namespace osmscout {
     return areaDataFile.GetByOffset(offsets,areas);
   }
 
-  bool Database::GetAreasByOffset(const std::list<FileOffset>& offsets,
+  bool Database::GetAreasByOffset(const std::set<FileOffset>& offsets,
                                   std::vector<AreaRef>& areas) const
   {
     if (!IsOpen()) {
@@ -951,6 +961,15 @@ namespace osmscout {
     return areaDataFile.GetByOffset(offsets,areas);
   }
 
+  bool Database::GetAreasByOffset(const std::list<FileOffset>& offsets,
+                                  std::vector<AreaRef>& areas) const
+  {
+    if (!IsOpen()) {
+      return false;
+    }
+
+    return areaDataFile.GetByOffset(offsets,areas);
+  }
 
   bool Database::GetWayByOffset(const FileOffset& offset,
                                 WayRef& way) const
@@ -975,6 +994,16 @@ namespace osmscout {
   }
 
   bool Database::GetWaysByOffset(const std::vector<FileOffset>& offsets,
+                                 std::vector<WayRef>& ways) const
+  {
+    if (!IsOpen()) {
+      return false;
+    }
+
+    return wayDataFile.GetByOffset(offsets,ways);
+  }
+
+  bool Database::GetWaysByOffset(const std::set<FileOffset>& offsets,
                                  std::vector<WayRef>& ways) const
   {
     if (!IsOpen()) {

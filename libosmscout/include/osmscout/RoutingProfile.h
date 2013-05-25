@@ -22,8 +22,13 @@
 
 #include <vector>
 
-#include <osmscout/RouteNode.h>
 #include <osmscout/Types.h>
+
+#include <osmscout/Way.h>
+
+#include <osmscout/RouteNode.h>
+
+#include "Area.h"
 
 namespace osmscout {
 
@@ -41,9 +46,13 @@ namespace osmscout {
                         size_t pathIndex) const = 0;
     virtual double GetCosts(const RouteNode& currentNode,
                             size_t pathIndex) const = 0;
+    virtual double GetCosts(const Area& area,
+                            double distance) const = 0;
     virtual double GetCosts(const Way& way,
                             double distance) const = 0;
     virtual double GetCosts(double distance) const = 0;
+    virtual double GetTime(const Area& area,
+                           double distance) const = 0;
     virtual double GetTime(const Way& way,
                            double distance) const = 0;
   };
@@ -82,6 +91,23 @@ namespace osmscout {
       return type<speeds.size() && speeds[type]>0.0;
     }
 
+    inline double GetTime(const Area& area,
+                          double distance) const
+    {
+      double speed;
+
+      if (area.roles[0].attributes.GetMaxSpeed()>0) {
+        speed=area.roles[0].attributes.GetMaxSpeed();
+      }
+      else {
+        speed=speeds[area.GetType()];
+      }
+
+      speed=std::min(vehicleMaxSpeed,speed);
+
+      return distance/speed;
+    }
+
     inline double GetTime(const Way& way,
                           double distance) const
     {
@@ -110,6 +136,12 @@ namespace osmscout {
                            size_t pathIndex) const
     {
       return currentNode.paths[pathIndex].distance;
+    }
+
+    inline double GetCosts(const Area& area,
+                           double distance) const
+    {
+      return distance;
     }
 
     inline double GetCosts(const Way& way,
@@ -146,6 +178,23 @@ namespace osmscout {
       speed=std::min(vehicleMaxSpeed,speed);
 
       return currentNode.paths[pathIndex].distance/speed;
+    }
+
+    inline double GetCosts(const Area& area,
+                           double distance) const
+    {
+      double speed;
+
+      if (area.roles[0].attributes.GetMaxSpeed()>0) {
+        speed=area.roles[0].attributes.GetMaxSpeed();
+      }
+      else {
+        speed=speeds[area.GetType()];
+      }
+
+      speed=std::min(vehicleMaxSpeed,speed);
+
+      return distance/speed;
     }
 
     inline double GetCosts(const Way& way,

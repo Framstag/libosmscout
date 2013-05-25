@@ -23,7 +23,11 @@
 #include <osmscout/NumericIndex.h>
 #include <osmscout/RouteNode.h>
 #include <osmscout/TurnRestriction.h>
+
+#include <osmscout/Area.h>
 #include <osmscout/Way.h>
+
+#include <osmscout/ObjectRef.h>
 
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/HashMap.h>
@@ -56,8 +60,9 @@ namespace osmscout {
       size_t     index;
     };
 
+    typedef OSMSCOUT_HASHMAP<PageId,uint32_t>              NodeUseMap;
     typedef OSMSCOUT_HASHMAP<Id, FileOffset>               NodeIdOffsetMap;
-    typedef std::map<Id,std::list<FileOffset> >            NodeIdWayOffsetMap;
+    typedef std::map<Id,std::list<ObjectFileRef> >         NodeIdObjectsMap;
     typedef std::map<Id,std::list<PendingOffset> >         PendingRouteNodeOffsetsMap;
     typedef std::map<Id,std::vector<TurnRestrictionData> > ViaTurnRestrictionMap;
 
@@ -65,6 +70,11 @@ namespace osmscout {
     bool ReadTurnRestrictionWayIds(const ImportParameter& parameter,
                                    Progress& progress,
                                    std::map<Id,FileOffset>& wayIdOffsetMap);
+
+    void SetNodeUsed(NodeUseMap& nodeUseMap,
+                    OSMId id);
+    bool IsNodeUsedAtLeastTwice(const NodeUseMap& nodeUseMap,
+                                OSMId id) const;
 
     bool ResolveWayIdsToFileOffsets(const ImportParameter& parameter,
                                     Progress& progress,
@@ -86,18 +96,23 @@ namespace osmscout {
     bool ReadJunctions(const ImportParameter& parameter,
                        Progress& progress,
                        const TypeConfig& typeConfig,
-                       OSMSCOUT_HASHSET<Id>& junctions);
+                       NodeUseMap& nodeUseMap);
 
-    bool ReadWayEndpoints(const ImportParameter& parameter,
-                          Progress& progress,
-                          const TypeConfig& typeConfig,
-                          const OSMSCOUT_HASHSET<Id>& junctions,
-                          NodeIdWayOffsetMap& endPointWayMap);
+    bool ReadWayObjectsAtJunctions(const ImportParameter& parameter,
+                                   Progress& progress,
+                                   const TypeConfig& typeConfig,
+                                   const NodeUseMap& nodeUseMap,
+                                   NodeIdObjectsMap& nodeObjectsMap);
 
     bool LoadWays(Progress& progress,
                   FileScanner& scanner,
                   const std::set<FileOffset>& fileOffsets,
                   OSMSCOUT_HASHMAP<FileOffset,WayRef>& waysMap);
+
+    bool LoadAreas(Progress& progress,
+                   FileScanner& scanner,
+                   const std::set<FileOffset>& fileOffsets,
+                   OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areasMap);
 
     /*
     uint8_t CalculateEncodedBearing(const Way& way,
@@ -106,26 +121,26 @@ namespace osmscout {
                                     bool clockwise) const;*/
 
     void CalculateAreaPaths(RouteNode& routeNode,
-                            const Way& way,
+                            const Area& area,
                             FileOffset routeNodeOffset,
-                            const NodeIdWayOffsetMap& nodeWayMap,
+                            const NodeIdObjectsMap& nodeObjectsMap,
                             const NodeIdOffsetMap& nodeIdOffsetMap,
                             PendingRouteNodeOffsetsMap& pendingOffsetsMap);
     void CalculateCircularWayPaths(RouteNode& routeNode,
                                    const Way& way,
                                    FileOffset routeNodeOffset,
-                                   const NodeIdWayOffsetMap& nodeWayMap,
+                                   const NodeIdObjectsMap& nodeObjectsMap,
                                    const NodeIdOffsetMap& nodeIdOffsetMap,
                                    PendingRouteNodeOffsetsMap& pendingOffsetsMap);
     void CalculateWayPaths(RouteNode& routeNode,
                            const Way& way,
                            FileOffset routeNodeOffset,
-                           const NodeIdWayOffsetMap& nodeWayMap,
+                           const NodeIdObjectsMap& nodeObjectsMap,
                            const NodeIdOffsetMap& nodeIdOffsetMap,
                            PendingRouteNodeOffsetsMap& pendingOffsetsMap);
 
     void FillRoutePathExcludes(RouteNode& routeNode,
-                               const std::list<FileOffset>& wayOffsets,
+                               const std::list<ObjectFileRef>& objects,
                                const ViaTurnRestrictionMap& restrictions);
 
     bool HandlePendingOffsets(const ImportParameter& parameter,
@@ -133,7 +148,7 @@ namespace osmscout {
                               const NodeIdOffsetMap& routeNodeIdOffsetMap,
                               PendingRouteNodeOffsetsMap& pendingOffsetsMap,
                               FileWriter& routeNodeWriter,
-                              std::vector<NodeIdWayOffsetMap::iterator>& block,
+                              std::vector<NodeIdObjectsMap::iterator>& block,
                               size_t blockCount);
 
   public:

@@ -42,6 +42,38 @@ namespace osmscout {
   public:
     class OSMSCOUT_API Postprocessor : public Referencable
     {
+    protected:
+      bool ResolveAllAreasAndWays(RouteDescription& description,
+                                  Database& database,
+                                  OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                                  OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap);
+
+      RouteDescription::NameDescriptionRef GetNameDescription(const ObjectFileRef& object,
+                                                              const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                                                              const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap);
+
+      bool IsRoundabout(const ObjectFileRef& object,
+                        const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                        const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap);
+
+      bool IsOfType(const ObjectFileRef& object,
+                    const OSMSCOUT_HASHSET<TypeId>& types,
+                    const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                    const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap);
+
+      bool IsNodeStartOrEndOfObject(const ObjectFileRef& nodeObject,
+                                    size_t nodeIndex,
+                                    const ObjectFileRef& object,
+                                    const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                                    const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap);
+
+      void GetCoordinates(const ObjectFileRef& object,
+                          size_t nodeIndex,
+                          const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                          const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap,
+                          double& lat,
+                          double& lon);
+
     public:
       virtual ~Postprocessor();
 
@@ -114,9 +146,10 @@ namespace osmscout {
     private:
       void AddCrossingWaysDescriptions(RouteDescription::CrossingWaysDescription* description,
                                        const RouteDescription::Node& node,
-                                       const WayRef& originWay,
-                                       const WayRef& targetWay,
-                                       const std::map<FileOffset,WayRef>& wayMap);
+                                       const ObjectFileRef& originObject,
+                                       const ObjectFileRef& targetObject,
+                                       const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                                       const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap);
 
     public:
       bool Process(const RoutingProfile& profile,
@@ -164,7 +197,8 @@ namespace osmscout {
 
     private:
       State GetInitialState(RouteDescription::Node& node,
-                            std::map<FileOffset,WayRef>& wayMap);
+                            const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                            const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap);
 
       void HandleRoundaboutEnter(RouteDescription::Node& node);
       void HandleRoundaboutNode(RouteDescription::Node& node);
@@ -175,11 +209,9 @@ namespace osmscout {
                                      const RouteDescription::NameDescriptionRef& fromName);
       bool HandleNameChange(const std::list<RouteDescription::Node>& path,
                             std::list<RouteDescription::Node>::const_iterator& lastNode,
-                            std::list<RouteDescription::Node>::iterator& node,
-                            const std::map<FileOffset,WayRef>& wayMap);
+                            std::list<RouteDescription::Node>::iterator& node);
       bool HandleDirectionChange(const std::list<RouteDescription::Node>& path,
-                                 std::list<RouteDescription::Node>::iterator& node,
-                                 const std::map<FileOffset,WayRef>& wayMap);
+                                 std::list<RouteDescription::Node>::iterator& node);
 
     public:
       bool Process(const RoutingProfile& profile,

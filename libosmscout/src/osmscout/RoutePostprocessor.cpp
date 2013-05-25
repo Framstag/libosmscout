@@ -32,6 +32,236 @@ namespace osmscout {
     // no code
   }
 
+  bool RoutePostprocessor::Postprocessor::ResolveAllAreasAndWays(RouteDescription& description,
+                                                                 Database& database,
+                                                                 OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                                                                 OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap)
+  {
+    std::set<FileOffset>         areaOffsets;
+    std::vector<AreaRef>         areas;
+
+    std::set<FileOffset>         wayOffsets;
+    std::vector<WayRef>          ways;
+
+    for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
+        node!=description.Nodes().end();
+        ++node) {
+      if (node->HasPathObject()) {
+        switch (node->GetPathObject().GetType()) {
+        case refNone:
+        case refNode:
+          assert(false);
+          break;
+        case refArea:
+          areaOffsets.insert(node->GetPathObject().GetFileOffset());
+        break;
+        case refWay:
+          wayOffsets.insert(node->GetPathObject().GetFileOffset());
+          break;
+        }
+      }
+
+      for (std::vector<Path>::const_iterator path=node->GetPaths().begin();
+          path!=node->GetPaths().end();
+          ++path) {
+        switch (path->GetObject().GetType()) {
+        case refNone:
+        case refNode:
+          assert(false);
+          break;
+        case refArea:
+          areaOffsets.insert(path->GetObject().GetFileOffset());
+        break;
+        case refWay:
+          wayOffsets.insert(path->GetObject().GetFileOffset());
+          break;
+        }
+      }
+    }
+
+    if (!database.GetAreasByOffset(areaOffsets,areas)) {
+      std::cerr << "Cannot retrieve crossing areas" << std::endl;
+      return false;
+    }
+
+    if (!database.GetWaysByOffset(wayOffsets,ways)) {
+      std::cerr << "Cannot retrieve crossing ways" << std::endl;
+      return false;
+    }
+
+    for (std::vector<WayRef>::const_iterator way=ways.begin();
+         way!=ways.end();
+         ++way) {
+      wayMap[(*way)->GetFileOffset()]=*way;
+    }
+
+    wayOffsets.clear();
+    ways.clear();
+
+    for (std::vector<AreaRef>::const_iterator area=areas.begin();
+         area!=areas.end();
+         ++area) {
+      areaMap[(*area)->GetFileOffset()]=*area;
+    }
+
+    areaOffsets.clear();
+    areas.clear();
+
+    return true;
+  }
+
+  RouteDescription::NameDescriptionRef RoutePostprocessor::Postprocessor::GetNameDescription(const ObjectFileRef& object,
+                                                                                             const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                                                                                             const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap)
+  {
+    RouteDescription::NameDescriptionRef description;
+
+    if (object.GetType()==refArea) {
+      OSMSCOUT_HASHMAP<FileOffset,AreaRef>::const_iterator entry=areaMap.find(object.GetFileOffset());
+
+      assert(entry!=areaMap.end());
+
+      description=new RouteDescription::NameDescription(entry->second->GetName());
+    }
+    else if (object.GetType()==refWay) {
+      OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=wayMap.find(object.GetFileOffset());
+
+      assert(entry!=wayMap.end());
+
+      description=new RouteDescription::NameDescription(entry->second->GetName(),
+                                                        entry->second->GetRefName());
+    }
+    else {
+      assert(false);
+    }
+
+    return description;
+  }
+
+  bool RoutePostprocessor::Postprocessor::IsRoundabout(const ObjectFileRef& object,
+                                                       const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                                                       const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap)
+  {
+    if (object.GetType()==refArea) {
+      OSMSCOUT_HASHMAP<FileOffset,AreaRef>::const_iterator entry=areaMap.find(object.GetFileOffset());
+
+      assert(entry!=areaMap.end());
+
+      return false;
+    }
+    else if (object.GetType()==refWay) {
+      OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=wayMap.find(object.GetFileOffset());
+
+      assert(entry!=wayMap.end());
+
+      return entry->second->IsRoundabout();
+    }
+    else {
+      assert(false);
+
+      return false;
+    }
+  }
+
+  bool RoutePostprocessor::Postprocessor::IsOfType(const ObjectFileRef& object,
+                                                   const OSMSCOUT_HASHSET<TypeId>& types,
+                                                   const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                                                   const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap)
+  {
+    if (object.GetType()==refArea) {
+      OSMSCOUT_HASHMAP<FileOffset,AreaRef>::const_iterator entry=areaMap.find(object.GetFileOffset());
+
+      assert(entry!=areaMap.end());
+
+      return types.find(entry->second->GetType())!=types.end();
+    }
+    else if (object.GetType()==refWay) {
+      OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=wayMap.find(object.GetFileOffset());
+
+      assert(entry!=wayMap.end());
+
+      return types.find(entry->second->GetType())!=types.end();
+    }
+    else {
+      assert(false);
+
+      return false;
+    }
+  }
+
+  bool RoutePostprocessor::Postprocessor::IsNodeStartOrEndOfObject(const ObjectFileRef& nodeObject,
+                                                                   size_t nodeIndex,
+                                                                   const ObjectFileRef& object,
+                                                                   const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                                                                   const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap)
+  {
+    Id nodeId;
+
+    if (object.GetType()==refArea) {
+      OSMSCOUT_HASHMAP<FileOffset,AreaRef>::const_iterator entry=areaMap.find(nodeObject.GetFileOffset());
+
+      assert(entry!=areaMap.end());
+
+      nodeId=entry->second->roles[0].ids[nodeIndex];
+    }
+    else if (object.GetType()==refWay) {
+      OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=wayMap.find(nodeObject.GetFileOffset());
+
+      assert(entry!=wayMap.end());
+
+      nodeId=entry->second->ids[nodeIndex];
+    }
+    else {
+      assert(false);
+    }
+
+    if (object.GetType()==refArea) {
+      return false;
+    }
+    else if (object.GetType()==refWay) {
+      OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=wayMap.find(object.GetFileOffset());
+
+      assert(entry!=wayMap.end());
+
+      return entry->second->ids.front()==nodeId ||
+             entry->second->ids.back()==nodeId;
+    }
+    else {
+      assert(false);
+
+      return false;
+    }
+  }
+
+  void RoutePostprocessor::Postprocessor::GetCoordinates(const ObjectFileRef& object,
+                                                         size_t nodeIndex,
+                                                         const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                                                         const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap,
+                                                         double& lat,
+                                                         double& lon)
+  {
+    if (object.GetType()==refArea) {
+      OSMSCOUT_HASHMAP<FileOffset,AreaRef>::const_iterator entry=areaMap.find(object.GetFileOffset());
+
+      assert(entry!=areaMap.end());
+
+      lat=entry->second->roles[0].nodes[nodeIndex].lat;
+      lon=entry->second->roles[0].nodes[nodeIndex].lon;
+    }
+    else if (object.GetType()==refWay) {
+      OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=wayMap.find(object.GetFileOffset());
+
+      assert(entry!=wayMap.end());
+
+      entry->second->GetCoordinates(nodeIndex,
+                                    lat,
+                                    lon);
+    }
+    else {
+      assert(false);
+    }
+  }
+
   RoutePostprocessor::StartPostprocessor::StartPostprocessor(const std::string& startDescription)
   : startDescription(startDescription)
   {
@@ -42,8 +272,10 @@ namespace osmscout {
                                                        RouteDescription& description,
                                                        Database& database)
   {
-    description.Nodes().front().AddDescription(RouteDescription::NODE_START_DESC,
-                                               new RouteDescription::StartDescription(startDescription));
+    if (!description.Nodes().empty()) {
+      description.Nodes().front().AddDescription(RouteDescription::NODE_START_DESC,
+                                                 new RouteDescription::StartDescription(startDescription));
+    }
 
     return true;
   }
@@ -58,8 +290,10 @@ namespace osmscout {
                                                         RouteDescription& description,
                                                         Database& database)
   {
-    description.Nodes().back().AddDescription(RouteDescription::NODE_TARGET_DESC,
-                                              new RouteDescription::TargetDescription(targetDescription));
+    if (!description.Nodes().empty()) {
+      description.Nodes().back().AddDescription(RouteDescription::NODE_TARGET_DESC,
+                                                new RouteDescription::TargetDescription(targetDescription));
+    }
 
     return true;
   }
@@ -68,43 +302,76 @@ namespace osmscout {
                                                                  RouteDescription& description,
                                                                  Database& database)
   {
-    FileOffset prevWayOffset=0;
-    WayRef     prevWay;
-    FileOffset curWayOffset=0;
-    WayRef     curWay;
-    size_t     prevNodeIndex=0;
-    size_t     curNodeIndex=0;
-    double     distance=0.0;
-    double     time=0.0;
+    ObjectFileRef prevObject;
+    GeoCoord      prevCoord(0.0,0.0);
+
+    ObjectFileRef curObject;
+    GeoCoord      curCoord(0.0,0.0);
+
+    AreaRef       area;
+    WayRef        way;
+
+    double        distance=0.0;
+    double        time=0.0;
 
     for (std::list<RouteDescription::Node>::iterator iter=description.Nodes().begin();
          iter!=description.Nodes().end();
          ++iter) {
       // The last node does not have a pathWayId set, since we are not going anywhere!
-      if (iter->HasPathWay()) {
+      if (iter->HasPathObject()) {
         // Only load the next way, if it is different from the old one
-        if (prevWay.Invalid() || prevWayOffset!=iter->GetPathWayOffset()) {
-          if (!database.GetWayByOffset(iter->GetPathWayOffset(),curWay)) {
-            std::cout << "Error while loading way with offset " << iter->GetPathWayOffset() << std::endl;
-            return false;
+        curObject=iter->GetPathObject();
+
+        if (curObject!=prevObject) {
+          switch (iter->GetPathObject().GetType()) {
+          case refNone:
+          case refNode:
+            assert(false);
+            break;
+          case refArea:
+            if (!database.GetAreaByOffset(curObject.GetFileOffset(),area)) {
+              std::cout << "Error while loading area with offset " << curObject.GetFileOffset() << std::endl;
+              return false;
+            }
+            break;
+          case refWay:
+            if (!database.GetWayByOffset(curObject.GetFileOffset(),way)) {
+              std::cout << "Error while loading way with offset " << curObject.GetFileOffset() << std::endl;
+              return false;
+            }
+            break;
           }
-
-          curWayOffset=iter->GetPathWayOffset();
-        }
-        else {
-          curWay=prevWay;
-          curWayOffset=prevWayOffset;
         }
 
-        curNodeIndex=iter->GetCurrentNodeIndex();
+        switch (iter->GetPathObject().GetType()) {
+        case refNone:
+        case refNode:
+          assert(false);
+          break;
+        case refArea:
+          curCoord=area->roles[0].nodes[iter->GetCurrentNodeIndex()];
+          break;
+        case refWay:
+          curCoord=way->nodes[iter->GetCurrentNodeIndex()];
+        }
 
-        if (prevWay.Valid()) {
-          double deltaDistance=GetEllipsoidalDistance(prevWay->nodes[prevNodeIndex].GetLon(),
-                                                      prevWay->nodes[prevNodeIndex].GetLat(),
-                                                      curWay->nodes[curNodeIndex].GetLon(),
-                                                      curWay->nodes[curNodeIndex].GetLat());
-          double deltaTime=profile.GetTime(curWay,
-                                           deltaDistance);
+        // There is no delta for the first route node
+        if (prevObject.Valid()) {
+          double deltaDistance=GetEllipsoidalDistance(prevCoord.GetLon(),
+                                                      prevCoord.GetLat(),
+                                                      curCoord.GetLon(),
+                                                      curCoord.GetLat());
+
+          double deltaTime=0.0;
+
+          if (iter->GetPathObject().GetType()==refArea) {
+            deltaTime=profile.GetTime(area,
+                                      deltaDistance);
+          }
+          else if (iter->GetPathObject().GetType()==refWay) {
+            deltaTime=profile.GetTime(way,
+                                      deltaDistance);
+          }
 
           distance+=deltaDistance;
           time+=deltaTime;
@@ -114,9 +381,8 @@ namespace osmscout {
       iter->SetDistance(distance);
       iter->SetTime(time);
 
-      prevWay=curWay;
-      prevWayOffset=curWayOffset;
-      prevNodeIndex=curNodeIndex;
+      prevObject=curObject;
+      prevCoord=curCoord;
     }
 
     return true;
@@ -126,38 +392,14 @@ namespace osmscout {
                                                          RouteDescription& description,
                                                          Database& database)
   {
-    //
-    // Load all ways in one go and put them into a map
-    //
+    OSMSCOUT_HASHMAP<FileOffset,AreaRef> areaMap;
+    OSMSCOUT_HASHMAP<FileOffset,WayRef>  wayMap;
 
-    std::set<FileOffset>        wayOffsets;
-    std::map<FileOffset,WayRef> wayMap;
-
-    for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
-        node!=description.Nodes().end();
-        ++node) {
-      if (node->HasPathWay()) {
-        wayOffsets.insert(node->GetPathWayOffset());
-      }
-
-      for (std::vector<Path>::const_iterator path=node->GetPaths().begin();
-          path!=node->GetPaths().end();
-          ++path) {
-        wayOffsets.insert(path->GetWayOffset());
-      }
-    }
-
-    for (std::set<FileOffset>::const_iterator offset=wayOffsets.begin();
-         offset!=wayOffsets.end();
-         ++offset) {
-      WayRef way;
-
-      if (!database.GetWayByOffset(*offset,way)) {
-        std::cerr << "Cannot retrieve crossing ways" << std::endl;
-        return false;
-      }
-
-      wayMap[*offset]=way;
+    if (!ResolveAllAreasAndWays(description,
+                                database,
+                                areaMap,
+                                wayMap)) {
+      return false;
     }
 
     //
@@ -168,32 +410,42 @@ namespace osmscout {
         node!=description.Nodes().end();
         ++node) {
       // The last node does not have a pathWayId set, since we are not going anywhere from the target node!
-      if (!node->HasPathWay()) {
+      if (!node->HasPathObject()) {
         break;
       }
 
-      WayRef                               way=wayMap[node->GetPathWayOffset()];
-      RouteDescription::NameDescriptionRef nameDesc=new RouteDescription::NameDescription(way->GetName(),
-                                                                                          way->GetRefName());
+      if (node->GetPathObject().GetType()==refArea) {
+        AreaRef                              area=areaMap[node->GetPathObject().GetFileOffset()];
+        RouteDescription::NameDescriptionRef nameDesc=new RouteDescription::NameDescription(area->GetName(),
+                                                                                            area->GetRefName());
 
-      if (way->IsBridge() &&
-          node!=description.Nodes().begin()) {
-        std::list<RouteDescription::Node>::iterator lastNode=node;
-
-        lastNode--;
-
-        RouteDescription::NameDescriptionRef lastDesc=dynamic_cast<RouteDescription::NameDescription*>(lastNode->GetDescription(RouteDescription::WAY_NAME_DESC));
-
-
-        if (lastDesc.Valid() &&
-            lastDesc->GetRef()==nameDesc->GetRef() &&
-            lastDesc->GetName()!=nameDesc->GetName()) {
-          nameDesc=lastDesc;
-        }
+        node->AddDescription(RouteDescription::WAY_NAME_DESC,
+                             nameDesc);
       }
+      else if (node->GetPathObject().GetType()==refWay) {
+        WayRef                               way=wayMap[node->GetPathObject().GetFileOffset()];
+        RouteDescription::NameDescriptionRef nameDesc=new RouteDescription::NameDescription(way->GetName(),
+                                                                                            way->GetRefName());
 
-      node->AddDescription(RouteDescription::WAY_NAME_DESC,
-                           nameDesc);
+        if (way->IsBridge() &&
+            node!=description.Nodes().begin()) {
+          std::list<RouteDescription::Node>::iterator lastNode=node;
+
+          lastNode--;
+
+          RouteDescription::NameDescriptionRef lastDesc=dynamic_cast<RouteDescription::NameDescription*>(lastNode->GetDescription(RouteDescription::WAY_NAME_DESC));
+
+
+          if (lastDesc.Valid() &&
+              lastDesc->GetRef()==nameDesc->GetRef() &&
+              lastDesc->GetName()!=nameDesc->GetName()) {
+            nameDesc=lastDesc;
+          }
+        }
+
+        node->AddDescription(RouteDescription::WAY_NAME_DESC,
+                             nameDesc);
+      }
     }
 
     return true;
@@ -201,43 +453,48 @@ namespace osmscout {
 
   void RoutePostprocessor::CrossingWaysPostprocessor::AddCrossingWaysDescriptions(RouteDescription::CrossingWaysDescription* description,
                                                                                   const RouteDescription::Node& node,
-                                                                                  const WayRef& originWay,
-                                                                                  const WayRef& targetWay,
-                                                                                  const std::map<FileOffset,WayRef>& wayMap)
+                                                                                  const ObjectFileRef& originObject,
+                                                                                  const ObjectFileRef& targetObject,
+                                                                                  const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                                                                                  const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap)
   {
     for (std::vector<Path>::const_iterator path=node.GetPaths().begin();
         path!=node.GetPaths().end();
         ++path) {
-      std::map<FileOffset,WayRef>::const_iterator way=wayMap.find(path->GetWayOffset());
-
-      if (way!=wayMap.end()) {
-        // Way is origin way and starts or end here so it is not an additional crossing way
-        if (originWay.Valid() &&
-            way->second->GetFileOffset()==originWay->GetFileOffset() &&
-            targetWay.Valid() &&
-            (way->second->ids.front()==targetWay->ids[node.GetCurrentNodeIndex()] ||
-             way->second->ids.back()==targetWay->ids[node.GetCurrentNodeIndex()])) {
+      if (path->GetObject().Valid()) {
+        // Way is origin way and starts or ends here so it is not an additional crossing way
+        if (originObject.Valid() &&
+            path->GetObject()==originObject &&
+            IsNodeStartOrEndOfObject(node.GetPathObject(),
+                                     node.GetCurrentNodeIndex(),
+                                     originObject,
+                                     areaMap,
+                                     wayMap)) {
           continue;
         }
 
-        // Way is target way and starts or end here so it is not an additional crossing way
-        if (targetWay.Valid() &&
-            way->second->GetFileOffset()==targetWay->GetFileOffset() &&
-            (node.GetCurrentNodeIndex()==0 ||
-             node.GetCurrentNodeIndex()==targetWay->ids.size()-1)) {
+        // Way is target way and starts or ends here so it is not an additional crossing way
+        if (targetObject.Valid() &&
+            path->GetObject()==targetObject &&
+            IsNodeStartOrEndOfObject(node.GetPathObject(),
+                                     node.GetCurrentNodeIndex(),
+                                     targetObject,
+                                     areaMap,
+                                     wayMap)) {
           continue;
         }
 
         // ways is origin way and target way so it is not an additional crossing way
-        if (originWay.Valid() &&
-            targetWay.Valid() &&
-            way->second->GetFileOffset()==originWay->GetFileOffset() &&
-            way->second->GetFileOffset()==targetWay->GetFileOffset()) {
+        if (originObject.Valid() &&
+            targetObject.Valid() &&
+            path->GetObject()==originObject &&
+            path->GetObject()==targetObject) {
           continue;
         }
 
-        description->AddDescription(new RouteDescription::NameDescription(way->second->GetName(),
-                                                                          way->second->GetRefName()));
+        description->AddDescription(GetNameDescription(path->GetObject(),
+                                                       areaMap,
+                                                       wayMap));
       }
     }
   }
@@ -246,38 +503,14 @@ namespace osmscout {
                                                               RouteDescription& description,
                                                               Database& database)
   {
-    //
-    // Load all ways in one go and put them into a map
-    //
+    OSMSCOUT_HASHMAP<FileOffset,AreaRef> areaMap;
+    OSMSCOUT_HASHMAP<FileOffset,WayRef>  wayMap;
 
-    std::set<FileOffset>        wayOffsets;
-    std::map<FileOffset,WayRef> wayMap;
-
-    for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
-        node!=description.Nodes().end();
-        ++node) {
-      if (node->HasPathWay()) {
-        wayOffsets.insert(node->GetPathWayOffset());
-      }
-
-      for (std::vector<Path>::const_iterator path=node->GetPaths().begin();
-          path!=node->GetPaths().end();
-          ++path) {
-        wayOffsets.insert(path->GetWayOffset());
-      }
-    }
-
-    for (std::set<FileOffset>::const_iterator offset=wayOffsets.begin();
-         offset!=wayOffsets.end();
-         ++offset) {
-      WayRef way;
-
-      if (!database.GetWayByOffset(*offset,way)) {
-        std::cerr << "Cannot retrieve crossing ways" << std::endl;
-        return false;
-      }
-
-      wayMap[*offset]=way;
+    if (!ResolveAllAreasAndWays(description,
+                                database,
+                                areaMap,
+                                wayMap)) {
+      return false;
     }
 
     //
@@ -285,7 +518,6 @@ namespace osmscout {
     //
 
     std::list<RouteDescription::Node>::iterator lastCrossing=description.Nodes().end();
-    WayRef                                      lastCrossingWay;
     std::list<RouteDescription::Node>::iterator lastNode=description.Nodes().end();
     std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
 
@@ -298,15 +530,12 @@ namespace osmscout {
       }
 
       if (lastNode==description.Nodes().end() ||
-          !node->HasPathWay()) {
+          !node->HasPathObject()) {
         lastNode=node;
         node++;
 
         continue;
       }
-
-      WayRef originWay=wayMap[lastNode->GetPathWayOffset()];
-      WayRef targetWay=wayMap[node->GetPathWayOffset()];
 
       // Count existing exits
       size_t exitCount=0;
@@ -314,7 +543,7 @@ namespace osmscout {
       for (size_t i=0; i<node->GetPaths().size(); i++) {
         // Leave out the path back to the last crossing (if it exists)
         if (lastCrossing!=description.Nodes().end() &&
-            node->GetPaths()[i].GetWayOffset()==lastCrossing->GetPathWayOffset() &&
+            node->GetPaths()[i].GetObject()==lastCrossing->GetPathObject() &&
             node->GetPaths()[i].GetTargetNodeIndex()==lastCrossing->GetCurrentNodeIndex()) {
           continue;
         }
@@ -327,15 +556,17 @@ namespace osmscout {
       }
 
       RouteDescription::CrossingWaysDescriptionRef desc=new RouteDescription::CrossingWaysDescription(exitCount,
-                                                                                                      new RouteDescription::NameDescription(originWay->GetName(),
-                                                                                                                                            originWay->GetRefName()),
-                                                                                                      new RouteDescription::NameDescription(targetWay->GetName(),
-                                                                                                                                            targetWay->GetRefName()));
-
+                                                                                                      GetNameDescription(lastNode->GetPathObject(),
+                                                                                                                         areaMap,
+                                                                                                                         wayMap),
+                                                                                                      GetNameDescription(node->GetPathObject(),
+                                                                                                                         areaMap,
+                                                                                                                         wayMap));
       AddCrossingWaysDescriptions(desc,
                                   *node,
-                                  originWay,
-                                  targetWay,
+                                  lastNode->GetPathObject(),
+                                  node->GetPathObject(),
+                                  areaMap,
                                   wayMap);
 
       node->AddDescription(RouteDescription::CROSSING_WAYS_DESC,
@@ -343,7 +574,6 @@ namespace osmscout {
 
       lastNode=node;
       lastCrossing=node;
-      lastCrossingWay=targetWay;
 
       node++;
     }
@@ -361,32 +591,14 @@ namespace osmscout {
                                                            RouteDescription& description,
                                                            Database& database)
   {
-    //
-    // Load all ways in one go and put them into a map
-    //
+    OSMSCOUT_HASHMAP<FileOffset,AreaRef> areaMap;
+    OSMSCOUT_HASHMAP<FileOffset,WayRef>  wayMap;
 
-    std::set<FileOffset>        wayOffsets;
-    std::map<FileOffset,WayRef> wayMap;
-
-    for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
-        node!=description.Nodes().end();
-        ++node) {
-      if (node->HasPathWay()) {
-        wayOffsets.insert(node->GetPathWayOffset());
-      }
-    }
-
-    for (std::set<FileOffset>::const_iterator offset=wayOffsets.begin();
-         offset!=wayOffsets.end();
-         ++offset) {
-      WayRef way;
-
-      if (!database.GetWayByOffset(*offset,way)) {
-        std::cerr << "Cannot retrieve crossing ways" << std::endl;
-        return false;
-      }
-
-      wayMap[*offset]=way;
+    if (!ResolveAllAreasAndWays(description,
+                                database,
+                                areaMap,
+                                wayMap)) {
+      return false;
     }
 
     std::list<RouteDescription::Node>::const_iterator prevNode=description.Nodes().end();
@@ -399,22 +611,33 @@ namespace osmscout {
 
       if (prevNode!=description.Nodes().end() &&
           nextNode!=description.Nodes().end() &&
-          nextNode->HasPathWay()) {
-        WayRef prevWay=wayMap[prevNode->GetPathWayOffset()];
-        double prevLat=0.0;
-        double prevLon=0.0;
+          nextNode->HasPathObject()) {
+        double prevLat;
+        double prevLon;
 
-        WayRef way=wayMap[node->GetPathWayOffset()];
-        double lat=0.0;
-        double lon=0.0;
+        double lat;
+        double lon;
 
-        WayRef nextWay=wayMap[nextNode->GetPathWayOffset()];
-        double nextLat=0.0;
-        double nextLon=0.0;
+        double nextLat;
+        double nextLon;
 
-        prevWay->GetCoordinates(prevNode->GetCurrentNodeIndex(),prevLat,prevLon);
-        way->GetCoordinates(node->GetCurrentNodeIndex(),lat,lon);
-        nextWay->GetCoordinates(nextNode->GetCurrentNodeIndex(),nextLat,nextLon);
+        GetCoordinates(prevNode->GetPathObject(),
+                       prevNode->GetCurrentNodeIndex(),
+                       areaMap,
+                       wayMap,
+                       prevLat,prevLon);
+
+        GetCoordinates(node->GetPathObject(),
+                       node->GetCurrentNodeIndex(),
+                       areaMap,
+                       wayMap,
+                       lat,lon);
+
+        GetCoordinates(nextNode->GetPathObject(),
+                       nextNode->GetCurrentNodeIndex(),
+                       areaMap,
+                       wayMap,
+                       nextLat,nextLon);
 
         double inBearing=GetSphericalBearingFinal(prevLon,prevLat,lon,lat)*180/M_PI;
         double outBearing=GetSphericalBearingInitial(lon,lat,nextLon,nextLat)*180/M_PI;
@@ -433,7 +656,7 @@ namespace osmscout {
           while (true) {
             // Next node does not exists or does not have a path?
             if (lookup==description.Nodes().end() ||
-                !lookup->HasPathWay()) {
+                !lookup->HasPathObject()) {
               break;
             }
 
@@ -449,15 +672,22 @@ namespace osmscout {
 
             forwardDistance+=lookup->GetDistance()-curveB->GetDistance();
 
-            WayRef wayB=wayMap[curveB->GetPathWayOffset()];
-            WayRef wayLookup=wayMap[lookup->GetPathWayOffset()];
             double curveBLat;
             double curveBLon;
             double lookupLat;
             double lookupLon;
 
-            wayB->GetCoordinates(curveB->GetCurrentNodeIndex(),curveBLat,curveBLon);
-            wayLookup->GetCoordinates(lookup->GetCurrentNodeIndex(),lookupLat,lookupLon);
+            GetCoordinates(curveB->GetPathObject(),
+                           curveB->GetCurrentNodeIndex(),
+                           areaMap,
+                           wayMap,
+                           curveBLat,curveBLon);
+
+            GetCoordinates(lookup->GetPathObject(),
+                           lookup->GetCurrentNodeIndex(),
+                           areaMap,
+                           wayMap,
+                           lookupLat,lookupLon);
 
             double lookupBearing=GetSphericalBearingInitial(curveBLon,curveBLat,lookupLon,lookupLat)*180/M_PI;
 
@@ -491,22 +721,45 @@ namespace osmscout {
   }
 
   RoutePostprocessor::InstructionPostprocessor::State RoutePostprocessor::InstructionPostprocessor::GetInitialState(RouteDescription::Node& node,
-                                                                                                                    std::map<FileOffset,WayRef>& wayMap)
+                                                                                                                    const OSMSCOUT_HASHMAP<FileOffset,AreaRef>& areaMap,
+                                                                                                                    const OSMSCOUT_HASHMAP<FileOffset,WayRef>& wayMap)
   {
-    if (!node.HasPathWay()) {
+    if (!node.HasPathObject()) {
       return street;
     }
 
-    const WayRef way=wayMap[node.GetPathWayOffset()];
-
-    if (way->IsRoundabout()) {
+    if (IsRoundabout(node.GetPathObject(),
+                     areaMap,
+                     wayMap)) {
       return roundabout;
     }
-    else if (motorwayLinkTypes.find(way->GetType())!=motorwayLinkTypes.end()) {
-      return link;
+
+    if (node.GetPathObject().GetType()==refArea) {
+      OSMSCOUT_HASHMAP<FileOffset,AreaRef>::const_iterator entry=areaMap.find(node.GetPathObject().GetFileOffset());
+
+      assert(entry!=areaMap.end());
+
+      if (motorwayLinkTypes.find(entry->second->GetType())!=motorwayLinkTypes.end()) {
+        return link;
+      }
+      else if (motorwayTypes.find(entry->second->GetType())!=motorwayTypes.end()) {
+        return motorway;
+      }
     }
-    else if (motorwayTypes.find(way->GetType())!=motorwayTypes.end()) {
-      return motorway;
+    else if (node.GetPathObject().GetType()==refWay) {
+      OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=wayMap.find(node.GetPathObject().GetFileOffset());
+
+      assert(entry!=wayMap.end());
+
+      if (motorwayLinkTypes.find(entry->second->GetType())!=motorwayLinkTypes.end()) {
+        return link;
+      }
+      else if (motorwayTypes.find(entry->second->GetType())!=motorwayTypes.end()) {
+        return motorway;
+      }
+    }
+    else {
+      return street;
     }
 
     return street;
@@ -561,8 +814,7 @@ namespace osmscout {
 
   bool RoutePostprocessor::InstructionPostprocessor::HandleNameChange(const std::list<RouteDescription::Node>& path,
                                                                       std::list<RouteDescription::Node>::const_iterator& lastNode,
-                                                                      std::list<RouteDescription::Node>::iterator& node,
-                                                                      const std::map<FileOffset,WayRef>& wayMap)
+                                                                      std::list<RouteDescription::Node>::iterator& node)
   {
     RouteDescription::NameDescriptionRef nextName;
     RouteDescription::NameDescriptionRef lastName;
@@ -608,8 +860,7 @@ namespace osmscout {
   }
 
   bool RoutePostprocessor::InstructionPostprocessor::HandleDirectionChange(const std::list<RouteDescription::Node>& path,
-                                                                           std::list<RouteDescription::Node>::iterator& node,
-                                                                           const std::map<FileOffset,WayRef>& wayMap)
+                                                                           std::list<RouteDescription::Node>::iterator& node)
   {
     if (node->GetPaths().size()<=1){
       return false;
@@ -672,45 +923,23 @@ namespace osmscout {
                                                              RouteDescription& description,
                                                              Database& database)
   {
-    //
-    // Load all ways in one go and put them into a map
-    //
+    OSMSCOUT_HASHMAP<FileOffset,AreaRef> areaMap;
+    OSMSCOUT_HASHMAP<FileOffset,WayRef>  wayMap;
 
-    std::set<FileOffset>        wayOffsets;
-    std::map<FileOffset,WayRef> wayMap;
-
-    for (std::list<RouteDescription::Node>::iterator node=description.Nodes().begin();
-        node!=description.Nodes().end();
-        ++node) {
-      if (node->HasPathWay()) {
-        wayOffsets.insert(node->GetPathWayOffset());
-      }
-
-      for (std::vector<Path>::const_iterator path=node->GetPaths().begin();
-          path!=node->GetPaths().end();
-          ++path) {
-        wayOffsets.insert(path->GetWayOffset());
-      }
-    }
-
-    for (std::set<FileOffset>::const_iterator offset=wayOffsets.begin();
-         offset!=wayOffsets.end();
-         ++offset) {
-      WayRef way;
-
-      if (!database.GetWayByOffset(*offset,way)) {
-        std::cerr << "Cannot retrieve crossing ways" << std::endl;
-        return false;
-      }
-
-      wayMap[*offset]=way;
+    if (!ResolveAllAreasAndWays(description,
+                                database,
+                                areaMap,
+                                wayMap)) {
+      return false;
     }
 
    //
     // Detect initial state
     //
 
-    State  state=GetInitialState(description.Nodes().front(),wayMap);
+    State  state=GetInitialState(description.Nodes().front(),
+                                 areaMap,
+                                 wayMap);
 
     inRoundabout=false;
     roundaboutCrossingCounter=0;
@@ -726,32 +955,35 @@ namespace osmscout {
     std::list<RouteDescription::Node>::iterator       node=description.Nodes().begin();
     std::list<RouteDescription::Node>::const_iterator lastNode=description.Nodes().end();
     while (node!=description.Nodes().end()) {
-
+/*
       WayRef                               originWay;
-      WayRef                               targetWay;
+      WayRef                               targetWay;*/
       RouteDescription::NameDescriptionRef originName;
       RouteDescription::NameDescriptionRef targetName;
 
-      if (lastNode!=description.Nodes().end()) {
-        originName=dynamic_cast<RouteDescription::NameDescription*>(lastNode->GetDescription(RouteDescription::WAY_NAME_DESC));
-
-        originWay=wayMap[lastNode->GetPathWayOffset()];
-      }
-
-      if (node->HasPathWay()) {
-        targetName=dynamic_cast<RouteDescription::NameDescription*>(node->GetDescription(RouteDescription::WAY_NAME_DESC));
-
-        targetWay=wayMap[node->GetPathWayOffset()];
-      }
-
       // First or last node
-      if (originWay.Invalid() || targetWay.Invalid()) {
+      if (lastNode==description.Nodes().end() ||
+          lastNode->GetPathObject().Invalid() ||
+          node->GetPathObject().Invalid()) {
         lastNode=node++;
         continue;
       }
 
-      if (!originWay->IsRoundabout() &&
-          targetWay->IsRoundabout()) {
+      originName=dynamic_cast<RouteDescription::NameDescription*>(lastNode->GetDescription(RouteDescription::WAY_NAME_DESC));
+      //originWay=wayMap[lastNode->GetPathObject()];
+
+      if (node->HasPathObject()) {
+        targetName=dynamic_cast<RouteDescription::NameDescription*>(node->GetDescription(RouteDescription::WAY_NAME_DESC));
+
+        //targetWay=wayMap[node->GetPathObject()];
+      }
+
+      if (!IsRoundabout(lastNode->GetPathObject(),
+                        areaMap,
+                        wayMap) &&
+          IsRoundabout(node->GetPathObject(),
+                       areaMap,
+                       wayMap)) {
         HandleRoundaboutEnter(*node);
         inRoundabout=true;
         roundaboutCrossingCounter=0;
@@ -759,8 +991,12 @@ namespace osmscout {
         continue;
       }
 
-      if (originWay->IsRoundabout() &&
-               !targetWay->IsRoundabout()) {
+      if (IsRoundabout(lastNode->GetPathObject(),
+                       areaMap,
+                       wayMap) &&
+          !IsRoundabout(node->GetPathObject(),
+                        areaMap,
+                        wayMap)) {
         HandleRoundaboutNode(*node);
         HandleRoundaboutLeave(*node);
         inRoundabout=false;
@@ -769,10 +1005,19 @@ namespace osmscout {
         continue;
       }
 
-      // Non-Link, non-motorway to motorway
-      if (motorwayLinkTypes.find(originWay->GetType())==motorwayLinkTypes.end() &&
-          motorwayTypes.find(originWay->GetType())==motorwayTypes.end() &&
-          motorwayTypes.find(targetWay->GetType())!=motorwayTypes.end()) {
+      // Non-Link, non-motorway to motorway (enter motorway))
+      if (!IsOfType(lastNode->GetPathObject(),
+                    motorwayLinkTypes,
+                    areaMap,
+                    wayMap) &&
+          !IsOfType(lastNode->GetPathObject(),
+                    motorwayTypes,
+                    areaMap,
+                    wayMap) &&
+          IsOfType(node->GetPathObject(),
+                   motorwayTypes,
+                   areaMap,
+                   wayMap)) {
         HandleDirectMotorwayEnter(*node,
                                   targetName);
 
@@ -780,10 +1025,19 @@ namespace osmscout {
         continue;
       }
 
-      // Motorway to Non-Link, non-motorway
-      if (motorwayTypes.find(originWay->GetType())!=motorwayTypes.end() &&
-          motorwayLinkTypes.find(targetWay->GetType())==motorwayLinkTypes.end() &&
-          motorwayTypes.find(targetWay->GetType())==motorwayTypes.end()) {
+      // motorway to Non-Link, non-motorway /leave motorway)
+      if (IsOfType(lastNode->GetPathObject(),
+                   motorwayTypes,
+                   areaMap,
+                   wayMap) &&
+          !IsOfType(node->GetPathObject(),
+                    motorwayLinkTypes,
+                    areaMap,
+                    wayMap) &&
+          !IsOfType(node->GetPathObject(),
+                    motorwayTypes,
+                    areaMap,
+                    wayMap)) {
         HandleDirectMotorwayLeave(*node,
                                   originName);
 
@@ -791,30 +1045,43 @@ namespace osmscout {
         continue;
       }
 
-      else if (motorwayLinkTypes.find(originWay->GetType())==motorwayLinkTypes.end() &&
-               motorwayLinkTypes.find(targetWay->GetType())!=motorwayLinkTypes.end()) {
-        bool                                        originIsMotorway=motorwayTypes.find(originWay->GetType())!=motorwayTypes.end();
+      else if (!IsOfType(lastNode->GetPathObject(),
+                         motorwayLinkTypes,
+                         areaMap,
+                         wayMap) &&
+               IsOfType(node->GetPathObject(),
+                        motorwayLinkTypes,
+                        areaMap,
+                        wayMap)) {
+        bool                                        originIsMotorway=IsOfType(lastNode->GetPathObject(),
+                                                                              motorwayTypes,
+                                                                              areaMap,
+                                                                              wayMap);
         bool                                        targetIsMotorway=false;
         std::list<RouteDescription::Node>::iterator next=node;
-        WayRef                                      nextWay;
         RouteDescription::NameDescriptionRef        nextName;
 
         next++;
         while (next!=description.Nodes().end() &&
-               next->HasPathWay()) {
+               next->HasPathObject()) {
 
           nextName=dynamic_cast<RouteDescription::NameDescription*>(next->GetDescription(RouteDescription::WAY_NAME_DESC));
-          nextWay=wayMap[next->GetPathWayOffset()];
 
-          if (motorwayLinkTypes.find(nextWay->GetType())==motorwayLinkTypes.end()) {
+          if (!IsOfType(next->GetPathObject(),
+                        motorwayLinkTypes,
+                        areaMap,
+                        wayMap)) {
             break;
           }
 
           next++;
         }
 
-        if (nextWay.Valid()) {
-          targetIsMotorway=motorwayTypes.find(nextWay->GetType())!=motorwayTypes.end();
+        if (next->GetPathObject().Valid()) {
+          targetIsMotorway=IsOfType(next->GetPathObject(),
+                                    motorwayTypes,
+                                    areaMap,
+                                    wayMap);
         }
 
         if (originIsMotorway && targetIsMotorway) {
@@ -837,8 +1104,7 @@ namespace osmscout {
                                desc);
 
           HandleDirectionChange(description.Nodes(),
-                                next,
-                                wayMap);
+                                next);
 
           node=next;
           lastNode=node++;
@@ -866,16 +1132,14 @@ namespace osmscout {
         HandleRoundaboutNode(*node);
       }
       else if (HandleDirectionChange(description.Nodes(),
-                                     node,
-                                     wayMap)) {
+                                     node)) {
         lastNode=node++;
         continue;
       }
 
       if (HandleNameChange(description.Nodes(),
                            lastNode,
-                           node,
-                           wayMap)) {
+                           node)) {
         lastNode=node++;
         continue;
       }

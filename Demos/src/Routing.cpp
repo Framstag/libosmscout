@@ -71,12 +71,14 @@ static bool LookupClosedNodeAtLocation(osmscout::Database& database,
                                        double lat,
                                        double lon,
                                        std::string& locationDesc,
-                                       osmscout::WayRef& way,
+                                       osmscout::ObjectFileRef& object,
                                        size_t& nodeIndex)
 {
   std::list<osmscout::AdminRegion> areas;
   bool                             limitReached;
   double                           minDistance=std::numeric_limits<double>::max();
+
+  object.Invalidate();
 
   if (!database.GetMatchingAdminRegions(area,
                                         areas,
@@ -123,7 +125,32 @@ static bool LookupClosedNodeAtLocation(osmscout::Database& database,
           reference!=location->references.end();
           ++reference) {
 
-        if (reference->GetType()==osmscout::refWay) {
+        if (reference->GetType()==osmscout::refArea) {
+          osmscout::AreaRef tmpArea;
+
+          if (database.GetAreaByOffset(reference->GetFileOffset(),tmpArea)) {
+            if (tmpArea->roles.size()==1) {
+              for (size_t i=0; i<tmpArea->roles[0].nodes.size(); i++) {
+                double distance=sqrt((tmpArea->roles[0].nodes[i].GetLat()-lat)*(tmpArea->roles[0].nodes[i].GetLat()-lat)+
+                                     (tmpArea->roles[0].nodes[i].GetLon()-lon)*(tmpArea->roles[0].nodes[i].GetLon()-lon));
+
+                if (distance<minDistance) {
+                  minDistance=distance;
+
+                  locationDesc=location->name;
+
+                  if (!location->path.empty()) {
+                    locationDesc+=" ("+osmscout::StringListToString(location->path)+")";
+                  }
+
+                  object.Set(tmpArea->GetFileOffset(),osmscout::refArea);
+                  nodeIndex=i;
+                }
+              }
+            }
+          }
+        }
+        else if (reference->GetType()==osmscout::refWay) {
           osmscout::WayRef tmpWay;
 
           if (database.GetWayByOffset(reference->GetFileOffset(),tmpWay)) {
@@ -140,7 +167,7 @@ static bool LookupClosedNodeAtLocation(osmscout::Database& database,
                   locationDesc+=" ("+osmscout::StringListToString(location->path)+")";
                 }
 
-                way=tmpWay;
+                object.Set(tmpWay->GetFileOffset(),osmscout::refWay);
                 nodeIndex=i;
               }
             }
@@ -150,9 +177,7 @@ static bool LookupClosedNodeAtLocation(osmscout::Database& database,
     }
   }
 
-  return way.Valid() &&
-         nodeIndex>=0 &&
-         nodeIndex<way->nodes.size();
+  return object.Valid();
 }
 
 static std::string MoveToTurnCommand(osmscout::RouteDescription::DirectionDescription::Move move)
@@ -479,10 +504,10 @@ int main(int argc, char* argv[])
   double                              targetLon;
   std::string                         targetLocationDesc;
 
-  osmscout::WayRef                    startWay;
+  osmscout::ObjectFileRef             startObject;
   size_t                              startNodeIndex;
 
-  osmscout::WayRef                    targetWay;
+  osmscout::ObjectFileRef             targetObject;
   size_t                              targetNodeIndex;
 
   int currentArg=1;
@@ -498,7 +523,9 @@ int main(int argc, char* argv[])
   }
 
   if (argc-currentArg!=9) {
-    std::cout << "Routing [-r] <map directory> <start location> <start area> <start lat> <start lon> <target location> <target area> <target lat> <target lon>" << std::endl;
+    std::cout << "Routing [-r] <map directory>" <<std::endl;
+    std::cout << "             <start location> <start area> <start lat> <start lon>" << std::endl;
+    std::cout << "             <target location> <target area> <target lat> <target lon>" << std::endl;
     std::cout << " -r  allow using oneways the wrong direction" << std::endl;
     return 1;
   }
@@ -557,7 +584,7 @@ int main(int argc, char* argv[])
                                   startLat,
                                   startLon,
                                   startLocationDesc,
-                                  startWay,
+                                  startObject,
                                   startNodeIndex)) {
     std::cerr << "Cannot find start node for start location '" << startLocation << ", " << startArea << "'" << std::endl;
     return 1;
@@ -569,7 +596,7 @@ int main(int argc, char* argv[])
                                   targetLat,
                                   targetLon,
                                   targetLocationDesc,
-                                  targetWay,
+                                  targetObject,
                                   targetNodeIndex)) {
     std::cerr << "Cannot find target node for target location '" << targetLocation << ", " << targetArea << "'" << std::endl;
     return 1;
@@ -650,9 +677,9 @@ int main(int argc, char* argv[])
   routingProfile.AddType(type,30.0);
 
   if (!router.CalculateRoute(routingProfile,
-                             startWay->GetFileOffset(),
+                             startObject,
                              startNodeIndex,
-                             targetWay->GetFileOffset(),
+                             targetObject,
                              targetNodeIndex,
                              data)) {
     std::cerr << "There was an error while calculating the route!" << std::endl;
@@ -843,8 +870,8 @@ int main(int argc, char* argv[])
 
     std::cout << "// " << node->GetTime() << "h " << std::setw(0) << std::setprecision(3) << node->GetDistance() << "km ";
 
-    if (node->GetPathWayOffset()!=0) {
-      std::cout << node->GetPathWayOffset() << "[" << node->GetCurrentNodeIndex() << "] => " << node->GetPathWayOffset() << "[" << node->GetTargetNodeIndex() << "]";
+    if (node->GetPathObject().Valid()) {
+      std::cout << node->GetPathObject().GetTypeName() << " " << node->GetPathObject().GetFileOffset() << "[" << node->GetCurrentNodeIndex() << "] => " << node->GetPathObject().GetTypeName() << " " << node->GetPathObject().GetFileOffset() << "[" << node->GetTargetNodeIndex() << "]";
     }
 
     std::cout << std::endl;

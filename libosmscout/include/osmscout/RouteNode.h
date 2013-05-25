@@ -22,9 +22,9 @@
 
 #include <vector>
 
+#include <osmscout/ObjectRef.h>
 #include <osmscout/Path.h>
 #include <osmscout/Types.h>
-#include <osmscout/Way.h>
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
@@ -47,8 +47,8 @@ namespace osmscout {
      */
     struct OSMSCOUT_API Exclude
     {
-      FileOffset sourceWay;  //! The source way
-      uint32_t   targetPath; //! The index of the target path
+      ObjectFileRef source;       //! The source way
+      uint32_t      targetIndex; //! The index of the target path
     };
 
     /**
@@ -57,16 +57,16 @@ namespace osmscout {
      */
     struct OSMSCOUT_API Path
     {
-      FileOffset offset;   //! File Offset of the  targeting route node
-      uint32_t   wayIndex; //! The index of the way to use from this route node to the target route node
-      TypeId     type;     //! The type of the way
-      uint8_t    maxSpeed; //! Maximum speed allowed on the way
-      uint8_t    grade;    //! Quality of road/track 1 (good)...5 (bad)
-      //uint8_t    bearing;  //! Encoded initial and final bearing of this path
-      uint8_t    flags;    //! Certain flags
-      double     distance; //! Distance from the current route node to the target route node
-      double     lat;      //! Latitude of the target node
-      double     lon;      //! Longitude of the target node
+      FileOffset offset;      //! File Offset of the  targeting route node
+      uint32_t   objectIndex; //! The index of the way to use from this route node to the target route node
+      TypeId     type;        //! The type of the way
+      uint8_t    maxSpeed;    //! Maximum speed allowed on the way
+      uint8_t    grade;       //! Quality of road/track 1 (good)...5 (bad)
+      //uint8_t    bearing;   //! Encoded initial and final bearing of this path
+      uint8_t    flags;       //! Certain flags
+      double     distance;    //! Distance from the current route node to the target route node
+      double     lat;         //! Latitude of the target node
+      double     lon;         //! Longitude of the target node
 
       inline bool HasAccess() const
       {
@@ -75,14 +75,20 @@ namespace osmscout {
     };
 
   public:
-    Id                      id;       //! Id of the route node, equal the id of the underlying node
-    std::vector<FileOffset> ways;     //! List of file offsets of the ways that cross this route node
-    std::vector<Path>       paths;    //! List of paths that can in principle be used from this node
-    std::vector<Exclude>    excludes; //! List of potential excludes regarding use of paths
+    Id                         id;         //! Id of the route node, equal the id of the underlying node
+    FileOffset                 fileOffset; //! FileOffset of the route node
+    std::vector<ObjectFileRef> objects;    //! List of objects (ways, areas) that cross this route node
+    std::vector<Path>          paths;      //! List of paths that can in principle be used from this node
+    std::vector<Exclude>       excludes;   //! List of potential excludes regarding use of paths
 
     inline Id GetId() const
     {
       return id;
+    }
+
+    inline FileOffset GetFileOffset() const
+    {
+      return fileOffset;
     }
 
     bool Read(FileScanner& scanner);

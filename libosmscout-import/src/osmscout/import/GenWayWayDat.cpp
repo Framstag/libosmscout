@@ -502,12 +502,12 @@ namespace osmscout {
   }
 
   bool WayWayDataGenerator::WriteWay(const ImportParameter& parameter,
-                                  Progress& progress,
-                                  const TypeConfig& typeConfig,
-                                  FileWriter& writer,
-                                  uint32_t& writtenWayCount,
-                                  const CoordDataFile::CoordResultMap& coordsMap,
-                                  const RawWay& rawWay)
+                                     Progress& progress,
+                                     const TypeConfig& typeConfig,
+                                     FileWriter& writer,
+                                     uint32_t& writtenWayCount,
+                                     const CoordDataFile::CoordResultMap& coordsMap,
+                                     const RawWay& rawWay)
   {
     std::vector<Tag> tags(rawWay.GetTags());
     Way              way;

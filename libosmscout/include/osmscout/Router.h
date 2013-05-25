@@ -85,28 +85,27 @@ namespace osmscout {
      */
     struct RNode : public Referencable
     {
-      FileOffset nodeOffset;
-      FileOffset wayOffset;
+      FileOffset    nodeOffset;
+      ObjectFileRef object;
 
-      double     currentCost;
-      double     estimateCost;
-      double     overallCost;
+      double        currentCost;
+      double        estimateCost;
+      double        overallCost;
 
-      FileOffset prev;
+      FileOffset    prev;
 
       bool       access;
 
       RNode()
-      : nodeOffset(0),
-        wayOffset(0)
+      : nodeOffset(0)
       {
         // no code
       }
 
       RNode(FileOffset nodeOffset,
-            FileOffset wayOffset)
+            const ObjectFileRef& object)
       : nodeOffset(nodeOffset),
-        wayOffset(wayOffset),
+        object(object),
         currentCost(0),
         estimateCost(0),
         overallCost(0),
@@ -117,10 +116,10 @@ namespace osmscout {
       }
 
       RNode(FileOffset nodeOffset,
-            FileOffset wayOffset,
+            const ObjectFileRef& object,
             FileOffset prev)
       : nodeOffset(nodeOffset),
-        wayOffset(wayOffset),
+        object(object),
         currentCost(0),
         estimateCost(0),
         overallCost(0),
@@ -168,6 +167,7 @@ namespace osmscout {
 
     std::string                   path;              //! Path to the directory containing all files
 
+    DataFile<Area>                areaDataFile;       //! Cached access to the 'areas.dat' file
     DataFile<Way>                 wayDataFile;       //! Cached access to the 'ways.dat' file
     IndexedDataFile<Id,RouteNode> routeNodeDataFile; //! Cached access to the 'route.dat' file
 
@@ -182,20 +182,40 @@ namespace osmscout {
                                      size_t nodeIndex,
                                      RouteNodeRef& routeNode,
                                      size_t& routeNodeIndex);
+
+    bool GetStartNodes(const RoutingProfile& profile,
+                       const ObjectFileRef& object,
+                       size_t nodeIndex,
+                       double& targetLon,
+                       double& targetLat,
+                       RNodeRef& forwardNode,
+                       RNodeRef& backwardNode);
+
+    bool GetTargetNodes(const ObjectFileRef& object,
+                        size_t nodeIndex,
+                        double& targetLon,
+                        double& targetLat,
+                        RouteNodeRef& forwardNode,
+                        FileOffset& forwardOffset,
+                        RouteNodeRef& backwardNode,
+                        FileOffset& backwardOffset);
+
     bool ResolveRNodesToList(const RNodeRef& end,
                              const CloseMap& closeMap,
                              std::list<RNodeRef>& nodes);
     bool ResolveRNodesToRouteData(const RoutingProfile& profile,
                                   const std::list<RNodeRef>& nodes,
-                                  FileOffset startWayId,
+                                  const ObjectFileRef& startObject,
                                   size_t startNodeIndex,
-                                  FileOffset targetWayId,
+                                  const ObjectFileRef& targetObject,
                                   size_t targetNodeIndex,
                                   RouteData& route);
     void AddNodes(RouteData& route,
                   const std::vector<Path>& startPaths,
                   size_t startNodeIndex,
-                  const WayRef& way,
+                  const ObjectFileRef& object,
+                  size_t idCount,
+                  bool oneway,
                   size_t targetNodeIndex);
 
     std::vector<Path> TransformPaths(const RoutingProfile& profile,
@@ -215,8 +235,10 @@ namespace osmscout {
     TypeConfig* GetTypeConfig() const;
 
     bool CalculateRoute(const RoutingProfile& profile,
-                        FileOffset startWayOffset, size_t startNodeIndex,
-                        FileOffset targetWayOffset, size_t targetNodeIndex,
+                        const ObjectFileRef& startObject,
+                        size_t startNodeIndex,
+                        const ObjectFileRef& targetObject,
+                        size_t targetNodeIndex,
                         RouteData& route);
 
     bool TransformRouteDataToWay(const RouteData& data,

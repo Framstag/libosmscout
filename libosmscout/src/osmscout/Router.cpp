@@ -75,6 +75,8 @@ namespace osmscout {
   Router::Router(const RouterParameter& parameter)
    : isOpen(false),
      debugPerformance(parameter.IsDebugPerformance()),
+     areaDataFile("areas.dat",
+                  parameter.GetWayCacheSize()),
      wayDataFile("ways.dat",
                   parameter.GetWayCacheSize()),
      routeNodeDataFile("route.dat",
@@ -101,6 +103,13 @@ namespace osmscout {
 
     if (!LoadTypeData(path,*typeConfig)) {
       std::cerr << "Cannot load 'types.dat'!" << std::endl;
+      delete typeConfig;
+      typeConfig=NULL;
+      return false;
+    }
+
+    if (!areaDataFile.Open(path,FileScanner::Normal,false)) {
+      std::cerr << "Cannot open 'areas.dat'!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
@@ -135,12 +144,14 @@ namespace osmscout {
   {
     routeNodeDataFile.Close();
     wayDataFile.Close();
+    areaDataFile.Close();
 
     isOpen=false;
   }
 
   void Router::FlushCache()
   {
+    areaDataFile.FlushCache();
     wayDataFile.FlushCache();
   }
 
@@ -214,92 +225,94 @@ namespace osmscout {
   void Router::AddNodes(RouteData& route,
                         const std::vector<Path>& startPaths,
                         size_t startNodeIndex,
-                        const WayRef& way,
+                        const ObjectFileRef& object,
+                        size_t idCount,
+                        bool oneway,
                         size_t targetNodeIndex)
   {
-    assert(startNodeIndex<way->nodes.size());
-    assert(targetNodeIndex<way->nodes.size());
+    assert(startNodeIndex<idCount);
+    assert(targetNodeIndex<idCount);
 
     if (std::max(startNodeIndex,targetNodeIndex)-std::min(startNodeIndex,targetNodeIndex)==1) {
-      // Form one node to the neighbour node (+1 or -1)
+      // From one node to the neighbour node (+1 or -1)
       route.AddEntry(startNodeIndex,
                      startPaths,
-                     way->GetFileOffset(),
+                     object,
                      targetNodeIndex);
     }
     else if (startNodeIndex<targetNodeIndex) {
       // Following the way
       route.AddEntry(startNodeIndex,
                      startPaths,
-                     way->GetFileOffset(),
+                     object,
                      startNodeIndex+1);
 
       for (size_t i=startNodeIndex+1; i<targetNodeIndex-1; i++) {
         route.AddEntry(i,
-                       way->GetFileOffset(),
+                       object,
                        i+1);
       }
 
       route.AddEntry(targetNodeIndex-1,
-                     way->GetFileOffset(),
+                     object,
                      targetNodeIndex);
     }
-    else if (way->IsOneway()) {
+    else if (oneway) {
       // startNodeIndex>tragetNodeIndex, but this is a oneway we assume
       // that the way is either an area or is a roundabound
       // TODO: proof this using the right assertions or checks
       size_t pos=startNodeIndex+1;
       size_t next;
 
-      if (pos>=way->nodes.size()) {
+      if (pos>=idCount) {
         pos=0;
       }
 
       next=pos+1;
-      if (next>=way->nodes.size()) {
+      if (next>=idCount) {
         next=0;
       }
 
       route.AddEntry(startNodeIndex,
                      startPaths,
-                     way->GetFileOffset(),
+                     object,
                      pos);
 
       while (next!=targetNodeIndex) {
         route.AddEntry(pos,
-                       way->GetFileOffset(),
+                       object,
                        next);
 
         pos++;
-        if (pos>=way->nodes.size()) {
+        if (pos>=idCount) {
           pos=0;
         }
 
         next=pos+1;
-        if (next>=way->nodes.size()) {
+        if (next>=idCount) {
           next=0;
         }
       }
 
       route.AddEntry(pos,
-                     way->GetFileOffset(),
+                     object,
                      targetNodeIndex);
     }
     else {
       // We follow the way in the opposite direction
       route.AddEntry(startNodeIndex,
                      startPaths,
-                     way->GetFileOffset(),
+                     object,
                      startNodeIndex-1);
 
       for (long i=startNodeIndex-1; i>(long)targetNodeIndex+1; i--) {
         route.AddEntry(i,
-                       way->GetFileOffset(),
+                       object,
                        i-1);
       }
 
       route.AddEntry(targetNodeIndex+1,
-                     way->GetFileOffset(),
+                     object,
                      targetNodeIndex);
     }
   }
@@ -313,7 +326,7 @@ namespace osmscout {
     for (size_t i=0; i<node.paths.size(); i++) {
       bool traversable=profile.CanUse(node,i);
 
-      result.push_back(osmscout::Path(node.ways[node.paths[i].wayIndex],
+      result.push_back(osmscout::Path(node.objects[node.paths[i].objectIndex],
                                       nextNodeIndex,
                                       traversable));
     }
@@ -323,56 +336,120 @@ namespace osmscout {
 
   bool Router::ResolveRNodesToRouteData(const RoutingProfile& profile,
                                         const std::list<RNodeRef>& nodes,
-                                        FileOffset startWayOffset,
+                                        const ObjectFileRef& startObject,
                                         size_t startNodeIndex,
-                                        FileOffset targetWayOffset,
+                                        const ObjectFileRef& targetObject,
                                         size_t targetNodeIndex,
                                         RouteData& route)
   {
-    WayRef way;
+    std::set<FileOffset>                      routeNodeOffsets;
+    std::set<FileOffset>                      wayOffsets;
+    std::set<FileOffset>                      areaOffsets;
 
-    if (!wayDataFile.GetByOffset(startWayOffset,way)) {
-      std::cerr << "Cannot load way with file offset " << startWayOffset << std::endl;
+    OSMSCOUT_HASHMAP<FileOffset,RouteNodeRef> routeNodeMap;
+    OSMSCOUT_HASHMAP<FileOffset,AreaRef>      areaMap;
+    OSMSCOUT_HASHMAP<FileOffset,WayRef>       wayMap;
+
+    std::vector<Id>                           *ids=NULL;
+    bool                                      oneway=false;
+
+    for (std::list<RNodeRef>::const_iterator n=nodes.begin();
+        n!=nodes.end();
+        n++) {
+      RNodeRef node(*n);
+
+      routeNodeOffsets.insert(node->nodeOffset);
+
+      if (node->object.Valid()) {
+        switch (node->object.GetType()) {
+        case refArea:
+          areaOffsets.insert(node->object.GetFileOffset());
+          break;
+        case refWay:
+          wayOffsets.insert(node->object.GetFileOffset());
+          break;
+        default:
+          assert(false);
+          break;
+        }
+      }
+    }
+
+    if (!routeNodeDataFile.GetByOffset(routeNodeOffsets,routeNodeMap)) {
+      std::cerr << "Cannot load route nodes" << std::endl;
       return false;
+    }
+
+    if (!areaDataFile.GetByOffset(areaOffsets,areaMap)) {
+      std::cerr << "Cannot load areas" << std::endl;
+      return false;
+    }
+
+    if (!wayDataFile.GetByOffset(wayOffsets,wayMap)) {
+      std::cerr << "Cannot load ways" << std::endl;
+      return false;
+    }
+
+
+
+    if (startObject.GetType()==refArea) {
+      OSMSCOUT_HASHMAP<FileOffset,AreaRef>::const_iterator entry=areaMap.find(startObject.GetFileOffset());
+
+      assert(entry!=areaMap.end());
+
+      ids=&entry->second->roles[0].ids;
+      oneway=false;
+    }
+    else if (startObject.GetType()==refWay) {
+      OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=wayMap.find(startObject.GetFileOffset());
+
+      assert(entry!=wayMap.end());
+
+      ids=&entry->second->ids;
+      oneway=entry->second->IsOneway();
+    }
+    else {
+      assert(false);
     }
 
     if (nodes.empty()) {
       // We assume that startNode and targetNode are on the same way (with no routing node in between)
-      assert(startWayOffset==targetWayOffset);
+      assert(startObject==targetObject);
 
       AddNodes(route,
                std::vector<Path>(),
                startNodeIndex,
-               way,
+               startObject,
+               ids->size(),
+               oneway,
                targetNodeIndex);
 
       route.AddEntry(targetNodeIndex,
-                     0,
+                     ObjectFileRef(),
                      0);
       return true;
     }
 
-    RouteNodeRef initialNode;
+    RouteNodeRef initialNode=routeNodeMap.find(nodes.front()->nodeOffset)->second;
 
-    // TODO: Optimize node=nextNode of the last step!
-    if (!routeNodeDataFile.GetByOffset(nodes.front()->nodeOffset,initialNode)) {
-      std::cerr << "Cannot load route node with offset " << nodes.front()->nodeOffset << std::endl;
-      return false;
-    }
-
-    if (way->ids[startNodeIndex]!=initialNode->GetId()) {
+    //
+    // Add The path from the start node to the first routing node
+    //
+    if ((*ids)[startNodeIndex]!=initialNode->GetId()) {
       size_t routeNodeIndex=0;
 
-      while (way->ids[routeNodeIndex]!=initialNode->GetId()) {
+      while ((*ids)[routeNodeIndex]!=initialNode->GetId()) {
         routeNodeIndex++;
       }
-      assert(routeNodeIndex<way->ids.size());
+      assert(routeNodeIndex<ids->size());
 
       // Start node to initial route node
       AddNodes(route,
                std::vector<Path>(),
                startNodeIndex,
-               way,
+               startObject,
+               ids->size(),
+               oneway,
                routeNodeIndex);
     }
 
@@ -383,104 +460,299 @@ namespace osmscout {
 
       nn++;
 
-      RouteNodeRef node;
+      RouteNodeRef node=routeNodeMap.find((*n)->nodeOffset)->second;
 
-      // TODO: Optimize node=nextNode of the last step!
-      if (!routeNodeDataFile.GetByOffset((*n)->nodeOffset,node)) {
-        std::cerr << "Cannot load route node with offset " << (*n)->nodeOffset << std::endl;
-        return false;
-      }
-
-      // We do not have any follower node, push the final entry (leading nowhere)
-      // to the route
+      //
+      // The path from the last routing node to the target node and the
+      // target node itself
+      //
       if (nn==nodes.end()) {
-        if (!wayDataFile.GetByOffset(targetWayOffset,way)) {
-          std::cerr << "Cannot load way with file offset " << targetWayOffset << std::endl;
-          return false;
+
+        if ((*n)->object.GetType()==refArea) {
+          OSMSCOUT_HASHMAP<FileOffset,AreaRef>::const_iterator entry=areaMap.find((*n)->object.GetFileOffset());
+
+          assert(entry!=areaMap.end());
+
+          ids=&entry->second->roles[0].ids;
+          oneway=false;
+        }
+        else if ((*n)->object.GetType()==refWay) {
+          OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=wayMap.find((*n)->object.GetFileOffset());
+
+          assert(entry!=wayMap.end());
+
+          ids=&entry->second->ids;
+          oneway=entry->second->IsOneway();
+        }
+        else {
+          assert(false);
         }
 
         size_t currentNodeIndex=0;
 
-        while (way->ids[currentNodeIndex]!=node->GetId()) {
+        while ((*ids)[currentNodeIndex]!=node->GetId()) {
           currentNodeIndex++;
         }
-        assert(currentNodeIndex<way->ids.size());
+        assert(currentNodeIndex<ids->size());
 
         if (currentNodeIndex!=targetNodeIndex) {
           AddNodes(route,
                    TransformPaths(profile,node,targetNodeIndex),
                    currentNodeIndex,
-                   way,
+                   targetObject,
+                   ids->size(),
+                   oneway,
                    targetNodeIndex);
         }
 
         route.AddEntry(targetNodeIndex,
-                       0,
+                       ObjectFileRef(),
                        0);
 
         break;
       }
 
-      RouteNodeRef nextNode;
+      RouteNodeRef nextNode=routeNodeMap.find((*nn)->nodeOffset)->second;
 
-      if (!routeNodeDataFile.GetByOffset((*nn)->nodeOffset,nextNode)) {
-        std::cerr << "Cannot load route node with offset " << (*nn)->nodeOffset << std::endl;
-        return false;
+      if ((*nn)->object.GetType()==refArea) {
+        OSMSCOUT_HASHMAP<FileOffset,AreaRef>::const_iterator entry=areaMap.find((*nn)->object.GetFileOffset());
+
+        assert(entry!=areaMap.end());
+
+        ids=&entry->second->roles[0].ids;
+        oneway=false;
       }
+      else if ((*nn)->object.GetType()==refWay) {
+        OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=wayMap.find((*nn)->object.GetFileOffset());
 
-      if (!wayDataFile.GetByOffset((*nn)->wayOffset,way)) {
-        std::cerr << "Cannot load way with file offset " << (*nn)->wayOffset << std::endl;
-        return false;
+        assert(entry!=wayMap.end());
+
+        ids=&entry->second->ids;
+        oneway=entry->second->IsOneway();
+      }
+      else {
+        assert(false);
       }
 
       size_t currentNodeIndex=0;
 
-      while (way->ids[currentNodeIndex]!=node->id) {
+      while ((*ids)[currentNodeIndex]!=node->id) {
         currentNodeIndex++;
       }
-      assert(currentNodeIndex<way->ids.size());
+      assert(currentNodeIndex<ids->size());
 
       size_t nextNodeIndex=0;
 
-      while (way->ids[nextNodeIndex]!=nextNode->id) {
+      while ((*ids)[nextNodeIndex]!=nextNode->id) {
         nextNodeIndex++;
       }
-      assert(nextNodeIndex<way->ids.size());
+      assert(nextNodeIndex<ids->size());
 
       AddNodes(route,
                TransformPaths(profile,node,nextNodeIndex),
                currentNodeIndex,
-               way,
+               (*nn)->object,
+               ids->size(),
+               oneway,
                nextNodeIndex);
     }
 
     return true;
   }
 
+  bool Router::GetStartNodes(const RoutingProfile& profile,
+                             const ObjectFileRef& object,
+                             size_t nodeIndex,
+                             double& targetLon,
+                             double& targetLat,
+                             RNodeRef& forwardNode,
+                             RNodeRef& backwardNode)
+  {
+    if (object.GetType()==refArea) {
+      // TODO:
+      return false;
+    }
+    else if (object.GetType()==refWay) {
+      WayRef        way;
+      double        startLon=0.0L;
+      double        startLat=0.0L;
+      RouteNodeRef  forwardRouteNode;
+      size_t        forwardNodePos;
+      FileOffset    forwardOffset;
+      RouteNodeRef  backwardRouteNode;
+      size_t        backwardNodePos;
+      FileOffset    backwardOffset;
+
+      if (!wayDataFile.GetByOffset(object.GetFileOffset(),
+                                   way)) {
+        std::cerr << "Cannot get start way!" << std::endl;
+        return false;
+      }
+
+      if (nodeIndex>=way->nodes.size()) {
+        std::cerr << "Given start node index " << nodeIndex << " is not within valid range [0," << way->nodes.size()-1 << std::endl;
+        return false;
+      }
+
+      startLon=way->nodes[nodeIndex].GetLon();
+      startLat=way->nodes[nodeIndex].GetLat();
+
+      GetClosestForwardRouteNode(way,
+                                 nodeIndex,
+                                 forwardRouteNode,
+                                 forwardNodePos);
+
+      GetClosestBackwardRouteNode(way,
+                                  nodeIndex,
+                                  backwardRouteNode,
+                                  backwardNodePos);
+
+      if (forwardRouteNode.Invalid() &&
+          backwardRouteNode.Invalid()) {
+        std::cerr << "No route node found for start way" << std::endl;
+        return false;
+      }
+
+      if (forwardRouteNode.Valid()) {
+        if (!routeNodeDataFile.GetOffset(forwardRouteNode->id,
+                                         forwardOffset)) {
+          std::cerr << "Cannot get offset of startForwardRouteNode" << std::endl;
+        }
+
+        RNodeRef node=new RNode(forwardOffset,
+                                object);
+
+        node->currentCost=profile.GetCosts(way,
+                                           GetSphericalDistance(startLon,
+                                                                startLat,
+                                                                way->nodes[forwardNodePos].GetLon(),
+                                                                way->nodes[forwardNodePos].GetLat()));
+        node->estimateCost=profile.GetCosts(GetSphericalDistance(startLon,
+                                                                 startLat,
+                                                                 targetLon,
+                                                                 targetLat));
+
+        node->overallCost=node->currentCost+node->estimateCost;
+
+        forwardNode=node;
+      }
+
+      if (backwardRouteNode.Valid()) {
+        if (!routeNodeDataFile.GetOffset(backwardRouteNode->id,
+                                         backwardOffset)) {
+          std::cerr << "Cannot get offset of startBackwardRouteNode" << std::endl;
+        }
+
+        RNodeRef node=new RNode(backwardOffset,
+                                object);
+
+        node->currentCost=profile.GetCosts(way,
+                                           GetSphericalDistance(startLon,
+                                                                startLat,
+                                                                way->nodes[backwardNodePos].GetLon(),
+                                                                way->nodes[backwardNodePos].GetLat()));
+        node->estimateCost=profile.GetCosts(GetSphericalDistance(startLon,
+                                                                 startLat,
+                                                                 targetLon,
+                                                                 targetLat));
+
+        node->overallCost=node->currentCost+node->estimateCost;
+
+        backwardNode=node;
+      }
+
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  bool Router::GetTargetNodes(const ObjectFileRef& object,
+                              size_t nodeIndex,
+                              double& targetLon,
+                              double& targetLat,
+                              RouteNodeRef& forwardNode,
+                              FileOffset& forwardOffset,
+                              RouteNodeRef& backwardNode,
+                              FileOffset& backwardOffset)
+  {
+    if (object.GetType()==refArea) {
+      // TODO:
+      return false;
+    }
+    else if (object.GetType()==refWay) {
+      WayRef way;
+      size_t forwardNodePos;
+      size_t backwardNodePos;
+
+      if (!wayDataFile.GetByOffset(object.GetFileOffset(),
+                                   way)) {
+        std::cerr << "Cannot get end way!" << std::endl;
+        return false;
+      }
+
+      if (nodeIndex>=way->nodes.size()) {
+        std::cerr << "Given target node index " << nodeIndex << " is not within valid range [0," << way->nodes.size()-1 << std::endl;
+        return false;
+      }
+
+      targetLon=way->nodes[nodeIndex].GetLon();
+      targetLat=way->nodes[nodeIndex].GetLat();
+
+      GetClosestForwardRouteNode(way,
+                                 nodeIndex,
+                                 forwardNode,
+                                 forwardNodePos);
+      GetClosestBackwardRouteNode(way,
+                                  nodeIndex,
+                                  backwardNode,
+                                  backwardNodePos);
+
+      if (forwardNode.Invalid() &&
+          backwardNode.Invalid()) {
+        std::cerr << "No route node found for target way" << std::endl;
+        return false;
+      }
+
+      if (forwardNode.Valid()) {
+        if (!routeNodeDataFile.GetOffset(forwardNode->id,
+                                         forwardOffset)) {
+          std::cerr << "Cannot get offset of targetForwardRouteNode" << std::endl;
+        }
+      }
+
+      if (backwardNode.Valid()) {
+        if (!routeNodeDataFile.GetOffset(backwardNode->id,
+                                         backwardOffset)) {
+          std::cerr << "Cannot get offset of targetBackwardRouteNode" << std::endl;
+        }
+      }
+
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+
   bool Router::CalculateRoute(const RoutingProfile& profile,
-                              FileOffset startWayOffset, size_t startNodeIndex,
-                              FileOffset targetWayOffset, size_t targetNodeIndex,
+                              const ObjectFileRef& startObject,
+                              size_t startNodeIndex,
+                              const ObjectFileRef& targetObject,
+                              size_t targetNodeIndex,
                               RouteData& route)
   {
-    WayRef                   startWay;
-    double                   startLon=0.0L;
-    double                   startLat=0.0L;
-
-    RouteNodeRef             startForwardRouteNode;
-    size_t                   startForwardNodePos;
-    FileOffset               startForwardOffset;
-    RouteNodeRef             startBackwardRouteNode;
-    size_t                   startBackwardNodePos;
-    FileOffset               startBackwardOffset;
+    RNodeRef                 startForwardNode;
+    RNodeRef                 startBackwardNode;
 
     WayRef                   targetWay;
     double                   targetLon=0.0L,targetLat=0.0L;
 
     RouteNodeRef             targetForwardRouteNode;
-    size_t                   targetForwardNodePos;
     FileOffset               targetForwardOffset;
     RouteNodeRef             targetBackwardRouteNode;
-    size_t                   targetBackwardNodePos;
     FileOffset               targetBackwardOffset;
 
     WayRef                   currentWay;
@@ -505,123 +777,35 @@ namespace osmscout {
     closeMap.reserve(250000);
 #endif
 
-    if (!wayDataFile.GetByOffset(startWayOffset,
-                                 startWay)) {
-      std::cerr << "Cannot get start way!" << std::endl;
+    if (!GetTargetNodes(targetObject,
+                        targetNodeIndex,
+                        targetLon,
+                        targetLat,
+                        targetForwardRouteNode,
+                        targetForwardOffset,
+                        targetBackwardRouteNode,
+                        targetBackwardOffset)) {
       return false;
     }
 
-    if (!wayDataFile.GetByOffset(targetWayOffset,
-                                 targetWay)) {
-      std::cerr << "Cannot get end way!" << std::endl;
+    if (!GetStartNodes(profile,
+                       startObject,
+                       startNodeIndex,
+                       targetLon,
+                       targetLat,
+                       startForwardNode,
+                       startBackwardNode)) {
       return false;
     }
 
-    if (startNodeIndex>=startWay->nodes.size()) {
-      std::cerr << "Given start node index " << startNodeIndex << " is not within valid range [0," << startWay->nodes.size()-1 << std::endl;
-      return false;
+    if (startForwardNode.Valid()) {
+      std::pair<OpenListRef,bool> result=openList.insert(startForwardNode);
+      openMap[startForwardNode->nodeOffset]=result.first;
     }
 
-    startLon=startWay->nodes[startNodeIndex].GetLon();
-    startLat=startWay->nodes[startNodeIndex].GetLat();
-
-    GetClosestForwardRouteNode(startWay,
-                               startNodeIndex,
-                               startForwardRouteNode,
-                               startForwardNodePos);
-    GetClosestBackwardRouteNode(startWay,
-                                startNodeIndex,
-                                startBackwardRouteNode,
-                                startBackwardNodePos);
-
-    if (startForwardRouteNode.Invalid() &&
-        startBackwardRouteNode.Invalid()) {
-      std::cerr << "No route node found for start way" << std::endl;
-      return false;
-    }
-
-    if (targetNodeIndex>=targetWay->nodes.size()) {
-      std::cerr << "Given target node index " << targetNodeIndex << " is not within valid range [0," << targetWay->nodes.size()-1 << std::endl;
-      return false;
-    }
-
-    GetClosestForwardRouteNode(targetWay,
-                               targetNodeIndex,
-                               targetForwardRouteNode,
-                               targetForwardNodePos);
-    GetClosestBackwardRouteNode(targetWay,
-                                targetNodeIndex,
-                                targetBackwardRouteNode,
-                                targetBackwardNodePos);
-
-    if (targetForwardRouteNode.Invalid() &&
-        targetBackwardRouteNode.Invalid()) {
-      std::cerr << "No route node found for target way" << std::endl;
-      return false;
-    }
-
-    if (targetForwardRouteNode.Valid()) {
-      if (!routeNodeDataFile.GetOffset(targetForwardRouteNode->id,
-                                       targetForwardOffset)) {
-        std::cerr << "Cannot get offset of targetForwardRouteNode" << std::endl;
-      }
-    }
-
-    if (targetBackwardRouteNode.Valid()) {
-      if (!routeNodeDataFile.GetOffset(targetBackwardRouteNode->id,
-                                       targetBackwardOffset)) {
-        std::cerr << "Cannot get offset of targetBackwardRouteNode" << std::endl;
-      }
-    }
-
-    if (startForwardRouteNode.Valid()) {
-      if (!routeNodeDataFile.GetOffset(startForwardRouteNode->id,
-                                       startForwardOffset)) {
-        std::cerr << "Cannot get offset of startForwardRouteNode" << std::endl;
-      }
-
-      RNodeRef node=new RNode(startForwardOffset,
-                              startWayOffset);
-
-      node->currentCost=profile.GetCosts(startWay,
-                                         GetSphericalDistance(startLon,
-                                                              startLat,
-                                                              startWay->nodes[startForwardNodePos].GetLon(),
-                                                              startWay->nodes[startForwardNodePos].GetLat()));
-      node->estimateCost=profile.GetCosts(GetSphericalDistance(startLon,
-                                                               startLat,
-                                                               targetLon,
-                                                               targetLat));
-
-      node->overallCost=node->currentCost+node->estimateCost;
-
-      std::pair<OpenListRef,bool> result=openList.insert(node);
-      openMap[node->nodeOffset]=result.first;
-    }
-
-    if (startBackwardRouteNode.Valid()) {
-      if (!routeNodeDataFile.GetOffset(startBackwardRouteNode->id,
-                                       startBackwardOffset)) {
-        std::cerr << "Cannot get offset of startBackwardRouteNode" << std::endl;
-      }
-
-      RNodeRef node=new RNode(startBackwardOffset,
-                              startWayOffset);
-
-      node->currentCost=profile.GetCosts(startWay,
-                                         GetSphericalDistance(startLon,
-                                                              startLat,
-                                                              startWay->nodes[startBackwardNodePos].GetLon(),
-                                                              startWay->nodes[startBackwardNodePos].GetLat()));
-      node->estimateCost=profile.GetCosts(GetSphericalDistance(startLon,
-                                                               startLat,
-                                                               targetLon,
-                                                               targetLat));
-
-      node->overallCost=node->currentCost+node->estimateCost;
-
-      std::pair<OpenListRef,bool> result=openList.insert(node);
-      openMap[node->nodeOffset]=result.first;
+    if (startBackwardNode.Valid()) {
+      std::pair<OpenListRef,bool> result=openList.insert(startBackwardNode);
+      openMap[startBackwardNode->nodeOffset]=result.first;
     }
 
     currentWay=NULL;
@@ -685,19 +869,19 @@ namespace osmscout {
         if (!currentRouteNode->excludes.empty()) {
           bool canTurnedInto=true;
           for (size_t e=0; e<currentRouteNode->excludes.size(); e++) {
-            if (currentRouteNode->excludes[e].sourceWay==current->wayOffset &&
-                currentRouteNode->excludes[e].targetPath==i) {
+            if (currentRouteNode->excludes[e].source==current->object &&
+                currentRouteNode->excludes[e].targetIndex==i) {
 #if defined(DEBUG_ROUTING)
               WayRef sourceWay;
               WayRef targetWay;
 
               wayDataFile.Get(current->wayId,sourceWay);
-              wayDataFile.Get(currentRouteNode->ways[path->wayIndex],targetWay);
+              wayDataFile.Get(currentRouteNode->objects[path->objectIndex],targetWay);
 
               std::cout << "  Node " <<  currentRouteNode->id << ": ";
               std::cout << "Cannot turn from " << current->wayId << " " << sourceWay->GetName() << " (" << sourceWay->GetRefName()  << ")";
               std::cout << " into ";
-              std::cout << currentRouteNode->ways[currentRouteNode->paths[i].wayIndex] << " " << targetWay->GetName() << " (" << targetWay->GetRefName()  << ")" << std::endl;
+              std::cout << currentRouteNode->objects[currentRouteNode->paths[i].objectIndex] << " " << targetWay->GetName() << " (" << targetWay->GetRefName()  << ")" << std::endl;
 #endif
               canTurnedInto=false;
               break;
@@ -748,7 +932,7 @@ namespace osmscout {
           RNodeRef node=*openEntry->second;
 
           node->prev=current->nodeOffset;
-          node->wayOffset=currentRouteNode->ways[path->wayIndex];
+          node->object=currentRouteNode->objects[path->objectIndex];
 
           node->currentCost=currentCost;
           node->estimateCost=estimateCost;
@@ -766,7 +950,7 @@ namespace osmscout {
         }
         else {
           RNodeRef node=new RNode(path->offset,
-                                  currentRouteNode->ways[path->wayIndex],
+                                  currentRouteNode->objects[path->objectIndex],
                                   current->nodeOffset);
 
           node->currentCost=currentCost;
@@ -798,8 +982,8 @@ namespace osmscout {
 
     clock.Stop();
 
-    std::cout << "From:                " << startWayOffset << "[" << startNodeIndex << "]" << std::endl;
-    std::cout << "To:                  " << targetWayOffset << "[" << targetNodeIndex << "]" << std::endl;
+    std::cout << "From:                " << startObject.GetTypeName() << " " << startObject.GetFileOffset() << "[" << startNodeIndex << "]" << std::endl;
+    std::cout << "To:                  " << targetObject.GetTypeName() <<  " " << targetObject.GetFileOffset() << "[" << targetNodeIndex << "]" << std::endl;
     std::cout << "Time:                " << clock << std::endl;
 #if defined(DEBUG_ROUTING)
     std::cout << "Cost:                " << current->currentCost << " " << current->estimateCost << " " << current->overallCost << std::endl;
@@ -826,9 +1010,9 @@ namespace osmscout {
 
     if (!ResolveRNodesToRouteData(profile,
                                   nodes,
-                                  startWayOffset,
+                                  startObject,
                                   startNodeIndex,
-                                  targetWayOffset,
+                                  targetObject,
                                   targetNodeIndex,
                                   route)) {
       //std::cerr << "Cannot convert routing result to route data" << std::endl;
@@ -860,25 +1044,47 @@ namespace osmscout {
     for (std::list<RouteData::RouteEntry>::const_iterator iter=data.Entries().begin();
          iter!=data.Entries().end();
          ++iter) {
-      if (iter->GetPathWayOffset()!=0) {
-        WayRef w;
+      if (iter->GetPathObject().Valid()) {
+        if (iter->GetPathObject().GetType()==refArea) {
+          AreaRef a;
 
-        if (!wayDataFile.GetByOffset(iter->GetPathWayOffset(),w)) {
-          return false;
+          if (!areaDataFile.GetByOffset(iter->GetPathObject().GetFileOffset(),a)) {
+            return false;
+          }
+
+          // Initial starting point
+          if (iter==data.Entries().begin()) {
+            size_t index=iter->GetCurrentNodeIndex();
+
+            way.ids.push_back(a->roles[0].ids[index]);
+            way.nodes.push_back(a->roles[0].nodes[index]);
+          }
+
+          size_t index=iter->GetTargetNodeIndex();
+
+          way.ids.push_back(a->roles[0].ids[index]);
+          way.nodes.push_back(a->roles[0].nodes[index]);
         }
+        else if (iter->GetPathObject().GetType()==refWay) {
+          WayRef w;
 
-        // Initial starting point
-        if (iter==data.Entries().begin()) {
-          size_t index=iter->GetCurrentNodeIndex();
+          if (!wayDataFile.GetByOffset(iter->GetPathObject().GetFileOffset(),w)) {
+            return false;
+          }
+
+          // Initial starting point
+          if (iter==data.Entries().begin()) {
+            size_t index=iter->GetCurrentNodeIndex();
+
+            way.ids.push_back(w->ids[index]);
+            way.nodes.push_back(w->nodes[index]);
+          }
+
+          size_t index=iter->GetTargetNodeIndex();
 
           way.ids.push_back(w->ids[index]);
           way.nodes.push_back(w->nodes[index]);
         }
-
-        size_t index=iter->GetTargetNodeIndex();
-
-        way.ids.push_back(w->ids[index]);
-        way.nodes.push_back(w->nodes[index]);
       }
     }
 
@@ -888,7 +1094,8 @@ namespace osmscout {
   bool Router::TransformRouteDataToPoints(const RouteData& data,
                                           std::list<Point>& points)
   {
-    WayRef w;
+    AreaRef a;
+    WayRef  w;
 
     points.clear();
 
@@ -899,31 +1106,57 @@ namespace osmscout {
     for (std::list<RouteData::RouteEntry>::const_iterator iter=data.Entries().begin();
          iter!=data.Entries().end();
          ++iter) {
-      if (iter->GetPathWayOffset()!=0) {
-
-        if (w.Invalid() ||
-            w->GetFileOffset()!=iter->GetPathWayOffset()) {
-          if (!wayDataFile.GetByOffset(iter->GetPathWayOffset(),w)) {
-            std::cerr << "Cannot load way with id " << iter->GetPathWayOffset() << std::endl;
-            return false;
+      if (iter->GetPathObject().Valid()) {
+        if (iter->GetPathObject().GetType()==refArea) {
+          if (a.Invalid() ||
+              a->GetFileOffset()!=iter->GetPathObject().GetFileOffset()) {
+            if (!areaDataFile.GetByOffset(iter->GetPathObject().GetFileOffset(),a)) {
+              std::cerr << "Cannot load area with id " << iter->GetPathObject().GetFileOffset() << std::endl;
+              return false;
+            }
           }
-        }
 
-        // Initial starting point
-        if (iter==data.Entries().begin()) {
-          size_t index=iter->GetCurrentNodeIndex();
+          // Initial starting point
+          if (iter==data.Entries().begin()) {
+            size_t index=iter->GetCurrentNodeIndex();
+
+            points.push_back(Point(a->roles[0].ids[index],
+                                   a->roles[0].nodes[index].GetLat(),
+                                   a->roles[0].nodes[index].GetLon()));
+          }
+
+          // target node of current path
+          size_t index=iter->GetTargetNodeIndex();
+
+          points.push_back(Point(a->roles[0].ids[index],
+                                 a->roles[0].nodes[index].GetLat(),
+                                 a->roles[0].nodes[index].GetLon()));
+        }
+        else if (iter->GetPathObject().GetType()==refWay) {
+          if (w.Invalid() ||
+              w->GetFileOffset()!=iter->GetPathObject().GetFileOffset()) {
+            if (!wayDataFile.GetByOffset(iter->GetPathObject().GetFileOffset(),w)) {
+              std::cerr << "Cannot load way with id " << iter->GetPathObject().GetFileOffset() << std::endl;
+              return false;
+            }
+          }
+
+          // Initial starting point
+          if (iter==data.Entries().begin()) {
+            size_t index=iter->GetCurrentNodeIndex();
+
+            points.push_back(Point(w->ids[index],
+                                   w->nodes[index].GetLat(),
+                                   w->nodes[index].GetLon()));
+          }
+
+          // target node of current path
+          size_t index=iter->GetTargetNodeIndex();
 
           points.push_back(Point(w->ids[index],
                                  w->nodes[index].GetLat(),
                                  w->nodes[index].GetLon()));
         }
-
-        // target node of current path
-        size_t index=iter->GetTargetNodeIndex();
-
-        points.push_back(Point(w->ids[index],
-                               w->nodes[index].GetLat(),
-                               w->nodes[index].GetLon()));
       }
     }
 
@@ -944,7 +1177,7 @@ namespace osmscout {
          ++iter) {
       description.AddNode(iter->GetCurrentNodeIndex(),
                           iter->GetPaths(),
-                          iter->GetPathWayOffset(),
+                          iter->GetPathObject(),
                           iter->GetTargetNodeIndex());
     }
 

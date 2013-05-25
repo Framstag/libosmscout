@@ -484,9 +484,9 @@ bool DatabaseTask::GetMatchingLocations(const osmscout::AdminRegion& region,
                                         false);
 }
 
-bool DatabaseTask::CalculateRoute(osmscout::FileOffset startWayOffset,
+bool DatabaseTask::CalculateRoute(const osmscout::ObjectFileRef& startObject,
                                   size_t startNodeIndex,
-                                  osmscout::FileOffset targetWayOffset,
+                                  const osmscout::ObjectFileRef& targetObject,
                                   size_t targetNodeIndex,
                                   osmscout::RouteData& route)
 {
@@ -497,9 +497,9 @@ bool DatabaseTask::CalculateRoute(osmscout::FileOffset startWayOffset,
   }
 
   return router->CalculateRoute(routingProfile,
-                                startWayOffset,
+                                startObject,
                                 startNodeIndex,
-                                targetWayOffset,
+                                targetObject,
                                 targetNodeIndex,
                                 route);
 }
