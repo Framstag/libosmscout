@@ -47,8 +47,7 @@ namespace osmscout {
 
   public:
     // Common flags (Area & Way)
-    const static uint16_t isArea          = 1 <<  0; //! We are an area (or a way if not set)
-    const static uint16_t hasAccess       = 1 <<  1; //! We do have access rights to this way/area
+    const static uint16_t hasAccess       = 1 <<  0; //! We do have access rights to this way/area
 
     // Area flags
 
@@ -91,11 +90,6 @@ namespace osmscout {
     inline uint16_t GetFlags() const
     {
       return flags;
-    }
-
-    inline bool IsArea() const
-    {
-      return (flags & isArea)!=0;
     }
 
     inline std::string GetName() const

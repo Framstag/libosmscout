@@ -1713,17 +1713,15 @@ namespace osmscout {
     for (std::list<WayRef>::const_iterator p=data.poiWays.begin();
          p!=data.poiWays.end();
          ++p) {
-      if (!(*p)->IsArea()) {
-        const WayRef& way=*p;
+      const WayRef& way=*p;
 
-        PrepareWaySegment(styleConfig,
-                          projection,
-                          parameter,
-                          ObjectFileRef(way->GetFileOffset(),refWay),
-                          way->GetAttributes(),
-                          way->nodes,
-                          way->ids);
-      }
+      PrepareWaySegment(styleConfig,
+                        projection,
+                        parameter,
+                        ObjectFileRef(way->GetFileOffset(),refWay),
+                        way->GetAttributes(),
+                        way->nodes,
+                        way->ids);
     }
 
     wayData.sort();

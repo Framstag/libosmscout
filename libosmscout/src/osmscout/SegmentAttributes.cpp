@@ -63,10 +63,6 @@ namespace osmscout {
 
     flags|=hasAccess;
 
-    if (area) {
-      flags|=isArea;
-    }
-
     std::vector<Tag>::iterator tag=tags.begin();
     while (tag!=tags.end()) {
       uint32_t ntPrio;
@@ -176,7 +172,7 @@ namespace osmscout {
 
         tag=tags.erase(tag);
       }
-      else if (!IsArea() && tag->key==typeConfig.tagSurface) {
+      else if (!area && tag->key==typeConfig.tagSurface) {
         if (!hasGrade) {
           if (tag->value=="paved" ||
               tag->value=="asphalt" ||
@@ -229,7 +225,7 @@ namespace osmscout {
 
         tag=tags.erase(tag);
       }
-      else if (!IsArea() && tag->key==typeConfig.tagTracktype) {
+      else if (!area && tag->key==typeConfig.tagTracktype) {
         if (tag->value=="grade1") {
           grade=1;
           hasGrade=true;
@@ -253,19 +249,19 @@ namespace osmscout {
 
         tag=tags.erase(tag);
       }
-      else if (!IsArea() && tag->key==typeConfig.tagBridge) {
+      else if (!area && tag->key==typeConfig.tagBridge) {
         if (!(tag->value=="no" || tag->value=="false" || tag->value=="0")) {
           flags|=isBridge;
         }
         tag=tags.erase(tag);
       }
-      else if (!IsArea() && tag->key==typeConfig.tagTunnel) {
+      else if (!area && tag->key==typeConfig.tagTunnel) {
         if (!(tag->value=="no" || tag->value=="false" || tag->value=="0")) {
           flags|=isTunnel;
         }
         tag=tags.erase(tag);
       }
-      else if (!IsArea() && tag->key==typeConfig.tagOneway) {
+      else if (!area && tag->key==typeConfig.tagOneway) {
         if (tag->value=="-1") {
           reverseNodes=true;
           flags|=isOneway;
@@ -286,17 +282,16 @@ namespace osmscout {
 
         tag=tags.erase(tag);
       }
-      else if (!IsArea() && tag->key==typeConfig.tagJunction) {
+      else if (!area && tag->key==typeConfig.tagJunction) {
         if (tag->value=="roundabout") {
           flags|=isOneway;
           flags|=isRoundabout;
           // If it is a roundabout is cannot be a area
-          flags&=~isArea;
         }
 
         tag=tags.erase(tag);
       }
-      else if (!IsArea() && tag->key==typeConfig.tagWidth) {
+      else if (!area && tag->key==typeConfig.tagWidth) {
         double w;
         size_t pos=0;
         size_t count=0;

@@ -37,8 +37,8 @@ namespace osmscout {
   : areaAreaIndexCacheSize(1000),
     areaNodeIndexCacheSize(1000),
     nodeCacheSize(1000),
-    wayCacheSize(8000),
-    relationCacheSize(1000),
+    wayCacheSize(4000),
+    areaCacheSize(4000),
     debugPerformance(false)
   {
     // no code
@@ -64,9 +64,9 @@ namespace osmscout {
     this->wayCacheSize=wayCacheSize;
   }
 
-  void DatabaseParameter::SetRelationCacheSize(unsigned long relationCacheSize)
+  void DatabaseParameter::SetAreaCacheSize(unsigned long areaCacheSize)
   {
-    this->relationCacheSize=relationCacheSize;
+    this->areaCacheSize=areaCacheSize;
   }
 
   void DatabaseParameter::SetDebugPerformance(bool debug)
@@ -94,9 +94,9 @@ namespace osmscout {
     return wayCacheSize;
   }
 
-  unsigned long DatabaseParameter::GetRelationCacheSize() const
+  unsigned long DatabaseParameter::GetAreaCacheSize() const
   {
-    return relationCacheSize;
+    return areaCacheSize;
   }
 
   bool DatabaseParameter::IsDebugPerformance() const
@@ -199,7 +199,7 @@ namespace osmscout {
      nodeDataFile("nodes.dat",
                   parameter.GetNodeCacheSize()),
      areaDataFile("areas.dat",
-                  parameter.GetRelationCacheSize()),
+                  parameter.GetAreaCacheSize()),
      wayDataFile("ways.dat",
                   parameter.GetWayCacheSize()),
      typeConfig(NULL),

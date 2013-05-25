@@ -112,11 +112,12 @@ namespace osmscout {
                          bool memoryMapedData)
   {
     datafilename=AppendFileToDir(path,datafile);
+
     this->memoryMapedData=memoryMapedData;
     this->modeData=modeData;
 
     isOpen=scanner.Open(datafilename,modeData,memoryMapedData);
-
+    
     return isOpen;
   }
 

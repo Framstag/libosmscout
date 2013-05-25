@@ -62,11 +62,6 @@ namespace osmscout {
         return attributes.GetFlags();
       }
 
-      inline bool IsArea() const
-      {
-        return attributes.IsArea();
-      }
-
       inline std::string GetName() const
       {
         return attributes.GetName();
@@ -129,11 +124,6 @@ namespace osmscout {
     inline uint16_t GetFlags() const
     {
       return attributes.GetFlags();
-    }
-
-    inline bool IsArea() const
-    {
-      return attributes.IsArea();
     }
 
     inline std::string GetName() const

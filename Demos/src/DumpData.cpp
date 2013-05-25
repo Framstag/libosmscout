@@ -363,16 +363,9 @@ static void DumpWay(const osmscout::TypeConfig* typeConfig,
   std::cout << "  id: " << id << std::endl;
   std::cout << "  fileOffset: " << way->GetFileOffset() << std::endl;
 
-  if (way->IsArea()) {
-    DumpAreaSegmentAttributes(way->GetAttributes(),
-                              typeConfig,
-                              2);
-  }
-  else {
-    DumpWaySegmentAttributes(way->GetAttributes(),
-                             typeConfig,
-                             2);
-  }
+  DumpWaySegmentAttributes(way->GetAttributes(),
+                           typeConfig,
+                           2);
 
   if (way->HasTags()) {
     std::cout << std::endl;

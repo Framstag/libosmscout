@@ -69,7 +69,7 @@ namespace osmscout {
 
     unsigned long wayCacheSize;
 
-    unsigned long relationCacheSize;
+    unsigned long areaCacheSize;
 
     bool          debugPerformance;
 
@@ -83,7 +83,7 @@ namespace osmscout {
 
     void SetWayCacheSize(unsigned long wayCacheSize);
 
-    void SetRelationCacheSize(unsigned long relationCacheSize);
+    void SetAreaCacheSize(unsigned long relationCacheSize);
 
     void SetDebugPerformance(bool debug);
 
@@ -94,7 +94,7 @@ namespace osmscout {
 
     unsigned long GetWayCacheSize() const;
 
-    unsigned long GetRelationCacheSize() const;
+    unsigned long GetAreaCacheSize() const;
 
     bool IsDebugPerformance() const;
   };

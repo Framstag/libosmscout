@@ -62,11 +62,6 @@ namespace osmscout {
       return attributes.GetType();
     }
 
-    inline bool IsArea() const
-    {
-      return attributes.IsArea();
-    }
-
     inline std::string GetName() const
     {
       return attributes.GetName();

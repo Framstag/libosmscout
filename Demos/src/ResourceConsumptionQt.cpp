@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
 
   databaseParameter.SetNodeCacheSize(0);
   databaseParameter.SetWayCacheSize(0);
-  databaseParameter.SetRelationCacheSize(0);
+  databaseParameter.SetAreaCacheSize(0);
 
   osmscout::Database          database(databaseParameter);
 
