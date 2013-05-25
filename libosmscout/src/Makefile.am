@@ -42,7 +42,6 @@ libosmscout_la_SOURCES= osmscout/util/Breaker.cpp \
                         osmscout/Node.cpp \
                         osmscout/Path.cpp \
                         osmscout/Point.cpp \
-                        osmscout/Relation.cpp \
                         osmscout/SegmentAttributes.cpp \
                         osmscout/Tag.cpp \
                         osmscout/TurnRestriction.cpp \

@@ -30,8 +30,8 @@
 #include <osmscout/TypeSet.h>
 
 #include <osmscout/Node.h>
-#include <osmscout/Relation.h>
-#include <osmscout/Way.h>
+
+#include <osmscout/SegmentAttributes.h>
 
 #include <osmscout/TypeConfig.h>
 

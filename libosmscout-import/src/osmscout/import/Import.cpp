@@ -23,14 +23,12 @@
 
 #include <osmscout/TypeConfigLoader.h>
 
-#include <osmscout/Node.h>
-#include <osmscout/Relation.h>
-#include <osmscout/RouteNode.h>
-#include <osmscout/Way.h>
 
 #include <osmscout/import/RawNode.h>
 #include <osmscout/import/RawWay.h>
 #include <osmscout/import/RawRelation.h>
+
+#include <osmscout/RouteNode.h>
 
 #include <osmscout/import/GenTypeDat.h>
 
