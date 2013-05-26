@@ -224,7 +224,7 @@ namespace osmscout {
                                 double maxlat,
                                 const std::vector<TypeSet>& wayTypes,
                                 size_t maxWayCount,
-                                std::vector<FileOffset>& wayWayOffsets) const
+                                std::vector<FileOffset>& offsets) const
   {
     if (!scanner.IsOpen()) {
       if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
@@ -234,16 +234,16 @@ namespace osmscout {
     }
 
     bool                         sizeExceeded=false;
-    OSMSCOUT_HASHSET<FileOffset> newWayWayOffsets;
+    OSMSCOUT_HASHSET<FileOffset> newOffsets;
 
-    wayWayOffsets.reserve(std::min(100000u,(uint32_t)maxWayCount));
+    offsets.reserve(std::min(100000u,(uint32_t)maxWayCount));
 
 #if defined(OSMSCOUT_HASHSET_HAS_RESERVE)
-    newWayWayOffsets.reserve(std::min(100000u,(uint32_t)maxWayCount));
+    newOffsets.reserve(std::min(100000u,(uint32_t)maxWayCount));
 #endif
 
     for (size_t i=0; i<wayTypes.size(); i++) {
-      newWayWayOffsets.clear();
+      newOffsets.clear();
 
       for (size_t type=0;
           type<wayTypeData.size();
@@ -255,8 +255,8 @@ namespace osmscout {
                           maxlon,
                           maxlat,
                           maxWayCount,
-                          newWayWayOffsets,
-                          wayWayOffsets.size(),
+                          newOffsets,
+                          offsets.size(),
                           sizeExceeded)) {
             return false;
           }
@@ -269,7 +269,7 @@ namespace osmscout {
 
       // Copy data from temporary set to final vector
 
-      wayWayOffsets.insert(wayWayOffsets.end(),newWayWayOffsets.begin(),newWayWayOffsets.end());
+      offsets.insert(offsets.end(),newOffsets.begin(),newOffsets.end());
     }
 
     //std::cout << "Found " << wayWayOffsets.size() << "+" << relationWayOffsets.size()<< " offsets in 'areaway.idx'" << std::endl;

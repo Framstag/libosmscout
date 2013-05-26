@@ -379,7 +379,6 @@ namespace osmscout {
                                  std::string& nodesTime,
                                  std::vector<NodeRef>& nodes) const
   {
-    std::vector<FileOffset> nodeOffsets;
 
     if (parameter.IsAborted()) {
       return false;
@@ -391,7 +390,8 @@ namespace osmscout {
       return false;
     }
 
-    StopClock nodeIndexTimer;
+    std::vector<FileOffset> nodeOffsets;
+    StopClock               nodeIndexTimer;
 
     if (nodeTypes.HasTypes()) {
       if (!areaNodeIndex.GetOffsets(lonMin,latMin,lonMax,latMax,
@@ -434,15 +434,75 @@ namespace osmscout {
     return true;
   }
 
-  bool Database::GetObjectsWayOffsets(const AreaSearchParameter& parameter,
-                                      const std::vector<TypeSet>& wayTypes,
-                                      const Magnification& magnification,
-                                      double lonMin, double latMin,
-                                      double lonMax, double latMax,
-                                      std::string& wayOptimizedTime,
-                                      std::string& wayIndexTime,
-                                      std::vector<FileOffset>& wayWayOffsets,
-                                      std::vector<WayRef>& ways) const
+  bool Database::GetObjectsAreas(const AreaSearchParameter& parameter,
+                                 const TypeSet& areaTypes,
+                                 const Magnification& magnification,
+                                 double lonMin, double latMin,
+                                 double lonMax, double latMax,
+                                 std::string& areaIndexTime,
+                                 std::string& areasTime,
+                                 std::vector<AreaRef>& areas) const
+  {
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
+    std::vector<FileOffset> wayAreaOffsets;
+    StopClock               areaIndexTimer;
+
+    if (areaTypes.HasTypes()) {
+      if (!areaAreaIndex.GetOffsets(lonMin,
+                                    latMin,
+                                    lonMax,
+                                    latMax,
+                                    magnification.GetLevel()+
+                                    parameter.GetMaximumAreaLevel(),
+                                    areaTypes,
+                                    parameter.GetMaximumAreas(),
+                                    wayAreaOffsets)) {
+        std::cout << "Error getting areas from area index!" << std::endl;
+        return false;
+      }
+    }
+
+    areaIndexTimer.Stop();
+    areaIndexTime=areaIndexTimer.ResultString();
+
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
+    std::sort(wayAreaOffsets.begin(),wayAreaOffsets.end());
+
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
+    StopClock areasTimer;
+
+    if (!wayAreaOffsets.empty()) {
+      if (!GetAreasByOffset(wayAreaOffsets,
+                            areas)) {
+        std::cout << "Error reading areas in area!" << std::endl;
+        return false;
+      }
+    }
+
+    areasTimer.Stop();
+    areasTime=areasTimer.ResultString();
+
+    return !parameter.IsAborted();
+  }
+
+  bool Database::GetObjectsWays(const AreaSearchParameter& parameter,
+                                const std::vector<TypeSet>& wayTypes,
+                                const Magnification& magnification,
+                                double lonMin, double latMin,
+                                double lonMax, double latMax,
+                                std::string& wayOptimizedTime,
+                                std::string& wayIndexTime,
+                                std::string& waysTime,
+                                std::vector<WayRef>& ways) const
   {
     std::vector<TypeSet> internalWayTypes(wayTypes);
 
@@ -454,7 +514,8 @@ namespace osmscout {
       return false;
     }
 
-    StopClock wayOptimizedTimer;
+    std::vector<FileOffset> wayWayOffsets;
+    StopClock               wayOptimizedTimer;
 
     if (!internalWayTypes.empty()) {
       if (parameter.GetUseLowZoomOptimization() &&
@@ -504,66 +565,6 @@ namespace osmscout {
       return false;
     }
 
-    return true;
-  }
-
-  bool Database::GetObjectsAreaOffsets(const AreaSearchParameter& parameter,
-                                       const TypeSet& areaTypes,
-                                       const Magnification& magnification,
-                                       double lonMin, double latMin,
-                                       double lonMax, double latMax,
-                                       std::string& areaIndexTime,
-                                       std::vector<FileOffset>& wayAreaOffsets) const
-  {
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
-    StopClock areaIndexTimer;
-
-    if (areaTypes.HasTypes()) {
-      if (!areaAreaIndex.GetOffsets(lonMin,
-                                    latMin,
-                                    lonMax,
-                                    latMax,
-                                    magnification.GetLevel()+
-                                    parameter.GetMaximumAreaLevel(),
-                                    areaTypes,
-                                    parameter.GetMaximumAreas(),
-                                    wayAreaOffsets)) {
-        std::cout << "Error getting areas from area index!" << std::endl;
-        return false;
-      }
-    }
-
-    areaIndexTimer.Stop();
-    areaIndexTime=areaIndexTimer.ResultString();
-
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
-    std::sort(wayAreaOffsets.begin(),wayAreaOffsets.end());
-
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
-    return true;
-  }
-
-  bool Database::GetObjectsWaysAndAreas(const AreaSearchParameter& parameter,
-                                        const std::vector<FileOffset>& wayWayOffsets,
-                                        const std::vector<FileOffset>& wayAreaOffsets,
-                                        std::string& waysTime,
-                                        std::string& areasTime,
-                                        std::vector<WayRef>& ways,
-                                        std::vector<AreaRef>& areas) const
-  {
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
     StopClock waysTimer;
 
     if (!wayWayOffsets.empty()) {
@@ -577,28 +578,7 @@ namespace osmscout {
     waysTimer.Stop();
     waysTime=waysTimer.ResultString();
 
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
-    StopClock areasTimer;
-
-    if (!wayAreaOffsets.empty()) {
-      if (!GetAreasByOffset(wayAreaOffsets,
-                            areas)) {
-        std::cout << "Error reading areas in area!" << std::endl;
-        return false;
-      }
-    }
-
-    areasTimer.Stop();
-    areasTime=areasTimer.ResultString();
-
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
-    return true;
+    return !parameter.IsAborted();
   }
 
   bool Database::GetObjects(const TypeSet &nodeTypes,
@@ -612,35 +592,31 @@ namespace osmscout {
                             std::vector<WayRef>& ways,
                             std::vector<AreaRef>& areas) const
   {
-    std::vector<FileOffset> wayWayOffsets;
-    std::vector<FileOffset> wayAreaOffsets;
+    std::string nodeIndexTime;
+    std::string nodesTime;
 
-    std::string             nodeIndexTime;
-    std::string             nodesTime;
+    std::string wayOptimizedTime;
+    std::string wayIndexTime;
+    std::string waysTime;
 
-    std::string             wayOptimizedTime;
-    std::string             wayIndexTime;
-    std::string             waysTime;
-
-    std::string             areaIndexTime;
-    std::string             areasTime;
+    std::string areaIndexTime;
+    std::string areasTime;
 
     if (!IsOpen()) {
       return false;
     }
 
-    {
-      ways.clear();
-      areas.clear();
-    }
+    nodes.clear();
+    ways.clear();
+    areas.clear();
 
     if (parameter.IsAborted()) {
       return false;
     }
 
     bool nodesSuccess;
-    bool wayOffsetsSuccess;
-    bool areaOffsetsSuccess;
+    bool waysSuccess;
+    bool areasSuccess;
 
 #pragma omp parallel if(parameter.GetUseMultithreading())
 #pragma omp sections
@@ -657,53 +633,34 @@ namespace osmscout {
                                    nodes);
 
 #pragma omp section
-      wayOffsetsSuccess=GetObjectsWayOffsets(parameter,
-                                             wayTypes,
-                                             magnification,
-                                             lonMin,
-                                             latMin,
-                                             lonMax,
-                                             latMax,
-                                             wayOptimizedTime,
-                                             wayIndexTime,
-                                             wayWayOffsets,
-                                             ways);
+      waysSuccess=GetObjectsWays(parameter,
+                                 wayTypes,
+                                 magnification,
+                                 lonMin,
+                                 latMin,
+                                 lonMax,
+                                 latMax,
+                                 wayOptimizedTime,
+                                 wayIndexTime,
+                                 waysTime,
+                                 ways);
 
 #pragma omp section
-      areaOffsetsSuccess=GetObjectsAreaOffsets(parameter,
-                                               areaTypes,
-                                               magnification,
-                                               lonMin,
-                                               latMin,
-                                               lonMax,
-                                               latMax,
-                                               areaIndexTime,
-                                               wayAreaOffsets);
+      areasSuccess=GetObjectsAreas(parameter,
+                                   areaTypes,
+                                   magnification,
+                                   lonMin,
+                                   latMin,
+                                   lonMax,
+                                   latMax,
+                                   areaIndexTime,
+                                   areasTime,
+                                   areas);
     }
 
     if (!nodesSuccess ||
-        !wayOffsetsSuccess ||
-        !areaOffsetsSuccess) {
-      return false;
-    }
-
-    bool waSuccess;
-
-#pragma omp parallel if(parameter.GetUseMultithreading())
-#pragma omp sections
-    {
-
-#pragma omp section
-      waSuccess=GetObjectsWaysAndAreas(parameter,
-                                      wayWayOffsets,
-                                      wayAreaOffsets,
-                                      waysTime,
-                                      areasTime,
-                                      ways,
-                                      areas);
-    }
-
-    if (!waSuccess) {
+        !waysSuccess ||
+        !areasSuccess) {
       return false;
     }
 

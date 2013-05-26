@@ -182,31 +182,24 @@ namespace osmscout {
                          std::string& nodesTime,
                          std::vector<NodeRef>& nodes) const;
 
-    bool GetObjectsWayOffsets(const AreaSearchParameter& parameter,
-                              const std::vector<TypeSet>& wayTypes,
-                              const Magnification& magnification,
-                              double lonMin, double latMin,
-                              double lonMax, double latMax,
-                              std::string& wayOptimizedTime,
-                              std::string& wayIndexTime,
-                              std::vector<FileOffset>& wayWayOffsets,
-                              std::vector<WayRef>& ways) const;
+    bool GetObjectsWays(const AreaSearchParameter& parameter,
+                        const std::vector<TypeSet>& wayTypes,
+                        const Magnification& magnification,
+                        double lonMin, double latMin,
+                        double lonMax, double latMax,
+                        std::string& wayOptimizedTime,
+                        std::string& wayIndexTime,
+                        std::string& waysTime,
+                        std::vector<WayRef>& ways) const;
 
-    bool GetObjectsAreaOffsets(const AreaSearchParameter& parameter,
+    bool GetObjectsAreas(const AreaSearchParameter& parameter,
                                const TypeSet& areaTypes,
                                const Magnification& magnification,
                                double lonMin, double latMin,
                                double lonMax, double latMax,
                                std::string& areaIndexTime,
-                               std::vector<FileOffset>& areaOffsets) const;
-
-    bool GetObjectsWaysAndAreas(const AreaSearchParameter& parameter,
-                                const std::vector<FileOffset>& wayWayOffsets,
-                                const std::vector<FileOffset>& wayAreaOffsets,
-                                std::string& waysTime,
-                                std::string& areasTime,
-                                std::vector<WayRef>& ways,
-                                std::vector<AreaRef>& areas) const;
+                               std::string& areasTime,
+                               std::vector<AreaRef>& areas) const;
 
   public:
     Database(const DatabaseParameter& parameter);

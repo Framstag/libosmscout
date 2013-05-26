@@ -107,8 +107,6 @@ namespace osmscout {
                                  size_t currentSize,
                                  bool& sizeExceeded) const
   {
-    std::set<FileOffset> newOffsets;
-
     if (typeData.indexOffset==0) {
       // No data for this type available
       return true;
@@ -122,11 +120,13 @@ namespace osmscout {
       return true;
     }
 
-    uint32_t minxc=(uint32_t)floor((minlon+180.0)/typeData.cellWidth);
-    uint32_t maxxc=(uint32_t)floor((maxlon+180.0)/typeData.cellWidth);
+    OSMSCOUT_HASHSET<FileOffset> newOffsets;
 
-    uint32_t minyc=(uint32_t)floor((minlat+90.0)/typeData.cellHeight);
-    uint32_t maxyc=(uint32_t)floor((maxlat+90.0)/typeData.cellHeight);
+    uint32_t             minxc=(uint32_t)floor((minlon+180.0)/typeData.cellWidth);
+    uint32_t             maxxc=(uint32_t)floor((maxlon+180.0)/typeData.cellWidth);
+
+    uint32_t             minyc=(uint32_t)floor((minlat+90.0)/typeData.cellHeight);
+    uint32_t             maxyc=(uint32_t)floor((maxlat+90.0)/typeData.cellHeight);
 
     minxc=std::max(minxc,typeData.cellXStart);
     maxxc=std::min(maxxc,typeData.cellXEnd);
@@ -213,11 +213,7 @@ namespace osmscout {
       }
     }
 
-    for (std::set<FileOffset>::const_iterator offset=newOffsets.begin();
-         offset!=newOffsets.end();
-         ++offset) {
-      offsets.push_back(*offset);
-    }
+    offsets.insert(offsets.end(),newOffsets.begin(),newOffsets.end());
 
     return true;
   }

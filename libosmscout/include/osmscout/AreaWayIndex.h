@@ -93,7 +93,7 @@ namespace osmscout {
                     double maxlat,
                     const std::vector<TypeSet>& wayTypes,
                     size_t maxWayCount,
-                    std::vector<FileOffset>& wayWayOffsets) const;
+                    std::vector<FileOffset>& offsets) const;
 
     void DumpStatistics();
   };
