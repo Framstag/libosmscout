@@ -30,15 +30,13 @@
 namespace osmscout {
 
   /**
-    AreaAreaIndex allows you to find areas and area relations in
-    a given area.
+    AreaAreaIndex allows you to find areas in
+    a given region.
 
     For areas result can be limited by the maximum level (which in turn
     defines the minimum size of the resulting areas since an area in a given
     level must fit into the cell size (but can cross cell borders)) and the
     maximum number of areas found.
-
-    Way in turn can be limited by type and result count.
 
     Internally the index is implemented as quadtree. As a result each index entry
     has 4 children (besides entries in the lowest level).
@@ -81,6 +79,23 @@ namespace osmscout {
       }
     };
 
+    struct CellRef
+    {
+      FileOffset offset;
+      size_t     x;
+      size_t     y;
+
+      CellRef(FileOffset offset,
+              size_t x,
+              size_t y)
+      : offset(offset),
+        x(x),
+        y(y)
+      {
+        // no code
+      }
+    };
+
   private:
     std::string                     filepart;       //! name of the data file
     std::string                     datafilename;   //! Fullpath and name of the data file
@@ -89,14 +104,14 @@ namespace osmscout {
     std::vector<double>             cellWidth;      //! Precalculated cellWidth for each level of the quadtree
     std::vector<double>             cellHeight;     //! Precalculated cellHeight for each level of the quadtree
     uint32_t                        maxLevel;       //! Maximum level in index
-    FileOffset                      topLevelOffset; //! Offset o fthe top level index entry
+    FileOffset                      topLevelOffset; //! File offset of the top level index entry
 
     mutable IndexCache              indexCache;     //! Cached map of all index entries by file offset
 
   private:
     bool GetIndexCell(uint32_t level,
-                       FileOffset offset,
-                       IndexCache::CacheRef& cacheRef) const;
+                      FileOffset offset,
+                      IndexCache::CacheRef& cacheRef) const;
 
   public:
     AreaAreaIndex(size_t cacheSize);
@@ -107,10 +122,10 @@ namespace osmscout {
                     double minlat,
                     double maxlon,
                     double maxlat,
-                    size_t maxAreaLevel,
+                    size_t maxLevel,
                     const TypeSet& types,
-                    size_t maxAreaCount,
-                    std::vector<FileOffset>& wayAreaOffsets) const;
+                    size_t maxCount,
+                    std::vector<FileOffset>& offsets) const;
 
     void DumpStatistics();
   };
