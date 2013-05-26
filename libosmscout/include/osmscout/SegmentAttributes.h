@@ -45,7 +45,6 @@ namespace osmscout {
     const static uint16_t hasGrade        = 1 << 14; //! We have grade information
     const static uint16_t hasTags         = 1 << 15; //! We have additional tags
 
-  public:
     // Common flags (Area & Way)
     const static uint16_t hasAccess       = 1 <<  0; //! We do have access rights to this way/area
 
@@ -59,8 +58,10 @@ namespace osmscout {
 
   public:
     TypeId           type;     //! type of the way/relation
-    mutable uint16_t flags;
     std::string      name;     //! name
+
+  private:
+    mutable uint16_t flags;
     std::string      nameAlt;  //! alternative name
     std::string      ref;      //! reference name (normally drawn in a plate)
     std::string      houseNr;  //! house number

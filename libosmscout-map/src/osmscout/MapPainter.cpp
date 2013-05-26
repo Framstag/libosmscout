@@ -190,8 +190,6 @@ namespace osmscout {
     debugLabel->SetPriority(0);
     debugLabel->SetTextColor(Color(0,0,0,0.5));
     debugLabel->SetSize(1.2);
-
-    coastlineSegmentAttributes.layer=0;
   }
 
   MapPainter::~MapPainter()
@@ -1296,7 +1294,7 @@ namespace osmscout {
       case PathTextStyle::none:
         break;
       case PathTextStyle::name:
-        if (!data.attributes->name.empty()) {
+        if (!data.attributes->GetName().empty()) {
           DrawContourLabel(projection,
                            parameter,
                            *pathTextStyle,
@@ -1307,7 +1305,7 @@ namespace osmscout {
         }
         break;
       case PathTextStyle::ref:
-        if (!data.attributes->ref.empty()) {
+        if (!data.attributes->GetRefName().empty()) {
           DrawContourLabel(projection,
                            parameter,
                            *pathTextStyle,
@@ -1325,7 +1323,7 @@ namespace osmscout {
       case ShieldStyle::none:
         break;
       case ShieldStyle::name:
-        if (!data.attributes->name.empty()) {
+        if (!data.attributes->GetName().empty()) {
           RegisterPointWayLabel(projection,
                                 parameter,
                                 shieldStyle,
@@ -1336,7 +1334,7 @@ namespace osmscout {
         }
         break;
       case ShieldStyle::ref:
-        if (!data.attributes->ref.empty()) {
+        if (!data.attributes->GetRefName().empty()) {
           RegisterPointWayLabel(projection,
                                 parameter,
                                 shieldStyle,

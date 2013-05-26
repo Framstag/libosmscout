@@ -157,22 +157,22 @@ namespace osmscout {
 
     inline bool HasTags() const
     {
-      return !attributes.tags.empty();
+      return !attributes.GetTags().empty();
     }
 
     inline size_t GetTagCount() const
     {
-      return attributes.tags.size();
+      return attributes.GetTags().size();
     }
 
     inline TagId GetTagKey(size_t idx) const
     {
-      return attributes.tags[idx].key;
+      return attributes.GetTags()[idx].key;
     }
 
     inline const std::string& GetTagValue(size_t idx) const
     {
-      return attributes.tags[idx].value;
+      return attributes.GetTags()[idx].value;
     }
 
     bool GetCenter(double& lat,
