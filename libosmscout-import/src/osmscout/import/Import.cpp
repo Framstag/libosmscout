@@ -52,6 +52,7 @@
 #include <osmscout/import/GenAreaNodeIndex.h>
 #include <osmscout/import/GenAreaWayIndex.h>
 
+#include <osmscout/import/GenOptimizeAreaWayIds.h>
 #include <osmscout/import/GenCityStreetIndex.h>
 #include <osmscout/import/GenWaterIndex.h>
 #include <osmscout/import/GenOptimizeLowZoom.h>
@@ -65,7 +66,7 @@
 namespace osmscout {
 
   static const size_t defaultStartStep=1;
-  static const size_t defaultEndStep=21;
+  static const size_t defaultEndStep=22;
 
   ImportParameter::ImportParameter()
    : typefile("map.ost"),
@@ -655,39 +656,42 @@ namespace osmscout {
     modules.push_back(new WayWayDataGenerator());
 
     /* 10 */
-    modules.push_back(new NodeDataGenerator());
+    modules.push_back(new OptimizeAreaWayIdsGenerator());
 
     /* 11 */
-    modules.push_back(new SortNodeDataGenerator());
+    modules.push_back(new NodeDataGenerator());
 
     /* 12 */
-    modules.push_back(new SortAreaDataGenerator());
+    modules.push_back(new SortNodeDataGenerator());
 
     /* 13 */
-    modules.push_back(new SortWayDataGenerator());
+    modules.push_back(new SortAreaDataGenerator());
 
     /* 14 */
-    modules.push_back(new AreaNodeIndexGenerator());
+    modules.push_back(new SortWayDataGenerator());
 
     /* 15 */
-    modules.push_back(new AreaWayIndexGenerator());
+    modules.push_back(new AreaNodeIndexGenerator());
 
     /* 16 */
-    modules.push_back(new AreaAreaIndexGenerator());
+    modules.push_back(new AreaWayIndexGenerator());
 
     /* 17 */
-    modules.push_back(new WaterIndexGenerator());
+    modules.push_back(new AreaAreaIndexGenerator());
 
     /* 18 */
-    modules.push_back(new OptimizeLowZoomGenerator());
+    modules.push_back(new WaterIndexGenerator());
 
     /* 19 */
-    modules.push_back(new CityStreetIndexGenerator());
+    modules.push_back(new OptimizeLowZoomGenerator());
 
     /* 20 */
-    modules.push_back(new RouteDataGenerator());
+    modules.push_back(new CityStreetIndexGenerator());
 
     /* 21 */
+    modules.push_back(new RouteDataGenerator());
+
+    /* 22 */
     modules.push_back(new NumericIndexGenerator<Id,RouteNode>("Generating 'route.idx'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               "route.dat"),

@@ -72,9 +72,9 @@ namespace osmscout {
                                    std::map<Id,FileOffset>& wayIdOffsetMap);
 
     void SetNodeUsed(NodeUseMap& nodeUseMap,
-                    OSMId id);
+                     Id id);
     bool IsNodeUsedAtLeastTwice(const NodeUseMap& nodeUseMap,
-                                OSMId id) const;
+                                Id id) const;
 
     bool ResolveWayIdsToFileOffsets(const ImportParameter& parameter,
                                     Progress& progress,

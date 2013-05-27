@@ -891,7 +891,7 @@ namespace osmscout {
 
   std::string RelAreaDataGenerator::GetDescription() const
   {
-    return "Generate 'relarea.dat'";
+    return "Generate 'relarea.tmp'";
   }
 
   bool RelAreaDataGenerator::Import(const ImportParameter& parameter,
@@ -936,7 +936,7 @@ namespace osmscout {
     // Analysing distribution of nodes in the given interval size
     //
 
-    progress.SetAction("Generate relarea.dat");
+    progress.SetAction("Generate relarea.tmp");
 
     FileScanner         scanner;
     FileWriter          relWriter;
@@ -967,7 +967,7 @@ namespace osmscout {
     }
 
     if (!relWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        "relarea.dat"))) {
+                                        "relarea.tmp"))) {
       progress.Error("Cannot create 'relarea.dat'");
       return false;
     }

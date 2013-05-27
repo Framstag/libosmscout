@@ -57,7 +57,7 @@ namespace osmscout {
 
   std::string WayAreaDataGenerator::GetDescription() const
   {
-    return "Generate 'wayarea.dat'";
+    return "Generate 'wayarea.tmp'";
   }
 
   bool WayAreaDataGenerator::ReadWayBlacklist(const ImportParameter& parameter,
@@ -262,7 +262,7 @@ namespace osmscout {
                                     Progress& progress,
                                     const TypeConfig& typeConfig)
   {
-    progress.SetAction("Generate wayarea.dat");
+    progress.SetAction("Generate wayarea.tmp");
 
     std::set<TypeId>                        wayTypes;
 
@@ -311,8 +311,8 @@ namespace osmscout {
     }
 
     if (!wayWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                     "wayarea.dat"))) {
-      progress.Error("Cannot create 'wayarea.dat'");
+                                     "wayarea.tmp"))) {
+      progress.Error("Cannot create 'wayarea.tmp'");
       return false;
     }
 

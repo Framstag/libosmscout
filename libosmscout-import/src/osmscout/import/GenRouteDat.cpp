@@ -106,7 +106,7 @@ namespace osmscout {
   }
 
   void RouteDataGenerator::SetNodeUsed(NodeUseMap& nodeUseMap,
-                                        OSMId id)
+                                       Id id)
   {
     PageId resolvedId=id-std::numeric_limits<Id>::min();
     PageId offset=resolvedId/16;
@@ -133,7 +133,7 @@ namespace osmscout {
   }
 
   bool RouteDataGenerator::IsNodeUsedAtLeastTwice(const NodeUseMap& nodeUseMap,
-                                                  OSMId id) const
+                                                  Id id) const
   {
     PageId resolvedId=id-std::numeric_limits<Id>::min();
     PageId offset=resolvedId/16;
