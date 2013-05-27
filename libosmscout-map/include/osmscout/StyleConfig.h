@@ -30,6 +30,8 @@
 #include <osmscout/TypeSet.h>
 
 #include <osmscout/Node.h>
+#include <osmscout/Area.h>
+#include <osmscout/Way.h>
 
 #include <osmscout/SegmentAttributes.h>
 
@@ -210,6 +212,9 @@ namespace osmscout {
    bool Matches(double meterInPixel,
                 double meterInMM) const;
    bool Matches(const SegmentAttributes& attributes,
+                double meterInPixel,
+                double meterInMM) const;
+   bool Matches(const WayAttributes& attributes,
                 double meterInPixel,
                 double meterInMM) const;
   };
@@ -1261,19 +1266,19 @@ namespace osmscout {
                           double dpi,
                           IconStyleRef& iconStyle) const;
 
-    void GetWayLineStyles(const SegmentAttributes& way,
+    void GetWayLineStyles(const WayAttributes& way,
                           const Projection& projection,
                           double dpi,
                           std::vector<LineStyleRef>& lineStyles) const;
-    void GetWayPathTextStyle(const SegmentAttributes& way,
+    void GetWayPathTextStyle(const WayAttributes& way,
                              const Projection& projection,
                              double dpi,
                              PathTextStyleRef& pathTextStyle) const;
-    void GetWayPathSymbolStyle(const SegmentAttributes& way,
+    void GetWayPathSymbolStyle(const WayAttributes& way,
                                const Projection& projection,
                                double dpi,
                                PathSymbolStyleRef& pathSymbolStyle) const;
-    void GetWayPathShieldStyle(const SegmentAttributes& way,
+    void GetWayPathShieldStyle(const WayAttributes& way,
                                const Projection& projection,
                                double dpi,
                                PathShieldStyleRef& pathShieldStyle) const;

@@ -1589,7 +1589,7 @@ namespace osmscout {
                                      const Projection& projection,
                                      const MapParameter& parameter,
                                      const ObjectFileRef& ref,
-                                     const SegmentAttributes& attributes,
+                                     const WayAttributes& attributes,
                                      const std::vector<GeoCoord>& nodes,
                                      const std::vector<Id>& ids)
   {

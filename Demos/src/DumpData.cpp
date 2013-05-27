@@ -263,9 +263,9 @@ static void DumpNode(const osmscout::TypeConfig* typeConfig,
   std::cout << "}" << std::endl;
 }
 
-static void DumpGeneralSegmentAttributes(const osmscout::SegmentAttributes& attributes,
-                                         const osmscout::TypeConfig* typeConfig,
-                                         size_t indent)
+static void DumpAreaSegmentAttributes(const osmscout::SegmentAttributes& attributes,
+                                      const osmscout::TypeConfig* typeConfig,
+                                      size_t indent)
 {
   if (attributes.GetType()!=osmscout::typeIgnore) {
     DumpIndent(indent);
@@ -291,15 +291,6 @@ static void DumpGeneralSegmentAttributes(const osmscout::SegmentAttributes& attr
     DumpIndent(indent);
     std::cout << "access: false" << std::endl;
   }
-}
-
-static void DumpAreaSegmentAttributes(const osmscout::SegmentAttributes& attributes,
-                                      const osmscout::TypeConfig* typeConfig,
-                                      size_t indent)
-{
-  DumpGeneralSegmentAttributes(attributes,
-                               typeConfig,
-                               indent);
 
   if (!attributes.GetHouseNr().empty()) {
     DumpIndent(indent);
@@ -307,13 +298,34 @@ static void DumpAreaSegmentAttributes(const osmscout::SegmentAttributes& attribu
   }
 }
 
-static void DumpWaySegmentAttributes(const osmscout::SegmentAttributes& attributes,
-                                     const osmscout::TypeConfig* typeConfig,
-                                     size_t indent)
+static void DumpWayAttributes(const osmscout::WayAttributes& attributes,
+                              const osmscout::TypeConfig* typeConfig,
+                              size_t indent)
 {
-  DumpGeneralSegmentAttributes(attributes,
-                               typeConfig,
-                               indent);
+  if (attributes.GetType()!=osmscout::typeIgnore) {
+    DumpIndent(indent);
+    std::cout << "type: " << typeConfig->GetTypeInfo(attributes.GetType()).GetName() << std::endl;
+  }
+
+  if (!attributes.GetName().empty()) {
+    DumpIndent(indent);
+    std::cout << "name: " << attributes.GetName() << std::endl;
+  }
+
+  if (!attributes.GetNameAlt().empty()) {
+    DumpIndent(indent);
+    std::cout << "nameAlt: " << attributes.GetNameAlt() << std::endl;
+  }
+
+  if (!attributes.GetRefName().empty()) {
+    DumpIndent(indent);
+    std::cout << "ref: " << attributes.GetRefName() << std::endl;
+  }
+
+  if (!attributes.HasAccess()) {
+    DumpIndent(indent);
+    std::cout << "access: false" << std::endl;
+  }
 
   if (attributes.IsBridge()) {
     DumpIndent(indent);
@@ -363,9 +375,9 @@ static void DumpWay(const osmscout::TypeConfig* typeConfig,
   std::cout << "  id: " << id << std::endl;
   std::cout << "  fileOffset: " << way->GetFileOffset() << std::endl;
 
-  DumpWaySegmentAttributes(way->GetAttributes(),
-                           typeConfig,
-                           2);
+  DumpWayAttributes(way->GetAttributes(),
+                    typeConfig,
+                    2);
 
   if (way->HasTags()) {
     std::cout << std::endl;

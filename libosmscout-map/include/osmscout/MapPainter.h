@@ -217,7 +217,7 @@ namespace osmscout {
     struct OSMSCOUT_MAP_API WayData
     {
       ObjectFileRef           ref;
-      const SegmentAttributes *attributes;     //! Attributes of line segment
+      const WayAttributes     *attributes;     //! Attributes of line segment
       LineStyleRef            lineStyle;       //! Line style
       size_t                  wayPriority;     //! Priority of way (from style sheet)
       size_t                  transStart;      //! Start of coordinates in transformation buffer
@@ -257,7 +257,7 @@ namespace osmscout {
     struct OSMSCOUT_API WayPathData
     {
       ObjectFileRef           ref;
-      const SegmentAttributes *attributes;     //! Attributes of line segment
+      const WayAttributes     *attributes;     //! Attributes of line segment
       size_t                  transStart;      //! Start of coordinates in transformation buffer
       size_t                  transEnd;        //! End of coordinates in transformation buffer
     };
@@ -352,7 +352,7 @@ namespace osmscout {
     FillStyleRef              landFill;
     FillStyleRef              seaFill;
     TextStyleRef              debugLabel;
-    SegmentAttributes         coastlineSegmentAttributes;
+    WayAttributes             coastlineSegmentAttributes;
     //@}
 
     /**
@@ -427,7 +427,7 @@ namespace osmscout {
                            const Projection& projection,
                            const MapParameter& parameter,
                            const ObjectFileRef& ref,
-                           const SegmentAttributes& attributes,
+                           const WayAttributes& attributes,
                            const std::vector<GeoCoord>& nodes,
                            const std::vector<Id>& ids);
 

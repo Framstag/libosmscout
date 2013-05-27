@@ -1110,6 +1110,34 @@ namespace osmscout {
     return true;
   }
 
+  bool StyleCriteria::Matches(const WayAttributes& attributes,
+                              double meterInPixel,
+                              double meterInMM) const
+  {
+    if (bridge &&
+        !attributes.IsBridge()) {
+      return false;
+    }
+
+    if (tunnel &&
+        !attributes.IsTunnel()) {
+      return false;
+    }
+
+    if (oneway &&
+        !attributes.IsOneway()) {
+      return false;
+    }
+
+    if (sizeCondition.Valid()) {
+      if (!sizeCondition->Evaluate(meterInPixel,meterInMM)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   StyleConfig::StyleConfig(TypeConfig* typeConfig)
    : typeConfig(typeConfig)
   {
@@ -1811,12 +1839,16 @@ namespace osmscout {
     }
   }
 
-  template <class S, class A>
-  void GetSegmentAttributesStyle(const std::vector<std::list<StyleSelector<S,A> > >& styleSelectors,
-                                 const SegmentAttributes& attributes,
-                                 const Projection& projection,
-                                 double dpi,
-                                 Ref<S>& style)
+  /**
+   * Get the style data based on the given attributes of an object (OA, either AreaAttributes or WayAttributes),
+   * a given style (S) and its style attributes (A).
+   */
+  template <class S, class A, class OA>
+  void GetObjectAttributesStyle(const std::vector<std::list<StyleSelector<S,A> > >& styleSelectors,
+                                const OA& attributes,
+                                const Projection& projection,
+                                double dpi,
+                                Ref<S>& style)
   {
     bool   fastpath=false;
     bool   composed=false;
@@ -1887,7 +1919,7 @@ namespace osmscout {
                  iconStyle);
   }
 
-  void StyleConfig::GetWayLineStyles(const SegmentAttributes& way,
+  void StyleConfig::GetWayLineStyles(const WayAttributes& way,
                                      const Projection& projection,
                                      double dpi,
                                      std::vector<LineStyleRef>& lineStyles) const
@@ -1900,11 +1932,11 @@ namespace osmscout {
     for (size_t slot=0; slot<wayLineStyleSelectors.size(); slot++) {
       style=NULL;
 
-      GetSegmentAttributesStyle(wayLineStyleSelectors[slot][way.GetType()],
-                                way,
-                                projection,
-                                dpi,
-                                style);
+      GetObjectAttributesStyle(wayLineStyleSelectors[slot][way.GetType()],
+                               way,
+                               projection,
+                               dpi,
+                               style);
 
       if (style.Valid()) {
         lineStyles.push_back(style);
@@ -1912,40 +1944,40 @@ namespace osmscout {
     }
   }
 
-  void StyleConfig::GetWayPathTextStyle(const SegmentAttributes& way,
+  void StyleConfig::GetWayPathTextStyle(const WayAttributes& way,
                                         const Projection& projection,
                                         double dpi,
                                         PathTextStyleRef& pathTextStyle) const
   {
-    GetSegmentAttributesStyle(wayPathTextStyleSelectors[way.GetType()],
-                              way,
-                              projection,
-                              dpi,
-                              pathTextStyle);
+    GetObjectAttributesStyle(wayPathTextStyleSelectors[way.GetType()],
+                             way,
+                             projection,
+                             dpi,
+                             pathTextStyle);
   }
 
-  void StyleConfig::GetWayPathSymbolStyle(const SegmentAttributes& way,
+  void StyleConfig::GetWayPathSymbolStyle(const WayAttributes& way,
                                           const Projection& projection,
                                           double dpi,
                                           PathSymbolStyleRef& pathSymbolStyle) const
   {
-    GetSegmentAttributesStyle(wayPathSymbolStyleSelectors[way.GetType()],
-                              way,
-                              projection,
-                              dpi,
-                              pathSymbolStyle);
+    GetObjectAttributesStyle(wayPathSymbolStyleSelectors[way.GetType()],
+                             way,
+                             projection,
+                             dpi,
+                             pathSymbolStyle);
   }
 
-  void StyleConfig::GetWayPathShieldStyle(const SegmentAttributes& way,
+  void StyleConfig::GetWayPathShieldStyle(const WayAttributes& way,
                                           const Projection& projection,
                                           double dpi,
                                           PathShieldStyleRef& pathShieldStyle) const
   {
-    GetSegmentAttributesStyle(wayPathShieldStyleSelectors[way.GetType()],
-                              way,
-                              projection,
-                              dpi,
-                              pathShieldStyle);
+    GetObjectAttributesStyle(wayPathShieldStyleSelectors[way.GetType()],
+                             way,
+                             projection,
+                             dpi,
+                             pathShieldStyle);
   }
 
   void StyleConfig::GetAreaFillStyle(const SegmentAttributes& area,
@@ -1953,11 +1985,11 @@ namespace osmscout {
                                      double dpi,
                                      FillStyleRef& fillStyle) const
   {
-    GetSegmentAttributesStyle(areaFillStyleSelectors[area.GetType()],
-                              area,
-                              projection,
-                              dpi,
-                              fillStyle);
+    GetObjectAttributesStyle(areaFillStyleSelectors[area.GetType()],
+                             area,
+                             projection,
+                             dpi,
+                             fillStyle);
   }
 
   void StyleConfig::GetAreaTextStyle(const SegmentAttributes& area,
@@ -1965,11 +1997,11 @@ namespace osmscout {
                                      double dpi,
                                      TextStyleRef& textStyle) const
   {
-    GetSegmentAttributesStyle(areaTextStyleSelectors[area.GetType()],
-                              area,
-                              projection,
-                              dpi,
-                              textStyle);
+    GetObjectAttributesStyle(areaTextStyleSelectors[area.GetType()],
+                             area,
+                             projection,
+                             dpi,
+                             textStyle);
   }
 
   void StyleConfig::GetAreaIconStyle(const SegmentAttributes& area,
@@ -1977,11 +2009,11 @@ namespace osmscout {
                                      double dpi,
                                      IconStyleRef& iconStyle) const
   {
-    GetSegmentAttributesStyle(areaIconStyleSelectors[area.GetType()],
-                              area,
-                              projection,
-                              dpi,
-                              iconStyle);
+    GetObjectAttributesStyle(areaIconStyleSelectors[area.GetType()],
+                             area,
+                             projection,
+                             dpi,
+                             iconStyle);
   }
 
   void StyleConfig::GetLandFillStyle(const Projection& projection,

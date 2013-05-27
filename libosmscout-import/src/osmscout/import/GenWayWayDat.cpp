@@ -519,7 +519,6 @@ namespace osmscout {
     if (!way.SetTags(progress,
                      typeConfig,
                      wayId,
-                     rawWay.IsArea(),
                      tags,
                      reverseNodes)) {
       return true;
