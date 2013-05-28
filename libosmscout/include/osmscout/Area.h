@@ -22,14 +22,91 @@
 
 #include <osmscout/GeoCoord.h>
 
-#include <osmscout/SegmentAttributes.h>
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
+#include <osmscout/util/Progress.h>
 #include <osmscout/util/Reference.h>
 
 namespace osmscout {
+
+  class OSMSCOUT_API AreaAttributes
+  {
+  private:
+    // Attribute availability flags (for optimized attribute storage)
+    const static uint16_t hasNameAlt      = 1 << 12; //! We have an alternative name (mainly in a second language)
+    const static uint16_t hasName         = 1 << 13; //! We have a name
+    const static uint16_t hasHouseNr      = 1 << 14; //! We have a house number
+    const static uint16_t hasTags         = 1 << 15; //! We have additional tags
+
+    const static uint16_t hasAccess       = 1 <<  0; //! We do have access rights to this way/area
+
+  public:
+    TypeId           type;     //! type of the way/relation
+    std::string      name;     //! name
+
+  private:
+    mutable uint16_t flags;
+    std::string      nameAlt;  //! alternative name
+    std::string      houseNr;  //! house number
+    std::vector<Tag> tags;     //! list of preparsed tags
+
+  public:
+    inline AreaAttributes()
+    : type(typeIgnore),
+      flags(0)
+    {
+      // no code
+    }
+
+    inline TypeId GetType() const
+    {
+      return type;
+    }
+
+    inline uint16_t GetFlags() const
+    {
+      return flags;
+    }
+
+    inline std::string GetName() const
+    {
+      return name;
+    }
+
+    inline std::string GetNameAlt() const
+    {
+      return nameAlt;
+    }
+
+    inline std::string GetHouseNr() const
+    {
+      return houseNr;
+    }
+
+    inline bool HasAccess() const
+    {
+      return (flags & hasAccess)!=0;
+    }
+
+    inline const std::vector<Tag>& GetTags() const
+    {
+      return tags;
+    }
+
+    bool SetTags(Progress& progress,
+                 const TypeConfig& typeConfig,
+                 Id id,
+                 std::vector<Tag>& tags,
+                 bool& reverseNodes);
+
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer) const;
+
+    bool operator==(const AreaAttributes& other) const;
+    bool operator!=(const AreaAttributes& other) const;
+  };
 
   /**
     Representation of an (complex/multipolygon) area
@@ -40,13 +117,13 @@ namespace osmscout {
     class Role
     {
     public:
-      SegmentAttributes     attributes;
+      AreaAttributes        attributes;
       uint8_t               ring;
       std::vector<Id>       ids;
       std::vector<GeoCoord> nodes;
 
     public:
-      inline const SegmentAttributes& GetAttributes() const
+      inline const AreaAttributes& GetAttributes() const
       {
         return attributes;
       }
@@ -65,38 +142,13 @@ namespace osmscout {
       {
         return attributes.GetName();
       }
-
-      inline std::string GetRefName() const
-      {
-        return attributes.GetRefName();
-      }
-
-      inline int8_t GetLayer() const
-      {
-        return attributes.GetLayer();
-      }
-
-      inline bool IsBridge() const
-      {
-        return attributes.IsBridge();
-      }
-
-      inline bool IsTunnel() const
-      {
-        return attributes.IsTunnel();
-      }
-
-      inline bool IsOneway() const
-      {
-        return attributes.IsOneway();
-      }
     };
 
   private:
     FileOffset        fileOffset;
 
   public:
-    SegmentAttributes attributes;
+    AreaAttributes    attributes;
     std::vector<Role> roles;
 
   public:
@@ -110,7 +162,7 @@ namespace osmscout {
       return fileOffset;
     }
 
-    inline const SegmentAttributes& GetAttributes() const
+    inline const AreaAttributes& GetAttributes() const
     {
       return attributes;
     }
@@ -128,31 +180,6 @@ namespace osmscout {
     inline std::string GetName() const
     {
       return attributes.GetName();
-    }
-
-    inline std::string GetRefName() const
-    {
-      return attributes.GetRefName();
-    }
-
-    inline int8_t GetLayer() const
-    {
-      return attributes.GetLayer();
-    }
-
-    inline bool IsBridge() const
-    {
-      return attributes.IsBridge();
-    }
-
-    inline bool IsTunnel() const
-    {
-      return attributes.IsTunnel();
-    }
-
-    inline bool IsOneway() const
-    {
-      return attributes.IsOneway();
     }
 
     inline bool HasTags() const

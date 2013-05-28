@@ -98,8 +98,8 @@ namespace osmscout {
     for (std::vector<TypeInfo>::const_iterator typeInfo=styleConfig.GetTypeConfig()->GetTypes().begin();
         typeInfo!=styleConfig.GetTypeConfig()->GetTypes().end();
         typeInfo++) {
-      SegmentAttributes attributes;
-      FillStyleRef      fillStyle;
+      AreaAttributes attributes;
+      FillStyleRef   fillStyle;
 
       attributes.type=typeInfo->GetId();
       styleConfig.GetAreaFillStyle(attributes,

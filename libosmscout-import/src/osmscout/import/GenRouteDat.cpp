@@ -870,8 +870,8 @@ namespace osmscout {
 
       path.objectIndex=(uint32_t)routeNode.objects.size()-1;
       path.type=area.GetType();
-      path.maxSpeed=role.attributes.GetMaxSpeed();
-      path.grade=role.attributes.GetGrade();
+      path.maxSpeed=0;
+      path.grade=1;
       //path.bearing=CalculateEncodedBearing(way,currentNode,nextNode,true);
       path.flags=CopyFlags(role);
       path.lat=role.nodes[nextNode].GetLat();
@@ -933,8 +933,8 @@ namespace osmscout {
 
       path.objectIndex=(uint32_t)routeNode.objects.size()-1;
       path.type=role.GetType();
-      path.maxSpeed=role.attributes.GetMaxSpeed();
-      path.grade=role.attributes.GetGrade();
+      path.maxSpeed=0;
+      path.grade=1;
       //path.bearing=CalculateEncodedBearing(way,currentNode,prevNode,false);
       path.flags=CopyFlags(role);
       path.lat=role.nodes[prevNode].GetLat();

@@ -263,7 +263,7 @@ static void DumpNode(const osmscout::TypeConfig* typeConfig,
   std::cout << "}" << std::endl;
 }
 
-static void DumpAreaSegmentAttributes(const osmscout::SegmentAttributes& attributes,
+static void DumpAreaSegmentAttributes(const osmscout::AreaAttributes& attributes,
                                       const osmscout::TypeConfig* typeConfig,
                                       size_t indent)
 {
@@ -280,11 +280,6 @@ static void DumpAreaSegmentAttributes(const osmscout::SegmentAttributes& attribu
   if (!attributes.GetNameAlt().empty()) {
     DumpIndent(indent);
     std::cout << "nameAlt: " << attributes.GetNameAlt() << std::endl;
-  }
-
-  if (!attributes.GetRefName().empty()) {
-    DumpIndent(indent);
-    std::cout << "ref: " << attributes.GetRefName() << std::endl;
   }
 
   if (!attributes.HasAccess()) {

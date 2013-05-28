@@ -25,6 +25,224 @@
 
 namespace osmscout {
 
+  bool AreaAttributes::SetTags(Progress& progress,
+                                  const TypeConfig& typeConfig,
+                                  Id id,
+                                  std::vector<Tag>& tags,
+                                  bool& reverseNodes)
+  {
+    uint32_t namePriority=0;
+    uint32_t nameAltPriority=0;
+
+    name.clear();
+    houseNr.clear();
+
+    flags=0;
+
+    this->tags.clear();
+
+    reverseNodes=false;
+
+    flags|=hasAccess;
+
+    std::vector<Tag>::iterator tag=tags.begin();
+    while (tag!=tags.end()) {
+      uint32_t ntPrio;
+      bool     isNameTag=typeConfig.IsNameTag(tag->key,ntPrio);
+      uint32_t natPrio;
+      bool     isNameAltTag=typeConfig.IsNameAltTag(tag->key,natPrio);
+
+      if (isNameTag &&
+          (name.empty() || ntPrio>namePriority)) {
+        name=tag->value;
+        namePriority=ntPrio;
+
+        /*
+        size_t i=0;
+        while (postfixes[i]!=NULL) {
+          size_t pos=name.rfind(postfixes[i]);
+          if (pos!=std::string::npos &&
+              pos==name.length()-strlen(postfixes[i])) {
+            name=name.substr(0,pos);
+            break;
+          }
+
+          i++;
+        }*/
+      }
+
+      if (isNameAltTag &&
+          (nameAlt.empty() || natPrio>nameAltPriority)) {
+        nameAlt=tag->value;
+        nameAltPriority=natPrio;
+      }
+
+      if (isNameTag || isNameAltTag) {
+        tag=tags.erase(tag);
+      }
+      else if (tag->key==typeConfig.tagHouseNr) {
+        houseNr=tag->value;
+        tag=tags.erase(tag);
+      }
+      else if (tag->key==typeConfig.tagAccess) {
+        if (tag->value=="no" ||
+            tag->value=="private" ||
+            tag->value=="destination" ||
+            tag->value=="delivery") {
+          flags&=~hasAccess;
+        }
+
+        tag=tags.erase(tag);
+      }
+      else {
+        ++tag;
+      }
+    }
+
+    this->tags=tags;
+
+    return true;
+  }
+
+  bool AreaAttributes::Read(FileScanner& scanner)
+  {
+    uint16_t flags;
+
+    scanner.ReadNumber(type);
+    scanner.Read(flags);
+
+    if (scanner.HasError()) {
+      return false;
+    }
+
+    this->flags=flags;
+
+    if (flags & hasName) {
+      scanner.Read(name);
+    }
+
+    if (flags & hasNameAlt) {
+      scanner.Read(nameAlt);
+    }
+
+    if (flags & hasHouseNr) {
+      scanner.Read(houseNr);
+    }
+
+    if (flags & hasTags) {
+      uint32_t tagCount;
+
+      scanner.ReadNumber(tagCount);
+      if (scanner.HasError()) {
+        return false;
+      }
+
+      tags.resize(tagCount);
+      for (size_t i=0; i<tagCount; i++) {
+        scanner.ReadNumber(tags[i].key);
+        scanner.Read(tags[i].value);
+      }
+    }
+
+    return !scanner.HasError();
+  }
+
+  bool AreaAttributes::Write(FileWriter& writer) const
+  {
+    writer.WriteNumber(type);
+
+    if (!name.empty()) {
+      flags|=hasName;
+    }
+    else {
+      flags&=~hasName;
+    }
+
+    if (!nameAlt.empty()) {
+      flags|=hasNameAlt;
+    }
+    else {
+      flags&=~hasNameAlt;
+    }
+
+    if (!houseNr.empty()) {
+      flags|=hasHouseNr;
+    }
+    else {
+      flags&=~hasHouseNr;
+    }
+
+    if (!tags.empty()) {
+      flags|=hasTags;
+    }
+    else {
+      flags&=~hasTags;
+    }
+
+    writer.Write(flags);
+
+    if (flags & hasName) {
+      writer.Write(name);
+    }
+
+    if (flags & hasNameAlt) {
+      writer.Write(nameAlt);
+    }
+
+    if (flags & hasHouseNr) {
+      writer.Write(houseNr);
+    }
+
+    if (flags & hasTags) {
+      writer.WriteNumber((uint32_t)tags.size());
+
+      for (size_t i=0; i<tags.size(); i++) {
+        writer.WriteNumber(tags[i].key);
+        writer.Write(tags[i].value);
+      }
+    }
+
+    return !writer.HasError();
+  }
+
+  bool AreaAttributes::operator==(const AreaAttributes& other) const
+  {
+    if (type!=other.type) {
+      return false;
+    }
+
+    if (name!=other.name ||
+        nameAlt!=other.nameAlt ||
+        houseNr!=other.houseNr) {
+      return false;
+    }
+
+    if (tags.empty() && other.tags.empty()) {
+      return true;
+    }
+
+    if (tags.size()!=other.tags.size()) {
+      return false;
+    }
+
+    for (size_t t=0; t<tags.size(); t++) {
+      if (tags[t].key!=other.tags[t].key) {
+        return false;
+      }
+
+      if (tags[t].value!=other.tags[t].value) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool AreaAttributes::operator!=(const AreaAttributes& other) const
+  {
+    return !this->operator==(other);
+  }
+
   bool Area::GetCenter(double& lat, double& lon) const
   {
     if (roles.empty()) {

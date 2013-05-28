@@ -777,7 +777,6 @@ namespace osmscout {
         if (!ring->role.attributes.SetTags(progress,
                                            typeConfig,
                                            ring->ways.front()->GetId(),
-                                           true,
                                            tags,
                                            reverseNodes)) {
           return false;
@@ -852,7 +851,6 @@ namespace osmscout {
     if (!relation.attributes.SetTags(progress,
                                      typeConfig,
                                      rawRelation.GetId(),
-                                     true,
                                      rawRelation.tags,
                                      reverseNodes)) {
       return false;

@@ -33,8 +33,6 @@
 #include <osmscout/Area.h>
 #include <osmscout/Way.h>
 
-#include <osmscout/SegmentAttributes.h>
-
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/Color.h>
@@ -211,7 +209,7 @@ namespace osmscout {
 
    bool Matches(double meterInPixel,
                 double meterInMM) const;
-   bool Matches(const SegmentAttributes& attributes,
+   bool Matches(const AreaAttributes& attributes,
                 double meterInPixel,
                 double meterInMM) const;
    bool Matches(const WayAttributes& attributes,
@@ -1283,15 +1281,15 @@ namespace osmscout {
                                double dpi,
                                PathShieldStyleRef& pathShieldStyle) const;
 
-    void GetAreaFillStyle(const SegmentAttributes& area,
+    void GetAreaFillStyle(const AreaAttributes& area,
                           const Projection& projection,
                           double dpi,
                           FillStyleRef& fillStyle) const;
-    void GetAreaTextStyle(const SegmentAttributes& area,
+    void GetAreaTextStyle(const AreaAttributes& area,
                           const Projection& projection,
                           double dpi,
                           TextStyleRef& textStyle) const;
-    void GetAreaIconStyle(const SegmentAttributes& area,
+    void GetAreaIconStyle(const AreaAttributes& area,
                           const Projection& projection,
                           double dpi,
                           IconStyleRef& iconStyle) const;

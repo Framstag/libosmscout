@@ -271,7 +271,7 @@ namespace osmscout {
     struct OSMSCOUT_API AreaData
     {
       ObjectFileRef           ref;
-      const SegmentAttributes *attributes;     //! Area attributes
+      const AreaAttributes    *attributes;     //! Area attributes
       FillStyleRef            fillStyle;       //! Fill style
       double                  minLat;
       double                  maxLat;
@@ -415,7 +415,7 @@ namespace osmscout {
                             const Projection& projection,
                             const MapParameter& parameter,
                             const ObjectFileRef& ref,
-                            const SegmentAttributes& attributes,
+                            const AreaAttributes& attributes,
                             const std::vector<GeoCoord>& nodes);
 
     void PrepareAreas(const StyleConfig& styleConfig,
@@ -467,7 +467,7 @@ namespace osmscout {
     void DrawAreaLabel(const StyleConfig& styleConfig,
                        const Projection& projection,
                        const MapParameter& parameter,
-                       const SegmentAttributes& attributes,
+                       const AreaAttributes& attributes,
                        const std::vector<GeoCoord>& nodes);
 
     void DrawAreaLabels(const StyleConfig& styleConfig,

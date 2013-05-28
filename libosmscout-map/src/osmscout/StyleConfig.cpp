@@ -1082,25 +1082,10 @@ namespace osmscout {
     return true;
   }
 
-  bool StyleCriteria::Matches(const SegmentAttributes& attributes,
+  bool StyleCriteria::Matches(const AreaAttributes& attributes,
                               double meterInPixel,
                               double meterInMM) const
   {
-    if (bridge &&
-        !attributes.IsBridge()) {
-      return false;
-    }
-
-    if (tunnel &&
-        !attributes.IsTunnel()) {
-      return false;
-    }
-
-    if (oneway &&
-        !attributes.IsOneway()) {
-      return false;
-    }
-
     if (sizeCondition.Valid()) {
       if (!sizeCondition->Evaluate(meterInPixel,meterInMM)) {
         return false;
@@ -1980,7 +1965,7 @@ namespace osmscout {
                              pathShieldStyle);
   }
 
-  void StyleConfig::GetAreaFillStyle(const SegmentAttributes& area,
+  void StyleConfig::GetAreaFillStyle(const AreaAttributes& area,
                                      const Projection& projection,
                                      double dpi,
                                      FillStyleRef& fillStyle) const
@@ -1992,7 +1977,7 @@ namespace osmscout {
                              fillStyle);
   }
 
-  void StyleConfig::GetAreaTextStyle(const SegmentAttributes& area,
+  void StyleConfig::GetAreaTextStyle(const AreaAttributes& area,
                                      const Projection& projection,
                                      double dpi,
                                      TextStyleRef& textStyle) const
@@ -2004,7 +1989,7 @@ namespace osmscout {
                              textStyle);
   }
 
-  void StyleConfig::GetAreaIconStyle(const SegmentAttributes& area,
+  void StyleConfig::GetAreaIconStyle(const AreaAttributes& area,
                                      const Projection& projection,
                                      double dpi,
                                      IconStyleRef& iconStyle) const

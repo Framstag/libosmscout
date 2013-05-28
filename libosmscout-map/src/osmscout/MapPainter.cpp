@@ -963,7 +963,7 @@ namespace osmscout {
   void MapPainter::DrawAreaLabel(const StyleConfig& styleConfig,
                                  const Projection& projection,
                                  const MapParameter& parameter,
-                                 const SegmentAttributes& attributes,
+                                 const AreaAttributes& attributes,
                                  const std::vector<GeoCoord>& nodes)
   {
     TextStyleRef  textStyle;
@@ -994,10 +994,7 @@ namespace osmscout {
     }
 
     if (hasLabel) {
-      if (!attributes.GetRefName().empty()) {
-        label=attributes.GetRefName();
-      }
-      else if (!attributes.GetName().empty()) {
+      if (!attributes.GetName().empty()) {
         label=attributes.GetName();
       }
       else if (!attributes.GetHouseNr().empty()) {
@@ -1415,7 +1412,7 @@ namespace osmscout {
                                       const Projection& projection,
                                       const MapParameter& parameter,
                                       const ObjectFileRef& ref,
-                                      const SegmentAttributes& attributes,
+                                      const AreaAttributes& attributes,
                                       const std::vector<GeoCoord>& nodes)
   {
     FillStyleRef fillStyle;

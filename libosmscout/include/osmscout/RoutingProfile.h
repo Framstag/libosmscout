@@ -94,14 +94,7 @@ namespace osmscout {
     inline double GetTime(const Area& area,
                           double distance) const
     {
-      double speed;
-
-      if (area.roles[0].attributes.GetMaxSpeed()>0) {
-        speed=area.roles[0].attributes.GetMaxSpeed();
-      }
-      else {
-        speed=speeds[area.GetType()];
-      }
+      double speed=speeds[area.GetType()];
 
       speed=std::min(vehicleMaxSpeed,speed);
 
@@ -183,14 +176,7 @@ namespace osmscout {
     inline double GetCosts(const Area& area,
                            double distance) const
     {
-      double speed;
-
-      if (area.roles[0].attributes.GetMaxSpeed()>0) {
-        speed=area.roles[0].attributes.GetMaxSpeed();
-      }
-      else {
-        speed=speeds[area.GetType()];
-      }
+      double speed=speeds[area.GetType()];
 
       speed=std::min(vehicleMaxSpeed,speed);
 

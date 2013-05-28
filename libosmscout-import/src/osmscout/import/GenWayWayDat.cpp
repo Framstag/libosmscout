@@ -344,7 +344,7 @@ namespace osmscout {
         continue;
       }
 
-      SegmentAttributes origAttributes;
+      WayAttributes     origAttributes;
       std::vector<Tag>  origTags(way->GetTags());
       bool              origReverseNodes;
 
@@ -352,7 +352,6 @@ namespace osmscout {
       if (!origAttributes.SetTags(silentProgress,
                                   typeConfig,
                                   way->GetId(),
-                                  way->IsArea(),
                                   origTags,
                                   origReverseNodes)) {
         continue;
@@ -378,7 +377,7 @@ namespace osmscout {
 
           assert(candidate->GetId()!=way->GetId());
 
-          SegmentAttributes candidateAttributes;
+          WayAttributes     candidateAttributes;
           std::vector<Tag>  candidateTags(candidate->GetTags());
           bool              candidateReverseNodes;
 
@@ -386,7 +385,6 @@ namespace osmscout {
           if (!candidateAttributes.SetTags(silentProgress,
                                            typeConfig,
                                            candidate->GetId(),
-                                           candidate->IsArea(),
                                            candidateTags,
                                            candidateReverseNodes)) {
             continue;

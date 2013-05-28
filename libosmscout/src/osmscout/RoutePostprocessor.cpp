@@ -416,8 +416,7 @@ namespace osmscout {
 
       if (node->GetPathObject().GetType()==refArea) {
         AreaRef                              area=areaMap[node->GetPathObject().GetFileOffset()];
-        RouteDescription::NameDescriptionRef nameDesc=new RouteDescription::NameDescription(area->GetName(),
-                                                                                            area->GetRefName());
+        RouteDescription::NameDescriptionRef nameDesc=new RouteDescription::NameDescription(area->GetName());
 
         node->AddDescription(RouteDescription::WAY_NAME_DESC,
                              nameDesc);
