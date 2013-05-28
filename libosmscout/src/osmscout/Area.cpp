@@ -106,7 +106,7 @@ namespace osmscout {
 
   bool AreaAttributes::Read(FileScanner& scanner)
   {
-    uint16_t flags;
+    uint8_t flags;
 
     scanner.ReadNumber(type);
     scanner.Read(flags);

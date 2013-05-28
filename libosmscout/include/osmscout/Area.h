@@ -35,19 +35,19 @@ namespace osmscout {
   {
   private:
     // Attribute availability flags (for optimized attribute storage)
-    const static uint16_t hasNameAlt      = 1 << 12; //! We have an alternative name (mainly in a second language)
-    const static uint16_t hasName         = 1 << 13; //! We have a name
-    const static uint16_t hasHouseNr      = 1 << 14; //! We have a house number
-    const static uint16_t hasTags         = 1 << 15; //! We have additional tags
+    const static uint8_t hasNameAlt      = 1 << 4; //! We have an alternative name (mainly in a second language)
+    const static uint8_t hasName         = 1 << 5; //! We have a name
+    const static uint8_t hasHouseNr      = 1 << 6; //! We have a house number
+    const static uint8_t hasTags         = 1 << 7; //! We have additional tags
 
-    const static uint16_t hasAccess       = 1 <<  0; //! We do have access rights to this way/area
+    const static uint8_t hasAccess       = 1 << 0; //! We do have access rights to this way/area
 
   public:
     TypeId           type;     //! type of the way/relation
     std::string      name;     //! name
 
   private:
-    mutable uint16_t flags;
+    mutable uint8_t  flags;
     std::string      nameAlt;  //! alternative name
     std::string      houseNr;  //! house number
     std::vector<Tag> tags;     //! list of preparsed tags
