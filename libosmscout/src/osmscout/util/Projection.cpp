@@ -292,7 +292,7 @@ namespace osmscout {
 //
 
   bool ReversedYAxisMercatorProjection::PixelToGeo(double x, double y,
-                                        double& lon, double& lat) const
+                                                   double& lon, double& lat) const
   {
         assert(valid);
 
@@ -305,7 +305,7 @@ namespace osmscout {
 #ifdef OSMSCOUT_HAVE_SSE2
 
     bool ReversedYAxisMercatorProjection::GeoToPixel(double lon, double lat,
-                                        double& x, double& y) const
+                                                     double& x, double& y) const
     {
         assert(valid);
 

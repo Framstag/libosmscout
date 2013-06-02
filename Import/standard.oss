@@ -154,7 +154,7 @@ SYMBOL christian_church_cross
  // natural_* (without coastline)
  //
 
- [MAG county-] {
+ [MAG state-] {
    [TYPE natural_glacier] AREA { color: @glacierColor; }
    [TYPE natural_fell] AREA { color: @fellColor; }
    [TYPE natural_heath] AREA { color: @heathColor; }
@@ -727,10 +727,17 @@ SYMBOL christian_church_cross
  // Landuse
  //
 
- [MAG county-] {
-   [TYPE landuse_quarry] AREA { color: @quarryColor; }
-   [TYPE landuse_forest] AREA { color: @forestColor; pattern: "forest"; patternMinMag: cityOver; }
+ [MAG state-] {
+   [TYPE landuse_commercial] AREA { color: @commercialColor; }
    [TYPE landuse_basin] AREA { color: @waterColor; borderColor: #887b7b; borderWidth: 0.1mm; }
+   [TYPE landuse_brownfield] AREA { color: @brownFieldColor; }
+   [TYPE landuse_farm,
+         landuse_farmland] AREA { color: @farmColor; }
+   [TYPE landuse_forest] AREA { color: @forestColor; pattern: "forest"; patternMinMag: cityOver; }
+   [TYPE landuse_greenfield] AREA { color: @greenFieldColor; }
+   [TYPE landuse_industrial] AREA { color: @industrialColor; }
+   [TYPE landuse_landfill] AREA { color: @landFillColor; }
+   [TYPE landuse_quarry] AREA { color: @quarryColor; }
    [TYPE landuse_reservoir] AREA { color: @waterColor; }
    [TYPE landuse_residential] AREA { color: @residentialColor; }
    [TYPE landuse_recreation_ground] AREA { color: @recreationColor; }
@@ -746,18 +753,10 @@ SYMBOL christian_church_cross
  }
 
  [MAG city-] {
-   [TYPE landuse_farm,
-         landuse_farmland] AREA { color: @farmColor; }
-
    [TYPE landuse_farmyard] AREA { color: @farmyardColor; }
-   [TYPE landuse_landfill] AREA { color: @landFillColor; }
    [TYPE landuse_allotments] AREA { color: @allotmentsColor; }
    [TYPE landuse_vineyard] AREA { color: @vineyardColor; }
    [TYPE landuse_retail] AREA { color: @retailColor; borderColor: #c5a0a0; borderWidth: 0.1mm; }
-   [TYPE landuse_commercial] AREA { color: @commercialColor; }
-   [TYPE landuse_industrial] AREA { color: @industrialColor; }
-   [TYPE landuse_brownfield] AREA { color: @brownFieldColor; }
-   [TYPE landuse_greenfield] AREA { color: @greenFieldColor; }
    [TYPE landuse_railway] AREA { color: #dcdcc8; }
    [TYPE landuse_construction] AREA { color: @constructionColor; }
    [TYPE landuse_cemetery] AREA { color: @cemeteryColor; pattern: "cemetery"; patternMinMag: detail; }
@@ -1117,7 +1116,7 @@ SYMBOL christian_church_cross
  // Aeroway
  //
 
- [MAG cityOver-] {
+ [MAG city-] {
    [TYPE aeroway_aerodrome,
          aeroway_helipad] AREA { color: #d5ddbd; }
 

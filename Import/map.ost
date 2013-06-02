@@ -79,19 +79,19 @@ TYPES
   TYPE landuse_brownfield = NODE AREA ("landuse"=="brownfield")
   TYPE landuse_cemetery = AREA ("landuse"=="cemetery")
   TYPE landuse_cemetery_sea = AREA ("landuse"=="cemetery" AND "cemetery"=="sea") OPTIONS IGNORESEALAND
-  TYPE landuse_commercial = NODE AREA ("landuse"=="commercial")
+  TYPE landuse_commercial = NODE AREA ("landuse"=="commercial") OPTIONS OPTIMIZE_LOW_ZOOM 
   TYPE landuse_construction = NODE AREA ("landuse"=="construction")
-  TYPE landuse_farm = AREA ("landuse"=="farm")
-  TYPE landuse_farmland = AREA ("landuse"=="farmland")
+  TYPE landuse_farm = AREA ("landuse"=="farm") OPTIONS OPTIMIZE_LOW_ZOOM
+  TYPE landuse_farmland = AREA ("landuse"=="farmland") OPTIONS OPTIMIZE_LOW_ZOOM
   TYPE landuse_farmyard_building = AREA ("landuse"=="farmyard"AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE landuse_farmyard = AREA ("landuse"=="farmyard")
-  TYPE landuse_forest = NODE AREA ("landuse"=="forest")
+  TYPE landuse_forest = NODE AREA ("landuse"=="forest") OPTIONS OPTIMIZE_LOW_ZOOM
   TYPE landuse_garages = AREA ("landuse"=="garages")
   TYPE landuse_grass = NODE AREA ("landuse"=="grass")
-  TYPE landuse_greenfield = NODE AREA ("landuse"=="greenfield")
+  TYPE landuse_greenfield = NODE AREA ("landuse"=="greenfield") OPTIONS OPTIMIZE_LOW_ZOOM
   TYPE landuse_greenhouse_horticulture = AREA ("landuse"=="greenhouse_horticulture")
-  TYPE landuse_industrial = NODE AREA ("landuse"=="industrial")
-  TYPE landuse_landfill = NODE AREA ("landuse"=="landfill")
+  TYPE landuse_industrial = NODE AREA ("landuse"=="industrial") OPTIONS OPTIMIZE_LOW_ZOOM
+  TYPE landuse_landfill = NODE AREA ("landuse"=="landfill") OPTIONS OPTIMIZE_LOW_ZOOM
   TYPE landuse_meadow = NODE AREA ("landuse"=="meadow")
   TYPE landuse_military = NODE AREA ("landuse"=="military")
   TYPE landuse_orchard = NODE AREA ("landuse"=="orchard")
@@ -99,12 +99,12 @@ TYPES
   TYPE landuse_railway = AREA ("landuse"=="railway")
   TYPE landuse_recreation_ground = NODE AREA ("landuse"=="recreation_ground")
   TYPE landuse_reservoir = NODE AREA ("landuse"=="reservoir")
-  TYPE landuse_residential = NODE AREA ("landuse"=="residential")
+  TYPE landuse_residential = NODE AREA ("landuse"=="residential") OPTIONS OPTIMIZE_LOW_ZOOM
   TYPE landuse_retail = NODE AREA ("landuse"=="retail")
   TYPE landuse_salt_pond = AREA ("landuse"=="salt_pond")
   TYPE landuse_village_green = NODE AREA ("landuse"=="village_green")
   TYPE landuse_vineyard = NODE AREA ("landuse"=="vineyard")
-  TYPE landuse_wood = NODE AREA ("landuse"=="wood")
+  TYPE landuse_wood = NODE AREA ("landuse"=="wood") OPTIONS OPTIMIZE_LOW_ZOOM
 
   TYPE natural_bay = NODE AREA ("natural"=="bay")
   TYPE natural_beach = NODE AREA ("natural"=="beach")
@@ -128,7 +128,7 @@ TYPES
   TYPE natural_wetland_marsh = NODE AREA ("natural"=="wetland" AND "wetland"=="marsh")
   TYPE natural_wetland_tidalflat = NODE AREA ("natural"=="wetland" AND "wetland"=="tidalflat")
   TYPE natural_wetland = NODE AREA ("natural"=="wetland")
-  TYPE natural_wood = NODE AREA ("natural"=="wood")
+  TYPE natural_wood = NODE AREA ("natural"=="wood") OPTIONS OPTIMIZE_LOW_ZOOM
 
   TYPE man_made_wastewater_plant = NODE AREA ("man_made"=="wastewater_plant")
   TYPE man_made_pier = WAY AREA ("man_made"=="pier")

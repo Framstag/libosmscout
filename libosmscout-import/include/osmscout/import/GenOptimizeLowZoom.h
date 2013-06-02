@@ -26,6 +26,7 @@
 
 #include <osmscout/import/Import.h>
 
+#include <osmscout/Area.h>
 #include <osmscout/Way.h>
 
 #include <osmscout/util/FileScanner.h>
@@ -41,19 +42,23 @@ namespace osmscout {
 
     struct TypeData
     {
-      uint32_t   indexLevel;   //! magnification level of index
-      size_t     indexCells;   //! Number of filled cells in index
-      size_t     indexEntries; //! Number of entries over all cells
+      TypeId     type;            //! The type
+      uint32_t   optLevel;        //! The display level this data was optimized for
+      uint32_t   indexLevel;      //! Magnification level of index
 
       uint32_t   cellXStart;
       uint32_t   cellXEnd;
       uint32_t   cellYStart;
       uint32_t   cellYEnd;
+
+      FileOffset bitmapOffset;    //! Position in file where the offset of the bitmap is written
+      uint8_t    dataOffsetBytes; //! Number of bytes per entry in bitmap
+
       uint32_t   cellXCount;
       uint32_t   cellYCount;
 
-      FileOffset bitmapOffset; //! Position in file where the offset of the bitmap is written
-      uint8_t    dataOffsetBytes; //! Number of bytes per entry in bitmap
+      size_t     indexCells;      //! Number of filled cells in index
+      size_t     indexEntries;    //! Number of entries over all cells
 
       TypeData();
 
@@ -65,43 +70,101 @@ namespace osmscout {
     };
 
   private:
-    void GetTypesToOptimize(const TypeConfig& typeConfig,
-                            std::set<TypeId>& types);
+    void GetWayTypesToOptimize(const TypeConfig& typeConfig,
+                               std::set<TypeId>& types);
 
-    void WriteHeader(FileWriter& writer,
-                     const std::set<TypeId>& types,
-                     const std::vector<TypeData>& typesData,
+    void GetAreaTypesToOptimize(const TypeConfig& typeConfig,
+                                std::set<TypeId>& types);
+
+    bool WriteTypeData(FileWriter& writer,
+                       const TypeData& data);
+
+    bool WriteHeader(FileWriter& writer,
+                     const std::list<TypeData>& areaTypesData,
+                     const std::set<TypeId>& wayTypes,
+                     const std::vector<TypeData>& wayTypesData,
                      uint32_t optimizeMaxMap);
 
-    bool GetWaysToOptimize(const ImportParameter& parameter,
+    bool GetAreas(const ImportParameter& parameter,
+                            Progress& progress,
+                            FileScanner& scanner,
+                            std::set<TypeId>& types,
+                            std::vector<std::list<AreaRef> >& areas);
+
+    void GetAreaIndexLevel(const ImportParameter& parameter,
+                           Progress& progress,
+                           const std::list<AreaRef>& areas,
+                           TypeData& typeData);
+
+    bool WriteAreas(Progress& progress,
+                    FileWriter& writer,
+                    const std::list<AreaRef>& areas,
+                    FileOffsetFileOffsetMap& offsets);
+
+    bool WriteAreaBitmap(Progress& progress,
+                         FileWriter& writer,
+                         const TypeInfo& type,
+                         const std::list<AreaRef>& areas,
+                         const FileOffsetFileOffsetMap& offsets,
+                         TypeData& data);
+
+    bool GetWays(const ImportParameter& parameter,
                            Progress& progress,
                            FileScanner& scanner,
                            std::set<TypeId>& types,
                            std::vector<std::list<WayRef> >& ways);
 
-    void MergeWays(const std::list<WayRef>& ways,
+    void MergeWays(Progress& progress,
+                   const std::list<WayRef>& ways,
                    std::list<WayRef>& newWays);
 
-    void GetIndexLevel(const ImportParameter& parameter,
-                       Progress& progress,
-                       const std::list<WayRef>& newWays,
-                       TypeData& typeData);
+    void GetWayIndexLevel(const ImportParameter& parameter,
+                          Progress& progress,
+                          const std::list<WayRef>& ways,
+                          TypeData& typeData);
 
-    bool WriteOptimizedWays(Progress& progress,
-                            FileWriter& writer,
-                            const std::list<WayRef>& ways,
-                            FileOffsetFileOffsetMap& offsets,
-                            size_t width,
-                            size_t height,
-                            const Magnification& magnification,
-                            TransPolygon::OptimizeMethod optimizeWayMethod);
+    void OptimizeAreas(Progress& progress,
+                       const TypeConfig& typeConfig,
+                       TypeId type,
+                       const std::list<AreaRef>& areas,
+                       std::list<AreaRef>& optimizedAreas,
+                       size_t width,
+                       size_t height,
+                       const Magnification& magnification,
+                       TransPolygon::OptimizeMethod optimizeWayMethod);
 
-    bool WriteBitmap(Progress& progress,
+    void OptimizeWays(Progress& progress,
+                      std::list<WayRef>& ways,
+                      size_t width,
+                      size_t height,
+                      const Magnification& magnification,
+                      TransPolygon::OptimizeMethod optimizeWayMethod);
+
+    bool WriteWays(Progress& progress,
+                   FileWriter& writer,
+                   const std::list<WayRef>& ways,
+                   FileOffsetFileOffsetMap& offsets);
+
+    bool WriteWayBitmap(Progress& progress,
+                        FileWriter& writer,
+                        const TypeInfo& type,
+                        const std::list<WayRef>& ways,
+                        const FileOffsetFileOffsetMap& offsets,
+                        TypeData& data);
+
+    bool HandleAreas(const ImportParameter& parameter,
+                     Progress& progress,
+                     const TypeConfig& typeConfig,
                      FileWriter& writer,
-                     const TypeInfo& type,
-                     const std::list<WayRef>& ways,
-                     const FileOffsetFileOffsetMap& offsets,
-                     TypeData& data);
+                     const std::set<TypeId>& types,
+                     std::list<TypeData>& typesData);
+
+    bool HandleWays(const ImportParameter& parameter,
+                    Progress& progress,
+                    const TypeConfig& typeConfig,
+                    FileWriter& writer,
+                    const std::set<TypeId>& types,
+                    std::vector<TypeData>& typesData);
 
   public:
     std::string GetDescription() const;

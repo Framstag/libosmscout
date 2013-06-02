@@ -25,9 +25,11 @@
 
 #include <osmscout/TypeSet.h>
 
+#include <osmscout/Area.h>
 #include <osmscout/Way.h>
 
 #include <osmscout/util/FileScanner.h>
+#include <osmscout/util/Magnification.h>
 
 namespace osmscout {
 
@@ -36,14 +38,17 @@ namespace osmscout {
   private:
     struct TypeData
     {
-      uint32_t   indexLevel;   //! magnification level of index
-      FileOffset bitmapOffset; //! Position in file where the offset of the bitmap is written
-      uint8_t    dataOffsetBytes;
+      uint32_t   optLevel;       //! magnification level of index
+      uint32_t   indexLevel;     //! magnification level of index
 
       uint32_t   cellXStart;
       uint32_t   cellXEnd;
       uint32_t   cellYStart;
       uint32_t   cellYEnd;
+
+      FileOffset bitmapOffset;   //! Position in file where the offset of the bitmap is written
+      uint8_t    dataOffsetBytes;
+
       uint32_t   cellXCount;
       uint32_t   cellYCount;
 
@@ -57,12 +62,24 @@ namespace osmscout {
     };
 
   private:
-    std::string               datafile;      //! Basename part fo the data file name
-    std::string               datafilename;  //! complete filename for data file
-    mutable FileScanner       scanner;       //! File stream to the data file
+    std::string                           datafile;      //! Basename part for the data file name
+    std::string                           datafilename;  //! complete filename for data file
+    mutable FileScanner                   scanner;       //! File stream to the data file
 
-    double                    magnification; //! Vergrößerung, bis zur der Optimization unterstützt wird
-    std::map<TypeId,TypeData> typesData;     //! Index information for all types
+    double                                magnification; //! Magnification, upto which we support optimization
+    std::map<TypeId,std::list<TypeData> > areaTypesData; //! Index information for all area types
+    std::map<TypeId,TypeData>             wayTypesData;  //! Index information for all way types
+
+  private:
+    bool ReadTypeData(FileScanner& scanner,
+                      TypeData& data);
+
+    bool GetOffsets(const TypeData& typeData,
+                    double minlon,
+                    double minlat,
+                    double maxlon,
+                    double maxlat,
+                    std::vector<FileOffset>& offsets) const;
 
   public:
     OptimizeLowZoom();
@@ -73,12 +90,12 @@ namespace osmscout {
 
     bool HasOptimizations(double magnification) const;
 
-    bool GetOffsets(const TypeData& typeData,
-                    double minlon,
-                    double minlat,
-                    double maxlon,
-                    double maxlat,
-                    std::vector<FileOffset>& offsets) const;
+    bool GetAreas(double lonMin, double latMin,
+                  double lonMax, double latMax,
+                  const Magnification& magnification,
+                  size_t maxAreaCount,
+                  TypeSet& areaTypes,
+                  std::vector<AreaRef>& areas) const;
 
     bool GetWays(double lonMin, double latMin,
                  double lonMax, double latMax,

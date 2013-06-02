@@ -302,6 +302,7 @@ namespace osmscout {
 
     bool Read(FileScanner& scanner);
     bool ReadOptimized(FileScanner& scanner);
+
     bool Write(FileWriter& writer) const;
     bool WriteOptimized(FileWriter& writer) const;
   };

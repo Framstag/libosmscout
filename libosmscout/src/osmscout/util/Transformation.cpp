@@ -364,9 +364,9 @@ namespace osmscout {
       TransformGeoToPixel(projection,
                           nodes);
 
-      DropSimilarPoints(optimizeErrorTolerance);
 
       if (optimize==fast) {
+        DropSimilarPoints(optimizeErrorTolerance);
         DropRedundantPointsFast(optimizeErrorTolerance);
       }
       else {

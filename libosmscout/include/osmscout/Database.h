@@ -197,6 +197,7 @@ namespace osmscout {
                                const Magnification& magnification,
                                double lonMin, double latMin,
                                double lonMax, double latMax,
+                               std::string& areaOptimizedTime,
                                std::string& areaIndexTime,
                                std::string& areasTime,
                                std::vector<AreaRef>& areas) const;

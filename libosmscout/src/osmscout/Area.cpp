@@ -379,6 +379,60 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
+  bool Area::ReadOptimized(FileScanner& scanner)
+  {
+    uint32_t roleCount;
+
+    if (!scanner.GetPos(fileOffset)) {
+      return false;
+    }
+
+    if (!attributes.Read(scanner)) {
+      return false;
+    }
+
+    scanner.ReadNumber(roleCount);
+    if (scanner.HasError()) {
+      return false;
+    }
+
+    roles.resize(roleCount);
+    for (size_t i=0; i<roleCount; i++) {
+      uint32_t nodesCount;
+
+      if (!roles[i].attributes.Read(scanner)) {
+        return false;
+      }
+
+      scanner.Read(roles[i].ring);
+
+      scanner.ReadNumber(nodesCount);
+
+      if (nodesCount>0) {
+        uint32_t minLat;
+        uint32_t minLon;
+
+        roles[i].nodes.resize(nodesCount);
+
+        scanner.Read(minLat);
+        scanner.Read(minLon);
+
+        for (size_t j=0; j<nodesCount; j++) {
+          uint32_t latValue;
+          uint32_t lonValue;
+
+          scanner.ReadNumber(latValue);
+          scanner.ReadNumber(lonValue);
+
+          roles[i].nodes[j].Set((minLat+latValue)/conversionFactor-90.0,
+                                (minLon+lonValue)/conversionFactor-180.0);
+        }
+      }
+    }
+
+    return !scanner.HasError();
+  }
+
   bool Area::Write(FileWriter& writer) const
   {
     if (!attributes.Write(writer)) {
@@ -409,6 +463,47 @@ namespace osmscout {
         for (size_t j=0; j<roles[i].nodes.size(); j++) {
           writer.WriteNumber(roles[i].ids[j]-minId);
         }
+
+        for (size_t j=0; j<roles[i].nodes.size(); j++) {
+          minLat=std::min(minLat,(uint32_t)round((roles[i].nodes[j].GetLat()+90.0)*conversionFactor));
+          minLon=std::min(minLon,(uint32_t)round((roles[i].nodes[j].GetLon()+180.0)*conversionFactor));
+        }
+
+        writer.Write(minLat);
+        writer.Write(minLon);
+
+        for (size_t j=0; j<roles[i].nodes.size(); j++) {
+          uint32_t latValue=(uint32_t)round((roles[i].nodes[j].GetLat()+90.0)*conversionFactor);
+          uint32_t lonValue=(uint32_t)round((roles[i].nodes[j].GetLon()+180.0)*conversionFactor);
+
+          writer.WriteNumber(latValue-minLat);
+          writer.WriteNumber(lonValue-minLon);
+        }
+      }
+    }
+
+    return !writer.HasError();
+  }
+
+  bool Area::WriteOptimized(FileWriter& writer) const
+  {
+    if (!attributes.Write(writer)) {
+      return false;
+    }
+
+    writer.WriteNumber((uint32_t)roles.size());
+    for (size_t i=0; i<roles.size(); i++) {
+      if (!roles[i].attributes.Write(writer)) {
+        return false;
+      }
+
+      writer.Write(roles[i].ring);
+
+      writer.WriteNumber((uint32_t)roles[i].nodes.size());
+
+      if (!roles[i].nodes.empty()) {
+        uint32_t minLat=std::numeric_limits<uint32_t>::max();
+        uint32_t minLon=std::numeric_limits<uint32_t>::max();
 
         for (size_t j=0; j<roles[i].nodes.size(); j++) {
           minLat=std::min(minLat,(uint32_t)round((roles[i].nodes[j].GetLat()+90.0)*conversionFactor));

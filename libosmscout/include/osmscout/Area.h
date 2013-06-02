@@ -212,7 +212,9 @@ namespace osmscout {
     void SetType(TypeId type);
 
     bool Read(FileScanner& scanner);
+    bool ReadOptimized(FileScanner& scanner);
     bool Write(FileWriter& writer) const;
+    bool WriteOptimized(FileWriter& writer) const;
   };
 
   typedef Ref<Area> AreaRef;

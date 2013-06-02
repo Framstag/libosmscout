@@ -439,27 +439,55 @@ namespace osmscout {
                                  const Magnification& magnification,
                                  double lonMin, double latMin,
                                  double lonMax, double latMax,
+                                 std::string& areaOptimizedTime,
                                  std::string& areaIndexTime,
                                  std::string& areasTime,
                                  std::vector<AreaRef>& areas) const
   {
+    TypeSet internalAreaTypes(areaTypes);
+
     if (parameter.IsAborted()) {
       return false;
     }
 
-    std::vector<FileOffset> wayAreaOffsets;
+    std::vector<FileOffset> areaOffsets;
+    StopClock               areaOptimizedTimer;
+
+    if (internalAreaTypes.HasTypes()) {
+      if (parameter.GetUseLowZoomOptimization() &&
+          optimizeLowZoom.HasOptimizations(magnification.GetMagnification())) {
+#pragma omp critical
+        optimizeLowZoom.GetAreas(lonMin,
+                                 latMin,
+                                 lonMax,
+                                 latMax,
+                                 magnification,
+                                 parameter.GetMaximumWays(),
+                                 internalAreaTypes,
+                                 areas);
+      }
+    }
+
+    areaOptimizedTimer.Stop();
+    areaOptimizedTime=areaOptimizedTimer.ResultString();
+
+    if (parameter.IsAborted()) {
+      return false;
+    }
+
+    std::vector<FileOffset> offsets;
     StopClock               areaIndexTimer;
 
-    if (areaTypes.HasTypes()) {
+    if (internalAreaTypes.HasTypes()) {
       if (!areaAreaIndex.GetOffsets(lonMin,
                                     latMin,
                                     lonMax,
                                     latMax,
                                     magnification.GetLevel()+
                                     parameter.GetMaximumAreaLevel(),
-                                    areaTypes,
+                                    internalAreaTypes,
                                     parameter.GetMaximumAreas(),
-                                    wayAreaOffsets)) {
+                                    offsets)) {
         std::cout << "Error getting areas from area index!" << std::endl;
         return false;
       }
@@ -472,7 +500,7 @@ namespace osmscout {
       return false;
     }
 
-    std::sort(wayAreaOffsets.begin(),wayAreaOffsets.end());
+    std::sort(offsets.begin(),offsets.end());
 
     if (parameter.IsAborted()) {
       return false;
@@ -480,8 +508,8 @@ namespace osmscout {
 
     StopClock areasTimer;
 
-    if (!wayAreaOffsets.empty()) {
-      if (!GetAreasByOffset(wayAreaOffsets,
+    if (!offsets.empty()) {
+      if (!GetAreasByOffset(offsets,
                             areas)) {
         std::cout << "Error reading areas in area!" << std::endl;
         return false;
@@ -510,16 +538,13 @@ namespace osmscout {
       return false;
     }
 
-    if (parameter.IsAborted()) {
-      return false;
-    }
-
     std::vector<FileOffset> wayWayOffsets;
     StopClock               wayOptimizedTimer;
 
     if (!internalWayTypes.empty()) {
       if (parameter.GetUseLowZoomOptimization() &&
           optimizeLowZoom.HasOptimizations(magnification.GetMagnification())) {
+#pragma omp critical
         optimizeLowZoom.GetWays(lonMin,
                                 latMin,
                                 lonMax,
@@ -595,12 +620,13 @@ namespace osmscout {
     std::string nodeIndexTime;
     std::string nodesTime;
 
+    std::string areaOptimizedTime;
+    std::string areaIndexTime;
+    std::string areasTime;
+
     std::string wayOptimizedTime;
     std::string wayIndexTime;
     std::string waysTime;
-
-    std::string areaIndexTime;
-    std::string areasTime;
 
     if (!IsOpen()) {
       return false;
@@ -653,6 +679,7 @@ namespace osmscout {
                                    latMin,
                                    lonMax,
                                    latMax,
+                                   areaOptimizedTime,
                                    areaIndexTime,
                                    areasTime,
                                    areas);
@@ -673,7 +700,7 @@ namespace osmscout {
       std::cout << "Load: ";
       std::cout << "n " << nodesTime << " ";
       std::cout << "w " << wayOptimizedTime << "/" << waysTime << " ";
-      std::cout << "a " << areasTime;
+      std::cout << "a " << areaOptimizedTime << "/" << areasTime;
       std::cout << std::endl;
     }
 

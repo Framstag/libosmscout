@@ -130,6 +130,7 @@ void DatabaseTask::Run()
         searchParameter.SetMaximumWays(maxWays->Get());
         searchParameter.SetMaximumAreas(maxAreas->Get());
 
+        searchParameter.SetUseLowZoomOptimization(true);
         searchParameter.SetUseMultithreading(currentMagnification.GetMagnification()<=osmscout::Magnification::magCity);
 
         drawParameter.SetIconPaths(paths);
