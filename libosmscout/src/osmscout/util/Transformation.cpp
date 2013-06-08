@@ -393,10 +393,6 @@ namespace osmscout {
     else {
       TransformGeoToPixel(projection,
                           nodes);
-
-      start=0;
-      end=nodes.size()-1;
-      length=nodes.size();
     }
   }
 
@@ -424,7 +420,7 @@ namespace osmscout {
 
       DropSimilarPoints(optimizeErrorTolerance);
 
-      if (optimize==fast){
+      if (optimize==fast) {
         DropRedundantPointsFast(optimizeErrorTolerance);
       }
       else {
@@ -450,10 +446,6 @@ namespace osmscout {
     else {
       TransformGeoToPixel(projection,
                           nodes);
-
-      start=0;
-      end=nodes.size()-1;
-      length=nodes.size();
     }
   }
 
