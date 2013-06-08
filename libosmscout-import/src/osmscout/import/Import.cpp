@@ -105,9 +105,9 @@ namespace osmscout {
      waterIndexMaxMag(14),
      optimizationMaxWayCount(1000000),
      optimizationMaxMag(10),
-     optimizationMinMag(6),
-     optimizationCellSizeAverage(16),
-     optimizationCellSizeMax(256),
+     optimizationMinMag(0),
+     optimizationCellSizeAverage(64),
+     optimizationCellSizeMax(255),
      optimizationWayMethod(TransPolygon::quality),
      routeNodeBlockSize(500000),
      assumeLand(true)

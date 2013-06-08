@@ -122,8 +122,6 @@ namespace osmscout
         return false;
       }
 
-      //std::cout << "Loading optimized area data for type " << typeId << " and level " << typeData.optLevel << std::endl;
-
       areaTypesData[typeId].push_back(typeData);
     }
 
@@ -132,10 +130,14 @@ namespace osmscout
 
       scanner.Read(typeId);
 
+      TypeData typeData;
+
       if (!ReadTypeData(scanner,
-          wayTypesData[typeId])) {
+                        typeData)) {
         return false;
       }
+
+      wayTypesData[typeId].push_back(typeData);
     }
 
     return !scanner.HasError();
@@ -297,49 +299,51 @@ namespace osmscout
         type!=areaTypesData.end();
         ++type) {
       if (areaTypes.IsTypeSet(type->first)) {
-        std::list<TypeData>::const_iterator bestMatch=type->second.end();
+        std::list<TypeData>::const_iterator match=type->second.end();
 
         for (std::list<TypeData>::const_iterator typeData=type->second.begin();
             typeData!=type->second.end();
             ++typeData) {
-          if (typeData->optLevel>=magnification.GetLevel() &&
-              (bestMatch==type->second.end() || typeData->optLevel<bestMatch->optLevel)) {
-            bestMatch=typeData;
+          if (typeData->optLevel==magnification.GetLevel()) {
+            match=typeData;
           }
         }
 
-        if (bestMatch!=type->second.end()) {
-          //std::cout << "Loading optimized data for type " << type->first << " for level " << magnification.GetLevel() << ", target level " << bestMatch->optLevel << std::endl;
-          if (!GetOffsets(*bestMatch,
-                          lonMin,
-                          latMin,
-                          lonMax,
-                          latMax,
-                          offsets)) {
-            return false;
-          }
-
-          for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
-              offset!=offsets.end();
-              ++offset) {
-            if (!scanner.SetPos(*offset)) {
-              std::cerr << "Error while positioning in file " << datafilename  << std::endl;
-              type++;
-              continue;
+        if (match!=type->second.end()) {
+          if (match->bitmapOffset!=0) {
+            if (!GetOffsets(*match,
+                            lonMin,
+                            latMin,
+                            lonMax,
+                            latMax,
+                            offsets)) {
+              return false;
             }
 
-            AreaRef area=new Area();
+            for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
+                offset!=offsets.end();
+                ++offset) {
+              if (!scanner.SetPos(*offset)) {
+                std::cerr << "Error while positioning in file " << datafilename  << std::endl;
+                type++;
+                continue;
+              }
 
-            if (!area->ReadOptimized(scanner)) {
-              std::cerr << "Error while reading data entry of type " << type->first << " from file " << datafilename  << std::endl;
-              continue;
+              AreaRef area=new Area();
+
+              if (!area->ReadOptimized(scanner)) {
+                std::cerr << "Error while reading data entry of type " << type->first << " from file " << datafilename  << std::endl;
+                continue;
+              }
+
+              areas.push_back(area);
             }
 
-            areas.push_back(area);
+            offsets.clear();
           }
+        }
 
-          offsets.clear();
-
+        if (match!=type->second.end()) {
           areaTypes.UnsetType(type->first);
         }
       }
@@ -350,6 +354,7 @@ namespace osmscout
 
   bool OptimizeLowZoom::GetWays(double lonMin, double latMin,
                                 double lonMax, double latMax,
+                                const Magnification& magnification,
                                 size_t maxWayCount,
                                 std::vector<TypeSet>& wayTypes,
                                 std::vector<WayRef>& ways) const
@@ -366,41 +371,57 @@ namespace osmscout
     offsets.reserve(20000);
 
     for (size_t i=0; i<wayTypes.size(); i++) {
-      for (std::map<TypeId,TypeData>::const_iterator type=wayTypesData.begin();
+      for (std::map<TypeId,std::list<TypeData> >::const_iterator type=wayTypesData.begin();
           type!=wayTypesData.end();
           ++type) {
         if (wayTypes[i].IsTypeSet(type->first)) {
-          if (!GetOffsets(type->second,
-                          lonMin,
-                          latMin,
-                          lonMax,
-                          latMax,
-                          offsets)) {
-            return false;
+          std::list<TypeData>::const_iterator match=type->second.end();
+
+          for (std::list<TypeData>::const_iterator typeData=type->second.begin();
+              typeData!=type->second.end();
+              ++typeData) {
+            if (typeData->optLevel==magnification.GetLevel()) {
+              match=typeData;
+            }
           }
 
-          for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
-              offset!=offsets.end();
-              ++offset) {
-            if (!scanner.SetPos(*offset)) {
-              std::cerr << "Error while positioning in file " << datafilename  << std::endl;
-              type++;
-              continue;
+          if (match!=type->second.end()) {
+            if (match->bitmapOffset!=0) {
+              if (!GetOffsets(*match,
+                              lonMin,
+                              latMin,
+                              lonMax,
+                              latMax,
+                              offsets)) {
+                return false;
+              }
+
+              for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
+                  offset!=offsets.end();
+                  ++offset) {
+                if (!scanner.SetPos(*offset)) {
+                  std::cerr << "Error while positioning in file " << datafilename  << std::endl;
+                  type++;
+                  continue;
+                }
+
+                WayRef way=new Way();
+
+                if (!way->ReadOptimized(scanner)) {
+                  std::cerr << "Error while reading data entry of type " << type->first << " from file " << datafilename  << std::endl;
+                  continue;
+                }
+
+                ways.push_back(way);
+              }
+
+              offsets.clear();
             }
-
-            WayRef way=new Way();
-
-            if (!way->ReadOptimized(scanner)) {
-              std::cerr << "Error while reading data entry of type " << type->first << " from file " << datafilename  << std::endl;
-              continue;
-            }
-
-            ways.push_back(way);
           }
 
-          offsets.clear();
-
-          wayTypes[i].UnsetType(type->first);
+          if (match!=type->second.end()) {
+            wayTypes[i].UnsetType(type->first);
+          }
         }
       }
     }

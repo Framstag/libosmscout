@@ -193,6 +193,10 @@ namespace osmscout {
   Database::Database(const DatabaseParameter& parameter)
    : isOpen(false),
      debugPerformance(parameter.IsDebugPerformance()),
+     minLon(0.0),
+     minLat(0.0),
+     maxLon(0.0),
+     maxLat(0.0),
      areaNodeIndex(/*parameter.GetAreaNodeIndexCacheSize()*/),
      areaWayIndex(),
      areaAreaIndex(parameter.GetAreaAreaIndexCacheSize()),
@@ -549,6 +553,7 @@ namespace osmscout {
                                 latMin,
                                 lonMax,
                                 latMax,
+                                magnification,
                                 parameter.GetMaximumWays(),
                                 internalWayTypes,
                                 ways);

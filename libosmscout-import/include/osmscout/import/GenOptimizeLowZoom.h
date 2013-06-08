@@ -81,8 +81,7 @@ namespace osmscout {
 
     bool WriteHeader(FileWriter& writer,
                      const std::list<TypeData>& areaTypesData,
-                     const std::set<TypeId>& wayTypes,
-                     const std::vector<TypeData>& wayTypesData,
+                     const std::list<TypeData>& wayTypesData,
                      uint32_t optimizeMaxMap);
 
     bool GetAreas(const ImportParameter& parameter,
@@ -107,6 +106,13 @@ namespace osmscout {
                          const std::list<AreaRef>& areas,
                          const FileOffsetFileOffsetMap& offsets,
                          TypeData& data);
+
+    bool HandleAreas(const ImportParameter& parameter,
+                     Progress& progress,
+                     const TypeConfig& typeConfig,
+                     FileWriter& writer,
+                     const std::set<TypeId>& types,
+                     std::list<TypeData>& typesData);
 
     bool GetWays(const ImportParameter& parameter,
                            Progress& progress,
@@ -134,7 +140,8 @@ namespace osmscout {
                        TransPolygon::OptimizeMethod optimizeWayMethod);
 
     void OptimizeWays(Progress& progress,
-                      std::list<WayRef>& ways,
+                      const std::list<WayRef>& ways,
+                      std::list<WayRef>& optimizedWays,
                       size_t width,
                       size_t height,
                       const Magnification& magnification,
@@ -152,19 +159,12 @@ namespace osmscout {
                         const FileOffsetFileOffsetMap& offsets,
                         TypeData& data);
 
-    bool HandleAreas(const ImportParameter& parameter,
-                     Progress& progress,
-                     const TypeConfig& typeConfig,
-                     FileWriter& writer,
-                     const std::set<TypeId>& types,
-                     std::list<TypeData>& typesData);
-
     bool HandleWays(const ImportParameter& parameter,
                     Progress& progress,
                     const TypeConfig& typeConfig,
                     FileWriter& writer,
                     const std::set<TypeId>& types,
-                    std::vector<TypeData>& typesData);
+                    std::list<TypeData>& typesData);
 
   public:
     std::string GetDescription() const;

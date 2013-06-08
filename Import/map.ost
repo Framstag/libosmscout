@@ -45,7 +45,7 @@ TYPES
   TYPE waterway_weir = NODE WAY ("waterway"=="weir") OPTIONS IGNORESEALAND
   TYPE waterway_dam = WAY AREA ("waterway"=="dam") OPTIONS IGNORESEALAND
 
-  TYPE railway_rail = WAY ("railway"=="rail") OPTIONS OPTIMIZE_LOW_ZOOM
+  TYPE railway_rail = WAY ("railway"=="rail") //OPTIONS OPTIMIZE_LOW_ZOOM
   TYPE railway_tram = WAY ("railway"=="tram")
   TYPE railway_light_rail = WAY ("railway"=="light_rail")
   TYPE railway_subway = WAY ("railway"=="subway")

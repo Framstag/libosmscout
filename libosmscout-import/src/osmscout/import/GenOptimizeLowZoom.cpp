@@ -87,6 +87,8 @@ namespace osmscout
   bool OptimizeLowZoomGenerator::WriteTypeData(FileWriter& writer,
                                                const TypeData& data)
   {
+    assert(data.type!=0);
+
     writer.Write(data.type);
     writer.Write(data.optLevel);
     writer.Write(data.indexLevel);
@@ -103,13 +105,12 @@ namespace osmscout
 
   bool OptimizeLowZoomGenerator::WriteHeader(FileWriter& writer,
                                              const std::list<TypeData>& areaTypesData,
-                                             const std::set<TypeId>& wayTypes,
-                                             const std::vector<TypeData>& wayTypesData,
+                                             const std::list<TypeData>& wayTypesData,
                                              uint32_t optimizeMaxMap)
   {
     writer.Write(optimizeMaxMap);
     writer.Write((uint32_t)areaTypesData.size());
-    writer.Write((uint32_t)wayTypes.size());
+    writer.Write((uint32_t)wayTypesData.size());
 
     for (std::list<TypeData>::const_iterator typeData=areaTypesData.begin();
         typeData!=areaTypesData.end();
@@ -120,11 +121,11 @@ namespace osmscout
       }
     }
 
-    for (std::set<TypeId>::const_iterator type=wayTypes.begin();
-        type!=wayTypes.end();
-        type++) {
+    for (std::list<TypeData>::const_iterator typeData=wayTypesData.begin();
+        typeData!=wayTypesData.end();
+        typeData++) {
       if (!WriteTypeData(writer,
-                         wayTypesData[*type])) {
+                         *typeData)) {
         return false;
       }
     }
@@ -215,13 +216,6 @@ namespace osmscout
                                                const Magnification& magnification,
                                                TransPolygon::OptimizeMethod optimizeWayMethod)
   {
-    /*
-    size_t origAreas=areas.size();
-    size_t origRoles=0;
-    size_t finalRoles=0;
-    size_t origNodes=0;
-    size_t finalNodes=0;*/
-
     MercatorProjection projection;
 
     projection.Set(0,0,magnification,width,height);
@@ -237,27 +231,18 @@ namespace osmscout
       double                  ymin;
       double                  ymax;
 
-      /*
-      origRoles+=area->roles.size();
-
-      newRoles.reserve(area->roles.size());
-
-      for (size_t r=0; r<area->roles.size(); r++) {
-        origNodes+=area->roles[r].nodes.size();
-      }*/
-
       size_t r=0;
       while (r<area->roles.size()) {
         polygon.TransformArea(projection,
                               optimizeWayMethod,
                               area->roles[r].nodes,
-                              8.0);
+                              1.0);
 
         polygon.GetBoundingBox(xmin,ymin,xmax,ymax);
 
         if (polygon.IsEmpty() ||
-            (xmax-xmin<=25.0 &&
-             ymax-ymin<=25.0)) {
+            (xmax-xmin<=6.0 &&
+             ymax-ymin<=6.0)) {
           // We drop all sub roles of the current role, too
           size_t s=r;
 
@@ -295,8 +280,6 @@ namespace osmscout
 
       optimizedAreas.push_back(copiedArea);
     }
-
-    //progress.Info("Areas: "+NumberToString(origAreas)+" => "+NumberToString(areas.size())+" roles: "+NumberToString(origRoles)+" => "+NumberToString(finalRoles)+ " nodes: "+NumberToString(origNodes)+" => "+NumberToString(finalNodes));
   }
 
 
@@ -305,7 +288,7 @@ namespace osmscout
                                                   const std::list<AreaRef>& areas,
                                                   TypeData& typeData)
   {
-    size_t level=parameter.GetOptimizationMinMag();
+    size_t level=5;//parameter.GetOptimizationMinMag();
 
     while (true) {
       double                 cellWidth=360.0/pow(2.0,(int)level);
@@ -488,6 +471,7 @@ namespace osmscout
     data.dataOffsetBytes=BytesNeeededToAddressFileData(dataSize);
 
     progress.Info("Writing map for level "+
+                  NumberToString(data.optLevel)+", index level "+
                   NumberToString(data.indexLevel)+", "+
                   NumberToString(cellOffsets.size())+" cells, "+
                   NumberToString(indexEntries)+" entries, "+
@@ -814,7 +798,7 @@ namespace osmscout
                                                   const std::list<WayRef>& ways,
                                                   TypeData& typeData)
   {
-    size_t level=parameter.GetOptimizationMinMag();
+    size_t level=1;//parameter.GetOptimizationMinMag();
 
     while (true) {
       double                 cellWidth=360.0/pow(2.0,(int)level);
@@ -900,7 +884,8 @@ namespace osmscout
   }
 
   void OptimizeLowZoomGenerator::OptimizeWays(Progress& progress,
-                                              std::list<WayRef>& ways,
+                                              const std::list<WayRef>& ways,
+                                              std::list<WayRef>& optimizedWays,
                                               size_t width,
                                               size_t height,
                                               const Magnification& magnification,
@@ -910,9 +895,9 @@ namespace osmscout
 
     projection.Set(0,0,magnification,width,height);
 
-    std::list<WayRef>::iterator w=ways.begin();
-
-    while (w!=ways.end()) {
+    for (std::list<WayRef>::const_iterator w=ways.begin();
+         w!=ways.end();
+         ++w) {
       WayRef                way(*w);
       TransPolygon          polygon;
       std::vector<GeoCoord> newNodes;
@@ -924,13 +909,12 @@ namespace osmscout
       polygon.TransformWay(projection,
                            optimizeWayMethod,
                            way->nodes,
-                           8.0);
+                           1.0);
 
       polygon.GetBoundingBox(xmin,ymin,xmax,ymax);
 
       if (xmax-xmin<=1.0 &&
           ymax-ymin<=1.0) {
-        w=ways.erase(w);
         continue;
       }
 
@@ -944,9 +928,11 @@ namespace osmscout
         }
       }
 
-      way->nodes=newNodes;
+      WayRef copiedWay=new Way(*way);
 
-      ++w;
+      copiedWay->nodes=newNodes;
+
+      optimizedWays.push_back(copiedWay);
     }
   }
 
@@ -1047,7 +1033,8 @@ namespace osmscout
 
     data.dataOffsetBytes=BytesNeeededToAddressFileData(dataSize);
 
-    progress.Info("Writing map level "+
+    progress.Info("Writing map for level "+
+                  NumberToString(data.optLevel)+", index level "+
                   NumberToString(data.indexLevel)+", "+
                   NumberToString(cellOffsets.size())+" cells, "+
                   NumberToString(indexEntries)+" entries, "+
@@ -1164,7 +1151,7 @@ namespace osmscout
         for (std::list<AreaRef>::const_iterator a=allAreas[type].begin();
             a!=allAreas[type].end();
             ++a) {
-          AreaRef area=*a;
+          AreaRef area(*a);
 
           origRoles+=area->roles.size();
 
@@ -1181,8 +1168,6 @@ namespace osmscout
 
           magnification.SetLevel(level);
 
-          progress.Info("Optimizing type for magnification level "+NumberToString(magnification.GetLevel()));
-
           OptimizeAreas(progress,
                         typeConfig,
                         type,
@@ -1193,7 +1178,15 @@ namespace osmscout
                         parameter.GetOptimizationWayMethod());
 
           if (optimizedAreas.empty()) {
-            progress.Info("Empty optimization result, no index generated");
+            progress.Info("Empty optimization result for level "+NumberToString(level)+", no index generated");
+
+            TypeData typeData;
+
+            typeData.type=type;
+            typeData.optLevel=level;
+
+            typesData.push_back(typeData);
+
             continue;
           }
 
@@ -1267,7 +1260,7 @@ namespace osmscout
                                             const TypeConfig& typeConfig,
                                             FileWriter& writer,
                                             const std::set<TypeId>& types,
-                                            std::vector<TypeData>& typesData)
+                                            std::list<TypeData>& typesData)
   {
     FileScanner   scanner;
     Magnification magnification; // Magnification, we optimize for
@@ -1303,7 +1296,7 @@ namespace osmscout
           continue;
         }
 
-        progress.SetAction("Handling type "+ typeConfig.GetTypeInfo(type).GetName());
+        progress.SetAction("Optimizing type "+ typeConfig.GetTypeInfo(type).GetName()+" ("+NumberToString(type)+")");
 
         //
         // Join ways
@@ -1321,43 +1314,99 @@ namespace osmscout
           continue;
         }
 
+        size_t origWays=newWays.size();
+        size_t origNodes=0;
+
+        for (std::list<WayRef>::const_iterator w=newWays.begin();
+            w!=newWays.end();
+            ++w) {
+          WayRef way(*w);
+
+          origNodes+=way->nodes.size();
+        }
+
         //
         // Transform/Optimize the way and store it
         //
 
-        // TODO: Wee need to make import parameters for the width and the height
-        OptimizeWays(progress,
-                     newWays,
-                     800,640,
-                     magnification,
-                     parameter.GetOptimizationWayMethod());
+        for (uint32_t level=parameter.GetOptimizationMinMag();
+             level<=parameter.GetOptimizationMaxMag();
+             level++) {
+          Magnification     magnification; // Magnification, we optimize for
+          std::list<WayRef> optimizedWays;
 
-        typesData[type].type=type;
-        typesData[type].optLevel=0;
+          magnification.SetLevel(level);
 
-        GetWayIndexLevel(parameter,
-                         progress,
-                         newWays,
-                         typesData[type]);
-
-
-        FileOffsetFileOffsetMap offsets;
-
-        if (!WriteWays(progress,
-                       writer,
+          // TODO: Wee need to make import parameters for the width and the height
+          OptimizeWays(progress,
                        newWays,
-                       offsets)) {
-          return false;
+                       optimizedWays,
+                       800,640,
+                       magnification,
+                       parameter.GetOptimizationWayMethod());
+
+          size_t optWays=optimizedWays.size();
+          size_t optNodes=0;
+
+          for (std::list<WayRef>::const_iterator w=optimizedWays.begin();
+              w!=optimizedWays.end();
+              ++w) {
+            WayRef way(*w);
+
+            optNodes+=way->nodes.size();
+          }
+
+          /*
+          std::cout << "Ways: " << origWays << " => " << optWays << std::endl;
+          std::cout << "Nodes: " << origNodes << " => " << optNodes << std::endl;*/
+
+          if (optimizedWays.empty()) {
+            progress.Info("Empty optimization result for level "+NumberToString(level)+", no index generated");
+
+            TypeData typeData;
+
+            typeData.type=type;
+            typeData.optLevel=level;
+
+            typesData.push_back(typeData);
+            continue;
+          }
+
+          TypeData typeData;
+
+          typeData.type=type;
+          typeData.optLevel=level;
+
+          GetWayIndexLevel(parameter,
+                           progress,
+                           optimizedWays,
+                           typeData);
+
+
+          FileOffsetFileOffsetMap offsets;
+
+          if (!WriteWays(progress,
+                         writer,
+                         optimizedWays,
+                         offsets)) {
+            return false;
+          }
+
+          if (!WriteWayBitmap(progress,
+                              writer,
+                              typeConfig.GetTypeInfo(type),
+                              optimizedWays,
+                              offsets,
+                              typeData)) {
+            return false;
+          }
+
+          typesData.push_back(typeData);
+
+          optimizedWays.clear();
         }
 
-        if (!WriteWayBitmap(progress,
-                            writer,
-                            typeConfig.GetTypeInfo(type),
-                            newWays,
-                            offsets,
-                            typesData[type])) {
-          return false;
-        }
+        newWays.clear();
       }
 
       if (typesToProcess.empty()) {
@@ -1372,18 +1421,16 @@ namespace osmscout
                                         Progress& progress,
                                         const TypeConfig& typeConfig)
   {
-    FileOffset                  indexOffset=0;
-    FileWriter                  writer;
-    Magnification               magnification; // Magnification, we optimize for
-    std::set<TypeId>            areaTypes;         // Types we optimize
-    std::list<TypeData>         areaTypesData;
-    std::set<TypeId>            wayTypes;         // Types we optimize
-    std::vector<TypeData>       wayTypesData;
+    FileOffset           indexOffset=0;
+    FileWriter           writer;
+    Magnification        magnification; // Magnification, we optimize for
+    std::set<TypeId>     areaTypes;         // Types we optimize
+    std::list<TypeData>  areaTypesData;
+    std::set<TypeId>     wayTypes;         // Types we optimize
+    std::list<TypeData>  wayTypesData;
 
     GetAreaTypesToOptimize(typeConfig,areaTypes);
     GetWayTypesToOptimize(typeConfig,wayTypes);
-
-    wayTypesData.resize(typeConfig.GetMaxTypeId()+1);
 
     if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      "optimized.dat"))) {
@@ -1424,7 +1471,6 @@ namespace osmscout
 
     if (!WriteHeader(writer,
                      areaTypesData,
-                     wayTypes,
                      wayTypesData,
                     (uint32_t)parameter.GetOptimizationMaxMag())) {
       progress.Error("Cannot write file header");

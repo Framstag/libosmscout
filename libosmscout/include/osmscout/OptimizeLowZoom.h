@@ -38,8 +38,8 @@ namespace osmscout {
   private:
     struct TypeData
     {
-      uint32_t   optLevel;       //! magnification level of index
-      uint32_t   indexLevel;     //! magnification level of index
+      uint32_t   optLevel;       //! The display level this data was optimized for
+      uint32_t   indexLevel;     //! Magnification level of index
 
       uint32_t   cellXStart;
       uint32_t   cellXEnd;
@@ -68,7 +68,7 @@ namespace osmscout {
 
     double                                magnification; //! Magnification, upto which we support optimization
     std::map<TypeId,std::list<TypeData> > areaTypesData; //! Index information for all area types
-    std::map<TypeId,TypeData>             wayTypesData;  //! Index information for all way types
+    std::map<TypeId,std::list<TypeData> > wayTypesData;  //! Index information for all way types
 
   private:
     bool ReadTypeData(FileScanner& scanner,
@@ -99,6 +99,7 @@ namespace osmscout {
 
     bool GetWays(double lonMin, double latMin,
                  double lonMax, double latMax,
+                 const Magnification& magnification,
                  size_t maxWayCount,
                  std::vector<TypeSet>& wayTypes,
                  std::vector<WayRef>& ways) const;
