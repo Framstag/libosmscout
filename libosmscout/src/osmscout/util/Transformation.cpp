@@ -181,12 +181,23 @@ namespace osmscout {
   {
     Projection::BatchTransformer batchTransformer(projection);
 
-    for (size_t i=0; i<nodes.size(); i++) {
-       batchTransformer.GeoToPixel(nodes[i].GetLon(),
-                                   nodes[i].GetLat(),
-                                   points[i].x,
-                                   points[i].y);
-      points[i].draw=true;
+    if (!nodes.empty()) {
+      start=0;
+      length=nodes.size();
+      end=length-1;
+
+      for (size_t i=start; i<=end; i++) {
+         batchTransformer.GeoToPixel(nodes[i].GetLon(),
+                                     nodes[i].GetLat(),
+                                     points[i].x,
+                                     points[i].y);
+        points[i].draw=true;
+      }
+    }
+    else {
+      start=0;
+      end=0;
+      length=0;
     }
   }
 
