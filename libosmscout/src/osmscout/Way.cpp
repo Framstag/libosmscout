@@ -27,10 +27,10 @@
 namespace osmscout {
 
   bool WayAttributes::SetTags(Progress& progress,
-                                  const TypeConfig& typeConfig,
-                                  Id id,
-                                  std::vector<Tag>& tags,
-                                  bool& reverseNodes)
+                              const TypeConfig& typeConfig,
+                              Id id,
+                              std::vector<Tag>& tags,
+                              bool& reverseNodes)
   {
     uint32_t namePriority=0;
     uint32_t nameAltPriority=0;
