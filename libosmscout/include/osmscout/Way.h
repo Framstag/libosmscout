@@ -183,6 +183,7 @@ namespace osmscout {
 
   public:
     inline Way()
+    : fileOffset(0)
     {
       // no code
     }
