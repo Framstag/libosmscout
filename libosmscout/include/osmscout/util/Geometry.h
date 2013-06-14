@@ -145,21 +145,28 @@ namespace osmscout {
    */
 /*
   template<typename N, typename M>
-  double IsLeft(const N& p0, const N& p1, const M& p2)
+  inline double IsLeft(const N& p0,
+                       const N& p1,
+                       const M& p2)
   {
-    if (p2.id==p0.id || p2.id==p1.id) {
+    if ((p2.GetLat()==p0.GetLat() &&
+         p2.GetLon()==p0.GetLon()) ||
+        (p2.GetLat()==p1.GetLat() &&
+         p2.GetLon()==p1.GetLon())) {
       return 0;
     }
 
-    return (p1.lon-p0.lon)*(p2.lat-p0.lat)-(p2.lon-p0.lon)*(p1.lat-p0.lat);
+    return (p1.GetLon()-p0.GetLon())*(p2.GetLat()-p0.GetLat())-
+           (p2.GetLon()-p0.GetLon())*(p1.GetLat()-p0.GetLat());
   }
 
   template<typename N, typename M>
-  bool IsPointInArea(const N& point,
-                     const std::vector<M>& nodes)
+  inline bool IsCoordInArea(const N& point,
+                            const std::vector<M>& nodes)
   {
-    for (int i=0; i<nodes.size()-1; i++) {
-      if (point.id==nodes[i].id) {
+    for (int i=0; i<(int)nodes.size()-1; i++) {
+      if (point.GetLat()==nodes[i].GetLat() &&
+          point.GetLon()==nodes[i].GetLon()) {
         return true;
       }
     }
@@ -167,16 +174,16 @@ namespace osmscout {
     int wn=0;    // the winding number counter
 
     // loop through all edges of the polygon
-    for (int i=0; i<nodes.size()-1; i++) {   // edge from V[i] to V[i+1]
-      if (nodes[i].lat<=point.lat) {         // start y <= P.y
-        if (nodes[i+1].lat>point.lat) {     // an upward crossing
+    for (int i=0; i<(int)nodes.size()-1; i++) {   // edge from V[i] to V[i+1]
+      if (nodes[i].GetLat()<=point.GetLat()) {         // start y <= P.y
+        if (nodes[i+1].GetLat()>point.GetLat()) {     // an upward crossing
           if (IsLeft(nodes[i],nodes[i+1],point) > 0) { // P left of edge
             ++wn;            // have a valid up intersect
           }
         }
       }
       else {                       // start y > P.y (no test needed)
-        if (nodes[i+1].lat<=point.lat) {    // a downward crossing
+        if (nodes[i+1].GetLat()<=point.GetLat()) {    // a downward crossing
           if (IsLeft(nodes[i],nodes[i+1],point) < 0) { // P right of edge
             --wn;            // have a valid down intersect
           }
@@ -188,21 +195,27 @@ namespace osmscout {
   }*/
 
   /**
-    Returns true, if point in area.
+    Returns true, if point in on the area border or within the area.
 
     See http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
     */
   template<typename N, typename M>
-  bool IsCoordInArea(const N& point,
-                     const std::vector<M>& nodes)
+  inline bool IsCoordInArea(const N& point,
+                            const std::vector<M>& nodes)
   {
-    size_t  i,j;
-    bool c=false;
+    size_t i,j;
+    bool   c=false;
 
     for (i=0, j=nodes.size()-1; i<nodes.size(); j=i++) {
-      if ((nodes[i].GetLat()>point.GetLat())!=(nodes[j].GetLat()>point.GetLat()) &&
-          (point.GetLon()<(nodes[j].GetLon()-nodes[i].GetLon())*(point.GetLat()-nodes[i].GetLat()) /
-           (nodes[j].GetLat()-nodes[i].GetLat())+nodes[i].GetLon()))  {
+      if (point.GetLat()==nodes[i].GetLat() &&
+          point.GetLon()==nodes[i].GetLon()) {
+        return true;
+      }
+
+      if ((((nodes[i].GetLat()<=point.GetLat()) && (point.GetLat()<nodes[j].GetLat())) ||
+           ((nodes[j].GetLat()<=point.GetLat()) && (point.GetLat()<nodes[i].GetLat()))) &&
+          (point.GetLon()<(nodes[j].GetLon()-nodes[i].GetLon())*(point.GetLat()-nodes[i].GetLat())/(nodes[j].GetLat()-nodes[i].GetLat())+
+           nodes[i].GetLon())) {
         c=!c;
       }
     }
@@ -219,17 +232,18 @@ namespace osmscout {
   inline int GetRelationOfPointToArea(const GeoCoord& point,
                                       const std::vector<GeoCoord>& nodes)
   {
-    size_t  i,j;
-    bool c=false;
+    size_t i,j;
+    bool   c=false;
 
     for (i=0, j=nodes.size()-1; i<nodes.size(); j=i++) {
       if (point==nodes[i]) {
         return 0;
       }
 
-      if ((nodes[i].GetLat()>point.GetLat())!=(nodes[j].GetLat()>point.GetLat()) &&
-          (point.GetLon()<(nodes[j].GetLon()-nodes[i].GetLon())*(point.GetLat()-nodes[i].GetLat()) /
-           (nodes[j].GetLat()-nodes[i].GetLat())+nodes[i].GetLon()))  {
+      if ((((nodes[i].GetLat()<=point.GetLat()) && (point.GetLat()<nodes[j].GetLat())) ||
+           ((nodes[j].GetLat()<=point.GetLat()) && (point.GetLat()<nodes[i].GetLat()))) &&
+          (point.GetLon()<(nodes[j].GetLon()-nodes[i].GetLon())*(point.GetLat()-nodes[i].GetLat())/(nodes[j].GetLat()-nodes[i].GetLat())+
+           nodes[i].GetLon())) {
         c=!c;
       }
     }
@@ -241,8 +255,8 @@ namespace osmscout {
     Return true, if area a is completely in area b
     */
   template<typename N,typename M>
-  bool IsAreaCompletelyInArea(const std::vector<N>& a,
-                              const std::vector<M>& b)
+  inline bool IsAreaCompletelyInArea(const std::vector<N>& a,
+                                     const std::vector<M>& b)
   {
     for (typename std::vector<N>::const_iterator i=a.begin(); i!=a.end(); i++) {
       if (GetRelationOfPointToArea(*i,b)<0) {
