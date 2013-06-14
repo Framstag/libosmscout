@@ -54,7 +54,8 @@ namespace osmscout {
 
   public:
     inline RawRelation()
-    : type(typeIgnore)
+    : id(0),
+      type(typeIgnore)
     {
       // no code
     }
