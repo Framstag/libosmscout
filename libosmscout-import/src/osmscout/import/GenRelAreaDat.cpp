@@ -350,25 +350,24 @@ namespace osmscout {
 
     GroupingState state(parts.size());
 
-    size_t i=0;
+    size_t ix=0;
     for (std::list<MultipolygonPart>::const_iterator r1=parts.begin();
          r1!=parts.end();
          ++r1) {
-      size_t j=0;
-
+      size_t jx=0;
       for (std::list<MultipolygonPart>::const_iterator r2=parts.begin();
            r2!=parts.end();
            ++r2) {
-        if (i!=j) {
+        if (ix!=jx) {
           if (IsAreaSubOfArea(r2->role.nodes,r1->role.nodes)) {
-            state.SetIncluded(i,j);
+            state.SetIncluded(ix,jx);
           }
         }
 
-        j++;
+        jx++;
       }
 
-      i++;
+      ix++;
     }
 
     //
@@ -585,7 +584,7 @@ namespace osmscout {
       }
     }
 
-    // Load child relations recursivly and collect more way ids at the same time
+    // Load child relations recursively and collect more way ids at the same time
 
     while (!relationIds.empty()) {
       std::vector<RawRelationRef> childRelations;
@@ -720,8 +719,7 @@ namespace osmscout {
                                                         Area& relation)
   {
     IdSet resolvedRelations;
-    bool         reverseNodes;
-    TagId        tagName=typeConfig.GetTagId("name");
+    TagId tagName=typeConfig.GetTagId("name");
 
     // Manually scan the tags of the RawRelation just to get a name for the relation
     // to improve the quality of further error output.
@@ -736,6 +734,7 @@ namespace osmscout {
       }
     }
 
+    // Type (might still be unknown at this point if type is defined at the outer ring)
     relation.SetType(rawRelation.GetType());
 
     std::list<MultipolygonPart> parts;
@@ -763,6 +762,31 @@ namespace osmscout {
       return false;
     }
 
+    /*
+    if (rawRelation.tags.size()>0) {
+      size_t outerRings=0;
+
+      for (std::list<MultipolygonPart>::iterator ring=parts.begin();
+           ring!=parts.end();
+           ring++) {
+        if (ring->role.ring==0) {
+          outerRings++;
+        }
+      }
+
+      if (outerRings==1) {
+        for (std::list<MultipolygonPart>::iterator ring=parts.begin();
+             ring!=parts.end();
+             ring++) {
+          if (ring->role.ring==0 &&
+              ring->ways.size()==1 &&
+              ring->ways.front()->GetTags().size()>0) {
+            std::cout << "!!! Relation " << rawRelation.GetId() << " has tags at relation and outer ring!" << std::endl;
+          }
+        }
+      }
+    }*/
+
     // Resolve SegmentAttributes for each ring
 
     for (std::list<MultipolygonPart>::iterator ring=parts.begin();
@@ -776,9 +800,7 @@ namespace osmscout {
 
         if (!ring->role.attributes.SetTags(progress,
                                            typeConfig,
-                                           ring->ways.front()->GetId(),
-                                           tags,
-                                           reverseNodes)) {
+                                           tags)) {
           return false;
         }
       }
@@ -850,9 +872,7 @@ namespace osmscout {
 
     if (!relation.attributes.SetTags(progress,
                                      typeConfig,
-                                     rawRelation.GetId(),
-                                     rawRelation.tags,
-                                     reverseNodes)) {
+                                     rawRelation.tags)) {
       return false;
     }
 
@@ -937,7 +957,7 @@ namespace osmscout {
     progress.SetAction("Generate relarea.tmp");
 
     FileScanner         scanner;
-    FileWriter          relWriter;
+    FileWriter          writer;
     uint32_t            rawRelationCount=0;
     size_t              selectedRelationCount=0;
     uint32_t            writtenRelationCount=0;
@@ -964,13 +984,13 @@ namespace osmscout {
       return false;
     }
 
-    if (!relWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
-                                        "relarea.tmp"))) {
+    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+                                     "relarea.tmp"))) {
       progress.Error("Cannot create 'relarea.dat'");
       return false;
     }
 
-    relWriter.Write(writtenRelationCount);
+    writer.Write(writtenRelationCount);
 
     for (uint32_t r=1; r<=rawRelationCount; r++) {
       progress.SetProgress(r,rawRelationCount);
@@ -993,6 +1013,7 @@ namespace osmscout {
         continue;
       }
 
+      // We should ignore the relation because of its type
       if (rawRel.GetType()!=typeIgnore &&
           typeConfig.GetTypeInfo(rawRel.GetType()).GetIgnore()) {
         continue;
@@ -1005,27 +1026,35 @@ namespace osmscout {
       // Check, if the type should be handled as multipolygon
       isArea=typeConfig.GetTypeInfo(rawRel.GetType()).GetMultipolygon();
 
-      // Is it possibly a explicitly marked multipolygon?
-      if (!isArea) {
-        std::vector<Tag>::iterator tag=rawRel.tags.begin();
-        while (tag!=rawRel.tags.end()) {
-          if (tag->key==typeConfig.tagType) {
-            if (tag->value=="multipolygon") {
-              isArea=true;
-            }
+      // Remove a likely existing type=multipolygon tag
+      // if the type does not define it as multipolygon relation
+      // this surely does anyway.
+      std::vector<Tag>::iterator tag=rawRel.tags.begin();
+      while (tag!=rawRel.tags.end()) {
+        if (tag->key==typeConfig.tagType) {
+          if (tag->value=="multipolygon") {
+            isArea=true;
+          }
 
-            tag=rawRel.tags.erase(tag);
-            break;
-          }
-          else {
-            tag++;
-          }
+          tag=rawRel.tags.erase(tag);
+
+          break;
+        }
+        else {
+          tag++;
         }
       }
 
+      // if it is not a area/explicit multipolygon relation skip it.
       if (!isArea) {
         continue;
       }
+
+      // Normally we now also skip an object because of its missing type, but
+      // in case of relations things are a little bit more difficult,
+      // type might be placed at the outer ring and not on the relation
+      // itself, we thus still need to parse the complete relation for
+      // type analysis before we can skip it.
 
       Area rel;
 
@@ -1057,14 +1086,14 @@ namespace osmscout {
 
       FileOffset fileOffset;
 
-      if (!relWriter.GetPos(fileOffset)) {
+      if (!writer.GetPos(fileOffset)) {
         progress.Error(std::string("Error while reading current fileOffset in file '")+
-                       relWriter.GetFilename()+"'");
+                       writer.GetFilename()+"'");
         return false;
       }
 
-      relWriter.Write(rawRel.GetId());
-      rel.Write(relWriter);
+      writer.Write(rawRel.GetId());
+      rel.Write(writer);
 
       writtenRelationCount++;
     }
@@ -1073,11 +1102,11 @@ namespace osmscout {
                   ", "+NumberToString(selectedRelationCount)+" relation selected"+
                   ", "+NumberToString(writtenRelationCount)+" relations written");
 
-    relWriter.SetPos(0);
-    relWriter.Write(writtenRelationCount);
+    writer.SetPos(0);
+    writer.Write(writtenRelationCount);
 
     if (!(scanner.Close() &&
-          relWriter.Close() &&
+          writer.Close() &&
           wayDataFile.Close() &&
           coordDataFile.Close())) {
       return false;
@@ -1085,7 +1114,7 @@ namespace osmscout {
 
     progress.SetAction("Generate wayareablack.dat");
 
-    if (!relWriter.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
+    if (!writer.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                         "wayareablack.dat"))) {
       progress.Error("Cannot create 'wayblack.dat'");
       return false;
@@ -1094,7 +1123,7 @@ namespace osmscout {
     for (IdSet::const_iterator id=wayAreaIndexBlacklist.begin();
          id!=wayAreaIndexBlacklist.end();
          ++id) {
-      relWriter.WriteNumber(*id);
+      writer.WriteNumber(*id);
     }
 
     progress.Info(NumberToString(wayAreaIndexBlacklist.size())+" ways written to blacklist");
@@ -1109,6 +1138,6 @@ namespace osmscout {
       progress.Debug(buffer);
     }
 
-    return relWriter.Close();
+    return writer.Close();
   }
 }

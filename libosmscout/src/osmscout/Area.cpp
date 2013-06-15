@@ -26,10 +26,8 @@
 namespace osmscout {
 
   bool AreaAttributes::SetTags(Progress& progress,
-                                  const TypeConfig& typeConfig,
-                                  Id id,
-                                  std::vector<Tag>& tags,
-                                  bool& reverseNodes)
+                               const TypeConfig& typeConfig,
+                               std::vector<Tag>& tags)
   {
     uint32_t namePriority=0;
     uint32_t nameAltPriority=0;
@@ -40,8 +38,6 @@ namespace osmscout {
     flags=0;
 
     this->tags.clear();
-
-    reverseNodes=false;
 
     flags|=hasAccess;
 

@@ -194,16 +194,13 @@ namespace osmscout {
   {
     std::vector<Tag> tags(rawWay.GetTags());
     Area             area;
-    bool             reverseNodes=false;
     OSMId            wayId=rawWay.GetId();
 
     area.SetType(rawWay.GetType());
 
     if (!area.attributes.SetTags(progress,
                                  typeConfig,
-                                 wayId,
-                                 tags,
-                                 reverseNodes)) {
+                                 tags)) {
       return true;
     }
 

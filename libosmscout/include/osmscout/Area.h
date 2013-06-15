@@ -97,9 +97,7 @@ namespace osmscout {
 
     bool SetTags(Progress& progress,
                  const TypeConfig& typeConfig,
-                 Id id,
-                 std::vector<Tag>& tags,
-                 bool& reverseNodes);
+                 std::vector<Tag>& tags);
 
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;
@@ -153,6 +151,7 @@ namespace osmscout {
 
   public:
     inline Area()
+    : fileOffset(0)
     {
       // no code
     }
