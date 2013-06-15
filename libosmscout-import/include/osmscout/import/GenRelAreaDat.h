@@ -117,7 +117,7 @@ namespace osmscout {
 
     struct MultipolygonPart
     {
-      Area::Role           role;
+      Area::Ring           role;
       std::list<RawWayRef> ways;
 
       inline bool IsArea() const

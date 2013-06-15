@@ -41,11 +41,11 @@ namespace osmscout {
     return flags;
   }
 
-  static uint8_t CopyFlags(const Area::Role& role)
+  static uint8_t CopyFlags(const Area::Ring& ring)
   {
     uint8_t flags=0;
 
-    if (role.attributes.HasAccess()) {
+    if (ring.attributes.HasAccess()) {
       flags|=RouteNode::hasAccess;
     }
 
@@ -481,14 +481,14 @@ namespace osmscout {
       }
 
       // We currently route only on simple areas, multipolygon relations
-      if (area.roles.size()!=1) {
+      if (!area.IsSimple()) {
         continue;
       }
 
       std::set<Id> nodeIds;
 
-      for (std::vector<Id>::const_iterator id=area.roles[0].ids.begin();
-          id!=area.roles[0].ids.end();
+      for (std::vector<Id>::const_iterator id=area.rings.front().ids.begin();
+          id!=area.rings.front().ids.end();
           id++) {
         if (*id==0) {
           continue;
@@ -644,14 +644,14 @@ namespace osmscout {
       }
 
       // We currently route only on simple areas, multipolygon relations
-      if (area.roles.size()!=1) {
+      if (!area.IsSimple()) {
         continue;
       }
 
       std::set<Id> nodeIds;
 
-      for (std::vector<Id>::const_iterator id=area.roles[0].ids.begin();
-          id!=area.roles[0].ids.end();
+      for (std::vector<Id>::const_iterator id=area.rings.front().ids.begin();
+          id!=area.rings.front().ids.end();
           id++) {
         if (*id==0) {
           continue;
@@ -809,52 +809,52 @@ namespace osmscout {
   {
     int               currentNode=0;
     double            distance;
-    const Area::Role& role=area.roles[0];
+    const Area::Ring& ring=area.rings.front();
 
     // Find current route node in area
-    while (currentNode<(int)role.nodes.size() &&
-          role.ids[currentNode]!=routeNode.id) {
+    while (currentNode<(int)ring.nodes.size() &&
+          ring.ids[currentNode]!=routeNode.id) {
       currentNode++;
     }
 
     // Make sure we found it
-    assert(currentNode<(int)role.nodes.size());
+    assert(currentNode<(int)ring.nodes.size());
 
     // Find next routing node in order
 
     int nextNode=currentNode+1;
 
-    if (nextNode>=(int)role.nodes.size()) {
+    if (nextNode>=(int)ring.nodes.size()) {
       nextNode=0;
     }
 
-    distance=GetSphericalDistance(role.nodes[currentNode].GetLon(),
-                                  role.nodes[currentNode].GetLat(),
-                                  role.nodes[nextNode].GetLon(),
-                                  role.nodes[nextNode].GetLat());
+    distance=GetSphericalDistance(ring.nodes[currentNode].GetLon(),
+                                  ring.nodes[currentNode].GetLat(),
+                                  ring.nodes[nextNode].GetLon(),
+                                  ring.nodes[nextNode].GetLat());
 
     while (nextNode!=currentNode &&
-           nodeObjectsMap.find(role.ids[nextNode])==nodeObjectsMap.end()) {
+           nodeObjectsMap.find(ring.ids[nextNode])==nodeObjectsMap.end()) {
       int lastNode=nextNode;
       nextNode++;
 
-      if (nextNode>=(int)role.nodes.size()) {
+      if (nextNode>=(int)ring.nodes.size()) {
         nextNode=0;
       }
 
       if (nextNode!=currentNode) {
-        distance+=GetSphericalDistance(role.nodes[lastNode].GetLon(),
-                                       role.nodes[lastNode].GetLat(),
-                                       role.nodes[nextNode].GetLon(),
-                                       role.nodes[nextNode].GetLat());
+        distance+=GetSphericalDistance(ring.nodes[lastNode].GetLon(),
+                                       ring.nodes[lastNode].GetLat(),
+                                       ring.nodes[nextNode].GetLon(),
+                                       ring.nodes[nextNode].GetLat());
       }
     }
 
     // Found next routing node in order
     if (nextNode!=currentNode &&
-        role.ids[nextNode]!=routeNode.id) {
+        ring.ids[nextNode]!=routeNode.id) {
       RouteNode::Path                 path;
-      NodeIdOffsetMap::const_iterator pathNodeOffset=nodeIdOffsetMap.find(role.ids[nextNode]);
+      NodeIdOffsetMap::const_iterator pathNodeOffset=nodeIdOffsetMap.find(ring.ids[nextNode]);
 
       if (pathNodeOffset!=nodeIdOffsetMap.end()) {
         path.offset=pathNodeOffset->second;
@@ -865,7 +865,7 @@ namespace osmscout {
         pendingOffset.routeNodeOffset=routeNodeOffset;
         pendingOffset.index=routeNode.paths.size();
 
-        pendingOffsetsMap[role.ids[nextNode]].push_back(pendingOffset);
+        pendingOffsetsMap[ring.ids[nextNode]].push_back(pendingOffset);
       }
 
       path.objectIndex=(uint32_t)routeNode.objects.size()-1;
@@ -873,9 +873,9 @@ namespace osmscout {
       path.maxSpeed=0;
       path.grade=1;
       //path.bearing=CalculateEncodedBearing(way,currentNode,nextNode,true);
-      path.flags=CopyFlags(role);
-      path.lat=role.nodes[nextNode].GetLat();
-      path.lon=role.nodes[nextNode].GetLon();
+      path.flags=CopyFlags(ring);
+      path.lat=ring.nodes[nextNode].GetLat();
+      path.lon=ring.nodes[nextNode].GetLon();
       path.distance=distance;
 
       routeNode.paths.push_back(path);
@@ -886,28 +886,28 @@ namespace osmscout {
     int prevNode=currentNode-1;
 
     if (prevNode<0) {
-      prevNode=(int)(role.nodes.size()-1);
+      prevNode=(int)(ring.nodes.size()-1);
     }
 
-    distance=GetSphericalDistance(role.nodes[currentNode].GetLon(),
-                                  role.nodes[currentNode].GetLat(),
-                                  role.nodes[prevNode].GetLon(),
-                                  role.nodes[prevNode].GetLat());
+    distance=GetSphericalDistance(ring.nodes[currentNode].GetLon(),
+                                  ring.nodes[currentNode].GetLat(),
+                                  ring.nodes[prevNode].GetLon(),
+                                  ring.nodes[prevNode].GetLat());
 
     while (prevNode!=currentNode &&
-        nodeObjectsMap.find(role.ids[prevNode])==nodeObjectsMap.end()) {
+        nodeObjectsMap.find(ring.ids[prevNode])==nodeObjectsMap.end()) {
       int lastNode=prevNode;
       prevNode--;
 
       if (prevNode<0) {
-        prevNode=(int)(role.nodes.size()-1);
+        prevNode=(int)(ring.nodes.size()-1);
       }
 
       if (prevNode!=currentNode) {
-        distance+=GetSphericalDistance(role.nodes[lastNode].GetLon(),
-                                       role.nodes[lastNode].GetLat(),
-                                       role.nodes[prevNode].GetLon(),
-                                       role.nodes[prevNode].GetLat());
+        distance+=GetSphericalDistance(ring.nodes[lastNode].GetLon(),
+                                       ring.nodes[lastNode].GetLat(),
+                                       ring.nodes[prevNode].GetLon(),
+                                       ring.nodes[prevNode].GetLat());
       }
     }
 
@@ -915,9 +915,9 @@ namespace osmscout {
 
     if (prevNode!=currentNode &&
         prevNode!=nextNode &&
-        role.ids[prevNode]!=routeNode.id) {
+        ring.ids[prevNode]!=routeNode.id) {
       RouteNode::Path                 path;
-      NodeIdOffsetMap::const_iterator pathNodeOffset=nodeIdOffsetMap.find(role.ids[prevNode]);
+      NodeIdOffsetMap::const_iterator pathNodeOffset=nodeIdOffsetMap.find(ring.ids[prevNode]);
 
       if (pathNodeOffset!=nodeIdOffsetMap.end()) {
         path.offset=pathNodeOffset->second;
@@ -928,17 +928,17 @@ namespace osmscout {
         pendingOffset.routeNodeOffset=routeNodeOffset;
         pendingOffset.index=routeNode.paths.size();
 
-        pendingOffsetsMap[role.ids[prevNode]].push_back(pendingOffset);
+        pendingOffsetsMap[ring.ids[prevNode]].push_back(pendingOffset);
       }
 
       path.objectIndex=(uint32_t)routeNode.objects.size()-1;
-      path.type=role.GetType();
+      path.type=ring.GetType();
       path.maxSpeed=0;
       path.grade=1;
       //path.bearing=CalculateEncodedBearing(way,currentNode,prevNode,false);
-      path.flags=CopyFlags(role);
-      path.lat=role.nodes[prevNode].GetLat();
-      path.lon=role.nodes[prevNode].GetLon();
+      path.flags=CopyFlags(ring);
+      path.lat=ring.nodes[prevNode].GetLat();
+      path.lon=ring.nodes[prevNode].GetLon();
       path.distance=distance;
 
       routeNode.paths.push_back(path);

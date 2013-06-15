@@ -202,7 +202,7 @@ namespace osmscout {
 
       assert(entry!=areaMap.end());
 
-      nodeId=entry->second->roles[0].ids[nodeIndex];
+      nodeId=entry->second->rings.front().ids[nodeIndex];
     }
     else if (object.GetType()==refWay) {
       OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=wayMap.find(nodeObject.GetFileOffset());
@@ -245,8 +245,8 @@ namespace osmscout {
 
       assert(entry!=areaMap.end());
 
-      lat=entry->second->roles[0].nodes[nodeIndex].lat;
-      lon=entry->second->roles[0].nodes[nodeIndex].lon;
+      lat=entry->second->rings.front().nodes[nodeIndex].lat;
+      lon=entry->second->rings.front().nodes[nodeIndex].lon;
     }
     else if (object.GetType()==refWay) {
       OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=wayMap.find(object.GetFileOffset());
@@ -349,7 +349,7 @@ namespace osmscout {
           assert(false);
           break;
         case refArea:
-          curCoord=area->roles[0].nodes[iter->GetCurrentNodeIndex()];
+          curCoord=area->rings.front().nodes[iter->GetCurrentNodeIndex()];
           break;
         case refWay:
           curCoord=way->nodes[iter->GetCurrentNodeIndex()];

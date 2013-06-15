@@ -245,10 +245,10 @@ namespace osmscout {
       }
 
       if (cityIds.find(area.GetType())!=cityIds.end()) {
-        for (std::vector<Area::Role>::const_iterator role=area.roles.begin();
-             role!=area.roles.end();
-             ++role) {
-          if (role->ring!=0) {
+        for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
+             ring!=area.rings.end();
+             ++ring) {
+          if (ring->ring!=0) {
             continue;
           }
 
@@ -258,7 +258,7 @@ namespace osmscout {
 
           cityArea.reference.Set(area.GetFileOffset(),refArea);
           cityArea.name=name;
-          cityArea.nodes=role->nodes;
+          cityArea.nodes=ring->nodes;
 
           cityAreas.push_back(cityArea);
         }
@@ -373,11 +373,11 @@ namespace osmscout {
               boundary.name=area.GetName();
               boundary.level=level;
 
-              for (std::vector<Area::Role>::const_iterator role=area.roles.begin();
-                   role!=area.roles.end();
-                   ++role) {
-                if (role->ring==0) {
-                  boundary.areas.push_back(role->nodes);
+              for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
+                   ring!=area.rings.end();
+                   ++ring) {
+                if (ring->ring==0) {
+                  boundary.areas.push_back(ring->nodes);
                 }
               }
 
@@ -519,7 +519,7 @@ namespace osmscout {
 
   static bool AddAreaToRegion(Region& region,
                               const Area& area,
-                              const Area::Role& role,
+                              const Area::Ring& ring,
                               double minlon,
                               double minlat,
                               double maxlon,
@@ -534,10 +534,10 @@ namespace osmscout {
           !(maxlat<r->minlat) &&
           !(minlat>r->maxlat)) {
         // Check if one point is in the area
-        bool match=IsCoordInArea(role.nodes[0],r->area);
+        bool match=IsCoordInArea(ring.nodes[0],r->area);
 
         if (match) {
-          bool completeMatch=AddAreaToRegion(*r,area,role,minlon,minlat,maxlon,maxlat);
+          bool completeMatch=AddAreaToRegion(*r,area,ring,minlon,minlat,maxlon,maxlat);
 
           if (completeMatch) {
             // We are done, the object is completely enclosed by one of our sub areas
@@ -551,7 +551,7 @@ namespace osmscout {
 
     region.areas[area.GetName()].push_back(area.GetFileOffset());
 
-    bool completeMatch=IsAreaCompletelyInArea(role.nodes,region.area);
+    bool completeMatch=IsAreaCompletelyInArea(ring.nodes,region.area);
 
     return completeMatch;
   }
@@ -576,16 +576,16 @@ namespace osmscout {
                               double maxlon,
                               double maxlat)
   {
-    for (std::vector<Area::Role>::const_iterator role=area.roles.begin();
-         role!=area.roles.end();
-         ++role) {
-      if (role->ring!=0) {
+    for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
+         ring!=area.rings.end();
+         ++ring) {
+      if (ring->ring!=0) {
         continue;
       }
 
       AddAreaToRegion(region,
                       area,
-                      *role,
+                      *ring,
                       minlon,
                       minlat,
                       maxlon,

@@ -1065,20 +1065,20 @@ namespace osmscout {
          ++r) {
       const AreaRef& area=*r;
 
-      for (size_t m=0; m<area->roles.size(); m++) {
-        if (area->roles[m].ring==0) {
+      for (size_t m=0; m<area->rings.size(); m++) {
+        if (area->rings[m].ring==0) {
           DrawAreaLabel(styleConfig,
                         projection,
                         parameter,
                         area->attributes,
-                        area->roles[m].nodes);
+                        area->rings[m].nodes);
         }
         else {
           DrawAreaLabel(styleConfig,
                         projection,
                         parameter,
-                        area->roles[m].attributes,
-                        area->roles[m].nodes);
+                        area->rings[m].attributes,
+                        area->rings[m].nodes);
         }
       }
     }
@@ -1482,29 +1482,29 @@ namespace osmscout {
          ++a) {
       const AreaRef& area=*a;
 
-      std::vector<PolyData> data(area->roles.size());
+      std::vector<PolyData> data(area->rings.size());
 
-      for (size_t i=0; i<area->roles.size(); i++) {
+      for (size_t i=0; i<area->rings.size(); i++) {
         transBuffer.TransformArea(projection,
                                   parameter.GetOptimizeAreaNodes(),
-                                  area->roles[i].nodes,
+                                  area->rings[i].nodes,
                                   data[i].transStart,data[i].transEnd,
                                   parameter.GetOptimizeErrorToleranceDots());
       }
 
-      size_t ring=0;
+      size_t ringId=0;
       bool foundRing=true;
 
       while (foundRing) {
         foundRing=false;
 
-        for (size_t i=0; i<area->roles.size(); i++) {
-          const Area::Role& role=area->roles[i];
+        for (size_t i=0; i<area->rings.size(); i++) {
+          const Area::Ring& ring=area->rings[i];
 
-          if (role.ring==ring) {
+          if (ring.ring==ringId) {
             FillStyleRef fillStyle;
 
-            if (role.ring==0) {
+            if (ring.ring==0) {
               if (area->GetType()!=typeIgnore) {
                 styleConfig.GetAreaFillStyle(area->GetAttributes(),
                                              projection,
@@ -1514,7 +1514,7 @@ namespace osmscout {
             }
             else {
               if (area->GetType()!=typeIgnore) {
-                styleConfig.GetAreaFillStyle(role.GetAttributes(),
+                styleConfig.GetAreaFillStyle(ring.GetAttributes(),
                                              projection,
                                              parameter.GetDPI(),
                                              fillStyle);
@@ -1529,7 +1529,7 @@ namespace osmscout {
             foundRing=true;
 
             if (!IsVisible(projection,
-                           role.nodes,
+                           ring.nodes,
                            fillStyle->GetBorderWidth()/2)) {
               continue;
             }
@@ -1543,30 +1543,30 @@ namespace osmscout {
             // Since we know that rings a created deep first, we only take into account direct followers
             // in the list with ring+1.
             size_t j=i+1;
-            while (j<area->roles.size() &&
-                   area->roles[j].ring==ring+1 &&
-                   area->roles[j].GetType()==typeIgnore) {
+            while (j<area->rings.size() &&
+                   area->rings[j].ring==ringId+1 &&
+                   area->rings[j].GetType()==typeIgnore) {
               a.clippings.push_back(data[j]);
 
               j++;
             }
 
             a.ref=ObjectFileRef(area->GetFileOffset(),refArea);
-            a.attributes=&role.attributes;
+            a.attributes=&ring.attributes;
             a.fillStyle=fillStyle;
             a.transStart=data[i].transStart;
             a.transEnd=data[i].transEnd;
 
-            a.minLat=role.nodes[0].GetLat();
-            a.maxLat=role.nodes[0].GetLat();
-            a.maxLon=role.nodes[0].GetLon();
-            a.minLon=role.nodes[0].GetLon();
+            a.minLat=ring.nodes[0].GetLat();
+            a.maxLat=ring.nodes[0].GetLat();
+            a.maxLon=ring.nodes[0].GetLon();
+            a.minLon=ring.nodes[0].GetLon();
 
-            for (size_t i=1; i<role.nodes.size(); i++) {
-              a.minLat=std::min(a.minLat,role.nodes[i].GetLat());
-              a.maxLat=std::min(a.maxLat,role.nodes[i].GetLat());
-              a.minLon=std::min(a.minLon,role.nodes[i].GetLon());
-              a.maxLon=std::min(a.maxLon,role.nodes[i].GetLon());
+            for (size_t i=1; i<ring.nodes.size(); i++) {
+              a.minLat=std::min(a.minLat,ring.nodes[i].GetLat());
+              a.maxLat=std::min(a.maxLat,ring.nodes[i].GetLat());
+              a.minLon=std::min(a.minLon,ring.nodes[i].GetLon());
+              a.maxLon=std::min(a.maxLon,ring.nodes[i].GetLon());
             }
 
             areaData.push_back(a);
@@ -1575,7 +1575,7 @@ namespace osmscout {
           }
         }
 
-        ring++;
+        ringId++;
       }
     }
 

@@ -225,17 +225,17 @@ namespace osmscout
          ++a) {
       AreaRef                 area(*a);
       TransPolygon            polygon;
-      std::vector<Area::Role> newRoles;
+      std::vector<Area::Ring> newRings;
       double                  xmin;
       double                  xmax;
       double                  ymin;
       double                  ymax;
 
       size_t r=0;
-      while (r<area->roles.size()) {
+      while (r<area->rings.size()) {
         polygon.TransformArea(projection,
                               optimizeWayMethod,
-                              area->roles[r].nodes,
+                              area->rings[r].nodes,
                               1.0);
 
         polygon.GetBoundingBox(xmin,ymin,xmax,ymax);
@@ -246,8 +246,8 @@ namespace osmscout
           // We drop all sub roles of the current role, too
           size_t s=r;
 
-          while (s+1<area->roles.size() &&
-                 area->roles[s+1].ring>area->roles[r].ring) {
+          while (s+1<area->rings.size() &&
+                 area->rings[s+1].ring>area->rings[r].ring) {
             s++;
           }
 
@@ -255,28 +255,28 @@ namespace osmscout
           continue;
         }
 
-        newRoles.push_back(area->roles[r]);
+        newRings.push_back(area->rings[r]);
 
-        newRoles.back().nodes.clear();
+        newRings.back().nodes.clear();
 
         for (size_t i=polygon.GetStart();
              i<=polygon.GetEnd();
              i++) {
           if (polygon.points[i].draw) {
-            newRoles.back().nodes.push_back(area->roles[r].nodes[i]);
+            newRings.back().nodes.push_back(area->rings[r].nodes[i]);
           }
         }
 
         r++;
       }
 
-      if (newRoles.empty()) {
+      if (newRings.empty()) {
         continue;
       }
 
       AreaRef copiedArea=new Area(*area);
 
-      copiedArea->roles=newRoles;
+      copiedArea->rings=newRings;
 
       optimizedAreas.push_back(copiedArea);
     }
@@ -1153,10 +1153,10 @@ namespace osmscout
             ++a) {
           AreaRef area(*a);
 
-          origRoles+=area->roles.size();
+          origRoles+=area->rings.size();
 
-          for (size_t r=0; r<area->roles.size(); r++) {
-            origNodes+=area->roles[r].nodes.size();
+          for (size_t r=0; r<area->rings.size(); r++) {
+            origNodes+=area->rings[r].nodes.size();
           }
         }
 
@@ -1199,10 +1199,10 @@ namespace osmscout
               ++a) {
             AreaRef area=*a;
 
-            optRoles+=area->roles.size();
+            optRoles+=area->rings.size();
 
-            for (size_t r=0; r<area->roles.size(); r++) {
-              optNodes+=area->roles[r].nodes.size();
+            for (size_t r=0; r<area->rings.size(); r++) {
+              optNodes+=area->rings[r].nodes.size();
             }
           }
 

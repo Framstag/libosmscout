@@ -33,13 +33,13 @@ namespace osmscout {
                               double& maxLat,
                               double& minLon)
     {
-      maxLat=data.roles[0].nodes[0].GetLat();
-      minLon=data.roles[0].nodes[0].GetLon();
+      maxLat=data.rings.front().nodes[0].GetLat();
+      minLon=data.rings.front().nodes[0].GetLon();
 
-      for (size_t r=0; r<data.roles.size(); r++) {
-        for (size_t n=1; n<data.roles[r].nodes.size(); n++) {
-          maxLat=std::max(maxLat,data.roles[r].nodes[n].GetLat());
-          minLon=std::min(minLon,data.roles[r].nodes[n].GetLon());
+      for (size_t r=0; r<data.rings.size(); r++) {
+        for (size_t n=1; n<data.rings[r].nodes.size(); n++) {
+          maxLat=std::max(maxLat,data.rings[r].nodes[n].GetLat());
+          minLon=std::min(minLon,data.rings[r].nodes[n].GetLon());
         }
       }
     }

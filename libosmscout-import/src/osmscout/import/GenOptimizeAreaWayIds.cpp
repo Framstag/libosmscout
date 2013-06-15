@@ -125,13 +125,13 @@ namespace osmscout {
         return false;
       }
 
-      for (std::vector<Area::Role>::const_iterator role=data.roles.begin();
-           role!=data.roles.end();
-           role++) {
+      for (std::vector<Area::Ring>::const_iterator ring=data.rings.begin();
+           ring!=data.rings.end();
+           ring++) {
         std::set<Id> nodeIds;
 
-        for (std::vector<Id>::const_iterator id=role->ids.begin();
-             id!=role->ids.end();
+        for (std::vector<Id>::const_iterator id=ring->ids.begin();
+             id!=ring->ids.end();
              id++) {
           if (nodeIds.find(*id)==nodeIds.end()) {
             SetNodeUsed(nodeUseMap,*id);
@@ -199,13 +199,13 @@ namespace osmscout {
         return false;
       }
 
-      for (std::vector<Area::Role>::const_iterator role=data.roles.begin();
-           role!=data.roles.end();
-           role++) {
+      for (std::vector<Area::Ring>::const_iterator ring=data.rings.begin();
+           ring!=data.rings.end();
+           ring++) {
         std::set<Id> nodeIds;
 
-        for (std::vector<Id>::const_iterator id=role->ids.begin();
-             id!=role->ids.end();
+        for (std::vector<Id>::const_iterator id=ring->ids.begin();
+             id!=ring->ids.end();
              id++) {
           if (nodeIds.find(*id)==nodeIds.end()) {
             SetNodeUsed(nodeUseMap,*id);
@@ -352,13 +352,13 @@ namespace osmscout {
         return false;
       }
 
-      for (std::vector<Area::Role>::iterator role=data.roles.begin();
-           role!=data.roles.end();
-           role++) {
+      for (std::vector<Area::Ring>::iterator ring=data.rings.begin();
+           ring!=data.rings.end();
+           ring++) {
         std::set<Id> nodeIds;
 
-        for (std::vector<Id>::iterator id=role->ids.begin();
-             id!=role->ids.end();
+        for (std::vector<Id>::iterator id=ring->ids.begin();
+             id!=ring->ids.end();
              id++) {
           if (!IsNodeUsedAtLeastTwice(nodeUseMap,*id)) {
             *id=0;
@@ -453,13 +453,13 @@ namespace osmscout {
         return false;
       }
 
-      for (std::vector<Area::Role>::iterator role=data.roles.begin();
-           role!=data.roles.end();
-           role++) {
+      for (std::vector<Area::Ring>::iterator ring=data.rings.begin();
+           ring!=data.rings.end();
+           ring++) {
         std::set<Id> nodeIds;
 
-        for (std::vector<Id>::iterator id=role->ids.begin();
-             id!=role->ids.end();
+        for (std::vector<Id>::iterator id=ring->ids.begin();
+             id!=ring->ids.end();
              id++) {
           if (!IsNodeUsedAtLeastTwice(nodeUseMap,*id)) {
             *id=0;

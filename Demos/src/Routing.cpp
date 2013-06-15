@@ -129,10 +129,10 @@ static bool LookupClosedNodeAtLocation(osmscout::Database& database,
           osmscout::AreaRef tmpArea;
 
           if (database.GetAreaByOffset(reference->GetFileOffset(),tmpArea)) {
-            if (tmpArea->roles.size()==1) {
-              for (size_t i=0; i<tmpArea->roles[0].nodes.size(); i++) {
-                double distance=sqrt((tmpArea->roles[0].nodes[i].GetLat()-lat)*(tmpArea->roles[0].nodes[i].GetLat()-lat)+
-                                     (tmpArea->roles[0].nodes[i].GetLon()-lon)*(tmpArea->roles[0].nodes[i].GetLon()-lon));
+            if (tmpArea->rings.size()==1) {
+              for (size_t i=0; i<tmpArea->rings[0].nodes.size(); i++) {
+                double distance=sqrt((tmpArea->rings[0].nodes[i].GetLat()-lat)*(tmpArea->rings[0].nodes[i].GetLat()-lat)+
+                                     (tmpArea->rings[0].nodes[i].GetLon()-lon)*(tmpArea->rings[0].nodes[i].GetLon()-lon));
 
                 if (distance<minDistance) {
                   minDistance=distance;

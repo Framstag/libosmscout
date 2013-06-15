@@ -397,7 +397,7 @@ namespace osmscout {
 
       assert(entry!=areaMap.end());
 
-      ids=&entry->second->roles[0].ids;
+      ids=&entry->second->rings.front().ids;
       oneway=false;
     }
     else if (startObject.GetType()==refWay) {
@@ -473,7 +473,7 @@ namespace osmscout {
 
           assert(entry!=areaMap.end());
 
-          ids=&entry->second->roles[0].ids;
+          ids=&entry->second->rings.front().ids;
           oneway=false;
         }
         else if ((*n)->object.GetType()==refWay) {
@@ -519,7 +519,7 @@ namespace osmscout {
 
         assert(entry!=areaMap.end());
 
-        ids=&entry->second->roles[0].ids;
+        ids=&entry->second->rings.front().ids;
         oneway=false;
       }
       else if ((*nn)->object.GetType()==refWay) {
@@ -1056,14 +1056,14 @@ namespace osmscout {
           if (iter==data.Entries().begin()) {
             size_t index=iter->GetCurrentNodeIndex();
 
-            way.ids.push_back(a->roles[0].ids[index]);
-            way.nodes.push_back(a->roles[0].nodes[index]);
+            way.ids.push_back(a->rings.front().ids[index]);
+            way.nodes.push_back(a->rings.front().nodes[index]);
           }
 
           size_t index=iter->GetTargetNodeIndex();
 
-          way.ids.push_back(a->roles[0].ids[index]);
-          way.nodes.push_back(a->roles[0].nodes[index]);
+          way.ids.push_back(a->rings.front().ids[index]);
+          way.nodes.push_back(a->rings.front().nodes[index]);
         }
         else if (iter->GetPathObject().GetType()==refWay) {
           WayRef w;
@@ -1120,17 +1120,17 @@ namespace osmscout {
           if (iter==data.Entries().begin()) {
             size_t index=iter->GetCurrentNodeIndex();
 
-            points.push_back(Point(a->roles[0].ids[index],
-                                   a->roles[0].nodes[index].GetLat(),
-                                   a->roles[0].nodes[index].GetLon()));
+            points.push_back(Point(a->rings.front().ids[index],
+                                   a->rings.front().nodes[index].GetLat(),
+                                   a->rings.front().nodes[index].GetLon()));
           }
 
           // target node of current path
           size_t index=iter->GetTargetNodeIndex();
 
-          points.push_back(Point(a->roles[0].ids[index],
-                                 a->roles[0].nodes[index].GetLat(),
-                                 a->roles[0].nodes[index].GetLon()));
+          points.push_back(Point(a->rings.front().ids[index],
+                                 a->rings.front().nodes[index].GetLat(),
+                                 a->rings.front().nodes[index].GetLon()));
         }
         else if (iter->GetPathObject().GetType()==refWay) {
           if (w.Invalid() ||

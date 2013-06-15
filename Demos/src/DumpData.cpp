@@ -412,13 +412,13 @@ static void DumpArea(const osmscout::TypeConfig* typeConfig,
                             typeConfig,
                             2);
 
-  for (size_t r=0; r<area->roles.size(); r++) {
+  for (size_t r=0; r<area->rings.size(); r++) {
     std::cout << std::endl;
     std::cout << "  role[" << r << "] {" << std::endl;
 
-    std::cout << "    ring: " << (size_t)area->roles[r].ring << std::endl;
+    std::cout << "    ring: " << (size_t)area->rings[r].ring << std::endl;
 
-    DumpAreaSegmentAttributes(area->roles[r].GetAttributes(),
+    DumpAreaSegmentAttributes(area->rings[r].GetAttributes(),
                               typeConfig,
                               4);
 

@@ -204,11 +204,11 @@ namespace osmscout {
       return true;
     }
 
-    Area::Role role;
+    Area::Ring ring;
 
-    role.ring=0;
-    role.ids.resize(rawWay.GetNodeCount());
-    role.nodes.resize(rawWay.GetNodeCount());
+    ring.ring=0;
+    ring.ids.resize(rawWay.GetNodeCount());
+    ring.nodes.resize(rawWay.GetNodeCount());
 
     bool success=true;
     for (size_t n=0; n<rawWay.GetNodeCount(); n++) {
@@ -223,9 +223,9 @@ namespace osmscout {
         break;
       }
 
-      role.ids[n]=coord->second.GetId();
+      ring.ids[n]=coord->second.GetId();
 
-      role.nodes[n].Set(coord->second.GetLat(),
+      ring.nodes[n].Set(coord->second.GetLat(),
                         coord->second.GetLon());
     }
 
@@ -234,12 +234,12 @@ namespace osmscout {
     }
 
     if (parameter.GetStrictAreas() &&
-        !AreaIsSimple(role.nodes)) {
+        !AreaIsSimple(ring.nodes)) {
       progress.Error("Area "+NumberToString(wayId)+" of type '"+typeConfig.GetTypeInfo(area.GetType()).GetName()+"' is not simple");
       return true;
     }
 
-    area.roles.push_back(role);
+    area.rings.push_back(ring);
 
     if (!writer.Write(wayId)) {
       return false;

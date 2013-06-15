@@ -893,16 +893,16 @@ namespace osmscout {
 
     // (Re)create roles for relation
 
-    relation.roles.reserve(parts.size());
+    relation.rings.reserve(parts.size());
     for (std::list<MultipolygonPart>::iterator ring=parts.begin();
          ring!=parts.end();
          ring++) {
       assert(!ring->role.nodes.empty());
 
-      relation.roles.push_back(ring->role);
+      relation.rings.push_back(ring->role);
     }
 
-    assert(!relation.roles.empty());
+    assert(!relation.rings.empty());
 
     return true;
   }
@@ -1078,9 +1078,9 @@ namespace osmscout {
       }
 
       areaTypeCount[rel.GetType()]++;
-      for (size_t i=0; i<rel.roles.size(); i++) {
-        if (rel.roles[i].ring==0) {
-          areaNodeTypeCount[rel.GetType()]+=rel.roles[i].nodes.size();
+      for (size_t i=0; i<rel.rings.size(); i++) {
+        if (rel.rings[i].ring==0) {
+          areaNodeTypeCount[rel.GetType()]+=rel.rings[i].nodes.size();
         }
       }
 
