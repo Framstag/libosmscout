@@ -104,7 +104,6 @@ namespace osmscout {
   {
     uint8_t flags;
 
-    scanner.ReadNumber(type);
     scanner.Read(flags);
 
     if (scanner.HasError()) {
@@ -145,8 +144,6 @@ namespace osmscout {
 
   bool AreaAttributes::Write(FileWriter& writer) const
   {
-    writer.WriteNumber(type);
-
     if (!name.empty()) {
       flags|=hasName;
     }
@@ -203,10 +200,6 @@ namespace osmscout {
 
   bool AreaAttributes::operator==(const AreaAttributes& other) const
   {
-    if (type!=other.type) {
-      return false;
-    }
-
     if (name!=other.name ||
         nameAlt!=other.nameAlt ||
         houseNr!=other.houseNr) {
@@ -307,7 +300,7 @@ namespace osmscout {
 
   void Area::SetType(TypeId type)
   {
-    attributes.type=type;
+    this->type=type;
   }
 
   bool Area::Read(FileScanner& scanner)
@@ -317,6 +310,8 @@ namespace osmscout {
     if (!scanner.GetPos(fileOffset)) {
       return false;
     }
+
+    scanner.ReadNumber(type);
 
     if (!attributes.Read(scanner)) {
       return false;
@@ -330,6 +325,8 @@ namespace osmscout {
     rings.resize(roleCount);
     for (size_t i=0; i<roleCount; i++) {
       uint32_t nodesCount;
+
+      scanner.ReadNumber(rings[i].type);
 
       if (!rings[i].attributes.Read(scanner)) {
         return false;
@@ -383,6 +380,8 @@ namespace osmscout {
       return false;
     }
 
+    scanner.ReadNumber(type);
+
     if (!attributes.Read(scanner)) {
       return false;
     }
@@ -395,6 +394,8 @@ namespace osmscout {
     rings.resize(roleCount);
     for (size_t i=0; i<roleCount; i++) {
       uint32_t nodesCount;
+
+      scanner.ReadNumber(rings[i].type);
 
       if (!rings[i].attributes.Read(scanner)) {
         return false;
@@ -431,12 +432,16 @@ namespace osmscout {
 
   bool Area::Write(FileWriter& writer) const
   {
+    writer.WriteNumber(type);
+
     if (!attributes.Write(writer)) {
       return false;
     }
 
     writer.WriteNumber((uint32_t)rings.size());
     for (size_t i=0; i<rings.size(); i++) {
+      writer.WriteNumber(rings[i].type);
+
       if (!rings[i].attributes.Write(writer)) {
         return false;
       }
@@ -483,12 +488,16 @@ namespace osmscout {
 
   bool Area::WriteOptimized(FileWriter& writer) const
   {
+    writer.WriteNumber(type);
+
     if (!attributes.Write(writer)) {
       return false;
     }
 
     writer.WriteNumber((uint32_t)rings.size());
     for (size_t i=0; i<rings.size(); i++) {
+      writer.WriteNumber(rings[i].type);
+
       if (!rings[i].attributes.Write(writer)) {
         return false;
       }

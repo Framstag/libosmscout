@@ -963,17 +963,20 @@ namespace osmscout {
   void MapPainter::DrawAreaLabel(const StyleConfig& styleConfig,
                                  const Projection& projection,
                                  const MapParameter& parameter,
+                                 const TypeId& type,
                                  const AreaAttributes& attributes,
                                  const std::vector<GeoCoord>& nodes)
   {
     TextStyleRef  textStyle;
     IconStyleRef  iconStyle;
 
-    styleConfig.GetAreaTextStyle(attributes,
+    styleConfig.GetAreaTextStyle(type,
+                                 attributes,
                                  projection,
                                  parameter.GetDPI(),
                                  textStyle);
-    styleConfig.GetAreaIconStyle(attributes,
+    styleConfig.GetAreaIconStyle(type,
+                                 attributes,
                                  projection,
                                  parameter.GetDPI(),
                                  iconStyle);
@@ -1070,6 +1073,7 @@ namespace osmscout {
           DrawAreaLabel(styleConfig,
                         projection,
                         parameter,
+                        area->GetType(),
                         area->attributes,
                         area->rings[m].nodes);
         }
@@ -1077,6 +1081,7 @@ namespace osmscout {
           DrawAreaLabel(styleConfig,
                         projection,
                         parameter,
+                        area->rings[m].GetType(),
                         area->rings[m].attributes,
                         area->rings[m].nodes);
         }
@@ -1407,7 +1412,7 @@ namespace osmscout {
       labelsDrawn++;
     }
   }
-
+/*
   bool MapPainter::PrepareAreaSegment(const StyleConfig& styleConfig,
                                       const Projection& projection,
                                       const MapParameter& parameter,
@@ -1416,7 +1421,6 @@ namespace osmscout {
                                       const std::vector<GeoCoord>& nodes)
   {
     FillStyleRef fillStyle;
-
 
     styleConfig.GetAreaFillStyle(attributes,
                                  projection,
@@ -1467,7 +1471,7 @@ namespace osmscout {
     areasSegments++;
 
     return true;
-  }
+  }*/
 
   void MapPainter::PrepareAreas(const StyleConfig& styleConfig,
                                 const Projection& projection,
@@ -1506,7 +1510,8 @@ namespace osmscout {
 
             if (ring.ring==0) {
               if (area->GetType()!=typeIgnore) {
-                styleConfig.GetAreaFillStyle(area->GetAttributes(),
+                styleConfig.GetAreaFillStyle(area->GetType(),
+                                             area->GetAttributes(),
                                              projection,
                                              parameter.GetDPI(),
                                              fillStyle);
@@ -1514,7 +1519,8 @@ namespace osmscout {
             }
             else {
               if (area->GetType()!=typeIgnore) {
-                styleConfig.GetAreaFillStyle(ring.GetAttributes(),
+                styleConfig.GetAreaFillStyle(ring.GetType(),
+                                             ring.GetAttributes(),
                                              projection,
                                              parameter.GetDPI(),
                                              fillStyle);

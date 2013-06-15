@@ -796,7 +796,7 @@ namespace osmscout {
           ring->ways.front()->GetType()!=typeIgnore) {
         std::vector<Tag> tags(ring->ways.front()->GetTags());
 
-        ring->role.attributes.type=ring->ways.front()->GetType();
+        ring->role.type=ring->ways.front()->GetType();
 
         if (!ring->role.attributes.SetTags(progress,
                                            typeConfig,
@@ -821,7 +821,7 @@ namespace osmscout {
 
           if (childRing->IsArea() &&
               ring->role.GetType()==childRing->role.GetType()) {
-            childRing->role.attributes.type=typeIgnore;
+            childRing->role.type=typeIgnore;
           }
 
           childRing++;
@@ -849,7 +849,7 @@ namespace osmscout {
             }
 
             relation.SetType(ring->ways.front()->GetType());
-            ring->role.attributes.type=typeIgnore;
+            ring->role.type=typeIgnore;
           }
           else if (relation.GetType()!=ring->role.GetType()) {
             progress.Warning("Multipolygon relation "+NumberToString(rawRelation.GetId())+

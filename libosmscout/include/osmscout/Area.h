@@ -44,7 +44,6 @@ namespace osmscout {
     const static uint8_t hasAccess       = 1 << 0; //! We do have access rights to this way/area
 
   public:
-    TypeId           type;     //! type of the way/relation
     std::string      name;     //! name
 
   private:
@@ -55,15 +54,9 @@ namespace osmscout {
 
   public:
     inline AreaAttributes()
-    : type(typeIgnore),
-      flags(0)
+    : flags(0)
     {
       // no code
-    }
-
-    inline TypeId GetType() const
-    {
-      return type;
     }
 
     inline uint16_t GetFlags() const
@@ -116,12 +109,20 @@ namespace osmscout {
     class Ring
     {
     public:
+      TypeId                type;     //! type of ring
       AreaAttributes        attributes;
       uint8_t               ring;
       std::vector<Id>       ids;
       std::vector<GeoCoord> nodes;
 
     public:
+      inline Ring()
+      : type(typeIgnore),
+        ring(0)
+      {
+
+      }
+
       inline const AreaAttributes& GetAttributes() const
       {
         return attributes;
@@ -129,7 +130,7 @@ namespace osmscout {
 
       inline TypeId GetType() const
       {
-        return attributes.GetType();
+        return type;
       }
 
       inline uint16_t GetFlags() const
@@ -147,12 +148,14 @@ namespace osmscout {
     FileOffset        fileOffset;
 
   public:
+    TypeId            type;     //! type of the area
     AreaAttributes    attributes;
     std::vector<Ring> rings;
 
   public:
     inline Area()
-    : fileOffset(0)
+    : fileOffset(0),
+      type(typeIgnore)
     {
       // no code
     }
@@ -169,7 +172,7 @@ namespace osmscout {
 
     inline TypeId GetType() const
     {
-      return attributes.GetType();
+      return type;
     }
 
     inline bool IsSimple() const

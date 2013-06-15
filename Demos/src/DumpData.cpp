@@ -263,13 +263,14 @@ static void DumpNode(const osmscout::TypeConfig* typeConfig,
   std::cout << "}" << std::endl;
 }
 
-static void DumpAreaSegmentAttributes(const osmscout::AreaAttributes& attributes,
+static void DumpAreaSegmentAttributes(const osmscout::TypeId& type,
+                                      const osmscout::AreaAttributes& attributes,
                                       const osmscout::TypeConfig* typeConfig,
                                       size_t indent)
 {
-  if (attributes.GetType()!=osmscout::typeIgnore) {
+  if (type!=osmscout::typeIgnore) {
     DumpIndent(indent);
-    std::cout << "type: " << typeConfig->GetTypeInfo(attributes.GetType()).GetName() << std::endl;
+    std::cout << "type: " << typeConfig->GetTypeInfo(type).GetName() << std::endl;
   }
 
   if (!attributes.GetName().empty()) {
@@ -408,7 +409,8 @@ static void DumpArea(const osmscout::TypeConfig* typeConfig,
   std::cout << "  id: " << id << std::endl;
   std::cout << "  fileOffset: " << area->GetFileOffset() << std::endl;
 
-  DumpAreaSegmentAttributes(area->GetAttributes(),
+  DumpAreaSegmentAttributes(area->GetType(),
+                            area->GetAttributes(),
                             typeConfig,
                             2);
 
@@ -418,7 +420,8 @@ static void DumpArea(const osmscout::TypeConfig* typeConfig,
 
     std::cout << "    ring: " << (size_t)area->rings[r].ring << std::endl;
 
-    DumpAreaSegmentAttributes(area->rings[r].GetAttributes(),
+    DumpAreaSegmentAttributes(area->rings[r].GetType(),
+                              area->rings[r].GetAttributes(),
                               typeConfig,
                               4);
 

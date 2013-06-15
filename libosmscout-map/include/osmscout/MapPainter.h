@@ -411,12 +411,13 @@ namespace osmscout {
       Private draw algorithm implementation routines.
      */
     //@{
+    /*
     bool PrepareAreaSegment(const StyleConfig& styleConfig,
                             const Projection& projection,
                             const MapParameter& parameter,
                             const ObjectFileRef& ref,
                             const AreaAttributes& attributes,
-                            const std::vector<GeoCoord>& nodes);
+                            const std::vector<GeoCoord>& nodes);*/
 
     void PrepareAreas(const StyleConfig& styleConfig,
                       const Projection& projection,
@@ -467,6 +468,7 @@ namespace osmscout {
     void DrawAreaLabel(const StyleConfig& styleConfig,
                        const Projection& projection,
                        const MapParameter& parameter,
+                       const TypeId& type,
                        const AreaAttributes& attributes,
                        const std::vector<GeoCoord>& nodes);
 

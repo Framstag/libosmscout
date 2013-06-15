@@ -101,8 +101,8 @@ namespace osmscout {
       AreaAttributes attributes;
       FillStyleRef   fillStyle;
 
-      attributes.type=typeInfo->GetId();
-      styleConfig.GetAreaFillStyle(attributes,
+      styleConfig.GetAreaFillStyle(typeInfo->GetId(),
+                                   attributes,
                                    projection,
                                    parameter.GetDPI(),
                                    fillStyle);
@@ -347,7 +347,7 @@ namespace osmscout {
                                const MapParameter& parameter,
                                const MapPainter::AreaData& area)
   {
-    stream << "    <path class=\"" << typeConfig->GetTypeInfo(area.attributes->GetType()).GetName() << "_area\"" << std::endl;
+//    stream << "    <path class=\"" << typeConfig->GetTypeInfo(area.attributes->GetType()).GetName() << "_area\"" << std::endl;
 
     if (!area.clippings.empty()) {
       stream << "          fillRule=\"evenodd\"";

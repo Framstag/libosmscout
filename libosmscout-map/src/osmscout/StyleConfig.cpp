@@ -1965,36 +1965,39 @@ namespace osmscout {
                              pathShieldStyle);
   }
 
-  void StyleConfig::GetAreaFillStyle(const AreaAttributes& area,
+  void StyleConfig::GetAreaFillStyle(const TypeId& type,
+                                     const AreaAttributes& area,
                                      const Projection& projection,
                                      double dpi,
                                      FillStyleRef& fillStyle) const
   {
-    GetObjectAttributesStyle(areaFillStyleSelectors[area.GetType()],
+    GetObjectAttributesStyle(areaFillStyleSelectors[type],
                              area,
                              projection,
                              dpi,
                              fillStyle);
   }
 
-  void StyleConfig::GetAreaTextStyle(const AreaAttributes& area,
+  void StyleConfig::GetAreaTextStyle(const TypeId& type,
+                                     const AreaAttributes& area,
                                      const Projection& projection,
                                      double dpi,
                                      TextStyleRef& textStyle) const
   {
-    GetObjectAttributesStyle(areaTextStyleSelectors[area.GetType()],
+    GetObjectAttributesStyle(areaTextStyleSelectors[type],
                              area,
                              projection,
                              dpi,
                              textStyle);
   }
 
-  void StyleConfig::GetAreaIconStyle(const AreaAttributes& area,
+  void StyleConfig::GetAreaIconStyle(const TypeId& type,
+                                     const AreaAttributes& area,
                                      const Projection& projection,
                                      double dpi,
                                      IconStyleRef& iconStyle) const
   {
-    GetObjectAttributesStyle(areaIconStyleSelectors[area.GetType()],
+    GetObjectAttributesStyle(areaIconStyleSelectors[type],
                              area,
                              projection,
                              dpi,
