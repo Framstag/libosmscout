@@ -252,7 +252,7 @@ namespace osmscout {
             continue;
           }
 
-          std::string name=area.GetName();
+          std::string name=area.rings.front().GetName();
 
           CityArea cityArea;
 
@@ -358,25 +358,26 @@ namespace osmscout {
       if (area.GetType()==boundaryId) {
         size_t level=0;
 
-        if (area.GetName().empty()) {
+        if (area.rings.front().GetName().empty()) {
           progress.Warning(std::string("Area boundary ")+
                            NumberToString(area.GetType())+" "+
                            NumberToString(area.GetFileOffset())+" has no name");
         }
 
-        for (size_t i=0; i<area.GetTagCount(); i++) {
-          if (area.GetTagKey(i)==typeConfig.tagAdminLevel) {
-            if (StringToNumber(area.GetTagValue(i),level)) {
+        for (std::vector<Tag>::const_iterator tag=area.rings.front().attributes.GetTags().begin();
+            tag!=area.rings.front().attributes.GetTags().end(); ++tag) {
+          if (tag->key==typeConfig.tagAdminLevel) {
+            if (StringToNumber(tag->value,level)) {
               Boundary boundary;
 
               boundary.reference.Set(area.GetFileOffset(),refArea);
-              boundary.name=area.GetName();
+              boundary.name=area.rings.front().GetName();
               boundary.level=level;
 
               for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
                    ring!=area.rings.end();
                    ++ring) {
-                if (ring->ring==0) {
+                if (ring->ring==Area::outerRingId) {
                   boundary.areas.push_back(ring->nodes);
                 }
               }
@@ -549,7 +550,7 @@ namespace osmscout {
 
     // If we (at least partly) contain it, we add it to the area but continue
 
-    region.areas[area.GetName()].push_back(area.GetFileOffset());
+    region.areas[area.rings.front().GetName()].push_back(area.GetFileOffset());
 
     bool completeMatch=IsAreaCompletelyInArea(ring.nodes,region.area);
 
@@ -579,7 +580,7 @@ namespace osmscout {
     for (std::vector<Area::Ring>::const_iterator ring=area.rings.begin();
          ring!=area.rings.end();
          ++ring) {
-      if (ring->ring!=0) {
+      if (ring->ring!=Area::outerRingId) {
         continue;
       }
 
@@ -681,7 +682,7 @@ namespace osmscout {
       }
 
       if (indexables.find(area.GetType())!=indexables.end() &&
-          !area.GetName().empty()) {
+          !area.rings.front().GetName().empty()) {
         double minlon;
         double maxlon;
         double minlat;

@@ -106,6 +106,10 @@ namespace osmscout {
   class OSMSCOUT_API Area : public Referencable
   {
   public:
+    const static size_t masterRingId = 0;
+    const static size_t outerRingId = 1;
+
+  public:
     class Ring
     {
     public:
@@ -120,7 +124,12 @@ namespace osmscout {
       : type(typeIgnore),
         ring(0)
       {
+        // no code
+      }
 
+      inline void SetType(const TypeId& type)
+      {
+        this->type=type;
       }
 
       inline const AreaAttributes& GetAttributes() const
@@ -142,20 +151,20 @@ namespace osmscout {
       {
         return attributes.GetName();
       }
+
+      bool GetCenter(double& lat,
+                     double& lon) const;
     };
 
   private:
     FileOffset        fileOffset;
 
   public:
-    TypeId            type;     //! type of the area
-    AreaAttributes    attributes;
     std::vector<Ring> rings;
 
   public:
     inline Area()
-    : fileOffset(0),
-      type(typeIgnore)
+    : fileOffset(0)
     {
       // no code
     }
@@ -165,49 +174,14 @@ namespace osmscout {
       return fileOffset;
     }
 
-    inline const AreaAttributes& GetAttributes() const
-    {
-      return attributes;
-    }
-
     inline TypeId GetType() const
     {
-      return type;
+      return rings.front().GetType();
     }
 
     inline bool IsSimple() const
     {
       return rings.size()==1;
-    }
-
-    inline uint16_t GetFlags() const
-    {
-      return attributes.GetFlags();
-    }
-
-    inline std::string GetName() const
-    {
-      return attributes.GetName();
-    }
-
-    inline bool HasTags() const
-    {
-      return !attributes.GetTags().empty();
-    }
-
-    inline size_t GetTagCount() const
-    {
-      return attributes.GetTags().size();
-    }
-
-    inline TagId GetTagKey(size_t idx) const
-    {
-      return attributes.GetTags()[idx].key;
-    }
-
-    inline const std::string& GetTagValue(size_t idx) const
-    {
-      return attributes.GetTags()[idx].value;
     }
 
     bool GetCenter(double& lat,
@@ -216,8 +190,6 @@ namespace osmscout {
                         double& maxLon,
                         double& minLat,
                         double& maxLat) const;
-
-    void SetType(TypeId type);
 
     bool Read(FileScanner& scanner);
     bool ReadOptimized(FileScanner& scanner);

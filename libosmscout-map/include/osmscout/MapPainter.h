@@ -470,7 +470,8 @@ namespace osmscout {
                        const MapParameter& parameter,
                        const TypeId& type,
                        const AreaAttributes& attributes,
-                       const std::vector<GeoCoord>& nodes);
+                       double x,
+                       double y);
 
     void DrawAreaLabels(const StyleConfig& styleConfig,
                         const Projection& projection,

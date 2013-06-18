@@ -409,12 +409,12 @@ static void DumpArea(const osmscout::TypeConfig* typeConfig,
   std::cout << "  id: " << id << std::endl;
   std::cout << "  fileOffset: " << area->GetFileOffset() << std::endl;
 
-  DumpAreaSegmentAttributes(area->GetType(),
-                            area->GetAttributes(),
+  DumpAreaSegmentAttributes(area->rings.front().GetType(),
+                            area->rings.front().GetAttributes(),
                             typeConfig,
                             2);
 
-  for (size_t r=0; r<area->rings.size(); r++) {
+  for (size_t r=1; r<area->rings.size(); r++) {
     std::cout << std::endl;
     std::cout << "  role[" << r << "] {" << std::endl;
 
@@ -428,11 +428,13 @@ static void DumpArea(const osmscout::TypeConfig* typeConfig,
     std::cout << "  }" << std::endl;
   }
 
-  if (area->HasTags()) {
+  if (!area->rings.front().attributes.GetTags().empty()) {
     std::cout << std::endl;
 
-    for (size_t t=0; t<area->GetTagCount(); t++) {
-      std::cout << "  " << typeConfig->GetTagInfo(area->GetTagKey(t)).GetName() << ": " << area->GetTagValue(t) << std::endl;
+    for (std::vector<osmscout::Tag>::const_iterator tag=area->rings.front().attributes.GetTags().begin();
+        tag!=area->rings.front().attributes.GetTags().end();
+        ++tag) {
+      std::cout << "  " << typeConfig->GetTagInfo(tag->key).GetName() << ": " << tag->value << std::endl;
     }
   }
 

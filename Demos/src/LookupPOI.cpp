@@ -174,7 +174,7 @@ int main(int argc, char* argv[])
       area++) {
     std::cout << "+ Area " << (*area)->GetFileOffset();
     std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*area)->GetType()).GetName();
-    std::cout << " " << (*area)->GetName() << std::endl;
+    std::cout << " " << (*area)->rings.front().GetName() << std::endl;
   }
 
   return 0;

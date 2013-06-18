@@ -22,7 +22,7 @@
 #include <limits>
 
 #include <osmscout/system/Math.h>
-
+#include <iostream>
 namespace osmscout {
 
   bool AreaAttributes::SetTags(Progress& progress,
@@ -232,11 +232,45 @@ namespace osmscout {
     return !this->operator==(other);
   }
 
-  bool Area::GetCenter(double& lat, double& lon) const
+  bool Area::Ring::GetCenter(double& lat, double& lon) const
   {
-    if (rings.empty()) {
+    double minLat=0.0;
+    double minLon=0.0;
+    double maxLat=0.0;
+    double maxLon=0.0;
+
+    bool start=true;
+
+    for (size_t j=0; j<nodes.size(); j++) {
+      if (start) {
+        minLat=nodes[j].GetLat();
+        minLon=nodes[j].GetLon();
+        maxLat=nodes[j].GetLat();
+        maxLon=nodes[j].GetLon();
+
+        start=false;
+      }
+      else {
+        minLat=std::min(minLat,nodes[j].GetLat());
+        minLon=std::min(minLon,nodes[j].GetLon());
+        maxLat=std::max(maxLat,nodes[j].GetLat());
+        maxLon=std::max(maxLon,nodes[j].GetLon());
+      }
+    }
+
+    if (start) {
       return false;
     }
+
+    lat=minLat+(maxLat-minLat)/2;
+    lon=minLon+(maxLon-minLon)/2;
+
+    return true;
+  }
+
+  bool Area::GetCenter(double& lat, double& lon) const
+  {
+    assert(!rings.empty());
 
     double minLat=0.0;
     double minLon=0.0;
@@ -246,22 +280,27 @@ namespace osmscout {
     bool start=true;
 
     for (size_t i=0; i<rings.size(); i++) {
-      for (size_t j=0; j<rings[i].nodes.size(); j++) {
-        if (start) {
-          minLat=rings[i].nodes[j].GetLat();
-          minLon=rings[i].nodes[j].GetLon();
-          maxLat=rings[i].nodes[j].GetLat();
-          maxLon=rings[i].nodes[j].GetLon();
+      if (rings[i].ring==Area::outerRingId) {
+        for (size_t j=0; j<rings[i].nodes.size(); j++) {
+          if (start) {
+            minLat=rings[i].nodes[j].GetLat();
+            maxLat=minLat;
+            minLon=rings[i].nodes[j].GetLon();
+            maxLon=minLon;
 
-          start=false;
+            start=false;
+          }
+          else {
+            minLat=std::min(minLat,rings[i].nodes[j].GetLat());
+            minLon=std::min(minLon,rings[i].nodes[j].GetLon());
+            maxLat=std::max(maxLat,rings[i].nodes[j].GetLat());
+            maxLon=std::max(maxLon,rings[i].nodes[j].GetLon());
+          }
         }
-
-        minLat=std::min(minLat,rings[i].nodes[j].GetLat());
-        minLon=std::min(minLon,rings[i].nodes[j].GetLon());
-        maxLat=std::max(maxLat,rings[i].nodes[j].GetLat());
-        maxLon=std::max(maxLon,rings[i].nodes[j].GetLon());
       }
     }
+
+    assert(!start);
 
     if (start) {
       return false;
@@ -279,51 +318,50 @@ namespace osmscout {
                                 double& maxLat) const
   {
     assert(!rings.empty());
-    assert(!rings[0].nodes.empty());
 
-    minLon=rings[0].nodes[0].GetLon();
-    maxLon=rings[0].nodes[0].GetLon();
-    minLat=rings[0].nodes[0].GetLat();
-    maxLat=rings[0].nodes[0].GetLat();
+    bool start=true;
 
     for (std::vector<Area::Ring>::const_iterator role=rings.begin();
          role!=rings.end();
          ++role) {
-      for (size_t i=0; i<role->nodes.size(); i++) {
-        minLon=std::min(minLon,role->nodes[i].GetLon());
-        maxLon=std::max(maxLon,role->nodes[i].GetLon());
-        minLat=std::min(minLat,role->nodes[i].GetLat());
-        maxLat=std::max(maxLat,role->nodes[i].GetLat());
+      if (role->ring==Area::outerRingId) {
+        for (size_t i=0; i<role->nodes.size(); i++) {
+          if (start) {
+            minLon=role->nodes[i].GetLon();
+            maxLon=minLon;
+            minLat=role->nodes[i].GetLat();
+            maxLat=minLat;
+
+            start=false;
+          }
+          else {
+            minLon=std::min(minLon,role->nodes[i].GetLon());
+            maxLon=std::max(maxLon,role->nodes[i].GetLon());
+            minLat=std::min(minLat,role->nodes[i].GetLat());
+            maxLat=std::max(maxLat,role->nodes[i].GetLat());
+          }
+        }
       }
     }
-  }
 
-  void Area::SetType(TypeId type)
-  {
-    this->type=type;
+    assert(!start);
   }
 
   bool Area::Read(FileScanner& scanner)
   {
-    uint32_t roleCount;
+    uint32_t ringCount;
 
     if (!scanner.GetPos(fileOffset)) {
       return false;
     }
 
-    scanner.ReadNumber(type);
-
-    if (!attributes.Read(scanner)) {
-      return false;
-    }
-
-    scanner.ReadNumber(roleCount);
+    scanner.ReadNumber(ringCount);
     if (scanner.HasError()) {
       return false;
     }
 
-    rings.resize(roleCount);
-    for (size_t i=0; i<roleCount; i++) {
+    rings.resize(ringCount);
+    for (size_t i=0; i<ringCount; i++) {
       uint32_t nodesCount;
 
       scanner.ReadNumber(rings[i].type);
@@ -374,25 +412,19 @@ namespace osmscout {
 
   bool Area::ReadOptimized(FileScanner& scanner)
   {
-    uint32_t roleCount;
+    uint32_t ringCount;
 
     if (!scanner.GetPos(fileOffset)) {
       return false;
     }
 
-    scanner.ReadNumber(type);
-
-    if (!attributes.Read(scanner)) {
-      return false;
-    }
-
-    scanner.ReadNumber(roleCount);
+    scanner.ReadNumber(ringCount);
     if (scanner.HasError()) {
       return false;
     }
 
-    rings.resize(roleCount);
-    for (size_t i=0; i<roleCount; i++) {
+    rings.resize(ringCount);
+    for (size_t i=0; i<ringCount; i++) {
       uint32_t nodesCount;
 
       scanner.ReadNumber(rings[i].type);
@@ -432,12 +464,6 @@ namespace osmscout {
 
   bool Area::Write(FileWriter& writer) const
   {
-    writer.WriteNumber(type);
-
-    if (!attributes.Write(writer)) {
-      return false;
-    }
-
     writer.WriteNumber((uint32_t)rings.size());
     for (size_t i=0; i<rings.size(); i++) {
       writer.WriteNumber(rings[i].type);
@@ -488,12 +514,6 @@ namespace osmscout {
 
   bool Area::WriteOptimized(FileWriter& writer) const
   {
-    writer.WriteNumber(type);
-
-    if (!attributes.Write(writer)) {
-      return false;
-    }
-
     writer.WriteNumber((uint32_t)rings.size());
     for (size_t i=0; i<rings.size(); i++) {
       writer.WriteNumber(rings[i].type);

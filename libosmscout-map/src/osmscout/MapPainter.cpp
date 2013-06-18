@@ -965,7 +965,8 @@ namespace osmscout {
                                  const MapParameter& parameter,
                                  const TypeId& type,
                                  const AreaAttributes& attributes,
-                                 const std::vector<GeoCoord>& nodes)
+                                 double x,
+                                 double y)
   {
     TextStyleRef  textStyle;
     IconStyleRef  iconStyle;
@@ -1008,14 +1009,6 @@ namespace osmscout {
     }
 
     if (!hasSymbol && !hasLabel && !hasIcon) {
-      return;
-    }
-
-    double x,y;
-
-    if (!GetCenterPixel(projection,
-                        nodes,
-                        x,y)) {
       return;
     }
 
@@ -1069,21 +1062,39 @@ namespace osmscout {
       const AreaRef& area=*r;
 
       for (size_t m=0; m<area->rings.size(); m++) {
-        if (area->rings[m].ring==0) {
+        if (area->rings[m].ring==Area::masterRingId) {
+          double lat,lon;
+          double x,y;
+
+          area->GetCenter(lat,lon);
+
+          projection.GeoToPixel(lon,
+                                lat,
+                                x,y);
+
           DrawAreaLabel(styleConfig,
                         projection,
                         parameter,
                         area->GetType(),
-                        area->attributes,
-                        area->rings[m].nodes);
+                        area->rings[m].attributes,
+                        x,y);
         }
         else {
+          double lat,lon;
+          double x,y;
+
+          area->rings[m].GetCenter(lat,lon);
+
+          projection.GeoToPixel(lon,
+                                lat,
+                                x,y);
+
           DrawAreaLabel(styleConfig,
                         projection,
                         parameter,
                         area->rings[m].GetType(),
                         area->rings[m].attributes,
-                        area->rings[m].nodes);
+                        x,y);
         }
       }
     }
@@ -1489,6 +1500,10 @@ namespace osmscout {
       std::vector<PolyData> data(area->rings.size());
 
       for (size_t i=0; i<area->rings.size(); i++) {
+        if (area->rings[i].ring==Area::masterRingId) {
+          continue;
+        }
+
         transBuffer.TransformArea(projection,
                                   parameter.GetOptimizeAreaNodes(),
                                   area->rings[i].nodes,
@@ -1496,7 +1511,7 @@ namespace osmscout {
                                   parameter.GetOptimizeErrorToleranceDots());
       }
 
-      size_t ringId=0;
+      size_t ringId=Area::outerRingId;
       bool foundRing=true;
 
       while (foundRing) {
@@ -1508,23 +1523,19 @@ namespace osmscout {
           if (ring.ring==ringId) {
             FillStyleRef fillStyle;
 
-            if (ring.ring==0) {
-              if (area->GetType()!=typeIgnore) {
-                styleConfig.GetAreaFillStyle(area->GetType(),
-                                             area->GetAttributes(),
-                                             projection,
-                                             parameter.GetDPI(),
-                                             fillStyle);
-              }
+            if (ring.ring==Area::outerRingId) {
+              styleConfig.GetAreaFillStyle(area->GetType(),
+                                           ring.GetAttributes(),
+                                           projection,
+                                           parameter.GetDPI(),
+                                           fillStyle);
             }
-            else {
-              if (area->GetType()!=typeIgnore) {
-                styleConfig.GetAreaFillStyle(ring.GetType(),
-                                             ring.GetAttributes(),
-                                             projection,
-                                             parameter.GetDPI(),
-                                             fillStyle);
-              }
+            else if (ring.GetType()!=typeIgnore) {
+              styleConfig.GetAreaFillStyle(ring.GetType(),
+                                           ring.GetAttributes(),
+                                           projection,
+                                           parameter.GetDPI(),
+                                           fillStyle);
             }
 
             if (fillStyle.Invalid())

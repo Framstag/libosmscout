@@ -121,7 +121,7 @@ namespace osmscout {
 
       assert(entry!=areaMap.end());
 
-      description=new RouteDescription::NameDescription(entry->second->GetName());
+      description=new RouteDescription::NameDescription(entry->second->rings.front().GetName());
     }
     else if (object.GetType()==refWay) {
       OSMSCOUT_HASHMAP<FileOffset,WayRef>::const_iterator entry=wayMap.find(object.GetFileOffset());
@@ -416,7 +416,7 @@ namespace osmscout {
 
       if (node->GetPathObject().GetType()==refArea) {
         AreaRef                              area=areaMap[node->GetPathObject().GetFileOffset()];
-        RouteDescription::NameDescriptionRef nameDesc=new RouteDescription::NameDescription(area->GetName());
+        RouteDescription::NameDescriptionRef nameDesc=new RouteDescription::NameDescription(area->rings.front().GetName());
 
         node->AddDescription(RouteDescription::WAY_NAME_DESC,
                              nameDesc);

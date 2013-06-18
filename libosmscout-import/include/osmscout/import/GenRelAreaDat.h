@@ -151,12 +151,14 @@ namespace osmscout {
     bool BuildRings(const ImportParameter& parameter,
                     Progress& progress,
                     Id id,
+                    const std::string& name,
                     const Area& relation,
                     std::list<MultipolygonPart>& parts);
 
     bool ResolveMultipolygon(const ImportParameter& parameter,
                              Progress& progress,
                              Id id,
+                             const std::string& name,
                              const Area& relation,
                              std::list<MultipolygonPart>& parts);
 
@@ -166,9 +168,10 @@ namespace osmscout {
                                     const CoordDataFile::CoordResultMap& coordMap,
                                     const IdRawWayMap& wayMap,
                                     const std::map<OSMId,RawRelationRef>& relationMap,
-                                    IdSet& resolvedRelations,
                                     const Area& relation,
-                                    RawRelation& rawRelation,
+                                    const std::string& name,
+                                    const RawRelation& rawRelation,
+                                    IdSet& resolvedRelations,
                                     std::list<MultipolygonPart>& parts);
 
   bool ResolveMultipolygonMembers(Progress& progress,
@@ -178,7 +181,8 @@ namespace osmscout {
                                   IndexedDataFile<OSMId,RawRelation>& relDataFile,
                                   IdSet& resolvedRelations,
                                   const Area& relation,
-                                  RawRelation& rawRelation,
+                                  const std::string& name,
+                                  const RawRelation& rawRelation,
                                   std::list<MultipolygonPart>& parts);
 
     bool HandleMultipolygonRelation(const ImportParameter& parameter,
@@ -189,8 +193,11 @@ namespace osmscout {
                                     IndexedDataFile<OSMId,RawWay>& wayDataFile,
                                     IndexedDataFile<OSMId,RawRelation>& relDataFile,
                                     RawRelation& rawRelation,
+                                    const std::string& name,
                                     Area& relation);
 
+    std::string ResolveRelationName(const TypeConfig& typeConfig,
+                                    const RawRelation& rawRelation) const;
 
   public:
     std::string GetDescription() const;

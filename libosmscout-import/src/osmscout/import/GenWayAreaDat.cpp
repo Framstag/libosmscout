@@ -196,17 +196,17 @@ namespace osmscout {
     Area             area;
     OSMId            wayId=rawWay.GetId();
 
-    area.SetType(rawWay.GetType());
 
-    if (!area.attributes.SetTags(progress,
+    Area::Ring ring;
+
+    if (!ring.attributes.SetTags(progress,
                                  typeConfig,
                                  tags)) {
       return true;
     }
 
-    Area::Ring ring;
-
-    ring.ring=0;
+    ring.SetType(rawWay.GetType());
+    ring.ring=Area::outerRingId;
     ring.ids.resize(rawWay.GetNodeCount());
     ring.nodes.resize(rawWay.GetNodeCount());
 

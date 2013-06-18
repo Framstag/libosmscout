@@ -233,44 +233,49 @@ namespace osmscout
 
       size_t r=0;
       while (r<area->rings.size()) {
-        polygon.TransformArea(projection,
-                              optimizeWayMethod,
-                              area->rings[r].nodes,
-                              1.0);
+        if (area->rings[r].ring!=Area::masterRingId) {
+          polygon.TransformArea(projection,
+                                optimizeWayMethod,
+                                area->rings[r].nodes,
+                                1.0);
 
-        polygon.GetBoundingBox(xmin,ymin,xmax,ymax);
+          polygon.GetBoundingBox(xmin,ymin,xmax,ymax);
 
-        if (polygon.IsEmpty() ||
-            (xmax-xmin<=6.0 &&
-             ymax-ymin<=6.0)) {
-          // We drop all sub roles of the current role, too
-          size_t s=r;
+          if (polygon.IsEmpty() ||
+              (xmax-xmin<=6.0 &&
+               ymax-ymin<=6.0)) {
+            // We drop all sub roles of the current role, too
+            size_t s=r;
 
-          while (s+1<area->rings.size() &&
-                 area->rings[s+1].ring>area->rings[r].ring) {
-            s++;
+            while (s+1<area->rings.size() &&
+                   area->rings[s+1].ring>area->rings[r].ring) {
+              s++;
+            }
+
+            r=s+1;
+            continue;
           }
-
-          r=s+1;
-          continue;
         }
 
         newRings.push_back(area->rings[r]);
 
         newRings.back().nodes.clear();
 
-        for (size_t i=polygon.GetStart();
-             i<=polygon.GetEnd();
-             i++) {
-          if (polygon.points[i].draw) {
-            newRings.back().nodes.push_back(area->rings[r].nodes[i]);
+        if (area->rings[r].ring!=Area::masterRingId) {
+          for (size_t i=polygon.GetStart();
+               i<=polygon.GetEnd();
+               i++) {
+            if (polygon.points[i].draw) {
+              newRings.back().nodes.push_back(area->rings[r].nodes[i]);
+            }
           }
         }
 
         r++;
       }
 
-      if (newRings.empty()) {
+      if ((area->rings.size()>1 && newRings.size()<=1) ||
+          (area->rings.size()==1 && newRings.size()==0)) {
         continue;
       }
 
