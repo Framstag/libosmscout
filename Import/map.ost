@@ -171,6 +171,8 @@ TYPES
   TYPE amenity_post_office_building = AREA ("amenity"=="post_office" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
   TYPE amenity_post_office = NODE ("amenity"=="post_office")
   TYPE amenity_post_box = NODE ("amenity"=="post_box")
+  TYPE amenity_school_building = NODE AREA ("amenity"=="school" AND EXISTS "building" AND !("building" IN ["no","false","0"]))
+  TYPE amenity_school = NODE AREA ("amenity"=="school")
   TYPE amenity_taxi = NODE AREA ("amenity"=="taxi")
   TYPE amenity_toilets = NODE ("amenity"=="toilets")
 

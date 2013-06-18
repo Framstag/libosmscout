@@ -920,8 +920,12 @@ SYMBOL christian_church_cross
    [TYPE amenity_post_office] AREA { color: #f0f0d8; }
 
    [TYPE amenity_taxi] AREA { color: #d2d2d2; }
-   [TYPE amenity_building] AREA { color: #b89c9c; borderColor: #887b7b; borderWidth: 0.1mm;}
-   [TYPE amenity] AREA { color: #f0f0d8; }
+   
+   [TYPE amenity_building,
+         amenity_school_building] AREA { color: #b89c9c; borderColor: #887b7b; borderWidth: 0.1mm;}
+   [TYPE amenity,
+         amenity_school] AREA { color: #f0f0d8; }
+   
    [TYPE power_generator] AREA { color: #bca9a9; }
  }
 
