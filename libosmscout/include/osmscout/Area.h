@@ -41,7 +41,7 @@ namespace osmscout {
     const static uint8_t hasHouseNr      = 1 << 6; //! We have a house number
     const static uint8_t hasTags         = 1 << 7; //! We have additional tags
 
-    const static uint8_t hasAccess       = 1 << 0; //! We do have access rights to this way/area
+    const static uint8_t hasAccess       = 1 << 0; //! We do have (general) access rights to this way/area
 
   public:
     std::string      name;     //! name
@@ -52,6 +52,17 @@ namespace osmscout {
     std::string      houseNr;  //! house number
     std::vector<Tag> tags;     //! list of preparsed tags
 
+  private:
+    void GetFlags(uint8_t& flags) const;
+    bool Read(FileScanner& scanner);
+    bool Read(FileScanner& scanner,
+              uint8_t flags);
+    bool Write(FileWriter& writer) const;
+    bool Write(FileWriter& writer,
+               uint8_t flags) const;
+
+    friend class Area;
+
   public:
     inline AreaAttributes()
     : flags(0)
@@ -59,7 +70,7 @@ namespace osmscout {
       // no code
     }
 
-    inline uint16_t GetFlags() const
+    inline uint8_t GetFlags() const
     {
       return flags;
     }
@@ -92,9 +103,6 @@ namespace osmscout {
     bool SetTags(Progress& progress,
                  const TypeConfig& typeConfig,
                  std::vector<Tag>& tags);
-
-    bool Read(FileScanner& scanner);
-    bool Write(FileWriter& writer) const;
 
     bool operator==(const AreaAttributes& other) const;
     bool operator!=(const AreaAttributes& other) const;
@@ -191,8 +199,19 @@ namespace osmscout {
                         double& minLat,
                         double& maxLat) const;
 
+    bool ReadIds(FileScanner& scanner,
+                 uint32_t nodesCount,
+                 std::vector<Id>& ids);
+    bool ReadCoords(FileScanner& scanner,
+                    uint32_t nodesCount,
+                    std::vector<GeoCoord>& coords);
     bool Read(FileScanner& scanner);
     bool ReadOptimized(FileScanner& scanner);
+
+    bool WriteIds(FileWriter& writer,
+                  const std::vector<Id>& ids) const;
+    bool WriteCoords(FileWriter& writer,
+                    const std::vector<GeoCoord>& coords) const;
     bool Write(FileWriter& writer) const;
     bool WriteOptimized(FileWriter& writer) const;
   };

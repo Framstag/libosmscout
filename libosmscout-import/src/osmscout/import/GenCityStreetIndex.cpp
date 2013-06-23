@@ -844,7 +844,7 @@ namespace osmscout {
       for (size_t i=0; i<indent; i++) {
         std::cout << " ";
       }
-      std::cout << r->name << " " << r->reference.GetTypeName() << " " << r->reference.GetFileOffset() << " " << r->areas.size() << " " << r->nodes.size() << " " << r->ways.size() << " " << r->aliases.size() << std::endl;
+      std::cout << r->name << " " << r->reference.GetFileOffset() << " " << r->areas.size() << " " << r->nodes.size() << " " << r->ways.size() << " " << r->aliases.size() << std::endl;
 
       for (std::list<RegionAlias>::const_iterator l=r->aliases.begin();
            l!=r->aliases.end();
@@ -852,7 +852,7 @@ namespace osmscout {
         for (size_t i=0; i<indent; i++) {
           std::cout << " ";
         }
-        std::cout << " =" << l->name << " " << l->reference.GetTypeName() << " " << l->reference.GetFileOffset() << std::endl;
+        std::cout << " = " << l->name << " " << l->reference.GetFileOffset() << std::endl;
       }
 
       DumpRegion(*r,indent+2);

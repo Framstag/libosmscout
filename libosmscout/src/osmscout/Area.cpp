@@ -100,6 +100,27 @@ namespace osmscout {
     return true;
   }
 
+  void AreaAttributes::GetFlags(uint8_t& flags) const
+  {
+    flags=0;
+
+    if (!name.empty()) {
+      flags|=hasName;
+    }
+
+    if (!nameAlt.empty()) {
+      flags|=hasNameAlt;
+    }
+
+    if (!houseNr.empty()) {
+      flags|=hasHouseNr;
+    }
+
+    if (!tags.empty()) {
+      flags|=hasTags;
+    }
+  }
+
   bool AreaAttributes::Read(FileScanner& scanner)
   {
     uint8_t flags;
@@ -110,6 +131,13 @@ namespace osmscout {
       return false;
     }
 
+    return Read(scanner,
+                flags);
+  }
+
+  bool AreaAttributes::Read(FileScanner& scanner,
+                            uint8_t flags)
+  {
     this->flags=flags;
 
     if (flags & hasName) {
@@ -144,36 +172,19 @@ namespace osmscout {
 
   bool AreaAttributes::Write(FileWriter& writer) const
   {
-    if (!name.empty()) {
-      flags|=hasName;
-    }
-    else {
-      flags&=~hasName;
-    }
+    uint8_t flags;
 
-    if (!nameAlt.empty()) {
-      flags|=hasNameAlt;
-    }
-    else {
-      flags&=~hasNameAlt;
-    }
-
-    if (!houseNr.empty()) {
-      flags|=hasHouseNr;
-    }
-    else {
-      flags&=~hasHouseNr;
-    }
-
-    if (!tags.empty()) {
-      flags|=hasTags;
-    }
-    else {
-      flags&=~hasTags;
-    }
+    GetFlags(flags);
 
     writer.Write(flags);
 
+    return Write(writer,
+                 flags);
+  }
+
+  bool AreaAttributes::Write(FileWriter& writer,
+                             uint8_t flags) const
+  {
     if (flags & hasName) {
       writer.Write(name);
     }
@@ -347,62 +358,132 @@ namespace osmscout {
     assert(!start);
   }
 
+  bool Area::ReadIds(FileScanner& scanner,
+                     uint32_t nodesCount,
+                     std::vector<Id>& ids)
+  {
+    Id minId;
+
+    ids.resize(nodesCount);
+
+    scanner.ReadNumber(minId);
+    for (size_t j=0; j<nodesCount; j++) {
+      Id id;
+
+      scanner.ReadNumber(id);
+
+      ids[j]=minId+id;
+    }
+
+    return !scanner.HasError();
+  }
+
+  bool Area::ReadCoords(FileScanner& scanner,
+                        uint32_t nodesCount,
+                        std::vector<GeoCoord>& coords)
+  {
+    uint32_t minLat;
+    uint32_t minLon;
+
+    coords.resize(nodesCount);
+
+    scanner.Read(minLat);
+    scanner.Read(minLon);
+
+    for (size_t j=0; j<nodesCount; j++) {
+      uint32_t latValue;
+      uint32_t lonValue;
+
+      scanner.ReadNumber(latValue);
+      scanner.ReadNumber(lonValue);
+
+      coords[j].Set((minLat+latValue)/conversionFactor-90.0,
+                     (minLon+lonValue)/conversionFactor-180.0);
+    }
+
+    return !scanner.HasError();
+  }
+
   bool Area::Read(FileScanner& scanner)
   {
-    uint32_t ringCount;
-
     if (!scanner.GetPos(fileOffset)) {
       return false;
     }
 
-    scanner.ReadNumber(ringCount);
-    if (scanner.HasError()) {
-      return false;
+    uint32_t ringCount=1;
+    uint8_t  outerFlags;
+    uint32_t nodesCount;
+
+    scanner.Read(outerFlags);
+
+    if (!(outerFlags & AreaAttributes::isSimple)) {
+      scanner.ReadNumber(ringCount);
+      if (scanner.HasError()) {
+        return false;
+      }
+
+      ringCount++;
     }
 
     rings.resize(ringCount);
-    for (size_t i=0; i<ringCount; i++) {
-      uint32_t nodesCount;
 
+    scanner.ReadNumber(rings[0].type);
+
+    if (!rings[0].attributes.Read(scanner,
+                                  outerFlags)) {
+      return false;
+    }
+
+    if (ringCount>1) {
+      rings[0].ring=masterRingId;
+    }
+    else {
+      rings[0].ring=outerRingId;
+    }
+
+    scanner.ReadNumber(nodesCount);
+
+    if (nodesCount>0) {
+      if (!ReadIds(scanner,
+                   nodesCount,
+                   rings[0].ids)) {
+        return false;
+      }
+
+      if (!ReadCoords(scanner,
+                      nodesCount,
+                      rings[0].nodes)) {
+        return false;
+      }
+    }
+
+    for (size_t i=1; i<ringCount; i++) {
       scanner.ReadNumber(rings[i].type);
 
-      if (!rings[i].attributes.Read(scanner)) {
-        return false;
+      if (rings[i].type!=typeIgnore) {
+        if (!rings[i].attributes.Read(scanner)) {
+          return false;
+        }
       }
 
       scanner.Read(rings[i].ring);
 
       scanner.ReadNumber(nodesCount);
 
-      if (nodesCount>0) {
-        Id       minId;
-        uint32_t minLat;
-        uint32_t minLon;
-
-        rings[i].ids.resize(nodesCount);
-        rings[i].nodes.resize(nodesCount);
-
-        scanner.ReadNumber(minId);
-        for (size_t j=0; j<nodesCount; j++) {
-          Id id;
-
-          scanner.ReadNumber(id);
-
-          rings[i].ids[j]=minId+id;
+      if (nodesCount>0 &&
+          rings[i].type!=typeIgnore) {
+        if (!ReadIds(scanner,
+                     nodesCount,
+                     rings[i].ids)) {
+          return false;
         }
+      }
 
-        scanner.Read(minLat);
-        scanner.Read(minLon);
-
-        for (size_t j=0; j<nodesCount; j++) {
-          uint32_t latValue;
-          uint32_t lonValue;
-
-          scanner.ReadNumber(latValue);
-          scanner.ReadNumber(lonValue);
-
-          rings[i].nodes[j].Set((minLat+latValue)/conversionFactor-90.0,
-                                (minLon+lonValue)/conversionFactor-180.0);
+      if (nodesCount>0) {
+        if (!ReadCoords(scanner,
+                        nodesCount,
+                        rings[i].nodes)) {
+          return false;
         }
       }
     }
@@ -412,25 +493,58 @@ namespace osmscout {
 
   bool Area::ReadOptimized(FileScanner& scanner)
   {
-    uint32_t ringCount;
-
     if (!scanner.GetPos(fileOffset)) {
       return false;
     }
 
-    scanner.ReadNumber(ringCount);
-    if (scanner.HasError()) {
-      return false;
+    uint32_t ringCount=1;
+    uint8_t  outerFlags;
+    uint32_t nodesCount;
+
+    scanner.Read(outerFlags);
+
+    if (!(outerFlags & AreaAttributes::isSimple)) {
+      scanner.ReadNumber(ringCount);
+      if (scanner.HasError()) {
+        return false;
+      }
+
+      ringCount++;
     }
 
     rings.resize(ringCount);
-    for (size_t i=0; i<ringCount; i++) {
-      uint32_t nodesCount;
 
+    scanner.ReadNumber(rings[0].type);
+
+    if (!rings[0].attributes.Read(scanner,
+                                  outerFlags)) {
+      return false;
+    }
+
+    if (ringCount>1) {
+      rings[0].ring=masterRingId;
+    }
+    else {
+      rings[0].ring=outerRingId;
+    }
+
+    scanner.ReadNumber(nodesCount);
+
+    if (nodesCount>0) {
+      if (!ReadCoords(scanner,
+                      nodesCount,
+                      rings[0].nodes)) {
+        return false;
+      }
+    }
+
+    for (size_t i=1; i<ringCount; i++) {
       scanner.ReadNumber(rings[i].type);
 
-      if (!rings[i].attributes.Read(scanner)) {
-        return false;
+      if (rings[i].type!=typeIgnore) {
+        if (!rings[i].attributes.Read(scanner)) {
+          return false;
+        }
       }
 
       scanner.Read(rings[i].ring);
@@ -438,23 +552,10 @@ namespace osmscout {
       scanner.ReadNumber(nodesCount);
 
       if (nodesCount>0) {
-        uint32_t minLat;
-        uint32_t minLon;
-
-        rings[i].nodes.resize(nodesCount);
-
-        scanner.Read(minLat);
-        scanner.Read(minLon);
-
-        for (size_t j=0; j<nodesCount; j++) {
-          uint32_t latValue;
-          uint32_t lonValue;
-
-          scanner.ReadNumber(latValue);
-          scanner.ReadNumber(lonValue);
-
-          rings[i].nodes[j].Set((minLat+latValue)/conversionFactor-90.0,
-                                (minLon+lonValue)/conversionFactor-180.0);
+        if (!ReadCoords(scanner,
+                        nodesCount,
+                        rings[i].nodes)) {
+          return false;
         }
       }
     }
@@ -462,51 +563,123 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
+  bool Area::WriteIds(FileWriter& writer,
+                      const std::vector<Id>& ids) const
+  {
+    Id minId=std::numeric_limits<Id>::max();
+
+    for (size_t j=0; j<ids.size(); j++) {
+      minId=std::min(minId,ids[j]);
+    }
+
+    writer.WriteNumber(minId);
+
+    for (size_t j=0; j<ids.size(); j++) {
+      writer.WriteNumber(ids[j]-minId);
+    }
+
+    return !writer.HasError();
+  }
+
+  bool Area::WriteCoords(FileWriter& writer,
+                         const std::vector<GeoCoord>& coords) const
+  {
+    uint32_t minLat=std::numeric_limits<uint32_t>::max();
+    uint32_t minLon=std::numeric_limits<uint32_t>::max();
+
+    for (size_t j=0; j<coords.size(); j++) {
+      minLat=std::min(minLat,(uint32_t)round((coords[j].GetLat()+90.0)*conversionFactor));
+      minLon=std::min(minLon,(uint32_t)round((coords[j].GetLon()+180.0)*conversionFactor));
+    }
+
+    writer.Write(minLat);
+    writer.Write(minLon);
+
+    for (size_t j=0; j<coords.size(); j++) {
+      uint32_t latValue=(uint32_t)round((coords[j].GetLat()+90.0)*conversionFactor);
+      uint32_t lonValue=(uint32_t)round((coords[j].GetLon()+180.0)*conversionFactor);
+
+      writer.WriteNumber(latValue-minLat);
+      writer.WriteNumber(lonValue-minLon);
+    }
+
+    return !writer.HasError();
+  }
+
   bool Area::Write(FileWriter& writer) const
   {
-    writer.WriteNumber((uint32_t)rings.size());
-    for (size_t i=0; i<rings.size(); i++) {
-      writer.WriteNumber(rings[i].type);
+    std::vector<Ring>::const_iterator ring=rings.begin();
 
-      if (!rings[i].attributes.Write(writer)) {
+    // Outer ring
+
+    uint8_t outerFlags;
+
+    ring->attributes.GetFlags(outerFlags);
+
+    if (rings.size()==1) {
+      outerFlags|=AreaAttributes::isSimple;
+    }
+
+    writer.Write(outerFlags);
+
+    if (rings.size()>1) {
+      writer.WriteNumber((uint32_t)rings.size()-1);
+    }
+
+    writer.WriteNumber(ring->type);
+
+    if (!ring->attributes.Write(writer,
+                                outerFlags)) {
+      return false;
+    }
+
+    writer.WriteNumber((uint32_t)ring->nodes.size());
+
+    if (!ring->nodes.empty()) {
+      if (!WriteIds(writer,
+                    ring->ids)) {
         return false;
       }
 
-      writer.Write(rings[i].ring);
+      if (!WriteCoords(writer,
+                       ring->nodes)) {
+        return false;
+      }
+    }
 
-      writer.WriteNumber((uint32_t)rings[i].nodes.size());
+    ++ring;
 
-      if (!rings[i].nodes.empty()) {
-        Id       minId=std::numeric_limits<Id>::max();
-        uint32_t minLat=std::numeric_limits<uint32_t>::max();
-        uint32_t minLon=std::numeric_limits<uint32_t>::max();
+    // Potential additional rings
 
-        for (size_t j=0; j<rings[i].ids.size(); j++) {
-          minId=std::min(minId,rings[i].ids[j]);
-        }
+    while (ring!=rings.end()) {
+      writer.WriteNumber(ring->type);
 
-        writer.WriteNumber(minId);
-
-        for (size_t j=0; j<rings[i].nodes.size(); j++) {
-          writer.WriteNumber(rings[i].ids[j]-minId);
-        }
-
-        for (size_t j=0; j<rings[i].nodes.size(); j++) {
-          minLat=std::min(minLat,(uint32_t)round((rings[i].nodes[j].GetLat()+90.0)*conversionFactor));
-          minLon=std::min(minLon,(uint32_t)round((rings[i].nodes[j].GetLon()+180.0)*conversionFactor));
-        }
-
-        writer.Write(minLat);
-        writer.Write(minLon);
-
-        for (size_t j=0; j<rings[i].nodes.size(); j++) {
-          uint32_t latValue=(uint32_t)round((rings[i].nodes[j].GetLat()+90.0)*conversionFactor);
-          uint32_t lonValue=(uint32_t)round((rings[i].nodes[j].GetLon()+180.0)*conversionFactor);
-
-          writer.WriteNumber(latValue-minLat);
-          writer.WriteNumber(lonValue-minLon);
+      if (ring->type!=typeIgnore) {
+        if (!ring->attributes.Write(writer)) {
+          return false;
         }
       }
+
+      writer.Write(ring->ring);
+
+      writer.WriteNumber((uint32_t)ring->nodes.size());
+
+      if (!ring->nodes.empty() &&
+          ring->type!=typeIgnore) {
+        if (!WriteIds(writer,
+                      ring->ids)) {
+          return false;
+        }
+      }
+
+      if (!ring->nodes.empty()) {
+        if (!WriteCoords(writer,
+                        ring->nodes)) {
+          return false;
+        }
+      }
+
+      ++ring;
     }
 
     return !writer.HasError();
@@ -514,38 +687,65 @@ namespace osmscout {
 
   bool Area::WriteOptimized(FileWriter& writer) const
   {
-    writer.WriteNumber((uint32_t)rings.size());
-    for (size_t i=0; i<rings.size(); i++) {
-      writer.WriteNumber(rings[i].type);
+    std::vector<Ring>::const_iterator ring=rings.begin();
 
-      if (!rings[i].attributes.Write(writer)) {
+    // Outer ring
+
+    uint8_t outerFlags;
+
+    ring->attributes.GetFlags(outerFlags);
+
+    if (rings.size()==1) {
+      outerFlags|=AreaAttributes::isSimple;
+    }
+
+    writer.Write(outerFlags);
+
+    if (rings.size()>1) {
+      writer.WriteNumber((uint32_t)rings.size()-1);
+    }
+
+    writer.WriteNumber(ring->type);
+
+    if (!ring->attributes.Write(writer,
+                                outerFlags)) {
+      return false;
+    }
+
+    writer.WriteNumber((uint32_t)ring->nodes.size());
+
+    if (!ring->nodes.empty()) {
+      if (!WriteCoords(writer,
+                      ring->nodes)) {
         return false;
       }
+    }
 
-      writer.Write(rings[i].ring);
+    ++ring;
 
-      writer.WriteNumber((uint32_t)rings[i].nodes.size());
+    // Potential additional rings
 
-      if (!rings[i].nodes.empty()) {
-        uint32_t minLat=std::numeric_limits<uint32_t>::max();
-        uint32_t minLon=std::numeric_limits<uint32_t>::max();
+    while (ring!=rings.end()) {
+      writer.WriteNumber(ring->type);
 
-        for (size_t j=0; j<rings[i].nodes.size(); j++) {
-          minLat=std::min(minLat,(uint32_t)round((rings[i].nodes[j].GetLat()+90.0)*conversionFactor));
-          minLon=std::min(minLon,(uint32_t)round((rings[i].nodes[j].GetLon()+180.0)*conversionFactor));
-        }
-
-        writer.Write(minLat);
-        writer.Write(minLon);
-
-        for (size_t j=0; j<rings[i].nodes.size(); j++) {
-          uint32_t latValue=(uint32_t)round((rings[i].nodes[j].GetLat()+90.0)*conversionFactor);
-          uint32_t lonValue=(uint32_t)round((rings[i].nodes[j].GetLon()+180.0)*conversionFactor);
-
-          writer.WriteNumber(latValue-minLat);
-          writer.WriteNumber(lonValue-minLon);
+      if (ring->type!=typeIgnore) {
+        if (!ring->attributes.Write(writer)) {
+          return false;
         }
       }
+
+      writer.Write(ring->ring);
+
+      writer.WriteNumber((uint32_t)ring->nodes.size());
+
+      if (!ring->nodes.empty()) {
+        if (!WriteCoords(writer,
+                        ring->nodes)) {
+          return false;
+        }
+      }
+
+      ++ring;
     }
 
     return !writer.HasError();
