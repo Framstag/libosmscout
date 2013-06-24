@@ -78,20 +78,15 @@ namespace osmscout {
      sortTileMag(13),
      numericIndexPageSize(4096),
      coordDataMemoryMaped(false),
-     rawNodeIndexMemoryMaped(true),
      rawNodeDataMemoryMaped(false),
      rawNodeDataCacheSize(10000),
-     rawNodeIndexCacheSize(25000),
      rawWayIndexMemoryMaped(true),
      rawWayDataMemoryMaped(false),
      rawWayDataCacheSize(5000),
      rawWayIndexCacheSize(10000),
      rawWayBlockSize(500000),
-     wayIndexMemoryMaped(true),
      wayDataMemoryMaped(false),
      wayDataCacheSize(0),
-     wayIndexCacheSize(10000),
-     waysLoadSize(1000000),
      areaAreaIndexMaxMag(17),
      areaWayMinMag(14),
      areaWayIndexMinFillRate(0.1),
@@ -170,11 +165,6 @@ namespace osmscout {
     return coordDataMemoryMaped;
   }
 
-  bool ImportParameter::GetRawNodeIndexMemoryMaped() const
-  {
-    return rawNodeIndexMemoryMaped;
-  }
-
   bool ImportParameter::GetRawNodeDataMemoryMaped() const
   {
     return rawNodeDataMemoryMaped;
@@ -210,24 +200,9 @@ namespace osmscout {
     return rawNodeDataCacheSize;
   }
 
-  size_t ImportParameter::GetRawNodeIndexCacheSize() const
-  {
-    return rawNodeIndexCacheSize;
-  }
-
-  bool ImportParameter::GetWayIndexMemoryMaped() const
-  {
-    return wayIndexMemoryMaped;
-  }
-
   size_t ImportParameter::GetWayDataCacheSize() const
   {
     return wayDataCacheSize;
-  }
-
-  size_t ImportParameter::GetWayIndexCacheSize() const
-  {
-    return wayIndexCacheSize;
   }
 
   bool ImportParameter::GetWayDataMemoryMaped() const
@@ -382,11 +357,6 @@ namespace osmscout {
     this->numericIndexPageSize=numericIndexPageSize;
   }
 
-  void ImportParameter::SetRawNodeIndexMemoryMaped(bool memoryMaped)
-  {
-    this->rawNodeIndexMemoryMaped=memoryMaped;
-  }
-
   void ImportParameter::SetCoordDataMemoryMaped(bool memoryMaped)
   {
     this->coordDataMemoryMaped=memoryMaped;
@@ -427,16 +397,6 @@ namespace osmscout {
     this->rawNodeDataCacheSize=nodeDataCacheSize;
   }
 
-  void ImportParameter::SetRawNodeIndexCacheSize(size_t nodeIndexCacheSize)
-  {
-    this->rawNodeIndexCacheSize=nodeIndexCacheSize;
-  }
-
-  void ImportParameter::SetWayIndexMemoryMaped(bool memoryMaped)
-  {
-    this->wayIndexMemoryMaped=memoryMaped;
-  }
-
   void ImportParameter::SetWayDataMemoryMaped(bool memoryMaped)
   {
     this->wayDataMemoryMaped=memoryMaped;
@@ -445,16 +405,6 @@ namespace osmscout {
   void ImportParameter::SetWayDataCacheSize(size_t wayDataCacheSize)
   {
     this->wayDataCacheSize=wayDataCacheSize;
-  }
-
-  void ImportParameter::SetWayIndexCacheSize(size_t wayIndexCacheSize)
-  {
-    this->wayIndexCacheSize=wayIndexCacheSize;
-  }
-
-  void ImportParameter::SetWaysLoadSize(size_t waysLoadSize)
-  {
-    this->waysLoadSize=waysLoadSize;
   }
 
   void ImportParameter::SetAreaAreaIndexMaxMag(size_t areaAreaIndexMaxMag)
