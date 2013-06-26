@@ -53,7 +53,8 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/AreaNodeIndex.h \
                         osmscout/AreaWayIndex.h \
                         osmscout/CityStreetIndex.h \
-                        osmscout/OptimizeLowZoom.h \
+                        osmscout/OptimizeAreasLowZoom.h \
+                        osmscout/OptimizeWaysLowZoom.h \
                         osmscout/WaterIndex.h \
                         osmscout/Route.h \
                         osmscout/RouteData.h \

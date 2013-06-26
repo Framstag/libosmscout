@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_IMPORT_GENOPTIMIZELOWZOOM_H
-#define OSMSCOUT_IMPORT_GENOPTIMIZELOWZOOM_H
+#ifndef OSMSCOUT_IMPORT_GENOPTIMIZEWAYSLOWZOOM_H
+#define OSMSCOUT_IMPORT_GENOPTIMIZEWAYSLOWZOOM_H
 
 /*
   This source is part of the libosmscout library
@@ -35,8 +35,11 @@
 
 namespace osmscout {
 
-  class OptimizeLowZoomGenerator : public ImportModule
+  class OptimizeWaysLowZoomGenerator : public ImportModule
   {
+  public:
+    static const char* FILE_WAYSOPT_DAT;
+
   private:
     typedef OSMSCOUT_HASHMAP<FileOffset,FileOffset> FileOffsetFileOffsetMap;
 
@@ -73,46 +76,12 @@ namespace osmscout {
     void GetWayTypesToOptimize(const TypeConfig& typeConfig,
                                std::set<TypeId>& types);
 
-    void GetAreaTypesToOptimize(const TypeConfig& typeConfig,
-                                std::set<TypeId>& types);
-
     bool WriteTypeData(FileWriter& writer,
                        const TypeData& data);
 
     bool WriteHeader(FileWriter& writer,
-                     const std::list<TypeData>& areaTypesData,
                      const std::list<TypeData>& wayTypesData,
                      uint32_t optimizeMaxMap);
-
-    bool GetAreas(const ImportParameter& parameter,
-                            Progress& progress,
-                            FileScanner& scanner,
-                            std::set<TypeId>& types,
-                            std::vector<std::list<AreaRef> >& areas);
-
-    void GetAreaIndexLevel(const ImportParameter& parameter,
-                           Progress& progress,
-                           const std::list<AreaRef>& areas,
-                           TypeData& typeData);
-
-    bool WriteAreas(Progress& progress,
-                    FileWriter& writer,
-                    const std::list<AreaRef>& areas,
-                    FileOffsetFileOffsetMap& offsets);
-
-    bool WriteAreaBitmap(Progress& progress,
-                         FileWriter& writer,
-                         const TypeInfo& type,
-                         const std::list<AreaRef>& areas,
-                         const FileOffsetFileOffsetMap& offsets,
-                         TypeData& data);
-
-    bool HandleAreas(const ImportParameter& parameter,
-                     Progress& progress,
-                     const TypeConfig& typeConfig,
-                     FileWriter& writer,
-                     const std::set<TypeId>& types,
-                     std::list<TypeData>& typesData);
 
     bool GetWays(const ImportParameter& parameter,
                            Progress& progress,
@@ -128,16 +97,6 @@ namespace osmscout {
                           Progress& progress,
                           const std::list<WayRef>& ways,
                           TypeData& typeData);
-
-    void OptimizeAreas(Progress& progress,
-                       const TypeConfig& typeConfig,
-                       TypeId type,
-                       const std::list<AreaRef>& areas,
-                       std::list<AreaRef>& optimizedAreas,
-                       size_t width,
-                       size_t height,
-                       const Magnification& magnification,
-                       TransPolygon::OptimizeMethod optimizeWayMethod);
 
     void OptimizeWays(Progress& progress,
                       const std::list<WayRef>& ways,

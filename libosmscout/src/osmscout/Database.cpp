@@ -287,8 +287,16 @@ namespace osmscout {
       return false;
     }
 
-    if (!optimizeLowZoom.Open(path)) {
-      std::cerr << "Cannot load low zoom optimizations!" << std::endl;
+    if (!optimizeAreasLowZoom.Open(path)) {
+      std::cerr << "Cannot load area low zoom optimizations!" << std::endl;
+      delete typeConfig;
+      typeConfig=NULL;
+      return false;
+    }
+
+
+    if (!optimizeWaysLowZoom.Open(path)) {
+      std::cerr << "Cannot load ways low zoom optimizations!" << std::endl;
       delete typeConfig;
       typeConfig=NULL;
       return false;
@@ -459,16 +467,15 @@ namespace osmscout {
 
     if (internalAreaTypes.HasTypes()) {
       if (parameter.GetUseLowZoomOptimization() &&
-          optimizeLowZoom.HasOptimizations(magnification.GetMagnification())) {
-#pragma omp critical
-        optimizeLowZoom.GetAreas(lonMin,
-                                 latMin,
-                                 lonMax,
-                                 latMax,
-                                 magnification,
-                                 parameter.GetMaximumWays(),
-                                 internalAreaTypes,
-                                 areas);
+          optimizeAreasLowZoom.HasOptimizations(magnification.GetMagnification())) {
+        optimizeAreasLowZoom.GetAreas(lonMin,
+                                      latMin,
+                                      lonMax,
+                                      latMax,
+                                      magnification,
+                                      parameter.GetMaximumWays(),
+                                      internalAreaTypes,
+                                      areas);
       }
     }
 
@@ -547,16 +554,15 @@ namespace osmscout {
 
     if (!internalWayTypes.empty()) {
       if (parameter.GetUseLowZoomOptimization() &&
-          optimizeLowZoom.HasOptimizations(magnification.GetMagnification())) {
-#pragma omp critical
-        optimizeLowZoom.GetWays(lonMin,
-                                latMin,
-                                lonMax,
-                                latMax,
-                                magnification,
-                                parameter.GetMaximumWays(),
-                                internalWayTypes,
-                                ways);
+          optimizeWaysLowZoom.HasOptimizations(magnification.GetMagnification())) {
+        optimizeWaysLowZoom.GetWays(lonMin,
+                                    latMin,
+                                    lonMax,
+                                    latMax,
+                                    magnification,
+                                    parameter.GetMaximumWays(),
+                                    internalWayTypes,
+                                    ways);
       }
     }
 

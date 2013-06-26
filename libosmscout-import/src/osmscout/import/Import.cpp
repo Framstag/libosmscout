@@ -55,7 +55,9 @@
 #include <osmscout/import/GenOptimizeAreaWayIds.h>
 #include <osmscout/import/GenCityStreetIndex.h>
 #include <osmscout/import/GenWaterIndex.h>
-#include <osmscout/import/GenOptimizeLowZoom.h>
+
+#include <osmscout/import/GenOptimizeAreasLowZoom.h>
+#include <osmscout/import/GenOptimizeWaysLowZoom.h>
 
 // Routing
 #include <osmscout/import/GenRouteDat.h>
@@ -66,7 +68,7 @@
 namespace osmscout {
 
   static const size_t defaultStartStep=1;
-  static const size_t defaultEndStep=22;
+  static const size_t defaultEndStep=23;
 
   ImportParameter::ImportParameter()
    : typefile("map.ost"),
@@ -633,15 +635,18 @@ namespace osmscout {
     modules.push_back(new WaterIndexGenerator());
 
     /* 19 */
-    modules.push_back(new OptimizeLowZoomGenerator());
+    modules.push_back(new OptimizeAreasLowZoomGenerator());
 
     /* 20 */
-    modules.push_back(new CityStreetIndexGenerator());
+    modules.push_back(new OptimizeWaysLowZoomGenerator());
 
     /* 21 */
-    modules.push_back(new RouteDataGenerator());
+    modules.push_back(new CityStreetIndexGenerator());
 
     /* 22 */
+    modules.push_back(new RouteDataGenerator());
+
+    /* 23 */
     modules.push_back(new NumericIndexGenerator<Id,RouteNode>("Generating 'route.idx'",
                                                               AppendFileToDir(parameter.GetDestinationDirectory(),
                                                                               "route.dat"),

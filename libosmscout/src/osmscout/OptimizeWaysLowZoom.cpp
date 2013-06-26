@@ -17,7 +17,7 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-#include <osmscout/OptimizeLowZoom.h>
+#include <osmscout/OptimizeWaysLowZoom.h>
 
 #include <osmscout/Way.h>
 
@@ -34,22 +34,22 @@
 
 namespace osmscout
 {
-  OptimizeLowZoom::OptimizeLowZoom()
-  : datafile("optimized.dat"),
+  OptimizeWaysLowZoom::OptimizeWaysLowZoom()
+  : datafile("waysopt.dat"),
     magnification(0.0)
   {
     // no code
   }
 
-  OptimizeLowZoom::~OptimizeLowZoom()
+  OptimizeWaysLowZoom::~OptimizeWaysLowZoom()
   {
     if (scanner.IsOpen()) {
       Close();
     }
   }
 
-  bool OptimizeLowZoom::ReadTypeData(FileScanner& scanner,
-                                     OptimizeLowZoom::TypeData& data)
+  bool OptimizeWaysLowZoom::ReadTypeData(FileScanner& scanner,
+                                         OptimizeWaysLowZoom::TypeData& data)
   {
     scanner.Read(data.optLevel);
     scanner.Read(data.indexLevel);
@@ -75,7 +75,7 @@ namespace osmscout
     return !scanner.HasError();
   }
 
-  bool OptimizeLowZoom::Open(const std::string& path)
+  bool OptimizeWaysLowZoom::Open(const std::string& path)
   {
     datafilename=AppendFileToDir(path,datafile);
 
@@ -97,11 +97,9 @@ namespace osmscout
     }
 
     uint32_t optimizationMaxMag;
-    uint32_t areaTypeCount;
     uint32_t wayTypeCount;
 
     scanner.Read(optimizationMaxMag);
-    scanner.Read(areaTypeCount);
     scanner.Read(wayTypeCount);
 
     if (scanner.HasError()) {
@@ -109,21 +107,6 @@ namespace osmscout
     }
 
     magnification=pow(2.0,(int)optimizationMaxMag);
-
-    for (size_t i=1; i<=areaTypeCount; i++) {
-      TypeId typeId;
-
-      scanner.Read(typeId);
-
-      TypeData typeData;
-
-      if (!ReadTypeData(scanner,
-                        typeData)) {
-        return false;
-      }
-
-      areaTypesData[typeId].push_back(typeData);
-    }
 
     for (size_t i=1; i<=wayTypeCount; i++) {
       TypeId typeId;
@@ -143,7 +126,7 @@ namespace osmscout
     return !scanner.HasError();
   }
 
-  bool OptimizeLowZoom::Close()
+  bool OptimizeWaysLowZoom::Close()
   {
     bool success=true;
 
@@ -156,17 +139,17 @@ namespace osmscout
     return success;
   }
 
-  bool OptimizeLowZoom::HasOptimizations(double magnification) const
+  bool OptimizeWaysLowZoom::HasOptimizations(double magnification) const
   {
     return magnification<=this->magnification;
   }
 
-  bool OptimizeLowZoom::GetOffsets(const TypeData& typeData,
-                                   double minlon,
-                                   double minlat,
-                                   double maxlon,
-                                   double maxlat,
-                                   std::vector<FileOffset>& offsets) const
+  bool OptimizeWaysLowZoom::GetOffsets(const TypeData& typeData,
+                                       double minlon,
+                                       double minlat,
+                                       double maxlon,
+                                       double maxlat,
+                                       std::vector<FileOffset>& offsets) const
   {
     std::set<FileOffset> newOffsets;
 
@@ -277,87 +260,12 @@ namespace osmscout
     return true;
   }
 
-  bool OptimizeLowZoom::GetAreas(double lonMin, double latMin,
-                                 double lonMax, double latMax,
-                                 const Magnification& magnification,
-                                 size_t maxAreaCount,
-                                 TypeSet& areaTypes,
-                                 std::vector<AreaRef>& areas) const
-  {
-    std::vector<FileOffset> offsets;
-
-    if (!scanner.IsOpen()) {
-      if (!scanner.Open(datafilename,FileScanner::LowMemRandom,true)) {
-        std::cerr << "Error while opening " << datafilename << " for reading!" << std::endl;
-        return false;
-      }
-    }
-
-    offsets.reserve(20000);
-
-    for (std::map<TypeId,std::list<TypeData> >::const_iterator type=areaTypesData.begin();
-        type!=areaTypesData.end();
-        ++type) {
-      if (areaTypes.IsTypeSet(type->first)) {
-        std::list<TypeData>::const_iterator match=type->second.end();
-
-        for (std::list<TypeData>::const_iterator typeData=type->second.begin();
-            typeData!=type->second.end();
-            ++typeData) {
-          if (typeData->optLevel==magnification.GetLevel()) {
-            match=typeData;
-          }
-        }
-
-        if (match!=type->second.end()) {
-          if (match->bitmapOffset!=0) {
-            if (!GetOffsets(*match,
-                            lonMin,
-                            latMin,
-                            lonMax,
-                            latMax,
-                            offsets)) {
-              return false;
-            }
-
-            for (std::vector<FileOffset>::const_iterator offset=offsets.begin();
-                offset!=offsets.end();
-                ++offset) {
-              if (!scanner.SetPos(*offset)) {
-                std::cerr << "Error while positioning in file " << datafilename  << std::endl;
-                type++;
-                continue;
-              }
-
-              AreaRef area=new Area();
-
-              if (!area->ReadOptimized(scanner)) {
-                std::cerr << "Error while reading data entry of type " << type->first << " from file " << datafilename  << std::endl;
-                continue;
-              }
-
-              areas.push_back(area);
-            }
-
-            offsets.clear();
-          }
-        }
-
-        if (match!=type->second.end()) {
-          areaTypes.UnsetType(type->first);
-        }
-      }
-    }
-
-    return true;
-  }
-
-  bool OptimizeLowZoom::GetWays(double lonMin, double latMin,
-                                double lonMax, double latMax,
-                                const Magnification& magnification,
-                                size_t maxWayCount,
-                                std::vector<TypeSet>& wayTypes,
-                                std::vector<WayRef>& ways) const
+  bool OptimizeWaysLowZoom::GetWays(double lonMin, double latMin,
+                                    double lonMax, double latMax,
+                                    const Magnification& magnification,
+                                    size_t maxWayCount,
+                                    std::vector<TypeSet>& wayTypes,
+                                    std::vector<WayRef>& ways) const
   {
     std::vector<FileOffset> offsets;
 

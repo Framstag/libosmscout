@@ -32,7 +32,8 @@
 #include <osmscout/NodeDataFile.h>
 #include <osmscout/WayDataFile.h>
 
-#include <osmscout/OptimizeLowZoom.h>
+#include <osmscout/OptimizeAreasLowZoom.h>
+#include <osmscout/OptimizeWaysLowZoom.h>
 
 // In area index
 #include <osmscout/AreaAreaIndex.h>
@@ -145,13 +146,13 @@ namespace osmscout {
   class OSMSCOUT_API Database
   {
   private:
-    bool                  isOpen;          //! true, if opened
+    bool                  isOpen;              //! true, if opened
     bool                  debugPerformance;
 
-    double                minLon;          //! bounding box of data
-    double                minLat;          //! bounding box of data
-    double                maxLon;          //! bounding box of data
-    double                maxLat;          //! bounding box of data
+    double                minLon;              //! bounding box of data
+    double                minLat;              //! bounding box of data
+    double                maxLon;              //! bounding box of data
+    double                maxLat;              //! bounding box of data
 
     AreaNodeIndex         areaNodeIndex;
     AreaWayIndex          areaWayIndex;
@@ -161,15 +162,16 @@ namespace osmscout {
 
     WaterIndex            waterIndex;
 
-    std::string           path;             //! Path to the directory containing all files
+    std::string           path;                 //! Path to the directory containing all files
 
-    NodeDataFile          nodeDataFile;     //! Cached access to the 'nodes.dat' file
-    AreaDataFile          areaDataFile;     //! Cached access to the 'areas.dat' file
-    WayDataFile           wayDataFile;      //! Cached access to the 'ways.dat' file
+    NodeDataFile          nodeDataFile;         //! Cached access to the 'nodes.dat' file
+    AreaDataFile          areaDataFile;         //! Cached access to the 'areas.dat' file
+    WayDataFile           wayDataFile;          //! Cached access to the 'ways.dat' file
 
-    OptimizeLowZoom       optimizeLowZoom;  //! Optimized data for low zoom situations
+    OptimizeAreasLowZoom  optimizeAreasLowZoom; //! Optimized data for low zoom situations
+    OptimizeWaysLowZoom   optimizeWaysLowZoom;  //! Optimized data for low zoom situations
 
-    TypeConfig            *typeConfig;      //! Type config for the currently opened map
+    TypeConfig            *typeConfig;          //! Type config for the currently opened map
 
     std::string           (*hashFunction) (std::string);
 

@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_OPTIMIZELOWZOOM_H
-#define OSMSCOUT_OPTIMIZELOWZOOM_H
+#ifndef OSMSCOUT_OPTIMIZEAREASLOWZOOM_H
+#define OSMSCOUT_OPTIMIZEAREASLOWZOOM_H
 
 /*
   This source is part of the libosmscout library
@@ -33,7 +33,7 @@
 
 namespace osmscout {
 
-  class OSMSCOUT_API OptimizeLowZoom
+  class OSMSCOUT_API OptimizeAreasLowZoom
   {
   private:
     struct TypeData
@@ -68,7 +68,6 @@ namespace osmscout {
 
     double                                magnification; //! Magnification, upto which we support optimization
     std::map<TypeId,std::list<TypeData> > areaTypesData; //! Index information for all area types
-    std::map<TypeId,std::list<TypeData> > wayTypesData;  //! Index information for all way types
 
   private:
     bool ReadTypeData(FileScanner& scanner,
@@ -82,8 +81,8 @@ namespace osmscout {
                     std::vector<FileOffset>& offsets) const;
 
   public:
-    OptimizeLowZoom();
-    virtual ~OptimizeLowZoom();
+    OptimizeAreasLowZoom();
+    virtual ~OptimizeAreasLowZoom();
 
     bool Open(const std::string& path);
     bool Close();
@@ -96,13 +95,6 @@ namespace osmscout {
                   size_t maxAreaCount,
                   TypeSet& areaTypes,
                   std::vector<AreaRef>& areas) const;
-
-    bool GetWays(double lonMin, double latMin,
-                 double lonMax, double latMax,
-                 const Magnification& magnification,
-                 size_t maxWayCount,
-                 std::vector<TypeSet>& wayTypes,
-                 std::vector<WayRef>& ways) const;
   };
 }
 
