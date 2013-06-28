@@ -94,7 +94,7 @@ namespace osmscout {
 
       FileOffset    prev;
 
-      bool       access;
+      bool          access;
 
       RNode()
       : nodeOffset(0)
