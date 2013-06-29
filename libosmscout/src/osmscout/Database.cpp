@@ -549,7 +549,7 @@ namespace osmscout {
       return false;
     }
 
-    std::vector<FileOffset> wayWayOffsets;
+    std::vector<FileOffset> offsets;
     StopClock               wayOptimizedTimer;
 
     if (!internalWayTypes.empty()) {
@@ -582,7 +582,7 @@ namespace osmscout {
                                    latMax,
                                    internalWayTypes,
                                    parameter.GetMaximumWays(),
-                                   wayWayOffsets)) {
+                                   offsets)) {
         std::cout << "Error getting ways Glations from area way index!" << std::endl;
         return false;
       }
@@ -595,7 +595,7 @@ namespace osmscout {
       return false;
     }
 
-    std::sort(wayWayOffsets.begin(),wayWayOffsets.end());
+    std::sort(offsets.begin(),offsets.end());
 
     if (parameter.IsAborted()) {
       return false;
@@ -603,8 +603,8 @@ namespace osmscout {
 
     StopClock waysTimer;
 
-    if (!wayWayOffsets.empty()) {
-      if (!GetWaysByOffset(wayWayOffsets,
+    if (!offsets.empty()) {
+      if (!GetWaysByOffset(offsets,
                            ways)) {
         std::cout << "Error reading ways in area!" << std::endl;
         return false;
