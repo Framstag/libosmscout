@@ -158,7 +158,7 @@ namespace osmscout {
       }
     }
 
-    uint8_t dataOffsetBytes=BytesNeeededToAddressFileData(dataSize);
+    uint8_t dataOffsetBytes=BytesNeeededToAddressFileData(dataSize+1);
 
     progress.Info("Writing map for "+
                   typeInfo.GetName()+" , "+
@@ -190,9 +190,7 @@ namespace osmscout {
     // We prefill with zero and only overwrite cells that have data
     // So zero means "no data for this cell"
     for (size_t i=0; i<typeData.cellXCount*typeData.cellYCount; i++) {
-      FileOffset cellOffset=0;
-
-      writer.WriteFileOffset(cellOffset,
+      writer.WriteFileOffset(0,
                              dataOffsetBytes);
     }
 
@@ -227,7 +225,7 @@ namespace osmscout {
 
       assert(cellOffset>bitmapCellOffset);
 
-      writer.WriteFileOffset(cellOffset-dataStartOffset,dataOffsetBytes);
+      writer.WriteFileOffset(cellOffset-dataStartOffset+1,dataOffsetBytes);
 
       if (!writer.SetPos(cellOffset)) {
         progress.Error("Cannot go back to cell start position in file");

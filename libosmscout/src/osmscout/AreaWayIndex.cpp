@@ -192,6 +192,8 @@ namespace osmscout {
           continue;
         }
 
+        cellDataOffset--;
+
         if (initialCellDataOffset==0) {
           initialCellDataOffset=dataOffset+cellDataOffset;
         }
