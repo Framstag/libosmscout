@@ -416,27 +416,97 @@ namespace osmscout {
     return true;
   }
 
-  bool RelAreaDataGenerator::ComposeMultipolygonMembers(Progress& progress,
-                                                        const TypeConfig& typeConfig,
-                                                        TypeId boundaryId,
-                                                        const CoordDataFile::CoordResultMap& coordMap,
-                                                        const IdRawWayMap& wayMap,
-                                                        const std::map<OSMId,RawRelationRef>& relationMap,
-                                                        const Area& relation,
-                                                        const std::string& name,
-                                                        const RawRelation& rawRelation,
-                                                        IdSet& resolvedRelations,
-                                                        std::list<MultipolygonPart>& parts)
+  bool RelAreaDataGenerator::ComposeAreaMembers(Progress& progress,
+                                                const TypeConfig& typeConfig,
+                                                const CoordDataFile::CoordResultMap& coordMap,
+                                                const IdRawWayMap& wayMap,
+                                                const std::map<OSMId,RawRelationRef>& relationMap,
+                                                const Area& relation,
+                                                const std::string& name,
+                                                const RawRelation& rawRelation,
+                                                IdSet& resolvedRelations,
+                                                std::list<MultipolygonPart>& parts)
   {
     for (std::vector<RawRelation::Member>::const_iterator member=rawRelation.members.begin();
          member!=rawRelation.members.end();
          member++) {
-      if (member->type==RawRelation::memberRelation &&
-          (member->role=="inner" ||
-           member->role=="outer" ||
-           member->role.empty())) {
-        if (boundaryId!=typeIgnore &&
-            rawRelation.GetType()==boundaryId) {
+      if (member->type==RawRelation::memberRelation) {
+        progress.Warning("Unsupported relation reference in relation "+
+                         NumberToString(rawRelation.GetId())+" "+
+                         typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                         name);
+      }
+      else if (member->type==RawRelation::memberWay &&
+               (member->role=="inner" ||
+                member->role=="outer" ||
+                member->role.empty())) {
+        IdRawWayMap::const_iterator wayEntry=wayMap.find(member->id);
+
+        if (wayEntry==wayMap.end()) {
+          progress.Error("Cannot resolve way member "+
+                         NumberToString(member->id)+
+                         " for relation "+
+                         NumberToString(rawRelation.GetId())+" "+
+                         typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                         name);
+
+          return false;
+        }
+
+        RawWayRef way(wayEntry->second);
+
+        MultipolygonPart part;
+
+        part.role.ring=Area::masterRingId;
+
+        part.role.ids.reserve(way->GetNodeCount());
+        part.role.nodes.reserve(way->GetNodeCount());
+        for (std::vector<OSMId>::const_iterator id=way->GetNodes().begin();
+             id!=way->GetNodes().end();
+             ++id) {
+          CoordDataFile::CoordResultMap::const_iterator coordEntry=coordMap.find(*id);
+
+          if (coordEntry==coordMap.end()) {
+            progress.Error("Cannot resolve node member "+
+                           NumberToString(*id)+
+                           " for relation "+
+                           NumberToString(rawRelation.GetId())+" "+
+                           typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
+                           name);
+
+            return false;
+          }
+
+          part.role.ids.push_back(coordEntry->second.GetId());
+          part.role.nodes.push_back(GeoCoord(coordEntry->second.GetLat(),coordEntry->second.GetLon()));
+        }
+
+        part.ways.push_back(way);
+
+        parts.push_back(part);
+      }
+    }
+
+    return true;
+  }
+
+  bool RelAreaDataGenerator::ComposeBoundaryMembers(Progress& progress,
+                                                    const TypeConfig& typeConfig,
+                                                    const CoordDataFile::CoordResultMap& coordMap,
+                                                    const IdRawWayMap& wayMap,
+                                                    const std::map<OSMId,RawRelationRef>& relationMap,
+                                                    const Area& relation,
+                                                    const std::string& name,
+                                                    const RawRelation& rawRelation,
+                                                    IdSet& resolvedRelations,
+                                                    std::list<MultipolygonPart>& parts)
+  {
+    for (std::vector<RawRelation::Member>::const_iterator member=rawRelation.members.begin();
+         member!=rawRelation.members.end();
+         member++) {
+      if (member->type==RawRelation::memberRelation) {
+        if (member->role=="inner" ||
+            member->role=="outer") {
           std::map<OSMId,RawRelationRef>::const_iterator relationEntry=relationMap.find(member->id);
 
           if (relationEntry==relationMap.end()) {
@@ -454,22 +524,21 @@ namespace osmscout {
 
           resolvedRelations.insert(member->id);
 
-          if (!ComposeMultipolygonMembers(progress,
-                                          typeConfig,
-                                          boundaryId,
-                                          coordMap,
-                                          wayMap,
-                                          relationMap,
-                                          relation,
-                                          name,
-                                          *childRelation,
-                                          resolvedRelations,
-                                          parts)) {
+          if (!ComposeBoundaryMembers(progress,
+                                      typeConfig,
+                                      coordMap,
+                                      wayMap,
+                                      relationMap,
+                                      relation,
+                                      name,
+                                      *childRelation,
+                                      resolvedRelations,
+                                      parts)) {
             break;
           }
         }
         else {
-          progress.Warning("Unsupported relation reference in relation "+
+          progress.Warning("Ignored boundary relation role '"+member->role+"' in relation "+
                            NumberToString(rawRelation.GetId())+" "+
                            typeConfig.GetTypeInfo(rawRelation.GetType()).GetName()+" "+
                            name);
@@ -704,17 +773,31 @@ namespace osmscout {
 
     // Now build together everything
 
-    return ComposeMultipolygonMembers(progress,
-                                      typeConfig,
-                                      boundaryId,
-                                      coordMap,
-                                      wayMap,
-                                      relationMap,
-                                      relation,
-                                      name,
-                                      rawRelation,
-                                      resolvedRelations,
-                                      parts);
+    if (boundaryId!=typeIgnore &&
+        rawRelation.GetType()==boundaryId) {
+      return ComposeBoundaryMembers(progress,
+                                    typeConfig,
+                                    coordMap,
+                                    wayMap,
+                                    relationMap,
+                                    relation,
+                                    name,
+                                    rawRelation,
+                                    resolvedRelations,
+                                    parts);
+    }
+    else {
+      return ComposeAreaMembers(progress,
+                                typeConfig,
+                                coordMap,
+                                wayMap,
+                                relationMap,
+                                relation,
+                                name,
+                                rawRelation,
+                                resolvedRelations,
+                                parts);
+    }
   }
 
   bool RelAreaDataGenerator::HandleMultipolygonRelation(const ImportParameter& parameter,

@@ -162,17 +162,27 @@ namespace osmscout {
                              const Area& relation,
                              std::list<MultipolygonPart>& parts);
 
-    bool ComposeMultipolygonMembers(Progress& progress,
-                                    const TypeConfig& typeConfig,
-                                    TypeId boundaryId,
-                                    const CoordDataFile::CoordResultMap& coordMap,
-                                    const IdRawWayMap& wayMap,
-                                    const std::map<OSMId,RawRelationRef>& relationMap,
-                                    const Area& relation,
-                                    const std::string& name,
-                                    const RawRelation& rawRelation,
-                                    IdSet& resolvedRelations,
-                                    std::list<MultipolygonPart>& parts);
+    bool ComposeAreaMembers(Progress& progress,
+                            const TypeConfig& typeConfig,
+                            const CoordDataFile::CoordResultMap& coordMap,
+                            const IdRawWayMap& wayMap,
+                            const std::map<OSMId,RawRelationRef>& relationMap,
+                            const Area& relation,
+                            const std::string& name,
+                            const RawRelation& rawRelation,
+                            IdSet& resolvedRelations,
+                            std::list<MultipolygonPart>& parts);
+
+    bool ComposeBoundaryMembers(Progress& progress,
+                                const TypeConfig& typeConfig,
+                                const CoordDataFile::CoordResultMap& coordMap,
+                                const IdRawWayMap& wayMap,
+                                const std::map<OSMId,RawRelationRef>& relationMap,
+                                const Area& relation,
+                                const std::string& name,
+                                const RawRelation& rawRelation,
+                                IdSet& resolvedRelations,
+                                std::list<MultipolygonPart>& parts);
 
   bool ResolveMultipolygonMembers(Progress& progress,
                                   const TypeConfig& typeConfig,
