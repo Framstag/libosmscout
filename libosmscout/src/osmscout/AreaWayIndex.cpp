@@ -27,6 +27,7 @@ namespace osmscout {
 
   AreaWayIndex::TypeData::TypeData()
   : indexLevel(0),
+    dataOffsetBytes(0),
     bitmapOffset(0),
     cellXStart(0),
     cellXEnd(0),
@@ -164,6 +165,7 @@ namespace osmscout {
           continue;
         }
 
+        // We added +1 during import and now substract it again
         cellDataOffset--;
 
         if (initialCellDataOffset==0) {
@@ -173,18 +175,21 @@ namespace osmscout {
         cellDataOffsetCount++;
       }
 
+      // We did not find any cells in the current row
       if (cellDataOffsetCount==0) {
         continue;
       }
 
+      // The first data entry must be positioned behind the bitmap
       assert(initialCellDataOffset>=bitmapCellOffset);
 
+      // first data entry in the row
       if (!scanner.SetPos(initialCellDataOffset)) {
         std::cerr << "Cannot go to cell data position " << initialCellDataOffset << std::endl;
         return false;
       }
 
-      // For each data cell in row found
+      // For each data cell (in range) in row found
       for (size_t i=0; i<cellDataOffsetCount; i++) {
         uint32_t   dataCount;
         FileOffset lastOffset=0;

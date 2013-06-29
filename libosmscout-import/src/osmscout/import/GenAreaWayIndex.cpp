@@ -31,6 +31,7 @@
 #include <osmscout/util/Number.h>
 #include <osmscout/util/String.h>
 
+#include <iostream>
 namespace osmscout {
 
   AreaWayIndexGenerator::TypeData::TypeData()
@@ -151,12 +152,13 @@ namespace osmscout {
            ++offset) {
         FileOffset data=*offset-previousOffset;
 
-        dataSize+=EncodeNumber(data,buffer);
+        dataSize+=EncodeNumber(data+1,buffer);
 
         previousOffset=*offset;
       }
     }
 
+    // "+1" because we add +1 to every offset, to generate offset > 0
     uint8_t dataOffsetBytes=BytesNeeededToAddressFileData(dataSize+1);
 
     progress.Info("Writing map for "+
@@ -224,6 +226,7 @@ namespace osmscout {
 
       assert(cellOffset>bitmapCellOffset);
 
+      // We add +1 to make sure, that we can differentiate between "0" as "no entry" and "0" as first data entry.
       writer.WriteFileOffset(cellOffset-dataStartOffset+1,dataOffsetBytes);
 
       if (!writer.SetPos(cellOffset)) {
