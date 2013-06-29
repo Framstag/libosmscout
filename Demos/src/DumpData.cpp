@@ -418,12 +418,32 @@ static void DumpArea(const osmscout::TypeConfig* typeConfig,
     std::cout << std::endl;
     std::cout << "  role[" << r << "] {" << std::endl;
 
-    std::cout << "    ring: " << (size_t)area->rings[r].ring << std::endl;
+    if (area->rings[r].ring==osmscout::Area::outerRingId) {
+      std::cout << "    outer" << std::endl;
+    }
+    else {
+      std::cout << "    ring: " << (size_t)area->rings[r].ring << std::endl;
+    }
 
     DumpAreaSegmentAttributes(area->rings[r].GetType(),
                               area->rings[r].GetAttributes(),
                               typeConfig,
                               4);
+
+    if (!area->rings[r].nodes.empty()) {
+      std::cout << std::endl;
+
+      for (size_t n=0; n<area->rings[r].nodes.size(); n++) {
+        std::cout << "    node[" << n << "] {";
+
+        if (n<area->rings[r].ids.size() &&
+            area->rings[r].ids[n]!=0) {
+          std::cout << " id: " << area->rings[r].ids[n];
+        }
+
+        std::cout << " lat: " << area->rings[r].nodes[n].GetLat() << " lon: "<< area->rings[r].nodes[n].GetLon() << " }" << std::endl;
+      }
+    }
 
     std::cout << "  }" << std::endl;
   }
