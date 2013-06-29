@@ -732,6 +732,7 @@ namespace osmscout
           continue;
         }
 
+        /*
         size_t origWays=newWays.size();
         size_t origNodes=0;
 
@@ -741,7 +742,7 @@ namespace osmscout
           WayRef way(*w);
 
           origNodes+=way->nodes.size();
-        }
+        }*/
 
         //
         // Transform/Optimize the way and store it
@@ -763,6 +764,7 @@ namespace osmscout
                        magnification,
                        parameter.GetOptimizationWayMethod());
 
+          /*
           size_t optWays=optimizedWays.size();
           size_t optNodes=0;
 
@@ -772,7 +774,7 @@ namespace osmscout
             WayRef way(*w);
 
             optNodes+=way->nodes.size();
-          }
+          }*/
 
           /*
           std::cout << "Ways: " << origWays << " => " << optWays << std::endl;

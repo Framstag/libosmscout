@@ -563,6 +563,7 @@ namespace osmscout
 
         progress.SetAction("Optimizing type "+ typeConfig.GetTypeInfo(type).GetName()+" ("+NumberToString(type)+")");
 
+        /*
         size_t origAreas=allAreas[type].size();
         size_t origRoles=0;
         size_t origNodes=0;
@@ -577,7 +578,7 @@ namespace osmscout
           for (size_t r=0; r<area->rings.size(); r++) {
             origNodes+=area->rings[r].nodes.size();
           }
-        }
+        }*/
 
         for (uint32_t level=parameter.GetOptimizationMinMag();
              level<=parameter.GetOptimizationMaxMag();
@@ -609,6 +610,7 @@ namespace osmscout
             continue;
           }
 
+          /*
           size_t optAreas=optimizedAreas.size();
           size_t optRoles=0;
           size_t optNodes=0;
@@ -623,7 +625,7 @@ namespace osmscout
             for (size_t r=0; r<area->rings.size(); r++) {
               optNodes+=area->rings[r].nodes.size();
             }
-          }
+          }*/
 
           /*
           std::cout << "Areas: " << origAreas << " => " << optAreas << std::endl;
