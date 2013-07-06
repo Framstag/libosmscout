@@ -58,8 +58,8 @@ namespace osmscout {
     SortAreaDataGenerator()
     : SortDataGenerator<Area>("areas.dat","areas.idmap")
     {
-      AddSource(OSMRefType::osmRefWay,"wayarea.dat");
-      AddSource(OSMRefType::osmRefRelation,"relarea.dat");
+      AddSource(osmRefWay,"wayarea.dat");
+      AddSource(osmRefRelation,"relarea.dat");
     }
 
     std::string GetDescription() const

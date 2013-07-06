@@ -46,7 +46,7 @@ namespace osmscout {
     SortWayDataGenerator()
     : SortDataGenerator<Way>("ways.dat","ways.idmap")
     {
-      AddSource(OSMRefType::osmRefWay,"wayway.dat");
+      AddSource(osmRefWay,"wayway.dat");
     }
 
     std::string GetDescription() const
