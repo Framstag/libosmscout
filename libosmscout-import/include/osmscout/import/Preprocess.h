@@ -37,10 +37,6 @@ namespace osmscout {
     FileWriter          wayWriter;
     FileWriter          relationWriter;
     FileWriter          coastlineWriter;
-    FileWriter          coordWriter;
-
-    Id                  coordPageCount;
-    CoordPageOffsetMap  coordIndex;
 
     std::vector<Tag>    tags;
 
@@ -58,6 +54,9 @@ namespace osmscout {
     bool                waySortingError;
     bool                relationSortingError;
 
+    Id                  coordPageCount;
+    CoordPageOffsetMap  coordIndex;
+    FileWriter          coordWriter;
     PageId              currentPageId;
     FileOffset          currentPageOffset;
     std::vector<double> lats;
