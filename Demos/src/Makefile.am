@@ -1,5 +1,4 @@
 bin_PROGRAMS = AddressLookup \
-               DumpData \
                PerformanceTest \
                ResourceConsumption \
                Routing \
@@ -59,10 +58,6 @@ DrawMapSVG_CXXFLAGS = $(LIBOSMSCOUTMAPSVG_CFLAGS) \
 DrawMapSVG_LDADD = $(LIBOSMSCOUTMAPSVG_LIBS) \
                    $(LIBOSMSCOUTMAP_LIBS) \
                    $(LIBOSMSCOUT_LIBS)
-
-DumpData_SOURCES = DumpData.cpp
-DumpData_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
-DumpData_LDADD = $(LIBOSMSCOUT_LIBS)
 
 LookupPOI_SOURCES = LookupPOI.cpp
 LookupPOI_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)

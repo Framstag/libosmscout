@@ -7,6 +7,7 @@ programs = libosmscout \
            libosmscout-map-qt \
            libosmscout-map-agg \
            Import \
+           DumpData \
            Demos \
            TravelJinni \
            OSMScout \
