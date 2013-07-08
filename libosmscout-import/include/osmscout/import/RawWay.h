@@ -49,7 +49,8 @@ namespace osmscout {
 
   public:
     inline RawWay()
-    : type(typeIgnore),
+    : id(0),
+      type(typeIgnore),
       flags(0)
     {
       // no code
