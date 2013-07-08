@@ -80,6 +80,9 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --noSort                             do not sort objects" << std::endl;
   std::cout << " --sortBlockSize <number>             size of one data block during sorting (default: " << parameter.GetSortBlockSize() << ")" << std::endl;
 
+  std::cout << " --areaDataMemoryMaped true|false     memory maped area data file access (default: " << BoolToString(parameter.GetAreaDataMemoryMaped()) << ")" << std::endl;
+  std::cout << " --areaDataCacheSize <number>         area data cache size (default: " << parameter.GetAreaDataCacheSize() << ")" << std::endl;
+
   std::cout << " --wayDataMemoryMaped true|false      memory maped way data file access (default: " << BoolToString(parameter.GetWayDataMemoryMaped()) << ")" << std::endl;
   std::cout << " --wayDataCacheSize <number>          way data cache size (default: " << parameter.GetWayDataCacheSize() << ")" << std::endl;
 
@@ -115,6 +118,9 @@ int main(int argc, char* argv[])
   size_t                    rawWayDataCacheSize=parameter.GetRawWayDataCacheSize();
   size_t                    rawWayIndexCacheSize=parameter.GetRawWayIndexCacheSize();
   size_t                    rawWayBlockSize=parameter.GetRawWayBlockSize();
+
+  bool                      areaDataMemoryMaped=parameter.GetAreaDataMemoryMaped();
+  size_t                    areaDataCacheSize=parameter.GetAreaDataCacheSize();
 
   bool                      wayDataMemoryMaped=parameter.GetWayDataMemoryMaped();
   size_t                    wayDataCacheSize=parameter.GetWayDataCacheSize();
@@ -342,6 +348,34 @@ int main(int argc, char* argv[])
         parameterError=true;
       }
     }
+    else if (strcmp(argv[i],"--areaDataMemoryMaped")==0) {
+      i++;
+
+      if (i<argc) {
+        if (!StringToBool(argv[i],areaDataMemoryMaped)) {
+          std::cerr << "Cannot parse areaDataMemoryMaped '" << argv[i] << "'" << std::endl;
+          parameterError=true;
+        }
+      }
+      else {
+        std::cerr << "Missing parameter after --areaDataMemoryMaped option" << std::endl;
+        parameterError=true;
+      }
+    }
+    else if (strcmp(argv[i],"--areaDataCacheSize")==0) {
+      i++;
+
+      if (i<argc) {
+        if (!osmscout::StringToNumber(argv[i],areaDataCacheSize)) {
+          std::cerr << "Cannot parse areaDataCacheSize '" << argv[i] << "'" << std::endl;
+          parameterError=true;
+        }
+      }
+      else {
+        std::cerr << "Missing parameter after --areaDataCacheSize option" << std::endl;
+        parameterError=true;
+      }
+    }
     else if (strcmp(argv[i],"--wayDataMemoryMaped")==0) {
       i++;
 
@@ -427,6 +461,8 @@ int main(int argc, char* argv[])
   parameter.SetRawWayIndexCacheSize(rawWayIndexCacheSize);
   parameter.SetRawWayBlockSize(rawWayBlockSize);
 
+  parameter.SetAreaDataMemoryMaped(areaDataMemoryMaped);
+  parameter.SetAreaDataCacheSize(areaDataCacheSize);
 
   parameter.SetWayDataMemoryMaped(wayDataMemoryMaped);
   parameter.SetWayDataCacheSize(wayDataCacheSize);
@@ -474,6 +510,11 @@ int main(int argc, char* argv[])
                 (parameter.GetSortObjects() ? "true" : "false"));
   progress.Info(std::string("SortBlockSize: ")+
                 osmscout::NumberToString(parameter.GetSortBlockSize()));
+
+  progress.Info(std::string("AreaDataMemoryMaped: ")+
+                (parameter.GetAreaDataMemoryMaped() ? "true" : "false"));
+  progress.Info(std::string("AreaDataCacheSize: ")+
+                osmscout::NumberToString(parameter.GetAreaDataCacheSize()));
 
   progress.Info(std::string("WayDataMemoryMaped: ")+
                 (parameter.GetWayDataMemoryMaped() ? "true" : "false"));

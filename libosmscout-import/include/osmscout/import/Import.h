@@ -67,6 +67,9 @@ namespace osmscout {
     size_t                       rawWayIndexCacheSize;     //! Size of the raw way index cache
     size_t                       rawWayBlockSize;          //! Number of ways loaded during import until nodes get resolved
 
+    bool                         areaDataMemoryMaped;      //! Use memory mapping for area data file access
+    size_t                       areaDataCacheSize;        //! Size of the area data cache
+
     bool                         wayDataMemoryMaped;       //! Use memory mapping for way data file access
     size_t                       wayDataCacheSize;         //! Size of the way data cache
 
@@ -126,6 +129,9 @@ namespace osmscout {
     size_t GetRawWayIndexCacheSize() const;
     size_t GetRawWayBlockSize() const;
 
+    bool GetAreaDataMemoryMaped() const;
+    size_t GetAreaDataCacheSize() const;
+
     bool GetWayDataMemoryMaped() const;
     size_t GetWayDataCacheSize() const;
 
@@ -181,6 +187,8 @@ namespace osmscout {
     void SetRawWayIndexCacheSize(size_t wayIndexCacheSize);
     void SetRawWayBlockSize(size_t blockSize);
 
+    void SetAreaDataMemoryMaped(bool memoryMaped);
+    void SetAreaDataCacheSize(size_t areaDataCacheSize);
 
     void SetWayDataMemoryMaped(bool memoryMaped);
     void SetWayDataCacheSize(size_t wayDataCacheSize);
