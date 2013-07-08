@@ -55,6 +55,7 @@ namespace osmscout {
                  Progress& progress,
                  const TypeConfig& typeConfig,
                  std::set<TypeId>& types,
+                 std::set<TypeId>& slowFallbackTypes,
                  const BlacklistSet& blacklist,
                  FileScanner& scanner,
                  std::vector<std::list<RawWayRef> >& areas);
@@ -66,6 +67,16 @@ namespace osmscout {
                   uint32_t& writtenWayCount,
                   const CoordDataFile::CoordResultMap& coordsMap,
                   const RawWay& rawWay);
+
+    bool HandleLowMemoryFallback(const ImportParameter& parameter,
+                                 Progress& progress,
+                                 const TypeConfig& typeConfig,
+                                 FileScanner& scanner,
+                                 std::set<TypeId>& types,
+                                 const BlacklistSet& blacklist,
+                                 FileWriter& writer,
+                                 uint32_t& writtenWayCount,
+                                 const CoordDataFile& coordDataFile);
 
   public:
     std::string GetDescription() const;
