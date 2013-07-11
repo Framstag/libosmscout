@@ -32,6 +32,7 @@
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/HashMap.h>
 #include <osmscout/util/HashSet.h>
+#include <osmscout/util/NodeUseMap.h>
 
 #include <osmscout/import/Import.h>
 
@@ -60,7 +61,6 @@ namespace osmscout {
       size_t     index;
     };
 
-    typedef OSMSCOUT_HASHMAP<PageId,uint32_t>              NodeUseMap;
     typedef OSMSCOUT_HASHMAP<Id, FileOffset>               NodeIdOffsetMap;
     typedef std::map<Id,std::list<ObjectFileRef> >         NodeIdObjectsMap;
     typedef std::map<Id,std::list<PendingOffset> >         PendingRouteNodeOffsetsMap;
@@ -70,11 +70,6 @@ namespace osmscout {
     bool ReadTurnRestrictionWayIds(const ImportParameter& parameter,
                                    Progress& progress,
                                    std::map<Id,FileOffset>& wayIdOffsetMap);
-
-    void SetNodeUsed(NodeUseMap& nodeUseMap,
-                     Id id);
-    bool IsNodeUsedAtLeastTwice(const NodeUseMap& nodeUseMap,
-                                Id id) const;
 
     bool ResolveWayIdsToFileOffsets(const ImportParameter& parameter,
                                     Progress& progress,

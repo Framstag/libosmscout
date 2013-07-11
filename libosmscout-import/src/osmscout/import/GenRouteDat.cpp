@@ -105,52 +105,6 @@ namespace osmscout {
     return true;
   }
 
-  void RouteDataGenerator::SetNodeUsed(NodeUseMap& nodeUseMap,
-                                       Id id)
-  {
-    PageId resolvedId=id-std::numeric_limits<Id>::min();
-    PageId offset=resolvedId/16;
-
-    NodeUseMap::iterator entry=nodeUseMap.find(offset);
-
-    if (entry==nodeUseMap.end()) {
-      entry=nodeUseMap.insert(std::make_pair(offset,0)).first;
-    }
-
-    uint32_t index=(resolvedId%16)*2;
-
-    uint32_t data=entry->second;
-
-    if (data & (1<<(index+1))) {
-      // do nothing
-    }
-    else if (data & (1<<index)) {
-      entry->second|=(1 << (index+1));
-    }
-    else {
-      entry->second|=(1 << index);
-    }
-  }
-
-  bool RouteDataGenerator::IsNodeUsedAtLeastTwice(const NodeUseMap& nodeUseMap,
-                                                  Id id) const
-  {
-    PageId resolvedId=id-std::numeric_limits<Id>::min();
-    PageId offset=resolvedId/16;
-
-    NodeUseMap::const_iterator entry=nodeUseMap.find(offset);
-
-    if (entry==nodeUseMap.end()) {
-      return false;
-    }
-
-    uint32_t index=(resolvedId%16)*2+1;
-
-    bool result=entry->second & (1 << index);
-
-    return result;
-  }
-
   bool RouteDataGenerator::ResolveWayIdsToFileOffsets(const ImportParameter& parameter,
                                                       Progress& progress,
                                                       std::map<Id,FileOffset>& wayIdOffsetMap)
@@ -428,7 +382,7 @@ namespace osmscout {
         }
 
         if (nodeIds.find(*id)==nodeIds.end()) {
-          SetNodeUsed(nodeUseMap,*id);
+          nodeUseMap.SetNodeUsed(*id);
 
           nodeIds.insert(*id);
         }
@@ -495,7 +449,7 @@ namespace osmscout {
         }
 
         if (nodeIds.find(*id)==nodeIds.end()) {
-          SetNodeUsed(nodeUseMap,*id);
+          nodeUseMap.SetNodeUsed(*id);
 
           nodeIds.insert(*id);
         }
@@ -579,7 +533,7 @@ namespace osmscout {
         }
 
         if (nodeIds.find(*id)==nodeIds.end()) {
-          if (IsNodeUsedAtLeastTwice(nodeUseMap,*id)) {
+          if (nodeUseMap.IsNodeUsedAtLeastTwice(*id)) {
             nodeObjectsMap[*id].push_back(ObjectFileRef(fileOffset,refWay));
           }
 
@@ -658,7 +612,7 @@ namespace osmscout {
         }
 
         if (nodeIds.find(*id)==nodeIds.end()) {
-          if (IsNodeUsedAtLeastTwice(nodeUseMap,*id)) {
+          if (nodeUseMap.IsNodeUsedAtLeastTwice(*id)) {
             nodeObjectsMap[*id].push_back(ObjectFileRef(fileOffset,refArea));
           }
 
@@ -1411,7 +1365,7 @@ namespace osmscout {
       return false;
     }
 
-    nodeUseMap.clear();
+    nodeUseMap.Clear();
 
     progress.Info(NumberToString(nodeObjectsMap.size())+ " route nodes collected");
 

@@ -29,19 +29,13 @@
 #include <osmscout/Area.h>
 #include <osmscout/Way.h>
 
+#include <osmscout/util/NodeUseMap.h>
+
 namespace osmscout {
 
   class OptimizeAreaWayIdsGenerator : public ImportModule
   {
   private:
-    typedef OSMSCOUT_HASHMAP<PageId,uint32_t> NodeUseMap;
-
-  private:
-    void SetNodeUsed(NodeUseMap& nodeUseMap,
-                    OSMId id);
-    bool IsNodeUsedAtLeastTwice(const NodeUseMap& nodeUseMap,
-                                OSMId id) const;
-
     bool ScanWayAreaIds(const ImportParameter& parameter,
                         Progress& progress,
                         NodeUseMap& nodeUseMap);

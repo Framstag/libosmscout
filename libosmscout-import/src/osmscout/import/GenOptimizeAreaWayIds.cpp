@@ -31,52 +31,6 @@ namespace osmscout {
     return "Optimize ids for areas and ways";
   }
 
-  void OptimizeAreaWayIdsGenerator::SetNodeUsed(NodeUseMap& nodeUseMap,
-                                                OSMId id)
-  {
-    PageId resolvedId=id-std::numeric_limits<Id>::min();
-    PageId offset=resolvedId/16;
-
-    NodeUseMap::iterator entry=nodeUseMap.find(offset);
-
-    if (entry==nodeUseMap.end()) {
-      entry=nodeUseMap.insert(std::make_pair(offset,0)).first;
-    }
-
-    uint32_t index=(resolvedId%16)*2;
-
-    uint32_t data=entry->second;
-
-    if (data & (1<<(index+1))) {
-      // do nothing
-    }
-    else if (data & (1<<index)) {
-      entry->second|=(1 << (index+1));
-    }
-    else {
-      entry->second|=(1 << index);
-    }
-  }
-
-  bool OptimizeAreaWayIdsGenerator::IsNodeUsedAtLeastTwice(const NodeUseMap& nodeUseMap,
-                                                           OSMId id) const
-  {
-    PageId resolvedId=id-std::numeric_limits<Id>::min();
-    PageId offset=resolvedId/16;
-
-    NodeUseMap::const_iterator entry=nodeUseMap.find(offset);
-
-    if (entry==nodeUseMap.end()) {
-      return false;
-    }
-
-    uint32_t index=(resolvedId%16)*2+1;
-
-    bool result=entry->second & (1 << index);
-
-    return result;
-  }
-
   bool OptimizeAreaWayIdsGenerator::ScanWayAreaIds(const ImportParameter& parameter,
                                                    Progress& progress,
                                                    NodeUseMap& nodeUseMap)
@@ -89,7 +43,7 @@ namespace osmscout {
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "wayarea.tmp"),
                                       FileScanner::Sequential,
-                                      parameter.GetWayDataMemoryMaped())) {
+                                      parameter.GetAreaDataMemoryMaped())) {
       progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
       return false;
     }
@@ -134,7 +88,7 @@ namespace osmscout {
              id!=ring->ids.end();
              id++) {
           if (nodeIds.find(*id)==nodeIds.end()) {
-            SetNodeUsed(nodeUseMap,*id);
+            nodeUseMap.SetNodeUsed(*id);
 
             nodeIds.insert(*id);
           }
@@ -163,7 +117,7 @@ namespace osmscout {
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "relarea.tmp"),
                                       FileScanner::Sequential,
-                                      parameter.GetWayDataMemoryMaped())) {
+                                      parameter.GetAreaDataMemoryMaped())) {
       progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
       return false;
     }
@@ -208,7 +162,7 @@ namespace osmscout {
              id!=ring->ids.end();
              id++) {
           if (nodeIds.find(*id)==nodeIds.end()) {
-            SetNodeUsed(nodeUseMap,*id);
+            nodeUseMap.SetNodeUsed(*id);
 
             nodeIds.insert(*id);
           }
@@ -279,7 +233,7 @@ namespace osmscout {
           id!=data.ids.end();
           id++) {
         if (nodeIds.find(*id)==nodeIds.end()) {
-          SetNodeUsed(nodeUseMap,*id);
+          nodeUseMap.SetNodeUsed(*id);
 
           nodeIds.insert(*id);
         }
@@ -308,7 +262,7 @@ namespace osmscout {
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "wayarea.tmp"),
                                       FileScanner::Sequential,
-                                      parameter.GetWayDataMemoryMaped())) {
+                                      parameter.GetAreaDataMemoryMaped())) {
       progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
       return false;
     }
@@ -360,7 +314,7 @@ namespace osmscout {
         for (std::vector<Id>::iterator id=ring->ids.begin();
              id!=ring->ids.end();
              id++) {
-          if (!IsNodeUsedAtLeastTwice(nodeUseMap,*id)) {
+          if (!nodeUseMap.IsNodeUsedAtLeastTwice(*id)) {
             *id=0;
           }
         }
@@ -409,7 +363,7 @@ namespace osmscout {
     if (!scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                       "relarea.tmp"),
                                       FileScanner::Sequential,
-                                      parameter.GetWayDataMemoryMaped())) {
+                                      parameter.GetAreaDataMemoryMaped())) {
       progress.Error(std::string("Cannot open '")+scanner.GetFilename()+"'");
       return false;
     }
@@ -461,7 +415,7 @@ namespace osmscout {
         for (std::vector<Id>::iterator id=ring->ids.begin();
              id!=ring->ids.end();
              id++) {
-          if (!IsNodeUsedAtLeastTwice(nodeUseMap,*id)) {
+          if (!nodeUseMap.IsNodeUsedAtLeastTwice(*id)) {
             *id=0;
           }
         }
@@ -557,7 +511,7 @@ namespace osmscout {
       for (std::vector<Id>::iterator id=data.ids.begin();
           id!=data.ids.end();
           id++) {
-        if (!IsNodeUsedAtLeastTwice(nodeUseMap,*id)) {
+        if (!nodeUseMap.IsNodeUsedAtLeastTwice(*id)) {
           *id=0;
         }
       }
