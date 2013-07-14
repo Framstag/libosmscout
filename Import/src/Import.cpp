@@ -89,6 +89,77 @@ void DumpHelp(osmscout::ImportParameter& parameter)
   std::cout << " --routeNodeBlockSize <number>        number of route nodes resolved in block (default: " << BoolToString(parameter.GetRouteNodeBlockSize()) << ")" << std::endl;
 }
 
+bool ParseBoolArgument(int argc,
+                       char* argv[],
+                       int& currentIndex,
+                       bool& value)
+{
+  int parameterIndex=currentIndex;
+  int argumentIndex=currentIndex+1;
+
+  currentIndex+=2;
+
+  if (argumentIndex<argc) {
+    if (!StringToBool(argv[argumentIndex],
+                      value)) {
+      std::cerr << "Cannot parse argument for parameter '" << argv[parameterIndex] << "'" << std::endl;
+      return false;
+    }
+  }
+  else {
+    std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
+bool ParseStringArgument(int argc,
+                         char* argv[],
+                         int& currentIndex,
+                         std::string& value)
+{
+  int parameterIndex=currentIndex;
+  int argumentIndex=currentIndex+1;
+
+  currentIndex+=2;
+
+  if (argumentIndex<argc) {
+    value=argv[argumentIndex];
+  }
+  else {
+    std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
+bool ParseSizeTArgument(int argc,
+                        char* argv[],
+                        int& currentIndex,
+                        size_t& value)
+{
+  int parameterIndex=currentIndex;
+  int argumentIndex=currentIndex+1;
+
+  currentIndex+=2;
+
+  if (argumentIndex<argc) {
+    if (!osmscout::StringToNumber(argv[argumentIndex],
+                                  value)) {
+      std::cerr << "Cannot parse argument for parameter '" << argv[parameterIndex] << "'" << std::endl;
+      return false;
+    }
+  }
+  else {
+    std::cerr << "Missing parameter after option '" << argv[parameterIndex] << "'" << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
 int main(int argc, char* argv[])
 {
   osmscout::ImportParameter parameter;
@@ -131,302 +202,156 @@ int main(int argc, char* argv[])
   int i=1;
   while (i<argc) {
     if (strcmp(argv[i],"-s")==0) {
-      i++;
-
-      if (i<argc) {
-        if (!osmscout::StringToNumber(argv[i],startStep)) {
-          std::cerr << "Cannot parse start step '" << argv[i] << "'" << std::endl;
-          parameterError=true;
-        }
-      }
-      else {
-        std::cerr << "Missing parameter after -s option" << std::endl;
-        parameterError=true;
-      }
+      parameterError=!ParseSizeTArgument(argc,
+                                         argv,
+                                         i,
+                                         startStep);
     }
     else if (strcmp(argv[i],"-e")==0) {
-      i++;
-
-      if (i<argc) {
-        if (!osmscout::StringToNumber(argv[i],endStep)) {
-          std::cerr << "Cannot parse end step '" << argv[i] << "'" << std::endl;
-          parameterError=true;
-        }
-      }
-      else {
-        std::cerr << "Missing parameter after -e option" << std::endl;
-        parameterError=true;
-      }
+      parameterError=!ParseSizeTArgument(argc,
+                                         argv,
+                                         i,
+                                         endStep);
     }
     else if (strcmp(argv[i],"-d")==0) {
       progress.SetOutputDebug(true);
+
+      i++;
     }
     else if (strcmp(argv[i],"-h")==0) {
       DumpHelp(parameter);
+
       return 0;
     }
     else if (strcmp(argv[i],"--help")==0) {
       DumpHelp(parameter);
+
       return 0;
     }
     else if (strcmp(argv[i],"--typefile")==0) {
-      i++;
-
-      if (i<argc) {
-        typefile=argv[i];
-      }
-      else {
-        std::cerr << "Missing parameter after --typefile option" << std::endl;
-        parameterError=true;
-      }
+      parameterError=!ParseStringArgument(argc,
+                                          argv,
+                                          i,
+                                          typefile);
     }
     else if (strcmp(argv[i],"--destinationDirectory")==0) {
-      i++;
-
-      if (i<argc) {
-        destinationDirectory=argv[i];
-      }
-      else {
-        std::cerr << "Missing parameter after --destinationDirectory option" << std::endl;
-        parameterError=true;
-      }
+      parameterError=!ParseStringArgument(argc,
+                                          argv,
+                                          i,
+                                          destinationDirectory);
     }
     else if (strcmp(argv[i],"--strictAreas")==0) {
-      i++;
-
-      if (i<argc) {
-        if (!StringToBool(argv[i],strictAreas)) {
-          std::cerr << "Cannot parse strictAreas '" << argv[i] << "'" << std::endl;
-          parameterError=true;
-        }
-      }
-      else {
-        std::cerr << "Missing parameter after --strictAreas option" << std::endl;
-        parameterError=true;
-      }
+      parameterError=!ParseBoolArgument(argc,
+                                        argv,
+                                        i,
+                                        strictAreas);
     }
     else if (strcmp(argv[i],"--numericIndexPageSize")==0) {
-      i++;
-
-      if (i<argc) {
-        if (!osmscout::StringToNumber(argv[i],numericIndexPageSize)) {
-          std::cerr << "Cannot parse numericIndexPageSize '" << argv[i] << "'" << std::endl;
-          parameterError=true;
-        }
-      }
-      else {
-        std::cerr << "Missing parameter after --numericIndexPageSize option" << std::endl;
-        parameterError=true;
-      }
+      parameterError=!ParseSizeTArgument(argc,
+                                         argv,
+                                         i,
+                                         numericIndexPageSize);
     }
     else if (strcmp(argv[i],"--coordDataMemoryMaped")==0) {
-      i++;
-
-      if (i<argc) {
-        if (!StringToBool(argv[i],coordDataMemoryMaped)) {
-          std::cerr << "Cannot parse coordDataMemoryMaped '" << argv[i] << "'" << std::endl;
-          parameterError=true;
-        }
-      }
-      else {
-        std::cerr << "Missing parameter after --coordDataMemoryMaped option" << std::endl;
-        parameterError=true;
-      }
+      parameterError=!ParseBoolArgument(argc,
+                                        argv,
+                                        i,
+                                        coordDataMemoryMaped);
     }
     else if (strcmp(argv[i],"--rawNodeDataMemoryMaped")==0) {
-      i++;
-
-      if (i<argc) {
-        if (!StringToBool(argv[i],rawNodeDataMemoryMaped)) {
-          std::cerr << "Cannot parse rawNodeDataMemoryMaped '" << argv[i] << "'" << std::endl;
-          parameterError=true;
-        }
-      }
-      else {
-        std::cerr << "Missing parameter after --rawNodeDataMemoryMaped option" << std::endl;
-        parameterError=true;
-      }
+      parameterError=!ParseBoolArgument(argc,
+                                        argv,
+                                        i,
+                                        rawNodeDataMemoryMaped);
     }
     else if (strcmp(argv[i],"--rawNodeDataCacheSize")==0) {
-      i++;
-
-      if (i<argc) {
-        if (!osmscout::StringToNumber(argv[i],rawNodeDataCacheSize)) {
-          std::cerr << "Cannot parse rawNodeDataCacheSize '" << argv[i] << "'" << std::endl;
-          parameterError=true;
-        }
-      }
-      else {
-        std::cerr << "Missing parameter after --rawNodeDataCacheSize option" << std::endl;
-        parameterError=true;
-      }
+      parameterError=!ParseSizeTArgument(argc,
+                                         argv,
+                                         i,
+                                         rawNodeDataCacheSize);
     }
     else if (strcmp(argv[i],"--rawWayIndexMemoryMaped")==0) {
-      i++;
-
-      if (i<argc) {
-        if (!StringToBool(argv[i],rawWayIndexMemoryMaped)) {
-          std::cerr << "Cannot parse rawWayIndexMemoryMaped '" << argv[i] << "'" << std::endl;
-          parameterError=true;
-        }
-      }
-      else {
-        std::cerr << "Missing parameter after --rawWayIndexMemoryMaped option" << std::endl;
-        parameterError=true;
-      }
+      parameterError=!ParseBoolArgument(argc,
+                                        argv,
+                                        i,
+                                        rawWayIndexMemoryMaped);
     }
     else if (strcmp(argv[i],"--rawWayDataMemoryMaped")==0) {
-      i++;
-
-      if (i<argc) {
-        if (!StringToBool(argv[i],rawWayDataMemoryMaped)) {
-          std::cerr << "Cannot parse rawWayDataMemoryMaped '" << argv[i] << "'" << std::endl;
-          parameterError=true;
-        }
-      }
-      else {
-        std::cerr << "Missing parameter after --rawWayDataMemoryMaped option" << std::endl;
-        parameterError=true;
-      }
+      parameterError=!ParseBoolArgument(argc,
+                                        argv,
+                                        i,
+                                        rawWayDataMemoryMaped);
     }
     else if (strcmp(argv[i],"--rawWayDataCacheSize")==0) {
-      i++;
-
-      if (i<argc) {
-        if (!osmscout::StringToNumber(argv[i],rawWayDataCacheSize)) {
-          std::cerr << "Cannot parse rawWayDataCacheSize '" << argv[i] << "'" << std::endl;
-          parameterError=true;
-        }
-      }
-      else {
-        std::cerr << "Missing parameter after --rawWayDataCacheSize option" << std::endl;
-        parameterError=true;
-      }
+      parameterError=!ParseSizeTArgument(argc,
+                                         argv,
+                                         i,
+                                         rawWayDataCacheSize);
     }
     else if (strcmp(argv[i],"--rawWayIndexCacheSize")==0) {
-      i++;
-
-      if (i<argc) {
-        if (!osmscout::StringToNumber(argv[i],rawWayIndexCacheSize)) {
-          std::cerr << "Cannot parse rawWayIndexCacheSize '" << argv[i] << "'" << std::endl;
-          parameterError=true;
-        }
-      }
-      else {
-        std::cerr << "Missing parameter after --rawWayIndexCacheSize option" << std::endl;
-        parameterError=true;
-      }
+      parameterError=!ParseSizeTArgument(argc,
+                                         argv,
+                                         i,
+                                         rawWayIndexCacheSize);
     }
     else if (strcmp(argv[i],"--rawWayBlockSize")==0) {
-      i++;
-
-      if (i<argc) {
-        if (!osmscout::StringToNumber(argv[i],rawWayBlockSize)) {
-          std::cerr << "Cannot parse rawWayBlockSize '" << argv[i] << "'" << std::endl;
-          parameterError=true;
-        }
-      }
-      else {
-        std::cerr << "Missing parameter after --rawWayBlockSize option" << std::endl;
-        parameterError=true;
-      }
+      parameterError=!ParseSizeTArgument(argc,
+                                         argv,
+                                         i,
+                                         rawWayBlockSize);
     }
     else if (strcmp(argv[i],"-noSort")==0) {
       parameter.SetSortObjects(false);
+
+      i++;
     }
     else if (strcmp(argv[i],"--sortBlockSize")==0) {
-      i++;
-
-      if (i<argc) {
-        if (!osmscout::StringToNumber(argv[i],sortBlockSize)) {
-          std::cerr << "Cannot parse sortBlockSize '" << argv[i] << "'" << std::endl;
-          parameterError=true;
-        }
-      }
-      else {
-        std::cerr << "Missing parameter after --renumberBlockSize option" << std::endl;
-        parameterError=true;
-      }
+      parameterError=!ParseSizeTArgument(argc,
+                                         argv,
+                                         i,
+                                         sortBlockSize);
     }
     else if (strcmp(argv[i],"--areaDataMemoryMaped")==0) {
-      i++;
-
-      if (i<argc) {
-        if (!StringToBool(argv[i],areaDataMemoryMaped)) {
-          std::cerr << "Cannot parse areaDataMemoryMaped '" << argv[i] << "'" << std::endl;
-          parameterError=true;
-        }
-      }
-      else {
-        std::cerr << "Missing parameter after --areaDataMemoryMaped option" << std::endl;
-        parameterError=true;
-      }
+      parameterError=!ParseBoolArgument(argc,
+                                        argv,
+                                        i,
+                                        areaDataMemoryMaped);
     }
     else if (strcmp(argv[i],"--areaDataCacheSize")==0) {
-      i++;
-
-      if (i<argc) {
-        if (!osmscout::StringToNumber(argv[i],areaDataCacheSize)) {
-          std::cerr << "Cannot parse areaDataCacheSize '" << argv[i] << "'" << std::endl;
-          parameterError=true;
-        }
-      }
-      else {
-        std::cerr << "Missing parameter after --areaDataCacheSize option" << std::endl;
-        parameterError=true;
-      }
+      parameterError=!ParseSizeTArgument(argc,
+                                         argv,
+                                         i,
+                                         areaDataCacheSize);
     }
     else if (strcmp(argv[i],"--wayDataMemoryMaped")==0) {
-      i++;
-
-      if (i<argc) {
-        if (!StringToBool(argv[i],wayDataMemoryMaped)) {
-          std::cerr << "Cannot parse wayDataMemoryMaped '" << argv[i] << "'" << std::endl;
-          parameterError=true;
-        }
-      }
-      else {
-        std::cerr << "Missing parameter after --wayDataMemoryMaped option" << std::endl;
-        parameterError=true;
-      }
+      parameterError=!ParseBoolArgument(argc,
+                                        argv,
+                                        i,
+                                        wayDataMemoryMaped);
     }
     else if (strcmp(argv[i],"--wayDataCacheSize")==0) {
-      i++;
-
-      if (i<argc) {
-        if (!osmscout::StringToNumber(argv[i],wayDataCacheSize)) {
-          std::cerr << "Cannot parse wayDataCacheSize '" << argv[i] << "'" << std::endl;
-          parameterError=true;
-        }
-      }
-      else {
-        std::cerr << "Missing parameter after --wayDataCacheSize option" << std::endl;
-        parameterError=true;
-      }
+      parameterError=!ParseSizeTArgument(argc,
+                                         argv,
+                                         i,
+                                         wayDataCacheSize);
     }
     else if (strcmp(argv[i],"--routeNodeBlockSize")==0) {
-      i++;
-
-      if (i<argc) {
-        if (!osmscout::StringToNumber(argv[i],routeNodeBlockSize)) {
-          std::cerr << "Cannot parse routeNodeBlockSize '" << argv[i] << "'" << std::endl;
-          parameterError=true;
-        }
-      }
-      else {
-        std::cerr << "Missing parameter after --routeNodeBlockSize option" << std::endl;
-        parameterError=true;
-      }
+      parameterError=!ParseSizeTArgument(argc,
+                                         argv,
+                                         i,
+                                         routeNodeBlockSize);
     }
     else if (mapfile.empty()) {
       mapfile=argv[i];
+
+      i++;
     }
     else {
       std::cerr << "Unknown option: " << argv[i] << std::endl;
-      parameterError=true;
-    }
 
-    i++;
+      parameterError=true;
+      i++;
+    }
   }
 
   if (startStep==1 &&
