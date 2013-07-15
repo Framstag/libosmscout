@@ -1,0 +1,115 @@
+#ifndef OSMSCOUT_MAP_MAPPAINTEROPENGL_H
+#define OSMSCOUT_MAP_MAPPAINTEROPENGL_H
+
+/*
+  This source is part of the libosmscout-map library
+  Copyright (C) 2013  Tim Teulings
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+*/
+
+#include <osmscout/MapOpenGLFeatures.h>
+
+#include <osmscout/private/MapOpenGLImportExport.h>
+
+#include <osmscout/MapPainter.h>
+
+namespace osmscout {
+
+  class OSMSCOUT_MAP_OPENGL_API MapPainterOpenGL : public MapPainter
+  {
+  protected:
+    bool HasIcon(const StyleConfig& styleConfig,
+                 const MapParameter& parameter,
+                 IconStyle& style);
+
+    bool HasPattern(const MapParameter& parameter,
+                    const FillStyle& style);
+
+    void GetTextDimension(const MapParameter& parameter,
+                          double fontSize,
+                          const std::string& text,
+                          double& xOff,
+                          double& yOff,
+                          double& width,
+                          double& height);
+
+    void DrawContourSymbol(const Projection& projection,
+                           const MapParameter& parameter,
+                           const Symbol& symbol,
+                           double space,
+                           size_t transStart, size_t transEnd);
+
+    void DrawLabel(const Projection& projection,
+                   const MapParameter& parameter,
+                   const LabelData& label);
+
+    void DrawContourLabel(const Projection& projection,
+                          const MapParameter& parameter,
+                          const PathTextStyle& style,
+                          const std::string& text,
+                          size_t transStart, size_t transEnd);
+
+    void DrawPrimitivePath(const Projection& projection,
+                           const MapParameter& parameter,
+                           const DrawPrimitiveRef& primitive,
+                           double x, double y,
+                           double minX,
+                           double minY,
+                           double maxX,
+                           double maxY);
+
+    void DrawSymbol(const Projection& projection,
+                    const MapParameter& parameter,
+                    const Symbol& symbol,
+                    double x, double y);
+
+    void DrawIcon(const IconStyle* style,
+                  double x, double y);
+
+    void DrawPath(const Projection& projection,
+                  const MapParameter& parameter,
+                  const Color& color,
+                  double width,
+                  const std::vector<double>& dash,
+                  LineStyle::CapStyle startCap,
+                  LineStyle::CapStyle endCap,
+                  size_t transStart, size_t transEnd);
+
+    void DrawArea(const Projection& projection,
+                  const MapParameter& parameter,
+                  const AreaData& area);
+
+    void DrawArea(const FillStyle& style,
+                  const MapParameter& parameter,
+                  double x,
+                  double y,
+                  double width,
+                  double height);
+
+  public:
+    MapPainterOpenGL();
+    virtual ~MapPainterOpenGL();
+
+/*
+    bool DrawMap(const StyleConfig& styleConfig,
+                 const Projection& projection,
+                 const MapParameter& parameter,
+                 const MapData& data,
+                 cairo_t *draw);*/
+  };
+}
+
+#endif
