@@ -1,0 +1,21 @@
+All source code and other content - if not explicitely given another license
+is under the GNU Lesser General Public License (LGPL).
+
+To enable people to use write and applications based on libosmscout
+on the various mobile devices technically supported and publish the reuslting
+apps to the platform app shops, the following exceptions /
+clarifications have been given:
+
+1. Making modifications to libosmscout configuration files, build scripts
+   and configuration headers in order to create a customised build setup
+   of libosmscout with the otherwise unmodified source code, does not
+   constitute a derived work.
+2. Building against libosmscout headers which have inlined code does not
+   constitute a derived work.
+3. Code which subclasses libosmscout classes outside of the libosmscout
+   libraries does not form a derived work.
+4. Statically linking the libosmscout libraries into a user application
+   distributed on the Apple App Store or Apple Mac App Store does not make
+   the user application a derived work.
+5. Using source code obsfucation on the libosmscout source code when
+   distributing it is not permitted.
