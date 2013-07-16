@@ -27,5 +27,22 @@ namespace osmscout {
   const Color Color::RED(1.0,0.0,0.0);
   const Color Color::GREEN(0.0,1.0,0.0);
   const Color Color::BLUE(0.0,0.0,1.0);
+
+  bool Color::operator<(const Color& other) const
+  {
+    if (r!=other.r) {
+      return r<other.r;
+    }
+
+    if (g!=other.g) {
+      return g<other.g;
+    }
+
+    if (b!=other.b) {
+      return b<other.b;
+    }
+
+    return a<other.a;
+  }
 }
 
