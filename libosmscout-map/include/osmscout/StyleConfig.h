@@ -399,6 +399,10 @@ namespace osmscout {
 
     void CopyAttributes(const LineStyle& other,
                         const std::set<Attribute>& attributes);
+
+    bool operator==(const LineStyle& other) const;
+    bool operator!=(const LineStyle& other) const;
+    bool operator<(const LineStyle& other) const;
   };
 
   typedef Ref<LineStyle>                                   LineStyleRef;
@@ -498,6 +502,10 @@ namespace osmscout {
 
     void CopyAttributes(const FillStyle& other,
                         const std::set<Attribute>& attributes);
+
+    bool operator==(const FillStyle& other) const;
+    bool operator!=(const FillStyle& other) const;
+    bool operator<(const FillStyle& other) const;
   };
 
   typedef Ref<FillStyle>                                   FillStyleRef;

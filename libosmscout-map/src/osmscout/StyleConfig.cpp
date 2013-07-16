@@ -144,7 +144,8 @@ namespace osmscout {
   }
 
   LineStyle::LineStyle(const LineStyle& style)
-  : lineColor(style.lineColor),
+  : slot(style.slot),
+    lineColor(style.lineColor),
     gapColor(style.gapColor),
     displayWidth(style.displayWidth),
     width(style.width),
@@ -276,6 +277,101 @@ namespace osmscout {
     }
   }
 
+  bool LineStyle::operator==(const LineStyle& other) const
+  {
+    if (slot!=other.slot) {
+      return false;
+    }
+
+    if (lineColor!=other.lineColor) {
+      return false;
+    }
+
+    if (gapColor!=other.gapColor) {
+      return false;
+    }
+
+    if (displayWidth!=other.displayWidth) {
+      return false;
+    }
+
+    if (width!=other.width) {
+      return false;
+    }
+
+    if (displayOffset!=other.displayOffset) {
+      return false;
+    }
+
+    if (offset!=other.offset) {
+      return false;
+    }
+
+    if (joinCap!=other.joinCap) {
+      return false;
+    }
+
+    if (endCap!=other.endCap) {
+      return false;
+    }
+
+    if (dash!=other.dash) {
+      return false;
+    }
+
+    return priority==other.priority;
+  }
+
+  bool LineStyle::operator!=(const LineStyle& other) const
+  {
+    return !operator==(other);
+  }
+
+  bool LineStyle::operator<(const LineStyle& other) const
+  {
+    if (slot!=other.slot) {
+      return slot<other.slot;
+    }
+
+    if (lineColor!=other.lineColor) {
+      return lineColor<other.lineColor;
+    }
+
+    if (gapColor!=other.gapColor) {
+      return gapColor<other.gapColor;
+    }
+
+    if (displayWidth!=other.displayWidth) {
+      return displayWidth<other.displayWidth;
+    }
+
+    if (width!=other.width) {
+      return width<other.width;
+    }
+
+    if (displayOffset!=other.displayOffset) {
+      return displayOffset<other.displayOffset;
+    }
+
+    if (offset!=other.offset) {
+      return offset<other.offset;
+    }
+
+    if (joinCap!=other.joinCap) {
+      return joinCap<other.joinCap;
+    }
+
+    if (endCap!=other.endCap) {
+      return endCap<other.endCap;
+    }
+
+    if (dash!=other.dash) {
+      return dash<other.dash;
+    }
+
+    return priority<other.priority;
+  }
+
   FillStyle::FillStyle()
    : fillColor(1.0,0.0,0.0,0.0),
      patternId(0),
@@ -372,6 +468,61 @@ namespace osmscout {
         break;
       }
     }
+  }
+
+  bool FillStyle::operator==(const FillStyle& other) const
+  {
+    if (fillColor!=other.fillColor) {
+      return false;
+    }
+
+    if (pattern!=other.pattern) {
+      return false;
+    }
+
+    if (patternMinMag!=other.patternMinMag) {
+      return false;
+    }
+
+    if (borderColor!=other.borderColor) {
+      return false;
+    }
+
+    if (borderWidth!=other.borderWidth) {
+      return false;
+    }
+
+    return borderDash==other.borderDash;
+  }
+
+  bool FillStyle::operator!=(const FillStyle& other) const
+  {
+    return !operator==(other);
+  }
+
+  bool FillStyle::operator<(const FillStyle& other) const
+  {
+    if (fillColor!=other.fillColor) {
+      return fillColor<other.fillColor;
+    }
+
+    if (pattern!=other.pattern) {
+      return pattern<other.pattern;
+    }
+
+    if (patternMinMag!=other.patternMinMag) {
+      return patternMinMag<other.patternMinMag;
+    }
+
+    if (borderColor!=other.borderColor) {
+      return borderColor<other.borderColor;
+    }
+
+    if (borderWidth!=other.borderWidth) {
+      return borderWidth<other.borderWidth;
+    }
+
+    return borderDash<other.borderDash;
   }
 
   LabelStyle::LabelStyle()
