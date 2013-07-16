@@ -553,6 +553,24 @@ namespace osmscout {
     //@{
 
     /**
+      Some optional callbacks between individual processing steps.
+     */
+    //@{
+    virtual void AfterPreprocessing(const StyleConfig& styleConfig,
+                                    const Projection& projection,
+                                    const MapParameter& parameter,
+                                    const MapData& data);
+    virtual void BeforeDrawing(const StyleConfig& styleConfig,
+                               const Projection& projection,
+                               const MapParameter& parameter,
+                               const MapData& data);
+    virtual void AfterDrawing(const StyleConfig& styleConfig,
+                              const Projection& projection,
+                              const MapParameter& parameter,
+                              const MapData& data);
+    //@}
+
+    /**
       Return true, if the icon in the IconStyle is available and can be drawn.
       If this method returns false, possibly a fallback (using a Symbol)
       will be chosen.

@@ -485,6 +485,30 @@ namespace osmscout {
     }
   }
 
+  void MapPainter::AfterPreprocessing(const StyleConfig& styleConfig,
+                                      const Projection& projection,
+                                      const MapParameter& parameter,
+                                      const MapData& data)
+  {
+    // No code
+  }
+
+  void MapPainter::BeforeDrawing(const StyleConfig& styleConfig,
+                                 const Projection& projection,
+                                 const MapParameter& parameter,
+                                 const MapData& data)
+  {
+
+  }
+
+  void MapPainter::AfterDrawing(const StyleConfig& styleConfig,
+                                const Projection& projection,
+                                const MapParameter& parameter,
+                                const MapData& data)
+  {
+
+  }
+
   void MapPainter::DrawGroundTiles(const StyleConfig& styleConfig,
                                    const Projection& projection,
                                    const MapParameter& parameter,
@@ -1830,6 +1854,18 @@ namespace osmscout {
       return false;
     }
 
+    // Optional callback after preprocessing data
+    AfterPreprocessing(styleConfig,
+                       projection,
+                       parameter,
+                       data);
+
+    // Optional callback after preprocessing data
+    BeforeDrawing(styleConfig,
+                  projection,
+                  parameter,
+                  data);
+
     //
     // Clear area with background color
     //
@@ -1972,6 +2008,11 @@ namespace osmscout {
                parameter);
 
     labelsTimer.Stop();
+
+    AfterDrawing(styleConfig,
+                 projection,
+                 parameter,
+                 data);
 
     if (parameter.IsDebugPerformance()) {
       std::cout << "Paths: ";
