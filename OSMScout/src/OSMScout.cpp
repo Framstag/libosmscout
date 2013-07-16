@@ -32,6 +32,10 @@ int main(int argc, char* argv[])
   MainWindow   window;
   int          result;
 
+  app.setOrganizationName("libosmscout");
+  app.setOrganizationDomain("libosmscout.sf.net");
+  app.setApplicationName("OSMScout");
+
   //qRegisterMetaType<RenderMapRequest>();
   qRegisterMetaType<DatabaseLoadedResponse>();
 
