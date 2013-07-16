@@ -40,6 +40,7 @@ namespace osmscout {
 
   MapPainterSVG::~MapPainterSVG()
   {
+    // No code
   }
 
   std::string MapPainterSVG::GetColorValue(const Color& color)
@@ -229,23 +230,27 @@ namespace osmscout {
                                 const MapParameter& parameter,
                                 IconStyle& style)
   {
+    // Not implemented
+
     return false;
   }
 
   void MapPainterSVG::GetTextDimension(const MapParameter& parameter,
-                                         double fontSize,
-                                         const std::string& text,
-                                         double& xOff,
-                                         double& yOff,
-                                         double& width,
-                                         double& height)
+                                       double fontSize,
+                                       const std::string& text,
+                                       double& xOff,
+                                       double& yOff,
+                                       double& width,
+                                       double& height)
   {
+    // Not implemented
   }
 
   void MapPainterSVG::DrawLabel(const Projection& projection,
                                   const MapParameter& parameter,
                                   const LabelData& label)
   {
+    // Not implemented
   }
 
   void MapPainterSVG::DrawContourLabel(const Projection& projection,
@@ -254,6 +259,16 @@ namespace osmscout {
                                        const std::string& text,
                                        size_t transStart, size_t transEnd)
   {
+    // Not implemented
+  }
+
+  void MapPainterSVG::DrawContourSymbol(const Projection& projection,
+                                        const MapParameter& parameter,
+                                        const Symbol& symbol,
+                                        double space,
+                                        size_t transStart, size_t transEnd)
+  {
+    // Not implemented
   }
 
   void MapPainterSVG::DrawSymbol(const Projection& projection,
@@ -261,11 +276,13 @@ namespace osmscout {
                                  const Symbol& style,
                                  double x, double y)
   {
+    // Not implemented
   }
 
   void MapPainterSVG::DrawIcon(const IconStyle* style,
                                  double x, double y)
   {
+    // Not implemented
   }
 
   void MapPainterSVG::DrawPath(const Projection& projection,
@@ -347,7 +364,7 @@ namespace osmscout {
                                const MapParameter& parameter,
                                const MapPainter::AreaData& area)
   {
-//    stream << "    <path class=\"" << typeConfig->GetTypeInfo(area.attributes->GetType()).GetName() << "_area\"" << std::endl;
+    //stream << "    <path class=\"" << typeConfig->GetTypeInfo(area.attributes->GetType()).GetName() << "_area\"" << std::endl;
 
     if (!area.clippings.empty()) {
       stream << "          fillRule=\"evenodd\"";
@@ -377,11 +394,11 @@ namespace osmscout {
   }
 
   void MapPainterSVG::DrawArea(const FillStyle& style,
-                                 const MapParameter& parameter,
-                                 double x,
-                                 double y,
-                                 double width,
-                                 double height)
+                               const MapParameter& parameter,
+                               double x,
+                               double y,
+                               double width,
+                               double height)
   {
     stream << "    <rect x=\"" << x << "\" y=\"" << y << "\" width=\"" << width << "\" height=\"" << height << "\"" << std::endl;
     stream << "          fill=\"" << GetColorValue(style.GetFillColor()) << "\"" << "/>" << std::endl;

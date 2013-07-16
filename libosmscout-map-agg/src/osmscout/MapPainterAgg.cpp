@@ -455,10 +455,19 @@ namespace osmscout {
     }
   }
 
+  void MapPainterAgg::DrawContourSymbol(const Projection& projection,
+                                        const MapParameter& parameter,
+                                        const Symbol& symbol,
+                                        double space,
+                                        size_t transStart, size_t transEnd)
+  {
+    // Not implemented
+  }
+
   void MapPainterAgg::DrawIcon(const IconStyle* style,
                               double x, double y)
   {
-    // TODO
+    // Not implemented
   }
 
   void MapPainterAgg::DrawSymbol(const Projection& projection,

@@ -115,6 +115,12 @@ namespace osmscout {
                           const std::string& text,
                           size_t transStart, size_t transEnd);
 
+    void DrawContourSymbol(const Projection& projection,
+                           const MapParameter& parameter,
+                           const Symbol& symbol,
+                           double space,
+                           size_t transStart, size_t transEnd);
+
     void DrawIcon(const IconStyle* style,
                   double x, double y);
 

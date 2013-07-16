@@ -350,6 +350,15 @@ namespace osmscout {
     painter->resetTransform();
   }
 
+  void MapPainterQt::DrawContourSymbol(const Projection& projection,
+                                       const MapParameter& parameter,
+                                       const Symbol& symbol,
+                                       double space,
+                                       size_t transStart, size_t transEnd)
+  {
+    // Not implemented
+  }
+
   void MapPainterQt::DrawIcon(const IconStyle* style,
                               double x, double y)
   {

@@ -569,7 +569,7 @@ namespace osmscout {
                                    const MapParameter& parameter,
                                    const Symbol& symbol,
                                    double space,
-                                   size_t transStart, size_t transEnd);
+                                   size_t transStart, size_t transEnd) = 0;
 
     /**
       Return the bounding box of the given text.
@@ -620,18 +620,18 @@ namespace osmscout {
                                   size_t transStart, size_t transEnd) = 0;
 
     /**
-      Draw the Icon as defined by the IconStyle at the givcen pixel coordinate.
+      Draw the Icon as defined by the IconStyle at the given pixel coordinate.
      */
     virtual void DrawIcon(const IconStyle* style,
                           double x, double y) = 0;
 
     /**
-      Draw the Symbol as defined by the SymbolStyle at the givcen pixel coordinate.
+      Draw the Symbol as defined by the SymbolStyle at the given pixel coordinate.
      */
     virtual void DrawSymbol(const Projection& projection,
                             const MapParameter& parameter,
                             const Symbol& symbol,
-                            double x, double y);
+                            double x, double y) = 0;
 
     /**
       Draw simple line with the given style,the given color, the given width
