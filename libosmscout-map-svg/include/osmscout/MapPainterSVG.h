@@ -21,6 +21,7 @@
 */
 
 #include <ostream>
+#include <map>
 #include <set>
 
 #include <osmscout/private/MapSVGImportExport.h>
@@ -32,8 +33,10 @@ namespace osmscout {
   class OSMSCOUT_MAP_SVG_API MapPainterSVG : public MapPainter
   {
   private:
-     std::ostream     stream;
-     const TypeConfig *typeConfig;
+     std::map<FillStyle,std::string> fillStyleNameMap;
+     std::map<LineStyle,std::string> lineStyleNameMap;
+     std::ostream                    stream;
+     const TypeConfig                *typeConfig;
 
   private:
     std::string GetColorValue(const Color& color);
@@ -48,6 +51,21 @@ namespace osmscout {
     void FinishMainGroup();
 
   protected:
+    void AfterPreprocessing(const StyleConfig& styleConfig,
+                            const Projection& projection,
+                            const MapParameter& parameter,
+                            const MapData& data);
+
+    void BeforeDrawing(const StyleConfig& styleConfig,
+                       const Projection& projection,
+                       const MapParameter& parameter,
+                       const MapData& data);
+
+    void AfterDrawing(const StyleConfig& styleConfig,
+                      const Projection& projection,
+                      const MapParameter& parameter,
+                      const MapData& data);
+
     bool HasIcon(const StyleConfig& styleConfig,
                  const MapParameter& parameter,
                  IconStyle& style);

@@ -24,6 +24,8 @@
 #include <limits>
 #include <list>
 
+#include <osmscout/util/String.h>
+
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
 
@@ -87,123 +89,107 @@ namespace osmscout {
     stream << std::endl;
   }
 
-  void MapPainterSVG::DumpStyles(const StyleConfig& styleConfig,
-                                 const MapParameter& parameter,
-                                 const Projection& projection)
+  void MapPainterSVG::AfterPreprocessing(const StyleConfig& styleConfig,
+                                         const Projection& projection,
+                                         const MapParameter& parameter,
+                                         const MapData& data)
   {
     stream << "  <defs>" << std::endl;
     stream << "    <style type=\"text/css\">" << std::endl;
     stream << "       <![CDATA[" << std::endl;
 
+    size_t nextAreaId=0;
+    for (std::list<AreaData>::const_iterator area=areaData.begin();
+        area!=areaData.end();
+        ++area) {
+      std::map<FillStyle,std::string>::const_iterator entry=fillStyleNameMap.find(*area->fillStyle);
 
-    for (std::vector<TypeInfo>::const_iterator typeInfo=styleConfig.GetTypeConfig()->GetTypes().begin();
-        typeInfo!=styleConfig.GetTypeConfig()->GetTypes().end();
-        typeInfo++) {
-      AreaAttributes attributes;
-      FillStyleRef   fillStyle;
+      if (entry==fillStyleNameMap.end()) {
+        std::string name="area_"+NumberToString(nextAreaId);
 
-      styleConfig.GetAreaFillStyle(typeInfo->GetId(),
-                                   attributes,
-                                   projection,
-                                   parameter.GetDPI(),
-                                   fillStyle);
+        fillStyleNameMap.insert(std::make_pair(*area->fillStyle,name));
 
-      if (fillStyle.Valid()) {
-        stream << "        ." << typeInfo->GetName() << "_area {";
+        nextAreaId++;
 
-        stream << "fill:" << GetColorValue(fillStyle->GetFillColor());
+        stream << "        ." << name << " {";
+
+        stream << "fill:" << GetColorValue(area->fillStyle->GetFillColor());
         stream << ";fillRule:nonzero";
 
         double borderWidth=ConvertWidthToPixel(parameter,
-                                               fillStyle->GetBorderWidth());
+                                               area->fillStyle->GetBorderWidth());
 
         if (borderWidth>0.0) {
-          stream << ";stroke:" << GetColorValue(fillStyle->GetBorderColor());
+          stream << ";stroke:" << GetColorValue(area->fillStyle->GetBorderColor());
           stream << ";stroke-width:" << borderWidth;
 
-          if (fillStyle->HasBorderDashes()) {
+          if (area->fillStyle->HasBorderDashes()) {
             stream << ";stroke-dasharray:";
 
-            for (size_t i=0; i<fillStyle->GetBorderDash().size(); i++) {
+            for (size_t i=0; i<area->fillStyle->GetBorderDash().size(); i++) {
               if (i>0) {
                 stream << ",";
               }
 
-              stream << fillStyle->GetBorderDash()[i]*borderWidth;
+              stream << area->fillStyle->GetBorderDash()[i]*borderWidth;
             }
           }
         }
 
+
+        stream << "}" << std::endl;
+
+      }
+    }
+
+    stream << std::endl;
+
+    size_t nextWayId=0;
+    for (std::list<WayData>::const_iterator way=wayData.begin();
+        way!=wayData.end();
+        ++way) {
+      std::map<LineStyle,std::string>::const_iterator entry=lineStyleNameMap.find(*way->lineStyle);
+
+      if (entry==lineStyleNameMap.end()) {
+        std::string name="way_"+NumberToString(nextWayId);
+
+        lineStyleNameMap.insert(std::make_pair(*way->lineStyle,name));
+
+        nextWayId++;
+
+        double lineWidth;
+
+        if (way->lineStyle->GetWidth()==0) {
+          lineWidth=ConvertWidthToPixel(parameter,way->lineStyle->GetDisplayWidth());
+        }
+        else {
+          lineWidth=GetProjectedWidth(projection,
+                                      ConvertWidthToPixel(parameter,way->lineStyle->GetDisplayWidth()),
+                                      way->lineStyle->GetWidth());
+        }
+
+        stream << "        ." << name << " {";
+        stream << "fill:none;";
+        stream << "stroke:" << GetColorValue(way->lineStyle->GetLineColor());
+
+        if (way->lineStyle->HasDashes()) {
+          stream << ";stroke-dasharray:";
+
+          for (size_t i=0; i<way->lineStyle->GetDash().size(); i++) {
+
+            if (i>0) {
+              stream << " ";
+            }
+
+            stream << way->lineStyle->GetDash()[i]*lineWidth;
+          }
+        }
 
         stream << "}" << std::endl;
       }
     }
 
     stream << std::endl;
-
-    /*
-    for (std::vector<TypeInfo>::const_iterator typeInfo=styleConfig.GetTypeConfig()->GetTypes().begin();
-        typeInfo!=styleConfig.GetTypeConfig()->GetTypes().end();
-        typeInfo++) {
-      // We skip internal types
-      if (!typeInfo->GetName().empty() && typeInfo->GetName()[0]=='_') {
-        continue;
-      }
-
-      SegmentAttributes attributes;
-      LineStyleRef      lineStyle;
-
-      attributes.type=typeInfo->GetId();
-
-      styleConfig.GetWayLineStyle(attributes,
-                                  projection,
-                                  parameter.GetDPI(),
-                                  lineStyle);
-
-      if (lineStyle.Valid()) {
-        double lineWidth;
-
-        if (lineStyle->GetWidth()==0) {
-          lineWidth=ConvertWidthToPixel(parameter,lineStyle->GetDisplayWidth());
-        }
-        else {
-          lineWidth=GetProjectedWidth(projection,
-                                      ConvertWidthToPixel(parameter,lineStyle->GetDisplayWidth()),
-                                      lineStyle->GetWidth());
-        }
-
-        stream << "        ." << typeInfo->GetName() << "_way_outline {";
-        stream << "fill:none;";
-        stream << "stroke:" << GetColorValue(lineStyle->GetOutlineColor());
-        stream << "}" << std::endl;
-
-        stream << "        ." << typeInfo->GetName() << "_way {";
-        stream << "fill:none;";
-        stream << "stroke:" << GetColorValue(lineStyle->GetLineColor());
-
-        if (lineStyle->HasDashes()) {
-          stream << ";stroke-dasharray:";
-
-          for (size_t i=0; i<lineStyle->GetDash().size(); i++) {
-
-            if (i>0) {
-              stream << " ";
-            }
-
-            stream << lineStyle->GetDash()[i]*lineWidth;
-          }
-        }
-
-        stream << "}" << std::endl;
-      }
-    }*/
-
-    stream << std::endl;
-
-    stream << "        .bridge_marker {";
-    stream << "fill:none;";
-    stream << "stroke:" << GetColorValue(Color(0,0,0));
-    stream << "}" << std::endl;
 
     stream << "       ]]>" << std::endl;
     stream << "    </style>" << std::endl;
@@ -216,12 +202,18 @@ namespace osmscout {
     stream << "</svg>" << std::endl;
   }
 
-  void MapPainterSVG::StartMainGroup()
+  void MapPainterSVG::BeforeDrawing(const StyleConfig& styleConfig,
+                                    const Projection& projection,
+                                    const MapParameter& parameter,
+                                    const MapData& data)
   {
     stream << "  <g id=\"map\">" << std::endl;
   }
 
-  void MapPainterSVG::FinishMainGroup()
+  void MapPainterSVG::AfterDrawing(const StyleConfig& styleConfig,
+                    const Projection& projection,
+                    const MapParameter& parameter,
+                    const MapData& data)
   {
     stream << "  </g>" << std::endl;
   }
@@ -337,6 +329,10 @@ namespace osmscout {
                               const MapParameter& parameter,
                               const WayData& data)
   {
+    std::map<LineStyle,std::string>::const_iterator styleNameEntry=lineStyleNameMap.find(*data.lineStyle);
+
+    assert(styleNameEntry!=lineStyleNameMap.end());
+
     if (!data.lineStyle->GetDash().empty() &&
         data.lineStyle->GetGapColor().GetA()>0.0) {
       DrawPath(projection,
@@ -351,7 +347,7 @@ namespace osmscout {
 
     DrawPath(projection,
              parameter,
-             typeConfig->GetTypeInfo(data.attributes->GetType()).GetName()+"_way",
+             styleNameEntry->second,
              data.lineWidth,
              LineStyle::capRound,
              LineStyle::capRound,
@@ -364,7 +360,11 @@ namespace osmscout {
                                const MapParameter& parameter,
                                const MapPainter::AreaData& area)
   {
-    //stream << "    <path class=\"" << typeConfig->GetTypeInfo(area.attributes->GetType()).GetName() << "_area\"" << std::endl;
+    std::map<FillStyle,std::string>::const_iterator styleNameEntry=fillStyleNameMap.find(*area.fillStyle);
+
+    assert(styleNameEntry!=fillStyleNameMap.end());
+
+    stream << "    <path class=\"" << styleNameEntry->second << "\"" << std::endl;
 
     if (!area.clippings.empty()) {
       stream << "          fillRule=\"evenodd\"";
@@ -415,18 +415,15 @@ namespace osmscout {
 
     WriteHeader(projection.GetWidth(),projection.GetHeight());
 
-    DumpStyles(styleConfig,
-               parameter,
-               projection);
-
-    StartMainGroup();
     Draw(styleConfig,
          projection,
          parameter,
          data);
-    FinishMainGroup();
 
     WriteFooter();
+
+    fillStyleNameMap.clear();
+    lineStyleNameMap.clear();
 
     return true;
   }
