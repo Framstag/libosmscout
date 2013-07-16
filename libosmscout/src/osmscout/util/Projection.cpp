@@ -154,6 +154,7 @@ namespace osmscout {
     this->lat=atan(sinh((atanh(sin(latMax*gradtorad))+atanh(sin(latMin*gradtorad)))/2))/gradtorad;
 
     scale=(width-1)/(gradtorad*(lonMax-lonMin));
+    scaleGradtorad = scale * gradtorad;
 
     // Width of an pixel in meter
     double d=(lonMax-lonMin)*gradtorad;
@@ -168,7 +169,7 @@ namespace osmscout {
     /*
     std::cout << "Box (grad) h: " << lonMin << "-" << lonMax << " v: " << latMin <<"-" << latMax << std::endl;
     std::cout << "Center (grad):" << this->lat << "x" << this->lon << std::endl;
-    std::cout << "Magnification: " << magnification << std::endl;
+    std::cout << "Magnification: " << magnification.GetMagnification() << std::endl;
     std::cout << "Scale: " << scale << std::endl;
     std::cout << "Screen dimension: " << width << "x" << height << std::endl;
     std::cout << "d: " << d << " " << d*180*60/M_PI << std::endl;
@@ -183,7 +184,6 @@ namespace osmscout {
     sse2ScaleGradtorad = _mm_set1_pd(scaleGradtorad);
     sse2Height         = _mm_set1_pd(height);
 #endif
-
 
     return true;
   }
