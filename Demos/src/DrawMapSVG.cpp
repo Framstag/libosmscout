@@ -87,6 +87,9 @@ int main(int argc, char* argv[])
   output=argv[9];
 
   osmscout::DatabaseParameter databaseParameter;
+
+  databaseParameter.SetDebugPerformance(true);
+
   osmscout::Database          database(databaseParameter);
 
   if (!database.Open(map.c_str())) {
@@ -112,6 +115,8 @@ int main(int argc, char* argv[])
   osmscout::AreaSearchParameter searchParameter;
   osmscout::MapData             data;
   osmscout::MapPainterSVG       painter;
+
+  drawParameter.SetDebugPerformance(true);
 
   projection.Set(std::min(lonLeft,lonRight),
                  std::min(latTop,latBottom),
@@ -152,10 +157,10 @@ int main(int argc, char* argv[])
   searchParameter.SetMaximumAreaLevel(6);
 
   painter.DrawMap(styleConfig,
-                      projection,
-                      drawParameter,
-                      data,
-                      stream);
+                  projection,
+                  drawParameter,
+                  data,
+                  stream);
 
   stream.close();
 
