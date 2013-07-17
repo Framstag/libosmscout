@@ -340,8 +340,8 @@ namespace osmscout {
                data.lineStyle->GetGapColor(),
                data.lineWidth,
                emptyDash,
-               LineStyle::capRound,
-               LineStyle::capRound,
+               data.startIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
+               data.endIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
                data.transStart,data.transEnd);
     }
 
@@ -349,8 +349,8 @@ namespace osmscout {
              parameter,
              styleNameEntry->second,
              data.lineWidth,
-             LineStyle::capRound,
-             LineStyle::capRound,
+             data.startIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
+             data.endIsClosed ? data.lineStyle->GetEndCap() : data.lineStyle->GetJoinCap(),
              data.transStart,data.transEnd);
 
     waysDrawn++;
