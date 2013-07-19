@@ -103,12 +103,10 @@ namespace osmscout {
     MapPainterOpenGL();
     virtual ~MapPainterOpenGL();
 
-/*
     bool DrawMap(const StyleConfig& styleConfig,
                  const Projection& projection,
                  const MapParameter& parameter,
-                 const MapData& data,
-                 cairo_t *draw);*/
+                 const MapData& data);
   };
 }
 

@@ -35,7 +35,7 @@ AC_TRY_COMPILE([],
                [LIB_CXXFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden"
                 AC_SUBST(LIB_CXXFLAGS)
                 AC_MSG_RESULT(yes)
-                AC_DEFINE(OSMSCOUT_MAP_CAIRO_EXPORT_SYMBOLS,1,[libosmscout uses special gcc compiler features to export symbols])],
+                AC_DEFINE(OSMSCOUT_MAP_OPENGL_EXPORT_SYMBOLS,1,[libosmscout uses special gcc compiler features to export symbols])],
                [AC_MSG_RESULT(no)])
 CXXFLAGS="$OLDCXXFLAGS"
 
@@ -56,6 +56,11 @@ dnl Check for libosmscout-map
 PKG_CHECK_MODULES(LIBOSMSCOUTMAP,[libosmscout-map],
                   [AC_SUBST(LIBOSMSCOUTMAP_CFLAGS)
                    AC_SUBST(LIBOSMSCOUTMAP_LIBS)])
+
+dnl Check for -lgl
+PKG_CHECK_MODULES(LIBOPENGL,[gl],
+                  [AC_SUBST(LIBOPENGL_CFLAGS)
+                   AC_SUBST(LIBOPENGL_LIBS)])
 
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 

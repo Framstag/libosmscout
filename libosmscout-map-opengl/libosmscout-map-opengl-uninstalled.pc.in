@@ -4,7 +4,9 @@ Version: @VERSION@
 Libs: -L@abs_builddir@/src/.libs \
       -losmscoutmapopengl \
       @LIBOSMSCOUTMAP_LIBS@ \
-      @LIBOSMSCOUT_LIBS@
+      @LIBOSMSCOUT_LIBS@ \
+      @LIBOPENGL_LIBS@
 Cflags: -I@abs_builddir@/include \
         @LIBOSMSCOUTMAP_CFLAGS@ \
-        @LIBOSMSCOUT_CFLAGS@ 
+        @LIBOSMSCOUT_CFLAGS@ \
+        @LIBOPENGL_CFLAGS@

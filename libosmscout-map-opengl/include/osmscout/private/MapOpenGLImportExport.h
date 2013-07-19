@@ -2,7 +2,7 @@
 #define OSMSCOUT_MAP_OPENGL_PRIVATE_IMPORT_EXPORT_H
 
 /*
-  This source is part of the libosmscout-map-svg library
+  This source is part of the libosmscout-map-opengl library
   Copyright (C) 2013  Tim Teulings
 
   This library is free software; you can redistribute it and/or

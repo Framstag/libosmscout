@@ -6,6 +6,7 @@ programs = libosmscout \
            libosmscout-map-agg \
            libosmscout-map-qt \
            libosmscout-map-agg \
+           libosmscout-map-opengl \
            Import \
            DumpData \
            Demos \

@@ -10,7 +10,9 @@ Version: @VERSION@
 Libs: -L${libdir} \
       -losmscoutmapopengl \
       @LIBOSMSCOUTMAP_LIBS@ \
-      @LIBOSMSCOUT_LIBS@ 
+      @LIBOSMSCOUT_LIBS@ \
+      @LIBOPENGL_LIBS@
 Cflags: -I${includedir} \
         @LIBOSMSCOUTMAP_CFLAGS@ \
-        @LIBOSMSCOUT_CFLAGS@ 
+        @LIBOSMSCOUT_CFLAGS@ \
+        @LIBOPENGL_CFLAGS@

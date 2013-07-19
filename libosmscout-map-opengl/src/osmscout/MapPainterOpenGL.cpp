@@ -19,6 +19,10 @@
 
 #include <osmscout/MapPainterOpenGL.h>
 
+#include <iostream>
+
+#include <GL/gl.h>
+
 namespace osmscout {
 
   MapPainterOpenGL::MapPainterOpenGL()
@@ -118,14 +122,65 @@ namespace osmscout {
                                   LineStyle::CapStyle endCap,
                                   size_t transStart, size_t transEnd)
   {
-    // TODO
+    // TODO:
+    // There is a limit in the OpenGL lineWidth, we need to
+    // fallback to using quads instead of lines for this.
+
+    glColor4d(color.GetR(),
+              color.GetG(),
+              color.GetB(),
+              color.GetA());
+
+    glLineWidth(width);
+
+    glBegin(GL_LINE_STRIP);
+
+    for (size_t i=transStart; i<=transEnd; i++) {
+      glVertex3d(transBuffer.buffer[i].x,transBuffer.buffer[i].y,0.0);
+    }
+
+    glEnd();
   }
 
   void MapPainterOpenGL::DrawArea(const Projection& projection,
                                   const MapParameter& parameter,
                                   const MapPainter::AreaData& area)
   {
-    // TODO
+    if (area.fillStyle->GetFillColor().IsVisible()) {
+      glColor4d(area.fillStyle->GetFillColor().GetR(),
+                area.fillStyle->GetFillColor().GetG(),
+                area.fillStyle->GetFillColor().GetB(),
+                area.fillStyle->GetFillColor().GetA());
+
+      glBegin(GL_POLYGON);
+
+      for (size_t i=area.transStart; i<=area.transEnd; i++) {
+        glVertex3d(transBuffer.buffer[i].x,transBuffer.buffer[i].y,0.0);
+      }
+
+      glEnd();
+    }
+
+    if (area.fillStyle->GetBorderWidth()>0 &&
+        area.fillStyle->GetBorderColor().IsVisible()) {
+      double borderWidth=ConvertWidthToPixel(parameter,
+                                             area.fillStyle->GetBorderWidth());
+
+      glColor4d(area.fillStyle->GetBorderColor().GetR(),
+                area.fillStyle->GetBorderColor().GetG(),
+                area.fillStyle->GetBorderColor().GetB(),
+                area.fillStyle->GetBorderColor().GetA());
+
+      glLineWidth(borderWidth);
+
+      glBegin(GL_LINE_LOOP);
+
+      for (size_t i=area.transStart; i<=area.transEnd; i++) {
+        glVertex3d(transBuffer.buffer[i].x,transBuffer.buffer[i].y,0.0);
+      }
+
+      glEnd();
+    }
   }
 
   void MapPainterOpenGL::DrawArea(const FillStyle& style,
@@ -135,26 +190,30 @@ namespace osmscout {
                                   double width,
                                   double height)
   {
-    // TODO
+    glColor4d(style.GetFillColor().GetR(),
+              style.GetFillColor().GetG(),
+              style.GetFillColor().GetB(),
+              style.GetFillColor().GetA());
+
+    glBegin(GL_QUADS);
+    glVertex3d(x, y+height, 0.0);       // Top Left
+    glVertex3d(x+width, y+height, 0.0); // Top Right
+    glVertex3d(x+width,y, 0.0);         // Bottom Right
+    glVertex3d(x,y, 0.0);               // Bottom Left
+    glEnd();
   }
 
-  /*
   bool MapPainterOpenGL::DrawMap(const StyleConfig& styleConfig,
                                 const Projection& projection,
                                 const MapParameter& parameter,
-                                const MapData& data,
-                                cairo_t *draw)
+                                const MapData& data)
   {
-    this->draw=draw;
-
-    minimumLineWidth=parameter.GetLineMinWidthPixel()*25.4/parameter.GetDPI();
-
     Draw(styleConfig,
          projection,
          parameter,
          data);
 
     return true;
-  }*/
+  }
 }
 

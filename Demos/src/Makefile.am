@@ -23,6 +23,12 @@ bin_PROGRAMS += DrawMapAgg \
                 Tiler
 endif
 
+if HAVE_LIB_OSMSCOUTMAPOPENGL
+if HAVE_LIB_GLUT
+bin_PROGRAMS += DrawMapOpenGL
+endif
+endif
+
 AddressLookup_SOURCES = AddressLookup.cpp
 AddressLookup_CXXFLAGS = $(LIBOSMSCOUT_CFLAGS)
 AddressLookup_LDADD = $(LIBOSMSCOUT_LIBS)
@@ -50,6 +56,17 @@ DrawMapQt_CXXFLAGS = $(LIBOSMSCOUTMAPQT_CFLAGS) \
 DrawMapQt_LDADD = $(LIBOSMSCOUTMAPQT_LIBS) \
                   $(LIBOSMSCOUTMAP_LIBS) \
                   $(LIBOSMSCOUT_LIBS)
+
+DrawMapOpenGL_SOURCES = DrawMapOpenGL.cpp
+DrawMapOpenGL_CXXFLAGS = $(LIBOSMSCOUTMAPOPENGL_CFLAGS) \
+                         $(LIBOSMSCOUTMAP_CFLAGS) \
+                         $(LIBOSMSCOUT_CFLAGS) \
+                         $(GLUT_CFLAGS)
+DrawMapOpenGL_LDADD = $(LIBOSMSCOUTMAPOPENGL_LIBS) \
+                      $(LIBOSMSCOUTMAP_LIBS) \
+                      $(LIBOSMSCOUT_LIBS) \
+                      $(GLUT_LIBS)
+
 
 DrawMapSVG_SOURCES = DrawMapSVG.cpp
 DrawMapSVG_CXXFLAGS = $(LIBOSMSCOUTMAPSVG_CFLAGS) \
