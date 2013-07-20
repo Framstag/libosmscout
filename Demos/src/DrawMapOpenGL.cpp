@@ -177,7 +177,7 @@ void OnDisplay()
   glLoadIdentity();
 
   glTranslated(-width/2.0,-height/2.0,-9.0);
-  //glRotatef(-15.0f,1.0f,0.0f,0.0f);
+  glRotatef(-15.0f,1.0f,0.0f,0.0f);
 
   if (!painter.DrawMap(*database.GetStyleConfig(),
                        projection,
