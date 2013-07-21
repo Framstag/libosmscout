@@ -28,8 +28,6 @@
 
 #include <osmscout/util/StopClock.h>
 
-DBThread dbThread;
-
 QBreaker::QBreaker()
   :osmscout::Breaker()
   ,aborted(false)
@@ -55,8 +53,9 @@ void QBreaker::Reset()
 }
 
 
-DBThread::DBThread()
- : database(databaseParameter),
+DBThread::DBThread(Settings* settings)
+ : settings(settings),
+   database(databaseParameter),
    styleConfig(NULL),
    router(routerParameter),
    iconDirectory(),
@@ -296,7 +295,7 @@ void DBThread::TriggerMapRendering()
 
     paths.push_back(iconDirectory.toLocal8Bit().data());
 
-    //drawParameter.SetDPI(QApplication::desktop()->physicalDpiX());
+    drawParameter.SetDPI(settings->GetDPI());
     drawParameter.SetIconPaths(paths);
     drawParameter.SetPatternPaths(paths);
     drawParameter.SetDebugPerformance(true);

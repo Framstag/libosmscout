@@ -23,8 +23,6 @@
 #include <QFormLayout>
 #include <QVBoxLayout>
 
-#include "DBThread.h"
-
 class LocationItem : public QStandardItem
 {
 public:
@@ -46,8 +44,10 @@ public:
   }
 };
 
-SearchLocationDialog::SearchLocationDialog(QWidget* parentWindow)
+SearchLocationDialog::SearchLocationDialog(QWidget* parentWindow,
+                                           DBThread* dbThread)
  : QDialog(parentWindow,Qt::Dialog),
+   dbThread(dbThread),
    locationName(new QLineEdit()),
    results(new QListView()),
    locations(new QStandardItemModel())
@@ -163,7 +163,7 @@ void SearchLocationDialog::Search()
   locations->clear();
 
   if (!locationName->text().isEmpty()) {
-    dbThread.GetMatchingAdminRegions(city,regions,50,limitReached);
+    dbThread->GetMatchingAdminRegions(city,regions,50,limitReached);
 
     std::cout << "Result of search for region " << city.toUtf8().data() << ": " << regions.size() << std::endl;
 
@@ -209,11 +209,11 @@ void SearchLocationDialog::Search()
        ++region) {
     std::list<osmscout::Location> locs;
 
-    dbThread.GetMatchingLocations(*region,
-                                  street,
-                                  locs,
-                                  50,
-                                  limitReached);
+    dbThread->GetMatchingLocations(*region,
+                                   street,
+                                   locs,
+                                   50,
+                                   limitReached);
 
     std::cout << "Result of search for street " << street.toUtf8().data() << " in region " << region->name << ": " << locs.size() << std::endl;
 

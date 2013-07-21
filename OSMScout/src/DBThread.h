@@ -39,6 +39,8 @@
 
 #include <osmscout/util/Breaker.h>
 
+#include "Settings.h"
+
 struct RenderMapRequest
 {
   double                  lon;
@@ -89,6 +91,7 @@ public slots:
   void Finalize();
 
 private:
+  Settings                     *settings;
   mutable QMutex               mutex;
   osmscout::DatabaseParameter  databaseParameter;
   osmscout::Database           database;
@@ -128,7 +131,7 @@ private:
   void FreeMaps();
 
 public:
-  DBThread();
+  DBThread(Settings* settings);
 
   void UpdateRenderRequest(const RenderMapRequest& request);
 
@@ -167,7 +170,5 @@ public:
   void ClearRoute();
   void AddRoute(const osmscout::Way& way);
 };
-
-extern DBThread dbThread;
 
 #endif

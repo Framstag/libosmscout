@@ -1,5 +1,5 @@
-#ifndef SEARCHLOCATION_DIALOG_H
-#define SEARCHLOCATION_DIALOG_H
+#ifndef SETTINGS_DIALOG_H
+#define SETTINGS_DIALOG_H
 
 /*
   OSMScout - a Qt backend for libosmscout and libosmscout-map
@@ -22,43 +22,29 @@
 
 #include <QDialog>
 #include <QLineEdit>
-#include <QListView>
+#include <QSpinBox>
 #include <QPushButton>
 #include <QStandardItemModel>
-#include <QTimer>
+#include <QTableView>
 
-#include <osmscout/Location.h>
+#include "Settings.h"
 
-#include <DBThread.h>
-
-class SearchLocationDialog : public QDialog
+class SettingsDialog : public QDialog
 {
   Q_OBJECT
 
 private:
-  DBThread           *dbThread;
-
-  QLineEdit          *locationName;
-  QListView          *results;
-  QStandardItemModel *locations;
-  QPushButton        *okButton;
-  QTimer             requestResultTimer;
-
-  osmscout::Location locationResult;
+  Settings    *settings;
+  QSpinBox    *dpi;
+  QPushButton *okButton;
 
 public slots:
-  void OnLocationNameChange(const QString& text);
-  void OnSelectionChanged(const QItemSelection& selected,
-                          const QItemSelection& deselected);
-  void OnDoubleClick(const QModelIndex& index);
-  void Search();
+  void Save();
 
 public:
-  SearchLocationDialog(QWidget* parentWindow,
-                       DBThread* dbThread);
-  ~SearchLocationDialog();
-
-  osmscout::Location GetLocationResult() const;
+  SettingsDialog(QWidget* parentWindow,
+                 Settings* settings);
+  ~SettingsDialog();
 };
 
 #endif

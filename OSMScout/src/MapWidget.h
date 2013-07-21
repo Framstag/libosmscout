@@ -30,6 +30,8 @@ class MapWidget: public QWidget
 
 
 private:
+  DBThread                *dbThread;
+
   double                  lon;
   double                  lat;
   osmscout::Magnification magnification;
@@ -53,7 +55,8 @@ private:
   void HandleMouseMove(QMouseEvent* event);
 
 public:
-  MapWidget(QWidget *parent=NULL);
+  MapWidget(QWidget* parent,
+            DBThread* dbThread);
   virtual ~MapWidget();
 
   void keyPressEvent(QKeyEvent* event);

@@ -24,7 +24,6 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 
-#include "DBThread.h"
 #include "SearchLocationDialog.h"
 
 #include <cmath>
@@ -234,8 +233,10 @@ void RouteModel::refresh()
   endResetModel();
 }
 
-RoutingDialog::RoutingDialog(QWidget* parentWindow)
+RoutingDialog::RoutingDialog(QWidget* parentWindow,
+                             DBThread* dbThread)
  : QDialog(parentWindow,Qt::Dialog),
+   dbThread(dbThread),
    from(new QLineEdit()),
    hasStart(false),
    to(new QLineEdit()),
@@ -331,7 +332,8 @@ void RoutingDialog::SelectFrom()
 {
   std::cout << "Select from..." << std::endl;
 
-  SearchLocationDialog dialog(this);
+  SearchLocationDialog dialog(this,
+                              dbThread);
 
   dialog.exec();
 
@@ -379,7 +381,8 @@ void RoutingDialog::SelectTo()
 {
   std::cout << "Select to..." << std::endl;
 
-  SearchLocationDialog dialog(this);
+  SearchLocationDialog dialog(this,
+                              dbThread);
 
   dialog.exec();
 
@@ -639,19 +642,19 @@ void RoutingDialog::Route()
   route.routeSteps.clear();
   routeModel->refresh();
 
-  if (!dbThread.CalculateRoute(route.startObject,
-                               route.startNodeIndex,
-                               route.endObject,
-                               route.endNodeIndex,
-                               routeData)) {
+  if (!dbThread->CalculateRoute(route.startObject,
+                                route.startNodeIndex,
+                                route.endObject,
+                                route.endNodeIndex,
+                                routeData)) {
     std::cerr << "There was an error while routing!" << std::endl;
     return;
   }
 
-  dbThread.TransformRouteDataToRouteDescription(routeData,
-                                                route.routeDescription,
-                                                route.start.toUtf8().constData(),
-                                                route.end.toUtf8().constData());
+  dbThread->TransformRouteDataToRouteDescription(routeData,
+                                                 route.routeDescription,
+                                                 route.start.toUtf8().constData(),
+                                                 route.end.toUtf8().constData());
 
   size_t                         roundaboutCrossingCounter=0;
   std::list<RouteStep>::iterator lastStep=route.routeSteps.end();
@@ -817,9 +820,9 @@ void RoutingDialog::Route()
     prevNode=node;
   }
 
-  if (dbThread.TransformRouteDataToWay(routeData,routeWay)) {
-    dbThread.ClearRoute();
-    dbThread.AddRoute(routeWay);
+  if (dbThread->TransformRouteDataToWay(routeData,routeWay)) {
+    dbThread->ClearRoute();
+    dbThread->AddRoute(routeWay);
   }
   else {
     std::cerr << "Error while transforming route" << std::endl;

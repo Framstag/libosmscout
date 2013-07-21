@@ -23,9 +23,14 @@
 
 #include "SearchLocationDialog.h"
 #include "RoutingDialog.h"
+#include "SettingsDialog.h"
 
-MainWindow::MainWindow()
- : map(new MapWidget())
+MainWindow::MainWindow(Settings* settings,
+                       DBThread *dbThread)
+ : settings(settings),
+   dbThread(dbThread),
+   map(new MapWidget(NULL,
+                     dbThread))
 {
   QMenu *menu;
 
@@ -33,16 +38,29 @@ MainWindow::MainWindow()
   menu->addAction("&Quit",this,SLOT(close()),QKeySequence("Ctrl+Q"));
 
   menu=menuBar()->addMenu("&Search");
-  searchLocationAction=menu->addAction("Search &location",this,SLOT(SearchLocation()),QKeySequence("Ctrl+F"));
-  routingAction=menu->addAction("&Routing",this,SLOT(Routing()),QKeySequence("Ctrl+R"));
+  searchLocationAction=menu->addAction("Search &location",
+                                       this,
+                                       SLOT(OpenSearchLocationDialog()),
+                                       QKeySequence("Ctrl+F"));
+  routingAction=menu->addAction("&Routing",
+                                this,
+                                SLOT(OpenRoutingDialog()),
+                                QKeySequence("Ctrl+R"));
+  menu->addSeparator();
+  settingsAction=menu->addAction("&Settings",
+                                 this,
+                                 SLOT(OpenSettingsDialog()));
 
   searchLocationAction->setEnabled(false);
   routingAction->setEnabled(false);
+  settingsAction->setEnabled(false);
 
   setCentralWidget(map);
 
-  connect(&dbThread,SIGNAL(InitialisationFinished(DatabaseLoadedResponse)),
-          this,SLOT(InitialisationFinished(DatabaseLoadedResponse)));
+  connect(dbThread,
+          SIGNAL(InitialisationFinished(DatabaseLoadedResponse)),
+          this,
+          SLOT(InitialisationFinished(DatabaseLoadedResponse)));
 }
 
 MainWindow::~MainWindow()
@@ -54,11 +72,13 @@ void MainWindow::InitialisationFinished(const DatabaseLoadedResponse& response)
 {
   searchLocationAction->setEnabled(true);
   routingAction->setEnabled(true);
+  settingsAction->setEnabled(true);
 }
 
-void MainWindow::SearchLocation()
+void MainWindow::OpenSearchLocationDialog()
 {
-  SearchLocationDialog dialog(this);
+  SearchLocationDialog dialog(this,
+                              dbThread);
 
   dialog.exec();
 
@@ -67,13 +87,23 @@ void MainWindow::SearchLocation()
 
     location=dialog.GetLocationResult();
 
-    map->ShowReference(location.references.front(),osmscout::Magnification::magVeryClose);
+    map->ShowReference(location.references.front(),
+                       osmscout::Magnification::magVeryClose);
   }
 }
 
-void MainWindow::Routing()
+void MainWindow::OpenRoutingDialog()
 {
-  RoutingDialog dialog(this);
+  RoutingDialog dialog(this,
+                       dbThread);
+
+  dialog.exec();
+}
+
+void MainWindow::OpenSettingsDialog()
+{
+  SettingsDialog dialog(this,
+                        settings);
 
   dialog.exec();
 }

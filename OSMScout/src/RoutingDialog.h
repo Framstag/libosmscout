@@ -1,5 +1,5 @@
-#ifndef ROUTINGDIALOG_H
-#define ROUTINGDIALOG_H
+#ifndef ROUTING_DIALOG_H
+#define ROUTING_DIALOG_H
 
 /*
   OSMScout - a Qt backend for libosmscout and libosmscout-map
@@ -29,6 +29,8 @@
 #include <osmscout/Location.h>
 #include <osmscout/Route.h>
 
+#include "DBThread.h"
+
 class RouteModel : public QAbstractTableModel
 {
   Q_OBJECT
@@ -57,12 +59,9 @@ class RoutingDialog : public QDialog
 {
   Q_OBJECT
 
-public slots:
-  void SelectFrom();
-  void SelectTo();
-  void Route();
-
 private:
+  DBThread   *dbThread;
+
   QLineEdit   *from;
   bool        hasStart;
   QLineEdit   *to;
@@ -70,6 +69,11 @@ private:
   QTableView  *routeView;
   RouteModel  *routeModel;
   QPushButton *routeButton;
+
+public slots:
+  void SelectFrom();
+  void SelectTo();
+  void Route();
 
 private:
   void DumpStartDescription(const osmscout::RouteDescription::StartDescriptionRef& startDescription,
@@ -92,7 +96,8 @@ private:
   void DumpNameChangedDescription(const osmscout::RouteDescription::NameChangedDescriptionRef& nameChangedDescription);
 
 public:
-  RoutingDialog(QWidget* parentWindow);
+  RoutingDialog(QWidget* parentWindow,
+                DBThread* dbThread);
   ~RoutingDialog();
 };
 

@@ -19,7 +19,8 @@
 
 #include <QApplication>
 
-#include "MapWidget.h"
+#include "Settings.h"
+
 #include "MainWindow.h"
 
 int main(int argc, char* argv[])
@@ -29,31 +30,44 @@ int main(int argc, char* argv[])
 #endif
 
   QApplication app(argc,argv);
-  MainWindow   window;
+  Settings     *settings;
+  MainWindow   *window;
   int          result;
 
   app.setOrganizationName("libosmscout");
   app.setOrganizationDomain("libosmscout.sf.net");
   app.setApplicationName("OSMScout");
 
+  settings=new Settings();
+
   //qRegisterMetaType<RenderMapRequest>();
   qRegisterMetaType<DatabaseLoadedResponse>();
 
   QThread thread;
-  dbThread.connect(&thread, SIGNAL(started()), SLOT(Initialize()));
-  dbThread.connect(&thread, SIGNAL(finished()), SLOT(Finalize()));
 
-  dbThread.moveToThread(&thread);
+  DBThread *dbThread=new DBThread(settings);
+
+  dbThread->connect(&thread, SIGNAL(started()), SLOT(Initialize()));
+  dbThread->connect(&thread, SIGNAL(finished()), SLOT(Finalize()));
+
+  dbThread->moveToThread(&thread);
   thread.start();
 
-  window.setWindowTitle("OSMScout");
-  window.resize(800,480);
-  window.show();
+  window=new MainWindow(settings,
+                        dbThread);
+  window->setWindowTitle("OSMScout");
+  window->resize(800,480);
+  window->show();
 
   result=app.exec();
 
   thread.quit();
   thread.wait();
+
+  delete window;
+  delete settings;
+
+  delete dbThread;
 
   return result;
 }

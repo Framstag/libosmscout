@@ -1,9 +1,6 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
-
 /*
   OSMScout - a Qt backend for libosmscout and libosmscout-map
-  Copyright (C) 2010  Tim Teulings
+  Copyright (C) 2013  Tim Teulings
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -20,37 +17,24 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <QMainWindow>
-
 #include "Settings.h"
 
-#include "MapWidget.h"
-
-class MainWindow : public QMainWindow
+Settings::Settings()
 {
-  Q_OBJECT
+  // no code
+}
 
-public slots:
-  void OpenSearchLocationDialog();
-  void OpenRoutingDialog();
-  void OpenSettingsDialog();
-  void InitialisationFinished(const DatabaseLoadedResponse& response);
+Settings::~Settings()
+{
+  // no code
+}
 
-private:
-  Settings  *settings;
-  DBThread  *dbThread;
+void Settings::SetDPI(size_t dpi)
+{
+  settings.setValue("settings/dpi", (uint)dpi);
+}
 
-  MapWidget *map;
-  QAction   *searchLocationAction;
-  QAction   *routingAction;
-  QAction   *settingsAction;
-
-public:
-  MainWindow(Settings* settings,
-             DBThread *dbThread);
-  ~MainWindow();
-
-
-};
-
-#endif
+size_t Settings::GetDPI() const
+{
+  return (size_t)settings.value("settings/dpi",92).toUInt();
+}

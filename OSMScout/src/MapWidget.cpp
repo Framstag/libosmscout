@@ -21,16 +21,18 @@
 
 #include <iostream>
 
-MapWidget::MapWidget(QWidget *parent) :
+MapWidget::MapWidget(QWidget *parent,
+                     DBThread* dbThread) :
   QWidget(parent),
+  dbThread(dbThread),
   requestNewMap(true)
 {
   setFocusPolicy(Qt::StrongFocus);
 
-  connect(&dbThread,SIGNAL(InitialisationFinished(DatabaseLoadedResponse)),this,SLOT(InitialisationFinished(DatabaseLoadedResponse)));
-  connect(this,SIGNAL(TriggerMapRenderingSignal()),&dbThread,SLOT(TriggerMapRendering()));
-  connect(&dbThread,SIGNAL(HandleMapRenderingResult()),this,SLOT(DrawRenderResult()));
-  connect(&dbThread,SIGNAL(Redraw()),this,SLOT(Redraw()));
+  connect(dbThread,SIGNAL(InitialisationFinished(DatabaseLoadedResponse)),this,SLOT(InitialisationFinished(DatabaseLoadedResponse)));
+  connect(this,SIGNAL(TriggerMapRenderingSignal()),dbThread,SLOT(TriggerMapRendering()));
+  connect(dbThread,SIGNAL(HandleMapRenderingResult()),this,SLOT(DrawRenderResult()));
+  connect(dbThread,SIGNAL(Redraw()),this,SLOT(Redraw()));
 
   lon=0;
   lat=0;
@@ -88,7 +90,7 @@ void MapWidget::TriggerMapRendering()
   request.width=width();
   request.height=height();
 
-  dbThread.UpdateRenderRequest(request);
+  dbThread->UpdateRenderRequest(request);
   emit TriggerMapRenderingSignal();
 }
 
@@ -240,7 +242,7 @@ void MapWidget::paintEvent(QPaintEvent* event)
 
   QPainter painter(this);
 
-  if (!dbThread.RenderMap(painter,request) &&
+  if (!dbThread->RenderMap(painter,request) &&
       requestNewMap) {
     TriggerMapRendering();
   }
@@ -283,7 +285,7 @@ void MapWidget::ShowReference(const osmscout::ObjectFileRef& reference,
   if (reference.GetType()==osmscout::refNode) {
     osmscout::NodeRef node;
 
-    if (dbThread.GetNodeByOffset(reference.GetFileOffset(),node)) {
+    if (dbThread->GetNodeByOffset(reference.GetFileOffset(),node)) {
       lon=node->GetLon();
       lat=node->GetLat();
       this->magnification=magnification;
@@ -294,7 +296,7 @@ void MapWidget::ShowReference(const osmscout::ObjectFileRef& reference,
   else if (reference.GetType()==osmscout::refArea) {
     osmscout::AreaRef area;
 
-    if (dbThread.GetAreaByOffset(reference.GetFileOffset(),area)) {
+    if (dbThread->GetAreaByOffset(reference.GetFileOffset(),area)) {
       if (area->GetCenter(lat,lon)) {
         this->magnification=magnification;
 
@@ -305,7 +307,7 @@ void MapWidget::ShowReference(const osmscout::ObjectFileRef& reference,
   else if (reference.GetType()==osmscout::refWay) {
     osmscout::WayRef way;
 
-    if (dbThread.GetWayByOffset(reference.GetFileOffset(),way)) {
+    if (dbThread->GetWayByOffset(reference.GetFileOffset(),way)) {
       if (way->GetCenter(lat,lon)) {
         this->magnification=magnification;
 
