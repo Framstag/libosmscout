@@ -24,7 +24,15 @@
 #include <map>
 #include <set>
 
+#include <osmscout/MapSVGFeatures.h>
+
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
+  #include <pango/pangoft2.h>
+#endif
+
 #include <osmscout/private/MapSVGImportExport.h>
+
+#include <osmscout/util/HashMap.h>
 
 #include <osmscout/MapPainter.h>
 
@@ -33,6 +41,13 @@ namespace osmscout {
   class OSMSCOUT_MAP_SVG_API MapPainterSVG : public MapPainter
   {
   private:
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
+    typedef OSMSCOUT_HASHMAP<size_t,PangoFontDescription*>  FontMap;          //! Map type for mapping  font sizes to font
+
+    PangoFontMap                     *pangoFontMap;
+    PangoContext                     *pangoContext;
+    FontMap                          fonts;            //! Cached scaled font
+#endif
      std::map<FillStyle,std::string> fillStyleNameMap;
      std::map<LineStyle,std::string> lineStyleNameMap;
      std::ostream                    stream;
@@ -40,6 +55,11 @@ namespace osmscout {
 
   private:
     std::string GetColorValue(const Color& color);
+
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
+    PangoFontDescription* GetFont(const MapParameter& parameter,
+                                  double fontSize);
+#endif
 
     void WriteHeader(size_t width,size_t height);
     void DumpStyles(const StyleConfig& styleConfig,

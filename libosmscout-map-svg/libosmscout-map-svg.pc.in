@@ -10,7 +10,9 @@ Version: @VERSION@
 Libs: -L${libdir} \
       -losmscoutmapsvg \
       @LIBOSMSCOUTMAP_LIBS@ \
-      @LIBOSMSCOUT_LIBS@
+      @LIBOSMSCOUT_LIBS@ \
+      @LIBPANGO_LIBS@
 Cflags: -I${includedir} \
         @LIBOSMSCOUTMAP_CFLAGS@ \
-        @LIBOSMSCOUT_CFLAGS@
+        @LIBOSMSCOUT_CFLAGS@ \
+        @LIBPANGO_CFLAGS@

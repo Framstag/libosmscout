@@ -37,13 +37,49 @@ namespace osmscout {
   : stream(NULL),
     typeConfig(NULL)
   {
-    // no code
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
+    pangoContext=pango_context_new();
+    pangoFontMap=pango_ft2_font_map_new();
+    pango_context_set_font_map(pangoContext,
+                               pangoFontMap);
+#endif
   }
 
   MapPainterSVG::~MapPainterSVG()
   {
-    // No code
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
+    for (FontMap::const_iterator entry=fonts.begin();
+         entry!=fonts.end();
+         ++entry) {
+      if (entry->second!=NULL) {
+        pango_font_description_free(entry->second);
+      }
+    }
+#endif
   }
+
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
+  PangoFontDescription* MapPainterSVG::GetFont(const MapParameter& parameter,
+                                               double fontSize)
+  {
+    FontMap::const_iterator f;
+
+    fontSize=fontSize*ConvertWidthToPixel(parameter,parameter.GetFontSize());
+
+    f=fonts.find(fontSize);
+
+    if (f!=fonts.end()) {
+      return f->second;
+    }
+
+    PangoFontDescription* font=pango_font_description_new();
+
+    pango_font_description_set_family(font,parameter.GetFontName().c_str());
+    pango_font_description_set_absolute_size(font,fontSize*PANGO_SCALE);
+
+    return fonts.insert(std::make_pair(fontSize,font)).first->second;
+  }
+#endif
 
   std::string MapPainterSVG::GetColorValue(const Color& color)
   {
@@ -57,11 +93,6 @@ namespace osmscout {
     }
 
     result.append("#");
-
-    if (!color.IsSolid()) {
-      result.append(1,valueChar[(unsigned int)(color.GetA()*255)/16]);
-      result.append(1,valueChar[(unsigned int)(color.GetA()*255)%16]);
-    }
 
     result.append(1,valueChar[(unsigned int)(color.GetR()*255)/16]);
     result.append(1,valueChar[(unsigned int)(color.GetR()*255)%16]);
@@ -114,6 +145,11 @@ namespace osmscout {
         stream << "        ." << name << " {";
 
         stream << "fill:" << GetColorValue(area->fillStyle->GetFillColor());
+
+        if (!area->fillStyle->GetFillColor().IsSolid()) {
+          stream << ";fill-opacity:" << area->fillStyle->GetFillColor().GetA();
+        }
+
         stream << ";fillRule:nonzero";
 
         double borderWidth=ConvertWidthToPixel(parameter,
@@ -121,6 +157,11 @@ namespace osmscout {
 
         if (borderWidth>0.0) {
           stream << ";stroke:" << GetColorValue(area->fillStyle->GetBorderColor());
+
+          if (!area->fillStyle->GetBorderColor().IsSolid()) {
+            stream << ";stroke-opacity:" << area->fillStyle->GetBorderColor().GetA();
+          }
+
           stream << ";stroke-width:" << borderWidth;
 
           if (area->fillStyle->HasBorderDashes()) {
@@ -171,6 +212,10 @@ namespace osmscout {
         stream << "        ." << name << " {";
         stream << "fill:none;";
         stream << "stroke:" << GetColorValue(way->lineStyle->GetLineColor());
+
+        if (!way->lineStyle->GetLineColor().IsSolid()) {
+          stream << ";stroke-opacity:" << way->lineStyle->GetLineColor().GetA();
+        }
 
         if (way->lineStyle->HasDashes()) {
           stream << ";stroke-dasharray:";
@@ -235,14 +280,106 @@ namespace osmscout {
                                        double& width,
                                        double& height)
   {
-    // Not implemented
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
+    PangoFontDescription *font;
+    PangoLayout          *layout=pango_layout_new(pangoContext);
+    PangoRectangle       extends;
+
+    font=GetFont(parameter,
+                 fontSize);
+
+    pango_layout_set_font_description(layout,font);
+    pango_layout_set_text(layout,text.c_str(),text.length());
+
+    pango_layout_get_pixel_extents(layout,&extends,NULL);
+
+    xOff=extends.x;
+    yOff=extends.y;
+    width=extends.width;
+    height=pango_font_description_get_size(font)/PANGO_SCALE;
+
+    g_object_unref(layout);
+#endif
   }
 
   void MapPainterSVG::DrawLabel(const Projection& projection,
                                   const MapParameter& parameter,
                                   const LabelData& label)
   {
-    // Not implemented
+    if (dynamic_cast<const TextStyle*>(label.style.Get())!=NULL) {
+      const TextStyle* style=dynamic_cast<const TextStyle*>(label.style.Get());
+  #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
+      PangoFontDescription* font=GetFont(parameter,
+                                         label.fontSize);
+  #endif
+
+      // TODO: This is not the exact placement, we cannot just move vertical by fontSize, but we must move the actual
+      // text height. For this we need the text bounding box in LabelData.
+
+      stream << "    <text";
+      stream << " x=\"" << label.x << "\"";
+      stream << " y=\"" << label.y+ConvertWidthToPixel(parameter,label.fontSize*parameter.GetFontSize()) << "\"";
+      stream << " font-family=\"" << parameter.GetFontName() << "\"";
+      stream << " font-size=\"" << ConvertWidthToPixel(parameter,label.fontSize*parameter.GetFontSize()) << "\"";
+      stream << " fill=\"" << GetColorValue(style->GetTextColor()) << "\"";
+
+      if (label.alpha!=1.0) {
+        stream << " fill-opacity=\"" << label.alpha << "\"";
+      }
+
+      stream << ">";
+      stream << label.text;
+      stream << "</text>" << std::endl;
+
+      /*
+      stream << "<rect x=\"" << label.bx1 << "\"" << " y=\"" << label.by1 << "\"" <<" width=\"" << label.bx2-label.bx1 << "\"" << " height=\"" << label.by2-label.by1 << "\""
+              << " fill=\"none\" stroke=\"blue\"/>" << std::endl;*/
+    }
+    else if (dynamic_cast<const ShieldStyle*>(label.style.Get())!=NULL) {
+      const ShieldStyle* style=dynamic_cast<const ShieldStyle*>(label.style.Get());
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
+     PangoFontDescription* font=GetFont(parameter,
+                                       label.fontSize);
+#endif
+     // Shield background
+     stream << "    <rect";
+     stream << " x=\"" << label.bx1 << "\"";
+     stream << " y=\"" << label.by1 << "\"";
+     stream << " width=\"" << label.bx2-label.bx1+1 << "\"";
+     stream << " height=\"" << label.by2-label.by1+1 << "\"";
+     stream << " fill=\"" << GetColorValue(style->GetBgColor()) << "\"";
+     stream << " stroke=\"none\"";
+     stream <<  "/>" << std::endl;
+
+     // Shield inner border
+     stream << "    <rect";
+     stream << " x=\"" << label.bx1+2 << "\"";
+     stream << " y=\"" << label.by1+2 << "\"";
+     stream << " width=\"" << label.bx2-label.bx1+1-4 << "\"";
+     stream << " height=\"" << label.by2-label.by1+1-4 << "\"";
+     stream << " fill=\"none\"";
+     stream << " stroke=\"" << GetColorValue(style->GetBorderColor()) << "\"";
+     stream << " stroke-width=\"1\"";
+     stream <<  "/>" << std::endl;
+
+      // TODO: This is not the exact placement, we cannot just move vertical by fontSize, but we must move the actual
+      // text height. For this we need the text bounding box in LabelData.
+
+      stream << "    <text";
+      stream << " x=\"" << label.x << "\"";
+      stream << " y=\"" << label.y+ConvertWidthToPixel(parameter,label.fontSize*parameter.GetFontSize()) << "\"";
+      stream << " font-family=\"" << parameter.GetFontName() << "\"";
+      stream << " font-size=\"" << ConvertWidthToPixel(parameter,label.fontSize*parameter.GetFontSize()) << "\"";
+      stream << " fill=\"" << GetColorValue(style->GetTextColor()) << "\"";
+
+      if (label.alpha!=1.0) {
+        stream << " fill-opacity=\"" << label.alpha << "\"";
+      }
+
+      stream << ">";
+      stream << label.text;
+      stream << "</text>" << std::endl;
+    }
   }
 
   void MapPainterSVG::DrawContourLabel(const Projection& projection,
@@ -286,7 +423,17 @@ namespace osmscout {
                                LineStyle::CapStyle endCap,
                                size_t transStart, size_t transEnd)
   {
-    stream << "    <polyline fill=\"none\" stroke=\"" << GetColorValue(color) << "\" stroke-width=\"" << width << "\"" << std::endl;
+    stream << "    <polyline";
+    stream << " fill=\"none\"";
+    stream << " stroke=\"" << GetColorValue(color) << "\"";
+
+    if (!color.IsSolid()) {
+      stream << " stroke-opacity=\"" << color.GetA() << "\"";
+    }
+
+    stream << " stroke-width=\"" << width << "\"";
+    stream << std::endl;
+
     stream << "              points=\"";
 
     for (size_t i=transStart; i<=transEnd; i++) {
@@ -309,7 +456,11 @@ namespace osmscout {
                                LineStyle::CapStyle endCap,
                                size_t transStart, size_t transEnd)
   {
-    stream << "    <polyline class=\"" << styleName  << "\" stroke-width=\"" << width << "\"" << std::endl;
+    stream << "    <polyline";
+    stream << " class=\"" << styleName  << "\"";
+    stream << " stroke-width=\"" << width << "\"";
+    stream << std::endl;
+
     stream << "              points=\"";
 
     for (size_t i=transStart; i<=transEnd; i++) {
@@ -367,7 +518,7 @@ namespace osmscout {
     stream << "    <path class=\"" << styleNameEntry->second << "\"" << std::endl;
 
     if (!area.clippings.empty()) {
-      stream << "          fillRule=\"evenodd\"";
+      stream << "          fillRule=\"evenodd\"" << std::endl;
     }
 
     stream << "          d=\"";

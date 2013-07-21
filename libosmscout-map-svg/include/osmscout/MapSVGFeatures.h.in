@@ -4,5 +4,8 @@
 /* Illumination uses special gcc compiler features to explicitely export symbols */
 #undef OSMSCOUT_MAP_SVG_EXPORT_SYMBOLS
 
+/* libpango found */
+#undef OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO
+
 #endif
 

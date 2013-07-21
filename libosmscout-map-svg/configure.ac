@@ -54,6 +54,12 @@ PKG_CHECK_MODULES(LIBOSMSCOUTMAP,[libosmscout-map],
                   [AC_SUBST(LIBOSMSCOUTMAP_CFLAGS)
                    AC_SUBST(LIBOSMSCOUTMAP_LIBS)])
 
+PKG_CHECK_MODULES(LIBPANGO, pangoft2,
+                  [AC_SUBST(LIBPANGO_CFLAGS)
+                   AC_SUBST(LIBPANGO_LIBS)
+                   AC_DEFINE(HAVE_LIB_PANGO,1,[libpango found])
+                   AC_DEFINE(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO,1,[libpango found])])
+
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
 AC_CONFIG_FILES([Makefile src/Makefile include/Makefile libosmscout-map-svg.pc libosmscout-map-svg-uninstalled.pc])
