@@ -38,6 +38,11 @@ namespace osmscout {
     typeConfig(NULL)
   {
 #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
+#if !defined(GLIB_VERSION_2_36)
+      /* Compatibility call for glibc versions prior to 2.36 */
+    g_type_init();
+#endif
+
     pangoContext=pango_context_new();
     pangoFontMap=pango_ft2_font_map_new();
     pango_context_set_font_map(pangoContext,
