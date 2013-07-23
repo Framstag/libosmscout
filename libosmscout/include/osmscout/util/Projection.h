@@ -32,7 +32,9 @@ namespace osmscout {
   {
   public:
 
-    /* This class is used to hide internal complexity concerned with batching GeoToPixel calls*/
+    /**
+     * This class is used to hide internal complexity concerned with batching GeoToPixel calls
+     */
     class BatchTransformer
     {
     public:
@@ -74,8 +76,7 @@ namespace osmscout {
         yPointer[count]=&y;
         count++;
 
-        if (count==2)
-        {
+        if (count==2) {
           count=0;
           return projection.GeoToPixel(*this);
         }
@@ -83,9 +84,7 @@ namespace osmscout {
         return true;
 
 #else
-
-        return projection.GeoToPixel(lon, lat, x, y);
-
+        return projection.GeoToPixel(lon,lat,x,y);
 #endif
       }
 
@@ -105,37 +104,85 @@ namespace osmscout {
 
     virtual ~Projection();
 
+    /**
+     * Returns longitude coordinate of the region center.
+     *
+     */
     virtual double GetLon() const = 0;
+
+    /**
+     * Returns latitude coordinate of the region center.
+     *
+     */
     virtual double GetLat() const = 0;
+
     virtual size_t GetWidth() const = 0;
     virtual size_t GetHeight() const = 0;
+
+    /**
+     * Returns minimum longitude value of the area covered by the projection.
+     */
     virtual double GetLonMin() const = 0;
+
+    /**
+     * Returns minimum latitude value of the area covered by the projection.
+     */
     virtual double GetLatMin() const = 0;
+
+    /**
+     * Returns maximum longitude value of the area covered by the projection.
+     */
     virtual double GetLonMax() const = 0;
+
+    /**
+     * Returns maximum latitude value of the area covered by the projection.
+     */
     virtual double GetLatMax() const = 0;
+
+    /**
+     * Return the magnification as part of the projection.
+     */
     virtual Magnification GetMagnification() const = 0;
 
     virtual bool Set(double lon, double lat,
                      const Magnification& magnification,
                      size_t width, size_t height) = 0;
 
+    /**
+     * Returns true, if the given geo coordinate is in the bounding box
+     */
     virtual bool GeoIsIn(double lon, double lat) const = 0;
+
+    /**
+     * Returns true, if the given bounding box is completely within the projection bounding box
+     */
     virtual bool GeoIsIn(double lonMin, double latMin,
                          double lonMax, double latMax) const = 0;
 
+    /**
+     * Converts a pixel coordinate to a geo coordinate
+     */
     virtual bool PixelToGeo(double x, double y,
                             double& lon, double& lat) const = 0;
 
+    /**
+     * Converts a geo coordinate to a pixel coordinate
+     */
     virtual bool GeoToPixel(double lon, double lat,
                             double& x, double& y) const = 0;
 
+    /**
+     * Returns the bounding box of the area covered
+     */
     virtual bool GetDimensions(double& lonMin, double& latMin,
                                double& lonMax, double& latMax) const = 0;
 
+    /**
+     * Returns the size of a pixel in mm
+     */
     virtual double GetPixelSize() const = 0;
 
   protected:
-
     virtual bool GeoToPixel(const BatchTransformer& transformData) const = 0;
 
     friend class BatchTransformer;
@@ -253,6 +300,7 @@ namespace osmscout {
 
   class OSMSCOUT_API ReversedYAxisMercatorProjection : public MercatorProjection
   {
+  private:
     bool PixelToGeo(double x, double y, double& lon, double& lat) const;
     bool GeoToPixel(double lon, double lat, double& x, double& y) const;
   protected:
