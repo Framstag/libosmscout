@@ -25,6 +25,7 @@
 
 #include <osmscout/CoreFeatures.h>
 
+#include <osmscout/GeoCoord.h>
 #include <osmscout/Types.h>
 
 namespace osmscout {
@@ -93,6 +94,7 @@ namespace osmscout {
     bool WriteNumber(uint64_t number);
 #endif
 
+    bool WriteCoord(const GeoCoord& coord);
     bool WriteCoord(double lat, double lon);
 
     bool Flush();

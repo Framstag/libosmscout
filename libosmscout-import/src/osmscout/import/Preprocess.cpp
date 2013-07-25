@@ -238,7 +238,7 @@ namespace osmscout {
 
       node.SetId(id);
       node.SetType(type);
-      node.SetCoordinates(lon,lat);
+      node.SetCoords(lon,lat);
       node.SetTags(tags);
 
       node.Write(nodeWriter);

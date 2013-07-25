@@ -126,8 +126,6 @@ int main(int argc, char* argv[])
   std::vector<osmscout::WayRef>  ways;
   std::vector<osmscout::AreaRef> areas;
 
-  osmscout::TagId nameTagId=database.GetTypeConfig()->GetTagId("name");
-
   if (!database.GetObjects(std::min(lonLeft,lonRight),
                            std::min(latTop,latBottom),
                            std::max(lonLeft,lonRight),
@@ -144,21 +142,9 @@ int main(int argc, char* argv[])
   for (std::vector<osmscout::NodeRef>::const_iterator node=nodes.begin();
       node!=nodes.end();
       node++) {
-    std::string name;
-
-    if (nameTagId!=osmscout::tagIgnore)
-    {
-      for (size_t i=0; i<(*node)->GetTagCount(); i++) {
-        if ((*node)->GetTagKey(i)==nameTagId) {
-          name=(*node)->GetTagValue(i);
-          break;
-        }
-      }
-    }
-
     std::cout << "+ Node " << (*node)->GetFileOffset();
     std::cout << " " << database.GetTypeConfig()->GetTypeInfo((*node)->GetType()).GetName();
-    std::cout << " " << name << std::endl;
+    std::cout << " " << (*node)->GetName() << std::endl;
   }
 
   for (std::vector<osmscout::WayRef>::const_iterator way=ways.begin();

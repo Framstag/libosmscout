@@ -33,10 +33,9 @@ namespace osmscout {
     this->type=type;
   }
 
-  void RawNode::SetCoordinates(double lon, double lat)
+  void RawNode::SetCoords(double lon, double lat)
   {
-    this->lon=lon;
-    this->lat=lat;
+    coords.Set(lat,lon);
   }
 
   void RawNode::SetTags(const std::vector<Tag>& tags)
@@ -59,7 +58,7 @@ namespace osmscout {
 
     type=(TypeId)tmpType;
 
-    if (!scanner.ReadCoord(lat,lon)) {
+    if (!scanner.ReadCoord(coords)) {
       return false;
     }
 
@@ -83,14 +82,10 @@ namespace osmscout {
 
   bool RawNode::Write(FileWriter& writer) const
   {
-    uint32_t latValue=(uint32_t)round((lat+90.0)*conversionFactor);
-    uint32_t lonValue=(uint32_t)round((lon+180.0)*conversionFactor);
-
     writer.WriteNumber(id);
 
     writer.WriteNumber(type);
-    writer.Write(latValue);
-    writer.Write(lonValue);
+    writer.WriteCoord(coords);
 
     writer.WriteNumber((uint32_t)tags.size());
     for (size_t i=0; i<tags.size(); i++) {

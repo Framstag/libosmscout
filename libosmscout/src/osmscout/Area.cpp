@@ -33,6 +33,7 @@ namespace osmscout {
     uint32_t nameAltPriority=0;
 
     name.clear();
+    nameAlt.clear();
     houseNr.clear();
 
     flags=0;

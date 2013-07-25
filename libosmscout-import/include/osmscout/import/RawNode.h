@@ -22,6 +22,7 @@
 
 #include <vector>
 
+#include <osmscout/GeoCoord.h>
 #include <osmscout/Tag.h>
 #include <osmscout/TypeConfig.h>
 
@@ -36,13 +37,13 @@ namespace osmscout {
   private:
     OSMId             id;
     TypeId            type;
-    double            lon;
-    double            lat;
+    GeoCoord          coords;
     std::vector<Tag>  tags;
 
   public:
     inline RawNode()
-    : type(typeIgnore)
+    : id(0),
+      type(typeIgnore)
     {
       // no code
     }
@@ -57,14 +58,19 @@ namespace osmscout {
       return type;
     }
 
-    inline double GetLon() const
+    inline const GeoCoord& GetCoords() const
     {
-      return lon;
+      return coords;
     }
 
     inline double GetLat() const
     {
-      return lat;
+      return coords.GetLat();
+    }
+
+    inline double GetLon() const
+    {
+      return coords.GetLon();
     }
 
     inline const std::vector<Tag>& GetTags() const
@@ -79,17 +85,17 @@ namespace osmscout {
 
     inline bool IsSame(const RawNode& other) const
     {
-      return lat==other.lat && lon==other.lon;
+      return coords==other.coords;
     }
 
     inline bool IsEqual(const RawNode& other) const
     {
-      return id==other.id || (lat==other.lat && lon==other.lon);
+      return id==other.id || coords==other.coords;
     }
 
     void SetId(OSMId id);
     void SetType(TypeId type);
-    void SetCoordinates(double lon, double lat);
+    void SetCoords(double lon, double lat);
     void SetTags(const std::vector<Tag>& tags);
 
     bool Read(FileScanner& scanner);

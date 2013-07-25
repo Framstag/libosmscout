@@ -117,9 +117,13 @@ namespace osmscout {
 
       if (rawNode.GetType()!=typeIgnore &&
           !typeConfig.GetTypeInfo(rawNode.GetType()).GetIgnore()) {
+        std::vector<Tag> tags(rawNode.GetTags());
+
         node.SetType(rawNode.GetType());
-        node.SetCoordinates(rawNode.GetLon(),rawNode.GetLat());
-        node.SetTags(rawNode.GetTags());
+        node.SetCoords(rawNode.GetCoords());
+        node.SetTags(progress,
+                     typeConfig,
+                     tags);
 
         FileOffset fileOffset;
 

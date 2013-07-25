@@ -22,27 +22,99 @@
 
 #include <vector>
 
+#include <osmscout/GeoCoord.h>
 #include <osmscout/Tag.h>
 #include <osmscout/TypeConfig.h>
 
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
+#include <osmscout/util/Progress.h>
 #include <osmscout/util/Reference.h>
 
 namespace osmscout {
+
+  class OSMSCOUT_API NodeAttributes
+  {
+  private:
+    // Attribute availability flags (for optimized attribute storage)
+    const static uint8_t hasNameAlt      = 1 << 4; //! We have an alternative name (mainly in a second language)
+    const static uint8_t hasName         = 1 << 5; //! We have a name
+    const static uint8_t hasHouseNr      = 1 << 6; //! We have a house number
+    const static uint8_t hasTags         = 1 << 7; //! We have additional tags
+
+  private:
+    mutable uint8_t  flags;
+
+    std::string      name;     //! name
+    std::string      nameAlt;  //! alternative name
+    std::string      houseNr;  //! house number
+    std::vector<Tag> tags;     //! list of preparsed tags
+
+  private:
+    void GetFlags(uint8_t& flags) const;
+    bool Read(FileScanner& scanner);
+    bool Write(FileWriter& writer) const;
+
+    friend class Node;
+
+  public:
+    inline NodeAttributes()
+    : flags(0)
+    {
+      // no code
+    }
+
+    inline uint8_t GetFlags() const
+    {
+      return flags;
+    }
+
+    inline std::string GetName() const
+    {
+      return name;
+    }
+
+    inline std::string GetNameAlt() const
+    {
+      return nameAlt;
+    }
+
+    inline std::string GetHouseNr() const
+    {
+      return houseNr;
+    }
+
+    inline bool HasTags() const
+    {
+      return !tags.empty();
+    }
+
+    inline const std::vector<Tag>& GetTags() const
+    {
+      return tags;
+    }
+
+    bool SetTags(Progress& progress,
+                 const TypeConfig& typeConfig,
+                 std::vector<Tag>& tags);
+
+    bool operator==(const NodeAttributes& other) const;
+    bool operator!=(const NodeAttributes& other) const;
+  };
 
   class OSMSCOUT_API Node : public Referencable
   {
   private:
     FileOffset        fileOffset;
-    TypeId            type;
-    double            lon;
-    double            lat;
-    std::vector<Tag>  tags;
+
+    TypeId            type;       //! Type of Node
+    GeoCoord          coords;     //! Coordinates of node
+    NodeAttributes    attributes; //! Attributes of the nodes
 
   public:
     inline Node()
-    : type(typeIgnore)
+    : fileOffset(0),
+      type(typeIgnore)
     {
       // no code
     }
@@ -58,39 +130,46 @@ namespace osmscout {
       return type;
     }
 
-    inline double GetLon() const
+    inline const GeoCoord& GetCoords() const
     {
-      return lon;
+      return coords;
     }
 
     inline double GetLat() const
     {
-      return lat;
+      return coords.GetLat();
+    }
+
+    inline double GetLon() const
+    {
+      return coords.GetLon();
+    }
+
+    inline const NodeAttributes& GetAttributes() const
+    {
+      return attributes;
+    }
+
+    inline std::string GetName() const
+    {
+      return attributes.GetName();
+    }
+
+    inline std::string GetHouseNr() const
+    {
+      return attributes.GetHouseNr();
     }
 
     inline bool HasTags() const
     {
-      return !tags.empty();
-    }
-
-    inline size_t GetTagCount() const
-    {
-      return tags.size();
-    }
-
-    inline TagId GetTagKey(size_t idx) const
-    {
-      return tags[idx].key;
-    }
-
-    inline const std::string& GetTagValue(size_t idx) const
-    {
-      return tags[idx].value;
+      return !attributes.GetTags().empty();
     }
 
     void SetType(TypeId type);
-    void SetCoordinates(double lon, double lat);
-    void SetTags(const std::vector<Tag>& tags);
+    void SetCoords(const GeoCoord& coords);
+    bool SetTags(Progress& progress,
+                 const TypeConfig& typeConfig,
+                 std::vector<Tag>& tags);
 
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;

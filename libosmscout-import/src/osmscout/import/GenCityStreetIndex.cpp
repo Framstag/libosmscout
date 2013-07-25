@@ -174,18 +174,7 @@ namespace osmscout {
       }
 
       if (cityIds.find(node.GetType())!=cityIds.end()) {
-        uint32_t    priority;
-        uint32_t    namePriority=0;
-        std::string name;
-
-        for (size_t i=0; i<node.GetTagCount(); i++) {
-          if (typeConfig.IsNameTag(node.GetTagKey(i),priority) &&
-              (name.empty() || priority>namePriority)) {
-            name=node.GetTagValue(i);
-            namePriority=priority;
-            break;
-          }
-        }
+        std::string name=node.GetName();
 
         if (name.empty()) {
           progress.Warning(std::string("Node ")+NumberToString(node.GetFileOffset())+" has no name, skipping");
@@ -815,17 +804,7 @@ namespace osmscout {
       }
 
       if (indexables.find(node.GetType())!=indexables.end()) {
-        uint32_t    priority;
-        uint32_t    namePriority=0;
-        std::string name;
-
-        for (size_t i=0; i<node.GetTagCount(); i++) {
-          if (typeConfig.IsNameTag(node.GetTagKey(i),priority) &&
-              (name.empty() || priority>namePriority)) {
-            name=node.GetTagValue(i);
-            break;
-          }
-        }
+        std::string name=node.GetName();
 
         if (!name.empty()) {
           AddNodeToRegion(rootArea,node,name,offset);

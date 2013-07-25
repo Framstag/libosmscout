@@ -1794,8 +1794,7 @@ namespace osmscout {
   }
 #endif
 
-  bool FileScanner::ReadCoord(double& lat,
-                              double& lon)
+  bool FileScanner::ReadCoord(GeoCoord& coord)
   {
     if (HasError()) {
       return false;
@@ -1864,9 +1863,8 @@ namespace osmscout {
 
       offset+=2*4;
 
-
-      lat=latDat/conversionFactor-90.0;
-      lon=lonDat/conversionFactor-180.0;
+      coord.Set(latDat/conversionFactor-90.0,
+                lonDat/conversionFactor-180.0);
 
       return true;
     }
@@ -1928,8 +1926,8 @@ namespace osmscout {
     lonDat|=add;
     dataPtr++;
 
-    lat=latDat/conversionFactor-90.0;
-    lon=lonDat/conversionFactor-180.0;
+    coord.Set(latDat/conversionFactor-90.0,
+              lonDat/conversionFactor-180.0);
 
     return true;
   }

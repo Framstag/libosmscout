@@ -95,6 +95,11 @@ namespace osmscout {
       return (flags & hasAccess)!=0;
     }
 
+    inline bool HasTags() const
+    {
+      return !tags.empty();
+    }
+
     inline const std::vector<Tag>& GetTags() const
     {
       return tags;

@@ -25,6 +25,7 @@
 
 #include <osmscout/CoreFeatures.h>
 
+#include <osmscout/GeoCoord.h>
 #include <osmscout/Types.h>
 
 #if defined(__WIN32__) || defined(WIN32)
@@ -136,8 +137,7 @@ namespace osmscout {
     bool ReadNumber(uint64_t& number);
 #endif
 
-    bool ReadCoord(double& lat,
-                   double& lon);
+    bool ReadCoord(GeoCoord& coord);
   };
 }
 

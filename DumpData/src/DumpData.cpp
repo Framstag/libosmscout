@@ -56,6 +56,8 @@ struct Job
   }
 };
 
+static const size_t IDENT=2;
+
 static bool ParseArguments(int argc,
                            char* argv[],
                            std::string& map,
@@ -237,6 +239,53 @@ static void DumpCoord(const osmscout::Point& coord)
   std::cout << "}" << std::endl;
 }
 
+static void DumpTags(const osmscout::TypeConfig* typeConfig,
+                     const std::vector<osmscout::Tag>& tags,
+                     size_t indent)
+{
+   DumpIndent(indent);
+   std::cout << "tags {" << std::endl;
+   for (size_t t=0; t<tags.size(); t++) {
+     DumpIndent(indent+2);
+     std::cout << typeConfig->GetTagInfo(tags[t].key).GetName() << ": " <<tags[t].value << std::endl;
+   }
+   DumpIndent(indent);
+   std::cout << "}" << std::endl;
+}
+
+static void DumpNodeAttributes(const osmscout::TypeId& type,
+                               const osmscout::NodeAttributes& attributes,
+                               const osmscout::TypeConfig* typeConfig,
+                               size_t indent)
+{
+  if (type!=osmscout::typeIgnore) {
+    std::cout << "  type: " << typeConfig->GetTypeInfo(type).GetName() << std::endl;
+  }
+
+  if (!attributes.GetName().empty()) {
+    DumpIndent(indent);
+    std::cout << "name: " << attributes.GetName() << std::endl;
+  }
+
+  if (!attributes.GetNameAlt().empty()) {
+    DumpIndent(indent);
+    std::cout << "nameAlt: " << attributes.GetNameAlt() << std::endl;
+  }
+
+  if (!attributes.GetHouseNr().empty()) {
+    DumpIndent(indent);
+    std::cout << "houseNr: " << attributes.GetHouseNr() << std::endl;
+  }
+
+  if (attributes.HasTags()) {
+    std::cout << std::endl;
+
+    DumpTags(typeConfig,
+             attributes.GetTags(),
+             indent);
+  }
+}
+
 static void DumpNode(const osmscout::TypeConfig* typeConfig,
                      const osmscout::NodeRef node,
                      osmscout::Id id)
@@ -245,20 +294,14 @@ static void DumpNode(const osmscout::TypeConfig* typeConfig,
   std::cout << "  id: " << id << std::endl;
   std::cout << "  fileOffset: " << node->GetFileOffset() << std::endl;
 
-  if (node->GetType()!=osmscout::typeIgnore) {
-    std::cout << "  type: " << typeConfig->GetTypeInfo(node->GetType()).GetName() << std::endl;
-  }
+  DumpNodeAttributes(node->GetType(),
+                     node->GetAttributes(),
+                     typeConfig,
+                     IDENT);
 
+  std::cout << std::endl;
   std::cout << "  lat: " << node->GetLat() << std::endl;
   std::cout << "  lon: " << node->GetLon() << std::endl;
-
-  if (node->HasTags()) {
-    std::cout << std::endl;
-
-    for (size_t t=0; t<node->GetTagCount(); t++) {
-      std::cout << "  " << typeConfig->GetTagInfo(node->GetTagKey(t)).GetName() << ": " << node->GetTagValue(t) << std::endl;
-    }
-  }
 
   std::cout << "}" << std::endl;
 }
@@ -283,14 +326,22 @@ static void DumpAreaSegmentAttributes(const osmscout::TypeId& type,
     std::cout << "nameAlt: " << attributes.GetNameAlt() << std::endl;
   }
 
+    if (!attributes.GetHouseNr().empty()) {
+    DumpIndent(indent);
+    std::cout << "houseNr: " << attributes.GetHouseNr() << std::endl;
+  }
+
   if (!attributes.HasAccess()) {
     DumpIndent(indent);
     std::cout << "access: false" << std::endl;
   }
 
-  if (!attributes.GetHouseNr().empty()) {
-    DumpIndent(indent);
-    std::cout << "houseNr: " << attributes.GetHouseNr() << std::endl;
+  if (attributes.HasTags()) {
+    std::cout << std::endl;
+
+    DumpTags(typeConfig,
+             attributes.GetTags(),
+             indent);
   }
 }
 
@@ -360,6 +411,14 @@ static void DumpWayAttributes(const osmscout::WayAttributes& attributes,
 
   DumpIndent(indent);
   std::cout << "grade: " << (size_t)attributes.GetGrade() << std::endl;
+
+  if (attributes.HasTags()) {
+    std::cout << std::endl;
+
+    DumpTags(typeConfig,
+             attributes.GetTags(),
+             indent);
+  }
 }
 
 static void DumpWay(const osmscout::TypeConfig* typeConfig,
@@ -374,14 +433,6 @@ static void DumpWay(const osmscout::TypeConfig* typeConfig,
   DumpWayAttributes(way->GetAttributes(),
                     typeConfig,
                     2);
-
-  if (way->HasTags()) {
-    std::cout << std::endl;
-
-    for (size_t t=0; t<way->GetTagCount(); t++) {
-      std::cout << "  " << typeConfig->GetTagInfo(way->GetTagKey(t)).GetName() << ": " << way->GetTagValue(t) << std::endl;
-    }
-  }
 
   if (!way->nodes.empty()) {
     std::cout << std::endl;
