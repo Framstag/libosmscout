@@ -528,9 +528,9 @@ namespace osmscout {
       landFill=this->landFill;
     }
 
-    DrawArea(*landFill,
-             parameter,
-             0,0,projection.GetWidth(),projection.GetHeight());
+    DrawGround(projection,
+               parameter,
+               *landFill);
 
     if (!parameter.GetRenderSeaLand()) {
       return;

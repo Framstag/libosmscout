@@ -176,8 +176,8 @@ void OnDisplay()
   glClear(GL_COLOR_BUFFER_BIT);
   glLoadIdentity();
 
-  glTranslated(-width/2.0,-height/2.0,-9.0);
-  glRotatef(-15.0f,1.0f,0.0f,0.0f);
+  //glTranslated(-width/2.0,-height/2.0,-9.0);
+  //glRotatef(-15.0f,1.0f,0.0f,0.0f);
 
   if (!painter.DrawMap(*database.GetStyleConfig(),
                        projection,
@@ -197,12 +197,13 @@ void OnResize(int width, int height)
   if (height==0)        // Prevent A Divide By Zero If The Window Is Too Small
     height=1;
 
-  glViewport(0, 0, width, height);    // Reset The Current Viewport And Perspective Transformation
-
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
 
-  gluPerspective(150.0f,(GLfloat)width/(GLfloat)height,0.0f,10.0f);
+  glViewport(0, 0, width, height);    // Reset The Current Viewport And Perspective Transformation
+  glOrtho(0.0,width,0.0,height,0.0f,10.0f);
+
+  //gluPerspective(150.0f,(GLfloat)width/(GLfloat)height,0.0f,10.0f);
   glMatrixMode(GL_MODELVIEW);
 
   ::width=width;
@@ -250,16 +251,11 @@ int main(int argc, char* argv[])
   drawParameter.SetRenderSeaLand(true);
   drawParameter.SetDebugPerformance(true);
 
-  /* Select type of Display mode:
-     Double buffer
-     RGBA color
-     Alpha components supported
-     Depth buffer */
   glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_ALPHA);
 
-  window=glutCreateWindow("DrawMapOpenGL"); // Create a window with the given title
   glutInitWindowSize(width, height);      // Set the window's initial width & height
   glutInitWindowPosition(50, 50);    // Position the window's initial top-left corner
+  window=glutCreateWindow("DrawMapOpenGL"); // Create a window with the given title
 
   glutDisplayFunc(OnDisplay);          // Register display callback handler for window re-paint
   glutKeyboardFunc(OnKeyPressed);      // Keyboard handling

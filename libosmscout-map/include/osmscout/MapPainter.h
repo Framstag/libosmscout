@@ -580,16 +580,6 @@ namespace osmscout {
                          IconStyle& style)= 0;
 
     /**
-      Draw the given text as a contour of the given path in a style defined
-      by the given LabelStyle.
-     */
-    virtual void DrawContourSymbol(const Projection& projection,
-                                   const MapParameter& parameter,
-                                   const Symbol& symbol,
-                                   double space,
-                                   size_t transStart, size_t transEnd) = 0;
-
-    /**
       Return the bounding box of the given text.
 
       The backend may decide to relayout the given text, however it must assure
@@ -620,22 +610,21 @@ namespace osmscout {
                                double& vertical);
 
     /**
+      (Optionally) fills the area with the given default color
+      for ground. In 2D backends this just fills the given area,
+      3D backends might draw a sphere or an infinite plane.
+     */
+    virtual void DrawGround(const Projection& projection,
+                            const MapParameter& parameter,
+                            const FillStyle& style) = 0;
+
+    /**
       Draw the given text at the given pixel coordinate in a style defined
       by the given LabelStyle.
      */
     virtual void DrawLabel(const Projection& projection,
                            const MapParameter& parameter,
                            const LabelData& label) = 0;
-
-    /**
-      Draw the given text as a contour of the given path in a style defined
-      by the given LabelStyle.
-     */
-    virtual void DrawContourLabel(const Projection& projection,
-                                  const MapParameter& parameter,
-                                  const PathTextStyle& style,
-                                  const std::string& text,
-                                  size_t transStart, size_t transEnd) = 0;
 
     /**
       Draw the Icon as defined by the IconStyle at the given pixel coordinate.
@@ -665,26 +654,32 @@ namespace osmscout {
                           size_t transStart, size_t transEnd) = 0;
 
     /**
+      Draw the given text as a contour of the given path in a style defined
+      by the given LabelStyle.
+     */
+    virtual void DrawContourLabel(const Projection& projection,
+                                  const MapParameter& parameter,
+                                  const PathTextStyle& style,
+                                  const std::string& text,
+                                  size_t transStart, size_t transEnd) = 0;
+
+    /**
+      Draw the given text as a contour of the given path in a style defined
+      by the given LabelStyle.
+     */
+    virtual void DrawContourSymbol(const Projection& projection,
+                                   const MapParameter& parameter,
+                                   const Symbol& symbol,
+                                   double space,
+                                   size_t transStart, size_t transEnd) = 0;
+
+    /**
       Draw the given area using the given FillStyle
       for the area outline.
      */
     virtual void DrawArea(const Projection& projection,
                           const MapParameter& parameter,
                           const AreaData& area) = 0;
-
-    /**
-      Draw the given area in using the given fill. This is currently done to
-      complete fill the map area with ground color,
-      later on, if we support water/earth detection it would be used for drawing
-      water and ground tiles.
-     */
-    virtual void DrawArea(const FillStyle& style,
-                          const MapParameter& parameter,
-                          double x,
-                          double y,
-                          double width,
-                          double height) = 0;
-
     //@}
 
     /**

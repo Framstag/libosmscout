@@ -685,19 +685,16 @@ namespace osmscout {
              path);
   }
 
-  void MapPainterAgg::DrawArea(const FillStyle& style,
-                              const MapParameter& parameter,
-                              double x,
-                              double y,
-                              double width,
-                              double height)
+  void MapPainterAgg::DrawGround(const Projection& projection,
+                                 const MapParameter& parameter,
+                                 const FillStyle& style)
   {
     agg::path_storage path;
 
-    path.move_to(x,y);
-    path.line_to(x+width,y);
-    path.line_to(x+width,y+height);
-    path.line_to(x, y+height);
+    path.move_to(0,0);
+    path.line_to(projection.GetWidth(),0);
+    path.line_to(projection.GetWidth(),projection.GetHeight());
+    path.line_to(0, projection.GetHeight());
     path.close_polygon();
 
     renderer_aa->color(agg::rgba(style.GetFillColor().GetR(),
@@ -711,10 +708,10 @@ namespace osmscout {
   }
 
   bool MapPainterAgg::DrawMap(const StyleConfig& styleConfig,
-                             const Projection& projection,
-                             const MapParameter& parameter,
-                             const MapData& data,
-                             AggPixelFormat* pf)
+                              const Projection& projection,
+                              const MapParameter& parameter,
+                              const MapData& data,
+                              AggPixelFormat* pf)
   {
     this->pf=pf;
 

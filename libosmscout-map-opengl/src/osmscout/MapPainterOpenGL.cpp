@@ -183,12 +183,9 @@ namespace osmscout {
     }
   }
 
-  void MapPainterOpenGL::DrawArea(const FillStyle& style,
-                                  const MapParameter& parameter,
-                                  double x,
-                                  double y,
-                                  double width,
-                                  double height)
+  void MapPainterOpenGL::DrawGround(const Projection& projection,
+                                    const MapParameter& parameter,
+                                    const FillStyle& style)
   {
     glColor4d(style.GetFillColor().GetR(),
               style.GetFillColor().GetG(),
@@ -196,10 +193,10 @@ namespace osmscout {
               style.GetFillColor().GetA());
 
     glBegin(GL_QUADS);
-    glVertex3d(x, y+height, 0.0);       // Top Left
-    glVertex3d(x+width, y+height, 0.0); // Top Right
-    glVertex3d(x+width,y, 0.0);         // Bottom Right
-    glVertex3d(x,y, 0.0);               // Bottom Left
+    glVertex3d(0,projection.GetHeight(),0.0);                     // Top Left
+    glVertex3d(projection.GetWidth(),projection.GetHeight(),0.0); // Top Right
+    glVertex3d(projection.GetWidth(),0.0,0.0);                    // Bottom Right
+    glVertex3d(0,0,0.0);                                          // Bottom Left
     glEnd();
   }
 
@@ -216,4 +213,3 @@ namespace osmscout {
     return true;
   }
 }
-

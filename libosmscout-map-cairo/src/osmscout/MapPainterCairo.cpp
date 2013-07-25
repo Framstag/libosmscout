@@ -1226,12 +1226,9 @@ namespace osmscout {
     cairo_restore(draw);
   }
 
-  void MapPainterCairo::DrawArea(const FillStyle& style,
-                                 const MapParameter& parameter,
-                                 double x,
-                                 double y,
-                                 double width,
-                                 double height)
+  void MapPainterCairo::DrawGround(const Projection& projection,
+                                   const MapParameter& parameter,
+                                   const FillStyle& style)
   {
     cairo_set_source_rgba(draw,
                           style.GetFillColor().GetR(),
@@ -1239,7 +1236,11 @@ namespace osmscout {
                           style.GetFillColor().GetB(),
                           1);
 
-    cairo_rectangle(draw,x,y,width,height);
+    cairo_rectangle(draw,
+                    0,
+                    0,
+                    projection.GetWidth(),
+                    projection.GetHeight());
     cairo_fill(draw);
   }
 

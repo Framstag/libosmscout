@@ -65,21 +65,13 @@ namespace osmscout {
                           double& width,
                           double& height);
 
+    void DrawGround(const Projection& projection,
+                    const MapParameter& parameter,
+                    const FillStyle& style);
+
     void DrawLabel(const Projection& projection,
                    const MapParameter& parameter,
                    const LabelData& label);
-
-    void DrawContourLabel(const Projection& projection,
-                          const MapParameter& parameter,
-                          const PathTextStyle& style,
-                          const std::string& text,
-                          size_t transStart, size_t transEnd);
-
-    void DrawContourSymbol(const Projection& projection,
-                           const MapParameter& parameter,
-                           const Symbol& symbol,
-                           double space,
-                           size_t transStart, size_t transEnd);
 
     void DrawIcon(const IconStyle* style,
                   double x, double y);
@@ -98,16 +90,21 @@ namespace osmscout {
                   LineStyle::CapStyle endCap,
                   size_t transStart, size_t transEnd);
 
+    void DrawContourLabel(const Projection& projection,
+                          const MapParameter& parameter,
+                          const PathTextStyle& style,
+                          const std::string& text,
+                          size_t transStart, size_t transEnd);
+
+    void DrawContourSymbol(const Projection& projection,
+                           const MapParameter& parameter,
+                           const Symbol& symbol,
+                           double space,
+                           size_t transStart, size_t transEnd);
+
     void DrawArea(const Projection& projection,
                   const MapParameter& parameter,
                   const AreaData& area);
-
-    void DrawArea(const FillStyle& style,
-                  const MapParameter& parameter,
-                  double x,
-                  double y,
-                  double width,
-                  double height);
 
   public:
     MapPainterQt();

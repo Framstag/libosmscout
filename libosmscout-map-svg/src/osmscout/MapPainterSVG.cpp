@@ -549,14 +549,11 @@ namespace osmscout {
     stream << "\" />" << std::endl;
   }
 
-  void MapPainterSVG::DrawArea(const FillStyle& style,
-                               const MapParameter& parameter,
-                               double x,
-                               double y,
-                               double width,
-                               double height)
+  void MapPainterSVG::DrawGround(const Projection& projection,
+                                 const MapParameter& parameter,
+                                 const FillStyle& style)
   {
-    stream << "    <rect x=\"" << x << "\" y=\"" << y << "\" width=\"" << width << "\" height=\"" << height << "\"" << std::endl;
+    stream << "    <rect x=\"" << 0 << "\" y=\"" << 0 << "\" width=\"" << projection.GetWidth() << "\" height=\"" << projection.GetHeight() << "\"" << std::endl;
     stream << "          fill=\"" << GetColorValue(style.GetFillColor()) << "\"" << "/>" << std::endl;
   }
 

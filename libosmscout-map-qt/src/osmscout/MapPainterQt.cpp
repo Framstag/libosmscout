@@ -595,14 +595,11 @@ namespace osmscout {
     painter->drawPath(path);
   }
 
-  void MapPainterQt::DrawArea(const FillStyle& style,
-                              const MapParameter& parameter,
-                              double x,
-                              double y,
-                              double width,
-                              double height)
+  void MapPainterQt::DrawGround(const Projection& projection,
+                                const MapParameter& parameter,
+                                const FillStyle& style)
   {
-    painter->fillRect(QRectF(x,y,width,height),
+    painter->fillRect(QRectF(0,0,projection.GetWidth(),projection.GetHeight()),
                       QBrush(QColor::fromRgbF(style.GetFillColor().GetR(),
                                               style.GetFillColor().GetG(),
                                               style.GetFillColor().GetB(),
