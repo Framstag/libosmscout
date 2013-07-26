@@ -72,7 +72,9 @@ TYPES
   TYPE aeroway_apron = AREA ("aeroway"=="apron")
   TYPE aeroway_gate = NODE ("aeroway"=="gate")
 
-  TYPE public_transport_platform = WAY AREA ("public_transport"=="platform" OR "railway"=="platform"OR "highway"=="platform")
+  TYPE public_transport_platform = WAY AREA ("public_transport"=="platform" OR
+                                             "railway"=="platform" OR
+                                             "highway"=="platform")
 
   TYPE landuse_allotments = NODE AREA ("landuse"=="allotments")
   TYPE landuse_basin = NODE AREA ("landuse"=="basin")
@@ -336,6 +338,9 @@ TYPES
   TYPE barrier_kent_carriage_gate = NODE ("barrier"=="kent_carriage_gate")
 
   // Types we currently ignore
+
+  // This does increase the size of nodes data too much 
+  TYPE building_entrance = NODE ("building"=="entrance" OR EXISTS "entrance") OPTIONS IGNORE  
 
   TYPE street_any = RELATION ("type"=="street") OPTIONS IGNORE
   TYPE tunnel_any = RELATION ("type"=="tunnel") OPTIONS IGNORE
