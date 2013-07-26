@@ -43,7 +43,7 @@ namespace osmscout {
       // no code
     }
 
-    inline void Set(double lat,
+     inline void Set(double lat,
                     double lon)
     {
       this->lat=lat;
@@ -74,6 +74,12 @@ namespace osmscout {
     {
       return lat<other.lat ||
       (lat==other.lat && lon<other.lon);
+    }
+
+    inline void operator=(const GeoCoord& other)
+    {
+      this->lat=other.lat;
+      this->lon=other.lon;
     }
   };
 }

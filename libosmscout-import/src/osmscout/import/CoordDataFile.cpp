@@ -27,11 +27,11 @@ namespace osmscout {
 
   CoordDataFile::CoordDataFile(const std::string& datafile)
   : isOpen(false),
-    datafile(datafile)
+    datafile(datafile),
+    coordPageSize(0)
   {
     // no code
   }
-
 
   CoordDataFile::~CoordDataFile()
   {
@@ -39,7 +39,6 @@ namespace osmscout {
       Close();
     }
   }
-
 
   bool CoordDataFile::Open(const std::string& path,
                            bool memoryMapedData)
@@ -157,7 +156,10 @@ namespace osmscout {
           return false;
         }
 
-        coordsMap.insert(std::make_pair(*id,Point(substituteId,latDat/conversionFactor-90.0,lonDat/conversionFactor-180.0)));
+        coordsMap.insert(std::make_pair(*id,
+                                        CoordEntry(substituteId,
+                                                   latDat/conversionFactor-90.0,
+                                                   lonDat/conversionFactor-180.0)));
       }
     }
 

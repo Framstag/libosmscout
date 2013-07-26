@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <osmscout/GeoCoord.h>
 #include <osmscout/Types.h>
 
 namespace osmscout {
@@ -27,40 +28,43 @@ namespace osmscout {
   class OSMSCOUT_API Point
   {
   private:
-    Id     id;
-    double lat;
-    double lon;
+    Id       id;
+    GeoCoord coords;
 
   public:
     inline Point()
+    : id(0)
     {
       // no code
     }
 
     inline Point(Id id,
+                 const GeoCoord& coords)
+     : id(id),
+       coords(coords)
+     {
+       // no code
+     }
+
+    inline Point(Id id,
                  double lat,
                  double lon)
     : id(id),
-      lat(lat),
-      lon(lon)
+      coords(lat,lon)
     {
       // no code
     }
 
     inline void Set(Id id,
-                    double lat,
-                    double lon)
+                    const GeoCoord& coords)
     {
       this->id=id;
-      this->lat=lat;
-      this->lon=lon;
+      this->coords=coords;
     }
 
-    inline void Set(double lat,
-                    double lon)
+    inline void Set(const GeoCoord& coords)
     {
-      this->lat=lat;
-      this->lon=lon;
+      this->coords=coords;
     }
 
     inline Id GetId() const
@@ -68,14 +72,19 @@ namespace osmscout {
       return id;
     }
 
+    inline const GeoCoord& GetCoords() const
+    {
+      return coords;
+    }
+
     inline double GetLat() const
     {
-      return lat;
+      return coords.GetLat();
     }
 
     inline double GetLon() const
     {
-      return lon;
+      return coords.GetLon();
     }
 
     inline bool IsIdentical(const Point& other) const
@@ -85,12 +94,12 @@ namespace osmscout {
 
     inline bool IsSame(const Point& other) const
     {
-      return lat==other.lat && lon==other.lon;
+      return coords==other.coords;
     }
 
     inline bool IsEqual(const Point& other) const
     {
-      return id==other.id || (lat==other.lat && lon==other.lon);
+      return id==other.id || (coords==other.coords);
     }
   };
 }

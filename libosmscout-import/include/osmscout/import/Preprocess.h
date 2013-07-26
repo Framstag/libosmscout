@@ -65,7 +65,10 @@ namespace osmscout {
 
   private:
     bool StoreCurrentPage();
-    bool StoreCoord(OSMId id, double lat, double lon);
+    bool StoreCoord(OSMId id,
+                    double lat,
+                    double lon,
+                    FileOffset nodeOffset);
 
   public:
     std::string GetDescription() const;

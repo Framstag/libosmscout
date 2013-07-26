@@ -38,7 +38,20 @@ namespace osmscout {
     typedef OSMSCOUT_HASHMAP<PageId,FileOffset> CoordPageOffsetMap;
 
   public:
-    typedef OSMSCOUT_HASHMAP<OSMId,Point> CoordResultMap;
+    struct CoordEntry
+    {
+      Point point;
+
+      CoordEntry(Id id,
+                 double lat,
+                 double lon)
+      : point(id,lat,lon)
+      {
+        // no code
+      }
+    };
+
+    typedef OSMSCOUT_HASHMAP<OSMId,CoordEntry> CoordResultMap;
 
   private:
     bool                isOpen;             //! If true,the data file is opened

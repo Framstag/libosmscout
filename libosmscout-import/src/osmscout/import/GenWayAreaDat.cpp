@@ -245,10 +245,9 @@ namespace osmscout {
         break;
       }
 
-      ring.ids[n]=coord->second.GetId();
+      ring.ids[n]=coord->second.point.GetId();
 
-      ring.nodes[n].Set(coord->second.GetLat(),
-                        coord->second.GetLon());
+      ring.nodes[n]=coord->second.point.GetCoords();
     }
 
     if (!success) {

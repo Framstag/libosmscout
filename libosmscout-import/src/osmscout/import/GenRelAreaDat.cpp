@@ -477,8 +477,8 @@ namespace osmscout {
             return false;
           }
 
-          part.role.ids.push_back(coordEntry->second.GetId());
-          part.role.nodes.push_back(GeoCoord(coordEntry->second.GetLat(),coordEntry->second.GetLon()));
+          part.role.ids.push_back(coordEntry->second.point.GetId());
+          part.role.nodes.push_back(coordEntry->second.point.GetCoords());
         }
 
         part.ways.push_back(way);
@@ -585,8 +585,8 @@ namespace osmscout {
             return false;
           }
 
-          part.role.ids.push_back(coordEntry->second.GetId());
-          part.role.nodes.push_back(GeoCoord(coordEntry->second.GetLat(),coordEntry->second.GetLon()));
+          part.role.ids.push_back(coordEntry->second.point.GetId());
+          part.role.nodes.push_back(coordEntry->second.point.GetCoords());
         }
 
         part.ways.push_back(way);

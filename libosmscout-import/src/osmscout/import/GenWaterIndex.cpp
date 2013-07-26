@@ -228,14 +228,14 @@ namespace osmscout {
         }
 
         if (n==0) {
-          coast->frontNodeId=coord->second.GetId();
+          coast->frontNodeId=coord->second.point.GetId();
         }
 
         if (n==coastline->GetNodeCount()-1) {
-          coast->backNodeId=coord->second.GetId();
+          coast->backNodeId=coord->second.point.GetId();
         }
 
-        coast->coast[n].Set(coord->second.GetLat(),coord->second.GetLon());
+        coast->coast[n]=coord->second.point.GetCoords();
       }
 
       if (!processingError) {

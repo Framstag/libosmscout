@@ -70,7 +70,10 @@ namespace osmscout {
     return !coordWriter.HasError();
   }
 
-  bool Preprocess::StoreCoord(OSMId id, double lat, double lon)
+  bool Preprocess::StoreCoord(OSMId id,
+                              double lat,
+                              double lon,
+                              FileOffset nodeOffset)
   {
     PageId relatedId=id-std::numeric_limits<Id>::min();
     PageId pageId=relatedId/coordPageSize;
@@ -222,19 +225,20 @@ namespace osmscout {
                                const double& lat,
                                const std::map<TagId,std::string>& tagMap)
   {
-    RawNode node;
-    TypeId  type=typeIgnore;
+    RawNode    node;
+    TypeId     type=typeIgnore;
+    FileOffset nodeOffset;
 
     if (id<lastNodeId) {
       nodeSortingError=true;
     }
 
-    StoreCoord(id,lat,lon);
-
     typeConfig.GetNodeTypeId(tagMap,type);
 
     if (type!=typeIgnore) {
       typeConfig.ResolveTags(tagMap,tags);
+
+      nodeWriter.GetPos(nodeOffset);
 
       node.SetId(id);
       node.SetType(type);
@@ -245,6 +249,14 @@ namespace osmscout {
 
       nodeCount++;
     }
+    else {
+      nodeOffset=0;
+    }
+
+    StoreCoord(id,
+               lat,
+               lon,
+               nodeOffset);
 
     lastNodeId=id;
   }
