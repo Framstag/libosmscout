@@ -36,11 +36,13 @@ namespace osmscout {
     uint32_t nameAltPriority=0;
     bool     hasGrade=false;
 
-    name.clear();
-    ref.clear();
-    houseNr.clear();
 
     flags=0;
+    //access=0;
+    name.clear();
+    nameAlt.clear();
+    ref.clear();
+    houseNr.clear();
     layer=0;
     width=0;
     maxSpeed=0;
@@ -163,49 +165,11 @@ namespace osmscout {
       }
       else if (tag->key==typeConfig.tagSurface) {
         if (!hasGrade) {
-          if (tag->value=="paved" ||
-              tag->value=="asphalt" ||
-              tag->value=="cobblestone" ||
-              tag->value=="cobblestone:flattened" ||
-              tag->value=="concrete" ||
-              tag->value=="concrete:lanes" ||
-              tag->value=="concrete:plates" ||
-              tag->value=="paving_stones" ||
-              tag->value=="paving_stones:20" ||
-              tag->value=="paving_stones:30" ||
-              tag->value=="sett" ||
-              tag->value=="tarred" ||
-              tag->value=="tartan") {
-            grade=1;
-          }
-          else if (tag->value=="ash" ||
-                   tag->value=="clay" ||
-                   tag->value=="compacted" ||
-                   tag->value=="compacted_gravel" ||
-                   tag->value=="fine_gravel" ||
-                   tag->value=="gravel" ||
-                   tag->value=="gravel;grass" ||
-                   tag->value=="grass_paver" ||
-                   tag->value=="metal" ||
-                   tag->value=="pebblestone" ||
-                   tag->value=="stone" ||
-                   tag->value=="wood") {
-            grade=2;
-          }
-          else if (tag->value=="unpaved" ||
-                   tag->value=="dirt" ||
-                   tag->value=="earth" ||
-                   tag->value=="grass" ||
-                   tag->value=="grass;earth" ||
-                   tag->value=="ground" ||
-                   tag->value=="mud" ||
-                   tag->value=="sand" ||
-                   tag->value=="soil") {
-            grade=3;
-          }
-          else if (tag->value=="artificial_turf" ||
-                   tag->value=="bark_mulch") {
-            grade=4;
+          size_t grade;
+
+          if (typeConfig.GetGradeForSurface(tag->value,
+                                            grade)) {
+            this->grade=(uint8_t)grade;
           }
           else {
             progress.Warning(std::string("Unknown surface type '")+tag->value+"' for "+NumberToString(id)+"!");
@@ -349,6 +313,8 @@ namespace osmscout {
 
     this->flags=flags;
 
+    //scanner.Read(access);
+
     if (flags & hasName) {
       scanner.Read(name);
     }
@@ -479,6 +445,8 @@ namespace osmscout {
     }
 
     writer.Write(flags);
+
+    //writer.Write(access);
 
     if (flags & hasName) {
       writer.Write(name);

@@ -57,6 +57,7 @@ namespace osmscout {
 
   private:
     mutable uint16_t flags;
+    //uint8_t          access;   //! Information regarding which vehicle can access this way
     std::string      nameAlt;  //! alternative name
     std::string      ref;      //! reference name (normally drawn in a plate)
     std::string      houseNr;  //! house number
@@ -70,6 +71,7 @@ namespace osmscout {
     inline WayAttributes()
     : type(typeIgnore),
       flags(0),
+      //access(0),
       layer(0),
       width(0),
       maxSpeed(0),

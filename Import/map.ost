@@ -1,5 +1,54 @@
 OST
 
+GRADES
+  SURFACE GRADE 1 {
+    "paved"
+    "asphalt"
+    "cobblestone"
+    "cobblestone:flattened"
+    "concrete"
+    "concrete:lanes"
+    "concrete:plates"
+    "paving_stones"
+    "paving_stones:20"
+    "paving_stones:30"
+    "sett"
+    "tarred"
+    "tartan"
+  }
+
+  SURFACE GRADE 2 {
+    "ash"
+    "clay"
+    "compacted"
+    "compacted_gravel"
+    "fine_gravel"
+    "gravel"
+    "gravel;grass"
+    "grass_paver"
+    "metal"
+    "pebblestone"
+    "stone"
+    "wood"
+  }
+
+  SURFACE GRADE 3 {
+    "unpaved"
+    "dirt"
+    "earth"
+    "grass"
+    "grass;earth"
+    "ground"
+    "mud"
+    "sand"
+    "soil"
+  }
+
+  SURFACE GRADE 4 {
+    "artificial_turf"
+    "bark_mulch"
+  }
+
 TYPES
   TYPE highway_motorway = WAY ("highway"=="motorway") OPTIONS ROUTE INDEX OPTIMIZE_LOW_ZOOM
   TYPE highway_motorway_link = WAY ("highway"=="motorway_link") OPTIONS ROUTE INDEX OPTIMIZE_LOW_ZOOM

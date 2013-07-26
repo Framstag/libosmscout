@@ -23,6 +23,8 @@
 
 #include <osmscout/TypeConfig.h>
 
+#include <osmscout/util/String.h>
+
 #include <osmscout/ost/Scanner.h>
 
 namespace osmscout {
@@ -115,8 +117,12 @@ std::string Destring(const char* str)
   void SemErr(const char* msg);
 
 	void OST();
+	void GRADES();
 	void TYPES();
 	void TAGS();
+	void GRADE();
+	void UINT(size_t& value);
+	void STRING(std::string& value);
 	void TYPE();
 	void IDENT(std::string& value);
 	void TYPEKINDS(unsigned char& types);

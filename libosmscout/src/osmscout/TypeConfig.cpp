@@ -805,4 +805,27 @@ namespace osmscout {
       }
     }
   }
+
+  void TypeConfig::RegisterSurfaceToGradeMapping(const std::string& surface,
+                                                 size_t grade)
+  {
+    surfaceToGradeMap.insert(std::make_pair(surface,
+                                            grade));
+  }
+
+  bool TypeConfig::GetGradeForSurface(const std::string& surface,
+                                      size_t& grade) const
+  {
+    OSMSCOUT_HASHMAP<std::string,size_t>::const_iterator entry=surfaceToGradeMap.find(surface);
+
+    if (entry!=surfaceToGradeMap.end()) {
+      grade=entry->second;
+
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
 }

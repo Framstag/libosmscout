@@ -149,44 +149,49 @@ Scanner::~Scanner() {
 void Scanner::Init() {
   EOL    = '\n';
   eofSym = 0;
-	maxT = 36;
-	noSym = 36;
+	maxT = 41;
+	noSym = 41;
 	int i;
 	for (i = 65; i <= 90; ++i) start.set(i, 1);
 	for (i = 97; i <= 122; ++i) start.set(i, 1);
 	for (i = 48; i <= 57; ++i) start.set(i, 2);
 	start.set(34, 3);
-	start.set(61, 14);
-	start.set(40, 7);
-	start.set(41, 8);
-	start.set(33, 15);
-	start.set(91, 11);
-	start.set(44, 12);
-	start.set(93, 13);
+	start.set(123, 7);
+	start.set(125, 8);
+	start.set(61, 16);
+	start.set(40, 9);
+	start.set(41, 10);
+	start.set(33, 17);
+	start.set(91, 13);
+	start.set(44, 14);
+	start.set(93, 15);
 		start.set(Buffer::EoF, -1);
 	keywords.set("OST", 4);
 	keywords.set("END", 5);
-	keywords.set("TYPES", 6);
-	keywords.set("TYPE", 7);
-	keywords.set("OR", 11);
-	keywords.set("OPTIONS", 12);
-	keywords.set("TAGS", 13);
-	keywords.set("TAG", 14);
-	keywords.set("AND", 15);
-	keywords.set("IN", 19);
-	keywords.set("EXISTS", 23);
-	keywords.set("NODE", 24);
-	keywords.set("WAY", 25);
-	keywords.set("AREA", 26);
-	keywords.set("RELATION", 27);
-	keywords.set("ROUTE", 28);
-	keywords.set("INDEX", 29);
-	keywords.set("CONSUME_CHILDREN", 30);
-	keywords.set("OPTIMIZE_LOW_ZOOM", 31);
-	keywords.set("IGNORE", 32);
-	keywords.set("MULTIPOLYGON", 33);
-	keywords.set("PIN_WAY", 34);
-	keywords.set("IGNORESEALAND", 35);
+	keywords.set("GRADES", 6);
+	keywords.set("SURFACE", 7);
+	keywords.set("GRADE", 8);
+	keywords.set("TYPES", 11);
+	keywords.set("TYPE", 12);
+	keywords.set("OR", 16);
+	keywords.set("OPTIONS", 17);
+	keywords.set("TAGS", 18);
+	keywords.set("TAG", 19);
+	keywords.set("AND", 20);
+	keywords.set("IN", 24);
+	keywords.set("EXISTS", 28);
+	keywords.set("NODE", 29);
+	keywords.set("WAY", 30);
+	keywords.set("AREA", 31);
+	keywords.set("RELATION", 32);
+	keywords.set("ROUTE", 33);
+	keywords.set("INDEX", 34);
+	keywords.set("CONSUME_CHILDREN", 35);
+	keywords.set("OPTIMIZE_LOW_ZOOM", 36);
+	keywords.set("IGNORE", 37);
+	keywords.set("MULTIPOLYGON", 38);
+	keywords.set("PIN_WAY", 39);
+	keywords.set("IGNORESEALAND", 40);
 
 
   tvalLength = 128;
@@ -369,25 +374,29 @@ Token* Scanner::NextToken() {
 		case 8:
 			{t->kind = 10; break;}
 		case 9:
-			case_9:
-			{t->kind = 17; break;}
+			{t->kind = 14; break;}
 		case 10:
-			case_10:
-			{t->kind = 18; break;}
+			{t->kind = 15; break;}
 		case 11:
-			{t->kind = 20; break;}
-		case 12:
-			{t->kind = 21; break;}
-		case 13:
+			case_11:
 			{t->kind = 22; break;}
+		case 12:
+			case_12:
+			{t->kind = 23; break;}
+		case 13:
+			{t->kind = 25; break;}
 		case 14:
-			recEnd = pos; recKind = 8;
-			if (ch == '=') {AddCh(); goto case_9;}
-			else {t->kind = 8; break;}
+			{t->kind = 26; break;}
 		case 15:
-			recEnd = pos; recKind = 16;
-			if (ch == '=') {AddCh(); goto case_10;}
-			else {t->kind = 16; break;}
+			{t->kind = 27; break;}
+		case 16:
+			recEnd = pos; recKind = 13;
+			if (ch == '=') {AddCh(); goto case_11;}
+			else {t->kind = 13; break;}
+		case 17:
+			recEnd = pos; recKind = 21;
+			if (ch == '=') {AddCh(); goto case_12;}
+			else {t->kind = 21; break;}
 
   }
   AppendVal(t);

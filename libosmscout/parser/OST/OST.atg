@@ -1,5 +1,7 @@
 #include <osmscout/TypeConfig.h>
 
+#include <osmscout/util/String.h>
+
 COMPILER OST
 
 std::string Destring(const char* str)
@@ -33,8 +35,48 @@ COMMENTS FROM "//" TO eol
 IGNORE '\t' + '\r' + '\n'
 
 PRODUCTIONS
-  OST         = SYNC "OST" [TYPES] [TAGS] "END".
-  TYPES       = SYNC "TYPES" TYPE {TYPE}.
+  OST         = SYNC "OST"
+                [GRADES]
+                [TYPES]
+                [TAGS]
+                "END"
+                .
+
+  GRADES      = SYNC "GRADES"
+                GRADE {GRADE}
+                .
+
+  GRADE       = (.
+                  size_t grade;
+                .)
+                SYNC "SURFACE" "GRADE"
+                UINT<grade>
+                "{"
+                 {
+                   (.
+                     std::string surface;
+                   .)
+
+                   STRING<surface>
+                   (.
+                     if (grade>=1 && grade<=5) {
+                       config.RegisterSurfaceToGradeMapping(surface,
+                                                            grade);
+                     }
+                     else {
+                       std::string e="Not a valid grade level: "+NumberToString(grade);
+
+                       SemErr(e.c_str());
+                     }
+                   .)
+                 }
+                "}"
+                .
+
+  TYPES       = SYNC "TYPES"
+                TYPE {TYPE}
+                .
+
   TYPE        = (.
                   std::string   name;
                   TagCondition  *condition=NULL;
@@ -63,6 +105,7 @@ PRODUCTIONS
                   config.AddTypeInfo(typeInfo);
                 .)
                 .
+
   TAGS        = SYNC "TAGS" TAG {TAG}.
   TAG         = SYNC "TAG"
                 string
@@ -260,6 +303,24 @@ PRODUCTIONS
               = ident
                 (.
                   value=t->val;
+                .)
+                .
+
+  STRING<std::string& value>
+              = string
+                (.
+                  value=Destring(t->val);
+                .)
+                .
+
+  UINT<size_t& value>
+              = number
+                (.
+                  if (!StringToNumber(t->val,value)) {
+                    std::string e="Cannot parse number '"+std::string(t->val)+"'";
+
+                    SemErr(e.c_str());
+                  }
                 .)
                 .
 END OST.

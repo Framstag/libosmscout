@@ -377,6 +377,8 @@ namespace osmscout {
     OSMSCOUT_HASHMAP<TagId,uint32_t>       nameTagIdToPrioMap;
     OSMSCOUT_HASHMAP<TagId,uint32_t>       nameAltTagIdToPrioMap;
 
+    OSMSCOUT_HASHMAP<std::string,size_t>   surfaceToGradeMap;
+
   public:
     TypeId                                 typeTileLand;
     TypeId                                 typeTileSea;
@@ -455,6 +457,11 @@ namespace osmscout {
 
     void GetRoutables(std::set<TypeId>& types) const;
     void GetIndexables(OSMSCOUT_HASHSET<TypeId>& types) const;
+
+    void RegisterSurfaceToGradeMapping(const std::string& surface,
+                                       size_t grade);
+    bool GetGradeForSurface(const std::string& surface,
+                            size_t& grade) const;
   };
 }
 
