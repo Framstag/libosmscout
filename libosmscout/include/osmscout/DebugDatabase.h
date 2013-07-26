@@ -29,7 +29,7 @@
 #include <osmscout/TypeConfig.h>
 #include <osmscout/TypeSet.h>
 
-#include <osmscout/Point.h>
+#include <osmscout/CoordDataFile.h>
 
 namespace osmscout {
 
@@ -76,8 +76,8 @@ namespace osmscout {
 
     TypeConfig* GetTypeConfig() const;
 
-    bool GetCoords(const std::vector<Id>& ids,
-                   std::vector<Point>& coords) const;
+    bool GetCoords(std::set<OSMId>& ids,
+                   CoordDataFile::CoordResultMap& coordsMap) const;
 
     bool ResolveReferences(const std::set<ObjectOSMRef>& ids,
                            const std::set<ObjectFileRef>& fileOffsets,

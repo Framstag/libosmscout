@@ -47,6 +47,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/ObjectRef.h \
                         osmscout/NumericIndex.h \
                         osmscout/DataFile.h \
+                        osmscout/CoordDataFile.h \
                         osmscout/AreaDataFile.h \
                         osmscout/NodeDataFile.h \
                         osmscout/WayDataFile.h \

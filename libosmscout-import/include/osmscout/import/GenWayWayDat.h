@@ -25,13 +25,14 @@
 #include <map>
 
 #include <osmscout/Way.h>
+
+#include <osmscout/CoordDataFile.h>
 #include <osmscout/NumericIndex.h>
 #include <osmscout/TurnRestriction.h>
 
 #include <osmscout/util/HashMap.h>
 #include <osmscout/util/HashSet.h>
 
-#include <osmscout/import/CoordDataFile.h>
 #include <osmscout/import/Import.h>
 #include <osmscout/import/RawWay.h>
 

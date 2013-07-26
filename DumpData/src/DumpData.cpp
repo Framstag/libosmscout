@@ -61,11 +61,11 @@ static const size_t IDENT=2;
 static bool ParseArguments(int argc,
                            char* argv[],
                            std::string& map,
-                           std::list<osmscout::Id>& coordIds,
+                           std::set<osmscout::OSMId>& coordIds,
                            std::list<Job>& jobs)
 {
   if (argc<2) {
-    std::cerr << "DumpData <map directory> {-c <Id>|-n <Id>|-no <FileOffset>|-w <Id>|-wo <FileOffset>|-r <Id>|-ro <FileOffset>}" << std::endl;
+    std::cerr << "DumpData <map directory> {-c <OSMId>|-n <OSMId>|-no <FileOffset>|-w <OSMId>|-wo <FileOffset>|-r <OSMId>|-ro <FileOffset>}" << std::endl;
     return false;
   }
 
@@ -77,7 +77,7 @@ static bool ParseArguments(int argc,
 
   while (arg<argc) {
     if (strcmp(argv[arg],"-c")==0) {
-      unsigned long id;
+      long id;
 
       arg++;
       if (arg>=argc) {
@@ -85,12 +85,12 @@ static bool ParseArguments(int argc,
         return false;
       }
 
-      if (sscanf(argv[arg],"%lu",&id)!=1) {
+      if (sscanf(argv[arg],"%ld",&id)!=1) {
         std::cerr << "Node id is not numeric!" << std::endl;
         return false;
       }
 
-      coordIds.push_back(id);
+      coordIds.insert(id);
 
       arg++;
     }
@@ -517,7 +517,7 @@ int main(int argc, char* argv[])
   std::string                    map;
   std::list<Job>                 jobs;
 
-  std::list<osmscout::Id>        coordIds;
+  std::set<osmscout::OSMId>      coordIds;
 
   if (!ParseArguments(argc,
                       argv,
@@ -581,16 +581,15 @@ int main(int argc, char* argv[])
     }
   }
 
-  std::vector<osmscout::Point>   coords;
-  std::vector<osmscout::NodeRef> nodes;
-  std::vector<osmscout::AreaRef> areas;
-  std::vector<osmscout::WayRef>  ways;
+  osmscout::CoordDataFile::CoordResultMap coordsMap;
+  std::vector<osmscout::NodeRef>          nodes;
+  std::vector<osmscout::AreaRef>          areas;
+  std::vector<osmscout::WayRef>           ways;
 
   if (!coordIds.empty()) {
-    std::vector<osmscout::Id> ids(coordIds.begin(),coordIds.end());
 
-    if (!debugDatabase.GetCoords(ids,
-                                 coords)) {
+    if (!debugDatabase.GetCoords(coordIds,
+                                 coordsMap)) {
       std::cerr << "Error whole loading coords by id" << std::endl;
     }
   }
@@ -646,25 +645,22 @@ int main(int argc, char* argv[])
     }
   }
 
-  for (std::list<osmscout::Id>::const_iterator id=coordIds.begin();
+  for (std::set<osmscout::OSMId>::const_iterator id=coordIds.begin();
        id!=coordIds.end();
        ++id) {
-    bool found=false;
+    osmscout::CoordDataFile::CoordResultMap::const_iterator coordsEntry;
 
-    for (size_t i=0; i<coords.size(); i++) {
-      if (coords[i].GetId()==*id) {
-        if (id!=coordIds.begin()) {
-          std::cout << std::endl;
-        }
+    coordsEntry=coordsMap.find(*id);
 
-        DumpCoord(coords[i]);
-        found=true;
-        break;
+    if (coordsEntry!=coordsMap.end()) {
+      if (id!=coordIds.begin()) {
+        std::cout << std::endl;
       }
-    }
 
-    if (!found) {
-        std::cerr << "Cannot find coord with id " << *id << std::endl;
+      DumpCoord(coordsEntry->second.point);
+    }
+    else {
+      std::cerr << "Cannot find coord with id " << *id << std::endl;
     }
   }
 

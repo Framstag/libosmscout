@@ -23,8 +23,10 @@
 #include <iostream>
 #include <iomanip>
 
-#include <osmscout/DataFile.h>
 #include <osmscout/Way.h>
+
+#include <osmscout/DataFile.h>
+#include <osmscout/CoordDataFile.h>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
@@ -33,7 +35,6 @@
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/String.h>
 
-#include <osmscout/import/CoordDataFile.h>
 #include <osmscout/import/RawCoastline.h>
 #include <osmscout/import/RawNode.h>
 

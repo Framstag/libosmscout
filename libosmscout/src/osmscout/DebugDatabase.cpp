@@ -89,93 +89,23 @@ namespace osmscout {
     return typeConfig;
   }
 
-  bool DebugDatabase::GetCoords(const std::vector<Id>& ids,
-                                std::vector<Point>& coords) const
+  bool DebugDatabase::GetCoords(std::set<OSMId>& ids,
+                                CoordDataFile::CoordResultMap& coordsMap) const
   {
-    FileScanner                     coordDataFile;
-    uint32_t                        coordPageSize;
-    OSMSCOUT_HASHMAP<Id,FileOffset> coordPageIdOffsetMap;
+    CoordDataFile dataFile("coord.dat");
 
-    if (!coordDataFile.Open(osmscout::AppendFileToDir(path,"coord.dat"),
-                            osmscout::FileScanner::LowMemRandom,
-                            false)) {
-      return false;
-
-    }
-
-    FileOffset mapFileOffset;
-
-    if (!coordDataFile.Read(coordPageSize))
-    {
-      std::cerr << "Error while reading page size from coord.dat" << std::endl;
-      return 1;
-    }
-
-    if (!coordDataFile.Read(mapFileOffset)) {
-      std::cerr << "Error while reading map offset from coord.dat" << std::endl;
-      return 1;
-    }
-
-    if (!coordDataFile.SetPos(mapFileOffset)) {
+    if (!dataFile.Open(path,
+                       false)) {
       return false;
     }
 
-    uint32_t mapSize;
-
-    if (!coordDataFile.Read(mapSize)) {
-      std::cerr << "Error while reading map size from coord.dat" << std::endl;
-      return 1;
+    if (!dataFile.Get(ids,
+                      coordsMap)) {
+      return false;
     }
 
-    for (size_t i=1; i<=mapSize; i++) {
-      osmscout::Id         pageId;
-      osmscout::FileOffset pageOffset;
-
-      if (!coordDataFile.Read(pageId)) {
-        std::cerr << "Error while reading pageId from coord.dat" << std::endl;
-        return 1;
-      }
-      if (!coordDataFile.Read(pageOffset)) {
-        std::cerr << "Error while reading pageOffset from coord.dat" << std::endl;
-        return 1;
-      }
-
-      coordPageIdOffsetMap[pageId]=pageOffset;
-    }
-
-    for (size_t i=0; i<ids.size(); i++) {
-      Id                                              coordPageId=ids[i]/coordPageSize;
-      OSMSCOUT_HASHMAP<Id,FileOffset>::const_iterator pageOffset=coordPageIdOffsetMap.find(coordPageId);
-
-      if (pageOffset==coordPageIdOffsetMap.end()) {
-        continue;
-      }
-
-      coordDataFile.SetPos(pageOffset->second+(ids[i]%coordPageSize)*2*sizeof(uint32_t));
-
-      uint32_t latDat;
-      uint32_t lonDat;
-
-      coordDataFile.Read(latDat);
-      coordDataFile.Read(lonDat);
-
-      if (latDat==0xffffffff || lonDat==0xffffffff) {
-        std::cerr << "Cannot load coord " << ids[i] << std::endl;
-        continue;
-      }
-
-      if (coordDataFile.HasError()) {
-        std::cerr << "Error while reading data from offset " << pageOffset->second << " of file " << coordDataFile.GetFilename() << "!" << std::endl;
-        continue;
-      }
-
-      coords.push_back(Point(ids[i],
-                             latDat/osmscout::conversionFactor-90.0,
-                             lonDat/osmscout::conversionFactor-180.0));
-    }
-
-    return true;
-  }
+    return dataFile.Close();
+   }
 
   bool DebugDatabase::ResolveReferences(const std::string& mapName,
                                         RefType fileType,

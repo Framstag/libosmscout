@@ -24,13 +24,14 @@
 
 #include <map>
 
-#include <osmscout/DataFile.h>
 
 #include <osmscout/Area.h>
 
+#include <osmscout/DataFile.h>
+#include <osmscout/CoordDataFile.h>
+
 #include <osmscout/util/Geometry.h>
 
-#include <osmscout/import/CoordDataFile.h>
 #include <osmscout/import/RawRelation.h>
 #include <osmscout/import/RawWay.h>
 

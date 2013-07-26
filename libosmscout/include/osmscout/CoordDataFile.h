@@ -1,5 +1,5 @@
-#ifndef OSMSCOUT_IMPORT_COORDDATAFILE_H
-#define OSMSCOUT_IMPORT_COORDDATAFILE_H
+#ifndef OSMSCOUT_COORDDATAFILE_H
+#define OSMSCOUT_COORDDATAFILE_H
 
 /*
   This source is part of the libosmscout library
@@ -25,6 +25,7 @@
 #include <vector>
 
 #include <osmscout/Point.h>
+
 #include <osmscout/util/Cache.h>
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/HashMap.h>
@@ -32,7 +33,7 @@
 
 namespace osmscout {
 
-  class CoordDataFile
+  class OSMSCOUT_API CoordDataFile
   {
   private:
     typedef OSMSCOUT_HASHMAP<PageId,FileOffset> CoordPageOffsetMap;
