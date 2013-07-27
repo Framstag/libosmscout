@@ -289,7 +289,7 @@ PRODUCTIONS
               .
 
   TYPEOPTION<TypeInfo& typeInfo>
-              =  "ROUTE"             (. typeInfo.CanBeRoute(true); .)
+              =  ROUTE<typeInfo>
                | "INDEX"             (. typeInfo.CanBeIndexed(true); .)
                | "CONSUME_CHILDREN"  (. typeInfo.SetConsumeChildren(true); .)
                | "OPTIMIZE_LOW_ZOOM" (. typeInfo.SetOptimizeLowZoom(true); .)
@@ -298,6 +298,32 @@ PRODUCTIONS
                | "PIN_WAY"           (. typeInfo.SetPinWay(true); .)
                | "IGNORESEALAND"     (. typeInfo.SetIgnoreSeaLand(true); .)
                .
+
+  ROUTE<TypeInfo& typeInfo>
+              = "ROUTE"
+                "["
+                   [
+                     "FOOT"
+                     (.
+                       typeInfo.CanRouteFoot(true);
+                     .)
+                   ]
+
+                   [
+                     "BICYCLE"
+                     (.
+                       typeInfo.CanRouteBicycle(true);
+                     .)
+                   ]
+
+                   [
+                     "CAR"
+                     (.
+                       typeInfo.CanRouteCar(true);
+                     .)
+                   ]
+                "]"
+                .
 
   IDENT<std::string& value>
               = ident

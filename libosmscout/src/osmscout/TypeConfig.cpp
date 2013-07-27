@@ -180,7 +180,9 @@ namespace osmscout {
      canBeWay(false),
      canBeArea(false),
      canBeRelation(false),
-     canBeRoute(false),
+     canRouteFoot(false),
+     canRouteBicycle(false),
+     canRouteCar(false),
      canBeIndexed(false),
      consumeChildren(false),
      optimizeLowZoom(false),
@@ -787,7 +789,9 @@ namespace osmscout {
     for (std::vector<TypeInfo>::const_iterator type=this->types.begin();
          type!=this->types.end();
          ++type) {
-      if (type->CanBeRoute()) {
+      if (type->CanRouteFoot() ||
+          type->CanRouteBicycle() ||
+          type->CanRouteCar()) {
         types.insert(type->GetId());
       }
     }

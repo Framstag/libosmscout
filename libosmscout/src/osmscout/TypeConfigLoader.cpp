@@ -163,7 +163,9 @@ namespace osmscout {
       bool        canBeWay;
       bool        canBeArea;
       bool        canBeRelation;
-      bool        canBeRoute;
+      bool        canRouteFoot;
+      bool        canRouteBicycle;
+      bool        canRouteCar;
       bool        canBeIndexed;
       bool        consumeChildren;
       bool        optimizeLowZoom;
@@ -178,7 +180,9 @@ namespace osmscout {
             scanner.Read(canBeWay) &&
             scanner.Read(canBeArea) &&
             scanner.Read(canBeRelation) &&
-            scanner.Read(canBeRoute) &&
+            scanner.Read(canRouteFoot) &&
+            scanner.Read(canRouteBicycle) &&
+            scanner.Read(canRouteCar) &&
             scanner.Read(canBeIndexed) &&
             scanner.Read(consumeChildren) &&
             scanner.Read(optimizeLowZoom) &&
@@ -201,7 +205,9 @@ namespace osmscout {
       typeInfo.CanBeWay(canBeWay);
       typeInfo.CanBeArea(canBeArea);
       typeInfo.CanBeRelation(canBeRelation);
-      typeInfo.CanBeRoute(canBeRoute);
+      typeInfo.CanRouteFoot(canRouteFoot);
+      typeInfo.CanRouteBicycle(canRouteBicycle);
+      typeInfo.CanRouteCar(canRouteCar);
       typeInfo.CanBeIndexed(canBeIndexed);
       typeInfo.SetConsumeChildren(consumeChildren);
       typeInfo.SetIgnore(optimizeLowZoom);

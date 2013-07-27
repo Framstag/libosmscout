@@ -110,7 +110,9 @@ namespace osmscout {
       writer.Write(type->CanBeWay());
       writer.Write(type->CanBeArea());
       writer.Write(type->CanBeRelation());
-      writer.Write(type->CanBeRoute());
+      writer.Write(type->CanRouteFoot());
+      writer.Write(type->CanRouteBicycle());
+      writer.Write(type->CanRouteCar());
       writer.Write(type->CanBeIndexed());
       writer.Write(type->GetConsumeChildren());
       writer.Write(type->GetOptimizeLowZoom());

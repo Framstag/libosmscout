@@ -368,7 +368,9 @@ namespace osmscout {
         continue;
       }
 
-      if (!typeConfig.GetTypeInfo(way.GetType()).CanBeRoute()) {
+      if (!(typeConfig.GetTypeInfo(way.GetType()).CanRouteFoot() ||
+            typeConfig.GetTypeInfo(way.GetType()).CanRouteBicycle() ||
+            typeConfig.GetTypeInfo(way.GetType()).CanRouteCar())) {
         continue;
       }
 
@@ -430,7 +432,9 @@ namespace osmscout {
         continue;
       }
 
-      if (!typeConfig.GetTypeInfo(area.GetType()).CanBeRoute()) {
+      if (!(typeConfig.GetTypeInfo(area.GetType()).CanRouteFoot() ||
+            typeConfig.GetTypeInfo(area.GetType()).CanRouteBicycle() ||
+            typeConfig.GetTypeInfo(area.GetType()).CanRouteCar())) {
         continue;
       }
 
@@ -519,7 +523,9 @@ namespace osmscout {
         continue;
       }
 
-      if (!typeConfig.GetTypeInfo(way.GetType()).CanBeRoute()) {
+      if (!(typeConfig.GetTypeInfo(way.GetType()).CanRouteFoot() ||
+            typeConfig.GetTypeInfo(way.GetType()).CanRouteBicycle() ||
+            typeConfig.GetTypeInfo(way.GetType()).CanRouteCar())) {
         continue;
       }
 
@@ -593,7 +599,9 @@ namespace osmscout {
         continue;
       }
 
-      if (!typeConfig.GetTypeInfo(area.GetType()).CanBeRoute()) {
+      if (!(typeConfig.GetTypeInfo(area.GetType()).CanRouteFoot() ||
+            typeConfig.GetTypeInfo(area.GetType()).CanRouteBicycle() ||
+            typeConfig.GetTypeInfo(area.GetType()).CanRouteCar())) {
         continue;
       }
 

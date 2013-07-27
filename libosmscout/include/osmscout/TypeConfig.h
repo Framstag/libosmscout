@@ -177,7 +177,9 @@ namespace osmscout {
     bool         canBeWay;
     bool         canBeArea;
     bool         canBeRelation;
-    bool         canBeRoute;
+    bool         canRouteFoot;
+    bool         canRouteBicycle;
+    bool         canRouteCar;
     bool         canBeIndexed;
     bool         consumeChildren;
     bool         optimizeLowZoom;
@@ -265,16 +267,40 @@ namespace osmscout {
       return canBeRelation;
     }
 
-    inline TypeInfo& CanBeRoute(bool canBeRoute)
+    inline TypeInfo& CanRouteFoot(bool canBeRoute)
     {
-      this->canBeRoute=canBeRoute;
+      this->canRouteFoot=canBeRoute;
 
       return *this;
     }
 
-    inline bool CanBeRoute() const
+    inline TypeInfo& CanRouteBicycle(bool canBeRoute)
     {
-      return canBeRoute;
+      this->canRouteBicycle=canBeRoute;
+
+      return *this;
+    }
+
+    inline TypeInfo& CanRouteCar(bool canBeRoute)
+    {
+      this->canRouteCar=canBeRoute;
+
+      return *this;
+    }
+
+    inline bool CanRouteFoot() const
+    {
+      return canRouteFoot;
+    }
+
+    inline bool CanRouteBicycle() const
+    {
+      return canRouteBicycle;
+    }
+
+    inline bool CanRouteCar() const
+    {
+      return canRouteCar;
     }
 
     inline TypeInfo& CanBeIndexed(bool canBeIndexed)
