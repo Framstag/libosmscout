@@ -624,6 +624,14 @@ int main(int argc, char* argv[])
   assert(type!=osmscout::typeIgnore);
   routingProfile.AddType(type,130.0);
 
+  type=typeConfig->GetWayTypeId("highway_motorway_trunk");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.AddType(type,100.0);
+
+  type=typeConfig->GetWayTypeId("highway_motorway_primary");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.AddType(type,70.0);
+
   type=typeConfig->GetWayTypeId("highway_motorway_link");
   assert(type!=osmscout::typeIgnore);
   routingProfile.AddType(type,60.0);
@@ -702,6 +710,8 @@ int main(int argc, char* argv[])
 
   instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway"));
   instructionProcessor->AddMotorwayLinkType(typeConfig->GetWayTypeId("highway_motorway_link"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway_trunk"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway_primary"));
   instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_trunk"));
   instructionProcessor->AddMotorwayLinkType(typeConfig->GetWayTypeId("highway_trunk_link"));
   postprocessors.push_back(instructionProcessor);

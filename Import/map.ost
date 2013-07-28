@@ -50,37 +50,49 @@ GRADES
   }
 
 TYPES
-  TYPE highway_motorway = WAY ("highway"=="motorway") OPTIONS ROUTE[CAR] INDEX OPTIMIZE_LOW_ZOOM
-  TYPE highway_motorway_link = WAY ("highway"=="motorway_link") OPTIONS ROUTE[CAR] INDEX OPTIMIZE_LOW_ZOOM
-  TYPE highway_trunk = WAY ("highway"=="trunk") OPTIONS ROUTE[CAR] INDEX OPTIMIZE_LOW_ZOOM
-  TYPE highway_trunk_link = WAY ("highway"=="trunk_link") OPTIONS ROUTE[CAR] INDEX OPTIMIZE_LOW_ZOOM
-  TYPE highway_primary = WAY ("highway"=="primary") OPTIONS ROUTE[CAR] INDEX OPTIMIZE_LOW_ZOOM
-  TYPE highway_primary_link = WAY ("highway"=="primary_link") OPTIONS ROUTE[CAR] INDEX
-  TYPE highway_secondary = WAY ("highway"=="secondary") OPTIONS ROUTE[CAR] INDEX OPTIMIZE_LOW_ZOOM
-  TYPE highway_secondary_link = WAY ("highway"=="secondary_link") OPTIONS ROUTE[CAR] INDEX
-  TYPE highway_tertiary = WAY ("highway"=="tertiary") OPTIONS ROUTE[CAR] INDEX OPTIMIZE_LOW_ZOOM
-  TYPE highway_unclassified = WAY ("highway"=="unclassified") OPTIONS ROUTE[CAR] INDEX
-  TYPE highway_road = WAY ("highway"=="road") OPTIONS ROUTE[CAR] INDEX OPTIMIZE_LOW_ZOOM
-  TYPE highway_residential = WAY ("highway"=="residential") OPTIONS ROUTE[CAR] INDEX
-  TYPE highway_living_street = WAY ("highway"=="living_street") OPTIONS ROUTE[CAR] INDEX
-  TYPE highway_service = WAY AREA ("highway"=="service") OPTIONS ROUTE[CAR] INDEX PIN_WAY
-  TYPE highway_track = WAY ("highway"=="track") OPTIONS ROUTE[FOOT] INDEX
+  // Motorways and motorways-like (only for cars)
+  TYPE highway_motorway = WAY ("highway"=="motorway")
+       OPTIONS ROUTE[CAR] INDEX OPTIMIZE_LOW_ZOOM
+  TYPE highway_motorway_trunk = WAY ("highway"=="trunk" AND EXISTS "motorroad" AND !("motorroad" IN ["no","false","0"]))
+       OPTIONS ROUTE[CAR] INDEX OPTIMIZE_LOW_ZOOM
+  TYPE highway_motorway_primary = WAY ("highway"=="primary" AND EXISTS "motorroad" AND !("motorroad" IN ["no","false","0"]))
+       OPTIONS ROUTE[CAR] INDEX OPTIMIZE_LOW_ZOOM
+  TYPE highway_motorway_link = WAY ("highway"=="motorway_link")
+       OPTIONS ROUTE[CAR] INDEX OPTIMIZE_LOW_ZOOM
+  
+  // Other roads mainly for cars
+  TYPE highway_trunk = WAY ("highway"=="trunk") OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX OPTIMIZE_LOW_ZOOM
+  TYPE highway_trunk_link = WAY ("highway"=="trunk_link") OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX OPTIMIZE_LOW_ZOOM
+  TYPE highway_primary = WAY ("highway"=="primary") OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX OPTIMIZE_LOW_ZOOM
+  TYPE highway_primary_link = WAY ("highway"=="primary_link") OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX
+  TYPE highway_secondary = WAY ("highway"=="secondary") OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX OPTIMIZE_LOW_ZOOM
+  TYPE highway_secondary_link = WAY ("highway"=="secondary_link") OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX
+  TYPE highway_tertiary = WAY ("highway"=="tertiary") OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX OPTIMIZE_LOW_ZOOM
+  TYPE highway_unclassified = WAY ("highway"=="unclassified") OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX
+  TYPE highway_road = WAY ("highway"=="road") OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX OPTIMIZE_LOW_ZOOM
+  TYPE highway_residential = WAY ("highway"=="residential") OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX
+  TYPE highway_living_street = WAY ("highway"=="living_street") OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX
+  TYPE highway_service = WAY AREA ("highway"=="service") OPTIONS ROUTE[FOOT BICYCLE CAR] INDEX PIN_WAY
+  
+  // Ways with main designation different to car
+  TYPE highway_track = WAY ("highway"=="track") OPTIONS ROUTE[FOOT BICYCLE] INDEX
   TYPE highway_pedestrian = WAY AREA ("highway"=="pedestrian") OPTIONS ROUTE[FOOT] INDEX PIN_WAY
-  TYPE highway_services = NODE AREA ("highway"=="services") OPTIONS ROUTE[CAR] INDEX
+  TYPE highway_services = NODE AREA ("highway"=="services") OPTIONS INDEX
   TYPE highway_bus_guideway = WAY ("highway"=="bus_guideway")
-  TYPE highway_path = WAY ("highway"=="path") OPTIONS ROUTE[FOOT] IGNORESEALAND
+  TYPE highway_path = WAY ("highway"=="path") OPTIONS ROUTE[FOOT BICYCLE] IGNORESEALAND
   TYPE highway_cycleway = WAY ("highway"=="cycleway") OPTIONS ROUTE[BICYCLE]
   TYPE highway_footway = WAY AREA ("highway"=="footway") OPTIONS ROUTE[FOOT] PIN_WAY
-  TYPE highway_bridleway = WAY ("highway"=="bridleway") OPTIONS ROUTE[FOOT]
-  TYPE highway_byway = WAY ("highway"=="byway") OPTIONS ROUTE[FOOT]
+  TYPE highway_bridleway = WAY ("highway"=="bridleway")
+  TYPE highway_byway = WAY ("highway"=="byway") OPTIONS ROUTE[FOOT] // Obsolete in OSM
   TYPE highway_steps = WAY ("highway"=="steps") OPTIONS ROUTE[FOOT]
   TYPE highway_mini_roundabout = NODE ("highway"=="mini_roundabout")
   TYPE highway_bus_stop = NODE ("highway"=="bus_stop")
   TYPE highway_turning_cycle = NODE ("highway"=="turning_cycle")
   TYPE highway_construction = WAY ("highway"=="construction")
-  TYPE highway_roundabout = WAY AREA ("highway"=="roundabout") OPTIONS ROUTE[CAR] PIN_WAY
+  TYPE highway_roundabout = WAY AREA ("highway"=="roundabout") OPTIONS ROUTE[FOOT BICYCLE CAR] PIN_WAY
   TYPE highway_motorway_junction = NODE ("highway"=="motorway_junction") OPTIONS ROUTE[CAR]
 
+  // Waterways and assorted
   TYPE waterway_stream = WAY ("waterway"=="stream") OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
   TYPE waterway_river = WAY ("waterway"=="river") OPTIONS OPTIMIZE_LOW_ZOOM IGNORESEALAND
   TYPE waterway_riverbank = AREA ("waterway"=="riverbank")
@@ -94,6 +106,7 @@ TYPES
   TYPE waterway_weir = NODE WAY ("waterway"=="weir") OPTIONS IGNORESEALAND
   TYPE waterway_dam = WAY AREA ("waterway"=="dam") OPTIONS IGNORESEALAND
 
+  // Railways and assorted
   TYPE railway_rail = WAY ("railway"=="rail") //OPTIONS OPTIMIZE_LOW_ZOOM
   TYPE railway_tram = WAY ("railway"=="tram")
   TYPE railway_light_rail = WAY ("railway"=="light_rail")

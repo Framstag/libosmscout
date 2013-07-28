@@ -130,6 +130,14 @@ void DBThread::Initialize()
     assert(type!=osmscout::typeIgnore);
     routingProfile.AddType(type,60.0);
 
+    type=typeConfig->GetWayTypeId("highway_motorway_trunk");
+    assert(type!=osmscout::typeIgnore);
+    routingProfile.AddType(type,100.0);
+
+    type=typeConfig->GetWayTypeId("highway_motorway_primary");
+    assert(type!=osmscout::typeIgnore);
+    routingProfile.AddType(type,70.0);
+
     type=typeConfig->GetWayTypeId("highway_trunk");
     assert(type!=osmscout::typeIgnore);
     routingProfile.AddType(type,100.0);
@@ -652,8 +660,10 @@ bool DBThread::TransformRouteDataToRouteDescription(const osmscout::RouteData& d
 
   instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway"));
   instructionProcessor->AddMotorwayLinkType(typeConfig->GetWayTypeId("highway_motorway_link"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway_trunk"));
   instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_trunk"));
   instructionProcessor->AddMotorwayLinkType(typeConfig->GetWayTypeId("highway_trunk_link"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway_primary"));
   postprocessors.push_back(instructionProcessor);
 
   if (!routePostprocessor.PostprocessRouteDescription(description,

@@ -298,11 +298,9 @@ bool DatabaseTask::Open(const std::wstring& path)
     return false;
   }
 
-  /*
   if (!router->Open(Lum::Base::WStringToString(p.GetPath()).c_str())) {
     return false;
   }
-
 
   osmscout::TypeId     type;
   osmscout::TypeConfig *typeConfig=router->GetTypeConfig();
@@ -314,6 +312,14 @@ bool DatabaseTask::Open(const std::wstring& path)
   type=typeConfig->GetWayTypeId("highway_motorway_link");
   assert(type!=osmscout::typeIgnore);
   routingProfile.AddType(type,60.0);
+
+  type=typeConfig->GetWayTypeId("highway_motorway_trunk");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.AddType(type,100.0);
+
+  type=typeConfig->GetWayTypeId("highway_motorway_primary");
+  assert(type!=osmscout::typeIgnore);
+  routingProfile.AddType(type,70.0);
 
   type=typeConfig->GetWayTypeId("highway_trunk");
   assert(type!=osmscout::typeIgnore);
@@ -361,7 +367,7 @@ bool DatabaseTask::Open(const std::wstring& path)
 
   type=typeConfig->GetWayTypeId("highway_service");
   assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,30.0);*/
+  routingProfile.AddType(type,30.0);
 
   return true;
 }
@@ -539,6 +545,8 @@ bool DatabaseTask::TransformRouteDataToRouteDescription(const osmscout::RouteDat
 
   instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway"));
   instructionProcessor->AddMotorwayLinkType(typeConfig->GetWayTypeId("highway_motorway_link"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway_trunk"));
+  instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_motorway_primary"));
   instructionProcessor->AddMotorwayType(typeConfig->GetWayTypeId("highway_trunk"));
   instructionProcessor->AddMotorwayLinkType(typeConfig->GetWayTypeId("highway_trunk_link"));
   postprocessors.push_back(instructionProcessor);
