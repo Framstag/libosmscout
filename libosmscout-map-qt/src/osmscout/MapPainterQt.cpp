@@ -280,13 +280,15 @@ namespace osmscout {
 
     QPainterPath p;
 
-    if (transBuffer.buffer[transStart].x<transBuffer.buffer[transEnd].x) {
+    if (coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()) {
       for (size_t j=transStart; j<=transEnd; j++) {
         if (j==transStart) {
-          p.moveTo(transBuffer.buffer[j].x,transBuffer.buffer[j].y);
+          p.moveTo(coordBuffer->buffer[j].GetX(),
+                   coordBuffer->buffer[j].GetY());
         }
         else {
-          p.lineTo(transBuffer.buffer[j].x,transBuffer.buffer[j].y);
+          p.lineTo(coordBuffer->buffer[j].GetX(),
+                   coordBuffer->buffer[j].GetY());
         }
       }
     }
@@ -295,12 +297,12 @@ namespace osmscout {
         size_t idx=transEnd-j;
 
         if (j==0) {
-          p.moveTo(transBuffer.buffer[idx].x,
-                   transBuffer.buffer[idx].y);
+          p.moveTo(coordBuffer->buffer[idx].GetX(),
+                   coordBuffer->buffer[idx].GetY());
         }
         else {
-          p.lineTo(transBuffer.buffer[idx].x,
-                   transBuffer.buffer[idx].y);
+          p.lineTo(coordBuffer->buffer[idx].GetX(),
+                   coordBuffer->buffer[idx].GetY());
         }
       }
     }
@@ -518,9 +520,11 @@ namespace osmscout {
 
     QPainterPath p;
 
-    p.moveTo(transBuffer.buffer[transStart].x,transBuffer.buffer[transStart].y);
+    p.moveTo(coordBuffer->buffer[transStart].GetX(),
+             coordBuffer->buffer[transStart].GetY());
     for (size_t i=transStart+1; i<=transEnd; i++) {
-      p.lineTo(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+      p.lineTo(coordBuffer->buffer[i].GetX(),
+               coordBuffer->buffer[i].GetY());
     }
 
     painter->strokePath(p,pen);
@@ -543,8 +547,8 @@ namespace osmscout {
                                                 color.GetB(),
                                                 color.GetA())));
 
-      painter->drawEllipse(QPointF(transBuffer.buffer[transStart].x,
-                                   transBuffer.buffer[transStart].y),
+      painter->drawEllipse(QPointF(coordBuffer->buffer[transStart].GetX(),
+                                   coordBuffer->buffer[transStart].GetY()),
                                    width/2,width/2);
     }
 
@@ -556,8 +560,8 @@ namespace osmscout {
                                                 color.GetB(),
                                                 color.GetA())));
 
-      painter->drawEllipse(QPointF(transBuffer.buffer[transEnd].x,
-                                   transBuffer.buffer[transEnd].y),
+      painter->drawEllipse(QPointF(coordBuffer->buffer[transEnd].GetX(),
+                                   coordBuffer->buffer[transEnd].GetY()),
                                    width/2,width/2);
     }
   }
@@ -568,9 +572,11 @@ namespace osmscout {
   {
     QPainterPath path;
 
-    path.moveTo(transBuffer.buffer[area.transStart].x,transBuffer.buffer[area.transStart].y);
+    path.moveTo(coordBuffer->buffer[area.transStart].GetX(),
+                coordBuffer->buffer[area.transStart].GetY());
     for (size_t i=area.transStart+1; i<=area.transEnd; i++) {
-      path.lineTo(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+      path.lineTo(coordBuffer->buffer[i].GetX(),
+                  coordBuffer->buffer[i].GetY());
     }
     path.closeSubpath();
 
@@ -580,9 +586,11 @@ namespace osmscout {
           c++) {
         const PolyData& data=*c;
 
-        path.moveTo(transBuffer.buffer[data.transStart].x,transBuffer.buffer[data.transStart].y);
+        path.moveTo(coordBuffer->buffer[data.transStart].GetX(),
+                    coordBuffer->buffer[data.transStart].GetY());
         for (size_t i=data.transStart+1; i<=data.transEnd; i++) {
-          path.lineTo(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+          path.lineTo(coordBuffer->buffer[i].GetX(),
+                      coordBuffer->buffer[i].GetY());
         }
         path.closeSubpath();
       }

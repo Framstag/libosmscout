@@ -26,10 +26,23 @@
 
 #include <osmscout/MapPainter.h>
 
+#include "osmscout/private/Config.h"
+
+#if defined(OSMSCOUT_MAP_OPENGL_HAVE_GL_GLUT_H)
+#  include <GL/glut.h>
+#elif defined(OSMSCOUT_MAP_OPENGL_HAVE_GLUT_GLUT_H)
+#  include <GLUT/glut.h>
+#else
+#  error "no glut.h"
+#endif
+
 namespace osmscout {
 
   class OSMSCOUT_MAP_OPENGL_API MapPainterOpenGL : public MapPainter
   {
+  private:
+    GLUtesselator* tesselator;
+
   protected:
     bool HasIcon(const StyleConfig& styleConfig,
                  const MapParameter& parameter,

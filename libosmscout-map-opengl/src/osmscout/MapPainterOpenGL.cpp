@@ -25,13 +25,51 @@
 
 namespace osmscout {
 
-  MapPainterOpenGL::MapPainterOpenGL()
+  static void tessalatorBeginCallback(GLenum which)
   {
-    // no code
+    glBegin(which);
+  }
+
+  static void tessalatorEndCallback()
+  {
+    glEnd();
+  }
+
+  static void tesselatorErrorCallback(GLenum errorCode)
+  {
+     const GLubyte *estring;
+
+     estring = gluErrorString(errorCode);
+     std::cerr << "Tessellation Error: " << estring << std::endl;
+  }
+
+  MapPainterOpenGL::MapPainterOpenGL()
+  : tesselator(gluNewTess())
+  {
+    gluTessNormal(tesselator,
+                  0,0,1);
+
+    gluTessCallback(tesselator,
+                    GLU_TESS_BEGIN,
+                    (GLvoid (*) ()) &tessalatorBeginCallback);
+
+    gluTessCallback(tesselator,
+                    GLU_TESS_VERTEX,
+                    (GLvoid (*) ()) &glVertex3dv);
+
+    gluTessCallback(tesselator,
+                    GLU_TESS_END,
+                    (GLvoid (*) ()) &tessalatorEndCallback);
+
+    gluTessCallback(tesselator,
+                    GLU_TESS_ERROR,
+                    (GLvoid (*) ()) &tesselatorErrorCallback);
+
   }
 
   MapPainterOpenGL::~MapPainterOpenGL()
   {
+    gluDeleteTess(tesselator);
   }
 
 
@@ -136,7 +174,9 @@ namespace osmscout {
     glBegin(GL_LINE_STRIP);
 
     for (size_t i=transStart; i<=transEnd; i++) {
-      glVertex3d(transBuffer.buffer[i].x,transBuffer.buffer[i].y,0.0);
+      glVertex3d(coordBuffer->buffer[i].GetX(),
+                 coordBuffer->buffer[i].GetY(),
+                 0.0);
     }
 
     glEnd();
@@ -152,13 +192,25 @@ namespace osmscout {
                 area.fillStyle->GetFillColor().GetB(),
                 area.fillStyle->GetFillColor().GetA());
 
-      glBegin(GL_POLYGON);
+      gluTessProperty(tesselator,
+                      GLU_TESS_BOUNDARY_ONLY,
+                      GL_FALSE);
+
+      gluTessBeginPolygon(tesselator,
+                          NULL);
+
+      gluTessBeginContour(tesselator);
 
       for (size_t i=area.transStart; i<=area.transEnd; i++) {
-        glVertex3d(transBuffer.buffer[i].x,transBuffer.buffer[i].y,0.0);
+
+        gluTessVertex(tesselator,
+                      (GLdouble*)&coordBuffer->buffer[i],
+                      (GLdouble*)&coordBuffer->buffer[i]);
       }
 
-      glEnd();
+      gluTessEndContour(tesselator);
+
+      gluTessEndPolygon(tesselator);
     }
 
     if (area.fillStyle->GetBorderWidth()>0 &&
@@ -176,7 +228,9 @@ namespace osmscout {
       glBegin(GL_LINE_LOOP);
 
       for (size_t i=area.transStart; i<=area.transEnd; i++) {
-        glVertex3d(transBuffer.buffer[i].x,transBuffer.buffer[i].y,0.0);
+        glVertex3d(coordBuffer->buffer[i].GetX(),
+                   coordBuffer->buffer[i].GetY(),
+                   0.0);
       }
 
       glEnd();

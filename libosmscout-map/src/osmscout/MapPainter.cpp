@@ -172,6 +172,8 @@ namespace osmscout {
   }
 
   MapPainter::MapPainter()
+  : coordBuffer(new CoordBufferImpl<Vertex2D>()),
+    transBuffer(coordBuffer)
   {
     tunnelDash.push_back(0.4);
     tunnelDash.push_back(0.4);
@@ -209,10 +211,10 @@ namespace osmscout {
     for (size_t i=transStart; i<transEnd; i++) {
       size_t j=i+1;
 
-      int x1=int(transBuffer.buffer[i].x/cellWidth);
-      int x2=int(transBuffer.buffer[j].x/cellWidth);
-      int y1=int(transBuffer.buffer[i].y/cellHeight);
-      int y2=int(transBuffer.buffer[j].y/cellHeight);
+      int x1=int(coordBuffer->buffer[i].GetX()/cellWidth);
+      int x2=int(coordBuffer->buffer[j].GetX()/cellWidth);
+      int y1=int(coordBuffer->buffer[i].GetY()/cellHeight);
+      int y2=int(coordBuffer->buffer[j].GetY()/cellHeight);
 
       osmscout::ScanConvertLine(x1,y1,x2,y2,cells);
     }
@@ -608,19 +610,19 @@ namespace osmscout {
                                   start,end,
                                   parameter.GetOptimizeErrorToleranceDots());
 
-        transBuffer.buffer[start+0].x=floor(transBuffer.buffer[start+0].x);
-        transBuffer.buffer[start+0].y=ceil(transBuffer.buffer[start+0].y);
+        coordBuffer->buffer[start+0].Set(floor(coordBuffer->buffer[start+0].GetX()),
+                                         ceil(coordBuffer->buffer[start+0].GetY()));
 
-        transBuffer.buffer[start+1].x=ceil(transBuffer.buffer[start+1].x);
-        transBuffer.buffer[start+1].y=ceil(transBuffer.buffer[start+1].y);
+        coordBuffer->buffer[start+1].Set(ceil(coordBuffer->buffer[start+1].GetX()),
+                                         ceil(coordBuffer->buffer[start+1].GetY()));
 
-        transBuffer.buffer[start+2].x=ceil(transBuffer.buffer[start+2].x);
-        transBuffer.buffer[start+2].y=floor(transBuffer.buffer[start+2].y);
+        coordBuffer->buffer[start+2].Set(ceil(coordBuffer->buffer[start+2].GetX()),
+                                         floor(coordBuffer->buffer[start+2].GetY()));
 
-        transBuffer.buffer[start+3].x=floor(transBuffer.buffer[start+3].x);
-        transBuffer.buffer[start+3].y=floor(transBuffer.buffer[start+3].y);
+        coordBuffer->buffer[start+3].Set(floor(coordBuffer->buffer[start+3].GetX()),
+                                         floor(coordBuffer->buffer[start+3].GetY()));
 
-        transBuffer.buffer[start+4]=transBuffer.buffer[start];
+        coordBuffer->buffer[start+4]=coordBuffer->buffer[start];
       }
       else {
         points.resize(tile->coords.size());
@@ -643,17 +645,17 @@ namespace osmscout {
 
         for (size_t i=0; i<points.size(); i++) {
           if (tile->coords[i].x==0) {
-            transBuffer.buffer[start+i].x=floor(transBuffer.buffer[start+i].x);
+            coordBuffer->buffer[start+i].SetX(floor(coordBuffer->buffer[start+i].GetX()));
           }
-          if (tile->coords[i].x==GroundTile::Coord::CELL_MAX) {
-            transBuffer.buffer[start+i].x=ceil(transBuffer.buffer[start+i].x);
+          else if (tile->coords[i].x==GroundTile::Coord::CELL_MAX) {
+            coordBuffer->buffer[start+i].SetX(ceil(coordBuffer->buffer[start+i].GetX()));
           }
 
           if (tile->coords[i].y==0) {
-            transBuffer.buffer[start+i].y=ceil(transBuffer.buffer[start+i].y);
+            coordBuffer->buffer[start+i].SetY(ceil(coordBuffer->buffer[start+i].GetY()));
           }
-          if (tile->coords[i].y==GroundTile::Coord::CELL_MAX) {
-            transBuffer.buffer[start+i].y=floor(transBuffer.buffer[start+i].y);
+          else if (tile->coords[i].y==GroundTile::Coord::CELL_MAX) {
+            coordBuffer->buffer[start+i].SetY(floor(coordBuffer->buffer[start+i].GetY()));
           }
         }
 
@@ -1415,66 +1417,6 @@ namespace osmscout {
       labelsDrawn++;
     }
   }
-/*
-  bool MapPainter::PrepareAreaSegment(const StyleConfig& styleConfig,
-                                      const Projection& projection,
-                                      const MapParameter& parameter,
-                                      const ObjectFileRef& ref,
-                                      const AreaAttributes& attributes,
-                                      const std::vector<GeoCoord>& nodes)
-  {
-    FillStyleRef fillStyle;
-
-    styleConfig.GetAreaFillStyle(attributes,
-                                 projection,
-                                 parameter.GetDPI(),
-                                 fillStyle);
-
-    if (fillStyle.Invalid())
-    {
-      return false;
-    }
-
-    if (!IsVisible(projection,
-                   nodes,
-                   fillStyle->GetBorderWidth()/2)) {
-      return false;
-    }
-
-    size_t start,end;
-
-    transBuffer.TransformArea(projection,
-                              parameter.GetOptimizeAreaNodes(),
-                              nodes,
-                              start,end,
-                              parameter.GetOptimizeErrorToleranceDots());
-
-    AreaData data;
-
-    data.ref=ref;
-    data.attributes=&attributes;
-    data.fillStyle=fillStyle;
-    data.transStart=start;
-    data.transEnd=end;
-
-    data.minLat=nodes[0].GetLat();
-    data.maxLat=nodes[0].GetLat();
-    data.minLon=nodes[0].GetLon();
-    data.maxLon=nodes[0].GetLon();
-
-    for (size_t i=1; i<nodes.size(); i++) {
-      data.minLat=std::min(data.minLat,nodes[i].GetLat());
-      data.maxLat=std::max(data.maxLat,nodes[i].GetLat());
-      data.minLon=std::min(data.minLon,nodes[i].GetLon());
-      data.maxLon=std::max(data.maxLon,nodes[i].GetLon());
-    }
-
-    areaData.push_back(data);
-
-    areasSegments++;
-
-    return true;
-  }*/
 
   void MapPainter::PrepareAreas(const StyleConfig& styleConfig,
                                 const Projection& projection,
@@ -1609,8 +1551,8 @@ namespace osmscout {
     }
 
     bool   transformed=false;
-    size_t transStart;
-    size_t transEnd;
+    size_t transStart=0; // Make the compiler happy
+    size_t transEnd=0;   // Make the compiler happy
 
     for (std::vector<LineStyleRef>::const_iterator ls=lineStyles.begin();
          ls!=lineStyles.end();
@@ -1687,9 +1629,10 @@ namespace osmscout {
       data.endIsClosed=ids.empty() || ids[ids.size()-1]==0;
 
       if (lineOffset!=0.0) {
-        transBuffer.GenerateParallelWay(transStart,transEnd,
-                                        lineOffset,
-                                        data.transStart, data.transEnd);
+        coordBuffer->GenerateParallelWay(transStart,transEnd,
+                                         lineOffset,
+                                         data.transStart,
+                                         data.transEnd);
       }
       else {
         data.transStart=transStart;

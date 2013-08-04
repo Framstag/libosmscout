@@ -541,6 +541,26 @@ namespace osmscout {
     return true;
   }
 
+  OSMSCOUT_API inline void Normalize(double x,
+                                     double y,
+                                     double& nx,
+                                     double& ny)
+  {
+    double length=sqrt(x*x+y*y);
+
+    nx=x/length;
+    ny=y/length;
+  }
+
+  OSMSCOUT_API inline double Det(double x1,
+                                 double y1,
+                                 double x2,
+                                 double y2)
+  {
+    return x1*y2-y1*x2;
+  }
+
+
   extern OSMSCOUT_API size_t Pow(size_t a, size_t b);
   extern OSMSCOUT_API double GetSphericalDistance(double aLon, double aLat,
                                                   double bLon, double bLat);

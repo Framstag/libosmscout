@@ -53,6 +53,168 @@ namespace osmscout {
       (y==other.y && x<other.x);
     }
   };
+
+  struct OSMSCOUT_API Vertex2D
+  {
+  private:
+    double coords[2];
+
+  public:
+    inline Vertex2D()
+    {
+      // no code
+    }
+
+    inline Vertex2D(const Vertex2D& other)
+    {
+      coords[0]=other.coords[0];
+      coords[1]=other.coords[1];
+    }
+
+    inline Vertex2D(double x,
+                    double y)
+    {
+      coords[0]=x;
+      coords[1]=y;
+    }
+
+    inline void SetX(double x)
+    {
+      coords[0]=x;
+    }
+
+    inline void SetY(double y)
+    {
+      coords[1]=y;
+    }
+
+    inline void Set(double x,
+                    double y)
+    {
+      coords[0]=x;
+      coords[1]=y;
+    }
+
+    inline double GetX() const
+    {
+      return coords[0];
+    }
+
+    inline double GetY() const
+    {
+      return coords[1];
+    }
+
+    inline bool operator==(const Vertex2D& other) const
+    {
+      return coords[0]==other.coords[0] &&
+             coords[1]==other.coords[1];
+    }
+
+    inline bool operator<(const Vertex2D& other) const
+    {
+      return coords[1]<other.coords[1] ||
+             (coords[1]==other.coords[1] && coords[0]<other.coords[0]);
+    }
+  };
+
+  struct OSMSCOUT_API Vertex3D
+  {
+  private:
+    double x;
+    double y;
+    double z;
+
+  public:
+    inline Vertex3D()
+    {
+      // no code
+    }
+
+    inline Vertex3D(const Vertex3D& other)
+     :x(other.x),
+      y(other.y),
+      z(other.z)
+    {
+      // no code
+    }
+
+    inline Vertex3D(double x,
+                    double y)
+     :x(x),
+      y(y),
+      z(0.0)
+
+    {
+      // no code
+    }
+
+    inline double GetX() const
+    {
+      return x;
+    }
+
+    inline double GetY() const
+    {
+      return y;
+    }
+
+    inline double GetZ() const
+    {
+      return y;
+    }
+
+    inline void SetX(double x)
+    {
+      this->x=x;
+    }
+
+    inline void SetY(double y)
+    {
+      this->y=y;
+    }
+
+    inline void SetZ(double z)
+    {
+      this->z=z;
+    }
+
+    inline void Set(double x,
+                    double y)
+    {
+      this->x=x;
+      this->y=y;
+      this->z=0;
+    }
+
+    inline void Set(double x,
+                    double y,
+                    double z)
+    {
+      this->x=x;
+      this->y=y;
+      this->z=z;
+    }
+
+    inline bool operator==(const Vertex3D& other) const
+    {
+      return x==other.x &&
+             y==other.y &&
+             z==other.z;
+    }
+
+    inline bool operator<(const Vertex3D& other) const
+    {
+      if (x!=other.x) {
+        return x<other.x;
+      }
+      else if (y!=other.y) {
+        return y<other.y;
+      }
+
+      return z<other.z;
+    }
+  };
 }
 
 #endif

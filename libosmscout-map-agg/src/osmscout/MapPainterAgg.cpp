@@ -365,21 +365,21 @@ namespace osmscout {
     double xo=0;
     double yo=0;
 
-    if (transBuffer.buffer[transStart].x<transBuffer.buffer[transEnd].x) {
+    if (coordBuffer->buffer[transStart].GetX()<coordBuffer->buffer[transEnd].GetX()) {
       for (size_t j=transStart; j<=transEnd; j++) {
         if (j==transStart) {
-          path.move_to(transBuffer.buffer[j].x,
-                       transBuffer.buffer[j].y);
+          path.move_to(coordBuffer->buffer[j].GetX(),
+                       coordBuffer->buffer[j].GetY());
         }
         else {
-          path.line_to(transBuffer.buffer[j].x,
-                       transBuffer.buffer[j].y);
-          length+=sqrt(pow(transBuffer.buffer[j].x-xo,2)+
-                       pow(transBuffer.buffer[j].y-yo,2));
+          path.line_to(coordBuffer->buffer[j].GetX(),
+                       coordBuffer->buffer[j].GetY());
+          length+=sqrt(pow(coordBuffer->buffer[j].GetX()-xo,2)+
+                       pow(coordBuffer->buffer[j].GetY()-yo,2));
         }
 
-        xo=transBuffer.buffer[j].x;
-        yo=transBuffer.buffer[j].y;
+        xo=coordBuffer->buffer[j].GetX();
+        yo=coordBuffer->buffer[j].GetY();
       }
     }
     else {
@@ -387,18 +387,18 @@ namespace osmscout {
         size_t idx=transEnd-j;
 
         if (j==0) {
-          path.move_to(transBuffer.buffer[idx].x,
-                       transBuffer.buffer[idx].y);
+          path.move_to(coordBuffer->buffer[idx].GetX(),
+                       coordBuffer->buffer[idx].GetY());
         }
         else {
-          path.line_to(transBuffer.buffer[idx].x,
-                       transBuffer.buffer[idx].y);
-          length+=sqrt(pow(transBuffer.buffer[idx].x-xo,2)+
-                       pow(transBuffer.buffer[idx].y-yo,2));
+          path.line_to(coordBuffer->buffer[idx].GetX(),
+                       coordBuffer->buffer[idx].GetY());
+          length+=sqrt(pow(coordBuffer->buffer[idx].GetX()-xo,2)+
+                       pow(coordBuffer->buffer[idx].GetY()-yo,2));
         }
 
-        xo=transBuffer.buffer[idx].x;
-        yo=transBuffer.buffer[idx].y;
+        xo=coordBuffer->buffer[idx].GetX();
+        yo=coordBuffer->buffer[idx].GetY();
       }
     }
 
@@ -578,10 +578,12 @@ namespace osmscout {
 
     for (size_t i=transStart; i<=transEnd; i++) {
       if (i==transStart) {
-        p.move_to(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+        p.move_to(coordBuffer->buffer[i].GetX(),
+                  coordBuffer->buffer[i].GetY());
       }
       else {
-        p.line_to(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+        p.line_to(coordBuffer->buffer[i].GetX(),
+                  coordBuffer->buffer[i].GetY());
       }
     }
 
@@ -654,9 +656,11 @@ namespace osmscout {
       rasterizer->filling_rule(agg::fill_non_zero);
     }
 
-    path.move_to(transBuffer.buffer[area.transStart].x,transBuffer.buffer[area.transStart].y);
+    path.move_to(coordBuffer->buffer[area.transStart].GetX(),
+                 coordBuffer->buffer[area.transStart].GetY());
     for (size_t i=area.transStart+1; i<=area.transEnd; i++) {
-      path.line_to(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+      path.line_to(coordBuffer->buffer[i].GetX(),
+                   coordBuffer->buffer[i].GetY());
     }
     path.close_polygon();
 
@@ -669,9 +673,11 @@ namespace osmscout {
         const PolyData    &data=*c;
         agg::path_storage clipPath;
 
-         clipPath.move_to(transBuffer.buffer[data.transStart].x,transBuffer.buffer[data.transStart].y);
+         clipPath.move_to(coordBuffer->buffer[data.transStart].GetX(),
+                          coordBuffer->buffer[data.transStart].GetY());
         for (size_t i=data.transStart+1; i<=data.transEnd; i++) {
-          clipPath.line_to(transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+          clipPath.line_to(coordBuffer->buffer[i].GetX(),
+                           coordBuffer->buffer[i].GetY());
         }
         clipPath.close_polygon();
 

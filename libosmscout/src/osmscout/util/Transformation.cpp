@@ -19,28 +19,22 @@
 
 #include <osmscout/util/Transformation.h>
 
-#include <string.h>
-
 #include <limits>
-
-#include <osmscout/system/Assert.h>
-#include <osmscout/system/Math.h>
-
-#include <iostream>
 
 namespace osmscout {
 
   class LineSegment
   {
   private:
-    TransPoint ref;
-    double     xdelta;
-    double     ydelta;
-    double     inverseLength;
+    TransPolygon::TransPoint ref;
+    double                   xdelta;
+    double                   ydelta;
+    double                   inverseLength;
 
   public:
 
-    LineSegment(const TransPoint& a, const TransPoint& b)
+    LineSegment(const TransPolygon::TransPoint& a,
+                const TransPolygon::TransPoint& b)
     :ref(a)
     {
       xdelta=b.x-a.x;
@@ -53,7 +47,7 @@ namespace osmscout {
       return !(xdelta==0 && ydelta==0);
     }
 
-    double CalculateDistanceSquared(const TransPoint& p)
+    double CalculateDistanceSquared(const TransPolygon::TransPoint& p)
     {
       double cx=p.x-ref.x;
       double cy=p.y-ref.y;
@@ -67,15 +61,15 @@ namespace osmscout {
       return dx*dx+dy*dy;
     }
 
-    double CalculateDistance(const TransPoint& p)
+    double CalculateDistance(const TransPolygon::TransPoint& p)
     {
       return sqrt(CalculateDistance(p));
     }
   };
 
-  static double CalculateDistancePointToLineSegment(const TransPoint& p,
-                                                    const TransPoint& a,
-                                                    const TransPoint& b)
+  static double CalculateDistancePointToLineSegment(const TransPolygon::TransPoint& p,
+                                                    const TransPolygon::TransPoint& a,
+                                                    const TransPolygon::TransPoint& b)
   {
     double xdelta=b.x-a.x;
     double ydelta=b.y-a.y;
@@ -107,7 +101,8 @@ namespace osmscout {
     return sqrt(dx*dx+dy*dy);
   }
 
-  static double CalculateDistancePointToPoint(const TransPoint& a, const TransPoint& b)
+  static double CalculateDistancePointToPoint(const TransPolygon::TransPoint& a,
+                                              const TransPolygon::TransPoint& b)
   {
     double xdelta=b.x-a.x;
     double ydelta=b.y-a.y;
@@ -115,7 +110,7 @@ namespace osmscout {
     return sqrt(xdelta*xdelta + ydelta*ydelta);
   }
 
-  static void SimplifyPolyLineDouglasPeucker(TransPoint* points,
+  static void SimplifyPolyLineDouglasPeucker(TransPolygon::TransPoint* points,
                                              size_t beginIndex,
                                              size_t endIndex,
                                              size_t endValueIndex,
@@ -273,7 +268,8 @@ namespace osmscout {
     }
   }
 
-  void TransPolygon::DropRedundantPointsDouglasPeucker(double optimizeErrorTolerance, bool isArea)
+  void TransPolygon::DropRedundantPointsDouglasPeucker(double optimizeErrorTolerance,
+                                                       bool isArea)
   {
     // An implementation of Douglas-Peuker algorithm http://softsurfer.com/Archive/algorithm_0205/algorithm_0205.htm
 
@@ -499,40 +495,25 @@ namespace osmscout {
     return true;
   }
 
-  TransBuffer::TransBuffer()
-  : bufferSize(131072),
-    usedPoints(0),
-    buffer(NULL)
+  CoordBuffer::~CoordBuffer()
   {
-    buffer = new Pixel[bufferSize];
+    // no code
+  }
+
+  TransBuffer::TransBuffer(CoordBuffer* buffer)
+  : buffer(buffer)
+  {
+    // no code
   }
 
   TransBuffer::~TransBuffer()
   {
-    delete [] buffer;
+    delete buffer;
   }
 
   void TransBuffer::Reset()
   {
-    usedPoints=0;
-  }
-
-  void TransBuffer::AssureRoomForPoints(size_t count)
-  {
-    if (usedPoints+count>bufferSize)
-    {
-      bufferSize=bufferSize*2;
-
-      Pixel* newBuffer=new Pixel[bufferSize];
-
-      memcpy(newBuffer,buffer, sizeof(Pixel)*usedPoints);
-
-      std::cout << "*** Buffer reallocation: " << bufferSize << std::endl;
-
-      delete [] buffer;
-
-      buffer=newBuffer;
-    }
+    buffer->Reset();
   }
 
   void TransBuffer::TransformArea(const Projection& projection,
@@ -541,29 +522,32 @@ namespace osmscout {
                                   size_t& start, size_t &end,
                                   double optimizeErrorTolerance)
   {
-    transPolygon.TransformArea(projection, optimize, nodes, optimizeErrorTolerance);
+    transPolygon.TransformArea(projection,
+                               optimize,
+                               nodes,
+                               optimizeErrorTolerance);
 
     assert(!transPolygon.IsEmpty());
 
-    AssureRoomForPoints(transPolygon.GetLength());
-
-    start=usedPoints;
+    bool isStart=true;
     for (size_t i=transPolygon.GetStart(); i<=transPolygon.GetEnd(); i++) {
       if (transPolygon.points[i].draw) {
-        buffer[usedPoints].x=transPolygon.points[i].x;
-        buffer[usedPoints].y=transPolygon.points[i].y;
-        usedPoints++;
+        end=buffer->PushCoord(transPolygon.points[i].x,
+                              transPolygon.points[i].y);
+
+        if (isStart) {
+          start=end;
+          isStart=false;
+        }
       }
     }
-
-    end=usedPoints-1;
   }
 
   bool TransBuffer::TransformWay(const Projection& projection,
-                    TransPolygon::OptimizeMethod optimize,
-                    const std::vector<GeoCoord>& nodes,
-                    size_t& start, size_t &end,
-                    double optimizeErrorTolerance)
+                                 TransPolygon::OptimizeMethod optimize,
+                                 const std::vector<GeoCoord>& nodes,
+                                 size_t& start, size_t &end,
+                                 double optimizeErrorTolerance)
   {
     transPolygon.TransformWay(projection, optimize, nodes, optimizeErrorTolerance);
 
@@ -571,140 +555,19 @@ namespace osmscout {
       return false;
     }
 
-    AssureRoomForPoints(transPolygon.GetLength());
-
-    start=usedPoints;
+    bool isStart=true;
     for (size_t i=transPolygon.GetStart(); i<=transPolygon.GetEnd(); i++) {
       if (transPolygon.points[i].draw) {
-        buffer[usedPoints].x=transPolygon.points[i].x;
-        buffer[usedPoints].y=transPolygon.points[i].y;
-        usedPoints++;
+        end=buffer->PushCoord(transPolygon.points[i].x,
+                              transPolygon.points[i].y);
+
+        if (isStart) {
+          start=end;
+          isStart=false;
+        }
       }
     }
-
-    end=usedPoints-1;
 
     return true;
-  }
-
-  static void normalize(double x, double y, double& nx,double& ny)
-  {
-    double length=sqrt(x*x+y*y);
-
-    nx=x/length;
-    ny=y/length;
-  }
-
-  static double det(double x1, double y1, double x2,double y2)
-  {
-    return x1*y2-y1*x2;
-  }
-
-  bool TransBuffer::GenerateParallelWay(size_t orgStart, size_t orgEnd,
-                                        double offset,
-                                        size_t& start, size_t& end)
-  {
-    if (orgStart+1>orgEnd) {
-      return false;
-    }
-
-    AssureRoomForPoints(orgEnd-orgStart+1);
-
-    double oax, oay;
-    double obx, oby;
-
-    normalize(buffer[orgStart].y-buffer[orgStart+1].y,
-              buffer[orgStart+1].x-buffer[orgStart].x,
-              oax, oay);
-
-    oax=offset*oax;
-    oay=offset*oay;
-
-    buffer[usedPoints].x=buffer[orgStart].x+oax;
-    buffer[usedPoints].y=buffer[orgStart].y+oay;
-
-    start=usedPoints;
-
-    usedPoints++;
-
-    for (size_t i=orgStart+1; i<orgEnd; i++) {
-      normalize(buffer[i-1].y-buffer[i].y,
-                buffer[i].x-buffer[i-1].x,
-                oax, oay);
-
-      oax=offset*oax;
-      oay=offset*oay;
-
-      normalize(buffer[i].y-buffer[i+1].y,
-                buffer[i+1].x-buffer[i].x,
-                obx, oby);
-
-      obx=offset*obx;
-      oby=offset*oby;
-
-
-      double det1=det(obx-oax, oby-oay, buffer[i+1].x-buffer[i].x, buffer[i+1].y-buffer[i].y);
-      double det2=det(buffer[i].x-buffer[i-1].x, buffer[i].y-buffer[i-1].y,
-                      buffer[i+1].x-buffer[i].x, buffer[i+1].y-buffer[i].y);
-
-      if (fabs(det2)>0.0001) {
-        buffer[usedPoints].x=buffer[i].x+oax+det1/det2*(buffer[i].x-buffer[i-1].x);
-        buffer[usedPoints].y=buffer[i].y+oay+det1/det2*(buffer[i].y-buffer[i-1].y);
-      }
-      else {
-        buffer[usedPoints].x=buffer[i].x+oax;
-        buffer[usedPoints].y=buffer[i].y+oay;
-      }
-
-      usedPoints++;
-    }
-
-    normalize(buffer[orgEnd-1].y-buffer[orgEnd].y,
-              buffer[orgEnd].x-buffer[orgEnd-1].x,
-              oax, oay);
-
-    oax=offset*oax;
-    oay=offset*oay;
-
-    buffer[usedPoints].x=buffer[orgEnd].x+oax;
-    buffer[usedPoints].y=buffer[orgEnd].y+oay;
-
-    end=usedPoints;
-
-    usedPoints++;
-
-    return true;
-  }
-
-  void TransBuffer::GetBoundingBox(size_t start, size_t end,
-                                   double& xmin, double& ymin,
-                                   double& xmax, double& ymax) const
-  {
-    xmin=buffer[start].x;
-    xmax=buffer[start].x;
-    ymin=buffer[start].y;
-    ymax=buffer[start].y;
-
-    for (size_t j=start+1; j<=end; j++) {
-      xmin=std::min(xmin,buffer[j].x);
-      xmax=std::max(xmax,buffer[j].x);
-      ymin=std::min(ymin,buffer[j].y);
-      ymax=std::max(ymax,buffer[j].y);
-    }
-  }
-
-  void TransBuffer::GetCenterPixel(size_t start, size_t end,
-                                   double& cx,
-                                   double& cy) const
-  {
-    double xmin;
-    double xmax;
-    double ymin;
-    double ymax;
-
-    GetBoundingBox(start,end,xmin,ymin,xmax,ymax);
-
-    cx=xmin+(xmax-xmin)/2;
-    cy=ymin+(ymax-ymin)/2;
   }
 }

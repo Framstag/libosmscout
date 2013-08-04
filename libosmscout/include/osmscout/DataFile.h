@@ -91,6 +91,8 @@ namespace osmscout {
   DataFile<N>::DataFile(const std::string& datafile,
                         unsigned long dataCacheSize)
   : datafile(datafile),
+    modeData(FileScanner::LowMemRandom),
+    memoryMapedData(false),
     cache(dataCacheSize),
     isOpen(false)
 
@@ -117,7 +119,7 @@ namespace osmscout {
     this->modeData=modeData;
 
     isOpen=scanner.Open(datafilename,modeData,memoryMapedData);
-    
+
     return isOpen;
   }
 

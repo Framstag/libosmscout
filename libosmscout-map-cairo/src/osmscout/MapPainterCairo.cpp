@@ -667,19 +667,19 @@ namespace osmscout {
     for (size_t j=transStart; j<=transEnd; j++) {
       if (j==transStart) {
         cairo_move_to(draw,
-                      transBuffer.buffer[j].x,
-                      transBuffer.buffer[j].y);
+                      coordBuffer->buffer[j].GetX(),
+                      coordBuffer->buffer[j].GetY());
       }
       else {
         cairo_line_to(draw,
-                      transBuffer.buffer[j].x,
-                      transBuffer.buffer[j].y);
-        lineLength+=sqrt(pow(transBuffer.buffer[j].x-xo,2)+
-                         pow(transBuffer.buffer[j].y-yo,2));
+                      coordBuffer->buffer[j].GetX(),
+                      coordBuffer->buffer[j].GetY());
+        lineLength+=sqrt(pow(coordBuffer->buffer[j].GetX()-xo,2)+
+                         pow(coordBuffer->buffer[j].GetY()-yo,2));
       }
 
-      xo=transBuffer.buffer[j].x;
-      yo=transBuffer.buffer[j].y;
+      xo=coordBuffer->buffer[j].GetX();
+      yo=coordBuffer->buffer[j].GetY();
     }
 
     cairo_path_t *path=cairo_copy_path_flat(draw);
@@ -895,23 +895,23 @@ namespace osmscout {
 
     cairo_new_path(draw);
 
-    if (transBuffer.buffer[transStart].x<=transBuffer.buffer[transEnd].x) {
+    if (coordBuffer->buffer[transStart].GetX()<=coordBuffer->buffer[transEnd].GetX()) {
       for (size_t j=transStart; j<=transEnd; j++) {
         if (j==transStart) {
           cairo_move_to(draw,
-                        transBuffer.buffer[j].x,
-                        transBuffer.buffer[j].y);
+                        coordBuffer->buffer[j].GetX(),
+                        coordBuffer->buffer[j].GetY());
         }
         else {
           cairo_line_to(draw,
-                        transBuffer.buffer[j].x,
-                        transBuffer.buffer[j].y);
-          lineLength+=sqrt(pow(transBuffer.buffer[j].x-xo,2)+
-                           pow(transBuffer.buffer[j].y-yo,2));
+                        coordBuffer->buffer[j].GetX(),
+                        coordBuffer->buffer[j].GetY());
+          lineLength+=sqrt(pow(coordBuffer->buffer[j].GetX()-xo,2)+
+                           pow(coordBuffer->buffer[j].GetY()-yo,2));
         }
 
-        xo=transBuffer.buffer[j].x;
-        yo=transBuffer.buffer[j].y;
+        xo=coordBuffer->buffer[j].GetX();
+        yo=coordBuffer->buffer[j].GetY();
       }
     }
     else {
@@ -920,19 +920,19 @@ namespace osmscout {
 
         if (j==0) {
           cairo_move_to(draw,
-                        transBuffer.buffer[idx].x,
-                        transBuffer.buffer[idx].y);
+                        coordBuffer->buffer[idx].GetX(),
+                        coordBuffer->buffer[idx].GetY());
         }
         else {
           cairo_line_to(draw,
-                        transBuffer.buffer[idx].x,
-                        transBuffer.buffer[idx].y);
-          lineLength+=sqrt(pow(transBuffer.buffer[idx].x-xo,2)+
-                           pow(transBuffer.buffer[idx].y-yo,2));
+                        coordBuffer->buffer[idx].GetX(),
+                        coordBuffer->buffer[idx].GetY());
+          lineLength+=sqrt(pow(coordBuffer->buffer[idx].GetX()-xo,2)+
+                           pow(coordBuffer->buffer[idx].GetY()-yo,2));
         }
 
-        xo=transBuffer.buffer[idx].x;
-        yo=transBuffer.buffer[idx].y;
+        xo=coordBuffer->buffer[idx].GetX();
+        yo=coordBuffer->buffer[idx].GetY();
       }
     }
 
@@ -1146,13 +1146,13 @@ namespace osmscout {
       if (i==transStart) {
         cairo_new_path(draw);
         cairo_move_to(draw,
-                      transBuffer.buffer[i].x,
-                      transBuffer.buffer[i].y);
+                      coordBuffer->buffer[i].GetX(),
+                      coordBuffer->buffer[i].GetY());
       }
       else {
         cairo_line_to(draw,
-                      transBuffer.buffer[i].x,
-                      transBuffer.buffer[i].y);
+                      coordBuffer->buffer[i].GetX(),
+                      coordBuffer->buffer[i].GetY());
       }
     }
 
@@ -1167,8 +1167,12 @@ namespace osmscout {
         cairo_set_dash(draw,NULL,0,0);
         cairo_set_line_width(draw,width);
 
-        cairo_move_to(draw,transBuffer.buffer[transStart].x,transBuffer.buffer[transStart].y);
-        cairo_line_to(draw,transBuffer.buffer[transStart].x,transBuffer.buffer[transStart].y);
+        cairo_move_to(draw,
+                      coordBuffer->buffer[transStart].GetX(),
+                      coordBuffer->buffer[transStart].GetY());
+        cairo_line_to(draw,
+                      coordBuffer->buffer[transStart].GetX(),
+                      coordBuffer->buffer[transStart].GetY());
         cairo_stroke(draw);
       }
 
@@ -1178,8 +1182,12 @@ namespace osmscout {
         cairo_set_dash(draw,NULL,0,0);
         cairo_set_line_width(draw,width);
 
-        cairo_move_to(draw,transBuffer.buffer[transEnd].x,transBuffer.buffer[transEnd].y);
-        cairo_line_to(draw,transBuffer.buffer[transEnd].x,transBuffer.buffer[transEnd].y);
+        cairo_move_to(draw,
+                      coordBuffer->buffer[transEnd].GetX(),
+                      coordBuffer->buffer[transEnd].GetY());
+        cairo_line_to(draw,
+                      coordBuffer->buffer[transEnd].GetX(),
+                      coordBuffer->buffer[transEnd].GetY());
         cairo_stroke(draw);
       }
     }
@@ -1196,9 +1204,13 @@ namespace osmscout {
     }
 
     cairo_new_path(draw);
-    cairo_move_to(draw,transBuffer.buffer[area.transStart].x,transBuffer.buffer[area.transStart].y);
+    cairo_move_to(draw,
+                  coordBuffer->buffer[area.transStart].GetX(),
+                  coordBuffer->buffer[area.transStart].GetY());
     for (size_t i=area.transStart+1; i<=area.transEnd; i++) {
-      cairo_line_to(draw,transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+      cairo_line_to(draw,
+                    coordBuffer->buffer[i].GetX(),
+                    coordBuffer->buffer[i].GetY());
     }
     cairo_close_path(draw);
 
@@ -1211,9 +1223,13 @@ namespace osmscout {
 
         cairo_new_sub_path(draw);
         cairo_set_line_width(draw,0.0);
-        cairo_move_to(draw,transBuffer.buffer[data.transStart].x,transBuffer.buffer[data.transStart].y);
+        cairo_move_to(draw,
+                      coordBuffer->buffer[data.transStart].GetX(),
+                      coordBuffer->buffer[data.transStart].GetY());
         for (size_t i=data.transStart+1; i<=data.transEnd; i++) {
-          cairo_line_to(draw,transBuffer.buffer[i].x,transBuffer.buffer[i].y);
+          cairo_line_to(draw,
+                        coordBuffer->buffer[i].GetX(),
+                        coordBuffer->buffer[i].GetY());
         }
         cairo_close_path(draw);
       }

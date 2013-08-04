@@ -446,7 +446,7 @@ namespace osmscout {
         stream << " ";
       }
 
-      stream << transBuffer.buffer[i].x << "," << transBuffer.buffer[i].y;
+      stream << coordBuffer->buffer[i].GetX() << "," << coordBuffer->buffer[i].GetY();
 
     }
 
@@ -473,7 +473,7 @@ namespace osmscout {
         stream << " ";
       }
 
-      stream << transBuffer.buffer[i].x << "," << transBuffer.buffer[i].y;
+      stream << coordBuffer->buffer[i].GetX() << "," << coordBuffer->buffer[i].GetY();
 
     }
 
@@ -528,9 +528,9 @@ namespace osmscout {
 
     stream << "          d=\"";
 
-    stream << "M " << transBuffer.buffer[area.transStart].x << " " << transBuffer.buffer[area.transStart].y;
+    stream << "M " << coordBuffer->buffer[area.transStart].GetX() << " " << coordBuffer->buffer[area.transStart].GetY();
     for (size_t i=area.transStart+1; i<=area.transEnd; i++) {
-      stream << " L " << transBuffer.buffer[i].x << " " << transBuffer.buffer[i].y;
+      stream << " L " << coordBuffer->buffer[i].GetX() << " " << coordBuffer->buffer[i].GetY();
     }
     stream << " Z";
 
@@ -539,9 +539,9 @@ namespace osmscout {
         c++) {
       const PolyData    &data=*c;
 
-      stream << "M " << transBuffer.buffer[data.transStart].x << " " << transBuffer.buffer[data.transStart].y;
+      stream << "M " << coordBuffer->buffer[data.transStart].GetX() << " " << coordBuffer->buffer[data.transStart].GetY();
       for (size_t i=data.transStart+1; i<=data.transEnd; i++) {
-        stream << " L " << transBuffer.buffer[i].x << " " << transBuffer.buffer[i].y;
+        stream << " L " << coordBuffer->buffer[i].GetX() << " " << coordBuffer->buffer[i].GetY();
       }
       stream << " Z";
     }

@@ -302,6 +302,7 @@ namespace osmscout {
        Scratch variables for path optimization algorithm
      */
     //@{
+    CoordBufferImpl<Vertex2D> *coordBuffer;
     TransBuffer               transBuffer; //! Static (avoid reallocation) buffer of transformed coordinates
     //@}
 

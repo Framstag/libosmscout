@@ -62,6 +62,21 @@ PKG_CHECK_MODULES(LIBOPENGL,[gl],
                   [AC_SUBST(LIBOPENGL_CFLAGS)
                    AC_SUBST(LIBOPENGL_LIBS)])
 
+AX_CHECK_GLUT
+AM_CONDITIONAL(HAVE_LIB_GLUT,[test "$no_glut" != "yes"])
+
+if test "x$ac_cv_header_GL_glut_h" = xyes; then
+  AC_DEFINE([OSMSCOUT_MAP_OPENGL_HAVE_GL_GLUT_H],
+             [1],
+             [GLUT is defined by header GL/glut.h])
+fi
+
+if test "x$ac_cv_header_GLUT_glut_h" = xyes; then
+  AC_DEFINE([OSMSCOUT_MAP_OPENGL_HAVE_GLUT_GLUT_H]
+            [1],
+            [GLUT is defined by header GLUT/glut.h])
+fi
+
 CPPFLAGS="-DLIB_DATADIR=\\\"$datadir/$PACKAGE_NAME\\\" $CPPFLAGS"
 
 AC_CONFIG_FILES([Makefile src/Makefile include/Makefile libosmscout-map-opengl.pc libosmscout-map-opengl-uninstalled.pc])
