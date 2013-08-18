@@ -44,7 +44,9 @@ namespace osmscout {
   }
 
   MapPainterOpenGL::MapPainterOpenGL()
-  : tesselator(gluNewTess())
+  : MapPainter(new CoordBufferImpl<Vertex3D>()),
+    coordBuffer((CoordBufferImpl<Vertex3D>*)transBuffer.buffer),
+    tesselator(gluNewTess())
   {
     gluTessNormal(tesselator,
                   0,0,1);
@@ -209,6 +211,25 @@ namespace osmscout {
       }
 
       gluTessEndContour(tesselator);
+
+      if (!area.clippings.empty()) {
+        // Clip areas within the area by using CAIRO_FILL_RULE_EVEN_ODD
+        for (std::list<PolyData>::const_iterator c=area.clippings.begin();
+            c!=area.clippings.end();
+            c++) {
+          const PolyData& data=*c;
+
+          gluTessBeginContour(tesselator);
+
+          for (size_t i=data.transStart; i<=data.transEnd; i++) {
+            gluTessVertex(tesselator,
+                          (GLdouble*)&coordBuffer->buffer[i],
+                          (GLdouble*)&coordBuffer->buffer[i]);
+          }
+
+          gluTessEndContour(tesselator);
+        }
+      }
 
       gluTessEndPolygon(tesselator);
     }

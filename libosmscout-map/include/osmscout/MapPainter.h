@@ -297,12 +297,13 @@ namespace osmscout {
       std::string       text;     //! The label text
     };
 
+  private:
+    CoordBuffer               *coordBuffer;
   protected:
     /**
        Scratch variables for path optimization algorithm
      */
     //@{
-    CoordBufferImpl<Vertex2D> *coordBuffer;
     TransBuffer               transBuffer; //! Static (avoid reallocation) buffer of transformed coordinates
     //@}
 
@@ -366,11 +367,6 @@ namespace osmscout {
     //@}
 
   private:
-    void ScanConvertLine(size_t transStart, size_t transEnd,
-                         double cellWidth,
-                         double cellHeight,
-                         std::vector<ScanCell>& cells);
-
     void CalculateEffectiveLabelStyle(const Projection& projection,
                                       const MapParameter& parameter,
                                       const LabelStyle& style,
@@ -725,7 +721,7 @@ namespace osmscout {
     //@}
 
   public:
-    MapPainter();
+    MapPainter(CoordBuffer *buffer);
     virtual ~MapPainter();
   };
 }

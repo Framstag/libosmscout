@@ -38,6 +38,8 @@
 namespace osmscout {
 
   MapPainterAgg::MapPainterAgg()
+  : MapPainter(new CoordBufferImpl<Vertex2D>()),
+    coordBuffer((CoordBufferImpl<Vertex2D>*)transBuffer.buffer)
   {
     // no code
   }

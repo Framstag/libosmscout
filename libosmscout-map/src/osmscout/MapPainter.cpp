@@ -171,8 +171,8 @@ namespace osmscout {
     this->breaker=breaker;
   }
 
-  MapPainter::MapPainter()
-  : coordBuffer(new CoordBufferImpl<Vertex2D>()),
+  MapPainter::MapPainter(CoordBuffer *buffer)
+  : coordBuffer(buffer),
     transBuffer(coordBuffer)
   {
     tunnelDash.push_back(0.4);
@@ -197,27 +197,6 @@ namespace osmscout {
   MapPainter::~MapPainter()
   {
     // no code
-  }
-
-  void MapPainter::ScanConvertLine(size_t transStart, size_t transEnd,
-                                   double cellWidth,
-                                   double cellHeight,
-                                   std::vector<ScanCell>& cells)
-  {
-    if (transStart==transEnd) {
-      return;
-    }
-
-    for (size_t i=transStart; i<transEnd; i++) {
-      size_t j=i+1;
-
-      int x1=int(coordBuffer->buffer[i].GetX()/cellWidth);
-      int x2=int(coordBuffer->buffer[j].GetX()/cellWidth);
-      int y1=int(coordBuffer->buffer[i].GetY()/cellHeight);
-      int y2=int(coordBuffer->buffer[j].GetY()/cellHeight);
-
-      osmscout::ScanConvertLine(x1,y1,x2,y2,cells);
-    }
   }
 
   bool MapPainter::IsVisible(const Projection& projection,
@@ -543,7 +522,8 @@ namespace osmscout {
     FillStyleRef          unknownFill;
     LineStyleRef          coastlineLine;
     std::vector<GeoCoord> points;
-    size_t                start,end;
+    size_t                start=0; // Make the compiler happy
+    size_t                end=0;   // Make the compiler happy
 
     styleConfig.GetSeaFillStyle(projection,
                                 parameter.GetDPI(),
@@ -604,25 +584,28 @@ namespace osmscout {
         points[3].Set(areaData.maxLat,areaData.minLon);
         points[4]=points[0];
 
-        transBuffer.TransformArea(projection,
-                                  TransPolygon::none,
-                                  points,
-                                  start,end,
-                                  parameter.GetOptimizeErrorToleranceDots());
+        transBuffer.transPolygon.TransformArea(projection,
+                                               TransPolygon::none,
+                                               points,
+                                               parameter.GetOptimizeErrorToleranceDots());
 
-        coordBuffer->buffer[start+0].Set(floor(coordBuffer->buffer[start+0].GetX()),
-                                         ceil(coordBuffer->buffer[start+0].GetY()));
+        size_t s=transBuffer.transPolygon.GetStart();
 
-        coordBuffer->buffer[start+1].Set(ceil(coordBuffer->buffer[start+1].GetX()),
-                                         ceil(coordBuffer->buffer[start+1].GetY()));
+        start=transBuffer.buffer->PushCoord(floor(transBuffer.transPolygon.points[s+0].x),
+                                            ceil(transBuffer.transPolygon.points[s+0].y));
 
-        coordBuffer->buffer[start+2].Set(ceil(coordBuffer->buffer[start+2].GetX()),
-                                         floor(coordBuffer->buffer[start+2].GetY()));
 
-        coordBuffer->buffer[start+3].Set(floor(coordBuffer->buffer[start+3].GetX()),
-                                         floor(coordBuffer->buffer[start+3].GetY()));
+        transBuffer.buffer->PushCoord(ceil(transBuffer.transPolygon.points[s+1].x),
+                                      ceil(transBuffer.transPolygon.points[s+1].y));
 
-        coordBuffer->buffer[start+4]=coordBuffer->buffer[start];
+        transBuffer.buffer->PushCoord(ceil(transBuffer.transPolygon.points[s+2].x),
+                                      floor(transBuffer.transPolygon.points[s+2].y));
+
+        transBuffer.buffer->PushCoord(floor(transBuffer.transPolygon.points[s+3].x),
+                                      floor(transBuffer.transPolygon.points[s+3].y));
+
+        end=transBuffer.buffer->PushCoord(floor(transBuffer.transPolygon.points[s+4].x),
+                                          ceil(transBuffer.transPolygon.points[s+4].y));
       }
       else {
         points.resize(tile->coords.size());
@@ -637,25 +620,41 @@ namespace osmscout {
           points[i].Set(lat,lon);
         }
 
-        transBuffer.TransformArea(projection,
-                                  TransPolygon::none,
-                                  points,
-                                  start,end,
-                                  parameter.GetOptimizeErrorToleranceDots());
+        transBuffer.transPolygon.TransformArea(projection,
+                                               TransPolygon::none,
+                                               points,
+                                               parameter.GetOptimizeErrorToleranceDots());
 
-        for (size_t i=0; i<points.size(); i++) {
+        for (size_t i=transBuffer.transPolygon.GetStart(); i<=transBuffer.transPolygon.GetEnd(); i++) {
+          double x,y;
+
           if (tile->coords[i].x==0) {
-            coordBuffer->buffer[start+i].SetX(floor(coordBuffer->buffer[start+i].GetX()));
+            x=floor(transBuffer.transPolygon.points[i].x);
           }
           else if (tile->coords[i].x==GroundTile::Coord::CELL_MAX) {
-            coordBuffer->buffer[start+i].SetX(ceil(coordBuffer->buffer[start+i].GetX()));
+            x=ceil(transBuffer.transPolygon.points[i].x);
+          }
+          else {
+            x=transBuffer.transPolygon.points[i].x;
           }
 
           if (tile->coords[i].y==0) {
-            coordBuffer->buffer[start+i].SetY(ceil(coordBuffer->buffer[start+i].GetY()));
+            y=ceil(transBuffer.transPolygon.points[i].y);
           }
           else if (tile->coords[i].y==GroundTile::Coord::CELL_MAX) {
-            coordBuffer->buffer[start+i].SetY(floor(coordBuffer->buffer[start+i].GetY()));
+            y=floor(transBuffer.transPolygon.points[i].y);
+          }
+          else {
+            y=transBuffer.transPolygon.points[i].y;
+          }
+
+          size_t idx=transBuffer.buffer->PushCoord(x,y);
+
+          if (i==transBuffer.transPolygon.GetStart()) {
+            start=idx;
+          }
+          else if (i==transBuffer.transPolygon.GetEnd()) {
+            end=idx;
           }
         }
 
@@ -759,7 +758,10 @@ namespace osmscout {
     double stepSizeInPixel=ConvertWidthToPixel(parameter,shieldStyle->GetShieldSpace());
 
     wayScanlines.clear();
-    ScanConvertLine(transStart,transEnd,1,1,wayScanlines);
+
+    transBuffer.buffer->ScanConvertLine(transStart,
+                                        transEnd,
+                                        wayScanlines);
 
     size_t i=0;
     while (i<wayScanlines.size()) {

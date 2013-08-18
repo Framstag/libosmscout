@@ -41,6 +41,7 @@ namespace osmscout {
   class OSMSCOUT_MAP_SVG_API MapPainterSVG : public MapPainter
   {
   private:
+    CoordBufferImpl<Vertex2D>        *coordBuffer;
 #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
     typedef OSMSCOUT_HASHMAP<size_t,PangoFontDescription*>  FontMap;          //! Map type for mapping  font sizes to font
 

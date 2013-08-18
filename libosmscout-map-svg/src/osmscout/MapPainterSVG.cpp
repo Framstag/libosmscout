@@ -34,7 +34,9 @@ namespace osmscout {
   static const char* valueChar="0123456789abcdef";
 
   MapPainterSVG::MapPainterSVG()
-  : stream(NULL),
+  : MapPainter(new CoordBufferImpl<Vertex2D>()),
+    coordBuffer((CoordBufferImpl<Vertex2D>*)transBuffer.buffer),
+    stream(NULL),
     typeConfig(NULL)
   {
 #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)

@@ -318,6 +318,8 @@ namespace osmscout {
 #endif
 
   MapPainterCairo::MapPainterCairo()
+  : MapPainter(new CoordBufferImpl<Vertex2D>()),
+    coordBuffer((CoordBufferImpl<Vertex2D>*)transBuffer.buffer)
   {
     // no code
   }

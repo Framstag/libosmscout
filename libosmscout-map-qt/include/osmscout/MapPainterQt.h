@@ -30,13 +30,16 @@ namespace osmscout {
 
   class OSMSCOUT_MAP_QT_API MapPainterQt : public MapPainter
   {
-    QPainter               *painter;
+  private:
+    CoordBufferImpl<Vertex2D> *coordBuffer;
 
-    std::vector<QImage>    images;        //! vector of QImage for icons
-    std::vector<QImage>    patternImages; //! vector of QImage for fill patterns
-    std::vector<QBrush>    patterns;      //! vector of QBrush for fill patterns
-    std::map<size_t,QFont> fonts;         //! Cached fonts
-    std::vector<double>    sin;           //! Lookup table for sin calculation
+    QPainter                  *painter;
+
+    std::vector<QImage>       images;        //! vector of QImage for icons
+    std::vector<QImage>       patternImages; //! vector of QImage for fill patterns
+    std::vector<QBrush>       patterns;      //! vector of QBrush for fill patterns
+    std::map<size_t,QFont>    fonts;         //! Cached fonts
+    std::vector<double>       sin;           //! Lookup table for sin calculation
 
   private:
     QFont GetFont(const MapParameter& parameter,

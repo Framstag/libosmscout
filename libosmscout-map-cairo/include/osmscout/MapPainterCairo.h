@@ -43,6 +43,8 @@ namespace osmscout {
   class OSMSCOUT_MAP_CAIRO_API MapPainterCairo : public MapPainter
   {
   private:
+    CoordBufferImpl<Vertex2D>              *coordBuffer;
+
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
     typedef PangoFontDescription*          Font;
 #else

@@ -31,6 +31,7 @@
 #include <osmscout/GeoCoord.h>
 #include <osmscout/Pixel.h>
 
+#include <osmscout/util/Geometry.h>
 #include <osmscout/util/Projection.h>
 
 #include <osmscout/system/Assert.h>
@@ -120,6 +121,14 @@ namespace osmscout {
     virtual void Reset() = 0;
     virtual size_t PushCoord(double x, double y) = 0;
     virtual size_t GetLength() const = 0;
+    virtual bool GenerateParallelWay(size_t orgStart,
+                                     size_t orgEnd,
+                                     double offset,
+                                     size_t& start,
+                                     size_t& end) = 0;
+    virtual void ScanConvertLine(size_t start,
+                                 size_t end,
+                                 std::vector<ScanCell>& cells) = 0;
   };
 
   template<class P>
@@ -145,6 +154,11 @@ namespace osmscout {
                              double offset,
                              size_t& start,
                              size_t& end);
+
+    void ScanConvertLine(size_t start,
+                         size_t end,
+                         std::vector<ScanCell>& cells);
+
 /*
     void GetBoundingBox(size_t start, size_t end,
                         double& xmin, double& ymin,
@@ -197,6 +211,12 @@ namespace osmscout {
     buffer[usedPoints].Set(x,y);
 
     return usedPoints++;
+  }
+
+  template<class P>
+  size_t CoordBufferImpl<P>::GetLength() const
+  {
+    return usedPoints;
   }
 
   template<class P>
@@ -274,9 +294,22 @@ namespace osmscout {
   }
 
   template<class P>
-  size_t CoordBufferImpl<P>::GetLength() const
+  void CoordBufferImpl<P>::ScanConvertLine(size_t start,
+                                           size_t end,
+                                           std::vector<ScanCell>& cells)
   {
-    return usedPoints;
+    for (size_t i=start; i<end; i++) {
+      size_t j=i+1;
+
+      int x1=int(buffer[i].GetX());
+      int x2=int(buffer[j].GetX());
+      int y1=int(buffer[i].GetY());
+      int y2=int(buffer[j].GetY());
+
+      osmscout::ScanConvertLine(x1,y1,
+                                x2,y2,
+                                cells);
+    }
   }
 
   /*
@@ -316,10 +349,8 @@ namespace osmscout {
 
   class OSMSCOUT_API TransBuffer
   {
-  private:
-    TransPolygon transPolygon;
-
   public:
+    TransPolygon transPolygon;
     CoordBuffer *buffer;
 
   public:
