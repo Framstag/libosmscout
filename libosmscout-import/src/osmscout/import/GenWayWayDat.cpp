@@ -334,7 +334,7 @@ namespace osmscout {
 
       WaysByNodeMap::iterator lastNodeCandidate=waysByNode.find(lastNodeId);
 
-      // Way is circular an dalready closed
+      // Way is circular and already closed
       if (lastNodeCandidate==waysByNode.end()) {
         continue;
       }
@@ -354,6 +354,15 @@ namespace osmscout {
                                   way->GetId(),
                                   origTags,
                                   origReverseNodes)) {
+        continue;
+      }
+
+      // If we are a oneway that could be merge with one than
+      // one alternative, we skip since we cannot be sure
+      // that the merge is correct
+      if (lastNodeCandidate!=waysByNode.end() &&
+          origAttributes.GetAccess().IsOneway() &&
+          lastNodeCandidate->second.size()>2) {
         continue;
       }
 
@@ -401,10 +410,12 @@ namespace osmscout {
           }
 
           // Merging ways in the wrong way
-          if (lastNodeId==candidate->GetLastNodeId() &&
-              origAttributes.IsOneway()) {
+
+          // We should not merge oneways if there is more than one alternative
+          /* if (lastNodeId==candidate->GetLastNodeId() &&
+              origAttributes.GetAccess().IsOnewayForward()) {
             continue;
-          }
+          }*/
 
           bool restricted=false;
 #pragma omp critical

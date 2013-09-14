@@ -62,27 +62,39 @@ namespace osmscout {
    */
   class OSMSCOUT_API AbstractRoutingProfile : public RoutingProfile
   {
+  public:
+    enum Vehicle
+    {
+      vehicleFoot,
+      vehicleBicylce,
+      vehicleCar
+    };
+
   protected:
+    Vehicle             vehicle;
+    uint8_t             vehicleRouteNodeBit;
     std::vector<double> speeds;
     double              minSpeed;
     double              maxSpeed;
     double              vehicleMaxSpeed;
-    bool                wrongDirectionOneway;
 
   public:
     AbstractRoutingProfile();
 
+    void SetVehicle(Vehicle vehicle);
     void SetVehicleMaxSpeed(double maxSpeed);
-    void SetTravelOnewaysInWrongDirection(bool wrongDirectionOneway);
+
+    inline Vehicle GetVehicle() const
+    {
+      return vehicle;
+    }
 
     void AddType(TypeId type, double speed);
 
     inline bool CanUse(const RouteNode& currentNode,
                        size_t pathIndex) const
     {
-      // Path is a "oneway in wrong direction" path that we cannot use
-      if (!wrongDirectionOneway &&
-          (currentNode.paths[pathIndex].flags & RouteNode::wrongDirectionOneway)) {
+      if (!(currentNode.paths[pathIndex].flags & vehicleRouteNodeBit)) {
         return false;
       }
 

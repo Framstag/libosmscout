@@ -512,8 +512,16 @@ int main(int argc, char* argv[])
 
   int currentArg=1;
   while (currentArg<argc) {
-    if (strcmp(argv[currentArg],"-r")==0) {
-      routingProfile.SetTravelOnewaysInWrongDirection(true);
+    if (strcmp(argv[currentArg],"--foot")==0) {
+      routingProfile.SetVehicle(osmscout::AbstractRoutingProfile::vehicleFoot);
+      currentArg++;
+    }
+    else if (strcmp(argv[currentArg],"--bicycle")==0) {
+      routingProfile.SetVehicle(osmscout::AbstractRoutingProfile::vehicleBicylce);
+      currentArg++;
+    }
+    else if (strcmp(argv[currentArg],"--car")==0) {
+      routingProfile.SetVehicle(osmscout::AbstractRoutingProfile::vehicleCar);
       currentArg++;
     }
     else {

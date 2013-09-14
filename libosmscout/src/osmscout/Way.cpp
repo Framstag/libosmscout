@@ -38,7 +38,6 @@ namespace osmscout {
 
 
     flags=0;
-    //access=0;
     name.clear();
     nameAlt.clear();
     ref.clear();
@@ -214,17 +213,6 @@ namespace osmscout {
         }
         tag=tags.erase(tag);
       }
-      else if (tag->key==typeConfig.tagOneway) {
-        if (tag->value=="-1") {
-          reverseNodes=true;
-          flags|=isOneway;
-        }
-        else if (!(tag->value=="no" || tag->value=="false" || tag->value=="0")) {
-          flags|=isOneway;
-        }
-
-        tag=tags.erase(tag);
-      }
       else if (tag->key==typeConfig.tagAccess) {
         if (tag->value=="no" ||
             tag->value=="private" ||
@@ -233,11 +221,11 @@ namespace osmscout {
           flags&=~hasAccess;
         }
 
-        tag=tags.erase(tag);
+        ++tag;
+        //tag=tags.erase(tag);
       }
       else if (tag->key==typeConfig.tagJunction) {
         if (tag->value=="roundabout") {
-          flags|=isOneway;
           flags|=isRoundabout;
           // If it is a roundabout is cannot be a area
         }
@@ -295,6 +283,12 @@ namespace osmscout {
       }
     }
 
+    access.Parse(progress,
+                 typeConfig,
+                 type,
+                 id,
+                 tags);
+
     this->tags=tags;
 
     return true;
@@ -313,7 +307,7 @@ namespace osmscout {
 
     this->flags=flags;
 
-    //scanner.Read(access);
+    access.Read(scanner);
 
     if (flags & hasName) {
       scanner.Read(name);
@@ -446,7 +440,7 @@ namespace osmscout {
 
     writer.Write(flags);
 
-    //writer.Write(access);
+    access.Write(writer);
 
     if (flags & hasName) {
       writer.Write(name);
@@ -498,12 +492,13 @@ namespace osmscout {
       return false;
     }
 
-    if ((flags & (isBridge | isTunnel | isOneway | isRoundabout))!=
-        (other.flags & (isBridge | isTunnel | isOneway | isRoundabout))) {
+    if ((flags & (hasAccess | isBridge | isTunnel | isRoundabout))!=
+        (other.flags & (hasAccess | isBridge | isTunnel | isRoundabout))) {
       return false;
     }
 
-    if (name!=other.name ||
+    if (access!=other.access ||
+        name!=other.name ||
         nameAlt!=other.nameAlt ||
         ref!=other.ref ||
         houseNr!=other.houseNr ||

@@ -374,6 +374,54 @@ static void DumpWayAttributes(const osmscout::WayAttributes& attributes,
     std::cout << "access: false" << std::endl;
   }
 
+  if (attributes.GetAccess().IsOnewayForward()) {
+    DumpIndent(indent);
+    std::cout << "oneway: forward" << std::endl;
+  }
+  else if (attributes.GetAccess().IsOnewayBackward()) {
+    DumpIndent(indent);
+    std::cout << "oneway: backward" << std::endl;
+  }
+
+  if (attributes.GetAccess().CanRouteFoot()) {
+    DumpIndent(indent);
+    std::cout << "foot: both" << std::endl;
+  }
+  else if (attributes.GetAccess().CanRouteFootForward()) {
+    DumpIndent(indent);
+    std::cout << "foot: forward" << std::endl;
+  }
+  else if (attributes.GetAccess().CanRouteFootBackward()) {
+    DumpIndent(indent);
+    std::cout << "foot: backward" << std::endl;
+  }
+
+  if (attributes.GetAccess().CanRouteBicycle()) {
+    DumpIndent(indent);
+    std::cout << "bicycle: both" << std::endl;
+  }
+  else if (attributes.GetAccess().CanRouteBicycleForward()) {
+    DumpIndent(indent);
+    std::cout << "bicycle: forward" << std::endl;
+  }
+  else if (attributes.GetAccess().CanRouteBicycleBackward()) {
+    DumpIndent(indent);
+    std::cout << "bicycle: backward" << std::endl;
+  }
+
+  if (attributes.GetAccess().CanRouteCar()) {
+    DumpIndent(indent);
+    std::cout << "car: both" << std::endl;
+  }
+  else if (attributes.GetAccess().CanRouteCarForward()) {
+    DumpIndent(indent);
+    std::cout << "car: forward" << std::endl;
+  }
+  else if (attributes.GetAccess().CanRouteCarBackward()) {
+    DumpIndent(indent);
+    std::cout << "car: backward" << std::endl;
+  }
+
   if (attributes.IsBridge()) {
     DumpIndent(indent);
     std::cout << "bridge: true" << std::endl;
@@ -382,11 +430,6 @@ static void DumpWayAttributes(const osmscout::WayAttributes& attributes,
   if (attributes.IsTunnel()) {
     DumpIndent(indent);
     std::cout << "tunnel: true" << std::endl;
-  }
-
-  if (attributes.IsOneway()) {
-    DumpIndent(indent);
-    std::cout << "oneway: true" << std::endl;
   }
 
   if (attributes.IsRoundabout()) {

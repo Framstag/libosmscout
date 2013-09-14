@@ -42,6 +42,7 @@ nobase_include_HEADERS= osmscout/private/Config.h \
                         osmscout/Point.h \
                         osmscout/Location.h \
                         osmscout/Tag.h \
+                        osmscout/AttributeAccess.h \
                         osmscout/TurnRestriction.h \
                         osmscout/Way.h \
                         osmscout/ObjectRef.h \

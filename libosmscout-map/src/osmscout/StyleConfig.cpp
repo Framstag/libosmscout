@@ -1261,7 +1261,7 @@ namespace osmscout {
     }
 
     if (oneway &&
-        !attributes.IsOneway()) {
+        !attributes.GetAccess().IsOneway()) {
       return false;
     }
 

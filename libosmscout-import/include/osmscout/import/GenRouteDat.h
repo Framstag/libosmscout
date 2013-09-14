@@ -67,43 +67,72 @@ namespace osmscout {
     typedef std::map<Id,std::vector<TurnRestrictionData> > ViaTurnRestrictionMap;
 
   private:
+    /**
+     * Read turn restrictions and return a map of way ids together with their (set to 0) file offset
+     */
     bool ReadTurnRestrictionWayIds(const ImportParameter& parameter,
                                    Progress& progress,
                                    std::map<Id,FileOffset>& wayIdOffsetMap);
 
+    /**
+     * Resove the file offsets for the way ids given in the wayIdOffsetMap
+     */
     bool ResolveWayIdsToFileOffsets(const ImportParameter& parameter,
                                     Progress& progress,
                                     std::map<Id,FileOffset>& wayIdOffsetMap);
 
+    /**
+     * Red the turn restriction again using the "way id to file offset" map and create a ViaTurnRestrictionMap.
+     */
     bool ReadTurnRestrictionData(const ImportParameter& parameter,
                                  Progress& progress,
                                  const std::map<Id,FileOffset>& wayIdOffsetMap,
                                  ViaTurnRestrictionMap& restrictions);
 
+    /**
+     * Helper method that sequentially calls ReadTurnRestrictionWayIds(),
+     * ResolveWayIdsToFileOffsets() and ReadTurnRestrictionData()
+     */
     bool ReadTurnRestrictions(const ImportParameter& parameter,
                               Progress& progress,
                               ViaTurnRestrictionMap& restrictions);
 
+    /**
+     * Calculates if one can travel from Way "from" to Way "to" with the restrictions given for the
+     * intersecting node.
+     */
     bool CanTurn(const std::vector<TurnRestrictionData>& restrictions,
                  FileOffset from,
                  FileOffset to) const;
 
+    /**
+     * Reads all relevant ways and areas and returns all nodes where these intersect.
+     */
     bool ReadJunctions(const ImportParameter& parameter,
                        Progress& progress,
                        const TypeConfig& typeConfig,
                        NodeUseMap& nodeUseMap);
 
+    /**
+     * Builds up a list of ObjectFileRefs for every junction node.
+     */
     bool ReadWayObjectsAtJunctions(const ImportParameter& parameter,
                                    Progress& progress,
                                    const TypeConfig& typeConfig,
                                    const NodeUseMap& nodeUseMap,
                                    NodeIdObjectsMap& nodeObjectsMap);
 
+    /**
+     * Loads ways based on their file offset.
+     */
     bool LoadWays(Progress& progress,
                   FileScanner& scanner,
                   const std::set<FileOffset>& fileOffsets,
                   OSMSCOUT_HASHMAP<FileOffset,WayRef>& waysMap);
 
+    /**
+     * Loads areas based on their file offset.
+     */
     bool LoadAreas(Progress& progress,
                    FileScanner& scanner,
                    const std::set<FileOffset>& fileOffsets,
@@ -115,18 +144,30 @@ namespace osmscout {
                                     size_t nextNode,
                                     bool clockwise) const;*/
 
-    void CalculateAreaPaths(RouteNode& routeNode,
+    /**
+     * Calculate all possible route from the given route node for the given area
+     */
+    void CalculateAreaPaths(const TypeConfig& typeConfig,
+                            RouteNode& routeNode,
                             const Area& area,
                             FileOffset routeNodeOffset,
                             const NodeIdObjectsMap& nodeObjectsMap,
                             const NodeIdOffsetMap& nodeIdOffsetMap,
                             PendingRouteNodeOffsetsMap& pendingOffsetsMap);
+
+    /**
+     * Calculate all possible route from the given route node for the given circular way
+     */
     void CalculateCircularWayPaths(RouteNode& routeNode,
                                    const Way& way,
                                    FileOffset routeNodeOffset,
                                    const NodeIdObjectsMap& nodeObjectsMap,
                                    const NodeIdOffsetMap& nodeIdOffsetMap,
                                    PendingRouteNodeOffsetsMap& pendingOffsetsMap);
+
+    /**
+     * Calculate all possible route from the given route node for the given non-circular way
+     */
     void CalculateWayPaths(RouteNode& routeNode,
                            const Way& way,
                            FileOffset routeNodeOffset,
@@ -134,10 +175,17 @@ namespace osmscout {
                            const NodeIdOffsetMap& nodeIdOffsetMap,
                            PendingRouteNodeOffsetsMap& pendingOffsetsMap);
 
+    /**
+     * Adds the result of the turn restriction evaluation to the route node.
+     */
     void FillRoutePathExcludes(RouteNode& routeNode,
                                const std::list<ObjectFileRef>& objects,
                                const ViaTurnRestrictionMap& restrictions);
 
+    /**
+     * Adds missing file offsets to route nodes that were not written at the time the referencing route node
+     * was stored.
+     */
     bool HandlePendingOffsets(const ImportParameter& parameter,
                               Progress& progress,
                               const NodeIdOffsetMap& routeNodeIdOffsetMap,

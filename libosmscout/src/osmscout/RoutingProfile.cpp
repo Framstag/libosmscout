@@ -31,22 +31,35 @@ namespace osmscout {
   }
 
   AbstractRoutingProfile::AbstractRoutingProfile()
-   : minSpeed(0),
+   : vehicle(vehicleCar),
+     vehicleRouteNodeBit(RouteNode::usableByCar),
+     minSpeed(0),
      maxSpeed(0),
-     vehicleMaxSpeed(std::numeric_limits<double>::max()),
-     wrongDirectionOneway(false)
+     vehicleMaxSpeed(std::numeric_limits<double>::max())
   {
     // no code
+  }
+
+  void AbstractRoutingProfile::SetVehicle(Vehicle vehicle)
+  {
+    this->vehicle=vehicle;
+
+    switch (vehicle) {
+    case vehicleFoot:
+      vehicleRouteNodeBit=RouteNode::usableByFoot;
+      break;
+    case vehicleBicylce:
+      vehicleRouteNodeBit=RouteNode::usableByBicycle;
+      break;
+    case vehicleCar:
+      vehicleRouteNodeBit=RouteNode::usableByCar;
+      break;
+    }
   }
 
   void AbstractRoutingProfile::SetVehicleMaxSpeed(double maxSpeed)
   {
     vehicleMaxSpeed=maxSpeed;
-  }
-
-  void AbstractRoutingProfile::SetTravelOnewaysInWrongDirection(bool wrongDirectionOneway)
-  {
-    this->wrongDirectionOneway=wrongDirectionOneway;
   }
 
   void AbstractRoutingProfile::AddType(TypeId type, double speed)

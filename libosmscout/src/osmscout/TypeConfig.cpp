@@ -261,7 +261,6 @@ namespace osmscout {
     RegisterTagForExternalUse("addr:housenumber");
     RegisterTagForExternalUse("junction");
     RegisterTagForExternalUse("maxspeed");
-    RegisterTagForExternalUse("access");
     RegisterTagForExternalUse("restriction");
     RegisterTagForExternalUse("surface");
     RegisterTagForExternalUse("tracktype");
@@ -269,6 +268,26 @@ namespace osmscout {
     RegisterTagForExternalUse("place_name");
     RegisterTagForExternalUse("boundary");
     RegisterTagForExternalUse("admin_level");
+
+    RegisterTagForExternalUse("access");
+    RegisterTagForExternalUse("access:foward");
+    RegisterTagForExternalUse("access:backward");
+
+    RegisterTagForExternalUse("access:foot");
+    RegisterTagForExternalUse("access:foot:foward");
+    RegisterTagForExternalUse("access:foot:backward");
+
+    RegisterTagForExternalUse("access:bicycle");
+    RegisterTagForExternalUse("access:bicycle:foward");
+    RegisterTagForExternalUse("access:bicycle:backward");
+
+    RegisterTagForExternalUse("access:motor_vehicle");
+    RegisterTagForExternalUse("access:motor_vehicle:foward");
+    RegisterTagForExternalUse("access:motor_vehicle:backward");
+
+    RegisterTagForExternalUse("access:motorcar");
+    RegisterTagForExternalUse("access:motorcar:foward");
+    RegisterTagForExternalUse("access:motorcar:backward");
 
     RegisterTagForInternalUse("area");
     RegisterTagForInternalUse("natural");
@@ -316,44 +335,84 @@ namespace osmscout {
     typeTileUnknown=GetTypeId("_tile_unknown");
     typeTileCoastline=GetTypeId("_tile_coastline");
 
-    tagAdminLevel=GetTagId("admin_level");
-    tagBoundary=GetTagId("boundary");
-    tagBridge=GetTagId("bridge");
-    tagLayer=GetTagId("layer");
-    tagOneway=GetTagId("oneway");
-    tagPlace=GetTagId("place");
     tagRef=GetTagId("ref");
+    tagBridge=GetTagId("bridge");
     tagTunnel=GetTagId("tunnel");
+    tagLayer=GetTagId("layer");
     tagType=GetTagId("type");
     tagWidth=GetTagId("width");
-    tagArea=GetTagId("area");
+    tagOneway=GetTagId("oneway");
     tagHouseNr=GetTagId("addr:housenumber");
     tagJunction=GetTagId("junction");
     tagMaxSpeed=GetTagId("maxspeed");
-    tagAccess=GetTagId("access");
     tagRestriction=GetTagId("restriction");
     tagSurface=GetTagId("surface");
     tagTracktype=GetTagId("tracktype");
+    tagPlace=GetTagId("place");
+    tagBoundary=GetTagId("boundary");
+    tagAdminLevel=GetTagId("admin_level");
+
+    tagAccess=GetTagId("access");
+    tagAccessForward=GetTagId("access:foward");
+    tagAccessBackward=GetTagId("access:backward");
+
+    tagAccessFoot=GetTagId("access:foot");
+    tagAccessFootForward=GetTagId("access:foot:foward");
+    tagAccessFootBackward=GetTagId("access:foot:backward");
+
+    tagAccessBicycle=GetTagId("access:bicycle");
+    tagAccessBicycleForward=GetTagId("access:bicycle:foward");
+    tagAccessBicycleBackward=GetTagId("access:bicycle:backward");
+
+    tagAccessMotorVehicle=GetTagId("access:motor_vehicle");
+    tagAccessMotorVehicleForward=GetTagId("access:motor_vehicle:foward");
+    tagAccessMotorVehicleBackward=GetTagId("access:motor_vehicle:backward");
+
+    tagAccessMotorcar=GetTagId("access:motorcar");
+    tagAccessMotorcarForward=GetTagId("access:motorcar:foward");
+    tagAccessMotorcarBackward=GetTagId("access:motorcar:backward");
+
+    tagArea=GetTagId("area");
     tagNatural=GetTagId("natural");
 
-    assert(tagAdminLevel!=tagIgnore);
-    assert(tagBoundary!=tagIgnore);
-    assert(tagBridge!=tagIgnore);
-    assert(tagLayer!=tagIgnore);
-    assert(tagOneway!=tagIgnore);
-    assert(tagPlace!=tagIgnore);
     assert(tagRef!=tagIgnore);
+    assert(tagBridge!=tagIgnore);
     assert(tagTunnel!=tagIgnore);
+    assert(tagLayer!=tagIgnore);
     assert(tagType!=tagIgnore);
     assert(tagWidth!=tagIgnore);
-    assert(tagArea!=tagIgnore);
+    assert(tagOneway!=tagIgnore);
     assert(tagHouseNr!=tagIgnore);
     assert(tagJunction!=tagIgnore);
     assert(tagMaxSpeed!=tagIgnore);
-    assert(tagAccess!=tagIgnore);
     assert(tagRestriction!=tagIgnore);
     assert(tagSurface!=tagIgnore);
     assert(tagTracktype!=tagIgnore);
+    assert(tagPlace!=tagIgnore);
+    assert(tagBoundary!=tagIgnore);
+    assert(tagAdminLevel!=tagIgnore);
+
+    assert(tagAccess!=tagIgnore);
+    assert(tagAccessForward!=tagIgnore);
+    assert(tagAccessBackward!=tagIgnore);
+
+    assert(tagAccessFoot!=tagIgnore);
+    assert(tagAccessFootForward!=tagIgnore);
+    assert(tagAccessFootBackward!=tagIgnore);
+
+    assert(tagAccessBicycle!=tagIgnore);
+    assert(tagAccessBicycleForward!=tagIgnore);
+    assert(tagAccessBicycleBackward!=tagIgnore);
+
+    assert(tagAccessMotorVehicle!=tagIgnore);
+    assert(tagAccessMotorVehicleForward!=tagIgnore);
+    assert(tagAccessMotorVehicleBackward!=tagIgnore);
+
+    assert(tagAccessMotorcar!=tagIgnore);
+    assert(tagAccessMotorcarForward!=tagIgnore);
+    assert(tagAccessMotorcarBackward!=tagIgnore);
+
+    assert(tagArea!=tagIgnore);
     assert(tagNatural!=tagIgnore);
   }
 

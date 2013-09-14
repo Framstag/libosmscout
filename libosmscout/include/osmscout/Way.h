@@ -24,6 +24,8 @@
 #include <osmscout/Tag.h>
 #include <osmscout/TypeConfig.h>
 
+#include <osmscout/AttributeAccess.h>
+
 #include <osmscout/util/FileScanner.h>
 #include <osmscout/util/FileWriter.h>
 #include <osmscout/util/Progress.h>
@@ -48,7 +50,6 @@ namespace osmscout {
     const static uint16_t hasAccess       = 1 <<  0; //! We do have access rights to this way/area
     const static uint16_t isBridge        = 1 <<  1; //! We are a bridge
     const static uint16_t isTunnel        = 1 <<  2; //! We are a tunnel
-    const static uint16_t isOneway        = 1 <<  3; //! We are a oneway (in way direction)
     const static uint16_t isRoundabout    = 1 <<  4; //! We are a roundabout
 
   public:
@@ -57,7 +58,7 @@ namespace osmscout {
 
   private:
     mutable uint16_t flags;
-    //uint8_t          access;   //! Information regarding which vehicle can access this way
+    AttributeAccess  access;   //! Information regarding which vehicle can access this way
     std::string      nameAlt;  //! alternative name
     std::string      ref;      //! reference name (normally drawn in a plate)
     std::string      houseNr;  //! house number
@@ -71,7 +72,6 @@ namespace osmscout {
     inline WayAttributes()
     : type(typeIgnore),
       flags(0),
-      //access(0),
       layer(0),
       width(0),
       maxSpeed(0),
@@ -88,6 +88,11 @@ namespace osmscout {
     inline uint16_t GetFlags() const
     {
       return flags;
+    }
+
+    inline const AttributeAccess& GetAccess() const
+    {
+      return access;
     }
 
     inline std::string GetName() const
@@ -138,11 +143,6 @@ namespace osmscout {
     inline bool IsTunnel() const
     {
       return (flags & isTunnel)!=0;
-    }
-
-    inline bool IsOneway() const
-    {
-      return (flags & isOneway)!=0;
     }
 
     inline bool IsRoundabout() const
@@ -253,11 +253,6 @@ namespace osmscout {
     inline bool IsTunnel() const
     {
       return attributes.IsTunnel();
-    }
-
-    inline bool IsOneway() const
-    {
-      return attributes.IsOneway();
     }
 
     inline bool IsRoundabout() const

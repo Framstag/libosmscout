@@ -423,13 +423,32 @@ namespace osmscout {
     TagId                                  tagHouseNr;
     TagId                                  tagJunction;
     TagId                                  tagMaxSpeed;
-    TagId                                  tagAccess;
     TagId                                  tagRestriction;
     TagId                                  tagSurface;
     TagId                                  tagTracktype;
     TagId                                  tagPlace;
     TagId                                  tagBoundary;
     TagId                                  tagAdminLevel;
+
+    TagId                                  tagAccess;
+    TagId                                  tagAccessForward;
+    TagId                                  tagAccessBackward;
+
+    TagId                                  tagAccessFoot;
+    TagId                                  tagAccessFootForward;
+    TagId                                  tagAccessFootBackward;
+
+    TagId                                  tagAccessBicycle;
+    TagId                                  tagAccessBicycleForward;
+    TagId                                  tagAccessBicycleBackward;
+
+    TagId                                  tagAccessMotorVehicle;
+    TagId                                  tagAccessMotorVehicleForward;
+    TagId                                  tagAccessMotorVehicleBackward;
+
+    TagId                                  tagAccessMotorcar;
+    TagId                                  tagAccessMotorcarForward;
+    TagId                                  tagAccessMotorcarBackward;
 
     // Internal use (only available during preprocessing)
     TagId                                  tagArea;

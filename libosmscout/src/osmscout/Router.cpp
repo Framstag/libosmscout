@@ -189,14 +189,16 @@ namespace osmscout {
       return;
     }
 
-    if (!way->IsOneway()) {
-      for (long i=nodeIndex-1; i>=0; i--) {
-        routeNodeDataFile.Get(way->ids[i],routeNode);
+    if (!way->GetAttributes().GetAccess().CanRouteBackward()) {
+      return;
+    }
 
-        if (routeNode.Valid()) {
-          routeNodeIndex=i;
-          return;
-        }
+    for (long i=nodeIndex-1; i>=0; i--) {
+      routeNodeDataFile.Get(way->ids[i],routeNode);
+
+      if (routeNode.Valid()) {
+        routeNodeIndex=i;
+        return;
       }
     }
   }
@@ -406,7 +408,7 @@ namespace osmscout {
       assert(entry!=wayMap.end());
 
       ids=&entry->second->ids;
-      oneway=entry->second->IsOneway();
+      oneway=!entry->second->GetAttributes().GetAccess().CanRouteBackward();
     }
     else {
       assert(false);
@@ -482,7 +484,7 @@ namespace osmscout {
           assert(entry!=wayMap.end());
 
           ids=&entry->second->ids;
-          oneway=entry->second->IsOneway();
+          oneway=!entry->second->GetAttributes().GetAccess().CanRouteBackward();
         }
         else {
           assert(false);
@@ -528,7 +530,7 @@ namespace osmscout {
         assert(entry!=wayMap.end());
 
         ids=&entry->second->ids;
-        oneway=entry->second->IsOneway();
+        oneway=!entry->second->GetAttributes().GetAccess().CanRouteBackward();
       }
       else {
         assert(false);

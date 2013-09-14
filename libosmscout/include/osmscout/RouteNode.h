@@ -39,7 +39,9 @@ namespace osmscout {
   {
   public:
     const static uint8_t hasAccess            = 1 << 0; //! We do have access rights to this way/area
-    const static uint8_t wrongDirectionOneway = 1 << 1; //! We are traveling a oneway in the wrong Direction
+    const static uint8_t usableByFoot         = 1 << 1; //! This path can be traveled by foot
+    const static uint8_t usableByBicycle      = 1 << 2; //! This path can be traveled by bicycle
+    const static uint8_t usableByCar          = 1 << 3; //! This path can be traveled by car
 
     /**
      * Exclude regarding use of paths. You cannot use the path with the index "targetPath" if you come
@@ -57,16 +59,16 @@ namespace osmscout {
      */
     struct OSMSCOUT_API Path
     {
-      FileOffset offset;      //! File Offset of the  targeting route node
-      uint32_t   objectIndex; //! The index of the way to use from this route node to the target route node
-      TypeId     type;        //! The type of the way
-      uint8_t    maxSpeed;    //! Maximum speed allowed on the way
-      uint8_t    grade;       //! Quality of road/track 1 (good)...5 (bad)
-      //uint8_t    bearing;   //! Encoded initial and final bearing of this path
-      uint8_t    flags;       //! Certain flags
-      double     distance;    //! Distance from the current route node to the target route node
-      double     lat;         //! Latitude of the target node
-      double     lon;         //! Longitude of the target node
+      FileOffset      offset;      //! File Offset of the  targeting route node
+      uint32_t        objectIndex; //! The index of the way to use from this route node to the target route node
+      TypeId          type;        //! The type of the way
+      uint8_t         maxSpeed;    //! Maximum speed allowed on the way
+      uint8_t         grade;       //! Quality of road/track 1 (good)...5 (bad)
+      //uint8_t         bearing;     //! Encoded initial and final bearing of this path
+      uint8_t         flags;       //! Certain flags
+      double          distance;    //! Distance from the current route node to the target route node
+      double          lat;         //! Latitude of the target node
+      double          lon;         //! Longitude of the target node
 
       inline bool HasAccess() const
       {
