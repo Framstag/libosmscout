@@ -244,7 +244,8 @@ SYMBOL christian_church_cross
  }
 
  [MAG county-] {
-   [TYPE highway_trunk] {
+   [TYPE highway_trunk,
+         highway_motorway_trunk] {
      [SIZE 18m 0.4mm:3px<] {
        WAY#outline { color: darken(@trunkColor,0.4); width: 18m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
        WAY { color: @trunkColor; width: 18m;}
@@ -252,7 +253,8 @@ SYMBOL christian_church_cross
      [SIZE 18m <0.4mm:3px] WAY { color: lighten(@trunkColor,0.3); displayWidth: 0.4mm;}
    }
 
-   [TYPE highway_primary] {
+   [TYPE highway_primary,
+         highway_motorway_primary] {
      [SIZE 14m 0.4mm:3px<] {
        WAY#outline { color: darken(@primaryColor,0.4); width: 14m; displayWidth: 0.5mm; priority: -1; joinCap: butt; }
        WAY { color: @primaryColor; width: 14m;}
@@ -705,6 +707,8 @@ SYMBOL christian_church_cross
  // Oneways
 
  [TYPE highway_motorway,
+       highway_motorway_trunk,
+       highway_motorway_primary,
        highway_motorway_link,
        highway_trunk,
        highway_trunk_link,
