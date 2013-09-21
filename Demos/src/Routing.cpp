@@ -65,11 +65,105 @@ static std::string TimeToString(double time)
   return stream.str();
 }
 
+static void GetCarSpeedTable(std::map<std::string,double>& map)
+{
+  map["highway_motorway"]=130.0;
+  map["highway_motorway_trunk"]=100.0;
+  map["highway_motorway_primary"]=70.0;
+  map["highway_motorway_link"]=60.0;
+  map["highway_motorway_junction"]=60.0;
+  map["highway_trunk"]=100.0;
+  map["highway_trunk_link"]=60.0;
+  map["highway_primary"]=70.0;
+  map["highway_primary_link"]=60.0;
+  map["highway_secondary"]=60.0;
+  map["highway_secondary_link"]=50.0;
+  map["highway_tertiary"]=55.0;
+  map["highway_unclassified"]=50.0;
+  map["highway_road"]=50.0;
+  map["highway_residential"]=40.0;
+  map["highway_roundabout"]=40.0;
+  map["highway_living_street"]=10.0;
+  map["highway_service"]=30.0;
+}
+
+static bool ParametrizeProfileForFoot(const osmscout::TypeConfig& typeConfig,
+                                      osmscout::AbstractRoutingProfile& routingProfile)
+{
+  routingProfile.SetVehicle(osmscout::AbstractRoutingProfile::vehicleFoot);
+  routingProfile.SetVehicleMaxSpeed(5.0);
+
+  for (osmscout::TypeId typeId=0; typeId<=typeConfig.GetMaxTypeId(); typeId++) {
+    if (!typeConfig.GetTypeInfo(typeId).CanRouteFoot()) {
+      continue;
+    }
+
+    //std::cout << "Adding type " << typeConfig.GetTypeInfo(typeId).GetName() << " to foot routing profile " << std::endl;
+
+    routingProfile.AddType(typeId,5.0);
+  }
+
+  return true;
+}
+
+static bool ParametrizeProfileForBicycle(const osmscout::TypeConfig& typeConfig,
+                                         osmscout::AbstractRoutingProfile& routingProfile)
+{
+  routingProfile.SetVehicle(osmscout::AbstractRoutingProfile::vehicleBicylce);
+  routingProfile.SetVehicleMaxSpeed(20.0);
+
+  for (osmscout::TypeId typeId=0; typeId<=typeConfig.GetMaxTypeId(); typeId++) {
+    if (!typeConfig.GetTypeInfo(typeId).CanRouteBicycle()) {
+      continue;
+    }
+
+    //std::cout << "Adding type " << typeConfig.GetTypeInfo(typeId).GetName() << " to bicycle routing profile " << std::endl;
+
+    routingProfile.AddType(typeId,20.0);
+  }
+
+  return true;
+}
+
+static bool ParametrizeProfileForCar(const osmscout::TypeConfig& typeConfig,
+                                     osmscout::AbstractRoutingProfile& routingProfile)
+{
+  routingProfile.SetVehicle(osmscout::AbstractRoutingProfile::vehicleCar);
+  routingProfile.SetVehicleMaxSpeed(160.0);
+
+  bool                         everythingResolved=true;
+  std::map<std::string,double> speedMap;
+
+  GetCarSpeedTable(speedMap);
+
+  for (osmscout::TypeId typeId=0; typeId<=typeConfig.GetMaxTypeId(); typeId++) {
+    if (!typeConfig.GetTypeInfo(typeId).CanRouteCar()) {
+      continue;
+    }
+
+    std::map<std::string,double>::const_iterator speed=speedMap.find(typeConfig.GetTypeInfo(typeId).GetName());
+
+    if (speed==speedMap.end()) {
+      std::cerr << "No speed for type '" << typeConfig.GetTypeInfo(typeId).GetName() << "' defined!" << std::endl;
+      everythingResolved=false;
+
+      continue;
+    }
+
+    //std::cout << "Adding type " << typeConfig.GetTypeInfo(typeId).GetName() << " to car routing profile " << std::endl;
+
+    routingProfile.AddType(typeId,speed->second);
+  }
+
+  return everythingResolved;
+}
+
 static bool LookupClosedNodeAtLocation(osmscout::Database& database,
                                        const std::string& location,
                                        const std::string& area,
                                        double lat,
                                        double lon,
+                                       osmscout::AbstractRoutingProfile::Vehicle vehicle,
                                        std::string& locationDesc,
                                        osmscout::ObjectFileRef& object,
                                        size_t& nodeIndex)
@@ -154,6 +248,25 @@ static bool LookupClosedNodeAtLocation(osmscout::Database& database,
           osmscout::WayRef tmpWay;
 
           if (database.GetWayByOffset(reference->GetFileOffset(),tmpWay)) {
+
+            switch (vehicle) {
+            case osmscout::AbstractRoutingProfile::vehicleFoot:
+              if (!tmpWay->GetAttributes().GetAccess().CanRouteFoot()) {
+                continue;
+              }
+              break;
+            case osmscout::AbstractRoutingProfile::vehicleBicylce:
+              if (!tmpWay->GetAttributes().GetAccess().CanRouteBicycle()) {
+                continue;
+              }
+              break;
+            case osmscout::AbstractRoutingProfile::vehicleCar:
+              if (!tmpWay->GetAttributes().GetAccess().CanRouteCar()) {
+                continue;
+              }
+              break;
+            }
+
             for (size_t i=0;  i<tmpWay->nodes.size(); i++) {
               double distance=sqrt((tmpWay->nodes[i].GetLat()-lat)*(tmpWay->nodes[i].GetLat()-lat)+
                                    (tmpWay->nodes[i].GetLon()-lon)*(tmpWay->nodes[i].GetLon()-lon));
@@ -489,39 +602,41 @@ static void DumpNameChangedDescription(size_t& lineCount,
 
 int main(int argc, char* argv[])
 {
-  osmscout::FastestPathRoutingProfile routingProfile;
-  std::string                         map;
+  osmscout::AbstractRoutingProfile::Vehicle vehicle=osmscout::AbstractRoutingProfile::vehicleCar;
+  osmscout::FastestPathRoutingProfile       routingProfile;
+  std::string                               map;
 
-  std::string                         startLocation;
-  std::string                         startArea;
-  double                              startLat;
-  double                              startLon;
-  std::string                         startLocationDesc;
+  std::string                               startLocation;
+  std::string                               startArea;
+  double                                    startLat;
+  double                                    startLon;
+  std::string                               startLocationDesc;
 
-  std::string                         targetLocation;
-  std::string                         targetArea;
-  double                              targetLat;
-  double                              targetLon;
-  std::string                         targetLocationDesc;
+  std::string                               targetLocation;
+  std::string                               targetArea;
+  double                                    targetLat;
+  double                                    targetLon;
+  std::string                               targetLocationDesc;
 
-  osmscout::ObjectFileRef             startObject;
-  size_t                              startNodeIndex;
+  osmscout::ObjectFileRef                   startObject;
+  size_t                                    startNodeIndex;
 
-  osmscout::ObjectFileRef             targetObject;
-  size_t                              targetNodeIndex;
+  osmscout::ObjectFileRef                   targetObject;
+  size_t                                    targetNodeIndex;
 
   int currentArg=1;
   while (currentArg<argc) {
     if (strcmp(argv[currentArg],"--foot")==0) {
-      routingProfile.SetVehicle(osmscout::AbstractRoutingProfile::vehicleFoot);
+      vehicle=osmscout::AbstractRoutingProfile::vehicleFoot;
+
       currentArg++;
     }
     else if (strcmp(argv[currentArg],"--bicycle")==0) {
-      routingProfile.SetVehicle(osmscout::AbstractRoutingProfile::vehicleBicylce);
+      vehicle=osmscout::AbstractRoutingProfile::vehicleBicylce;
       currentArg++;
     }
     else if (strcmp(argv[currentArg],"--car")==0) {
-      routingProfile.SetVehicle(osmscout::AbstractRoutingProfile::vehicleCar);
+      vehicle=osmscout::AbstractRoutingProfile::vehicleCar;
       currentArg++;
     }
     else {
@@ -591,6 +706,7 @@ int main(int argc, char* argv[])
                                   startArea,
                                   startLat,
                                   startLon,
+                                  vehicle,
                                   startLocationDesc,
                                   startObject,
                                   startNodeIndex)) {
@@ -603,6 +719,7 @@ int main(int argc, char* argv[])
                                   targetArea,
                                   targetLat,
                                   targetLon,
+                                  vehicle,
                                   targetLocationDesc,
                                   targetObject,
                                   targetNodeIndex)) {
@@ -619,78 +736,26 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  osmscout::TypeId                    type;
   osmscout::TypeConfig                *typeConfig=router.GetTypeConfig();
 
   //osmscout::ShortestPathRoutingProfile routingProfile;
   osmscout::RouteData                 data;
   osmscout::RouteDescription          description;
 
-  routingProfile.SetVehicleMaxSpeed(160.0);
-
-  type=typeConfig->GetWayTypeId("highway_motorway");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,130.0);
-
-  type=typeConfig->GetWayTypeId("highway_motorway_trunk");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,100.0);
-
-  type=typeConfig->GetWayTypeId("highway_motorway_primary");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,70.0);
-
-  type=typeConfig->GetWayTypeId("highway_motorway_link");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,60.0);
-
-  type=typeConfig->GetWayTypeId("highway_trunk");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,100.0);
-
-  type=typeConfig->GetWayTypeId("highway_trunk_link");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,60.0);
-
-  type=typeConfig->GetWayTypeId("highway_primary");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,70.0);
-
-  type=typeConfig->GetWayTypeId("highway_primary_link");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,60.0);
-
-  type=typeConfig->GetWayTypeId("highway_secondary");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,60.0);
-
-  type=typeConfig->GetWayTypeId("highway_secondary_link");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,50.0);
-
-  type=typeConfig->GetWayTypeId("highway_tertiary");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,55.0);
-
-  type=typeConfig->GetWayTypeId("highway_unclassified");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,50.0);
-
-  type=typeConfig->GetWayTypeId("highway_road");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,50.0);
-
-  type=typeConfig->GetWayTypeId("highway_residential");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,40.0);
-
-  type=typeConfig->GetWayTypeId("highway_living_street");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,10.0);
-
-  type=typeConfig->GetWayTypeId("highway_service");
-  assert(type!=osmscout::typeIgnore);
-  routingProfile.AddType(type,30.0);
+  switch (vehicle) {
+  case osmscout::AbstractRoutingProfile::vehicleFoot:
+    ParametrizeProfileForFoot(*typeConfig,
+                              routingProfile);
+    break;
+  case osmscout::AbstractRoutingProfile::vehicleBicylce:
+    ParametrizeProfileForBicycle(*typeConfig,
+                                 routingProfile);
+    break;
+  case osmscout::AbstractRoutingProfile::vehicleCar:
+    ParametrizeProfileForCar(*typeConfig,
+                             routingProfile);
+    break;
+  }
 
   if (!router.CalculateRoute(routingProfile,
                              startObject,

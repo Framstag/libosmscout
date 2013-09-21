@@ -836,7 +836,9 @@ namespace osmscout {
       // Get potential follower in the current way
 
 #if defined(DEBUG_ROUTING)
-      std::cout << "Analysing follower of node " << currentRouteNode->GetId() << " " << current->currentCost << " " << current->estimateCost << " " << current->overallCost << std::endl;
+      std::cout << "Analysing follower of node " << currentRouteNode->GetFileOffset();
+      std::cout << " (" << current->object.GetTypeName() << " " << current->object.GetFileOffset() << "["  << currentRouteNode->GetId() << "]" << ")";
+      std::cout << " " << current->currentCost << " " << current->estimateCost << " " << current->overallCost << std::endl;
 #endif
       size_t i=0;
       for (std::vector<osmscout::RouteNode::Path>::const_iterator path=currentRouteNode->paths.begin();
@@ -845,15 +847,10 @@ namespace osmscout {
            ++i) {
         if (path->offset==current->prev) {
 #if defined(DEBUG_ROUTING)
-          std::cout << "  Skipping route from " << currentRouteNode->id << " to " << path->id << " (back the the last node visited)" << std::endl;
-#endif
-          nodesIgnoredCount++;
-          continue;
-        }
-
-        if (!profile.CanUse(*currentRouteNode,i)) {
-#if defined(DEBUG_ROUTING)
-          std::cout << "  Skipping route from " << currentRouteNode->id << " to " << path->id << " (wrong type " << typeConfig->GetTypeInfo(path->type).GetName()  << ")" << std::endl;
+          std::cout << "  Skipping route";
+          std::cout << " to " << path->offset;
+          std::cout << " (" << currentRouteNode->objects[path->objectIndex].GetTypeName() << " " << currentRouteNode->objects[path->objectIndex].GetFileOffset() << ")";
+          std::cout << " => back to the last node visited" << std::endl;
 #endif
           nodesIgnoredCount++;
           continue;
@@ -862,9 +859,33 @@ namespace osmscout {
         if (!current->access &&
             path->HasAccess()) {
 #if defined(DEBUG_ROUTING)
-          std::cout << "  Skipping route from " << currentRouteNode->id << " to " << path->id << " (moving from non-accessible way back to accessible way)" << std::endl;
+          std::cout << "  Skipping route";
+          std::cout << " to " << path->offset;
+          std::cout << " (" << currentRouteNode->objects[path->objectIndex].GetTypeName() << " " << currentRouteNode->objects[path->objectIndex].GetFileOffset() << ")";
+          std::cout << " => moving from non-accessible way back to accessible way" << std::endl;
 #endif
           nodesIgnoredCount++;
+          continue;
+        }
+
+        if (!profile.CanUse(*currentRouteNode,i)) {
+#if defined(DEBUG_ROUTING)
+          std::cout << "  Skipping route";
+          std::cout << " to " << path->offset;
+          std::cout << " (" << currentRouteNode->objects[path->objectIndex].GetTypeName() << " " << currentRouteNode->objects[path->objectIndex].GetFileOffset() << ")";
+          std::cout << " => Cannot be used"<< std::endl;
+#endif
+          nodesIgnoredCount++;
+          continue;
+        }
+
+        if (closeMap.find(path->offset)!=closeMap.end()) {
+#if defined(DEBUG_ROUTING)
+          std::cout << "  Skipping route";
+          std::cout << " to " << path->offset;
+          std::cout << " (" << currentRouteNode->objects[path->objectIndex].GetTypeName() << " " << currentRouteNode->objects[path->objectIndex].GetFileOffset() << ")";
+          std::cout << " => already calculated" << std::endl;
+#endif
           continue;
         }
 
@@ -874,16 +895,10 @@ namespace osmscout {
             if (currentRouteNode->excludes[e].source==current->object &&
                 currentRouteNode->excludes[e].targetIndex==i) {
 #if defined(DEBUG_ROUTING)
-              WayRef sourceWay;
-              WayRef targetWay;
-
-              wayDataFile.Get(current->wayId,sourceWay);
-              wayDataFile.Get(currentRouteNode->objects[path->objectIndex],targetWay);
-
-              std::cout << "  Node " <<  currentRouteNode->id << ": ";
-              std::cout << "Cannot turn from " << current->wayId << " " << sourceWay->GetName() << " (" << sourceWay->GetRefName()  << ")";
-              std::cout << " into ";
-              std::cout << currentRouteNode->objects[currentRouteNode->paths[i].objectIndex] << " " << targetWay->GetName() << " (" << targetWay->GetRefName()  << ")" << std::endl;
+              std::cout << "  Skipping route";
+              std::cout << " to " << path->offset;
+              std::cout << " (" << currentRouteNode->objects[path->objectIndex].GetTypeName() << " " << currentRouteNode->objects[path->objectIndex].GetFileOffset() << ")";
+              std::cout << " => turn not allowed" << std::endl;
 #endif
               canTurnedInto=false;
               break;
@@ -894,13 +909,6 @@ namespace osmscout {
             nodesIgnoredCount++;
             continue;
           }
-        }
-
-        if (closeMap.find(path->offset)!=closeMap.end()) {
-#if defined(DEBUG_ROUTING)
-          std::cout << "  Skipping route node " << path->id << "/" << currentRouteNode->paths[i].offset << " (closed)" << std::endl;
-#endif
-          continue;
         }
 
         double currentCost=current->currentCost+
@@ -915,7 +923,10 @@ namespace osmscout {
         if (openEntry!=openMap.end() &&
             (*openEntry->second)->currentCost<=currentCost) {
 #if defined(DEBUG_ROUTING)
-          std::cout << "  Skipping route node " << currentRouteNode->paths[i].id << "/" << currentRouteNode->paths[i].offset << " (cheaper route exists " << currentCost << "<=>" << (*openEntry->second)->currentCost << ")" << std::endl;
+          std::cout << "  Skipping route";
+          std::cout << " to " << path->offset;
+          std::cout << " (" << currentRouteNode->objects[path->objectIndex].GetTypeName() << " " << currentRouteNode->objects[path->objectIndex].GetFileOffset() << ")";
+          std::cout << "  => cheaper route exists " << currentCost << "<=>" << (*openEntry->second)->currentCost << std::endl;
 #endif
           continue;
         }
@@ -942,7 +953,7 @@ namespace osmscout {
           node->access=currentRouteNode->paths[i].HasAccess();
 
 #if defined(DEBUG_ROUTING)
-          std::cout << "  Updating route " << current->nodeOffset << " via way " << node->wayId << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->id << std::endl;
+          std::cout << "  Updating route " << current->nodeOffset << " via " << node->object.GetTypeName() << " " << node->object.GetFileOffset() << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->id << std::endl;
 #endif
 
           openList.erase(openEntry->second);
@@ -961,7 +972,9 @@ namespace osmscout {
           node->access=path->HasAccess();
 
 #if defined(DEBUG_ROUTING)
-          std::cout << "  Inserting route " << current->nodeOffset <<  " via way " << node->wayId  << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->id << std::endl;
+          std::cout << "  Inserting route to " << path->offset;
+          std::cout <<  " (" << node->object.GetTypeName() << " " << node->object.GetFileOffset() << ")";
+          std::cout << " " << currentCost << " " << estimateCost << " " << overallCost << " " << currentRouteNode->id << std::endl;
 #endif
 
           std::pair<OpenListRef,bool> result=openList.insert(node);
