@@ -171,6 +171,8 @@ namespace osmscout {
                  std::vector<Tag>& tags,
                  bool& reverseNodes);
 
+    void SetLayer(int8_t layer);
+
     bool Read(FileScanner& scanner);
     bool Write(FileWriter& writer) const;
 
@@ -302,6 +304,8 @@ namespace osmscout {
                  Id id,
                  std::vector<Tag>& tags,
                  bool& reverseNodes);
+
+    void SetLayerToMax();
 
     bool Read(FileScanner& scanner);
     bool ReadOptimized(FileScanner& scanner);

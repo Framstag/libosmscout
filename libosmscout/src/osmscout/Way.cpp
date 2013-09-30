@@ -19,6 +19,8 @@
 
 #include <osmscout/Way.h>
 
+#include <limits>
+
 #include <osmscout/util/String.h>
 
 #include <osmscout/system/Assert.h>
@@ -292,6 +294,11 @@ namespace osmscout {
     this->tags=tags;
 
     return true;
+  }
+
+  void WayAttributes::SetLayer(int8_t layer)
+  {
+    this->layer=layer;
   }
 
   bool WayAttributes::Read(FileScanner& scanner)
@@ -575,6 +582,11 @@ namespace osmscout {
                               id,
                               tags,
                               reverseNodes);
+  }
+
+  void Way::SetLayerToMax()
+  {
+    attributes.SetLayer(std::numeric_limits<int8_t>::max());
   }
 
   void Way::GetBoundingBox(double& minLon,
