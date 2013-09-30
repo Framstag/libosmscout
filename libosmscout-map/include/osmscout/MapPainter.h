@@ -227,7 +227,7 @@ namespace osmscout {
       bool                    endIsClosed;     //! The end of the way is closed, it does not lead to another way or area
 
       /**
-       * We then draw lines on order of layer (Smaller layers first)
+       * We then draw lines in order of layer (Smaller layers first)
        *
        * Within a layer, we draw lines in order of line style priority (first overlays, lower priority value first)
        *
